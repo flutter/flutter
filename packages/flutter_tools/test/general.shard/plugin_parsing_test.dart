@@ -20,7 +20,7 @@ void main() {
 
       final dynamic pluginYaml = loadYaml(pluginYamlRaw);
       final Plugin plugin =
-          Plugin.fromYaml(_kTestPluginName, _kTestPluginPath, pluginYaml);
+          Plugin.fromYaml(_kTestPluginName, _kTestPluginPath, pluginYaml, const <String>[]);
 
       final AndroidPlugin androidPlugin =
           plugin.platforms[AndroidPlugin.kConfigKey];
@@ -53,7 +53,7 @@ void main() {
 
       final dynamic pluginYaml = loadYaml(pluginYamlRaw);
       final Plugin plugin =
-          Plugin.fromYaml(_kTestPluginName, _kTestPluginPath, pluginYaml);
+          Plugin.fromYaml(_kTestPluginName, _kTestPluginPath, pluginYaml, const <String>[]);
 
       final AndroidPlugin androidPlugin =
           plugin.platforms[AndroidPlugin.kConfigKey];
@@ -100,7 +100,7 @@ void main() {
 
       final dynamic pluginYaml = loadYaml(pluginYamlRaw);
       final Plugin plugin =
-      Plugin.fromYaml(_kTestPluginName, _kTestPluginPath, pluginYaml);
+      Plugin.fromYaml(_kTestPluginName, _kTestPluginPath, pluginYaml, const <String>[]);
 
       final AndroidPlugin androidPlugin =
       plugin.platforms[AndroidPlugin.kConfigKey];
@@ -144,7 +144,7 @@ void main() {
 
       final dynamic pluginYaml = loadYaml(pluginYamlRaw);
       final Plugin plugin =
-      Plugin.fromYaml(_kTestPluginName, _kTestPluginPath, pluginYaml);
+      Plugin.fromYaml(_kTestPluginName, _kTestPluginPath, pluginYaml, const <String>[]);
 
       expect(plugin.platforms, <String, PluginPlatform> {});
     });

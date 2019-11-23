@@ -68,10 +68,10 @@ class TextInputType {
   /// Requests the default platform keyboard.
   static const TextInputType text = TextInputType._(0);
 
-  /// Optimize for multi-line textual information.
+  /// Optimize for multiline textual information.
   ///
   /// Requests the default platform keyboard, but accepts newlines when the
-  /// enter key is pressed. This is the input type used for all multi-line text
+  /// enter key is pressed. This is the input type used for all multiline text
   /// fields.
   static const TextInputType multiline = TextInputType._(1);
 
@@ -408,7 +408,7 @@ class TextInputConfiguration {
   /// Defaults to false.
   final bool obscureText;
 
-  /// Whether to enable auto-correction.
+  /// Whether to enable autocorrection.
   ///
   /// Defaults to true.
   final bool autocorrect;

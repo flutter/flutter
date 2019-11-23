@@ -113,7 +113,7 @@ void main() {
       )
     );
 
-    final NavigatorState navigator = insideKey.currentContext.ancestorStateOfType(const TypeMatcher<NavigatorState>());
+    final NavigatorState navigator = insideKey.currentContext.findAncestorStateOfType<NavigatorState>();
 
     expect(state(), equals('BC')); // transition ->1 is at 1.0
 

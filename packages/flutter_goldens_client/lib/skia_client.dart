@@ -58,7 +58,7 @@ class SkiaGoldClient {
   final io.HttpClient httpClient;
 
   /// The local [Directory] within the [comparisonRoot] for the current test
-  /// context. In this directory, the client will create image and json files
+  /// context. In this directory, the client will create image and JSON files
   /// for the goldctl tool to use.
   ///
   /// This is informed by the [FlutterGoldenFileComparator] [basedir]. It cannot
@@ -404,7 +404,7 @@ class SkiaGoldDigest {
     this.status,
   });
 
-  /// Create a digest from requested json.
+  /// Create a digest from requested JSON.
   factory SkiaGoldDigest.fromJson(Map<String, dynamic> json) {
     if (json == null)
       return null;
@@ -424,10 +424,10 @@ class SkiaGoldDigest {
   /// Parameter set for the given test, e.g. Platform : Windows.
   final Map<String, dynamic> paramSet;
 
-  /// Test name associated with the digest, e.g. positive or untriaged.
+  /// Test name associated with the digest, e.g. positive or un-triaged.
   final String testName;
 
-  /// Status of the given digest, e.g. positive or untriaged.
+  /// Status of the given digest, e.g. positive or un-triaged.
   final String status;
 
   /// Validates a given digest against the current testing conditions.

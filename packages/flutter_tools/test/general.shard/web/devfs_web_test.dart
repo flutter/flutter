@@ -127,6 +127,31 @@ void main() {
     verify(headers.add('Content-Length', source.lengthSync())).called(1);
     verify(headers.add('Content-Type', 'application/javascript')).called(1);
     verify(response.add(source.readAsBytesSync())).called(1);
+  }, overrides: <Type, Generator>{
+    Platform: () => linux,
+  }));
+
+  test('serves JavaScript files from in memory cache on Windows', () => testbed.run(() async {
+    final File source = fs.file('source')
+      ..writeAsStringSync('main() {}');
+    final File sourcemap = fs.file('sourcemap')
+      ..writeAsStringSync('{}');
+    final File manifest = fs.file('manifest')
+      ..writeAsStringSync(json.encode(<String, Object>{'/C:/foo.js': <String, Object>{
+        'code': <int>[0, source.lengthSync()],
+        'sourcemap': <int>[0, 2],
+      }}));
+    webAssetServer.write(source, manifest, sourcemap);
+
+    when(request.uri).thenReturn(Uri.parse('http://foobar/C:/foo.js'));
+    requestController.add(request);
+    await closeCompleter.future;
+
+    verify(headers.add('Content-Length', source.lengthSync())).called(1);
+    verify(headers.add('Content-Type', 'application/javascript')).called(1);
+    verify(response.add(source.readAsBytesSync())).called(1);
+  }, overrides: <Type, Generator>{
+    Platform: () => windows,
   }));
 
   test('serves JavaScript files from in memory cache not from manifest', () => testbed.run(() async {

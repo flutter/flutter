@@ -179,7 +179,7 @@ bool debugItemsHaveDuplicateKeys(Iterable<Widget> items) {
 /// Does nothing if asserts are disabled. Always returns true.
 bool debugCheckHasTable(BuildContext context) {
   assert(() {
-    if (context.widget is! Table && context.ancestorWidgetOfExactType(Table) == null) {
+    if (context.widget is! Table && context.findAncestorWidgetOfExactType<Table>() == null) {
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('No Table widget found.'),
         ErrorDescription('${context.widget.runtimeType} widgets require a Table widget ancestor.'),
@@ -207,7 +207,7 @@ bool debugCheckHasTable(BuildContext context) {
 /// Does nothing if asserts are disabled. Always returns true.
 bool debugCheckHasMediaQuery(BuildContext context) {
   assert(() {
-    if (context.widget is! MediaQuery && context.ancestorWidgetOfExactType(MediaQuery) == null) {
+    if (context.widget is! MediaQuery && context.findAncestorWidgetOfExactType<MediaQuery>() == null) {
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('No MediaQuery widget found.'),
         ErrorDescription('${context.widget.runtimeType} widgets require a MediaQuery widget ancestor.'),
@@ -239,7 +239,7 @@ bool debugCheckHasMediaQuery(BuildContext context) {
 /// Does nothing if asserts are disabled. Always returns true.
 bool debugCheckHasDirectionality(BuildContext context) {
   assert(() {
-    if (context.widget is! Directionality && context.ancestorWidgetOfExactType(Directionality) == null) {
+    if (context.widget is! Directionality && context.findAncestorWidgetOfExactType<Directionality>() == null) {
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('No Directionality widget found.'),
         ErrorDescription('${context.widget.runtimeType} widgets require a Directionality widget ancestor.\n'),

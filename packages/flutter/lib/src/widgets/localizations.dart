@@ -6,7 +6,6 @@ import 'dart:async';
 import 'dart:ui' show Locale;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
 import 'binding.dart';
@@ -412,7 +411,7 @@ class Localizations extends StatefulWidget {
   static Locale localeOf(BuildContext context, { bool nullOk = false }) {
     assert(context != null);
     assert(nullOk != null);
-    final _LocalizationsScope scope = context.inheritFromWidgetOfExactType(_LocalizationsScope);
+    final _LocalizationsScope scope = context.dependOnInheritedWidgetOfExactType<_LocalizationsScope>();
     if (nullOk && scope == null)
       return null;
     assert(scope != null, 'a Localizations ancestor was not found');
@@ -423,7 +422,7 @@ class Localizations extends StatefulWidget {
   // Localizations.override factory constructor.
   static List<LocalizationsDelegate<dynamic>> _delegatesOf(BuildContext context) {
     assert(context != null);
-    final _LocalizationsScope scope = context.inheritFromWidgetOfExactType(_LocalizationsScope);
+    final _LocalizationsScope scope = context.dependOnInheritedWidgetOfExactType<_LocalizationsScope>();
     assert(scope != null, 'a Localizations ancestor was not found');
     return List<LocalizationsDelegate<dynamic>>.from(scope.localizationsState.widget.delegates);
   }
@@ -446,7 +445,7 @@ class Localizations extends StatefulWidget {
   static T of<T>(BuildContext context, Type type) {
     assert(context != null);
     assert(type != null);
-    final _LocalizationsScope scope = context.inheritFromWidgetOfExactType(_LocalizationsScope);
+    final _LocalizationsScope scope = context.dependOnInheritedWidgetOfExactType<_LocalizationsScope>();
     return scope?.localizationsState?.resourcesFor<T>(type);
   }
 
@@ -520,9 +519,9 @@ class _LocalizationsState extends State<Localizations> {
       // have finished loading. Until then the old locale will continue to be used.
       // - If we're running at app startup time then defer reporting the first
       // "useful" frame until after the async load has completed.
-      RendererBinding.instance.deferFirstFrame();
+      WidgetsBinding.instance.deferFirstFrameReport();
       typeToResourcesFuture.then<void>((Map<Type, dynamic> value) {
-        RendererBinding.instance.allowFirstFrame();
+        WidgetsBinding.instance.allowFirstFrameReport();
         if (!mounted)
           return;
         setState(() {
