@@ -2,6 +2,9 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//flutter/shell/config.gni")
+import("//flutter/testing/testing.gni")
+
 source_set("testing_lib") {
   testonly = true
 
@@ -77,4 +80,55 @@ if (current_toolchain == host_toolchain) {
       "//third_party/swiftshader_flutter:swiftshader",
     ]
   }
+
+  # All targets on all platforms should be able to the Metal utilities. On
+  # platforms where Metal in not available, the tests must be skipped or
+  # implemented to use another available client rendering API. This is usually
+  # either OpenGL which is portably implemented via SwiftShader or the software
+  # backend. This way, all tests compile on all platforms but the Metal backend
+  # exercised on platforms where Metal itself is available.
+  source_set("metal") {
+    testonly = true
+
+    sources = [
+      "$flutter_root/testing/test_metal_surface.cc",
+      "$flutter_root/testing/test_metal_surface.h",
+    ]
+
+    defines = []
+
+    if (shell_enable_metal) {
+      sources += [ "$flutter_root/testing/test_metal_surface_impl.mm" ]
+      defines += [ "TESTING_ENABLE_METAL" ]
+    }
+
+    deps = [
+      ":skia",
+      "$flutter_root/fml",
+    ]
+  }
+}
+
+test_fixtures("testing_fixtures") {
+  fixtures = []
+}
+
+# The //flutter/testing library provides utility methods to other test targets.
+# This test target tests the testing utilities.
+executable("testing_unittests") {
+  testonly = true
+
+  sources = [
+    "$flutter_root/testing/test_metal_surface_unittests.cc",
+  ]
+
+  deps = [
+    ":dart",
+    ":metal",
+    ":opengl",
+    ":skia",
+    ":testing",
+    ":testing_fixtures",
+    ":testing_lib",
+  ]
 }
