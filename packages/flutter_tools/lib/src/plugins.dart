@@ -204,10 +204,11 @@ class Plugin {
       if (!(value is YamlMap)) {
         return false;
       }
-      if (value.containsKey('default_package')) {
+      final YamlMap yamlValue = value as YamlMap;
+      if (yamlValue.containsKey('default_package')) {
         return false;
       }
-      return !validate(value);
+      return !validate(yamlValue);
     }
     final List<String> errors = <String>[];
     if (isInvalid(AndroidPlugin.kConfigKey, AndroidPlugin.validate)) {
@@ -246,7 +247,7 @@ class Plugin {
     if (!platformsYaml.containsKey(platformKey)) {
       return false;
     }
-    if (platformsYaml[platformKey].containsKey('default_package')) {
+    if ((platformsYaml[platformKey] as YamlMap).containsKey('default_package')) {
       return false;
     }
     return true;
@@ -276,13 +277,13 @@ Plugin _pluginFromPubspec(String name, Uri packageRoot) {
     return null;
   }
   final String packageRootPath = fs.path.fromUri(packageRoot);
-  final YamlMap dependencies = pubspec['dependencies'];
+  final YamlMap dependencies = pubspec['dependencies'] as YamlMap;
   printTrace('Found plugin $name at $packageRootPath');
   return Plugin.fromYaml(
     name,
     packageRootPath,
     flutterConfig['plugin'] as YamlMap,
-    dependencies == null ? <String>[] : <String>[...dependencies.keys],
+    dependencies == null ? <String>[] : <String>[...dependencies.keys.cast<String>()],
   );
 }
 

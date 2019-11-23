@@ -178,8 +178,6 @@ void main() {
   test('runner with web server device uses debug extension with --start-paused', () => testbed.run(() async {
     _setupMocks();
     when(mockFlutterDevice.device).thenReturn(WebServerDevice());
-    final BufferLogger bufferLogger = logger;
-
     final ResidentWebRunner runner = DwdsWebRunnerFactory().createWebRunner(
       mockFlutterDevice,
       flutterProject: FlutterProject.current(),
@@ -187,7 +185,7 @@ void main() {
       ipv6: true,
       stayResident: true,
       dartDefines: <String>[],
-    );
+    ) as ResidentWebRunner;
 
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
      unawaited(runner.run(
@@ -198,7 +196,7 @@ void main() {
     // Check connect() was told to use the debug extension.
     verify(mockWebFs.connect(true)).called(1);
     // And ensure the debug services was started.
-    expect(bufferLogger.statusText, contains('Debug service listening on'));
+    expect(testLogger.statusText, contains('Debug service listening on'));
   }));
 
   test('profile does not supportsServiceProtocol', () => testbed.run(() {
