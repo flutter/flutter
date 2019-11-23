@@ -125,10 +125,11 @@ void main() {
 
     // Pointer enters the annotation.
     ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+      _pointerData(PointerChange.add, const Offset(1.0, 0.0)),
       _pointerData(PointerChange.hover, const Offset(1.0, 0.0)),
     ]));
     expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
-      const PointerEnterEvent(position: Offset(1.0, 0.0)),
+      const PointerEnterEvent(position: Offset(0.0, 0.0)),
       const PointerHoverEvent(position: Offset(1.0, 0.0)),
     ]));
     expect(listenerLogs, <bool>[true]);
@@ -159,10 +160,11 @@ void main() {
 
     // Pointer is added on the annotation.
     ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
-      _pointerData(PointerChange.hover, const Offset(1.0, 301.0)),
+      _pointerData(PointerChange.add, const Offset(0.0, 301.0)),
+      _pointerData(PointerChange.add, const Offset(1.0, 301.0)),
     ]));
     expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
-      const PointerEnterEvent(position: Offset(1.0, 301.0)),
+      const PointerEnterEvent(position: Offset(0.0, 301.0)),
       const PointerHoverEvent(position: Offset(1.0, 301.0)),
     ]));
     expect(listenerLogs, <bool>[true]);
@@ -178,10 +180,11 @@ void main() {
 
     // The first mouse is added on the annotation.
     ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+      _pointerData(PointerChange.add, const Offset(0.0, 0.0)),
       _pointerData(PointerChange.hover, const Offset(0.0, 1.0)),
     ]));
     expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
-      const PointerEnterEvent(position: Offset(0.0, 1.0)),
+      const PointerEnterEvent(position: Offset(0.0, 0.0)),
       const PointerHoverEvent(position: Offset(0.0, 1.0)),
     ]));
     expect(_mouseTracker.mouseIsConnected, isTrue);
@@ -189,10 +192,11 @@ void main() {
 
     // The second mouse is added on the annotation.
     ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+      _pointerData(PointerChange.add, const Offset(0.0, 401.0), device: 1),
       _pointerData(PointerChange.hover, const Offset(1.0, 401.0), device: 1),
     ]));
     expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
-      const PointerEnterEvent(position: Offset(1.0, 401.0), device: 1),
+      const PointerEnterEvent(position: Offset(0.0, 401.0), device: 1),
       const PointerHoverEvent(position: Offset(1.0, 401.0), device: 1),
     ]));
     expect(_mouseTracker.mouseIsConnected, isTrue);
@@ -267,6 +271,10 @@ void main() {
       }
     });
 
+    void mockMarkNeedsPaint() {
+      _binding.scheduleMouseTrackerPostFrameCheck();
+    }
+
     final VoidCallback firstListener = () {
       if (!_mouseTracker.mouseIsConnected) {
         _mouseTracker.detachAnnotation(annotation);
@@ -275,16 +283,21 @@ void main() {
         _mouseTracker.attachAnnotation(annotation);
         isInHitRegion = true;
       }
+      mockMarkNeedsPaint();
     };
     _mouseTracker.addListener(firstListener);
 
     // The pointer is added onto the annotation, triggering attaching callback.
     ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
-      _pointerData(PointerChange.hover, const Offset(1.0, 0.0)),
+      _pointerData(PointerChange.add, const Offset(1.0, 0.0)),
     ]));
     expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
+    ]));
+    expect(_mouseTracker.mouseIsConnected, isTrue);
+
+    _binding.flushPostFrameCallbacks(Duration.zero);
+    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
       const PointerEnterEvent(position: Offset(1.0, 0.0)),
-      const PointerHoverEvent(position: Offset(1.0, 0.0)),
     ]));
     expect(_mouseTracker.mouseIsConnected, isTrue);
     events.clear();
@@ -625,7 +638,7 @@ void main() {
 
     // When no annotations are attached, hovering should not call finder.
     ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
-      _pointerData(PointerChange.hover, const Offset(0.0, 101.0)),
+      _pointerData(PointerChange.add, const Offset(0.0, 101.0)),
     ]));
     expect(finderCalled, 0);
 
@@ -688,7 +701,7 @@ void main() {
     // Starts out of A.
     isInB = false;
     ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
-      _pointerData(PointerChange.hover, const Offset(0.0, 1.0)),
+      _pointerData(PointerChange.add, const Offset(0.0, 1.0)),
     ]));
     expect(logs, <String>[]);
 
@@ -744,9 +757,9 @@ void main() {
     isInA = true;
     isInB = false;
     ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
-      _pointerData(PointerChange.hover, const Offset(0.0, 1.0)),
+      _pointerData(PointerChange.add, const Offset(0.0, 1.0)),
     ]));
-    expect(logs, <String>['enterA', 'hoverA']);
+    expect(logs, <String>['enterA']);
     logs.clear();
 
     // Moves into B within one frame.

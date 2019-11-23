@@ -530,10 +530,12 @@ class MouseTracker extends ChangeNotifier {
   ///
   /// This method is typically called by the [RenderObject] that owns an
   /// annotation, as soon as the render object is added to the render tree.
+  ///
   /// {@template flutter.mouseTracker.attachAnnotation}
-  /// This method does not cause any immediate effect, since the state it
-  /// changes is used during a post-frame callback or when handling certain
-  /// pointer events.
+  /// Render objects that call this method might want to schedule a frame as
+  /// well, typically by calling [RenderObject.markNeedsPaint], because this
+  /// method does not cause any immediate effect, since the state it changes is
+  /// used during a post-frame callback or when handling certain pointer events.
   ///
   /// ### About annotation attachment
   ///
