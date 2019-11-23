@@ -44,7 +44,7 @@ def get_out_dir(args):
     if args.enable_vulkan:
         target_dir.append('vulkan')
 
-    if args.enable_metal:
+    if args.enable_metal and args.target_os == 'ios':
       target_dir.append('metal')
 
     return os.path.join(args.out_dir, 'out', '_'.join(target_dir))
@@ -74,9 +74,6 @@ def to_gn_args(args):
 
     if args.target_os != 'android' and args.enable_vulkan:
       raise Exception('--enable-vulkan is only supported on Android')
-
-    if args.target_os != 'ios' and args.enable_metal:
-      raise Exception('--enable-metal is only supported on iOS')
 
     runtime_mode = args.runtime_mode
 
