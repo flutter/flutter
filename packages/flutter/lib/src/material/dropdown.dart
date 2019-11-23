@@ -1059,7 +1059,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       _internalNode ??= _createFocusNode();
     }
     _actionMap = <LocalKey, ActionFactory>{
-      ActivateAction.key: _createActivateAction,
+      ActivateAction.key: _createAction,
     };
     focusNode.addListener(_handleFocusChanged);
     final FocusManager focusManager = WidgetsBinding.instance.focusManager;
@@ -1172,7 +1172,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
     });
   }
 
-  Action _createActivateAction() {
+  Action _createAction() {
     return CallbackAction(
       ActivateAction.key,
       onInvoke: (FocusNode node, Intent intent) {

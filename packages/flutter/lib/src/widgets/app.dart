@@ -8,6 +8,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 
 import 'actions.dart';
 import 'banner.dart';
@@ -686,19 +687,20 @@ class WidgetsApp extends StatefulWidget {
   /// {@template flutter.widgets.widgetsApp.shortcuts}
   /// The default map of keyboard shortcuts to intents for the application.
   ///
-  /// By default, this is the output of [defaultShortcuts], called with
-  /// [defaultTargetPlatform]. If you wish to modify the default [shortcuts],
-  /// call [defaultShortcuts] and modify the resulting map, passing it as the
-  /// [shortcuts] for this app. Add to the bindings, or override specific
-  /// bindings for a widget subtree, by adding your own [Shortcuts] widget.
+  /// By default, this is the output of [WidgetsApp.defaultShortcuts], called
+  /// with [defaultTargetPlatform]. If you wish to modify the default
+  /// [shortcuts], call [WidgetsApp.defaultShortcuts] and modify the resulting
+  /// map, passing it as the [shortcuts] for this app. Add to the bindings, or
+  /// override specific bindings for a widget subtree, by adding your own
+  /// [Shortcuts] widget.
   ///
   /// See also:
   ///
-  ///  - [LogicalKeySet], a set of [LogicalKeyboardKey]s that make up the keys
+  /// * [LogicalKeySet], a set of [LogicalKeyboardKey]s that make up the keys
   ///    for this map.
-  ///  - The [Shortcuts] widget, which defines a keyboard mapping.
-  ///  - The [Actions] widget, which defines the mapping from intent to action.
-  ///  - The [Intent] and [Action] classes, which allow definition of new
+  /// * The [Shortcuts] widget, which defines a keyboard mapping.
+  /// * The [Actions] widget, which defines the mapping from intent to action.
+  /// * The [Intent] and [Action] classes, which allow definition of new
   ///    actions.
   /// {@endtemplate}
   final Map<LogicalKeySet, Intent> shortcuts;
@@ -706,21 +708,21 @@ class WidgetsApp extends StatefulWidget {
   /// {@template flutter.widgets.widgetsApp.actions}
   /// The default map of intent keys to actions for the application.
   ///
-  /// By default, this is the output of [defaultActions], called with
+  /// By default, this is the output of [WidgetsApp.defaultActions], called with
   /// [defaultTargetPlatform]. Specifying [actions] for an app overrides the
   /// default, so if you wish to modify the default [actions], you can call
-  /// [defaultActions] and modify the resulting map, passing it as the
-  /// [actions] for this app. You may also add to the bindings, or override
+  /// [WidgetsApp.defaultActions] and modify the resulting map, passing it as
+  /// the [actions] for this app. You may also add to the bindings, or override
   /// specific bindings for a widget subtree, by adding your own [Actions]
   /// widget.
   ///
   /// See also:
   ///
-  ///  - The [shortcuts] parameter, which defines the default set of shortcuts
+  /// * The [shortcuts] parameter, which defines the default set of shortcuts
   ///    for the application.
-  ///  - The [Shortcuts] widget, which defines a keyboard mapping.
-  ///  - The [Actions] widget, which defines the mapping from intent to action.
-  ///  - The [Intent] and [Action] classes, which allow definition of new
+  /// * The [Shortcuts] widget, which defines a keyboard mapping.
+  /// * The [Actions] widget, which defines the mapping from intent to action.
+  /// * The [Intent] and [Action] classes, which allow definition of new
   ///    actions.
   /// {@endtemplate}
   final Map<LocalKey, ActionFactory> actions;
@@ -747,6 +749,79 @@ class WidgetsApp extends StatefulWidget {
   /// This is how `flutter run` turns off the banner when you take a screen shot
   /// with "s".
   static bool debugAllowBannerOverride = true;
+
+  // Default shortcuts for the web platform.
+  static final Map<LogicalKeySet, Intent> _defaultWebShortcuts = <LogicalKeySet, Intent>{
+    LogicalKeySet(LogicalKeyboardKey.tab): const Intent(NextFocusAction.key),
+    LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.tab): const Intent(PreviousFocusAction.key),
+    LogicalKeySet(LogicalKeyboardKey.space): const Intent(ActivateAction.key),
+  };
+
+  // Default shortcuts for the macOS platform.
+  static final Map<LogicalKeySet, Intent> _defaultMacOsShortcuts = <LogicalKeySet, Intent>{
+    LogicalKeySet(LogicalKeyboardKey.tab): const Intent(NextFocusAction.key),
+    LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.tab): const Intent(PreviousFocusAction.key),
+    LogicalKeySet(LogicalKeyboardKey.arrowLeft): const DirectionalFocusIntent(TraversalDirection.left),
+    LogicalKeySet(LogicalKeyboardKey.arrowRight): const DirectionalFocusIntent(TraversalDirection.right),
+    LogicalKeySet(LogicalKeyboardKey.arrowDown): const DirectionalFocusIntent(TraversalDirection.down),
+    LogicalKeySet(LogicalKeyboardKey.arrowUp): const DirectionalFocusIntent(TraversalDirection.up),
+    LogicalKeySet(LogicalKeyboardKey.enter): const Intent(ActivateAction.key),
+    LogicalKeySet(LogicalKeyboardKey.space): const Intent(ActivateAction.key),
+  };
+
+  // Default shortcuts for most platforms.
+  static final Map<LogicalKeySet, Intent> _defaultShortcuts = <LogicalKeySet, Intent>{
+    LogicalKeySet(LogicalKeyboardKey.tab): const Intent(NextFocusAction.key),
+    LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.tab): const Intent(PreviousFocusAction.key),
+    LogicalKeySet(LogicalKeyboardKey.arrowLeft): const DirectionalFocusIntent(TraversalDirection.left),
+    LogicalKeySet(LogicalKeyboardKey.arrowRight): const DirectionalFocusIntent(TraversalDirection.right),
+    LogicalKeySet(LogicalKeyboardKey.arrowDown): const DirectionalFocusIntent(TraversalDirection.down),
+    LogicalKeySet(LogicalKeyboardKey.arrowUp): const DirectionalFocusIntent(TraversalDirection.up),
+    LogicalKeySet(LogicalKeyboardKey.enter): const Intent(ActivateAction.key),
+    LogicalKeySet(LogicalKeyboardKey.space): const Intent(ActivateAction.key),
+  };
+
+  /// Generates the default shortcut key bindings for the given `platform`.
+  ///
+  /// Used by [WidgetsApp] to assign the default key bindings.
+  static Map<LogicalKeySet, Intent> defaultShortcuts(TargetPlatform platform) {
+    if (kIsWeb) {
+      return _defaultWebShortcuts;
+    }
+
+    // TODO(gspencergoog): Move this into the switch below once TargetPlatform.macOS exists.
+    // https://github.com/flutter/flutter/issues/31366
+    if (Platform.isMacOS) {
+      return _defaultMacOsShortcuts;
+    }
+
+    switch (platform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        return _defaultShortcuts;
+        break;
+      case TargetPlatform.iOS:
+        // No keyboard support on iOS yet.
+        break;
+    }
+    return const <LogicalKeySet, Intent>{};
+  }
+
+  // Default actions for all platforms.
+  static final Map<LocalKey, ActionFactory> _defaultActions = <LocalKey, ActionFactory>{
+    DoNothingAction.key: () => const DoNothingAction(),
+    RequestFocusAction.key: () => RequestFocusAction(),
+    NextFocusAction.key: () => NextFocusAction(),
+    PreviousFocusAction.key: () => PreviousFocusAction(),
+    DirectionalFocusAction.key: () => DirectionalFocusAction(),
+  };
+
+  /// Returns the default map of actions used by [WidgetsApp] as the set of
+  /// available actions for an application.
+  static Map<LocalKey, ActionFactory> defaultActions(TargetPlatform targetPlatform) {
+    // At the moment, all platforms have the same set of available actions.
+    return _defaultActions;
+  }
 
   @override
   _WidgetsAppState createState() => _WidgetsAppState();
@@ -1249,9 +1324,9 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
 
     assert(_debugCheckLocalizations(appLocale));
     return Shortcuts(
-      shortcuts: widget.shortcuts ?? defaultShortcuts(defaultTargetPlatform),
+      shortcuts: widget.shortcuts ?? WidgetsApp.defaultShortcuts(defaultTargetPlatform),
       child: Actions(
-        actions: widget.actions ?? defaultActions(defaultTargetPlatform),
+        actions: widget.actions ?? WidgetsApp.defaultActions(defaultTargetPlatform),
         child: DefaultFocusTraversal(
           policy: ReadingOrderTraversalPolicy(),
           child: _MediaQueryFromWindow(

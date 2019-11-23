@@ -16,7 +16,7 @@ class TestAction extends Action {
 
   @override
   void invoke(FocusNode node, Intent intent) {
-    calls++;
+    calls += 1;
   }
 }
 
