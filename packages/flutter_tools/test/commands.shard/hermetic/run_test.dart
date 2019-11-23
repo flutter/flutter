@@ -55,11 +55,15 @@ void main() {
 
     group('dart-flags option', () {
       setUpAll(() {
+        final FakeDevice fakeDevice = FakeDevice();
         when(mockDeviceManager.getDevices()).thenAnswer((Invocation invocation) {
           return Stream<Device>.fromIterable(<Device>[
-            FakeDevice(),
+            fakeDevice,
           ]);
         });
+        when(mockDeviceManager.findTargetDevices(any)).thenAnswer(
+          (Invocation invocation) => Future<List<Device>>.value(<Device>[fakeDevice])
+        );
       });
 
       RunCommand command;
@@ -195,11 +199,13 @@ void main() {
       MockWebRunnerFactory mockWebRunnerFactory;
 
       setUpAll(() {
-        when(mockDeviceManager.getDevices()).thenAnswer((Invocation invocation) {
-          return Stream<Device>.fromIterable(<Device>[
-            FakeDevice().._targetPlatform = TargetPlatform.web_javascript,
-          ]);
-        });
+        final FakeDevice fakeDevice = FakeDevice().._targetPlatform = TargetPlatform.web_javascript;
+        when(mockDeviceManager.getDevices()).thenAnswer(
+          (Invocation invocation) => Stream<Device>.fromIterable(<Device>[fakeDevice])
+        );
+        when(mockDeviceManager.findTargetDevices(any)).thenAnswer(
+          (Invocation invocation) => Future<List<Device>>.value(<Device>[fakeDevice])
+        );
       });
 
       RunCommand command;
