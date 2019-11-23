@@ -127,15 +127,21 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
     if (modifiers & anyMask == 0) {
       return false;
     }
+    // If only the "anyMask" bit is set, then we respond true for requests of
+    // whether either left or right is pressed.
+    // Handles the case where macOS supplies just the "either" modifier flag,
+    // but not the left/right flag. (e.g. modifierShift but not
+    // modifierLeftShift).
+    final bool anyOnly = modifiers & (leftMask | rightMask | anyMask) == anyMask;
     switch (side) {
       case KeyboardSide.any:
         return true;
       case KeyboardSide.all:
-        return modifiers & leftMask != 0 && modifiers & rightMask != 0;
+        return modifiers & leftMask != 0 && modifiers & rightMask != 0 || anyOnly;
       case KeyboardSide.left:
-        return modifiers & leftMask != 0;
+        return modifiers & leftMask != 0 || anyOnly;
       case KeyboardSide.right:
-        return modifiers & rightMask != 0;
+        return modifiers & rightMask != 0 || anyOnly;
     }
     return false;
   }
@@ -178,15 +184,17 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
 
   @override
   KeyboardSide getModifierSide(ModifierKey key) {
-    final int independentModifier = modifiers & deviceIndependentMask;
-    KeyboardSide findSide(int leftMask, int rightMask) {
+    KeyboardSide findSide(int leftMask, int rightMask, int anyMask) {
       final int combinedMask = leftMask | rightMask;
-      final int combined = independentModifier & combinedMask;
+      final int combined = modifiers & combinedMask;
       if (combined == leftMask) {
         return KeyboardSide.left;
       } else if (combined == rightMask) {
         return KeyboardSide.right;
-      } else if (combined == combinedMask) {
+      } else if (combined == combinedMask || modifiers & (combinedMask | anyMask) == anyMask) {
+        // Handles the case where macOS supplies just the "either" modifier
+        // flag, but not the left/right flag. (e.g. modifierShift but not
+        // modifierLeftShift).
         return KeyboardSide.all;
       }
       return null;
@@ -194,13 +202,13 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
 
     switch (key) {
       case ModifierKey.controlModifier:
-        return findSide(modifierLeftControl, modifierRightControl);
+        return findSide(modifierLeftControl, modifierRightControl, modifierControl);
       case ModifierKey.shiftModifier:
-        return findSide(modifierLeftShift, modifierRightShift);
+        return findSide(modifierLeftShift, modifierRightShift, modifierShift);
       case ModifierKey.altModifier:
-        return findSide(modifierLeftOption, modifierRightOption);
+        return findSide(modifierLeftOption, modifierRightOption, modifierOption);
       case ModifierKey.metaModifier:
-        return findSide(modifierLeftCommand, modifierRightCommand);
+        return findSide(modifierLeftCommand, modifierRightCommand, modifierCommand);
       case ModifierKey.capsLockModifier:
       case ModifierKey.numLockModifier:
       case ModifierKey.scrollLockModifier:
