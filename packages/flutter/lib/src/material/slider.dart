@@ -117,6 +117,7 @@ class Slider extends StatefulWidget {
     @required this.onChanged,
     this.onChangeStart,
     this.onChangeEnd,
+    this.touchActive,
     this.min = 0.0,
     this.max = 1.0,
     this.divisions,
@@ -146,6 +147,7 @@ class Slider extends StatefulWidget {
     @required this.onChanged,
     this.onChangeStart,
     this.onChangeEnd,
+    this.touchActive,
     this.min = 0.0,
     this.max = 1.0,
     this.divisions,
@@ -205,6 +207,11 @@ class Slider extends StatefulWidget {
   ///  * [onChangeEnd] for a callback that is called when the user stops
   ///    changing the value.
   final ValueChanged<double> onChanged;
+
+  // Current status of the slider
+  //
+  // true if the user still has the slider touched
+  final ValueChanged<bool> touchActive;
 
   /// Called when the user starts selecting a new value for the slider.
   ///
@@ -398,6 +405,9 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
   static const Duration enableAnimationDuration = Duration(milliseconds: 75);
   static const Duration valueIndicatorAnimationDuration = Duration(milliseconds: 100);
 
+  // indicates if the user just tapped the slider to move it
+  bool _quickTouch;
+
   // Animation controller that is run when the overlay (a.k.a radial reaction)
   // is shown in response to user interaction.
   AnimationController overlayController;
@@ -449,7 +459,18 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     final double lerpValue = _lerp(value);
     if (lerpValue != widget.value) {
       widget.onChanged(lerpValue);
+
+      if (_quickTouch != null) {
+        if (_quickTouch) {
+          widget.touchActive(false);
+        }
+        _quickTouch = null;
+      }
     }
+  }
+
+  void _handleQuickTouch(bool quickTouch) {
+    _quickTouch = quickTouch;
   }
 
   void _handleDragStart(double value) {
@@ -554,6 +575,8 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       onChanged: (widget.onChanged != null) && (widget.max > widget.min) ? _handleChanged : null,
       onChangeStart: widget.onChangeStart != null ? _handleDragStart : null,
       onChangeEnd: widget.onChangeEnd != null ? _handleDragEnd : null,
+      touchActive: widget.touchActive,
+      quickTouch: _handleQuickTouch,
       state: this,
       semanticFormatterCallback: widget.semanticFormatterCallback,
     );
@@ -590,6 +613,8 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
     this.onChanged,
     this.onChangeStart,
     this.onChangeEnd,
+    this.touchActive,
+    this.quickTouch,
     this.state,
     this.semanticFormatterCallback,
   }) : super(key: key);
@@ -602,6 +627,8 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
   final ValueChanged<double> onChanged;
   final ValueChanged<double> onChangeStart;
   final ValueChanged<double> onChangeEnd;
+  final ValueChanged<bool> touchActive;
+  final ValueChanged<bool> quickTouch;
   final SemanticFormatterCallback semanticFormatterCallback;
   final _SliderState state;
 
@@ -616,6 +643,8 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
       onChanged: onChanged,
       onChangeStart: onChangeStart,
       onChangeEnd: onChangeEnd,
+      touchActive: touchActive,
+      quickTouch: quickTouch,
       state: state,
       textDirection: Directionality.of(context),
       semanticFormatterCallback: semanticFormatterCallback,
@@ -635,6 +664,8 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
       ..onChanged = onChanged
       ..onChangeStart = onChangeStart
       ..onChangeEnd = onChangeEnd
+      ..touchActive = touchActive
+      ..quickTouch = quickTouch
       ..textDirection = Directionality.of(context)
       ..semanticFormatterCallback = semanticFormatterCallback
       ..platform = Theme.of(context).platform;
@@ -655,6 +686,8 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     SemanticFormatterCallback semanticFormatterCallback,
     this.onChangeStart,
     this.onChangeEnd,
+    this.touchActive,
+    this.quickTouch,
     @required _SliderState state,
     @required TextDirection textDirection,
   }) : assert(value != null && value >= 0.0 && value <= 1.0),
@@ -722,6 +755,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   HorizontalDragGestureRecognizer _drag;
   TapGestureRecognizer _tap;
   bool _active = false;
+  bool _touchActive = false;
   double _currentDragValue = 0.0;
 
   // This rect is used in gesture calculations, where the gesture coordinates
@@ -854,6 +888,8 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
   ValueChanged<double> onChangeStart;
   ValueChanged<double> onChangeEnd;
+  ValueChanged<bool> touchActive;
+  ValueChanged<bool> quickTouch;
 
   TextDirection get textDirection => _textDirection;
   TextDirection _textDirection;
@@ -976,6 +1012,13 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       }
       _currentDragValue = _getValueFromGlobalPosition(globalPosition);
       onChanged(_discretize(_currentDragValue));
+      if (_touchActive != null) {
+        if (_touchActive) {
+          touchActive(true);
+        }
+        quickTouch(false);
+        _touchActive = null;
+      }
       _state.overlayController.forward();
       if (showValueIndicator) {
         _state.valueIndicatorController.forward();
@@ -995,6 +1038,13 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (_active && _state.mounted) {
       if (onChangeEnd != null) {
         onChangeEnd(_discretize(_currentDragValue));
+      }
+      if (_touchActive != null) {
+        if (!_touchActive) {
+          touchActive(false);
+        }
+        quickTouch(false);
+        _touchActive = null;
       }
       _active = false;
       _currentDragValue = 0.0;
@@ -1033,6 +1083,12 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
   @override
   void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
+    if (event is PointerDownEvent) {
+      _touchActive = true;
+    } else if (event is PointerUpEvent) {
+      quickTouch(true);
+      _touchActive = false;
+    }
     assert(debugHandleEvent(event, entry));
     if (event is PointerDownEvent && isInteractive) {
       // We need to add the drag first so that it has priority.
