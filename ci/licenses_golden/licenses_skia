@@ -1,4 +1,4 @@
-Signature: 68d412de34ec10138518fbcb15922cc7
+Signature: f911c0b222e97db1213161265b556a8a
 
 UNUSED LICENSES:
 
@@ -806,15 +806,17 @@ Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
 met:
 
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+  * Neither the name of the copyright holder nor the names of its
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -831,341 +833,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: skcms
-LIBRARY: skia
 LIBRARY: vulkanmemoryallocator
-ORIGIN: ../../../third_party/skia/bench/ClearBench.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/include/third_party/skcms/skcms.h + ../../../third_party/skia/include/third_party/skcms/LICENSE
 TYPE: LicenseType.bsd
-FILE: ../../../third_party/skia/bench/ClearBench.cpp
-FILE: ../../../third_party/skia/bench/CompositingImagesBench.cpp
-FILE: ../../../third_party/skia/bench/CubicMapBench.cpp
-FILE: ../../../third_party/skia/bench/GrCCFillGeometryBench.cpp
-FILE: ../../../third_party/skia/bench/ImageCycleBench.cpp
-FILE: ../../../third_party/skia/bench/JSONBench.cpp
-FILE: ../../../third_party/skia/bench/PathOpsBench.cpp
-FILE: ../../../third_party/skia/bench/PolyUtilsBench.cpp
-FILE: ../../../third_party/skia/bench/ShaderMaskFilterBench.cpp
-FILE: ../../../third_party/skia/bench/TypefaceBench.cpp
-FILE: ../../../third_party/skia/experimental/pvg/draw_msg.proto
-FILE: ../../../third_party/skia/fuzz/FuzzCommon.cpp
-FILE: ../../../third_party/skia/fuzz/FuzzPathMeasure.cpp
-FILE: ../../../third_party/skia/fuzz/FuzzRegionOp.cpp
-FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzImageFilterDeserialize.cpp
-FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzPathDeserialize.cpp
-FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzRegionDeserialize.cpp
-FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzRegionSetPath.cpp
-FILE: ../../../third_party/skia/gm/analytic_gradients.cpp
-FILE: ../../../third_party/skia/gm/androidblendmodes.cpp
-FILE: ../../../third_party/skia/gm/b_119394958.cpp
-FILE: ../../../third_party/skia/gm/clockwise.cpp
-FILE: ../../../third_party/skia/gm/crbug_847759.cpp
-FILE: ../../../third_party/skia/gm/crbug_884166.cpp
-FILE: ../../../third_party/skia/gm/crbug_887103.cpp
-FILE: ../../../third_party/skia/gm/crbug_892988.cpp
-FILE: ../../../third_party/skia/gm/crbug_899512.cpp
-FILE: ../../../third_party/skia/gm/crbug_905548.cpp
-FILE: ../../../third_party/skia/gm/daa.cpp
-FILE: ../../../third_party/skia/gm/drawimageset.cpp
-FILE: ../../../third_party/skia/gm/drawquadset.cpp
-FILE: ../../../third_party/skia/gm/fontregen.cpp
-FILE: ../../../third_party/skia/gm/fwidth_squircle.cpp
-FILE: ../../../third_party/skia/gm/gradients_degenerate.cpp
-FILE: ../../../third_party/skia/gm/hugepath.cpp
-FILE: ../../../third_party/skia/gm/localmatrixshader.cpp
-FILE: ../../../third_party/skia/gm/make_raster_image.cpp
-FILE: ../../../third_party/skia/gm/mandoline.cpp
-FILE: ../../../third_party/skia/gm/orientation.cpp
-FILE: ../../../third_party/skia/gm/p3.cpp
-FILE: ../../../third_party/skia/gm/pathmeasure.cpp
-FILE: ../../../third_party/skia/gm/perspimages.cpp
-FILE: ../../../third_party/skia/gm/polygonoffset.cpp
-FILE: ../../../third_party/skia/gm/scaledemoji.cpp
-FILE: ../../../third_party/skia/gm/scaledemoji_rendering.cpp
-FILE: ../../../third_party/skia/gm/shadermaskfilter.cpp
-FILE: ../../../third_party/skia/gm/sharedcorners.cpp
-FILE: ../../../third_party/skia/gm/skinning.cpp
-FILE: ../../../third_party/skia/gm/trickycubicstrokes.cpp
-FILE: ../../../third_party/skia/gm/unpremul.cpp
-FILE: ../../../third_party/skia/gm/wacky_yuv_formats.cpp
-FILE: ../../../third_party/skia/include/android/SkAnimatedImage.h
-FILE: ../../../third_party/skia/include/c/sk_colorspace.h
-FILE: ../../../third_party/skia/include/c/sk_imageinfo.h
-FILE: ../../../third_party/skia/include/core/SkCanvasVirtualEnforcer.h
-FILE: ../../../third_party/skia/include/core/SkContourMeasure.h
-FILE: ../../../third_party/skia/include/core/SkCoverageMode.h
-FILE: ../../../third_party/skia/include/core/SkCubicMap.h
-FILE: ../../../third_party/skia/include/core/SkFontMetrics.h
-FILE: ../../../third_party/skia/include/core/SkFontParameters.h
-FILE: ../../../third_party/skia/include/core/SkFontTypes.h
-FILE: ../../../third_party/skia/include/core/SkYUVAIndex.h
-FILE: ../../../third_party/skia/include/effects/SkOpPathEffect.h
-FILE: ../../../third_party/skia/include/effects/SkShaderMaskFilter.h
-FILE: ../../../third_party/skia/include/effects/SkTrimPathEffect.h
-FILE: ../../../third_party/skia/include/gpu/GrBackendDrawableInfo.h
-FILE: ../../../third_party/skia/include/gpu/GrDriverBugWorkarounds.h
-FILE: ../../../third_party/skia/include/gpu/vk/GrVkMemoryAllocator.h
-FILE: ../../../third_party/skia/include/gpu/vk/GrVkVulkan.h
-FILE: ../../../third_party/skia/include/ports/SkFontMgr_fuchsia.h
-FILE: ../../../third_party/skia/include/private/GrVkTypesPriv.h
-FILE: ../../../third_party/skia/include/private/SkMacros.h
-FILE: ../../../third_party/skia/include/private/SkSafe32.h
-FILE: ../../../third_party/skia/include/private/SkTo.h
 FILE: ../../../third_party/skia/include/third_party/skcms/skcms.h
-FILE: ../../../third_party/skia/include/utils/Sk3D.h
-FILE: ../../../third_party/skia/include/utils/SkAnimCodecPlayer.h
-FILE: ../../../third_party/skia/include/utils/SkTextUtils.h
-FILE: ../../../third_party/skia/infra/cts/run_testlab.go
-FILE: ../../../third_party/skia/modules/skottie/gm/3dgm.cpp
-FILE: ../../../third_party/skia/modules/skottie/include/SkottieProperty.h
-FILE: ../../../third_party/skia/modules/skottie/src/SkottieAdapter.cpp
-FILE: ../../../third_party/skia/modules/skottie/src/SkottieAdapter.h
-FILE: ../../../third_party/skia/modules/skottie/src/SkottieJson.cpp
-FILE: ../../../third_party/skia/modules/skottie/src/SkottieJson.h
-FILE: ../../../third_party/skia/modules/skottie/src/SkottiePriv.h
-FILE: ../../../third_party/skia/modules/skottie/src/SkottieProperty.cpp
-FILE: ../../../third_party/skia/modules/skottie/src/SkottieTest.cpp
-FILE: ../../../third_party/skia/modules/skottie/src/SkottieTool.cpp
-FILE: ../../../third_party/skia/modules/skottie/src/layers/PrecompLayer.cpp
-FILE: ../../../third_party/skia/modules/skottie/src/layers/ShapeLayer.cpp
-FILE: ../../../third_party/skia/modules/skottie/src/layers/TextLayer.cpp
-FILE: ../../../third_party/skia/modules/skottie/utils/SkottieUtils.cpp
-FILE: ../../../third_party/skia/modules/skottie/utils/SkottieUtils.h
-FILE: ../../../third_party/skia/modules/sksg/include/SkSGClipEffect.h
-FILE: ../../../third_party/skia/modules/sksg/include/SkSGColorFilter.h
-FILE: ../../../third_party/skia/modules/sksg/include/SkSGGeometryTransform.h
-FILE: ../../../third_party/skia/modules/sksg/include/SkSGGradient.h
-FILE: ../../../third_party/skia/modules/sksg/include/SkSGImage.h
-FILE: ../../../third_party/skia/modules/sksg/include/SkSGMaskEffect.h
-FILE: ../../../third_party/skia/modules/sksg/include/SkSGOpacityEffect.h
-FILE: ../../../third_party/skia/modules/sksg/include/SkSGPlane.h
-FILE: ../../../third_party/skia/modules/sksg/include/SkSGRoundEffect.h
-FILE: ../../../third_party/skia/modules/sksg/include/SkSGScene.h
-FILE: ../../../third_party/skia/modules/sksg/include/SkSGText.h
-FILE: ../../../third_party/skia/modules/sksg/src/SkSGClipEffect.cpp
-FILE: ../../../third_party/skia/modules/sksg/src/SkSGColorFilter.cpp
-FILE: ../../../third_party/skia/modules/sksg/src/SkSGGeometryTransform.cpp
-FILE: ../../../third_party/skia/modules/sksg/src/SkSGGradient.cpp
-FILE: ../../../third_party/skia/modules/sksg/src/SkSGImage.cpp
-FILE: ../../../third_party/skia/modules/sksg/src/SkSGMaskEffect.cpp
-FILE: ../../../third_party/skia/modules/sksg/src/SkSGOpacityEffect.cpp
-FILE: ../../../third_party/skia/modules/sksg/src/SkSGPlane.cpp
-FILE: ../../../third_party/skia/modules/sksg/src/SkSGRoundEffect.cpp
-FILE: ../../../third_party/skia/modules/sksg/src/SkSGScene.cpp
-FILE: ../../../third_party/skia/modules/sksg/src/SkSGText.cpp
-FILE: ../../../third_party/skia/modules/skshaper/src/SkShaper.cpp
-FILE: ../../../third_party/skia/samplecode/SampleAnimatedImage.cpp
-FILE: ../../../third_party/skia/samplecode/SampleCusp.cpp
-FILE: ../../../third_party/skia/samplecode/SampleFlutterAnimate.cpp
-FILE: ../../../third_party/skia/samplecode/SampleGlyphTransform.cpp
-FILE: ../../../third_party/skia/src/android/SkAnimatedImage.cpp
-FILE: ../../../third_party/skia/src/c/sk_imageinfo.cpp
-FILE: ../../../third_party/skia/src/codec/SkEncodedInfo.cpp
-FILE: ../../../third_party/skia/src/codec/SkParseEncodedOrigin.cpp
-FILE: ../../../third_party/skia/src/codec/SkWuffsCodec.cpp
-FILE: ../../../third_party/skia/src/codec/SkWuffsCodec.h
-FILE: ../../../third_party/skia/src/core/SkBlurPriv.h
-FILE: ../../../third_party/skia/src/core/SkCanvasPriv.cpp
-FILE: ../../../third_party/skia/src/core/SkColorSpaceXformSteps.cpp
-FILE: ../../../third_party/skia/src/core/SkColorSpaceXformSteps.h
-FILE: ../../../third_party/skia/src/core/SkContourMeasure.cpp
-FILE: ../../../third_party/skia/src/core/SkCoverageModePriv.h
-FILE: ../../../third_party/skia/src/core/SkCubicMap.cpp
-FILE: ../../../third_party/skia/src/core/SkCubicSolver.h
-FILE: ../../../third_party/skia/src/core/SkDeferredDisplayList.cpp
-FILE: ../../../third_party/skia/src/core/SkDeferredDisplayListPriv.h
-FILE: ../../../third_party/skia/src/core/SkDraw_text.cpp
-FILE: ../../../third_party/skia/src/core/SkFontPriv.h
-FILE: ../../../third_party/skia/src/core/SkGlyph.cpp
-FILE: ../../../third_party/skia/src/core/SkIPoint16.h
-FILE: ../../../third_party/skia/src/core/SkMaskFilterBase.h
-FILE: ../../../third_party/skia/src/core/SkPath_serial.cpp
-FILE: ../../../third_party/skia/src/core/SkPicturePriv.h
-FILE: ../../../third_party/skia/src/core/SkRRectPriv.h
-FILE: ../../../third_party/skia/src/core/SkRectPriv.h
-FILE: ../../../third_party/skia/src/core/SkRemoteGlyphCache.cpp
-FILE: ../../../third_party/skia/src/core/SkRemoteGlyphCache.h
-FILE: ../../../third_party/skia/src/core/SkSafeRange.h
-FILE: ../../../third_party/skia/src/core/SkSpan.h
-FILE: ../../../third_party/skia/src/core/SkStrikeCache.cpp
-FILE: ../../../third_party/skia/src/core/SkSurfaceCharacterization.cpp
-FILE: ../../../third_party/skia/src/core/SkTextBlobPriv.h
-FILE: ../../../third_party/skia/src/core/SkTypeface_remote.cpp
-FILE: ../../../third_party/skia/src/core/SkTypeface_remote.h
-FILE: ../../../third_party/skia/src/core/SkYUVASizeInfo.cpp
-FILE: ../../../third_party/skia/src/effects/SkOpPE.h
-FILE: ../../../third_party/skia/src/effects/SkOpPathEffect.cpp
-FILE: ../../../third_party/skia/src/effects/SkShaderMaskFilter.cpp
-FILE: ../../../third_party/skia/src/effects/SkTrimPE.h
-FILE: ../../../third_party/skia/src/effects/SkTrimPathEffect.cpp
-FILE: ../../../third_party/skia/src/gpu/GrContextThreadSafeProxyPriv.h
-FILE: ../../../third_party/skia/src/gpu/GrDDLContext.cpp
-FILE: ../../../third_party/skia/src/gpu/GrDriverBugWorkarounds.cpp
-FILE: ../../../third_party/skia/src/gpu/GrFPArgs.h
-FILE: ../../../third_party/skia/src/gpu/GrLegacyDirectContext.cpp
-FILE: ../../../third_party/skia/src/gpu/GrProxyProvider.cpp
-FILE: ../../../third_party/skia/src/gpu/GrProxyProvider.h
-FILE: ../../../third_party/skia/src/gpu/GrRenderTargetProxyPriv.h
-FILE: ../../../third_party/skia/src/gpu/GrResourceProviderPriv.h
-FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCClipPath.cpp
-FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCClipPath.h
-FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCConicShader.cpp
-FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCConicShader.h
-FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCDrawPathsOp.cpp
-FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCDrawPathsOp.h
-FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCPathCache.cpp
-FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCPathCache.h
-FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCPerFlushResources.cpp
-FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCPerFlushResources.h
-FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCPerOpsTaskPaths.h
-FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCSTLList.h
-FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCStrokeGeometry.cpp
-FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCStrokeGeometry.h
-FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCStroker.cpp
-FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCStroker.h
-FILE: ../../../third_party/skia/src/gpu/effects/GrAARectEffect.fp
-FILE: ../../../third_party/skia/src/gpu/effects/GrAlphaThresholdFragmentProcessor.fp
-FILE: ../../../third_party/skia/src/gpu/effects/GrCircleBlurFragmentProcessor.fp
-FILE: ../../../third_party/skia/src/gpu/effects/GrConfigConversionEffect.fp
-FILE: ../../../third_party/skia/src/gpu/effects/GrConstColorProcessor.fp
-FILE: ../../../third_party/skia/src/gpu/effects/GrLumaColorFilterEffect.fp
-FILE: ../../../third_party/skia/src/gpu/effects/GrMagnifierEffect.fp
-FILE: ../../../third_party/skia/src/gpu/effects/GrPremulInputFragmentProcessor.fp
-FILE: ../../../third_party/skia/src/gpu/effects/GrRRectBlurEffect.fp
-FILE: ../../../third_party/skia/src/gpu/effects/GrRectBlurEffect.fp
-FILE: ../../../third_party/skia/src/gpu/effects/GrSkSLFP.cpp
-FILE: ../../../third_party/skia/src/gpu/effects/GrSkSLFP.h
-FILE: ../../../third_party/skia/src/gpu/effects/GrYUVtoRGBEffect.cpp
-FILE: ../../../third_party/skia/src/gpu/effects/GrYUVtoRGBEffect.h
-FILE: ../../../third_party/skia/src/gpu/effects/generated/GrAARectEffect.cpp
-FILE: ../../../third_party/skia/src/gpu/effects/generated/GrAARectEffect.h
-FILE: ../../../third_party/skia/src/gpu/effects/generated/GrAlphaThresholdFragmentProcessor.cpp
-FILE: ../../../third_party/skia/src/gpu/effects/generated/GrAlphaThresholdFragmentProcessor.h
-FILE: ../../../third_party/skia/src/gpu/effects/generated/GrCircleBlurFragmentProcessor.cpp
-FILE: ../../../third_party/skia/src/gpu/effects/generated/GrCircleBlurFragmentProcessor.h
-FILE: ../../../third_party/skia/src/gpu/effects/generated/GrConfigConversionEffect.cpp
-FILE: ../../../third_party/skia/src/gpu/effects/generated/GrConfigConversionEffect.h
-FILE: ../../../third_party/skia/src/gpu/effects/generated/GrConstColorProcessor.cpp
-FILE: ../../../third_party/skia/src/gpu/effects/generated/GrConstColorProcessor.h
-FILE: ../../../third_party/skia/src/gpu/effects/generated/GrLumaColorFilterEffect.cpp
-FILE: ../../../third_party/skia/src/gpu/effects/generated/GrLumaColorFilterEffect.h
-FILE: ../../../third_party/skia/src/gpu/effects/generated/GrMagnifierEffect.cpp
-FILE: ../../../third_party/skia/src/gpu/effects/generated/GrMagnifierEffect.h
-FILE: ../../../third_party/skia/src/gpu/effects/generated/GrPremulInputFragmentProcessor.cpp
-FILE: ../../../third_party/skia/src/gpu/effects/generated/GrPremulInputFragmentProcessor.h
-FILE: ../../../third_party/skia/src/gpu/effects/generated/GrRRectBlurEffect.cpp
-FILE: ../../../third_party/skia/src/gpu/effects/generated/GrRRectBlurEffect.h
-FILE: ../../../third_party/skia/src/gpu/effects/generated/GrRectBlurEffect.cpp
-FILE: ../../../third_party/skia/src/gpu/effects/generated/GrRectBlurEffect.h
-FILE: ../../../third_party/skia/src/gpu/geometry/GrQuad.cpp
-FILE: ../../../third_party/skia/src/gpu/gradients/GrClampedGradientEffect.fp
-FILE: ../../../third_party/skia/src/gpu/gradients/GrDualIntervalGradientColorizer.fp
-FILE: ../../../third_party/skia/src/gpu/gradients/GrGradientBitmapCache.cpp
-FILE: ../../../third_party/skia/src/gpu/gradients/GrGradientBitmapCache.h
-FILE: ../../../third_party/skia/src/gpu/gradients/GrGradientShader.cpp
-FILE: ../../../third_party/skia/src/gpu/gradients/GrGradientShader.h
-FILE: ../../../third_party/skia/src/gpu/gradients/GrLinearGradientLayout.fp
-FILE: ../../../third_party/skia/src/gpu/gradients/GrRadialGradientLayout.fp
-FILE: ../../../third_party/skia/src/gpu/gradients/GrSingleIntervalGradientColorizer.fp
-FILE: ../../../third_party/skia/src/gpu/gradients/GrSweepGradientLayout.fp
-FILE: ../../../third_party/skia/src/gpu/gradients/GrTextureGradientColorizer.fp
-FILE: ../../../third_party/skia/src/gpu/gradients/GrTiledGradientEffect.fp
-FILE: ../../../third_party/skia/src/gpu/gradients/GrTwoPointConicalGradientLayout.fp
-FILE: ../../../third_party/skia/src/gpu/gradients/GrUnrolledBinaryGradientColorizer.fp
-FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrClampedGradientEffect.cpp
-FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrClampedGradientEffect.h
-FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrDualIntervalGradientColorizer.cpp
-FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrDualIntervalGradientColorizer.h
-FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrLinearGradientLayout.cpp
-FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrLinearGradientLayout.h
-FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrRadialGradientLayout.cpp
-FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrRadialGradientLayout.h
-FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrSingleIntervalGradientColorizer.cpp
-FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrSingleIntervalGradientColorizer.h
-FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrSweepGradientLayout.cpp
-FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrSweepGradientLayout.h
-FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrTextureGradientColorizer.cpp
-FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrTextureGradientColorizer.h
-FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrTiledGradientEffect.cpp
-FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrTiledGradientEffect.h
-FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrTwoPointConicalGradientLayout.cpp
-FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrTwoPointConicalGradientLayout.h
-FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrUnrolledBinaryGradientColorizer.cpp
-FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrUnrolledBinaryGradientColorizer.h
-FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlBuffer.h
-FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlBuffer.mm
-FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlCppUtil.h
-FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlDepthStencil.mm
-FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlOpsRenderPass.h
-FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlOpsRenderPass.mm
-FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlPipelineState.h
-FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlPipelineState.mm
-FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlPipelineStateBuilder.h
-FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlPipelineStateBuilder.mm
-FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlPipelineStateDataManager.h
-FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlPipelineStateDataManager.mm
-FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlResourceProvider.h
-FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlResourceProvider.mm
-FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlSampler.h
-FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlSampler.mm
-FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlStencilAttachment.h
-FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlStencilAttachment.mm
-FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlTextureRenderTarget.h
-FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlTextureRenderTarget.mm
-FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlUniformHandler.h
-FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlUniformHandler.mm
-FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlVaryingHandler.h
-FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlVaryingHandler.mm
-FILE: ../../../third_party/skia/src/gpu/ops/GrClearStencilClipOp.cpp
-FILE: ../../../third_party/skia/src/gpu/ops/GrDebugMarkerOp.cpp
-FILE: ../../../third_party/skia/src/gpu/ops/GrDrawableOp.cpp
-FILE: ../../../third_party/skia/src/gpu/ops/GrDrawableOp.h
-FILE: ../../../third_party/skia/src/gpu/ops/GrFillRRectOp.cpp
-FILE: ../../../third_party/skia/src/gpu/ops/GrFillRRectOp.h
-FILE: ../../../third_party/skia/src/gpu/ops/GrFillRectOp.cpp
-FILE: ../../../third_party/skia/src/gpu/ops/GrFillRectOp.h
-FILE: ../../../third_party/skia/src/gpu/ops/GrQuadPerEdgeAA.cpp
-FILE: ../../../third_party/skia/src/gpu/ops/GrQuadPerEdgeAA.h
-FILE: ../../../third_party/skia/src/gpu/ops/GrStrokeRectOp.cpp
-FILE: ../../../third_party/skia/src/gpu/ops/GrStrokeRectOp.h
-FILE: ../../../third_party/skia/src/gpu/text/GrAtlasManager.cpp
-FILE: ../../../third_party/skia/src/gpu/text/GrAtlasManager.h
-FILE: ../../../third_party/skia/src/gpu/text/GrSDFMaskFilter.cpp
-FILE: ../../../third_party/skia/src/gpu/text/GrSDFMaskFilter.h
-FILE: ../../../third_party/skia/src/gpu/vk/GrVkAMDMemoryAllocator.cpp
-FILE: ../../../third_party/skia/src/gpu/vk/GrVkAMDMemoryAllocator.h
-FILE: ../../../third_party/skia/src/gpu/vk/GrVkCommandPool.cpp
-FILE: ../../../third_party/skia/src/gpu/vk/GrVkCommandPool.h
-FILE: ../../../third_party/skia/src/gpu/vk/GrVkImageLayout.h
-FILE: ../../../third_party/skia/src/gpu/vk/GrVkSamplerYcbcrConversion.cpp
-FILE: ../../../third_party/skia/src/gpu/vk/GrVkSamplerYcbcrConversion.h
-FILE: ../../../third_party/skia/src/gpu/vk/GrVkTypesPriv.cpp
-FILE: ../../../third_party/skia/src/image/SkImage_GpuBase.cpp
-FILE: ../../../third_party/skia/src/image/SkImage_GpuBase.h
-FILE: ../../../third_party/skia/src/image/SkImage_GpuYUVA.cpp
-FILE: ../../../third_party/skia/src/image/SkImage_GpuYUVA.h
-FILE: ../../../third_party/skia/src/image/SkImage_Lazy.h
-FILE: ../../../third_party/skia/src/opts/SkBitmapProcState_opts.h
-FILE: ../../../third_party/skia/src/opts/SkOpts_hsw.cpp
-FILE: ../../../third_party/skia/src/opts/SkRasterPipeline_opts.h
-FILE: ../../../third_party/skia/src/pathops/SkPathOpsAsWinding.cpp
-FILE: ../../../third_party/skia/src/pathops/SkPathOpsTCurve.h
-FILE: ../../../third_party/skia/src/pdf/SkClusterator.cpp
-FILE: ../../../third_party/skia/src/pdf/SkClusterator.h
-FILE: ../../../third_party/skia/src/pdf/SkPDFTag.cpp
-FILE: ../../../third_party/skia/src/pdf/SkPDFTag.h
-FILE: ../../../third_party/skia/src/ports/SkFontMgr_fuchsia.cpp
-FILE: ../../../third_party/skia/src/sksl/SkSLByteCode.cpp
-FILE: ../../../third_party/skia/src/sksl/SkSLCPPUniformCTypes.cpp
-FILE: ../../../third_party/skia/src/sksl/SkSLCPPUniformCTypes.h
-FILE: ../../../third_party/skia/src/sksl/SkSLPipelineStageCodeGenerator.cpp
-FILE: ../../../third_party/skia/src/sksl/ir/SkSLVariableReference.cpp
-FILE: ../../../third_party/skia/src/utils/Sk3D.cpp
-FILE: ../../../third_party/skia/src/utils/SkAnimCodecPlayer.cpp
-FILE: ../../../third_party/skia/src/utils/SkCallableTraits.h
-FILE: ../../../third_party/skia/src/utils/SkJSON.cpp
-FILE: ../../../third_party/skia/src/utils/SkJSON.h
-FILE: ../../../third_party/skia/src/utils/SkTextUtils.cpp
-FILE: ../../../third_party/skia/src/utils/mac/SkUniqueCFRef.h
-FILE: ../../../third_party/skia/src/utils/win/SkDWriteNTDDI_VERSION.h
 FILE: ../../../third_party/skia/third_party/skcms/skcms.cc
 FILE: ../../../third_party/skia/third_party/skcms/skcms_internal.h
 FILE: ../../../third_party/skia/third_party/skcms/src/Transform_inl.h
@@ -1455,6 +1126,8 @@ FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.e
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Test-Android-Clang-Nexus5x-GPU-Adreno418-arm64-Release-All-Android_ASAN.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Test-Android-Clang-Pixel3a-GPU-Adreno615-arm64-Debug-All-Android_Vulkan.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Test-ChromeOS-Clang-SamsungChromebookPlus-GPU-MaliT860-arm-Release-All.json
+FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Test-Debian10-GCC-GCE-CPU-AVX2-x86-Debug-All-Docker.json
+FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Test-Debian10-GCC-GCE-CPU-AVX2-x86_64-Debug-All-Docker.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Test-Debian9-Clang-GCE-CPU-AVX2-x86_64-Debug-All-Coverage.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Test-Debian9-Clang-GCE-CPU-AVX2-x86_64-Release-All-Lottie.json
 FILE: ../../../third_party/skia/infra/bots/recipe_modules/flavor/examples/full.expected/Test-Debian9-Clang-GCE-CPU-AVX2-x86_64-Release-All-TSAN.json
@@ -1576,6 +1249,7 @@ FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Android-Cl
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-ChromeOS-Clang-AcerChromebookR13Convertible-GPU-PowerVRGX6250-arm-Debug-All.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Chromecast-Clang-Chorizo-CPU-Cortex_A7-arm-Release-All.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Chromecast-Clang-Chorizo-GPU-Cortex_A7-arm-Release-All.json
+FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Debian10-GCC-GCE-CPU-AVX2-x86_64-Debug-All-Docker.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Debian9-Clang-GCE-CPU-AVX2-x86_64-Debug-All-ASAN.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Debian9-Clang-GCE-CPU-AVX2-x86_64-Debug-All-BonusConfigs.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/Test-Debian9-Clang-GCE-CPU-AVX2-x86_64-Debug-All-MSAN.json
@@ -1617,7 +1291,6 @@ FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/failed_dm.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/failed_get_hashes.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/failed_pull.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/failed_push.json
-FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/internal_bot_2.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/internal_bot_5.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test.expected/trybot.json
 FILE: ../../../third_party/skia/infra/bots/recipes/test_canvaskit.expected/Test-Debian9-EMCC-GCE-GPU-WEBGL1-wasm-Debug-All-CanvasKit.json
@@ -1667,14 +1340,6 @@ FILE: ../../../third_party/skia/infra/wasm-common/docker/emsdk-base/Dockerfile
 FILE: ../../../third_party/skia/infra/wasm-common/docker/gold-karma-chrome-tests/Dockerfile
 FILE: ../../../third_party/skia/infra/wasm-common/docker/karma-chrome-tests/Dockerfile
 FILE: ../../../third_party/skia/infra/wasm-common/docker/perf-karma-chrome-tests/Dockerfile
-FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/NotoSerif-Regular.ttf
-FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/Roboto-Regular.ttf
-FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/Roboto-Regular.woff
-FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/example.html
-FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/extra.html
-FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/node.example.js
-FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/package.json
-FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/test.png
 FILE: ../../../third_party/skia/modules/canvaskit/cpu.js
 FILE: ../../../third_party/skia/modules/canvaskit/debug.js
 FILE: ../../../third_party/skia/modules/canvaskit/externs.js
@@ -1714,10 +1379,6 @@ FILE: ../../../third_party/skia/modules/pathkit/externs.js
 FILE: ../../../third_party/skia/modules/pathkit/helper.js
 FILE: ../../../third_party/skia/modules/pathkit/karma.bench.conf.js
 FILE: ../../../third_party/skia/modules/pathkit/karma.conf.js
-FILE: ../../../third_party/skia/modules/pathkit/npm-asmjs/example.html
-FILE: ../../../third_party/skia/modules/pathkit/npm-asmjs/package.json
-FILE: ../../../third_party/skia/modules/pathkit/npm-wasm/example.html
-FILE: ../../../third_party/skia/modules/pathkit/npm-wasm/package.json
 FILE: ../../../third_party/skia/modules/pathkit/package.json
 FILE: ../../../third_party/skia/modules/pathkit/perf/effects.bench.js
 FILE: ../../../third_party/skia/modules/pathkit/perf/path.bench.js
@@ -1833,15 +1494,17 @@ Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
 met:
 
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+  * Neither the name of the copyright holder nor the names of its
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -2121,15 +1784,17 @@ Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
 met:
 
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+  * Neither the name of the copyright holder nor the names of its
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -2366,15 +2031,17 @@ Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
 met:
 
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+  * Neither the name of the copyright holder nor the names of its
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -2587,15 +2254,17 @@ Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
 met:
 
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+  * Neither the name of the copyright holder nor the names of its
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -2996,15 +2665,17 @@ Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
 met:
 
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+  * Neither the name of the copyright holder nor the names of its
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -3228,15 +2899,17 @@ Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
 met:
 
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+  * Neither the name of the copyright holder nor the names of its
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -3354,15 +3027,17 @@ Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
 met:
 
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+  * Neither the name of the copyright holder nor the names of its
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -3558,15 +3233,383 @@ Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
 met:
 
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+  * Neither the name of the copyright holder nor the names of its
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: skia
+ORIGIN: ../../../third_party/skia/bench/ClearBench.cpp + ../../../third_party/skia/LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../third_party/skia/bench/ClearBench.cpp
+FILE: ../../../third_party/skia/bench/CompositingImagesBench.cpp
+FILE: ../../../third_party/skia/bench/CubicMapBench.cpp
+FILE: ../../../third_party/skia/bench/GrCCFillGeometryBench.cpp
+FILE: ../../../third_party/skia/bench/ImageCycleBench.cpp
+FILE: ../../../third_party/skia/bench/JSONBench.cpp
+FILE: ../../../third_party/skia/bench/PathOpsBench.cpp
+FILE: ../../../third_party/skia/bench/PolyUtilsBench.cpp
+FILE: ../../../third_party/skia/bench/ShaderMaskFilterBench.cpp
+FILE: ../../../third_party/skia/bench/TypefaceBench.cpp
+FILE: ../../../third_party/skia/experimental/pvg/draw_msg.proto
+FILE: ../../../third_party/skia/fuzz/FuzzCommon.cpp
+FILE: ../../../third_party/skia/fuzz/FuzzPathMeasure.cpp
+FILE: ../../../third_party/skia/fuzz/FuzzRegionOp.cpp
+FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzImageFilterDeserialize.cpp
+FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzPathDeserialize.cpp
+FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzRegionDeserialize.cpp
+FILE: ../../../third_party/skia/fuzz/oss_fuzz/FuzzRegionSetPath.cpp
+FILE: ../../../third_party/skia/gm/analytic_gradients.cpp
+FILE: ../../../third_party/skia/gm/androidblendmodes.cpp
+FILE: ../../../third_party/skia/gm/b_119394958.cpp
+FILE: ../../../third_party/skia/gm/clockwise.cpp
+FILE: ../../../third_party/skia/gm/crbug_847759.cpp
+FILE: ../../../third_party/skia/gm/crbug_884166.cpp
+FILE: ../../../third_party/skia/gm/crbug_887103.cpp
+FILE: ../../../third_party/skia/gm/crbug_892988.cpp
+FILE: ../../../third_party/skia/gm/crbug_899512.cpp
+FILE: ../../../third_party/skia/gm/crbug_905548.cpp
+FILE: ../../../third_party/skia/gm/daa.cpp
+FILE: ../../../third_party/skia/gm/drawimageset.cpp
+FILE: ../../../third_party/skia/gm/drawquadset.cpp
+FILE: ../../../third_party/skia/gm/fontregen.cpp
+FILE: ../../../third_party/skia/gm/fwidth_squircle.cpp
+FILE: ../../../third_party/skia/gm/gradients_degenerate.cpp
+FILE: ../../../third_party/skia/gm/hugepath.cpp
+FILE: ../../../third_party/skia/gm/localmatrixshader.cpp
+FILE: ../../../third_party/skia/gm/make_raster_image.cpp
+FILE: ../../../third_party/skia/gm/mandoline.cpp
+FILE: ../../../third_party/skia/gm/orientation.cpp
+FILE: ../../../third_party/skia/gm/p3.cpp
+FILE: ../../../third_party/skia/gm/pathmeasure.cpp
+FILE: ../../../third_party/skia/gm/perspimages.cpp
+FILE: ../../../third_party/skia/gm/polygonoffset.cpp
+FILE: ../../../third_party/skia/gm/scaledemoji.cpp
+FILE: ../../../third_party/skia/gm/scaledemoji_rendering.cpp
+FILE: ../../../third_party/skia/gm/shadermaskfilter.cpp
+FILE: ../../../third_party/skia/gm/sharedcorners.cpp
+FILE: ../../../third_party/skia/gm/skinning.cpp
+FILE: ../../../third_party/skia/gm/trickycubicstrokes.cpp
+FILE: ../../../third_party/skia/gm/unpremul.cpp
+FILE: ../../../third_party/skia/gm/wacky_yuv_formats.cpp
+FILE: ../../../third_party/skia/include/android/SkAnimatedImage.h
+FILE: ../../../third_party/skia/include/c/sk_colorspace.h
+FILE: ../../../third_party/skia/include/c/sk_imageinfo.h
+FILE: ../../../third_party/skia/include/core/SkCanvasVirtualEnforcer.h
+FILE: ../../../third_party/skia/include/core/SkContourMeasure.h
+FILE: ../../../third_party/skia/include/core/SkCoverageMode.h
+FILE: ../../../third_party/skia/include/core/SkCubicMap.h
+FILE: ../../../third_party/skia/include/core/SkFontMetrics.h
+FILE: ../../../third_party/skia/include/core/SkFontParameters.h
+FILE: ../../../third_party/skia/include/core/SkFontTypes.h
+FILE: ../../../third_party/skia/include/core/SkYUVAIndex.h
+FILE: ../../../third_party/skia/include/effects/SkOpPathEffect.h
+FILE: ../../../third_party/skia/include/effects/SkShaderMaskFilter.h
+FILE: ../../../third_party/skia/include/effects/SkTrimPathEffect.h
+FILE: ../../../third_party/skia/include/gpu/GrBackendDrawableInfo.h
+FILE: ../../../third_party/skia/include/gpu/GrDriverBugWorkarounds.h
+FILE: ../../../third_party/skia/include/gpu/vk/GrVkMemoryAllocator.h
+FILE: ../../../third_party/skia/include/gpu/vk/GrVkVulkan.h
+FILE: ../../../third_party/skia/include/ports/SkFontMgr_fuchsia.h
+FILE: ../../../third_party/skia/include/private/GrVkTypesPriv.h
+FILE: ../../../third_party/skia/include/private/SkMacros.h
+FILE: ../../../third_party/skia/include/private/SkSafe32.h
+FILE: ../../../third_party/skia/include/private/SkTo.h
+FILE: ../../../third_party/skia/include/utils/Sk3D.h
+FILE: ../../../third_party/skia/include/utils/SkAnimCodecPlayer.h
+FILE: ../../../third_party/skia/include/utils/SkTextUtils.h
+FILE: ../../../third_party/skia/infra/cts/run_testlab.go
+FILE: ../../../third_party/skia/modules/skottie/gm/3dgm.cpp
+FILE: ../../../third_party/skia/modules/skottie/include/SkottieProperty.h
+FILE: ../../../third_party/skia/modules/skottie/src/SkottieAdapter.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/SkottieAdapter.h
+FILE: ../../../third_party/skia/modules/skottie/src/SkottieJson.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/SkottieJson.h
+FILE: ../../../third_party/skia/modules/skottie/src/SkottiePriv.h
+FILE: ../../../third_party/skia/modules/skottie/src/SkottieProperty.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/SkottieTest.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/SkottieTool.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/layers/PrecompLayer.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/layers/ShapeLayer.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/layers/TextLayer.cpp
+FILE: ../../../third_party/skia/modules/skottie/utils/SkottieUtils.cpp
+FILE: ../../../third_party/skia/modules/skottie/utils/SkottieUtils.h
+FILE: ../../../third_party/skia/modules/sksg/include/SkSGClipEffect.h
+FILE: ../../../third_party/skia/modules/sksg/include/SkSGColorFilter.h
+FILE: ../../../third_party/skia/modules/sksg/include/SkSGGeometryTransform.h
+FILE: ../../../third_party/skia/modules/sksg/include/SkSGGradient.h
+FILE: ../../../third_party/skia/modules/sksg/include/SkSGImage.h
+FILE: ../../../third_party/skia/modules/sksg/include/SkSGMaskEffect.h
+FILE: ../../../third_party/skia/modules/sksg/include/SkSGOpacityEffect.h
+FILE: ../../../third_party/skia/modules/sksg/include/SkSGPlane.h
+FILE: ../../../third_party/skia/modules/sksg/include/SkSGRoundEffect.h
+FILE: ../../../third_party/skia/modules/sksg/include/SkSGScene.h
+FILE: ../../../third_party/skia/modules/sksg/include/SkSGText.h
+FILE: ../../../third_party/skia/modules/sksg/src/SkSGClipEffect.cpp
+FILE: ../../../third_party/skia/modules/sksg/src/SkSGColorFilter.cpp
+FILE: ../../../third_party/skia/modules/sksg/src/SkSGGeometryTransform.cpp
+FILE: ../../../third_party/skia/modules/sksg/src/SkSGGradient.cpp
+FILE: ../../../third_party/skia/modules/sksg/src/SkSGImage.cpp
+FILE: ../../../third_party/skia/modules/sksg/src/SkSGMaskEffect.cpp
+FILE: ../../../third_party/skia/modules/sksg/src/SkSGOpacityEffect.cpp
+FILE: ../../../third_party/skia/modules/sksg/src/SkSGPlane.cpp
+FILE: ../../../third_party/skia/modules/sksg/src/SkSGRoundEffect.cpp
+FILE: ../../../third_party/skia/modules/sksg/src/SkSGScene.cpp
+FILE: ../../../third_party/skia/modules/sksg/src/SkSGText.cpp
+FILE: ../../../third_party/skia/modules/skshaper/src/SkShaper.cpp
+FILE: ../../../third_party/skia/samplecode/SampleAnimatedImage.cpp
+FILE: ../../../third_party/skia/samplecode/SampleCusp.cpp
+FILE: ../../../third_party/skia/samplecode/SampleFlutterAnimate.cpp
+FILE: ../../../third_party/skia/samplecode/SampleGlyphTransform.cpp
+FILE: ../../../third_party/skia/src/android/SkAnimatedImage.cpp
+FILE: ../../../third_party/skia/src/c/sk_imageinfo.cpp
+FILE: ../../../third_party/skia/src/codec/SkEncodedInfo.cpp
+FILE: ../../../third_party/skia/src/codec/SkParseEncodedOrigin.cpp
+FILE: ../../../third_party/skia/src/codec/SkWuffsCodec.cpp
+FILE: ../../../third_party/skia/src/codec/SkWuffsCodec.h
+FILE: ../../../third_party/skia/src/core/SkBlurPriv.h
+FILE: ../../../third_party/skia/src/core/SkCanvasPriv.cpp
+FILE: ../../../third_party/skia/src/core/SkColorSpaceXformSteps.cpp
+FILE: ../../../third_party/skia/src/core/SkColorSpaceXformSteps.h
+FILE: ../../../third_party/skia/src/core/SkContourMeasure.cpp
+FILE: ../../../third_party/skia/src/core/SkCoverageModePriv.h
+FILE: ../../../third_party/skia/src/core/SkCubicMap.cpp
+FILE: ../../../third_party/skia/src/core/SkCubicSolver.h
+FILE: ../../../third_party/skia/src/core/SkDeferredDisplayList.cpp
+FILE: ../../../third_party/skia/src/core/SkDeferredDisplayListPriv.h
+FILE: ../../../third_party/skia/src/core/SkDraw_text.cpp
+FILE: ../../../third_party/skia/src/core/SkFontPriv.h
+FILE: ../../../third_party/skia/src/core/SkGlyph.cpp
+FILE: ../../../third_party/skia/src/core/SkIPoint16.h
+FILE: ../../../third_party/skia/src/core/SkMaskFilterBase.h
+FILE: ../../../third_party/skia/src/core/SkPath_serial.cpp
+FILE: ../../../third_party/skia/src/core/SkPicturePriv.h
+FILE: ../../../third_party/skia/src/core/SkRRectPriv.h
+FILE: ../../../third_party/skia/src/core/SkRectPriv.h
+FILE: ../../../third_party/skia/src/core/SkRemoteGlyphCache.cpp
+FILE: ../../../third_party/skia/src/core/SkRemoteGlyphCache.h
+FILE: ../../../third_party/skia/src/core/SkSafeRange.h
+FILE: ../../../third_party/skia/src/core/SkSpan.h
+FILE: ../../../third_party/skia/src/core/SkStrikeCache.cpp
+FILE: ../../../third_party/skia/src/core/SkSurfaceCharacterization.cpp
+FILE: ../../../third_party/skia/src/core/SkTextBlobPriv.h
+FILE: ../../../third_party/skia/src/core/SkTypeface_remote.cpp
+FILE: ../../../third_party/skia/src/core/SkTypeface_remote.h
+FILE: ../../../third_party/skia/src/core/SkYUVASizeInfo.cpp
+FILE: ../../../third_party/skia/src/effects/SkOpPE.h
+FILE: ../../../third_party/skia/src/effects/SkOpPathEffect.cpp
+FILE: ../../../third_party/skia/src/effects/SkShaderMaskFilter.cpp
+FILE: ../../../third_party/skia/src/effects/SkTrimPE.h
+FILE: ../../../third_party/skia/src/effects/SkTrimPathEffect.cpp
+FILE: ../../../third_party/skia/src/gpu/GrContextThreadSafeProxyPriv.h
+FILE: ../../../third_party/skia/src/gpu/GrDDLContext.cpp
+FILE: ../../../third_party/skia/src/gpu/GrDriverBugWorkarounds.cpp
+FILE: ../../../third_party/skia/src/gpu/GrFPArgs.h
+FILE: ../../../third_party/skia/src/gpu/GrLegacyDirectContext.cpp
+FILE: ../../../third_party/skia/src/gpu/GrProxyProvider.cpp
+FILE: ../../../third_party/skia/src/gpu/GrProxyProvider.h
+FILE: ../../../third_party/skia/src/gpu/GrRenderTargetProxyPriv.h
+FILE: ../../../third_party/skia/src/gpu/GrResourceProviderPriv.h
+FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCClipPath.cpp
+FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCClipPath.h
+FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCConicShader.cpp
+FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCConicShader.h
+FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCDrawPathsOp.cpp
+FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCDrawPathsOp.h
+FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCPathCache.cpp
+FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCPathCache.h
+FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCPerFlushResources.cpp
+FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCPerFlushResources.h
+FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCPerOpsTaskPaths.h
+FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCSTLList.h
+FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCStrokeGeometry.cpp
+FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCStrokeGeometry.h
+FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCStroker.cpp
+FILE: ../../../third_party/skia/src/gpu/ccpr/GrCCStroker.h
+FILE: ../../../third_party/skia/src/gpu/effects/GrAARectEffect.fp
+FILE: ../../../third_party/skia/src/gpu/effects/GrAlphaThresholdFragmentProcessor.fp
+FILE: ../../../third_party/skia/src/gpu/effects/GrCircleBlurFragmentProcessor.fp
+FILE: ../../../third_party/skia/src/gpu/effects/GrConfigConversionEffect.fp
+FILE: ../../../third_party/skia/src/gpu/effects/GrConstColorProcessor.fp
+FILE: ../../../third_party/skia/src/gpu/effects/GrLumaColorFilterEffect.fp
+FILE: ../../../third_party/skia/src/gpu/effects/GrMagnifierEffect.fp
+FILE: ../../../third_party/skia/src/gpu/effects/GrPremulInputFragmentProcessor.fp
+FILE: ../../../third_party/skia/src/gpu/effects/GrRRectBlurEffect.fp
+FILE: ../../../third_party/skia/src/gpu/effects/GrRectBlurEffect.fp
+FILE: ../../../third_party/skia/src/gpu/effects/GrSkSLFP.cpp
+FILE: ../../../third_party/skia/src/gpu/effects/GrSkSLFP.h
+FILE: ../../../third_party/skia/src/gpu/effects/GrYUVtoRGBEffect.cpp
+FILE: ../../../third_party/skia/src/gpu/effects/GrYUVtoRGBEffect.h
+FILE: ../../../third_party/skia/src/gpu/effects/generated/GrAARectEffect.cpp
+FILE: ../../../third_party/skia/src/gpu/effects/generated/GrAARectEffect.h
+FILE: ../../../third_party/skia/src/gpu/effects/generated/GrAlphaThresholdFragmentProcessor.cpp
+FILE: ../../../third_party/skia/src/gpu/effects/generated/GrAlphaThresholdFragmentProcessor.h
+FILE: ../../../third_party/skia/src/gpu/effects/generated/GrCircleBlurFragmentProcessor.cpp
+FILE: ../../../third_party/skia/src/gpu/effects/generated/GrCircleBlurFragmentProcessor.h
+FILE: ../../../third_party/skia/src/gpu/effects/generated/GrConfigConversionEffect.cpp
+FILE: ../../../third_party/skia/src/gpu/effects/generated/GrConfigConversionEffect.h
+FILE: ../../../third_party/skia/src/gpu/effects/generated/GrConstColorProcessor.cpp
+FILE: ../../../third_party/skia/src/gpu/effects/generated/GrConstColorProcessor.h
+FILE: ../../../third_party/skia/src/gpu/effects/generated/GrLumaColorFilterEffect.cpp
+FILE: ../../../third_party/skia/src/gpu/effects/generated/GrLumaColorFilterEffect.h
+FILE: ../../../third_party/skia/src/gpu/effects/generated/GrMagnifierEffect.cpp
+FILE: ../../../third_party/skia/src/gpu/effects/generated/GrMagnifierEffect.h
+FILE: ../../../third_party/skia/src/gpu/effects/generated/GrPremulInputFragmentProcessor.cpp
+FILE: ../../../third_party/skia/src/gpu/effects/generated/GrPremulInputFragmentProcessor.h
+FILE: ../../../third_party/skia/src/gpu/effects/generated/GrRRectBlurEffect.cpp
+FILE: ../../../third_party/skia/src/gpu/effects/generated/GrRRectBlurEffect.h
+FILE: ../../../third_party/skia/src/gpu/effects/generated/GrRectBlurEffect.cpp
+FILE: ../../../third_party/skia/src/gpu/effects/generated/GrRectBlurEffect.h
+FILE: ../../../third_party/skia/src/gpu/geometry/GrQuad.cpp
+FILE: ../../../third_party/skia/src/gpu/gradients/GrClampedGradientEffect.fp
+FILE: ../../../third_party/skia/src/gpu/gradients/GrDualIntervalGradientColorizer.fp
+FILE: ../../../third_party/skia/src/gpu/gradients/GrGradientBitmapCache.cpp
+FILE: ../../../third_party/skia/src/gpu/gradients/GrGradientBitmapCache.h
+FILE: ../../../third_party/skia/src/gpu/gradients/GrGradientShader.cpp
+FILE: ../../../third_party/skia/src/gpu/gradients/GrGradientShader.h
+FILE: ../../../third_party/skia/src/gpu/gradients/GrLinearGradientLayout.fp
+FILE: ../../../third_party/skia/src/gpu/gradients/GrRadialGradientLayout.fp
+FILE: ../../../third_party/skia/src/gpu/gradients/GrSingleIntervalGradientColorizer.fp
+FILE: ../../../third_party/skia/src/gpu/gradients/GrSweepGradientLayout.fp
+FILE: ../../../third_party/skia/src/gpu/gradients/GrTextureGradientColorizer.fp
+FILE: ../../../third_party/skia/src/gpu/gradients/GrTiledGradientEffect.fp
+FILE: ../../../third_party/skia/src/gpu/gradients/GrTwoPointConicalGradientLayout.fp
+FILE: ../../../third_party/skia/src/gpu/gradients/GrUnrolledBinaryGradientColorizer.fp
+FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrClampedGradientEffect.cpp
+FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrClampedGradientEffect.h
+FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrDualIntervalGradientColorizer.cpp
+FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrDualIntervalGradientColorizer.h
+FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrLinearGradientLayout.cpp
+FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrLinearGradientLayout.h
+FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrRadialGradientLayout.cpp
+FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrRadialGradientLayout.h
+FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrSingleIntervalGradientColorizer.cpp
+FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrSingleIntervalGradientColorizer.h
+FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrSweepGradientLayout.cpp
+FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrSweepGradientLayout.h
+FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrTextureGradientColorizer.cpp
+FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrTextureGradientColorizer.h
+FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrTiledGradientEffect.cpp
+FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrTiledGradientEffect.h
+FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrTwoPointConicalGradientLayout.cpp
+FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrTwoPointConicalGradientLayout.h
+FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrUnrolledBinaryGradientColorizer.cpp
+FILE: ../../../third_party/skia/src/gpu/gradients/generated/GrUnrolledBinaryGradientColorizer.h
+FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlBuffer.h
+FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlBuffer.mm
+FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlCppUtil.h
+FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlDepthStencil.mm
+FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlOpsRenderPass.h
+FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlOpsRenderPass.mm
+FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlPipelineState.h
+FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlPipelineState.mm
+FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlPipelineStateBuilder.h
+FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlPipelineStateBuilder.mm
+FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlPipelineStateDataManager.h
+FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlPipelineStateDataManager.mm
+FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlResourceProvider.h
+FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlResourceProvider.mm
+FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlSampler.h
+FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlSampler.mm
+FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlStencilAttachment.h
+FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlStencilAttachment.mm
+FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlTextureRenderTarget.h
+FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlTextureRenderTarget.mm
+FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlUniformHandler.h
+FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlUniformHandler.mm
+FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlVaryingHandler.h
+FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlVaryingHandler.mm
+FILE: ../../../third_party/skia/src/gpu/ops/GrClearStencilClipOp.cpp
+FILE: ../../../third_party/skia/src/gpu/ops/GrDebugMarkerOp.cpp
+FILE: ../../../third_party/skia/src/gpu/ops/GrDrawableOp.cpp
+FILE: ../../../third_party/skia/src/gpu/ops/GrDrawableOp.h
+FILE: ../../../third_party/skia/src/gpu/ops/GrFillRRectOp.cpp
+FILE: ../../../third_party/skia/src/gpu/ops/GrFillRRectOp.h
+FILE: ../../../third_party/skia/src/gpu/ops/GrFillRectOp.cpp
+FILE: ../../../third_party/skia/src/gpu/ops/GrFillRectOp.h
+FILE: ../../../third_party/skia/src/gpu/ops/GrQuadPerEdgeAA.cpp
+FILE: ../../../third_party/skia/src/gpu/ops/GrQuadPerEdgeAA.h
+FILE: ../../../third_party/skia/src/gpu/ops/GrStrokeRectOp.cpp
+FILE: ../../../third_party/skia/src/gpu/ops/GrStrokeRectOp.h
+FILE: ../../../third_party/skia/src/gpu/text/GrAtlasManager.cpp
+FILE: ../../../third_party/skia/src/gpu/text/GrAtlasManager.h
+FILE: ../../../third_party/skia/src/gpu/text/GrSDFMaskFilter.cpp
+FILE: ../../../third_party/skia/src/gpu/text/GrSDFMaskFilter.h
+FILE: ../../../third_party/skia/src/gpu/vk/GrVkAMDMemoryAllocator.cpp
+FILE: ../../../third_party/skia/src/gpu/vk/GrVkAMDMemoryAllocator.h
+FILE: ../../../third_party/skia/src/gpu/vk/GrVkCommandPool.cpp
+FILE: ../../../third_party/skia/src/gpu/vk/GrVkCommandPool.h
+FILE: ../../../third_party/skia/src/gpu/vk/GrVkImageLayout.h
+FILE: ../../../third_party/skia/src/gpu/vk/GrVkSamplerYcbcrConversion.cpp
+FILE: ../../../third_party/skia/src/gpu/vk/GrVkSamplerYcbcrConversion.h
+FILE: ../../../third_party/skia/src/gpu/vk/GrVkTypesPriv.cpp
+FILE: ../../../third_party/skia/src/image/SkImage_GpuBase.cpp
+FILE: ../../../third_party/skia/src/image/SkImage_GpuBase.h
+FILE: ../../../third_party/skia/src/image/SkImage_GpuYUVA.cpp
+FILE: ../../../third_party/skia/src/image/SkImage_GpuYUVA.h
+FILE: ../../../third_party/skia/src/image/SkImage_Lazy.h
+FILE: ../../../third_party/skia/src/opts/SkBitmapProcState_opts.h
+FILE: ../../../third_party/skia/src/opts/SkOpts_hsw.cpp
+FILE: ../../../third_party/skia/src/opts/SkRasterPipeline_opts.h
+FILE: ../../../third_party/skia/src/pathops/SkPathOpsAsWinding.cpp
+FILE: ../../../third_party/skia/src/pathops/SkPathOpsTCurve.h
+FILE: ../../../third_party/skia/src/pdf/SkClusterator.cpp
+FILE: ../../../third_party/skia/src/pdf/SkClusterator.h
+FILE: ../../../third_party/skia/src/pdf/SkPDFTag.cpp
+FILE: ../../../third_party/skia/src/pdf/SkPDFTag.h
+FILE: ../../../third_party/skia/src/ports/SkFontMgr_fuchsia.cpp
+FILE: ../../../third_party/skia/src/sksl/SkSLByteCode.cpp
+FILE: ../../../third_party/skia/src/sksl/SkSLCPPUniformCTypes.cpp
+FILE: ../../../third_party/skia/src/sksl/SkSLCPPUniformCTypes.h
+FILE: ../../../third_party/skia/src/sksl/SkSLPipelineStageCodeGenerator.cpp
+FILE: ../../../third_party/skia/src/sksl/ir/SkSLVariableReference.cpp
+FILE: ../../../third_party/skia/src/utils/Sk3D.cpp
+FILE: ../../../third_party/skia/src/utils/SkAnimCodecPlayer.cpp
+FILE: ../../../third_party/skia/src/utils/SkCallableTraits.h
+FILE: ../../../third_party/skia/src/utils/SkJSON.cpp
+FILE: ../../../third_party/skia/src/utils/SkJSON.h
+FILE: ../../../third_party/skia/src/utils/SkTextUtils.cpp
+FILE: ../../../third_party/skia/src/utils/mac/SkUniqueCFRef.h
+FILE: ../../../third_party/skia/src/utils/win/SkDWriteNTDDI_VERSION.h
+----------------------------------------------------------------------------------------------------
+Copyright 2018 Google Inc.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+  * Neither the name of the copyright holder nor the names of its
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -3892,15 +3935,17 @@ Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
 met:
 
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+  * Neither the name of the copyright holder nor the names of its
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -5048,15 +5093,17 @@ Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
 met:
 
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+  * Neither the name of the copyright holder nor the names of its
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -5101,15 +5148,17 @@ Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
 met:
 
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+  * Neither the name of the copyright holder nor the names of its
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -5136,15 +5185,17 @@ Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
 met:
 
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+  * Neither the name of the copyright holder nor the names of its
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -5176,15 +5227,17 @@ Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
 met:
 
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+  * Neither the name of the copyright holder nor the names of its
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -5230,15 +5283,17 @@ Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
 met:
 
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+  * Neither the name of the copyright holder nor the names of its
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -5271,15 +5326,17 @@ Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
 met:
 
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+  * Neither the name of the copyright holder nor the names of its
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -5306,15 +5363,17 @@ Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
 met:
 
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+  * Neither the name of the copyright holder nor the names of its
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -5488,15 +5547,17 @@ Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
 met:
 
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+  * Neither the name of the copyright holder nor the names of its
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -5530,15 +5591,17 @@ Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
 met:
 
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+  * Neither the name of the copyright holder nor the names of its
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -5582,15 +5645,17 @@ Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
 met:
 
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+  * Neither the name of the copyright holder nor the names of its
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -5624,15 +5689,17 @@ Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
 met:
 
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+  * Neither the name of the copyright holder nor the names of its
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -5659,15 +5726,17 @@ Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
 met:
 
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+  * Neither the name of the copyright holder nor the names of its
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -5702,15 +5771,17 @@ Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
 met:
 
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+  * Neither the name of the copyright holder nor the names of its
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -5740,15 +5811,17 @@ Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
 met:
 
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+  * Neither the name of the copyright holder nor the names of its
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -5796,15 +5869,17 @@ Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
 met:
 
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+  * Neither the name of the copyright holder nor the names of its
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -5870,15 +5945,17 @@ Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
 met:
 
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+  * Neither the name of the copyright holder nor the names of its
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -5966,11 +6043,22 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: skia
-ORIGIN: ../../../third_party/skia/samplecode/SampleTextureUpload.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/modules/canvaskit/canvaskit/LICENSE
 TYPE: LicenseType.bsd
-FILE: ../../../third_party/skia/samplecode/SampleTextureUpload.cpp
+FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/NotoSerif-Regular.ttf
+FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/Roboto-Regular.ttf
+FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/Roboto-Regular.woff
+FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/example.html
+FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/extra.html
+FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/node.example.js
+FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/package.json
+FILE: ../../../third_party/skia/modules/canvaskit/canvaskit/test.png
+FILE: ../../../third_party/skia/modules/pathkit/npm-asmjs/example.html
+FILE: ../../../third_party/skia/modules/pathkit/npm-asmjs/package.json
+FILE: ../../../third_party/skia/modules/pathkit/npm-wasm/example.html
+FILE: ../../../third_party/skia/modules/pathkit/npm-wasm/package.json
 ----------------------------------------------------------------------------------------------------
-Copyright 2019 Google Inc. and Adobe Inc.
+Copyright (c) 2011 Google Inc. All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
@@ -6001,6 +6089,43 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: skia
+ORIGIN: ../../../third_party/skia/samplecode/SampleTextureUpload.cpp + ../../../third_party/skia/LICENSE
+TYPE: LicenseType.bsd
+FILE: ../../../third_party/skia/samplecode/SampleTextureUpload.cpp
+----------------------------------------------------------------------------------------------------
+Copyright 2019 Google Inc. and Adobe Inc.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+  * Neither the name of the copyright holder nor the names of its
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================================================
+
+====================================================================================================
+LIBRARY: skia
 ORIGIN: ../../../third_party/skia/src/codec/SkCodecPriv.h + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/skia/src/codec/SkCodecPriv.h
@@ -6014,15 +6139,17 @@ Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
 met:
 
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+  * Neither the name of the copyright holder nor the names of its
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -6057,15 +6184,17 @@ Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
 met:
 
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+  * Neither the name of the copyright holder nor the names of its
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -6093,15 +6222,17 @@ Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
 met:
 
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+  * Neither the name of the copyright holder nor the names of its
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -6138,15 +6269,17 @@ Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
 met:
 
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+  * Neither the name of the copyright holder nor the names of its
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -6176,15 +6309,17 @@ Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
 met:
 
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+  * Neither the name of the copyright holder nor the names of its
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -6212,15 +6347,17 @@ Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
 met:
 
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+  * Neither the name of the copyright holder nor the names of its
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -6247,15 +6384,17 @@ Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
 met:
 
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+  * Neither the name of the copyright holder nor the names of its
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -6282,15 +6421,17 @@ Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
 met:
 
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+  * Neither the name of the copyright holder nor the names of its
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -6317,15 +6458,17 @@ Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
 met:
 
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+  * Neither the name of the copyright holder nor the names of its
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -6353,15 +6496,17 @@ Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
 met:
 
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+  * Neither the name of the copyright holder nor the names of its
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -6389,15 +6534,17 @@ Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
 met:
 
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+  * Neither the name of the copyright holder nor the names of its
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -6426,15 +6573,17 @@ Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
 met:
 
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+  * Neither the name of the copyright holder nor the names of its
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -6463,15 +6612,17 @@ Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
 met:
 
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+  * Neither the name of the copyright holder nor the names of its
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -6499,15 +6650,17 @@ Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
 met:
 
-   * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-   * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-   * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+  * Neither the name of the copyright holder nor the names of its
+    contributors may be used to endorse or promote products derived
+    from this software without specific prior written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -6568,4 +6721,4 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ====================================================================================================
-Total license count: 51
+Total license count: 53
