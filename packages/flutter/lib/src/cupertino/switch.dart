@@ -101,10 +101,9 @@ class CupertinoSwitch extends StatefulWidget {
   /// the [CupertinoTheme] in accordance to native iOS behavior.
   final Color activeColor;
 
-  /// The color to use for the background when the switch is off
+  /// The color to use for the background when the switch is off.
   ///
-  /// Defaults to [CupertinoColors.secondarySystemFill] when null and ignores
-  /// the [CupertinoTheme] in accordance to native iOS behavior.
+  /// Defaults to [CupertinoColors.secondarySystemFill] when null.
   final Color trackColor;
 
   /// {@template flutter.cupertino.switch.dragStartBehavior}
@@ -196,7 +195,7 @@ class _CupertinoSwitchRenderObjectWidget extends LeafRenderObjectWidget {
     renderObject
       ..value = value
       ..activeColor = activeColor
-      ..trackColor = CupertinoDynamicColor.resolve(CupertinoColors.secondarySystemFill, context)
+      ..trackColor = trackColor
       ..onChanged = onChanged
       ..textDirection = Directionality.of(context)
       ..vsync = vsync
