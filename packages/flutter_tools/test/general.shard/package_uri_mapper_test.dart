@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:typed_data';
+
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
@@ -31,7 +33,7 @@ void main() {
     mockFile = MockFile();
     when(mockFileSystem.path).thenReturn(fs.path);
     when(mockFileSystem.file(any)).thenReturn(mockFile);
-    when(mockFile.readAsBytesSync()).thenReturn(utf8.encode(packagesContents));
+    when(mockFile.readAsBytesSync()).thenReturn(utf8.encode(packagesContents) as Uint8List);
   });
 
   testUsingContext('Can map main.dart to correct package', () async {
@@ -66,7 +68,7 @@ void main() {
     when(mockFileSystem.path).thenReturn(fs.path);
     when(mockFileSystem.file(any)).thenReturn(mockFile);
     when(mockFile.readAsBytesSync())
-        .thenReturn(utf8.encode(multiRootPackagesContents));
+        .thenReturn(utf8.encode(multiRootPackagesContents) as Uint8List);
     final PackageUriMapper packageUriMapper = PackageUriMapper(
         '/example/lib/main.dart',
         '.packages',

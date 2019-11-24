@@ -81,7 +81,7 @@ void main() {
       Cache.flutterRoot = '../..';
       final ProcessResult result = await _runFlutterTest('filtering', automatedTestsDirectory, flutterTestDirectory,
         extraArguments: const <String>['--name', 'inc.*de']);
-      if (!result.stdout.contains('+1: All tests passed')) {
+      if (!(result.stdout as String).contains('+1: All tests passed')) {
         fail('unexpected output from test:\n\n${result.stdout}\n-- end stdout --\n\n');
       }
       expect(result.exitCode, 0);
@@ -91,7 +91,7 @@ void main() {
       Cache.flutterRoot = '../..';
       final ProcessResult result = await _runFlutterTest('filtering', automatedTestsDirectory, flutterTestDirectory,
         extraArguments: const <String>['--plain-name', 'include']);
-      if (!result.stdout.contains('+1: All tests passed')) {
+      if (!(result.stdout as String).contains('+1: All tests passed')) {
         fail('unexpected output from test:\n\n${result.stdout}\n-- end stdout --\n\n');
       }
       expect(result.exitCode, 0);
@@ -101,14 +101,15 @@ void main() {
       Cache.flutterRoot = '../..';
       final ProcessResult result = await _runFlutterTest('trivial', automatedTestsDirectory, flutterTestDirectory,
         extraArguments: const <String>['--verbose']);
-      if ((!result.stdout.contains('+1: All tests passed')) ||
-          (!result.stdout.contains('test 0: starting shell process')) ||
-          (!result.stdout.contains('test 0: deleting temporary directory')) ||
-          (!result.stdout.contains('test 0: finished')) ||
-          (!result.stdout.contains('test package returned with exit code 0'))) {
+      final String stdout = result.stdout as String;
+      if ((!stdout.contains('+1: All tests passed')) ||
+          (!stdout.contains('test 0: starting shell process')) ||
+          (!stdout.contains('test 0: deleting temporary directory')) ||
+          (!stdout.contains('test 0: finished')) ||
+          (!stdout.contains('test package returned with exit code 0'))) {
         fail('unexpected output from test:\n\n${result.stdout}\n-- end stdout --\n\n');
       }
-      if (result.stderr.isNotEmpty) {
+      if ((result.stderr as String).isNotEmpty) {
         fail('unexpected error output from test:\n\n${result.stderr}\n-- end stderr --\n\n');
       }
       expect(result.exitCode, 0);
@@ -118,14 +119,15 @@ void main() {
       Cache.flutterRoot = '../..';
       final ProcessResult result = await _runFlutterTest(null, automatedTestsDirectory, flutterTestDirectory + '/child_directory',
         extraArguments: const <String>['--verbose']);
-      if ((!result.stdout.contains('+2: All tests passed')) ||
-          (!result.stdout.contains('test 0: starting shell process')) ||
-          (!result.stdout.contains('test 0: deleting temporary directory')) ||
-          (!result.stdout.contains('test 0: finished')) ||
-          (!result.stdout.contains('test package returned with exit code 0'))) {
+      final String stdout = result.stdout as String;
+      if ((!stdout.contains('+2: All tests passed')) ||
+          (!stdout.contains('test 0: starting shell process')) ||
+          (!stdout.contains('test 0: deleting temporary directory')) ||
+          (!stdout.contains('test 0: finished')) ||
+          (!stdout.contains('test package returned with exit code 0'))) {
         fail('unexpected output from test:\n\n${result.stdout}\n-- end stdout --\n\n');
       }
-      if (result.stderr.isNotEmpty) {
+      if ((result.stderr as String).isNotEmpty) {
         fail('unexpected error output from test:\n\n${result.stderr}\n-- end stderr --\n\n');
       }
       expect(result.exitCode, 0);
@@ -160,7 +162,7 @@ Future<void> _testFile(
   );
 
   expect(exec.exitCode, exitCode);
-  final List<String> output = exec.stdout.split('\n');
+  final List<String> output = (exec.stdout as String).split('\n');
   if (output.first == 'Waiting for another flutter command to release the startup lock...') {
     output.removeAt(0);
   }
@@ -168,7 +170,7 @@ Future<void> _testFile(
     output.removeAt(0);
   }
   output.add('<<stderr>>');
-  output.addAll(exec.stderr.split('\n'));
+  output.addAll((exec.stderr as String).split('\n'));
   final List<String> expectations = fs.file(fullTestExpectation).readAsLinesSync();
   bool allowSkip = false;
   int expectationLineNumber = 0;

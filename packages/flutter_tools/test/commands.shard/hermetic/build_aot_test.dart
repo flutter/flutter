@@ -47,7 +47,7 @@ void main() {
       '--no-pub',
     ]);
 
-    final Environment environment = verify(buildSystem.build(any, captureAny)).captured.single;
+    final Environment environment = verify(buildSystem.build(any, captureAny)).captured.single as Environment;
     expect(environment.defines, <String, String>{
       kTargetFile: fs.path.absolute(fs.path.join('lib', 'main.dart')),
       kBuildMode: 'release',

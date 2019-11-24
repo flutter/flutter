@@ -27,7 +27,7 @@ void main() {
 
     when(cache.isUpToDate()).thenReturn(false);
     when(cache.updateAll(any)).thenAnswer((Invocation invocation) {
-      artifacts = invocation.positionalArguments.first;
+      artifacts = invocation.positionalArguments.first as Set<DevelopmentArtifact>;
       return Future<void>.value(null);
     });
     flutterVersion = MockFlutterVersion();
