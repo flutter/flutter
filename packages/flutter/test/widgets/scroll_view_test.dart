@@ -559,4 +559,13 @@ void main() {
     expect(tester.takeException(), isInstanceOf<Exception>());
     expect(finder, findsOneWidget);
   });
+
+  testWidgets('ListView.builder asserts on negative childCount', (WidgetTester tester) async {
+    expect(() => ListView.builder(
+      itemBuilder: (BuildContext context, int index) {
+        return const SizedBox();
+      },
+      itemCount: -1,
+    ), throwsA(isInstanceOf<AssertionError>()));
+  });
 }

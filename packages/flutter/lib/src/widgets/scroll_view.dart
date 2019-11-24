@@ -943,7 +943,8 @@ class ListView extends BoxScrollView {
     double cacheExtent,
     int semanticChildCount,
     DragStartBehavior dragStartBehavior = DragStartBehavior.start,
-  }) : childrenDelegate = SliverChildBuilderDelegate(
+  }) : assert(itemCount == null || itemCount >= 0),
+       childrenDelegate = SliverChildBuilderDelegate(
          itemBuilder,
          childCount: itemCount,
          addAutomaticKeepAlives: addAutomaticKeepAlives,
