@@ -146,6 +146,51 @@ void main() {
       ]);
     });
 
+    test('Starts invoking onBytesReceived when controller turns on', () async {
+      response = MockHttpClientResponse();
+      final SendChunkEventsController sendChunkEventsController = SendChunkEventsController();
+      when(response.compressionState).thenReturn(HttpClientResponseCompressionState.notCompressed);
+      when(response.listen(
+        any,
+        onDone: anyNamed('onDone'),
+        onError: anyNamed('onError'),
+        cancelOnError: anyNamed('cancelOnError'),
+      )).thenAnswer((Invocation invocation) {
+        final void Function(List<int>) onData = invocation.positionalArguments[0];
+        final void Function(Object) onError = invocation.namedArguments[#onError];
+        final void Function() onDone = invocation.namedArguments[#onDone];
+        final bool cancelOnError = invocation.namedArguments[#cancelOnError];
+
+        return Stream<Uint8List>.fromIterable(
+            <Uint8List>[chunkOne, chunkTwo]).listen(
+          (List<int> data) {
+            onData(data);
+            if (!sendChunkEventsController.isSomebodyListening) {
+              sendChunkEventsController.start();
+            }
+          },
+          onDone: onDone,
+          onError: onError,
+          cancelOnError: cancelOnError,
+        );
+      });
+      final int syntheticTotal = (chunkOne.length + chunkTwo.length) * 2;
+      when(response.contentLength).thenReturn(syntheticTotal);
+      final List<int> records = <int>[];
+      await consolidateHttpClientResponseBytes(
+        response,
+        onBytesReceived: (int cumulative, int total) {
+          records.addAll(<int>[cumulative, total]);
+        },
+        sendChunkEventsController: sendChunkEventsController,
+      );
+
+      expect(records, <int>[
+        chunkTwo.length,
+        syntheticTotal,
+      ]);
+    });
+
     test('forwards errors from HttpClientResponse', () async {
       when(response.listen(
         any,
