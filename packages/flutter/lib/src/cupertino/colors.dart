@@ -978,7 +978,7 @@ class CupertinoDynamicColor extends Color with DiagnosticableMixin implements Di
 
     Element _debugContext;
     assert(() {
-      _debugContext = context;
+      _debugContext = context as Element;
       return true;
     }());
     return CupertinoDynamicColor._(

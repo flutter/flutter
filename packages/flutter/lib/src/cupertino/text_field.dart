@@ -97,7 +97,7 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
     // this handler. If the clear button widget recognizes the up event,
     // then do not handle it.
     if (_state._clearGlobalKey.currentContext != null) {
-      final RenderBox renderBox = _state._clearGlobalKey.currentContext.findRenderObject();
+      final RenderBox renderBox = _state._clearGlobalKey.currentContext.findRenderObject() as RenderBox;
       final Offset localOffset = renderBox.globalToLocal(details.globalPosition);
       if (renderBox.hitTest(BoxHitTestResult(), position: localOffset)) {
         return;
@@ -841,7 +841,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
     final Color decorationColor = CupertinoDynamicColor.resolve(widget.decoration?.color, context);
 
     final BoxBorder border = widget.decoration?.border;
-    Border resolvedBorder = border;
+    Border resolvedBorder = border as Border;
     if (border is Border) {
       BorderSide resolveBorderSide(BorderSide side) {
         return side == BorderSide.none

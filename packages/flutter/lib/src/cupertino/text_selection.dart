@@ -169,12 +169,12 @@ class _ToolbarRenderBox extends RenderShiftedBox {
       .loosen();
 
     child.layout(heightConstraint.enforce(enforcedConstraint), parentUsesSize: true,);
-    final _ToolbarParentData childParentData = child.parentData;
+    final _ToolbarParentData childParentData = child.parentData as _ToolbarParentData;
 
     // The local x-coordinate of the center of the toolbar.
     final double lowerBound = child.size.width/2 + _kToolbarScreenPadding;
     final double upperBound = size.width - child.size.width/2 - _kToolbarScreenPadding;
-    final double adjustedCenterX = _arrowTipX.clamp(lowerBound, upperBound);
+    final double adjustedCenterX = _arrowTipX.clamp(lowerBound, upperBound) as double;
 
     childParentData.offset = Offset(adjustedCenterX - child.size.width / 2, _barTopY);
     childParentData.arrowXOffsetFromCenter = _arrowTipX - adjustedCenterX;
@@ -182,7 +182,7 @@ class _ToolbarRenderBox extends RenderShiftedBox {
 
   // The path is described in the toolbar's coordinate system.
   Path _clipPath() {
-    final _ToolbarParentData childParentData = child.parentData;
+    final _ToolbarParentData childParentData = child.parentData as _ToolbarParentData;
     final Path rrect = Path()
       ..addRRect(
         RRect.fromRectAndRadius(
@@ -215,7 +215,7 @@ class _ToolbarRenderBox extends RenderShiftedBox {
       return;
     }
 
-    final _ToolbarParentData childParentData = child.parentData;
+    final _ToolbarParentData childParentData = child.parentData as _ToolbarParentData;
     context.pushClipPath(
       needsCompositing,
       offset + childParentData.offset,
@@ -245,7 +245,7 @@ class _ToolbarRenderBox extends RenderShiftedBox {
       ..strokeWidth = 2.0
       ..style = PaintingStyle.stroke;
 
-      final _ToolbarParentData childParentData = child.parentData;
+      final _ToolbarParentData childParentData = child.parentData as _ToolbarParentData;
       context.canvas.drawPath(_clipPath().shift(offset + childParentData.offset), _debugPaint);
       return true;
     }());
@@ -322,7 +322,7 @@ class _CupertinoTextSelectionControls extends TextSelectionControls {
     final double arrowTipX = (position.dx + globalEditableRegion.left).clamp(
       _kArrowScreenPadding + mediaQuery.padding.left,
       mediaQuery.size.width - mediaQuery.padding.right - _kArrowScreenPadding,
-    );
+    ) as double;
 
     // The y-coordinate has to be calculated instead of directly quoting postion.dy,
     // since the caller (TextSelectionOverlay._buildToolbar) does not know whether
