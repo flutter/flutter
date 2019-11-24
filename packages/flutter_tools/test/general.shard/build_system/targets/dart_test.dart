@@ -118,7 +118,7 @@ flutter_tools:lib/''');
   }));
 
   test('kernel_snapshot handles null result from kernel compilation', () => testbed.run(() async {
-    final FakeKernelCompilerFactory fakeKernelCompilerFactory = kernelCompilerFactory;
+    final FakeKernelCompilerFactory fakeKernelCompilerFactory = kernelCompilerFactory as FakeKernelCompilerFactory;
     fakeKernelCompilerFactory.kernelCompiler = MockKernelCompiler();
     when(fakeKernelCompilerFactory.kernelCompiler.compile(
       sdkRoot: anyNamed('sdkRoot'),

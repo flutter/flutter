@@ -18,13 +18,13 @@ void main() {
           'iosPrefix: FLT\n'
           'pluginClass: SamplePlugin\n';
 
-      final dynamic pluginYaml = loadYaml(pluginYamlRaw);
+      final YamlMap pluginYaml = loadYaml(pluginYamlRaw) as YamlMap;
       final Plugin plugin =
           Plugin.fromYaml(_kTestPluginName, _kTestPluginPath, pluginYaml, const <String>[]);
 
       final AndroidPlugin androidPlugin =
-          plugin.platforms[AndroidPlugin.kConfigKey];
-      final IOSPlugin iosPlugin = plugin.platforms[IOSPlugin.kConfigKey];
+          plugin.platforms[AndroidPlugin.kConfigKey] as AndroidPlugin;
+      final IOSPlugin iosPlugin = plugin.platforms[IOSPlugin.kConfigKey] as IOSPlugin;
       final String androidPluginClass = androidPlugin.pluginClass;
       final String iosPluginClass = iosPlugin.pluginClass;
 
@@ -51,20 +51,20 @@ void main() {
           ' windows:\n'
           '  pluginClass: WinSamplePlugin\n';
 
-      final dynamic pluginYaml = loadYaml(pluginYamlRaw);
+      final YamlMap pluginYaml = loadYaml(pluginYamlRaw) as YamlMap;
       final Plugin plugin =
           Plugin.fromYaml(_kTestPluginName, _kTestPluginPath, pluginYaml, const <String>[]);
 
       final AndroidPlugin androidPlugin =
-          plugin.platforms[AndroidPlugin.kConfigKey];
-      final IOSPlugin iosPlugin = plugin.platforms[IOSPlugin.kConfigKey];
+          plugin.platforms[AndroidPlugin.kConfigKey] as AndroidPlugin;
+      final IOSPlugin iosPlugin = plugin.platforms[IOSPlugin.kConfigKey] as IOSPlugin;
       final LinuxPlugin linuxPlugin =
-          plugin.platforms[LinuxPlugin.kConfigKey];
+          plugin.platforms[LinuxPlugin.kConfigKey] as LinuxPlugin;
       final MacOSPlugin macOSPlugin =
-          plugin.platforms[MacOSPlugin.kConfigKey];
-      final WebPlugin webPlugin = plugin.platforms[WebPlugin.kConfigKey];
+          plugin.platforms[MacOSPlugin.kConfigKey] as MacOSPlugin;
+      final WebPlugin webPlugin = plugin.platforms[WebPlugin.kConfigKey] as WebPlugin;
       final WindowsPlugin windowsPlugin =
-          plugin.platforms[WindowsPlugin.kConfigKey];
+          plugin.platforms[WindowsPlugin.kConfigKey] as WindowsPlugin;
       final String androidPluginClass = androidPlugin.pluginClass;
       final String iosPluginClass = iosPlugin.pluginClass;
 
@@ -100,18 +100,14 @@ void main() {
 
       final dynamic pluginYaml = loadYaml(pluginYamlRaw);
       final Plugin plugin =
-      Plugin.fromYaml(_kTestPluginName, _kTestPluginPath, pluginYaml, const <String>[]);
+      Plugin.fromYaml(_kTestPluginName, _kTestPluginPath, pluginYaml as YamlMap, const <String>[]);
 
-      final AndroidPlugin androidPlugin =
-      plugin.platforms[AndroidPlugin.kConfigKey];
-      final IOSPlugin iosPlugin = plugin.platforms[IOSPlugin.kConfigKey];
-      final LinuxPlugin linuxPlugin =
-      plugin.platforms[LinuxPlugin.kConfigKey];
-      final MacOSPlugin macOSPlugin =
-      plugin.platforms[MacOSPlugin.kConfigKey];
-      final WebPlugin webPlugin = plugin.platforms[WebPlugin.kConfigKey];
-      final WindowsPlugin windowsPlugin =
-      plugin.platforms[WindowsPlugin.kConfigKey];
+      final AndroidPlugin androidPlugin = plugin.platforms[AndroidPlugin.kConfigKey] as AndroidPlugin;
+      final IOSPlugin iosPlugin = plugin.platforms[IOSPlugin.kConfigKey] as IOSPlugin;
+      final LinuxPlugin linuxPlugin = plugin.platforms[LinuxPlugin.kConfigKey] as LinuxPlugin;
+      final MacOSPlugin macOSPlugin = plugin.platforms[MacOSPlugin.kConfigKey] as MacOSPlugin;
+      final WebPlugin webPlugin = plugin.platforms[WebPlugin.kConfigKey] as WebPlugin;
+      final WindowsPlugin windowsPlugin = plugin.platforms[WindowsPlugin.kConfigKey] as WindowsPlugin;
       final String androidPluginClass = androidPlugin.pluginClass;
       final String iosPluginClass = iosPlugin.pluginClass;
 
@@ -144,7 +140,7 @@ void main() {
 
       final dynamic pluginYaml = loadYaml(pluginYamlRaw);
       final Plugin plugin =
-      Plugin.fromYaml(_kTestPluginName, _kTestPluginPath, pluginYaml, const <String>[]);
+      Plugin.fromYaml(_kTestPluginName, _kTestPluginPath, pluginYaml as YamlMap, const <String>[]);
 
       expect(plugin.platforms, <String, PluginPlatform> {});
     });
