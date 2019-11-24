@@ -81,6 +81,7 @@ abstract class ScrollView extends StatelessWidget {
        assert(!shrinkWrap || center == null),
        assert(anchor != null),
        assert(anchor >= 0.0 && anchor <= 1.0),
+       assert(semanticChildCount == null || semanticChildCount >= 0),
        primary = primary ?? controller == null && identical(scrollDirection, Axis.vertical),
        physics = physics ?? (primary == true || (primary == null && controller == null && identical(scrollDirection, Axis.vertical)) ? const AlwaysScrollableScrollPhysics() : null),
        super(key: key);
@@ -944,6 +945,7 @@ class ListView extends BoxScrollView {
     int semanticChildCount,
     DragStartBehavior dragStartBehavior = DragStartBehavior.start,
   }) : assert(itemCount == null || itemCount >= 0),
+       assert(semanticChildCount == null || semanticChildCount <= itemCount),
        childrenDelegate = SliverChildBuilderDelegate(
          itemBuilder,
          childCount: itemCount,
