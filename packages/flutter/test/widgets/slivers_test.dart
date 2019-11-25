@@ -440,6 +440,38 @@ void main() {
     );
   }
 
+  group('SliverOffstage - ', () {
+    testWidgets('offstage true', (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
+      await tester.pumpWidget(_boilerPlate(
+        const SliverOffstage(
+          offstage: true,
+          sliver: SliverToBoxAdapter(
+            child: Text('a'),
+          )
+        )
+      ));
+
+      expect(semantics.nodesWith(label: 'a'), hasLength(0));
+      expect(find.byType(Text), findsNothing);
+    });
+
+    testWidgets('offstage false', (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
+      await tester.pumpWidget(_boilerPlate(
+        const SliverOffstage(
+          offstage: false,
+          sliver: SliverToBoxAdapter(
+            child: Text('a'),
+          )
+        )
+      ));
+
+      expect(semantics.nodesWith(label: 'a'), hasLength(1));
+      expect(find.byType(Text), findsOneWidget);
+    });
+  });
+
   group('SliverOpacity - ', () {
     testWidgets('painting & semantics', (WidgetTester tester) async {
       final SemanticsTester semantics = SemanticsTester(tester);
