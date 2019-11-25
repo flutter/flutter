@@ -214,7 +214,6 @@ void main() {
 
   group('Snapshotter - AOT', () {
     const String kSnapshotDart = 'snapshot.dart';
-    const String kSDKPath = '/path/to/sdk';
     String skyEnginePath;
 
     _FakeGenSnapshot genSnapshot;
@@ -244,8 +243,6 @@ void main() {
       mockAndroidSdk = MockAndroidSdk();
       mockArtifacts = MockArtifacts();
       mockXcode = MockXcode();
-      when(mockXcode.iPhoneSdkLocation()).thenAnswer((_) => Future<String>.value(kSDKPath));
-
       bufferLogger = BufferLogger();
       for (BuildMode mode in BuildMode.values) {
         when(mockArtifacts.getArtifactPath(Artifact.snapshotDart,
@@ -337,19 +334,8 @@ void main() {
         'main.dill',
       ]);
 
-      final VerificationResult toVerifyCC = verify(xcode.cc(captureAny));
-      expect(toVerifyCC.callCount, 1);
-      final List<String> ccArgs = toVerifyCC.captured.first;
-      expect(ccArgs, contains('-fembed-bitcode'));
-      expect(ccArgs, contains('-isysroot'));
-      expect(ccArgs, contains(kSDKPath));
-
-      final VerificationResult toVerifyClang = verify(xcode.clang(captureAny));
-      expect(toVerifyClang.callCount, 1);
-      final List<String> clangArgs = toVerifyClang.captured.first;
-      expect(clangArgs, contains('-fembed-bitcode'));
-      expect(clangArgs, contains('-isysroot'));
-      expect(clangArgs, contains(kSDKPath));
+      verify(xcode.cc(argThat(contains('-fembed-bitcode')))).called(1);
+      verify(xcode.clang(argThat(contains('-fembed-bitcode')))).called(1);
 
       final File assemblyFile = fs.file(assembly);
       expect(assemblyFile.existsSync(), true);
@@ -394,19 +380,8 @@ void main() {
         'main.dill',
       ]);
 
-      final VerificationResult toVerifyCC = verify(xcode.cc(captureAny));
-      expect(toVerifyCC.callCount, 1);
-      final List<String> ccArgs = toVerifyCC.captured.first;
-      expect(ccArgs, contains('-fembed-bitcode'));
-      expect(ccArgs, contains('-isysroot'));
-      expect(ccArgs, contains(kSDKPath));
-
-      final VerificationResult toVerifyClang = verify(xcode.clang(captureAny));
-      expect(toVerifyClang.callCount, 1);
-      final List<String> clangArgs = toVerifyClang.captured.first;
-      expect(clangArgs, contains('-fembed-bitcode'));
-      expect(clangArgs, contains('-isysroot'));
-      expect(clangArgs, contains(kSDKPath));
+      verify(xcode.cc(argThat(contains('-fembed-bitcode')))).called(1);
+      verify(xcode.clang(argThat(contains('-fembed-bitcode')))).called(1);
 
       final File assemblyFile = fs.file(assembly);
       final File assemblyBitcodeFile = fs.file('$assembly.stripped.S');
@@ -455,9 +430,6 @@ void main() {
       ]);
       verifyNever(xcode.cc(argThat(contains('-fembed-bitcode'))));
       verifyNever(xcode.clang(argThat(contains('-fembed-bitcode'))));
-
-      verify(xcode.cc(argThat(contains('-isysroot')))).called(1);
-      verify(xcode.clang(argThat(contains('-isysroot')))).called(1);
 
       final File assemblyFile = fs.file(assembly);
       expect(assemblyFile.existsSync(), true);
