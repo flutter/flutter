@@ -348,11 +348,22 @@ class LocalizationsGenerator {
   /// _AppLocalizationsDelegate.
   String className;
 
+  /// The list of all arb files in [l10nDirectory].
   final List<String> arbFilenames = <String>[];
+
+  /// The supported language codes as found in the arb files located in
+  /// [l10nDirectory].
   final Set<String> supportedLanguageCodes = <String>{};
+
+  /// The supported locales as found in the arb files located in
+  /// [l10nDirectory].
   final Set<LocaleInfo> supportedLocales = <LocaleInfo>{};
+
+  /// The class methods that will be generated in the localizations class
+  /// based on messages found in the template arb file.
   final List<String> classMethods = <String>[];
 
+  /// Initializes [l10nDirectory], [templateArbFile], [outputFile] and [className].
   void initialize({
     String l10nDirectoryPath,
     String templateArbFileName,

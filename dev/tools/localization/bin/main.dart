@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:args/args.dart' as argslib;
@@ -76,7 +75,6 @@ Future<void> main(List<String> arguments) async {
     exitWithError(e.message);
   }
 
-  // TODO(shihaohong): create method that generates arb files using the intl_translation:generate_from_arb command
   final ProcessResult pubGetResult = await Process.run('flutter', <String>['pub', 'get']);
   if (pubGetResult.exitCode != 0) {
     stderr.write(pubGetResult.stderr);
