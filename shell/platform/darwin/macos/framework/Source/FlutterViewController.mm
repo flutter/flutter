@@ -522,14 +522,12 @@ static void CommonInit(FlutterViewController* controller) {
 }
 
 - (void)flagsChanged:(NSEvent*)event {
-  NSUInteger currentlyPressedFlags =
-      event.modifierFlags & NSEventModifierFlagDeviceIndependentFlagsMask;
-  if (currentlyPressedFlags < _keyboardState.previously_pressed_flags) {
+  if (event.modifierFlags < _keyboardState.previously_pressed_flags) {
     [self keyUp:event];
   } else {
     [self keyDown:event];
   }
-  _keyboardState.previously_pressed_flags = currentlyPressedFlags;
+  _keyboardState.previously_pressed_flags = event.modifierFlags;
 }
 
 - (void)mouseEntered:(NSEvent*)event {
