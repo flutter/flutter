@@ -491,10 +491,9 @@ class AndroidDevice extends Device {
     }
 
     final TargetPlatform devicePlatform = await targetPlatform;
-    if (!(devicePlatform == TargetPlatform.android_arm ||
-          devicePlatform == TargetPlatform.android_arm64) &&
-        !debuggingOptions.buildInfo.isDebug) {
-      printError('Profile and release builds are only supported on ARM targets.');
+    if (devicePlatform == TargetPlatform.android_x86 &&
+       !debuggingOptions.buildInfo.isDebug) {
+      printError('Profile and release builds are only supported on ARM/x64 targets.');
       return LaunchResult.failed();
     }
 
