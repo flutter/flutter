@@ -2602,48 +2602,48 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
 
     testWidgets('InspectorSerializationDelegate addAdditionalPropertiesCallback', (WidgetTester tester) async {
       await tester.pumpWidget(
-          MaterialApp(
-            title: 'Hello World!',
-            home: Scaffold(
-              appBar: AppBar(
-                title: const Text('Hello World!'),
-              ),
-              body: Center(
-                child: Column(
-                  children: const <Widget>[
-                    Text('Hello World!'),
-                  ],
-                ),
+        MaterialApp(
+          title: 'Hello World!',
+          home: Scaffold(
+            appBar: AppBar(
+              title: const Text('Hello World!'),
+            ),
+            body: Center(
+              child: Column(
+                children: const <Widget>[
+                  Text('Hello World!'),
+                ],
               ),
             ),
-          )
+          ),
+        )
       );
       final Finder columnWidgetFinder = find.byType(Column);
       expect(columnWidgetFinder, findsOneWidget);
       final Element columnWidgetElement = columnWidgetFinder
-          .evaluate()
-          .first;
+        .evaluate()
+        .first;
       final InspectorSerializationDelegate delegate = InspectorSerializationDelegate(
-          groupName: 'inspector-layout',
-          service: service,
-          summaryTree: false,
-          includeProperties: true,
-          addAdditionalPropertiesCallback: (DiagnosticsNode node,
-              InspectorSerializationDelegate delegate) {
-            final Map<String, Object> additionalJson = <String, Object>{};
-            final Object value = node.value;
-            if (value is Element) {
-              additionalJson['renderObject'] =
-                  value.renderObject.toDiagnosticsNode().toJsonMap(
-                    delegate.copyWith(subtreeDepth: 0),
-                  );
-            }
-            additionalJson['callbackIsCalled'] = true;
-            return additionalJson;
+        groupName: 'inspector-layout',
+        service: service,
+        summaryTree: false,
+        includeProperties: true,
+        addAdditionalPropertiesCallback: (DiagnosticsNode node,
+            InspectorSerializationDelegate delegate) {
+          final Map<String, Object> additionalJson = <String, Object>{};
+          final Object value = node.value;
+          if (value is Element) {
+            additionalJson['renderObject'] =
+              value.renderObject.toDiagnosticsNode().toJsonMap(
+                delegate.copyWith(subtreeDepth: 0),
+              );
           }
+          additionalJson['callbackIsCalled'] = true;
+          return additionalJson;
+        }
       );
       final Map<String, Object> json = columnWidgetElement.toDiagnosticsNode()
-          .toJsonMap(delegate);
+        .toJsonMap(delegate);
       expect(json['callbackIsCalled'], true);
       expect(json.containsKey('renderObject'), true);
       expect(json['renderObject'], isA<Map<String, dynamic>>());

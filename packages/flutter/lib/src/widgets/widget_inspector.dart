@@ -2942,31 +2942,30 @@ class InspectorSerializationDelegate implements DiagnosticsSerializationDelegate
   ///   int subtreeDepth,
   /// ) {
   ///   return _nodeToJson(
-  ///      root,
-  ///      _SerializationDelegate(
-  ///        groupName: groupName,
-  ///        summaryTree: false,
-  ///        subtreeDepth: subtreeDepth,
-  ///        includeProperties: true,
-  ///        service: this,
-  ///        addAdditionalPropertiesCallback: (DiagnosticsNode node, _SerializationDelegate delegate) {
-  ///          final Map<String, Object> additionalJson = <String, Object>{};
-  ///          final Object value = node.value;
-  ///          if (value is Element) {
-  ///            final renderObject = value.renderObject;
-  ///            additionalJson['renderObject'] = renderObject?.toDiagnosticsNode()?.toJsonMap(
-  ///              delegate.copyWith(
-  ///                subtreeDepth: 0,
-  ///                includeProperties: true,
-  ///              ),
-  ///            );
-  ///            final Constraints constraints = renderObject.constraints;
-  ///          return additionalJson;
-  ///        }
-  ///      ),
-  ///    );
+  ///     root,
+  ///     _SerializationDelegate(
+  ///       groupName: groupName,
+  ///         summaryTree: false,
+  ///         subtreeDepth: subtreeDepth,
+  ///         includeProperties: true,
+  ///         service: this,
+  ///         addAdditionalPropertiesCallback: (DiagnosticsNode node, _SerializationDelegate delegate) {
+  ///           final Map<String, Object> additionalJson = <String, Object>{};
+  ///           final Object value = node.value;
+  ///           if (value is Element) {
+  ///             final renderObject = value.renderObject;
+  ///             additionalJson['renderObject'] = renderObject?.toDiagnosticsNode()?.toJsonMap(
+  ///               delegate.copyWith(
+  ///                 subtreeDepth: 0,
+  ///                 includeProperties: true,
+  ///               ),
+  ///             );
+  ///           }
+  ///           return additionalJson;
+  ///        },
+  ///     ),
+  ///  );
   /// }
-  ///
   final Map<String,
       Object> Function(DiagnosticsNode, InspectorSerializationDelegate) addAdditionalPropertiesCallback;
   
