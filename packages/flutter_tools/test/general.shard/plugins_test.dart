@@ -273,6 +273,7 @@ dependencies:
         expect(flutterProject.flutterPluginsFile.existsSync(), true);
         expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), true);
         expect(flutterProject.flutterPluginsFile.readAsStringSync(),
+          '# This is a generated file; do not edit or check into version control.\n'
           'plugin-a=/.tmp_rand0/plugin.rand0/\n'
           'plugin-b=/.tmp_rand0/plugin.rand1/\n'
           'plugin-c=/.tmp_rand0/plugin.rand2/\n'
@@ -280,6 +281,7 @@ dependencies:
         );
         expect(flutterProject.flutterPluginsDependenciesFile.readAsStringSync(),
           '{'
+            '"_info":"// This is a generated file; do not edit or check into version control.",'
             '"dependencyGraph":['
               '{'
                 '"name":"plugin-a",'
