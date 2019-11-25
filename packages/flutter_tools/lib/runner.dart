@@ -15,14 +15,11 @@ import 'src/base/file_system.dart';
 import 'src/base/io.dart';
 import 'src/base/logger.dart';
 import 'src/base/process.dart';
-import 'src/base/terminal.dart';
 import 'src/base/utils.dart';
 import 'src/context_runner.dart';
-import 'src/convert.dart';
 import 'src/doctor.dart';
-import 'src/flutter_manifest.dart';
 import 'src/globals.dart';
-import 'src/project.dart';
+import 'src/reporting/github_template.dart';
 import 'src/reporting/reporting.dart';
 import 'src/runner/flutter_command.dart';
 import 'src/runner/flutter_command_runner.dart';
@@ -133,7 +130,7 @@ Future<int> _handleToolError(
     );
 
     final String errorString = error.toString();
-    printError(errorString);
+    printError('Oops; flutter has exited unexpectedly: "$errorString".');
 
     try {
       await _informUserOfCrash(args, error, stackTrace, errorString);
@@ -160,82 +157,19 @@ Future<void> _informUserOfCrash(List<String> args, dynamic error, StackTrace sta
   printError('A crash report has been written to ${file.path}.');
   printStatus('This crash may already be reported. Check GitHub for similar crashes.', emphasis: true);
 
-  printStatus('https://github.com/flutter/flutter/issues?q=is%3Aissue+${Uri.encodeQueryComponent(errorString)}\n', wrap: false);
+  final GitHubTemplateCreator gitHubTemplateCreator = context.get<GitHubTemplateCreator>() ?? GitHubTemplateCreator();
+  final String similarIssuesURL = await gitHubTemplateCreator.toolCrashSimilarIssuesGitHubURL(errorString);
+  printStatus('$similarIssuesURL\n', wrap: false);
   printStatus('To report your crash to the Flutter team, first read the guide to filing a bug.', emphasis: true);
   printStatus('https://flutter.dev/docs/resources/bug-reports\n', wrap: false);
   printStatus('Create a new GitHub issue. Paste this link into your browser and complete the template. Thank you!', emphasis: true);
 
-  final String title = '[tool_crash] $errorString';
   final String command = _crashCommand(args);
-  final String body = '''## Command
-  ```
-  $command
-  ```
-
-  ## Steps to Reproduce
-  1. ...
-  2. ...
-  3. ...
-
-  ## Logs
-  ${_crashException(error)}
-  ```
-  ${LineSplitter.split(stackTrace.toString()).take(20).join('\n')}
-  ```
-  ```
-  $doctorText
-  ```
-
-  ## Flutter Application Metadata
-  ${_projectMetadataInformation()}
-  ''';
-  printStatus('https://github.com/flutter/flutter/issues/new?title=${Uri.encodeQueryComponent(title)}'
-    '&body=${Uri.encodeQueryComponent(body)}'
-    '&labels=${Uri.encodeQueryComponent('tool,severe: crash')}\n', wrap: false);
-
-  printStatus('Oops; flutter has exited unexpectedly.', emphasis: true, color: TerminalColor.red);
+  final String gitHubTemplateURL = await gitHubTemplateCreator.toolCrashIssueTemplateGitHubURL(command, errorString, _crashException(error), stackTrace, doctorText);
+  printStatus('$gitHubTemplateURL\n', wrap: false);
 }
 
 String _crashCommand(List<String> args) => 'flutter ${args.join(' ')}';
-
-String _projectMetadataInformation() {
-  FlutterProject project;
-  try {
-    project = FlutterProject.current();
-  } on Exception catch (exception) {
-    // pubspec may be malformed.
-    return exception.toString();
-  }
-  final FlutterManifest manifest = project?.manifest;
-  if (project == null || manifest == null || manifest.isEmpty) {
-    return 'No pubspec in working directory.';
-  }
-  String description = '';
-  if (manifest != null) {
-    description += '''
-**Version**: ${manifest.appVersion}
-**Material**: ${manifest.usesMaterialDesign}
-**Android X**: ${manifest.usesAndroidX}
-**Module**: ${manifest.isModule}
-**Plugin**: ${manifest.isPlugin}
-**Android package**: ${manifest.androidPackage}
-**iOS bundle identifier**: ${manifest.iosBundleIdentifier}
-''';
-  }
-  final File file = project.flutterPluginsFile;
-  if (file.existsSync()) {
-    description += '### Plugins\n';
-    for (String plugin in project.flutterPluginsFile.readAsLinesSync()) {
-      final List<String> pluginParts = plugin.split('=');
-      if (pluginParts.length != 2) {
-        continue;
-      }
-      description += pluginParts.first;
-    }
-  }
-
-  return description;
-}
 
 String _crashException(dynamic error) => '${error.runtimeType}: $error';
 
