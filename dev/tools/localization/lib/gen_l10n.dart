@@ -299,6 +299,19 @@ bool _isDirectoryReadableAndWritable(String statString) {
   return true;
 }
 
+bool _isValidGetterAndMethodName(String name) {
+  // Dart getter and method name cannot contain non-alphanumeric symbols
+  if (name.contains(RegExp(r'[^a-zA-Z\d]')))
+    return false;
+  // Dart class name must start with lower case character
+  if (name[0].contains(RegExp(r'[A-Z]')))
+    return false;
+  // Dart class name cannot start with a number
+  if (name[0].contains(RegExp(r'\d')))
+    return false;
+  return true;
+}
+
 /// The localizations generation class used to generate the localizations
 /// classes, as well as all pertinent Dart files required to internationalize a
 /// Flutter application.
@@ -338,6 +351,7 @@ class LocalizationsGenerator {
   final List<String> arbFilenames = <String>[];
   final Set<String> supportedLanguageCodes = <String>{};
   final Set<LocaleInfo> supportedLocales = <LocaleInfo>{};
+  final List<String> classMethods = <String>[];
 
   void initialize({
     String l10nDirectoryPath,
@@ -447,7 +461,45 @@ class LocalizationsGenerator {
         }
       }
     }
-    print(supportedLocales);
+  }
+
+  void parseTemplateArbFile() {
+    Map<String, dynamic> bundle;
+    try {
+      bundle = json.decode(templateArbFile.readAsStringSync());
+    } on FileSystemException catch (e) {
+      throw FileSystemException('Unable to read input arb file: $e');
+    } on FormatException catch (e) {
+      throw FormatException('Unable to parse arb file: $e');
+    }
+
+    final RegExp pluralValueRE = RegExp(r'^\s*\{[\w\s,]*,\s*plural\s*,');
+    for (String key in bundle.keys.toList()..sort()) {
+      if (key.startsWith('@'))
+        continue;
+      if (!_isValidGetterAndMethodName(key))
+        throw L10nException(
+          'Invalid key format: $key \n It has to be in camel case, cannot start '
+          'with a number, and cannot contain non-alphanumeric characters.'
+        );
+      if (pluralValueRE.hasMatch(bundle[key]))
+        classMethods.add(genPluralMethod(bundle, key));
+      else
+        classMethods.add(genSimpleMethod(bundle, key));
+    }
+  }
+
+  void generateOutputFile() {
+    final String directory = path.basename(l10nDirectory.path);
+    final String outputFileName = path.basename(outputFile.path);
+    outputFile.writeAsStringSync(
+      defaultFileTemplate
+        .replaceAll('@className', className)
+        .replaceAll('@classMethods', classMethods.join('\n'))
+        .replaceAll('@importFile', '$directory/$outputFileName')
+        .replaceAll('@supportedLocales', genSupportedLocaleProperty(supportedLocales))
+        .replaceAll('@supportedLanguageCodes', supportedLanguageCodes.toList().join(', '))
+    );
   }
 }
 

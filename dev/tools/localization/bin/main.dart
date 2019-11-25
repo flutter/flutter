@@ -1,3 +1,7 @@
+// Copyright 2019 The Chromium Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -6,24 +10,6 @@ import 'package:args/args.dart' as argslib;
 import 'package:localization/gen_l10n.dart';
 import 'package:localization/localizations_utils.dart';
 import 'package:path/path.dart' as path;
-
-bool _isValidGetterAndMethodName(String name) {
-  // Dart getter and method name cannot contain non-alphanumeric symbols
-  if (name.contains(RegExp(r'[^a-zA-Z\d]')))
-    return false;
-  // Dart class name must start with lower case character
-  if (name[0].contains(RegExp(r'[A-Z]')))
-    return false;
-  // Dart class name cannot start with a number
-  if (name[0].contains(RegExp(r'\d')))
-    return false;
-  return true;
-}
-
-String _importFilePath(String path, String fileName) {
-  final String replaceLib = path.replaceAll('lib/', '');
-  return '$replaceLib/$fileName';
-}
 
 Future<void> main(List<String> arguments) async {
   final argslib.ArgParser parser = argslib.ArgParser();
@@ -80,47 +66,15 @@ Future<void> main(List<String> arguments) async {
       classNameString: classNameString,
     );
     localizationsGenerator.parseArbFiles();
+    localizationsGenerator.parseTemplateArbFile();
+    localizationsGenerator.generateOutputFile();
   } on FileSystemException catch (e) {
+    exitWithError(e.message);
+  } on FormatException catch (e) {
     exitWithError(e.message);
   } on L10nException catch (e) {
     exitWithError(e.message);
   }
-
-  // TODO(shihaohong): create a method to decode templateArbFile
-  final List<String> classMethods = <String>[];
-  Map<String, dynamic> bundle;
-  try {
-    bundle = json.decode(localizationsGenerator.templateArbFile.readAsStringSync());
-  } on FileSystemException catch (e) {
-    exitWithError('Unable to read input arb file: $e');
-  } on FormatException catch (e) {
-    exitWithError('Unable to parse arb file: $e');
-  }
-
-  final RegExp pluralValueRE = RegExp(r'^\s*\{[\w\s,]*,\s*plural\s*,');
-  for (String key in bundle.keys.toList()..sort()) {
-    if (key.startsWith('@'))
-      continue;
-    if (!_isValidGetterAndMethodName(key))
-      exitWithError(
-        'Invalid key format: $key \n It has to be in camel case, cannot start '
-        'with a number, and cannot contain non-alphanumeric characters.'
-      );
-    if (pluralValueRE.hasMatch(bundle[key]))
-      classMethods.add(genPluralMethod(bundle, key));
-    else
-      classMethods.add(genSimpleMethod(bundle, key));
-  }
-
-  // TODO(shihaohong): create a method that creates the output file
-  localizationsGenerator.outputFile.writeAsStringSync(
-    defaultFileTemplate
-      .replaceAll('@className', classNameString)
-      .replaceAll('@classMethods', classMethods.join('\n'))
-      .replaceAll('@importFile', _importFilePath(arbPathString, outputFileString))
-      .replaceAll('@supportedLocales', genSupportedLocaleProperty(localizationsGenerator.supportedLocales))
-      .replaceAll('@supportedLanguageCodes', localizationsGenerator.supportedLanguageCodes.toList().join(', '))
-  );
 
   // TODO(shihaohong): create method that generates arb files using the intl_translation:generate_from_arb command
   final ProcessResult pubGetResult = await Process.run('flutter', <String>['pub', 'get']);

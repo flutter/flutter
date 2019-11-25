@@ -389,4 +389,12 @@ void main() {
       );
     });
   });
+
+  group('LocalizationsGenerator.parseTemplateArbFile:', () {
+    // TODO(shihaohong): add tests
+  });
+
+  group('LocalizationsGenerator.generateOutputFile:', () {
+    // TODO(shihaohong): add tests
+  });
 }
