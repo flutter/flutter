@@ -167,13 +167,9 @@ abstract class FlutterTestDriver {
     // If we try to kill the process while it's paused, we'll end up terminating
     // it forcefully and it won't terminate child processes, so we need to ensure
     // it's running before terminating.
-    if (_vmService != null) {
-      try {
-        await resume().timeout(defaultTimeout);
-      } catch (e) {
-        _debugPrint('Ignoring failure to resume during shutdown');
-      }
-    }
+    await resume().timeout(defaultTimeout)
+        .catchError((Object e) => _debugPrint('Ignoring failure to resume during shutdown'));
+
     _debugPrint('Sending SIGTERM to $_processPid..');
     ProcessSignal.SIGTERM.send(_processPid);
     return _process.exitCode.timeout(quitTimeout, onTimeout: _killForcefully);
@@ -390,10 +386,8 @@ abstract class FlutterTestDriver {
 
     if (_printDebugOutputToStdOut) {
       _debugPrint('$task...');
-      return callback()..timeout(timeout, onTimeout: () {
-        _debugPrint('$task is taking longer than usual...');
-        return null;
-      });
+      final Timer longWarning = Timer(timeout, () => _debugPrint('$task is taking longer than usual...'));
+      return callback().whenComplete(longWarning.cancel);
     }
 
     // We're not showing all output to the screen, so let's capture the output
@@ -409,14 +403,12 @@ abstract class FlutterTestDriver {
     }
     final StreamSubscription<String> subscription = _allMessages.stream.listen(logMessage);
 
-    final Future<T> future = callback();
-
-    future.timeout(timeout ?? defaultTimeout, onTimeout: () {
+    final Timer longWarning = Timer(timeout, () {
       _debugPrint(messages.toString());
       timeoutExpired = true;
       _debugPrint('$task is taking longer than usual...');
-      return null;
     });
+    final Future<T> future = callback().whenComplete(longWarning.cancel);
 
     return future.catchError((dynamic error) {
       if (!timeoutExpired) {
