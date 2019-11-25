@@ -96,6 +96,7 @@ void main() {
       find.byType(RepaintBoundary),
       matchesGoldenFile('continuous_rectangle_border.golden_test_varying_radii.png'),
     );
+    // TODO(Piinks): Remove skip once web goldens are supported, https://github.com/flutter/flutter/issues/40297
   }, skip: isBrowser);
 
   testWidgets('Golden test topLeft radii', (WidgetTester tester) async {
@@ -116,6 +117,7 @@ void main() {
       find.byType(RepaintBoundary),
       matchesGoldenFile('continuous_rectangle_border.golden_test_topLeft_radii.png'),
     );
+    // TODO(Piinks): Remove skip once web goldens are supported, https://github.com/flutter/flutter/issues/40297
   }, skip: isBrowser);
 
   testWidgets('Golden test topRight radii', (WidgetTester tester) async {
@@ -136,6 +138,7 @@ void main() {
       find.byType(RepaintBoundary),
       matchesGoldenFile('continuous_rectangle_border.golden_test_topRight_radii.png'),
     );
+    // TODO(Piinks): Remove skip once web goldens are supported, https://github.com/flutter/flutter/issues/40297
   }, skip: isBrowser);
 
   testWidgets('Golden test bottomLeft radii', (WidgetTester tester) async {
@@ -156,6 +159,7 @@ void main() {
       find.byType(RepaintBoundary),
       matchesGoldenFile('continuous_rectangle_border.golden_test_bottomLeft_radii.png'),
     );
+    // TODO(Piinks): Remove skip once web goldens are supported, https://github.com/flutter/flutter/issues/40297
   }, skip: isBrowser);
 
   testWidgets('Golden test bottomRight radii', (WidgetTester tester) async {
@@ -176,6 +180,7 @@ void main() {
       find.byType(RepaintBoundary),
       matchesGoldenFile('continuous_rectangle_border.golden_test_bottomRight_radii.png'),
     );
+    // TODO(Piinks): Remove skip once web goldens are supported, https://github.com/flutter/flutter/issues/40297
   }, skip: isBrowser);
 
   testWidgets('Golden test large radii', (WidgetTester tester) async {
