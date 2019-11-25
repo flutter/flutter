@@ -9,6 +9,7 @@ import 'dart:ui';
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+// ignore: deprecated_member_use
 import 'package:test_api/test_api.dart' as test_package show TestFailure;
 
 import 'goldens.dart';
@@ -34,14 +35,33 @@ ComparisonResult compareLists(List<int> test, List<int> master) {
   throw UnsupportedError('Golden testing is not supported on the web.');
 }
 
+/// The default [WebGoldenComparator] implementation for `flutter test`.
+///
+/// This comparator will send a request to the test server for golden comparison
+/// which will then defer the comparison to [goldenFileComparator].
+///
+/// See also:
+///
+///   * [matchesGoldenFile], the function from [flutter_test] that invokes the
+///    comparator.
 class DefaultWebGoldenComparator extends WebGoldenComparator {
+  /// Creates a new [DefaultWebGoldenComparator] for the specified [testFile].
+  ///
+  /// Golden file keys will be interpreted as file paths relative to the
+  /// directory in which [testFile] resides.
+  ///
+  /// The [testFile] URL must represent a file.
   DefaultWebGoldenComparator(this.testUri);
 
+  /// The test file currently being executed.
+  ///
+  /// Golden file keys will be interpreted as file paths relative to the
+  /// directory in which this file resides.
   Uri testUri;
 
   @override
   Future<bool> compare(Element element, Size size, Uri golden) async {
-    String key = golden.toString();
+    final String key = golden.toString();
 
     final html.HttpRequest request = await html.HttpRequest.request(
       'flutter_goldens',
@@ -53,7 +73,7 @@ class DefaultWebGoldenComparator extends WebGoldenComparator {
         'height': size.height.round(),
       }),
     );
-    final Object response = request.response;
+    final String response = request.response as String;
     if (response == 'true') {
       return true;
     } else {

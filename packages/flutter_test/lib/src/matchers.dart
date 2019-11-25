@@ -20,13 +20,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
+import '_matchers_io.dart' if (dart.library.html) '_matchers_web.dart' show MatchesGoldenFile, captureImage;
 import 'accessibility.dart';
 import 'binding.dart';
 import 'finders.dart';
 import 'goldens.dart';
 import 'widget_tester.dart' show WidgetTester;
-
-import '_matchers_io.dart' if (dart.library.html) '_matchers_web.dart' show captureImage, MatchesGoldenFile;
 
 /// Asserts that the [Finder] matches no widgets in the widget tree.
 ///
@@ -1636,17 +1635,6 @@ class _ColorMatcher extends Matcher {
 
   @override
   Description describe(Description description) => description.add('matches color $targetColor');
-}
-
-Future<ui.Image> _captureImage(Element element) {
-  RenderObject renderObject = element.renderObject;
-  while (!renderObject.isRepaintBoundary) {
-    renderObject = renderObject.parent as RenderObject;
-    assert(renderObject != null);
-  }
-  assert(!renderObject.debugNeedsPaint);
-  final OffsetLayer layer = renderObject.debugLayer as OffsetLayer;
-  return layer.toImage(renderObject.paintBounds);
 }
 
 int _countDifferentPixels(Uint8List imageA, Uint8List imageB) {

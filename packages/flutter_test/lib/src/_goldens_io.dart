@@ -8,7 +8,6 @@ import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart' show Element;
 import 'package:image/image.dart';
 import 'package:path/path.dart' as path;
@@ -246,15 +245,13 @@ ComparisonResult compareLists(List<int> test, List<int> master) {
 
 /// An unsupported [WebGoldenComparator] that exists for API compatibility.
 class DefaultWebGoldenComparator extends WebGoldenComparator {
-  DefaultWebGoldenComparator(Uri _);
-
   @override
   Future<bool> compare(Element element, Size size, Uri golden) {
-    throw UnsupportedError('DefaultWebGoldenComparator is noonly supported on the web.');
+    throw UnsupportedError('DefaultWebGoldenComparator is only supported on the web.');
   }
 
   @override
   Future<void> update(Uri golden, Element element, Size size) {
-    throw UnsupportedError('DefaultWebGoldenComparator is noonly supported on the web.');
+    throw UnsupportedError('DefaultWebGoldenComparator is only supported on the web.');
   }
 }

@@ -409,16 +409,16 @@ class SkiaGoldClient {
   /// Returns a JSON String with keys value pairs used to uniquely identify the
   /// configuration that generated the given golden file.
   ///
-  /// Currently, the only key value pair being tracked is the platform the image
-  /// was rendered on.
+  /// Currently, the only key value pairs being tracked is the platform the
+  /// image was rendered on, and for web tests, the browser the image was
+  /// rendered on.
   String _getKeysJSON() {
-    return json.encode(
-      <String, dynamic>{
-        'Platform' : platform.operatingSystem,
-        if (platform.environment[_kTestBrowserKey] != null)
-          'Browser' : platform.environment[_kTestBrowserKey],
-      }
-    );
+    final Map<String, dynamic> keys = <String, dynamic>{
+      'Platform' : platform.operatingSystem,
+    };
+    if (platform.environment[_kTestBrowserKey] != null)
+      keys['Browser'] = platform.environment[_kTestBrowserKey];
+    return json.encode(keys);
   }
 
   /// Removes the file extension from the [fileName] to represent the test name

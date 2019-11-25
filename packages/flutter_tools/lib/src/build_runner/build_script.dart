@@ -255,7 +255,7 @@ class FlutterWebTestBootstrapBuilder implements Builder {
     final String assetPath = id.pathSegments.first == 'lib'
         ? path.url.join('packages', id.package, id.path)
         : id.path;
-    final testUrl = path.toUri(path.absolute(assetPath));
+    final Uri testUrl = path.toUri(path.absolute(assetPath));
     final Metadata metadata = parseMetadata(
         assetPath, contents, Runtime.builtIn.map((Runtime runtime) => runtime.name).toSet());
 

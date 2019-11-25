@@ -10,29 +10,42 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:test_api/src/frontend/async_matcher.dart'; // ignore: implementation_imports
+// ignore: deprecated_member_use
 import 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf;
 
 import 'binding.dart';
 import 'finders.dart';
 import 'goldens.dart';
 
+/// Render the closest [RepaintBoundary] of the [element] into an image.
+///
+/// See also:
+///
+///  * [OffsetLayer.toImage] which is the actual method being called.
 Future<ui.Image> captureImage(Element element) {
   RenderObject renderObject = element.renderObject;
   while (!renderObject.isRepaintBoundary) {
-    renderObject = renderObject.parent;
+    renderObject = renderObject.parent as RenderObject;
     assert(renderObject != null);
   }
   assert(!renderObject.debugNeedsPaint);
-  final OffsetLayer layer = renderObject.debugLayer;
+  final OffsetLayer layer = renderObject.debugLayer as OffsetLayer;
   return layer.toImage(renderObject.paintBounds);
 }
 
+/// The matcher created by [matchesGoldenFile]. This class is enabled when the
+/// test is running on a VM using conditional import.
 class MatchesGoldenFile extends AsyncMatcher {
+  /// Creates an instance of [MatchesGoldenFile]. Called by [matchesGoldenFile].
   const MatchesGoldenFile(this.key, this.version);
 
+  /// Creates an instance of [MatchesGoldenFile]. Called by [matchesGoldenFile].
   MatchesGoldenFile.forStringPath(String path, this.version) : key = Uri.parse(path);
 
+  /// The [key] to the golden image.
   final Uri key;
+
+  /// The [version] of the golden image.
   final int version;
 
   @override
@@ -43,7 +56,7 @@ class MatchesGoldenFile extends AsyncMatcher {
     } else if (item is ui.Image) {
       imageFuture = Future<ui.Image>.value(item);
     } else {
-      final Finder finder = item;
+      final Finder finder = item as Finder;
       final Iterable<Element> elements = finder.evaluate();
       if (elements.isEmpty) {
         return 'could not be rendered because no widget was found';
@@ -55,7 +68,7 @@ class MatchesGoldenFile extends AsyncMatcher {
 
     final Uri testNameUri = goldenFileComparator.getTestUri(key, version);
 
-    final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+    final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
     return binding.runAsync<String>(() async {
       final ui.Image image = await imageFuture;
       final ByteData bytes = await image.toByteData(format: ui.ImageByteFormat.png);
