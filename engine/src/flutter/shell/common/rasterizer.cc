@@ -151,13 +151,14 @@ void Rasterizer::Draw(fml::RefPtr<Pipeline<flutter::LayerTree>> pipeline) {
   }
 }
 
-sk_sp<SkImage> Rasterizer::MakeRasterSnapshot(sk_sp<SkPicture> picture,
-                                              SkISize picture_size) {
+sk_sp<SkImage> Rasterizer::DoMakeRasterSnapshot(
+    SkISize size,
+    std::function<void(SkCanvas*)> draw_callback) {
   TRACE_EVENT0("flutter", __FUNCTION__);
 
   sk_sp<SkSurface> surface;
   SkImageInfo image_info = SkImageInfo::MakeN32Premul(
-      picture_size.width(), picture_size.height(), SkColorSpace::MakeSRGB());
+      size.width(), size.height(), SkColorSpace::MakeSRGB());
   if (surface_ == nullptr || surface_->GetContext() == nullptr) {
     // Raster surface is fine if there is no on screen surface. This might
     // happen in case of software rendering.
@@ -179,8 +180,7 @@ sk_sp<SkImage> Rasterizer::MakeRasterSnapshot(sk_sp<SkPicture> picture,
     return nullptr;
   }
 
-  surface->getCanvas()->drawPicture(picture.get());
-
+  draw_callback(surface->getCanvas());
   surface->getCanvas()->flush();
 
   sk_sp<SkImage> device_snapshot;
@@ -201,6 +201,34 @@ sk_sp<SkImage> Rasterizer::MakeRasterSnapshot(sk_sp<SkPicture> picture,
   }
 
   return nullptr;
+}
+
+sk_sp<SkImage> Rasterizer::MakeRasterSnapshot(sk_sp<SkPicture> picture,
+                                              SkISize picture_size) {
+  return DoMakeRasterSnapshot(picture_size,
+                              [picture = std::move(picture)](SkCanvas* canvas) {
+                                canvas->drawPicture(picture);
+                              });
+}
+
+sk_sp<SkImage> Rasterizer::ConvertToRasterImage(sk_sp<SkImage> image) {
+  TRACE_EVENT0("flutter", __FUNCTION__);
+
+  // If the rasterizer does not have a surface with a GrContext, then it will
+  // be unable to render a cross-context SkImage.  The caller will need to
+  // create the raster image on the IO thread.
+  if (surface_ == nullptr || surface_->GetContext() == nullptr) {
+    return nullptr;
+  }
+
+  if (image == nullptr) {
+    return nullptr;
+  }
+
+  return DoMakeRasterSnapshot(image->dimensions(),
+                              [image = std::move(image)](SkCanvas* canvas) {
+                                canvas->drawImage(image, 0, 0);
+                              });
 }
 
 RasterStatus Rasterizer::DoDraw(
