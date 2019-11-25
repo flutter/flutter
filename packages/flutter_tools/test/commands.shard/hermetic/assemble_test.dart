@@ -5,14 +5,13 @@
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/assemble.dart';
-import 'package:flutter_tools/src/globals.dart';
 import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
+import '../../src/context.dart';
 import '../../src/testbed.dart';
 
 void main() {
@@ -29,9 +28,8 @@ void main() {
       });
     final CommandRunner<void> commandRunner = createTestCommandRunner(AssembleCommand());
     await commandRunner.run(<String>['assemble', '-o Output', 'debug_macos_bundle_flutter_assets']);
-    final BufferLogger bufferLogger = logger;
 
-    expect(bufferLogger.traceText, contains('build succeeded.'));
+    expect(testLogger.traceText, contains('build succeeded.'));
   });
 
   testbed.test('Throws ToolExit if not provided with output', () async {
@@ -57,7 +55,6 @@ void main() {
   });
 
   testbed.test('Does not log stack traces during build failure', () async {
-    final BufferLogger bufferLogger = logger;
     final StackTrace testStackTrace = StackTrace.current;
     when(buildSystem.build(any, any, buildSystemConfig: anyNamed('buildSystemConfig')))
       .thenAnswer((Invocation invocation) async {
@@ -69,8 +66,8 @@ void main() {
 
     await expectLater(commandRunner.run(<String>['assemble', '-o Output', 'debug_macos_bundle_flutter_assets']),
       throwsA(isInstanceOf<ToolExit>()));
-    expect(bufferLogger.errorText, contains('bar'));
-    expect(bufferLogger.errorText, isNot(contains(testStackTrace.toString())));
+    expect(testLogger.errorText, contains('bar'));
+    expect(testLogger.errorText, isNot(contains(testStackTrace.toString())));
   });
 
   testbed.test('Only writes input and output files when the values change', () async {

@@ -10,7 +10,6 @@ import 'package:flutter_tools/src/android/android_studio.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/context.dart';
-import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/config.dart';
@@ -62,12 +61,11 @@ void main() {
 
   group('config', () {
     testUsingContext('machine flag', () async {
-      final BufferLogger logger = context.get<Logger>();
       final ConfigCommand command = ConfigCommand();
       await command.handleMachine();
 
-      expect(logger.statusText, isNotEmpty);
-      final dynamic jsonObject = json.decode(logger.statusText);
+      expect(testLogger.statusText, isNotEmpty);
+      final dynamic jsonObject = json.decode(testLogger.statusText);
       expect(jsonObject, isMap);
 
       expect(jsonObject.containsKey('android-studio-dir'), true);
@@ -156,7 +154,6 @@ void main() {
     });
 
     testUsingContext('warns the user to reload IDE', () async {
-      final BufferLogger logger = context.get<Logger>();
       final ConfigCommand configCommand = ConfigCommand();
       final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
 
@@ -165,13 +162,12 @@ void main() {
         '--enable-web'
       ]);
 
-      expect(logger.statusText, contains('You may need to restart any open editors'));
+      expect(testLogger.statusText, contains('You may need to restart any open editors'));
     }, overrides: <Type, Generator>{
       Usage: () => mockUsage,
     });
 
     testUsingContext('displays which config settings are available on stable', () async {
-      final BufferLogger logger = context.get<Logger>();
       when(mockFlutterVersion.channel).thenReturn('stable');
       final ConfigCommand configCommand = ConfigCommand();
       final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
@@ -188,10 +184,10 @@ void main() {
         'config',
       ]);
 
-      expect(logger.statusText, contains('enable-web: true (Unavailable)'));
-      expect(logger.statusText, contains('enable-linux-desktop: true (Unavailable)'));
-      expect(logger.statusText, contains('enable-windows-desktop: true (Unavailable)'));
-      expect(logger.statusText, contains('enable-macos-desktop: true (Unavailable)'));
+      expect(testLogger.statusText, contains('enable-web: true (Unavailable)'));
+      expect(testLogger.statusText, contains('enable-linux-desktop: true (Unavailable)'));
+      expect(testLogger.statusText, contains('enable-windows-desktop: true (Unavailable)'));
+      expect(testLogger.statusText, contains('enable-macos-desktop: true (Unavailable)'));
       verifyNoAnalytics();
     }, overrides: <Type, Generator>{
       AndroidStudio: () => mockAndroidStudio,

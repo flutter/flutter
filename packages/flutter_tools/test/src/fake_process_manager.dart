@@ -212,7 +212,7 @@ abstract class FakeProcessManager implements ProcessManager {
     bool includeParentEnvironment = true, // ignored
     bool runInShell = false, // ignored
     ProcessStartMode mode = ProcessStartMode.normal, // ignored
-  }) async => _runCommand(command, workingDirectory, environment);
+  }) async => _runCommand(command.cast<String>(), workingDirectory, environment);
 
   @override
   Future<ProcessResult> run(
@@ -224,7 +224,7 @@ abstract class FakeProcessManager implements ProcessManager {
     Encoding stdoutEncoding = systemEncoding,
     Encoding stderrEncoding = systemEncoding,
   }) async {
-    final _FakeProcess process = _runCommand(command, workingDirectory, environment);
+    final _FakeProcess process = _runCommand(command.cast<String>(), workingDirectory, environment);
     await process.exitCode;
     return ProcessResult(
       process.pid,
@@ -244,7 +244,7 @@ abstract class FakeProcessManager implements ProcessManager {
     Encoding stdoutEncoding = systemEncoding, // actual encoder is ignored
     Encoding stderrEncoding = systemEncoding, // actual encoder is ignored
   }) {
-    final _FakeProcess process = _runCommand(command, workingDirectory, environment);
+    final _FakeProcess process = _runCommand(command.cast<String>(), workingDirectory, environment);
     return ProcessResult(
       process.pid,
       process._exitCode,

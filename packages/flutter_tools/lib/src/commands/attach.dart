@@ -223,7 +223,7 @@ class AttachCommand extends FlutterCommand {
         FuchsiaIsolateDiscoveryProtocol isolateDiscoveryProtocol;
         try {
           isolateDiscoveryProtocol = device.getIsolateDiscoveryProtocol(module);
-          observatoryUri = Stream<Uri>.fromFuture(isolateDiscoveryProtocol.uri).asBroadcastStream();
+          observatoryUri = Stream<Uri>.value(await isolateDiscoveryProtocol.uri).asBroadcastStream();
         } catch (_) {
           isolateDiscoveryProtocol?.dispose();
           final List<ForwardedPort> ports = device.portForwarder.forwardedPorts.toList();
@@ -233,15 +233,16 @@ class AttachCommand extends FlutterCommand {
           rethrow;
         }
       } else if ((device is IOSDevice) || (device is IOSSimulator)) {
-        observatoryUri = Stream<Uri>
-          .fromFuture(
-            MDnsObservatoryDiscovery.instance.getObservatoryUri(
-              appId,
-              device,
-              usesIpv6: usesIpv6,
-              deviceVmservicePort: deviceVmservicePort,
-            )
-          ).asBroadcastStream();
+        final Uri uriFromMdns =
+          await MDnsObservatoryDiscovery.instance.getObservatoryUri(
+            appId,
+            device,
+            usesIpv6: usesIpv6,
+            deviceVmservicePort: deviceVmservicePort,
+          );
+        observatoryUri = uriFromMdns == null
+          ? null
+          : Stream<Uri>.value(uriFromMdns).asBroadcastStream();
       }
       // If MDNS discovery fails or we're not on iOS, fallback to ProtocolDiscovery.
       if (observatoryUri == null) {

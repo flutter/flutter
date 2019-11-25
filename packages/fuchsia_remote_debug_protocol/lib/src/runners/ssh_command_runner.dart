@@ -99,6 +99,6 @@ class SshCommandRunner {
           'Command failed: $command\nstdout: ${result.stdout}\nstderr: ${result.stderr}');
     }
     _log.fine('SSH command stdout in brackets:[${result.stdout}]');
-    return result.stdout.split('\n');
+    return (result.stdout as String).split('\n');
   }
 }
