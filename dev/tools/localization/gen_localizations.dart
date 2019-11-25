@@ -43,12 +43,12 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:localization/localizations_utils.dart';
 import 'package:path/path.dart' as path;
 import 'package:meta/meta.dart';
 
 import 'gen_cupertino_localizations.dart';
 import 'gen_material_localizations.dart';
-import 'localizations_utils.dart';
 import 'localizations_validator.dart';
 
 /// This is the core of this script; it generates the code used for translations.
