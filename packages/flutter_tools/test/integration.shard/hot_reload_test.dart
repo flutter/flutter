@@ -36,10 +36,17 @@ void main() {
   });
 
   test('newly added code executes during hot reload', () async {
-    await _flutter.run();
-    _project.uncommentHotReloadPrint();
     final StringBuffer stdout = StringBuffer();
-    final StreamSubscription<String> subscription = _flutter.stdout.listen(stdout.writeln);
+    final Completer<void> sawTick = Completer<void>();
+    final StreamSubscription<String> subscription = _flutter.stdout.listen((String line) {
+      if (line.contains('(((TICK 1)))')) {
+        sawTick.complete();
+      }
+      stdout.write(line);
+    });
+    await _flutter.run();
+    await sawTick.future;
+    _project.uncommentHotReloadPrint();
     try {
       await _flutter.hotReload();
       expect(stdout.toString(), contains('(((((RELOAD WORKED)))))'));
