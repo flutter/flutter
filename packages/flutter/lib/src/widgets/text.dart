@@ -150,7 +150,7 @@ class DefaultTextStyle extends InheritedTheme {
   /// DefaultTextStyle style = DefaultTextStyle.of(context);
   /// ```
   static DefaultTextStyle of(BuildContext context) {
-    return context.inheritFromWidgetOfExactType(DefaultTextStyle) ?? const DefaultTextStyle.fallback();
+    return context.dependOnInheritedWidgetOfExactType<DefaultTextStyle>() ?? const DefaultTextStyle.fallback();
   }
 
   @override
@@ -165,7 +165,7 @@ class DefaultTextStyle extends InheritedTheme {
 
   @override
   Widget wrap(BuildContext context, Widget child) {
-    final DefaultTextStyle defaultTextStyle = context.ancestorWidgetOfExactType(DefaultTextStyle);
+    final DefaultTextStyle defaultTextStyle = context.findAncestorWidgetOfExactType<DefaultTextStyle>();
     return identical(this, defaultTextStyle) ? child : DefaultTextStyle(
       style: style,
       textAlign: textAlign,

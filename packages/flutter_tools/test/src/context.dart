@@ -38,10 +38,10 @@ export 'package:flutter_tools/src/base/context.dart' show Generator;
 export 'fake_process_manager.dart' show ProcessManager, FakeProcessManager, FakeCommand;
 
 /// Return the test logger. This assumes that the current Logger is a BufferLogger.
-BufferLogger get testLogger => context.get<Logger>();
+BufferLogger get testLogger => context.get<Logger>() as BufferLogger;
 
-FakeDeviceManager get testDeviceManager => context.get<DeviceManager>();
-FakeDoctor get testDoctor => context.get<Doctor>();
+FakeDeviceManager get testDeviceManager => context.get<DeviceManager>() as FakeDeviceManager;
+FakeDoctor get testDoctor => context.get<Doctor>() as FakeDoctor;
 
 typedef ContextInitializer = void Function(AppContext testContext);
 
@@ -149,7 +149,7 @@ void testUsingContext(
 
 void _printBufferedErrors(AppContext testContext) {
   if (testContext.get<Logger>() is BufferLogger) {
-    final BufferLogger bufferLogger = testContext.get<Logger>();
+    final BufferLogger bufferLogger = testContext.get<Logger>() as BufferLogger;
     if (bufferLogger.errorText.isNotEmpty) {
       print(bufferLogger.errorText);
     }

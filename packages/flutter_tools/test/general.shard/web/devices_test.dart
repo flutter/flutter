@@ -101,6 +101,10 @@ void main() {
 
     expect(chromeDevice.isSupported(), true);
     expect(await chromeDevice.sdkNameAndVersion, 'ABC');
+
+    // Verify caching works correctly.
+    expect(await chromeDevice.sdkNameAndVersion, 'ABC');
+    verify(mockProcessManager.run(<String>['chrome.foo', '--version'])).called(1);
   }, overrides: <Type, Generator>{
     Platform: () => mockPlatform,
     ProcessManager: () => mockProcessManager,

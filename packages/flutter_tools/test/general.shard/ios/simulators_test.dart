@@ -193,7 +193,7 @@ void main() {
     await simulator.sideloadUpdatedAssetsForInstalledApplicationBundle(BuildInfo.debug, 'lib/main.dart');
 
     final VerificationResult result = verify(buildSystem.build(any, captureAny));
-    final Environment environment = result.captured.single;
+    final Environment environment = result.captured.single as Environment;
     expect(environment.defines, <String, String>{
       kTargetFile: 'lib/main.dart',
       kTargetPlatform: 'ios',

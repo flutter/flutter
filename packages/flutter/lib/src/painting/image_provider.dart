@@ -904,7 +904,7 @@ class NetworkImageLoadException implements Exception {
   /// A human-readable error message.
   final String _message;
 
-  /// Resolved URI of the requested image.
+  /// Resolved URL of the requested image.
   final Uri uri;
 
   @override

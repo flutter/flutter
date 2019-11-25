@@ -7,7 +7,6 @@ import 'dart:io';
 
 import 'package:path/path.dart' as path;
 import 'package:flutter_devicelab/framework/framework.dart';
-import 'package:flutter_devicelab/framework/ios.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 
 /// Combines several TaskFunctions with trivial success value into one.
@@ -47,8 +46,6 @@ class PluginTest {
       final _FlutterProject app = await _FlutterProject.create(tempDir, options,
           name: 'plugintestapp', template: 'app', environment: appCreateEnvironment);
       try {
-        if (buildTarget == 'ios')
-          await prepareProvisioningCertificates(app.rootPath);
         section('Add plugins');
         await app.addPlugin('plugintest',
             pluginPath: path.join('..', 'plugintest'));

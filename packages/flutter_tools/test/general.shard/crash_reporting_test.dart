@@ -11,7 +11,6 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/runner.dart' as tools;
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/doctor.dart';
@@ -181,8 +180,7 @@ void main() {
       expect(method, null);
       expect(uri, null);
 
-      final BufferLogger logger = context.get<Logger>();
-      expect(logger.statusText, '');
+      expect(testLogger.statusText, '');
     }, overrides: <Type, Generator>{
       Stdio: () => const _NoStderr(),
     });
@@ -260,8 +258,7 @@ Future<void> verifyCrashReportSent(RequestInfo crashInfo, {
   expect(crashInfo.fields['error_message'], 'Bad state: Test bad state error');
   expect(crashInfo.fields['comments'], 'crash');
 
-  final BufferLogger logger = context.get<Logger>();
-  expect(logger.statusText, 'Sending crash report to Google.\n'
+  expect(testLogger.statusText, 'Sending crash report to Google.\n'
       'Crash report sent (report ID: test-report-id)\n');
 
   // Verify that we've written the crash report to disk.
@@ -295,11 +292,11 @@ class MockCrashReportSender extends MockClient {
         })
         .where((List<String> pair) => pair != null),
       key: (dynamic key) {
-        final List<String> pair = key;
+        final List<String> pair = key as List<String>;
         return pair[0];
       },
       value: (dynamic value) {
-        final List<String> pair = value;
+        final List<String> pair = value as List<String>;
         return pair[1];
       },
     );

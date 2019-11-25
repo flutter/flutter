@@ -5,7 +5,7 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
-import 'package:test_api/backend.dart';
+import 'package:test_api/backend.dart'; // ignore: deprecated_member_use
 import 'package:test_core/src/executable.dart' as test; // ignore: implementation_imports
 import 'package:test_core/src/runner/hack_register_platform.dart' as hack; // ignore: implementation_imports
 

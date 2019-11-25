@@ -76,7 +76,7 @@ class _DriverBinding extends BindingBase with ServicesBinding, SchedulerBinding,
 ///
 /// `silenceErrors` will prevent exceptions from being logged. This is useful
 /// for tests where exceptions are expected. Defaults to false. Any errors
-/// will still be returned in the `response` field of the result json along
+/// will still be returned in the `response` field of the result JSON along
 /// with an `isError` boolean.
 void enableFlutterDriverExtension({ DataHandler handler, bool silenceErrors = false }) {
   assert(WidgetsBinding.instance == null);
@@ -232,7 +232,10 @@ class FlutterDriverExtension {
   }
 
   // This can be used to wait for the first frame being rasterized during app launch.
-  @Deprecated('This method has been deprecated in favor of _waitForCondition.')
+  @Deprecated(
+    'This method has been deprecated in favor of _waitForCondition. '
+    'This feature was deprecated after v1.9.3.'
+  )
   Future<Result> _waitUntilFirstFrameRasterized(Command command) async {
     await WidgetsBinding.instance.waitUntilFirstFrameRasterized;
     return null;
@@ -390,7 +393,10 @@ class FlutterDriverExtension {
     return null;
   }
 
-  @Deprecated('This method has been deprecated in favor of _waitForCondition.')
+  @Deprecated(
+    'This method has been deprecated in favor of _waitForCondition. '
+    'This feature was deprecated after v1.9.3.'
+  )
   Future<Result> _waitUntilNoTransientCallbacks(Command command) async {
     if (SchedulerBinding.instance.transientCallbackCount != 0)
       await _waitUntilFrame(() => SchedulerBinding.instance.transientCallbackCount == 0);
@@ -416,7 +422,10 @@ class FlutterDriverExtension {
   /// test author to use some other method to avoid flakiness.
   ///
   /// This method has been deprecated in favor of [_waitForCondition].
-  @Deprecated('This method has been deprecated in favor of _waitForCondition.')
+  @Deprecated(
+    'This method has been deprecated in favor of _waitForCondition. '
+    'This feature was deprecated after v1.9.3.'
+  )
   Future<Result> _waitUntilNoPendingFrame(Command command) async {
     await _waitUntilFrame(() {
       return SchedulerBinding.instance.transientCallbackCount == 0

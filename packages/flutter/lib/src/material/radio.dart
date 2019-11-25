@@ -187,7 +187,6 @@ class Radio<T> extends StatefulWidget {
 class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin {
   bool get enabled => widget.onChanged != null;
   Map<LocalKey, ActionFactory> _actionMap;
-  bool _showHighlight = false;
 
   @override
   void initState() {
@@ -196,8 +195,6 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin {
       SelectAction.key: _createAction,
       if (!kIsWeb) ActivateAction.key: _createAction,
     };
-    _updateHighlightMode(FocusManager.instance.highlightMode);
-    FocusManager.instance.addHighlightModeListener(_handleFocusHighlightModeChange);
   }
 
   void _actionHandler(FocusNode node, Intent intent){
@@ -215,27 +212,19 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin {
     );
   }
 
-  void _updateHighlightMode(FocusHighlightMode mode) {
-    switch (FocusManager.instance.highlightMode) {
-      case FocusHighlightMode.touch:
-        _showHighlight = false;
-        break;
-      case FocusHighlightMode.traditional:
-        _showHighlight = true;
-        break;
+  bool _focused = false;
+  void _handleHighlightChanged(bool focused) {
+    if (_focused != focused) {
+      setState(() { _focused = focused; });
     }
   }
 
-  void _handleFocusHighlightModeChange(FocusHighlightMode mode) {
-    if (!mounted) {
-      return;
+  bool _hovering = false;
+  void _handleHoverChanged(bool hovering) {
+    if (_hovering != hovering) {
+      setState(() { _hovering = hovering; });
     }
-    setState(() { _updateHighlightMode(mode); });
   }
-
-  bool hovering = false;
-  void _handleMouseEnter(PointerEnterEvent event) => setState(() { hovering = true; });
-  void _handleMouseExit(PointerExitEvent event) => setState(() { hovering = false; });
 
   Color _getInactiveColor(ThemeData themeData) {
     return enabled ? themeData.unselectedWidgetColor : themeData.disabledColor;
@@ -260,33 +249,28 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin {
         break;
     }
     final BoxConstraints additionalConstraints = BoxConstraints.tight(size);
-    return MouseRegion(
-      onEnter: enabled ? _handleMouseEnter : null,
-      onExit: enabled ? _handleMouseExit : null,
-      child: Actions(
-        actions: _actionMap,
-        child: Focus(
-          focusNode: widget.focusNode,
-          autofocus: widget.autofocus,
-          canRequestFocus: enabled,
-          debugLabel: '${describeIdentity(widget)}(${widget.value})',
-          child: Builder(
-            builder: (BuildContext context) {
-              return _RadioRenderObjectWidget(
-                selected: widget.value == widget.groupValue,
-                activeColor: widget.activeColor ?? themeData.toggleableActiveColor,
-                inactiveColor: _getInactiveColor(themeData),
-                focusColor: widget.focusColor ?? themeData.focusColor,
-                hoverColor: widget.hoverColor ?? themeData.hoverColor,
-                onChanged: enabled ? _handleChanged : null,
-                additionalConstraints: additionalConstraints,
-                vsync: this,
-                hasFocus: enabled && _showHighlight && Focus.of(context).hasFocus,
-                hovering: enabled && _showHighlight && hovering,
-              );
-            },
-          ),
-        ),
+    return FocusableActionDetector(
+      actions: _actionMap,
+      focusNode: widget.focusNode,
+      autofocus: widget.autofocus,
+      enabled: enabled,
+      onShowFocusHighlight: _handleHighlightChanged,
+      onShowHoverHighlight: _handleHoverChanged,
+      child: Builder(
+        builder: (BuildContext context) {
+          return _RadioRenderObjectWidget(
+            selected: widget.value == widget.groupValue,
+            activeColor: widget.activeColor ?? themeData.toggleableActiveColor,
+            inactiveColor: _getInactiveColor(themeData),
+            focusColor: widget.focusColor ?? themeData.focusColor,
+            hoverColor: widget.hoverColor ?? themeData.hoverColor,
+            onChanged: enabled ? _handleChanged : null,
+            additionalConstraints: additionalConstraints,
+            vsync: this,
+            hasFocus: _focused,
+            hovering: _hovering,
+          );
+        },
       ),
     );
   }

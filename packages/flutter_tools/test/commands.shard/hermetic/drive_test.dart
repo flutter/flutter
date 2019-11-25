@@ -485,7 +485,7 @@ void main() {
           platformArgs: anyNamed('platformArgs'),
           prebuiltApplication: anyNamed('prebuiltApplication'),
         )).thenAnswer((Invocation invocation) async {
-          debuggingOptions = invocation.namedArguments[#debuggingOptions];
+          debuggingOptions = invocation.namedArguments[#debuggingOptions] as DebuggingOptions;
           return mockLaunchResult;
         });
         when(mockDevice.isAppInstalled(any))

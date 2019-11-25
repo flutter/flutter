@@ -190,7 +190,7 @@ class CupertinoIcons {
   /// A 25% charged battery.
   static const IconData battery_25_percent = IconData(0xf115, fontFamily: iconFont, fontPackage: iconFontPackage);
 
-  /// The bluetooth logo.
+  /// The Bluetooth logo.
   static const IconData bluetooth = IconData(0xf116, fontFamily: iconFont, fontPackage: iconFontPackage);
 
   /// A restart arrow, pointing downwards.
