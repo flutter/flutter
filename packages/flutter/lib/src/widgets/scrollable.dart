@@ -84,6 +84,7 @@ class Scrollable extends StatefulWidget {
     this.excludeFromSemantics = false,
     this.semanticChildCount,
     this.dragStartBehavior = DragStartBehavior.start,
+    this.semanticsConfigurationOverride,
   }) : assert(axisDirection != null),
        assert(dragStartBehavior != null),
        assert(viewportBuilder != null),
@@ -210,6 +211,9 @@ class Scrollable extends StatefulWidget {
   ///
   /// Determined by the [axisDirection].
   Axis get axis => axisDirectionToAxis(axisDirection);
+
+  // TODO(darrenaustin): document
+  final SemanticsConfigurationOverride semanticsConfigurationOverride;
 
   @override
   ScrollableState createState() => ScrollableState();
@@ -588,6 +592,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
           gestures: _gestureRecognizers,
           behavior: HitTestBehavior.opaque,
           excludeFromSemantics: widget.excludeFromSemantics,
+          semanticsConfigurationOverride: widget.semanticsConfigurationOverride,
           child: Semantics(
             explicitChildNodes: !widget.excludeFromSemantics,
             child: IgnorePointer(

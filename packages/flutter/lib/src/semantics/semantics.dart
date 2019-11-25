@@ -3947,6 +3947,9 @@ class SemanticsConfiguration {
   }
 }
 
+// TODO(darrenaustin):  document
+typedef void SemanticsConfigurationOverride(SemanticsConfiguration config);
+
 /// Used by [debugDumpSemanticsTree] to specify the order in which child nodes
 /// are printed.
 enum DebugSemanticsDumpOrder {

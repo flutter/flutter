@@ -3331,6 +3331,7 @@ class RenderSemanticsGestureHandler extends RenderProxyBox {
     GestureDragUpdateCallback onHorizontalDragUpdate,
     GestureDragUpdateCallback onVerticalDragUpdate,
     this.scrollFactor = 0.8,
+    this.semanticsConfigurationOverride,
   }) : assert(scrollFactor != null),
        _onTap = onTap,
        _onLongPress = onLongPress,
@@ -3415,6 +3416,9 @@ class RenderSemanticsGestureHandler extends RenderProxyBox {
   /// leftwards drag.
   double scrollFactor;
 
+  // TODO(darrenaustin): document
+  final SemanticsConfigurationOverride semanticsConfigurationOverride;
+
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
@@ -3435,6 +3439,7 @@ class RenderSemanticsGestureHandler extends RenderProxyBox {
       if (_isValidAction(SemanticsAction.scrollDown))
         config.onScrollDown = _performSemanticScrollDown;
     }
+    semanticsConfigurationOverride?.call(config);
   }
 
   bool _isValidAction(SemanticsAction action) {

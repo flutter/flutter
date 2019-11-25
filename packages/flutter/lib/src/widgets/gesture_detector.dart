@@ -802,6 +802,7 @@ class RawGestureDetector extends StatefulWidget {
     this.behavior,
     this.excludeFromSemantics = false,
     this.semantics,
+    this.semanticsConfigurationOverride,
   }) : assert(gestures != null),
        assert(excludeFromSemantics != null),
        super(key: key);
@@ -898,6 +899,9 @@ class RawGestureDetector extends StatefulWidget {
   /// ```
   /// {@end-tool}
   final SemanticsGestureDelegate semantics;
+
+  // TODO(darrenaustin): document
+  final SemanticsConfigurationOverride semanticsConfigurationOverride;
 
   @override
   RawGestureDetectorState createState() => RawGestureDetectorState();
@@ -1041,6 +1045,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
       result = _GestureSemantics(
         child: result,
         assignSemantics: _updateSemanticsForRenderObject,
+        semanticsOverrideCallback: widget.semanticsConfigurationOverride,
       );
     return result;
   }
@@ -1070,14 +1075,18 @@ class _GestureSemantics extends SingleChildRenderObjectWidget {
     Key key,
     Widget child,
     @required this.assignSemantics,
+    this.semanticsOverrideCallback,
   }) : assert(assignSemantics != null),
        super(key: key, child: child);
 
   final _AssignSemantics assignSemantics;
+  final SemanticsConfigurationOverride semanticsOverrideCallback;
 
   @override
   RenderSemanticsGestureHandler createRenderObject(BuildContext context) {
-    final RenderSemanticsGestureHandler renderObject = RenderSemanticsGestureHandler();
+    final RenderSemanticsGestureHandler renderObject = RenderSemanticsGestureHandler(
+      semanticsConfigurationOverride: semanticsOverrideCallback
+    );
     assignSemantics(renderObject);
     return renderObject;
   }

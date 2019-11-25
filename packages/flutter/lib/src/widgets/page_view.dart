@@ -728,6 +728,41 @@ class _PageViewState extends State<PageView> {
     return null;
   }
 
+  void _overrideSemanticsConfig(SemanticsConfiguration config) {
+    if (config.onScrollLeft != null) {
+      config.onScrollLeft = _performSemanticsScrollLeft;
+    }
+    if (config.onScrollRight != null) {
+      config.onScrollRight = _performSemanticsScrollRight;
+    }
+    if (config.onScrollUp != null) {
+      config.onScrollUp = _performSemanticsScrollUp;
+    }
+    if (config.onScrollDown != null) {
+      config.onScrollDown = _performSemanticsScrollDown;
+    }
+  }
+
+  void _performSemanticsScrollLeft() {
+    assert(widget.scrollDirection == Axis.horizontal);
+    widget.controller.jumpToPage(widget.controller.page.round() + 1);
+  }
+
+  void _performSemanticsScrollRight() {
+    assert(widget.scrollDirection == Axis.horizontal);
+    widget.controller.jumpToPage(widget.controller.page.round() - 1);
+  }
+
+  void _performSemanticsScrollUp() {
+    assert(widget.scrollDirection == Axis.vertical);
+    widget.controller.jumpToPage(widget.controller.page.round() + 1);
+  }
+
+  void _performSemanticsScrollDown() {
+    assert(widget.scrollDirection == Axis.vertical);
+    widget.controller.jumpToPage(widget.controller.page.round() - 1);
+  }
+
   @override
   Widget build(BuildContext context) {
     final AxisDirection axisDirection = _getDirection(context);
@@ -752,6 +787,7 @@ class _PageViewState extends State<PageView> {
         axisDirection: axisDirection,
         controller: widget.controller,
         physics: physics,
+        semanticsConfigurationOverride: _overrideSemanticsConfig,
         viewportBuilder: (BuildContext context, ViewportOffset position) {
           return Viewport(
             cacheExtent: 0.0,
