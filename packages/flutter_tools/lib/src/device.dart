@@ -507,7 +507,7 @@ class DebuggingOptions {
     this.hostname,
     this.port,
     this.vmserviceOutFile,
-    this.fastStart,
+    this.fastStart = false,
    }) : debuggingEnabled = true;
 
   DebuggingOptions.disabled(this.buildInfo, { this.initializePlatform = true, this.port, this.hostname, this.cacheSkSL = false, })

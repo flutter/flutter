@@ -297,6 +297,9 @@ class RunCommand extends RunCommandBase {
     if (deviceManager.hasSpecifiedAllDevices && runningWithPrebuiltApplication) {
       throwToolExit('Using -d all with --use-application-binary is not supported');
     }
+    if (boolArg('fast-start') && runningWithPrebuiltApplication) {
+      throwToolExit('--fast-start is not supported with --use-application-binary');
+    }
   }
 
   DebuggingOptions _createDebuggingOptions() {
