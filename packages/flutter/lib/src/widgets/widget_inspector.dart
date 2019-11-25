@@ -2966,9 +2966,8 @@ class InspectorSerializationDelegate implements DiagnosticsSerializationDelegate
   ///     ),
   ///  );
   /// }
-  final Map<String,
-      Object> Function(DiagnosticsNode, InspectorSerializationDelegate) addAdditionalPropertiesCallback;
-  
+  final Map<String, Object> Function(DiagnosticsNode, InspectorSerializationDelegate) addAdditionalPropertiesCallback;
+
   final List<DiagnosticsNode> _nodesCreatedByLocalProject = <DiagnosticsNode>[];
 
   /// Whether the Inspector is interactive or not

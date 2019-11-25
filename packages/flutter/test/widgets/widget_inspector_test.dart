@@ -2650,7 +2650,6 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       final Map<String, dynamic> renderObjectJson = json['renderObject'];
       expect(renderObjectJson['description'], startsWith('RenderFlex'));
     });
-
   }
 }
 
