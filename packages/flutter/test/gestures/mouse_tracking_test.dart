@@ -608,6 +608,7 @@ void main() {
     });
 
     final ui.PointerDataPacket packet = ui.PointerDataPacket(data: <ui.PointerData>[
+      _pointerData(PointerChange.add, const Offset(0.0, 101.0)),
       _pointerData(PointerChange.hover, const Offset(1.0, 101.0)),
     ]);
 
