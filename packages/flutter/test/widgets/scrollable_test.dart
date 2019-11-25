@@ -36,7 +36,9 @@ Future<void> pumpTest(
 
 const double dragOffset = 200.0;
 
-const LogicalKeyboardKey modifierKey = (!kIsWeb && Platform.isMacOS)
+// TODO(gspencergoog): Change this to use TargetPlatform.macOS once that is available.
+// https://github.com/flutter/flutter/issues/31366
+final LogicalKeyboardKey modifierKey = (!kIsWeb && Platform.isMacOS)
     ? LogicalKeyboardKey.metaLeft
     : LogicalKeyboardKey.controlLeft;
 
@@ -277,7 +279,7 @@ void main() {
     expect(getScrollOffset(tester), 20.0);
   });
 
-  testWidgets('Vertical scrollables are scrolled when activated via keyboard.', (WidgetTester tester) async {
+  testWidgets("Keyboard scrolling doesn't happen if scroll physics are set to NeverScrollableScrollPhysics", (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
     final FocusNode focusNode = FocusNode(debugLabel: 'SizedBox');
     await tester.pumpWidget(
@@ -288,14 +290,17 @@ void main() {
         home: CustomScrollView(
           controller: controller,
           physics: const NeverScrollableScrollPhysics(),
-          slivers: <Widget>[
-            SliverToBoxAdapter(
-              child: Focus(
-                focusNode: focusNode,
-                child: const SizedBox(height: 2000.0),
-              ),
-            ),
-          ],
+          slivers: List<Widget>.generate(
+            20,
+            (int index) {
+              return SliverToBoxAdapter(
+                child: Focus(
+                  focusNode: focusNode,
+                  child: SizedBox(key: ValueKey<String>('Box $index'), height: 50.0),
+                ),
+              );
+            },
+          ),
         ),
       ),
     );
@@ -303,22 +308,78 @@ void main() {
     focusNode.requestFocus();
     await tester.pumpAndSettle();
     expect(controller.position.pixels, equals(0.0));
+    expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 50.0)));
     await tester.sendKeyDownEvent(modifierKey);
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     await tester.sendKeyUpEvent(modifierKey);
     await tester.pumpAndSettle();
-    expect(controller.position.pixels, equals(50.0));
+    expect(controller.position.pixels, equals(0.0));
+    expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 50.0)));
     await tester.sendKeyDownEvent(modifierKey);
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
     await tester.sendKeyUpEvent(modifierKey);
     await tester.pumpAndSettle();
     expect(controller.position.pixels, equals(0.0));
+    expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 50.0)));
     await tester.sendKeyEvent(LogicalKeyboardKey.pageDown);
     await tester.pumpAndSettle();
-    expect(controller.position.pixels, equals(480.0));
+    expect(controller.position.pixels, equals(0.0));
+    expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 50.0)));
     await tester.sendKeyEvent(LogicalKeyboardKey.pageUp);
     await tester.pumpAndSettle();
     expect(controller.position.pixels, equals(0.0));
+    expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 50.0)));
+
+    // TODO(gspencergoog): Once we can test against TargetPlatform.macOS instead
+    // of Platform.isMacOS, don't skip this on web anymore.
+    // https://github.com/flutter/flutter/issues/31366
+  }, skip: kIsWeb);
+
+  testWidgets('Vertical scrollables are scrolled when activated via keyboard.', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    final FocusNode focusNode = FocusNode(debugLabel: 'SizedBox');
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          platform: TargetPlatform.fuchsia,
+        ),
+        home: CustomScrollView(
+          controller: controller,
+          slivers: List<Widget>.generate(
+            20,
+            (int index) {
+              return SliverToBoxAdapter(
+                child: Focus(
+                  focusNode: focusNode,
+                  child: SizedBox(key: ValueKey<String>('Box $index'), height: 50.0),
+                ),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(controller.position.pixels, equals(0.0));
+    expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 50.0)));
+    await tester.sendKeyDownEvent(modifierKey);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.sendKeyUpEvent(modifierKey);
+    await tester.pumpAndSettle();
+    expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, -50.0, 800.0, 0.0)));
+    await tester.sendKeyDownEvent(modifierKey);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.sendKeyUpEvent(modifierKey);
+    await tester.pumpAndSettle();
+    expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 50.0)));
+    await tester.sendKeyEvent(LogicalKeyboardKey.pageDown);
+    await tester.pumpAndSettle();
+    expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, -400.0, 800.0, -350.0)));
+    await tester.sendKeyEvent(LogicalKeyboardKey.pageUp);
+    await tester.pumpAndSettle();
+    expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 50.0)));
 
     // TODO(gspencergoog): Once we can test against TargetPlatform.macOS instead
     // of Platform.isMacOS, don't skip this on web anymore.
@@ -336,15 +397,17 @@ void main() {
         home: CustomScrollView(
           controller: controller,
           scrollDirection: Axis.horizontal,
-          physics: const NeverScrollableScrollPhysics(),
-          slivers: <Widget>[
-            SliverToBoxAdapter(
-              child: Focus(
-                focusNode: focusNode,
-                child: const SizedBox(width: 2000.0),
-              ),
-            ),
-          ],
+          slivers: List<Widget>.generate(
+            20,
+            (int index) {
+              return SliverToBoxAdapter(
+                child: Focus(
+                  focusNode: focusNode,
+                  child: SizedBox(key: ValueKey<String>('Box $index'), width: 50.0),
+                ),
+              );
+            },
+          ),
         ),
       ),
     );
@@ -352,16 +415,16 @@ void main() {
     focusNode.requestFocus();
     await tester.pumpAndSettle();
     expect(controller.position.pixels, equals(0.0));
+    expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, 0.0, 50.0, 600.0)));
     await tester.sendKeyDownEvent(modifierKey);
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
     await tester.sendKeyUpEvent(modifierKey);
     await tester.pumpAndSettle();
-    expect(controller.position.pixels, equals(50.0));
+    expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(-50.0, 0.0, 0.0, 600.0)));
     await tester.sendKeyDownEvent(modifierKey);
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
     await tester.sendKeyUpEvent(modifierKey);
     await tester.pumpAndSettle();
-    expect(controller.position.pixels, equals(0.0));
 
     // TODO(gspencergoog): Once we can test against TargetPlatform.macOS instead
     // of Platform.isMacOS, don't skip this on web anymore.
@@ -377,17 +440,19 @@ void main() {
           platform: TargetPlatform.fuchsia,
         ),
         home: CustomScrollView(
-          reverse: true,
           controller: controller,
-          physics: const NeverScrollableScrollPhysics(),
-          slivers: <Widget>[
-            SliverToBoxAdapter(
-              child: Focus(
-                focusNode: focusNode,
-                child: const SizedBox(height: 2000.0),
-              ),
-            ),
-          ],
+          reverse: true,
+          slivers: List<Widget>.generate(
+            20,
+            (int index) {
+              return SliverToBoxAdapter(
+                child: Focus(
+                  focusNode: focusNode,
+                  child: SizedBox(key: ValueKey<String>('Box $index'), height: 50.0),
+                ),
+              );
+            },
+          ),
         ),
       ),
     );
@@ -395,22 +460,23 @@ void main() {
     focusNode.requestFocus();
     await tester.pumpAndSettle();
     expect(controller.position.pixels, equals(0.0));
+    expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, 550.0, 800.0, 600.0)));
     await tester.sendKeyDownEvent(modifierKey);
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
     await tester.sendKeyUpEvent(modifierKey);
     await tester.pumpAndSettle();
-    expect(controller.position.pixels, equals(50.0));
+    expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, 600.0, 800.0, 650.0)));
     await tester.sendKeyDownEvent(modifierKey);
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     await tester.sendKeyUpEvent(modifierKey);
     await tester.pumpAndSettle();
-    expect(controller.position.pixels, equals(0.0));
+    expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, 550.0, 800.0, 600.0)));
     await tester.sendKeyEvent(LogicalKeyboardKey.pageUp);
     await tester.pumpAndSettle();
-    expect(controller.position.pixels, equals(480.0));
+    expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, 950.0, 800.0, 1000.0)));
     await tester.sendKeyEvent(LogicalKeyboardKey.pageDown);
     await tester.pumpAndSettle();
-    expect(controller.position.pixels, equals(0.0));
+    expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, 550.0, 800.0, 600.0)));
 
     // TODO(gspencergoog): Once we can test against TargetPlatform.macOS instead
     // of Platform.isMacOS, don't skip this on web anymore.
@@ -426,18 +492,20 @@ void main() {
           platform: TargetPlatform.fuchsia,
         ),
         home: CustomScrollView(
-          reverse: true,
           controller: controller,
           scrollDirection: Axis.horizontal,
-          physics: const NeverScrollableScrollPhysics(),
-          slivers: <Widget>[
-            SliverToBoxAdapter(
-              child: Focus(
-                focusNode: focusNode,
-                child: const SizedBox(width: 2000.0),
-              ),
-            ),
-          ],
+          reverse: true,
+          slivers: List<Widget>.generate(
+            20,
+            (int index) {
+              return SliverToBoxAdapter(
+                child: Focus(
+                  focusNode: focusNode,
+                  child: SizedBox(key: ValueKey<String>('Box $index'), width: 50.0),
+                ),
+              );
+            },
+          ),
         ),
       ),
     );
@@ -445,16 +513,16 @@ void main() {
     focusNode.requestFocus();
     await tester.pumpAndSettle();
     expect(controller.position.pixels, equals(0.0));
+    expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(750.0, 0.0, 800.0, 600.00)));
     await tester.sendKeyDownEvent(modifierKey);
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
     await tester.sendKeyUpEvent(modifierKey);
     await tester.pumpAndSettle();
-    expect(controller.position.pixels, equals(50.0));
+    expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(800.0, 0.0, 850.0, 600.0)));
     await tester.sendKeyDownEvent(modifierKey);
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
     await tester.sendKeyUpEvent(modifierKey);
     await tester.pumpAndSettle();
-    expect(controller.position.pixels, equals(0.0));
 
     // TODO(gspencergoog): Once we can test against TargetPlatform.macOS instead
     // of Platform.isMacOS, don't skip this on web anymore.
@@ -463,7 +531,6 @@ void main() {
 
   testWidgets('Custom scrollables with a center sliver are scrolled when activated via keyboard.', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
-    final FocusNode focusNode = FocusNode(debugLabel: 'SizedBox');
     final List<String> items = List<String>.generate(20, (int index) => 'Item $index');
     await tester.pumpWidget(
       MaterialApp(
@@ -472,14 +539,15 @@ void main() {
         ),
         home: CustomScrollView(
           controller: controller,
-          center: const ValueKey<String>('Item 10'),
+          center: const ValueKey<String>('Center'),
           slivers: items.map<Widget>(
             (String item) {
               return SliverToBoxAdapter(
-                key: ValueKey<String>(item),
+                key: item == 'Item 10' ? const ValueKey<String>('Center') : null,
                 child: Focus(
-                  focusNode: focusNode,
+                  autofocus: item == 'Item 10',
                   child: Container(
+                    key: ValueKey<String>(item),
                     alignment: Alignment.center,
                     height: 100,
                     child: Text(item),
@@ -492,9 +560,9 @@ void main() {
       ),
     );
 
-    focusNode.requestFocus();
     await tester.pumpAndSettle();
     expect(controller.position.pixels, equals(0.0));
+    expect(tester.getRect(find.byKey(const ValueKey<String>('Item 10'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 100.0)));
     for (int i = 0; i < 10; ++i) {
       await tester.sendKeyDownEvent(modifierKey);
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
@@ -503,6 +571,7 @@ void main() {
     }
     // Starts at #10 already, so doesn't work out to 500.0 because it hits bottom.
     expect(controller.position.pixels, equals(400.0));
+    expect(tester.getRect(find.byKey(const ValueKey<String>('Item 10'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, -400.0, 800.0, -300.0)));
     for (int i = 0; i < 10; ++i) {
       await tester.sendKeyDownEvent(modifierKey);
       await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
@@ -511,6 +580,7 @@ void main() {
     }
     // Goes up two past "center" where it started, so negative.
     expect(controller.position.pixels, equals(-100.0));
+    expect(tester.getRect(find.byKey(const ValueKey<String>('Item 10'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, 100.0, 800.0, 200.0)));
 
     // TODO(gspencergoog): Once we can test against TargetPlatform.macOS instead
     // of Platform.isMacOS, don't skip this on web anymore.

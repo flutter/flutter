@@ -811,18 +811,18 @@ enum ScrollIncrementType {
   /// Indicates that the [ScrollIncrementCalculator] should return the scroll
   /// distance it should move when the user requests to scroll by a "line".
   ///
-  /// The distance a "line" scrolls is really refers to what should happen when
-  /// the key binding for "scroll down/up by a line" is triggered. It's up to
-  /// the [ScrollIncrementCalculator] function to decide what that means for a
+  /// The distance a "line" scrolls refers to what should happen when the key
+  /// binding for "scroll down/up by a line" is triggered. It's up to the
+  /// [ScrollIncrementCalculator] function to decide what that means for a
   /// particular scrollable.
   line,
 
   /// Indicates that the [ScrollIncrementCalculator] should return the scroll
   /// distance it should move when the user requests to scroll by a "page".
   ///
-  /// The distance a "page" scrolls is really refers to what should happen when
-  /// the key binding for "scroll down/up by a page" is triggered. It's up to
-  /// the [ScrollIncrementCalculator] function to decide what that means for a
+  /// The distance a "page" scrolls refers to what should happen when the key
+  /// binding for "scroll down/up by a page" is triggered. It's up to the
+  /// [ScrollIncrementCalculator] function to decide what that means for a
   /// particular scrollable.
   page,
 }
@@ -857,8 +857,10 @@ class ScrollIncrementDetails {
 /// specified.
 class ScrollIntent extends Intent {
   /// Creates a const [ScrollIntent] that requests scrolling in the given
-  /// [axis], with the given [type]. If [reversed] is specified, then the scroll
-  /// will happen in the opposite direction from the normal scroll direction.
+  /// [axis], with the given [type].
+  ///
+  /// If [reversed] is specified, then the scroll will happen in the opposite
+  /// direction from the normal scroll direction.
   const ScrollIntent({
     @required this.axis,
     this.reversed = false,
@@ -912,6 +914,7 @@ class ScrollAction extends Action {
     assert(state.position.viewportDimension != null);
     assert(state.position.maxScrollExtent != null);
     assert(state.position.minScrollExtent != null);
+    assert(state.widget.physics.shouldAcceptUserOffset(state.position));
     if (state.widget.incrementCalculator != null) {
       return state.widget.incrementCalculator(
         ScrollIncrementDetails(
@@ -1000,6 +1003,10 @@ class ScrollAction extends Action {
     assert(state.position.maxScrollExtent != null);
     assert(state.position.minScrollExtent != null);
 
+    // Don't do anything if the user isn't allowed to scroll.
+    if (!state.widget.physics.shouldAcceptUserOffset(state.position)) {
+      return;
+    }
     final double increment = _getIncrement(state, intent);
     if (increment == 0.0) {
       return;

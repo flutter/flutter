@@ -1048,44 +1048,37 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.tab): const Intent(PreviousFocusAction.key),
 
     // Directional keyboard traversal. Not available on web.
-    if (!kIsWeb)
+    if (!kIsWeb) ...<LogicalKeySet, Intent>{
       LogicalKeySet(LogicalKeyboardKey.arrowLeft): const DirectionalFocusIntent(TraversalDirection.left),
-    if (!kIsWeb)
       LogicalKeySet(LogicalKeyboardKey.arrowRight): const DirectionalFocusIntent(TraversalDirection.right),
-    if (!kIsWeb)
       LogicalKeySet(LogicalKeyboardKey.arrowDown): const DirectionalFocusIntent(TraversalDirection.down),
-    if (!kIsWeb)
-      LogicalKeySet(LogicalKeyboardKey.arrowUp): const DirectionalFocusIntent(TraversalDirection.up),
+      LogicalKeySet(LogicalKeyboardKey.arrowUp): const DirectionalFocusIntent(TraversalDirection.up)
+    },
 
     // Keyboard scrolling.
     // TODO(gspencergoog): Convert all of the Platform.isMacOS checks to be
     // defaultTargetPlatform == TargetPlatform.macOS, once that exists.
-    if (!kIsWeb && !Platform.isMacOS)
+    // https://github.com/flutter/flutter/issues/31366
+    if (!kIsWeb && !Platform.isMacOS) ...<LogicalKeySet, Intent>{
       LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.arrowUp): const ScrollIntent(axis: Axis.vertical, reversed: true),
-    if (!kIsWeb && !Platform.isMacOS)
       LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.arrowDown): const ScrollIntent(axis: Axis.vertical),
-    if (!kIsWeb && !Platform.isMacOS)
       LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.arrowLeft): const ScrollIntent(axis: Axis.horizontal, reversed: true),
-    if (!kIsWeb && !Platform.isMacOS)
       LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.arrowRight): const ScrollIntent(axis: Axis.horizontal),
-    if (!kIsWeb && Platform.isMacOS)
+    },
+    if (!kIsWeb && Platform.isMacOS) ...<LogicalKeySet, Intent>{
       LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.arrowUp): const ScrollIntent(axis: Axis.vertical, reversed: true),
-    if (!kIsWeb && Platform.isMacOS)
       LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.arrowDown): const ScrollIntent(axis: Axis.vertical, reversed: false),
-    if (!kIsWeb && Platform.isMacOS)
       LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.arrowLeft): const ScrollIntent(axis: Axis.horizontal, reversed: true),
-    if (!kIsWeb && Platform.isMacOS)
       LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.arrowRight): const ScrollIntent(axis: Axis.horizontal, reversed: false),
+    },
 
     // Web scrolling.
-    if (kIsWeb)
+    if (kIsWeb) ...<LogicalKeySet, Intent>{
       LogicalKeySet(LogicalKeyboardKey.arrowUp): const ScrollIntent(axis: Axis.vertical, reversed: true),
-    if (kIsWeb)
       LogicalKeySet(LogicalKeyboardKey.arrowDown): const ScrollIntent(axis: Axis.vertical),
-    if (kIsWeb)
       LogicalKeySet(LogicalKeyboardKey.arrowLeft): const ScrollIntent(axis: Axis.horizontal, reversed: true),
-    if (kIsWeb)
       LogicalKeySet(LogicalKeyboardKey.arrowRight): const ScrollIntent(axis: Axis.horizontal),
+    },
 
     LogicalKeySet(LogicalKeyboardKey.pageUp): const ScrollIntent(axis: Axis.vertical, reversed: true, type: ScrollIncrementType.page),
     LogicalKeySet(LogicalKeyboardKey.pageDown): const ScrollIntent(axis: Axis.vertical, type: ScrollIncrementType.page),
