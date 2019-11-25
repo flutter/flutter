@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -608,25 +608,20 @@ void main() {
       );
     }
 
-    for (TargetPlatform platform in <TargetPlatform>[ TargetPlatform.iOS, TargetPlatform.macOS ]) {
-      value = false;
-      await tester.pumpWidget(buildFrame(platform));
-      expect(find.byType(CupertinoSwitch), findsOneWidget);
+    await tester.pumpWidget(buildFrame(TargetPlatform.iOS));
+    expect(find.byType(CupertinoSwitch), findsOneWidget);
 
-      expect(value, isFalse, reason: 'on ${describeEnum(platform)}');
-      await tester.tap(find.byType(Switch));
-      expect(value, isTrue, reason: 'on ${describeEnum(platform)}');
-    }
+    expect(value, isFalse);
+    await tester.tap(find.byType(Switch));
+    expect(value, isTrue);
 
-    for (TargetPlatform platform in <TargetPlatform>[ TargetPlatform.android, TargetPlatform.fuchsia ]) {
-      value = false;
-      await tester.pumpWidget(buildFrame(platform));
-      await tester.pumpAndSettle(); // Finish the theme change animation.
-      expect(find.byType(CupertinoSwitch), findsNothing);
-      expect(value, isFalse, reason: 'on ${describeEnum(platform)}');
-      await tester.tap(find.byType(Switch));
-      expect(value, isTrue, reason: 'on ${describeEnum(platform)}');
-    }
+    await tester.pumpWidget(buildFrame(TargetPlatform.android));
+    await tester.pumpAndSettle(); // Finish the theme change animation.
+    expect(find.byType(CupertinoSwitch), findsNothing);
+    expect(value, isTrue);
+    await tester.tap(find.byType(Switch));
+    expect(value, isFalse);
+
   });
 
   testWidgets('Switch is focusable and has correct focus color', (WidgetTester tester) async {

@@ -57,8 +57,9 @@ void main() {
     expect(find.text('header'), findsOneWidget);
   });
 
-  testWidgets('Drawer dismiss barrier has label', (WidgetTester tester) async {
+  testWidgets('Drawer dismiss barrier has label on iOS', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
     await tester.pumpWidget(
       const MaterialApp(
         home: Scaffold(
@@ -79,7 +80,8 @@ void main() {
     ));
 
     semantics.dispose();
-  }, targetPlatforms: <TargetPlatform>[ TargetPlatform.iOS,  TargetPlatform.macOS ]);
+    debugDefaultTargetPlatformOverride = null;
+  });
 
   testWidgets('Drawer dismiss barrier has no label on Android', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);

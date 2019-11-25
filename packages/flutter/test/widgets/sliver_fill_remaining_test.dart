@@ -235,6 +235,7 @@ void main() {
 
     // iOS/Similar scroll physics when hasScrollBody: false & fillOverscroll: true behavior
     testWidgets('child without size is sized by extent and overscroll', (WidgetTester tester) async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
       final List<Widget> slivers = <Widget>[
         sliverBox,
         SliverFillRemaining(
@@ -251,9 +252,11 @@ void main() {
       await tester.pump();
       final RenderBox box2 = tester.renderObject<RenderBox>(find.byType(Container).last);
       expect(box2.size.height, greaterThan(450));
-    }, targetPlatforms: <TargetPlatform>[ TargetPlatform.iOS,  TargetPlatform.macOS ]);
+      debugDefaultTargetPlatformOverride = null;
+    });
 
     testWidgets('child with size is overridden and sized by extent and overscroll', (WidgetTester tester) async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
       final GlobalKey key = GlobalKey();
       final List<Widget> slivers = <Widget>[
         sliverBox,
@@ -286,9 +289,10 @@ void main() {
       expect(tester.getBottomLeft(button).dy, equals(600.0));
       expect(tester.getCenter(button).dx, equals(400.0));
       debugDefaultTargetPlatformOverride = null;
-    }, targetPlatforms: <TargetPlatform>[ TargetPlatform.iOS,  TargetPlatform.macOS ]);
+    });
 
     testWidgets('extent is overridden by child size and overscroll if precedingScrollExtent > viewportMainAxisExtent', (WidgetTester tester) async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
       final GlobalKey key = GlobalKey();
       final ScrollController controller = ScrollController();
       final List<Widget> slivers = <Widget>[
@@ -327,6 +331,7 @@ void main() {
       final Finder button = find.byType(RaisedButton);
       expect(tester.getBottomLeft(button).dy, equals(550.0));
       expect(tester.getCenter(button).dx, equals(400.0));
+      debugDefaultTargetPlatformOverride = null;
 
       // Drag for overscroll
       await tester.drag(find.byType(Scrollable), const Offset(0.0, -50.0));
@@ -336,7 +341,8 @@ void main() {
       // Check that the button alignment is still centered in stretched child
       expect(tester.getBottomLeft(button).dy, lessThan(550.0));
       expect(tester.getCenter(button).dx, equals(400.0));
-    }, targetPlatforms: <TargetPlatform>[ TargetPlatform.iOS,  TargetPlatform.macOS ]);
+      debugDefaultTargetPlatformOverride = null;
+    });
 
     // Android/Other scroll physics when hasScrollBody: false, ignores fillOverscroll: true
     testWidgets('child without size is sized by extent, fillOverscroll is ignored', (WidgetTester tester) async {

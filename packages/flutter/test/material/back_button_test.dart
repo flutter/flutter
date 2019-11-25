@@ -66,37 +66,30 @@ void main() {
   });
 
   testWidgets('BackButton icon', (WidgetTester tester) async {
-    final Key androidKey = UniqueKey();
     final Key iOSKey = UniqueKey();
-    final Key macOSKey = UniqueKey();
+    final Key androidKey = UniqueKey();
+
 
     await tester.pumpWidget(
       MaterialApp(
         home: Column(
           children: <Widget>[
             Theme(
-              data: ThemeData(platform: TargetPlatform.android),
-              child: BackButtonIcon(key: androidKey),
-            ),
-            Theme(
               data: ThemeData(platform: TargetPlatform.iOS),
               child: BackButtonIcon(key: iOSKey),
             ),
             Theme(
-              data: ThemeData(platform: TargetPlatform.macOS),
-              child: BackButtonIcon(key: macOSKey),
+              data: ThemeData(platform: TargetPlatform.android),
+              child: BackButtonIcon(key: androidKey),
             ),
           ],
         ),
       ),
     );
 
-    final Icon androidIcon = tester.widget(find.descendant(of: find.byKey(androidKey), matching: find.byType(Icon)));
     final Icon iOSIcon = tester.widget(find.descendant(of: find.byKey(iOSKey), matching: find.byType(Icon)));
-    final Icon macOSIcon = tester.widget(find.descendant(of: find.byKey(macOSKey), matching: find.byType(Icon)));
-    expect(iOSIcon.icon == androidIcon.icon, isFalse);
-    expect(macOSIcon.icon == androidIcon.icon, isFalse);
-    expect(macOSIcon.icon == iOSIcon.icon, isTrue);
+    final Icon androidIcon = tester.widget(find.descendant(of: find.byKey(androidKey), matching: find.byType(Icon)));
+    expect(iOSIcon == androidIcon, false);
   });
 
   testWidgets('BackButton semantics', (WidgetTester tester) async {

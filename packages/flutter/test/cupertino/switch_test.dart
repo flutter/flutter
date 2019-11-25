@@ -40,6 +40,7 @@ void main() {
   });
 
   testWidgets('Switch emits light haptic vibration on tap', (WidgetTester tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
     final Key switchKey = UniqueKey();
     bool value = false;
 
@@ -76,9 +77,11 @@ void main() {
 
     expect(log, hasLength(1));
     expect(log.single, isMethodCall('HapticFeedback.vibrate', arguments: 'HapticFeedbackType.lightImpact'));
-  }, targetPlatforms: <TargetPlatform>[ TargetPlatform.iOS ]);
+    debugDefaultTargetPlatformOverride = null;
+  });
 
   testWidgets('Using other widgets that rebuild the switch will not cause vibrations', (WidgetTester tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
     final Key switchKey = UniqueKey();
     final Key switchKey2 = UniqueKey();
     bool value = false;
@@ -146,9 +149,11 @@ void main() {
 
     expect(log, hasLength(4));
     expect(log[3], isMethodCall('HapticFeedback.vibrate', arguments: 'HapticFeedbackType.lightImpact'));
-  }, targetPlatforms: <TargetPlatform>[ TargetPlatform.iOS ]);
+    debugDefaultTargetPlatformOverride = null;
+  });
 
   testWidgets('Haptic vibration triggers on drag', (WidgetTester tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
     bool value = false;
     final List<MethodCall> log = <MethodCall>[];
 
@@ -183,9 +188,11 @@ void main() {
 
     expect(log, hasLength(1));
     expect(log[0], isMethodCall('HapticFeedback.vibrate', arguments: 'HapticFeedbackType.lightImpact'));
-  }, targetPlatforms: <TargetPlatform>[ TargetPlatform.iOS ]);
+    debugDefaultTargetPlatformOverride = null;
+  });
 
   testWidgets('No haptic vibration triggers from a programmatic value change', (WidgetTester tester) async {
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
     final Key switchKey = UniqueKey();
     bool value = false;
 
@@ -234,7 +241,8 @@ void main() {
     await tester.pump();
 
     expect(log, hasLength(0));
-  }, targetPlatforms: <TargetPlatform>[ TargetPlatform.iOS ]);
+    debugDefaultTargetPlatformOverride = null;
+  });
 
   testWidgets('Switch can drag (LTR)', (WidgetTester tester) async {
     bool value = false;

@@ -152,19 +152,6 @@ void main() {
     await tester.drag(find.byType(SingleChildScrollView), const Offset(0.0, -10.0));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200));
-    expect(find.byType(Scrollbar), paints..rrect());
-    await gesture.up();
-    await tester.pumpAndSettle();
-
-    await tester.pumpWidget(viewWithScroll(TargetPlatform.macOS));
-    await gesture.down(
-      tester.getCenter(find.byType(SingleChildScrollView)),
-    );
-    await gesture.moveBy(const Offset(0.0, -10.0));
-    await tester.drag(find.byType(SingleChildScrollView), const Offset(0.0, -10.0));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 200));
-    expect(find.byType(Scrollbar), paints..rrect());
     expect(find.byType(CupertinoScrollbar), paints..rrect());
   });
 
@@ -187,7 +174,7 @@ void main() {
     }
 
     await tester.pumpWidget(viewWithScroll(TargetPlatform.iOS));
-    TestGesture gesture = await tester.startGesture(
+    final TestGesture gesture = await tester.startGesture(
       tester.getCenter(find.byType(SingleChildScrollView))
     );
     await gesture.moveBy(const Offset(0.0, -10.0));
@@ -195,19 +182,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200));
     expect(find.byType(CupertinoScrollbar), paints..rrect());
-    CupertinoScrollbar scrollbar = find.byType(CupertinoScrollbar).evaluate().first.widget;
-    expect(scrollbar.controller, isNotNull);
-
-    await tester.pumpWidget(viewWithScroll(TargetPlatform.macOS));
-    gesture = await tester.startGesture(
-        tester.getCenter(find.byType(SingleChildScrollView))
-    );
-    await gesture.moveBy(const Offset(0.0, -10.0));
-    await tester.drag(find.byType(SingleChildScrollView), const Offset(0.0, -10.0));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 200));
-    expect(find.byType(CupertinoScrollbar), paints..rrect());
-    scrollbar = find.byType(CupertinoScrollbar).evaluate().first.widget;
+    final CupertinoScrollbar scrollbar = find.byType(CupertinoScrollbar).evaluate().first.widget;
     expect(scrollbar.controller, isNotNull);
   });
 
