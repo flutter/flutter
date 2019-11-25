@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart';
 
 import 'basic.dart';
 import 'framework.dart';
+import 'sliver.dart';
 import 'ticker_provider.dart';
 
 /// Whether to show or hide a child.
@@ -299,7 +300,7 @@ class SliverVisibility extends StatelessWidget {
   const SliverVisibility({
     Key key,
     @required this.sliver,
-    this.replacementSliver, // TODO(Piinks): = const SizedBox.shrink(),
+    this.replacementSliver = const SliverToBoxAdapter(child: SizedBox.shrink()),
     this.visible = true,
     this.maintainState = false,
     this.maintainAnimation = false,
@@ -307,7 +308,6 @@ class SliverVisibility extends StatelessWidget {
     this.maintainSemantics = false,
     this.maintainInteractivity = false,
   }) : assert(sliver != null),
-      assert(replacementSliver != null),
       assert(visible != null),
       assert(maintainState != null),
       assert(maintainAnimation != null),
