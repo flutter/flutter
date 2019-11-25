@@ -425,6 +425,58 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
     });
 
+    testUsingContext('fallbacks to protocol observatory if MDNS failed on iOS', () async {
+      const int devicePort = 499;
+      const int hostPort = 42;
+      final MockDeviceLogReader mockLogReader = MockDeviceLogReader();
+      final MockPortForwarder portForwarder = MockPortForwarder();
+      final MockIOSDevice device = MockIOSDevice();
+      final MockHotRunner mockHotRunner = MockHotRunner();
+      final MockHotRunnerFactory mockHotRunnerFactory = MockHotRunnerFactory();
+      when(device.portForwarder).thenReturn(portForwarder);
+      when(device.getLogReader()).thenAnswer((_) => mockLogReader);
+      when(portForwarder.forward(devicePort, hostPort: anyNamed('hostPort')))
+        .thenAnswer((_) async => hostPort);
+      when(portForwarder.forwardedPorts)
+        .thenReturn(<ForwardedPort>[ForwardedPort(hostPort, devicePort)]);
+      when(portForwarder.unforward(any))
+        .thenAnswer((_) async => null);
+      when(mockHotRunner.attach(appStartedCompleter: anyNamed('appStartedCompleter')))
+        .thenAnswer((_) async => 0);
+      when(mockHotRunnerFactory.build(
+        any,
+        target: anyNamed('target'),
+        debuggingOptions: anyNamed('debuggingOptions'),
+        packagesFilePath: anyNamed('packagesFilePath'),
+        flutterProject: anyNamed('flutterProject'),
+        ipv6: false,
+      )).thenReturn(mockHotRunner);
+      when(mockHotRunner.exited).thenReturn(false);
+      when(mockHotRunner.isWaitingForObservatory).thenReturn(false);
+
+      testDeviceManager.addDevice(device);
+
+      final File foo = fs.file('lib/foo.dart')..createSync();
+
+      // Delete the main.dart file to be sure that attach works without it.
+      fs.file(fs.path.join('lib', 'main.dart')).deleteSync();
+
+      final AttachCommand command = AttachCommand(hotRunnerFactory: mockHotRunnerFactory);
+      await createTestCommandRunner(command).run(<String>['attach', '-t', foo.path, '-v']);
+
+      verify(mockHotRunnerFactory.build(
+        any,
+        target: foo.path,
+        debuggingOptions: anyNamed('debuggingOptions'),
+        packagesFilePath: anyNamed('packagesFilePath'),
+        flutterProject: anyNamed('flutterProject'),
+        ipv6: false,
+      )).called(1);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => testFileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
     group('forwarding to given port', () {
       const int devicePort = 499;
       const int hostPort = 42;
