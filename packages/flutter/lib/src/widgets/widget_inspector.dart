@@ -2898,6 +2898,7 @@ class _SerializationDelegate implements DiagnosticsSerializationDelegate {
     this.subtreeDepth = 1,
     this.includeProperties = false,
     @required this.service,
+    this.addAdditionalPropertiesCallback,
   });
 
   final WidgetInspectorService service;
@@ -2914,6 +2915,8 @@ class _SerializationDelegate implements DiagnosticsSerializationDelegate {
   @override
   final bool expandPropertyValues;
 
+  final Map<String, Object> Function(DiagnosticsNode, _SerializationDelegate) addAdditionalPropertiesCallback;
+  
   final List<DiagnosticsNode> _nodesCreatedByLocalProject = <DiagnosticsNode>[];
 
   bool get interactive => groupName != null;
@@ -2937,6 +2940,9 @@ class _SerializationDelegate implements DiagnosticsSerializationDelegate {
         _nodesCreatedByLocalProject.add(node);
         result['createdByLocalProject'] = true;
       }
+    }
+    if (addAdditionalPropertiesCallback != null) {
+      result.addAll(addAdditionalPropertiesCallback(node, this));
     }
     return result;
   }
@@ -2986,6 +2992,7 @@ class _SerializationDelegate implements DiagnosticsSerializationDelegate {
       subtreeDepth: subtreeDepth ?? this.subtreeDepth,
       includeProperties: includeProperties ?? this.includeProperties,
       service: service,
+      addAdditionalPropertiesCallback: addAdditionalPropertiesCallback,
     );
   }
 }
