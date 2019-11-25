@@ -88,6 +88,7 @@ class Scrollable extends StatefulWidget {
        assert(dragStartBehavior != null),
        assert(viewportBuilder != null),
        assert(excludeFromSemantics != null),
+       assert(semanticChildCount == null || semanticChildCount >= 0),
        super (key: key);
 
   /// The direction in which this widget scrolls.
@@ -643,6 +644,7 @@ class _ScrollSemantics extends SingleChildRenderObjectWidget {
     @required this.semanticChildCount,
     Widget child,
   }) : assert(position != null),
+       assert(semanticChildCount == null || semanticChildCount >= 0),
        super(key: key, child: child);
 
   final ScrollPosition position;
