@@ -11,5 +11,4 @@ analyzer:
 linter:
   rules:
     unawaited_futures: true
-    avoid_as: false # Disabled so we can gradually migrate to no implicit dynamic.
     curly_braces_in_flow_control_structures: true
