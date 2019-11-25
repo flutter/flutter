@@ -135,6 +135,7 @@ public class DummyPluginAClass {
       final String flutterPluginsDependenciesFileContent = flutterPluginsDependenciesFile.readAsStringSync();
       const String kExpectedPluginsDependenciesContent =
         '{'
+          '\"_info\":\"// This is a generated file; do not edit or check into version control.\",'
           '\"dependencyGraph\":['
             '{'
               '\"name\":\"plugin_a\",'
