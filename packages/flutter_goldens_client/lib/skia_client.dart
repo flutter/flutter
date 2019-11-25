@@ -19,6 +19,7 @@ import 'package:process/process.dart';
 const String _kFlutterRootKey = 'FLUTTER_ROOT';
 const String _kGoldctlKey = 'GOLDCTL';
 const String _kServiceAccountKey = 'GOLD_SERVICE_ACCOUNT';
+const String _kTestBrowserKey = 'FLUTTER_TEST_BROWSER';
 
 /// A client for uploading image tests and making baseline requests to the
 /// Flutter Gold Dashboard.
@@ -414,6 +415,8 @@ class SkiaGoldClient {
     return json.encode(
       <String, dynamic>{
         'Platform' : platform.operatingSystem,
+        if (platform.environment[_kTestBrowserKey] != null)
+          'Browser' : platform.environment[_kTestBrowserKey],
       }
     );
   }
@@ -477,6 +480,8 @@ class SkiaGoldDigest {
   bool isValid(Platform platform, String name, String expectation) {
     return imageHash == expectation
       && (paramSet['Platform'] as List<dynamic>).contains(platform.operatingSystem)
+      && (platform.environment[_kTestBrowserKey] == null
+         || paramSet['Browser'] == platform.environment[_kTestBrowserKey])
       && testName == name
       && status == 'positive';
     }

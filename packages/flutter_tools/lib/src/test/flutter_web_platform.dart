@@ -5,6 +5,8 @@
 // ignore_for_file: implementation_imports
 
 import 'dart:async';
+import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:async/async.dart';
 import 'package:http_multi_server/http_multi_server.dart';
@@ -20,6 +22,7 @@ import 'package:test_api/backend.dart'; // ignore: deprecated_member_use
 import 'package:test_api/src/backend/runtime.dart';
 import 'package:test_api/src/backend/suite_platform.dart';
 import 'package:test_api/src/util/stack_trace_mapper.dart';
+import 'package:test_api/test_api.dart' show TestFailure;
 import 'package:test_core/src/runner/configuration.dart';
 import 'package:test_core/src/runner/environment.dart';
 import 'package:test_core/src/runner/platform.dart';
@@ -27,18 +30,31 @@ import 'package:test_core/src/runner/plugin/platform_helpers.dart';
 import 'package:test_core/src/runner/runner_suite.dart';
 import 'package:test_core/src/runner/suite.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart' hide StackTrace;
 
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/io.dart';
+import '../base/process.dart';
+import '../base/process_manager.dart';
+import '../build_info.dart';
 import '../cache.dart';
 import '../convert.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
+import '../project.dart';
 import '../web/chrome.dart';
 
+import 'test_compiler.dart';
+import 'test_config.dart';
+
 class FlutterWebPlatform extends PlatformPlugin {
-  FlutterWebPlatform._(this._server, this._config, this._root) {
+  FlutterWebPlatform._(this._server, this._config, this._root, {
+    FlutterProject flutterProject,
+    String shellPath,
+    this.updateGoldens,
+  }) {
     // Look up the location of the testing resources.
     final Map<String, Uri> packageMap = PackageMap(fs.path.join(
       Cache.flutterRoot,
@@ -58,17 +74,27 @@ class FlutterWebPlatform extends PlatformPlugin {
         .add(createStaticHandler(_config.suiteDefaults.precompiledPath,
             serveFilesOutsidePath: true))
         .add(_handleStaticArtifact)
+        .add(_goldenFileHandler)
         .add(_wrapperHandler);
     _server.mount(cascade.handler);
+
+    _testGoldenComparator = _TestGoldenComparator(flutterProject, shellPath);
   }
 
-  static Future<FlutterWebPlatform> start(String root) async {
+  static Future<FlutterWebPlatform> start(String root, {
+    FlutterProject flutterProject,
+    String shellPath,
+    bool updateGoldens = false,
+  }) async {
     final shelf_io.IOServer server =
         shelf_io.IOServer(await HttpMultiServer.loopback(0));
     return FlutterWebPlatform._(
       server,
       Configuration.current,
       root,
+      flutterProject: flutterProject,
+      shellPath: shellPath,
+      updateGoldens: updateGoldens,
     );
   }
 
@@ -162,6 +188,41 @@ class FlutterWebPlatform extends PlatformPlugin {
         testHostDartJs.openRead(),
         headers: <String, String>{'Content-Type': 'text/javascript'},
       );
+    } else {
+      return shelf.Response.notFound('Not Found');
+    }
+  }
+
+  final bool updateGoldens;
+  _TestGoldenComparator _testGoldenComparator;
+
+  Future<shelf.Response> _goldenFileHandler(shelf.Request request) async {
+    if (request.url.path.contains('flutter_goldens')) {
+      final Map<String, Object> body = json.decode(await request.readAsString());
+      final Uri goldenKey = Uri.parse(body['key']);
+      final Uri testUri = Uri.parse(body['testUri']);
+      final num width = body['width'];
+      final num height = body['height'];
+      final Runtime browser = Runtime.chrome;
+      final BrowserManager browserManager = await _browserManagerFor(browser);
+      final ChromeTab chromeTab = await browserManager._browser.chromeConnection.getTab((ChromeTab tab) {
+        return tab.url.contains(browserManager._browser.url);
+      });
+      final WipConnection connection = await chromeTab.connect();
+      final WipResponse response = await connection.sendCommand('Page.captureScreenshot', <String, Object>{
+        // Clip the screenshot to include only the element.
+        'clip': <String, Object>{
+          'x': 0.0,
+          'y': 0.0,
+          'width': width.toDouble(),
+          'height': height.toDouble(),
+          'scale': 1.0,
+        }
+      });
+      final Uint8List bytes = base64.decode(response.result['data']);
+
+      final String errorMessage = await _testGoldenComparator.compareGoldens(testUri, bytes, goldenKey, updateGoldens);
+      return shelf.Response.ok(errorMessage ?? 'true');
     } else {
       return shelf.Response.notFound('Not Found');
     }
@@ -296,6 +357,7 @@ class FlutterWebPlatform extends PlatformPlugin {
       })
       .toList();
     futures.add(_server.close());
+    futures.add(_testGoldenComparator.close());
     await Future.wait<void>(futures);
   });
 }
@@ -701,4 +763,180 @@ class _BrowserEnvironment implements Environment {
 
   @override
   CancelableOperation<dynamic> displayPause() => _manager._displayPause();
+}
+
+/// Helper class to start golden file comparison in a separate process.
+///
+/// Golden file comparator is configured using flutter_test_config.dart and that
+/// file can contain arbitrary Dart code that depends on dart:ui. Thus it has to
+/// be executed in a `flutter_tester` environment. This helper class generates a
+/// Dart file configured with flutter_test_config.dart to perform the comparison
+/// of golden files.
+class _TestGoldenComparator {
+  final FlutterProject flutterProject;
+  final String shellPath;
+  final Directory tempDir;
+  TestCompiler compiler;
+
+  _TestGoldenComparatorProcess _previousComparator;
+  Uri _previousTestUri;
+
+  _TestGoldenComparator(this.flutterProject, this.shellPath)
+      : tempDir = fs.systemTempDirectory.createTempSync('flutter_web_platform.');
+
+  Future<void> close() async {
+    tempDir.deleteSync(recursive: true);
+    compiler?.dispose();
+    await _previousComparator?.close();
+  }
+
+  /// Start golden comparator in a separate process. Start one file per test file
+  /// to reduce the overhead of starting `flutter_tester`.
+  Future<_TestGoldenComparatorProcess> _processForTestFile(Uri testUri) async {
+    if (testUri == _previousTestUri) {
+      return _previousComparator;
+    }
+
+    String bootstrap = _TestGoldenComparatorProcess.generateBootstrap(testUri);
+    Process process = await _startProcess(bootstrap);
+    _previousComparator?.close();
+    _previousComparator = _TestGoldenComparatorProcess(process);
+    _previousTestUri = testUri;
+
+    return _previousComparator;
+  }
+
+  Future<Process> _startProcess(String testBootstrap) async {
+    // Prepare the Dart file that will talk to us and start the test.
+    final File listenerFile = (await tempDir.createTemp('listener')).childFile('listener.dart');
+    await listenerFile.writeAsString(testBootstrap);
+
+    // Lazily create the compiler
+    compiler = compiler ?? TestCompiler(BuildMode.debug, false, flutterProject);
+    String output = await compiler.compile(listenerFile.path);
+    final List<String> command = <String>[
+      shellPath,
+      '--disable-observatory',
+      '--non-interactive',
+      '--packages=${PackageMap.globalPackagesPath}',
+      output,
+    ];
+
+    final Map<String, String> environment = <String, String>{
+      // Chrome is the only supported browser currently.
+      'FLUTTER_TEST_BROWSER': 'chrome',
+    };
+    return processManager.start(command, environment: environment);
+  }
+
+  Future<String> compareGoldens(Uri testUri, Uint8List bytes, Uri goldenKey, bool updateGoldens) async {
+    final imageFile = await (await tempDir.createTemp('image')).childFile('image').writeAsBytes(bytes);
+
+    _TestGoldenComparatorProcess process = await _processForTestFile(testUri);
+    process.sendCommand(imageFile, goldenKey, updateGoldens);
+
+    Map<String, dynamic> result = await process.getResponse();
+
+    if (result == null) {
+      return 'unknown error';
+    } else {
+      return result['success'] ? null : (result['message'] ?? 'does not match');
+    }
+  }
+}
+
+/// Represents a `flutter_tester` process started for golden comparison. Also
+/// handles communication with the child process.
+class _TestGoldenComparatorProcess {
+  _TestGoldenComparatorProcess(this.process) {
+    // Pipe stdout and stderr to printTrace and printError.
+    // Also parse stdout as a stream of JSON objects.
+    streamIterator = StreamIterator(process.stdout
+        .transform<String>(utf8.decoder)
+        .transform<String>(const LineSplitter())
+        .where((line) {
+          printTrace('<<< $line');
+          return line.isNotEmpty && line[0] == '{';
+        })
+        .map((line) => jsonDecode(line))
+        .cast<Map<String, dynamic>>());
+
+    process.stderr
+        .transform<String>(utf8.decoder)
+        .transform<String>(const LineSplitter())
+        .forEach((line) {
+      printError('<<< $line');
+    });
+  }
+
+  final Process process;
+  StreamIterator<Map<String, dynamic>> streamIterator;
+
+  Future<void> close() async {
+    await process.stdin.close();
+    process.kill();
+  }
+
+  void sendCommand(File imageFile, Uri goldenKey, bool updateGoldens) {
+    Object command = jsonEncode({
+      'imageFile': imageFile.path,
+      'key': goldenKey.toString(),
+      'update': updateGoldens,
+    });
+    printTrace('Preparing to send command: $command');
+    process.stdin.writeln(command);
+  }
+
+  Future<Map<String, dynamic>> getResponse() async {
+    bool available = await streamIterator.moveNext();
+    assert(available);
+    return streamIterator.current;
+  }
+
+  static String generateBootstrap(Uri testUri) {
+      File testConfigFile = findTestConfigFile(fs.file(testUri));
+      // Generate comparator process for the file.
+      return '''
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:flutter_test/flutter_test.dart';
+
+${testConfigFile != null ? "import '${Uri.file(testConfigFile.path)}' as test_config;" : ""}
+
+void main() async {
+  LocalFileComparator comparator = LocalFileComparator(Uri.parse('${testUri}'));
+  goldenFileComparator = comparator;
+
+  ${testConfigFile != null ? 'test_config.main(() async {' : ''}
+  final commands = stdin
+    .transform<String>(utf8.decoder)
+    .transform<String>(const LineSplitter())
+    .map<Object>((s) => jsonDecode(s));
+  await for (Object command in commands) {
+    if (command is Map<String, dynamic>) {
+    File imageFile = File(command['imageFile']);
+    Uri goldenKey = Uri.parse(command['key']);
+    bool update = command['update'];
+
+    final bytes = await File(imageFile.path).readAsBytes();
+    if (update) {
+      await goldenFileComparator.update(goldenKey, bytes);
+      print(jsonEncode({'success': true}));
+    } else {
+      try {
+        bool success = await goldenFileComparator.compare(bytes, goldenKey);
+        print(jsonEncode({'success': success}));
+      } on TestFailure catch (ex) {
+        print(jsonEncode({'success': false, 'message': ex.message}));
+      }
+    }
+    } else {
+      print('object type is not right');
+    }
+  }
+  ${testConfigFile != null ? '});' : ''}
+}
+      ''';
+  }
 }

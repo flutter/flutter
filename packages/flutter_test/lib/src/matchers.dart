@@ -26,6 +26,8 @@ import 'finders.dart';
 import 'goldens.dart';
 import 'widget_tester.dart' show WidgetTester;
 
+import '_matchers_io.dart' if (dart.library.html) '_matchers_web.dart' show captureImage, MatchesGoldenFile;
+
 /// Asserts that the [Finder] matches no widgets in the widget tree.
 ///
 /// ## Sample code
@@ -366,9 +368,9 @@ Matcher coversSameAreaAs(Path expectedPath, { @required Rect areaToCompare, int 
 ///    may swap out the backend for this matcher.
 AsyncMatcher matchesGoldenFile(dynamic key, {int version}) {
   if (key is Uri) {
-    return _MatchesGoldenFile(key, version);
+    return MatchesGoldenFile(key, version);
   } else if (key is String) {
-    return _MatchesGoldenFile.forStringPath(key, version);
+    return MatchesGoldenFile.forStringPath(key, version);
   }
   throw ArgumentError('Unexpected type for golden file: ${key.runtimeType}');
 }
@@ -1681,7 +1683,7 @@ class _MatchesReferenceImage extends AsyncMatcher {
       } else if (elements.length > 1) {
         return 'matched too many widgets';
       }
-      imageFuture = _captureImage(elements.single);
+      imageFuture = captureImage(elements.single);
     }
 
     final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
@@ -1709,60 +1711,6 @@ class _MatchesReferenceImage extends AsyncMatcher {
   @override
   Description describe(Description description) {
     return description.add('rasterized image matches that of a $referenceImage reference image');
-  }
-}
-
-class _MatchesGoldenFile extends AsyncMatcher {
-  const _MatchesGoldenFile(this.key, this.version);
-
-  _MatchesGoldenFile.forStringPath(String path, this.version) : key = Uri.parse(path);
-
-  final Uri key;
-  final int version;
-
-  @override
-  Future<String> matchAsync(dynamic item) async {
-    Future<ui.Image> imageFuture;
-    if (item is Future<ui.Image>) {
-      imageFuture = item;
-    } else if (item is ui.Image) {
-      imageFuture = Future<ui.Image>.value(item);
-    } else {
-      final Finder finder = item as Finder;
-      final Iterable<Element> elements = finder.evaluate();
-      if (elements.isEmpty) {
-        return 'could not be rendered because no widget was found';
-      } else if (elements.length > 1) {
-        return 'matched too many widgets';
-      }
-      imageFuture = _captureImage(elements.single);
-    }
-
-    final Uri testNameUri = goldenFileComparator.getTestUri(key, version);
-
-    final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
-    return binding.runAsync<String>(() async {
-      final ui.Image image = await imageFuture;
-      final ByteData bytes = await image.toByteData(format: ui.ImageByteFormat.png);
-      if (bytes == null)
-        return 'could not encode screenshot.';
-      if (autoUpdateGoldenFiles) {
-        await goldenFileComparator.update(testNameUri, bytes.buffer.asUint8List());
-        return null;
-      }
-      try {
-        final bool success = await goldenFileComparator.compare(bytes.buffer.asUint8List(), testNameUri);
-        return success ? null : 'does not match';
-      } on TestFailure catch (ex) {
-        return ex.message;
-      }
-    }, additionalTime: const Duration(minutes: 1));
-  }
-
-  @override
-  Description describe(Description description) {
-    final Uri testNameUri = goldenFileComparator.getTestUri(key, version);
-    return description.add('one widget whose rasterized image matches golden image "$testNameUri"');
   }
 }
 
