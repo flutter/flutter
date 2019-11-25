@@ -619,7 +619,7 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
     assert(widget.onShowHoverHighlight != null);
     if (!_hovering) {
       _mayTriggerCallback(task: () {
-        setState(() { _hovering = true; });
+        _hovering = true;
       });
     }
   }
@@ -628,7 +628,7 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
     assert(widget.onShowHoverHighlight != null);
     if (_hovering) {
       _mayTriggerCallback(task: () {
-        setState(() { _hovering = false; });
+        _hovering = false;
       });
     }
   }
@@ -637,35 +637,34 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
   void _handleFocusChange(bool focused) {
     if (_focused != focused) {
       _mayTriggerCallback(task: () {
-        setState(() {
-          _focused = focused;
-          widget.onFocusChange?.call(_focused);
-        });
+        _focused = focused;
       });
+      widget.onFocusChange?.call(_focused);
     }
   }
 
-  bool _shouldShowHoverHighlight({@required FocusableActionDetector target}) {
-    return _hovering && target.enabled && _canShowHighlight;
-  }
-  bool _shouldShowFocusHighlight({@required FocusableActionDetector target}) {
-    return _focused && target.enabled && _canShowHighlight;
-  }
-
   // Record old states, do `task` if not null, then compare old states with the
-  // new state, and trigger callbacks if necessary.
+  // new states, and trigger callbacks if necessary.
   //
-  // The old states are collected on `oldWidget` if it is provided, or the
-  // current widget (before doing `task`) otherwise.
+  // The old states are collected from `oldWidget` if it is provided, or the
+  // current widget (before doing `task`) otherwise. The new states are always
+  // collected from the current widget.
   void _mayTriggerCallback({VoidCallback task, FocusableActionDetector oldWidget}) {
+    bool shouldShowHoverHighlight(FocusableActionDetector target) {
+      return _hovering && target.enabled && _canShowHighlight;
+    }
+    bool shouldShowFocusHighlight(FocusableActionDetector target) {
+      return _focused && target.enabled && _canShowHighlight;
+    }
+
     assert(SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks);
     final FocusableActionDetector oldTarget = oldWidget ?? widget;
-    final bool didShowHoverHighlight = _shouldShowHoverHighlight(target: oldTarget);
-    final bool didShowFocusHighlight = _shouldShowFocusHighlight(target: oldTarget);
+    final bool didShowHoverHighlight = shouldShowHoverHighlight(oldTarget);
+    final bool didShowFocusHighlight = shouldShowFocusHighlight(oldTarget);
     if (task != null)
       task();
-    final bool doShowHoverHighlight = _shouldShowHoverHighlight(target: widget);
-    final bool doShowFocusHighlight = _shouldShowFocusHighlight(target: widget);
+    final bool doShowHoverHighlight = shouldShowHoverHighlight(widget);
+    final bool doShowFocusHighlight = shouldShowFocusHighlight(widget);
     if (didShowFocusHighlight != doShowFocusHighlight)
       widget.onShowFocusHighlight?.call(doShowFocusHighlight);
     if (didShowHoverHighlight != doShowHoverHighlight)
