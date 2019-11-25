@@ -125,12 +125,10 @@ void main() {
 
     // Pointer enters the annotation.
     ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
-      _pointerData(PointerChange.add, const Offset(1.0, 0.0)),
-      _pointerData(PointerChange.hover, const Offset(1.0, 0.0)),
+      _pointerData(PointerChange.add, const Offset(0.0, 0.0)),
     ]));
     expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
       const PointerEnterEvent(position: Offset(0.0, 0.0)),
-      const PointerHoverEvent(position: Offset(1.0, 0.0)),
     ]));
     expect(listenerLogs, <bool>[true]);
     events.clear();
@@ -161,11 +159,9 @@ void main() {
     // Pointer is added on the annotation.
     ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.add, const Offset(0.0, 301.0)),
-      _pointerData(PointerChange.add, const Offset(1.0, 301.0)),
     ]));
     expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
       const PointerEnterEvent(position: Offset(0.0, 301.0)),
-      const PointerHoverEvent(position: Offset(1.0, 301.0)),
     ]));
     expect(listenerLogs, <bool>[true]);
     events.clear();
