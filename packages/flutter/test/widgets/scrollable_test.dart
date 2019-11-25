@@ -38,6 +38,8 @@ const double dragOffset = 200.0;
 
 // TODO(gspencergoog): Change this to use TargetPlatform.macOS once that is available.
 // https://github.com/flutter/flutter/issues/31366
+// Can't be const, since Platform.macOS asserts if called in const context.
+// ignore: prefer_const_declarations
 final LogicalKeyboardKey modifierKey = (!kIsWeb && Platform.isMacOS)
     ? LogicalKeyboardKey.metaLeft
     : LogicalKeyboardKey.controlLeft;
@@ -281,7 +283,6 @@ void main() {
 
   testWidgets("Keyboard scrolling doesn't happen if scroll physics are set to NeverScrollableScrollPhysics", (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
-    final FocusNode focusNode = FocusNode(debugLabel: 'SizedBox');
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
@@ -295,7 +296,7 @@ void main() {
             (int index) {
               return SliverToBoxAdapter(
                 child: Focus(
-                  focusNode: focusNode,
+                  autofocus: index == 0,
                   child: SizedBox(key: ValueKey<String>('Box $index'), height: 50.0),
                 ),
               );
@@ -305,7 +306,6 @@ void main() {
       ),
     );
 
-    focusNode.requestFocus();
     await tester.pumpAndSettle();
     expect(controller.position.pixels, equals(0.0));
     expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 50.0)));
@@ -337,7 +337,6 @@ void main() {
 
   testWidgets('Vertical scrollables are scrolled when activated via keyboard.', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
-    final FocusNode focusNode = FocusNode(debugLabel: 'SizedBox');
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
@@ -350,7 +349,7 @@ void main() {
             (int index) {
               return SliverToBoxAdapter(
                 child: Focus(
-                  focusNode: focusNode,
+                  autofocus: index == 0,
                   child: SizedBox(key: ValueKey<String>('Box $index'), height: 50.0),
                 ),
               );
@@ -360,7 +359,6 @@ void main() {
       ),
     );
 
-    focusNode.requestFocus();
     await tester.pumpAndSettle();
     expect(controller.position.pixels, equals(0.0));
     expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, 0.0, 800.0, 50.0)));
@@ -388,7 +386,6 @@ void main() {
 
   testWidgets('Horizontal scrollables are scrolled when activated via keyboard.', (WidgetTester tester) async {
     final ScrollController controller = ScrollController();
-    final FocusNode focusNode = FocusNode(debugLabel: 'SizedBox');
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(
@@ -402,7 +399,7 @@ void main() {
             (int index) {
               return SliverToBoxAdapter(
                 child: Focus(
-                  focusNode: focusNode,
+                  autofocus: index == 0,
                   child: SizedBox(key: ValueKey<String>('Box $index'), width: 50.0),
                 ),
               );
@@ -412,7 +409,6 @@ void main() {
       ),
     );
 
-    focusNode.requestFocus();
     await tester.pumpAndSettle();
     expect(controller.position.pixels, equals(0.0));
     expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, 0.0, 50.0, 600.0)));
@@ -425,6 +421,54 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
     await tester.sendKeyUpEvent(modifierKey);
     await tester.pumpAndSettle();
+    expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(0.0, 0.0, 50.0, 600.0)));
+
+    // TODO(gspencergoog): Once we can test against TargetPlatform.macOS instead
+    // of Platform.isMacOS, don't skip this on web anymore.
+    // https://github.com/flutter/flutter/issues/31366
+  }, skip: kIsWeb);
+
+  testWidgets('Horizontal scrollables are scrolled the correct direction in RTL locales.', (WidgetTester tester) async {
+    final ScrollController controller = ScrollController();
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(
+          platform: TargetPlatform.fuchsia,
+        ),
+        home: Directionality(
+          textDirection: TextDirection.rtl,
+          child: CustomScrollView(
+            controller: controller,
+            scrollDirection: Axis.horizontal,
+            slivers: List<Widget>.generate(
+              20,
+                  (int index) {
+                return SliverToBoxAdapter(
+                  child: Focus(
+                    autofocus: index == 0,
+                    child: SizedBox(key: ValueKey<String>('Box $index'), width: 50.0),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+    expect(controller.position.pixels, equals(0.0));
+    expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(750.0, 0.0, 800.0, 600.0)));
+    await tester.sendKeyDownEvent(modifierKey);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.sendKeyUpEvent(modifierKey);
+    await tester.pumpAndSettle();
+    expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(800.0, 0.0, 850.0, 600.0)));
+    await tester.sendKeyDownEvent(modifierKey);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.sendKeyUpEvent(modifierKey);
+    await tester.pumpAndSettle();
+    expect(tester.getRect(find.byKey(const ValueKey<String>('Box 0'), skipOffstage: false)), equals(const Rect.fromLTRB(750.0, 0.0, 800.0, 600.0)));
 
     // TODO(gspencergoog): Once we can test against TargetPlatform.macOS instead
     // of Platform.isMacOS, don't skip this on web anymore.

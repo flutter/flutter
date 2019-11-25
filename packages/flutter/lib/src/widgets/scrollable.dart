@@ -857,25 +857,20 @@ class ScrollIncrementDetails {
 /// specified.
 class ScrollIntent extends Intent {
   /// Creates a const [ScrollIntent] that requests scrolling in the given
-  /// [axis], with the given [type].
+  /// [direction], with the given [type].
   ///
   /// If [reversed] is specified, then the scroll will happen in the opposite
   /// direction from the normal scroll direction.
   const ScrollIntent({
-    @required this.axis,
-    this.reversed = false,
+    @required this.direction,
     this.type = ScrollIncrementType.line,
-  })  : assert(axis != null),
+  })  : assert(direction != null),
         assert(type != null),
         super(ScrollAction.key);
 
   /// The direction in which to scroll the scrollable containing the focused
   /// widget.
-  final Axis axis;
-
-  /// Whether or not the natural scroll direction for this scroll operation
-  /// should be reversed.
-  final bool reversed;
+  final AxisDirection direction;
 
   /// The type of scrolling that is intended.
   final ScrollIncrementType type;
@@ -914,7 +909,7 @@ class ScrollAction extends Action {
     assert(state.position.viewportDimension != null);
     assert(state.position.maxScrollExtent != null);
     assert(state.position.minScrollExtent != null);
-    assert(state.widget.physics.shouldAcceptUserOffset(state.position));
+    assert(state.widget.physics == null || state.widget.physics.shouldAcceptUserOffset(state.position));
     if (state.widget.incrementCalculator != null) {
       return state.widget.incrementCalculator(
         ScrollIncrementDetails(
@@ -936,8 +931,7 @@ class ScrollAction extends Action {
   // directions into account.
   double _getIncrement(ScrollableState state, ScrollIntent intent) {
     final double increment = _calculateScrollIncrement(state, type: intent.type);
-    final AxisDirection resolvedDirection = getAxisDirectionFromAxisReverseAndDirectionality(state.context, intent.axis, intent.reversed);
-    switch (resolvedDirection) {
+    switch (intent.direction) {
       case AxisDirection.down:
         switch (state.axisDirection) {
           case AxisDirection.up:
@@ -1004,7 +998,7 @@ class ScrollAction extends Action {
     assert(state.position.minScrollExtent != null);
 
     // Don't do anything if the user isn't allowed to scroll.
-    if (!state.widget.physics.shouldAcceptUserOffset(state.position)) {
+    if (state.widget.physics != null && !state.widget.physics.shouldAcceptUserOffset(state.position)) {
       return;
     }
     final double increment = _getIncrement(state, intent);
