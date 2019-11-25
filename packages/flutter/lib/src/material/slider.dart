@@ -589,6 +589,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
       onChangeEnd: widget.onChangeEnd != null ? _handleDragEnd : null,
       state: this,
       semanticFormatterCallback: widget.semanticFormatterCallback,
+      useV2Slider: widget.useV2Slider,
     );
   }
 
@@ -626,6 +627,7 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
     this.onChangeEnd,
     this.state,
     this.semanticFormatterCallback,
+    this.useV2Slider,
   }) : super(key: key);
 
   final double value;
@@ -639,6 +641,7 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
   final ValueChanged<double> onChangeEnd;
   final SemanticFormatterCallback semanticFormatterCallback;
   final _SliderState state;
+  final bool useV2Slider;
 
   @override
   _RenderSlider createRenderObject(BuildContext context) {
@@ -656,6 +659,7 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
       textDirection: Directionality.of(context),
       semanticFormatterCallback: semanticFormatterCallback,
       platform: Theme.of(context).platform,
+      useV2Slider: useV2Slider,
     );
   }
 
