@@ -600,3 +600,23 @@ void platform_view_mutators_with_pixel_ratio() {
   };
   window.scheduleFrame();
 }
+
+@pragma('vm:entry-point')
+void empty_scene() {
+  window.onBeginFrame = (Duration duration) {
+    window.render(SceneBuilder().build());
+    signalNativeTest();
+  };
+  window.scheduleFrame();
+}
+
+@pragma('vm:entry-point')
+void scene_with_no_container() {
+  window.onBeginFrame = (Duration duration) {
+    SceneBuilder builder = SceneBuilder();
+    builder.addPicture(Offset(0.0, 0.0), CreateGradientBox(Size(400.0, 300.0)));
+    window.render(builder.build());
+    signalNativeTest();
+  };
+  window.scheduleFrame();
+}
