@@ -86,6 +86,7 @@ Future<void> main(List<String> arguments) async {
     exitWithError(e.message);
   }
 
+  // TODO(shihaohong): create a method to decode templateArbFile
   final List<String> classMethods = <String>[];
   Map<String, dynamic> bundle;
   try {
@@ -97,7 +98,6 @@ Future<void> main(List<String> arguments) async {
   }
 
   final RegExp pluralValueRE = RegExp(r'^\s*\{[\w\s,]*,\s*plural\s*,');
-
   for (String key in bundle.keys.toList()..sort()) {
     if (key.startsWith('@'))
       continue;
@@ -112,6 +112,7 @@ Future<void> main(List<String> arguments) async {
       classMethods.add(genSimpleMethod(bundle, key));
   }
 
+  // TODO(shihaohong): create a method that creates the output file
   localizationsGenerator.outputFile.writeAsStringSync(
     defaultFileTemplate
       .replaceAll('@className', classNameString)
@@ -121,6 +122,7 @@ Future<void> main(List<String> arguments) async {
       .replaceAll('@supportedLanguageCodes', localizationsGenerator.supportedLanguageCodes.toList().join(', '))
   );
 
+  // TODO(shihaohong): create method that generates arb files using the intl_translation:generate_from_arb command
   final ProcessResult pubGetResult = await Process.run('flutter', <String>['pub', 'get']);
   if (pubGetResult.exitCode != 0) {
     stderr.write(pubGetResult.stderr);
