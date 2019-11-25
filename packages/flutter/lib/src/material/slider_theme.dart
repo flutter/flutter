@@ -185,13 +185,13 @@ class SliderTheme extends InheritedTheme {
   ///  * [SliderThemeData], which describes the actual configuration of a slider
   ///    theme.
   static SliderThemeData of(BuildContext context) {
-    final SliderTheme inheritedTheme = context.inheritFromWidgetOfExactType(SliderTheme);
+    final SliderTheme inheritedTheme = context.dependOnInheritedWidgetOfExactType<SliderTheme>();
     return inheritedTheme != null ? inheritedTheme.data : Theme.of(context).sliderTheme;
   }
 
   @override
   Widget wrap(BuildContext context, Widget child) {
-    final SliderTheme ancestorTheme = context.ancestorWidgetOfExactType(SliderTheme);
+    final SliderTheme ancestorTheme = context.findAncestorWidgetOfExactType<SliderTheme>();
     return identical(this, ancestorTheme) ? child : SliderTheme(data: data, child: child);
   }
 
@@ -1500,7 +1500,7 @@ abstract class BaseSliderTrackShape {
 /// [parentBox]. The track rectangle extends to the bounds of the [parentBox],
 /// but is padded by the [RoundSliderOverlayShape] radius. The height is defined
 /// by the [SliderThemeData.trackHeight]. The color is determined by the
-/// [Slider]'s enabled state and the track segments's active state which are
+/// [Slider]'s enabled state and the track segment's active state which are
 /// defined by:
 ///   [SliderThemeData.activeTrackColor],
 ///   [SliderThemeData.inactiveTrackColor],
@@ -1706,7 +1706,7 @@ class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
 /// [parentBox]. The track rectangle extends to the bounds of the [parentBox],
 /// but is padded by the [RoundSliderOverlayShape] radius. The height is
 /// defined by the [SliderThemeData.trackHeight]. The color is determined by the
-/// [Slider]'s enabled state and the track segments's active state which are
+/// [Slider]'s enabled state and the track segment's active state which are
 /// defined by:
 ///   [SliderThemeData.activeTrackColor],
 ///   [SliderThemeData.inactiveTrackColor],

@@ -142,7 +142,7 @@ Matcher isSameColorAs(Color color) => _ColorMatcher(targetColor: color);
 /// empty, and does not contain the default `Instance of ...` string.
 const Matcher hasOneLineDescription = _HasOneLineDescription();
 
-/// Asserts that an object's toStringDeep() is a plausible multi-line
+/// Asserts that an object's toStringDeep() is a plausible multiline
 /// description.
 ///
 /// Specifically, this matcher checks that an object's
@@ -308,7 +308,7 @@ Matcher coversSameAreaAs(Path expectedPath, { @required Rect areaToCompare, int 
 /// treated as the image for the widget. As such, you may choose to wrap a test
 /// widget in a [RepaintBoundary] to specify a particular focus for the test.
 ///
-/// The [key] may be either a [Uri] or a [String] representation of a URI.
+/// The [key] may be either a [Uri] or a [String] representation of a URL.
 ///
 /// The [version] is a number that can be used to differentiate historical
 /// golden files. This parameter is optional.
@@ -589,8 +589,8 @@ Matcher matchesSemantics({
 ///
 /// Supported accessibility guidelines:
 ///
-///   * [androidTapTargetGuideline], for Android minimum tapable area guidelines.
-///   * [iOSTapTargetGuideline], for iOS minimum tapable area guidelines.
+///   * [androidTapTargetGuideline], for Android minimum tappable area guidelines.
+///   * [iOSTapTargetGuideline], for iOS minimum tappable area guidelines.
 ///   * [textContrastGuideline], for WCAG minimum text contrast guidelines.
 AsyncMatcher meetsGuideline(AccessibilityGuideline guideline) {
   return _MatchesAccessibilityGuideline(guideline);
@@ -812,7 +812,7 @@ class _EqualsIgnoringHashCodes extends Matcher {
   ) {
     if (matchState.containsKey(_mismatchedValueKey)) {
       final String actualValue = matchState[_mismatchedValueKey] as String;
-      // Leading whitespace is added so that lines in the multi-line
+      // Leading whitespace is added so that lines in the multiline
       // description returned by addDescriptionOf are all indented equally
       // which makes the output easier to read for this case.
       return mismatchDescription

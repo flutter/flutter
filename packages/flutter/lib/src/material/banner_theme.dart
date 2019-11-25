@@ -140,13 +140,13 @@ class MaterialBannerTheme extends InheritedTheme {
   /// MaterialBannerThemeData theme = MaterialBannerTheme.of(context);
   /// ```
   static MaterialBannerThemeData of(BuildContext context) {
-    final MaterialBannerTheme bannerTheme = context.inheritFromWidgetOfExactType(MaterialBannerTheme);
+    final MaterialBannerTheme bannerTheme = context.dependOnInheritedWidgetOfExactType<MaterialBannerTheme>();
     return bannerTheme?.data ?? Theme.of(context).bannerTheme;
   }
 
   @override
   Widget wrap(BuildContext context, Widget child) {
-    final MaterialBannerTheme ancestorTheme = context.ancestorWidgetOfExactType(MaterialBannerTheme);
+    final MaterialBannerTheme ancestorTheme = context.findAncestorWidgetOfExactType<MaterialBannerTheme>();
     return identical(this, ancestorTheme) ? child : MaterialBannerTheme(data: data, child: child);
   }
 

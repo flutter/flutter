@@ -291,12 +291,20 @@ Future<void> _runBuildTests() async {
       await _flutterBuildIpa(examplePath);
     }
   }
-  // Web compilation tests.
-  await _flutterBuildDart2js(path.join('dev', 'integration_tests', 'web'), path.join('lib', 'main.dart'));
-  // Should not fail to compile with dart:io.
-  await _flutterBuildDart2js(path.join('dev', 'integration_tests', 'web_compile_tests'),
-    path.join('lib', 'dart_io_import.dart'),
-  );
+
+  final String branch = Platform.environment['CIRRUS_BRANCH'];
+  if (branch != 'beta' && branch != 'stable') {
+    // Web compilation tests.
+    await _flutterBuildDart2js(
+      path.join('dev', 'integration_tests', 'web'),
+      path.join('lib', 'main.dart'),
+    );
+    // Should not fail to compile with dart:io.
+    await _flutterBuildDart2js(
+      path.join('dev', 'integration_tests', 'web_compile_tests'),
+      path.join('lib', 'dart_io_import.dart'),
+    );
+  }
 }
 
 Future<void> _flutterBuildAot(String relativePathToApplication) async {
@@ -961,7 +969,7 @@ Future<String> verifyVersion(File file) async {
 }
 
 /// If the CIRRUS_TASK_NAME environment variable exists, we use that to determine
-/// the shard and subshard (parsing it in the form shard-subshard-platform, ignoring
+/// the shard and sub-shard (parsing it in the form shard-subshard-platform, ignoring
 /// the platform).
 ///
 /// However, for local testing you can just set the SHARD and SUBSHARD

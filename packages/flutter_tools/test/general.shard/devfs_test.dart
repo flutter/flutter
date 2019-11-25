@@ -10,6 +10,7 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/vmservice.dart';
@@ -159,6 +160,7 @@ void main() {
       verify(httpRequest.close()).called(kFailedAttempts + 1);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
+      HttpClientFactory: () => () => httpClient,
       ProcessManager: () => FakeProcessManager.any(),
     });
   });
@@ -208,6 +210,7 @@ void main() {
       expect(report.success, true);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
+      HttpClient: () => () => HttpClient(),
       ProcessManager: () => FakeProcessManager.any(),
     });
 
@@ -310,6 +313,7 @@ void main() {
       expect(devFS.lastCompiled, isNot(previousCompile));
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
+      HttpClient: () => () => HttpClient(),
       ProcessManager: () => FakeProcessManager.any(),
     });
   });

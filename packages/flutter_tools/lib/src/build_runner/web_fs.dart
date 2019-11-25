@@ -71,7 +71,7 @@ typedef DwdsFactory = Future<Dwds> Function({
   bool enableDebugExtension,
 });
 
-/// A function with the same signatuure as [WebFs.start].
+/// A function with the same signature as [WebFs.start].
 typedef WebFsFactory = Future<WebFs> Function({
   @required String target,
   @required FlutterProject flutterProject,
@@ -100,7 +100,7 @@ class WebFs {
     this._dartDefines,
   );
 
-  /// The server uri.
+  /// The server URL.
   final String uri;
 
   final HttpServer _server;

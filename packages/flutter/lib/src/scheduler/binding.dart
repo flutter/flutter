@@ -338,6 +338,11 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
   }
 
   Future<String> _handleLifecycleMessage(String message) async {
+    // TODO(chunhtai): remove the workaround once the issue is fixed
+    // https://github.com/flutter/flutter/issues/39832
+    if (message == 'AppLifecycleState.detached')
+      return null;
+
     handleAppLifecycleStateChanged(_parseAppLifecycleMessage(message));
     return null;
   }

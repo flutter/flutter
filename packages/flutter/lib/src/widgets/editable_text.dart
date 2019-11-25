@@ -544,7 +544,7 @@ class EditableText extends StatefulWidget {
   /// and CSS's [line-height](https://www.w3.org/TR/CSS2/visudet.html#line-height).
   /// {@endtemplate}
   ///
-  /// Within editable text and textfields, [StrutStyle] will not use its standalone
+  /// Within editable text and text fields, [StrutStyle] will not use its standalone
   /// default values, and will instead inherit omitted/null properties from the
   /// [TextStyle] instead. See [StrutStyle.inheritFromTextStyle].
   StrutStyle get strutStyle {

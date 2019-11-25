@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-/// Json response template for Skia Gold expectations request:
+/// JSON response template for Skia Gold expectations request:
 /// https://flutter-gold.skia.org/json/expectations/commit/HEAD
 String rawExpectationsTemplate() {
   return '''

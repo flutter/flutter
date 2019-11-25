@@ -12,7 +12,6 @@ import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
-import 'package:flutter_tools/src/globals.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
@@ -59,8 +58,6 @@ void main() {
   });
 
   testUsingContext('compile expression can compile single expression', () async {
-    final BufferLogger bufferLogger = logger;
-
     final Completer<List<int>> compileResponseCompleter =
         Completer<List<int>>();
     final Completer<List<int>> compileExpressionResponseCompleter =
@@ -85,7 +82,7 @@ void main() {
       expect(mockFrontendServerStdIn.getAndClear(),
           'compile /path/to/main.dart\n');
       verifyNoMoreInteractions(mockFrontendServerStdIn);
-      expect(bufferLogger.errorText,
+      expect(testLogger.errorText,
           equals('\nCompiler message:\nline1\nline2\n'));
       expect(output.outputFilename, equals('/path/to/main.dart.dill'));
 
@@ -111,7 +108,6 @@ void main() {
   });
 
   testUsingContext('compile expressions without awaiting', () async {
-    final BufferLogger bufferLogger = logger;
     final Completer<List<int>> compileResponseCompleter = Completer<List<int>>();
     final Completer<List<int>> compileExpressionResponseCompleter1 = Completer<List<int>>();
     final Completer<List<int>> compileExpressionResponseCompleter2 = Completer<List<int>>();
@@ -132,7 +128,7 @@ void main() {
         null, /* invalidatedFiles */
         outputPath: '/build/',
       ).then((CompilerOutput outputCompile) {
-        expect(bufferLogger.errorText,
+        expect(testLogger.errorText,
             equals('\nCompiler message:\nline1\nline2\n'));
         expect(outputCompile.outputFilename, equals('/path/to/main.dart.dill'));
 
