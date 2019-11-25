@@ -39,6 +39,9 @@ void main() {
     final StringBuffer stdout = StringBuffer();
     final Completer<void> sawTick = Completer<void>();
     final StreamSubscription<String> subscription = _flutter.stdout.listen((String line) {
+      // This line is printed by a build method in the test app, and indicates that all
+      // setup is completed.
+      // see: test/integration.shard/test_data/hot_reload_project.dart#L47
       if (line.contains('(((TICK 1)))')) {
         sawTick.complete();
       }
@@ -68,6 +71,9 @@ void main() {
     final Completer<void> sawDebuggerPausedMessage = Completer<void>();
     final StreamSubscription<String> subscription = _flutter.stdout.listen(
       (String line) {
+        // This line is printed by a build method in the test app, and indicates that all
+        // setup is completed.
+        // see: test/integration.shard/test_data/hot_reload_project.dart#L47
         if (line.contains('((((TICK 1))))')) {
           expect(sawTick1.isCompleted, isFalse);
           sawTick1.complete();
