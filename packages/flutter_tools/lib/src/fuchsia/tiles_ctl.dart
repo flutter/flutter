@@ -52,7 +52,7 @@ class FuchsiaTilesCtl {
     return result.exitCode == 0;
   }
 
-  /// Returns a mapping of tile keys to app urls.
+  /// Returns a mapping of tile keys to app URLs.
   ///
   /// Returns an empty mapping if tiles_ctl is running but no apps are running.
   /// Returns null if tiles_ctl is not running.
@@ -86,7 +86,7 @@ class FuchsiaTilesCtl {
   ///
   /// The app is passed the arguments in [args]. Flutter apps receive these
   /// arguments as arguments to `main()`. [url] should be formatted as a
-  /// Fuchsia-style package url, e.g.:
+  /// Fuchsia-style package URL, e.g.:
   ///     fuchsia-pkg://fuchsia.com/flutter_gallery#meta/flutter_gallery.cmx
   /// Returns true on success and false on failure.
   Future<bool> add(FuchsiaDevice device, String url, List<String> args) async {

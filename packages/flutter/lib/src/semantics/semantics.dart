@@ -751,11 +751,11 @@ class SemanticsProperties extends DiagnosticableTree {
   /// Doing so instructs screen readers to not read out the [value].
   final bool obscured;
 
-  /// Whether the [value] is coming from a field that supports multi-line text
+  /// Whether the [value] is coming from a field that supports multiline text
   /// editing.
   ///
   /// This option is only meaningful when [textField] is true to indicate
-  /// whether it's a single-line or multi-line text field.
+  /// whether it's a single-line or multiline text field.
   ///
   /// This option is null when [textField] is false.
   final bool multiline;
@@ -1737,7 +1737,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   TextSelection _textSelection;
 
   /// If this node represents a text field, this indicates whether or not it's
-  /// a multi-line text field.
+  /// a multiline text field.
   bool get isMultiline => _isMultiline;
   bool _isMultiline;
 
@@ -3697,10 +3697,10 @@ class SemanticsConfiguration {
     _setFlag(SemanticsFlag.isObscured, value);
   }
 
-  /// Whether the text field is multi-line.
+  /// Whether the text field is multiline.
   ///
   /// This option is usually set in combination with [textField] to indicate
-  /// that the text field is configured to be multi-line.
+  /// that the text field is configured to be multiline.
   bool get isMultiline => _hasFlag(SemanticsFlag.isMultiline);
   set isMultiline(bool value) {
     _setFlag(SemanticsFlag.isMultiline, value);

@@ -37,7 +37,7 @@ import 'text_style.dart';
 ///
 /// Ascent is the font's spacing above the baseline without leading and
 /// descent is the spacing below the baseline without leading. Leading is
-/// split evenly betweenthe top and bottom. The values for `ascent` and
+/// split evenly between the top and bottom. The values for `ascent` and
 /// `descent` are provided by the font named by [fontFamily]. If no
 /// [fontFamily] or [fontFamilyFallback] is provided, then the platform's
 /// default family will be used.

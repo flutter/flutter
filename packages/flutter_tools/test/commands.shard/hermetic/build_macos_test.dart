@@ -7,7 +7,6 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -15,7 +14,6 @@ import 'package:flutter_tools/src/commands/build.dart';
 import 'package:flutter_tools/src/commands/build_macos.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/globals.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
@@ -128,7 +126,6 @@ void main() {
   });
 
   testUsingContext('macOS build does not spew stdout to status logger', () async {
-    final BufferLogger bufferLogger = logger;
     final BuildCommand command = BuildCommand();
     applyMocksToCommand(command);
     createMinimalMockProjectFiles();
@@ -137,8 +134,8 @@ void main() {
     await createTestCommandRunner(command).run(
       const <String>['build', 'macos', '--debug']
     );
-    expect(bufferLogger.statusText, isNot(contains('STDOUT STUFF')));
-    expect(bufferLogger.traceText, contains('STDOUT STUFF'));
+    expect(testLogger.statusText, isNot(contains('STDOUT STUFF')));
+    expect(testLogger.traceText, contains('STDOUT STUFF'));
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
     ProcessManager: () => mockProcessManager,

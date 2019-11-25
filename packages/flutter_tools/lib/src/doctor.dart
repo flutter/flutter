@@ -385,11 +385,11 @@ class GroupedValidator extends DoctorValidator {
 
   List<ValidationResult> _subResults;
 
-  /// Subvalidator results.
+  /// Sub-validator results.
   ///
-  /// To avoid losing information when results are merged, the subresults are
+  /// To avoid losing information when results are merged, the sub-results are
   /// cached on this field when they are available. The results are in the same
-  /// order as the subvalidator list.
+  /// order as the sub-validator list.
   List<ValidationResult> get subResults => _subResults;
 
   @override
@@ -571,9 +571,9 @@ class ValidationMessage {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    final ValidationMessage typedOther = other;
-    return typedOther.message == message
-      && typedOther.type == type;
+    return other is ValidationMessage
+        && other.message == message
+        && other.type == type;
   }
 
   @override

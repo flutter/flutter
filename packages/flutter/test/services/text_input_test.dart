@@ -173,6 +173,37 @@ void main() {
       expect(client.latestMethodCall, 'connectionClosed');
     });
   });
+
+  test('TextEditingValue handles JSON affinity', () async {
+    final Map<String, dynamic> json = <String, dynamic>{};
+    json['text'] = 'Xiaomuqiao';
+
+    TextEditingValue val = TextEditingValue.fromJSON(json);
+    expect(val.text, 'Xiaomuqiao');
+    expect(val.selection.baseOffset, -1);
+    expect(val.selection.extentOffset, -1);
+    expect(val.selection.affinity, null);
+    expect(val.selection.isDirectional, false);
+    expect(val.composing.start, -1);
+    expect(val.composing.end, -1);
+
+    json['text'] = 'Xiaomuqiao';
+    json['selectionBase'] = 5;
+    json['selectionExtent'] = 6;
+    json['selectionAffinity'] = 'TextAffinity.upstream';
+    json['selectionIsDirectional'] = true;
+    json['composingBase'] = 7;
+    json['composingExtent'] = 8;
+
+    val = TextEditingValue.fromJSON(json);
+    expect(val.text, 'Xiaomuqiao');
+    expect(val.selection.baseOffset, 5);
+    expect(val.selection.extentOffset, 6);
+    expect(val.selection.affinity, TextAffinity.upstream);
+    expect(val.selection.isDirectional, true);
+    expect(val.composing.start, 7);
+    expect(val.composing.end, 8);
+  });
 }
 
 class FakeTextInputClient implements TextInputClient {

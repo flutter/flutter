@@ -10,7 +10,10 @@ import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 void macroPerfTest(
     String testName,
     String routeName,
-    {Duration pageDelay, Duration duration = const Duration(seconds: 3)}) {
+    { Duration pageDelay,
+      Duration duration = const Duration(seconds: 3),
+      Future<void> driverOps(FlutterDriver driver),
+    }) {
   test(testName, () async {
     final FlutterDriver driver = await FlutterDriver.connect();
 
@@ -32,7 +35,11 @@ void macroPerfTest(
     }
 
     final Timeline timeline = await driver.traceAction(() async {
-      await Future<void>.delayed(duration);
+      final Future<void> durationFuture = Future<void>.delayed(duration);
+      if (driverOps != null) {
+        await driverOps(driver);
+      }
+      await durationFuture;
     });
 
     final TimelineSummary summary = TimelineSummary.summarize(timeline);

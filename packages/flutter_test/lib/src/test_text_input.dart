@@ -87,8 +87,8 @@ class TestTextInput {
     log.add(methodCall);
     switch (methodCall.method) {
       case 'TextInput.setClient':
-        _client = methodCall.arguments[0];
-        setClientArgs = methodCall.arguments[1];
+        _client = methodCall.arguments[0] as int;
+        setClientArgs = methodCall.arguments[1] as Map<String, dynamic>;
         break;
       case 'TextInput.clearClient':
         _client = 0;
@@ -97,7 +97,7 @@ class TestTextInput {
           onCleared();
         break;
       case 'TextInput.setEditingState':
-        editingState = methodCall.arguments;
+        editingState = methodCall.arguments as Map<String, dynamic>;
         break;
       case 'TextInput.show':
         _isVisible = true;

@@ -501,7 +501,7 @@ class _HitTestableFinder extends ChainedFinder {
   @override
   Iterable<Element> filter(Iterable<Element> parentCandidates) sync* {
     for (final Element candidate in parentCandidates) {
-      final RenderBox box = candidate.renderObject;
+      final RenderBox box = candidate.renderObject as RenderBox;
       assert(box != null);
       final Offset absoluteOffset = box.localToGlobal(alignment.alongSize(box.size));
       final HitTestResult hitResult = HitTestResult();
@@ -544,14 +544,13 @@ class _TextFinder extends MatchFinder {
 
   @override
   bool matches(Element candidate) {
-    if (candidate.widget is Text) {
-      final Text textWidget = candidate.widget;
-      if (textWidget.data != null)
-        return textWidget.data == text;
-      return textWidget.textSpan.toPlainText() == text;
-    } else if (candidate.widget is EditableText) {
-      final EditableText editable = candidate.widget;
-      return editable.controller.text == text;
+    final Widget widget = candidate.widget;
+    if (widget is Text) {
+      if (widget.data != null)
+        return widget.data == text;
+      return widget.textSpan.toPlainText() == text;
+    } else if (widget is EditableText) {
+      return widget.controller.text == text;
     }
     return false;
   }

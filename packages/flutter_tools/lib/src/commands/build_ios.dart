@@ -19,24 +19,13 @@ import 'build.dart';
 /// .ipas, see https://flutter.dev/docs/deployment/ios.
 class BuildIOSCommand extends BuildSubCommand {
   BuildIOSCommand() {
+    addBuildModeFlags(defaultToRelease: false);
     usesTargetOption();
     usesFlavorOption();
     usesPubOption();
     usesBuildNumberOption();
     usesBuildNameOption();
     argParser
-      ..addFlag('debug',
-        negatable: false,
-        help: 'Build a debug version of your app (default mode for iOS simulator builds).',
-      )
-      ..addFlag('profile',
-        negatable: false,
-        help: 'Build a version of your app specialized for performance profiling.',
-      )
-      ..addFlag('release',
-        negatable: false,
-        help: 'Build a release version of your app (default mode for device builds).',
-      )
       ..addFlag('simulator',
         help: 'Build for the iOS simulator instead of the device.',
       )
@@ -60,20 +49,20 @@ class BuildIOSCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final bool forSimulator = argResults['simulator'];
+    final bool forSimulator = boolArg('simulator');
     defaultBuildMode = forSimulator ? BuildMode.debug : BuildMode.release;
 
     if (!platform.isMacOS) {
       throwToolExit('Building for iOS is only supported on the Mac.');
     }
 
-    final BuildableIOSApp app = await applicationPackages.getPackageForPlatform(TargetPlatform.ios);
+    final BuildableIOSApp app = await applicationPackages.getPackageForPlatform(TargetPlatform.ios) as BuildableIOSApp;
 
     if (app == null) {
       throwToolExit('Application not configured for iOS');
     }
 
-    final bool shouldCodesign = argResults['codesign'];
+    final bool shouldCodesign = boolArg('codesign');
 
     if (!forSimulator && !shouldCodesign) {
       printStatus('Warning: Building for device with codesigning disabled. You will '

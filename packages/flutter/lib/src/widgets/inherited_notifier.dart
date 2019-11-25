@@ -19,7 +19,7 @@ import 'framework.dart';
 /// even if the [notifier] fires multiple times between two frames.
 ///
 /// Typically this class is subclassed with a class that provides an `of` static
-/// method that calls [BuildContext.inheritFromWidgetOfExactType] with that
+/// method that calls [BuildContext.dependOnInheritedWidgetOfExactType] with that
 /// class.
 ///
 /// The [updateShouldNotify] method may also be overridden, to change the logic

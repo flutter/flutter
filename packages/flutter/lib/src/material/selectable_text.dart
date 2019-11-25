@@ -131,6 +131,8 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
 /// The string might break across multiple lines or might all be displayed on
 /// the same line depending on the layout constraints.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=ZSU3ZXOs6hc}
+///
 /// The [style] argument is optional. When omitted, the text will use the style
 /// from the closest enclosing [DefaultTextStyle]. If the given style's
 /// [TextStyle.inherit] property is true (the default), the given style will

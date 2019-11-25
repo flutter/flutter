@@ -479,6 +479,11 @@ class FlutterErrorDetails extends Diagnosticable {
 
 /// Error class used to report Flutter-specific assertion failures and
 /// contract violations.
+///
+/// See also:
+///
+///  * <https://flutter.dev/docs/testing/errors>, more information about error
+///    handling in Flutter.
 class FlutterError extends Error with DiagnosticableTreeMixin implements AssertionError {
   /// Create an error message from a string.
   ///
@@ -767,7 +772,7 @@ void debugPrintStack({StackTrace stackTrace, String label, int maxFrames}) {
   debugPrint(FlutterError.defaultStackFilter(lines).join('\n'));
 }
 
-/// Diagnostic with a [StackTrace] [value] suitable for displaying stacktraces
+/// Diagnostic with a [StackTrace] [value] suitable for displaying stack traces
 /// as part of a [FlutterError] object.
 ///
 /// See also:

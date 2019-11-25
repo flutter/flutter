@@ -17,7 +17,7 @@ class ComplexLayoutApp extends StatefulWidget {
   @override
   ComplexLayoutAppState createState() => ComplexLayoutAppState();
 
-  static ComplexLayoutAppState of(BuildContext context) => context.ancestorStateOfType(const TypeMatcher<ComplexLayoutAppState>());
+  static ComplexLayoutAppState of(BuildContext context) => context.findAncestorStateOfType<ComplexLayoutAppState>();
 }
 
 class ComplexLayoutAppState extends State<ComplexLayoutApp> {
@@ -84,7 +84,7 @@ class ComplexLayout extends StatefulWidget {
   @override
   ComplexLayoutState createState() => ComplexLayoutState();
 
-  static ComplexLayoutState of(BuildContext context) => context.ancestorStateOfType(const TypeMatcher<ComplexLayoutState>());
+  static ComplexLayoutState of(BuildContext context) => context.findAncestorStateOfType<ComplexLayoutState>();
 }
 
 class ComplexLayoutState extends State<ComplexLayout> {
