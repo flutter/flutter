@@ -146,6 +146,7 @@ public class DummyPluginAClass {
             '}'
           ']'
         '}';
+
       if (flutterPluginsDependenciesFileContent != kExpectedPluginsDependenciesContent) {
         return TaskResult.failure(
           'Unexpected file content in ${flutterPluginsDependenciesFile.path}: '
