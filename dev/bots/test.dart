@@ -275,6 +275,11 @@ Future<void> _runToolTests() async {
   await selectSubshard(subshards);
 }
 
+// Example apps that should not be built by _runBuildTests`
+const List<String> _excludedExampleApplications = <String>[
+  'splash',
+];
+
 /// Verifies that AOT, APK, and IPA (if on macOS) builds the examples apps
 /// without crashing. It does not actually launch the apps. That happens later
 /// in the devicelab. This is just a smoke-test. In particular, this will verify
@@ -284,6 +289,9 @@ Future<void> _runBuildTests() async {
   final Stream<FileSystemEntity> exampleDirectories = Directory(path.join(flutterRoot, 'examples')).list();
   await for (FileSystemEntity fileEntity in exampleDirectories) {
     if (fileEntity is! Directory) {
+      continue;
+    }
+    if (_excludedExampleApplications.any((String name) => name.contains(fileEntity.path))) {
       continue;
     }
     final String examplePath = fileEntity.path;
