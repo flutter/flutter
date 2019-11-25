@@ -124,6 +124,7 @@ class Slider extends StatefulWidget {
     this.activeColor,
     this.inactiveColor,
     this.semanticFormatterCallback,
+    this.useV2Slider = false,
   }) : _sliderType = _SliderType.material,
        assert(value != null),
        assert(min != null),
@@ -131,6 +132,7 @@ class Slider extends StatefulWidget {
        assert(min <= max),
        assert(value >= min && value <= max),
        assert(divisions == null || divisions > 0),
+       assert(useV2Slider != null),
        super(key: key);
 
   /// Creates a [CupertinoSlider] if the target platform is iOS, creates a
@@ -153,6 +155,7 @@ class Slider extends StatefulWidget {
     this.activeColor,
     this.inactiveColor,
     this.semanticFormatterCallback,
+    this.useV2Slider = false,
   }) : _sliderType = _SliderType.adaptive,
        assert(value != null),
        assert(min != null),
@@ -160,6 +163,7 @@ class Slider extends StatefulWidget {
        assert(min <= max),
        assert(value >= min && value <= max),
        assert(divisions == null || divisions > 0),
+       assert(useV2Slider != null),
        super(key: key);
 
   /// The currently selected value for this slider.
@@ -372,6 +376,13 @@ class Slider extends StatefulWidget {
   /// Ignored if this slider is created with [Slider.adaptive]
   final SemanticFormatterCallback semanticFormatterCallback;
 
+  /// Whether to use the updated Material spec version of the slider.
+  ///
+  /// This is a temporary flag for migrating the slider from v1 to v2. To avoid
+  /// unexpected breaking changes, this value should be set to true. Setting
+  /// this to false is considered deprecated.
+  final bool useV2Slider;
+
   final _SliderType _sliderType ;
 
   @override
@@ -477,12 +488,13 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     return widget.max > widget.min ? (value - widget.min) / (widget.max - widget.min) : 0.0;
   }
 
-  static const double _defaultTrackHeight = 4;
-  static const SliderTrackShape _defaultTrackShape = RoundedRectSliderTrackShape();
-  static const SliderTickMarkShape _defaultTickMarkShape = RoundSliderTickMarkShape();
+  final bool useV2Slider = widget.useV2Slider;
+  static const double _defaultTrackHeight = useV2Slider ? 4 : 2;
+  static const SliderTrackShape _defaultTrackShape = RoundedRectSliderTrackShape(useV2Slider: useV2Slider);
+  static const SliderTickMarkShape _defaultTickMarkShape = RoundSliderTickMarkShape(useV2Slider: useV2Slider);
   static const SliderComponentShape _defaultOverlayShape = RoundSliderOverlayShape();
-  static const SliderComponentShape _defaultThumbShape = RoundSliderThumbShape();
-  static const SliderComponentShape _defaultValueIndicatorShape = RectangularSliderValueIndicatorShape();
+  static const SliderComponentShape _defaultThumbShape = RoundSliderThumbShape(useV2Slider: useV2Slider);
+  static const SliderComponentShape _defaultValueIndicatorShape = useV2Slider ? RectangularSliderValueIndicatorShape() : PaddleSliderValueIndicatorShape();
   static const ShowValueIndicator _defaultShowValueIndicator = ShowValueIndicator.onlyForDiscrete;
 
   @override
@@ -682,6 +694,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     this.onChangeEnd,
     @required _SliderState state,
     @required TextDirection textDirection,
+    this.useV2Slider,
   }) : assert(value != null && value >= 0.0 && value <= 1.0),
        assert(state != null),
        assert(textDirection != null),
@@ -695,7 +708,8 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
        _sizeWithOverflow = sizeWithOverflow,
        _onChanged = onChanged,
        _state = state,
-       _textDirection = textDirection {
+       _textDirection = textDirection,
+       _useV2Slider = useV2Slider, {
     _updateLabelPainter();
     final GestureArenaTeam team = GestureArenaTeam();
     _drag = HorizontalDragGestureRecognizer()
@@ -901,6 +915,8 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     _textDirection = value;
     _updateLabelPainter();
   }
+
+  final bool _useV2Slider;
 
   bool get showValueIndicator {
     bool showValueIndicator;
@@ -1158,7 +1174,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
         isEnabled: isInteractive,
         sliderTheme: _sliderTheme,
       ).width;
-      final double adjustedTrackWidth = trackRect.width - trackRect.height;
+      final double adjustedTrackWidth = trackRect.width - _useV2Slider ? trackRect.height : tickMarkWidth;
       // If the tick marks would be too dense, don't bother painting them.
       if (adjustedTrackWidth / divisions >= 3.0 * tickMarkWidth) {
         final double dy = trackRect.center.dy;

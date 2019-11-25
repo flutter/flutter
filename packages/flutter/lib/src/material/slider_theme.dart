@@ -108,6 +108,14 @@ import 'theme_data.dart';
 /// track segments. In [TextDirection.ltr], the start of the slider is on the
 /// left, and in [TextDirection.rtl], the start of the slider is on the right.
 /// {@endtemplate}
+/// 
+/// {@template flutter.material.slider.useV2Slider}
+/// Whether to use the updated Material spec version of the slider shape.
+///
+/// This is a temporary flag for migrating the slider from v1 to v2. To avoid
+/// unexpected breaking changes, this value should be set to true. Setting
+/// this to false is considered deprecated.
+/// {@endtemplate}
 
 /// Applies a slider theme to descendant [Slider] widgets.
 ///
@@ -1678,7 +1686,10 @@ class RectangularSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
 ///  * [RectangularSliderTrackShape], for a similar track with sharp edges.
 class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackShape {
   /// Create a slider track that draws two rectangles with rounded outer edges.
-  const RoundedRectSliderTrackShape();
+  const RoundedRectSliderTrackShape({this.useV2Slider = false});
+
+  /// {@macro flutter.material.slider.useV2Slider}
+  final bool useV2Slider;
 
   @override
   void paint(
@@ -1739,28 +1750,46 @@ class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
     );
     final Radius trackRadius = Radius.circular(trackRect.height / 2);
 
-    context.canvas.drawRRect(
-      RRect.fromLTRBAndCorners(
-        trackRect.left,
-        trackRect.top,
-        thumbCenter.dx,
-        trackRect.bottom,
-        topLeft: trackRadius,
-        bottomLeft: trackRadius,
-      ),
-      leftTrackPaint,
-    );
-    context.canvas.drawRRect(
-      RRect.fromLTRBAndCorners(
-        thumbCenter.dx,
-        trackRect.top,
-        trackRect.right,
-        trackRect.bottom,
-        topRight: trackRadius,
-        bottomRight: trackRadius,
-      ),
-      rightTrackPaint,
-    );
+    if (useV2Slider) {
+      context.canvas.drawRRect(
+        RRect.fromLTRBAndCorners(
+          trackRect.left,
+          trackRect.top,
+          thumbCenter.dx,
+          trackRect.bottom,
+          topLeft: trackRadius,
+          bottomLeft: trackRadius,
+        ),
+        leftTrackPaint,
+      );
+      context.canvas.drawRRect(
+        RRect.fromLTRBAndCorners(
+          thumbCenter.dx,
+          trackRect.top,
+          trackRect.right,
+          trackRect.bottom,
+          topRight: trackRadius,
+          bottomRight: trackRadius,
+        ),
+        rightTrackPaint,
+      );
+    } else {
+      // The arc rects create a semi-circle with radius equal to track height.
+      final Rect leftTrackArcRect = Rect.fromLTWH(trackRect.left, trackRect.top, trackRect.height, trackRect.height);
+      if (!leftTrackArcRect.isEmpty)
+        context.canvas.drawArc(leftTrackArcRect, math.pi / 2, math.pi, false, leftTrackPaint);
+      final Rect rightTrackArcRect = Rect.fromLTWH(trackRect.right - trackRect.height / 2, trackRect.top, trackRect.height, trackRect.height);
+      if (!rightTrackArcRect.isEmpty)
+        context.canvas.drawArc(rightTrackArcRect, -math.pi / 2, math.pi, false, rightTrackPaint);
+
+      final Size thumbSize = sliderTheme.thumbShape.getPreferredSize(isEnabled, isDiscrete);
+      final Rect leftTrackSegment = Rect.fromLTRB(trackRect.left + trackRect.height / 2, trackRect.top, thumbCenter.dx - thumbSize.width / 2, trackRect.bottom);
+      if (!leftTrackSegment.isEmpty)
+        context.canvas.drawRect(leftTrackSegment, leftTrackPaint);
+      final Rect rightTrackSegment = Rect.fromLTRB(thumbCenter.dx + thumbSize.width / 2, trackRect.top, trackRect.right, trackRect.bottom);
+      if (!rightTrackSegment.isEmpty)
+        context.canvas.drawRect(rightTrackSegment, rightTrackPaint);
+    }
   }
 }
 
@@ -1792,7 +1821,7 @@ class RectangularRangeSliderTrackShape extends RangeSliderTrackShape {
   ///
   /// The middle track segment is the selected range and is active, and the two
   /// outer track segments are inactive.
-  const RectangularRangeSliderTrackShape();
+  const RectangularRangeSliderTrackShape({ this.useV2Slider });
 
   @override
   Rect getPreferredRect({
@@ -2067,14 +2096,21 @@ class RoundedRectRangeSliderTrackShape extends RangeSliderTrackShape {
 ///    sliders in a widget subtree.
 class RoundSliderTickMarkShape extends SliderTickMarkShape {
   /// Create a slider tick mark that draws a circle.
-  const RoundSliderTickMarkShape({ this.tickMarkRadius });
+  const RoundSliderTickMarkShape({
+    this.tickMarkRadius,
+    this.useV2Slider,
+  });
 
   /// The preferred radius of the round tick mark.
   ///
-  /// If it is not provided, then 1/4 of the [SliderThemeData.trackHeight] is
-  /// used.
+  /// If it is not provided, and [useV2Slider] is true, then 1/4 of the
+  /// [SliderThemeData.trackHeight] is used. If it is not provided, and
+  /// [useV2Slider] is false, then half of the track height is used.
   final double tickMarkRadius;
 
+  /// {@macro flutter.material.slider.useV2Slider}
+  final bool useV2Slider;
+  
   @override
   Size getPreferredSize({
     @required SliderThemeData sliderTheme,
@@ -2084,9 +2120,10 @@ class RoundSliderTickMarkShape extends SliderTickMarkShape {
     assert(sliderTheme.trackHeight != null);
     assert(isEnabled != null);
     // The tick marks are tiny circles. If no radius is provided, then the
-    // radius is defaulted to be 1/4 of the [SliderThemeData.trackHeight], or a
-    // diameter of half the [SliderThemeData.trackHeight].
-    return Size.fromRadius(tickMarkRadius ?? sliderTheme.trackHeight / 4);
+    // radius is defaulted to be a fraction of the
+    // [SliderThemeData.trackHeight]. The fraction is 1/4 when [useV2Slider] is
+    // true, and 1/2 when it is false.
+    return Size.fromRadius(tickMarkRadius ?? sliderTheme.trackHeight / (useV2Slider ? 4 : 2));
   }
 
   @override
@@ -2295,6 +2332,9 @@ class _EmptySliderComponentShape extends SliderComponentShape {
 
 /// The default shape of a [Slider]'s thumb.
 ///
+/// If [useSliderV2] is true, then there is a shadow for the resting and
+/// pressed state.
+///
 /// See also:
 ///
 ///  * [Slider], which includes a thumb defined by this shape.
@@ -2307,6 +2347,7 @@ class RoundSliderThumbShape extends SliderComponentShape {
     this.disabledThumbRadius,
     this.elevation = 1.0,
     this.pressedElevation = 6.0,
+    this.useV2Slider = false
   });
 
   /// The preferred radius of the round thumb shape when the slider is enabled.
@@ -2323,19 +2364,27 @@ class RoundSliderThumbShape extends SliderComponentShape {
 
   /// The resting elevation adds shadow to the unpressed thumb.
   ///
+  /// This value is only used when [useV2Slider] is true.
+  ///
   /// The default is 1.
   ///
   /// Use 0 for no shadow. The higher the value, the larger the shadow. For
   /// example, a value of 12 will create a very large shadow.
+  ///
   final double elevation;
 
   /// The pressed elevation adds shadow to the pressed thumb.
+  ///
+  /// This value is only used when [useV2Slider] is true.
   ///
   /// The default is 6.
   ///
   /// Use 0 for no shadow. The higher the value, the larger the shadow. For
   /// example, a value of 12 will create a very large shadow.
   final double pressedElevation;
+
+  /// {@macro flutter.material.slider.useV2Slider}
+  final bool useV2Slider;
 
   @override
   Size getPreferredSize(bool isEnabled, bool isDiscrete) {
@@ -2374,25 +2423,33 @@ class RoundSliderThumbShape extends SliderComponentShape {
       begin: sliderTheme.disabledThumbColor,
       end: sliderTheme.thumbColor,
     );
-    final Tween<double> elevationTween = Tween<double>(
-      begin: elevation,
-      end: pressedElevation,
-    );
 
-    final double evaluatedElevation = elevationTween.evaluate(activationAnimation);
-    final Color color = colorTween.evaluate(enableAnimation);
-    final double radius = radiusTween.evaluate(enableAnimation);
-    final Path path = Path()..addArc(Rect.fromCenter(center: center, width: 2 * radius, height: 2 * radius), 0, math.pi * 2);
-    canvas.drawShadow(path, Colors.black, evaluatedElevation, true);
-
-    // If the thumb is translucent, clear the space of the track and shadow so
-    // the thumb can be drawn without interference.
-    if (color.alpha != 0xff) {
-      canvas.drawCircle(
-        center,
-        radius,
-        Paint()..color = sliderTheme.surfaceColor.withOpacity(1),
+    if (useV2Slider) {
+      final Tween<double> elevationTween = Tween<double>(
+        begin: elevation,
+        end: pressedElevation,
       );
+
+      final double evaluatedElevation = elevationTween.evaluate(
+          activationAnimation);
+      final Color color = colorTween.evaluate(enableAnimation);
+      final double radius = radiusTween.evaluate(enableAnimation);
+      final Path path = Path()
+        ..addArc(Rect.fromCenter(
+            center: center, width: 2 * radius, height: 2 * radius), 0,
+            math.pi * 2);
+      canvas.drawShadow(path, Colors.black, evaluatedElevation, true);
+
+      // If the thumb is translucent, clear the space of the track and shadow so
+      // the thumb can be drawn without interference.
+      if (color.alpha != 0xff) {
+        canvas.drawCircle(
+          center,
+          radius,
+          Paint()
+            ..color = sliderTheme.surfaceColor.withOpacity(1),
+        );
+      }
     }
 
     canvas.drawCircle(
