@@ -589,13 +589,13 @@ abstract class FlutterCommand extends Command<void> {
   Future<FlutterCommandResult> verifyThenRunCommand(String commandPath) async {
     await validateCommand();
 
-    // First always update universal artifacts, as some of these (e.g.
-    // idevice_id on macOS) are required to run `requiredArtifacts`.
-    await cache.updateAll(<DevelopmentArtifact>{DevelopmentArtifact.universal});
-
     // Populate the cache. We call this before pub get below so that the
     // sky_engine package is available in the flutter cache for pub to find.
     if (shouldUpdateCache) {
+      // First always update universal artifacts, as some of these (e.g.
+      // idevice_id on macOS) are required to run `requiredArtifacts`.
+      await cache.updateAll(<DevelopmentArtifact>{DevelopmentArtifact.universal});
+
       await cache.updateAll(await requiredArtifacts);
     }
 
