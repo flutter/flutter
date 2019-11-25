@@ -35,9 +35,6 @@
 }
 
 - (void)testPlatformView {
-  //[self checkGolden];
-  [[XCUIDevice sharedDevice] pressButton:XCUIDeviceButtonHome];
-  [self.application activate];
   [self checkGolden];
 }
 
