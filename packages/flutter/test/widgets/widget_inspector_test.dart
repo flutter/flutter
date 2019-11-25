@@ -2623,32 +2623,50 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       final Element columnWidgetElement = columnWidgetFinder
         .evaluate()
         .first;
-      final InspectorSerializationDelegate delegate = InspectorSerializationDelegate(
-        groupName: 'inspector-layout',
-        service: service,
-        summaryTree: false,
-        includeProperties: true,
-        addAdditionalPropertiesCallback: (DiagnosticsNode node,
-            InspectorSerializationDelegate delegate) {
-          final Map<String, Object> additionalJson = <String, Object>{};
-          final Object value = node.value;
-          if (value is Element) {
-            additionalJson['renderObject'] =
-              value.renderObject.toDiagnosticsNode().toJsonMap(
-                delegate.copyWith(subtreeDepth: 0),
-              );
-          }
-          additionalJson['callbackIsCalled'] = true;
-          return additionalJson;
-        }
-      );
-      final Map<String, Object> json = columnWidgetElement.toDiagnosticsNode()
-        .toJsonMap(delegate);
+      final DiagnosticsNode node = columnWidgetElement.toDiagnosticsNode();
+      final InspectorSerializationDelegate delegate =
+        InspectorSerializationDelegate(
+          service: service,
+          summaryTree: false,
+          includeProperties: true,
+          addAdditionalPropertiesCallback:
+            (DiagnosticsNode node, InspectorSerializationDelegate delegate) {
+              final Map<String, Object> additionalJson = <String, Object>{};
+              final Object value = node.value;
+              if (value is Element) {
+                additionalJson['renderObject'] =
+                  value.renderObject.toDiagnosticsNode().toJsonMap(
+                    delegate.copyWith(subtreeDepth: 0),
+                  );
+              }
+              additionalJson['callbackIsCalled'] = true;
+              return additionalJson;
+            },
+        );
+      final Map<String, Object> json = node.toJsonMap(delegate);
       expect(json['callbackIsCalled'], true);
       expect(json.containsKey('renderObject'), true);
       expect(json['renderObject'], isA<Map<String, dynamic>>());
       final Map<String, dynamic> renderObjectJson = json['renderObject'];
       expect(renderObjectJson['description'], startsWith('RenderFlex'));
+      final InspectorSerializationDelegate unsafeDelegate =
+        InspectorSerializationDelegate(
+          service: service,
+          summaryTree: false,
+          includeProperties: true,
+          addAdditionalPropertiesCallback:
+            (DiagnosticsNode node, InspectorSerializationDelegate delegate) {
+              return null;
+            },
+        );
+      final InspectorSerializationDelegate defaultDelegate =
+        InspectorSerializationDelegate(
+          service: service,
+          summaryTree: false,
+          includeProperties: true,
+          addAdditionalPropertiesCallback: null,
+        );
+      expect(node.toJsonMap(unsafeDelegate), node.toJsonMap(defaultDelegate));
     });
   }
 }

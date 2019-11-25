@@ -2994,7 +2994,7 @@ class InspectorSerializationDelegate implements DiagnosticsSerializationDelegate
       }
     }
     if (addAdditionalPropertiesCallback != null) {
-      result.addAll(addAdditionalPropertiesCallback(node, this));
+      result.addAll(addAdditionalPropertiesCallback(node, this) ?? <String, Object>{});
     }
     return result;
   }
