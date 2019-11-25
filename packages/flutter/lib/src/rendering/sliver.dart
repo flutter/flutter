@@ -2166,7 +2166,7 @@ class RenderSliverOffstage extends RenderSliver with RenderObjectWithChildMixin<
   void paint(PaintingContext context, Offset offset) {
     if (offstage)
       return;
-    super.paint(context, offset);
+    context.paintChild(child, offset);
   }
 
   @override

@@ -605,38 +605,12 @@ void main() {
     )));
     expect(find.byType(Text, skipOffstage: false), findsOneWidget);
     expect(find.text('a true', skipOffstage: false), findsOneWidget);
-    expect(find.byType(Placeholder), findsOneWidget);
+    expect(find.byType(Placeholder), findsNothing);
     expect(find.byType(SliverVisibility), findsOneWidget);
     expect(find.byType(SliverVisibility), paintsNothing);
     renderViewport = tester.renderObject(find.byType(Viewport));
     renderSliver = renderViewport.lastChild;
     expect(renderSliver.geometry.scrollExtent, 14.0);
-    expect(renderSliver.constraints.crossAxisExtent, 800.0);
-    expect(semantics.nodesWith(label: 'a true'), hasLength(1));
-    expect(log, <String>[]);
-    await tester.tap(find.byKey(anchor));
-    expect(log, <String>['tap']);
-    log.clear();
-
-    // visible: false, maintain all but size, replacementSliver
-    await tester.pumpWidget(_boilerPlate(SliverVisibility(
-      sliver: testChild,
-      replacementSliver: const SliverToBoxAdapter(child: Placeholder()),
-      visible: false,
-      maintainState: true,
-      maintainAnimation: true,
-      maintainSize: true,
-      maintainInteractivity: true,
-      maintainSemantics: true,
-    )));
-    expect(find.byType(Text, skipOffstage: false), findsNothing);
-    expect(find.text('a true', skipOffstage: false), findsNothing);
-    expect(find.byType(Placeholder), findsOneWidget);
-    expect(find.byType(SliverVisibility), findsOneWidget);
-    expect(find.byType(SliverVisibility), paintsNothing);
-    renderViewport = tester.renderObject(find.byType(Viewport));
-    renderSliver = renderViewport.lastChild;
-    expect(renderSliver.geometry.scrollExtent, 400.0);
     expect(renderSliver.constraints.crossAxisExtent, 800.0);
     expect(semantics.nodesWith(label: 'a true'), hasLength(1));
     expect(log, <String>[]);
@@ -765,8 +739,7 @@ void main() {
     expect(find.byType(Text), findsOneWidget);
     expect(find.text('a true'), findsOneWidget);
     expect(find.byType(SliverVisibility), findsOneWidget);
-    // TODO(Piinks): this fails
-//    expect(find.byType(SliverVisibility), paints..paragraph());
+    expect(find.byType(SliverVisibility), paints..paragraph());
     renderViewport = tester.renderObject(find.byType(Viewport));
     renderSliver = renderViewport.lastChild;
     expect(renderSliver.geometry.scrollExtent, 14.0);
@@ -806,8 +779,7 @@ void main() {
     expect(find.byType(Text), findsOneWidget);
     expect(find.text('a true', skipOffstage: false), findsOneWidget);
     expect(find.byType(SliverVisibility, skipOffstage: false), findsOneWidget);
-    // TODO(Piinks): This fails
-//    expect(find.byType(SliverVisibility, skipOffstage: false), paints..paragraph());
+    expect(find.byType(SliverVisibility, skipOffstage: false), paints..paragraph());
     renderViewport = tester.renderObject(find.byType(Viewport));
     renderSliver = renderViewport.lastChild;
     expect(renderSliver.geometry.scrollExtent, 14.0);
@@ -911,7 +883,7 @@ void main() {
     await tester.tap(find.byKey(anchor));
     expect(log, <String>['created new state', 'tap']);
     log.clear();
-    
+
     semantics.dispose();
   }, skip: isBrowser);
 }
