@@ -1023,7 +1023,7 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
   }
 }
 
-/// A sliver that contains a multiple box children that each fills the viewport.
+/// A sliver that contains multiple box children that each fills the viewport.
 ///
 /// [SliverFillViewport] places its children in a linear array along the main
 /// axis. Each child is sized to fill the viewport, both in the main and cross
@@ -1118,7 +1118,7 @@ class _SliverFractionalPadding extends SingleChildRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, _RenderSliverFractionalPadding renderObject) {
-    renderObject.setViewportFraction(viewportFraction);
+    renderObject.viewportFraction = viewportFraction;
   }
 }
 
@@ -1131,8 +1131,9 @@ class _RenderSliverFractionalPadding extends RenderSliverPadding {
        _viewportFraction = viewportFraction,
        super(padding: EdgeInsets.zero);
 
+  double get viewportFraction => _viewportFraction;
   double _viewportFraction;
-  void setViewportFraction(double newValue) {
+  set viewportFraction(double newValue) {
     assert(newValue != null);
     if (_viewportFraction == newValue)
       return;
@@ -1144,7 +1145,7 @@ class _RenderSliverFractionalPadding extends RenderSliverPadding {
   @override
   EdgeInsetsGeometry get padding {
     assert(constraints.axis != null);
-    final double paddingValue = constraints.viewportMainAxisExtent * _viewportFraction;
+    final double paddingValue = constraints.viewportMainAxisExtent * viewportFraction;
     switch (constraints.axis) {
       case Axis.horizontal:
         return EdgeInsets.symmetric(horizontal: paddingValue);
