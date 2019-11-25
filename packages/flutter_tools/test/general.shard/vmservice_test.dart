@@ -196,7 +196,7 @@ void main() {
         bool done = false;
         final MockPeer mockPeer = MockPeer();
         expect(mockPeer.returnedFromSendRequest, 0);
-        final VMService vmService = VMService(mockPeer, null, null, null, null, null);
+        final VMService vmService = VMService(mockPeer, null, null, null, null, null, null);
         expect(mockPeer.sentNotifications, contains('registerService'));
         final List<String> registeredServices =
           mockPeer.sentNotifications['registerService']
@@ -269,7 +269,7 @@ void main() {
       FakeAsync().run((FakeAsync time) {
         final MockPeer mockPeer = MockPeer();
         Future<void> reloadSources(String isolateId, { bool pause, bool force}) async {}
-        VMService(mockPeer, null, null, reloadSources, null, null);
+        VMService(mockPeer, null, null, reloadSources, null, null, null);
 
         expect(mockPeer.registeredMethods, contains('reloadMethod'));
       });

@@ -696,6 +696,7 @@ VMServiceConnector getFakeVmServiceFactory({
     Restart restart,
     CompileExpression compileExpression,
     CompressionOptions compression,
+    Device device,
   }) async {
     final VMService vmService = VMServiceMock();
     final VM vm = VMMock();

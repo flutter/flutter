@@ -105,7 +105,7 @@ void main() {
       .thenAnswer((Invocation invocation) async {
         return testUri;
       });
-    when(mockFlutterDevice.vmService).thenReturn(mockVMService);
+    when(mockFlutterDevice.vmServices).thenReturn(<VMService>[mockVMService]);
     when(mockFlutterDevice.refreshViews()).thenAnswer((Invocation invocation) async { });
     when(mockFlutterDevice.reloadSources(any, pause: anyNamed('pause'))).thenReturn(<Future<Map<String, dynamic>>>[
       Future<Map<String, dynamic>>.value(<String, dynamic>{
