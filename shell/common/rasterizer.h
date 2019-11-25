@@ -426,6 +426,13 @@ class Rasterizer final : public SnapshotDelegate {
   sk_sp<SkImage> MakeRasterSnapshot(sk_sp<SkPicture> picture,
                                     SkISize picture_size) override;
 
+  // |SnapshotDelegate|
+  sk_sp<SkImage> ConvertToRasterImage(sk_sp<SkImage> image) override;
+
+  sk_sp<SkImage> DoMakeRasterSnapshot(
+      SkISize size,
+      std::function<void(SkCanvas*)> draw_callback);
+
   RasterStatus DoDraw(std::unique_ptr<flutter::LayerTree> layer_tree);
 
   RasterStatus DrawToSurface(flutter::LayerTree& layer_tree);
