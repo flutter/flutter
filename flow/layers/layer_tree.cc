@@ -27,6 +27,12 @@ void LayerTree::RecordBuildTime(fml::TimePoint start) {
 void LayerTree::Preroll(CompositorContext::ScopedFrame& frame,
                         bool ignore_raster_cache) {
   TRACE_EVENT0("flutter", "LayerTree::Preroll");
+
+  if (!root_layer_) {
+    FML_LOG(ERROR) << "The scene did not specify any layers.";
+    return;
+  }
+
   SkColorSpace* color_space =
       frame.canvas() ? frame.canvas()->imageInfo().colorSpace() : nullptr;
   frame.context().raster_cache().SetCheckboardCacheImages(
@@ -75,6 +81,12 @@ void LayerTree::UpdateScene(SceneUpdateContext& context,
 void LayerTree::Paint(CompositorContext::ScopedFrame& frame,
                       bool ignore_raster_cache) const {
   TRACE_EVENT0("flutter", "LayerTree::Paint");
+
+  if (!root_layer_) {
+    FML_LOG(ERROR) << "The scene did not specify any layers to paint.";
+    return;
+  }
+
   SkISize canvas_size = frame.canvas()->getBaseLayerSize();
   SkNWayCanvas internal_nodes_canvas(canvas_size.width(), canvas_size.height());
   internal_nodes_canvas.addCanvas(frame.canvas());
