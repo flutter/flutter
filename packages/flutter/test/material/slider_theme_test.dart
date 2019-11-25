@@ -94,6 +94,24 @@ void main() {
     ]);
   });
 
+  testWidgets('Slider V2 uses ThemeData slider theme if present', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(
+      platform: TargetPlatform.android,
+      primarySwatch: Colors.red,
+    );
+    final SliderThemeData sliderTheme = theme.sliderTheme;
+
+    await tester.pumpWidget(_buildApp(sliderTheme, value: 0.5, enabled: false, useV2Slider: useV2Slider));
+    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
+
+    expect(
+      sliderBox,
+      paints
+        ..rrect(color: sliderTheme.disabledActiveTrackColor)
+        ..rrect(color: sliderTheme.disabledInactiveTrackColor),
+    );
+  });
+
   testWidgets('Slider uses ThemeData slider theme if present', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(
       platform: TargetPlatform.android,
@@ -107,8 +125,30 @@ void main() {
     expect(
       sliderBox,
       paints
-        ..rrect(color: sliderTheme.disabledActiveTrackColor)
-        ..rrect(color: sliderTheme.disabledInactiveTrackColor),
+        ..rect(color: sliderTheme.disabledActiveTrackColor)
+        ..rect(color: sliderTheme.disabledInactiveTrackColor),
+    );
+  });
+
+  testWidgets('Slider V2 overrides ThemeData theme if SliderTheme present', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(
+      platform: TargetPlatform.android,
+      primarySwatch: Colors.red,
+    );
+    final SliderThemeData sliderTheme = theme.sliderTheme;
+    final SliderThemeData customTheme = sliderTheme.copyWith(
+      activeTrackColor: Colors.purple,
+      inactiveTrackColor: Colors.purple.withAlpha(0x3d),
+    );
+
+    await tester.pumpWidget(_buildApp(sliderTheme, value: 0.5, enabled: false, useV2Slider, useV2Slider));
+    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
+
+    expect(
+      sliderBox,
+      paints
+        ..rrect(color: customTheme.disabledActiveTrackColor)
+        ..rrect(color: customTheme.disabledInactiveTrackColor),
     );
   });
 
@@ -129,8 +169,8 @@ void main() {
     expect(
       sliderBox,
       paints
-        ..rrect(color: customTheme.disabledActiveTrackColor)
-        ..rrect(color: customTheme.disabledInactiveTrackColor),
+        ..rect(color: customTheme.disabledActiveTrackColor)
+        ..rect(color: customTheme.disabledInactiveTrackColor),
     );
   });
 
@@ -218,14 +258,14 @@ void main() {
     expect(lerp.valueIndicatorTextStyle.color, equals(middleGrey.withAlpha(0xff)));
   });
 
-  testWidgets('Default slider track draws correctly', (WidgetTester tester) async {
+  testWidgets('V2 slider track draws correctly', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(
       platform: TargetPlatform.android,
       primarySwatch: Colors.blue,
     );
     final SliderThemeData sliderTheme = theme.sliderTheme.copyWith(thumbColor: Colors.red.shade500);
 
-    await tester.pumpWidget(_buildApp(sliderTheme, value: 0.25));
+    await tester.pumpWidget(_buildApp(sliderTheme, value: 0.25, useV2Slider: useV2Slider));
     final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
 
     const Radius radius = Radius.circular(2);
@@ -242,17 +282,43 @@ void main() {
     await tester.pumpWidget(_buildApp(sliderTheme, value: 0.25, enabled: false));
     await tester.pumpAndSettle(); // wait for disable animation
 
-    // The disabled slider thumb has a horizontal gap between itself and the
-    // track segments. Therefore, the track segments are shorter since they do
-    // not extend to the center of the thumb, but rather the outer edge of th
-    // gap. As a result, the `right` value of the first segment is less than it
-    // is above, and the `left` value of the second segment is more than it is
-    // above.
+    // The disabled slider thumb is the same size as the enabled thumb.
     expect(
       sliderBox,
       paints
         ..rrect(rrect: RRect.fromLTRBAndCorners(24.0, 298.0, 212.0, 302.0, topLeft: radius, bottomLeft: radius), color: sliderTheme.disabledActiveTrackColor)
         ..rrect(rrect: RRect.fromLTRBAndCorners(212.0, 298.0, 776.0, 302.0, topRight: radius, bottomRight: radius), color: sliderTheme.disabledInactiveTrackColor),
+    );
+  });
+
+  testWidgets('Default slider track draws correctly', (WidgetTester tester) async {
+    final ThemeData theme = ThemeData(
+      platform: TargetPlatform.android,
+      primarySwatch: Colors.blue,
+    );
+    final SliderThemeData sliderTheme = theme.sliderTheme.copyWith(thumbColor: Colors.red.shade500);
+
+    await tester.pumpWidget(_buildApp(sliderTheme, value: 0.25));
+    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
+
+    // The enabled slider thumb has track segments that extend to and from
+    // the center of the thumb.
+    expect(
+      sliderBox,
+      paints
+        ..rect(rect: const Rect.fromLTRB(25.0, 299.0, 202.0, 301.0), color: sliderTheme.activeTrackColor)
+        ..rect(rect: const Rect.fromLTRB(222.0, 299.0, 776.0, 301.0), color: sliderTheme.inactiveTrackColor),
+    );
+
+    await tester.pumpWidget(_buildApp(sliderTheme, value: 0.25, enabled: false));
+    await tester.pumpAndSettle(); // wait for disable animation
+
+    // The disabled slider thumb is the same size as the enabled thumb.
+    expect(
+      sliderBox,
+      paints
+        ..rect(rect: const Rect.fromLTRB(25.0, 299.0, 202.0, 301.0), color: sliderTheme.disabledActiveTrackColor)
+        ..rect(rect: const Rect.fromLTRB(222.0, 299.0, 776.0, 301.0), color: sliderTheme.disabledInactiveTrackColor),
     );
   });
 
@@ -361,7 +427,7 @@ void main() {
     );
   });
 
-  testWidgets('Default slider value indicator shape draws correctly', (WidgetTester tester) async {
+  testWidgets('Slider V2 value indicator shape draws correctly', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(
       platform: TargetPlatform.android,
       primarySwatch: Colors.blue,
@@ -386,6 +452,7 @@ void main() {
                       label: '$value',
                       divisions: 3,
                       onChanged: (double d) { },
+                      useV2Slider: useV2Slider,
                     ),
                   ),
                 ),
@@ -539,7 +606,7 @@ void main() {
     await gesture.up();
   }, skip: isBrowser);
 
-  testWidgets('Paddle slider value indicator shape draws correctly', (WidgetTester tester) async {
+  testWidgets('Default paddle slider value indicator shape draws correctly', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(
       platform: TargetPlatform.android,
       primarySwatch: Colors.blue,
@@ -1128,6 +1195,7 @@ Widget _buildApp(
   double value = 0.0,
   bool enabled = true,
   int divisions,
+  bool useV2Slider = false,
 }) {
   final ValueChanged<double> onChanged = enabled ? (double d) => value = d : null;
   return MaterialApp(
@@ -1140,6 +1208,7 @@ Widget _buildApp(
             label: '$value',
             onChanged: onChanged,
             divisions: divisions,
+            useV2Slider: useV2Slider
           ),
         ),
       ),
