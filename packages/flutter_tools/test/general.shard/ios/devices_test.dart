@@ -111,7 +111,7 @@ void main() {
 
       IOSDeviceLogReader createLogReader(
           IOSDevice device,
-          ApplicationPackage appPackage,
+          IOSApp appPackage,
           Process process) {
         final IOSDeviceLogReader logReader = IOSDeviceLogReader(device, appPackage);
         logReader.idevicesyslogProcess = process;
@@ -436,7 +436,7 @@ void main() {
           bundlePath: anyNamed('bundlePath'),
           launchArguments: anyNamed('launchArguments'),
         )).thenAnswer((Invocation inv) {
-          args = inv.namedArguments[const Symbol('launchArguments')];
+          args = inv.namedArguments[const Symbol('launchArguments')] as List<String>;
           return Future<int>.value(0);
         });
 

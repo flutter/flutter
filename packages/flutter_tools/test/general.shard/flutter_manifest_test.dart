@@ -8,7 +8,6 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
 
@@ -401,7 +400,6 @@ flutter:
     });
 
     testUsingContext('handles an invalid plugin declaration', () async {
-      final BufferLogger bufferLogger = context.get<Logger>();
       const String manifest = '''
 name: test
 flutter:
@@ -409,7 +407,7 @@ flutter:
 ''';
       final FlutterManifest flutterManifest = FlutterManifest.createFromString(manifest);
       expect(flutterManifest, null);
-      expect(bufferLogger.errorText, contains('Expected "plugin" to be an object, but got null'));
+      expect(testLogger.errorText, contains('Expected "plugin" to be an object, but got null'));
     });
 
 
@@ -528,7 +526,6 @@ flutter:
 
     // Regression test for https://github.com/flutter/flutter/issues/31764
     testUsingContext('Returns proper error when font detail is malformed', () async {
-      final BufferLogger logger = context.get<Logger>();
       const String manifest = '''
 name: test
 dependencies:
@@ -543,11 +540,10 @@ flutter:
       final FlutterManifest flutterManifest = FlutterManifest.createFromString(manifest);
 
       expect(flutterManifest, null);
-      expect(logger.errorText, contains('Expected "fonts" to either be null or a list.'));
+      expect(testLogger.errorText, contains('Expected "fonts" to either be null or a list.'));
     });
 
     testUsingContext('Returns proper error when font detail is not a list of maps', () async {
-      final BufferLogger logger = context.get<Logger>();
       const String manifest = '''
 name: test
 dependencies:
@@ -562,11 +558,10 @@ flutter:
       final FlutterManifest flutterManifest = FlutterManifest.createFromString(manifest);
 
       expect(flutterManifest, null);
-      expect(logger.errorText, contains('Expected "fonts" to be a list of maps.'));
+      expect(testLogger.errorText, contains('Expected "fonts" to be a list of maps.'));
     });
 
     testUsingContext('Returns proper error when font is a map instead of a list', () async {
-      final BufferLogger logger = context.get<Logger>();
       const String manifest = '''
 name: test
 dependencies:
@@ -581,11 +576,10 @@ flutter:
       final FlutterManifest flutterManifest = FlutterManifest.createFromString(manifest);
 
       expect(flutterManifest, null);
-      expect(logger.errorText, contains('Expected "fonts" to be a list'));
+      expect(testLogger.errorText, contains('Expected "fonts" to be a list'));
     });
 
     testUsingContext('Returns proper error when second font family is invalid', () async {
-      final BufferLogger logger = context.get<Logger>();
       const String manifest = '''
 name: test
 dependencies:
@@ -601,11 +595,10 @@ flutter:
 ''';
       final FlutterManifest flutterManifest = FlutterManifest.createFromString(manifest);
       expect(flutterManifest, null);
-      expect(logger.errorText, contains('Expected a map.'));
+      expect(testLogger.errorText, contains('Expected a map.'));
     });
 
     testUsingContext('Does not crash on empty entry', () async {
-      final BufferLogger logger = context.get<Logger>();
       const String manifest = '''
 name: test
 dependencies:
@@ -620,7 +613,7 @@ flutter:
       final FlutterManifest flutterManifest = FlutterManifest.createFromString(manifest);
       final List<Uri> assets = flutterManifest.assets;
 
-      expect(logger.errorText, contains('Asset manifest contains a null or empty uri.'));
+      expect(testLogger.errorText, contains('Asset manifest contains a null or empty uri.'));
       expect(assets.length, 1);
     });
   });

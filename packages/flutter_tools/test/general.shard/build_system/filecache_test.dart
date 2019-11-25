@@ -2,14 +2,15 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:typed_data';
+
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/file_hash_store.dart';
-import 'package:flutter_tools/src/globals.dart';
 import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
+import '../../src/context.dart';
 import '../../src/testbed.dart';
 
 void main() {
@@ -34,7 +35,7 @@ void main() {
 
     expect(fs.file(fs.path.join(environment.buildDir.path, '.filecache')).existsSync(), true);
 
-    final List<int> buffer = fs.file(fs.path.join(environment.buildDir.path, '.filecache'))
+    final Uint8List buffer = fs.file(fs.path.join(environment.buildDir.path, '.filecache'))
         .readAsBytesSync();
     final FileStorage fileStorage = FileStorage.fromBuffer(buffer);
 
@@ -51,7 +52,7 @@ void main() {
     await fileCache.hashFiles(<File>[file]);
     fileCache.persist();
     final String currentHash =  fileCache.currentHashes[file.path];
-    final List<int> buffer = fs.file(fs.path.join(environment.buildDir.path, '.filecache'))
+    final Uint8List buffer = fs.file(fs.path.join(environment.buildDir.path, '.filecache'))
         .readAsBytesSync();
     FileStorage fileStorage = FileStorage.fromBuffer(buffer);
 
@@ -97,7 +98,6 @@ void main() {
   }));
 
   test('handles failure to persist file cache', () => testbed.run(() async {
-    final BufferLogger bufferLogger = logger;
     final FakeForwardingFileSystem fakeForwardingFileSystem = FakeForwardingFileSystem(fs);
     final FileHashStore fileCache = FileHashStore(environment, fakeForwardingFileSystem);
     final String cacheFile = environment.buildDir.childFile('.filecache').path;
@@ -109,11 +109,10 @@ void main() {
     fakeForwardingFileSystem.files[cacheFile] = mockFile;
     fileCache.persist();
 
-    expect(bufferLogger.errorText, contains('Out of space!'));
+    expect(testLogger.errorText, contains('Out of space!'));
   }));
 
   test('handles failure to restore file cache', () => testbed.run(() async {
-    final BufferLogger bufferLogger = logger;
     final FakeForwardingFileSystem fakeForwardingFileSystem = FakeForwardingFileSystem(fs);
     final FileHashStore fileCache = FileHashStore(environment, fakeForwardingFileSystem);
     final String cacheFile = environment.buildDir.childFile('.filecache').path;
@@ -124,14 +123,14 @@ void main() {
     fakeForwardingFileSystem.files[cacheFile] = mockFile;
     fileCache.initialize();
 
-    expect(bufferLogger.errorText, contains('Out of space!'));
+    expect(testLogger.errorText, contains('Out of space!'));
   }));
 }
 
 class FakeForwardingFileSystem extends ForwardingFileSystem {
   FakeForwardingFileSystem(FileSystem fileSystem) : super(fileSystem);
 
-  final Map<String, FileSystemEntity> files = <String, FileSystemEntity>{};
+  final Map<String, File> files = <String, File>{};
 
   @override
   File file(dynamic path) => files[path] ?? super.file(path);

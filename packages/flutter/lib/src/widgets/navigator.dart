@@ -1488,8 +1488,8 @@ class Navigator extends StatefulWidget {
     bool nullOk = false,
   }) {
     final NavigatorState navigator = rootNavigator
-        ? context.rootAncestorStateOfType(const TypeMatcher<NavigatorState>())
-        : context.ancestorStateOfType(const TypeMatcher<NavigatorState>());
+        ? context.findRootAncestorStateOfType<NavigatorState>()
+        : context.findAncestorStateOfType<NavigatorState>();
     assert(() {
       if (navigator == null && !nullOk) {
         throw FlutterError(
@@ -2315,7 +2315,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       // If we're between frames (SchedulerPhase.idle) then absorb any
       // subsequent pointers from this frame. The absorbing flag will be
       // reset in the next frame, see build().
-      final RenderAbsorbPointer absorber = _overlayKey.currentContext?.ancestorRenderObjectOfType(const TypeMatcher<RenderAbsorbPointer>());
+      final RenderAbsorbPointer absorber = _overlayKey.currentContext?.findAncestorRenderObjectOfType<RenderAbsorbPointer>();
       setState(() {
         absorber?.absorbing = true;
         // We do this in setState so that we'll reset the absorbing value back

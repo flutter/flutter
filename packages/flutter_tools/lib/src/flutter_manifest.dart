@@ -319,7 +319,7 @@ String buildSchemaPath(FileSystem fs) {
 
 /// This method should be kept in sync with the schema in
 /// `$FLUTTER_ROOT/packages/flutter_tools/schema/pubspec_yaml.json`,
-/// but avoid introducing depdendencies on packages for simple validation.
+/// but avoid introducing dependencies on packages for simple validation.
 bool _validate(YamlMap manifest) {
   final List<String> errors = <String>[];
   for (final MapEntry<dynamic, dynamic> kvp in manifest.entries) {

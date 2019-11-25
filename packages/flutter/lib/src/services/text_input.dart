@@ -68,10 +68,10 @@ class TextInputType {
   /// Requests the default platform keyboard.
   static const TextInputType text = TextInputType._(0);
 
-  /// Optimize for multi-line textual information.
+  /// Optimize for multiline textual information.
   ///
   /// Requests the default platform keyboard, but accepts newlines when the
-  /// enter key is pressed. This is the input type used for all multi-line text
+  /// enter key is pressed. This is the input type used for all multiline text
   /// fields.
   static const TextInputType multiline = TextInputType._(1);
 
@@ -408,7 +408,7 @@ class TextInputConfiguration {
   /// Defaults to false.
   final bool obscureText;
 
-  /// Whether to enable auto-correction.
+  /// Whether to enable autocorrection.
   ///
   /// Defaults to true.
   final bool autocorrect;
@@ -472,6 +472,9 @@ TextAffinity _toTextAffinity(String affinity) {
     case 'TextAffinity.upstream':
       return TextAffinity.upstream;
   }
+  // Null affinity indicates that the platform did not provide a valid
+  // affinity. Set it to null here to allow the framework to supply
+  // a fallback affinity.
   return null;
 }
 
@@ -533,7 +536,7 @@ class TextEditingValue {
       selection: TextSelection(
         baseOffset: encoded['selectionBase'] ?? -1,
         extentOffset: encoded['selectionExtent'] ?? -1,
-        affinity: _toTextAffinity(encoded['selectionAffinity']) ?? TextAffinity.downstream,
+        affinity: _toTextAffinity(encoded['selectionAffinity']),
         isDirectional: encoded['selectionIsDirectional'] ?? false,
       ),
       composing: TextRange(

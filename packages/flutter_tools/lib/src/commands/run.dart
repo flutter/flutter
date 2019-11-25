@@ -301,7 +301,7 @@ class RunCommand extends RunCommandBase {
 
   DebuggingOptions _createDebuggingOptions() {
     final BuildInfo buildInfo = getBuildInfo();
-    if (buildInfo.isRelease) {
+    if (buildInfo.mode.isRelease) {
       return DebuggingOptions.disabled(
         buildInfo,
         initializePlatform: boolArg('web-initialize-platform'),
@@ -347,8 +347,13 @@ class RunCommand extends RunCommandBase {
       if (devices.length > 1) {
         throwToolExit('--machine does not support -d all.');
       }
-      final Daemon daemon = Daemon(stdinCommandStream, stdoutCommandResponse,
-          notifyingLogger: NotifyingLogger(), logToStdout: true);
+      final Daemon daemon = Daemon(
+        stdinCommandStream,
+        stdoutCommandResponse,
+        notifyingLogger: NotifyingLogger(),
+        logToStdout: true,
+        dartDefines: dartDefines,
+      );
       AppInstance app;
       try {
         final String applicationBinaryPath = stringArg('use-application-binary');

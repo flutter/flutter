@@ -5,19 +5,17 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutter_tools/src/base/context.dart';
-import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/project.dart';
-import 'package:mockito/mockito.dart';
-import 'package:process/process.dart';
-
 import 'package:flutter_tools/src/application_package.dart';
+import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/desktop_device.dart';
 import 'package:flutter_tools/src/device.dart';
+import 'package:flutter_tools/src/project.dart';
+import 'package:mockito/mockito.dart';
+import 'package:process/process.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -171,8 +169,7 @@ void main() {
       final MockAppplicationPackage package = MockAppplicationPackage();
       final LaunchResult result = await device.startApp(package, prebuiltApplication: true);
       expect(result.started, false);
-      final BufferLogger logger = context.get<Logger>();
-      expect(logger.errorText, contains('Unable to find executable to run'));
+      expect(testLogger.errorText, contains('Unable to find executable to run'));
     });
 
     testUsingContext('stopApp kills process started by startApp', () async {
