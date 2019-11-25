@@ -531,30 +531,21 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   @override
   Rect describeSemanticsClip(RenderSliver child) {
     assert(axis != null);
-
-    double extent;
-    switch (cacheExtentStyle) {
-      case CacheExtentStyle.pixel:
-        extent = cacheExtent;
-        break;
-      case CacheExtentStyle.viewport:
-        assert(_calculatedCacheExtent != null);
-        extent = _calculatedCacheExtent * cacheExtent;
-    }
+    assert(_calculatedCacheExtent != null);
 
     switch (axis) {
       case Axis.vertical:
         return Rect.fromLTRB(
           semanticBounds.left,
-          semanticBounds.top - extent,
+          semanticBounds.top - _calculatedCacheExtent,
           semanticBounds.right,
-          semanticBounds.bottom + extent,
+          semanticBounds.bottom + _calculatedCacheExtent,
         );
       case Axis.horizontal:
         return Rect.fromLTRB(
-          semanticBounds.left - extent,
+          semanticBounds.left - _calculatedCacheExtent,
           semanticBounds.top,
-          semanticBounds.right + extent,
+          semanticBounds.right + _calculatedCacheExtent,
           semanticBounds.bottom,
         );
     }
@@ -1392,18 +1383,16 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
     final double reverseDirectionRemainingPaintExtent = centerOffset.clamp(0.0, mainAxisExtent);
     final double forwardDirectionRemainingPaintExtent = (mainAxisExtent - centerOffset).clamp(0.0, mainAxisExtent);
 
-    double cacheMultiplier;
     switch (cacheExtentStyle) {
       case CacheExtentStyle.pixel:
         _calculatedCacheExtent = cacheExtent;
-        cacheMultiplier = 2.0;
         break;
       case CacheExtentStyle.viewport:
-        _calculatedCacheExtent = mainAxisExtent;
-        cacheMultiplier = cacheExtent;
+        _calculatedCacheExtent = mainAxisExtent * cacheExtent;
+        break;
     }
 
-    final double fullCacheExtent = mainAxisExtent + cacheMultiplier * _calculatedCacheExtent;
+    final double fullCacheExtent = mainAxisExtent + 2 * _calculatedCacheExtent;
     final double centerCacheOffset = centerOffset + _calculatedCacheExtent;
     final double reverseDirectionRemainingCacheExtent = centerCacheOffset.clamp(0.0, fullCacheExtent);
     final double forwardDirectionRemainingCacheExtent = (fullCacheExtent - centerCacheOffset).clamp(0.0, fullCacheExtent);

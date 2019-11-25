@@ -30,6 +30,7 @@ void main() {
     final RenderViewport renderViewport = RenderViewport(
       crossAxisDirection: AxisDirection.left,
       offset: ViewportOffset.zero(),
+      children: children,
     );
     layout(renderViewport, phase: EnginePhase.flushSemantics);
     expect(
