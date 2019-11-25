@@ -243,9 +243,93 @@ void main() {
       expect(generator.supportedLocales.contains(LocaleInfo.fromString('es')), true);
     });
 
-    // TODO: add test to check that @@locale is properly parsed
+    test('correctly parses @@locale property in arb file', () {
+      const String arbFileWithEnLocale = '''{
+  "@@locale": "en",
+  "title": "Stocks",
+  "@title": {
+    "description": "Title for the Stocks application"
+  }
+}''';
 
-    // TODO: add test to check verify that @@locale is used over file name as preference
+      const String arbFileWithZhLocale = '''{
+  "@@locale": "zh",
+  "title": "Stocks",
+  "@title": {
+    "description": "Title for the Stocks application"
+  }
+}''';
+
+      final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+        ..createSync(recursive: true);
+      l10nDirectory.childFile('first_file.arb')
+        .writeAsStringSync(arbFileWithEnLocale);
+      l10nDirectory.childFile('second_file.arb')
+        .writeAsStringSync(arbFileWithZhLocale);
+
+      LocalizationsGenerator generator;
+      try {
+        generator = LocalizationsGenerator(fs);
+        generator.initialize(
+          l10nDirectoryPath: defaultArbPathString,
+          templateArbFileName: 'first_file.arb',
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        );
+        generator.parseArbFiles();
+      } on L10nException catch (e) {
+        fail('Setting language and locales should not fail $e');
+      }
+
+      expect(generator.supportedLocales.contains(LocaleInfo.fromString('en')), true);
+      expect(generator.supportedLocales.contains(LocaleInfo.fromString('zh')), true);
+    });
+
+    test('correctly parses @@locale property in arb file', () {
+      const String arbFileWithEnLocale = '''{
+  "@@locale": "en",
+  "title": "Stocks",
+  "@title": {
+    "description": "Title for the Stocks application"
+  }
+}''';
+
+      const String arbFileWithZhLocale = '''{
+  "@@locale": "zh",
+  "title": "Stocks",
+  "@title": {
+    "description": "Title for the Stocks application"
+  }
+}''';
+
+      final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+        ..createSync(recursive: true);
+      l10nDirectory.childFile('app_es.arb')
+        .writeAsStringSync(arbFileWithEnLocale);
+      l10nDirectory.childFile('app_am.arb')
+        .writeAsStringSync(arbFileWithZhLocale);
+
+      LocalizationsGenerator generator;
+      try {
+        generator = LocalizationsGenerator(fs);
+        generator.initialize(
+          l10nDirectoryPath: defaultArbPathString,
+          templateArbFileName: 'app_es.arb',
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        );
+        generator.parseArbFiles();
+      } on L10nException catch (e) {
+        fail('Setting language and locales should not fail $e');
+      }
+
+      // @@locale property should hold higher priority
+      expect(generator.supportedLocales.contains(LocaleInfo.fromString('en')), true);
+      expect(generator.supportedLocales.contains(LocaleInfo.fromString('zh')), true);
+      // filename should not be used since @@locale is specified
+      expect(generator.supportedLocales.contains(LocaleInfo.fromString('es')), false);
+      expect(generator.supportedLocales.contains(LocaleInfo.fromString('am')), false);
+    });
 
     test('throws when arb file\'s locale could not be determined', () {
       fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
