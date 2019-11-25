@@ -361,7 +361,7 @@ class _PlatformItem extends StatelessWidget {
       case TargetPlatform.iOS:
         return 'Cupertino';
       case TargetPlatform.macOS:
-        return 'Cupertino Desktop';
+        return 'Material Desktop (macOS)';
     }
     assert(false);
     return null;

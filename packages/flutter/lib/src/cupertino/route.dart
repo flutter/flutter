@@ -291,8 +291,8 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
   ///
   /// This method can be applied to any [PageRoute], not just
   /// [CupertinoPageRoute]. It's typically used to provide a Cupertino style
-  /// horizontal transition for material widgets when the target platform is
-  /// [TargetPlatform.iOS] or [TargetPlatform.macOS].
+  /// horizontal transition for material widgets when the target platform
+  /// is [TargetPlatform.iOS].
   ///
   /// See also:
   ///
