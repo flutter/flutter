@@ -167,10 +167,12 @@ abstract class FlutterTestDriver {
     // If we try to kill the process while it's paused, we'll end up terminating
     // it forcefully and it won't terminate child processes, so we need to ensure
     // it's running before terminating.
-    try {
-      await resume().timeout(defaultTimeout);
-    } catch (e) {
-      _debugPrint('Ignoring failure to resume during shutdown');
+    if (_vmService != null) {
+      try {
+        await resume().timeout(defaultTimeout);
+      } catch (e) {
+        _debugPrint('Ignoring failure to resume during shutdown');
+      }
     }
     _debugPrint('Sending SIGTERM to $_processPid..');
     ProcessSignal.SIGTERM.send(_processPid);
