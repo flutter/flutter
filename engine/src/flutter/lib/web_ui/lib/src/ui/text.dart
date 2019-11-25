@@ -1437,8 +1437,5 @@ abstract class ParagraphBuilder {
 /// * `fontFamily`: The family name used to identify the font in text styles.
 ///  If this is not provided, then the family name will be extracted from the font file.
 Future<void> loadFontFromList(Uint8List list, {String fontFamily}) {
-  if (engine.assertionsEnabled) {
-    throw UnsupportedError('loadFontFromList is not supported.');
-  }
-  return Future<void>.value(null);
+  return _fontCollection.loadFontFromList(list, fontFamily: fontFamily);
 }

@@ -73,6 +73,10 @@ class FontCollection {
     }
   }
 
+  Future<void> loadFontFromList(Uint8List list, {String fontFamily}) {
+    return _assetFontManager._loadFontFaceBytes(fontFamily, list);
+  }
+
   /// Registers fonts that are used by tests.
   void debugRegisterTestFonts() {
     _testFontManager = FontManager();
@@ -187,6 +191,22 @@ class FontManager {
       html.window.console
           .warn('Error while loading font family "$family":\n$e');
     }
+  }
+
+  // Loads a font from bytes, surfacing errors through the future.
+  Future<void> _loadFontFaceBytes(String family, Uint8List list) {
+    // Since these fonts are loaded by user code, surface the error
+    // through the returned future.
+    final html.FontFace fontFace = html.FontFace(family, list);
+    return fontFace.load().then((_) {
+      html.document.fonts.add(fontFace);
+    }, onError: (dynamic exception) {
+      // Failures here will throw an html.DomException which confusingly
+      // does not implement Exception or Error. Rethrow an Exception so it can
+      // be caught in user code without depending on dart:html or requiring a
+      // catch block without "on".
+      throw Exception(exception.toString());
+    });
   }
 
   /// Returns a [Future] that completes when all fonts that have been
