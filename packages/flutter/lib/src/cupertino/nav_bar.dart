@@ -2042,9 +2042,7 @@ class _NavigationBarComponentsTransition {
     }
 
     final RenderAnimatedOpacity topBackLabelOpacity =
-        topComponents.backLabelKey.currentContext?.ancestorRenderObjectOfType(
-          const TypeMatcher<RenderAnimatedOpacity>()
-        );
+        topComponents.backLabelKey.currentContext?.findAncestorRenderObjectOfType<RenderAnimatedOpacity>();
 
     Animation<double> midClickOpacity;
     if (topBackLabelOpacity != null && topBackLabelOpacity.opacity.value < 1.0) {

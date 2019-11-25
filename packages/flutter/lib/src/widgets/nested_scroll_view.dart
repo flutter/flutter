@@ -266,7 +266,7 @@ class NestedScrollView extends StatefulWidget {
   /// For sample code showing how to use this method, see the [NestedScrollView]
   /// documentation.
   static SliverOverlapAbsorberHandle sliverOverlapAbsorberHandleFor(BuildContext context) {
-    final _InheritedNestedScrollView target = context.inheritFromWidgetOfExactType(_InheritedNestedScrollView);
+    final _InheritedNestedScrollView target = context.dependOnInheritedWidgetOfExactType<_InheritedNestedScrollView>();
     assert(target != null, 'NestedScrollView.sliverOverlapAbsorberHandleFor must be called with a context that contains a NestedScrollView.');
     return target.state._absorberHandle;
   }

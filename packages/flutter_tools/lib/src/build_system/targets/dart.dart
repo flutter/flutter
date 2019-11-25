@@ -42,7 +42,7 @@ const String kExtraGenSnapshotOptions = 'ExtraGenSnapshotOptions';
 
 /// Alternative scheme for file URIs.
 ///
-/// May be used along with [kFileSystemRoots] to support a multiroot
+/// May be used along with [kFileSystemRoots] to support a multi-root
 /// filesystem.
 const String kFileSystemScheme = 'FileSystemScheme';
 
@@ -62,7 +62,7 @@ const String kDartDefines = 'DartDefines';
 /// The other supported value is armv7, the 32-bit iOS architecture.
 const String kIosArchs = 'IosArchs';
 
-/// Copies the prebuilt flutter bundle.
+/// Copies the pre-built flutter bundle.
 // This is a one-off rule for implementing build bundle in terms of assemble.
 class CopyFlutterBundle extends Target {
   const CopyFlutterBundle();
@@ -118,7 +118,7 @@ class CopyFlutterBundle extends Target {
   ];
 }
 
-/// Copies the prebuilt flutter bundle for release mode.
+/// Copies the pre-built flutter bundle for release mode.
 class ReleaseCopyFlutterBundle extends CopyFlutterBundle {
   const ReleaseCopyFlutterBundle();
 
@@ -331,7 +331,7 @@ class AotElfRelease extends AotElfBase {
   ];
 }
 
-/// Copies the prebuilt flutter aot bundle.
+/// Copies the pre-built flutter aot bundle.
 // This is a one-off rule for implementing build aot in terms of assemble.
 abstract class CopyFlutterAotBundle extends Target {
   const CopyFlutterAotBundle();

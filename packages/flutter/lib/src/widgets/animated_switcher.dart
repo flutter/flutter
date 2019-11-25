@@ -66,6 +66,8 @@ typedef AnimatedSwitcherLayoutBuilder = Widget Function(Widget currentChild, Lis
 /// A widget that by default does a cross-fade between a new widget and the
 /// widget previously set on the [AnimatedSwitcher] as a child.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=2W7POjFb88g}
+///
 /// If they are swapped fast enough (i.e. before [duration] elapses), more than
 /// one previous child can exist and be transitioning out while the newest one
 /// is transitioning in.

@@ -158,7 +158,7 @@ class DeviceManager {
 
   /// Find and return a list of devices based on the current project and environment.
   ///
-  /// Returns a list of deviecs specified by the user.
+  /// Returns a list of devices specified by the user.
   ///
   /// * If the user specified '-d all', then return all connected devices which
   /// support the current project, except for fuchsia and web.
@@ -221,7 +221,7 @@ class DeviceManager {
 
   /// Returns whether the device is supported for the project.
   ///
-  /// This exists to allow the check to be overriden for google3 clients.
+  /// This exists to allow the check to be overridden for google3 clients.
   bool isDeviceSupportedForProject(Device device, FlutterProject flutterProject) {
     return device.isSupportedForProject(flutterProject);
   }
@@ -545,7 +545,7 @@ class DebuggingOptions {
   final int deviceVmServicePort;
   final String port;
   final String hostname;
-  /// A file where the vmservice uri should be written after the application is started.
+  /// A file where the vmservice URL should be written after the application is started.
   final String vmserviceOutFile;
 
   bool get hasObservatoryPort => hostVmServicePort != null;

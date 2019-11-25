@@ -211,7 +211,7 @@ void main() {
     fs.file('.packages').createSync();
     final CommandRunner<void> runner = createTestCommandRunner(BuildBundleCommand());
     when(buildSystem.build(any, any)).thenAnswer((Invocation invocation) async {
-      final Environment environment = invocation.positionalArguments[1];
+      final Environment environment = invocation.positionalArguments[1] as Environment;
       expect(environment.defines, <String, String>{
         kTargetFile: fs.path.join('lib', 'main.dart'),
         kBuildMode: 'debug',

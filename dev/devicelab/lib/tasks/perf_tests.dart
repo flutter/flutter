@@ -342,7 +342,6 @@ class CompileTest {
   }
 
   static Future<Map<String, dynamic>> _compileAot() async {
-    // Generate blobs instead of assembly.
     await flutter('clean');
     final Stopwatch watch = Stopwatch()..start();
     final List<String> options = <String>[

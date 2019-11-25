@@ -25,7 +25,7 @@ bool _isTaskRegistered = false;
 /// The task does not run immediately but waits for the request via the
 /// VM service protocol to run it.
 ///
-/// It is ok for a [task] to perform many things. However, only one task can be
+/// It is OK for a [task] to perform many things. However, only one task can be
 /// registered per Dart VM.
 Future<TaskResult> task(TaskFunction task) {
   if (_isTaskRegistered)
@@ -143,7 +143,7 @@ class _TaskRunner {
     });
   }
 
-  /// Disables the keep-alive port, allowing the VM to exit.
+  /// Disables the keepalive port, allowing the VM to exit.
   void _closeKeepAlivePort() {
     _startTaskTimeout?.cancel();
     _keepAlivePort?.close();

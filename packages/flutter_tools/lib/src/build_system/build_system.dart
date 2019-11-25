@@ -29,7 +29,7 @@ BuildSystem get buildSystem => context.get<BuildSystem>();
 /// A reasonable amount of files to open at the same time.
 ///
 /// This number is somewhat arbitrary - it is difficult to detect whether
-/// or not we'll run out of file descriptiors when using async dart:io
+/// or not we'll run out of file descriptors when using async dart:io
 /// APIs.
 const int kMaxOpenFiles = 64;
 
@@ -83,7 +83,7 @@ class BuildSystemConfig {
 ///
 /// ## Code review
 ///
-/// ### Targes should only depend on files that are provided as inputs
+/// ### Targets should only depend on files that are provided as inputs
 ///
 /// Example: gen_snapshot must be provided as an input to the aot_elf
 /// build steps, even though it isn't a source file. This ensures that changes

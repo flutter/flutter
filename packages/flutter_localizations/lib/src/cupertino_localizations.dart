@@ -25,7 +25,7 @@ import 'widgets_localizations.dart';
 ///
 /// {@macro flutter.localizations.cupertino.languages}
 ///
-/// This list is available programatically via [kCupertinoSupportedLanguages].
+/// This list is available programmatically via [kCupertinoSupportedLanguages].
 ///
 /// ## Sample code
 ///
