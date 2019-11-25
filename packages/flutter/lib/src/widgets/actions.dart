@@ -613,16 +613,14 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
   void _handleMouseEnter(PointerEnterEvent event) {
     assert(widget.onShowHoverHighlight != null);
     if (!_hovering) {
-      // TODO(gspencergoog): remove scheduleMicrotask once MouseRegion event timing has changed.
-      scheduleMicrotask(() { setState(() { _hovering = true; _handleShowHoverHighlight(); }); });
+      setState(() { _hovering = true; _handleShowHoverHighlight(); });
     }
   }
 
   void _handleMouseExit(PointerExitEvent event) {
     assert(widget.onShowHoverHighlight != null);
     if (_hovering) {
-      // TODO(gspencergoog): remove scheduleMicrotask once MouseRegion event timing has changed.
-      scheduleMicrotask(() { setState(() { _hovering = false; _handleShowHoverHighlight(); }); });
+      setState(() { _hovering = false; _handleShowHoverHighlight(); });
     }
   }
 
@@ -643,6 +641,14 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
 
   void _handleShowFocusHighlight() {
     widget.onShowFocusHighlight?.call(_focused && widget.enabled && _canShowHighlight);
+  }
+
+  @override
+  void didUpdateWidget(FocusableActionDetector oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.enabled != oldWidget.enabled) {
+      _handleShowHoverHighlight();
+    }
   }
 
   @override
