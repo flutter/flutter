@@ -210,7 +210,7 @@ class FlutterDevice {
   }
 
   List<FlutterView> get views {
-    if (vmService == null || !vmService.isClosed) {
+    if (vmService == null || vmService.isClosed) {
       return <FlutterView>[];
     }
     return (viewFilter != null
