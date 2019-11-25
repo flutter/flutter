@@ -1823,6 +1823,9 @@ class RectangularRangeSliderTrackShape extends RangeSliderTrackShape {
   /// outer track segments are inactive.
   const RectangularRangeSliderTrackShape({ this.useV2Slider });
 
+  /// {@macro flutter.material.slider.useV2Slider}
+  final bool useV2Slider;
+
   @override
   Rect getPreferredRect({
     @required RenderBox parentBox,
@@ -1947,7 +1950,10 @@ class RoundedRectRangeSliderTrackShape extends RangeSliderTrackShape {
   ///
   /// The middle track segment is the selected range and is active, and the two
   /// outer track segments are inactive.
-  const RoundedRectRangeSliderTrackShape();
+  const RoundedRectRangeSliderTrackShape({ this.useV2Slider });
+
+  /// {@macro flutter.material.slider.useV2Slider}
+  final bool useV2Slider;
 
   @override
   Rect getPreferredRect({
@@ -2012,10 +2018,16 @@ class RoundedRectRangeSliderTrackShape extends RangeSliderTrackShape {
 
     // Assign the track segment paints, which are left: active, right: inactive,
     // but reversed for right to left text.
-    final ColorTween activeTrackColorTween = ColorTween(begin: sliderTheme.disabledActiveTrackColor , end: sliderTheme.activeTrackColor);
-    final ColorTween inactiveTrackColorTween = ColorTween(begin: sliderTheme.disabledInactiveTrackColor , end: sliderTheme.inactiveTrackColor);
-    final Paint activePaint = Paint()..color = activeTrackColorTween.evaluate(enableAnimation);
-    final Paint inactivePaint = Paint()..color = inactiveTrackColorTween.evaluate(enableAnimation);
+    final ColorTween activeTrackColorTween = ColorTween(
+        begin: sliderTheme.disabledActiveTrackColor,
+        end: sliderTheme.activeTrackColor);
+    final ColorTween inactiveTrackColorTween = ColorTween(
+        begin: sliderTheme.disabledInactiveTrackColor,
+        end: sliderTheme.inactiveTrackColor);
+    final Paint activePaint = Paint()
+      ..color = activeTrackColorTween.evaluate(enableAnimation);
+    final Paint inactivePaint = Paint()
+      ..color = inactiveTrackColorTween.evaluate(enableAnimation);
 
     Offset leftThumbOffset;
     Offset rightThumbOffset;
@@ -2029,7 +2041,8 @@ class RoundedRectRangeSliderTrackShape extends RangeSliderTrackShape {
         rightThumbOffset = startThumbCenter;
         break;
     }
-    final Size thumbSize = sliderTheme.rangeThumbShape.getPreferredSize(isEnabled, isDiscrete);
+    final Size thumbSize = sliderTheme.rangeThumbShape.getPreferredSize(
+        isEnabled, isDiscrete);
     final double thumbRadius = thumbSize.width / 2;
     assert(thumbRadius > 0);
 
@@ -2040,39 +2053,62 @@ class RoundedRectRangeSliderTrackShape extends RangeSliderTrackShape {
       isEnabled: isEnabled,
       isDiscrete: isDiscrete,
     );
-    final Radius trackRadius = Radius.circular(trackRect.height / 2);
 
-    context.canvas.drawRRect(
-      RRect.fromLTRBAndCorners(
-        trackRect.left,
-        trackRect.top,
-        leftThumbOffset.dx,
-        trackRect.bottom,
-        topLeft: trackRadius,
-        bottomLeft: trackRadius,
-      ),
-      inactivePaint,
-    );
-    context.canvas.drawRect(
-      Rect.fromLTRB(
-        leftThumbOffset.dx,
-        trackRect.top,
-        rightThumbOffset.dx,
-        trackRect.bottom,
-      ),
-      activePaint,
-    );
-    context.canvas.drawRRect(
-      RRect.fromLTRBAndCorners(
-        rightThumbOffset.dx,
-        trackRect.top,
-        trackRect.right,
-        trackRect.bottom,
-        topRight: trackRadius,
-        bottomRight: trackRadius,
-      ),
-      inactivePaint,
-    );
+    if (useV2Slider) {
+      final Radius trackRadius = Radius.circular(trackRect.height / 2);
+
+      context.canvas.drawRRect(
+        RRect.fromLTRBAndCorners(
+          trackRect.left,
+          trackRect.top,
+          leftThumbOffset.dx,
+          trackRect.bottom,
+          topLeft: trackRadius,
+          bottomLeft: trackRadius,
+        ),
+        inactivePaint,
+      );
+      context.canvas.drawRect(
+        Rect.fromLTRB(
+          leftThumbOffset.dx,
+          trackRect.top,
+          rightThumbOffset.dx,
+          trackRect.bottom,
+        ),
+        activePaint,
+      );
+      context.canvas.drawRRect(
+        RRect.fromLTRBAndCorners(
+          rightThumbOffset.dx,
+          trackRect.top,
+          trackRect.right,
+          trackRect.bottom,
+          topRight: trackRadius,
+          bottomRight: trackRadius,
+        ),
+        inactivePaint,
+      );
+    } else {
+      final double trackRadius = trackRect.height / 2;
+
+      final Rect leftTrackArcRect = Rect.fromLTWH(trackRect.left, trackRect.top, trackRect.height, trackRect.height);
+      if (!leftTrackArcRect.isEmpty)
+        context.canvas.drawArc(leftTrackArcRect, math.pi / 2, math.pi, false, inactivePaint);
+
+      final Rect leftTrackSegment = Rect.fromLTRB(trackRect.left + trackRadius, trackRect.top, leftThumbOffset.dx - thumbRadius, trackRect.bottom);
+      if (!leftTrackSegment.isEmpty)
+        context.canvas.drawRect(leftTrackSegment, inactivePaint);
+      final Rect middleTrackSegment = Rect.fromLTRB(leftThumbOffset.dx + thumbRadius, trackRect.top, rightThumbOffset.dx - thumbRadius, trackRect.bottom);
+      if (!middleTrackSegment.isEmpty)
+        context.canvas.drawRect(middleTrackSegment, activePaint);
+      final Rect rightTrackSegment = Rect.fromLTRB(rightThumbOffset.dx + thumbRadius, trackRect.top, trackRect.right - trackRadius, trackRect.bottom);
+      if (!rightTrackSegment.isEmpty)
+        context.canvas.drawRect(rightTrackSegment, inactivePaint);
+
+      final Rect rightTrackArcRect = Rect.fromLTWH(trackRect.right - trackRect.height, trackRect.top, trackRect.height, trackRect.height);
+      if (!rightTrackArcRect.isEmpty)
+        context.canvas.drawArc(rightTrackArcRect, -math.pi / 2, math.pi, false, inactivePaint);
+    }
   }
 }
 
@@ -2198,13 +2234,20 @@ class RoundSliderTickMarkShape extends SliderTickMarkShape {
 ///    sliders in a widget subtree.
 class RoundRangeSliderTickMarkShape extends RangeSliderTickMarkShape {
   /// Create a range slider tick mark that draws a circle.
-  const RoundRangeSliderTickMarkShape({ this.tickMarkRadius });
+  const RoundRangeSliderTickMarkShape({
+    this.tickMarkRadius,
+    this.useV2Slider,
+  });
 
   /// The preferred radius of the round tick mark.
   ///
-  /// If it is not provided, then 1/4 of the [SliderThemeData.trackHeight] is
-  /// used.
+  /// If it is not provided, and [useV2Slider] is true, then 1/4 of the
+  /// [SliderThemeData.trackHeight] is used. If it is not provided, and
+  /// [useV2Slider] is false, then half of the track height is used.
   final double tickMarkRadius;
+
+  /// {@macro flutter.material.slider.useV2Slider}
+  final bool useV2Slider;
 
   @override
   Size getPreferredSize({
@@ -2214,7 +2257,7 @@ class RoundRangeSliderTickMarkShape extends RangeSliderTickMarkShape {
     assert(sliderTheme != null);
     assert(sliderTheme.trackHeight != null);
     assert(isEnabled != null);
-    return Size.fromRadius(tickMarkRadius ?? sliderTheme.trackHeight / 4);
+    return Size.fromRadius(tickMarkRadius ?? sliderTheme.trackHeight / (useV2Slider ? 4 : 2));
   }
 
   @override
@@ -2332,7 +2375,7 @@ class _EmptySliderComponentShape extends SliderComponentShape {
 
 /// The default shape of a [Slider]'s thumb.
 ///
-/// If [useSliderV2] is true, then there is a shadow for the resting and
+/// If [useV2Slider] is true, then there is a shadow for the resting and
 /// pressed state.
 ///
 /// See also:
@@ -2347,7 +2390,7 @@ class RoundSliderThumbShape extends SliderComponentShape {
     this.disabledThumbRadius,
     this.elevation = 1.0,
     this.pressedElevation = 6.0,
-    this.useV2Slider = false
+    this.useV2Slider = false,
   });
 
   /// The preferred radius of the round thumb shape when the slider is enabled.
@@ -2462,6 +2505,9 @@ class RoundSliderThumbShape extends SliderComponentShape {
 
 /// The default shape of a [RangeSlider]'s thumbs.
 ///
+/// If [useV2Slider] is true, then there is a shadow for the resting and
+/// pressed state.
+///
 /// See also:
 ///
 ///  * [RangeSlider], which includes thumbs defined by this shape.
@@ -2474,7 +2520,11 @@ class RoundRangeSliderThumbShape extends RangeSliderThumbShape {
     this.disabledThumbRadius,
     this.elevation = 1.0,
     this.pressedElevation = 6.0,
+    this.useV2Slider = false,
   }) : assert(enabledThumbRadius != null);
+
+  /// {@macro flutter.material.slider.useV2Slider}
+  final bool useV2Slider;
 
   /// The preferred radius of the round thumb shape when the slider is enabled.
   ///
@@ -2567,20 +2617,22 @@ class RoundRangeSliderThumbShape extends RangeSliderThumbShape {
       }
     }
 
-    final double evaluatedElevation = isPressed ? elevationTween.evaluate(activationAnimation) : elevation;
-    final Color color = colorTween.evaluate(enableAnimation);
-    final Path shadowPath = Path()..addArc(Rect.fromCenter(center: center, width: 2 * radius, height: 2 * radius), 0, math.pi * 2);
-    canvas.drawShadow(shadowPath, Colors.black, evaluatedElevation, true);
+    if (useV2Slider) {
+      final double evaluatedElevation = isPressed ? elevationTween.evaluate(activationAnimation) : elevation;
+      final Color color = colorTween.evaluate(enableAnimation);
+      final Path shadowPath = Path()
+        ..addArc(Rect.fromCenter(center: center, width: 2 * radius, height: 2 * radius), 0, math.pi * 2);
+      canvas.drawShadow(shadowPath, Colors.black, evaluatedElevation, true);
 
-    // If the thumb is translucent, clear the space of the track and shadow so
-    // the thumb can be drawn without interference.
-    if (color.alpha != 0xff) {
-      canvas.drawCircle(
-        center,
-        radius,
-        Paint()
-          ..color = sliderTheme.surfaceColor.withOpacity(1),
-      );
+      // If the thumb is translucent, clear the space of the track and shadow so
+      // the thumb can be drawn without interference.
+      if (color.alpha != 0xff) {
+        canvas.drawCircle(
+          center,
+          radius,
+          Paint()..color = sliderTheme.surfaceColor.withOpacity(1),
+        );
+      }
     }
 
     canvas.drawCircle(

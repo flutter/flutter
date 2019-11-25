@@ -376,7 +376,7 @@ class Slider extends StatefulWidget {
   /// Ignored if this slider is created with [Slider.adaptive]
   final SemanticFormatterCallback semanticFormatterCallback;
 
-  /// Whether to use the updated Material spec version of the slider.
+  /// Whether to use the updated Material spec version of the [Slider].
   ///
   /// This is a temporary flag for migrating the slider from v1 to v2. To avoid
   /// unexpected breaking changes, this value should be set to true. Setting
@@ -401,6 +401,7 @@ class Slider extends StatefulWidget {
     properties.add(StringProperty('label', label));
     properties.add(ColorProperty('activeColor', activeColor));
     properties.add(ColorProperty('inactiveColor', inactiveColor));
+    properties.add(ColorProperty('useV2Slider', useV2Slider));
     properties.add(ObjectFlagProperty<ValueChanged<double>>.has('semanticFormatterCallback', semanticFormatterCallback));
   }
 }

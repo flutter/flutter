@@ -127,6 +127,7 @@ class RangeSlider extends StatefulWidget {
     this.activeColor,
     this.inactiveColor,
     this.semanticFormatterCallback,
+    this.useV2Slider = false,
   }) : assert(values != null),
        assert(min != null),
        assert(max != null),
@@ -135,6 +136,7 @@ class RangeSlider extends StatefulWidget {
        assert(values.start >= min && values.start <= max),
        assert(values.end >= min && values.end <= max),
        assert(divisions == null || divisions > 0),
+       assert(useV2Slider != null),
        super(key: key);
 
   /// The currently selected values for this range slider.
@@ -332,6 +334,13 @@ class RangeSlider extends StatefulWidget {
   /// {@end-tool}
   final RangeSemanticFormatterCallback semanticFormatterCallback;
 
+  /// Whether to use the updated Material spec version of the [RangeSlider].
+  ///
+  /// This is a temporary flag for migrating the slider from v1 to v2. To avoid
+  /// unexpected breaking changes, this value should be set to true. Setting
+  /// this to false is considered deprecated.
+  final bool useV2Slider;
+
   // Touch width for the tap boundary of the slider thumbs.
   static const double _minTouchTargetWidth = kMinInteractiveDimension;
 
@@ -353,6 +362,7 @@ class RangeSlider extends StatefulWidget {
     properties.add(StringProperty('labelEnd', labels?.end));
     properties.add(ColorProperty('activeColor', activeColor));
     properties.add(ColorProperty('inactiveColor', inactiveColor));
+    properties.add(ColorProperty('useV2Slider', useV2Slider));
     properties.add(ObjectFlagProperty<ValueChanged<RangeValues>>.has('semanticFormatterCallback', semanticFormatterCallback));
   }
 }
@@ -519,12 +529,13 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
     return null;
   };
 
-  static const double _defaultTrackHeight = 4;
-  static const RangeSliderTrackShape _defaultTrackShape = RoundedRectRangeSliderTrackShape();
-  static const RangeSliderTickMarkShape _defaultTickMarkShape = RoundRangeSliderTickMarkShape();
+  final bool useV2Slider = widget.useV2Slider;
+  static const double _defaultTrackHeight = useV2Slider ? 4 : 2;
+  static const RangeSliderTrackShape _defaultTrackShape = RoundedRectRangeSliderTrackShape(useV2Slider: useV2Slider);
+  static const RangeSliderTickMarkShape _defaultTickMarkShape = RoundRangeSliderTickMarkShape(useV2Slider: useV2Slider);
   static const SliderComponentShape _defaultOverlayShape = RoundSliderOverlayShape();
-  static const RangeSliderThumbShape _defaultThumbShape = RoundRangeSliderThumbShape();
-  static const RangeSliderValueIndicatorShape _defaultValueIndicatorShape = RectangularRangeSliderValueIndicatorShape();
+  static const RangeSliderThumbShape _defaultThumbShape = RoundRangeSliderThumbShape(useV2Slider: useV2Slider);
+  static const RangeSliderValueIndicatorShape _defaultValueIndicatorShape = useV2Slider ? RectangularRangeSliderValueIndicatorShape() : PaddleRangeSliderValueIndicatorShape();
   static const ShowValueIndicator _defaultShowValueIndicator = ShowValueIndicator.onlyForDiscrete;
   static const double _defaultMinThumbSeparation = 8;
 
@@ -601,6 +612,7 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
       onChangeEnd: widget.onChangeEnd != null ? _handleDragEnd : null,
       state: this,
       semanticFormatterCallback: widget.semanticFormatterCallback,
+      useV2Slider: widget.useV2Slider,
     );
   }
 }
@@ -619,6 +631,7 @@ class _RangeSliderRenderObjectWidget extends LeafRenderObjectWidget {
     this.onChangeEnd,
     this.state,
     this.semanticFormatterCallback,
+    this.useV2Slider,
   }) : super(key: key);
 
   final RangeValues values;
@@ -632,6 +645,7 @@ class _RangeSliderRenderObjectWidget extends LeafRenderObjectWidget {
   final ValueChanged<RangeValues> onChangeEnd;
   final RangeSemanticFormatterCallback semanticFormatterCallback;
   final _RangeSliderState state;
+  final bool useV2Slider;
 
   @override
   _RenderRangeSlider createRenderObject(BuildContext context) {
@@ -650,6 +664,7 @@ class _RangeSliderRenderObjectWidget extends LeafRenderObjectWidget {
       textDirection: Directionality.of(context),
       semanticFormatterCallback: semanticFormatterCallback,
       platform: Theme.of(context).platform,
+      useV2Slider: useV2Slider,
     );
   }
 
@@ -688,6 +703,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     this.onChangeEnd,
     @required _RangeSliderState state,
     @required TextDirection textDirection,
+    this.useV2Slider,
   })  : assert(values != null),
         assert(values.start >= 0.0 && values.start <= 1.0),
         assert(values.end >= 0.0 && values.end <= 1.0),
@@ -704,7 +720,8 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
         _sizeWithOverflow = sizeWithOverflow,
         _onChanged = onChanged,
         _state = state,
-        _textDirection = textDirection {
+        _textDirection = textDirection,
+        _useV2Slider = useV2Slider, {
     _updateLabelPainters();
     final GestureArenaTeam team = GestureArenaTeam();
     _drag = HorizontalDragGestureRecognizer()
@@ -942,6 +959,8 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
         return 0.05;
     }
   }
+
+  final bool _useV2Slider;
 
   void _updateLabelPainters() {
     _updateLabelPainter(Thumb.start);
@@ -1269,7 +1288,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
         isEnabled: isEnabled,
         sliderTheme: _sliderTheme,
       ).width;
-      final double adjustedTrackWidth = trackRect.width - trackRect.height;
+      final double adjustedTrackWidth = trackRect.width - _useV2Slider ? trackRect.height : tickMarkWidth;
       // If the tick marks would be too dense, don't bother painting them.
       if (adjustedTrackWidth / divisions >= 3.0 * tickMarkWidth) {
         final double dy = trackRect.center.dy;
