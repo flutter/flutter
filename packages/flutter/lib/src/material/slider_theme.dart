@@ -2360,6 +2360,7 @@ class _EmptySliderComponentShape extends SliderComponentShape {
     Offset center, {
     Animation<double> activationAnimation,
     Animation<double> enableAnimation,
+
     bool isDiscrete,
     TextPainter labelPainter,
     RenderBox parentBox,
@@ -2467,6 +2468,9 @@ class RoundSliderThumbShape extends SliderComponentShape {
       end: sliderTheme.thumbColor,
     );
 
+    final Color color = colorTween.evaluate(enableAnimation);
+    final double radius = radiusTween.evaluate(enableAnimation);
+
     if (useV2Slider) {
       final Tween<double> elevationTween = Tween<double>(
         begin: elevation,
@@ -2475,12 +2479,8 @@ class RoundSliderThumbShape extends SliderComponentShape {
 
       final double evaluatedElevation = elevationTween.evaluate(
           activationAnimation);
-      final Color color = colorTween.evaluate(enableAnimation);
-      final double radius = radiusTween.evaluate(enableAnimation);
       final Path path = Path()
-        ..addArc(Rect.fromCenter(
-            center: center, width: 2 * radius, height: 2 * radius), 0,
-            math.pi * 2);
+        ..addArc(Rect.fromCenter(center: center, width: 2 * radius, height: 2 * radius), 0, math.pi * 2);
       canvas.drawShadow(path, Colors.black, evaluatedElevation, true);
 
       // If the thumb is translucent, clear the space of the track and shadow so
@@ -2489,8 +2489,7 @@ class RoundSliderThumbShape extends SliderComponentShape {
         canvas.drawCircle(
           center,
           radius,
-          Paint()
-            ..color = sliderTheme.surfaceColor.withOpacity(1),
+          Paint()..color = sliderTheme.surfaceColor.withOpacity(1),
         );
       }
     }
@@ -2617,9 +2616,10 @@ class RoundRangeSliderThumbShape extends RangeSliderThumbShape {
       }
     }
 
+    final Color color = colorTween.evaluate(enableAnimation);
+
     if (useV2Slider) {
       final double evaluatedElevation = isPressed ? elevationTween.evaluate(activationAnimation) : elevation;
-      final Color color = colorTween.evaluate(enableAnimation);
       final Path shadowPath = Path()
         ..addArc(Rect.fromCenter(center: center, width: 2 * radius, height: 2 * radius), 0, math.pi * 2);
       canvas.drawShadow(shadowPath, Colors.black, evaluatedElevation, true);

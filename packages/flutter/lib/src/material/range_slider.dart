@@ -362,7 +362,7 @@ class RangeSlider extends StatefulWidget {
     properties.add(StringProperty('labelEnd', labels?.end));
     properties.add(ColorProperty('activeColor', activeColor));
     properties.add(ColorProperty('inactiveColor', inactiveColor));
-    properties.add(ColorProperty('useV2Slider', useV2Slider));
+    properties.add(BoolProperty('useV2Slider', useV2Slider));
     properties.add(ObjectFlagProperty<ValueChanged<RangeValues>>.has('semanticFormatterCallback', semanticFormatterCallback));
   }
 }
@@ -703,7 +703,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
     this.onChangeEnd,
     @required _RangeSliderState state,
     @required TextDirection textDirection,
-    this.useV2Slider,
+    bool useV2Slider,
   })  : assert(values != null),
         assert(values.start >= 0.0 && values.start <= 1.0),
         assert(values.end >= 0.0 && values.end <= 1.0),
@@ -721,7 +721,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
         _onChanged = onChanged,
         _state = state,
         _textDirection = textDirection,
-        _useV2Slider = useV2Slider, {
+        _useV2Slider = useV2Slider {
     _updateLabelPainters();
     final GestureArenaTeam team = GestureArenaTeam();
     _drag = HorizontalDragGestureRecognizer()

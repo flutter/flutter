@@ -699,7 +699,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     this.onChangeEnd,
     @required _SliderState state,
     @required TextDirection textDirection,
-    this.useV2Slider,
+    bool useV2Slider,
   }) : assert(value != null && value >= 0.0 && value <= 1.0),
        assert(state != null),
        assert(textDirection != null),
@@ -714,7 +714,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
        _onChanged = onChanged,
        _state = state,
        _textDirection = textDirection,
-       _useV2Slider = useV2Slider, {
+       _useV2Slider = useV2Slider {
     _updateLabelPainter();
     final GestureArenaTeam team = GestureArenaTeam();
     _drag = HorizontalDragGestureRecognizer()
