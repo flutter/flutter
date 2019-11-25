@@ -15,6 +15,14 @@ import 'object.dart';
 import 'sliver.dart';
 import 'viewport_offset.dart';
 
+/// The unit of measurement for a [Viewport.cacheExtent].
+enum CacheExtentStyle {
+  /// Treat the [Viewport.cacheExtent] as logical pixels.
+  pixel,
+  /// Treat the [Viewport.cacheExtent] as a multiplier of the main axis extent.
+  viewport,
+}
+
 /// An interface for render objects that are bigger on the inside.
 ///
 /// Some render objects, such as [RenderViewport], present a portion of their
@@ -161,17 +169,17 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     @required AxisDirection crossAxisDirection,
     @required ViewportOffset offset,
     double cacheExtent,
-    bool autoCache = false,
+    CacheExtentStyle cacheExtentStyle = CacheExtentStyle.pixel,
   }) : assert(axisDirection != null),
        assert(crossAxisDirection != null),
        assert(offset != null),
        assert(axisDirectionToAxis(axisDirection) != axisDirectionToAxis(crossAxisDirection)),
-       assert(autoCache != null),
+       assert(cacheExtentStyle != null),
        _axisDirection = axisDirection,
        _crossAxisDirection = crossAxisDirection,
        _offset = offset,
        _cacheExtent = cacheExtent ?? RenderAbstractViewport.defaultCacheExtent,
-       _autoCache = autoCache;
+       _cacheExtentStyle = cacheExtentStyle;
 
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
@@ -265,10 +273,6 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   /// viewport to an invisible item in the cache area, the framework will bring
   /// that item into view with an (implicit) scroll action.
   /// {@endtemplate}
-  ///
-  /// This value will be mutated during layout if [autoCache] is set to true.
-  /// Other attempts to mutate it will be over-written during the next layout
-  /// pass.
   double get cacheExtent => _cacheExtent;
   double _cacheExtent;
   set cacheExtent(double value) {
@@ -277,22 +281,30 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     if (value == _cacheExtent)
       return;
     _cacheExtent = value;
-    // When auto-caching, this value is computed during layout.
-    if (!autoCache) {
-      markNeedsLayout();
-    }
+    markNeedsLayout();
   }
 
-  /// Whether layout should calculate the cache extent automatically from the
-  /// main axis extent.
-  bool get autoCache => _autoCache;
-  bool _autoCache;
-  set autoCache(bool value) {
+  /// This value is set during layout based on the [CacheExtentStyle].
+  ///
+  /// When the style is [CacheExtentStyle.viewport], it is the main axis extent
+  /// of the viewport
+  double _calculatedCacheExtent;
+
+  /// {@template flutter.rendering.viewport.cacheExtentStyle}
+  /// If set, the [cacheExtent] will be automatically calculated as the main
+  /// axis extent of the viewport multiplied by this value.
+  ///
+  /// If this is set, the [cacheExtent] must be null, as it will automatically
+  /// be derived during layout.
+  /// {@endtemplate}
+  CacheExtentStyle get cacheExtentStyle => _cacheExtentStyle;
+  CacheExtentStyle _cacheExtentStyle;
+  set cacheExtentStyle(CacheExtentStyle value) {
     assert(value != null);
-    if (value == _autoCache) {
+    if (value == _cacheExtentStyle) {
       return;
     }
-    _autoCache = value;
+    _cacheExtentStyle = value;
     markNeedsLayout();
   }
 
@@ -518,20 +530,31 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
 
   @override
   Rect describeSemanticsClip(RenderSliver child) {
-    assert (axis != null);
+    assert(axis != null);
+
+    double extent;
+    switch (cacheExtentStyle) {
+      case CacheExtentStyle.pixel:
+        extent = cacheExtent;
+        break;
+      case CacheExtentStyle.viewport:
+        assert(_calculatedCacheExtent != null);
+        extent = _calculatedCacheExtent * cacheExtent;
+    }
+
     switch (axis) {
       case Axis.vertical:
         return Rect.fromLTRB(
           semanticBounds.left,
-          semanticBounds.top - cacheExtent,
+          semanticBounds.top - extent,
           semanticBounds.right,
-          semanticBounds.bottom + cacheExtent,
+          semanticBounds.bottom + extent,
         );
       case Axis.horizontal:
         return Rect.fromLTRB(
-          semanticBounds.left - cacheExtent,
+          semanticBounds.left - extent,
           semanticBounds.top,
-          semanticBounds.right + cacheExtent,
+          semanticBounds.right + extent,
           semanticBounds.bottom,
         );
     }
@@ -1100,9 +1123,10 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
     List<RenderSliver> children,
     RenderSliver center,
     double cacheExtent,
-    bool autoCache = false,
+    CacheExtentStyle cacheExtentStyle = CacheExtentStyle.pixel,
   }) : assert(anchor != null),
        assert(anchor >= 0.0 && anchor <= 1.0),
+       assert(cacheExtentStyle != CacheExtentStyle.viewport || cacheExtent != null),
        _anchor = anchor,
        _center = center,
        super(
@@ -1110,7 +1134,7 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
          crossAxisDirection: crossAxisDirection,
          offset: offset,
          cacheExtent: cacheExtent,
-         autoCache: autoCache,
+         cacheExtentStyle: cacheExtentStyle,
        ) {
     addAll(children);
     if (center == null && firstChild != null)
@@ -1368,12 +1392,19 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
     final double reverseDirectionRemainingPaintExtent = centerOffset.clamp(0.0, mainAxisExtent);
     final double forwardDirectionRemainingPaintExtent = (mainAxisExtent - centerOffset).clamp(0.0, mainAxisExtent);
 
-    if (autoCache) {
-      cacheExtent = mainAxisExtent;
+    double cacheMultiplier;
+    switch (cacheExtentStyle) {
+      case CacheExtentStyle.pixel:
+        _calculatedCacheExtent = cacheExtent;
+        cacheMultiplier = 2.0;
+        break;
+      case CacheExtentStyle.viewport:
+        _calculatedCacheExtent = mainAxisExtent;
+        cacheMultiplier = cacheExtent;
     }
 
-    final double fullCacheExtent = mainAxisExtent + 2 * cacheExtent;
-    final double centerCacheOffset = centerOffset + cacheExtent;
+    final double fullCacheExtent = mainAxisExtent + cacheMultiplier * _calculatedCacheExtent;
+    final double centerCacheOffset = centerOffset + _calculatedCacheExtent;
     final double reverseDirectionRemainingCacheExtent = centerCacheOffset.clamp(0.0, fullCacheExtent);
     final double forwardDirectionRemainingCacheExtent = (fullCacheExtent - centerCacheOffset).clamp(0.0, fullCacheExtent);
 
@@ -1392,7 +1423,7 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
         growthDirection: GrowthDirection.reverse,
         advance: childBefore,
         remainingCacheExtent: reverseDirectionRemainingCacheExtent,
-        cacheOrigin: (mainAxisExtent - centerOffset).clamp(-cacheExtent, 0.0),
+        cacheOrigin: (mainAxisExtent - centerOffset).clamp(-_calculatedCacheExtent, 0.0),
       );
       if (result != 0.0)
         return -result;
@@ -1410,7 +1441,7 @@ class RenderViewport extends RenderViewportBase<SliverPhysicalContainerParentDat
       growthDirection: GrowthDirection.forward,
       advance: childAfter,
       remainingCacheExtent: forwardDirectionRemainingCacheExtent,
-      cacheOrigin: centerOffset.clamp(-cacheExtent, 0.0),
+      cacheOrigin: centerOffset.clamp(-_calculatedCacheExtent, 0.0),
     );
   }
 

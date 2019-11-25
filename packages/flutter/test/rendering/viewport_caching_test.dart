@@ -26,7 +26,7 @@ void main() {
     ];
   });
 
-  test('Cache extent - null, no autocache', () async {
+  test('Cache extent - null, pixels', () async {
     final RenderViewport renderViewport = RenderViewport(
       crossAxisDirection: AxisDirection.left,
       offset: ViewportOffset.zero(),
@@ -38,7 +38,7 @@ void main() {
     );
   });
 
-  test('Cache extent - 0', () async {
+  test('Cache extent - 0, pixels', () async {
     final RenderViewport renderViewport = RenderViewport(
       crossAxisDirection: AxisDirection.left,
       offset: ViewportOffset.zero(),
@@ -49,7 +49,7 @@ void main() {
     expect(renderViewport.describeSemanticsClip(null), rectExpandedOnAxis(0.0));
   });
 
-  test('Cache extent - 500', () async {
+  test('Cache extent - 500, pixels', () async {
     final RenderViewport renderViewport = RenderViewport(
       crossAxisDirection: AxisDirection.left,
       offset: ViewportOffset.zero(),
@@ -60,20 +60,67 @@ void main() {
     expect(renderViewport.describeSemanticsClip(null), rectExpandedOnAxis(500.0));
   });
 
-  test('Cache extent - auto', () async {
+  test('Cache extent - nullx viewport', () async {
+    await expectLater(() => RenderViewport(
+        crossAxisDirection: AxisDirection.left,
+        offset: ViewportOffset.zero(),
+        cacheExtent: null,
+        cacheExtentStyle: CacheExtentStyle.viewport,
+        children: children,
+      ),
+      throwsAssertionError
+    );
+  });
+
+  test('Cache extent - 0x viewport', () async {
     final RenderViewport renderViewport = RenderViewport(
       crossAxisDirection: AxisDirection.left,
       offset: ViewportOffset.zero(),
-      cacheExtent: 500.0,
-      autoCache: true,
+      cacheExtent: 0.0,
+      cacheExtentStyle: CacheExtentStyle.viewport,
       children: children,
     );
 
-    expect(renderViewport.cacheExtent, 500);
+    layout(renderViewport);
+    expect(renderViewport.describeSemanticsClip(null), rectExpandedOnAxis(0));
+  });
+
+  test('Cache extent - .5x viewport', () async {
+    final RenderViewport renderViewport = RenderViewport(
+      crossAxisDirection: AxisDirection.left,
+      offset: ViewportOffset.zero(),
+      cacheExtent: .5,
+      cacheExtentStyle: CacheExtentStyle.viewport,
+      children: children,
+    );
 
     layout(renderViewport);
+    expect(renderViewport.describeSemanticsClip(null), rectExpandedOnAxis(height  / 2));
+  });
 
-    expect(renderViewport.cacheExtent, height);
+  test('Cache extent - 1x viewport', () async {
+    final RenderViewport renderViewport = RenderViewport(
+      crossAxisDirection: AxisDirection.left,
+      offset: ViewportOffset.zero(),
+      cacheExtent: 1.0,
+      cacheExtentStyle: CacheExtentStyle.viewport,
+      children: children,
+    );
+
+    layout(renderViewport);
     expect(renderViewport.describeSemanticsClip(null), rectExpandedOnAxis(height));
+  });
+
+  test('Cache extent - 2.5x viewport', () async {
+    final RenderViewport renderViewport = RenderViewport(
+      crossAxisDirection: AxisDirection.left,
+      offset: ViewportOffset.zero(),
+      cacheExtent: 2.5,
+      cacheExtentStyle: CacheExtentStyle.viewport,
+      children: children,
+    );
+
+    layout(renderViewport);
+    expect(renderViewport.describeSemanticsClip(null), rectExpandedOnAxis(height * 2.5));
   });
 }
