@@ -317,7 +317,8 @@ List<Plugin> findPlugins(FlutterProject project) {
 /// otherwise returns [false].
 bool _writeFlutterPluginsList(FlutterProject project, List<Plugin> plugins) {
   final List<dynamic> directAppDependencies = <dynamic>[];
-  final StringBuffer flutterPluginsBuffer = StringBuffer();
+  const String info = 'This is a generated file; do not edit or check into version control.';
+  final StringBuffer flutterPluginsBuffer = StringBuffer('# $info\n');
 
   final Set<String> pluginNames = <String>{};
   for (Plugin plugin in plugins) {
@@ -334,7 +335,7 @@ bool _writeFlutterPluginsList(FlutterProject project, List<Plugin> plugins) {
   final File pluginsFile = project.flutterPluginsFile;
   final String oldPluginFileContent = _readFileContent(pluginsFile);
   final String pluginFileContent = flutterPluginsBuffer.toString();
-  if (pluginFileContent.isNotEmpty) {
+  if (pluginNames.isNotEmpty) {
     pluginsFile.writeAsStringSync(pluginFileContent, flush: true);
   } else {
     if (pluginsFile.existsSync()) {
@@ -345,9 +346,10 @@ bool _writeFlutterPluginsList(FlutterProject project, List<Plugin> plugins) {
   final File dependenciesFile = project.flutterPluginsDependenciesFile;
   final String oldDependenciesFileContent = _readFileContent(dependenciesFile);
   final String dependenciesFileContent = json.encode(<String, dynamic>{
+      '_info': '// $info',
       'dependencyGraph': directAppDependencies,
     });
-  if (pluginFileContent.isNotEmpty) {
+  if (pluginNames.isNotEmpty) {
     dependenciesFile.writeAsStringSync(dependenciesFileContent, flush: true);
   } else {
     if (dependenciesFile.existsSync()) {
