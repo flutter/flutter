@@ -481,20 +481,20 @@ class TextTheme extends Diagnosticable {
       return true;
     if (other.runtimeType != runtimeType)
       return false;
-    final TextTheme typedOther = other;
-    return display4 == typedOther.display4
-        && display3 == typedOther.display3
-        && display2 == typedOther.display2
-        && display1 == typedOther.display1
-        && headline == typedOther.headline
-        && title == typedOther.title
-        && subhead == typedOther.subhead
-        && body2 == typedOther.body2
-        && body1 == typedOther.body1
-        && caption == typedOther.caption
-        && button == typedOther.button
-        && subtitle == typedOther.subtitle
-        && overline == typedOther.overline;
+    return other is TextTheme
+        && other.display4 == display4
+        && other.display3 == display3
+        && other.display2 == display2
+        && other.display1 == display1
+        && other.headline == headline
+        && other.title == title
+        && other.subhead == subhead
+        && other.body2 == body2
+        && other.body1 == body1
+        && other.caption == caption
+        && other.button == button
+        && other.subtitle == subtitle
+        && other.overline == overline;
   }
 
   @override

@@ -512,7 +512,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
   }
 
   @override
-  void didUpdateWidget(InkResponse oldWidget) {
+  void didUpdateWidget(T oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (_isWidgetEnabled(widget) != _isWidgetEnabled(oldWidget)) {
       _handleHoverChange(_hovering);
@@ -566,7 +566,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
       return;
     if (value) {
       if (highlight == null) {
-        final RenderBox referenceBox = context.findRenderObject();
+        final RenderBox referenceBox = context.findRenderObject() as RenderBox;
         _highlights[type] = InkHighlight(
           controller: Material.of(context),
           referenceBox: referenceBox,
@@ -604,7 +604,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
 
   InteractiveInkFeature _createInkFeature(Offset globalPosition) {
     final MaterialInkController inkController = Material.of(context);
-    final RenderBox referenceBox = context.findRenderObject();
+    final RenderBox referenceBox = context.findRenderObject() as RenderBox;
     final Offset position = referenceBox.globalToLocal(globalPosition);
     final Color color = widget.splashColor ?? Theme.of(context).splashColor;
     final RectCallback rectCallback = widget.containedInkWell ? widget.getRectCallback(referenceBox) : null;
@@ -682,7 +682,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
 
     Offset globalPosition;
     if (context != null) {
-      final RenderBox referenceBox = context.findRenderObject();
+      final RenderBox referenceBox = context.findRenderObject() as RenderBox;
       assert(referenceBox.hasSize, 'InkResponse must be done with layout before starting a splash.');
       globalPosition = referenceBox.localToGlobal(referenceBox.paintBounds.center);
     } else {

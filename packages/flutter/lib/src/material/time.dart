@@ -113,11 +113,9 @@ class TimeOfDay {
 
   @override
   bool operator ==(dynamic other) {
-    if (other is! TimeOfDay)
-      return false;
-    final TimeOfDay typedOther = other;
-    return typedOther.hour == hour
-        && typedOther.minute == minute;
+    return other is TimeOfDay
+        && other.hour == hour
+        && other.minute == minute;
   }
 
   @override

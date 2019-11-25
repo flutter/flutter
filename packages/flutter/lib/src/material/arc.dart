@@ -201,7 +201,7 @@ T _maxBy<T>(Iterable<T> input, _KeyFunc<T> keyFunc) {
   dynamic maxKey;
   for (T value in input) {
     final dynamic key = keyFunc(value);
-    if (maxKey == null || key > maxKey) {
+    if (maxKey == null || (key > maxKey) as bool) {
       maxValue = value;
       maxKey = key;
     }

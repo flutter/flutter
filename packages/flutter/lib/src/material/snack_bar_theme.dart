@@ -161,14 +161,14 @@ class SnackBarThemeData extends Diagnosticable {
       return true;
     if (other.runtimeType != runtimeType)
       return false;
-    final SnackBarThemeData typedOther = other;
-    return typedOther.backgroundColor == backgroundColor
-        && typedOther.actionTextColor == actionTextColor
-        && typedOther.disabledActionTextColor == disabledActionTextColor
-        && typedOther.contentTextStyle == contentTextStyle
-        && typedOther.elevation == elevation
-        && typedOther.shape == shape
-        && typedOther.behavior == behavior;
+    return other is SnackBarThemeData
+        && other.backgroundColor == backgroundColor
+        && other.actionTextColor == actionTextColor
+        && other.disabledActionTextColor == disabledActionTextColor
+        && other.contentTextStyle == contentTextStyle
+        && other.elevation == elevation
+        && other.shape == shape
+        && other.behavior == behavior;
   }
 
   @override

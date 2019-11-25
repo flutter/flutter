@@ -557,8 +557,9 @@ class _OutlineBorder extends ShapeBorder implements MaterialStateProperty<ShapeB
       return true;
     if (runtimeType != other.runtimeType)
       return false;
-    final _OutlineBorder typedOther = other;
-    return side == typedOther.side && shape == typedOther.shape;
+    return other is _OutlineBorder
+        && other.side == side
+        && other.shape == shape;
   }
 
   @override

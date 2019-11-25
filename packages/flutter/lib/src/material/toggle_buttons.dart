@@ -1061,7 +1061,7 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
         );
 
         child.layout(innerConstraints, parentUsesSize: true);
-        final BoxParentData childParentData = child.parentData;
+        final BoxParentData childParentData = child.parentData as BoxParentData;
         childParentData.offset = Offset(leadingBorderSide.width, leadingBorderSide.width);
 
         size = constraints.constrain(Size(
@@ -1083,7 +1083,7 @@ class _SelectToggleButtonRenderObject extends RenderShiftedBox {
         );
 
         child.layout(innerConstraints, parentUsesSize: true);
-        final BoxParentData childParentData = child.parentData;
+        final BoxParentData childParentData = child.parentData as BoxParentData;
 
         if (isLastButton) {
           childParentData.offset = Offset(trailingBorderOffset, trailingBorderOffset);

@@ -358,7 +358,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
     }
     contents = NotificationListener<LayoutChangedNotification>(
       onNotification: (LayoutChangedNotification notification) {
-        final _RenderInkFeatures renderer = _inkFeatureRenderer.currentContext.findRenderObject();
+        final _RenderInkFeatures renderer = _inkFeatureRenderer.currentContext.findRenderObject() as _RenderInkFeatures;
         renderer._didChangeLayout();
         return false;
       },
@@ -575,7 +575,7 @@ abstract class InkFeature {
     this.onRemoved,
   }) : assert(controller != null),
        assert(referenceBox != null),
-       _controller = controller;
+       _controller = controller as _RenderInkFeatures;
 
   /// The [MaterialInkController] associated with this [InkFeature].
   ///
@@ -612,7 +612,7 @@ abstract class InkFeature {
     final List<RenderObject> descendants = <RenderObject>[referenceBox];
     RenderObject node = referenceBox;
     while (node != _controller) {
-      node = node.parent;
+      node = node.parent as RenderObject;
       assert(node != null);
       descendants.add(node);
     }
@@ -734,9 +734,21 @@ class _MaterialInteriorState extends AnimatedWidgetBaseState<_MaterialInterior> 
 
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
-    _elevation = visitor(_elevation, widget.elevation, (dynamic value) => Tween<double>(begin: value));
-    _shadowColor = visitor(_shadowColor, widget.shadowColor, (dynamic value) => ColorTween(begin: value));
-    _border = visitor(_border, widget.shape, (dynamic value) => ShapeBorderTween(begin: value));
+    _elevation = visitor(
+      _elevation,
+      widget.elevation,
+      (dynamic value) => Tween<double>(begin: value as double),
+    ) as Tween<double>;
+    _shadowColor = visitor(
+      _shadowColor,
+      widget.shadowColor,
+      (dynamic value) => ColorTween(begin: value as Color),
+    ) as ColorTween;
+    _border = visitor(
+      _border,
+      widget.shape,
+      (dynamic value) => ShapeBorderTween(begin: value as ShapeBorder),
+    ) as ShapeBorderTween;
   }
 
   @override

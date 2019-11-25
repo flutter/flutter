@@ -1004,7 +1004,7 @@ class _DialPainter extends CustomPainter {
         final double width = labelPainter.width * _semanticNodeSizeScale;
         final double height = labelPainter.height * _semanticNodeSizeScale;
         final Offset nodeOffset = getOffsetForTheta(labelTheta, ring) + Offset(-width / 2.0, -height / 2.0);
-        final TextSpan textSpan = labelPainter.text;
+        final TextSpan textSpan = labelPainter.text as TextSpan;
         final CustomPainterSemantics node = CustomPainterSemantics(
           rect: Rect.fromLTRB(
             nodeOffset.dx - 24.0 + width / 2,
@@ -1190,7 +1190,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
       _thetaTween
         ..begin = angle
         ..end = angle; // The controller doesn't animate during the pan gesture.
-      final RenderBox box = context.findRenderObject();
+      final RenderBox box = context.findRenderObject() as RenderBox;
       final double radius = box.size.shortestSide / 2.0;
       if (widget.mode == _TimePickerMode.hour && widget.use24HourDials) {
         if (offset.distance * 1.5 < radius)
@@ -1208,7 +1208,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
   void _handlePanStart(DragStartDetails details) {
     assert(!_dragging);
     _dragging = true;
-    final RenderBox box = context.findRenderObject();
+    final RenderBox box = context.findRenderObject() as RenderBox;
     _position = box.globalToLocal(details.globalPosition);
     _center = box.size.center(Offset.zero);
     _updateThetaForPan();
@@ -1235,7 +1235,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
   }
 
   void _handleTapUp(TapUpDetails details) {
-    final RenderBox box = context.findRenderObject();
+    final RenderBox box = context.findRenderObject() as RenderBox;
     _position = box.globalToLocal(details.globalPosition);
     _center = box.size.center(Offset.zero);
     _updateThetaForPan();

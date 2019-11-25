@@ -288,7 +288,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
 
         // 0.0 -> Expanded
         // 1.0 -> Collapsed to toolbar
-        final double t = (1.0 - (settings.currentExtent - settings.minExtent) / deltaExtent).clamp(0.0, 1.0);
+        final double t = (1.0 - (settings.currentExtent - settings.minExtent) / deltaExtent).clamp(0.0, 1.0) as double;
 
         // background
         if (widget.background != null) {
@@ -358,7 +358,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
           if (widget.stretchModes.contains(StretchMode.fadeTitle) &&
             constraints.maxHeight > settings.maxExtent) {
             final double stretchOpacity = 1 -
-              ((constraints.maxHeight - settings.maxExtent) / 100).clamp(0.0, 1.0);
+              (((constraints.maxHeight - settings.maxExtent) / 100).clamp(0.0, 1.0) as double);
             title = Opacity(
               opacity: stretchOpacity,
               child: title,

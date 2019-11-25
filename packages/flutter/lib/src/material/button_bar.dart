@@ -316,7 +316,7 @@ class _RenderButtonBarRow extends RenderFlex {
       double currentHeight = 0.0;
 
       while (child != null) {
-        final FlexParentData childParentData = child.parentData;
+        final FlexParentData childParentData = child.parentData as FlexParentData;
 
         // Lay out the child with the button bar's original constraints, but
         // with minimum width set to zero.

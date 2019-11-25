@@ -240,8 +240,8 @@ class UnderlineInputBorder extends InputBorder {
       return true;
     if (runtimeType != other.runtimeType)
       return false;
-    final InputBorder typedOther = other;
-    return typedOther.borderSide == borderSide;
+    return other is InputBorder
+        && other.borderSide == borderSide;
   }
 
   @override
@@ -497,10 +497,10 @@ class OutlineInputBorder extends InputBorder {
       return true;
     if (runtimeType != other.runtimeType)
       return false;
-    final OutlineInputBorder typedOther = other;
-    return typedOther.borderSide == borderSide
-        && typedOther.borderRadius == borderRadius
-        && typedOther.gapPadding == gapPadding;
+    return other is OutlineInputBorder
+        && other.borderSide == borderSide
+        && other.borderRadius == borderRadius
+        && other.gapPadding == gapPadding;
   }
 
   @override

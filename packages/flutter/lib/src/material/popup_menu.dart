@@ -159,7 +159,7 @@ class _RenderMenuItem extends RenderShiftedBox {
       child.layout(constraints, parentUsesSize: true);
       size = constraints.constrain(child.size);
     }
-    final BoxParentData childParentData = child.parentData;
+    final BoxParentData childParentData = child.parentData as BoxParentData;
     childParentData.offset = Offset.zero;
     onLayout(size);
   }
@@ -490,7 +490,7 @@ class _PopupMenu<T> extends StatelessWidget {
 
     for (int i = 0; i < route.items.length; i += 1) {
       final double start = (i + 1) * unit;
-      final double end = (start + 1.5 * unit).clamp(0.0, 1.0);
+      final double end = (start + 1.5 * unit).clamp(0.0, 1.0) as double;
       final CurvedAnimation opacity = CurvedAnimation(
         parent: route.animation,
         curve: Interval(start, end),
@@ -591,7 +591,9 @@ class _PopupMenuRouteLayout extends SingleChildLayoutDelegate {
   BoxConstraints getConstraintsForChild(BoxConstraints constraints) {
     // The menu can be at most the size of the overlay minus 8.0 pixels in each
     // direction.
-    return BoxConstraints.loose(constraints.biggest - const Offset(_kMenuScreenPadding * 2.0, _kMenuScreenPadding * 2.0));
+    return BoxConstraints.loose(
+      constraints.biggest - const Offset(_kMenuScreenPadding * 2.0, _kMenuScreenPadding * 2.0) as Size,
+    );
   }
 
   @override
@@ -677,7 +679,7 @@ class _PopupMenuRoute<T> extends PopupRoute<T> {
   final RelativeRect position;
   final List<PopupMenuEntry<T>> items;
   final List<Size> itemSizes;
-  final dynamic initialValue;
+  final T initialValue;
   final double elevation;
   final ThemeData theme;
   final String semanticLabel;
@@ -1041,8 +1043,8 @@ class PopupMenuButton<T> extends StatefulWidget {
 class _PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
   void showButtonMenu() {
     final PopupMenuThemeData popupMenuTheme = PopupMenuTheme.of(context);
-    final RenderBox button = context.findRenderObject();
-    final RenderBox overlay = Overlay.of(context).context.findRenderObject();
+    final RenderBox button = context.findRenderObject() as RenderBox;
+    final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
     final RelativeRect position = RelativeRect.fromRect(
       Rect.fromPoints(
         button.localToGlobal(widget.offset, ancestor: overlay),
