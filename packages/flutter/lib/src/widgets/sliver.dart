@@ -1712,8 +1712,7 @@ class SliverOpacity extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void updateRenderObject(BuildContext context,
-    RenderSliverOpacity renderObject) {
+  void updateRenderObject(BuildContext context, RenderSliverOpacity renderObject) {
     renderObject
       ..opacity = opacity
       ..alwaysIncludeSemantics = alwaysIncludeSemantics;
@@ -1784,6 +1783,66 @@ class SliverIgnorePointer extends SingleChildRenderObjectWidget {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<bool>('ignoring', ignoring));
     properties.add(DiagnosticsProperty<bool>('ignoringSemantics', ignoringSemantics, defaultValue: null));
+  }
+}
+
+/// A sliver that lays its sliver child out as if it was in the tree, but
+/// without painting anything, without making the sliver child available for hit
+/// testing, and without taking any room in the parent.
+///
+/// Animations continue to run in offstage sliver children, and therefore use
+/// battery and CPU time, regardless of whether the animations end up being
+/// visible.
+///
+/// To hide a sliver widget from view while it is
+/// not needed, prefer removing the widget from the tree entirely rather than
+/// keeping it alive in an [Offstage] subtree.
+class SliverOffstage extends SingleChildRenderObjectWidget {
+  /// Creates a sliver that visually hides its sliver child.
+  const SliverOffstage({
+    Key key,
+    this.offstage = true,
+    Widget sliver,
+  }) : assert(offstage != null),
+       super(key: key, child: sliver);
+
+  /// Whether the sliver child is hidden from the rest of the tree.
+  ///
+  /// If true, the sliver child is laid out as if it was in the tree, but
+  /// without painting anything, without making the child available for hit
+  /// testing, and without taking any room in the parent.
+  ///
+  /// If false, the sliver child is included in the tree as normal.
+  final bool offstage;
+
+  @override
+  RenderSliverOffstage createRenderObject(BuildContext context) => RenderSliverOffstage(offstage: offstage);
+
+  @override
+  void updateRenderObject(BuildContext context, RenderSliverOffstage renderObject) {
+    renderObject.offstage = offstage;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<bool>('offstage', offstage));
+  }
+
+  @override
+  _SliverOffstageElement createElement() => _SliverOffstageElement(this);
+}
+
+class _SliverOffstageElement extends SingleChildRenderObjectElement {
+  _SliverOffstageElement(SliverOffstage widget) : super(widget);
+
+  @override
+  SliverOffstage get widget => super.widget;
+
+  @override
+  void debugVisitOnstageChildren(ElementVisitor visitor) {
+    if (!widget.offstage)
+      super.debugVisitOnstageChildren(visitor);
   }
 }
 

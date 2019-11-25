@@ -1965,7 +1965,7 @@ class RenderSliverOpacity extends RenderSliver with RenderObjectWithChildMixin<R
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DoubleProperty('opacity', opacity));
-    properties.add(FlagProperty('alwaysIncludeSemantics', value: alwaysIncludeSemantics, ifTrue: 'alwaysIncludeSemantics',));
+    properties.add(FlagProperty('alwaysIncludeSemantics', value: alwaysIncludeSemantics, ifTrue: 'alwaysIncludeSemantics'));
   }
 }
 
@@ -2079,6 +2079,118 @@ class RenderSliverIgnorePointer extends RenderSliver with RenderObjectWithChildM
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<bool>('ignoring', ignoring));
-    properties.add(DiagnosticsProperty<bool>('ignoringSemantics', _effectiveIgnoringSemantics, description: ignoringSemantics == null ? 'implicitly $_effectiveIgnoringSemantics' : null,),);
+    properties.add(DiagnosticsProperty<bool>('ignoringSemantics', _effectiveIgnoringSemantics, description: ignoringSemantics == null ? 'implicitly $_effectiveIgnoringSemantics' : null));
+  }
+}
+
+/// Lays the sliver child out as if it was in the tree, but without painting
+/// anything, without making the sliver child available for hit testing, and
+/// without taking any room in the parent.
+class RenderSliverOffstage extends RenderSliver with RenderObjectWithChildMixin<RenderSliver> {
+  /// Creates an offstage render object.
+  RenderSliverOffstage({
+    bool offstage = true,
+    RenderSliver sliver,
+  }) : assert(offstage != null),
+       _offstage = offstage {
+    child = sliver;
+  }
+
+  /// Whether the sliver child is hidden from the rest of the tree.
+  ///
+  /// If true, the sliver child is laid out as if it was in the tree, but
+  /// without painting anything, without making the sliver child available for
+  /// hit testing, and without taking any room in the parent.
+  ///
+  /// If false, the sliver child is included in the tree as normal.
+  bool get offstage => _offstage;
+  bool _offstage;
+
+  set offstage(bool value) {
+    assert(value != null);
+    if (value == _offstage)
+      return;
+    _offstage = value;
+    markNeedsLayoutForSizedByParentChange();
+  }
+
+  @override
+  void setupParentData(RenderObject child) {
+    if (child.parentData is! SliverPhysicalParentData)
+      child.parentData = SliverPhysicalParentData();
+  }
+
+  @override
+  void performLayout() {
+    assert(child != null);
+    child.layout(constraints, parentUsesSize: true);
+    geometry = child.geometry;
+  }
+
+  @override
+  bool hitTest(SliverHitTestResult result, {double mainAxisPosition, double crossAxisPosition}) {
+    return !offstage && super.hitTest(
+      result,
+      mainAxisPosition: mainAxisPosition,
+      crossAxisPosition: crossAxisPosition,
+    );
+  }
+
+  @override
+  bool hitTestChildren(SliverHitTestResult result, {double mainAxisPosition, double crossAxisPosition}) {
+    return !offstage
+      && child != null
+      && child.geometry.hitTestExtent > 0
+      && child.hitTest(
+        result,
+        mainAxisPosition: mainAxisPosition,
+        crossAxisPosition: crossAxisPosition,
+      );
+  }
+
+  @override
+  double childMainAxisPosition(RenderSliver child) {
+    assert(child != null);
+    assert(child == this.child);
+    return 0.0;
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (offstage)
+      return;
+    super.paint(context, offset);
+  }
+
+  @override
+  void applyPaintTransform(RenderObject child, Matrix4 transform) {
+    assert(child != null);
+    final SliverPhysicalParentData childParentData = child.parentData;
+    childParentData.applyPaintTransform(transform);
+  }
+
+  @override
+  void visitChildrenForSemantics(RenderObjectVisitor visitor) {
+    if (offstage)
+      return;
+    super.visitChildrenForSemantics(visitor);
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<bool>('offstage', offstage));
+  }
+
+  @override
+  List<DiagnosticsNode> debugDescribeChildren() {
+    if (child == null)
+      return <DiagnosticsNode>[];
+    return <DiagnosticsNode>[
+      child.toDiagnosticsNode(
+        name: 'child',
+        style: offstage ? DiagnosticsTreeStyle.offstage : DiagnosticsTreeStyle.sparse,
+      ),
+    ];
   }
 }
