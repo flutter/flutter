@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -85,10 +84,6 @@ typedef WidgetTesterCallback = Future<void> Function(WidgetTester widgetTester);
 /// provides convenient widget [Finder]s for use with the
 /// [WidgetTester].
 ///
-/// Will define one [testWidgets] test for each platform in [targetPlatforms]. The
-/// [targetPlatforms] argument defaults to [TargetPlatform.values]. Will skip any
-/// platforms defined in [except].
-///
 /// See also:
 ///
 ///  * [AutomatedTestWidgetsFlutterBinding.addTime] to learn more about
@@ -105,23 +100,18 @@ typedef WidgetTesterCallback = Future<void> Function(WidgetTester widgetTester);
 /// ```
 @isTest
 void testWidgets(
-    String description,
-    WidgetTesterCallback callback, {
-      bool skip = false,
-      test_package.Timeout timeout,
-      Duration initialTimeout,
-      bool semanticsEnabled = true,
-      Iterable<TargetPlatform> targetPlatforms = const <TargetPlatform>[],
-    }) {
+  String description,
+  WidgetTesterCallback callback, {
+  bool skip = false,
+  test_package.Timeout timeout,
+  Duration initialTimeout,
+  bool semanticsEnabled = true,
+}) {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
   final WidgetTester tester = WidgetTester._(binding);
-  if (targetPlatforms.isEmpty) {
-    targetPlatforms = <TargetPlatform>[debugDefaultTargetPlatformOverride];
-  }
-  final TargetPlatform origDefaultPlatform = debugDefaultTargetPlatformOverride;
-  for (TargetPlatform platform in targetPlatforms) {
-    final String platformDescription = platform != debugDefaultTargetPlatformOverride ? '$description (${describeEnum(platform)})' : description;
-    test(platformDescription, () {
+  test(
+    description,
+    () {
       SemanticsHandle semanticsHandle;
       if (semanticsEnabled == true) {
         semanticsHandle = tester.ensureSemantics();
@@ -131,23 +121,17 @@ void testWidgets(
       return binding.runTest(
         () async {
           debugResetSemanticsIdCounter();
-          try {
-            debugDefaultTargetPlatformOverride = platform;
-            await callback(tester);
-          } finally {
-            debugDefaultTargetPlatformOverride = origDefaultPlatform;
-          }
+          await callback(tester);
           semanticsHandle?.dispose();
         },
         tester._endOfTestVerifications,
         description: description ?? '',
         timeout: initialTimeout,
       );
-      },
-      skip: skip,
-      timeout: timeout ?? binding.defaultTestTimeout,
-    );
-  }
+    },
+    skip: skip,
+    timeout: timeout ?? binding.defaultTestTimeout,
+  );
 }
 
 /// Runs the [callback] inside the Flutter benchmark environment.
