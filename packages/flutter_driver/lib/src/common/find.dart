@@ -435,7 +435,7 @@ class GetSemanticsId extends CommandWithTarget {
   /// Creates a command which finds a Widget and then looks up the semantic id.
   GetSemanticsId(SerializableFinder finder, {Duration timeout}) : super(finder, timeout: timeout);
 
-  /// Creates a command from a json map.
+  /// Creates a command from a JSON map.
   GetSemanticsId.deserialize(Map<String, String> json)
     : super.deserialize(json);
 

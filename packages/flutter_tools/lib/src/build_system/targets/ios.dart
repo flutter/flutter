@@ -18,7 +18,7 @@ import 'dart.dart';
 /// Supports compiling a dart kernel file to an assembly file.
 ///
 /// If more than one iOS arch is provided, then this rule will
-/// produce a univeral binary.
+/// produce a universal binary.
 abstract class AotAssemblyBase extends Target {
   const AotAssemblyBase();
 

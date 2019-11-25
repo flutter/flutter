@@ -273,7 +273,7 @@ class RangeSlider extends StatefulWidget {
   /// There are two labels: one for the start thumb and one for the end thumb.
   ///
   /// Each label is rendered using the active [ThemeData]'s
-  /// [ThemeData.accentTextTheme.body2] text style, and can be overriden
+  /// [ThemeData.accentTextTheme.body2] text style, and can be overridden
   /// by changing the [SliderThemeData.valueIndicatorTextStyle].
   ///
   /// If null, then the value indicator will not be displayed.

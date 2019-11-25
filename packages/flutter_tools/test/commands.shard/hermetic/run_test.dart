@@ -244,6 +244,37 @@ void main() {
         FlutterVersion: () => mockStableFlutterVersion,
         WebRunnerFactory: () => mockWebRunnerFactory,
       });
+
+      testUsingContext('populates dartDefines in --machine mode', () async {
+        final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_run_test.');
+        fs.currentDirectory = tempDir;
+
+        final Directory libDir = tempDir.childDirectory('lib');
+        libDir.createSync();
+        final File mainFile = libDir.childFile('main.dart');
+        mainFile.writeAsStringSync('void main() {}');
+
+        final Directory webDir = tempDir.childDirectory('web');
+        webDir.createSync();
+        final File indexFile = libDir.childFile('index.html');
+        indexFile.writeAsStringSync('<h1>Hello</h1>');
+
+        when(mockDeviceManager.deviceDiscoverers).thenReturn(<DeviceDiscovery>[]);
+
+        args.add('--machine');
+        await createTestCommandRunner(command).run(args);
+        expect(mockWebRunnerFactory._dartDefines, <String>['FOO=bar']);
+      }, overrides: <Type, Generator>{
+        DeviceManager: () => mockDeviceManager,
+        FeatureFlags: () => TestFeatureFlags(
+          isWebEnabled: true,
+        ),
+        FileSystem: () => fs,
+        ProcessManager: () => mockProcessManager,
+        DeviceManager: () => mockDeviceManager,
+        FlutterVersion: () => mockStableFlutterVersion,
+        WebRunnerFactory: () => mockWebRunnerFactory,
+      });
     });
   });
 }
@@ -275,6 +306,9 @@ class FakeDevice extends Fake implements Device {
   static const int kSuccess = 1;
   static const int kFailure = -1;
   TargetPlatform _targetPlatform = TargetPlatform.ios;
+
+  @override
+  String get id => 'fake_device';
 
   void _throwToolExit(int code) => throwToolExit(null, exitCode: code);
 
@@ -351,6 +385,9 @@ class MockWebRunnerFactory extends Mock implements WebRunnerFactory {
 
 class MockWebRunner extends Mock implements ResidentRunner {
   @override
+  bool get debuggingEnabled => false;
+
+  @override
   Future<int> run({
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<void> appStartedCompleter,
@@ -358,4 +395,7 @@ class MockWebRunner extends Mock implements ResidentRunner {
   }) async {
     return 0;
   }
+
+  @override
+  Future<int> waitForAppToFinish() async => 0;
 }

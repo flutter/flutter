@@ -48,7 +48,7 @@ void main() {
     mockProcessUtils = MockProcessUtils();
     when(mockBuildDaemonCreator.startBuildDaemon(any, release: anyNamed('release'), initializePlatform: anyNamed('initializePlatform')))
       .thenAnswer((Invocation invocation) async {
-        lastInitializePlatform = invocation.namedArguments[#initializePlatform];
+        lastInitializePlatform = invocation.namedArguments[#initializePlatform] as bool;
         return mockBuildDaemonClient;
       });
     when(mockOperatingSystemUtils.findFreePort()).thenAnswer((Invocation _) async {
@@ -60,7 +60,7 @@ void main() {
       mapFunction: anyNamed('mapFunction'),
       environment: anyNamed('environment'),
     )).thenAnswer((Invocation invocation) async {
-      final String workingDirectory = invocation.namedArguments[#workingDirectory];
+      final String workingDirectory = invocation.namedArguments[#workingDirectory] as String;
       fs.file(fs.path.join(workingDirectory, '.packages')).createSync(recursive: true);
       return 0;
     });

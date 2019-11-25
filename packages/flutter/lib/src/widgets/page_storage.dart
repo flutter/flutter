@@ -161,7 +161,7 @@ class PageStorage extends StatelessWidget {
   /// PageStorageBucket bucket = PageStorage.of(context);
   /// ```
   static PageStorageBucket of(BuildContext context) {
-    final PageStorage widget = context.ancestorWidgetOfExactType(PageStorage);
+    final PageStorage widget = context.findAncestorWidgetOfExactType<PageStorage>();
     return widget?.bucket;
   }
 

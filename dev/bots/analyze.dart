@@ -131,7 +131,7 @@ Future<void> run(List<String> arguments) async {
 final RegExp _findDeprecationPattern = RegExp(r'@[Dd]eprecated');
 final RegExp _deprecationPattern1 = RegExp(r'^( *)@Deprecated\($'); // ignore: flutter_deprecation_syntax (see analyze.dart)
 final RegExp _deprecationPattern2 = RegExp(r"^ *'(.+) '$");
-final RegExp _deprecationPattern3 = RegExp(r"^ *'This feature was deprecated after v([0-9]+)\.([0-9]+)\.([0-9]+)\.(?: See: (https://flutter.dev/.+))?'$");
+final RegExp _deprecationPattern3 = RegExp(r"^ *'This feature was deprecated after v([0-9]+)\.([0-9]+)\.([0-9]+)\.'$");
 final RegExp _deprecationPattern4 = RegExp(r'^ *\)$');
 
 /// Some deprecation notices are special, for example they're used to annotate members that
@@ -190,10 +190,6 @@ Future<void> verifyDeprecations(String workingDirectory) async {
           throw 'Deprecation notice should be a grammatically correct sentence and end with a period.';
         if (!lines[lineNumber].startsWith("$indent  '"))
           throw 'Unexpected deprecation notice indent.';
-        if (int.parse(match3[1]) > 1 || int.parse(match3[2]) > 11) {
-          if (match3[4] == null)
-            throw 'A URL to the deprecation notice is required.';
-        }
         lineNumber += 1;
         if (lineNumber >= lines.length)
           throw 'Incomplete deprecation notice.';

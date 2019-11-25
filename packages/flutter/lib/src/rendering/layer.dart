@@ -21,7 +21,7 @@ import 'debug.dart';
 ///  * [Layer.findAnnotations], which create and use objects of this class.
 @immutable
 class AnnotationEntry<T> {
-  /// Create an entry of found annotation by providing the oject and related
+  /// Create an entry of found annotation by providing the object and related
   /// information.
   const AnnotationEntry({
     @required this.annotation,
@@ -590,11 +590,11 @@ class TextureLayer extends Layer {
 
   /// When true the texture that will not be updated with new frames.
   ///
-  /// This is used when resizing an embedded  Android views: When resizing
-  /// there is a short period during which the framework cannot tell
-  /// if the newest texture frame has the previous or new size, to workaround this
-  /// the framework "freezes" the texture just before resizing the Android view and unfreezes
-  /// it when it is certain that a frame with the new size is ready.
+  /// This is used when resizing an embedded  Android views: When resizing there
+  /// is a short period during which the framework cannot tell if the newest
+  /// texture frame has the previous or new size, to workaround this the
+  /// framework "freezes" the texture just before resizing the Android view and
+  /// un-freezes it when it is certain that a frame with the new size is ready.
   final bool freeze;
 
   @override
@@ -2338,7 +2338,7 @@ class AnnotatedRegionLayer<T> extends ContainerLayer {
   /// The [offset] defaults to [Offset.zero] if not provided, and is ignored if
   /// [size] is not set.
   ///
-  /// The [offset] only offsets the clipping rectagle, and does not affect
+  /// The [offset] only offsets the clipping rectangle, and does not affect
   /// how the painting or annotation search is propagated to its children.
   final Offset offset;
 

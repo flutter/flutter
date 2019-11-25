@@ -295,7 +295,7 @@ class RunCommand extends RunCommandBase {
 
   DebuggingOptions _createDebuggingOptions() {
     final BuildInfo buildInfo = getBuildInfo();
-    if (buildInfo.isRelease) {
+    if (buildInfo.mode.isRelease) {
       return DebuggingOptions.disabled(
         buildInfo,
         initializePlatform: boolArg('web-initialize-platform'),
@@ -321,7 +321,6 @@ class RunCommand extends RunCommandBase {
         initializePlatform: boolArg('web-initialize-platform'),
         hostname: featureFlags.isWebEnabled ? stringArg('web-hostname') : '',
         port: featureFlags.isWebEnabled ? stringArg('web-port') : '',
-        browserLaunch: featureFlags.isWebEnabled ? boolArg('web-browser-launch') : null,
         vmserviceOutFile: stringArg('vmservice-out-file'),
       );
     }
@@ -341,8 +340,13 @@ class RunCommand extends RunCommandBase {
       if (devices.length > 1) {
         throwToolExit('--machine does not support -d all.');
       }
-      final Daemon daemon = Daemon(stdinCommandStream, stdoutCommandResponse,
-          notifyingLogger: NotifyingLogger(), logToStdout: true);
+      final Daemon daemon = Daemon(
+        stdinCommandStream,
+        stdoutCommandResponse,
+        notifyingLogger: NotifyingLogger(),
+        logToStdout: true,
+        dartDefines: dartDefines,
+      );
       AppInstance app;
       try {
         final String applicationBinaryPath = stringArg('use-application-binary');

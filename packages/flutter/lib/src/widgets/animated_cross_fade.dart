@@ -66,6 +66,8 @@ typedef AnimatedCrossFadeBuilder = Widget Function(Widget topChild, Key topChild
 /// A widget that cross-fades between two given children and animates itself
 /// between their sizes.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=PGK2UUAyE54}
+///
 /// The animation is controlled through the [crossFadeState] parameter.
 /// [firstCurve] and [secondCurve] represent the opacity curves of the two
 /// children. The [firstCurve] is inverted, i.e. it fades out when providing a
