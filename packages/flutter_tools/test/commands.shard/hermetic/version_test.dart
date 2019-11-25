@@ -117,7 +117,7 @@ class MockProcessManager extends Mock implements ProcessManager {
       return ProcessResult(0, 0, 'v10.0.0\r\nv20.0.0', '');
     }
     if (command[0] == 'git' && command[1] == 'checkout') {
-      version = command[2];
+      version = command[2] as String;
     }
     return ProcessResult(0, 0, '', '');
   }

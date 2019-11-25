@@ -4,6 +4,7 @@
 
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/exceptions.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -133,7 +134,7 @@ void main() {
     final File stampFile = fs.file(fs.path.join(environment.buildDir.path, 'foo.stamp'));
     expect(stampFile.existsSync(), true);
 
-    final Map<String, Object> stampContents = json.decode(stampFile.readAsStringSync());
+    final Map<String, dynamic> stampContents = castStringKeyedMap(json.decode(stampFile.readAsStringSync()));
     expect(stampContents['inputs'], <Object>['/foo.dart']);
   }));
 

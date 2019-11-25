@@ -94,12 +94,19 @@ void main() {
     });
 
     group('startApp', () {
-      final MockAndroidApk mockApk = MockAndroidApk();
-      final MockProcessManager mockProcessManager = MockProcessManager();
-      final MockAndroidSdk mockAndroidSdk = MockAndroidSdk();
-      final MockProcessUtils mockProcessUtils = MockProcessUtils();
+      MockAndroidApk mockApk;
+      MockProcessManager mockProcessManager;
+      MockAndroidSdk mockAndroidSdk;
+      MockProcessUtils mockProcessUtils;
 
-      testUsingContext(' succeeds with --cache-sksl', () async {
+      setUp(() {
+        mockApk = MockAndroidApk();
+        mockProcessManager = MockProcessManager();
+        mockAndroidSdk = MockAndroidSdk();
+        mockProcessUtils = MockProcessUtils();
+      });
+
+      testUsingContext('succeeds with --cache-sksl', () async {
         const String deviceId = '1234';
         final AndroidDevice device = AndroidDevice(deviceId, modelID: 'TestModel');
 
@@ -134,6 +141,41 @@ void main() {
             mockProcessUtils.runCmd.sublist(cmdIndex - 1, cmdIndex + 2),
             equals(<String>['--ez', 'cache-sksl', 'true']),
         );
+      }, overrides: <Type, Generator>{
+        AndroidSdk: () => mockAndroidSdk,
+        FileSystem: () => MemoryFileSystem(),
+        ProcessManager: () => mockProcessManager,
+        ProcessUtils: () => mockProcessUtils,
+      });
+
+      testUsingContext('can run a release build on x64', () async {
+        const String deviceId = '1234';
+        final AndroidDevice device = AndroidDevice(deviceId, modelID: 'TestModel');
+
+        final Directory sdkDir = MockAndroidSdk.createSdkDirectory();
+        Config.instance.setValue('android-sdk', sdkDir.path);
+        final File adbExe = fs.file(getAdbPath(androidSdk));
+
+        when(mockAndroidSdk.licensesAvailable).thenReturn(true);
+        when(mockAndroidSdk.latestVersion).thenReturn(MockAndroidSdkVersion());
+
+        when(mockProcessManager.run(
+          <String>[adbExe.path, '-s', deviceId, 'shell', 'getprop'],
+          stdoutEncoding: latin1,
+          stderrEncoding: latin1,
+        )).thenAnswer((_) async {
+          return ProcessResult(0, 0, '[ro.build.version.sdk]: [24]\n[ro.product.cpu.abi]: [x86_64]', '');
+        });
+
+        final LaunchResult launchResult = await device.startApp(
+          mockApk,
+          prebuiltApplication: true,
+          debuggingOptions: DebuggingOptions.disabled(
+            const BuildInfo(BuildMode.release, null),
+          ),
+          platformArgs: <String, dynamic>{},
+        );
+        expect(launchResult.started, true);
       }, overrides: <Type, Generator>{
         AndroidSdk: () => mockAndroidSdk,
         FileSystem: () => MemoryFileSystem(),
@@ -378,7 +420,7 @@ Use the 'android' tool to install them:
       ProcessManager: () => mockProcessManager
     });
 
-    testUsingContext('detects kind fire ABI', () async {
+    testUsingContext('detects kindle fire ABI', () async {
       cpu = 'arm64-v8a';
       abilist = 'arm';
       final AndroidDevice device = AndroidDevice('test');
