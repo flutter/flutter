@@ -19,6 +19,7 @@ import 'base/file_system.dart';
 import 'base/io.dart' as io;
 import 'base/utils.dart';
 import 'convert.dart' show base64, utf8;
+import 'device.dart';
 import 'globals.dart';
 import 'version.dart';
 import 'vmservice_record_replay.dart';
@@ -351,6 +352,19 @@ class VMService {
 
   Future<void> get done async {
     await _peer.done;
+  }
+
+  /// The connected physical device instance.
+  Device _device;
+  set device(Device device) {
+    _device = device;
+    _peer.registerMethod('flutterRss', (rpc.Parameters params) async {
+      return _device.queryRss();
+    });
+    _peer.sendNotification('registerService', <String, String>{
+      'service': 'flutterRss',
+      'alias': 'Flutter Tools',
+    });
   }
 
   // Events

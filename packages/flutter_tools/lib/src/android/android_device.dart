@@ -475,6 +475,8 @@ class AndroidDevice extends Device {
     return true;
   }
 
+  AndroidApk _package;
+
   @override
   Future<LaunchResult> startApp(
     AndroidApk package, {
@@ -610,6 +612,7 @@ class AndroidDevice extends Device {
       return LaunchResult.failed();
     }
 
+    _package = package;
     if (!debuggingOptions.debuggingEnabled) {
       return LaunchResult.succeeded();
     }
@@ -646,6 +649,21 @@ class AndroidDevice extends Device {
     final List<String> command = adbCommandForDevice(<String>['shell', 'am', 'force-stop', app.id]);
     return processUtils.stream(command).then<bool>(
         (int exitCode) => exitCode == 0 || allowHeapCorruptionOnWindows(exitCode));
+  }
+
+  @override
+  Future<Map<String, Object>> queryRss() async {
+    final RunResult runResult = await processUtils.run(adbCommandForDevice(<String>[
+      'shell',
+      'dumpsys',
+      'meminfo',
+      _package.launchActivity,
+      '-d',
+    ]));
+    if (runResult.exitCode != 0) {
+      return <String, Object>{};
+    }
+    return parseMeminfoDump(runResult.stdout);
   }
 
   @override
@@ -711,6 +729,45 @@ Map<String, String> parseAdbDeviceProperties(String str) {
     properties[match.group(1)] = match.group(2);
   }
   return properties;
+}
+
+
+const String _kJavaHeapKey = 'Java Heap';
+const String _kNativeHeapKey = 'Native Heap';
+const String _kGraphicsKey = 'Graphics';
+
+/// Process the dumpsys info formatted in a table-like structure.
+///
+/// Example output:
+///
+/// Applications Memory Usage (in Kilobytes):
+/// Uptime: 441088659 Realtime: 521464097
+///
+/// ** MEMINFO in pid 16141 [io.flutter.demo.gallery] **
+///                   Pss  Private  Private  SwapPss     Heap     Heap     Heap
+///                 Total    Dirty    Clean    Dirty     Size    Alloc     Free
+///                ------   ------   ------   ------   ------   ------   ------
+/// Native Heap      8648     8620        0       16    20480    12403     8076
+/// Dalvik Heap       547      424       40       18     2628     1092     1536
+/// Dalvik Other      464      464        0        0
+/// Stack             496      496        0        0
+/// ...
+///
+/// For more information, see https://developer.android.com/studio/command-line/dumpsys.
+@visibleForTesting
+Map<String, Object> parseMeminfoDump(String input) {
+  final Map<String, Object> result = <String, Object>{};
+  for (String line in input.split('\n')) {
+    line = line.trim();
+    if (line.startsWith(_kJavaHeapKey)) {
+      result[_kJavaHeapKey] = int.tryParse(line.split(':').last.trim());
+    } else if (line.startsWith(_kNativeHeapKey)) {
+      result[_kNativeHeapKey] = int.tryParse(line.split(':').last.trim());
+    } else if (line.startsWith(_kGraphicsKey)) {
+      result[_kGraphicsKey] = int.tryParse(line.split(':').last.trim());
+    }
+  }
+  return result;
 }
 
 /// Return the list of connected ADB devices.

@@ -423,6 +423,14 @@ abstract class Device {
   /// Stop an app package on the current device.
   Future<bool> stopApp(covariant ApplicationPackage app);
 
+  /// Query the current application RSS.
+  ///
+  /// If the device does not support this callback, an empty map
+  /// is returned.
+  Future<Map<String, Object>> queryRss() {
+    return Future<Map<String, Object>>.value(<String, Object>{});
+  }
+
   Future<void> takeScreenshot(File outputFile) => Future<void>.error('unimplemented');
 
   @override
