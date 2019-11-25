@@ -168,7 +168,7 @@ abstract class FlutterTestDriver {
     // it forcefully and it won't terminate child processes, so we need to ensure
     // it's running before terminating.
     try {
-    await resume().timeout(defaultTimeout);
+      await resume().timeout(defaultTimeout);
     } catch (e) {
       _debugPrint('Ignoring failure to resume during shutdown');
     }
@@ -353,7 +353,7 @@ abstract class FlutterTestDriver {
         return;
       }
       if ((event != null && json['event'] == event) ||
-          (id    != null && json['id']    == id)) {
+          (id != null && json['id'] == id)) {
         await subscription.cancel();
         _debugPrint('OK ($interestingOccurrence)');
         response.complete(json);
@@ -533,7 +533,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
         // have already completed.
         _currentRunningAppId = (await started)['params']['appId'] as String;
         prematureExitGuard.complete();
-      } catch(error, stackTrace) {
+      } catch (error, stackTrace) {
         prematureExitGuard.completeError(error, stackTrace);
       }
     }());
@@ -554,7 +554,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
       'app.restart',
       <String, dynamic>{'appId': _currentRunningAppId, 'fullRestart': fullRestart, 'pause': pause},
     );
-    _debugPrint('${ fullRestart ? "Hot restart" : "Hot reload" } complete.');
+    _debugPrint('${fullRestart ? "Hot restart" : "Hot reload"} complete.');
 
     if (hotReloadResponse == null || hotReloadResponse['code'] != 0) {
       _throwErrorResponse('Hot ${fullRestart ? 'restart' : 'reload'} request failed');
