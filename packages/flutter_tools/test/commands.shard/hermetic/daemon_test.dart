@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/commands/daemon.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_workflow.dart';
 import 'package:flutter_tools/src/globals.dart';
@@ -65,7 +66,7 @@ void main() {
       });
       expect(response['id'], isNull);
       expect(response['event'], 'daemon.logMessage');
-      final Map<String, String> logMessage = response['params'].cast<String, String>();
+      final Map<String, String> logMessage = castStringKeyedMap(response['params']).cast<String, String>();
       expect(logMessage['level'], 'error');
       expect(logMessage['message'], 'daemon.logMessage test');
       await responses.close();
@@ -232,7 +233,7 @@ void main() {
         expect(response['event'], 'device.added');
         expect(response['params'], isMap);
 
-        final Map<String, dynamic> params = response['params'];
+        final Map<String, dynamic> params = castStringKeyedMap(response['params']);
         expect(params['platform'], isNotEmpty); // the mock device has a platform of 'android-arm'
 
         await responses.close();

@@ -169,7 +169,7 @@ class AssembleCommand extends FlutterCommand {
     final Target target = targets.length == 1 ? targets.single : _CompositeTarget(targets);
     final BuildResult result = await buildSystem.build(target, environment, buildSystemConfig: BuildSystemConfig(
       resourcePoolSize: argResults.wasParsed('resource-pool-size')
-        ? int.tryParse(argResults['resource-pool-size'])
+        ? int.tryParse(stringArg('resource-pool-size'))
         : null,
     ));
     if (!result.success) {

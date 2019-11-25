@@ -115,7 +115,7 @@ void main() {
       snapshotType: captureAnyNamed('snapshotType'),
       darwinArch: anyNamed('darwinArch'),
       additionalArgs: anyNamed('additionalArgs')
-    )).captured.single;
+    )).captured.single as SnapshotType;
 
     expect(snapshotType.platform, TargetPlatform.android_arm64);
     expect(snapshotType.mode, BuildMode.release);

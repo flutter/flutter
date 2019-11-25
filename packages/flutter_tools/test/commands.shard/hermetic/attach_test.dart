@@ -306,7 +306,7 @@ void main() {
           ),
         )..called(1);
 
-        final List<FlutterDevice> flutterDevices = verificationResult.captured.first;
+        final List<FlutterDevice> flutterDevices = verificationResult.captured.first as List<FlutterDevice>;
         expect(flutterDevices, hasLength(1));
 
         // Validate that the attach call built a flutter device with the right
