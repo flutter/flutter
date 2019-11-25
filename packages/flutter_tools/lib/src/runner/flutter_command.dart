@@ -593,8 +593,8 @@ abstract class FlutterCommand extends Command<void> {
     // idevice_id on macOS) are required to run `requiredArtifacts`.
     await cache.updateAll(<DevelopmentArtifact>{DevelopmentArtifact.universal});
 
-    // Populate the cache. We call this before pub get below so that the sky_engine
-    // package is available in the flutter cache for pub to find.
+    // Populate the cache. We call this before pub get below so that the
+    // sky_engine package is available in the flutter cache for pub to find.
     if (shouldUpdateCache) {
       await cache.updateAll(await requiredArtifacts);
     }
@@ -621,8 +621,8 @@ abstract class FlutterCommand extends Command<void> {
 
   /// The set of development artifacts required for this command.
   ///
-  /// Defaults to an empty set. Including DevelopmentArtifact.universal is not
-  /// required as it is always updated.
+  /// Defaults to an empty set. Including [DevelopmentArtifact.universal] is
+  /// not required as it is always updated.
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{};
 
   /// Subclasses must implement this to execute the command.
