@@ -577,7 +577,9 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
   @override
   void initState() {
     super.initState();
-    _updateHighlightMode(FocusManager.instance.highlightMode);
+    SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
+      _updateHighlightMode(FocusManager.instance.highlightMode);
+    });
     FocusManager.instance.addHighlightModeListener(_handleFocusHighlightModeChange);
   }
 
