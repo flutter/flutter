@@ -15,6 +15,7 @@ void main() {
     double minChildSize = .25,
     double itemExtent,
     Key containerKey,
+    NotificationListenerCallback<ScrollNotification> onScrollNotification,
   }) {
     return Directionality(
       textDirection: TextDirection.ltr,
@@ -29,14 +30,17 @@ void main() {
             minChildSize: minChildSize,
             initialChildSize: initialChildSize,
             builder: (BuildContext context, ScrollController scrollController) {
-              return Container(
-                key: containerKey,
-                color: const Color(0xFFABCDEF),
-                child: ListView.builder(
-                  controller: scrollController,
-                  itemExtent: itemExtent,
-                  itemCount: itemCount,
-                  itemBuilder: (BuildContext context, int index) => Text('Item $index'),
+              return NotificationListener<ScrollNotification>(
+                onNotification: onScrollNotification,
+                child: Container(
+                  key: containerKey,
+                  color: const Color(0xFFABCDEF),
+                  child: ListView.builder(
+                    controller: scrollController,
+                    itemExtent: itemExtent,
+                    itemCount: itemCount,
+                    itemBuilder: (BuildContext context, int index) => Text('Item $index'),
+                  ),
                 ),
               );
             },
@@ -259,6 +263,50 @@ void main() {
       }, skip: isBrowser);
 
       debugDefaultTargetPlatformOverride = null;
+    });
+
+    testWidgets('ScrollNotification correctly dispatched when flung without covering its container', (WidgetTester tester) async {
+      final List<Type> notificationTypes = <Type>[];
+      await tester.pumpWidget(_boilerplate(
+        null,
+        onScrollNotification: (ScrollNotification notification) {
+          notificationTypes.add(notification.runtimeType);
+          return false;
+        },
+      ));
+
+      await tester.fling(find.text('Item 1'), const Offset(0, -200), 200);
+      await tester.pumpAndSettle();
+
+      // TODO(itome): Make sure UserScrollNotification and ScrollUpdateNotification are called correctly.
+      final List<Type> types = <Type>[
+        ScrollStartNotification,
+        ScrollEndNotification,
+      ];
+      expect(notificationTypes, equals(types));
+    });
+
+    testWidgets('ScrollNotification correctly dispatched when flung with contents scroll', (WidgetTester tester) async {
+      final List<Type> notificationTypes = <Type>[];
+      await tester.pumpWidget(_boilerplate(
+        null,
+        onScrollNotification: (ScrollNotification notification) {
+          notificationTypes.add(notification.runtimeType);
+          return false;
+        },
+      ));
+
+      await tester.flingFrom(const Offset(0, 325), const Offset(0, -325), 200);
+      await tester.pumpAndSettle();
+
+      final List<Type> types = <Type>[
+        ScrollStartNotification,
+        UserScrollNotification,
+        ...List<Type>.filled(5, ScrollUpdateNotification),
+        ScrollEndNotification,
+        UserScrollNotification,
+      ];
+      expect(notificationTypes, types);
     });
   }
 }

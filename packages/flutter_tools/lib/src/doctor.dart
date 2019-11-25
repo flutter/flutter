@@ -385,11 +385,11 @@ class GroupedValidator extends DoctorValidator {
 
   List<ValidationResult> _subResults;
 
-  /// Subvalidator results.
+  /// Sub-validator results.
   ///
-  /// To avoid losing information when results are merged, the subresults are
+  /// To avoid losing information when results are merged, the sub-results are
   /// cached on this field when they are available. The results are in the same
-  /// order as the subvalidator list.
+  /// order as the sub-validator list.
   List<ValidationResult> get subResults => _subResults;
 
   @override
@@ -571,9 +571,9 @@ class ValidationMessage {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    final ValidationMessage typedOther = other;
-    return typedOther.message == message
-      && typedOther.type == type;
+    return other is ValidationMessage
+        && other.message == message
+        && other.type == type;
   }
 
   @override
@@ -587,13 +587,22 @@ class FlutterValidator extends DoctorValidator {
   Future<ValidationResult> validate() async {
     final List<ValidationMessage> messages = <ValidationMessage>[];
     ValidationType valid = ValidationType.installed;
+    String versionChannel;
+    String frameworkVersion;
 
-    final FlutterVersion version = FlutterVersion.instance;
+    try {
+      final FlutterVersion version = FlutterVersion.instance;
+      versionChannel = version.channel;
+      frameworkVersion = version.frameworkVersion;
+      messages.add(ValidationMessage(userMessages.flutterVersion(frameworkVersion, Cache.flutterRoot)));
+      messages.add(ValidationMessage(userMessages.flutterRevision(version.frameworkRevisionShort, version.frameworkAge, version.frameworkDate)));
+      messages.add(ValidationMessage(userMessages.engineRevision(version.engineRevisionShort)));
+      messages.add(ValidationMessage(userMessages.dartRevision(version.dartSdkVersion)));
+    } on VersionCheckError catch (e) {
+      messages.add(ValidationMessage.error(e.message));
+      valid = ValidationType.partial;
+    }
 
-    messages.add(ValidationMessage(userMessages.flutterVersion(version.frameworkVersion, Cache.flutterRoot)));
-    messages.add(ValidationMessage(userMessages.flutterRevision(version.frameworkRevisionShort, version.frameworkAge, version.frameworkDate)));
-    messages.add(ValidationMessage(userMessages.engineRevision(version.engineRevisionShort)));
-    messages.add(ValidationMessage(userMessages.dartRevision(version.dartSdkVersion)));
     final String genSnapshotPath =
       artifacts.getArtifactPath(Artifact.genSnapshot);
 
@@ -609,7 +618,7 @@ class FlutterValidator extends DoctorValidator {
     }
 
     return ValidationResult(valid, messages,
-      statusInfo: userMessages.flutterStatusInfo(version.channel, version.frameworkVersion, os.name, platform.localeName),
+      statusInfo: userMessages.flutterStatusInfo(versionChannel, frameworkVersion, os.name, platform.localeName),
     );
   }
 }

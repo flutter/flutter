@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io' as io;
 import 'dart:typed_data';
 
 import 'package:file/file.dart';
@@ -30,11 +31,14 @@ Future<void> main(FutureOr<void> testMain()) async {
     goldenFileComparator = await FlutterSkiaGoldFileComparator.fromDefaultComparator(platform);
   } else if (FlutterPreSubmitFileComparator.isAvailableForEnvironment(platform)) {
     goldenFileComparator = await FlutterPreSubmitFileComparator.fromDefaultComparator(platform);
-  } else if (FlutterSkippingGoldenFileComparator.isAvailableForEnvironment(platform)){
-    goldenFileComparator = FlutterSkippingGoldenFileComparator.fromDefaultComparator();
+  } else if (FlutterSkippingGoldenFileComparator.isAvailableForEnvironment(platform)) {
+    goldenFileComparator = FlutterSkippingGoldenFileComparator.fromDefaultComparator(
+      'Golden file testing is unavailable on LUCI and  some Cirrus shards.'
+    );
   } else {
     goldenFileComparator = await FlutterLocalFileComparator.fromDefaultComparator(platform);
   }
+
   await testMain();
 }
 
@@ -74,7 +78,8 @@ Future<void> main(FutureOr<void> testMain()) async {
 ///  The [FlutterSkippingGoldenFileComparator] is utilized to skip tests outside
 ///  of the appropriate environments. Currently, tests executing in post-submit
 ///  on the LUCI build environment are skipped, as post-submit checks are done
-///  on Cirrus.
+///  on Cirrus. This comparator is also used when an internet connection is
+///  unavailable.
 abstract class FlutterGoldenFileComparator extends GoldenFileComparator {
   /// Creates a [FlutterGoldenFileComparator] that will resolve golden file
   /// URIs relative to the specified [basedir], and retrieve golden baselines
@@ -151,7 +156,7 @@ abstract class FlutterGoldenFileComparator extends GoldenFileComparator {
     return goldenFile;
   }
 
-  /// Prepends the golden Uri with the library name that encloses the current
+  /// Prepends the golden URL with the library name that encloses the current
   /// test.
   Uri _addPrefix(Uri golden) {
     final String prefix = basedir.pathSegments[basedir.pathSegments.length - 2];
@@ -205,7 +210,7 @@ class FlutterSkiaGoldFileComparator extends FlutterGoldenFileComparator {
     LocalFileComparator defaultComparator,
   }) async {
 
-    defaultComparator ??= goldenFileComparator;
+    defaultComparator ??= goldenFileComparator as LocalFileComparator;
     final Directory baseDirectory = FlutterGoldenFileComparator.getBaseDirectory(
       defaultComparator,
       platform,
@@ -288,7 +293,7 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
     LocalFileComparator defaultComparator,
   }) async {
 
-    defaultComparator ??= goldenFileComparator;
+    defaultComparator ??= goldenFileComparator as LocalFileComparator;
     final Directory baseDirectory = FlutterGoldenFileComparator.getBaseDirectory(
       defaultComparator,
       platform,
@@ -349,7 +354,8 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
 /// conditions that do not execute golden file tests.
 ///
 /// Currently, this comparator is used in post-submit checks on LUCI and with
-/// some Cirrus shards that do not run framework tests.
+/// some Cirrus shards that do not run framework tests. This comparator is also
+/// used when an internet connection is not available for contacting Gold.
 ///
 /// See also:
 ///
@@ -370,25 +376,32 @@ class FlutterSkippingGoldenFileComparator extends FlutterGoldenFileComparator {
   FlutterSkippingGoldenFileComparator(
     final Uri basedir,
     final SkiaGoldClient skiaClient,
-  ) : super(basedir, skiaClient);
+    this.reason,
+  ) : assert(reason != null),
+      super(basedir, skiaClient);
+
+  /// Describes the reason for using the [FlutterSkippingGoldenFileComparator].
+  ///
+  /// Cannot be null.
+  final String reason;
 
   /// Creates a new [FlutterSkippingGoldenFileComparator] that mirrors the
   /// relative path resolution of the default [goldenFileComparator].
-  static FlutterSkippingGoldenFileComparator fromDefaultComparator({
+  static FlutterSkippingGoldenFileComparator fromDefaultComparator(
+    String reason, {
     LocalFileComparator defaultComparator,
   }) {
-    defaultComparator ??= goldenFileComparator;
+    defaultComparator ??= goldenFileComparator as LocalFileComparator;
     const FileSystem fs = LocalFileSystem();
     final Uri basedir = defaultComparator.basedir;
     final SkiaGoldClient skiaClient = SkiaGoldClient(fs.directory(basedir));
-    return FlutterSkippingGoldenFileComparator(basedir, skiaClient);
+    return FlutterSkippingGoldenFileComparator(basedir, skiaClient, reason);
   }
 
   @override
   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
     print(
-      'Skipping "$golden" test : Golden file testing is unavailable on LUCI and '
-      'some Cirrus shards.'
+      'Skipping "$golden" test : $reason'
     );
     return true;
   }
@@ -451,16 +464,16 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
   /// Creates a new [FlutterLocalFileComparator] that mirrors the
   /// relative path resolution of the default [goldenFileComparator].
   ///
-  /// The [goldens] and [defaultComparator] parameters are visible for testing
-  /// purposes only.
+  /// The [goldens], [defaultComparator], and [baseDirectory] parameters are
+  /// visible for testing purposes only.
   static Future<FlutterGoldenFileComparator> fromDefaultComparator(
     final Platform platform, {
     SkiaGoldClient goldens,
     LocalFileComparator defaultComparator,
+    Directory baseDirectory,
   }) async {
-
-    defaultComparator ??= goldenFileComparator;
-    final Directory baseDirectory = FlutterGoldenFileComparator.getBaseDirectory(
+    defaultComparator ??= goldenFileComparator as LocalFileComparator;
+    baseDirectory ??= FlutterGoldenFileComparator.getBaseDirectory(
       defaultComparator,
       platform,
     );
@@ -470,7 +483,16 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
     }
 
     goldens ??= SkiaGoldClient(baseDirectory);
-    await goldens.getExpectations();
+
+    try {
+      await goldens.getExpectations();
+    } on io.OSError catch (_) {
+      return FlutterSkippingGoldenFileComparator(
+        baseDirectory.uri,
+        goldens,
+        'No network connection available for contacting Gold.',
+      );
+    }
 
     return FlutterLocalFileComparator(baseDirectory.uri, goldens);
   }

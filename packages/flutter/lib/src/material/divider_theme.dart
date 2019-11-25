@@ -159,13 +159,13 @@ class DividerTheme extends InheritedTheme {
   /// DividerThemeData theme = DividerTheme.of(context);
   /// ```
   static DividerThemeData of(BuildContext context) {
-    final DividerTheme dividerTheme = context.inheritFromWidgetOfExactType(DividerTheme);
+    final DividerTheme dividerTheme = context.dependOnInheritedWidgetOfExactType<DividerTheme>();
     return dividerTheme?.data ?? Theme.of(context).dividerTheme;
   }
 
   @override
   Widget wrap(BuildContext context, Widget child) {
-    final DividerTheme ancestorTheme = context.ancestorWidgetOfExactType(DividerTheme);
+    final DividerTheme ancestorTheme = context.findAncestorWidgetOfExactType<DividerTheme>();
     return identical(this, ancestorTheme) ? child : DividerTheme(data: data, child: child);
   }
 

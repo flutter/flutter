@@ -304,7 +304,7 @@ class AndroidSdk {
     String findAndroidHomeDir() {
       String androidHomeDir;
       if (config.containsKey('android-sdk')) {
-        androidHomeDir = config.getValue('android-sdk');
+        androidHomeDir = config.getValue('android-sdk') as String;
       } else if (platform.environment.containsKey(kAndroidHome)) {
         androidHomeDir = platform.environment[kAndroidHome];
       } else if (platform.environment.containsKey(kAndroidSdkRoot)) {

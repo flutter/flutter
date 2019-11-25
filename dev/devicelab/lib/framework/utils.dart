@@ -121,7 +121,7 @@ void recursiveCopy(Directory source, Directory target) {
 
   for (FileSystemEntity entity in source.listSync(followLinks: false)) {
     final String name = path.basename(entity.path);
-    if (entity is Directory)
+    if (entity is Directory && !entity.path.contains('.dart_tool'))
       recursiveCopy(entity, Directory(path.join(target.path, name)));
     else if (entity is File) {
       final File dest = File(path.join(target.path, name));
@@ -602,7 +602,7 @@ int parseServicePort(String line, {
   return matches.isEmpty ? null : int.parse(matches[0].group(2));
 }
 
-/// Tries to extract a Uri from the string.
+/// Tries to extract a URL from the string.
 ///
 /// The `prefix`, if specified, is a regular expression pattern and must not contain groups.
 /// `prefix` defaults to the RegExp: `An Observatory debugger .* is available at: `.

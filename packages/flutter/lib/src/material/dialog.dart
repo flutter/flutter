@@ -137,6 +137,8 @@ class Dialog extends StatelessWidget {
 /// of actions. The title is displayed above the content and the actions are
 /// displayed below the content.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=75CsnyRXf5I}
+///
 /// If the content is too large to fit on the screen vertically, the dialog will
 /// display the title and the actions and let the content overflow, which is
 /// rarely desired. Consider using a scrolling widget for [content], such as
@@ -694,8 +696,10 @@ Future<T> showDialog<T>({
   @Deprecated(
     'Instead of using the "child" argument, return the child from a closure '
     'provided to the "builder" argument. This will ensure that the BuildContext '
-    'is appropriate for widgets built in the dialog.'
-  ) Widget child,
+    'is appropriate for widgets built in the dialog. '
+    'This feature was deprecated after v0.2.3.'
+  )
+  Widget child,
   WidgetBuilder builder,
   bool useRootNavigator = true,
 }) {

@@ -245,14 +245,17 @@ abstract class MacOSBundleFlutterAssets extends Target {
   @override
   List<Source> get inputs => const <Source>[
     Source.pattern('{BUILD_DIR}/App.framework/App'),
-    Source.depfile('flutter_assets.d'),
   ];
 
   @override
   List<Source> get outputs => const <Source>[
     Source.pattern('{OUTPUT_DIR}/App.framework/Versions/A/App'),
     Source.pattern('{OUTPUT_DIR}/App.framework/Versions/A/Resources/Info.plist'),
-    Source.depfile('flutter_assets.d'),
+  ];
+
+  @override
+  List<String> get depfiles => const <String>[
+    'flutter_assets.d',
   ];
 
   @override

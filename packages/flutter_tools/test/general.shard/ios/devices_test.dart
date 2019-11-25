@@ -91,8 +91,8 @@ void main() {
 
     group('.dispose()', () {
       IOSDevice device;
-      MockApplicationPackage appPackage1;
-      MockApplicationPackage appPackage2;
+      MockIOSApp appPackage1;
+      MockIOSApp appPackage2;
       IOSDeviceLogReader logReader1;
       IOSDeviceLogReader logReader2;
       MockProcess mockProcess1;
@@ -111,7 +111,7 @@ void main() {
 
       IOSDeviceLogReader createLogReader(
           IOSDevice device,
-          ApplicationPackage appPackage,
+          IOSApp appPackage,
           Process process) {
         final IOSDeviceLogReader logReader = IOSDeviceLogReader(device, appPackage);
         logReader.idevicesyslogProcess = process;
@@ -119,8 +119,8 @@ void main() {
       }
 
       setUp(() {
-        appPackage1 = MockApplicationPackage();
-        appPackage2 = MockApplicationPackage();
+        appPackage1 = MockIOSApp();
+        appPackage2 = MockIOSApp();
         when(appPackage1.name).thenReturn('flutterApp1');
         when(appPackage2.name).thenReturn('flutterApp2');
         mockProcess1 = MockProcess();
@@ -249,6 +249,22 @@ void main() {
         Cache.enableLocking();
       });
 
+      testUsingContext('returns failed if the IOSDevice is not found', () async {
+        final IOSDevice device = IOSDevice('123');
+        when(mockIMobileDevice.getInfoForDevice(any, 'CPUArchitecture')).thenThrow(
+          const IOSDeviceNotFoundError(
+            'ideviceinfo could not find device:\n'
+            'No device found with udid 123, is it plugged in?\n'
+            'Try unlocking attached devices.'
+          )
+        );
+        final LaunchResult result = await device.startApp(mockApp);
+        expect(result.started, false);
+      }, overrides: <Type, Generator>{
+        IMobileDevice: () => mockIMobileDevice,
+        Platform: () => macPlatform,
+      });
+
       testUsingContext(' succeeds in debug mode via mDNS', () async {
         final IOSDevice device = IOSDevice('123');
         device.portForwarder = mockPortForwarder;
@@ -259,7 +275,7 @@ void main() {
           port: 1234,
           path: 'observatory',
         );
-        when(mockMDnsObservatoryDiscovery.getObservatoryUri(any, any, any))
+        when(mockMDnsObservatoryDiscovery.getObservatoryUri(any, any, usesIpv6: anyNamed('usesIpv6')))
           .thenAnswer((Invocation invocation) => Future<Uri>.value(uri));
 
         final LaunchResult launchResult = await device.startApp(mockApp,
@@ -329,7 +345,7 @@ void main() {
           mockLogReader.addLine('Foo');
           mockLogReader.addLine('Observatory listening on http://127.0.0.1:$devicePort');
         });
-        when(mockMDnsObservatoryDiscovery.getObservatoryUri(any, any, any))
+        when(mockMDnsObservatoryDiscovery.getObservatoryUri(any, any, usesIpv6: anyNamed('usesIpv6')))
           .thenAnswer((Invocation invocation) => Future<Uri>.value(null));
 
         final LaunchResult launchResult = await device.startApp(mockApp,
@@ -362,7 +378,7 @@ void main() {
           mockLogReader.addLine('Foo');
           mockLogReader.addLine('Observatory listening on http:/:/127.0.0.1:$devicePort');
         });
-        when(mockMDnsObservatoryDiscovery.getObservatoryUri(any, any, any))
+        when(mockMDnsObservatoryDiscovery.getObservatoryUri(any, any, usesIpv6: anyNamed('usesIpv6')))
           .thenAnswer((Invocation invocation) => Future<Uri>.value(null));
 
         final LaunchResult launchResult = await device.startApp(mockApp,
@@ -411,7 +427,7 @@ void main() {
           port: 1234,
           path: 'observatory',
         );
-        when(mockMDnsObservatoryDiscovery.getObservatoryUri(any, any, any))
+        when(mockMDnsObservatoryDiscovery.getObservatoryUri(any, any, usesIpv6: anyNamed('usesIpv6')))
             .thenAnswer((Invocation invocation) => Future<Uri>.value(uri));
 
         List<String> args;
@@ -420,7 +436,7 @@ void main() {
           bundlePath: anyNamed('bundlePath'),
           launchArguments: anyNamed('launchArguments'),
         )).thenAnswer((Invocation inv) {
-          args = inv.namedArguments[const Symbol('launchArguments')];
+          args = inv.namedArguments[const Symbol('launchArguments')] as List<String>;
           return Future<int>.value(0);
         });
 

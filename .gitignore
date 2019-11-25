@@ -17,8 +17,10 @@
 .idea/
 
 # Visual Studio Code related
-.vscode/
+.classpath
 .project
+.settings/
+.vscode/
 
 # Flutter repo-specific
 /bin/cache/
@@ -42,6 +44,7 @@ version
 **/doc/api/
 .dart_tool/
 .flutter-plugins
+.flutter-plugins-dependencies
 .packages
 .pub-cache/
 .pub/

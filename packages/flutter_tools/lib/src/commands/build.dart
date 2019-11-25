@@ -21,7 +21,7 @@ import 'build_web.dart';
 
 class BuildCommand extends FlutterCommand {
   BuildCommand({bool verboseHelp = false}) {
-    addSubcommand(BuildAarCommand(verboseHelp: verboseHelp));
+    addSubcommand(BuildAarCommand());
     addSubcommand(BuildApkCommand(verboseHelp: verboseHelp));
     addSubcommand(BuildAppBundleCommand(verboseHelp: verboseHelp));
     addSubcommand(BuildAotCommand(verboseHelp: verboseHelp));
@@ -29,7 +29,7 @@ class BuildCommand extends FlutterCommand {
     addSubcommand(BuildIOSFrameworkCommand());
     addSubcommand(BuildBundleCommand(verboseHelp: verboseHelp));
     addSubcommand(BuildWebCommand());
-    addSubcommand(BuildMacosCommand(verboseHelp: verboseHelp));
+    addSubcommand(BuildMacosCommand());
     addSubcommand(BuildLinuxCommand());
     addSubcommand(BuildWindowsCommand());
     addSubcommand(BuildFuchsiaCommand(verboseHelp: verboseHelp));

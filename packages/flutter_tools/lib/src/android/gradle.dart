@@ -57,7 +57,6 @@ Directory getBundleDirectory(FlutterProject project) {
 
 /// The directory where the repo is generated.
 /// Only applicable to AARs.
-@visibleForTesting
 Directory getRepoDirectory(Directory buildDirectory) {
   return buildDirectory
     .childDirectory('outputs')
@@ -209,7 +208,7 @@ void createSettingsAarGradle(Directory androidDirectory) {
 ///
 /// * [project] is typically [FlutterProject.current()].
 /// * [androidBuildInfo] is the build configuration.
-/// * [target] is the target dart entrypoint. Typically, `lib/main.dart`.
+/// * [target] is the target dart entry point. Typically, `lib/main.dart`.
 /// * If [isBuildingBundle] is `true`, then the output artifact is an `*.aab`,
 ///   otherwise the output artifact is an `*.apk`.
 /// * The plugins are built as AARs if [shouldBuildPluginAsAar] is `true`. This isn't set by default
@@ -282,7 +281,7 @@ Future<void> buildGradleApp({
     command.add('-q');
   }
   if (artifacts is LocalEngineArtifacts) {
-    final LocalEngineArtifacts localEngineArtifacts = artifacts;
+    final LocalEngineArtifacts localEngineArtifacts = artifacts as LocalEngineArtifacts;
     final Directory localEngineRepo = _getLocalEngineRepo(
       engineOutPath: localEngineArtifacts.engineOutPath,
       androidBuildInfo: androidBuildInfo,
@@ -474,20 +473,17 @@ Future<void> buildGradleApp({
 ///
 /// * [project] is typically [FlutterProject.current()].
 /// * [androidBuildInfo] is the build configuration.
-/// * [target] is the target dart entrypoint. Typically, `lib/main.dart`.
 /// * [outputDir] is the destination of the artifacts,
 Future<void> buildGradleAar({
   @required FlutterProject project,
   @required AndroidBuildInfo androidBuildInfo,
   @required String target,
-  @required Directory outputDir,
-  @required bool printHowToConsumeAaar,
+  @required Directory outputDirectory,
 }) async {
   assert(project != null);
-  assert(androidBuildInfo != null);
   assert(target != null);
-  assert(outputDir != null);
-  assert(printHowToConsumeAaar != null);
+  assert(androidBuildInfo != null);
+  assert(outputDirectory != null);
 
   if (androidSdk == null) {
     exitWithNoSdkMessage();
@@ -516,20 +512,21 @@ Future<void> buildGradleAar({
     gradleUtils.getExecutable(project),
     '-I=$initScript',
     '-Pflutter-root=$flutterRoot',
-    '-Poutput-dir=${outputDir.path}',
+    '-Poutput-dir=${outputDirectory.path}',
     '-Pis-plugin=${manifest.isPlugin}',
   ];
 
   if (target != null && target.isNotEmpty) {
     command.add('-Ptarget=$target');
   }
+
   if (androidBuildInfo.targetArchs.isNotEmpty) {
     final String targetPlatforms = androidBuildInfo.targetArchs
         .map(getPlatformNameForAndroidArch).join(',');
     command.add('-Ptarget-platform=$targetPlatforms');
   }
   if (artifacts is LocalEngineArtifacts) {
-    final LocalEngineArtifacts localEngineArtifacts = artifacts;
+    final LocalEngineArtifacts localEngineArtifacts = artifacts as LocalEngineArtifacts;
     final Directory localEngineRepo = _getLocalEngineRepo(
       engineOutPath: localEngineArtifacts.engineOutPath,
       androidBuildInfo: androidBuildInfo,
@@ -567,7 +564,7 @@ Future<void> buildGradleAar({
       exitCode: exitCode,
     );
   }
-  final Directory repoDirectory = getRepoDirectory(outputDir);
+  final Directory repoDirectory = getRepoDirectory(outputDirectory);
   if (!repoDirectory.existsSync()) {
     printStatus(result.stdout, wrap: false);
     printError(result.stderr, wrap: false);
@@ -580,24 +577,17 @@ Future<void> buildGradleAar({
     '$successMark Built ${fs.path.relative(repoDirectory.path)}.',
     color: TerminalColor.green,
   );
-  if (printHowToConsumeAaar) {
-    _printHowToConsumeAar(
-      buildMode: androidBuildInfo.buildInfo.modeName,
-      androidPackage: project.manifest.androidPackage,
-      repoPath: repoDirectory.path,
-    );
-  }
 }
 
 /// Prints how to consume the AAR from a host app.
-void _printHowToConsumeAar({
-  @required String buildMode,
+void printHowToConsumeAar({
+  @required Set<String> buildModes,
   @required String androidPackage,
-  @required String repoPath,
+  @required Directory repoDirectory,
 }) {
-  assert(buildMode != null);
+  assert(buildModes != null && buildModes.isNotEmpty);
   assert(androidPackage != null);
-  assert(repoPath != null);
+  assert(repoDirectory != null);
 
   printStatus('''
 
@@ -607,20 +597,42 @@ ${terminal.bolden('Consuming the Module')}
 
       repositories {
         maven {
-            url '$repoPath'
+            url '${repoDirectory.path}'
         }
         maven {
             url 'http://download.flutter.io'
         }
       }
 
-  3. Make the host app depend on the $buildMode module:
+  3. Make the host app depend on the Flutter module:
 
-      dependencies {
-        ${buildMode}Implementation '$androidPackage:flutter_$buildMode:1.0'
+    dependencies {''');
+
+  for (String buildMode in buildModes) {
+    printStatus('''
+      ${buildMode}Implementation '$androidPackage:flutter_$buildMode:1.0''');
+  }
+
+printStatus('''
+    }
+''');
+
+  if (buildModes.contains('profile')) {
+    printStatus('''
+
+  4. Add the `profile` build type:
+
+    android {
+      buildTypes {
+        profile {
+          initWith debug
+        }
       }
+    }
+''');
+  }
 
-To learn more, visit https://flutter.dev/go/build-aar''');
+printStatus('To learn more, visit https://flutter.dev/go/build-aar''');
 }
 
 String _hex(List<int> bytes) {
@@ -705,8 +717,7 @@ Future<void> buildPluginsAsAar(
           ),
         ),
         target: '',
-        outputDir: buildDirectory,
-        printHowToConsumeAaar: false,
+        outputDirectory: buildDirectory,
       );
     } on ToolExit {
       // Log the entire plugin entry in `.flutter-plugins` since it

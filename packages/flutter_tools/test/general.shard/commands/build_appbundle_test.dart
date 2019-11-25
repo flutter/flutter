@@ -10,7 +10,6 @@ import 'package:flutter_tools/src/android/android_builder.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_appbundle.dart';
@@ -348,9 +347,8 @@ flutter:
         );
       }, throwsToolExit());
 
-      final BufferLogger logger = context.get<Logger>();
-      expect(logger.statusText, contains('Your app isn\'t using AndroidX'));
-      expect(logger.statusText, contains(
+      expect(testLogger.statusText, contains('Your app isn\'t using AndroidX'));
+      expect(testLogger.statusText, contains(
         'To avoid potential build failures, you can quickly migrate your app by '
         'following the steps on https://goo.gl/CP92wY'
         )
@@ -400,10 +398,9 @@ flutter:
         );
       }, throwsToolExit());
 
-      final BufferLogger logger = context.get<Logger>();
-      expect(logger.statusText.contains('Your app isn\'t using AndroidX'), isFalse);
+      expect(testLogger.statusText.contains('Your app isn\'t using AndroidX'), isFalse);
       expect(
-        logger.statusText.contains(
+        testLogger.statusText.contains(
           'To avoid potential build failures, you can quickly migrate your app by '
           'following the steps on https://goo.gl/CP92wY'
         ),

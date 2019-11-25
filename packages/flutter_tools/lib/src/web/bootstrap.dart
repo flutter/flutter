@@ -11,7 +11,7 @@ import 'package:meta/meta.dart';
 /// actual main.dart file.
 ///
 /// This file is served when the browser requests "main.dart.js" in debug mode,
-/// and is responsible for bootstraping the RequireJS modules and attaching
+/// and is responsible for bootstrapping the RequireJS modules and attaching
 /// the hot reload hooks.
 String generateBootstrapScript({
   @required String requireUrl,
