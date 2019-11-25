@@ -3911,6 +3911,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     }());
     if (dirty)
       return;
+    debugPrintStack(label: 'markNeedsBuild');
     _dirty = true;
     owner.scheduleBuildFor(this);
   }
@@ -4294,6 +4295,7 @@ class StatelessElement extends ComponentElement {
   void update(StatelessWidget newWidget) {
     super.update(newWidget);
     assert(widget == newWidget);
+    debugPrintStack(label: 'update');
     _dirty = true;
     rebuild();
   }
@@ -4389,6 +4391,7 @@ class StatefulElement extends ComponentElement {
     // Notice that we mark ourselves as dirty before calling didUpdateWidget to
     // let authors call setState from within didUpdateWidget without triggering
     // asserts.
+    debugPrintStack(label: 'update');
     _dirty = true;
     _state._widget = widget;
     try {
@@ -4553,6 +4556,7 @@ abstract class ProxyElement extends ComponentElement {
     super.update(newWidget);
     assert(widget == newWidget);
     updated(oldWidget);
+    debugPrintStack(label: 'update');
     _dirty = true;
     rebuild();
   }
