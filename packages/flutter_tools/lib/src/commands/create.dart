@@ -656,7 +656,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
       // removed, and the new schema should always be used.
       'useNewPluginSchema': macos,
       // If a desktop platform is included, add a workaround for #31366.
-      // When Linus and Windows are added, we will need this workaround again.
+      // When Linux and Windows are added, we will need this workaround again.
       'includeTargetPlatformWorkaround': false,
     };
   }
