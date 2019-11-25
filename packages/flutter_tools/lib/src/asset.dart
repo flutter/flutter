@@ -257,11 +257,11 @@ class _Asset {
 
   final String baseDir;
 
-  /// A platform-independent Uri where this asset can be found on disk on the
+  /// A platform-independent URL where this asset can be found on disk on the
   /// host system relative to [baseDir].
   final Uri relativeUri;
 
-  /// A platform-independent Uri representing the entry for the asset manifest.
+  /// A platform-independent URL representing the entry for the asset manifest.
   final Uri entryUri;
 
   File get assetFile {

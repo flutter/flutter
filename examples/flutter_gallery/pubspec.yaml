@@ -17,7 +17,6 @@ dependencies:
   video_player: 0.10.2+5
   scoped_model: 1.0.1
   shrine_images: 1.1.2
-  rally_assets: 1.0.0
 
   # Also update dev/benchmarks/complex_layout/pubspec.yaml
   # and dev/benchmarks/macrobenchmarks/pubspec.yaml
@@ -204,8 +203,6 @@ flutter:
     - packages/shrine_images/35-0.jpg
     - packages/shrine_images/36-0.jpg
     - packages/shrine_images/37-0.jpg
-    - packages/rally_assets/logo.png
-    - packages/rally_assets/thumb.png
 
   fonts:
     - family: Raleway
@@ -257,31 +254,15 @@ flutter:
           weight: 400
     - family: LibreFranklin
       fonts:
-        - asset: packages/flutter_gallery_assets/fonts/librefranklin/LibreFranklin-Bold.ttf
-        - asset: packages/flutter_gallery_assets/fonts/librefranklin/LibreFranklin-Light.ttf
-        - asset: packages/flutter_gallery_assets/fonts/librefranklin/LibreFranklin-Medium.ttf
-        - asset: packages/flutter_gallery_assets/fonts/librefranklin/LibreFranklin-Regular.ttf
+      - asset: packages/flutter_gallery_assets/fonts/librefranklin/LibreFranklin-Bold.ttf
+      - asset: packages/flutter_gallery_assets/fonts/librefranklin/LibreFranklin-Light.ttf
+      - asset: packages/flutter_gallery_assets/fonts/librefranklin/LibreFranklin-Medium.ttf
+      - asset: packages/flutter_gallery_assets/fonts/librefranklin/LibreFranklin-Regular.ttf
     - family: Merriweather
       fonts:
-        - asset: packages/flutter_gallery_assets/fonts/merriweather/Merriweather-BlackItalic.ttf
-        - asset: packages/flutter_gallery_assets/fonts/merriweather/Merriweather-Italic.ttf
-        - asset: packages/flutter_gallery_assets/fonts/merriweather/Merriweather-Regular.ttf
-        - asset: packages/flutter_gallery_assets/fonts/merriweather/Merriweather-Light.ttf
-    - family: Roboto Condensed
-      fonts:
-        - asset: packages/rally_assets/RobotoCondensed-Light.ttf
-          weight: 400
-        - asset: packages/rally_assets/RobotoCondensed-Regular.ttf
-          weight: 500
-        - asset: packages/rally_assets/RobotoCondensed-Bold.ttf
-          weight: 700
-    - family: Eczar
-      fonts:
-        - asset: packages/rally_assets/Eczar-Regular.ttf
-          weight: 400
-        - asset: packages/rally_assets/Eczar-SemiBold.ttf
-          weight: 600
-        - asset: packages/rally_assets/Eczar-Bold.ttf
-          weight: 700
+      - asset: packages/flutter_gallery_assets/fonts/merriweather/Merriweather-BlackItalic.ttf
+      - asset: packages/flutter_gallery_assets/fonts/merriweather/Merriweather-Italic.ttf
+      - asset: packages/flutter_gallery_assets/fonts/merriweather/Merriweather-Regular.ttf
+      - asset: packages/flutter_gallery_assets/fonts/merriweather/Merriweather-Light.ttf
 
-# PUBSPEC CHECKSUM: de7e
+# PUBSPEC CHECKSUM: 1e1b

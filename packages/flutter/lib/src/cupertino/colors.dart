@@ -642,7 +642,7 @@ class CupertinoColors {
 ///
 /// {@tool sample}
 ///
-/// The following code samples demostrate two cases where you have to manually
+/// The following code samples demonstrate two cases where you have to manually
 /// resolve a [CupertinoDynamicColor].
 ///
 /// ```dart
@@ -926,16 +926,16 @@ class CupertinoDynamicColor extends Color with DiagnosticableMixin implements Di
   /// `data` is [CupertinoUserInterfaceLevelData.elevated]), the resolved
   /// [CupertinoDynamicColor] will be the same as this [CupertinoDynamicColor],
   /// except its effective color will be the `darkHighContrastElevatedColor` variant
-  /// from the orignal [CupertinoDynamicColor].
+  /// from the original [CupertinoDynamicColor].
   ///
   /// Calling this function may create dependencies on the closest instance of some
   /// [InheritedWidget]s that enclose the given [BuildContext]. E.g., if [darkColor]
   /// is different from [color], this method will call [CupertinoTheme.of], and
-  /// then [MediaQuery.of] if brightness wasn't specified in the theme data retrived
+  /// then [MediaQuery.of] if brightness wasn't specified in the theme data retrieved
   /// from the previous [CupertinoTheme.of] call, in an effort to determine the
   /// brightness value.
   ///
-  /// If any of the required dependecies are missing from the given context, the
+  /// If any of the required dependencies are missing from the given context, the
   /// default value of that trait will be used ([Brightness.light] platform
   /// brightness, normal contrast, [CupertinoUserInterfaceLevelData.base] elevation
   /// level), unless [nullOk] is set to false, in which case an exception will be

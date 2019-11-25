@@ -77,7 +77,6 @@ void main() {
   setUp(() {
     _ensureTestGestureBinding();
     _binding.postFrameCallbacks.clear();
-    PointerEventConverter.clearPointers();
   });
 
   test('MouseTrackerAnnotation has correct toString', () {
@@ -134,11 +133,10 @@ void main() {
 
     // Remove
     ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
-      _pointerData(PointerChange.remove, const Offset(1.0, 201.0)),
+      _pointerData(PointerChange.remove, const Offset(1.0, 101.0)),
     ]));
     expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
-      const PointerHoverEvent(position: Offset(1.0, 201.0)),
-      const PointerExitEvent(position: Offset(1.0, 201.0)),
+      const PointerExitEvent(position: Offset(1.0, 101.0)),
     ]));
     expect(listenerLogs, <bool>[false]);
     events.clear();
@@ -286,12 +284,12 @@ void main() {
     _setUpWithOneAnnotation(logEvents: events);
 
     ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+      _pointerData(PointerChange.add, const Offset(0.0, 101.0)),
       _pointerData(PointerChange.down, const Offset(0.0, 101.0)),
     ]));
     expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
-      // This Enter event is triggered by the [PointerAddedEvent] that was
-      // synthesized during the event normalization of pointer event converter.
-      // The [PointerDownEvent] is ignored by [MouseTracker].
+      // This Enter event is triggered by the [PointerAddedEvent] The
+      // [PointerDownEvent] is ignored by [MouseTracker].
       const PointerEnterEvent(position: Offset(0.0, 101.0)),
     ]));
     events.clear();

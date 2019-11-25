@@ -5,7 +5,7 @@
 import 'basic_types.dart';
 import 'constants.dart';
 
-/// DEPRECATED. `function` cannot be treeshaken out of release builds.
+/// DEPRECATED. `function` cannot be tree-shaken out of release builds.
 ///
 /// Instead use:
 ///

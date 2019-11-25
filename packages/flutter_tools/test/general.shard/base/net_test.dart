@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
@@ -365,25 +364,25 @@ class FakeHttpClientResponse implements io.HttpClientResponse {
   String get reasonPhrase => '<reason phrase>';
 
   @override
-  StreamSubscription<Uint8List> listen(
-    void onData(Uint8List event), {
+  StreamSubscription<List<int>> listen(
+    void onData(List<int> event), {
     Function onError,
     void onDone(),
     bool cancelOnError,
   }) {
     if (data == null) {
-      return Stream<Uint8List>.fromFuture(Future<Uint8List>.error(
+      return Stream<List<int>>.fromFuture(Future<List<int>>.error(
         const io.SocketException('test'),
       )).listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);
     } else {
-      return Stream<Uint8List>.fromFuture(Future<Uint8List>.value(
-        utf8.encode(data) as Uint8List,
+      return Stream<List<int>>.fromFuture(Future<List<int>>.value(
+        utf8.encode(data),
       )).listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);
     }
   }
 
   @override
-  Future<dynamic> forEach(void Function(Uint8List element) action) async {
+  Future<dynamic> forEach(void Function(List<int> element) action) async {
     if (data == null) {
       return Future<void>.error(const io.SocketException('test'));
     } else {

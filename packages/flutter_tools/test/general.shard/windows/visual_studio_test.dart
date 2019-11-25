@@ -81,8 +81,8 @@ void main() {
 
     final String finalResponse = responseOverride ??
         json.encode(<Map<String, dynamic>>[response]);
-    when<String>(result.stdout).thenReturn(finalResponse);
-    when<String>(result.stderr).thenReturn('');
+    when<String>(result.stdout as String).thenReturn(finalResponse);
+    when<String>(result.stderr as String).thenReturn('');
     final List<String> requirementArguments = requiredComponents == null
         ? <String>[]
         : <String>['-requires', ...requiredComponents];
@@ -180,8 +180,8 @@ void main() {
       )).thenAnswer((Invocation invocation) {
         return result;
       });
-      when<String>(result.stdout).thenReturn('');
-      when<String>(result.stderr).thenReturn('');
+      when<String>(result.stdout as String).thenReturn('');
+      when<String>(result.stderr as String).thenReturn('');
 
       visualStudio = VisualStudio();
       expect(visualStudio.isInstalled, false);

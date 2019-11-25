@@ -58,7 +58,7 @@ void main() {
       Cache: () => cache,
     });
 
-    void testUsingCommandContext(String testName, Function testBody) {
+    void testUsingCommandContext(String testName, dynamic Function() testBody) {
       testUsingContext(testName, testBody, overrides: <Type, Generator>{
         ProcessInfo: () => mockProcessInfo,
         SystemClock: () => clock,
