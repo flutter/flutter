@@ -287,15 +287,19 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   /// This value is set during layout based on the [CacheExtentStyle].
   ///
   /// When the style is [CacheExtentStyle.viewport], it is the main axis extent
-  /// of the viewport
+  /// of the viewport multiplied by the requested cache extent, which is still
+  /// expressed in pixels.
   double _calculatedCacheExtent;
 
   /// {@template flutter.rendering.viewport.cacheExtentStyle}
-  /// If set, the [cacheExtent] will be automatically calculated as the main
-  /// axis extent of the viewport multiplied by this value.
+  /// Controls how the [cacheExtent] is interpreted.
   ///
-  /// If this is set, the [cacheExtent] must be null, as it will automatically
-  /// be derived during layout.
+  /// If set to [CacheExtentStyle.pixels], the [cacheExtent] will be treated as
+  /// a logical pixels.
+  ///
+  /// If set to [CacheExtentStyle.viewport], the [cacheExtent] will be treated
+  /// as a multiplier for the main axis extent of the viewport. In this case,
+  /// the [cacheExtent] must not be null.
   /// {@endtemplate}
   CacheExtentStyle get cacheExtentStyle => _cacheExtentStyle;
   CacheExtentStyle _cacheExtentStyle;

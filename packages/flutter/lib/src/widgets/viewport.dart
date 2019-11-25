@@ -113,8 +113,6 @@ class Viewport extends MultiChildRenderObjectWidget {
   final Key center;
 
   /// {@macro flutter.rendering.viewport.cacheExtent}
-  ///
-  /// If this value is set, the [viepw]
   final double cacheExtent;
 
   /// {@macro flutter.rendering.viewport.cacheExtentStyle}
