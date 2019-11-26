@@ -610,23 +610,28 @@ void main() {
       );
     }
 
-    await tester.pumpWidget(buildFrame(TargetPlatform.iOS));
-    expect(find.byType(CupertinoSwitch), findsOneWidget);
+    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.iOS, TargetPlatform.macOS ]) {
+      value = false;
+      await tester.pumpWidget(buildFrame(platform));
+      expect(find.byType(CupertinoSwitch), findsOneWidget, reason: 'on ${describeEnum(platform)}');
 
-    final CupertinoSwitch adaptiveSwitch = tester.widget(find.byType(CupertinoSwitch));
-    expect(adaptiveSwitch.trackColor, inactiveTrackColor);
+      final CupertinoSwitch adaptiveSwitch = tester.widget(find.byType(CupertinoSwitch));
+      expect(adaptiveSwitch.trackColor, inactiveTrackColor, reason: 'on ${describeEnum(platform)}');
 
-    expect(value, isFalse);
-    await tester.tap(find.byType(Switch));
-    expect(value, isTrue);
+      expect(value, isFalse, reason: 'on ${describeEnum(platform)}');
+      await tester.tap(find.byType(Switch));
+      expect(value, isTrue, reason: 'on ${describeEnum(platform)}');
+    }
 
-    await tester.pumpWidget(buildFrame(TargetPlatform.android));
-    await tester.pumpAndSettle(); // Finish the theme change animation.
-    expect(find.byType(CupertinoSwitch), findsNothing);
-    expect(value, isTrue);
-    await tester.tap(find.byType(Switch));
-    expect(value, isFalse);
-
+    for (final TargetPlatform platform in <TargetPlatform>[ TargetPlatform.android, TargetPlatform.fuchsia ]) {
+      value = false;
+      await tester.pumpWidget(buildFrame(platform));
+      await tester.pumpAndSettle(); // Finish the theme change animation.
+      expect(find.byType(CupertinoSwitch), findsNothing);
+      expect(value, isFalse, reason: 'on ${describeEnum(platform)}');
+      await tester.tap(find.byType(Switch));
+      expect(value, isTrue, reason: 'on ${describeEnum(platform)}');
+    }
   });
 
   testWidgets('Switch is focusable and has correct focus color', (WidgetTester tester) async {
