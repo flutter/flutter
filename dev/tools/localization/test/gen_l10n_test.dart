@@ -599,6 +599,26 @@ void main() {
   });
 
   group('LocalizationsGenerator.generateOutputFile:', () {
-    // TODO(shihaohong): add tests
+    test('correctly generates the localizations classes:', () {
+      _standardFlutterDirectoryL10nSetup(fs);
+      final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+      try {
+        generator.initialize(
+          l10nDirectoryPath: defaultArbPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        );
+        generator.parseArbFiles();
+        generator.generateClassMethods();
+        generator.generateOutputFile();
+      } on Exception catch (e) {
+       fail('Generating output localization file should succeed: $e');
+      }
+
+      final String outputFileString = generator.outputFile.readAsStringSync();
+      expect(outputFileString, contains('class AppLocalizations'));
+      expect(outputFileString, contains('class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations>'));
+    });
   });
 }

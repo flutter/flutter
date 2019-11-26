@@ -508,6 +508,8 @@ class LocalizationsGenerator {
     }
   }
 
+  /// Generates a file that contains the localizations class and the
+  /// LocalizationsDelegate class.
   void generateOutputFile() {
     final String directory = path.basename(l10nDirectory.path);
     final String outputFileName = path.basename(outputFile.path);
