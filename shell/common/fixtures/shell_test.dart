@@ -121,3 +121,20 @@ void canAccessIsolateLaunchData() {
 }
 
 void notifyMessage(String string) native 'NotifyMessage';
+
+@pragma('vm:entry-point')
+void canConvertMappings() {
+  sendFixtureMapping(getFixtureMapping());
+}
+
+List<int> getFixtureMapping() native 'GetFixtureMapping';
+void sendFixtureMapping(List<int> list) native 'SendFixtureMapping';
+
+@pragma('vm:entry-point')
+void canDecompressImageFromAsset() {
+  decodeImageFromList(Uint8List.fromList(getFixtureImage()), (Image result) {
+    notifyWidthHeight(result.width, result.height);
+  });
+}
+
+List<int> getFixtureImage() native 'GetFixtureImage';

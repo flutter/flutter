@@ -13,6 +13,7 @@
 #include "flutter/flow/layers/picture_layer.h"
 #include "flutter/flow/layers/transform_layer.h"
 #include "flutter/fml/command_line.h"
+#include "flutter/fml/dart/dart_converter.h"
 #include "flutter/fml/make_copyable.h"
 #include "flutter/fml/message_loop.h"
 #include "flutter/fml/synchronization/count_down_latch.h"
@@ -1011,6 +1012,144 @@ TEST_F(ShellTest, Screenshot) {
 
   ASSERT_TRUE(reference_data->equals(screenshot_future.get().data.get()));
 
+  DestroyShell(std::move(shell));
+}
+
+enum class MemsetPatternOp {
+  kMemsetPatternOpSetBuffer,
+  kMemsetPatternOpCheckBuffer,
+};
+
+//------------------------------------------------------------------------------
+/// @brief      Depending on the operation, either scribbles a known pattern
+///             into the buffer or checks if that pattern is present in an
+///             existing buffer. This is a portable variant of the
+///             memset_pattern class of methods that also happen to do assert
+///             that the same pattern exists.
+///
+/// @param      buffer  The buffer
+/// @param[in]  size    The size
+/// @param[in]  op      The operation
+///
+/// @return     If the result of the operation was a success.
+///
+static bool MemsetPatternSetOrCheck(uint8_t* buffer,
+                                    size_t size,
+                                    MemsetPatternOp op) {
+  if (buffer == nullptr) {
+    return false;
+  }
+
+  auto pattern = reinterpret_cast<const uint8_t*>("dErP");
+  constexpr auto pattern_length = 4;
+
+  uint8_t* start = buffer;
+  uint8_t* p = buffer;
+
+  while ((start + size) - p >= pattern_length) {
+    switch (op) {
+      case MemsetPatternOp::kMemsetPatternOpSetBuffer:
+        memmove(p, pattern, pattern_length);
+        break;
+      case MemsetPatternOp::kMemsetPatternOpCheckBuffer:
+        if (memcmp(pattern, p, pattern_length) != 0) {
+          return false;
+        }
+        break;
+    };
+    p += pattern_length;
+  }
+
+  if ((start + size) - p != 0) {
+    switch (op) {
+      case MemsetPatternOp::kMemsetPatternOpSetBuffer:
+        memmove(p, pattern, (start + size) - p);
+        break;
+      case MemsetPatternOp::kMemsetPatternOpCheckBuffer:
+        if (memcmp(pattern, p, (start + size) - p) != 0) {
+          return false;
+        }
+        break;
+    }
+  }
+
+  return true;
+}
+
+TEST_F(ShellTest, CanConvertToAndFromMappings) {
+  const size_t buffer_size = 2 << 20;
+
+  uint8_t* buffer = static_cast<uint8_t*>(::malloc(buffer_size));
+  ASSERT_NE(buffer, nullptr);
+  ASSERT_TRUE(MemsetPatternSetOrCheck(
+      buffer, buffer_size, MemsetPatternOp::kMemsetPatternOpSetBuffer));
+
+  std::unique_ptr<fml::Mapping> mapping =
+      std::make_unique<fml::NonOwnedMapping>(
+          buffer, buffer_size, [](const uint8_t* buffer, size_t size) {
+            ::free(const_cast<uint8_t*>(buffer));
+          });
+
+  ASSERT_EQ(mapping->GetSize(), buffer_size);
+
+  fml::AutoResetWaitableEvent latch;
+  AddNativeCallback(
+      "SendFixtureMapping", CREATE_NATIVE_ENTRY([&](auto args) {
+        auto mapping_from_dart =
+            tonic::DartConverter<std::unique_ptr<fml::Mapping>>::FromDart(
+                Dart_GetNativeArgument(args, 0));
+        ASSERT_NE(mapping_from_dart, nullptr);
+        ASSERT_EQ(mapping_from_dart->GetSize(), buffer_size);
+        ASSERT_TRUE(MemsetPatternSetOrCheck(
+            const_cast<uint8_t*>(mapping_from_dart->GetMapping()),  // buffer
+            mapping_from_dart->GetSize(),                           // size
+            MemsetPatternOp::kMemsetPatternOpCheckBuffer            // op
+            ));
+        latch.Signal();
+      }));
+
+  AddNativeCallback(
+      "GetFixtureMapping", CREATE_NATIVE_ENTRY([&](auto args) {
+        tonic::DartConverter<tonic::DartConverterMapping>::SetReturnValue(
+            args, mapping);
+      }));
+
+  auto settings = CreateSettingsForFixture();
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  configuration.SetEntrypoint("canConvertMappings");
+  std::unique_ptr<Shell> shell = CreateShell(settings);
+  ASSERT_NE(shell.get(), nullptr);
+  RunEngine(shell.get(), std::move(configuration));
+  latch.Wait();
+  DestroyShell(std::move(shell));
+}
+
+TEST_F(ShellTest, CanDecompressImageFromAsset) {
+  fml::AutoResetWaitableEvent latch;
+  AddNativeCallback("NotifyWidthHeight", CREATE_NATIVE_ENTRY([&](auto args) {
+                      auto width = tonic::DartConverter<int>::FromDart(
+                          Dart_GetNativeArgument(args, 0));
+                      auto height = tonic::DartConverter<int>::FromDart(
+                          Dart_GetNativeArgument(args, 1));
+                      ASSERT_EQ(width, 100);
+                      ASSERT_EQ(height, 100);
+                      latch.Signal();
+                    }));
+
+  AddNativeCallback(
+      "GetFixtureImage", CREATE_NATIVE_ENTRY([](auto args) {
+        auto fixture = OpenFixtureAsMapping("shelltest_screenshot.png");
+        tonic::DartConverter<tonic::DartConverterMapping>::SetReturnValue(
+            args, fixture);
+      }));
+
+  auto settings = CreateSettingsForFixture();
+  auto configuration = RunConfiguration::InferFromSettings(settings);
+  configuration.SetEntrypoint("canDecompressImageFromAsset");
+  std::unique_ptr<Shell> shell = CreateShell(settings);
+  ASSERT_NE(shell.get(), nullptr);
+  RunEngine(shell.get(), std::move(configuration));
+  latch.Wait();
   DestroyShell(std::move(shell));
 }
 

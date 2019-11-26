@@ -249,8 +249,9 @@ executable("fml_unittests") {
   deps = [
     ":fml_fixtures",
     "$flutter_root/fml",
+    "$flutter_root/fml/dart",
+    "$flutter_root/runtime:libdart",
     "$flutter_root/testing",
-    "//third_party/dart/runtime:libdart_jit",
   ]
 }
 

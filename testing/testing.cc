@@ -49,5 +49,9 @@ fml::UniqueFD OpenFixture(std::string fixture_name) {
   return fixture_fd;
 }
 
+std::unique_ptr<fml::Mapping> OpenFixtureAsMapping(std::string fixture_name) {
+  return fml::FileMapping::CreateReadOnly(OpenFixture(fixture_name));
+}
+
 }  // namespace testing
 }  // namespace flutter
