@@ -118,11 +118,11 @@ class BoxShadow extends ui.Shadow {
       return true;
     if (runtimeType != other.runtimeType)
       return false;
-    final BoxShadow typedOther = other;
-    return color == typedOther.color &&
-           offset == typedOther.offset &&
-           blurRadius == typedOther.blurRadius &&
-           spreadRadius == typedOther.spreadRadius;
+    return other is BoxShadow
+        && other.color == color
+        && other.offset == offset
+        && other.blurRadius == blurRadius
+        && other.spreadRadius == spreadRadius;
   }
 
   @override

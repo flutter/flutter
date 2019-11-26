@@ -151,9 +151,9 @@ class ContinuousRectangleBorder extends ShapeBorder {
   bool operator ==(dynamic other) {
     if (runtimeType != other.runtimeType)
       return false;
-    final ContinuousRectangleBorder typedOther = other;
-    return side == typedOther.side
-        && borderRadius == typedOther.borderRadius;
+    return other is ContinuousRectangleBorder
+        && other.side == side
+        && other.borderRadius == borderRadius;
   }
 
   @override

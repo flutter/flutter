@@ -235,7 +235,7 @@ class BoxDecoration extends Decoration {
       return scale(t);
     if (a is BoxDecoration)
       return BoxDecoration.lerp(a, this, t);
-    return super.lerpFrom(a, t);
+    return super.lerpFrom(a, t) as BoxDecoration;
   }
 
   @override
@@ -244,7 +244,7 @@ class BoxDecoration extends Decoration {
       return scale(1.0 - t);
     if (b is BoxDecoration)
       return BoxDecoration.lerp(this, b, t);
-    return super.lerpTo(b, t);
+    return super.lerpTo(b, t) as BoxDecoration;
   }
 
   /// Linearly interpolate between two box decorations.
@@ -299,14 +299,14 @@ class BoxDecoration extends Decoration {
       return true;
     if (runtimeType != other.runtimeType)
       return false;
-    final BoxDecoration typedOther = other;
-    return color == typedOther.color &&
-           image == typedOther.image &&
-           border == typedOther.border &&
-           borderRadius == typedOther.borderRadius &&
-           boxShadow == typedOther.boxShadow &&
-           gradient == typedOther.gradient &&
-           shape == typedOther.shape;
+    return other is BoxDecoration
+        && other.color == color
+        && other.image == image
+        && other.border == border
+        && other.borderRadius == borderRadius
+        && other.boxShadow == boxShadow
+        && other.gradient == gradient
+        && other.shape == shape;
   }
 
   @override
@@ -468,7 +468,7 @@ class _BoxDecorationPainter extends BoxPainter {
       canvas,
       rect,
       shape: _decoration.shape,
-      borderRadius: _decoration.borderRadius,
+      borderRadius: _decoration.borderRadius as BorderRadius,
       textDirection: configuration.textDirection,
     );
   }

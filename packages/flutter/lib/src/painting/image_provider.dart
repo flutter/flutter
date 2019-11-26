@@ -51,7 +51,7 @@ class ImageConfiguration {
     Locale locale,
     TextDirection textDirection,
     Size size,
-    String platform,
+    TargetPlatform platform,
   }) {
     return ImageConfiguration(
       bundle: bundle ?? this.bundle,
@@ -94,13 +94,13 @@ class ImageConfiguration {
   bool operator ==(dynamic other) {
     if (other.runtimeType != runtimeType)
       return false;
-    final ImageConfiguration typedOther = other;
-    return typedOther.bundle == bundle
-        && typedOther.devicePixelRatio == devicePixelRatio
-        && typedOther.locale == locale
-        && typedOther.textDirection == textDirection
-        && typedOther.size == size
-        && typedOther.platform == platform;
+    return other is ImageConfiguration
+        && other.bundle == bundle
+        && other.devicePixelRatio == devicePixelRatio
+        && other.locale == locale
+        && other.textDirection == textDirection
+        && other.size == size
+        && other.platform == platform;
   }
 
   @override
@@ -439,10 +439,10 @@ class AssetBundleImageKey {
   bool operator ==(dynamic other) {
     if (other.runtimeType != runtimeType)
       return false;
-    final AssetBundleImageKey typedOther = other;
-    return bundle == typedOther.bundle
-        && name == typedOther.name
-        && scale == typedOther.scale;
+    return other is AssetBundleImageKey
+        && other.bundle == bundle
+        && other.name == name
+        && other.scale == scale;
   }
 
   @override
@@ -501,10 +501,10 @@ class _SizeAwareCacheKey {
   bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
-    final _SizeAwareCacheKey typedOther = other;
-    return providerCacheKey == typedOther.providerCacheKey
-        && width == typedOther.width
-        && height == typedOther.height;
+    return other is _SizeAwareCacheKey
+        && other.providerCacheKey == providerCacheKey
+        && other.width == width
+        && other.height == height;
   }
 
   @override
@@ -657,9 +657,9 @@ class FileImage extends ImageProvider<FileImage> {
   bool operator ==(dynamic other) {
     if (other.runtimeType != runtimeType)
       return false;
-    final FileImage typedOther = other;
-    return file?.path == typedOther.file?.path
-        && scale == typedOther.scale;
+    return other is FileImage
+        && other.file?.path == file?.path
+        && other.scale == scale;
   }
 
   @override
@@ -718,9 +718,9 @@ class MemoryImage extends ImageProvider<MemoryImage> {
   bool operator ==(dynamic other) {
     if (other.runtimeType != runtimeType)
       return false;
-    final MemoryImage typedOther = other;
-    return bytes == typedOther.bytes
-        && scale == typedOther.scale;
+    return other is MemoryImage
+        && other.bytes == bytes
+        && other.scale == scale;
   }
 
   @override
@@ -855,10 +855,10 @@ class ExactAssetImage extends AssetBundleImageProvider {
   bool operator ==(dynamic other) {
     if (other.runtimeType != runtimeType)
       return false;
-    final ExactAssetImage typedOther = other;
-    return keyName == typedOther.keyName
-        && scale == typedOther.scale
-        && bundle == typedOther.bundle;
+    return other is ExactAssetImage
+        && other.keyName == keyName
+        && other.scale == scale
+        && other.bundle == bundle;
   }
 
   @override

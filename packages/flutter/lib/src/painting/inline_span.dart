@@ -358,8 +358,8 @@ abstract class InlineSpan extends DiagnosticableTree {
       return true;
     if (other.runtimeType != runtimeType)
       return false;
-    final InlineSpan typedOther = other;
-    return typedOther.style == style;
+    return other is InlineSpan
+        && other.style == style;
   }
 
   @override
