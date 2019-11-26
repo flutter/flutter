@@ -29,6 +29,7 @@ import io.flutter.plugin.common.MethodCall;
 import io.flutter.plugin.platform.PlatformViewsController;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -71,6 +72,27 @@ public class TextInputPluginTest {
 
         // Verify that we haven't restarted the input.
         assertEquals(1, testImm.getRestartCount(testView));
+    }
+
+    @Test
+    public void setTextInputEditingState_alwaysSetEditableWhenDifferent() {
+        // Initialize a general TextInputPlugin.
+        InputMethodSubtype inputMethodSubtype = mock(InputMethodSubtype.class);
+        TestImm testImm = Shadow.extract(RuntimeEnvironment.application.getSystemService(Context.INPUT_METHOD_SERVICE));
+        testImm.setCurrentInputMethodSubtype(inputMethodSubtype);
+        View testView = new View(RuntimeEnvironment.application);
+        TextInputPlugin textInputPlugin = new TextInputPlugin(testView, mock(DartExecutor.class), mock(PlatformViewsController.class));
+        textInputPlugin.setTextInputClient(0, new TextInputChannel.Configuration(false, false, true, TextInputChannel.TextCapitalization.NONE, null, null, null));
+        // There's a pending restart since we initialized the text input client. Flush that now. With changed text, we should
+        // always set the Editable contents.
+        textInputPlugin.setTextInputEditingState(testView, new TextInputChannel.TextEditState("hello", 0, 0));
+        assertEquals(1, testImm.getRestartCount(testView));
+        assertTrue(textInputPlugin.getEditable().toString().equals("hello"));
+
+        // No pending restart, set Editable contents anyways.
+        textInputPlugin.setTextInputEditingState(testView, new TextInputChannel.TextEditState("Shibuyawoo", 0, 0));
+        assertEquals(1, testImm.getRestartCount(testView));
+        assertTrue(textInputPlugin.getEditable().toString().equals("Shibuyawoo"));
     }
 
     // See https://github.com/flutter/flutter/issues/29341 and https://github.com/flutter/flutter/issues/31512
