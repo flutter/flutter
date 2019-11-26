@@ -26,6 +26,7 @@ import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
+import '../base/net.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../build_info.dart';
@@ -87,8 +88,6 @@ typedef WebFsFactory = Future<WebFs> Function({
 /// Used for exposing URLs to the end user by passing the request out to the
 /// daemon client.
 UrlTunneller get tunnelUrl => context.get<UrlTunneller>() ?? (String url) => Future<String>.value(url);
-
-typedef UrlTunneller = Future<String> Function(String url);
 
 /// The dev filesystem responsible for building and serving  web applications.
 class WebFs {
