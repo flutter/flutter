@@ -88,6 +88,8 @@ import 'scrollable.dart';
 /// in both cases the "available space" is infinite (since this is in a viewport).
 /// The next section describes a technique for providing a maximum height constraint.
 ///
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/widgets/single_child_scroll_view_fixed.png)
+///
 /// ```dart
 /// Widget build(BuildContext context) {
 ///   return LayoutBuilder(
@@ -150,6 +152,8 @@ import 'scrollable.dart';
 /// {@tool snippet --template=stateless_widget}
 /// In this example, the column becomes either as big as viewport, or as big as
 /// the contents, whichever is biggest.
+///
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/widgets/single_child_scroll_view_expanded.png)
 ///
 /// ```dart
 /// Widget build(BuildContext context) {
