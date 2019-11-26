@@ -264,7 +264,7 @@ class MouseTracker extends ChangeNotifier {
         ? LinkedHashSet<MouseTrackerAnnotation>.from(
             annotationFinder(mouseState.mostRecentEvent.position)
           )
-        : <MouseTrackerAnnotation>{};
+        : <MouseTrackerAnnotation>{} as LinkedHashSet<MouseTrackerAnnotation>;
 
     _dispatchDeviceCallbacks(
       currentState: mouseState,
