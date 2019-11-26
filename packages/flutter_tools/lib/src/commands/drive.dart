@@ -328,6 +328,11 @@ void restoreAppStopper() {
 Future<bool> _stopApp(DriveCommand command) async {
   printTrace('Stopping application.');
   final ApplicationPackage package = await command.applicationPackages.getPackageForPlatform(await command.device.targetPlatform);
+  if (package != null) {
+    printTrace('No package found on the device.');
+    await command._deviceLogSubscription?.cancel();
+    return true;
+  }
   final bool stopped = await command.device.stopApp(package);
   await command._deviceLogSubscription?.cancel();
   return stopped;

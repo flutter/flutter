@@ -8,7 +8,6 @@ import '../base/common.dart';
 import '../base/platform.dart';
 import '../build_info.dart';
 import '../cache.dart';
-import '../fuchsia/cmx_validator.dart';
 import '../fuchsia/fuchsia_build.dart';
 import '../fuchsia/fuchsia_pm.dart';
 import '../project.dart';
@@ -64,7 +63,6 @@ class BuildFuchsiaCommand extends BuildSubCommand {
     if (!flutterProject.fuchsia.existsSync()) {
       throwToolExit('No Fuchsia project is configured.');
     }
-    await validateCmxFile(flutterProject.fuchsia);
     await buildFuchsia(
       fuchsiaProject: flutterProject.fuchsia,
       target: targetFile,
