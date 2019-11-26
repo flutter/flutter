@@ -24,52 +24,6 @@ final String resetBold = RegExp.escape(AnsiTerminal.resetBold);
 final String resetColor = RegExp.escape(AnsiTerminal.resetColor);
 
 void main() {
-  test('AppContext error', () async {
-    final BufferLogger mockLogger = BufferLogger();
-    final VerboseLogger verboseLogger = VerboseLogger(mockLogger, FakeStopwatch());
-    TestBindings(
-      verbose: true,
-      logger: verboseLogger,
-      platform: _noAnsiPlatform,
-      outputPreferences: OutputPreferences(showColor: false),
-    ).initializeBinding();
-
-    verboseLogger.printStatus('Hey Hey Hey Hey');
-    verboseLogger.printTrace('Oooh, I do I do I do');
-    verboseLogger.printError('Helpless!');
-
-    expect(mockLogger.statusText, matches(r'^\[ (?: {0,2}\+[0-9]{1,4} ms|       )\] Hey Hey Hey Hey\n'
-                                            r'\[ (?: {0,2}\+[0-9]{1,4} ms|       )\] Oooh, I do I do I do\n$'));
-    expect(mockLogger.traceText, '');
-    expect(mockLogger.errorText, matches( r'^\[ (?: {0,2}\+[0-9]{1,4} ms|       )\] Helpless!\n$'));
-  });
-
-  test('AppContext ANSI colored errors', () {
-    final BufferLogger mockLogger = BufferLogger();
-    final VerboseLogger verboseLogger = VerboseLogger(mockLogger, FakeStopwatch());
-    TestBindings(
-      verbose: true,
-      logger: verboseLogger,
-      outputPreferences: OutputPreferences(showColor: true),
-      platform: FakePlatform()..stdoutSupportsAnsi = true
-    ).initializeBinding();
-
-    verboseLogger.printStatus('Hey Hey Hey Hey');
-    verboseLogger.printTrace('Oooh, I do I do I do');
-    verboseLogger.printError('Helpless!');
-
-    expect(
-      mockLogger.statusText,
-      matches(r'^\[ (?: {0,2}\+[0-9]{1,4} ms|       )\] '
-        '${bold}Hey Hey Hey Hey$resetBold'
-        r'\n\[ (?: {0,2}\+[0-9]{1,4} ms|       )\] Oooh, I do I do I do\n$'));
-    expect(mockLogger.traceText, '');
-    expect(
-      mockLogger.errorText,
-      matches('^$red' r'\[ (?: {0,2}\+[0-9]{1,4} ms|       )\] '
-        '${bold}Helpless!$resetBold$resetColor' r'\n$'));
-  });
-
   group('Spinners', () {
     MockStdio mockStdio;
     FakeStopwatch mockStopwatch;
@@ -712,6 +666,52 @@ void main() {
       Logger: () => BufferLogger(),
       Platform: _kNoAnsiPlatform,
     });
+  });
+
+  test('AppContext error', () async {
+    final BufferLogger mockLogger = BufferLogger();
+    final VerboseLogger verboseLogger = VerboseLogger(mockLogger, FakeStopwatch());
+    TestBindings(
+      verbose: true,
+      logger: verboseLogger,
+      platform: _noAnsiPlatform,
+      outputPreferences: OutputPreferences(showColor: false),
+    ).initializeBinding();
+
+    verboseLogger.printStatus('Hey Hey Hey Hey');
+    verboseLogger.printTrace('Oooh, I do I do I do');
+    verboseLogger.printError('Helpless!');
+
+    expect(mockLogger.statusText, matches(r'^\[ (?: {0,2}\+[0-9]{1,4} ms|       )\] Hey Hey Hey Hey\n'
+                                            r'\[ (?: {0,2}\+[0-9]{1,4} ms|       )\] Oooh, I do I do I do\n$'));
+    expect(mockLogger.traceText, '');
+    expect(mockLogger.errorText, matches( r'^\[ (?: {0,2}\+[0-9]{1,4} ms|       )\] Helpless!\n$'));
+  });
+
+  test('AppContext ANSI colored errors', () {
+    final BufferLogger mockLogger = BufferLogger();
+    final VerboseLogger verboseLogger = VerboseLogger(mockLogger, FakeStopwatch());
+    TestBindings(
+      verbose: true,
+      logger: verboseLogger,
+      outputPreferences: OutputPreferences(showColor: true),
+      platform: FakePlatform()..stdoutSupportsAnsi = true
+    ).initializeBinding();
+
+    verboseLogger.printStatus('Hey Hey Hey Hey');
+    verboseLogger.printTrace('Oooh, I do I do I do');
+    verboseLogger.printError('Helpless!');
+
+    expect(
+      mockLogger.statusText,
+      matches(r'^\[ (?: {0,2}\+[0-9]{1,4} ms|       )\] '
+        '${bold}Hey Hey Hey Hey$resetBold'
+        r'\n\[ (?: {0,2}\+[0-9]{1,4} ms|       )\] Oooh, I do I do I do\n$'));
+    expect(mockLogger.traceText, '');
+    expect(
+      mockLogger.errorText,
+      matches('^$red' r'\[ (?: {0,2}\+[0-9]{1,4} ms|       )\] '
+        '${bold}Helpless!$resetBold$resetColor' r'\n$'));
   });
 }
 
