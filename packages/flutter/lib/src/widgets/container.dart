@@ -310,11 +310,12 @@ class Container extends StatelessWidget {
     this.margin,
     this.transform,
     this.child,
-    this.clipBehavior,
+    this.clipBehavior = Clip.none,
   }) : assert(margin == null || margin.isNonNegative),
        assert(padding == null || padding.isNonNegative),
        assert(decoration == null || decoration.debugAssertIsValid()),
        assert(constraints == null || constraints.debugAssertIsValid()),
+       assert(clipBehavior != null),
        assert(color == null || decoration == null,
          'Cannot provide both a color and a decoration\n'
          'The color argument is just a shorthand for "decoration: new BoxDecoration(color: color)".'
@@ -438,8 +439,7 @@ class Container extends StatelessWidget {
     if (transform != null)
       current = Transform(transform: transform, child: current);
 
-    if (clipBehavior != null &&
-        clipBehavior != Clip.none) {
+    if (clipBehavior != Clip.none) {
       current = ClipPath(
         clipper: _PathClipper(
           textDirection: Directionality.of(context),
