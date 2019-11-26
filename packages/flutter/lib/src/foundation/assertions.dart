@@ -335,7 +335,7 @@ class FlutterErrorDetails extends Diagnosticable {
       }
       longMessage ??= fullMessage;
     } else if (exception is String) {
-      longMessage = exception;
+      longMessage = exception as String;
     } else if (exception is Error || exception is Exception) {
       longMessage = exception.toString();
     } else {
@@ -349,10 +349,10 @@ class FlutterErrorDetails extends Diagnosticable {
 
   Diagnosticable _exceptionToDiagnosticable() {
     if (exception is FlutterError) {
-      return exception;
+      return exception as FlutterError;
     }
     if (exception is AssertionError && exception.message is FlutterError) {
-      return exception.message;
+      return exception.message as FlutterError;
     }
     return null;
   }

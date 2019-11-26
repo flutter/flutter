@@ -3110,7 +3110,7 @@ mixin DiagnosticableMixin {
   DiagnosticsNode toDiagnosticsNode({ String name, DiagnosticsTreeStyle style }) {
     return DiagnosticableNode<Diagnosticable>(
       name: name,
-      value: this,
+      value: this as Diagnosticable,
       style: style,
     );
   }
