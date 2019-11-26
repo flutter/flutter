@@ -2909,14 +2909,17 @@ class InspectorSerializationDelegate implements DiagnosticsSerializationDelegate
   /// Service used by GUI tools to interact with the [WidgetInspector].
   final WidgetInspectorService service;
 
-  /// The `groupName` parameter is not needed but is specified to regularize the
-  /// API surface of methods called from the Flutter IntelliJ Plugin.
+  /// Optional `groupName` parameter which indicates that the json should
+  /// contain live object ids.
+  ///
+  /// Object ids returned as part of the json will remain live at least until
+  /// [WidgetInspectorService.disposeGroup()] is called on [groupName].
   final String groupName;
 
-  /// Whether delegating for summaryTree nodes or detailsTree node
+  /// Whether the tree should only include nodes created by the local project.
   final bool summaryTree;
 
-  /// Maximum depth of descendents that is truncatable
+  /// Maximum descendents of [DiagnosticsNode] before truncating.
   final int maxDescendentsTruncatableNode;
 
   @override
@@ -2937,8 +2940,9 @@ class InspectorSerializationDelegate implements DiagnosticsSerializationDelegate
   /// can evaluate the following expression to register a VM Service API
   /// with a custom serialization to experiment with visualizing layouts.
   ///
-  /// The following code samples demonstrates adding the RenderObject associated
-  /// with an Element to the serialized data for all elements in the tree:
+  /// The following code samples demonstrates adding the [RenderObject] associated
+  /// with an [Element] to the serialized data for all elements in the tree:
+  ///
   /// ```dart
   /// Map<String, Object> getDetailsSubtreeWithRenderObject(
   ///   String id,
@@ -2975,14 +2979,13 @@ class InspectorSerializationDelegate implements DiagnosticsSerializationDelegate
 
   final List<DiagnosticsNode> _nodesCreatedByLocalProject = <DiagnosticsNode>[];
 
-  /// Whether the Inspector is interactive or not
-  bool get interactive => groupName != null;
+  bool get _interactive => groupName != null;
 
   @override
   Map<String, Object> additionalNodeProperties(DiagnosticsNode node) {
     final Map<String, Object> result = <String, Object>{};
     final Object value = node.value;
-    if (interactive) {
+    if (_interactive) {
       result['objectId'] = service.toId(node, groupName);
       result['valueId'] = service.toId(value, groupName);
     }
@@ -3010,7 +3013,7 @@ class InspectorSerializationDelegate implements DiagnosticsSerializationDelegate
     // we keep subtreeDepth from going down to zero until we reach nodes
     // that also exist in the summary tree. This ensures that every time
     // you expand a node in the details tree, you expand the entire subtree
-    // up until you reach the next nodes shared with the sum mary tree.
+    // up until you reach the next nodes shared with the summary tree.
     return summaryTree || subtreeDepth > 1 || service._shouldShowInSummaryTree(node)
         ? copyWith(subtreeDepth: subtreeDepth - 1)
         : this;
