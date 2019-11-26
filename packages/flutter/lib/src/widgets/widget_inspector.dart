@@ -2931,7 +2931,8 @@ class InspectorSerializationDelegate implements DiagnosticsSerializationDelegate
   /// Callback to add additional experimental serialization properties.
   ///
   /// This callback can be used to customize the serialization of DiagnosticsNode
-  /// objects for experimental features.
+  /// objects for experimental features in widget inspector clients such as
+  /// [Dart DevTools](https://github.com/flutter/devtools).
   /// For example, [Dart DevTools](https://github.com/flutter/devtools)
   /// can evaluate the following expression to register a VM Service API
   /// with a custom serialization to experiment with visualizing layouts.
