@@ -190,6 +190,7 @@ class TestCallbackPainter extends CustomPainter {
   bool shouldRepaint(TestCallbackPainter oldPainter) => true;
 }
 
+
 class RenderSizedBox extends RenderBox {
   RenderSizedBox(this._size);
 
