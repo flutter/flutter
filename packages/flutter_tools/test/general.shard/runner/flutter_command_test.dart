@@ -53,7 +53,13 @@ void main() {
       final DummyFlutterCommand flutterCommand = DummyFlutterCommand(shouldUpdateCache: true);
       await flutterCommand.run();
       // First call for universal, second for the rest
-      verify(cache.updateAll(any)).called(2);
+      expect(
+        verify(cache.updateAll(captureAny)).captured,
+        <Set<DevelopmentArtifact>>[
+          <DevelopmentArtifact>{DevelopmentArtifact.universal},
+          <DevelopmentArtifact>{},
+        ],
+      );
     },
     overrides: <Type, Generator>{
       Cache: () => cache,
