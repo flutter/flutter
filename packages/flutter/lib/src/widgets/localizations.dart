@@ -522,13 +522,13 @@ class _LocalizationsState extends State<Localizations> {
       // "useful" frame until after the async load has completed.
       RendererBinding.instance.deferFirstFrame();
       typeToResourcesFuture.then<void>((Map<Type, dynamic> value) {
+        if (mounted) {
+          setState(() {
+            _typeToResources = value;
+            _locale = locale;
+          });
+        }
         RendererBinding.instance.allowFirstFrame();
-        if (!mounted)
-          return;
-        setState(() {
-          _typeToResources = value;
-          _locale = locale;
-        });
       });
     }
   }
