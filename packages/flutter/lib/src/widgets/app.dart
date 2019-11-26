@@ -687,12 +687,32 @@ class WidgetsApp extends StatefulWidget {
   /// {@template flutter.widgets.widgetsApp.shortcuts}
   /// The default map of keyboard shortcuts to intents for the application.
   ///
-  /// By default, this is the output of [WidgetsApp.defaultShortcuts], called
-  /// with [defaultTargetPlatform]. If you wish to modify the default
-  /// [shortcuts], call [WidgetsApp.defaultShortcuts] and modify the resulting
-  /// map, passing it as the [shortcuts] for this app. Add to the bindings, or
-  /// override specific bindings for a widget subtree, by adding your own
-  /// [Shortcuts] widget.
+  /// By default, this is set to [WidgetsApp.defaultShortcuts].
+  ///
+  /// {@tool sample}
+  /// This example shows how to add a single shortcut for
+  /// [LogicalKeyboardKey.select] to the default shortcuts without needing to
+  /// add your own [Shortcuts] widget.
+  ///
+  /// Alternatively, you could insert a [Shortcuts] widget with just the mapping
+  /// you want to add between the [WidgetsApp] and its child and get the same
+  /// effect.
+  ///
+  /// ```dart
+  /// Widget build(BuildContext context) {
+  ///   return WidgetsApp(
+  ///     shortcuts: <LogicalKeySet, Intent>{
+  ///       ... WidgetsApp.defaultShortcuts,
+  ///       LogicalKeySet(LogicalKeyboardKey.select): const Intent(ActivateAction.key),
+  ///     },
+  ///     color: const Color(0xFFFF0000),
+  ///     builder: (BuildContext context, Widget child) {
+  ///       return const Placeholder();
+  ///     },
+  ///   );
+  /// }
+  /// ```
+  /// {@end-tool}
   ///
   /// See also:
   ///
@@ -716,6 +736,35 @@ class WidgetsApp extends StatefulWidget {
   /// specific bindings for a widget subtree, by adding your own [Actions]
   /// widget.
   ///
+  /// {@tool sample}
+  /// This example shows how to add a single action handling an
+  /// [ActivateAction] to the default actions without needing to
+  /// add your own [Actions] widget.
+  ///
+  /// Alternatively, you could insert a [Actions] widget with just the mapping
+  /// you want to add between the [WidgetsApp] and its child and get the same
+  /// effect.
+  ///
+  /// ```dart
+  /// Widget build(BuildContext context) {
+  ///   return WidgetsApp(
+  ///     actions: <LocalKey, ActionFactory>{
+  ///       ... WidgetsApp.defaultActions,
+  ///       ActivateAction.key: () => CallbackAction(
+  ///         ActivateAction.key,
+  ///         onInvoke: (FocusNode focusNode, Intent intent) {
+  ///           // Do something here...
+  ///         },
+  ///       ),
+  ///     },
+  ///     color: const Color(0xFFFF0000),
+  ///     builder: (BuildContext context, Widget child) {
+  ///       return const Placeholder();
+  ///     },
+  ///   );
+  /// }
+  /// ```
+  /// {@end-tool}
   /// See also:
   ///
   /// * The [shortcuts] parameter, which defines the default set of shortcuts
@@ -781,10 +830,11 @@ class WidgetsApp extends StatefulWidget {
     LogicalKeySet(LogicalKeyboardKey.space): const Intent(ActivateAction.key),
   };
 
-  /// Generates the default shortcut key bindings for the given `platform`.
+  /// Generates the default shortcut key bindings based on the
+  /// [defaultTargetPlatform].
   ///
-  /// Used by [WidgetsApp] to assign the default key bindings.
-  static Map<LogicalKeySet, Intent> defaultShortcuts(TargetPlatform platform) {
+  /// Used by [WidgetsApp] to assign a default value to [WidgetsApp.shortcuts].
+  static Map<LogicalKeySet, Intent> get defaultShortcuts {
     if (kIsWeb) {
       return _defaultWebShortcuts;
     }
@@ -795,7 +845,7 @@ class WidgetsApp extends StatefulWidget {
       return _defaultMacOsShortcuts;
     }
 
-    switch (platform) {
+    switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
         return _defaultShortcuts;
@@ -804,24 +854,17 @@ class WidgetsApp extends StatefulWidget {
         // No keyboard support on iOS yet.
         break;
     }
-    return const <LogicalKeySet, Intent>{};
+    return <LogicalKeySet, Intent>{};
   }
 
-  // Default actions for all platforms.
-  static final Map<LocalKey, ActionFactory> _defaultActions = <LocalKey, ActionFactory>{
+  /// The default value of [WidgetsApp.actions].
+  static final Map<LocalKey, ActionFactory> defaultActions = <LocalKey, ActionFactory>{
     DoNothingAction.key: () => const DoNothingAction(),
     RequestFocusAction.key: () => RequestFocusAction(),
     NextFocusAction.key: () => NextFocusAction(),
     PreviousFocusAction.key: () => PreviousFocusAction(),
     DirectionalFocusAction.key: () => DirectionalFocusAction(),
   };
-
-  /// Returns the default map of actions used by [WidgetsApp] as the set of
-  /// available actions for an application.
-  static Map<LocalKey, ActionFactory> defaultActions(TargetPlatform targetPlatform) {
-    // At the moment, all platforms have the same set of available actions.
-    return _defaultActions;
-  }
 
   @override
   _WidgetsAppState createState() => _WidgetsAppState();
@@ -1324,9 +1367,9 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
 
     assert(_debugCheckLocalizations(appLocale));
     return Shortcuts(
-      shortcuts: widget.shortcuts ?? WidgetsApp.defaultShortcuts(defaultTargetPlatform),
+      shortcuts: widget.shortcuts ?? WidgetsApp.defaultShortcuts,
       child: Actions(
-        actions: widget.actions ?? WidgetsApp.defaultActions(defaultTargetPlatform),
+        actions: widget.actions ?? WidgetsApp.defaultActions,
         child: DefaultFocusTraversal(
           policy: ReadingOrderTraversalPolicy(),
           child: _MediaQueryFromWindow(

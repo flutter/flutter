@@ -36,7 +36,6 @@ void main() {
   });
 
   testWidgets('WidgetsApp can override default key bindings', (WidgetTester tester) async {
-    final TestAction action = TestAction();
     bool checked = false;
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(
@@ -63,6 +62,7 @@ void main() {
     expect(checked, isTrue);
     checked = false;
 
+    final TestAction action = TestAction();
     await tester.pumpWidget(
       WidgetsApp(
         key: key,
