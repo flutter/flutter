@@ -142,61 +142,55 @@ class RenderSliverFillRemaining extends RenderSliverSingleBoxAdapter {
 
   @override
   void performLayout() {
-    double childExtent;
-    double extent = constraints.viewportMainAxisExtent - constraints.precedingScrollExtent;
-    double maxExtent = constraints.remainingPaintExtent - math.min(constraints.overlap, 0.0);
+    final bool previousSliversCanFillViewport = constraints.viewportMainAxisExtent < constraints.precedingScrollExtent;
+    final double availableExtent = constraints.remainingPaintExtent - math.min(constraints.overlap, 0.0);
 
-    if (hasScrollBody) {
-      extent = maxExtent;
-      if (child != null)
-        child.layout(
-          constraints.asBoxConstraints(
-            minExtent: extent,
-            maxExtent: extent,
-          ),
-          parentUsesSize: true,
-        );
-    } else if (child != null) {
-      switch (constraints.axis) {
-        case Axis.horizontal:
-          childExtent = child.getMaxIntrinsicWidth(constraints.crossAxisExtent);
-          break;
-        case Axis.vertical:
-          childExtent = child.getMaxIntrinsicHeight(constraints.crossAxisExtent);
-          break;
+    double childExtent = availableExtent;
+    if (child != null) {
+      double minExtent = 0.0;
+      double maxExtent = double.infinity;
+      if (hasScrollBody) {
+        minExtent = availableExtent;
+        maxExtent = availableExtent;
+      } else if (fillOverscroll) {
+        minExtent = availableExtent;
+      } else if (!previousSliversCanFillViewport) {
+        // Child needs to be at least as big as the remaining space in the viewport.
+        minExtent = constraints.viewportMainAxisExtent - constraints.precedingScrollExtent;
       }
 
-      if (constraints.precedingScrollExtent > constraints.viewportMainAxisExtent || childExtent > extent)
-        extent = childExtent;
-      if (maxExtent < extent)
-        maxExtent = extent;
-      if ((fillOverscroll ? maxExtent : extent) > childExtent) {
-        child.layout(
-          constraints.asBoxConstraints(
-            minExtent: extent,
-            maxExtent: fillOverscroll ? maxExtent : extent,
-          ),
-          parentUsesSize: true,
-        );
-      } else {
-        child.layout(constraints.asBoxConstraints(), parentUsesSize: true);
+      child.layout(
+        constraints.asBoxConstraints(
+          minExtent: minExtent,
+          maxExtent: maxExtent,
+        ),
+        parentUsesSize: true,
+      );
+
+      switch (constraints.axis) {
+        case Axis.horizontal:
+          childExtent = child.size.width;
+          break;
+        case Axis.vertical:
+          childExtent = child.size.height;
+          break;
       }
     }
 
-    assert(extent.isFinite,
-      'The calculated extent for the child of SliverFillRemaining is not finite.'
+    assert(childExtent.isFinite,
+    'The calculated extent for the child of SliverFillRemaining is not finite.'
         'This can happen if the child is a scrollable, in which case, the'
         'hasScrollBody property of SliverFillRemaining should not be set to'
         'false.',
     );
-    final double paintedChildSize = calculatePaintOffset(constraints, from: 0.0, to: extent);
+    final double paintedChildSize = calculatePaintOffset(constraints, from: 0.0, to: childExtent);
     assert(paintedChildSize.isFinite);
     assert(paintedChildSize >= 0.0);
     geometry = SliverGeometry(
-      scrollExtent: hasScrollBody ? constraints.viewportMainAxisExtent : extent,
+      scrollExtent: hasScrollBody ? constraints.viewportMainAxisExtent : childExtent,
       paintExtent: paintedChildSize,
       maxPaintExtent: paintedChildSize,
-      hasVisualOverflow: extent > constraints.remainingPaintExtent || constraints.scrollOffset > 0.0,
+      hasVisualOverflow: childExtent > constraints.remainingPaintExtent || constraints.scrollOffset > 0.0,
     );
     if (child != null)
       setChildParentData(child, constraints, geometry);
