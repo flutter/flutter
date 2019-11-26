@@ -165,7 +165,7 @@ void main() {
         DeviceManager: () => mockDeviceManager,
         FileSystem: () => fs,
         ProcessManager: () => mockProcessManager,
-      })
+      });
     });
 
     group('dart-flags option', () {
