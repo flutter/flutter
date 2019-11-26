@@ -102,6 +102,10 @@ public class TextInputPlugin {
         return mImm;
     }
 
+    @VisibleForTesting Editable getEditable() {
+        return mEditable;
+    }
+
     /***
      * Use the current platform view input connection until unlockPlatformViewInputConnection is called.
      *
@@ -306,15 +310,21 @@ public class TextInputPlugin {
     }
 
     @VisibleForTesting void setTextInputEditingState(View view, TextInputChannel.TextEditState state) {
-        if (!restartAlwaysRequired && !mRestartInputPending && state.text.equals(mEditable.toString())) {
-            applyStateToSelection(state);
+        // Always replace the contents of mEditable if the text differs
+        if (!state.text.equals(mEditable.toString())) {
+            mEditable.replace(0, mEditable.length(), state.text);
+        }
+        // Always apply state to selection which handles updating the selection if needed.
+        applyStateToSelection(state);
+        // Use updateSelection to update imm on selection if it is not neccessary to restart.
+        if (!restartAlwaysRequired && !mRestartInputPending) {
             mImm.updateSelection(mView, Math.max(Selection.getSelectionStart(mEditable), 0),
                     Math.max(Selection.getSelectionEnd(mEditable), 0),
                     BaseInputConnection.getComposingSpanStart(mEditable),
                     BaseInputConnection.getComposingSpanEnd(mEditable));
+        // Restart if there is a pending restart or the device requires a force restart
+        // (see isRestartAlwaysRequired). Restarting will also update the selection.
         } else {
-            mEditable.replace(0, mEditable.length(), state.text);
-            applyStateToSelection(state);
             mImm.restartInput(view);
             mRestartInputPending = false;
         }
