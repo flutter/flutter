@@ -31,7 +31,13 @@ class GitHubTemplateCreator {
   /// GitHub URL to present to the user containing encoded suggested template.
   ///
   /// Shorten the URL, if possible.
-  Future<String> toolCrashIssueTemplateGitHubURL(String command, String errorString, String exception, StackTrace stackTrace, String doctorText) async {
+  Future<String> toolCrashIssueTemplateGitHubURL(
+      String command,
+      String errorString,
+      String exception,
+      StackTrace stackTrace,
+      String doctorText
+    ) async {
     final String title = '[tool_crash] $errorString';
     final String body = '''## Command
   ```
@@ -73,12 +79,12 @@ class GitHubTemplateCreator {
       // pubspec may be malformed.
       return exception.toString();
     }
-    final FlutterManifest manifest = project?.manifest;
-    if (project == null || manifest == null || manifest.isEmpty) {
-      return 'No pubspec in working directory.';
-    }
-    String description = '';
-    if (manifest != null) {
+    try {
+      final FlutterManifest manifest = project?.manifest;
+      if (project == null || manifest == null || manifest.isEmpty) {
+        return 'No pubspec in working directory.';
+      }
+      String description = '';
       description += '''
 **Version**: ${manifest.appVersion}
 **Material**: ${manifest.usesMaterialDesign}
@@ -88,20 +94,22 @@ class GitHubTemplateCreator {
 **Android package**: ${manifest.androidPackage}
 **iOS bundle identifier**: ${manifest.iosBundleIdentifier}
 ''';
-    }
-    final File file = project.flutterPluginsFile;
-    if (file.existsSync()) {
-      description += '### Plugins\n';
-      for (String plugin in project.flutterPluginsFile.readAsLinesSync()) {
-        final List<String> pluginParts = plugin.split('=');
-        if (pluginParts.length != 2) {
-          continue;
+      final File file = project.flutterPluginsFile;
+      if (file.existsSync()) {
+        description += '### Plugins\n';
+        for (String plugin in project.flutterPluginsFile.readAsLinesSync()) {
+          final List<String> pluginParts = plugin.split('=');
+          if (pluginParts.length != 2) {
+            continue;
+          }
+          description += pluginParts.first;
         }
-        description += pluginParts.first;
       }
-    }
 
-    return description;
+      return description;
+    } on Exception catch (exception) {
+      return exception.toString();
+    }
   }
 
   /// Shorten GitHub URL with git.io API.

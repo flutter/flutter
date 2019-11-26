@@ -165,7 +165,13 @@ Future<void> _informUserOfCrash(List<String> args, dynamic error, StackTrace sta
   printStatus('Create a new GitHub issue by pasting this link into your browser and completing the issue template. Thank you!', emphasis: true);
 
   final String command = _crashCommand(args);
-  final String gitHubTemplateURL = await gitHubTemplateCreator.toolCrashIssueTemplateGitHubURL(command, errorString, _crashException(error), stackTrace, doctorText);
+  final String gitHubTemplateURL = await gitHubTemplateCreator.toolCrashIssueTemplateGitHubURL(
+    command,
+    errorString,
+    _crashException(error),
+    stackTrace,
+    doctorText
+  );
   printStatus('$gitHubTemplateURL\n', wrap: false);
 }
 

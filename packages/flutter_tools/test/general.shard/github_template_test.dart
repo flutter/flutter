@@ -19,7 +19,8 @@ void main() {
       final GitHubTemplateCreator creator = GitHubTemplateCreator();
       expect(
         await creator.toolCrashSimilarIssuesGitHubURL('this is a 100% error'),
-        _kShortURL);
+        _kShortURL
+      );
     }, overrides: <Type, Generator>{
       HttpClientFactory: () => () => SuccessShortenURLFakeHttpClient(),
     });
@@ -28,7 +29,8 @@ void main() {
       final GitHubTemplateCreator creator = GitHubTemplateCreator();
       expect(
         await creator.toolCrashSimilarIssuesGitHubURL('this is a 100% error'),
-        'https://github.com/flutter/flutter/issues?q=is%3Aissue+this+is+a+100%25+error');
+        'https://github.com/flutter/flutter/issues?q=is%3Aissue+this+is+a+100%25+error'
+      );
     }, overrides: <Type, Generator>{
       HttpClientFactory: () => () => FakeHttpClient(),
     });
@@ -41,10 +43,10 @@ void main() {
       final StackTrace stackTrace = StackTrace.fromString('trace');
       const String doctorText = ' [✓] Flutter (Channel report';
 
-
       expect(
         await creator.toolCrashIssueTemplateGitHubURL(command, errorString, exception, stackTrace, doctorText),
-        _kShortURL);
+        _kShortURL
+      );
     }, overrides: <Type, Generator>{
       HttpClientFactory: () => () => SuccessShortenURLFakeHttpClient(),
     });
@@ -60,13 +62,14 @@ void main() {
       expect(
         await creator.toolCrashIssueTemplateGitHubURL(command, errorString, exception, stackTrace, doctorText),
         'https://github.com/flutter/flutter/issues/new?title=%5Btool_crash%5D+this+is+a+100%25+error&body=%23%'
-          '23+Command%0A++%60%60%60%0A++flutter+test%0A++%60%60%60%0A++%0A++%23%23+Steps+to+Reproduce%0A++1.+..'
-          '.%0A++2.+...%0A++3.+...%0A++%0A++%23%23+Logs%0A++failing+to+succeed%21%21%21%0A++%60%60%60%0A++trace%'
-          '0A++%60%60%60%0A++%60%60%60%0A+++%5B%E2%9C%93%5D+Flutter+%28Channel+report%0A++%60%60%60%0A++%0A++%23'
-          '%23+Flutter+Application+Metadata%0A++%2A%2AVersion%2A%2A%3A+null%0A%2A%2AMaterial%2A%2A%3A+false%0A%2'
-          'A%2AAndroid+X%2A%2A%3A+false%0A%2A%2AModule%2A%2A%3A+false%0A%2A%2APlugin%2A%2A%3A+false%0A%2A%2AAndr'
-          'oid+package%2A%2A%3A+null%0A%2A%2AiOS+bundle+identifier%2A%2A%3A+null%0A%0A++&labels=tool%2Csevere%3A'
-          '+crash');
+          '23+Command%0A++%60%60%60%0A++flutter+test%0A++%60%60%60%0A%0A++%23%23+Steps+to+Reproduce%0A++1.+...'
+          '%0A++2.+...%0A++3.+...%0A%0A++%23%23+Logs%0A++failing+to+succeed%21%21%21%0A++%60%60%60%0A++trace%0A'
+          '++%60%60%60%0A++%60%60%60%0A+++%5B%E2%9C%93%5D+Flutter+%28Channel+report%0A++%60%60%60%0A%0A++%23%23'
+          '+Flutter+Application+Metadata%0A++%2A%2AVersion%2A%2A%3A+null%0A%2A%2AMaterial%2A%2A%3A+false%0A%2A'
+          '%2AAndroid+X%2A%2A%3A+false%0A%2A%2AModule%2A%2A%3A+false%0A%2A%2APlugin%2A%2A%3A+false%0A%2A%2AAndr'
+          'oid+package%2A%2A%3A+null%0A%2A%2AiOS+bundle+identifier%2A%2A%3A+null%0A%0A++&labels=tool%2Csevere%3'
+          'A+crash'
+      );
     }, overrides: <Type, Generator>{
       HttpClientFactory: () => () => FakeHttpClient(),
     });

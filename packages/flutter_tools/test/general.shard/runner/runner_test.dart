@@ -90,17 +90,17 @@ void main() {
       // runner.run() asynchronously calls the exit function set above, so we
       // catch it in a zone.
       unawaited(runZoned<Future<void>>(
-          () {
-          unawaited(runner.run(
-            <String>['test'],
-            <FlutterCommand>[
-              CrashingFlutterCommand(),
-            ],
-            // This flutterVersion disables crash reporting.
-            flutterVersion: '[user-branch]/',
-            reportCrashes: true,
-          ));
-          return null;
+        () {
+        unawaited(runner.run(
+          <String>['test'],
+          <FlutterCommand>[
+            CrashingFlutterCommand(),
+          ],
+          // This flutterVersion disables crash reporting.
+          flutterVersion: '[user-branch]/',
+          reportCrashes: true,
+        ));
+        return null;
         },
         onError: (Object error) {
           expect(error, 'test exit');
