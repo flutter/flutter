@@ -51,7 +51,7 @@ const Tolerance _kFlingTolerance = Tolerance(
 /// out of this behavior.
 ///
 /// For example, the [AnimationController] which controls the physics simulation
-/// for a scrollable list will have [AnimationBehavior.preserve] so that when
+/// for a scrollable list will have [AnimationBehavior.preserve], so that when
 /// a user attempts to scroll it does not jump to the end/beginning too quickly.
 enum AnimationBehavior {
   /// The [AnimationController] will reduce its duration when
