@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #include "flutter/vulkan/vulkan_utilities.h"
+#include "flutter/fml/build_config.h"
 
 #include <algorithm>
 #include <unordered_set>
@@ -11,6 +12,8 @@ namespace vulkan {
 
 bool IsDebuggingEnabled() {
 #ifndef NDEBUG
+  return true;
+#elif defined(VULKAN_VALIDATION_LAYERS_ENABLED)
   return true;
 #else
   return false;
@@ -27,7 +30,6 @@ bool ValidationErrorsFatal() {
 #if OS_FUCHSIA
   return false;
 #endif
-
   return true;
 }
 
