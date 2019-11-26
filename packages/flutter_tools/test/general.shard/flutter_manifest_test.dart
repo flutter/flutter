@@ -359,6 +359,7 @@ flutter:
       expect(flutterManifest.isModule, false);
       expect(flutterManifest.isPlugin, false);
       expect(flutterManifest.androidPackage, null);
+      expect(flutterManifest.usesAndroidX, false);
     });
 
     test('allows a module declaration', () async {
@@ -367,10 +368,12 @@ name: test
 flutter:
   module:
     androidPackage: com.example
+    androidX: true
 ''';
       final FlutterManifest flutterManifest = FlutterManifest.createFromString(manifest);
       expect(flutterManifest.isModule, true);
       expect(flutterManifest.androidPackage, 'com.example');
+      expect(flutterManifest.usesAndroidX, true);
     });
 
     test('allows a legacy plugin declaration', () async {

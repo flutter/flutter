@@ -25,6 +25,7 @@ import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/persistent_tool_state.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/reporting/github_template.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:meta/meta.dart';
@@ -111,7 +112,8 @@ void testUsingContext(
           TimeoutConfiguration: () => const TimeoutConfiguration(),
           PlistParser: () => FakePlistParser(),
           Signals: () => FakeSignals(),
-          Pub: () => ThrowingPub() // prevent accidentally using pub.
+          Pub: () => ThrowingPub(), // prevent accidentally using pub.
+          GitHubTemplateCreator: () => MockGitHubTemplateCreator(),
         },
         body: () {
           final String flutterRoot = getFlutterRoot();
@@ -392,6 +394,8 @@ class MockFlutterVersion extends Mock implements FlutterVersion {
 class MockClock extends Mock implements SystemClock {}
 
 class MockHttpClient extends Mock implements HttpClient {}
+
+class MockGitHubTemplateCreator extends Mock implements GitHubTemplateCreator {}
 
 class FakePlistParser implements PlistParser {
   @override

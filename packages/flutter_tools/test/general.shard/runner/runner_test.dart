@@ -10,8 +10,10 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' as io;
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/reporting/github_template.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
+import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
 
 import '../../src/common.dart';
@@ -19,7 +21,9 @@ import '../../src/context.dart';
 
 void main() {
   group('runner', () {
+    MockGitHubTemplateCreator mockGitHubTemplateCreator;
     setUp(() {
+      mockGitHubTemplateCreator = MockGitHubTemplateCreator();
       runner.crashFileSystem = MemoryFileSystem();
       // Instead of exiting with dart:io exit(), this causes an exception to
       // be thrown, which we catch with the onError callback in the zone below.
@@ -33,7 +37,7 @@ void main() {
       Cache.enableLocking();
     });
 
-    testUsingContext('error handling', () async {
+    testUsingContext('error handling crash report', () async {
       final Completer<void> completer = Completer<void>();
       // runner.run() asynchronously calls the exit function set above, so we
       // catch it in a zone.
@@ -64,7 +68,7 @@ void main() {
       // *original* crash, and not the crash from the first crash report
       // attempt.
       final CrashingUsage crashingUsage = flutterUsage as CrashingUsage;
-      expect(crashingUsage.sentException, 'runCommand');
+      expect(crashingUsage.sentException, 'an exception % --');
     }, overrides: <Type, Generator>{
       Platform: () => FakePlatform(environment: <String, String>{
         'FLUTTER_ANALYTICS_LOG_FILE': 'test',
@@ -73,6 +77,58 @@ void main() {
       FileSystem: () => MemoryFileSystem(),
       ProcessManager: () => FakeProcessManager.any(),
       Usage: () => CrashingUsage(),
+    });
+
+    testUsingContext('GitHub issue template', () async {
+      const String similarURL = 'https://example.com/1';
+      when(mockGitHubTemplateCreator.toolCrashSimilarIssuesGitHubURL(any))
+        .thenAnswer((_) async => similarURL);
+      const String templateURL = 'https://example.com/2';
+      when(mockGitHubTemplateCreator.toolCrashIssueTemplateGitHubURL(any, any, any, any, any))
+        .thenAnswer((_) async => templateURL);
+      final Completer<void> completer = Completer<void>();
+      // runner.run() asynchronously calls the exit function set above, so we
+      // catch it in a zone.
+      unawaited(runZoned<Future<void>>(
+        () {
+        unawaited(runner.run(
+          <String>['test'],
+          <FlutterCommand>[
+            CrashingFlutterCommand(),
+          ],
+          // This flutterVersion disables crash reporting.
+          flutterVersion: '[user-branch]/',
+          reportCrashes: true,
+        ));
+        return null;
+        },
+        onError: (Object error) {
+          expect(error, 'test exit');
+          completer.complete();
+        },
+      ));
+      await completer.future;
+
+      final String errorText = testLogger.errorText;
+      expect(errorText, contains('A crash report has been written to /flutter_01.log.'));
+      expect(errorText, contains('Oops; flutter has exited unexpectedly: "an exception % --".\n'));
+
+      final String statusText = testLogger.statusText;
+      expect(statusText, contains(similarURL));
+      expect(statusText, contains('https://flutter.dev/docs/resources/bug-reports'));
+      expect(statusText, contains(templateURL));
+
+    }, overrides: <Type, Generator>{
+      Platform: () => FakePlatform(
+        environment: <String, String>{
+          'FLUTTER_ANALYTICS_LOG_FILE': 'test',
+          'FLUTTER_ROOT': '/',
+        },
+        operatingSystem: 'linux'
+      ),
+      FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager.any(),
+      GitHubTemplateCreator: () => mockGitHubTemplateCreator,
     });
   });
 }
@@ -86,7 +142,7 @@ class CrashingFlutterCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    throw 'runCommand';
+    throw 'an exception % --'; // Test URL encoding.
   }
 }
 

@@ -180,7 +180,7 @@ void main() {
       expect(method, null);
       expect(uri, null);
 
-      expect(testLogger.statusText, '');
+      expect(testLogger.traceText, isNot(contains('Crash report sent')));
     }, overrides: <Type, Generator>{
       Stdio: () => const _NoStderr(),
     });
@@ -258,8 +258,8 @@ Future<void> verifyCrashReportSent(RequestInfo crashInfo, {
   expect(crashInfo.fields['error_message'], 'Bad state: Test bad state error');
   expect(crashInfo.fields['comments'], 'crash');
 
-  expect(testLogger.statusText, 'Sending crash report to Google.\n'
-      'Crash report sent (report ID: test-report-id)\n');
+  expect(testLogger.traceText, contains('Sending crash report to Google.'));
+  expect(testLogger.traceText, contains('Crash report sent (report ID: test-report-id)'));
 
   // Verify that we've written the crash report to disk.
   final List<String> writtenFiles =
