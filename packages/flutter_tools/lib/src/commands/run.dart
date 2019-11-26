@@ -60,12 +60,6 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
         help: 'A file to write the attached vmservice uri to after an'
           ' application is started.',
         valueHelp: 'project/example/out.txt'
-      )
-      ..addFlag('fast-start',
-        negatable: true,
-        defaultsTo: false,
-        hide: true,
-        help: 'Whether to bootstrap an empty application.'
       );
     usesWebOptions(hide: !verboseHelp);
     usesTargetOption();
@@ -81,6 +75,125 @@ abstract class RunCommandBase extends FlutterCommand with DeviceBasedDevelopment
   bool get dumpSkpOnShaderCompilation => boolArg('dump-skp-on-shader-compilation');
 
   String get route => stringArg('route');
+}	
+
+class RunCommand extends RunCommandBase {	
+  RunCommand({ bool verboseHelp = false }) : super(verboseHelp: verboseHelp) {	
+    requiresPubspecYaml();	
+    usesFilesystemOptions(hide: !verboseHelp);	
+    argParser	
+      ..addFlag('start-paused',	
+        negatable: false,	
+        help: 'Start in a paused mode and wait for a debugger to connect.',	
+      )	
+      ..addFlag('enable-software-rendering',	
+        negatable: false,	
+        help: 'Enable rendering using the Skia software backend. '	
+              'This is useful when testing Flutter on emulators. By default, '	
+              'Flutter will attempt to either use OpenGL or Vulkan and fall back '	
+              'to software when neither is available.',	
+      )	
+      ..addFlag('skia-deterministic-rendering',	
+        negatable: false,	
+        help: 'When combined with --enable-software-rendering, provides 100% '	
+              'deterministic Skia rendering.',	
+      )	
+      ..addFlag('trace-skia',	
+        negatable: false,	
+        help: 'Enable tracing of Skia code. This is useful when debugging '	
+              'the GPU thread. By default, Flutter will not log skia code.',	
+      )	
+      ..addFlag('trace-systrace',	
+        negatable: false,	
+        help: 'Enable tracing to the system tracer. This is only useful on '	
+              'platforms where such a tracer is available (Android and Fuchsia).',	
+      )	
+      ..addFlag('await-first-frame-when-tracing',	
+        defaultsTo: true,	
+        help: 'Whether to wait for the first frame when tracing startup ("--trace-startup"), '	
+              'or just dump the trace as soon as the application is running. The first frame '	
+              'is detected by looking for a Timeline event with the name '	
+              '"${Tracing.firstUsefulFrameEventName}". '	
+              'By default, the widgets library\'s binding takes care of sending this event. ',	
+      )	
+      ..addFlag('use-test-fonts',	
+        negatable: true,	
+        help: 'Enable (and default to) the "Ahem" font. This is a special font '	
+              'used in tests to remove any dependencies on the font metrics. It '	
+              'is enabled when you use "flutter test". Set this flag when running '	
+              'a test using "flutter run" for debugging purposes. This flag is '	
+              'only available when running in debug mode.',	
+      )	
+      ..addFlag('build',	
+        defaultsTo: true,	
+        help: 'If necessary, build the app before running.',	
+      )	
+      ..addOption('dart-flags',	
+        hide: !verboseHelp,	
+        help: 'Pass a list of comma separated flags to the Dart instance at '	
+              'application startup. Flags passed through this option must be '	
+              'present on the whitelist defined within the Flutter engine. If '	
+              'a non-whitelisted flag is encountered, the process will be '	
+              'terminated immediately.\n\n'	
+              'This flag is not available on the stable channel and is only '	
+              'applied in debug and profile modes. This option should only '	
+              'be used for experiments and should not be used by typical users.')	
+      ..addOption('use-application-binary',	
+        hide: !verboseHelp,	
+        help: 'Specify a pre-built application binary to use when running.',	
+      )	
+      ..addOption('project-root',	
+        hide: !verboseHelp,	
+        help: 'Specify the project root directory.',	
+      )	
+      ..addFlag('machine',	
+        hide: !verboseHelp,	
+        negatable: false,	
+        help: 'Handle machine structured JSON command input and provide output '	
+              'and progress in machine friendly format.',	
+      )	
+      ..addFlag('hot',	
+        negatable: true,	
+        defaultsTo: kHotReloadDefault,	
+        help: 'Run with support for hot reloading. Only available for debug mode. Not available with "--trace-startup".',	
+      )	
+      ..addFlag('resident',	
+        negatable: true,	
+        defaultsTo: true,	
+        hide: !verboseHelp,	
+        help: 'Stay resident after launching the application. Not available with "--trace-startup".',	
+      )	
+      ..addOption('pid-file',	
+        help: 'Specify a file to write the process id to. '	
+              'You can send SIGUSR1 to trigger a hot reload '	
+              'and SIGUSR2 to trigger a hot restart.',	
+      )	
+      ..addFlag('benchmark',	
+        negatable: false,	
+        hide: !verboseHelp,	
+        help: 'Enable a benchmarking mode. This will run the given application, '	
+              'measure the startup time and the app restart time, write the '	
+              'results out to "refresh_benchmark.json", and exit. This flag is '	
+              'intended for use in generating automated flutter benchmarks.',	
+      )	
+      ..addFlag('disable-service-auth-codes',	
+        negatable: false,	
+        hide: !verboseHelp,	
+        help: 'No longer require an authentication code to connect to the VM '	
+              'service (not recommended).')	
+      ..addFlag('web-initialize-platform',	
+        negatable: true,	
+        defaultsTo: true,	
+        hide: true,	
+        help: 'Whether to automatically invoke webOnlyInitializePlatform.',	
+      )	
+      ..addOption(FlutterOptions.kExtraFrontEndOptions, hide: true)	
+      ..addOption(FlutterOptions.kExtraGenSnapshotOptions, hide: true)	
+      ..addMultiOption(FlutterOptions.kEnableExperiment,	
+        splitCommas: true,	
+        hide: true,	
+      );	
+  }
 
   @override
   final String name = 'run';
