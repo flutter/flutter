@@ -162,7 +162,7 @@ Future<void> _informUserOfCrash(List<String> args, dynamic error, StackTrace sta
   printStatus('$similarIssuesURL\n', wrap: false);
   printStatus('To report your crash to the Flutter team, first read the guide to filing a bug.', emphasis: true);
   printStatus('https://flutter.dev/docs/resources/bug-reports\n', wrap: false);
-  printStatus('Create a new GitHub issue. Paste this link into your browser and complete the template. Thank you!', emphasis: true);
+  printStatus('Create a new GitHub issue by pasting this link into your browser and completing the issue template. Thank you!', emphasis: true);
 
   final String command = _crashCommand(args);
   final String gitHubTemplateURL = await gitHubTemplateCreator.toolCrashIssueTemplateGitHubURL(command, errorString, _crashException(error), stackTrace, doctorText);
