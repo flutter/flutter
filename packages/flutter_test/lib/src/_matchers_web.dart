@@ -91,6 +91,7 @@ void _renderElement(ui.Window window, RenderObject renderObject) {
   if (layer is OffsetLayer) {
     sceneBuilder.pushOffset(-layer.offset.dx, -layer.offset.dy);
   }
+  // ignore: invalid_use_of_visible_for_testing_member, invalid_use_of_protected_member
   layer.updateSubtreeNeedsAddToScene();
   // ignore: invalid_use_of_protected_member
   layer.addToScene(sceneBuilder);
