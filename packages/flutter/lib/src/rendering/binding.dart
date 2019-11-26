@@ -330,6 +330,15 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
       scheduleWarmUpFrame();
   }
 
+  /// Call this to pretend that no frames have been sent to the engine yet.
+  ///
+  /// This is useful for tests that want to call [deferFirstFrame] and
+  /// [allowFirstFrame] since those methods only have an effect if no frames
+  /// have been sent to the engine yet.
+  void resetFirstFrameSent() {
+    _firstFrameSent = false;
+  }
+
   /// Pump the rendering pipeline to generate a frame.
   ///
   /// This method is called by [handleDrawFrame], which itself is called
