@@ -6,6 +6,7 @@ import 'dart:async';
 
 import '../convert.dart';
 import '../globals.dart';
+import 'binding.dart';
 import 'context.dart';
 import 'io.dart' as io;
 import 'platform.dart';
@@ -37,7 +38,9 @@ String get successMark {
 final AnsiTerminal _defaultAnsiTerminal = AnsiTerminal();
 
 OutputPreferences get outputPreferences {
-  return context?.get<OutputPreferences>() ?? _defaultOutputPreferences;
+  return BindingBase.instance?.outputPreferences ??
+    context?.get<OutputPreferences>() ??
+    _defaultOutputPreferences;
 }
 final OutputPreferences _defaultOutputPreferences = OutputPreferences();
 

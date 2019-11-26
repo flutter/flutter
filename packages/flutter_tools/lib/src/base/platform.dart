@@ -4,6 +4,7 @@
 
 import 'package:platform/platform.dart';
 
+import 'binding.dart';
 import 'context.dart';
 import 'file_system.dart';
 
@@ -12,7 +13,8 @@ export 'package:platform/platform.dart';
 const Platform _kLocalPlatform = LocalPlatform();
 const String _kRecordingType = 'platform';
 
-Platform get platform => context.get<Platform>() ?? _kLocalPlatform;
+Platform get platform => BindingBase.instance?.platform ??
+  context.get<Platform>() ?? _kLocalPlatform;
 
 /// Serializes the current [platform] to the specified base recording
 /// [location].

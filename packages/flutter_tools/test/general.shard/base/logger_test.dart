@@ -14,60 +14,60 @@ import 'package:quiver/testing/async.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/mocks.dart';
+import '../../src/test_bindings.dart';
 
+final Platform _noAnsiPlatform = FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false;
 final Generator _kNoAnsiPlatform = () => FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false;
+final String red = RegExp.escape(AnsiTerminal.red);
+final String bold = RegExp.escape(AnsiTerminal.bold);
+final String resetBold = RegExp.escape(AnsiTerminal.resetBold);
+final String resetColor = RegExp.escape(AnsiTerminal.resetColor);
 
 void main() {
-  final String red = RegExp.escape(AnsiTerminal.red);
-  final String bold = RegExp.escape(AnsiTerminal.bold);
-  final String resetBold = RegExp.escape(AnsiTerminal.resetBold);
-  final String resetColor = RegExp.escape(AnsiTerminal.resetColor);
+  test('AppContext error', () async {
+    final BufferLogger mockLogger = BufferLogger();
+    final VerboseLogger verboseLogger = VerboseLogger(mockLogger, FakeStopwatch());
+    TestBindings(
+      verbose: true,
+      logger: verboseLogger,
+      platform: _noAnsiPlatform,
+      outputPreferences: OutputPreferences(showColor: false),
+    ).initializeBinding();
 
-  group('AppContext', () {
-    FakeStopwatch fakeStopWatch;
+    verboseLogger.printStatus('Hey Hey Hey Hey');
+    verboseLogger.printTrace('Oooh, I do I do I do');
+    verboseLogger.printError('Helpless!');
 
-    setUp(() {
-      fakeStopWatch = FakeStopwatch();
-    });
-    testUsingContext('error', () async {
-      final BufferLogger mockLogger = BufferLogger();
-      final VerboseLogger verboseLogger = VerboseLogger(mockLogger);
+    expect(mockLogger.statusText, matches(r'^\[ (?: {0,2}\+[0-9]{1,4} ms|       )\] Hey Hey Hey Hey\n'
+                                            r'\[ (?: {0,2}\+[0-9]{1,4} ms|       )\] Oooh, I do I do I do\n$'));
+    expect(mockLogger.traceText, '');
+    expect(mockLogger.errorText, matches( r'^\[ (?: {0,2}\+[0-9]{1,4} ms|       )\] Helpless!\n$'));
+  });
 
-      verboseLogger.printStatus('Hey Hey Hey Hey');
-      verboseLogger.printTrace('Oooh, I do I do I do');
-      verboseLogger.printError('Helpless!');
+  test('AppContext ANSI colored errors', () {
+    final BufferLogger mockLogger = BufferLogger();
+    final VerboseLogger verboseLogger = VerboseLogger(mockLogger, FakeStopwatch());
+    TestBindings(
+      verbose: true,
+      logger: verboseLogger,
+      outputPreferences: OutputPreferences(showColor: true),
+      platform: FakePlatform()..stdoutSupportsAnsi = true
+    ).initializeBinding();
 
-      expect(mockLogger.statusText, matches(r'^\[ (?: {0,2}\+[0-9]{1,4} ms|       )\] Hey Hey Hey Hey\n'
-                                             r'\[ (?: {0,2}\+[0-9]{1,4} ms|       )\] Oooh, I do I do I do\n$'));
-      expect(mockLogger.traceText, '');
-      expect(mockLogger.errorText, matches( r'^\[ (?: {0,2}\+[0-9]{1,4} ms|       )\] Helpless!\n$'));
-    }, overrides: <Type, Generator>{
-      OutputPreferences: () => OutputPreferences(showColor: false),
-      Platform: _kNoAnsiPlatform,
-      Stopwatch: () => fakeStopWatch,
-    });
+    verboseLogger.printStatus('Hey Hey Hey Hey');
+    verboseLogger.printTrace('Oooh, I do I do I do');
+    verboseLogger.printError('Helpless!');
 
-    testUsingContext('ANSI colored errors', () async {
-      final BufferLogger mockLogger = BufferLogger();
-      final VerboseLogger verboseLogger = VerboseLogger(mockLogger);
-
-      verboseLogger.printStatus('Hey Hey Hey Hey');
-      verboseLogger.printTrace('Oooh, I do I do I do');
-      verboseLogger.printError('Helpless!');
-
-      expect(
-          mockLogger.statusText,
-          matches(r'^\[ (?: {0,2}\+[0-9]{1,4} ms|       )\] ' '${bold}Hey Hey Hey Hey$resetBold'
-                  r'\n\[ (?: {0,2}\+[0-9]{1,4} ms|       )\] Oooh, I do I do I do\n$'));
-      expect(mockLogger.traceText, '');
-      expect(
-          mockLogger.errorText,
-          matches('^$red' r'\[ (?: {0,2}\+[0-9]{1,4} ms|       )\] ' '${bold}Helpless!$resetBold$resetColor' r'\n$'));
-    }, overrides: <Type, Generator>{
-      OutputPreferences: () => OutputPreferences(showColor: true),
-      Platform: () => FakePlatform()..stdoutSupportsAnsi = true,
-      Stopwatch: () => fakeStopWatch,
-    });
+    expect(
+      mockLogger.statusText,
+      matches(r'^\[ (?: {0,2}\+[0-9]{1,4} ms|       )\] '
+        '${bold}Hey Hey Hey Hey$resetBold'
+        r'\n\[ (?: {0,2}\+[0-9]{1,4} ms|       )\] Oooh, I do I do I do\n$'));
+    expect(mockLogger.traceText, '');
+    expect(
+      mockLogger.errorText,
+      matches('^$red' r'\[ (?: {0,2}\+[0-9]{1,4} ms|       )\] '
+        '${bold}Helpless!$resetBold$resetColor' r'\n$'));
   });
 
   group('Spinners', () {
@@ -699,7 +699,7 @@ void main() {
         matches(r'^$'),
       ]);
     }, overrides: <Type, Generator>{
-      Logger: () => VerboseLogger(StdoutLogger()),
+      Logger: () => VerboseLogger(StdoutLogger(), FakeStopwatch()),
       Stdio: () => mockStdio,
       Platform: _kNoAnsiPlatform,
     });

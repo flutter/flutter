@@ -356,13 +356,12 @@ class BufferLogger extends Logger {
 }
 
 class VerboseLogger extends Logger {
-  VerboseLogger(this.parent) : assert(terminal != null) {
+  VerboseLogger(this.parent, this._stopwatch) : assert(terminal != null) {
     _stopwatch.start();
   }
 
   final Logger parent;
-
-  final Stopwatch _stopwatch = context.get<Stopwatch>() ?? Stopwatch();
+  final Stopwatch _stopwatch;
 
   @override
   bool get isVerbose => true;

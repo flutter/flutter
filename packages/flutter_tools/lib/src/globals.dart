@@ -3,13 +3,14 @@
 // found in the LICENSE file.
 
 import 'artifacts.dart';
+import 'base/binding.dart';
 import 'base/config.dart';
 import 'base/context.dart';
 import 'base/logger.dart';
 import 'base/terminal.dart';
 import 'cache.dart';
 
-Logger get logger => context.get<Logger>();
+Logger get logger => BindingBase.instance?.logger ?? context.get<Logger>();
 Cache get cache => Cache.instance;
 Config get config => Config.instance;
 Artifacts get artifacts => Artifacts.instance;

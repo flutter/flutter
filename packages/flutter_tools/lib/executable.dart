@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'runner.dart' as runner;
+import 'src/base/binding.dart';
 import 'src/base/context.dart';
 // The build_runner code generation is provided here to make it easier to
 // avoid introducing the dependency into google3. Not all build* packages
@@ -49,6 +50,13 @@ import 'src/runner/flutter_command.dart';
 import 'src/web/compile.dart';
 import 'src/web/web_runner.dart';
 
+class _FlutterBindings extends Object with BindingBase {
+  _FlutterBindings(this.verbose);
+
+  @override
+  final bool verbose;
+}
+
 /// Main entry point for commands.
 ///
 /// This function is intended to be used from the `flutter` command line tool.
@@ -61,6 +69,8 @@ Future<void> main(List<String> args) async {
       (args.isNotEmpty && args.first == 'help') || (args.length == 1 && verbose);
   final bool muteCommandLogging = help || doctor;
   final bool verboseHelp = help && verbose;
+
+  _FlutterBindings(verbose).initializeBinding();
 
   await runner.run(args, <FlutterCommand>[
     AnalyzeCommand(verboseHelp: verboseHelp),
