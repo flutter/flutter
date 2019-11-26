@@ -259,7 +259,7 @@ class ScrollPhysics {
   double get dragStartDistanceMotionThreshold => parent?.dragStartDistanceMotionThreshold;
 
   /// Whether a viewport is allowed to change its scroll position implicitly in
-  /// responds to a call to [RenderObject.showOnScreen].
+  /// response to a call to [RenderObject.showOnScreen].
   ///
   /// [RenderObject.showOnScreen] is for example used to bring a text field
   /// fully on screen after it has received focus. This property controls
