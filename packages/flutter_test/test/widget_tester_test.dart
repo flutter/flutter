@@ -746,7 +746,6 @@ void main() {
       }
     }, variant: TargetPlatformVariant.all());
   });
-
 }
 
 class FakeMatcher extends AsyncMatcher {

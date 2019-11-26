@@ -425,9 +425,7 @@ void main() {
     expect(editableText.cursorOffset, const Offset(-2.0 / 3.0, 0));
   });
 
-  testWidgets('Cursor animates on iOS', (WidgetTester tester) async {
-    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-
+  testWidgets('Cursor animates', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: CupertinoTextField(),
@@ -459,13 +457,9 @@ void main() {
     await tester.pump(const Duration(milliseconds: 50));
 
     expect(renderEditable.cursorColor.alpha, 0);
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
-    debugDefaultTargetPlatformOverride = null;
-  });
-
-  testWidgets('Cursor radius is 2.0 on iOS', (WidgetTester tester) async {
-    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-
+  testWidgets('Cursor radius is 2.0', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
         home: CupertinoTextField(),
@@ -476,9 +470,7 @@ void main() {
     final RenderEditable renderEditable = editableTextState.renderEditable;
 
     expect(renderEditable.cursorRadius, const Radius.circular(2.0));
-
-    debugDefaultTargetPlatformOverride = null;
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS, TargetPlatform.macOS }));
 
   testWidgets('Cupertino cursor android golden', (WidgetTester tester) async {
     final Widget widget = CupertinoApp(
@@ -507,9 +499,7 @@ void main() {
     );
   });
 
-  testWidgets('Cupertino cursor iOS golden', (WidgetTester tester) async {
-    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
-
+  testWidgets('Cupertino cursor golden', (WidgetTester tester) async {
     final Widget widget = CupertinoApp(
       home: Center(
         child: RepaintBoundary(
@@ -530,12 +520,13 @@ void main() {
     await tester.tapAt(textOffsetToPosition(tester, testValue.length));
     await tester.pumpAndSettle();
 
-    debugDefaultTargetPlatformOverride = null;
     await expectLater(
       find.byKey(const ValueKey<int>(1)),
-      matchesGoldenFile('text_field_cursor_test.cupertino.1.png'),
+      matchesGoldenFile(
+        'text_field_cursor_test.cupertino_${describeEnum(debugDefaultTargetPlatformOverride).toLowerCase()}.1.png',
+      ),
     );
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets(
     'can control text content via controller',
@@ -2946,8 +2937,7 @@ void main() {
     expect(editableText.cursorColor.value, 0x87654321);
   });
 
-  testWidgets('iOS shows selection handles', (WidgetTester tester) async {
-    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+  testWidgets('shows selection handles', (WidgetTester tester) async {
     const String testText = 'lorem ipsum';
     final TextEditingController controller = TextEditingController(text: testText);
 
@@ -2977,9 +2967,7 @@ void main() {
 
     expect(left.opacity.value, equals(1.0));
     expect(right.opacity.value, equals(1.0));
-
-    debugDefaultTargetPlatformOverride = null;
-  });
+  }, variant: const TargetPlatformVariant(<TargetPlatform>{ TargetPlatform.iOS,  TargetPlatform.macOS }));
 
   testWidgets('when CupertinoTextField would be blocked by keyboard, it is shown with enough space for the selection handle', (WidgetTester tester) async {
     final ScrollController scrollController = ScrollController();
