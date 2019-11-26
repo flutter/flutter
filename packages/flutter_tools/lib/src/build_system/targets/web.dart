@@ -200,6 +200,7 @@ class WebReleaseBundle extends Target {
   @override
   List<String> get depfiles => const <String>[
     'dart2js.d',
+    'web.d',
   ];
 
   @override
@@ -214,11 +215,53 @@ class WebReleaseBundle extends Target {
     }
     final Directory outputDirectory = environment.outputDir.childDirectory('assets');
     outputDirectory.createSync(recursive: true);
-    environment.projectDir
-      .childDirectory('web')
-      .childFile('index.html')
-      .copySync(fs.path.join(environment.outputDir.path, 'index.html'));
-    final Depfile depfile = await copyAssets(environment, environment.outputDir.childDirectory('assets'));
-    depfile.writeToFile(environment.buildDir.childFile('flutter_assets.d'));
+    final String basePath = environment.projectDir.childDirectory('web').absolute.path;
+    final List<File> inputs = <File>[];
+    final List<File> outputs = <File>[];
+    final String outputPrefix = fs.path.join(
+      environment.projectDir.path,
+    );
+    for (String artifact in environment.projectDir.childDirectory('web').listSync(recursive: true).map((FileSystemEntity file) => file.absolute.path)) {
+      final String entityPath = fs.path.join(basePath, artifact);
+      // If this artifact is a file, just copy the source over.
+      if (fs.isFileSync(entityPath)) {
+        final String outputPath = fs.path.join(
+          outputPrefix,
+          fs.path.relative(entityPath, from: basePath),
+        );
+        final File destinationFile = fs.file(outputPath);
+        if (!destinationFile.parent.existsSync()) {
+          destinationFile.parent.createSync(recursive: true);
+        }
+        final File inputFile = fs.file(entityPath);
+        inputFile.copySync(destinationFile.path);
+        inputs.add(inputFile);
+        outputs.add(destinationFile);
+        continue;
+      }
+      // If the artifact is a directory recursively
+      // copy every file from it.
+      for (File input in fs.directory(entityPath)
+          .listSync(recursive: true)
+          .whereType<File>()) {
+        final String outputPath = fs.path.join(
+          outputPrefix,
+          fs.path.relative(input.path, from: basePath),
+        );
+        final File destinationFile = fs.file(outputPath);
+        if (!destinationFile.parent.existsSync()) {
+          destinationFile.parent.createSync(recursive: true);
+        }
+        final File inputFile = fs.file(input);
+        inputFile.copySync(destinationFile.path);
+        inputs.add(inputFile);
+        outputs.add(destinationFile);
+      }
+    }
+    final Depfile webDepfile = Depfile(inputs, outputs);
+    webDepfile.writeToFile(environment.buildDir.childFile('web.d'));
+
+    final Depfile assetsDepfile = await copyAssets(environment, environment.outputDir.childDirectory('assets'));
+    assetsDepfile.writeToFile(environment.buildDir.childFile('flutter_assets.d'));
   }
 }

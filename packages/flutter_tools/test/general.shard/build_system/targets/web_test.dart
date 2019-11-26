@@ -310,6 +310,26 @@ void main() {
   }, overrides: <Type, Generator>{
     ProcessManager: () => MockProcessManager(),
   }));
+
+  test('WebReleaseBundle copies all files from web folder', () => testbed.run(() async {
+    fs.file(fs.path.join('web', 'index.html'))
+      ..createSync(recursive: true)
+      ..writeAsStringSync('hello');
+    final File textFile = fs.file(fs.path.join('web', 'abc.txt'))
+      ..createSync(recursive: true)
+      ..writeAsStringSync('hello world');
+    await const WebReleaseBundle().build(environment);
+
+    expect(environment.outputDir.childFile('abc.txt').existsSync(), true);
+
+    textFile.deleteSync();
+    await const WebReleaseBundle().build(environment);
+
+    expect(environment.outputDir.childFile('abc.txt').existsSync(), false);
+  }, overrides: <Type, Generator>{
+    ProcessManager: () => MockProcessManager(),
+    Platform: () => FakePlatform()..environment = <String, String>{'HOME': '/home/me'},
+  }));
 }
 
 class MockProcessManager extends Mock implements ProcessManager {}
