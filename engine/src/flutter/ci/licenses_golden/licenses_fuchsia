@@ -1,4 +1,4 @@
-Signature: 7a0361087fcc8ddbe4707acaefe438ea
+Signature: aeb7438cd2fa58d40202faeb0b5c0224
 
 UNUSED LICENSES:
 
@@ -20,7 +20,6 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/VkLayer_unique_objects.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libVkLayer_image_pipe_swapchain.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libfdio.so
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libinspect-common.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libmemfs.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libsvc.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libsyslog.so
@@ -30,7 +29,6 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libasync-loop-default.a
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libfdio.so
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libinspect-common.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libmemfs.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libsvc.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libsync.a
@@ -230,7 +228,6 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/VkLayer_unique_objects.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libVkLayer_image_pipe_swapchain.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libfdio.so
-FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libinspect-common.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libmemfs.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libsvc.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libsyslog.so
@@ -240,7 +237,6 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libasync-loop-default.a
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libfdio.so
-FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libinspect-common.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libmemfs.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libsvc.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libsync.a
@@ -540,7 +536,6 @@ FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_base/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_sync/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/fit/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/images_cpp/meta.json
-FILE: ../../../fuchsia/sdk/linux/pkg/inspect-common/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/inspect/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/media_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/media_cpp_no_converters/meta.json
@@ -715,7 +710,6 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/VkLayer_unique_objects.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libVkLayer_image_pipe_swapchain.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libfdio.so
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libinspect-common.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libmemfs.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libsvc.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libsyslog.so
@@ -725,7 +719,6 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libasync-loop-default.a
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libfdio.so
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libinspect-common.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libmemfs.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libsvc.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libsync.a
@@ -971,7 +964,6 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/VkLayer_unique_objects.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libVkLayer_image_pipe_swapchain.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libfdio.so
-FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libinspect-common.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libmemfs.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libsvc.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libsyslog.so
@@ -981,7 +973,6 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libasync-loop-default.a
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libfdio.so
-FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libinspect-common.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libmemfs.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libsvc.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libsync.a
@@ -1532,8 +1523,6 @@ FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/string_view.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fit/include/lib/fit/utility_internal.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fit/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/images_cpp/meta.json
-FILE: ../../../fuchsia/sdk/linux/pkg/inspect-common/include/lib/inspect/common.h
-FILE: ../../../fuchsia/sdk/linux/pkg/inspect-common/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/inspect/health.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/inspect/hierarchy.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/inspect/include/lib/inspect/cpp/health.h
@@ -1683,7 +1672,6 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/VkLayer_unique_objects.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libVkLayer_image_pipe_swapchain.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libfdio.so
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libinspect-common.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libmemfs.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libsvc.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libsyslog.so
@@ -1693,7 +1681,6 @@ FILE: ../../../fuchsia/sdk/linux/arch/arm64/dist/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libasync-loop-default.a
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libfdio.so
-FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libinspect-common.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libmemfs.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libsvc.so
 FILE: ../../../fuchsia/sdk/linux/arch/arm64/lib/libsync.a
@@ -1893,7 +1880,6 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/VkLayer_unique_objects.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libVkLayer_image_pipe_swapchain.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libfdio.so
-FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libinspect-common.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libmemfs.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libsvc.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libsyslog.so
@@ -1903,7 +1889,6 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/dist/libvulkan.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libasync-default.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libasync-loop-default.a
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libfdio.so
-FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libinspect-common.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libmemfs.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libsvc.so
 FILE: ../../../fuchsia/sdk/linux/arch/x64/lib/libsync.a
@@ -2203,7 +2188,6 @@ FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_base/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_sync/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/fit/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/images_cpp/meta.json
-FILE: ../../../fuchsia/sdk/linux/pkg/inspect-common/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/inspect/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/media_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/media_cpp_no_converters/meta.json
