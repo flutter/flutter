@@ -1122,14 +1122,13 @@ class _SliverFractionalPadding extends SingleChildRenderObjectWidget {
   }
 }
 
-class _RenderSliverFractionalPadding extends RenderSliverPadding {
+class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
   _RenderSliverFractionalPadding({
     double viewportFraction = 0,
   }) : assert(viewportFraction != null),
        assert(viewportFraction <= 0.5),
        assert(viewportFraction >= 0),
-       _viewportFraction = viewportFraction,
-       super(padding: EdgeInsets.zero);
+       _viewportFraction = viewportFraction;
 
   double get viewportFraction => _viewportFraction;
   double _viewportFraction;
@@ -1138,12 +1137,11 @@ class _RenderSliverFractionalPadding extends RenderSliverPadding {
     if (_viewportFraction == newValue)
       return;
     _viewportFraction = newValue;
-    // Update the padding using the setter. The setter calls marksNeedsLayout internally.
-    padding = padding;
+    markNeedsLayout();
   }
 
   @override
-  EdgeInsetsGeometry get padding {
+  EdgeInsets get resolvedPadding {
     assert(constraints.axis != null);
     final double paddingValue = constraints.viewportMainAxisExtent * viewportFraction;
     switch (constraints.axis) {

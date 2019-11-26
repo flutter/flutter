@@ -76,7 +76,6 @@ void main() {
         ' │ geometry: SliverGeometry(scrollExtent: 12000.0, paintExtent:\n'
         ' │   600.0, maxPaintExtent: 12000.0, hasVisualOverflow: true,\n'
         ' │   cacheExtent: 850.0)\n'
-        ' │ padding: EdgeInsets.zero\n'
         ' │\n'
         ' └─child: RenderSliverFillViewport#00000 relayoutBoundary=up2\n'
         '   │ needs compositing\n'
