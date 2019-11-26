@@ -88,11 +88,6 @@ class UpdatePackagesCommand extends FlutterCommand {
   @override
   final bool hidden;
 
-  @override
-  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
-    DevelopmentArtifact.universal,
-  };
-
   Future<void> _downloadCoverageData() async {
     final Status status = logger.startProgress(
       'Downloading lcov data for package:flutter...',

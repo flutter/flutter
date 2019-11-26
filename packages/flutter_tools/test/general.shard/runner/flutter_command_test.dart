@@ -52,7 +52,14 @@ void main() {
     testUsingContext('honors shouldUpdateCache true', () async {
       final DummyFlutterCommand flutterCommand = DummyFlutterCommand(shouldUpdateCache: true);
       await flutterCommand.run();
-      verify(cache.updateAll(any)).called(1);
+      // First call for universal, second for the rest
+      expect(
+        verify(cache.updateAll(captureAny)).captured,
+        <Set<DevelopmentArtifact>>[
+          <DevelopmentArtifact>{DevelopmentArtifact.universal},
+          <DevelopmentArtifact>{},
+        ],
+      );
     },
     overrides: <Type, Generator>{
       Cache: () => cache,
