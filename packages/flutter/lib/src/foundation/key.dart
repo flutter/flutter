@@ -67,8 +67,8 @@ class ValueKey<T> extends LocalKey {
   bool operator ==(dynamic other) {
     if (other.runtimeType != runtimeType)
       return false;
-    final ValueKey<T> typedOther = other;
-    return value == typedOther.value;
+    return other is ValueKey<T>
+        && other.value == value;
   }
 
   @override
