@@ -26,7 +26,7 @@ const String kHasWebPlugins = 'HasWebPlugins';
 /// Valid values are O1 (lowest, profile default) to O4 (highest, release default).
 const String kDart2jsOptimization = 'Dart2jsOptimization';
 
-/// Generates an entrypoint for a web target.
+/// Generates an entry point for a web target.
 class WebEntrypointTarget extends Target {
   const WebEntrypointTarget();
 
@@ -94,7 +94,7 @@ Future<void> main() async {
   }
 }
 
-/// Compiles a web entrypoint with dart2js.
+/// Compiles a web entry point with dart2js.
 class Dart2JSTarget extends Target {
   const Dart2JSTarget();
 
@@ -113,12 +113,14 @@ class Dart2JSTarget extends Target {
     Source.artifact(Artifact.engineDartBinary),
     Source.pattern('{BUILD_DIR}/main.dart'),
     Source.pattern('{PROJECT_DIR}/.packages'),
-    Source.depfile('dart2js.d'),
   ];
 
   @override
-  List<Source> get outputs => const <Source>[
-    Source.depfile('dart2js.d'),
+  List<Source> get outputs => const <Source>[];
+
+  @override
+  List<String> get depfiles => const <String>[
+    'dart2js.d',
   ];
 
   @override
@@ -187,14 +189,17 @@ class WebReleaseBundle extends Target {
     Source.pattern('{BUILD_DIR}/main.dart.js'),
     Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
     Source.pattern('{PROJECT_DIR}/web/index.html'),
-    Source.depfile('flutter_assets.d'),
   ];
 
   @override
   List<Source> get outputs => const <Source>[
     Source.pattern('{OUTPUT_DIR}/main.dart.js'),
     Source.pattern('{OUTPUT_DIR}/index.html'),
-    Source.depfile('flutter_assets.d'),
+  ];
+
+  @override
+  List<String> get depfiles => const <String>[
+    'dart2js.d',
   ];
 
   @override

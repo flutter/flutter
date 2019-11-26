@@ -166,7 +166,7 @@ class _DefaultPub implements Pub {
         'Running "flutter pub $command" in ${fs.path.basename(directory)}...',
         timeout: timeoutConfiguration.slowOperation,
       );
-      final bool verbose = FlutterCommand.current != null && FlutterCommand.current.globalResults['verbose'];
+      final bool verbose = FlutterCommand.current != null && FlutterCommand.current.globalResults['verbose'] as bool;
       final List<String> args = <String>[
         if (verbose) '--verbose' else '--verbosity=warning',
         ...<String>[command, '--no-precompile'],

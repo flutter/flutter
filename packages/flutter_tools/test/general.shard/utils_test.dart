@@ -153,13 +153,13 @@ baz=qux
         'wrapped and indentation preserved.';
     final FakeStdio fakeStdio = FakeStdio();
 
-    void testWrap(String description, Function body) {
+    void testWrap(String description, dynamic Function() body) {
       testUsingContext(description, body, overrides: <Type, Generator>{
         OutputPreferences: () => OutputPreferences(wrapText: true, wrapColumn: _lineLength),
       });
     }
 
-    void testNoWrap(String description, Function body) {
+    void testNoWrap(String description, dynamic Function() body) {
       testUsingContext(description, body, overrides: <Type, Generator>{
         OutputPreferences: () => OutputPreferences(wrapText: false),
       });

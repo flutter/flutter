@@ -8,7 +8,7 @@ const String _kFlutterUA = 'UA-67589403-6';
 
 /// The collection of custom dimensions understood by the analytics backend.
 /// When adding to this list, first ensure that the custom dimension is
-/// defined in the backend, or will be defined shortly after the relevent PR
+/// defined in the backend, or will be defined shortly after the relevant PR
 /// lands.
 enum CustomDimensions {
   sessionHostOsDetails,  // cd1
@@ -92,7 +92,7 @@ abstract class Usage {
   /// Whether this is the first run of the tool.
   bool get isFirstRun;
 
-  /// Whether analytics reporting should be supressed.
+  /// Whether analytics reporting should be suppressed.
   bool get suppressAnalytics;
 
   /// Suppress analytics for this session.

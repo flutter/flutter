@@ -88,6 +88,7 @@ class Scrollable extends StatefulWidget {
        assert(dragStartBehavior != null),
        assert(viewportBuilder != null),
        assert(excludeFromSemantics != null),
+       assert(semanticChildCount == null || semanticChildCount >= 0),
        super (key: key);
 
   /// The direction in which this widget scrolls.
@@ -229,7 +230,7 @@ class Scrollable extends StatefulWidget {
   /// ScrollableState scrollable = Scrollable.of(context);
   /// ```
   static ScrollableState of(BuildContext context) {
-    final _ScrollableScope widget = context.inheritFromWidgetOfExactType(_ScrollableScope);
+    final _ScrollableScope widget = context.dependOnInheritedWidgetOfExactType<_ScrollableScope>();
     return widget?.scrollable;
   }
 
@@ -240,6 +241,7 @@ class Scrollable extends StatefulWidget {
     double alignment = 0.0,
     Duration duration = Duration.zero,
     Curve curve = Curves.ease,
+    ScrollPositionAlignmentPolicy alignmentPolicy = ScrollPositionAlignmentPolicy.explicit,
   }) {
     final List<Future<void>> futures = <Future<void>>[];
 
@@ -250,6 +252,7 @@ class Scrollable extends StatefulWidget {
         alignment: alignment,
         duration: duration,
         curve: curve,
+        alignmentPolicy: alignmentPolicy,
       ));
       context = scrollable.context;
       scrollable = Scrollable.of(context);
@@ -641,6 +644,7 @@ class _ScrollSemantics extends SingleChildRenderObjectWidget {
     @required this.semanticChildCount,
     Widget child,
   }) : assert(position != null),
+       assert(semanticChildCount == null || semanticChildCount >= 0),
        super(key: key, child: child);
 
   final ScrollPosition position;

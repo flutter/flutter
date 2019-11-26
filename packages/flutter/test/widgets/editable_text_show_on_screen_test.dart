@@ -259,7 +259,7 @@ void main() {
             children: <Widget>[
               EditableText(
                 backgroundCursorColor: Colors.grey,
-                maxLines: null, // multi-line
+                maxLines: null, // multiline
                 controller: controller,
                 focusNode: focusNode,
                 style: textStyle,

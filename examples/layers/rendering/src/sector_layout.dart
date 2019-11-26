@@ -88,7 +88,7 @@ class SectorParentData extends ParentData {
 ///  * <https://en.wikipedia.org/wiki/Polar_coordinate_system>, which defines
 ///    the polar coordinate space.
 ///  * [RenderBox], which is the base class for [RenderObject]s that live in a
-///    cartesian coordinate space.
+///    Cartesian coordinate space.
 abstract class RenderSector extends RenderObject {
 
   @override

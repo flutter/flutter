@@ -68,9 +68,13 @@ void main() {
     await defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
     expect(observer.lifecycleState, AppLifecycleState.inactive);
 
+
     message = const StringCodec().encodeMessage('AppLifecycleState.detached');
     await defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
-    expect(observer.lifecycleState, AppLifecycleState.detached);
+    // TODO(chunhtai): this should be detached once the issue is fixed
+    // https://github.com/flutter/flutter/issues/39832
+    // The binding drops detached message for now.
+    expect(observer.lifecycleState, AppLifecycleState.inactive);
   });
 
   testWidgets('didPushRoute callback', (WidgetTester tester) async {
@@ -103,16 +107,6 @@ void main() {
 
     message = const StringCodec().encodeMessage('AppLifecycleState.inactive');
     await defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
-    expect(tester.binding.hasScheduledFrame, isFalse);
-
-    message = const StringCodec().encodeMessage('AppLifecycleState.detached');
-    await defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
-    expect(tester.binding.hasScheduledFrame, isFalse);
-
-    message = const StringCodec().encodeMessage('AppLifecycleState.inactive');
-    await defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
-    expect(tester.binding.hasScheduledFrame, isTrue);
-    await tester.pump();
     expect(tester.binding.hasScheduledFrame, isFalse);
 
     message = const StringCodec().encodeMessage('AppLifecycleState.paused');

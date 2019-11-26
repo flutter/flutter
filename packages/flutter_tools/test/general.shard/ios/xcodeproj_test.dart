@@ -722,7 +722,7 @@ flutter:
   });
 }
 
-Platform fakePlatform(String name) {
+FakePlatform fakePlatform(String name) {
   return FakePlatform.fromPlatform(const LocalPlatform())..operatingSystem = name;
 }
 

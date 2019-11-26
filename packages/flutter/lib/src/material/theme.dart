@@ -125,7 +125,7 @@ class Theme extends StatelessWidget {
   /// }
   /// ```
   static ThemeData of(BuildContext context, { bool shadowThemeOnly = false }) {
-    final _InheritedTheme inheritedTheme = context.inheritFromWidgetOfExactType(_InheritedTheme);
+    final _InheritedTheme inheritedTheme = context.dependOnInheritedWidgetOfExactType<_InheritedTheme>();
     if (shadowThemeOnly) {
       if (inheritedTheme == null || inheritedTheme.theme.isMaterialAppTheme)
         return null;
@@ -176,7 +176,7 @@ class _InheritedTheme extends InheritedTheme {
 
   @override
   Widget wrap(BuildContext context, Widget child) {
-    final _InheritedTheme ancestorTheme = context.ancestorWidgetOfExactType(_InheritedTheme);
+    final _InheritedTheme ancestorTheme = context.findAncestorWidgetOfExactType<_InheritedTheme>();
     return identical(this, ancestorTheme) ? child : Theme(data: theme.data, child: child);
   }
 

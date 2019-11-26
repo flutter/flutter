@@ -609,7 +609,7 @@ String _defaultApplicationName(BuildContext context) {
   // someone really wants their application title to change dynamically, they
   // can provide an explicit applicationName to the widgets defined in this
   // file, instead of relying on the default.
-  final Title ancestorTitle = context.ancestorWidgetOfExactType(Title);
+  final Title ancestorTitle = context.findAncestorWidgetOfExactType<Title>();
   return ancestorTitle?.title ?? Platform.resolvedExecutable.split(Platform.pathSeparator).last;
 }
 
