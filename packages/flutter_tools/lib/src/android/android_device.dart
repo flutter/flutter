@@ -791,42 +791,40 @@ Map<String, String> parseAdbDeviceProperties(String str) {
 /// For more information, see https://developer.android.com/studio/command-line/dumpsys.
 @visibleForTesting
 AndroidMemoryInfo parseMeminfoDump(String input) {
-  Iterable<String> lines = input.split('\n');
-  lines = lines
-    .skipWhile((String line) => !line.contains('App Summary'))
-    .takeWhile((String line) => !line.contains('TOTAL'));
   final AndroidMemoryInfo androidMemoryInfo = AndroidMemoryInfo();
-  for (String line in lines) {
-    if (!line.contains(':')) {
-      continue;
-    }
-    final List<String> sections = line.trim().split(':');
-    final String key = sections.first.trim();
-    final int value = int.tryParse(sections.last.trim()) ?? 0;
-    switch (key) {
-      case AndroidMemoryInfo._kJavaHeapKey:
-        androidMemoryInfo.javaHeap = value;
-        break;
-      case AndroidMemoryInfo._kNativeHeapKey:
-        androidMemoryInfo.nativeHeap = value;
-        break;
-      case AndroidMemoryInfo._kCodeKey:
-        androidMemoryInfo.code = value;
-        break;
-      case AndroidMemoryInfo._kStackKey:
-        androidMemoryInfo.stack = value;
-        break;
-      case AndroidMemoryInfo._kGraphicsKey:
-        androidMemoryInfo.graphics = value;
-        break;
-      case AndroidMemoryInfo._kPrivateOtherKey:
-        androidMemoryInfo.privateOther = value;
-        break;
-      case AndroidMemoryInfo._kSystemKey:
-        androidMemoryInfo.system = value;
-        break;
-    }
-  }
+  input
+    .split('\n')
+    .skipWhile((String line) => !line.contains('App Summary'))
+    .takeWhile((String line) => !line.contains('TOTAL'))
+    .where((String line) => line.contains(':'))
+    .forEach((String line) {
+      final List<String> sections = line.trim().split(':');
+      final String key = sections.first.trim();
+      final int value = int.tryParse(sections.last.trim()) ?? 0;
+      switch (key) {
+        case AndroidMemoryInfo._kJavaHeapKey:
+          androidMemoryInfo.javaHeap = value;
+          break;
+        case AndroidMemoryInfo._kNativeHeapKey:
+          androidMemoryInfo.nativeHeap = value;
+          break;
+        case AndroidMemoryInfo._kCodeKey:
+          androidMemoryInfo.code = value;
+          break;
+        case AndroidMemoryInfo._kStackKey:
+          androidMemoryInfo.stack = value;
+          break;
+        case AndroidMemoryInfo._kGraphicsKey:
+          androidMemoryInfo.graphics = value;
+          break;
+        case AndroidMemoryInfo._kPrivateOtherKey:
+          androidMemoryInfo.privateOther = value;
+          break;
+        case AndroidMemoryInfo._kSystemKey:
+          androidMemoryInfo.system = value;
+          break;
+      }
+  });
   return androidMemoryInfo;
 }
 

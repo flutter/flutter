@@ -633,7 +633,13 @@ void main() {
     await flutterDevice.connect();
     verify(mockLogReader.connectedVMServices = <VMService>[ mockVMService ]);
   }, overrides: <Type, Generator>{
-    VMServiceConnector: () => (Uri httpUri, { ReloadSources reloadSources, Restart restart, CompileExpression compileExpression, io.CompressionOptions compression }) async => mockVMService,
+    VMServiceConnector: () => (Uri httpUri, {
+      ReloadSources reloadSources,
+      Restart restart,
+      CompileExpression compileExpression,
+      io.CompressionOptions compression,
+      Device device,
+    }) async => mockVMService,
   }));
 }
 
