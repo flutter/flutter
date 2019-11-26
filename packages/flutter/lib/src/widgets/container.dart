@@ -441,9 +441,9 @@ class Container extends StatelessWidget {
 
     if (clipBehavior != Clip.none) {
       current = ClipPath(
-        clipper: _PathClipper(
+        clipper: _DecorationClipper(
           textDirection: Directionality.of(context),
-          getClipPath: decoration.getClipPath
+          decoration: decoration
         ),
         clipBehavior: clipBehavior,
         child: current,
@@ -467,20 +467,24 @@ class Container extends StatelessWidget {
   }
 }
 
-// todo
-class _PathClipper extends CustomClipper<Path> {
-  _PathClipper({this.textDirection, this.getClipPath});
+/// A clipper that uses [Decoration.getClipPath] to clip.
+class _DecorationClipper extends CustomClipper<Path> {
+  _DecorationClipper({
+    @required this.textDirection,
+    @required this.decoration
+  }) : assert (textDirection != null),
+       assert (decoration != null);
 
   final TextDirection textDirection;
-  final Path Function(Rect rect, TextDirection direction) getClipPath;
+  final Decoration decoration;
 
   @override
-  Path getClip(Size size) => getClipPath(
-    Rect.fromLTRB(0, 0, size.width, size.height),
-    textDirection,
-  );
+  Path getClip(Size size) =>
+      decoration.getClipPath(Offset.zero & size, textDirection);
 
   @override
-  bool shouldReclip(CustomClipper<Path> oldClipper) => false;
-
+  bool shouldReclip(_DecorationClipper oldClipper) {
+    return oldClipper.decoration != decoration
+        || oldClipper.textDirection != textDirection;
+  }
 }
