@@ -2123,7 +2123,7 @@ class RenderSliverOffstage extends RenderSliver with RenderObjectWithChildMixin<
   @override
   void performLayout() {
     assert(child != null);
-    child.layout(constraints);
+    child.layout(constraints, parentUsesSize: true);
     geometry = child.geometry;
   }
 
