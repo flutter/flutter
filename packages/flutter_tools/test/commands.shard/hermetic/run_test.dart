@@ -10,6 +10,7 @@ import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/context.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/run.dart';
@@ -51,6 +52,54 @@ void main() {
       } on ToolExit catch (e) {
         expect(e.exitCode ?? 1, 1);
       }
+    });
+
+    testUsingContext('does not support --start-paused and --fast-start', () async {
+      fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+      fs.file('pubspec.yaml').createSync();
+      fs.file('.packages').createSync();
+
+      final RunCommand command = RunCommand();
+      applyMocksToCommand(command);
+      try {
+        await createTestCommandRunner(command).run(<String>[
+          'run',
+          '--start-paused',
+          '--fast-start',
+          '--no-pub',
+          '--show-test-device',
+        ]);
+        fail('Expect exception');
+      } catch (e) {
+        expect(e.toString(), contains('--fast-start is not supported with --start-paused'));
+      }
+    }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    testUsingContext('does not support --use-application-binary and --fast-start', () async {
+      fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+      fs.file('pubspec.yaml').createSync();
+      fs.file('.packages').createSync();
+
+      final RunCommand command = RunCommand();
+      applyMocksToCommand(command);
+      try {
+        await createTestCommandRunner(command).run(<String>[
+          'run',
+          '--use-application-binary=app/bar/faz',
+          '--fast-start',
+          '--no-pub',
+          '--show-test-device',
+        ]);
+        fail('Expect exception');
+      } catch (e) {
+        expect(e.toString(), contains('--fast-start is not supported with --use-application-binary'));
+      }
+    }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     group('dart-flags option', () {
