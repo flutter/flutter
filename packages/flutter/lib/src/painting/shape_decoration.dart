@@ -4,7 +4,6 @@
 
 import 'package:flutter/foundation.dart';
 
-import '../../rendering.dart';
 import 'basic_types.dart';
 import 'borders.dart';
 import 'box_border.dart';

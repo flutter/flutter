@@ -387,12 +387,7 @@ class Container extends StatelessWidget {
   /// The transformation matrix to apply before painting the container.
   final Matrix4 transform;
 
-  /// The clip behavior when [Container.decoration] has a border.
-  ///
-  /// By default [Container] doesn't clip the child when it is outside the
-  /// border.
-  ///
-  /// Defaults to [Clip.none].
+  /// The clip behavior when [Container.decoration] has a clipPath.
   final Clip clipBehavior;
 
   EdgeInsetsGeometry get _paddingIncludingDecoration {
@@ -472,13 +467,8 @@ class Container extends StatelessWidget {
   }
 }
 
-// this is used in Container for ClipPath and implementation is closely related
-// to the [Container.clipBehaviour].
-//
-// if there is any plan to make this public, it's better to change the
-// implementation to fit more general use cases.
+// todo
 class _PathClipper extends CustomClipper<Path> {
-
   _PathClipper({this.textDirection, this.getClipPath});
 
   final TextDirection textDirection;
