@@ -51,7 +51,7 @@ void main() {
     await _flutter.run();
     await sawTick.future;
     _project.uncommentHotReloadPrint();
-    print("DEBUGGING: ${DateTime.now()}");
+    print('DEBUGGING: ${DateTime.now()}');
     try {
       await _flutter.hotReload();
       expect(stdout.toString(), contains('(((((RELOAD WORKED)))))'));
