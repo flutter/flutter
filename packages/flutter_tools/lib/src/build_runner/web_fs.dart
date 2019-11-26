@@ -353,11 +353,27 @@ abstract class AssetServer {
 }
 
 class ReleaseAssetServer extends AssetServer {
+  // Locations where source files, assets, or source maps may be located.
+  final List<Uri> _searchPaths = <Uri>[
+    fs.directory(getWebBuildDirectory()).uri,
+    fs.directory(Cache.flutterRoot).parent.uri,
+    fs.currentDirectory.childDirectory('lib').uri,
+  ];
+
   @override
   Future<Response> handle(Request request) async {
-    final Uri artifactUri = fs.directory(getWebBuildDirectory()).uri.resolveUri(request.url);
-    final File file = fs.file(artifactUri);
-    if (file.existsSync()) {
+    Uri fileUri;
+    for (Uri uri in _searchPaths) {
+      final Uri potential = uri.resolve(request.url.path);
+      if (potential == null || !fs.isFileSync(potential.toFilePath())) {
+        continue;
+      }
+      fileUri = potential;
+      break;
+    }
+
+    if (fileUri != null) {
+      final File file = fs.file(fileUri);
       final Uint8List bytes = file.readAsBytesSync();
       // Fallback to "application/octet-stream" on null which
       // makes no claims as to the structure of the data.
