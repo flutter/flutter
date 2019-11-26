@@ -5,10 +5,10 @@
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:localization/gen_l10n.dart';
-import 'package:path/path.dart' as path;
-import 'package:test/test.dart';
-
 import 'package:localization/localizations_utils.dart';
+import 'package:path/path.dart' as path;
+
+import 'common.dart';
 
 final String defaultArbPathString = path.join('lib', 'l10n');
 const String defaultTemplateArbFileName = 'app_en.arb';
