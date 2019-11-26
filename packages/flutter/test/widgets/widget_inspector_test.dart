@@ -2639,17 +2639,18 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
                     delegate.copyWith(subtreeDepth: 0),
                   );
               }
-              additionalJson['callbackIsCalled'] = true;
+              additionalJson['callbackExecuted'] = true;
               return additionalJson;
             },
         );
       final Map<String, Object> json = node.toJsonMap(delegate);
-      expect(json['callbackIsCalled'], true);
+      expect(json['callbackExecuted'], true);
       expect(json.containsKey('renderObject'), true);
       expect(json['renderObject'], isA<Map<String, dynamic>>());
       final Map<String, dynamic> renderObjectJson = json['renderObject'];
       expect(renderObjectJson['description'], startsWith('RenderFlex'));
-      final InspectorSerializationDelegate unsafeDelegate =
+
+      final InspectorSerializationDelegate emptyDelegate =
         InspectorSerializationDelegate(
           service: service,
           summaryTree: false,
@@ -2666,7 +2667,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           includeProperties: true,
           addAdditionalPropertiesCallback: null,
         );
-      expect(node.toJsonMap(unsafeDelegate), node.toJsonMap(defaultDelegate));
+      expect(node.toJsonMap(emptyDelegate), node.toJsonMap(defaultDelegate));
     });
   }
 }

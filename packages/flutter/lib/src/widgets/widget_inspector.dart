@@ -2889,8 +2889,9 @@ int _toLocationId(_Location location) {
   return id;
 }
 
-/// A delegate that configures how a hierarchy of [DiagnosticsNode]s should be
-/// serialized for Flutter Inspector.
+/// A delegate that configures how a hierarchy of [DiagnosticsNode]s are
+/// serialized by the Flutter Inspector.
+@visibleForTesting
 class InspectorSerializationDelegate implements DiagnosticsSerializationDelegate {
   /// Creates an [InspectorSerializationDelegate] that serialize [DiagnosticsNode]
   /// for Flutter Inspector service.
@@ -2930,12 +2931,14 @@ class InspectorSerializationDelegate implements DiagnosticsSerializationDelegate
   /// Callback to add additional experimental serialization properties.
   ///
   /// This callback can be used to customize the serialization of DiagnosticsNode
-  /// objects for experimental features. For example, Dart DevTools can evaluate
-  /// the following expression to register a VM Service API with a custom serialization
-  /// to experiment with visualizing layouts.
+  /// objects for experimental features.
+  /// For example, [Dart DevTools](https://github.com/flutter/devtools)
+  /// can evaluate the following expression to register a VM Service API
+  /// with a custom serialization to experiment with visualizing layouts.
   ///
-  /// Example usage:
-  ///
+  /// The following code samples demonstrates adding the RenderObject associated
+  /// with an Element to the serialized data for all elements in the tree:
+  /// ```dart
   /// Map<String, Object> getDetailsSubtreeWithRenderObject(
   ///   String id,
   ///   String groupName,
@@ -2943,29 +2946,30 @@ class InspectorSerializationDelegate implements DiagnosticsSerializationDelegate
   /// ) {
   ///   return _nodeToJson(
   ///     root,
-  ///     _SerializationDelegate(
+  ///     InspectorSerializationDelegate(
   ///       groupName: groupName,
-  ///         summaryTree: false,
-  ///         subtreeDepth: subtreeDepth,
-  ///         includeProperties: true,
-  ///         service: this,
-  ///         addAdditionalPropertiesCallback: (DiagnosticsNode node, _SerializationDelegate delegate) {
-  ///           final Map<String, Object> additionalJson = <String, Object>{};
-  ///           final Object value = node.value;
-  ///           if (value is Element) {
-  ///             final renderObject = value.renderObject;
-  ///             additionalJson['renderObject'] = renderObject?.toDiagnosticsNode()?.toJsonMap(
-  ///               delegate.copyWith(
-  ///                 subtreeDepth: 0,
-  ///                 includeProperties: true,
-  ///               ),
-  ///             );
-  ///           }
-  ///           return additionalJson;
-  ///        },
+  ///       summaryTree: false,
+  ///       subtreeDepth: subtreeDepth,
+  ///       includeProperties: true,
+  ///       service: this,
+  ///       addAdditionalPropertiesCallback: (DiagnosticsNode node, _SerializationDelegate delegate) {
+  ///         final Map<String, Object> additionalJson = <String, Object>{};
+  ///         final Object value = node.value;
+  ///         if (value is Element) {
+  ///           final renderObject = value.renderObject;
+  ///           additionalJson['renderObject'] = renderObject?.toDiagnosticsNode()?.toJsonMap(
+  ///             delegate.copyWith(
+  ///               subtreeDepth: 0,
+  ///               includeProperties: true,
+  ///             ),
+  ///           );
+  ///         }
+  ///         return additionalJson;
+  ///       },
   ///     ),
   ///  );
   /// }
+  /// ```
   final Map<String, Object> Function(DiagnosticsNode, InspectorSerializationDelegate) addAdditionalPropertiesCallback;
 
   final List<DiagnosticsNode> _nodesCreatedByLocalProject = <DiagnosticsNode>[];
