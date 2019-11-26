@@ -284,10 +284,6 @@ class RunCommand extends RunCommandBase {
     if (!runningWithPrebuiltApplication) {
       await super.validateCommand();
     }
-    devices = await findAllTargetDevices();
-    if (devices == null) {
-      throwToolExit(null);
-    }
     if (deviceManager.hasSpecifiedAllDevices && runningWithPrebuiltApplication) {
       throwToolExit('Using -d all with --use-application-binary is not supported');
     }
@@ -295,7 +291,7 @@ class RunCommand extends RunCommandBase {
 
   DebuggingOptions _createDebuggingOptions() {
     final BuildInfo buildInfo = getBuildInfo();
-    if (buildInfo.isRelease) {
+    if (buildInfo.mode.isRelease) {
       return DebuggingOptions.disabled(
         buildInfo,
         initializePlatform: boolArg('web-initialize-platform'),
@@ -336,12 +332,22 @@ class RunCommand extends RunCommandBase {
 
     writePidFile(stringArg('pid-file'));
 
+    devices = await findAllTargetDevices();
+    if (devices == null) {
+      throwToolExit(null);
+    }
+
     if (boolArg('machine')) {
       if (devices.length > 1) {
         throwToolExit('--machine does not support -d all.');
       }
-      final Daemon daemon = Daemon(stdinCommandStream, stdoutCommandResponse,
-          notifyingLogger: NotifyingLogger(), logToStdout: true);
+      final Daemon daemon = Daemon(
+        stdinCommandStream,
+        stdoutCommandResponse,
+        notifyingLogger: NotifyingLogger(),
+        logToStdout: true,
+        dartDefines: dartDefines,
+      );
       AppInstance app;
       try {
         final String applicationBinaryPath = stringArg('use-application-binary');

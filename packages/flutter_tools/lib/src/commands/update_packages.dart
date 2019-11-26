@@ -88,11 +88,6 @@ class UpdatePackagesCommand extends FlutterCommand {
   @override
   final bool hidden;
 
-  @override
-  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
-    DevelopmentArtifact.universal,
-  };
-
   Future<void> _downloadCoverageData() async {
     final Status status = logger.startProgress(
       'Downloading lcov data for package:flutter...',
@@ -1207,7 +1202,7 @@ class PubDependencyTree {
   /// dependencies section). We ignore if something is a dependency or
   /// dev_dependency (pub won't use different versions for those two).
   ///
-  /// We then parse out the package name, version number, and subdependencies for
+  /// We then parse out the package name, version number, and sub-dependencies for
   /// each entry, and store than in our _versions and _dependencyTree fields
   /// above.
   String fill(String message) {

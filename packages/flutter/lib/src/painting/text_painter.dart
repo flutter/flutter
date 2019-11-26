@@ -83,7 +83,7 @@ class PlaceholderDimensions {
 ///
 /// See [Text.textWidthBasis], for example.
 enum TextWidthBasis {
-  /// Multiline text will take up the full width given by the parent. For single
+  /// multiline text will take up the full width given by the parent. For single
   /// line text, only the minimum amount of width needed to contain the text
   /// will be used. A common use case for this is a standard series of
   /// paragraphs.
@@ -178,7 +178,7 @@ class TextPainter {
   /// This and [textDirection] must be non-null before you call [layout].
   ///
   /// The [InlineSpan] this provides is in the form of a tree that may contain
-  /// multiple instances of [TextSpan]s and [WidgetSpan]s. To obtain a plaintext
+  /// multiple instances of [TextSpan]s and [WidgetSpan]s. To obtain a plain text
   /// representation of the contents of this [TextPainter], use [InlineSpan.toPlainText]
   /// to get the full contents of all nodes in the tree. [TextSpan.text] will
   /// only provide the contents of the first node in the tree.
@@ -846,7 +846,7 @@ class TextPainter {
   ///
   /// This can potentially return a large amount of data, so it is not recommended
   /// to repeatedly call this. Instead, cache the results. The cached results
-  /// should be invalidated upon the next sucessful [layout].
+  /// should be invalidated upon the next successful [layout].
   List<ui.LineMetrics> computeLineMetrics() {
     assert(!_needsLayout);
     return _paragraph.computeLineMetrics();

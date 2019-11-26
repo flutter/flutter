@@ -602,7 +602,7 @@ int parseServicePort(String line, {
   return matches.isEmpty ? null : int.parse(matches[0].group(2));
 }
 
-/// Tries to extract a Uri from the string.
+/// Tries to extract a URL from the string.
 ///
 /// The `prefix`, if specified, is a regular expression pattern and must not contain groups.
 /// `prefix` defaults to the RegExp: `An Observatory debugger .* is available at: `.

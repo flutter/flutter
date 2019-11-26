@@ -1273,7 +1273,7 @@ class CupertinoTimerPicker extends StatefulWidget {
   /// Callback called when the timer duration changes.
   final ValueChanged<Duration> onTimerDurationChanged;
 
-  /// Defines how the timper picker should be positioned within its parent.
+  /// Defines how the timer picker should be positioned within its parent.
   ///
   /// This property must not be null. It defaults to [Alignment.center].
   final AlignmentGeometry alignment;

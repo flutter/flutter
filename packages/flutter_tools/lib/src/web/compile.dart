@@ -81,7 +81,7 @@ class WebCompilationProxy {
   /// Returns whether or not the build was successful.
   ///
   /// `release` controls whether we build the bundle for dartdevc or only
-  /// the entrypoints for dart2js to later take over.
+  /// the entry points for dart2js to later take over.
   Future<bool> initialize({
     @required Directory projectDirectory,
     @required String projectName,

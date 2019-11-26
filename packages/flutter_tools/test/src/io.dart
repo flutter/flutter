@@ -12,7 +12,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 ///
 /// Do not provide a [LocalFileSystem] as a delegate. Since internally this calls
 /// out to `dart:io` classes, it will result in a stack overflow error as the
-/// IOOverrides and LocalFileSystem call eachother endlessly.
+/// IOOverrides and LocalFileSystem call each other endlessly.
 ///
 /// The only safe delegate types are those that do not call out to `dart:io`,
 /// like the [MemoryFileSystem].

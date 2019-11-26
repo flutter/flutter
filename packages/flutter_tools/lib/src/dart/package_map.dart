@@ -46,7 +46,7 @@ class PackageMap {
   /// Returns the path to [packageUri].
   String pathForPackage(Uri packageUri) => uriForPackage(packageUri).path;
 
-  /// Returns the path to [packageUri] as Uri.
+  /// Returns the path to [packageUri] as URL.
   Uri uriForPackage(Uri packageUri) {
     assert(packageUri.scheme == 'package');
     final List<String> pathSegments = packageUri.pathSegments.toList();

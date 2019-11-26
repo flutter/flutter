@@ -63,20 +63,20 @@ class ProtocolDiscovery {
   StreamSubscription<String> _deviceLogSubscription;
   _BufferedStreamController<Uri> _uriStreamController;
 
-  /// The discovered service URI.
+  /// The discovered service URL.
   /// Use [uris] instead.
   // TODO(egarciad): replace `uri` for `uris`.
   Future<Uri> get uri {
     return uris.first;
   }
 
-  /// The discovered service URIs.
+  /// The discovered service URLs.
   ///
-  /// When a new observatory URI is available in [logReader],
-  /// the URIs are forwarded at most once every [throttleDuration].
+  /// When a new observatory URL: is available in [logReader],
+  /// the URLs are forwarded at most once every [throttleDuration].
   ///
   /// Port forwarding is only attempted when this is invoked,
-  /// for each observatory URI in the stream.
+  /// for each observatory URL in the stream.
   Stream<Uri> get uris {
     return _uriStreamController.stream
       .transform(_throttle<Uri>(

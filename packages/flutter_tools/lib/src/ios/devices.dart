@@ -629,9 +629,9 @@ class IOSDeviceLogReader extends DeviceLogReader {
   set idevicesyslogProcess(Process process) => _idevicesyslogProcess = process;
   Process _idevicesyslogProcess;
 
-  // Returns a stateful line handler to properly capture multi-line output.
+  // Returns a stateful line handler to properly capture multiline output.
   //
-  // For multi-line log messages, any line after the first is logged without
+  // For multiline log messages, any line after the first is logged without
   // any specific prefix. To properly capture those, we enter "printing" mode
   // after matching a log line from the runner. When in printing mode, we print
   // all lines until we find the start of another log message (from any app).
