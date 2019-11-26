@@ -681,7 +681,7 @@ class PageView extends StatefulWidget {
     this.onPageChanged,
     @required this.childrenDelegate,
     this.dragStartBehavior = DragStartBehavior.start,
-    this.allowImplicitScrolling,
+    this.allowImplicitScrolling = false,
   }) : assert(childrenDelegate != null),
        assert(allowImplicitScrolling != null),
        controller = controller ?? _defaultPageController,
