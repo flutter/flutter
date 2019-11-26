@@ -5,20 +5,17 @@
 part of engine;
 
 class SkPictureRecorder implements ui.PictureRecorder {
-  @override
-  ui.Rect cullRect;
-
+  ui.Rect _cullRect;
   js.JsObject _recorder;
 
-  @override
-  RecordingCanvas beginRecording(ui.Rect bounds) {
-    cullRect = bounds;
+  SkCanvas beginRecording(ui.Rect bounds) {
+    _cullRect = bounds;
     _recorder = js.JsObject(canvasKit['SkPictureRecorder']);
     final js.JsObject skRect = js.JsObject(canvasKit['LTRBRect'],
         <double>[bounds.left, bounds.top, bounds.right, bounds.bottom]);
     final js.JsObject skCanvas =
         _recorder.callMethod('beginRecording', <js.JsObject>[skRect]);
-    return SkRecordingCanvas(skCanvas);
+    return SkCanvas(skCanvas);
   }
 
   @override
@@ -26,9 +23,10 @@ class SkPictureRecorder implements ui.PictureRecorder {
     final js.JsObject skPicture =
         _recorder.callMethod('finishRecordingAsPicture');
     _recorder.callMethod('delete');
-    return SkPicture(skPicture, cullRect);
+    _recorder = null;
+    return SkPicture(skPicture, _cullRect);
   }
 
   @override
-  bool get isRecording => false;
+  bool get isRecording => _recorder != null;
 }

@@ -14,11 +14,24 @@ class Rasterizer {
   /// Creates a new frame from this rasterizer's surface, draws the given
   /// [LayerTree] into it, and then submits the frame.
   void draw(LayerTree layerTree) {
-    final SurfaceFrame frame = surface.acquireFrame(ui.window.physicalSize);
-    final SkCanvas canvas = frame.canvas;
-    final Frame compositorFrame = context.acquireFrame(canvas);
+    if (layerTree == null) {
+      return;
+    }
 
-    canvas.clear();
+    final ui.Size physicalSize = ui.window.physicalSize;
+    final ui.Size frameSize = ui.Size(
+      physicalSize.width.truncate().toDouble(),
+      physicalSize.height.truncate().toDouble(),
+    );
+
+    if (frameSize.isEmpty) {
+      return;
+    }
+    layerTree.frameSize = frameSize;
+
+    final SurfaceFrame frame = surface.acquireFrame(layerTree.frameSize);
+    final SkCanvas canvas = frame.skiaCanvas;
+    final Frame compositorFrame = context.acquireFrame(canvas);
 
     compositorFrame.raster(layerTree, ignoreRasterCache: true);
     frame.submit();

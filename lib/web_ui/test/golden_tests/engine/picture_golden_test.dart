@@ -13,7 +13,7 @@ import 'package:web_engine_tester/golden_tester.dart';
 void main() {
   group('Picture', () {
     test('toImage produces an image', () async {
-      final ui.PictureRecorder recorder = ui.PictureRecorder();
+      final EnginePictureRecorder recorder = ui.PictureRecorder();
       final RecordingCanvas canvas = recorder.beginRecording(ui.Rect.fromLTRB(0, 0, 200, 100));
       canvas.drawCircle(
         const ui.Offset(100, 50),

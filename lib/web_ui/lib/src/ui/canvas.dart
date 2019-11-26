@@ -165,7 +165,7 @@ class Vertices {
 ///
 /// To begin recording, construct a [Canvas] to record the commands.
 /// To end recording, use the [PictureRecorder.endRecording] method.
-class PictureRecorder {
+abstract class PictureRecorder {
   /// Creates a new idle PictureRecorder. To associate it with a
   /// [Canvas] and begin recording, pass this [PictureRecorder] to the
   /// [Canvas] constructor.
@@ -173,22 +173,8 @@ class PictureRecorder {
     if (engine.experimentalUseSkia) {
       return engine.SkPictureRecorder();
     } else {
-      return PictureRecorder._();
+      return engine.EnginePictureRecorder();
     }
-  }
-
-  PictureRecorder._();
-
-  engine.RecordingCanvas _canvas;
-  Rect cullRect;
-  bool _isRecording = false;
-
-  engine.RecordingCanvas beginRecording(Rect bounds) {
-    assert(!_isRecording);
-    cullRect = bounds;
-    _isRecording = true;
-    _canvas = engine.RecordingCanvas(cullRect);
-    return _canvas;
   }
 
   /// Whether this object is currently recording commands.
@@ -198,7 +184,7 @@ class PictureRecorder {
   /// call to [endRecording], and false if either this
   /// [PictureRecorder] has not yet been associated with a [Canvas],
   /// or the [endRecording] method has already been called.
-  bool get isRecording => _isRecording;
+  bool get isRecording;
 
   /// Finishes recording graphical operations.
   ///
@@ -207,15 +193,7 @@ class PictureRecorder {
   /// and the canvas objects are invalid and cannot be used further.
   ///
   /// Returns null if the PictureRecorder is not associated with a canvas.
-  Picture endRecording() {
-    // Returning null is what the flutter engine does:
-    // lib/ui/painting/picture_recorder.cc
-    if (!_isRecording) {
-      return null;
-    }
-    _isRecording = false;
-    return Picture._(_canvas, cullRect);
-  }
+  Picture endRecording();
 }
 
 /// An interface for recording graphical operations.
@@ -238,6 +216,14 @@ class PictureRecorder {
 class Canvas {
   engine.RecordingCanvas _canvas;
 
+  factory Canvas(PictureRecorder recorder, [Rect cullRect]) {
+    if (engine.experimentalUseSkia) {
+      return engine.CanvasKitCanvas(recorder, cullRect);
+    } else {
+      return Canvas._(recorder, cullRect);
+    }
+  }
+
   /// Creates a canvas for recording graphical operations into the
   /// given picture recorder.
   ///
@@ -250,7 +236,8 @@ class Canvas {
   ///
   /// To end the recording, call [PictureRecorder.endRecording] on the
   /// given recorder.
-  Canvas(PictureRecorder recorder, [Rect cullRect]) : assert(recorder != null) {
+  Canvas._(engine.EnginePictureRecorder recorder, [Rect cullRect])
+      : assert(recorder != null) {
     if (recorder.isRecording) {
       throw ArgumentError(
           '"recorder" must not already be associated with another Canvas.');
@@ -1054,13 +1041,7 @@ class Canvas {
 /// A [Picture] can be placed in a [Scene] using a [SceneBuilder], via
 /// the [SceneBuilder.addPicture] method. A [Picture] can also be
 /// drawn into a [Canvas], using the [Canvas.drawPicture] method.
-class Picture {
-  /// This class is created by the engine, and should not be instantiated
-  /// or extended directly.
-  ///
-  /// To create a [Picture], use a [PictureRecorder].
-  Picture._(this.recordingCanvas, this.cullRect);
-
+abstract class Picture {
   /// Creates an image from this picture.
   ///
   /// The returned image will be `width` pixels wide and `height` pixels high.
@@ -1069,33 +1050,17 @@ class Picture {
   ///
   /// Although the image is returned synchronously, the picture is actually
   /// rasterized the first time the image is drawn and then cached.
-  Future<Image> toImage(int width, int height) async {
-    final engine.BitmapCanvas canvas = engine.BitmapCanvas(Rect.fromLTRB(0, 0, width.toDouble(), height.toDouble()));
-    recordingCanvas.apply(canvas);
-    final String imageDataUrl = canvas.canvas.toDataUrl();
-    final html.ImageElement imageElement = html.ImageElement()
-      ..src = imageDataUrl
-      ..width = width
-      ..height = height;
-    return engine.HtmlImage(
-      imageElement,
-      width,
-      height,
-    );
-  }
+  Future<Image> toImage(int width, int height);
 
   /// Release the resources used by this object. The object is no longer usable
   /// after this method is called.
-  void dispose() {}
+  void dispose();
 
   /// Returns the approximate number of bytes allocated for this object.
   ///
   /// The actual size of this picture may be larger, particularly if it contains
   /// references to image or other large objects.
-  int get approximateBytesUsed => 0;
-
-  final engine.RecordingCanvas recordingCanvas;
-  final Rect cullRect;
+  int get approximateBytesUsed;
 }
 
 /// Determines the winding rule that decides how the interior of a [Path] is

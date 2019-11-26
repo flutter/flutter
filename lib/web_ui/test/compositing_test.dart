@@ -255,7 +255,7 @@ void testLayerLifeCycle(
 
 class MockPersistedPicture extends PersistedPicture {
   factory MockPersistedPicture() {
-    final PictureRecorder recorder = PictureRecorder();
+    final EnginePictureRecorder recorder = PictureRecorder();
     // Use the largest cull rect so that layer clips are effective. The tests
     // rely on this.
     recorder.beginRecording(Rect.largest)..drawPaint(Paint());
