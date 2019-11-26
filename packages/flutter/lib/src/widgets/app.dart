@@ -4,6 +4,7 @@
 
 import 'dart:async';
 import 'dart:collection' show HashMap;
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -20,6 +21,7 @@ import 'media_query.dart';
 import 'navigator.dart';
 import 'pages.dart';
 import 'performance_overlay.dart';
+import 'scrollable.dart';
 import 'semantics_debugger.dart';
 import 'shortcuts.dart';
 import 'text.dart';
@@ -1041,12 +1043,46 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
   }
 
   final Map<LogicalKeySet, Intent> _keyMap = <LogicalKeySet, Intent>{
+    // Next/previous keyboard traversal.
     LogicalKeySet(LogicalKeyboardKey.tab): const Intent(NextFocusAction.key),
     LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.tab): const Intent(PreviousFocusAction.key),
-    LogicalKeySet(LogicalKeyboardKey.arrowLeft): const DirectionalFocusIntent(TraversalDirection.left),
-    LogicalKeySet(LogicalKeyboardKey.arrowRight): const DirectionalFocusIntent(TraversalDirection.right),
-    LogicalKeySet(LogicalKeyboardKey.arrowDown): const DirectionalFocusIntent(TraversalDirection.down),
-    LogicalKeySet(LogicalKeyboardKey.arrowUp): const DirectionalFocusIntent(TraversalDirection.up),
+
+    // Directional keyboard traversal. Not available on web.
+    if (!kIsWeb) ...<LogicalKeySet, Intent>{
+      LogicalKeySet(LogicalKeyboardKey.arrowLeft): const DirectionalFocusIntent(TraversalDirection.left),
+      LogicalKeySet(LogicalKeyboardKey.arrowRight): const DirectionalFocusIntent(TraversalDirection.right),
+      LogicalKeySet(LogicalKeyboardKey.arrowDown): const DirectionalFocusIntent(TraversalDirection.down),
+      LogicalKeySet(LogicalKeyboardKey.arrowUp): const DirectionalFocusIntent(TraversalDirection.up)
+    },
+
+    // Keyboard scrolling.
+    // TODO(gspencergoog): Convert all of the Platform.isMacOS checks to be
+    // defaultTargetPlatform == TargetPlatform.macOS, once that exists.
+    // https://github.com/flutter/flutter/issues/31366
+    if (!kIsWeb && !Platform.isMacOS) ...<LogicalKeySet, Intent>{
+      LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.arrowUp): const ScrollIntent(direction: AxisDirection.up),
+      LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.arrowDown): const ScrollIntent(direction: AxisDirection.down),
+      LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.arrowLeft): const ScrollIntent(direction: AxisDirection.left),
+      LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.arrowRight): const ScrollIntent(direction: AxisDirection.right),
+    },
+    if (!kIsWeb && Platform.isMacOS) ...<LogicalKeySet, Intent>{
+      LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.arrowUp): const ScrollIntent(direction: AxisDirection.up),
+      LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.arrowDown): const ScrollIntent(direction: AxisDirection.down),
+      LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.arrowLeft): const ScrollIntent(direction: AxisDirection.left),
+      LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.arrowRight): const ScrollIntent(direction: AxisDirection.right),
+    },
+
+    // Web scrolling.
+    if (kIsWeb) ...<LogicalKeySet, Intent>{
+      LogicalKeySet(LogicalKeyboardKey.arrowUp): const ScrollIntent(direction: AxisDirection.up),
+      LogicalKeySet(LogicalKeyboardKey.arrowDown): const ScrollIntent(direction: AxisDirection.down),
+      LogicalKeySet(LogicalKeyboardKey.arrowLeft): const ScrollIntent(direction: AxisDirection.left),
+      LogicalKeySet(LogicalKeyboardKey.arrowRight): const ScrollIntent(direction: AxisDirection.right),
+    },
+
+    LogicalKeySet(LogicalKeyboardKey.pageUp): const ScrollIntent(direction: AxisDirection.up, type: ScrollIncrementType.page),
+    LogicalKeySet(LogicalKeyboardKey.pageDown): const ScrollIntent(direction: AxisDirection.down, type: ScrollIncrementType.page),
+
     LogicalKeySet(LogicalKeyboardKey.enter): const Intent(ActivateAction.key),
     LogicalKeySet(LogicalKeyboardKey.space): const Intent(SelectAction.key),
   };
@@ -1057,6 +1093,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     NextFocusAction.key: () => NextFocusAction(),
     PreviousFocusAction.key: () => PreviousFocusAction(),
     DirectionalFocusAction.key: () => DirectionalFocusAction(),
+    ScrollAction.key: () => ScrollAction(),
   };
 
   @override
@@ -1169,7 +1206,6 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
       : _locale;
 
     assert(_debugCheckLocalizations(appLocale));
-
     return Shortcuts(
       shortcuts: _keyMap,
       child: Actions(
