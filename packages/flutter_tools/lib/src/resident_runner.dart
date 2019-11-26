@@ -177,6 +177,7 @@ class FlutterDevice {
           reloadSources: reloadSources,
           restart: restart,
           compileExpression: compileExpression,
+          device: device,
         );
       } on Exception catch (exception) {
         printTrace('Fail to connect to service protocol: $observatoryUri: $exception');

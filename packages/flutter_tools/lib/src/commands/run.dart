@@ -301,7 +301,7 @@ class RunCommand extends RunCommandBase {
     devices = await findAllTargetDevices();
     if (devices == null) {
       throwToolExit(null);
-    }
+    
     if (deviceManager.hasSpecifiedAllDevices && runningWithPrebuiltApplication) {
       throwToolExit('Using -d all with --use-application-binary is not supported');
     }
@@ -350,6 +350,11 @@ class RunCommand extends RunCommandBase {
     final bool hotMode = shouldUseHotMode();
 
     writePidFile(stringArg('pid-file'));
+
+    devices = await findAllTargetDevices();
+    if (devices == null) {
+      throwToolExit(null);
+    }
 
     if (boolArg('machine')) {
       if (devices.length > 1) {

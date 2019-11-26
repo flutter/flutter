@@ -238,7 +238,7 @@ class Doctor {
   }
 
   /// Print information about the state of installed tooling.
-  Future<bool> diagnose({ bool androidLicenses = false, bool verbose = true }) async {
+  Future<bool> diagnose({ bool androidLicenses = false, bool verbose = true, bool showColor = true }) async {
     if (androidLicenses) {
       return AndroidLicenseValidator.runLicenseManager();
     }
@@ -283,11 +283,12 @@ class Doctor {
 
       DoctorResultEvent(validator: validator, result: result).send();
 
+      final String leadingBox = showColor ? result.coloredLeadingBox : result.leadingBox;
       if (result.statusInfo != null) {
-        printStatus('${result.coloredLeadingBox} ${validator.title} (${result.statusInfo})',
+        printStatus('$leadingBox ${validator.title} (${result.statusInfo})',
             hangingIndent: result.leadingBox.length + 1);
       } else {
-        printStatus('${result.coloredLeadingBox} ${validator.title}',
+        printStatus('$leadingBox ${validator.title}',
             hangingIndent: result.leadingBox.length + 1);
       }
 
@@ -295,7 +296,8 @@ class Doctor {
         if (message.type != ValidationMessageType.information || verbose == true) {
           int hangingIndent = 2;
           int indent = 4;
-          for (String line in '${message.coloredIndicator} ${message.message}'.split('\n')) {
+          final String indicator = showColor ? message.coloredIndicator : message.indicator;
+          for (String line in '$indicator ${message.message}'.split('\n')) {
             printStatus(line, hangingIndent: hangingIndent, indent: indent, emphasis: true);
             // Only do hanging indent for the first line.
             hangingIndent = 0;
@@ -314,9 +316,9 @@ class Doctor {
     }
 
     if (issues > 0) {
-      printStatus('${terminal.color('!', TerminalColor.yellow)} Doctor found issues in $issues categor${issues > 1 ? "ies" : "y"}.', hangingIndent: 2);
+      printStatus('${showColor ? terminal.color('!', TerminalColor.yellow) : '!'} Doctor found issues in $issues categor${issues > 1 ? "ies" : "y"}.', hangingIndent: 2);
     } else {
-      printStatus('${terminal.color('•', TerminalColor.green)} No issues found!', hangingIndent: 2);
+      printStatus('${showColor ? terminal.color('•', TerminalColor.green) : '•'} No issues found!', hangingIndent: 2);
     }
 
     return doctorResult;
