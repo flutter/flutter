@@ -11,6 +11,9 @@ import 'package:path/path.dart' as path;
 
 /// Tests that a plugin A can depend on platform code from a plugin B
 /// as long as plugin B is defined as a pub dependency of plugin A.
+///
+/// This test fails when `flutter build apk` fails and the stderr from this command
+/// contains "Unresolved reference: plugin_b".
 Future<void> main() async {
   await task(() async {
 
@@ -158,12 +161,19 @@ public class DummyPluginAClass {
 
       section('Build plugin A example app');
 
+      final StringBuffer stderr = StringBuffer();
       await inDirectory(exampleApp, () async {
-        await flutter(
+        await evalFlutter(
           'build',
           options: <String>['apk', '--target-platform', 'android-arm'],
+          canFail: true,
+          stderr: stderr,
         );
       });
+
+      if (stderr.toString().contains('Unresolved reference: plugin_b')) {
+        return TaskResult.failure('plugin_a cannot reference plugin_b');
+      }
 
       final bool pluginAExampleApk = exists(File(path.join(
         pluginADirectory.path,
