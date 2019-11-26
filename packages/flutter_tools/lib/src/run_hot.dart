@@ -1128,9 +1128,6 @@ class ProjectFileInvalidator {
             uri.toFilePath(windows: platform.isWindows)).modified;
         if (updatedAt != null && updatedAt.isAfter(lastCompiled)) {
           invalidatedFiles.add(uri);
-        } else {
-          // Debugging.
-          printStatus('File $uri is up to date with $updatedAt and last compiled $lastCompiled');
         }
       }
     }

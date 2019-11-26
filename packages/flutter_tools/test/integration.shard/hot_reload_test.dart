@@ -49,7 +49,7 @@ void main() {
     });
     await _flutter.run();
     await sawTick.future;
-    _project.uncommentHotReloadPrint();
+    await _project.uncommentHotReloadPrint();
     try {
       await _flutter.hotReload();
       expect(stdout.toString(), contains('(((((RELOAD WORKED)))))'));
