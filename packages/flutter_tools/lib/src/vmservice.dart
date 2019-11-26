@@ -273,11 +273,12 @@ class VMService {
       });
     }
     if (device != null) {
-      _peer.registerMethod('flutterRss', (rpc.Parameters params) async {
-        return device.queryRss();
+      _peer.registerMethod('flutterMemoryInfo', (rpc.Parameters params) async {
+        final MemoryInfo result = await device.queryMemoryInfo();
+        return result.toJson();
       });
       _peer.sendNotification('registerService', <String, String>{
-        'service': 'flutterRss',
+        'service': 'flutterMemoryInfo',
         'alias': 'Flutter Tools',
       });
     }

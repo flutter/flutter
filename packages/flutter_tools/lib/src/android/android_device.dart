@@ -651,7 +651,7 @@ class AndroidDevice extends Device {
   }
 
   @override
-  Future<Map<String, Object>> queryRss() async {
+  Future<MemoryInfo> queryMemoryInfo() async {
     final RunResult runResult = await processUtils.run(adbCommandForDevice(<String>[
       'shell',
       'dumpsys',
@@ -660,7 +660,7 @@ class AndroidDevice extends Device {
       '-d',
     ]));
     if (runResult.exitCode != 0) {
-      return <String, Object>{};
+      return const MemoryInfo.empty();
     }
     return parseMeminfoDump(runResult.stdout);
   }
@@ -730,11 +730,6 @@ Map<String, String> parseAdbDeviceProperties(String str) {
   return properties;
 }
 
-
-const String _kJavaHeapKey = 'Java Heap';
-const String _kNativeHeapKey = 'Native Heap';
-const String _kGraphicsKey = 'Graphics';
-
 /// Process the dumpsys info formatted in a table-like structure.
 ///
 /// Currently this only pulls information from the  "App Summary" subsection.
@@ -795,19 +790,44 @@ const String _kGraphicsKey = 'Graphics';
 ///
 /// For more information, see https://developer.android.com/studio/command-line/dumpsys.
 @visibleForTesting
-Map<String, Object> parseMeminfoDump(String input) {
-  final Map<String, Object> result = <String, Object>{};
-  for (String line in input.split('\n')) {
-    line = line.trim();
-    if (line.startsWith(_kJavaHeapKey)) {
-      result[_kJavaHeapKey] = int.tryParse(line.split(':').last.trim());
-    } else if (line.startsWith(_kNativeHeapKey)) {
-      result[_kNativeHeapKey] = int.tryParse(line.split(':').last.trim());
-    } else if (line.startsWith(_kGraphicsKey)) {
-      result[_kGraphicsKey] = int.tryParse(line.split(':').last.trim());
+AndroidMemoryInfo parseMeminfoDump(String input) {
+  Iterable<String> lines = input.split('\n');
+  lines = lines
+    .skipWhile((String line) => !line.contains('App Summary'))
+    .takeWhile((String line) => !line.contains('TOTAL'));
+  final AndroidMemoryInfo androidMemoryInfo = AndroidMemoryInfo();
+  for (String line in lines) {
+    if (!line.contains(':')) {
+      continue;
+    }
+    final List<String> sections = line.trim().split(':');
+    final String key = sections.first.trim();
+    final int value = int.tryParse(sections.last.trim()) ?? 0;
+    switch (key) {
+      case AndroidMemoryInfo._kJavaHeapKey:
+        androidMemoryInfo.javaHeap = value;
+        break;
+      case AndroidMemoryInfo._kNativeHeapKey:
+        androidMemoryInfo.nativeHeap = value;
+        break;
+      case AndroidMemoryInfo._kCodeKey:
+        androidMemoryInfo.code = value;
+        break;
+      case AndroidMemoryInfo._kStackKey:
+        androidMemoryInfo.stack = value;
+        break;
+      case AndroidMemoryInfo._kGraphicsKey:
+        androidMemoryInfo.graphics = value;
+        break;
+      case AndroidMemoryInfo._kPrivateOtherKey:
+        androidMemoryInfo.privateOther = value;
+        break;
+      case AndroidMemoryInfo._kSystemKey:
+        androidMemoryInfo.system = value;
+        break;
     }
   }
-  return result;
+  return androidMemoryInfo;
 }
 
 /// Return the list of connected ADB devices.
@@ -832,6 +852,42 @@ List<AndroidDevice> getAdbDevices() {
   final List<AndroidDevice> devices = <AndroidDevice>[];
   parseADBDeviceOutput(text, devices: devices);
   return devices;
+}
+
+/// Android specific implementation of memory info.
+class AndroidMemoryInfo extends MemoryInfo {
+  static const String _kJavaHeapKey = 'Java Heap';
+  static const String _kNativeHeapKey = 'Native Heap';
+  static const String _kCodeKey = 'Code';
+  static const String _kStackKey = 'Stack';
+  static const String _kGraphicsKey = 'Graphics';
+  static const String _kPrivateOtherKey = 'Private Other';
+  static const String _kSystemKey = 'System';
+  static const String _kTotalKey = 'Total';
+
+  // Each measurement has KB as a unit.
+  int javaHeap = 0;
+  int nativeHeap = 0;
+  int code = 0;
+  int stack = 0;
+  int graphics = 0;
+  int privateOther = 0;
+  int system = 0;
+
+  @override
+  Map<String, Object> toJson() {
+    return <String, Object>{
+      'platform': 'Android',
+      _kJavaHeapKey: javaHeap,
+      _kNativeHeapKey: nativeHeap,
+      _kCodeKey: code,
+      _kStackKey: stack,
+      _kGraphicsKey: graphics,
+      _kPrivateOtherKey: privateOther,
+      _kSystemKey: system,
+      _kTotalKey: javaHeap + nativeHeap + code + stack + graphics + privateOther + system,
+    };
+  }
 }
 
 /// Get diagnostics about issues with any connected devices.

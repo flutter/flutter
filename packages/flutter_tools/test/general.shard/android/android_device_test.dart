@@ -734,11 +734,33 @@ Uptime: 441088659 Realtime: 521464097
   PAGECACHE_OVERFLOW:        0          MALLOC_SIZE:        0
 ''';
 
-    final Map<String, Object> result = parseMeminfoDump(exampleOutput);
+    final AndroidMemoryInfo result = parseMeminfoDump(exampleOutput);
 
-    expect(result, containsPair('Java Heap', 4296));
-    expect(result, containsPair('Native Heap', 8620));
-    expect(result, containsPair('Graphics', 2584));
+    // Parses correctly
+    expect(result.javaHeap, 4296);
+    expect(result.nativeHeap, 8620);
+    expect(result.code, 11288);
+    expect(result.stack, 496);
+    expect(result.graphics, 2584);
+    expect(result.privateOther, 65228);
+    expect(result.system, 2573);
+
+    // toJson works correctly
+    final Map<String, Object> json = result.toJson();
+
+    expect(json, containsPair('Java Heap', 4296));
+    expect(json, containsPair('Native Heap', 8620));
+    expect(json, containsPair('Code', 11288));
+    expect(json, containsPair('Stack', 496));
+    expect(json, containsPair('Graphics', 2584));
+    expect(json, containsPair('Private Other', 65228));
+    expect(json, containsPair('System', 2573));
+
+    // computed from summation of other fields.
+    expect(json, containsPair('Total', 95085));
+
+    // contains identifier for platform in memory info.
+    expect(json, containsPair('platform', 'Android'));
   });
 }
 
