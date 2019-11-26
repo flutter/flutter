@@ -75,7 +75,10 @@ class FlutterWebPlatform extends PlatformPlugin {
         .add(_wrapperHandler);
     _server.mount(cascade.handler);
 
-    _testGoldenComparator = _TestGoldenComparator(flutterProject, shellPath);
+    _testGoldenComparator = TestGoldenComparator(
+      shellPath,
+      () => TestCompiler(BuildMode.debug, false, flutterProject),
+    );
   }
 
   static Future<FlutterWebPlatform> start(String root, {
@@ -191,7 +194,7 @@ class FlutterWebPlatform extends PlatformPlugin {
   }
 
   final bool updateGoldens;
-  _TestGoldenComparator _testGoldenComparator;
+  TestGoldenComparator _testGoldenComparator;
 
   Future<shelf.Response> _goldenFileHandler(shelf.Request request) async {
     if (request.url.path.contains('flutter_goldens')) {
@@ -780,13 +783,14 @@ class _BrowserEnvironment implements Environment {
 /// be executed in a `flutter_tester` environment. This helper class generates a
 /// Dart file configured with flutter_test_config.dart to perform the comparison
 /// of golden files.
-class _TestGoldenComparator {
-  _TestGoldenComparator(this.flutterProject, this.shellPath)
+class TestGoldenComparator {
+  /// Creates a [TestGoldenComparator] instance.
+  TestGoldenComparator(this.shellPath, this.compilerFactory)
       : tempDir = fs.systemTempDirectory.createTempSync('flutter_web_platform.');
 
-  final FlutterProject flutterProject;
   final String shellPath;
   final Directory tempDir;
+  final TestCompiler Function() compilerFactory;
 
   TestCompiler _compiler;
   TestGoldenComparatorProcess _previousComparator;
@@ -820,7 +824,7 @@ class _TestGoldenComparator {
     await listenerFile.writeAsString(testBootstrap);
 
     // Lazily create the compiler
-    _compiler = _compiler ?? TestCompiler(BuildMode.debug, false, flutterProject);
+    _compiler = _compiler ?? compilerFactory();
     final String output = await _compiler.compile(listenerFile.path);
     final List<String> command = <String>[
       shellPath,
