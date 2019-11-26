@@ -632,7 +632,7 @@ class PointerAddedEvent extends PointerEvent {
       orientation: orientation,
       tilt: tilt,
       transform: transform,
-      original: original ?? this,
+      original: original as PointerAddedEvent ?? this,
     );
   }
 }
@@ -694,7 +694,7 @@ class PointerRemovedEvent extends PointerEvent {
       radiusMin: radiusMin,
       radiusMax: radiusMax,
       transform: transform,
-      original: original ?? this,
+      original: original as PointerRemovedEvent ?? this,
     );
   }
 }
@@ -799,7 +799,7 @@ class PointerHoverEvent extends PointerEvent {
       tilt: tilt,
       synthesized: synthesized,
       transform: transform,
-      original: original ?? this,
+      original: original as PointerHoverEvent ?? this,
     );
   }
 }
@@ -907,7 +907,7 @@ class PointerEnterEvent extends PointerEvent {
     down: event?.down,
     synthesized: event?.synthesized,
     transform: event?.transform,
-    original: event?.original,
+    original: event?.original as PointerEnterEvent,
   );
 
   @override
@@ -945,7 +945,7 @@ class PointerEnterEvent extends PointerEvent {
       down: down,
       synthesized: synthesized,
       transform: transform,
-      original: original ?? this,
+      original: original as PointerEnterEvent ?? this,
     );
   }
 }
@@ -1053,7 +1053,7 @@ class PointerExitEvent extends PointerEvent {
     down: event?.down,
     synthesized: event?.synthesized,
     transform: event?.transform,
-    original: event?.original,
+    original: event?.original as PointerExitEvent,
   );
 
   @override
@@ -1091,7 +1091,7 @@ class PointerExitEvent extends PointerEvent {
       down: down,
       synthesized: synthesized,
       transform: transform,
-      original: original ?? this,
+      original: original as PointerExitEvent ?? this,
     );
   }
 }
@@ -1175,7 +1175,7 @@ class PointerDownEvent extends PointerEvent {
       orientation: orientation,
       tilt: tilt,
       transform: transform,
-      original: original ?? this,
+      original: original as PointerDownEvent ?? this,
     );
   }
 }
@@ -1284,7 +1284,7 @@ class PointerMoveEvent extends PointerEvent {
       platformData: platformData,
       synthesized: synthesized,
       transform: transform,
-      original: original ?? this,
+      original: original as PointerMoveEvent ?? this,
     );
   }
 }
@@ -1372,7 +1372,7 @@ class PointerUpEvent extends PointerEvent {
       orientation: orientation,
       tilt: tilt,
       transform: transform,
-      original: original ?? this,
+      original: original as PointerUpEvent ?? this,
     );
   }
 }
@@ -1454,7 +1454,7 @@ class PointerScrollEvent extends PointerSignalEvent {
       localPosition: PointerEvent.transformPosition(transform, position),
       scrollDelta: scrollDelta,
       transform: transform,
-      original: original ?? this,
+      original: original as PointerScrollEvent ?? this,
     );
   }
 
@@ -1544,7 +1544,7 @@ class PointerCancelEvent extends PointerEvent {
       orientation: orientation,
       tilt: tilt,
       transform: transform,
-      original: original ?? this,
+      original: original as PointerCancelEvent ?? this,
     );
   }
 }

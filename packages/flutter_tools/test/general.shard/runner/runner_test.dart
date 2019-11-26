@@ -63,7 +63,7 @@ void main() {
       // exception on the first attempt, the second attempt tries to report the
       // *original* crash, and not the crash from the first crash report
       // attempt.
-      final CrashingUsage crashingUsage = flutterUsage;
+      final CrashingUsage crashingUsage = flutterUsage as CrashingUsage;
       expect(crashingUsage.sentException, 'runCommand');
     }, overrides: <Type, Generator>{
       Platform: () => FakePlatform(environment: <String, String>{

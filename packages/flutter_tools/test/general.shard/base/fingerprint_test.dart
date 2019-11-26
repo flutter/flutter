@@ -6,6 +6,7 @@ import 'dart:convert' show json;
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/fingerprint.dart';
@@ -301,7 +302,7 @@ void main() {
         fs.file('b.dart').writeAsStringSync('This is b');
         final Fingerprint fingerprint = Fingerprint.fromBuildInputs(<String, String>{}, <String>['a.dart', 'b.dart']);
 
-        final Map<String, dynamic> jsonObject = json.decode(fingerprint.toJson());
+        final Map<String, dynamic> jsonObject = castStringKeyedMap(json.decode(fingerprint.toJson()));
         expect(jsonObject['files'], hasLength(2));
         expect(jsonObject['files']['a.dart'], '8a21a15fad560b799f6731d436c1b698');
         expect(jsonObject['files']['b.dart'], '6f144e08b58cd0925328610fad7ac07c');
@@ -313,14 +314,14 @@ void main() {
       testUsingContext('includes framework version', () {
         final Fingerprint fingerprint = Fingerprint.fromBuildInputs(<String, String>{}, <String>[]);
 
-        final Map<String, dynamic> jsonObject = json.decode(fingerprint.toJson());
+        final Map<String, dynamic> jsonObject = castStringKeyedMap(json.decode(fingerprint.toJson()));
         expect(jsonObject['version'], mockVersion.frameworkRevision);
       }, overrides: <Type, Generator>{FlutterVersion: () => mockVersion});
 
       testUsingContext('includes provided properties', () {
         final Fingerprint fingerprint = Fingerprint.fromBuildInputs(<String, String>{'a': 'A', 'b': 'B'}, <String>[]);
 
-        final Map<String, dynamic> jsonObject = json.decode(fingerprint.toJson());
+        final Map<String, dynamic> jsonObject = castStringKeyedMap(json.decode(fingerprint.toJson()));
         expect(jsonObject['properties'], hasLength(2));
         expect(jsonObject['properties']['a'], 'A');
         expect(jsonObject['properties']['b'], 'B');
@@ -348,7 +349,7 @@ void main() {
           },
         });
         final Fingerprint fingerprint = Fingerprint.fromJson(jsonString);
-        final Map<String, dynamic> content = json.decode(fingerprint.toJson());
+        final Map<String, dynamic> content = castStringKeyedMap(json.decode(fingerprint.toJson()));
         expect(content, hasLength(3));
         expect(content['version'], mockVersion.frameworkRevision);
         expect(content['properties'], hasLength(3));

@@ -127,15 +127,21 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
     if (modifiers & anyMask == 0) {
       return false;
     }
+    // If only the "anyMask" bit is set, then we respond true for requests of
+    // whether either left or right is pressed.
+    // Handles the case where macOS supplies just the "either" modifier flag,
+    // but not the left/right flag. (e.g. modifierShift but not
+    // modifierLeftShift).
+    final bool anyOnly = modifiers & (leftMask | rightMask | anyMask) == anyMask;
     switch (side) {
       case KeyboardSide.any:
         return true;
       case KeyboardSide.all:
-        return modifiers & leftMask != 0 && modifiers & rightMask != 0;
+        return modifiers & leftMask != 0 && modifiers & rightMask != 0 || anyOnly;
       case KeyboardSide.left:
-        return modifiers & leftMask != 0;
+        return modifiers & leftMask != 0 || anyOnly;
       case KeyboardSide.right:
-        return modifiers & rightMask != 0;
+        return modifiers & rightMask != 0 || anyOnly;
     }
     return false;
   }
@@ -143,17 +149,23 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
   @override
   bool isModifierPressed(ModifierKey key, {KeyboardSide side = KeyboardSide.any}) {
     final int independentModifier = modifiers & deviceIndependentMask;
+    bool result;
     switch (key) {
       case ModifierKey.controlModifier:
-        return _isLeftRightModifierPressed(side, independentModifier & modifierControl, modifierLeftControl, modifierRightControl);
+        result = _isLeftRightModifierPressed(side, independentModifier & modifierControl, modifierLeftControl, modifierRightControl);
+        break;
       case ModifierKey.shiftModifier:
-        return _isLeftRightModifierPressed(side, independentModifier & modifierShift, modifierLeftShift, modifierRightShift);
+        result = _isLeftRightModifierPressed(side, independentModifier & modifierShift, modifierLeftShift, modifierRightShift);
+        break;
       case ModifierKey.altModifier:
-        return _isLeftRightModifierPressed(side, independentModifier & modifierOption, modifierLeftOption, modifierRightOption);
+        result = _isLeftRightModifierPressed(side, independentModifier & modifierOption, modifierLeftOption, modifierRightOption);
+        break;
       case ModifierKey.metaModifier:
-        return _isLeftRightModifierPressed(side, independentModifier & modifierCommand, modifierLeftCommand, modifierRightCommand);
+        result = _isLeftRightModifierPressed(side, independentModifier & modifierCommand, modifierLeftCommand, modifierRightCommand);
+        break;
       case ModifierKey.capsLockModifier:
-        return independentModifier & modifierCapsLock != 0;
+        result = independentModifier & modifierCapsLock != 0;
+        break;
     // On macOS, the function modifier bit is set for any function key, like F1,
     // F2, etc., but the meaning of ModifierKey.modifierFunction in Flutter is
     // that of the Fn modifier key, so there's no good way to emulate that on
@@ -163,21 +175,26 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
       case ModifierKey.symbolModifier:
       case ModifierKey.scrollLockModifier:
         // These modifier masks are not used in macOS keyboards.
-        return false;
+        result = false;
+        break;
     }
-    return false;
+    assert(!result || getModifierSide(key) != null, "$runtimeType thinks that a modifier is pressed, but can't figure out what side it's on.");
+    return result;
   }
 
   @override
   KeyboardSide getModifierSide(ModifierKey key) {
-    KeyboardSide findSide(int leftMask, int rightMask) {
+    KeyboardSide findSide(int leftMask, int rightMask, int anyMask) {
       final int combinedMask = leftMask | rightMask;
       final int combined = modifiers & combinedMask;
       if (combined == leftMask) {
         return KeyboardSide.left;
       } else if (combined == rightMask) {
         return KeyboardSide.right;
-      } else if (combined == combinedMask) {
+      } else if (combined == combinedMask || modifiers & (combinedMask | anyMask) == anyMask) {
+        // Handles the case where macOS supplies just the "either" modifier
+        // flag, but not the left/right flag. (e.g. modifierShift but not
+        // modifierLeftShift).
         return KeyboardSide.all;
       }
       return null;
@@ -185,13 +202,13 @@ class RawKeyEventDataMacOs extends RawKeyEventData {
 
     switch (key) {
       case ModifierKey.controlModifier:
-        return findSide(modifierLeftControl, modifierRightControl);
+        return findSide(modifierLeftControl, modifierRightControl, modifierControl);
       case ModifierKey.shiftModifier:
-        return findSide(modifierLeftShift, modifierRightShift);
+        return findSide(modifierLeftShift, modifierRightShift, modifierShift);
       case ModifierKey.altModifier:
-        return findSide(modifierLeftOption, modifierRightOption);
+        return findSide(modifierLeftOption, modifierRightOption, modifierOption);
       case ModifierKey.metaModifier:
-        return findSide(modifierLeftCommand, modifierRightCommand);
+        return findSide(modifierLeftCommand, modifierRightCommand, modifierCommand);
       case ModifierKey.capsLockModifier:
       case ModifierKey.numLockModifier:
       case ModifierKey.scrollLockModifier:
