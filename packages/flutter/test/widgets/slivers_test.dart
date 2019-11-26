@@ -454,6 +454,10 @@ void main() {
 
       expect(semantics.nodesWith(label: 'a'), hasLength(0));
       expect(find.byType(Text), findsNothing);
+      final RenderViewport renderViewport = tester.renderObject(find.byType(Viewport));
+      final RenderSliver renderSliver = renderViewport.lastChild;
+      expect(renderSliver.geometry.scrollExtent, 0.0);
+      expect(find.byType(SliverOffstage), findsNothing);
     });
 
     testWidgets('offstage false', (WidgetTester tester) async {
@@ -469,6 +473,10 @@ void main() {
 
       expect(semantics.nodesWith(label: 'a'), hasLength(1));
       expect(find.byType(Text), findsOneWidget);
+      final RenderViewport renderViewport = tester.renderObject(find.byType(Viewport));
+      final RenderSliver renderSliver = renderViewport.lastChild;
+      expect(renderSliver.geometry.scrollExtent, 14.0);
+      expect(find.byType(SliverOffstage), paints..paragraph());
     });
   });
 
