@@ -2,8 +2,8 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("$flutter_root/tools/fuchsia/common_libs.gni")
 import("$flutter_root/tools/fuchsia/fuchsia_debug_symbols.gni")
+import("$flutter_root/tools/fuchsia/fuchsia_libs.gni")
 
 # Creates a Fuchsia archive (.far) file using PM from the Fuchsia SDK.
 template("fuchsia_archive") {

@@ -268,6 +268,12 @@ def to_gn_args(args):
     if args.ubsan:
       gn_args['is_ubsan'] = True
 
+    if args.enable_vulkan_validation_layers:
+      if args.target_os is not 'fuchsia':
+        print('Vulkan validation layers are currently only supported on Fuchsia targets.')
+        sys.exit(1)
+      gn_args['enable_vulkan_validation_layers'] = True
+
     return gn_args
 
 def parse_args(args):
@@ -316,6 +322,7 @@ def parse_args(args):
 
   parser.add_argument('--enable-fontconfig', action='store_true', default=False)
   parser.add_argument('--enable-skshaper', action='store_true', default=False)
+  parser.add_argument('--enable-vulkan-validation-layers', action='store_true', default=False)
 
   parser.add_argument('--embedder-for-target', dest='embedder_for_target', action='store_true', default=False)
 

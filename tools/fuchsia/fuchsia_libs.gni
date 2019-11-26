@@ -69,3 +69,66 @@ common_libs = [
             "$clang_base/${clang_manifest_json.md5_beb70f40d525448b39ea87d9f5811e56}")
   },
 ]
+
+vulkan_dist = "$fuchsia_sdk_base/dist"
+
+vulkan_validation_libs = [
+  {
+    name = "VkLayer_core_validation.so"
+    path = rebase_path("$vulkan_dist")
+  },
+  {
+    name = "VkLayer_khronos_validation.so"
+    path = rebase_path("$vulkan_dist")
+  },
+  {
+    name = "VkLayer_object_lifetimes.so"
+    path = rebase_path("$vulkan_dist")
+  },
+  {
+    name = "VkLayer_stateless_validation.so"
+    path = rebase_path("$vulkan_dist")
+  },
+  {
+    name = "VkLayer_thread_safety.so"
+    path = rebase_path("$vulkan_dist")
+  },
+  {
+    name = "VkLayer_unique_objects.so"
+    path = rebase_path("$vulkan_dist")
+  },
+]
+
+vulkan_data_dir =
+    "//fuchsia/sdk/linux/pkg/vulkan_layers/data/vulkan/explicit_layer.d"
+
+vulkan_icds = [
+  {
+    path = rebase_path("$vulkan_data_dir/VkLayer_core_validation.json")
+    dest = "vulkan/explicit_layer.d/VkLayer_core_validation.json"
+  },
+  {
+    path = rebase_path("$vulkan_data_dir/VkLayer_object_lifetimes.json")
+    dest = "vulkan/explicit_layer.d/VkLayer_object_lifetimes.json"
+  },
+  {
+    path = rebase_path("$vulkan_data_dir/VkLayer_thread_safety.json")
+    dest = "vulkan/explicit_layer.d/VkLayer_thread_safety.json"
+  },
+  {
+    path = rebase_path("$vulkan_data_dir/VkLayer_stateless_validation.json")
+    dest = "vulkan/explicit_layer.d/VkLayer_stateless_validation.json"
+  },
+  {
+    path = rebase_path("$vulkan_data_dir/VkLayer_unique_objects.json")
+    dest = "vulkan/explicit_layer.d/VkLayer_unique_objects.json"
+  },
+  {
+    path = rebase_path("$vulkan_data_dir/VkLayer_khronos_validation.json")
+    dest = "vulkan/explicit_layer.d/VkLayer_khronos_validation.json"
+  },
+  {
+    path = rebase_path("$vulkan_data_dir/VkLayer_standard_validation.json")
+    dest = "vulkan/explicit_layer.d/VkLayer_standard_validation.json"
+  },
+]

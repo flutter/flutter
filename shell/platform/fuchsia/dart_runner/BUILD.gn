@@ -6,9 +6,9 @@ assert(is_fuchsia)
 
 import("//build/fuchsia/sdk.gni")
 import("$flutter_root/common/fuchsia_config.gni")
-import("$flutter_root/tools/fuchsia/common_libs.gni")
 import("$flutter_root/tools/fuchsia/dart.gni")
 import("$flutter_root/tools/fuchsia/fuchsia_archive.gni")
+import("$flutter_root/tools/fuchsia/fuchsia_libs.gni")
 
 template("runner") {
   assert(defined(invoker.product), "The parameter 'product' must be defined")
