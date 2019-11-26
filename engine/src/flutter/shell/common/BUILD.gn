@@ -173,6 +173,7 @@ if (current_toolchain == host_toolchain) {
       ":shell_unittests_gpu_configuration",
       "$flutter_root/common",
       "$flutter_root/flow",
+      "$flutter_root/fml/dart",
       "$flutter_root/lib/ui:ui",
       "$flutter_root/shell",
       "$flutter_root/testing:dart",
