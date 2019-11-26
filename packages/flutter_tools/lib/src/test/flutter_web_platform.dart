@@ -789,7 +789,7 @@ class _TestGoldenComparator {
   final Directory tempDir;
 
   TestCompiler _compiler;
-  _TestGoldenComparatorProcess _previousComparator;
+  TestGoldenComparatorProcess _previousComparator;
   Uri _previousTestUri;
 
   Future<void> close() async {
@@ -800,15 +800,15 @@ class _TestGoldenComparator {
 
   /// Start golden comparator in a separate process. Start one file per test file
   /// to reduce the overhead of starting `flutter_tester`.
-  Future<_TestGoldenComparatorProcess> _processForTestFile(Uri testUri) async {
+  Future<TestGoldenComparatorProcess> _processForTestFile(Uri testUri) async {
     if (testUri == _previousTestUri) {
       return _previousComparator;
     }
 
-    final String bootstrap = _TestGoldenComparatorProcess.generateBootstrap(testUri);
+    final String bootstrap = TestGoldenComparatorProcess.generateBootstrap(testUri);
     final Process process = await _startProcess(bootstrap);
     unawaited(_previousComparator?.close());
-    _previousComparator = _TestGoldenComparatorProcess(process);
+    _previousComparator = TestGoldenComparatorProcess(process);
     _previousTestUri = testUri;
 
     return _previousComparator;
@@ -840,7 +840,7 @@ class _TestGoldenComparator {
   Future<String> compareGoldens(Uri testUri, Uint8List bytes, Uri goldenKey, bool updateGoldens) async {
     final File imageFile = await (await tempDir.createTemp('image')).childFile('image').writeAsBytes(bytes);
 
-    final _TestGoldenComparatorProcess process = await _processForTestFile(testUri);
+    final TestGoldenComparatorProcess process = await _processForTestFile(testUri);
     process.sendCommand(imageFile, goldenKey, updateGoldens);
 
     final Map<String, dynamic> result = await process.getResponse().timeout(const Duration(seconds: 10));
@@ -855,8 +855,9 @@ class _TestGoldenComparator {
 
 /// Represents a `flutter_tester` process started for golden comparison. Also
 /// handles communication with the child process.
-class _TestGoldenComparatorProcess {
-  _TestGoldenComparatorProcess(this.process) {
+class TestGoldenComparatorProcess {
+  /// Creates a [TestGoldenComparatorProcess] backed by [process].
+  TestGoldenComparatorProcess(this.process) {
     // Pipe stdout and stderr to printTrace and printError.
     // Also parse stdout as a stream of JSON objects.
     streamIterator = StreamIterator<Map<String, dynamic>>(
