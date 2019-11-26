@@ -6,7 +6,7 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:localization/gen_l10n.dart';
 import 'package:path/path.dart' as path;
-import 'package:test_api/test_api.dart';
+import 'package:test/test.dart';
 
 import 'package:localization/localizations_utils.dart';
 
@@ -390,8 +390,212 @@ void main() {
     });
   });
 
-  group('LocalizationsGenerator.parseTemplateArbFile:', () {
-    // TODO(shihaohong): add tests
+  group('LocalizationsGenerator.generateClassMethods:', () {
+    test('correctly generates a simple message:', () {
+      _standardFlutterDirectoryL10nSetup(fs);
+      final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+      try {
+        generator.initialize(
+          l10nDirectoryPath: defaultArbPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        );
+        generator.parseArbFiles();
+        generator.generateClassMethods();
+        print(generator.classMethods);
+      } on Exception catch (e) {
+       fail('Parsing template arb file should succeed: $e');
+      }
+
+      expect(generator.classMethods, isNotEmpty);
+      expect(
+        generator.classMethods.first,
+        '''  String get title {
+    return Intl.message(
+      r'Stocks',
+      locale: _localeName,
+      name: 'title',
+      desc: r'Title for the Stocks application'
+    );
+  }
+''');
+    });
+
+    test('correctly generates a plural message:', () {
+      const String singlePluralMessageArbFileString = '''{
+  "helloWorlds": "{count,plural, =0{Hello}=1{Hello World}=2{Hello two worlds}few{Hello {count} worlds}many{Hello all {count} worlds}other{Hello other {count} worlds}}",
+  "@helloWorlds": {
+    "placeholders": {
+      "count": {}
+    }
+  }
+}''';
+      final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+        ..createSync(recursive: true);
+      l10nDirectory.childFile(defaultTemplateArbFileName)
+        .writeAsStringSync(singlePluralMessageArbFileString);
+
+      final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+      try {
+        generator.initialize(
+          l10nDirectoryPath: defaultArbPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        );
+        generator.parseArbFiles();
+        generator.generateClassMethods();
+        print(generator.classMethods);
+      } on Exception catch (e) {
+       fail('Parsing template arb file should succeed: $e');
+      }
+
+      expect(generator.classMethods, isNotEmpty);
+      expect(
+        generator.classMethods.first,
+        '''  String helloWorlds(int count) {
+    return Intl.plural(
+      count,
+      locale: _localeName,
+      name: 'helloWorlds',
+      args: <Object>[count],
+      zero: 'Hello',
+      one: 'Hello World',
+      two: 'Hello two worlds',
+      few: 'Hello \$count worlds',
+      many: 'Hello all \$count worlds',
+      other: 'Hello other \$count worlds'
+    );
+  }
+'''
+      );
+    });
+
+    test('should throw when failing to parse the arb file:', () {
+      const String arbFileWithTrailingComma = '''{
+  "title": "Stocks",
+  "@title": {
+    "description": "Title for the Stocks application"
+  },
+}''';
+      final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+        ..createSync(recursive: true);
+      l10nDirectory.childFile(defaultTemplateArbFileName)
+        .writeAsStringSync(arbFileWithTrailingComma);
+
+      final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+      try {
+        generator.initialize(
+          l10nDirectoryPath: defaultArbPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        );
+        generator.parseArbFiles();
+        generator.generateClassMethods();
+      } on FormatException catch (e) {
+        expect(e.message, contains('Unexpected character'));
+        return;
+      }
+
+      fail(
+        'should fail with a FormatException due to a trailing comma in the '
+        'arb file.'
+      );
+    });
+
+    group('checks for method/getter formatting', () {
+      test('cannot contain non-alphanumeric symbols', () {
+        const String nonAlphaNumericArbFile = '''{
+    "title!!": "Stocks",
+    "@title!!": {
+      "description": "Title for the Stocks application"
+    }
+  }''';
+        final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+          ..createSync(recursive: true);
+        l10nDirectory.childFile(defaultTemplateArbFileName)
+          .writeAsStringSync(nonAlphaNumericArbFile);
+
+        final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+        try {
+          generator.initialize(
+            l10nDirectoryPath: defaultArbPathString,
+            templateArbFileName: defaultTemplateArbFileName,
+            outputFileString: defaultOutputFileString,
+            classNameString: defaultClassNameString,
+          );
+          generator.parseArbFiles();
+          generator.generateClassMethods();
+        } on L10nException catch (e) {
+          expect(e.message, contains('Invalid key format'));
+          return;
+        }
+
+        fail('should fail due to non-alphanumeric character.');
+      });
+
+      test('must start with lowercase character', () {
+        const String nonAlphaNumericArbFile = '''{
+    "Title": "Stocks",
+    "@Title": {
+      "description": "Title for the Stocks application"
+    }
+  }''';
+        final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+          ..createSync(recursive: true);
+        l10nDirectory.childFile(defaultTemplateArbFileName)
+          .writeAsStringSync(nonAlphaNumericArbFile);
+
+        final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+        try {
+          generator.initialize(
+            l10nDirectoryPath: defaultArbPathString,
+            templateArbFileName: defaultTemplateArbFileName,
+            outputFileString: defaultOutputFileString,
+            classNameString: defaultClassNameString,
+          );
+          generator.parseArbFiles();
+          generator.generateClassMethods();
+        } on L10nException catch (e) {
+          expect(e.message, contains('Invalid key format'));
+          return;
+        }
+
+        fail('should fail since key starts with a non-lowercase.');
+      });
+
+      test('cannot start with a number', () {
+        const String nonAlphaNumericArbFile = '''{
+    "123title": "Stocks",
+    "@123title": {
+      "description": "Title for the Stocks application"
+    }
+  }''';
+        final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+          ..createSync(recursive: true);
+        l10nDirectory.childFile(defaultTemplateArbFileName)
+          .writeAsStringSync(nonAlphaNumericArbFile);
+
+        final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+        try {
+          generator.initialize(
+            l10nDirectoryPath: defaultArbPathString,
+            templateArbFileName: defaultTemplateArbFileName,
+            outputFileString: defaultOutputFileString,
+            classNameString: defaultClassNameString,
+          );
+          generator.parseArbFiles();
+          generator.generateClassMethods();
+        } on L10nException catch (e) {
+          expect(e.message, contains('Invalid key format'));
+          return;
+        }
+
+        fail('should fail since key starts with a number.');
+      });
+    });
   });
 
   group('LocalizationsGenerator.generateOutputFile:', () {

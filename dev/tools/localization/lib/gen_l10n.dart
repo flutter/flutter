@@ -474,7 +474,15 @@ class LocalizationsGenerator {
     }
   }
 
-  void parseTemplateArbFile() {
+  /// Generates the Dart class methods for the localizations class.
+  ///
+  /// The method parses [templateArbFile] and uses its resource ids as the
+  /// Dart method and getter names. It then uses its values to figure out
+  /// how to define these getters.
+  ///
+  /// For example, a message with plurals will be handled differently from
+  /// a simple, singular message.
+  void generateClassMethods() {
     Map<String, dynamic> bundle;
     try {
       bundle = json.decode(templateArbFile.readAsStringSync());
