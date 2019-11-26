@@ -110,8 +110,10 @@ class BackdropFilterLayer extends ContainerLayer {
 class ClipPathLayer extends ContainerLayer {
   /// The path used to clip child layers.
   final ui.Path _clipPath;
+  final ui.Clip _clipBehavior;
 
-  ClipPathLayer(this._clipPath);
+  ClipPathLayer(this._clipPath, this._clipBehavior)
+      : assert(_clipBehavior != ui.Clip.none);
 
   @override
   void preroll(PrerollContext prerollContext, Matrix4 matrix) {
@@ -127,8 +129,15 @@ class ClipPathLayer extends ContainerLayer {
     assert(needsPainting);
 
     paintContext.canvas.save();
-    paintContext.canvas.clipPath(_clipPath);
+    paintContext.canvas.clipPath(_clipPath, _clipBehavior != ui.Clip.hardEdge);
+
+    if (_clipBehavior == ui.Clip.antiAliasWithSaveLayer) {
+      paintContext.canvas.saveLayer(paintBounds, null);
+    }
     paintChildren(paintContext);
+    if (_clipBehavior == ui.Clip.antiAliasWithSaveLayer) {
+      paintContext.canvas.restore();
+    }
     paintContext.canvas.restore();
   }
 }
@@ -137,8 +146,10 @@ class ClipPathLayer extends ContainerLayer {
 class ClipRectLayer extends ContainerLayer {
   /// The rectangle used to clip child layers.
   final ui.Rect _clipRect;
+  final ui.Clip _clipBehavior;
 
-  ClipRectLayer(this._clipRect);
+  ClipRectLayer(this._clipRect, this._clipBehavior)
+      : assert(_clipBehavior != ui.Clip.none);
 
   @override
   void preroll(PrerollContext prerollContext, Matrix4 matrix) {
@@ -153,8 +164,18 @@ class ClipRectLayer extends ContainerLayer {
     assert(needsPainting);
 
     paintContext.canvas.save();
-    paintContext.canvas.clipRect(_clipRect);
+    paintContext.canvas.clipRect(
+      _clipRect,
+      ui.ClipOp.intersect,
+      _clipBehavior != ui.Clip.hardEdge,
+    );
+    if (_clipBehavior == ui.Clip.antiAliasWithSaveLayer) {
+      paintContext.canvas.saveLayer(_clipRect, null);
+    }
     paintChildren(paintContext);
+    if (_clipBehavior == ui.Clip.antiAliasWithSaveLayer) {
+      paintContext.canvas.restore();
+    }
     paintContext.canvas.restore();
   }
 }
@@ -163,8 +184,10 @@ class ClipRectLayer extends ContainerLayer {
 class ClipRRectLayer extends ContainerLayer {
   /// The rounded rectangle used to clip child layers.
   final ui.RRect _clipRRect;
+  final ui.Clip _clipBehavior;
 
-  ClipRRectLayer(this._clipRRect);
+  ClipRRectLayer(this._clipRRect, this._clipBehavior)
+      : assert(_clipBehavior != ui.Clip.none);
 
   @override
   void preroll(PrerollContext prerollContext, Matrix4 matrix) {
@@ -179,8 +202,15 @@ class ClipRRectLayer extends ContainerLayer {
     assert(needsPainting);
 
     paintContext.canvas.save();
-    paintContext.canvas.clipRRect(_clipRRect);
+    paintContext.canvas
+        .clipRRect(_clipRRect, _clipBehavior != ui.Clip.hardEdge);
+    if (_clipBehavior == ui.Clip.antiAliasWithSaveLayer) {
+      paintContext.canvas.saveLayer(paintBounds, null);
+    }
     paintChildren(paintContext);
+    if (_clipBehavior == ui.Clip.antiAliasWithSaveLayer) {
+      paintContext.canvas.restore();
+    }
     paintContext.canvas.restore();
   }
 }
@@ -287,7 +317,7 @@ class TransformLayer extends ContainerLayer
 /// A layer containing a [Picture].
 class PictureLayer extends Layer {
   /// The picture to paint into the canvas.
-  final ui.Picture picture;
+  final SkPicture picture;
 
   /// The offset at which to paint the picture.
   final ui.Offset offset;
@@ -414,13 +444,13 @@ class PhysicalShapeLayer extends ContainerLayer
     final int saveCount = paintContext.canvas.save();
     switch (_clipBehavior) {
       case ui.Clip.hardEdge:
-        paintContext.canvas.clipPath(_path, doAntiAlias: false);
+        paintContext.canvas.clipPath(_path, false);
         break;
       case ui.Clip.antiAlias:
-        paintContext.canvas.clipPath(_path, doAntiAlias: true);
+        paintContext.canvas.clipPath(_path, true);
         break;
       case ui.Clip.antiAliasWithSaveLayer:
-        paintContext.canvas.clipPath(_path, doAntiAlias: true);
+        paintContext.canvas.clipPath(_path, true);
         paintContext.canvas.saveLayer(paintBounds, null);
         break;
       case ui.Clip.none:

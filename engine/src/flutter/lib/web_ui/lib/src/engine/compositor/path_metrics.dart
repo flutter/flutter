@@ -102,8 +102,9 @@ class _SkPathMeasure {
       {bool startWithMoveTo = true}) {
     assert(contourIndex == currentContourIndex,
         'PathMetrics are invalid if it is not the current contour.');
-    // TODO(het): Add this once `getSegment` is added to CanvasKit.
-    throw UnimplementedError('extractPath');
+    final js.JsObject skPath = pathMeasure
+        .callMethod('getSegment', <dynamic>[start, end, startWithMoveTo]);
+    return SkPath._fromSkPath(skPath);
   }
 
   bool isClosed(int contourIndex) {

@@ -494,7 +494,7 @@ void _testCullRectComputation() {
 }
 
 void _drawTestPicture(SceneBuilder builder) {
-  final PictureRecorder recorder = PictureRecorder();
+  final EnginePictureRecorder recorder = PictureRecorder();
   final RecordingCanvas canvas =
       recorder.beginRecording(const Rect.fromLTRB(0, 0, 100, 100));
   canvas.drawCircle(
@@ -529,7 +529,7 @@ typedef PaintCallback = void Function(RecordingCanvas canvas);
 
 void drawWithBitmapCanvas(SceneBuilder builder, PaintCallback callback,
     {Rect bounds = Rect.largest}) {
-  final PictureRecorder recorder = PictureRecorder();
+  final EnginePictureRecorder recorder = PictureRecorder();
   final RecordingCanvas canvas = recorder.beginRecording(bounds);
 
   canvas.debugEnforceArbitraryPaint();

@@ -41,11 +41,11 @@ class SkPath implements ui.Path {
 
   @override
   void addArc(ui.Rect oval, double startAngle, double sweepAngle) {
-    const double _toDegrees = 180.0 / math.pi;
+    const double toDegrees = 180.0 / math.pi;
     _skPath.callMethod('addArc', <dynamic>[
       makeSkRect(oval),
-      startAngle * _toDegrees,
-      sweepAngle * _toDegrees,
+      startAngle * toDegrees,
+      sweepAngle * toDegrees,
     ]);
   }
 
@@ -83,20 +83,9 @@ class SkPath implements ui.Path {
 
   @override
   void addPolygon(List<ui.Offset> points, bool close) {
-    // TODO(het): Use `addPoly` once CanvasKit makes it available.
     assert(points != null);
-    if (points.isEmpty) {
-      return;
-    }
-
-    moveTo(points.first.dx, points.first.dy);
-    for (int i = 1; i < points.length; i++) {
-      final ui.Offset point = points[i];
-      lineTo(point.dx, point.dy);
-    }
-    if (close) {
-      this.close();
-    }
+    final Float32List encodedPoints = encodePointList(points);
+    _skPath.callMethod('addPoly', <dynamic>[encodedPoints, close]);
   }
 
   @override
@@ -124,11 +113,11 @@ class SkPath implements ui.Path {
   @override
   void arcTo(
       ui.Rect rect, double startAngle, double sweepAngle, bool forceMoveTo) {
-    const double radsToDegrees = 180.0 / math.pi;
+    const double toDegrees = 180.0 / math.pi;
     _skPath.callMethod('arcTo', <dynamic>[
       makeSkRect(rect),
-      startAngle * radsToDegrees,
-      sweepAngle * radsToDegrees,
+      startAngle * toDegrees,
+      sweepAngle * toDegrees,
       forceMoveTo,
     ]);
   }

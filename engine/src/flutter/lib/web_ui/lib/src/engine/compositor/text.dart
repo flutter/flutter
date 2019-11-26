@@ -17,6 +17,9 @@ const Map<String, String> _fontFamilyOverrides = <String, String>{
   'AbrilFatface': 'Abril Fatface',
   'packages/cupertino_icons/CupertinoIcons': 'CupertinoIcons',
   '.SF Pro Text': 'Google Sans',
+  '.SF Pro Display': 'Google Sans',
+  '.SF UI Text': 'Google Sans',
+  '.SF UI Display': 'Google Sans',
 };
 
 class SkParagraphStyle implements ui.ParagraphStyle {

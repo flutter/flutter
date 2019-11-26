@@ -340,7 +340,7 @@ abstract class PersistedPicture extends PersistedLeafSurface {
 
   final double dx;
   final double dy;
-  final ui.Picture picture;
+  final EnginePicture picture;
   final ui.Rect localPaintBounds;
   final int hints;
 

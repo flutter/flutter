@@ -743,7 +743,8 @@ class BitmapCanvas extends EngineCanvas with SaveStackTracking {
 
   /// Paints the [picture] into this canvas.
   void drawPicture(ui.Picture picture) {
-    picture.recordingCanvas.apply(this);
+    final EnginePicture enginePicture = picture;
+    enginePicture.recordingCanvas.apply(this);
   }
 
   /// Draws vertices on a gl context.
