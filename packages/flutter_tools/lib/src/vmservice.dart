@@ -19,6 +19,7 @@ import 'base/file_system.dart';
 import 'base/io.dart' as io;
 import 'base/utils.dart';
 import 'convert.dart' show base64, utf8;
+import 'device.dart';
 import 'globals.dart';
 import 'version.dart';
 import 'vmservice_record_replay.dart';
@@ -101,7 +102,13 @@ Future<StreamChannel<String>> _defaultOpenChannel(Uri uri, {io.CompressionOption
 
 /// Override `VMServiceConnector` in [context] to return a different VMService
 /// from [VMService.connect] (used by tests).
-typedef VMServiceConnector = Future<VMService> Function(Uri httpUri, { ReloadSources reloadSources, Restart restart, CompileExpression compileExpression, io.CompressionOptions compression });
+typedef VMServiceConnector = Future<VMService> Function(Uri httpUri, {
+  ReloadSources reloadSources,
+  Restart restart,
+  CompileExpression compileExpression,
+  io.CompressionOptions compression,
+  Device device,
+});
 
 /// A connection to the Dart VM Service.
 // TODO(mklim): Test this, https://github.com/flutter/flutter/issues/23031
@@ -113,6 +120,7 @@ class VMService {
     ReloadSources reloadSources,
     Restart restart,
     CompileExpression compileExpression,
+    Device device,
   ) {
     _vm = VM._empty(this);
     _peer.listen().catchError(_connectionError.completeError);
@@ -264,6 +272,16 @@ class VMService {
         'alias': 'Flutter Tools',
       });
     }
+    if (device != null) {
+      _peer.registerMethod('flutterMemoryInfo', (rpc.Parameters params) async {
+        final MemoryInfo result = await device.queryMemoryInfo();
+        return result.toJson();
+      });
+      _peer.sendNotification('registerService', <String, String>{
+        'service': 'flutterMemoryInfo',
+        'alias': 'Flutter Tools',
+      });
+    }
   }
 
   /// Enables recording of VMService JSON-rpc activity to the specified base
@@ -310,9 +328,16 @@ class VMService {
       Restart restart,
       CompileExpression compileExpression,
       io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
+      Device device,
     }) async {
     final VMServiceConnector connector = context.get<VMServiceConnector>() ?? VMService._connect;
-    return connector(httpUri, reloadSources: reloadSources, restart: restart, compileExpression: compileExpression, compression: compression);
+    return connector(httpUri,
+      reloadSources: reloadSources,
+      restart: restart,
+      compileExpression: compileExpression,
+      compression: compression,
+      device: device,
+    );
   }
 
   static Future<VMService> _connect(
@@ -321,11 +346,12 @@ class VMService {
     Restart restart,
     CompileExpression compileExpression,
     io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
+    Device device,
   }) async {
     final Uri wsUri = httpUri.replace(scheme: 'ws', path: fs.path.join(httpUri.path, 'ws'));
     final StreamChannel<String> channel = await _openChannel(wsUri, compression: compression);
     final rpc.Peer peer = rpc.Peer.withoutJson(jsonDocument.bind(channel), onUnhandledError: _unhandledError);
-    final VMService service = VMService(peer, httpUri, wsUri, reloadSources, restart, compileExpression);
+    final VMService service = VMService(peer, httpUri, wsUri, reloadSources, restart, compileExpression, device);
     // This call is to ensure we are able to establish a connection instead of
     // keeping on trucking and failing farther down the process.
     await service._sendRequest('getVersion', const <String, dynamic>{});
