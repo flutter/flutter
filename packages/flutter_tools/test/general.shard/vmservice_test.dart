@@ -7,8 +7,10 @@ import 'dart:io';
 
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
+import 'package:mockito/mockito.dart';
 import 'package:quiver/testing/async.dart';
 
 import '../src/common.dart';
@@ -265,7 +267,7 @@ void main() {
       Stdio: () => mockStdio,
     });
 
-     testUsingContext('registers hot UI method', () {
+    testUsingContext('registers hot UI method', () {
       FakeAsync().run((FakeAsync time) {
         final MockPeer mockPeer = MockPeer();
         Future<void> reloadSources(String isolateId, { bool pause, bool force}) async {}
@@ -277,5 +279,21 @@ void main() {
       Logger: () => StdoutLogger(),
       Stdio: () => mockStdio,
     });
+
+    testUsingContext('registers flutterMemoryInfo service', () {
+      FakeAsync().run((FakeAsync time) {
+        final MockDevice mockDevice = MockDevice();
+        final MockPeer mockPeer = MockPeer();
+        Future<void> reloadSources(String isolateId, { bool pause, bool force}) async {}
+        VMService(mockPeer, null, null, reloadSources, null, null, mockDevice);
+
+        expect(mockPeer.registeredMethods, contains('flutterMemoryInfo'));
+      });
+    }, overrides: <Type, Generator>{
+      Logger: () => StdoutLogger(),
+      Stdio: () => mockStdio,
+    });
   });
 }
+
+class MockDevice extends Mock implements Device {}
