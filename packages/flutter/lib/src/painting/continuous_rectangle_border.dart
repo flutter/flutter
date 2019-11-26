@@ -115,10 +115,10 @@ class ContinuousRectangleBorder extends ShapeBorder {
       ..cubicTo(left, top, left, top, left + tlRadiusY, top)
       ..lineTo(right - trRadiusX, top)
       ..cubicTo(right, top, right, top, right, top + trRadiusY)
-      ..lineTo(right, bottom - blRadiusX)
-      ..cubicTo(right, bottom, right, bottom, right - blRadiusY, bottom)
-      ..lineTo(left + brRadiusX, bottom)
-      ..cubicTo(left, bottom, left, bottom, left, bottom - brRadiusY)
+      ..lineTo(right, bottom - brRadiusX)
+      ..cubicTo(right, bottom, right, bottom, right - brRadiusY, bottom)
+      ..lineTo(left + blRadiusX, bottom)
+      ..cubicTo(left, bottom, left, bottom, left, bottom - blRadiusY)
       ..close();
   }
 

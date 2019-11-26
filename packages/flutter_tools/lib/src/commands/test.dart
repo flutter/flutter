@@ -106,9 +106,7 @@ class TestCommand extends FastFlutterCommand {
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async {
-    final Set<DevelopmentArtifact> results = <DevelopmentArtifact>{
-      DevelopmentArtifact.universal,
-    };
+    final Set<DevelopmentArtifact> results = <DevelopmentArtifact>{};
     if (stringArg('platform') == 'chrome') {
       results.add(DevelopmentArtifact.web);
     }

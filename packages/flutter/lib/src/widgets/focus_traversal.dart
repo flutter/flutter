@@ -1002,8 +1002,8 @@ class DirectionalFocusIntent extends Intent {
   final bool ignoreTextFields;
 }
 
-/// An [Action] that moves the focus to the focusable node in the given
-/// [direction] configured by the associated [DirectionalFocusIntent].
+/// An [Action] that moves the focus to the focusable node in the direction
+/// configured by the associated [DirectionalFocusIntent.direction].
 ///
 /// This is the [Action] associated with the [key] and bound by default to the
 /// [LogicalKeyboardKey.arrowUp], [LogicalKeyboardKey.arrowDown],
@@ -1015,9 +1015,6 @@ class DirectionalFocusAction extends _RequestFocusActionBase {
 
   /// The [LocalKey] that uniquely identifies this action to [DirectionalFocusIntent].
   static const LocalKey key = ValueKey<Type>(DirectionalFocusAction);
-
-  /// The direction in which to look for the next focusable node when invoked.
-  TraversalDirection direction;
 
   @override
   void invoke(FocusNode node, DirectionalFocusIntent intent) {

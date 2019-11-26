@@ -30,7 +30,6 @@ class BuildWindowsCommand extends BuildSubCommand {
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
     DevelopmentArtifact.windows,
-    DevelopmentArtifact.universal,
   };
 
   @override

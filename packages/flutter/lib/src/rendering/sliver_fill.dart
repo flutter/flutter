@@ -157,16 +157,15 @@ class RenderSliverFillRemaining extends RenderSliverSingleBoxAdapter {
           parentUsesSize: true,
         );
     } else if (child != null) {
-      child.layout(constraints.asBoxConstraints(), parentUsesSize: true);
-
       switch (constraints.axis) {
         case Axis.horizontal:
-          childExtent = child.size.width;
+          childExtent = child.getMaxIntrinsicWidth(constraints.crossAxisExtent);
           break;
         case Axis.vertical:
-          childExtent = child.size.height;
+          childExtent = child.getMaxIntrinsicHeight(constraints.crossAxisExtent);
           break;
       }
+
       if (constraints.precedingScrollExtent > constraints.viewportMainAxisExtent || childExtent > extent)
         extent = childExtent;
       if (maxExtent < extent)
@@ -179,6 +178,8 @@ class RenderSliverFillRemaining extends RenderSliverSingleBoxAdapter {
           ),
           parentUsesSize: true,
         );
+      } else {
+        child.layout(constraints.asBoxConstraints(), parentUsesSize: true);
       }
     }
 

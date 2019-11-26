@@ -85,7 +85,6 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
-    DevelopmentArtifact.universal,
     DevelopmentArtifact.iOS,
   };
 
