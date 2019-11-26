@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -84,6 +85,10 @@ typedef WidgetTesterCallback = Future<void> Function(WidgetTester widgetTester);
 /// provides convenient widget [Finder]s for use with the
 /// [WidgetTester].
 ///
+/// Will define one [testWidgets] test for each platform in [matrix]. If
+/// [matrix] is empty, the test will be run once in the default test
+/// environment.
+///
 /// See also:
 ///
 ///  * [AutomatedTestWidgetsFlutterBinding.addTime] to learn more about
@@ -100,39 +105,142 @@ typedef WidgetTesterCallback = Future<void> Function(WidgetTester widgetTester);
 /// ```
 @isTest
 void testWidgets(
-  String description,
-  WidgetTesterCallback callback, {
-  bool skip = false,
-  test_package.Timeout timeout,
-  Duration initialTimeout,
-  bool semanticsEnabled = true,
-}) {
+    String description,
+    WidgetTesterCallback callback, {
+      bool skip = false,
+      test_package.Timeout timeout,
+      Duration initialTimeout,
+      bool semanticsEnabled = true,
+      Iterable<TestDimension<dynamic>> matrix = const <TestDimension<dynamic>>[],
+    }) {
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
   final WidgetTester tester = WidgetTester._(binding);
-  test(
-    description,
-    () {
-      SemanticsHandle semanticsHandle;
-      if (semanticsEnabled == true) {
-        semanticsHandle = tester.ensureSemantics();
-      }
-      tester._recordNumberOfSemanticsHandles();
-      test_package.addTearDown(binding.postTest);
-      return binding.runTest(
-        () async {
-          debugResetSemanticsIdCounter();
-          tester.resetTestTextInput();
-          await callback(tester);
-          semanticsHandle?.dispose();
-        },
-        tester._endOfTestVerifications,
-        description: description ?? '',
-        timeout: initialTimeout,
+  if (matrix == null || matrix.isEmpty) {
+    matrix = <DefaultDimension>[DefaultDimension()];
+  }
+  for (TestDimension<dynamic> dimension in matrix) {
+    for (dynamic variation in dimension.variations) {
+      final String variationDescription = dimension.describeVariation(variation);
+      final String combinedDescription = variationDescription.isNotEmpty ? '$description ($variationDescription)' : description;
+      test(combinedDescription, () {
+        SemanticsHandle semanticsHandle;
+        if (semanticsEnabled == true) {
+          semanticsHandle = tester.ensureSemantics();
+        }
+        tester._recordNumberOfSemanticsHandles();
+        test_package.addTearDown(binding.postTest);
+        return binding.runTest(
+              () async {
+            debugResetSemanticsIdCounter();
+            tester.resetTestTextInput();
+            try {
+              dimension.setUp(variation);
+              await callback(tester);
+            } catch (e) {
+              debugPrint('══╡ EXCEPTION with $variationDescription ╞════════════════════════════════════════════════════');
+              rethrow;
+            } finally {
+              dimension.tearDown(variation);
+            }
+            semanticsHandle?.dispose();
+          },
+          tester._endOfTestVerifications,
+          description: description ?? '',
+          timeout: initialTimeout,
+        );
+      },
+        skip: skip,
+        timeout: timeout ?? binding.defaultTestTimeout,
       );
-    },
-    skip: skip,
-    timeout: timeout ?? binding.defaultTestTimeout,
-  );
+    }
+  }
+}
+
+/// An abstract base class for describing test environment variations.
+///
+/// These serve as elements of the `matrix` argument to [testWidgets].
+///
+/// Use care when adding dimensions to the testing matrix: it multiplies the
+/// number of tests run, which can drastically increase the time it takes to run
+/// all the tests.
+abstract class TestDimension<T> {
+  /// A const constructor so that subclasses can be const.
+  const TestDimension();
+
+  /// Returns an iterable of the variations that this test dimension represents.
+  ///
+  /// The variations returned should be unique so that the same variation isn't
+  /// needlessly run twice.
+  Iterable<T> get variations;
+
+  /// Returns the string that will be used to both add to the test description, and
+  /// be printed when a test fails for this variation.
+  String describeVariation(T variation);
+
+  /// A function that will be called before each variation is tested, with the
+  /// variation that will be tested.
+  ///
+  /// This function should preserve any state needed to restore the testing
+  /// environment back to its base state when [tearDown] is called.
+  Future<void> setUp(T variation);
+
+  /// A function that is guaranteed to be called after this variation is tested,
+  /// even if it throws an exception.
+  ///
+  /// Calling this function must return the testing environment back to the base
+  /// state it was in before [setUp] was called.
+  Future<void> tearDown(T variation);
+}
+
+/// The [TestDimension] that represents the "default" test that is run if no
+/// `matrix` is specified for [testWidgets].
+///
+/// This dimension can be added into a list of other test dimensions to provide
+/// a "control" test where nothing is changed from the base test environment.
+class DefaultDimension extends TestDimension<dynamic> {
+  @override
+  final Iterable<dynamic> variations = <String>['default'];
+
+  @override
+  String describeVariation(dynamic variation) => '';
+
+  @override
+  Future<void> setUp(dynamic variation) async {}
+
+  @override
+  Future<void> tearDown(dynamic variation) async {}
+}
+
+/// A [TestDimension] that runs tests with [debugDefaultTargetPlatformOverride]
+/// set to different values of [TargetPlatform].
+class TargetPlatformDimension extends TestDimension<TargetPlatform> {
+  /// Creates a [TargetPlatformDimension] that tests the given [variations].
+  TargetPlatformDimension(this.variations)
+    : assert(variations.toSet().length == variations.length,
+             'There were ${variations.length - variations.toSet().length} platforms '
+             'that were specified more than once. Each platform may only be tested once.');
+
+  // Stores the target platform that was set when setUp was called.
+  TargetPlatform _previousTargetPlatform;
+
+  @override
+  final Iterable<TargetPlatform> variations;
+
+  @override
+  String describeVariation(TargetPlatform variation) => 'TargetPlatform ${describeEnum(variation)}';
+
+  @override
+  Future<void> setUp(TargetPlatform variation) async {
+    assert(_previousTargetPlatform == null);
+    _previousTargetPlatform = debugDefaultTargetPlatformOverride;
+    debugDefaultTargetPlatformOverride = variation;
+  }
+
+  @override
+  Future<void> tearDown(TargetPlatform variation) async {
+    debugDefaultTargetPlatformOverride = _previousTargetPlatform;
+    _previousTargetPlatform = null;
+  }
 }
 
 /// Runs the [callback] inside the Flutter benchmark environment.

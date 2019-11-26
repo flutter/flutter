@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -665,6 +666,7 @@ void main() {
     await tester.showKeyboard(find.byType(TextField));
     await tester.pump();
   });
+
   testWidgets('verifyTickersWereDisposed control test', (WidgetTester tester) async {
       FlutterError error;
       final Ticker ticker = tester.createTicker((Duration duration) {});
@@ -697,6 +699,18 @@ void main() {
         ));
       }
       ticker.stop();
+  });
+
+  group('testWidgets matrix works', () {
+    int numberOfVariationsRun = 0;
+
+    testWidgets('matrix tests run all variations', (WidgetTester tester) async {
+      if (debugDefaultTargetPlatformOverride == null) {
+        expect(numberOfVariationsRun, equals(TargetPlatform.values.length));
+      } else {
+        numberOfVariationsRun += 1;
+      }
+    }, matrix: <TestDimension<dynamic>>[ TargetPlatformDimension(TargetPlatform.values), DefaultDimension() ]);
   });
 
 }
