@@ -458,7 +458,7 @@ class SkiaGoldDigest {
     return SkiaGoldDigest(
       imageHash: json['digest'] as String,
       paramSet: Map<String, dynamic>.from(json['paramset'] as Map<String, dynamic> ??
-        <String, String>{'Platform': 'none'}),
+        <String, List<String>>{'Platform': <String>[]}),
       testName: json['test'] as String,
       status: json['status'] as String,
     );
