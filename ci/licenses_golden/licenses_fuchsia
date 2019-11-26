@@ -1,4 +1,4 @@
-Signature: aeb7438cd2fa58d40202faeb0b5c0224
+Signature: c495a1a3d63c57a6590969a0687f03e5
 
 UNUSED LICENSES:
 
@@ -470,10 +470,10 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.ethernet/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.goldfish/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hwinfo/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.images/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.inspect/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.intl/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ldsvc/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ledger/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.logger/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.math/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.audio/meta.json
@@ -1360,11 +1360,12 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hwinfo/hwinfo.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hwinfo/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.images/image_pipe2.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.images/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.inspect/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.inspect/tree.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.intl/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.intl/property_provider.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ldsvc/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ledger/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.logger/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.math/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.audio/meta.json
@@ -1528,6 +1529,7 @@ FILE: ../../../fuchsia/sdk/linux/pkg/inspect/hierarchy.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/inspect/include/lib/inspect/cpp/health.h
 FILE: ../../../fuchsia/sdk/linux/pkg/inspect/include/lib/inspect/cpp/hierarchy.h
 FILE: ../../../fuchsia/sdk/linux/pkg/inspect/include/lib/inspect/cpp/reader.h
+FILE: ../../../fuchsia/sdk/linux/pkg/inspect/include/lib/inspect/cpp/value_list.h
 FILE: ../../../fuchsia/sdk/linux/pkg/inspect/include/lib/inspect/cpp/vmo/block.h
 FILE: ../../../fuchsia/sdk/linux/pkg/inspect/include/lib/inspect/cpp/vmo/scanner.h
 FILE: ../../../fuchsia/sdk/linux/pkg/inspect/include/lib/inspect/cpp/vmo/snapshot.h
@@ -2122,10 +2124,10 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.ethernet/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hardware.goldfish/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.hwinfo/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.images/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.inspect/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.intl/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.io/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ldsvc/meta.json
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ledger/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.logger/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.math/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.audio/meta.json
@@ -3203,7 +3205,6 @@ FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/syscalls/types.
 FILE: ../../../fuchsia/sdk/linux/arch/x64/sysroot/include/zircon/types.h
 FILE: ../../../fuchsia/sdk/linux/dart/fidl/lib/src/interface.dart
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.fonts/font_provider.fidl
-FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ledger/ledger.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.math/math.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.playback/problem.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.playback/seeking_reader.fidl
