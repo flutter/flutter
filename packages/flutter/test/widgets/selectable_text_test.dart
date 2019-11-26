@@ -200,21 +200,6 @@ void main() {
     expect(selectableText.dragStartBehavior, DragStartBehavior.start);
     expect(selectableText.cursorWidth, 2.0);
     expect(selectableText.enableInteractiveSelection, true);
-
-    RenderBox renderBox = tester.renderObject(find.byType(SelectableText));
-    expect(renderBox.size.height, 14.0);
-
-    await tester.pumpWidget(
-      boilerplate(
-        child: const SelectableText(
-          'selectable text',
-          textScaleFactor: 1.9,
-        ),
-      ),
-    );
-
-    renderBox = tester.renderObject(find.byType(SelectableText));
-    expect(renderBox.size.height, 27.0);
   });
 
   testWidgets('Rich selectable text has expected defaults', (WidgetTester tester) async {
@@ -333,6 +318,29 @@ void main() {
 
     final RenderBox longtextBox = findSelectableTextBox();
     expect(longtextBox.size, const Size(199.0, 14.0));
+  });
+
+  testWidgets('can scale with textScaleFactor', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      boilerplate(
+        child: const SelectableText('selectable text'),
+      ),
+    );
+
+    final RenderBox renderBox = tester.renderObject(find.byType(SelectableText));
+    expect(renderBox.size.height, 14.0);
+
+    await tester.pumpWidget(
+      boilerplate(
+        child: const SelectableText(
+          'selectable text',
+          textScaleFactor: 1.9,
+        ),
+      ),
+    );
+
+    final RenderBox scaledBox = tester.renderObject(find.byType(SelectableText));
+    expect(scaledBox.size.height, 27.0);
   });
 
   testWidgets('can switch between textWidthBasis', (WidgetTester tester) async {
