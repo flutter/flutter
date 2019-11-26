@@ -263,7 +263,11 @@ Future<void> _runToolTests() async {
       await _pubRunTest(
         toolsPath,
         testPath: path.join(kTest, '$subshard$kDotShard'),
-        useBuildRunner: canUseBuildRunner,
+        // Integration and command tests are slow so the precompilcation does
+        // not noticeably improve overall performance.
+        useBuildRunner: subshard != 'general'
+          ? false
+          :  canUseBuildRunner,
         tableData: bigqueryApi?.tabledata,
         enableFlutterToolAsserts: true,
       );
