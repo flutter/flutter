@@ -26,6 +26,7 @@ import '../vmservice.dart';
 
 import 'amber_ctl.dart';
 import 'application_package.dart';
+import 'cmx_validator.dart';
 import 'fuchsia_build.dart';
 import 'fuchsia_pm.dart';
 import 'fuchsia_sdk.dart';
@@ -229,6 +230,7 @@ class FuchsiaDevice extends Device {
     bool ipv6 = false,
   }) async {
     if (!prebuiltApplication) {
+      await validateCmxFile(FlutterProject.current().fuchsia);
       await buildFuchsia(fuchsiaProject: FlutterProject.current().fuchsia,
                          targetPlatform: await targetPlatform,
                          target: mainPath,
@@ -399,6 +401,10 @@ class FuchsiaDevice extends Device {
 
   @override
   Future<bool> stopApp(covariant FuchsiaApp app) async {
+    if (app == null) {
+      printError('Trying to stop a "null" app. Defaulting to success.');
+      return true;
+    }
     final int appKey = await FuchsiaTilesCtl.findAppKey(this, app.id);
     if (appKey != -1) {
       if (!await fuchsiaDeviceTools.tilesCtl.remove(this, appKey)) {
