@@ -63,6 +63,9 @@ class DevelopmentArtifact {
   static const DevelopmentArtifact flutterRunner = DevelopmentArtifact._('flutter_runner', unstable: true);
 
   /// Artifacts required for any development platform.
+  ///
+  /// This does not need to be explicitly returned from requiredArtifacts as
+  /// it will always be downloaded.
   static const DevelopmentArtifact universal = DevelopmentArtifact._('universal');
 
   /// The values of DevelopmentArtifacts.

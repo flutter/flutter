@@ -30,7 +30,6 @@ class BuildLinuxCommand extends BuildSubCommand {
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
     DevelopmentArtifact.linux,
-    DevelopmentArtifact.universal,
   };
 
   @override

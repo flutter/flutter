@@ -55,9 +55,7 @@ class UnpackCommand extends FlutterCommand {
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async {
-    final Set<DevelopmentArtifact> result = <DevelopmentArtifact>{
-      DevelopmentArtifact.universal,
-    };
+    final Set<DevelopmentArtifact> result = <DevelopmentArtifact>{};
     final TargetPlatform targetPlatform = getTargetPlatformForName(stringArg('target-platform'));
     switch (targetPlatform) {
       case TargetPlatform.windows_x64:

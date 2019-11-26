@@ -167,7 +167,7 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
   @optionalTypeArgs
   Animation<U> drive<U>(Animatable<U> child) {
     assert(this is Animation<double>);
-    return child.animate(this as dynamic); // TODO(ianh): Clean this once https://github.com/dart-lang/sdk/issues/32120 is fixed.
+    return child.animate(this as Animation<double>);
   }
 
   @override

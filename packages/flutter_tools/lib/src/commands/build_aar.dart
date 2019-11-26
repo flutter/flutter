@@ -55,7 +55,6 @@ class BuildAarCommand extends BuildSubCommand {
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
     DevelopmentArtifact.androidGenSnapshot,
-    DevelopmentArtifact.universal,
   };
 
   @override
