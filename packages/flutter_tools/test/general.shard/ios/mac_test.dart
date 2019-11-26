@@ -113,7 +113,7 @@ void main() {
       Artifacts: () => mockArtifacts,
     });
 
-    testUsingContext('getInfoForDevice throws IOSDeviceNotFoundError when user has not yet trusted the host', () async {
+    testUsingContext('getInfoForDevice throws IOSDeviceNotTrustedError when user has not yet trusted the host', () async {
       when(mockArtifacts.getArtifactPath(Artifact.ideviceinfo, platform: anyNamed('platform'))).thenReturn(ideviceInfoPath);
       when(mockProcessManager.run(
         <String>[ideviceInfoPath, '-u', 'foo', '-k', 'bar'],
@@ -155,7 +155,7 @@ void main() {
       Artifacts: () => mockArtifacts,
     });
 
-    testUsingContext('getInfoForDevice throws IOSDeviceNotFoundError when host trust is revoked', () async {
+    testUsingContext('getInfoForDevice throws IOSDeviceNotTrustedError when host trust is revoked', () async {
       when(mockArtifacts.getArtifactPath(Artifact.ideviceinfo, platform: anyNamed('platform'))).thenReturn(ideviceInfoPath);
       when(mockProcessManager.run(
         <String>[ideviceInfoPath, '-u', 'foo', '-k', 'bar'],
@@ -166,6 +166,27 @@ void main() {
           255,
           '',
           'ERROR: Could not connect to lockdownd, error code -${LockdownReturnCode.invalidHostId.code}',
+        );
+        return Future<ProcessResult>.value(result);
+      });
+      expect(() async => await iMobileDevice.getInfoForDevice('foo', 'bar'), throwsA(isInstanceOf<IOSDeviceNotTrustedError>()));
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+      Cache: () => mockCache,
+      Artifacts: () => mockArtifacts,
+    });
+
+    testUsingContext('getInfoForDevice throws IOSDeviceNotTrustedError when device is password protected', () async {
+      when(mockArtifacts.getArtifactPath(Artifact.ideviceinfo, platform: anyNamed('platform'))).thenReturn(ideviceInfoPath);
+      when(mockProcessManager.run(
+        <String>[ideviceInfoPath, '-u', 'foo', '-k', 'bar'],
+        environment: <String, String>{'DYLD_LIBRARY_PATH': libimobiledevicePath},
+      )).thenAnswer((_) {
+        final ProcessResult result = ProcessResult(
+          1,
+          255,
+          '',
+          'ERROR: Could not connect to lockdownd, error code -${LockdownReturnCode.passwordProtected.code}',
         );
         return Future<ProcessResult>.value(result);
       });

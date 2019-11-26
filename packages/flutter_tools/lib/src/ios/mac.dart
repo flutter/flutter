@@ -86,9 +86,49 @@ class LockdownReturnCode {
 
   /// Error code indicating that the host is not trusted.
   ///
-  /// This can happen if the user explicitly says "do not trust this  computer"
+  /// This can happen if the user explicitly says "do not trust this computer"
   /// or if they revoke all trusted computers in the device settings.
   static const LockdownReturnCode invalidHostId = LockdownReturnCode._(21);
+
+  /// Error code indicating the device is password protected.
+  static const LockdownReturnCode passwordProtected = LockdownReturnCode._(17);
+
+  /// Throws an exception when `ideviceinfo` fails.
+  static void handleError(ProcessResult result) {
+    final String stdout = result.stdout as String;
+    final String stderr = result.stderr as String;
+
+    if (result.exitCode == 255 && stdout != null) {
+      if (stdout.contains('No device found')) {
+        throw IOSDeviceNotFoundError(
+          'ideviceinfo could not find device:\n'
+          '$stdout. Try unlocking attached devices.'
+        );
+      }
+      if (stderr.contains('Could not connect to lockdownd')) {
+        if (stderr.contains('error code -${LockdownReturnCode.pairingDialogResponsePending.code}')) {
+          throw const IOSDeviceNotTrustedError(
+            'Device info unavailable. Is the device asking to "Trust This Computer?"',
+            LockdownReturnCode.pairingDialogResponsePending,
+          );
+        }
+        if (stderr.contains('error code -${LockdownReturnCode.invalidHostId.code}')) {
+          throw const IOSDeviceNotTrustedError(
+            'Device info unavailable. Device pairing "trust" may have been revoked.',
+            LockdownReturnCode.invalidHostId,
+          );
+        }
+        if (stderr.contains('error code -${LockdownReturnCode.passwordProtected.code}')) {
+          throw const IOSDeviceNotTrustedError(
+            'Device info unavailable. Device may be password protected, please'
+            ' unlock and try again.',
+            LockdownReturnCode.passwordProtected,
+          );
+        }
+      }
+    }
+    throw ToolExit('ideviceinfo returned an error:\n$stderr');
+  }
 }
 
 class IMobileDevice {
@@ -203,29 +243,11 @@ class IMobileDevice {
           <MapEntry<String, String>>[cache.dyLdLibEntry]
         ),
       );
-      final String stdout = result.stdout as String;
-      final String stderr = result.stderr as String;
-      if (result.exitCode == 255 && stdout != null && stdout.contains('No device found')) {
-        throw IOSDeviceNotFoundError('ideviceinfo could not find device:\n$stdout. Try unlocking attached devices.');
-      }
-      if (result.exitCode == 255 && stderr != null && stderr.contains('Could not connect to lockdownd')) {
-        if (stderr.contains('error code -${LockdownReturnCode.pairingDialogResponsePending.code}')) {
-          throw const IOSDeviceNotTrustedError(
-            'Device info unavailable. Is the device asking to "Trust This Computer?"',
-            LockdownReturnCode.pairingDialogResponsePending,
-          );
-        }
-        if (stderr.contains('error code -${LockdownReturnCode.invalidHostId.code}')) {
-          throw const IOSDeviceNotTrustedError(
-            'Device info unavailable. Device pairing "trust" may have been revoked.',
-            LockdownReturnCode.invalidHostId,
-          );
-        }
-      }
+
       if (result.exitCode != 0) {
-        throw ToolExit('ideviceinfo returned an error:\n$stderr');
+        LockdownReturnCode.handleError(result);
       }
-      return stdout.trim();
+      return (result.stdout as String).trim();
     } on ProcessException {
       throw ToolExit('Failed to invoke ideviceinfo. Run flutter doctor.');
     }
