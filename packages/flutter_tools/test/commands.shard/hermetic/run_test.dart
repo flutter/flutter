@@ -84,6 +84,8 @@ void main() {
         final RunCommand command = RunCommand();
         applyMocksToCommand(command);
 
+        // No devices are attached, we just want to verify update the cache
+        // BEFORE checking for devices
         when(mockDeviceManager.getDevices()).thenAnswer(
           (Invocation invocation) => Stream<Device>.fromIterable(<Device>[])
         );
@@ -98,6 +100,7 @@ void main() {
           ]);
           fail('Exception expected');
         } on ToolExit catch (e) {
+          // We expect a ToolExit because no devices are attached
           expect(e.message, null);
         } catch (e) {
           fail('ToolExit expected');
