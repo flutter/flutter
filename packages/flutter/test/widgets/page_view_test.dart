@@ -784,4 +784,46 @@ void main() {
     pageController.position.jumpTo(799.99999999999);
     expect(pageController.page, 1);
   });
+
+  testWidgets('PageView can participate in a11y scrolling', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    final PageController controller = PageController();
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: PageView(
+          controller: controller,
+          children: List<Widget>.generate(4, (int i) {
+            return Semantics(
+              child: Text('Page #$i'),
+              container: true,
+            );
+          }),
+          allowImplicitScrolling: true,
+        ),
+    ));
+    expect(controller.page, 0);
+
+    expect(semantics, includesNodeWith(flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling]));
+    expect(semantics, includesNodeWith(label: 'Page #0'));
+    expect(semantics, includesNodeWith(label: 'Page #1', flags: <SemanticsFlag>[SemanticsFlag.isHidden]));
+    expect(semantics, isNot(includesNodeWith(label: 'Page #2', flags: <SemanticsFlag>[SemanticsFlag.isHidden])));
+    expect(semantics, isNot(includesNodeWith(label: 'Page #3', flags: <SemanticsFlag>[SemanticsFlag.isHidden])));
+
+    controller.nextPage(duration: const Duration(milliseconds: 150), curve: Curves.ease);
+    await tester.pumpAndSettle();
+    expect(semantics, includesNodeWith(label: 'Page #0', flags: <SemanticsFlag>[SemanticsFlag.isHidden]));
+    expect(semantics, includesNodeWith(label: 'Page #1'));
+    expect(semantics, includesNodeWith(label: 'Page #2', flags: <SemanticsFlag>[SemanticsFlag.isHidden]));
+    expect(semantics, isNot(includesNodeWith(label: 'Page #3', flags: <SemanticsFlag>[SemanticsFlag.isHidden])));
+
+    controller.nextPage(duration: const Duration(milliseconds: 150), curve: Curves.ease);
+    await tester.pumpAndSettle();
+    expect(semantics, isNot(includesNodeWith(label: 'Page #0', flags: <SemanticsFlag>[SemanticsFlag.isHidden])));
+    expect(semantics, includesNodeWith(label: 'Page #1', flags: <SemanticsFlag>[SemanticsFlag.isHidden]));
+    expect(semantics, includesNodeWith(label: 'Page #2'));
+    expect(semantics, includesNodeWith(label: 'Page #3', flags: <SemanticsFlag>[SemanticsFlag.isHidden]));
+
+    semantics.dispose();
+  });
 }
