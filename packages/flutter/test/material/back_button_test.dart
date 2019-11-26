@@ -69,7 +69,6 @@ void main() {
     final Key iOSKey = UniqueKey();
     final Key androidKey = UniqueKey();
 
-
     await tester.pumpWidget(
       MaterialApp(
         home: Column(
@@ -122,5 +121,24 @@ void main() {
       isFocusable: true,
     ));
     handle.dispose();
+  });
+
+  testWidgets('CloseButton color test', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Material(
+          child: CloseButton(
+            color: Colors.red,
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      find.byWidgetPredicate(
+        (Widget widget) => widget is CloseButton && widget.color == Colors.red,
+      ),
+      findsOneWidget,
+    );
   });
 }
