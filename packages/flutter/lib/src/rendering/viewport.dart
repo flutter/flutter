@@ -175,6 +175,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
        assert(offset != null),
        assert(axisDirectionToAxis(axisDirection) != axisDirectionToAxis(crossAxisDirection)),
        assert(cacheExtentStyle != null),
+       assert(cacheExtent != null || cacheExtentStyle == CacheExtentStyle.pixel),
        _axisDirection = axisDirection,
        _crossAxisDirection = crossAxisDirection,
        _offset = offset,
