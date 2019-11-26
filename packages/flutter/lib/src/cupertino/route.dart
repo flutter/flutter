@@ -177,11 +177,6 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
   String get barrierLabel => null;
 
   @override
-  bool canTransitionFrom(TransitionRoute<dynamic> previousRoute) {
-    return previousRoute is CupertinoPageRoute;
-  }
-
-  @override
   bool canTransitionTo(TransitionRoute<dynamic> nextRoute) {
     // Don't perform outgoing animation if the next route is a fullscreen dialog.
     return nextRoute is CupertinoPageRoute && !nextRoute.fullscreenDialog;
