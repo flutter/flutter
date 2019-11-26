@@ -4,9 +4,8 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools/src/base/process.dart';
-
 import '../base/file_system.dart';
+import '../base/process.dart';
 import '../cache.dart';
 import '../runner/flutter_command.dart';
 import 'analyze_continuously.dart';
