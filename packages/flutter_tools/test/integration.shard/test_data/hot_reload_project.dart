@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
-
 import 'package:flutter_tools/src/base/file_system.dart';
 
 import '../test_utils.dart';
@@ -83,17 +81,11 @@ class HotReloadProject extends Project {
   Uri get buildBreakpointUri => mainDart;
   int get buildBreakpointLine => lineContaining(main, '// BUILD BREAKPOINT');
 
-  Future<void> uncommentHotReloadPrint() async {
+  void uncommentHotReloadPrint() {
     final String newMainContents = main.replaceAll(
       '// printHotReloadWorked();',
       'printHotReloadWorked();',
     );
     writeFile(fs.path.join(dir.path, 'lib', 'main.dart'), newMainContents);
-    if (Platform.isWindows) {
-      // The Windows filesystem does not have sufficient resultion for the
-      // integration test cases that make synchronous modifications and
-      // trigger reloads.
-      await Future<void>.delayed(const Duration(milliseconds: 16));
-    }
   }
 }

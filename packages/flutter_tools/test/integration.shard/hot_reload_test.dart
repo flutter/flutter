@@ -39,6 +39,7 @@ void main() {
     final StringBuffer stdout = StringBuffer();
     final Completer<void> sawTick = Completer<void>();
     final StreamSubscription<String> subscription = _flutter.stdout.listen((String line) {
+      print('$line');
       // This line is printed by a build method in the test app, and indicates that all
       // setup is completed.
       // see: test/integration.shard/test_data/hot_reload_project.dart#L47
@@ -49,7 +50,8 @@ void main() {
     });
     await _flutter.run();
     await sawTick.future;
-    await _project.uncommentHotReloadPrint();
+    _project.uncommentHotReloadPrint();
+    print("DEBUGGING: ${DateTime.now()}");
     try {
       await _flutter.hotReload();
       expect(stdout.toString(), contains('(((((RELOAD WORKED)))))'));
