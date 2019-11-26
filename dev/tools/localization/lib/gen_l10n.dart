@@ -5,15 +5,9 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:file/local.dart' as local;
 import 'package:file/file.dart' as file;
-import 'package:path/path.dart' as path;
-
 import 'package:localization/localizations_utils.dart';
-
-// TODO(shihaohong): Remove and pass directly to [LocalizationsGenerator]
-// once all references to [fs] has been properly migrated.
-const local.LocalFileSystem fs = local.LocalFileSystem();
+import 'package:path/path.dart' as path;
 
 const String defaultFileTemplate = '''
 import 'dart:async';

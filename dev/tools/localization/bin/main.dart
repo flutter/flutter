@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:args/args.dart' as argslib;
+import 'package:file/local.dart' as local;
 import 'package:localization/gen_l10n.dart';
 import 'package:localization/localizations_utils.dart';
 import 'package:path/path.dart' as path;
@@ -56,6 +57,7 @@ Future<void> main(List<String> arguments) async {
   final String templateArbFileName = results['template-arb-file'];
   final String classNameString = results['output-class'];
 
+  const local.LocalFileSystem fs = local.LocalFileSystem();
   final LocalizationsGenerator localizationsGenerator = LocalizationsGenerator(fs);
   try {
     localizationsGenerator.initialize(
@@ -65,7 +67,7 @@ Future<void> main(List<String> arguments) async {
       classNameString: classNameString,
     );
     localizationsGenerator.parseArbFiles();
-    localizationsGenerator.parseTemplateArbFile();
+    localizationsGenerator.generateClassMethods();
     localizationsGenerator.generateOutputFile();
   } on FileSystemException catch (e) {
     exitWithError(e.message);
