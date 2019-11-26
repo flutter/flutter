@@ -37,7 +37,7 @@ class GitHubTemplateCreator {
   ```
   $command
   ```
-  
+
   ## Steps to Reproduce
   1. ...
   2. ...
@@ -51,7 +51,7 @@ class GitHubTemplateCreator {
   ```
   $doctorText
   ```
-  
+
   ## Flutter Application Metadata
   ${_projectMetadataInformation()}
   ''';
