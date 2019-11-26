@@ -63,10 +63,8 @@ class Velocity {
 
   @override
   bool operator ==(dynamic other) {
-    if (other is! Velocity)
-      return false;
-    final Velocity typedOther = other;
-    return pixelsPerSecond == typedOther.pixelsPerSecond;
+    return other is Velocity
+        && other.pixelsPerSecond == pixelsPerSecond;
   }
 
   @override

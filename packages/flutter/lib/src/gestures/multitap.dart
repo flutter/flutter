@@ -168,7 +168,7 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
           return false;
       }
     }
-    return super.isPointerAllowed(event);
+    return super.isPointerAllowed(event as PointerDownEvent);
   }
 
   @override
@@ -177,7 +177,7 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
       if (!_firstTap.isWithinGlobalTolerance(event, kDoubleTapSlop)) {
         // Ignore out-of-bounds second taps.
         return;
-      } else if (!_firstTap.hasElapsedMinTime() || !_firstTap.hasSameButton(event)) {
+      } else if (!_firstTap.hasElapsedMinTime() || !_firstTap.hasSameButton(event as PointerDownEvent)) {
         // Restart when the second tap is too close to the first, or when buttons
         // mismatch.
         _reset();
@@ -190,7 +190,7 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
   void _trackFirstTap(PointerEvent event) {
     _stopDoubleTapTimer();
     final _TapTracker tracker = _TapTracker(
-      event: event,
+      event: event as PointerDownEvent,
       entry: GestureBinding.instance.gestureArena.add(event.pointer, this),
       doubleTapMinTime: kDoubleTapMinTime,
     );
@@ -322,7 +322,7 @@ class _TapGesture extends _TapTracker {
     Duration longTapDelay,
   }) : _lastPosition = OffsetPair.fromEventPosition(event),
        super(
-    event: event,
+    event: event as PointerDownEvent,
     entry: GestureBinding.instance.gestureArena.add(event.pointer, gestureRecognizer),
     doubleTapMinTime: kDoubleTapMinTime,
   ) {

@@ -218,7 +218,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
         return false;
       }
     }
-    return super.isPointerAllowed(event);
+    return super.isPointerAllowed(event as PointerDownEvent);
   }
 
   @override
@@ -412,7 +412,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     assert(tracker != null);
 
     DragEndDetails details;
-    void Function() debugReport;
+    String Function() debugReport;
 
     final VelocityEstimate estimate = tracker.getVelocityEstimate();
     if (estimate != null && isFlingGesture(estimate)) {

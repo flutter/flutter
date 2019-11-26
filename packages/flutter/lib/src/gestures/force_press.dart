@@ -341,7 +341,7 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
     // If the device incorrectly reports a pressure outside of pressureMin
     // and pressureMax, we still want this recognizer to respond normally.
     if (!value.isNaN)
-      value = value.clamp(0.0, 1.0);
+      value = value.clamp(0.0, 1.0) as double;
     return value;
   }
 

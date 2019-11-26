@@ -142,7 +142,7 @@ class HitTestResult {
       'matrix through PointerEvent.removePerspectiveTransform?'
       'The provided matrix is:\n$transform'
     );
-    _transforms.add(_transforms.isEmpty ? transform :  transform * _transforms.last);
+    _transforms.add(_transforms.isEmpty ? transform : (transform * _transforms.last as Matrix4));
   }
 
   /// Removes the last transform added via [pushTransform].
