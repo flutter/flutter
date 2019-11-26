@@ -350,7 +350,7 @@ class FakeHttpClientRequest implements HttpClientRequest {
   }
 
   @override
-  HttpHeaders get headers => null;
+  HttpHeaders get headers => FakeHttpHeaders();
 
   @override
   String get method => null;
