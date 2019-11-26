@@ -692,12 +692,12 @@ class PageView extends StatefulWidget {
   /// scrolling.
   ///
   /// With this flag set to false, when accessibility focus reaches the end of
-  /// the current page and a user performs another implicit scroll action,
+  /// the current page and the user attempts to move it to the next element, the
   /// focus will traverse to the next widget outside of the page view.
   ///
   /// With this flag set to true, when accessibility focus reaches the end of
-  /// the current page and the user performs another implicit scroll action,
-  /// focus will traverse to the next page in the page view.
+  /// the current page and user attempts to move it to the next element, focus
+  /// will traverse to the next page in the page view.
   final bool allowImplicitScrolling;
 
   /// The axis along which the page view scrolls.
@@ -805,6 +805,9 @@ class _PageViewState extends State<PageView> {
         physics: physics,
         viewportBuilder: (BuildContext context, ViewportOffset position) {
           return Viewport(
+            // TODO(dnfield): we should provide a way to set cacheExtent
+            // independent of implicit scrolling:
+            // https://github.com/flutter/flutter/issues/45632
             cacheExtent: widget.allowImplicitScrolling ? 1.0 : 0.0,
             cacheExtentStyle: CacheExtentStyle.viewport,
             axisDirection: axisDirection,
