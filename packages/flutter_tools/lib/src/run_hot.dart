@@ -10,7 +10,6 @@ import 'package:meta/meta.dart';
 import 'package:pool/pool.dart';
 
 import 'base/async_guard.dart';
-import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
@@ -180,8 +179,8 @@ class HotRunner extends ResidentRunner {
         // Only handle one debugger connection.
         connectionInfoCompleter.complete(
           DebugConnectionInfo(
-            httpUri: flutterDevices.first.vmServices.first.httpAddress,
-            wsUri: flutterDevices.first.vmServices.first.wsAddress,
+            httpUri: flutterDevices.first.vmService.httpAddress,
+            wsUri: flutterDevices.first.vmService.wsAddress,
             baseUri: baseUris.first.toString(),
           ),
         );
@@ -428,23 +427,18 @@ class HotRunner extends ResidentRunner {
           continue;
         }
         // Reload the isolate.
-        final Completer<void> completer = Completer<void>();
-        futures.add(completer.future);
-        unawaited(view.uiIsolate.reload().then(
-          (ServiceObject _) {
-            final ServiceEvent pauseEvent = view.uiIsolate.pauseEvent;
-            if ((pauseEvent != null) && pauseEvent.isPauseEvent) {
-              // Resume the isolate so that it can be killed by the embedder.
-              return view.uiIsolate.resume();
-            }
-            return null;
-          },
-        ).whenComplete(
-          () { completer.complete(null); },
-        ));
+        futures.add(view.uiIsolate.reload().then((ServiceObject _) {
+          final ServiceEvent pauseEvent = view.uiIsolate.pauseEvent;
+          if ((pauseEvent != null) && pauseEvent.isPauseEvent) {
+            // Resume the isolate so that it can be killed by the embedder.
+            return view.uiIsolate.resume();
+          }
+          return null;
+        }));
       }
     }
     await Future.wait(futures);
+
     // We are now running from source.
     _runningFromSnapshot = false;
     await _launchFromDevFS(mainPath + '.dill');
@@ -718,12 +712,10 @@ class HotRunner extends ResidentRunner {
           // running from snapshot to running from uploaded files.
           await device.resetAssetDirectory();
         }
-        final Completer<DeviceReloadReport> completer = Completer<DeviceReloadReport>();
-        allReportsFutures.add(completer.future);
         final List<Future<Map<String, dynamic>>> reportFutures = device.reloadSources(
           entryPath, pause: pause,
         );
-        unawaited(Future.wait(reportFutures).then(
+        allReportsFutures.add(Future.wait(reportFutures).then(
           (List<Map<String, dynamic>> reports) async {
             // TODO(aam): Investigate why we are validating only first reload report,
             // which seems to be current behavior
@@ -733,7 +725,7 @@ class HotRunner extends ResidentRunner {
             await device.updateReloadStatus(
               validateReloadReport(firstReport, printErrors: false),
             );
-            completer.complete(DeviceReloadReport(device, reports));
+            return DeviceReloadReport(device, reports);
           },
         ));
       }
@@ -795,13 +787,12 @@ class HotRunner extends ResidentRunner {
         printTrace('Sending reload event to "${view.uiIsolate.name}"');
         futuresViews.add(view.uiIsolate.reload());
       }
-      final Completer<void> deviceCompleter = Completer<void>();
-      unawaited(Future.wait(futuresViews).whenComplete(() {
-        deviceCompleter.complete(device.refreshViews());
+      allDevices.add(Future.wait(futuresViews).whenComplete(() {
+        return device.refreshViews();
       }));
-      allDevices.add(deviceCompleter.future);
     }
     await Future.wait(allDevices);
+
     // We are now running from source.
     _runningFromSnapshot = false;
     // Check if any isolates are paused.
@@ -851,7 +842,7 @@ class HotRunner extends ResidentRunner {
           }
         }(),
     ];
-    final Future<void> reassembleFuture = Future.wait<void>(futures).then<void>((List<void> values) { });
+    final Future<void> reassembleFuture = Future.wait<void>(futures);
     await reassembleFuture.timeout(
       const Duration(seconds: 2),
       onTimeout: () async {
@@ -987,9 +978,8 @@ class HotRunner extends ResidentRunner {
     printStatus(message);
     for (FlutterDevice device in flutterDevices) {
       final String dname = device.device.name;
-      for (VMService vm in device.vmServices) {
-        printStatus('An Observatory debugger and profiler on $dname is available at: ${vm.httpAddress}');
-      }
+      printStatus('An Observatory debugger and profiler on $dname is '
+        'available at: ${device.vmService.httpAddress}');
     }
     final String quitMessage = _didAttach
         ? 'To detach, press "d"; to quit, press "q".'
