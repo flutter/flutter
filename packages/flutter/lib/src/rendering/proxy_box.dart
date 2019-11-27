@@ -968,6 +968,9 @@ class RenderShaderMask extends RenderProxyBox {
   ///
   /// The shader callback is called with the current size of the child so that
   /// it can customize the shader to the size and location of the child.
+  ///
+  /// The rectangle will always be at the origin when called by
+  /// [RenderShaderMask].
   // TODO(abarth): Use the delegate pattern here to avoid generating spurious
   // repaints when the ShaderCallback changes identity.
   ShaderCallback get shaderCallback => _shaderCallback;

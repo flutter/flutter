@@ -214,7 +214,9 @@ abstract class WidgetsBindingObserver {
   ///    boilerplate.
   void didChangeTextScaleFactor() { }
 
-  /// {@macro on_platform_brightness_change}
+  /// Called when the platform brightness changes.
+  ///
+  /// This method exposes notifications from [Window.onPlatformBrightnessChanged].
   void didChangePlatformBrightness() { }
 
   /// Called when the system tells the app that the user's locale has
