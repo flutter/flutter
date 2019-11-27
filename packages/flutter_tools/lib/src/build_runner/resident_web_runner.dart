@@ -48,7 +48,7 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
     @required DebuggingOptions debuggingOptions,
     @required List<String> dartDefines,
   }) {
-    if (featureFlags.isWebIncrementalCompilerEnabled) {
+    if (featureFlags.isWebIncrementalCompilerEnabled && debuggingOptions.buildInfo.isDebug) {
       return _ExperimentalResidentWebRunner(
         device,
         target: target,
@@ -448,10 +448,10 @@ class _ExperimentalResidentWebRunner extends ResidentWebRunner {
 
     try {
       if (fullRestart) {
-        await _wipConnection.sendCommand('Page.reload');
+        await _wipConnection?.sendCommand('Page.reload');
       } else {
-        await _wipConnection.debugger
-            .sendCommand('Runtime.evaluate', params: <String, Object>{
+        await _wipConnection?.debugger
+            ?.sendCommand('Runtime.evaluate', params: <String, Object>{
           'expression': 'window.\$hotReloadHook([$modules])',
           'awaitPromise': true,
           'returnByValue': true,
@@ -523,12 +523,13 @@ class _ExperimentalResidentWebRunner extends ResidentWebRunner {
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<void> appStartedCompleter,
   }) async {
-    final Chrome chrome = await ChromeLauncher.connectedInstance;
-    final ChromeTab chromeTab =
-        await chrome.chromeConnection.getTab((ChromeTab chromeTab) {
-      return chromeTab.url.contains(debuggingOptions.hostname);
-    });
-    _wipConnection = await chromeTab.connect();
+    if (device.device is ChromeDevice) {
+      final Chrome chrome = await ChromeLauncher.connectedInstance;
+      final ChromeTab chromeTab = await chrome.chromeConnection.getTab((ChromeTab chromeTab) {
+        return chromeTab.url.contains(debuggingOptions.hostname);
+      });
+      _wipConnection = await chromeTab.connect();
+    }
     appStartedCompleter?.complete();
     connectionInfoCompleter?.complete();
     if (stayResident) {

@@ -49,6 +49,7 @@ void main() {
   MockChromeTab mockChromeTab;
   MockWipConnection mockWipConnection;
   MockWipDebugger mockWipDebugger;
+  MockWebServerDevice mockWebServerDevice;
   bool didSkipDwds;
 
   setUp(() {
@@ -66,6 +67,7 @@ void main() {
     mockChromeTab = MockChromeTab();
     mockWipConnection = MockWipConnection();
     mockWipDebugger = MockWipDebugger();
+    mockWebServerDevice = MockWebServerDevice();
     when(mockFlutterDevice.device).thenReturn(mockChromeDevice);
     testbed = Testbed(
       setup: () {
@@ -429,6 +431,49 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(isWebIncrementalCompilerEnabled: true),
   }));
 
+  test('Can hot restart after attaching - experimental with web-server device', () => testbed.run(() async {
+    _setupMocks();
+    when(mockFlutterDevice.device).thenReturn(mockWebServerDevice);
+    when(mockWebDevFS.update(
+      mainPath: anyNamed('mainPath'),
+      target: anyNamed('target'),
+      bundle: anyNamed('bundle'),
+      firstBuildTime: anyNamed('firstBuildTime'),
+      bundleFirstUpload: anyNamed('bundleFirstUpload'),
+      generator: anyNamed('generator'),
+      fullRestart: anyNamed('fullRestart'),
+      dillOutputPath: anyNamed('dillOutputPath'),
+      trackWidgetCreation: anyNamed('trackWidgetCreation'),
+      projectRootPath: anyNamed('projectRootPath'),
+      pathToReload: anyNamed('pathToReload'),
+      invalidatedFiles: anyNamed('invalidatedFiles'),
+    )).thenAnswer((Invocation invocation) async {
+      return UpdateFSReport(success: true)
+        ..invalidatedModules = <String>['example'];
+    });
+    final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
+    unawaited(residentWebRunner.run(
+      connectionInfoCompleter: connectionInfoCompleter,
+    ));
+    await connectionInfoCompleter.future;
+    final OperationResult result = await residentWebRunner.restart(fullRestart: true);
+
+    expect(testLogger.statusText, contains('Restarted application in'));
+    expect(result.code, 0);
+    verify(mockResidentCompiler.accept()).called(2);
+    // ensure that analytics are sent.
+    verify(Usage.instance.sendEvent('hot', 'restart', parameters: <String, String>{
+      'cd27': 'web-javascript',
+      'cd28': null,
+      'cd29': 'false',
+      'cd30': 'true',
+    })).called(1);
+    verifyNever(Usage.instance.sendTiming('hot', 'web-incremental-restart', any));
+  }, overrides: <Type, Generator>{
+    Usage: () => MockFlutterUsage(),
+    FeatureFlags: () => TestFeatureFlags(isWebIncrementalCompilerEnabled: true),
+  }));
+
   test('Can hot restart after attaching', () => testbed.run(() async {
     _setupMocks();
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
@@ -458,6 +503,21 @@ void main() {
     verify(Usage.instance.sendTiming('hot', 'web-recompile', any)).called(1);
   }, overrides: <Type, Generator>{
     Usage: () => MockFlutterUsage(),
+  }));
+
+  test('Selects Dwds runner in profile mode with incremental compiler enabled', () => testbed.run(() async {
+    final ResidentWebRunner residentWebRunner = DwdsWebRunnerFactory().createWebRunner(
+      mockFlutterDevice,
+      flutterProject: FlutterProject.current(),
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.profile),
+      ipv6: true,
+      stayResident: true,
+      dartDefines: const <String>[],
+    ) as ResidentWebRunner;
+
+    expect(residentWebRunner.runtimeType.toString(), '_DwdsResidentWebRunner');
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isWebIncrementalCompilerEnabled: true),
   }));
 
   test('Fails on compilation errors in hot restart', () => testbed.run(() async {
@@ -1022,3 +1082,4 @@ class MockChromeTab extends Mock implements ChromeTab {}
 class MockWipConnection extends Mock implements WipConnection {}
 class MockWipDebugger extends Mock implements WipDebugger {}
 class MockLogger extends Mock implements Logger {}
+class MockWebServerDevice extends Mock implements WebServerDevice {}
