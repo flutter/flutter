@@ -5,7 +5,7 @@
 import 'dart:convert' show json;
 import 'dart:io';
 
-import 'package:localization/localizations_utils.dart';
+import 'localizations_utils.dart';
 
 // The first suffix in kPluralSuffixes must be "Other". "Other" is special
 // because it's the only one that is required.

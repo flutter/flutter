@@ -7,9 +7,10 @@ import 'dart:io';
 
 import 'package:args/args.dart' as argslib;
 import 'package:file/local.dart' as local;
-import 'package:localization/gen_l10n.dart';
-import 'package:localization/localizations_utils.dart';
 import 'package:path/path.dart' as path;
+
+import '../gen_l10n.dart';
+import '../localizations_utils.dart';
 
 Future<void> main(List<String> arguments) async {
   final argslib.ArgParser parser = argslib.ArgParser();

@@ -4,9 +4,10 @@
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
-import 'package:localization/gen_l10n.dart';
-import 'package:localization/localizations_utils.dart';
 import 'package:path/path.dart' as path;
+
+import '../gen_l10n.dart';
+import '../localizations_utils.dart';
 
 import 'common.dart';
 

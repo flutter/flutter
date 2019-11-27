@@ -25,8 +25,9 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:localization/localizations_utils.dart';
 import 'package:path/path.dart' as path;
+
+import 'localizations_utils.dart';
 
 Map<String, dynamic> loadBundle(File file) {
   if (!FileSystemEntity.isFileSync(file.path))

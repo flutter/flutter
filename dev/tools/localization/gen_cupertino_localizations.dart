@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:localization/localizations_utils.dart';
+import 'localizations_utils.dart';
 
 HeaderGenerator generateCupertinoHeader = (String regenerateInstructions) {
   return '''

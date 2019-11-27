@@ -6,8 +6,9 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:file/file.dart' as file;
-import 'package:localization/localizations_utils.dart';
 import 'package:path/path.dart' as path;
+
+import 'localizations_utils.dart';
 
 const String defaultFileTemplate = '''
 import 'dart:async';
