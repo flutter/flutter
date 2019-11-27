@@ -525,8 +525,7 @@ class _ExperimentalResidentWebRunner extends ResidentWebRunner {
   }) async {
     if (device.device is ChromeDevice) {
       final Chrome chrome = await ChromeLauncher.connectedInstance;
-      final ChromeTab chromeTab =
-          await chrome.chromeConnection.getTab((ChromeTab chromeTab) {
+      final ChromeTab chromeTab = await chrome.chromeConnection.getTab((ChromeTab chromeTab) {
         return chromeTab.url.contains(debuggingOptions.hostname);
       });
       _wipConnection = await chromeTab.connect();
