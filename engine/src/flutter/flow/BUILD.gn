@@ -109,6 +109,7 @@ executable("flow_unittests") {
     "flow_run_all_unittests.cc",
     "flow_test_utils.cc",
     "flow_test_utils.h",
+    "layers/layer_unittests.cc",
     "layers/performance_overlay_layer_unittests.cc",
     "layers/physical_shape_layer_unittests.cc",
     "matrix_decomposition_unittests.cc",

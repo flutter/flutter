@@ -9,6 +9,7 @@ namespace flutter {
 ClipRectLayer::ClipRectLayer(const SkRect& clip_rect, Clip clip_behavior)
     : clip_rect_(clip_rect), clip_behavior_(clip_behavior) {
   FML_DCHECK(clip_behavior != Clip::none);
+  set_renders_to_save_layer(clip_behavior == Clip::antiAliasWithSaveLayer);
 }
 
 ClipRectLayer::~ClipRectLayer() = default;

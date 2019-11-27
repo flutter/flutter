@@ -43,6 +43,10 @@ class LayerTree {
     root_layer_ = std::move(root_layer);
   }
 
+  bool root_needs_screen_readback() const {
+    return root_layer_ && root_layer_->tree_reads_surface();
+  }
+
   const SkISize& frame_size() const { return frame_size_; }
 
   void set_frame_size(const SkISize& frame_size) { frame_size_ = frame_size; }

@@ -9,7 +9,13 @@
 namespace flutter {
 
 OpacityLayer::OpacityLayer(int alpha, const SkPoint& offset)
-    : alpha_(alpha), offset_(offset) {}
+    : alpha_(alpha), offset_(offset) {
+  // This type of layer either renders via a SaveLayer or it renders
+  // from a raster cache image.  In either case, it does not pass
+  // any rendering from a child through to the surface so it is
+  // effectively "renders to save layer" in all cases.
+  set_renders_to_save_layer(true);
+}
 
 OpacityLayer::~OpacityLayer() = default;
 

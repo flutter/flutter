@@ -48,7 +48,7 @@ class IOSSurfaceGL final : public IOSSurface,
 
   intptr_t GLContextFBO() const override;
 
-  bool UseOffscreenSurface() const override;
+  bool UseOffscreenSurface(const bool needs_readback) const override;
 
   // |GPUSurfaceGLDelegate|
   ExternalViewEmbedder* GetExternalViewEmbedder() override;

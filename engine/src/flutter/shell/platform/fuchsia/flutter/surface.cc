@@ -24,7 +24,8 @@ bool Surface::IsValid() {
 
 // |flutter::Surface|
 std::unique_ptr<flutter::SurfaceFrame> Surface::AcquireFrame(
-    const SkISize& size) {
+    const SkISize& size,
+    const bool needs_readback) {
   return std::make_unique<flutter::SurfaceFrame>(
       nullptr, [](const flutter::SurfaceFrame& surface_frame,
                   SkCanvas* canvas) { return true; });
