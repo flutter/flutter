@@ -102,7 +102,7 @@ Future<void> main(List<String> args) async {
   if (Platform.environment.containsKey(CIRRUS_TASK_NAME))
     print('Running task: ${Platform.environment[CIRRUS_TASK_NAME]}');
   print('═' * 80);
-  // await _runSmokeTests();
+  await _runSmokeTests();
   print('═' * 80);
   await selectShard(const <String, ShardRunner>{
     'add_to_app_tests': _runAddToAppTests,
