@@ -1294,6 +1294,7 @@ class ClipRectLayer extends ContainerLayer {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Rect>('clipRect', clipRect));
+    properties.add(DiagnosticsProperty<Clip>('clipBehavior', clipBehavior));
   }
 }
 
@@ -1374,6 +1375,7 @@ class ClipRRectLayer extends ContainerLayer {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<RRect>('clipRRect', clipRRect));
+    properties.add(DiagnosticsProperty<Clip>('clipBehavior', clipBehavior));
   }
 }
 
@@ -1448,6 +1450,12 @@ class ClipPathLayer extends ContainerLayer {
     addChildrenToScene(builder, layerOffset);
     if (enabled)
       builder.pop();
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Clip>('clipBehavior', clipBehavior));
   }
 }
 
