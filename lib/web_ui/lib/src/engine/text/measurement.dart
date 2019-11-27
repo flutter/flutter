@@ -614,7 +614,9 @@ double _measureSubstring(
   int start,
   int end,
 ) {
-  assert(0 <= start && start <= end && end <= text.length);
+  assert(0 <= start);
+  assert(start <= end);
+  assert(end <= text.length);
 
   if (start == end) {
     return 0;
@@ -624,6 +626,7 @@ double _measureSubstring(
       end == _lastEnd &&
       text == _lastText &&
       _lastStyle == style) {
+    // TODO(mdebbar): Explore caching all widths in a map, not only the last one.
     return _lastWidth;
   }
   _lastStart = start;
@@ -654,7 +657,9 @@ double _roundWidth(double width) {
 /// The return value is the new end of the substring after excluding the
 /// trailing characters.
 int _excludeTrailing(String text, int start, int end, CharPredicate predicate) {
-  assert(0 <= start && start <= end && end <= text.length);
+  assert(0 <= start);
+  assert(start <= end);
+  assert(end <= text.length);
 
   while (start < end && predicate(text.codeUnitAt(end - 1))) {
     end--;
@@ -676,7 +681,7 @@ class LinesCalculator {
   final double _maxWidth;
 
   /// The lines that have been consumed so far.
-  List<String> lines = <String>[];
+  List<EngineLineMetrics> lines = <EngineLineMetrics>[];
 
   int _lineStart = 0;
   int _chunkStart = 0;
@@ -703,13 +708,8 @@ class LinesCalculator {
     // A single chunk of text could be force-broken into multiple lines if it
     // doesn't fit in a single line. That's why we need a loop.
     while (!_reachedMaxLines) {
-      final double lineWidth = _measureSubstring(
-        _canvasContext,
-        _style,
-        _text,
-        _lineStart,
-        chunkEndWithoutSpace,
-      );
+      final double lineWidth =
+          measureSubstring(_lineStart, chunkEndWithoutSpace);
 
       // The current chunk doesn't reach the maximum width, so we stop here and
       // wait for the next line break.
@@ -731,30 +731,37 @@ class LinesCalculator {
         // When there's an ellipsis, truncate text to leave enough space for
         // the ellipsis.
         final double availableWidth = _maxWidth - _ellipsisWidth;
-        final int breakingPoint = _forceBreak(
-          availableWidth,
-          _text,
-          _lineStart,
-          chunkEndWithoutSpace,
+        final int breakingPoint = forceBreakSubstring(
+          maxWidth: availableWidth,
+          start: _lineStart,
+          end: chunkEndWithoutSpace,
         );
-        lines.add(_text.substring(_lineStart, breakingPoint) + _style.ellipsis);
+        lines.add(EngineLineMetrics.withText(
+          _text.substring(_lineStart, breakingPoint) + _style.ellipsis,
+          hardBreak: false,
+          width: measureSubstring(_lineStart, breakingPoint) + _ellipsisWidth,
+          lineNumber: lines.length,
+        ));
       } else if (isChunkTooLong) {
-        final int breakingPoint =
-            _forceBreak(_maxWidth, _text, _lineStart, chunkEndWithoutSpace);
+        final int breakingPoint = forceBreakSubstring(
+          maxWidth: _maxWidth,
+          start: _lineStart,
+          end: chunkEndWithoutSpace,
+        );
         if (breakingPoint == chunkEndWithoutSpace) {
-          // We could force-break the chunk any further which means we reached
+          // We couldn't force-break the chunk any further which means we reached
           // the last character and there isn't enough space for it to fit in
           // its own line. Since this is the last character in the chunk, we
           // don't do anything here and we rely on the next iteration (or the
           // [isHardBreak] check below) to break the line.
           break;
         }
-        _addLineBreak(lineEnd: breakingPoint);
+        _addLineBreak(lineEnd: breakingPoint, isHardBreak: false);
         _chunkStart = breakingPoint;
       } else {
         // The control case of current line exceeding [_maxWidth], we break the
         // line.
-        _addLineBreak(lineEnd: _chunkStart);
+        _addLineBreak(lineEnd: _chunkStart, isHardBreak: false);
       }
     }
 
@@ -763,23 +770,48 @@ class LinesCalculator {
     }
 
     if (isHardBreak) {
-      _addLineBreak(lineEnd: chunkEnd);
+      _addLineBreak(lineEnd: chunkEnd, isHardBreak: true);
     }
     _chunkStart = chunkEnd;
   }
 
-  void _addLineBreak({@required int lineEnd}) {
-    final int indexWithoutNewlines = _excludeTrailing(
+  void _addLineBreak({
+    @required int lineEnd,
+    @required bool isHardBreak,
+  }) {
+    final int endWithoutNewlines = _excludeTrailing(
       _text,
       _lineStart,
       lineEnd,
       _newlinePredicate,
     );
-    lines.add(_text.substring(_lineStart, indexWithoutNewlines));
+    final int endWithoutSpace = _excludeTrailing(
+      _text,
+      _lineStart,
+      endWithoutNewlines,
+      _whitespacePredicate,
+    );
+    final int lineNumber = lines.length;
+    final EngineLineMetrics metrics = EngineLineMetrics.withText(
+      _text.substring(_lineStart, endWithoutNewlines),
+      hardBreak: isHardBreak,
+      width: measureSubstring(_lineStart, endWithoutSpace),
+      lineNumber: lineNumber,
+    );
+    lines.add(metrics);
     _lineStart = lineEnd;
     if (lines.length == _style.maxLines) {
       _reachedMaxLines = true;
     }
+  }
+
+  /// Measures the width of a substring of [_text] starting from the index
+  /// [start] (inclusive) to [end] (exclusive).
+  ///
+  /// This method uses [_text], [_style] and [_canvasContext] to perform the
+  /// measurement.
+  double measureSubstring(int start, int end) {
+    return _measureSubstring(_canvasContext, _style, _text, start, end);
   }
 
   /// In a continuous block of text, finds the point where text can be broken to
@@ -787,15 +819,22 @@ class LinesCalculator {
   ///
   /// This always returns at least one character even if there isn't enough
   /// space for it.
-  int _forceBreak(double maxWidth, String text, int start, int end) {
-    assert(0 <= start && start < end && end <= text.length);
+  int forceBreakSubstring({
+    @required double maxWidth,
+    @required int start,
+    @required int end,
+  }) {
+    assert(0 <= start);
+    assert(start < end);
+    assert(end <= _text.length);
 
+    // When there's no ellipsis, the breaking point should be at least one
+    // character away from [start].
     int low = hasEllipsis ? start : start + 1;
     int high = end;
     do {
       final int mid = (low + high) ~/ 2;
-      final double width =
-          _measureSubstring(_canvasContext, _style, text, start, mid);
+      final double width = measureSubstring(start, mid);
       if (width < maxWidth) {
         low = mid;
       } else if (width > maxWidth) {
@@ -805,7 +844,6 @@ class LinesCalculator {
       }
     } while (high - low > 1);
 
-    // The breaking point should be at least one character away from [start].
     return low;
   }
 }

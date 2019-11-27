@@ -838,9 +838,9 @@ class MeasurementResult {
   /// {@macro dart.ui.paragraph.ideographicBaseline}
   final double ideographicBaseline;
 
-  /// Substrings that represent how the text should wrap into multiple lines to
-  /// satisfy [constraintWidth],
-  final List<String> lines;
+  /// The full list of [EngineLineMetrics] that describe in detail the various metrics
+  /// of each laid out line.
+  final List<EngineLineMetrics> lines;
 
   const MeasurementResult(
     this.constraintWidth, {
