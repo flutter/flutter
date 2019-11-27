@@ -1855,7 +1855,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   ///   );
   /// }
   /// ```
-  ///
+  /// {@end-tool}
   /// See also:
   ///
   ///  * [BottomSheet], which becomes the parent of the widget returned by the
