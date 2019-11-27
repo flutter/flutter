@@ -539,6 +539,54 @@ void main() {
     element.createChild(0, after: null);
   });
 
+  testWidgets('GlobalKey - can reorder under LayoutBuilder while dirtying children', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/43780
+    // This can be reproduce under these conditions
+    // 1. Reorders the children under LayoutBuilder.
+    // 2. One of reordered child is marked dirty with in the same frame.
+    // 3. The LayoutBuilder is marked dirty.
+    final List<String> listItems = <String>['Item 1', 'Item 2', 'Item 3', 'Item 4'];
+
+    Widget listItemToWidget(int index, String listItem) {
+      return _Stateful(
+        child: Text(
+          listItem,
+          textDirection: TextDirection.ltr,
+          key: GlobalObjectKey(listItem),
+        ),
+      );
+    }
+    Widget buildContents() {
+      final List<Widget> children = <Widget>[];
+      for (int i = 0; i < listItems.length; i++) {
+        children.add(listItemToWidget(i, listItems[i]));
+      }
+      return Column(
+        children: children,
+      );
+    }
+
+    await tester.pumpWidget(
+      LayoutBuilder(
+        builder: (_,__) => buildContents(),
+      )
+    );
+    final _StatefulState state = tester.firstState(find.byType(_Stateful).at(1));
+    // Marks one child dirty.
+    state.rebuild();
+    // Reorders the children.
+    final String temp = listItems[1];
+    listItems[1] = listItems[2];
+    listItems[2] = temp;
+    // This will mark the root Element to be dirty and pump a new frame.
+    await tester.pumpWidget(
+      LayoutBuilder(
+        builder: (_,__) => buildContents(),
+      )
+    );
+    expect(tester.takeException(), null);
+  });
+
   testWidgets('Defunct setState throws exception', (WidgetTester tester) async {
     StateSetter setState;
 
@@ -753,4 +801,21 @@ class DirtyElementWithCustomBuildOwner extends Element {
 
   @override
   bool get dirty => true;
+}
+
+class _Stateful extends StatefulWidget {
+  const _Stateful({Key key, this.child}) : super(key: key);
+  final Widget child;
+
+  @override
+  State<StatefulWidget> createState() => _StatefulState();
+}
+
+class _StatefulState extends State<_Stateful> {
+  void rebuild() => setState(() {});
+
+  @override
+  Widget build(BuildContext context) {
+    return widget.child;
+  }
 }
