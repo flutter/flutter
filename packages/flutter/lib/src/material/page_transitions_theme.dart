@@ -486,14 +486,15 @@ class CupertinoPageTransitionsBuilder extends PageTransitionsBuilder {
 class PageTransitionsTheme extends Diagnosticable {
   /// Construct a PageTransitionsTheme.
   ///
-  /// By default the list of builders is: [FadeUpwardsPageTransitionsBuilder],
-  /// [CupertinoPageTransitionsBuilder] for [TargetPlatform.android]
-  /// and [TargetPlatform.iOS] respectively.
+  /// By default the list of builders is: [FadeUpwardsPageTransitionsBuilder]
+  /// for [TargetPlatform.android], and [CupertinoPageTransitionsBuilder] for
+  /// [TargetPlatform.iOS] and [TargetPlatform.macOS].
   const PageTransitionsTheme({ Map<TargetPlatform, PageTransitionsBuilder> builders }) : _builders = builders;
 
   static const Map<TargetPlatform, PageTransitionsBuilder> _defaultBuilders = <TargetPlatform, PageTransitionsBuilder>{
     TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
     TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+    TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
   };
 
   /// The [PageTransitionsBuilder]s supported by this theme.

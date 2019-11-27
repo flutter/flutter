@@ -462,11 +462,13 @@ void main() {
         IOSDeploy: () => mockIosDeploy,
       });
 
-      void testNonPrebuilt({
+      void testNonPrebuilt(
+        String name, {
         @required bool showBuildSettingsFlakes,
+        void Function() additionalSetup,
+        void Function() additionalExpectations,
       }) {
-        const String name = ' non-prebuilt succeeds in debug mode';
-        testUsingContext(name + ' flaky: $showBuildSettingsFlakes', () async {
+        testUsingContext('non-prebuilt succeeds in debug mode $name', () async {
           final Directory targetBuildDir =
               projectDir.childDirectory('build/ios/iphoneos/Debug-arm64');
 
@@ -525,6 +527,10 @@ void main() {
             projectDir.path,
           ]);
 
+          if (additionalSetup != null) {
+            additionalSetup();
+          }
+
           final IOSApp app = await AbsoluteBuildableIOSApp.fromProject(
             FlutterProject.fromDirectory(projectDir).ios);
           final IOSDevice device = IOSDevice('123');
@@ -550,6 +556,10 @@ void main() {
           expect(launchResult.started, isTrue);
           expect(launchResult.hasObservatory, isFalse);
           expect(await device.stopApp(mockApp), isFalse);
+
+          if (additionalExpectations != null) {
+            additionalExpectations();
+          }
         }, overrides: <Type, Generator>{
           DoctorValidatorsProvider: () => FakeIosDoctorProvider(),
           IMobileDevice: () => mockIMobileDevice,
@@ -559,8 +569,44 @@ void main() {
         });
       }
 
-      testNonPrebuilt(showBuildSettingsFlakes: false);
-      testNonPrebuilt(showBuildSettingsFlakes: true);
+      testNonPrebuilt('flaky: false', showBuildSettingsFlakes: false);
+      testNonPrebuilt('flaky: true', showBuildSettingsFlakes: true);
+      testNonPrebuilt('with concurrent build failiure',
+        showBuildSettingsFlakes: false,
+        additionalSetup: () {
+          int callCount = 0;
+          when(mockProcessManager.run(
+            argThat(allOf(
+              contains('xcodebuild'),
+              contains('-configuration'),
+              contains('Debug'),
+            )),
+            workingDirectory: anyNamed('workingDirectory'),
+            environment: anyNamed('environment'),
+          )).thenAnswer((Invocation inv) {
+            // Succeed after 2 calls.
+            if (++callCount > 2) {
+              return Future<ProcessResult>.value(ProcessResult(0, 0, '', ''));
+            }
+            // Otherwise fail with the Xcode concurrent error.
+            return Future<ProcessResult>.value(ProcessResult(
+              0,
+              1,
+              '''
+                "/Developer/Xcode/DerivedData/foo/XCBuildData/build.db":
+                database is locked
+                Possibly there are two concurrent builds running in the same filesystem location.
+                ''',
+              '',
+            ));
+          });
+        },
+        additionalExpectations: () {
+          expect(testLogger.statusText, contains('will retry in 2 seconds'));
+          expect(testLogger.statusText, contains('will retry in 4 seconds'));
+          expect(testLogger.statusText, contains('Xcode build done.'));
+        },
+      );
     });
 
     group('Process calls', () {

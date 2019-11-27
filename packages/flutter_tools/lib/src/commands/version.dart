@@ -18,6 +18,7 @@ import '../version.dart';
 
 class VersionCommand extends FlutterCommand {
   VersionCommand() : super() {
+    usesPubOption(hide: true);
     argParser.addFlag('force',
       abbr: 'f',
       help: 'Force switch to older Flutter versions that do not include a version command',
@@ -117,7 +118,7 @@ class VersionCommand extends FlutterCommand {
     printStatus(flutterVersion.toString());
 
     final String projectRoot = findProjectRoot();
-    if (projectRoot != null) {
+    if (projectRoot != null && shouldRunPub) {
       printStatus('');
       await pub.get(
         context: PubContext.pubUpgrade,

@@ -173,9 +173,10 @@ abstract class FlutterCommand extends Command<void> {
     return bundle.defaultMainPath;
   }
 
-  void usesPubOption() {
+  void usesPubOption({bool hide = false}) {
     argParser.addFlag('pub',
       defaultsTo: true,
+      hide: hide,
       help: 'Whether to run "flutter pub get" before executing this command.');
     _usesPubOption = true;
   }

@@ -296,13 +296,17 @@ class DragAndDropAppState extends State<DragAndDropApp> {
   }
 }
 
-void main() {
-  if (!kIsWeb && Platform.isMacOS) {
-    // TODO(gspencergoog): Update this when TargetPlatform includes macOS. https://github.com/flutter/flutter/issues/31366
-    // See https://github.com/flutter/flutter/wiki/Desktop-shells#target-platform-override
+// Sets a platform override for desktop to avoid exceptions. See
+// https://flutter.dev/desktop#target-platform-override for more info.
+// TODO(gspencergoog): Remove once TargetPlatform includes all desktop platforms.
+void _enablePlatformOverrideForDesktop() {
+  if (!kIsWeb && (Platform.isWindows || Platform.isLinux)) {
     debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
   }
+}
 
+void main() {
+  _enablePlatformOverrideForDesktop();
   runApp(MaterialApp(
     title: 'Drag and Drop Flutter Demo',
     home: DragAndDropApp(),

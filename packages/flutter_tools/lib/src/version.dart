@@ -130,9 +130,19 @@ class FlutterVersion {
   };
 
   /// A date String describing the last framework commit.
-  String get frameworkCommitDate => _latestGitCommitDate();
+  ///
+  /// If a git command fails, this will return a placeholder date.
+  String get frameworkCommitDate => _latestGitCommitDate(lenient: true);
 
-  static String _latestGitCommitDate([ String branch ]) {
+  // The date of the latest commit on the given branch. If no branch is
+  // specified, then it is the current local branch.
+  //
+  // If lenient is true, and the git command fails, a placeholder date is
+  // returned. Otherwise, the VersionCheckError exception is propagated.
+  static String _latestGitCommitDate({
+    String branch,
+    bool lenient = false,
+  }) {
     final List<String> args = gitLog(<String>[
       if (branch != null) branch,
       '-n',
@@ -140,7 +150,21 @@ class FlutterVersion {
       '--pretty=format:%ad',
       '--date=iso',
     ]);
-    return _runSync(args, lenient: false);
+    try {
+      // Don't plumb 'lenient' through directly so that we can print an error
+      // if something goes wrong.
+      return _runSync(args, lenient: false);
+    } on VersionCheckError catch (e) {
+      if (lenient) {
+        final DateTime dummyDate = DateTime.fromMillisecondsSinceEpoch(0);
+        printError('Failed to find the latest git commit date: $e\n'
+          'Returning $dummyDate instead.');
+        // Return something that DateTime.parse() can parse.
+        return dummyDate.toString();
+      } else {
+        rethrow;
+      }
+    }
   }
 
   /// The name of the temporary git remote used to check for the latest
@@ -153,8 +177,8 @@ class FlutterVersion {
 
   /// The date of the latest framework commit in the remote repository.
   ///
-  /// Throws [ToolExit] if a git command fails, for example, when the remote git
-  /// repository is not reachable due to a network issue.
+  /// Throws [VersionCheckError] if a git command fails, for example, when the
+  /// remote git repository is not reachable due to a network issue.
   static Future<String> fetchRemoteFrameworkCommitDate(String branch) async {
     await _removeVersionCheckRemoteIfExists();
     try {
@@ -166,7 +190,10 @@ class FlutterVersion {
         'https://github.com/flutter/flutter.git',
       ]);
       await _run(<String>['git', 'fetch', _versionCheckRemote, branch]);
-      return _latestGitCommitDate('$_versionCheckRemote/$branch');
+      return _latestGitCommitDate(
+        branch: '$_versionCheckRemote/$branch',
+        lenient: false,
+      );
     } finally {
       await _removeVersionCheckRemoteIfExists();
     }
@@ -219,7 +246,13 @@ class FlutterVersion {
     String tentativeAncestorRevision,
   }) {
     final ProcessResult result = processManager.runSync(
-      <String>['git', 'merge-base', '--is-ancestor', tentativeAncestorRevision, tentativeDescendantRevision],
+      <String>[
+        'git',
+        'merge-base',
+        '--is-ancestor',
+        tentativeAncestorRevision,
+        tentativeDescendantRevision
+      ],
       workingDirectory: Cache.flutterRoot,
     );
     return result.exitCode == 0;
@@ -291,7 +324,16 @@ class FlutterVersion {
       return;
     }
 
-    final DateTime localFrameworkCommitDate = DateTime.parse(frameworkCommitDate);
+    DateTime localFrameworkCommitDate;
+    try {
+      localFrameworkCommitDate = DateTime.parse(_latestGitCommitDate(
+        lenient: false
+      ));
+    } on VersionCheckError {
+      // Don't perform the update check if the verison check failed.
+      return;
+    }
+
     final Duration frameworkAge = _clock.now().difference(localFrameworkCommitDate);
     final bool installationSeemsOutdated = frameworkAge > versionAgeConsideredUpToDate(channel);
 
@@ -299,12 +341,11 @@ class FlutterVersion {
     // to the server if we haven't checked recently so won't happen on every
     // command.
     final DateTime latestFlutterCommitDate = await _getLatestAvailableFlutterDate();
-    final VersionCheckResult remoteVersionStatus =
-        latestFlutterCommitDate == null
-            ? VersionCheckResult.unknown
-            : latestFlutterCommitDate.isAfter(localFrameworkCommitDate)
-                ? VersionCheckResult.newVersionAvailable
-                : VersionCheckResult.versionIsCurrent;
+    final VersionCheckResult remoteVersionStatus = latestFlutterCommitDate == null
+        ? VersionCheckResult.unknown
+        : latestFlutterCommitDate.isAfter(localFrameworkCommitDate)
+          ? VersionCheckResult.newVersionAvailable
+          : VersionCheckResult.versionIsCurrent;
 
     // Do not load the stamp before the above server check as it may modify the stamp file.
     final VersionCheckStamp stamp = await VersionCheckStamp.load();
@@ -314,15 +355,15 @@ class FlutterVersion {
     // We show a warning if either we know there is a new remote version, or we couldn't tell but the local
     // version is outdated.
     final bool canShowWarning =
-        remoteVersionStatus == VersionCheckResult.newVersionAvailable ||
-            (remoteVersionStatus == VersionCheckResult.unknown &&
-                installationSeemsOutdated);
+      remoteVersionStatus == VersionCheckResult.newVersionAvailable ||
+        (remoteVersionStatus == VersionCheckResult.unknown &&
+          installationSeemsOutdated);
 
     if (beenAWhileSinceWarningWasPrinted && canShowWarning) {
       final String updateMessage =
-          remoteVersionStatus == VersionCheckResult.newVersionAvailable
-              ? newVersionAvailableMessage()
-              : versionOutOfDateMessage(frameworkAge);
+        remoteVersionStatus == VersionCheckResult.newVersionAvailable
+          ? newVersionAvailableMessage()
+          : versionOutOfDateMessage(frameworkAge);
       printStatus(updateMessage, emphasis: true);
       await Future.wait<void>(<Future<void>>[
         stamp.store(
@@ -379,7 +420,9 @@ class FlutterVersion {
     final VersionCheckStamp versionCheckStamp = await VersionCheckStamp.load();
 
     if (versionCheckStamp.lastTimeVersionWasChecked != null) {
-      final Duration timeSinceLastCheck = _clock.now().difference(versionCheckStamp.lastTimeVersionWasChecked);
+      final Duration timeSinceLastCheck = _clock.now().difference(
+        versionCheckStamp.lastTimeVersionWasChecked,
+      );
 
       // Don't ping the server too often. Return cached value if it's fresh.
       if (timeSinceLastCheck < checkAgeConsideredUpToDate) {
@@ -389,7 +432,9 @@ class FlutterVersion {
 
     // Cache is empty or it's been a while since the last server ping. Ping the server.
     try {
-      final DateTime remoteFrameworkCommitDate = DateTime.parse(await FlutterVersion.fetchRemoteFrameworkCommitDate(channel));
+      final DateTime remoteFrameworkCommitDate = DateTime.parse(
+        await FlutterVersion.fetchRemoteFrameworkCommitDate(channel),
+      );
       await versionCheckStamp.store(
         newTimeVersionWasChecked: _clock.now(),
         newKnownRemoteVersion: remoteFrameworkCommitDate,
@@ -533,7 +578,10 @@ class VersionCheckError implements Exception {
 /// If [lenient] is true and the command fails, returns an empty string.
 /// Otherwise, throws a [ToolExit] exception.
 String _runSync(List<String> command, { bool lenient = true }) {
-  final ProcessResult results = processManager.runSync(command, workingDirectory: Cache.flutterRoot);
+  final ProcessResult results = processManager.runSync(
+    command,
+    workingDirectory: Cache.flutterRoot,
+  );
 
   if (results.exitCode == 0) {
     return (results.stdout as String).trim();
@@ -542,6 +590,7 @@ String _runSync(List<String> command, { bool lenient = true }) {
   if (!lenient) {
     throw VersionCheckError(
       'Command exited with code ${results.exitCode}: ${command.join(' ')}\n'
+      'Standard out: ${results.stdout}\n'
       'Standard error: ${results.stderr}'
     );
   }

@@ -283,6 +283,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
   String _getRouteLabel(MaterialLocalizations localizations) {
     switch (Theme.of(context).platform) {
       case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
         return '';
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
