@@ -1083,13 +1083,14 @@ class ProjectFileInvalidator {
     this._platform,
     this._logger,
     String flutterRoot,
-  ) : _pathToFlutterSources = _fileSystem.path.join(flutterRoot, 'packages', 'flutter');
+  ) : _flutterSources = _fileSystem.directory(
+      _fileSystem.path.join(flutterRoot, 'packages', 'flutter'));
 
   final FileSystem _fileSystem;
   final DirectoryWatcherFactory _directoryWatcherFactory;
   final Platform _platform;
   final Logger _logger;
-  final String _pathToFlutterSources;
+  final Directory _flutterSources;
 
   static const String _pubCachePathLinuxAndMac = '.pub-cache';
   static const String _pubCachePathWindows = 'Pub/Cache';
@@ -1125,7 +1126,7 @@ class ProjectFileInvalidator {
     if (lastCompiled == null) {
       // Initial load
       assert(urisToMonitor.isEmpty);
-      _fileWatcher = _directoryWatcherFactory.watchDirectory(_pathToFlutterSources)
+      _fileWatcher = _directoryWatcherFactory.watchDirectory(_flutterSources.path)
         .events.listen((WatchEvent watchEvent) {
           _logger.printTrace('Adding flutter sources to watch list.');
           _fileWatcher.cancel();
@@ -1135,12 +1136,11 @@ class ProjectFileInvalidator {
     }
 
     final Stopwatch stopwatch = Stopwatch()..start();
-    print(_pathToFlutterSources);
-
     final List<Uri> urisToScan = <Uri>[
       // Don't watch pub cache directories to speed things up a little.
       for (Uri uri in urisToMonitor)
-        if (_isNotInPubCache(uri) && (watchingFlutter || !uri.path.contains(_pathToFlutterSources)))
+        if (_isNotInPubCache(uri) &&
+          (watchingFlutter || !uri.path.contains(_flutterSources.uri.path)))
           uri,
 
       // We need to check the .packages file too since it is not used in compilation.
