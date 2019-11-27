@@ -5,8 +5,6 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:flutter_tools/src/features.dart';
-
 import '../asset.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -17,6 +15,7 @@ import '../cache.dart';
 import '../codegen.dart';
 import '../dart/pub.dart';
 import '../devfs.dart';
+import '../features.dart';
 import '../globals.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart';
