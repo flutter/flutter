@@ -637,6 +637,7 @@ void main() {
       ReloadSources reloadSources,
       Restart restart,
       CompileExpression compileExpression,
+      ReloadMethod reloadMethod,
       io.CompressionOptions compression,
       Device device,
     }) async => mockVMService,
