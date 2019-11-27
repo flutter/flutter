@@ -725,6 +725,7 @@ abstract class SliverMultiBoxAdaptorWidget extends SliverWithKeepAliveWidget {
   }) : assert(delegate != null),
        super(key: key);
 
+  /// {@template flutter.widgets.sliverMultiBoxAdaptor.delegate}
   /// The delegate that provides the children for this widget.
   ///
   /// The children are constructed lazily using this delegate to avoid creating
@@ -735,6 +736,7 @@ abstract class SliverMultiBoxAdaptorWidget extends SliverWithKeepAliveWidget {
   ///  * [SliverChildBuilderDelegate] and [SliverChildListDelegate], which are
   ///    commonly used subclasses of [SliverChildDelegate] that use a builder
   ///    callback and an explicit child list, respectively.
+  /// {@endtemplate}
   final SliverChildDelegate delegate;
 
   @override
@@ -1055,16 +1057,7 @@ class SliverFillViewport extends StatelessWidget {
   /// the viewport in the main axis.
   final double viewportFraction;
 
-  /// The delegate that provides the children for this widget.
-  ///
-  /// The children are constructed lazily using this delegate to avoid creating
-  /// more children than are visible through the [Viewport].
-  ///
-  /// See also:
-  ///
-  ///  * [SliverChildBuilderDelegate] and [SliverChildListDelegate], which are
-  ///    commonly used subclasses of [SliverChildDelegate] that use a builder
-  ///    callback and an explicit child list, respectively.
+  /// {@macro flutter.widgets.sliverMultiBoxAdaptor.delegate}
   final SliverChildDelegate delegate;
 
   @override
@@ -1137,22 +1130,39 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
     if (_viewportFraction == newValue)
       return;
     _viewportFraction = newValue;
-    markNeedsLayout();
+    _markNeedsResolution();
   }
 
   @override
-  EdgeInsets get resolvedPadding {
+  EdgeInsets get resolvedPadding => _resolvedPadding;
+  EdgeInsets _resolvedPadding;
+
+  void _markNeedsResolution() {
+    _resolvedPadding = null;
+    markNeedsLayout();
+  }
+
+  void _resolve() {
+    if (_resolvedPadding != null)
+      return;
     assert(constraints.axis != null);
     final double paddingValue = constraints.viewportMainAxisExtent * viewportFraction;
     switch (constraints.axis) {
       case Axis.horizontal:
-        return EdgeInsets.symmetric(horizontal: paddingValue);
+        _resolvedPadding = EdgeInsets.symmetric(horizontal: paddingValue);
+        break;
       case Axis.vertical:
-        return EdgeInsets.symmetric(vertical: paddingValue);
+        _resolvedPadding = EdgeInsets.symmetric(vertical: paddingValue);
+        break;
     }
 
-    assert(false, 'Unreachable');
-    return EdgeInsets.symmetric(vertical: paddingValue);
+    return;
+  }
+
+  @override
+  void performLayout() {
+    _resolve();
+    super.performLayout();
   }
 }
 

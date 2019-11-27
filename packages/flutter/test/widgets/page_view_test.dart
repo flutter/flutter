@@ -600,10 +600,10 @@ void main() {
       expect(tester.getTopLeft(find.text('Hawaii')), const Offset(-(4 - 1) * 800 / 2, 0));
   });
 
-  // Regression test for https://github.com/flutter/flutter/issues/45096.
   testWidgets(
-    'PageView large viewportFraction can scroll and to the last page and snap',
+    'PageView large viewportFraction can scroll to the last page and snap',
     (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/45096.
       final PageController controller = PageController(viewportFraction: 5/4);
 
       Widget build(PageController controller) {
@@ -639,6 +639,7 @@ void main() {
   testWidgets(
     'All visible pages are able to receive touch events',
     (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/23873.
       final PageController controller = PageController(viewportFraction: 1/4, initialPage: 0);
       int tappedIndex;
 

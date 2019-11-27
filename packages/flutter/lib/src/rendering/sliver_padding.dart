@@ -18,11 +18,13 @@ import 'sliver.dart';
 /// of its child. Any incoming [SliverConstraints.overlap] is ignored and not
 /// passed on to the child.
 ///
+/// {@template flutter.rendering.sliverPadding.limitation}
 /// Applying padding to anything but the most mundane sliver is likely to have
 /// undesired effects. For example, wrapping a [RenderSliverPinnedPersistentHeader]
 /// will cause the app bar to overlap earlier slivers (contrary to the normal
 /// behavior of pinned app bars), and while the app bar is pinned, the padding
 /// will scroll away.
+/// {@endtemplate}
 abstract class RenderSliverEdgeInsetsPadding extends RenderSliver with RenderObjectWithChildMixin<RenderSliver> {
   /// The amount to pad the child in each dimension.
   ///
@@ -305,11 +307,7 @@ abstract class RenderSliverEdgeInsetsPadding extends RenderSliver with RenderObj
 /// its child. Any incoming [SliverConstraints.overlap] is ignored and not
 /// passed on to the child.
 ///
-/// Applying padding to anything but the most mundane sliver is likely to have
-/// undesired effects. For example, wrapping a
-/// [RenderSliverPinnedPersistentHeader] will cause the app bar to overlap
-/// earlier slivers (contrary to the normal behavior of pinned app bars), and
-/// while the app bar is pinned, the padding will scroll away.
+/// {@macro flutter.rendering.sliverPadding.limitation}
 class RenderSliverPadding extends RenderSliverEdgeInsetsPadding {
   /// Creates a render object that insets its child in a viewport.
   ///
@@ -326,17 +324,18 @@ class RenderSliverPadding extends RenderSliverEdgeInsetsPadding {
   }
 
   @override
-  EdgeInsets resolvedPadding;
+  EdgeInsets get resolvedPadding => _resolvedPadding;
+  EdgeInsets _resolvedPadding;
 
   void _resolve() {
     if (resolvedPadding != null)
       return;
-    resolvedPadding = padding.resolve(textDirection);
+    _resolvedPadding = padding.resolve(textDirection);
     assert(resolvedPadding.isNonNegative);
   }
 
   void _markNeedsResolution() {
-    resolvedPadding = null;
+    _resolvedPadding = null;
     markNeedsLayout();
   }
 
