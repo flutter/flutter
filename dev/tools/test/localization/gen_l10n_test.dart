@@ -6,10 +6,10 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:path/path.dart' as path;
 
-import '../gen_l10n.dart';
-import '../localizations_utils.dart';
+import '../../localization/gen_l10n.dart';
+import '../../localization/localizations_utils.dart';
 
-import 'common.dart';
+import '../common.dart';
 
 final String defaultArbPathString = path.join('lib', 'l10n');
 const String defaultTemplateArbFileName = 'app_en.arb';
@@ -404,7 +404,6 @@ void main() {
         );
         generator.parseArbFiles();
         generator.generateClassMethods();
-        print(generator.classMethods);
       } on Exception catch (e) {
        fail('Parsing template arb file should succeed: $e');
       }
@@ -447,7 +446,6 @@ void main() {
         );
         generator.parseArbFiles();
         generator.generateClassMethods();
-        print(generator.classMethods);
       } on Exception catch (e) {
        fail('Parsing template arb file should succeed: $e');
       }
