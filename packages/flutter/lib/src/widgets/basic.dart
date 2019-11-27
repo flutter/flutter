@@ -4995,7 +4995,7 @@ class Flow extends MultiChildRenderObjectWidget {
 /// {@tool sample}
 ///
 /// This sample demonstrates how to mix and match text with different text
-/// styles using the `RichText` Widget. It displays the text "Hello bold world,"
+/// styles using the [RichText] Widget. It displays the text "Hello bold world,"
 /// emphasizing the word "bold" using a bold font weight.
 ///
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/widgets/rich_text.png)
