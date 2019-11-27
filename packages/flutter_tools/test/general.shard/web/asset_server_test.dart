@@ -4,6 +4,7 @@
 
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/build_runner/web_fs.dart';
 import 'package:flutter_tools/src/globals.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -150,5 +151,27 @@ void main() {
       'Content-Type': 'text/html',
       'content-length': '28',
     });
+  }));
+
+  test('release asset server serves content from flutter root', () => testbed.run(() async {
+    assetServer = ReleaseAssetServer();
+    fs.file(fs.path.join('flutter', 'bar.dart'))
+      ..createSync(recursive: true)
+      ..writeAsStringSync('void main() { }');
+    final Response response = await assetServer
+      .handle(Request('GET', Uri.parse('http://localhost:8080/flutter/bar.dart')));
+
+    expect(response.statusCode, HttpStatus.ok);
+  }));
+
+  test('release asset server serves content from project directory', () => testbed.run(() async {
+    assetServer = ReleaseAssetServer();
+    fs.file(fs.path.join('lib', 'bar.dart'))
+      ..createSync(recursive: true)
+      ..writeAsStringSync('void main() { }');
+    final Response response = await assetServer
+      .handle(Request('GET', Uri.parse('http://localhost:8080/bar.dart')));
+
+    expect(response.statusCode, HttpStatus.ok);
   }));
 }

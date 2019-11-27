@@ -94,7 +94,7 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
   }
 }
 
-/// Handles mapping a single root file scheme to a multiroot scheme.
+/// Handles mapping a single root file scheme to a multi-root scheme.
 ///
 /// This allows one build_runner build to read the output from a previous
 /// isolated build.

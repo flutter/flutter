@@ -687,7 +687,7 @@ class DropdownButtonHideUnderline extends InheritedWidget {
   /// Returns whether the underline of [DropdownButton] widgets should
   /// be hidden.
   static bool at(BuildContext context) {
-    return context.inheritFromWidgetOfExactType(DropdownButtonHideUnderline) != null;
+    return context.dependOnInheritedWidgetOfExactType<DropdownButtonHideUnderline>() != null;
   }
 
   @override

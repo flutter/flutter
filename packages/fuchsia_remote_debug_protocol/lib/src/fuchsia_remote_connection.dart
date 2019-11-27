@@ -81,11 +81,11 @@ enum DartVmEventType {
 /// An event regarding the Dart VM.
 ///
 /// Specifies the type of the event (whether the VM has started or has stopped),
-/// and contains the service port of the VM as well as a URI to connect to it.
+/// and contains the service port of the VM as well as a URL to connect to it.
 class DartVmEvent {
   DartVmEvent._({this.eventType, this.servicePort, this.uri});
 
-  /// The URI used to connect to the Dart VM.
+  /// The URL used to connect to the Dart VM.
   final Uri uri;
 
   /// The type of event regarding this instance of the Dart VM.

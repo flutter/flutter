@@ -85,7 +85,7 @@ void main() {
 
     await chromeLauncher.launch('example_url', skipCheck: true, dataDir: dataDir);
     final VerificationResult result = verify(processManager.start(captureAny));
-    final String arg = result.captured.single
+    final String arg = (result.captured.single as List<String>)
       .firstWhere((String arg) => arg.startsWith('--user-data-dir='));
     final Directory tempDirectory = fs.directory(arg.split('=')[1]);
     final File tempFile = tempDirectory

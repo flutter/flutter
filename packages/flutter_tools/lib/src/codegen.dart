@@ -33,7 +33,7 @@ CodeGenerator get codeGenerator => context.get<CodeGenerator>();
 abstract class CodeGenerator {
   const CodeGenerator();
 
-  /// Starts a persistent code generting daemon.
+  /// Starts a persistent code generating daemon.
   ///
   /// The defines of the daemon command are the arguments required in the
   /// flutter_build kernel builder.
@@ -44,7 +44,7 @@ abstract class CodeGenerator {
   Future<void> generateBuildScript(FlutterProject flutterProject);
 
   /// Create generated packages file which adds a multi-root scheme to the user's
-  /// project directory. Currently we only replace the root package with a multiroot
+  /// project directory. Currently we only replace the root package with a multi-root
   /// scheme. To support codegen on arbitrary packages we would need to do
   /// this for each dependency.
   void updatePackages(FlutterProject flutterProject) {
@@ -83,7 +83,7 @@ abstract class CodegenDaemon {
 /// An implementation of the [KernelCompiler] which delegates to build_runner.
 ///
 /// Only a subset of the arguments provided to the [KernelCompiler] are
-/// supported here. Using the build pipeline implies a fixed multiroot
+/// supported here. Using the build pipeline implies a fixed multi-root
 /// filesystem and requires a pubspec.
 class CodeGeneratingKernelCompiler implements KernelCompiler {
   const CodeGeneratingKernelCompiler();

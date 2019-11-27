@@ -50,8 +50,8 @@ class FlutterCompactFormatter {
   /// this is Windows or not outputting to a terminal.
   String get _noColor => useColor ? '\u001b[0m' : '';
 
-  /// The termianl escape for clearing the line, or a carriage return if
-  /// this is Windows or not outputting to a termianl.
+  /// The terminal escape for clearing the line, or a carriage return if
+  /// this is Windows or not outputting to a terminal.
   String get _clearLine => useColor ? '\x1b[2K\r' : '\r';
 
   final Map<int, TestResult> _tests = <int, TestResult>{};

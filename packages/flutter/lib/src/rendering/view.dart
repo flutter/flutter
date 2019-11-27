@@ -253,8 +253,9 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       case TargetPlatform.android:
         lowerOverlayStyle = layer.find<SystemUiOverlayStyle>(bottom);
         break;
-      case TargetPlatform.iOS:
       case TargetPlatform.fuchsia:
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
         break;
     }
     // If there are no overlay styles in the UI don't bother updating.

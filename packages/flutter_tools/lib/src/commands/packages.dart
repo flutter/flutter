@@ -38,11 +38,6 @@ class PackagesCommand extends FlutterCommand {
   final String description = 'Commands for managing Flutter packages.';
 
   @override
-  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
-    DevelopmentArtifact.universal,
-  };
-
-  @override
   Future<FlutterCommandResult> runCommand() async => null;
 }
 
@@ -98,7 +93,7 @@ class PackagesGetCommand extends FlutterCommand {
       await pub.get(context: PubContext.pubGet,
         directory: directory,
         upgrade: upgrade ,
-        offline: argResults['offline'],
+        offline: boolArg('offline'),
         checkLastModified: false,
       );
       pubGetTimer.stop();
@@ -203,8 +198,8 @@ class PackagesPublishCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     final List<String> args = <String>[
       ...argResults.rest,
-      if (argResults['dry-run']) '--dry-run',
-      if (argResults['force']) '--force',
+      if (boolArg('dry-run')) '--dry-run',
+      if (boolArg('force')) '--force',
     ];
     Cache.releaseLockEarly();
     await pub.interactively(<String>['publish', ...args]);

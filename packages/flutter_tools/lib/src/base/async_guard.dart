@@ -99,9 +99,9 @@ Future<T> asyncGuard<T>(
       completer.completeError(e, s);
       return;
     }
-    if (onError is _BinaryOnError) {
+    if (onError is _BinaryOnError<T>) {
       completer.complete(onError(e, s));
-    } else if (onError is _UnaryOnError) {
+    } else if (onError is _UnaryOnError<T>) {
       completer.complete(onError(e));
     }
   }

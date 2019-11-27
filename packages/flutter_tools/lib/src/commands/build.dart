@@ -29,7 +29,7 @@ class BuildCommand extends FlutterCommand {
     addSubcommand(BuildIOSFrameworkCommand());
     addSubcommand(BuildBundleCommand(verboseHelp: verboseHelp));
     addSubcommand(BuildWebCommand());
-    addSubcommand(BuildMacosCommand(verboseHelp: verboseHelp));
+    addSubcommand(BuildMacosCommand());
     addSubcommand(BuildLinuxCommand());
     addSubcommand(BuildWindowsCommand());
     addSubcommand(BuildFuchsiaCommand(verboseHelp: verboseHelp));

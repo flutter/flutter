@@ -86,6 +86,7 @@ class _ScrollbarState extends State<Scrollbar> with TickerProviderStateMixin {
     final ThemeData theme = Theme.of(context);
     switch (theme.platform) {
       case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
         // On iOS, stop all local animations. CupertinoScrollbar has its own
         // animations.
         _fadeoutTimer?.cancel();

@@ -65,14 +65,9 @@ class AnalyzeCommand extends FlutterCommand {
   String get description => "Analyze the project's Dart code.";
 
   @override
-  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
-    DevelopmentArtifact.universal,
-  };
-
-  @override
   bool get shouldRunPub {
     // If they're not analyzing the current project.
-    if (!argResults['current-package']) {
+    if (!boolArg('current-package')) {
       return false;
     }
 
@@ -86,7 +81,7 @@ class AnalyzeCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    if (argResults['watch']) {
+    if (boolArg('watch')) {
       await AnalyzeContinuously(
         argResults,
         runner.getRepoRoots(),

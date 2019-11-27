@@ -158,7 +158,7 @@ class DeviceManager {
 
   /// Find and return a list of devices based on the current project and environment.
   ///
-  /// Returns a list of deviecs specified by the user.
+  /// Returns a list of devices specified by the user.
   ///
   /// * If the user specified '-d all', then return all connected devices which
   /// support the current project, except for fuchsia and web.
@@ -221,7 +221,7 @@ class DeviceManager {
 
   /// Returns whether the device is supported for the project.
   ///
-  /// This exists to allow the check to be overriden for google3 clients.
+  /// This exists to allow the check to be overridden for google3 clients.
   bool isDeviceSupportedForProject(Device device, FlutterProject flutterProject) {
     return device.isSupportedForProject(flutterProject);
   }
@@ -303,7 +303,6 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
 }
 
 abstract class Device {
-
   Device(this.id, {@required this.category, @required this.platformType, @required this.ephemeral});
 
   final String id;
@@ -356,16 +355,16 @@ abstract class Device {
   bool isSupportedForProject(FlutterProject flutterProject);
 
   /// Check if a version of the given app is already installed
-  Future<bool> isAppInstalled(ApplicationPackage app);
+  Future<bool> isAppInstalled(covariant ApplicationPackage app);
 
   /// Check if the latest build of the [app] is already installed.
-  Future<bool> isLatestBuildInstalled(ApplicationPackage app);
+  Future<bool> isLatestBuildInstalled(covariant ApplicationPackage app);
 
   /// Install an app package on the current device
-  Future<bool> installApp(ApplicationPackage app);
+  Future<bool> installApp(covariant ApplicationPackage app);
 
   /// Uninstall an app package from the current device
-  Future<bool> uninstallApp(ApplicationPackage app);
+  Future<bool> uninstallApp(covariant ApplicationPackage app);
 
   /// Check if the device is supported by Flutter
   bool isSupported();
@@ -382,7 +381,7 @@ abstract class Device {
   /// Get a log reader for this device.
   /// If [app] is specified, this will return a log reader specific to that
   /// application. Otherwise, a global log reader will be returned.
-  DeviceLogReader getLogReader({ ApplicationPackage app });
+  DeviceLogReader getLogReader({ covariant ApplicationPackage app });
 
   /// Get the port forwarder for this device.
   DevicePortForwarder get portForwarder;
@@ -398,7 +397,7 @@ abstract class Device {
   /// [platformArgs] allows callers to pass platform-specific arguments to the
   /// start call. The build mode is not used by all platforms.
   Future<LaunchResult> startApp(
-    ApplicationPackage package, {
+    covariant ApplicationPackage package, {
     String mainPath,
     String route,
     DebuggingOptions debuggingOptions,
@@ -422,7 +421,15 @@ abstract class Device {
   bool get supportsScreenshot => false;
 
   /// Stop an app package on the current device.
-  Future<bool> stopApp(ApplicationPackage app);
+  Future<bool> stopApp(covariant ApplicationPackage app);
+
+  /// Query the current application memory usage..
+  ///
+  /// If the device does not support this callback, an empty map
+  /// is returned.
+  Future<MemoryInfo> queryMemoryInfo() {
+    return Future<MemoryInfo>.value(const MemoryInfo.empty());
+  }
 
   Future<void> takeScreenshot(File outputFile) => Future<void>.error('unimplemented');
 
@@ -488,6 +495,25 @@ abstract class Device {
   void dispose() {}
 }
 
+/// Information about an application's memory usage.
+abstract class MemoryInfo {
+  /// Const constructor to allow subclasses to be const.
+  const MemoryInfo();
+
+  /// Create a [MemoryInfo] object with no information.
+  const factory MemoryInfo.empty() = _NoMemoryInfo;
+
+  /// Convert the object to a JSON representation suitable for serialization.
+  Map<String, Object> toJson();
+}
+
+class _NoMemoryInfo implements MemoryInfo {
+  const _NoMemoryInfo();
+
+  @override
+  Map<String, Object> toJson() => <String, Object>{};
+}
+
 class DebuggingOptions {
   DebuggingOptions.enabled(
     this.buildInfo, {
@@ -507,7 +533,6 @@ class DebuggingOptions {
     this.initializePlatform = true,
     this.hostname,
     this.port,
-    this.browserLaunch = true,
     this.vmserviceOutFile,
    }) : debuggingEnabled = true;
 
@@ -525,7 +550,6 @@ class DebuggingOptions {
       verboseSystemLogs = false,
       hostVmServicePort = null,
       deviceVmServicePort = null,
-      browserLaunch = true,
       vmserviceOutFile = null;
 
   final bool debuggingEnabled;
@@ -548,8 +572,7 @@ class DebuggingOptions {
   final int deviceVmServicePort;
   final String port;
   final String hostname;
-  final bool browserLaunch;
-  /// A file where the vmservice uri should be written after the application is started.
+  /// A file where the vmservice URL should be written after the application is started.
   final String vmserviceOutFile;
 
   bool get hasObservatoryPort => hostVmServicePort != null;
@@ -582,17 +605,15 @@ class ForwardedPort {
 
   final int hostPort;
   final int devicePort;
-  final dynamic context;
+  final Process context;
 
   @override
   String toString() => 'ForwardedPort HOST:$hostPort to DEVICE:$devicePort';
 
   /// Kill subprocess (if present) used in forwarding.
   void dispose() {
-    final Process process = context;
-
-    if (process != null) {
-      process.kill();
+    if (context != null) {
+      context.kill();
     }
   }
 }

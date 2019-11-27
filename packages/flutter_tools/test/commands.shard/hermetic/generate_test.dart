@@ -3,15 +3,14 @@
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/codegen.dart';
 import 'package:flutter_tools/src/commands/generate.dart';
 import 'package:flutter_tools/src/convert.dart';
-import 'package:flutter_tools/src/globals.dart';
 import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
+import '../../src/context.dart';
 import '../../src/mocks.dart';
 import '../../src/testbed.dart';
 
@@ -47,7 +46,6 @@ void main() {
 
   test('Outputs error information from flutter generate', () => testbed.run(() async {
     final GenerateCommand command = GenerateCommand();
-    final BufferLogger bufferLogger = logger;
     applyMocksToCommand(command);
     fs.file(fs.path.join('lib', 'main.dart'))
       ..createSync(recursive: true);
@@ -71,10 +69,10 @@ void main() {
     await createTestCommandRunner(command)
       .run(const <String>['generate']);
 
-    expect(bufferLogger.errorText, contains('a'));
-    expect(bufferLogger.errorText, contains('b'));
-    expect(bufferLogger.errorText, contains('foo builder'));
-    expect(bufferLogger.errorText, isNot(contains('Error reading error')));
+    expect(testLogger.errorText, contains('a'));
+    expect(testLogger.errorText, contains('b'));
+    expect(testLogger.errorText, contains('foo builder'));
+    expect(testLogger.errorText, isNot(contains('Error reading error')));
   }));
 }
 

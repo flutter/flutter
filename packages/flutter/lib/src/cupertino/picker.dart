@@ -172,7 +172,7 @@ class CupertinoPicker extends StatefulWidget {
 
   /// {@macro flutter.rendering.wheelList.squeeze}
   ///
-  /// Defaults to `1.45` fo visually mimic iOS.
+  /// Defaults to `1.45` to visually mimic iOS.
   final double squeeze;
 
   /// An option callback when the currently centered item changes.
@@ -230,6 +230,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
         break;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
+      case TargetPlatform.macOS:
         hasSuitableHapticHardware = false;
         break;
     }
