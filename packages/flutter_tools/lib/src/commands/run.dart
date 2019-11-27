@@ -301,10 +301,6 @@ class RunCommand extends RunCommandBase {
     if (boolArg('fast-start') && boolArg('start-paused')) {
       throwToolExit('--fast-start is not supported with --start-paused');
     }
-    devices = await findAllTargetDevices();
-    if (devices == null) {
-      throwToolExit(null);
-    }
     if (deviceManager.hasSpecifiedAllDevices && runningWithPrebuiltApplication) {
       throwToolExit('Using -d all with --use-application-binary is not supported');
     }
