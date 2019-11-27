@@ -116,4 +116,11 @@ void main() {
     final DomRenderer renderer = DomRenderer();
     renderer.reset();
   });
+
+  test('accesibility placeholder is attached after creation', () {
+    DomRenderer();
+
+    expect(html.document.getElementsByTagName('flt-semantics-placeholder'),
+          isNotEmpty);
+  });
 }

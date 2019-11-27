@@ -389,7 +389,18 @@ flt-glass-pane * {
 
     _glassPaneElement.append(_sceneHostElement);
 
-    EngineSemanticsOwner.instance.autoEnableOnTap(this);
+    final html.Element _accesibilityPlaceholder = EngineSemanticsOwner
+        .instance.enableSemantics
+        .prepareAccesibilityPlaceholder();
+
+    // Insert the semantics placeholder after the scene host. For all widgets
+    // in the scene, except for platform widgets, the scene host will pass the
+    // pointer events through to the semantics tree. However, for platform
+    // views, the pointer events will not pass through, and will be handled
+    // by the platform view.
+    glassPaneElement
+        .insertBefore(_accesibilityPlaceholder, _sceneHostElement);
+
     PointerBinding(this);
 
     // Hide the DOM nodes used to render the scene from accessibility, because

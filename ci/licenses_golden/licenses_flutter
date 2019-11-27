@@ -415,6 +415,7 @@ FILE: ../../../flutter/lib/web_ui/lib/src/engine/semantics/label_and_value.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/semantics/live_region.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/semantics/scrollable.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/semantics/semantics.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/engine/semantics/semantics_helper.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/semantics/tappable.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/semantics/text_field.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/services/buffers.dart

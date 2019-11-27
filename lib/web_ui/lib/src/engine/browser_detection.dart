@@ -121,3 +121,19 @@ OperatingSystem _detectOperatingSystem() {
     return OperatingSystem.unknown;
   }
 }
+
+/// List of Operating Systems we know to be working on laptops/desktops.
+///
+/// These devices tend to behave differently on many core issues such as events,
+/// screen readers, input devices.
+const Set<OperatingSystem> _desktopOperatingSystems = {
+  OperatingSystem.macOs,
+  OperatingSystem.linux,
+  OperatingSystem.windows,
+};
+
+/// A flag to check if the current operating system is a laptop/desktop
+/// operating system.
+///
+/// See [_desktopOperatingSystems].
+bool get isDesktop => _desktopOperatingSystems.contains(operatingSystem);
