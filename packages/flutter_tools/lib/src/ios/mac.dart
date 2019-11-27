@@ -464,11 +464,9 @@ Future<XcodeBuildResult> buildXcodeProject({
 
   final Stopwatch sw = Stopwatch()..start();
   initialBuildStatus = logger.startProgress('Running Xcode build...', timeout: timeoutConfiguration.fastOperation);
-  final RunResult buildResult = await processUtils.run(
-    buildCommands,
-    workingDirectory: app.project.hostAppRoot.path,
-    allowReentrantFlutter: true,
-  );
+
+  final RunResult buildResult = await _runBuildWithRetries(buildCommands, app);
+
   // Notifies listener that no more output is coming.
   scriptOutputPipeFile?.writeAsStringSync('all done');
   buildSubStatus?.stop();
@@ -570,6 +568,49 @@ Future<XcodeBuildResult> buildXcodeProject({
       ),
     );
   }
+}
+
+Future<RunResult> _runBuildWithRetries(List<String> buildCommands, BuildableIOSApp app) async {
+  int buildRetryDelaySeconds = 1;
+  int remainingTries = 8;
+
+  RunResult buildResult;
+  while (remainingTries > 0) {
+    remainingTries--;
+    buildRetryDelaySeconds *= 2;
+
+    buildResult = await processUtils.run(
+      buildCommands,
+      workingDirectory: app.project.hostAppRoot.path,
+      allowReentrantFlutter: true,
+    );
+
+    // If the result is anything other than a concurrent build failure, exit
+    // the loop after the first build.
+    if (!_isXcodeConcurrentBuildFailure(buildResult)) {
+      break;
+    }
+
+    if (remainingTries > 0) {
+      printStatus('Xcode build failed due to concurrent builds, '
+        'will retry in $buildRetryDelaySeconds seconds.');
+      await Future<void>.delayed(Duration(seconds: buildRetryDelaySeconds));
+    } else {
+      printStatus(
+        'Xcode build failed too many times due to concurrent builds, '
+        'giving up.');
+      break;
+    }
+  }
+
+  return buildResult;
+}
+
+bool _isXcodeConcurrentBuildFailure(RunResult result) {
+return result.exitCode != 0 &&
+    result.stdout != null &&
+    result.stdout.contains('database is locked') &&
+    result.stdout.contains('there are two concurrent builds running');
 }
 
 String readGeneratedXcconfig(String appPath) {
