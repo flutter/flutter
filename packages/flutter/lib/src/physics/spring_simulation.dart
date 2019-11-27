@@ -196,7 +196,7 @@ class _CriticalSolution implements _SpringSolution {
 
   @override
   double dx(double time) {
-    final double power = math.pow(math.e, _r * time);
+    final double power = math.pow(math.e, _r * time) as double;
     return _r * (_c1 + _c2 * time) * power + _c2 * power;
   }
 
@@ -266,13 +266,13 @@ class _UnderdampedSolution implements _SpringSolution {
 
   @override
   double x(double time) {
-    return math.pow(math.e, _r * time) *
+    return (math.pow(math.e, _r * time) as double) *
            (_c1 * math.cos(_w * time) + _c2 * math.sin(_w * time));
   }
 
   @override
   double dx(double time) {
-    final double power = math.pow(math.e, _r * time);
+    final double power = math.pow(math.e, _r * time) as double;
     final double cosine = math.cos(_w * time);
     final double sine = math.sin(_w * time);
     return      power * (_c2 * _w * cosine - _c1 * _w * sine) +
