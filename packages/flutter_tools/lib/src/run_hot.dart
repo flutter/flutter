@@ -193,7 +193,7 @@ class HotRunner extends ResidentRunner {
       }
     }
 
-    printTrace('hot ui took ${stopwatch.elapsedMilliseconds}');
+    printStatus('reloadMethod took ${stopwatch.elapsedMilliseconds}');
     flutterUsage.sendTiming('hot', 'ui', stopwatch.elapsed);
     return;
   }

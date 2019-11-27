@@ -170,7 +170,7 @@ void main() {
     const int disabledExtensions = kIsWeb ? 3 : 0;
     // If you add a service extension... TEST IT! :-)
     // ...then increment this number.
-    expect(binding.extensions.length, 27 + widgetInspectorExtensionCount - disabledExtensions);
+    expect(binding.extensions.length, 28 + widgetInspectorExtensionCount - disabledExtensions);
 
     expect(console, isEmpty);
     debugPrint = debugPrintThrottled;
@@ -691,5 +691,12 @@ void main() {
     expect(trace, contains('dart:core,Object,Object.\n'));
     expect(trace, contains('package:test_api/test_api.dart,::,test\n'));
     expect(trace, contains('service_extensions_test.dart,::,main\n'));
+  }, skip: isBrowser);
+
+  test('Service extensions - fastReassemble', () async {
+    Map<String, dynamic> result;
+    result = await binding.testExtension('fastReassemble', <String, String>{'class': 'Foo'});
+
+    expect(result, containsPair('Success', 'true'));
   }, skip: isBrowser);
 }

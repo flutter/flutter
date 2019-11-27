@@ -2735,15 +2735,15 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     return 0;
   }
 
-/// Retrieve the set of active [Element] instances.
-///
-/// Throws a [StateError] if accessed outside of debug mode.
-static Set<Element> get debugTrackedElements {
+  /// Retrieve the set of active [Element] instances.
+  ///
+  /// Throws a [StateError] if accessed outside of debug mode.
+  static Set<Element> get debugTrackedElements {
   if (kReleaseMode || kProfileMode) {
     throw StateError('illegal access of debug getter in non-debug mode.');
   }
-  return Element._debugTrackedElements;
-}
+    return Element._debugTrackedElements;
+  }
   static final Set<Element> _debugTrackedElements = Set<Element>.identity();
 
   /// The configuration for this element.
