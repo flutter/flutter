@@ -445,8 +445,9 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
       case TargetPlatform.iOS:
         HapticFeedback.lightImpact();
         break;
-      case TargetPlatform.fuchsia:
       case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.macOS:
         break;
     }
   }

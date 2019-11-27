@@ -82,6 +82,7 @@ class ModalBarrier extends StatelessWidget {
         platformSupportsDismissingBarrier = false;
         break;
       case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
         platformSupportsDismissingBarrier = true;
         break;
     }

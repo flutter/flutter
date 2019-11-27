@@ -502,6 +502,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
           case TargetPlatform.fuchsia:
             return _buildMaterialSlider(context);
           case TargetPlatform.iOS:
+          case TargetPlatform.macOS:
             return _buildCupertinoSlider(context);
         }
       }
@@ -888,14 +889,15 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   double get _adjustmentUnit {
     switch (_platform) {
       case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
       // Matches iOS implementation of material slider.
         return 0.1;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
-      default:
       // Matches Android implementation of material slider.
         return 0.05;
     }
+    return 0.0;
   }
 
   void _updateLabelPainter() {

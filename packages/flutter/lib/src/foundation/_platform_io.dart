@@ -11,6 +11,8 @@ platform.TargetPlatform get defaultTargetPlatform {
   platform.TargetPlatform result;
   if (Platform.isIOS) {
     result = platform.TargetPlatform.iOS;
+  } else if (Platform.isMacOS) {
+    result = platform.TargetPlatform.macOS;
   } else if (Platform.isAndroid) {
     result = platform.TargetPlatform.android;
   } else if (Platform.isFuchsia) {

@@ -209,6 +209,7 @@ class _DayPeriodControl extends StatelessWidget {
         _announceToAccessibility(context, MaterialLocalizations.of(context).anteMeridiemAbbreviation);
         break;
       case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
         break;
     }
     _togglePeriod();
@@ -224,6 +225,7 @@ class _DayPeriodControl extends StatelessWidget {
         _announceToAccessibility(context, MaterialLocalizations.of(context).postMeridiemAbbreviation);
         break;
       case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
         break;
     }
     _togglePeriod();
@@ -1525,6 +1527,7 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
         });
         break;
       case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
         break;
     }
   }
