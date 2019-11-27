@@ -193,7 +193,7 @@ class RunCommand extends RunCommandBase {
         hide: true,
         help: 'Whether to quickly bootstrap applications with a minimal app. '
               'Currently this is only support on Android devices run from the '
-              'command line. This option cannot be pared with --start-paused or '
+              'command line. This option cannot be paired with --start-paused or '
               'with --use-application-binary.'
       )
       ..addOption(FlutterOptions.kExtraFrontEndOptions, hide: true)
