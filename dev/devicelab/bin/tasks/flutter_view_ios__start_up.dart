@@ -17,7 +17,13 @@ Future<void> main() async {
       '${flutterDirectory.path}/examples/flutter_view/ios',
     );
     await inDirectory(iosDirectory, () async {
-      await exec('pod', <String>['install']);
+      await exec(
+        'pod',
+        <String>['install'],
+        environment: <String, String>{
+          'LANG': '${Platform.localeName}.UTF8',
+        },
+      );
     });
 
     final TaskFunction taskFunction = createFlutterViewStartupTest();
