@@ -453,6 +453,8 @@ class SimpleDialogOption extends StatelessWidget {
 /// Typically passed as the child widget to [showDialog], which displays the
 /// dialog.
 ///
+/// {@animation 350 622 https://flutter.github.io/assets-for-api-docs/assets/material/simple_dialog.mp4}
+///
 /// {@tool sample}
 ///
 /// In this example, the user is asked to select between two options. These
@@ -465,8 +467,6 @@ class SimpleDialogOption extends StatelessWidget {
 /// One advantage of using an enum as the return value and then using that to
 /// drive a switch statement is that the analyzer will flag any switch statement
 /// that doesn't mention every value in the enum.
-///
-/// {@animation 350 622 https://flutter.github.io/assets-for-api-docs/assets/material/simple_dialog.mp4}
 ///
 /// ```dart
 /// Future<void> _askedToLead() async {
