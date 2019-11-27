@@ -324,6 +324,20 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
         },
       );
 
+      // Register the ability to quickly mark elements as dirty.
+      registerServiceExtension(
+        name: 'fastReassemble',
+        callback: (Map<String, Object> params) async {
+          final String className = params['class'];
+          for (Element element in debugTrackedElements) {
+            if (element.widget.runtimeType.toString() == className) {
+              element.markNeedsBuild();
+            }
+          }
+          return <String, String>{'Success': 'true'};
+        },
+      );
+
       // Expose the ability to send Widget rebuilds as [Timeline] events.
       registerBoolServiceExtension(
         name: 'profileWidgetBuilds',

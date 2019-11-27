@@ -146,6 +146,56 @@ class HotRunner extends ResidentRunner {
     throw 'Failed to compile $expression';
   }
 
+  Future<void> _reloadMethod({String libraryId, String classId}) async {
+    final Stopwatch stopwatch = Stopwatch()..start();
+    final UpdateFSReport results = UpdateFSReport(success: true);
+    for (FlutterDevice device in flutterDevices) {
+      results.incorporateResults(await device.updateDevFS(
+        mainPath: mainPath,
+        target: target,
+        bundle: assetBundle,
+        firstBuildTime: firstBuildTime,
+        bundleFirstUpload: false,
+        bundleDirty: false,
+        fullRestart: false,
+        projectRootPath: projectRootPath,
+        pathToReload: getReloadPath(fullRestart: false),
+        invalidatedFiles: <Uri>[Uri.parse(libraryId)],
+        dillOutputPath: dillOutputPath,
+      ));
+    }
+    if (!results.success) {
+      return;
+    }
+    try {
+      final String entryPath = fs.path.relative(
+        getReloadPath(fullRestart: false),
+        from: projectRootPath,
+      );
+      for (FlutterDevice device in flutterDevices) {
+        final List<Future<Map<String, dynamic>>> reportFutures = device.reloadSources(
+          entryPath, pause: false,
+        );
+        final List<Map<String, dynamic>> reports = await Future.wait(reportFutures);
+        final Map<String, dynamic> firstReport = reports.first;
+        await device.updateReloadStatus(validateReloadReport(firstReport, printErrors: false));
+        return DeviceReloadReport(device, reports);
+      }
+    } on Map<String, dynamic> {
+      return;
+    } catch (error) {
+      return;
+    }
+
+    for (FlutterDevice device in flutterDevices) {
+      for (FlutterView view in device.views) {
+        await view.uiIsolate.flutterFastReassemble(classId);
+      }
+    }
+    flutterUsage.sendTiming('hot', 'ui', stopwatch.elapsed);
+    return;
+  }
+
   // Returns the exit code of the flutter tool process, like [run].
   @override
   Future<int> attach({
@@ -158,6 +208,7 @@ class HotRunner extends ResidentRunner {
         reloadSources: _reloadSourcesService,
         restart: _restartService,
         compileExpression: _compileExpressionService,
+        reloadMethod: _reloadMethod,
       );
     } catch (error) {
       printError('Error connecting to the service protocol: $error');
