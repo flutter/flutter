@@ -80,7 +80,7 @@ class CocoaPods {
     _versionText ??= processUtils.run(
       <String>['pod', '--version'],
       environment: <String, String>{
-        'LANG': '${platform.localeName}.UTF8',
+        'LANG': '${platform.localeName.replaceAll('-', '_')}.UTF-8',
       },
     ).then<String>((RunResult result) {
       return result.exitCode == 0 ? result.stdout.trim() : null;
@@ -310,7 +310,7 @@ class CocoaPods {
         // See https://github.com/flutter/flutter/issues/10873.
         // CocoaPods analytics adds a lot of latency.
         'COCOAPODS_DISABLE_STATS': 'true',
-        'LANG': '${platform.localeName}.UTF8',
+        'LANG': '${platform.localeName.replaceAll('-', '_')}.UTF-8',
       },
     );
     status.stop();

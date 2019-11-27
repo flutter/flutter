@@ -80,12 +80,12 @@ void main() {
     when(mockProcessManager.run(
       <String>['pod', 'install', '--verbose'],
       workingDirectory: 'project/ios',
-      environment: <String, String>{'FLUTTER_FRAMEWORK_DIR': 'engine/path', 'COCOAPODS_DISABLE_STATS': 'true', 'LANG': '${platform.localeName}.UTF8'},
+      environment: <String, String>{'FLUTTER_FRAMEWORK_DIR': 'engine/path', 'COCOAPODS_DISABLE_STATS': 'true', 'LANG': '${platform.localeName.replaceAll('-', '_')}.UTF-8'},
     )).thenAnswer((_) async => exitsHappy());
     when(mockProcessManager.run(
       <String>['pod', 'install', '--verbose'],
       workingDirectory: 'project/macos',
-      environment: <String, String>{'FLUTTER_FRAMEWORK_DIR': 'engine/path', 'COCOAPODS_DISABLE_STATS': 'true', 'LANG': '${platform.localeName}.UTF8'},
+      environment: <String, String>{'FLUTTER_FRAMEWORK_DIR': 'engine/path', 'COCOAPODS_DISABLE_STATS': 'true', 'LANG': '${platform.localeName.replaceAll('-', '_')}.UTF-8'},
     )).thenAnswer((_) async => exitsHappy());
   });
 
@@ -368,7 +368,7 @@ void main() {
         environment: <String, String>{
           'FLUTTER_FRAMEWORK_DIR': 'engine/path',
           'COCOAPODS_DISABLE_STATS': 'true',
-          'LANG': '${platform.localeName}.UTF8',
+          'LANG': '${platform.localeName.replaceAll('-', '_')}.UTF-8',
         },
       )).thenAnswer((_) async => exitsWithError(
         '''
@@ -421,7 +421,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
       verify(mockProcessManager.run(
         <String>['pod', 'install', '--verbose'],
         workingDirectory: 'project/ios',
-        environment: <String, String>{'FLUTTER_FRAMEWORK_DIR': 'engine/path', 'COCOAPODS_DISABLE_STATS': 'true', 'LANG': '${platform.localeName}.UTF8'},
+        environment: <String, String>{'FLUTTER_FRAMEWORK_DIR': 'engine/path', 'COCOAPODS_DISABLE_STATS': 'true', 'LANG': '${platform.localeName.replaceAll('-', '_')}.UTF-8'},
       ));
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
@@ -448,7 +448,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
         environment: <String, String>{
           'FLUTTER_FRAMEWORK_DIR': 'engine/path',
           'COCOAPODS_DISABLE_STATS': 'true',
-          'LANG': '${platform.localeName}.UTF8',
+          'LANG': '${platform.localeName.replaceAll('-', '_')}.UTF-8',
         },
       ));
     }, overrides: <Type, Generator>{
@@ -479,7 +479,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
         environment: <String, String>{
           'FLUTTER_FRAMEWORK_DIR': 'engine/path',
           'COCOAPODS_DISABLE_STATS': 'true',
-          'LANG': '${platform.localeName}.UTF8',
+          'LANG': '${platform.localeName.replaceAll('-', '_')}.UTF-8',
         },
       ));
     }, overrides: <Type, Generator>{
@@ -510,7 +510,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
         environment: <String, String>{
           'FLUTTER_FRAMEWORK_DIR': 'engine/path',
           'COCOAPODS_DISABLE_STATS': 'true',
-          'LANG': '${platform.localeName}.UTF8',
+          'LANG': '${platform.localeName.replaceAll('-', '_')}.UTF-8',
         },
       ));
     }, overrides: <Type, Generator>{
@@ -543,7 +543,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
         environment: <String, String>{
           'FLUTTER_FRAMEWORK_DIR': 'engine/path',
           'COCOAPODS_DISABLE_STATS': 'true',
-          'LANG': '${platform.localeName}.UTF8',
+          'LANG': '${platform.localeName.replaceAll('-', '_')}.UTF-8',
         },
       ));
     }, overrides: <Type, Generator>{
@@ -596,7 +596,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
         environment: <String, String>{
           'FLUTTER_FRAMEWORK_DIR': 'engine/path',
           'COCOAPODS_DISABLE_STATS': 'true',
-          'LANG': '${platform.localeName}.UTF8',
+          'LANG': '${platform.localeName.replaceAll('-', '_')}.UTF-8',
         },
       )).thenAnswer(
         (_) async => exitsWithError()

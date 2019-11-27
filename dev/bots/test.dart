@@ -334,7 +334,7 @@ Future<void> _flutterBuildIpa(String relativePathToApplication) async {
       <String>['install'],
       workingDirectory: podfile.parent.path,
       environment: <String, String>{
-        'LANG': '${Platform.localeName}.UTF8',
+        'LANG': '${Platform.localeName.replaceAll('-', '_')}.UTF-8',
       },
     );
   }

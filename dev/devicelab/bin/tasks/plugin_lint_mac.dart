@@ -46,7 +46,7 @@ Future<void> main() async {
             '--allow-warnings',
           ],
           environment: <String, String>{
-            'LANG': '${Platform.localeName}.UTF8',
+            'LANG': '${Platform.localeName.replaceAll('-', '_')}.UTF-8',
           },
         );
       });
@@ -64,7 +64,7 @@ Future<void> main() async {
             '--use-libraries',
           ],
           environment: <String, String>{
-            'LANG': '${Platform.localeName}.UTF8',
+            'LANG': '${Platform.localeName.replaceAll('-', '_')}.UTF-8',
           },
         );
       });

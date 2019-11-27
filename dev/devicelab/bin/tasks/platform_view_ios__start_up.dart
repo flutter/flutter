@@ -28,7 +28,7 @@ Future<void> main() async {
         'pod',
         <String>['install'],
         environment: <String, String>{
-          'LANG': '${Platform.localeName}.UTF8',
+          'LANG': '${Platform.localeName.replaceAll('-', '_')}.UTF-8',
         },
       );
     });
