@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -49,6 +49,7 @@ PrintCallback print = core_internals.print;
 /// For example:
 /// bin/cache/dart-sdk/bin/dart dev/bots/analyze.dart --dart-sdk=/tmp/dart-sdk
 Future<void> main(List<String> arguments) async {
+  print('$clock STARTING ANALYSIS');
   try {
     await run(arguments);
   } on ExitException catch (error) {
@@ -65,28 +66,48 @@ Future<void> run(List<String> arguments) async {
     exit(1);
   }
 
+  print('$clock Deprecations...');
   await verifyDeprecations(flutterRoot);
+
+  print('$clock Licenses...');
   await verifyNoMissingLicense(flutterRoot);
+
+  print('$clock Test imports...');
   await verifyNoTestImports(flutterRoot);
+
+  print('$clock Test package imports...');
   await verifyNoTestPackageImports(flutterRoot);
+
+  print('$clock Generated plugin registrants...');
   await verifyGeneratedPluginRegistrants(flutterRoot);
+
+  print('$clock Bad imports (framework)...');
   await verifyNoBadImportsInFlutter(flutterRoot);
+
+  print('$clock Bad imports (tools)...');
   await verifyNoBadImportsInFlutterTools(flutterRoot);
+
+  print('$clock Internationalization...');
   await verifyInternationalizations();
+
+  print('$clock Trailing spaces...');
   await verifyNoTrailingSpaces();
 
   // Ensure that all package dependencies are in sync.
+  print('$clock Package dependencies...');
   await runCommand(flutter, <String>['update-packages', '--verify-only'],
     workingDirectory: flutterRoot,
   );
 
   // Analyze all the sample code in the repo
+  print('$clock Sample code...');
   await runCommand(dart,
     <String>[path.join(flutterRoot, 'dev', 'bots', 'analyze-sample-code.dart')],
     workingDirectory: flutterRoot,
   );
 
   // Analyze all the Dart code in the repo.
+  print('$clock Dart analysis...');
   await _runFlutterAnalyze(flutterRoot, options: <String>[
     '--flutter-repo',
     ...arguments,
@@ -94,6 +115,7 @@ Future<void> run(List<String> arguments) async {
 
   // Try with the --watch analyzer, to make sure it returns success also.
   // The --benchmark argument exits after one run.
+  print('$clock Dart analysis (with --watch)...');
   await _runFlutterAnalyze(flutterRoot, options: <String>[
     '--flutter-repo',
     '--watch',
@@ -102,8 +124,8 @@ Future<void> run(List<String> arguments) async {
   ]);
 
   // Try analysis against a big version of the gallery; generate into a temporary directory.
+  print('$clock Dart analysis (mega gallery)...');
   final Directory outDir = Directory.systemTemp.createTempSync('flutter_mega_gallery.');
-
   try {
     await runCommand(dart,
       <String>[
@@ -113,13 +135,11 @@ Future<void> run(List<String> arguments) async {
       ],
       workingDirectory: flutterRoot,
     );
-    {
-      await _runFlutterAnalyze(outDir.path, options: <String>[
-        '--watch',
-        '--benchmark',
-        ...arguments,
-      ]);
-    }
+    await _runFlutterAnalyze(outDir.path, options: <String>[
+      '--watch',
+      '--benchmark',
+      ...arguments,
+    ]);
   } finally {
     outDir.deleteSync(recursive: true);
   }
@@ -146,7 +166,7 @@ final RegExp _grandfatheredDeprecation = RegExp(r' // ignore: flutter_deprecatio
 
 Future<void> verifyDeprecations(String workingDirectory) async {
   final List<String> errors = <String>[];
-  for (File file in _dartFiles(workingDirectory)) {
+  for (File file in _allFiles(workingDirectory, 'dart')) {
     int lineNumber = 0;
     final List<String> lines = file.readAsLinesSync();
     final List<int> linesWithDeprecations = <int>[];
@@ -212,24 +232,53 @@ Future<void> verifyDeprecations(String workingDirectory) async {
   }
 }
 
+String _generateLicense(String prefix) {
+  assert(prefix != null);
+  return '${prefix}Copyright 2014 The Flutter Authors. All rights reserved.\n'
+         '${prefix}Use of this source code is governed by a BSD-style license that can be\n'
+         '${prefix}found in the LICENSE file.';
+}
+
 Future<void> verifyNoMissingLicense(String workingDirectory) async {
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'dart', _generateLicense('// '), skipShrine: true);
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'java', _generateLicense('// '));
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'h', _generateLicense('// '));
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'm', _generateLicense('// '));
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'swift', _generateLicense('// '));
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'gradle', _generateLicense('// '));
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'gn', _generateLicense('# '));
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'sh', '#!/usr/bin/env bash\n' + _generateLicense('# '));
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'bat', '@ECHO off\n' + _generateLicense('REM '));
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'ps1', _generateLicense('# '));
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'html', '<!DOCTYPE HTML>\n<!-- ${_generateLicense('')} -->', trailingBlank: false);
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'xml', '<!-- ${_generateLicense('')} -->');
+}
+
+Future<void> _verifyNoMissingLicenseForExtension(String workingDirectory, String extension, String license, { bool trailingBlank = true, bool skipShrine = true }) async {
+  assert(!license.endsWith('\n'));
+  final String licensePattern = license + '\n' + (trailingBlank ? '\n' : '');
   final List<String> errors = <String>[];
-  for (FileSystemEntity entity in _dartFiles(workingDirectory)) {
+  for (FileSystemEntity entity in _allFiles(workingDirectory, extension)) {
     final File file = entity;
-    bool hasLicense = false;
-    final List<String> lines = file.readAsLinesSync();
-    if (lines.isNotEmpty)
-      hasLicense = lines.first.startsWith(RegExp(r'// Copyright \d{4}'));
-    if (!hasLicense)
+    if (skipShrine && path.split(file.path).contains('shrine'))
+      continue; // TODO(ianh): I'm investigating relicensing this directory.
+    final String contents = file.readAsStringSync().replaceAll('\r\n', '\n');
+    if (contents.isEmpty)
+      continue; // let's not go down the /bin/true rabbit hole
+    if (!contents.startsWith(licensePattern))
       errors.add(file.path);
   }
   // Fail if any errors
   if (errors.isNotEmpty) {
     print('$redLine');
-    final String s = errors.length == 1 ? '' : 's';
-    print('${bold}License headers cannot be found at the beginning of the following file$s.$reset\n');
+    final String s = errors.length == 1 ? ' does' : 's do';
+    print('${bold}The following ${errors.length} file$s not have the right license header:$reset\n');
     print(errors.join('\n'));
     print('$redLine\n');
+    print('The expected license header is:');
+    print('$license');
+    if (trailingBlank)
+      print('...followed by a blank line.');
     exit(1);
   }
 }
@@ -575,13 +624,21 @@ bool _listEquals<T>(List<T> a, List<T> b) {
   return true;
 }
 
-Iterable<File> _dartFiles(String workingDirectory) sync* {
+Iterable<File> _allFiles(String workingDirectory, String extension) sync* {
   final Set<FileSystemEntity> pending = <FileSystemEntity>{ Directory(workingDirectory) };
   while (pending.isNotEmpty) {
     final FileSystemEntity entity = pending.first;
     pending.remove(entity);
+    if (path.extension(entity.path) == '.tmpl')
+      continue;
     if (entity is File) {
-      if (path.extension(entity.path) == '.dart')
+      if (_isGeneratedPluginRegistrant(entity))
+        continue;
+      if (path.basename(entity.path) == 'flutter_export_environment.sh')
+        continue;
+      if (path.basename(entity.path) == 'gradlew.bat')
+        continue;
+      if (path.extension(entity.path) == '.$extension')
         yield entity;
     } else if (entity is Directory) {
       if (File(path.join(entity.path, '.dartignore')).existsSync())
@@ -589,6 +646,8 @@ Iterable<File> _dartFiles(String workingDirectory) sync* {
       if (path.basename(entity.path) == '.git')
         continue;
       if (path.basename(entity.path) == '.dart_tool')
+        continue;
+      if (path.basename(entity.path) == 'build')
         continue;
       pending.addAll(entity.listSync());
     }
