@@ -187,6 +187,15 @@ class RunCommand extends RunCommandBase {
         hide: true,
         help: 'Whether to automatically invoke webOnlyInitializePlatform.',
       )
+      ..addFlag('fast-start',
+        negatable: true,
+        defaultsTo: false,
+        hide: true,
+        help: 'Whether to quickly bootstrap applications with a minimal app. '
+              'Currently this is only support on Android devices run from the '
+              'command line. This option cannot be pared with --start-paused or '
+              'with --use-application-binary.'
+      )
       ..addOption(FlutterOptions.kExtraFrontEndOptions, hide: true)
       ..addOption(FlutterOptions.kExtraGenSnapshotOptions, hide: true)
       ..addMultiOption(FlutterOptions.kEnableExperiment,

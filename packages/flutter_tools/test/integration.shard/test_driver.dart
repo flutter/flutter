@@ -497,7 +497,7 @@ class FlutterRunTestDriver extends FlutterTestDriver {
     // fast.
     unawaited(_process.exitCode.then((_) {
       if (!prematureExitGuard.isCompleted) {
-        prematureExitGuard.completeError('Process existed prematurely: ${args.join(' ')}');
+        prematureExitGuard.completeError('Process existed prematurely: ${args.join(' ')}: $_errorBuffer');
       }
     }));
 
