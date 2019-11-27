@@ -15,6 +15,7 @@ namespace flutter {
 ClipPathLayer::ClipPathLayer(const SkPath& clip_path, Clip clip_behavior)
     : clip_path_(clip_path), clip_behavior_(clip_behavior) {
   FML_DCHECK(clip_behavior != Clip::none);
+  set_renders_to_save_layer(clip_behavior == Clip::antiAliasWithSaveLayer);
 }
 
 ClipPathLayer::~ClipPathLayer() = default;

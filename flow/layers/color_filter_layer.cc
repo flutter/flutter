@@ -7,7 +7,9 @@
 namespace flutter {
 
 ColorFilterLayer::ColorFilterLayer(sk_sp<SkColorFilter> filter)
-    : filter_(std::move(filter)) {}
+    : filter_(std::move(filter)) {
+  set_renders_to_save_layer(true);
+}
 
 ColorFilterLayer::~ColorFilterLayer() = default;
 

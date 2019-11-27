@@ -193,12 +193,17 @@ static sk_sp<SkSurface> CreateOffscreenSurface(GrContext* context,
                                      &surface_props);
 }
 
-bool GPUSurfaceGL::CreateOrUpdateSurfaces(const SkISize& size) {
+bool GPUSurfaceGL::CreateOrUpdateSurfaces(const SkISize& size,
+                                          const bool needs_readback) {
+  bool needs_offscreen = delegate_->UseOffscreenSurface(needs_readback);
   if (onscreen_surface_ != nullptr &&
       size == SkISize::Make(onscreen_surface_->width(),
                             onscreen_surface_->height())) {
     // Surface size appears unchanged. So bail.
-    return true;
+    bool has_offscreen = offscreen_surface_ != nullptr;
+    if (needs_offscreen == has_offscreen) {
+      return true;
+    }
   }
 
   // We need to do some updates.
@@ -228,7 +233,7 @@ bool GPUSurfaceGL::CreateOrUpdateSurfaces(const SkISize& size) {
     return false;
   }
 
-  if (delegate_->UseOffscreenSurface()) {
+  if (needs_offscreen) {
     offscreen_surface = CreateOffscreenSurface(context_.get(), size);
     if (offscreen_surface == nullptr) {
       FML_LOG(ERROR) << "Could not create offscreen surface.";
@@ -248,7 +253,9 @@ SkMatrix GPUSurfaceGL::GetRootTransformation() const {
 }
 
 // |Surface|
-std::unique_ptr<SurfaceFrame> GPUSurfaceGL::AcquireFrame(const SkISize& size) {
+std::unique_ptr<SurfaceFrame> GPUSurfaceGL::AcquireFrame(
+    const SkISize& size,
+    const bool needs_readback) {
   if (delegate_ == nullptr) {
     return nullptr;
   }
@@ -271,7 +278,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceGL::AcquireFrame(const SkISize& size) {
   const auto root_surface_transformation = GetRootTransformation();
 
   sk_sp<SkSurface> surface =
-      AcquireRenderSurface(size, root_surface_transformation);
+      AcquireRenderSurface(size, root_surface_transformation, needs_readback);
 
   if (surface == nullptr) {
     return nullptr;
@@ -335,14 +342,15 @@ bool GPUSurfaceGL::PresentSurface(SkCanvas* canvas) {
 
 sk_sp<SkSurface> GPUSurfaceGL::AcquireRenderSurface(
     const SkISize& untransformed_size,
-    const SkMatrix& root_surface_transformation) {
+    const SkMatrix& root_surface_transformation,
+    const bool needs_readback) {
   const auto transformed_rect = root_surface_transformation.mapRect(
       SkRect::MakeWH(untransformed_size.width(), untransformed_size.height()));
 
   const auto transformed_size =
       SkISize::Make(transformed_rect.width(), transformed_rect.height());
 
-  if (!CreateOrUpdateSurfaces(transformed_size)) {
+  if (!CreateOrUpdateSurfaces(transformed_size, needs_readback)) {
     return nullptr;
   }
 

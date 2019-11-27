@@ -50,7 +50,9 @@ class Surface {
 
   virtual bool IsValid() = 0;
 
-  virtual std::unique_ptr<SurfaceFrame> AcquireFrame(const SkISize& size) = 0;
+  virtual std::unique_ptr<SurfaceFrame> AcquireFrame(
+      const SkISize& size,
+      const bool needs_readback) = 0;
 
   virtual SkMatrix GetRootTransformation() const = 0;
 
