@@ -461,7 +461,7 @@ void main() {
     expect(testLogger.statusText, contains('Restarted application in'));
     expect(result.code, 0);
     verify(mockResidentCompiler.accept()).called(2);
-	  // ensure that analytics are sent.
+    // ensure that analytics are sent.
     verify(Usage.instance.sendEvent('hot', 'restart', parameters: <String, String>{
       'cd27': 'web-javascript',
       'cd28': null,
