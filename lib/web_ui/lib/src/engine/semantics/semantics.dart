@@ -1198,7 +1198,7 @@ class EngineSemanticsOwner {
     _now = () => DateTime.now();
   }
 
-  final SemanticsHelper enableSemantics = SemanticsHelper();
+  final SemanticsHelper semanticsHelper = SemanticsHelper();
 
   /// Whether the user has requested that [updateSemantics] be called when
   /// the semantic contents of window changes.
@@ -1346,7 +1346,7 @@ class EngineSemanticsOwner {
       _temporarilyDisableBrowserGestureMode();
     }
 
-    return enableSemantics.shouldEnableSemantics(event);
+    return semanticsHelper.shouldEnableSemantics(event);
   }
 
   /// Callbacks called when the [GestureMode] changes.
