@@ -871,17 +871,12 @@ class WidgetsApp extends StatefulWidget {
       return _defaultWebShortcuts;
     }
 
-    // TODO(gspencergoog): Move this into the switch below once TargetPlatform.macOS exists.
-    // https://github.com/flutter/flutter/issues/31366
-    if (Platform.isMacOS) {
-      return _defaultMacOsShortcuts;
-    }
-
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
         return _defaultShortcuts;
-        break;
+      case TargetPlatform.macOS:
+        return _defaultMacOsShortcuts;
       case TargetPlatform.iOS:
         // No keyboard support on iOS yet.
         break;
