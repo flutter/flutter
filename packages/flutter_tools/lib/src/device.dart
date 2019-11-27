@@ -135,8 +135,9 @@ class DeviceManager {
   }
 
   /// Return the list of all connected devices.
-  Stream<Device> getAllConnectedDevices() async* {
+  Stream<Device> getAllConnectedDevices([bool ignoreExceptions = false]) async* {
     for (DeviceDiscovery discoverer in _platformDiscoverers) {
+      print(discoverer);
       for (Device device in await discoverer.devices) {
         yield device;
       }

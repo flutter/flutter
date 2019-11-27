@@ -4,16 +4,22 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/ios/devices.dart';
+import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
+import 'package:platform/platform.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
 
 void main() {
+  final FakePlatform macPlatform = FakePlatform.fromPlatform(const LocalPlatform())
+    ..operatingSystem = 'macos';
+
   group('DeviceManager', () {
     testUsingContext('getDevices', () async {
       // Test that DeviceManager.getDevices() doesn't throw.
@@ -41,6 +47,27 @@ void main() {
     });
   });
 
+  group('getAllConnectedDevices()', () {
+    testUsingContext('ignores exceptions if passed argument ignoreExceptions = true', () async {
+      final MockIosDevices mockIosDevices = MockIosDevices();
+      when(mockIosDevices.pollingGetDevices()).thenThrow(
+        const IOSDeviceNotTrustedError('yolo', LockdownReturnCode.passwordProtected)
+      );
+      final List<DeviceDiscovery> discoverers = <DeviceDiscovery>[
+        mockIosDevices,
+      ];
+      final DiscovererInjectedDeviceManager deviceManager = DiscovererInjectedDeviceManager(discoverers);
+      try {
+        await deviceManager.getAllConnectedDevices().toList();
+      } catch (e) {
+        // There should be no exceptions
+        rethrow;
+      }
+    }, overrides: <Type, Generator>{
+      Platform: () => macPlatform,
+    });
+  });
+
   group('Filter devices', () {
     _MockDevice ephemeral;
     _MockDevice nonEphemeralOne;
@@ -58,6 +85,14 @@ void main() {
         ..targetPlatform = Future<TargetPlatform>.value(TargetPlatform.web_javascript);
       fuchsiaDevice = _MockDevice('fuchsiay', 'fuchsiay')
         ..targetPlatform = Future<TargetPlatform>.value(TargetPlatform.fuchsia_x64);
+    });
+
+    testUsingContext('ignores exceptions if an explicitly asked for device was found', () async {
+      final DeviceManager deviceManager = DeviceManager();
+
+      // TODO finish this!
+    }, overrides: <Type, Generator>{
+      Platform: () => macPlatform,
     });
 
     testUsingContext('chooses ephemeral device', () async {
@@ -163,6 +198,15 @@ void main() {
   });
 }
 
+class DiscovererInjectedDeviceManager extends DeviceManager {
+  DiscovererInjectedDeviceManager(this._injectedDiscoverers);
+
+  @override
+  List<DeviceDiscovery> get deviceDiscoverers => _injectedDiscoverers;
+
+  final List<DeviceDiscovery> _injectedDiscoverers;
+}
+
 class TestDeviceManager extends DeviceManager {
   TestDeviceManager(this.allDevices);
 
@@ -170,7 +214,7 @@ class TestDeviceManager extends DeviceManager {
   bool isAlwaysSupportedOverride;
 
   @override
-  Stream<Device> getAllConnectedDevices() {
+  Stream<Device> getAllConnectedDevices([bool ignoreExceptions = false]) {
     return Stream<Device>.fromIterable(allDevices);
   }
 
@@ -182,6 +226,8 @@ class TestDeviceManager extends DeviceManager {
     return super.isDeviceSupportedForProject(device, flutterProject);
   }
 }
+
+class MockIosDevices extends Mock implements IOSDevices {}
 
 class _MockDevice extends Device {
   _MockDevice(this.name, String id, [bool ephemeral = true, this._isSupported = true]) : super(

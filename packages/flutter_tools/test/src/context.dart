@@ -184,7 +184,7 @@ class FakeDeviceManager implements DeviceManager {
   }
 
   @override
-  Stream<Device> getAllConnectedDevices() => Stream<Device>.fromIterable(devices);
+  Stream<Device> getAllConnectedDevices([bool ignoreExceptions = false]) => Stream<Device>.fromIterable(devices);
 
   @override
   Stream<Device> getDevicesById(String deviceId) {
