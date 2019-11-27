@@ -11,7 +11,6 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/dart/sdk.dart';
 
 import '../../src/common.dart';
-import '../../src/context.dart';
 
 // This test depends on some files in ///dev/automated_tests/flutter_test/*
 
@@ -23,61 +22,61 @@ void main() {
     final String automatedTestsDirectory = fs.path.join('..', '..', 'dev', 'automated_tests');
     final String flutterTestDirectory = fs.path.join(automatedTestsDirectory, 'flutter_test');
 
-    testUsingContext('not have extraneous error messages', () async {
+    test('not have extraneous error messages', () async {
       Cache.flutterRoot = '../..';
       return _testFile('trivial_widget', automatedTestsDirectory, flutterTestDirectory, exitCode: isZero);
     }, skip: io.Platform.isLinux); // Flutter on Linux sometimes has problems with font resolution (#7224)
 
-    testUsingContext('report nice errors for exceptions thrown within testWidgets()', () async {
+    test('report nice errors for exceptions thrown within testWidgets()', () async {
       Cache.flutterRoot = '../..';
       return _testFile('exception_handling', automatedTestsDirectory, flutterTestDirectory);
     }, skip: io.Platform.isWindows); // TODO(chunhtai): Remove Skip https://github.com/flutter/flutter/issues/35425.
 
-    testUsingContext('report a nice error when a guarded function was called without await', () async {
+    test('report a nice error when a guarded function was called without await', () async {
       Cache.flutterRoot = '../..';
       return _testFile('test_async_utils_guarded', automatedTestsDirectory, flutterTestDirectory);
     }, skip: io.Platform.isWindows); // TODO(chunhtai): Remove Skip https://github.com/flutter/flutter/issues/35425.
 
-    testUsingContext('report a nice error when an async function was called without await', () async {
+    test('report a nice error when an async function was called without await', () async {
       Cache.flutterRoot = '../..';
       return _testFile('test_async_utils_unguarded', automatedTestsDirectory, flutterTestDirectory);
     }, skip: io.Platform.isWindows); // TODO(chunhtai): Remove Skip https://github.com/flutter/flutter/issues/35425.
 
-    testUsingContext('report a nice error when a Ticker is left running', () async {
+    test('report a nice error when a Ticker is left running', () async {
       Cache.flutterRoot = '../..';
       return _testFile('ticker', automatedTestsDirectory, flutterTestDirectory);
     }, skip: io.Platform.isWindows); // TODO(chunhtai): Remove Skip https://github.com/flutter/flutter/issues/35425.
 
-    testUsingContext('report a nice error when a pubspec.yaml is missing a flutter_test dependency', () async {
+    test('report a nice error when a pubspec.yaml is missing a flutter_test dependency', () async {
       final String missingDependencyTests = fs.path.join('..', '..', 'dev', 'missing_dependency_tests');
       Cache.flutterRoot = '../..';
       return _testFile('trivial', missingDependencyTests, missingDependencyTests);
     }, skip: io.Platform.isWindows); // TODO(chunhtai): Remove Skip https://github.com/flutter/flutter/issues/35425.
 
-    testUsingContext('report which user created widget caused the error', () async {
+    test('report which user created widget caused the error', () async {
       Cache.flutterRoot = '../..';
       return _testFile('print_user_created_ancestor', automatedTestsDirectory, flutterTestDirectory,
           extraArguments: const <String>['--track-widget-creation']);
     }, skip: io.Platform.isWindows); // TODO(chunhtai): Remove Skip https://github.com/flutter/flutter/issues/35425.
 
-    testUsingContext('report which user created widget caused the error - no flag', () async {
+    test('report which user created widget caused the error - no flag', () async {
       Cache.flutterRoot = '../..';
       return _testFile('print_user_created_ancestor_no_flag', automatedTestsDirectory, flutterTestDirectory,
          extraArguments: const <String>['--no-track-widget-creation']);
     }, skip: io.Platform.isWindows); // TODO(chunhtai): Remove Skip https://github.com/flutter/flutter/issues/35425.
 
-    testUsingContext('report correct created widget caused the error', () async {
+    test('report correct created widget caused the error', () async {
       Cache.flutterRoot = '../..';
       return _testFile('print_correct_local_widget', automatedTestsDirectory, flutterTestDirectory,
         extraArguments: const <String>['--track-widget-creation']);
     }, skip: io.Platform.isWindows); // TODO(chunhtai): Remove Skip https://github.com/flutter/flutter/issues/35425.
 
-    testUsingContext('can load assets within its own package', () async {
+    test('can load assets within its own package', () async {
       Cache.flutterRoot = '../..';
       return _testFile('package_assets', automatedTestsDirectory, flutterTestDirectory, exitCode: isZero);
     }, skip: io.Platform.isWindows);
 
-    testUsingContext('run a test when its name matches a regexp', () async {
+    test('run a test when its name matches a regexp', () async {
       Cache.flutterRoot = '../..';
       final ProcessResult result = await _runFlutterTest('filtering', automatedTestsDirectory, flutterTestDirectory,
         extraArguments: const <String>['--name', 'inc.*de']);
@@ -87,7 +86,7 @@ void main() {
       expect(result.exitCode, 0);
     });
 
-    testUsingContext('run a test when its name contains a string', () async {
+    test('run a test when its name contains a string', () async {
       Cache.flutterRoot = '../..';
       final ProcessResult result = await _runFlutterTest('filtering', automatedTestsDirectory, flutterTestDirectory,
         extraArguments: const <String>['--plain-name', 'include']);
@@ -97,7 +96,7 @@ void main() {
       expect(result.exitCode, 0);
     });
 
-    testUsingContext('test runs to completion', () async {
+    test('test runs to completion', () async {
       Cache.flutterRoot = '../..';
       final ProcessResult result = await _runFlutterTest('trivial', automatedTestsDirectory, flutterTestDirectory,
         extraArguments: const <String>['--verbose']);
@@ -115,7 +114,7 @@ void main() {
       expect(result.exitCode, 0);
     });
 
-    testUsingContext('run all tests inside of a directory with no trailing slash', () async {
+    test('run all tests inside of a directory with no trailing slash', () async {
       Cache.flutterRoot = '../..';
       final ProcessResult result = await _runFlutterTest(null, automatedTestsDirectory, flutterTestDirectory + '/child_directory',
         extraArguments: const <String>['--verbose']);
@@ -133,6 +132,18 @@ void main() {
       expect(result.exitCode, 0);
     });
 
+    test('Refuses to test on chrome platform when feature is disabled', () async {
+      Cache.flutterRoot = '../..';
+      return _testFile('trivial_widget',
+        automatedTestsDirectory,
+        flutterTestDirectory,
+        exitCode: isNot(isZero),
+        extraArguments: <String>[
+        '--platform=chrome'
+      ], environment: <String, String>{
+        'WEB_TEST_PLATFORM': 'false'
+      });
+    }, skip: io.Platform.isLinux); // Flutter on Linux sometimes has problems with font resolution (#7224)
   });
 }
 
@@ -142,6 +153,7 @@ Future<void> _testFile(
   String testDirectory, {
   Matcher exitCode,
   List<String> extraArguments = const <String>[],
+  Map<String, String> environment = const <String, String>{},
 }) async {
   exitCode ??= isNonZero;
   final String fullTestExpectation = fs.path.join(testDirectory, '${testName}_expectation.txt');
@@ -159,6 +171,7 @@ Future<void> _testFile(
     workingDirectory,
     testDirectory,
     extraArguments: extraArguments,
+    environment: environment,
   );
 
   expect(exec.exitCode, exitCode);
@@ -227,6 +240,7 @@ Future<ProcessResult> _runFlutterTest(
   String workingDirectory,
   String testDirectory, {
   List<String> extraArguments = const <String>[],
+  Map<String, String> environment = const <String, String>{},
 }) async {
 
   String testPath;
@@ -266,6 +280,7 @@ Future<ProcessResult> _runFlutterTest(
       fs.path.join(dartSdkPath, 'bin', 'dart'),
       args,
       workingDirectory: workingDirectory,
+      environment: environment,
     );
   } finally {
     _testExclusionLock = null;

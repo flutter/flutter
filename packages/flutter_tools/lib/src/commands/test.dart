@@ -5,6 +5,8 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:flutter_tools/src/features.dart';
+
 import '../asset.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
@@ -100,6 +102,7 @@ class TestCommand extends FastFlutterCommand {
         allowed: const <String>['tester', 'chrome'],
         defaultsTo: 'tester',
         help: 'The platform to run the unit tests on. Defaults to "tester".',
+        hide: true,
       );
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
   }
@@ -204,6 +207,10 @@ class TestCommand extends FastFlutterCommand {
     }
 
     Cache.releaseLockEarly();
+    final bool runOnChrome = stringArg('platform') == 'chrome';
+    if (!featureFlags.isFlutterTestWebEnabled && runOnChrome) {
+      throwToolExit('--platform=chrome is not currently supported.');
+    }
 
     // Run builders once before all tests.
     if (flutterProject.hasBuilders) {
@@ -239,7 +246,7 @@ class TestCommand extends FastFlutterCommand {
       concurrency: jobs,
       buildTestAssets: buildTestAssets,
       flutterProject: flutterProject,
-      web: stringArg('platform') == 'chrome',
+      web: runOnChrome,
     );
 
     if (collector != null) {

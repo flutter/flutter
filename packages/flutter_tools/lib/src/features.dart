@@ -42,6 +42,9 @@ class FeatureFlags {
   /// Whether the web incremental compiler is enabled.
   bool get isWebIncrementalCompilerEnabled => isEnabled(flutterWebIncrementalCompiler);
 
+  /// Whether flutter test --platform=chrome is enabled.
+  bool get isFlutterTestWebEnabled => isEnabled(flutterTestWeb);
+
   /// Whether a particular feature is enabled for the current channel.
   ///
   /// Prefer using one of the specific getters above instead of this API.
@@ -59,8 +62,11 @@ class FeatureFlags {
       }
     }
     if (feature.environmentOverride != null) {
-      if (platform.environment[feature.environmentOverride]?.toLowerCase() == 'true') {
+      final String value = platform.environment[feature.environmentOverride]?.toLowerCase();
+      if (value == 'true') {
         isEnabled = true;
+      } else if (value == 'false') {
+        isEnabled = false;
       }
     }
     return isEnabled;
@@ -76,6 +82,7 @@ const List<Feature> allFeatures = <Feature>[
   flutterBuildPluginAsAarFeature,
   flutterAndroidEmbeddingV2Feature,
   flutterWebIncrementalCompiler,
+  flutterTestWeb,
 ];
 
 /// The [Feature] for flutter web.
@@ -162,6 +169,16 @@ const Feature flutterWebIncrementalCompiler = Feature(
   ),
 );
 
+/// The [Feature] for supporting the chrome platform nn flutter test.
+const Feature flutterTestWeb = Feature(
+  name: 'Enable flutter test --platform=chrome',
+  environmentOverride: 'WEB_TEST_PLATFORM',
+  master: FeatureChannelSetting(
+    available: true,
+    enabledByDefault: true,
+  )
+);
+
 /// A [Feature] is a process for conditionally enabling tool features.
 ///
 /// All settings are optional, and if not provided will generally default to
@@ -199,9 +216,10 @@ class Feature {
 
   /// The name of an environment variable that can override the setting.
   ///
-  /// The environment variable needs to be set to the value 'true'. This is
+  /// The environment variable needs to be set to the value `true`. This is
   /// only intended for usage by CI and not as an advertised method to enable
-  /// a feature.
+  /// a feature. It may also be set to `false` to disable a feature that is
+  /// enabled by default.
   ///
   /// If not provided, defaults to `null` meaning there is no override.
   final String environmentOverride;
