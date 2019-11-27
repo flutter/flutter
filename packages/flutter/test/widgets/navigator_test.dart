@@ -255,42 +255,42 @@ void main() {
     expect(log, equals(<String>['left']));
   });
 
-  // This test doesn't work because the testing framework uses a fake version of
-  // the pointer event dispatch loop.
-  //
-  // TODO(abarth): Test more of the real code and enable this test.
-  // See https://github.com/flutter/flutter/issues/4771.
-  //
-  // testWidgets('Pending gestures are rejected', (WidgetTester tester) async {
-  //   List<String> log = <String>[];
-  //   final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-  //     '/': (BuildContext context) {
-  //       return new Row(
-  //         children: <Widget>[
-  //           new GestureDetector(
-  //             onTap: () {
-  //               log.add('left');
-  //               Navigator.pushNamed(context, '/second');
-  //             },
-  //             child: new Text('left')
-  //           ),
-  //           new GestureDetector(
-  //             onTap: () { log.add('right'); },
-  //             child: new Text('right')
-  //           ),
-  //         ]
-  //       );
-  //     },
-  //     '/second': (BuildContext context) => new Container(),
-  //   };
-  //   await tester.pumpWidget(new MaterialApp(routes: routes));
-  //   TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('right')), pointer: 23);
-  //   expect(log, isEmpty);
-  //   await tester.tap(find.text('left'));
-  //   expect(log, equals(<String>['left']));
-  //   await gesture.up();
-  //   expect(log, equals(<String>['left']));
-  // });
+   testWidgets('Pending gestures are rejected', (WidgetTester tester) async {
+     final List<String> log = <String>[];
+     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+       '/': (BuildContext context) {
+         return Row(
+           children: <Widget>[
+             GestureDetector(
+               onTap: () {
+                 log.add('left');
+                 Navigator.pushNamed(context, '/second');
+               },
+               child: const Text('left')
+             ),
+             GestureDetector(
+               onTap: () { log.add('right'); },
+               child: const Text('right'),
+             ),
+           ]
+         );
+       },
+       '/second': (BuildContext context) => Container(),
+     };
+     await tester.pumpWidget(MaterialApp(routes: routes));
+     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('right')), pointer: 23);
+     expect(log, isEmpty);
+     await tester.tap(find.text('left'));
+     expect(log, equals(<String>['left']));
+     await gesture.up();
+     expect(log, equals(<String>['left']));
+
+     // This test doesn't work because it relies on part of the pointer event
+     // dispatching mechanism that is mocked out in testing. We should use the real
+     // mechanism even during testing and enable this test.
+     // TODO(abarth): Test more of the real code and enable this test.
+     // See https://github.com/flutter/flutter/issues/4771.
+   }, skip: true);
 
   testWidgets('popAndPushNamed', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
@@ -1183,6 +1183,57 @@ void main() {
     expect(find.byKey(const ValueKey<String>('/A')), findsNothing);  // replaced
     expect(find.byKey(const ValueKey<String>('/A/B')), findsNothing); // popped
     expect(find.byKey(const ValueKey<String>('/C')), findsOneWidget);
+  });
+
+  testWidgets('focus acts correctly in the presence of offstage navigators', (WidgetTester tester) async {
+    Widget _childNavRouteBuilder(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+      return const Focus(debugLabel: 'Nav Child', child: Text('foobar'));
+    }
+
+    Route<void> _childNavRoute(RouteSettings settings) {
+      return PageRouteBuilder<void>(
+        pageBuilder: _childNavRouteBuilder,
+      );
+    }
+
+    final GlobalKey<NavigatorState> topLevelNav = GlobalKey<NavigatorState>(debugLabel: 'Top Level');
+    final GlobalKey<NavigatorState> navA = GlobalKey<NavigatorState>(debugLabel: 'navA');
+    final GlobalKey<NavigatorState> navB = GlobalKey<NavigatorState>(debugLabel: 'navB');
+    final GlobalKey<NavigatorState> navC = GlobalKey<NavigatorState>(debugLabel: 'navC');
+
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: Navigator(
+        key: topLevelNav,
+        onGenerateRoute: (RouteSettings settings) {
+          return PageRouteBuilder<void>(
+            pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+              return Stack(
+                children: <Widget>[
+                  Offstage(
+                    child: Navigator(key: navA, onGenerateRoute: _childNavRoute),
+                  ),
+                  Offstage(
+                    offstage: false,
+                    child: Navigator(key: navB, onGenerateRoute: _childNavRoute),
+                  ),
+                  Offstage(
+                    child: Navigator(key: navC, onGenerateRoute: _childNavRoute),
+                  ),
+                ],
+              );
+            },
+          );
+        },
+      ),
+    ));
+
+    await tester.pumpAndSettle();
+
+    expect(topLevelNav.currentState.focusScopeNode.hasFocus, isTrue);
+    expect(navA.currentState.focusScopeNode.hasFocus, isFalse);
+    expect(navB.currentState.focusScopeNode.hasFocus, isTrue);
+    expect(navC.currentState.focusScopeNode.hasFocus, isFalse);
   });
 }
 

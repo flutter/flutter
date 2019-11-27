@@ -136,7 +136,10 @@ abstract class Route<T> {
   @mustCallSuper
   TickerFuture didPush() {
     return TickerFuture.complete()..then<void>((void _) {
-      navigator.focusScopeNode.requestFocus();
+      final Offstage offstageWidget = navigator.context.findAncestorWidgetOfExactType<Offstage>();
+      if (offstageWidget == null || !offstageWidget.offstage) {
+        navigator.focusScopeNode.requestFocus();
+      }
     });
   }
 
