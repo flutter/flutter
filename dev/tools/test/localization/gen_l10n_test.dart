@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:path/path.dart' as path;
@@ -39,7 +41,9 @@ void _standardFlutterDirectoryL10nSetup(FileSystem fs) {
 void main() {
   MemoryFileSystem fs;
   setUp(() {
-    fs = MemoryFileSystem();
+    fs = MemoryFileSystem(
+      style: Platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix
+    );
   });
 
   group('LocalizationsGenerator setters:', () {
@@ -55,7 +59,7 @@ void main() {
           classNameString: defaultClassNameString,
         );
       } on FileSystemException catch (e) {
-        fail('Setters should not fail $e');
+        fail('Setters should not fail: \n$e');
       }
     });
 
@@ -237,7 +241,7 @@ void main() {
         );
         generator.parseArbFiles();
       } on L10nException catch (e) {
-        fail('Setting language and locales should not fail $e');
+        fail('Setting language and locales should not fail: \n$e');
       }
 
       expect(generator.supportedLocales.contains(LocaleInfo.fromString('en')), true);
@@ -279,7 +283,7 @@ void main() {
         );
         generator.parseArbFiles();
       } on L10nException catch (e) {
-        fail('Setting language and locales should not fail $e');
+        fail('Setting language and locales should not fail: \n$e');
       }
 
       expect(generator.supportedLocales.contains(LocaleInfo.fromString('en')), true);
@@ -321,7 +325,7 @@ void main() {
         );
         generator.parseArbFiles();
       } on L10nException catch (e) {
-        fail('Setting language and locales should not fail $e');
+        fail('Setting language and locales should not fail: \n$e');
       }
 
       // @@locale property should hold higher priority
@@ -405,7 +409,7 @@ void main() {
         generator.parseArbFiles();
         generator.generateClassMethods();
       } on Exception catch (e) {
-       fail('Parsing template arb file should succeed: $e');
+        fail('Parsing template arb file should succeed: \n$e');
       }
 
       expect(generator.classMethods, isNotEmpty);
@@ -447,7 +451,7 @@ void main() {
         generator.parseArbFiles();
         generator.generateClassMethods();
       } on Exception catch (e) {
-       fail('Parsing template arb file should succeed: $e');
+        fail('Parsing template arb file should succeed: \n$e');
       }
 
       expect(generator.classMethods, isNotEmpty);
@@ -612,7 +616,7 @@ void main() {
         generator.generateClassMethods();
         generator.generateOutputFile();
       } on Exception catch (e) {
-       fail('Generating output localization file should succeed: $e');
+        fail('Generating output localization file should succeed: \n$e');
       }
 
       final String outputFileString = generator.outputFile.readAsStringSync();
