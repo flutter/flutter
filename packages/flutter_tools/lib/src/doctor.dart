@@ -596,8 +596,15 @@ class FlutterValidator extends DoctorValidator {
       final FlutterVersion version = FlutterVersion.instance;
       versionChannel = version.channel;
       frameworkVersion = version.frameworkVersion;
-      messages.add(ValidationMessage(userMessages.flutterVersion(frameworkVersion, Cache.flutterRoot)));
-      messages.add(ValidationMessage(userMessages.flutterRevision(version.frameworkRevisionShort, version.frameworkAge, version.frameworkDate)));
+      messages.add(ValidationMessage(userMessages.flutterVersion(
+        frameworkVersion,
+        Cache.flutterRoot,
+      )));
+      messages.add(ValidationMessage(userMessages.flutterRevision(
+        version.frameworkRevisionShort,
+        version.frameworkAge,
+        version.frameworkDate,
+      )));
       messages.add(ValidationMessage(userMessages.engineRevision(version.engineRevisionShort)));
       messages.add(ValidationMessage(userMessages.dartRevision(version.dartSdkVersion)));
     } on VersionCheckError catch (e) {
