@@ -668,49 +668,88 @@ void main() {
   });
 
   testWidgets('verifyTickersWereDisposed control test', (WidgetTester tester) async {
-      FlutterError error;
-      final Ticker ticker = tester.createTicker((Duration duration) {});
-      ticker.start();
-      try {
-        tester.verifyTickersWereDisposed('');
-      } on FlutterError catch (e) {
-        error = e;
-      } finally {
-        expect(error, isNotNull);
-        expect(error.diagnostics.length, 4);
-        expect(error.diagnostics[2].level, DiagnosticLevel.hint);
-        expect(
-          error.diagnostics[2].toStringDeep(),
-          'Tickers used by AnimationControllers should be disposed by\n'
-          'calling dispose() on the AnimationController itself. Otherwise,\n'
-          'the ticker will leak.\n',
-        );
-        expect(error.diagnostics.last, isInstanceOf<DiagnosticsProperty<Ticker>>());
-        expect(error.diagnostics.last.value, ticker);
-        expect(error.toStringDeep(), startsWith(
-          'FlutterError\n'
-          '   A Ticker was active .\n'
-          '   All Tickers must be disposed.\n'
-          '   Tickers used by AnimationControllers should be disposed by\n'
-          '   calling dispose() on the AnimationController itself. Otherwise,\n'
-          '   the ticker will leak.\n'
-          '   The offending ticker was:\n'
-          '     _TestTicker()\n',
-        ));
-      }
-      ticker.stop();
+    FlutterError error;
+    final Ticker ticker = tester.createTicker((Duration duration) {});
+    ticker.start();
+    try {
+      tester.verifyTickersWereDisposed('');
+    } on FlutterError catch (e) {
+      error = e;
+    } finally {
+      expect(error, isNotNull);
+      expect(error.diagnostics.length, 4);
+      expect(error.diagnostics[2].level, DiagnosticLevel.hint);
+      expect(
+        error.diagnostics[2].toStringDeep(),
+        'Tickers used by AnimationControllers should be disposed by\n'
+        'calling dispose() on the AnimationController itself. Otherwise,\n'
+        'the ticker will leak.\n',
+      );
+      expect(error.diagnostics.last, isInstanceOf<DiagnosticsProperty<Ticker>>());
+      expect(error.diagnostics.last.value, ticker);
+      expect(error.toStringDeep(), startsWith(
+        'FlutterError\n'
+        '   A Ticker was active .\n'
+        '   All Tickers must be disposed.\n'
+        '   Tickers used by AnimationControllers should be disposed by\n'
+        '   calling dispose() on the AnimationController itself. Otherwise,\n'
+        '   the ticker will leak.\n'
+        '   The offending ticker was:\n'
+        '     _TestTicker()\n',
+      ));
+    }
+    ticker.stop();
   });
 
-  group('testWidgets matrix works', () {
+  group('testWidgets variants work', () {
     int numberOfVariationsRun = 0;
 
-    testWidgets('matrix tests run all variations', (WidgetTester tester) async {
+    testWidgets('variant tests run all values', (WidgetTester tester) async {
       if (debugDefaultTargetPlatformOverride == null) {
         expect(numberOfVariationsRun, equals(TargetPlatform.values.length));
       } else {
         numberOfVariationsRun += 1;
       }
-    }, matrix: <TestDimension<dynamic>>[ TargetPlatformDimension(TargetPlatform.values), DefaultDimension() ]);
+    }, variants: <TestVariant<dynamic>>[ TargetPlatformVariant(TargetPlatform.values), const DefaultTestVariant() ]);
+
+    testWidgets('variant tests have descriptions with details', (WidgetTester tester) async {
+      if (debugDefaultTargetPlatformOverride == null) {
+        expect(tester.testDescription, equals('variant tests have descriptions with details'));
+      } else {
+        expect(tester.testDescription, equals('variant tests have descriptions with details ($debugDefaultTargetPlatformOverride)'));
+      }
+    }, variants: <TestVariant<dynamic>>[ TargetPlatformVariant(TargetPlatform.values), const DefaultTestVariant() ]);
+  });
+
+  group('TargetPlatformVariant', () {
+    int numberOfVariationsRun = 0;
+    TargetPlatform origTargetPlatform;
+
+    setUpAll((){
+      origTargetPlatform = debugDefaultTargetPlatformOverride;
+    });
+
+    tearDownAll((){
+      expect(debugDefaultTargetPlatformOverride, equals(origTargetPlatform));
+    });
+
+    testWidgets('TargetPlatformVariant tests return debugDefaultTargetPlatformOverride to original value', (WidgetTester tester) async {
+      expect(debugDefaultTargetPlatformOverride, equals(TargetPlatform.iOS));
+      expect(defaultTargetPlatform, equals(TargetPlatform.iOS));
+    }, variants: <TestVariant<dynamic>>[ TargetPlatformVariant(<TargetPlatform> [ TargetPlatform.iOS ]) ]);
+
+    testWidgets('TargetPlatformVariant.only tests given value', (WidgetTester tester) async {
+      expect(debugDefaultTargetPlatformOverride, equals(TargetPlatform.iOS));
+      expect(defaultTargetPlatform, equals(TargetPlatform.iOS));
+    }, variants: <TestVariant<dynamic>>[ TargetPlatformVariant.only(TargetPlatform.iOS) ]);
+
+    testWidgets('TargetPlatformVariant.all tests run all variants', (WidgetTester tester) async {
+      if (debugDefaultTargetPlatformOverride == null) {
+        expect(numberOfVariationsRun, equals(TargetPlatform.values.length));
+      } else {
+        numberOfVariationsRun += 1;
+      }
+    }, variants: <TestVariant<dynamic>>[ TargetPlatformVariant.all(), const DefaultTestVariant() ]);
   });
 
 }

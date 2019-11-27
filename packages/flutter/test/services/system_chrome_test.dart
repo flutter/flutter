@@ -9,8 +9,6 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('SystemChrome overlay style test', (WidgetTester tester) async {
-    await tester.idle(); // Flush any outstanding microtasks.
-
     // The first call is a cache miss and will queue a microtask
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle.light);
     expect(tester.binding.microtaskCount, equals(1));
