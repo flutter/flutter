@@ -40,7 +40,7 @@ class SemanticsHelper {
       isDesktop ? DesktopSemanticsEnabler() : MobileSemanticsEnabler();
 
   bool shouldEnableSemantics(html.Event event) {
-    return _enableSemantics.tryEnableSemantics(event);
+    return _enableSemantics.shouldEnableSemantics(event);
   }
 
   html.Element prepareAccesibilityPlaceholder() {
