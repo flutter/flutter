@@ -998,6 +998,8 @@ List<DiagnosticsNode> _debugCompareFloats(String labelA, double valueA, String l
 /// or reappearing at different offsets based on the user's scroll direction
 /// ([SliverConstraints.userScrollDirection]).
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=Mz3kHQxBjGg}
+///
 /// ## Writing a RenderSliver subclass
 ///
 /// Slivers can have sliver children, or children from another coordinate
