@@ -725,6 +725,7 @@ abstract class SliverMultiBoxAdaptorWidget extends SliverWithKeepAliveWidget {
   }) : assert(delegate != null),
        super(key: key);
 
+  /// {@template flutter.widgets.sliverMultiBoxAdaptor.delegate}
   /// The delegate that provides the children for this widget.
   ///
   /// The children are constructed lazily using this delegate to avoid creating
@@ -735,6 +736,7 @@ abstract class SliverMultiBoxAdaptorWidget extends SliverWithKeepAliveWidget {
   ///  * [SliverChildBuilderDelegate] and [SliverChildListDelegate], which are
   ///    commonly used subclasses of [SliverChildDelegate] that use a builder
   ///    callback and an explicit child list, respectively.
+  /// {@endtemplate}
   final SliverChildDelegate delegate;
 
   @override
@@ -1023,7 +1025,7 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
   }
 }
 
-/// A sliver that contains a multiple box children that each fill the viewport.
+/// A sliver that contains multiple box children that each fills the viewport.
 ///
 /// [SliverFillViewport] places its children in a linear array along the main
 /// axis. Each child is sized to fill the viewport, both in the main and cross
@@ -1038,9 +1040,40 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
 ///    the main axis extent of each item.
 ///  * [SliverList], which does not require its children to have the same
 ///    extent in the main axis.
-class SliverFillViewport extends SliverMultiBoxAdaptorWidget {
+class SliverFillViewport extends StatelessWidget {
   /// Creates a sliver whose box children that each fill the viewport.
   const SliverFillViewport({
+    Key key,
+    @required this.delegate,
+    this.viewportFraction = 1.0,
+  }) : assert(viewportFraction != null),
+       assert(viewportFraction > 0.0),
+       super(key: key);
+
+  /// The fraction of the viewport that each child should fill in the main axis.
+  ///
+  /// If this fraction is less than 1.0, more than one child will be visible at
+  /// once. If this fraction is greater than 1.0, each child will be larger than
+  /// the viewport in the main axis.
+  final double viewportFraction;
+
+  /// {@macro flutter.widgets.sliverMultiBoxAdaptor.delegate}
+  final SliverChildDelegate delegate;
+
+  @override
+  Widget build(BuildContext context) {
+    return _SliverFractionalPadding(
+      viewportFraction: (1 - viewportFraction).clamp(0, 1) / 2,
+      sliver: _SliverFillViewportRenderObjectWidget(
+        viewportFraction: viewportFraction,
+        delegate: delegate,
+      ),
+    );
+  }
+}
+
+class _SliverFillViewportRenderObjectWidget extends SliverMultiBoxAdaptorWidget {
+  const _SliverFillViewportRenderObjectWidget({
     Key key,
     @required SliverChildDelegate delegate,
     this.viewportFraction = 1.0,
@@ -1048,11 +1081,6 @@ class SliverFillViewport extends SliverMultiBoxAdaptorWidget {
        assert(viewportFraction > 0.0),
        super(key: key, delegate: delegate);
 
-  /// The fraction of the viewport that each child should fill in the main axis.
-  ///
-  /// If this fraction is less than 1.0, more than one child will be visible at
-  /// once. If this fraction is greater than 1.0, each child will be larger than
-  /// the viewport in the main axis.
   final double viewportFraction;
 
   @override
@@ -1064,6 +1092,77 @@ class SliverFillViewport extends SliverMultiBoxAdaptorWidget {
   @override
   void updateRenderObject(BuildContext context, RenderSliverFillViewport renderObject) {
     renderObject.viewportFraction = viewportFraction;
+  }
+}
+
+class _SliverFractionalPadding extends SingleChildRenderObjectWidget {
+  const _SliverFractionalPadding({
+    this.viewportFraction = 0,
+    Widget sliver,
+  }) : assert(viewportFraction != null),
+       assert(viewportFraction >= 0),
+       assert(viewportFraction <= 0.5),
+       super(child: sliver);
+
+  final double viewportFraction;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) => _RenderSliverFractionalPadding(viewportFraction: viewportFraction);
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderSliverFractionalPadding renderObject) {
+    renderObject.viewportFraction = viewportFraction;
+  }
+}
+
+class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
+  _RenderSliverFractionalPadding({
+    double viewportFraction = 0,
+  }) : assert(viewportFraction != null),
+       assert(viewportFraction <= 0.5),
+       assert(viewportFraction >= 0),
+       _viewportFraction = viewportFraction;
+
+  double get viewportFraction => _viewportFraction;
+  double _viewportFraction;
+  set viewportFraction(double newValue) {
+    assert(newValue != null);
+    if (_viewportFraction == newValue)
+      return;
+    _viewportFraction = newValue;
+    _markNeedsResolution();
+  }
+
+  @override
+  EdgeInsets get resolvedPadding => _resolvedPadding;
+  EdgeInsets _resolvedPadding;
+
+  void _markNeedsResolution() {
+    _resolvedPadding = null;
+    markNeedsLayout();
+  }
+
+  void _resolve() {
+    if (_resolvedPadding != null)
+      return;
+    assert(constraints.axis != null);
+    final double paddingValue = constraints.viewportMainAxisExtent * viewportFraction;
+    switch (constraints.axis) {
+      case Axis.horizontal:
+        _resolvedPadding = EdgeInsets.symmetric(horizontal: paddingValue);
+        break;
+      case Axis.vertical:
+        _resolvedPadding = EdgeInsets.symmetric(vertical: paddingValue);
+        break;
+    }
+
+    return;
+  }
+
+  @override
+  void performLayout() {
+    _resolve();
+    super.performLayout();
   }
 }
 
