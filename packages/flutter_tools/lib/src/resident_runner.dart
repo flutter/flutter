@@ -734,6 +734,10 @@ abstract class ResidentRunner {
     throw '${fullRestart ? 'Restart' : 'Reload'} is not supported in $mode mode';
   }
 
+  Future<void> reloadMethod({ String classId, String libraryId }) {
+    throw UnsupportedError('Method is not supported.');
+  }
+
   @protected
   void writeVmserviceFile() {
     if (debuggingOptions.vmserviceOutFile != null) {
@@ -1260,6 +1264,14 @@ class TerminalHandler {
       case 'Z':
         await residentRunner.debugToggleDebugCheckElevationsEnabled();
         return true;
+      // TODO(jonahwilliams): remove this debugging code.
+      case 'X':
+        await residentRunner.reloadMethod(
+          classId: 'GalleryHome',
+          libraryId: 'file:///Users/jonahwilliams/Documents/flutter/examples/flutter_gallery/lib/gallery/home.dart',
+        );
+        return true;
+      // End TOOD
     }
     return false;
   }

@@ -146,9 +146,11 @@ class HotRunner extends ResidentRunner {
     throw 'Failed to compile $expression';
   }
 
-  Future<void> _reloadMethod({String libraryId, String classId}) async {
+  @override
+  Future<void> reloadMethod({String libraryId, String classId}) async {
     final Stopwatch stopwatch = Stopwatch()..start();
     final UpdateFSReport results = UpdateFSReport(success: true);
+    final List<Uri> invalidated =  <Uri>[Uri.parse(libraryId)];
     for (FlutterDevice device in flutterDevices) {
       results.incorporateResults(await device.updateDevFS(
         mainPath: mainPath,
@@ -160,7 +162,7 @@ class HotRunner extends ResidentRunner {
         fullRestart: false,
         projectRootPath: projectRootPath,
         pathToReload: getReloadPath(fullRestart: false),
-        invalidatedFiles: <Uri>[Uri.parse(libraryId)],
+        invalidatedFiles: invalidated,
         dillOutputPath: dillOutputPath,
       ));
     }
@@ -179,11 +181,9 @@ class HotRunner extends ResidentRunner {
         final List<Map<String, dynamic>> reports = await Future.wait(reportFutures);
         final Map<String, dynamic> firstReport = reports.first;
         await device.updateReloadStatus(validateReloadReport(firstReport, printErrors: false));
-        return DeviceReloadReport(device, reports);
       }
-    } on Map<String, dynamic> {
-      return;
     } catch (error) {
+      printTrace(error.toString());
       return;
     }
 
@@ -192,6 +192,8 @@ class HotRunner extends ResidentRunner {
         await view.uiIsolate.flutterFastReassemble(classId);
       }
     }
+
+    printTrace('hot ui took ${stopwatch.elapsedMilliseconds}');
     flutterUsage.sendTiming('hot', 'ui', stopwatch.elapsed);
     return;
   }
@@ -208,7 +210,7 @@ class HotRunner extends ResidentRunner {
         reloadSources: _reloadSourcesService,
         restart: _restartService,
         compileExpression: _compileExpressionService,
-        reloadMethod: _reloadMethod,
+        reloadMethod: reloadMethod,
       );
     } catch (error) {
       printError('Error connecting to the service protocol: $error');

@@ -613,6 +613,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
     printTrace('<- recompile $mainUri$inputKey');
     for (Uri fileUri in request.invalidatedFiles) {
       _server.stdin.writeln(_mapFileUri(fileUri.toString(), packageUriMapper));
+      printTrace('${_mapFileUri(fileUri.toString(), packageUriMapper)}');
     }
     _server.stdin.writeln(inputKey);
     printTrace('<- $inputKey');

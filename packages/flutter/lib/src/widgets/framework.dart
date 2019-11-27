@@ -2626,16 +2626,6 @@ class BuildOwner {
   }
 }
 
-/// Retrieve the set of active [Element] instances.
-///
-/// Throws a [StateError] if accessed outside of debug mode.
-Set<Element> get debugTrackedElements {
-  if (kReleaseMode || kProfileMode) {
-    throw StateError('illegal access of debug getter in non-debug mode.');
-  }
-  return Element._debugTrackedElements;
-}
-
 /// An instantiation of a [Widget] at a particular location in the tree.
 ///
 /// Widgets describe how to configure a subtree but the same widget can be used
@@ -2745,7 +2735,16 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     return 0;
   }
 
-  static Set<Element> _debugTrackedElements = Set<Element>.identity();
+/// Retrieve the set of active [Element] instances.
+///
+/// Throws a [StateError] if accessed outside of debug mode.
+static Set<Element> get debugTrackedElements {
+  if (kReleaseMode || kProfileMode) {
+    throw StateError('illegal access of debug getter in non-debug mode.');
+  }
+  return Element._debugTrackedElements;
+}
+  static final Set<Element> _debugTrackedElements = Set<Element>.identity();
 
   /// The configuration for this element.
   @override
