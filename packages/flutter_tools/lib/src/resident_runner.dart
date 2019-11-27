@@ -134,7 +134,7 @@ class FlutterDevice {
   final Device device;
   final ResidentCompiler generator;
   Stream<Uri> observatoryUris;
-  List<VMService> vmServices;
+  VMService vmService;
   DevFS devFS;
   ApplicationPackage package;
   List<String> fileSystemRoots;
@@ -191,8 +191,8 @@ class FlutterDevice {
       }
       printTrace('Successfully connected to service protocol: $observatoryUri');
 
-      vmServices = <VMService>[service];
-      device.getLogReader(app: package).connectedVMServices = vmServices;
+      vmService = service;
+      device.getLogReader(app: package).connectedVMService = vmService;
       completer.complete();
       await subscription.cancel();
     }, onError: (dynamic error) {
@@ -208,37 +208,23 @@ class FlutterDevice {
   }
 
   Future<void> refreshViews() async {
-    if (vmServices == null || vmServices.isEmpty) {
-      return Future<void>.value(null);
+    if (vmService == null) {
+      return;
     }
-    final List<Future<void>> futures = <Future<void>>[
-      for (VMService service in vmServices) service.vm.refreshViews(waitForViews: true),
-    ];
-    await Future.wait(futures);
+    await vmService.vm.refreshViews(waitForViews: true);
   }
 
   List<FlutterView> get views {
-    if (vmServices == null) {
+    if (vmService == null || vmService.isClosed) {
       return <FlutterView>[];
     }
 
-    return vmServices
-      .where((VMService service) => !service.isClosed)
-      .expand<FlutterView>(
-        (VMService service) {
-          return viewFilter != null
-               ? service.vm.allViewsWithName(viewFilter)
-               : service.vm.views;
-        },
-      )
-      .toList();
+    return (viewFilter != null
+        ? vmService.vm.allViewsWithName(viewFilter)
+        : vmService.vm.views).toList();
   }
 
-  Future<void> getVMs() async {
-    for (VMService service in vmServices) {
-      await service.getVM();
-    }
-  }
+  Future<void> getVMs() => vmService.getVM();
 
   Future<void> exitApps() async {
     if (!device.supportsFlutterExit) {
@@ -249,7 +235,6 @@ class FlutterDevice {
     if (flutterViews == null || flutterViews.isEmpty) {
       return;
     }
-    final List<Future<void>> futures = <Future<void>>[];
     // If any of the flutter views are paused, we might not be able to
     // cleanly exit since the service extension may not have been registered.
     if (flutterViews.any((FlutterView view) {
@@ -262,6 +247,7 @@ class FlutterDevice {
       await device.stopApp(package);
       return;
     }
+    final List<Future<void>> futures = <Future<void>>[];
     for (FlutterView view in flutterViews) {
       if (view != null && view.uiIsolate != null) {
         assert(!view.uiIsolate.pauseEvent.isPauseEvent);
@@ -281,7 +267,7 @@ class FlutterDevice {
   }) {
     // One devFS per device. Shared by all running instances.
     devFS = DevFS(
-      vmServices[0],
+      vmService,
       fsName,
       rootDirectory,
       packagesFilePath: packagesFilePath,
@@ -416,7 +402,7 @@ class FlutterDevice {
   }
 
   void initLogReader() {
-    device.getLogReader(app: package).appPid = vmServices.first.vm.pid;
+    device.getLogReader(app: package).appPid = vmService.vm.pid;
   }
 
   Future<int> runHot({
@@ -736,7 +722,7 @@ abstract class ResidentRunner {
   void writeVmserviceFile() {
     if (debuggingOptions.vmserviceOutFile != null) {
       try {
-        final String address = flutterDevices.first.vmServices.first.wsAddress.toString();
+        final String address = flutterDevices.first.vmService.wsAddress.toString();
         final File vmserviceOutFile = fs.file(debuggingOptions.vmserviceOutFile);
         vmserviceOutFile.createSync(recursive: true);
         vmserviceOutFile.writeAsStringSync(address);
@@ -940,15 +926,13 @@ abstract class ResidentRunner {
 
     // Listen for service protocol connection to close.
     for (FlutterDevice device in flutterDevices) {
-      for (VMService service in device.vmServices) {
-        // This hooks up callbacks for when the connection stops in the future.
-        // We don't want to wait for them. We don't handle errors in those callbacks'
-        // futures either because they just print to logger and is not critical.
-        unawaited(service.done.then<void>(
-          _serviceProtocolDone,
-          onError: _serviceProtocolError,
-        ).whenComplete(_serviceDisconnected));
-      }
+      // This hooks up callbacks for when the connection stops in the future.
+      // We don't want to wait for them. We don't handle errors in those callbacks'
+      // futures either because they just print to logger and is not critical.
+      unawaited(device.vmService.done.then<void>(
+        _serviceProtocolDone,
+        onError: _serviceProtocolError,
+      ).whenComplete(_serviceDisconnected));
     }
   }
 

@@ -104,7 +104,7 @@ void main() {
       .thenAnswer((Invocation invocation) async {
         return testUri;
       });
-    when(mockFlutterDevice.vmServices).thenReturn(<VMService>[mockVMService]);
+    when(mockFlutterDevice.vmService).thenReturn(mockVMService);
     when(mockFlutterDevice.refreshViews()).thenAnswer((Invocation invocation) async { });
     when(mockFlutterDevice.reloadSources(any, pause: anyNamed('pause'))).thenReturn(<Future<Map<String, dynamic>>>[
       Future<Map<String, dynamic>>.value(<String, dynamic>{
@@ -631,7 +631,7 @@ void main() {
     );
 
     await flutterDevice.connect();
-    verify(mockLogReader.connectedVMServices = <VMService>[ mockVMService ]);
+    verify(mockLogReader.connectedVMService = mockVMService);
   }, overrides: <Type, Generator>{
     VMServiceConnector: () => (Uri httpUri, {
       ReloadSources reloadSources,

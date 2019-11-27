@@ -83,15 +83,15 @@ class ColdRunner extends ResidentRunner {
     if (flutterDevices.first.observatoryUris != null) {
       // For now, only support one debugger connection.
       connectionInfoCompleter?.complete(DebugConnectionInfo(
-        httpUri: flutterDevices.first.vmServices.first.httpAddress,
-        wsUri: flutterDevices.first.vmServices.first.wsAddress,
+        httpUri: flutterDevices.first.vmService.httpAddress,
+        wsUri: flutterDevices.first.vmService.wsAddress,
       ));
     }
 
     printTrace('Application running.');
 
     for (FlutterDevice device in flutterDevices) {
-      if (device.vmServices == null) {
+      if (device.vmService == null) {
         continue;
       }
       device.initLogReader();
@@ -102,10 +102,10 @@ class ColdRunner extends ResidentRunner {
     if (traceStartup) {
       // Only trace startup for the first device.
       final FlutterDevice device = flutterDevices.first;
-      if (device.vmServices != null && device.vmServices.isNotEmpty) {
+      if (device.vmService != null) {
         printStatus('Tracing startup on ${device.device.name}.');
         await downloadStartupTrace(
-          device.vmServices.first,
+          device.vmService,
           awaitFirstFrame: awaitFirstFrameWhenTracing,
         );
       }
@@ -183,10 +183,9 @@ class ColdRunner extends ResidentRunner {
     bool haveAnything = false;
     for (FlutterDevice device in flutterDevices) {
       final String dname = device.device.name;
-      if (device.vmServices != null) {
-        for (VMService vm in device.vmServices) {
-          printStatus('An Observatory debugger and profiler on $dname is available at: ${vm.httpAddress}');
-        }
+      if (device.vmService != null) {
+        printStatus('An Observatory debugger and profiler on $dname is '
+          'available at: ${device.vmService .httpAddress}');
       }
     }
     if (supportsServiceProtocol) {
@@ -212,7 +211,7 @@ class ColdRunner extends ResidentRunner {
   Future<void> preExit() async {
     for (FlutterDevice device in flutterDevices) {
       // If we're running in release mode, stop the app using the device logic.
-      if (device.vmServices == null || device.vmServices.isEmpty) {
+      if (device.vmService == null) {
         await device.device.stopApp(device.package);
       }
     }
