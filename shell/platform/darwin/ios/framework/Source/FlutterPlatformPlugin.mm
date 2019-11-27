@@ -224,7 +224,11 @@ using namespace flutter;
 
 - (void)setClipboardData:(NSDictionary*)data {
   UIPasteboard* pasteboard = [UIPasteboard generalPasteboard];
-  pasteboard.string = data[@"text"];
+  if (data[@"text"]) {
+    pasteboard.string = data[@"text"];
+  } else {
+    pasteboard.string = @"null";
+  }
 }
 
 @end
