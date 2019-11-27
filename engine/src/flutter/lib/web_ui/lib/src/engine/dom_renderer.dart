@@ -390,7 +390,7 @@ flt-glass-pane * {
     _glassPaneElement.append(_sceneHostElement);
 
     final html.Element _accesibilityPlaceholder = EngineSemanticsOwner
-        .instance.enableSemantics
+        .instance.semanticsHelper
         .prepareAccesibilityPlaceholder();
 
     // Insert the semantics placeholder after the scene host. For all widgets

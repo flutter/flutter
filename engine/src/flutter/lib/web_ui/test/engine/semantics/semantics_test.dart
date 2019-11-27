@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:html' as html;
 import 'dart:typed_data';
 
+import 'package:mockito/mockito.dart';
 import 'package:quiver/testing/async.dart';
 import 'package:test/test.dart';
 
@@ -190,7 +191,29 @@ void _testEngineSemanticsOwner() {
       semantics().semanticsEnabled = false;
     });
   });
+  test('checks shouldEnableSemantics for every global event', () {
+    final MockSemanticsEnabler mockSemanticsEnabler = MockSemanticsEnabler();
+    semantics().semanticsHelper.semanticsEnabler = mockSemanticsEnabler;
+    final html.Event pointerEvent = html.Event('pointermove');
+
+    semantics().receiveGlobalEvent(pointerEvent);
+
+    // Verify the interactions.
+    verify(mockSemanticsEnabler.shouldEnableSemantics(pointerEvent));
+  });
+
+  test('Forward events to framewors if shouldEnableSemantics', () {
+    final MockSemanticsEnabler mockSemanticsEnabler = MockSemanticsEnabler();
+    semantics().semanticsHelper.semanticsEnabler = mockSemanticsEnabler;
+    final html.Event pointerEvent = html.Event('pointermove');
+    when(mockSemanticsEnabler.shouldEnableSemantics(pointerEvent))
+        .thenReturn(true);
+
+    expect(semantics().receiveGlobalEvent(pointerEvent), isTrue);
+  });
 }
+
+class MockSemanticsEnabler extends Mock implements SemanticsEnabler {}
 
 void _testHeader() {
   test('renders heading role for headers', () {
