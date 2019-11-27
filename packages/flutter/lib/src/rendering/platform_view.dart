@@ -729,11 +729,6 @@ class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
     }
   }
 
-  /// How to behave during hit testing.
-  // The implicit setter is enough here as changing this value will just affect
-  // any newly arriving events there's nothing we need to invalidate.
-  // PlatformViewHitTestBehavior hitTestBehavior;
-
   /// {@macro  flutter.rendering.platformView.updateGestureRecognizers}
   ///
   /// Any active gesture arena the `PlatformView` participates in is rejected when the
