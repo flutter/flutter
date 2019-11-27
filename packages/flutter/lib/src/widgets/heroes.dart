@@ -73,7 +73,7 @@ enum HeroFlightDirection {
 // The bounding box for context in ancestorContext coordinate system, or in the global
 // coordinate system when null.
 Rect _boundingBoxFor(BuildContext context, [BuildContext ancestorContext]) {
-  final RenderBox box = context.findRenderObject();
+  final RenderBox box = context.findRenderObject() as RenderBox;
   assert(box != null && box.hasSize);
   return MatrixUtils.transformRect(
       box.getTransformTo(ancestorContext?.findRenderObject()),
@@ -274,8 +274,8 @@ class Hero extends StatefulWidget {
         }
         return true;
       }());
-      final Hero heroWidget = hero.widget;
-      final _HeroState heroState = hero.state;
+      final Hero heroWidget = hero.widget as Hero;
+      final _HeroState heroState = hero.state as _HeroState;
       if (!isUserGestureTransition || heroWidget.transitionOnUserGestures) {
         result[tag] = heroState;
       } else {
@@ -286,10 +286,10 @@ class Hero extends StatefulWidget {
     }
 
     void visitor(Element element) {
-      if (element.widget is Hero) {
-        final StatefulElement hero = element;
-        final Hero heroWidget = element.widget;
-        final Object tag = heroWidget.tag;
+      final Widget widget = element.widget;
+      if (widget is Hero) {
+        final StatefulElement hero = element as StatefulElement;
+        final Object tag = widget.tag;
         assert(tag != null);
         if (Navigator.of(hero) == navigator) {
           inviteHero(hero, tag);
@@ -344,7 +344,7 @@ class _HeroState extends State<Hero> {
   void startFlight({ bool shouldIncludedChildInPlaceholder = false }) {
     _shouldIncludeChild = shouldIncludedChildInPlaceholder;
     assert(mounted);
-    final RenderBox box = context.findRenderObject();
+    final RenderBox box = context.findRenderObject() as RenderBox;
     assert(box != null && box.hasSize);
     setState(() {
       _placeholderSize = box.size;
@@ -489,7 +489,7 @@ class _HeroFlight {
       animation: _proxyAnimation,
       child: shuttle,
       builder: (BuildContext context, Widget child) {
-        final RenderBox toHeroBox = manifest.toHero.context?.findRenderObject();
+        final RenderBox toHeroBox = manifest.toHero.context?.findRenderObject() as RenderBox;
         if (_aborted || toHeroBox == null || !toHeroBox.attached) {
           // The toHero no longer exists or it's no longer the flight's destination.
           // Continue flying while fading out.
@@ -501,7 +501,7 @@ class _HeroFlight {
         } else if (toHeroBox.hasSize) {
           // The toHero has been laid out. If it's no longer where the hero animation is
           // supposed to end up then recreate the heroRect tween.
-          final RenderBox finalRouteBox = manifest.toRoute.subtreeContext?.findRenderObject();
+          final RenderBox finalRouteBox = manifest.toRoute.subtreeContext?.findRenderObject() as RenderBox;
           final Offset toHeroOrigin = toHeroBox.localToGlobal(Offset.zero, ancestor: finalRouteBox);
           if (toHeroOrigin != heroRectTween.end.topLeft) {
             final Rect heroRectEnd = toHeroOrigin & heroRectTween.end.size;
@@ -882,7 +882,7 @@ class HeroController extends NavigatorObserver {
     BuildContext fromHeroContext,
     BuildContext toHeroContext,
   ) {
-    final Hero toHero = toHeroContext.widget;
+    final Hero toHero = toHeroContext.widget as Hero;
     return toHero.child;
   };
 }

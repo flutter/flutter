@@ -173,10 +173,10 @@ class _SliverPersistentHeaderElement extends RenderObjectElement {
   _SliverPersistentHeaderElement(_SliverPersistentHeaderRenderObjectWidget widget) : super(widget);
 
   @override
-  _SliverPersistentHeaderRenderObjectWidget get widget => super.widget;
+  _SliverPersistentHeaderRenderObjectWidget get widget => super.widget as _SliverPersistentHeaderRenderObjectWidget;
 
   @override
-  _RenderSliverPersistentHeaderForWidgetsMixin get renderObject => super.renderObject;
+  _RenderSliverPersistentHeaderForWidgetsMixin get renderObject => super.renderObject as _RenderSliverPersistentHeaderForWidgetsMixin;
 
   @override
   void mount(Element parent, dynamic newSlot) {
@@ -230,7 +230,7 @@ class _SliverPersistentHeaderElement extends RenderObjectElement {
   }
 
   @override
-  void insertChildRenderObject(covariant RenderObject child, dynamic slot) {
+  void insertChildRenderObject(covariant RenderBox child, dynamic slot) {
     assert(renderObject.debugValidateChild(child));
     renderObject.child = child;
   }

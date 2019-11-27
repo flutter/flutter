@@ -610,7 +610,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
   ScrollActivity createInnerBallisticScrollActivity(_NestedScrollPosition position, double velocity) {
     return position.createBallisticScrollActivity(
       position.physics.createBallisticSimulation(
-        velocity == 0 ? position : _getMetrics(position, velocity),
+        velocity == 0 ? position as ScrollMetrics : _getMetrics(position, velocity),
         velocity,
       ),
       mode: _NestedBallisticScrollActivityMode.inner,
@@ -621,7 +621,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
     assert(innerPosition != null);
     double pixels, minRange, maxRange, correctionOffset, extra;
     if (innerPosition.pixels == innerPosition.minScrollExtent) {
-      pixels = _outerPosition.pixels.clamp(_outerPosition.minScrollExtent, _outerPosition.maxScrollExtent); // TODO(ianh): gracefully handle out-of-range outer positions
+      pixels = _outerPosition.pixels.clamp(_outerPosition.minScrollExtent, _outerPosition.maxScrollExtent) as double; // TODO(ianh): gracefully handle out-of-range outer positions
       minRange = _outerPosition.minScrollExtent;
       maxRange = _outerPosition.maxScrollExtent;
       assert(minRange <= maxRange);
@@ -687,7 +687,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
 
   double unnestOffset(double value, _NestedScrollPosition source) {
     if (source == _outerPosition)
-      return value.clamp(_outerPosition.minScrollExtent, _outerPosition.maxScrollExtent);
+      return value.clamp(_outerPosition.minScrollExtent, _outerPosition.maxScrollExtent) as double;
     if (value < source.minScrollExtent)
       return value - source.minScrollExtent + _outerPosition.minScrollExtent;
     return value - source.minScrollExtent + _outerPosition.maxScrollExtent;
@@ -695,7 +695,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
 
   double nestOffset(double value, _NestedScrollPosition target) {
     if (target == _outerPosition)
-      return value.clamp(_outerPosition.minScrollExtent, _outerPosition.maxScrollExtent);
+      return value.clamp(_outerPosition.minScrollExtent, _outerPosition.maxScrollExtent) as double;
     if (value < _outerPosition.minScrollExtent)
       return value - _outerPosition.minScrollExtent + target.minScrollExtent;
     if (value > _outerPosition.maxScrollExtent)
@@ -987,7 +987,7 @@ class _NestedScrollPosition extends ScrollPosition implements ScrollActivityDele
     // The logic for max is equivalent but on the other side.
     final double max = delta > 0.0 ? double.infinity : math.max(maxScrollExtent, pixels);
     final double oldPixels = pixels;
-    final double newPixels = (pixels - delta).clamp(min, max);
+    final double newPixels = (pixels - delta).clamp(min, max) as double;
     final double clampedDelta = newPixels - pixels;
     if (clampedDelta == 0.0)
       return delta;
@@ -1152,7 +1152,7 @@ class _NestedInnerBallisticScrollActivity extends BallisticScrollActivity {
   final _NestedScrollCoordinator coordinator;
 
   @override
-  _NestedScrollPosition get delegate => super.delegate;
+  _NestedScrollPosition get delegate => super.delegate as _NestedScrollPosition;
 
   @override
   void resetActivity() {
@@ -1185,7 +1185,7 @@ class _NestedOuterBallisticScrollActivity extends BallisticScrollActivity {
   final _NestedScrollMetrics metrics;
 
   @override
-  _NestedScrollPosition get delegate => super.delegate;
+  _NestedScrollPosition get delegate => super.delegate as _NestedScrollPosition;
 
   @override
   void resetActivity() {
@@ -1215,7 +1215,7 @@ class _NestedOuterBallisticScrollActivity extends BallisticScrollActivity {
         done = true;
       }
     } else {
-      value = value.clamp(metrics.minRange, metrics.maxRange);
+      value = value.clamp(metrics.minRange, metrics.maxRange) as double;
       done = true;
     }
     final bool result = super.applyMoveTo(value + metrics.correctionOffset);

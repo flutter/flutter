@@ -1375,7 +1375,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       // Clamp the final results to prevent programmatically scrolling to
       // out-of-paragraph-bounds positions when encountering tall fonts/scripts that
       // extend past the ascent.
-      scrollOffset = scrollOffset.clamp(0.0, renderEditable.maxScrollExtent);
+      scrollOffset = scrollOffset.clamp(0.0, renderEditable.maxScrollExtent) as double;
     }
     return scrollOffset;
   }
@@ -1744,7 +1744,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   ///
   /// This property is typically used to notify the renderer of input gestures
   /// when [ignorePointer] is true. See [RenderEditable.ignorePointer].
-  RenderEditable get renderEditable => _editableKey.currentContext.findRenderObject();
+  RenderEditable get renderEditable => _editableKey.currentContext.findRenderObject() as RenderEditable;
 
   @override
   TextEditingValue get textEditingValue => _value;

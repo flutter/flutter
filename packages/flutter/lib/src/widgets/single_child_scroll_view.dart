@@ -575,7 +575,7 @@ class _RenderSingleChildViewport extends RenderBox with RenderObjectWithChildMix
     if (target is! RenderBox)
       return RevealedOffset(offset: offset.pixels, rect: rect);
 
-    final RenderBox targetBox = target;
+    final RenderBox targetBox = target as RenderBox;
     final Matrix4 transform = targetBox.getTransformTo(child);
     final Rect bounds = MatrixUtils.transformRect(transform, rect);
     final Size contentSize = child.size;

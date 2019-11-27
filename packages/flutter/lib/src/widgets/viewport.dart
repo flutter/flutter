@@ -186,10 +186,10 @@ class _ViewportElement extends MultiChildRenderObjectElement {
   _ViewportElement(Viewport widget) : super(widget);
 
   @override
-  Viewport get widget => super.widget;
+  Viewport get widget => super.widget as Viewport;
 
   @override
-  RenderViewport get renderObject => super.renderObject;
+  RenderViewport get renderObject => super.renderObject as RenderViewport;
 
   @override
   void mount(Element parent, dynamic newSlot) {
@@ -208,9 +208,9 @@ class _ViewportElement extends MultiChildRenderObjectElement {
     if (widget.center != null) {
       renderObject.center = children.singleWhere(
         (Element element) => element.widget.key == widget.center
-      ).renderObject;
+      ).renderObject as RenderSliver;
     } else if (children.isNotEmpty) {
-      renderObject.center = children.first.renderObject;
+      renderObject.center = children.first.renderObject as RenderSliver;
     } else {
       renderObject.center = null;
     }
@@ -219,7 +219,7 @@ class _ViewportElement extends MultiChildRenderObjectElement {
   @override
   void debugVisitOnstageChildren(ElementVisitor visitor) {
     children.where((Element e) {
-      final RenderSliver renderSliver = e.renderObject;
+      final RenderSliver renderSliver = e.renderObject as RenderSliver;
       return renderSliver.geometry.visible;
     }).forEach(visitor);
   }

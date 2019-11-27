@@ -381,7 +381,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   @protected
   void restoreScrollOffset() {
     if (pixels == null) {
-      final double value = PageStorage.of(context.storageContext)?.readState(context.storageContext);
+      final double value = PageStorage.of(context.storageContext)?.readState(context.storageContext) as double;
       if (value != null)
         correctPixels(value);
     }
@@ -543,16 +543,16 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     double target;
     switch (alignmentPolicy) {
       case ScrollPositionAlignmentPolicy.explicit:
-        target = viewport.getOffsetToReveal(object, alignment).offset.clamp(minScrollExtent, maxScrollExtent);
+        target = viewport.getOffsetToReveal(object, alignment).offset.clamp(minScrollExtent, maxScrollExtent) as double;
         break;
       case ScrollPositionAlignmentPolicy.keepVisibleAtEnd:
-        target = viewport.getOffsetToReveal(object, 1.0).offset.clamp(minScrollExtent, maxScrollExtent);
+        target = viewport.getOffsetToReveal(object, 1.0).offset.clamp(minScrollExtent, maxScrollExtent) as double;
         if (target < pixels) {
           target = pixels;
         }
         break;
       case ScrollPositionAlignmentPolicy.keepVisibleAtStart:
-        target = viewport.getOffsetToReveal(object, 0.0).offset.clamp(minScrollExtent, maxScrollExtent);
+        target = viewport.getOffsetToReveal(object, 0.0).offset.clamp(minScrollExtent, maxScrollExtent) as double;
         if (target > pixels) {
           target = pixels;
         }
@@ -641,7 +641,7 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
     assert(clamp != null);
 
     if (clamp)
-      to = to.clamp(minScrollExtent, maxScrollExtent);
+      to = to.clamp(minScrollExtent, maxScrollExtent) as double;
 
     return super.moveTo(to, duration: duration, curve: curve);
   }

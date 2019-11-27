@@ -215,7 +215,7 @@ class _TweenAnimationBuilderState<T> extends AnimatedWidgetBaseState<TweenAnimat
       // Constructor will never be called because null is never provided as current tween.
       assert(false);
       return null;
-    });
+    }) as Tween<T>;
   }
 
   @override
