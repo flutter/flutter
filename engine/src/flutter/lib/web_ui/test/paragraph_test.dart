@@ -164,4 +164,24 @@ void main() async {
     paragraph.layout(const ParagraphConstraints(width: 1000));
     expect(paragraph.getBoxesForRange(0, 0), isEmpty);
   });
+
+  test('longestLine', () {
+    // [Paragraph.longestLine] is only supported by canvas-based measurement.
+    TextMeasurementService.enableExperimentalCanvasImplementation = true;
+    TextMeasurementService.initialize(rulerCacheCapacity: 2);
+
+    final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle(
+      fontFamily: 'Ahem',
+      fontStyle: FontStyle.normal,
+      fontWeight: FontWeight.normal,
+      fontSize: 10,
+    ));
+    builder.addText('abcd\nabcde abc');
+    final Paragraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: 80.0));
+    expect(paragraph.longestLine, 50.0);
+
+    TextMeasurementService.clearCache();
+    TextMeasurementService.enableExperimentalCanvasImplementation = false;
+  });
 }

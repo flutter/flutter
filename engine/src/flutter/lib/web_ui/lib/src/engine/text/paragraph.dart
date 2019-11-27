@@ -4,6 +4,102 @@
 
 part of engine;
 
+class EngineLineMetrics implements ui.LineMetrics {
+  EngineLineMetrics({
+    this.hardBreak,
+    this.ascent,
+    this.descent,
+    this.unscaledAscent,
+    this.height,
+    this.width,
+    this.left,
+    this.baseline,
+    this.lineNumber,
+  }) : text = null;
+
+  EngineLineMetrics.withText(
+    this.text, {
+    @required this.hardBreak,
+    this.ascent,
+    this.descent,
+    this.unscaledAscent,
+    this.height,
+    @required this.width,
+    this.left,
+    this.baseline,
+    @required this.lineNumber,
+  })  : assert(text != null),
+        assert(hardBreak != null),
+        assert(width != null),
+        assert(lineNumber != null && lineNumber >= 0);
+
+  /// The textual content representing this line.
+  final String text;
+
+  @override
+  final bool hardBreak;
+
+  @override
+  final double ascent;
+
+  @override
+  final double descent;
+
+  @override
+  final double unscaledAscent;
+
+  @override
+  final double height;
+
+  @override
+  final double width;
+
+  @override
+  final double left;
+
+  @override
+  final double baseline;
+
+  @override
+  final int lineNumber;
+
+  @override
+  int get hashCode => ui.hashValues(
+        text,
+        hardBreak,
+        ascent,
+        descent,
+        unscaledAscent,
+        height,
+        width,
+        left,
+        baseline,
+        lineNumber,
+      );
+
+  @override
+  bool operator ==(dynamic other) {
+    if (identical(this, other)) {
+      return true;
+    }
+
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    final EngineLineMetrics typedOther = other;
+    return text == typedOther.text &&
+        hardBreak == typedOther.hardBreak &&
+        ascent == typedOther.ascent &&
+        descent == typedOther.descent &&
+        unscaledAscent == typedOther.unscaledAscent &&
+        height == typedOther.height &&
+        width == typedOther.width &&
+        left == typedOther.left &&
+        baseline == typedOther.baseline &&
+        lineNumber == typedOther.lineNumber;
+  }
+}
+
 /// The web implementation of [ui.Paragraph].
 class EngineParagraph implements ui.Paragraph {
   /// This class is created by the engine, and should not be instantiated
@@ -72,9 +168,28 @@ class EngineParagraph implements ui.Paragraph {
   /// Valid only after [layout] has been called.
   double get _lineHeight => _measurementResult?.lineHeight ?? 0;
 
-  // TODO(flutter_web): see https://github.com/flutter/flutter/issues/33613.
   @override
-  double get longestLine => 0;
+  double get longestLine {
+    if (_measurementResult.lines != null) {
+      double maxWidth = 0.0;
+      for (ui.LineMetrics metrics in _measurementResult.lines) {
+        if (maxWidth < metrics.width) {
+          maxWidth = metrics.width;
+        }
+      }
+      return maxWidth;
+    }
+
+    // In the single-line case, the longest line is equal to the maximum
+    // intrinsic width of the paragraph.
+    if (_measurementResult.isSingleLine) {
+      return _measurementResult.maxIntrinsicWidth;
+    }
+
+    // If we don't have any line metrics information, there's no way to know the
+    // longest line in a multi-line paragraph.
+    return 0.0;
+  }
 
   @override
   double get minIntrinsicWidth => _measurementResult?.minIntrinsicWidth ?? 0;
@@ -101,7 +216,25 @@ class EngineParagraph implements ui.Paragraph {
 
   /// If not null, this list would contain the strings representing each line
   /// in the paragraph.
-  List<String> get _lines => _measurementResult?.lines;
+  ///
+  /// Avoid repetitively accessing this field as it generates a new list every
+  /// time.
+  List<String> get _lines {
+    if (_plainText == null) {
+      return null;
+    }
+
+    final List<EngineLineMetrics> metricsList = _measurementResult.lines;
+    if (metricsList == null) {
+      return null;
+    }
+
+    final List<String> lines = <String>[];
+    for (EngineLineMetrics metrics in metricsList) {
+      lines.add(metrics.text);
+    }
+    return lines;
+  }
 
   @override
   void layout(ui.ParagraphConstraints constraints) {
@@ -161,7 +294,7 @@ class EngineParagraph implements ui.Paragraph {
   bool get _drawOnCanvas {
     bool canDrawTextOnCanvas;
     if (TextMeasurementService.enableExperimentalCanvasImplementation) {
-      canDrawTextOnCanvas = _lines != null;
+      canDrawTextOnCanvas = _measurementResult.lines != null;
     } else {
       canDrawTextOnCanvas = _measurementResult.isSingleLine &&
           _plainText != null &&
@@ -303,8 +436,7 @@ class EngineParagraph implements ui.Paragraph {
 
   @override
   List<ui.LineMetrics> computeLineMetrics() {
-    // TODO(flutter_web): https://github.com/flutter/flutter/issues/39537
-    return null;
+    return _measurementResult.lines;
   }
 }
 
