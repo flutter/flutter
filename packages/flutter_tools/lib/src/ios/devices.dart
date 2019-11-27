@@ -582,21 +582,21 @@ class IOSDeviceLogReader extends DeviceLogReader {
   VMService _connectedVMService;
 
   @override
-  set connectedVMService(VMService connectedVMServices) {
-    _listenToUnifiedLoggingEvents(connectedVMServices);
-    _connectedVMService = connectedVMServices;
+  set connectedVMService(VMService connectedVmService) {
+    _listenToUnifiedLoggingEvents(connectedVmService);
+    _connectedVMService = connectedVmService;
   }
 
   static const int _minimumUniversalLoggingSdkVersion = 13;
 
-  Future<void> _listenToUnifiedLoggingEvents(VMService vmService) async {
+  Future<void> _listenToUnifiedLoggingEvents(VMService connectedVmService) async {
     if (device.majorSdkVersion < _minimumUniversalLoggingSdkVersion) {
       return;
     }
     // The VM service will not publish logging events unless the debug stream is being listened to.
     // onDebugEvent listens to this stream as a side effect.
-    unawaited(vmService.onDebugEvent);
-    _loggingSubscriptions.add((await vmService.onStdoutEvent).listen((ServiceEvent event) {
+    unawaited(connectedVmService.onDebugEvent);
+    _loggingSubscriptions.add((await connectedVmService.onStdoutEvent).listen((ServiceEvent event) {
       final String logMessage = event.message;
       if (logMessage.isNotEmpty) {
         _linesController.add(logMessage);

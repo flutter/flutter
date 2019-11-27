@@ -211,7 +211,7 @@ class FlutterDevice {
     if (vmService == null) {
       return;
     }
-    return vmService.vm.refreshViews(waitForViews: true);
+    await vmService.vm.refreshViews(waitForViews: true);
   }
 
   List<FlutterView> get views {
@@ -224,9 +224,7 @@ class FlutterDevice {
         : vmService.vm.views).toList();
   }
 
-  Future<void> getVMs() async {
-    return vmService.getVM();
-  }
+  Future<void> getVMs() => vmService.getVM();
 
   Future<void> exitApps() async {
     if (!device.supportsFlutterExit) {
