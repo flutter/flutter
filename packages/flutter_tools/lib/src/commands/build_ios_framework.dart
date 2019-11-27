@@ -146,7 +146,9 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
       throwToolExit("Module's iOS folder missing");
     }
 
-    final Directory outputDirectory = fs.directory(fs.path.normalize(outputArgument));
+    // Append a known directory so if they pass in /Users/user/Desktop/ the command doesn't delete their Desktop...
+    final Directory outputDirectory = fs.directory(fs.path.normalize(outputArgument))
+      .childDirectory('FlutterFrameworks');
 
     if (outputDirectory.existsSync()) {
       outputDirectory.deleteSync(recursive: true);
