@@ -73,6 +73,7 @@ part 'engine/semantics/label_and_value.dart';
 part 'engine/semantics/live_region.dart';
 part 'engine/semantics/scrollable.dart';
 part 'engine/semantics/semantics.dart';
+part 'engine/semantics/semantics_helper.dart';
 part 'engine/semantics/tappable.dart';
 part 'engine/semantics/text_field.dart';
 part 'engine/services/buffers.dart';
