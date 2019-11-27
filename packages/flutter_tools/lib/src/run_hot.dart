@@ -8,6 +8,7 @@ import 'package:json_rpc_2/error_code.dart' as rpc_error_code;
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:meta/meta.dart';
 import 'package:pool/pool.dart';
+import 'package:watcher/watcher.dart';
 
 import 'base/async_guard.dart';
 import 'base/common.dart';
@@ -18,6 +19,7 @@ import 'base/platform.dart';
 import 'base/terminal.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
+import 'cache.dart';
 import 'compile.dart';
 import 'convert.dart';
 import 'devfs.dart';
@@ -27,7 +29,14 @@ import 'reporting/reporting.dart';
 import 'resident_runner.dart';
 import 'vmservice.dart';
 
-ProjectFileInvalidator get projectFileInvalidator => context.get<ProjectFileInvalidator>() ?? const ProjectFileInvalidator();
+ProjectFileInvalidator get projectFileInvalidator => context.get<ProjectFileInvalidator>() ?? _defaultInvalidator;
+final ProjectFileInvalidator _defaultInvalidator = ProjectFileInvalidator(
+  fs,
+  DirectoryWatcherFactory(fs),
+  platform,
+  logger,
+  Cache.flutterRoot,
+);
 
 HotRunnerConfig get hotRunnerConfig => context.get<HotRunnerConfig>();
 
@@ -1048,8 +1057,39 @@ class HotRunner extends ResidentRunner {
   }
 }
 
+/// A factory for constructing [Watcher] instances.
+class DirectoryWatcherFactory {
+  const DirectoryWatcherFactory(this._fileSystem);
+
+  final FileSystem _fileSystem;
+
+  /// Create a [Watcher] for a given [path].
+  ///
+  /// Throws [StateError] if [path] is not a directory.
+  Watcher watchDirectory(String path) {
+    if (!_fileSystem.isDirectorySync(path)) {
+      throw StateError('$path is not a directory');
+    }
+    return Watcher(path);
+  }
+}
+
+/// The [ProjectFileInvalidator] track the dependencies for a running
+/// application to determine when they are dirty.
 class ProjectFileInvalidator {
-  const ProjectFileInvalidator();
+  ProjectFileInvalidator(
+    this._fileSystem,
+    this._directoryWatcherFactory,
+    this._platform,
+    this._logger,
+    String flutterRoot,
+  ) : _pathToFlutterSources = _fileSystem.path.join(flutterRoot, 'packages', 'flutter');
+
+  final FileSystem _fileSystem;
+  final DirectoryWatcherFactory _directoryWatcherFactory;
+  final Platform _platform;
+  final Logger _logger;
+  final String _pathToFlutterSources;
 
   static const String _pubCachePathLinuxAndMac = '.pub-cache';
   static const String _pubCachePathWindows = 'Pub/Cache';
@@ -1062,6 +1102,17 @@ class ProjectFileInvalidator {
   // ~2000 files.
   static const int _kMaxPendingStats = 8;
 
+  StreamSubscription<void> _fileWatcher;
+
+  /// Whether we should monitor the flutter source tree for changes.
+  ///
+  /// To reduce the number of files that we diff for changes, we use a single
+  /// filesystem watcher to monitor the flutter directory for any changes. If
+  /// observed, we cancel the watcher and include the flutter directory for
+  /// subsequent changes.
+  bool get watchingFlutter => _watchingFlutter;
+  bool _watchingFlutter = false;
+
   Future<List<Uri>> findInvalidated({
     @required DateTime lastCompiled,
     @required List<Uri> urisToMonitor,
@@ -1072,19 +1123,28 @@ class ProjectFileInvalidator {
     assert(packagesPath != null);
 
     if (lastCompiled == null) {
-      // Initial load.
+      // Initial load
       assert(urisToMonitor.isEmpty);
+      _fileWatcher = _directoryWatcherFactory.watchDirectory(_pathToFlutterSources)
+        .events.listen((WatchEvent watchEvent) {
+          _logger.printTrace('Adding flutter sources to watch list.');
+          _fileWatcher.cancel();
+          _watchingFlutter = true;
+        });
       return <Uri>[];
     }
 
     final Stopwatch stopwatch = Stopwatch()..start();
+    print(_pathToFlutterSources);
 
     final List<Uri> urisToScan = <Uri>[
       // Don't watch pub cache directories to speed things up a little.
-      ...urisToMonitor.where(_isNotInPubCache),
+      for (Uri uri in urisToMonitor)
+        if (_isNotInPubCache(uri) && (watchingFlutter || !uri.path.contains(_pathToFlutterSources)))
+          uri,
 
       // We need to check the .packages file too since it is not used in compilation.
-      fs.file(packagesPath).uri,
+      _fileSystem.file(packagesPath).uri,
     ];
     final List<Uri> invalidatedFiles = <Uri>[];
 
@@ -1093,8 +1153,8 @@ class ProjectFileInvalidator {
       final List<Future<void>> waitList = <Future<void>>[];
       for (final Uri uri in urisToScan) {
         waitList.add(pool.withResource<void>(
-          () => fs
-            .stat(uri.toFilePath(windows: platform.isWindows))
+          () => _fileSystem
+            .stat(uri.toFilePath(windows: _platform.isWindows))
             .then((FileStat stat) {
               final DateTime updatedAt = stat.modified;
               if (updatedAt != null && updatedAt.isAfter(lastCompiled)) {
@@ -1106,14 +1166,14 @@ class ProjectFileInvalidator {
       await Future.wait<void>(waitList);
     } else {
       for (final Uri uri in urisToScan) {
-        final DateTime updatedAt = fs.statSync(
-            uri.toFilePath(windows: platform.isWindows)).modified;
+        final DateTime updatedAt = _fileSystem.statSync(
+            uri.toFilePath(windows: _platform.isWindows)).modified;
         if (updatedAt != null && updatedAt.isAfter(lastCompiled)) {
           invalidatedFiles.add(uri);
         }
       }
     }
-    printTrace(
+    _logger.printTrace(
       'Scanned through ${urisToScan.length} files in '
       '${stopwatch.elapsedMilliseconds}ms'
       '${asyncScanning ? " (async)" : ""}',
@@ -1121,8 +1181,8 @@ class ProjectFileInvalidator {
     return invalidatedFiles;
   }
 
-  static bool _isNotInPubCache(Uri uri) {
-    return !(platform.isWindows && uri.path.contains(_pubCachePathWindows))
+  bool _isNotInPubCache(Uri uri) {
+    return !(_platform.isWindows && uri.path.contains(_pubCachePathWindows))
         && !uri.path.contains(_pubCachePathLinuxAndMac);
   }
 }

@@ -2,68 +2,183 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
+
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/run_hot.dart';
-import 'package:meta/meta.dart';
+import 'package:mockito/mockito.dart';
+import 'package:watcher/watcher.dart';
 
 import '../src/common.dart';
-import '../src/context.dart';
 
 // assumption: tests have a timeout less than 100 days
 final DateTime inFuture = DateTime.now().add(const Duration(days: 100));
+final DateTime inPast = DateTime.now().subtract(const Duration(days: 100));
 
 void main() {
-  group('ProjectFileInvalidator', () {
-    _testProjectFileInvalidator(asyncScanning: false);
-  });
-  group('ProjectFileInvalidator (async scanning)', () {
-    _testProjectFileInvalidator(asyncScanning: true);
-  });
-}
+  FakeDirectoryWatcherFactory fakeDirectoryWatcherFactory;
+  StreamController<WatchEvent> watchController;
+  BufferLogger logger;
 
-void _testProjectFileInvalidator({@required bool asyncScanning}) {
-  const ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator();
+  setUp(() {
+    logger = BufferLogger();
+    fakeDirectoryWatcherFactory = FakeDirectoryWatcherFactory();
+    watchController = StreamController<WatchEvent>.broadcast();
+    when(fakeDirectoryWatcherFactory.watcher.events)
+      .thenAnswer((Invocation invocation) {
+        return watchController.stream;
+      });
+  });
 
-  testUsingContext('No last compile', () async {
-    expect(
+  for (bool asyncScanning in <bool>[true, false]) {
+    test('No last compile', () async {
+      final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(
+        MemoryFileSystem(),
+        fakeDirectoryWatcherFactory,
+        const LocalPlatform(),
+        logger,
+        '',
+      );
+
+      expect(
+        await projectFileInvalidator.findInvalidated(
+          lastCompiled: null,
+          urisToMonitor: <Uri>[],
+          packagesPath: '',
+          asyncScanning: asyncScanning,
+        ),
+        isEmpty,
+      );
+    });
+
+    test('Empty project', () async {
+      final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(
+        MemoryFileSystem(),
+        fakeDirectoryWatcherFactory,
+        const LocalPlatform(),
+        logger,
+        '',
+      );
+
+      expect(
+        await projectFileInvalidator.findInvalidated(
+          lastCompiled: inFuture,
+          urisToMonitor: <Uri>[],
+          packagesPath: '',
+          asyncScanning: asyncScanning,
+        ),
+        isEmpty,
+      );
+    });
+
+    test('Non-existent files are ignored', () async {
+      final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(
+        MemoryFileSystem(),
+        fakeDirectoryWatcherFactory,
+        const LocalPlatform(),
+        logger,
+        '',
+      );
+
+      expect(
+        await projectFileInvalidator.findInvalidated(
+          lastCompiled: inFuture,
+          urisToMonitor: <Uri>[Uri.parse('/not-there-anymore'),],
+          packagesPath: '',
+          asyncScanning: asyncScanning,
+        ),
+        isEmpty,
+      );
+    });
+
+    test('Begins watching flutter directory after detecting change', () async {
+      final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(
+        MemoryFileSystem(),
+        fakeDirectoryWatcherFactory,
+        const LocalPlatform(),
+        logger,
+        '',
+      );
       await projectFileInvalidator.findInvalidated(
         lastCompiled: null,
         urisToMonitor: <Uri>[],
         packagesPath: '',
         asyncScanning: asyncScanning,
-      ),
-      isEmpty,
-    );
-  });
+      );
 
-  testUsingContext('Empty project', () async {
-    expect(
+      expect(projectFileInvalidator.watchingFlutter, false);
+
+      watchController.add(WatchEvent(ChangeType.MODIFY, ''));
+      await null;
+
+      expect(projectFileInvalidator.watchingFlutter, true);
+      expect(logger.traceText, contains('Adding flutter sources to watch list.'));
+    });
+
+    test('Does not stat file from flutter directory if watchingFlutter is false', () async {
+      final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
+      memoryFileSystem.file('packages/flutter/lib/foo.dart')
+        ..createSync(recursive: true)
+        ..setLastModifiedSync(inFuture);
+      final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(
+        memoryFileSystem,
+        fakeDirectoryWatcherFactory,
+        const LocalPlatform(),
+        logger,
+        '',
+      );
+      final List<Uri> results = await projectFileInvalidator.findInvalidated(
+        lastCompiled: inPast,
+        urisToMonitor: <Uri>[Uri.parse('packages/flutter/lib/foo.dart')],
+        packagesPath: '',
+        asyncScanning: asyncScanning,
+      );
+
+      expect(results, hasLength(1)); // only contains packages file.
+    });
+
+    test('Does stat file from flutter directory if watchingFlutter is true', () async {
+      final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
+      memoryFileSystem.file('packages/flutter/lib/foo.dart')
+        ..createSync(recursive: true)
+        ..setLastModifiedSync(inFuture);
+      final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(
+        memoryFileSystem,
+        fakeDirectoryWatcherFactory,
+        const LocalPlatform(),
+        logger,
+        '',
+      );
       await projectFileInvalidator.findInvalidated(
-        lastCompiled: inFuture,
+        lastCompiled: null,
         urisToMonitor: <Uri>[],
         packagesPath: '',
         asyncScanning: asyncScanning,
-      ),
-      isEmpty,
-    );
-  }, overrides: <Type, Generator>{
-    FileSystem: () => MemoryFileSystem(),
-    ProcessManager: () => FakeProcessManager.any(),
-  });
+      );
+      watchController.add(WatchEvent(ChangeType.MODIFY, ''));
+      await null;
 
-  testUsingContext('Non-existent files are ignored', () async {
-    expect(
-      await projectFileInvalidator.findInvalidated(
-        lastCompiled: inFuture,
-        urisToMonitor: <Uri>[Uri.parse('/not-there-anymore'),],
+      final List<Uri> results = await projectFileInvalidator.findInvalidated(
+        lastCompiled: inPast,
+        urisToMonitor: <Uri>[Uri.parse('packages/flutter/lib/foo.dart')],
         packagesPath: '',
         asyncScanning: asyncScanning,
-      ),
-      isEmpty,
-    );
-  }, overrides: <Type, Generator>{
-    FileSystem: () => MemoryFileSystem(),
-    ProcessManager: () => FakeProcessManager.any(),
-  });
+      );
+
+      expect(results, hasLength(2));
+    });
+  }
 }
+
+class FakeDirectoryWatcherFactory implements DirectoryWatcherFactory {
+  Watcher watcher = MockWatcher();
+
+  @override
+  Watcher watchDirectory(String path) {
+    return watcher;
+  }
+}
+
+class MockWatcher extends Mock implements Watcher {}
