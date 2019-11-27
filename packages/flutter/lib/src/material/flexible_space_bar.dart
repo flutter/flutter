@@ -166,7 +166,7 @@ class FlexibleSpaceBar extends StatefulWidget {
   /// Whether the title should be centered.
   ///
   /// By default this property is true if the current target platform
-  /// is [TargetPlatform.iOS], false otherwise.
+  /// is [TargetPlatform.iOS] or [TargetPlatform.macOS], false otherwise.
   final bool centerTitle;
 
   /// Collapse effect while scrolling.
@@ -239,6 +239,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
       case TargetPlatform.fuchsia:
         return false;
       case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
         return true;
     }
     return null;
@@ -341,6 +342,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
           Widget title;
           switch (theme.platform) {
             case TargetPlatform.iOS:
+            case TargetPlatform.macOS:
               title = widget.title;
               break;
             case TargetPlatform.fuchsia:
@@ -349,6 +351,7 @@ class _FlexibleSpaceBarState extends State<FlexibleSpaceBar> {
                 namesRoute: true,
                 child: widget.title,
               );
+              break;
           }
 
           // StretchMode.fadeTitle

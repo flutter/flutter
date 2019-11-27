@@ -177,6 +177,7 @@ class Drawer extends StatelessWidget {
     String label = semanticLabel;
     switch (Theme.of(context).platform) {
       case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
         label = semanticLabel;
         break;
       case TargetPlatform.android:
@@ -523,6 +524,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
           platformHasBackButton = true;
           break;
         case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
         case TargetPlatform.fuchsia:
           platformHasBackButton = false;
           break;

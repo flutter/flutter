@@ -1719,6 +1719,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     assert(defaultTargetPlatform != null);
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
         return Rect.fromLTWH(0.0, 0.0, cursorWidth, preferredLineHeight + 2);
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
@@ -1777,6 +1778,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (caretHeight != null) {
       switch (defaultTargetPlatform) {
         case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
           final double heightDiff = caretHeight - caretRect.height;
           // Center the caret vertically along the text.
           caretRect = Rect.fromLTWH(
