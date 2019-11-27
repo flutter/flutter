@@ -572,7 +572,7 @@ Future<XcodeBuildResult> buildXcodeProject({
 
 Future<RunResult> _runBuildWithRetries(List<String> buildCommands, BuildableIOSApp app) async {
   int buildRetryDelaySeconds = 1;
-  int remainingTries = 5;
+  int remainingTries = 8;
 
   RunResult buildResult;
   while (remainingTries > 0) {
