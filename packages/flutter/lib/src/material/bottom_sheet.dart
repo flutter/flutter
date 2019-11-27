@@ -483,7 +483,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
 ///   );
 /// }
 /// ```
-///
+/// {@end-tool}
 /// See also:
 ///
 ///  * [BottomSheet], which becomes the parent of the widget returned by the
