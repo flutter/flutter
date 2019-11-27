@@ -121,10 +121,15 @@ class SkiaGoldClient {
         .path,
     ];
 
-    await io.Process.run(
+    final io.ProcessResult result = await io.Process.run(
       _goldctl,
       authArguments,
     );
+
+    if (result.exitCode != 0) {
+      print('goldctl auth stdout: ${result.stdout}');
+      print('goldctl auth stderr: ${result.stderr}');
+    }
   }
 
   /// Executes the `imgtest init` command in the goldctl tool.
@@ -158,10 +163,15 @@ class SkiaGoldClient {
       throw NonZeroExitCode(1, buf.toString());
     }
 
-    await io.Process.run(
+    final io.ProcessResult result = await io.Process.run(
       _goldctl,
       imgtestInitArguments,
     );
+
+    if (result.exitCode != 0) {
+      print('goldctl imgtest init stdout: ${result.stdout}');
+      print('goldctl imgtest init stderr: ${result.stderr}');
+    }
   }
 
   /// Executes the `imgtest add` command in the goldctl tool.
@@ -186,10 +196,16 @@ class SkiaGoldClient {
       '--png-file', goldenFile.path,
     ];
 
-    await io.Process.run(
+    final io.ProcessResult result = await io.Process.run(
       _goldctl,
       imgtestArguments,
     );
+
+    if (result.exitCode != 0) {
+      print('goldctl imgtest add stdout: ${result.stdout}');
+      print('goldctl imgtest add stderr: ${result.stderr}');
+    }
+
     return true;
   }
 
