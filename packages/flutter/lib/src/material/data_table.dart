@@ -227,7 +227,7 @@ class DataCell {
 ///
 /// {@tool snippet --template=stateless_widget_scaffold}
 ///
-/// This sample shows how to display a table with three columns: name, age, and
+/// This sample shows how to display a [DataTable] with three columns: name, age, and
 /// role. The columns are defined by three [DataColumn] objects. The table
 /// contains three rows of data for three example users, the data for which
 /// is defined by three [DataRow] objects.
