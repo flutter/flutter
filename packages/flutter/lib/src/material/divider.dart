@@ -64,7 +64,7 @@ import 'theme.dart';
 ///   );
 /// }
 /// ```
-///
+/// {@end-tool}
 /// See also:
 ///
 ///  * [PopupMenuDivider], which is the equivalent but for popup menus.
