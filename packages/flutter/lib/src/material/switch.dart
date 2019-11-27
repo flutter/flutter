@@ -354,6 +354,7 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
           case TargetPlatform.fuchsia:
             return buildMaterialSwitch(context);
           case TargetPlatform.iOS:
+          case TargetPlatform.macOS:
             return buildCupertinoSwitch(context);
         }
       }

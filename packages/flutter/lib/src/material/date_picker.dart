@@ -911,6 +911,7 @@ class _DatePickerDialogState extends State<_DatePickerDialog> {
         HapticFeedback.vibrate();
         break;
       case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
         break;
     }
   }

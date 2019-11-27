@@ -314,6 +314,7 @@ class AlertDialog extends StatelessWidget {
     if (title == null) {
       switch (theme.platform) {
         case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
           label = semanticLabel;
           break;
         case TargetPlatform.android:
@@ -591,6 +592,7 @@ class SimpleDialog extends StatelessWidget {
     String label = semanticLabel;
     if (title == null) {
       switch (theme.platform) {
+        case TargetPlatform.macOS:
         case TargetPlatform.iOS:
           label = semanticLabel;
           break;

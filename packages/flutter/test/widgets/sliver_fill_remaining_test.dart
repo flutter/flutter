@@ -331,6 +331,7 @@ void main() {
       final Finder button = find.byType(RaisedButton);
       expect(tester.getBottomLeft(button).dy, equals(550.0));
       expect(tester.getCenter(button).dx, equals(400.0));
+      debugDefaultTargetPlatformOverride = null;
 
       // Drag for overscroll
       await tester.drag(find.byType(Scrollable), const Offset(0.0, -50.0));

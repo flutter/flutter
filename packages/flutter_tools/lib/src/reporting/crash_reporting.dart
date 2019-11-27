@@ -90,7 +90,7 @@ class CrashReportSender {
         return;
       }
 
-      printStatus('Sending crash report to Google.');
+      printTrace('Sending crash report to Google.');
 
       final Uri uri = _baseUrl.replace(
         queryParameters: <String, String>{
@@ -121,7 +121,7 @@ class CrashReportSender {
       if (resp.statusCode == 200) {
         final String reportId = await http.ByteStream(resp.stream)
             .bytesToString();
-        printStatus('Crash report sent (report ID: $reportId)');
+        printTrace('Crash report sent (report ID: $reportId)');
         _crashReportSent = true;
       } else {
         printError('Failed to send crash report. Server responded with HTTP status code ${resp.statusCode}');

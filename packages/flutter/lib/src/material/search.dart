@@ -487,6 +487,7 @@ class _SearchPageState<T> extends State<_SearchPage<T>> {
     String routeName;
     switch (theme.platform) {
       case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
         routeName = '';
         break;
       case TargetPlatform.android:
