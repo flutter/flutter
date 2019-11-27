@@ -341,7 +341,7 @@ class RenderUiKitView extends RenderBox {
     if (event is! PointerDownEvent) {
       return;
     }
-    _gestureRecognizer.addPointer(event);
+    _gestureRecognizer.addPointer(event as PointerDownEvent);
     _lastPointerDownEvent = event.original ?? event;
   }
 

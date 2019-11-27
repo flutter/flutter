@@ -623,7 +623,7 @@ class RenderWrap extends RenderBox with ContainerRenderObjectMixin<RenderBox, Wr
         runMainAxisExtent += spacing;
       runCrossAxisExtent = math.max(runCrossAxisExtent, childCrossAxisExtent);
       childCount += 1;
-      final WrapParentData childParentData = child.parentData;
+      final WrapParentData childParentData = child.parentData as WrapParentData;
       childParentData._runIndex = runMetrics.length;
       child = childParentData.nextSibling;
     }
@@ -724,7 +724,7 @@ class RenderWrap extends RenderBox with ContainerRenderObjectMixin<RenderBox, Wr
         crossAxisOffset -= runCrossAxisExtent;
 
       while (child != null) {
-        final WrapParentData childParentData = child.parentData;
+        final WrapParentData childParentData = child.parentData as WrapParentData;
         if (childParentData._runIndex != i)
           break;
         final double childMainAxisExtent = _getMainAxisExtent(child);

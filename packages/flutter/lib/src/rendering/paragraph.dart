@@ -414,7 +414,7 @@ class RenderParagraph extends RenderBox
   bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
     RenderBox child = firstChild;
     while (child != null) {
-      final TextParentData textParentData = child.parentData;
+      final TextParentData textParentData = child.parentData as TextParentData;
       final Matrix4 transform = Matrix4.translationValues(
         textParentData.offset.dx,
         textParentData.offset.dy,
@@ -458,7 +458,7 @@ class RenderParagraph extends RenderBox
     }
     if (span is TextSpan) {
       final TextSpan textSpan = span;
-      textSpan.recognizer?.addPointer(event);
+      textSpan.recognizer?.addPointer(event as PointerDownEvent);
     }
   }
 
@@ -550,7 +550,7 @@ class RenderParagraph extends RenderBox
     RenderBox child = firstChild;
     int childIndex = 0;
     while (child != null && childIndex < _textPainter.inlinePlaceholderBoxes.length) {
-      final TextParentData textParentData = child.parentData;
+      final TextParentData textParentData = child.parentData as TextParentData;
       textParentData.offset = Offset(
         _textPainter.inlinePlaceholderBoxes[childIndex].left,
         _textPainter.inlinePlaceholderBoxes[childIndex].top,
@@ -681,7 +681,7 @@ class RenderParagraph extends RenderBox
     // it until we finish layout, and RenderObject is in immutable state at
     // this point.
     while (child != null && childIndex < _textPainter.inlinePlaceholderBoxes.length) {
-      final TextParentData textParentData = child.parentData;
+      final TextParentData textParentData = child.parentData as TextParentData;
 
       final double scale = textParentData.scale;
       context.pushTransform(
@@ -876,7 +876,7 @@ class RenderParagraph extends RenderBox
 
       if (info.isPlaceholder) {
         final SemanticsNode childNode = children.elementAt(placeholderIndex++);
-        final TextParentData parentData = child.parentData;
+        final TextParentData parentData = child.parentData as TextParentData;
         childNode.rect = Rect.fromLTWH(
           childNode.rect.left,
           childNode.rect.top,
@@ -890,13 +890,12 @@ class RenderParagraph extends RenderBox
           ..sortKey = OrdinalSortKey(ordinal++)
           ..textDirection = initialDirection
           ..label = info.semanticsLabel ?? info.text;
-        if (info.recognizer != null) {
-          if (info.recognizer is TapGestureRecognizer) {
-            final TapGestureRecognizer recognizer = info.recognizer;
+        final GestureRecognizer recognizer = info.recognizer;
+        if (recognizer != null) {
+          if (recognizer is TapGestureRecognizer) {
             configuration.onTap = recognizer.onTap;
             configuration.isLink = true;
-          } else if (info.recognizer is LongPressGestureRecognizer) {
-            final LongPressGestureRecognizer recognizer = info.recognizer;
+          } else if (recognizer is LongPressGestureRecognizer) {
             configuration.onLongPress = recognizer.onLongPress;
           } else {
             assert(false);

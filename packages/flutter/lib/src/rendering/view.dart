@@ -139,9 +139,9 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
 
   Matrix4 _rootTransform;
 
-  Layer _updateMatricesAndCreateNewRootLayer() {
+  TransformLayer _updateMatricesAndCreateNewRootLayer() {
     _rootTransform = configuration.toMatrix();
-    final ContainerLayer rootLayer = TransformLayer(transform: _rootTransform);
+    final TransformLayer rootLayer = TransformLayer(transform: _rootTransform);
     rootLayer.attach(this);
     assert(_rootTransform != null);
     return rootLayer;

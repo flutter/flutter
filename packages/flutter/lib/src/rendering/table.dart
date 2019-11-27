@@ -1036,7 +1036,7 @@ class RenderTable extends RenderBox {
         final int xy = x + y * columns;
         final RenderBox child = _children[xy];
         if (child != null) {
-          final TableCellParentData childParentData = child.parentData;
+          final TableCellParentData childParentData = child.parentData as TableCellParentData;
           assert(childParentData != null);
           childParentData.x = x;
           childParentData.y = y;
@@ -1075,7 +1075,7 @@ class RenderTable extends RenderBox {
         final int xy = x + y * columns;
         final RenderBox child = _children[xy];
         if (child != null) {
-          final TableCellParentData childParentData = child.parentData;
+          final TableCellParentData childParentData = child.parentData as TableCellParentData;
           switch (childParentData.verticalAlignment ?? defaultVerticalAlignment) {
             case TableCellVerticalAlignment.baseline:
               if (baselines[x] != null)
@@ -1110,7 +1110,7 @@ class RenderTable extends RenderBox {
     for (int index = _children.length - 1; index >= 0; index -= 1) {
       final RenderBox child = _children[index];
       if (child != null) {
-        final BoxParentData childParentData = child.parentData;
+        final BoxParentData childParentData = child.parentData as BoxParentData;
         final bool isHit = result.addWithPaintOffset(
           offset: childParentData.offset,
           position: position,
@@ -1156,7 +1156,7 @@ class RenderTable extends RenderBox {
     for (int index = 0; index < _children.length; index += 1) {
       final RenderBox child = _children[index];
       if (child != null) {
-        final BoxParentData childParentData = child.parentData;
+        final BoxParentData childParentData = child.parentData as BoxParentData;
         context.paintChild(child, childParentData.offset + offset);
       }
     }
