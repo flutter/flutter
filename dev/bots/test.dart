@@ -289,7 +289,7 @@ Future<void> _runBuildTests() async {
     if (fileEntity is! Directory) {
       continue;
     }
-    if (_excludedExampleApplications.any((String name) => fileEntity.path.contains(name))) {
+    if (_excludedExampleApplications.any(fileEntity.path.endsWith)) {
       continue;
     }
     final String examplePath = fileEntity.path;
