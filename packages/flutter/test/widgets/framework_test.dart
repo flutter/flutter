@@ -556,7 +556,7 @@ void main() {
         ),
       );
     }
-    Widget buildContents() {
+    Widget buildContents(BuildContext context, BoxConstraints constraints) {
       final List<Widget> children = <Widget>[];
       for (int i = 0; i < listItems.length; i++) {
         children.add(listItemToWidget(i, listItems[i]));
@@ -568,7 +568,7 @@ void main() {
 
     await tester.pumpWidget(
       LayoutBuilder(
-        builder: (_,__) => buildContents(),
+        builder: buildContents,
       )
     );
     final _StatefulState state = tester.firstState(find.byType(_Stateful).at(1));
@@ -581,10 +581,57 @@ void main() {
     // This will mark the root Element to be dirty and pump a new frame.
     await tester.pumpWidget(
       LayoutBuilder(
-        builder: (_,__) => buildContents(),
+        builder: buildContents,
       )
     );
     expect(tester.takeException(), null);
+  });
+
+  testWidgets('GlobalKey - deplicated key under LayoutBuilder while dirtying children does throw', (WidgetTester tester) async {
+    int count = 0;
+    final FlutterExceptionHandler oldHandler = FlutterError.onError;
+    FlutterError.onError = (FlutterErrorDetails details) {
+      expect(details.exception, isFlutterError);
+      count += 1;
+    };
+    final List<String> listItems = <String>['Item 1', 'Item 2', 'Item 3', 'Item 4'];
+    Widget listItemToWidget(int index, String listItem) {
+      return _Stateful(
+        child: Text(
+          listItem,
+          textDirection: TextDirection.ltr,
+          key: GlobalObjectKey(listItem),
+        ),
+      );
+    }
+    Widget buildContents(BuildContext context, BoxConstraints constraints) {
+      final List<Widget> children = <Widget>[];
+      for (int i = 0; i < listItems.length; i++) {
+        children.add(listItemToWidget(i, listItems[i]));
+      }
+      return Column(
+        children: children,
+      );
+    }
+
+    await tester.pumpWidget(
+      LayoutBuilder(
+        builder: buildContents,
+      )
+    );
+    final _StatefulState state = tester.firstState(find.byType(_Stateful).at(1));
+    // Marks one child dirty.
+    state.rebuild();
+    // Duplicates the children with global key;
+    listItems[1] = listItems[2];
+    // This will mark the root Element to be dirty and pump a new frame.
+    await tester.pumpWidget(
+      LayoutBuilder(
+        builder: buildContents,
+      )
+    );
+    FlutterError.onError = oldHandler;
+    expect(count, 2);
   });
 
   testWidgets('Defunct setState throws exception', (WidgetTester tester) async {

@@ -190,7 +190,7 @@ abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
       // of dirty node rebuild will be overwritten by the LayoutBuilder rebuild.
       // It should be safe to remove all the other reservations of GlobalKeys.
       // See https://github.com/flutter/flutter/issues/43780
-      _debugReservations.removeWhere((_, Element e) => e == parent);
+      _debugReservations.removeWhere((GlobalKey key, Element element) => element == parent);
       _debugReservations[this] = parent;
       return true;
     }());
