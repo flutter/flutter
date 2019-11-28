@@ -1064,14 +1064,7 @@ class DirectoryWatcherFactory {
   final FileSystem _fileSystem;
 
   /// Create a [Watcher] for a given [path].
-  ///
-  /// Throws [StateError] if [path] is not a directory.
-  Watcher watchDirectory(String path) {
-    if (!_fileSystem.isDirectorySync(path)) {
-      throw StateError('$path is not a directory');
-    }
-    return Watcher(path);
-  }
+  Watcher watchDirectory(String path) =>  Watcher(path);
 }
 
 /// The [ProjectFileInvalidator] track the dependencies for a running
@@ -1126,12 +1119,17 @@ class ProjectFileInvalidator {
     if (lastCompiled == null) {
       // Initial load
       assert(urisToMonitor.isEmpty);
-      _fileWatcher = _directoryWatcherFactory.watchDirectory(_flutterSources.path)
-        .events.listen((WatchEvent watchEvent) {
-          _logger.printTrace('Adding flutter sources to watch list.');
-          _fileWatcher.cancel();
-          _watchingFlutter = true;
-        });
+      if (_flutterSources.existsSync()) {
+        _fileWatcher = _directoryWatcherFactory.watchDirectory(_flutterSources.path)
+          .events.listen((WatchEvent watchEvent) {
+            _logger.printTrace('Adding flutter sources to watch list.');
+            _fileWatcher.cancel();
+            _watchingFlutter = true;
+          });
+      } else {
+        // If we can't find the Flutter source directory, bail out to normal behavior.
+        _watchingFlutter = true;
+      }
       return <Uri>[];
     }
 
