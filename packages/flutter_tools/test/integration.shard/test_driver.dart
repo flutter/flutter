@@ -538,6 +538,29 @@ class FlutterRunTestDriver extends FlutterTestDriver {
   Future<void> hotRestart({ bool pause = false }) => _restart(fullRestart: true, pause: pause);
   Future<void> hotReload() => _restart(fullRestart: false);
 
+  Future<void> scheduleFrame() async {
+    if (_currentRunningAppId == null) {
+      throw Exception('App has not started yet');
+    }
+    await _sendRequest(
+      'app.callServiceExtension',
+      <String, dynamic>{'appId': _currentRunningAppId, 'methodName': 'ext.ui.window.scheduleFrame'},
+    );
+  }
+
+  Future<void> reloadMethod({ String libraryId, String classId }) async {
+    if (_currentRunningAppId == null) {
+      throw Exception('App has not started yet');
+    }
+    final dynamic reloadMethodResponse = await _sendRequest(
+      'app.reloadMethod',
+      <String, dynamic>{'appId': _currentRunningAppId, 'class': classId, 'library': libraryId},
+    );
+    if (reloadMethodResponse == null || reloadMethodResponse['code'] != 0) {
+      _throwErrorResponse('reloadMethodResponse request failed');
+    }
+  }
+
   Future<void> _restart({ bool fullRestart = false, bool pause = false }) async {
     if (_currentRunningAppId == null) {
       throw Exception('App has not started yet');

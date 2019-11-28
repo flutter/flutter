@@ -147,7 +147,7 @@ class HotRunner extends ResidentRunner {
   }
 
   @override
-  Future<void> reloadMethod({String libraryId, String classId}) async {
+  Future<OperationResult> reloadMethod({String libraryId, String classId}) async {
     final Stopwatch stopwatch = Stopwatch()..start();
     final UpdateFSReport results = UpdateFSReport(success: true);
     final List<Uri> invalidated =  <Uri>[Uri.parse(libraryId)];
@@ -167,7 +167,7 @@ class HotRunner extends ResidentRunner {
       ));
     }
     if (!results.success) {
-      return;
+      return OperationResult(1, 'Failed to compile');
     }
     try {
       final String entryPath = fs.path.relative(
@@ -183,8 +183,7 @@ class HotRunner extends ResidentRunner {
         await device.updateReloadStatus(validateReloadReport(firstReport, printErrors: false));
       }
     } catch (error) {
-      printTrace(error.toString());
-      return;
+      return OperationResult(1, error.toString());
     }
 
     for (FlutterDevice device in flutterDevices) {
@@ -195,7 +194,7 @@ class HotRunner extends ResidentRunner {
 
     printStatus('reloadMethod took ${stopwatch.elapsedMilliseconds}');
     flutterUsage.sendTiming('hot', 'ui', stopwatch.elapsed);
-    return;
+    return OperationResult.ok;
   }
 
   // Returns the exit code of the flutter tool process, like [run].

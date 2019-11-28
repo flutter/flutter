@@ -107,6 +107,15 @@ The `restart()` restarts the given application. It returns a Map of `{ int code,
 - `reason`: optional; the reason for the full restart (eg. `save`, `manual`) for reporting purposes
 - `pause`: optional; when doing a hot restart the isolate should enter a paused mode
 
+#### app.reloadMethod
+
+Performs a limited hot restart which does not sync assets and only marks elements as dirty, instead of reassembling the full application. A `code` of `0` indicates success, and non-zero indicates a failure.
+
+- `appId`: the id of a previously started app; this is required.
+- `library`: the absolute file URI of the library to be updated; this is required.
+- `class`: the name of the StatelessWidget that was updated, or the StatefulWidget
+corresponding to the updated State class; this is required.
+
 #### app.callServiceExtension
 
 The `callServiceExtension()` allows clients to make arbitrary calls to service protocol extensions. It returns a `Map` - the result returned by the service protocol method.
