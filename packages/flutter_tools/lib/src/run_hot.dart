@@ -215,9 +215,8 @@ class HotRunner extends ResidentRunner {
     if (debuggingOptions.fastStart) {
       await restart(
         fullRestart: true,
-        benchmarkMode: true,
+        benchmarkMode: !debuggingOptions.startPaused,
         reason: 'restart',
-        // pause: debuggingOptions.startPaused, does not currently work.
         silent: true,
       );
     }
@@ -538,7 +537,7 @@ class HotRunner extends ResidentRunner {
     String reason,
     bool benchmarkMode = false,
     bool silent = false,
-    bool pause = false, // this is not currently supported for hot restart.
+    bool pause = false,
   }) async {
     String targetPlatform;
     String sdkName;
@@ -577,6 +576,7 @@ class HotRunner extends ResidentRunner {
       sdkName: sdkName,
       emulator: emulator,
       reason: reason,
+      pause: pause,
     );
     if (result.isOk) {
       final String elapsed = getElapsedAsMilliseconds(timer.elapsed);
@@ -643,6 +643,7 @@ class HotRunner extends ResidentRunner {
     String sdkName,
     bool emulator,
     String reason,
+    bool pause,
   }) async {
     final bool reloadOnTopOfSnapshot = _runningFromSnapshot;
     final String progressPrefix = reloadOnTopOfSnapshot ? 'Initializing' : 'Performing';
@@ -658,6 +659,7 @@ class HotRunner extends ResidentRunner {
         sdkName: sdkName,
         emulator: emulator,
         reason: reason,
+        pause: pause,
         onSlow: (String message) {
           status?.cancel();
           status = logger.startProgress(

@@ -54,30 +54,6 @@ void main() {
       }
     });
 
-    testUsingContext('does not support --start-paused and --fast-start', () async {
-      fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
-      fs.file('pubspec.yaml').createSync();
-      fs.file('.packages').createSync();
-
-      final RunCommand command = RunCommand();
-      applyMocksToCommand(command);
-      try {
-        await createTestCommandRunner(command).run(<String>[
-          'run',
-          '--start-paused',
-          '--fast-start',
-          '--no-pub',
-          '--show-test-device',
-        ]);
-        fail('Expect exception');
-      } catch (e) {
-        expect(e.toString(), contains('--fast-start is not supported with --start-paused'));
-      }
-    }, overrides: <Type, Generator>{
-      FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => FakeProcessManager.any(),
-    });
-
     testUsingContext('does not support --use-application-binary and --fast-start', () async {
       fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
       fs.file('pubspec.yaml').createSync();

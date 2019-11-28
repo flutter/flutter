@@ -192,9 +192,8 @@ class RunCommand extends RunCommandBase {
         defaultsTo: false,
         hide: true,
         help: 'Whether to quickly bootstrap applications with a minimal app. '
-              'Currently this is only support on Android devices run from the '
-              'command line. This option cannot be paired with --start-paused or '
-              'with --use-application-binary.'
+              'Currently this is only support on Android devices. This option '
+              'cannot be paired with --use-application-binary.'
       )
       ..addOption(FlutterOptions.kExtraFrontEndOptions, hide: true)
       ..addOption(FlutterOptions.kExtraGenSnapshotOptions, hide: true)
@@ -295,11 +294,6 @@ class RunCommand extends RunCommandBase {
     }
     if (boolArg('fast-start') && runningWithPrebuiltApplication) {
       throwToolExit('--fast-start is not supported with --use-application-binary');
-    }
-    // TODO(jonahwilliams): this check can be removed once the followng is fixed.
-    // https://github.com/flutter/flutter/issues/45424
-    if (boolArg('fast-start') && boolArg('start-paused')) {
-      throwToolExit('--fast-start is not supported with --start-paused');
     }
     if (deviceManager.hasSpecifiedAllDevices && runningWithPrebuiltApplication) {
       throwToolExit('Using -d all with --use-application-binary is not supported');
