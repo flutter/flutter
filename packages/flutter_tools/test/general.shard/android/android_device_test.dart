@@ -680,6 +680,35 @@ flutter:
     });
   });
 
+  group('logReader', () {
+    ProcessManager mockProcessManager;
+    AndroidSdk mockAndroidSdk;
+
+    setUp(() {
+      mockAndroidSdk = MockAndroidSdk();
+      mockProcessManager = MockProcessManager();
+    });
+
+    testUsingContext('calls adb logcat with expected flags', () async {
+      const String klastLocatcatTimestamp = '11-27 15:39:04.506';
+      when(mockAndroidSdk.adbPath).thenReturn('adb');
+      when(mockProcessManager.runSync(<String>['adb', '-s', '1234', 'shell', '-x', 'logcat', '-v', 'time', '-t', '1']))
+        .thenReturn(ProcessResult(0, 0, '$klastLocatcatTimestamp I/flutter: irrelevant', ''));
+      when(mockProcessManager.start(argThat(contains('logcat'))))
+        .thenAnswer((_) => Future<Process>.value(createMockProcess()));
+
+      final AndroidDevice device = AndroidDevice('1234');
+      final DeviceLogReader logReader = device.getLogReader();
+      logReader.logLines.listen((_) {});
+
+      verify(mockProcessManager.start(const <String>['adb', '-s', '1234', 'logcat', '-v', 'time', '-T', klastLocatcatTimestamp]))
+        .called(1);
+    }, overrides: <Type, Generator>{
+      AndroidSdk: () => mockAndroidSdk,
+      ProcessManager: () => mockProcessManager,
+    });
+  });
+
   test('Can parse adb shell dumpsys info', () {
     const String exampleOutput = r'''
 Applications Memory Usage (in Kilobytes):
