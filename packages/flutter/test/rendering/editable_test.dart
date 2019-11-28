@@ -611,29 +611,4 @@ void main() {
     editable.layout(BoxConstraints.loose(const Size(1000.0, 1000.0)));
     expect(editable.maxScrollExtent, equals(10));
   }, skip: isBrowser); // TODO(yjbanov): https://github.com/flutter/flutter/issues/42772
-
-  test('selection affinity uses fallback', () {
-    final TextSelectionDelegate delegate = FakeEditableTextState();
-    EditableText.debugDeterministicCursor = true;
-
-    final RenderEditable editable = RenderEditable(
-      textDirection: TextDirection.ltr,
-      cursorColor: const Color.fromARGB(0xFF, 0xFF, 0x00, 0x00),
-      offset: ViewportOffset.zero(),
-      textSelectionDelegate: delegate,
-      startHandleLayerLink: LayerLink(),
-      endHandleLayerLink: LayerLink(),
-    );
-
-    expect(editable.selection, null);
-
-    const TextSelection sel1 = TextSelection(baseOffset: 10, extentOffset: 11);
-    editable.selection = sel1;
-    expect(editable.selection, sel1);
-
-    const TextSelection sel2 = TextSelection(baseOffset: 10, extentOffset: 11, affinity: null);
-    const TextSelection sel3 = TextSelection(baseOffset: 10, extentOffset: 11, affinity: TextAffinity.downstream);
-    editable.selection = sel2;
-    expect(editable.selection, sel3);
-  }, skip: isBrowser);
 }

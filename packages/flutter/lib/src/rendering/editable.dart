@@ -402,12 +402,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   // down in a multiline text field when selecting using the keyboard.
   bool _wasSelectingVerticallyWithKeyboard = false;
 
-  // This is the affinity we use when a platform-supplied value has null
-  // affinity.
-  //
-  // This affinity should never be null.
-  TextAffinity _fallbackAffinity = TextAffinity.downstream;
-
   // Call through to onSelectionChanged.
   void _handleSelectionChange(
     TextSelection nextSelection,
@@ -422,17 +416,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (onSelectionChanged != null) {
       onSelectionChanged(nextSelection, this, cause);
     }
-  }
-
-  // Sets the fallback affinity to the affinity of the selection.
-  void _setFallbackAffinity(
-    TextAffinity affinity,
-  ) {
-    assert(affinity != null);
-    // Engine-computed selections will always compute affinity when necessary.
-    // Cache this affinity in the case where the platform supplied selection
-    // does not provide an affinity.
-    _fallbackAffinity = affinity;
   }
 
   static final Set<LogicalKeyboardKey> _movementKeys = <LogicalKeyboardKey>{
@@ -980,15 +963,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   set selection(TextSelection value) {
     if (_selection == value)
       return;
-    // Use the _fallbackAffinity when the set selection has a null
-    // affinity. This happens when the platform does not supply affinity,
-    // in which case using the fallback affinity computed from dart:ui will
-    // be superior to simply defaulting to TextAffinity.downstream.
-    if (value.affinity == null) {
-      _selection = value.copyWith(affinity: _fallbackAffinity);
-    } else {
-      _selection = value;
-    }
+    _selection = value;
     _selectionRects = null;
     markNeedsPaint();
     markNeedsSemanticsUpdate();
@@ -1591,7 +1566,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     );
     // Call [onSelectionChanged] only when the selection actually changed.
     _handleSelectionChange(newSelection, cause);
-    _setFallbackAffinity(newSelection.affinity);
   }
 
   /// Select a word around the location of the last tap down.
@@ -1640,18 +1614,15 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       return;
     }
     final TextPosition position = _textPainter.getPositionForOffset(globalToLocal(_lastTapDownPosition - _paintOffset));
-    _setFallbackAffinity(position.affinity);
     final TextRange word = _textPainter.getWordBoundary(position);
-    final TextRange lineBoundary = _textPainter.getLineBoundary(position);
-    final bool endOfLine = lineBoundary?.end == position.offset && position.affinity != null;
     if (position.offset - word.start <= 1) {
       _handleSelectionChange(
-        TextSelection.collapsed(offset: word.start, affinity: endOfLine ? position.affinity : TextAffinity.downstream),
+        TextSelection.collapsed(offset: word.start, affinity: TextAffinity.downstream),
         cause,
       );
     } else {
       _handleSelectionChange(
-        TextSelection.collapsed(offset: word.end, affinity: endOfLine ? position.affinity : TextAffinity.upstream),
+        TextSelection.collapsed(offset: word.end, affinity: TextAffinity.upstream),
         cause,
       );
     }
