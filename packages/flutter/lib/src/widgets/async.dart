@@ -372,7 +372,7 @@ typedef AsyncWidgetBuilder<T> = Widget Function(BuildContext context, AsyncSnaps
 ///             Icon(
 ///               Icons.error_outline,
 ///               color: Colors.red,
-///               size: widget.size,
+///               size: 60,
 ///             ),
 ///             Padding(
 ///               padding: const EdgeInsets.only(top: 16),
@@ -386,7 +386,7 @@ typedef AsyncWidgetBuilder<T> = Widget Function(BuildContext context, AsyncSnaps
 ///                 Icon(
 ///                   Icons.info,
 ///                   color: Colors.blue,
-///                   size: widget.size,
+///                   size: 60,
 ///                 ),
 ///                 const Padding(
 ///                   padding: EdgeInsets.only(top: 16),
@@ -398,8 +398,8 @@ typedef AsyncWidgetBuilder<T> = Widget Function(BuildContext context, AsyncSnaps
 ///               children = <Widget>[
 ///                 SizedBox(
 ///                   child: const CircularProgressIndicator(),
-///                   width: widget.size,
-///                   height: widget.size,
+///                   width: 60,
+///                   height: 60,
 ///                 ),
 ///                 const Padding(
 ///                   padding: EdgeInsets.only(top: 16),
@@ -412,7 +412,7 @@ typedef AsyncWidgetBuilder<T> = Widget Function(BuildContext context, AsyncSnaps
 ///                 Icon(
 ///                   Icons.check_circle_outline,
 ///                   color: Colors.green,
-///                   size: widget.size,
+///                   size: 60,
 ///                 ),
 ///                 Padding(
 ///                   padding: const EdgeInsets.only(top: 16),
@@ -425,7 +425,7 @@ typedef AsyncWidgetBuilder<T> = Widget Function(BuildContext context, AsyncSnaps
 ///                 Icon(
 ///                   Icons.info,
 ///                   color: Colors.blue,
-///                   size: widget.size,
+///                   size: 60,
 ///                 ),
 ///                 Padding(
 ///                   padding: const EdgeInsets.only(top: 16),
