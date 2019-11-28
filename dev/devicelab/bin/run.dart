@@ -55,9 +55,9 @@ Future<void> main(List<String> rawArgs) async {
     return;
   }
 
-  final bool silent = args['silent'];
-  final String localEngine = args['local-engine'];
-  final String localEngineSrcPath = args['local-engine-src-path'];
+  final bool silent = args['silent'] as bool;
+  final String localEngine = args['local-engine'] as String;
+  final String localEngineSrcPath = args['local-engine-src-path'] as String;
 
   for (String taskName in _taskNames) {
     section('Running task "$taskName"');
@@ -72,9 +72,9 @@ Future<void> main(List<String> rawArgs) async {
     print(const JsonEncoder.withIndent('  ').convert(result));
     section('Finished task "$taskName"');
 
-    if (!result['success']) {
+    if (!(result['success'] as bool)) {
       exitCode = 1;
-      if (args['exit']) {
+      if (args['exit'] as bool) {
         return;
       }
     }
@@ -94,10 +94,10 @@ void addTasks({
     tasks.removeRange(0, index);
   }
   // Only start skipping if user specified a task to continue from
-  final String stage = args['stage'];
+  final String stage = args['stage'] as String;
   for (ManifestTask task in tasks) {
     final bool isQualifyingStage = stage == null || task.stage == stage;
-    final bool isQualifyingHost = !args['match-host-platform'] || task.isSupportedByHost();
+    final bool isQualifyingHost = !(args['match-host-platform'] as bool) || task.isSupportedByHost();
     if (isQualifyingHost && isQualifyingStage) {
       taskNames.add(task.name);
     }

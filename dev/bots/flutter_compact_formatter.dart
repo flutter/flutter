@@ -82,9 +82,9 @@ class FlutterCompactFormatter {
       print(raw);
       return null;
     }
-    final Map<String, dynamic> decoded = json.decode(raw);
+    final Map<String, dynamic> decoded = json.decode(raw) as Map<String, dynamic>;
     final TestResult originalResult = _tests[decoded['testID']];
-    switch (decoded['type']) {
+    switch (decoded['type'] as String) {
       case 'done':
         stdout.write(_clearLine);
         stdout.write('$_bold${_stopwatch.elapsed}$_noColor ');
@@ -92,7 +92,7 @@ class FlutterCompactFormatter {
             '$_green+$successes $_yellow~$skips $_red-$failures:$_bold$_gray Done.$_noColor');
         break;
       case 'testStart':
-        final Map<String, dynamic> testData = decoded['test'];
+        final Map<String, dynamic> testData = decoded['test'] as Map<String, dynamic>;
         if (testData['url'] == null) {
           started += 1;
           stdout.write(_clearLine);
@@ -101,20 +101,20 @@ class FlutterCompactFormatter {
               '$_green+$successes $_yellow~$skips $_red-$failures: $_gray${testData['name']}$_noColor');
           break;
         }
-        _tests[testData['id']] = TestResult(
-          id: testData['id'],
-          name: testData['name'],
-          line: testData['root_line'] ?? testData['line'],
-          column: testData['root_column'] ?? testData['column'],
-          path: testData['root_url'] ?? testData['url'],
-          startTime: decoded['time'],
+        _tests[testData['id'] as int] = TestResult(
+          id: testData['id'] as int,
+          name: testData['name'] as String,
+          line: testData['root_line'] as int ?? testData['line'] as int,
+          column: testData['root_column'] as int ?? testData['column'] as int,
+          path: testData['root_url'] as String ?? testData['url'] as String,
+          startTime: decoded['time'] as int,
         );
         break;
       case 'testDone':
         if (originalResult == null) {
           break;
         }
-        originalResult.endTime = decoded['time'];
+        originalResult.endTime = decoded['time'] as int;
         if (decoded['skipped'] == true) {
           skips += 1;
           originalResult.status = TestStatus.skipped;
@@ -129,8 +129,8 @@ class FlutterCompactFormatter {
         }
         break;
       case 'error':
-        final String error = decoded['error'];
-        final String stackTrace = decoded['stackTrace'];
+        final String error = decoded['error'] as String;
+        final String stackTrace = decoded['stackTrace'] as String;
         if (originalResult != null) {
           originalResult.errorMessage = error;
           originalResult.stackTrace = stackTrace;
@@ -143,7 +143,7 @@ class FlutterCompactFormatter {
         break;
       case 'print':
         if (originalResult != null) {
-          originalResult.messages.add(decoded['message']);
+          originalResult.messages.add(decoded['message'] as String);
         }
         break;
       case 'group':
