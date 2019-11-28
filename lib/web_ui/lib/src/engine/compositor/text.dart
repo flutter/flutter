@@ -9,17 +9,12 @@ part of engine;
 /// fonts. CanvasKit reads the font name from the font's bytes. So, we map
 /// some common family names to how they are registered in the Gallery app.
 const Map<String, String> _fontFamilyOverrides = <String, String>{
-  'Roboto': 'Google Sans',
   'GoogleSans': 'Google Sans',
   'GoogleSansDisplay': 'Google Sans Display',
   'MaterialIcons': 'Material Icons',
-  'LibreFranklin': 'LibreFranklin',
+  'LibreFranklin': 'Libre Franklin',
   'AbrilFatface': 'Abril Fatface',
   'packages/cupertino_icons/CupertinoIcons': 'CupertinoIcons',
-  '.SF Pro Text': 'Google Sans',
-  '.SF Pro Display': 'Google Sans',
-  '.SF UI Text': 'Google Sans',
-  '.SF UI Display': 'Google Sans',
 };
 
 class SkParagraphStyle implements ui.ParagraphStyle {
@@ -71,7 +66,8 @@ class SkParagraphStyle implements ui.ParagraphStyle {
       skTextStyle['fontSize'] = fontSize;
     }
 
-    if (fontFamily == null) {
+    if (fontFamily == null ||
+        !skiaFontCollection.registeredFamilies.contains(fontFamily)) {
       fontFamily = 'Roboto';
     }
     if (_fontFamilyOverrides.containsKey(fontFamily)) {
@@ -205,7 +201,8 @@ class SkTextStyle implements ui.TextStyle {
       style['fontSize'] = fontSize;
     }
 
-    if (fontFamily == null) {
+    if (fontFamily == null ||
+        !skiaFontCollection.registeredFamilies.contains(fontFamily)) {
       fontFamily = 'Roboto';
     }
 
