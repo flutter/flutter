@@ -759,16 +759,20 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
         && effectiveDecoration.counterText == null
         && widget.buildCounter != null) {
       final bool isFocused = _effectiveFocusNode.hasFocus;
-      counter = Semantics(
-        container: true,
-        liveRegion: isFocused,
-        child: widget.buildCounter(
-          context,
-          currentLength: currentLength,
-          maxLength: widget.maxLength,
-          isFocused: isFocused,
-        ),
+      final Widget buildCounter = widget.buildCounter(
+        context,
+        currentLength: currentLength,
+        maxLength: widget.maxLength,
+        isFocused: isFocused,
       );
+      // If buildCounter returns null, the counter widget should return nothing.
+      if (buildCounter != null) {
+        counter = Semantics(
+          container: true,
+          liveRegion: isFocused,
+          child: buildCounter,
+        );
+      }
       return effectiveDecoration.copyWith(counter: counter);
     }
 
