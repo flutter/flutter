@@ -192,7 +192,7 @@ class RunCommand extends RunCommandBase {
         defaultsTo: false,
         hide: true,
         help: 'Whether to quickly bootstrap applications with a minimal app. '
-              'Currently this is only support on Android devices. This option '
+              'Currently this is only supported on Android devices. This option '
               'cannot be paired with --use-application-binary.'
       )
       ..addOption(FlutterOptions.kExtraFrontEndOptions, hide: true)
