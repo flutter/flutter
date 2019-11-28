@@ -155,6 +155,10 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
       printStatus('Building framework for $iosProject in ${getNameForBuildMode(mode)} mode...');
       final String xcodeBuildConfiguration = toTitleCase(getNameForBuildMode(mode));
       final Directory modeDirectory = outputDirectory.childDirectory(xcodeBuildConfiguration);
+
+      if (modeDirectory.existsSync()) {
+        modeDirectory.deleteSync(recursive: true);
+      }
       final Directory iPhoneBuildOutput = modeDirectory.childDirectory('iphoneos');
       final Directory simulatorBuildOutput = modeDirectory.childDirectory('iphonesimulator');
 
