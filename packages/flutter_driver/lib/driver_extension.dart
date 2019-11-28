@@ -24,4 +24,4 @@
 ///     }
 library flutter_driver_extension;
 
-export 'src/extension/extension.dart' show enableFlutterDriverExtension, DataHandler;
+export 'src/extension/extension.dart';

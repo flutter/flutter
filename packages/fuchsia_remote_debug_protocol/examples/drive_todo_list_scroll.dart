@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:core';
 
-import 'package:flutter_driver/flutter_driver.dart';
+import 'package:flutter_driver/flutter_driver.dart' hide Logger;
 import 'package:fuchsia_remote_debug_protocol/fuchsia_remote_debug_protocol.dart';
 import 'package:fuchsia_remote_debug_protocol/logging.dart';
 
