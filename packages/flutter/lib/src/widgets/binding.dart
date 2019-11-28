@@ -329,11 +329,13 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
         name: 'fastReassemble',
         callback: (Map<String, Object> params) async {
           final String className = params['class'];
-          for (Element element in Element.debugTrackedElements) {
-            if (element.widget.runtimeType.toString() == className) {
+          void markElementsDirty(Element element) {
+            if (element.widget.runtimeType.toString().startsWith(className)) {
               element.markNeedsBuild();
             }
+            element.visitChildElements(markElementsDirty);
           }
+          markElementsDirty(renderViewElement);
           return <String, String>{'Success': 'true'};
         },
       );
