@@ -240,7 +240,7 @@ String _generateLicense(String prefix) {
 }
 
 Future<void> verifyNoMissingLicense(String workingDirectory) async {
-  await _verifyNoMissingLicenseForExtension(workingDirectory, 'dart', _generateLicense('// '), skipShrine: true);
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'dart', _generateLicense('// '));
   await _verifyNoMissingLicenseForExtension(workingDirectory, 'java', _generateLicense('// '));
   await _verifyNoMissingLicenseForExtension(workingDirectory, 'h', _generateLicense('// '));
   await _verifyNoMissingLicenseForExtension(workingDirectory, 'm', _generateLicense('// '));
@@ -254,14 +254,11 @@ Future<void> verifyNoMissingLicense(String workingDirectory) async {
   await _verifyNoMissingLicenseForExtension(workingDirectory, 'xml', '<!-- ${_generateLicense('')} -->');
 }
 
-Future<void> _verifyNoMissingLicenseForExtension(String workingDirectory, String extension, String license, { bool trailingBlank = true, bool skipShrine = true }) async {
+Future<void> _verifyNoMissingLicenseForExtension(String workingDirectory, String extension, String license, { bool trailingBlank = true }) async {
   assert(!license.endsWith('\n'));
   final String licensePattern = license + '\n' + (trailingBlank ? '\n' : '');
   final List<String> errors = <String>[];
-  for (FileSystemEntity entity in _allFiles(workingDirectory, extension)) {
-    final File file = entity;
-    if (skipShrine && path.split(file.path).contains('shrine'))
-      continue; // TODO(ianh): I'm investigating relicensing this directory.
+  for (File file in _allFiles(workingDirectory, extension)) {
     final String contents = file.readAsStringSync().replaceAll('\r\n', '\n');
     if (contents.isEmpty)
       continue; // let's not go down the /bin/true rabbit hole
