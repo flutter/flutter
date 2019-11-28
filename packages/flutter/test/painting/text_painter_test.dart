@@ -790,42 +790,4 @@ void main() {
     expect(lines[2].lineNumber, 2);
     expect(lines[3].lineNumber, 3);
   }, skip: !isLinux);
-
-  test('getLineBoundary', () {
-    final TextPainter painter = TextPainter()
-      ..textDirection = TextDirection.ltr;
-
-    const String text = 'test1\nhello line two really long for soft break\nfinal line 4';
-    painter.text = const TextSpan(
-      text: text,
-    );
-
-    painter.layout(maxWidth: 300);
-
-    final List<ui.LineMetrics> lines = painter.computeLineMetrics();
-
-    expect(lines.length, 4);
-
-    expect(painter.getLineBoundary(const TextPosition(offset: -1)), const TextRange(start: -1, end: -1));
-
-    expect(painter.getLineBoundary(const TextPosition(offset: 0)), const TextRange(start: 0, end: 5));
-    expect(painter.getLineBoundary(const TextPosition(offset: 1)), const TextRange(start: 0, end: 5));
-    expect(painter.getLineBoundary(const TextPosition(offset: 4)), const TextRange(start: 0, end: 5));
-    expect(painter.getLineBoundary(const TextPosition(offset: 5)), const TextRange(start: 0, end: 5));
-
-    expect(painter.getLineBoundary(const TextPosition(offset: 10)), const TextRange(start: 6, end: 28));
-    expect(painter.getLineBoundary(const TextPosition(offset: 15)), const TextRange(start: 6, end: 28));
-    expect(painter.getLineBoundary(const TextPosition(offset: 21)), const TextRange(start: 6, end: 28));
-    expect(painter.getLineBoundary(const TextPosition(offset: 28)), const TextRange(start: 6, end: 28));
-
-    expect(painter.getLineBoundary(const TextPosition(offset: 29)), const TextRange(start: 28, end: 47));
-    expect(painter.getLineBoundary(const TextPosition(offset: 47)), const TextRange(start: 28, end: 47));
-
-    expect(painter.getLineBoundary(const TextPosition(offset: 48)), const TextRange(start: 48, end: 60));
-    expect(painter.getLineBoundary(const TextPosition(offset: 49)), const TextRange(start: 48, end: 60));
-    expect(painter.getLineBoundary(const TextPosition(offset: 60)), const TextRange(start: 48, end: 60));
-
-    expect(painter.getLineBoundary(const TextPosition(offset: 61)), const TextRange(start: -1, end: -1));
-    expect(painter.getLineBoundary(const TextPosition(offset: 100)), const TextRange(start: -1, end: -1));
-  }, skip: !isLinux);
 }
