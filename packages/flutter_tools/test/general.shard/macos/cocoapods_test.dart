@@ -166,7 +166,7 @@ void main() {
       pretendPodVersionIs('1.8.0');
       expect(await cocoaPodsUnderTest.isCocoaPodsInitialized, isTrue);
     }, overrides: <Type, Generator>{
-      Platform: () => FakePlatform(),
+      Platform: () => FakePlatform(localeName: 'en_US'),
       FileSystem: () => fs,
       ProcessManager: () => mockProcessManager,
     });
