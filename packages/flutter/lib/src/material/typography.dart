@@ -53,10 +53,12 @@ enum ScriptCategory {
 /// `Theme.of(context).primaryTextTheme` or
 /// `Theme.of(context).accentTextTheme`.
 ///
-/// The color text themes are [blackMountainView],
-/// [whiteMountainView], and [blackCupertino] and [whiteCupertino]. The
-/// Mountain View theme [TextStyles] are based on the Roboto fonts and the
-/// Cupertino themes are based on the San Francisco fonts.
+/// The color text themes are [blackMountainView], [whiteMountainView], and
+/// [blackCupertino] and [whiteCupertino]. The Mountain View theme [TextStyles]
+/// are based on the Roboto fonts as used on Android. The Cupertino themes are
+/// based on the [San Francisco
+/// font](https://developer.apple.com/ios/human-interface-guidelines/visual-design/typography/)
+/// fonts as used by Apple on iOS.
 ///
 /// Two sets of geometry themes are provided: 2014 and 2018. The 2014 themes
 /// correspond to the original version of the Material Design spec and are
@@ -64,18 +66,13 @@ enum ScriptCategory {
 /// specification and feature different font sizes, font weights, and
 /// letter spacing values.
 ///
-/// By default, [ThemeData.typography] is
-/// `Typography(platform: platform)` which uses [englishLike2014],
-/// [dense2014] and [tall2014]. To use the 2018 text theme
-/// geometries, specify a typography value:
+/// By default, [ThemeData.typography] is `Typography.material2014(platform:
+/// platform)` which uses [englishLike2014], [dense2014] and [tall2014]. To use
+/// the 2018 text theme geometries, specify a value using the [material2018]
+/// constructor:
 ///
 /// ```dart
-/// Typography(
-///   platorm: platform,
-///   englishLike: Typography.englishLike2018,
-///   dense: Typography.dense2018,
-///   tall: Typography.tall2018,
-/// )
+/// typography: Typography.material2018(platform: platform)
 /// ```
 ///
 /// See also:
@@ -88,6 +85,27 @@ enum ScriptCategory {
 class Typography extends Diagnosticable {
   /// Creates a typography instance.
   ///
+  /// This constructor is identical to [Typography.material2014]. It is
+  /// deprecated because the 2014 material design defaults used by that
+  /// constructor are obsolete. The current material design specification
+  /// recommendations are those reflected by [Typography.material2018].
+  @Deprecated(
+    'The default Typography constructor defaults to the 2014 material design defaults. '
+    'Applications are urged to migrate to Typography.material2018(), or, if the 2014 defaults '
+    'are desired, to explicitly request them using Typography.material2014(). '
+    'This feature was deprecated after v1.12.15.'
+  )
+  factory Typography({
+    TargetPlatform platform,
+    TextTheme black,
+    TextTheme white,
+    TextTheme englishLike,
+    TextTheme dense,
+    TextTheme tall,
+  }) = Typography.material2014;
+
+  /// Creates a typography instance using material design's 2014 defaults.
+  ///
   /// If [platform] is [TargetPlatform.iOS] or [TargetPlatform.macOS], the
   /// default values for [black] and [white] are [blackCupertino] and
   /// [whiteCupertino] respectively. Otherwise they are [blackMountainView] and
@@ -96,7 +114,7 @@ class Typography extends Diagnosticable {
   ///
   /// The default values for [englishLike], [dense], and [tall] are
   /// [englishLike2014], [dense2014], and [tall2014].
-  factory Typography({
+  factory Typography.material2014({
     TargetPlatform platform = TargetPlatform.android,
     TextTheme black,
     TextTheme white,
@@ -105,6 +123,55 @@ class Typography extends Diagnosticable {
     TextTheme tall,
   }) {
     assert(platform != null || (black != null && white != null));
+    return Typography._withPlatform(
+      platform,
+      black, white,
+      englishLike ?? englishLike2014,
+      dense ?? dense2014,
+      tall ?? tall2014,
+    );
+  }
+
+  /// Creates a typography instance using material design's 2018 defaults.
+  ///
+  /// If [platform] is [TargetPlatform.iOS] or [TargetPlatform.macOS], the
+  /// default values for [black] and [white] are [blackCupertino] and
+  /// [whiteCupertino] respectively. Otherwise they are [blackMountainView] and
+  /// [whiteMoutainView]. If [platform] is null then both [black] and [white]
+  /// must be specified.
+  ///
+  /// The default values for [englishLike], [dense], and [tall] are
+  /// [englishLike2018], [dense2018], and [tall2018].
+  factory Typography.material2018({
+    TargetPlatform platform = TargetPlatform.android,
+    TextTheme black,
+    TextTheme white,
+    TextTheme englishLike,
+    TextTheme dense,
+    TextTheme tall,
+  }) {
+    assert(platform != null || (black != null && white != null));
+    return Typography._withPlatform(
+      platform,
+      black, white,
+      englishLike ?? englishLike2018,
+      dense ?? dense2018,
+      tall ?? tall2018,
+    );
+  }
+
+  factory Typography._withPlatform(
+    TargetPlatform platform,
+    TextTheme black,
+    TextTheme white,
+    TextTheme englishLike,
+    TextTheme dense,
+    TextTheme tall,
+  ) {
+    assert(platform != null || (black != null && white != null));
+    assert(englishLike != null);
+    assert(dense != null);
+    assert(tall != null);
     switch (platform) {
       case TargetPlatform.iOS:
       case TargetPlatform.macOS:
@@ -116,9 +183,6 @@ class Typography extends Diagnosticable {
         black ??= blackMountainView;
         white ??= whiteMountainView;
     }
-    englishLike ??= englishLike2014;
-    dense ??= dense2014;
-    tall ??= tall2014;
     return Typography._(black, white, englishLike, dense, tall);
   }
 
@@ -206,12 +270,12 @@ class Typography extends Diagnosticable {
     TextTheme dense,
     TextTheme tall,
   }) {
-    return Typography(
-      black: black ?? this.black,
-      white: white ?? this.white,
-      englishLike: englishLike ?? this.englishLike,
-      dense: dense ?? this.dense,
-      tall: tall ?? this.tall,
+    return Typography._(
+      black ?? this.black,
+      white ?? this.white,
+      englishLike ?? this.englishLike,
+      dense ?? this.dense,
+      tall ?? this.tall,
     );
   }
 
@@ -219,12 +283,12 @@ class Typography extends Diagnosticable {
   ///
   /// {@macro dart.ui.shadow.lerp}
   static Typography lerp(Typography a, Typography b, double t) {
-    return Typography(
-      black: TextTheme.lerp(a.black, b.black, t),
-      white: TextTheme.lerp(a.white, b.white, t),
-      englishLike: TextTheme.lerp(a.englishLike, b.englishLike, t),
-      dense: TextTheme.lerp(a.dense, b.dense, t),
-      tall: TextTheme.lerp(a.tall, b.tall, t),
+    return Typography._(
+      TextTheme.lerp(a.black, b.black, t),
+      TextTheme.lerp(a.white, b.white, t),
+      TextTheme.lerp(a.englishLike, b.englishLike, t),
+      TextTheme.lerp(a.dense, b.dense, t),
+      TextTheme.lerp(a.tall, b.tall, t),
     );
   }
 
@@ -256,7 +320,7 @@ class Typography extends Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    final Typography defaultTypography = Typography();
+    final Typography defaultTypography = Typography.material2018();
     properties.add(DiagnosticsProperty<TextTheme>('black', black, defaultValue: defaultTypography.black));
     properties.add(DiagnosticsProperty<TextTheme>('white', white, defaultValue: defaultTypography.white));
     properties.add(DiagnosticsProperty<TextTheme>('englishLike', englishLike, defaultValue: defaultTypography.englishLike));
