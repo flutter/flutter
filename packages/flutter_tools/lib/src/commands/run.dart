@@ -352,7 +352,7 @@ class RunCommand extends RunCommandBase {
         dartDefines: dartDefines,
       );
       AppInstance app;
-      final DateTime appStartedTime = systemClock.now();
+      DateTime appStartedTime;
       await context.run<void>(
         body: () async {
           try {
@@ -372,6 +372,7 @@ class RunCommand extends RunCommandBase {
           } catch (error) {
             throwToolExit(error.toString());
           }
+          appStartedTime = systemClock.now();
           final int result = await app.runner.waitForAppToFinish();
           if (result != 0) {
             throwToolExit(null, exitCode: result);
