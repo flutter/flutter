@@ -688,7 +688,7 @@ class AndroidDevice extends Device {
     String output;
     try {
       output = runAdbCheckedSync(<String>[
-        'shell', '-x', 'logcat', '-v', 'time', '-t', '1',
+        'shell', '-x', 'logcat', '-v', 'time', '-t', '1'
       ]);
     } catch (error) {
       printError('Failed to extract the most recent timestamp from the Android log: $error.');
@@ -1007,8 +1007,9 @@ class _AdbLogReader extends DeviceLogReader {
   String get name => device.name;
 
   void _start() {
-    // Start the adb logcat process and filter logs by the "flutter" tag.
-    final List<String> args = <String>['shell', '-x', 'logcat', '-v', 'time', '-s', 'flutter'];
+    final String lastTimestamp = device.lastLogcatTimestamp;
+    // Start the adb logcat process and filter the most recent logs since `lastTimestamp`.
+    final List<String> args = <String>['logcat', '-v', 'time', '-T', lastTimestamp];
     processUtils.start(device.adbCommandForDevice(args)).then<void>((Process process) {
       _process = process;
       // We expect logcat streams to occasionally contain invalid utf-8,
