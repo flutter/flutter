@@ -330,7 +330,10 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
         callback: (Map<String, Object> params) async {
           final String className = params['class'];
           void markElementsDirty(Element element) {
-            if (element?.widget?.runtimeType?.toString()?.startsWith(className) ?? false) {
+            if (element == null) {
+              return;
+            }
+            if (element.widget?.runtimeType?.toString()?.startsWith(className) ?? false) {
               element.markNeedsBuild();
             }
             element.visitChildElements(markElementsDirty);
