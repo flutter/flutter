@@ -224,8 +224,12 @@ class VsCode {
       return null;
     }
     final String jsonString = fs.file(packageJsonPath).readAsStringSync();
-    final Map<String, dynamic> jsonObject = castStringKeyedMap(json.decode(jsonString));
-    return jsonObject['version'] as String;
+    try {
+      final Map<String, dynamic> jsonObject = castStringKeyedMap(json.decode(jsonString));
+      return jsonObject['version'] as String;
+    } on FormatException {
+      return null;
+    }
   }
 }
 
