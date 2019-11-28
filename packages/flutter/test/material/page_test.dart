@@ -788,32 +788,33 @@ void main() {
   });
 
   testWidgets(
-      'On iOS, a MaterialPageRoute should slide out with CupertinoPageTransition'
-          'when a compatible PageRoute is pushed on top of it',
-          (WidgetTester tester) async {
-        // Regression test for https://github.com/flutter/flutter/issues/44864.
-        await tester.pumpWidget(
-          MaterialApp(
-            theme: ThemeData(platform: TargetPlatform.iOS),
-            home: Scaffold(
-              appBar: AppBar(title: const Text('Title')),
-            ),
-          ),
-        );
+    'On iOS, a MaterialPageRoute should slide out with CupertinoPageTransition'
+      'when a compatible PageRoute is pushed on top of it',
+      (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/44864.
+    
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData(platform: TargetPlatform.iOS),
+        home: Scaffold(
+          appBar: AppBar(title: const Text('Title')),
+        ),
+      ),
+    );
 
-        final Offset titleInitialTopLeft = tester.getTopLeft(find.text('Title'));
+    final Offset titleInitialTopLeft = tester.getTopLeft(find.text('Title'));
 
-        tester.state<NavigatorState>(find.byType(Navigator)).push<void>(
-          CupertinoPageRoute<void>(builder: (BuildContext context) => const Placeholder()),
-        );
+    tester.state<NavigatorState>(find.byType(Navigator)).push<void>(
+      CupertinoPageRoute<void>(builder: (BuildContext context) => const Placeholder()),
+    );
 
-        await tester.pump();
-        await tester.pump(const Duration(milliseconds: 150));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 150));
 
-        final Offset titleTransientTopLeft = tester.getTopLeft(find.text('Title'));
+    final Offset titleTransientTopLeft = tester.getTopLeft(find.text('Title'));
 
-        // Title of the first route slides to the left.
-        expect(titleInitialTopLeft.dy, equals(titleTransientTopLeft.dy));
-        expect(titleInitialTopLeft.dx, greaterThan(titleTransientTopLeft.dx));
-      });
+    // Title of the first route slides to the left.
+    expect(titleInitialTopLeft.dy, equals(titleTransientTopLeft.dy));
+    expect(titleInitialTopLeft.dx, greaterThan(titleTransientTopLeft.dx));
+  });
 }
