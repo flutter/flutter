@@ -389,6 +389,8 @@ class Container extends StatelessWidget {
   final Matrix4 transform;
 
   /// The clip behavior when [Container.decoration] has a clipPath.
+  ///
+  /// Defaults to [Clip.none].
   final Clip clipBehavior;
 
   EdgeInsetsGeometry get _paddingIncludingDecoration {
@@ -479,8 +481,9 @@ class _DecorationClipper extends CustomClipper<Path> {
   final Decoration decoration;
 
   @override
-  Path getClip(Size size) =>
-      decoration.getClipPath(Offset.zero & size, textDirection);
+  Path getClip(Size size) {
+    return decoration.getClipPath(Offset.zero & size, textDirection);
+  }
 
   @override
   bool shouldReclip(_DecorationClipper oldClipper) {
