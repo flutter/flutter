@@ -253,6 +253,10 @@ executable("fml_unittests") {
     "$flutter_root/runtime:libdart",
     "$flutter_root/testing",
   ]
+
+  if (is_fuchsia && using_fuchsia_sdk) {
+    libs = [ "${fuchsia_sdk_path}/arch/${target_cpu}/sysroot/lib/libzircon.so" ]
+  }
 }
 
 if (is_fuchsia) {

@@ -28,17 +28,13 @@ source_set("test_font") {
 group("libdart") {
   public_deps = []
 
-  if (!(is_fuchsia && using_fuchsia_sdk)) {
-    if (flutter_runtime_mode == "profile" ||
-        flutter_runtime_mode == "release") {
-      public_deps +=
-          [ "//third_party/dart/runtime:libdart_precompiled_runtime" ]
-    } else {
-      public_deps += [
-        "$flutter_root/lib/snapshot",
-        "//third_party/dart/runtime:libdart_jit",
-      ]
-    }
+  if (flutter_runtime_mode == "profile" || flutter_runtime_mode == "release") {
+    public_deps += [ "//third_party/dart/runtime:libdart_precompiled_runtime" ]
+  } else {
+    public_deps += [
+      "$flutter_root/lib/snapshot",
+      "//third_party/dart/runtime:libdart_jit",
+    ]
   }
 }
 
