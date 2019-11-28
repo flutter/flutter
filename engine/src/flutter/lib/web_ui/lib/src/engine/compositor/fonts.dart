@@ -4,8 +4,13 @@
 
 part of engine;
 
+const String _robotoUrl =
+    'http://fonts.gstatic.com/s/roboto/v20/KFOmCnqEu92Fr1Me5WZLCzYlKw.ttf';
+
 class SkiaFontCollection {
   final List<Future<ByteBuffer>> _loadingFontBuffers = <Future<ByteBuffer>>[];
+
+  final Set<String> registeredFamilies = <String>{};
 
   Future<void> ensureFontsLoaded() async {
     final List<Uint8List> fontBuffers =
@@ -46,6 +51,8 @@ class SkiaFontCollection {
       final String family = fontFamily['family'];
       final List<dynamic> fontAssets = fontFamily['fonts'];
 
+      registeredFamilies.add(family);
+
       for (dynamic fontAssetItem in fontAssets) {
         final Map<String, dynamic> fontAsset = fontAssetItem;
         final String asset = fontAsset['asset'];
@@ -53,6 +60,16 @@ class SkiaFontCollection {
             .fetch(assetManager.getAssetUrl(asset))
             .then((dynamic fetchResult) => fetchResult.arrayBuffer()));
       }
+    }
+
+    /// We need a default fallback font for CanvasKit, in order to
+    /// avoid crashing while laying out text with an unregistered font. We chose
+    /// Roboto to match Android.
+    if (!registeredFamilies.contains('Roboto')) {
+      // Download Roboto and add it to the font buffers.
+      _loadingFontBuffers.add(html.window
+          .fetch(_robotoUrl)
+          .then((dynamic fetchResult) => fetchResult.arrayBuffer()));
     }
   }
 
