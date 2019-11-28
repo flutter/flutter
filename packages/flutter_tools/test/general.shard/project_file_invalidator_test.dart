@@ -93,9 +93,29 @@ void main() {
       );
     });
 
-    test('Begins watching flutter directory after detecting change', () async {
+    test('Does not start watcher if sources cannot be located', () async {
       final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(
         MemoryFileSystem(),
+        fakeDirectoryWatcherFactory,
+        const LocalPlatform(),
+        logger,
+        '',
+      );
+      await projectFileInvalidator.findInvalidated(
+        lastCompiled: null,
+        urisToMonitor: <Uri>[],
+        packagesPath: '',
+        asyncScanning: asyncScanning,
+      );
+
+      expect(projectFileInvalidator.watchingFlutter, true);
+    });
+
+    test('Begins watching flutter directory after detecting change', () async {
+      final MemoryFileSystem memoryFileSystem = MemoryFileSystem();
+      memoryFileSystem.directory('packages/flutter').createSync(recursive: true);
+      final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(
+        memoryFileSystem,
         fakeDirectoryWatcherFactory,
         const LocalPlatform(),
         logger,
