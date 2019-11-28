@@ -32,7 +32,7 @@ import 'vmservice.dart';
 ProjectFileInvalidator get projectFileInvalidator => context.get<ProjectFileInvalidator>() ?? _defaultInvalidator;
 final ProjectFileInvalidator _defaultInvalidator = ProjectFileInvalidator(
   fs,
-  DirectoryWatcherFactory(fs),
+  const DirectoryWatcherFactory(),
   platform,
   logger,
   Cache.flutterRoot,
@@ -1059,9 +1059,7 @@ class HotRunner extends ResidentRunner {
 
 /// A factory for constructing [Watcher] instances.
 class DirectoryWatcherFactory {
-  const DirectoryWatcherFactory(this._fileSystem);
-
-  final FileSystem _fileSystem;
+  const DirectoryWatcherFactory();
 
   /// Create a [Watcher] for a given [path].
   Watcher watchDirectory(String path) =>  Watcher(path);
