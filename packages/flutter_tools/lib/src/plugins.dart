@@ -314,7 +314,7 @@ List<Plugin> _findAllPlugins(FlutterProject project) {
 
 List<Plugin> findPlugins(FlutterProject project) {
   final List<Plugin> allPlugins = _findAllPlugins(project);
-  
+
   // if a pubspec file is available, only report plugins that aren't a dev
   // dependency.
   final String pubspecFile = fs.path.join(project.directory.path, 'pubspec.yaml');
@@ -328,23 +328,28 @@ List<Plugin> findPlugins(FlutterProject project) {
   }
   final Map<dynamic, dynamic> directDependencies = pubspec['dependencies'] as Map<dynamic, dynamic>;
 
-  // crawl non-dev dependencies, starting from the project
+  final Map<String, Plugin> allPluginsByName = <String, Plugin>{
+    for (final Plugin plugin in allPlugins) plugin.name: plugin,
+  };
+  // crawl non-dev plugins and their dependencies, starting from the project
   final Queue<Plugin> pending = ListQueue<Plugin>.from(
     allPlugins.where((Plugin plugin) => directDependencies.containsKey(plugin.name)));
-  final Map<String, Plugin> foundPlugins = <String, Plugin>{};
+  final Map<String, Plugin> handledPlugins = <String, Plugin>{};
 
   while (pending.isNotEmpty) {
     final Plugin current = pending.removeFirst();
-    foundPlugins[current.name] = current;
-    
+    handledPlugins[current.name] = current;
+
     for (String dependency in current.dependencies) {
-      if (!foundPlugins.containsKey(dependency)) {
-        pending.add(allPlugins.singleWhere((Plugin p) => p.name == dependency));
+      // dependencies of a plugin can include non-plugin packages, so check if
+      // an unhandled plugin was found for the dependency
+      if (!handledPlugins.containsKey(dependency) && allPluginsByName.containsKey(dependency)) {
+        pending.add(allPluginsByName[dependency]);
       }
     }
   }
 
-  return foundPlugins.values.toList();
+  return handledPlugins.values.toList();
 }
 
 /// Writes the .flutter-plugins and .flutter-plugins-dependencies files based on the list of plugins.

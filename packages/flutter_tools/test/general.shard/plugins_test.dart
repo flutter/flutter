@@ -630,7 +630,7 @@ transitive2:file://${transitiveDevDir.childDirectory('lib').path}''');
 dependencies:
   direct:
 dev_dependencies:
-  dev:      
+  dev:
       ''');
 
       directDir.childFile('pubspec.yaml').writeAsStringSync('''
