@@ -28,16 +28,31 @@ void _renderTemplateToFile(String template, dynamic context, String filePath) {
   file.writeAsStringSync(renderedTemplate);
 }
 
-class Plugin {
-  Plugin({
+class _FoundPackage {
+
+  _FoundPackage({
     @required this.name,
+    @required this.dependencies
+  }): assert(name != null),
+      assert(dependencies != null);
+
+  final String name;
+
+    /// The name of the packages this package depends on.
+  final List<String> dependencies;
+}
+
+class Plugin extends _FoundPackage {
+  Plugin({
+    @required String name,
     @required this.path,
     @required this.platforms,
-    @required this.dependencies,
+    @required List<String> dependencies,
   }) : assert(name != null),
        assert(path != null),
        assert(platforms != null),
-       assert(dependencies != null);
+       assert(dependencies != null),
+       super(name: name, dependencies: dependencies);
 
   /// Parses [Plugin] specification from the provided pluginYaml.
   ///
@@ -254,17 +269,13 @@ class Plugin {
     return true;
   }
 
-  final String name;
   final String path;
-
-  /// The name of the packages this plugin depends on.
-  final List<String> dependencies;
 
   /// This is a mapping from platform config key to the plugin platform spec.
   final Map<String, PluginPlatform> platforms;
 }
 
-Plugin _pluginFromPubspec(String name, Uri packageRoot) {
+_FoundPackage _packageFromPubspec(String name, Uri packageRoot) {
   final String pubspecPath = fs.path.fromUri(packageRoot.resolve('pubspec.yaml'));
   if (!fs.isFileSync(pubspecPath)) {
     return null;
@@ -274,23 +285,29 @@ Plugin _pluginFromPubspec(String name, Uri packageRoot) {
     return null;
   }
   final dynamic flutterConfig = pubspec['flutter'];
-  if (flutterConfig == null || !(flutterConfig.containsKey('plugin') as bool)) {
-    return null;
-  }
+  final bool isPlugin = flutterConfig != null && flutterConfig.containsKey('plugin') as bool;
+
   final String packageRootPath = fs.path.fromUri(packageRoot);
   final YamlMap dependencies = pubspec['dependencies'] as YamlMap;
-  printTrace('Found plugin $name at $packageRootPath');
-  return Plugin.fromYaml(
-    name,
-    packageRootPath,
-    flutterConfig['plugin'] as YamlMap,
-    dependencies == null ? <String>[] : <String>[...dependencies.keys.cast<String>()],
-  );
+  final List<String> dependencyNames = dependencies == null ?
+    <String>[] : <String>[...dependencies.keys.cast<String>()];
+
+  if (isPlugin) {
+    printTrace('Found plugin $name at $packageRootPath');
+    return Plugin.fromYaml(
+      name,
+      packageRootPath,
+      flutterConfig['plugin'] as YamlMap,
+      dependencyNames,
+    );
+  } else {
+    printTrace('Found dart package $name at $packageRootPath');
+    return _FoundPackage(name: name, dependencies: dependencyNames);
+  }
 }
 
-/// Finds all plugin packages from the `.packages` file of a [project].
-List<Plugin> _findAllPlugins(FlutterProject project) {
-  final List<Plugin> plugins = <Plugin>[];
+/// Finds all packages from the `.packages` file of a [project].
+Iterable<_FoundPackage> _findAllPackages(FlutterProject project) {
   Map<String, Uri> packages;
   try {
     final String packagesFile = fs.path.join(
@@ -300,20 +317,20 @@ List<Plugin> _findAllPlugins(FlutterProject project) {
     packages = PackageMap(packagesFile).map;
   } on FormatException catch (e) {
     printTrace('Invalid .packages file: $e');
-    return plugins;
+    return <Plugin>[];
   }
-  packages.forEach((String name, Uri uri) {
-    final Uri packageRoot = uri.resolve('..');
-    final Plugin plugin = _pluginFromPubspec(name, packageRoot);
-    if (plugin != null) {
-      plugins.add(plugin);
-    }
-  });
-  return plugins;
+
+  return packages.entries
+    .map((MapEntry<String, Uri> entry) {
+      final Uri packageRoot = entry.value.resolve('..');
+      return _packageFromPubspec(entry.key, packageRoot);
+    })
+    .where((_FoundPackage package) => package != null);
 }
 
 List<Plugin> findPlugins(FlutterProject project) {
-  final List<Plugin> allPlugins = _findAllPlugins(project);
+  final Iterable<_FoundPackage> allPackages = _findAllPackages(project);
+  final List<Plugin> allPlugins = allPackages.whereType<Plugin>().toList();
 
   // if a pubspec file is available, only report plugins that aren't a dev
   // dependency.
@@ -323,33 +340,44 @@ List<Plugin> findPlugins(FlutterProject project) {
   }
 
   final dynamic pubspec = loadYaml(fs.file(pubspecFile).readAsStringSync());
-  if (pubspec['dependencies'] == null || pubspec['dependencies'] is! Map) {
+  if (pubspec['dependencies'] == null || pubspec['dependencies'] is! YamlMap) {
     return allPlugins;
   }
-  final Map<dynamic, dynamic> directDependencies = pubspec['dependencies'] as Map<dynamic, dynamic>;
 
-  final Map<String, Plugin> allPluginsByName = <String, Plugin>{
-    for (final Plugin plugin in allPlugins) plugin.name: plugin,
+  final Map<String, _FoundPackage> allPackagesByName = <String, _FoundPackage>{
+    for (final _FoundPackage package in allPackages) package.name: package,
   };
-  // crawl non-dev plugins and their dependencies, starting from the project
-  final Queue<Plugin> pending = ListQueue<Plugin>.from(
-    allPlugins.where((Plugin plugin) => directDependencies.containsKey(plugin.name)));
-  final Map<String, Plugin> handledPlugins = <String, Plugin>{};
+
+  // Crawl non-dev packages and their dependencies, starting from the project.
+  // While we're only interested in plugins, we need to crawl all packages
+  // because they could depend on a plugin transitively
+  final YamlMap directDependencies = pubspec['dependencies'] as YamlMap;
+  final Queue<_FoundPackage> pending = ListQueue<_FoundPackage>.from(
+    allPackages.where((_FoundPackage package) {
+      return directDependencies.containsKey(package.name);
+    }));
+  final Map<String, _FoundPackage> foundPackages = <String, _FoundPackage>{};
 
   while (pending.isNotEmpty) {
-    final Plugin current = pending.removeFirst();
-    handledPlugins[current.name] = current;
+    final _FoundPackage current = pending.removeFirst();
+    foundPackages[current.name] = current;
 
     for (String dependency in current.dependencies) {
-      // dependencies of a plugin can include non-plugin packages, so check if
-      // an unhandled plugin was found for the dependency
-      if (!handledPlugins.containsKey(dependency) && allPluginsByName.containsKey(dependency)) {
-        pending.add(allPluginsByName[dependency]);
+      if (!foundPackages.containsKey(dependency)) {
+        final _FoundPackage package = allPackagesByName[dependency];
+        if (package == null) {
+          printError(
+            'Warning: The package $dependency appeared in a pubspec, but '
+            'could not be found in a .packages file. Try running flutter '
+            'packages get again.');
+        } else {
+          pending.add(package);
+        }
       }
     }
   }
 
-  return handledPlugins.values.toList();
+  return foundPackages.values.whereType<Plugin>().toList();
 }
 
 /// Writes the .flutter-plugins and .flutter-plugins-dependencies files based on the list of plugins.
