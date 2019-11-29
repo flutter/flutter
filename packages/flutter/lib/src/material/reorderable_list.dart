@@ -63,6 +63,7 @@ class ReorderableListView extends StatefulWidget {
     @required this.onReorder,
     this.scrollDirection = Axis.vertical,
     this.padding,
+    this.dragColor,
     this.reverse = false,
   }) : assert(scrollDirection != null),
        assert(onReorder != null),
@@ -87,6 +88,9 @@ class ReorderableListView extends StatefulWidget {
 
   /// The amount of space by which to inset the [children].
   final EdgeInsets padding;
+
+  /// The background color of the current item being dragged.
+  final Color draggingColor;
 
   /// Whether the scroll view scrolls in the reading direction.
   ///
@@ -138,6 +142,7 @@ class _ReorderableListViewState extends State<ReorderableListView> {
         return _ReorderableListContent(
           header: widget.header,
           children: widget.children,
+          dragColor: widget.dragColor,
           scrollDirection: widget.scrollDirection,
           onReorder: widget.onReorder,
           padding: widget.padding,
@@ -167,9 +172,11 @@ class _ReorderableListContent extends StatefulWidget {
     @required this.padding,
     @required this.onReorder,
     @required this.reverse,
+    @required this.dragColor,
   });
 
   final Widget header;
+  final Color dragColor;
   final List<Widget> children;
   final Axis scrollDirection;
   final EdgeInsets padding;
@@ -454,6 +461,7 @@ class _ReorderableListContentState extends State<_ReorderableListContent> with T
           child: Material(
             elevation: 6.0,
             child: toWrapWithSemantics,
+            color: widget.dragColor
           ),
         ),
         child: _dragging == toWrap.key ? const SizedBox() : toWrapWithSemantics,
