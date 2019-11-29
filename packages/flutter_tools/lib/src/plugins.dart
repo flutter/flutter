@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:collection';
 
 import 'package:meta/meta.dart';
 import 'package:mustache/mustache.dart' as mustache;
@@ -287,7 +288,8 @@ Plugin _pluginFromPubspec(String name, Uri packageRoot) {
   );
 }
 
-List<Plugin> findPlugins(FlutterProject project) {
+/// Finds all plugin packages from the `.packages` file of a [project].
+List<Plugin> _findAllPlugins(FlutterProject project) {
   final List<Plugin> plugins = <Plugin>[];
   Map<String, Uri> packages;
   try {
@@ -308,6 +310,41 @@ List<Plugin> findPlugins(FlutterProject project) {
     }
   });
   return plugins;
+}
+
+List<Plugin> findPlugins(FlutterProject project) {
+  final List<Plugin> allPlugins = _findAllPlugins(project);
+  
+  // if a pubspec file is available, only report plugins that aren't a dev
+  // dependency.
+  final String pubspecFile = fs.path.join(project.directory.path, 'pubspec.yaml');
+  if (!fs.isFileSync(pubspecFile)) {
+    return allPlugins;
+  }
+
+  final dynamic pubspec = loadYaml(fs.file(pubspecFile).readAsStringSync());
+  if (pubspec['dependencies'] == null || pubspec['dependencies'] is! Map) {
+    return allPlugins;
+  }
+  final Map<dynamic, dynamic> directDependencies = pubspec['dependencies'] as Map<dynamic, dynamic>;
+
+  // crawl non-dev dependencies, starting from the project
+  final Queue<Plugin> pending = ListQueue<Plugin>.from(
+    allPlugins.where((Plugin plugin) => directDependencies.containsKey(plugin.name)));
+  final Map<String, Plugin> foundPlugins = <String, Plugin>{};
+
+  while (pending.isNotEmpty) {
+    final Plugin current = pending.removeFirst();
+    foundPlugins[current.name] = current;
+    
+    for (String dependency in current.dependencies) {
+      if (!foundPlugins.containsKey(dependency)) {
+        pending.add(allPlugins.singleWhere((Plugin p) => p.name == dependency));
+      }
+    }
+  }
+
+  return foundPlugins.values.toList();
 }
 
 /// Writes the .flutter-plugins and .flutter-plugins-dependencies files based on the list of plugins.

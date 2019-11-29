@@ -612,6 +612,61 @@ web_plugin_with_nested:${webPluginWithNestedFile.childDirectory('lib').uri.toStr
         FeatureFlags: () => featureFlags,
       });
     });
+
+    testUsingContext('dev_dependencies aren\'t included in plugins', () async {
+      final Directory basePkgDir = fs.directory('/pubcache')..createSync();
+      final Directory directDir = basePkgDir.childDirectory('direct')..createSync();
+      final Directory devDir = basePkgDir.childDirectory('dev')..createSync();
+      final Directory transitiveDirectDir = basePkgDir.childDirectory('transitive1')..createSync();
+      final Directory transitiveDevDir = basePkgDir.childDirectory('transitive2')..createSync();
+
+      packagesFile.writeAsStringSync('''
+direct:file://${directDir.childDirectory('lib').path}
+dev:file://${devDir.childDirectory('lib').path}
+transitive1:file://${transitiveDirectDir.childDirectory('lib').path}
+transitive2:file://${transitiveDevDir.childDirectory('lib').path}''');
+
+      flutterProject.directory.childFile('pubspec.yaml').writeAsStringSync('''
+dependencies:
+  direct:
+dev_dependencies:
+  dev:      
+      ''');
+
+      directDir.childFile('pubspec.yaml').writeAsStringSync('''
+dependencies:
+  transitive1:
+flutter:
+  plugin:
+    foo: bar
+      ''');
+      transitiveDirectDir.childFile('pubspec.yaml').writeAsStringSync('''
+flutter:
+  plugin:
+    foo: bar
+      ''');
+      devDir.childFile('pubspec.yaml').writeAsStringSync('''
+dependencies:
+  transitive2:
+flutter:
+  plugin:
+    foo: bar
+      ''');
+      transitiveDevDir.childFile('pubspec.yaml').writeAsStringSync('''
+flutter:
+  plugin:
+    foo: bar
+      ''');
+
+      final List<Plugin> plugins = findPlugins(flutterProject);
+      final List<String> pluginNames = plugins.map((Plugin p) => p.name).toList();
+      expect(pluginNames, containsAll(<String>['direct', 'transitive1']));
+      expect(pluginNames, isNot(contains('dev')));
+      expect(pluginNames, isNot(contains('transitive2')));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
   });
 }
 
