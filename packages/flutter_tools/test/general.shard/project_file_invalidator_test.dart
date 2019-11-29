@@ -20,9 +20,11 @@ final DateTime inPast = DateTime.now().subtract(const Duration(days: 100));
 void main() {
   FakeDirectoryWatcherFactory fakeDirectoryWatcherFactory;
   StreamController<WatchEvent> watchController;
+  FakePlatform platform;
   BufferLogger logger;
 
   setUp(() {
+    platform = FakePlatform();
     logger = BufferLogger();
     fakeDirectoryWatcherFactory = FakeDirectoryWatcherFactory();
     watchController = StreamController<WatchEvent>.broadcast();
@@ -37,7 +39,7 @@ void main() {
       final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(
         MemoryFileSystem(),
         fakeDirectoryWatcherFactory,
-        const LocalPlatform(),
+        platform,
         logger,
         '',
       );
@@ -57,7 +59,7 @@ void main() {
       final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(
         MemoryFileSystem(),
         fakeDirectoryWatcherFactory,
-        const LocalPlatform(),
+        platform,
         logger,
         '',
       );
@@ -77,7 +79,7 @@ void main() {
       final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(
         MemoryFileSystem(),
         fakeDirectoryWatcherFactory,
-        const LocalPlatform(),
+        platform,
         logger,
         '',
       );
@@ -97,7 +99,7 @@ void main() {
       final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(
         MemoryFileSystem(),
         fakeDirectoryWatcherFactory,
-        const LocalPlatform(),
+        platform,
         logger,
         '',
       );
@@ -117,7 +119,7 @@ void main() {
       final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(
         memoryFileSystem,
         fakeDirectoryWatcherFactory,
-        const LocalPlatform(),
+        platform,
         logger,
         '',
       );
@@ -145,7 +147,7 @@ void main() {
       final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(
         memoryFileSystem,
         fakeDirectoryWatcherFactory,
-        const LocalPlatform(),
+        platform,
         logger,
         '',
       );
@@ -167,7 +169,7 @@ void main() {
       final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(
         memoryFileSystem,
         fakeDirectoryWatcherFactory,
-        const LocalPlatform(),
+        platform,
         logger,
         '',
       );
