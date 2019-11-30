@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -177,14 +177,15 @@ class MockProcessManager extends Mock implements ProcessManager {
     bool runInShell = false,
     ProcessStartMode mode = ProcessStartMode.normal,
   }) {
+    final List<String> commands = command.cast<String>();
     if (!runSucceeds) {
-      final String executable = command[0];
-      final List<String> arguments = command.length > 1 ? command.sublist(1) : <String>[];
+      final String executable = commands[0];
+      final List<String> arguments = commands.length > 1 ? commands.sublist(1) : <String>[];
       throw ProcessException(executable, arguments);
     }
 
-    commands = command;
-    return Future<Process>.value(processFactory(command));
+    this.commands = commands;
+    return Future<Process>.value(processFactory(commands));
   }
 }
 
@@ -254,7 +255,7 @@ class MockProcess extends Mock implements Process {
     this.stdout = const Stream<List<int>>.empty(),
     this.stderr = const Stream<List<int>>.empty(),
   }) : exitCode = exitCode ?? Future<int>.value(0),
-       stdin = stdin ?? MemoryIOSink();
+       stdin = stdin as IOSink ?? MemoryIOSink();
 
   @override
   final int pid;
@@ -272,7 +273,7 @@ class MockProcess extends Mock implements Process {
   final Stream<List<int>> stderr;
 }
 
-/// A fake process implemenation which can be provided all necessary values.
+/// A fake process implementation which can be provided all necessary values.
 class FakeProcess implements Process {
   FakeProcess({
     this.pid = 1,
@@ -281,7 +282,7 @@ class FakeProcess implements Process {
     this.stdout = const Stream<List<int>>.empty(),
     this.stderr = const Stream<List<int>>.empty(),
   }) : exitCode = exitCode ?? Future<int>.value(0),
-       stdin = stdin ?? MemoryIOSink();
+       stdin = stdin as IOSink ?? MemoryIOSink();
 
   @override
   final int pid;
@@ -534,6 +535,12 @@ class MockAndroidDevice extends Mock implements AndroidDevice {
   bool isSupported() => true;
 
   @override
+  bool get supportsHotRestart => true;
+
+  @override
+  bool get supportsFlutterExit => false;
+
+  @override
   bool isSupportedForProject(FlutterProject flutterProject) => true;
 }
 
@@ -563,16 +570,33 @@ class MockDeviceLogReader extends DeviceLogReader {
   @override
   String get name => 'MockLogReader';
 
-  final StreamController<String> _linesController = StreamController<String>.broadcast();
+  StreamController<String> _cachedLinesController;
+
+  final List<String> _lineQueue = <String>[];
+  StreamController<String> get _linesController {
+    _cachedLinesController ??= StreamController<String>
+      .broadcast(onListen: () {
+        _lineQueue.forEach(_linesController.add);
+        _lineQueue.clear();
+     });
+    return _cachedLinesController;
+  }
 
   @override
   Stream<String> get logLines => _linesController.stream;
 
-  void addLine(String line) => _linesController.add(line);
+  void addLine(String line) {
+    if (_linesController.hasListener) {
+      _linesController.add(line);
+    } else {
+      _lineQueue.add(line);
+    }
+  }
 
   @override
-  void dispose() {
-    _linesController.close();
+  Future<void> dispose() async {
+    _lineQueue.clear();
+    await _linesController.close();
   }
 }
 

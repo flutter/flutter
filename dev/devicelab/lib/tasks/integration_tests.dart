@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -8,7 +8,6 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 import '../framework/adb.dart';
 import '../framework/framework.dart';
-import '../framework/ios.dart';
 import '../framework/utils.dart';
 
 TaskFunction createChannelsIntegrationTest() {
@@ -130,8 +129,6 @@ class DriverTest {
       final String deviceId = device.deviceId;
       await flutter('packages', options: <String>['get']);
 
-      if (deviceOperatingSystem == DeviceOperatingSystem.ios)
-        await prepareProvisioningCertificates(testDirectory);
       final List<String> options = <String>[
         '-v',
         '-t',

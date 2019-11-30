@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -238,7 +238,7 @@ class Doctor {
   }
 
   /// Print information about the state of installed tooling.
-  Future<bool> diagnose({ bool androidLicenses = false, bool verbose = true }) async {
+  Future<bool> diagnose({ bool androidLicenses = false, bool verbose = true, bool showColor = true }) async {
     if (androidLicenses) {
       return AndroidLicenseValidator.runLicenseManager();
     }
@@ -283,11 +283,12 @@ class Doctor {
 
       DoctorResultEvent(validator: validator, result: result).send();
 
+      final String leadingBox = showColor ? result.coloredLeadingBox : result.leadingBox;
       if (result.statusInfo != null) {
-        printStatus('${result.coloredLeadingBox} ${validator.title} (${result.statusInfo})',
+        printStatus('$leadingBox ${validator.title} (${result.statusInfo})',
             hangingIndent: result.leadingBox.length + 1);
       } else {
-        printStatus('${result.coloredLeadingBox} ${validator.title}',
+        printStatus('$leadingBox ${validator.title}',
             hangingIndent: result.leadingBox.length + 1);
       }
 
@@ -295,7 +296,8 @@ class Doctor {
         if (message.type != ValidationMessageType.information || verbose == true) {
           int hangingIndent = 2;
           int indent = 4;
-          for (String line in '${message.coloredIndicator} ${message.message}'.split('\n')) {
+          final String indicator = showColor ? message.coloredIndicator : message.indicator;
+          for (String line in '$indicator ${message.message}'.split('\n')) {
             printStatus(line, hangingIndent: hangingIndent, indent: indent, emphasis: true);
             // Only do hanging indent for the first line.
             hangingIndent = 0;
@@ -314,9 +316,9 @@ class Doctor {
     }
 
     if (issues > 0) {
-      printStatus('${terminal.color('!', TerminalColor.yellow)} Doctor found issues in $issues categor${issues > 1 ? "ies" : "y"}.', hangingIndent: 2);
+      printStatus('${showColor ? terminal.color('!', TerminalColor.yellow) : '!'} Doctor found issues in $issues categor${issues > 1 ? "ies" : "y"}.', hangingIndent: 2);
     } else {
-      printStatus('${terminal.color('•', TerminalColor.green)} No issues found!', hangingIndent: 2);
+      printStatus('${showColor ? terminal.color('•', TerminalColor.green) : '•'} No issues found!', hangingIndent: 2);
     }
 
     return doctorResult;
@@ -385,11 +387,11 @@ class GroupedValidator extends DoctorValidator {
 
   List<ValidationResult> _subResults;
 
-  /// Subvalidator results.
+  /// Sub-validator results.
   ///
-  /// To avoid losing information when results are merged, the subresults are
+  /// To avoid losing information when results are merged, the sub-results are
   /// cached on this field when they are available. The results are in the same
-  /// order as the subvalidator list.
+  /// order as the sub-validator list.
   List<ValidationResult> get subResults => _subResults;
 
   @override
@@ -571,9 +573,9 @@ class ValidationMessage {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    final ValidationMessage typedOther = other;
-    return typedOther.message == message
-      && typedOther.type == type;
+    return other is ValidationMessage
+        && other.message == message
+        && other.type == type;
   }
 
   @override
@@ -594,8 +596,15 @@ class FlutterValidator extends DoctorValidator {
       final FlutterVersion version = FlutterVersion.instance;
       versionChannel = version.channel;
       frameworkVersion = version.frameworkVersion;
-      messages.add(ValidationMessage(userMessages.flutterVersion(frameworkVersion, Cache.flutterRoot)));
-      messages.add(ValidationMessage(userMessages.flutterRevision(version.frameworkRevisionShort, version.frameworkAge, version.frameworkDate)));
+      messages.add(ValidationMessage(userMessages.flutterVersion(
+        frameworkVersion,
+        Cache.flutterRoot,
+      )));
+      messages.add(ValidationMessage(userMessages.flutterRevision(
+        version.frameworkRevisionShort,
+        version.frameworkAge,
+        version.frameworkDate,
+      )));
       messages.add(ValidationMessage(userMessages.engineRevision(version.engineRevisionShort)));
       messages.add(ValidationMessage(userMessages.dartRevision(version.dartSdkVersion)));
     } on VersionCheckError catch (e) {

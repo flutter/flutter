@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -79,10 +79,13 @@ enum _ContextMenuLocation {
 /// This sample shows a very simple CupertinoContextMenu for an empty red
 /// 100x100 Container. Simply long press on it to open.
 ///
+/// ```dart imports
+/// import 'package:flutter/cupertino.dart';
+/// ```
+///
 /// ```dart
 /// Widget build(BuildContext context) {
 ///   return Scaffold(
-///     key: scaffoldKey,
 ///     body: Center(
 ///       child: Container(
 ///         width: 100,

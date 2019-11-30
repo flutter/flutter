@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -31,6 +31,11 @@ class BuildFuchsiaCommand extends BuildSubCommand {
       ],
       defaultsTo: FuchsiaPackageServer.toolHost,
     );
+    argParser.addOption('target-platform',
+      defaultsTo: 'fuchsia-x64',
+      allowed: <String>['fuchsia-arm64', 'fuchsia-x64'],
+      help: 'The target platform for which the app is compiled.',
+    );
   }
 
   @override
@@ -42,7 +47,6 @@ class BuildFuchsiaCommand extends BuildSubCommand {
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
     DevelopmentArtifact.fuchsia,
-    DevelopmentArtifact.universal,
   };
 
   @override
@@ -69,8 +73,9 @@ class BuildFuchsiaCommand extends BuildSubCommand {
     await buildFuchsia(
       fuchsiaProject: flutterProject.fuchsia,
       target: targetFile,
+      targetPlatform: getTargetPlatformForName(stringArg('target-platform')),
       buildInfo: buildInfo,
-      runnerPackageSource: argResults['runner-source'],
+      runnerPackageSource: stringArg('runner-source'),
     );
     return null;
   }

@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -65,6 +65,8 @@ typedef AnimatedCrossFadeBuilder = Widget Function(Widget topChild, Key topChild
 
 /// A widget that cross-fades between two given children and animates itself
 /// between their sizes.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=PGK2UUAyE54}
 ///
 /// The animation is controlled through the [crossFadeState] parameter.
 /// [firstCurve] and [secondCurve] represent the opacity curves of the two

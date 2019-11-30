@@ -1,5 +1,5 @@
-#!/bin/bash
-# Copyright 2016 The Chromium Authors. All rights reserved.
+#!/usr/bin/env bash
+# Copyright 2014 The Flutter Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
@@ -142,14 +142,10 @@ BuildApp() {
     mkdir "${derived_dir}/engine"
     RunCommand cp -r -- "${flutter_podspec}" "${derived_dir}/engine"
     RunCommand cp -r -- "${flutter_framework}" "${derived_dir}/engine"
-    # Make headers, plists, and modulemap files read-only to discourage editing.
-    RunCommand find "${derived_dir}/engine/Flutter.framework" -type f \( -name '*.h' -o -name '*.modulemap' -o -name '*.plist' \) -exec chmod a-w "{}" \;
   else
     RunCommand rm -rf -- "${derived_dir}/Flutter.framework"
     RunCommand cp -- "${flutter_podspec}" "${derived_dir}"
     RunCommand cp -r -- "${flutter_framework}" "${derived_dir}"
-    # Make headers, plists, and modulemap files read-only to discourage editing.
-    RunCommand find "${derived_dir}/Flutter.framework" -type f \( -name '*.h' -o -name '*.modulemap' -o -name '*.plist' \) -exec chmod a-w "{}" \;
   fi
 
   RunCommand pushd "${project_path}" > /dev/null

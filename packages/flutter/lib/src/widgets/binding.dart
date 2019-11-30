@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -214,7 +214,9 @@ abstract class WidgetsBindingObserver {
   ///    boilerplate.
   void didChangeTextScaleFactor() { }
 
-  /// {@macro on_platform_brightness_change}
+  /// Called when the platform brightness changes.
+  ///
+  /// This method exposes notifications from [Window.onPlatformBrightnessChanged].
   void didChangePlatformBrightness() { }
 
   /// Called when the system tells the app that the user's locale has
