@@ -4,11 +4,14 @@
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/dart/package_map.dart';
 import 'package:flutter_tools/src/features.dart';
+import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/plugins.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:matcher/matcher.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 
@@ -613,59 +616,206 @@ web_plugin_with_nested:${webPluginWithNestedFile.childDirectory('lib').uri.toStr
       });
     });
 
-    testUsingContext('dev_dependencies aren\'t included in plugins', () async {
-      final Directory basePkgDir = fs.directory('/pubcache')..createSync();
-      final Directory directDir = basePkgDir.childDirectory('direct')..createSync();
-      final Directory devDir = basePkgDir.childDirectory('dev')..createSync();
-      final Directory transitiveDirectDir = basePkgDir.childDirectory('transitive1')..createSync();
-      final Directory transitiveDevDir = basePkgDir.childDirectory('transitive2')..createSync();
+    group('plugin crawling', () {
+      Directory basePkgDir;
+      File pubspecFile;
+      // use a different flutter project here because we want to use the real
+      // directDependencies getter
+      FlutterProject project;
 
-      packagesFile.writeAsStringSync('''
-direct:file://${directDir.childDirectory('lib').path}
-dev:file://${devDir.childDirectory('lib').path}
-transitive1:file://${transitiveDirectDir.childDirectory('lib').path}
-transitive2:file://${transitiveDevDir.childDirectory('lib').path}''');
+      setUp(() {
+        basePkgDir = fs.directory('/pubcache')..createSync();
+        pubspecFile = flutterProject.directory.childFile('pubspec.yaml');
 
-      flutterProject.directory.childFile('pubspec.yaml').writeAsStringSync('''
+        project = FlutterProject(
+          fs.directory('/'),
+          FlutterManifest.empty(),
+          FlutterManifest.empty(),
+        );
+      });
+
+      void createPackage({
+        @required String name, 
+        List<String> dependencies = const <String>[],
+        List<String> devDependencies = const <String>[],
+        bool isPlugin = false}) {
+          final Directory dir = basePkgDir.childDirectory(name)..createSync();
+          final StringBuffer pubspecContent = StringBuffer();
+          
+          void writeDependenciesBlock(String name, List<String> pkgs) {
+            if (pkgs.isNotEmpty) {
+              pubspecContent.write('$name: \n');
+              for (final String dependency in dependencies) {
+                pubspecContent.write('  $dependency:\n');
+              }
+            }
+          }
+
+          writeDependenciesBlock('dependencies', dependencies);
+          writeDependenciesBlock('dev_dependencies', devDependencies);
+
+          if (isPlugin) {
+            pubspecContent.write('''
+flutter:
+  plugin:
+    foo: bar''');
+          }
+
+          dir.childFile('pubspec.yaml').writeAsStringSync(pubspecContent.toString());
+      }
+
+      void writePackagesFile(List<String> packages) {
+        final StringBuffer content = StringBuffer();
+        bool first = true;
+        for (final String package in packages) {
+          if (!first) {
+            content.write('\n');
+          }
+          final Directory dir = basePkgDir.childDirectory(package).childDirectory('lib');
+          content.write('$package:file://${dir.path}');
+          first = false;
+        }
+        packagesFile.writeAsStringSync(content.toString());
+      }
+
+      testUsingContext('when no pubspec exists, all dependencies are used', () async {
+        createPackage(name: 'foo', isPlugin: true);
+        createPackage(name: 'bar', isPlugin: true);
+        createPackage(name: 'baz', isPlugin: true);
+        writePackagesFile(<String>['foo', 'bar', 'baz']);
+
+        expect(
+          findPlugins(project).map((Plugin p) => p.name),
+          containsAll(<String>['foo', 'bar', 'baz']),
+        );
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+      });
+
+      testUsingContext('dev_dependencies aren\'t included in plugins', () async {
+        createPackage(name: 'regular', dependencies: <String>['reg_transitive'], isPlugin: true);
+        createPackage(name: 'reg_transitive', isPlugin: true);
+        createPackage(name: 'dev', dependencies: <String>['transitive_dev'], isPlugin: true);
+        createPackage(name: 'transitive_dev', isPlugin: true);
+        writePackagesFile(<String>['regular', 'dev', 'reg_transitive', 'transitive_dev']);
+
+        pubspecFile.writeAsStringSync('''
+  dependencies:
+    regular:
+  dev_dependencies:
+    dev:
+        ''');
+
+        final List<Plugin> plugins = findPlugins(project);
+        final List<String> pluginNames = plugins.map((Plugin p) => p.name).toList();
+        expect(pluginNames, containsAll(<String>['regular', 'reg_transitive']));
+        expect(pluginNames, isNot(contains('dev')));
+        expect(pluginNames, isNot(contains('transitive_dev')));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+      });
+
+      testUsingContext('throws when dependency doesn\'t appear in .packages', () async {
+        createPackage(name: 'foo', dependencies: <String>['bar']);
+        createPackage(name: 'bar', isPlugin: true);
+        writePackagesFile(<String>['foo']);
+
+        pubspecFile.writeAsStringSync('''
 dependencies:
-  direct:
+  foo:        
+        ''');
+
+        expect(
+          () => findPlugins(project),
+          throwsA(const TypeMatcher<ToolExit>()
+            .having(
+              (ToolExit e) => e.message,
+              'Error message contains missing package',
+              contains('bar')
+            )
+            .having(
+              (ToolExit e) => e.message,
+              'Error message suggests getting packages',
+              contains('flutter packages get')
+            ),
+          ),
+        );
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+      });
+
+      testUsingContext('finds transitive plugins via regular packages', () async {
+        createPackage(name: 'pure_dart', dependencies: <String>['plugin'], isPlugin: false);
+        createPackage(name: 'plugin', isPlugin: true);
+        writePackagesFile(<String>['pure_dart', 'plugin']);
+
+        pubspecFile.writeAsStringSync('''
+dependencies:
+  pure_dart:        
+        ''');
+
+        expect(findPlugins(project).map((Plugin p) => p.name), <String>['plugin']);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+      });
+
+      testUsingContext('includes plugin depended on by both regular and dev dependency', () async {
+        createPackage(name: 'regular', dependencies: <String>['transitive']);
+        createPackage(name: 'dev', dependencies: <String>['transitive']);
+        createPackage(name: 'transitive', isPlugin: true);
+        writePackagesFile(<String>['regular', 'dev', 'transitive']);
+
+        flutterProject.directory.childFile('pubspec.yaml').writeAsStringSync('''
+dependencies:
+  regular:
 dev_dependencies:
-  dev:
-      ''');
+  dev:        
+        ''');
 
-      directDir.childFile('pubspec.yaml').writeAsStringSync('''
-dependencies:
-  transitive1:
-flutter:
-  plugin:
-    foo: bar
-      ''');
-      transitiveDirectDir.childFile('pubspec.yaml').writeAsStringSync('''
-flutter:
-  plugin:
-    foo: bar
-      ''');
-      devDir.childFile('pubspec.yaml').writeAsStringSync('''
-dependencies:
-  transitive2:
-flutter:
-  plugin:
-    foo: bar
-      ''');
-      transitiveDevDir.childFile('pubspec.yaml').writeAsStringSync('''
-flutter:
-  plugin:
-    foo: bar
-      ''');
+        final List<Plugin> plugins = findPlugins(project);
+        expect(plugins, hasLength(1));
+        expect(plugins.single.name, 'transitive');
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+      });
 
-      final List<Plugin> plugins = findPlugins(flutterProject);
-      final List<String> pluginNames = plugins.map((Plugin p) => p.name).toList();
-      expect(pluginNames, containsAll(<String>['direct', 'transitive1']));
-      expect(pluginNames, isNot(contains('dev')));
-      expect(pluginNames, isNot(contains('transitive2')));
-    }, overrides: <Type, Generator>{
-      FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager.any(),
+      testUsingContext('doesn\'t crawl transitive dev_dependencies', () async {
+        createPackage(name: 'regular', devDependencies: <String>['transitive']);
+        createPackage(name: 'transitive', isPlugin: true);
+        writePackagesFile(<String>['regular', 'transitive']);
+
+        pubspecFile.writeAsStringSync('''
+dependencies:
+  regular:
+        ''');
+
+        expect(findPlugins(project), isEmpty);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+      });
+
+      testUsingContext('doesn\'t find any plugins without direct dependencies', () async {
+        createPackage(name: 'dev1', isPlugin: true);
+        createPackage(name: 'dev2', isPlugin: true);
+        writePackagesFile(<String>['dev1', 'dev2']);
+
+        pubspecFile.writeAsStringSync('''
+dev_dependencies:
+  dev1:
+  dev2:
+        ''');
+
+        expect(findPlugins(project), isEmpty);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+      });   
     });
   });
 }

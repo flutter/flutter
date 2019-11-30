@@ -313,7 +313,10 @@ Package _packageFromPubspec(String name, Uri packageRoot) {
 Iterable<Package> _findAllPackages(FlutterProject project) {
   Map<String, Uri> packages;
   try {
-    final String packagesFile = project.packagesFile.path;
+    final String packagesFile = fs.path.join(
+      project.directory.path,
+      PackageMap.globalPackagesPath,
+    );
     packages = PackageMap(packagesFile).map;
   } on FormatException catch (e) {
     printTrace('Invalid .packages file: $e');
