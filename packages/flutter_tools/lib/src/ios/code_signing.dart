@@ -70,9 +70,9 @@ const String fixWithDevelopmentTeamInstruction = '''
        open ios/Runner.xcworkspace
   2- Select the 'Runner' project in the navigator then the 'Runner' target
      in the project settings
-  3- In the 'General' tab, make sure a 'Development Team' is selected.\u0020
+  3- In the 'Signing & Capabilities' tab, make sure a 'Development Team' is selected.\u0020
      You may need to:
-         - Log in with your Apple ID in Xcode first
+         - Log in with your Apple ID in Xcode firs
          - Ensure you have a valid unique Bundle ID
          - Register your device with your Apple Developer Account
          - Let Xcode automatically provision a profile for your app
