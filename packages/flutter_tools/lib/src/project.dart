@@ -230,12 +230,24 @@ class FlutterProject {
     await injectPlugins(this, checkProjects: checkProjects);
   }
 
+  YamlMap _cachedPubspec;
+  YamlMap get _pubspecContent {
+    if (_cachedPubspec != null) {
+      return _cachedPubspec;
+    }
+    if (!pubspecFile.existsSync()) {
+      return null;
+    }
+
+    return loadYaml(pubspecFile.readAsStringSync()) as YamlMap;
+  }
+
   /// Return the set of builders used by this package.
   YamlMap get builders {
     if (!pubspecFile.existsSync()) {
       return null;
     }
-    final YamlMap pubspec = loadYaml(pubspecFile.readAsStringSync()) as YamlMap;
+    final YamlMap pubspec = _pubspecContent;
     // If the pubspec file is empty, this will be null.
     if (pubspec == null) {
       return null;
@@ -247,6 +259,17 @@ class FlutterProject {
   bool get hasBuilders {
     final YamlMap result = builders;
     return result != null && result.isNotEmpty;
+  }
+
+  /// The direct dependencies of this project, read from the [pubspecFile]. This
+  /// doesn't include `dev_dependencies`. If the pubspec file doesn't exist, 
+  /// returns null.
+  List<String> get directDependencies {
+    final YamlMap pubspec = _pubspecContent;
+    if (pubspec == null) {
+      return null;
+    }
+    return readDependencies(pubspec);
   }
 }
 
