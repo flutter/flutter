@@ -1,6 +1,7 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -249,8 +250,8 @@ class Actions extends InheritedWidget {
   /// The `context` argument must not be null.
   static ActionDispatcher of(BuildContext context, {bool nullOk = false}) {
     assert(context != null);
-    final InheritedElement inheritedElement = context.ancestorInheritedElementForWidgetOfExactType(Actions);
-    final Actions inherited = context.inheritFromElement(inheritedElement);
+    final InheritedElement inheritedElement = context.getElementForInheritedWidgetOfExactType<Actions>();
+    final Actions inherited = context.dependOnInheritedElement(inheritedElement);
     assert(() {
       if (nullOk) {
         return true;

@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -186,7 +186,7 @@ class ButtonBar extends StatelessWidget {
 /// there is not enough horizontal space.
 ///
 /// It first attempts to lay out its buttons as though there were no
-/// maximumm width constraints on the widget. If the button bar's width is
+/// maximum width constraints on the widget. If the button bar's width is
 /// less than the maximum width constraints of the widget, it then lays
 /// out the widget as though it were placed in a [Row].
 ///
@@ -249,7 +249,7 @@ class _ButtonBarRow extends Flex {
 /// there is not enough horizontal space.
 ///
 /// It first attempts to lay out its buttons as though there were no
-/// maximumm width constraints on the widget. If the button bar's width is
+/// maximum width constraints on the widget. If the button bar's width is
 /// less than the maximum width constraints of the widget, it then lays
 /// out the widget as though it were placed in a [Row].
 ///

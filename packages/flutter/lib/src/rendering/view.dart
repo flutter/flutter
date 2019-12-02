@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -253,8 +253,9 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       case TargetPlatform.android:
         lowerOverlayStyle = layer.find<SystemUiOverlayStyle>(bottom);
         break;
-      case TargetPlatform.iOS:
       case TargetPlatform.fuchsia:
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
         break;
     }
     // If there are no overlay styles in the UI don't bother updating.

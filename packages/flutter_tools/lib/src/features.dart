@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -261,7 +261,7 @@ class FeatureChannelSetting {
 
   /// Whether the feature is available on this channel.
   ///
-  /// If not provded, defaults to `false`. This implies that the feature
+  /// If not provided, defaults to `false`. This implies that the feature
   /// cannot be enabled even by the settings below.
   final bool available;
 

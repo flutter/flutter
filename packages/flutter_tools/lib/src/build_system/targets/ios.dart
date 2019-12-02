@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -18,7 +18,7 @@ import 'dart.dart';
 /// Supports compiling a dart kernel file to an assembly file.
 ///
 /// If more than one iOS arch is provided, then this rule will
-/// produce a univeral binary.
+/// produce a universal binary.
 abstract class AotAssemblyBase extends Target {
   const AotAssemblyBase();
 

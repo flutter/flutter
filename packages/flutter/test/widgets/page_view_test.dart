@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -532,8 +532,7 @@ void main() {
   });
 
   testWidgets('PageView large viewportFraction', (WidgetTester tester) async {
-    final PageController controller =
-        PageController(viewportFraction: 5/4);
+    final PageController controller = PageController(viewportFraction: 5/4);
 
     Widget build(PageController controller) {
       return Directionality(
@@ -599,6 +598,89 @@ void main() {
       await tester.pump();
 
       expect(tester.getTopLeft(find.text('Hawaii')), const Offset(-(4 - 1) * 800 / 2, 0));
+  });
+
+  testWidgets(
+    'PageView large viewportFraction can scroll to the last page and snap',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/45096.
+      final PageController controller = PageController(viewportFraction: 5/4);
+
+      Widget build(PageController controller) {
+        return Directionality(
+          textDirection: TextDirection.ltr,
+          child: PageView.builder(
+            controller: controller,
+            itemCount: 3,
+            itemBuilder: (BuildContext context, int index) {
+              return Container(
+                height: 200.0,
+                color: index % 2 == 0
+                  ? const Color(0xFF0000FF)
+                  : const Color(0xFF00FF00),
+                  child: Text(index.toString()),
+              );
+            },
+          ),
+        );
+      }
+
+      await tester.pumpWidget(build(controller));
+
+      expect(tester.getCenter(find.text('0')), const Offset(400, 300));
+
+      controller.jumpToPage(2);
+      await tester.pump();
+      await tester.pumpAndSettle();
+
+      expect(tester.getCenter(find.text('2')), const Offset(400, 300));
+  });
+
+  testWidgets(
+    'All visible pages are able to receive touch events',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/23873.
+      final PageController controller = PageController(viewportFraction: 1/4, initialPage: 0);
+      int tappedIndex;
+
+      Widget build() {
+        return Directionality(
+          textDirection: TextDirection.ltr,
+          child: PageView.builder(
+            controller: controller,
+            itemCount: 20,
+            itemBuilder: (BuildContext context, int index) {
+              return GestureDetector(
+                onTap: () => tappedIndex = index,
+                child: SizedBox.expand(child: Text('$index')),
+              );
+            },
+          ),
+        );
+      }
+
+      Iterable<int> visiblePages = const <int> [0, 1, 2];
+      await tester.pumpWidget(build());
+
+      // The first 3 items should be visible and tappable.
+      for (int index in visiblePages) {
+        expect(find.text(index.toString()), findsOneWidget);
+        // The center of page 2's x-coordinate is 800, so we have to manually
+        // offset it a bit to make sure the tap lands within the screen.
+        final Offset center = tester.getCenter(find.text('$index')) - const Offset(3, 0);
+        await tester.tapAt(center);
+        expect(tappedIndex, index);
+      }
+
+      controller.jumpToPage(19);
+      await tester.pump();
+      // The last 3 items should be visible and tappable.
+      visiblePages = const <int> [17, 18, 19];
+      for (int index in visiblePages) {
+        expect(find.text('$index'), findsOneWidget);
+        await tester.tap(find.text('$index'));
+        expect(tappedIndex, index);
+      }
   });
 
   testWidgets('PageView does not report page changed on overscroll', (WidgetTester tester) async {
@@ -783,5 +865,47 @@ void main() {
     // Simulate precision error.
     pageController.position.jumpTo(799.99999999999);
     expect(pageController.page, 1);
+  });
+
+  testWidgets('PageView can participate in a11y scrolling', (WidgetTester tester) async {
+    final SemanticsTester semantics = SemanticsTester(tester);
+
+    final PageController controller = PageController();
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: PageView(
+          controller: controller,
+          children: List<Widget>.generate(4, (int i) {
+            return Semantics(
+              child: Text('Page #$i'),
+              container: true,
+            );
+          }),
+          allowImplicitScrolling: true,
+        ),
+    ));
+    expect(controller.page, 0);
+
+    expect(semantics, includesNodeWith(flags: <SemanticsFlag>[SemanticsFlag.hasImplicitScrolling]));
+    expect(semantics, includesNodeWith(label: 'Page #0'));
+    expect(semantics, includesNodeWith(label: 'Page #1', flags: <SemanticsFlag>[SemanticsFlag.isHidden]));
+    expect(semantics, isNot(includesNodeWith(label: 'Page #2', flags: <SemanticsFlag>[SemanticsFlag.isHidden])));
+    expect(semantics, isNot(includesNodeWith(label: 'Page #3', flags: <SemanticsFlag>[SemanticsFlag.isHidden])));
+
+    controller.nextPage(duration: const Duration(milliseconds: 150), curve: Curves.ease);
+    await tester.pumpAndSettle();
+    expect(semantics, includesNodeWith(label: 'Page #0', flags: <SemanticsFlag>[SemanticsFlag.isHidden]));
+    expect(semantics, includesNodeWith(label: 'Page #1'));
+    expect(semantics, includesNodeWith(label: 'Page #2', flags: <SemanticsFlag>[SemanticsFlag.isHidden]));
+    expect(semantics, isNot(includesNodeWith(label: 'Page #3', flags: <SemanticsFlag>[SemanticsFlag.isHidden])));
+
+    controller.nextPage(duration: const Duration(milliseconds: 150), curve: Curves.ease);
+    await tester.pumpAndSettle();
+    expect(semantics, isNot(includesNodeWith(label: 'Page #0', flags: <SemanticsFlag>[SemanticsFlag.isHidden])));
+    expect(semantics, includesNodeWith(label: 'Page #1', flags: <SemanticsFlag>[SemanticsFlag.isHidden]));
+    expect(semantics, includesNodeWith(label: 'Page #2'));
+    expect(semantics, includesNodeWith(label: 'Page #3', flags: <SemanticsFlag>[SemanticsFlag.isHidden]));
+
+    semantics.dispose();
   });
 }
