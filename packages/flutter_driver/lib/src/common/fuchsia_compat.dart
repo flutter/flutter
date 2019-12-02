@@ -32,7 +32,9 @@ class _DummyPortForwarder implements PortForwarder {
 class _DummySshCommandRunner implements SshCommandRunner {
   _DummySshCommandRunner();
 
-  final Logger _log = Logger('_DummySshCommandRunner');
+  void _log(String message) {
+    driverLog('_DummySshCommandRunner', message);
+  }
 
   @override
   String get sshConfigPath => null;
@@ -58,7 +60,7 @@ class _DummySshCommandRunner implements SshCommandRunner {
       final ProcessResult r = await Process.run(exe, args);
       return r.stdout.split('\n');
     } on ProcessException catch (e) {
-      _log.warning("Error running '$command': $e");
+      _log("Error running '$command': $e");
     }
     return <String>[];
   }
