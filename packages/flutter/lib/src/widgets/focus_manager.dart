@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -165,7 +165,7 @@ class FocusAttachment {
 ///
 /// There are several actors involved in the lifecycle of a
 /// [FocusNode]/[FocusScopeNode]. They are created and disposed by their
-/// _owner_, attached, detached, and reparented using a [FocusAttachment] by
+/// _owner_, attached, detached, and re-parented using a [FocusAttachment] by
 /// their _host_ (which must be owned by the [State] of a [StatefulWidget]), and
 /// they are managed by the [FocusManager]. Different parts of the [FocusNode]
 /// API are intended for these different actors.

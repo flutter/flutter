@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -71,7 +71,7 @@ typedef DwdsFactory = Future<Dwds> Function({
   bool enableDebugExtension,
 });
 
-/// A function with the same signatuure as [WebFs.start].
+/// A function with the same signature as [WebFs.start].
 typedef WebFsFactory = Future<WebFs> Function({
   @required String target,
   @required FlutterProject flutterProject,
@@ -100,7 +100,7 @@ class WebFs {
     this._dartDefines,
   );
 
-  /// The server uri.
+  /// The server URL.
   final String uri;
 
   final HttpServer _server;
@@ -353,11 +353,27 @@ abstract class AssetServer {
 }
 
 class ReleaseAssetServer extends AssetServer {
+  // Locations where source files, assets, or source maps may be located.
+  final List<Uri> _searchPaths = <Uri>[
+    fs.directory(getWebBuildDirectory()).uri,
+    fs.directory(Cache.flutterRoot).parent.uri,
+    fs.currentDirectory.childDirectory('lib').uri,
+  ];
+
   @override
   Future<Response> handle(Request request) async {
-    final Uri artifactUri = fs.directory(getWebBuildDirectory()).uri.resolveUri(request.url);
-    final File file = fs.file(artifactUri);
-    if (file.existsSync()) {
+    Uri fileUri;
+    for (Uri uri in _searchPaths) {
+      final Uri potential = uri.resolve(request.url.path);
+      if (potential == null || !fs.isFileSync(potential.toFilePath())) {
+        continue;
+      }
+      fileUri = potential;
+      break;
+    }
+
+    if (fileUri != null) {
+      final File file = fs.file(fileUri);
       final Uint8List bytes = file.readAsBytesSync();
       // Fallback to "application/octet-stream" on null which
       // makes no claims as to the structure of the data.

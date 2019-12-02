@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -756,7 +756,7 @@ void main() {
 
   /// Toolbar is not used in Flutter Web. Skip this check.
   ///
-  /// Web is using native dom elements (it is also used as platform input)
+  /// Web is using native DOM elements (it is also used as platform input)
   /// to enable clipboard functionality of the toolbar: copy, paste, select,
   /// cut. It might also provide additional functionality depending on the
   /// browser (such as translation). Due to this, in browsers, we should not
@@ -1589,8 +1589,7 @@ void main() {
       ),
     );
 
-    final RenderEditable render = tester.allRenderObjects
-        .firstWhere((RenderObject o) => o.runtimeType == RenderEditable);
+    final RenderEditable render = tester.allRenderObjects.whereType<RenderEditable>().first;
     final int semanticsId = render.debugSemantics.id;
 
     expect(controller.selection.baseOffset, 4);
@@ -1682,8 +1681,7 @@ void main() {
       ),
     );
 
-    final RenderEditable render = tester.allRenderObjects
-        .firstWhere((RenderObject o) => o.runtimeType == RenderEditable);
+    final RenderEditable render = tester.allRenderObjects.whereType<RenderEditable>().first;
     final int semanticsId = render.debugSemantics.id;
 
     expect(controller.selection.baseOffset, 14);
@@ -1784,8 +1782,7 @@ void main() {
       ),
     );
 
-    final RenderEditable render = tester.allRenderObjects
-        .firstWhere((RenderObject o) => o.runtimeType == RenderEditable);
+    final RenderEditable render = tester.allRenderObjects.whereType<RenderEditable>().first;
     final int semanticsId = render.debugSemantics.id;
 
     expect(controller.selection.baseOffset, 4);
@@ -1885,8 +1882,7 @@ void main() {
       ),
     );
 
-    final RenderEditable render = tester.allRenderObjects
-        .firstWhere((RenderObject o) => o.runtimeType == RenderEditable);
+    final RenderEditable render = tester.allRenderObjects.whereType<RenderEditable>().first;
     final int semanticsId = render.debugSemantics.id;
 
     expect(controller.selection.baseOffset, 14);
@@ -2311,8 +2307,7 @@ void main() {
     ));
 
     // Simulate selection change via tap to show handles.
-    final RenderEditable render = tester.allRenderObjects
-        .firstWhere((RenderObject o) => o.runtimeType == RenderEditable);
+    final RenderEditable render = tester.allRenderObjects.whereType<RenderEditable>().first;
     expect(render.text.style.fontStyle, FontStyle.italic);
   });
 
@@ -2798,8 +2793,8 @@ void main() {
       // Check that the animations are functional and going in the right
       // direction.
 
-      final List<Widget> transitions =
-        find.byType(FadeTransition).evaluate().map((Element e) => e.widget).toList();
+      final List<FadeTransition> transitions =
+        find.byType(FadeTransition).evaluate().map((Element e) => e.widget).cast<FadeTransition>().toList();
       // On Android, an empty app contains a single FadeTransition. The following
       // two are the left and right text selection handles, respectively.
       final FadeTransition left = transitions[1];
@@ -3637,8 +3632,8 @@ void main() {
       // Check that the animations are functional and going in the right
       // direction.
 
-      final List<Widget> transitions =
-        find.byType(FadeTransition).evaluate().map((Element e) => e.widget).toList();
+      final List<FadeTransition> transitions =
+        find.byType(FadeTransition).evaluate().map((Element e) => e.widget).cast<FadeTransition>().toList();
       final FadeTransition left = transitions[0];
       final FadeTransition right = transitions[1];
 

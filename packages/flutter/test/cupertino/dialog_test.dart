@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -642,7 +642,7 @@ void main() {
 
     final RenderBox actionsSectionBox = findScrollableActionsSectionRenderBox(tester);
 
-    // The two multi-line buttons with large text are taller than 50% of the
+    // The two multiline buttons with large text are taller than 50% of the
     // dialog height, but with the accessibility layout policy, the 2 buttons
     // should be in a scrollable area equal to half the dialog height.
     expect(

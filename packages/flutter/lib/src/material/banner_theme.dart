@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -140,13 +140,13 @@ class MaterialBannerTheme extends InheritedTheme {
   /// MaterialBannerThemeData theme = MaterialBannerTheme.of(context);
   /// ```
   static MaterialBannerThemeData of(BuildContext context) {
-    final MaterialBannerTheme bannerTheme = context.inheritFromWidgetOfExactType(MaterialBannerTheme);
+    final MaterialBannerTheme bannerTheme = context.dependOnInheritedWidgetOfExactType<MaterialBannerTheme>();
     return bannerTheme?.data ?? Theme.of(context).bannerTheme;
   }
 
   @override
   Widget wrap(BuildContext context, Widget child) {
-    final MaterialBannerTheme ancestorTheme = context.ancestorWidgetOfExactType(MaterialBannerTheme);
+    final MaterialBannerTheme ancestorTheme = context.findAncestorWidgetOfExactType<MaterialBannerTheme>();
     return identical(this, ancestorTheme) ? child : MaterialBannerTheme(data: data, child: child);
   }
 

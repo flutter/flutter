@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -338,6 +338,11 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
   }
 
   Future<String> _handleLifecycleMessage(String message) async {
+    // TODO(chunhtai): remove the workaround once the issue is fixed
+    // https://github.com/flutter/flutter/issues/39832
+    if (message == 'AppLifecycleState.detached')
+      return null;
+
     handleAppLifecycleStateChanged(_parseAppLifecycleMessage(message));
     return null;
   }
