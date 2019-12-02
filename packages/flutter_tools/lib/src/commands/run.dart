@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -284,10 +284,6 @@ class RunCommand extends RunCommandBase {
     if (!runningWithPrebuiltApplication) {
       await super.validateCommand();
     }
-    devices = await findAllTargetDevices();
-    if (devices == null) {
-      throwToolExit(null);
-    }
     if (deviceManager.hasSpecifiedAllDevices && runningWithPrebuiltApplication) {
       throwToolExit('Using -d all with --use-application-binary is not supported');
     }
@@ -335,6 +331,11 @@ class RunCommand extends RunCommandBase {
     final bool hotMode = shouldUseHotMode();
 
     writePidFile(stringArg('pid-file'));
+
+    devices = await findAllTargetDevices();
+    if (devices == null) {
+      throwToolExit(null);
+    }
 
     if (boolArg('machine')) {
       if (devices.length > 1) {

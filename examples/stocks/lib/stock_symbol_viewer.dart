@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -30,6 +30,7 @@ class _StockSymbolView extends StatelessWidget {
             children: <Widget>[
               Text(
                 '${stock.symbol}',
+                key: ValueKey<String>('${stock.symbol}_symbol_name'),
                 style: Theme.of(context).textTheme.display2,
               ),
               arrow,

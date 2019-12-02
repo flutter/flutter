@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -968,6 +968,9 @@ class RenderShaderMask extends RenderProxyBox {
   ///
   /// The shader callback is called with the current size of the child so that
   /// it can customize the shader to the size and location of the child.
+  ///
+  /// The rectangle will always be at the origin when called by
+  /// [RenderShaderMask].
   // TODO(abarth): Use the delegate pattern here to avoid generating spurious
   // repaints when the ShaderCallback changes identity.
   ShaderCallback get shaderCallback => _shaderCallback;
@@ -2682,7 +2685,8 @@ class RenderMouseRegion extends RenderProxyBox {
       _onHover(event);
   }
 
-  /// Called when a pointer leaves the region (with or without buttons pressed).
+  /// Called when a pointer leaves the region (with or without buttons pressed)
+  /// and the annotation is still attached.
   PointerExitEventListener get onExit => _onExit;
   set onExit(PointerExitEventListener value) {
     if (_onExit != value) {

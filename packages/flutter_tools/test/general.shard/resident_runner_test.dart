@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -104,9 +104,7 @@ void main() {
       .thenAnswer((Invocation invocation) async {
         return testUri;
       });
-    when(mockFlutterDevice.vmServices).thenReturn(<VMService>[
-      mockVMService,
-    ]);
+    when(mockFlutterDevice.vmService).thenReturn(mockVMService);
     when(mockFlutterDevice.refreshViews()).thenAnswer((Invocation invocation) async { });
     when(mockFlutterDevice.reloadSources(any, pause: anyNamed('pause'))).thenReturn(<Future<Map<String, dynamic>>>[
       Future<Map<String, dynamic>>.value(<String, dynamic>{
@@ -633,9 +631,15 @@ void main() {
     );
 
     await flutterDevice.connect();
-    verify(mockLogReader.connectedVMServices = <VMService>[ mockVMService ]);
+    verify(mockLogReader.connectedVMService = mockVMService);
   }, overrides: <Type, Generator>{
-    VMServiceConnector: () => (Uri httpUri, { ReloadSources reloadSources, Restart restart, CompileExpression compileExpression, io.CompressionOptions compression }) async => mockVMService,
+    VMServiceConnector: () => (Uri httpUri, {
+      ReloadSources reloadSources,
+      Restart restart,
+      CompileExpression compileExpression,
+      io.CompressionOptions compression,
+      Device device,
+    }) async => mockVMService,
   }));
 }
 
