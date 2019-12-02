@@ -136,8 +136,7 @@ abstract class Route<T> {
   @mustCallSuper
   TickerFuture didPush() {
     return TickerFuture.complete()..then<void>((void _) {
-      final Offstage offstageWidget = navigator.context.findAncestorWidgetOfExactType<Offstage>();
-      if (offstageWidget == null || !offstageWidget.offstage) {
+      if (settings.autofocus) {
         navigator.focusScopeNode.requestFocus();
       }
     });
@@ -314,19 +313,22 @@ class RouteSettings {
   const RouteSettings({
     this.name,
     this.isInitialRoute = false,
+    this.autofocus = true,
     this.arguments,
-  });
+  }) : assert(autofocus != null);
 
   /// Creates a copy of this route settings object with the given fields
   /// replaced with the new values.
   RouteSettings copyWith({
     String name,
     bool isInitialRoute,
+    bool autofocus,
     Object arguments,
   }) {
     return RouteSettings(
       name: name ?? this.name,
       isInitialRoute: isInitialRoute ?? this.isInitialRoute,
+      autofocus: autofocus ?? this.autofocus,
       arguments: arguments ?? this.arguments,
     );
   }
@@ -340,6 +342,14 @@ class RouteSettings {
   ///
   /// The initial route typically skips any entrance transition to speed startup.
   final bool isInitialRoute;
+
+  /// Whether this route's [FocusScopeNode] should be focused automatically when
+  /// pushed.
+  ///
+  /// By default, the route's [FocusScopeNode] is focused when pushed.
+  ///
+  /// This happens as part of [Route.didPush].
+  final bool autofocus;
 
   /// The arguments passed to this route.
   ///

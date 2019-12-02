@@ -1185,13 +1185,14 @@ void main() {
     expect(find.byKey(const ValueKey<String>('/C')), findsOneWidget);
   });
 
-  testWidgets('focus acts correctly in the presence of offstage navigators', (WidgetTester tester) async {
+  testWidgets('route autofocus can be controlled with settings', (WidgetTester tester) async {
     Widget _childNavRouteBuilder(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
       return const Focus(debugLabel: 'Nav Child', child: Text('foobar'));
     }
 
-    Route<void> _childNavRoute(RouteSettings settings) {
+    Route<void> _childNavRoute(RouteSettings settings, {bool offstage = true}) {
       return PageRouteBuilder<void>(
+        settings: settings.copyWith(autofocus: !offstage),
         pageBuilder: _childNavRouteBuilder,
       );
     }
@@ -1201,32 +1202,34 @@ void main() {
     final GlobalKey<NavigatorState> navB = GlobalKey<NavigatorState>(debugLabel: 'navB');
     final GlobalKey<NavigatorState> navC = GlobalKey<NavigatorState>(debugLabel: 'navC');
 
-    await tester.pumpWidget(Directionality(
-      textDirection: TextDirection.ltr,
-      child: Navigator(
-        key: topLevelNav,
-        onGenerateRoute: (RouteSettings settings) {
-          return PageRouteBuilder<void>(
-            pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-              return Stack(
-                children: <Widget>[
-                  Offstage(
-                    child: Navigator(key: navA, onGenerateRoute: _childNavRoute),
-                  ),
-                  Offstage(
-                    offstage: false,
-                    child: Navigator(key: navB, onGenerateRoute: _childNavRoute),
-                  ),
-                  Offstage(
-                    child: Navigator(key: navC, onGenerateRoute: _childNavRoute),
-                  ),
-                ],
-              );
-            },
-          );
-        },
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Navigator(
+          key: topLevelNav,
+          onGenerateRoute: (RouteSettings settings) {
+            return PageRouteBuilder<void>(
+              pageBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+                return Stack(
+                  children: <Widget>[
+                    Offstage(
+                      child: Navigator(key: navA, onGenerateRoute: _childNavRoute),
+                    ),
+                    Offstage(
+                      offstage: false,
+                      child: Navigator(key: navB, onGenerateRoute: (RouteSettings settings) => _childNavRoute(settings, offstage: false)),
+                    ),
+                    Offstage(
+                      child: Navigator(key: navC, onGenerateRoute: _childNavRoute),
+                    ),
+                  ],
+                );
+              },
+            );
+          },
+        ),
       ),
-    ));
+    );
 
     await tester.pumpAndSettle();
 
