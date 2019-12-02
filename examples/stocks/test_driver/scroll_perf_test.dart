@@ -5,8 +5,7 @@
 import 'dart:async';
 
 import 'package:flutter_driver/flutter_driver.dart';
-// ignore: deprecated_member_use
-import 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf;
+import 'package:test/test.dart' hide TypeMatcher, isInstanceOf;
 
 void main() {
   group('scrolling performance test', () {

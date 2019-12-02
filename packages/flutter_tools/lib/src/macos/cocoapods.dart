@@ -77,7 +77,12 @@ class CocoaPods {
       processUtils.exitsHappy(<String>['which', 'pod']);
 
   Future<String> get cocoaPodsVersionText {
-    _versionText ??= processUtils.run(<String>['pod', '--version']).then<String>((RunResult result) {
+    _versionText ??= processUtils.run(
+      <String>['pod', '--version'],
+      environment: <String, String>{
+        'LANG': 'en_US.UTF-8',
+      },
+    ).then<String>((RunResult result) {
       return result.exitCode == 0 ? result.stdout.trim() : null;
     }, onError: (dynamic _) => null);
     return _versionText;
@@ -305,6 +310,7 @@ class CocoaPods {
         // See https://github.com/flutter/flutter/issues/10873.
         // CocoaPods analytics adds a lot of latency.
         'COCOAPODS_DISABLE_STATS': 'true',
+        'LANG': 'en_US.UTF-8',
       },
     );
     status.stop();
