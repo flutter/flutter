@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -1294,6 +1294,7 @@ class ClipRectLayer extends ContainerLayer {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Rect>('clipRect', clipRect));
+    properties.add(DiagnosticsProperty<Clip>('clipBehavior', clipBehavior));
   }
 }
 
@@ -1374,6 +1375,7 @@ class ClipRRectLayer extends ContainerLayer {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<RRect>('clipRRect', clipRRect));
+    properties.add(DiagnosticsProperty<Clip>('clipBehavior', clipBehavior));
   }
 }
 
@@ -1448,6 +1450,12 @@ class ClipPathLayer extends ContainerLayer {
     addChildrenToScene(builder, layerOffset);
     if (enabled)
       builder.pop();
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Clip>('clipBehavior', clipBehavior));
   }
 }
 
@@ -1665,6 +1673,11 @@ class OpacityLayer extends ContainerLayer {
 }
 
 /// A composited layer that applies a shader to its children.
+///
+/// The shader is only applied inside the given [maskRect]. The shader itself
+/// uses the top left of the [maskRect] as its origin.
+///
+/// The [maskRect] does not affect the positions of any child layers.
 class ShaderMaskLayer extends ContainerLayer {
   /// Creates a shader mask layer.
   ///
@@ -1680,8 +1693,16 @@ class ShaderMaskLayer extends ContainerLayer {
 
   /// The shader to apply to the children.
   ///
+  /// The origin of the shader (e.g. of the coordinate system used by the `from`
+  /// and `to` arguments to [ui.Gradient.linear]) is at the top left of the
+  /// [maskRect].
+  ///
   /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
+  ///
+  /// See also:
+  ///
+  ///  * [ui.Gradient] and [ui.ImageShader], two shader types that can be used.
   Shader get shader => _shader;
   Shader _shader;
   set shader(Shader value) {
@@ -1691,7 +1712,10 @@ class ShaderMaskLayer extends ContainerLayer {
     }
   }
 
-  /// The size of the shader.
+  /// The position and size of the shader.
+  ///
+  /// The [shader] is only rendered inside this rectangle, using the top left of
+  /// the rectangle as its origin.
   ///
   /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
@@ -1722,6 +1746,7 @@ class ShaderMaskLayer extends ContainerLayer {
     assert(shader != null);
     assert(maskRect != null);
     assert(blendMode != null);
+    assert(layerOffset != null);
     final Rect shiftedMaskRect = layerOffset == Offset.zero ? maskRect : maskRect.shift(layerOffset);
     engineLayer = builder.pushShaderMask(shader, shiftedMaskRect, blendMode, oldLayer: _engineLayer);
     addChildrenToScene(builder, layerOffset);

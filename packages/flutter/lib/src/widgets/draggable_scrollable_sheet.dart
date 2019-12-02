@@ -1,4 +1,4 @@
-// Copyright 2019 The Flutter Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -490,6 +490,8 @@ class _DraggableScrollableSheetScrollPosition
         velocity = ballisticController.velocity + (physics.tolerance.velocity * ballisticController.velocity.sign);
         super.goBallistic(velocity);
         ballisticController.stop();
+      } else if (ballisticController.isCompleted) {
+        super.goBallistic(0);
       }
     }
 

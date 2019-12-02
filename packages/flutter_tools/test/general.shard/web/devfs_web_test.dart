@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -51,7 +51,7 @@ void main() {
       headers = MockHttpHeaders();
       closeCompleter = Completer<void>();
       when(mockHttpServer.listen(any, onError: anyNamed('onError'))).thenAnswer((Invocation invocation) {
-        final Function callback = invocation.positionalArguments.first;
+        final void Function(HttpRequest) callback = invocation.positionalArguments.first as void Function(HttpRequest);
         return requestController.stream.listen(callback);
       });
       when(request.response).thenReturn(response);

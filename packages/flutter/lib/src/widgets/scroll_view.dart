@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -81,6 +81,7 @@ abstract class ScrollView extends StatelessWidget {
        assert(!shrinkWrap || center == null),
        assert(anchor != null),
        assert(anchor >= 0.0 && anchor <= 1.0),
+       assert(semanticChildCount == null || semanticChildCount >= 0),
        primary = primary ?? controller == null && identical(scrollDirection, Axis.vertical),
        physics = physics ?? (primary == true || (primary == null && controller == null && identical(scrollDirection, Axis.vertical)) ? const AlwaysScrollableScrollPhysics() : null),
        super(key: key);
@@ -943,7 +944,9 @@ class ListView extends BoxScrollView {
     double cacheExtent,
     int semanticChildCount,
     DragStartBehavior dragStartBehavior = DragStartBehavior.start,
-  }) : childrenDelegate = SliverChildBuilderDelegate(
+  }) : assert(itemCount == null || itemCount >= 0),
+       assert(semanticChildCount == null || semanticChildCount <= itemCount),
+       childrenDelegate = SliverChildBuilderDelegate(
          itemBuilder,
          childCount: itemCount,
          addAutomaticKeepAlives: addAutomaticKeepAlives,

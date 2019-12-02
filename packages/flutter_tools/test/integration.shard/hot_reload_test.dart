@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -108,18 +108,13 @@ void main() {
   });
 
   test('hot reload doesn\'t reassemble if paused', () async {
-    final Future<void> setup = _flutter.run(withDebugger: true);
-    final Completer<void> sawTick1 = Completer<void>();
+    await _flutter.run(withDebugger: true);
     final Completer<void> sawTick2 = Completer<void>();
     final Completer<void> sawTick3 = Completer<void>();
     final Completer<void> sawDebuggerPausedMessage1 = Completer<void>();
     final Completer<void> sawDebuggerPausedMessage2 = Completer<void>();
     final StreamSubscription<String> subscription = _flutter.stdout.listen(
       (String line) {
-        if (line.contains('((((TICK 1))))')) {
-          expect(sawTick1.isCompleted, isFalse);
-          sawTick1.complete();
-        }
         if (line.contains('((((TICK 2))))')) {
           expect(sawTick2.isCompleted, isFalse);
           sawTick2.complete();
@@ -134,8 +129,6 @@ void main() {
         }
       },
     );
-    await setup;
-    await sawTick1.future;
     await _flutter.addBreakpoint(
       _project.buildBreakpointUri,
       _project.buildBreakpointLine,

@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -145,6 +145,10 @@ class FlutterProject {
 
   /// The `.flutter-plugins` file of this project.
   File get flutterPluginsFile => directory.childFile('.flutter-plugins');
+
+  /// The `.flutter-plugins-dependencies` file of this project,
+  /// which contains the dependencies each plugin depends on.
+  File get flutterPluginsDependenciesFile => directory.childFile('.flutter-plugins-dependencies');
 
   /// The `.dart-tool` directory of this project.
   Directory get dartTool => directory.childDirectory('.dart_tool');

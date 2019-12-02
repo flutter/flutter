@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -291,12 +291,20 @@ Future<void> _runBuildTests() async {
       await _flutterBuildIpa(examplePath);
     }
   }
-  // Web compilation tests.
-  await _flutterBuildDart2js(path.join('dev', 'integration_tests', 'web'), path.join('lib', 'main.dart'));
-  // Should not fail to compile with dart:io.
-  await _flutterBuildDart2js(path.join('dev', 'integration_tests', 'web_compile_tests'),
-    path.join('lib', 'dart_io_import.dart'),
-  );
+
+  final String branch = Platform.environment['CIRRUS_BRANCH'];
+  if (branch != 'beta' && branch != 'stable') {
+    // Web compilation tests.
+    await _flutterBuildDart2js(
+      path.join('dev', 'integration_tests', 'web'),
+      path.join('lib', 'main.dart'),
+    );
+    // Should not fail to compile with dart:io.
+    await _flutterBuildDart2js(
+      path.join('dev', 'integration_tests', 'web_compile_tests'),
+      path.join('lib', 'dart_io_import.dart'),
+    );
+  }
 }
 
 Future<void> _flutterBuildAot(String relativePathToApplication) async {
@@ -755,6 +763,7 @@ Future<void> _runHostOnlyDeviceLabTests() async {
 
     () => _runDevicelabTest('module_host_with_custom_build_test', environment: gradleEnvironment, testEmbeddingV2: true),
     () => _runDevicelabTest('module_test', environment: gradleEnvironment, testEmbeddingV2: true),
+    () => _runDevicelabTest('plugin_dependencies_test', environment: gradleEnvironment),
 
     // TODO(jmagman): Re-enable once flakiness is resolved, https://github.com/flutter/flutter/issues/37525
     // if (Platform.isMacOS) () => _runDevicelabTest('module_test_ios'),

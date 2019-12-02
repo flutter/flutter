@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -34,7 +34,7 @@ void main() {
   testUsingContext('pub get 69', () async {
     String error;
 
-    final MockProcessManager processMock = context.get<ProcessManager>();
+    final MockProcessManager processMock = context.get<ProcessManager>() as MockProcessManager;
 
     FakeAsync().run((FakeAsync time) {
       expect(processMock.lastPubEnvironment, isNull);
@@ -158,7 +158,7 @@ void main() {
   testUsingContext('pub cache in environment is used', () async {
     String error;
 
-    final MockProcessManager processMock = context.get<ProcessManager>();
+    final MockProcessManager processMock = context.get<ProcessManager>() as MockProcessManager;
 
     FakeAsync().run((FakeAsync time) {
       MockDirectory.findCache = true;
@@ -410,7 +410,7 @@ class MockFileSystem extends ForwardingFileSystem {
 
   @override
   Directory directory(dynamic path) {
-    return MockDirectory(path);
+    return MockDirectory(path as String);
   }
 }
 

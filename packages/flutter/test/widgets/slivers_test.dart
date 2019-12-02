@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -439,6 +439,46 @@ void main() {
       )
     );
   }
+
+  group('SliverOffstage - ', () {
+    testWidgets('offstage true', (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
+      await tester.pumpWidget(_boilerPlate(
+        const SliverOffstage(
+          offstage: true,
+          sliver: SliverToBoxAdapter(
+            child: Text('a'),
+          )
+        )
+      ));
+
+      expect(semantics.nodesWith(label: 'a'), hasLength(0));
+      expect(find.byType(Text), findsNothing);
+      final RenderViewport renderViewport = tester.renderObject(find.byType(Viewport));
+      final RenderSliver renderSliver = renderViewport.lastChild;
+      expect(renderSliver.geometry.scrollExtent, 0.0);
+      expect(find.byType(SliverOffstage), findsNothing);
+    });
+
+    testWidgets('offstage false', (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
+      await tester.pumpWidget(_boilerPlate(
+        const SliverOffstage(
+          offstage: false,
+          sliver: SliverToBoxAdapter(
+            child: Text('a'),
+          )
+        )
+      ));
+
+      expect(semantics.nodesWith(label: 'a'), hasLength(1));
+      expect(find.byType(Text), findsOneWidget);
+      final RenderViewport renderViewport = tester.renderObject(find.byType(Viewport));
+      final RenderSliver renderSliver = renderViewport.lastChild;
+      expect(renderSliver.geometry.scrollExtent, 14.0);
+      expect(find.byType(SliverOffstage), paints..paragraph());
+    });
+  });
 
   group('SliverOpacity - ', () {
     testWidgets('painting & semantics', (WidgetTester tester) async {
