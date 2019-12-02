@@ -275,6 +275,8 @@ Future<void> _runToolTests() async {
 
 // Example apps that should not be built by _runBuildTests`
 const List<String> _excludedExampleApplications = <String>[
+  // This application contains no platform code and cannot be built, except for
+  // as a part of a '--fast-start' Android application.
   'splash',
 ];
 
