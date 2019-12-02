@@ -14,16 +14,16 @@ import 'package:path/path.dart' as path;
 import 'package:pedantic/pedantic.dart';
 import 'package:stream_channel/isolate_channel.dart';
 import 'package:stream_channel/stream_channel.dart';
-import 'package:test_core/src/runner/hack_register_platform.dart' as hack; // ignore: implementation_imports
-import 'package:test_core/src/executable.dart' as test; // ignore: implementation_imports
-import 'package:vm_service_client/vm_service_client.dart'; // ignore: deprecated_member_use
-import 'package:test_api/src/backend/runtime.dart'; // ignore: implementation_imports
-import 'package:test_api/src/backend/suite_platform.dart'; // ignore: implementation_imports
-import 'package:test_core/src/runner/platform.dart'; // ignore: implementation_imports
-import 'package:test_core/src/runner/runner_suite.dart'; // ignore: implementation_imports
-import 'package:test_core/src/runner/suite.dart'; // ignore: implementation_imports
-import 'package:test_core/src/runner/plugin/platform_helpers.dart'; // ignore: implementation_imports
-import 'package:test_core/src/runner/environment.dart'; // ignore: implementation_imports
+import 'package:test_core/src/runner/hack_register_platform.dart' as hack;
+import 'package:test_core/src/executable.dart' as test;
+import 'package:vm_service_client/vm_service_client.dart';
+import 'package:test_api/src/backend/runtime.dart';
+import 'package:test_api/src/backend/suite_platform.dart';
+import 'package:test_core/src/runner/platform.dart';
+import 'package:test_core/src/runner/runner_suite.dart';
+import 'package:test_core/src/runner/suite.dart';
+import 'package:test_core/src/runner/plugin/platform_helpers.dart';
+import 'package:test_core/src/runner/environment.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/test/coverage_collector.dart';
 

@@ -51,7 +51,7 @@ void main() {
       for (File file in files) {
         for (String line in file.readAsLinesSync()) {
           if (line.startsWith(RegExp(r'import.*dart:io')) &&
-              !line.contains('ignore: dart_io_import')) {
+              !line.contains('ignore_for_flutter: dart_io_import')) {
             final String relativePath = fs.path.relative(file.path, from:flutterTools);
             fail("$relativePath imports 'dart:io'; import 'lib/src/base/io.dart' instead");
           }
@@ -71,7 +71,7 @@ void main() {
       for (File file in files) {
         for (String line in file.readAsLinesSync()) {
           if (line.startsWith(RegExp(r'import.*package:path/path.dart')) &&
-              !line.contains('ignore: package_path_import')) {
+              !line.contains('ignore_for_flutter: package_path_import')) {
             final String relativePath = fs.path.relative(file.path, from:flutterTools);
             fail("$relativePath imports 'package:path/path.dart'; use 'fs.path' instead");
           }
@@ -95,7 +95,7 @@ void main() {
       for (File file in files) {
         for (String line in file.readAsLinesSync()) {
           if (line.startsWith(RegExp(r'import.*dart:convert')) &&
-              !line.contains('ignore: dart_convert_import')) {
+              !line.contains('ignore_for_flutter: dart_convert_import')) {
             final String relativePath = fs.path.relative(file.path, from:flutterTools);
             fail("$relativePath imports 'dart:convert'; import 'lib/src/convert.dart' instead");
           }

@@ -22,7 +22,7 @@ import 'package:build_test/src/debug_test_builder.dart';
 import 'package:build_web_compilers/build_web_compilers.dart';
 import 'package:build_web_compilers/builders.dart';
 import 'package:build_web_compilers/src/dev_compiler_bootstrap.dart';
-import 'package:path/path.dart' as path; // ignore: package_path_import
+import 'package:path/path.dart' as path; // ignore_for_flutter: package_path_import
 import 'package:test_core/backend.dart'; // ignore: deprecated_member_use
 
 const String ddcBootstrapExtension = '.dart.bootstrap.js';
@@ -265,10 +265,10 @@ import 'dart:html';
 import 'dart:js';
 
 import 'package:stream_channel/stream_channel.dart';
-import 'package:test_api/src/backend/stack_trace_formatter.dart'; // ignore: implementation_imports
-import 'package:test_api/src/util/stack_trace_mapper.dart'; // ignore: implementation_imports
-import 'package:test_api/src/remote_listener.dart'; // ignore: implementation_imports
-import 'package:test_api/src/suite_channel_manager.dart'; // ignore: implementation_imports
+import 'package:test_api/src/backend/stack_trace_formatter.dart';
+import 'package:test_api/src/util/stack_trace_mapper.dart';
+import 'package:test_api/src/remote_listener.dart';
+import 'package:test_api/src/suite_channel_manager.dart';
 
 import "${path.url.basename(id.path)}" as test;
 

@@ -39,7 +39,6 @@ dependencies:
       dartFile.writeAsStringSync('''
 import 'dart:$lib' as $lib;
 void main() {
-  // ignore: unnecessary_statements
   $lib.$member;
 }
 ''');
