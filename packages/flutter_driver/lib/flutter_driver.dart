@@ -11,22 +11,39 @@
 /// Protractor (Angular), Espresso (Android) or Earl Gray (iOS).
 library flutter_driver;
 
-export 'src/common/diagnostics_tree.dart';
-export 'src/common/enum_util.dart';
-export 'src/common/error.dart';
-export 'src/common/find.dart';
-export 'src/common/frame_sync.dart';
-export 'src/common/fuchsia_compat.dart';
-export 'src/common/geometry.dart';
-export 'src/common/gesture.dart';
-export 'src/common/health.dart';
-export 'src/common/message.dart';
-export 'src/common/render_tree.dart';
-export 'src/common/request_data.dart';
-export 'src/common/semantics.dart';
-export 'src/common/text.dart';
-export 'src/common/wait.dart';
-export 'src/driver/common.dart';
-export 'src/driver/driver.dart';
-export 'src/driver/timeline.dart';
-export 'src/driver/timeline_summary.dart';
+export 'src/common/error.dart' show
+  DriverError,
+  LogLevel,
+  LogRecord,
+  flutterDriverLog;
+export 'src/common/find.dart' show
+  SerializableFinder;
+export 'src/common/health.dart' show
+  Health,
+  HealthStatus;
+export 'src/common/message.dart' show
+  Command,
+  Result;
+export 'src/common/render_tree.dart' show
+  RenderTree;
+export 'src/common/wait.dart' show
+  CombinedCondition,
+  FirstFrameRasterized,
+  NoPendingFrame,
+  NoPendingPlatformMessages,
+  NoTransientCallbacks,
+  SerializableWaitCondition;
+export 'src/driver/common.dart' show
+  testOutputsDirectory;
+export 'src/driver/driver.dart' show
+  find,
+  CommonFinders,
+  EvaluatorFunction,
+  FlutterDriver,
+  TimelineStream;
+export 'src/driver/timeline.dart' show
+  Timeline,
+  TimelineEvent;
+export 'src/driver/timeline_summary.dart' show
+  TimelineSummary,
+  kBuildBudget;
