@@ -550,7 +550,7 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
     final double _defaultTrackHeight = useV2Slider ? 4 : 2;
     final RangeSliderTrackShape _defaultTrackShape = RoundedRectRangeSliderTrackShape(useV2Slider: useV2Slider);
     final RangeSliderTickMarkShape _defaultTickMarkShape = RoundRangeSliderTickMarkShape(useV2Slider: useV2Slider);
-    final SliderComponentShape _defaultOverlayShape = RoundSliderOverlayShape();
+    const SliderComponentShape _defaultOverlayShape = RoundSliderOverlayShape();
     final RangeSliderThumbShape _defaultThumbShape = RoundRangeSliderThumbShape(useV2Slider: useV2Slider);
     final RangeSliderValueIndicatorShape _defaultValueIndicatorShape = useV2Slider ? const RectangularRangeSliderValueIndicatorShape() : const PaddleRangeSliderValueIndicatorShape();
     const ShowValueIndicator _defaultShowValueIndicator = ShowValueIndicator.onlyForDiscrete;
