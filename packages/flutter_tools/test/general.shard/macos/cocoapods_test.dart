@@ -166,7 +166,7 @@ void main() {
       pretendPodVersionIs('1.8.0');
       expect(await cocoaPodsUnderTest.isCocoaPodsInitialized, isTrue);
     }, overrides: <Type, Generator>{
-      Platform: () => FakePlatform(localeName: 'en_US'),
+      Platform: () => FakePlatform(),
       FileSystem: () => fs,
       ProcessManager: () => mockProcessManager,
     });
@@ -626,6 +626,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
       environment = <String, String>{
         'FLUTTER_FRAMEWORK_DIR': 'engine/path',
         'COCOAPODS_DISABLE_STATS': 'true',
+        'CP_REPOS_DIR': cocoapodsRepoDir,
         'LANG': 'en_US.UTF8',
       };
     });
@@ -648,10 +649,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
       ProcessManager: () => mockProcessManager,
-      Platform: () => FakePlatform(
-        environment: <String, String>{ 'CP_REPOS_DIR': cocoapodsRepoDir },
-        localeName: 'en_US'
-      ),
+      Platform: () => FakePlatform(environment: environment),
     });
   });
 }
