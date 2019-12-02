@@ -2,13 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools/src/compile.dart';
-
 import '../../artifacts.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
 import '../../base/process_manager.dart';
 import '../../build_info.dart';
+import '../../compile.dart';
 import '../../dart/package_map.dart';
 import '../../globals.dart';
 import '../../project.dart';
