@@ -55,7 +55,10 @@ class WebEntrypointTarget extends Target {
     final String importPath = fs.path.absolute(targetFile);
     final PackageUriMapper packageUriMapper = PackageUriMapper(
       importPath,
-      PackageMap.globalPackagesPath, null, null);
+      PackageMap.globalPackagesPath,
+      null,
+      null,
+    );
     final Uri mainImport = packageUriMapper.map(importPath);
     if (mainImport == null) {
       throw Exception('Missing package definition for $mainImport');
@@ -74,7 +77,7 @@ import 'dart:ui' as ui;
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 
 import '$generatedImport';
-import "$mainImport" as entrypoint;
+import '$mainImport' as entrypoint;
 
 Future<void> main() async {
   registerPlugins(webPluginRegistry);
@@ -88,7 +91,7 @@ Future<void> main() async {
       contents = '''
 import 'dart:ui' as ui;
 
-import "$mainImport" as entrypoint;
+import '$mainImport' as entrypoint;
 
 Future<void> main() async {
   if ($shouldInitializePlatform) {
