@@ -224,7 +224,19 @@ abstract class BaseTapGestureRecognizer extends PrimaryPointerGestureRecognizer 
 
   @override
   void didExceedDeadline() {
-    _checkDown();
+    // The situation that [didExceedDeadline] is called after `_reset` can
+    // happen if a non-primary pointer is tracked, and the primary pointer goes
+    // up before the timeout. The timer is only reset when it stops tracking
+    // the last pointer, but `_reset` is called at the Up event. We can't put
+    // `_reset` at [didStopTrackingLastPointer] either, since when arena might
+    // be resolved some time after [didStopTrackingLastPointer].
+    //
+    // The best way might be to reset the timer and the states at a new method
+    // [didEndSequence], which is triggered when no pointer is tracked or
+    // unresolved. But it'll be breaking too many existing tests that we might
+    // not want to do it now.
+    if (_down != null)
+      _checkDown();
   }
 
   @override

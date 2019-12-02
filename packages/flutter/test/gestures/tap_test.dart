@@ -584,6 +584,9 @@ void main() {
 
   testGesture('non-primary pointers does not trigger timtout', (GestureTester tester) {
     // Regression test for https://github.com/flutter/flutter/issues/43310
+    // Pointer1 down, pointer2 down, then pointer 1 up, all within the timeout.
+    // In this way, `BaseTapGestureRecognizer.didExceedDeadline` can be triggered
+    // after its `_reset`.
     final TapGestureRecognizer tap = TapGestureRecognizer();
 
     final List<String> recognized = <String>[];
