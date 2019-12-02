@@ -290,7 +290,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   /// Whether frames produced by [drawFrame] are sent to the engine.
   ///
   /// If false the framework will do all the work to produce a frame,
-  /// but the frame is never send to the engine to actually appear on screen.
+  /// but the frame is never sent to the engine to actually appear on screen.
   ///
   /// See also:
   ///
