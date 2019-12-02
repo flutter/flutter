@@ -48,20 +48,35 @@ void main() {
   });
 
   group('getAllConnectedDevices()', () {
-    testUsingContext('ignores exceptions if passed argument ignoreExceptions = true', () async {
-      final MockIosDevices mockIosDevices = MockIosDevices();
-      when(mockIosDevices.pollingGetDevices()).thenThrow(
-        const IOSDeviceNotTrustedError('yolo', LockdownReturnCode.passwordProtected)
+    MockIosDevices mockIosDevices;
+    List<DeviceDiscovery> discoverers;
+
+    setUpAll(() {
+      mockIosDevices = MockIosDevices();
+      when(mockIosDevices.devices).thenThrow(
+        const IOSDeviceNotTrustedError('Error', LockdownReturnCode.passwordProtected)
       );
-      final List<DeviceDiscovery> discoverers = <DeviceDiscovery>[
-        mockIosDevices,
-      ];
+      when(mockIosDevices.supportsPlatform).thenReturn(true);
+      discoverers = <DeviceDiscovery>[mockIosDevices];
+    });
+
+    testUsingContext('does not swallow exceptions if ignoreExceptions argument not passed', () async {
+      final DiscovererInjectedDeviceManager deviceManager = DiscovererInjectedDeviceManager(discoverers);
+      await expectLater(
+        deviceManager.getAllConnectedDevices().toList(),
+        throwsA(isInstanceOf<IOSDeviceNotTrustedError>()),
+      );
+    }, overrides: <Type, Generator>{
+      Platform: () => macPlatform,
+    });
+
+    testUsingContext('swallows exceptions if passed argument ignoreExceptions = true', () async {
       final DiscovererInjectedDeviceManager deviceManager = DiscovererInjectedDeviceManager(discoverers);
       try {
-        await deviceManager.getAllConnectedDevices().toList();
+        await deviceManager.getAllConnectedDevices(true).toList();
       } catch (e) {
         // There should be no exceptions
-        rethrow;
+        expect(true, false, reason: 'exceptions were thrown!');
       }
     }, overrides: <Type, Generator>{
       Platform: () => macPlatform,
