@@ -585,10 +585,7 @@ class BoxConstraints extends Constraints {
       return true;
     if (runtimeType != other.runtimeType)
       return false;
-    assert(() {
-      return other is BoxConstraints
-          && other.debugAssertIsValid();
-    }());
+    assert(other is BoxConstraints && other.debugAssertIsValid());
     return other is BoxConstraints
         && other.minWidth == minWidth
         && other.maxWidth == maxWidth

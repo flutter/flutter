@@ -451,10 +451,9 @@ class SliverConstraints extends Constraints {
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
-    assert(() {
-      return other is SliverConstraints
-          && other.debugAssertIsValid();
-    }());
+    if (other is! SliverConstraints)
+      return false;
+    assert(other is SliverConstraints && other.debugAssertIsValid());
     return other is SliverConstraints
         && other.axisDirection == axisDirection
         && other.growthDirection == growthDirection

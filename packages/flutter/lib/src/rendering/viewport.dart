@@ -659,7 +659,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     RenderBox pivot;
     bool onlySlivers = target is RenderSliver; // ... between viewport and `target` (`target` included).
     while (child.parent != this) {
-      final AbstractNode parent = child.parent;
+      final RenderObject parent = child.parent as RenderObject;
       assert(parent != null, '$target must be a descendant of $this');
       if (child is RenderBox) {
         pivot = child;
@@ -670,7 +670,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
         onlySlivers = false;
         leadingScrollOffset = 0.0;
       }
-      child = parent as RenderObject;
+      child = parent;
     }
 
     if (pivot != null) {
