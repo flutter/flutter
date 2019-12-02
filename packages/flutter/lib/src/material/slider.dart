@@ -401,7 +401,7 @@ class Slider extends StatefulWidget {
     properties.add(StringProperty('label', label));
     properties.add(ColorProperty('activeColor', activeColor));
     properties.add(ColorProperty('inactiveColor', inactiveColor));
-    properties.add(ColorProperty('useV2Slider', useV2Slider));
+    properties.add(FlagProperty('useV2Slider', value: useV2Slider));
     properties.add(ObjectFlagProperty<ValueChanged<double>>.has('semanticFormatterCallback', semanticFormatterCallback));
   }
 }
@@ -489,15 +489,6 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     return widget.max > widget.min ? (value - widget.min) / (widget.max - widget.min) : 0.0;
   }
 
-  final bool useV2Slider = widget.useV2Slider;
-  static const double _defaultTrackHeight = useV2Slider ? 4 : 2;
-  static const SliderTrackShape _defaultTrackShape = RoundedRectSliderTrackShape(useV2Slider: useV2Slider);
-  static const SliderTickMarkShape _defaultTickMarkShape = RoundSliderTickMarkShape(useV2Slider: useV2Slider);
-  static const SliderComponentShape _defaultOverlayShape = RoundSliderOverlayShape();
-  static const SliderComponentShape _defaultThumbShape = RoundSliderThumbShape(useV2Slider: useV2Slider);
-  static const SliderComponentShape _defaultValueIndicatorShape = useV2Slider ? RectangularSliderValueIndicatorShape() : PaddleSliderValueIndicatorShape();
-  static const ShowValueIndicator _defaultShowValueIndicator = ShowValueIndicator.onlyForDiscrete;
-
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
@@ -534,6 +525,15 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
     // colors come from the ThemeData.colorScheme. These colors, along with
     // the default shapes and text styles are aligned to the Material
     // Guidelines.
+
+    final bool useV2Slider = widget.useV2Slider;
+    final double _defaultTrackHeight = useV2Slider ? 4 : 2;
+    final SliderTrackShape _defaultTrackShape = RoundedRectSliderTrackShape(useV2Slider: useV2Slider);
+    final SliderTickMarkShape _defaultTickMarkShape = RoundSliderTickMarkShape(useV2Slider: useV2Slider);
+    const SliderComponentShape _defaultOverlayShape = RoundSliderOverlayShape();
+    final SliderComponentShape _defaultThumbShape = RoundSliderThumbShape(useV2Slider: useV2Slider);
+    final SliderComponentShape _defaultValueIndicatorShape = useV2Slider ? const RectangularSliderValueIndicatorShape() : const PaddleSliderValueIndicatorShape();
+    const ShowValueIndicator _defaultShowValueIndicator = ShowValueIndicator.onlyForDiscrete;
 
     // The value indicator color is not the same as the thumb and active track
     // (which can be defined by activeColor) if the
@@ -1181,7 +1181,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
         isEnabled: isInteractive,
         sliderTheme: _sliderTheme,
       ).width;
-      final double adjustedTrackWidth = trackRect.width - _useV2Slider ? trackRect.height : tickMarkWidth;
+      final double adjustedTrackWidth = trackRect.width - (_useV2Slider ? trackRect.height : tickMarkWidth);
       // If the tick marks would be too dense, don't bother painting them.
       if (adjustedTrackWidth / divisions >= 3.0 * tickMarkWidth) {
         final double dy = trackRect.center.dy;

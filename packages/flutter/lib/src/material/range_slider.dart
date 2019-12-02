@@ -362,7 +362,7 @@ class RangeSlider extends StatefulWidget {
     properties.add(StringProperty('labelEnd', labels?.end));
     properties.add(ColorProperty('activeColor', activeColor));
     properties.add(ColorProperty('inactiveColor', inactiveColor));
-    properties.add(BoolProperty('useV2Slider', useV2Slider));
+    properties.add(FlagProperty('useV2Slider', value: useV2Slider));
     properties.add(ObjectFlagProperty<ValueChanged<RangeValues>>.has('semanticFormatterCallback', semanticFormatterCallback));
   }
 }
@@ -529,15 +529,7 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
     return null;
   };
 
-  final bool useV2Slider = widget.useV2Slider;
-  static const double _defaultTrackHeight = useV2Slider ? 4 : 2;
-  static const RangeSliderTrackShape _defaultTrackShape = RoundedRectRangeSliderTrackShape(useV2Slider: useV2Slider);
-  static const RangeSliderTickMarkShape _defaultTickMarkShape = RoundRangeSliderTickMarkShape(useV2Slider: useV2Slider);
-  static const SliderComponentShape _defaultOverlayShape = RoundSliderOverlayShape();
-  static const RangeSliderThumbShape _defaultThumbShape = RoundRangeSliderThumbShape(useV2Slider: useV2Slider);
-  static const RangeSliderValueIndicatorShape _defaultValueIndicatorShape = useV2Slider ? RectangularRangeSliderValueIndicatorShape() : PaddleRangeSliderValueIndicatorShape();
-  static const ShowValueIndicator _defaultShowValueIndicator = ShowValueIndicator.onlyForDiscrete;
-  static const double _defaultMinThumbSeparation = 8;
+
 
   @override
   Widget build(BuildContext context) {
@@ -553,6 +545,16 @@ class _RangeSliderState extends State<RangeSlider> with TickerProviderStateMixin
     // colors come from the ThemeData.colorScheme. These colors, along with
     // the default shapes and text styles are aligned to the Material
     // Guidelines.
+
+    final bool useV2Slider = widget.useV2Slider;
+    final double _defaultTrackHeight = useV2Slider ? 4 : 2;
+    final RangeSliderTrackShape _defaultTrackShape = RoundedRectRangeSliderTrackShape(useV2Slider: useV2Slider);
+    final RangeSliderTickMarkShape _defaultTickMarkShape = RoundRangeSliderTickMarkShape(useV2Slider: useV2Slider);
+    final SliderComponentShape _defaultOverlayShape = RoundSliderOverlayShape();
+    final RangeSliderThumbShape _defaultThumbShape = RoundRangeSliderThumbShape(useV2Slider: useV2Slider);
+    final RangeSliderValueIndicatorShape _defaultValueIndicatorShape = useV2Slider ? const RectangularRangeSliderValueIndicatorShape() : const PaddleRangeSliderValueIndicatorShape();
+    const ShowValueIndicator _defaultShowValueIndicator = ShowValueIndicator.onlyForDiscrete;
+    const double _defaultMinThumbSeparation = 8;
 
     // The value indicator color is not the same as the thumb and active track
     // (which can be defined by activeColor) if the
@@ -1288,7 +1290,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
         isEnabled: isEnabled,
         sliderTheme: _sliderTheme,
       ).width;
-      final double adjustedTrackWidth = trackRect.width - _useV2Slider ? trackRect.height : tickMarkWidth;
+      final double adjustedTrackWidth = trackRect.width - (_useV2Slider ? trackRect.height : tickMarkWidth);
       // If the tick marks would be too dense, don't bother painting them.
       if (adjustedTrackWidth / divisions >= 3.0 * tickMarkWidth) {
         final double dy = trackRect.center.dy;
