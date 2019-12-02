@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -138,14 +138,6 @@ List<GalleryDemo> _buildGalleryDemos() {
       category: _kDemos,
       routeName: PestoDemo.routeName,
       buildRoute: (BuildContext context) => const PestoDemo(),
-    ),
-    GalleryDemo(
-      title: 'Rally',
-      subtitle: 'A personal finance app',
-      icon: GalleryIcons.data_table,
-      category: _kDemos,
-      routeName: RallyDemo.routeName,
-      buildRoute: (BuildContext context) => const RallyDemo(),
     ),
 
     // Style

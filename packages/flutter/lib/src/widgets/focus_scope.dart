@@ -1,6 +1,7 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
 import 'package:flutter/foundation.dart';
 
 import 'basic.dart';
@@ -266,7 +267,7 @@ class Focus extends StatefulWidget {
     assert(context != null);
     assert(nullOk != null);
     assert(scopeOk != null);
-    final _FocusMarker marker = context.inheritFromWidgetOfExactType(_FocusMarker);
+    final _FocusMarker marker = context.dependOnInheritedWidgetOfExactType<_FocusMarker>();
     final FocusNode node = marker?.notifier;
     if (node == null) {
       if (!nullOk) {
@@ -538,7 +539,7 @@ class FocusScope extends Focus {
   /// The [context] argument must not be null.
   static FocusScopeNode of(BuildContext context) {
     assert(context != null);
-    final _FocusMarker marker = context.inheritFromWidgetOfExactType(_FocusMarker);
+    final _FocusMarker marker = context.dependOnInheritedWidgetOfExactType<_FocusMarker>();
     return marker?.notifier?.nearestScope ?? context.owner.focusManager.rootScope;
   }
 

@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -808,8 +808,6 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
         'active mouse gesture to remove the mouse pointer.');
     // ignore: invalid_use_of_visible_for_testing_member
     RendererBinding.instance.initMouseTracker();
-    // ignore: invalid_use_of_visible_for_testing_member
-    PointerEventConverter.clearPointers();
   }
 }
 

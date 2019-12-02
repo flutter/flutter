@@ -1,4 +1,7 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# Copyright 2014 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
 
 set -e
 
@@ -100,6 +103,9 @@ elif [[ "$OS" == "darwin" ]]; then
       echo "Testing archiving with distribution profile..."
       (
         cd examples/flutter_gallery/ios
+        # Cirrus Mac VMs come with an old version of fastlane which was causing
+        # dependency issues (https://github.com/flutter/flutter/issues/43435),
+        # so explicitly use the version specified in $BUNDLE_GEMFILE.
         bundle exec fastlane build_and_deploy_testflight
       )
       echo "(Not deploying; Flutter Gallery is only deployed to TestFlight for tagged dev branch commits.)"

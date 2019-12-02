@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -85,7 +85,6 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
-    DevelopmentArtifact.universal,
     DevelopmentArtifact.iOS,
   };
 
@@ -149,10 +148,6 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
 
     final Directory outputDirectory = fs.directory(fs.path.normalize(outputArgument));
 
-    if (outputDirectory.existsSync()) {
-      outputDirectory.deleteSync(recursive: true);
-    }
-
     aotBuilder ??= AotBuilder();
     bundleBuilder ??= BundleBuilder();
 
@@ -160,6 +155,10 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
       printStatus('Building framework for $iosProject in ${getNameForBuildMode(mode)} mode...');
       final String xcodeBuildConfiguration = toTitleCase(getNameForBuildMode(mode));
       final Directory modeDirectory = outputDirectory.childDirectory(xcodeBuildConfiguration);
+
+      if (modeDirectory.existsSync()) {
+        modeDirectory.deleteSync(recursive: true);
+      }
       final Directory iPhoneBuildOutput = modeDirectory.childDirectory('iphoneos');
       final Directory simulatorBuildOutput = modeDirectory.childDirectory('iphonesimulator');
 

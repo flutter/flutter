@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -208,12 +208,12 @@ class AndroidAot extends AotElfBase {
 }
 
 // AndroidAot instances used by the bundle rules below.
-const Target androidArmProfile = AndroidAot(TargetPlatform.android_arm,  BuildMode.profile);
-const Target androidArm64Profile = AndroidAot(TargetPlatform.android_arm64, BuildMode.profile);
-const Target androidx64Profile = AndroidAot(TargetPlatform.android_x64, BuildMode.profile);
-const Target androidArmRelease = AndroidAot(TargetPlatform.android_arm,  BuildMode.release);
-const Target androidArm64Release = AndroidAot(TargetPlatform.android_arm64, BuildMode.release);
-const Target androidx64Release = AndroidAot(TargetPlatform.android_x64, BuildMode.release);
+const AndroidAot androidArmProfile = AndroidAot(TargetPlatform.android_arm,  BuildMode.profile);
+const AndroidAot androidArm64Profile = AndroidAot(TargetPlatform.android_arm64, BuildMode.profile);
+const AndroidAot androidx64Profile = AndroidAot(TargetPlatform.android_x64, BuildMode.profile);
+const AndroidAot androidArmRelease = AndroidAot(TargetPlatform.android_arm,  BuildMode.release);
+const AndroidAot androidArm64Release = AndroidAot(TargetPlatform.android_arm64, BuildMode.release);
+const AndroidAot androidx64Release = AndroidAot(TargetPlatform.android_x64, BuildMode.release);
 
 /// A rule paired with [AndroidAot] that copies the produced so files into the output directory.
 class AndroidAotBundle extends Target {

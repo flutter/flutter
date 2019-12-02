@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -63,6 +63,9 @@ class DevelopmentArtifact {
   static const DevelopmentArtifact flutterRunner = DevelopmentArtifact._('flutter_runner', unstable: true);
 
   /// Artifacts required for any development platform.
+  ///
+  /// This does not need to be explicitly returned from requiredArtifacts as
+  /// it will always be downloaded.
   static const DevelopmentArtifact universal = DevelopmentArtifact._('universal');
 
   /// The values of DevelopmentArtifacts.

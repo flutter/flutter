@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -106,9 +106,7 @@ class TestCommand extends FastFlutterCommand {
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async {
-    final Set<DevelopmentArtifact> results = <DevelopmentArtifact>{
-      DevelopmentArtifact.universal,
-    };
+    final Set<DevelopmentArtifact> results = <DevelopmentArtifact>{};
     if (stringArg('platform') == 'chrome') {
       results.add(DevelopmentArtifact.web);
     }

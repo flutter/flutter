@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -211,7 +211,7 @@ void main() {
     fs.file('.packages').createSync();
     final CommandRunner<void> runner = createTestCommandRunner(BuildBundleCommand());
     when(buildSystem.build(any, any)).thenAnswer((Invocation invocation) async {
-      final Environment environment = invocation.positionalArguments[1];
+      final Environment environment = invocation.positionalArguments[1] as Environment;
       expect(environment.defines, <String, String>{
         kTargetFile: fs.path.join('lib', 'main.dart'),
         kBuildMode: 'debug',

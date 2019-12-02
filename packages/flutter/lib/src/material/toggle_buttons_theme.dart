@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -264,13 +264,13 @@ class ToggleButtonsTheme extends InheritedTheme {
   /// ToggleButtonsTheme theme = ToggleButtonsTheme.of(context);
   /// ```
   static ToggleButtonsThemeData of(BuildContext context) {
-    final ToggleButtonsTheme toggleButtonsTheme = context.inheritFromWidgetOfExactType(ToggleButtonsTheme);
+    final ToggleButtonsTheme toggleButtonsTheme = context.dependOnInheritedWidgetOfExactType<ToggleButtonsTheme>();
     return toggleButtonsTheme?.data ?? Theme.of(context).toggleButtonsTheme;
   }
 
   @override
   Widget wrap(BuildContext context, Widget child) {
-    final ToggleButtonsTheme ancestorTheme = context.ancestorWidgetOfExactType(ToggleButtonsTheme);
+    final ToggleButtonsTheme ancestorTheme = context.findAncestorWidgetOfExactType<ToggleButtonsTheme>();
     return identical(this, ancestorTheme) ? child : ToggleButtonsTheme(data: data, child: child);
   }
 

@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -25,7 +25,6 @@ ThemeData _buildDarkTheme() {
   final ThemeData base = ThemeData(
     brightness: Brightness.dark,
     accentColorBrightness: Brightness.dark,
-    colorScheme: colorScheme,
     primaryColor: primaryColor,
     primaryColorDark: const Color(0xFF0050a0),
     primaryColorLight: secondaryColor,

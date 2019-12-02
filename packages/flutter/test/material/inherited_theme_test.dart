@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -525,7 +525,7 @@ void main() {
     await tester.tap(find.text('push wrapped'));
     await tester.pumpAndSettle(); // route animation
     RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
-    expect(sliderBox, paints..rrect(color: activeTrackColor)..rrect(color: inactiveTrackColor));
+    expect(sliderBox, paints..rect(color: activeTrackColor)..rect(color: inactiveTrackColor));
     expect(sliderBox, paints..circle(color: thumbColor));
 
     Navigator.of(navigatorContext).pop();
@@ -534,7 +534,7 @@ void main() {
     await tester.tap(find.text('push unwrapped'));
     await tester.pumpAndSettle(); // route animation
     sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
-    expect(sliderBox, isNot(paints..rrect(color: activeTrackColor)..rrect(color: inactiveTrackColor)));
+    expect(sliderBox, isNot(paints..rect(color: activeTrackColor)..rect(color: inactiveTrackColor)));
     expect(sliderBox, isNot(paints..circle(color: thumbColor)));
   });
 
