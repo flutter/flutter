@@ -304,7 +304,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   /// Call this to perform asynchronous initialization work before the first
   /// frame is rendered (which takes down the splash screen). The framework
   /// will still do all the work to produce frames, but those frames are never
-  /// send to the engine and will not appear on screen.
+  /// sent to the engine and will not appear on screen.
   ///
   /// Calling this has no effect after the first frame has been send to the
   /// engine.
