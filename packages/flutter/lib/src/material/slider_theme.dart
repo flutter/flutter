@@ -108,7 +108,7 @@ import 'theme_data.dart';
 /// track segments. In [TextDirection.ltr], the start of the slider is on the
 /// left, and in [TextDirection.rtl], the start of the slider is on the right.
 /// {@endtemplate}
-/// 
+///
 /// {@template flutter.material.slider.useV2Slider}
 /// Whether to use the updated Material spec version of the slider shape.
 ///
@@ -2146,7 +2146,7 @@ class RoundSliderTickMarkShape extends SliderTickMarkShape {
 
   /// {@macro flutter.material.slider.useV2Slider}
   final bool useV2Slider;
-  
+
   @override
   Size getPreferredSize({
     @required SliderThemeData sliderTheme,
