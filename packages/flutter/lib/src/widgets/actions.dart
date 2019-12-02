@@ -2,9 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:async';
-
 import 'package:flutter/foundation.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/gestures.dart';
 
 import 'basic.dart';
@@ -550,10 +549,15 @@ class FocusableActionDetector extends StatefulWidget {
   /// {@macro flutter.widgets.shortcuts.shortcuts}
   final Map<LogicalKeySet, Intent> shortcuts;
 
-  /// A function that will be called when the focus highlight should be shown or hidden.
+  /// A function that will be called when the focus highlight should be shown or
+  /// hidden.
+  ///
+  /// This method is not triggered at the unmount of the widget.
   final ValueChanged<bool> onShowFocusHighlight;
 
   /// A function that will be called when the hover highlight should be shown or hidden.
+  ///
+  /// This method is not triggered at the unmount of the widget.
   final ValueChanged<bool> onShowHoverHighlight;
 
   /// A function that will be called when the focus changes.
@@ -574,7 +578,9 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
   @override
   void initState() {
     super.initState();
-    _updateHighlightMode(FocusManager.instance.highlightMode);
+    SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
+      _updateHighlightMode(FocusManager.instance.highlightMode);
+    });
     FocusManager.instance.addHighlightModeListener(_handleFocusHighlightModeChange);
   }
 
@@ -586,23 +592,22 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
 
   bool _canShowHighlight = false;
   void _updateHighlightMode(FocusHighlightMode mode) {
-    final bool couldShowHighlight = _canShowHighlight;
-    switch (FocusManager.instance.highlightMode) {
-      case FocusHighlightMode.touch:
-        _canShowHighlight = false;
-        break;
-      case FocusHighlightMode.traditional:
-        _canShowHighlight = true;
-        break;
-    }
-    if  (couldShowHighlight != _canShowHighlight) {
-      _handleShowFocusHighlight();
-      _handleShowHoverHighlight();
-    }
+    _mayTriggerCallback(task: () {
+      switch (FocusManager.instance.highlightMode) {
+        case FocusHighlightMode.touch:
+          _canShowHighlight = false;
+          break;
+        case FocusHighlightMode.traditional:
+          _canShowHighlight = true;
+          break;
+      }
+    });
   }
 
-  /// Have to have this separate from the _updateHighlightMode because it gets
-  /// called in initState, where things aren't mounted yet.
+  // Have to have this separate from the _updateHighlightMode because it gets
+  // called in initState, where things aren't mounted yet.
+  // Since this method is a highlight mode listener, it is only called
+  // immediately following pointer events.
   void _handleFocusHighlightModeChange(FocusHighlightMode mode) {
     if (!mounted) {
       return;
@@ -614,36 +619,67 @@ class _FocusableActionDetectorState extends State<FocusableActionDetector> {
   void _handleMouseEnter(PointerEnterEvent event) {
     assert(widget.onShowHoverHighlight != null);
     if (!_hovering) {
-      // TODO(gspencergoog): remove scheduleMicrotask once MouseRegion event timing has changed.
-      scheduleMicrotask(() { setState(() { _hovering = true; _handleShowHoverHighlight(); }); });
+      _mayTriggerCallback(task: () {
+        _hovering = true;
+      });
     }
   }
 
   void _handleMouseExit(PointerExitEvent event) {
     assert(widget.onShowHoverHighlight != null);
     if (_hovering) {
-      // TODO(gspencergoog): remove scheduleMicrotask once MouseRegion event timing has changed.
-      scheduleMicrotask(() { setState(() { _hovering = false; _handleShowHoverHighlight(); }); });
+      _mayTriggerCallback(task: () {
+        _hovering = false;
+      });
     }
   }
 
   bool _focused = false;
   void _handleFocusChange(bool focused) {
     if (_focused != focused) {
-      setState(() {
+      _mayTriggerCallback(task: () {
         _focused = focused;
-        _handleShowFocusHighlight();
-        widget.onFocusChange?.call(_focused);
       });
+      widget.onFocusChange?.call(_focused);
     }
   }
 
-  void _handleShowHoverHighlight() {
-    widget.onShowHoverHighlight?.call(_hovering && widget.enabled && _canShowHighlight);
+  // Record old states, do `task` if not null, then compare old states with the
+  // new states, and trigger callbacks if necessary.
+  //
+  // The old states are collected from `oldWidget` if it is provided, or the
+  // current widget (before doing `task`) otherwise. The new states are always
+  // collected from the current widget.
+  void _mayTriggerCallback({VoidCallback task, FocusableActionDetector oldWidget}) {
+    bool shouldShowHoverHighlight(FocusableActionDetector target) {
+      return _hovering && target.enabled && _canShowHighlight;
+    }
+    bool shouldShowFocusHighlight(FocusableActionDetector target) {
+      return _focused && target.enabled && _canShowHighlight;
+    }
+
+    assert(SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks);
+    final FocusableActionDetector oldTarget = oldWidget ?? widget;
+    final bool didShowHoverHighlight = shouldShowHoverHighlight(oldTarget);
+    final bool didShowFocusHighlight = shouldShowFocusHighlight(oldTarget);
+    if (task != null)
+      task();
+    final bool doShowHoverHighlight = shouldShowHoverHighlight(widget);
+    final bool doShowFocusHighlight = shouldShowFocusHighlight(widget);
+    if (didShowFocusHighlight != doShowFocusHighlight)
+      widget.onShowFocusHighlight?.call(doShowFocusHighlight);
+    if (didShowHoverHighlight != doShowHoverHighlight)
+      widget.onShowHoverHighlight?.call(doShowHoverHighlight);
   }
 
-  void _handleShowFocusHighlight() {
-    widget.onShowFocusHighlight?.call(_focused && widget.enabled && _canShowHighlight);
+  @override
+  void didUpdateWidget(FocusableActionDetector oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.enabled != oldWidget.enabled) {
+      SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
+        _mayTriggerCallback(oldWidget: oldWidget);
+      });
+    }
   }
 
   @override
