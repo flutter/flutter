@@ -35,6 +35,7 @@ class StockRow extends StatelessWidget {
     if (stock.percentChange > 0)
       changeInPrice = '+' + changeInPrice;
     return InkWell(
+      key: ValueKey<String>(stock.symbol),
       onTap: _getHandler(onPressed),
       onDoubleTap: _getHandler(onDoubleTap),
       onLongPress: _getHandler(onLongPressed),
