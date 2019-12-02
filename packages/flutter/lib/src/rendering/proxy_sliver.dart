@@ -5,7 +5,8 @@
 import 'dart:ui' as ui show Color;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/rendering.dart';
+
+import 'object.dart';
 
 /// A base class for sliver render objects that resemble their children.
 ///
