@@ -362,7 +362,7 @@ class RangeSlider extends StatefulWidget {
     properties.add(StringProperty('labelEnd', labels?.end));
     properties.add(ColorProperty('activeColor', activeColor));
     properties.add(ColorProperty('inactiveColor', inactiveColor));
-    properties.add(FlagProperty('useV2Slider', value: useV2Slider));
+    properties.add(FlagProperty('useV2Slider', value: useV2Slider, ifFalse: 'useV1Slider'));
     properties.add(ObjectFlagProperty<ValueChanged<RangeValues>>.has('semanticFormatterCallback', semanticFormatterCallback));
   }
 }
@@ -1290,7 +1290,8 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
         isEnabled: isEnabled,
         sliderTheme: _sliderTheme,
       ).width;
-      final double adjustedTrackWidth = trackRect.width - (_useV2Slider ? trackRect.height : tickMarkWidth);
+      final double padding = _useV2Slider ? trackRect.height : tickMarkWidth;
+      final double adjustedTrackWidth = trackRect.width - padding;
       // If the tick marks would be too dense, don't bother painting them.
       if (adjustedTrackWidth / divisions >= 3.0 * tickMarkWidth) {
         final double dy = trackRect.center.dy;
@@ -1298,7 +1299,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
           final double value = i / divisions;
           // The ticks are mapped to be within the track, so the tick mark width
           // must be subtracted from the track width.
-          final double dx = trackRect.left + value * adjustedTrackWidth + trackRect.height / 2;
+          final double dx = trackRect.left + value * adjustedTrackWidth + padding / 2;
           final Offset tickMarkOffset = Offset(dx, dy);
           _sliderTheme.rangeTickMarkShape.paint(
             context,

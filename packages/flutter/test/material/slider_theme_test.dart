@@ -101,7 +101,7 @@ void main() {
     );
     final SliderThemeData sliderTheme = theme.sliderTheme;
 
-    await tester.pumpWidget(_buildApp(sliderTheme, value: 0.5, enabled: false, useV2Slider: useV2Slider));
+    await tester.pumpWidget(_buildApp(sliderTheme, value: 0.5, enabled: false, useV2Slider: true));
     final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
 
     expect(
@@ -141,7 +141,7 @@ void main() {
       inactiveTrackColor: Colors.purple.withAlpha(0x3d),
     );
 
-    await tester.pumpWidget(_buildApp(sliderTheme, value: 0.5, enabled: false, useV2Slider, useV2Slider));
+    await tester.pumpWidget(_buildApp(sliderTheme, value: 0.5, enabled: false, useV2Slider: true));
     final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
 
     expect(
@@ -258,14 +258,14 @@ void main() {
     expect(lerp.valueIndicatorTextStyle.color, equals(middleGrey.withAlpha(0xff)));
   });
 
-  testWidgets('V2 slider track draws correctly', (WidgetTester tester) async {
+  testWidgets('Slider V2 track draws correctly', (WidgetTester tester) async {
     final ThemeData theme = ThemeData(
       platform: TargetPlatform.android,
       primarySwatch: Colors.blue,
     );
     final SliderThemeData sliderTheme = theme.sliderTheme.copyWith(thumbColor: Colors.red.shade500);
 
-    await tester.pumpWidget(_buildApp(sliderTheme, value: 0.25, useV2Slider: useV2Slider));
+    await tester.pumpWidget(_buildApp(sliderTheme, value: 0.25, useV2Slider: true));
     final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
 
     const Radius radius = Radius.circular(2);
@@ -279,7 +279,7 @@ void main() {
         ..rrect(rrect: RRect.fromLTRBAndCorners(212.0, 298.0, 776.0, 302.0, topRight: radius, bottomRight: radius), color: sliderTheme.inactiveTrackColor),
     );
 
-    await tester.pumpWidget(_buildApp(sliderTheme, value: 0.25, enabled: false));
+    await tester.pumpWidget(_buildApp(sliderTheme, value: 0.25, enabled: false, useV2Slider: true));
     await tester.pumpAndSettle(); // wait for disable animation
 
     // The disabled slider thumb is the same size as the enabled thumb.
@@ -452,7 +452,7 @@ void main() {
                       label: '$value',
                       divisions: 3,
                       onChanged: (double d) { },
-                      useV2Slider: useV2Slider,
+                      useV2Slider: true,
                     ),
                   ),
                 ),
@@ -783,9 +783,37 @@ void main() {
 
   testWidgets('The slider track height can be overridden', (WidgetTester tester) async {
     final SliderThemeData sliderTheme = ThemeData().sliderTheme.copyWith(trackHeight: 16);
-    const Radius radius = Radius.circular(8);
 
     await tester.pumpWidget(_buildApp(sliderTheme, value: 0.25));
+
+    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
+
+    // Top and bottom are centerY (300) + and - trackRadius (8).
+    expect(
+      sliderBox,
+      paints
+        ..rect(rect: const Rect.fromLTRB(32.0, 292.0, 202.0, 308.0), color: sliderTheme.activeTrackColor)
+        ..rect(rect: const Rect.fromLTRB(222.0, 292.0, 776.0, 308.0), color: sliderTheme.inactiveTrackColor),
+    );
+
+    await tester.pumpWidget(_buildApp(sliderTheme, value: 0.25, enabled: false));
+    await tester.pumpAndSettle(); // wait for disable animation
+
+    // The disabled thumb is smaller so the active track has to paint longer to
+    // get to the edge.
+    expect(
+      sliderBox,
+      paints
+        ..rect(rect: const Rect.fromLTRB(32.0, 292.0, 202.0, 308.0), color: sliderTheme.disabledActiveTrackColor)
+        ..rect(rect: const Rect.fromLTRB(222.0, 292.0, 776.0, 308.0), color: sliderTheme.disabledInactiveTrackColor),
+    );
+  });
+
+  testWidgets('The slider V2 track height can be overridden', (WidgetTester tester) async {
+    final SliderThemeData sliderTheme = ThemeData().sliderTheme.copyWith(trackHeight: 16);
+    const Radius radius = Radius.circular(8);
+
+    await tester.pumpWidget(_buildApp(sliderTheme, value: 0.25, useV2Slider: true));
 
     final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
 
@@ -797,7 +825,7 @@ void main() {
         ..rrect(rrect: RRect.fromLTRBAndCorners(212.0, 292.0, 776.0, 308.0, topRight: radius, bottomRight: radius), color: sliderTheme.inactiveTrackColor),
     );
 
-    await tester.pumpWidget(_buildApp(sliderTheme, value: 0.25, enabled: false));
+    await tester.pumpWidget(_buildApp(sliderTheme, value: 0.25, enabled: false, useV2Slider: true));
     await tester.pumpAndSettle(); // wait for disable animation
 
     // The disabled thumb is smaller so the active track has to paint longer to
@@ -858,7 +886,6 @@ void main() {
     );
   });
 
-
   testWidgets('The default slider tick mark shape size can be overridden', (WidgetTester tester) async {
     final SliderThemeData sliderTheme = ThemeData().sliderTheme.copyWith(
       tickMarkShape: const RoundSliderTickMarkShape(tickMarkRadius: 5),
@@ -875,12 +902,45 @@ void main() {
     expect(
       sliderBox,
       paints
+        ..circle(x: 29, y: 300, radius: 5, color: sliderTheme.activeTickMarkColor)
+        ..circle(x: 400, y: 300, radius: 5, color: sliderTheme.activeTickMarkColor)
+        ..circle(x: 771, y: 300, radius: 5, color: sliderTheme.inactiveTickMarkColor),
+    );
+
+    await tester.pumpWidget(_buildApp(sliderTheme, value: 0.5, divisions: 2, enabled: false));
+    await tester.pumpAndSettle();
+
+    expect(
+      sliderBox,
+      paints
+        ..circle(x: 29, y: 300, radius: 5, color: sliderTheme.disabledActiveTickMarkColor)
+        ..circle(x: 400, y: 300, radius: 5, color: sliderTheme.disabledActiveTickMarkColor)
+        ..circle(x: 771, y: 300, radius: 5, color: sliderTheme.disabledInactiveTickMarkColor),
+    );
+  });
+
+  testWidgets('The default slider V2 tick mark shape size can be overridden', (WidgetTester tester) async {
+    final SliderThemeData sliderTheme = ThemeData().sliderTheme.copyWith(
+      tickMarkShape: const RoundSliderTickMarkShape(tickMarkRadius: 5, useV2Slider: true),
+      activeTickMarkColor: const Color(0xfadedead),
+      inactiveTickMarkColor: const Color(0xfadebeef),
+      disabledActiveTickMarkColor: const Color(0xfadecafe),
+      disabledInactiveTickMarkColor: const Color(0xfadeface),
+    );
+
+    await tester.pumpWidget(_buildApp(sliderTheme, value: 0.5, divisions: 2, useV2Slider: true));
+
+    final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
+
+    expect(
+      sliderBox,
+      paints
         ..circle(x: 26, y: 300, radius: 5, color: sliderTheme.activeTickMarkColor)
         ..circle(x: 400, y: 300, radius: 5, color: sliderTheme.activeTickMarkColor)
         ..circle(x: 774, y: 300, radius: 5, color: sliderTheme.inactiveTickMarkColor),
     );
 
-    await tester.pumpWidget(_buildApp(sliderTheme, value: 0.5, divisions: 2,  enabled: false));
+    await tester.pumpWidget(_buildApp(sliderTheme, value: 0.5, divisions: 2,  enabled: false, useV2Slider: true));
     await tester.pumpAndSettle();
 
     expect(
@@ -960,7 +1020,7 @@ void main() {
     final RenderBox sliderBox = tester.firstRenderObject<RenderBox>(find.byType(Slider));
 
     // Only 2 track segments.
-    expect(sliderBox, paintsExactlyCountTimes(#drawRRect, 2));
+    expect(sliderBox, paintsExactlyCountTimes(#drawRect, 2));
     expect(sliderBox, paintsExactlyCountTimes(#drawCircle, 0));
     expect(sliderBox, paintsExactlyCountTimes(#drawPath, 0));
   });

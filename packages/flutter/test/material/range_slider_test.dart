@@ -2084,7 +2084,8 @@ void main() {
       'labelStart: "lowerValue"',
       'labelEnd: "upperValue"',
       'activeColor: MaterialColor(primary value: Color(0xff2196f3))',
-      'inactiveColor: MaterialColor(primary value: Color(0xff9e9e9e))'
+      'inactiveColor: MaterialColor(primary value: Color(0xff9e9e9e))',
+      'useV1Slider',
     ]);
   });
 }

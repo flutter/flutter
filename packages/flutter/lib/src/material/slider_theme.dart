@@ -2134,7 +2134,7 @@ class RoundSliderTickMarkShape extends SliderTickMarkShape {
   /// Create a slider tick mark that draws a circle.
   const RoundSliderTickMarkShape({
     this.tickMarkRadius,
-    this.useV2Slider,
+    this.useV2Slider = false,
   });
 
   /// The preferred radius of the round tick mark.
@@ -2236,7 +2236,7 @@ class RoundRangeSliderTickMarkShape extends RangeSliderTickMarkShape {
   /// Create a range slider tick mark that draws a circle.
   const RoundRangeSliderTickMarkShape({
     this.tickMarkRadius,
-    this.useV2Slider,
+    this.useV2Slider = false,
   });
 
   /// The preferred radius of the round tick mark.
