@@ -73,7 +73,7 @@ void main() {
     expect(generated, contains('entrypoint.main();'));
 
     // Import.
-    expect(generated, contains('import "package:foo/main.dart" as entrypoint;'));
+    expect(generated, contains("import 'package:foo/main.dart' as entrypoint;"));
   }));
 
   test('WebEntrypointTarget generates an entrypoint with plugins and init platform on windows', () => testbed.run(() async {
@@ -94,7 +94,7 @@ void main() {
     expect(generated, contains('entrypoint.main();'));
 
     // Import.
-    expect(generated, contains('import "package:foo/main.dart" as entrypoint;'));
+    expect(generated, contains("import 'package:foo/main.dart' as entrypoint;"));
   }, overrides: <Type, Generator>{
     Platform: () => mockWindowsPlatform,
   }));
