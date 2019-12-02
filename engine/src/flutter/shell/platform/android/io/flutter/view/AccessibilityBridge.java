@@ -1377,16 +1377,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
                 }
                 sendAccessibilityEvent(event);
             }
-            if (object.hasFlag(Flag.IS_LIVE_REGION)) {
-                String label = object.label == null ? "" : object.label;
-                String previousLabel = object.previousLabel == null ? "" : object.label;
-                if (!label.equals(previousLabel) || !object.hadFlag(Flag.IS_LIVE_REGION)) {
-                    sendWindowContentChangeEvent(object.id);
-                }
-            } else if (object.hasFlag(Flag.IS_TEXT_FIELD) && object.didChangeLabel()
-                    && inputFocusedSemanticsNode != null && inputFocusedSemanticsNode.id == object.id) {
-                // Text fields should announce when their label changes while focused. We use a live
-                // region tag to do so, and this event triggers that update.
+            if (object.hasFlag(Flag.IS_LIVE_REGION) && object.didChangeLabel()) {
                 sendWindowContentChangeEvent(object.id);
             }
             if (accessibilityFocusedSemanticsNode != null && accessibilityFocusedSemanticsNode.id == object.id
