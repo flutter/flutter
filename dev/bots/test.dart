@@ -761,8 +761,8 @@ Future<void> _runHostOnlyDeviceLabTests() async {
     if (Platform.isMacOS) () => _runDevicelabTest('flutter_create_offline_test_mac'),
     if (Platform.isLinux) () => _runDevicelabTest('flutter_create_offline_test_linux'),
     if (Platform.isWindows) () => _runDevicelabTest('flutter_create_offline_test_windows'),
-    // TODO(ianh): Fails on macOS looking for "dexdump", https://github.com/flutter/flutter/issues/42494
     () => _runDevicelabTest('gradle_fast_start_test', environment: gradleEnvironment),
+    // TODO(ianh): Fails on macOS looking for "dexdump", https://github.com/flutter/flutter/issues/42494
     if (!Platform.isMacOS) () => _runDevicelabTest('gradle_jetifier_test', environment: gradleEnvironment),
     () => _runDevicelabTest('gradle_non_android_plugin_test', environment: gradleEnvironment),
     () => _runDevicelabTest('gradle_plugin_bundle_test', environment: gradleEnvironment),
