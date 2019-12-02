@@ -1,4 +1,4 @@
-Signature: 4ce27405521b707b43c2d0e6efdc8d5b
+Signature: 69a0bc4edef486cababeace42b42336a
 
 UNUSED LICENSES:
 
@@ -7699,6 +7699,7 @@ FILE: ../../../third_party/dart/sdk/lib/ffi/dynamic_library.dart
 FILE: ../../../third_party/dart/sdk/lib/ffi/ffi.dart
 FILE: ../../../third_party/dart/sdk/lib/ffi/native_type.dart
 FILE: ../../../third_party/dart/sdk/lib/ffi/struct.dart
+FILE: ../../../third_party/dart/sdk/lib/internal/errors.dart
 FILE: ../../../third_party/dart/sdk/lib/wasm/wasm.dart
 FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_runtime/lib/rti.dart
 FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_runtime/lib/shared/recipe_syntax.dart
@@ -7711,6 +7712,7 @@ FILE: ../../../third_party/dart/sdk_nnbd/lib/ffi/dynamic_library.dart
 FILE: ../../../third_party/dart/sdk_nnbd/lib/ffi/ffi.dart
 FILE: ../../../third_party/dart/sdk_nnbd/lib/ffi/native_type.dart
 FILE: ../../../third_party/dart/sdk_nnbd/lib/ffi/struct.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/internal/errors.dart
 FILE: ../../../third_party/dart/sdk_nnbd/lib/wasm/wasm.dart
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2019, the Dart project authors.  Please see the AUTHORS file
