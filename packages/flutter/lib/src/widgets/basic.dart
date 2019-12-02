@@ -5842,18 +5842,71 @@ class MouseRegion extends SingleChildRenderObjectWidget {
   }) : assert(opaque != null),
        super(key: key, child: child);
 
-  /// Called when a mouse pointer (with or without buttons pressed) enters the
-  /// region defined by this widget, or when the widget appears under the
-  /// pointer.
+  /// Called when a mouse pointer, with or without buttons pressed, has
+  /// entered this widget.
+  ///
+  /// This callback is triggered when the pointer has started to be contained
+  /// by the region of this widget. More specifically, the callback is triggered
+  /// by the following cases:
+  ///
+  ///  * This widget has appeared under a pointer.
+  ///  * This widget has moved to under a pointer.
+  ///  * A new pointer has been added to somewhere within this widget.
+  ///  * An existing pointer has moved into this widget.
+  ///
+  /// This callback is not always matched by an [onExit]. If the [MouseRegion]
+  /// is unmounted while being hovered by a pointer, the [onExit] of the widget
+  /// callback will never called, despite the earlier call of [onEnter]. For
+  /// more details, see [onExit].
+  ///
+  /// See also:
+  ///
+  ///  * [onExit], which is triggered when a mouse pointer exits the region.
+  ///  * [MouseTrackerAnnotation.onEnter], which is how this callback is
+  ///    internally implemented.
   final PointerEnterEventListener onEnter;
 
-  /// Called when a mouse pointer (with or without buttons pressed) changes
-  /// position, and the new position is within the region defined by this widget.
+  /// Called when a mouse pointer changes position without buttons pressed, and
+  /// the new position is within the region defined by this widget.
+  ///
+  /// This callback is triggered when:
+  ///
+  ///  * An annotation that did not contain the pointer has moved to under a
+  ///    pointer that has no buttons pressed.
+  ///  * A pointer has moved onto, or moved within an annotation without buttons
+  ///    pressed.
+  ///
+  /// This callback is not triggered when
+  ///
+  ///  * An annotation that is containing the pointer has moved, and still
+  ///    contains the pointer.
   final PointerHoverEventListener onHover;
 
-  /// Called when a mouse pointer (with or without buttons pressed) leaves the
-  /// region defined by this widget, or when the widget disappears from under
-  /// the pointer.
+  /// Called when a mouse pointer, with or without buttons pressed, has exited
+  /// this widget when the widget is still mounted.
+  ///
+  /// This callback is triggered when the pointer has stopped to be contained
+  /// by the region of this widget, except when it's caused by the removal of
+  /// this widget. More specifically, the callback is triggered by
+  /// the following cases:
+  ///
+  ///  * This widget, which used to contain a pointer, has moved away.
+  ///  * A pointer that used to be within this widget has been removed.
+  ///  * A pointer that used to be within this widget has moved away.
+  ///
+  /// And is __not__ triggered by the following case,
+  ///
+  ///  * This widget, which used to contain a pointer, has disappeared.
+  ///
+  /// The last case is the only case when [onExit] does not match an earlier
+  /// [onEnter].
+  /// {@macro flutter.mouseTracker.onExit}
+  ///
+  /// See also:
+  ///
+  ///  * [onEnter], which is triggered when a mouse pointer enters the region.
+  ///  * [MouseTrackerAnnotation.onExit], which is how this callback is
+  ///    internally implemented.
   final PointerExitEventListener onExit;
 
   /// Whether this widget should prevent other [MouseRegion]s visually behind it

@@ -281,6 +281,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
 
   void _handlePersistentFrameCallback(Duration timeStamp) {
     drawFrame();
+    _mouseTracker.schedulePostFrameCheck();
   }
 
   /// Pump the rendering pipeline to generate a frame.
