@@ -306,7 +306,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   /// will still do all the work to produce frames, but those frames are never
   /// sent to the engine and will not appear on screen.
   ///
-  /// Calling this has no effect after the first frame has been send to the
+  /// Calling this has no effect after the first frame has been sent to the
   /// engine.
   void deferFirstFrame() {
     assert(_firstFrameDeferredCount >= 0);
