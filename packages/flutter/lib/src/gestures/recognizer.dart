@@ -501,7 +501,7 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
   @override
   void rejectGesture(int pointer) {
     if (pointer == primaryPointer && state == GestureRecognizerState.possible) {
-      _stopTimer();
+      stopTimer();
       state = GestureRecognizerState.defunct;
     }
   }
@@ -509,17 +509,22 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
   @override
   void didStopTrackingLastPointer(int pointer) {
     assert(state != GestureRecognizerState.ready);
-    _stopTimer();
+    stopTimer();
     state = GestureRecognizerState.ready;
   }
 
   @override
   void dispose() {
-    _stopTimer();
+    stopTimer();
     super.dispose();
   }
 
-  void _stopTimer() {
+  /// Stop the timer that is created by [deadline].
+  ///
+  /// This method is automatically called when the gesture is rejected or
+  /// the recognizer is disposed.
+  @protected
+  void stopTimer() {
     if (_timer != null) {
       _timer.cancel();
       _timer = null;
