@@ -127,8 +127,11 @@ class SkiaGoldClient {
     );
 
     if (result.exitCode != 0) {
-      print('goldctl auth stdout: ${result.stdout}');
-      print('goldctl auth stderr: ${result.stderr}');
+      final StringBuffer buf = StringBuffer()
+        ..writeln('Skia Gold auth failed.')
+        ..writeln('stdout: ${result.stdout}')
+        ..writeln('stderr: ${result.stderr}');
+      throw NonZeroExitCode(1, buf.toString());
     }
   }
 
@@ -169,8 +172,11 @@ class SkiaGoldClient {
     );
 
     if (result.exitCode != 0) {
-      print('goldctl imgtest init stdout: ${result.stdout}');
-      print('goldctl imgtest init stderr: ${result.stderr}');
+      final StringBuffer buf = StringBuffer()
+        ..writeln('Skia Gold imgtest init failed.')
+        ..writeln('stdout: ${result.stdout}')
+        ..writeln('stderr: ${result.stderr}');
+      throw NonZeroExitCode(1, buf.toString());
     }
   }
 
