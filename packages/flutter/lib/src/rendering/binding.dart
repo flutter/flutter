@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -182,11 +182,12 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   @protected
   void handleTextScaleFactorChanged() { }
 
-  /// {@template on_platform_brightness_change}
   /// Called when the platform brightness changes.
   ///
-  /// The current platform brightness can be queried either from a Flutter
-  /// binding, or from a [MediaQuery] widget.
+  /// The current platform brightness can be queried from a Flutter binding or
+  /// from a [MediaQuery] widget. The latter is preferred from widgets because
+  /// it causes the widget to be automatically rebuilt when the brightness
+  /// changes.
   ///
   /// {@tool sample}
   /// Querying [Window.platformBrightness].
@@ -197,7 +198,7 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   /// {@end-tool}
   ///
   /// {@tool sample}
-  /// Querying [MediaQuery] directly.
+  /// Querying [MediaQuery] directly. Preferred.
   ///
   /// ```dart
   /// final Brightness brightness = MediaQuery.platformBrightnessOf(context);
@@ -214,7 +215,6 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
   /// {@end-tool}
   ///
   /// See [Window.onPlatformBrightnessChanged].
-  /// {@endtemplate}
   @protected
   void handlePlatformBrightnessChanged() { }
 

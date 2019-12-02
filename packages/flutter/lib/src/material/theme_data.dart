@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -873,9 +873,10 @@ class ThemeData extends Diagnosticable {
   /// In a test environment, the platform returned is [TargetPlatform.android]
   /// regardless of the host platform. (Android was chosen because the tests
   /// were originally written assuming Android-like behavior, and we added
-  /// platform adaptations for iOS later). Tests can check iOS behavior by
-  /// setting the [platform] of the [Theme] explicitly to [TargetPlatform.iOS],
-  /// or by setting [debugDefaultTargetPlatformOverride].
+  /// platform adaptations for other platforms later). Tests can check behavior
+  /// for other platforms by setting the [platform] of the [Theme] explicitly to
+  /// another [TargetPlatform] value, or by setting
+  /// [debugDefaultTargetPlatformOverride].
   final TargetPlatform platform;
 
   /// Configures the hit test size of certain Material widgets.
