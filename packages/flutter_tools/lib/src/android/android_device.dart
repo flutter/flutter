@@ -1009,7 +1009,7 @@ class _AdbLogReader extends DeviceLogReader {
   void _start() {
     final String lastTimestamp = device.lastLogcatTimestamp;
     // Start the adb logcat process and filter the most recent logs since `lastTimestamp`.
-    final List<String> args = <String>['logcat', '-v', 'time', '-T', lastTimestamp];
+    final List<String> args = <String>['logcat', '-v', 'time', '-T', lastTimestamp ?? ''];
     processUtils.start(device.adbCommandForDevice(args)).then<void>((Process process) {
       _process = process;
       // We expect logcat streams to occasionally contain invalid utf-8,
