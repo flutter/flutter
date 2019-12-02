@@ -84,7 +84,7 @@ void main() {
       try {
         generator.setL10nDirectory(null);
       } on L10nException catch (e) {
-        expect(e.message, 'Input string cannot be null');
+        expect(e.message, contains('cannot be null'));
         return;
       }
 
@@ -100,7 +100,7 @@ void main() {
       try {
         generator.setTemplateArbFile(null);
       } on L10nException catch (e) {
-        expect(e.message, 'Input string cannot be null');
+        expect(e.message, contains('cannot be null'));
         return;
       }
 
@@ -116,7 +116,7 @@ void main() {
       try {
         generator.setTemplateArbFile(null);
       } on L10nException catch (e) {
-        expect(e.message, 'Input string cannot be null');
+        expect(e.message, contains('cannot be null'));
         return;
       }
 
@@ -132,7 +132,7 @@ void main() {
       try {
         generator.setOutputFile(null);
       } on L10nException catch (e) {
-        expect(e.message, 'Input string cannot be null');
+        expect(e.message, contains('cannot be null'));
         return;
       }
 
@@ -148,7 +148,7 @@ void main() {
       try {
         generator.setClassName(null);
       } on L10nException catch (e) {
-        expect(e.message, 'Input string cannot be null');
+        expect(e.message, contains('cannot be null'));
         return;
       }
 

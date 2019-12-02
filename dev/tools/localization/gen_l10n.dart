@@ -288,10 +288,17 @@ bool _isValidClassName(String className) {
   return true;
 }
 
-bool _isDirectoryReadableAndWritable(String statString) {
-  if ((statString[0] == '-' || statString[3] == '-') && (statString[1] == '-' || statString[4] == '-'))
-    return false;
-  return true;
+bool _isNotReadable(FileStat fileStat) {
+  final String rawStatString = fileStat.modeString();
+  // Removes potential prepended permission bits, such as '(suid)' and '(guid)'.
+  final String statString = rawStatString.substring(rawStatString.length - 9);
+  return !(statString[0] == 'r' || statString[3] == 'r' || statString[6] == 'r');
+}
+bool _isNotWritable(FileStat fileStat) {
+  final String rawStatString = fileStat.modeString();
+  // Removes potential prepended permission bits, such as '(suid)' and '(guid)'.
+  final String statString = rawStatString.substring(rawStatString.length - 9);
+  return !(statString[1] == 'w' || statString[4] == 'w' || statString[7] == 'w');
 }
 
 bool _isValidGetterAndMethodName(String name) {
@@ -320,27 +327,32 @@ class LocalizationsGenerator {
 
   /// The reference to the project's l10n directory.
   ///
-  /// It is assumed that all input files (ie. [templateArbFile], arb files
-  /// for translated messages) and output files (ie. The localizations
+  /// It is assumed that all input files (e.g. [templateArbFile], arb files
+  /// for translated messages) and output files (e.g. The localizations
   /// [outputFile], `messages_<locale>.dart` and `messages_all.dart`)
   /// will reside here.
+  ///
+  /// This directory is specified with the [initialize] method.
   Directory l10nDirectory;
 
-  /// The reference to the template arb file.
+  /// The input arb file which defines all of the messages that will be
+  /// exported by the generated class that's written to [outputFile].
   ///
-  /// The messages and its metadata will be used to generate the
-  /// `messages_<locale>.dart` and `messages_all.dart` files.
+  /// This file is specified with the [initialize] method.
   File templateArbFile;
 
-  /// The reference to the Dart file will contain the localizations and
-  /// localizations delegate classes.
+  /// The file to write the generated localizations and localizations delegate
+  /// classes to.
+  ///
+  /// This file is specified with the [initialize] method.
   File outputFile;
 
   /// The class name to be used for the localizations class in [outputFile].
   ///
-  /// For example, if 'AppLocalizations' is passed in, the AppLocalizations
-  /// class will be created with a [LocalizationsDelegate] named
-  /// _AppLocalizationsDelegate.
+  /// For example, if 'AppLocalizations' is passed in, a class named
+  /// AppLocalizations will be used for localized message lookups.
+  ///
+  /// The class name is specified with the [initialize] method.
   String className;
 
   /// The list of all arb files in [l10nDirectory].
@@ -374,7 +386,7 @@ class LocalizationsGenerator {
   /// Sets the reference [Directory] for [l10nDirectory].
   void setL10nDirectory(String arbPathString) {
     if (arbPathString == null)
-      throw L10nException('Input string cannot be null');
+      throw L10nException('arbPathString argument cannot be null');
     l10nDirectory = _fs.directory(arbPathString);
     if (!l10nDirectory.existsSync())
       throw FileSystemException(
@@ -382,8 +394,8 @@ class LocalizationsGenerator {
         'Make sure that the correct path was provided.'
       );
 
-    final String l10nDirectoryStatModeString = l10nDirectory.statSync().modeString();
-    if (!_isDirectoryReadableAndWritable(l10nDirectoryStatModeString))
+    final FileStat fileStat = l10nDirectory.statSync();
+    if (_isNotReadable(fileStat) || _isNotWritable(fileStat))
       throw FileSystemException(
         "The 'arb-dir' directory, $l10nDirectory, doesn't allow reading and writing.\n"
         'Please ensure that the user has read and write permissions.'
@@ -393,7 +405,7 @@ class LocalizationsGenerator {
   /// Sets the reference [File] for [templateArbFile].
   void setTemplateArbFile(String templateArbFileName) {
     if (templateArbFileName == null)
-      throw L10nException('Input string cannot be null');
+      throw L10nException('templateArbFileName argument cannot be null');
     if (l10nDirectory == null)
       throw L10nException('l10nDirectory cannot be null when setting template arb file');
 
@@ -409,7 +421,7 @@ class LocalizationsGenerator {
   /// Sets the reference [File] for the localizations delegate [outputFile].
   void setOutputFile(String outputFileString) {
     if (outputFileString == null)
-      throw L10nException('Input string cannot be null');
+      throw L10nException('outputFileString argument cannot be null');
     outputFile = _fs.file(path.join(l10nDirectory.path, outputFileString));
   }
 
@@ -417,7 +429,7 @@ class LocalizationsGenerator {
   /// classes.
   void setClassName(String classNameString) {
     if (classNameString == null)
-      throw L10nException('Input string cannot be null');
+      throw L10nException('classNameString argument cannot be null');
     if (!_isValidClassName(classNameString))
       throw L10nException(
         "The 'output-class', $classNameString, is not a valid Dart class name.\n"
@@ -428,12 +440,12 @@ class LocalizationsGenerator {
   /// Scans [l10nDirectory] for arb files and parses them for language and locale
   /// information.
   void parseArbFiles() {
-    final List<FileSystemEntity> sortedFileSystemEntityList = l10nDirectory
+    final List<FileSystemEntity> fileSystemEntityList = l10nDirectory
       .listSync()
-      .toList()
-      ..sort(sortFilesByPath);
+      .toList();
+    final List<LocaleInfo> localeInfoList = <LocaleInfo>[];
 
-    for (FileSystemEntity entity in sortedFileSystemEntityList) {
+    for (FileSystemEntity entity in fileSystemEntityList) {
       final String entityPath = entity.path;
       if (entity is File) {
         final RegExp arbFilenameRE = RegExp(r'(\w+)\.arb$');
@@ -448,7 +460,7 @@ class LocalizationsGenerator {
                 "The following .arb file's locale could not be determined: \n"
                 '$entityPath \n'
                 "Make sure that the locale is specified in the '@@locale' "
-                'property or as part of the filename (ie. file_en.arb)'
+                'property or as part of the filename (e.g. file_en.arb)'
               );
             }
 
@@ -457,23 +469,28 @@ class LocalizationsGenerator {
 
           arbFilenames.add(entityPath);
           final LocaleInfo localeInfo = LocaleInfo.fromString(localeString);
-          if (supportedLocales.contains(localeInfo))
+          if (localeInfoList.contains(localeInfo))
             throw L10nException(
               'Multiple arb files with the same locale detected. \n'
               'Ensure that there is exactly one arb file for each locale.'
             );
-          supportedLocales.add(localeInfo);
-          supportedLanguageCodes.add('\'${localeInfo.languageCode}\'');
+          localeInfoList.add(localeInfo);
         }
       }
     }
+
+    localeInfoList.sort((LocaleInfo a, LocaleInfo b) => a.compareTo(b));
+    supportedLocales.addAll(localeInfoList);
+    supportedLanguageCodes.addAll(localeInfoList.map((LocaleInfo localeInfo) {
+      return '\'${localeInfo.languageCode}\'';
+    }));
   }
 
-  /// Generates the Dart class methods for the localizations class.
+  /// Generates the methods for the localizations class.
   ///
   /// The method parses [templateArbFile] and uses its resource ids as the
-  /// Dart method and getter names. It then uses its values to figure out
-  /// how to define these getters.
+  /// Dart method and getter names. It then uses each resource id's
+  /// corresponding resource value to figure out how to define these getters.
   ///
   /// For example, a message with plurals will be handled differently from
   /// a simple, singular message.
