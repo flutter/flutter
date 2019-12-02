@@ -262,7 +262,7 @@ class FlutterProject {
   }
 
   /// The direct dependencies of this project, read from the [pubspecFile]. This
-  /// doesn't include `dev_dependencies`. If the pubspec file doesn't exist, 
+  /// doesn't include `dev_dependencies`. If the pubspec file doesn't exist,
   /// returns null.
   List<String> get directDependencies {
     final YamlMap pubspec = _pubspecContent;

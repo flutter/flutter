@@ -635,13 +635,13 @@ web_plugin_with_nested:${webPluginWithNestedFile.childDirectory('lib').uri.toStr
       });
 
       void createPackage({
-        @required String name, 
+        @required String name,
         List<String> dependencies = const <String>[],
         List<String> devDependencies = const <String>[],
         bool isPlugin = false}) {
           final Directory dir = basePkgDir.childDirectory(name)..createSync();
           final StringBuffer pubspecContent = StringBuffer();
-          
+
           void writeDependenciesBlock(String name, List<String> pkgs) {
             if (pkgs.isNotEmpty) {
               pubspecContent.write('$name: \n');
@@ -724,7 +724,7 @@ flutter:
 
         pubspecFile.writeAsStringSync('''
 dependencies:
-  foo:        
+  foo:
         ''');
 
         expect(
@@ -754,7 +754,7 @@ dependencies:
 
         pubspecFile.writeAsStringSync('''
 dependencies:
-  pure_dart:        
+  pure_dart:
         ''');
 
         expect(findPlugins(project).map((Plugin p) => p.name), <String>['plugin']);
@@ -773,7 +773,7 @@ dependencies:
 dependencies:
   regular:
 dev_dependencies:
-  dev:        
+  dev:
         ''');
 
         final List<Plugin> plugins = findPlugins(project);
@@ -815,7 +815,7 @@ dev_dependencies:
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
-      });   
+      });
     });
   });
 }

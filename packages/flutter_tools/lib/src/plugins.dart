@@ -368,7 +368,7 @@ List<Plugin> findPlugins(FlutterProject project) {
           throwToolExit(
             'This project or a used package depends on $dependency, which '
             'could not be found in the .packages file. Try running '
-            'flutter packages get again.');           
+            'flutter packages get again.');
         } else {
           pending.add(package);
         }
