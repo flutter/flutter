@@ -218,19 +218,18 @@ class DefaultTestVariant extends TestVariant<void> {
 /// set to different values of [TargetPlatform].
 class TargetPlatformVariant extends TestVariant<TargetPlatform> {
   /// Creates a [TargetPlatformVariant] that tests the given [values].
-  TargetPlatformVariant(this.values)
-    : assert(values.toSet().length == values.length, 'Each platform may only be tested once.');
+  const TargetPlatformVariant(this.values);
 
   /// Creates a [TargetPlatformVariant] that tests all values from
   /// the [TargetPlatform] enum.
-  TargetPlatformVariant.all() : values = TargetPlatform.values;
+  TargetPlatformVariant.all() : values = TargetPlatform.values.toSet();
 
   /// Creates a [TargetPlatformVariant] that tests only the given value of
   /// [TargetPlatform].
-  TargetPlatformVariant.only(TargetPlatform platform) : values = <TargetPlatform>[platform];
+  TargetPlatformVariant.only(TargetPlatform platform) : values = <TargetPlatform>{platform};
 
   @override
-  final Iterable<TargetPlatform> values;
+  final Set<TargetPlatform> values;
 
   @override
   String describeValue(TargetPlatform value) => value.toString();

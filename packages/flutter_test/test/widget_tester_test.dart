@@ -704,13 +704,13 @@ void main() {
   group('testWidgets variants work', () {
     int numberOfVariationsRun = 0;
 
-    testWidgets('variant tests run all values', (WidgetTester tester) async {
+    testWidgets('variant tests run all values provided', (WidgetTester tester) async {
       if (debugDefaultTargetPlatformOverride == null) {
         expect(numberOfVariationsRun, equals(TargetPlatform.values.length));
       } else {
         numberOfVariationsRun += 1;
       }
-    }, variants: <TestVariant<dynamic>>[ TargetPlatformVariant(TargetPlatform.values), const DefaultTestVariant() ]);
+    }, variants: <TestVariant<dynamic>>[ TargetPlatformVariant.all(), const DefaultTestVariant() ]);
 
     testWidgets('variant tests have descriptions with details', (WidgetTester tester) async {
       if (debugDefaultTargetPlatformOverride == null) {
@@ -718,7 +718,7 @@ void main() {
       } else {
         expect(tester.testDescription, equals('variant tests have descriptions with details ($debugDefaultTargetPlatformOverride)'));
       }
-    }, variants: <TestVariant<dynamic>>[ TargetPlatformVariant(TargetPlatform.values), const DefaultTestVariant() ]);
+    }, variants: <TestVariant<dynamic>>[ TargetPlatformVariant.all(), const DefaultTestVariant() ]);
   });
 
   group('TargetPlatformVariant', () {
@@ -732,11 +732,6 @@ void main() {
     tearDownAll((){
       expect(debugDefaultTargetPlatformOverride, equals(origTargetPlatform));
     });
-
-    testWidgets('TargetPlatformVariant tests return debugDefaultTargetPlatformOverride to original value', (WidgetTester tester) async {
-      expect(debugDefaultTargetPlatformOverride, equals(TargetPlatform.iOS));
-      expect(defaultTargetPlatform, equals(TargetPlatform.iOS));
-    }, variants: <TestVariant<dynamic>>[ TargetPlatformVariant(<TargetPlatform> [ TargetPlatform.iOS ]) ]);
 
     testWidgets('TargetPlatformVariant.only tests given value', (WidgetTester tester) async {
       expect(debugDefaultTargetPlatformOverride, equals(TargetPlatform.iOS));
