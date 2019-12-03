@@ -195,7 +195,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
     if (firstChild == null) {
       if (!addInitialChild(index: firstIndex, layoutOffset: indexToLayoutOffset(itemExtent, firstIndex))) {
         // There are either no children, or we are past the end of all our children.
-        // If it is the later, we will need to find the first available child.
+        // If it is the latter, we will need to find the first available child.
         double max;
         if (childManager.childCount != null) {
           max = computeMaxScrollOffset(constraints, itemExtent);
