@@ -788,12 +788,10 @@ class SemanticsProperties extends DiagnosticableTree {
 
   /// If non-null, whether the node should be considered a live region.
   ///
-  /// On Android, when a live region semantics node is first created TalkBack
-  /// will make a polite announcement of the current label. This announcement
-  /// occurs even if the node is not focused. Subsequent polite announcements
-  /// can be made by sending a [UpdateLiveRegionEvent] semantics event. The
-  /// announcement will only be made if the node's label has changed since the
-  /// last update.
+  /// On Android, when the label changes on a live region semantics node,
+  /// TalkBack will make a polite announcement of the current label. This
+  /// announcement occurs even if the node is not focused, but only if the label
+  /// has changed since the last update.
   ///
   /// On iOS, no announcements are made but the node is marked as
   /// `UIAccessibilityTraitUpdatesFrequently`.
@@ -807,7 +805,6 @@ class SemanticsProperties extends DiagnosticableTree {
   ///
   ///  * [SemanticsFlag.liveRegion], the semantics flag this setting controls.
   ///  * [SemanticsConfiguration.liveRegion], for a full description of a live region.
-  ///  * [UpdateLiveRegionEvent], to trigger a polite announcement of a live region.
   final bool liveRegion;
 
   /// The maximum number of characters that can be entered into an editable
@@ -3522,12 +3519,10 @@ class SemanticsConfiguration {
 
   /// Whether the semantics node is a live region.
   ///
-  /// On Android, when a live region semantics node is first created TalkBack
-  /// will make a polite announcement of the current label. This announcement
-  /// occurs even if the node is not focused. Subsequent polite announcements
-  /// can be made by sending a [UpdateLiveRegionEvent] semantics event. The
-  /// announcement will only be made if the node's label has changed since the
-  /// last update.
+  /// On Android, when the label changes on a live region semantics node,
+  /// TalkBack will make a polite announcement of the current label. This
+  /// announcement occurs even if the node is not focused, but only if the label
+  /// has changed since the last update.
   ///
   /// An example of a live region is the [Snackbar] widget. When it appears
   /// on the screen it may be difficult to focus to read the label. A live

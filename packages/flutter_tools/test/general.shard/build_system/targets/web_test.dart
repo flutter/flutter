@@ -9,6 +9,7 @@ import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/depfile.dart';
 import 'package:flutter_tools/src/build_system/targets/dart.dart';
 import 'package:flutter_tools/src/build_system/targets/web.dart';
+import 'package:flutter_tools/src/dart/package_map.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
@@ -35,12 +36,17 @@ void main() {
     when(mockWindowsPlatform.isLinux).thenReturn(false);
 
     testbed = Testbed(setup: () {
+      final File packagesFile = fs.file(fs.path.join('foo', '.packages'))
+        ..createSync(recursive: true)
+        ..writeAsStringSync('foo:lib/\n');
+      PackageMap.globalPackagesPath = packagesFile.path;
+
       environment = Environment(
-        projectDir: fs.currentDirectory,
+        projectDir: fs.currentDirectory.childDirectory('foo'),
         outputDir: fs.currentDirectory,
         buildDir: fs.currentDirectory,
         defines: <String, String>{
-          kTargetFile: fs.path.join('lib', 'main.dart'),
+          kTargetFile: fs.path.join('foo', 'lib', 'main.dart'),
         }
       );
       environment.buildDir.createSync(recursive: true);
@@ -57,7 +63,7 @@ void main() {
     final String generated = environment.buildDir.childFile('main.dart').readAsStringSync();
 
     // Plugins
-    expect(generated, contains("import 'file:///lib/generated_plugin_registrant.dart';"));
+    expect(generated, contains("import 'package:foo/generated_plugin_registrant.dart';"));
     expect(generated, contains('registerPlugins(webPluginRegistry);'));
 
     // Platform
@@ -67,7 +73,7 @@ void main() {
     expect(generated, contains('entrypoint.main();'));
 
     // Import.
-    expect(generated, contains('import "file:///lib/main.dart" as entrypoint;'));
+    expect(generated, contains("import 'package:foo/main.dart' as entrypoint;"));
   }));
 
   test('WebEntrypointTarget generates an entrypoint with plugins and init platform on windows', () => testbed.run(() async {
@@ -78,7 +84,7 @@ void main() {
     final String generated = environment.buildDir.childFile('main.dart').readAsStringSync();
 
     // Plugins
-    expect(generated, contains("import 'file:///C:/lib/generated_plugin_registrant.dart';"));
+    expect(generated, contains("import 'package:foo/generated_plugin_registrant.dart';"));
     expect(generated, contains('registerPlugins(webPluginRegistry);'));
 
     // Platform
@@ -88,7 +94,7 @@ void main() {
     expect(generated, contains('entrypoint.main();'));
 
     // Import.
-    expect(generated, contains('import "file:///C:/lib/main.dart" as entrypoint;'));
+    expect(generated, contains("import 'package:foo/main.dart' as entrypoint;"));
   }, overrides: <Type, Generator>{
     Platform: () => mockWindowsPlatform,
   }));
@@ -101,7 +107,7 @@ void main() {
     final String generated = environment.buildDir.childFile('main.dart').readAsStringSync();
 
     // Plugins
-    expect(generated, isNot(contains("import 'file:///lib/generated_plugin_registrant.dart';")));
+    expect(generated, isNot(contains("import 'package:foo/generated_plugin_registrant.dart';")));
     expect(generated, isNot(contains('registerPlugins(webPluginRegistry);')));
 
     // Platform
@@ -119,7 +125,7 @@ void main() {
     final String generated = environment.buildDir.childFile('main.dart').readAsStringSync();
 
     // Plugins
-    expect(generated, contains("import 'file:///lib/generated_plugin_registrant.dart';"));
+    expect(generated, contains("import 'package:foo/generated_plugin_registrant.dart';"));
     expect(generated, contains('registerPlugins(webPluginRegistry);'));
 
     // Platform
@@ -137,7 +143,7 @@ void main() {
     final String generated = environment.buildDir.childFile('main.dart').readAsStringSync();
 
     // Plugins
-    expect(generated, isNot(contains("import 'file:///lib/generated_plugin_registrant.dart';")));
+    expect(generated, isNot(contains("import 'package:foo/generated_plugin_registrant.dart';")));
     expect(generated, isNot(contains('registerPlugins(webPluginRegistry);')));
 
     // Platform
@@ -162,7 +168,7 @@ void main() {
       '--no-minify', // but uses unminified names for debugging
       '-o',
       environment.buildDir.childFile('main.dart.js').absolute.path,
-      '--packages=.packages',
+      '--packages=${fs.path.join('foo', '.packages')}',
       '-Ddart.vm.profile=true',
       environment.buildDir.childFile('main.dart').absolute.path,
     ];
@@ -185,7 +191,7 @@ void main() {
       '-O4', // highest optimizations.
       '-o',
       environment.buildDir.childFile('main.dart.js').absolute.path,
-      '--packages=.packages',
+      '--packages=${fs.path.join('foo', '.packages')}',
       '-Ddart.vm.product=true',
       environment.buildDir.childFile('main.dart').absolute.path,
     ];
@@ -209,7 +215,7 @@ void main() {
       '-O3', // configured optimizations.
       '-o',
       environment.buildDir.childFile('main.dart.js').absolute.path,
-      '--packages=.packages',
+      '--packages=${fs.path.join('foo', '.packages')}',
       '-Ddart.vm.product=true',
       environment.buildDir.childFile('main.dart').absolute.path,
     ];
@@ -252,7 +258,7 @@ void main() {
       '-O4',
       '-o',
       environment.buildDir.childFile('main.dart.js').absolute.path,
-      '--packages=.packages',
+      '--packages=${fs.path.join('foo', '.packages')}',
       '-Ddart.vm.product=true',
       '-DFOO=bar',
       '-DBAZ=qux',
@@ -279,7 +285,7 @@ void main() {
       '--no-minify',
       '-o',
       environment.buildDir.childFile('main.dart.js').absolute.path,
-      '--packages=.packages',
+      '--packages=${fs.path.join('foo', '.packages')}',
       '-Ddart.vm.profile=true',
       '-DFOO=bar',
       '-DBAZ=qux',
