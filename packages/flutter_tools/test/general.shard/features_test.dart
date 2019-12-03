@@ -78,27 +78,19 @@ void main() {
     }));
 
     test('flutter web help string', () {
-      expect(flutterWebFeature.generateHelpMessage(),
-      'Enable or disable Flutter for web. '
-      'This setting will take effect on the master, dev, and beta channels.');
+      expect(flutterWebFeature.generateHelpMessage(), 'Enable or disable Flutter for web. This setting will take effect on the master, dev, and beta channels.');
     });
 
     test('flutter macOS desktop help string', () {
-      expect(flutterMacOSDesktopFeature.generateHelpMessage(),
-      'Enable or disable Flutter for desktop on macOS. '
-      'This setting will take effect on the master and dev channels.');
+      expect(flutterMacOSDesktopFeature.generateHelpMessage(), 'Enable or disable Flutter for desktop on macOS. This setting will take effect on the master channel.');
     });
 
     test('flutter Linux desktop help string', () {
-      expect(flutterLinuxDesktopFeature.generateHelpMessage(),
-      'Enable or disable Flutter for desktop on Linux. '
-      'This setting will take effect on the master channel.');
+      expect(flutterLinuxDesktopFeature.generateHelpMessage(), 'Enable or disable Flutter for desktop on Linux. This setting will take effect on the master channel.');
     });
 
     test('flutter Windows desktop help string', () {
-      expect(flutterWindowsDesktopFeature.generateHelpMessage(),
-      'Enable or disable Flutter for desktop on Windows. '
-      'This setting will take effect on the master channel.');
+      expect(flutterWindowsDesktopFeature.generateHelpMessage(), 'Enable or disable Flutter for desktop on Windows. This setting will take effect on the master channel.');
     });
 
     test('help string on multiple channels', () {
@@ -225,18 +217,18 @@ void main() {
       expect(featureFlags.isMacOSEnabled, false);
     }));
 
-    test('flutter macos desktop enabled with config on dev', () => testbed.run(() {
+    test('flutter macos desktop not enabled with config on dev', () => testbed.run(() {
       when(mockFlutterVerion.channel).thenReturn('dev');
-      when<bool>(mockFlutterConfig.getValue('enable-macos-desktop') as bool).thenReturn(true);
+      when<bool>(mockFlutterConfig.getValue('flutter-desktop-macos') as bool).thenReturn(true);
 
-      expect(featureFlags.isMacOSEnabled, true);
+      expect(featureFlags.isMacOSEnabled, false);
     }));
 
-    test('flutter macos desktop enabled with environment variable on dev', () => testbed.run(() {
+    test('flutter macos desktop not enabled with environment variable on dev', () => testbed.run(() {
       when(mockFlutterVerion.channel).thenReturn('dev');
       when(mockPlatform.environment).thenReturn(<String, String>{'FLUTTER_MACOS': 'true'});
 
-      expect(featureFlags.isMacOSEnabled, true);
+      expect(featureFlags.isMacOSEnabled, false);
     }));
 
     test('flutter macos desktop off by default on beta', () => testbed.run(() {
