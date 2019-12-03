@@ -129,6 +129,11 @@ abstract class FlutterGoldenFileComparator extends GoldenFileComparator {
   Uri getTestUri(Uri key, int version) => key;
 
   /// Calculate the appropriate basedir for the current test context.
+  ///
+  /// The optional [suffix] argument is used by the
+  /// [FlutterSkiaGoldFileComparator] and the [FlutterPreSubmitFileComparator].
+  /// These [FlutterGoldenFileComparators] randomize their base directories to
+  /// maintain thread safety while using the `goldctl` tool.
   @protected
   @visibleForTesting
   static Directory getBaseDirectory(LocalFileComparator defaultComparator, Platform platform, {String suffix = ''}) {
