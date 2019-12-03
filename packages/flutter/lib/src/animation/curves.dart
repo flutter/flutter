@@ -3,8 +3,10 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
+import 'package:vector_math/vector_math.dart' show Vector2;
 
 /// An easing curve, i.e. a mapping of the unit interval to the unit interval.
 ///
@@ -265,6 +267,486 @@ class Cubic extends Curve {
   String toString() {
     return '$runtimeType(${a.toStringAsFixed(2)}, ${b.toStringAsFixed(2)}, ${c.toStringAsFixed(2)}, ${d.toStringAsFixed(2)})';
   }
+}
+
+/// Abstract class that defines an API for evaluating 2D curves.
+abstract class Curve2D {
+  /// Abstract const constructor. This constructor enables subclasses to provide
+  /// const constructors so that they can be used in const expressions.
+  const Curve2D();
+
+  /// Returns the position of the curve at point `t`.
+  ///
+  /// This function must ensure that the value of `t` must be between 0.0 and
+  /// 1.0
+  ///
+  /// It is recommended that subclasses override [transformInternal] instead of
+  /// this function, as the above case is already enforced in the default
+  /// implementation of [transform], which delegates the remaining logic to
+  /// [transformInternal].
+  Offset transform(double t) {
+    assert(t >= 0.0 && t <= 1.0, 'parameter t is ${t.toStringAsFixed(2)}, which is outside of the range [0.0, 1.0]');
+    return transformInternal(t);
+  }
+
+  /// Returns the position of the curve at point `t`, where `t` is between 0.0
+  /// and 1.0, inclusive.
+  @protected
+  Offset transformInternal(double t) {
+    throw UnimplementedError();
+  }
+
+  @override
+  String toString() => '$runtimeType';
+}
+
+/// A spline that passes smoothly through the given control points using a
+/// centripetal Catmull-Rom spline.
+///
+/// When the curve is evaluated with [transform], the output values will move
+/// smoothly from one control point to the next, passing through the control
+/// points.
+///
+/// Unlike Bezier splines, Catmull-Rom splines have the advantage that their
+/// curves pass through the control points given to them. They are both cubic
+/// polynomial representations, and, in fact, Catmull-Rom splines can be
+/// converted mathematically into Bezier splines. This class implements a
+/// "centripetal" Catmull-Rom spline implementation. The term centripetal
+/// implies that it won't form loops or self-intersections within a single
+/// segment.
+///
+/// See also:
+///
+///  * A Wikipedia article on [centripetal Catmull-Rom splines](https://en.wikipedia.org/wiki/Centripetal_Catmull%E2%80%93Rom_spline).
+///  * This [paper on using Catmull-Rom splines](http://faculty.cs.tamu.edu/schaefer/research/cr_cad.pdf).
+class CatmullRomSpline extends Curve2D {
+  /// Constructs a centripetal Catmull-Rom spline curve.
+  ///
+  /// The `points` argument is a list of four or more points that describe the
+  /// points that the curve must pass through.
+  ///
+  /// The optional `tension` argument controls how tightly the curve approaches
+  /// the given `points`. It must be in the range 0.0 to 1.0, inclusive. It
+  /// defaults to 0.0, which provides the smoothest curve. A value of 1.0
+  /// produces a linear interpolation between points.
+  ///
+  /// The optional `endHandle` and `startHandle` points are the beginning and
+  /// ending handle positions. If not specified, they are created automatically
+  /// by extending the line formed by the first and/or last line segment in the
+  /// input points, respectively.
+  ///
+  /// The `tension` and `points` arguments must not be null, and the `points`
+  /// list must contain at least four points to interpolate.
+  CatmullRomSpline(
+      List<Offset> points, {
+        double tension = 0.0,
+        Offset startHandle,
+        Offset endHandle,
+      })  : assert(points != null),
+        assert(tension != null),
+        assert(tension <= 1.0, 'tension $tension must not be greater than 1.0.'),
+        assert(tension >= 0.0, 'tension $tension must not be negative.'),
+        assert(points.length > 3, 'There must be at least four points to create a CatmullRom curve.') {
+    // If not specified, select the first and last control points (which are
+    // handles: they are not intersected by the resulting curve) so that they
+    // extend the first and last segments, respectively.
+    startHandle ??= points[0] * 2.0 - points[1];
+    endHandle ??= points.last * 2.0 - points[points.length - 2];
+    final List<Offset> allPoints = <Offset>[
+      startHandle,
+      ...points,
+      endHandle,
+    ];
+
+    // An alpha of 0.5 is what makes it a centripetal Catmull-Rom spline. A
+    // value of 0.0 would make it a uniform Catmull-Rom spline, and a value of
+    // 1.0 would make it a chordal Catmull-Rom spline. Non-centripetal values
+    // for alpha can give self-intersecting behavior or looping within a
+    // segment.
+    const double alpha = 0.5;
+    for (int i = 0; i < allPoints.length - 3; ++i) {
+      final List<Offset> curve = <Offset>[allPoints[i], allPoints[i + 1], allPoints[i + 2], allPoints[i + 3]];
+      final Offset diffCurve10 = curve[1] - curve[0];
+      final Offset diffCurve21 = curve[2] - curve[1];
+      final Offset diffCurve32 = curve[3] - curve[2];
+      final double t01 = math.pow(diffCurve10.distance, alpha);
+      final double t12 = math.pow(diffCurve21.distance, alpha);
+      final double t23 = math.pow(diffCurve32.distance, alpha);
+      final double reverseTension = 1.0 - tension;
+
+      final Offset m1 = (diffCurve21 + (diffCurve10 / t01 - (curve[2] - curve[0]) / (t01 + t12)) * t12) * reverseTension;
+      final Offset m2 = (diffCurve21 + (diffCurve32 / t23 - (curve[3] - curve[1]) / (t12 + t23)) * t12) * reverseTension;
+      final Offset sumM12 = m1 + m2;
+
+      final List<Offset> controls = <Offset>[
+        diffCurve21 * -2.0 + sumM12,
+        diffCurve21 * 3.0 - m1 - sumM12,
+        m1,
+        curve[1],
+      ];
+      _controlPoints.add(controls);
+    }
+  }
+
+  final List<List<Offset>> _controlPoints = <List<Offset>>[];
+
+  @override
+  Offset transformInternal(double t) {
+    assert(t >= 0.0 && t <= 1.0, 'parametric value $t is outside of [0, 1] range.');
+    final double length = _controlPoints.length.toDouble();
+    double position;
+    double localT;
+    int index;
+    if (t < 1.0) {
+      position = t * length;
+      localT = position % 1.0;
+      index = position.floor();
+    } else {
+      position = length;
+      localT = 1.0;
+      index = _controlPoints.length - 1;
+    }
+    final List<Offset> controlPoints = _controlPoints[index];
+    final double localT2 = localT * localT;
+    return controlPoints[0] * localT2 * localT
+         + controlPoints[1] * localT2
+         + controlPoints[2] * localT
+         + controlPoints[3];
+  }
+}
+
+/// A curve that passes smoothly through the given control points using a
+/// centripetal Catmull-Rom spline.
+///
+/// When the curve is evaluated with [transform], the values will interpolate
+/// smoothly from one control point to the next, passing through (0.0, 0.0), the
+/// given points, and (1.0, 1.0).
+///
+/// Unlike [Bezier] curves, Catmull-Rom curves have the advantage that their
+/// curves pass through the control points given to them. They are both cubic
+/// polynomial representations, and, in fact, Catmull-Rom splines can be
+/// converted mathematically into Bezier splines. This class implements a
+/// centripetal Catmull-Rom curve. The term centripetal implies that it won't
+/// form loops or self-intersections within a single segment, and corresponds to
+/// a Catmull-Rom α (alpha) value of 0.5.
+///
+/// See also:
+///
+///  * A Wikipedia article on [centripetal Catmull-Rom splines](https://en.wikipedia.org/wiki/Centripetal_Catmull%E2%80%93Rom_spline).
+///  * [new CatmullRomCurve] for a description of the constraints put on the
+///    input control points.
+///  * This [paper on using Catmull-Rom splines](http://faculty.cs.tamu.edu/schaefer/research/cr_cad.pdf).
+class CatmullRomCurve extends Curve {
+  /// Constructs a centripetal [CatmullRomCurve].
+  ///
+  /// It takes a list of two or more points that describe the points that the
+  /// curve must pass through.
+  ///
+  /// The `points` list must meet the following criteria:
+  ///
+  ///  * The `points` and `tension` arguments must not be null.
+  ///  * The list of `points` must contain at least two points.
+  ///  * The X value of each point must be greater than 0.0 and less then 1.0.
+  ///  * The X values of each point must be greater than the
+  ///    previous point's X value (i.e. monotonically increasing).
+  ///  * The angle between two adjacent segments must not be less than 60
+  ///    degrees. As the `tension` increases, this value decreases, and angles of
+  ///    zero degrees are accepted at a tension of 1.0.
+  ///  * The (non-axis-aligned) non-adjacent bounding rectangles, parallel to
+  ///    the control segments of the curve must not overlap.
+  ///
+  /// The static function [validateControlPoints] can be used to check that
+  /// these conditions are met, and will return true if they are. In debug mode,
+  /// it will also optionally return a list of reasons in text form. In debug
+  /// mode, this constructor will assert that these conditions are met and print
+  /// the reasons.
+  ///
+  /// When the curve is evaluated with [transform], the values will interpolate
+  /// smoothly from one control point to the next, passing through (0.0, 0.0), the
+  /// given points, and (1.0, 1.0).
+  ///
+  /// The optional `tension` argument controls how tightly the curve approaches
+  /// the given `points`. It must be in the range 0.0 to 1.0, inclusive. It
+  /// defaults to 0.0, which provides the smoothest curve. A value of 1.0
+  /// is equivalent to a linear interpolation between points.
+  ///
+  /// See also:
+  ///
+  ///  * This [paper on using Catmull-Rom splines](http://faculty.cs.tamu.edu/schaefer/research/cr_cad.pdf).
+  CatmullRomCurve(List<Offset> points, {double tension = 0.0})
+      : assert(tension != null),
+        assert(() {
+          final List<String> reasons = <String>[];
+          final bool valid = validateControlPoints(
+            points,
+            tension: tension,
+            reasons: reasons,
+          );
+          if (!valid) {
+            debugPrint('Validation of $runtimeType failed:');
+            for (String reason in reasons) {
+              debugPrint('  $reason');
+            }
+          }
+          return valid;
+        }(), 'control points $points could not be validated.'),
+        // Synthesize the first and last points to make sure the curve always goes
+        // from (0,0) to (1,1), which is part of the Curve contract.
+        valueSpline = CatmullRomSpline(<Offset>[Offset.zero, ...points, const Offset(1.0, 1.0)], tension: tension);
+
+  final CatmullRomSpline valueSpline;
+
+  // Computes the minimum bounding rectangle (not necessarily axis-aligned) that can
+  // contain a CatmullRom spline defined by these control points (The fourth
+  // control point isn't necessary for determining the size of the bounding box).
+  static List<Vector2> _computeBoundingQuad(Vector2 p1, Vector2 p2, Vector2 p3, Vector2 v1, Vector2 v2, double tension) {
+    // Calculate the max bounding height perpendicular to the p2-p3 segment.
+    final double d2 = v2.length;
+    final double d1 = v1.length;
+    final double r = d1 / d2;
+    final double sqrtR = math.sqrt(r);
+    final double boxHalf = (1.0 - tension) * d2 * (sqrtR / (4.0 * (1.0 + sqrtR)));
+
+    // Determine the perpendicular unit vector from the v2.
+    final Vector2 perpendicular = v2.scaleOrthogonalInto(boxHalf / v2.length, Vector2(0.0, 0.0));
+    final Vector2 firstPoint = p2 + perpendicular;
+    final List<Vector2> box = <Vector2>[firstPoint, p3 + perpendicular, p3 - perpendicular, p2 - perpendicular, firstPoint];
+    return box;
+  }
+
+  static int _whichSideOfAxis(List<Vector2> polygon, Vector2 axis, Vector2 perpendicular) {
+    // Polygon vertices are projected to the form axis+t*perpendicular. Return
+    // value is +1 if all t > 0, -1 if all t < 0, 0 otherwise, in which case the
+    // line splits the polygon.
+    int positive = 0;
+    int negative = 0;
+    for (int i = 0; i < polygon.length; i++) {
+      final double t = axis.dot(polygon[i] - perpendicular);
+      if (t > 0.0) {
+        positive++;
+      } else if (t < 0.0) {
+        negative++;
+      }
+      if (positive != 0 && negative != 0) {
+        return 0;
+      }
+    }
+    return positive != 0 ? 1 : -1;
+  }
+
+  static bool _quadsIntersect(List<Vector2> polygon1, List<Vector2> polygon2) {
+    // Test edges of polygon1 for separation. Because of the counterclockwise ordering,
+    // the projection interval for polygon1 is [m,0] where m <= 0. Only try to determine
+    // if polygon2 is on the ‘positive’ side of the line.
+    int j = polygon1.length - 1;
+    for (int i = 0; i < polygon1.length; i++) {
+      final Vector2 axis = (polygon1[i] - polygon1[j]).scaleOrthogonalInto(1.0, Vector2(0, 0));
+      if (_whichSideOfAxis(polygon2, axis, polygon1[i]) > 0) {
+        // polygon2 is entirely on ‘positive’ side of line polygon1[i] + t * axis
+        return false;
+      }
+      j = i;
+    }
+    // Test edges of polygon2 for separation. Because of the counterclockwise ordering,
+    // the projection interval for polygon2 is [m,0] where m <= 0. Only try to determine
+    // if polygon1 is on the ‘positive’ side of the line.
+    j = polygon2.length - 1;
+    for (int i = 0; i < polygon2.length; i++) {
+      final Vector2 axis = (polygon2[i] - polygon2[j]).scaleOrthogonalInto(1.0, Vector2(0, 0));
+      if (_whichSideOfAxis(polygon1, axis, polygon2[i]) > 0) {
+        // polygon1 is entirely on ‘positive’ side of line polygon2[i] + t * axis
+        return false;
+      }
+      j = i;
+    }
+    return true;
+  }
+
+  /// Validates that a given set of control points for a [CatmullRomCurve] is
+  /// well-formed and will not produce a spline that self-intersects.
+  ///
+  /// This is used in debug mode to validate a curve to make sure that it won't
+  /// violate the contract for a [Curve], in that it be non-self-intersecting
+  /// and single-valued.
+  ///
+  /// It uses the methodology laid out in [this paper](http://faculty.cs.tamu.edu/schaefer/research/cr_cad.pdf).
+  ///
+  /// First, it calculates the maximum extent bounding boxes of the values that
+  /// the curve can take on, and makes sure that non-adjacent control point
+  /// segments do not have overlapping bounding boxes. Then, for the adjacent
+  /// segments, ensures that they have an angle between them of greater than 60
+  /// degrees. These conditions together ensure that the curve won't be
+  /// self-intersecting.
+  ///
+  /// In debug mode, and `reasons` is non-null, this function will fill in
+  /// `reasons` with descriptions of the problems encountered.
+  static bool validateControlPoints(
+      List<Offset> interiorPoints, {
+      double tension = 0.0,
+      List<String> reasons,
+      List<CatmullRomSpline> boxes,
+    }) {
+    assert(tension != null);
+    if (interiorPoints == null) {
+      assert(() {
+        reasons?.add('Supplied interior points cannot be null');
+        return true;
+      }());
+      return false;
+    }
+
+    if (interiorPoints.length < 2) {
+      assert(() {
+        reasons?.add('There must be at least two points supplied to create a valid curve.');
+        return true;
+      }());
+      return false;
+    }
+
+    List<Offset> points = <Offset>[Offset.zero, ...interiorPoints, const Offset(1.0, 1.0)];
+    final Offset startHandle = points[0] * 2.0 - points[1];
+    final Offset endHandle = points.last * 2.0 - points[points.length - 2];
+    points = <Offset>[startHandle, ...points, endHandle];
+    double lastX = -double.infinity;
+    for (int i = 0; i < points.length; ++i) {
+      if (i > 1 && i < points.length - 2 && (points[i].dx <= 0.0 || points[i].dx >= 1.0)) {
+        assert(() {
+          reasons?.add('Points must have X values between 0.0 and 1.0, exclusive. '
+              'Point $i has an x value (${points[i].dx}) which is outside the range.');
+          return true;
+        }());
+        return false;
+      }
+      if (points[i].dx <= lastX) {
+        assert(() {
+          reasons?.add('Each X coordinate must be greater than the preceding X coordinate '
+              '(i.e. must be monotonically increasing in X). Point $i has x value of ${points[i].dx}, '
+              'which is not greater than $lastX');
+          return true;
+        }());
+        return false;
+      }
+      lastX = points[i].dx;
+    }
+
+    final List<List<Vector2>> quads = <List<Vector2>>[];
+
+    Vector2 toVector(Offset p) {
+      return Vector2(p.dx, p.dy);
+    }
+
+    bool success = true;
+
+    // Step through each set of four control points.
+    for (int i = 0; i < points.length - 3; ++i) {
+      final Vector2 p1 = toVector(points[i]);
+      final Vector2 p2 = toVector(points[i + 1]);
+      final Vector2 p3 = toVector(points[i + 2]);
+      // This is the initial control point that leads to the first point on the
+      // interpolated curve.
+      final Vector2 v1 = p1 - p2;
+      // This is the segment which defines the two ends of the interpolated curve.
+      final Vector2 v2 = p3 - p2;
+
+      if (points.length > 5 && tension != 1.0) {
+        // We only need to compute the quads if we have three or more spline
+        // segments: Only the bounding quads of non-adjacent segments need to be
+        // compared, and if there are fewer than three spline segments, there
+        // can be no non-adjacent segments.
+        // If tension is 1.0, then the quads are all degenerate, so don't bother
+        // generating/checking them.
+        quads.add(_computeBoundingQuad(p1, p2, p3, v1, v2, tension));
+        if (boxes != null) {
+          boxes.add(CatmullRomSpline(quads.last.map<Offset>((Vector2 vec) => Offset(vec.x, vec.y)).toList(), tension: 1.0));
+        }
+      }
+
+      // Check the angle between v1 and v2.  If it's less than π/3, then it's
+      // possible for the curve to overlap the one next to it, so it fails.
+      final double angle = v2.angleTo(v1);
+      final double minAngle = (1.0 - tension) * math.pi / 3.0;
+      if (angle < minAngle) {
+        bool bail = true;
+        assert(() {
+          reasons?.add('The included angle between segments $i and ${i + 1} (defined '
+              'by points ${<Offset>[points[i], points[i + 1], points[i + 2]]}) is less '
+              'than 60 degrees (it is ${(180.0 * angle / math.pi).toStringAsFixed(2)} '
+              'degrees).');
+          // No need to keep going if we're not giving reasons.
+          bail = reasons == null;
+          success = false;
+          return true;
+        }());
+        if (bail) {
+          // If we're not in debug mode, then we want to bail immediately
+          // instead of checking all the segments.
+          return false;
+        }
+      }
+    }
+    if (!success) {
+      // This can only happen in debug mode when reasons is non-null.
+      return false;
+    }
+
+    if (quads.isNotEmpty) {
+      for (int i = 0; i < quads.length; ++i) {
+        final List<Vector2> quad1 = quads[i];
+        for (int j = 0; j < quads.length; ++j) {
+          if (j <= i + 1 && j >= i - 1) {
+            // Don't need to compare adjacent quads, or itself.
+            continue;
+          }
+          // If non-adjacent quads intersect, then the curve loops back on
+          // itself, so it fails.
+          if (_quadsIntersect(quad1, quads[j])) {
+            bool bail = true;
+            assert(() {
+              reasons?.add('The bounding quads of segments $i and $j overlap.');
+              // No need to keep going if we're not giving reasons.
+              bail = reasons == null;
+              success = false;
+              return true;
+            }());
+            if (bail) {
+              // If we're not in debug mode, then we want to bail immediately
+              // instead of checking all the segments.
+              return false;
+            }
+          }
+        }
+      }
+    }
+    return success;
+  }
+
+  // Finds the time that corresponds to the x value of the spline at parametric
+  // value t.
+  double _findInverse(double t) {
+    double start = 0.0;
+    double end = 1.0;
+    double mid;
+    double offsetToOrigin(double pos) => t - valueSpline.transform(pos).dx;
+    // Use a binary search to find the inverse point within 1e-6, or 100
+    // subdivisions, whichever comes first.
+    const double errorLimit = 1e-6;
+    int count = 100;
+    final double startValue = offsetToOrigin(start);
+    while ((end - start) / 2.0 > errorLimit && count > 0) {
+      mid = (end + start) / 2.0;
+      final double value = offsetToOrigin(mid);
+      if (value.sign == startValue.sign) {
+        start = mid;
+      } else {
+        end = mid;
+      }
+      count--;
+    }
+    return mid;
+  }
+
+  @override
+  double transformInternal(double t) => valueSpline.transform(_findInverse(t)).dy;
 }
 
 /// A curve that is the reversed inversion of its given curve.

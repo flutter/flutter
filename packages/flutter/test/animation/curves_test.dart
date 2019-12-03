@@ -244,4 +244,179 @@ void main() {
     expect(Curves.bounceInOut.transform(1), 1);
   });
 
+  test('CatmullRomSpline interpolates values properly', () {
+    final CatmullRomSpline curve = CatmullRomSpline(
+      const <Offset>[
+        Offset(0.0, 0.0),
+        Offset(0.01, 0.25),
+        Offset(0.2, 0.25),
+        Offset(0.33, 0.25),
+        Offset(0.5, 1.0),
+        Offset(0.66, 0.75),
+        Offset(1.0, 1.0),
+      ],
+      tension: 0.0,
+      startHandle: const Offset(-0.0, -0.3),
+      endHandle: const Offset(1.3, 1.3),
+    );
+    for (double t = 0; t <= 100; t += 1) {
+      final Offset value = curve.transform(t / 100.0);
+      print('${t / 100.0}\t${value.dx}\t${value.dy}');
+    }
+    expect(curve.transform(0.0).dx, closeTo(0.0, 1e-6));
+    expect(curve.transform(0.0).dy, closeTo(0.0, 1e-6));
+    expect(curve.transform(0.25).dx, closeTo(0.33, 1e-6));
+    expect(curve.transform(0.25).dy, closeTo(1.0, 1e-6));
+    expect(curve.transform(0.5).dx, closeTo(0.5, 1e-6));
+    expect(curve.transform(0.5).dy, closeTo(0.0, 1e-6));
+    expect(curve.transform(0.75).dx, closeTo(0.66, 1e-6));
+    expect(curve.transform(0.75).dy, closeTo(-1.0, 1e-6));
+    expect(curve.transform(1.0).dx, closeTo(1.0, 1e-6));
+    expect(curve.transform(1.0).dy, closeTo(0.0, 1e-6));
+  });
+  test('CatmullRomSpline enforces contract', () {
+    expect(() {
+      CatmullRomSpline(null);
+    }, throwsAssertionError);
+    expect(() {
+      CatmullRomSpline(const <Offset>[]);
+    }, throwsAssertionError);
+    expect(() {
+      CatmullRomSpline(const <Offset>[Offset.zero]);
+    }, throwsAssertionError);
+    expect(() {
+      CatmullRomSpline(const <Offset>[Offset.zero, Offset.zero]);
+    }, throwsAssertionError);
+    expect(() {
+      CatmullRomSpline(const <Offset>[Offset.zero, Offset.zero, Offset.zero]);
+    }, throwsAssertionError);
+    expect(() {
+      CatmullRomSpline(const <Offset>[Offset.zero, Offset.zero, Offset.zero, Offset.zero], tension: -1.0);
+    }, throwsAssertionError);
+    expect(() {
+      CatmullRomSpline(const <Offset>[Offset.zero, Offset.zero, Offset.zero, Offset.zero], tension: 2.0);
+    }, throwsAssertionError);
+  });
+  test('CatmullRomCurve interpolates given points correctly', () {
+    final CatmullRomCurve curve = CatmullRomCurve(
+      const <Offset>[
+        Offset(0.01, 0.25),
+        Offset(0.2, 0.25),
+        Offset(0.33, 0.25),
+        Offset(0.5, 1.0),
+        Offset(0.8, 0.75),
+      ],
+    );
+//    for (double t = 0; t <= 100; t += 1) {
+//      print('${(t / 100.0).toStringAsFixed(4)}\t${curve.transform(t / 100.0).toStringAsFixed(4)}');
+//    }
+    expect(curve.transform(0.0), closeTo(0.0, 1e-6));
+    expect(curve.transform(0.01), closeTo(0.25, 1e-6));
+    expect(curve.transform(0.2), closeTo(0.25, 1e-6));
+    expect(curve.transform(0.33), closeTo(0.25, 1e-5));
+    expect(curve.transform(0.5), closeTo(1.0, 1e-6));
+    expect(curve.transform(0.6), closeTo(0.9357596, 1e-6));
+    expect(curve.transform(0.8), closeTo(0.75, 1e-6));
+    expect(curve.transform(1.0), closeTo(1.0, 1e-6));
+  });
+  test('CatmullRomCurve enforces contract', () {
+    expect(() {
+      CatmullRomCurve(null);
+    }, throwsAssertionError);
+    expect(() {
+      CatmullRomCurve(const <Offset>[]);
+    }, throwsAssertionError);
+    expect(() {
+      CatmullRomCurve(const <Offset>[Offset.zero]);
+    }, throwsAssertionError);
+    expect(() {
+      CatmullRomCurve(const <Offset>[Offset.zero, Offset.zero]);
+    }, throwsAssertionError);
+
+    // Monotonically increasing in X.
+    expect(
+        CatmullRomCurve.validateControlPoints(
+          const <Offset>[
+            Offset(0.2, 0.25),
+            Offset(0.01, 0.25),
+          ],
+          tension: 0.0,
+        ),
+        isFalse);
+    expect(() {
+      CatmullRomCurve(
+        const <Offset>[
+          Offset(0.2, 0.25),
+          Offset(0.01, 0.25),
+        ],
+        tension: 0.0,
+      );
+    }, throwsAssertionError);
+
+    // X within range (0.0, 1.0).
+    expect(
+        CatmullRomCurve.validateControlPoints(
+          const <Offset>[
+            Offset(0.2, 0.25),
+            Offset(1.01, 0.25),
+          ],
+          tension: 0.0,
+        ),
+        isFalse);
+    expect(() {
+      CatmullRomCurve(
+        const <Offset>[
+          Offset(0.2, 0.25),
+          Offset(1.01, 0.25),
+        ],
+        tension: 0.0,
+      );
+    }, throwsAssertionError);
+
+    // Angle less than 60 degrees.
+    expect(
+        CatmullRomCurve.validateControlPoints(
+          const <Offset>[
+            Offset(0.19, 0.0),
+            Offset(0.2, 0.25),
+            Offset(0.21, 0.0),
+          ],
+          tension: 0.0,
+        ),
+        isFalse);
+    expect(() {
+      CatmullRomCurve(
+        const <Offset>[
+          Offset(0.19, 0.0),
+          Offset(0.2, 0.25),
+          Offset(0.21, 0.0),
+        ],
+        tension: 0.0,
+      );
+    }, throwsAssertionError);
+
+    // Non-adjacent bounding boxes intersect.
+    expect(
+        CatmullRomCurve.validateControlPoints(
+          const <Offset>[
+            Offset(0.1, 0.25),
+            Offset(0.39, 0.25),
+            Offset(0.41, 0.27),
+            Offset(0.5, 1.0),
+          ],
+          tension: 0.0,
+        ),
+        isFalse);
+    expect(() {
+      CatmullRomCurve(
+        const <Offset>[
+          Offset(0.1, 0.25),
+          Offset(0.39, 0.25),
+          Offset(0.41, 0.27),
+          Offset(0.5, 1.0),
+        ],
+        tension: 0.0,
+      );
+    }, throwsAssertionError);
+  });
 }
