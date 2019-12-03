@@ -68,4 +68,18 @@ void main() {
       paints..rect(rect: Offset.zero & size),
     );
   });
+
+  test('BoxDecoration.getClipPath', () {
+    const double radius = 10;
+    final BoxDecoration decoration = BoxDecoration(
+      borderRadius: BorderRadius.circular(radius),
+    );
+    const Rect rect = Rect.fromLTWH(0.0, 0.0, 100.0, 20.0);
+    final Path clipPath = decoration.getClipPath(rect, TextDirection.ltr);
+    final Matcher isLookLikeExpectedPath = isPathThat(
+      includes: const <Offset>[ Offset(30.0, 10.0), Offset(50.0, 10.0), ],
+      excludes: const <Offset>[ Offset(1.0, 1.0), Offset(99.0, 19.0), ],
+    );
+    expect(clipPath, isLookLikeExpectedPath);
+  });
 }
