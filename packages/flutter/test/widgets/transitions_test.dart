@@ -303,17 +303,17 @@ void main() {
     expect(actualAlignment, const Alignment(1.0, -1.0));
   });
 
-  double _getOpacity(WidgetTester tester, String textValue) {
-    final FadeTransition opacityWidget = tester.widget<FadeTransition>(
-      find.ancestor(
-        of: find.text(textValue),
-        matching: find.byType(FadeTransition),
-      ).first,
-    );
-    return opacityWidget.opacity.value;
-  }
-
   group('FadeTransition', () {
+    double _getOpacity(WidgetTester tester, String textValue) {
+      final FadeTransition opacityWidget = tester.widget<FadeTransition>(
+        find.ancestor(
+          of: find.text(textValue),
+          matching: find.byType(FadeTransition),
+        ).first,
+      );
+      return opacityWidget.opacity.value;
+    }
+
     testWidgets('animates', (WidgetTester tester) async {
       final AnimationController controller = AnimationController(vsync: const TestVSync());
       final Animation<double> animation = Tween<double>(begin: 0.0, end: 1.0).animate(controller);
@@ -348,6 +348,16 @@ void main() {
   });
 
   group('SliverFadeTransition', () {
+    double _getOpacity(WidgetTester tester, String textValue) {
+      final SliverFadeTransition opacityWidget = tester.widget<SliverFadeTransition>(
+        find.ancestor(
+          of: find.text(textValue),
+          matching: find.byType(SliverFadeTransition),
+        ).first,
+      );
+      return opacityWidget.opacity.value;
+    }
+    
     testWidgets('animates', (WidgetTester tester) async {
       final AnimationController controller = AnimationController(vsync: const TestVSync());
       final Animation<double> animation = Tween<double>(begin: 0.0, end: 1.0).animate(controller);
