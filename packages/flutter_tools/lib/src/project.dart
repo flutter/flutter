@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -146,6 +146,10 @@ class FlutterProject {
   /// The `.flutter-plugins` file of this project.
   File get flutterPluginsFile => directory.childFile('.flutter-plugins');
 
+  /// The `.flutter-plugins-dependencies` file of this project,
+  /// which contains the dependencies each plugin depends on.
+  File get flutterPluginsDependenciesFile => directory.childFile('.flutter-plugins-dependencies');
+
   /// The `.dart-tool` directory of this project.
   Directory get dartTool => directory.childDirectory('.dart_tool');
 
@@ -231,12 +235,12 @@ class FlutterProject {
     if (!pubspecFile.existsSync()) {
       return null;
     }
-    final YamlMap pubspec = loadYaml(pubspecFile.readAsStringSync());
+    final YamlMap pubspec = loadYaml(pubspecFile.readAsStringSync()) as YamlMap;
     // If the pubspec file is empty, this will be null.
     if (pubspec == null) {
       return null;
     }
-    return pubspec['builders'];
+    return pubspec['builders'] as YamlMap;
   }
 
   /// Whether there are any builders used by this package.
@@ -893,7 +897,7 @@ class LinuxProject {
   Future<void> ensureReadyForPlatformSpecificTooling() async {}
 }
 
-/// The Fuchisa sub project
+/// The Fuchsia sub project
 class FuchsiaProject {
   FuchsiaProject._(this.project);
 

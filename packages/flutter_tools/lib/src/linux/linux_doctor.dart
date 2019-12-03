@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -32,7 +32,7 @@ class LinuxDoctorValidator extends DoctorValidator {
       validationType = ValidationType.missing;
       messages.add(ValidationMessage.error('clang++ is not installed'));
     } else {
-      final String firstLine = clangResult.stdout.split('\n').first.trim();
+      final String firstLine = (clangResult.stdout as String).split('\n').first.trim();
       final String versionString = RegExp(r'[0-9]+\.[0-9]+\.[0-9]+').firstMatch(firstLine).group(0);
       final Version version = Version.parse(versionString);
       if (version >= minimumClangVersion) {
@@ -59,7 +59,7 @@ class LinuxDoctorValidator extends DoctorValidator {
       validationType = ValidationType.missing;
       messages.add(ValidationMessage.error('make is not installed'));
     } else {
-      final String firstLine = makeResult.stdout.split('\n').first.trim();
+      final String firstLine = (makeResult.stdout as String).split('\n').first.trim();
       messages.add(ValidationMessage(firstLine));
     }
 

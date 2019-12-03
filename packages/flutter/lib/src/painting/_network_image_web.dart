@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -10,7 +10,7 @@ import 'package:flutter/foundation.dart';
 import 'image_provider.dart' as image_provider;
 import 'image_stream.dart';
 
-/// The dart:html implemenation of [image_provider.NetworkImage].
+/// The dart:html implementation of [image_provider.NetworkImage].
 ///
 /// NetworkImage on the web does not support decoding to a specified size.
 class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkImage> implements image_provider.NetworkImage {

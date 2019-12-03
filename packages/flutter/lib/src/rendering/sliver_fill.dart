@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -56,41 +56,6 @@ class RenderSliverFillViewport extends RenderSliverFixedExtentBoxAdaptor {
       return;
     _viewportFraction = value;
     markNeedsLayout();
-  }
-
-  double get _padding => (1.0 - viewportFraction) * constraints.viewportMainAxisExtent * 0.5;
-
-  @override
-  double indexToLayoutOffset(double itemExtent, int index) {
-    return _padding + super.indexToLayoutOffset(itemExtent, index);
-  }
-
-  @override
-  int getMinChildIndexForScrollOffset(double scrollOffset, double itemExtent) {
-    return super.getMinChildIndexForScrollOffset(math.max(scrollOffset - _padding, 0.0), itemExtent);
-  }
-
-  @override
-  int getMaxChildIndexForScrollOffset(double scrollOffset, double itemExtent) {
-    return super.getMaxChildIndexForScrollOffset(math.max(scrollOffset - _padding, 0.0), itemExtent);
-  }
-
-  @override
-  double estimateMaxScrollOffset(
-    SliverConstraints constraints, {
-    int firstIndex,
-    int lastIndex,
-    double leadingScrollOffset,
-    double trailingScrollOffset,
-  }) {
-    final double padding = _padding;
-    return childManager.estimateMaxScrollOffset(
-      constraints,
-      firstIndex: firstIndex,
-      lastIndex: lastIndex,
-      leadingScrollOffset: leadingScrollOffset - padding,
-      trailingScrollOffset: trailingScrollOffset - padding,
-    ) + padding + padding;
   }
 }
 

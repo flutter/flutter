@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -30,7 +30,6 @@ class BuildWebCommand extends BuildSubCommand {
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async =>
       const <DevelopmentArtifact>{
-        DevelopmentArtifact.universal,
         DevelopmentArtifact.web,
       };
 
@@ -49,7 +48,7 @@ class BuildWebCommand extends BuildSubCommand {
       throwToolExit('"build web" is not currently supported.');
     }
     final FlutterProject flutterProject = FlutterProject.current();
-    final String target = argResults['target'];
+    final String target = stringArg('target');
     final BuildInfo buildInfo = getBuildInfo();
     if (buildInfo.isDebug) {
       throwToolExit('debug builds cannot be built directly for the web. Try using "flutter run"');
@@ -58,7 +57,7 @@ class BuildWebCommand extends BuildSubCommand {
       flutterProject,
       target,
       buildInfo,
-      argResults['web-initialize-platform'],
+      boolArg('web-initialize-platform'),
       dartDefines,
     );
     return null;

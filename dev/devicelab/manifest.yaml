@@ -167,6 +167,12 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
+  picture_cache_perf__timeline_summary:
+    description: >
+      Measures the runtime performance of raster caching many pictures on Android.
+    stage: devicelab
+    required_agent_capabilities: ["mac/android"]
+
   cubic_bezier_perf__timeline_summary:
     description: >
       Measures the runtime performance of cubic bezier animations on Android.
@@ -559,6 +565,14 @@ tasks:
       A some test that runs on macOS Catalina, which is a clone of the Dart VM hot patching performance benchmarking.
     stage: devicelab
     required_agent_capabilities: ["mac-catalina/android"]
+
+  # macOS target platform tests
+  hot_mode_dev_cycle_macos_target__benchmark:
+    description: >
+      Checks the functionality and performance of hot reload on a macOS target platform
+    stage: devicelab
+    required_agent_capabilities: ["mac/ios"]
+    flaky: true
 
   # Tests running on Windows host
 

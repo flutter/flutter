@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/commands/daemon.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_workflow.dart';
 import 'package:flutter_tools/src/globals.dart';
@@ -39,6 +40,7 @@ void main() {
         commands.stream,
         responses.add,
         notifyingLogger: notifyingLogger,
+        dartDefines: const <String>[],
       );
       commands.add(<String, dynamic>{'id': 0, 'method': 'daemon.version'});
       final Map<String, dynamic> response = await responses.stream.firstWhere(_notEvent);
@@ -56,6 +58,7 @@ void main() {
         commands.stream,
         responses.add,
         notifyingLogger: notifyingLogger,
+        dartDefines: const <String>[],
       );
       printError('daemon.logMessage test');
       final Map<String, dynamic> response = await responses.stream.firstWhere((Map<String, dynamic> map) {
@@ -63,7 +66,7 @@ void main() {
       });
       expect(response['id'], isNull);
       expect(response['event'], 'daemon.logMessage');
-      final Map<String, String> logMessage = response['params'].cast<String, String>();
+      final Map<String, String> logMessage = castStringKeyedMap(response['params']).cast<String, String>();
       expect(logMessage['level'], 'error');
       expect(logMessage['message'], 'daemon.logMessage test');
       await responses.close();
@@ -83,6 +86,7 @@ void main() {
           responses.add,
           notifyingLogger: notifyingLogger,
           logToStdout: true,
+          dartDefines: const <String>[],
         );
         printStatus('daemon.logMessage test');
         // Service the event loop.
@@ -103,6 +107,7 @@ void main() {
         commands.stream,
         responses.add,
         notifyingLogger: notifyingLogger,
+        dartDefines: const <String>[],
       );
       commands.add(<String, dynamic>{'id': 0, 'method': 'daemon.shutdown'});
       return daemon.onExit.then<void>((int code) async {
@@ -112,16 +117,13 @@ void main() {
     });
 
     testUsingContext('app.restart without an appId should report an error', () async {
-      final DaemonCommand command = DaemonCommand();
-      applyMocksToCommand(command);
-
       final StreamController<Map<String, dynamic>> commands = StreamController<Map<String, dynamic>>();
       final StreamController<Map<String, dynamic>> responses = StreamController<Map<String, dynamic>>();
       daemon = Daemon(
         commands.stream,
         responses.add,
-        daemonCommand: command,
         notifyingLogger: notifyingLogger,
+        dartDefines: const <String>[],
       );
 
       commands.add(<String, dynamic>{'id': 0, 'method': 'app.restart'});
@@ -133,16 +135,13 @@ void main() {
     });
 
     testUsingContext('ext.flutter.debugPaint via service extension without an appId should report an error', () async {
-      final DaemonCommand command = DaemonCommand();
-      applyMocksToCommand(command);
-
       final StreamController<Map<String, dynamic>> commands = StreamController<Map<String, dynamic>>();
       final StreamController<Map<String, dynamic>> responses = StreamController<Map<String, dynamic>>();
       daemon = Daemon(
         commands.stream,
         responses.add,
-        daemonCommand: command,
         notifyingLogger: notifyingLogger,
+        dartDefines: const <String>[],
       );
 
       commands.add(<String, dynamic>{
@@ -160,16 +159,13 @@ void main() {
     });
 
     testUsingContext('app.stop without appId should report an error', () async {
-      final DaemonCommand command = DaemonCommand();
-      applyMocksToCommand(command);
-
       final StreamController<Map<String, dynamic>> commands = StreamController<Map<String, dynamic>>();
       final StreamController<Map<String, dynamic>> responses = StreamController<Map<String, dynamic>>();
       daemon = Daemon(
         commands.stream,
         responses.add,
-        daemonCommand: command,
         notifyingLogger: notifyingLogger,
+        dartDefines: const <String>[],
       );
 
       commands.add(<String, dynamic>{'id': 0, 'method': 'app.stop'});
@@ -187,6 +183,7 @@ void main() {
         commands.stream,
         responses.add,
         notifyingLogger: notifyingLogger,
+        dartDefines: const <String>[],
       );
       commands.add(<String, dynamic>{'id': 0, 'method': 'device.getDevices'});
       final Map<String, dynamic> response = await responses.stream.firstWhere(_notEvent);
@@ -203,6 +200,7 @@ void main() {
         commands.stream,
         responses.add,
         notifyingLogger: notifyingLogger,
+        dartDefines: const <String>[],
       );
       final MockPollingDeviceDiscovery discoverer = MockPollingDeviceDiscovery();
       daemon.deviceDomain.addDeviceDiscoverer(discoverer);
@@ -221,9 +219,10 @@ void main() {
       final StreamController<Map<String, dynamic>> commands = StreamController<Map<String, dynamic>>();
       final StreamController<Map<String, dynamic>> responses = StreamController<Map<String, dynamic>>();
       daemon = Daemon(
-          commands.stream,
-          responses.add,
-          notifyingLogger: notifyingLogger,
+        commands.stream,
+        responses.add,
+        notifyingLogger: notifyingLogger,
+        dartDefines: const <String>[],
       );
 
       final MockPollingDeviceDiscovery discoverer = MockPollingDeviceDiscovery();
@@ -234,7 +233,7 @@ void main() {
         expect(response['event'], 'device.added');
         expect(response['params'], isMap);
 
-        final Map<String, dynamic> params = response['params'];
+        final Map<String, dynamic> params = castStringKeyedMap(response['params']);
         expect(params['platform'], isNotEmpty); // the mock device has a platform of 'android-arm'
 
         await responses.close();
@@ -247,16 +246,13 @@ void main() {
     });
 
     testUsingContext('emulator.launch without an emulatorId should report an error', () async {
-      final DaemonCommand command = DaemonCommand();
-      applyMocksToCommand(command);
-
       final StreamController<Map<String, dynamic>> commands = StreamController<Map<String, dynamic>>();
       final StreamController<Map<String, dynamic>> responses = StreamController<Map<String, dynamic>>();
       daemon = Daemon(
         commands.stream,
         responses.add,
-        daemonCommand: command,
         notifyingLogger: notifyingLogger,
+        dartDefines: const <String>[],
       );
 
       commands.add(<String, dynamic>{'id': 0, 'method': 'emulator.launch'});
@@ -274,6 +270,7 @@ void main() {
         commands.stream,
         responses.add,
         notifyingLogger: notifyingLogger,
+        dartDefines: const <String>[],
       );
       commands.add(<String, dynamic>{'id': 0, 'method': 'emulator.getEmulators'});
       final Map<String, dynamic> response = await responses.stream.firstWhere(_notEvent);

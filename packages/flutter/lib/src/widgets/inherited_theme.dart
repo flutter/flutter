@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -101,7 +101,7 @@ abstract class InheritedTheme extends InheritedWidget {
   /// This implementation for [TooltipTheme] is typical:
   /// ```dart
   /// Widget wrap(BuildContext context, Widget child) {
-  ///   final TooltipTheme ancestorTheme = context.ancestorWidgetOfExactType(TooltipTheme);
+  ///   final TooltipTheme ancestorTheme = context.findAncestorWidgetOfExactType<TooltipTheme>());
   ///   return identical(this, ancestorTheme) ? child : TooltipTheme(data: data, child: child);
   /// }
   /// ```

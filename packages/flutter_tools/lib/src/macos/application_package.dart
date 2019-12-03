@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -43,7 +43,7 @@ abstract class MacOSApp extends ApplicationPackage {
   }
 
   /// Look up the executable name for a macOS application bundle.
-  static _ExecutableAndId _executableFromBundle(Directory applicationBundle) {
+  static _ExecutableAndId _executableFromBundle(FileSystemEntity applicationBundle) {
     final FileSystemEntityType entityType = fs.typeSync(applicationBundle.path);
     if (entityType == FileSystemEntityType.notFound) {
       printError('File "${applicationBundle.path}" does not exist.');
@@ -67,8 +67,8 @@ abstract class MacOSApp extends ApplicationPackage {
       return null;
     }
     final Map<String, dynamic> propertyValues = PlistParser.instance.parseFile(plistPath);
-    final String id = propertyValues[PlistParser.kCFBundleIdentifierKey];
-    final String executableName = propertyValues[PlistParser.kCFBundleExecutable];
+    final String id = propertyValues[PlistParser.kCFBundleIdentifierKey] as String;
+    final String executableName = propertyValues[PlistParser.kCFBundleExecutable] as String;
     if (id == null) {
       printError('Invalid prebuilt macOS app. Info.plist does not contain bundle identifier');
       return null;

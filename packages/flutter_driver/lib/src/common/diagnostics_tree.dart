@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -17,7 +17,7 @@ enum DiagnosticsType {
 
 EnumIndex<DiagnosticsType> _diagnosticsTypeIndex = EnumIndex<DiagnosticsType>(DiagnosticsType.values);
 
-/// A Flutter Driver command to retrieve the json-serialized [DiagnosticsNode]
+/// A Flutter Driver command to retrieve the JSON-serialized [DiagnosticsNode]
 /// tree of the object identified by [finder].
 ///
 /// The [DiagnosticsType] of the [DiagnosticsNode] tree returned is specified by
@@ -67,7 +67,7 @@ class DiagnosticsTreeResult extends Result {
   /// Creates a [DiagnosticsTreeResult].
   const DiagnosticsTreeResult(this.json);
 
-  /// The json encoded [DiagnosticsNode] tree requested by the
+  /// The JSON encoded [DiagnosticsNode] tree requested by the
   /// [GetDiagnosticsTree] command.
   final Map<String, Object> json;
 

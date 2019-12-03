@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -91,8 +91,8 @@ void main() {
 
     group('.dispose()', () {
       IOSDevice device;
-      MockApplicationPackage appPackage1;
-      MockApplicationPackage appPackage2;
+      MockIOSApp appPackage1;
+      MockIOSApp appPackage2;
       IOSDeviceLogReader logReader1;
       IOSDeviceLogReader logReader2;
       MockProcess mockProcess1;
@@ -111,7 +111,7 @@ void main() {
 
       IOSDeviceLogReader createLogReader(
           IOSDevice device,
-          ApplicationPackage appPackage,
+          IOSApp appPackage,
           Process process) {
         final IOSDeviceLogReader logReader = IOSDeviceLogReader(device, appPackage);
         logReader.idevicesyslogProcess = process;
@@ -119,8 +119,8 @@ void main() {
       }
 
       setUp(() {
-        appPackage1 = MockApplicationPackage();
-        appPackage2 = MockApplicationPackage();
+        appPackage1 = MockIOSApp();
+        appPackage2 = MockIOSApp();
         when(appPackage1.name).thenReturn('flutterApp1');
         when(appPackage2.name).thenReturn('flutterApp2');
         mockProcess1 = MockProcess();
@@ -247,6 +247,22 @@ void main() {
         tryToDelete(tempDir);
 
         Cache.enableLocking();
+      });
+
+      testUsingContext('returns failed if the IOSDevice is not found', () async {
+        final IOSDevice device = IOSDevice('123');
+        when(mockIMobileDevice.getInfoForDevice(any, 'CPUArchitecture')).thenThrow(
+          const IOSDeviceNotFoundError(
+            'ideviceinfo could not find device:\n'
+            'No device found with udid 123, is it plugged in?\n'
+            'Try unlocking attached devices.'
+          )
+        );
+        final LaunchResult result = await device.startApp(mockApp);
+        expect(result.started, false);
+      }, overrides: <Type, Generator>{
+        IMobileDevice: () => mockIMobileDevice,
+        Platform: () => macPlatform,
       });
 
       testUsingContext(' succeeds in debug mode via mDNS', () async {
@@ -420,7 +436,7 @@ void main() {
           bundlePath: anyNamed('bundlePath'),
           launchArguments: anyNamed('launchArguments'),
         )).thenAnswer((Invocation inv) {
-          args = inv.namedArguments[const Symbol('launchArguments')];
+          args = inv.namedArguments[const Symbol('launchArguments')] as List<String>;
           return Future<int>.value(0);
         });
 
@@ -446,11 +462,13 @@ void main() {
         IOSDeploy: () => mockIosDeploy,
       });
 
-      void testNonPrebuilt({
+      void testNonPrebuilt(
+        String name, {
         @required bool showBuildSettingsFlakes,
+        void Function() additionalSetup,
+        void Function() additionalExpectations,
       }) {
-        const String name = ' non-prebuilt succeeds in debug mode';
-        testUsingContext(name + ' flaky: $showBuildSettingsFlakes', () async {
+        testUsingContext('non-prebuilt succeeds in debug mode $name', () async {
           final Directory targetBuildDir =
               projectDir.childDirectory('build/ios/iphoneos/Debug-arm64');
 
@@ -509,6 +527,10 @@ void main() {
             projectDir.path,
           ]);
 
+          if (additionalSetup != null) {
+            additionalSetup();
+          }
+
           final IOSApp app = await AbsoluteBuildableIOSApp.fromProject(
             FlutterProject.fromDirectory(projectDir).ios);
           final IOSDevice device = IOSDevice('123');
@@ -534,6 +556,10 @@ void main() {
           expect(launchResult.started, isTrue);
           expect(launchResult.hasObservatory, isFalse);
           expect(await device.stopApp(mockApp), isFalse);
+
+          if (additionalExpectations != null) {
+            additionalExpectations();
+          }
         }, overrides: <Type, Generator>{
           DoctorValidatorsProvider: () => FakeIosDoctorProvider(),
           IMobileDevice: () => mockIMobileDevice,
@@ -543,8 +569,44 @@ void main() {
         });
       }
 
-      testNonPrebuilt(showBuildSettingsFlakes: false);
-      testNonPrebuilt(showBuildSettingsFlakes: true);
+      testNonPrebuilt('flaky: false', showBuildSettingsFlakes: false);
+      testNonPrebuilt('flaky: true', showBuildSettingsFlakes: true);
+      testNonPrebuilt('with concurrent build failiure',
+        showBuildSettingsFlakes: false,
+        additionalSetup: () {
+          int callCount = 0;
+          when(mockProcessManager.run(
+            argThat(allOf(
+              contains('xcodebuild'),
+              contains('-configuration'),
+              contains('Debug'),
+            )),
+            workingDirectory: anyNamed('workingDirectory'),
+            environment: anyNamed('environment'),
+          )).thenAnswer((Invocation inv) {
+            // Succeed after 2 calls.
+            if (++callCount > 2) {
+              return Future<ProcessResult>.value(ProcessResult(0, 0, '', ''));
+            }
+            // Otherwise fail with the Xcode concurrent error.
+            return Future<ProcessResult>.value(ProcessResult(
+              0,
+              1,
+              '''
+                "/Developer/Xcode/DerivedData/foo/XCBuildData/build.db":
+                database is locked
+                Possibly there are two concurrent builds running in the same filesystem location.
+                ''',
+              '',
+            ));
+          });
+        },
+        additionalExpectations: () {
+          expect(testLogger.statusText, contains('will retry in 2 seconds'));
+          expect(testLogger.statusText, contains('will retry in 4 seconds'));
+          expect(testLogger.statusText, contains('Xcode build done.'));
+        },
+      );
     });
 
     group('Process calls', () {

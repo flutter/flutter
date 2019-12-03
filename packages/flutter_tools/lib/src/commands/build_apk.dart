@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -45,7 +45,6 @@ class BuildApkCommand extends BuildSubCommand {
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
     DevelopmentArtifact.androidGenSnapshot,
-    DevelopmentArtifact.universal,
   };
 
   @override
@@ -59,15 +58,15 @@ class BuildApkCommand extends BuildSubCommand {
     final Map<CustomDimensions, String> usage = <CustomDimensions, String>{};
 
     usage[CustomDimensions.commandBuildApkTargetPlatform] =
-        (argResults['target-platform'] as List<String>).join(',');
+        stringsArg('target-platform').join(',');
     usage[CustomDimensions.commandBuildApkSplitPerAbi] =
-        argResults['split-per-abi'].toString();
+        boolArg('split-per-abi').toString();
 
-    if (argResults['release']) {
+    if (boolArg('release')) {
       usage[CustomDimensions.commandBuildApkBuildMode] = 'release';
-    } else if (argResults['debug']) {
+    } else if (boolArg('debug')) {
       usage[CustomDimensions.commandBuildApkBuildMode] = 'debug';
-    } else if (argResults['profile']) {
+    } else if (boolArg('profile')) {
       usage[CustomDimensions.commandBuildApkBuildMode] = 'profile';
     } else {
       // The build defaults to release.
@@ -81,13 +80,13 @@ class BuildApkCommand extends BuildSubCommand {
     final BuildInfo buildInfo = getBuildInfo();
     final AndroidBuildInfo androidBuildInfo = AndroidBuildInfo(
       buildInfo,
-      splitPerAbi: argResults['split-per-abi'],
-      targetArchs: argResults['target-platform'].map<AndroidArch>(getAndroidArchForName),
-      shrink: argResults['shrink'],
+      splitPerAbi: boolArg('split-per-abi'),
+      targetArchs: stringsArg('target-platform').map<AndroidArch>(getAndroidArchForName),
+      shrink: boolArg('shrink'),
     );
 
     if (buildInfo.isRelease && !androidBuildInfo.splitPerAbi && androidBuildInfo.targetArchs.length > 1) {
-      final String targetPlatforms = argResults['target-platform'].join(', ');
+      final String targetPlatforms = stringsArg('target-platform').join(', ');
 
       printStatus('You are building a fat APK that includes binaries for '
                   '$targetPlatforms.', emphasis: true, color: TerminalColor.green);

@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -31,6 +31,26 @@
 ///   opacity: _visible ? 1.0 : 0.0,
 ///   child: const Text('Poor wandering ones!'),
 /// )
+/// ```
+/// {@end-tool}
+///
+/// {@tool dartpad --template=stateless_widget_material}
+/// Bla blabla blabla some [Text] when the `_blabla` blabla blabla is true, and
+/// blabla it when it is blabla:
+///
+/// ```dart preamble
+/// bool _visible = true;
+/// final GlobalKey globalKey = GlobalKey();
+/// ```
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return Opacity(
+///     key: globalKey,
+///     opacity: _visible ? 1.0 : 0.0,
+///     child: const Text('Poor wandering ones!'),
+///   );
+/// }
 /// ```
 /// {@end-tool}
 ///

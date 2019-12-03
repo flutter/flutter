@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -729,11 +729,6 @@ class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
     }
   }
 
-  /// How to behave during hit testing.
-  // The implicit setter is enough here as changing this value will just affect
-  // any newly arriving events there's nothing we need to invalidate.
-  // PlatformViewHitTestBehavior hitTestBehavior;
-
   /// {@macro  flutter.rendering.platformView.updateGestureRecognizers}
   ///
   /// Any active gesture arena the `PlatformView` participates in is rejected when the
@@ -787,7 +782,7 @@ mixin _PlatformViewGestureMixin on RenderBox {
   ///
   /// Any active gesture arena the `PlatformView` participates in is rejected when the
   /// set of gesture recognizers is changed.
-  void _updateGestureRecognizersWithCallBack(Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers, _HandlePointerEvent _handlePointerEvent) {
+  void _updateGestureRecognizersWithCallBack(Set<Factory<OneSequenceGestureRecognizer>> gestureRecognizers, _HandlePointerEvent handlePointerEvent) {
     assert(gestureRecognizers != null);
     assert(
     _factoriesTypeSet(gestureRecognizers).length == gestureRecognizers.length,
@@ -797,7 +792,7 @@ mixin _PlatformViewGestureMixin on RenderBox {
       return;
     }
     _gestureRecognizer?.dispose();
-    _gestureRecognizer = _PlatformViewGestureRecognizer(_handlePointerEvent, gestureRecognizers);
+    _gestureRecognizer = _PlatformViewGestureRecognizer(handlePointerEvent, gestureRecognizers);
   }
 
   _PlatformViewGestureRecognizer _gestureRecognizer;

@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -88,11 +88,6 @@ class UpdatePackagesCommand extends FlutterCommand {
   @override
   final bool hidden;
 
-  @override
-  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
-    DevelopmentArtifact.universal,
-  };
-
   Future<void> _downloadCoverageData() async {
     final Status status = logger.startProgress(
       'Downloading lcov data for package:flutter...',
@@ -114,11 +109,11 @@ class UpdatePackagesCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     final List<Directory> packages = runner.getRepoPackages();
 
-    final bool upgrade = argResults['force-upgrade'];
-    final bool isPrintPaths = argResults['paths'];
-    final bool isPrintTransitiveClosure = argResults['transitive-closure'];
-    final bool isVerifyOnly = argResults['verify-only'];
-    final bool isConsumerOnly = argResults['consumer-only'];
+    final bool upgrade = boolArg('force-upgrade');
+    final bool isPrintPaths = boolArg('paths');
+    final bool isPrintTransitiveClosure = boolArg('transitive-closure');
+    final bool isVerifyOnly = boolArg('verify-only');
+    final bool isConsumerOnly = boolArg('consumer-only');
 
     // "consumer" packages are those that constitute our public API (e.g. flutter, flutter_test, flutter_driver, flutter_localizations).
     if (isConsumerOnly) {
@@ -298,7 +293,7 @@ class UpdatePackagesCommand extends FlutterCommand {
       }
 
       if (isPrintPaths) {
-        showDependencyPaths(from: argResults['from'], to: argResults['to'], tree: tree);
+        showDependencyPaths(from: stringArg('from'), to: stringArg('to'), tree: tree);
         return null;
       }
 
@@ -1207,7 +1202,7 @@ class PubDependencyTree {
   /// dependencies section). We ignore if something is a dependency or
   /// dev_dependency (pub won't use different versions for those two).
   ///
-  /// We then parse out the package name, version number, and subdependencies for
+  /// We then parse out the package name, version number, and sub-dependencies for
   /// each entry, and store than in our _versions and _dependencyTree fields
   /// above.
   String fill(String message) {
