@@ -11,8 +11,6 @@ namespace flutter {
 OpacityLayer::OpacityLayer(int alpha, const SkPoint& offset)
     : alpha_(alpha), offset_(offset) {}
 
-OpacityLayer::~OpacityLayer() = default;
-
 void OpacityLayer::EnsureSingleChild() {
   FML_DCHECK(layers().size() > 0);  // OpacityLayer should never be a leaf
 

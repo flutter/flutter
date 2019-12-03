@@ -8,18 +8,16 @@
 
 namespace flutter {
 namespace testing {
+namespace {
 
-// |testing::Test|
-void ThreadTest::SetUp() {
+fml::RefPtr<fml::TaskRunner> GetDefaultTaskRunner() {
   fml::MessageLoop::EnsureInitializedForCurrentThread();
-  current_task_runner_ = fml::MessageLoop::GetCurrent().GetTaskRunner();
+  return fml::MessageLoop::GetCurrent().GetTaskRunner();
 }
 
-// |testing::Test|
-void ThreadTest::TearDown() {
-  current_task_runner_ = nullptr;
-  extra_threads_.clear();
-}
+}  // namespace
+
+ThreadTest::ThreadTest() : current_task_runner_(GetDefaultTaskRunner()) {}
 
 fml::RefPtr<fml::TaskRunner> ThreadTest::GetCurrentTaskRunner() {
   return current_task_runner_;

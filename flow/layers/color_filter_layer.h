@@ -14,7 +14,6 @@ namespace flutter {
 class ColorFilterLayer : public ContainerLayer {
  public:
   ColorFilterLayer(sk_sp<SkColorFilter> filter);
-  ~ColorFilterLayer() override;
 
   void Paint(PaintContext& context) const override;
 

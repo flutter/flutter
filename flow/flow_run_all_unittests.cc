@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#include "flutter/fml/build_config.h"
 #include "flutter/fml/command_line.h"
 #include "flutter/fml/logging.h"
 #include "gtest/gtest.h"
@@ -23,8 +24,14 @@
 int main(int argc, char** argv) {
   testing::InitGoogleTest(&argc, argv);
   fml::CommandLine cmd = fml::CommandLineFromArgcArgv(argc, argv);
+
+#if defined(OS_FUCHSIA)
+  flutter::SetGoldenDir(cmd.GetOptionValueWithDefault(
+      "golden-dir", "/pkg/data/flutter/testing/resources"));
+#else
   flutter::SetGoldenDir(
       cmd.GetOptionValueWithDefault("golden-dir", "flutter/testing/resources"));
+#endif
   flutter::SetFontFile(cmd.GetOptionValueWithDefault(
       "font-file",
       "flutter/third_party/txt/third_party/fonts/Roboto-Regular.ttf"));
