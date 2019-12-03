@@ -17,10 +17,7 @@ template("runner") {
 
   invoker_output_name = invoker.output_name
   extra_defines = invoker.extra_defines
-  extra_deps = []
-  if (defined(invoker.extra_deps)) {
-    extra_deps += invoker.extra_deps
-  }
+  extra_deps = invoker.extra_deps
 
   executable(target_name) {
     output_name = invoker_output_name
@@ -80,12 +77,20 @@ runner("dart_jit_runner_bin") {
   if (flutter_runtime_mode == "profile") {
     extra_defines += [ "FLUTTER_PROFILE" ]
   }
+  extra_deps = [
+    "//third_party/dart/runtime:libdart_jit",
+    "//third_party/dart/runtime/platform:libdart_platform_jit",
+  ]
 }
 
 runner("dart_jit_product_runner_bin") {
   output_name = "dart_jit_product_runner"
   product = true
   extra_defines = [ "DART_PRODUCT" ]
+  extra_deps = [
+    "//third_party/dart/runtime:libdart_jit_product",
+    "//third_party/dart/runtime/platform:libdart_platform_jit_product",
+  ]
 }
 
 runner("dart_aot_runner_bin") {
@@ -95,7 +100,11 @@ runner("dart_aot_runner_bin") {
   if (flutter_runtime_mode == "profile") {
     extra_defines += [ "FLUTTER_PROFILE" ]
   }
-  extra_deps = [ "embedder:dart_aot_snapshot_cc" ]
+  extra_deps = [
+    "embedder:dart_aot_snapshot_cc",
+    "//third_party/dart/runtime:libdart_precompiled_runtime",
+    "//third_party/dart/runtime/platform:libdart_platform_precompiled_runtime",
+  ]
 }
 
 runner("dart_aot_product_runner_bin") {
@@ -105,7 +114,11 @@ runner("dart_aot_product_runner_bin") {
     "AOT_RUNTIME",
     "DART_PRODUCT",
   ]
-  extra_deps = [ "embedder:dart_aot_product_snapshot_cc" ]
+  extra_deps = [
+    "embedder:dart_aot_product_snapshot_cc",
+    "//third_party/dart/runtime:libdart_precompiled_runtime_product",
+    "//third_party/dart/runtime/platform:libdart_platform_precompiled_runtime_product",
+  ]
 }
 
 template("aot_runner_package") {
