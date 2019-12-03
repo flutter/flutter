@@ -911,7 +911,12 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
 
   @override
   String toStringShort() {
-    return '${describeIdentity(this)}${debugLabel != null && debugLabel.isNotEmpty ? '($debugLabel)' : ''}';
+    final bool hasDebugLabel = debugLabel != null && debugLabel.isNotEmpty;
+    final String extraData = '${hasDebugLabel ? debugLabel : ''}'
+        '${hasFocus && hasDebugLabel ? ' ' : ''}'
+        '${hasFocus && !hasPrimaryFocus ? '[IN FOCUS PATH]' : ''}'
+        '${hasPrimaryFocus ? '[PRIMARY FOCUS]' : ''}';
+    return '${describeIdentity(this)}${extraData.isNotEmpty ? '($extraData)' : ''}';
   }
 }
 

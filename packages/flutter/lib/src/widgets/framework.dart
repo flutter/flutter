@@ -2044,15 +2044,15 @@ abstract class BuildContext {
   /// Returns the nearest ancestor widget of the given type [T], which must be the
   /// type of a concrete [Widget] subclass.
   ///
-  /// In general, [dependOnInheritedWidgetOfExactType] is more useful, since inherited
-  /// widgets will trigger consumers to rebuild when they change. This method is
-  /// appropriate when used in interaction event handlers (e.g. gesture
-  /// callbacks) or for performing one-off tasks such as asserting that you have
-  /// or don't have a widget of a specific type as an ancestor. The return value
-  /// of a Widget's build method should not depend on the value returned by this
-  /// method, because the build context will not rebuild if the return value of
-  /// this method changes. This could lead to a situation where data used in the
-  /// build method changes, but the widget is not rebuilt.
+  /// In general, [dependOnInheritedWidgetOfExactType] is more useful, since
+  /// inherited widgets will trigger consumers to rebuild when they change. This
+  /// method is appropriate when used in interaction event handlers (e.g.
+  /// gesture callbacks) or for performing one-off tasks such as asserting that
+  /// you have or don't have a widget of a specific type as an ancestor. The
+  /// return value of a Widget's build method should not depend on the value
+  /// returned by this method, because the build context will not rebuild if the
+  /// return value of this method changes. This could lead to a situation where
+  /// data used in the build method changes, but the widget is not rebuilt.
   ///
   /// Calling this method is relatively expensive (O(N) in the depth of the
   /// tree). Only call this method if the distance from this widget to the
@@ -2062,6 +2062,9 @@ abstract class BuildContext {
   /// because the widget tree is no longer stable at that time. To refer to
   /// an ancestor from one of those methods, save a reference to the ancestor
   /// by calling [findAncestorWidgetOfExactType] in [State.didChangeDependencies].
+  ///
+  /// Returns null if a widget of the requested type does not appear in the
+  /// ancestors of this context.
   T findAncestorWidgetOfExactType<T extends Widget>();
 
   /// Returns the [State] object of the nearest ancestor [StatefulWidget] widget

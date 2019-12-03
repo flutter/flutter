@@ -98,6 +98,17 @@ void main() {
     );
     expect(log, isEmpty);
   });
+
+  test('ShapeDecoration.getClipPath', () {
+    const ShapeDecoration decoration = ShapeDecoration(shape: CircleBorder(side: BorderSide.none));
+    const Rect rect = Rect.fromLTWH(0.0, 0.0, 100.0, 20.0);
+    final Path clipPath = decoration.getClipPath(rect, TextDirection.ltr);
+    final Matcher isLookLikeExpectedPath = isPathThat(
+      includes: const <Offset>[ Offset(50.0, 10.0), ],
+      excludes: const <Offset>[ Offset(1.0, 1.0), Offset(30.0, 10.0), Offset(99.0, 19.0), ],
+    );
+    expect(clipPath, isLookLikeExpectedPath);
+  });
 }
 
 class TestImageProvider extends ImageProvider<TestImageProvider> {
