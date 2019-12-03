@@ -7,6 +7,7 @@ import '../../base/file_system.dart';
 import '../../base/io.dart';
 import '../../base/process_manager.dart';
 import '../../build_info.dart';
+import '../../compile.dart';
 import '../../dart/package_map.dart';
 import '../../globals.dart';
 import '../../project.dart';
@@ -51,21 +52,32 @@ class WebEntrypointTarget extends Target {
     final String targetFile = environment.defines[kTargetFile];
     final bool shouldInitializePlatform = environment.defines[kInitializePlatform] == 'true';
     final bool hasPlugins = environment.defines[kHasWebPlugins] == 'true';
-    final String import = fs.file(fs.path.absolute(targetFile)).uri.toString();
+    final String importPath = fs.path.absolute(targetFile);
+    final PackageUriMapper packageUriMapper = PackageUriMapper(
+      importPath,
+      PackageMap.globalPackagesPath,
+      null,
+      null,
+    );
+    final Uri mainImport = packageUriMapper.map(importPath);
+    if (mainImport == null) {
+      throw Exception('Missing package definition for $mainImport');
+    }
 
     String contents;
     if (hasPlugins) {
       final String generatedPath = environment.projectDir
         .childDirectory('lib')
         .childFile('generated_plugin_registrant.dart')
-        .absolute.uri.toString();
+        .absolute.path;
+      final Uri generatedImport = packageUriMapper.map(generatedPath);
       contents = '''
 import 'dart:ui' as ui;
 
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 
-import '$generatedPath';
-import "$import" as entrypoint;
+import '$generatedImport';
+import '$mainImport' as entrypoint;
 
 Future<void> main() async {
   registerPlugins(webPluginRegistry);
@@ -79,7 +91,7 @@ Future<void> main() async {
       contents = '''
 import 'dart:ui' as ui;
 
-import "$import" as entrypoint;
+import '$mainImport' as entrypoint;
 
 Future<void> main() async {
   if ($shouldInitializePlatform) {
