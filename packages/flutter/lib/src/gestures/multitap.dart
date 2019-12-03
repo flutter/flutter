@@ -145,7 +145,7 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
   /// same location twice in quick succession.
   ///
   /// This triggers when the pointer stops contacting the device after the 2nd tap,
-  /// immediately after [onDoubleTapUp].
+  /// immediately after the second [GestureTapUpCallback].
   ///
   /// See also:
   ///

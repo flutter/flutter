@@ -35,9 +35,6 @@ import 'theme.dart';
 ///
 /// See also:
 ///
-///  * [ComputeNotch] a function used for creating a notch in a shape.
-///  * [ScaffoldGeometry.floatingActionBarComputeNotch] the [ComputeNotch] used to
-///    make a notch for the [FloatingActionButton].
 ///  * [FloatingActionButton] which the [BottomAppBar] makes a notch for.
 ///  * [AppBar] for a toolbar that is shown at the top of the screen.
 class BottomAppBar extends StatefulWidget {

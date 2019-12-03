@@ -26,7 +26,7 @@ const double _kForegroundScreenOpacityFraction = 0.7;
 /// Displays its children widgets on a wheel for selection and
 /// calls back when the currently selected item changes.
 ///
-/// By default, the first child in [children] will be the initially selected child.
+/// By default, the first child in `children` will be the initially selected child.
 /// The index of a different child can be specified in [scrollController], to make
 /// that child the initially selected child.
 ///
