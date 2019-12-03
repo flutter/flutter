@@ -1118,7 +1118,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     return enableInteractiveSelection ?? !obscureText;
   }
 
-  /// The color used to paint the prompt rectange.
+  /// The color used to paint the prompt rectangle.
   Color get promptRectColor => _promptRectPaint.color;
   set promptRectColor(Color newValue) {
     // Painter.color can not be null.
@@ -1136,7 +1136,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
 
   TextRange _promptRectRange;
-  /// Dismisses the currently shown prompt rectange and displays a new prompt rectangle
+  /// Dismisses the currently shown prompt rectangle and displays a new prompt rectangle
   /// over [newRange] in the given color [promptRectColor].
   ///
   /// When set to null, the currently shown prompt rectangle (if any) will be dismissed.
