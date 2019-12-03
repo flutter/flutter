@@ -492,6 +492,7 @@ class AppDomain extends Domain {
         ipv6: ipv6,
         stayResident: true,
         dartDefines: daemon.dartDefines,
+        urlTunneller: options.webEnableExposeUrl ? daemon.daemonDomain.exposeUrl : null,
       );
     } else if (enableHotReload) {
       runner = HotRunner(

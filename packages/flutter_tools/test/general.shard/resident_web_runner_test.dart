@@ -78,6 +78,7 @@ void main() {
           ipv6: true,
           stayResident: true,
           dartDefines: const <String>[],
+          urlTunneller: null,
         ) as ResidentWebRunner;
       },
       overrides: <Type, Generator>{
@@ -142,6 +143,7 @@ void main() {
       ipv6: true,
       stayResident: true,
       dartDefines: const <String>[],
+      urlTunneller: null,
     ) as ResidentWebRunner;
 
     expect(profileResidentWebRunner.debuggingEnabled, false);
@@ -172,6 +174,7 @@ void main() {
       ipv6: true,
       stayResident: true,
       dartDefines: <String>[],
+      urlTunneller: null,
     );
 
     expect(profileResidentWebRunner.debuggingEnabled, true);
@@ -187,6 +190,7 @@ void main() {
       ipv6: true,
       stayResident: true,
       dartDefines: <String>[],
+      urlTunneller: null,
     ) as ResidentWebRunner;
 
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
@@ -210,6 +214,7 @@ void main() {
       ipv6: true,
       stayResident: true,
       dartDefines: const <String>[],
+      urlTunneller: null,
     );
 
     expect(profileResidentWebRunner.supportsServiceProtocol, false);
@@ -263,6 +268,7 @@ void main() {
       ipv6: true,
       stayResident: false,
       dartDefines: const <String>[],
+      urlTunneller: null,
     ) as ResidentWebRunner;
 
     expect(await residentWebRunner.run(), 0);
@@ -299,6 +305,7 @@ void main() {
       ipv6: true,
       stayResident: true,
       dartDefines: const <String>[],
+      urlTunneller: null,
     ) as ResidentWebRunner;
     _setupMocks();
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
@@ -513,6 +520,7 @@ void main() {
       ipv6: true,
       stayResident: true,
       dartDefines: const <String>[],
+      urlTunneller: null,
     ) as ResidentWebRunner;
 
     expect(residentWebRunner.runtimeType.toString(), '_DwdsResidentWebRunner');
@@ -830,6 +838,7 @@ void main() {
       ipv6: true,
       stayResident: true,
       dartDefines: const <String>[],
+      urlTunneller: null,
     ) as ResidentWebRunner;
 
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
@@ -865,6 +874,7 @@ void main() {
       ipv6: true,
       stayResident: true,
       dartDefines: const <String>[],
+      urlTunneller: null,
     ) as ResidentWebRunner;
 
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();

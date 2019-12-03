@@ -127,6 +127,7 @@ void main() {
       initializePlatform: true,
       hostname: null,
       port: null,
+      urlTunneller: null,
       dartDefines: const <String>[],
     );
     // Since the .packages file is missing in the memory filesystem, this should
@@ -157,6 +158,7 @@ void main() {
       initializePlatform: false,
       hostname: null,
       port: null,
+      urlTunneller: null,
       dartDefines: const <String>[],
     );
 
@@ -178,6 +180,7 @@ void main() {
       initializePlatform: false,
       hostname: 'foo',
       port: '1234',
+      urlTunneller: null,
       dartDefines: const <String>[],
     );
 
@@ -211,6 +214,7 @@ void main() {
       initializePlatform: false,
       hostname: 'foo',
       port: '1234',
+      urlTunneller: null,
       dartDefines: const <String>[],
     ), throwsA(isInstanceOf<Exception>()));
   }));

@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:build_daemon/client.dart';
 import 'package:dwds/dwds.dart';
+import 'package:flutter_tools/src/base/net.dart';
 import 'package:meta/meta.dart';
 import 'package:vm_service/vm_service.dart' as vmservice;
 import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart'
@@ -47,6 +48,7 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
     @required bool ipv6,
     @required DebuggingOptions debuggingOptions,
     @required List<String> dartDefines,
+    @required UrlTunneller urlTunneller,
   }) {
     if (featureFlags.isWebIncrementalCompilerEnabled && debuggingOptions.buildInfo.isDebug) {
       return _ExperimentalResidentWebRunner(
@@ -57,6 +59,8 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
         ipv6: ipv6,
         stayResident: stayResident,
         dartDefines: dartDefines,
+        // TODO(dantup): Do we need to pass urlTunneller through to this? Does
+        // it use DWDS?
       );
     }
     return _DwdsResidentWebRunner(
@@ -67,6 +71,7 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
       ipv6: ipv6,
       stayResident: stayResident,
       dartDefines: dartDefines,
+      urlTunneller: urlTunneller,
     );
   }
 }
@@ -550,6 +555,7 @@ class _DwdsResidentWebRunner extends ResidentWebRunner {
     @required FlutterProject flutterProject,
     @required bool ipv6,
     @required DebuggingOptions debuggingOptions,
+    @required this.urlTunneller,
     bool stayResident = true,
     @required List<String> dartDefines,
   }) : super(
@@ -561,6 +567,8 @@ class _DwdsResidentWebRunner extends ResidentWebRunner {
           stayResident: stayResident,
           dartDefines: dartDefines,
         );
+
+  UrlTunneller urlTunneller;
 
   @override
   Future<int> run({
@@ -606,6 +614,7 @@ class _DwdsResidentWebRunner extends ResidentWebRunner {
           initializePlatform: debuggingOptions.initializePlatform,
           hostname: debuggingOptions.hostname,
           port: debuggingOptions.port,
+          urlTunneller: urlTunneller,
           skipDwds: !_enableDwds,
           dartDefines: dartDefines,
         );

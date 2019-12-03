@@ -82,12 +82,9 @@ typedef WebFsFactory = Future<WebFs> Function({
   @required bool initializePlatform,
   @required String hostname,
   @required String port,
+  @required UrlTunneller urlTunneller,
   @required List<String> dartDefines,
 });
-
-/// Used for exposing URLs to the end user by passing the request out to the
-/// daemon client.
-UrlTunneller get tunnelUrl => context.get<UrlTunneller>() ?? (String url) => Future<String>.value(url);
 
 /// The dev filesystem responsible for building and serving  web applications.
 class WebFs {
@@ -181,6 +178,7 @@ class WebFs {
     @required bool initializePlatform,
     @required String hostname,
     @required String port,
+    @required UrlTunneller urlTunneller,
     @required List<String> dartDefines,
   }) async {
     // workaround for https://github.com/flutter/flutter/issues/38290
@@ -304,7 +302,7 @@ class WebFs {
           serveDevTools: false,
           verbose: false,
           enableDebugExtension: true,
-          urlEncoder: tunnelUrl,
+          urlEncoder: urlTunneller,
           logWriter: (dynamic level, String message) => printTrace(message),
         );
         handler = pipeline.addHandler(dwds.handler);

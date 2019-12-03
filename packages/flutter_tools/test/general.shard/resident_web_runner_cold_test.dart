@@ -42,6 +42,7 @@ void main() {
           ipv6: true,
           stayResident: true,
           dartDefines: const <String>[],
+          urlTunneller: null,
         ) as ResidentWebRunner;
       },
       overrides: <Type, Generator>{
