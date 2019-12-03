@@ -91,6 +91,10 @@ const Feature flutterWebFeature = Feature(
     available: true,
     enabledByDefault: false,
   ),
+  beta: FeatureChannelSetting(
+    available: true,
+    enabledByDefault: false,
+  ),
 );
 
 /// The [Feature] for macOS desktop.

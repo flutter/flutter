@@ -78,7 +78,7 @@ void main() {
     }));
 
     test('flutter web help string', () {
-      expect(flutterWebFeature.generateHelpMessage(), 'Enable or disable Flutter for web. This setting will take effect on the master and dev channels.');
+      expect(flutterWebFeature.generateHelpMessage(), 'Enable or disable Flutter for web. This setting will take effect on the master, dev, and beta channels.');
     });
 
     test('flutter macOS desktop help string', () {
@@ -155,18 +155,18 @@ void main() {
       expect(featureFlags.isWebEnabled, false);
     }));
 
-    test('flutter web not enabled with config on beta', () => testbed.run(() {
+    test('flutter web enabled with config on beta', () => testbed.run(() {
       when(mockFlutterVerion.channel).thenReturn('beta');
       when<bool>(mockFlutterConfig.getValue('enable-web') as bool).thenReturn(true);
 
-      expect(featureFlags.isWebEnabled, false);
+      expect(featureFlags.isWebEnabled, true);
     }));
 
     test('flutter web not enabled with environment variable on beta', () => testbed.run(() {
       when(mockFlutterVerion.channel).thenReturn('beta');
       when(mockPlatform.environment).thenReturn(<String, String>{'FLUTTER_WEB': 'true'});
 
-      expect(featureFlags.isWebEnabled, false);
+      expect(featureFlags.isWebEnabled, true);
     }));
 
     test('flutter web off by default on stable', () => testbed.run(() {
