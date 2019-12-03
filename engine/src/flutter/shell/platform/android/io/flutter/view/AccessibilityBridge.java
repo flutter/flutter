@@ -1473,11 +1473,7 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         if (!accessibilityManager.isEnabled()) {
             return;
         }
-        if (viewId == ROOT_NODE_ID) {
-            rootAccessibilityView.sendAccessibilityEvent(eventType);
-        } else {
-            sendAccessibilityEvent(obtainAccessibilityEvent(viewId, eventType));
-        }
+        sendAccessibilityEvent(obtainAccessibilityEvent(viewId, eventType));
     }
 
     /**
@@ -1491,7 +1487,9 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
         if (!accessibilityManager.isEnabled()) {
             return;
         }
-        // TODO(mattcarroll): why are we explicitly talking to the root view's parent?
+        // See https://developer.android.com/reference/android/view/View.html#sendAccessibilityEvent(int)
+        // We just want the final part at this point, since the event parameter
+        // has already been correctly populated.
         rootAccessibilityView.getParent().requestSendAccessibilityEvent(rootAccessibilityView, event);
     }
 
@@ -1542,9 +1540,6 @@ public class AccessibilityBridge extends AccessibilityNodeProvider {
      * invoked to create an {@link AccessibilityEvent} for the {@link #rootAccessibilityView}.
      */
     private AccessibilityEvent obtainAccessibilityEvent(int virtualViewId, int eventType) {
-        if (BuildConfig.DEBUG && virtualViewId == ROOT_NODE_ID) {
-            Log.e(TAG, "VirtualView node must not be the root node.");
-        }
         AccessibilityEvent event = AccessibilityEvent.obtain(eventType);
         event.setPackageName(rootAccessibilityView.getContext().getPackageName());
         event.setSource(rootAccessibilityView, virtualViewId);
