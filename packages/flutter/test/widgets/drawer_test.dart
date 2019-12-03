@@ -82,10 +82,9 @@ void main() {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     final List<String> logs = <String>[];
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-    addTearDown(gesture.removePointer);
-
     // Start out of hoverTarget
-    await gesture.moveTo(const Offset(100, 100));
+    await gesture.addPointer(location: const Offset(100, 100));
+    addTearDown(gesture.removePointer);
 
     await tester.pumpWidget(
       MaterialApp(

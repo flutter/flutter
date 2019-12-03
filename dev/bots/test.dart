@@ -333,6 +333,9 @@ Future<void> _flutterBuildIpa(String relativePathToApplication) async {
     await runCommand('pod',
       <String>['install'],
       workingDirectory: podfile.parent.path,
+      environment: <String, String>{
+        'LANG': 'en_US.UTF-8',
+      },
     );
   }
   await runCommand(flutter,

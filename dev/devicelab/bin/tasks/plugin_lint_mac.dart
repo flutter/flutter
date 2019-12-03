@@ -45,6 +45,9 @@ Future<void> main() async {
             objcPodspecPath,
             '--allow-warnings',
           ],
+          environment: <String, String>{
+            'LANG': 'en_US.UTF-8',
+          },
         );
       });
 
@@ -60,6 +63,9 @@ Future<void> main() async {
             '--allow-warnings',
             '--use-libraries',
           ],
+          environment: <String, String>{
+            'LANG': 'en_US.UTF-8',
+          },
         );
       });
 

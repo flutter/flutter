@@ -91,7 +91,7 @@ typedef NestedScrollViewHeaderSliversBuilder = List<Widget> Function(BuildContex
 ///           // This is not necessary if the "headerSliverBuilder" only builds
 ///           // widgets that do not overlap the next sliver.
 ///           handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
-///           child: SliverAppBar(
+///           sliver: SliverAppBar(
 ///             title: const Text('Books'), // This is the title in the app bar.
 ///             pinned: true,
 ///             expandedHeight: 150.0,
@@ -1317,7 +1317,7 @@ class SliverOverlapAbsorberHandle extends ChangeNotifier {
 /// A sliver that wraps another, forcing its layout extent to be treated as
 /// overlap.
 ///
-/// The difference between the overlap requested by the [child] sliver and the
+/// The difference between the overlap requested by the child [sliver] and the
 /// overlap reported by this widget, called the _absorbed overlap_, is reported
 /// to the [SliverOverlapAbsorberHandle], which is typically passed to a
 /// [SliverOverlapInjector].
@@ -1331,14 +1331,20 @@ class SliverOverlapAbsorber extends SingleChildRenderObjectWidget {
   /// [SliverOverlapAbsorberHandle].
   ///
   /// The [handle] must not be null.
-  ///
-  /// The [child] must be a sliver.
   const SliverOverlapAbsorber({
     Key key,
     @required this.handle,
+    @Deprecated(
+      'Use sliver instead. '
+      'This feature was deprecated after v1.10.16.'
+    )
     Widget child,
+    Widget sliver,
   }) : assert(handle != null),
-       super(key: key, child: child);
+      // ignore: deprecated_member_use_from_same_package
+      assert(child == null || sliver == null),
+      // ignore: deprecated_member_use_from_same_package
+      super(key: key, child: sliver ?? child);
 
   /// The object in which the absorbed overlap is recorded.
   ///
@@ -1369,7 +1375,7 @@ class SliverOverlapAbsorber extends SingleChildRenderObjectWidget {
 /// A sliver that wraps another, forcing its layout extent to be treated as
 /// overlap.
 ///
-/// The difference between the overlap requested by the [child] sliver and the
+/// The difference between the overlap requested by the child [sliver] and the
 /// overlap reported by this widget, called the _absorbed overlap_, is reported
 /// to the [SliverOverlapAbsorberHandle], which is typically passed to a
 /// [RenderSliverOverlapInjector].
@@ -1379,13 +1385,20 @@ class RenderSliverOverlapAbsorber extends RenderSliver with RenderObjectWithChil
   ///
   /// The [handle] must not be null.
   ///
-  /// The [child] must be a [RenderSliver].
+  /// The [sliver] must be a [RenderSliver].
   RenderSliverOverlapAbsorber({
     @required SliverOverlapAbsorberHandle handle,
+    @Deprecated(
+      'Use sliver instead. '
+      'This feature was deprecated after v1.10.16.'
+    )
     RenderSliver child,
+    RenderSliver sliver,
   }) : assert(handle != null),
+       // ignore: deprecated_member_use_from_same_package
+       assert(child == null || sliver == null),
        _handle = handle {
-    this.child = child;
+    this.child = sliver ?? child;
   }
 
   /// The object in which the absorbed overlap is recorded.
@@ -1486,9 +1499,17 @@ class SliverOverlapInjector extends SingleChildRenderObjectWidget {
   const SliverOverlapInjector({
     Key key,
     @required this.handle,
+    @Deprecated(
+      'Use sliver instead. '
+      'This feature was deprecated after v1.10.16.'
+    )
     Widget child,
+    Widget sliver,
   }) : assert(handle != null),
-       super(key: key, child: child);
+       // ignore: deprecated_member_use_from_same_package
+       assert(child == null || sliver == null),
+       // ignore: deprecated_member_use_from_same_package
+       super(key: key, child: sliver ?? child);
 
   /// The handle to the [SliverOverlapAbsorber] that is feeding this injector.
   ///
