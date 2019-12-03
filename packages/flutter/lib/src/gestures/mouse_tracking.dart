@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:collection' show LinkedHashSet, HashSet;
+import 'dart:collection' show HashSet;
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -161,7 +161,7 @@ class MouseTrackerAnnotation extends Diagnosticable {
 /// position.
 typedef MouseDetectorAnnotationFinder = Iterable<MouseTrackerAnnotation> Function(Offset offset);
 
-typedef _UpdatedDeviceHandler = void Function(_MouseState mouseState, LinkedHashSet<MouseTrackerAnnotation> previousAnnotations);
+typedef _UpdatedDeviceHandler = void Function(_MouseState mouseState, List<MouseTrackerAnnotation> previousAnnotations);
 
 // Various states of a connected mouse device used by [MouseTracker].
 class _MouseState {
@@ -171,13 +171,11 @@ class _MouseState {
        _latestEvent = initialEvent;
 
   // The list of annotations that contains this device.
-  //
-  // It uses [LinkedHashSet] to keep the insertion order.
-  LinkedHashSet<MouseTrackerAnnotation> get annotations => _annotations;
-  LinkedHashSet<MouseTrackerAnnotation> _annotations = LinkedHashSet<MouseTrackerAnnotation>();
+  List<MouseTrackerAnnotation> get annotations => _annotations;
+  List<MouseTrackerAnnotation> _annotations = <MouseTrackerAnnotation>[];
 
-  LinkedHashSet<MouseTrackerAnnotation> replaceAnnotations(LinkedHashSet<MouseTrackerAnnotation> value) {
-    final LinkedHashSet<MouseTrackerAnnotation> previous = _annotations;
+  List<MouseTrackerAnnotation> replaceAnnotations(List<MouseTrackerAnnotation> value) {
+    final List<MouseTrackerAnnotation> previous = _annotations;
     _annotations = value;
     return previous;
   }
@@ -270,7 +268,7 @@ class MouseTracker extends ChangeNotifier {
 
   // The collection of annotations that are currently being tracked. It is
   // operated on by [attachAnnotation] and [detachAnnotation].
-  final Set<Key> _trackedAnnotations = <Key>{};
+  final Set<Key> _trackedAnnotationKeys = HashSet<Key>();
 
   // Tracks the state of connected mouse devices.
   //
@@ -312,14 +310,14 @@ class MouseTracker extends ChangeNotifier {
     final PointerEvent previousEvent = existingState?.latestEvent;
     _updateDevices(
       targetEvent: event,
-      handleUpdatedDevice: (_MouseState mouseState, LinkedHashSet<MouseTrackerAnnotation> previousAnnotations) {
+      handleUpdatedDevice: (_MouseState mouseState, List<MouseTrackerAnnotation> previousAnnotations) {
         assert(mouseState.device == event.device);
         _dispatchDeviceCallbacks(
           lastAnnotations: previousAnnotations,
           nextAnnotations: mouseState.annotations,
           handledEvent: previousEvent,
           unhandledEvent: event,
-          trackedAnnotations: _trackedAnnotations,
+          trackedAnnotationKeys: _trackedAnnotationKeys,
         );
       },
     );
@@ -329,12 +327,12 @@ class MouseTracker extends ChangeNotifier {
   //
   // If the device is not connected or there are no annotations attached, empty
   // is returned without calling `annotationFinder`.
-  LinkedHashSet<MouseTrackerAnnotation> _findAnnotations(_MouseState state) {
+  List<MouseTrackerAnnotation> _findAnnotations(_MouseState state) {
     final Offset globalPosition = state.latestEvent.position;
     final int device = state.device;
-    return (_mouseStates.containsKey(device) && _trackedAnnotations.isNotEmpty)
-      ? LinkedHashSet<MouseTrackerAnnotation>.from(annotationFinder(globalPosition))
-      : <MouseTrackerAnnotation>{};
+    return (_mouseStates.containsKey(device) && _trackedAnnotationKeys.isNotEmpty)
+      ? List<MouseTrackerAnnotation>.from(annotationFinder(globalPosition))
+      : <MouseTrackerAnnotation>[];
   }
 
   static bool get _duringBuildPhase {
@@ -347,13 +345,13 @@ class MouseTracker extends ChangeNotifier {
   // every frame.
   void _updateAllDevices() {
     _updateDevices(
-      handleUpdatedDevice: (_MouseState mouseState, LinkedHashSet<MouseTrackerAnnotation> previousAnnotations) {
+      handleUpdatedDevice: (_MouseState mouseState, List<MouseTrackerAnnotation> previousAnnotations) {
         _dispatchDeviceCallbacks(
           lastAnnotations: previousAnnotations,
           nextAnnotations: mouseState.annotations,
           handledEvent: mouseState.latestEvent,
           unhandledEvent: mouseState.latestEvent,
-          trackedAnnotations: _trackedAnnotations,
+          trackedAnnotationKeys: _trackedAnnotationKeys,
         );
       }
     );
@@ -429,8 +427,8 @@ class MouseTracker extends ChangeNotifier {
     // state, because `targetEvent` should be null when `_mouseStates` is used.
     final Iterable<_MouseState> dirtyStates = targetEvent == null ? _mouseStates.values : <_MouseState>[targetState];
     for (_MouseState dirtyState in dirtyStates) {
-      final LinkedHashSet<MouseTrackerAnnotation> nextAnnotations = _findAnnotations(dirtyState);
-      final LinkedHashSet<MouseTrackerAnnotation> lastAnnotations = dirtyState.replaceAnnotations(nextAnnotations);
+      final List<MouseTrackerAnnotation> nextAnnotations = _findAnnotations(dirtyState);
+      final List<MouseTrackerAnnotation> lastAnnotations = dirtyState.replaceAnnotations(nextAnnotations);
       handleUpdatedDevice(dirtyState, lastAnnotations);
     }
     assert(() {
@@ -447,17 +445,17 @@ class MouseTracker extends ChangeNotifier {
   //
   // The `unhandledEvent` can be null. Other arguments must not be null.
   static void _dispatchDeviceCallbacks({
-    @required LinkedHashSet<MouseTrackerAnnotation> lastAnnotations,
-    @required LinkedHashSet<MouseTrackerAnnotation> nextAnnotations,
+    @required List<MouseTrackerAnnotation> lastAnnotations,
+    @required List<MouseTrackerAnnotation> nextAnnotations,
     @required PointerEvent handledEvent,
     @required PointerEvent unhandledEvent,
-    @required Set<Key> trackedAnnotations,
+    @required Set<Key> trackedAnnotationKeys,
   }) {
     assert(lastAnnotations != null);
     assert(nextAnnotations != null);
     // handledEvent can be null
     assert(unhandledEvent != null);
-    assert(trackedAnnotations != null);
+    assert(trackedAnnotationKeys != null);
     // Order is important for mouse event callbacks. The `findAnnotations`
     // returns annotations in the visual order from front to back. We call
     // it the "visual order", and the opposite one "reverse visual order".
@@ -477,7 +475,7 @@ class MouseTracker extends ChangeNotifier {
       (MouseTrackerAnnotation value) => !nextKeys.contains(value.key),
     );
     for (final MouseTrackerAnnotation annotation in exitingAnnotations) {
-      final bool attached = trackedAnnotations.contains(annotation.key);
+      final bool attached = trackedAnnotationKeys.contains(annotation.key);
       // Exit is not sent if annotation is no longer attached, because this
       // trigger may cause exceptions and has safer alternatives. See
       // [MouseRegion.onExit] for details.
@@ -492,7 +490,7 @@ class MouseTracker extends ChangeNotifier {
       (MouseTrackerAnnotation value) => !lastKeys.contains(value.key),
     ).toList().reversed;
     for (final MouseTrackerAnnotation annotation in enteringAnnotations) {
-      assert(trackedAnnotations.contains(annotation.key));
+      assert(trackedAnnotationKeys.contains(annotation.key));
       if (annotation.onEnter != null) {
         annotation.onEnter(PointerEnterEvent.fromMouseEvent(unhandledEvent));
       }
@@ -507,7 +505,7 @@ class MouseTracker extends ChangeNotifier {
       for (final MouseTrackerAnnotation annotation in hoveringAnnotations) {
         // Deduplicate: Trigger hover if it's a newly hovered annotation
         // or the position has changed
-        assert(trackedAnnotations.contains(annotation.key));
+        assert(trackedAnnotationKeys.contains(annotation.key));
         if (!lastKeys.contains(annotation.key)
             || handledEvent is! PointerHoverEvent
             || handledEvent.position != unhandledEvent.position) {
@@ -554,7 +552,9 @@ class MouseTracker extends ChangeNotifier {
   /// MouseTracker. Do not call in other contexts.
   @visibleForTesting
   bool isAnnotationAttached(MouseTrackerAnnotation annotation) {
-    return _trackedAnnotations.contains(annotation?.key);
+    if (annotation == null)
+      return false;
+    return _trackedAnnotationKeys.contains(annotation.key);
   }
 
   /// Notify [MouseTracker] that a new [MouseTrackerAnnotation] has started to
@@ -593,8 +593,8 @@ class MouseTracker extends ChangeNotifier {
   ///  * Attaching an annotation that has been attached will assert.
   void attachAnnotation(MouseTrackerAnnotation annotation) {
     assert(!_duringDeviceUpdate);
-    assert(!_trackedAnnotations.contains(annotation.key));
-    _trackedAnnotations.add(annotation.key);
+    assert(!_trackedAnnotationKeys.contains(annotation.key));
+    _trackedAnnotationKeys.add(annotation.key);
   }
 
   /// Notify [MouseTracker] that a mouse tracker annotation that was previously
@@ -606,7 +606,7 @@ class MouseTracker extends ChangeNotifier {
   ///  * Detaching an annotation that has not been attached will assert.
   void detachAnnotation(MouseTrackerAnnotation annotation) {
     assert(!_duringDeviceUpdate);
-    assert(_trackedAnnotations.contains(annotation.key));
-    _trackedAnnotations.remove(annotation.key);
+    assert(_trackedAnnotationKeys.contains(annotation.key));
+    _trackedAnnotationKeys.remove(annotation.key);
   }
 }
