@@ -54,11 +54,7 @@ source_set("skia") {
   testonly = true
 
   sources = [
-    "$flutter_root/testing/assertions_skia.cc",
     "$flutter_root/testing/assertions_skia.h",
-    "$flutter_root/testing/canvas_test.h",
-    "$flutter_root/testing/mock_canvas.cc",
-    "$flutter_root/testing/mock_canvas.h",
   ]
 
   public_deps = [
@@ -122,8 +118,7 @@ if (current_toolchain == host_toolchain) {
     testonly = true
 
     sources = [
-      "mock_canvas_unittests.cc",
-      "test_metal_surface_unittests.cc",
+      "$flutter_root/testing/test_metal_surface_unittests.cc",
     ]
 
     deps = [

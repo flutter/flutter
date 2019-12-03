@@ -6,44 +6,13 @@
 
 namespace flutter {
 
-ContainerLayer::ContainerLayer()
-    : child_needs_screen_readback_(false), renders_to_save_layer_(false) {}
+ContainerLayer::ContainerLayer() {}
+
+ContainerLayer::~ContainerLayer() = default;
 
 void ContainerLayer::Add(std::shared_ptr<Layer> layer) {
-  Layer* the_layer = layer.get();
-  the_layer->set_parent(this);
+  layer->set_parent(this);
   layers_.push_back(std::move(layer));
-  if (the_layer->tree_reads_surface()) {
-    NotifyChildReadback(the_layer);
-  }
-}
-
-void ContainerLayer::ClearChildren() {
-  layers_.clear();
-  if (child_needs_screen_readback_) {
-    child_needs_screen_readback_ = false;
-    UpdateTreeReadsSurface();
-  }
-}
-
-void ContainerLayer::set_renders_to_save_layer(bool value) {
-  if (renders_to_save_layer_ != value) {
-    renders_to_save_layer_ = value;
-    UpdateTreeReadsSurface();
-  }
-}
-
-void ContainerLayer::NotifyChildReadback(const Layer* layer) {
-  if (child_needs_screen_readback_ || !layer->tree_reads_surface()) {
-    return;
-  }
-  child_needs_screen_readback_ = true;
-  UpdateTreeReadsSurface();
-}
-
-bool ContainerLayer::ComputeTreeReadsSurface() const {
-  return layer_reads_surface() ||
-         (!renders_to_save_layer_ && child_needs_screen_readback_);
 }
 
 void ContainerLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
@@ -52,12 +21,6 @@ void ContainerLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
   SkRect child_paint_bounds = SkRect::MakeEmpty();
   PrerollChildren(context, matrix, &child_paint_bounds);
   set_paint_bounds(child_paint_bounds);
-}
-
-void ContainerLayer::Paint(PaintContext& context) const {
-  FML_DCHECK(needs_painting());
-
-  PaintChildren(context);
 }
 
 void ContainerLayer::PrerollChildren(PrerollContext* context,

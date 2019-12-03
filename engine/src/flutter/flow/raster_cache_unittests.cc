@@ -3,14 +3,9 @@
 // found in the LICENSE file.
 
 #include "flutter/flow/raster_cache.h"
-
 #include "gtest/gtest.h"
 #include "third_party/skia/include/core/SkPicture.h"
 #include "third_party/skia/include/core/SkPictureRecorder.h"
-
-namespace flutter {
-namespace testing {
-namespace {
 
 sk_sp<SkPicture> GetSamplePicture() {
   SkPictureRecorder recorder;
@@ -21,8 +16,6 @@ sk_sp<SkPicture> GetSamplePicture() {
                                           paint);
   return recorder.finishRecordingAsPicture();
 }
-
-}  // namespace
 
 TEST(RasterCache, SimpleInitialization) {
   flutter::RasterCache cache;
@@ -100,6 +93,3 @@ TEST(RasterCache, SweepsRemoveUnusedFrames) {
   ASSERT_FALSE(cache.Prepare(NULL, picture.get(), matrix, srgb.get(), true,
                              false));  // 5
 }
-
-}  // namespace testing
-}  // namespace flutter

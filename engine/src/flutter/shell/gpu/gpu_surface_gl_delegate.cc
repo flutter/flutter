@@ -12,8 +12,7 @@ bool GPUSurfaceGLDelegate::GLContextFBOResetAfterPresent() const {
   return false;
 }
 
-bool GPUSurfaceGLDelegate::UseOffscreenSurface(
-    const bool needs_readback) const {
+bool GPUSurfaceGLDelegate::UseOffscreenSurface() const {
   return false;
 }
 

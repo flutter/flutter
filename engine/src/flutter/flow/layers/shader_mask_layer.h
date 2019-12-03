@@ -16,6 +16,7 @@ class ShaderMaskLayer : public ContainerLayer {
   ShaderMaskLayer(sk_sp<SkShader> shader,
                   const SkRect& mask_rect,
                   SkBlendMode blend_mode);
+  ~ShaderMaskLayer() override;
 
   void Paint(PaintContext& context) const override;
 

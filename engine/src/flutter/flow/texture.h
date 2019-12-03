@@ -14,9 +14,12 @@
 namespace flutter {
 
 class Texture {
+ protected:
+  Texture(int64_t id);
+
  public:
-  Texture(int64_t id);  // Called from UI or GPU thread.
-  virtual ~Texture();   // Called from GPU thread.
+  // Called from GPU thread.
+  virtual ~Texture();
 
   // Called from GPU thread.
   virtual void Paint(SkCanvas& canvas,
@@ -47,6 +50,7 @@ class Texture {
 class TextureRegistry {
  public:
   TextureRegistry();
+  ~TextureRegistry();
 
   // Called from GPU thread.
   void RegisterTexture(std::shared_ptr<Texture> texture);

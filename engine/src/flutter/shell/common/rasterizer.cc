@@ -297,8 +297,7 @@ RasterStatus Rasterizer::DoDraw(
 RasterStatus Rasterizer::DrawToSurface(flutter::LayerTree& layer_tree) {
   FML_DCHECK(surface_);
 
-  auto frame = surface_->AcquireFrame(layer_tree.frame_size(),
-                                      layer_tree.root_needs_screen_readback());
+  auto frame = surface_->AcquireFrame(layer_tree.frame_size());
 
   if (frame == nullptr) {
     return RasterStatus::kFailed;

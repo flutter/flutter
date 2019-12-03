@@ -24,8 +24,7 @@ bool GPUSurfaceSoftware::IsValid() {
 
 // |Surface|
 std::unique_ptr<SurfaceFrame> GPUSurfaceSoftware::AcquireFrame(
-    const SkISize& logical_size,
-    const bool needs_readback) {
+    const SkISize& logical_size) {
   // TODO(38466): Refactor GPU surface APIs take into account the fact that an
   // external view embedder may want to render to the root surface.
   if (!render_to_surface_) {
