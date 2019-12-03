@@ -5,7 +5,7 @@
 part of engine;
 
 const String _robotoUrl =
-    'http://fonts.gstatic.com/s/roboto/v20/KFOmCnqEu92Fr1Me5WZLCzYlKw.ttf';
+    'https://fonts.gstatic.com/s/roboto/v20/KFOmCnqEu92Fr1Me5WZLCzYlKw.ttf';
 
 class SkiaFontCollection {
   final List<Future<ByteBuffer>> _loadingFontBuffers = <Future<ByteBuffer>>[];
