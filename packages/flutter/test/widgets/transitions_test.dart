@@ -313,7 +313,6 @@ void main() {
       );
       return opacityWidget.opacity.value;
     }
-
     testWidgets('animates', (WidgetTester tester) async {
       final AnimationController controller = AnimationController(vsync: const TestVSync());
       final Animation<double> animation = Tween<double>(begin: 0.0, end: 1.0).animate(controller);
@@ -357,7 +356,6 @@ void main() {
       );
       return opacityWidget.opacity.value;
     }
-    
     testWidgets('animates', (WidgetTester tester) async {
       final AnimationController controller = AnimationController(vsync: const TestVSync());
       final Animation<double> animation = Tween<double>(begin: 0.0, end: 1.0).animate(controller);

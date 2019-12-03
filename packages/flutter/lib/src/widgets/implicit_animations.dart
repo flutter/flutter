@@ -1430,7 +1430,7 @@ class SliverAnimatedOpacity extends ImplicitlyAnimatedWidget {
   }
 }
 
-class _SliverAnimatedOpacityState extends ImplicitlyAnimatedWidgetState<AnimatedOpacity> {
+class _SliverAnimatedOpacityState extends ImplicitlyAnimatedWidgetState<SliverAnimatedOpacity> {
   Tween<double> _opacity;
   Animation<double> _opacityAnimation;
 
@@ -1448,7 +1448,7 @@ class _SliverAnimatedOpacityState extends ImplicitlyAnimatedWidgetState<Animated
   Widget build(BuildContext context) {
     return SliverFadeTransition(
       opacity: _opacityAnimation,
-      child: widget.child,
+      sliver: widget.sliver,
       alwaysIncludeSemantics: widget.alwaysIncludeSemantics,
     );
   }
