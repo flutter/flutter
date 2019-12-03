@@ -101,6 +101,11 @@ struct KeyboardState {
 @property(nonatomic) KeyboardState keyboardState;
 
 /**
+ * Event monitor for keyUp events.
+ */
+@property(nonatomic) id keyUpMonitor;
+
+/**
  * Starts running |engine|, including any initial setup.
  */
 - (BOOL)launchEngine;
@@ -241,6 +246,14 @@ static void CommonInit(FlutterViewController* controller) {
   if (!_engine.running) {
     [self launchEngine];
   }
+  [self listenForMetaModifiedKeyUpEvents];
+}
+
+- (void)viewWillDisappear {
+  // Per Apple's documentation, it is discouraged to call removeMonitor: in dealloc, and it's
+  // recommended to be called earlier in the lifecycle.
+  [NSEvent removeMonitor:_keyUpMonitor];
+  _keyUpMonitor = nil;
 }
 
 - (void)dealloc {
@@ -268,7 +281,6 @@ static void CommonInit(FlutterViewController* controller) {
 }
 
 - (void)removeKeyResponder:(NSResponder*)responder {
-  [self.additionalKeyResponders removeObject:responder];
 }
 
 #pragma mark - Private methods
@@ -285,6 +297,27 @@ static void CommonInit(FlutterViewController* controller) {
   // to the engine.
   [self sendInitialSettings];
   return YES;
+}
+
+// macOS does not call keyUp: on a key while the command key is pressed. This results in a loss
+// of a key event once the modified key is released. This method registers the
+// ViewController as a listener for a keyUp event before it's handled by NSApplication, and should
+// NOT modify the event to avoid any unexpected behavior.
+- (void)listenForMetaModifiedKeyUpEvents {
+  NSAssert(_keyUpMonitor == nil, @"_keyUpMonitor was already created");
+  FlutterViewController* __weak weakSelf = self;
+  _keyUpMonitor = [NSEvent
+      addLocalMonitorForEventsMatchingMask:NSEventMaskKeyUp
+                                   handler:^NSEvent*(NSEvent* event) {
+                                     // Intercept keyUp only for events triggered on the current
+                                     // view.
+                                     if (weakSelf.view &&
+                                         ([[event window] firstResponder] == weakSelf.view) &&
+                                         ([event modifierFlags] & NSEventModifierFlagCommand) &&
+                                         ([event type] == NSEventTypeKeyUp))
+                                       [weakSelf keyUp:event];
+                                     return event;
+                                   }];
 }
 
 - (void)configureTrackingArea {
