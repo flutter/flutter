@@ -144,8 +144,10 @@ class TapSemanticEvent extends SemanticsEvent {
 /// See also:
 ///
 ///  * [SemanticsFlag.liveRegion], for a description of live regions.
-// TODO(dnfield): Remove this for for first stable release of 2020
-@Deprecated('This event has never been implemented and will be removed in a future version of Flutter.')
+@Deprecated(
+  'This event has never been implemented and will be removed in a future version of Flutter. References to it should be removed.'
+  'This feature was deprecated after v1.12.16.'
+)
 class UpdateLiveRegionEvent extends SemanticsEvent {
   /// Creates a new [UpdateLiveRegionEvent].
   const UpdateLiveRegionEvent() : super('updateLiveRegion');
