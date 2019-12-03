@@ -19,9 +19,13 @@ namespace flutter {
 namespace testing {
 
 ShellTest::ShellTest()
-    : native_resolver_(std::make_shared<TestDartNativeResolver>()) {}
-
-ShellTest::~ShellTest() = default;
+    : native_resolver_(std::make_shared<TestDartNativeResolver>()),
+      thread_host_("io.flutter.test." + GetCurrentTestName() + ".",
+                   ThreadHost::Type::Platform | ThreadHost::Type::IO |
+                       ThreadHost::Type::UI | ThreadHost::Type::GPU),
+      assets_dir_(fml::OpenDirectory(GetFixturesPath(),
+                                     false,
+                                     fml::FilePermission::kRead)) {}
 
 void ShellTest::SendEnginePlatformMessage(
     Shell* shell,
@@ -225,10 +229,10 @@ Settings ShellTest::CreateSettingsForFixture() {
 TaskRunners ShellTest::GetTaskRunnersForFixture() {
   return {
       "test",
-      thread_host_->platform_thread->GetTaskRunner(),  // platform
-      thread_host_->gpu_thread->GetTaskRunner(),       // gpu
-      thread_host_->ui_thread->GetTaskRunner(),        // ui
-      thread_host_->io_thread->GetTaskRunner()         // io
+      thread_host_.platform_thread->GetTaskRunner(),  // platform
+      thread_host_.gpu_thread->GetTaskRunner(),       // gpu
+      thread_host_.ui_thread->GetTaskRunner(),        // ui
+      thread_host_.io_thread->GetTaskRunner()         // io
   };
 }
 
@@ -265,24 +269,6 @@ void ShellTest::DestroyShell(std::unique_ptr<Shell> shell,
                                       latch.Signal();
                                     });
   latch.Wait();
-}
-
-// |testing::ThreadTest|
-void ShellTest::SetUp() {
-  ThreadTest::SetUp();
-  assets_dir_ =
-      fml::OpenDirectory(GetFixturesPath(), false, fml::FilePermission::kRead);
-  thread_host_ = std::make_unique<ThreadHost>(
-      "io.flutter.test." + GetCurrentTestName() + ".",
-      ThreadHost::Type::Platform | ThreadHost::Type::IO | ThreadHost::Type::UI |
-          ThreadHost::Type::GPU);
-}
-
-// |testing::ThreadTest|
-void ShellTest::TearDown() {
-  ThreadTest::TearDown();
-  assets_dir_.reset();
-  thread_host_.reset();
 }
 
 void ShellTest::AddNativeCallback(std::string name,

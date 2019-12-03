@@ -24,8 +24,6 @@ TransformLayer::TransformLayer(const SkMatrix& transform)
   }
 }
 
-TransformLayer::~TransformLayer() = default;
-
 void TransformLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
   SkMatrix child_matrix;
   child_matrix.setConcat(matrix, transform_);

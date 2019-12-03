@@ -11,8 +11,6 @@ ColorFilterLayer::ColorFilterLayer(sk_sp<SkColorFilter> filter)
   set_renders_to_save_layer(true);
 }
 
-ColorFilterLayer::~ColorFilterLayer() = default;
-
 void ColorFilterLayer::Paint(PaintContext& context) const {
   TRACE_EVENT0("flutter", "ColorFilterLayer::Paint");
   FML_DCHECK(needs_painting());

@@ -18,8 +18,6 @@ ClipPathLayer::ClipPathLayer(const SkPath& clip_path, Clip clip_behavior)
   set_renders_to_save_layer(clip_behavior == Clip::antiAliasWithSaveLayer);
 }
 
-ClipPathLayer::~ClipPathLayer() = default;
-
 void ClipPathLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
   SkRect previous_cull_rect = context->cull_rect;
   SkRect clip_path_bounds = clip_path_.getBounds();

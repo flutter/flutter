@@ -22,7 +22,9 @@ PhysicalShapeLayer::PhysicalShapeLayer(SkColor color,
     : color_(color),
       shadow_color_(shadow_color),
       device_pixel_ratio_(device_pixel_ratio),
+#if defined(OS_FUCHSIA)
       viewport_depth_(viewport_depth),
+#endif
       elevation_(elevation),
       path_(path),
       isRect_(false),
@@ -49,8 +51,6 @@ PhysicalShapeLayer::PhysicalShapeLayer(SkColor color,
   set_renders_to_save_layer(clip_behavior == Clip::antiAliasWithSaveLayer);
 }
 
-PhysicalShapeLayer::~PhysicalShapeLayer() = default;
-
 void PhysicalShapeLayer::Preroll(PrerollContext* context,
                                  const SkMatrix& matrix) {
   TRACE_EVENT0("flutter", "PhysicalShapeLayer::Preroll");
@@ -67,48 +67,11 @@ void PhysicalShapeLayer::Preroll(PrerollContext* context,
     // Let the system compositor draw all shadows for us.
     set_needs_system_composite(true);
 #else
-    // Add some margin to the paint bounds to leave space for the shadow.
-    // We fill this whole region and clip children to it so we don't need to
-    // join the child paint bounds.
-    // The offset is calculated as follows:
-
-    //                   .---                           (kLightRadius)
-    //                -------/                          (light)
-    //                   |  /
-    //                   | /
-    //                   |/
-    //                   |O
-    //                  /|                              (kLightHeight)
-    //                 / |
-    //                /  |
-    //               /   |
-    //              /    |
-    //             -------------                        (layer)
-    //            /|     |
-    //           / |     |                              (elevation)
-    //        A /  |     |B
-    // ------------------------------------------------ (canvas)
-    //          ---                                     (extent of shadow)
-    //
-    // E = lt        }           t = (r + w/2)/h
-    //                } =>
-    // r + w/2 = ht  }           E = (l/h)(r + w/2)
-    //
-    // Where: E = extent of shadow
-    //        l = elevation of layer
-    //        r = radius of the light source
-    //        w = width of the layer
-    //        h = light height
-    //        t = tangent of AOB, i.e., multiplier for elevation to extent
-    SkRect bounds(path_.getBounds());
-    // tangent for x
-    double tx = (kLightRadius * device_pixel_ratio_ + bounds.width() * 0.5) /
-                kLightHeight;
-    // tangent for y
-    double ty = (kLightRadius * device_pixel_ratio_ + bounds.height() * 0.5) /
-                kLightHeight;
-    bounds.outset(elevation_ * tx, elevation_ * ty);
-    set_paint_bounds(bounds);
+    // We will draw the shadow in Paint(), so add some margin to the paint
+    // bounds to leave space for the shadow. We fill this whole region and clip
+    // children to it so we don't need to join the child paint bounds.
+    set_paint_bounds(ComputeShadowBounds(path_.getBounds(), elevation_,
+                                         device_pixel_ratio_));
 #endif  // defined(OS_FUCHSIA)
   }
 }
@@ -191,6 +154,50 @@ void PhysicalShapeLayer::Paint(PaintContext& context) const {
   PaintChildren(context);
 
   context.internal_nodes_canvas->restoreToCount(saveCount);
+}
+
+SkRect PhysicalShapeLayer::ComputeShadowBounds(const SkRect& bounds,
+                                               float elevation,
+                                               float pixel_ratio) {
+  // The shadow offset is calculated as follows:
+  //                   .---                           (kLightRadius)
+  //                -------/                          (light)
+  //                   |  /
+  //                   | /
+  //                   |/
+  //                   |O
+  //                  /|                              (kLightHeight)
+  //                 / |
+  //                /  |
+  //               /   |
+  //              /    |
+  //             -------------                        (layer)
+  //            /|     |
+  //           / |     |                              (elevation)
+  //        A /  |     |B
+  // ------------------------------------------------ (canvas)
+  //          ---                                     (extent of shadow)
+  //
+  // E = lt        }           t = (r + w/2)/h
+  //                } =>
+  // r + w/2 = ht  }           E = (l/h)(r + w/2)
+  //
+  // Where: E = extent of shadow
+  //        l = elevation of layer
+  //        r = radius of the light source
+  //        w = width of the layer
+  //        h = light height
+  //        t = tangent of AOB, i.e., multiplier for elevation to extent
+  // tangent for x
+  double tx =
+      (kLightRadius * pixel_ratio + bounds.width() * 0.5) / kLightHeight;
+  // tangent for y
+  double ty =
+      (kLightRadius * pixel_ratio + bounds.height() * 0.5) / kLightHeight;
+  SkRect shadow_bounds(bounds);
+  shadow_bounds.outset(elevation * tx, elevation * ty);
+
+  return shadow_bounds;
 }
 
 void PhysicalShapeLayer::DrawShadow(SkCanvas* canvas,

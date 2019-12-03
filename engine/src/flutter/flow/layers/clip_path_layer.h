@@ -12,7 +12,6 @@ namespace flutter {
 class ClipPathLayer : public ContainerLayer {
  public:
   ClipPathLayer(const SkPath& clip_path, Clip clip_behavior = Clip::antiAlias);
-  ~ClipPathLayer() override;
 
   void Preroll(PrerollContext* context, const SkMatrix& matrix) override;
 

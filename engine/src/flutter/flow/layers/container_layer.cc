@@ -9,8 +9,6 @@ namespace flutter {
 ContainerLayer::ContainerLayer()
     : child_needs_screen_readback_(false), renders_to_save_layer_(false) {}
 
-ContainerLayer::~ContainerLayer() = default;
-
 void ContainerLayer::Add(std::shared_ptr<Layer> layer) {
   Layer* the_layer = layer.get();
   the_layer->set_parent(this);
@@ -54,6 +52,12 @@ void ContainerLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
   SkRect child_paint_bounds = SkRect::MakeEmpty();
   PrerollChildren(context, matrix, &child_paint_bounds);
   set_paint_bounds(child_paint_bounds);
+}
+
+void ContainerLayer::Paint(PaintContext& context) const {
+  FML_DCHECK(needs_painting());
+
+  PaintChildren(context);
 }
 
 void ContainerLayer::PrerollChildren(PrerollContext* context,

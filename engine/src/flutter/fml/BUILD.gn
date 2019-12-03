@@ -2,12 +2,11 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("//build/fuchsia/sdk.gni")
-import("$flutter_root/testing/testing.gni")
-
 if (is_fuchsia) {
+  import("//build/fuchsia/sdk.gni")
   import("$flutter_root/tools/fuchsia/fuchsia_archive.gni")
 }
+import("$flutter_root/testing/testing.gni")
 
 source_set("fml") {
   sources = [
