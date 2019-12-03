@@ -396,12 +396,12 @@ class ConstantTween<T> extends Tween<T> {
   /// Create a tween whose [begin] and [end] values equal [value].
   ConstantTween(T value) : super(begin: value, end: value);
 
-  /// This tween doesn't interpolate, it always returns [value].
+  /// This tween doesn't interpolate, it always returns the same value.
   @override
   T lerp(double t) => begin;
 
   @override
-  String toString() => '$runtimeType(value: begin)';
+  String toString() => '$runtimeType(value: $begin)';
 }
 
 /// Transforms the value of the given animation by the given curve.

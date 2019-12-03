@@ -3636,15 +3636,16 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   /// Whether descendants of this [RenderObject] are allowed to add semantic
   /// information to the [SemanticsNode] annotated by this widget.
   ///
-  /// When set to false descendants are allowed to annotate [SemanticNode]s of
+  /// When set to false descendants are allowed to annotate [SemanticsNode]s of
   /// their parent with the semantic information they want to contribute to the
   /// semantic tree.
   /// When set to true the only way for descendants to contribute semantic
   /// information to the semantic tree is to introduce new explicit
-  /// [SemanticNode]s to the tree.
+  /// [SemanticsNode]s to the tree.
   ///
-  /// This setting is often used in combination with [isSemanticBoundary] to
-  /// create semantic boundaries that are either writable or not for children.
+  /// This setting is often used in combination with
+  /// [SemanticsConfiguration.isSemanticBoundary] to create semantic boundaries
+  /// that are either writable or not for children.
   bool get explicitChildNodes => _explicitChildNodes;
   bool _explicitChildNodes;
   set explicitChildNodes(bool value) {
@@ -3671,8 +3672,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
-  /// If non-null, sets the [SemanticsNode.hasCheckedState] semantic to true and
-  /// the [SemanticsNode.isChecked] semantic to the given value.
+  /// If non-null, sets the [SemanticsFlag.hasCheckedState] semantic to true and
+  /// the [SemanticsConfiguration.isChecked] semantic to the given value.
   bool get checked => _checked;
   bool _checked;
   set checked(bool value) {
@@ -3682,8 +3683,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
-  /// If non-null, sets the [SemanticsNode.hasEnabledState] semantic to true and
-  /// the [SemanticsNode.isEnabled] semantic to the given value.
+  /// If non-null, sets the [SemanticsFlag.hasEnabledState] semantic to true and
+  /// the [SemanticsConfiguration.isEnabled] semantic to the given value.
   bool get enabled => _enabled;
   bool _enabled;
   set enabled(bool value) {
@@ -3693,8 +3694,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
-  /// If non-null, sets the [SemanticsNode.isSelected] semantic to the given
-  /// value.
+  /// If non-null, sets the [SemanticsConfiguration.isSelected] semantic to the
+  /// given value.
   bool get selected => _selected;
   bool _selected;
   set selected(bool value) {
@@ -3704,7 +3705,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
-  /// If non-null, sets the [SemanticsNode.isButton] semantic to the given value.
+  /// If non-null, sets the [SemanticsConfiguration.isButton] semantic to the
+  /// given value.
   bool get button => _button;
   bool _button;
   set button(bool value) {
@@ -3848,7 +3850,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     _image = value;
   }
 
-  /// If non-null, sets the [SemanticsNode.isLiveRegion] semantic to the given
+  /// If non-null, sets the [SemanticsFlag.isLiveRegion] semantic to the given
   /// value.
   bool get liveRegion => _liveRegion;
   bool _liveRegion;

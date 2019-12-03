@@ -503,11 +503,11 @@ class EditableText extends StatefulWidget {
   /// Whether to show cursor.
   ///
   /// The cursor refers to the blinking caret when the [EditableText] is focused.
+  /// {@endtemplate}
   ///
   /// See also:
   ///
   ///  * [showSelectionHandles], which controls the visibility of the selection handles.
-  /// {@endtemplate}
   final bool showCursor;
 
   /// {@template flutter.widgets.editableText.autocorrect}

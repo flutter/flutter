@@ -311,7 +311,7 @@ class __ZoomPageTransitionState extends State<_ZoomPageTransition> {
 /// Used by [PageTransitionsTheme] to define a [MaterialPageRoute] page
 /// transition animation.
 ///
-/// Apps can configure the map of builders for [ThemeData.platformTheme]
+/// Apps can configure the map of builders for [ThemeData.pageTransitionsTheme]
 /// to customize the default [MaterialPageRoute] page transition animation
 /// for different platforms.
 ///

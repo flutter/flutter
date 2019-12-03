@@ -2702,7 +2702,7 @@ abstract class RenderObject extends AbstractNode with DiagnosticableTreeMixin im
   ///
   /// If [isSemanticBoundary] is true, this method is called with the `node`
   /// created for this [RenderObject], the `config` to be applied to that node
-  /// and the `children` [SemanticNode]s that descendants of this RenderObject
+  /// and the `children` [SemanticsNode]s that descendants of this RenderObject
   /// have generated.
   ///
   /// By default, the method will annotate `node` with `config` and add the
@@ -3419,7 +3419,7 @@ abstract class _InterestingSemanticsFragment extends _SemanticsFragment {
        _ancestorChain = <RenderObject>[owner],
        super(dropsSemanticsOfPreviousSiblings: dropsSemanticsOfPreviousSiblings);
 
-  /// The [RenderObject] that owns this fragment (and any new [SemanticNode]
+  /// The [RenderObject] that owns this fragment (and any new [SemanticsNode]
   /// introduced by it).
   RenderObject get owner => _ancestorChain.first;
 
