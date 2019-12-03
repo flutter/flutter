@@ -117,8 +117,13 @@ class UpgradeCommandRunner {
     }
     await resetChanges(gitTagVersion);
     await upgradeChannel(flutterVersion);
-    await attemptFastForward();
-    await flutterUpgradeContinue();
+    final bool alreadyUpToDate = await attemptFastForward(flutterVersion);
+    if (alreadyUpToDate) {
+      // If the upgrade was a no op, then do not continue with the second half.
+      printTrace('Flutter is already up to date on channel ${flutterVersion.channel}');
+    } else {
+      await flutterUpgradeContinue();
+    }
   }
 
   Future<void> flutterUpgradeContinue() async {
@@ -229,7 +234,10 @@ class UpgradeCommandRunner {
   ///
   /// If there haven't been any hot fixes or local changes, this is equivalent
   /// to a fast-forward.
-  Future<void> attemptFastForward() async {
+  ///
+  /// If the fast forward lands us on the same channel and revision, then
+  /// returns true, otherwise returns false.
+  Future<bool> attemptFastForward(FlutterVersion oldFlutterVersion) async {
     final int code = await processUtils.stream(
       <String>['git', 'pull', '--ff'],
       workingDirectory: Cache.flutterRoot,
@@ -238,6 +246,17 @@ class UpgradeCommandRunner {
     if (code != 0) {
       throwToolExit(null, exitCode: code);
     }
+
+    // Check if the upgrade did anything.
+    bool alreadyUpToDate = false;
+    try {
+      final FlutterVersion newFlutterVersion = FlutterVersion();
+      alreadyUpToDate = newFlutterVersion.channel == oldFlutterVersion.channel &&
+        newFlutterVersion.frameworkRevision == oldFlutterVersion.frameworkRevision;
+    } catch (e) {
+      printTrace('Failed to determine FlutterVersion after upgrade fast-forward: $e');
+    }
+    return alreadyUpToDate;
   }
 
   /// Update the engine repository and precache all artifacts.
