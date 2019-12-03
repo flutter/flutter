@@ -593,6 +593,7 @@ class MouseTracker extends ChangeNotifier {
   ///  * Attaching an annotation that has been attached will assert.
   void attachAnnotation(MouseTrackerAnnotation annotation) {
     assert(!_duringDeviceUpdate);
+    assert(annotation?.key != null);
     assert(!_trackedAnnotationKeys.contains(annotation.key));
     _trackedAnnotationKeys.add(annotation.key);
   }
@@ -606,6 +607,7 @@ class MouseTracker extends ChangeNotifier {
   ///  * Detaching an annotation that has not been attached will assert.
   void detachAnnotation(MouseTrackerAnnotation annotation) {
     assert(!_duringDeviceUpdate);
+    assert(annotation?.key != null);
     assert(_trackedAnnotationKeys.contains(annotation.key));
     _trackedAnnotationKeys.remove(annotation.key);
   }
