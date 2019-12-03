@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -37,7 +37,7 @@ import 'text_style.dart';
 ///
 /// Ascent is the font's spacing above the baseline without leading and
 /// descent is the spacing below the baseline without leading. Leading is
-/// split evenly betweenthe top and bottom. The values for `ascent` and
+/// split evenly between the top and bottom. The values for `ascent` and
 /// `descent` are provided by the font named by [fontFamily]. If no
 /// [fontFamily] or [fontFamilyFallback] is provided, then the platform's
 /// default family will be used.

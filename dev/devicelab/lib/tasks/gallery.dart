@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -9,7 +9,6 @@ import 'dart:math' as math;
 
 import '../framework/adb.dart';
 import '../framework/framework.dart';
-import '../framework/ios.dart';
 import '../framework/utils.dart';
 
 TaskFunction createGalleryTransitionTest({ bool semanticsEnabled = false }) {
@@ -30,9 +29,6 @@ class GalleryTransitionTest {
         dir('${flutterDirectory.path}/examples/flutter_gallery');
     await inDirectory<void>(galleryDirectory, () async {
       await flutter('packages', options: <String>['get']);
-
-      if (deviceOperatingSystem == DeviceOperatingSystem.ios)
-        await prepareProvisioningCertificates(galleryDirectory.path);
 
       final String testDriver = semanticsEnabled
           ? 'transitions_perf_with_semantics.dart'

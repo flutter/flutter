@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -751,11 +751,11 @@ class SemanticsProperties extends DiagnosticableTree {
   /// Doing so instructs screen readers to not read out the [value].
   final bool obscured;
 
-  /// Whether the [value] is coming from a field that supports multi-line text
+  /// Whether the [value] is coming from a field that supports multiline text
   /// editing.
   ///
   /// This option is only meaningful when [textField] is true to indicate
-  /// whether it's a single-line or multi-line text field.
+  /// whether it's a single-line or multiline text field.
   ///
   /// This option is null when [textField] is false.
   final bool multiline;
@@ -788,12 +788,10 @@ class SemanticsProperties extends DiagnosticableTree {
 
   /// If non-null, whether the node should be considered a live region.
   ///
-  /// On Android, when a live region semantics node is first created TalkBack
-  /// will make a polite announcement of the current label. This announcement
-  /// occurs even if the node is not focused. Subsequent polite announcements
-  /// can be made by sending a [UpdateLiveRegionEvent] semantics event. The
-  /// announcement will only be made if the node's label has changed since the
-  /// last update.
+  /// On Android, when the label changes on a live region semantics node,
+  /// TalkBack will make a polite announcement of the current label. This
+  /// announcement occurs even if the node is not focused, but only if the label
+  /// has changed since the last update.
   ///
   /// On iOS, no announcements are made but the node is marked as
   /// `UIAccessibilityTraitUpdatesFrequently`.
@@ -807,7 +805,6 @@ class SemanticsProperties extends DiagnosticableTree {
   ///
   ///  * [SemanticsFlag.liveRegion], the semantics flag this setting controls.
   ///  * [SemanticsConfiguration.liveRegion], for a full description of a live region.
-  ///  * [UpdateLiveRegionEvent], to trigger a polite announcement of a live region.
   final bool liveRegion;
 
   /// The maximum number of characters that can be entered into an editable
@@ -1737,7 +1734,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   TextSelection _textSelection;
 
   /// If this node represents a text field, this indicates whether or not it's
-  /// a multi-line text field.
+  /// a multiline text field.
   bool get isMultiline => _isMultiline;
   bool _isMultiline;
 
@@ -3522,12 +3519,10 @@ class SemanticsConfiguration {
 
   /// Whether the semantics node is a live region.
   ///
-  /// On Android, when a live region semantics node is first created TalkBack
-  /// will make a polite announcement of the current label. This announcement
-  /// occurs even if the node is not focused. Subsequent polite announcements
-  /// can be made by sending a [UpdateLiveRegionEvent] semantics event. The
-  /// announcement will only be made if the node's label has changed since the
-  /// last update.
+  /// On Android, when the label changes on a live region semantics node,
+  /// TalkBack will make a polite announcement of the current label. This
+  /// announcement occurs even if the node is not focused, but only if the label
+  /// has changed since the last update.
   ///
   /// An example of a live region is the [Snackbar] widget. When it appears
   /// on the screen it may be difficult to focus to read the label. A live
@@ -3697,10 +3692,10 @@ class SemanticsConfiguration {
     _setFlag(SemanticsFlag.isObscured, value);
   }
 
-  /// Whether the text field is multi-line.
+  /// Whether the text field is multiline.
   ///
   /// This option is usually set in combination with [textField] to indicate
-  /// that the text field is configured to be multi-line.
+  /// that the text field is configured to be multiline.
   bool get isMultiline => _hasFlag(SemanticsFlag.isMultiline);
   set isMultiline(bool value) {
     _setFlag(SemanticsFlag.isMultiline, value);

@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -121,17 +121,17 @@ class RunResult {
   final List<String> _command;
 
   int get exitCode => processResult.exitCode;
-  String get stdout => processResult.stdout;
-  String get stderr => processResult.stderr;
+  String get stdout => processResult.stdout as String;
+  String get stderr => processResult.stderr as String;
 
   @override
   String toString() {
     final StringBuffer out = StringBuffer();
-    if (processResult.stdout.isNotEmpty) {
-      out.writeln(processResult.stdout);
+    if (stdout.isNotEmpty) {
+      out.writeln(stdout);
     }
-    if (processResult.stderr.isNotEmpty) {
-      out.writeln(processResult.stderr);
+    if (stderr.isNotEmpty) {
+      out.writeln(stderr);
     }
     return out.toString().trimRight();
   }

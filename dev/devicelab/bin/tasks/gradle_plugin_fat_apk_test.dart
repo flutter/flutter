@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -111,8 +111,8 @@ Future<void> main() async {
         // When the platform-target isn't specified, we generate the snapshots
         // for arm and arm64.
         final List<String> targetPlatforms = <String>[
-          'android-arm',
-          'android-arm64',
+          'arm64-v8a',
+          'armeabi-v7a',
         ];
         for (final String targetPlatform in targetPlatforms) {
           final String androidArmSnapshotPath = path.join(

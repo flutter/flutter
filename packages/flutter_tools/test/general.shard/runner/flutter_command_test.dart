@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -52,13 +52,20 @@ void main() {
     testUsingContext('honors shouldUpdateCache true', () async {
       final DummyFlutterCommand flutterCommand = DummyFlutterCommand(shouldUpdateCache: true);
       await flutterCommand.run();
-      verify(cache.updateAll(any)).called(1);
+      // First call for universal, second for the rest
+      expect(
+        verify(cache.updateAll(captureAny)).captured,
+        <Set<DevelopmentArtifact>>[
+          <DevelopmentArtifact>{DevelopmentArtifact.universal},
+          <DevelopmentArtifact>{},
+        ],
+      );
     },
     overrides: <Type, Generator>{
       Cache: () => cache,
     });
 
-    void testUsingCommandContext(String testName, Function testBody) {
+    void testUsingCommandContext(String testName, dynamic Function() testBody) {
       testUsingContext(testName, testBody, overrides: <Type, Generator>{
         ProcessInfo: () => mockProcessInfo,
         SystemClock: () => clock,

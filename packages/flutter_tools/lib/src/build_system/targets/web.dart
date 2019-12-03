@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -7,6 +7,7 @@ import '../../base/file_system.dart';
 import '../../base/io.dart';
 import '../../base/process_manager.dart';
 import '../../build_info.dart';
+import '../../compile.dart';
 import '../../dart/package_map.dart';
 import '../../globals.dart';
 import '../../project.dart';
@@ -26,7 +27,7 @@ const String kHasWebPlugins = 'HasWebPlugins';
 /// Valid values are O1 (lowest, profile default) to O4 (highest, release default).
 const String kDart2jsOptimization = 'Dart2jsOptimization';
 
-/// Generates an entrypoint for a web target.
+/// Generates an entry point for a web target.
 class WebEntrypointTarget extends Target {
   const WebEntrypointTarget();
 
@@ -51,21 +52,32 @@ class WebEntrypointTarget extends Target {
     final String targetFile = environment.defines[kTargetFile];
     final bool shouldInitializePlatform = environment.defines[kInitializePlatform] == 'true';
     final bool hasPlugins = environment.defines[kHasWebPlugins] == 'true';
-    final String import = fs.file(fs.path.absolute(targetFile)).uri.toString();
+    final String importPath = fs.path.absolute(targetFile);
+    final PackageUriMapper packageUriMapper = PackageUriMapper(
+      importPath,
+      PackageMap.globalPackagesPath,
+      null,
+      null,
+    );
+    final Uri mainImport = packageUriMapper.map(importPath);
+    if (mainImport == null) {
+      throw Exception('Missing package definition for $mainImport');
+    }
 
     String contents;
     if (hasPlugins) {
       final String generatedPath = environment.projectDir
         .childDirectory('lib')
         .childFile('generated_plugin_registrant.dart')
-        .absolute.uri.toString();
+        .absolute.path;
+      final Uri generatedImport = packageUriMapper.map(generatedPath);
       contents = '''
 import 'dart:ui' as ui;
 
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 
-import '$generatedPath';
-import "$import" as entrypoint;
+import '$generatedImport';
+import '$mainImport' as entrypoint;
 
 Future<void> main() async {
   registerPlugins(webPluginRegistry);
@@ -79,7 +91,7 @@ Future<void> main() async {
       contents = '''
 import 'dart:ui' as ui;
 
-import "$import" as entrypoint;
+import '$mainImport' as entrypoint;
 
 Future<void> main() async {
   if ($shouldInitializePlatform) {
@@ -94,7 +106,7 @@ Future<void> main() async {
   }
 }
 
-/// Compiles a web entrypoint with dart2js.
+/// Compiles a web entry point with dart2js.
 class Dart2JSTarget extends Target {
   const Dart2JSTarget();
 
@@ -113,12 +125,14 @@ class Dart2JSTarget extends Target {
     Source.artifact(Artifact.engineDartBinary),
     Source.pattern('{BUILD_DIR}/main.dart'),
     Source.pattern('{PROJECT_DIR}/.packages'),
-    Source.depfile('dart2js.d'),
   ];
 
   @override
-  List<Source> get outputs => const <Source>[
-    Source.depfile('dart2js.d'),
+  List<Source> get outputs => const <Source>[];
+
+  @override
+  List<String> get depfiles => const <String>[
+    'dart2js.d',
   ];
 
   @override
@@ -187,14 +201,17 @@ class WebReleaseBundle extends Target {
     Source.pattern('{BUILD_DIR}/main.dart.js'),
     Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
     Source.pattern('{PROJECT_DIR}/web/index.html'),
-    Source.depfile('flutter_assets.d'),
   ];
 
   @override
   List<Source> get outputs => const <Source>[
     Source.pattern('{OUTPUT_DIR}/main.dart.js'),
     Source.pattern('{OUTPUT_DIR}/index.html'),
-    Source.depfile('flutter_assets.d'),
+  ];
+
+  @override
+  List<String> get depfiles => const <String>[
+    'dart2js.d',
   ];
 
   @override

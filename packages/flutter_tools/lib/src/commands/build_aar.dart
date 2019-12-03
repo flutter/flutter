@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -55,7 +55,6 @@ class BuildAarCommand extends BuildSubCommand {
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
     DevelopmentArtifact.androidGenSnapshot,
-    DevelopmentArtifact.universal,
   };
 
   @override
@@ -72,8 +71,7 @@ class BuildAarCommand extends BuildSubCommand {
     } else {
       usage[CustomDimensions.commandBuildAarProjectType] = 'app';
     }
-    usage[CustomDimensions.commandBuildAarTargetPlatform] =
-        (argResults['target-platform'] as List<String>).join(',');
+    usage[CustomDimensions.commandBuildAarTargetPlatform] = stringsArg('target-platform').join(',');
     return usage;
   }
 
@@ -87,14 +85,14 @@ class BuildAarCommand extends BuildSubCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final Set<AndroidBuildInfo> androidBuildInfo = <AndroidBuildInfo>{};
-    final Iterable<AndroidArch> targetArchitectures = argResults['target-platform']
+    final Iterable<AndroidArch> targetArchitectures = stringsArg('target-platform')
       .map<AndroidArch>(getAndroidArchForName);
 
     for (String buildMode in const <String>['debug', 'profile', 'release']) {
-      if (argResults[buildMode]) {
+      if (boolArg(buildMode)) {
         androidBuildInfo.add(
           AndroidBuildInfo(
-            BuildInfo(BuildMode.fromName(buildMode), argResults['flavor']),
+            BuildInfo(BuildMode.fromName(buildMode), stringArg('flavor')),
             targetArchs: targetArchitectures,
           )
         );
@@ -107,12 +105,12 @@ class BuildAarCommand extends BuildSubCommand {
       project: _getProject(),
       target: '', // Not needed because this command only builds Android's code.
       androidBuildInfo: androidBuildInfo,
-      outputDirectoryPath: argResults['output-dir'],
+      outputDirectoryPath: stringArg('output-dir'),
     );
     return null;
   }
 
-  /// Returns the [FlutterProject] which is determinated from the remaining command-line
+  /// Returns the [FlutterProject] which is determined from the remaining command-line
   /// argument if any or the current working directory.
   FlutterProject _getProject() {
     if (argResults.rest.isEmpty) {

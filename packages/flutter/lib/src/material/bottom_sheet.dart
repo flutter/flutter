@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -90,7 +90,7 @@ class BottomSheet extends StatefulWidget {
   final WidgetBuilder builder;
 
   /// If true, the bottom sheet can be dragged up and down and dismissed by
-  /// swiping downards.
+  /// swiping downwards.
   ///
   /// Default is true.
   final bool enableDrag;
@@ -283,6 +283,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
   String _getRouteLabel(MaterialLocalizations localizations) {
     switch (Theme.of(context).platform) {
       case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
         return '';
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
@@ -497,11 +498,11 @@ Future<T> showModalBottomSheet<T>({
 /// this method.
 ///
 /// The new bottom sheet becomes a [LocalHistoryEntry] for the enclosing
-/// [ModalRoute] and a back button is added to the appbar of the [Scaffold]
+/// [ModalRoute] and a back button is added to the app bar of the [Scaffold]
 /// that closes the bottom sheet.
 ///
 /// To create a persistent bottom sheet that is not a [LocalHistoryEntry] and
-/// does not add a back button to the enclosing Scaffold's appbar, use the
+/// does not add a back button to the enclosing Scaffold's app bar, use the
 /// [Scaffold.bottomSheet] constructor parameter.
 ///
 /// A closely related widget is a modal bottom sheet, which is an alternative

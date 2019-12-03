@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -276,8 +276,7 @@ abstract class RawKeyEvent extends Diagnosticable {
       case 'macos':
         data = RawKeyEventDataMacOs(
             characters: message['characters'] ?? '',
-            charactersIgnoringModifiers:
-                message['charactersIgnoringModifiers'] ?? '',
+            charactersIgnoringModifiers: message['charactersIgnoringModifiers'] ?? '',
             keyCode: message['keyCode'] ?? 0,
             modifiers: message['modifiers'] ?? 0);
         break;
@@ -287,7 +286,8 @@ abstract class RawKeyEvent extends Diagnosticable {
             unicodeScalarValues: message['unicodeScalarValues'] ?? 0,
             keyCode: message['keyCode'] ?? 0,
             scanCode: message['scanCode'] ?? 0,
-            modifiers: message['modifiers'] ?? 0);
+            modifiers: message['modifiers'] ?? 0,
+            isDown: message['type'] == 'keydown');
         break;
       case 'web':
         data = RawKeyEventDataWeb(

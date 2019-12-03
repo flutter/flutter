@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -118,7 +118,7 @@ flutter_tools:lib/''');
   }));
 
   test('kernel_snapshot handles null result from kernel compilation', () => testbed.run(() async {
-    final FakeKernelCompilerFactory fakeKernelCompilerFactory = kernelCompilerFactory;
+    final FakeKernelCompilerFactory fakeKernelCompilerFactory = kernelCompilerFactory as FakeKernelCompilerFactory;
     fakeKernelCompilerFactory.kernelCompiler = MockKernelCompiler();
     when(fakeKernelCompilerFactory.kernelCompiler.compile(
       sdkRoot: anyNamed('sdkRoot'),
@@ -232,6 +232,7 @@ flutter_tools:lib/''');
     await const KernelSnapshot().build(androidEnvironment
       ..defines[kTargetPlatform]  = 'darwin-x64'
       ..defines[kBuildMode] = 'debug'
+      ..defines[kTrackWidgetCreation] = 'false'
     );
   }, overrides: <Type, Generator>{
     KernelCompilerFactory: () => MockKernelCompilerFactory(),

@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -99,9 +99,9 @@ Future<T> asyncGuard<T>(
       completer.completeError(e, s);
       return;
     }
-    if (onError is _BinaryOnError) {
+    if (onError is _BinaryOnError<T>) {
       completer.complete(onError(e, s));
-    } else if (onError is _UnaryOnError) {
+    } else if (onError is _UnaryOnError<T>) {
       completer.complete(onError(e));
     }
   }

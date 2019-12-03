@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -83,7 +83,7 @@ class AndroidValidator extends DoctorValidator {
         printTrace('java -version');
         final ProcessResult result = await processManager.run(<String>[javaBinary, '-version']);
         if (result.exitCode == 0) {
-          final List<String> versionLines = result.stderr.split('\n');
+          final List<String> versionLines = (result.stderr as String).split('\n');
           javaVersionText = versionLines.length >= 2 ? versionLines[1] : versionLines[0];
         }
       } catch (error) {
@@ -236,7 +236,7 @@ class AndroidLicenseValidator extends DoctorValidator {
     try {
       final ProcessResult result = await processManager.run(<String>[javaBinary, '-version']);
       if (result.exitCode == 0) {
-        final List<String> versionLines = result.stderr.split('\n');
+        final List<String> versionLines = (result.stderr as String).split('\n');
         javaVersion = versionLines.length >= 2 ? versionLines[1] : versionLines[0];
       }
     } catch (error) {

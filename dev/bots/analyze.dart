@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -49,6 +49,7 @@ PrintCallback print = core_internals.print;
 /// For example:
 /// bin/cache/dart-sdk/bin/dart dev/bots/analyze.dart --dart-sdk=/tmp/dart-sdk
 Future<void> main(List<String> arguments) async {
+  print('$clock STARTING ANALYSIS');
   try {
     await run(arguments);
   } on ExitException catch (error) {
@@ -65,27 +66,48 @@ Future<void> run(List<String> arguments) async {
     exit(1);
   }
 
+  print('$clock Deprecations...');
+  await verifyDeprecations(flutterRoot);
+
+  print('$clock Licenses...');
   await verifyNoMissingLicense(flutterRoot);
+
+  print('$clock Test imports...');
   await verifyNoTestImports(flutterRoot);
+
+  print('$clock Test package imports...');
   await verifyNoTestPackageImports(flutterRoot);
+
+  print('$clock Generated plugin registrants...');
   await verifyGeneratedPluginRegistrants(flutterRoot);
+
+  print('$clock Bad imports (framework)...');
   await verifyNoBadImportsInFlutter(flutterRoot);
+
+  print('$clock Bad imports (tools)...');
   await verifyNoBadImportsInFlutterTools(flutterRoot);
+
+  print('$clock Internationalization...');
   await verifyInternationalizations();
+
+  print('$clock Trailing spaces...');
   await verifyNoTrailingSpaces();
 
   // Ensure that all package dependencies are in sync.
+  print('$clock Package dependencies...');
   await runCommand(flutter, <String>['update-packages', '--verify-only'],
     workingDirectory: flutterRoot,
   );
 
   // Analyze all the sample code in the repo
+  print('$clock Sample code...');
   await runCommand(dart,
     <String>[path.join(flutterRoot, 'dev', 'bots', 'analyze-sample-code.dart')],
     workingDirectory: flutterRoot,
   );
 
   // Analyze all the Dart code in the repo.
+  print('$clock Dart analysis...');
   await _runFlutterAnalyze(flutterRoot, options: <String>[
     '--flutter-repo',
     ...arguments,
@@ -93,6 +115,7 @@ Future<void> run(List<String> arguments) async {
 
   // Try with the --watch analyzer, to make sure it returns success also.
   // The --benchmark argument exits after one run.
+  print('$clock Dart analysis (with --watch)...');
   await _runFlutterAnalyze(flutterRoot, options: <String>[
     '--flutter-repo',
     '--watch',
@@ -101,8 +124,8 @@ Future<void> run(List<String> arguments) async {
   ]);
 
   // Try analysis against a big version of the gallery; generate into a temporary directory.
+  print('$clock Dart analysis (mega gallery)...');
   final Directory outDir = Directory.systemTemp.createTempSync('flutter_mega_gallery.');
-
   try {
     await runCommand(dart,
       <String>[
@@ -112,38 +135,147 @@ Future<void> run(List<String> arguments) async {
       ],
       workingDirectory: flutterRoot,
     );
-    {
-      await _runFlutterAnalyze(outDir.path, options: <String>[
-        '--watch',
-        '--benchmark',
-        ...arguments,
-      ]);
-    }
+    await _runFlutterAnalyze(outDir.path, options: <String>[
+      '--watch',
+      '--benchmark',
+      ...arguments,
+    ]);
   } finally {
     outDir.deleteSync(recursive: true);
   }
 }
 
-Future<void> verifyNoMissingLicense(String workingDirectory) async {
+
+// TESTS
+
+final RegExp _findDeprecationPattern = RegExp(r'@[Dd]eprecated');
+final RegExp _deprecationPattern1 = RegExp(r'^( *)@Deprecated\($'); // ignore: flutter_deprecation_syntax (see analyze.dart)
+final RegExp _deprecationPattern2 = RegExp(r"^ *'(.+) '$");
+final RegExp _deprecationPattern3 = RegExp(r"^ *'This feature was deprecated after v([0-9]+)\.([0-9]+)\.([0-9]+)\.'$");
+final RegExp _deprecationPattern4 = RegExp(r'^ *\)$');
+
+/// Some deprecation notices are special, for example they're used to annotate members that
+/// will never go away and were never allowed but which we are trying to show messages for.
+/// (One example would be a library that intentionally conflicts with a member in another
+/// library to indicate that it is incompatible with that other library. Another would be
+/// the regexp just above...)
+const String _ignoreDeprecation = ' // ignore: flutter_deprecation_syntax (see analyze.dart)';
+
+/// Some deprecation notices are grand-fathered in for now. They must have an issue listed.
+final RegExp _grandfatheredDeprecation = RegExp(r' // ignore: flutter_deprecation_syntax, https://github.com/flutter/flutter/issues/[0-9]+$');
+
+Future<void> verifyDeprecations(String workingDirectory) async {
   final List<String> errors = <String>[];
-  for (FileSystemEntity entity in Directory(path.join(workingDirectory, 'packages'))
-      .listSync(recursive: true)
-      .where((FileSystemEntity entity) => entity is File && path.extension(entity.path) == '.dart')) {
-    final File file = entity;
-    bool hasLicense = false;
+  for (File file in _allFiles(workingDirectory, 'dart')) {
+    int lineNumber = 0;
     final List<String> lines = file.readAsLinesSync();
-    if (lines.isNotEmpty)
-      hasLicense = lines.first.startsWith(RegExp(r'// Copyright \d{4}'));
-    if (!hasLicense)
+    final List<int> linesWithDeprecations = <int>[];
+    for (String line in lines) {
+      if (line.contains(_findDeprecationPattern) &&
+          !line.endsWith(_ignoreDeprecation) &&
+          !line.contains(_grandfatheredDeprecation)) {
+        linesWithDeprecations.add(lineNumber);
+      }
+      lineNumber += 1;
+    }
+    for (int lineNumber in linesWithDeprecations) {
+      try {
+        final Match match1 = _deprecationPattern1.firstMatch(lines[lineNumber]);
+        if (match1 == null)
+          throw 'Deprecation notice does not match required pattern.';
+        final String indent = match1[1];
+        lineNumber += 1;
+        if (lineNumber >= lines.length)
+          throw 'Incomplete deprecation notice.';
+        Match match3;
+        String message;
+        do {
+          final Match match2 = _deprecationPattern2.firstMatch(lines[lineNumber]);
+          if (match2 == null)
+            throw 'Deprecation notice does not match required pattern.';
+          if (!lines[lineNumber].startsWith("$indent  '"))
+            throw 'Unexpected deprecation notice indent.';
+          if (message == null) {
+            final String firstChar = String.fromCharCode(match2[1].runes.first);
+            if (firstChar.toUpperCase() != firstChar)
+              throw 'Deprecation notice should be a grammatically correct sentence and start with a capital letter; see style guide.';
+          }
+          message = match2[1];
+          lineNumber += 1;
+          if (lineNumber >= lines.length)
+            throw 'Incomplete deprecation notice.';
+          match3 = _deprecationPattern3.firstMatch(lines[lineNumber]);
+        } while (match3 == null);
+        if (!message.endsWith('.') && !message.endsWith('!') && !message.endsWith('?'))
+          throw 'Deprecation notice should be a grammatically correct sentence and end with a period.';
+        if (!lines[lineNumber].startsWith("$indent  '"))
+          throw 'Unexpected deprecation notice indent.';
+        lineNumber += 1;
+        if (lineNumber >= lines.length)
+          throw 'Incomplete deprecation notice.';
+        if (!lines[lineNumber].contains(_deprecationPattern4))
+          throw 'End of deprecation notice does not match required pattern.';
+        if (!lines[lineNumber].startsWith('$indent)'))
+          throw 'Unexpected deprecation notice indent.';
+      } catch (error) {
+        errors.add('${file.path}:${lineNumber + 1}: $error');
+      }
+    }
+  }
+  // Fail if any errors
+  if (errors.isNotEmpty) {
+    print('$redLine');
+    print(errors.join('\n'));
+    print('${bold}See: https://github.com/flutter/flutter/wiki/Tree-hygiene#handling-breaking-changes$reset\n');
+    print('$redLine\n');
+    exit(1);
+  }
+}
+
+String _generateLicense(String prefix) {
+  assert(prefix != null);
+  return '${prefix}Copyright 2014 The Flutter Authors. All rights reserved.\n'
+         '${prefix}Use of this source code is governed by a BSD-style license that can be\n'
+         '${prefix}found in the LICENSE file.';
+}
+
+Future<void> verifyNoMissingLicense(String workingDirectory) async {
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'dart', _generateLicense('// '));
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'java', _generateLicense('// '));
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'h', _generateLicense('// '));
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'm', _generateLicense('// '));
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'swift', _generateLicense('// '));
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'gradle', _generateLicense('// '));
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'gn', _generateLicense('# '));
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'sh', '#!/usr/bin/env bash\n' + _generateLicense('# '));
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'bat', '@ECHO off\n' + _generateLicense('REM '));
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'ps1', _generateLicense('# '));
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'html', '<!DOCTYPE HTML>\n<!-- ${_generateLicense('')} -->', trailingBlank: false);
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'xml', '<!-- ${_generateLicense('')} -->');
+}
+
+Future<void> _verifyNoMissingLicenseForExtension(String workingDirectory, String extension, String license, { bool trailingBlank = true }) async {
+  assert(!license.endsWith('\n'));
+  final String licensePattern = license + '\n' + (trailingBlank ? '\n' : '');
+  final List<String> errors = <String>[];
+  for (File file in _allFiles(workingDirectory, extension)) {
+    final String contents = file.readAsStringSync().replaceAll('\r\n', '\n');
+    if (contents.isEmpty)
+      continue; // let's not go down the /bin/true rabbit hole
+    if (!contents.startsWith(licensePattern))
       errors.add(file.path);
   }
   // Fail if any errors
   if (errors.isNotEmpty) {
     print('$redLine');
-    final String s = errors.length == 1 ? '' : 's';
-    print('${bold}License headers cannot be found at the beginning of the following file$s.$reset\n');
+    final String s = errors.length == 1 ? ' does' : 's do';
+    print('${bold}The following ${errors.length} file$s not have the right license header:$reset\n');
     print(errors.join('\n'));
     print('$redLine\n');
+    print('The expected license header is:');
+    print('$license');
+    if (trailingBlank)
+      print('...followed by a blank line.');
     exit(1);
   }
 }
@@ -487,6 +619,36 @@ bool _listEquals<T>(List<T> a, List<T> b) {
       return false;
   }
   return true;
+}
+
+Iterable<File> _allFiles(String workingDirectory, String extension) sync* {
+  final Set<FileSystemEntity> pending = <FileSystemEntity>{ Directory(workingDirectory) };
+  while (pending.isNotEmpty) {
+    final FileSystemEntity entity = pending.first;
+    pending.remove(entity);
+    if (path.extension(entity.path) == '.tmpl')
+      continue;
+    if (entity is File) {
+      if (_isGeneratedPluginRegistrant(entity))
+        continue;
+      if (path.basename(entity.path) == 'flutter_export_environment.sh')
+        continue;
+      if (path.basename(entity.path) == 'gradlew.bat')
+        continue;
+      if (path.extension(entity.path) == '.$extension')
+        yield entity;
+    } else if (entity is Directory) {
+      if (File(path.join(entity.path, '.dartignore')).existsSync())
+        continue;
+      if (path.basename(entity.path) == '.git')
+        continue;
+      if (path.basename(entity.path) == '.dart_tool')
+        continue;
+      if (path.basename(entity.path) == 'build')
+        continue;
+      pending.addAll(entity.listSync());
+    }
+  }
 }
 
 Future<String> _getCommitRange() async {
