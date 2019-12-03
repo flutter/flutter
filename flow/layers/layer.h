@@ -145,46 +145,13 @@ class Layer {
 
   bool needs_painting() const { return !paint_bounds_.isEmpty(); }
 
-  // True iff the layer, or some descendant of the layer, performs an
-  // operation which depends on (i.e. must read back from) the surface
-  // on which it is rendered in any way beyond the functionality of
-  // BlendMode. This value has no setter as it is computed from other
-  // flags and properties on the layer.
-  // For an example see |BackdropFilterLayer|.
-  //
-  // See |UpdateTreeReadsSurface|
-  // See |set_layer_reads_surface|
-  // See |ContainerLayer::set_renders_to_save_layer|
-  // See |ContainerLayer::NotifyChildReadback|
-  bool tree_reads_surface() const { return tree_reads_surface_; }
-
   uint64_t unique_id() const { return unique_id_; }
-
- protected:
-  // Compute a new value for tree_reads_surface_ from all of the various
-  // properties of this layer.
-  // Used by |UpdateTreeReadsSurface|
-  virtual bool ComputeTreeReadsSurface() const;
-
-  // Update the tree_reads_surface_ value and propagate changes to
-  // ancestors if needed.
-  // Uses |ComputeTreeReadsSurface|
-  void UpdateTreeReadsSurface();
-
-  // True iff the layer itself (not a child or other descendant) performs
-  // an operation which reads from the surface on which it is rendered.
-  bool layer_reads_surface() const { return layer_reads_surface_; }
-
-  void set_layer_reads_surface(bool value);
 
  private:
   ContainerLayer* parent_;
   bool needs_system_composite_;
   SkRect paint_bounds_;
   uint64_t unique_id_;
-
-  bool tree_reads_surface_;
-  bool layer_reads_surface_;
 
   static uint64_t NextUniqueID();
 

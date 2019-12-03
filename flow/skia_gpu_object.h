@@ -54,11 +54,14 @@ class SkiaGPUObject {
   using SkiaObjectType = T;
 
   SkiaGPUObject() = default;
+
   SkiaGPUObject(sk_sp<SkiaObjectType> object, fml::RefPtr<SkiaUnrefQueue> queue)
       : object_(std::move(object)), queue_(std::move(queue)) {
     FML_DCHECK(object_);
   }
+
   SkiaGPUObject(SkiaGPUObject&&) = default;
+
   ~SkiaGPUObject() { reset(); }
 
   SkiaGPUObject& operator=(SkiaGPUObject&&) = default;

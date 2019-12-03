@@ -12,9 +12,6 @@
 #include "flutter/flow/matrix_decomposition.h"
 #include "gtest/gtest.h"
 
-namespace flutter {
-namespace testing {
-
 TEST(MatrixDecomposition, Rotation) {
   SkMatrix44 matrix = SkMatrix44::I();
 
@@ -96,8 +93,7 @@ TEST(MatrixDecomposition, Combination) {
 }
 
 TEST(MatrixDecomposition, ScaleFloatError) {
-  constexpr float scale_increment = 0.00001f;
-  for (float scale = 0.0001f; scale < 2.0f; scale += scale_increment) {
+  for (float scale = 0.0001f; scale < 2.0f; scale += 0.000001f) {
     SkMatrix44 matrix = SkMatrix44::I();
     matrix.setScale(scale, scale, 1.0f);
 
@@ -156,6 +152,3 @@ TEST(MatrixDecomposition, ScaleFloatError) {
   ASSERT_FLOAT_EQ(0, decomposition3.rotation().fData[1]);
   ASSERT_FLOAT_EQ(0, decomposition3.rotation().fData[2]);
 }
-
-}  // namespace testing
-}  // namespace flutter

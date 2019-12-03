@@ -22,6 +22,8 @@ class LayerTree {
  public:
   LayerTree();
 
+  ~LayerTree();
+
   void Preroll(CompositorContext::ScopedFrame& frame,
                bool ignore_raster_cache = false);
 
@@ -39,10 +41,6 @@ class LayerTree {
 
   void set_root_layer(std::shared_ptr<Layer> root_layer) {
     root_layer_ = std::move(root_layer);
-  }
-
-  bool root_needs_screen_readback() const {
-    return root_layer_ && root_layer_->tree_reads_surface();
   }
 
   const SkISize& frame_size() const { return frame_size_; }

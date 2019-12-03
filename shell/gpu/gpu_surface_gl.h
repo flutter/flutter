@@ -32,9 +32,7 @@ class GPUSurfaceGL : public Surface {
   bool IsValid() override;
 
   // |Surface|
-  std::unique_ptr<SurfaceFrame> AcquireFrame(
-      const SkISize& size,
-      const bool needs_readback) override;
+  std::unique_ptr<SurfaceFrame> AcquireFrame(const SkISize& size) override;
 
   // |Surface|
   SkMatrix GetRootTransformation() const override;
@@ -62,12 +60,11 @@ class GPUSurfaceGL : public Surface {
   bool valid_ = false;
   fml::WeakPtrFactory<GPUSurfaceGL> weak_factory_;
 
-  bool CreateOrUpdateSurfaces(const SkISize& size, const bool needs_readback);
+  bool CreateOrUpdateSurfaces(const SkISize& size);
 
   sk_sp<SkSurface> AcquireRenderSurface(
       const SkISize& untransformed_size,
-      const SkMatrix& root_surface_transformation,
-      const bool needs_readback);
+      const SkMatrix& root_surface_transformation);
 
   bool PresentSurface(SkCanvas* canvas);
 

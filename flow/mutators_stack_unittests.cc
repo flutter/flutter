@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 #include "flutter/flow/embedded_views.h"
-
 #include "gtest/gtest.h"
 
 namespace flutter {

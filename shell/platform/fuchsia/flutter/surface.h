@@ -29,8 +29,7 @@ class Surface final : public flutter::Surface {
 
   // |flutter::Surface|
   std::unique_ptr<flutter::SurfaceFrame> AcquireFrame(
-      const SkISize& size,
-      const bool needs_readback) override;
+      const SkISize& size) override;
 
   // |flutter::Surface|
   GrContext* GetContext() override;

@@ -19,6 +19,7 @@ class PictureLayer : public Layer {
                SkiaGPUObject<SkPicture> picture,
                bool is_complex,
                bool will_change);
+  ~PictureLayer() override;
 
   SkPicture* picture() const { return picture_.get().get(); }
 
