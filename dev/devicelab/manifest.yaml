@@ -670,6 +670,12 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
+  fast_scroll_large_images__memory:
+    description: >
+      Measures memory usage for scrolling through a list of large images.
+    stage: devicelab
+    required_agent_capabilities: ["mac/android"]
+
   analyzer_benchmark:
     description: >
       Measures the speed of Dart analyzer.
