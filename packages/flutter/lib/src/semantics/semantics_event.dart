@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -144,6 +144,12 @@ class TapSemanticEvent extends SemanticsEvent {
 /// See also:
 ///
 ///  * [SemanticsFlag.liveRegion], for a description of live regions.
+///
+/// Deprecated. This message was never implemented, and references to it should be removed.
+@Deprecated(
+  'This event has never been implemented and will be removed in a future version of Flutter. References to it should be removed. '
+  'This feature was deprecated after v1.12.16.'
+)
 class UpdateLiveRegionEvent extends SemanticsEvent {
   /// Creates a new [UpdateLiveRegionEvent].
   const UpdateLiveRegionEvent() : super('updateLiveRegion');

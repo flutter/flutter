@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -1662,7 +1662,7 @@ mixin WidgetInspectorService {
   ///
   /// If the currently selected [RenderObject] is identical to the
   /// [RenderObject] referenced by `previousSelectionId` then the previous
-  /// [DiagnosticNode] is reused.
+  /// [DiagnosticsNode] is reused.
   @protected
   String getSelectedRenderObject(String previousSelectionId, String groupName) {
     return _safeJsonEncode(_getSelectedRenderObject(previousSelectionId, groupName));
@@ -1677,7 +1677,7 @@ mixin WidgetInspectorService {
   /// Returns a [DiagnosticsNode] representing the currently selected [Element].
   ///
   /// If the currently selected [Element] is identical to the [Element]
-  /// referenced by `previousSelectionId` then the previous [DiagnosticNode] is
+  /// referenced by `previousSelectionId` then the previous [DiagnosticsNode] is
   /// reused.
   @protected
   String getSelectedWidget(String previousSelectionId, String groupName) {
@@ -1767,7 +1767,7 @@ mixin WidgetInspectorService {
   /// tree.
   ///
   /// If the currently selected [Element] is identical to the [Element]
-  /// referenced by `previousSelectionId` then the previous [DiagnosticNode] is
+  /// referenced by `previousSelectionId` then the previous [DiagnosticsNode] is
   /// reused.
   String getSelectedSummaryWidget(String previousSelectionId, String groupName) {
     return _safeJsonEncode(_getSelectedSummaryWidget(previousSelectionId, groupName));

@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -997,6 +997,8 @@ List<DiagnosticsNode> _debugCompareFloats(String labelA, double valueA, String l
 /// is based, achieve effects such as staying visible despite the scroll offset,
 /// or reappearing at different offsets based on the user's scroll direction
 /// ([SliverConstraints.userScrollDirection]).
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=Mz3kHQxBjGg}
 ///
 /// ## Writing a RenderSliver subclass
 ///

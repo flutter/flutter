@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -333,6 +333,9 @@ Future<void> _flutterBuildIpa(String relativePathToApplication) async {
     await runCommand('pod',
       <String>['install'],
       workingDirectory: podfile.parent.path,
+      environment: <String, String>{
+        'LANG': 'en_US.UTF-8',
+      },
     );
   }
   await runCommand(flutter,

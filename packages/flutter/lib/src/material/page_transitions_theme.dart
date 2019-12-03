@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -311,7 +311,7 @@ class __ZoomPageTransitionState extends State<_ZoomPageTransition> {
 /// Used by [PageTransitionsTheme] to define a [MaterialPageRoute] page
 /// transition animation.
 ///
-/// Apps can configure the map of builders for [ThemeData.platformTheme]
+/// Apps can configure the map of builders for [ThemeData.pageTransitionsTheme]
 /// to customize the default [MaterialPageRoute] page transition animation
 /// for different platforms.
 ///
