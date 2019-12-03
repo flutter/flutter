@@ -71,11 +71,11 @@ CanvasPath::CanvasPath() {}
 CanvasPath::~CanvasPath() {}
 
 int CanvasPath::getFillType() {
-  return path_.getFillType();
+  return static_cast<int>(path_.getFillType());
 }
 
 void CanvasPath::setFillType(int fill_type) {
-  path_.setFillType(static_cast<SkPath::FillType>(fill_type));
+  path_.setFillType(static_cast<SkPathFillType>(fill_type));
 }
 
 void CanvasPath::moveTo(float x, float y) {
