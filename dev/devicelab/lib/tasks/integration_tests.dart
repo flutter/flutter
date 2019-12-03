@@ -10,6 +10,13 @@ import '../framework/adb.dart';
 import '../framework/framework.dart';
 import '../framework/utils.dart';
 
+TaskFunction createFfiIntegrationTest() {
+  return DriverTest(
+    '${flutterDirectory.path}/dev/integration_tests/ffi',
+    'lib/main.dart',
+  );
+}
+
 TaskFunction createChannelsIntegrationTest() {
   return DriverTest(
     '${flutterDirectory.path}/dev/integration_tests/channels',
