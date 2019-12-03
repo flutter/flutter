@@ -11,8 +11,6 @@ ClipRectLayer::ClipRectLayer(const SkRect& clip_rect, Clip clip_behavior)
   FML_DCHECK(clip_behavior != Clip::none);
 }
 
-ClipRectLayer::~ClipRectLayer() = default;
-
 void ClipRectLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
   SkRect previous_cull_rect = context->cull_rect;
   if (context->cull_rect.intersect(clip_rect_)) {

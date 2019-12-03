@@ -26,7 +26,6 @@ class OpacityLayer : public ContainerLayer {
   // to many leaf layers. Therefore we try to capture that offset here to stop
   // the propagation as repainting the OpacityLayer is expensive.
   OpacityLayer(int alpha, const SkPoint& offset);
-  ~OpacityLayer() override;
 
   void Preroll(PrerollContext* context, const SkMatrix& matrix) override;
 

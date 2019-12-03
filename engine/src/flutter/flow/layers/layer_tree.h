@@ -22,8 +22,6 @@ class LayerTree {
  public:
   LayerTree();
 
-  ~LayerTree();
-
   void Preroll(CompositorContext::ScopedFrame& frame,
                bool ignore_raster_cache = false);
 
