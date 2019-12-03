@@ -626,6 +626,11 @@ class EditableText extends StatefulWidget {
 
   /// The color to use when painting the autocorrection Rect.
   ///
+  /// For [CupertinoTextField]s, the value is set to the ambient
+  /// [CupertinoThemeData.primaryColor] with 20% opacity. For [TextField]s, the
+  /// value is null on non-iOS platforms and the same color used in [CupertinoTextField]
+  /// on iOS.
+  ///
   /// Defaults to null, which disables autocorrection Rect painting.
   final Color autocorrectionTextRectColor;
 
@@ -732,6 +737,10 @@ class EditableText extends StatefulWidget {
   final bool autofocus;
 
   /// The color to use when painting the selection.
+  ///
+  /// For [CupertinoTextField]s, the value is set to the ambient
+  /// [CupertinoThemeData.primaryColor] with 20% opacity. For [TextField]s, the
+  /// value is set to the ambient [ThemeData.textSelectionColor].
   final Color selectionColor;
 
   /// Optional delegate for building the text selection handles and toolbar.
