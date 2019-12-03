@@ -2776,11 +2776,11 @@ class SemanticsConfiguration {
   /// so in the form of explicit [SemanticsNode]s.
   ///
   /// When set to false children of the owning [RenderObject] are allowed to
-  /// annotate [SemanticNode]s of their parent with the semantic information
+  /// annotate [SemanticsNode]s of their parent with the semantic information
   /// they want to contribute to the semantic tree.
   /// When set to true the only way for children of the owning [RenderObject]
   /// to contribute semantic information to the semantic tree is to introduce
-  /// new explicit [SemanticNode]s to the tree.
+  /// new explicit [SemanticsNode]s to the tree.
   ///
   /// This setting is often used in combination with [isSemanticBoundary] to
   /// create semantic boundaries that are either writable or not for children.
@@ -2804,7 +2804,7 @@ class SemanticsConfiguration {
   bool isBlockingSemanticsOfPreviouslyPaintedNodes = false;
 
   // SEMANTIC ANNOTATIONS
-  // These will end up on [SemanticNode]s generated from
+  // These will end up on [SemanticsNode]s generated from
   // [SemanticsConfiguration]s.
 
   /// Whether this configuration is empty.

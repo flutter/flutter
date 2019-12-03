@@ -106,7 +106,7 @@ class MouseTrackerAnnotation {
   ///    annotation is attached, then you can call the callback when that
   ///    condition goes from true to false.
   ///  * In the cases where the solutions above won't work, you can always
-  ///    override [Widget.dispose] or [RenderObject.detach].
+  ///    override [State.dispose] or [RenderObject.detach].
   /// {@endtemplate}
   ///
   /// Technically, whether [onExit] will be called is controlled by

@@ -119,7 +119,7 @@ class CupertinoTabController extends ChangeNotifier {
 ///
 /// Tabs' contents are built with the provided [tabBuilder] at the active
 /// tab index. The [tabBuilder] must be able to build the same number of
-/// pages as there are [tabBar.items]. Inactive tabs will be moved [Offstage]
+/// pages as there are [tabBar] items. Inactive tabs will be moved [Offstage]
 /// and their animations disabled.
 ///
 /// Adding/removing tabs, or changing the order of tabs is supported but not
@@ -280,7 +280,7 @@ class CupertinoTabScaffold extends StatefulWidget {
   /// By default uses [CupertinoTheme]'s `scaffoldBackgroundColor` when null.
   final Color backgroundColor;
 
-  /// Whether the [child] should size itself to avoid the window's bottom inset.
+  /// Whether the body should size itself to avoid the window's bottom inset.
   ///
   /// For example, if there is an onscreen keyboard displayed above the
   /// scaffold, the body can be resized to avoid overlapping the keyboard, which
