@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter_driver/src/common/error.dart';
 import 'package:flutter_driver/src/common/health.dart';
@@ -19,9 +20,12 @@ import 'common.dart';
 /// Magical timeout value that's different from the default.
 const Duration _kTestTimeout = Duration(milliseconds: 1234);
 const String _kSerializedTestTimeout = '1234';
+const String _kChrome = 'chrome';
+const String _kWebScriptPrefix = 'window.\$flutterDriver(\'';
+const String _kWebScriptSuffix = '\')';
 
 void main() {
-  group('FlutterDriver.connect', () {
+  group('VMServiceFlutterDriver.connect', () {
     List<LogRecord> log;
     StreamSubscription<LogRecord> logSub;
     MockVMServiceClient mockClient;
@@ -113,17 +117,17 @@ void main() {
     });
   });
 
-  group('FlutterDriver', () {
+  group('VMServiceFlutterDriver', () {
     MockVMServiceClient mockClient;
     MockPeer mockPeer;
     MockIsolate mockIsolate;
-    FlutterDriver driver;
+    VMServiceFlutterDriver driver;
 
     setUp(() {
       mockClient = MockVMServiceClient();
       mockPeer = MockPeer();
       mockIsolate = MockIsolate();
-      driver = FlutterDriver.connectedTo(mockClient, mockPeer, mockIsolate);
+      driver = VMServiceFlutterDriver.connectedTo(mockClient, mockPeer, mockIsolate);
     });
 
     test('checks the health of the driver extension', () async {
@@ -597,17 +601,17 @@ void main() {
     });
   });
 
-  group('FlutterDriver with custom timeout', () {
+  group('VMServiceFlutterDriver with custom timeout', () {
     MockVMServiceClient mockClient;
     MockPeer mockPeer;
     MockIsolate mockIsolate;
-    FlutterDriver driver;
+    VMServiceFlutterDriver driver;
 
     setUp(() {
       mockClient = MockVMServiceClient();
       mockPeer = MockPeer();
       mockIsolate = MockIsolate();
-      driver = FlutterDriver.connectedTo(mockClient, mockPeer, mockIsolate);
+      driver = VMServiceFlutterDriver.connectedTo(mockClient, mockPeer, mockIsolate);
     });
 
     test('GetHealth has no default timeout', () async {
@@ -631,6 +635,344 @@ void main() {
       await driver.checkHealth(timeout: _kTestTimeout);
     });
   });
+
+  group('WebFlutterDriver', () {
+    MockFlutterWebConnection mockConnection;
+    WebFlutterDriver driver;
+
+    setUp(() {
+      mockConnection = MockFlutterWebConnection();
+      driver = WebFlutterDriver.connectedTo(mockConnection, _kChrome);
+    });
+
+    test('closes connection', () async {
+      when(mockConnection.close()).thenAnswer((Invocation invocation) => Future<dynamic>.value(null));
+      await driver.close();
+    });
+
+    group('ByValueKey', () {
+      test('restricts value types', () async {
+        expect(() => find.byValueKey(null),
+            throwsA(isInstanceOf<DriverError>()));
+      });
+
+      test('finds by ValueKey', () async {
+        when(mockConnection.sendCommand(any, any)).thenAnswer((Invocation i) async {
+          final String script = _checkAndEncode(i.positionalArguments[0]);
+          expect(Map<String, String>.from(jsonDecode(script)), <String, String>{
+            'command': 'tap',
+            'timeout': _kSerializedTestTimeout,
+            'finderType': 'ByValueKey',
+            'keyValueString': 'foo',
+            'keyValueType': 'String',
+          });
+          return jsonEncode(await makeMockResponse(<String, dynamic>{}));
+        });
+        await driver.tap(find.byValueKey('foo'), timeout: _kTestTimeout);
+      });
+    });
+
+    group('BySemanticsLabel', () {
+      test('finds by Semantic label using String', () async {
+        when(mockConnection.sendCommand(any, any)).thenAnswer((Invocation i) async {
+          final String script = _checkAndEncode(i.positionalArguments[0]);
+          expect(Map<String, String>.from(jsonDecode(script)), <String, String>{
+            'command': 'tap',
+            'timeout': _kSerializedTestTimeout,
+            'finderType': 'BySemanticsLabel',
+            'label': 'foo',
+          });
+          return jsonEncode(await makeMockResponse(<String, dynamic>{}));
+        });
+        await driver.tap(find.bySemanticsLabel('foo'), timeout: _kTestTimeout);
+      });
+
+      test('finds by Semantic label using RegExp', () async {
+        when(mockConnection.sendCommand(any, any)).thenAnswer((Invocation i) async {
+          final String script = _checkAndEncode(i.positionalArguments[0]);
+          expect(Map<String, String>.from(jsonDecode(script)), <String, String>{
+            'command': 'tap',
+            'timeout': _kSerializedTestTimeout,
+            'finderType': 'BySemanticsLabel',
+            'label': '^foo',
+            'isRegExp': 'true',
+          });
+          return jsonEncode(await makeMockResponse(<String, dynamic>{}));
+        });
+        await driver.tap(find.bySemanticsLabel(RegExp('^foo')), timeout: _kTestTimeout);
+      });
+    });
+
+    group('tap', () {
+      test('requires a target reference', () async {
+        expect(driver.tap(null), throwsA(isInstanceOf<DriverError>()));
+      });
+
+      test('sends the tap command', () async {
+        when(mockConnection.sendCommand(any, any)).thenAnswer((Invocation i) async {
+          final String script = _checkAndEncode(i.positionalArguments[0]);
+          expect(Map<String, String>.from(jsonDecode(script)), <String, String>{
+            'command': 'tap',
+            'timeout': _kSerializedTestTimeout,
+            'finderType': 'ByText',
+            'text': 'foo',
+          });
+          return jsonEncode(await makeMockResponse(<String, dynamic>{}));
+        });
+        await driver.tap(find.text('foo'), timeout: _kTestTimeout);
+      });
+    });
+
+    group('getText', () {
+      test('requires a target reference', () async {
+        expect(driver.getText(null), throwsA(isInstanceOf<DriverError>()));
+      });
+
+      test('sends the getText command', () async {
+        when(mockConnection.sendCommand(any, any)).thenAnswer((Invocation i) async {
+          final String script = _checkAndEncode(i.positionalArguments[0]);
+          expect(Map<String, String>.from(jsonDecode(script)), <String, String>{
+            'command': 'get_text',
+            'timeout': _kSerializedTestTimeout,
+            'finderType': 'ByValueKey',
+            'keyValueString': '123',
+            'keyValueType': 'int',
+          });
+          return jsonEncode(await makeMockResponse(<String, String>{
+            'text': 'hello',
+          }));
+        });
+        final String result = await driver.getText(find.byValueKey(123), timeout: _kTestTimeout);
+        expect(result, 'hello');
+      });
+    });
+
+    group('waitFor', () {
+      test('requires a target reference', () async {
+        expect(driver.waitFor(null), throwsA(isInstanceOf<DriverError>()));
+      });
+
+      test('sends the waitFor command', () async {
+        when(mockConnection.sendCommand(any, any)).thenAnswer((Invocation i) async {
+          final String script = _checkAndEncode(i.positionalArguments[0]);
+          expect(Map<String, String>.from(jsonDecode(script)), <String, String>{
+            'command': 'waitFor',
+            'finderType': 'ByTooltipMessage',
+            'text': 'foo',
+            'timeout': _kSerializedTestTimeout,
+          });
+          return jsonEncode(await makeMockResponse(<String, dynamic>{}));
+        });
+        await driver.waitFor(find.byTooltip('foo'), timeout: _kTestTimeout);
+      });
+    });
+
+    group('waitForCondition', () {
+      test('sends the wait for NoPendingFrameCondition command', () async {
+        when(mockConnection.sendCommand(any, any)).thenAnswer((Invocation i) async {
+          final String script = _checkAndEncode(i.positionalArguments[0]);
+          expect(Map<String, String>.from(jsonDecode(script)), <String, String>{
+            'command': 'waitForCondition',
+            'timeout': _kSerializedTestTimeout,
+            'conditionName': 'NoPendingFrameCondition',
+          });
+          return jsonEncode(await makeMockResponse(<String, dynamic>{}));
+        });
+        await driver.waitForCondition(const NoPendingFrame(), timeout: _kTestTimeout);
+      });
+
+      test('sends the wait for NoPendingPlatformMessages command', () async {
+        when(mockConnection.sendCommand(any, any)).thenAnswer((Invocation i) async {
+          final String script = _checkAndEncode(i.positionalArguments[0]);
+          expect(Map<String, String>.from(jsonDecode(script)), <String, String>{
+            'command': 'waitForCondition',
+            'timeout': _kSerializedTestTimeout,
+            'conditionName': 'NoPendingPlatformMessagesCondition',
+          });
+          return jsonEncode(await makeMockResponse(<String, dynamic>{}));
+        });
+        await driver.waitForCondition(const NoPendingPlatformMessages(), timeout: _kTestTimeout);
+      });
+
+      test('sends the waitForCondition of combined conditions command', () async {
+        when(mockConnection.sendCommand(any, any)).thenAnswer((Invocation i) async {
+          final String script = _checkAndEncode(i.positionalArguments[0]);
+          expect(Map<String, String>.from(jsonDecode(script)), <String, String>{
+            'command': 'waitForCondition',
+            'timeout': _kSerializedTestTimeout,
+            'conditionName': 'CombinedCondition',
+            'conditions': '[{"conditionName":"NoPendingFrameCondition"},{"conditionName":"NoTransientCallbacksCondition"}]',
+          });
+          return jsonEncode(await makeMockResponse(<String, dynamic>{}));
+        });
+        const SerializableWaitCondition combinedCondition =
+        CombinedCondition(<SerializableWaitCondition>[NoPendingFrame(), NoTransientCallbacks()]);
+        await driver.waitForCondition(combinedCondition, timeout: _kTestTimeout);
+      });
+    });
+
+    group('waitUntilNoTransientCallbacks', () {
+      test('sends the waitUntilNoTransientCallbacks command', () async {
+        when(mockConnection.sendCommand(any, any)).thenAnswer((Invocation i) async {
+          final String script = _checkAndEncode(i.positionalArguments[0]);
+          expect(Map<String, String>.from(jsonDecode(script)), <String, String>{
+            'command': 'waitForCondition',
+            'timeout': _kSerializedTestTimeout,
+            'conditionName': 'NoTransientCallbacksCondition',
+          });
+          return jsonEncode(await makeMockResponse(<String, dynamic>{}));
+        });
+        await driver.waitUntilNoTransientCallbacks(timeout: _kTestTimeout);
+      });
+    });
+
+    group('waitUntilFirstFrameRasterized', () {
+      test('sends the waitUntilFirstFrameRasterized command', () async {
+        when(mockConnection.sendCommand(any, any)).thenAnswer((Invocation i) async {
+          final String script = _checkAndEncode(i.positionalArguments[0]);
+          expect(Map<String, String>.from(jsonDecode(script)), <String, String>{
+            'command': 'waitForCondition',
+            'conditionName': 'FirstFrameRasterizedCondition',
+          });
+          return jsonEncode(await makeMockResponse(<String, dynamic>{}));
+        });
+        await driver.waitUntilFirstFrameRasterized();
+      });
+    });
+
+    group('getOffset', () {
+      test('requires a target reference', () async {
+        expect(driver.getCenter(null), throwsA(isInstanceOf<DriverError>()));
+        expect(driver.getTopLeft(null), throwsA(isInstanceOf<DriverError>()));
+        expect(driver.getTopRight(null), throwsA(isInstanceOf<DriverError>()));
+        expect(driver.getBottomLeft(null), throwsA(isInstanceOf<DriverError>()));
+        expect(driver.getBottomRight(null), throwsA(isInstanceOf<DriverError>()));
+      });
+
+      test('sends the getCenter command', () async {
+        when(mockConnection.sendCommand(any, any)).thenAnswer((Invocation i) async {
+          final String script = _checkAndEncode(i.positionalArguments[0]);
+          expect(Map<String, String>.from(jsonDecode(script)), <String, String>{
+            'command': 'get_offset',
+            'offsetType': 'center',
+            'timeout': _kSerializedTestTimeout,
+            'finderType': 'ByValueKey',
+            'keyValueString': '123',
+            'keyValueType': 'int',
+          });
+          return jsonEncode(await makeMockResponse(<String, double>{
+            'dx': 11,
+            'dy': 12,
+          }));
+        });
+        final DriverOffset result = await driver.getCenter(find.byValueKey(123), timeout: _kTestTimeout);
+        expect(result, const DriverOffset(11, 12));
+      });
+
+      test('sends the getTopLeft command', () async {
+        when(mockConnection.sendCommand(any, any)).thenAnswer((Invocation i) async {
+          final String script = _checkAndEncode(i.positionalArguments[0]);
+          expect(Map<String, String>.from(jsonDecode(script)), <String, String>{
+            'command': 'get_offset',
+            'offsetType': 'topLeft',
+            'timeout': _kSerializedTestTimeout,
+            'finderType': 'ByValueKey',
+            'keyValueString': '123',
+            'keyValueType': 'int',
+          });
+          return jsonEncode(await makeMockResponse(<String, double>{
+            'dx': 11,
+            'dy': 12,
+          }));
+        });
+        final DriverOffset result = await driver.getTopLeft(find.byValueKey(123), timeout: _kTestTimeout);
+        expect(result, const DriverOffset(11, 12));
+      });
+
+      test('sends the getTopRight command', () async {
+        when(mockConnection.sendCommand(any, any)).thenAnswer((Invocation i) async {
+          final String script = _checkAndEncode(i.positionalArguments[0]);
+          expect(Map<String, String>.from(jsonDecode(script)), <String, String>{
+            'command': 'get_offset',
+            'offsetType': 'topRight',
+            'timeout': _kSerializedTestTimeout,
+            'finderType': 'ByValueKey',
+            'keyValueString': '123',
+            'keyValueType': 'int',
+          });
+          return jsonEncode(await makeMockResponse(<String, double>{
+            'dx': 11,
+            'dy': 12,
+          }));
+        });
+        final DriverOffset result = await driver.getTopRight(find.byValueKey(123), timeout: _kTestTimeout);
+        expect(result, const DriverOffset(11, 12));
+      });
+
+      test('sends the getBottomLeft command', () async {
+        when(mockConnection.sendCommand(any, any)).thenAnswer((Invocation i) async {
+          final String script = _checkAndEncode(i.positionalArguments[0]);
+          expect(Map<String, String>.from(jsonDecode(script)), <String, String>{
+            'command': 'get_offset',
+            'offsetType': 'bottomLeft',
+            'timeout': _kSerializedTestTimeout,
+            'finderType': 'ByValueKey',
+            'keyValueString': '123',
+            'keyValueType': 'int',
+          });
+          return jsonEncode(await makeMockResponse(<String, double>{
+            'dx': 11,
+            'dy': 12,
+          }));
+        });
+        final DriverOffset result = await driver.getBottomLeft(find.byValueKey(123), timeout: _kTestTimeout);
+        expect(result, const DriverOffset(11, 12));
+      });
+
+      test('sends the getBottomRight command', () async {
+        when(mockConnection.sendCommand(any, any)).thenAnswer((Invocation i) async {
+          final String script = _checkAndEncode(i.positionalArguments[0]);
+          expect(Map<String, String>.from(jsonDecode(script)), <String, String>{
+            'command': 'get_offset',
+            'offsetType': 'bottomRight',
+            'timeout': _kSerializedTestTimeout,
+            'finderType': 'ByValueKey',
+            'keyValueString': '123',
+            'keyValueType': 'int',
+          });
+          return jsonEncode(await makeMockResponse(<String, double>{
+            'dx': 11,
+            'dy': 12,
+          }));
+        });
+        final DriverOffset result = await driver.getBottomRight(find.byValueKey(123), timeout: _kTestTimeout);
+        expect(result, const DriverOffset(11, 12));
+      });
+    });
+
+
+    test('checks the health of the driver extension', () async {
+      when(mockConnection.sendCommand(any, any)).thenAnswer((Invocation i) async {
+        final String script = _checkAndEncode(i.positionalArguments[0]);
+        expect(Map<String, String>.from(jsonDecode(script)), <String, String>{
+          'command': 'get_health',
+        });
+        return jsonEncode(await makeMockResponse(<String, dynamic>{'status': 'ok'}));
+      });
+      await driver.checkHealth();
+    });
+  });
+}
+
+/// This function will verify the format of the script
+/// and return the actual script.
+/// script will be in the following format:
+//   window.flutterDriver('[actual script]')
+String _checkAndEncode(dynamic script) {
+  expect(script.startsWith(_kWebScriptPrefix), isTrue);
+  expect(script.endsWith(_kWebScriptSuffix), isTrue);
+  // Strip prefix and suffix
+  return script.substring(_kWebScriptPrefix.length, script.length - 2);
 }
 
 Future<Map<String, dynamic>> makeMockResponse(
@@ -654,6 +996,8 @@ class MockVMPauseStartEvent extends Mock implements VMPauseStartEvent { }
 class MockVMPauseBreakpointEvent extends Mock implements VMPauseBreakpointEvent { }
 
 class MockVMResumeEvent extends Mock implements VMResumeEvent { }
+
+class MockFlutterWebConnection extends Mock implements FlutterWebConnection { }
 
 class MockPeer extends Mock implements rpc.Peer {
   @override
