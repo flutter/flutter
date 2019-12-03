@@ -597,36 +597,63 @@ void main() {
     ]));
   });
 
-  test('should not flip out if not all mouse events are listened to', () {
-    bool isInHitRegionOne = true;
-    bool isInHitRegionTwo = false;
+  test('annotations with the same key should inherit presence', () {
+    const Key key = Key('annotation');
+    final List<String> logs = <String>[];
     final MouseTrackerAnnotation annotation1 = MouseTrackerAnnotation(
-      onEnter: (PointerEnterEvent event) {}
+      onEnter: (PointerEnterEvent event) { logs.add('enter1'); },
+      onExit: (PointerExitEvent event) { logs.add('exit1'); },
+      key: key,
     );
     final MouseTrackerAnnotation annotation2 = MouseTrackerAnnotation(
-      onExit: (PointerExitEvent event) {}
+      onEnter: (PointerEnterEvent event) { logs.add('enter2'); },
+      onExit: (PointerExitEvent event) { logs.add('exit2'); },
+      key: key,
     );
+    MouseTrackerAnnotation foundAnnotation;
+    bool finderCalled = false;
     _setUpMouseAnnotationFinder((Offset position) sync* {
-      if (isInHitRegionOne)
-        yield annotation1;
-      else if (isInHitRegionTwo)
-        yield annotation2;
+      finderCalled = true;
+      if (foundAnnotation != null)
+        yield foundAnnotation;
     });
 
-    final ui.PointerDataPacket packet = ui.PointerDataPacket(data: <ui.PointerData>[
+    _mouseTracker.attachAnnotation(annotation1);
+    expect(logs, isEmpty);
+
+    // Pointer is added on annotation1
+    foundAnnotation = annotation1;
+    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.add, const Offset(0.0, 101.0)),
-      _pointerData(PointerChange.hover, const Offset(1.0, 101.0)),
-    ]);
+    ]));
+    expect(logs, <String>['enter1']);
+    logs.clear();
 
-    isInHitRegionOne = false;
-    isInHitRegionTwo = true;
-    _mouseTracker.attachAnnotation(annotation2);
+    // Annotation is changed to annotation2, which has the same key, so we don't
+    // detach and attach annotations.
+    foundAnnotation = annotation2;
+    _binding.scheduleMouseTrackerPostFrameCheck();
+    _binding.flushPostFrameCallbacks(Duration.zero);
+    expect(logs, isEmpty);
 
-    ui.window.onPointerDataPacket(packet);
+    // Pointer moves out
+    foundAnnotation = null;
+    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+      _pointerData(PointerChange.hover, const Offset(0.0, 301.0)),
+    ]));
+    expect(logs, <String>['exit2']);
+    logs.clear();
+
     _mouseTracker.detachAnnotation(annotation2);
-    isInHitRegionTwo = false;
+    expect(logs, isEmpty);
 
-    // Passes if no errors are thrown.
+    // Expect there to be no annotations, so finder is no longer called
+    finderCalled = false;
+    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+      _pointerData(PointerChange.hover, const Offset(0.0, 401.0)),
+    ]));
+    expect(finderCalled, isFalse);
+    logs.clear();
   });
 
   test('should not call annotationFinder when no annotations are attached', () {
