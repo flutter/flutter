@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -53,72 +54,69 @@ void main() {
       controller = AnimationController(vsync: const TestVSync());
     });
 
-    testWidgets(
-      'decoration test',
-      (WidgetTester tester) async {
-        final DecoratedBoxTransition transitionUnderTest =
-            DecoratedBoxTransition(
-              decoration: decorationTween.animate(controller),
-              child: const Text('Doesn\'t matter', textDirection: TextDirection.ltr),
-            );
+    testWidgets('decoration test', (WidgetTester tester) async {
+      final DecoratedBoxTransition transitionUnderTest =
+      DecoratedBoxTransition(
+        decoration: decorationTween.animate(controller),
+        child: const Text('Doesn\'t matter', textDirection: TextDirection.ltr),
+      );
 
-        await tester.pumpWidget(transitionUnderTest);
-        RenderDecoratedBox actualBox =
-            tester.renderObject(find.byType(DecoratedBox));
-        BoxDecoration actualDecoration = actualBox.decoration;
+      await tester.pumpWidget(transitionUnderTest);
+      RenderDecoratedBox actualBox = tester.renderObject(find.byType(DecoratedBox));
+      BoxDecoration actualDecoration = actualBox.decoration;
 
-        expect(actualDecoration.color, const Color(0xFFFFFFFF));
-        expect(actualDecoration.boxShadow[0].blurRadius, 10.0);
-        expect(actualDecoration.boxShadow[0].spreadRadius, 4.0);
-        expect(actualDecoration.boxShadow[0].color, const Color(0x66000000));
+      expect(actualDecoration.color, const Color(0xFFFFFFFF));
+      expect(actualDecoration.boxShadow[0].blurRadius, 10.0);
+      expect(actualDecoration.boxShadow[0].spreadRadius, 4.0);
+      expect(actualDecoration.boxShadow[0].color, const Color(0x66000000));
 
-        controller.value = 0.5;
+      controller.value = 0.5;
 
-        await tester.pump();
-        actualBox = tester.renderObject(find.byType(DecoratedBox));
-        actualDecoration = actualBox.decoration;
+      await tester.pump();
+      actualBox = tester.renderObject(find.byType(DecoratedBox));
+      actualDecoration = actualBox.decoration;
 
-        expect(actualDecoration.color, const Color(0xFF7F7F7F));
-        expect(actualDecoration.border, isInstanceOf<Border>());
-        final Border border = actualDecoration.border;
-        expect(border.left.width, 2.5);
-        expect(border.left.style, BorderStyle.solid);
-        expect(border.left.color, const Color(0xFF101010));
-        expect(actualDecoration.borderRadius, BorderRadius.circular(5.0));
-        expect(actualDecoration.shape, BoxShape.rectangle);
-        expect(actualDecoration.boxShadow[0].blurRadius, 5.0);
-        expect(actualDecoration.boxShadow[0].spreadRadius, 2.0);
-        // Scaling a shadow doesn't change the color.
-        expect(actualDecoration.boxShadow[0].color, const Color(0x66000000));
+      expect(actualDecoration.color, const Color(0xFF7F7F7F));
+      expect(actualDecoration.border, isInstanceOf<Border>());
+      final Border border = actualDecoration.border;
+      expect(border.left.width, 2.5);
+      expect(border.left.style, BorderStyle.solid);
+      expect(border.left.color, const Color(0xFF101010));
+      expect(actualDecoration.borderRadius, BorderRadius.circular(5.0));
+      expect(actualDecoration.shape, BoxShape.rectangle);
+      expect(actualDecoration.boxShadow[0].blurRadius, 5.0);
+      expect(actualDecoration.boxShadow[0].spreadRadius, 2.0);
+      // Scaling a shadow doesn't change the color.
+      expect(actualDecoration.boxShadow[0].color, const Color(0x66000000));
 
-        controller.value = 1.0;
+      controller.value = 1.0;
 
-        await tester.pump();
-        actualBox = tester.renderObject(find.byType(DecoratedBox));
-        actualDecoration = actualBox.decoration;
+      await tester.pump();
+      actualBox = tester.renderObject(find.byType(DecoratedBox));
+      actualDecoration = actualBox.decoration;
 
-        expect(actualDecoration.color, const Color(0xFF000000));
-        expect(actualDecoration.boxShadow, null);
-      },
-    );
+      expect(actualDecoration.color, const Color(0xFF000000));
+      expect(actualDecoration.boxShadow, null);
+    });
 
     testWidgets('animations work with curves test', (WidgetTester tester) async {
       final Animation<Decoration> curvedDecorationAnimation =
-          decorationTween.animate(CurvedAnimation(
-            parent: controller,
-            curve: Curves.easeOut,
-          ));
+      decorationTween.animate(CurvedAnimation(
+        parent: controller,
+        curve: Curves.easeOut,
+      ));
 
-      final DecoratedBoxTransition transitionUnderTest =
-          DecoratedBoxTransition(
-            decoration: curvedDecorationAnimation,
-            position: DecorationPosition.foreground,
-            child: const Text('Doesn\'t matter', textDirection: TextDirection.ltr),
-          );
+      final DecoratedBoxTransition transitionUnderTest = DecoratedBoxTransition(
+        decoration: curvedDecorationAnimation,
+        position: DecorationPosition.foreground,
+        child: const Text(
+          'Doesn\'t matter',
+          textDirection: TextDirection.ltr,
+        ),
+      );
 
       await tester.pumpWidget(transitionUnderTest);
-      RenderDecoratedBox actualBox =
-          tester.renderObject(find.byType(DecoratedBox));
+      RenderDecoratedBox actualBox = tester.renderObject(find.byType(DecoratedBox));
       BoxDecoration actualDecoration = actualBox.decoration;
 
       expect(actualDecoration.color, const Color(0xFFFFFFFF));
@@ -199,13 +197,13 @@ void main() {
     final Animation<double> animation = Tween<double>(begin: -1.0, end: 1.0).animate(controller);
 
     final Widget widget =  Directionality(
-        textDirection: TextDirection.ltr,
-        child: SizeTransition(
-          axis: Axis.vertical,
-          sizeFactor: animation,
-          child: const Text('Ready'),
-        ),
-      );
+      textDirection: TextDirection.ltr,
+      child: SizeTransition(
+        axis: Axis.vertical,
+        sizeFactor: animation,
+        child: const Text('Ready'),
+      ),
+    );
 
     await tester.pumpWidget(widget);
 
@@ -230,13 +228,13 @@ void main() {
     final Animation<double> animation = Tween<double>(begin: -1.0, end: 1.0).animate(controller);
 
     final Widget widget =  Directionality(
-        textDirection: TextDirection.ltr,
-        child: SizeTransition(
-          axis: Axis.horizontal,
-          sizeFactor: animation,
-          child: const Text('Ready'),
-        ),
-      );
+      textDirection: TextDirection.ltr,
+      child: SizeTransition(
+        axis: Axis.horizontal,
+        sizeFactor: animation,
+        child: const Text('Ready'),
+      ),
+    );
 
     await tester.pumpWidget(widget);
 
@@ -261,7 +259,10 @@ void main() {
     final Widget widget = RotationTransition(
       alignment: Alignment.topRight,
       turns: controller,
-      child: const Text('Rotation', textDirection: TextDirection.ltr),
+      child: const Text(
+        'Rotation',
+        textDirection: TextDirection.ltr,
+      ),
     );
 
     await tester.pumpWidget(widget);
@@ -291,8 +292,7 @@ void main() {
     );
 
     await tester.pumpWidget(widget);
-    RotationTransition actualRotatedBox =
-        tester.widget(find.byType(RotationTransition));
+    RotationTransition actualRotatedBox = tester.widget(find.byType(RotationTransition));
     Alignment actualAlignment = actualRotatedBox.alignment;
     expect(actualAlignment, const Alignment(1.0, -1.0));
 
@@ -301,5 +301,99 @@ void main() {
     actualRotatedBox = tester.widget(find.byType(RotationTransition));
     actualAlignment = actualRotatedBox.alignment;
     expect(actualAlignment, const Alignment(1.0, -1.0));
+  });
+
+  double _getOpacity(WidgetTester tester, String textValue) {
+    final FadeTransition opacityWidget = tester.widget<FadeTransition>(
+      find.ancestor(
+        of: find.text(textValue),
+        matching: find.byType(FadeTransition),
+      ).first,
+    );
+    return opacityWidget.opacity.value;
+  }
+
+  group('FadeTransition', () {
+    testWidgets('animates', (WidgetTester tester) async {
+      final AnimationController controller = AnimationController(vsync: const TestVSync());
+      final Animation<double> animation = Tween<double>(begin: 0.0, end: 1.0).animate(controller);
+      final Widget widget =  Directionality(
+        textDirection: TextDirection.ltr,
+        child: FadeTransition(
+          opacity: animation,
+          child: const Text('Fade In'),
+        ),
+      );
+
+      await tester.pumpWidget(widget);
+
+      expect(_getOpacity(tester, 'Fade In'), 0.0);
+
+      controller.value = 0.25;
+      await tester.pump();
+      expect(_getOpacity(tester, 'Fade In'), 0.25);
+
+      controller.value = 0.5;
+      await tester.pump();
+      expect(_getOpacity(tester, 'Fade In'), 0.5);
+
+      controller.value = 0.75;
+      await tester.pump();
+      expect(_getOpacity(tester, 'Fade In'), 0.75);
+
+      controller.value = 1.0;
+      await tester.pump();
+      expect(_getOpacity(tester, 'Fade In'), 1.0);
+    });
+  });
+
+  group('SliverFadeTransition', () {
+    testWidgets('animates', (WidgetTester tester) async {
+      final AnimationController controller = AnimationController(vsync: const TestVSync());
+      final Animation<double> animation = Tween<double>(begin: 0.0, end: 1.0).animate(controller);
+      final Widget widget = Localizations(
+        locale: const Locale('en', 'us'),
+        delegates: const <LocalizationsDelegate<dynamic>>[
+          DefaultWidgetsLocalizations.delegate,
+          DefaultMaterialLocalizations.delegate,
+        ],
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: MediaQuery(
+            data: const MediaQueryData(),
+            child: CustomScrollView(
+              slivers: <Widget>[
+                SliverFadeTransition(
+                  opacity: animation,
+                  sliver: const SliverToBoxAdapter(
+                    child: Text('Fade In'),
+                  ),
+                ),
+              ]
+            )
+          )
+        )
+      );
+
+      await tester.pumpWidget(widget);
+
+      expect(_getOpacity(tester, 'Fade In'), 0.0);
+
+      controller.value = 0.25;
+      await tester.pump();
+      expect(_getOpacity(tester, 'Fade In'), 0.25);
+
+      controller.value = 0.5;
+      await tester.pump();
+      expect(_getOpacity(tester, 'Fade In'), 0.5);
+
+      controller.value = 0.75;
+      await tester.pump();
+      expect(_getOpacity(tester, 'Fade In'), 0.75);
+
+      controller.value = 1.0;
+      await tester.pump();
+      expect(_getOpacity(tester, 'Fade In'), 1.0);
+    });
   });
 }
