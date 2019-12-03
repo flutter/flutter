@@ -2245,6 +2245,84 @@ void main() {
     expect(focusNode2.hasPrimaryFocus, isFalse);
   });
 
+  testWidgets('Chip responds to density changes.', (WidgetTester tester) async {
+    const Key key = Key('test');
+    const Key textKey = Key('test text');
+    const Key iconKey = Key('test icon');
+    const Key avatarKey = Key('test avatar');
+    Future<void> buildTest(VisualDensity visualDensity) async {
+      return await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: Column(
+                children: <Widget>[
+                  InputChip(
+                    visualDensity: visualDensity,
+                    key: key,
+                    onPressed: () {},
+                    onDeleted: () {},
+                    label: const Text('Test', key: textKey),
+                    deleteIcon: const Icon(Icons.delete, key: iconKey),
+                    avatar: const Icon(Icons.play_arrow, key: avatarKey),
+                  ),
+                  InputChip(
+                    visualDensity: visualDensity,
+                    onPressed: () {},
+                    onDeleted: () {},
+                    label: const Text('Test 2'),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await buildTest(const VisualDensity());
+    final RenderBox box = tester.renderObject(find.byKey(key));
+    Rect textBox = tester.getRect(find.byKey(textKey));
+    Rect iconBox = tester.getRect(find.byKey(iconKey));
+    Rect avatarBox = tester.getRect(find.byKey(avatarKey));
+    await tester.pumpAndSettle();
+    expect(box.size, equals(const Size(128, 48)));
+    expect(textBox, equals(const Rect.fromLTRB(372, 17, 428, 31)));
+    expect(iconBox, equals(const Rect.fromLTRB(436, 12, 460, 36)));
+    expect(avatarBox, equals(const Rect.fromLTRB(340, 12, 364, 36)));
+
+    await buildTest(const VisualDensity(horizontal: 3.0, vertical: 3.0));
+    textBox = tester.getRect(find.byKey(textKey));
+    iconBox = tester.getRect(find.byKey(iconKey));
+    avatarBox = tester.getRect(find.byKey(avatarKey));
+    await tester.pumpAndSettle();
+    expect(box.size, equals(const Size(128, 60)));
+    expect(textBox, equals(const Rect.fromLTRB(372, 23, 428, 37)));
+    expect(iconBox, equals(const Rect.fromLTRB(436, 18, 460, 42)));
+    expect(avatarBox, equals(const Rect.fromLTRB(340, 18, 364, 42)));
+
+    await buildTest(const VisualDensity(horizontal: -3.0, vertical: -3.0));
+    textBox = tester.getRect(find.byKey(textKey));
+    iconBox = tester.getRect(find.byKey(iconKey));
+    avatarBox = tester.getRect(find.byKey(avatarKey));
+    await tester.pumpAndSettle();
+    expect(box.size, equals(const Size(128, 36)));
+    expect(textBox, equals(const Rect.fromLTRB(372, 11, 428, 25)));
+    expect(iconBox, equals(const Rect.fromLTRB(436, 6, 460, 30)));
+    expect(avatarBox, equals(const Rect.fromLTRB(340, 6, 364, 30)));
+
+    await buildTest(const VisualDensity(horizontal: 3.0, vertical: -3.0));
+    await tester.pumpAndSettle();
+    textBox = tester.getRect(find.byKey(textKey));
+    iconBox = tester.getRect(find.byKey(iconKey));
+    avatarBox = tester.getRect(find.byKey(avatarKey));
+    await tester.pumpAndSettle();
+    expect(box.size, equals(const Size(128, 36)));
+    expect(textBox, equals(const Rect.fromLTRB(372, 11, 428, 25)));
+    expect(iconBox, equals(const Rect.fromLTRB(436, 6, 460, 30)));
+    expect(avatarBox, equals(const Rect.fromLTRB(340, 6, 364, 30)));
+  });
+
   testWidgets('Input chip check mark color is determined by platform brightness when light', (WidgetTester tester) async {
     await _pumpCheckmarkChip(
       tester,
