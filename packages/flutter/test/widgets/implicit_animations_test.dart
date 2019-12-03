@@ -360,6 +360,33 @@ class _TestAnimatedOpacityWidgetState extends _TestAnimatedWidgetState {
   }
 }
 
+class _TestSliverAnimatedOpacityWidgetState extends _TestAnimatedWidgetState {
+  @override
+  Widget getAnimatedWidget() {
+    return SliverAnimatedOpacity(
+      sliver: child,
+      duration: duration,
+      onEnd: widget.callback,
+      opacity: toggle ? 0.1 : 0.9,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final Widget animatedWidget = getAnimatedWidget();
+
+    return Scaffold(
+      body: CustomScrollView(
+        slivers: <Widget>[
+        animatedWidget,
+        SliverToBoxAdapter(
+          child: Switch(key: widget.switchKey, value: toggle, onChanged: onChanged),
+        ),
+      ],
+    );
+  }
+}
+
 class _TestAnimatedDefaultTextStyleWidgetState extends _TestAnimatedWidgetState {
   @override
   Widget getAnimatedWidget() {
