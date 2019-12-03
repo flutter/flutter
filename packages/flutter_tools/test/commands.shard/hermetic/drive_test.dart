@@ -46,7 +46,7 @@ void main() {
       appStarter = (DriveCommand command) {
         throw 'Unexpected call to appStarter';
       };
-      testRunner = (List<String> testArgs, String observatoryUri) {
+      testRunner = (List<String> testArgs, Map<String, String> environment) {
         throw 'Unexpected call to testRunner';
       };
       appStopper = (DriveCommand command) {
@@ -171,7 +171,7 @@ void main() {
       appStarter = expectAsync1((DriveCommand command) async {
         return LaunchResult.succeeded();
       });
-      testRunner = expectAsync2((List<String> testArgs, String observatoryUri) async {
+      testRunner = expectAsync2((List<String> testArgs, Map<String, String> environment) async {
         expect(testArgs, <String>[testFile]);
         return null;
       });
@@ -204,7 +204,7 @@ void main() {
       appStarter = expectAsync1((DriveCommand command) async {
         return LaunchResult.succeeded();
       });
-      testRunner = (List<String> testArgs, String observatoryUri) async {
+      testRunner = (List<String> testArgs, Map<String, String> environment) async {
         throwToolExit(null, exitCode: 123);
       };
       appStopper = expectAsync1((DriveCommand command) async {
@@ -361,7 +361,7 @@ void main() {
         testApp = fs.path.join(tempDir.path, 'test', 'e2e.dart');
         testFile = fs.path.join(tempDir.path, 'test_driver', 'e2e_test.dart');
 
-        testRunner = (List<String> testArgs, String observatoryUri) async {
+        testRunner = (List<String> testArgs, Map<String, String> environment) async {
           throwToolExit(null, exitCode: 123);
         };
         appStopper = expectAsync1(
@@ -494,7 +494,7 @@ void main() {
         testApp = fs.path.join(tempDir.path, 'test', 'e2e.dart');
         testFile = fs.path.join(tempDir.path, 'test_driver', 'e2e_test.dart');
 
-        testRunner = (List<String> testArgs, String observatoryUri) async {
+        testRunner = (List<String> testArgs, Map<String, String> environment) async {
           throwToolExit(null, exitCode: 123);
         };
         appStopper = expectAsync1(
