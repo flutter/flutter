@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -567,6 +567,64 @@ class FadeTransition extends SingleChildRenderObjectWidget {
 
   @override
   void updateRenderObject(BuildContext context, RenderAnimatedOpacity renderObject) {
+    renderObject
+      ..opacity = opacity
+      ..alwaysIncludeSemantics = alwaysIncludeSemantics;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Animation<double>>('opacity', opacity));
+    properties.add(FlagProperty('alwaysIncludeSemantics', value: alwaysIncludeSemantics, ifTrue: 'alwaysIncludeSemantics'));
+  }
+}
+
+/// Animates the opacity of a sliver widget.
+///
+/// See also:
+///
+///  * [SliverOpacity], which does not animate changes in opacity.
+class SliverFadeTransition extends SingleChildRenderObjectWidget {
+  /// Creates an opacity transition.
+  ///
+  /// The [opacity] argument must not be null.
+  const SliverFadeTransition({
+    Key key,
+    @required this.opacity,
+    this.alwaysIncludeSemantics = false,
+    Widget sliver,
+  }) : assert(opacity != null),
+      super(key: key, child: sliver);
+
+  /// The animation that controls the opacity of the sliver child.
+  ///
+  /// If the current value of the opacity animation is v, the child will be
+  /// painted with an opacity of v. For example, if v is 0.5, the child will be
+  /// blended 50% with its background. Similarly, if v is 0.0, the child will be
+  /// completely transparent.
+  final Animation<double> opacity;
+
+  /// Whether the semantic information of the sliver child is always included.
+  ///
+  /// Defaults to false.
+  ///
+  /// When true, regardless of the opacity settings the sliver child's semantic
+  /// information is exposed as if the widget were fully visible. This is
+  /// useful in cases where labels may be hidden during animations that
+  /// would otherwise contribute relevant semantics.
+  final bool alwaysIncludeSemantics;
+
+  @override
+  RenderSliverAnimatedOpacity createRenderObject(BuildContext context) {
+    return RenderSliverAnimatedOpacity(
+      opacity: opacity,
+      alwaysIncludeSemantics: alwaysIncludeSemantics,
+    );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderSliverAnimatedOpacity renderObject) {
     renderObject
       ..opacity = opacity
       ..alwaysIncludeSemantics = alwaysIncludeSemantics;

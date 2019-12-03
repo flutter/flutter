@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -66,6 +66,14 @@ void main() {
 
     message = const StringCodec().encodeMessage('AppLifecycleState.inactive');
     await defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
+    expect(observer.lifecycleState, AppLifecycleState.inactive);
+
+
+    message = const StringCodec().encodeMessage('AppLifecycleState.detached');
+    await defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
+    // TODO(chunhtai): this should be detached once the issue is fixed
+    // https://github.com/flutter/flutter/issues/39832
+    // The binding drops detached message for now.
     expect(observer.lifecycleState, AppLifecycleState.inactive);
   });
 

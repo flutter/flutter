@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -99,6 +99,6 @@ class SshCommandRunner {
           'Command failed: $command\nstdout: ${result.stdout}\nstderr: ${result.stderr}');
     }
     _log.fine('SSH command stdout in brackets:[${result.stdout}]');
-    return result.stdout.split('\n');
+    return (result.stdout as String).split('\n');
   }
 }

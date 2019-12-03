@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -89,7 +89,7 @@ class VMPlatform extends PlatformPlugin {
       _pending.remove(codePath);
     }));
     final ServiceProtocolInfo info = await Service.controlWebServer(enable: true);
-    final dynamic channel = IsolateChannel<Object>.connectReceive(receivePort)
+    final StreamChannel<Object> channel = IsolateChannel<Object>.connectReceive(receivePort)
       .transformStream(StreamTransformer<Object, Object>.fromHandlers(
         handleDone: (EventSink<Object> sink) async {
           try {

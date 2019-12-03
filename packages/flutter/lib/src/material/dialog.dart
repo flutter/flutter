@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -136,6 +136,8 @@ class Dialog extends StatelessWidget {
 /// acknowledgement. An alert dialog has an optional title and an optional list
 /// of actions. The title is displayed above the content and the actions are
 /// displayed below the content.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=75CsnyRXf5I}
 ///
 /// If the content is too large to fit on the screen vertically, the dialog will
 /// display the title and the actions and let the content overflow, which is
@@ -312,6 +314,7 @@ class AlertDialog extends StatelessWidget {
     if (title == null) {
       switch (theme.platform) {
         case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
           label = semanticLabel;
           break;
         case TargetPlatform.android:
@@ -589,6 +592,7 @@ class SimpleDialog extends StatelessWidget {
     String label = semanticLabel;
     if (title == null) {
       switch (theme.platform) {
+        case TargetPlatform.macOS:
         case TargetPlatform.iOS:
           label = semanticLabel;
           break;

@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -1444,7 +1444,7 @@ class Navigator extends StatefulWidget {
   }
 
   /// Immediately remove a route from the navigator that most tightly encloses
-  /// the given context, and [Route.dispose] it. The route to be replaced is the
+  /// the given context, and [Route.dispose] it. The route to be removed is the
   /// one below the given `anchorRoute`.
   ///
   /// {@template flutter.widgets.navigator.removeRouteBelow}
@@ -1488,8 +1488,8 @@ class Navigator extends StatefulWidget {
     bool nullOk = false,
   }) {
     final NavigatorState navigator = rootNavigator
-        ? context.rootAncestorStateOfType(const TypeMatcher<NavigatorState>())
-        : context.ancestorStateOfType(const TypeMatcher<NavigatorState>());
+        ? context.findRootAncestorStateOfType<NavigatorState>()
+        : context.findAncestorStateOfType<NavigatorState>();
     assert(() {
       if (navigator == null && !nullOk) {
         throw FlutterError(
@@ -2201,7 +2201,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   }
 
   /// Immediately remove a route from the navigator, and [Route.dispose] it. The
-  /// route to be replaced is the one below the given `anchorRoute`.
+  /// route to be removed is the one below the given `anchorRoute`.
   ///
   /// {@macro flutter.widgets.navigator.removeRouteBelow}
   void removeRouteBelow(Route<dynamic> anchorRoute) {
@@ -2315,7 +2315,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       // If we're between frames (SchedulerPhase.idle) then absorb any
       // subsequent pointers from this frame. The absorbing flag will be
       // reset in the next frame, see build().
-      final RenderAbsorbPointer absorber = _overlayKey.currentContext?.ancestorRenderObjectOfType(const TypeMatcher<RenderAbsorbPointer>());
+      final RenderAbsorbPointer absorber = _overlayKey.currentContext?.findAncestorRenderObjectOfType<RenderAbsorbPointer>();
       setState(() {
         absorber?.absorbing = true;
         // We do this in setState so that we'll reset the absorbing value back

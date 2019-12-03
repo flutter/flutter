@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -341,7 +341,7 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
     // If the device incorrectly reports a pressure outside of pressureMin
     // and pressureMax, we still want this recognizer to respond normally.
     if (!value.isNaN)
-      value = value.clamp(0.0, 1.0);
+      value = value.clamp(0.0, 1.0) as double;
     return value;
   }
 
