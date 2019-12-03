@@ -7,6 +7,7 @@ import 'image_stream.dart';
 const int _kDefaultSize = 1000;
 const int _kDefaultSizeBytes = 100 << 20; // 100 MiB
 
+/// Function used by [ImageCache.largeImageHandler].
 typedef LargeImageHandler = void Function(ImageCache, int);
 
 /// Class for caching images.
