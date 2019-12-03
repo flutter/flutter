@@ -578,8 +578,8 @@ class CupertinoTextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
     properties.add(DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));
     properties.add(DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: true));
-    properties.add(DiagnosticsProperty<bool>('enableSmartDashes', enableSmartDashes));
-    properties.add(DiagnosticsProperty<bool>('enableSmartQuotes', enableSmartQuotes));
+    properties.add(DiagnosticsProperty<bool>('enableSmartDashes', enableSmartDashes, defaultValue: !obscureText));
+    properties.add(DiagnosticsProperty<bool>('enableSmartQuotes', enableSmartQuotes, defaultValue: !obscureText));
     properties.add(DiagnosticsProperty<bool>('enableSuggestions', enableSuggestions, defaultValue: true));
     properties.add(IntProperty('maxLines', maxLines, defaultValue: 1));
     properties.add(IntProperty('minLines', minLines, defaultValue: null));

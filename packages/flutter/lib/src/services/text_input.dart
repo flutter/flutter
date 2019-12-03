@@ -420,19 +420,21 @@ class TextInputConfiguration {
   /// {@template flutter.services.textInput.enableSmartDashes}
   /// Whether to allow the platform to automatically format dashes.
   ///
-  /// This flag only affects iOS. It sets UITextSmartDashesType in the engine.
-  /// When true, it passes UITextSmartDashesTypeYes, and when false, it passes
-  /// UITextSmartDashesTypeNo.
+  /// This flag only affects iOS versions 11 and above. It sets
+  /// [`UITextSmartDashesType`](https://developer.apple.com/documentation/uikit/uitextsmartdashestype?language=objc) in the engine. When true, it passes
+  /// [`UITextSmartDashesTypeDefault`](https://developer.apple.com/documentation/uikit/uitextsmartdashestype/uitextsmartdashestypedefault?language=objc), and when false, it passes
+  /// [`UITextSmartDashesTypeNo`](https://developer.apple.com/documentation/uikit/uitextsmartdashestype/uitextsmartdashestypeno?language=objc).
   ///
   /// As an example of what this does, two consecutive hyphen characters will be
   /// automatically replaced with one en dash, and three consecutive hyphens
   /// will become one em dash.
   ///
-  /// Defaults to true, unless obscureText is true, when it defaults to false.
+  /// Defaults to true, unless [obscureText] is true, when it defaults to false.
   /// This is to avoid the problem where password fields receive autoformatted
   /// characters.
   ///
   /// See also:
+  ///
   ///  * [enableSmartQuotes]
   ///  * <https://developer.apple.com/documentation/uikit/uitextinputtraits>
   /// {@endtemplate}
@@ -441,19 +443,20 @@ class TextInputConfiguration {
   /// {@template flutter.services.textInput.enableSmartQuotes}
   /// Whether to allow the platform to automatically format quotes.
   ///
-  /// This flag only affects iOS. It sets UITextSmartQuotesType in the engine.
-  /// When true, it passes UITextSmartQuotesTypeYes, and when false, it passes
-  /// UITextSmartQuotesTypeNo.
+  /// This flag only affects iOS. It sets [`UITextSmartQuotesType`](https://developer.apple.com/documentation/uikit/uitextsmartquotestype?language=objc) in the engine.
+  /// When true, it passes [`UITextSmartQuotesTypeDefault`](https://developer.apple.com/documentation/uikit/uitextsmartquotestype/uitextsmartquotestypedefault?language=objc), and when false, it passes
+  /// [`UITextSmartQuotesTypeNo`](https://developer.apple.com/documentation/uikit/uitextsmartquotestype/uitextsmartquotestypeno?language=objc).
   ///
   /// As an example of what this does, a standard vertical double quote
   /// character will be automatically replaced by a left or right double quote
   /// depending on its position in a word.
   ///
-  /// Defaults to true, unless obscureText is true, when it defaults to false.
+  /// Defaults to true, unless [obscureText] is true, when it defaults to false.
   /// This is to avoid the problem where password fields receive autoformatted
   /// characters.
   ///
   /// See also:
+  ///
   ///  * [enableSmartDashes]
   ///  * <https://developer.apple.com/documentation/uikit/uitextinputtraits>
   /// {@endtemplate}
@@ -469,6 +472,7 @@ class TextInputConfiguration {
   /// Defaults to true. Cannot be null.
   ///
   /// See also:
+  ///
   ///  * <https://developer.android.com/reference/android/text/InputType.html#TYPE_TEXT_FLAG_NO_SUGGESTIONS>
   /// {@endtemplate}
   final bool enableSuggestions;

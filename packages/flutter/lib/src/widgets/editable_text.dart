@@ -1053,8 +1053,8 @@ class EditableText extends StatefulWidget {
     properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode));
     properties.add(DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));
     properties.add(DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: true));
-    properties.add(DiagnosticsProperty<bool>('enableSmartDashes', enableSmartDashes));
-    properties.add(DiagnosticsProperty<bool>('enableSmartQuotes', enableSmartQuotes));
+    properties.add(DiagnosticsProperty<bool>('enableSmartDashes', enableSmartDashes, defaultValue: !obscureText));
+    properties.add(DiagnosticsProperty<bool>('enableSmartQuotes', enableSmartQuotes, defaultValue: !obscureText));
     properties.add(DiagnosticsProperty<bool>('enableSuggestions', enableSuggestions, defaultValue: true));
     style?.debugFillProperties(properties);
     properties.add(EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
