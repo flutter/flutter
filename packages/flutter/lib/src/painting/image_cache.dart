@@ -92,9 +92,11 @@ class ImageCache {
   int get currentSizeBytes => _currentSizeBytes;
   int _currentSizeBytes = 0;
 
-  /// Callback that is executed when inserting an image that is too large for
-  /// the cache.  Set to `null` for the default behavior, which is to increase
-  /// the cache size to accomodate the large image.
+  /// Callback that is executed when inserting an image whose byte size is
+  /// larger than the [maximumByteSize].  Editing the [maximumByteSize] in the
+  /// callback can accomodate for the image.  Set to `null` for the default
+  /// behavior, which is to increase the [maximumByteSize] to accomodate the
+  /// large image.
   set largeImageHandler(LargeImageHandler handler) {
     _largeImageHandler = handler;
   }
