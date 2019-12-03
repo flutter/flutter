@@ -12,7 +12,7 @@ import 'text_theme.dart';
 /// its localized [TextStyle] geometry for [ThemeData.textTheme].
 ///
 /// The script category defines the overall geometry of a [TextTheme] for
-/// the static [MaterialTextGeometry.localizedFor] method in terms of the
+/// the [Typography.geometryThemeFor] method in terms of the
 /// three language categories defined in <https://material.io/go/design-typography>.
 ///
 /// Generally speaking, font sizes for [ScriptCategory.tall] and
