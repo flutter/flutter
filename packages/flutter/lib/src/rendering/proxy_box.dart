@@ -2746,34 +2746,12 @@ class RenderMouseRegion extends RenderProxyBox {
     _updateAnnotations();
   }
 
-  /// Attaches the annotation for this render object, if any.
-  ///
-  /// This is called by the [MouseRegion]'s [Element] to tell this
-  /// [RenderMouseRegion] that it has transitioned from "inactive"
-  /// state to "active". We call it here so that
-  /// [MouseTrackerAnnotation.onEnter] isn't called during the build step for
-  /// the widget that provided the callback, and [State.setState] can safely be
-  /// called within that callback.
-  void postActivate() {
-    if (_annotationIsActive)
-      RendererBinding.instance.mouseTracker.attachAnnotation(_hoverAnnotation);
-  }
-
-  /// Detaches the annotation for this render object, if any.
-  ///
-  /// This is called by the [MouseRegion]'s [Element] to tell this
-  /// [RenderMouseRegion] that it will shortly be transitioned from "active"
-  /// state to "inactive". We call it here so that
-  /// [MouseTrackerAnnotation.onExit] isn't called during the build step for the
-  /// widget that provided the callback, and [State.setState] can safely be
-  /// called within that callback.
-  void preDeactivate() {
-    if (_annotationIsActive)
-      RendererBinding.instance.mouseTracker.detachAnnotation(_hoverAnnotation);
-  }
-
   @override
   void detach() {
+    if (_annotationIsActive) {
+      RendererBinding.instance.mouseTracker.detachAnnotation(_hoverAnnotation);
+      _hoverAnnotation = null;
+    }
     RendererBinding.instance.mouseTracker.removeListener(_updateAnnotations);
     super.detach();
   }

@@ -5926,9 +5926,6 @@ class MouseRegion extends SingleChildRenderObjectWidget {
   final bool opaque;
 
   @override
-  _MouseRegionElement createElement() => _MouseRegionElement(this);
-
-  @override
   RenderMouseRegion createRenderObject(BuildContext context) {
     return RenderMouseRegion(
       onEnter: onEnter,
@@ -5959,24 +5956,6 @@ class MouseRegion extends SingleChildRenderObjectWidget {
       listeners.add('hover');
     properties.add(IterableProperty<String>('listeners', listeners, ifEmpty: '<none>'));
     properties.add(DiagnosticsProperty<bool>('opaque', opaque, defaultValue: true));
-  }
-}
-
-class _MouseRegionElement extends SingleChildRenderObjectElement {
-  _MouseRegionElement(SingleChildRenderObjectWidget widget) : super(widget);
-
-  @override
-  void activate() {
-    super.activate();
-    final RenderMouseRegion renderMouseRegion = renderObject;
-    renderMouseRegion.postActivate();
-  }
-
-  @override
-  void deactivate() {
-    final RenderMouseRegion renderMouseRegion = renderObject;
-    renderMouseRegion.preDeactivate();
-    super.deactivate();
   }
 }
 

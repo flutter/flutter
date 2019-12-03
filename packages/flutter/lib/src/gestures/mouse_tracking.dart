@@ -29,13 +29,12 @@ typedef PointerHoverEventListener = void Function(PointerHoverEvent event);
 /// The annotation object used to annotate layers that are interested in mouse
 /// movements.
 ///
-// This is added to a layer and managed  by the [MouseRegion] widget.
+/// This is added to a layer and managed by the [MouseRegion] widget.
 class MouseTrackerAnnotation extends Diagnosticable {
   /// Creates an annotation that can be used to find layers interested in mouse
   /// movements.
   ///
-  /// All arguments are optional. The [key] defaults to a unique key that is
-  /// different from any other annotations.
+  /// All arguments are optional.
   const MouseTrackerAnnotation({
     this.onEnter,
     this.onHover,
@@ -77,7 +76,7 @@ class MouseTrackerAnnotation extends Diagnosticable {
   ///  * A pointer has moved onto, or moved within an annotation without buttons
   ///    pressed.
   ///
-  /// This callback is not triggered when
+  /// This callback is not triggered when:
   ///
   ///  * An annotation that is containing the pointer has moved, and still
   ///    contains the pointer.
@@ -129,11 +128,14 @@ class MouseTrackerAnnotation extends Diagnosticable {
   /// Controls how one annotation replaces another annotation during an
   /// annotation search.
   ///
-  /// If the [runtimeType] and [key] properties of the two annotations are
-  /// [operator==], then the new annotation replaces the old annotation and
-  /// inherits its presence. For example, if both the old and new annotation
-  /// contains the pointer, then the old one's [onExit] and the new one's
-  /// [onEnter] will not be triggered.
+  /// During the process of determining pointer entrance and exit, two
+  /// annotations are considered equal if the two annotations have [key]s that
+  /// are equal by [operator==].
+  ///
+  /// This getter never returns empty. If [key] is not set during object
+  /// creation, this getter will return a unique key that is different from any
+  /// other annotations, which means such an annotation is only equal to itself
+  /// in terms of [key].
   Key get key => _key ?? ValueKey<MouseTrackerAnnotation>(this);
   final Key _key;
 
@@ -552,7 +554,7 @@ class MouseTracker extends ChangeNotifier {
   /// MouseTracker. Do not call in other contexts.
   @visibleForTesting
   bool isAnnotationAttached(MouseTrackerAnnotation annotation) {
-    return _trackedAnnotations.contains(annotation.key);
+    return _trackedAnnotations.contains(annotation?.key);
   }
 
   /// Notify [MouseTracker] that a new [MouseTrackerAnnotation] has started to
@@ -566,6 +568,10 @@ class MouseTracker extends ChangeNotifier {
   /// well, typically by calling [RenderObject.markNeedsPaint], because this
   /// method does not cause any immediate effect, since the state it changes is
   /// used during a post-frame callback or when handling certain pointer events.
+  ///
+  /// Only the [MouseTrackerAnnotation.key] property of the annotation is used,
+  /// therefore there is no need to call this method if the object only switches
+  /// from one annotation to another with the same key.
   ///
   /// ### About annotation attachment
   ///

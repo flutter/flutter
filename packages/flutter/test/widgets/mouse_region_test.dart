@@ -639,12 +639,14 @@ void main() {
 
     await tester.pumpWidget(
       Center(
-          child: Container(
-              child: HoverFeedback(
-        key: feedbackKey,
-        onEnter: () => numEntries++,
-        onExit: () => numExits++,
-      ))),
+        child: Container(
+          child: HoverFeedback(
+            key: feedbackKey,
+            onEnter: () => numEntries++,
+            onExit: () => numExits++,
+          ),
+        ),
+      ),
     );
     await tester.pump();
     expect(numEntries, equals(1));
