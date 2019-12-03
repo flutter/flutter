@@ -80,7 +80,7 @@ void main() {
     test('flutter web help string', () {
       expect(flutterWebFeature.generateHelpMessage(),
       'Enable or disable Flutter for web. '
-      'This setting will take effect on the master, dev, and beta channels.')
+      'This setting will take effect on the master, dev, and beta channels.');
     });
 
     test('flutter macOS desktop help string', () {
