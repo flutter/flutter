@@ -2,7 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../../foundation.dart';
+import 'package:flutter/foundation.dart';
+
 import 'framework.dart';
 
 /// A [ValueKey] that defines where [PageStorage] values will be saved.
