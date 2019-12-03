@@ -788,7 +788,7 @@ class SemanticsProperties extends DiagnosticableTree {
 
   /// If non-null, whether the node should be considered a live region.
   ///
-  /// On Android, when a the label changes on a live region semantics node,
+  /// On Android, when the label changes on a live region semantics node,
   /// TalkBack will make a polite announcement of the current label. This
   /// announcement occurs even if the node is not focused, but only if the label
   /// has changed since the last update.
@@ -3519,7 +3519,7 @@ class SemanticsConfiguration {
 
   /// Whether the semantics node is a live region.
   ///
-  /// On Android, when a the label changes on a live region semantics node,
+  /// On Android, when the label changes on a live region semantics node,
   /// TalkBack will make a polite announcement of the current label. This
   /// announcement occurs even if the node is not focused, but only if the label
   /// has changed since the last update.
