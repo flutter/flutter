@@ -21,7 +21,7 @@ const Duration _kTestTimeout = Duration(milliseconds: 1234);
 const String _kSerializedTestTimeout = '1234';
 
 void main() {
-  group('FlutterDriver.connect', () {
+  group('VMServiceFlutterDriver.connect', () {
     List<LogRecord> log;
     StreamSubscription<LogRecord> logSub;
     MockVMServiceClient mockClient;
@@ -113,17 +113,17 @@ void main() {
     });
   });
 
-  group('FlutterDriver', () {
+  group('VMServiceFlutterDriver', () {
     MockVMServiceClient mockClient;
     MockPeer mockPeer;
     MockIsolate mockIsolate;
-    FlutterDriver driver;
+    VMServiceFlutterDriver driver;
 
     setUp(() {
       mockClient = MockVMServiceClient();
       mockPeer = MockPeer();
       mockIsolate = MockIsolate();
-      driver = FlutterDriver.connectedTo(mockClient, mockPeer, mockIsolate);
+      driver = VMServiceFlutterDriver.connectedTo(mockClient, mockPeer, mockIsolate);
     });
 
     test('checks the health of the driver extension', () async {
@@ -597,17 +597,17 @@ void main() {
     });
   });
 
-  group('FlutterDriver with custom timeout', () {
+  group('VMServiceFlutterDriver with custom timeout', () {
     MockVMServiceClient mockClient;
     MockPeer mockPeer;
     MockIsolate mockIsolate;
-    FlutterDriver driver;
+    VMServiceFlutterDriver driver;
 
     setUp(() {
       mockClient = MockVMServiceClient();
       mockPeer = MockPeer();
       mockIsolate = MockIsolate();
-      driver = FlutterDriver.connectedTo(mockClient, mockPeer, mockIsolate);
+      driver = VMServiceFlutterDriver.connectedTo(mockClient, mockPeer, mockIsolate);
     });
 
     test('GetHealth has no default timeout', () async {
