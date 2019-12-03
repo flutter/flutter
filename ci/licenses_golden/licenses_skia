@@ -1,4 +1,4 @@
-Signature: 81e6c3d8cb6f315b7415188b8e0ca05a
+Signature: 6994b850237578149dcd1d33789b2a59
 
 UNUSED LICENSES:
 
@@ -962,6 +962,7 @@ FILE: ../../../third_party/skia/animations/text#1.xml
 FILE: ../../../third_party/skia/bench/microbench.json
 FILE: ../../../third_party/skia/bench/skpbench.json
 FILE: ../../../third_party/skia/build/fuchsia/skqp/skqp.cmx
+FILE: ../../../third_party/skia/build/fuchsia/skqp/test_manifest.json
 FILE: ../../../third_party/skia/docker/binary-size/Dockerfile
 FILE: ../../../third_party/skia/docker/cmake-release/Dockerfile
 FILE: ../../../third_party/skia/docker/skia-build-tools/Dockerfile
