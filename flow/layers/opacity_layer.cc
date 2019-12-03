@@ -17,8 +17,6 @@ OpacityLayer::OpacityLayer(int alpha, const SkPoint& offset)
   set_renders_to_save_layer(true);
 }
 
-OpacityLayer::~OpacityLayer() = default;
-
 void OpacityLayer::EnsureSingleChild() {
   FML_DCHECK(layers().size() > 0);  // OpacityLayer should never be a leaf
 

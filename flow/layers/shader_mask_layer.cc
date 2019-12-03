@@ -13,8 +13,6 @@ ShaderMaskLayer::ShaderMaskLayer(sk_sp<SkShader> shader,
   set_renders_to_save_layer(true);
 }
 
-ShaderMaskLayer::~ShaderMaskLayer() = default;
-
 void ShaderMaskLayer::Paint(PaintContext& context) const {
   TRACE_EVENT0("flutter", "ShaderMaskLayer::Paint");
   FML_DCHECK(needs_painting());

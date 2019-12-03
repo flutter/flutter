@@ -14,8 +14,6 @@ TextureLayer::TextureLayer(const SkPoint& offset,
                            bool freeze)
     : offset_(offset), size_(size), texture_id_(texture_id), freeze_(freeze) {}
 
-TextureLayer::~TextureLayer() = default;
-
 void TextureLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
   set_paint_bounds(SkRect::MakeXYWH(offset_.x(), offset_.y(), size_.width(),
                                     size_.height()));

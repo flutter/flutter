@@ -8,25 +8,10 @@
 
 #include "flutter/flow/layers/performance_overlay_layer.h"
 #include "third_party/skia/include/core/SkFont.h"
+#include "third_party/skia/include/core/SkTextBlob.h"
 
 namespace flutter {
 namespace {
-
-void DrawStatisticsText(SkCanvas& canvas,
-                        const std::string& string,
-                        int x,
-                        int y,
-                        const std::string& font_path) {
-  SkFont font;
-  if (font_path != "") {
-    font = SkFont(SkTypeface::MakeFromFile(font_path.c_str()));
-  }
-  font.setSize(15);
-  SkPaint paint;
-  paint.setColor(SK_ColorGRAY);
-  canvas.drawSimpleText(string.c_str(), string.size(), SkTextEncoding::kUTF8, x,
-                        y, font, paint);
-}
 
 void VisualizeStopWatch(SkCanvas& canvas,
                         const Stopwatch& stopwatch,
@@ -47,20 +32,38 @@ void VisualizeStopWatch(SkCanvas& canvas,
   }
 
   if (show_labels) {
-    double max_ms_per_frame = stopwatch.MaxDelta().ToMillisecondsF();
-    double average_ms_per_frame = stopwatch.AverageDelta().ToMillisecondsF();
-    std::stringstream stream;
-    stream.setf(std::ios::fixed | std::ios::showpoint);
-    stream << std::setprecision(1);
-    stream << label_prefix << "  "
-           << "max " << max_ms_per_frame << " ms/frame, "
-           << "avg " << average_ms_per_frame << " ms/frame";
-    DrawStatisticsText(canvas, stream.str(), x + label_x, y + height + label_y,
-                       font_path);
+    auto text = PerformanceOverlayLayer::MakeStatisticsText(
+        stopwatch, label_prefix, font_path);
+    SkPaint paint;
+    paint.setColor(SK_ColorGRAY);
+    canvas.drawTextBlob(text, x + label_x, y + height + label_y, paint);
   }
 }
 
 }  // namespace
+
+sk_sp<SkTextBlob> PerformanceOverlayLayer::MakeStatisticsText(
+    const Stopwatch& stopwatch,
+    const std::string& label_prefix,
+    const std::string& font_path) {
+  SkFont font;
+  if (font_path != "") {
+    font = SkFont(SkTypeface::MakeFromFile(font_path.c_str()));
+  }
+  font.setSize(15);
+
+  double max_ms_per_frame = stopwatch.MaxDelta().ToMillisecondsF();
+  double average_ms_per_frame = stopwatch.AverageDelta().ToMillisecondsF();
+  std::stringstream stream;
+  stream.setf(std::ios::fixed | std::ios::showpoint);
+  stream << std::setprecision(1);
+  stream << label_prefix << "  "
+         << "max " << max_ms_per_frame << " ms/frame, "
+         << "avg " << average_ms_per_frame << " ms/frame";
+  auto text = stream.str();
+  return SkTextBlob::MakeFromText(text.c_str(), text.size(), font,
+                                  SkTextEncoding::kUTF8);
+}
 
 PerformanceOverlayLayer::PerformanceOverlayLayer(uint64_t options,
                                                  const char* font_path)

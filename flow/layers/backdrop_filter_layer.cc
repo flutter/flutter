@@ -11,8 +11,6 @@ BackdropFilterLayer::BackdropFilterLayer(sk_sp<SkImageFilter> filter)
   set_layer_reads_surface(filter_.get() != nullptr);
 }
 
-BackdropFilterLayer::~BackdropFilterLayer() = default;
-
 void BackdropFilterLayer::Paint(PaintContext& context) const {
   TRACE_EVENT0("flutter", "BackdropFilterLayer::Paint");
   FML_DCHECK(needs_painting());

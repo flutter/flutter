@@ -17,8 +17,6 @@ LayerTree::LayerTree()
       checkerboard_raster_cache_images_(false),
       checkerboard_offscreen_layers_(false) {}
 
-LayerTree::~LayerTree() = default;
-
 void LayerTree::RecordBuildTime(fml::TimePoint start) {
   build_start_ = start;
   build_finish_ = fml::TimePoint::Now();

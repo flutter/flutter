@@ -14,7 +14,6 @@ namespace flutter {
 class TransformLayer : public ContainerLayer {
  public:
   TransformLayer(const SkMatrix& transform);
-  ~TransformLayer() override;
 
   void Preroll(PrerollContext* context, const SkMatrix& matrix) override;
 

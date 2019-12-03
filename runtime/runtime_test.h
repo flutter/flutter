@@ -19,24 +19,17 @@ class RuntimeTest : public ThreadTest {
  public:
   RuntimeTest();
 
-  ~RuntimeTest();
-
   Settings CreateSettingsForFixture();
 
   void AddNativeCallback(std::string name, Dart_NativeFunction callback);
 
- protected:
-  // |testing::ThreadTest|
-  void SetUp() override;
-
-  // |testing::ThreadTest|
-  void TearDown() override;
-
  private:
-  fml::UniqueFD assets_dir_;
-  std::shared_ptr<TestDartNativeResolver> native_resolver_;
-
   void SetSnapshotsAndAssets(Settings& settings);
+
+  std::shared_ptr<TestDartNativeResolver> native_resolver_;
+  fml::UniqueFD assets_dir_;
+
+  FML_DISALLOW_COPY_AND_ASSIGN(RuntimeTest);
 };
 
 }  // namespace testing

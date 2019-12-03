@@ -12,8 +12,6 @@ ClipRectLayer::ClipRectLayer(const SkRect& clip_rect, Clip clip_behavior)
   set_renders_to_save_layer(clip_behavior == Clip::antiAliasWithSaveLayer);
 }
 
-ClipRectLayer::~ClipRectLayer() = default;
-
 void ClipRectLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
   SkRect previous_cull_rect = context->cull_rect;
   if (context->cull_rect.intersect(clip_rect_)) {
