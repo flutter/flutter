@@ -26,7 +26,16 @@ class ComplexLayoutAppState extends State<ComplexLayoutApp> {
     return MaterialApp(
       theme: lightTheme ? ThemeData.light() : ThemeData.dark(),
       title: 'Advanced Layout',
-      home: scrollMode == ScrollMode.complex ? const ComplexLayout() : const TileScrollLayout());
+      home: scrollMode == ScrollMode.complex ?
+        ComplexLayout(
+          lightTheme: lightTheme,
+          scrollMode: scrollMode,
+        ) :
+        TileScrollLayout(
+          lightTheme: lightTheme,
+          scrollMode: scrollMode,
+        ),
+    );
   }
 
   bool _lightTheme = true;
@@ -53,7 +62,10 @@ class ComplexLayoutAppState extends State<ComplexLayoutApp> {
 }
 
 class TileScrollLayout extends StatelessWidget {
-  const TileScrollLayout({ Key key }) : super(key: key);
+  const TileScrollLayout({ this.lightTheme, this.scrollMode, Key key }) : super(key: key);
+
+  final bool lightTheme;
+  final ScrollMode scrollMode;
 
   @override
   Widget build(BuildContext context) {
@@ -73,13 +85,19 @@ class TileScrollLayout extends StatelessWidget {
           );
         },
       ),
-      drawer: const GalleryDrawer(),
+      drawer: GalleryDrawer(
+        lightTheme: lightTheme,
+        scrollMode: scrollMode,
+      ),
     );
   }
 }
 
 class ComplexLayout extends StatefulWidget {
-  const ComplexLayout({ Key key }) : super(key: key);
+  const ComplexLayout({ this.lightTheme, this.scrollMode, Key key }) : super(key: key);
+
+  final bool lightTheme;
+  final ScrollMode scrollMode;
 
   @override
   ComplexLayoutState createState() => ComplexLayoutState();
@@ -120,7 +138,10 @@ class ComplexLayoutState extends State<ComplexLayout> {
           BottomBar(),
         ],
       ),
-      drawer: const GalleryDrawer(),
+      drawer: GalleryDrawer(
+        lightTheme: widget.lightTheme,
+        scrollMode: widget.scrollMode,
+      ),
     );
   }
 }
@@ -596,7 +617,10 @@ class BottomBarButton extends StatelessWidget {
 }
 
 class GalleryDrawer extends StatelessWidget {
-  const GalleryDrawer({ Key key }) : super(key: key);
+  const GalleryDrawer({ this.lightTheme, this.scrollMode, Key key }) : super(key: key);
+
+  final bool lightTheme;
+  final ScrollMode scrollMode;
 
   void _changeTheme(BuildContext context, bool value) {
     ComplexLayoutApp.of(context).lightTheme = value;
@@ -608,7 +632,6 @@ class GalleryDrawer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final ScrollMode currentMode = ComplexLayoutApp.of(context).scrollMode;
     return Drawer(
       // Note: for real apps, see the Gallery material Drawer demo. More
       // typically, a drawer would have a fixed header with a scrolling body
@@ -622,19 +645,19 @@ class GalleryDrawer extends StatelessWidget {
             key: const Key('scroll-switcher'),
             title: const Text('Scroll Mode'),
             onTap: () {
-              _changeScrollMode(context, currentMode == ScrollMode.complex ? ScrollMode.tile : ScrollMode.complex);
+              _changeScrollMode(context, scrollMode == ScrollMode.complex ? ScrollMode.tile : ScrollMode.complex);
              Navigator.pop(context);
             },
-            trailing: Text(currentMode == ScrollMode.complex ? 'Tile' : 'Complex'),
+            trailing: Text(scrollMode == ScrollMode.complex ? 'Tile' : 'Complex'),
           ),
           ListTile(
             leading: const Icon(Icons.brightness_5),
             title: const Text('Light'),
             onTap: () { _changeTheme(context, true); },
-            selected: ComplexLayoutApp.of(context).lightTheme,
+            selected: lightTheme,
             trailing: Radio<bool>(
               value: true,
-              groupValue: ComplexLayoutApp.of(context).lightTheme,
+              groupValue: lightTheme,
               onChanged: (bool value) { _changeTheme(context, value); },
             ),
           ),
@@ -642,10 +665,10 @@ class GalleryDrawer extends StatelessWidget {
             leading: const Icon(Icons.brightness_7),
             title: const Text('Dark'),
             onTap: () { _changeTheme(context, false); },
-            selected: !ComplexLayoutApp.of(context).lightTheme,
+            selected: !lightTheme,
             trailing: Radio<bool>(
               value: false,
-              groupValue: ComplexLayoutApp.of(context).lightTheme,
+              groupValue: lightTheme,
               onChanged: (bool value) { _changeTheme(context, value); },
             ),
           ),
