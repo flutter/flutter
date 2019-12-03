@@ -35,6 +35,7 @@ import 'theme.dart';
 ///
 /// See also:
 ///
+///  * [NotchedShape] which calculates the notch for a notched [BottomAppBar].
 ///  * [FloatingActionButton] which the [BottomAppBar] makes a notch for.
 ///  * [AppBar] for a toolbar that is shown at the top of the screen.
 class BottomAppBar extends StatefulWidget {

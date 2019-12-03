@@ -257,6 +257,10 @@ abstract class PointerEvent extends Diagnosticable {
   /// system according to [transform].
   ///
   /// If this event has not been transformed, [position] is returned as-is.
+  /// See also:
+  ///
+  ///  * [position], which is the position in the global coordinate system of
+  ///    the screen.
   final Offset localPosition;
 
   /// Distance in logical pixels that the pointer moved since the last

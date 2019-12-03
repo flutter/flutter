@@ -524,12 +524,14 @@ class WidgetsApp extends StatefulWidget {
   /// The priority of each available fallback is:
   ///
   ///  1. [localeListResolutionCallback] is attempted first.
-  ///  2. [localeResolutionCallback] is attempted second.
-  ///  3. Flutter's basic resolution algorithm is attempted last.
+  ///  1. [localeResolutionCallback] is attempted second.
+  ///  1. Flutter's basic resolution algorithm, as described in
+  ///     [supportedLocales], is attempted last.
   ///
   /// Properly localized projects should provide a more advanced algorithm than
-  /// `basicLocaleListResolution` as it does not implement a complete algorithm
-  /// (such as the one defined in [Unicode TR35](https://unicode.org/reports/tr35/#LanguageMatching))
+  /// the basic method from [supportedLocales], as it does not implement a
+  /// complete algorithm (such as the one defined in
+  /// [Unicode TR35](https://unicode.org/reports/tr35/#LanguageMatching))
   /// and is optimized for speed at the detriment of some uncommon edge-cases.
   /// {@endtemplate}
   ///
@@ -572,11 +574,11 @@ class WidgetsApp extends StatefulWidget {
   /// `basicLocaleListResolution`, attempts to match by the following priority:
   ///
   ///  1. [Locale.languageCode], [Locale.scriptCode], and [Locale.countryCode]
-  ///  2. [Locale.languageCode] and [Locale.countryCode] only
-  ///  3. [Locale.languageCode] and [Locale.countryCode] only
-  ///  4. [Locale.languageCode] only
-  ///  5. [Locale.countryCode] only when all preferred locales fail to match
-  ///  6. Returns the first element of [supportedLocales] as a fallback
+  ///  1. [Locale.languageCode] and [Locale.countryCode] only
+  ///  1. [Locale.languageCode] and [Locale.countryCode] only
+  ///  1. [Locale.languageCode] only
+  ///  1. [Locale.countryCode] only when all preferred locales fail to match
+  ///  1. Returns the first element of [supportedLocales] as a fallback
   ///
   /// When more than one supported locale matches one of these criteria, only
   /// the first matching locale is returned.
@@ -874,11 +876,11 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
   /// To summarize, the main matching priority is:
   ///
   ///  1. [Locale.languageCode], [Locale.scriptCode], and [Locale.countryCode]
-  ///  2. [Locale.languageCode] and [Locale.scriptCode] only
-  ///  3. [Locale.languageCode] and [Locale.countryCode] only
-  ///  4. [Locale.languageCode] only (with caveats, see above)
-  ///  5. [Locale.countryCode] only when all [preferredLocales] fail to match
-  ///  6. Returns the first element of [supportedLocales] as a fallback
+  ///  1. [Locale.languageCode] and [Locale.scriptCode] only
+  ///  1. [Locale.languageCode] and [Locale.countryCode] only
+  ///  1. [Locale.languageCode] only (with caveats, see above)
+  ///  1. [Locale.countryCode] only when all [preferredLocales] fail to match
+  ///  1. Returns the first element of [supportedLocales] as a fallback
   ///
   /// This algorithm does not take language distance (how similar languages are to each other)
   /// into account, and will not handle edge cases such as resolving `de` to `fr` rather than `zh`
