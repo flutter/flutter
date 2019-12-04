@@ -502,6 +502,8 @@ class MouseTracker extends ChangeNotifier {
   void schedulePostFrameCheck() {
     assert(_duringBuildPhase);
     assert(!_duringDeviceUpdate);
+    if (!mouseIsConnected)
+      return;
     if (!_hasScheduledPostFrameCheck) {
       _hasScheduledPostFrameCheck = true;
       SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
