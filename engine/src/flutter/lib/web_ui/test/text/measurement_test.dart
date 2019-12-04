@@ -407,6 +407,28 @@ void main() async {
     });
 
     testMeasurements(
+      'wraps multi-line text correctly when constraint width is infinite',
+      (TextMeasurementService instance) {
+        final EngineParagraph paragraph = build(ahemStyle, '123\n456 789');
+        final MeasurementResult result =
+            instance.measure(paragraph, infiniteConstraints);
+
+        expect(result.isSingleLine, false);
+        expect(result.maxIntrinsicWidth, 70);
+        expect(result.minIntrinsicWidth, 30);
+        expect(result.width, double.infinity);
+        expect(result.height, 20);
+
+        if (instance is CanvasTextMeasurementService) {
+          expect(result.lines, <EngineLineMetrics>[
+            line('123', hardBreak: true, width: 30.0, lineNumber: 0),
+            line('456 789', hardBreak: true, width: 70.0, lineNumber: 1),
+          ]);
+        }
+      },
+    );
+
+    testMeasurements(
       'takes letter spacing into account',
       (TextMeasurementService instance) {
         const ui.ParagraphConstraints constraints =

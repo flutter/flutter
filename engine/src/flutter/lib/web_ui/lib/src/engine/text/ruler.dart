@@ -210,9 +210,25 @@ class TextDimensions {
   }
 
   /// Updated element style width.
-  void updateWidth(String cssWidth) {
+  void updateConstraintWidth(double width, String ellipsis) {
     _invalidateBoundsCache();
-    _element.style.width = cssWidth;
+
+    if (width.isInfinite) {
+      _element.style
+        ..width = null
+        ..whiteSpace = 'pre';
+    } else if (ellipsis != null) {
+      // Width is finite, but we don't want to let the text soft-wrap when
+      // ellipsis overflow is enabled.
+      _element.style
+        ..width = '${width}px'
+        ..whiteSpace = 'pre';
+    } else {
+      // Width is finite and there's no ellipsis overflow.
+      _element.style
+        ..width = '${width}px'
+        ..whiteSpace = 'pre-wrap';
+    }
   }
 
   void _invalidateBoundsCache() {
@@ -475,17 +491,8 @@ class ParagraphRuler {
       ..display = 'block'
       ..overflowWrap = 'break-word';
 
-    // TODO(flutter_web): Implement the ellipsis overflow for multi-line text
-    // too. As a pre-requisite, we need to be able to programmatically find
-    // line breaks.
-    if (style.ellipsis == null) {
-      elementStyle.whiteSpace = 'pre-wrap';
-    } else {
-      // The height measurement is affected by whether the text has the ellipsis
-      // overflow property or not. This is because when ellipsis is set, we may
-      // not render all the lines, but stop at the first line that overflows.
+    if (style.ellipsis != null) {
       elementStyle
-        ..whiteSpace = 'pre'
         ..overflow = 'hidden'
         ..textOverflow = 'ellipsis';
     }
@@ -595,7 +602,10 @@ class ParagraphRuler {
     // The extra 0.5 is because sometimes the browser needs slightly more space
     // than the size it reports back. When that happens the text may be wrap
     // when we thought it didn't.
-    constrainedDimensions.updateWidth('${constraints.width + 0.5}px');
+    constrainedDimensions.updateConstraintWidth(
+      constraints.width + 0.5,
+      style.ellipsis,
+    );
   }
 
   /// Returns text position in a paragraph that contains multiple
@@ -701,7 +711,7 @@ class ParagraphRuler {
       ..appendText(before)
       ..append(rangeSpan)
       ..appendText(after);
-    constrainedDimensions.updateWidth('${constraints.width}px');
+    constrainedDimensions.updateConstraintWidth(constraints.width, null);
 
     // Measure the rects of [rangeSpan].
     final List<html.Rectangle<num>> clientRects = rangeSpan.getClientRects();
