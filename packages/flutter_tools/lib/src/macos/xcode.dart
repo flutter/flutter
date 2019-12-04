@@ -17,6 +17,25 @@ const int kXcodeRequiredVersionMinor = 2;
 
 Xcode get xcode => context.get<Xcode>();
 
+enum SdkType {
+  iPhone,
+  iPhoneSimulator,
+  macOS,
+}
+
+String getNameForSdk(SdkType sdk) {
+  switch (sdk) {
+    case SdkType.iPhone:
+      return 'iphoneos';
+    case SdkType.iPhoneSimulator:
+      return 'iphonesimulator';
+    case SdkType.macOS:
+      return 'macosx';
+  }
+  assert(false);
+  return null;
+}
+
 class Xcode {
   bool get isInstalledAndMeetsVersionCheck => platform.isMacOS && isInstalled && isVersionSatisfactory;
 
@@ -117,9 +136,9 @@ class Xcode {
     );
   }
 
-  Future<String> iPhoneSdkLocation() async {
+  Future<String> sdkLocation(SdkType sdk) async {
     final RunResult runResult = await processUtils.run(
-      <String>['xcrun', '--sdk', 'iphoneos', '--show-sdk-path'],
+      <String>['xcrun', '--sdk', getNameForSdk(sdk), '--show-sdk-path'],
       throwOnError: true,
     );
     if (runResult.exitCode != 0) {
