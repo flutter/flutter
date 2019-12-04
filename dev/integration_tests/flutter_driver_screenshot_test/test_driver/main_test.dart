@@ -18,21 +18,19 @@ Future<void> main() async {
 
   tearDownAll(() => driver.close());
 
-  group('image rendering ', () {
-    test('A page with an image screenshot', () async {
+  test('A page with an image screenshot', () async {
 
-      await driver.waitFor(find.byValueKey('image_page'));
-      final SerializableFinder imagePageListTile =
-          find.byValueKey('image_page');
-      await driver.tap(imagePageListTile);
-      await driver.waitFor(find.byValueKey('red_square_image'));
-      await driver.waitUntilNoTransientCallbacks();
+    final SerializableFinder imagePageListTile =
+        find.byValueKey('image_page');
+    await driver.waitFor(imagePageListTile);
+    await driver.tap(imagePageListTile);
+    await driver.waitFor(find.byValueKey('red_square_image'));
+    await driver.waitUntilNoTransientCallbacks();
 
-      final DriverScreenShotTester tester = DriverScreenShotTester(testName: 'red_square_image', deviceModel: deviceModel, driver: driver);
-      final List<int> screenShot = await tester.getScreenshotAsBytes();
-      final bool compareResult = await tester.compareScreenshots(screenShot);
-      expect(compareResult, true);
-      await driver.tap(find.byTooltip('Back'));
-    });
+    final DriverScreenShotTester tester = DriverScreenShotTester(testName: 'red_square_image', deviceModel: deviceModel, driver: driver);
+    final List<int> screenShot = await tester.getScreenshotAsBytes();
+    final bool compareResult = await tester.compareScreenshots(screenShot);
+    expect(compareResult, true);
+    await driver.tap(find.byTooltip('Back'));
   });
 }

@@ -12,16 +12,16 @@ import 'package:collection/collection.dart';
 const String _kPathParent = 'test_driver/goldens/';
 
 /// The utility class that helps test cases to tests screenshots with a [FlutterDriver].
+@immutable
 class DriverScreenShotTester {
   /// Constructs a [DriverScreenShotTester].
   ///
   /// All the parameters are required and must not be null.
-  // ignore: always_require_non_null_named_parameters
-  DriverScreenShotTester(
-      {@required this.testName,
-      @required this.driver,
-      @required this.deviceModel})
-      : assert(testName != null),
+  const DriverScreenShotTester({
+    @required this.testName,
+    @required this.driver,
+    @required this.deviceModel,
+  })  : assert(testName != null),
         assert(driver != null),
         assert(deviceModel != null);
 
@@ -42,7 +42,7 @@ class DriverScreenShotTester {
   /// prior to this call.
   Future<bool> compareScreenshots(List<int> screenshot) async {
     final File file = File(_getImageFilePath());
-    final List<int> matcher = file.readAsBytesSync();
+    final List<int> matcher = await file.readAsBytes();
     final Function listEquals = const ListEquality<int>().equals;
     return listEquals(screenshot, matcher);
   }
@@ -61,18 +61,11 @@ class DriverScreenShotTester {
   Future<void> saveScreenshot(List<int> screenshot) async {
     final File file = File(_getImageFilePath());
     if (!file.existsSync()) {
-      file.writeAsBytesSync(screenshot);
+      await file.writeAsBytes(screenshot);
     }
   }
 
-  /// Check if the golden exists.
-  bool goldenExists() {
-    final File file = File(_getImageFilePath());
-    return file.existsSync();
-  }
-
   String _getImageFilePath() {
-    return path.joinAll(
-        <String>[_kPathParent, testName, deviceModel + '.png']);
+    return path.joinAll(<String>[_kPathParent, testName, deviceModel + '.png']);
   }
 }

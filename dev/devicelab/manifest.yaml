@@ -509,7 +509,7 @@ tasks:
     required_agent_capabilities: ["mac/ios"]
     timeout_in_minutes: 20
 
-  flutter_driver_screenshot_test:
+  flutter_driver_screenshot_test_ios:
     description: >
       Screenshot tests running on iPhone 6s.
     stage: devicelab_ios
