@@ -417,6 +417,7 @@ FILE: ../../../flutter/lib/web_ui/lib/src/engine/picture.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/platform_views.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/plugins.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/pointer_binding.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/engine/pointer_converter.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/recording_canvas.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/render_vertices.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/rrect_renderer.dart
