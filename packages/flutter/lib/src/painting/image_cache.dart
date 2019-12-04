@@ -99,13 +99,17 @@ class ImageCache {
   /// behavior, which is to increase the [maximumByteSize] to accomodate the
   /// large image.
   ///
+  /// {@tool sample}
+  ///
   /// Here is an example implementation that increases the cache size in
   /// response to a large image:
+  /// ```dart
   /// static void handler(ImageCache imageCache, int imageSize) {
   ///   final int newSize = imageSize + 1000;
   ///   imageCache.maximumSizeBytes = newSize;
   ///   Analytics.log("Increase image cache size", newSize);
   /// }
+  /// ```
   set largeImageHandler(LargeImageHandler handler) {
     _largeImageHandler = handler;
   }
