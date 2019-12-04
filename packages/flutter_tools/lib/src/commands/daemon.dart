@@ -358,7 +358,12 @@ class DaemonDomain extends Domain {
   /// tunnelling is not required for a given URL.
   Future<String> exposeUrl(String url) async {
     final dynamic res = await daemon.sendRequest('app.exposeUrl', <String, String>{'url': url});
-    return res is String ? res : url;
+    if (res is Map<String, dynamic> && res['url'] is String) {
+      return res['url'] as String;
+    } else {
+      printError('Invalid response to exposeUrl - params should include a String url field');
+      return url;
+    }
   }
 
   Future<void> shutdown(Map<String, dynamic> args) {
