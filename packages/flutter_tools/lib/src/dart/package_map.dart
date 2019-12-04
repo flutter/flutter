@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -46,7 +46,7 @@ class PackageMap {
   /// Returns the path to [packageUri].
   String pathForPackage(Uri packageUri) => uriForPackage(packageUri).path;
 
-  /// Returns the path to [packageUri] as Uri.
+  /// Returns the path to [packageUri] as URL.
   Uri uriForPackage(Uri packageUri) {
     assert(packageUri.scheme == 'package');
     final List<String> pathSegments = packageUri.pathSegments.toList();

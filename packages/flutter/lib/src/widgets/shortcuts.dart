@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -89,8 +89,8 @@ class KeySet<T extends KeyboardKey> extends Diagnosticable {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    final KeySet<T> typedOther = other;
-    return setEquals<T>(_keys, typedOther._keys);
+    return other is KeySet<T>
+        && setEquals<T>(other._keys, _keys);
   }
 
   @override
@@ -274,7 +274,7 @@ class Shortcuts extends StatefulWidget {
   /// The [context] argument must not be null.
   static ShortcutManager of(BuildContext context, {bool nullOk = false}) {
     assert(context != null);
-    final _ShortcutsMarker inherited = context.inheritFromWidgetOfExactType(_ShortcutsMarker);
+    final _ShortcutsMarker inherited = context.dependOnInheritedWidgetOfExactType<_ShortcutsMarker>();
     assert(() {
       if (nullOk) {
         return true;

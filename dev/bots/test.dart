@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -106,7 +106,6 @@ Future<void> main(List<String> args) async {
   print('═' * 80);
   await selectShard(const <String, ShardRunner>{
     'add_to_app_tests': _runAddToAppTests,
-    'add_to_app_life_cycle_tests': _runAddToAppLifeCycleTests,
     'build_tests': _runBuildTests,
     'framework_coverage': _runFrameworkCoverage,
     'framework_tests': _runFrameworkTests,
@@ -266,9 +265,7 @@ Future<void> _runToolTests() async {
         testPath: path.join(kTest, '$subshard$kDotShard'),
         useBuildRunner: canUseBuildRunner,
         tableData: bigqueryApi?.tabledata,
-        // TODO(ianh): The integration tests fail to start on Windows if asserts are enabled.
-        // See https://github.com/flutter/flutter/issues/36476
-        enableFlutterToolAsserts: !(subshard == 'integration' && Platform.isWindows),
+        enableFlutterToolAsserts: true,
       );
     },
   );
@@ -294,12 +291,20 @@ Future<void> _runBuildTests() async {
       await _flutterBuildIpa(examplePath);
     }
   }
-  // Web compilation tests.
-  await _flutterBuildDart2js(path.join('dev', 'integration_tests', 'web'), path.join('lib', 'main.dart'));
-  // Should not fail to compile with dart:io.
-  await _flutterBuildDart2js(path.join('dev', 'integration_tests', 'web_compile_tests'),
-    path.join('lib', 'dart_io_import.dart'),
-  );
+
+  final String branch = Platform.environment['CIRRUS_BRANCH'];
+  if (branch != 'beta' && branch != 'stable') {
+    // Web compilation tests.
+    await _flutterBuildDart2js(
+      path.join('dev', 'integration_tests', 'web'),
+      path.join('lib', 'main.dart'),
+    );
+    // Should not fail to compile with dart:io.
+    await _flutterBuildDart2js(
+      path.join('dev', 'integration_tests', 'web_compile_tests'),
+      path.join('lib', 'dart_io_import.dart'),
+    );
+  }
 }
 
 Future<void> _flutterBuildAot(String relativePathToApplication) async {
@@ -328,6 +333,9 @@ Future<void> _flutterBuildIpa(String relativePathToApplication) async {
     await runCommand('pod',
       <String>['install'],
       workingDirectory: podfile.parent.path,
+      environment: <String, String>{
+        'LANG': 'en_US.UTF-8',
+      },
     );
   }
   await runCommand(flutter,
@@ -352,17 +360,6 @@ Future<void> _runAddToAppTests() async {
   if (Platform.isMacOS) {
     print('${green}Running add-to-app iOS integration tests$reset...');
     final String addToAppDir = path.join(flutterRoot, 'dev', 'integration_tests', 'ios_add2app');
-    await runCommand('./build_and_test.sh',
-      <String>[],
-      workingDirectory: addToAppDir,
-    );
-  }
-}
-
-Future<void> _runAddToAppLifeCycleTests() async {
-  if (Platform.isMacOS) {
-    print('${green}Running add-to-app life cycle iOS integration tests$reset...');
-    final String addToAppDir = path.join(flutterRoot, 'dev', 'integration_tests', 'ios_add2app_life_cycle');
     await runCommand('./build_and_test.sh',
       <String>[],
       workingDirectory: addToAppDir,
@@ -769,6 +766,7 @@ Future<void> _runHostOnlyDeviceLabTests() async {
 
     () => _runDevicelabTest('module_host_with_custom_build_test', environment: gradleEnvironment, testEmbeddingV2: true),
     () => _runDevicelabTest('module_test', environment: gradleEnvironment, testEmbeddingV2: true),
+    () => _runDevicelabTest('plugin_dependencies_test', environment: gradleEnvironment),
 
     // TODO(jmagman): Re-enable once flakiness is resolved, https://github.com/flutter/flutter/issues/37525
     // if (Platform.isMacOS) () => _runDevicelabTest('module_test_ios'),
@@ -975,7 +973,7 @@ Future<String> verifyVersion(File file) async {
 }
 
 /// If the CIRRUS_TASK_NAME environment variable exists, we use that to determine
-/// the shard and subshard (parsing it in the form shard-subshard-platform, ignoring
+/// the shard and sub-shard (parsing it in the form shard-subshard-platform, ignoring
 /// the platform).
 ///
 /// However, for local testing you can just set the SHARD and SUBSHARD

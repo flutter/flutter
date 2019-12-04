@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -126,7 +126,10 @@ class FlutterManifest {
   ///
   /// If false the deprecated Android Support library will be used.
   bool get usesAndroidX {
-    return _flutterDescriptor['module']['androidX'] as bool ?? false;
+    if (_flutterDescriptor.containsKey('module')) {
+      return _flutterDescriptor['module']['androidX'] as bool;
+    }
+    return false;
   }
 
   /// True if this manifest declares a Flutter module project.
@@ -319,7 +322,7 @@ String buildSchemaPath(FileSystem fs) {
 
 /// This method should be kept in sync with the schema in
 /// `$FLUTTER_ROOT/packages/flutter_tools/schema/pubspec_yaml.json`,
-/// but avoid introducing depdendencies on packages for simple validation.
+/// but avoid introducing dependencies on packages for simple validation.
 bool _validate(YamlMap manifest) {
   final List<String> errors = <String>[];
   for (final MapEntry<dynamic, dynamic> kvp in manifest.entries) {

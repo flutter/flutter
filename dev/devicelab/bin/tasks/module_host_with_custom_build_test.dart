@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -236,7 +236,7 @@ Future<void> main() async {
         return TaskResult.failure('Failed to build app-demo-release-unsigned.apk');
       }
 
-      section('Verify AOT blobs in app-demo-release-unsigned.apk');
+      section('Verify AOT ELF in app-demo-release-unsigned.apk');
 
       checkCollectionContains<String>(<String>[
         ...flutterAssets,
@@ -274,7 +274,7 @@ Future<void> main() async {
         return TaskResult.failure('Failed to build app-demo-prod-unsigned.apk');
       }
 
-      section('Verify AOT blobs in app-demo-prod-unsigned.apk');
+      section('Verify AOT ELF in app-demo-prod-unsigned.apk');
 
       checkCollectionContains<String>(<String>[
         ...flutterAssets,

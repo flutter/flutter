@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -237,13 +237,13 @@ class TooltipTheme extends InheritedTheme {
   /// TooltipThemeData theme = TooltipTheme.of(context);
   /// ```
   static TooltipThemeData of(BuildContext context) {
-    final TooltipTheme tooltipTheme = context.inheritFromWidgetOfExactType(TooltipTheme);
+    final TooltipTheme tooltipTheme = context.dependOnInheritedWidgetOfExactType<TooltipTheme>();
     return tooltipTheme?.data ?? Theme.of(context).tooltipTheme;
   }
 
   @override
   Widget wrap(BuildContext context, Widget child) {
-    final TooltipTheme ancestorTheme = context.ancestorWidgetOfExactType(TooltipTheme);
+    final TooltipTheme ancestorTheme = context.findAncestorWidgetOfExactType<TooltipTheme>();
     return identical(this, ancestorTheme) ? child : TooltipTheme(data: data, child: child);
   }
 

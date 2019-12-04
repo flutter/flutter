@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -212,6 +212,21 @@ class BoxDecoration extends Decoration {
 
   @override
   EdgeInsetsGeometry get padding => border?.dimensions;
+
+  @override
+  Path getClipPath(Rect rect, TextDirection textDirection) {
+    Path clipPath;
+    switch (shape) {
+      case BoxShape.circle:
+        clipPath = Path()..addOval(rect);
+        break;
+      case BoxShape.rectangle:
+        if (borderRadius != null)
+          clipPath = Path()..addRRect(borderRadius.resolve(textDirection).toRRect(rect));
+        break;
+    }
+    return clipPath;
+  }
 
   /// Returns a new box decoration that is scaled by the given factor.
   BoxDecoration scale(double factor) {

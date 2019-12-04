@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -101,7 +101,7 @@ abstract class FocusTraversalPolicy {
   @protected
   void invalidateScopeData(FocusScopeNode node) {}
 
-  /// This is called whenever the given [node] is reparented into a new scope,
+  /// This is called whenever the given [node] is re-parented into a new scope,
   /// so that the policy has a chance to update or invalidate any cached data
   /// that it maintains per scope about the node.
   ///
@@ -587,7 +587,7 @@ class WidgetOrderFocusTraversalPolicy extends FocusTraversalPolicy with Directio
       }
     }
     while (candidate is FocusScopeNode && candidate.focusedChild != null) {
-      final FocusScopeNode candidateScope = candidate;
+      final FocusScopeNode candidateScope = candidate as FocusScopeNode;
       candidate = candidateScope.focusedChild;
     }
     return candidate;
@@ -868,7 +868,7 @@ class DefaultFocusTraversal extends InheritedWidget {
   /// The [context] argument must not be null.
   static FocusTraversalPolicy of(BuildContext context, { bool nullOk = false }) {
     assert(context != null);
-    final DefaultFocusTraversal inherited = context.inheritFromWidgetOfExactType(DefaultFocusTraversal);
+    final DefaultFocusTraversal inherited = context.dependOnInheritedWidgetOfExactType<DefaultFocusTraversal>();
     assert(() {
       if (nullOk) {
         return true;
@@ -1002,8 +1002,8 @@ class DirectionalFocusIntent extends Intent {
   final bool ignoreTextFields;
 }
 
-/// An [Action] that moves the focus to the focusable node in the given
-/// [direction] configured by the associated [DirectionalFocusIntent].
+/// An [Action] that moves the focus to the focusable node in the direction
+/// configured by the associated [DirectionalFocusIntent.direction].
 ///
 /// This is the [Action] associated with the [key] and bound by default to the
 /// [LogicalKeyboardKey.arrowUp], [LogicalKeyboardKey.arrowDown],
@@ -1015,9 +1015,6 @@ class DirectionalFocusAction extends _RequestFocusActionBase {
 
   /// The [LocalKey] that uniquely identifies this action to [DirectionalFocusIntent].
   static const LocalKey key = ValueKey<Type>(DirectionalFocusAction);
-
-  /// The direction in which to look for the next focusable node when invoked.
-  TraversalDirection direction;
 
   @override
   void invoke(FocusNode node, DirectionalFocusIntent intent) {

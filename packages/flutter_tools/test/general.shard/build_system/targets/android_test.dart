@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -115,7 +115,7 @@ void main() {
       snapshotType: captureAnyNamed('snapshotType'),
       darwinArch: anyNamed('darwinArch'),
       additionalArgs: anyNamed('additionalArgs')
-    )).captured.single;
+    )).captured.single as SnapshotType;
 
     expect(snapshotType.platform, TargetPlatform.android_arm64);
     expect(snapshotType.mode, BuildMode.release);

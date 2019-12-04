@@ -1,4 +1,4 @@
-// Copyright 2019 The Flutter Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -50,8 +50,8 @@ class FlutterCompactFormatter {
   /// this is Windows or not outputting to a terminal.
   String get _noColor => useColor ? '\u001b[0m' : '';
 
-  /// The termianl escape for clearing the line, or a carriage return if
-  /// this is Windows or not outputting to a termianl.
+  /// The terminal escape for clearing the line, or a carriage return if
+  /// this is Windows or not outputting to a terminal.
   String get _clearLine => useColor ? '\x1b[2K\r' : '\r';
 
   final Map<int, TestResult> _tests = <int, TestResult>{};

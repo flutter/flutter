@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -284,7 +284,7 @@ abstract class FlutterDriver {
   }) async {
     return sendCommand(GetDiagnosticsTree(
       finder,
-      DiagnosticsType.renderObject,
+      DiagnosticsType.widget,
       subtreeDepth: subtreeDepth,
       includeProperties: includeProperties,
       timeout: timeout,
@@ -645,12 +645,11 @@ class DriverOffset {
 
   @override
   bool operator ==(dynamic other) {
-    if (other is! DriverOffset)
-      return false;
-    final DriverOffset typedOther = other;
-    return dx == typedOther.dx && dy == typedOther.dy;
+    return other is DriverOffset
+        && other.dx == dx
+        && other.dy == dy;
   }
 
   @override
-  int get hashCode => dx.hashCode + dy.hashCode;
+  int get hashCode => dx.hashCode ^ dy.hashCode;
 }
