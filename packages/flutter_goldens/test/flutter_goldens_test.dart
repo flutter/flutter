@@ -84,14 +84,12 @@ void main() {
 
     group('Request Handling', () {
       String testName;
-      String pullRequestNumber;
       String expectation;
       Uri url;
       MockHttpClientRequest mockHttpRequest;
 
       setUp(() {
         testName = 'flutter.golden_test.1.png';
-        pullRequestNumber = '1234';
         expectation = '55109a4bed52acc780530f7a9aeff6c0';
         mockHttpRequest = MockHttpClientRequest();
       });
@@ -210,120 +208,6 @@ void main() {
         final List<int> masterBytes = await skiaClient.getImageBytes(expectation);
 
         expect(masterBytes, equals(_kTestPngBytes));
-      });
-
-      group('ignores', () {
-        Uri url;
-        MockHttpClientRequest mockHttpRequest;
-        MockHttpClientResponse mockHttpResponse;
-
-        setUp(() {
-          url = Uri.parse('https://flutter-gold.skia.org/json/ignores');
-          mockHttpRequest = MockHttpClientRequest();
-          mockHttpResponse = MockHttpClientResponse(utf8.encode(
-              ignoreResponseTemplate(
-                pullRequestNumber: pullRequestNumber,
-                expires: DateTime.now()
-                  .add(const Duration(days: 1))
-                  .toString(),
-                otherTestName: 'unrelatedTest.1'
-              )
-          ));
-          when(mockHttpClient.getUrl(url))
-            .thenAnswer((_) => Future<MockHttpClientRequest>.value(mockHttpRequest));
-          when(mockHttpRequest.close())
-            .thenAnswer((_) => Future<MockHttpClientResponse>.value(mockHttpResponse));
-        });
-
-        test('returns true for ignored test and ignored pull request number', () async {
-          expect(
-            await skiaClient.testIsIgnoredForPullRequest(
-              pullRequestNumber,
-              testName,
-            ),
-            isTrue,
-          );
-        });
-
-        test('returns true for ignored test and not ignored pull request number', () async {
-          expect(
-            await skiaClient.testIsIgnoredForPullRequest(
-              '5678',
-              testName,
-            ),
-            isTrue,
-          );
-        });
-
-        test('returns false for not ignored test and ignored pull request number', () async {
-         expect(
-            await skiaClient.testIsIgnoredForPullRequest(
-              pullRequestNumber,
-              'failure.png',
-            ),
-            isFalse,
-          );
-        });
-
-        test('throws exception for expired ignore', () async {
-          mockHttpResponse = MockHttpClientResponse(utf8.encode(
-            ignoreResponseTemplate(
-              pullRequestNumber: pullRequestNumber,
-            )
-          ));
-          when(mockHttpRequest.close())
-            .thenAnswer((_) => Future<MockHttpClientResponse>.value(mockHttpResponse));
-          final Future<bool> test = skiaClient.testIsIgnoredForPullRequest(
-            pullRequestNumber,
-            testName,
-          );
-          expect(
-            test,
-            throwsException,
-          );
-        });
-
-        test('throws exception for first expired ignore among multiple', () async {
-          mockHttpResponse = MockHttpClientResponse(utf8.encode(
-            ignoreResponseTemplate(
-              pullRequestNumber: pullRequestNumber,
-              otherExpires: DateTime.now()
-                .add(const Duration(days: 1))
-                .toString(),
-            )
-          ));
-          when(mockHttpRequest.close())
-            .thenAnswer((_) => Future<MockHttpClientResponse>.value(mockHttpResponse));
-          final Future<bool> test = skiaClient.testIsIgnoredForPullRequest(
-            pullRequestNumber,
-            testName,
-          );
-          expect(
-            test,
-            throwsException,
-          );
-        });
-
-        test('throws exception for later expired ignore among multiple', () async {
-          mockHttpResponse = MockHttpClientResponse(utf8.encode(
-            ignoreResponseTemplate(
-              pullRequestNumber: pullRequestNumber,
-              expires: DateTime.now()
-                .add(const Duration(days: 1))
-                .toString(),
-            )
-          ));
-          when(mockHttpRequest.close())
-            .thenAnswer((_) => Future<MockHttpClientResponse>.value(mockHttpResponse));
-          final Future<bool> test = skiaClient.testIsIgnoredForPullRequest(
-            pullRequestNumber,
-            testName,
-          );
-          expect(
-            test,
-            throwsException,
-          );
-        });
       });
 
       group('digest parsing', () {
@@ -507,39 +391,6 @@ void main() {
     });
 
     group('Pre-Submit', () {
-      FlutterPreSubmitFileComparator comparator;
-      final MockSkiaGoldClient mockSkiaClient = MockSkiaGoldClient();
-
-      setUp(() {
-        final Directory basedir = fs.directory('flutter/test/library/')
-          ..createSync(recursive: true);
-        comparator = FlutterPreSubmitFileComparator(
-          basedir.uri,
-          mockSkiaClient,
-          fs: fs,
-          platform: FakePlatform(
-            environment: <String, String>{
-              'FLUTTER_ROOT': _kFlutterRoot,
-              'CIRRUS_CI' : 'true',
-              'CIRRUS_PR' : '1234',
-              'GOLD_SERVICE_ACCOUNT' : 'service account...'
-            },
-            operatingSystem: 'macos'
-          ),
-        );
-
-        when(mockSkiaClient.getImageBytes('55109a4bed52acc780530f7a9aeff6c0'))
-          .thenAnswer((_) => Future<List<int>>.value(_kTestPngBytes));
-        when(mockSkiaClient.expectations)
-          .thenReturn(expectationsTemplate());
-        when(mockSkiaClient.cleanTestName('library.flutter.golden_test.1.png'))
-          .thenReturn('flutter.golden_test.1');
-        when(mockSkiaClient.isValidDigestForExpectation(
-          '55109a4bed52acc780530f7a9aeff6c0',
-          'library.flutter.golden_test.1.png',
-        ))
-          .thenAnswer((_) => Future<bool>.value(false));
-      });
       group('correctly determines testing environment', () {
         test('returns true', () {
           platform = FakePlatform(
@@ -600,50 +451,6 @@ void main() {
             isFalse,
           );
         });
-      });
-
-      test('comparison passes test that is ignored for this PR', () async {
-        when(mockSkiaClient.getImageBytes('55109a4bed52acc780530f7a9aeff6c0'))
-          .thenAnswer((_) => Future<List<int>>.value(_kTestPngBytes));
-        when(mockSkiaClient.testIsIgnoredForPullRequest(
-          '1234',
-          'library.flutter.golden_test.1.png',
-        ))
-          .thenAnswer((_) => Future<bool>.value(true));
-        expect(
-          await comparator.compare(
-            Uint8List.fromList(_kFailPngBytes),
-            Uri.parse('flutter.golden_test.1.png'),
-          ),
-          isTrue,
-        );
-      });
-
-      test('fails test that is not ignored', () async {
-        when(mockSkiaClient.getImageBytes('55109a4bed52acc780530f7a9aeff6c0'))
-          .thenAnswer((_) => Future<List<int>>.value(_kTestPngBytes));
-        when(mockSkiaClient.testIsIgnoredForPullRequest(
-          '1234',
-          'library.flutter.golden_test.1.png',
-        ))
-          .thenAnswer((_) => Future<bool>.value(false));
-        expect(
-          await comparator.compare(
-            Uint8List.fromList(_kFailPngBytes),
-            Uri.parse('flutter.golden_test.1.png'),
-          ),
-          isFalse,
-        );
-      });
-
-      test('passes non-existent baseline for new test', () async {
-        expect(
-          await comparator.compare(
-            Uint8List.fromList(_kFailPngBytes),
-            Uri.parse('flutter.new_golden_test.1.png'),
-          ),
-          isTrue,
-        );
       });
     });
 

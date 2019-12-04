@@ -209,6 +209,96 @@ class SkiaGoldClient {
     return true;
   }
 
+  /// Executes the `imgtest init` command in the goldctl tool for tryjobs.
+  ///
+  /// The `imgtest` command collects and uploads test results to the Skia Gold
+  /// backend, the `init` argument initializes the current tryjob.
+  Future<void> tryjobInit() async {
+    final File keys = workDirectory.childFile('keys.json');
+    final File failures = workDirectory.childFile('failures.json');
+
+    await keys.writeAsString(_getKeysJSON());
+    await failures.create();
+    final String commitHash = await _getCurrentCommit();
+    final String pullRequest = platform.environment['CIRRUS_PR'];
+    final String cirrusTaskID = platform.environment['CIRRUS_TASK_ID'];
+
+
+    final List<String> imgtestInitArguments = <String>[
+      'imgtest', 'init',
+      '--instance', 'flutter',
+      '--work-dir', workDirectory
+        .childDirectory('temp')
+        .path,
+      '--commit', commitHash,
+      '--keys-file', keys.path,
+      '--failure-file', failures.path,
+      '--passfail',
+      '--crs', 'github',
+      '--changelist', pullRequest,
+      '--cis', 'cirrus',
+      '--jobid', cirrusTaskID,
+      '--patchset_id', commitHash,
+    ];
+
+    if (imgtestInitArguments.contains(null)) {
+      final StringBuffer buf = StringBuffer()
+        ..writeln('Null argument for Skia Gold tryjobInit:');
+      imgtestInitArguments.forEach(buf.writeln);
+      throw NonZeroExitCode(1, buf.toString());
+    }
+
+    final io.ProcessResult result = await io.Process.run(
+      _goldctl,
+      imgtestInitArguments,
+    );
+
+    if (result.exitCode != 0) {
+      final StringBuffer buf = StringBuffer()
+        ..writeln('Skia Gold tryjobInit failure.')
+        ..writeln('stdout: ${result.stdout}')
+        ..writeln('stderr: ${result.stderr}');
+      throw NonZeroExitCode(1, buf.toString());
+    }
+  }
+
+  /// Executes the `imgtest add` command in the goldctl tool for tryjobs.
+  ///
+  /// The `imgtest` command collects and uploads test results to the Skia Gold
+  /// backend, the `add` argument uploads the current image test. A response is
+  /// returned from the invocation of this command that indicates a pass or fail
+  /// result for the tryjob.
+  ///
+  /// The testName and goldenFile parameters reference the current comparison
+  /// being evaluated by the [FlutterSkiaGoldFileComparator].
+  Future<bool> tryjobAdd(String testName, File goldenFile) async {
+    assert(testName != null);
+    assert(goldenFile != null);
+
+    final List<String> imgtestArguments = <String>[
+      'imgtest', 'add',
+      '--work-dir', workDirectory
+        .childDirectory('temp')
+        .path,
+      '--test-name', cleanTestName(testName),
+      '--png-file', goldenFile.path,
+    ];
+
+    final io.ProcessResult result = await io.Process.run(
+      _goldctl,
+      imgtestArguments,
+    );
+
+    if (result.exitCode != 0) {
+      final StringBuffer buf = StringBuffer()
+        ..writeln('Skia Gold tryjobAdd failure.')
+        ..writeln('stdout: ${result.stdout}')
+        ..writeln('stderr: ${result.stderr}\n');
+      throw NonZeroExitCode(1, buf.toString());
+    }
+    return result.exitCode == 0;
+  }
+
   /// Requests and sets the [_expectations] known to Flutter Gold at head.
   Future<void> getExpectations() async {
     _expectations = <String, List<String>>{};
@@ -260,69 +350,6 @@ class SkiaGoldClient {
       SkiaGoldHttpOverrides(),
     );
     return imageBytes;
-  }
-
-  /// Returns a boolean value for whether or not the given test and current pull
-  /// request are ignored on Flutter Gold.
-  ///
-  /// This is only relevant when used by the [FlutterPreSubmitFileComparator]
-  /// when a golden file test fails. In order to land a change to an existing
-  /// golden file, an ignore must be set up in Flutter Gold. This will serve as
-  /// a flag to permit the change to land, protect against any unwanted changes,
-  /// and ensure that changes that have landed are triaged.
-  Future<bool> testIsIgnoredForPullRequest(String pullRequest, String testName) async {
-    bool ignoreIsActive = false;
-    testName = cleanTestName(testName);
-    String rawResponse;
-    await io.HttpOverrides.runWithHttpOverrides<Future<void>>(() async {
-      final Uri requestForIgnores = Uri.parse(
-        'https://flutter-gold.skia.org/json/ignores'
-      );
-
-      try {
-        final io.HttpClientRequest request = await httpClient.getUrl(requestForIgnores);
-        final io.HttpClientResponse response = await request.close();
-        rawResponse = await utf8.decodeStream(response);
-        final List<dynamic> ignores = json.decode(rawResponse) as List<dynamic>;
-        for(dynamic ignore in ignores) {
-          final List<String> ignoredQueries = (ignore['query'] as String).split('&');
-          final String ignoredPullRequest = (ignore['note'] as String).split('/').last;
-          final DateTime expiration = DateTime.parse(ignore['expires'] as String);
-          // The currently failing test is in the process of modification.
-          if (ignoredQueries.contains('name=$testName')) {
-            if (expiration.isAfter(DateTime.now())) {
-              ignoreIsActive = true;
-            } else {
-              // If any ignore is expired for the given test, throw with
-              // guidance.
-              final StringBuffer buf = StringBuffer()
-                ..writeln('This test has an expired ignore in place, and the')
-                ..writeln('change has not been triaged.')
-                ..writeln('The associated pull request is:')
-                ..writeln('https://github.com/flutter/flutter/pull/$ignoredPullRequest');
-              throw NonZeroExitCode(1, buf.toString());
-            }
-          }
-        }
-      } on FormatException catch(_) {
-        if (rawResponse.contains('stream timeout')) {
-          final StringBuffer buf = StringBuffer()
-            ..writeln('Stream timeout on /ignores api.')
-            ..writeln('This may be caused by a failure to triage a change.')
-            ..writeln('Check https://flutter-gold.skia.org/ignores, or')
-            ..writeln('https://flutter-gold.skia.org/?query=source_type%3Dflutter')
-            ..writeln('for untriaged golden files.');
-          throw NonZeroExitCode(1, buf.toString());
-        } else {
-          print('Formatting error detected requesting /ignores from Flutter Gold.'
-              '\nrawResponse: $rawResponse');
-          rethrow;
-        }
-      }
-    },
-      SkiaGoldHttpOverrides(),
-    );
-    return ignoreIsActive;
   }
 
   /// The [_expectations] retrieved from Flutter Gold do not include the
