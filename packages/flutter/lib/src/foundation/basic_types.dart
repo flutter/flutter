@@ -12,9 +12,10 @@ export 'dart:ui' show VoidCallback;
 /// Signature for callbacks that report that an underlying value has changed.
 ///
 /// See also:
+///
+///  * [ValueSetter], for callbacks that report that a value has been set.
 typedef ValueChanged<T> = void Function(T value);
 
-///
 /// Signature for callbacks that report that a value has been set.
 ///
 /// This is the same signature as [ValueChanged], but is used when the

@@ -12,7 +12,8 @@ import 'basic_types.dart';
 ///
 /// See also:
 ///
-///    (though not the alignment semantics).
+///  * [applyBoxFit], which applies the sizing semantics of these values (though
+///    not the alignment semantics).
 enum BoxFit {
   /// Fill the target box by distorting the source's aspect ratio.
   ///

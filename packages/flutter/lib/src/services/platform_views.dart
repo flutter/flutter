@@ -19,10 +19,6 @@ final PlatformViewsRegistry platformViewsRegistry = PlatformViewsRegistry._insta
 ///
 /// A Flutter application has a single [PlatformViewsRegistry] which can be accesses
 /// through the [platformViewsRegistry] getter.
-///
-/// See also:
-///
-///  * [PlatformView], a widget that shows a platform view.
 class PlatformViewsRegistry {
   PlatformViewsRegistry._instance();
 
@@ -48,8 +44,6 @@ typedef PlatformViewCreatedCallback = void Function(int id);
 /// Provides access to the platform views service.
 ///
 /// This service allows creating and controlling platform-specific views.
-///
-/// See also:
 class PlatformViewsService {
   PlatformViewsService._() {
     SystemChannels.platform_views.setMethodCallHandler(_onMethodCall);
@@ -76,7 +70,6 @@ class PlatformViewsService {
     return null;
   }
 
-  ///
   /// Maps platform view IDs to focus callbacks.
   ///
   /// The callbacks are invoked when the platform view asks to be focused.
@@ -726,9 +719,10 @@ abstract class PlatformViewController {
   /// The viewId should always be unique and non-negative. And it must not be null.
   ///
   /// See also:
+  ///
+  ///  * [PlatformViewRegistry], which is a helper for managing platform view ids.
   int get viewId;
 
-  ///
   /// Dispatches the `event` to the platform view.
   void dispatchPointerEvent(PointerEvent event);
 

@@ -127,13 +127,13 @@ import 'theme_data.dart';
 ///
 ///  * [SliderThemeData], which describes the actual configuration of a slider
 ///    theme.
-///    {@macro flutter.material.slider.seeAlso.sliderComponentShape}
-///    {@macro flutter.material.slider.seeAlso.sliderTrackShape}
-///    {@macro flutter.material.slider.seeAlso.sliderTickMarkShape}
-///    {@macro flutter.material.slider.seeAlso.rangeSliderThumbShape}
-///    {@macro flutter.material.slider.seeAlso.rangeSliderValueIndicatorShape}
-///    {@macro flutter.material.slider.seeAlso.rangeSliderTrackShape}
-///    {@macro flutter.material.slider.seeAlso.rangeSliderTickMarkShape}
+/// {@macro flutter.material.slider.seeAlso.sliderComponentShape}
+/// {@macro flutter.material.slider.seeAlso.sliderTrackShape}
+/// {@macro flutter.material.slider.seeAlso.sliderTickMarkShape}
+/// {@macro flutter.material.slider.seeAlso.rangeSliderThumbShape}
+/// {@macro flutter.material.slider.seeAlso.rangeSliderValueIndicatorShape}
+/// {@macro flutter.material.slider.seeAlso.rangeSliderTrackShape}
+/// {@macro flutter.material.slider.seeAlso.rangeSliderTickMarkShape}
 class SliderTheme extends InheritedTheme {
   /// Applies the given theme [data] to [child].
   ///
@@ -298,13 +298,13 @@ enum Thumb {
 ///  * [Theme] widget, which performs a similar function to [SliderTheme],
 ///    but for overall themes.
 ///  * [ThemeData], which has a default [SliderThemeData].
-///    {@macro flutter.material.slider.seeAlso.sliderComponentShape}
-///    {@macro flutter.material.slider.seeAlso.sliderTrackShape}
-///    {@macro flutter.material.slider.seeAlso.sliderTickMarkShape}
-///    {@macro flutter.material.slider.seeAlso.rangeSliderThumbShape}
-///    {@macro flutter.material.slider.seeAlso.rangeSliderValueIndicatorShape}
-///    {@macro flutter.material.slider.seeAlso.rangeSliderTrackShape}
-///    {@macro flutter.material.slider.seeAlso.rangeSliderTickMarkShape}
+/// {@macro flutter.material.slider.seeAlso.sliderComponentShape}
+/// {@macro flutter.material.slider.seeAlso.sliderTrackShape}
+/// {@macro flutter.material.slider.seeAlso.sliderTickMarkShape}
+/// {@macro flutter.material.slider.seeAlso.rangeSliderThumbShape}
+/// {@macro flutter.material.slider.seeAlso.rangeSliderValueIndicatorShape}
+/// {@macro flutter.material.slider.seeAlso.rangeSliderTrackShape}
+/// {@macro flutter.material.slider.seeAlso.rangeSliderTickMarkShape}
 class SliderThemeData extends Diagnosticable {
   /// Create a [SliderThemeData] given a set of exact values. All the values
   /// must be specified.
@@ -940,9 +940,9 @@ class SliderThemeData extends Diagnosticable {
 ///
 /// See also:
 ///
-///    {@macro flutter.material.slider.seeAlso.roundSliderThumbShape}
-///    {@macro flutter.material.slider.seeAlso.roundSliderOverlayShape}
-///    {@macro flutter.material.slider.seeAlso.paddleSliderValueIndicatorShape}
+/// {@macro flutter.material.slider.seeAlso.roundSliderThumbShape}
+/// {@macro flutter.material.slider.seeAlso.roundSliderOverlayShape}
+/// {@macro flutter.material.slider.seeAlso.paddleSliderValueIndicatorShape}
 abstract class SliderComponentShape {
   /// This abstract const constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -1017,9 +1017,9 @@ abstract class SliderComponentShape {
 ///
 /// See also:
 ///
-///    {@macro flutter.material.slider.seeAlso.roundSliderTickMarkShape}
-///    {@macro flutter.material.slider.seeAlso.sliderTrackShape}
-///    {@macro flutter.material.slider.seeAlso.sliderComponentShape}
+/// {@macro flutter.material.slider.seeAlso.roundSliderTickMarkShape}
+/// {@macro flutter.material.slider.seeAlso.sliderTrackShape}
+/// {@macro flutter.material.slider.seeAlso.sliderComponentShape}
 abstract class SliderTickMarkShape {
   /// This abstract const constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -1089,9 +1089,9 @@ abstract class SliderTickMarkShape {
 ///
 /// See also:
 ///
-///    {@macro flutter.material.slider.seeAlso.roundedRectSliderTrackShape}
-///    {@macro flutter.material.slider.seeAlso.sliderTickMarkShape}
-///    {@macro flutter.material.slider.seeAlso.sliderComponentShape}
+/// {@macro flutter.material.slider.seeAlso.roundedRectSliderTrackShape}
+/// {@macro flutter.material.slider.seeAlso.sliderTickMarkShape}
+/// {@macro flutter.material.slider.seeAlso.sliderComponentShape}
 abstract class SliderTrackShape {
   /// This abstract const constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -1163,11 +1163,11 @@ abstract class SliderTrackShape {
 ///
 /// See also:
 ///
-///    {@macro flutter.material.slider.seeAlso.roundRangeSliderThumbShape}
-///    {@macro flutter.material.slider.seeAlso.rangeSliderTickMarkShape}
-///    {@macro flutter.material.slider.seeAlso.rangeSliderTrackShape}
-///    {@macro flutter.material.slider.seeAlso.rangeSliderValueIndicatorShape}
-///    {@macro flutter.material.slider.seeAlso.sliderComponentShape}
+/// {@macro flutter.material.slider.seeAlso.roundRangeSliderThumbShape}
+/// {@macro flutter.material.slider.seeAlso.rangeSliderTickMarkShape}
+/// {@macro flutter.material.slider.seeAlso.rangeSliderTrackShape}
+/// {@macro flutter.material.slider.seeAlso.rangeSliderValueIndicatorShape}
+/// {@macro flutter.material.slider.seeAlso.sliderComponentShape}
 abstract class RangeSliderThumbShape {
   /// This abstract const constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -1222,11 +1222,11 @@ abstract class RangeSliderThumbShape {
 ///
 /// See also:
 ///
-///    {@macro flutter.material.slider.seeAlso.paddleRangeSliderValueIndicatorShape}
-///    {@macro flutter.material.slider.seeAlso.rangeSliderTickMarkShape}
-///    {@macro flutter.material.slider.seeAlso.rangeSliderThumbShape}
-///    {@macro flutter.material.slider.seeAlso.rangeSliderTrackShape}
-///    {@macro flutter.material.slider.seeAlso.sliderComponentShape}
+/// {@macro flutter.material.slider.seeAlso.paddleRangeSliderValueIndicatorShape}
+/// {@macro flutter.material.slider.seeAlso.rangeSliderTickMarkShape}
+/// {@macro flutter.material.slider.seeAlso.rangeSliderThumbShape}
+/// {@macro flutter.material.slider.seeAlso.rangeSliderTrackShape}
+/// {@macro flutter.material.slider.seeAlso.sliderComponentShape}
 abstract class RangeSliderValueIndicatorShape {
   /// This abstract const constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -1304,11 +1304,11 @@ abstract class RangeSliderValueIndicatorShape {
 ///
 /// See also:
 ///
-///    {@macro flutter.material.slider.seeAlso.roundRangeSliderTickMarkShape}
-///    {@macro flutter.material.slider.seeAlso.rangeSliderThumbShape}
-///    {@macro flutter.material.slider.seeAlso.rangeSliderTrackShape}
-///    {@macro flutter.material.slider.seeAlso.rangeSliderValueIndicatorShape}
-///    {@macro flutter.material.slider.seeAlso.sliderComponentShape}
+/// {@macro flutter.material.slider.seeAlso.roundRangeSliderTickMarkShape}
+/// {@macro flutter.material.slider.seeAlso.rangeSliderThumbShape}
+/// {@macro flutter.material.slider.seeAlso.rangeSliderTrackShape}
+/// {@macro flutter.material.slider.seeAlso.rangeSliderValueIndicatorShape}
+/// {@macro flutter.material.slider.seeAlso.sliderComponentShape}
 abstract class RangeSliderTickMarkShape {
   /// This abstract const constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -1367,11 +1367,11 @@ abstract class RangeSliderTickMarkShape {
 ///
 /// See also:
 ///
-///    {@macro flutter.material.slider.seeAlso.roundedRectRangeSliderTrackShape}
-///    {@macro flutter.material.slider.seeAlso.rangeSliderTickMarkShape}
-///    {@macro flutter.material.slider.seeAlso.rangeSliderThumbShape}
-///    {@macro flutter.material.slider.seeAlso.rangeSliderValueIndicatorShape}
-///    {@macro flutter.material.slider.seeAlso.sliderComponentShape}
+/// {@macro flutter.material.slider.seeAlso.roundedRectRangeSliderTrackShape}
+/// {@macro flutter.material.slider.seeAlso.rangeSliderTickMarkShape}
+/// {@macro flutter.material.slider.seeAlso.rangeSliderThumbShape}
+/// {@macro flutter.material.slider.seeAlso.rangeSliderValueIndicatorShape}
+/// {@macro flutter.material.slider.seeAlso.sliderComponentShape}
 abstract class RangeSliderTrackShape {
   /// This abstract const constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -1448,16 +1448,16 @@ abstract class RangeSliderTrackShape {
 /// Base track shape that provides an implementation of [getPreferredRect] for
 /// default sizing.
 ///
+/// The height is set from [SliderThemeData.trackHeight] and the width of the
+/// parent box less the larger of the widths of [SliderThemeData.thumbShape] and
+/// [SliderThemeData.overlayShape].
+///
 /// See also:
 ///
 ///  * [RectangularSliderTrackShape], which is a track shape with sharp
 ///    rectangular edges
 ///  * [RoundedRectSliderTrackShape], which is a track shape with round
 ///    stadium-like edges.
-///
-///    The height is set from [SliderThemeData.trackHeight] and the width of the
-///    parent box less the larger of the widths of [SliderThemeData.thumbShape] and
-///    [SliderThemeData.overlayShape].
 abstract class BaseSliderTrackShape {
   /// Returns a rect that represents the track bounds that fits within the
   /// [Slider].
@@ -1514,7 +1514,7 @@ abstract class BaseSliderTrackShape {
 ///  * [Slider], for the component that is meant to display this shape.
 ///  * [SliderThemeData], where an instance of this class is set to inform the
 ///    slider of the visual details of the its track.
-///    {@macro flutter.material.slider.seeAlso.sliderTrackShape}
+/// {@macro flutter.material.slider.seeAlso.sliderTrackShape}
 ///  * [RoundedRectSliderTrackShape], for a similar track with rounded edges.
 class RectangularSliderTrackShape extends SliderTrackShape with BaseSliderTrackShape {
   /// Creates a slider track that draws 2 rectangles.
@@ -1618,7 +1618,7 @@ class RectangularSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
 ///  * [Slider], for the component that is meant to display this shape.
 ///  * [SliderThemeData], where an instance of this class is set to inform the
 ///    slider of the visual details of the its track.
-///    {@macro flutter.material.slider.seeAlso.sliderTrackShape}
+/// {@macro flutter.material.slider.seeAlso.sliderTrackShape}
 ///  * [RectangularSliderTrackShape], for a similar track with sharp edges.
 class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackShape {
   /// Create a slider track that draws two rectangles with rounded outer edges.
@@ -1720,7 +1720,7 @@ class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
 ///  * [RangeSlider], for the component that is meant to display this shape.
 ///  * [SliderThemeData], where an instance of this class is set to inform the
 ///    slider of the visual details of the its track.
-///    {@macro flutter.material.slider.seeAlso.rangeSliderTrackShape}
+/// {@macro flutter.material.slider.seeAlso.rangeSliderTrackShape}
 ///  * [RoundedRectRangeSliderTrackShape], for a similar track with rounded
 ///    edges.
 class RectangularRangeSliderTrackShape extends RangeSliderTrackShape {
@@ -1847,7 +1847,7 @@ class RectangularRangeSliderTrackShape extends RangeSliderTrackShape {
 ///  * [RangeSlider], for the component that is meant to display this shape.
 ///  * [SliderThemeData], where an instance of this class is set to inform the
 ///    slider of the visual details of the its track.
-///    {@macro flutter.material.slider.seeAlso.rangeSliderTrackShape}
+/// {@macro flutter.material.slider.seeAlso.rangeSliderTrackShape}
 ///  * [RectangularRangeSliderTrackShape], for a similar track with sharp edges.
 class RoundedRectRangeSliderTrackShape extends RangeSliderTrackShape {
   /// Create a slider track with rounded outer edges.

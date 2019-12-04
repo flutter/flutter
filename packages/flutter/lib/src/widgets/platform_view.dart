@@ -82,9 +82,10 @@ class AndroidView extends StatefulWidget {
   /// for this type must have been registered.
   ///
   /// See also:
+  ///
+  ///  * [AndroidView] for an example of registering a platform view factory.
   final String viewType;
 
-  ///
   /// {@template flutter.widgets.platformViews.createdParam}
   /// Callback to invoke after the platform view has been created.
   ///
@@ -703,6 +704,8 @@ class _UiKitPlatformView extends LeafRenderObjectWidget {
 /// The parameters used to create a [PlatformViewController].
 ///
 /// See also:
+///
+///  * [CreatePlatformViewCallback] which uses this object to create a [PlatformViewController].
 class PlatformViewCreationParams {
 
   const PlatformViewCreationParams._({
@@ -713,7 +716,6 @@ class PlatformViewCreationParams {
   }) : assert(id != null),
        assert(onPlatformViewCreated != null);
 
-  ///
   /// The unique identifier for the new platform view.
   ///
   /// [PlatformViewController.viewId] should match this id.
@@ -749,9 +751,10 @@ typedef PlatformViewSurfaceFactory = Widget Function(BuildContext context, Platf
 /// params [PlatformViewCreationParams.id] field.
 ///
 /// See also:
+///
+///  * [PlatformViewLink], which links a platform view with the Flutter framework.
 typedef CreatePlatformViewCallback = PlatformViewController Function(PlatformViewCreationParams params);
 
-///
 /// Links a platform view with the Flutter framework.
 ///
 /// Provides common functionality for embedding a platform view (e.g an android.view.View on Android)

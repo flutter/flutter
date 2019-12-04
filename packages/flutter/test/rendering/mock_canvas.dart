@@ -123,18 +123,24 @@ abstract class PaintPattern {
   /// found, the matcher fails.
   ///
   /// See also:
+  ///
+  ///  * [restore], which indicates that a restore is expected next.
+  ///  * [saveRestore], which indicates that a matching pair of save/restore
+  ///    calls is expected next.
   void save();
 
-  ///
   /// Indicates that a restore is expected next.
   ///
   /// Calls are skipped until a call to [Canvas.restore] is found. If none is
   /// found, the matcher fails.
   ///
   /// See also:
+  ///
+  ///  * [save], which indicates that a save is expected next.
+  ///  * [saveRestore], which indicates that a matching pair of save/restore
+  ///    calls is expected next.
   void restore();
 
-  ///
   /// Indicates that a matching pair of save/restore calls is expected next.
   ///
   /// Calls are skipped until a call to [Canvas.save] is found, then, calls are
@@ -142,9 +148,11 @@ abstract class PaintPattern {
   /// pair of calls could be found, the matcher fails.
   ///
   /// See also:
+  ///
+  ///  * [save], which indicates that a save is expected next.
+  ///  * [restore], which indicates that a restore is expected next.
   void saveRestore();
 
-  ///
   /// Indicates that a rectangular clip is expected next.
   ///
   /// The next rectangular clip is examined. Any arguments that are passed to

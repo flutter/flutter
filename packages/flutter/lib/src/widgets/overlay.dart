@@ -174,7 +174,7 @@ class _OverlayEntryState extends State<_OverlayEntry> {
   }
 }
 
-/// A [Stack] of entries that can be managed independently.
+/// A widget that manages a [Stack] of entries that can be managed independently.
 ///
 /// Overlays let independent child widgets "float" visual elements on top of
 /// other widgets by inserting them into the overlay's [Stack]. The overlay lets

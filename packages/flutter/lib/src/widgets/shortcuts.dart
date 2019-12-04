@@ -231,8 +231,8 @@ class ShortcutManager extends ChangeNotifier with DiagnosticableMixin {
 ///
 /// See also:
 ///
-///  * [Intent], a class for containing a description of a user
-///    action to be invoked.
+///  * [Intent], a class for containing a description of a user action to be
+///    invoked.
 ///  * [Action], a class for defining an invocation of a user action.
 class Shortcuts extends StatefulWidget {
   /// Creates a ActionManager object.

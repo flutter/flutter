@@ -692,9 +692,11 @@ class RelativePositionedTransition extends AnimatedWidget {
   /// The animation that controls the child's size and position.
   ///
   /// See also:
+  ///
+  ///  * [size], which gets the size of the box that the [Positioned] widget's
+  ///    offsets are relative to.
   Animation<Rect> get rect => listenable as Animation<Rect>;
 
-  ///
   /// The [Positioned] widget's offsets are relative to a box of this
   /// size whose origin is 0,0.
   final Size size;

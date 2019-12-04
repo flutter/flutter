@@ -54,8 +54,11 @@ class UniqueKey extends LocalKey {
 /// generate that widget.
 ///
 /// See also:
+///
+///  * [Key], the base class for all keys.
+///  * The discussion at [Widget.key] for more information about how widgets use
+///    keys.
 class ObjectKey extends LocalKey {
-  ///
   /// Creates a key that uses [identical] on [value] for its [operator==].
   const ObjectKey(this.value);
 
@@ -101,9 +104,11 @@ class ObjectKey extends LocalKey {
 /// global key. Attempting to do so will assert at runtime.
 ///
 /// See also:
+///
+///  * The discussion at [Widget.key] for more information about how widgets use
+///    keys.
 @optionalTypeArgs
 abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
-  ///
   /// Creates a [LabeledGlobalKey], which is a [GlobalKey] with a label used for
   /// debugging.
   ///
@@ -413,9 +418,10 @@ abstract class Widget extends DiagnosticableTree {
   /// an explicit key.
   ///
   /// See also:
+  ///
+  ///  * The discussions at [Key] and [GlobalKey].
   final Key key;
 
-  ///
   /// Inflates this configuration to a concrete instance.
   ///
   /// A given widget can be included in the tree zero or more times. In particular
@@ -1193,7 +1199,8 @@ abstract class State<T extends StatefulWidget> extends Diagnosticable {
   ///
   /// See also:
   ///
-  ///    removed from the tree permanently.
+  ///  * [dispose], which is called after [deactivate] if the widget is removed
+  ///    from the tree permanently.
   @protected
   @mustCallSuper
   void deactivate() { }
@@ -1215,6 +1222,8 @@ abstract class State<T extends StatefulWidget> extends Diagnosticable {
   /// super.dispose().
   ///
   /// See also:
+  ///
+  ///  * [deactivate], which is called prior to [dispose].
   @protected
   @mustCallSuper
   void dispose() {
@@ -1225,7 +1234,6 @@ abstract class State<T extends StatefulWidget> extends Diagnosticable {
     }());
   }
 
-  ///
   /// Describes the part of the user interface represented by this widget.
   ///
   /// The framework calls this method in a number of different situations:

@@ -60,7 +60,7 @@ import 'text_style.dart';
 ///
 ///  * [StrutStyle](dart-ui/StrutStyle-class.html), the class in the [dart:ui] library.
 ///
-///    ### Fields and their default values.
+/// ### Fields and their default values.
 
 // ///////////////////////////////////////////////////////////////////////////
 // The defaults are noted here for convenience. The actual place where they //

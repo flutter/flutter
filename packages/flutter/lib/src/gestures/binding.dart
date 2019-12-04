@@ -231,6 +231,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
 ///
 /// See also:
 ///
+///  * [FlutterErrorDetailsForPointerRouter], which is also used by the
 ///    gesture library.
 class FlutterErrorDetailsForPointerEventDispatcher extends FlutterErrorDetails {
   /// Creates a [FlutterErrorDetailsForPointerEventDispatcher] object with the given

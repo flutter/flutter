@@ -38,86 +38,86 @@ import 'viewport.dart';
 ///
 ///  * [PageView], which is the widget this object controls.
 ///
-///    {@tool sample}
+/// {@tool sample}
 ///
-///    This widget introduces a [MaterialApp], [Scaffold] and [PageView] with two pages
-///    using the default constructor. Both pages contain a [RaisedButton] allowing you
-///    to animate the [PageView] using a [PageController].
+/// This widget introduces a [MaterialApp], [Scaffold] and [PageView] with two pages
+/// using the default constructor. Both pages contain a [RaisedButton] allowing you
+/// to animate the [PageView] using a [PageController].
 ///
-///    ```dart
-///    class MyPageView extends StatefulWidget {
-///    MyPageView({Key key}) : super(key: key);
+/// ```dart
+/// class MyPageView extends StatefulWidget {
+///   MyPageView({Key key}) : super(key: key);
 ///
-///    _MyPageViewState createState() => _MyPageViewState();
-///    }
+///   _MyPageViewState createState() => _MyPageViewState();
+/// }
 ///
-///    class _MyPageViewState extends State<MyPageView> {
-///    PageController _pageController;
+/// class _MyPageViewState extends State<MyPageView> {
+///   PageController _pageController;
 ///
-///    @override
-///    void initState() {
-///    super.initState();
-///    _pageController = PageController();
-///    }
+///   @override
+///   void initState() {
+///     super.initState();
+///     _pageController = PageController();
+///   }
 ///
-///    @override
-///    void dispose() {
-///    _pageController.dispose();
-///    super.dispose();
-///    }
+///   @override
+///   void dispose() {
+///     _pageController.dispose();
+///     super.dispose();
+///   }
 ///
-///    @override
-///    Widget build(BuildContext context) {
-///    return MaterialApp(
-///    home: Scaffold(
-///    body: PageView(
-///    controller: _pageController,
-///    children: [
-///    Container(
-///    color: Colors.red,
-///    child: Center(
-///    child: RaisedButton(
-///    color: Colors.white,
-///    onPressed: () {
-///    if (_pageController.hasClients) {
-///    _pageController.animateToPage(
-///    1,
-///    duration: const Duration(milliseconds: 400),
-///    curve: Curves.easeInOut,
-///    );
-///    }
-///    },
-///    child: Text('Next'),
-///    ),
-///    ),
-///    ),
-///    Container(
-///    color: Colors.blue,
-///    child: Center(
-///    child: RaisedButton(
-///    color: Colors.white,
-///    onPressed: () {
-///    if (_pageController.hasClients) {
-///    _pageController.animateToPage(
-///    0,
-///    duration: const Duration(milliseconds: 400),
-///    curve: Curves.easeInOut,
-///    );
-///    }
-///    },
-///    child: Text('Previous'),
-///    ),
-///    ),
-///    ),
-///    ],
-///    ),
-///    ),
-///    );
-///    }
-///    }
+///   @override
+///   Widget build(BuildContext context) {
+///     return MaterialApp(
+///       home: Scaffold(
+///         body: PageView(
+///           controller: _pageController,
+///           children: [
+///             Container(
+///               color: Colors.red,
+///               child: Center(
+///                 child: RaisedButton(
+///                   color: Colors.white,
+///                   onPressed: () {
+///                     if (_pageController.hasClients) {
+///                       _pageController.animateToPage(
+///                         1,
+///                         duration: const Duration(milliseconds: 400),
+///                         curve: Curves.easeInOut,
+///                       );
+///                     }
+///                   },
+///                   child: Text('Next'),
+///                 ),
+///               ),
+///             ),
+///             Container(
+///               color: Colors.blue,
+///               child: Center(
+///                 child: RaisedButton(
+///                   color: Colors.white,
+///                   onPressed: () {
+///                     if (_pageController.hasClients) {
+///                       _pageController.animateToPage(
+///                         0,
+///                         duration: const Duration(milliseconds: 400),
+///                         curve: Curves.easeInOut,
+///                       );
+///                     }
+///                   },
+///                   child: Text('Previous'),
+///                 ),
+///               ),
+///             ),
+///           ],
+///         ),
+///       ),
+///     );
+///   }
+/// }
 ///
-///    ```
-///    {@end-tool}
+/// ```
+/// {@end-tool}
 class PageController extends ScrollController {
   /// Creates a page controller.
   ///

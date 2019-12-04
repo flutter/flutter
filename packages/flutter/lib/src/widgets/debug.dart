@@ -30,9 +30,11 @@ import 'table.dart';
 /// overwhelming), consider [debugProfileBuildsEnabled].
 ///
 /// See also:
+///
+///  * [WidgetsBinding.drawFrame], which pumps the build and rendering pipeline
+///    to generate a frame.
 bool debugPrintRebuildDirtyWidgets = false;
 
-///
 /// Signature for [debugOnRebuildDirtyWidget] implementations.
 typedef RebuildDirtyWidgetCallback = void Function(Element e, bool builtOnce);
 
@@ -64,9 +66,11 @@ RebuildDirtyWidgetCallback debugOnRebuildDirtyWidget;
 /// [runApp]) from the regular builds triggered by the pipeline.
 ///
 /// See also:
+///
+///  * [WidgetsBinding.drawFrame], which pumps the build and rendering pipeline
+///    to generate a frame.
 bool debugPrintBuildScope = false;
 
-///
 /// Log the call stacks that mark widgets as needing to be rebuilt.
 ///
 /// This is called whenever [BuildOwner.scheduleBuildFor] adds an element to the
@@ -94,6 +98,7 @@ bool debugPrintGlobalKeyedWidgetLifecycle = false;
 ///
 /// See also:
 ///
+///  * [debugProfilePaintsEnabled], which does something similar but for
 ///    painting, and [debugPrintRebuildDirtyWidgets], which does something similar
 ///    but reporting the builds to the console.
 bool debugProfileBuildsEnabled = false;

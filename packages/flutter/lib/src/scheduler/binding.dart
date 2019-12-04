@@ -50,10 +50,12 @@ typedef TaskCallback<T> = T Function();
 /// whenever the system needs to decide whether a task at a given
 /// priority needs to be run.
 ///
-/// Return true if a task with the given priority should be executed
-/// at this time, false otherwise.
+/// Return true if a task with the given priority should be executed at this
+/// time, false otherwise.
 ///
 /// See also:
+///
+///  * [defaultSchedulingStrategy], the default [SchedulingStrategy] for [SchedulerBinding.schedulingStrategy].
 typedef SchedulingStrategy = bool Function({ int priority, SchedulerBinding scheduler });
 
 class _TaskEntry<T> {
@@ -125,7 +127,6 @@ class _FrameCallbackEntry {
   StackTrace debugStack;
 }
 
-///
 /// The various phases that a [SchedulerBinding] goes through during
 /// [SchedulerBinding.handleBeginFrame].
 ///
@@ -135,8 +136,10 @@ class _FrameCallbackEntry {
 /// so their relative index values can be compared to each other.
 ///
 /// See also:
+///
+///  * [WidgetsBinding.drawFrame], which pumps the build and rendering pipeline
+///    to generate a frame.
 enum SchedulerPhase {
-  ///
   /// No frame is being processed. Tasks (scheduled by
   /// [WidgetsBinding.scheduleTask]), microtasks (scheduled by
   /// [scheduleMicrotask]), [Timer] callbacks, event handlers (e.g. from user

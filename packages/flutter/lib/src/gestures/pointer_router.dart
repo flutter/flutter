@@ -125,6 +125,7 @@ class PointerRouter {
 ///
 /// See also:
 ///
+///  * [FlutterErrorDetailsForPointerEventDispatcher], which is also used
 ///    by the gestures library.
 class FlutterErrorDetailsForPointerRouter extends FlutterErrorDetails {
   /// Creates a [FlutterErrorDetailsForPointerRouter] object with the given

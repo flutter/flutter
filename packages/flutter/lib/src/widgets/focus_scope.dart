@@ -121,16 +121,16 @@ import 'inherited_notifier.dart';
 /// See also:
 ///
 ///  * [FocusNode], which represents a node in the focus hierarchy and
-///    [FocusNode]'s API documentation includes a detailed explanation of its
-///    role in the overall focus system.
+///    [FocusNode]'s API documentation includes a detailed explanation of its role
+///    in the overall focus system.
 ///  * [FocusScope], a widget that manages a group of focusable widgets using a
 ///    [FocusScopeNode].
 ///  * [FocusScopeNode], a node that collects focus nodes into a group for
 ///    traversal.
 ///  * [FocusManager], a singleton that manages the primary focus and
 ///    distributes key events to focused nodes.
-///  * [FocusTraversalPolicy], an object used to determine how to move the
-///    focus to other nodes.
+///  * [FocusTraversalPolicy], an object used to determine how to move the focus
+///    to other nodes.
 ///  * [DefaultFocusTraversal], a widget used to configure the default focus
 ///    traversal policy for a widget subtree.
 class Focus extends StatefulWidget {
@@ -496,8 +496,8 @@ class _FocusState extends State<Focus> {
 ///    managing focus without having to manage the node.
 ///  * [FocusManager], a singleton that manages the focus and distributes key
 ///    events to focused nodes.
-///  * [FocusTraversalPolicy], an object used to determine how to move the
-///    focus to other nodes.
+///  * [FocusTraversalPolicy], an object used to determine how to move the focus
+///    to other nodes.
 ///  * [DefaultFocusTraversal], a widget used to configure the default focus
 ///    traversal policy for a widget subtree.
 class FocusScope extends Focus {

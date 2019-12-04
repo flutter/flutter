@@ -942,12 +942,12 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
 ///
 /// See also:
 ///
-///  * [Focus], a widget that manages a [FocusNode] and provides access to
-///    focus information and actions to its descendant widgets.
+///  * [Focus], a widget that manages a [FocusNode] and provides access to focus
+///    information and actions to its descendant widgets.
 ///  * [FocusScope], a widget that manages a [FocusScopeNode] and provides
 ///    access to scope information and actions to its descendant widgets.
-///  * [FocusAttachment], a widget that connects a [FocusScopeNode] to the
-///    focus tree.
+///  * [FocusAttachment], a widget that connects a [FocusScopeNode] to the focus
+///    tree.
 ///  * [FocusManager], a singleton that manages the focus and distributes key
 ///    events to focused nodes.
 class FocusScopeNode extends FocusNode {

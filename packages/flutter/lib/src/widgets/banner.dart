@@ -86,6 +86,7 @@ class BannerPainter extends CustomPainter {
   ///
   /// See also:
   ///
+  ///  * [layoutDirection], which controls the interpretation of values in
   ///    [location].
   final TextDirection textDirection;
 
@@ -98,7 +99,7 @@ class BannerPainter extends CustomPainter {
   ///
   /// See also:
   ///
-  ///    [message].
+  ///  * [textDirection], which controls the reading direction of the [message].
   final TextDirection layoutDirection;
 
   /// The color to paint behind the [message].
@@ -281,7 +282,7 @@ class Banner extends StatelessWidget {
   ///
   /// See also:
   ///
-  ///    [location].
+  ///  * [layoutDirection], which controls the interpretation of the [location].
   final TextDirection textDirection;
 
   /// Where to show the banner (e.g., the upper right corner).
@@ -295,7 +296,7 @@ class Banner extends StatelessWidget {
   ///
   /// See also:
   ///
-  ///    [message].
+  ///  * [textDirection], which controls the reading direction of the [message].
   final TextDirection layoutDirection;
 
   /// The color of the banner.
@@ -336,7 +337,7 @@ class Banner extends StatelessWidget {
 /// [MaterialApp] builds one of these by default.
 /// Does nothing in release mode.
 class CheckedModeBanner extends StatelessWidget {
-  /// Creates a checked mode banner.
+  /// Creates a const checked mode banner.
   const CheckedModeBanner({
     Key key,
     @required this.child,

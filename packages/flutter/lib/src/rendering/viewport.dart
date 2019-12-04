@@ -802,7 +802,8 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   ///
   /// See also:
   ///
-  ///    direction computed for the child during layout.
+  ///  * [paintOffsetOf], which uses the layout offset and growth direction
+  ///    computed for the child during layout.
   @protected
   Offset computeAbsolutePaintOffset(RenderSliver child, double layoutOffset, GrowthDirection growthDirection) {
     assert(hasSize); // this is only usable once we have a size
@@ -889,8 +890,9 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   ///
   /// See also:
   ///
-  ///    from an explicit layout offset and growth direction instead of using the
-  ///    values computed for the child during layout.
+  ///  * [computeAbsolutePaintOffset], which computes the paint offset from an
+  ///    explicit layout offset and growth direction instead of using the values
+  ///    computed for the child during layout.
   @protected
   Offset paintOffsetOf(RenderSliver child);
 
