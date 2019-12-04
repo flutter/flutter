@@ -33,6 +33,8 @@ class BuildAarCommand extends BuildSubCommand {
         help: 'Build a release version of the current project.',
       );
     usesFlavorOption();
+    usesBuildNumberOption();
+    usesBuildNameOption();
     usesPubOption();
     argParser
       ..addMultiOption(
@@ -45,7 +47,7 @@ class BuildAarCommand extends BuildSubCommand {
       ..addOption(
         'output-dir',
         help: 'The absolute path to the directory where the repository is generated.'
-              'By default, this is \'<current-directory>android/build\'. ',
+            'By default, this is \'<current-directory>android/build\'. ',
       );
   }
 
@@ -54,8 +56,8 @@ class BuildAarCommand extends BuildSubCommand {
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
-    DevelopmentArtifact.androidGenSnapshot,
-  };
+        DevelopmentArtifact.androidGenSnapshot,
+      };
 
   @override
   Future<Map<CustomDimensions, String>> get usageValues async {
@@ -85,17 +87,25 @@ class BuildAarCommand extends BuildSubCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final Set<AndroidBuildInfo> androidBuildInfo = <AndroidBuildInfo>{};
-    final Iterable<AndroidArch> targetArchitectures = stringsArg('target-platform')
-      .map<AndroidArch>(getAndroidArchForName);
+    final Iterable<AndroidArch> targetArchitectures =
+        stringsArg('target-platform').map<AndroidArch>(getAndroidArchForName);
+
+    final String buildNumber = argParser.options.containsKey('build-number')
+        ? stringArg('build-number')
+        : null;
+
+    final String buildName = argParser.options.containsKey('build-name')
+        ? stringArg('build-name')
+        : null;
 
     for (String buildMode in const <String>['debug', 'profile', 'release']) {
       if (boolArg(buildMode)) {
-        androidBuildInfo.add(
-          AndroidBuildInfo(
-            BuildInfo(BuildMode.fromName(buildMode), stringArg('flavor')),
-            targetArchs: targetArchitectures,
-          )
-        );
+        androidBuildInfo.add(AndroidBuildInfo(
+          BuildInfo(BuildMode.fromName(buildMode), stringArg('flavor'),
+              buildNumber: buildNumber,
+              buildName: buildName),
+          targetArchs: targetArchitectures,
+        ));
       }
     }
     if (androidBuildInfo.isEmpty) {

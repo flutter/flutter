@@ -493,6 +493,9 @@ Future<void> buildGradleAar({
     throwToolExit('AARs can only be built for plugin or module projects.');
   }
 
+  updateLocalProperties(
+      project: project, buildInfo: androidBuildInfo.buildInfo);
+
   final String aarTask = getAarTaskFor(androidBuildInfo.buildInfo);
   final Status status = logger.startProgress(
     'Running Gradle task \'$aarTask\'...',
