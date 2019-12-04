@@ -45,7 +45,7 @@ export 'package:test_api/test_api.dart' hide
   isInstanceOf; // we have our own wrapper in matchers.dart
 
 /// Signature for callback to [testWidgets] and [benchmarkWidgets].
-typedef WidgetTesterCallback = Future<void> Function(WidgetTester widgetTester);
+typedef WidgetTesterCallback = Future<void> Function(WidgetTester);
 
 /// Runs the [callback] inside the Flutter test environment.
 ///
@@ -864,7 +864,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   Future<void> ensureVisible(Finder finder) => Scrollable.ensureVisible(element(finder));
 }
 
-typedef _TickerDisposeCallback = void Function(_TestTicker ticker);
+typedef _TickerDisposeCallback = void Function(_TestTicker);
 
 class _TestTicker extends Ticker {
   _TestTicker(TickerCallback onTick, this._onDispose) : super(onTick);

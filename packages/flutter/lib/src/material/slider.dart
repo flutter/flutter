@@ -29,7 +29,7 @@ import 'theme.dart';
 /// See also:
 ///
 ///  * [Slider.semanticFormatterCallback], which shows an example use case.
-typedef SemanticFormatterCallback = String Function(double value);
+typedef SemanticFormatterCallback = String Function(double);
 
 enum _SliderType { material, adaptive }
 

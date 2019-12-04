@@ -8,7 +8,7 @@ import 'async_guard.dart';
 import 'context.dart';
 import 'io.dart';
 
-typedef SignalHandler = FutureOr<void> Function(ProcessSignal signal);
+typedef SignalHandler = FutureOr<void> Function(ProcessSignal);
 
 Signals get signals => Signals.instance;
 

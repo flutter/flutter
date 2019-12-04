@@ -25,8 +25,8 @@ import 'scroll_simulation.dart';
 /// as a [SingleChildScrollView], [ListView] or [GridView], to have the whole
 /// sheet be draggable.
 typedef ScrollableWidgetBuilder = Widget Function(
-  BuildContext context,
-  ScrollController scrollController,
+  BuildContext,
+  ScrollController,
 );
 
 /// A container for a [Scrollable] that responds to drag gestures by resizing

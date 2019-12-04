@@ -123,4 +123,4 @@ Future<T> asyncGuard<T>(
 }
 
 typedef _UnaryOnError<T> = FutureOr<T> Function(Object error);
-typedef _BinaryOnError<T> = FutureOr<T> Function(Object error, StackTrace stackTrace);
+typedef _BinaryOnError<T> = FutureOr<T> Function(Object error, StackTrace);

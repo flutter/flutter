@@ -71,7 +71,7 @@ Widget buildTest({
   );
 }
 
-typedef DismissMethod = Future<void> Function(WidgetTester tester, Finder finder, { @required AxisDirection gestureDirection });
+typedef DismissMethod = Future<void> Function(WidgetTester, Finder, { @required AxisDirection gestureDirection });
 
 Future<void> dismissElement(WidgetTester tester, Finder finder, { @required AxisDirection gestureDirection }) async {
   Offset downLocation;

@@ -36,7 +36,7 @@ bool _focusDebug(String message, [Iterable<String> details]) {
 /// to receive key events.
 ///
 /// The [node] is the node that received the event.
-typedef FocusOnKeyCallback = bool Function(FocusNode node, RawKeyEvent event);
+typedef FocusOnKeyCallback = bool Function(FocusNode, RawKeyEvent);
 
 /// An attachment point for a [FocusNode].
 ///

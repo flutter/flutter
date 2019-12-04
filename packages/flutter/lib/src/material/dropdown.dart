@@ -32,7 +32,7 @@ const EdgeInsets _kUnalignedButtonPadding = EdgeInsets.zero;
 const EdgeInsets _kAlignedMenuMargin = EdgeInsets.zero;
 const EdgeInsetsGeometry _kUnalignedMenuMargin = EdgeInsetsDirectional.only(start: 16.0, end: 24.0);
 
-typedef DropdownButtonBuilder = List<Widget> Function(BuildContext context);
+typedef DropdownButtonBuilder = List<Widget> Function(BuildContext);
 
 class _DropdownMenuPainter extends CustomPainter {
   _DropdownMenuPainter({

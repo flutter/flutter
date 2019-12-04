@@ -12,7 +12,7 @@ export 'dart:ui' show VoidCallback;
 /// Signature for callbacks that report that an underlying value has changed.
 ///
 /// See also [ValueSetter].
-typedef ValueChanged<T> = void Function(T value);
+typedef ValueChanged<T> = void Function(T);
 
 /// Signature for callbacks that report that a value has been set.
 ///
@@ -26,7 +26,7 @@ typedef ValueChanged<T> = void Function(T value);
 ///
 ///  * [ValueGetter], the getter equivalent of this signature.
 ///  * [AsyncValueSetter], an asynchronous version of this signature.
-typedef ValueSetter<T> = void Function(T value);
+typedef ValueSetter<T> = void Function(T);
 
 /// Signature for callbacks that are to report a value on demand.
 ///
@@ -37,7 +37,7 @@ typedef ValueSetter<T> = void Function(T value);
 typedef ValueGetter<T> = T Function();
 
 /// Signature for callbacks that filter an iterable.
-typedef IterableFilter<T> = Iterable<T> Function(Iterable<T> input);
+typedef IterableFilter<T> = Iterable<T> Function(Iterable<T>);
 
 /// Signature of callbacks that have no arguments and return no data, but that
 /// return a [Future] to indicate when their work is complete.
@@ -56,7 +56,7 @@ typedef AsyncCallback = Future<void> Function();
 ///
 ///  * [ValueSetter], a synchronous version of this signature.
 ///  * [AsyncValueGetter], the getter equivalent of this signature.
-typedef AsyncValueSetter<T> = Future<void> Function(T value);
+typedef AsyncValueSetter<T> = Future<void> Function(T);
 
 /// Signature for callbacks that are to asynchronously report a value on demand.
 ///

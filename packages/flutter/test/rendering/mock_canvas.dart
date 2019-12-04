@@ -67,10 +67,10 @@ Matcher paintsExactlyCountTimes(Symbol methodName, int count) {
 typedef PaintPatternPredicate = bool Function(Symbol methodName, List<dynamic> arguments);
 
 /// The signature of [RenderObject.paint] functions.
-typedef _ContextPainterFunction = void Function(PaintingContext context, Offset offset);
+typedef _ContextPainterFunction = void Function(PaintingContext, Offset);
 
 /// The signature of functions that paint directly on a canvas.
-typedef _CanvasPainterFunction = void Function(Canvas canvas);
+typedef _CanvasPainterFunction = void Function(Canvas);
 
 /// Builder interface for patterns used to match display lists (canvas calls).
 ///

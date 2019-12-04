@@ -15,7 +15,7 @@ import 'package:flutter/widgets.dart';
 const double _kOpenScale = 1.1;
 
 typedef _DismissCallback = void Function(
-  BuildContext context,
+  BuildContext,
   double scale,
   double opacity,
 );
@@ -24,15 +24,15 @@ typedef _DismissCallback = void Function(
 ///
 /// Called every time the animation value changes.
 typedef ContextMenuPreviewBuilder = Widget Function(
-  BuildContext context,
-  Animation<double> animation,
+  BuildContext,
+  Animation<double>,
   Widget child,
 );
 
 // A function that proxies to ContextMenuPreviewBuilder without the child.
 typedef _ContextMenuPreviewBuilderChildless = Widget Function(
-  BuildContext context,
-  Animation<double> animation,
+  BuildContext,
+  Animation<double>,
 );
 
 // Given a GlobalKey, return the Rect of the corresponding RenderBox's

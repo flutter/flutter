@@ -22,13 +22,13 @@ const double _kDismissThreshold = 0.4;
 /// the given `direction`.
 ///
 /// Used by [Dismissible.onDismissed].
-typedef DismissDirectionCallback = void Function(DismissDirection direction);
+typedef DismissDirectionCallback = void Function(DismissDirection);
 
 /// Signature used by [Dismissible] to give the application an opportunity to
 /// confirm or veto a dismiss gesture.
 ///
 /// Used by [Dismissible.confirmDismiss].
-typedef ConfirmDismissCallback = Future<bool> Function(DismissDirection direction);
+typedef ConfirmDismissCallback = Future<bool> Function(DismissDirection);
 
 /// The direction in which a [Dismissible] can be dismissed.
 enum DismissDirection {

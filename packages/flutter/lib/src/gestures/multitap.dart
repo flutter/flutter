@@ -25,11 +25,11 @@ typedef GestureDoubleTapCallback = void Function();
 
 /// Signature used by [MultiTapGestureRecognizer] for when a pointer that might
 /// cause a tap has contacted the screen at a particular location.
-typedef GestureMultiTapDownCallback = void Function(int pointer, TapDownDetails details);
+typedef GestureMultiTapDownCallback = void Function(int pointer, TapDownDetails);
 
 /// Signature used by [MultiTapGestureRecognizer] for when a pointer that will
 /// trigger a tap has stopped contacting the screen at a particular location.
-typedef GestureMultiTapUpCallback = void Function(int pointer, TapUpDetails details);
+typedef GestureMultiTapUpCallback = void Function(int pointer, TapUpDetails);
 
 /// Signature used by [MultiTapGestureRecognizer] for when a tap has occurred.
 typedef GestureMultiTapCallback = void Function(int pointer);

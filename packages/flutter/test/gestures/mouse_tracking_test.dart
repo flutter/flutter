@@ -14,7 +14,7 @@ import 'package:flutter/services.dart';
 
 import '../flutter_test_alternative.dart';
 
-typedef HandleEventCallback = void Function(PointerEvent event);
+typedef HandleEventCallback = void Function(PointerEvent);
 
 class _TestGestureFlutterBinding extends BindingBase
     with ServicesBinding, SchedulerBinding, GestureBinding, SemanticsBinding, RendererBinding {

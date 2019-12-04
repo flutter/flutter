@@ -85,14 +85,14 @@ void enableFlutterDriverExtension({ DataHandler handler, bool silenceErrors = fa
 }
 
 /// Signature for functions that handle a command and return a result.
-typedef CommandHandlerCallback = Future<Result> Function(Command c);
+typedef CommandHandlerCallback = Future<Result> Function(Command);
 
 /// Signature for functions that deserialize a JSON map to a command object.
 typedef CommandDeserializerCallback = Command Function(Map<String, String> params);
 
 /// Signature for functions that run the given finder and return the [Element]
 /// found, if any, or null otherwise.
-typedef FinderConstructor = Finder Function(SerializableFinder finder);
+typedef FinderConstructor = Finder Function(SerializableFinder);
 
 /// The class that manages communication between a Flutter Driver test and the
 /// application being remote-controlled, on the application side.

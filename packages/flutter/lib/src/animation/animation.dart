@@ -26,7 +26,7 @@ enum AnimationStatus {
 }
 
 /// Signature for listeners attached using [Animation.addStatusListener].
-typedef AnimationStatusListener = void Function(AnimationStatus status);
+typedef AnimationStatusListener = void Function(AnimationStatus);
 
 /// An animation with a value of type `T`.
 ///

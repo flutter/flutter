@@ -14,7 +14,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'semantics_tester.dart';
 
-typedef TraversalTestFunction = Future<void> Function(TraversalTester tester);
+typedef TraversalTestFunction = Future<void> Function(TraversalTester);
 const Size tenByTen = Size(10.0, 10.0);
 
 void main() {

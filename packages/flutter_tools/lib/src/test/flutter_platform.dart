@@ -70,7 +70,7 @@ final Map<InternetAddressType, InternetAddress> _kHosts = <InternetAddressType, 
   InternetAddressType.IPv6: InternetAddress.loopbackIPv6,
 };
 
-typedef PlatformPluginRegistration = void Function(FlutterPlatform platform);
+typedef PlatformPluginRegistration = void Function(FlutterPlatform);
 
 /// Configure the `test` package to work with Flutter.
 ///

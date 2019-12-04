@@ -52,7 +52,7 @@ class DragDownDetails {
 /// The `details` object provides the position of the touch.
 ///
 /// See [DragGestureRecognizer.onDown].
-typedef GestureDragDownCallback = void Function(DragDownDetails details);
+typedef GestureDragDownCallback = void Function(DragDownDetails);
 
 /// Details object for callbacks that use [GestureDragStartCallback].
 ///
@@ -109,7 +109,7 @@ class DragStartDetails {
 /// touched the surface.
 ///
 /// See [DragGestureRecognizer.onStart].
-typedef GestureDragStartCallback = void Function(DragStartDetails details);
+typedef GestureDragStartCallback = void Function(DragStartDetails);
 
 /// Details object for callbacks that use [GestureDragUpdateCallback].
 ///
@@ -194,7 +194,7 @@ class DragUpdateDetails {
 /// has traveled since the last update.
 ///
 /// See [DragGestureRecognizer.onUpdate].
-typedef GestureDragUpdateCallback = void Function(DragUpdateDetails details);
+typedef GestureDragUpdateCallback = void Function(DragUpdateDetails);
 
 /// Details object for callbacks that use [GestureDragEndCallback].
 ///

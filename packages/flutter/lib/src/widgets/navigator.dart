@@ -30,10 +30,10 @@ import 'ticker_provider.dart';
 /// Creates a route for the given route settings.
 ///
 /// Used by [Navigator.onGenerateRoute] and [Navigator.onUnknownRoute].
-typedef RouteFactory = Route<dynamic> Function(RouteSettings settings);
+typedef RouteFactory = Route<dynamic> Function(RouteSettings);
 
 /// Signature for the [Navigator.popUntil] predicate argument.
-typedef RoutePredicate = bool Function(Route<dynamic> route);
+typedef RoutePredicate = bool Function(Route<dynamic>);
 
 /// Signature for a callback that verifies that it's OK to call [Navigator.pop].
 ///

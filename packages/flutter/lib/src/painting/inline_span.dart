@@ -33,7 +33,7 @@ class Accumulator {
 ///
 /// Returns true when the walk should continue, and false to stop visiting further
 /// [InlineSpan]s.
-typedef InlineSpanVisitor = bool Function(InlineSpan span);
+typedef InlineSpanVisitor = bool Function(InlineSpan);
 
 /// The textual and semantic label information for an [InlineSpan].
 ///

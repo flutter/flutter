@@ -141,7 +141,7 @@ Future<void> precacheImage(
 ///  * [Image.frameBuilder], which makes use of this signature in the [Image]
 ///    widget.
 typedef ImageFrameBuilder = Widget Function(
-  BuildContext context,
+  BuildContext,
   Widget child,
   int frame,
   bool wasSynchronouslyLoaded,
@@ -181,7 +181,7 @@ typedef ImageFrameBuilder = Widget Function(
 ///  * [ImageChunkListener], a lower-level signature for listening to raw
 ///    [ImageChunkEvent]s.
 typedef ImageLoadingBuilder = Widget Function(
-  BuildContext context,
+  BuildContext,
   Widget child,
   ImageChunkEvent loadingProgress,
 );

@@ -24,7 +24,7 @@ export 'semantics_event.dart';
 /// Return false to stop visiting nodes.
 ///
 /// Used by [SemanticsNode.visitChildren].
-typedef SemanticsNodeVisitor = bool Function(SemanticsNode node);
+typedef SemanticsNodeVisitor = bool Function(SemanticsNode);
 
 /// Signature for [SemanticsAction]s that move the cursor.
 ///
@@ -34,7 +34,7 @@ typedef MoveCursorHandler = void Function(bool extendSelection);
 
 /// Signature for the [SemanticsAction.setSelection] handlers to change the
 /// text selection (or re-position the cursor) to `selection`.
-typedef SetSelectionHandler = void Function(TextSelection selection);
+typedef SetSelectionHandler = void Function(TextSelection);
 
 typedef _SemanticsActionHandler = void Function(dynamic args);
 

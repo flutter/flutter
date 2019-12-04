@@ -13,7 +13,7 @@ import 'stock_list.dart';
 import 'stock_symbol_viewer.dart';
 import 'stock_types.dart';
 
-typedef ModeUpdater = void Function(StockMode mode);
+typedef ModeUpdater = void Function(StockMode);
 
 enum _StockMenuItem { autorefresh, refresh, speedUp, speedDown }
 enum StockHomeTab { market, portfolio }

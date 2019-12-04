@@ -25,21 +25,21 @@ typedef GestureLongPressUpCallback = void Function();
 /// Called when a pointer has remained in contact with the screen at the
 /// same location for a long period of time. Also reports the long press down
 /// position.
-typedef GestureLongPressStartCallback = void Function(LongPressStartDetails details);
+typedef GestureLongPressStartCallback = void Function(LongPressStartDetails);
 
 /// Callback signature for [LongPressGestureRecognizer.onLongPressMoveUpdate].
 ///
 /// Called when a pointer is moving after being held in contact at the same
 /// location for a long period of time. Reports the new position and its offset
 /// from the original down position.
-typedef GestureLongPressMoveUpdateCallback = void Function(LongPressMoveUpdateDetails details);
+typedef GestureLongPressMoveUpdateCallback = void Function(LongPressMoveUpdateDetails);
 
 /// Callback signature for [LongPressGestureRecognizer.onLongPressEnd].
 ///
 /// Called when a pointer stops contacting the screen after a long press
 /// gesture was detected. Also reports the position where the pointer stopped
 /// contacting the screen.
-typedef GestureLongPressEndCallback = void Function(LongPressEndDetails details);
+typedef GestureLongPressEndCallback = void Function(LongPressEndDetails);
 
 /// Details for callbacks that use [GestureLongPressStartCallback].
 ///

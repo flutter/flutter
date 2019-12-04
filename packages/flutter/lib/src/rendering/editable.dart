@@ -29,7 +29,7 @@ const double _kFloatingCaretRadius = 1.0;
 /// (including the cursor location).
 ///
 /// Used by [RenderEditable.onSelectionChanged].
-typedef SelectionChangedHandler = void Function(TextSelection selection, RenderEditable renderObject, SelectionChangedCause cause);
+typedef SelectionChangedHandler = void Function(TextSelection, RenderEditable, SelectionChangedCause);
 
 /// Indicates what triggered the change in selected text (including changes to
 /// the cursor location).

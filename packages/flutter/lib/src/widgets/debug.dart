@@ -33,7 +33,7 @@ import 'table.dart';
 bool debugPrintRebuildDirtyWidgets = false;
 
 /// Signature for [debugOnRebuildDirtyWidget] implementations.
-typedef RebuildDirtyWidgetCallback = void Function(Element e, bool builtOnce);
+typedef RebuildDirtyWidgetCallback = void Function(Element, bool builtOnce);
 
 /// Callback invoked for every dirty widget built each frame.
 ///

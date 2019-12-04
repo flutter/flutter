@@ -10,7 +10,7 @@ import 'package:args/args.dart' as argslib;
 import 'package:meta/meta.dart';
 
 typedef HeaderGenerator = String Function(String regenerateInstructions);
-typedef ConstructorGenerator = String Function(LocaleInfo locale);
+typedef ConstructorGenerator = String Function(LocaleInfo);
 
 int sortFilesByPath (FileSystemEntity a, FileSystemEntity b) {
   return a.path.compareTo(b.path);

@@ -14,12 +14,12 @@ import 'overlay.dart';
 /// Signature for determining whether the given data will be accepted by a [DragTarget].
 ///
 /// Used by [DragTarget.onWillAccept].
-typedef DragTargetWillAccept<T> = bool Function(T data);
+typedef DragTargetWillAccept<T> = bool Function(T);
 
 /// Signature for causing a [DragTarget] to accept the given data.
 ///
 /// Used by [DragTarget.onAccept].
-typedef DragTargetAccept<T> = void Function(T data);
+typedef DragTargetAccept<T> = void Function(T);
 
 /// Signature for building children of a [DragTarget].
 ///
@@ -29,12 +29,12 @@ typedef DragTargetAccept<T> = void Function(T data);
 /// this [DragTarget] and that will not be accepted by the [DragTarget].
 ///
 /// Used by [DragTarget.builder].
-typedef DragTargetBuilder<T> = Widget Function(BuildContext context, List<T> candidateData, List<dynamic> rejectedData);
+typedef DragTargetBuilder<T> = Widget Function(BuildContext, List<T> candidateData, List<dynamic> rejectedData);
 
 /// Signature for when a [Draggable] is dropped without being accepted by a [DragTarget].
 ///
 /// Used by [Draggable.onDraggableCanceled].
-typedef DraggableCanceledCallback = void Function(Velocity velocity, Offset offset);
+typedef DraggableCanceledCallback = void Function(Velocity, Offset);
 
 /// Signature for when the draggable is dropped.
 ///
@@ -43,12 +43,12 @@ typedef DraggableCanceledCallback = void Function(Velocity velocity, Offset offs
 /// `details` is whether the draggable's [DragTarget] accepted it.
 ///
 /// Used by [Draggable.onDragEnd]
-typedef DragEndCallback = void Function(DraggableDetails details);
+typedef DragEndCallback = void Function(DraggableDetails);
 
 /// Signature for when a [Draggable] leaves a [DragTarget].
 ///
 /// Used by [DragTarget.onLeave].
-typedef DragTargetLeave<T> = void Function(T data);
+typedef DragTargetLeave<T> = void Function(T);
 
 /// Where the [Draggable] should be anchored during a drag.
 enum DragAnchor {
@@ -568,7 +568,7 @@ class _DragTargetState<T> extends State<DragTarget<T>> {
 }
 
 enum _DragEndKind { dropped, canceled }
-typedef _OnDragEnd = void Function(Velocity velocity, Offset offset, bool wasAccepted);
+typedef _OnDragEnd = void Function(Velocity, Offset, bool wasAccepted);
 
 // The lifetime of this object is a little dubious right now. Specifically, it
 // lives as long as the pointer is down. Arguably it should self-immolate if the

@@ -8,7 +8,7 @@ import 'events.dart';
 
 /// The callback to register with a [PointerSignalResolver] to express
 /// interest in a pointer signal event.
-typedef PointerSignalResolvedCallback = void Function(PointerSignalEvent event);
+typedef PointerSignalResolvedCallback = void Function(PointerSignalEvent);
 
 /// An resolver for pointer signal events.
 ///

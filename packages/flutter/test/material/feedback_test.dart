@@ -222,4 +222,4 @@ class TestWidget extends StatelessWidget {
   }
 }
 
-typedef HandlerCreator = VoidCallback Function(BuildContext context);
+typedef HandlerCreator = VoidCallback Function(BuildContext);

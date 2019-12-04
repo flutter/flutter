@@ -13,7 +13,7 @@ import 'io.dart';
 import 'process_manager.dart';
 import 'utils.dart';
 
-typedef StringConverter = String Function(String string);
+typedef StringConverter = String Function(String);
 
 /// A function that will be run before the VM exits.
 typedef ShutdownHook = FutureOr<dynamic> Function();

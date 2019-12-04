@@ -627,7 +627,7 @@ class BoxConstraints extends Constraints {
 ///
 ///  * [RenderBox.hitTest], which documents more details around hit testing
 ///    [RenderBox]es.
-typedef BoxHitTest = bool Function(BoxHitTestResult result, Offset position);
+typedef BoxHitTest = bool Function(BoxHitTestResult, Offset position);
 
 /// The result of performing a hit test on [RenderBox]es.
 ///

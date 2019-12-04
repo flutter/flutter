@@ -107,7 +107,7 @@ abstract class Action extends Diagnosticable {
 }
 
 /// The signature of a callback accepted by [CallbackAction].
-typedef OnInvokeCallback = void Function(FocusNode node, Intent tag);
+typedef OnInvokeCallback = void Function(FocusNode, Intent tag);
 
 /// An [Action] that takes a callback in order to configure it without having to
 /// subclass it.

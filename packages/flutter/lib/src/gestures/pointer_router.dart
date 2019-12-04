@@ -8,7 +8,7 @@ import 'package:vector_math/vector_math_64.dart';
 import 'events.dart';
 
 /// A callback that receives a [PointerEvent]
-typedef PointerRoute = void Function(PointerEvent event);
+typedef PointerRoute = void Function(PointerEvent);
 
 /// A routing table for [PointerEvent] events.
 class PointerRouter {

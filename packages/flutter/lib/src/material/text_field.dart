@@ -23,7 +23,7 @@ export 'package:flutter/services.dart' show TextInputType, TextInputAction, Text
 /// Signature for the [TextField.buildCounter] callback.
 typedef InputCounterWidgetBuilder = Widget Function(
   /// The build context for the TextField
-  BuildContext context, {
+  BuildContext, {
   /// The length of the string currently in the input.
   @required int currentLength,
   /// The maximum string length that can be entered into the TextField.

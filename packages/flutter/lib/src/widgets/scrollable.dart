@@ -31,7 +31,7 @@ export 'package:flutter/physics.dart' show Tolerance;
 
 /// Signature used by [Scrollable] to build the viewport through which the
 /// scrollable content is displayed.
-typedef ViewportBuilder = Widget Function(BuildContext context, ViewportOffset position);
+typedef ViewportBuilder = Widget Function(BuildContext, ViewportOffset position);
 
 /// A widget that scrolls.
 ///
@@ -785,12 +785,12 @@ class _RenderScrollSemantics extends RenderProxyBox {
   }
 }
 
-/// A typedef for a function that can calculate the offset for a type of scroll
-/// increment given a [ScrollIncrementDetails].
+/// A function that can calculate the offset for a type of scroll increment
+/// given a [ScrollIncrementDetails].
 ///
 /// This function is used as the type for [Scrollable.incrementCalculator],
 /// which is called from a [ScrollAction].
-typedef ScrollIncrementCalculator = double Function(ScrollIncrementDetails details);
+typedef ScrollIncrementCalculator = double Function(ScrollIncrementDetails);
 
 /// Describes the type of scroll increment that will be performed by a
 /// [ScrollAction] on a [Scrollable].

@@ -849,7 +849,7 @@ enum _StateLifecycle {
 }
 
 /// The signature of [State.setState] functions.
-typedef StateSetter = void Function(VoidCallback fn);
+typedef StateSetter = void Function(VoidCallback);
 
 /// The logic and internal state for a [StatefulWidget].
 ///
@@ -1805,7 +1805,7 @@ class _InactiveElements {
 ///
 /// It is safe to call `element.visitChildElements` reentrantly within
 /// this callback.
-typedef ElementVisitor = void Function(Element element);
+typedef ElementVisitor = void Function(Element);
 
 /// A handle to the location of a widget in the widget tree.
 ///
@@ -3995,7 +3995,7 @@ class _ElementDiagnosticableTreeNode extends DiagnosticableTreeNode {
 ///  * [FlutterError.reportError], which is typically called with the same
 ///    [FlutterErrorDetails] object immediately prior to [ErrorWidget.builder]
 ///    being called.
-typedef ErrorWidgetBuilder = Widget Function(FlutterErrorDetails details);
+typedef ErrorWidgetBuilder = Widget Function(FlutterErrorDetails);
 
 /// A widget that renders an exception's message.
 ///
@@ -4145,7 +4145,7 @@ class ErrorWidget extends LeafRenderObjectWidget {
 ///  * [IndexedWidgetBuilder], which is similar but also takes an index.
 ///  * [TransitionBuilder], which is similar but also takes a child.
 ///  * [ValueWidgetBuilder], which is similar but takes a value and a child.
-typedef WidgetBuilder = Widget Function(BuildContext context);
+typedef WidgetBuilder = Widget Function(BuildContext);
 
 /// Signature for a function that creates a widget for a given index, e.g., in a
 /// list.
@@ -4156,7 +4156,7 @@ typedef WidgetBuilder = Widget Function(BuildContext context);
 ///
 ///  * [WidgetBuilder], which is similar but only takes a [BuildContext].
 ///  * [TransitionBuilder], which is similar but also takes a child.
-typedef IndexedWidgetBuilder = Widget Function(BuildContext context, int index);
+typedef IndexedWidgetBuilder = Widget Function(BuildContext, int index);
 
 /// A builder that builds a widget given a child.
 ///
@@ -4170,7 +4170,7 @@ typedef IndexedWidgetBuilder = Widget Function(BuildContext context, int index);
 ///  * [WidgetBuilder], which is similar but only takes a [BuildContext].
 ///  * [IndexedWidgetBuilder], which is similar but also takes an index.
 ///  * [ValueWidgetBuilder], which is similar but takes a value and a child.
-typedef TransitionBuilder = Widget Function(BuildContext context, Widget child);
+typedef TransitionBuilder = Widget Function(BuildContext, Widget child);
 
 /// A builder that creates a widget given the two callbacks `onStepContinue` and
 /// `onStepCancel`.
@@ -4180,7 +4180,7 @@ typedef TransitionBuilder = Widget Function(BuildContext context, Widget child);
 /// See also:
 ///
 ///  * [WidgetBuilder], which is similar but only takes a [BuildContext].
-typedef ControlsWidgetBuilder = Widget Function(BuildContext context, { VoidCallback onStepContinue, VoidCallback onStepCancel });
+typedef ControlsWidgetBuilder = Widget Function(BuildContext, { VoidCallback onStepContinue, VoidCallback onStepCancel });
 
 /// An [Element] that composes other [Element]s.
 ///

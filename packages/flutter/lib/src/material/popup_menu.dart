@@ -859,7 +859,7 @@ Future<T> showMenu<T>({
 /// dismissed.
 ///
 /// Used by [PopupMenuButton.onSelected].
-typedef PopupMenuItemSelected<T> = void Function(T value);
+typedef PopupMenuItemSelected<T> = void Function(T);
 
 /// Signature for the callback invoked when a [PopupMenuButton] is dismissed
 /// without selecting an item.
@@ -871,7 +871,7 @@ typedef PopupMenuCanceled = void Function();
 /// the button is pressed.
 ///
 /// Used by [PopupMenuButton.itemBuilder].
-typedef PopupMenuItemBuilder<T> = List<PopupMenuEntry<T>> Function(BuildContext context);
+typedef PopupMenuItemBuilder<T> = List<PopupMenuEntry<T>> Function(BuildContext);
 
 /// Displays a menu when pressed and calls [onSelected] when the menu is dismissed
 /// because an item was selected. The value passed to [onSelected] is the value of

@@ -224,7 +224,7 @@ Future<Device> findTargetDevice() async {
 }
 
 /// Starts the application on the device given command configuration.
-typedef AppStarter = Future<LaunchResult> Function(DriveCommand command);
+typedef AppStarter = Future<LaunchResult> Function(DriveCommand);
 
 AppStarter appStarter = _startApp; // (mutable for testing)
 void restoreAppStarter() {
@@ -319,7 +319,7 @@ Future<void> _runTests(List<String> testArgs, String observatoryUri) async {
 
 
 /// Stops the application.
-typedef AppStopper = Future<bool> Function(DriveCommand command);
+typedef AppStopper = Future<bool> Function(DriveCommand);
 AppStopper appStopper = _stopApp;
 void restoreAppStopper() {
   appStopper = _stopApp;

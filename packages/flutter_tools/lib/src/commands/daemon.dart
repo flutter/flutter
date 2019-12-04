@@ -666,7 +666,7 @@ class AppDomain extends Domain {
   }
 }
 
-typedef _DeviceEventHandler = void Function(Device device);
+typedef _DeviceEventHandler = void Function(Device);
 
 /// This domain lets callers list and monitor connected devices.
 ///

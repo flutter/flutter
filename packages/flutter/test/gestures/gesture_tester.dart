@@ -32,7 +32,7 @@ class GestureTester {
   }
 }
 
-typedef GestureTest = void Function(GestureTester tester);
+typedef GestureTest = void Function(GestureTester);
 
 @isTest
 void testGesture(String description, GestureTest callback) {

@@ -49,7 +49,7 @@ class _ChildEntry {
 ///
 /// The function should return a widget which wraps the given `child`. It may
 /// also use the `animation` to inform its transition. It must not return null.
-typedef AnimatedSwitcherTransitionBuilder = Widget Function(Widget child, Animation<double> animation);
+typedef AnimatedSwitcherTransitionBuilder = Widget Function(Widget child, Animation<double>);
 
 /// Signature for builders used to generate custom layouts for
 /// [AnimatedSwitcher].

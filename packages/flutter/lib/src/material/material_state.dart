@@ -64,7 +64,7 @@ enum MaterialState {
 
 /// Signature for the function that returns a value of type `T` based on a given
 /// set of states.
-typedef MaterialPropertyResolver<T> = T Function(Set<MaterialState> states);
+typedef MaterialPropertyResolver<T> = T Function(Set<MaterialState>);
 
 /// Defines a [Color] whose value depends on a set of [MaterialState]s which
 /// represent the interactive state of a component.

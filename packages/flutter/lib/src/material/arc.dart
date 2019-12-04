@@ -193,7 +193,7 @@ const List<_Diagonal> _allDiagonals = <_Diagonal>[
   _Diagonal(_CornerId.bottomLeft, _CornerId.topRight),
 ];
 
-typedef _KeyFunc<T> = dynamic Function(T input);
+typedef _KeyFunc<T> = dynamic Function(T);
 
 // Select the element for which the key function returns the maximum value.
 T _maxBy<T>(Iterable<T> input, _KeyFunc<T> keyFunc) {

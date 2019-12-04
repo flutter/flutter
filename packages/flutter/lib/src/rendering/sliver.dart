@@ -776,7 +776,7 @@ class SliverGeometry extends Diagnosticable {
 ///
 ///  * [RenderSliver.hitTest], which documents more details around hit testing
 ///    [RenderSliver]s.
-typedef SliverHitTest = bool Function(SliverHitTestResult result, { @required double mainAxisPosition, @required double crossAxisPosition });
+typedef SliverHitTest = bool Function(SliverHitTestResult, { @required double mainAxisPosition, @required double crossAxisPosition });
 
 /// The result of performing a hit test on [RenderSliver]s.
 ///

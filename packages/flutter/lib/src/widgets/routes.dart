@@ -1646,10 +1646,10 @@ Future<T> showGeneralDialog<T>({
 /// Used in [PageRouteBuilder] and [showGeneralDialog].
 ///
 /// See [ModalRoute.buildPage] for complete definition of the parameters.
-typedef RoutePageBuilder = Widget Function(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation);
+typedef RoutePageBuilder = Widget Function(BuildContext, Animation<double> animation, Animation<double> secondaryAnimation);
 
 /// Signature for the function that builds a route's transitions.
 /// Used in [PageRouteBuilder] and [showGeneralDialog].
 ///
 /// See [ModalRoute.buildTransitions] for complete definition of the parameters.
-typedef RouteTransitionsBuilder = Widget Function(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child);
+typedef RouteTransitionsBuilder = Widget Function(BuildContext, Animation<double> animation, Animation<double> secondaryAnimation, Widget child);

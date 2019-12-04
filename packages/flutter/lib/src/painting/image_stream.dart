@@ -136,12 +136,12 @@ class ImageStreamListener {
 /// frame is requested if the call was asynchronous (after the current frame)
 /// and no rendering frame is requested if the call was synchronous (within the
 /// same stack frame as the call to [ImageStream.addListener]).
-typedef ImageListener = void Function(ImageInfo image, bool synchronousCall);
+typedef ImageListener = void Function(ImageInfo, bool synchronousCall);
 
 /// Signature for listening to [ImageChunkEvent] events.
 ///
 /// Used in [ImageStreamListener].
-typedef ImageChunkListener = void Function(ImageChunkEvent event);
+typedef ImageChunkListener = void Function(ImageChunkEvent);
 
 /// Signature for reporting errors when resolving images.
 ///

@@ -70,7 +70,7 @@ enum _TextSelectionHandlePosition { start, end }
 /// of the [RenderBox] given by the [TextSelectionOverlay.renderObject].
 ///
 /// Used by [TextSelectionOverlay.onSelectionOverlayChanged].
-typedef TextSelectionOverlayChanged = void Function(TextEditingValue value, Rect caretRect);
+typedef TextSelectionOverlayChanged = void Function(TextEditingValue, Rect caretRect);
 
 /// Signature for when a pointer that's dragging to select text has moved again.
 ///
@@ -83,7 +83,7 @@ typedef TextSelectionOverlayChanged = void Function(TextEditingValue value, Rect
 /// This signature is different from [GestureDragUpdateCallback] to make it
 /// easier for various text fields to use [TextSelectionGestureDetector] without
 /// having to store the start position.
-typedef DragSelectionUpdateCallback = void Function(DragStartDetails startDetails, DragUpdateDetails updateDetails);
+typedef DragSelectionUpdateCallback = void Function(DragStartDetails, DragUpdateDetails);
 
 /// An interface for building the selection UI, to be provided by the
 /// implementor of the toolbar widget.

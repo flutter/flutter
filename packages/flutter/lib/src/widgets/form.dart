@@ -240,7 +240,7 @@ class _FormScope extends InheritedWidget {
 /// otherwise.
 ///
 /// Used by [FormField.validator].
-typedef FormFieldValidator<T> = String Function(T value);
+typedef FormFieldValidator<T> = String Function(T);
 
 /// Signature for being notified when a form field changes value.
 ///

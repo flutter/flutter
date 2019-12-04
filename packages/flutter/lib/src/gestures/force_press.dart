@@ -68,20 +68,20 @@ class ForcePressDetails {
 
 /// Signature used by a [ForcePressGestureRecognizer] for when a pointer has
 /// pressed with at least [ForcePressGestureRecognizer.startPressure].
-typedef GestureForcePressStartCallback = void Function(ForcePressDetails details);
+typedef GestureForcePressStartCallback = void Function(ForcePressDetails);
 
 /// Signature used by [ForcePressGestureRecognizer] for when a pointer that has
 /// pressed with at least [ForcePressGestureRecognizer.peakPressure].
-typedef GestureForcePressPeakCallback = void Function(ForcePressDetails details);
+typedef GestureForcePressPeakCallback = void Function(ForcePressDetails);
 
 /// Signature used by [ForcePressGestureRecognizer] during the frames
 /// after the triggering of a [ForcePressGestureRecognizer.onStart] callback.
-typedef GestureForcePressUpdateCallback = void Function(ForcePressDetails details);
+typedef GestureForcePressUpdateCallback = void Function(ForcePressDetails);
 
 /// Signature for when the pointer that previously triggered a
 /// [ForcePressGestureRecognizer.onStart] callback is no longer in contact
 /// with the screen.
-typedef GestureForcePressEndCallback = void Function(ForcePressDetails details);
+typedef GestureForcePressEndCallback = void Function(ForcePressDetails);
 
 /// Signature used by [ForcePressGestureRecognizer] for interpolating the raw
 /// device pressure to a value in the range [0, 1] given the device's pressure

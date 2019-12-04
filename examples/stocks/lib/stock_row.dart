@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'stock_arrow.dart';
 import 'stock_data.dart';
 
-typedef StockRowActionCallback = void Function(Stock stock);
+typedef StockRowActionCallback = void Function(Stock);
 
 class StockRow extends StatelessWidget {
   StockRow({

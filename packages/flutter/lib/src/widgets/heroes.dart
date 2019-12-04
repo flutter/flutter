@@ -33,7 +33,7 @@ typedef CreateRectTween = Tween<Rect> Function(Rect begin, Rect end);
 ///  * [TransitionBuilder], which is similar but only takes a [BuildContext]
 ///    and a child widget.
 typedef HeroPlaceholderBuilder = Widget Function(
-  BuildContext context,
+  BuildContext,
   Size heroSize,
   Widget child,
 );
@@ -43,13 +43,13 @@ typedef HeroPlaceholderBuilder = Widget Function(
 /// show the destination route's instance of the Hero).
 typedef HeroFlightShuttleBuilder = Widget Function(
   BuildContext flightContext,
-  Animation<double> animation,
-  HeroFlightDirection flightDirection,
+  Animation<double>,
+  HeroFlightDirection,
   BuildContext fromHeroContext,
   BuildContext toHeroContext,
 );
 
-typedef _OnFlightEnded = void Function(_HeroFlight flight);
+typedef _OnFlightEnded = void Function(_HeroFlight);
 
 /// Direction of the hero's flight based on the navigation operation.
 enum HeroFlightDirection {

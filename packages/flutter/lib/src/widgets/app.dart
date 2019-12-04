@@ -47,7 +47,7 @@ export 'dart:ui' show Locale;
 ///  * [LocaleResolutionCallback], which takes only one default locale (instead of a list)
 ///    and is attempted only after this callback fails or is null. [LocaleListResolutionCallback]
 ///    is recommended over [LocaleResolutionCallback].
-typedef LocaleListResolutionCallback = Locale Function(List<Locale> locales, Iterable<Locale> supportedLocales);
+typedef LocaleListResolutionCallback = Locale Function(List<Locale>, Iterable<Locale> supportedLocales);
 
 /// {@template flutter.widgets.widgetsApp.localeResolutionCallback}
 /// The signature of [WidgetsApp.localeResolutionCallback].
@@ -75,7 +75,7 @@ typedef LocaleListResolutionCallback = Locale Function(List<Locale> locales, Ite
 ///  * [LocaleListResolutionCallback], which takes a list of preferred locales (instead of one locale).
 ///    Resolutions by [LocaleListResolutionCallback] take precedence over [LocaleResolutionCallback].
 /// {@endtemplate}
-typedef LocaleResolutionCallback = Locale Function(Locale locale, Iterable<Locale> supportedLocales);
+typedef LocaleResolutionCallback = Locale Function(Locale, Iterable<Locale> supportedLocales);
 
 /// The signature of [WidgetsApp.onGenerateTitle].
 ///
@@ -85,12 +85,12 @@ typedef LocaleResolutionCallback = Locale Function(Locale locale, Iterable<Local
 /// localized title.
 ///
 /// This function must not return null.
-typedef GenerateAppTitle = String Function(BuildContext context);
+typedef GenerateAppTitle = String Function(BuildContext);
 
 /// The signature of [WidgetsApp.pageRouteBuilder].
 ///
 /// Creates a [PageRoute] using the given [RouteSettings] and [WidgetBuilder].
-typedef PageRouteFactory = PageRoute<T> Function<T>(RouteSettings settings, WidgetBuilder builder);
+typedef PageRouteFactory = PageRoute<T> Function<T>(RouteSettings, WidgetBuilder);
 
 /// A convenience class that wraps a number of widgets that are commonly
 /// required for an application.

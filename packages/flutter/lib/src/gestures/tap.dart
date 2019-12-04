@@ -46,7 +46,7 @@ class TapDownDetails {
 ///
 ///  * [GestureDetector.onTapDown], which matches this signature.
 ///  * [TapGestureRecognizer], which uses this signature in one of its callbacks.
-typedef GestureTapDownCallback = void Function(TapDownDetails details);
+typedef GestureTapDownCallback = void Function(TapDownDetails);
 
 /// Details for [GestureTapUpCallback], such as position.
 ///
@@ -79,7 +79,7 @@ class TapUpDetails {
 ///
 ///  * [GestureDetector.onTapUp], which matches this signature.
 ///  * [TapGestureRecognizer], which uses this signature in one of its callbacks.
-typedef GestureTapUpCallback = void Function(TapUpDetails details);
+typedef GestureTapUpCallback = void Function(TapUpDetails);
 
 /// Signature for when a tap has occurred.
 ///

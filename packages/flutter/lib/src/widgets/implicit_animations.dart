@@ -333,7 +333,7 @@ typedef TweenConstructor<T> = Tween<T> Function(T targetValue);
 /// of this visitor.
 ///
 /// The `<T>` parameter specifies the type of value that's being animated.
-typedef TweenVisitor<T> = Tween<T> Function(Tween<T> tween, T targetValue, TweenConstructor<T> constructor);
+typedef TweenVisitor<T> = Tween<T> Function(Tween<T>, T targetValue, TweenConstructor<T>);
 
 /// A base class for the `State` of widgets with implicit animations.
 ///

@@ -14,17 +14,17 @@ import 'pointer_router.dart';
 /// Signature for listening to [PointerEnterEvent] events.
 ///
 /// Used by [MouseTrackerAnnotation], [MouseRegion] and [RenderMouseRegion].
-typedef PointerEnterEventListener = void Function(PointerEnterEvent event);
+typedef PointerEnterEventListener = void Function(PointerEnterEvent);
 
 /// Signature for listening to [PointerExitEvent] events.
 ///
 /// Used by [MouseTrackerAnnotation], [MouseRegion] and [RenderMouseRegion].
-typedef PointerExitEventListener = void Function(PointerExitEvent event);
+typedef PointerExitEventListener = void Function(PointerExitEvent);
 
 /// Signature for listening to [PointerHoverEvent] events.
 ///
 /// Used by [MouseTrackerAnnotation], [MouseRegion] and [RenderMouseRegion].
-typedef PointerHoverEventListener = void Function(PointerHoverEvent event);
+typedef PointerHoverEventListener = void Function(PointerHoverEvent);
 
 /// The annotation object used to annotate layers that are interested in mouse
 /// movements.

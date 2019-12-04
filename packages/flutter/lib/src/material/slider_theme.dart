@@ -2845,7 +2845,7 @@ class _PaddleSliderTrackShapePathPainter {
 /// See also:
 ///
 ///  * [RangeSlider.semanticFormatterCallback], which shows an example use case.
-typedef RangeSemanticFormatterCallback = String Function(RangeValues values);
+typedef RangeSemanticFormatterCallback = String Function(RangeValues);
 
 /// Decides which thumbs (if any) should be selected.
 ///
@@ -2855,8 +2855,8 @@ typedef RangeSemanticFormatterCallback = String Function(RangeValues values);
 ///
 /// Override [RangeSlider.thumbSelector] for custom thumb selection.
 typedef RangeThumbSelector = Thumb Function(
-  TextDirection textDirection,
-  RangeValues values,
+  TextDirection,
+  RangeValues,
   double tapValue,
   Size thumbSize,
   Size trackSize,

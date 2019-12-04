@@ -41,7 +41,7 @@ class ParentData {
 /// of the [PaintingContext.canvas] to the coordinate system of the callee.
 ///
 /// Used by many of the methods of [PaintingContext].
-typedef PaintingContextCallback = void Function(PaintingContext context, Offset offset);
+typedef PaintingContextCallback = void Function(PaintingContext, Offset);
 
 /// A place to paint.
 ///

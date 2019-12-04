@@ -10,7 +10,7 @@ import 'diagnostics.dart';
 import 'print.dart';
 
 /// Signature for [FlutterError.onError] handler.
-typedef FlutterExceptionHandler = void Function(FlutterErrorDetails details);
+typedef FlutterExceptionHandler = void Function(FlutterErrorDetails);
 
 /// Signature for [DiagnosticPropertiesBuilder] transformer.
 typedef DiagnosticPropertiesTransformer = Iterable<DiagnosticsNode> Function(Iterable<DiagnosticsNode> properties);

@@ -14,10 +14,10 @@ import 'sliver.dart';
 import 'ticker_provider.dart';
 
 /// Signature for the builder callback used by [AnimatedList].
-typedef AnimatedListItemBuilder = Widget Function(BuildContext context, int index, Animation<double> animation);
+typedef AnimatedListItemBuilder = Widget Function(BuildContext, int index, Animation<double>);
 
 /// Signature for the builder callback used by [AnimatedListState.removeItem].
-typedef AnimatedListRemovedItemBuilder = Widget Function(BuildContext context, Animation<double> animation);
+typedef AnimatedListRemovedItemBuilder = Widget Function(BuildContext, Animation<double>);
 
 // The default insert/remove animation duration.
 const Duration _kDuration = Duration(milliseconds: 300);

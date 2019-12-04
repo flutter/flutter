@@ -31,7 +31,7 @@ export 'package:flutter/rendering.dart' show
 ///  * [CustomScrollView], for an explanation of scroll semantics.
 ///  * [SliverChildBuilderDelegate], for an explanation of how this is used to
 ///    generate indexes.
-typedef SemanticIndexCallback = int Function(Widget widget, int localIndex);
+typedef SemanticIndexCallback = int Function(Widget, int localIndex);
 
 int _kDefaultSemanticIndexCallback(Widget _, int localIndex) => localIndex;
 
@@ -210,7 +210,7 @@ class _SaltedValueKey extends ValueKey<Key>{
   const _SaltedValueKey(Key key): assert(key != null), super(key);
 }
 
-typedef ChildIndexGetter = int Function(Key key);
+typedef ChildIndexGetter = int Function(Key);
 
 /// A delegate that supplies children for slivers using a builder callback.
 ///

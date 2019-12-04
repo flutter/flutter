@@ -2523,27 +2523,27 @@ class RenderFractionalTranslation extends RenderProxyBox {
 /// Signature for listening to [PointerDownEvent] events.
 ///
 /// Used by [Listener] and [RenderPointerListener].
-typedef PointerDownEventListener = void Function(PointerDownEvent event);
+typedef PointerDownEventListener = void Function(PointerDownEvent);
 
 /// Signature for listening to [PointerMoveEvent] events.
 ///
 /// Used by [Listener] and [RenderPointerListener].
-typedef PointerMoveEventListener = void Function(PointerMoveEvent event);
+typedef PointerMoveEventListener = void Function(PointerMoveEvent);
 
 /// Signature for listening to [PointerUpEvent] events.
 ///
 /// Used by [Listener] and [RenderPointerListener].
-typedef PointerUpEventListener = void Function(PointerUpEvent event);
+typedef PointerUpEventListener = void Function(PointerUpEvent);
 
 /// Signature for listening to [PointerCancelEvent] events.
 ///
 /// Used by [Listener] and [RenderPointerListener].
-typedef PointerCancelEventListener = void Function(PointerCancelEvent event);
+typedef PointerCancelEventListener = void Function(PointerCancelEvent);
 
 /// Signature for listening to [PointerSignalEvent] events.
 ///
 /// Used by [Listener] and [RenderPointerListener].
-typedef PointerSignalEventListener = void Function(PointerSignalEvent event);
+typedef PointerSignalEventListener = void Function(PointerSignalEvent);
 
 /// Calls callbacks in response to common pointer events.
 ///

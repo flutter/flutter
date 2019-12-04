@@ -447,7 +447,7 @@ class _UiKitViewGestureRecognizer extends OneSequenceGestureRecognizer {
   }
 }
 
-typedef _HandlePointerEvent = void Function(PointerEvent event);
+typedef _HandlePointerEvent = void Function(PointerEvent);
 
 // This recognizer constructs gesture recognizers from a set of gesture recognizer factories
 // it was give, adds all of them to a gesture arena team with the _PlatformViewGestureRecognizer

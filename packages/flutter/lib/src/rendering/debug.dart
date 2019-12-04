@@ -155,7 +155,7 @@ bool debugCheckIntrinsicSizes = false;
 bool debugProfilePaintsEnabled = false;
 
 /// Signature for [debugOnProfilePaint] implementations.
-typedef ProfilePaintCallback = void Function(RenderObject renderObject);
+typedef ProfilePaintCallback = void Function(RenderObject);
 
 /// Callback invoked for every [RenderObject] painted each frame.
 ///
