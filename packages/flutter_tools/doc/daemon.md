@@ -180,7 +180,7 @@ This request will only be sent if a web application was run in a mode that requi
 
 The request will contain an `id` field and a `params` field that is a map containing a string `url` field.
 
-The response should be sent using the same `id` as the request with a `params` map containing the mapped `url` (or the same URL in the case where the client does not need to perform any mapping).
+The response should be sent using the same `id` as the request with a `result` map containing the mapped `url` (or the same URL in the case where the client does not need to perform any mapping).
 
 ### device domain
 
