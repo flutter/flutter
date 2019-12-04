@@ -69,20 +69,20 @@ class Visibility extends StatelessWidget {
        assert(maintainAnimation != null),
        assert(maintainSize != null),
        assert(
-        maintainState == true || maintainAnimation == false,
-       'Cannot maintain animations if the state is not also maintained.',
+         maintainState == true || maintainAnimation == false,
+         'Cannot maintain animations if the state is not also maintained.'
        ),
        assert(
-        maintainAnimation == true || maintainSize == false,
-       'Cannot maintain size if animations are not maintained.',
+         maintainAnimation == true || maintainSize == false,
+         'Cannot maintain size if animations are not maintained.',
        ),
        assert(
-        maintainSize == true || maintainSemantics == false,
-        'Cannot maintain semantics if size is not maintained.',
+         maintainSize == true || maintainSemantics == false,
+         'Cannot maintain semantics if size is not maintained.',
        ),
        assert(
-        maintainSize == true || maintainInteractivity == false,
-        'Cannot maintain interactivity if size is not maintained.',
+         maintainSize == true || maintainInteractivity == false,
+         'Cannot maintain interactivity if size is not maintained.',
        ),
        super(key: key);
 
@@ -281,8 +281,8 @@ class Visibility extends StatelessWidget {
 ///
 /// Using this widget is not necessary to hide children. The simplest way to
 /// hide a child is just to not include it, or, if a child _must_ be given (e.g.
-/// because the parent is a [StatelessWidget]) then to use
-// TODO(Piinks): What is the default replacement here?
+/// because the parent is a [StatelessWidget]) then to use a childless
+/// [SliverToBoxAdapter] instead of the child that would otherwise be included.
 class SliverVisibility extends StatelessWidget {
   /// Control whether the given [sliver] is [visible].
   ///
@@ -300,7 +300,7 @@ class SliverVisibility extends StatelessWidget {
   const SliverVisibility({
     Key key,
     @required this.sliver,
-    this.replacementSliver = const SliverToBoxAdapter(child: SizedBox.shrink()),
+    this.replacementSliver = const SliverToBoxAdapter(),
     this.visible = true,
     this.maintainState = false,
     this.maintainAnimation = false,
@@ -308,38 +308,37 @@ class SliverVisibility extends StatelessWidget {
     this.maintainSemantics = false,
     this.maintainInteractivity = false,
   }) : assert(sliver != null),
-      assert(visible != null),
-      assert(maintainState != null),
-      assert(maintainAnimation != null),
-      assert(maintainSize != null),
-      assert(
-        maintainState == true || maintainAnimation == false,
-        'Cannot maintain animations if the state is not also maintained.',
-      ),
-      assert(
-        maintainAnimation == true || maintainSize == false,
-        'Cannot maintain size if animations are not maintained.',
-      ),
-      assert(
-        maintainSize == true || maintainSemantics == false,
-        'Cannot maintain semantics if size is not maintained.',
-      ),
-      assert(
-        maintainSize == true || maintainInteractivity == false,
-        'Cannot maintain interactivity if size is not maintained.',
-      ),
-      super(key: key);
+       assert(visible != null),
+       assert(maintainState != null),
+       assert(maintainAnimation != null),
+       assert(maintainSize != null),
+       assert(
+         maintainState == true || maintainAnimation == false,
+         'Cannot maintain animations if the state is not also maintained.',
+       ),
+       assert(
+         maintainAnimation == true || maintainSize == false,
+         'Cannot maintain size if animations are not maintained.',
+       ),
+       assert(
+         maintainSize == true || maintainSemantics == false,
+         'Cannot maintain semantics if size is not maintained.',
+       ),
+       assert(
+         maintainSize == true || maintainInteractivity == false,
+         'Cannot maintain interactivity if size is not maintained.',
+       ),
+       super(key: key);
 
   /// The sliver to show or hide, as controlled by [visible].
-  ///
-  /// {@macro flutter.widgets.child}
   final Widget sliver;
 
   /// The widget to use when the sliver child is not [visible], assuming that
   /// none of the `maintain` flags (in particular, [maintainState]) are set.
   ///
-  /// The normal behavior is to replace the widget with a
-  // TODO(Piinks): Find new default
+  /// The normal behavior is to replace the widget with a childless
+  /// [SliverToBoxAdapter], which by default has a geometry of
+  /// [SliverGeometry.zero].
   final Widget replacementSliver;
 
   /// Switches between showing the [sliver] or hiding it.
