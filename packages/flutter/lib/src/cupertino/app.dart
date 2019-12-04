@@ -194,10 +194,7 @@ class CupertinoApp extends StatefulWidget {
   /// {@macro flutter.widgets.widgetsApp.debugShowCheckedModeBanner}
   final bool debugShowCheckedModeBanner;
 
-  /// The default map of keyboard shortcuts to intents for the application.
-  ///
-  /// By default, this is set to [WidgetsApp.defaultShortcuts].
-  ///
+  /// {@macro flutter.widgets.widgetsApp.shortcuts}
   /// {@tool sample}
   /// This example shows how to add a single shortcut for
   /// [LogicalKeyboardKey.select] to the default shortcuts without needing to
@@ -222,27 +219,10 @@ class CupertinoApp extends StatefulWidget {
   /// }
   /// ```
   /// {@end-tool}
-  ///
-  /// See also:
-  ///
-  /// * [LogicalKeySet], a set of [LogicalKeyboardKey]s that make up the keys
-  ///    for this map.
-  /// * The [Shortcuts] widget, which defines a keyboard mapping.
-  /// * The [Actions] widget, which defines the mapping from intent to action.
-  /// * The [Intent] and [Action] classes, which allow definition of new
-  ///    actions.
+  /// {@macro flutter.widgets.widgetsApp.shortcuts.seeAlso}
   final Map<LogicalKeySet, Intent> shortcuts;
 
-  /// The default map of intent keys to actions for the application.
-  ///
-  /// By default, this is the output of [WidgetsApp.defaultActions], called with
-  /// [defaultTargetPlatform]. Specifying [actions] for an app overrides the
-  /// default, so if you wish to modify the default [actions], you can call
-  /// [WidgetsApp.defaultActions] and modify the resulting map, passing it as
-  /// the [actions] for this app. You may also add to the bindings, or override
-  /// specific bindings for a widget subtree, by adding your own [Actions]
-  /// widget.
-  ///
+  /// {@macro flutter.widgets.widgetsApp.actions}
   /// {@tool sample}
   /// This example shows how to add a single action handling an
   /// [ActivateAction] to the default actions without needing to
@@ -272,14 +252,7 @@ class CupertinoApp extends StatefulWidget {
   /// }
   /// ```
   /// {@end-tool}
-  /// See also:
-  ///
-  /// * The [shortcuts] parameter, which defines the default set of shortcuts
-  ///    for the application.
-  /// * The [Shortcuts] widget, which defines a keyboard mapping.
-  /// * The [Actions] widget, which defines the mapping from intent to action.
-  /// * The [Intent] and [Action] classes, which allow definition of new
-  ///    actions.
+  /// {@macro flutter.widgets.widgetsApp.actions.seeAlso}
   final Map<LocalKey, ActionFactory> actions;
 
   @override

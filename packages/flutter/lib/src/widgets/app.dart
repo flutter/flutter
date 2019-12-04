@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:collection' show HashMap;
-import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -684,9 +683,11 @@ class WidgetsApp extends StatefulWidget {
   /// {@endtemplate}
   final bool debugShowCheckedModeBanner;
 
+  /// {@template flutter.widgets.widgetsApp.shortcuts}
   /// The default map of keyboard shortcuts to intents for the application.
   ///
   /// By default, this is set to [WidgetsApp.defaultShortcuts].
+  /// {@endtemplate}
   ///
   /// {@tool sample}
   /// This example shows how to add a single shortcut for
@@ -713,16 +714,19 @@ class WidgetsApp extends StatefulWidget {
   /// ```
   /// {@end-tool}
   ///
+  /// {@template flutter.widgets.widgetsApp.shortcuts.seeAlso}
   /// See also:
   ///
-  /// * [LogicalKeySet], a set of [LogicalKeyboardKey]s that make up the keys
+  ///  * [LogicalKeySet], a set of [LogicalKeyboardKey]s that make up the keys
   ///    for this map.
-  /// * The [Shortcuts] widget, which defines a keyboard mapping.
-  /// * The [Actions] widget, which defines the mapping from intent to action.
-  /// * The [Intent] and [Action] classes, which allow definition of new
+  ///  * The [Shortcuts] widget, which defines a keyboard mapping.
+  ///  * The [Actions] widget, which defines the mapping from intent to action.
+  ///  * The [Intent] and [Action] classes, which allow definition of new
   ///    actions.
+  /// {@endtemplate}
   final Map<LogicalKeySet, Intent> shortcuts;
 
+  /// {@template flutter.widgets.widgetsApp.actions}
   /// The default map of intent keys to actions for the application.
   ///
   /// By default, this is the output of [WidgetsApp.defaultActions], called with
@@ -732,6 +736,7 @@ class WidgetsApp extends StatefulWidget {
   /// the [actions] for this app. You may also add to the bindings, or override
   /// specific bindings for a widget subtree, by adding your own [Actions]
   /// widget.
+  /// {@endtemplate}
   ///
   /// {@tool sample}
   /// This example shows how to add a single action handling an
@@ -762,14 +767,17 @@ class WidgetsApp extends StatefulWidget {
   /// }
   /// ```
   /// {@end-tool}
+  ///
+  /// {@template flutter.widgets.widgetsApp.actions.seeAlso}
   /// See also:
   ///
-  /// * The [shortcuts] parameter, which defines the default set of shortcuts
+  ///  * The [shortcuts] parameter, which defines the default set of shortcuts
   ///    for the application.
-  /// * The [Shortcuts] widget, which defines a keyboard mapping.
-  /// * The [Actions] widget, which defines the mapping from intent to action.
-  /// * The [Intent] and [Action] classes, which allow definition of new
+  ///  * The [Shortcuts] widget, which defines a keyboard mapping.
+  ///  * The [Actions] widget, which defines the mapping from intent to action.
+  ///  * The [Intent] and [Action] classes, which allow definition of new
   ///    actions.
+  /// {@endtemplate}
   final Map<LocalKey, ActionFactory> actions;
 
   /// If true, forces the performance overlay to be visible in all instances.
