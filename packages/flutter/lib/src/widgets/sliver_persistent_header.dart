@@ -92,7 +92,7 @@ abstract class SliverPersistentHeaderDelegate {
 }
 
 /// A sliver whose size varies when the sliver is scrolled to the edge
-/// of the viewport opposite its [GrowthDirection].
+/// of the viewport opposite the sliver's [GrowthDirection].
 ///
 /// In the normal case of a [CustomScrollView] with no centered sliver, this
 /// sliver will vary its size when scrolled to the leading edge of the viewport.
