@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -535,21 +535,21 @@ class MediaQueryData {
   bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
-    final MediaQueryData typedOther = other;
-    return typedOther.size == size
-        && typedOther.devicePixelRatio == devicePixelRatio
-        && typedOther.textScaleFactor == textScaleFactor
-        && typedOther.platformBrightness == platformBrightness
-        && typedOther.padding == padding
-        && typedOther.viewPadding == viewPadding
-        && typedOther.viewInsets == viewInsets
-        && typedOther.physicalDepth == physicalDepth
-        && typedOther.alwaysUse24HourFormat == alwaysUse24HourFormat
-        && typedOther.highContrast == highContrast
-        && typedOther.disableAnimations == disableAnimations
-        && typedOther.invertColors == invertColors
-        && typedOther.accessibleNavigation == accessibleNavigation
-        && typedOther.boldText == boldText;
+    return other is MediaQueryData
+        && other.size == size
+        && other.devicePixelRatio == devicePixelRatio
+        && other.textScaleFactor == textScaleFactor
+        && other.platformBrightness == platformBrightness
+        && other.padding == padding
+        && other.viewPadding == viewPadding
+        && other.viewInsets == viewInsets
+        && other.physicalDepth == physicalDepth
+        && other.alwaysUse24HourFormat == alwaysUse24HourFormat
+        && other.highContrast == highContrast
+        && other.disableAnimations == disableAnimations
+        && other.invertColors == invertColors
+        && other.accessibleNavigation == accessibleNavigation
+        && other.boldText == boldText;
   }
 
   @override

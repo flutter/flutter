@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -18,8 +18,8 @@ import 'theme.dart';
 /// When Shape is `null`, the dialog defaults to a [RoundedRectangleBorder] with
 /// a border radius of 2.0 on all corners.
 ///
-/// [titleTextStyle] and [contentTextStyle] are used in [AlertDialogs].
-/// If null, they default to [ThemeData.textTheme.title] and [ThemeData.textTheme.subhead],
+/// [titleTextStyle] and [contentTextStyle] are used in [AlertDialog]s.
+/// If null, they default to [TextTheme.title] and [TextTheme.subhead],
 /// respectively.
 ///
 /// See also:

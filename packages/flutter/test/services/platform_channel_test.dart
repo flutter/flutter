@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -69,7 +69,7 @@ void main() {
           }
         },
       );
-      expect(channel.invokeMethod<List<String>>('sayHello', 'hello'), throwsA(isInstanceOf<TypeError>()));
+      expect(channel.invokeMethod<List<String>>('sayHello', 'hello'), throwsA(isInstanceOf<CastError>()));
       expect(await channel.invokeListMethod<String>('sayHello', 'hello'), <String>['hello', 'world']);
     });
 
@@ -101,7 +101,7 @@ void main() {
           }
         },
       );
-      expect(channel.invokeMethod<Map<String, String>>('sayHello', 'hello'), throwsA(isInstanceOf<TypeError>()));
+      expect(channel.invokeMethod<Map<String, String>>('sayHello', 'hello'), throwsA(isInstanceOf<CastError>()));
       expect(await channel.invokeMapMethod<String, String>('sayHello', 'hello'), <String, String>{'hello': 'world'});
     });
 

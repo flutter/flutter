@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -1444,7 +1444,7 @@ class Navigator extends StatefulWidget {
   }
 
   /// Immediately remove a route from the navigator that most tightly encloses
-  /// the given context, and [Route.dispose] it. The route to be replaced is the
+  /// the given context, and [Route.dispose] it. The route to be removed is the
   /// one below the given `anchorRoute`.
   ///
   /// {@template flutter.widgets.navigator.removeRouteBelow}
@@ -1626,7 +1626,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       isInitialRoute: _history.isEmpty,
       arguments: arguments,
     );
-    Route<T> route = widget.onGenerateRoute(settings);
+    Route<T> route = widget.onGenerateRoute(settings) as Route<T>;
     if (route == null && !allowNull) {
       assert(() {
         if (widget.onUnknownRoute == null) {
@@ -1641,7 +1641,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
         }
         return true;
       }());
-      route = widget.onUnknownRoute(settings);
+      route = widget.onUnknownRoute(settings) as Route<T>;
       assert(() {
         if (route == null) {
           throw FlutterError.fromParts(<DiagnosticsNode>[
@@ -2073,7 +2073,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///    to define the route's `willPop` method.
   @optionalTypeArgs
   Future<bool> maybePop<T extends Object>([ T result ]) async {
-    final Route<T> route = _history.last;
+    final Route<T> route = _history.last as Route<T>;
     assert(route._navigator == this);
     final RoutePopDisposition disposition = await route.willPop();
     if (disposition != RoutePopDisposition.bubble && mounted) {
@@ -2201,7 +2201,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   }
 
   /// Immediately remove a route from the navigator, and [Route.dispose] it. The
-  /// route to be replaced is the one below the given `anchorRoute`.
+  /// route to be removed is the one below the given `anchorRoute`.
   ///
   /// {@macro flutter.widgets.navigator.removeRouteBelow}
   void removeRouteBelow(Route<dynamic> anchorRoute) {

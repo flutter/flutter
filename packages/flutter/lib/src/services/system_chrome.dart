@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -196,13 +196,13 @@ class SystemUiOverlayStyle {
   bool operator ==(dynamic other) {
     if (other.runtimeType != runtimeType)
       return false;
-    final SystemUiOverlayStyle typedOther = other;
-    return typedOther.systemNavigationBarColor == systemNavigationBarColor
-      && typedOther.systemNavigationBarDividerColor == systemNavigationBarDividerColor
-      && typedOther.statusBarColor == statusBarColor
-      && typedOther.statusBarIconBrightness == statusBarIconBrightness
-      && typedOther.statusBarBrightness == statusBarBrightness
-      && typedOther.systemNavigationBarIconBrightness == systemNavigationBarIconBrightness;
+    return other is SystemUiOverlayStyle
+        && other.systemNavigationBarColor == systemNavigationBarColor
+        && other.systemNavigationBarDividerColor == systemNavigationBarDividerColor
+        && other.statusBarColor == statusBarColor
+        && other.statusBarIconBrightness == statusBarIconBrightness
+        && other.statusBarBrightness == statusBarBrightness
+        && other.systemNavigationBarIconBrightness == systemNavigationBarIconBrightness;
   }
 }
 

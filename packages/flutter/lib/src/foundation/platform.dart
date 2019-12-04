@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -13,7 +13,7 @@ import '_platform_io.dart'
 /// platform for styling purposes, rather than using [defaultTargetPlatform].
 /// Widgets and render objects at lower layers that try to emulate the
 /// underlying platform can depend on [defaultTargetPlatform] directly. The
-/// [dart.io.Platform] object should only be used directly when it's critical to
+/// [dart:io.Platform] object should only be used directly when it's critical to
 /// actually know the current platform, without any overrides possible (for
 /// example, when a system API is about to be called).
 ///
@@ -47,6 +47,9 @@ enum TargetPlatform {
 
   /// iOS: <http://www.apple.com/ios/>
   iOS,
+
+  /// macOS: <http://www.apple.com/macos>
+  macOS,
 }
 
 /// Override the [defaultTargetPlatform].

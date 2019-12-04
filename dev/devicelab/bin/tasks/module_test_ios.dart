@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -242,7 +242,13 @@ Future<void> main() async {
       final File objectiveCAnalyticsOutputFile = File(path.join(tempDir.path, 'analytics-objc.log'));
       final Directory objectiveCBuildDirectory = Directory(path.join(tempDir.path, 'build-objc'));
       await inDirectory(objectiveCHostApp, () async {
-        await exec('pod', <String>['install']);
+        await exec(
+          'pod',
+          <String>['install'],
+          environment: <String, String>{
+            'LANG': 'en_US.UTF-8',
+          },
+        );
         await exec(
           'xcodebuild',
           <String>[
@@ -325,7 +331,13 @@ Future<void> main() async {
       final Directory swiftBuildDirectory = Directory(path.join(tempDir.path, 'build-swift'));
 
       await inDirectory(swiftHostApp, () async {
-        await exec('pod', <String>['install']);
+        await exec(
+          'pod',
+          <String>['install'],
+          environment: <String, String>{
+            'LANG': 'en_US.UTF-8',
+          },
+        );
         await exec(
           'xcodebuild',
           <String>[
