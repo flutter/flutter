@@ -270,7 +270,6 @@ abstract class BaseTapGestureRecognizer extends PrimaryPointerGestureRecognizer 
   }
 
   void _reset() {
-    stopTimer();
     _sentTapDown = false;
     _wonArenaForPrimaryPointer = false;
     _up = null;
