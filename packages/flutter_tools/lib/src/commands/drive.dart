@@ -154,8 +154,7 @@ class DriveCommand extends RunCommandBase {
 
     Cache.releaseLockEarly();
 
-    Map<String, String> environment =
-    <String, String> {
+    final Map<String, String> environment = <String, String>{
       'VM_SERVICE_URL': observatoryUri,
       'SELENIUM_PORT': argResults['driver-port'],
       'BROWSER_NAME': argResults['browser-name'],

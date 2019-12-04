@@ -8,6 +8,7 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:matcher/matcher.dart';
+import 'package:meta/meta.dart';
 import 'package:webdriver/sync_io.dart' as sync;
 import 'package:webdriver/support/async.dart';
 
@@ -19,24 +20,31 @@ import 'web_driver_config.dart';
 
 /// An implementation of the Flutter Driver using the WebDriver.
 class WebFlutterDriver extends FlutterDriver {
+  /// Creates a driver that uses a connection provided by the given
+  /// [_connection], and [_browserName].
+  @visibleForTesting
+  WebFlutterDriver.connectedTo(
+      this._connection,
+      this._browserName);
+
+  WebFlutterDriver._connect(this._connection, this._browserName);
+
   final FlutterWebConnection _connection;
   final String _browserName;
   DateTime _startTime;
-
-  WebFlutterDriver._connect(this._connection, this._browserName);
 
   /// Creates a driver that uses a connection provided by the given
   /// [hostUrl].
   static Future<FlutterDriver> connectWeb({String hostUrl}) async {
     hostUrl ??= Platform.environment['VM_SERVICE_URL'];
-    String browserName = Platform.environment['BROWSER_NAME'];
-    Map<String, dynamic> settings = <String, dynamic> {
+    final String browserName = Platform.environment['BROWSER_NAME'];
+    final Map<String, dynamic> settings = <String, dynamic>{
       'browser-name': browserName,
       'browser-dimension': Platform.environment['BROWSER_DIMENSION'],
       'headless': Platform.environment['HEADLESS']?.toLowerCase() == 'true',
       'selenium-port': Platform.environment['SELENIUM_PORT'],
     };
-    final connection = await FlutterWebConnection.connect
+    final FlutterWebConnection connection = await FlutterWebConnection.connect
       (hostUrl, settings);
     return WebFlutterDriver._connect(connection, browserName);
   }
@@ -46,7 +54,7 @@ class WebFlutterDriver extends FlutterDriver {
     Map<String, dynamic> response;
     final Map<String, String> serialized = command.serialize();
     try {
-      final dynamic data = await _connection.sendCommand('window.\$flutterDriver(\'${jsonEncode(serialized)}\')');
+      final dynamic data = await _connection.sendCommand('window.\$flutterDriver(\'${jsonEncode(serialized)}\')', command.timeout);
       response = data != null ? json.decode(data) : <String, dynamic>{};
     } catch (error, stackTrace) {
       throw DriverError('Failed to respond to $command due to remote error\n : \$flutterDriver(\'${jsonEncode(serialized)}\')',
@@ -146,11 +154,10 @@ class WebFlutterDriver extends FlutterDriver {
       return null;
     }
 
-    List<sync.LogEntry> logs = _connection.logs;
-    List<Map<String, dynamic>> events = [];
-    for (var entry in logs) {
+    final List<Map<String, dynamic>> events = <Map<String, dynamic>>[];
+    for (sync.LogEntry entry in _connection.logs) {
       if (_startTime.isBefore(entry.timestamp)) {
-        Map<String, dynamic> data = jsonDecode(entry.message)['message'];
+        final Map<String, dynamic> data = jsonDecode(entry.message)['message'];
         if (data['method'] == 'Tracing.dataCollected') {
           // 'ts' data collected from Chrome is in double format, conversion needed
           data['params']['ts'] =
@@ -159,7 +166,7 @@ class WebFlutterDriver extends FlutterDriver {
         }
       }
     }
-    Map<String, dynamic> json = <String, dynamic>{
+    final Map<String, dynamic> json = <String, dynamic>{
       'traceEvents': events,
     };
     _startTime = null;
@@ -196,37 +203,36 @@ class WebFlutterDriver extends FlutterDriver {
 
 /// Encapsulates connection information to an instance of a Flutter Web application.
 class FlutterWebConnection {
+  FlutterWebConnection._(this._driver);
 
   final sync.WebDriver _driver;
-
-  FlutterWebConnection._(this._driver);
 
   /// Starts WebDriver with the given [capabilities] and
   /// establishes the connection to Flutter Web application.
   static Future<FlutterWebConnection> connect(String url, Map<String, dynamic> settings) async {
-    sync.WebDriver driver = createDriver(settings);
+    final sync.WebDriver driver = createDriver(settings);
     driver.get(url);
 
     // Configure WebDriver browser by setting its location and dimension.
-    List<String> dimensions = settings['browser-dimension'].split(',');
+    final List<String> dimensions = settings['browser-dimension'].split(',');
     if (dimensions.length != 2) {
       throw DriverError('Invalid browser window size.');
     }
-    int x = int.parse(dimensions[0]);
-    int y = int.parse(dimensions[1]);
-    sync.Window window = driver.window;
-    await window.setLocation(Point<int>(0, 0));
-    await window.setSize(Rectangle<int>(0, 0, x, y));
+    final int x = int.parse(dimensions[0]);
+    final int y = int.parse(dimensions[1]);
+    final sync.Window window = driver.window;
+    window.setLocation(const Point<int>(0, 0));
+    window.setSize(Rectangle<int>(0, 0, x, y));
 
     // Wait until extension is installed.
-    await waitFor<void>(() => driver.execute('return typeof(window.\$flutterDriver)', []),
+    await waitFor<void>(() => driver.execute('return typeof(window.\$flutterDriver)', <String>[]),
         matcher: 'function',
-        timeout: Duration(minutes: 1));
-    return new FlutterWebConnection._(driver);
+        timeout: const Duration(minutes: 1));
+    return FlutterWebConnection._(driver);
   }
 
   /// Sends command via WebDriver to Flutter web application
-  Future<dynamic> sendCommand(String script) async {
+  Future<dynamic> sendCommand(String script, Duration duration) async {
     dynamic result;
     try {
       _driver.execute(script, <void>[]);
@@ -235,9 +241,9 @@ class FlutterWebConnection {
     }
 
     try {
-      result = await waitFor<dynamic>(() => _driver.execute('return \$flutterDriverResult', <void>[]),
+      result = await waitFor<dynamic>(() => _driver.execute('return \$flutterDriverResult', <String>[]),
           matcher: isNotNull,
-          timeout: Duration(seconds: 30));
+          timeout: duration ?? const Duration(seconds: 30));
     } catch (_) {
       // Returns null if exception thrown.
       return null;
@@ -257,7 +263,7 @@ class FlutterWebConnection {
   List<int> screenshot()  => _driver.captureScreenshotAsList();
 
   /// Closes the WebDriver.
-  Future close() async {
+  Future<void> close() async {
     _driver.quit();
   }
 }

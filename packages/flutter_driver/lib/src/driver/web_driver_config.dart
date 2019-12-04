@@ -6,11 +6,16 @@ import 'package:webdriver/sync_io.dart' as sync;
 
 import '../common/error.dart';
 
+/// The name of Chrome browser
 const String kChrome = 'chrome';
+/// The name of Firefox browser
 const String kFirefox = 'firefox';
+/// The name of Edge browser
 const String kEdge = 'edge';
+/// The name of Safari(macOS) browser
 const String kSafari = 'safari';
-const String kIosSafari = "ios-safari";
+/// The name of Safari(iOS) browser
+const String kIosSafari = 'ios-safari';
 
 /// Creates a WebDriver instance with the given [settings].
 sync.WebDriver createDriver(Map<String, dynamic> settings) {
@@ -36,8 +41,8 @@ Map<String, dynamic> _getDesiredCapabilities(String browserName, bool headless) 
         'acceptInsecureCerts': true,
         'browserName': 'chrome',
         'goog:loggingPrefs': <String, String>{ sync.LogType.performance: 'ALL'},
-        'chromeOptions': {
-          'args': [
+        'chromeOptions': <String, dynamic>{
+          'args': <String>[
             '--bwsi',
             '--disable-background-timer-throttling',
             '--disable-default-apps',
@@ -49,7 +54,7 @@ Map<String, dynamic> _getDesiredCapabilities(String browserName, bool headless) 
             '--no-first-run',
             if (headless) '--headless'
           ],
-          'perfLoggingPrefs': {
+          'perfLoggingPrefs': <String, String>{
             'traceCategories':
               'devtools.timeline,'
               'v8,blink.console,benchmark,blink,'
@@ -62,11 +67,11 @@ Map<String, dynamic> _getDesiredCapabilities(String browserName, bool headless) 
       return <String, dynamic>{
         'acceptInsecureCerts': true,
         'browserName': 'firefox',
-        'moz:firefoxOptions' : {
-          'args': [
+        'moz:firefoxOptions' : <String, dynamic>{
+          'args': <String>[
             if (headless) '-headless'
           ],
-          'prefs': {
+          'prefs': <String, dynamic>{
             'dom.file.createInChild': true,
             'dom.timeout.background_throttling_max_budget': -1,
             'media.autoplay.default': 0,
@@ -76,7 +81,7 @@ Map<String, dynamic> _getDesiredCapabilities(String browserName, bool headless) 
             'security.insecure_field_warning.contextual.enabled': false,
             'test.currentTimeOffsetSeconds': 11491200
           },
-          'log': {'level': 'trace'}
+          'log': <String, String>{'level': 'trace'}
         }
       };
       break;
@@ -89,7 +94,7 @@ Map<String, dynamic> _getDesiredCapabilities(String browserName, bool headless) 
     case kSafari:
       return <String, dynamic>{
         'browserName': 'safari',
-        'safari.options': {
+        'safari.options': <String, dynamic>{
           'skipExtensionInstallation': true,
           'cleanSession': true
         }

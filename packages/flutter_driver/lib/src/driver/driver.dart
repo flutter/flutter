@@ -26,6 +26,7 @@ import 'web_driver.dart';
 export 'vmservice_driver.dart';
 export 'web_driver.dart';
 
+/// Timeline stream identifier.
 enum TimelineStream {
   /// A meta-identifier that instructs the Dart VM to record all streams.
   all,
@@ -59,12 +60,6 @@ enum TimelineStream {
 /// things seem to be taking a long time.
 @visibleForTesting
 const Duration kUnusuallyLongTimeout = Duration(seconds: 5);
-
-/// The amount of time we wait prior to making the next attempt to connect to
-/// the VM service.
-const Duration _kPauseBetweenReconnectAttempts = Duration(seconds: 1);
-
-final Logger _log = Logger('FlutterDriver');
 
 /// A convenient accessor to frequently used finders.
 ///
@@ -132,6 +127,7 @@ abstract class FlutterDriver {
     );
   }
 
+  /// Sends [command] to the Flutter Driver extensions.
   Future<Map<String, dynamic>> sendCommand(Command command);
 
   /// Checks the status of the Flutter Driver extension.
