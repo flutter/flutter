@@ -425,6 +425,8 @@ class _RawMaterialButtonState extends State<RawMaterialButton> {
           kMinInteractiveDimension + densityAdjustment.dx,
           kMinInteractiveDimension + densityAdjustment.dy,
         );
+        assert(minSize.width >= 0.0);
+        assert(minSize.height >= 0.0);
         break;
       case MaterialTapTargetSize.shrinkWrap:
         minSize = Size.zero;

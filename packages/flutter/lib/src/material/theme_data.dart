@@ -686,16 +686,17 @@ class ThemeData extends Diagnosticable {
   /// Typically, density values are integral, but any value in range may be
   /// used. The range includes values from [VisualDensity.minimumDensity] (which
   /// is -4), to [VisualDensity.maximumDensity] (which is 4), inclusive, where
-  /// negative values indicate a denser UI, and positive values indicate a more
-  /// expanded UI. If a component doesn't support the value given, it will clamp
-  /// to the the nearest supported value.
+  /// negative values indicate a denser, more compact, UI, and positive values
+  /// indicate a less dense, more expanded, UI. If a component doesn't support
+  /// the value given, it will clamp to the the nearest supported value.
   ///
-  /// Defaults to vertical and horizontal densities of 0.
+  /// The default for visual densities is zero for both vertical and horizontal
+  /// densities, which corresponds to the default visual density of components
+  /// in the Material Design specification.
   ///
   /// As a rule of thumb, a change of 1 or -1 in density corresponds to 4
-  /// logical pixels (or whatever the [VisualDensity.interval] is set to). However,
-  /// this is not a strict relationship since components interpret the density
-  /// values appropriately for their needs.
+  /// logical pixels. However, this is not a strict relationship since
+  /// components interpret the density values appropriately for their needs.
   ///
   /// A larger value translates to a spacing increase (less dense), and a
   /// smaller value translates to a spacing decrease (more dense).
@@ -1681,10 +1682,21 @@ class _FifoCache<K, V> {
 /// "compactness" of the components in the UI. It is unitless, since it means
 /// different things to different UI components.
 ///
+/// The default for visual densities is zero for both vertical and horizontal
+/// densities, which corresponds to the default visual density of components in
+/// the Material Design specification. It does not affect text sizes, icon
+/// sizes, or padding values.
+///
 /// For example, for buttons, it affects the spacing around the child of the
 /// button. For lists, it affects the distance between baselines of entries in
 /// the list. For chips, it only affects the vertical size, not the horizontal
 /// size.
+///
+/// See also:
+///
+///  * [ThemeData.visualDensity], where this property is used to specify the base
+///    horizontal density of Material components.
+///  * [Material design guidance on density](https://material.io/design/layout/applying-density.html).
 class VisualDensity extends Diagnosticable {
   /// A const constructor for [VisualDensity].
   ///
@@ -1710,7 +1722,8 @@ class VisualDensity extends Diagnosticable {
   /// The default profile for [VisualDensity] in [ThemeData].
   ///
   /// This default value represents a visual density that is less dense than
-  /// either [comfortable] or [compact].
+  /// either [comfortable] or [compact], and corresponds to density values of
+  /// zero in both axes.
   static const VisualDensity standard = VisualDensity();
 
   /// The profile for a "comfortable" interpretation of [VisualDensity].
@@ -1719,6 +1732,8 @@ class VisualDensity extends Diagnosticable {
   /// making themselves more visually dense than [standard] and less dense than
   /// [compact] to different degrees based on the Material Design specification
   /// of the "comfortable" setting for their particular use case.
+  ///
+  /// It corresponds to a density value of -1 in both axes.
   static const VisualDensity comfortable = VisualDensity(horizontal: -1.0, vertical: -1.0);
 
   /// The profile for a "compact" interpretation of [VisualDensity].
@@ -1727,6 +1742,8 @@ class VisualDensity extends Diagnosticable {
   /// making themselves more visually dense than [standard] and [comfortable] to
   /// different degrees based on the Material Design specification of the
   /// "comfortable" setting for their particular use case.
+  ///
+  /// It corresponds to a density value of -2 in both axes.
   static const VisualDensity compact = VisualDensity(horizontal: -2.0, vertical: -2.0);
 
   /// Copy the current [VisualDensity] with the given values replacing the
@@ -1744,23 +1761,33 @@ class VisualDensity extends Diagnosticable {
   /// The horizontal visual density of UI components.
   ///
   /// This property affects only the horizontal spacing between and within
-  /// components, to allow for different UI visual densities.
+  /// components, to allow for different UI visual densities. It does not affect
+  /// text sizes, icon sizes, or padding values. The default value is 0.0,
+  /// corresponding to the metrics specified in the Material Design
+  /// specification. The value can range from [minimumDensity] to
+  /// [maximumDensity], inclusive.
   ///
   /// See also:
   ///
-  ///  - [ThemeData.visualDensity], where this property is used to specify the base
+  ///  * [ThemeData.visualDensity], where this property is used to specify the base
   ///    horizontal density of Material components.
+  ///  * [Material design guidance on density](https://material.io/design/layout/applying-density.html).
   final double horizontal;
 
   /// The vertical visual density of UI components.
   ///
   /// This property affects only the vertical spacing between and within
-  /// components, to allow for different UI visual densities.
+  /// components, to allow for different UI visual densities. It does not affect
+  /// text sizes, icon sizes, or padding values. The default value is 0.0,
+  /// corresponding to the metrics specified in the Material Design
+  /// specification. The value can range from [minimumDensity] to
+  /// [maximumDensity], inclusive.
   ///
   /// See also:
   ///
-  ///  - [ThemeData.visualDensity], where this property is used to specify the base
+  ///  * [ThemeData.visualDensity], where this property is used to specify the base
   ///    vertical density of Material components.
+  ///  * [Material design guidance on density](https://material.io/design/layout/applying-density.html).
   final double vertical;
 
   /// The base adjustment in logical pixels of the visual density of UI components.
@@ -1772,11 +1799,11 @@ class VisualDensity extends Diagnosticable {
   /// individual interpretation of density.
   Offset get baseSizeAdjustment {
     // The number of logical pixels represented by an increase or decrease in
-    // density by 1.0. The Material Design guidelines say to increment/decrement
+    // density by one. The Material Design guidelines say to increment/decrement
     // sized in terms of four pixel increments.
     const double interval = 4.0;
 
-    return Offset(horizontal * interval, vertical * interval);
+    return Offset(horizontal, vertical) * interval;
   }
 
   /// Linearly interpolate between two densities.
