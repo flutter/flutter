@@ -154,30 +154,32 @@ class Dialog extends StatelessWidget {
 /// Typically passed as the child widget to [showDialog], which displays the
 /// dialog.
 ///
+/// {@animation 350 622 https://flutter.github.io/assets-for-api-docs/assets/material/alert_dialog.mp4}
+///
 /// {@tool sample}
 ///
 /// This snippet shows a method in a [State] which, when called, displays a dialog box
 /// and returns a [Future] that completes when the dialog is dismissed.
 ///
 /// ```dart
-/// Future<void> _neverSatisfied() async {
+/// Future<void> _showMyDialog() async {
 ///   return showDialog<void>(
 ///     context: context,
 ///     barrierDismissible: false, // user must tap button!
 ///     builder: (BuildContext context) {
 ///       return AlertDialog(
-///         title: Text('Rewind and remember'),
+///         title: Text('AlertDialog Title'),
 ///         content: SingleChildScrollView(
 ///           child: ListBody(
 ///             children: <Widget>[
-///               Text('You will never be satisfied.'),
-///               Text('You\’re like me. I’m never satisfied.'),
+///               Text('This is a demo alert dialog.'),
+///               Text('Would you like to approve of this message?'),
 ///             ],
 ///           ),
 ///         ),
 ///         actions: <Widget>[
 ///           FlatButton(
-///             child: Text('Regret'),
+///             child: Text('Approve'),
 ///             onPressed: () {
 ///               Navigator.of(context).pop();
 ///             },
@@ -451,6 +453,8 @@ class SimpleDialogOption extends StatelessWidget {
 ///
 /// Typically passed as the child widget to [showDialog], which displays the
 /// dialog.
+///
+/// {@animation 350 622 https://flutter.github.io/assets-for-api-docs/assets/material/simple_dialog.mp4}
 ///
 /// {@tool sample}
 ///
