@@ -595,7 +595,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   ///
   /// Use [nearestScope] to start at this node instead of above it.
   FocusScopeNode get enclosingScope {
-    return ancestors.firstWhere((FocusNode node) => node is FocusScopeNode, orElse: () => null);
+    return ancestors.firstWhere((FocusNode node) => node is FocusScopeNode, orElse: () => null) as FocusScopeNode;
   }
 
   /// Returns the size of the attached widget's [RenderObject], in logical
@@ -1040,7 +1040,7 @@ class FocusScopeNode extends FocusNode {
     // found, a scope doesn't have a focusedChild, or a non-scope is
     // encountered.
     while (primaryFocus is FocusScopeNode && primaryFocus.focusedChild != null) {
-      final FocusScopeNode scope = primaryFocus;
+      final FocusScopeNode scope = primaryFocus as FocusScopeNode;
       primaryFocus = scope.focusedChild;
     }
     if (identical(primaryFocus, this)) {
@@ -1426,7 +1426,7 @@ class FocusManager with DiagnosticableTreeMixin {
     properties.add(FlagProperty('haveScheduledUpdate', value: _haveScheduledUpdate, ifTrue: 'UPDATE SCHEDULED'));
     properties.add(DiagnosticsProperty<FocusNode>('primaryFocus', primaryFocus, defaultValue: null));
     properties.add(DiagnosticsProperty<FocusNode>('nextFocus', _nextFocus, defaultValue: null));
-    final Element element = primaryFocus?.context;
+    final Element element = primaryFocus?.context as Element;
     if (element != null) {
       properties.add(DiagnosticsProperty<String>('primaryFocusCreator', element.debugGetCreatorChain(20)));
     }

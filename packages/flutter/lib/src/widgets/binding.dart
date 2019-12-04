@@ -535,7 +535,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
       case 'popRoute':
         return handlePopRoute();
       case 'pushRoute':
-        return handlePushRoute(methodCall.arguments);
+        return handlePushRoute(methodCall.arguments as String);
     }
     return Future<dynamic>.value();
   }
@@ -563,8 +563,8 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   @override
   Future<void> handleSystemMessage(Object systemMessage) async {
     await super.handleSystemMessage(systemMessage);
-    final Map<String, dynamic> message = systemMessage;
-    final String type = message['type'];
+    final Map<String, dynamic> message = systemMessage as Map<String, dynamic>;
+    final String type = message['type'] as String;
     switch (type) {
       case 'memoryPressure':
         handleMemoryPressure();
@@ -821,7 +821,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
       container: renderView,
       debugShortDescription: '[root]',
       child: rootWidget,
-    ).attachToRenderTree(buildOwner, renderViewElement);
+    ).attachToRenderTree(buildOwner, renderViewElement as RenderObjectToWidgetElement<RenderBox>);
   }
 
   /// Whether the [renderViewElement] has been initialized.
@@ -976,7 +976,7 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RootRenderObje
   RenderObjectToWidgetElement(RenderObjectToWidgetAdapter<T> widget) : super(widget);
 
   @override
-  RenderObjectToWidgetAdapter<T> get widget => super.widget;
+  RenderObjectToWidgetAdapter<T> get widget => super.widget as RenderObjectToWidgetAdapter<T>;
 
   Element _child;
 
@@ -1019,7 +1019,7 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RootRenderObje
       // due to a reassemble.
       final Widget newWidget = _newWidget;
       _newWidget = null;
-      update(newWidget);
+      update(newWidget as RenderObjectToWidgetAdapter<T>);
     }
     super.performRebuild();
     assert(_newWidget == null);
@@ -1043,13 +1043,13 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RootRenderObje
   }
 
   @override
-  RenderObjectWithChildMixin<T> get renderObject => super.renderObject;
+  RenderObjectWithChildMixin<T> get renderObject => super.renderObject as RenderObjectWithChildMixin<T>;
 
   @override
   void insertChildRenderObject(RenderObject child, dynamic slot) {
     assert(slot == _rootChildSlot);
     assert(renderObject.debugValidateChild(child));
-    renderObject.child = child;
+    renderObject.child = child as T;
   }
 
   @override

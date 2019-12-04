@@ -268,12 +268,10 @@ class AsyncSnapshot<T> {
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
-    if (other is! AsyncSnapshot<T>)
-      return false;
-    final AsyncSnapshot<T> typedOther = other;
-    return connectionState == typedOther.connectionState
-        && data == typedOther.data
-        && error == typedOther.error;
+    return other is AsyncSnapshot<T>
+        && other.connectionState == connectionState
+        && other.data == data
+        && other.error == error;
   }
 
   @override
