@@ -770,7 +770,7 @@ class BrowserManager {
         final String mapPath = p.join(
           env.environment.webUiRootDir.path,
           'build',
-          '$path.js.map',
+          '$path.browser_test.dart.js.map',
         );
         final JSStackTraceMapper mapper = JSStackTraceMapper(
           await File(mapPath).readAsString(),
