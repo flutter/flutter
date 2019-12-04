@@ -56,7 +56,7 @@ void main() {
       }
     });
 
-    testUsingContext('does not support --use-application-binary and --fast-start', () async {
+    testUsingContext('does not support "--use-application-binary" and "--fast-start"', () async {
       fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
       fs.file('pubspec.yaml').createSync();
       fs.file('.packages').createSync();
