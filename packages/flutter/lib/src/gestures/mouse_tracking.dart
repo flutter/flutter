@@ -28,7 +28,7 @@ typedef PointerHoverEventListener = void Function(PointerHoverEvent event);
 
 // A key, so that (_IdenticalKey<T>(a) == _IdenticalKey<T>(b)) is equivalent to
 // identical(a, b).
-class _IdenticalKey<T> {
+class _IdenticalKey<T> implements Key {
   _IdenticalKey(this.value);
 
   final T value;
@@ -580,16 +580,19 @@ class MouseTracker extends ChangeNotifier {
   ///
   /// This method is typically called by the [RenderObject] that owns an
   /// annotation, as soon as the render object is added to the render tree.
+  /// It's caller's responsibility to ensure that no annotation with the same
+  /// key is attached when calling this method; otherwise an assertion error
+  /// will be triggered.
   ///
   /// {@template flutter.mouseTracker.attachAnnotation}
+  /// Only the [MouseTrackerAnnotation.key] property of the annotation is used,
+  /// therefore there is no need to call this method if the object only switches
+  /// from one annotation to another with the same key.
+  ///
   /// Render objects that call this method might want to schedule a frame as
   /// well, typically by calling [RenderObject.markNeedsPaint], because this
   /// method does not cause any immediate effect, since the state it changes is
   /// used during a post-frame callback or when handling certain pointer events.
-  ///
-  /// Only the [MouseTrackerAnnotation.key] property of the annotation is used,
-  /// therefore there is no need to call this method if the object only switches
-  /// from one annotation to another with the same key.
   ///
   /// ### About annotation attachment
   ///
@@ -621,6 +624,10 @@ class MouseTracker extends ChangeNotifier {
   ///
   /// This method is typically called by the [RenderObject] that owns an
   /// annotation, as soon as the render object is removed from the render tree.
+  /// It's caller's responsibility to ensure that one annotation with the same
+  /// key is attached when calling this method; otherwise an assertion error
+  /// will be triggered.
+  ///
   /// {@macro flutter.mouseTracker.attachAnnotation}
   ///  * Detaching an annotation that has not been attached will assert.
   void detachAnnotation(MouseTrackerAnnotation annotation) {

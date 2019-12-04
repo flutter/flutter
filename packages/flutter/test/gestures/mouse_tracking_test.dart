@@ -600,15 +600,24 @@ void main() {
   test('annotations with the same key should inherit presence', () {
     const Key key = Key('annotation');
     final List<String> logs = <String>[];
+    // Annotation #1 and #2 has the same key. The #3 is not specified with a
+    // key, which is a different key.
     final MouseTrackerAnnotation annotation1 = MouseTrackerAnnotation(
       onEnter: (PointerEnterEvent event) { logs.add('enter1'); },
+      onHover: (PointerHoverEvent event) { logs.add('hover1'); },
       onExit: (PointerExitEvent event) { logs.add('exit1'); },
       key: key,
     );
     final MouseTrackerAnnotation annotation2 = MouseTrackerAnnotation(
       onEnter: (PointerEnterEvent event) { logs.add('enter2'); },
+      onHover: (PointerHoverEvent event) { logs.add('hover2'); },
       onExit: (PointerExitEvent event) { logs.add('exit2'); },
       key: key,
+    );
+    final MouseTrackerAnnotation annotation3 = MouseTrackerAnnotation(
+      onEnter: (PointerEnterEvent event) { logs.add('enter3'); },
+      onHover: (PointerHoverEvent event) { logs.add('hover3'); },
+      onExit: (PointerExitEvent event) { logs.add('exit3'); },
     );
     MouseTrackerAnnotation foundAnnotation;
     bool finderCalled = false;
@@ -619,6 +628,7 @@ void main() {
     });
 
     _mouseTracker.attachAnnotation(annotation1);
+    _mouseTracker.attachAnnotation(annotation3);
     expect(logs, isEmpty);
 
     // Pointer is added on annotation1
@@ -636,15 +646,32 @@ void main() {
     _binding.flushPostFrameCallbacks(Duration.zero);
     expect(logs, isEmpty);
 
-    // Pointer moves out
-    foundAnnotation = null;
+    // Pointer moves within annotation2
+    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+      _pointerData(PointerChange.hover, const Offset(0.0, 201.0)),
+    ]));
+    expect(logs, <String>['hover2']);
+    logs.clear();
+
+    // Pointer moves to annotation3
+    foundAnnotation = annotation3;
     ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.hover, const Offset(0.0, 301.0)),
     ]));
-    expect(logs, <String>['exit2']);
+    expect(logs, <String>['exit2', 'enter3', 'hover3']);
     logs.clear();
 
+    // Pointer moves out
+    foundAnnotation = null;
+    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+      _pointerData(PointerChange.hover, const Offset(0.0, 401.0)),
+    ]));
+    expect(logs, <String>['exit3']);
+    logs.clear();
+
+    // Disconnect mouse
     _mouseTracker.detachAnnotation(annotation2);
+    _mouseTracker.detachAnnotation(annotation3);
     expect(logs, isEmpty);
 
     // Expect there to be no annotations, so finder is no longer called
