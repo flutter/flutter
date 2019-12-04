@@ -1,4 +1,5 @@
 # CIRRUS CONFIGURATION FILE
+# https://cirrus-ci.org/guide/writing-tasks/
 
 use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
 
@@ -578,9 +579,10 @@ task:
 
 docker_builder:
   # Only build a new docker image when we tag a release (for dev, beta, or
-  # release.) Note: tagging a commit and pushing to a release branch are
+  # stable). Note: tagging a commit and pushing to a release branch are
   # different cirrus triggers. See a tag CI run at e.g.
   # https://cirrus-ci.com/github/flutter/flutter/v1.2.3
+  name: docker_build
   only_if: $CIRRUS_TAG != ''
   environment:
     GCLOUD_CREDENTIALS: ENCRYPTED[f7c098d4dd7f5ee1bfee0bb7e944cce72efbe10e97ad6440ae72de4de6a1c24d23f421a2619c668e94377fb64b0bb3e6]
