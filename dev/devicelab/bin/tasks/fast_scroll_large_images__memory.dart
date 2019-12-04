@@ -33,9 +33,9 @@ class FastScrollLargeImagesMemoryTest extends MemoryTest {
   Future<void> useMemory() async {
     await launchApp();
     await recordStart();
-    for (int iteration = 0; iteration < 4; iteration += 1) {
-      await device.shellExec('input', <String>['swipe', '0 1000 0 0 100']);
-      await Future<void>.delayed(const Duration(milliseconds: 2000));
+    for (int i = 0; i < 3; i += 1) {
+      await device.shellExec('input', <String>['swipe', '0 1500 0 0 50']);
+      await Future<void>.delayed(const Duration(milliseconds: 3000));
     }
     await recordEnd();
   }
