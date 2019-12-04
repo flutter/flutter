@@ -69,7 +69,7 @@ void main() {
           }
         },
       );
-      expect(channel.invokeMethod<List<String>>('sayHello', 'hello'), throwsA(isInstanceOf<TypeError>()));
+      expect(channel.invokeMethod<List<String>>('sayHello', 'hello'), throwsA(isInstanceOf<CastError>()));
       expect(await channel.invokeListMethod<String>('sayHello', 'hello'), <String>['hello', 'world']);
     });
 
@@ -101,7 +101,7 @@ void main() {
           }
         },
       );
-      expect(channel.invokeMethod<Map<String, String>>('sayHello', 'hello'), throwsA(isInstanceOf<TypeError>()));
+      expect(channel.invokeMethod<Map<String, String>>('sayHello', 'hello'), throwsA(isInstanceOf<CastError>()));
       expect(await channel.invokeMapMethod<String, String>('sayHello', 'hello'), <String, String>{'hello': 'world'});
     });
 

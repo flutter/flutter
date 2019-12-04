@@ -65,7 +65,7 @@ class PlatformViewsService {
   Future<void> _onMethodCall(MethodCall call) {
     switch(call.method) {
       case 'viewFocused':
-        final int id = call.arguments;
+        final int id = call.arguments as int;
         if (_focusCallbacks.containsKey(id)) {
           _focusCallbacks[id]();
         }
