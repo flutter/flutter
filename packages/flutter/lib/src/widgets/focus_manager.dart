@@ -404,9 +404,16 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// If true, this focus node may request the primary focus.
   ///
   /// Defaults to true.  Set to false if you want this node to do nothing when
-  /// [requestFocus] is called on it. Does not affect the children of this node,
-  /// and [hasFocus] can still return true if this node is the ancestor of a
-  /// node with primary focus.
+  /// [requestFocus] is called on it.
+  ///
+  /// If set to false on a [FocusScopeNode], will cause all of the children of
+  /// the scope node to not be focusable.
+  ///
+  /// If set to false on a [FocusNode], it will not affect the children of the
+  /// node.
+  ///
+  /// The [hasFocus] member can still return true if this node is the ancestor
+  /// of a node with primary focus.
   ///
   /// This is different than [skipTraversal] because [skipTraversal] still
   /// allows the node to be focused, just not traversed to via the
