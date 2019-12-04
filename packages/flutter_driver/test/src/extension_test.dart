@@ -83,7 +83,8 @@ void main() {
 
     testWidgets('handler', (WidgetTester tester) async {
       expect(log, isEmpty);
-      final dynamic result = RequestDataResult.fromJson((await extension.call(const RequestData('hello').serialize()))['response']);
+      final Map<String, dynamic> response = await extension.call(const RequestData('hello').serialize());
+      final RequestDataResult result = RequestDataResult.fromJson(response['response'] as Map<String, dynamic>);
       expect(log, <String>['hello']);
       expect(result.message, '1');
     });
@@ -471,8 +472,9 @@ void main() {
       await tester.pumpWidget(
         const Text('hello', textDirection: TextDirection.ltr));
 
-      final Map<String, Object> arguments = GetSemanticsId(const ByText('hello')).serialize();
-      final GetSemanticsIdResult result = GetSemanticsIdResult.fromJson((await extension.call(arguments))['response']);
+      final Map<String, String> arguments = GetSemanticsId(const ByText('hello')).serialize();
+      final Map<String, dynamic> response = await extension.call(arguments);
+      final GetSemanticsIdResult result = GetSemanticsIdResult.fromJson(response['response'] as Map<String, dynamic>);
 
       expect(result.id, 1);
       semantics.dispose();
@@ -482,8 +484,8 @@ void main() {
       await tester.pumpWidget(
         const Text('hello', textDirection: TextDirection.ltr));
 
-      final Map<String, Object> arguments = GetSemanticsId(const ByText('hello')).serialize();
-      final Map<String, Object> response = await extension.call(arguments);
+      final Map<String, String> arguments = GetSemanticsId(const ByText('hello')).serialize();
+      final Map<String, dynamic> response = await extension.call(arguments);
 
       expect(response['isError'], true);
       expect(response['response'], contains('Bad state: No semantics data found'));
@@ -501,8 +503,8 @@ void main() {
         ),
       );
 
-      final Map<String, Object> arguments = GetSemanticsId(const ByText('hello')).serialize();
-      final Map<String, Object> response = await extension.call(arguments);
+      final Map<String, String> arguments = GetSemanticsId(const ByText('hello')).serialize();
+      final Map<String, dynamic> response = await extension.call(arguments);
 
       expect(response['isError'], true);
       expect(response['response'], contains('Bad state: Found more than one element with the same ID'));
@@ -514,8 +516,9 @@ void main() {
     final FlutterDriverExtension extension = FlutterDriverExtension((String arg) async => '', true);
 
     Future<Offset> getOffset(OffsetType offset) async {
-      final Map<String, Object> arguments = GetOffset(ByValueKey(1), offset).serialize();
-      final GetOffsetResult result = GetOffsetResult.fromJson((await extension.call(arguments))['response']);
+      final Map<String, String> arguments = GetOffset(ByValueKey(1), offset).serialize();
+      final Map<String, dynamic> response = await extension.call(arguments);
+      final GetOffsetResult result = GetOffsetResult.fromJson(response['response'] as Map<String, dynamic>);
       return Offset(result.dx, result.dy);
     }
 
@@ -545,16 +548,16 @@ void main() {
       final FlutterDriverExtension extension = FlutterDriverExtension((String arg) async => '', true);
 
       Future<String> getDescendantText({ String of, bool matchRoot = false}) async {
-        final Map<String, Object> arguments = GetText(Descendant(
+        final Map<String, String> arguments = GetText(Descendant(
           of: ByValueKey(of),
           matching: ByValueKey('text2'),
           matchRoot: matchRoot,
         ), timeout: const Duration(seconds: 1)).serialize();
         final Map<String, dynamic> result = await extension.call(arguments);
-        if (result['isError']) {
+        if (result['isError'] as bool) {
           return null;
         }
-        return GetTextResult.fromJson(result['response']).text;
+        return GetTextResult.fromJson(result['response'] as Map<String, dynamic>).text;
       }
 
       await tester.pumpWidget(
@@ -590,16 +593,16 @@ void main() {
       final FlutterDriverExtension extension = FlutterDriverExtension((String arg) async => '', true);
 
       Future<String> getDescendantText() async {
-        final Map<String, Object> arguments = GetText(Descendant(
+        final Map<String, String> arguments = GetText(Descendant(
           of: ByValueKey('column'),
           matching: const ByType('Text'),
           firstMatchOnly: true,
         ), timeout: const Duration(seconds: 1)).serialize();
         final Map<String, dynamic> result = await extension.call(arguments);
-        if (result['isError']) {
+        if (result['isError'] as bool) {
           return null;
         }
-        return GetTextResult.fromJson(result['response']).text;
+        return GetTextResult.fromJson(result['response'] as Map<String, dynamic>).text;
       }
 
       await tester.pumpWidget(
@@ -624,16 +627,16 @@ void main() {
       final FlutterDriverExtension extension = FlutterDriverExtension((String arg) async => '', true);
 
       Future<Offset> getAncestorTopLeft({ String of, String matching, bool matchRoot = false}) async {
-        final Map<String, Object> arguments = GetOffset(Ancestor(
+        final Map<String, String> arguments = GetOffset(Ancestor(
           of: ByValueKey(of),
           matching: ByValueKey(matching),
           matchRoot: matchRoot,
         ), OffsetType.topLeft, timeout: const Duration(seconds: 1)).serialize();
         final Map<String, dynamic> response = await extension.call(arguments);
-        if (response['isError']) {
+        if (response['isError'] as bool) {
           return null;
         }
-        final GetOffsetResult result = GetOffsetResult.fromJson(response['response']);
+        final GetOffsetResult result = GetOffsetResult.fromJson(response['response'] as Map<String, dynamic>);
         return Offset(result.dx, result.dy);
       }
 
@@ -694,16 +697,16 @@ void main() {
       final FlutterDriverExtension extension = FlutterDriverExtension((String arg) async => '', true);
 
       Future<Offset> getAncestorTopLeft() async {
-        final Map<String, Object> arguments = GetOffset(Ancestor(
+        final Map<String, String> arguments = GetOffset(Ancestor(
           of: ByValueKey('leaf'),
           matching: const ByType('Container'),
           firstMatchOnly: true,
         ), OffsetType.topLeft, timeout: const Duration(seconds: 1)).serialize();
         final Map<String, dynamic> response = await extension.call(arguments);
-        if (response['isError']) {
+        if (response['isError'] as bool) {
           return null;
         }
-        final GetOffsetResult result = GetOffsetResult.fromJson(response['response']);
+        final GetOffsetResult result = GetOffsetResult.fromJson(response['response'] as Map<String, dynamic>);
         return Offset(result.dx, result.dy);
       }
 
@@ -742,8 +745,9 @@ void main() {
     final FlutterDriverExtension extension = FlutterDriverExtension((String arg) async => '', true);
 
     Future<Map<String, Object>> getDiagnosticsTree(DiagnosticsType type, SerializableFinder finder, { int depth = 0, bool properties = true }) async {
-      final Map<String, Object> arguments = GetDiagnosticsTree(finder, type, subtreeDepth: depth, includeProperties: properties).serialize();
-      final DiagnosticsTreeResult result = DiagnosticsTreeResult((await extension.call(arguments))['response']);
+      final Map<String, String> arguments = GetDiagnosticsTree(finder, type, subtreeDepth: depth, includeProperties: properties).serialize();
+      final Map<String, dynamic> response = await extension.call(arguments);
+      final DiagnosticsTreeResult result = DiagnosticsTreeResult(response['response'] as Map<String, dynamic>);
       return result.json;
     }
 
@@ -761,7 +765,7 @@ void main() {
     expect(result['children'], isNull); // depth: 0
     expect(result['widgetRuntimeType'], 'Text');
 
-    List<Map<String, Object>> properties = result['properties'];
+    List<Map<String, Object>> properties = (result['properties'] as List<dynamic>).cast<Map<String, Object>>();
     Map<String, Object> stringProperty = properties.singleWhere((Map<String, Object> property) => property['name'] == 'data');
     expect(stringProperty['description'], '"Hello World"');
     expect(stringProperty['propertyType'], 'String');
@@ -771,11 +775,11 @@ void main() {
     expect(result['properties'], isNull); // properties: false
 
     result = await getDiagnosticsTree(DiagnosticsType.widget, ByValueKey('Text'), depth: 1);
-    List<Map<String, Object>> children = result['children'];
+    List<Map<String, Object>> children = (result['children'] as List<dynamic>).cast<Map<String, Object>>();
     expect(children.single['children'], isNull);
 
     result = await getDiagnosticsTree(DiagnosticsType.widget, ByValueKey('Text'), depth: 100);
-    children = result['children'];
+    children = (result['children'] as List<dynamic>).cast<Map<String, Object>>();
     expect(children.single['children'], isEmpty);
 
     // RenderObject
@@ -789,17 +793,17 @@ void main() {
     expect(result['description'], startsWith('RenderParagraph'));
 
     result = await getDiagnosticsTree(DiagnosticsType.renderObject, ByValueKey('Text'), depth: 1);
-    children = result['children'];
+    children = (result['children'] as List<dynamic>).cast<Map<String, Object>>();
     final Map<String, Object> textSpan = children.single;
     expect(textSpan['description'], 'TextSpan');
-    properties = textSpan['properties'];
+    properties = (textSpan['properties'] as List<dynamic>).cast<Map<String, Object>>();
     stringProperty = properties.singleWhere((Map<String, Object> property) => property['name'] == 'text');
     expect(stringProperty['description'], '"Hello World"');
     expect(stringProperty['propertyType'], 'String');
     expect(children.single['children'], isNull);
 
     result = await getDiagnosticsTree(DiagnosticsType.renderObject, ByValueKey('Text'), depth: 100);
-    children = result['children'];
+    children = (result['children'] as List<dynamic>).cast<Map<String, Object>>();
     expect(children.single['children'], isEmpty);
   });
 

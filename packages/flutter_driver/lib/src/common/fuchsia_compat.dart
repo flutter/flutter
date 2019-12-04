@@ -58,7 +58,7 @@ class _DummySshCommandRunner implements SshCommandRunner {
       // will wait indefinitely for the `out` directory to be serviced, causing
       // a deadlock.
       final ProcessResult r = await Process.run(exe, args);
-      return r.stdout.split('\n');
+      return (r.stdout as String).split('\n');
     } on ProcessException catch (e) {
       _log("Error running '$command': $e");
     }
