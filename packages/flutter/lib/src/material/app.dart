@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -81,7 +81,7 @@ enum ThemeMode {
 /// This example shows how to create a [MaterialApp] that disables the "debug"
 /// banner with a [home] route that will be displayed when the app is launched.
 ///
-/// ![A screenshot of the MaterialApp class with a home Scaffold](https://flutter.github.io/assets-for-api-docs/assets/material/basic_material_app.png)
+/// ![The MaterialApp displays a Scaffold ](https://flutter.github.io/assets-for-api-docs/assets/material/basic_material_app.png)
 ///
 /// ```dart
 /// MaterialApp(
@@ -125,7 +125,7 @@ enum ThemeMode {
 /// This example shows how to create a [MaterialApp] that defines a [theme] that
 /// will be used for material widgets in the app.
 ///
-/// ![A screenshot of the MaterialApp class with a custom theme](https://flutter.github.io/assets-for-api-docs/assets/material/theme_material_app.png)
+/// ![The MaterialApp displays a Scaffold with a dark background and a blue / grey AppBar at the top](https://flutter.github.io/assets-for-api-docs/assets/material/theme_material_app.png)
 ///
 /// ```dart
 /// MaterialApp(
@@ -481,6 +481,7 @@ class _MaterialScrollBehavior extends ScrollBehavior {
     // the base class as well.
     switch (getPlatform(context)) {
       case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
         return child;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
@@ -553,8 +554,9 @@ class _MaterialAppState extends State<MaterialApp> {
       key: GlobalObjectKey(this),
       navigatorKey: widget.navigatorKey,
       navigatorObservers: _navigatorObservers,
-        pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) =>
-            MaterialPageRoute<T>(settings: settings, builder: builder),
+      pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
+        return MaterialPageRoute<T>(settings: settings, builder: builder);
+      },
       home: widget.home,
       routes: widget.routes,
       initialRoute: widget.initialRoute,

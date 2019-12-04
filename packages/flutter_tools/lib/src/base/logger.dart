@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -146,6 +146,12 @@ abstract class Logger {
     bool multilineOutput = false,
     int progressIndicatorPadding = kDefaultStatusPadding,
   });
+
+  /// Send an event to be emitted.
+  ///
+  /// Only surfaces a value in machine modes, Loggers may ignore this message in
+  /// non-machine modes.
+  void sendEvent(String name, [Map<String, dynamic> args]) { }
 }
 
 class StdoutLogger extends Logger {
@@ -167,12 +173,14 @@ class StdoutLogger extends Logger {
     _status?.pause();
     message ??= '';
     message = wrapText(message, indent: indent, hangingIndent: hangingIndent, shouldWrap: wrap);
-    if (emphasis == true)
+    if (emphasis == true) {
       message = terminal.bolden(message);
+    }
     message = terminal.color(message, color ?? TerminalColor.red);
     stderr.writeln(message);
-    if (stackTrace != null)
+    if (stackTrace != null) {
       stderr.writeln(stackTrace.toString());
+    }
     _status?.resume();
   }
 
@@ -189,12 +197,15 @@ class StdoutLogger extends Logger {
     _status?.pause();
     message ??= '';
     message = wrapText(message, indent: indent, hangingIndent: hangingIndent, shouldWrap: wrap);
-    if (emphasis == true)
+    if (emphasis == true) {
       message = terminal.bolden(message);
-    if (color != null)
+    }
+    if (color != null) {
       message = terminal.color(message, color);
-    if (newline != false)
+    }
+    if (newline != false) {
       message = '$message\n';
+    }
     writeToStdOut(message);
     _status?.resume();
   }
@@ -245,6 +256,9 @@ class StdoutLogger extends Logger {
   void _clearStatus() {
     _status = null;
   }
+
+  @override
+  void sendEvent(String name, [Map<String, dynamic> args]) { }
 }
 
 /// A [StdoutLogger] which replaces Unicode characters that cannot be printed to
@@ -279,6 +293,9 @@ class BufferLogger extends Logger {
   String get traceText => _trace.toString();
 
   @override
+  bool get hasTerminal => false;
+
+  @override
   void printError(
     String message, {
     StackTrace stackTrace,
@@ -304,10 +321,11 @@ class BufferLogger extends Logger {
     int hangingIndent,
     bool wrap,
   }) {
-    if (newline != false)
+    if (newline != false) {
       _status.writeln(wrapText(message, indent: indent, hangingIndent: hangingIndent, shouldWrap: wrap));
-    else
+    } else {
       _status.write(wrapText(message, indent: indent, hangingIndent: hangingIndent, shouldWrap: wrap));
+    }
   }
 
   @override
@@ -332,16 +350,19 @@ class BufferLogger extends Logger {
     _status.clear();
     _trace.clear();
   }
+
+  @override
+  void sendEvent(String name, [Map<String, dynamic> args]) { }
 }
 
 class VerboseLogger extends Logger {
   VerboseLogger(this.parent) : assert(terminal != null) {
-    stopwatch.start();
+    _stopwatch.start();
   }
 
   final Logger parent;
 
-  Stopwatch stopwatch = Stopwatch();
+  final Stopwatch _stopwatch = context.get<Stopwatch>() ?? Stopwatch();
 
   @override
   bool get isVerbose => true;
@@ -411,11 +432,12 @@ class VerboseLogger extends Logger {
   }
 
   void _emit(_LogType type, String message, [ StackTrace stackTrace ]) {
-    if (message.trim().isEmpty)
+    if (message.trim().isEmpty) {
       return;
+    }
 
-    final int millis = stopwatch.elapsedMilliseconds;
-    stopwatch.reset();
+    final int millis = _stopwatch.elapsedMilliseconds;
+    _stopwatch.reset();
 
     String prefix;
     const int prefixWidth = 8;
@@ -423,8 +445,9 @@ class VerboseLogger extends Logger {
       prefix = ''.padLeft(prefixWidth);
     } else {
       prefix = '+$millis ms'.padLeft(prefixWidth);
-      if (millis >= 100)
+      if (millis >= 100) {
         prefix = terminal.bolden(prefix);
+      }
     }
     prefix = '[$prefix] ';
 
@@ -433,14 +456,18 @@ class VerboseLogger extends Logger {
 
     if (type == _LogType.error) {
       parent.printError(prefix + terminal.bolden(indentMessage));
-      if (stackTrace != null)
+      if (stackTrace != null) {
         parent.printError(indent + stackTrace.toString().replaceAll('\n', '\n$indent'));
+      }
     } else if (type == _LogType.status) {
       parent.printStatus(prefix + terminal.bolden(indentMessage));
     } else {
       parent.printStatus(prefix + indentMessage);
     }
   }
+
+  @override
+  void sendEvent(String name, [Map<String, dynamic> args]) { }
 }
 
 enum _LogType { error, status, trace }
@@ -477,8 +504,13 @@ abstract class Status {
     VoidCallback onFinish,
     SlowWarningCallback slowWarningCallback,
   }) {
-    if (terminal.supportsColor)
-      return AnsiSpinner(timeout: timeout, onFinish: onFinish, slowWarningCallback: slowWarningCallback)..start();
+    if (terminal.supportsColor) {
+      return AnsiSpinner(
+        timeout: timeout,
+        onFinish: onFinish,
+        slowWarningCallback: slowWarningCallback,
+      )..start();
+    }
     return SilentStatus(timeout: timeout, onFinish: onFinish)..start();
   }
 
@@ -494,8 +526,9 @@ abstract class Status {
 
   @protected
   String get elapsedTime {
-    if (timeout == null || timeout > timeoutConfiguration.fastOperation)
+    if (timeout == null || timeout > timeoutConfiguration.fastOperation) {
       return getElapsedAsSeconds(_stopwatch.elapsed);
+    }
     return getElapsedAsMilliseconds(_stopwatch.elapsed);
   }
 
@@ -525,8 +558,9 @@ abstract class Status {
   void finish() {
     assert(_stopwatch.isRunning);
     _stopwatch.stop();
-    if (onFinish != null)
+    if (onFinish != null) {
       onFinish();
+    }
   }
 }
 
@@ -569,8 +603,9 @@ class SummaryStatus extends Status {
 
   @override
   void stop() {
-    if (!_messageShowingOnCurrentLine)
+    if (!_messageShowingOnCurrentLine) {
       _printMessage();
+    }
     super.stop();
     writeSummaryInformation();
     stdout.write('\n');
@@ -579,8 +614,9 @@ class SummaryStatus extends Status {
   @override
   void cancel() {
     super.cancel();
-    if (_messageShowingOnCurrentLine)
+    if (_messageShowingOnCurrentLine) {
       stdout.write('\n');
+    }
   }
 
   /// Prints a (minimum) 8 character padded time.
@@ -593,8 +629,9 @@ class SummaryStatus extends Status {
   void writeSummaryInformation() {
     assert(_messageShowingOnCurrentLine);
     stdout.write(elapsedTime.padLeft(_kTimePadding));
-    if (seemsSlow)
+    if (seemsSlow) {
       stdout.write(' (!)');
+    }
   }
 
   @override
@@ -770,11 +807,13 @@ class AnsiStatus extends AnsiSpinner {
   /// If [multilineOutput] is true, then it prints the message again on a new
   /// line before writing the elapsed time.
   void writeSummaryInformation() {
-    if (multilineOutput)
+    if (multilineOutput) {
       stdout.write('\n${'$message Done'.padRight(padding)}$_margin');
+    }
     stdout.write(elapsedTime.padLeft(_kTimePadding));
-    if (seemsSlow)
+    if (seemsSlow) {
       stdout.write(' (!)');
+    }
   }
 
   void _clearStatus() {

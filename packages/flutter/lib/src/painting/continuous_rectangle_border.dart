@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -115,10 +115,10 @@ class ContinuousRectangleBorder extends ShapeBorder {
       ..cubicTo(left, top, left, top, left + tlRadiusY, top)
       ..lineTo(right - trRadiusX, top)
       ..cubicTo(right, top, right, top, right, top + trRadiusY)
-      ..lineTo(right, bottom - blRadiusX)
-      ..cubicTo(right, bottom, right, bottom, right - blRadiusY, bottom)
-      ..lineTo(left + brRadiusX, bottom)
-      ..cubicTo(left, bottom, left, bottom, left, bottom - brRadiusY)
+      ..lineTo(right, bottom - brRadiusX)
+      ..cubicTo(right, bottom, right, bottom, right - brRadiusY, bottom)
+      ..lineTo(left + blRadiusX, bottom)
+      ..cubicTo(left, bottom, left, bottom, left, bottom - blRadiusY)
       ..close();
   }
 
@@ -138,7 +138,7 @@ class ContinuousRectangleBorder extends ShapeBorder {
       return;
     switch (side.style) {
       case BorderStyle.none:
-      break;
+        break;
       case BorderStyle.solid:
         final Path path = getOuterPath(rect, textDirection: textDirection);
         final Paint paint = side.toPaint();

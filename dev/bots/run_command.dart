@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -95,7 +95,6 @@ Future<void> runCommand(String executable, List<String> arguments, {
   OutputMode outputMode = OutputMode.print,
   CapturedOutput output,
   bool skip = false,
-  bool expectFlaky = false,
   bool Function(String) removeLine,
 }) async {
   assert((outputMode == OutputMode.capture) == (output != null),
@@ -144,10 +143,6 @@ Future<void> runCommand(String executable, List<String> arguments, {
     output.stdout = _flattenToString(await savedStdout);
     output.stderr = _flattenToString(await savedStderr);
   }
-
-  // If the test is flaky we don't care about the actual exit.
-  if (expectFlaky)
-    return;
 
   if ((exitCode == 0) == expectNonZeroExit || (expectedExitCode != null && exitCode != expectedExitCode)) {
     if (failureMessage != null) {

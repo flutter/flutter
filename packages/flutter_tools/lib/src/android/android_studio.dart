@@ -1,13 +1,14 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
-import '../base/io.dart';
 import '../base/platform.dart';
+import '../base/process.dart';
 import '../base/process_manager.dart';
+import '../base/utils.dart';
 import '../base/version.dart';
 import '../globals.dart';
 import '../ios/plist_parser.dart';
@@ -45,25 +46,26 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     Map<String, dynamic> plistValues = PlistParser.instance.parseFile(plistFile);
     // As AndroidStudio managed by JetBrainsToolbox could have a wrapper pointing to the real Android Studio.
     // Check if we've found a JetBrainsToolbox wrapper and deal with it properly.
-    final String jetBrainsToolboxAppBundlePath = plistValues['JetBrainsToolboxApp'];
+    final String jetBrainsToolboxAppBundlePath = plistValues['JetBrainsToolboxApp'] as String;
     if (jetBrainsToolboxAppBundlePath != null) {
       studioPath = fs.path.join(jetBrainsToolboxAppBundlePath, 'Contents');
       plistFile = fs.path.join(studioPath, 'Info.plist');
       plistValues = PlistParser.instance.parseFile(plistFile);
     }
 
-    final String versionString = plistValues[PlistParser.kCFBundleShortVersionStringKey];
+    final String versionString = plistValues[PlistParser.kCFBundleShortVersionStringKey] as String;
 
     Version version;
-    if (versionString != null)
+    if (versionString != null) {
       version = Version.parse(versionString);
+    }
 
     String pathsSelectorValue;
-    final Map<String, dynamic> jvmOptions = plistValues['JVMOptions'];
+    final Map<String, dynamic> jvmOptions = castStringKeyedMap(plistValues['JVMOptions']);
     if (jvmOptions != null) {
-      final Map<String, dynamic> jvmProperties = jvmOptions['Properties'];
+      final Map<String, dynamic> jvmProperties = castStringKeyedMap(jvmOptions['Properties']);
       if (jvmProperties != null) {
-        pathsSelectorValue = jvmProperties['idea.paths.selector'];
+        pathsSelectorValue = jvmProperties['idea.paths.selector'] as String;
       }
     }
     final String presetPluginsPath = pathsSelectorValue == null
@@ -140,18 +142,20 @@ class AndroidStudio implements Comparable<AndroidStudio> {
   @override
   int compareTo(AndroidStudio other) {
     final int result = version.compareTo(other.version);
-    if (result == 0)
+    if (result == 0) {
       return directory.compareTo(other.directory);
+    }
     return result;
   }
 
   /// Locates the newest, valid version of Android Studio.
   static AndroidStudio latestValid() {
-    final String configuredStudio = config.getValue('android-studio-dir');
+    final String configuredStudio = config.getValue('android-studio-dir') as String;
     if (configuredStudio != null) {
       String configuredStudioPath = configuredStudio;
-      if (platform.isMacOS && !configuredStudioPath.endsWith('Contents'))
+      if (platform.isMacOS && !configuredStudioPath.endsWith('Contents')) {
         configuredStudioPath = fs.path.join(configuredStudioPath, 'Contents');
+      }
       return AndroidStudio(configuredStudioPath,
           configured: configuredStudio);
     }
@@ -173,8 +177,9 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     final List<FileSystemEntity> candidatePaths = <FileSystemEntity>[];
 
     void _checkForStudio(String path) {
-      if (!fs.isDirectorySync(path))
+      if (!fs.isDirectorySync(path)) {
         return;
+      }
       try {
         final Iterable<Directory> directories = fs
             .directory(path)
@@ -197,7 +202,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     _checkForStudio('/Applications');
     _checkForStudio(fs.path.join(homeDirPath, 'Applications'));
 
-    final String configuredStudioDir = config.getValue('android-studio-dir');
+    final String configuredStudioDir = config.getValue('android-studio-dir') as String;
     if (configuredStudioDir != null) {
       FileSystemEntity configuredStudio = fs.file(configuredStudioDir);
       if (configuredStudio.basename == 'Contents') {
@@ -220,8 +225,9 @@ class AndroidStudio implements Comparable<AndroidStudio> {
 
     bool _hasStudioAt(String path, { Version newerThan }) {
       return studios.any((AndroidStudio studio) {
-        if (studio.directory != path)
+        if (studio.directory != path) {
           return false;
+        }
         if (newerThan != null) {
           return studio.version.compareTo(newerThan) >= 0;
         }
@@ -231,7 +237,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
 
     // Read all $HOME/.AndroidStudio*/system/.home files. There may be several
     // pointing to the same installation, so we grab only the latest one.
-    if (fs.directory(homeDirPath).existsSync()) {
+    if (homeDirPath != null && fs.directory(homeDirPath).existsSync()) {
       for (FileSystemEntity entity in fs.directory(homeDirPath).listSync(followLinks: false)) {
         if (entity is Directory && entity.basename.startsWith('.AndroidStudio')) {
           final AndroidStudio studio = AndroidStudio.fromHomeDot(entity);
@@ -243,7 +249,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
       }
     }
 
-    final String configuredStudioDir = config.getValue('android-studio-dir');
+    final String configuredStudioDir = config.getValue('android-studio-dir') as String;
     if (configuredStudioDir != null && !_hasStudioAt(configuredStudioDir)) {
       studios.add(AndroidStudio(configuredStudioDir,
           configured: configuredStudioDir));
@@ -290,7 +296,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     if (!processManager.canRun(javaExecutable)) {
       _validationMessages.add('Unable to find bundled Java version.');
     } else {
-      final ProcessResult result = processManager.runSync(<String>[javaExecutable, '-version']);
+      final RunResult result = processUtils.runSync(<String>[javaExecutable, '-version']);
       if (result.exitCode == 0) {
         final List<String> versionLines = result.stderr.split('\n');
         final String javaVersion = versionLines.length >= 2 ? versionLines[1] : versionLines[0];

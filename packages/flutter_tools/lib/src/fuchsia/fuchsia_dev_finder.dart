@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -30,9 +30,9 @@ class FuchsiaDevFinder {
     final List<String> command = <String>[
       fuchsiaArtifacts.devFinder.path,
       'list',
-      '-full'
+      '-full',
     ];
-    final RunResult result = await runAsync(command);
+    final RunResult result = await processUtils.run(command);
     if (result.exitCode != 0) {
       printError('dev_finder failed: ${result.stderr}');
       return null;
@@ -40,12 +40,14 @@ class FuchsiaDevFinder {
     return result.stdout.split('\n');
   }
 
-  /// Returns the host address by which the device [deviceName] should use for
-  /// the host.
+  /// Returns the address of the named device.
+  ///
+  /// If local is true, then gives the address by which the device reaches the
+  /// host.
   ///
   /// The string [deviceName] should be the name of the device from the
   /// 'list' command, e.g. 'scare-cable-skip-joy'.
-  Future<String> resolve(String deviceName) async {
+  Future<String> resolve(String deviceName, {bool local = false}) async {
     if (fuchsiaArtifacts.devFinder == null ||
         !fuchsiaArtifacts.devFinder.existsSync()) {
       throwToolExit('Fuchsia dev_finder tool not found.');
@@ -53,11 +55,11 @@ class FuchsiaDevFinder {
     final List<String> command = <String>[
       fuchsiaArtifacts.devFinder.path,
       'resolve',
-      '-local',
+      if (local) '-local',
       '-device-limit', '1',
-      deviceName
+      deviceName,
     ];
-    final RunResult result = await runAsync(command);
+    final RunResult result = await processUtils.run(command);
     if (result.exitCode != 0) {
       printError('dev_finder failed: ${result.stderr}');
       return null;

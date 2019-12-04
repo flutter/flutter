@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -46,27 +46,30 @@ class PackageMap {
   /// Returns the path to [packageUri].
   String pathForPackage(Uri packageUri) => uriForPackage(packageUri).path;
 
-  /// Returns the path to [packageUri] as Uri.
+  /// Returns the path to [packageUri] as URL.
   Uri uriForPackage(Uri packageUri) {
     assert(packageUri.scheme == 'package');
     final List<String> pathSegments = packageUri.pathSegments.toList();
     final String packageName = pathSegments.removeAt(0);
     final Uri packageBase = map[packageName];
-    if (packageBase == null)
+    if (packageBase == null) {
       return null;
+    }
     final String packageRelativePath = fs.path.joinAll(pathSegments);
     return packageBase.resolveUri(fs.path.toUri(packageRelativePath));
   }
 
   String checkValid() {
-    if (fs.isFileSync(packagesPath))
+    if (fs.isFileSync(packagesPath)) {
       return null;
+    }
     String message = '$packagesPath does not exist.';
     final String pubspecPath = fs.path.absolute(fs.path.dirname(packagesPath), 'pubspec.yaml');
-    if (fs.isFileSync(pubspecPath))
+    if (fs.isFileSync(pubspecPath)) {
       message += '\nDid you run "flutter pub get" in this directory?';
-    else
+    } else {
       message += '\nDid you run this command from the same directory as your pubspec.yaml file?';
+    }
     return message;
   }
 }

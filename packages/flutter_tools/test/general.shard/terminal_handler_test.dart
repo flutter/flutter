@@ -1,13 +1,12 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:async';
+
 import 'package:flutter_tools/src/base/common.dart';
-import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/globals.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:mockito/mockito.dart';
@@ -71,7 +70,7 @@ void main() {
     });
 
     testUsingContext('a - debugToggleProfileWidgetBuilds without service protocol', () async {
-       when(mockResidentRunner.supportsServiceProtocol).thenReturn(false);
+      when(mockResidentRunner.supportsServiceProtocol).thenReturn(false);
       await terminalHandler.processTerminalInput('a');
 
       verifyNever(mockResidentRunner.debugToggleProfileWidgetBuilds());
@@ -123,9 +122,7 @@ void main() {
 
       await terminalHandler.processTerminalInput('l');
 
-      final BufferLogger bufferLogger = logger;
-
-      expect(bufferLogger.statusText, contains('Connected views:\n'));
+      expect(testLogger.statusText, contains('Connected views:\n'));
     });
 
     testUsingContext('L - debugDumpLayerTree with service protocol', () async {
@@ -242,9 +239,7 @@ void main() {
 
       verify(mockResidentRunner.restart(fullRestart: false)).called(1);
 
-      final BufferLogger bufferLogger = logger;
-
-      expect(bufferLogger.statusText, contains('Try again after fixing the above error(s).'));
+      expect(testLogger.statusText, contains('Try again after fixing the above error(s).'));
     });
 
     testUsingContext('r - hotReload supported and fails fatally', () async {
@@ -287,9 +282,7 @@ void main() {
 
       verify(mockResidentRunner.restart(fullRestart: true)).called(1);
 
-      final BufferLogger bufferLogger = logger;
-
-      expect(bufferLogger.statusText, contains('Try again after fixing the above error(s).'));
+      expect(testLogger.statusText, contains('Try again after fixing the above error(s).'));
     });
 
     testUsingContext('R - hotRestart supported and fails fatally', () async {

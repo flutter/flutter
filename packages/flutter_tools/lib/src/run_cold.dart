@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -23,13 +23,11 @@ class ColdRunner extends ResidentRunner {
     this.awaitFirstFrameWhenTracing = true,
     this.applicationBinary,
     bool ipv6 = false,
-    bool usesTerminalUi = false,
     bool stayResident = true,
   }) : super(devices,
              target: target,
              debuggingOptions: debuggingOptions,
              hotMode: false,
-             usesTerminalUi: usesTerminalUi,
              stayResident: stayResident,
              ipv6: ipv6);
 
@@ -54,8 +52,9 @@ class ColdRunner extends ResidentRunner {
     if (!prebuiltMode) {
       if (!fs.isFileSync(mainPath)) {
         String message = 'Tried to run $mainPath, but that file does not exist.';
-        if (target == null)
+        if (target == null) {
           message += '\nConsider using the -t option to specify the Dart file to start.';
+        }
         printError(message);
         return 1;
       }
@@ -66,8 +65,9 @@ class ColdRunner extends ResidentRunner {
         coldRunner: this,
         route: route,
       );
-      if (result != 0)
+      if (result != 0) {
         return result;
+      }
     }
 
     // Connect to observatory.
@@ -83,16 +83,17 @@ class ColdRunner extends ResidentRunner {
     if (flutterDevices.first.observatoryUris != null) {
       // For now, only support one debugger connection.
       connectionInfoCompleter?.complete(DebugConnectionInfo(
-        httpUri: flutterDevices.first.observatoryUris.first,
-        wsUri: flutterDevices.first.vmServices.first.wsAddress,
+        httpUri: flutterDevices.first.vmService.httpAddress,
+        wsUri: flutterDevices.first.vmService.wsAddress,
       ));
     }
 
     printTrace('Application running.');
 
     for (FlutterDevice device in flutterDevices) {
-      if (device.vmServices == null)
+      if (device.vmService == null) {
         continue;
+      }
       device.initLogReader();
       await device.refreshViews();
       printTrace('Connected to ${device.device.name}');
@@ -101,10 +102,10 @@ class ColdRunner extends ResidentRunner {
     if (traceStartup) {
       // Only trace startup for the first device.
       final FlutterDevice device = flutterDevices.first;
-      if (device.vmServices != null && device.vmServices.isNotEmpty) {
+      if (device.vmService != null) {
         printStatus('Tracing startup on ${device.device.name}.');
         await downloadStartupTrace(
-          device.vmServices.first,
+          device.vmService,
           awaitFirstFrame: awaitFirstFrameWhenTracing,
         );
       }
@@ -113,8 +114,11 @@ class ColdRunner extends ResidentRunner {
 
     appStartedCompleter?.complete();
 
-    if (stayResident && !traceStartup)
+    writeVmserviceFile();
+
+    if (stayResident && !traceStartup) {
       return waitForAppToFinish();
+    }
     await cleanupAtFinish();
     return 0;
   }
@@ -166,6 +170,10 @@ class ColdRunner extends ResidentRunner {
 
   @override
   Future<void> cleanupAtFinish() async {
+    for (FlutterDevice flutterDevice in flutterDevices) {
+      flutterDevice.device.dispose();
+    }
+
     await stopEchoingDeviceLog();
   }
 
@@ -175,11 +183,9 @@ class ColdRunner extends ResidentRunner {
     bool haveAnything = false;
     for (FlutterDevice device in flutterDevices) {
       final String dname = device.device.name;
-      if (device.observatoryUris != null) {
-        for (Uri uri in device.observatoryUris) {
-          printStatus('An Observatory debugger and profiler on $dname is available at $uri');
-          haveAnything = true;
-        }
+      if (device.vmService != null) {
+        printStatus('An Observatory debugger and profiler on $dname is '
+          'available at: ${device.vmService .httpAddress}');
       }
     }
     if (supportsServiceProtocol) {
@@ -205,8 +211,10 @@ class ColdRunner extends ResidentRunner {
   Future<void> preExit() async {
     for (FlutterDevice device in flutterDevices) {
       // If we're running in release mode, stop the app using the device logic.
-      if (device.vmServices == null || device.vmServices.isEmpty)
+      if (device.vmService == null) {
         await device.device.stopApp(device.package);
+      }
     }
+    await super.preExit();
   }
 }

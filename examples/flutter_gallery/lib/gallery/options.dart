@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -360,6 +360,8 @@ class _PlatformItem extends StatelessWidget {
         return 'Fuchsia';
       case TargetPlatform.iOS:
         return 'Cupertino';
+      case TargetPlatform.macOS:
+        return 'Material Desktop (macOS)';
     }
     assert(false);
     return null;
@@ -425,13 +427,10 @@ class GalleryOptionsPage extends StatelessWidget {
         options.showPerformanceOverlay == null)
       return const <Widget>[];
 
-    final List<Widget> items = <Widget>[
+    return <Widget>[
       const Divider(),
       const _Heading('Diagnostics'),
-    ];
-
-    if (options.showOffscreenLayersCheckerboard != null) {
-      items.add(
+      if (options.showOffscreenLayersCheckerboard != null)
         _BooleanItem(
           'Highlight offscreen layers',
           options.showOffscreenLayersCheckerboard,
@@ -439,10 +438,7 @@ class GalleryOptionsPage extends StatelessWidget {
             onOptionsChanged(options.copyWith(showOffscreenLayersCheckerboard: value));
           },
         ),
-      );
-    }
-    if (options.showRasterCacheImagesCheckerboard != null) {
-      items.add(
+      if (options.showRasterCacheImagesCheckerboard != null)
         _BooleanItem(
           'Highlight raster cache images',
           options.showRasterCacheImagesCheckerboard,
@@ -450,10 +446,7 @@ class GalleryOptionsPage extends StatelessWidget {
             onOptionsChanged(options.copyWith(showRasterCacheImagesCheckerboard: value));
           },
         ),
-      );
-    }
-    if (options.showPerformanceOverlay != null) {
-      items.add(
+      if (options.showPerformanceOverlay != null)
         _BooleanItem(
           'Show performance overlay',
           options.showPerformanceOverlay,
@@ -461,10 +454,7 @@ class GalleryOptionsPage extends StatelessWidget {
             onOptionsChanged(options.copyWith(showPerformanceOverlay: value));
           },
         ),
-      );
-    }
-
-    return items;
+    ];
   }
 
   @override

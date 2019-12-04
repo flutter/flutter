@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -25,6 +25,10 @@ const double _kForegroundScreenOpacityFraction = 0.7;
 ///
 /// Displays its children widgets on a wheel for selection and
 /// calls back when the currently selected item changes.
+///
+/// By default, the first child in `children` will be the initially selected child.
+/// The index of a different child can be specified in [scrollController], to make
+/// that child the initially selected child.
 ///
 /// Can be used with [showCupertinoModalPopup] to display the picker modally at the
 /// bottom of the screen.
@@ -154,7 +158,8 @@ class CupertinoPicker extends StatefulWidget {
   /// {@macro flutter.rendering.wheelList.magnification}
   final double magnification;
 
-  /// A [FixedExtentScrollController] to read and control the current item.
+  /// A [FixedExtentScrollController] to read and control the current item, and
+  /// to set the initial item.
   ///
   /// If null, an implicit one will be created internally.
   final FixedExtentScrollController scrollController;
@@ -167,7 +172,7 @@ class CupertinoPicker extends StatefulWidget {
 
   /// {@macro flutter.rendering.wheelList.squeeze}
   ///
-  /// Defaults to `1.45` fo visually mimic iOS.
+  /// Defaults to `1.45` to visually mimic iOS.
   final double squeeze;
 
   /// An option callback when the currently centered item changes.
@@ -225,6 +230,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
         break;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
+      case TargetPlatform.macOS:
         hasSuitableHapticHardware = false;
         break;
     }

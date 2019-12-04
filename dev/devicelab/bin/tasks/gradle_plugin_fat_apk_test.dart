@@ -1,4 +1,4 @@
-// Copyright (c) 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -19,20 +19,18 @@ Future<void> main() async {
 
         final Iterable<String> apkFiles = await getFilesInApk(pluginProject.debugApkPath);
 
-        checkItContains<String>(<String>[
-          'AndroidManifest.xml',
-          'classes.dex',
-          'assets/flutter_assets/isolate_snapshot_data',
-          'assets/flutter_assets/kernel_blob.bin',
-          'assets/flutter_assets/vm_snapshot_data',
-          'lib/arm64-v8a/libflutter.so',
+        checkCollectionContains<String>(<String>[
+          ...flutterAssets,
+          ...debugAssets,
+          ...baseApkFiles,
           'lib/armeabi-v7a/libflutter.so',
+          'lib/arm64-v8a/libflutter.so',
           // Debug mode intentionally includes `x86` and `x86_64`.
           'lib/x86/libflutter.so',
           'lib/x86_64/libflutter.so',
         ], apkFiles);
 
-        checkItDoesNotContain<String>(<String>[
+        checkCollectionDoesNotContain<String>(<String>[
           'lib/arm64-v8a/libapp.so',
           'lib/armeabi-v7a/libapp.so',
           'lib/x86/libapp.so',
@@ -46,20 +44,16 @@ Future<void> main() async {
 
         final Iterable<String> apkFiles = await getFilesInApk(pluginProject.releaseApkPath);
 
-        checkItContains<String>(<String>[
-          'AndroidManifest.xml',
-          'classes.dex',
-          'lib/arm64-v8a/libflutter.so',
-          'lib/arm64-v8a/libapp.so',
+        checkCollectionContains<String>(<String>[
+          ...flutterAssets,
+          ...baseApkFiles,
           'lib/armeabi-v7a/libflutter.so',
           'lib/armeabi-v7a/libapp.so',
+          'lib/arm64-v8a/libflutter.so',
+          'lib/arm64-v8a/libapp.so',
         ], apkFiles);
 
-        checkItDoesNotContain<String>(<String>[
-          'assets/flutter_assets/isolate_snapshot_data',
-          'assets/flutter_assets/kernel_blob.bin',
-          'assets/flutter_assets/vm_snapshot_data',
-        ], apkFiles);
+        checkCollectionDoesNotContain<String>(debugAssets, apkFiles);
       });
 
       await runPluginProjectTest((FlutterPluginProject pluginProject) async {
@@ -69,20 +63,16 @@ Future<void> main() async {
 
         final Iterable<String> apkFiles = await getFilesInApk(pluginProject.releaseApkPath);
 
-        checkItContains<String>(<String>[
-          'AndroidManifest.xml',
-          'classes.dex',
+        checkCollectionContains<String>(<String>[
+          ...flutterAssets,
+          ...baseApkFiles,
           'lib/armeabi-v7a/libflutter.so',
           'lib/armeabi-v7a/libapp.so',
           'lib/arm64-v8a/libflutter.so',
           'lib/arm64-v8a/libapp.so',
         ], apkFiles);
 
-        checkItDoesNotContain<String>(<String>[
-          'assets/flutter_assets/isolate_snapshot_data',
-          'assets/flutter_assets/kernel_blob.bin',
-          'assets/flutter_assets/vm_snapshot_data',
-        ], apkFiles);
+        checkCollectionDoesNotContain<String>(debugAssets, apkFiles);
       });
 
       await runPluginProjectTest((FlutterPluginProject pluginProject) async {
@@ -93,33 +83,25 @@ Future<void> main() async {
 
         final Iterable<String> armApkFiles = await getFilesInApk(pluginProject.releaseArmApkPath);
 
-        checkItContains<String>(<String>[
-          'AndroidManifest.xml',
-          'classes.dex',
+        checkCollectionContains<String>(<String>[
+          ...flutterAssets,
+          ...baseApkFiles,
           'lib/armeabi-v7a/libflutter.so',
           'lib/armeabi-v7a/libapp.so',
         ], armApkFiles);
 
-        checkItDoesNotContain<String>(<String>[
-          'assets/flutter_assets/isolate_snapshot_data',
-          'assets/flutter_assets/kernel_blob.bin',
-          'assets/flutter_assets/vm_snapshot_data',
-        ], armApkFiles);
+        checkCollectionDoesNotContain<String>(debugAssets, armApkFiles);
 
         final Iterable<String> arm64ApkFiles = await getFilesInApk(pluginProject.releaseArm64ApkPath);
 
-        checkItContains<String>(<String>[
-          'AndroidManifest.xml',
-          'classes.dex',
+        checkCollectionContains<String>(<String>[
+          ...flutterAssets,
+          ...baseApkFiles,
           'lib/arm64-v8a/libflutter.so',
           'lib/arm64-v8a/libapp.so',
         ], arm64ApkFiles);
 
-        checkItDoesNotContain<String>(<String>[
-          'assets/flutter_assets/isolate_snapshot_data',
-          'assets/flutter_assets/kernel_blob.bin',
-          'assets/flutter_assets/vm_snapshot_data',
-        ], arm64ApkFiles);
+        checkCollectionDoesNotContain<String>(debugAssets, arm64ApkFiles);
       });
 
       await runProjectTest((FlutterProject project) async {
@@ -129,18 +111,19 @@ Future<void> main() async {
         // When the platform-target isn't specified, we generate the snapshots
         // for arm and arm64.
         final List<String> targetPlatforms = <String>[
-          'android-arm',
-          'android-arm64'
+          'arm64-v8a',
+          'armeabi-v7a',
         ];
         for (final String targetPlatform in targetPlatforms) {
           final String androidArmSnapshotPath = path.join(
-              project.rootPath,
-              'build',
-              'app',
-              'intermediates',
-              'flutter',
-              'release',
-              targetPlatform);
+            project.rootPath,
+            'build',
+            'app',
+            'intermediates',
+            'flutter',
+            'release',
+            targetPlatform,
+          );
 
           final String sharedLibrary = path.join(androidArmSnapshotPath, 'app.so');
           if (!File(sharedLibrary).existsSync()) {

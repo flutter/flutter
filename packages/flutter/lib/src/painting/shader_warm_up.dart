@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -72,7 +72,7 @@ abstract class ShaderWarmUp {
   /// Alternatively, one may run the app with `flutter run --trace-skia` and
   /// then examine the GPU thread in the observatory timeline to see which
   /// Skia draw operations are commonly used, and which shader compilations
-  /// are causing janks.
+  /// are causing jank.
   @protected
   Future<void> warmUpOnCanvas(ui.Canvas canvas);
 
@@ -99,9 +99,10 @@ abstract class ShaderWarmUp {
 /// issues seen so far.
 class DefaultShaderWarmUp extends ShaderWarmUp {
   /// Allow [DefaultShaderWarmUp] to be used as the default value of parameters.
-  const DefaultShaderWarmUp(
-      {this.drawCallSpacing = 0.0,
-      this.canvasSize = const ui.Size(100.0, 100.0)});
+  const DefaultShaderWarmUp({
+    this.drawCallSpacing = 0.0,
+    this.canvasSize = const ui.Size(100.0, 100.0),
+  });
 
   /// Constant that can be used to space out draw calls for visualizing the draws
   /// for debugging purposes (example: 80.0).  Be sure to also change your canvas

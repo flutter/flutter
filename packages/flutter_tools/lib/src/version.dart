@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -18,7 +18,6 @@ import 'convert.dart';
 import 'globals.dart';
 
 class FlutterVersion {
-  @visibleForTesting
   FlutterVersion([this._clock = const SystemClock()]) {
     _frameworkRevision = _runGit(gitLog(<String>['-n', '1', '--pretty=format:%H']).join(' '));
     _frameworkVersion = GitTagVersion.determine().frameworkVersionFor(_frameworkRevision);
@@ -67,7 +66,7 @@ class FlutterVersion {
         final String remote = channel.substring(0, slash);
         _repositoryUrl = _runGit('git ls-remote --get-url $remote');
         _channel = channel.substring(slash + 1);
-       } else if (channel.isEmpty) {
+      } else if (channel.isEmpty) {
         _channel = 'unknown';
       } else {
         _channel = channel;
@@ -121,19 +120,29 @@ class FlutterVersion {
   }
 
   Map<String, Object> toJson() => <String, Object>{
-        'frameworkVersion': frameworkVersion ?? 'unknown',
-        'channel': channel,
-        'repositoryUrl': repositoryUrl ?? 'unknown source',
-        'frameworkRevision': frameworkRevision,
-        'frameworkCommitDate': frameworkCommitDate,
-        'engineRevision': engineRevision,
-        'dartSdkVersion': dartSdkVersion,
-      };
+    'frameworkVersion': frameworkVersion ?? 'unknown',
+    'channel': channel,
+    'repositoryUrl': repositoryUrl ?? 'unknown source',
+    'frameworkRevision': frameworkRevision,
+    'frameworkCommitDate': frameworkCommitDate,
+    'engineRevision': engineRevision,
+    'dartSdkVersion': dartSdkVersion,
+  };
 
   /// A date String describing the last framework commit.
-  String get frameworkCommitDate => _latestGitCommitDate();
+  ///
+  /// If a git command fails, this will return a placeholder date.
+  String get frameworkCommitDate => _latestGitCommitDate(lenient: true);
 
-  static String _latestGitCommitDate([ String branch ]) {
+  // The date of the latest commit on the given branch. If no branch is
+  // specified, then it is the current local branch.
+  //
+  // If lenient is true, and the git command fails, a placeholder date is
+  // returned. Otherwise, the VersionCheckError exception is propagated.
+  static String _latestGitCommitDate({
+    String branch,
+    bool lenient = false,
+  }) {
     final List<String> args = gitLog(<String>[
       if (branch != null) branch,
       '-n',
@@ -141,7 +150,21 @@ class FlutterVersion {
       '--pretty=format:%ad',
       '--date=iso',
     ]);
-    return _runSync(args, lenient: false);
+    try {
+      // Don't plumb 'lenient' through directly so that we can print an error
+      // if something goes wrong.
+      return _runSync(args, lenient: false);
+    } on VersionCheckError catch (e) {
+      if (lenient) {
+        final DateTime dummyDate = DateTime.fromMillisecondsSinceEpoch(0);
+        printError('Failed to find the latest git commit date: $e\n'
+          'Returning $dummyDate instead.');
+        // Return something that DateTime.parse() can parse.
+        return dummyDate.toString();
+      } else {
+        rethrow;
+      }
+    }
   }
 
   /// The name of the temporary git remote used to check for the latest
@@ -154,8 +177,8 @@ class FlutterVersion {
 
   /// The date of the latest framework commit in the remote repository.
   ///
-  /// Throws [ToolExit] if a git command fails, for example, when the remote git
-  /// repository is not reachable due to a network issue.
+  /// Throws [VersionCheckError] if a git command fails, for example, when the
+  /// remote git repository is not reachable due to a network issue.
   static Future<String> fetchRemoteFrameworkCommitDate(String branch) async {
     await _removeVersionCheckRemoteIfExists();
     try {
@@ -167,7 +190,10 @@ class FlutterVersion {
         'https://github.com/flutter/flutter.git',
       ]);
       await _run(<String>['git', 'fetch', _versionCheckRemote, branch]);
-      return _latestGitCommitDate('$_versionCheckRemote/$branch');
+      return _latestGitCommitDate(
+        branch: '$_versionCheckRemote/$branch',
+        lenient: false,
+      );
     } finally {
       await _removeVersionCheckRemoteIfExists();
     }
@@ -178,16 +204,18 @@ class FlutterVersion {
         .split('\n')
         .map<String>((String name) => name.trim()) // to account for OS-specific line-breaks
         .toList();
-    if (remotes.contains(_versionCheckRemote))
+    if (remotes.contains(_versionCheckRemote)) {
       await _run(<String>['git', 'remote', 'remove', _versionCheckRemote]);
+    }
   }
 
   static FlutterVersion get instance => context.get<FlutterVersion>();
 
   /// Return a short string for the version (e.g. `master/0.0.59-pre.92`, `scroll_refactor/a76bc8e22b`).
   String getVersionString({ bool redactUnknownBranches = false }) {
-    if (frameworkVersion != 'unknown')
+    if (frameworkVersion != 'unknown') {
       return '${getBranchName(redactUnknownBranches: redactUnknownBranches)}/$frameworkVersion';
+    }
     return '${getBranchName(redactUnknownBranches: redactUnknownBranches)}/$frameworkRevisionShort';
   }
 
@@ -202,8 +230,10 @@ class FlutterVersion {
     }();
     if (redactUnknownBranches || _branch.isEmpty) {
       // Only return the branch names we know about; arbitrary branch names might contain PII.
-      if (!officialChannels.contains(_branch) && !obsoleteBranches.containsKey(_branch))
+      if (!officialChannels.contains(_branch) &&
+          !obsoleteBranches.containsKey(_branch)) {
         return '[user-branch]';
+      }
     }
     return _branch;
   }
@@ -216,7 +246,13 @@ class FlutterVersion {
     String tentativeAncestorRevision,
   }) {
     final ProcessResult result = processManager.runSync(
-      <String>['git', 'merge-base', '--is-ancestor', tentativeAncestorRevision, tentativeDescendantRevision],
+      <String>[
+        'git',
+        'merge-base',
+        '--is-ancestor',
+        tentativeAncestorRevision,
+        tentativeDescendantRevision
+      ],
       workingDirectory: Cache.flutterRoot,
     );
     return result.exitCode == 0;
@@ -288,7 +324,16 @@ class FlutterVersion {
       return;
     }
 
-    final DateTime localFrameworkCommitDate = DateTime.parse(frameworkCommitDate);
+    DateTime localFrameworkCommitDate;
+    try {
+      localFrameworkCommitDate = DateTime.parse(_latestGitCommitDate(
+        lenient: false
+      ));
+    } on VersionCheckError {
+      // Don't perform the update check if the verison check failed.
+      return;
+    }
+
     final Duration frameworkAge = _clock.now().difference(localFrameworkCommitDate);
     final bool installationSeemsOutdated = frameworkAge > versionAgeConsideredUpToDate(channel);
 
@@ -296,12 +341,11 @@ class FlutterVersion {
     // to the server if we haven't checked recently so won't happen on every
     // command.
     final DateTime latestFlutterCommitDate = await _getLatestAvailableFlutterDate();
-    final VersionCheckResult remoteVersionStatus =
-        latestFlutterCommitDate == null
-            ? VersionCheckResult.unknown
-            : latestFlutterCommitDate.isAfter(localFrameworkCommitDate)
-                ? VersionCheckResult.newVersionAvailable
-                : VersionCheckResult.versionIsCurrent;
+    final VersionCheckResult remoteVersionStatus = latestFlutterCommitDate == null
+        ? VersionCheckResult.unknown
+        : latestFlutterCommitDate.isAfter(localFrameworkCommitDate)
+          ? VersionCheckResult.newVersionAvailable
+          : VersionCheckResult.versionIsCurrent;
 
     // Do not load the stamp before the above server check as it may modify the stamp file.
     final VersionCheckStamp stamp = await VersionCheckStamp.load();
@@ -311,15 +355,15 @@ class FlutterVersion {
     // We show a warning if either we know there is a new remote version, or we couldn't tell but the local
     // version is outdated.
     final bool canShowWarning =
-        remoteVersionStatus == VersionCheckResult.newVersionAvailable ||
-            (remoteVersionStatus == VersionCheckResult.unknown &&
-                installationSeemsOutdated);
+      remoteVersionStatus == VersionCheckResult.newVersionAvailable ||
+        (remoteVersionStatus == VersionCheckResult.unknown &&
+          installationSeemsOutdated);
 
     if (beenAWhileSinceWarningWasPrinted && canShowWarning) {
       final String updateMessage =
-          remoteVersionStatus == VersionCheckResult.newVersionAvailable
-              ? newVersionAvailableMessage()
-              : versionOutOfDateMessage(frameworkAge);
+        remoteVersionStatus == VersionCheckResult.newVersionAvailable
+          ? newVersionAvailableMessage()
+          : versionOutOfDateMessage(frameworkAge);
       printStatus(updateMessage, emphasis: true);
       await Future.wait<void>(<Future<void>>[
         stamp.store(
@@ -376,16 +420,21 @@ class FlutterVersion {
     final VersionCheckStamp versionCheckStamp = await VersionCheckStamp.load();
 
     if (versionCheckStamp.lastTimeVersionWasChecked != null) {
-      final Duration timeSinceLastCheck = _clock.now().difference(versionCheckStamp.lastTimeVersionWasChecked);
+      final Duration timeSinceLastCheck = _clock.now().difference(
+        versionCheckStamp.lastTimeVersionWasChecked,
+      );
 
       // Don't ping the server too often. Return cached value if it's fresh.
-      if (timeSinceLastCheck < checkAgeConsideredUpToDate)
+      if (timeSinceLastCheck < checkAgeConsideredUpToDate) {
         return versionCheckStamp.lastKnownRemoteVersion;
+      }
     }
 
     // Cache is empty or it's been a while since the last server ping. Ping the server.
     try {
-      final DateTime remoteFrameworkCommitDate = DateTime.parse(await FlutterVersion.fetchRemoteFrameworkCommitDate(channel));
+      final DateTime remoteFrameworkCommitDate = DateTime.parse(
+        await FlutterVersion.fetchRemoteFrameworkCommitDate(channel),
+      );
       await versionCheckStamp.store(
         newTimeVersionWasChecked: _clock.now(),
         newKnownRemoteVersion: remoteFrameworkCommitDate,
@@ -430,7 +479,7 @@ class VersionCheckStamp {
       // Attempt to parse stamp JSON.
       try {
         final dynamic jsonObject = json.decode(versionCheckStamp);
-        if (jsonObject is Map) {
+        if (jsonObject is Map<String, dynamic>) {
           return fromJson(jsonObject);
         } else {
           printTrace('Warning: expected version stamp to be a Map but found: $jsonObject');
@@ -448,7 +497,7 @@ class VersionCheckStamp {
   static VersionCheckStamp fromJson(Map<String, dynamic> jsonObject) {
     DateTime readDateTime(String property) {
       return jsonObject.containsKey(property)
-          ? DateTime.parse(jsonObject[property])
+          ? DateTime.parse(jsonObject[property] as String)
           : null;
     }
 
@@ -466,14 +515,17 @@ class VersionCheckStamp {
   }) async {
     final Map<String, String> jsonData = toJson();
 
-    if (newTimeVersionWasChecked != null)
+    if (newTimeVersionWasChecked != null) {
       jsonData['lastTimeVersionWasChecked'] = '$newTimeVersionWasChecked';
+    }
 
-    if (newKnownRemoteVersion != null)
+    if (newKnownRemoteVersion != null) {
       jsonData['lastKnownRemoteVersion'] = '$newKnownRemoteVersion';
+    }
 
-    if (newTimeWarningWasPrinted != null)
+    if (newTimeWarningWasPrinted != null) {
       jsonData['lastTimeWarningWasPrinted'] = '$newTimeWarningWasPrinted';
+    }
 
     const JsonEncoder prettyJsonEncoder = JsonEncoder.withIndent('  ');
     Cache.instance.setStampFor(flutterVersionCheckStampFile, prettyJsonEncoder.convert(jsonData));
@@ -490,14 +542,17 @@ class VersionCheckStamp {
 
     final Map<String, String> jsonData = <String, String>{};
 
-    if (updateTimeVersionWasChecked != null)
+    if (updateTimeVersionWasChecked != null) {
       jsonData['lastTimeVersionWasChecked'] = '$updateTimeVersionWasChecked';
+    }
 
-    if (updateKnownRemoteVersion != null)
+    if (updateKnownRemoteVersion != null) {
       jsonData['lastKnownRemoteVersion'] = '$updateKnownRemoteVersion';
+    }
 
-    if (updateTimeWarningWasPrinted != null)
+    if (updateTimeWarningWasPrinted != null) {
       jsonData['lastTimeWarningWasPrinted'] = '$updateTimeWarningWasPrinted';
+    }
 
     return jsonData;
   }
@@ -523,14 +578,19 @@ class VersionCheckError implements Exception {
 /// If [lenient] is true and the command fails, returns an empty string.
 /// Otherwise, throws a [ToolExit] exception.
 String _runSync(List<String> command, { bool lenient = true }) {
-  final ProcessResult results = processManager.runSync(command, workingDirectory: Cache.flutterRoot);
+  final ProcessResult results = processManager.runSync(
+    command,
+    workingDirectory: Cache.flutterRoot,
+  );
 
-  if (results.exitCode == 0)
-    return results.stdout.trim();
+  if (results.exitCode == 0) {
+    return (results.stdout as String).trim();
+  }
 
   if (!lenient) {
     throw VersionCheckError(
       'Command exited with code ${results.exitCode}: ${command.join(' ')}\n'
+      'Standard out: ${results.stdout}\n'
       'Standard error: ${results.stderr}'
     );
   }
@@ -539,7 +599,10 @@ String _runSync(List<String> command, { bool lenient = true }) {
 }
 
 String _runGit(String command) {
-  return runSync(command.split(' '), workingDirectory: Cache.flutterRoot);
+  return processUtils.runSync(
+    command.split(' '),
+    workingDirectory: Cache.flutterRoot,
+  ).stdout.trim();
 }
 
 /// Runs [command] in the root of the Flutter installation and returns the
@@ -549,8 +612,9 @@ String _runGit(String command) {
 Future<String> _run(List<String> command) async {
   final ProcessResult results = await processManager.run(command, workingDirectory: Cache.flutterRoot);
 
-  if (results.exitCode == 0)
-    return results.stdout.trim();
+  if (results.exitCode == 0) {
+    return (results.stdout as String).trim();
+  }
 
   throw VersionCheckError(
     'Command exited with code ${results.exitCode}: ${command.join(' ')}\n'
@@ -559,8 +623,9 @@ Future<String> _run(List<String> command) async {
 }
 
 String _shortGitRevision(String revision) {
-  if (revision == null)
+  if (revision == null) {
     return '';
+  }
   return revision.length > 10 ? revision.substring(0, 10) : revision;
 }
 
@@ -608,15 +673,18 @@ class GitTagVersion {
   }
 
   String frameworkVersionFor(String revision) {
-    if (x == null || y == null || z == null || !revision.startsWith(hash))
+    if (x == null || y == null || z == null || !revision.startsWith(hash)) {
       return '0.0.0-unknown';
+    }
     if (commits == 0) {
-      if (hotfix != null)
+      if (hotfix != null) {
         return '$x.$y.$z+hotfix.$hotfix';
+      }
       return '$x.$y.$z';
     }
-    if (hotfix != null)
+    if (hotfix != null) {
       return '$x.$y.$z+hotfix.${hotfix + 1}-pre.$commits';
+    }
     return '$x.$y.${z + 1}-pre.$commits';
   }
 }

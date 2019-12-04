@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -33,6 +33,18 @@ abstract class EdgeInsetsGeometry {
   double get _right;
   double get _start;
   double get _top;
+
+  /// An [EdgeInsetsGeometry] with infinite offsets in each direction.
+  ///
+  /// Can be used as an infinite upper bound for [clamp].
+  static const EdgeInsetsGeometry infinity = _MixedEdgeInsets.fromLRSETB(
+    double.infinity,
+    double.infinity,
+    double.infinity,
+    double.infinity,
+    double.infinity,
+    double.infinity,
+  );
 
   /// Whether every dimension is non-negative.
   bool get isNonNegative {
@@ -143,6 +155,19 @@ abstract class EdgeInsetsGeometry {
       _end + other._end,
       _top + other._top,
       _bottom + other._bottom,
+    );
+  }
+
+  /// Returns the a new [EdgeInsetsGeometry] object with all values greater than
+  /// or equal to `min`, and less than or equal to `max`.
+  EdgeInsetsGeometry clamp(EdgeInsetsGeometry min, EdgeInsetsGeometry max) {
+    return _MixedEdgeInsets.fromLRSETB(
+      _left.clamp(min._left, max._left),
+      _right.clamp(min._right, max._right),
+      _start.clamp(min._start, max._start),
+      _end.clamp(min._end, max._end),
+      _top.clamp(min._top, max._top),
+      _bottom.clamp(min._bottom, max._bottom),
     );
   }
 

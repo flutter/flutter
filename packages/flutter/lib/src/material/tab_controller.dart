@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -11,7 +11,7 @@ import 'constants.dart';
 /// Coordinates tab selection between a [TabBar] and a [TabBarView].
 ///
 /// The [index] property is the index of the selected tab and the [animation]
-/// represents the current scroll positions of the tab bar and the tar bar view.
+/// represents the current scroll positions of the tab bar and the tab bar view.
 /// The selected tab's index can be changed with [animateTo].
 ///
 /// A stateful widget that builds a [TabBar] or a [TabBarView] can create
@@ -313,7 +313,7 @@ class DefaultTabController extends StatefulWidget {
     @required this.child,
   }) : assert(initialIndex != null),
        assert(length >= 0),
-       assert(initialIndex >= 0 && initialIndex < length),
+       assert(length == 0 || (initialIndex >= 0 && initialIndex < length)),
        super(key: key);
 
   /// The total number of tabs.
@@ -342,7 +342,7 @@ class DefaultTabController extends StatefulWidget {
   /// TabController controller = DefaultTabBarController.of(context);
   /// ```
   static TabController of(BuildContext context) {
-    final _TabControllerScope scope = context.inheritFromWidgetOfExactType(_TabControllerScope);
+    final _TabControllerScope scope = context.dependOnInheritedWidgetOfExactType<_TabControllerScope>();
     return scope?.controller;
   }
 

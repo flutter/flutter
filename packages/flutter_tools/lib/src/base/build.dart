@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -69,7 +69,10 @@ class GenSnapshot {
       outputFilter = (String line) => line != kStripWarning ? line : null;
     }
 
-    return runCommandAndStreamOutput(<String>[snapshotterPath, ...args], mapFunction: outputFilter);
+    return processUtils.stream(
+      <String>[snapshotterPath, ...args],
+      mapFunction: outputFilter,
+    );
   }
 }
 
@@ -91,6 +94,7 @@ class AOTSnapshotter {
     DarwinArch darwinArch,
     List<String> extraGenSnapshotOptions = const <String>[],
     @required bool bitcode,
+    bool quiet = false,
   }) async {
     if (bitcode && platform != TargetPlatform.ios) {
       printError('Bitcode is only supported for iOS.');
@@ -154,11 +158,11 @@ class AOTSnapshotter {
 
     genSnapshotArgs.add(mainPath);
 
-    // Verify that all required inputs exist.
+    // TODO(jonahwilliams): fully remove input checks once all callers are
+    // using assemble.
     final Iterable<String> missingInputs = inputPaths.where((String p) => !fs.isFileSync(p));
     if (missingInputs.isNotEmpty) {
-      printError('Missing input files: $missingInputs from $inputPaths');
-      return 1;
+      printTrace('Missing input files: $missingInputs from $inputPaths');
     }
 
     final SnapshotType snapshotType = SnapshotType(platform, buildMode);
@@ -178,19 +182,22 @@ class AOTSnapshotter {
     // is resolved.
     // The DWARF section confuses Xcode tooling, so this strips it. Ideally,
     // gen_snapshot would provide an argument to do this automatically.
-    if (platform == TargetPlatform.ios && bitcode) {
-      final IOSink sink = fs.file('$assembly.bitcode').openWrite();
+    final bool stripSymbols = platform == TargetPlatform.ios && buildMode == BuildMode.release && bitcode;
+    if (stripSymbols) {
+      final IOSink sink = fs.file('$assembly.stripped.S').openWrite();
       for (String line in fs.file(assembly).readAsLinesSync()) {
         if (line.startsWith('.section __DWARF')) {
           break;
         }
         sink.writeln(line);
       }
+      await sink.flush();
       await sink.close();
     }
 
     // Write path to gen_snapshot, since snapshots have to be re-generated when we roll
     // the Dart SDK.
+    // TODO(jonahwilliams): remove when all callers are using assemble.
     final String genSnapshotPath = GenSnapshot.getSnapshotterPath(snapshotType);
     outputDir.childFile('gen_snapshot.d').writeAsStringSync('gen_snapshot.d: $genSnapshotPath\n');
 
@@ -199,12 +206,15 @@ class AOTSnapshotter {
     if (platform == TargetPlatform.ios || platform == TargetPlatform.darwin_x64) {
       final RunResult result = await _buildFramework(
         appleArch: darwinArch,
-        assemblyPath: bitcode ? '$assembly.bitcode' : assembly,
+        isIOS: platform == TargetPlatform.ios,
+        assemblyPath: stripSymbols ? '$assembly.stripped.S' : assembly,
         outputPath: outputDir.path,
         bitcode: bitcode,
+        quiet: quiet,
       );
-      if (result.exitCode != 0)
+      if (result.exitCode != 0) {
         return result.exitCode;
+      }
     }
     return 0;
   }
@@ -213,26 +223,40 @@ class AOTSnapshotter {
   /// source at [assemblyPath].
   Future<RunResult> _buildFramework({
     @required DarwinArch appleArch,
+    @required bool isIOS,
     @required String assemblyPath,
     @required String outputPath,
     @required bool bitcode,
+    @required bool quiet
   }) async {
     final String targetArch = getNameForDarwinArch(appleArch);
-    printStatus('Building App.framework for $targetArch...');
+    if (!quiet) {
+      printStatus('Building App.framework for $targetArch...');
+    }
+
     final List<String> commonBuildOptions = <String>[
       '-arch', targetArch,
-      if (appleArch == DarwinArch.arm64 || appleArch == DarwinArch.armv7)
+      if (isIOS)
         '-miphoneos-version-min=8.0',
     ];
 
+    const String embedBitcodeArg = '-fembed-bitcode';
     final String assemblyO = fs.path.join(outputPath, 'snapshot_assembly.o');
+    List<String> isysrootArgs;
+    if (isIOS) {
+      final String iPhoneSDKLocation = await xcode.iPhoneSdkLocation();
+      if (iPhoneSDKLocation != null) {
+        isysrootArgs = <String>['-isysroot', iPhoneSDKLocation];
+      }
+    }
     final RunResult compileResult = await xcode.cc(<String>[
-      ...commonBuildOptions,
+      '-arch', targetArch,
+      if (isysrootArgs != null) ...isysrootArgs,
+      if (bitcode) embedBitcodeArg,
       '-c',
       assemblyPath,
       '-o',
       assemblyO,
-      if (bitcode) '-fembed-bitcode',
     ]);
     if (compileResult.exitCode != 0) {
       printError('Failed to compile AOT snapshot. Compiler terminated with exit code ${compileResult.exitCode}');
@@ -248,26 +272,16 @@ class AOTSnapshotter {
       '-Xlinker', '-rpath', '-Xlinker', '@executable_path/Frameworks',
       '-Xlinker', '-rpath', '-Xlinker', '@loader_path/Frameworks',
       '-install_name', '@rpath/App.framework/App',
-      if (bitcode) '-fembed-bitcode',
+      if (bitcode) embedBitcodeArg,
+      if (isysrootArgs != null) ...isysrootArgs,
       '-o', appLib,
       assemblyO,
     ];
     final RunResult linkResult = await xcode.clang(linkArgs);
     if (linkResult.exitCode != 0) {
       printError('Failed to link AOT snapshot. Linker terminated with exit code ${compileResult.exitCode}');
-      return linkResult;
     }
-    // See https://github.com/flutter/flutter/issues/22560
-    // These have to be placed in a .noindex folder to prevent Xcode from
-    // using Spotlight to find them and potentially attach the wrong ones.
-    final RunResult dsymResult = await xcode.dsymutil(<String>[
-      appLib,
-      '-o', fs.path.join(outputPath, 'App.framework.dSYM.noindex'),
-    ]);
-    if (dsymResult.exitCode != 0) {
-      printError('Failed to extract dSYM out of dynamic lib');
-    }
-    return dsymResult;
+    return linkResult;
   }
 
   /// Compiles a Dart file to kernel.
@@ -280,6 +294,7 @@ class AOTSnapshotter {
     @required String packagesPath,
     @required String outputPath,
     @required bool trackWidgetCreation,
+    @required List<String> dartDefines,
     List<String> extraFrontEndOptions = const <String>[],
   }) async {
     final FlutterProject flutterProject = FlutterProject.current();
@@ -288,8 +303,9 @@ class AOTSnapshotter {
 
     printTrace('Compiling Dart to kernel: $mainPath');
 
-    if ((extraFrontEndOptions != null) && extraFrontEndOptions.isNotEmpty)
+    if ((extraFrontEndOptions != null) && extraFrontEndOptions.isNotEmpty) {
       printTrace('Extra front-end options: $extraFrontEndOptions');
+    }
 
     final String depfilePath = fs.path.join(outputPath, 'kernel_compile.d');
     final KernelCompiler kernelCompiler = await kernelCompilerFactory.create(flutterProject);
@@ -307,8 +323,9 @@ class AOTSnapshotter {
       extraFrontEndOptions: extraFrontEndOptions,
       linkPlatformKernelIn: true,
       aot: true,
+      buildMode: buildMode,
       trackWidgetCreation: trackWidgetCreation,
-      targetProductVm: buildMode == BuildMode.release,
+      dartDefines: dartDefines,
     ));
 
     // Write path to frontend_server, since things need to be re-generated when that changes.
@@ -319,11 +336,13 @@ class AOTSnapshotter {
   }
 
   bool _isValidAotPlatform(TargetPlatform platform, BuildMode buildMode) {
-    if (buildMode == BuildMode.debug)
+    if (buildMode == BuildMode.debug) {
       return false;
+    }
     return const <TargetPlatform>[
       TargetPlatform.android_arm,
       TargetPlatform.android_arm64,
+      TargetPlatform.android_x64,
       TargetPlatform.ios,
       TargetPlatform.darwin_x64,
     ].contains(platform);

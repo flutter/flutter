@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -286,13 +286,9 @@ class TestWindow implements Window {
   }
 
   @override
-  // use frameTimings. https://github.com/flutter/flutter/issues/38838
-  // ignore: deprecated_member_use
   TimingsCallback get onReportTimings => _window.onReportTimings;
   @override
   set onReportTimings(TimingsCallback callback) {
-    // use frameTimings. https://github.com/flutter/flutter/issues/38838
-    // ignore: deprecated_member_use
     _window.onReportTimings = callback;
   }
 

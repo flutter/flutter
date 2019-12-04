@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -59,7 +59,7 @@ void main() {
       'contentTextStyle: TextStyle(inherit: true, color: Color(0xff123456))',
       'elevation: 2.0',
       'shape: RoundedRectangleBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none), BorderRadius.circular(2.0))',
-      'behavior: SnackBarBehavior.floating'
+      'behavior: SnackBarBehavior.floating',
     ]);
   });
 

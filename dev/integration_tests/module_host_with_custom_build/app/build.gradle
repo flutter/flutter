@@ -1,3 +1,7 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 apply plugin: 'com.android.application'
 
 android {
@@ -39,5 +43,5 @@ android {
 
 dependencies {
     implementation project(':flutter')
-    implementation 'com.android.support:appcompat-v7:27.1.1'
+    implementation 'androidx.appcompat:appcompat:1.1.0'
 }

@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -14,8 +14,7 @@ void main() {
     setUpAll(() async {
       driver = await FlutterDriver.connect();
 
-      // TODO(liyuqian): enable the following once it's proved to be non-flaky by transition_perf_test.dart.
-      // await driver.waitUntilFirstFrameRasterized();
+      await driver.waitUntilFirstFrameRasterized();
     });
 
     tearDownAll(() async {

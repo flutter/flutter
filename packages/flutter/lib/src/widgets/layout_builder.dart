@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -43,10 +43,10 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
   _LayoutBuilderElement(ConstrainedLayoutBuilder<ConstraintType> widget) : super(widget);
 
   @override
-  ConstrainedLayoutBuilder<ConstraintType> get widget => super.widget;
+  ConstrainedLayoutBuilder<ConstraintType> get widget => super.widget as ConstrainedLayoutBuilder<ConstraintType>;
 
   @override
-  RenderConstrainedLayoutBuilder<ConstraintType, RenderObject> get renderObject => super.renderObject;
+  RenderConstrainedLayoutBuilder<ConstraintType, RenderObject> get renderObject => super.renderObject as RenderConstrainedLayoutBuilder<ConstraintType, RenderObject>;
 
   Element _child;
 
@@ -107,7 +107,7 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
               informationCollector: () sync* {
                 yield DiagnosticsDebugCreator(DebugCreator(this));
               },
-            )
+            ),
           );
         }
       }
@@ -123,7 +123,7 @@ class _LayoutBuilderElement<ConstraintType extends Constraints> extends RenderOb
             informationCollector: () sync* {
               yield DiagnosticsDebugCreator(DebugCreator(this));
             },
-          )
+          ),
         );
         _child = updateChild(null, built, slot);
       }

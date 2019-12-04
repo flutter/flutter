@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -13,7 +13,11 @@ import 'theme.dart';
 const double _kTabBarHeight = 50.0;
 const double _kTabBarCompactHeight = 32.0;
 
-const Color _kDefaultTabBarBorderColor = Color(0x4C000000);
+const Color _kDefaultTabBarBorderColor = CupertinoDynamicColor.withBrightness(
+  color: Color(0x4C000000),
+  darkColor: Color(0x29000000),
+);
+const Color _kDefaultTabBarInactiveColor = CupertinoColors.inactiveGray;
 
 /// An iOS-styled bottom navigation tab bar.
 ///
@@ -53,8 +57,8 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
     this.currentIndex = 0,
     this.backgroundColor,
     this.activeColor,
-    this.inactiveColor = CupertinoColors.inactiveGray,
-    this.iconSize = 34.0,
+    this.inactiveColor = _kDefaultTabBarInactiveColor,
+    this.iconSize = 30.0,
     this.wideIconSize = 30.0,
     this.compactIconSize = 22.0,
     this.isWide = false,
@@ -113,7 +117,8 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
   /// The foreground color of the icon and title for the [BottomNavigationBarItem]s
   /// in the unselected state.
   ///
-  /// Defaults to [CupertinoColors.inactiveGray] and cannot be null.
+  /// Defaults to a [CupertinoDynamicColor] that matches the disabled foreground
+  /// color of the native `UITabBar` component. Cannot be null.
   final Color inactiveColor;
 
   /// The size of all of the [BottomNavigationBarItem] icons.
@@ -160,29 +165,51 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
   bool opaque(BuildContext context) {
     final Color backgroundColor =
         this.backgroundColor ?? CupertinoTheme.of(context).barBackgroundColor;
-    return backgroundColor.alpha == 0xFF;
+    return CupertinoDynamicColor.resolve(backgroundColor, context).alpha == 0xFF;
   }
 
   @override
   Widget build(BuildContext context) {
     final double bottomPadding = MediaQuery.of(context).padding.bottom;
 
+    final Color backgroundColor = CupertinoDynamicColor.resolve(
+      this.backgroundColor ?? CupertinoTheme.of(context).barBackgroundColor,
+      context,
+    );
+
+    BorderSide resolveBorderSide(BorderSide side) {
+      return side == BorderSide.none
+        ? side
+        : side.copyWith(color: CupertinoDynamicColor.resolve(side.color, context));
+    }
+
+    // Return the border as is when it's a subclass.
+    final Border resolvedBorder = border == null || border.runtimeType != Border
+      ? border
+      : Border(
+        top: resolveBorderSide(border.top),
+        left: resolveBorderSide(border.left),
+        bottom: resolveBorderSide(border.bottom),
+        right: resolveBorderSide(border.right),
+      );
+
+    final Color inactive = CupertinoDynamicColor.resolve(inactiveColor, context);
     Widget result = DecoratedBox(
       decoration: BoxDecoration(
-        border: border,
-        color: backgroundColor ?? CupertinoTheme.of(context).barBackgroundColor,
+        border: resolvedBorder,
+        color: backgroundColor,
       ),
       child: SizedBox(
         height: (isWide && isCompact ? _kTabBarCompactHeight : _kTabBarHeight) + bottomPadding,
         child: IconTheme.merge( // Default with the inactive state.
           data: IconThemeData(
-            color: inactiveColor,
+            color: inactive,
             size: isWide ? (isCompact ? compactIconSize : wideIconSize) : iconSize,
           ),
           child: DefaultTextStyle( // Default with the inactive state.
             style: (isWide ?
               CupertinoTheme.of(context).textTheme.tabWideLabelTextStyle
-              : CupertinoTheme.of(context).textTheme.tabLabelTextStyle).copyWith(color: inactiveColor),
+              : CupertinoTheme.of(context).textTheme.tabLabelTextStyle).copyWith(color: inactive),
             child: Padding(
               padding: isWide && isCompact ? EdgeInsets.only(top: 4.0, bottom: bottomPadding) : EdgeInsets.only(bottom: bottomPadding),
               child: _buildTabItems(context),
@@ -284,7 +311,10 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
     if (!active)
       return item;
 
-    final Color activeColor = this.activeColor ?? CupertinoTheme.of(context).primaryColor;
+    final Color activeColor = CupertinoDynamicColor.resolve(
+      this.activeColor ?? CupertinoTheme.of(context).primaryColor,
+      context,
+    );
     return IconTheme.merge(
       data: IconThemeData(color: activeColor),
       child: DefaultTextStyle.merge(

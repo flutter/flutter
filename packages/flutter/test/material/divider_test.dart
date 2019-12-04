@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -202,5 +202,12 @@ void main() {
     lineRect = tester.getRect(find.byType(DecoratedBox));
     expect(lineRect.top, dividerRect.top + customIndent);
     expect(lineRect.bottom, dividerRect.bottom - customIndent);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/39533
+  testWidgets('createBorderSide does not throw exception with null context', (WidgetTester tester) async {
+    // Passing a null context used to throw an exception but no longer does.
+    expect(() => Divider.createBorderSide(null), isNot(throwsAssertionError));
+    expect(() => Divider.createBorderSide(null), isNot(throwsNoSuchMethodError));
   });
 }

@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -12,7 +12,7 @@ void main() {
   test('no imports of commands/* or test/* in lib/src/*', () {
     final List<String> skippedPaths = <String> [
       fs.path.join(flutterTools, 'lib', 'src', 'commands'),
-      fs.path.join(flutterTools, 'lib', 'src', 'test')
+      fs.path.join(flutterTools, 'lib', 'src', 'test'),
     ];
     bool _isNotSkipped(FileSystemEntity entity) => skippedPaths.every((String path) => !entity.path.startsWith(path));
 
@@ -135,4 +135,4 @@ void main() {
 
 bool _isDartFile(FileSystemEntity entity) => entity is File && entity.path.endsWith('.dart');
 
-File _asFile(FileSystemEntity entity) => entity;
+File _asFile(FileSystemEntity entity) => entity as File;

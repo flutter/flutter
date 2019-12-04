@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -381,8 +381,16 @@ class Slider extends StatefulWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DoubleProperty('value', value));
+    properties.add(ObjectFlagProperty<ValueChanged<double>>('onChanged', onChanged, ifNull: 'disabled'));
+    properties.add(ObjectFlagProperty<ValueChanged<double>>.has('onChangeStart', onChangeStart));
+    properties.add(ObjectFlagProperty<ValueChanged<double>>.has('onChangeEnd', onChangeEnd));
     properties.add(DoubleProperty('min', min));
     properties.add(DoubleProperty('max', max));
+    properties.add(IntProperty('divisions', divisions));
+    properties.add(StringProperty('label', label));
+    properties.add(ColorProperty('activeColor', activeColor));
+    properties.add(ColorProperty('inactiveColor', inactiveColor));
+    properties.add(ObjectFlagProperty<ValueChanged<double>>.has('semanticFormatterCallback', semanticFormatterCallback));
   }
 }
 
@@ -494,6 +502,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
           case TargetPlatform.fuchsia:
             return _buildMaterialSlider(context);
           case TargetPlatform.iOS:
+          case TargetPlatform.macOS:
             return _buildCupertinoSlider(context);
         }
       }
@@ -635,7 +644,7 @@ class _SliderRenderObjectWidget extends LeafRenderObjectWidget {
   }
 }
 
-class _RenderSlider extends RenderBox {
+class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   _RenderSlider({
     @required double value,
     int divisions,
@@ -880,14 +889,15 @@ class _RenderSlider extends RenderBox {
   double get _adjustmentUnit {
     switch (_platform) {
       case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
       // Matches iOS implementation of material slider.
         return 0.1;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
-      default:
       // Matches Android implementation of material slider.
         return 0.05;
     }
+    return 0.0;
   }
 
   void _updateLabelPainter() {
@@ -907,6 +917,13 @@ class _RenderSlider extends RenderBox {
     // bidi algorithm might line up the glyphs differently which can result in
     // different ligatures, different shapes, etc. So we always markNeedsLayout.
     markNeedsLayout();
+  }
+
+  @override
+  void systemFontsDidChange() {
+    super.systemFontsDidChange();
+    _labelPainter.markNeedsLayout();
+    _updateLabelPainter();
   }
 
   @override

@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -29,8 +29,7 @@ void main() {
     expect(popupMenuTheme.textStyle, null);
   });
 
-  testWidgets('Default PopupMenuThemeData debugFillProperties',
-          (WidgetTester tester) async {
+  testWidgets('Default PopupMenuThemeData debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     const PopupMenuThemeData().debugFillProperties(builder);
 
@@ -42,8 +41,7 @@ void main() {
     expect(description, <String>[]);
   });
 
-  testWidgets('PopupMenuThemeData implements debugFillProperties',
-          (WidgetTester tester) async {
+  testWidgets('PopupMenuThemeData implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     PopupMenuThemeData(
       color: const Color(0xFFFFFFFF),
@@ -61,7 +59,7 @@ void main() {
       'color: Color(0xffffffff)',
       'shape: RoundedRectangleBorder(BorderSide(Color(0xff000000), 0.0, BorderStyle.none), BorderRadius.circular(2.0))',
       'elevation: 2.0',
-      'text style: TextStyle(inherit: true, color: Color(0xffffffff))'
+      'text style: TextStyle(inherit: true, color: Color(0xffffffff))',
     ]);
   });
 

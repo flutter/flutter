@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -38,6 +38,10 @@ import 'theme.dart';
 ///
 /// Creates a [TextFormField] with an [InputDecoration] and validator function.
 ///
+/// ![If the user enters valid text, the TextField appears normally without any warnings to the user](https://flutter.github.io/assets-for-api-docs/assets/material/text_form_field.png)
+///
+/// ![If the user enters invalid text, the error message returned from the validator function is displayed in dark red underneath the input](https://flutter.github.io/assets-for-api-docs/assets/material/text_form_field_error.png)
+///
 /// ```dart
 /// TextFormField(
 ///   decoration: const InputDecoration(
@@ -70,7 +74,7 @@ class TextFormField extends FormField<String> {
   /// When a [controller] is specified, [initialValue] must be null (the
   /// default). If [controller] is null, then a [TextEditingController]
   /// will be constructed automatically and its `text` will be initialized
-  /// to [initalValue] or the empty string.
+  /// to [initialValue] or the empty string.
   ///
   /// For documentation about the various parameters, see the [TextField] class
   /// and [new TextField], the constructor.
@@ -87,12 +91,14 @@ class TextFormField extends FormField<String> {
     StrutStyle strutStyle,
     TextDirection textDirection,
     TextAlign textAlign = TextAlign.start,
+    TextAlignVertical textAlignVertical,
     bool autofocus = false,
     bool readOnly = false,
     ToolbarOptions toolbarOptions,
     bool showCursor,
     bool obscureText = false,
     bool autocorrect = true,
+    bool enableSuggestions = true,
     bool autovalidate = false,
     bool maxLengthEnforced = true,
     int maxLines = 1,
@@ -120,6 +126,7 @@ class TextFormField extends FormField<String> {
        assert(readOnly != null),
        assert(obscureText != null),
        assert(autocorrect != null),
+       assert(enableSuggestions != null),
        assert(autovalidate != null),
        assert(maxLengthEnforced != null),
        assert(scrollPadding != null),
@@ -134,6 +141,7 @@ class TextFormField extends FormField<String> {
          !expands || (maxLines == null && minLines == null),
          'minLines and maxLines must be null when expands is true.',
        ),
+       assert(!obscureText || maxLines == 1, 'Obscured fields cannot be multiline.'),
        assert(maxLength == null || maxLength > 0),
        assert(enableInteractiveSelection != null),
        super(
@@ -162,6 +170,7 @@ class TextFormField extends FormField<String> {
         style: style,
         strutStyle: strutStyle,
         textAlign: textAlign,
+        textAlignVertical: textAlignVertical,
         textDirection: textDirection,
         textCapitalization: textCapitalization,
         autofocus: autofocus,
@@ -170,6 +179,7 @@ class TextFormField extends FormField<String> {
         showCursor: showCursor,
         obscureText: obscureText,
         autocorrect: autocorrect,
+        enableSuggestions: enableSuggestions,
         maxLengthEnforced: maxLengthEnforced,
         maxLines: maxLines,
         minLines: minLines,

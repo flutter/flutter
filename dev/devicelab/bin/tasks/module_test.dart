@@ -1,4 +1,4 @@
-// Copyright (c) 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -11,7 +11,9 @@ import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:path/path.dart' as path;
 
 final String gradlew = Platform.isWindows ? 'gradlew.bat' : 'gradlew';
-final String gradlewExecutable = Platform.isWindows ? gradlew : './$gradlew';
+final String gradlewExecutable = Platform.isWindows ? '.\\$gradlew' : './$gradlew';
+
+final bool useAndroidEmbeddingV2 = Platform.environment['ENABLE_ANDROID_EMBEDDING_V2'] == 'true';
 
 /// Tests that the Flutter module project template works and supports
 /// adding Flutter to an existing Android app.
@@ -43,7 +45,7 @@ Future<void> main() async {
       String content = await pubspec.readAsString();
       content = content.replaceFirst(
         '\ndependencies:\n',
-        '\ndependencies:\n  device_info:\n  package_info:\n',
+        '\ndependencies:\n  device_info: 0.4.1\n  package_info: 0.4.0+9\n',
       );
       await pubspec.writeAsString(content, flush: true);
       await inDirectory(projectDir, () async {
@@ -143,7 +145,14 @@ Future<void> main() async {
       final Directory hostApp = Directory(path.join(tempDir.path, 'hello_host_app'));
       mkdir(hostApp);
       recursiveCopy(
-        Directory(path.join(flutterDirectory.path, 'dev', 'integration_tests', 'android_host_app')),
+        Directory(
+          path.join(
+            flutterDirectory.path,
+            'dev',
+            'integration_tests',
+            useAndroidEmbeddingV2 ? 'android_host_app_v2_embedding' : 'android_host_app',
+          ),
+        ),
         hostApp,
       );
       copy(
@@ -189,11 +198,10 @@ Future<void> main() async {
 
       section('Check files in debug APK');
 
-      checkItContains<String>(<String>[
-        'AndroidManifest.xml',
-        'assets/flutter_assets/isolate_snapshot_data',
-        'assets/flutter_assets/kernel_blob.bin',
-        'assets/flutter_assets/vm_snapshot_data',
+      checkCollectionContains<String>(<String>[
+        ...flutterAssets,
+        ...debugAssets,
+        ...baseApkFiles,
       ], await getFilesInApk(debugHostApk));
 
       section('Check debug AndroidManifest.xml');
@@ -208,13 +216,13 @@ Future<void> main() async {
       }
 
       final String analyticsOutput = analyticsOutputFile.readAsStringSync();
-      if (!analyticsOutput.contains('cd24: android-arm64')
+      if (!analyticsOutput.contains('cd24: android')
           || !analyticsOutput.contains('cd25: true')
-          || !analyticsOutput.contains('viewName: build/bundle')) {
+          || !analyticsOutput.contains('viewName: assemble')) {
         return TaskResult.failure(
           'Building outer app produced the following analytics: "$analyticsOutput"'
-          'but not the expected strings: "cd24: android-arm64", "cd25: true" and '
-          '"viewName: build/bundle"'
+          'but not the expected strings: "cd24: android", "cd25: true" and '
+          '"viewName: assemble"'
         );
       }
 
@@ -245,8 +253,9 @@ Future<void> main() async {
 
       section('Check files in release APK');
 
-      checkItContains<String>(<String>[
-        'AndroidManifest.xml',
+      checkCollectionContains<String>(<String>[
+        ...flutterAssets,
+        ...baseApkFiles,
         'lib/arm64-v8a/libapp.so',
         'lib/arm64-v8a/libflutter.so',
         'lib/armeabi-v7a/libapp.so',

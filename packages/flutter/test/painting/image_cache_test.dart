@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -133,9 +133,9 @@ void main() {
 
     test('Returns null if an error is caught resolving an image', () {
       final ErrorImageProvider errorImage = ErrorImageProvider();
-      expect(() => imageCache.putIfAbsent(errorImage, () => errorImage.load(errorImage)), throwsA(isInstanceOf<Error>()));
+      expect(() => imageCache.putIfAbsent(errorImage, () => errorImage.load(errorImage, null)), throwsA(isInstanceOf<Error>()));
       bool caughtError = false;
-      final ImageStreamCompleter result = imageCache.putIfAbsent(errorImage, () => errorImage.load(errorImage), onError: (dynamic error, StackTrace stackTrace) {
+      final ImageStreamCompleter result = imageCache.putIfAbsent(errorImage, () => errorImage.load(errorImage, null), onError: (dynamic error, StackTrace stackTrace) {
         caughtError = true;
       });
       expect(result, null);

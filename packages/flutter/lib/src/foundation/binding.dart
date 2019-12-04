@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -98,7 +98,10 @@ abstract class BindingBase {
   @mustCallSuper
   void initInstances() {
     assert(!_debugInitialized);
-    assert(() { _debugInitialized = true; return true; }());
+    assert(() {
+      _debugInitialized = true;
+      return true;
+    }());
   }
 
   /// Called when the binding is initialized, to register service
@@ -160,6 +163,9 @@ abstract class BindingBase {
               case 'iOS':
                 debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
                 break;
+              case 'macOS':
+                debugDefaultTargetPlatformOverride = TargetPlatform.macOS;
+                break;
               case 'fuchsia':
                 debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
                 break;
@@ -182,7 +188,10 @@ abstract class BindingBase {
       );
       return true;
     }());
-    assert(() { _debugServiceExtensionsRegistered = true; return true; }());
+    assert(() {
+      _debugServiceExtensionsRegistered = true;
+      return true;
+    }());
   }
 
   /// Whether [lockEvents] is currently locking events.

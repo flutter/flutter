@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -36,7 +36,7 @@ class AnalyzeContinuously extends AnalyzeBase {
   Future<void> analyze() async {
     List<String> directories;
 
-    if (argResults['flutter-repo']) {
+    if (argResults['flutter-repo'] as bool) {
       final PackageDependencyTracker dependencies = PackageDependencyTracker();
       dependencies.checkForConflictingDependencies(repoPackages, dependencies);
 
@@ -52,7 +52,7 @@ class AnalyzeContinuously extends AnalyzeBase {
       analysisTarget = fs.currentDirectory.path;
     }
 
-    final String sdkPath = argResults['dart-sdk'] ?? sdk.dartSdkPath;
+    final String sdkPath = argResults['dart-sdk'] as String ?? sdk.dartSdkPath;
 
     final AnalysisServer server = AnalysisServer(sdkPath, directories);
     server.onAnalyzing.listen((bool isAnalyzing) => _handleAnalysisStatus(server, isAnalyzing));
@@ -64,19 +64,22 @@ class AnalyzeContinuously extends AnalyzeBase {
     final int exitCode = await server.onExit;
 
     final String message = 'Analysis server exited with code $exitCode.';
-    if (exitCode != 0)
+    if (exitCode != 0) {
       throwToolExit(message, exitCode: exitCode);
+    }
     printStatus(message);
 
-    if (server.didServerErrorOccur)
+    if (server.didServerErrorOccur) {
       throwToolExit('Server error(s) occurred.');
+    }
   }
 
   void _handleAnalysisStatus(AnalysisServer server, bool isAnalyzing) {
     if (isAnalyzing) {
       analysisStatus?.cancel();
-      if (!firstAnalysis)
+      if (!firstAnalysis) {
         printStatus('\n');
+      }
       analysisStatus = logger.startProgress('Analyzing $analysisTarget...', timeout: timeoutConfiguration.slowOperation);
       analyzedPaths.clear();
       analysisTimer = Stopwatch()..start();
@@ -103,7 +106,7 @@ class AnalyzeContinuously extends AnalyzeBase {
       final int undocumentedMembers = errors.where((AnalysisError error) {
         return error.code == 'public_member_api_docs';
       }).length;
-      if (!argResults['dartdocs']) {
+      if (!(argResults['dartdocs'] as bool)) {
         errors.removeWhere((AnalysisError error) => error.code == 'public_member_api_docs');
         issueCount -= undocumentedMembers;
       }
@@ -112,8 +115,9 @@ class AnalyzeContinuously extends AnalyzeBase {
 
       for (AnalysisError error in errors) {
         printStatus(error.toString());
-        if (error.code != null)
+        if (error.code != null) {
           printTrace('error code: ${error.code}');
+        }
       }
 
       dumpErrors(errors.map<String>((AnalysisError error) => error.toLegacyString()));
@@ -123,16 +127,17 @@ class AnalyzeContinuously extends AnalyzeBase {
       final int issueDiff = issueCount - lastErrorCount;
       lastErrorCount = issueCount;
 
-      if (firstAnalysis)
+      if (firstAnalysis) {
         errorsMessage = '$issueCount ${pluralize('issue', issueCount)} found';
-      else if (issueDiff > 0)
+      } else if (issueDiff > 0) {
         errorsMessage = '$issueCount ${pluralize('issue', issueCount)} found ($issueDiff new)';
-      else if (issueDiff < 0)
+      } else if (issueDiff < 0) {
         errorsMessage = '$issueCount ${pluralize('issue', issueCount)} found (${-issueDiff} fixed)';
-      else if (issueCount != 0)
+      } else if (issueCount != 0) {
         errorsMessage = '$issueCount ${pluralize('issue', issueCount)} found';
-      else
+      } else {
         errorsMessage = 'no issues found';
+      }
 
       String dartdocMessage;
       if (undocumentedMembers == 1) {

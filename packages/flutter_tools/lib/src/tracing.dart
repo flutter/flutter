@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -57,8 +57,9 @@ class Tracing {
             break;
           }
         }
-        if (!done)
+        if (!done) {
           await whenFirstFrameRendered.future;
+        }
       } catch (exception) {
         status.cancel();
         rethrow;
@@ -95,11 +96,11 @@ Future<void> downloadStartupTrace(VMService observatory, { bool awaitFirstFrame 
 
   int extractInstantEventTimestamp(String eventName) {
     final List<Map<String, dynamic>> events =
-        List<Map<String, dynamic>>.from(timeline['traceEvents']);
+        List<Map<String, dynamic>>.from((timeline['traceEvents'] as List<dynamic>).cast<Map<String, dynamic>>());
     final Map<String, dynamic> event = events.firstWhere(
       (Map<String, dynamic> event) => event['name'] == eventName, orElse: () => null,
     );
-    return event == null ? null : event['ts'];
+    return event == null ? null : (event['ts'] as int);
   }
 
   String message = 'No useful metrics were gathered.';
@@ -138,8 +139,9 @@ Future<void> downloadStartupTrace(VMService observatory, { bool awaitFirstFrame 
     final int timeToFirstFrameMicros = firstFrameBuiltTimestampMicros - engineEnterTimestampMicros;
     traceInfo['timeToFirstFrameMicros'] = timeToFirstFrameMicros;
     message = 'Time to first frame: ${timeToFirstFrameMicros ~/ 1000}ms.';
-    if (frameworkInitTimestampMicros != null)
+    if (frameworkInitTimestampMicros != null) {
       traceInfo['timeAfterFrameworkInitMicros'] = firstFrameBuiltTimestampMicros - frameworkInitTimestampMicros;
+    }
   }
 
   traceInfoFile.writeAsStringSync(toPrettyJson(traceInfo));

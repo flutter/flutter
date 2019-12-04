@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -42,8 +42,9 @@ class LogsCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    if (argResults['clear'])
+    if (boolArg('clear')) {
       device.clearLogs();
+    }
 
     final DeviceLogReader logReader = device.getLogReader();
 
@@ -78,8 +79,9 @@ class LogsCommand extends FlutterCommand {
     // Wait for the log reader to be finished.
     final int result = await exitCompleter.future;
     await subscription.cancel();
-    if (result != 0)
+    if (result != 0) {
       throwToolExit('Error listening to $logReader logs.');
+    }
 
     return null;
   }

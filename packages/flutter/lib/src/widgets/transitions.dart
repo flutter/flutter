@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -194,6 +194,51 @@ class _AnimatedState extends State<AnimatedWidget> {
 /// animated by a [CurvedAnimation] set to [Curves.elasticIn]:
 /// {@animation 300 378 https://flutter.github.io/assets-for-api-docs/assets/widgets/slide_transition.mp4}
 ///
+/// {@tool snippet --template=stateful_widget_scaffold_center_freeform_state}
+/// The following code implements the [SlideTransition] as seen in the video
+/// above:
+///
+/// ```dart
+/// class _MyStatefulWidgetState extends State<MyStatefulWidget> with SingleTickerProviderStateMixin {
+///   AnimationController _controller;
+///   Animation<Offset> _offsetAnimation;
+///
+///   @override
+///   void initState() {
+///     super.initState();
+///     _controller = AnimationController(
+///       duration: const Duration(seconds: 2),
+///       vsync: this,
+///     )..repeat(reverse: true);
+///     _offsetAnimation = Tween<Offset>(
+///       begin: Offset.zero,
+///       end: const Offset(1.5, 0.0),
+///     ).animate(CurvedAnimation(
+///       parent: _controller,
+///       curve: Curves.elasticIn,
+///     ));
+///   }
+///
+///   @override
+///   void dispose() {
+///     super.dispose();
+///     _controller.dispose();
+///   }
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return SlideTransition(
+///       position: _offsetAnimation,
+///       child: const Padding(
+///         padding: EdgeInsets.all(8.0),
+///         child: FlutterLogo(size: 150.0),
+///       ),
+///     );
+///   }
+/// }
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [AlignTransition], an animated version of an [Align] that animates its
@@ -220,7 +265,7 @@ class SlideTransition extends AnimatedWidget {
   /// If the current value of the position animation is `(dx, dy)`, the child
   /// will be translated horizontally by `width * dx` and vertically by
   /// `height * dy`, after applying the [textDirection] if available.
-  Animation<Offset> get position => listenable;
+  Animation<Offset> get position => listenable as Animation<Offset>;
 
   /// The direction to use for the x offset described by the [position].
   ///
@@ -292,7 +337,7 @@ class ScaleTransition extends AnimatedWidget {
   ///
   /// If the current value of the scale animation is v, the child will be
   /// painted v times its normal size.
-  Animation<double> get scale => listenable;
+  Animation<double> get scale => listenable as Animation<double>;
 
   /// The alignment of the origin of the coordinate system in which the scale
   /// takes place, relative to the size of the box.
@@ -346,7 +391,7 @@ class RotationTransition extends AnimatedWidget {
   ///
   /// If the current value of the turns animation is v, the child will be
   /// rotated v * 2 * pi radians before being painted.
-  Animation<double> get turns => listenable;
+  Animation<double> get turns => listenable as Animation<double>;
 
   /// The alignment of the origin of the coordinate system around which the
   /// rotation occurs, relative to the size of the box.
@@ -428,7 +473,7 @@ class SizeTransition extends AnimatedWidget {
   ///
   /// If the value of [sizeFactor] is less than one, the child will be clipped
   /// in the appropriate axis.
-  Animation<double> get sizeFactor => listenable;
+  Animation<double> get sizeFactor => listenable as Animation<double>;
 
   /// Describes how to align the child along the axis that [sizeFactor] is
   /// modifying.
@@ -590,7 +635,7 @@ class PositionedTransition extends AnimatedWidget {
        super(key: key, listenable: rect);
 
   /// The animation that controls the child's size and position.
-  Animation<RelativeRect> get rect => listenable;
+  Animation<RelativeRect> get rect => listenable as Animation<RelativeRect>;
 
   /// The widget below this widget in the tree.
   ///
@@ -647,7 +692,7 @@ class RelativePositionedTransition extends AnimatedWidget {
   /// The animation that controls the child's size and position.
   ///
   /// See also [size].
-  Animation<Rect> get rect => listenable;
+  Animation<Rect> get rect => listenable as Animation<Rect>;
 
   /// The [Positioned] widget's offsets are relative to a box of this
   /// size whose origin is 0,0.
@@ -761,7 +806,7 @@ class AlignTransition extends AnimatedWidget {
        super(key: key, listenable: alignment);
 
   /// The animation that controls the child's alignment.
-  Animation<AlignmentGeometry> get alignment => listenable;
+  Animation<AlignmentGeometry> get alignment => listenable as Animation<AlignmentGeometry>;
 
   /// If non-null, the child's width factor, see [Align.widthFactor].
   final double widthFactor;
@@ -810,7 +855,7 @@ class DefaultTextStyleTransition extends AnimatedWidget {
        super(key: key, listenable: style);
 
   /// The animation that controls the descendants' text style.
-  Animation<TextStyle> get style => listenable;
+  Animation<TextStyle> get style => listenable as Animation<TextStyle>;
 
   /// How the text should be aligned horizontally.
   final TextAlign textAlign;
@@ -875,7 +920,8 @@ class DefaultTextStyleTransition extends AnimatedWidget {
 ///
 /// This code defines a widget called `Spinner` that spins a green square
 /// continually. It is built with an [AnimatedBuilder] and makes use of the
-/// [child] feature to avoid having to rebuild the [Container] each time.
+/// [child] feature to avoid having to rebuild the [Container] each time. The
+/// resulting animation is shown below the code.
 ///
 /// ```dart
 /// class Spinner extends StatefulWidget {
@@ -905,7 +951,14 @@ class DefaultTextStyleTransition extends AnimatedWidget {
 ///   Widget build(BuildContext context) {
 ///     return AnimatedBuilder(
 ///       animation: _controller,
-///       child: Container(width: 200.0, height: 200.0, color: Colors.green),
+///       child: Container(
+///         width: 200.0,
+///         height: 200.0,
+///         color: Colors.green,
+///         child: const Center(
+///           child: Text('Wee'),
+///         ),
+///       ),
 ///       builder: (BuildContext context, Widget child) {
 ///         return Transform.rotate(
 ///           angle: _controller.value * 2.0 * math.pi,
@@ -917,6 +970,8 @@ class DefaultTextStyleTransition extends AnimatedWidget {
 /// }
 /// ```
 /// {@end-tool}
+///
+/// {@animation 300 300 https://flutter.github.io/assets-for-api-docs/assets/widgets/animated_builder.mp4}
 ///
 /// See also:
 ///

@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -52,7 +52,7 @@ void main() {
             );
           },
         ),
-      )
+      ),
     ));
 
     await tester.pumpAndSettle();
@@ -103,8 +103,8 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         key: scaffoldKey,
-        body: const Center(child: Text('body'))
-      )
+        body: const Center(child: Text('body')),
+      ),
     ));
 
     scaffoldKey.currentState.showBottomSheet<void>(
@@ -258,7 +258,7 @@ void main() {
           onPressed: null,
           child: Text('fab'),
         ),
-      )
+      ),
     ));
 
     scaffoldKey.currentState.showBottomSheet<void>(
@@ -466,8 +466,8 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         key: scaffoldKey,
-        body: const Center(child: Text('body'))
-      )
+        body: const Center(child: Text('body')),
+      ),
     ));
 
     final PersistentBottomSheetController<void> bottomSheet = scaffoldKey.currentState.showBottomSheet<void>((_) {

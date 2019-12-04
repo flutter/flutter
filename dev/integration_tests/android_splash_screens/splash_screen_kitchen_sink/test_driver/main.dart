@@ -1,6 +1,7 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
 import 'dart:async';
 
 import 'package:flutter_driver/driver_extension.dart';
@@ -38,7 +39,7 @@ void createTestChannelBetweenAndroidAndFlutter() {
   // Channel used for Android to send Flutter changes to the splash display.
   const BasicMessageChannel<String> testChannel = BasicMessageChannel<String>(
       'testChannel',
-      StringCodec()
+      StringCodec(),
   );
 
   // Every splash display change message that we receive from Android is either

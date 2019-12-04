@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -7,8 +7,10 @@ import 'dart:io';
 
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
+import 'package:mockito/mockito.dart';
 import 'package:quiver/testing/async.dart';
 
 import '../src/common.dart';
@@ -47,13 +49,17 @@ class MockPeer implements rpc.Peer {
 
   @override
   void registerMethod(String name, Function callback) {
-    // this does get called
+    registeredMethods.add(name);
   }
 
   @override
   void sendNotification(String method, [ dynamic parameters ]) {
-    throw 'unexpected call to sendNotification';
+    // this does get called
+    sentNotifications.putIfAbsent(method, () => <dynamic>[]).add(parameters);
   }
+
+  Map<String, List<dynamic>> sentNotifications = <String, List<dynamic>>{};
+  List<String> registeredMethods = <String>[];
 
   bool isolatesEnabled = false;
 
@@ -71,8 +77,9 @@ class MockPeer implements rpc.Peer {
 
   @override
   Future<dynamic> sendRequest(String method, [ dynamic parameters ]) async {
-    if (method == 'getVM')
+    if (method == 'getVM') {
       await _getVMLatch;
+    }
     await Future<void>.delayed(Duration.zero);
     returnedFromSendRequest += 1;
     if (method == 'getVM') {
@@ -191,7 +198,13 @@ void main() {
         bool done = false;
         final MockPeer mockPeer = MockPeer();
         expect(mockPeer.returnedFromSendRequest, 0);
-        final VMService vmService = VMService(mockPeer, null, null, null, null, null);
+        final VMService vmService = VMService(mockPeer, null, null, null, null, null, null);
+        expect(mockPeer.sentNotifications, contains('registerService'));
+        final List<String> registeredServices =
+          mockPeer.sentNotifications['registerService']
+            .map((dynamic service) => (service as Map<String, String>)['service'])
+            .toList();
+        expect(registeredServices, contains('flutterVersion'));
         vmService.getVM().then((void value) { done = true; });
         expect(done, isFalse);
         expect(mockPeer.returnedFromSendRequest, 0);
@@ -253,5 +266,34 @@ void main() {
       Logger: () => StdoutLogger(),
       Stdio: () => mockStdio,
     });
+
+    testUsingContext('registers hot UI method', () {
+      FakeAsync().run((FakeAsync time) {
+        final MockPeer mockPeer = MockPeer();
+        Future<void> reloadSources(String isolateId, { bool pause, bool force}) async {}
+        VMService(mockPeer, null, null, reloadSources, null, null, null);
+
+        expect(mockPeer.registeredMethods, contains('reloadMethod'));
+      });
+    }, overrides: <Type, Generator>{
+      Logger: () => StdoutLogger(),
+      Stdio: () => mockStdio,
+    });
+
+    testUsingContext('registers flutterMemoryInfo service', () {
+      FakeAsync().run((FakeAsync time) {
+        final MockDevice mockDevice = MockDevice();
+        final MockPeer mockPeer = MockPeer();
+        Future<void> reloadSources(String isolateId, { bool pause, bool force}) async {}
+        VMService(mockPeer, null, null, reloadSources, null, null, mockDevice);
+
+        expect(mockPeer.registeredMethods, contains('flutterMemoryInfo'));
+      });
+    }, overrides: <Type, Generator>{
+      Logger: () => StdoutLogger(),
+      Stdio: () => mockStdio,
+    });
   });
 }
+
+class MockDevice extends Mock implements Device {}

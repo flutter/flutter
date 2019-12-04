@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -36,6 +36,7 @@ class Scrollbar extends StatefulWidget {
   const Scrollbar({
     Key key,
     @required this.child,
+    this.controller,
   }) : super(key: key);
 
   /// The widget below this widget in the tree.
@@ -46,10 +47,12 @@ class Scrollbar extends StatefulWidget {
   /// Typically a [ListView] or [CustomScrollView].
   final Widget child;
 
+  /// {@macro flutter.cupertino.cupertinoScrollbar.controller}
+  final ScrollController controller;
+
   @override
   _ScrollbarState createState() => _ScrollbarState();
 }
-
 
 class _ScrollbarState extends State<Scrollbar> with TickerProviderStateMixin {
   ScrollbarPainter _materialPainter;
@@ -76,10 +79,14 @@ class _ScrollbarState extends State<Scrollbar> with TickerProviderStateMixin {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    assert((() { _useCupertinoScrollbar = null; return true; })());
+    assert((() {
+      _useCupertinoScrollbar = null;
+      return true;
+    })());
     final ThemeData theme = Theme.of(context);
     switch (theme.platform) {
       case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
         // On iOS, stop all local animations. CupertinoScrollbar has its own
         // animations.
         _fadeoutTimer?.cancel();
@@ -145,6 +152,7 @@ class _ScrollbarState extends State<Scrollbar> with TickerProviderStateMixin {
     if (_useCupertinoScrollbar) {
       return CupertinoScrollbar(
         child: widget.child,
+        controller: widget.controller,
       );
     }
     return NotificationListener<ScrollNotification>(

@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -55,6 +55,59 @@ const Duration _kBaseSettleDuration = Duration(milliseconds: 246);
 /// drawer children are often constructed with [ListTile]s, often concluding
 /// with an [AboutListTile].
 ///
+/// The [AppBar] automatically displays an appropriate [IconButton] to show the
+/// [Drawer] when a [Drawer] is available in the [Scaffold]. The [Scaffold]
+/// automatically handles the edge-swipe gesture to show the drawer.
+///
+/// {@animation 350 622 https://flutter.github.io/assets-for-api-docs/assets/material/drawer.mp4}
+///
+/// {@tool sample}
+/// This example shows how to create a [Scaffold] that contains an [AppBar] and
+/// a [Drawer]. A user taps the "menu" icon in the [AppBar] to open the
+/// [Drawer]. The [Drawer] displays four items: A header and three menu items.
+/// The [Drawer] displays the four items using a [ListView], which allows the
+/// user to scroll through the items if need be.
+///
+/// ```dart
+/// Scaffold(
+///   appBar: AppBar(
+///     title: const Text('Drawer Demo'),
+///   ),
+///   drawer: Drawer(
+///     child: ListView(
+///       padding: EdgeInsets.zero,
+///       children: const <Widget>[
+///         DrawerHeader(
+///           decoration: BoxDecoration(
+///             color: Colors.blue,
+///           ),
+///           child: Text(
+///             'Drawer Header',
+///             style: TextStyle(
+///               color: Colors.white,
+///               fontSize: 24,
+///             ),
+///           ),
+///         ),
+///         ListTile(
+///           leading: Icon(Icons.message),
+///           title: Text('Messages'),
+///         ),
+///         ListTile(
+///           leading: Icon(Icons.account_circle),
+///           title: Text('Profile'),
+///         ),
+///         ListTile(
+///           leading: Icon(Icons.settings),
+///           title: Text('Settings'),
+///         ),
+///       ],
+///     ),
+///   ),
+/// )
+/// ```
+/// {@end-tool}
+///
 /// An open drawer can be closed by calling [Navigator.pop]. For example
 /// a drawer item might close the drawer when tapped:
 ///
@@ -68,10 +121,6 @@ const Duration _kBaseSettleDuration = Duration(milliseconds: 246);
 ///   },
 /// );
 /// ```
-///
-/// The [AppBar] automatically displays an appropriate [IconButton] to show the
-/// [Drawer] when a [Drawer] is available in the [Scaffold]. The [Scaffold]
-/// automatically handles the edge-swipe gesture to show the drawer.
 ///
 /// See also:
 ///
@@ -128,6 +177,7 @@ class Drawer extends StatelessWidget {
     String label = semanticLabel;
     switch (Theme.of(context).platform) {
       case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
         label = semanticLabel;
         break;
       case TargetPlatform.android:
@@ -376,12 +426,12 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
           break;
       }
       switch (Directionality.of(context)) {
-      case TextDirection.rtl:
-        _controller.fling(velocity: -visualVelocity);
-        break;
-      case TextDirection.ltr:
-        _controller.fling(velocity: visualVelocity);
-        break;
+        case TextDirection.rtl:
+          _controller.fling(velocity: -visualVelocity);
+          break;
+        case TextDirection.ltr:
+          _controller.fling(velocity: visualVelocity);
+          break;
       }
     } else if (_controller.value < 0.5) {
       close();
@@ -443,16 +493,14 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
     double dragAreaWidth = widget.edgeDragWidth;
     if (widget.edgeDragWidth == null) {
       switch (textDirection) {
-        case TextDirection.ltr: {
+        case TextDirection.ltr:
           dragAreaWidth = _kEdgeDragWidth +
             (drawerIsStart ? padding.left : padding.right);
-        }
-        break;
-        case TextDirection.rtl: {
+          break;
+        case TextDirection.rtl:
           dragAreaWidth = _kEdgeDragWidth +
             (drawerIsStart ? padding.right : padding.left);
-        }
-        break;
+          break;
       }
     }
 
@@ -476,6 +524,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
           platformHasBackButton = true;
           break;
         case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
         case TargetPlatform.fuchsia:
           platformHasBackButton = false;
           break;
@@ -499,9 +548,12 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
                   onTap: close,
                   child: Semantics(
                     label: MaterialLocalizations.of(context)?.modalBarrierDismissLabel,
-                    child: Container( // The drawer's "scrim"
-                      color: _scrimColorTween.evaluate(_controller),
-                    ),
+                    child: MouseRegion(
+                      opaque: true,
+                      child: Container( // The drawer's "scrim"
+                        color: _scrimColorTween.evaluate(_controller),
+                      ),
+                    )
                   ),
                 ),
               ),

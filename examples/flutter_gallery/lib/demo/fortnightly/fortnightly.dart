@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -139,7 +139,7 @@ class FruitPage extends StatelessWidget {
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       child: Row(
                         children: <Widget>[
-                          CircleAvatar(
+                          const CircleAvatar(
                             backgroundImage: ExactAssetImage(
                               'people/square/trevor.png',
                               package: 'flutter_gallery_assets',

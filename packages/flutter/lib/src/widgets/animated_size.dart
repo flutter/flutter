@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -10,6 +10,10 @@ import 'framework.dart';
 
 /// Animated widget that automatically transitions its size over a given
 /// duration whenever the given child's size changes.
+///
+/// See also:
+///
+///  * [SizeTransition], which changes its size based on an [Animation].
 class AnimatedSize extends SingleChildRenderObjectWidget {
   /// Creates a widget that animates its size to match that of its child.
   ///

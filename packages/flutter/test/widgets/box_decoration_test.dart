@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -28,7 +28,7 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
   }
 
   @override
-  ImageStreamCompleter load(TestImageProvider key) {
+  ImageStreamCompleter load(TestImageProvider key, DecoderCallback decode) {
     return OneFrameImageStreamCompleter(
       future.then<ImageInfo>((void value) => ImageInfo(image: image))
     );
@@ -100,7 +100,7 @@ Future<void> main() async {
           border: Border.all(width: 10.0, color: const Color(0x80FF00FF)),
           color: Colors.teal[600],
         ),
-      )
+      ),
     );
   });
 
@@ -116,7 +116,7 @@ Future<void> main() async {
             height: 25.0,
           ),
         ),
-      )
+      ),
     );
     expect(tester.getSize(find.byKey(key)), equals(const Size(45.0, 45.0)));
   });

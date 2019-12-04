@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -98,6 +98,17 @@ void main() {
     );
     expect(log, isEmpty);
   });
+
+  test('ShapeDecoration.getClipPath', () {
+    const ShapeDecoration decoration = ShapeDecoration(shape: CircleBorder(side: BorderSide.none));
+    const Rect rect = Rect.fromLTWH(0.0, 0.0, 100.0, 20.0);
+    final Path clipPath = decoration.getClipPath(rect, TextDirection.ltr);
+    final Matcher isLookLikeExpectedPath = isPathThat(
+      includes: const <Offset>[ Offset(50.0, 10.0), ],
+      excludes: const <Offset>[ Offset(1.0, 1.0), Offset(30.0, 10.0), Offset(99.0, 19.0), ],
+    );
+    expect(clipPath, isLookLikeExpectedPath);
+  });
 }
 
 class TestImageProvider extends ImageProvider<TestImageProvider> {
@@ -107,7 +118,7 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
   }
 
   @override
-  ImageStreamCompleter load(TestImageProvider key) {
+  ImageStreamCompleter load(TestImageProvider key, DecoderCallback decode) {
     return OneFrameImageStreamCompleter(
       SynchronousFuture<ImageInfo>(ImageInfo(image: TestImage(), scale: 1.0)),
     );

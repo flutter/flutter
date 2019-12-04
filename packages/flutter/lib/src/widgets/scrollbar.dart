@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -44,11 +44,11 @@ const double _kMinInteractiveSize = 48.0;
 class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   /// Creates a scrollbar with customizations given by construction arguments.
   ScrollbarPainter({
-    @required this.color,
-    @required this.textDirection,
+    @required Color color,
+    @required TextDirection textDirection,
     @required this.thickness,
     @required this.fadeoutOpacityAnimation,
-    this.padding = EdgeInsets.zero,
+    EdgeInsets padding = EdgeInsets.zero,
     this.mainAxisMargin = 0.0,
     this.crossAxisMargin = 0.0,
     this.radius,
@@ -66,16 +66,37 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
        assert(minOverscrollLength == null || minOverscrollLength >= 0),
        assert(padding != null),
        assert(padding.isNonNegative),
+       _color = color,
+       _textDirection = textDirection,
+       _padding = padding,
        minOverscrollLength = minOverscrollLength ?? minLength {
     fadeoutOpacityAnimation.addListener(notifyListeners);
   }
 
   /// [Color] of the thumb. Mustn't be null.
-  final Color color;
+  Color get color => _color;
+  Color _color;
+  set color(Color value) {
+    assert(value != null);
+    if (color == value)
+      return;
+
+    _color = value;
+    notifyListeners();
+  }
 
   /// [TextDirection] of the [BuildContext] which dictates the side of the
   /// screen the scrollbar appears in (the trailing side). Mustn't be null.
-  final TextDirection textDirection;
+  TextDirection get textDirection => _textDirection;
+  TextDirection _textDirection;
+  set textDirection(TextDirection value) {
+    assert(value != null);
+    if (textDirection == value)
+      return;
+
+    _textDirection = value;
+    notifyListeners();
+  }
 
   /// Thickness of the scrollbar in its cross-axis in logical pixels. Mustn't be null.
   double thickness;
@@ -110,7 +131,17 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   ///
   /// Defaults to [EdgeInsets.zero]. Must not be null and offsets from all four
   /// directions must be greater than or equal to zero.
-  final EdgeInsets padding;
+  EdgeInsets get padding => _padding;
+  EdgeInsets _padding;
+  set padding(EdgeInsets value) {
+    assert(value != null);
+    if (padding == value)
+      return;
+
+    _padding = value;
+    notifyListeners();
+  }
+
 
   /// The preferred smallest size the scrollbar can shrink to when the total
   /// scrollable extent is large, the current visible viewport is small, and the
@@ -162,8 +193,8 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
   }
 
   Paint get _paint {
-    return Paint()..color =
-        color.withOpacity(color.opacity * fadeoutOpacityAnimation.value);
+    return Paint()
+      ..color = color.withOpacity(color.opacity * fadeoutOpacityAnimation.value);
   }
 
   void _paintThumbCrossAxis(Canvas canvas, Size size, double thumbOffset, double thumbExtent, AxisDirection direction) {
@@ -209,11 +240,11 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     // isn't less than the absolute minimum size.
     // _totalContentExtent >= viewportDimension, so (_totalContentExtent - _mainAxisPadding) > 0
     final double fractionVisible = ((_lastMetrics.extentInside - _mainAxisPadding) / (_totalContentExtent - _mainAxisPadding))
-      .clamp(0.0, 1.0);
+      .clamp(0.0, 1.0) as double;
 
     final double thumbExtent = math.max(
       math.min(_trackExtent, minOverscrollLength),
-      _trackExtent * fractionVisible
+      _trackExtent * fractionVisible,
     );
 
     final double fractionOverscrolled = 1.0 - _lastMetrics.extentInside / _lastMetrics.viewportDimension;
@@ -236,7 +267,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
 
     // The `thumbExtent` should be no greater than `trackSize`, otherwise
     // the scrollbar may scroll towards the wrong direction.
-    return thumbExtent.clamp(newMinLength, _trackExtent);
+    return thumbExtent.clamp(newMinLength, _trackExtent) as double;
   }
 
   @override
@@ -280,7 +311,7 @@ class ScrollbarPainter extends ChangeNotifier implements CustomPainter {
     final double scrollableExtent = metrics.maxScrollExtent - metrics.minScrollExtent;
 
     final double fractionPast = (scrollableExtent > 0)
-      ? ((metrics.pixels - metrics.minScrollExtent) / scrollableExtent).clamp(0.0, 1.0)
+      ? ((metrics.pixels - metrics.minScrollExtent) / scrollableExtent).clamp(0.0, 1.0) as double
       : 0;
 
     return (_isReversed ? 1 - fractionPast : fractionPast) * (_trackExtent - thumbExtent);

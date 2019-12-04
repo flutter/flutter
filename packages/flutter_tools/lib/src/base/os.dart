@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -41,8 +41,9 @@ abstract class OperatingSystemUtils {
   /// if `which` was not able to locate the binary.
   File which(String execName) {
     final List<File> result = _which(execName);
-    if (result == null || result.isEmpty)
+    if (result == null || result.isEmpty) {
       return null;
+    }
     return result.first;
   }
 
@@ -141,43 +142,60 @@ class _PosixUtils extends OperatingSystemUtils {
 
   @override
   List<File> _which(String execName, { bool all = false }) {
-    final List<String> command = <String>['which'];
-    if (all)
-      command.add('-a');
-    command.add(execName);
+    final List<String> command = <String>[
+      'which',
+      if (all) '-a',
+      execName,
+    ];
     final ProcessResult result = processManager.runSync(command);
-    if (result.exitCode != 0)
+    if (result.exitCode != 0) {
       return const <File>[];
-    final String stdout = result.stdout;
+    }
+    final String stdout = result.stdout as String;
     return stdout.trim().split('\n').map<File>((String path) => fs.file(path.trim())).toList();
   }
 
   @override
   void zip(Directory data, File zipFile) {
-    runSync(<String>['zip', '-r', '-q', zipFile.path, '.'], workingDirectory: data.path);
+    processUtils.runSync(
+      <String>['zip', '-r', '-q', zipFile.path, '.'],
+      workingDirectory: data.path,
+      throwOnError: true,
+    );
   }
 
   // unzip -o -q zipfile -d dest
   @override
   void unzip(File file, Directory targetDirectory) {
-    runSync(<String>['unzip', '-o', '-q', file.path, '-d', targetDirectory.path]);
+    processUtils.runSync(
+      <String>['unzip', '-o', '-q', file.path, '-d', targetDirectory.path],
+      throwOnError: true,
+    );
   }
 
   @override
-  bool verifyZip(File zipFile) => exitsHappy(<String>['zip', '-T', zipFile.path]);
+  bool verifyZip(File zipFile) =>
+      processUtils.exitsHappySync(<String>['zip', '-T', zipFile.path]);
 
   // tar -xzf tarball -C dest
   @override
   void unpack(File gzippedTarFile, Directory targetDirectory) {
-    runSync(<String>['tar', '-xzf', gzippedTarFile.path, '-C', targetDirectory.path]);
+    processUtils.runSync(
+      <String>['tar', '-xzf', gzippedTarFile.path, '-C', targetDirectory.path],
+      throwOnError: true,
+    );
   }
 
   @override
-  bool verifyGzip(File gzippedFile) => exitsHappy(<String>['gzip', '-t', gzippedFile.path]);
+  bool verifyGzip(File gzippedFile) =>
+      processUtils.exitsHappySync(<String>['gzip', '-t', gzippedFile.path]);
 
   @override
   File makePipe(String path) {
-    runSync(<String>['mkfifo', path]);
+    processUtils.runSync(
+      <String>['mkfifo', path],
+      throwOnError: true,
+    );
     return fs.file(path);
   }
 
@@ -187,12 +205,12 @@ class _PosixUtils extends OperatingSystemUtils {
   String get name {
     if (_name == null) {
       if (platform.isMacOS) {
-        final List<ProcessResult> results = <ProcessResult>[
-          processManager.runSync(<String>['sw_vers', '-productName']),
-          processManager.runSync(<String>['sw_vers', '-productVersion']),
-          processManager.runSync(<String>['sw_vers', '-buildVersion']),
+        final List<RunResult> results = <RunResult>[
+          processUtils.runSync(<String>['sw_vers', '-productName']),
+          processUtils.runSync(<String>['sw_vers', '-productVersion']),
+          processUtils.runSync(<String>['sw_vers', '-buildVersion']),
         ];
-        if (results.every((ProcessResult result) => result.exitCode == 0)) {
+        if (results.every((RunResult result) => result.exitCode == 0)) {
           _name = '${results[0].stdout.trim()} ${results[1].stdout
               .trim()} ${results[2].stdout.trim()}';
         }
@@ -219,11 +237,13 @@ class _WindowsUtils extends OperatingSystemUtils {
   List<File> _which(String execName, { bool all = false }) {
     // `where` always returns all matches, not just the first one.
     final ProcessResult result = processManager.runSync(<String>['where', execName]);
-    if (result.exitCode != 0)
+    if (result.exitCode != 0) {
       return const <File>[];
-    final List<String> lines = result.stdout.trim().split('\n');
-    if (all)
+    }
+    final List<String> lines = (result.stdout as String).trim().split('\n');
+    if (all) {
       return lines.map<File>((String path) => fs.file(path.trim())).toList();
+    }
     return <File>[fs.file(lines.first.trim())];
   }
 
@@ -234,7 +254,7 @@ class _WindowsUtils extends OperatingSystemUtils {
       if (entity is! File) {
         continue;
       }
-      final File file = entity;
+      final File file = entity as File;
       final String path = file.fileSystem.path.relative(file.path, from: data.path);
       final List<int> bytes = file.readAsBytesSync();
       archive.addFile(ArchiveFile(path, bytes.length, bytes));
@@ -283,13 +303,15 @@ class _WindowsUtils extends OperatingSystemUtils {
   void _unpackArchive(Archive archive, Directory targetDirectory) {
     for (ArchiveFile archiveFile in archive.files) {
       // The archive package doesn't correctly set isFile.
-      if (!archiveFile.isFile || archiveFile.name.endsWith('/'))
+      if (!archiveFile.isFile || archiveFile.name.endsWith('/')) {
         continue;
+      }
 
       final File destFile = fs.file(fs.path.join(targetDirectory.path, archiveFile.name));
-      if (!destFile.parent.existsSync())
+      if (!destFile.parent.existsSync()) {
         destFile.parent.createSync(recursive: true);
-      destFile.writeAsBytesSync(archiveFile.content);
+      }
+      destFile.writeAsBytesSync(archiveFile.content as List<int>);
     }
   }
 
@@ -305,10 +327,11 @@ class _WindowsUtils extends OperatingSystemUtils {
     if (_name == null) {
       final ProcessResult result = processManager.runSync(
           <String>['ver'], runInShell: true);
-      if (result.exitCode == 0)
-        _name = result.stdout.trim();
-      else
+      if (result.exitCode == 0) {
+        _name = (result.stdout as String).trim();
+      } else {
         _name = super.name;
+      }
     }
     return _name;
   }
@@ -325,11 +348,13 @@ String findProjectRoot([ String directory ]) {
   const String kProjectRootSentinel = 'pubspec.yaml';
   directory ??= fs.currentDirectory.path;
   while (true) {
-    if (fs.isFileSync(fs.path.join(directory, kProjectRootSentinel)))
+    if (fs.isFileSync(fs.path.join(directory, kProjectRootSentinel))) {
       return directory;
+    }
     final String parent = fs.path.dirname(directory);
-    if (directory == parent)
+    if (directory == parent) {
       return null;
+    }
     directory = parent;
   }
 }

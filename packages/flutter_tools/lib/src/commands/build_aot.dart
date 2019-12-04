@@ -1,36 +1,29 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:async';
 
-import '../artifacts.dart';
-import '../base/build.dart';
+import '../aot.dart';
 import '../base/common.dart';
-import '../base/context.dart';
-import '../base/file_system.dart';
-import '../base/logger.dart';
-import '../base/process.dart';
-import '../base/version.dart';
 import '../build_info.dart';
-import '../dart/package_map.dart';
-import '../globals.dart';
-import '../ios/plist_parser.dart';
-import '../macos/xcode.dart';
+import '../ios/bitcode.dart';
 import '../resident_runner.dart';
 import '../runner/flutter_command.dart';
 import 'build.dart';
 
+/// Builds AOT snapshots into platform specific library containers.
 class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmentArtifacts {
-  BuildAotCommand({bool verboseHelp = false}) {
+  BuildAotCommand({bool verboseHelp = false, this.aotBuilder}) {
     usesTargetOption();
     addBuildModeFlags();
     usesPubOption();
+    usesDartDefines();
     argParser
       ..addOption('output-dir', defaultsTo: getAotBuildDirectory())
       ..addOption('target-platform',
         defaultsTo: 'android-arm',
-        allowed: <String>['android-arm', 'android-arm64', 'ios'],
+        allowed: <String>['android-arm', 'android-arm64', 'ios', 'android-x64'],
       )
       ..addFlag('quiet', defaultsTo: false)
       ..addFlag('report-timings',
@@ -53,7 +46,7 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
         hide: true,
       )
       ..addFlag('bitcode',
-        defaultsTo: false,
+        defaultsTo: kBitcodeEnabledDefault,
         help: 'Build the AOT bundle with bitcode. Requires a compatible bitcode engine.',
         hide: true,
       );
@@ -63,6 +56,8 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
     usesTrackWidgetCreation(hasEffect: false, verboseHelp: verboseHelp);
   }
 
+  AotBuilder aotBuilder;
+
   @override
   final String name = 'aot';
 
@@ -71,190 +66,29 @@ class BuildAotCommand extends BuildSubCommand with TargetPlatformBasedDevelopmen
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final String targetPlatform = argResults['target-platform'];
+    final String targetPlatform = stringArg('target-platform');
     final TargetPlatform platform = getTargetPlatformForName(targetPlatform);
-    if (platform == null)
-      throwToolExit('Unknown platform: $targetPlatform');
-
-    final bool bitcode = argResults['bitcode'];
+    final String outputPath = stringArg('output-dir') ?? getAotBuildDirectory();
     final BuildMode buildMode = getBuildMode();
-
-    if (bitcode) {
-      if (platform != TargetPlatform.ios) {
-        throwToolExit('Bitcode is only supported on iOS (TargetPlatform is $targetPlatform).');
-      }
-      await validateBitcode();
+    if (platform == null) {
+      throwToolExit('Unknown platform: $targetPlatform');
     }
 
-    Status status;
-    if (!argResults['quiet']) {
-      final String typeName = artifacts.getEngineType(platform, buildMode);
-      status = logger.startProgress(
-        'Building AOT snapshot in ${getFriendlyModeName(getBuildMode())} mode ($typeName)...',
-        timeout: timeoutConfiguration.slowOperation,
-      );
-    }
-    final String outputPath = argResults['output-dir'] ?? getAotBuildDirectory();
-    final bool reportTimings = argResults['report-timings'];
-    try {
-      String mainPath = findMainDartFile(targetFile);
-      final AOTSnapshotter snapshotter = AOTSnapshotter(reportTimings: reportTimings);
+    aotBuilder ??= AotBuilder();
 
-      // Compile to kernel.
-      mainPath = await snapshotter.compileKernel(
-        platform: platform,
-        buildMode: buildMode,
-        mainPath: mainPath,
-        packagesPath: PackageMap.globalPackagesPath,
-        trackWidgetCreation: false,
-        outputPath: outputPath,
-        extraFrontEndOptions: argResults[FlutterOptions.kExtraFrontEndOptions],
-      );
-      if (mainPath == null) {
-        throwToolExit('Compiler terminated unexpectedly.');
-        return null;
-      }
-
-      // Build AOT snapshot.
-      if (platform == TargetPlatform.ios) {
-        // Determine which iOS architectures to build for.
-        final Iterable<DarwinArch> buildArchs = argResults['ios-arch'].map<DarwinArch>(getIOSArchForName);
-        final Map<DarwinArch, String> iosBuilds = <DarwinArch, String>{};
-        for (DarwinArch arch in buildArchs)
-          iosBuilds[arch] = fs.path.join(outputPath, getNameForDarwinArch(arch));
-
-        // Generate AOT snapshot and compile to arch-specific App.framework.
-        final Map<DarwinArch, Future<int>> exitCodes = <DarwinArch, Future<int>>{};
-        iosBuilds.forEach((DarwinArch iosArch, String outputPath) {
-          exitCodes[iosArch] = snapshotter.build(
-            platform: platform,
-            darwinArch: iosArch,
-            buildMode: buildMode,
-            mainPath: mainPath,
-            packagesPath: PackageMap.globalPackagesPath,
-            outputPath: outputPath,
-            extraGenSnapshotOptions: argResults[FlutterOptions.kExtraGenSnapshotOptions],
-            bitcode: bitcode,
-          ).then<int>((int buildExitCode) {
-            return buildExitCode;
-          });
-        });
-
-        // Merge arch-specific App.frameworks into a multi-arch App.framework.
-        if ((await Future.wait<int>(exitCodes.values)).every((int buildExitCode) => buildExitCode == 0)) {
-          final Iterable<String> dylibs = iosBuilds.values.map<String>((String outputDir) => fs.path.join(outputDir, 'App.framework', 'App'));
-          fs.directory(fs.path.join(outputPath, 'App.framework'))..createSync();
-          await runCheckedAsync(<String>[
-            'lipo',
-            ...dylibs,
-            '-create',
-            '-output', fs.path.join(outputPath, 'App.framework', 'App'),
-          ]);
-          final Iterable<String> dSYMs = iosBuilds.values.map<String>((String outputDir) => fs.path.join(outputDir, 'App.framework.dSYM.noindex'));
-          fs.directory(fs.path.join(outputPath, 'App.framework.dSYM.noindex', 'Contents', 'Resources', 'DWARF'))..createSync(recursive: true);
-          await runCheckedAsync(<String>[
-            'lipo',
-            '-create',
-            '-output', fs.path.join(outputPath, 'App.framework.dSYM.noindex', 'Contents', 'Resources', 'DWARF', 'App'),
-            ...dSYMs.map((String path) => fs.path.join(path, 'Contents', 'Resources', 'DWARF', 'App'))
-          ]);
-        } else {
-          status?.cancel();
-          exitCodes.forEach((DarwinArch iosArch, Future<int> exitCodeFuture) async {
-            final int buildExitCode = await exitCodeFuture;
-            printError('Snapshotting ($iosArch) exited with non-zero exit code: $buildExitCode');
-          });
-        }
-      } else {
-        // Android AOT snapshot.
-        final int snapshotExitCode = await snapshotter.build(
-          platform: platform,
-          buildMode: buildMode,
-          mainPath: mainPath,
-          packagesPath: PackageMap.globalPackagesPath,
-          outputPath: outputPath,
-          extraGenSnapshotOptions: argResults[FlutterOptions.kExtraGenSnapshotOptions],
-          bitcode: false,
-        );
-        if (snapshotExitCode != 0) {
-          status?.cancel();
-          throwToolExit('Snapshotting exited with non-zero exit code: $snapshotExitCode');
-        }
-      }
-    } on String catch (error) {
-      // Catch the String exceptions thrown from the `runCheckedSync` methods below.
-      status?.cancel();
-      printError(error);
-      return null;
-    }
-    status?.stop();
-
-    if (outputPath == null)
-      throwToolExit(null);
-
-    final String builtMessage = 'Built to $outputPath${fs.path.separator}.';
-    if (argResults['quiet']) {
-      printTrace(builtMessage);
-    } else {
-      printStatus(builtMessage);
-    }
+    await aotBuilder.build(
+      platform: platform,
+      outputPath: outputPath,
+      buildMode: buildMode,
+      mainDartFile: findMainDartFile(targetFile),
+      bitcode: boolArg('bitcode'),
+      quiet: boolArg('quiet'),
+      reportTimings: boolArg('report-timings'),
+      iosBuildArchs: stringsArg('ios-arch').map<DarwinArch>(getIOSArchForName),
+      extraFrontEndOptions: stringsArg(FlutterOptions.kExtraFrontEndOptions),
+      extraGenSnapshotOptions: stringsArg(FlutterOptions.kExtraGenSnapshotOptions),
+      dartDefines: dartDefines,
+    );
     return null;
   }
-}
-
-Future<void> validateBitcode() async {
-  final Artifacts artifacts = Artifacts.instance;
-  if (artifacts is! LocalEngineArtifacts) {
-    throwToolExit('Bitcode is only supported with a local engine built with --bitcode.');
-  }
-  final String flutterFrameworkPath = artifacts.getArtifactPath(Artifact.flutterFramework);
-  if (!fs.isDirectorySync(flutterFrameworkPath)) {
-    throwToolExit('Flutter.framework not found at $flutterFrameworkPath');
-  }
-  final Xcode xcode = context.get<Xcode>();
-
-  // Check for bitcode in Flutter binary.
-  final RunResult otoolResult = await xcode.otool(<String>[
-    '-l', fs.path.join(flutterFrameworkPath, 'Flutter'),
-  ]);
-  if (!otoolResult.stdout.contains('__LLVM')) {
-    throwToolExit('The Flutter.framework at $flutterFrameworkPath does not contain bitcode.');
-  }
-  final RunResult clangResult = await xcode.clang(<String>['--version']);
-  final String clangVersion = clangResult.stdout.split('\n').first;
-  final String engineClangVersion = PlistParser.instance.getValueFromFile(
-    fs.path.join(flutterFrameworkPath, 'Info.plist'),
-    'ClangVersion',
-  );
-  final Version engineClangSemVer = _parseVersionFromClang(engineClangVersion);
-  final Version clangSemVer = _parseVersionFromClang(clangVersion);
-  if (engineClangSemVer > clangSemVer) {
-    throwToolExit(
-      'The Flutter.framework at $flutterFrameworkPath was built '
-      'with "${engineClangVersion ?? 'unknown'}", but the current version '
-      'of clang is "$clangVersion". This will result in failures when trying to'
-      'archive an IPA. To resolve this issue, update your version of Xcode to '
-      'at least $engineClangSemVer.',
-    );
-  }
-}
-
-Version _parseVersionFromClang(String clangVersion) {
-  const String prefix = 'Apple LLVM version ';
-  void _invalid() {
-    throwToolExit('Unable to parse Clang version from "$clangVersion". '
-                  'Expected a string like "$prefix #.#.# (clang-####.#.##.#)".');
-  }
-  if (clangVersion == null || clangVersion.length <= prefix.length || !clangVersion.startsWith(prefix)) {
-    _invalid();
-  }
-  final int lastSpace = clangVersion.lastIndexOf(' ');
-  if (lastSpace == -1) {
-    _invalid();
-  }
-  final Version version = Version.parse(clangVersion.substring(prefix.length, lastSpace));
-  if (version == null) {
-    _invalid();
-  }
-  return version;
 }

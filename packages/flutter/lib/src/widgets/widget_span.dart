@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -128,6 +128,10 @@ class WidgetSpan extends PlaceholderSpan {
 
   @override
   InlineSpan getSpanForPositionVisitor(TextPosition position, Accumulator offset) {
+    if (position.offset == offset.value) {
+      return this;
+    }
+    offset.increment(1);
     return null;
   }
 
@@ -144,7 +148,7 @@ class WidgetSpan extends PlaceholderSpan {
       return RenderComparison.layout;
     if ((style == null) != (other.style == null))
       return RenderComparison.layout;
-    final WidgetSpan typedOther = other;
+    final WidgetSpan typedOther = other as WidgetSpan;
     if (child != typedOther.child || alignment != typedOther.alignment) {
       return RenderComparison.layout;
     }
@@ -167,10 +171,10 @@ class WidgetSpan extends PlaceholderSpan {
       return false;
     if (super != other)
       return false;
-    final WidgetSpan typedOther = other;
-    return typedOther.child == child
-        && typedOther.alignment == alignment
-        && typedOther.baseline == baseline;
+    return other is WidgetSpan
+        && other.child == child
+        && other.alignment == alignment
+        && other.baseline == baseline;
   }
 
   @override

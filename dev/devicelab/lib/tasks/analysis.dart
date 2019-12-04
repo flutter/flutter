@@ -1,4 +1,4 @@
-// Copyright (c) 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -65,12 +65,10 @@ abstract class _Benchmark {
 
   Directory get directory;
 
-  List<String> get options {
-    final List<String> result = <String>[ '--benchmark' ];
-    if (watch)
-      result.add('--watch');
-    return result;
-  }
+  List<String> get options => <String>[
+    '--benchmark',
+    if (watch) '--watch',
+  ];
 
   Future<double> execute(int iteration, int targetIterations) async {
     section('Analyze $title ${watch ? 'with watcher' : ''} - ${iteration + 1} / $targetIterations');

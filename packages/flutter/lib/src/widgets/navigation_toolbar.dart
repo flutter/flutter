@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -61,17 +61,6 @@ class NavigationToolbar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasDirectionality(context));
-    final List<Widget> children = <Widget>[];
-
-    if (leading != null)
-      children.add(LayoutId(id: _ToolbarSlot.leading, child: leading));
-
-    if (middle != null)
-      children.add(LayoutId(id: _ToolbarSlot.middle, child: middle));
-
-    if (trailing != null)
-      children.add(LayoutId(id: _ToolbarSlot.trailing, child: trailing));
-
     final TextDirection textDirection = Directionality.of(context);
     return CustomMultiChildLayout(
       delegate: _ToolbarLayout(
@@ -79,7 +68,11 @@ class NavigationToolbar extends StatelessWidget {
         middleSpacing: middleSpacing,
         textDirection: textDirection,
       ),
-      children: children,
+      children: <Widget>[
+        if (leading != null) LayoutId(id: _ToolbarSlot.leading, child: leading),
+        if (middle != null) LayoutId(id: _ToolbarSlot.middle, child: middle),
+        if (trailing != null) LayoutId(id: _ToolbarSlot.trailing, child: trailing),
+      ],
     );
   }
 }

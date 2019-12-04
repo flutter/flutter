@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -13,7 +13,7 @@ void main() {
     final List<RenderBox> children = <RenderBox>[
       RenderSizedBox(const Size(400.0, 100.0)),
       RenderSizedBox(const Size(400.0, 100.0)),
-      RenderSizedBox(const Size(400.0, 100.0))
+      RenderSizedBox(const Size(400.0, 100.0)),
     ];
     final TestRenderSliverBoxChildManager childManager = TestRenderSliverBoxChildManager(
       children: children,
@@ -24,7 +24,7 @@ void main() {
       offset: ViewportOffset.zero(),
       cacheExtent: 0,
       children: <RenderSliver>[
-        childManager.createRenderSliverFixedExtentList(),
+        childManager.createRenderSliverFillViewport(),
       ],
     );
     layout(root);
@@ -52,11 +52,10 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
   RenderSliverMultiBoxAdaptor _renderObject;
   List<RenderBox> children;
 
-  RenderSliverFixedExtentList createRenderSliverFixedExtentList() {
+  RenderSliverFillViewport createRenderSliverFillViewport() {
     assert(_renderObject == null);
-    _renderObject = RenderSliverFixedExtentList(
+    _renderObject = RenderSliverFillViewport(
       childManager: this,
-      itemExtent: 600,
     );
     return _renderObject;
   }
@@ -82,12 +81,12 @@ class TestRenderSliverBoxChildManager extends RenderSliverBoxChildManager {
 
   @override
   double estimateMaxScrollOffset(
-      SliverConstraints constraints, {
-        int firstIndex,
-        int lastIndex,
-        double leadingScrollOffset,
-        double trailingScrollOffset,
-      }) {
+    SliverConstraints constraints, {
+    int firstIndex,
+    int lastIndex,
+    double leadingScrollOffset,
+    double trailingScrollOffset,
+  }) {
     assert(lastIndex >= firstIndex);
     return children.length * (trailingScrollOffset - leadingScrollOffset) / (lastIndex - firstIndex + 1);
   }

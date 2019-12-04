@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -28,8 +28,9 @@ class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts
   Future<void> validateCommand() async {
     await super.validateCommand();
     device = await findTargetDevice();
-    if (device == null)
+    if (device == null) {
       throwToolExit('No target device found');
+    }
   }
 
   @override
@@ -40,21 +41,24 @@ class InstallCommand extends FlutterCommand with DeviceBasedDevelopmentArtifacts
 
     printStatus('Installing $package to $device...');
 
-    if (!await installApp(device, package))
+    if (!await installApp(device, package)) {
       throwToolExit('Install failed');
+    }
 
     return null;
   }
 }
 
 Future<bool> installApp(Device device, ApplicationPackage package, { bool uninstall = true }) async {
-  if (package == null)
+  if (package == null) {
     return false;
+  }
 
   if (uninstall && await device.isAppInstalled(package)) {
     printStatus('Uninstalling old version...');
-    if (!await device.uninstallApp(package))
+    if (!await device.uninstallApp(package)) {
       printError('Warning: uninstalling old version failed');
+    }
   }
 
   return device.installApp(package);

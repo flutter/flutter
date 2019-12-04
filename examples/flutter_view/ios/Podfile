@@ -7,6 +7,7 @@ install! 'cocoapods', :disable_input_output_paths => true
 target 'Runner' do
   # Uncomment this line if you're using Swift or would like to use dynamic frameworks
    use_frameworks!
+   use_modular_headers!
 
   # Pods for Runner
   pod 'MaterialControls', '~> 1.2.2'

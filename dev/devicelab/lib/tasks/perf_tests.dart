@@ -1,4 +1,4 @@
-// Copyright (c) 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -54,11 +54,29 @@ TaskFunction createCubicBezierPerfTest() {
   ).run;
 }
 
-TaskFunction createBackdropFilterPerfTest() {
+TaskFunction createBackdropFilterPerfTest({bool needsMeasureCpuGpu = false}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test_driver/backdrop_filter_perf.dart',
     'backdrop_filter_perf',
+    needsMeasureCpuGPu: needsMeasureCpuGpu,
+  ).run;
+}
+
+TaskFunction createSimpleAnimationPerfTest({bool needsMeasureCpuGpu = false}) {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/simple_animation_perf.dart',
+    'simple_animation_perf',
+    needsMeasureCpuGPu: needsMeasureCpuGpu,
+  ).run;
+}
+
+TaskFunction createPictureCachePerfTest() {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/picture_cache_perf.dart',
+    'picture_cache_perf',
   ).run;
 }
 
@@ -122,7 +140,7 @@ TaskFunction createBasicMaterialCompileTest() {
       await flutter('create', options: <String>['--template=app', sampleAppName]);
     });
 
-    if (!(await sampleDir.exists()))
+    if (!sampleDir.existsSync())
       throw 'Failed to create default Flutter app in ${sampleDir.path}';
 
     return CompileTest(sampleDir.path).run();
@@ -141,9 +159,6 @@ class StartupTest {
     return await inDirectory<TaskResult>(testDirectory, () async {
       final String deviceId = (await devices.workingDevice).deviceId;
       await flutter('packages', options: <String>['get']);
-
-      if (deviceOperatingSystem == DeviceOperatingSystem.ios)
-        await prepareProvisioningCertificates(testDirectory);
 
       await flutter('run', options: <String>[
         '--verbose',
@@ -168,11 +183,17 @@ class StartupTest {
 /// Measures application runtime performance, specifically per-frame
 /// performance.
 class PerfTest {
-  const PerfTest(this.testDirectory, this.testTarget, this.timelineFileName);
+  const PerfTest(
+      this.testDirectory,
+      this.testTarget,
+      this.timelineFileName,
+      {this.needsMeasureCpuGPu = false});
 
   final String testDirectory;
   final String testTarget;
   final String timelineFileName;
+
+  final bool needsMeasureCpuGPu;
 
   Future<TaskResult> run() {
     return inDirectory<TaskResult>(testDirectory, () async {
@@ -180,9 +201,6 @@ class PerfTest {
       await device.unlock();
       final String deviceId = device.deviceId;
       await flutter('packages', options: <String>['get']);
-
-      if (deviceOperatingSystem == DeviceOperatingSystem.ios)
-        await prepareProvisioningCertificates(testDirectory);
 
       await flutter('drive', options: <String>[
         '-v',
@@ -202,6 +220,12 @@ class PerfTest {
         );
       }
 
+      if (needsMeasureCpuGPu) {
+        await inDirectory<void>('$testDirectory/build', () async {
+          data.addAll(await measureIosCpuGpu(deviceId: deviceId));
+        });
+      }
+
       return TaskResult.success(data, benchmarkScoreKeys: <String>[
         'average_frame_build_time_millis',
         'worst_frame_build_time_millis',
@@ -213,6 +237,8 @@ class PerfTest {
         'missed_frame_rasterizer_budget_count',
         '90th_percentile_frame_rasterizer_time_millis',
         '99th_percentile_frame_rasterizer_time_millis',
+        if (needsMeasureCpuGPu) 'cpu_percentage',
+        if (needsMeasureCpuGPu) 'gpu_percentage',
       ]);
     });
   }
@@ -259,7 +285,7 @@ class WebCompileTest {
     rmTree(sampleDir);
 
     await inDirectory<void>(Directory.systemTemp, () async {
-      await flutter('create', options: <String>['--template=app', '--web', sampleAppName], environment: <String, String>{
+      await flutter('create', options: <String>['--template=app', sampleAppName], environment: <String, String>{
           'FLUTTER_WEB': 'true',
         });
       await inDirectory(sampleDir, () async {
@@ -316,7 +342,6 @@ class CompileTest {
   }
 
   static Future<Map<String, dynamic>> _compileAot() async {
-    // Generate blobs instead of assembly.
     await flutter('clean');
     final Stopwatch watch = Stopwatch()..start();
     final List<String> options = <String>[
@@ -361,7 +386,6 @@ class CompileTest {
     switch (deviceOperatingSystem) {
       case DeviceOperatingSystem.ios:
         options.insert(0, 'ios');
-        await prepareProvisioningCertificates(cwd);
         watch.start();
         await flutter('build', options: options);
         watch.stop();
@@ -406,7 +430,6 @@ class CompileTest {
     switch (deviceOperatingSystem) {
       case DeviceOperatingSystem.ios:
         options.insert(0, 'ios');
-        await prepareProvisioningCertificates(cwd);
         break;
       case DeviceOperatingSystem.android:
         options.insert(0, 'apk');
@@ -517,9 +540,6 @@ class MemoryTest {
       _device = await devices.workingDevice;
       await device.unlock();
       await flutter('packages', options: <String>['get']);
-
-      if (deviceOperatingSystem == DeviceOperatingSystem.ios)
-        await prepareProvisioningCertificates(project);
 
       final StreamSubscription<String> adb = device.logcat.listen(
         (String data) {
@@ -663,9 +683,6 @@ class ReportedDurationTest {
       await device.unlock();
       await flutter('packages', options: <String>['get']);
 
-      if (deviceOperatingSystem == DeviceOperatingSystem.ios)
-        await prepareProvisioningCertificates(project);
-
       final StreamSubscription<String> adb = device.logcat.listen(
         (String data) {
           if (durationPattern.hasMatch(data))
@@ -689,7 +706,7 @@ class ReportedDurationTest {
       _device = null;
 
       final Map<String, dynamic> reportedDuration = <String, dynamic>{
-        'duration': duration
+        'duration': duration,
       };
       _device = null;
 

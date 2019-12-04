@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -209,6 +209,7 @@ class _DayPeriodControl extends StatelessWidget {
         _announceToAccessibility(context, MaterialLocalizations.of(context).anteMeridiemAbbreviation);
         break;
       case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
         break;
     }
     _togglePeriod();
@@ -224,6 +225,7 @@ class _DayPeriodControl extends StatelessWidget {
         _announceToAccessibility(context, MaterialLocalizations.of(context).postMeridiemAbbreviation);
         break;
       case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
         break;
     }
     _togglePeriod();
@@ -259,7 +261,7 @@ class _DayPeriodControl extends StatelessWidget {
               heightFactor: 1,
               child: Semantics(
                 selected: amSelected,
-                child: Text(materialLocalizations.anteMeridiemAbbreviation, style: amStyle)
+                child: Text(materialLocalizations.anteMeridiemAbbreviation, style: amStyle),
               ),
             ),
           ),
@@ -467,9 +469,8 @@ class _MinuteControl extends StatelessWidget {
 _TimePickerHeaderFormat _buildHeaderFormat(
   TimeOfDayFormat timeOfDayFormat,
   _TimePickerFragmentContext context,
-  Orientation orientation
+  Orientation orientation,
 ) {
-
   // Creates an hour fragment.
   _TimePickerHeaderFragment hour() {
     return _TimePickerHeaderFragment(
@@ -541,12 +542,13 @@ _TimePickerHeaderFormat _buildHeaderFormat(
     _TimePickerHeaderFragment fragment2,
     _TimePickerHeaderFragment fragment3,
   }) {
-    final List<_TimePickerHeaderFragment> fragments = <_TimePickerHeaderFragment>[fragment1];
-    if (fragment2 != null) {
-      fragments.add(fragment2);
-      if (fragment3 != null)
-        fragments.add(fragment3);
-    }
+    final List<_TimePickerHeaderFragment> fragments = <_TimePickerHeaderFragment>[
+      fragment1,
+      if (fragment2 != null) ...<_TimePickerHeaderFragment>[
+        fragment2,
+        if (fragment3 != null) fragment3,
+      ],
+    ];
     return _TimePickerHeaderPiece(pivotIndex, fragments, bottomMargin: bottomMargin);
   }
 
@@ -871,7 +873,7 @@ class _TappableLabel {
 }
 
 class _DialPainter extends CustomPainter {
-  const _DialPainter({
+  _DialPainter({
     @required this.primaryOuterLabels,
     @required this.primaryInnerLabels,
     @required this.secondaryOuterLabels,
@@ -882,7 +884,7 @@ class _DialPainter extends CustomPainter {
     @required this.activeRing,
     @required this.textDirection,
     @required this.selectedValue,
-  });
+  }) : super(repaint: PaintingBinding.instance.systemFonts);
 
   final List<_TappableLabel> primaryOuterLabels;
   final List<_TappableLabel> primaryInnerLabels;
@@ -1336,50 +1338,41 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     );
   }
 
-  List<_TappableLabel> _build24HourInnerRing(TextTheme textTheme) {
-    final List<_TappableLabel> labels = <_TappableLabel>[];
-    for (TimeOfDay timeOfDay in _amHours) {
-      labels.add(_buildTappableLabel(
+  List<_TappableLabel> _build24HourInnerRing(TextTheme textTheme) => <_TappableLabel>[
+    for (TimeOfDay timeOfDay in _amHours)
+      _buildTappableLabel(
         textTheme,
         timeOfDay.hour,
         localizations.formatHour(timeOfDay, alwaysUse24HourFormat: media.alwaysUse24HourFormat),
         () {
           _selectHour(timeOfDay.hour);
         },
-      ));
-    }
-    return labels;
-  }
+      ),
+  ];
 
-  List<_TappableLabel> _build24HourOuterRing(TextTheme textTheme) {
-    final List<_TappableLabel> labels = <_TappableLabel>[];
-    for (TimeOfDay timeOfDay in _pmHours) {
-      labels.add(_buildTappableLabel(
+  List<_TappableLabel> _build24HourOuterRing(TextTheme textTheme) => <_TappableLabel>[
+    for (TimeOfDay timeOfDay in _pmHours)
+      _buildTappableLabel(
         textTheme,
         timeOfDay.hour,
         localizations.formatHour(timeOfDay, alwaysUse24HourFormat: media.alwaysUse24HourFormat),
         () {
           _selectHour(timeOfDay.hour);
         },
-      ));
-    }
-    return labels;
-  }
+      ),
+  ];
 
-  List<_TappableLabel> _build12HourOuterRing(TextTheme textTheme) {
-    final List<_TappableLabel> labels = <_TappableLabel>[];
-    for (TimeOfDay timeOfDay in _amHours) {
-      labels.add(_buildTappableLabel(
+  List<_TappableLabel> _build12HourOuterRing(TextTheme textTheme) => <_TappableLabel>[
+    for (TimeOfDay timeOfDay in _amHours)
+      _buildTappableLabel(
         textTheme,
         timeOfDay.hour,
         localizations.formatHour(timeOfDay, alwaysUse24HourFormat: media.alwaysUse24HourFormat),
         () {
           _selectHour(timeOfDay.hour);
         },
-      ));
-    }
-    return labels;
-  }
+      ),
+  ];
 
   List<_TappableLabel> _buildMinutes(TextTheme textTheme) {
     const List<TimeOfDay> _minuteMarkerValues = <TimeOfDay>[
@@ -1397,18 +1390,17 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
       TimeOfDay(hour: 0, minute: 55),
     ];
 
-    final List<_TappableLabel> labels = <_TappableLabel>[];
-    for (TimeOfDay timeOfDay in _minuteMarkerValues) {
-      labels.add(_buildTappableLabel(
-        textTheme,
-        timeOfDay.minute,
-        localizations.formatMinute(timeOfDay),
-        () {
-          _selectMinute(timeOfDay.minute);
-        },
-      ));
-    }
-    return labels;
+    return <_TappableLabel>[
+      for (TimeOfDay timeOfDay in _minuteMarkerValues)
+        _buildTappableLabel(
+          textTheme,
+          timeOfDay.minute,
+          localizations.formatMinute(timeOfDay),
+          () {
+            _selectMinute(timeOfDay.minute);
+          },
+        ),
+    ];
   }
 
   @override
@@ -1535,6 +1527,7 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
         });
         break;
       case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
         break;
     }
   }
@@ -1741,8 +1734,8 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
 /// ```
 /// {@end-tool}
 ///
-/// The [context] argument is passed to [showDialog], the documentation for
-/// which discusses how it is used.
+/// The [context] and [useRootNavigator] arguments are passed to [showDialog],
+/// the documentation for which discusses how it is used.
 ///
 /// The [builder] parameter can be used to wrap the dialog widget
 /// to add inherited widgets like [Localizations.override],
@@ -1790,14 +1783,17 @@ Future<TimeOfDay> showTimePicker({
   @required BuildContext context,
   @required TimeOfDay initialTime,
   TransitionBuilder builder,
+  bool useRootNavigator = true,
 }) async {
   assert(context != null);
   assert(initialTime != null);
+  assert(useRootNavigator != null);
   assert(debugCheckHasMaterialLocalizations(context));
 
   final Widget dialog = _TimePickerDialog(initialTime: initialTime);
   return await showDialog<TimeOfDay>(
     context: context,
+    useRootNavigator: useRootNavigator,
     builder: (BuildContext context) {
       return builder == null ? dialog : builder(context, dialog);
     },

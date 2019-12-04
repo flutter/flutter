@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -7,7 +7,6 @@ import 'dart:io';
 
 import 'package:flutter_devicelab/framework/adb.dart';
 import 'package:flutter_devicelab/framework/framework.dart';
-import 'package:flutter_devicelab/framework/ios.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
 
 import 'service_extensions_test.dart';
@@ -23,7 +22,6 @@ Future<void> main() async {
         dir('${flutterDirectory.path}/dev/integration_tests/ui');
     await inDirectory<void>(testDirectory, () async {
       await flutter('packages', options: <String>['get']);
-      await prepareProvisioningCertificates(testDirectory.path);
 
       await checkNoWarningHostLaunch(deviceId);
       await checkNoWarningXcodeLaunch(deviceId);
@@ -44,7 +42,7 @@ Future<void> checkNoWarningHostLaunch(String deviceId) async {
     '--verbose-system-logs',
     '-d',
     deviceId,
-    'lib/empty.dart'
+    'lib/empty.dart',
   ]);
 
   expect(!output.contains(expectedWarning));
@@ -84,9 +82,9 @@ Future<void> checkWarningHomeScreenLaunch(String deviceId) async {
     '--verbose-system-logs',
     '-d',
     deviceId,
-    'lib/empty.dart'
+    'lib/empty.dart',
   ], environment: <String, String>{
-    'FLUTTER_TOOLS_DEBUG_WITHOUT_CHECKED_MODE': 'true'
+    'FLUTTER_TOOLS_DEBUG_WITHOUT_CHECKED_MODE': 'true',
   });
   expect(output.contains(expectedWarning));
 }

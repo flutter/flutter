@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -130,6 +130,14 @@ List<GalleryDemo> _buildGalleryDemos() {
       category: _kDemos,
       routeName: TransformationsDemo.routeName,
       buildRoute: (BuildContext context) => const TransformationsDemo(),
+    ),
+    GalleryDemo(
+      title: 'Pesto',
+      subtitle: 'Simple recipe browser',
+      icon: Icons.adjust,
+      category: _kDemos,
+      routeName: PestoDemo.routeName,
+      buildRoute: (BuildContext context) => const PestoDemo(),
     ),
 
     // Style
@@ -555,23 +563,6 @@ List<GalleryDemo> _buildGalleryDemos() {
       buildRoute: (BuildContext context) => const VideoDemo(),
     ),
   ];
-
-  // Keep Pesto around for its regression test value. It is not included
-  // in (release builds) the performance tests.
-  assert(() {
-    galleryDemos.insert(0,
-      GalleryDemo(
-        title: 'Pesto',
-        subtitle: 'Simple recipe browser',
-        icon: Icons.adjust,
-        category: _kDemos,
-        routeName: PestoDemo.routeName,
-        buildRoute: (BuildContext context) => const PestoDemo(),
-      ),
-    );
-    return true;
-  }());
-
   return galleryDemos;
 }
 

@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -96,7 +96,7 @@ void main() {
       expect(result.type, ValidationType.missing);
       expect(result.messages, <ValidationMessage>[
         ValidationMessage('clang++ 4.0.1'),
-        ValidationMessage.error('make is not installed')
+        ValidationMessage.error('make is not installed'),
       ]);
     }, overrides: <Type, Generator>{
       ProcessManager: () => processManager,

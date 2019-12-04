@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -8,6 +8,8 @@ import 'dart:io' show ProcessResult, Process;
 import 'package:file/file.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/build_system/build_system.dart';
+import 'package:flutter_tools/src/build_system/targets/dart.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -183,6 +185,25 @@ void main() {
     });
   });
 
+  testUsingContext('builds with targetPlatform', () async {
+    final IOSSimulator simulator = IOSSimulator('x', name: 'iPhone X');
+    when(buildSystem.build(any, any)).thenAnswer((Invocation invocation) async {
+      return BuildResult(success: true);
+    });
+    await simulator.sideloadUpdatedAssetsForInstalledApplicationBundle(BuildInfo.debug, 'lib/main.dart');
+
+    final VerificationResult result = verify(buildSystem.build(any, captureAny));
+    final Environment environment = result.captured.single as Environment;
+    expect(environment.defines, <String, String>{
+      kTargetFile: 'lib/main.dart',
+      kTargetPlatform: 'ios',
+      kBuildMode: 'debug',
+      kTrackWidgetCreation: 'false',
+    });
+  }, overrides: <Type, Generator>{
+    BuildSystem: () => MockBuildSystem(),
+  });
+
   group('Simulator screenshot', () {
     MockXcode mockXcode;
     MockProcessManager mockProcessManager;
@@ -222,12 +243,12 @@ void main() {
         await deviceUnderTest.takeScreenshot(mockFile);
         verify(mockProcessManager.run(
           <String>[
-              '/usr/bin/xcrun',
-              'simctl',
-              'io',
-              'x',
-              'screenshot',
-              fs.path.join('some', 'path', 'to', 'screenshot.png'),
+            '/usr/bin/xcrun',
+            'simctl',
+            'io',
+            'x',
+            'screenshot',
+            fs.path.join('some', 'path', 'to', 'screenshot.png'),
           ],
           environment: null,
           workingDirectory: null,
@@ -338,7 +359,7 @@ void main() {
 
       final IOSSimulator device = IOSSimulator('123456', simulatorCategory: 'iOS 11.0');
       final DeviceLogReader logReader = device.getLogReader(
-        app: BuildableIOSApp(mockIosProject),
+        app: await BuildableIOSApp.fromProject(mockIosProject),
       );
 
       final List<String> lines = await logReader.logLines.toList();
@@ -454,23 +475,21 @@ void main() {
     });
 
     testUsingContext("startApp uses compiled app's Info.plist to find CFBundleIdentifier", () async {
-        final IOSSimulator device = IOSSimulator('x', name: 'iPhone SE', simulatorCategory: 'iOS 11.2');
-        when(PlistParser.instance.getValueFromFile(any, any)).thenReturn('correct');
+      final IOSSimulator device = IOSSimulator('x', name: 'iPhone SE', simulatorCategory: 'iOS 11.2');
+      when(PlistParser.instance.getValueFromFile(any, any)).thenReturn('correct');
 
-        final Directory mockDir = fs.currentDirectory;
-        final IOSApp package = PrebuiltIOSApp(projectBundleId: 'incorrect', bundleName: 'name', bundleDir: mockDir);
+      final Directory mockDir = fs.currentDirectory;
+      final IOSApp package = PrebuiltIOSApp(projectBundleId: 'incorrect', bundleName: 'name', bundleDir: mockDir);
 
-        const BuildInfo mockInfo = BuildInfo(BuildMode.debug, 'flavor');
-        final DebuggingOptions mockOptions = DebuggingOptions.disabled(mockInfo);
-        await device.startApp(package, prebuiltApplication: true, debuggingOptions: mockOptions);
+      const BuildInfo mockInfo = BuildInfo(BuildMode.debug, 'flavor');
+      final DebuggingOptions mockOptions = DebuggingOptions.disabled(mockInfo);
+      await device.startApp(package, prebuiltApplication: true, debuggingOptions: mockOptions);
 
-        verify(simControl.launch(any, 'correct', any));
-      },
-      overrides: <Type, Generator>{
-        SimControl: () => simControl,
-        PlistParser: () => MockPlistUtils(),
-      },
-    );
+      verify(simControl.launch(any, 'correct', any));
+    }, overrides: <Type, Generator>{
+      SimControl: () => simControl,
+      PlistParser: () => MockPlistUtils(),
+    });
   });
 
   testUsingContext('IOSDevice.isSupportedForProject is true on module project', () async {
@@ -488,6 +507,7 @@ flutter:
     expect(IOSSimulator('test').isSupportedForProject(flutterProject), true);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
   testUsingContext('IOSDevice.isSupportedForProject is true with editable host app', () async {
@@ -499,6 +519,7 @@ flutter:
     expect(IOSSimulator('test').isSupportedForProject(flutterProject), true);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
   testUsingContext('IOSDevice.isSupportedForProject is false with no host app and no module', () async {
@@ -509,5 +530,8 @@ flutter:
     expect(IOSSimulator('test').isSupportedForProject(flutterProject), false);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
+    ProcessManager: () => FakeProcessManager.any(),
   });
 }
+
+class MockBuildSystem extends Mock implements BuildSystem {}

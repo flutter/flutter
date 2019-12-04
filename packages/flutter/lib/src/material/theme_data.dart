@@ -1,8 +1,8 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show Color, hashList;
+import 'dart:ui' show Color, hashList, lerpDouble;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -92,9 +92,76 @@ enum MaterialTapTargetSize {
 
 /// Holds the color and typography values for a material design theme.
 ///
-/// Use this class to configure a [Theme] widget.
+/// Use this class to configure a [Theme] or [MaterialApp] widget.
 ///
 /// To obtain the current theme, use [Theme.of].
+///
+/// {@tool sample}
+///
+/// This sample creates a [Theme] widget that stores the `ThemeData`. The
+/// `ThemeData` can be accessed by descendant Widgets that use the correct
+/// `context`. This example uses the [Builder] widget to gain access to a
+/// descendant `context` that contains the `ThemeData`.
+///
+/// The [Container] widget uses [Theme.of] to retrieve the [primaryColor] from
+/// the `ThemeData` to draw an amber square.
+///
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/theme_data.png)
+///
+/// ```dart
+/// Theme(
+///   data: ThemeData(primaryColor: Colors.amber),
+///   child: Builder(
+///     builder: (BuildContext context) {
+///       return Container(
+///         width: 100,
+///         height: 100,
+///         color: Theme.of(context).primaryColor,
+///       );
+///     },
+///   ),
+/// )
+/// ```
+/// {@end-tool}
+///
+/// In addition to using the [Theme] widget, you can provide `ThemeData` to a
+/// [MaterialApp]. The `ThemeData` will be used throughout the app to style
+/// material design widgets.
+///
+/// {@tool sample}
+///
+/// This sample creates a [MaterialApp] widget that stores `ThemeData` and
+/// passes the `ThemeData` to descendant widgets. The [AppBar] widget uses the
+/// [primaryColor] to create a blue background. The [Text] widget uses the
+/// [TextTheme.body1] to create purple text. The [FloatingActionButton] widget
+/// uses the [accentColor] to create a green background.
+///
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/material_app_theme_data.png)
+///
+/// ```dart
+/// MaterialApp(
+///   theme: ThemeData(
+///     primaryColor: Colors.blue,
+///     accentColor: Colors.green,
+///     textTheme: TextTheme(body1: TextStyle(color: Colors.purple)),
+///   ),
+///   home: Scaffold(
+///     appBar: AppBar(
+///       title: const Text('ThemeData Demo'),
+///     ),
+///     floatingActionButton: FloatingActionButton(
+///       child: const Icon(Icons.add),
+///       onPressed: () {},
+///     ),
+///     body: Center(
+///       child: Text(
+///         'Button pressed 0 times',
+///       ),
+///     ),
+///   ),
+/// )
+/// ```
+/// {@end-tool}
 @immutable
 class ThemeData extends Diagnosticable {
   /// Create a [ThemeData] given a set of preferred values.
@@ -115,10 +182,25 @@ class ThemeData extends Diagnosticable {
   ///    ([accentColorBrightness]), so that the right contrasting text
   ///    color will be used over the accent color.
   ///
+  /// Most of these parameters map to the [ThemeData] field with the same name,
+  /// all of which are described in more detail on the fields themselves. The
+  /// exceptions are:
+  ///
+  ///  * [primarySwatch] - used to configure default values for several fields,
+  ///    including: [primaryColor], [primaryColorBrightness], [primaryColorLight],
+  ///    [primaryColorDark], [toggleableActiveColor], [accentColor], [colorScheme],
+  ///    [secondaryHeaderColor], [textSelectionColor], [backgroundColor], and
+  ///    [buttonColor].
+  ///
+  ///  * [fontFamily] - sets the default fontFamily for any
+  ///    [TextStyle.fontFamily] that isn't set directly in the [textTheme],
+  ///    [primaryTextTheme], or [accentTextTheme].
+  ///
   /// See <https://material.io/design/color/> for
   /// more discussion on how to pick the right colors.
   factory ThemeData({
     Brightness brightness,
+    VisualDensity visualDensity,
     MaterialColor primarySwatch,
     Color primaryColor,
     Brightness primaryColorBrightness,
@@ -185,6 +267,7 @@ class ThemeData extends Diagnosticable {
   }) {
     brightness ??= Brightness.light;
     final bool isDark = brightness == Brightness.dark;
+    visualDensity ??= const VisualDensity();
     primarySwatch ??= Colors.blue;
     primaryColor ??= isDark ? Colors.grey[900] : primarySwatch;
     primaryColorBrightness ??= estimateBrightnessForColor(primaryColor);
@@ -234,19 +317,19 @@ class ThemeData extends Diagnosticable {
     iconTheme ??= isDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black87);
     platform ??= defaultTargetPlatform;
     typography ??= Typography(platform: platform);
-    final TextTheme defaultTextTheme = isDark ? typography.white : typography.black;
+    TextTheme defaultTextTheme = isDark ? typography.white : typography.black;
+    TextTheme defaultPrimaryTextTheme = primaryIsDark ? typography.white : typography.black;
+    TextTheme defaultAccentTextTheme = accentIsDark ? typography.white : typography.black;
+    if (fontFamily != null) {
+      defaultTextTheme = defaultTextTheme.apply(fontFamily: fontFamily);
+      defaultPrimaryTextTheme = defaultPrimaryTextTheme.apply(fontFamily: fontFamily);
+      defaultAccentTextTheme = defaultAccentTextTheme.apply(fontFamily: fontFamily);
+    }
     textTheme = defaultTextTheme.merge(textTheme);
-    final TextTheme defaultPrimaryTextTheme = primaryIsDark ? typography.white : typography.black;
     primaryTextTheme = defaultPrimaryTextTheme.merge(primaryTextTheme);
-    final TextTheme defaultAccentTextTheme = accentIsDark ? typography.white : typography.black;
     accentTextTheme = defaultAccentTextTheme.merge(accentTextTheme);
     materialTapTargetSize ??= MaterialTapTargetSize.padded;
     applyElevationOverlayColor ??= false;
-    if (fontFamily != null) {
-      textTheme = textTheme.apply(fontFamily: fontFamily);
-      primaryTextTheme = primaryTextTheme.apply(fontFamily: fontFamily);
-      accentTextTheme = accentTextTheme.apply(fontFamily: fontFamily);
-    }
 
     // Used as the default color (fill color) for RaisedButtons. Computing the
     // default for ButtonThemeData for the sake of backwards compatibility.
@@ -291,6 +374,7 @@ class ThemeData extends Diagnosticable {
 
     return ThemeData.raw(
       brightness: brightness,
+      visualDensity: visualDensity,
       primaryColor: primaryColor,
       primaryColorBrightness: primaryColorBrightness,
       primaryColorLight: primaryColorLight,
@@ -367,6 +451,7 @@ class ThemeData extends Diagnosticable {
     // operator == and in the hashValues method and in the order of fields
     // in this class, and in the lerp() method.
     @required this.brightness,
+    @required this.visualDensity,
     @required this.primaryColor,
     @required this.primaryColorBrightness,
     @required this.primaryColorLight,
@@ -429,6 +514,7 @@ class ThemeData extends Diagnosticable {
     @required this.dividerTheme,
     @required this.buttonBarTheme,
   }) : assert(brightness != null),
+       assert(visualDensity != null),
        assert(primaryColor != null),
        assert(primaryColorBrightness != null),
        assert(primaryColorLight != null),
@@ -495,8 +581,8 @@ class ThemeData extends Diagnosticable {
   ///
   /// If [colorScheme.brightness] is [Brightness.dark] then
   /// [ThemeData.applyElevationOverlayColor] will be set to true to support
-  /// the Material dark theme method for indicating elevation by overlaying
-  /// a semi-transparent white color on top of the surface color.
+  /// the Material dark theme method for indicating elevation by applying
+  /// a semi-transparent onSurface color on top of the surface color.
   ///
   /// This is the recommended method to theme your application. As we move
   /// forward we will be converting all the widget implementations to only use
@@ -536,6 +622,7 @@ class ThemeData extends Diagnosticable {
       accentColor: colorScheme.secondary,
       accentColorBrightness: ThemeData.estimateBrightnessForColor(colorScheme.secondary),
       scaffoldBackgroundColor: colorScheme.background,
+      bottomAppBarColor: colorScheme.surface,
       cardColor: colorScheme.surface,
       dividerColor: colorScheme.onSurface.withOpacity(0.12),
       backgroundColor: colorScheme.background,
@@ -586,6 +673,35 @@ class ThemeData extends Diagnosticable {
   /// card and canvas colors when the brightness is dark; when the brightness is
   /// dark, use Colors.white or the accentColor for a contrasting color.
   final Brightness brightness;
+
+  /// The density value for specifying the compactness of various UI components.
+  ///
+  /// {@template flutter.material.themedata.visualDensity}
+  /// Density, in the context of a UI, is the vertical and horizontal
+  /// "compactness" of the elements in the UI. It is unitless, since it means
+  /// different things to different UI elements. For buttons, it affects the
+  /// spacing around the centered label of the button. For lists, it affects the
+  /// distance between baselines of entries in the list.
+  ///
+  /// Typically, density values are integral, but any value in range may be
+  /// used. The range includes values from [VisualDensity.minimumDensity] (which
+  /// is -4), to [VisualDensity.maximumDensity] (which is 4), inclusive, where
+  /// negative values indicate a denser, more compact, UI, and positive values
+  /// indicate a less dense, more expanded, UI. If a component doesn't support
+  /// the value given, it will clamp to the the nearest supported value.
+  ///
+  /// The default for visual densities is zero for both vertical and horizontal
+  /// densities, which corresponds to the default visual density of components
+  /// in the Material Design specification.
+  ///
+  /// As a rule of thumb, a change of 1 or -1 in density corresponds to 4
+  /// logical pixels. However, this is not a strict relationship since
+  /// components interpret the density values appropriately for their needs.
+  ///
+  /// A larger value translates to a spacing increase (less dense), and a
+  /// smaller value translates to a spacing decrease (more dense).
+  /// {@endtemplate}
+  final VisualDensity visualDensity;
 
   /// The background color for major parts of the app (toolbars, tab bars, etc)
   ///
@@ -791,27 +907,28 @@ class ThemeData extends Diagnosticable {
   /// In a test environment, the platform returned is [TargetPlatform.android]
   /// regardless of the host platform. (Android was chosen because the tests
   /// were originally written assuming Android-like behavior, and we added
-  /// platform adaptations for iOS later). Tests can check iOS behavior by
-  /// setting the [platform] of the [Theme] explicitly to [TargetPlatform.iOS],
-  /// or by setting [debugDefaultTargetPlatformOverride].
+  /// platform adaptations for other platforms later). Tests can check behavior
+  /// for other platforms by setting the [platform] of the [Theme] explicitly to
+  /// another [TargetPlatform] value, or by setting
+  /// [debugDefaultTargetPlatformOverride].
   final TargetPlatform platform;
 
   /// Configures the hit test size of certain Material widgets.
   final MaterialTapTargetSize materialTapTargetSize;
 
-  /// Apply a semi-transparent white overlay on Material surfaces to indicate
+  /// Apply a semi-transparent overlay color on Material surfaces to indicate
   /// elevation for dark themes.
   ///
   /// Material drop shadows can be difficult to see in a dark theme, so the
   /// elevation of a surface should be portrayed with an "overlay" in addition
-  /// to the shadow. As the elevation of the component increases, the white
+  /// to the shadow. As the elevation of the component increases, the
   /// overlay increases in opacity. [applyElevationOverlayColor] turns the
   /// application of this overlay on or off.
   ///
-  /// If [true] a semi-transparent white overlay will be applied to the color
-  /// of [Material] widgets when their [Material.color] is [colorScheme.surface].
-  /// The level of transparency is based on [Material.elevation] as per the
-  /// Material Dark theme specification.
+  /// If [true] a semi-transparent version of [colorScheme.onSurface] will be
+  /// applied on top of the color of [Material] widgets when their [Material.color]
+  /// is [colorScheme.surface]. The level of transparency is based on
+  /// [Material.elevation] as per the Material Dark theme specification.
   ///
   /// If [false] the surface color will be used unmodified.
   ///
@@ -901,6 +1018,7 @@ class ThemeData extends Diagnosticable {
   /// Creates a copy of this theme but with the given fields replaced with the new values.
   ThemeData copyWith({
     Brightness brightness,
+    VisualDensity visualDensity,
     Color primaryColor,
     Brightness primaryColorBrightness,
     Color primaryColorLight,
@@ -921,7 +1039,7 @@ class ThemeData extends Diagnosticable {
     Color unselectedWidgetColor,
     Color disabledColor,
     ButtonThemeData buttonTheme,
-    ToggleButtonsTheme toggleButtonsTheme,
+    ToggleButtonsThemeData toggleButtonsTheme,
     Color buttonColor,
     Color secondaryHeaderColor,
     Color textSelectionColor,
@@ -966,6 +1084,7 @@ class ThemeData extends Diagnosticable {
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
     return ThemeData.raw(
       brightness: brightness ?? this.brightness,
+      visualDensity: visualDensity ?? this.visualDensity,
       primaryColor: primaryColor ?? this.primaryColor,
       primaryColorBrightness: primaryColorBrightness ?? this.primaryColorBrightness,
       primaryColorLight: primaryColorLight ?? this.primaryColorLight,
@@ -1109,6 +1228,7 @@ class ThemeData extends Diagnosticable {
     // the class and in the lerp() method.
     return ThemeData.raw(
       brightness: t < 0.5 ? a.brightness : b.brightness,
+      visualDensity: VisualDensity.lerp(a.visualDensity, b.visualDensity, t),
       primaryColor: Color.lerp(a.primaryColor, b.primaryColor, t),
       primaryColorBrightness: t < 0.5 ? a.primaryColorBrightness : b.primaryColorBrightness,
       primaryColorLight: Color.lerp(a.primaryColorLight, b.primaryColorLight, t),
@@ -1182,6 +1302,7 @@ class ThemeData extends Diagnosticable {
     // hashValues() and in the raw constructor and in the order of fields in
     // the class and in the lerp() method.
     return (otherData.brightness == brightness) &&
+           (otherData.visualDensity == visualDensity) &&
            (otherData.primaryColor == primaryColor) &&
            (otherData.primaryColorBrightness == primaryColorBrightness) &&
            (otherData.primaryColorLight == primaryColorLight) &&
@@ -1250,6 +1371,7 @@ class ThemeData extends Diagnosticable {
     // and in the order of fields in the class and in the lerp() method.
     final List<Object> values = <Object>[
       brightness,
+      visualDensity,
       primaryColor,
       primaryColorBrightness,
       primaryColorLight,
@@ -1321,6 +1443,7 @@ class ThemeData extends Diagnosticable {
     final ThemeData defaultData = ThemeData.fallback();
     properties.add(EnumProperty<TargetPlatform>('platform', platform, defaultValue: defaultTargetPlatform));
     properties.add(EnumProperty<Brightness>('brightness', brightness, defaultValue: defaultData.brightness));
+    properties.add(DiagnosticsProperty<VisualDensity>('visualDensity', visualDensity, defaultValue: defaultData.visualDensity));
     properties.add(ColorProperty('primaryColor', primaryColor, defaultValue: defaultData.primaryColor));
     properties.add(EnumProperty<Brightness>('primaryColorBrightness', primaryColorBrightness, defaultValue: defaultData.primaryColorBrightness));
     properties.add(ColorProperty('accentColor', accentColor, defaultValue: defaultData.accentColor));
@@ -1416,7 +1539,7 @@ class MaterialBasedCupertinoThemeData extends CupertinoThemeData {
   ///
   /// The [materialTheme] parameter must not be null.
   MaterialBasedCupertinoThemeData({
-      @required ThemeData materialTheme,
+    @required ThemeData materialTheme,
   }) : this._(
     materialTheme,
     (materialTheme.cupertinoOverrideTheme ?? const CupertinoThemeData()).noDefault(),
@@ -1550,5 +1673,169 @@ class _FifoCache<K, V> {
     if (_cache.length == _maximumSize)
       _cache.remove(_cache.keys.first);
     return _cache[key] = loader();
+  }
+}
+
+/// Defines the visual density of user interface components.
+///
+/// Density, in the context of a UI, is the vertical and horizontal
+/// "compactness" of the components in the UI. It is unitless, since it means
+/// different things to different UI components.
+///
+/// The default for visual densities is zero for both vertical and horizontal
+/// densities, which corresponds to the default visual density of components in
+/// the Material Design specification. It does not affect text sizes, icon
+/// sizes, or padding values.
+///
+/// For example, for buttons, it affects the spacing around the child of the
+/// button. For lists, it affects the distance between baselines of entries in
+/// the list. For chips, it only affects the vertical size, not the horizontal
+/// size.
+///
+/// See also:
+///
+///  * [ThemeData.visualDensity], where this property is used to specify the base
+///    horizontal density of Material components.
+///  * [Material design guidance on density](https://material.io/design/layout/applying-density.html).
+class VisualDensity extends Diagnosticable {
+  /// A const constructor for [VisualDensity].
+  ///
+  /// All of the arguments must be non-null, and [horizontal] and [vertical]
+  /// must be in the interval between [minimumDensity] and [maximumDensity],
+  /// inclusive.
+  const VisualDensity({
+    this.horizontal = 0.0,
+    this.vertical = 0.0,
+  }) : assert(horizontal != null),
+       assert(vertical != null),
+       assert(vertical <= maximumDensity),
+       assert(vertical >= minimumDensity),
+       assert(horizontal <= maximumDensity),
+       assert(horizontal >= minimumDensity);
+
+  /// The minimum allowed density.
+  static const double minimumDensity = -4.0;
+
+  /// The maximum allowed density.
+  static const double maximumDensity = 4.0;
+
+  /// The default profile for [VisualDensity] in [ThemeData].
+  ///
+  /// This default value represents a visual density that is less dense than
+  /// either [comfortable] or [compact], and corresponds to density values of
+  /// zero in both axes.
+  static const VisualDensity standard = VisualDensity();
+
+  /// The profile for a "comfortable" interpretation of [VisualDensity].
+  ///
+  /// Individual components will interpret the density value independently,
+  /// making themselves more visually dense than [standard] and less dense than
+  /// [compact] to different degrees based on the Material Design specification
+  /// of the "comfortable" setting for their particular use case.
+  ///
+  /// It corresponds to a density value of -1 in both axes.
+  static const VisualDensity comfortable = VisualDensity(horizontal: -1.0, vertical: -1.0);
+
+  /// The profile for a "compact" interpretation of [VisualDensity].
+  ///
+  /// Individual components will interpret the density value independently,
+  /// making themselves more visually dense than [standard] and [comfortable] to
+  /// different degrees based on the Material Design specification of the
+  /// "comfortable" setting for their particular use case.
+  ///
+  /// It corresponds to a density value of -2 in both axes.
+  static const VisualDensity compact = VisualDensity(horizontal: -2.0, vertical: -2.0);
+
+  /// Copy the current [VisualDensity] with the given values replacing the
+  /// current values.
+  VisualDensity copyWith({
+    double horizontal,
+    double vertical,
+  }) {
+    return VisualDensity(
+      horizontal: horizontal ?? this.horizontal,
+      vertical: vertical ?? this.vertical,
+    );
+  }
+
+  /// The horizontal visual density of UI components.
+  ///
+  /// This property affects only the horizontal spacing between and within
+  /// components, to allow for different UI visual densities. It does not affect
+  /// text sizes, icon sizes, or padding values. The default value is 0.0,
+  /// corresponding to the metrics specified in the Material Design
+  /// specification. The value can range from [minimumDensity] to
+  /// [maximumDensity], inclusive.
+  ///
+  /// See also:
+  ///
+  ///  * [ThemeData.visualDensity], where this property is used to specify the base
+  ///    horizontal density of Material components.
+  ///  * [Material design guidance on density](https://material.io/design/layout/applying-density.html).
+  final double horizontal;
+
+  /// The vertical visual density of UI components.
+  ///
+  /// This property affects only the vertical spacing between and within
+  /// components, to allow for different UI visual densities. It does not affect
+  /// text sizes, icon sizes, or padding values. The default value is 0.0,
+  /// corresponding to the metrics specified in the Material Design
+  /// specification. The value can range from [minimumDensity] to
+  /// [maximumDensity], inclusive.
+  ///
+  /// See also:
+  ///
+  ///  * [ThemeData.visualDensity], where this property is used to specify the base
+  ///    vertical density of Material components.
+  ///  * [Material design guidance on density](https://material.io/design/layout/applying-density.html).
+  final double vertical;
+
+  /// The base adjustment in logical pixels of the visual density of UI components.
+  ///
+  /// The input density values are multiplied by a constant to arrive at a base
+  /// size adjustment that fits material design guidelines.
+  ///
+  /// Individual components may adjust this value based upon their own
+  /// individual interpretation of density.
+  Offset get baseSizeAdjustment {
+    // The number of logical pixels represented by an increase or decrease in
+    // density by one. The Material Design guidelines say to increment/decrement
+    // sized in terms of four pixel increments.
+    const double interval = 4.0;
+
+    return Offset(horizontal, vertical) * interval;
+  }
+
+  /// Linearly interpolate between two densities.
+  static VisualDensity lerp(VisualDensity a, VisualDensity b, double t) {
+    return VisualDensity(
+      horizontal: lerpDouble(a.horizontal, b.horizontal, t),
+      vertical: lerpDouble(a.horizontal, b.horizontal, t),
+    );
+  }
+
+  @override
+  bool operator ==(dynamic other) {
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    final VisualDensity typedOther = other;
+    return horizontal == typedOther.horizontal
+        && vertical == typedOther.vertical;
+  }
+
+  @override
+  int get hashCode => hashValues(horizontal, vertical);
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DoubleProperty('horizontal', horizontal, defaultValue: 0.0));
+    properties.add(DoubleProperty('vertical', vertical, defaultValue: 0.0));
+  }
+
+  @override
+  String toStringShort() {
+    return '${super.toStringShort()}(h: ${debugFormatDouble(horizontal)}, v: ${debugFormatDouble(vertical)})';
   }
 }

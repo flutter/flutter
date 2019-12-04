@@ -1,4 +1,4 @@
-// Copyright (c) 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -12,6 +12,8 @@ import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:process/process.dart';
 import 'package:stack_trace/stack_trace.dart';
+
+import 'framework.dart';
 
 /// Virtual current working directory, which affect functions, such as [exec].
 String cwd = Directory.current.path;
@@ -119,11 +121,16 @@ void recursiveCopy(Directory source, Directory target) {
 
   for (FileSystemEntity entity in source.listSync(followLinks: false)) {
     final String name = path.basename(entity.path);
-    if (entity is Directory)
+    if (entity is Directory && !entity.path.contains('.dart_tool'))
       recursiveCopy(entity, Directory(path.join(target.path, name)));
     else if (entity is File) {
       final File dest = File(path.join(target.path, name));
       dest.writeAsBytesSync(entity.readAsBytesSync());
+      // Preserve executable bit
+      final String modes = entity.statSync().modeString();
+      if (modes != null && modes.contains('x')) {
+        makeExecutable(dest);
+      }
     }
   }
 }
@@ -132,6 +139,27 @@ FileSystemEntity move(FileSystemEntity whatToMove,
     {Directory to, String name}) {
   return whatToMove
       .renameSync(path.join(to.path, name ?? path.basename(whatToMove.path)));
+}
+
+/// Equivalent of `chmod a+x file`
+void makeExecutable(File file) {
+  // Windows files do not have an executable bit
+  if (Platform.isWindows) {
+    return;
+  }
+  final ProcessResult result = _processManager.runSync(<String>[
+    'chmod',
+    'a+x',
+    file.path,
+  ]);
+
+  if (result.exitCode != 0) {
+    throw FileSystemException(
+      'Error making ${file.path} executable.\n'
+      '${result.stderr}',
+      file.path,
+    );
+  }
 }
 
 /// Equivalent of `mkdir directory`.
@@ -229,13 +257,15 @@ Future<Process> startProcess(
 }) async {
   assert(isBot != null);
   final String command = '$executable ${arguments?.join(" ") ?? ""}';
-  print('\nExecuting: $command');
+  final String finalWorkingDirectory = workingDirectory ?? cwd;
+  print('\nExecuting: $command in $finalWorkingDirectory'
+      + (environment != null ? ' with environment $environment' : ''));
   environment ??= <String, String>{};
   environment['BOT'] = isBot ? 'true' : 'false';
   final Process process = await _processManager.start(
     <String>[executable, ...arguments],
     environment: environment,
-    workingDirectory: workingDirectory ?? cwd,
+    workingDirectory: finalWorkingDirectory,
   );
   final ProcessInfo processInfo = ProcessInfo(command, process);
   _runningProcesses.add(processInfo);
@@ -421,7 +451,7 @@ void cd(dynamic directory) {
     throw 'Cannot cd into directory that does not exist: $directory';
 }
 
-Directory get flutterDirectory => dir('../..').absolute;
+Directory get flutterDirectory => Directory.current.parent.parent;
 
 String requireEnvVar(String name) {
   final String value = Platform.environment[name];
@@ -572,7 +602,7 @@ int parseServicePort(String line, {
   return matches.isEmpty ? null : int.parse(matches[0].group(2));
 }
 
-/// Tries to extract a Uri from the string.
+/// Tries to extract a URL from the string.
 ///
 /// The `prefix`, if specified, is a regular expression pattern and must not contain groups.
 /// `prefix` defaults to the RegExp: `An Observatory debugger .* is available at: `.
@@ -594,5 +624,44 @@ Uri parseServiceUri(String line, {
 void checkFileExists(String file) {
   if (!exists(File(file))) {
     throw FileSystemException('Expected file to exit.', file);
+  }
+}
+
+/// Checks that the file does not exists, otherwise throws a [FileSystemException].
+void checkFileNotExists(String file) {
+  if (exists(File(file))) {
+    throw FileSystemException('Expected file to exit.', file);
+  }
+}
+
+/// Check that `collection` contains all entries in `values`.
+void checkCollectionContains<T>(Iterable<T> values, Iterable<T> collection) {
+  for (T value in values) {
+    if (!collection.contains(value)) {
+      throw TaskResult.failure('Expected to find `$value` in `${collection.toString()}`.');
+    }
+  }
+}
+
+/// Check that `collection` does not contain any entries in `values`
+void checkCollectionDoesNotContain<T>(Iterable<T> values, Iterable<T> collection) {
+  for (T value in values) {
+    if (collection.contains(value)) {
+      throw TaskResult.failure('Did not expect to find `$value` in `$collection`.');
+    }
+  }
+}
+
+/// Checks that the contents of a [File] at `filePath` contains the specified
+/// [Pattern]s, otherwise throws a [TaskResult].
+void checkFileContains(List<Pattern> patterns, String filePath) {
+  final String fileContent = File(filePath).readAsStringSync();
+  for (Pattern pattern in patterns) {
+    if (!fileContent.contains(pattern)) {
+      throw TaskResult.failure(
+        'Expected to find `$pattern` in `$filePath` '
+        'instead it found:\n$fileContent'
+      );
+    }
   }
 }

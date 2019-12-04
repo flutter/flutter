@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -14,7 +14,7 @@ void main() {
     });
     expect(log[0], contains('Example label'));
     expect(log[1], contains('debugPrintStack'));
-  });
+  }, skip: isBrowser);
 
   test('debugPrintStack', () {
     final List<String> log = captureOutput(() {
@@ -39,7 +39,7 @@ void main() {
 
     expect(joined, contains('captureOutput'));
     expect(joined, contains('\nExample information\n'));
-  });
+  }, skip: isBrowser);
 
   test('FlutterErrorDetails.toString', () {
     expect(
@@ -56,7 +56,7 @@ void main() {
         'MESSAGE\n'
         '\n'
         'INFO\n'
-        '═════════════════════════════════════════════════════════════════\n'
+        '═════════════════════════════════════════════════════════════════\n',
 
     );
     expect(
@@ -87,7 +87,7 @@ void main() {
         'MESSAGE\n'
         '\n'
         'INFO\n'
-        '═════════════════════════════════════════════════════════════════\n'
+        '═════════════════════════════════════════════════════════════════\n',
     );
     expect(
       FlutterErrorDetails(
@@ -111,14 +111,14 @@ void main() {
       '══╡ EXCEPTION CAUGHT BY FLUTTER FRAMEWORK ╞══════════════════════\n'
       'The following message was thrown:\n'
       'MESSAGE\n'
-      '═════════════════════════════════════════════════════════════════\n'
+      '═════════════════════════════════════════════════════════════════\n',
     );
     expect(
       const FlutterErrorDetails().toString(),
       '══╡ EXCEPTION CAUGHT BY FLUTTER FRAMEWORK ╞══════════════════════\n'
       'The following Null object was thrown:\n'
       '  null\n'
-      '═════════════════════════════════════════════════════════════════\n'
+      '═════════════════════════════════════════════════════════════════\n',
     );
   });
 
@@ -154,7 +154,7 @@ void main() {
       'FlutterError\n'
       '   My Error Summary.\n'
       '   My first description.\n'
-      '   My second description.\n'
+      '   My second description.\n',
     );
 
     error = FlutterError(
@@ -180,7 +180,7 @@ void main() {
       '   My first description.\n'
       '   My second description.\n'
       '\n'
-      '\n'
+      '\n',
     );
 
     error = FlutterError(
@@ -205,7 +205,7 @@ void main() {
       '   My Error Summary.\n'
       '   My first description.\n'
       '\n'
-      '   My second description.\n'
+      '   My second description.\n',
     );
     error = FlutterError('My Error Summary.');
     expect(error.diagnostics.length, 1);
@@ -215,7 +215,7 @@ void main() {
     expect(
       error.toStringDeep(),
       'FlutterError\n'
-      '   My Error Summary.\n'
+      '   My Error Summary.\n',
     );
   });
 

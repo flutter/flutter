@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -98,6 +98,51 @@ void main() {
     final Offset actionsTopRight = tester.getTopRight(find.byType(ButtonBar));
     expect(contentBottomLeft.dy, greaterThan(actionsTopRight.dy));
     expect(contentBottomLeft.dx, lessThan(actionsTopRight.dx));
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/39574
+  testWidgets('Single action laid out beside content but aligned to the trailing edge', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: MaterialBanner(
+          content: const Text('Content'),
+          actions: <Widget>[
+            FlatButton(
+              child: const Text('Action'),
+              onPressed: () { },
+            ),
+          ],
+        ),
+      ),
+    );
+
+    final Offset actionsTopRight = tester.getTopRight(find.byType(ButtonBar));
+    final Offset bannerTopRight = tester.getTopRight(find.byType(MaterialBanner));
+    expect(actionsTopRight.dx, bannerTopRight.dx);
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/39574
+  testWidgets('Single action laid out beside content but aligned to the trailing edge - RTL', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Directionality(
+        textDirection: TextDirection.rtl,
+          child: MaterialBanner(
+            content: const Text('Content'),
+            actions: <Widget>[
+              FlatButton(
+                child: const Text('Action'),
+                onPressed: () { },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    final Offset actionsTopLeft = tester.getTopLeft(find.byType(ButtonBar));
+    final Offset bannerTopLeft = tester.getTopLeft(find.byType(MaterialBanner));
+    expect(actionsTopLeft.dx, bannerTopLeft.dx);
   });
 
   testWidgets('Actions laid out below content if forced override', (WidgetTester tester) async {

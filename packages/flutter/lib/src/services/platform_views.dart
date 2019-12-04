@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -65,7 +65,7 @@ class PlatformViewsService {
   Future<void> _onMethodCall(MethodCall call) {
     switch(call.method) {
       case 'viewFocused':
-        final int id = call.arguments;
+        final int id = call.arguments as int;
         if (_focusCallbacks.containsKey(id)) {
           _focusCallbacks[id]();
         }
@@ -734,4 +734,7 @@ abstract class PlatformViewController {
   ///
   /// The [PlatformViewController] is unusable after calling dispose.
   void dispose();
+
+  /// Clears the view's focus on the platform side.
+  void clearFocus();
 }

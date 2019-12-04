@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -66,7 +66,10 @@ abstract class BinaryMessenger {
 /// This is used to send messages from the application to the platform, and
 /// keeps track of which handlers have been registered on each channel so
 /// it may dispatch incoming messages to the registered handler.
-@Deprecated('Use ServicesBinding.instance.defaultBinaryMessenger instead.')
+@Deprecated(
+  'Use ServicesBinding.instance.defaultBinaryMessenger instead. '
+  'This feature was deprecated after v1.6.5.'
+)
 BinaryMessenger get defaultBinaryMessenger {
   assert(() {
     if (ServicesBinding.instance == null) {

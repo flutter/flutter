@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -245,14 +245,18 @@ class _LeaveBehindListItem extends StatelessWidget {
         },
         background: Container(
           color: theme.primaryColor,
-          child: const ListTile(
-            leading: Icon(Icons.delete, color: Colors.white, size: 36.0),
+          child: const Center(
+            child: ListTile(
+              leading: Icon(Icons.delete, color: Colors.white, size: 36.0),
+            ),
           ),
         ),
         secondaryBackground: Container(
           color: theme.primaryColor,
-          child: const ListTile(
-            trailing: Icon(Icons.archive, color: Colors.white, size: 36.0),
+          child: const Center(
+            child: ListTile(
+              trailing: Icon(Icons.archive, color: Colors.white, size: 36.0),
+            ),
           ),
         ),
         child: Container(

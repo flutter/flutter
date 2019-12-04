@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -11,6 +11,10 @@ import 'package:meta/meta.dart';
 
 typedef HeaderGenerator = String Function(String regenerateInstructions);
 typedef ConstructorGenerator = String Function(LocaleInfo locale);
+
+int sortFilesByPath (FileSystemEntity a, FileSystemEntity b) {
+  return a.path.compareTo(b.path);
+}
 
 /// Simple data class to hold parsed locale. Does not promise validity of any data.
 class LocaleInfo implements Comparable<LocaleInfo> {
@@ -153,7 +157,7 @@ void loadMatchingArbsIntoBundleMaps({
   /// overwrite the existing assumed data.
   final Set<LocaleInfo> assumedLocales = <LocaleInfo>{};
 
-  for (FileSystemEntity entity in directory.listSync()) {
+  for (FileSystemEntity entity in directory.listSync().toList()..sort(sortFilesByPath)) {
     final String entityPath = entity.path;
     if (FileSystemEntity.isFileSync(entityPath) && filenamePattern.hasMatch(entityPath)) {
       final String localeString = filenamePattern.firstMatch(entityPath)[1];

@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -149,9 +149,9 @@ void main() {
       s.debugPaint(
         PaintingContext(
           ContainerLayer(), const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0)),
-        const Offset(0.0, 500)
+        const Offset(0.0, 500),
       );
-    } catch(e) {
+    } catch (e) {
       error = e;
     }
     expect(error, isNull);
@@ -182,9 +182,9 @@ void main() {
       s.debugPaint(
         PaintingContext(
           ContainerLayer(), const Rect.fromLTRB(0.0, 0.0, 800.0, 600.0)),
-        const Offset(0.0, 500)
+        const Offset(0.0, 500),
       );
-    } catch(e) {
+    } catch (e) {
       error = e;
     }
     expect(error, isNull);

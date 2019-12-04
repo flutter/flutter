@@ -21,12 +21,33 @@ dev_dependencies:
 # The following section is specific to Flutter.
 flutter:
   # This section identifies this Flutter project as a plugin project.
+{{^useNewPluginSchema}}
   # The androidPackage and pluginClass identifiers should not ordinarily
   # be modified. They are used by the tooling to maintain consistency when
   # adding or updating assets for this project.
   plugin:
     androidPackage: {{androidIdentifier}}
     pluginClass: {{pluginClass}}
+{{/useNewPluginSchema}}
+{{#useNewPluginSchema}}
+  # The 'pluginClass' and Android 'package' identifiers should not ordinarily
+  # be modified. They are used by the tooling to maintain consistency when
+  # adding or updating assets for this project.
+  #
+  # NOTE: This new plugin description format is not supported on Flutter's
+  # stable channel as of 1.9.1. A plugin published using this format will not
+  # work for most clients until the next major stable release.
+  # However, it is required in order to declare macOS support.
+  plugin:
+    platforms:
+      android:
+        package: {{androidIdentifier}}
+        pluginClass: {{pluginClass}}
+      ios:
+        pluginClass: {{pluginClass}}
+      macos:
+        pluginClass: {{pluginClass}}
+{{/useNewPluginSchema}}
 
   # To add assets to your plugin package, add an assets section, like this:
   # assets:

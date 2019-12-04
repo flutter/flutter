@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -68,11 +68,7 @@ void main() {
     }));
 
     test('does not apply on other platforms', () => testbed.run(() {
-      when(mockProcessManager.canRun('chrome')).thenReturn(false);
       expect(workflow.appliesToHostPlatform, false);
-      expect(workflow.canLaunchDevices, false);
-      expect(workflow.canListDevices, false);
-      expect(workflow.canListEmulators, false);
     }, overrides: <Type, Generator>{
       Platform: () => notSupported,
     }));
@@ -92,13 +88,14 @@ void main() {
 class MockProcessManager extends Mock implements ProcessManager {}
 
 class MockPlatform extends Mock implements Platform {
-  MockPlatform(
-      {this.windows = false,
-      this.macos = false,
-      this.linux = false,
-      this.environment = const <String, String>{
-        kChromeEnvironment: 'chrome',
-      }});
+  MockPlatform({
+    this.windows = false,
+    this.macos = false,
+    this.linux = false,
+    this.environment = const <String, String>{
+      kChromeEnvironment: 'chrome',
+    },
+  });
 
   final bool windows;
   final bool macos;

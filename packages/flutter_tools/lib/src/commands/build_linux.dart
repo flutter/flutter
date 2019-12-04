@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -17,35 +17,23 @@ import 'build.dart';
 /// A command to build a linux desktop target through a build shell script.
 class BuildLinuxCommand extends BuildSubCommand {
   BuildLinuxCommand() {
+    addBuildModeFlags();
     usesTargetOption();
-    argParser.addFlag('debug',
-      negatable: false,
-      help: 'Build a debug version of your app.',
-    );
-    argParser.addFlag('profile',
-      negatable: false,
-      help: 'Build a version of your app specialized for performance profiling.'
-    );
-    argParser.addFlag('release',
-      negatable: false,
-      help: 'Build a version of your app specialized for performance profiling.',
-    );
   }
 
   @override
   final String name = 'linux';
 
   @override
-  bool hidden = true;
+  bool get hidden => !featureFlags.isLinuxEnabled || !platform.isLinux;
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
     DevelopmentArtifact.linux,
-    DevelopmentArtifact.universal,
   };
 
   @override
-  String get description => 'build the Linux desktop target (Experimental).';
+  String get description => 'build the Linux desktop target.';
 
   @override
   Future<FlutterCommandResult> runCommand() async {

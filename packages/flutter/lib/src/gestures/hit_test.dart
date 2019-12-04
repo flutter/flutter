@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -54,7 +54,7 @@ class HitTestEntry {
   final HitTestTarget target;
 
   @override
-  String toString() => '$target';
+  String toString() => '${describeIdentity(this)}($target)';
 
   /// Returns a matrix describing how [PointerEvent]s delivered to this
   /// [HitTestEntry] should be transformed from the global coordinate space of
@@ -62,8 +62,8 @@ class HitTestEntry {
   ///
   /// See also:
   ///
-  ///  * [HitTestResult.addWithPaintTransform], which is used during hit testing
-  ///    to build up the transform returned by this method.
+  ///  * [HitTestResult.pushTransform], which is used during hit
+  ///    testing to build up the transform returned by this method.
   Matrix4 get transform => _transform;
   Matrix4 _transform;
 }
@@ -129,7 +129,7 @@ class HitTestResult {
   ///  * [BoxHitTestResult.addWithPaintTransform], which is a public wrapper
   ///    around this function for hit testing on [RenderBox]s.
   ///  * [SliverHitTestResult.addWithAxisOffset], which is a public wrapper
-  ///    around this function for hit testing on [RenderSlivers]s.
+  ///    around this function for hit testing on [RenderSliver]s.
   @protected
   void pushTransform(Matrix4 transform) {
     assert(transform != null);
@@ -142,7 +142,7 @@ class HitTestResult {
       'matrix through PointerEvent.removePerspectiveTransform?'
       'The provided matrix is:\n$transform'
     );
-    _transforms.add(_transforms.isEmpty ? transform :  transform * _transforms.last);
+    _transforms.add(_transforms.isEmpty ? transform : (transform * _transforms.last as Matrix4));
   }
 
   /// Removes the last transform added via [pushTransform].

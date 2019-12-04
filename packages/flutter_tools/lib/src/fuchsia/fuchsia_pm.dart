@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -58,8 +58,7 @@ class FuchsiaPM {
   ///
   /// where $APPNAME is the same [appName] passed to [init], and meta/package
   /// is set up to be the file `meta/package` created by [init].
-  Future<bool> build(
-      String buildPath, String keyPath, String manifestPath) {
+  Future<bool> build(String buildPath, String keyPath, String manifestPath) {
     return _runPMCommand(<String>[
       '-o',
       buildPath,
@@ -100,9 +99,9 @@ class FuchsiaPM {
     ]);
   }
 
-  /// Spawns an http server in a new process for serving Fuchisa packages.
+  /// Spawns an http server in a new process for serving Fuchsia packages.
   ///
-  /// The arguemnt [repoPath] should have previously been an arguemnt to
+  /// The argument [repoPath] should have previously been an argument to
   /// [newrepo]. The [host] should be the host reported by
   /// [FuchsiaDevFinder.resolve], and [port] should be an unused port for the
   /// http server to bind.
@@ -118,7 +117,7 @@ class FuchsiaPM {
       '-l',
       '$host:$port',
     ];
-    final Process process = await runCommand(command);
+    final Process process = await processUtils.start(command);
     process.stdout
         .transform(utf8.decoder)
         .transform(const LineSplitter())
@@ -151,8 +150,8 @@ class FuchsiaPM {
     if (fuchsiaArtifacts.pm == null) {
       throwToolExit('Fuchsia pm tool not found');
     }
-    final List<String> command = <String>[fuchsiaArtifacts.pm.path] + args;
-    final RunResult result = await runAsync(command);
+    final List<String> command = <String>[fuchsiaArtifacts.pm.path, ...args];
+    final RunResult result = await processUtils.run(command);
     return result.exitCode == 0;
   }
 }
@@ -179,19 +178,22 @@ class FuchsiaPM {
 class FuchsiaPackageServer {
   FuchsiaPackageServer(this._repo, this.name, this._host, this._port);
 
+  static const String deviceHost = 'fuchsia.com';
+  static const String toolHost = 'flutter_tool';
+
   final String _repo;
   final String _host;
   final int _port;
 
   Process _process;
 
-  /// The url that can be used by the device to access this package server.
+  /// The URL that can be used by the device to access this package server.
   String get url => 'http://$_host:$_port';
 
   // The name used to reference the server by fuchsia-pkg:// urls.
   final String name;
 
-  /// Usees [FuchiaPM.newrepo] and [FuchsiaPM.serve] to spin up a new Fuchsia
+  /// Uses [FuchiaPM.newrepo] and [FuchsiaPM.serve] to spin up a new Fuchsia
   /// package server.
   ///
   /// Returns false if the repo could not be created or the server could not

@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -50,7 +50,7 @@ void main() {
       when(mockProcessManager.canRun(kMacOSExecutable)).thenReturn(false);
       final ValidationResult result = await webValidator.validate();
       expect(result.messages, <ValidationMessage>[
-        ValidationMessage.hint('CHROME_EXECUTABLE not set')
+        ValidationMessage.hint('Cannot find Chrome. Try setting CHROME_EXECUTABLE to a Chrome executable.'),
       ]);
       expect(result.type, ValidationType.missing);
     }));

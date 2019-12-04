@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -10,6 +10,17 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
+
+const CupertinoDynamicColor _kSystemFill = CupertinoDynamicColor(
+  color: Color.fromARGB(51, 120, 120, 128),
+  darkColor: Color.fromARGB(91, 120, 120, 128),
+  highContrastColor: Color.fromARGB(71, 120, 120, 128),
+  darkHighContrastColor: Color.fromARGB(112, 120, 120, 128),
+  elevatedColor: Color.fromARGB(51, 120, 120, 128),
+  darkElevatedColor: Color.fromARGB(91, 120, 120, 128),
+  highContrastElevatedColor: Color.fromARGB(71, 120, 120, 128),
+  darkHighContrastElevatedColor: Color.fromARGB(112, 120, 120, 128),
+);
 
 void main() {
 
@@ -401,7 +412,7 @@ void main() {
     expect(
       find.byType(CupertinoSlider),
       // First line it paints is blue.
-      paints..rrect(color: CupertinoColors.activeBlue),
+      paints..rrect(color: CupertinoColors.systemBlue.color),
     );
 
     await tester.pumpWidget(
@@ -415,9 +426,10 @@ void main() {
         ),
       ),
     );
+
     expect(
       find.byType(CupertinoSlider),
-      paints..rrect(color: CupertinoColors.activeOrange),
+      paints..rrect(color: CupertinoColors.systemBlue.darkColor),
     );
   });
 
@@ -436,20 +448,20 @@ void main() {
     );
     expect(
       find.byType(CupertinoSlider),
-      paints..rrect(color: CupertinoColors.activeGreen),
+      paints..rrect(color: CupertinoColors.systemGreen.darkColor),
     );
   });
 
   testWidgets('Themes can be overridden by dynamic colors', (WidgetTester tester) async {
-    final CupertinoDynamicColor activeColor = CupertinoDynamicColor(
-      color: const Color(0x00000001),
-      darkColor: const Color(0x00000002),
-      elevatedColor: const Color(0x00000003),
-      highContrastColor: const Color(0x00000004),
-      darkElevatedColor: const Color(0x00000005),
-      darkHighContrastColor: const Color(0x00000006),
-      highContrastElevatedColor: const Color(0x00000007),
-      darkHighContrastElevatedColor: const Color(0x00000008),
+    const CupertinoDynamicColor activeColor = CupertinoDynamicColor(
+      color: Color(0x00000001),
+      darkColor: Color(0x00000002),
+      elevatedColor: Color(0x00000003),
+      highContrastColor: Color(0x00000004),
+      darkElevatedColor: Color(0x00000005),
+      darkHighContrastColor: Color(0x00000006),
+      highContrastElevatedColor: Color(0x00000007),
+      darkHighContrastElevatedColor: Color(0x00000008),
     );
 
     Widget withTraits(Brightness brightness, CupertinoUserInterfaceLevelData level, bool highContrast) {
@@ -512,12 +524,12 @@ void main() {
 
     expect(
       find.byType(CupertinoSlider),
-      paints..rrect(color: CupertinoSystemColors.fallbackValues.systemFill.color),
+      paints..rrect(color: _kSystemFill.color),
     );
 
     expect(
       find.byType(CupertinoSlider),
-      isNot(paints..rrect(color: CupertinoSystemColors.fallbackValues.systemFill.darkColor)),
+      isNot(paints..rrect(color: _kSystemFill.darkColor)),
     );
 
     await tester.pumpWidget(
@@ -535,12 +547,60 @@ void main() {
 
     expect(
       find.byType(CupertinoSlider),
-      paints..rrect(color: CupertinoSystemColors.fallbackValues.systemFill.darkColor),
+      paints..rrect(color: _kSystemFill.darkColor),
     );
 
     expect(
       find.byType(CupertinoSlider),
-      isNot(paints..rrect(color: CupertinoSystemColors.fallbackValues.systemFill.color)),
+      isNot(paints..rrect(color: _kSystemFill.color)),
+    );
+  });
+
+  testWidgets('Thumb color can be overridden', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoSlider(
+            thumbColor: CupertinoColors.systemPurple,
+            onChanged: (double value) { },
+            value: 0,
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      find.byType(CupertinoSlider),
+      paints
+      ..rrect()
+      ..rrect()
+      ..rrect()
+      ..rrect()
+      ..rrect()
+      ..rrect(color: CupertinoColors.systemPurple.color)
+    );
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        home: Center(
+          child: CupertinoSlider(
+            thumbColor: CupertinoColors.activeOrange,
+            onChanged: (double value) { },
+            value: 0,
+          ),
+        ),
+      ),
+    );
+
+    expect(
+        find.byType(CupertinoSlider),
+        paints
+          ..rrect()
+          ..rrect()
+          ..rrect()
+          ..rrect()
+          ..rrect()
+          ..rrect(color: CupertinoColors.activeOrange.color)
     );
   });
 }

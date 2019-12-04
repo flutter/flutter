@@ -1,4 +1,4 @@
-// Copyright 2018 The Flutter Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -35,8 +35,7 @@ const Map<String, String> localEngineDebugBuildModeRelease = <String, String>{
 };
 
 // Can't use a debug build with a profile engine.
-const Map<String, String> localEngineProfileBuildeModeRelease =
-    <String, String>{
+const Map<String, String> localEngineProfileBuildeModeRelease = <String, String>{
   'SOURCE_ROOT': '../../../examples/hello_world',
   'FLUTTER_ROOT': '../../..',
   'LOCAL_ENGINE': '/engine/src/out/ios_profile',

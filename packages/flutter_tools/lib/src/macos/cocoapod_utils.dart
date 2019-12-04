@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -14,8 +14,7 @@ import 'cocoapods.dart';
 
 /// For a given build, determines whether dependencies have changed since the
 /// last call to processPods, then calls processPods with that information.
-Future<void> processPodsIfNeeded(XcodeBasedProject xcodeProject,
-    String buildDirectory, BuildMode buildMode) async {
+Future<void> processPodsIfNeeded(XcodeBasedProject xcodeProject, String buildDirectory, BuildMode buildMode) async {
   final FlutterProject project = xcodeProject.parent;
   // Ensure that the plugin list is up to date, since hasPlugins relies on it.
   refreshPluginsList(project);
@@ -37,7 +36,7 @@ Future<void> processPodsIfNeeded(XcodeBasedProject xcodeProject,
   final bool didPodInstall = await cocoaPods.processPods(
     xcodeProject: xcodeProject,
     engineDir: flutterFrameworkDir(buildMode),
-    isSwift: xcodeProject.isSwift,
+    isSwift: await xcodeProject.isSwift,
     dependenciesChanged: !fingerprinter.doesFingerprintMatch(),
   );
   if (didPodInstall) {

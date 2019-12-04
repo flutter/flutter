@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -82,6 +82,7 @@ class ModalBarrier extends StatelessWidget {
         platformSupportsDismissingBarrier = false;
         break;
       case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
         platformSupportsDismissingBarrier = true;
         break;
     }
@@ -94,18 +95,21 @@ class ModalBarrier extends StatelessWidget {
         // modal barriers are not dismissible in accessibility mode.
         excluding: !semanticsDismissible || !modalBarrierSemanticsDismissible,
         child: _ModalBarrierGestureDetector(
-          onAnyTapDown: () {
+          onDismiss: () {
             if (dismissible)
               Navigator.maybePop(context);
           },
           child: Semantics(
             label: semanticsDismissible ? semanticsLabel : null,
             textDirection: semanticsDismissible && semanticsLabel != null ? Directionality.of(context) : null,
-            child: ConstrainedBox(
-              constraints: const BoxConstraints.expand(),
-              child: color == null ? null : DecoratedBox(
-                decoration: BoxDecoration(
-                  color: color,
+            child: MouseRegion(
+              opaque: true,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints.expand(),
+                child: color == null ? null : DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: color,
+                  ),
                 ),
               ),
             ),
@@ -148,7 +152,7 @@ class AnimatedModalBarrier extends AnimatedWidget {
   ///
   ///  * [ModalRoute.barrierColor], which controls this property for the
   ///    [AnimatedModalBarrier] built by [ModalRoute] pages.
-  Animation<Color> get color => listenable;
+  Animation<Color> get color => listenable as Animation<Color>;
 
   /// Whether touching the barrier will pop the current route off the [Navigator].
   ///
@@ -191,124 +195,66 @@ class AnimatedModalBarrier extends AnimatedWidget {
 //
 // It is similar to [TapGestureRecognizer.onTapDown], but accepts any single
 // button, which means the gesture also takes parts in gesture arenas.
-class _AnyTapGestureRecognizer extends PrimaryPointerGestureRecognizer {
-  _AnyTapGestureRecognizer({
-    Object debugOwner,
-  }) : super(debugOwner: debugOwner);
+class _AnyTapGestureRecognizer extends BaseTapGestureRecognizer {
+  _AnyTapGestureRecognizer({ Object debugOwner })
+    : super(debugOwner: debugOwner);
 
-  VoidCallback onAnyTapDown;
+  VoidCallback onAnyTapUp;
 
-  bool _sentTapDown = false;
-  bool _wonArenaForPrimaryPointer = false;
-  // The buttons sent by `PointerDownEvent`. If a `PointerMoveEvent` comes with a
-  // different set of buttons, the gesture is canceled.
-  int _initialButtons;
-
+  @protected
   @override
-  void addAllowedPointer(PointerDownEvent event) {
-    super.addAllowedPointer(event);
-    // `_initialButtons` must be assigned here instead of `handlePrimaryPointer`,
-    // because `acceptGesture` might be called before `handlePrimaryPointer`,
-    // which relies on `_initialButtons` to create `TapDownDetails`.
-    _initialButtons = event.buttons;
+  bool isPointerAllowed(PointerDownEvent event) {
+    if (onAnyTapUp == null)
+      return false;
+    return super.isPointerAllowed(event);
   }
 
+  @protected
   @override
-  void handlePrimaryPointer(PointerEvent event) {
-    if (event is PointerUpEvent || event is PointerCancelEvent) {
-      resolve(GestureDisposition.rejected);
-      _reset();
-    } else if (event.buttons != _initialButtons) {
-      resolve(GestureDisposition.rejected);
-      stopTrackingPointer(primaryPointer);
-    }
+  void handleTapDown({PointerDownEvent down}) {
+    // Do nothing.
   }
 
+  @protected
   @override
-  void resolve(GestureDisposition disposition) {
-    if (_wonArenaForPrimaryPointer && disposition == GestureDisposition.rejected) {
-      // This can happen if the gesture has been canceled. For example, when
-      // the pointer has exceeded the touch slop, the buttons have been changed,
-      // or if the recognizer is disposed.
-      assert(_sentTapDown);
-      _reset();
-    }
-    super.resolve(disposition);
+  void handleTapUp({PointerDownEvent down, PointerUpEvent up}) {
+    if (onAnyTapUp != null)
+      onAnyTapUp();
   }
 
+  @protected
   @override
-  void didExceedDeadlineWithEvent(PointerDownEvent event) {
-    _checkDown(event.pointer);
-  }
-
-  @override
-  void acceptGesture(int pointer) {
-    super.acceptGesture(pointer);
-    if (pointer == primaryPointer) {
-      _checkDown(pointer);
-      _wonArenaForPrimaryPointer = true;
-      _reset();
-    }
-  }
-
-  @override
-  void rejectGesture(int pointer) {
-    super.rejectGesture(pointer);
-    if (pointer == primaryPointer) {
-      // Another gesture won the arena.
-      assert(state != GestureRecognizerState.possible);
-      _reset();
-    }
-  }
-
-  void _checkDown(int pointer) {
-    if (_sentTapDown)
-      return;
-    if (onAnyTapDown != null)
-      onAnyTapDown();
-    _sentTapDown = true;
-  }
-
-  void _reset() {
-    _sentTapDown = false;
-    _wonArenaForPrimaryPointer = false;
-    _initialButtons = null;
+  void handleTapCancel({PointerDownEvent down, PointerCancelEvent cancel, String reason}) {
+    // Do nothing.
   }
 
   @override
   String get debugDescription => 'any tap';
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(FlagProperty('wonArenaForPrimaryPointer', value: _wonArenaForPrimaryPointer, ifTrue: 'won arena'));
-    properties.add(FlagProperty('sentTapDown', value: _sentTapDown, ifTrue: 'sent tap down'));
-  }
 }
 
 class _ModalBarrierSemanticsDelegate extends SemanticsGestureDelegate {
-  const _ModalBarrierSemanticsDelegate({this.onAnyTapDown});
+  const _ModalBarrierSemanticsDelegate({this.onDismiss});
 
-  final VoidCallback onAnyTapDown;
+  final VoidCallback onDismiss;
 
   @override
   void assignSemantics(RenderSemanticsGestureHandler renderObject) {
-    renderObject.onTap = onAnyTapDown;
+    renderObject.onTap = onDismiss;
   }
 }
 
 
 class _AnyTapGestureRecognizerFactory extends GestureRecognizerFactory<_AnyTapGestureRecognizer> {
-  const _AnyTapGestureRecognizerFactory({this.onAnyTapDown});
+  const _AnyTapGestureRecognizerFactory({this.onAnyTapUp});
 
-  final VoidCallback onAnyTapDown;
+  final VoidCallback onAnyTapUp;
 
   @override
   _AnyTapGestureRecognizer constructor() => _AnyTapGestureRecognizer();
 
   @override
   void initializer(_AnyTapGestureRecognizer instance) {
-    instance.onAnyTapDown = onAnyTapDown;
+    instance.onAnyTapUp = onAnyTapUp;
   }
 }
 
@@ -318,29 +264,29 @@ class _ModalBarrierGestureDetector extends StatelessWidget {
   const _ModalBarrierGestureDetector({
     Key key,
     @required this.child,
-    @required this.onAnyTapDown,
+    @required this.onDismiss,
   }) : assert(child != null),
-       assert(onAnyTapDown != null),
+       assert(onDismiss != null),
        super(key: key);
 
   /// The widget below this widget in the tree.
   /// See [RawGestureDetector.child].
   final Widget child;
 
-  /// Immediately called when a pointer causes a tap down.
-  /// See [_AnyTapGestureRecognizer.onAnyTapDown].
-  final VoidCallback onAnyTapDown;
+  /// Immediately called when an event that should dismiss the modal barrier
+  /// has happened.
+  final VoidCallback onDismiss;
 
   @override
   Widget build(BuildContext context) {
     final Map<Type, GestureRecognizerFactory> gestures = <Type, GestureRecognizerFactory>{
-      _AnyTapGestureRecognizer: _AnyTapGestureRecognizerFactory(onAnyTapDown: onAnyTapDown),
+      _AnyTapGestureRecognizer: _AnyTapGestureRecognizerFactory(onAnyTapUp: onDismiss),
     };
 
     return RawGestureDetector(
       gestures: gestures,
       behavior: HitTestBehavior.opaque,
-      semantics: _ModalBarrierSemanticsDelegate(onAnyTapDown: onAnyTapDown),
+      semantics: _ModalBarrierSemanticsDelegate(onDismiss: onDismiss),
       child: child,
     );
   }

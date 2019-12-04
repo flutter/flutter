@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -68,7 +68,7 @@ void main() {
             ),
           ),
         ],
-      )
+      ),
     );
 
     final StateMarkerState leftState = left.currentState;
@@ -95,7 +95,7 @@ void main() {
             child: StateMarker(key: left),
           ),
         ],
-      )
+      ),
     );
 
     expect(left.currentState, equals(leftState));
@@ -116,7 +116,7 @@ void main() {
             child: Container(),
           ),
         ),
-      )
+      ),
     );
 
     expect(left.currentState, equals(leftState));
@@ -139,7 +139,7 @@ void main() {
             child: grandchild,
           ),
         ],
-      )
+      ),
     );
 
     final StateMarkerState leftState = left.currentState;
@@ -162,7 +162,7 @@ void main() {
           ),
           StateMarker(key: left),
         ],
-      )
+      ),
     );
 
     expect(left.currentState, equals(leftState));
@@ -183,7 +183,7 @@ void main() {
             child: Container(),
           ),
         ),
-      )
+      ),
     );
 
     expect(left.currentState, equals(leftState));
@@ -365,7 +365,7 @@ void main() {
             ),
           ),
         ],
-      )
+      ),
     );
 
     await tester.pumpWidget(
@@ -384,7 +384,7 @@ void main() {
             ),
           ),
         ],
-      )
+      ),
     );
   });
 }

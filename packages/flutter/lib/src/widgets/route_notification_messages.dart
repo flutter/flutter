@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -29,14 +29,12 @@ class RouteNotificationMessages {
   static void _notifyRouteChange(String methodName, Route<dynamic> route, Route<dynamic> previousRoute) {
     final String previousRouteName = previousRoute?.settings?.name;
     final String routeName = route?.settings?.name;
-    if (previousRouteName != null || routeName != null) {
-      SystemChannels.navigation.invokeMethod<void>(
-        methodName,
-        <String, dynamic>{
-          'previousRouteName': previousRouteName,
-          'routeName': routeName,
-        },
-      );
-    }
+    SystemChannels.navigation.invokeMethod<void>(
+      methodName,
+      <String, dynamic>{
+        'previousRouteName': previousRouteName,
+        'routeName': routeName,
+      },
+    );
   }
 }

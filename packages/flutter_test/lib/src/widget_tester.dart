@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -9,13 +9,17 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:meta/meta.dart';
+
+// ignore: deprecated_member_use
 import 'package:test_api/test_api.dart' as test_package;
 
 import 'all_elements.dart';
 import 'binding.dart';
 import 'controller.dart';
+import 'event_simulation.dart';
 import 'finders.dart';
 import 'matchers.dart';
 import 'test_async_utils.dart';
@@ -25,6 +29,7 @@ import 'test_text_input.dart';
 /// Keep users from needing multiple imports to test semantics.
 export 'package:flutter/rendering.dart' show SemanticsHandle;
 
+// ignore: deprecated_member_use
 /// Hide these imports so that they do not conflict with our own implementations in
 /// test_compat.dart. This handles setting up a declarer when one is not defined, which
 /// can happen when a test is executed via flutter_run.
@@ -102,7 +107,7 @@ void testWidgets(
   Duration initialTimeout,
   bool semanticsEnabled = true,
 }) {
-  final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+  final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
   final WidgetTester tester = WidgetTester._(binding);
   test(
     description,
@@ -193,7 +198,7 @@ Future<void> benchmarkWidgets(
     print('└─────────────────────────────────────────────────╌┄┈  🐢');
     return true;
   }());
-  final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+  final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
   assert(binding is! AutomatedTestWidgetsFlutterBinding);
   final WidgetTester tester = WidgetTester._(binding);
   SemanticsHandle semanticsHandle;
@@ -279,7 +284,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
 
   /// The binding instance used by the testing framework.
   @override
-  TestWidgetsFlutterBinding get binding => super.binding;
+  TestWidgetsFlutterBinding get binding => super.binding as TestWidgetsFlutterBinding;
 
   /// Renders the UI from the given [widget].
   ///
@@ -480,9 +485,10 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   @override
   void dispatchEvent(PointerEvent event, HitTestResult result) {
     if (event is PointerDownEvent) {
-      final RenderObject innerTarget = result.path.firstWhere(
-        (HitTestEntry candidate) => candidate.target is RenderObject,
-      ).target;
+      final RenderObject innerTarget = result.path
+        .map((HitTestEntry candidate) => candidate.target)
+        .whereType<RenderObject>()
+        .first;
       final Element innerTargetElement = collectAllElementsFrom(
         binding.renderViewElement,
         skipOffstage: true,
@@ -510,8 +516,8 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
           break;
         totalNumber += 1; // optimistically assume we'll be able to describe it
 
-        if (element.widget is Tooltip) {
-          final Tooltip widget = element.widget;
+        final Widget widget = element.widget;
+        if (widget is Tooltip) {
           final Iterable<Element> matches = find.byTooltip(widget.message).evaluate();
           if (matches.length == 1) {
             debugPrint('  find.byTooltip(\'${widget.message}\')');
@@ -519,9 +525,8 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
           }
         }
 
-        if (element.widget is Text) {
+        if (widget is Text) {
           assert(descendantText == null);
-          final Text widget = element.widget;
           final Iterable<Element> matches = find.text(widget.data).evaluate();
           descendantText = widget.data;
           if (matches.length == 1) {
@@ -530,13 +535,13 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
           }
         }
 
-        if (element.widget.key is ValueKey<dynamic>) {
-          final ValueKey<dynamic> key = element.widget.key;
+        final Key key = widget.key;
+        if (key is ValueKey<dynamic>) {
           String keyLabel;
           if (key is ValueKey<int> ||
               key is ValueKey<double> ||
               key is ValueKey<bool>) {
-            keyLabel = 'const ${element.widget.key.runtimeType}(${key.value})';
+            keyLabel = 'const ${key.runtimeType}(${key.value})';
           } else if (key is ValueKey<String>) {
             keyLabel = 'const Key(\'${key.value}\')';
           }
@@ -549,20 +554,20 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
           }
         }
 
-        if (!_isPrivate(element.widget.runtimeType)) {
+        if (!_isPrivate(widget.runtimeType)) {
           if (numberOfTypes < 5) {
-            final Iterable<Element> matches = find.byType(element.widget.runtimeType).evaluate();
+            final Iterable<Element> matches = find.byType(widget.runtimeType).evaluate();
             if (matches.length == 1) {
-              debugPrint('  find.byType(${element.widget.runtimeType})');
+              debugPrint('  find.byType(${widget.runtimeType})');
               numberOfTypes += 1;
               continue;
             }
           }
 
           if (descendantText != null && numberOfWithTexts < 5) {
-            final Iterable<Element> matches = find.widgetWithText(element.widget.runtimeType, descendantText).evaluate();
+            final Iterable<Element> matches = find.widgetWithText(widget.runtimeType, descendantText).evaluate();
             if (matches.length == 1) {
-              debugPrint('  find.widgetWithText(${element.widget.runtimeType}, \'$descendantText\')');
+              debugPrint('  find.widgetWithText(${widget.runtimeType}, \'$descendantText\')');
               numberOfWithTexts += 1;
               continue;
             }
@@ -634,13 +639,16 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     if (_tickers != null) {
       for (Ticker ticker in _tickers) {
         if (ticker.isActive) {
-          throw FlutterError(
-            'A Ticker was active $when.\n'
-            'All Tickers must be disposed. Tickers used by AnimationControllers '
-            'should be disposed by calling dispose() on the AnimationController itself. '
-            'Otherwise, the ticker will leak.\n'
-            'The offending ticker was: ${ticker.toString(debugIncludeStack: true)}'
-          );
+          throw FlutterError.fromParts(<DiagnosticsNode>[
+            ErrorSummary('A Ticker was active $when.'),
+            ErrorDescription('All Tickers must be disposed.'),
+            ErrorHint(
+              'Tickers used by AnimationControllers '
+              'should be disposed by calling dispose() on the AnimationController itself. '
+              'Otherwise, the ticker will leak.'
+            ),
+            ticker.describeForError('The offending ticker was')
+          ]);
         }
       }
     }
@@ -654,13 +662,20 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   void _verifySemanticsHandlesWereDisposed() {
     assert(_lastRecordedSemanticsHandles != null);
     if (binding.pipelineOwner.debugOutstandingSemanticsHandles > _lastRecordedSemanticsHandles) {
-      throw FlutterError(
-        'A SemanticsHandle was active at the end of the test.\n'
-        'All SemanticsHandle instances must be disposed by calling dispose() on '
-        'the SemanticsHandle. If your test uses SemanticsTester, it is '
-        'sufficient to call dispose() on SemanticsTester. Otherwise, the '
-        'existing handle will leak into another test and alter its behavior.'
-      );
+      // TODO(jacobr): The hint for this one causes a change in line breaks but
+      // I think it is for the best.
+      throw FlutterError.fromParts(<DiagnosticsNode>[
+        ErrorSummary('A SemanticsHandle was active at the end of the test.'),
+        ErrorDescription(
+          'All SemanticsHandle instances must be disposed by calling dispose() on '
+          'the SemanticsHandle.'
+        ),
+        ErrorHint(
+          'If your test uses SemanticsTester, it is '
+          'sufficient to call dispose() on SemanticsTester. Otherwise, the '
+          'existing handle will leak into another test and alter its behavior.'
+        )
+      ]);
     }
     _lastRecordedSemanticsHandles = null;
   }
@@ -719,6 +734,74 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     });
   }
 
+  /// Simulates sending physical key down and up events through the system channel.
+  ///
+  /// This only simulates key events coming from a physical keyboard, not from a
+  /// soft keyboard.
+  ///
+  /// Specify `platform` as one of the platforms allowed in
+  /// [Platform.operatingSystem] to make the event appear to be from that type
+  /// of system. Defaults to "android". Must not be null. Some platforms (e.g.
+  /// Windows, iOS) are not yet supported.
+  ///
+  /// Keys that are down when the test completes are cleared after each test.
+  ///
+  /// This method sends both the key down and the key up events, to simulate a
+  /// key press. To simulate individual down and/or up events, see
+  /// [sendKeyDownEvent] and [sendKeyUpEvent].
+  ///
+  /// See also:
+  ///
+  ///  - [sendKeyDownEvent] to simulate only a key down event.
+  ///  - [sendKeyUpEvent] to simulate only a key up event.
+  Future<void> sendKeyEvent(LogicalKeyboardKey key, { String platform = 'android' }) async {
+    assert(platform != null);
+    await simulateKeyDownEvent(key, platform: platform);
+    // Internally wrapped in async guard.
+    return simulateKeyUpEvent(key, platform: platform);
+  }
+
+  /// Simulates sending a physical key down event through the system channel.
+  ///
+  /// This only simulates key down events coming from a physical keyboard, not
+  /// from a soft keyboard.
+  ///
+  /// Specify `platform` as one of the platforms allowed in
+  /// [Platform.operatingSystem] to make the event appear to be from that type
+  /// of system. Defaults to "android". Must not be null. Some platforms (e.g.
+  /// Windows, iOS) are not yet supported.
+  ///
+  /// Keys that are down when the test completes are cleared after each test.
+  ///
+  /// See also:
+  ///
+  ///  - [sendKeyUpEvent] to simulate the corresponding key up event.
+  ///  - [sendKeyEvent] to simulate both the key up and key down in the same call.
+  Future<void> sendKeyDownEvent(LogicalKeyboardKey key, { String platform = 'android' }) async {
+    assert(platform != null);
+    // Internally wrapped in async guard.
+    return simulateKeyDownEvent(key, platform: platform);
+  }
+
+  /// Simulates sending a physical key up event through the system channel.
+  ///
+  /// This only simulates key up events coming from a physical keyboard,
+  /// not from a soft keyboard.
+  ///
+  /// Specify `platform` as one of the platforms allowed in
+  /// [Platform.operatingSystem] to make the event appear to be from that type
+  /// of system. Defaults to "android". May not be null.
+  ///
+  /// See also:
+  ///
+  ///  - [sendKeyDownEvent] to simulate the corresponding key down event.
+  ///  - [sendKeyEvent] to simulate both the key up and key down in the same call.
+  Future<void> sendKeyUpEvent(LogicalKeyboardKey key, { String platform = 'android' }) async {
+    assert(platform != null);
+    // Internally wrapped in async guard.
+    return simulateKeyUpEvent(key, platform: platform);
+  }
+
   /// Makes an effort to dismiss the current page with a Material [Scaffold] or
   /// a [CupertinoPageScaffold].
   ///
@@ -759,7 +842,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     RenderObject renderObject = element.findRenderObject();
     SemanticsNode result = renderObject.debugSemantics;
     while (renderObject != null && result == null) {
-      renderObject = renderObject?.parent;
+      renderObject = renderObject?.parent as RenderObject;
       result = renderObject?.debugSemantics;
     }
     if (result == null)

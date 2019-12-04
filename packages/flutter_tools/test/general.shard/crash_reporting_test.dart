@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -11,7 +11,6 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/runner.dart' as tools;
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/doctor.dart';
@@ -181,8 +180,7 @@ void main() {
       expect(method, null);
       expect(uri, null);
 
-      final BufferLogger logger = context.get<Logger>();
-      expect(logger.statusText, '');
+      expect(testLogger.traceText, isNot(contains('Crash report sent')));
     }, overrides: <Type, Generator>{
       Stdio: () => const _NoStderr(),
     });
@@ -260,9 +258,8 @@ Future<void> verifyCrashReportSent(RequestInfo crashInfo, {
   expect(crashInfo.fields['error_message'], 'Bad state: Test bad state error');
   expect(crashInfo.fields['comments'], 'crash');
 
-  final BufferLogger logger = context.get<Logger>();
-  expect(logger.statusText, 'Sending crash report to Google.\n'
-      'Crash report sent (report ID: test-report-id)\n');
+  expect(testLogger.traceText, contains('Sending crash report to Google.'));
+  expect(testLogger.traceText, contains('Crash report sent (report ID: test-report-id)'));
 
   // Verify that we've written the crash report to disk.
   final List<String> writtenFiles =
@@ -274,47 +271,47 @@ Future<void> verifyCrashReportSent(RequestInfo crashInfo, {
 
 class MockCrashReportSender extends MockClient {
   MockCrashReportSender(RequestInfo crashInfo) : super((Request request) async {
-      MockCrashReportSender.sendCalls++;
-      crashInfo.method = request.method;
-      crashInfo.uri = request.url;
+    MockCrashReportSender.sendCalls++;
+    crashInfo.method = request.method;
+    crashInfo.uri = request.url;
 
-      // A very ad-hoc multipart request parser. Good enough for this test.
-      String boundary = request.headers['Content-Type'];
-      boundary = boundary.substring(boundary.indexOf('boundary=') + 9);
-      crashInfo.fields = Map<String, String>.fromIterable(
-        utf8.decode(request.bodyBytes)
-            .split('--$boundary')
-            .map<List<String>>((String part) {
+    // A very ad-hoc multipart request parser. Good enough for this test.
+    String boundary = request.headers['Content-Type'];
+    boundary = boundary.substring(boundary.indexOf('boundary=') + 9);
+    crashInfo.fields = Map<String, String>.fromIterable(
+      utf8.decode(request.bodyBytes)
+        .split('--$boundary')
+        .map<List<String>>((String part) {
           final Match nameMatch = RegExp(r'name="(.*)"').firstMatch(part);
-          if (nameMatch == null)
+          if (nameMatch == null) {
             return null;
+          }
           final String name = nameMatch[1];
           final String value = part.split('\n').skip(2).join('\n').trim();
           return <String>[name, value];
         })
-            .where((List<String> pair) => pair != null),
-        key: (dynamic key) {
-          final List<String> pair = key;
-          return pair[0];
-        },
-        value: (dynamic value) {
-          final List<String> pair = value;
-          return pair[1];
-        },
-      );
+        .where((List<String> pair) => pair != null),
+      key: (dynamic key) {
+        final List<String> pair = key as List<String>;
+        return pair[0];
+      },
+      value: (dynamic value) {
+        final List<String> pair = value as List<String>;
+        return pair[1];
+      },
+    );
 
-      return Response(
-        'test-report-id',
-        200,
-      );
-    });
+    return Response(
+      'test-report-id',
+      200,
+    );
+  });
 
   static int sendCalls = 0;
 }
 
 class CrashingCrashReportSender extends MockClient {
-  CrashingCrashReportSender(Object exception)
-      : super((Request request) async {
+  CrashingCrashReportSender(Object exception) : super((Request request) async {
     throw exception;
   });
 }

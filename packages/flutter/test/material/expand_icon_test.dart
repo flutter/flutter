@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -148,6 +148,7 @@ void main() {
       hasTapAction: true,
       hasEnabledState: true,
       isEnabled: true,
+      isFocusable: true,
       isButton: true,
       onTapHint: localizations.expandedIconTapHint,
     ));
@@ -163,6 +164,7 @@ void main() {
       hasTapAction: true,
       hasEnabledState: true,
       isEnabled: true,
+      isFocusable: true,
       isButton: true,
       onTapHint: localizations.collapsedIconTapHint,
     ));
@@ -176,16 +178,17 @@ void main() {
     await tester.pumpWidget(wrap(
       child: StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
-        return ExpandIcon(
-          isExpanded: expanded,
-          onPressed: (bool isExpanded) {
-            setState(() {
-              expanded = !isExpanded;
-            });
-          },
-          color: Colors.indigo,
-        );
-      }),
+          return ExpandIcon(
+            isExpanded: expanded,
+            onPressed: (bool isExpanded) {
+              setState(() {
+                expanded = !isExpanded;
+              });
+            },
+            color: Colors.indigo,
+          );
+        },
+      ),
     ));
     await tester.pumpAndSettle();
     iconTheme = tester.firstWidget(find.byType(IconTheme).last);
@@ -201,17 +204,18 @@ void main() {
     await tester.pumpWidget(wrap(
       child: StatefulBuilder(
         builder: (BuildContext context, StateSetter setState) {
-        return ExpandIcon(
-          isExpanded: expanded,
-          onPressed: (bool isExpanded) {
-            setState(() {
-              expanded = !isExpanded;
-            });
-          },
-          color: Colors.indigo,
-          expandedColor: Colors.teal,
-        );
-      }),
+          return ExpandIcon(
+            isExpanded: expanded,
+            onPressed: (bool isExpanded) {
+              setState(() {
+                expanded = !isExpanded;
+              });
+            },
+            color: Colors.indigo,
+            expandedColor: Colors.teal,
+          );
+        },
+      ),
     ));
     await tester.pumpAndSettle();
     iconTheme = tester.firstWidget(find.byType(IconTheme).last);

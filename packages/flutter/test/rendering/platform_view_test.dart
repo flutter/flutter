@@ -1,4 +1,4 @@
-// Copyright 2019 The Flutter Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -21,12 +21,13 @@ void main() {
         controller: fakePlatformViewController,
         hitTestBehavior: PlatformViewHitTestBehavior.opaque,
         gestureRecognizers: <Factory<OneSequenceGestureRecognizer>>{
-                  Factory<VerticalDragGestureRecognizer>(
-                    () {
-                      return VerticalDragGestureRecognizer();
-                    },
-                  ),
-                },);
+          Factory<VerticalDragGestureRecognizer>(
+            () {
+              return VerticalDragGestureRecognizer();
+            },
+          ),
+        },
+      );
     });
 
     test('layout should size to max constraint', () {
@@ -67,5 +68,5 @@ void main() {
 
       semanticsHandle.dispose();
     });
-  });
+  }, skip: isBrowser); // TODO(yjbanov): fails on Web with obscured stack trace: https://github.com/flutter/flutter/issues/42770
 }

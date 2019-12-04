@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -46,8 +46,9 @@ class IntelliJPlugins {
 
   bool _hasPackage(String packageName) {
     final String packagePath = fs.path.join(pluginsPath, packageName);
-    if (packageName.endsWith('.jar'))
+    if (packageName.endsWith('.jar')) {
       return fs.isFileSync(packagePath);
+    }
     return fs.isDirectorySync(packagePath);
   }
 
@@ -61,7 +62,7 @@ class IntelliJPlugins {
       final Archive archive =
           ZipDecoder().decodeBytes(fs.file(jarPath).readAsBytesSync());
       final ArchiveFile file = archive.findFile('META-INF/plugin.xml');
-      final String content = utf8.decode(file.content);
+      final String content = utf8.decode(file.content as List<int>);
       const String versionStartTag = '<version>';
       final int start = content.indexOf(versionStartTag);
       final int end = content.indexOf('</version>', start);

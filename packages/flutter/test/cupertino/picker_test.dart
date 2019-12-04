@@ -1,6 +1,7 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -34,10 +35,11 @@ void main() {
 
     final RenderParagraph paragraph = tester.renderObject(find.text('1'));
 
-    expect(paragraph.text.style, const TextStyle(
+    expect(paragraph.text.style.color, isSameColorAs(CupertinoColors.black));
+    expect(paragraph.text.style.copyWith(color: CupertinoColors.black), const TextStyle(
       inherit: false,
       fontFamily: '.SF Pro Display',
-      fontSize: 25.0,
+      fontSize: 21.0,
       fontWeight: FontWeight.w400,
       letterSpacing: -0.41,
       color: CupertinoColors.black,

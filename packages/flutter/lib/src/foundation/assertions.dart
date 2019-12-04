@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -25,18 +25,18 @@ abstract class _ErrorDiagnostic extends DiagnosticsProperty<List<Object>> {
   /// interactive display of errors.
   _ErrorDiagnostic(
     String message, {
-      DiagnosticsTreeStyle style = DiagnosticsTreeStyle.flat,
-      DiagnosticLevel level = DiagnosticLevel.info,
-    }) : assert(message != null),
-         super(
-           null,
-           <Object>[message],
-           showName: false,
-           showSeparator: false,
-           defaultValue: null,
-           style: style,
-           level: level,
-         );
+    DiagnosticsTreeStyle style = DiagnosticsTreeStyle.flat,
+    DiagnosticLevel level = DiagnosticLevel.info,
+  }) : assert(message != null),
+       super(
+         null,
+         <Object>[message],
+         showName: false,
+         showSeparator: false,
+         defaultValue: null,
+         style: style,
+         level: level,
+       );
 
   /// In debug builds, a kernel transformer rewrites calls to the default
   /// constructors for [ErrorSummary], [ErrorDetails], and [ErrorHint] to use
@@ -182,7 +182,7 @@ class ErrorHint extends _ErrorDiagnostic {
 /// An [ErrorSpacer] creates an empty [DiagnosticsNode], that can be used to
 /// tune the spacing between other [DiagnosticsNode] objects.
 class ErrorSpacer extends DiagnosticsProperty<void> {
-  /// Creates an empty space to insert into a list of [DiagnosticNode] objects
+  /// Creates an empty space to insert into a list of [DiagnosticsNode] objects
   /// typically within a [FlutterError] object.
   ErrorSpacer() : super(
     '',
@@ -335,7 +335,7 @@ class FlutterErrorDetails extends Diagnosticable {
       }
       longMessage ??= fullMessage;
     } else if (exception is String) {
-      longMessage = exception;
+      longMessage = exception as String;
     } else if (exception is Error || exception is Exception) {
       longMessage = exception.toString();
     } else {
@@ -349,10 +349,10 @@ class FlutterErrorDetails extends Diagnosticable {
 
   Diagnosticable _exceptionToDiagnosticable() {
     if (exception is FlutterError) {
-      return exception;
+      return exception as FlutterError;
     }
     if (exception is AssertionError && exception.message is FlutterError) {
-      return exception.message;
+      return exception.message as FlutterError;
     }
     return null;
   }
@@ -479,6 +479,11 @@ class FlutterErrorDetails extends Diagnosticable {
 
 /// Error class used to report Flutter-specific assertion failures and
 /// contract violations.
+///
+/// See also:
+///
+///  * <https://flutter.dev/docs/testing/errors>, more information about error
+///    handling in Flutter.
 class FlutterError extends Error with DiagnosticableTreeMixin implements AssertionError {
   /// Create an error message from a string.
   ///
@@ -511,7 +516,7 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
 
   /// Create an error message from a list of [DiagnosticsNode]s.
   ///
-  /// By convention, there should be exactly one [FlutterSummary] in the list,
+  /// By convention, there should be exactly one [ErrorSummary] in the list,
   /// and it should be the first entry.
   ///
   /// Other entries are typically [ErrorDescription]s (for material that is
@@ -547,9 +552,9 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
             '(one line) summary description of the problem that was '
             'detected.'
           ),
+          DiagnosticsProperty<FlutterError>('Malformed', this, expandableValue: true, showSeparator: false, style: DiagnosticsTreeStyle.whitespace),
+          ErrorDescription('\nThe malformed error has ${summaries.length} summaries.'),
         ];
-        message.add(DiagnosticsProperty<FlutterError>('Malformed', this, expandableValue: true, showSeparator: false, style: DiagnosticsTreeStyle.whitespace));
-        message.add(ErrorDescription('\nThe malformed error has ${summaries.length} summaries.'));
         int i = 1;
         for (DiagnosticsNode summary in summaries) {
           message.add(DiagnosticsProperty<DiagnosticsNode>('Summary $i', summary, expandableValue : true));
@@ -644,7 +649,7 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
           wrapWidth: wrapWidth,
           wrapWidthProperties: wrapWidth,
           maxDescendentsTruncatableNode: 5,
-        ).render(details.toDiagnosticsNode(style: DiagnosticsTreeStyle.error)).trimRight()
+        ).render(details.toDiagnosticsNode(style: DiagnosticsTreeStyle.error)).trimRight(),
       );
     } else {
       debugPrint('Another exception was thrown: ${details.summary}');
@@ -767,13 +772,8 @@ void debugPrintStack({StackTrace stackTrace, String label, int maxFrames}) {
   debugPrint(FlutterError.defaultStackFilter(lines).join('\n'));
 }
 
-/// Diagnostic with a [StackTrace] [value] suitable for displaying stacktraces
+/// Diagnostic with a [StackTrace] [value] suitable for displaying stack traces
 /// as part of a [FlutterError] object.
-///
-/// See also:
-///
-/// * [FlutterErrorBuilder.addStackTrace], which is the typical way [StackTrace]
-///   objects are added to a [FlutterError].
 class DiagnosticsStackTrace extends DiagnosticsBlock {
   /// Creates a diagnostic for a stack trace.
   ///
