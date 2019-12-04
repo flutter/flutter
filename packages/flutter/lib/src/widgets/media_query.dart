@@ -77,9 +77,9 @@ enum Orientation {
 ///
 /// See also:
 ///
-/// * [Scaffold], [SafeArea], [CupertinoTabScaffold], and
-/// [CupertinoPageScaffold], all of which are informed by [padding],
-/// [viewPadding], and [viewInsets].
+///  * [Scaffold], [SafeArea], [CupertinoTabScaffold], and
+///    [CupertinoPageScaffold], all of which are informed by [padding],
+///    [viewPadding], and [viewInsets].
 @immutable
 class MediaQueryData {
   /// Creates data for a media query with explicit values.
@@ -174,8 +174,8 @@ class MediaQueryData {
   ///
   /// See also:
   ///
-  /// * [ui.window], which provides some additional detail about this property
-  ///   and how it relates to [padding] and [viewPadding].
+  ///  * [ui.window], which provides some additional detail about this property
+  ///    and how it relates to [padding] and [viewPadding].
   final EdgeInsets viewInsets;
 
   /// The parts of the display that are partially obscured by system UI,
@@ -213,8 +213,8 @@ class MediaQueryData {
   ///
   /// See also:
   ///
-  /// * [ui.window], which provides some additional detail about this
-  ///   property and how it relates to [padding] and [viewInsets].
+  ///  * [ui.window], which provides some additional detail about this
+  ///    property and how it relates to [padding] and [viewInsets].
   final EdgeInsets viewPadding;
 
   /// The areas along the edges of the display where the system consumes
@@ -739,7 +739,7 @@ class MediaQuery extends InheritedWidget {
   /// See also:
   ///
   ///  * [MediaQueryData.viewPadding], the affected property of the
-  ///  [MediaQueryData].
+  ///    [MediaQueryData].
   ///  * [removePadding], the same thing but for [MediaQueryData.padding].
   ///  * [removeViewInsets], the same thing but for [MediaQueryData.viewInsets].
   factory MediaQuery.removeViewPadding({

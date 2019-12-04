@@ -216,15 +216,15 @@ class IconButton extends StatelessWidget {
   ///
   /// The icon is enabled if [onPressed] is not null.
   ///
-  /// See also [disabledColor].
+  /// See also:
   ///
-  /// ```dart
-  /// IconButton(
-  ///   color: Colors.blue,
-  ///   onPressed: _handleTap,
-  ///   icon: Icons.widgets,
-  /// )
-  /// ```
+  ///    ```dart
+  ///    IconButton(
+  ///    color: Colors.blue,
+  ///    onPressed: _handleTap,
+  ///    icon: Icons.widgets,
+  ///    )
+  ///    ```
   final Color color;
 
   /// The primary color of the button when the button is in the down (pressed) state.
@@ -250,9 +250,10 @@ class IconButton extends StatelessWidget {
   ///
   /// The icon is disabled if [onPressed] is null.
   ///
-  /// See also [color].
+  /// See also:
   final Color disabledColor;
 
+  ///
   /// The callback that is called when the button is tapped or otherwise activated.
   ///
   /// If this is set to null, the button will be disabled.

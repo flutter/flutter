@@ -815,7 +815,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   ///
   /// This is called by [runApp] to configure the widget tree.
   ///
-  /// See also [RenderObjectToWidgetAdapter.attachToRenderTree].
+  /// See also:
   void attachRootWidget(Widget rootWidget) {
     _renderViewElement = RenderObjectToWidgetAdapter<RenderBox>(
       container: renderView,
@@ -824,6 +824,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
     ).attachToRenderTree(buildOwner, renderViewElement as RenderObjectToWidgetElement<RenderBox>);
   }
 
+  ///
   /// Whether the [renderViewElement] has been initialized.
   ///
   /// This will be false until [runApp] is called (or [WidgetTester.pumpWidget]

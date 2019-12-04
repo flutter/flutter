@@ -467,8 +467,9 @@ void debugDumpSemanticsTree(DebugSemanticsDumpOrder childOrder) {
 /// library, such as the Flutter Widgets library, then you would use
 /// that layer's binding.
 ///
-/// See also [BindingBase].
+/// See also:
 class RenderingFlutterBinding extends BindingBase with GestureBinding, ServicesBinding, SchedulerBinding, SemanticsBinding, PaintingBinding, RendererBinding {
+  ///
   /// Creates a binding for the rendering layer.
   ///
   /// The `root` render box is attached directly to the [renderView] and is

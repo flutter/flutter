@@ -270,7 +270,7 @@ class DrawerController extends StatefulWidget {
   ///  * [DragGestureRecognizer.dragStartBehavior], which gives an example for
   ///    the different behaviors.
   ///
-  /// {@endtemplate}
+  ///    {@endtemplate}
   final DragStartBehavior dragStartBehavior;
 
   /// The color to use for the scrim that obscures primary content while a drawer is open.

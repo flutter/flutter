@@ -1787,7 +1787,7 @@ class InputDecorator extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  - [InputDecoration.hoverColor], which is also blended into the focus
+  ///  * [InputDecoration.hoverColor], which is also blended into the focus
   ///    color and fill color when the [isHovering] is true to produce the final
   ///    color.
   final bool isFocused;
@@ -1802,7 +1802,7 @@ class InputDecorator extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  - [InputDecoration.focusColor], which is also blended into the hover
+  ///  * [InputDecoration.focusColor], which is also blended into the hover
   ///    color and fill color when [isFocused] is true to produce the final
   ///    color.
   final bool isHovering;

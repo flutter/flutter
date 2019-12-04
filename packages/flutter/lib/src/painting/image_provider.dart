@@ -398,7 +398,7 @@ abstract class ImageProvider<T> {
   ///
   /// See also:
   ///
-  ///   * [ResizeImage], for modifying the key to account for cache dimensions.
+  ///  * [ResizeImage], for modifying the key to account for cache dimensions.
   @protected
   ImageStreamCompleter load(T key, DecoderCallback decode);
 

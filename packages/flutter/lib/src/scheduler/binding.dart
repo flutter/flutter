@@ -53,7 +53,7 @@ typedef TaskCallback<T> = T Function();
 /// Return true if a task with the given priority should be executed
 /// at this time, false otherwise.
 ///
-/// See also [defaultSchedulingStrategy].
+/// See also:
 typedef SchedulingStrategy = bool Function({ int priority, SchedulerBinding scheduler });
 
 class _TaskEntry<T> {
@@ -125,6 +125,7 @@ class _FrameCallbackEntry {
   StackTrace debugStack;
 }
 
+///
 /// The various phases that a [SchedulerBinding] goes through during
 /// [SchedulerBinding.handleBeginFrame].
 ///
@@ -133,8 +134,9 @@ class _FrameCallbackEntry {
 /// The values of this enum are ordered in the same order as the phases occur,
 /// so their relative index values can be compared to each other.
 ///
-/// See also the discussion at [WidgetsBinding.drawFrame].
+/// See also:
 enum SchedulerPhase {
+  ///
   /// No frame is being processed. Tasks (scheduled by
   /// [WidgetsBinding.scheduleTask]), microtasks (scheduled by
   /// [scheduleMicrotask]), [Timer] callbacks, event handlers (e.g. from user

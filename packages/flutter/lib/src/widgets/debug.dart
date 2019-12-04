@@ -29,9 +29,10 @@ import 'table.dart';
 /// Observatory rather than getting it in the console (where it can be
 /// overwhelming), consider [debugProfileBuildsEnabled].
 ///
-/// See also the discussion at [WidgetsBinding.drawFrame].
+/// See also:
 bool debugPrintRebuildDirtyWidgets = false;
 
+///
 /// Signature for [debugOnRebuildDirtyWidget] implementations.
 typedef RebuildDirtyWidgetCallback = void Function(Element e, bool builtOnce);
 
@@ -62,9 +63,10 @@ RebuildDirtyWidgetCallback debugOnRebuildDirtyWidget;
 /// triggered by the initial mounting of a widget tree (e.g. in a call to
 /// [runApp]) from the regular builds triggered by the pipeline.
 ///
-/// See also the discussion at [WidgetsBinding.drawFrame].
+/// See also:
 bool debugPrintBuildScope = false;
 
+///
 /// Log the call stacks that mark widgets as needing to be rebuilt.
 ///
 /// This is called whenever [BuildOwner.scheduleBuildFor] adds an element to the
@@ -90,9 +92,10 @@ bool debugPrintGlobalKeyedWidgetLifecycle = false;
 /// optimize your app, see https://flutter.dev/docs/testing/debugging#tracing-any-dart-code-performance
 /// and https://fuchsia.googlesource.com/topaz/+/master/shell/docs/performance.md
 ///
-/// See also [debugProfilePaintsEnabled], which does something similar but for
-/// painting, and [debugPrintRebuildDirtyWidgets], which does something similar
-/// but reporting the builds to the console.
+/// See also:
+///
+///    painting, and [debugPrintRebuildDirtyWidgets], which does something similar
+///    but reporting the builds to the console.
 bool debugProfileBuildsEnabled = false;
 
 /// Show banners for deprecated widgets.

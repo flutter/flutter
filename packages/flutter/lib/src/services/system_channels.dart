@@ -28,14 +28,14 @@ class SystemChannels {
   ///    [WidgetsBindingObserver.didPushRoute], which expose this channel's
   ///    methods.
   ///
-  /// The following methods are used for the opposite direction data flow. The
-  /// framework notifies the engine about the route changes.
+  ///    The following methods are used for the opposite direction data flow. The
+  ///    framework notifies the engine about the route changes.
   ///
   ///  * `routePushed`, which is called when a route is pushed. (e.g. A modal
-  ///  replaces the entire screen.)
+  ///    replaces the entire screen.)
   ///
   ///  * `routePopped`, which is called when a route is popped. (e.g. A dialog,
-  ///  such as time picker is closed.)
+  ///    such as time picker is closed.)
   ///
   ///  * `routeReplaced`, which is called when a route is replaced.
   ///
@@ -251,12 +251,13 @@ class SystemChannels {
 
   /// A [MethodChannel] for controlling platform views.
   ///
-  /// See also: [PlatformViewsService] for the available operations on this channel.
+  /// See also:
   static const MethodChannel platform_views = MethodChannel(
     'flutter/platform_views',
     StandardMethodCodec(),
   );
 
+  ///
   /// A [MethodChannel] for configuring the Skia graphics library.
   ///
   /// The following outgoing methods are defined for this channel (invoked using

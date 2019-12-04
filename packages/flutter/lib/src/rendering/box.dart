@@ -273,8 +273,9 @@ class BoxConstraints extends Constraints {
   /// Returns the size that both satisfies the constraints and is as close as
   /// possible to the given size.
   ///
-  /// See also [constrainDimensions], which applies the same algorithm to
-  /// separately provided widths and heights.
+  /// See also:
+  ///
+  ///    separately provided widths and heights.
   Size constrain(Size size) {
     Size result = Size(constrainWidth(size.width), constrainHeight(size.height));
     assert(() {
@@ -1511,12 +1512,13 @@ abstract class RenderBox extends RenderObject {
   ///
   /// This function should never return a negative or infinite value.
   ///
-  /// See also examples in the definition of [computeMinIntrinsicWidth].
+  /// See also:
   @protected
   double computeMaxIntrinsicWidth(double height) {
     return 0.0;
   }
 
+  ///
   /// Returns the minimum height that this box could be without failing to
   /// correctly paint its contents within itself, without clipping.
   ///
@@ -1585,12 +1587,13 @@ abstract class RenderBox extends RenderObject {
   ///
   /// This function should never return a negative or infinite value.
   ///
-  /// See also examples in the definition of [computeMinIntrinsicWidth].
+  /// See also:
   @protected
   double computeMinIntrinsicHeight(double width) {
     return 0.0;
   }
 
+  ///
   /// Returns the smallest height beyond which increasing the height never
   /// decreases the preferred width. The preferred width is the value that
   /// would be returned by [getMinIntrinsicWidth] for that height.
@@ -1664,12 +1667,13 @@ abstract class RenderBox extends RenderObject {
   ///
   /// This function should never return a negative or infinite value.
   ///
-  /// See also examples in the definition of [computeMinIntrinsicWidth].
+  /// See also:
   @protected
   double computeMaxIntrinsicHeight(double width) {
     return 0.0;
   }
 
+  ///
   /// Whether this render object has undergone layout and has a [size].
   bool get hasSize => _size != null;
 

@@ -53,8 +53,9 @@ class UniqueKey extends LocalKey {
 /// Used to tie the identity of a widget to the identity of an object used to
 /// generate that widget.
 ///
-/// See also the discussions at [Key] and [Widget.key].
+/// See also:
 class ObjectKey extends LocalKey {
+  ///
   /// Creates a key that uses [identical] on [value] for its [operator==].
   const ObjectKey(this.value);
 
@@ -99,9 +100,10 @@ class ObjectKey extends LocalKey {
 /// You cannot simultaneously include two widgets in the tree with the same
 /// global key. Attempting to do so will assert at runtime.
 ///
-/// See also the discussion at [Widget.key].
+/// See also:
 @optionalTypeArgs
 abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
+  ///
   /// Creates a [LabeledGlobalKey], which is a [GlobalKey] with a label used for
   /// debugging.
   ///
@@ -410,9 +412,10 @@ abstract class Widget extends DiagnosticableTree {
   /// Generally, a widget that is the only child of another widget does not need
   /// an explicit key.
   ///
-  /// See also the discussions at [Key] and [GlobalKey].
+  /// See also:
   final Key key;
 
+  ///
   /// Inflates this configuration to a concrete instance.
   ///
   /// A given widget can be included in the tree zero or more times. In particular
@@ -1188,8 +1191,9 @@ abstract class State<T extends StatefulWidget> extends Diagnosticable {
   /// If you override this, make sure to end your method with a call to
   /// super.deactivate().
   ///
-  /// See also [dispose], which is called after [deactivate] if the widget is
-  /// removed from the tree permanently.
+  /// See also:
+  ///
+  ///    removed from the tree permanently.
   @protected
   @mustCallSuper
   void deactivate() { }
@@ -1210,7 +1214,7 @@ abstract class State<T extends StatefulWidget> extends Diagnosticable {
   /// If you override this, make sure to end your method with a call to
   /// super.dispose().
   ///
-  /// See also [deactivate], which is called prior to [dispose].
+  /// See also:
   @protected
   @mustCallSuper
   void dispose() {
@@ -1221,6 +1225,7 @@ abstract class State<T extends StatefulWidget> extends Diagnosticable {
     }());
   }
 
+  ///
   /// Describes the part of the user interface represented by this widget.
   ///
   /// The framework calls this method in a number of different situations:

@@ -214,11 +214,11 @@ class Material extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///   * [ThemeData.applyElevationOverlayColor] which controls the whether
-  ///     an overlay color will be applied to indicate elevation.
-  ///   * [color] which may have an elevation overlay applied.
+  ///  * [ThemeData.applyElevationOverlayColor] which controls the whether
+  ///    an overlay color will be applied to indicate elevation.
+  ///  * [color] which may have an elevation overlay applied.
   ///
-  /// {@endtemplate}
+  ///    {@endtemplate}
   final double elevation;
 
   /// The color to paint the material.

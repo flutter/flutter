@@ -579,9 +579,9 @@ class EditableText extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///   * {@macro flutter.gestures.monodrag.dragStartExample}
+  ///  * {@macro flutter.gestures.monodrag.dragStartExample}
   ///
-  /// {@endtemplate}
+  ///    {@endtemplate}
   final TextDirection textDirection;
 
   /// {@template flutter.widgets.editableText.textCapitalization}
@@ -597,7 +597,7 @@ class EditableText extends StatefulWidget {
   ///
   ///  * [TextCapitalization], for a description of each capitalization behavior.
   ///
-  /// {@endtemplate}
+  ///    {@endtemplate}
   final TextCapitalization textCapitalization;
 
   /// Used to select a font when the same Unicode character can

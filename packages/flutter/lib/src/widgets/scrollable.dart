@@ -221,7 +221,7 @@ class Scrollable extends StatefulWidget {
   ///  * [DragGestureRecognizer.dragStartBehavior], which gives an example for
   ///    the different behaviors.
   ///
-  /// {@endtemplate}
+  ///    {@endtemplate}
   final DragStartBehavior dragStartBehavior;
 
   /// The axis along which the scroll view scrolls.

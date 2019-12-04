@@ -122,26 +122,29 @@ abstract class PaintPattern {
   /// Calls are skipped until a call to [Canvas.save] is found. If none is
   /// found, the matcher fails.
   ///
-  /// See also: [restore], [saveRestore].
+  /// See also:
   void save();
 
+  ///
   /// Indicates that a restore is expected next.
   ///
   /// Calls are skipped until a call to [Canvas.restore] is found. If none is
   /// found, the matcher fails.
   ///
-  /// See also: [save], [saveRestore].
+  /// See also:
   void restore();
 
+  ///
   /// Indicates that a matching pair of save/restore calls is expected next.
   ///
   /// Calls are skipped until a call to [Canvas.save] is found, then, calls are
   /// skipped until the matching [Canvas.restore] call is found. If no matching
   /// pair of calls could be found, the matcher fails.
   ///
-  /// See also: [save], [restore].
+  /// See also:
   void saveRestore();
 
+  ///
   /// Indicates that a rectangular clip is expected next.
   ///
   /// The next rectangular clip is examined. Any arguments that are passed to

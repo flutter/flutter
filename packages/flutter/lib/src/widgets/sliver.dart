@@ -736,7 +736,7 @@ abstract class SliverMultiBoxAdaptorWidget extends SliverWithKeepAliveWidget {
   ///  * [SliverChildBuilderDelegate] and [SliverChildListDelegate], which are
   ///    commonly used subclasses of [SliverChildDelegate] that use a builder
   ///    callback and an explicit child list, respectively.
-  /// {@endtemplate}
+  ///    {@endtemplate}
   final SliverChildDelegate delegate;
 
   @override

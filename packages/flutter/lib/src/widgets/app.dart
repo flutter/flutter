@@ -74,7 +74,7 @@ typedef LocaleListResolutionCallback = Locale Function(List<Locale> locales, Ite
 ///
 ///  * [LocaleListResolutionCallback], which takes a list of preferred locales (instead of one locale).
 ///    Resolutions by [LocaleListResolutionCallback] take precedence over [LocaleResolutionCallback].
-/// {@endtemplate}
+///    {@endtemplate}
 typedef LocaleResolutionCallback = Locale Function(Locale locale, Iterable<Locale> supportedLocales);
 
 /// The signature of [WidgetsApp.onGenerateTitle].
@@ -98,9 +98,10 @@ typedef PageRouteFactory = PageRoute<T> Function<T>(RouteSettings settings, Widg
 /// One of the primary roles that [WidgetsApp] provides is binding the system
 /// back button to popping the [Navigator] or quitting the application.
 ///
-/// See also: [CheckedModeBanner], [DefaultTextStyle], [MediaQuery],
-/// [Localizations], [Title], [Navigator], [Overlay], [SemanticsDebugger] (the
-/// widgets wrapped by this one).
+/// See also:
+///
+///    [Localizations], [Title], [Navigator], [Overlay], [SemanticsDebugger] (the
+///    widgets wrapped by this one).
 class WidgetsApp extends StatefulWidget {
   /// Creates a widget that wraps a number of widgets that are commonly
   /// required for an application.
@@ -384,7 +385,7 @@ class WidgetsApp extends StatefulWidget {
   ///  * [Navigator.push], for pushing additional routes.
   ///  * [Navigator.pop], for removing a route from the stack.
   ///
-  /// {@endtemplate}
+  ///    {@endtemplate}
   final String initialRoute;
 
   /// {@template flutter.widgets.widgetsApp.navigatorObservers}
