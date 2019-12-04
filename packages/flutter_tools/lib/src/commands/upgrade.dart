@@ -194,11 +194,12 @@ class UpgradeCommandRunner {
     }
   }
 
-  /// Attempts to reset to the last known tag or branch. This should restore the
-  /// history to something that is compatible with the regular upgrade
-  /// process.
+  /// Attempts to reset to the last non-hotfix tag.
+  ///
+  /// If the git history is on a hotfix, doing a fast forward will not pick up
+  /// major or minor version upgrades. By resetting to the point before the
+  /// hotfix, doing a git fast forward should succeed.
   Future<void> resetChanges(GitTagVersion gitTagVersion) async {
-    // We only got here by using --force.
     String tag;
     if (gitTagVersion == const GitTagVersion.unknown()) {
       tag = 'v0.0.0';
