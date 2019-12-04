@@ -479,7 +479,7 @@ class LocalizationsGenerator {
       }
     }
 
-    localeInfoList.sort((LocaleInfo a, LocaleInfo b) => a.compareTo(b));
+    localeInfoList.sort();
     supportedLocales.addAll(localeInfoList);
     supportedLanguageCodes.addAll(localeInfoList.map((LocaleInfo localeInfo) {
       return '\'${localeInfo.languageCode}\'';
