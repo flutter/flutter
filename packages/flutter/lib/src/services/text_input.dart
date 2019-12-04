@@ -142,12 +142,10 @@ class TextInputType {
 
   @override
   bool operator ==(dynamic other) {
-    if (other is! TextInputType)
-      return false;
-    final TextInputType typedOther = other;
-    return typedOther.index == index
-        && typedOther.signed == signed
-        && typedOther.decimal == decimal;
+    return other is TextInputType
+        && other.index == index
+        && other.signed == signed
+        && other.decimal == decimal;
   }
 
   @override
@@ -529,16 +527,16 @@ class TextEditingValue {
   /// Creates an instance of this class from a JSON object.
   factory TextEditingValue.fromJSON(Map<String, dynamic> encoded) {
     return TextEditingValue(
-      text: encoded['text'],
+      text: encoded['text'] as String,
       selection: TextSelection(
-        baseOffset: encoded['selectionBase'] ?? -1,
-        extentOffset: encoded['selectionExtent'] ?? -1,
-        affinity: _toTextAffinity(encoded['selectionAffinity']) ?? TextAffinity.downstream,
-        isDirectional: encoded['selectionIsDirectional'] ?? false,
+        baseOffset: encoded['selectionBase'] as int ?? -1,
+        extentOffset: encoded['selectionExtent'] as int ?? -1,
+        affinity: _toTextAffinity(encoded['selectionAffinity'] as String) ?? TextAffinity.downstream,
+        isDirectional: encoded['selectionIsDirectional'] as bool ?? false,
       ),
       composing: TextRange(
-        start: encoded['composingBase'] ?? -1,
-        end: encoded['composingExtent'] ?? -1,
+        start: encoded['composingBase'] as int ?? -1,
+        end: encoded['composingExtent'] as int ?? -1,
       ),
     );
   }
@@ -588,12 +586,10 @@ class TextEditingValue {
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
-    if (other is! TextEditingValue)
-      return false;
-    final TextEditingValue typedOther = other;
-    return typedOther.text == text
-        && typedOther.selection == selection
-        && typedOther.composing == composing;
+    return other is TextEditingValue
+        && other.text == text
+        && other.selection == selection
+        && other.composing == composing;
   }
 
   @override
@@ -820,7 +816,9 @@ RawFloatingCursorPoint _toTextPoint(FloatingCursorDragState state, Map<String, d
   assert(state != null, 'You must provide a state to set a new editing point.');
   assert(encoded['X'] != null, 'You must provide a value for the horizontal location of the floating cursor.');
   assert(encoded['Y'] != null, 'You must provide a value for the vertical location of the floating cursor.');
-  final Offset offset = state == FloatingCursorDragState.Update ? Offset(encoded['X'], encoded['Y']) : const Offset(0, 0);
+  final Offset offset = state == FloatingCursorDragState.Update
+    ? Offset(encoded['X'] as double, encoded['Y'] as double)
+    : const Offset(0, 0);
   return RawFloatingCursorPoint(offset: offset, state: state);
 }
 
@@ -952,20 +950,23 @@ class TextInput {
       return;
     }
 
-    final List<dynamic> args = methodCall.arguments;
-    final int client = args[0];
+    final List<dynamic> args = methodCall.arguments as List<dynamic>;
+    final int client = args[0] as int;
     // The incoming message was for a different client.
     if (client != _currentConnection._id)
       return;
     switch (method) {
       case 'TextInputClient.updateEditingState':
-        _currentConnection._client.updateEditingValue(TextEditingValue.fromJSON(args[1]));
+        _currentConnection._client.updateEditingValue(TextEditingValue.fromJSON(args[1] as Map<String, dynamic>));
         break;
       case 'TextInputClient.performAction':
-        _currentConnection._client.performAction(_toTextInputAction(args[1]));
+        _currentConnection._client.performAction(_toTextInputAction(args[1] as String));
         break;
       case 'TextInputClient.updateFloatingCursor':
-        _currentConnection._client.updateFloatingCursor(_toTextPoint(_toTextCursorAction(args[1]), args[2]));
+        _currentConnection._client.updateFloatingCursor(_toTextPoint(
+          _toTextCursorAction(args[1] as String),
+          args[2] as Map<String, dynamic>,
+        ));
         break;
       case 'TextInputClient.onConnectionClosed':
         _currentConnection._client.connectionClosed();

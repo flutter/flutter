@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
@@ -16,6 +17,16 @@ import 'package:flutter_driver/src/common/text.dart';
 import 'package:flutter_driver/src/common/wait.dart';
 import 'package:flutter_driver/src/extension/extension.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+Future<void> silenceDriverLogger(AsyncCallback callback) async {
+  final DriverLogCallback oldLogger = driverLog;
+  driverLog = (String source, String message) { };
+  try {
+    await callback();
+  } finally {
+    driverLog = oldLogger;
+  }
+}
 
 void main() {
   group('waitUntilNoTransientCallbacks', () {
@@ -72,7 +83,8 @@ void main() {
 
     testWidgets('handler', (WidgetTester tester) async {
       expect(log, isEmpty);
-      final dynamic result = RequestDataResult.fromJson((await extension.call(const RequestData('hello').serialize()))['response']);
+      final Map<String, dynamic> response = await extension.call(const RequestData('hello').serialize());
+      final RequestDataResult result = RequestDataResult.fromJson(response['response'] as Map<String, dynamic>);
       expect(log, <String>['hello']);
       expect(result.message, '1');
     });
@@ -460,8 +472,9 @@ void main() {
       await tester.pumpWidget(
         const Text('hello', textDirection: TextDirection.ltr));
 
-      final Map<String, Object> arguments = GetSemanticsId(const ByText('hello')).serialize();
-      final GetSemanticsIdResult result = GetSemanticsIdResult.fromJson((await extension.call(arguments))['response']);
+      final Map<String, String> arguments = GetSemanticsId(const ByText('hello')).serialize();
+      final Map<String, dynamic> response = await extension.call(arguments);
+      final GetSemanticsIdResult result = GetSemanticsIdResult.fromJson(response['response'] as Map<String, dynamic>);
 
       expect(result.id, 1);
       semantics.dispose();
@@ -471,8 +484,8 @@ void main() {
       await tester.pumpWidget(
         const Text('hello', textDirection: TextDirection.ltr));
 
-      final Map<String, Object> arguments = GetSemanticsId(const ByText('hello')).serialize();
-      final Map<String, Object> response = await extension.call(arguments);
+      final Map<String, String> arguments = GetSemanticsId(const ByText('hello')).serialize();
+      final Map<String, dynamic> response = await extension.call(arguments);
 
       expect(response['isError'], true);
       expect(response['response'], contains('Bad state: No semantics data found'));
@@ -490,8 +503,8 @@ void main() {
         ),
       );
 
-      final Map<String, Object> arguments = GetSemanticsId(const ByText('hello')).serialize();
-      final Map<String, Object> response = await extension.call(arguments);
+      final Map<String, String> arguments = GetSemanticsId(const ByText('hello')).serialize();
+      final Map<String, dynamic> response = await extension.call(arguments);
 
       expect(response['isError'], true);
       expect(response['response'], contains('Bad state: Found more than one element with the same ID'));
@@ -503,8 +516,9 @@ void main() {
     final FlutterDriverExtension extension = FlutterDriverExtension((String arg) async => '', true);
 
     Future<Offset> getOffset(OffsetType offset) async {
-      final Map<String, Object> arguments = GetOffset(ByValueKey(1), offset).serialize();
-      final GetOffsetResult result = GetOffsetResult.fromJson((await extension.call(arguments))['response']);
+      final Map<String, String> arguments = GetOffset(ByValueKey(1), offset).serialize();
+      final Map<String, dynamic> response = await extension.call(arguments);
+      final GetOffsetResult result = GetOffsetResult.fromJson(response['response'] as Map<String, dynamic>);
       return Offset(result.dx, result.dy);
     }
 
@@ -530,205 +544,210 @@ void main() {
   });
 
   testWidgets('descendant finder', (WidgetTester tester) async {
-    flutterDriverLog.listen((LogRecord _) {}); // Silence logging.
-    final FlutterDriverExtension extension = FlutterDriverExtension((String arg) async => '', true);
+    await silenceDriverLogger(() async {
+      final FlutterDriverExtension extension = FlutterDriverExtension((String arg) async => '', true);
 
-    Future<String> getDescendantText({ String of, bool matchRoot = false}) async {
-      final Map<String, Object> arguments = GetText(Descendant(
-        of: ByValueKey(of),
-        matching: ByValueKey('text2'),
-        matchRoot: matchRoot,
-      ), timeout: const Duration(seconds: 1)).serialize();
-      final Map<String, dynamic> result = await extension.call(arguments);
-      if (result['isError']) {
-        return null;
+      Future<String> getDescendantText({ String of, bool matchRoot = false}) async {
+        final Map<String, String> arguments = GetText(Descendant(
+          of: ByValueKey(of),
+          matching: ByValueKey('text2'),
+          matchRoot: matchRoot,
+        ), timeout: const Duration(seconds: 1)).serialize();
+        final Map<String, dynamic> result = await extension.call(arguments);
+        if (result['isError'] as bool) {
+          return null;
+        }
+        return GetTextResult.fromJson(result['response'] as Map<String, dynamic>).text;
       }
-      return GetTextResult.fromJson(result['response']).text;
-    }
 
-    await tester.pumpWidget(
-        MaterialApp(
-            home: Column(
-              key: const ValueKey<String>('column'),
-              children: const <Widget>[
-                Text('Hello1', key: ValueKey<String>('text1')),
-                Text('Hello2', key: ValueKey<String>('text2')),
-                Text('Hello3', key: ValueKey<String>('text3')),
-              ],
-            )
-        )
-    );
+      await tester.pumpWidget(
+          MaterialApp(
+              home: Column(
+                key: const ValueKey<String>('column'),
+                children: const <Widget>[
+                  Text('Hello1', key: ValueKey<String>('text1')),
+                  Text('Hello2', key: ValueKey<String>('text2')),
+                  Text('Hello3', key: ValueKey<String>('text3')),
+                ],
+              )
+          )
+      );
 
-    expect(await getDescendantText(of: 'column'), 'Hello2');
-    expect(await getDescendantText(of: 'column', matchRoot: true), 'Hello2');
-    expect(await getDescendantText(of: 'text2', matchRoot: true), 'Hello2');
+      expect(await getDescendantText(of: 'column'), 'Hello2');
+      expect(await getDescendantText(of: 'column', matchRoot: true), 'Hello2');
+      expect(await getDescendantText(of: 'text2', matchRoot: true), 'Hello2');
 
-    // Find nothing
-    Future<String> result = getDescendantText(of: 'text1', matchRoot: true);
-    await tester.pump(const Duration(seconds: 2));
-    expect(await result, null);
+      // Find nothing
+      Future<String> result = getDescendantText(of: 'text1', matchRoot: true);
+      await tester.pump(const Duration(seconds: 2));
+      expect(await result, null);
 
-    result = getDescendantText(of: 'text2');
-    await tester.pump(const Duration(seconds: 2));
-    expect(await result, null);
+      result = getDescendantText(of: 'text2');
+      await tester.pump(const Duration(seconds: 2));
+      expect(await result, null);
+    });
   });
 
   testWidgets('descendant finder firstMatchOnly', (WidgetTester tester) async {
-    flutterDriverLog.listen((LogRecord _) {}); // Silence logging.
-    final FlutterDriverExtension extension = FlutterDriverExtension((String arg) async => '', true);
+    await silenceDriverLogger(() async {
+      final FlutterDriverExtension extension = FlutterDriverExtension((String arg) async => '', true);
 
-    Future<String> getDescendantText() async {
-      final Map<String, Object> arguments = GetText(Descendant(
-        of: ByValueKey('column'),
-        matching: const ByType('Text'),
-        firstMatchOnly: true,
-      ), timeout: const Duration(seconds: 1)).serialize();
-      final Map<String, dynamic> result = await extension.call(arguments);
-      if (result['isError']) {
-        return null;
+      Future<String> getDescendantText() async {
+        final Map<String, String> arguments = GetText(Descendant(
+          of: ByValueKey('column'),
+          matching: const ByType('Text'),
+          firstMatchOnly: true,
+        ), timeout: const Duration(seconds: 1)).serialize();
+        final Map<String, dynamic> result = await extension.call(arguments);
+        if (result['isError'] as bool) {
+          return null;
+        }
+        return GetTextResult.fromJson(result['response'] as Map<String, dynamic>).text;
       }
-      return GetTextResult.fromJson(result['response']).text;
-    }
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Column(
-          key: const ValueKey<String>('column'),
-          children: const <Widget>[
-            Text('Hello1', key: ValueKey<String>('text1')),
-            Text('Hello2', key: ValueKey<String>('text2')),
-            Text('Hello3', key: ValueKey<String>('text3')),
-          ],
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Column(
+            key: const ValueKey<String>('column'),
+            children: const <Widget>[
+              Text('Hello1', key: ValueKey<String>('text1')),
+              Text('Hello2', key: ValueKey<String>('text2')),
+              Text('Hello3', key: ValueKey<String>('text3')),
+            ],
+          ),
         ),
-      ),
-    );
+      );
 
-    expect(await getDescendantText(), 'Hello1');
+      expect(await getDescendantText(), 'Hello1');
+    });
   });
 
   testWidgets('ancestor finder', (WidgetTester tester) async {
-    flutterDriverLog.listen((LogRecord _) {}); // Silence logging.
-    final FlutterDriverExtension extension = FlutterDriverExtension((String arg) async => '', true);
+    await silenceDriverLogger(() async {
+      final FlutterDriverExtension extension = FlutterDriverExtension((String arg) async => '', true);
 
-    Future<Offset> getAncestorTopLeft({ String of, String matching, bool matchRoot = false}) async {
-      final Map<String, Object> arguments = GetOffset(Ancestor(
-        of: ByValueKey(of),
-        matching: ByValueKey(matching),
-        matchRoot: matchRoot,
-      ), OffsetType.topLeft, timeout: const Duration(seconds: 1)).serialize();
-      final Map<String, dynamic> response = await extension.call(arguments);
-      if (response['isError']) {
-        return null;
+      Future<Offset> getAncestorTopLeft({ String of, String matching, bool matchRoot = false}) async {
+        final Map<String, String> arguments = GetOffset(Ancestor(
+          of: ByValueKey(of),
+          matching: ByValueKey(matching),
+          matchRoot: matchRoot,
+        ), OffsetType.topLeft, timeout: const Duration(seconds: 1)).serialize();
+        final Map<String, dynamic> response = await extension.call(arguments);
+        if (response['isError'] as bool) {
+          return null;
+        }
+        final GetOffsetResult result = GetOffsetResult.fromJson(response['response'] as Map<String, dynamic>);
+        return Offset(result.dx, result.dy);
       }
-      final GetOffsetResult result = GetOffsetResult.fromJson(response['response']);
-      return Offset(result.dx, result.dy);
-    }
 
-    await tester.pumpWidget(
-        MaterialApp(
-          home: Center(
-              child: Container(
-                key: const ValueKey<String>('parent'),
-                height: 100,
-                width: 100,
-                child: Center(
-                  child: Row(
-                    children: <Widget>[
-                      Container(
-                        key: const ValueKey<String>('leftchild'),
-                        width: 25,
-                        height: 25,
-                      ),
-                      Container(
-                        key: const ValueKey<String>('righttchild'),
-                        width: 25,
-                        height: 25,
-                      ),
-                    ],
+      await tester.pumpWidget(
+          MaterialApp(
+            home: Center(
+                child: Container(
+                  key: const ValueKey<String>('parent'),
+                  height: 100,
+                  width: 100,
+                  child: Center(
+                    child: Row(
+                      children: <Widget>[
+                        Container(
+                          key: const ValueKey<String>('leftchild'),
+                          width: 25,
+                          height: 25,
+                        ),
+                        Container(
+                          key: const ValueKey<String>('righttchild'),
+                          width: 25,
+                          height: 25,
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              )
-          ),
-        )
-    );
+                )
+            ),
+          )
+      );
 
-    expect(
-      await getAncestorTopLeft(of: 'leftchild', matching: 'parent'),
-      const Offset((800 - 100) / 2, (600 - 100) / 2),
-    );
-    expect(
-      await getAncestorTopLeft(of: 'leftchild', matching: 'parent', matchRoot: true),
-      const Offset((800 - 100) / 2, (600 - 100) / 2),
-    );
-    expect(
-      await getAncestorTopLeft(of: 'parent', matching: 'parent', matchRoot: true),
-      const Offset((800 - 100) / 2, (600 - 100) / 2),
-    );
+      expect(
+        await getAncestorTopLeft(of: 'leftchild', matching: 'parent'),
+        const Offset((800 - 100) / 2, (600 - 100) / 2),
+      );
+      expect(
+        await getAncestorTopLeft(of: 'leftchild', matching: 'parent', matchRoot: true),
+        const Offset((800 - 100) / 2, (600 - 100) / 2),
+      );
+      expect(
+        await getAncestorTopLeft(of: 'parent', matching: 'parent', matchRoot: true),
+        const Offset((800 - 100) / 2, (600 - 100) / 2),
+      );
 
-    // Find nothing
-    Future<Offset> result = getAncestorTopLeft(of: 'leftchild', matching: 'leftchild');
-    await tester.pump(const Duration(seconds: 2));
-    expect(await result, null);
+      // Find nothing
+      Future<Offset> result = getAncestorTopLeft(of: 'leftchild', matching: 'leftchild');
+      await tester.pump(const Duration(seconds: 2));
+      expect(await result, null);
 
-    result = getAncestorTopLeft(of: 'leftchild', matching: 'righttchild');
-    await tester.pump(const Duration(seconds: 2));
-    expect(await result, null);
+      result = getAncestorTopLeft(of: 'leftchild', matching: 'righttchild');
+      await tester.pump(const Duration(seconds: 2));
+      expect(await result, null);
+    });
   });
 
   testWidgets('ancestor finder firstMatchOnly', (WidgetTester tester) async {
-    flutterDriverLog.listen((LogRecord _) {}); // Silence logging.
-    final FlutterDriverExtension extension = FlutterDriverExtension((String arg) async => '', true);
+    await silenceDriverLogger(() async {
+      final FlutterDriverExtension extension = FlutterDriverExtension((String arg) async => '', true);
 
-    Future<Offset> getAncestorTopLeft() async {
-      final Map<String, Object> arguments = GetOffset(Ancestor(
-        of: ByValueKey('leaf'),
-        matching: const ByType('Container'),
-        firstMatchOnly: true,
-      ), OffsetType.topLeft, timeout: const Duration(seconds: 1)).serialize();
-      final Map<String, dynamic> response = await extension.call(arguments);
-      if (response['isError']) {
-        return null;
+      Future<Offset> getAncestorTopLeft() async {
+        final Map<String, String> arguments = GetOffset(Ancestor(
+          of: ByValueKey('leaf'),
+          matching: const ByType('Container'),
+          firstMatchOnly: true,
+        ), OffsetType.topLeft, timeout: const Duration(seconds: 1)).serialize();
+        final Map<String, dynamic> response = await extension.call(arguments);
+        if (response['isError'] as bool) {
+          return null;
+        }
+        final GetOffsetResult result = GetOffsetResult.fromJson(response['response'] as Map<String, dynamic>);
+        return Offset(result.dx, result.dy);
       }
-      final GetOffsetResult result = GetOffsetResult.fromJson(response['response']);
-      return Offset(result.dx, result.dy);
-    }
 
-    await tester.pumpWidget(
-      MaterialApp(
-        home: Center(
-          child: Container(
-            height: 200,
-            width: 200,
-            child: Center(
-              child: Container(
-                height: 100,
-                width: 100,
-                child: Center(
-                  child: Container(
-                    key: const ValueKey<String>('leaf'),
-                    height: 50,
-                    width: 50,
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Center(
+            child: Container(
+              height: 200,
+              width: 200,
+              child: Center(
+                child: Container(
+                  height: 100,
+                  width: 100,
+                  child: Center(
+                    child: Container(
+                      key: const ValueKey<String>('leaf'),
+                      height: 50,
+                      width: 50,
+                    ),
                   ),
                 ),
               ),
             ),
           ),
         ),
-      ),
-    );
+      );
 
-    expect(
-      await getAncestorTopLeft(),
-      const Offset((800 - 100) / 2, (600 - 100) / 2),
-    );
+      expect(
+        await getAncestorTopLeft(),
+        const Offset((800 - 100) / 2, (600 - 100) / 2),
+      );
+    });
   });
 
   testWidgets('GetDiagnosticsTree', (WidgetTester tester) async {
     final FlutterDriverExtension extension = FlutterDriverExtension((String arg) async => '', true);
 
     Future<Map<String, Object>> getDiagnosticsTree(DiagnosticsType type, SerializableFinder finder, { int depth = 0, bool properties = true }) async {
-      final Map<String, Object> arguments = GetDiagnosticsTree(finder, type, subtreeDepth: depth, includeProperties: properties).serialize();
-      final DiagnosticsTreeResult result = DiagnosticsTreeResult((await extension.call(arguments))['response']);
+      final Map<String, String> arguments = GetDiagnosticsTree(finder, type, subtreeDepth: depth, includeProperties: properties).serialize();
+      final Map<String, dynamic> response = await extension.call(arguments);
+      final DiagnosticsTreeResult result = DiagnosticsTreeResult(response['response'] as Map<String, dynamic>);
       return result.json;
     }
 
@@ -746,7 +765,7 @@ void main() {
     expect(result['children'], isNull); // depth: 0
     expect(result['widgetRuntimeType'], 'Text');
 
-    List<Map<String, Object>> properties = result['properties'];
+    List<Map<String, Object>> properties = (result['properties'] as List<dynamic>).cast<Map<String, Object>>();
     Map<String, Object> stringProperty = properties.singleWhere((Map<String, Object> property) => property['name'] == 'data');
     expect(stringProperty['description'], '"Hello World"');
     expect(stringProperty['propertyType'], 'String');
@@ -756,11 +775,11 @@ void main() {
     expect(result['properties'], isNull); // properties: false
 
     result = await getDiagnosticsTree(DiagnosticsType.widget, ByValueKey('Text'), depth: 1);
-    List<Map<String, Object>> children = result['children'];
+    List<Map<String, Object>> children = (result['children'] as List<dynamic>).cast<Map<String, Object>>();
     expect(children.single['children'], isNull);
 
     result = await getDiagnosticsTree(DiagnosticsType.widget, ByValueKey('Text'), depth: 100);
-    children = result['children'];
+    children = (result['children'] as List<dynamic>).cast<Map<String, Object>>();
     expect(children.single['children'], isEmpty);
 
     // RenderObject
@@ -774,17 +793,17 @@ void main() {
     expect(result['description'], startsWith('RenderParagraph'));
 
     result = await getDiagnosticsTree(DiagnosticsType.renderObject, ByValueKey('Text'), depth: 1);
-    children = result['children'];
+    children = (result['children'] as List<dynamic>).cast<Map<String, Object>>();
     final Map<String, Object> textSpan = children.single;
     expect(textSpan['description'], 'TextSpan');
-    properties = textSpan['properties'];
+    properties = (textSpan['properties'] as List<dynamic>).cast<Map<String, Object>>();
     stringProperty = properties.singleWhere((Map<String, Object> property) => property['name'] == 'text');
     expect(stringProperty['description'], '"Hello World"');
     expect(stringProperty['propertyType'], 'String');
     expect(children.single['children'], isNull);
 
     result = await getDiagnosticsTree(DiagnosticsType.renderObject, ByValueKey('Text'), depth: 100);
-    children = result['children'];
+    children = (result['children'] as List<dynamic>).cast<Map<String, Object>>();
     expect(children.single['children'], isEmpty);
   });
 
