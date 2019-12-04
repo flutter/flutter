@@ -168,7 +168,9 @@ class FlutterDriverExtension {
   final DataHandler _requestDataHandler;
   final bool _silenceErrors;
 
-  static final Logger _log = Logger('FlutterDriverExtension');
+  void _log(String message) {
+    driverLog('FlutterDriverExtension', message);
+  }
 
   final WidgetController _prober = LiveWidgetController(WidgetsBinding.instance);
   final Map<String, CommandHandlerCallback> _commandHandlers = <String, CommandHandlerCallback>{};
@@ -207,14 +209,14 @@ class FlutterDriverExtension {
       final Result response = await responseFuture;
       return _makeResponse(response?.toJson());
     } on TimeoutException catch (error, stackTrace) {
-      final String msg = 'Timeout while executing $commandKind: $error\n$stackTrace';
-      _log.error(msg);
-      return _makeResponse(msg, isError: true);
+      final String message = 'Timeout while executing $commandKind: $error\n$stackTrace';
+      _log(message);
+      return _makeResponse(message, isError: true);
     } catch (error, stackTrace) {
-      final String msg = 'Uncaught extension error while executing $commandKind: $error\n$stackTrace';
+      final String message = 'Uncaught extension error while executing $commandKind: $error\n$stackTrace';
       if (!_silenceErrors)
-        _log.error(msg);
-      return _makeResponse(msg, isError: true);
+        _log(message);
+      return _makeResponse(message, isError: true);
     }
   }
 
