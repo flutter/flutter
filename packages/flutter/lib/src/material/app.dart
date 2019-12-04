@@ -457,10 +457,92 @@ class MaterialApp extends StatefulWidget {
   /// {@macro flutter.widgets.widgetsApp.debugShowCheckedModeBanner}
   final bool debugShowCheckedModeBanner;
 
-  /// {@macro flutter.widgets.widgetsApp.shortcuts}
+  /// The default map of keyboard shortcuts to intents for the application.
+  ///
+  /// By default, this is set to [WidgetsApp.defaultShortcuts].
+  ///
+  /// {@tool sample}
+  /// This example shows how to add a single shortcut for
+  /// [LogicalKeyboardKey.select] to the default shortcuts without needing to
+  /// add your own [Shortcuts] widget.
+  ///
+  /// Alternatively, you could insert a [Shortcuts] widget with just the mapping
+  /// you want to add between the [WidgetsApp] and its child and get the same
+  /// effect.
+  ///
+  /// ```dart
+  /// Widget build(BuildContext context) {
+  ///   return WidgetsApp(
+  ///     shortcuts: <LogicalKeySet, Intent>{
+  ///       ... WidgetsApp.defaultShortcuts,
+  ///       LogicalKeySet(LogicalKeyboardKey.select): const Intent(ActivateAction.key),
+  ///     },
+  ///     color: const Color(0xFFFF0000),
+  ///     builder: (BuildContext context, Widget child) {
+  ///       return const Placeholder();
+  ///     },
+  ///   );
+  /// }
+  /// ```
+  /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  /// * [LogicalKeySet], a set of [LogicalKeyboardKey]s that make up the keys
+  ///    for this map.
+  /// * The [Shortcuts] widget, which defines a keyboard mapping.
+  /// * The [Actions] widget, which defines the mapping from intent to action.
+  /// * The [Intent] and [Action] classes, which allow definition of new
+  ///    actions.
   final Map<LogicalKeySet, Intent> shortcuts;
 
-  /// {@macro flutter.widgets.widgetsApp.actions}
+  /// The default map of intent keys to actions for the application.
+  ///
+  /// By default, this is the output of [WidgetsApp.defaultActions], called with
+  /// [defaultTargetPlatform]. Specifying [actions] for an app overrides the
+  /// default, so if you wish to modify the default [actions], you can call
+  /// [WidgetsApp.defaultActions] and modify the resulting map, passing it as
+  /// the [actions] for this app. You may also add to the bindings, or override
+  /// specific bindings for a widget subtree, by adding your own [Actions]
+  /// widget.
+  ///
+  /// {@tool sample}
+  /// This example shows how to add a single action handling an
+  /// [ActivateAction] to the default actions without needing to
+  /// add your own [Actions] widget.
+  ///
+  /// Alternatively, you could insert a [Actions] widget with just the mapping
+  /// you want to add between the [WidgetsApp] and its child and get the same
+  /// effect.
+  ///
+  /// ```dart
+  /// Widget build(BuildContext context) {
+  ///   return WidgetsApp(
+  ///     actions: <LocalKey, ActionFactory>{
+  ///       ... WidgetsApp.defaultActions,
+  ///       ActivateAction.key: () => CallbackAction(
+  ///         ActivateAction.key,
+  ///         onInvoke: (FocusNode focusNode, Intent intent) {
+  ///           // Do something here...
+  ///         },
+  ///       ),
+  ///     },
+  ///     color: const Color(0xFFFF0000),
+  ///     builder: (BuildContext context, Widget child) {
+  ///       return const Placeholder();
+  ///     },
+  ///   );
+  /// }
+  /// ```
+  /// {@end-tool}
+  /// See also:
+  ///
+  /// * The [shortcuts] parameter, which defines the default set of shortcuts
+  ///    for the application.
+  /// * The [Shortcuts] widget, which defines a keyboard mapping.
+  /// * The [Actions] widget, which defines the mapping from intent to action.
+  /// * The [Intent] and [Action] classes, which allow definition of new
+  ///    actions.
   final Map<LocalKey, ActionFactory> actions;
 
   /// Turns on a [GridPaper] overlay that paints a baseline grid

@@ -684,7 +684,6 @@ class WidgetsApp extends StatefulWidget {
   /// {@endtemplate}
   final bool debugShowCheckedModeBanner;
 
-  /// {@template flutter.widgets.widgetsApp.shortcuts}
   /// The default map of keyboard shortcuts to intents for the application.
   ///
   /// By default, this is set to [WidgetsApp.defaultShortcuts].
@@ -722,10 +721,8 @@ class WidgetsApp extends StatefulWidget {
   /// * The [Actions] widget, which defines the mapping from intent to action.
   /// * The [Intent] and [Action] classes, which allow definition of new
   ///    actions.
-  /// {@endtemplate}
   final Map<LogicalKeySet, Intent> shortcuts;
 
-  /// {@template flutter.widgets.widgetsApp.actions}
   /// The default map of intent keys to actions for the application.
   ///
   /// By default, this is the output of [WidgetsApp.defaultActions], called with
@@ -773,7 +770,6 @@ class WidgetsApp extends StatefulWidget {
   /// * The [Actions] widget, which defines the mapping from intent to action.
   /// * The [Intent] and [Action] classes, which allow definition of new
   ///    actions.
-  /// {@endtemplate}
   final Map<LocalKey, ActionFactory> actions;
 
   /// If true, forces the performance overlay to be visible in all instances.

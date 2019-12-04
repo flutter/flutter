@@ -35,7 +35,7 @@ Future<void> pumpTest(
 
 const double dragOffset = 200.0;
 
-final LogicalKeyboardKey modifierKey = (!kIsWeb && defaultTargetPlatform == TargetPlatform.macOS)
+final LogicalKeyboardKey modifierKey = defaultTargetPlatform == TargetPlatform.macOS
     ? LogicalKeyboardKey.metaLeft
     : LogicalKeyboardKey.controlLeft;
 
