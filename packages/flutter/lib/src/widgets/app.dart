@@ -49,6 +49,7 @@ export 'dart:ui' show Locale;
 ///    is recommended over [LocaleResolutionCallback].
 typedef LocaleListResolutionCallback = Locale Function(List<Locale> locales, Iterable<Locale> supportedLocales);
 
+/// {@template flutter.widgets.widgetsApp.localeResolutionCallback}
 /// The signature of [WidgetsApp.localeResolutionCallback].
 ///
 /// It is recommended to provide a [LocaleListResolutionCallback] instead of a
@@ -73,6 +74,7 @@ typedef LocaleListResolutionCallback = Locale Function(List<Locale> locales, Ite
 ///
 ///  * [LocaleListResolutionCallback], which takes a list of preferred locales (instead of one locale).
 ///    Resolutions by [LocaleListResolutionCallback] take precedence over [LocaleResolutionCallback].
+/// {@endtemplate}
 typedef LocaleResolutionCallback = Locale Function(Locale locale, Iterable<Locale> supportedLocales);
 
 /// The signature of [WidgetsApp.onGenerateTitle].
@@ -487,7 +489,7 @@ class WidgetsApp extends StatefulWidget {
   ///
   /// The value of [Localizations.locale] will equal this locale if
   /// it matches one of the [supportedLocales]. Otherwise it will be
-  /// the first [supportedLocale].
+  /// the first element of [supportedLocales].
   /// {@endtemplate}
   ///
   /// See also:
@@ -511,22 +513,25 @@ class WidgetsApp extends StatefulWidget {
   /// when the app is started, and when the user changes the
   /// device's locale.
   ///
-  /// When a [localeListResolutionCallback] is provided, Flutter will first attempt to
-  /// resolve the locale with the provided [localeListResolutionCallback]. If the
-  /// callback or result is null, it will fallback to trying the [localeResolutionCallback].
-  /// If both [localeResolutionCallback] and [localeListResolutionCallback] are left null
-  /// or fail to resolve (return null), the [WidgetsApp.basicLocaleListResolution]
-  /// fallback algorithm will be used.
+  /// When a [localeListResolutionCallback] is provided, Flutter will first
+  /// attempt to resolve the locale with the provided
+  /// [localeListResolutionCallback]. If the callback or result is null, it will
+  /// fallback to trying the [localeResolutionCallback]. If both
+  /// [localeResolutionCallback] and [localeListResolutionCallback] are left
+  /// null or fail to resolve (return null), the a basic fallback algorithm will
+  /// be used.
   ///
   /// The priority of each available fallback is:
   ///
   ///  1. [localeListResolutionCallback] is attempted first.
-  ///  2. [localeResolutionCallback] is attempted second.
-  ///  3. Flutter's [WidgetsApp.basicLocaleListResolution] algorithm is attempted last.
+  ///  1. [localeResolutionCallback] is attempted second.
+  ///  1. Flutter's basic resolution algorithm, as described in
+  ///     [supportedLocales], is attempted last.
   ///
   /// Properly localized projects should provide a more advanced algorithm than
-  /// [basicLocaleListResolution] as it does not implement a complete algorithm
-  /// (such as the one defined in [Unicode TR35](https://unicode.org/reports/tr35/#LanguageMatching))
+  /// the basic method from [supportedLocales], as it does not implement a
+  /// complete algorithm (such as the one defined in
+  /// [Unicode TR35](https://unicode.org/reports/tr35/#LanguageMatching))
   /// and is optimized for speed at the detriment of some uncommon edge-cases.
   /// {@endtemplate}
   ///
@@ -539,8 +544,6 @@ class WidgetsApp extends StatefulWidget {
   ///
   ///  * [MaterialApp.localeListResolutionCallback], which sets the callback of the
   ///    [WidgetsApp] it creates.
-  ///  * [basicLocaleListResolution], a static method that implements the locale resolution
-  ///    algorithm that is used when no custom locale resolution algorithm is provided.
   final LocaleListResolutionCallback localeListResolutionCallback;
 
   /// {@macro flutter.widgets.widgetsApp.localeListResolutionCallback}
@@ -556,8 +559,6 @@ class WidgetsApp extends StatefulWidget {
   ///
   ///  * [MaterialApp.localeResolutionCallback], which sets the callback of the
   ///    [WidgetsApp] it creates.
-  ///  * [basicLocaleListResolution], a static method that implements the locale resolution
-  ///    algorithm that is used when no custom locale resolution algorithm is provided.
   final LocaleResolutionCallback localeResolutionCallback;
 
   /// {@template flutter.widgets.widgetsApp.supportedLocales}
@@ -570,24 +571,24 @@ class WidgetsApp extends StatefulWidget {
   /// `[const Locale('en', 'US')]`.
   ///
   /// The order of the list matters. The default locale resolution algorithm,
-  /// [basicLocaleListResolution], attempts to match by the following priority:
+  /// `basicLocaleListResolution`, attempts to match by the following priority:
   ///
   ///  1. [Locale.languageCode], [Locale.scriptCode], and [Locale.countryCode]
-  ///  2. [Locale.languageCode] and [Locale.countryCode] only
-  ///  3. [Locale.languageCode] and [Locale.countryCode] only
-  ///  4. [Locale.languageCode] only
-  ///  6. [Locale.countryCode] only when all [preferredLocales] fail to match
-  ///  5. returns [supportedLocales.first] as a fallback
+  ///  1. [Locale.languageCode] and [Locale.countryCode] only
+  ///  1. [Locale.languageCode] and [Locale.countryCode] only
+  ///  1. [Locale.languageCode] only
+  ///  1. [Locale.countryCode] only when all preferred locales fail to match
+  ///  1. Returns the first element of [supportedLocales] as a fallback
   ///
-  /// When more than one supported locale matches one of these criteria, only the first
-  /// matching locale is returned. See [basicLocaleListResolution] for a complete
-  /// description of the algorithm.
+  /// When more than one supported locale matches one of these criteria, only
+  /// the first matching locale is returned.
   ///
-  /// The default locale resolution algorithm can be overridden by providing a value for
-  /// [localeListResolutionCallback]. The provided [basicLocaleListResolution] is optimized
-  /// for speed and does not implement a full algorithm (such as the one defined in
-  /// [Unicode TR35](https://unicode.org/reports/tr35/#LanguageMatching)) that takes
-  /// distances between languages into account.
+  /// The default locale resolution algorithm can be overridden by providing a
+  /// value for [localeListResolutionCallback]. The provided
+  /// `basicLocaleListResolution` is optimized for speed and does not implement
+  /// a full algorithm (such as the one defined in
+  /// [Unicode TR35](https://unicode.org/reports/tr35/#LanguageMatching)) that
+  /// takes distances between languages into account.
   ///
   /// When supporting languages with more than one script, it is recommended
   /// to specify the [Locale.scriptCode] explicitly. Locales may also be defined without
@@ -626,8 +627,6 @@ class WidgetsApp extends StatefulWidget {
   ///    when the device's locale changes.
   ///  * [localizationsDelegates], which collectively define all of the localized
   ///    resources used by this app.
-  ///  * [basicLocaleListResolution], a static method that implements the locale resolution
-  ///    algorithm that is used when no custom locale resolution algorithm is provided.
   final Iterable<Locale> supportedLocales;
 
   /// Turns on a performance overlay.
@@ -847,40 +846,41 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
 
   /// The default locale resolution algorithm.
   ///
-  /// Custom resolution algorithms can be provided through [WidgetsApp.localeListResolutionCallback]
-  /// or [WidgetsApp.localeResolutionCallback].
+  /// Custom resolution algorithms can be provided through
+  /// [WidgetsApp.localeListResolutionCallback] or
+  /// [WidgetsApp.localeResolutionCallback].
   ///
-  /// When no custom locale resolution algorithms are provided or if both fail to resolve,
-  /// Flutter will default to calling this algorithm.
+  /// When no custom locale resolution algorithms are provided or if both fail
+  /// to resolve, Flutter will default to calling this algorithm.
   ///
   /// This algorithm prioritizes speed at the cost of slightly less appropriate
   /// resolutions for edge cases.
   ///
-  /// This algorithm will resolve to the earliest locale in [preferredLocales] that
+  /// This algorithm will resolve to the earliest preferred locale that
   /// matches the most fields, prioritizing in the order of perfect match,
   /// languageCode+countryCode, languageCode+scriptCode, languageCode-only.
   ///
   /// In the case where a locale is matched by languageCode-only and is not the
-  /// default (first) locale, the next locale in preferredLocales with a
+  /// default (first) locale, the next preferred locale with a
   /// perfect match can supersede the languageCode-only match if it exists.
   ///
-  /// When a preferredLocale matches more than one supported locale, it will resolve
-  /// to the first matching locale listed in the supportedLocales.
+  /// When a preferredLocale matches more than one supported locale, it will
+  /// resolve to the first matching locale listed in the supportedLocales.
   ///
-  /// When all [preferredLocales] have been exhausted without a match, the first countryCode only
-  /// match will be returned.
+  /// When all preferred locales have been exhausted without a match, the first
+  /// countryCode only match will be returned.
   ///
-  /// When no match at all is found, the first (default) locale in [supportedLocales] will be
-  /// returned.
+  /// When no match at all is found, the first (default) locale in
+  /// [supportedLocales] will be returned.
   ///
   /// To summarize, the main matching priority is:
   ///
   ///  1. [Locale.languageCode], [Locale.scriptCode], and [Locale.countryCode]
-  ///  2. [Locale.languageCode] and [Locale.scriptCode] only
-  ///  3. [Locale.languageCode] and [Locale.countryCode] only
-  ///  4. [Locale.languageCode] only (with caveats, see above)
-  ///  5. [Locale.countryCode] only when all [preferredLocales] fail to match
-  ///  6. returns [supportedLocales.first] as a fallback
+  ///  1. [Locale.languageCode] and [Locale.scriptCode] only
+  ///  1. [Locale.languageCode] and [Locale.countryCode] only
+  ///  1. [Locale.languageCode] only (with caveats, see above)
+  ///  1. [Locale.countryCode] only when all [preferredLocales] fail to match
+  ///  1. Returns the first element of [supportedLocales] as a fallback
   ///
   /// This algorithm does not take language distance (how similar languages are to each other)
   /// into account, and will not handle edge cases such as resolving `de` to `fr` rather than `zh`

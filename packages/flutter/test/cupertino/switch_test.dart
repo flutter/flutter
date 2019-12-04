@@ -7,6 +7,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+
+import '../rendering/mock_canvas.dart';
 
 void main() {
   testWidgets('Switch can toggle on tap', (WidgetTester tester) async {
@@ -431,6 +434,28 @@ void main() {
 
     expect(find.byType(Opacity), findsOneWidget);
     expect(tester.widget<Opacity>(find.byType(Opacity).first).opacity, 0.5);
+  });
+
+  testWidgets('Switch is using track color when set', (WidgetTester tester) async {
+    const Color trackColor = Color(0xFF00FF00);
+
+    await tester.pumpWidget(
+      const Directionality(
+        textDirection: TextDirection.ltr,
+        child: Center(
+          child: CupertinoSwitch(
+            value: false,
+            trackColor: trackColor,
+            dragStartBehavior: DragStartBehavior.down,
+            onChanged: null,
+          ),
+        ),
+      ),
+    );
+
+    expect(find.byType(CupertinoSwitch), findsOneWidget);
+    expect(tester.widget<CupertinoSwitch>(find.byType(CupertinoSwitch)).trackColor, trackColor);
+    expect(find.byType(CupertinoSwitch), paints..rrect(color: trackColor));
   });
 
   testWidgets('Switch is opaque when enabled', (WidgetTester tester) async {
