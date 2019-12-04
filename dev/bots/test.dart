@@ -291,20 +291,12 @@ Future<void> _runBuildTests() async {
       await _flutterBuildIpa(examplePath);
     }
   }
-
-  final String branch = Platform.environment['CIRRUS_BRANCH'];
-  if (branch != 'beta' && branch != 'stable') {
-    // Web compilation tests.
-    await _flutterBuildDart2js(
-      path.join('dev', 'integration_tests', 'web'),
-      path.join('lib', 'main.dart'),
-    );
-    // Should not fail to compile with dart:io.
-    await _flutterBuildDart2js(
-      path.join('dev', 'integration_tests', 'web_compile_tests'),
-      path.join('lib', 'dart_io_import.dart'),
-    );
-  }
+  // Web compilation tests.
+  await _flutterBuildDart2js(path.join('dev', 'integration_tests', 'web'), path.join('lib', 'main.dart'));
+  // Should not fail to compile with dart:io.
+  await _flutterBuildDart2js(path.join('dev', 'integration_tests', 'web_compile_tests'),
+    path.join('lib', 'dart_io_import.dart'),
+  );
 }
 
 Future<void> _flutterBuildAot(String relativePathToApplication) async {
