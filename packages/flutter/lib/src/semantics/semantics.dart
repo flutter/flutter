@@ -129,10 +129,10 @@ class CustomSemanticsAction {
   bool operator ==(dynamic other) {
     if (other.runtimeType != runtimeType)
       return false;
-    final CustomSemanticsAction typedOther = other;
-    return typedOther.label == label
-      && typedOther.hint == hint
-      && typedOther.action == action;
+    return other is CustomSemanticsAction
+        && other.label == label
+        && other.hint == hint
+        && other.action == action;
   }
 
   @override
@@ -422,32 +422,30 @@ class SemanticsData extends Diagnosticable {
 
   @override
   bool operator ==(dynamic other) {
-    if (other is! SemanticsData)
-      return false;
-    final SemanticsData typedOther = other;
-    return typedOther.flags == flags
-        && typedOther.actions == actions
-        && typedOther.label == label
-        && typedOther.value == value
-        && typedOther.increasedValue == increasedValue
-        && typedOther.decreasedValue == decreasedValue
-        && typedOther.hint == hint
-        && typedOther.textDirection == textDirection
-        && typedOther.rect == rect
-        && setEquals(typedOther.tags, tags)
-        && typedOther.scrollChildCount == scrollChildCount
-        && typedOther.scrollIndex == scrollIndex
-        && typedOther.textSelection == textSelection
-        && typedOther.scrollPosition == scrollPosition
-        && typedOther.scrollExtentMax == scrollExtentMax
-        && typedOther.scrollExtentMin == scrollExtentMin
-        && typedOther.platformViewId == platformViewId
-        && typedOther.maxValueLength == maxValueLength
-        && typedOther.currentValueLength == currentValueLength
-        && typedOther.transform == transform
-        && typedOther.elevation == elevation
-        && typedOther.thickness == thickness
-        && _sortedListsEqual(typedOther.customSemanticsActionIds, customSemanticsActionIds);
+    return other is SemanticsData
+        && other.flags == flags
+        && other.actions == actions
+        && other.label == label
+        && other.value == value
+        && other.increasedValue == increasedValue
+        && other.decreasedValue == decreasedValue
+        && other.hint == hint
+        && other.textDirection == textDirection
+        && other.rect == rect
+        && setEquals(other.tags, tags)
+        && other.scrollChildCount == scrollChildCount
+        && other.scrollIndex == scrollIndex
+        && other.textSelection == textSelection
+        && other.scrollPosition == scrollPosition
+        && other.scrollExtentMax == scrollExtentMax
+        && other.scrollExtentMin == scrollExtentMin
+        && other.platformViewId == platformViewId
+        && other.maxValueLength == maxValueLength
+        && other.currentValueLength == currentValueLength
+        && other.transform == transform
+        && other.elevation == elevation
+        && other.thickness == thickness
+        && _sortedListsEqual(other.customSemanticsActionIds, customSemanticsActionIds);
   }
 
   @override
@@ -564,9 +562,9 @@ class SemanticsHintOverrides extends DiagnosticableTree {
   bool operator ==(dynamic other) {
     if (other.runtimeType != runtimeType)
       return false;
-    final SemanticsHintOverrides typedOther = other;
-    return typedOther.onTapHint == onTapHint
-      && typedOther.onLongPressHint == onLongPressHint;
+    return other is SemanticsHintOverrides
+        && other.onTapHint == onTapHint
+        && other.onLongPressHint == onLongPressHint;
   }
 
   @override
@@ -1500,10 +1498,10 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   // AbstractNode OVERRIDES
 
   @override
-  SemanticsOwner get owner => super.owner;
+  SemanticsOwner get owner => super.owner as SemanticsOwner;
 
   @override
-  SemanticsNode get parent => super.parent;
+  SemanticsNode get parent => super.parent as SemanticsNode;
 
   @override
   void redepthChildren() {
@@ -3080,7 +3078,7 @@ class SemanticsConfiguration {
   set onMoveCursorForwardByCharacter(MoveCursorHandler value) {
     assert(value != null);
     _addAction(SemanticsAction.moveCursorForwardByCharacter, (dynamic args) {
-      final bool extentSelection = args;
+      final bool extentSelection = args as bool;
       assert(extentSelection != null);
       value(extentSelection);
     });
@@ -3099,7 +3097,7 @@ class SemanticsConfiguration {
   set onMoveCursorBackwardByCharacter(MoveCursorHandler value) {
     assert(value != null);
     _addAction(SemanticsAction.moveCursorBackwardByCharacter, (dynamic args) {
-      final bool extentSelection = args;
+      final bool extentSelection = args as bool;
       assert(extentSelection != null);
       value(extentSelection);
     });
@@ -3118,7 +3116,7 @@ class SemanticsConfiguration {
   set onMoveCursorForwardByWord(MoveCursorHandler value) {
     assert(value != null);
     _addAction(SemanticsAction.moveCursorForwardByWord, (dynamic args) {
-      final bool extentSelection = args;
+      final bool extentSelection = args as bool;
       assert(extentSelection != null);
       value(extentSelection);
     });
@@ -3137,7 +3135,7 @@ class SemanticsConfiguration {
   set onMoveCursorBackwardByWord(MoveCursorHandler value) {
     assert(value != null);
     _addAction(SemanticsAction.moveCursorBackwardByWord, (dynamic args) {
-      final bool extentSelection = args;
+      final bool extentSelection = args as bool;
       assert(extentSelection != null);
       value(extentSelection);
     });
@@ -3157,7 +3155,7 @@ class SemanticsConfiguration {
     assert(value != null);
     _addAction(SemanticsAction.setSelection, (dynamic args) {
       assert(args != null && args is Map);
-      final Map<String, int> selection = args.cast<String, int>();
+      final Map<String, int> selection = (args as Map<dynamic, dynamic>).cast<String, int>();
       assert(selection != null && selection['base'] != null && selection['extent'] != null);
       value(TextSelection(
         baseOffset: selection['base'],
@@ -3356,7 +3354,7 @@ class SemanticsConfiguration {
   }
 
   void _onCustomSemanticsAction(dynamic args) {
-    final CustomSemanticsAction action = CustomSemanticsAction.getAction(args);
+    final CustomSemanticsAction action = CustomSemanticsAction.getAction(args as int);
     if (action == null)
       return;
     final VoidCallback callback = _customSemanticsActions[action];
