@@ -506,9 +506,9 @@ class MouseTracker extends ChangeNotifier {
 
     // Send enter events to annotations that are not in last but in next, in
     // reverse visual order.
-    final Iterable<MouseTrackerAnnotation> enteringAnnotations = nextAnnotations.where(
+    final Iterable<MouseTrackerAnnotation> enteringAnnotations = nextAnnotations.reversed.where(
       (MouseTrackerAnnotation value) => !lastKeys.contains(value.key),
-    ).toList().reversed;
+    );
     for (final MouseTrackerAnnotation annotation in enteringAnnotations) {
       assert(trackedAnnotationKeys.contains(annotation.key));
       if (annotation.onEnter != null) {
@@ -517,21 +517,19 @@ class MouseTracker extends ChangeNotifier {
     }
 
     // Send hover events to annotations that are in next, in reverse visual order.
-    // For now the order between the hover events is designed this way for no
-    // solid reasons but to keep it aligned with enter events for simplicity.
+    // We chose reverse visual order only to keep it aligned with enter events
+    // for simplicity. Feel free to change it if there is a solid reason in the
+    // future.
     if (unhandledEvent is PointerHoverEvent) {
-      final Iterable<MouseTrackerAnnotation> hoveringAnnotations =
-        nextAnnotations.toList().reversed;
+      final bool pointerHasMoved = handledEvent is! PointerHoverEvent || handledEvent.position != unhandledEvent.position;
+      // If the hover event follows a non-hover event, or has moved since the
+      // last hover, then trigger hover callback to all annotations. Otherwise,
+      // trigger hover callback only to annotations that it newly enters.
+      final Iterable<MouseTrackerAnnotation> hoveringAnnotations = pointerHasMoved ? nextAnnotations.reversed : enteringAnnotations;
       for (final MouseTrackerAnnotation annotation in hoveringAnnotations) {
-        // Deduplicate: Trigger hover if it's a newly hovered annotation
-        // or the position has changed
         assert(trackedAnnotationKeys.contains(annotation.key));
-        if (!lastKeys.contains(annotation.key)
-            || handledEvent is! PointerHoverEvent
-            || handledEvent.position != unhandledEvent.position) {
-          if (annotation.onHover != null) {
-            annotation.onHover(unhandledEvent);
-          }
+        if (annotation.onHover != null) {
+          annotation.onHover(unhandledEvent);
         }
       }
     }
