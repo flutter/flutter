@@ -21,7 +21,7 @@ import 'web_driver_config.dart';
 /// An implementation of the Flutter Driver using the WebDriver.
 class WebFlutterDriver extends FlutterDriver {
   /// Creates a driver that uses a connection provided by the given
-  /// [_connection], and [_browserName].
+  /// [_connection] and [_browserName].
   @visibleForTesting
   WebFlutterDriver.connectedTo(
       this._connection,
