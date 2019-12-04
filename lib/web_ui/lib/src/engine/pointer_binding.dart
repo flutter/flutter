@@ -15,23 +15,17 @@ class PointerBinding {
   static PointerBinding get instance => _instance;
   static PointerBinding _instance;
 
-  // Set of pointerIds that are added before routing hover and mouse wheel
-  // events.
-  //
-  // The device needs to send a one time PointerChange.add before hover and
-  // wheel events.
-  Set<int> _activePointerIds = <int>{};
-
   PointerBinding(this.domRenderer) {
     if (_instance == null) {
       _instance = this;
+      _pointerDataConverter = PointerDataConverter();
       _detector = const PointerSupportDetector();
       _adapter = _createAdapter();
     }
     assert(() {
       registerHotRestartListener(() {
         _adapter?.clearListeners();
-        _activePointerIds.clear();
+        _pointerDataConverter?.clearPointerState();
       });
       return true;
     }());
@@ -40,7 +34,7 @@ class PointerBinding {
   final DomRenderer domRenderer;
   PointerSupportDetector _detector;
   BaseAdapter _adapter;
-
+  PointerDataConverter _pointerDataConverter;
   /// Should be used in tests to define custom detection of pointer support.
   ///
   /// ```dart
@@ -62,22 +56,22 @@ class PointerBinding {
     newDetector ??= const PointerSupportDetector();
     // When changing the detector, we need to swap the adapter.
     if (newDetector != _detector) {
-      _activePointerIds.clear();
       _detector = newDetector;
       _adapter?.clearListeners();
       _adapter = _createAdapter();
+      _pointerDataConverter?.clearPointerState();
     }
   }
 
   BaseAdapter _createAdapter() {
     if (_detector.hasPointerEvents) {
-      return PointerAdapter(_onPointerData, domRenderer);
+      return PointerAdapter(_onPointerData, domRenderer, _pointerDataConverter);
     }
     if (_detector.hasTouchEvents) {
-      return TouchAdapter(_onPointerData, domRenderer);
+      return TouchAdapter(_onPointerData, domRenderer, _pointerDataConverter);
     }
     if (_detector.hasMouseEvents) {
-      return MouseAdapter(_onPointerData, domRenderer);
+      return MouseAdapter(_onPointerData, domRenderer, _pointerDataConverter);
     }
     return null;
   }
@@ -123,11 +117,19 @@ class _PressedButton {
 
 /// Common functionality that's shared among adapters.
 abstract class BaseAdapter {
-  static final Map<String, html.EventListener> _listeners =
-      <String, html.EventListener>{};
+  BaseAdapter(this._callback, this.domRenderer, this._pointerDataConverter) {
+    _setup();
+  }
 
+  /// Listeners that are registered through dart to js api.
+  static final Map<String, html.EventListener> _listeners =
+    <String, html.EventListener>{};
+  /// Listeners that are registered through native javascript api.
+  static final Map<String, html.EventListener> _nativeListeners =
+    <String, html.EventListener>{};
   final DomRenderer domRenderer;
   PointerDataCallback _callback;
+  PointerDataConverter _pointerDataConverter;
 
   // A set of the buttons that are currently being pressed.
   Set<_PressedButton> _pressedButtons = Set<_PressedButton>();
@@ -144,10 +146,6 @@ abstract class BaseAdapter {
     }
   }
 
-  BaseAdapter(this._callback, this.domRenderer) {
-    _setup();
-  }
-
   /// Each subclass is expected to override this method to attach its own event
   /// listeners and convert events into pointer events.
   void _setup();
@@ -156,9 +154,21 @@ abstract class BaseAdapter {
   void clearListeners() {
     final html.Element glassPane = domRenderer.glassPaneElement;
     _listeners.forEach((String eventName, html.EventListener listener) {
-      glassPane.removeEventListener(eventName, listener, true);
+        glassPane.removeEventListener(eventName, listener, true);
+    });
+    // For native listener, we will need to remove it through native javascript
+    // api.
+    _nativeListeners.forEach((String eventName, html.EventListener listener) {
+      js_util.callMethod(
+        domRenderer.glassPaneElement,
+        'removeEventListener', <dynamic>[
+          'wheel',
+          listener,
+        ]
+      );
     });
     _listeners.clear();
+    _nativeListeners.clear();
   }
 
   void _addEventListener(String eventName, html.EventListener handler) {
@@ -176,6 +186,75 @@ abstract class BaseAdapter {
     _listeners[eventName] = loggedHandler;
     domRenderer.glassPaneElement
         .addEventListener(eventName, loggedHandler, true);
+  }
+
+  /// Converts a floating number timestamp (in milliseconds) to a [Duration] by
+  /// splitting it into two integer components: milliseconds + microseconds.
+  Duration _eventTimeStampToDuration(num milliseconds) {
+    final int ms = milliseconds.toInt();
+    final int micro =
+    ((milliseconds - ms) * Duration.microsecondsPerMillisecond).toInt();
+    return Duration(milliseconds: ms, microseconds: micro);
+  }
+
+  List<ui.PointerData> _convertWheelEventToPointerData(
+    html.WheelEvent event,
+   ) {
+    const int domDeltaPixel = 0x00;
+    const int domDeltaLine = 0x01;
+    const int domDeltaPage = 0x02;
+
+    // Flutter only supports pixel scroll delta. Convert deltaMode values
+    // to pixels.
+    double deltaX = event.deltaX;
+    double deltaY = event.deltaY;
+    switch (event.deltaMode) {
+      case domDeltaLine:
+        deltaX *= 32.0;
+        deltaY *= 32.0;
+        break;
+      case domDeltaPage:
+        deltaX *= ui.window.physicalSize.width;
+        deltaY *= ui.window.physicalSize.height;
+        break;
+      case domDeltaPixel:
+      default:
+        break;
+    }
+    final List<ui.PointerData> data = <ui.PointerData>[];
+    _pointerDataConverter.convert(
+      data,
+      change: ui.PointerChange.hover,
+      timeStamp: _eventTimeStampToDuration(event.timeStamp),
+      kind: ui.PointerDeviceKind.mouse,
+      signalKind: ui.PointerSignalKind.scroll,
+      device: _mouseDeviceId,
+      physicalX: event.client.x * ui.window.devicePixelRatio,
+      physicalY: event.client.y * ui.window.devicePixelRatio,
+      buttons: event.buttons,
+      pressure: 1.0,
+      pressureMin: 0.0,
+      pressureMax: 1.0,
+      scrollDeltaX: deltaX,
+      scrollDeltaY: deltaY,
+    );
+    return data;
+  }
+
+  void _addWheelEventListener(html.EventListener handler) {
+    final dynamic eventOptions = js_util.newObject();
+    final html.EventListener jsHandler = js.allowInterop((html.Event event) => handler(event));
+    _nativeListeners['wheel'] = jsHandler;
+    js_util.setProperty(eventOptions, 'passive', false);
+    js_util.callMethod(
+      domRenderer.glassPaneElement,
+      'addEventListener', <dynamic>[
+        'wheel',
+        jsHandler,
+        eventOptions
+      ]
+    );
+
   }
 }
 
@@ -207,16 +286,17 @@ int _deviceFromHtmlEvent(event) {
 
 /// Adapter class to be used with browsers that support native pointer events.
 class PointerAdapter extends BaseAdapter {
-  PointerAdapter(PointerDataCallback callback, DomRenderer domRenderer)
-      : super(callback, domRenderer);
+  PointerAdapter(
+    PointerDataCallback callback,
+    DomRenderer domRenderer,
+    PointerDataConverter _pointerDataConverter
+  ) : super(callback, domRenderer, _pointerDataConverter);
 
   @override
   void _setup() {
     _addEventListener('pointerdown', (html.Event event) {
       final int pointerButton = _pointerButtonFromHtmlEvent(event);
       final int device = _deviceFromHtmlEvent(event);
-      // The pointerdown event will cause an 'add' event on the framework side.
-      PointerBinding._instance._activePointerIds.add(device);
       if (_isButtonDown(device, pointerButton)) {
         // TODO(flutter_web): Remove this temporary fix for right click
         // on web platform once context guesture is implemented.
@@ -239,13 +319,6 @@ class PointerAdapter extends BaseAdapter {
               ? ui.PointerChange.move
               : ui.PointerChange.hover,
           pointerEvent);
-      _ensureMouseDeviceAdded(
-          data,
-          pointerEvent.client.x,
-          pointerEvent.client.y,
-          pointerEvent.buttons,
-          pointerEvent.timeStamp,
-          pointerEvent.pointerId);
       _callback(data);
     });
 
@@ -270,7 +343,8 @@ class PointerAdapter extends BaseAdapter {
       _callback(_convertEventToPointerData(ui.PointerChange.cancel, event));
     });
 
-    _addWheelEventListener((html.WheelEvent event) {
+    _addWheelEventListener((html.Event event) {
+      assert(event is html.WheelEvent);
       if (_debugLogPointerEvents) {
         print(event.type);
       }
@@ -289,7 +363,8 @@ class PointerAdapter extends BaseAdapter {
     final List<ui.PointerData> data = <ui.PointerData>[];
     for (int i = 0; i < allEvents.length; i++) {
       final html.PointerEvent event = allEvents[i];
-      data.add(ui.PointerData(
+      _pointerDataConverter.convert(
+        data,
         change: change,
         timeStamp: _eventTimeStampToDuration(event.timeStamp),
         kind: _pointerTypeToDeviceKind(event.pointerType),
@@ -301,7 +376,7 @@ class PointerAdapter extends BaseAdapter {
         pressureMin: 0.0,
         pressureMax: 1.0,
         tilt: _computeHighestTilt(event),
-      ));
+      );
     }
     return data;
   }
@@ -343,8 +418,11 @@ class PointerAdapter extends BaseAdapter {
 
 /// Adapter to be used with browsers that support touch events.
 class TouchAdapter extends BaseAdapter {
-  TouchAdapter(PointerDataCallback callback, DomRenderer domRenderer)
-      : super(callback, domRenderer);
+  TouchAdapter(
+    PointerDataCallback callback,
+    DomRenderer domRenderer,
+    PointerDataConverter _pointerDataConverter
+  ) : super(callback, domRenderer, _pointerDataConverter);
 
   @override
   void _setup() {
@@ -381,11 +459,12 @@ class TouchAdapter extends BaseAdapter {
     html.TouchEvent event,
   ) {
     final html.TouchList touches = event.changedTouches;
-    final List<ui.PointerData> data = List<ui.PointerData>(touches.length);
+    final List<ui.PointerData> data = List<ui.PointerData>();
     final int len = touches.length;
     for (int i = 0; i < len; i++) {
       final html.Touch touch = touches[i];
-      data[i] = ui.PointerData(
+      _pointerDataConverter.convert(
+        data,
         change: change,
         timeStamp: _eventTimeStampToDuration(event.timeStamp),
         kind: ui.PointerDeviceKind.touch,
@@ -408,8 +487,11 @@ const int _mouseDeviceId = -1;
 
 /// Adapter to be used with browsers that support mouse events.
 class MouseAdapter extends BaseAdapter {
-  MouseAdapter(PointerDataCallback callback, DomRenderer domRenderer)
-      : super(callback, domRenderer);
+  MouseAdapter(
+    PointerDataCallback callback,
+    DomRenderer domRenderer,
+    PointerDataConverter _pointerDataConverter
+  ) : super(callback, domRenderer, _pointerDataConverter);
 
   @override
   void _setup() {
@@ -442,7 +524,8 @@ class MouseAdapter extends BaseAdapter {
       _callback(_convertEventToPointerData(ui.PointerChange.up, event));
     });
 
-    _addWheelEventListener((html.WheelEvent event) {
+    _addWheelEventListener((html.Event event) {
+      assert(event is html.WheelEvent);
       if (_debugLogPointerEvents) {
         print(event.type);
       }
@@ -455,16 +538,9 @@ class MouseAdapter extends BaseAdapter {
     ui.PointerChange change,
     html.MouseEvent event,
   ) {
-    final List<ui.PointerData> data = <ui.PointerData>[];
-    // The mousedown event will cause an 'add' event on the framework side.
-    if (event.type == 'mousedown') {
-      PointerBinding._instance._activePointerIds.add(_mouseDeviceId);
-    }
-    if (event.type == 'mousemove') {
-      _ensureMouseDeviceAdded(data, event.client.x, event.client.y,
-          event.buttons, event.timeStamp, _mouseDeviceId);
-    }
-    data.add(ui.PointerData(
+    List<ui.PointerData> data = <ui.PointerData>[];
+    _pointerDataConverter.convert(
+      data,
       change: change,
       timeStamp: _eventTimeStampToDuration(event.timeStamp),
       kind: ui.PointerDeviceKind.mouse,
@@ -476,101 +552,7 @@ class MouseAdapter extends BaseAdapter {
       pressure: 1.0,
       pressureMin: 0.0,
       pressureMax: 1.0,
-    ));
+    );
     return data;
   }
-}
-
-/// Convert a floating number timestamp (in milliseconds) to a [Duration] by
-/// splitting it into two integer components: milliseconds + microseconds.
-Duration _eventTimeStampToDuration(num milliseconds) {
-  final int ms = milliseconds.toInt();
-  final int micro =
-      ((milliseconds - ms) * Duration.microsecondsPerMillisecond).toInt();
-  return Duration(milliseconds: ms, microseconds: micro);
-}
-
-void _ensureMouseDeviceAdded(List<ui.PointerData> data, double clientX,
-    double clientY, int buttons, double timeStamp, int deviceId) {
-  if (PointerBinding.instance._activePointerIds.contains(deviceId)) {
-    return;
-  }
-  PointerBinding.instance._activePointerIds.add(deviceId);
-  // Only send [PointerChange.add] the first time.
-  data.insert(
-      0,
-      ui.PointerData(
-        change: ui.PointerChange.add,
-        timeStamp: _eventTimeStampToDuration(timeStamp),
-        kind: ui.PointerDeviceKind.mouse,
-        // In order for Flutter to actually add this pointer, we need to set the
-        // signal to none.
-        signalKind: ui.PointerSignalKind.none,
-        device: deviceId,
-        physicalX: clientX * ui.window.devicePixelRatio,
-        physicalY: clientY * ui.window.devicePixelRatio,
-        buttons: buttons,
-        pressure: 1.0,
-        pressureMin: 0.0,
-        pressureMax: 1.0,
-        scrollDeltaX: 0,
-        scrollDeltaY: 0,
-      ));
-}
-
-List<ui.PointerData> _convertWheelEventToPointerData(
-  html.WheelEvent event,
-) {
-  const int domDeltaPixel = 0x00;
-  const int domDeltaLine = 0x01;
-  const int domDeltaPage = 0x02;
-
-  // Flutter only supports pixel scroll delta. Convert deltaMode values
-  // to pixels.
-  double deltaX = event.deltaX;
-  double deltaY = event.deltaY;
-  switch (event.deltaMode) {
-    case domDeltaLine:
-      deltaX *= 32.0;
-      deltaY *= 32.0;
-      break;
-    case domDeltaPage:
-      deltaX *= ui.window.physicalSize.width;
-      deltaY *= ui.window.physicalSize.height;
-      break;
-    case domDeltaPixel:
-    default:
-      break;
-  }
-
-  final List<ui.PointerData> data = <ui.PointerData>[];
-  _ensureMouseDeviceAdded(data, event.client.x, event.client.y, event.buttons,
-      event.timeStamp, _mouseDeviceId);
-  data.add(ui.PointerData(
-    change: ui.PointerChange.hover,
-    timeStamp: _eventTimeStampToDuration(event.timeStamp),
-    kind: ui.PointerDeviceKind.mouse,
-    signalKind: ui.PointerSignalKind.scroll,
-    device: _mouseDeviceId,
-    physicalX: event.client.x * ui.window.devicePixelRatio,
-    physicalY: event.client.y * ui.window.devicePixelRatio,
-    buttons: event.buttons,
-    pressure: 1.0,
-    pressureMin: 0.0,
-    pressureMax: 1.0,
-    scrollDeltaX: deltaX,
-    scrollDeltaY: deltaY,
-  ));
-  return data;
-}
-
-void _addWheelEventListener(void listener(html.WheelEvent e)) {
-  final dynamic eventOptions = js_util.newObject();
-  js_util.setProperty(eventOptions, 'passive', false);
-  js_util.callMethod(PointerBinding.instance.domRenderer.glassPaneElement,
-      'addEventListener', <dynamic>[
-    'wheel',
-    js.allowInterop((html.WheelEvent event) => listener(event)),
-    eventOptions
-  ]);
 }

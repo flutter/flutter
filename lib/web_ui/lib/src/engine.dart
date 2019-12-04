@@ -62,6 +62,7 @@ part 'engine/picture.dart';
 part 'engine/platform_views.dart';
 part 'engine/plugins.dart';
 part 'engine/pointer_binding.dart';
+part 'engine/pointer_converter.dart';
 part 'engine/recording_canvas.dart';
 part 'engine/render_vertices.dart';
 part 'engine/rrect_renderer.dart';
