@@ -535,12 +535,12 @@ class _LocalizationsState extends State<Localizations> {
 
   T resourcesFor<T>(Type type) {
     assert(type != null);
-    final T resources = _typeToResources[type];
+    final T resources = _typeToResources[type] as T;
     return resources;
   }
 
   TextDirection get _textDirection {
-    final WidgetsLocalizations resources = _typeToResources[WidgetsLocalizations];
+    final WidgetsLocalizations resources = _typeToResources[WidgetsLocalizations] as WidgetsLocalizations;
     assert(resources != null);
     return resources.textDirection;
   }
