@@ -533,7 +533,7 @@ void main() {
     }
 
     await buildTest(const VisualDensity());
-    final RenderBox box = tester.renderObject(find.byType(RawMaterialButton));
+    final RenderBox box = tester.renderObject(find.byKey(key));
     await tester.pumpAndSettle();
     expect(box.size, equals(const Size(100, 100)));
 

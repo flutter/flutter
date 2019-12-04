@@ -713,32 +713,27 @@ void main() {
     }
 
     await buildTest(const VisualDensity());
-    RenderBox box = tester.renderObject(find.byType(FlatButton));
+    final RenderBox box = tester.renderObject(find.byKey(key));
     await tester.pumpAndSettle();
     expect(box.size, equals(const Size(132, 100)));
 
     await buildTest(const VisualDensity(horizontal: 3.0, vertical: 3.0));
-    box = tester.renderObject(find.byType(FlatButton));
     await tester.pumpAndSettle();
     expect(box.size, equals(const Size(156, 124)));
 
     await buildTest(const VisualDensity(horizontal: -3.0, vertical: -3.0));
-    box = tester.renderObject(find.byType(FlatButton));
     await tester.pumpAndSettle();
     expect(box.size, equals(const Size(108, 100)));
 
     await buildTest(const VisualDensity(), useText: true);
-    box = tester.renderObject(find.byType(FlatButton));
     await tester.pumpAndSettle();
     expect(box.size, equals(const Size(88, 48)));
 
     await buildTest(const VisualDensity(horizontal: 3.0, vertical: 3.0), useText: true);
-    box = tester.renderObject(find.byType(FlatButton));
     await tester.pumpAndSettle();
     expect(box.size, equals(const Size(112, 60)));
 
     await buildTest(const VisualDensity(horizontal: -3.0, vertical: -3.0), useText: true);
-    box = tester.renderObject(find.byType(FlatButton));
     await tester.pumpAndSettle();
     expect(box.size, equals(const Size(76, 36)));
   });
