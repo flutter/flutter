@@ -250,6 +250,42 @@ void main() {
       });
     });
 
+    group('getWidgetDiagnostics', () {
+      test('sends the getWidgetDiagnostics command', () async {
+        when(mockIsolate.invokeExtension(any, any)).thenAnswer((Invocation i) {
+          expect(i.positionalArguments[1], <String, dynamic>{
+            'command': 'get_diagnostics_tree',
+            'diagnosticsType': 'widget',
+            'finderType': 'ByTooltipMessage',
+            'text': 'foo',
+            'includeProperties': 'true',
+            'subtreeDepth': '0',
+            'timeout': _kSerializedTestTimeout,
+          });
+          return makeMockResponse(<String, dynamic>{});
+        });
+        await driver.getWidgetDiagnostics(find.byTooltip('foo'), timeout: _kTestTimeout);
+      });
+    });
+
+    group('getRenderObjectDiagnostics', () {
+      test('sends the getRenderObjectDiagnostics command', () async {
+        when(mockIsolate.invokeExtension(any, any)).thenAnswer((Invocation i) {
+          expect(i.positionalArguments[1], <String, dynamic>{
+            'command': 'get_diagnostics_tree',
+            'diagnosticsType': 'renderObject',
+            'finderType': 'ByTooltipMessage',
+            'text': 'foo',
+            'includeProperties': 'true',
+            'subtreeDepth': '0',
+            'timeout': _kSerializedTestTimeout,
+          });
+          return makeMockResponse(<String, dynamic>{});
+        });
+        await driver.getRenderObjectDiagnostics(find.byTooltip('foo'), timeout: _kTestTimeout);
+      });
+    });
+
     group('waitForCondition', () {
       test('sends the wait for NoPendingFrameCondition command', () async {
         when(mockIsolate.invokeExtension(any, any)).thenAnswer((Invocation i) {

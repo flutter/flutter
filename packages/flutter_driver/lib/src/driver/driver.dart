@@ -619,7 +619,7 @@ class FlutterDriver {
   }) async {
     return _sendCommand(GetDiagnosticsTree(
       finder,
-      DiagnosticsType.renderObject,
+      DiagnosticsType.widget,
       subtreeDepth: subtreeDepth,
       includeProperties: includeProperties,
       timeout: timeout,
