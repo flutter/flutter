@@ -59,8 +59,7 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
         ipv6: ipv6,
         stayResident: stayResident,
         dartDefines: dartDefines,
-        // TODO(dantup): Do we need to pass urlTunneller through to this? Does
-        // it use DWDS?
+        // TODO(dantup): If this becomes default it may need to urlTunneller.
       );
     }
     return _DwdsResidentWebRunner(
