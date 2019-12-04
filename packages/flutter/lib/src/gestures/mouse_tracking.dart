@@ -26,6 +26,26 @@ typedef PointerExitEventListener = void Function(PointerExitEvent event);
 /// Used by [MouseTrackerAnnotation], [MouseRegion] and [RenderMouseRegion].
 typedef PointerHoverEventListener = void Function(PointerHoverEvent event);
 
+// A key, so that (_IdenticalKey<T>(a) == _IdenticalKey<T>(b)) is equivalent to
+// identical(a, b).
+class _IdenticalKey<T> {
+  _IdenticalKey(this.value);
+
+  final T value;
+
+  // Don't return `identityHashCode(value)` directly since the hash of this key
+  // needs to be different from that of its value.
+  @override
+  int get hashCode => identityHashCode(T) ^ identityHashCode(value);
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other))
+      return true;
+    return other is _IdenticalKey<T> && identical(other.value, value);
+  }
+}
+
 /// The annotation object used to annotate layers that are interested in mouse
 /// movements.
 ///
@@ -136,7 +156,7 @@ class MouseTrackerAnnotation extends Diagnosticable {
   /// creation, this getter will return a unique key that is different from any
   /// other annotations, which means such an annotation is only equal to itself
   /// in terms of [key].
-  Key get key => _key ?? ValueKey<MouseTrackerAnnotation>(this);
+  Key get key => _key ?? _IdenticalKey<MouseTrackerAnnotation>(this);
   final Key _key;
 
   @override
