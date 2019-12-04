@@ -93,7 +93,8 @@ std::ostream& operator<<(std::ostream& os, const SkRRect& r) {
 }
 
 std::ostream& operator<<(std::ostream& os, const SkPath& r) {
-  return os << "Valid: " << r.isValid() << ", FillType: " << r.getFillType()
+  return os << "Valid: " << r.isValid()
+            << ", FillType: " << static_cast<int>(r.getFillType())
             << ", Bounds: " << r.getBounds();
 }
 
