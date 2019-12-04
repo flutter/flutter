@@ -337,27 +337,112 @@ typedef AsyncWidgetBuilder<T> = Widget Function(BuildContext context, AsyncSnaps
 /// as the builder will always be called before the stream listener has a chance
 /// to be processed.
 ///
-/// {@tool sample}
+/// {@animation 200 150 https://flutter.github.io/assets-for-api-docs/assets/widgets/stream_builder.mp4}
 ///
-/// This sample shows a [StreamBuilder] configuring a text label to show the
-/// latest bid received for a lot in an auction. Assume the `_lot` field is
-/// set by a selector elsewhere in the UI.
+/// {@animation 200 150 https://flutter.github.io/assets-for-api-docs/assets/widgets/stream_builder_error.mp4}
+///
+/// {@tool snippet --template=stateful_widget_material}
+///
+/// This sample shows a [StreamBuilder] that listens to a Stream that emits bids
+/// for an auction. Every time the StreamBuilder receives a bid from the Stream,
+/// it will display the price of the bid below an icon. If the Stream emits an
+/// error, the error is displayed below an error icon. When the Stream finishes
+/// emitting bids, the final price is displayed.
 ///
 /// ```dart
-/// StreamBuilder<int>(
-///   stream: _lot?.bids, // a Stream<int> or null
-///   builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
-///     if (snapshot.hasError)
-///       return Text('Error: ${snapshot.error}');
-///     switch (snapshot.connectionState) {
-///       case ConnectionState.none: return Text('Select lot');
-///       case ConnectionState.waiting: return Text('Awaiting bids...');
-///       case ConnectionState.active: return Text('\$${snapshot.data}');
-///       case ConnectionState.done: return Text('\$${snapshot.data} (closed)');
-///     }
-///     return null; // unreachable
-///   },
-/// )
+/// Stream<int> _bids = (() async* {
+///   await Future<void>.delayed(Duration(seconds: 1));
+///   yield 1;
+///   await Future<void>.delayed(Duration(seconds: 1));
+/// })();
+///
+/// Widget build(BuildContext context) {
+///   return Container(
+///     alignment: FractionalOffset.center,
+///     color: Colors.white,
+///     child: StreamBuilder<int>(
+///       stream: _bids,
+///       builder: (BuildContext context, AsyncSnapshot<int> snapshot) {
+///         List<Widget> children;
+///
+///         if (snapshot.hasError) {
+///           children = <Widget>[
+///             Icon(
+///               Icons.error_outline,
+///               color: Colors.red,
+///               size: 60,
+///             ),
+///             Padding(
+///               padding: const EdgeInsets.only(top: 16),
+///               child: Text('Error: ${snapshot.error}'),
+///             )
+///           ];
+///         } else {
+///           switch (snapshot.connectionState) {
+///             case ConnectionState.none:
+///               children = <Widget>[
+///                 Icon(
+///                   Icons.info,
+///                   color: Colors.blue,
+///                   size: 60,
+///                 ),
+///                 const Padding(
+///                   padding: EdgeInsets.only(top: 16),
+///                   child: Text('Select a lot'),
+///                 )
+///               ];
+///               break;
+///             case ConnectionState.waiting:
+///               children = <Widget>[
+///                 SizedBox(
+///                   child: const CircularProgressIndicator(),
+///                   width: 60,
+///                   height: 60,
+///                 ),
+///                 const Padding(
+///                   padding: EdgeInsets.only(top: 16),
+///                   child: Text('Awaiting bids...'),
+///                 )
+///               ];
+///               break;
+///             case ConnectionState.active:
+///               children = <Widget>[
+///                 Icon(
+///                   Icons.check_circle_outline,
+///                   color: Colors.green,
+///                   size: 60,
+///                 ),
+///                 Padding(
+///                   padding: const EdgeInsets.only(top: 16),
+///                   child: Text('\$${snapshot.data}'),
+///                 )
+///               ];
+///               break;
+///             case ConnectionState.done:
+///               children = <Widget>[
+///                 Icon(
+///                   Icons.info,
+///                   color: Colors.blue,
+///                   size: 60,
+///                 ),
+///                 Padding(
+///                   padding: const EdgeInsets.only(top: 16),
+///                   child: Text('\$${snapshot.data} (closed)'),
+///                 )
+///               ];
+///               break;
+///           }
+///         }
+///
+///         return Column(
+///           mainAxisAlignment: MainAxisAlignment.center,
+///           crossAxisAlignment: CrossAxisAlignment.center,
+///           children: children,
+///         );
+///       },
+///     ),
+///   );
+/// }
 /// ```
 /// {@end-tool}
 ///

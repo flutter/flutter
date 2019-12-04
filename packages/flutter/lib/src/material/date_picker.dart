@@ -1092,6 +1092,8 @@ typedef SelectableDayPredicate = bool Function(DateTime day);
 /// The [builder] parameter can be used to wrap the dialog widget
 /// to add inherited widgets like [Theme].
 ///
+/// {@animation 350 622 https://flutter.github.io/assets-for-api-docs/assets/material/show_date_picker.mp4}
+///
 /// {@tool sample}
 /// Show a date picker with the dark theme.
 ///
