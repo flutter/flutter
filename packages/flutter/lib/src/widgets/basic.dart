@@ -1931,7 +1931,7 @@ class LayoutId extends ParentDataWidget<CustomMultiChildLayout> {
   @override
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is MultiChildLayoutParentData);
-    final MultiChildLayoutParentData parentData = renderObject.parentData;
+    final MultiChildLayoutParentData parentData = renderObject.parentData as MultiChildLayoutParentData;
     if (parentData.id != id) {
       parentData.id = id;
       final AbstractNode targetParent = renderObject.parent;
@@ -2659,7 +2659,7 @@ class _OffstageElement extends SingleChildRenderObjectElement {
   _OffstageElement(Offstage widget) : super(widget);
 
   @override
-  Offstage get widget => super.widget;
+  Offstage get widget => super.widget as Offstage;
 
   @override
   void debugVisitOnstageChildren(ElementVisitor visitor) {
@@ -3528,7 +3528,7 @@ class Positioned extends ParentDataWidget<Stack> {
   @override
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is StackParentData);
-    final StackParentData parentData = renderObject.parentData;
+    final StackParentData parentData = renderObject.parentData as StackParentData;
     bool needsLayout = false;
 
     if (parentData.left != left) {
@@ -4384,7 +4384,7 @@ class Flexible extends ParentDataWidget<Flex> {
   @override
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is FlexParentData);
-    final FlexParentData parentData = renderObject.parentData;
+    final FlexParentData parentData = renderObject.parentData as FlexParentData;
     bool needsLayout = false;
 
     if (parentData.flex != flex) {
@@ -4993,6 +4993,12 @@ class Flow extends MultiChildRenderObjectWidget {
 /// span.
 ///
 /// {@tool sample}
+///
+/// This sample demonstrates how to mix and match text with different text
+/// styles using the [RichText] Widget. It displays the text "Hello bold world,"
+/// emphasizing the word "bold" using a bold font weight.
+///
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/widgets/rich_text.png)
 ///
 /// ```dart
 /// RichText(
@@ -5968,13 +5974,13 @@ class _MouseRegionElement extends SingleChildRenderObjectElement {
   @override
   void activate() {
     super.activate();
-    final RenderMouseRegion renderMouseRegion = renderObject;
+    final RenderMouseRegion renderMouseRegion = renderObject as RenderMouseRegion;
     renderMouseRegion.postActivate();
   }
 
   @override
   void deactivate() {
-    final RenderMouseRegion renderMouseRegion = renderObject;
+    final RenderMouseRegion renderMouseRegion = renderObject as RenderMouseRegion;
     renderMouseRegion.preDeactivate();
     super.deactivate();
   }
@@ -6416,12 +6422,12 @@ class Semantics extends SingleChildRenderObjectWidget {
   /// Whether descendants of this widget are allowed to add semantic information
   /// to the [SemanticsNode] annotated by this widget.
   ///
-  /// When set to false descendants are allowed to annotate [SemanticNode]s of
+  /// When set to false descendants are allowed to annotate [SemanticsNode]s of
   /// their parent with the semantic information they want to contribute to the
   /// semantic tree.
   /// When set to true the only way for descendants to contribute semantic
   /// information to the semantic tree is to introduce new explicit
-  /// [SemanticNode]s to the tree.
+  /// [SemanticsNode]s to the tree.
   ///
   /// If the semantics properties of this node include
   /// [SemanticsProperties.scopesRoute] set to true, then [explicitChildNodes]
@@ -6763,7 +6769,7 @@ class KeyedSubtree extends StatelessWidget {
 
   /// Wrap each item in a KeyedSubtree whose key is based on the item's existing key or
   /// the sum of its list index and `baseIndex`.
-  static List<Widget> ensureUniqueKeysForList(Iterable<Widget> items, { int baseIndex = 0 }) {
+  static List<Widget> ensureUniqueKeysForList(List<Widget> items, { int baseIndex = 0 }) {
     if (items == null || items.isEmpty)
       return items;
 

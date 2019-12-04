@@ -201,6 +201,7 @@ void main() {
 
     final ThemeData theme = ThemeData.raw(
       brightness: Brightness.dark,
+      visualDensity: const VisualDensity(),
       primaryColor: Colors.black,
       primaryColorBrightness: Brightness.dark,
       primaryColorLight: Colors.black,
@@ -279,6 +280,7 @@ void main() {
 
     final ThemeData otherTheme = ThemeData.raw(
       brightness: Brightness.light,
+      visualDensity: const VisualDensity(),
       primaryColor: Colors.white,
       primaryColorBrightness: Brightness.light,
       primaryColorLight: Colors.white,

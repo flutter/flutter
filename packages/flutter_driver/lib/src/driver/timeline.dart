@@ -29,20 +29,20 @@ class TimelineEvent {
   factory TimelineEvent(Map<String, dynamic> json) {
     return TimelineEvent._(
       json,
-      json['name'],
-      json['cat'],
-      json['ph'],
-      json['pid'],
-      json['tid'],
+      json['name'] as String,
+      json['cat'] as String,
+      json['ph'] as String,
+      json['pid'] as int,
+      json['tid'] as int,
       json['dur'] != null
-        ? Duration(microseconds: json['dur'])
+        ? Duration(microseconds: json['dur'] as int)
         : null,
       json['tdur'] != null
-        ? Duration(microseconds: json['tdur'])
+        ? Duration(microseconds: json['tdur'] as int)
         : null,
-      json['ts'],
-      json['tts'],
-      json['args'],
+      json['ts'] as int,
+      json['tts'] as int,
+      json['args'] as Map<String, dynamic>,
     );
   }
 
@@ -122,7 +122,7 @@ class TimelineEvent {
 }
 
 List<TimelineEvent> _parseEvents(Map<String, dynamic> json) {
-  final List<dynamic> jsonEvents = json['traceEvents'];
+  final List<dynamic> jsonEvents = json['traceEvents'] as List<dynamic>;
 
   if (jsonEvents == null)
     return null;

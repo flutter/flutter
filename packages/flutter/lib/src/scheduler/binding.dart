@@ -417,7 +417,8 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
   // Whether this scheduler already requested to be called from the event loop.
   bool _hasRequestedAnEventLoopCallback = false;
 
-  // Ensures that the scheduler services a task scheduled by [scheduleTask].
+  // Ensures that the scheduler services a task scheduled by
+  // [SchedulerBinding.scheduleTask].
   void _ensureEventLoopCallback() {
     assert(!locked);
     assert(_taskQueue.isNotEmpty);

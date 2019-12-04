@@ -130,11 +130,11 @@ class DividerThemeData extends Diagnosticable {
 }
 
 /// An inherited widget that defines the configuration for
-/// [Divider]s, [VerticalDividers]s, dividers between [ListTile]s, and dividers
+/// [Divider]s, [VerticalDivider]s, dividers between [ListTile]s, and dividers
 /// between rows in [DataTable]s in this widget's subtree.
 class DividerTheme extends InheritedTheme {
   /// Creates a divider theme that controls the configurations for
-  /// [Divider]s, [VerticalDividers]s, dividers between [ListTile]s, and dividers
+  /// [Divider]s, [VerticalDivider]s, dividers between [ListTile]s, and dividers
   /// between rows in [DataTable]s in its widget subtree.
   const DividerTheme({
     Key key,
@@ -143,7 +143,7 @@ class DividerTheme extends InheritedTheme {
   }) : assert(data != null),
        super(key: key, child: child);
 
-  /// The properties for descendant [Divider]s, [VerticalDividers]s, dividers
+  /// The properties for descendant [Divider]s, [VerticalDivider]s, dividers
   /// between [ListTile]s, and dividers between rows in [DataTable]s.
   final DividerThemeData data;
 

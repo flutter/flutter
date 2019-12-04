@@ -587,7 +587,7 @@ class WidgetOrderFocusTraversalPolicy extends FocusTraversalPolicy with Directio
       }
     }
     while (candidate is FocusScopeNode && candidate.focusedChild != null) {
-      final FocusScopeNode candidateScope = candidate;
+      final FocusScopeNode candidateScope = candidate as FocusScopeNode;
       candidate = candidateScope.focusedChild;
     }
     return candidate;

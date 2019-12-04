@@ -22,6 +22,49 @@ import 'theme.dart';
 /// The box's total height is controlled by [height]. The appropriate
 /// padding is automatically computed from the height.
 ///
+/// {@tool snippet --template=stateless_widget_scaffold}
+///
+/// This sample shows how to display a Divider between an orange and blue box
+/// inside a column. The Divider is 20 logical pixels in height and contains a
+/// vertically centered black line that is 5 logical pixels thick. The black
+/// line is indented by 20 logical pixels.
+///
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/divider.png)
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return Center(
+///     child: Column(
+///       children: <Widget>[
+///         Expanded(
+///           child: Container(
+///             color: Colors.amber,
+///             child: const Center(
+///               child: Text('Above'),
+///             ),
+///           ),
+///         ),
+///         const Divider(
+///           color: Colors.black,
+///           height: 20,
+///           thickness: 5,
+///           indent: 20,
+///           endIndent: 0,
+///         ),
+///         Expanded(
+///           child: Container(
+///             color: Colors.blue,
+///             child: const Center(
+///               child: Text('Below'),
+///             ),
+///           ),
+///         ),
+///       ],
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
 /// See also:
 ///
 ///  * [PopupMenuDivider], which is the equivalent but for popup menus.
