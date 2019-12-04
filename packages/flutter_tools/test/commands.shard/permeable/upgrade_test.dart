@@ -121,6 +121,30 @@ void main() {
       Platform: () => fakePlatform,
     });
 
+    testUsingContext('Doesn\'t continue on known tag, dev branch, no force, already up-to-date', () async {
+      fakeCommandRunner.alreadyUpToDate = true;
+      final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
+        false,
+        false,
+        gitTagVersion,
+        flutterVersion,
+      );
+      expect(await result, null);
+      verifyNever(processManager.start(
+        <String>[
+          fs.path.join('bin', 'flutter'),
+          'upgrade',
+          '--continue',
+          '--no-version-check',
+        ],
+        environment: anyNamed('environment'),
+        workingDirectory: anyNamed('workingDirectory'),
+      ));
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => processManager,
+      Platform: () => fakePlatform,
+    });
+
     testUsingContext('verifyUpstreamConfigured', () async {
       when(processManager.run(
         <String>['git', 'rev-parse', '@{u}'],
@@ -288,6 +312,8 @@ void main() {
 class FakeUpgradeCommandRunner extends UpgradeCommandRunner {
   bool willHaveUncomittedChanges = false;
 
+  bool alreadyUpToDate = false;
+
   @override
   Future<void> verifyUpstreamConfigured() async {}
 
@@ -301,7 +327,7 @@ class FakeUpgradeCommandRunner extends UpgradeCommandRunner {
   Future<void> upgradeChannel(FlutterVersion flutterVersion) async {}
 
   @override
-  Future<void> attemptFastForward() async {}
+  Future<bool> attemptFastForward(FlutterVersion flutterVersion) async => alreadyUpToDate;
 
   @override
   Future<void> precacheArtifacts() async {}
