@@ -631,6 +631,8 @@ class EditableText extends StatefulWidget {
   /// value is null on non-iOS platforms and the same color used in [CupertinoTextField]
   /// on iOS.
   ///
+  /// Currently the autocorrection Rect only appears on iOS.
+  ///
   /// Defaults to null, which disables autocorrection Rect painting.
   final Color autocorrectionTextRectColor;
 
