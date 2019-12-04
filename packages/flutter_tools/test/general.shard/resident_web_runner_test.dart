@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_runner/resident_web_runner.dart';
 import 'package:flutter_tools/src/build_runner/web_fs.dart';
@@ -91,6 +92,7 @@ void main() {
           @required String hostname,
           @required String port,
           @required List<String> dartDefines,
+          @required UrlTunneller urlTunneller,
         }) async {
           didSkipDwds = skipDwds;
           return mockWebFs;

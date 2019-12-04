@@ -8,6 +8,7 @@ import 'package:dwds/dwds.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/globals.dart';
@@ -35,7 +36,7 @@ void main() {
     when(mockFlutterDevice.device).thenReturn(mockWebDevice);
     testbed = Testbed(
       setup: () {
-        residentWebRunner =  residentWebRunner = DwdsWebRunnerFactory().createWebRunner(
+        residentWebRunner = residentWebRunner = DwdsWebRunnerFactory().createWebRunner(
           mockFlutterDevice,
           flutterProject: FlutterProject.current(),
           debuggingOptions: DebuggingOptions.disabled(BuildInfo.release),
@@ -54,6 +55,7 @@ void main() {
           @required bool initializePlatform,
           @required String hostname,
           @required String port,
+          @required UrlTunneller urlTunneller,
           @required List<String> dartDefines,
         }) async {
           return mockWebFs;
