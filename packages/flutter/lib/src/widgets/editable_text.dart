@@ -353,8 +353,8 @@ class EditableText extends StatefulWidget {
     this.readOnly = false,
     this.obscureText = false,
     this.autocorrect = true,
-    bool enableSmartDashes,
-    bool enableSmartQuotes,
+    SmartDashesType smartDashesType,
+    SmartQuotesType smartQuotesType,
     this.enableSuggestions = true,
     @required this.style,
     StrutStyle strutStyle,
@@ -405,8 +405,8 @@ class EditableText extends StatefulWidget {
        assert(focusNode != null),
        assert(obscureText != null),
        assert(autocorrect != null),
-       enableSmartDashes = enableSmartDashes ?? !obscureText,
-       enableSmartQuotes = enableSmartQuotes ?? !obscureText,
+       smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
+       smartQuotesType = smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
        assert(enableSuggestions != null),
        assert(showSelectionHandles != null),
        assert(enableInteractiveSelection != null),
@@ -522,11 +522,11 @@ class EditableText extends StatefulWidget {
   /// {@endtemplate}
   final bool autocorrect;
 
-  /// {@macro flutter.services.textInput.enableSmartDashes}
-  final bool enableSmartDashes;
+  /// {@macro flutter.services.textInput.smartDashesType}
+  final SmartDashesType smartDashesType;
 
-  /// {@macro flutter.services.textInput.enableSmartQuotes}
-  final bool enableSmartQuotes;
+  /// {@macro flutter.services.textInput.smartQuotesType}
+  final SmartQuotesType smartQuotesType;
 
   /// {@macro flutter.services.textInput.enableSuggestions}
   final bool enableSuggestions;
@@ -1053,8 +1053,8 @@ class EditableText extends StatefulWidget {
     properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode));
     properties.add(DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));
     properties.add(DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: true));
-    properties.add(DiagnosticsProperty<bool>('enableSmartDashes', enableSmartDashes, defaultValue: !obscureText));
-    properties.add(DiagnosticsProperty<bool>('enableSmartQuotes', enableSmartQuotes, defaultValue: !obscureText));
+    properties.add(DiagnosticsProperty<SmartDashesType>('smartDashesType', smartDashesType, defaultValue: obscureText ? SmartDashesType.disabled : SmartDashesType.enabled));
+    properties.add(DiagnosticsProperty<SmartQuotesType>('smartQuotesType', smartQuotesType, defaultValue: obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled));
     properties.add(DiagnosticsProperty<bool>('enableSuggestions', enableSuggestions, defaultValue: true));
     style?.debugFillProperties(properties);
     properties.add(EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
@@ -1414,8 +1414,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           inputType: widget.keyboardType,
           obscureText: widget.obscureText,
           autocorrect: widget.autocorrect,
-          enableSmartDashes: widget.enableSmartDashes,
-          enableSmartQuotes: widget.enableSmartQuotes,
+          smartDashesType: widget.smartDashesType ?? (widget.obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
+          smartQuotesType: widget.smartQuotesType ?? (widget.obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
           enableSuggestions: widget.enableSuggestions,
           inputAction: widget.textInputAction ?? (widget.keyboardType == TextInputType.multiline
               ? TextInputAction.newline
@@ -1877,8 +1877,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               textWidthBasis: widget.textWidthBasis,
               obscureText: widget.obscureText,
               autocorrect: widget.autocorrect,
-              enableSmartDashes: widget.enableSmartDashes,
-              enableSmartQuotes: widget.enableSmartQuotes,
+              smartDashesType: widget.smartDashesType,
+              smartQuotesType: widget.smartQuotesType,
               enableSuggestions: widget.enableSuggestions,
               offset: offset,
               onSelectionChanged: _handleSelectionChanged,
@@ -1945,8 +1945,8 @@ class _Editable extends LeafRenderObjectWidget {
     this.locale,
     this.obscureText,
     this.autocorrect,
-    this.enableSmartDashes,
-    this.enableSmartQuotes,
+    this.smartDashesType,
+    this.smartQuotesType,
     this.enableSuggestions,
     this.offset,
     this.onSelectionChanged,
@@ -1985,8 +1985,8 @@ class _Editable extends LeafRenderObjectWidget {
   final bool obscureText;
   final TextWidthBasis textWidthBasis;
   final bool autocorrect;
-  final bool enableSmartDashes;
-  final bool enableSmartQuotes;
+  final SmartDashesType smartDashesType;
+  final SmartQuotesType smartQuotesType;
   final bool enableSuggestions;
   final ViewportOffset offset;
   final SelectionChangedHandler onSelectionChanged;

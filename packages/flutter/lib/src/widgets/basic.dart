@@ -6810,3 +6810,33 @@ class _StatefulBuilderState extends State<StatefulBuilder> {
   @override
   Widget build(BuildContext context) => widget.builder(context, setState);
 }
+
+/// Indicates how to handle the intelligent replacement of dashes in text input.
+///
+/// See also:
+///
+///  * [TextField.smartDashesType]
+///  * [TextFormField.smartDashesType]
+///  * [CupertinoTextField.smartDashesType]
+///  * [EditableText.smartDashesType]
+///  * [SmartQuotesType]
+///  * <https://developer.apple.com/documentation/uikit/uitextinputtraits>
+enum SmartDashesType {
+  enabled,
+  disabled,
+}
+
+/// Indicates how to handle the intelligent replacement of quotes in text input.
+///
+/// See also:
+///
+///  * [TextField.smartQuotesType]
+///  * [TextFormField.smartQuotesType]
+///  * [CupertinoTextField.smartQuotesType]
+///  * [EditableText.smartQuotesType]
+///  * [SmartDashesType]
+///  * <https://developer.apple.com/documentation/uikit/uitextinputtraits>
+enum SmartQuotesType {
+  enabled,
+  disabled,
+}

@@ -14,6 +14,7 @@ import 'dart:ui' show
   hashValues;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart' show SmartDashesType, SmartQuotesType;
 import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
 import 'message_codec.dart';
@@ -387,8 +388,8 @@ class TextInputConfiguration {
     this.inputType = TextInputType.text,
     this.obscureText = false,
     this.autocorrect = true,
-    bool enableSmartDashes,
-    bool enableSmartQuotes,
+    SmartDashesType smartDashesType,
+    SmartQuotesType smartQuotesType,
     this.enableSuggestions = true,
     this.actionLabel,
     this.inputAction = TextInputAction.done,
@@ -396,8 +397,8 @@ class TextInputConfiguration {
     this.textCapitalization = TextCapitalization.none,
   }) : assert(inputType != null),
        assert(obscureText != null),
-       enableSmartDashes = enableSmartDashes ?? !obscureText,
-       enableSmartQuotes = enableSmartQuotes ?? !obscureText,
+       smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
+       smartQuotesType = smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
        assert(autocorrect != null),
        assert(enableSuggestions != null),
        assert(keyboardAppearance != null),
@@ -417,7 +418,7 @@ class TextInputConfiguration {
   /// Defaults to true.
   final bool autocorrect;
 
-  /// {@template flutter.services.textInput.enableSmartDashes}
+  /// {@template flutter.services.textInput.smartDashesType}
   /// Whether to allow the platform to automatically format dashes.
   ///
   /// This flag only affects iOS versions 11 and above. It sets
@@ -435,12 +436,12 @@ class TextInputConfiguration {
   ///
   /// See also:
   ///
-  ///  * [enableSmartQuotes]
+  ///  * [smartQuotesType]
   ///  * <https://developer.apple.com/documentation/uikit/uitextinputtraits>
   /// {@endtemplate}
-  final bool enableSmartDashes;
+  final SmartDashesType smartDashesType;
 
-  /// {@template flutter.services.textInput.enableSmartQuotes}
+  /// {@template flutter.services.textInput.smartQuotesType}
   /// Whether to allow the platform to automatically format quotes.
   ///
   /// This flag only affects iOS. It sets [`UITextSmartQuotesType`](https://developer.apple.com/documentation/uikit/uitextsmartquotestype?language=objc) in the engine.
@@ -457,10 +458,10 @@ class TextInputConfiguration {
   ///
   /// See also:
   ///
-  ///  * [enableSmartDashes]
+  ///  * [smartDashesType]
   ///  * <https://developer.apple.com/documentation/uikit/uitextinputtraits>
   /// {@endtemplate}
-  final bool enableSmartQuotes;
+  final SmartQuotesType smartQuotesType;
 
   /// {@template flutter.services.textInput.enableSuggestions}
   /// Whether to show input suggestions as the user types.
@@ -506,8 +507,8 @@ class TextInputConfiguration {
       'inputType': inputType.toJson(),
       'obscureText': obscureText,
       'autocorrect': autocorrect,
-      'enableSmartDashes': enableSmartDashes,
-      'enableSmartQuotes': enableSmartQuotes,
+      'smartDashesType': smartDashesType.toString(),
+      'smartQuotesType': smartQuotesType.toString(),
       'enableSuggestions': enableSuggestions,
       'actionLabel': actionLabel,
       'inputAction': inputAction.toString(),
