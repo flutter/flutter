@@ -546,6 +546,44 @@ void main() {
     expect(selectionChangedCount, 1);
   }, skip: isBrowser);
 
+  test('promptRect disappears when promptRectColor is set to null', () {
+    const Color promptRectColor = Color(0x12345678);
+    final TextSelectionDelegate delegate = FakeEditableTextState();
+    final RenderEditable editable = RenderEditable(
+      text: const TextSpan(
+        style: TextStyle(height: 1.0, fontSize: 10.0, fontFamily: 'Ahem'),
+        text: 'ABCDEFG',
+      ),
+      startHandleLayerLink: LayerLink(),
+      endHandleLayerLink: LayerLink(),
+      textAlign: TextAlign.start,
+      textDirection: TextDirection.ltr,
+      locale: const Locale('en', 'US'),
+      offset: ViewportOffset.fixed(10.0),
+      textSelectionDelegate: delegate,
+      selection: const TextSelection.collapsed(offset: 0),
+      promptRectColor: promptRectColor,
+      promptRectRange: const TextRange(start: 0, end: 1),
+    );
+    editable.layout(BoxConstraints.loose(const Size(1000.0, 1000.0)));
+
+    expect(
+      (Canvas canvas) => editable.paint(TestRecordingPaintingContext(canvas), Offset.zero),
+      paints..rect(color: promptRectColor),
+    );
+
+    editable.promptRectColor = null;
+
+    editable.layout(BoxConstraints.loose(const Size(1000.0, 1000.0)));
+    pumpFrame();
+
+    expect(editable.promptRectColor, promptRectColor);
+    expect(
+      (Canvas canvas) => editable.paint(TestRecordingPaintingContext(canvas), Offset.zero),
+      isNot(paints..rect(color: promptRectColor)),
+    );
+  });
+
   test('editable hasFocus correctly initialized', () {
     // Regression test for https://github.com/flutter/flutter/issues/21640
     final TextSelectionDelegate delegate = FakeEditableTextState();
