@@ -800,7 +800,7 @@ class RenderOpacity extends RenderProxyBox {
         return;
       }
       assert(needsCompositing);
-      layer = context.pushOpacity(offset, _alpha, super.paint, oldLayer: layer);
+      layer = context.pushOpacity(offset, _alpha, super.paint, oldLayer: layer as OpacityLayer);
     }
   }
 
@@ -920,7 +920,7 @@ class RenderAnimatedOpacity extends RenderProxyBox {
         return;
       }
       assert(needsCompositing);
-      layer = context.pushOpacity(offset, _alpha, super.paint, oldLayer: layer);
+      layer = context.pushOpacity(offset, _alpha, super.paint, oldLayer: layer as OpacityLayer);
     }
   }
 
@@ -962,7 +962,7 @@ class RenderShaderMask extends RenderProxyBox {
        super(child);
 
   @override
-  ShaderMaskLayer get layer => super.layer;
+  ShaderMaskLayer get layer => super.layer as ShaderMaskLayer;
 
   /// Called to creates the [Shader] that generates the mask.
   ///
@@ -1030,7 +1030,7 @@ class RenderBackdropFilter extends RenderProxyBox {
       super(child);
 
   @override
-  BackdropFilterLayer get layer => super.layer;
+  BackdropFilterLayer get layer => super.layer as BackdropFilterLayer;
 
   /// The image filter to apply to the existing painted content before painting
   /// the child.
@@ -1163,7 +1163,7 @@ class ShapeBorderClipper extends CustomClipper<Path> {
   bool shouldReclip(CustomClipper<Path> oldClipper) {
     if (oldClipper.runtimeType != ShapeBorderClipper)
       return true;
-    final ShapeBorderClipper typedOldClipper = oldClipper;
+    final ShapeBorderClipper typedOldClipper = oldClipper as ShapeBorderClipper;
     return typedOldClipper.shape != shape
         || typedOldClipper.textDirection != textDirection;
   }
@@ -1315,7 +1315,14 @@ class RenderClipRect extends _RenderCustomClip<Rect> {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       _updateClip();
-      layer = context.pushClipRect(needsCompositing, offset, _clip, super.paint, clipBehavior: clipBehavior, oldLayer: layer);
+      layer = context.pushClipRect(
+        needsCompositing,
+        offset,
+        _clip,
+        super.paint,
+        clipBehavior: clipBehavior,
+        oldLayer: layer as ClipRectLayer,
+      );
     } else {
       layer = null;
     }
@@ -1394,7 +1401,13 @@ class RenderClipRRect extends _RenderCustomClip<RRect> {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       _updateClip();
-      layer = context.pushClipRRect(needsCompositing, offset, _clip.outerRect, _clip, super.paint, clipBehavior: clipBehavior, oldLayer: layer);
+      layer = context.pushClipRRect(
+        needsCompositing,
+        offset,
+        _clip.outerRect,
+        _clip,
+        super.paint, clipBehavior: clipBehavior, oldLayer: layer as ClipRRectLayer,
+      );
     } else {
       layer = null;
     }
@@ -1465,7 +1478,15 @@ class RenderClipOval extends _RenderCustomClip<Rect> {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       _updateClip();
-      layer = context.pushClipPath(needsCompositing, offset, _clip, _getClipPath(_clip), super.paint, clipBehavior: clipBehavior, oldLayer: layer);
+      layer = context.pushClipPath(
+        needsCompositing,
+        offset,
+        _clip,
+        _getClipPath(_clip),
+        super.paint,
+        clipBehavior: clipBehavior,
+        oldLayer: layer as ClipPathLayer,
+      );
     } else {
       layer = null;
     }
@@ -1530,7 +1551,15 @@ class RenderClipPath extends _RenderCustomClip<Path> {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       _updateClip();
-      layer = context.pushClipPath(needsCompositing, offset, Offset.zero & size, _clip, super.paint, clipBehavior: clipBehavior, oldLayer: layer);
+      layer = context.pushClipPath(
+        needsCompositing,
+        offset,
+        Offset.zero & size,
+        _clip,
+        super.paint,
+        clipBehavior: clipBehavior,
+        oldLayer: layer as ClipPathLayer,
+      );
     } else {
       layer = null;
     }
@@ -1667,7 +1696,7 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
        );
 
   @override
-  PhysicalModelLayer get layer => super.layer;
+  PhysicalModelLayer get layer => super.layer as PhysicalModelLayer;
 
   /// The shape of the layer.
   ///
@@ -1809,7 +1838,7 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
        );
 
   @override
-  PhysicalModelLayer get layer => super.layer;
+  PhysicalModelLayer get layer => super.layer as PhysicalModelLayer;
 
   @override
   Path get _defaultClip => Path()..addRect(Offset.zero & size);
@@ -2191,7 +2220,13 @@ class RenderTransform extends RenderProxyBox {
       final Matrix4 transform = _effectiveTransform;
       final Offset childOffset = MatrixUtils.getAsTranslation(transform);
       if (childOffset == null) {
-        layer = context.pushTransform(needsCompositing, offset, transform, super.paint, oldLayer: layer);
+        layer = context.pushTransform(
+          needsCompositing,
+          offset,
+          transform,
+          super.paint,
+          oldLayer: layer as TransformLayer,
+        );
       } else {
         super.paint(context, offset + childOffset);
         layer = null;
@@ -2209,7 +2244,7 @@ class RenderTransform extends RenderProxyBox {
     super.debugFillProperties(properties);
     properties.add(TransformProperty('transform matrix', _transform));
     properties.add(DiagnosticsProperty<Offset>('origin', origin));
-    properties.add(DiagnosticsProperty<Alignment>('alignment', alignment));
+    properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment));
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('transformHitTests', transformHitTests));
   }
@@ -2339,7 +2374,7 @@ class RenderFittedBox extends RenderProxyBox {
     final Offset childOffset = MatrixUtils.getAsTranslation(_transform);
     if (childOffset == null)
       return context.pushTransform(needsCompositing, offset, _transform, super.paint,
-          oldLayer: layer is TransformLayer ? layer : null);
+          oldLayer: layer is TransformLayer ? layer as TransformLayer : null);
     else
       super.paint(context, offset + childOffset);
     return null;
@@ -2353,7 +2388,7 @@ class RenderFittedBox extends RenderProxyBox {
     if (child != null) {
       if (_hasVisualOverflow)
         layer = context.pushClipRect(needsCompositing, offset, Offset.zero & size, _paintChildWithTransform,
-            oldLayer: layer is ClipRectLayer ? layer : null);
+            oldLayer: layer is ClipRectLayer ? layer as ClipRectLayer : null);
       else
         layer = _paintChildWithTransform(context, offset);
     }
@@ -2387,7 +2422,7 @@ class RenderFittedBox extends RenderProxyBox {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(EnumProperty<BoxFit>('fit', fit));
-    properties.add(DiagnosticsProperty<Alignment>('alignment', alignment));
+    properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment));
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
   }
 }
@@ -2906,7 +2941,7 @@ class RenderRepaintBoundary extends RenderProxyBox {
   ///  * [dart:ui.Scene.toImage] for more information about the image returned.
   Future<ui.Image> toImage({ double pixelRatio = 1.0 }) {
     assert(!debugNeedsPaint);
-    final OffsetLayer offsetLayer = layer;
+    final OffsetLayer offsetLayer = layer as OffsetLayer;
     return offsetLayer.toImage(Offset.zero & size, pixelRatio: pixelRatio);
   }
 
@@ -4794,7 +4829,7 @@ class RenderLeaderLayer extends RenderProxyBox {
     if (layer == null) {
       layer = LeaderLayer(link: link, offset: offset);
     } else {
-      final LeaderLayer leaderLayer = layer;
+      final LeaderLayer leaderLayer = layer as LeaderLayer;
       leaderLayer
         ..link = link
         ..offset = offset;
@@ -4895,7 +4930,7 @@ class RenderFollowerLayer extends RenderProxyBox {
 
   /// The layer we created when we were last painted.
   @override
-  FollowerLayer get layer => super.layer;
+  FollowerLayer get layer => super.layer as FollowerLayer;
 
   /// Return the transform that was used in the last composition phase, if any.
   ///
