@@ -262,7 +262,7 @@ Future<void> _runToolTests() async {
     value: (dynamic subshard) => () async {
       await _pubRunTest(
         toolsPath,
-        testPath: path.join(kTest, '$subshard$kDotShard'),
+        testPath: path.join(kTest, '$subshard$kDotShard', '**', '*_test.dart'),
         useBuildRunner: canUseBuildRunner,
         tableData: bigqueryApi?.tabledata,
         enableFlutterToolAsserts: true,
