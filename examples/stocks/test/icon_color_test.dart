@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -41,7 +41,7 @@ void checkIconColor(WidgetTester tester, String label, Color color) {
   final Element listTile = findElementOfExactWidgetTypeGoingUp(tester.element(find.text(label)), ListTile);
   expect(listTile, isNotNull);
   final Element asset = findElementOfExactWidgetTypeGoingDown(listTile, RichText);
-  final RichText richText = asset.widget;
+  final RichText richText = asset.widget as RichText;
   expect(richText.text.style.color, equals(color));
 }
 

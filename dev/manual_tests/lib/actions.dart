@@ -1,6 +1,7 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -165,7 +166,7 @@ class UndoIntent extends Intent {
 
   @override
   bool isEnabled(BuildContext context) {
-    final UndoableActionDispatcher manager = Actions.of(context, nullOk: true);
+    final UndoableActionDispatcher manager = Actions.of(context, nullOk: true) as UndoableActionDispatcher;
     return manager.canUndo;
   }
 }
@@ -175,7 +176,7 @@ class RedoIntent extends Intent {
 
   @override
   bool isEnabled(BuildContext context) {
-    final UndoableActionDispatcher manager = Actions.of(context, nullOk: true);
+    final UndoableActionDispatcher manager = Actions.of(context, nullOk: true) as UndoableActionDispatcher;
     return manager.canRedo;
   }
 }
@@ -188,7 +189,7 @@ final Action kUndoAction = CallbackAction(
     if (node?.context == null) {
       return;
     }
-    final UndoableActionDispatcher manager = Actions.of(node.context, nullOk: true);
+    final UndoableActionDispatcher manager = Actions.of(node.context, nullOk: true) as UndoableActionDispatcher;
     manager?.undo();
   },
 );
@@ -201,7 +202,7 @@ final Action kRedoAction = CallbackAction(
     if (node?.context == null) {
       return;
     }
-    final UndoableActionDispatcher manager = Actions.of(node.context, nullOk: true);
+    final UndoableActionDispatcher manager = Actions.of(node.context, nullOk: true) as UndoableActionDispatcher;
     manager?.redo();
   },
 );

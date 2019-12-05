@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -171,7 +171,7 @@ class OverlayGeometryAppState extends State<OverlayGeometryApp> {
   void handleTapUp(GlobalKey target, Offset globalPosition) {
     setState(() {
       markers[MarkerType.touch] = globalPosition;
-      final RenderBox box = target.currentContext.findRenderObject();
+      final RenderBox box = target.currentContext.findRenderObject() as RenderBox;
       markers[MarkerType.topLeft] = box.localToGlobal(const Offset(0.0, 0.0));
       final Size size = box.size;
       markers[MarkerType.bottomRight] = box.localToGlobal(Offset(size.width, size.height));

@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -585,6 +585,7 @@ void main() {
 
   testWidgets('Switch.adaptive', (WidgetTester tester) async {
     bool value = false;
+    const Color inactiveTrackColor = Colors.pink;
 
     Widget buildFrame(TargetPlatform platform) {
       return MaterialApp(
@@ -595,6 +596,7 @@ void main() {
               child: Center(
                 child: Switch.adaptive(
                   value: value,
+                  inactiveTrackColor: inactiveTrackColor,
                   onChanged: (bool newValue) {
                     setState(() {
                       value = newValue;
@@ -610,6 +612,9 @@ void main() {
 
     await tester.pumpWidget(buildFrame(TargetPlatform.iOS));
     expect(find.byType(CupertinoSwitch), findsOneWidget);
+
+    final CupertinoSwitch adaptiveSwitch = tester.widget(find.byType(CupertinoSwitch));
+    expect(adaptiveSwitch.trackColor, inactiveTrackColor);
 
     expect(value, isFalse);
     await tester.tap(find.byType(Switch));
@@ -744,6 +749,7 @@ void main() {
 
     // Start hovering
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
     addTearDown(gesture.removePointer);
     await gesture.moveTo(tester.getCenter(find.byType(Switch)));
 

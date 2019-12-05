@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -84,8 +84,8 @@ class CircleBorder extends ShapeBorder {
   bool operator ==(dynamic other) {
     if (runtimeType != other.runtimeType)
       return false;
-    final CircleBorder typedOther = other;
-    return side == typedOther.side;
+    return other is CircleBorder
+        && other.side == side;
   }
 
   @override

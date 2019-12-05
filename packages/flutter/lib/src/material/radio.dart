@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -192,8 +192,7 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     _actionMap = <LocalKey, ActionFactory>{
-      SelectAction.key: _createAction,
-      if (!kIsWeb) ActivateAction.key: _createAction,
+      ActivateAction.key: _createAction,
     };
   }
 
@@ -207,7 +206,7 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin {
 
   Action _createAction() {
     return CallbackAction(
-      SelectAction.key,
+      ActivateAction.key,
       onInvoke: _actionHandler,
     );
   }

@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -688,7 +688,7 @@ class AndroidDevice extends Device {
     String output;
     try {
       output = runAdbCheckedSync(<String>[
-        'shell', '-x', 'logcat', '-v', 'time', '-t', '1',
+        'shell', '-x', 'logcat', '-v', 'time', '-t', '1'
       ]);
     } catch (error) {
       printError('Failed to extract the most recent timestamp from the Android log: $error.');
@@ -718,6 +718,12 @@ class AndroidDevice extends Device {
   @override
   bool isSupportedForProject(FlutterProject flutterProject) {
     return flutterProject.android.existsSync();
+  }
+
+  @override
+  Future<void> dispose() async {
+    _logReader?._stop();
+    await _portForwarder?.dispose();
   }
 }
 
@@ -1007,8 +1013,15 @@ class _AdbLogReader extends DeviceLogReader {
   String get name => device.name;
 
   void _start() {
-    // Start the adb logcat process and filter logs by the "flutter" tag.
-    final List<String> args = <String>['shell', '-x', 'logcat', '-v', 'time', '-s', 'flutter'];
+    final String lastTimestamp = device.lastLogcatTimestamp;
+    // Start the adb logcat process and filter the most recent logs since `lastTimestamp`.
+    final List<String> args = <String>[
+      'logcat',
+      '-v',
+      'time',
+      '-T',
+      lastTimestamp ?? '', // Empty `-T` means the timestamp of the logcat command invocation.
+    ];
     processUtils.start(device.adbCommandForDevice(args)).then<void>((Process process) {
       _process = process;
       // We expect logcat streams to occasionally contain invalid utf-8,
@@ -1116,9 +1129,12 @@ class _AdbLogReader extends DeviceLogReader {
   }
 
   void _stop() {
-    // TODO(devoncarew): We should remove adb port forwarding here.
-
     _process?.kill();
+  }
+
+  @override
+  void dispose() {
+    _stop();
   }
 }
 
@@ -1128,7 +1144,6 @@ class _AndroidDevicePortForwarder extends DevicePortForwarder {
   final AndroidDevice device;
 
   static int _extractPort(String portString) {
-
     return int.tryParse(portString.trim());
   }
 
@@ -1239,5 +1254,12 @@ class _AndroidDevicePortForwarder extends DevicePortForwarder {
       device.adbCommandForDevice(unforwardCommand),
       throwOnError: true,
     );
+  }
+
+  @override
+  Future<void> dispose() async {
+    for (ForwardedPort port in forwardedPorts) {
+      await unforward(port);
+    }
   }
 }

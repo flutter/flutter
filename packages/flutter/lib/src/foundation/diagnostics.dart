@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -158,6 +158,7 @@ enum DiagnosticsTreeStyle {
   /// the following line.
   ///
   /// See also:
+  ///
   ///  * [singleLine], which displays the same information but keeps the
   ///    property and value on the same line.
   errorProperty,
@@ -166,8 +167,8 @@ enum DiagnosticsTreeStyle {
   ///
   /// See also:
   ///
-  ///  * [DebugOverflowIndicator], which uses this style to display just the
-  ///    immediate children of a node.
+  ///  * [DebugOverflowIndicatorMixin], which uses this style to display just
+  ///    the immediate children of a node.
   shallow,
 
   /// Render only the children of a node truncating before the tree becomes too
@@ -326,9 +327,6 @@ class TextTreeConfiguration {
 
   /// Mandatory string to add after the properties of a node regardless of
   /// whether the node has any properties.
-  ///
-  /// See [headerLineTextConfiguration] for an example of using this field to
-  /// add a colon at the end of the header line.
   final String mandatoryAfterProperties;
 
   /// Property separator to add between properties.
@@ -515,7 +513,7 @@ final TextTreeConfiguration denseTextConfiguration = TextTreeConfiguration(
 ///    ╚═══════════
 /// ```
 ///
-/// /// See also:
+/// See also:
 ///
 ///  * [DiagnosticsTreeStyle.transition], uses this style for ASCII art display.
 final TextTreeConfiguration transitionTextConfiguration = TextTreeConfiguration(
@@ -1061,7 +1059,7 @@ bool _isSingleLine(DiagnosticsTreeStyle style) {
 ///
 /// See also:
 ///
-/// * [DiagnosticsNode.toStringDeep], which uses a [TextRender] to return a
+///  * [DiagnosticsNode.toStringDeep], which uses a [TextTreeRenderer] to return a
 ///    string representation of this node and its descendants.
 class TextTreeRenderer {
   /// Creates a [TextTreeRenderer] object with the given arguments specifying

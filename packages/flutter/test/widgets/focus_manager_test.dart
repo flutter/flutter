@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -664,12 +664,12 @@ void main() {
         description,
         equalsIgnoringHashCodes(
           'FocusManager#00000\n'
-          ' │ primaryFocus: FocusNode#00000(Child 4)\n'
+          ' │ primaryFocus: FocusNode#00000(Child 4 [PRIMARY FOCUS])\n'
           ' │ primaryFocusCreator: Container-[GlobalKey#00000] ← [root]\n'
           ' │\n'
-          ' └─rootScope: FocusScopeNode#00000(Root Focus Scope)\n'
+          ' └─rootScope: FocusScopeNode#00000(Root Focus Scope [IN FOCUS PATH])\n'
           '   │ IN FOCUS PATH\n'
-          '   │ focusedChildren: FocusScopeNode#00000\n'
+          '   │ focusedChildren: FocusScopeNode#00000([IN FOCUS PATH])\n'
           '   │\n'
           '   ├─Child 1: FocusScopeNode#00000(Scope 1)\n'
           '   │ │ context: Container-[GlobalKey#00000]\n'
@@ -683,19 +683,19 @@ void main() {
           '   │   └─Child 2: FocusNode#00000\n'
           '   │       context: Container-[GlobalKey#00000]\n'
           '   │\n'
-          '   └─Child 2: FocusScopeNode#00000\n'
+          '   └─Child 2: FocusScopeNode#00000([IN FOCUS PATH])\n'
           '     │ context: Container-[GlobalKey#00000]\n'
           '     │ IN FOCUS PATH\n'
-          '     │ focusedChildren: FocusNode#00000(Child 4)\n'
+          '     │ focusedChildren: FocusNode#00000(Child 4 [PRIMARY FOCUS])\n'
           '     │\n'
-          '     └─Child 1: FocusNode#00000(Parent 2)\n'
+          '     └─Child 1: FocusNode#00000(Parent 2 [IN FOCUS PATH])\n'
           '       │ context: Container-[GlobalKey#00000]\n'
           '       │ IN FOCUS PATH\n'
           '       │\n'
           '       ├─Child 1: FocusNode#00000(Child 3)\n'
           '       │   context: Container-[GlobalKey#00000]\n'
           '       │\n'
-          '       └─Child 2: FocusNode#00000(Child 4)\n'
+          '       └─Child 2: FocusNode#00000(Child 4 [PRIMARY FOCUS])\n'
           '           context: Container-[GlobalKey#00000]\n'
           '           PRIMARY FOCUS\n'
         ));

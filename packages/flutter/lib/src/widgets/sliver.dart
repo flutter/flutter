@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -725,6 +725,7 @@ abstract class SliverMultiBoxAdaptorWidget extends SliverWithKeepAliveWidget {
   }) : assert(delegate != null),
        super(key: key);
 
+  /// {@template flutter.widgets.sliverMultiBoxAdaptor.delegate}
   /// The delegate that provides the children for this widget.
   ///
   /// The children are constructed lazily using this delegate to avoid creating
@@ -735,6 +736,7 @@ abstract class SliverMultiBoxAdaptorWidget extends SliverWithKeepAliveWidget {
   ///  * [SliverChildBuilderDelegate] and [SliverChildListDelegate], which are
   ///    commonly used subclasses of [SliverChildDelegate] that use a builder
   ///    callback and an explicit child list, respectively.
+  /// {@endtemplate}
   final SliverChildDelegate delegate;
 
   @override
@@ -813,7 +815,7 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
 
   @override
   RenderSliverList createRenderObject(BuildContext context) {
-    final SliverMultiBoxAdaptorElement element = context;
+    final SliverMultiBoxAdaptorElement element = context as SliverMultiBoxAdaptorElement;
     return RenderSliverList(childManager: element);
   }
 }
@@ -876,7 +878,7 @@ class SliverFixedExtentList extends SliverMultiBoxAdaptorWidget {
 
   @override
   RenderSliverFixedExtentList createRenderObject(BuildContext context) {
-    final SliverMultiBoxAdaptorElement element = context;
+    final SliverMultiBoxAdaptorElement element = context as SliverMultiBoxAdaptorElement;
     return RenderSliverFixedExtentList(childManager: element, itemExtent: itemExtent);
   }
 
@@ -996,7 +998,7 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
 
   @override
   RenderSliverGrid createRenderObject(BuildContext context) {
-    final SliverMultiBoxAdaptorElement element = context;
+    final SliverMultiBoxAdaptorElement element = context as SliverMultiBoxAdaptorElement;
     return RenderSliverGrid(childManager: element, gridDelegate: gridDelegate);
   }
 
@@ -1023,7 +1025,7 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
   }
 }
 
-/// A sliver that contains a multiple box children that each fill the viewport.
+/// A sliver that contains multiple box children that each fills the viewport.
 ///
 /// [SliverFillViewport] places its children in a linear array along the main
 /// axis. Each child is sized to fill the viewport, both in the main and cross
@@ -1038,15 +1040,15 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
 ///    the main axis extent of each item.
 ///  * [SliverList], which does not require its children to have the same
 ///    extent in the main axis.
-class SliverFillViewport extends SliverMultiBoxAdaptorWidget {
+class SliverFillViewport extends StatelessWidget {
   /// Creates a sliver whose box children that each fill the viewport.
   const SliverFillViewport({
     Key key,
-    @required SliverChildDelegate delegate,
+    @required this.delegate,
     this.viewportFraction = 1.0,
   }) : assert(viewportFraction != null),
        assert(viewportFraction > 0.0),
-       super(key: key, delegate: delegate);
+       super(key: key);
 
   /// The fraction of the viewport that each child should fill in the main axis.
   ///
@@ -1055,15 +1057,112 @@ class SliverFillViewport extends SliverMultiBoxAdaptorWidget {
   /// the viewport in the main axis.
   final double viewportFraction;
 
+  /// {@macro flutter.widgets.sliverMultiBoxAdaptor.delegate}
+  final SliverChildDelegate delegate;
+
+  @override
+  Widget build(BuildContext context) {
+    return _SliverFractionalPadding(
+      viewportFraction: (1 - viewportFraction).clamp(0, 1) / 2,
+      sliver: _SliverFillViewportRenderObjectWidget(
+        viewportFraction: viewportFraction,
+        delegate: delegate,
+      ),
+    );
+  }
+}
+
+class _SliverFillViewportRenderObjectWidget extends SliverMultiBoxAdaptorWidget {
+  const _SliverFillViewportRenderObjectWidget({
+    Key key,
+    @required SliverChildDelegate delegate,
+    this.viewportFraction = 1.0,
+  }) : assert(viewportFraction != null),
+       assert(viewportFraction > 0.0),
+       super(key: key, delegate: delegate);
+
+  final double viewportFraction;
+
   @override
   RenderSliverFillViewport createRenderObject(BuildContext context) {
-    final SliverMultiBoxAdaptorElement element = context;
+    final SliverMultiBoxAdaptorElement element = context as SliverMultiBoxAdaptorElement;
     return RenderSliverFillViewport(childManager: element, viewportFraction: viewportFraction);
   }
 
   @override
   void updateRenderObject(BuildContext context, RenderSliverFillViewport renderObject) {
     renderObject.viewportFraction = viewportFraction;
+  }
+}
+
+class _SliverFractionalPadding extends SingleChildRenderObjectWidget {
+  const _SliverFractionalPadding({
+    this.viewportFraction = 0,
+    Widget sliver,
+  }) : assert(viewportFraction != null),
+       assert(viewportFraction >= 0),
+       assert(viewportFraction <= 0.5),
+       super(child: sliver);
+
+  final double viewportFraction;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) => _RenderSliverFractionalPadding(viewportFraction: viewportFraction);
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderSliverFractionalPadding renderObject) {
+    renderObject.viewportFraction = viewportFraction;
+  }
+}
+
+class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
+  _RenderSliverFractionalPadding({
+    double viewportFraction = 0,
+  }) : assert(viewportFraction != null),
+       assert(viewportFraction <= 0.5),
+       assert(viewportFraction >= 0),
+       _viewportFraction = viewportFraction;
+
+  double get viewportFraction => _viewportFraction;
+  double _viewportFraction;
+  set viewportFraction(double newValue) {
+    assert(newValue != null);
+    if (_viewportFraction == newValue)
+      return;
+    _viewportFraction = newValue;
+    _markNeedsResolution();
+  }
+
+  @override
+  EdgeInsets get resolvedPadding => _resolvedPadding;
+  EdgeInsets _resolvedPadding;
+
+  void _markNeedsResolution() {
+    _resolvedPadding = null;
+    markNeedsLayout();
+  }
+
+  void _resolve() {
+    if (_resolvedPadding != null)
+      return;
+    assert(constraints.axis != null);
+    final double paddingValue = constraints.viewportMainAxisExtent * viewportFraction;
+    switch (constraints.axis) {
+      case Axis.horizontal:
+        _resolvedPadding = EdgeInsets.symmetric(horizontal: paddingValue);
+        break;
+      case Axis.vertical:
+        _resolvedPadding = EdgeInsets.symmetric(vertical: paddingValue);
+        break;
+    }
+
+    return;
+  }
+
+  @override
+  void performLayout() {
+    _resolve();
+    super.performLayout();
   }
 }
 
@@ -1076,10 +1175,10 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
   SliverMultiBoxAdaptorElement(SliverMultiBoxAdaptorWidget widget) : super(widget);
 
   @override
-  SliverMultiBoxAdaptorWidget get widget => super.widget;
+  SliverMultiBoxAdaptorWidget get widget => super.widget as SliverMultiBoxAdaptorWidget;
 
   @override
-  RenderSliverMultiBoxAdaptor get renderObject => super.renderObject;
+  RenderSliverMultiBoxAdaptor get renderObject => super.renderObject as RenderSliverMultiBoxAdaptor;
 
   @override
   void update(covariant SliverMultiBoxAdaptorWidget newWidget) {
@@ -1121,9 +1220,9 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
         final Element newChild = updateChild(newChildren[index], _build(index), index);
         if (newChild != null) {
           _childElements[index] = newChild;
-          final SliverMultiBoxAdaptorParentData parentData = newChild.renderObject.parentData;
+          final SliverMultiBoxAdaptorParentData parentData = newChild.renderObject.parentData as SliverMultiBoxAdaptorParentData;
           if (!parentData.keptAlive)
-            _currentBeforeChild = newChild.renderObject;
+            _currentBeforeChild = newChild.renderObject as RenderBox;
         } else {
           _childElements.remove(index);
         }
@@ -1167,7 +1266,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
     owner.buildScope(this, () {
       final bool insertFirst = after == null;
       assert(insertFirst || _childElements[index-1] != null);
-      _currentBeforeChild = insertFirst ? null : _childElements[index-1].renderObject;
+      _currentBeforeChild = insertFirst ? null : (_childElements[index-1].renderObject as RenderBox);
       Element newChild;
       try {
         _currentlyUpdatingChildIndex = index;
@@ -1185,9 +1284,9 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
 
   @override
   Element updateChild(Element child, Widget newWidget, dynamic newSlot) {
-    final SliverMultiBoxAdaptorParentData oldParentData = child?.renderObject?.parentData;
+    final SliverMultiBoxAdaptorParentData oldParentData = child?.renderObject?.parentData as SliverMultiBoxAdaptorParentData;
     final Element newChild = super.updateChild(child, newWidget, newSlot);
-    final SliverMultiBoxAdaptorParentData newParentData = newChild?.renderObject?.parentData;
+    final SliverMultiBoxAdaptorParentData newParentData = newChild?.renderObject?.parentData as SliverMultiBoxAdaptorParentData;
 
     // Preserve the old layoutOffset if the renderObject was swapped out.
     if (oldParentData != newParentData && oldParentData != null && newParentData != null) {
@@ -1291,7 +1390,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
   @override
   void didAdoptChild(RenderBox child) {
     assert(_currentlyUpdatingChildIndex != null);
-    final SliverMultiBoxAdaptorParentData childParentData = child.parentData;
+    final SliverMultiBoxAdaptorParentData childParentData = child.parentData as SliverMultiBoxAdaptorParentData;
     childParentData.index = _currentlyUpdatingChildIndex;
   }
 
@@ -1307,9 +1406,9 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
     assert(slot != null);
     assert(_currentlyUpdatingChildIndex == slot);
     assert(renderObject.debugValidateChild(child));
-    renderObject.insert(child, after: _currentBeforeChild);
+    renderObject.insert(child as RenderBox, after: _currentBeforeChild);
     assert(() {
-      final SliverMultiBoxAdaptorParentData childParentData = child.parentData;
+      final SliverMultiBoxAdaptorParentData childParentData = child.parentData as SliverMultiBoxAdaptorParentData;
       assert(slot == childParentData.index);
       return true;
     }());
@@ -1319,13 +1418,13 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
   void moveChildRenderObject(covariant RenderObject child, int slot) {
     assert(slot != null);
     assert(_currentlyUpdatingChildIndex == slot);
-    renderObject.move(child, after: _currentBeforeChild);
+    renderObject.move(child as RenderBox, after: _currentBeforeChild);
   }
 
   @override
   void removeChildRenderObject(covariant RenderObject child) {
     assert(_currentlyUpdatingChildIndex != null);
-    renderObject.remove(child);
+    renderObject.remove(child as RenderBox);
   }
 
   @override
@@ -1339,7 +1438,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
   @override
   void debugVisitOnstageChildren(ElementVisitor visitor) {
     _childElements.values.where((Element child) {
-      final SliverMultiBoxAdaptorParentData parentData = child.renderObject.parentData;
+      final SliverMultiBoxAdaptorParentData parentData = child.renderObject.parentData as SliverMultiBoxAdaptorParentData;
       double itemExtent;
       switch (renderObject.constraints.axis) {
         case Axis.horizontal:
@@ -1837,7 +1936,7 @@ class _SliverOffstageElement extends SingleChildRenderObjectElement {
   _SliverOffstageElement(SliverOffstage widget) : super(widget);
 
   @override
-  SliverOffstage get widget => super.widget;
+  SliverOffstage get widget => super.widget as SliverOffstage;
 
   @override
   void debugVisitOnstageChildren(ElementVisitor visitor) {
@@ -1886,7 +1985,7 @@ class KeepAlive extends ParentDataWidget<SliverWithKeepAliveWidget> {
   @override
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is KeepAliveParentDataMixin);
-    final KeepAliveParentDataMixin parentData = renderObject.parentData;
+    final KeepAliveParentDataMixin parentData = renderObject.parentData as KeepAliveParentDataMixin;
     if (parentData.keepAlive != keepAlive) {
       parentData.keepAlive = keepAlive;
       final AbstractNode targetParent = renderObject.parent;

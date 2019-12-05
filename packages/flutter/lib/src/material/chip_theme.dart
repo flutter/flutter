@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -23,7 +23,7 @@ import 'theme_data.dart';
 /// rebuilt if the theme later changes.
 ///
 /// The [ThemeData] object given by the [Theme.of] call also contains a default
-/// [Theme.chipTheme] that can be customized by copying it (using
+/// [ThemeData.chipTheme] that can be customized by copying it (using
 /// [ChipThemeData.copyWith]).
 ///
 /// See also:

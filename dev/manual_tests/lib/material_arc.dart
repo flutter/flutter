@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -139,7 +139,7 @@ class _PointDemoState extends State<_PointDemo> {
     if (_dragTarget != null)
       return _IgnoreDrag();
 
-    final RenderBox box = _painterKey.currentContext.findRenderObject();
+    final RenderBox box = _painterKey.currentContext.findRenderObject() as RenderBox;
     final double startOffset = (box.localToGlobal(_begin) - position).distanceSquared;
     final double endOffset = (box.localToGlobal(_end) - position).distanceSquared;
     setState(() {
@@ -307,7 +307,7 @@ class _RectangleDemoState extends State<_RectangleDemo> {
     if (_dragTarget != null)
       return _IgnoreDrag();
 
-    final RenderBox box = _painterKey.currentContext.findRenderObject();
+    final RenderBox box = _painterKey.currentContext.findRenderObject() as RenderBox;
     final double startOffset = (box.localToGlobal(_begin.center) - position).distanceSquared;
     final double endOffset = (box.localToGlobal(_end.center) - position).distanceSquared;
     setState(() {

@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -263,8 +263,8 @@ class _ActiveItem implements Comparable<_ActiveItem> {
 ///
 /// See also:
 ///
-/// * [SliverAnimatedList], a sliver that animates items when they are inserted
-///   or removed from a list.
+///  * [SliverAnimatedList], a sliver that animates items when they are inserted
+///    or removed from a list.
 class AnimatedList extends StatefulWidget {
   /// Creates a scrolling container that animates items when they are inserted
   /// or removed.
@@ -727,10 +727,10 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
 ///
 /// See also:
 ///
-/// * [SliverList], which does not animate items when they are inserted or
-///   removed.
-/// * [AnimatedList], a non-sliver scrolling container that animates items when
-///   they are inserted or removed.
+///  * [SliverList], which does not animate items when they are inserted or
+///    removed.
+///  * [AnimatedList], a non-sliver scrolling container that animates items when
+///    they are inserted or removed.
 class SliverAnimatedList extends StatefulWidget {
   /// Creates a sliver that animates items when they are inserted or removed.
   const SliverAnimatedList({

@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -227,12 +227,12 @@ void main() {
       expect(parentFocusScope, hasAGoodToStringDeep);
       expect(
         parentFocusScope.toStringDeep(),
-        equalsIgnoringHashCodes('FocusScopeNode#00000(Parent Scope Node)\n'
+        equalsIgnoringHashCodes('FocusScopeNode#00000(Parent Scope Node [IN FOCUS PATH])\n'
             ' │ context: FocusScope\n'
             ' │ IN FOCUS PATH\n'
-            ' │ focusedChildren: FocusNode#00000(Child)\n'
+            ' │ focusedChildren: FocusNode#00000(Child [PRIMARY FOCUS])\n'
             ' │\n'
-            ' └─Child 1: FocusNode#00000(Child)\n'
+            ' └─Child 1: FocusNode#00000(Child [PRIMARY FOCUS])\n'
             '     context: Focus\n'
             '     PRIMARY FOCUS\n'),
       );
@@ -240,16 +240,17 @@ void main() {
       expect(FocusManager.instance.rootScope, hasAGoodToStringDeep);
       expect(
         FocusManager.instance.rootScope.toStringDeep(minLevel: DiagnosticLevel.info),
-        equalsIgnoringHashCodes('FocusScopeNode#00000(Root Focus Scope)\n'
+        equalsIgnoringHashCodes('FocusScopeNode#00000(Root Focus Scope [IN FOCUS PATH])\n'
             ' │ IN FOCUS PATH\n'
-            ' │ focusedChildren: FocusScopeNode#00000(Parent Scope Node)\n'
+            ' │ focusedChildren: FocusScopeNode#00000(Parent Scope Node [IN FOCUS\n'
+            ' │   PATH])\n'
             ' │\n'
-            ' └─Child 1: FocusScopeNode#00000(Parent Scope Node)\n'
+            ' └─Child 1: FocusScopeNode#00000(Parent Scope Node [IN FOCUS PATH])\n'
             '   │ context: FocusScope\n'
             '   │ IN FOCUS PATH\n'
-            '   │ focusedChildren: FocusNode#00000(Child)\n'
+            '   │ focusedChildren: FocusNode#00000(Child [PRIMARY FOCUS])\n'
             '   │\n'
-            '   └─Child 1: FocusNode#00000(Child)\n'
+            '   └─Child 1: FocusNode#00000(Child [PRIMARY FOCUS])\n'
             '       context: Focus\n'
             '       PRIMARY FOCUS\n'),
       );

@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -763,7 +763,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   @optionalTypeArgs
   static ModalRoute<T> of<T extends Object>(BuildContext context) {
     final _ModalScopeStatus widget = context.dependOnInheritedWidgetOfExactType<_ModalScopeStatus>();
-    return widget?.route;
+    return widget?.route as ModalRoute<T>;
   }
 
   /// Schedule a call to [buildTransitions].

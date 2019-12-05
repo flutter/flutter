@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -156,7 +156,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
     return TextSpan(
       text: _fiddleWithText(node.text),
       style: _fiddleWithStyle(node.style),
-      children: _fiddleWithChildren(node.children?.map((InlineSpan child) => _fiddleWith(child))?.toList() ?? <InlineSpan>[]),
+      children: _fiddleWithChildren(node.children?.map((InlineSpan child) => _fiddleWith(child as TextSpan))?.toList() ?? <TextSpan>[]),
     );
   }
 
@@ -343,7 +343,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
     if (node.children == null || node.children.isEmpty)
       return 0;
     int result = 0;
-    for (TextSpan child in node.children)
+    for (TextSpan child in node.children.cast<TextSpan>())
       result = math.max(result, depthOf(child));
     return result;
   }

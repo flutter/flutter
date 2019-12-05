@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -665,6 +665,36 @@ flutter:
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
     });
+
+    testUsingContext('disposing device disposes the portForwarder', () async {
+      bool unforwardCalled = false;
+      when(mockProcessManager.run(argThat(containsAll(<String>[
+        'forward',
+        'tcp:0',
+        'tcp:123',
+      ])))).thenAnswer((_) async {
+        return ProcessResult(0, 0, '456', '');
+      });
+      when(mockProcessManager.runSync(argThat(containsAll(<String>[
+        'forward',
+        '--list',
+      ])))).thenReturn(ProcessResult(0, 0, '1234 tcp:456 tcp:123', ''));
+      when(mockProcessManager.run(argThat(containsAll(<String>[
+        'forward',
+        '--remove',
+        'tcp:456',
+      ])))).thenAnswer((_) async {
+        unforwardCalled = true;
+        return ProcessResult(0, 0, '', '');
+      });
+      expect(await forwarder.forward(123), equals(456));
+
+      await device.dispose();
+
+      expect(unforwardCalled, isTrue);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+    });
   });
 
   group('lastLogcatTimestamp', () {
@@ -676,6 +706,53 @@ flutter:
           .thenReturn(ProcessResult(0, 1, '', ''));
       expect(device.lastLogcatTimestamp, isNull);
     }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+    });
+  });
+
+  group('logReader', () {
+    ProcessManager mockProcessManager;
+    AndroidSdk mockAndroidSdk;
+
+    setUp(() {
+      mockAndroidSdk = MockAndroidSdk();
+      mockProcessManager = MockProcessManager();
+    });
+
+    testUsingContext('calls adb logcat with expected flags', () async {
+      const String klastLocatcatTimestamp = '11-27 15:39:04.506';
+      when(mockAndroidSdk.adbPath).thenReturn('adb');
+      when(mockProcessManager.runSync(<String>['adb', '-s', '1234', 'shell', '-x', 'logcat', '-v', 'time', '-t', '1']))
+        .thenReturn(ProcessResult(0, 0, '$klastLocatcatTimestamp I/flutter: irrelevant', ''));
+      when(mockProcessManager.start(argThat(contains('logcat'))))
+        .thenAnswer((_) => Future<Process>.value(createMockProcess()));
+
+      final AndroidDevice device = AndroidDevice('1234');
+      final DeviceLogReader logReader = device.getLogReader();
+      logReader.logLines.listen((_) {});
+
+      verify(mockProcessManager.start(const <String>['adb', '-s', '1234', 'logcat', '-v', 'time', '-T', klastLocatcatTimestamp]))
+        .called(1);
+    }, overrides: <Type, Generator>{
+      AndroidSdk: () => mockAndroidSdk,
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('calls adb logcat with expected flags when the device logs are empty', () async {
+      when(mockAndroidSdk.adbPath).thenReturn('adb');
+      when(mockProcessManager.runSync(<String>['adb', '-s', '1234', 'shell', '-x', 'logcat', '-v', 'time', '-t', '1']))
+        .thenReturn(ProcessResult(0, 0, '', ''));
+      when(mockProcessManager.start(argThat(contains('logcat'))))
+        .thenAnswer((_) => Future<Process>.value(createMockProcess()));
+
+      final AndroidDevice device = AndroidDevice('1234');
+      final DeviceLogReader logReader = device.getLogReader();
+      logReader.logLines.listen((_) {});
+
+      verify(mockProcessManager.start(const <String>['adb', '-s', '1234', 'logcat', '-v', 'time', '-T', '']))
+        .called(1);
+    }, overrides: <Type, Generator>{
+      AndroidSdk: () => mockAndroidSdk,
       ProcessManager: () => mockProcessManager,
     });
   });

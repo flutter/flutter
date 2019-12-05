@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -116,6 +116,31 @@ void main() {
         flutterVersion,
       );
       expect(await result, null);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => processManager,
+      Platform: () => fakePlatform,
+    });
+
+    testUsingContext('Doesn\'t continue on known tag, dev branch, no force, already up-to-date', () async {
+      fakeCommandRunner.alreadyUpToDate = true;
+      final Future<FlutterCommandResult> result = fakeCommandRunner.runCommand(
+        false,
+        false,
+        gitTagVersion,
+        flutterVersion,
+      );
+      expect(await result, null);
+      verifyNever(processManager.start(
+        <String>[
+          fs.path.join('bin', 'flutter'),
+          'upgrade',
+          '--continue',
+          '--no-version-check',
+        ],
+        environment: anyNamed('environment'),
+        workingDirectory: anyNamed('workingDirectory'),
+      ));
+      expect(testLogger.statusText, contains('Flutter is already up to date'));
     }, overrides: <Type, Generator>{
       ProcessManager: () => processManager,
       Platform: () => fakePlatform,
@@ -288,6 +313,8 @@ void main() {
 class FakeUpgradeCommandRunner extends UpgradeCommandRunner {
   bool willHaveUncomittedChanges = false;
 
+  bool alreadyUpToDate = false;
+
   @override
   Future<void> verifyUpstreamConfigured() async {}
 
@@ -301,7 +328,7 @@ class FakeUpgradeCommandRunner extends UpgradeCommandRunner {
   Future<void> upgradeChannel(FlutterVersion flutterVersion) async {}
 
   @override
-  Future<void> attemptFastForward() async {}
+  Future<bool> attemptFastForward(FlutterVersion flutterVersion) async => alreadyUpToDate;
 
   @override
   Future<void> precacheArtifacts() async {}

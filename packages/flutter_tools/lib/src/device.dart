@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -492,7 +492,7 @@ abstract class Device {
   /// Clean up resources allocated by device
   ///
   /// For example log readers or port forwarders.
-  void dispose() {}
+  Future<void> dispose();
 }
 
 /// Information about an application's memory usage.
@@ -633,7 +633,7 @@ abstract class DevicePortForwarder {
   Future<void> unforward(ForwardedPort forwardedPort);
 
   /// Cleanup allocated resources, like forwardedPorts
-  Future<void> dispose() async { }
+  Future<void> dispose();
 }
 
 /// Read the log for a particular device.
@@ -645,7 +645,7 @@ abstract class DeviceLogReader {
 
   /// Some logs can be obtained from a VM service stream.
   /// Set this after the VM services are connected.
-  List<VMService> connectedVMServices;
+  VMService connectedVMService;
 
   @override
   String toString() => name;
@@ -654,7 +654,7 @@ abstract class DeviceLogReader {
   int appPid;
 
   // Clean up resources allocated by log reader e.g. subprocesses
-  void dispose() { }
+  void dispose();
 }
 
 /// Describes an app running on the device.
@@ -675,7 +675,7 @@ class NoOpDeviceLogReader implements DeviceLogReader {
   int appPid;
 
   @override
-  List<VMService> connectedVMServices;
+  VMService connectedVMService;
 
   @override
   Stream<String> get logLines => const Stream<String>.empty();

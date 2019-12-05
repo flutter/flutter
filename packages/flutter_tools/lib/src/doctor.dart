@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -596,8 +596,15 @@ class FlutterValidator extends DoctorValidator {
       final FlutterVersion version = FlutterVersion.instance;
       versionChannel = version.channel;
       frameworkVersion = version.frameworkVersion;
-      messages.add(ValidationMessage(userMessages.flutterVersion(frameworkVersion, Cache.flutterRoot)));
-      messages.add(ValidationMessage(userMessages.flutterRevision(version.frameworkRevisionShort, version.frameworkAge, version.frameworkDate)));
+      messages.add(ValidationMessage(userMessages.flutterVersion(
+        frameworkVersion,
+        Cache.flutterRoot,
+      )));
+      messages.add(ValidationMessage(userMessages.flutterRevision(
+        version.frameworkRevisionShort,
+        version.frameworkAge,
+        version.frameworkDate,
+      )));
       messages.add(ValidationMessage(userMessages.engineRevision(version.engineRevisionShort)));
       messages.add(ValidationMessage(userMessages.dartRevision(version.dartSdkVersion)));
     } on VersionCheckError catch (e) {

@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -150,9 +150,9 @@ const String pluralMethodTemplate = '''
 ''';
 
 List<String> genMethodParameters(Map<String, dynamic> bundle, String key, String type) {
-  final Map<String, dynamic> attributesMap = bundle['@$key'];
+  final Map<String, dynamic> attributesMap = bundle['@$key'] as Map<String, dynamic>;
   if (attributesMap != null && attributesMap.containsKey('placeholders')) {
-    final Map<String, dynamic> placeholders = attributesMap['placeholders'];
+    final Map<String, dynamic> placeholders = attributesMap['placeholders'] as Map<String, dynamic>;
     return placeholders.keys.map((String parameter) => '$type $parameter').toList();
   }
   return <String>[];
@@ -160,14 +160,14 @@ List<String> genMethodParameters(Map<String, dynamic> bundle, String key, String
 
 List<String> genIntlMethodArgs(Map<String, dynamic> bundle, String key) {
   final List<String> attributes = <String>['name: \'$key\''];
-  final Map<String, dynamic> attributesMap = bundle['@$key'];
+  final Map<String, dynamic> attributesMap = bundle['@$key'] as Map<String, dynamic>;
   if (attributesMap != null) {
     if (attributesMap.containsKey('description')) {
-      final String description = attributesMap['description'];
+      final String description = attributesMap['description'] as String;
       attributes.add('desc: ${generateString(description)}');
     }
     if (attributesMap.containsKey('placeholders')) {
-      final Map<String, dynamic> placeholders = attributesMap['placeholders'];
+      final Map<String, dynamic> placeholders = attributesMap['placeholders'] as Map<String, dynamic>;
       if (placeholders.isNotEmpty) {
         final String args = placeholders.keys.join(', ');
         attributes.add('args: <Object>[$args]');
@@ -179,15 +179,15 @@ List<String> genIntlMethodArgs(Map<String, dynamic> bundle, String key) {
 
 String genSimpleMethod(Map<String, dynamic> bundle, String key) {
   String genSimpleMethodMessage(Map<String, dynamic> bundle, String key) {
-    String message = bundle[key];
-    final Map<String, dynamic> attributesMap = bundle['@$key'];
-    final Map<String, dynamic> placeholders = attributesMap['placeholders'];
+    String message = bundle[key] as String;
+    final Map<String, dynamic> attributesMap = bundle['@$key'] as Map<String, dynamic>;
+    final Map<String, dynamic> placeholders = attributesMap['placeholders'] as Map<String, dynamic>;
     for (String placeholder in placeholders.keys)
       message = message.replaceAll('{$placeholder}', '\$$placeholder');
     return generateString(message);
   }
 
-  final Map<String, dynamic> attributesMap = bundle['@$key'];
+  final Map<String, dynamic> attributesMap = bundle['@$key'] as Map<String, dynamic>;
   if (attributesMap == null)
     throw L10nException(
       'Resource attribute "@$key" was not found. Please ensure that each '
@@ -204,18 +204,18 @@ String genSimpleMethod(Map<String, dynamic> bundle, String key) {
 
   return getterMethodTemplate
     .replaceAll('@methodName', key)
-    .replaceAll('@message', '${generateString(bundle[key])}')
+    .replaceAll('@message', '${generateString(bundle[key] as String)}')
     .replaceAll('@intlMethodArgs', genIntlMethodArgs(bundle, key).join(',\n      '));
 }
 
 String genPluralMethod(Map<String, dynamic> bundle, String key) {
-  final Map<String, dynamic> attributesMap = bundle['@$key'];
+  final Map<String, dynamic> attributesMap = bundle['@$key'] as Map<String, dynamic>;
   assert(attributesMap != null && attributesMap.containsKey('placeholders'));
-  final Iterable<String> placeholders = attributesMap['placeholders'].keys;
+  final Iterable<String> placeholders = attributesMap['placeholders'].keys as Iterable<String>;
 
   // To make it easier to parse the plurals message, temporarily replace each
   // "{placeholder}" parameter with "#placeholder#".
-  String message = bundle[key];
+  String message = bundle[key] as String;
   for (String placeholder in placeholders)
     message = message.replaceAll('{$placeholder}', '#$placeholder#');
 
