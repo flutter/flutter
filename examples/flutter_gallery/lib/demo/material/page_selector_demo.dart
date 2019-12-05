@@ -14,7 +14,7 @@ class _PageSelector extends StatelessWidget {
   void _handleArrowButtonPress(BuildContext context, int delta) {
     final TabController controller = DefaultTabController.of(context);
     if (!controller.indexIsChanging)
-      controller.animateTo((controller.index + delta).clamp(0, icons.length - 1));
+      controller.animateTo((controller.index + delta).clamp(0, icons.length - 1) as int);
   }
 
   @override

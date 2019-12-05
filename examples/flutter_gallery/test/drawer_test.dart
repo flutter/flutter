@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_gallery/gallery/app.dart';
 
 void main() {
-  final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+  final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
   if (binding is LiveTestWidgetsFlutterBinding)
     binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fullyLive;
 
@@ -31,7 +31,7 @@ void main() {
     await tester.pumpAndSettle();
 
     // Verify theme settings
-    MaterialApp app = find.byType(MaterialApp).evaluate().first.widget;
+    MaterialApp app = find.byType(MaterialApp).evaluate().first.widget as MaterialApp;
     expect(app.theme.brightness, equals(Brightness.light));
     expect(app.darkTheme.brightness, equals(Brightness.dark));
 
@@ -40,7 +40,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Dark'));
     await tester.pumpAndSettle();
-    app = find.byType(MaterialApp).evaluate().first.widget;
+    app = find.byType(MaterialApp).evaluate().first.widget as MaterialApp;
     expect(app.themeMode, ThemeMode.dark);
 
     // Switch to the light theme: first menu button, choose 'Light'
@@ -48,7 +48,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Light'));
     await tester.pumpAndSettle();
-    app = find.byType(MaterialApp).evaluate().first.widget;
+    app = find.byType(MaterialApp).evaluate().first.widget as MaterialApp;
     expect(app.themeMode, ThemeMode.light);
 
     // Switch back to system theme setting: first menu button, choose 'System Default'
@@ -56,7 +56,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('System Default').at(1));
     await tester.pumpAndSettle();
-    app = find.byType(MaterialApp).evaluate().first.widget;
+    app = find.byType(MaterialApp).evaluate().first.widget as MaterialApp;
     expect(app.themeMode, ThemeMode.system);
 
     // Verify platform settings
@@ -67,7 +67,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Cupertino').at(1));
     await tester.pumpAndSettle();
-    app = find.byType(MaterialApp).evaluate().first.widget;
+    app = find.byType(MaterialApp).evaluate().first.widget as MaterialApp;
     expect(app.theme.platform, equals(TargetPlatform.iOS));
 
     // Verify the font scale.
