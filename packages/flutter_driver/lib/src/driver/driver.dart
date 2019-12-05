@@ -4,7 +4,9 @@
 
 import 'dart:async';
 
+import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:meta/meta.dart';
+import 'package:vm_service_client/vm_service_client.dart';
 
 import '../common/diagnostics_tree.dart';
 import '../common/error.dart';
@@ -78,6 +80,26 @@ typedef EvaluatorFunction = dynamic Function();
 
 /// Drives a Flutter Application running in another process.
 abstract class FlutterDriver {
+  /// Creates a driver that uses a connection provided by either the combination
+  /// of [webConnection] and [browser], or the combination of [serviceClient],
+  /// [peer] and [appIsolate]
+  @visibleForTesting
+  factory FlutterDriver.connectedTo({
+    FlutterWebConnection webConnection,
+    Browser browser,
+    VMServiceClient serviceClient,
+    rpc.Peer peer,
+    VMIsolate appIsolate,
+  }) {
+    if (webConnection != null && browser != null) {
+      return WebFlutterDriver.connectedTo(webConnection, browser);
+    }
+    return VMServiceFlutterDriver.connectedTo(serviceClient, peer, appIsolate);
+  }
+
+  ///
+  FlutterDriver();
+
   /// Connects to a Flutter application.
   ///
   /// Resumes the application if it is currently paused (e.g. at a breakpoint).
@@ -113,10 +135,11 @@ abstract class FlutterDriver {
     int isolateNumber,
     Pattern fuchsiaModuleTarget,
     bool browser = false,
+    Duration timeout,
   }) async {
 
     if (browser) {
-      return WebFlutterDriver.connectWeb(hostUrl: dartVmServiceUrl);
+      return WebFlutterDriver.connectWeb(hostUrl: dartVmServiceUrl, timeout: timeout);
     }
     return VMServiceFlutterDriver.connect(
               dartVmServiceUrl: dartVmServiceUrl,
@@ -128,6 +151,8 @@ abstract class FlutterDriver {
   }
 
   /// Sends [command] to the Flutter Driver extensions.
+  /// This must be implemented by subclass. Check vmservice_driver and
+  /// web_driver for reference.
   Future<Map<String, dynamic>> sendCommand(Command command);
 
   /// Checks the status of the Flutter Driver extension.
@@ -466,6 +491,53 @@ abstract class FlutterDriver {
   /// Take a screenshot.
   ///
   /// The image will be returned as a PNG.
+  ///
+  ///  HACK: There will be a 2-second artificial delay before screenshotting,
+  ///        the delay here is to deal with a race between the driver script and
+  ///        the GPU thread. The issue is that driver API synchronizes with the
+  ///        framework based on transient callbacks, which are out of sync with
+  ///        the GPU thread. Here's the timeline of events in ASCII art:
+  ///
+  ///        -------------------------------------------------------------------
+  ///        Without this delay:
+  ///        -------------------------------------------------------------------
+  ///        UI    : <-- build -->
+  ///        GPU   :               <-- rasterize -->
+  ///        Gap   :              | random |
+  ///        Driver:                        <-- screenshot -->
+  ///
+  ///        In the diagram above, the gap is the time between the last driver
+  ///        action taken, such as a `tap()`, and the subsequent call to
+  ///        `screenshot()`. The gap is random because it is determined by the
+  ///        unpredictable network communication between the driver process and
+  ///        the application. If this gap is too short, which it typically will
+  ///        be, the screenshot is taken before the GPU thread is done
+  ///        rasterizing the frame, so the screenshot of the previous frame is
+  ///        taken, which is wrong.
+  ///
+  ///        -------------------------------------------------------------------
+  ///        With this delay, if we're lucky:
+  ///        -------------------------------------------------------------------
+  ///        UI    : <-- build -->
+  ///        GPU   :               <-- rasterize -->
+  ///        Gap   :              |    2 seconds or more   |
+  ///        Driver:                                        <-- screenshot -->
+  ///
+  ///        The two-second gap should be long enough for the GPU thread to
+  ///        finish rasterizing the frame, but not longer than necessary to keep
+  ///        driver tests as fast a possible.
+  ///
+  ///        -------------------------------------------------------------------
+  ///        With this delay, if we're not lucky:
+  ///        -------------------------------------------------------------------
+  ///        UI    : <-- build -->
+  ///        GPU   :               <-- rasterize randomly slow today -->
+  ///        Gap   :              |    2 seconds or more   |
+  ///        Driver:                                        <-- screenshot -->
+  ///
+  ///        In practice, sometimes the device gets really busy for a while and
+  ///        even two seconds isn't enough, which means that this is still racy
+  ///        and a source of flakes.
   Future<List<int>> screenshot();
 
   /// Returns the Flags set in the Dart VM as JSON.
@@ -487,6 +559,8 @@ abstract class FlutterDriver {
   ///     ]
   ///
   /// [getFlagList]: https://github.com/dart-lang/sdk/blob/master/runtime/vm/service/service.md#getflaglist
+  ///
+  /// Calling this function on WebFlutterDriver will throw unimplemented error.
   Future<List<Map<String, dynamic>>> getVmFlags();
 
   /// Starts recording performance traces.
@@ -494,6 +568,8 @@ abstract class FlutterDriver {
   /// The `timeout` argument causes a warning to be displayed to the user if the
   /// operation exceeds the specified timeout; it does not actually cancel the
   /// operation.
+  ///
+  /// For WebFlutterDriver, this is only supported for Chrome.
   Future<void> startTracing({
     List<TimelineStream> streams = const <TimelineStream>[TimelineStream.all],
     Duration timeout = kUnusuallyLongTimeout,
@@ -504,6 +580,8 @@ abstract class FlutterDriver {
   /// The `timeout` argument causes a warning to be displayed to the user if the
   /// operation exceeds the specified timeout; it does not actually cancel the
   /// operation.
+  ///
+  /// For WebFlutterDriver, this is only supported for Chrome.
   Future<Timeline> stopTracingAndDownloadTimeline({
     Duration timeout = kUnusuallyLongTimeout,
   });
@@ -525,6 +603,8 @@ abstract class FlutterDriver {
   ///
   /// If this is run in debug mode, a warning message will be printed to suggest
   /// running the benchmark in profile mode instead.
+  ///
+  /// For WebFlutterDriver, this is only supported for Chrome.
   Future<Timeline> traceAction(
     Future<dynamic> action(), {
     List<TimelineStream> streams = const <TimelineStream>[TimelineStream.all],
@@ -536,6 +616,8 @@ abstract class FlutterDriver {
   /// The `timeout` argument causes a warning to be displayed to the user if the
   /// operation exceeds the specified timeout; it does not actually cancel the
   /// operation.
+  ///
+  /// For WebFlutterDriver, this is only supported for Chrome.
   Future<void> clearTimeline({
     Duration timeout = kUnusuallyLongTimeout,
   });
@@ -568,6 +650,8 @@ abstract class FlutterDriver {
   }
 
   /// Force a garbage collection run in the VM.
+  ///
+  /// Calling this function on WebFlutterDriver will throw unimplemented error.
   Future<void> forceGC();
 
   /// Closes the underlying connection to the VM service.

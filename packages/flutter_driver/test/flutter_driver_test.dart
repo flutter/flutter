@@ -20,7 +20,6 @@ import 'common.dart';
 /// Magical timeout value that's different from the default.
 const Duration _kTestTimeout = Duration(milliseconds: 1234);
 const String _kSerializedTestTimeout = '1234';
-const String _kChrome = 'chrome';
 const String _kWebScriptPrefix = 'window.\$flutterDriver(\'';
 const String _kWebScriptSuffix = '\')';
 
@@ -31,8 +30,6 @@ void main() {
   };
 
   group('VMServiceFlutterDriver.connect', () {
-    List<LogRecord> log;
-    StreamSubscription<LogRecord> logSub;
     MockVMServiceClient mockClient;
     MockVM mockVM;
     MockIsolate mockIsolate;
@@ -601,7 +598,7 @@ void main() {
           expect(log, <String>[]);
           time.elapse(kUnusuallyLongTimeout);
         });
-        expect(log, <String>['FlutterDriver: waitFor message is taking a long time to complete...']);
+        expect(log, <String>['VMServiceFlutterDriver: waitFor message is taking a long time to complete...']);
       });
 
       test('local custom timeout', () async {
@@ -616,7 +613,7 @@ void main() {
           expect(log, <String>[]);
           time.elapse(customTimeout);
         });
-        expect(log, <String>['FlutterDriver: waitFor message is taking a long time to complete...']);
+        expect(log, <String>['VMServiceFlutterDriver: waitFor message is taking a long time to complete...']);
       });
 
       test('remote error', () async {
@@ -677,7 +674,7 @@ void main() {
 
     setUp(() {
       mockConnection = MockFlutterWebConnection();
-      driver = WebFlutterDriver.connectedTo(mockConnection, _kChrome);
+      driver = WebFlutterDriver.connectedTo(mockConnection, Browser.chrome);
     });
 
     test('closes connection', () async {
@@ -694,7 +691,7 @@ void main() {
       test('finds by ValueKey', () async {
         when(mockConnection.sendCommand(any, any)).thenAnswer((Invocation i) async {
           final String script = _checkAndEncode(i.positionalArguments[0]);
-          expect(Map<String, String>.from(jsonDecode(script)), <String, String>{
+          expect(Map<String, String>.from(jsonDecode(script) as Map), <String, String>{
             'command': 'tap',
             'timeout': _kSerializedTestTimeout,
             'finderType': 'ByValueKey',
@@ -711,7 +708,7 @@ void main() {
       test('finds by Semantic label using String', () async {
         when(mockConnection.sendCommand(any, any)).thenAnswer((Invocation i) async {
           final String script = _checkAndEncode(i.positionalArguments[0]);
-          expect(Map<String, String>.from(jsonDecode(script)), <String, String>{
+          expect(Map<String, String>.from(jsonDecode(script) as Map), <String, String>{
             'command': 'tap',
             'timeout': _kSerializedTestTimeout,
             'finderType': 'BySemanticsLabel',
@@ -725,7 +722,7 @@ void main() {
       test('finds by Semantic label using RegExp', () async {
         when(mockConnection.sendCommand(any, any)).thenAnswer((Invocation i) async {
           final String script = _checkAndEncode(i.positionalArguments[0]);
-          expect(Map<String, String>.from(jsonDecode(script)), <String, String>{
+          expect(Map<String, String>.from(jsonDecode(script) as Map), <String, String>{
             'command': 'tap',
             'timeout': _kSerializedTestTimeout,
             'finderType': 'BySemanticsLabel',
@@ -746,7 +743,7 @@ void main() {
       test('sends the tap command', () async {
         when(mockConnection.sendCommand(any, any)).thenAnswer((Invocation i) async {
           final String script = _checkAndEncode(i.positionalArguments[0]);
-          expect(Map<String, String>.from(jsonDecode(script)), <String, String>{
+          expect(Map<String, String>.from(jsonDecode(script) as Map), <String, String>{
             'command': 'tap',
             'timeout': _kSerializedTestTimeout,
             'finderType': 'ByText',
@@ -766,7 +763,7 @@ void main() {
       test('sends the getText command', () async {
         when(mockConnection.sendCommand(any, any)).thenAnswer((Invocation i) async {
           final String script = _checkAndEncode(i.positionalArguments[0]);
-          expect(Map<String, String>.from(jsonDecode(script)), <String, String>{
+          expect(Map<String, String>.from(jsonDecode(script) as Map), <String, String>{
             'command': 'get_text',
             'timeout': _kSerializedTestTimeout,
             'finderType': 'ByValueKey',
@@ -790,7 +787,7 @@ void main() {
       test('sends the waitFor command', () async {
         when(mockConnection.sendCommand(any, any)).thenAnswer((Invocation i) async {
           final String script = _checkAndEncode(i.positionalArguments[0]);
-          expect(Map<String, String>.from(jsonDecode(script)), <String, String>{
+          expect(Map<String, String>.from(jsonDecode(script) as Map), <String, String>{
             'command': 'waitFor',
             'finderType': 'ByTooltipMessage',
             'text': 'foo',
@@ -806,7 +803,7 @@ void main() {
       test('sends the wait for NoPendingFrameCondition command', () async {
         when(mockConnection.sendCommand(any, any)).thenAnswer((Invocation i) async {
           final String script = _checkAndEncode(i.positionalArguments[0]);
-          expect(Map<String, String>.from(jsonDecode(script)), <String, String>{
+          expect(Map<String, String>.from(jsonDecode(script) as Map), <String, String>{
             'command': 'waitForCondition',
             'timeout': _kSerializedTestTimeout,
             'conditionName': 'NoPendingFrameCondition',
@@ -819,7 +816,7 @@ void main() {
       test('sends the wait for NoPendingPlatformMessages command', () async {
         when(mockConnection.sendCommand(any, any)).thenAnswer((Invocation i) async {
           final String script = _checkAndEncode(i.positionalArguments[0]);
-          expect(Map<String, String>.from(jsonDecode(script)), <String, String>{
+          expect(Map<String, String>.from(jsonDecode(script) as Map), <String, String>{
             'command': 'waitForCondition',
             'timeout': _kSerializedTestTimeout,
             'conditionName': 'NoPendingPlatformMessagesCondition',
@@ -832,7 +829,7 @@ void main() {
       test('sends the waitForCondition of combined conditions command', () async {
         when(mockConnection.sendCommand(any, any)).thenAnswer((Invocation i) async {
           final String script = _checkAndEncode(i.positionalArguments[0]);
-          expect(Map<String, String>.from(jsonDecode(script)), <String, String>{
+          expect(Map<String, String>.from(jsonDecode(script) as Map), <String, String>{
             'command': 'waitForCondition',
             'timeout': _kSerializedTestTimeout,
             'conditionName': 'CombinedCondition',
@@ -850,7 +847,7 @@ void main() {
       test('sends the waitUntilNoTransientCallbacks command', () async {
         when(mockConnection.sendCommand(any, any)).thenAnswer((Invocation i) async {
           final String script = _checkAndEncode(i.positionalArguments[0]);
-          expect(Map<String, String>.from(jsonDecode(script)), <String, String>{
+          expect(Map<String, String>.from(jsonDecode(script) as Map), <String, String>{
             'command': 'waitForCondition',
             'timeout': _kSerializedTestTimeout,
             'conditionName': 'NoTransientCallbacksCondition',
@@ -865,7 +862,7 @@ void main() {
       test('sends the waitUntilFirstFrameRasterized command', () async {
         when(mockConnection.sendCommand(any, any)).thenAnswer((Invocation i) async {
           final String script = _checkAndEncode(i.positionalArguments[0]);
-          expect(Map<String, String>.from(jsonDecode(script)), <String, String>{
+          expect(Map<String, String>.from(jsonDecode(script) as Map), <String, String>{
             'command': 'waitForCondition',
             'conditionName': 'FirstFrameRasterizedCondition',
           });
@@ -887,7 +884,7 @@ void main() {
       test('sends the getCenter command', () async {
         when(mockConnection.sendCommand(any, any)).thenAnswer((Invocation i) async {
           final String script = _checkAndEncode(i.positionalArguments[0]);
-          expect(Map<String, String>.from(jsonDecode(script)), <String, String>{
+          expect(Map<String, String>.from(jsonDecode(script) as Map), <String, String>{
             'command': 'get_offset',
             'offsetType': 'center',
             'timeout': _kSerializedTestTimeout,
@@ -907,7 +904,7 @@ void main() {
       test('sends the getTopLeft command', () async {
         when(mockConnection.sendCommand(any, any)).thenAnswer((Invocation i) async {
           final String script = _checkAndEncode(i.positionalArguments[0]);
-          expect(Map<String, String>.from(jsonDecode(script)), <String, String>{
+          expect(Map<String, String>.from(jsonDecode(script) as Map), <String, String>{
             'command': 'get_offset',
             'offsetType': 'topLeft',
             'timeout': _kSerializedTestTimeout,
@@ -927,7 +924,7 @@ void main() {
       test('sends the getTopRight command', () async {
         when(mockConnection.sendCommand(any, any)).thenAnswer((Invocation i) async {
           final String script = _checkAndEncode(i.positionalArguments[0]);
-          expect(Map<String, String>.from(jsonDecode(script)), <String, String>{
+          expect(Map<String, String>.from(jsonDecode(script) as Map), <String, String>{
             'command': 'get_offset',
             'offsetType': 'topRight',
             'timeout': _kSerializedTestTimeout,
@@ -947,7 +944,7 @@ void main() {
       test('sends the getBottomLeft command', () async {
         when(mockConnection.sendCommand(any, any)).thenAnswer((Invocation i) async {
           final String script = _checkAndEncode(i.positionalArguments[0]);
-          expect(Map<String, String>.from(jsonDecode(script)), <String, String>{
+          expect(Map<String, String>.from(jsonDecode(script) as Map), <String, String>{
             'command': 'get_offset',
             'offsetType': 'bottomLeft',
             'timeout': _kSerializedTestTimeout,
@@ -967,7 +964,7 @@ void main() {
       test('sends the getBottomRight command', () async {
         when(mockConnection.sendCommand(any, any)).thenAnswer((Invocation i) async {
           final String script = _checkAndEncode(i.positionalArguments[0]);
-          expect(Map<String, String>.from(jsonDecode(script)), <String, String>{
+          expect(Map<String, String>.from(jsonDecode(script) as Map), <String, String>{
             'command': 'get_offset',
             'offsetType': 'bottomRight',
             'timeout': _kSerializedTestTimeout,
@@ -985,16 +982,57 @@ void main() {
       });
     });
 
-
     test('checks the health of the driver extension', () async {
       when(mockConnection.sendCommand(any, any)).thenAnswer((Invocation i) async {
         final String script = _checkAndEncode(i.positionalArguments[0]);
-        expect(Map<String, String>.from(jsonDecode(script)), <String, String>{
+        expect(Map<String, String>.from(jsonDecode(script) as Map), <String, String>{
           'command': 'get_health',
         });
         return jsonEncode(await makeMockResponse(<String, dynamic>{'status': 'ok'}));
       });
       await driver.checkHealth();
+    });
+
+    group('clearTimeline', () {
+      test('clears timeline', () async {
+        await driver.startTracing();
+        expect(driver.startTime, isNotNull);
+        await driver.clearTimeline();
+        expect(driver.startTime, isNull);
+      });
+    });
+
+    group('WebFlutterDriver Unimplemented error', () {
+      test('forceGC', () async {
+        expect(driver.forceGC(),
+            throwsA(isInstanceOf<UnimplementedError>()));
+      });
+
+      test('getVmFlags', () async {
+        expect(driver.getVmFlags(),
+            throwsA(isInstanceOf<UnimplementedError>()));
+      });
+    });
+  });
+
+  group('WebFlutterDriver with non-chrome browser', () {
+    MockFlutterWebConnection mockConnection;
+    WebFlutterDriver driver;
+
+    setUp(() {
+      mockConnection = MockFlutterWebConnection();
+      driver = WebFlutterDriver.connectedTo(mockConnection, Browser.edge);
+    });
+
+    test('tracing', () async {
+      expect(driver.traceAction(() {}),
+          throwsA(isInstanceOf<UnimplementedError>()));
+      expect(driver.startTracing(),
+          throwsA(isInstanceOf<UnimplementedError>()));
+      expect(driver.stopTracingAndDownloadTimeline(),
+          throwsA(isInstanceOf<UnimplementedError>()));
+      expect(driver.clearTimeline(),
+          throwsA(isInstanceOf<UnimplementedError>()));
     });
   });
 }
@@ -1004,10 +1042,11 @@ void main() {
 /// script will be in the following format:
 //   window.flutterDriver('[actual script]')
 String _checkAndEncode(dynamic script) {
+  expect(script is String, isTrue);
   expect(script.startsWith(_kWebScriptPrefix), isTrue);
   expect(script.endsWith(_kWebScriptSuffix), isTrue);
   // Strip prefix and suffix
-  return script.substring(_kWebScriptPrefix.length, script.length - 2);
+  return script.substring(_kWebScriptPrefix.length, script.length - 2) as String;
 }
 
 Future<Map<String, dynamic>> makeMockResponse(

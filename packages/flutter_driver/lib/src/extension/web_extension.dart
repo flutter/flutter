@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -16,7 +16,7 @@ void registerWebServiceExtension(Future<Map<String, dynamic>> Function(Map<Strin
   js_util.setProperty(html.window, '\$flutterDriver', allowInterop((dynamic message) async {
     // ignore: undefined_function, undefined_identifier
     final Map<String, String> params = Map<String, String>.from(
-        jsonDecode(message));
+        jsonDecode(message as String) as Map);
     final Map<String, dynamic> result = Map<String, dynamic>.from(
         await call(params));
     context['\$flutterDriverResult'] = json.encode(result);

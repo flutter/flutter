@@ -156,9 +156,9 @@ class DriveCommand extends RunCommandBase {
 
     final Map<String, String> environment = <String, String>{
       'VM_SERVICE_URL': observatoryUri,
-      'SELENIUM_PORT': argResults['driver-port'],
-      'BROWSER_NAME': argResults['browser-name'],
-      'BROWSER_DIMENSION': argResults['browser-dimension'],
+      'SELENIUM_PORT': argResults['driver-port'].toString(),
+      'BROWSER_NAME': argResults['browser-name'].toString(),
+      'BROWSER_DIMENSION': argResults['browser-dimension'].toString(),
       'HEADLESS': argResults['headless'].toString(),
     };
 

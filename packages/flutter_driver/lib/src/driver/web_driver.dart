@@ -1,11 +1,11 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2019 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:math';
+import 'dart:math' as math;
 
 import 'package:matcher/matcher.dart';
 import 'package:meta/meta.dart';
@@ -18,35 +18,39 @@ import 'driver.dart';
 import 'timeline.dart';
 import 'web_driver_config.dart';
 
+export 'web_driver_config.dart';
+
 /// An implementation of the Flutter Driver using the WebDriver.
 class WebFlutterDriver extends FlutterDriver {
   /// Creates a driver that uses a connection provided by the given
   /// [_connection] and [_browserName].
   @visibleForTesting
-  WebFlutterDriver.connectedTo(
-      this._connection,
-      this._browserName);
-
-  WebFlutterDriver._connect(this._connection, this._browserName);
+  WebFlutterDriver.connectedTo(this._connection, this._browser);
 
   final FlutterWebConnection _connection;
-  final String _browserName;
+  final Browser _browser;
   DateTime _startTime;
 
+  @visibleForTesting
+  DateTime get startTime => _startTime;
+
   /// Creates a driver that uses a connection provided by the given
-  /// [hostUrl].
-  static Future<FlutterDriver> connectWeb({String hostUrl}) async {
+  /// [hostUrl] which would fallback to environment variable VM_SERVICE_URL.
+  /// Driver also depends on environment variables BROWSER_NAME,
+  /// BROWSER_DIMENSION, HEADLESS and SELENIUM_PORT for configurations.
+  static Future<FlutterDriver> connectWeb(
+      {String hostUrl, Duration timeout}) async {
     hostUrl ??= Platform.environment['VM_SERVICE_URL'];
-    final String browserName = Platform.environment['BROWSER_NAME'];
+    final Browser browser = browserNameToEnum(Platform.environment['BROWSER_NAME']);
     final Map<String, dynamic> settings = <String, dynamic>{
-      'browser-name': browserName,
+      'browser': browser,
       'browser-dimension': Platform.environment['BROWSER_DIMENSION'],
       'headless': Platform.environment['HEADLESS']?.toLowerCase() == 'true',
       'selenium-port': Platform.environment['SELENIUM_PORT'],
     };
     final FlutterWebConnection connection = await FlutterWebConnection.connect
-      (hostUrl, settings);
-    return WebFlutterDriver._connect(connection, browserName);
+      (hostUrl, settings, timeout: timeout);
+    return WebFlutterDriver.connectedTo(connection, browser);
   }
 
   @override
@@ -55,7 +59,7 @@ class WebFlutterDriver extends FlutterDriver {
     final Map<String, String> serialized = command.serialize();
     try {
       final dynamic data = await _connection.sendCommand('window.\$flutterDriver(\'${jsonEncode(serialized)}\')', command.timeout);
-      response = data != null ? json.decode(data) : <String, dynamic>{};
+      response = data != null ? json.decode(data as String) as Map<String, dynamic> : <String, dynamic>{};
     } catch (error, stackTrace) {
       throw DriverError('Failed to respond to $command due to remote error\n : \$flutterDriver(\'${jsonEncode(serialized)}\')',
           error,
@@ -64,7 +68,7 @@ class WebFlutterDriver extends FlutterDriver {
     }
     if (response['isError'] == true)
       throw DriverError('Error in Flutter application: ${response['response']}');
-    return response['response'];
+    return response['response'] as Map<String, dynamic>;
   }
 
   @override
@@ -82,52 +86,6 @@ class WebFlutterDriver extends FlutterDriver {
 
   @override
   Future<List<int>> screenshot() async {
-    // HACK: this artificial delay here is to deal with a race between the
-    //       driver script and the GPU thread. The issue is that driver API
-    //       synchronizes with the framework based on transient callbacks, which
-    //       are out of sync with the GPU thread. Here's the timeline of events
-    //       in ASCII art:
-    //
-    //       -------------------------------------------------------------------
-    //       Without this delay:
-    //       -------------------------------------------------------------------
-    //       UI    : <-- build -->
-    //       GPU   :               <-- rasterize -->
-    //       Gap   :              | random |
-    //       Driver:                        <-- screenshot -->
-    //
-    //       In the diagram above, the gap is the time between the last driver
-    //       action taken, such as a `tap()`, and the subsequent call to
-    //       `screenshot()`. The gap is random because it is determined by the
-    //       unpredictable network communication between the driver process and
-    //       the application. If this gap is too short, which it typically will
-    //       be, the screenshot is taken before the GPU thread is done
-    //       rasterizing the frame, so the screenshot of the previous frame is
-    //       taken, which is wrong.
-    //
-    //       -------------------------------------------------------------------
-    //       With this delay, if we're lucky:
-    //       -------------------------------------------------------------------
-    //       UI    : <-- build -->
-    //       GPU   :               <-- rasterize -->
-    //       Gap   :              |    2 seconds or more   |
-    //       Driver:                                        <-- screenshot -->
-    //
-    //       The two-second gap should be long enough for the GPU thread to
-    //       finish rasterizing the frame, but not longer than necessary to keep
-    //       driver tests as fast a possible.
-    //
-    //       -------------------------------------------------------------------
-    //       With this delay, if we're not lucky:
-    //       -------------------------------------------------------------------
-    //       UI    : <-- build -->
-    //       GPU   :               <-- rasterize randomly slow today -->
-    //       Gap   :              |    2 seconds or more   |
-    //       Driver:                                        <-- screenshot -->
-    //
-    //       In practice, sometimes the device gets really busy for a while and
-    //       even two seconds isn't enough, which means that this is still racy
-    //       and a source of flakes.
     await Future<void>.delayed(const Duration(seconds: 2));
 
     return _connection.screenshot();
@@ -138,18 +96,14 @@ class WebFlutterDriver extends FlutterDriver {
     List<TimelineStream> streams = const <TimelineStream>[TimelineStream.all],
     Duration timeout = kUnusuallyLongTimeout,
   }) async {
-    if (_browserName != kChrome) {
-      throw UnimplementedError();
-    }
+    _checkBrowserSupportsTimeline();
 
     _startTime = DateTime.now();
   }
 
   @override
   Future<Timeline> stopTracingAndDownloadTimeline({Duration timeout = kUnusuallyLongTimeout}) async {
-    if (_browserName != kChrome) {
-      throw UnimplementedError();
-    }
+    _checkBrowserSupportsTimeline();
     if (_startTime == null) {
       return null;
     }
@@ -157,12 +111,17 @@ class WebFlutterDriver extends FlutterDriver {
     final List<Map<String, dynamic>> events = <Map<String, dynamic>>[];
     for (sync.LogEntry entry in _connection.logs) {
       if (_startTime.isBefore(entry.timestamp)) {
-        final Map<String, dynamic> data = jsonDecode(entry.message)['message'];
+        final Map<String, dynamic> data = jsonDecode(entry.message)['message'] as Map<String, dynamic>;
         if (data['method'] == 'Tracing.dataCollected') {
           // 'ts' data collected from Chrome is in double format, conversion needed
-          data['params']['ts'] =
-              double.parse(data['params']['ts'].toString()).toInt();
-          events.add(data['params']);
+          try {
+            data['params']['ts'] =
+                double.parse(data['params']['ts'].toString()).toInt();
+          } on FormatException catch (_) {
+            // data is corrupted, skip
+            continue;
+          }
+          events.add(data['params'] as Map<String, dynamic>);
         }
       }
     }
@@ -178,9 +137,7 @@ class WebFlutterDriver extends FlutterDriver {
     List<TimelineStream> streams = const <TimelineStream>[TimelineStream.all],
     bool retainPriorEvents = false,
   }) async {
-    if (_browserName != kChrome) {
-      throw UnimplementedError();
-    }
+    _checkBrowserSupportsTimeline();
     if (!retainPriorEvents) {
       await clearTimeline();
     }
@@ -192,12 +149,17 @@ class WebFlutterDriver extends FlutterDriver {
 
   @override
   Future<void> clearTimeline({Duration timeout = kUnusuallyLongTimeout}) async {
-    if (_browserName != kChrome) {
-      throw UnimplementedError();
-    }
+    _checkBrowserSupportsTimeline();
 
     // Reset start time
     _startTime = null;
+  }
+
+  /// Checks whether browser supports Timeline related operations
+  void _checkBrowserSupportsTimeline() {
+    if (_browser != Browser.chrome) {
+      throw UnimplementedError();
+    }
   }
 }
 
@@ -209,25 +171,28 @@ class FlutterWebConnection {
 
   /// Starts WebDriver with the given [capabilities] and
   /// establishes the connection to Flutter Web application.
-  static Future<FlutterWebConnection> connect(String url, Map<String, dynamic> settings) async {
+  static Future<FlutterWebConnection> connect(
+      String url,
+      Map<String, dynamic> settings,
+      {Duration timeout}) async {
     final sync.WebDriver driver = createDriver(settings);
     driver.get(url);
 
     // Configure WebDriver browser by setting its location and dimension.
-    final List<String> dimensions = settings['browser-dimension'].split(',');
+    final List<String> dimensions = settings['browser-dimension'].split(',') as List<String>;
     if (dimensions.length != 2) {
       throw DriverError('Invalid browser window size.');
     }
     final int x = int.parse(dimensions[0]);
     final int y = int.parse(dimensions[1]);
     final sync.Window window = driver.window;
-    window.setLocation(const Point<int>(0, 0));
-    window.setSize(Rectangle<int>(0, 0, x, y));
+    window.setLocation(const math.Point<int>(0, 0));
+    window.setSize(math.Rectangle<int>(0, 0, x, y));
 
     // Wait until extension is installed.
     await waitFor<void>(() => driver.execute('return typeof(window.\$flutterDriver)', <String>[]),
         matcher: 'function',
-        timeout: const Duration(minutes: 1));
+        timeout: timeout ?? const Duration(minutes: 10));
     return FlutterWebConnection._(driver);
   }
 
@@ -241,7 +206,8 @@ class FlutterWebConnection {
     }
 
     try {
-      result = await waitFor<dynamic>(() => _driver.execute('return \$flutterDriverResult', <String>[]),
+      result = await waitFor<dynamic>(() => _driver.execute('r'
+          'eturn \$flutterDriverResult', <String>[]),
           matcher: isNotNull,
           timeout: duration ?? const Duration(seconds: 30));
     } catch (_) {

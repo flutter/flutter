@@ -25,8 +25,6 @@ import 'common.dart';
 import 'driver.dart';
 import 'timeline.dart';
 
-final Logger _log = Logger('FlutterDriver');
-
 /// An implementation of the Flutter Driver over the vmservice protocol.
 class VMServiceFlutterDriver extends FlutterDriver {
   /// Creates a driver that uses a connection provided by the given
@@ -60,7 +58,9 @@ class VMServiceFlutterDriver extends FlutterDriver {
     if (Platform.isFuchsia && isolateNumber == null) {
       // TODO(awdavies): Use something other than print. On fuchsia
       // `stderr`/`stdout` appear to have issues working correctly.
-      flutterDriverLog.listen(print);
+      driverLog = (String source, String message) {
+        print('$source: $message');
+      };
       fuchsiaModuleTarget ??= Platform.environment['FUCHSIA_MODULE_TARGET'];
       if (fuchsiaModuleTarget == null) {
         throw DriverError(
@@ -91,7 +91,7 @@ class VMServiceFlutterDriver extends FlutterDriver {
     }
 
     // Connect to Dart VM services
-    _log.info('Connecting to Flutter application at $dartVmServiceUrl');
+    _log('Connecting to Flutter application at $dartVmServiceUrl');
     final VMServiceClientConnection connection =
     await vmServiceConnectFunction(dartVmServiceUrl);
     final VMServiceClient client = connection.client;
@@ -100,7 +100,7 @@ class VMServiceFlutterDriver extends FlutterDriver {
         null ? vm.isolates.first :
     vm.isolates.firstWhere(
             (VMIsolateRef isolate) => isolate.number == isolateNumber);
-    _log.trace('Isolate found with number: ${isolateRef.number}');
+    _log('Isolate found with number: ${isolateRef.number}');
 
     VMIsolate isolate = await isolateRef.loadRunnable();
 
@@ -132,12 +132,12 @@ class VMServiceFlutterDriver extends FlutterDriver {
     // the isolate is already resumed. There could be a race with other tools,
     // such as a debugger, any of which could have resumed the isolate.
     Future<dynamic> resumeLeniently() {
-      _log.trace('Attempting to resume isolate');
+      _log('Attempting to resume isolate');
       return isolate.resume().catchError((dynamic e) {
         const int vmMustBePausedCode = 101;
         if (e is rpc.RpcException && e.code == vmMustBePausedCode) {
           // No biggie; something else must have resumed the isolate
-          _log.warning(
+          _log(
               'Attempted to resume an already resumed isolate. This may happen '
                   'when we lose a race with another tool (usually a debugger) that '
                   'is connected to the same isolate.'
@@ -172,7 +172,7 @@ class VMServiceFlutterDriver extends FlutterDriver {
 
     // Attempt to resume isolate if it was paused
     if (isolate.pauseEvent is VMPauseStartEvent) {
-      _log.trace('Isolate is paused at start.');
+      _log('Isolate is paused at start.');
 
       // If the isolate is paused at the start, e.g. via the --start-paused
       // option, then the VM service extension is not registered yet. Wait for
@@ -182,7 +182,7 @@ class VMServiceFlutterDriver extends FlutterDriver {
       final Future<dynamic> whenResumed = resumeLeniently();
       await whenResumed;
 
-      _log.trace('Waiting for service extension');
+      _log('Waiting for service extension');
       // We will never receive the extension event if the user does not
       // register it. If that happens, show a message but continue waiting.
       await _warnIfSlow<String>(
@@ -199,12 +199,12 @@ class VMServiceFlutterDriver extends FlutterDriver {
         isolate.pauseEvent is VMPauseInterruptedEvent) {
       // If the isolate is paused for any other reason, assume the extension is
       // already there.
-      _log.trace('Isolate is paused mid-flight.');
+      _log('Isolate is paused mid-flight.');
       await resumeLeniently();
     } else if (isolate.pauseEvent is VMResumeEvent) {
-      _log.trace('Isolate is not paused. Assuming application is ready.');
+      _log('Isolate is not paused. Assuming application is ready.');
     } else {
-      _log.warning(
+      _log(
           'Unknown pause event type ${isolate.pauseEvent.runtimeType}. '
               'Assuming application is ready.'
       );
@@ -220,7 +220,7 @@ class VMServiceFlutterDriver extends FlutterDriver {
         if (e.code != error_code.METHOD_NOT_FOUND) {
           rethrow;
         }
-        _log.trace(
+        _log(
             'Check Health failed, try to wait for the service extensions to be'
                 'registered.'
         );
@@ -236,7 +236,7 @@ class VMServiceFlutterDriver extends FlutterDriver {
       throw DriverError('Flutter application health check failed.');
     }
 
-    _log.info('Connected to Flutter application.');
+    _log('Connected to Flutter application.');
     return driver;
   }
 
@@ -248,7 +248,7 @@ class VMServiceFlutterDriver extends FlutterDriver {
   static const String _clearVMTimelineMethodName = 'clearVMTimeline';
   static const String _collectAllGarbageMethodName = '_collectAllGarbage';
 
-  // The additional blank line in the beginning is for _log.warning.
+  // The additional blank line in the beginning is for _log.
   static const String _kDebugWarning = '''
 ┏╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍╍┓
 ┇ ⚠    THIS BENCHMARK IS BEING RUN IN DEBUG MODE     ⚠  ┇
@@ -283,7 +283,7 @@ class VMServiceFlutterDriver extends FlutterDriver {
       return;
     }
 
-    _log.warning(
+    _log(
         'Peer connection is closed! Trying to restore the connection...'
     );
 
@@ -318,7 +318,7 @@ class VMServiceFlutterDriver extends FlutterDriver {
       final Future<Map<String, dynamic>> future = _appIsolate.invokeExtension(
         _flutterExtensionMethodName,
         serialized,
-      ).then<Map<String, dynamic>>((Object value) => value);
+      ).then<Map<String, dynamic>>((Object value) => value as Map<String, dynamic>);
       response = await _warnIfSlow<Map<String, dynamic>>(
         future: future,
         timeout: command.timeout ?? kUnusuallyLongTimeout,
@@ -332,14 +332,14 @@ class VMServiceFlutterDriver extends FlutterDriver {
         stackTrace,
       );
     }
-    if (response['isError'])
+    if (response['isError'] as bool)
       throw DriverError('Error in Flutter application: ${response['response']}');
-    return response['response'];
+    return response['response'] as Map<String, dynamic>;
   }
 
   void _logCommunication(String message) {
     if (_printCommunication)
-      _log.info(message);
+      _log(message);
     if (_logCommunicationToFile) {
       final f.File file = fs.file(p.join(testOutputsDirectory, 'flutter_driver_commands_$_driverId.log'));
       file.createSync(recursive: true); // no-op if file exists
@@ -349,64 +349,18 @@ class VMServiceFlutterDriver extends FlutterDriver {
 
   @override
   Future<List<int>> screenshot() async {
-    // HACK: this artificial delay here is to deal with a race between the
-    //       driver script and the GPU thread. The issue is that driver API
-    //       synchronizes with the framework based on transient callbacks, which
-    //       are out of sync with the GPU thread. Here's the timeline of events
-    //       in ASCII art:
-    //
-    //       -------------------------------------------------------------------
-    //       Without this delay:
-    //       -------------------------------------------------------------------
-    //       UI    : <-- build -->
-    //       GPU   :               <-- rasterize -->
-    //       Gap   :              | random |
-    //       Driver:                        <-- screenshot -->
-    //
-    //       In the diagram above, the gap is the time between the last driver
-    //       action taken, such as a `tap()`, and the subsequent call to
-    //       `screenshot()`. The gap is random because it is determined by the
-    //       unpredictable network communication between the driver process and
-    //       the application. If this gap is too short, which it typically will
-    //       be, the screenshot is taken before the GPU thread is done
-    //       rasterizing the frame, so the screenshot of the previous frame is
-    //       taken, which is wrong.
-    //
-    //       -------------------------------------------------------------------
-    //       With this delay, if we're lucky:
-    //       -------------------------------------------------------------------
-    //       UI    : <-- build -->
-    //       GPU   :               <-- rasterize -->
-    //       Gap   :              |    2 seconds or more   |
-    //       Driver:                                        <-- screenshot -->
-    //
-    //       The two-second gap should be long enough for the GPU thread to
-    //       finish rasterizing the frame, but not longer than necessary to keep
-    //       driver tests as fast a possible.
-    //
-    //       -------------------------------------------------------------------
-    //       With this delay, if we're not lucky:
-    //       -------------------------------------------------------------------
-    //       UI    : <-- build -->
-    //       GPU   :               <-- rasterize randomly slow today -->
-    //       Gap   :              |    2 seconds or more   |
-    //       Driver:                                        <-- screenshot -->
-    //
-    //       In practice, sometimes the device gets really busy for a while and
-    //       even two seconds isn't enough, which means that this is still racy
-    //       and a source of flakes.
     await Future<void>.delayed(const Duration(seconds: 2));
 
-    final Map<String, dynamic> result = await _peer.sendRequest('_flutter.screenshot');
-    return base64.decode(result['screenshot']);
+    final Map<String, dynamic> result = await _peer.sendRequest('_flutter.screenshot') as Map<String, dynamic>;
+    return base64.decode(result['screenshot'] as String);
   }
 
   @override
   Future<List<Map<String, dynamic>>> getVmFlags() async {
     await _restorePeerConnectionIfNeeded();
-    final Map<String, dynamic> result = await _peer.sendRequest('getFlagList');
+    final Map<String, dynamic> result = await _peer.sendRequest('getFlagList') as Map<String, dynamic>;
     return result != null
-        ? result['flags'].cast<Map<String,dynamic>>()
+        ? (result['flags'] as List<dynamic>).cast<Map<String,dynamic>>()
         : const <Map<String, dynamic>>[];
   }
 
@@ -446,7 +400,7 @@ class VMServiceFlutterDriver extends FlutterDriver {
         timeout: timeout,
         message: 'VM is taking an unusually long time to respond to being told to stop tracing...',
       );
-      return Timeline.fromJson(await _peer.sendRequest(_getVMTimelineMethodName));
+      return Timeline.fromJson(await _peer.sendRequest(_getVMTimelineMethodName) as Map<String, dynamic>);
     } catch (error, stackTrace) {
       throw DriverError(
         'Failed to stop tracing due to remote error',
@@ -479,7 +433,7 @@ class VMServiceFlutterDriver extends FlutterDriver {
     await action();
 
     if (!(await _isPrecompiledMode())) {
-      _log.warning(_kDebugWarning);
+      _log(_kDebugWarning);
     }
     return stopTracingAndDownloadTimeline();
   }
@@ -581,7 +535,7 @@ void _unhandledJsonRpcError(dynamic error, dynamic stack) {
   if (_ignoreRpcError(error)) {
     return;
   }
-  _log.trace('Unhandled RPC error:\n$error\n$stack');
+  _log('Unhandled RPC error:\n$error\n$stack');
   // TODO(dnfield): https://github.com/flutter/flutter/issues/31813
   // assert(false);
 }
@@ -600,7 +554,7 @@ String _getWebSocketUrl(String url) {
 
 void _checkCloseCode(WebSocket ws) {
   if (ws.closeCode != 1000 && ws.closeCode != null) {
-    _log.warning('$ws is closed with an unexpected code ${ws.closeCode}');
+    _log('$ws is closed with an unexpected code ${ws.closeCode}');
   }
 }
 
@@ -630,7 +584,7 @@ Future<VMServiceClientConnection> _waitAndConnect(String url) async {
       await ws1?.close();
       await ws2?.close();
       if (attempts > 5)
-        _log.warning('It is taking an unusually long time to connect to the VM...');
+        _log('It is taking an unusually long time to connect to the VM...');
       attempts += 1;
       await Future<void>.delayed(_kPauseBetweenReconnectAttempts);
     }
@@ -662,6 +616,9 @@ String _timelineStreamsToString(List<TimelineStream> streams) {
   return '[$contents]';
 }
 
+void _log(String message) {
+  driverLog('VMServiceFlutterDriver', message);
+}
 Future<T> _warnIfSlow<T>({
   @required Future<T> future,
   @required Duration timeout,
@@ -670,7 +627,7 @@ Future<T> _warnIfSlow<T>({
   assert(future != null);
   assert(timeout != null);
   assert(message != null);
-  return future..timeout(timeout, onTimeout: () { _log.warning(message); return null; });
+  return future..timeout(timeout, onTimeout: () { _log(message); return null; });
 }
 
 /// Encapsulates connection information to an instance of a Flutter application.
