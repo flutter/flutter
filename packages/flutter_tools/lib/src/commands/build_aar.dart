@@ -91,8 +91,10 @@ class BuildAarCommand extends BuildSubCommand {
         stringsArg('target-platform').map<AndroidArch>(getAndroidArchForName);
 
     final String buildNumber = argParser.options.containsKey('build-number')
-        ? stringArg('build-number')
-        : '1.0';
+        && stringArg('build-number') != null
+        && stringArg('build-number').isNotEmpty
+          ? stringArg('build-number')
+          : '1.0';
 
     for (String buildMode in const <String>['debug', 'profile', 'release']) {
       if (boolArg(buildMode)) {
