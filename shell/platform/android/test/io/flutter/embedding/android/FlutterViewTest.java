@@ -79,6 +79,19 @@ public class FlutterViewTest {
   }
 
   @Test
+  public void detachFromFlutterEngine_turnsOffA11y() {
+    FlutterView flutterView = new FlutterView(RuntimeEnvironment.application);
+    FlutterEngine flutterEngine = spy(new FlutterEngine(RuntimeEnvironment.application, mockFlutterLoader, mockFlutterJni));
+    FlutterRenderer flutterRenderer = spy(new FlutterRenderer(mockFlutterJni));
+    when(flutterEngine.getRenderer()).thenReturn(flutterRenderer);
+
+    flutterView.attachToFlutterEngine(flutterEngine);
+    flutterView.detachFromFlutterEngine();
+
+    verify(flutterRenderer, times(1)).setSemanticsEnabled(false);
+  }
+
+  @Test
   public void onConfigurationChanged_fizzlesWhenNullEngine() {
     FlutterView flutterView = new FlutterView(RuntimeEnvironment.application);
     FlutterEngine flutterEngine = spy(new FlutterEngine(RuntimeEnvironment.application, mockFlutterLoader, mockFlutterJni));
