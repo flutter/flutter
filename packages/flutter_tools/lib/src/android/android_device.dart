@@ -645,6 +645,9 @@ class AndroidDevice extends Device {
   bool get supportsHotRestart => true;
 
   @override
+  bool get supportsFastStart => true;
+
+  @override
   Future<bool> stopApp(AndroidApk app) {
     final List<String> command = adbCommandForDevice(<String>['shell', 'am', 'force-stop', app.id]);
     return processUtils.stream(command).then<bool>(
