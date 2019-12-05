@@ -265,7 +265,7 @@ class AOTSnapshotter {
       '-Xlinker', '-rpath', '-Xlinker', '@loader_path/Frameworks',
       '-install_name', '@rpath/App.framework/App',
       if (bitcode) embedBitcodeArg,
-      if (bitcode && isIOS) ...<String>[embedBitcodeArg, '-isysroot', await xcode.iPhoneSdkLocation()],
+      if (bitcode && isIOS) ...<String>[embedBitcodeArg, '-isysroot', await xcode.sdkLocation(SdkType.iPhone)],
       '-o', appLib,
       assemblyO,
     ];

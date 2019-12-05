@@ -79,16 +79,31 @@ Future<void> main() async {
         'App',
       ));
 
-      final String aotSymbols = await dylibSymbols(path.join(
+      final String appFrameworkPath = path.join(
         outputPath,
         'Debug',
         'App.framework',
         'App',
-      ));
+      );
+      final String aotSymbols = await dylibSymbols(appFrameworkPath);
 
       if (aotSymbols.contains('architecture') ||
           aotSymbols.contains('_kDartVmSnapshot')) {
         throw TaskResult.failure('Debug App.framework contains AOT');
+      }
+
+      final String debugAppArchs = await fileType(appFrameworkPath);
+
+      if (!debugAppArchs.contains('armv7')) {
+        throw TaskResult.failure('Debug App.framework armv7 architecture missing');
+      }
+
+      if (!debugAppArchs.contains('arm64')) {
+        throw TaskResult.failure('Debug App.framework arm64 architecture missing');
+      }
+
+      if (!debugAppArchs.contains('x86_64')) {
+        throw TaskResult.failure('Debug App.framework x86_64 architecture missing');
       }
 
       section('Check profile, release builds has Dart AOT dylib');
@@ -114,6 +129,10 @@ Future<void> main() async {
 
         if (!aotSymbols.contains('arm64')) {
           throw TaskResult.failure('$mode App.framework arm64 architecture missing');
+        }
+
+        if (aotSymbols.contains('x86_64')) {
+          throw TaskResult.failure('$mode App.framework contains x86_64 architecture');
         }
 
         if (!aotSymbols.contains('_kDartVmSnapshot')) {
