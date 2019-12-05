@@ -423,7 +423,7 @@ class _ExperimentalResidentWebRunner extends ResidentWebRunner {
   @override
   Future<OperationResult> restart({
     bool fullRestart = false,
-    bool pauseAfterRestart = false,
+    bool pause = false,
     String reason,
     bool benchmarkMode = false,
   }) async {
@@ -692,7 +692,7 @@ class _DwdsResidentWebRunner extends ResidentWebRunner {
   @override
   Future<OperationResult> restart({
     bool fullRestart = false,
-    bool pauseAfterRestart = false,
+    bool pause = false,
     String reason,
     bool benchmarkMode = false,
   }) async {
