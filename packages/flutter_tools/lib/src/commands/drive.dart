@@ -84,6 +84,13 @@ class DriveCommand extends RunCommandBase {
         help: 'Name of browser where tests will be executed. \n'
               'Following browsers are supported: \n'
               'Chrome, Firefox, Safari and Edge. Defaults to Chrome.',
+        allowed: <String>[
+          'chrome',
+          'edge',
+          'firefox',
+          'ios-safari',
+          'safari',
+        ]
       )
       ..addOption('browser-dimension',
         defaultsTo: '1600,1024',
