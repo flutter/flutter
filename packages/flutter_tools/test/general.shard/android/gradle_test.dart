@@ -1649,6 +1649,7 @@ plugin2=${plugin2.path}
         project: FlutterProject.current(),
         outputDirectory: fs.directory('build/'),
         target: '',
+        buildNumber: '1.0',
       );
 
       expect(
