@@ -262,7 +262,7 @@ Future<void> _runToolTests() async {
     value: (dynamic subshard) => () async {
       await _pubRunTest(
         toolsPath,
-        testPath: path.join(kTest, '$subshard$kDotShard', '**', '*_test.dart'),
+        testPath: path.join(kTest, '$subshard$kDotShard'),
         useBuildRunner: canUseBuildRunner,
         tableData: bigqueryApi?.tabledata,
         enableFlutterToolAsserts: true,
@@ -569,12 +569,9 @@ Future<void> _pubRunTest(String workingDirectory, {
 }) async {
   final List<String> args = <String>['run'];
   if (useBuildRunner) {
-    final String posixTestPath = path.posix.joinAll(path.split(testPath));
     args.addAll(<String>[
       'build_runner',
       'test',
-      '--build-filter=$posixTestPath/*.dill',
-      '--build-filter=$posixTestPath/**/*.dill',
       '--',
     ]);
   } else {
@@ -596,8 +593,13 @@ Future<void> _pubRunTest(String workingDirectory, {
   args.add('-j$cpus');
   if (!hasColor)
     args.add('--no-color');
-  if (testPath != null)
-    args.add(testPath);
+  if (testPath != null) {
+    final Iterable<String> testPaths = Directory(testPath)
+      .listSync(recursive: true)
+      .where((FileSystemEntity entity) => entity.path.endsWith('_test.dart'))
+      .map((FileSystemEntity entity) => entity.path);
+    args.addAll(testPaths);
+  }
   final Map<String, String> pubEnvironment = <String, String>{
     'FLUTTER_ROOT': flutterRoot,
   };

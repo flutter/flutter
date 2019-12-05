@@ -461,6 +461,9 @@ class FakeDevice extends Fake implements Device {
   bool get supportsHotReload => false;
 
   @override
+  bool get supportsFastStart => false;
+
+  @override
   Future<String> get sdkNameAndVersion => Future<String>.value('');
 
   @override
