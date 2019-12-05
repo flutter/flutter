@@ -193,9 +193,9 @@ class ShapeDecoration extends Decoration {
     if (a is BoxDecoration) {
       return ShapeDecoration.lerp(ShapeDecoration.fromBoxDecoration(a), this, t);
     } else if (a == null || a is ShapeDecoration) {
-      return ShapeDecoration.lerp(a, this, t);
+      return ShapeDecoration.lerp(a as ShapeDecoration, this, t);
     }
-    return super.lerpFrom(a, t);
+    return super.lerpFrom(a, t) as ShapeDecoration;
   }
 
   @override
@@ -203,9 +203,9 @@ class ShapeDecoration extends Decoration {
     if (b is BoxDecoration) {
       return ShapeDecoration.lerp(this, ShapeDecoration.fromBoxDecoration(b), t);
     } else if (b == null || b is ShapeDecoration) {
-      return ShapeDecoration.lerp(this, b, t);
+      return ShapeDecoration.lerp(this, b as ShapeDecoration, t);
     }
-    return super.lerpTo(b, t);
+    return super.lerpTo(b, t) as ShapeDecoration;
   }
 
   /// Linearly interpolate between two shapes.
@@ -251,12 +251,12 @@ class ShapeDecoration extends Decoration {
       return true;
     if (runtimeType != other.runtimeType)
       return false;
-    final ShapeDecoration typedOther = other;
-    return color == typedOther.color
-        && gradient == typedOther.gradient
-        && image == typedOther.image
-        && shadows == typedOther.shadows
-        && shape == typedOther.shape;
+    return other is ShapeDecoration
+        && other.color == color
+        && other.gradient == gradient
+        && other.image == image
+        && other.shadows == shadows
+        && other.shape == shape;
   }
 
   @override
