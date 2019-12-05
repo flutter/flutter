@@ -1025,7 +1025,6 @@ plugin2=${plugin2.path}
         FlutterProject.fromPath(androidDirectory.path),
         const AndroidBuildInfo(BuildInfo.release),
         buildDirectory: buildDirectory,
-        buildNumber: '1.0'
       );
 
       final String flutterRoot = fs.path.absolute(Cache.flutterRoot);
@@ -1650,7 +1649,6 @@ plugin2=${plugin2.path}
         project: FlutterProject.current(),
         outputDirectory: fs.directory('build/'),
         target: '',
-        buildNumber: '1.0',
       );
 
       expect(
@@ -1900,7 +1898,6 @@ plugin2=${plugin2.path}
         buildModes: const <String>{'release'},
         androidPackage: 'com.mycompany',
         repoDirectory: fs.directory('build/'),
-        buildNumber: '1.0',
       );
 
       expect(
@@ -1940,7 +1937,6 @@ plugin2=${plugin2.path}
         buildModes: const <String>{'debug'},
         androidPackage: 'com.mycompany',
         repoDirectory: fs.directory('build/'),
-        buildNumber: '1.0',
       );
 
       expect(

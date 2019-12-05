@@ -480,13 +480,12 @@ Future<void> buildGradleAar({
   @required AndroidBuildInfo androidBuildInfo,
   @required String target,
   @required Directory outputDirectory,
-  @required String buildNumber,
+  String buildNumber = '1.0',
 }) async {
   assert(project != null);
   assert(target != null);
   assert(androidBuildInfo != null);
   assert(outputDirectory != null);
-  assert(buildNumber != null);
 
   if (androidSdk == null) {
     exitWithNoSdkMessage();
@@ -588,12 +587,11 @@ void printHowToConsumeAar({
   @required Set<String> buildModes,
   @required String androidPackage,
   @required Directory repoDirectory,
-  @required String buildNumber,
+  String buildNumber = '1.0',
 }) {
   assert(buildModes != null && buildModes.isNotEmpty);
   assert(androidPackage != null);
   assert(repoDirectory != null);
-  assert(buildNumber != null);
 
   printStatus('''
 
