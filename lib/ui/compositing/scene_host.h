@@ -33,14 +33,11 @@ class SceneHost : public RefCountedDartWrappable<SceneHost> {
   static void OnViewDisconnected(scenic::ResourceId id);
   static void OnViewStateChanged(scenic::ResourceId id, bool state);
 
-  SceneHost(fml::RefPtr<zircon::dart::Handle> viewHolderToken,
-            Dart_Handle viewConnectedCallback,
-            Dart_Handle viewDisconnectedCallback,
-            Dart_Handle viewStateChangedCallback);
   ~SceneHost() override;
 
   zx_koid_t id() const { return koid_; }
 
+  // These are visible to Dart.
   void dispose();
   void setProperties(double width,
                      double height,
@@ -49,9 +46,13 @@ class SceneHost : public RefCountedDartWrappable<SceneHost> {
                      double insetBottom,
                      double insetLeft,
                      bool focusable);
-  void setOpacity(double opacity);
 
  private:
+  SceneHost(fml::RefPtr<zircon::dart::Handle> viewHolderToken,
+            Dart_Handle viewConnectedCallback,
+            Dart_Handle viewDisconnectedCallback,
+            Dart_Handle viewStateChangedCallback);
+
   fml::RefPtr<fml::TaskRunner> gpu_task_runner_;
   tonic::DartPersistentValue view_connected_callback_;
   tonic::DartPersistentValue view_disconnected_callback_;

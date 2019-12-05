@@ -14,13 +14,14 @@
 #include "flutter/fml/macros.h"
 #include "flutter/fml/time/time_delta.h"
 #include "third_party/skia/include/core/SkPicture.h"
-#include "third_party/skia/include/core/SkSize.h"
 
 namespace flutter {
 
 class LayerTree {
  public:
-  LayerTree();
+  LayerTree(const SkISize& frame_size,
+            float frame_physical_depth,
+            float frame_device_pixel_ratio);
 
   void Preroll(CompositorContext::ScopedFrame& frame,
                bool ignore_raster_cache = false);
@@ -42,8 +43,8 @@ class LayerTree {
   }
 
   const SkISize& frame_size() const { return frame_size_; }
-
-  void set_frame_size(const SkISize& frame_size) { frame_size_ = frame_size; }
+  float frame_physical_depth() const { return frame_physical_depth_; }
+  float frame_device_pixel_ratio() const { return frame_device_pixel_ratio_; }
 
   void RecordBuildTime(fml::TimePoint begin_start);
   fml::TimePoint build_start() const { return build_start_; }
@@ -69,18 +70,15 @@ class LayerTree {
     checkerboard_offscreen_layers_ = checkerboard;
   }
 
-  void set_device_pixel_ratio(double device_pixel_ratio) {
-    device_pixel_ratio_ = device_pixel_ratio;
-  }
-
-  double device_pixel_ratio() const { return device_pixel_ratio_; }
+  double device_pixel_ratio() const { return frame_device_pixel_ratio_; }
 
  private:
-  SkISize frame_size_ = SkISize::MakeEmpty();  // Physical pixels.
-  double device_pixel_ratio_ = 1.0;
   std::shared_ptr<Layer> root_layer_;
   fml::TimePoint build_start_;
   fml::TimePoint build_finish_;
+  SkISize frame_size_ = SkISize::MakeEmpty();  // Physical pixels.
+  float frame_physical_depth_;
+  float frame_device_pixel_ratio_ = 1.0f;  // Logical / Physical pixels ratio.
   uint32_t rasterizer_tracing_threshold_;
   bool checkerboard_raster_cache_images_;
   bool checkerboard_offscreen_layers_;

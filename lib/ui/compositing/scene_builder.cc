@@ -23,8 +23,6 @@
 #include "flutter/fml/build_config.h"
 #include "flutter/lib/ui/painting/matrix.h"
 #include "flutter/lib/ui/painting/shader.h"
-#include "flutter/lib/ui/ui_dart_state.h"
-#include "flutter/lib/ui/window/window.h"
 #include "third_party/skia/include/core/SkColorFilter.h"
 #include "third_party/tonic/converter/dart_converter.h"
 #include "third_party/tonic/dart_args.h"
@@ -80,7 +78,12 @@ void SceneBuilder::RegisterNatives(tonic::DartLibraryNatives* natives) {
   });
 }
 
-SceneBuilder::SceneBuilder() = default;
+SceneBuilder::SceneBuilder() {
+  // Add a ContainerLayer as the root layer, so that AddLayer operations are
+  // always valid.
+  PushLayer(std::make_shared<flutter::ContainerLayer>());
+}
+
 SceneBuilder::~SceneBuilder() = default;
 
 fml::RefPtr<EngineLayer> SceneBuilder::pushTransform(
@@ -176,12 +179,6 @@ fml::RefPtr<EngineLayer> SceneBuilder::pushPhysicalShape(const CanvasPath* path,
                                                          int clipBehavior) {
   auto layer = std::make_shared<flutter::PhysicalShapeLayer>(
       static_cast<SkColor>(color), static_cast<SkColor>(shadow_color),
-      static_cast<float>(UIDartState::Current()
-                             ->window()
-                             ->viewport_metrics()
-                             .device_pixel_ratio),
-      static_cast<float>(
-          UIDartState::Current()->window()->viewport_metrics().physical_depth),
       static_cast<float>(elevation), path->path(),
       static_cast<flutter::Clip>(clipBehavior));
   PushLayer(layer);
@@ -189,33 +186,24 @@ fml::RefPtr<EngineLayer> SceneBuilder::pushPhysicalShape(const CanvasPath* path,
 }
 
 void SceneBuilder::addRetained(fml::RefPtr<EngineLayer> retainedLayer) {
-  if (!current_layer_) {
-    return;
-  }
-  current_layer_->Add(retainedLayer->Layer());
+  AddLayer(retainedLayer->Layer());
 }
 
 void SceneBuilder::pop() {
-  if (!current_layer_) {
-    return;
-  }
-  current_layer_ = current_layer_->parent();
+  PopLayer();
 }
 
 void SceneBuilder::addPicture(double dx,
                               double dy,
                               Picture* picture,
                               int hints) {
-  if (!current_layer_) {
-    return;
-  }
   SkPoint offset = SkPoint::Make(dx, dy);
   SkRect pictureRect = picture->picture()->cullRect();
   pictureRect.offset(offset.x(), offset.y());
   auto layer = std::make_unique<flutter::PictureLayer>(
       offset, UIDartState::CreateGPUObject(picture->picture()), !!(hints & 1),
       !!(hints & 2));
-  current_layer_->Add(std::move(layer));
+  AddLayer(std::move(layer));
 }
 
 void SceneBuilder::addTexture(double dx,
@@ -224,12 +212,9 @@ void SceneBuilder::addTexture(double dx,
                               double height,
                               int64_t textureId,
                               bool freeze) {
-  if (!current_layer_) {
-    return;
-  }
   auto layer = std::make_unique<flutter::TextureLayer>(
       SkPoint::Make(dx, dy), SkSize::Make(width, height), textureId, freeze);
-  current_layer_->Add(std::move(layer));
+  AddLayer(std::move(layer));
 }
 
 void SceneBuilder::addPlatformView(double dx,
@@ -237,12 +222,9 @@ void SceneBuilder::addPlatformView(double dx,
                                    double width,
                                    double height,
                                    int64_t viewId) {
-  if (!current_layer_) {
-    return;
-  }
   auto layer = std::make_unique<flutter::PlatformViewLayer>(
       SkPoint::Make(dx, dy), SkSize::Make(width, height), viewId);
-  current_layer_->Add(std::move(layer));
+  AddLayer(std::move(layer));
 }
 
 #if defined(OS_FUCHSIA)
@@ -252,13 +234,10 @@ void SceneBuilder::addChildScene(double dx,
                                  double height,
                                  SceneHost* sceneHost,
                                  bool hitTestable) {
-  if (!current_layer_) {
-    return;
-  }
   auto layer = std::make_unique<flutter::ChildSceneLayer>(
       sceneHost->id(), SkPoint::Make(dx, dy), SkSize::Make(width, height),
       hitTestable);
-  current_layer_->Add(std::move(layer));
+  AddLayer(std::move(layer));
 }
 #endif  // defined(OS_FUCHSIA)
 
@@ -267,14 +246,11 @@ void SceneBuilder::addPerformanceOverlay(uint64_t enabledOptions,
                                          double right,
                                          double top,
                                          double bottom) {
-  if (!current_layer_) {
-    return;
-  }
   SkRect rect = SkRect::MakeLTRB(left, top, right, bottom);
   auto layer =
       std::make_unique<flutter::PerformanceOverlayLayer>(enabledOptions);
   layer->set_paint_bounds(rect);
-  current_layer_->Add(std::move(layer));
+  AddLayer(std::move(layer));
 }
 
 void SceneBuilder::setRasterizerTracingThreshold(uint32_t frameInterval) {
@@ -290,29 +266,33 @@ void SceneBuilder::setCheckerboardOffscreenLayers(bool checkerboard) {
 }
 
 fml::RefPtr<Scene> SceneBuilder::build() {
+  FML_DCHECK(layer_stack_.size() >= 1);
+
   fml::RefPtr<Scene> scene = Scene::create(
-      std::move(root_layer_), rasterizer_tracing_threshold_,
+      layer_stack_[0], rasterizer_tracing_threshold_,
       checkerboard_raster_cache_images_, checkerboard_offscreen_layers_);
-  ClearDartWrapper();
+  ClearDartWrapper();  // may delete this object.
   return scene;
 }
 
-void SceneBuilder::PushLayer(std::shared_ptr<flutter::ContainerLayer> layer) {
+void SceneBuilder::AddLayer(std::shared_ptr<Layer> layer) {
   FML_DCHECK(layer);
 
-  if (!root_layer_) {
-    root_layer_ = std::move(layer);
-    current_layer_ = root_layer_.get();
-    return;
+  if (!layer_stack_.empty()) {
+    layer_stack_.back()->Add(std::move(layer));
   }
+}
 
-  if (!current_layer_) {
-    return;
+void SceneBuilder::PushLayer(std::shared_ptr<ContainerLayer> layer) {
+  AddLayer(layer);
+  layer_stack_.push_back(std::move(layer));
+}
+
+void SceneBuilder::PopLayer() {
+  // We never pop the root layer, so that AddLayer operations are always valid.
+  if (layer_stack_.size() > 1) {
+    layer_stack_.pop_back();
   }
-
-  flutter::ContainerLayer* newLayer = layer.get();
-  current_layer_->Add(std::move(layer));
-  current_layer_ = newLayer;
 }
 
 }  // namespace flutter

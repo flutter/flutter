@@ -16,7 +16,8 @@ namespace flutter {
 static const double kUnsetDepth = 1.7976931348623157e+308;
 
 struct ViewportMetrics {
-  ViewportMetrics();
+  ViewportMetrics() = default;
+  ViewportMetrics(const ViewportMetrics& other) = default;
 
   // Create a 2D ViewportMetrics instance.
   ViewportMetrics(double p_device_pixel_ratio,
@@ -50,8 +51,6 @@ struct ViewportMetrics {
                   double p_physical_view_inset_right,
                   double p_physical_view_inset_bottom,
                   double p_physical_view_inset_left);
-
-  ViewportMetrics(const ViewportMetrics& other);
 
   double device_pixel_ratio = 1.0;
   double physical_width = 0;

@@ -51,7 +51,6 @@ class ViewHolder {
                      double insetBottom,
                      double insetLeft,
                      bool focusable);
-  void SetOpacity(double opacity);
 
   // Creates or updates the contained ViewHolder resource using the specified
   // |SceneUpdateContext|.
@@ -63,7 +62,6 @@ class ViewHolder {
  private:
   fml::RefPtr<fml::TaskRunner> ui_task_runner_;
 
-  std::unique_ptr<scenic::OpacityNodeHACK> opacity_node_;
   std::unique_ptr<scenic::EntityNode> entity_node_;
   std::unique_ptr<scenic::ViewHolder> view_holder_;
 
@@ -71,9 +69,7 @@ class ViewHolder {
   BindCallback pending_bind_callback_;
 
   fuchsia::ui::gfx::ViewProperties pending_properties_;
-  double pending_opacity_;
   bool has_pending_properties_ = false;
-  bool has_pending_opacity_ = false;
 
   FML_DISALLOW_COPY_AND_ASSIGN(ViewHolder);
 };

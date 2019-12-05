@@ -383,12 +383,6 @@ class SceneHost {
       void Function() viewDisconnectedCallback,
       void Function(bool) viewStateChangedCallback);
 
-  SceneHost.fromViewHolderToken(
-      dynamic viewHolderToken,
-      void Function() viewConnectedCallback,
-      void Function() viewDisconnectedCallback,
-      void Function(bool) viewStateChangedCallback);
-
   /// Releases the resources associated with the SceneHost.
   ///
   /// After calling this function, the SceneHost cannot be used further.
@@ -398,12 +392,6 @@ class SceneHost {
   /// as well as whether it can be the target of focus events or not.
   void setProperties(double width, double height, double insetTop,
       double insetRight, double insetBottom, double insetLeft, bool focusable) {
-    throw UnimplementedError();
-  }
-
-  /// Set the opacity of the linked scene.  This opacity value is applied only
-  /// once, when the child scene is composited into our own.
-  void setOpacity(double opacity) {
     throw UnimplementedError();
   }
 }

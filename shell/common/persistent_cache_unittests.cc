@@ -56,7 +56,7 @@ TEST_F(ShellTest, CacheSkSLWorks) {
     SkPath path;
     path.addCircle(50, 50, 20);
     auto physical_shape_layer = std::make_shared<PhysicalShapeLayer>(
-        SK_ColorRED, SK_ColorBLUE, 1.0f, 1.0f, 1.0f, path, Clip::antiAlias);
+        SK_ColorRED, SK_ColorBLUE, 1.0f, path, Clip::antiAlias);
     root->Add(physical_shape_layer);
   };
   PumpOneFrame(shell.get(), 100, 100, builder);

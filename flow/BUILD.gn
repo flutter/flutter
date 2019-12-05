@@ -28,6 +28,8 @@ source_set("flow") {
     "layers/color_filter_layer.h",
     "layers/container_layer.cc",
     "layers/container_layer.h",
+    "layers/elevated_container_layer.cc",
+    "layers/elevated_container_layer.h",
     "layers/layer.cc",
     "layers/layer.h",
     "layers/layer_tree.cc",
@@ -76,6 +78,8 @@ source_set("flow") {
     sources += [
       "layers/child_scene_layer.cc",
       "layers/child_scene_layer.h",
+      "layers/fuchsia_system_composited_layer.cc",
+      "layers/fuchsia_system_composited_layer.h",
       "scene_update_context.cc",
       "scene_update_context.h",
       "view_holder.cc",
