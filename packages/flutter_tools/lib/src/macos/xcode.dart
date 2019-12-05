@@ -23,6 +23,12 @@ enum SdkType {
   macOS,
 }
 
+/// SDK name passed to `xcrun --sdk`. Corresponds to undocumented Xcode
+/// SUPPORTED_PLATFORMS values.
+///
+/// Usage: xcrun [options] <tool name> ... arguments ...
+/// ...
+/// --sdk <sdk name>            find the tool for the given SDK name
 String getNameForSdk(SdkType sdk) {
   switch (sdk) {
     case SdkType.iPhone:
@@ -137,6 +143,7 @@ class Xcode {
   }
 
   Future<String> sdkLocation(SdkType sdk) async {
+    assert(sdk != null);
     final RunResult runResult = await processUtils.run(
       <String>['xcrun', '--sdk', getNameForSdk(sdk), '--show-sdk-path'],
       throwOnError: true,

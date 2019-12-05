@@ -257,6 +257,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
   Future<void> _produceAppFramework(BuildMode mode, Directory iPhoneBuildOutput, Directory simulatorBuildOutput, Directory modeDirectory) async {
     const String appFrameworkName = 'App.framework';
     final Directory destinationAppFrameworkDirectory = modeDirectory.childDirectory(appFrameworkName);
+    destinationAppFrameworkDirectory.createSync(recursive: true);
 
     if (mode == BuildMode.debug) {
       final Status status = logger.startProgress(' ├─Add placeholder App.framework for debug...', timeout: timeoutConfiguration.fastOperation);
@@ -298,7 +299,6 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
     final File simulatorAppFrameworkFile = simulatorAppFrameworkDirectory.childFile(binaryName);
     await createStubAppFramework(simulatorAppFrameworkFile, SdkType.iPhoneSimulator);
 
-    copyDirectorySync(iPhoneAppFrameworkDirectory, destinationAppFrameworkDirectory);
     final List<String> lipoCommand = <String>[
       'xcrun',
       'lipo',

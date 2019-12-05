@@ -131,6 +131,10 @@ Future<void> main() async {
           throw TaskResult.failure('$mode App.framework arm64 architecture missing');
         }
 
+        if (aotSymbols.contains('x86_64')) {
+          throw TaskResult.failure('$mode App.framework contains x86_64 architecture');
+        }
+
         if (!aotSymbols.contains('_kDartVmSnapshot')) {
           throw TaskResult.failure('$mode App.framework missing Dart AOT');
         }
