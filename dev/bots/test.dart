@@ -594,7 +594,7 @@ Future<void> _pubRunTest(String workingDirectory, {
   if (!hasColor)
     args.add('--no-color');
   if (testPath != null) {
-    final Iterable<String> testPaths = Directory(testPath)
+    final Iterable<String> testPaths = Directory(path.join(workingDirectory, testPath))
       .listSync(recursive: true)
       .where((FileSystemEntity entity) => entity.path.endsWith('_test.dart'))
       .map((FileSystemEntity entity) => entity.path);
