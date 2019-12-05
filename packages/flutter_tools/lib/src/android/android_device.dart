@@ -527,7 +527,6 @@ class AndroidDevice extends Device {
           androidBuildInfo: AndroidBuildInfo(
             debuggingOptions.buildInfo,
             targetArchs: <AndroidArch>[androidArch],
-            fastStart: debuggingOptions.fastStart
           ),
       );
       // Package has been built, so we can get the updated application ID and
@@ -643,9 +642,6 @@ class AndroidDevice extends Device {
 
   @override
   bool get supportsHotRestart => true;
-
-  @override
-  bool get supportsFastStart => true;
 
   @override
   Future<bool> stopApp(AndroidApk app) {
