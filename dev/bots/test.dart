@@ -264,7 +264,7 @@ Future<void> _runToolTests() async {
     // The `dynamic` on the next line is because Map.fromIterable isn't generic.
     value: (dynamic subshard) => () async {
       if (subshard == 'commands') {
-        // Due to https://github.com/dart-lang/test/issues/1116 , pub or test
+        // Due to https://github.com/dart-lang/test/issues/1116, pub or test
         // appears to be skipping all tests from the hermetic shard if not
         // explicitly specifed.
         await _pubRunTest(
@@ -274,13 +274,16 @@ Future<void> _runToolTests() async {
           tableData: bigqueryApi?.tabledata,
           enableFlutterToolAsserts: true,
         );
-        await _pubRunTest(
-          toolsPath,
-          testPath: path.join(kTest, '$subshard$kDotShard', 'permeable'),
-          useBuildRunner: canUseBuildRunner,
-          tableData: bigqueryApi?.tabledata,
-          enableFlutterToolAsserts: true,
-        );
+        // https://github.com/flutter/flutter/issues/46180
+        if (!Platform.isWindows) {
+          await _pubRunTest(
+            toolsPath,
+            testPath: path.join(kTest, '$subshard$kDotShard', 'permeable'),
+            useBuildRunner: canUseBuildRunner,
+            tableData: bigqueryApi?.tabledata,
+            enableFlutterToolAsserts: true,
+          );
+        }
         return;
       }
 
