@@ -40,6 +40,7 @@ void _standardFlutterDirectoryL10nSetup(FileSystem fs) {
 
 void main() {
   MemoryFileSystem fs;
+
   setUp(() {
     fs = MemoryFileSystem(
       style: Platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix
@@ -49,18 +50,19 @@ void main() {
   group('LocalizationsGenerator setters:', () {
     test('happy path', () {
       _standardFlutterDirectoryL10nSetup(fs);
-
-      try {
-        final LocalizationsGenerator generator = LocalizationsGenerator(fs);
-        generator.initialize(
-          l10nDirectoryPath: defaultArbPathString,
-          templateArbFileName: defaultTemplateArbFileName,
-          outputFileString: defaultOutputFileString,
-          classNameString: defaultClassNameString,
-        );
-      } on FileSystemException catch (e) {
-        fail('Setters should not fail: \n$e');
-      }
+      expect(() {
+        try {
+          final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+          generator.initialize(
+            l10nDirectoryPath: defaultArbPathString,
+            templateArbFileName: defaultTemplateArbFileName,
+            outputFileString: defaultOutputFileString,
+            classNameString: defaultClassNameString,
+          );
+        } on FileSystemException catch (e) {
+          fail('Setters should not fail: \n$e');
+        }
+      }, returnsNormally);
     });
 
     test('setL10nDirectory fails if the directory does not exist', () {
