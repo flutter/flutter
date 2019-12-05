@@ -150,7 +150,7 @@ int nthStylusButton(int number) => (kPrimaryStylusButton << (number - 1)) & kMax
 ///
 /// See also:
 ///
-///   * [isSingleButton], which checks if a `buttons` contains exactly one button.
+///  * [isSingleButton], which checks if a `buttons` contains exactly one button.
 int smallestButton(int buttons) => buttons & (-buttons);
 
 /// Returns whether `buttons` contains one and only one button.
@@ -170,8 +170,8 @@ int smallestButton(int buttons) => buttons & (-buttons);
 ///
 /// See also:
 ///
-///   * [smallestButton], which returns the button in a `buttons` bit field with
-///     the smallest integer button.
+///  * [smallestButton], which returns the button in a `buttons` bit field with
+///    the smallest integer button.
 bool isSingleButton(int buttons) => buttons != 0 && (smallestButton(buttons) == buttons);
 
 /// Base class for touch, stylus, or mouse events.

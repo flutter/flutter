@@ -30,6 +30,7 @@ typedef CreateRectTween = Tween<Rect> Function(Rect begin, Rect end);
 /// implicitly.
 ///
 /// See also:
+///
 ///  * [TransitionBuilder], which is similar but only takes a [BuildContext]
 ///    and a child widget.
 typedef HeroPlaceholderBuilder = Widget Function(

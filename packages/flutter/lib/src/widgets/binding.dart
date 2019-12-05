@@ -815,7 +815,10 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   ///
   /// This is called by [runApp] to configure the widget tree.
   ///
-  /// See also [RenderObjectToWidgetAdapter.attachToRenderTree].
+  /// See also:
+  ///
+  ///  * [RenderObjectToWidgetAdapter.attachToRenderTree], which inflates a
+  ///    widget and attaches it to the render tree.
   void attachRootWidget(Widget rootWidget) {
     _renderViewElement = RenderObjectToWidgetAdapter<RenderBox>(
       container: renderView,

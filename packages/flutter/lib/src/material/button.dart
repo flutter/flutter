@@ -186,7 +186,7 @@ class RawMaterialButton extends StatefulWidget {
   ///
   ///  * [elevation], the default elevation.
   ///  * [hoverElevation], the elevation when a pointer is hovering over the
-  ///  button.
+  ///    button.
   ///  * [focusElevation], the elevation when the button is focused.
   ///  * [disabledElevation], the elevation when the button is disabled.
   final double highlightElevation;
@@ -200,7 +200,7 @@ class RawMaterialButton extends StatefulWidget {
   ///
   ///  * [elevation], the default elevation.
   ///  * [hoverElevation], the elevation when a pointer is hovering over the
-  ///  button.
+  ///    button.
   ///  * [focusElevation], the elevation when the button is focused.
   ///  * [highlightElevation], the elevation when the button is pressed.
   final double disabledElevation;

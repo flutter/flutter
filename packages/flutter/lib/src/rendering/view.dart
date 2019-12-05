@@ -193,8 +193,8 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   ///
   /// See also:
   ///
-  /// * [Layer.findAllAnnotations], which is used by this method to find all
-  ///   [AnnotatedRegionLayer]s annotated for mouse tracking.
+  ///  * [Layer.findAllAnnotations], which is used by this method to find all
+  ///    [AnnotatedRegionLayer]s annotated for mouse tracking.
   Iterable<MouseTrackerAnnotation> hitTestMouseTrackers(Offset position) {
     // Layer hit testing is done using device pixels, so we have to convert
     // the logical coordinates of the event location back to device pixels

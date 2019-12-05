@@ -466,8 +466,6 @@ void debugDumpSemanticsTree(DebugSemanticsDumpOrder childOrder) {
 /// rendering layer directly. If you are writing to a higher-level
 /// library, such as the Flutter Widgets library, then you would use
 /// that layer's binding.
-///
-/// See also [BindingBase].
 class RenderingFlutterBinding extends BindingBase with GestureBinding, ServicesBinding, SchedulerBinding, SemanticsBinding, PaintingBinding, RendererBinding {
   /// Creates a binding for the rendering layer.
   ///

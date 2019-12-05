@@ -380,7 +380,8 @@ class SystemChrome {
   /// {@end-tool}
   ///
   /// See also:
-  ///   * [AnnotatedRegion], the widget used to place data into the layer tree.
+  ///
+  ///  * [AnnotatedRegion], the widget used to place data into the layer tree.
   static void setSystemUIOverlayStyle(SystemUiOverlayStyle style) {
     assert(style != null);
     if (_pendingStyle != null) {
