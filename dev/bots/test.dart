@@ -263,6 +263,27 @@ Future<void> _runToolTests() async {
       .map<String>((String name) => path.basenameWithoutExtension(name)),
     // The `dynamic` on the next line is because Map.fromIterable isn't generic.
     value: (dynamic subshard) => () async {
+      if (subshard == 'commands') {
+        // Due to https://github.com/dart-lang/test/issues/1116 , pub or test
+        // appears to be skipping all tests from the hermetic shard if not
+        // explicitly specifed.
+        await _pubRunTest(
+          toolsPath,
+          testPath: path.join(kTest, '$subshard$kDotShard', 'hermetic'),
+          useBuildRunner: canUseBuildRunner,
+          tableData: bigqueryApi?.tabledata,
+          enableFlutterToolAsserts: true,
+        );
+        await _pubRunTest(
+          toolsPath,
+          testPath: path.join(kTest, '$subshard$kDotShard', 'permeable'),
+          useBuildRunner: canUseBuildRunner,
+          tableData: bigqueryApi?.tabledata,
+          enableFlutterToolAsserts: true,
+        );
+        return;
+      }
+
       await _pubRunTest(
         toolsPath,
         testPath: path.join(kTest, '$subshard$kDotShard'),
@@ -596,20 +617,8 @@ Future<void> _pubRunTest(String workingDirectory, {
   args.add('-j$cpus');
   if (!hasColor)
     args.add('--no-color');
-  if (testPath != null) {
-    // Due to https://github.com/dart-lang/test/issues/1116, we need to
-    // specify each test file to be run, otherwise tests may be skipped.
-    // We cannot use this trick on windows due to terminal line limits.
-    if (!Platform.isWindows) {
-      final Iterable<String> testPaths = Directory(path.join(workingDirectory, testPath))
-        .listSync(recursive: true)
-        .where((FileSystemEntity entity) => entity.path.endsWith('_test.dart'))
-        .map((FileSystemEntity entity) => path.relative(entity.path, from: workingDirectory));
-      args.addAll(testPaths);
-    } else {
-      args.add(testPath);
-    }
-  }
+  if (testPath != null)
+    args.add(testPath);
   final Map<String, String> pubEnvironment = <String, String>{
     'FLUTTER_ROOT': flutterRoot,
   };
