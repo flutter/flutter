@@ -50,9 +50,9 @@ class ImageInfo {
   bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
-    final ImageInfo typedOther = other;
-    return typedOther.image == image
-        && typedOther.scale == scale;
+    return other is ImageInfo
+        && other.image == image
+        && other.scale == scale;
   }
 }
 
@@ -119,10 +119,10 @@ class ImageStreamListener {
   bool operator ==(dynamic other) {
     if (other.runtimeType != runtimeType)
       return false;
-    final ImageStreamListener typedOther = other;
-    return onImage == typedOther.onImage
-        && onChunk == typedOther.onChunk
-        && onError == typedOther.onError;
+    return other is ImageStreamListener
+        && other.onImage == onImage
+        && other.onChunk == onChunk
+        && other.onError == onError;
   }
 }
 

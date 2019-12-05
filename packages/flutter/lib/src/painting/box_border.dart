@@ -105,9 +105,9 @@ abstract class BoxBorder extends ShapeBorder {
   static BoxBorder lerp(BoxBorder a, BoxBorder b, double t) {
     assert(t != null);
     if ((a is Border || a == null) && (b is Border || b == null))
-      return Border.lerp(a, b, t);
+      return Border.lerp(a as Border, b as Border, t);
     if ((a is BorderDirectional || a == null) && (b is BorderDirectional || b == null))
-      return BorderDirectional.lerp(a, b, t);
+      return BorderDirectional.lerp(a as BorderDirectional, b as BorderDirectional, t);
     if (b is Border && a is BorderDirectional) {
       final BoxBorder c = b;
       b = a;
@@ -402,14 +402,12 @@ class Border extends BoxBorder {
 
   @override
   Border add(ShapeBorder other, { bool reversed = false }) {
-    if (other is! Border)
-      return null;
-    final Border typedOther = other;
-    if (BorderSide.canMerge(top, typedOther.top) &&
-        BorderSide.canMerge(right, typedOther.right) &&
-        BorderSide.canMerge(bottom, typedOther.bottom) &&
-        BorderSide.canMerge(left, typedOther.left)) {
-      return Border.merge(this, typedOther);
+    if (other is Border &&
+        BorderSide.canMerge(top, other.top) &&
+        BorderSide.canMerge(right, other.right) &&
+        BorderSide.canMerge(bottom, other.bottom) &&
+        BorderSide.canMerge(left, other.left)) {
+      return Border.merge(this, other);
     }
     return null;
   }
@@ -521,11 +519,11 @@ class Border extends BoxBorder {
       return true;
     if (runtimeType != other.runtimeType)
       return false;
-    final Border typedOther = other;
-    return top == typedOther.top &&
-           right == typedOther.right &&
-           bottom == typedOther.bottom &&
-           left == typedOther.left;
+    return other is Border
+        && other.top == top
+        && other.right == right
+        && other.bottom == bottom
+        && other.left == left;
   }
 
   @override
@@ -825,11 +823,11 @@ class BorderDirectional extends BoxBorder {
       return true;
     if (runtimeType != other.runtimeType)
       return false;
-    final BorderDirectional typedOther = other;
-    return top == typedOther.top &&
-           start == typedOther.start &&
-           end == typedOther.end &&
-           bottom == typedOther.bottom;
+    return other is BorderDirectional
+        && other.top == top
+        && other.start == start
+        && other.end == end
+        && other.bottom == bottom;
   }
 
   @override

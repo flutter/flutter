@@ -38,12 +38,12 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
   @override
   ImageStreamCompleter load(image_provider.NetworkImage key, image_provider.DecoderCallback decode) {
     return MultiFrameImageStreamCompleter(
-      codec: _loadAsync(key, decode),
+      codec: _loadAsync(key as NetworkImage, decode),
       scale: key.scale,
       informationCollector: () {
         return <DiagnosticsNode>[
           DiagnosticsProperty<image_provider.ImageProvider>('Image provider', this),
-          DiagnosticsProperty<NetworkImage>('Image key', key),
+          DiagnosticsProperty<NetworkImage>('Image key', key as NetworkImage),
         ];
       },
     );
@@ -55,13 +55,13 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
   // Web does not support decoding network images to a specified size. The decode parameter
   // here is ignored and the web-only `ui.webOnlyInstantiateImageCodecFromUrl` will be used
   // directly in place of the typical `instantiateImageCodec` method.
-  Future<ui.Codec> _loadAsync(NetworkImage key, image_provider.DecoderCallback decode) async {
+  Future<ui.Codec> _loadAsync(NetworkImage key, image_provider.DecoderCallback decode) {
     assert(key == this);
 
     final Uri resolved = Uri.base.resolve(key.url);
     // This API only exists in the web engine implementation and is not
     // contained in the analyzer summary for Flutter.
-    return ui.webOnlyInstantiateImageCodecFromUrl(resolved); // ignore: undefined_function
+    return ui.webOnlyInstantiateImageCodecFromUrl(resolved) as Future<ui.Codec>; // ignore: undefined_function
   }
 
   @override
@@ -69,8 +69,9 @@ class NetworkImage extends image_provider.ImageProvider<image_provider.NetworkIm
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    final NetworkImage typedOther = other;
-    return url == typedOther.url && scale == typedOther.scale;
+    return other is NetworkImage
+        && other.url == url
+        && other.scale == scale;
   }
 
   @override
