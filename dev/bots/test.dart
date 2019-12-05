@@ -604,7 +604,7 @@ Future<void> _pubRunTest(String workingDirectory, {
       final Iterable<String> testPaths = Directory(path.join(workingDirectory, testPath))
         .listSync(recursive: true)
         .where((FileSystemEntity entity) => entity.path.endsWith('_test.dart'))
-        .map((FileSystemEntity entity) => entity.path);
+        .map((FileSystemEntity entity) => path.relative(entity.path, from: workingDirectory));
       args.addAll(testPaths);
     } else {
       args.add(testPath);
