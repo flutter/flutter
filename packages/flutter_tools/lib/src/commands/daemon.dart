@@ -577,7 +577,7 @@ class AppDomain extends Domain {
     }
 
     _inProgressHotReload = app._runInZone<OperationResult>(this, () {
-      return app.restart(fullRestart: fullRestart, pauseAfterRestart: pauseAfterRestart, reason: restartReason);
+      return app.restart(fullRestart: fullRestart, pause: pauseAfterRestart, reason: restartReason);
     });
     return _inProgressHotReload.whenComplete(() {
       _inProgressHotReload = null;
@@ -922,8 +922,8 @@ class AppInstance {
 
   _AppRunLogger _logger;
 
-  Future<OperationResult> restart({ bool fullRestart = false, bool pauseAfterRestart = false, String reason }) {
-    return runner.restart(fullRestart: fullRestart, pauseAfterRestart: pauseAfterRestart, reason: reason);
+  Future<OperationResult> restart({ bool fullRestart = false, bool pause = false, String reason }) {
+    return runner.restart(fullRestart: fullRestart, pause: pause, reason: reason);
   }
 
   Future<void> stop() => runner.exit();
