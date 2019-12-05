@@ -40,7 +40,8 @@ typedef InlineSpanVisitor = bool Function(InlineSpan span);
 /// For [PlaceholderSpan]s, [InlineSpanSemanticsInformation.placeholder] is used by default.
 ///
 /// See also:
-///   * [InlineSpan.getSemanticsInformation]
+///
+///  * [InlineSpan.getSemanticsInformation]
 @immutable
 class InlineSpanSemanticsInformation {
   /// Constructs an object that holds the text and semantics label values of an

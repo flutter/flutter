@@ -53,7 +53,11 @@ class UniqueKey extends LocalKey {
 /// Used to tie the identity of a widget to the identity of an object used to
 /// generate that widget.
 ///
-/// See also the discussions at [Key] and [Widget.key].
+/// See also:
+///
+///  * [Key], the base class for all keys.
+///  * The discussion at [Widget.key] for more information about how widgets use
+///    keys.
 class ObjectKey extends LocalKey {
   /// Creates a key that uses [identical] on [value] for its [operator==].
   const ObjectKey(this.value);
@@ -99,7 +103,10 @@ class ObjectKey extends LocalKey {
 /// You cannot simultaneously include two widgets in the tree with the same
 /// global key. Attempting to do so will assert at runtime.
 ///
-/// See also the discussion at [Widget.key].
+/// See also:
+///
+///  * The discussion at [Widget.key] for more information about how widgets use
+///    keys.
 @optionalTypeArgs
 abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
   /// Creates a [LabeledGlobalKey], which is a [GlobalKey] with a label used for
@@ -410,7 +417,9 @@ abstract class Widget extends DiagnosticableTree {
   /// Generally, a widget that is the only child of another widget does not need
   /// an explicit key.
   ///
-  /// See also the discussions at [Key] and [GlobalKey].
+  /// See also:
+  ///
+  ///  * The discussions at [Key] and [GlobalKey].
   final Key key;
 
   /// Inflates this configuration to a concrete instance.
@@ -1188,8 +1197,10 @@ abstract class State<T extends StatefulWidget> extends Diagnosticable {
   /// If you override this, make sure to end your method with a call to
   /// super.deactivate().
   ///
-  /// See also [dispose], which is called after [deactivate] if the widget is
-  /// removed from the tree permanently.
+  /// See also:
+  ///
+  ///  * [dispose], which is called after [deactivate] if the widget is removed
+  ///    from the tree permanently.
   @protected
   @mustCallSuper
   void deactivate() { }
@@ -1210,7 +1221,9 @@ abstract class State<T extends StatefulWidget> extends Diagnosticable {
   /// If you override this, make sure to end your method with a call to
   /// super.dispose().
   ///
-  /// See also [deactivate], which is called prior to [dispose].
+  /// See also:
+  ///
+  ///  * [deactivate], which is called prior to [dispose].
   @protected
   @mustCallSuper
   void dispose() {

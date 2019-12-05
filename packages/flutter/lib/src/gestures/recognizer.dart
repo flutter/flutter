@@ -32,7 +32,7 @@ typedef RecognizerCallback<T> = T Function();
 ///
 /// See also:
 ///
-///   * [DragGestureRecognizer.dragStartBehavior], which gives an example for the different behaviors.
+///  * [DragGestureRecognizer.dragStartBehavior], which gives an example for the different behaviors.
 enum DragStartBehavior {
   /// Set the initial offset, at the position where the first down event was
   /// detected.

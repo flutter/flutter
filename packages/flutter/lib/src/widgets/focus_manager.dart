@@ -351,18 +351,18 @@ class FocusAttachment {
 ///
 /// See also:
 ///
-///   * [Focus], a widget that manages a [FocusNode] and provides access to
-///     focus information and actions to its descendant widgets.
-///   * [FocusScope], a widget that manages a [FocusScopeNode] and provides
-///     access to scope information and actions to its descendant widgets.
-///   * [FocusAttachment], a widget that connects a [FocusScopeNode] to the
-///     widget tree.
-///   * [FocusManager], a singleton that manages the focus and distributes key
-///     events to focused nodes.
-///   * [FocusTraversalPolicy], a class used to determine how to move the focus
-///     to other nodes.
-///   * [DefaultFocusTraversal], a widget used to configure the default focus
-///     traversal policy for a widget subtree.
+///  * [Focus], a widget that manages a [FocusNode] and provides access to
+///    focus information and actions to its descendant widgets.
+///  * [FocusScope], a widget that manages a [FocusScopeNode] and provides
+///    access to scope information and actions to its descendant widgets.
+///  * [FocusAttachment], a widget that connects a [FocusScopeNode] to the
+///    widget tree.
+///  * [FocusManager], a singleton that manages the focus and distributes key
+///    events to focused nodes.
+///  * [FocusTraversalPolicy], a class used to determine how to move the focus
+///    to other nodes.
+///  * [DefaultFocusTraversal], a widget used to configure the default focus
+///    traversal policy for a widget subtree.
 class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// Creates a focus node.
   ///
@@ -417,10 +417,10 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   ///
   /// See also:
   ///
-  ///   - [DefaultFocusTraversal], a widget that sets the traversal policy for
-  ///     its descendants.
-  ///   - [FocusTraversalPolicy], a class that can be extended to describe a
-  ///     traversal policy.
+  ///  * [DefaultFocusTraversal], a widget that sets the traversal policy for
+  ///    its descendants.
+  ///  * [FocusTraversalPolicy], a class that can be extended to describe a
+  ///    traversal policy.
   bool get canRequestFocus {
     final FocusScopeNode scope = enclosingScope;
     return _canRequestFocus && (scope == null || scope.canRequestFocus);
@@ -548,8 +548,8 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   ///
   /// See also:
   ///
-  ///   * [Focus.isAt], which is a static method that will return the focus
-  ///     state of the nearest ancestor [Focus] widget's focus node.
+  ///  * [Focus.isAt], which is a static method that will return the focus
+  ///    state of the nearest ancestor [Focus] widget's focus node.
   bool get hasFocus {
     if (_manager?.primaryFocus == null) {
       return false;
@@ -942,14 +942,14 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
 ///
 /// See also:
 ///
-///   * [Focus], a widget that manages a [FocusNode] and provides access to
-///     focus information and actions to its descendant widgets.
-///   * [FocusScope], a widget that manages a [FocusScopeNode] and provides
-///     access to scope information and actions to its descendant widgets.
-///   * [FocusAttachment], a widget that connects a [FocusScopeNode] to the
-///     focus tree.
-///   * [FocusManager], a singleton that manages the focus and distributes key
-///     events to focused nodes.
+///  * [Focus], a widget that manages a [FocusNode] and provides access to focus
+///    information and actions to its descendant widgets.
+///  * [FocusScope], a widget that manages a [FocusScopeNode] and provides
+///    access to scope information and actions to its descendant widgets.
+///  * [FocusAttachment], a widget that connects a [FocusScopeNode] to the focus
+///    tree.
+///  * [FocusManager], a singleton that manages the focus and distributes key
+///    events to focused nodes.
 class FocusScopeNode extends FocusNode {
   /// Creates a FocusScope node.
   ///

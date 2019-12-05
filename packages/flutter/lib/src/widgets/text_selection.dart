@@ -819,8 +819,9 @@ class _TextSelectionHandleOverlayState
 ///
 /// See also:
 ///
-/// * [TextField], which implements this delegate for the Material textfield.
-/// * [CupertinoTextField], which implements this delegate for the Cupertino textfield.
+///  * [TextField], which implements this delegate for the Material textfield.
+///  * [CupertinoTextField], which implements this delegate for the Cupertino
+///    textfield.
 abstract class TextSelectionGestureDetectorBuilderDelegate {
   /// [GlobalKey] to the [EditableText] for which the
   /// [TextSelectionGestureDetectorBuilder] will build a [TextSelectionGestureDetector].

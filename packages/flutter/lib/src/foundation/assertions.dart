@@ -92,12 +92,12 @@ abstract class _ErrorDiagnostic extends DiagnosticsProperty<List<Object>> {
 ///
 /// See also:
 ///
-/// * [ErrorSummary], which provides a short (one line) description of the
-///   problem that was detected.
-/// * [ErrorHint], which provides specific, non-obvious advice that may be
-///   applicable.
-/// * [FlutterError], which is the most common place to use an
-///   [ErrorDescription].
+///  * [ErrorSummary], which provides a short (one line) description of the
+///    problem that was detected.
+///  * [ErrorHint], which provides specific, non-obvious advice that may be
+///    applicable.
+///  * [FlutterError], which is the most common place to use an
+///    [ErrorDescription].
 class ErrorDescription extends _ErrorDiagnostic {
   /// A lint enforces that this constructor can only be called with a string
   /// literal to match the limitations of the Dart Kernel transformer that
@@ -126,12 +126,12 @@ class ErrorDescription extends _ErrorDiagnostic {
 ///
 /// See also:
 ///
-/// * [ErrorDescription], which provides an explanation of the problem and its
-///   cause, any information that may help track down the problem, background
-///   information, etc.
-/// * [ErrorHint], which provides specific, non-obvious advice that may be
-///   applicable.
-/// * [FlutterError], which is the most common place to use an [ErrorSummary].
+///  * [ErrorDescription], which provides an explanation of the problem and its
+///    cause, any information that may help track down the problem, background
+///    information, etc.
+///  * [ErrorHint], which provides specific, non-obvious advice that may be
+///    applicable.
+///  * [FlutterError], which is the most common place to use an [ErrorSummary].
 class ErrorSummary extends _ErrorDiagnostic {
   /// A lint enforces that this constructor can only be called with a string
   /// literal to match the limitations of the Dart Kernel transformer that
@@ -156,12 +156,12 @@ class ErrorSummary extends _ErrorDiagnostic {
 ///
 /// See also:
 ///
-/// * [ErrorSummary], which provides a short (one line) description of the
-///   problem that was detected.
-/// * [ErrorDescription], which provides an explanation of the problem and its
-///   cause, any information that may help track down the problem, background
-///   information, etc.
-/// * [FlutterError], which is the most common place to use an [ErrorHint].
+///  * [ErrorSummary], which provides a short (one line) description of the
+///    problem that was detected.
+///  * [ErrorDescription], which provides an explanation of the problem and its
+///    cause, any information that may help track down the problem, background
+///    information, etc.
+///  * [FlutterError], which is the most common place to use an [ErrorHint].
 class ErrorHint extends _ErrorDiagnostic {
   /// A lint enforces that this constructor can only be called with a string
   /// literal to match the limitations of the Dart Kernel transformer that
