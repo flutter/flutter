@@ -149,10 +149,6 @@ const String pluralMethodTemplate = '''
   }
 ''';
 
-int sortFilesByPath (FileSystemEntity a, FileSystemEntity b) {
-  return a.path.compareTo(b.path);
-}
-
 List<String> genMethodParameters(Map<String, dynamic> bundle, String key, String type) {
   final Map<String, dynamic> attributesMap = bundle['@$key'];
   if (attributesMap != null && attributesMap.containsKey('placeholders')) {
@@ -193,7 +189,7 @@ String genSimpleMethod(Map<String, dynamic> bundle, String key) {
 
   final Map<String, dynamic> attributesMap = bundle['@$key'];
   if (attributesMap == null)
-    exitWithError(
+    throw L10nException(
       'Resource attribute "@$key" was not found. Please ensure that each '
       'resource id has a corresponding resource attribute.'
     );
