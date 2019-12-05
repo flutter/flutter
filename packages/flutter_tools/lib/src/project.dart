@@ -461,13 +461,6 @@ class IosProject implements XcodeBasedProject {
     final Directory engineDest = ephemeralDirectory
       .childDirectory('Flutter')
       .childDirectory('engine');
-    final File lastMode = engineDest.childFile('last_mode');
-    BuildMode buildMode;
-    if (lastMode.existsSync()) {
-      buildMode = BuildMode.fromName(lastMode.readAsStringSync());
-    } else {
-      buildMode = BuildMode.debug;
-    }
 
     _deleteIfExistsSync(ephemeralDirectory);
     _overwriteFromTemplate(fs.path.join('module', 'ios', 'library'), ephemeralDirectory);
@@ -477,13 +470,15 @@ class IosProject implements XcodeBasedProject {
       if (hasPlugins(parent)) {
         _overwriteFromTemplate(fs.path.join('module', 'ios', 'host_app_ephemeral_cocoapods'), ephemeralDirectory);
       }
-      // Copy podspec and framework.
+      // Copy podspec and framework from engine cache. The actual build mode
+      // doesn't actually matter as it will be overwritten by xcode_backend.sh.
+      // However, cocoapods will run before that script and requires something
+      // to be in this location.
       final Directory framework = fs.directory(artifacts.getArtifactPath(Artifact.flutterFramework,
-        platform: TargetPlatform.ios, mode: buildMode));
+        platform: TargetPlatform.ios, mode: BuildMode.debug));
       final File podspec = framework.parent.childFile('Flutter.podspec');
       copyDirectorySync(framework, engineDest.childDirectory('Flutter.framework'));
       podspec.copySync(engineDest.childFile('Flutter.podspec').path);
-      lastMode.writeAsStringSync(buildMode.toString());
     }
   }
 

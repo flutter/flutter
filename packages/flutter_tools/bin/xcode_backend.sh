@@ -142,8 +142,6 @@ BuildApp() {
     mkdir "${derived_dir}/engine"
     RunCommand cp -r -- "${flutter_podspec}" "${derived_dir}/engine"
     RunCommand cp -r -- "${flutter_framework}" "${derived_dir}/engine"
-    # Copy last built mode so it can be re-created by the tool.
-    echo "${build_mode}" > "${derived_dir}/engine/last_mode"
   else
     RunCommand rm -rf -- "${derived_dir}/Flutter.framework"
     RunCommand cp -- "${flutter_podspec}" "${derived_dir}"
