@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -101,13 +101,11 @@ class TextSelection extends TextRange {
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
-    if (other is! TextSelection)
-      return false;
-    final TextSelection typedOther = other;
-    return typedOther.baseOffset == baseOffset
-        && typedOther.extentOffset == extentOffset
-        && typedOther.affinity == affinity
-        && typedOther.isDirectional == isDirectional;
+    return other is TextSelection
+        && other.baseOffset == baseOffset
+        && other.extentOffset == extentOffset
+        && other.affinity == affinity
+        && other.isDirectional == isDirectional;
   }
 
   @override

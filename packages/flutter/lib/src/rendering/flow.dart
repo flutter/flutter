@@ -1,9 +1,10 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
+import 'dart:ui' as ui show Color;
 
+import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'box.dart';
@@ -133,8 +134,6 @@ abstract class FlowDelegate {
   @override
   String toString() => '$runtimeType';
 }
-
-int _getAlphaFromOpacity(double opacity) => (opacity * 255).round();
 
 /// Parent data for use with [RenderFlow].
 ///
@@ -288,7 +287,7 @@ class RenderFlow extends RenderBox
       _randomAccessChildren.add(child);
       final BoxConstraints innerConstraints = _delegate.getConstraintsForChild(i, constraints);
       child.layout(innerConstraints, parentUsesSize: true);
-      final FlowParentData childParentData = child.parentData;
+      final FlowParentData childParentData = child.parentData as FlowParentData;
       childParentData.offset = Offset.zero;
       child = childParentData.nextSibling;
       i += 1;
@@ -316,7 +315,7 @@ class RenderFlow extends RenderBox
   void paintChild(int i, { Matrix4 transform, double opacity = 1.0 }) {
     transform ??= Matrix4.identity();
     final RenderBox child = _randomAccessChildren[i];
-    final FlowParentData childParentData = child.parentData;
+    final FlowParentData childParentData = child.parentData as FlowParentData;
     assert(() {
       if (childParentData._transform != null) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
@@ -343,7 +342,7 @@ class RenderFlow extends RenderBox
     if (opacity == 1.0) {
       _paintingContext.pushTransform(needsCompositing, _paintingOffset, transform, painter);
     } else {
-      _paintingContext.pushOpacity(_paintingOffset, _getAlphaFromOpacity(opacity), (PaintingContext context, Offset offset) {
+      _paintingContext.pushOpacity(_paintingOffset, ui.Color.getAlphaFromOpacity(opacity), (PaintingContext context, Offset offset) {
         context.pushTransform(needsCompositing, offset, transform, painter);
       });
     }
@@ -354,7 +353,7 @@ class RenderFlow extends RenderBox
     _paintingContext = context;
     _paintingOffset = offset;
     for (RenderBox child in _randomAccessChildren) {
-      final FlowParentData childParentData = child.parentData;
+      final FlowParentData childParentData = child.parentData as FlowParentData;
       childParentData._transform = null;
     }
     try {
@@ -378,7 +377,7 @@ class RenderFlow extends RenderBox
       if (childIndex >= children.length)
         continue;
       final RenderBox child = children[childIndex];
-      final FlowParentData childParentData = child.parentData;
+      final FlowParentData childParentData = child.parentData as FlowParentData;
       final Matrix4 transform = childParentData._transform;
       if (transform == null)
         continue;
@@ -397,7 +396,7 @@ class RenderFlow extends RenderBox
 
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
-    final FlowParentData childParentData = child.parentData;
+    final FlowParentData childParentData = child.parentData as FlowParentData;
     if (childParentData._transform != null)
       transform.multiply(childParentData._transform);
     super.applyPaintTransform(child, transform);

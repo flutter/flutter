@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -90,7 +90,7 @@ void main() {
         .createSync(recursive: true);
 
     when(processManager.run(any)).thenAnswer((Invocation invocation) async {
-      final List<String> arguments = invocation.positionalArguments.first;
+      final List<String> arguments = invocation.positionalArguments.first as List<String>;
       final String sourcePath = arguments[arguments.length - 2];
       final String targetPath = arguments.last;
       final Directory source = fs.directory(sourcePath);

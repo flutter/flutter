@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -687,6 +687,9 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
 
     runApp(Container(key: UniqueKey(), child: _preTestMessage)); // Reset the tree to a known state.
     await pump();
+    // Pretend that the first frame produced in the test body is the first frame
+    // sent to the engine.
+    resetFirstFrameSent();
 
     final bool autoUpdateGoldensBeforeTest = autoUpdateGoldenFiles && !isBrowser;
     final TestExceptionReporter reportTestExceptionBeforeTest = reportTestException;
@@ -808,8 +811,6 @@ abstract class TestWidgetsFlutterBinding extends BindingBase
         'active mouse gesture to remove the mouse pointer.');
     // ignore: invalid_use_of_visible_for_testing_member
     RendererBinding.instance.initMouseTracker();
-    // ignore: invalid_use_of_visible_for_testing_member
-    PointerEventConverter.clearPointers();
   }
 }
 
@@ -965,6 +966,31 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
     return result;
   }
 
+  int _firstFrameDeferredCount = 0;
+  bool _firstFrameSent = false;
+
+  @override
+  bool get sendFramesToEngine => _firstFrameSent || _firstFrameDeferredCount == 0;
+
+  @override
+  void deferFirstFrame() {
+    assert(_firstFrameDeferredCount >= 0);
+    _firstFrameDeferredCount += 1;
+  }
+
+  @override
+  void allowFirstFrame() {
+    assert(_firstFrameDeferredCount > 0);
+    _firstFrameDeferredCount -= 1;
+    // Unlike in RendererBinding.allowFirstFrame we do not force a frame her
+    // to give the test full control over frame scheduling.
+  }
+
+  @override
+  void resetFirstFrameSent() {
+    _firstFrameSent = false;
+  }
+
   EnginePhase _phase = EnginePhase.sendSemanticsUpdate;
 
   // Cloned from RendererBinding.drawFrame() but with early-exit semantics.
@@ -981,7 +1007,8 @@ class AutomatedTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
           pipelineOwner.flushCompositingBits();
           if (_phase != EnginePhase.compositingBits) {
             pipelineOwner.flushPaint();
-            if (_phase != EnginePhase.paint) {
+            if (_phase != EnginePhase.paint && sendFramesToEngine) {
+              _firstFrameSent = true;
               renderView.compositeFrame(); // this sends the bits to the GPU
               if (_phase != EnginePhase.composite) {
                 pipelineOwner.flushSemantics();
@@ -1335,7 +1362,7 @@ class LiveTestWidgetsFlutterBinding extends TestWidgetsFlutterBinding {
   }
 
   @override
-  _LiveTestRenderView get renderView => super.renderView;
+  _LiveTestRenderView get renderView => super.renderView as _LiveTestRenderView;
 
   void _handleViewNeedsPaint() {
     _viewNeedsPaint = true;
@@ -1577,7 +1604,7 @@ class _LiveTestRenderView extends RenderView {
   }) : super(configuration: configuration, window: window);
 
   @override
-  TestViewConfiguration get configuration => super.configuration;
+  TestViewConfiguration get configuration => super.configuration as TestViewConfiguration;
   @override
   set configuration(covariant TestViewConfiguration value) { super.configuration = value; }
 

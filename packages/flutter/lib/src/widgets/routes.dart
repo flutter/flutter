@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -762,8 +762,8 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// (specifically, if [isCurrent] or [canPop] change value).
   @optionalTypeArgs
   static ModalRoute<T> of<T extends Object>(BuildContext context) {
-    final _ModalScopeStatus widget = context.inheritFromWidgetOfExactType(_ModalScopeStatus);
-    return widget?.route;
+    final _ModalScopeStatus widget = context.dependOnInheritedWidgetOfExactType<_ModalScopeStatus>();
+    return widget?.route as ModalRoute<T>;
   }
 
   /// Schedule a call to [buildTransitions].
@@ -1217,9 +1217,10 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
 
   /// True if one or more [WillPopCallback] callbacks exist.
   ///
-  /// This method is used to disable the horizontal swipe pop gesture
-  /// supported by [MaterialPageRoute] for [TargetPlatform.iOS].
-  /// If a pop might be vetoed, then the back gesture is disabled.
+  /// This method is used to disable the horizontal swipe pop gesture supported
+  /// by [MaterialPageRoute] for [TargetPlatform.iOS] and
+  /// [TargetPlatform.macOS]. If a pop might be vetoed, then the back gesture is
+  /// disabled.
   ///
   /// The [buildTransitions] method will not be called again if this changes,
   /// since it can change during the build as descendants of the route add or

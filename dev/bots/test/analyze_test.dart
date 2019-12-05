@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -58,13 +58,23 @@ void main() {
 
   test('analyze.dart - verifyNoMissingLicense', () async {
     final String result = await capture(() => verifyNoMissingLicense(path.join('test', 'analyze-test-input', 'root')), exitCode: 1);
-    expect(result, '''
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-License headers cannot be found at the beginning of the following file.
-
-test/analyze-test-input/root/packages/foo/foo.dart
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-'''.replaceAll('/', Platform.isWindows ? '\\' : '/'));
+    expect(result,
+      '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
+      +
+      (
+        'The following 1 file does not have the right license header:\n'
+        '\n'
+        'test/analyze-test-input/root/packages/foo/foo.dart\n'
+        .replaceAll('/', Platform.isWindows ? '\\' : '/')
+      )
+      +
+      '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n'
+      '\n'
+      'The expected license header is:\n'
+      '// Copyright 2014 The Flutter Authors. All rights reserved.\n'
+      '// Use of this source code is governed by a BSD-style license that can be\n'
+      '// found in the LICENSE file.\n'
+      '...followed by a blank line.\n'
+    );
   });
 }

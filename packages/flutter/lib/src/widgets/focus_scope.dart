@@ -1,6 +1,7 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
 import 'package:flutter/foundation.dart';
 
 import 'basic.dart';
@@ -266,7 +267,7 @@ class Focus extends StatefulWidget {
     assert(context != null);
     assert(nullOk != null);
     assert(scopeOk != null);
-    final _FocusMarker marker = context.inheritFromWidgetOfExactType(_FocusMarker);
+    final _FocusMarker marker = context.dependOnInheritedWidgetOfExactType<_FocusMarker>();
     final FocusNode node = marker?.notifier;
     if (node == null) {
       if (!nullOk) {
@@ -325,7 +326,6 @@ class Focus extends StatefulWidget {
 class _FocusState extends State<Focus> {
   FocusNode _internalNode;
   FocusNode get focusNode => widget.focusNode ?? _internalNode;
-  bool _hasFocus;
   bool _hasPrimaryFocus;
   bool _canRequestFocus;
   bool _didAutofocus = false;
@@ -347,7 +347,6 @@ class _FocusState extends State<Focus> {
     _focusAttachment = focusNode.attach(context, onKey: widget.onKey);
     focusNode.skipTraversal = widget.skipTraversal ?? focusNode.skipTraversal;
     focusNode.canRequestFocus = widget.canRequestFocus ?? focusNode.canRequestFocus;
-    _hasFocus = focusNode.hasFocus;
     _canRequestFocus = focusNode.canRequestFocus;
     _hasPrimaryFocus = focusNode.hasPrimaryFocus;
 
@@ -425,22 +424,19 @@ class _FocusState extends State<Focus> {
   }
 
   void _handleFocusChanged() {
-    if (_hasFocus != focusNode.hasFocus) {
-      setState(() {
-        _hasFocus = focusNode.hasFocus;
-      });
-      if (widget.onFocusChange != null) {
-        widget.onFocusChange(focusNode.hasFocus);
-      }
+    final bool hasPrimaryFocus = focusNode.hasPrimaryFocus;
+    final bool canRequestFocus = focusNode.canRequestFocus;
+    if (widget.onFocusChange != null) {
+      widget.onFocusChange(focusNode.hasFocus);
     }
-    if (_hasPrimaryFocus != focusNode.hasPrimaryFocus) {
+    if (_hasPrimaryFocus != hasPrimaryFocus) {
       setState(() {
-        _hasPrimaryFocus = focusNode.hasPrimaryFocus;
+        _hasPrimaryFocus = hasPrimaryFocus;
       });
     }
-    if (_canRequestFocus != focusNode.canRequestFocus) {
+    if (_canRequestFocus != canRequestFocus) {
       setState(() {
-        _canRequestFocus = focusNode.canRequestFocus;
+        _canRequestFocus = canRequestFocus;
       });
     }
   }
@@ -543,7 +539,7 @@ class FocusScope extends Focus {
   /// The [context] argument must not be null.
   static FocusScopeNode of(BuildContext context) {
     assert(context != null);
-    final _FocusMarker marker = context.inheritFromWidgetOfExactType(_FocusMarker);
+    final _FocusMarker marker = context.dependOnInheritedWidgetOfExactType<_FocusMarker>();
     return marker?.notifier?.nearestScope ?? context.owner.focusManager.rootScope;
   }
 

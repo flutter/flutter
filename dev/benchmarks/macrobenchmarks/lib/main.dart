@@ -1,8 +1,9 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:macrobenchmarks/src/picture_cache.dart';
 
 import 'common.dart';
 import 'src/backdrop_filter.dart';
@@ -26,6 +27,7 @@ class MacrobenchmarksApp extends StatelessWidget {
         kCubicBezierRouteName: (BuildContext context) => CubicBezierPage(),
         kBackdropFilterRouteName: (BuildContext context) => BackdropFilterPage(),
         kSimpleAnimationRouteName: (BuildContext conttext) => SimpleAnimationPage(),
+        kPictureCacheRouteName: (BuildContext conttext) => PictureCachePage(),
       },
     );
   }
@@ -64,6 +66,13 @@ class HomePage extends StatelessWidget {
             child: const Text('Simple Animation'),
             onPressed: () {
               Navigator.pushNamed(context, kSimpleAnimationRouteName);
+            },
+          ),
+          RaisedButton(
+            key: const Key(kPictureCacheRouteName),
+            child: const Text('Picture Cache'),
+            onPressed: () {
+              Navigator.pushNamed(context, kPictureCacheRouteName);
             },
           ),
         ],

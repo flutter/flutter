@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -60,7 +60,8 @@ void main() {
       'id': 2,
       'method': 'device.getDevices',
     })}]');
-    response = await stream.first;
+    // Skip other device.added events that may fire (desktop/web devices).
+    response = await stream.firstWhere((Map<String, dynamic> response) => response['event'] != 'device.added');
     expect(response['id'], 2);
     expect(response['error'], isNull);
 

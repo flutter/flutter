@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -8,20 +8,14 @@ import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:completion/completion.dart';
 import 'package:file/file.dart';
-import 'package:platform/platform.dart';
-import 'package:process/process.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
-import '../base/flags.dart';
 import '../base/io.dart' as io;
 import '../base/logger.dart';
-import '../base/os.dart';
 import '../base/platform.dart';
-import '../base/process.dart';
-import '../base/process_manager.dart';
 import '../base/terminal.dart';
 import '../base/user_messages.dart';
 import '../base/utils.dart';
@@ -33,7 +27,6 @@ import '../globals.dart';
 import '../reporting/reporting.dart';
 import '../tester/flutter_tester.dart';
 import '../version.dart';
-import '../vmservice.dart';
 
 const String kFlutterRootEnvironmentVariableName = 'FLUTTER_ROOT'; // should point to //flutter/ (root of flutter/flutter repo)
 const String kFlutterEngineEnvironmentVariableName = 'FLUTTER_ENGINE'; // should point to //engine/src/ (root of flutter/engine repo)
@@ -97,10 +90,6 @@ class FlutterCommandRunner extends CommandRunner<void> {
     argParser.addFlag('suppress-analytics',
         negatable: false,
         help: 'Suppress analytics reporting when this command runs.');
-    argParser.addFlag('bug-report',
-        negatable: false,
-        help: 'Captures a bug report file to submit to the Flutter team.\n'
-              'Contains local paths, device identifiers, and log snippets.');
 
     String packagesHelp;
     bool showPackagesCommand;
@@ -142,19 +131,6 @@ class FlutterCommandRunner extends CommandRunner<void> {
     if (verboseHelp) {
       argParser.addSeparator('Options for testing the "flutter" tool itself:');
     }
-
-    argParser.addOption('record-to',
-        hide: !verboseHelp,
-        help: 'Enables recording of process invocations (including stdout and stderr of all such invocations), '
-              'and file system access (reads and writes).\n'
-              'Serializes that recording to a directory with the path specified in this flag. If the '
-              'directory does not already exist, it will be created.');
-    argParser.addOption('replay-from',
-        hide: !verboseHelp,
-        help: 'Enables mocking of process invocations by replaying their stdout, stderr, and exit code from '
-              'the specified recording (obtained via --record-to). The path specified in this flag must refer '
-              'to a directory that holds serialized process invocations structured according to the output of '
-              '--record-to.');
     argParser.addFlag('show-test-device',
         negatable: false,
         hide: !verboseHelp,
@@ -212,7 +188,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
     } catch (error) {
       // we don't have a logger at the time this is run
       // (which is why we don't use printTrace here)
-      print(userMessages.runnerNoRoot(error));
+      print(userMessages.runnerNoRoot('$error'));
     }
     return '.';
   }
@@ -224,7 +200,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
       // override this function so we can call tryArgsCompletion instead, so the
       // completion package can interrogate the argParser, and as part of that,
       // it calls argParser.parse(args) itself and returns the result.
-      return tryArgsCompletion(args, argParser);
+      return tryArgsCompletion(args.toList(), argParser);
     } on ArgParserException catch (error) {
       if (error.commands.isEmpty) {
         usageException(error.message);
@@ -253,12 +229,10 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
   @override
   Future<void> runCommand(ArgResults topLevelResults) async {
-    final Map<Type, dynamic> contextOverrides = <Type, dynamic>{
-      Flags: Flags(topLevelResults),
-    };
+    final Map<Type, dynamic> contextOverrides = <Type, dynamic>{};
 
     // Check for verbose.
-    if (topLevelResults['verbose']) {
+    if (topLevelResults['verbose'] as bool) {
       // Override the logger.
       contextOverrides[Logger] = VerboseLogger(logger);
     }
@@ -269,7 +243,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
     int wrapColumn;
     if (topLevelResults.wasParsed('wrap-column')) {
       try {
-        wrapColumn = int.parse(topLevelResults['wrap-column']);
+        wrapColumn = int.parse(topLevelResults['wrap-column'] as String);
         if (wrapColumn < 0) {
           throwToolExit(userMessages.runnerWrapColumnInvalid(topLevelResults['wrap-column']));
         }
@@ -281,79 +255,22 @@ class FlutterCommandRunner extends CommandRunner<void> {
     // If we're not writing to a terminal with a defined width, then don't wrap
     // anything, unless the user explicitly said to.
     final bool useWrapping = topLevelResults.wasParsed('wrap')
-        ? topLevelResults['wrap']
-        : io.stdio.terminalColumns == null ? false : topLevelResults['wrap'];
+        ? topLevelResults['wrap'] as bool
+        : io.stdio.terminalColumns != null && topLevelResults['wrap'] as bool;
     contextOverrides[OutputPreferences] = OutputPreferences(
       wrapText: useWrapping,
-      showColor: topLevelResults['color'],
+      showColor: topLevelResults['color'] as bool,
       wrapColumn: wrapColumn,
     );
 
-    if (topLevelResults['show-test-device'] ||
+    if (topLevelResults['show-test-device'] as bool ||
         topLevelResults['device-id'] == FlutterTesterDevices.kTesterDeviceId) {
       FlutterTesterDevices.showFlutterTesterDevice = true;
     }
 
-    String recordTo = topLevelResults['record-to'];
-    String replayFrom = topLevelResults['replay-from'];
-
-    if (topLevelResults['bug-report']) {
-      // --bug-report implies --record-to=<tmp_path>
-      final Directory tempDir = const LocalFileSystem()
-          .systemTempDirectory
-          .createTempSync('flutter_tools_bug_report.');
-      recordTo = tempDir.path;
-
-      // Record the arguments that were used to invoke this runner.
-      final File manifest = tempDir.childFile('MANIFEST.txt');
-      final StringBuffer buffer = StringBuffer()
-        ..writeln('# arguments')
-        ..writeln(topLevelResults.arguments)
-        ..writeln()
-        ..writeln('# rest')
-        ..writeln(topLevelResults.rest);
-      manifest.writeAsStringSync(buffer.toString(), flush: true);
-
-      // ZIP the recording up once the recording has been serialized.
-      addShutdownHook(() {
-        final File zipFile = getUniqueFile(fs.currentDirectory, 'bugreport', 'zip');
-        os.zip(tempDir, zipFile);
-        printStatus(userMessages.runnerBugReportFinished(zipFile.basename));
-      }, ShutdownStage.POST_PROCESS_RECORDING);
-      addShutdownHook(() => tempDir.deleteSync(recursive: true), ShutdownStage.CLEANUP);
-    }
-
-    assert(recordTo == null || replayFrom == null);
-
-    if (recordTo != null) {
-      recordTo = recordTo.trim();
-      if (recordTo.isEmpty) {
-        throwToolExit(userMessages.runnerNoRecordTo);
-      }
-      contextOverrides.addAll(<Type, dynamic>{
-        ProcessManager: getRecordingProcessManager(recordTo),
-        FileSystem: getRecordingFileSystem(recordTo),
-        Platform: getRecordingPlatform(recordTo),
-      });
-      VMService.enableRecordingConnection(recordTo);
-    }
-
-    if (replayFrom != null) {
-      replayFrom = replayFrom.trim();
-      if (replayFrom.isEmpty) {
-        throwToolExit(userMessages.runnerNoReplayFrom);
-      }
-      contextOverrides.addAll(<Type, dynamic>{
-        ProcessManager: await getReplayProcessManager(replayFrom),
-        FileSystem: getReplayFileSystem(replayFrom),
-        Platform: getReplayPlatform(replayFrom),
-      });
-      VMService.enableReplayConnection(replayFrom);
-    }
-
     // We must set Cache.flutterRoot early because other features use it (e.g.
     // enginePath's initializer uses it).
-    final String flutterRoot = topLevelResults['flutter-root'] ?? defaultFlutterRoot;
+    final String flutterRoot = topLevelResults['flutter-root'] as String ?? defaultFlutterRoot;
     Cache.flutterRoot = fs.path.normalize(fs.path.absolute(flutterRoot));
 
     // Set up the tooling configuration.
@@ -369,13 +286,13 @@ class FlutterCommandRunner extends CommandRunner<void> {
         return MapEntry<Type, Generator>(type, () => value);
       }),
       body: () async {
-        logger.quiet = topLevelResults['quiet'];
+        logger.quiet = topLevelResults['quiet'] as bool;
 
         if (platform.environment['FLUTTER_ALREADY_LOCKED'] != 'true') {
           await Cache.lock();
         }
 
-        if (topLevelResults['suppress-analytics']) {
+        if (topLevelResults['suppress-analytics'] as bool) {
           flutterUsage.suppressAnalytics = true;
         }
 
@@ -387,21 +304,21 @@ class FlutterCommandRunner extends CommandRunner<void> {
           printError('Please ensure you have permissions in the artifact cache directory.');
           throwToolExit('Failed to write the version file');
         }
-        if (topLevelResults.command?.name != 'upgrade' && topLevelResults['version-check']) {
+        if (topLevelResults.command?.name != 'upgrade' && topLevelResults['version-check'] as bool) {
           await FlutterVersion.instance.checkFlutterVersionFreshness();
         }
 
         if (topLevelResults.wasParsed('packages')) {
-          PackageMap.globalPackagesPath = fs.path.normalize(fs.path.absolute(topLevelResults['packages']));
+          PackageMap.globalPackagesPath = fs.path.normalize(fs.path.absolute(topLevelResults['packages'] as String));
         }
 
         // See if the user specified a specific device.
-        deviceManager.specifiedDeviceId = topLevelResults['device-id'];
+        deviceManager.specifiedDeviceId = topLevelResults['device-id'] as String;
 
-        if (topLevelResults['version']) {
+        if (topLevelResults['version'] as bool) {
           flutterUsage.sendCommand('version');
           String status;
-          if (topLevelResults['machine']) {
+          if (topLevelResults['machine'] as bool) {
             status = const JsonEncoder.withIndent('  ').convert(FlutterVersion.instance.toJson());
           } else {
             status = FlutterVersion.instance.toString();
@@ -410,7 +327,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
           return;
         }
 
-        if (topLevelResults['machine']) {
+        if (topLevelResults['machine'] as bool) {
           throwToolExit('The --machine flag is only valid with the --version flag.', exitCode: 2);
         }
         await super.runCommand(topLevelResults);
@@ -426,7 +343,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
   }
 
   String _findEnginePath(ArgResults globalResults) {
-    String engineSourcePath = globalResults['local-engine-src-path'] ?? platform.environment[kFlutterEngineEnvironmentVariableName];
+    String engineSourcePath = globalResults['local-engine-src-path'] as String ?? platform.environment[kFlutterEngineEnvironmentVariableName];
 
     if (engineSourcePath == null && globalResults['local-engine'] != null) {
       try {
@@ -478,7 +395,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
   EngineBuildPaths _findEngineBuildPath(ArgResults globalResults, String enginePath) {
     String localEngine;
     if (globalResults['local-engine'] != null) {
-      localEngine = globalResults['local-engine'];
+      localEngine = globalResults['local-engine'] as String;
     } else {
       throwToolExit(userMessages.runnerLocalEngineRequired, exitCode: 2);
     }

@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -166,7 +166,7 @@ class _DefaultPub implements Pub {
         'Running "flutter pub $command" in ${fs.path.basename(directory)}...',
         timeout: timeoutConfiguration.slowOperation,
       );
-      final bool verbose = FlutterCommand.current != null && FlutterCommand.current.globalResults['verbose'];
+      final bool verbose = FlutterCommand.current != null && FlutterCommand.current.globalResults['verbose'] as bool;
       final List<String> args = <String>[
         if (verbose) '--verbose' else '--verbosity=warning',
         ...<String>[command, '--no-precompile'],

@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -24,7 +24,7 @@ import 'scaffold.dart' show Scaffold;
 /// Does nothing if asserts are disabled. Always returns true.
 bool debugCheckHasMaterial(BuildContext context) {
   assert(() {
-    if (context.widget is! Material && context.ancestorWidgetOfExactType(Material) == null) {
+    if (context.widget is! Material && context.findAncestorWidgetOfExactType<Material>() == null) {
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('No Material widget found.'),
         ErrorDescription(
@@ -108,7 +108,7 @@ bool debugCheckHasMaterialLocalizations(BuildContext context) {
 /// Does nothing if asserts are disabled. Always returns true.
 bool debugCheckHasScaffold(BuildContext context) {
   assert(() {
-    if (context.widget is! Scaffold && context.ancestorWidgetOfExactType(Scaffold) == null) {
+    if (context.widget is! Scaffold && context.findAncestorWidgetOfExactType<Scaffold>() == null) {
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary('No Scaffold widget found.'),
         ErrorDescription('${context.widget.runtimeType} widgets require a Scaffold widget ancestor.'),

@@ -1,8 +1,8 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show Color, hashList;
+import 'dart:ui' show Color, hashList, lerpDouble;
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -200,6 +200,7 @@ class ThemeData extends Diagnosticable {
   /// more discussion on how to pick the right colors.
   factory ThemeData({
     Brightness brightness,
+    VisualDensity visualDensity,
     MaterialColor primarySwatch,
     Color primaryColor,
     Brightness primaryColorBrightness,
@@ -266,6 +267,7 @@ class ThemeData extends Diagnosticable {
   }) {
     brightness ??= Brightness.light;
     final bool isDark = brightness == Brightness.dark;
+    visualDensity ??= const VisualDensity();
     primarySwatch ??= Colors.blue;
     primaryColor ??= isDark ? Colors.grey[900] : primarySwatch;
     primaryColorBrightness ??= estimateBrightnessForColor(primaryColor);
@@ -372,6 +374,7 @@ class ThemeData extends Diagnosticable {
 
     return ThemeData.raw(
       brightness: brightness,
+      visualDensity: visualDensity,
       primaryColor: primaryColor,
       primaryColorBrightness: primaryColorBrightness,
       primaryColorLight: primaryColorLight,
@@ -448,6 +451,7 @@ class ThemeData extends Diagnosticable {
     // operator == and in the hashValues method and in the order of fields
     // in this class, and in the lerp() method.
     @required this.brightness,
+    @required this.visualDensity,
     @required this.primaryColor,
     @required this.primaryColorBrightness,
     @required this.primaryColorLight,
@@ -510,6 +514,7 @@ class ThemeData extends Diagnosticable {
     @required this.dividerTheme,
     @required this.buttonBarTheme,
   }) : assert(brightness != null),
+       assert(visualDensity != null),
        assert(primaryColor != null),
        assert(primaryColorBrightness != null),
        assert(primaryColorLight != null),
@@ -668,6 +673,35 @@ class ThemeData extends Diagnosticable {
   /// card and canvas colors when the brightness is dark; when the brightness is
   /// dark, use Colors.white or the accentColor for a contrasting color.
   final Brightness brightness;
+
+  /// The density value for specifying the compactness of various UI components.
+  ///
+  /// {@template flutter.material.themedata.visualDensity}
+  /// Density, in the context of a UI, is the vertical and horizontal
+  /// "compactness" of the elements in the UI. It is unitless, since it means
+  /// different things to different UI elements. For buttons, it affects the
+  /// spacing around the centered label of the button. For lists, it affects the
+  /// distance between baselines of entries in the list.
+  ///
+  /// Typically, density values are integral, but any value in range may be
+  /// used. The range includes values from [VisualDensity.minimumDensity] (which
+  /// is -4), to [VisualDensity.maximumDensity] (which is 4), inclusive, where
+  /// negative values indicate a denser, more compact, UI, and positive values
+  /// indicate a less dense, more expanded, UI. If a component doesn't support
+  /// the value given, it will clamp to the the nearest supported value.
+  ///
+  /// The default for visual densities is zero for both vertical and horizontal
+  /// densities, which corresponds to the default visual density of components
+  /// in the Material Design specification.
+  ///
+  /// As a rule of thumb, a change of 1 or -1 in density corresponds to 4
+  /// logical pixels. However, this is not a strict relationship since
+  /// components interpret the density values appropriately for their needs.
+  ///
+  /// A larger value translates to a spacing increase (less dense), and a
+  /// smaller value translates to a spacing decrease (more dense).
+  /// {@endtemplate}
+  final VisualDensity visualDensity;
 
   /// The background color for major parts of the app (toolbars, tab bars, etc)
   ///
@@ -873,9 +907,10 @@ class ThemeData extends Diagnosticable {
   /// In a test environment, the platform returned is [TargetPlatform.android]
   /// regardless of the host platform. (Android was chosen because the tests
   /// were originally written assuming Android-like behavior, and we added
-  /// platform adaptations for iOS later). Tests can check iOS behavior by
-  /// setting the [platform] of the [Theme] explicitly to [TargetPlatform.iOS],
-  /// or by setting [debugDefaultTargetPlatformOverride].
+  /// platform adaptations for other platforms later). Tests can check behavior
+  /// for other platforms by setting the [platform] of the [Theme] explicitly to
+  /// another [TargetPlatform] value, or by setting
+  /// [debugDefaultTargetPlatformOverride].
   final TargetPlatform platform;
 
   /// Configures the hit test size of certain Material widgets.
@@ -983,6 +1018,7 @@ class ThemeData extends Diagnosticable {
   /// Creates a copy of this theme but with the given fields replaced with the new values.
   ThemeData copyWith({
     Brightness brightness,
+    VisualDensity visualDensity,
     Color primaryColor,
     Brightness primaryColorBrightness,
     Color primaryColorLight,
@@ -1048,6 +1084,7 @@ class ThemeData extends Diagnosticable {
     cupertinoOverrideTheme = cupertinoOverrideTheme?.noDefault();
     return ThemeData.raw(
       brightness: brightness ?? this.brightness,
+      visualDensity: visualDensity ?? this.visualDensity,
       primaryColor: primaryColor ?? this.primaryColor,
       primaryColorBrightness: primaryColorBrightness ?? this.primaryColorBrightness,
       primaryColorLight: primaryColorLight ?? this.primaryColorLight,
@@ -1191,6 +1228,7 @@ class ThemeData extends Diagnosticable {
     // the class and in the lerp() method.
     return ThemeData.raw(
       brightness: t < 0.5 ? a.brightness : b.brightness,
+      visualDensity: VisualDensity.lerp(a.visualDensity, b.visualDensity, t),
       primaryColor: Color.lerp(a.primaryColor, b.primaryColor, t),
       primaryColorBrightness: t < 0.5 ? a.primaryColorBrightness : b.primaryColorBrightness,
       primaryColorLight: Color.lerp(a.primaryColorLight, b.primaryColorLight, t),
@@ -1264,6 +1302,7 @@ class ThemeData extends Diagnosticable {
     // hashValues() and in the raw constructor and in the order of fields in
     // the class and in the lerp() method.
     return (otherData.brightness == brightness) &&
+           (otherData.visualDensity == visualDensity) &&
            (otherData.primaryColor == primaryColor) &&
            (otherData.primaryColorBrightness == primaryColorBrightness) &&
            (otherData.primaryColorLight == primaryColorLight) &&
@@ -1332,6 +1371,7 @@ class ThemeData extends Diagnosticable {
     // and in the order of fields in the class and in the lerp() method.
     final List<Object> values = <Object>[
       brightness,
+      visualDensity,
       primaryColor,
       primaryColorBrightness,
       primaryColorLight,
@@ -1401,65 +1441,66 @@ class ThemeData extends Diagnosticable {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     final ThemeData defaultData = ThemeData.fallback();
-    properties.add(EnumProperty<TargetPlatform>('platform', platform, defaultValue: defaultTargetPlatform, level: DiagnosticLevel.hidden));
-    properties.add(EnumProperty<Brightness>('brightness', brightness, defaultValue: defaultData.brightness, level: DiagnosticLevel.hidden));
-    properties.add(ColorProperty('primaryColor', primaryColor, defaultValue: defaultData.primaryColor, level: DiagnosticLevel.hidden));
-    properties.add(EnumProperty<Brightness>('primaryColorBrightness', primaryColorBrightness, defaultValue: defaultData.primaryColorBrightness, level: DiagnosticLevel.hidden));
-    properties.add(ColorProperty('accentColor', accentColor, defaultValue: defaultData.accentColor, level: DiagnosticLevel.hidden));
-    properties.add(EnumProperty<Brightness>('accentColorBrightness', accentColorBrightness, defaultValue: defaultData.accentColorBrightness, level: DiagnosticLevel.hidden));
-    properties.add(ColorProperty('canvasColor', canvasColor, defaultValue: defaultData.canvasColor, level: DiagnosticLevel.hidden));
-    properties.add(ColorProperty('scaffoldBackgroundColor', scaffoldBackgroundColor, defaultValue: defaultData.scaffoldBackgroundColor, level: DiagnosticLevel.hidden));
-    properties.add(ColorProperty('bottomAppBarColor', bottomAppBarColor, defaultValue: defaultData.bottomAppBarColor, level: DiagnosticLevel.hidden));
-    properties.add(ColorProperty('cardColor', cardColor, defaultValue: defaultData.cardColor, level: DiagnosticLevel.hidden));
-    properties.add(ColorProperty('dividerColor', dividerColor, defaultValue: defaultData.dividerColor, level: DiagnosticLevel.hidden));
-    properties.add(ColorProperty('focusColor', focusColor, defaultValue: defaultData.focusColor, level: DiagnosticLevel.hidden));
-    properties.add(ColorProperty('hoverColor', hoverColor, defaultValue: defaultData.hoverColor, level: DiagnosticLevel.hidden));
-    properties.add(ColorProperty('highlightColor', highlightColor, defaultValue: defaultData.highlightColor, level: DiagnosticLevel.hidden));
-    properties.add(ColorProperty('splashColor', splashColor, defaultValue: defaultData.splashColor, level: DiagnosticLevel.hidden));
-    properties.add(ColorProperty('selectedRowColor', selectedRowColor, defaultValue: defaultData.selectedRowColor, level: DiagnosticLevel.hidden));
-    properties.add(ColorProperty('unselectedWidgetColor', unselectedWidgetColor, defaultValue: defaultData.unselectedWidgetColor, level: DiagnosticLevel.hidden));
-    properties.add(ColorProperty('disabledColor', disabledColor, defaultValue: defaultData.disabledColor, level: DiagnosticLevel.hidden));
-    properties.add(ColorProperty('buttonColor', buttonColor, defaultValue: defaultData.buttonColor, level: DiagnosticLevel.hidden));
-    properties.add(ColorProperty('secondaryHeaderColor', secondaryHeaderColor, defaultValue: defaultData.secondaryHeaderColor, level: DiagnosticLevel.hidden));
-    properties.add(ColorProperty('textSelectionColor', textSelectionColor, defaultValue: defaultData.textSelectionColor, level: DiagnosticLevel.hidden));
-    properties.add(ColorProperty('cursorColor', cursorColor, defaultValue: defaultData.cursorColor, level: DiagnosticLevel.hidden));
-    properties.add(ColorProperty('textSelectionHandleColor', textSelectionHandleColor, defaultValue: defaultData.textSelectionHandleColor, level: DiagnosticLevel.hidden));
-    properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: defaultData.backgroundColor, level: DiagnosticLevel.hidden));
-    properties.add(ColorProperty('dialogBackgroundColor', dialogBackgroundColor, defaultValue: defaultData.dialogBackgroundColor, level: DiagnosticLevel.hidden));
-    properties.add(ColorProperty('indicatorColor', indicatorColor, defaultValue: defaultData.indicatorColor, level: DiagnosticLevel.hidden));
-    properties.add(ColorProperty('hintColor', hintColor, defaultValue: defaultData.hintColor, level: DiagnosticLevel.hidden));
-    properties.add(ColorProperty('errorColor', errorColor, defaultValue: defaultData.errorColor, level: DiagnosticLevel.hidden));
-    properties.add(ColorProperty('toggleableActiveColor', toggleableActiveColor, defaultValue: defaultData.toggleableActiveColor, level: DiagnosticLevel.hidden));
-    properties.add(DiagnosticsProperty<ButtonThemeData>('buttonTheme', buttonTheme, level: DiagnosticLevel.hidden));
-    properties.add(DiagnosticsProperty<ToggleButtonsThemeData>('toggleButtonsTheme', toggleButtonsTheme, level: DiagnosticLevel.hidden));
-    properties.add(DiagnosticsProperty<TextTheme>('textTheme', textTheme, level: DiagnosticLevel.hidden));
-    properties.add(DiagnosticsProperty<TextTheme>('primaryTextTheme', primaryTextTheme, level: DiagnosticLevel.hidden));
-    properties.add(DiagnosticsProperty<TextTheme>('accentTextTheme', accentTextTheme, level: DiagnosticLevel.hidden));
-    properties.add(DiagnosticsProperty<InputDecorationTheme>('inputDecorationTheme', inputDecorationTheme, level: DiagnosticLevel.hidden));
-    properties.add(DiagnosticsProperty<IconThemeData>('iconTheme', iconTheme, level: DiagnosticLevel.hidden));
-    properties.add(DiagnosticsProperty<IconThemeData>('primaryIconTheme', primaryIconTheme, level: DiagnosticLevel.hidden));
-    properties.add(DiagnosticsProperty<IconThemeData>('accentIconTheme', accentIconTheme, level: DiagnosticLevel.hidden));
-    properties.add(DiagnosticsProperty<SliderThemeData>('sliderTheme', sliderTheme, level: DiagnosticLevel.hidden));
-    properties.add(DiagnosticsProperty<TabBarTheme>('tabBarTheme', tabBarTheme, level: DiagnosticLevel.hidden));
-    properties.add(DiagnosticsProperty<TooltipThemeData>('tooltipTheme', tooltipTheme, level: DiagnosticLevel.hidden));
-    properties.add(DiagnosticsProperty<CardTheme>('cardTheme', cardTheme, level: DiagnosticLevel.hidden));
-    properties.add(DiagnosticsProperty<ChipThemeData>('chipTheme', chipTheme, level: DiagnosticLevel.hidden));
-    properties.add(DiagnosticsProperty<MaterialTapTargetSize>('materialTapTargetSize', materialTapTargetSize, level: DiagnosticLevel.hidden));
-    properties.add(DiagnosticsProperty<bool>('applyElevationOverlayColor', applyElevationOverlayColor, level: DiagnosticLevel.hidden));
-    properties.add(DiagnosticsProperty<PageTransitionsTheme>('pageTransitionsTheme', pageTransitionsTheme, level: DiagnosticLevel.hidden));
-    properties.add(DiagnosticsProperty<AppBarTheme>('appBarTheme', appBarTheme, defaultValue: defaultData.appBarTheme, level: DiagnosticLevel.hidden));
-    properties.add(DiagnosticsProperty<BottomAppBarTheme>('bottomAppBarTheme', bottomAppBarTheme, defaultValue: defaultData.bottomAppBarTheme, level: DiagnosticLevel.hidden));
-    properties.add(DiagnosticsProperty<ColorScheme>('colorScheme', colorScheme, defaultValue: defaultData.colorScheme, level: DiagnosticLevel.hidden));
-    properties.add(DiagnosticsProperty<DialogTheme>('dialogTheme', dialogTheme, defaultValue: defaultData.dialogTheme, level: DiagnosticLevel.hidden));
-    properties.add(DiagnosticsProperty<FloatingActionButtonThemeData>('floatingActionButtonThemeData', floatingActionButtonTheme, defaultValue: defaultData.floatingActionButtonTheme, level: DiagnosticLevel.hidden));
-    properties.add(DiagnosticsProperty<Typography>('typography', typography, defaultValue: defaultData.typography, level: DiagnosticLevel.hidden));
-    properties.add(DiagnosticsProperty<CupertinoThemeData>('cupertinoOverrideTheme', cupertinoOverrideTheme, defaultValue: defaultData.cupertinoOverrideTheme, level: DiagnosticLevel.hidden));
-    properties.add(DiagnosticsProperty<SnackBarThemeData>('snackBarTheme', snackBarTheme, defaultValue: defaultData.snackBarTheme, level: DiagnosticLevel.hidden));
-    properties.add(DiagnosticsProperty<BottomSheetThemeData>('bottomSheetTheme', bottomSheetTheme, defaultValue: defaultData.bottomSheetTheme, level: DiagnosticLevel.hidden));
-    properties.add(DiagnosticsProperty<PopupMenuThemeData>('popupMenuTheme', popupMenuTheme, defaultValue: defaultData.popupMenuTheme, level: DiagnosticLevel.hidden));
-    properties.add(DiagnosticsProperty<MaterialBannerThemeData>('bannerTheme', bannerTheme, defaultValue: defaultData.bannerTheme, level: DiagnosticLevel.hidden));
-    properties.add(DiagnosticsProperty<DividerThemeData>('dividerTheme', dividerTheme, defaultValue: defaultData.dividerTheme, level: DiagnosticLevel.hidden));
-    properties.add(DiagnosticsProperty<ButtonBarThemeData>('buttonBarTheme', buttonBarTheme, defaultValue: defaultData.buttonBarTheme, level: DiagnosticLevel.hidden));
+    properties.add(EnumProperty<TargetPlatform>('platform', platform, defaultValue: defaultTargetPlatform));
+    properties.add(EnumProperty<Brightness>('brightness', brightness, defaultValue: defaultData.brightness));
+    properties.add(DiagnosticsProperty<VisualDensity>('visualDensity', visualDensity, defaultValue: defaultData.visualDensity));
+    properties.add(ColorProperty('primaryColor', primaryColor, defaultValue: defaultData.primaryColor));
+    properties.add(EnumProperty<Brightness>('primaryColorBrightness', primaryColorBrightness, defaultValue: defaultData.primaryColorBrightness));
+    properties.add(ColorProperty('accentColor', accentColor, defaultValue: defaultData.accentColor));
+    properties.add(EnumProperty<Brightness>('accentColorBrightness', accentColorBrightness, defaultValue: defaultData.accentColorBrightness));
+    properties.add(ColorProperty('canvasColor', canvasColor, defaultValue: defaultData.canvasColor));
+    properties.add(ColorProperty('scaffoldBackgroundColor', scaffoldBackgroundColor, defaultValue: defaultData.scaffoldBackgroundColor));
+    properties.add(ColorProperty('bottomAppBarColor', bottomAppBarColor, defaultValue: defaultData.bottomAppBarColor));
+    properties.add(ColorProperty('cardColor', cardColor, defaultValue: defaultData.cardColor));
+    properties.add(ColorProperty('dividerColor', dividerColor, defaultValue: defaultData.dividerColor));
+    properties.add(ColorProperty('focusColor', focusColor, defaultValue: defaultData.focusColor));
+    properties.add(ColorProperty('hoverColor', hoverColor, defaultValue: defaultData.hoverColor));
+    properties.add(ColorProperty('highlightColor', highlightColor, defaultValue: defaultData.highlightColor));
+    properties.add(ColorProperty('splashColor', splashColor, defaultValue: defaultData.splashColor));
+    properties.add(ColorProperty('selectedRowColor', selectedRowColor, defaultValue: defaultData.selectedRowColor));
+    properties.add(ColorProperty('unselectedWidgetColor', unselectedWidgetColor, defaultValue: defaultData.unselectedWidgetColor));
+    properties.add(ColorProperty('disabledColor', disabledColor, defaultValue: defaultData.disabledColor));
+    properties.add(ColorProperty('buttonColor', buttonColor, defaultValue: defaultData.buttonColor));
+    properties.add(ColorProperty('secondaryHeaderColor', secondaryHeaderColor, defaultValue: defaultData.secondaryHeaderColor));
+    properties.add(ColorProperty('textSelectionColor', textSelectionColor, defaultValue: defaultData.textSelectionColor));
+    properties.add(ColorProperty('cursorColor', cursorColor, defaultValue: defaultData.cursorColor));
+    properties.add(ColorProperty('textSelectionHandleColor', textSelectionHandleColor, defaultValue: defaultData.textSelectionHandleColor));
+    properties.add(ColorProperty('backgroundColor', backgroundColor, defaultValue: defaultData.backgroundColor));
+    properties.add(ColorProperty('dialogBackgroundColor', dialogBackgroundColor, defaultValue: defaultData.dialogBackgroundColor));
+    properties.add(ColorProperty('indicatorColor', indicatorColor, defaultValue: defaultData.indicatorColor));
+    properties.add(ColorProperty('hintColor', hintColor, defaultValue: defaultData.hintColor));
+    properties.add(ColorProperty('errorColor', errorColor, defaultValue: defaultData.errorColor));
+    properties.add(ColorProperty('toggleableActiveColor', toggleableActiveColor, defaultValue: defaultData.toggleableActiveColor));
+    properties.add(DiagnosticsProperty<ButtonThemeData>('buttonTheme', buttonTheme));
+    properties.add(DiagnosticsProperty<ToggleButtonsThemeData>('toggleButtonsTheme', toggleButtonsTheme));
+    properties.add(DiagnosticsProperty<TextTheme>('textTheme', textTheme));
+    properties.add(DiagnosticsProperty<TextTheme>('primaryTextTheme', primaryTextTheme));
+    properties.add(DiagnosticsProperty<TextTheme>('accentTextTheme', accentTextTheme));
+    properties.add(DiagnosticsProperty<InputDecorationTheme>('inputDecorationTheme', inputDecorationTheme));
+    properties.add(DiagnosticsProperty<IconThemeData>('iconTheme', iconTheme));
+    properties.add(DiagnosticsProperty<IconThemeData>('primaryIconTheme', primaryIconTheme));
+    properties.add(DiagnosticsProperty<IconThemeData>('accentIconTheme', accentIconTheme));
+    properties.add(DiagnosticsProperty<SliderThemeData>('sliderTheme', sliderTheme));
+    properties.add(DiagnosticsProperty<TabBarTheme>('tabBarTheme', tabBarTheme));
+    properties.add(DiagnosticsProperty<TooltipThemeData>('tooltipTheme', tooltipTheme));
+    properties.add(DiagnosticsProperty<CardTheme>('cardTheme', cardTheme));
+    properties.add(DiagnosticsProperty<ChipThemeData>('chipTheme', chipTheme));
+    properties.add(DiagnosticsProperty<MaterialTapTargetSize>('materialTapTargetSize', materialTapTargetSize));
+    properties.add(DiagnosticsProperty<bool>('applyElevationOverlayColor', applyElevationOverlayColor));
+    properties.add(DiagnosticsProperty<PageTransitionsTheme>('pageTransitionsTheme', pageTransitionsTheme));
+    properties.add(DiagnosticsProperty<AppBarTheme>('appBarTheme', appBarTheme, defaultValue: defaultData.appBarTheme));
+    properties.add(DiagnosticsProperty<BottomAppBarTheme>('bottomAppBarTheme', bottomAppBarTheme, defaultValue: defaultData.bottomAppBarTheme));
+    properties.add(DiagnosticsProperty<ColorScheme>('colorScheme', colorScheme, defaultValue: defaultData.colorScheme));
+    properties.add(DiagnosticsProperty<DialogTheme>('dialogTheme', dialogTheme, defaultValue: defaultData.dialogTheme));
+    properties.add(DiagnosticsProperty<FloatingActionButtonThemeData>('floatingActionButtonThemeData', floatingActionButtonTheme, defaultValue: defaultData.floatingActionButtonTheme));
+    properties.add(DiagnosticsProperty<Typography>('typography', typography, defaultValue: defaultData.typography));
+    properties.add(DiagnosticsProperty<CupertinoThemeData>('cupertinoOverrideTheme', cupertinoOverrideTheme, defaultValue: defaultData.cupertinoOverrideTheme));
+    properties.add(DiagnosticsProperty<SnackBarThemeData>('snackBarTheme', snackBarTheme, defaultValue: defaultData.snackBarTheme));
+    properties.add(DiagnosticsProperty<BottomSheetThemeData>('bottomSheetTheme', bottomSheetTheme, defaultValue: defaultData.bottomSheetTheme));
+    properties.add(DiagnosticsProperty<PopupMenuThemeData>('popupMenuTheme', popupMenuTheme, defaultValue: defaultData.popupMenuTheme));
+    properties.add(DiagnosticsProperty<MaterialBannerThemeData>('bannerTheme', bannerTheme, defaultValue: defaultData.bannerTheme));
+    properties.add(DiagnosticsProperty<DividerThemeData>('dividerTheme', dividerTheme, defaultValue: defaultData.dividerTheme));
+    properties.add(DiagnosticsProperty<ButtonBarThemeData>('buttonBarTheme', buttonBarTheme, defaultValue: defaultData.buttonBarTheme));
   }
 }
 
@@ -1632,5 +1673,169 @@ class _FifoCache<K, V> {
     if (_cache.length == _maximumSize)
       _cache.remove(_cache.keys.first);
     return _cache[key] = loader();
+  }
+}
+
+/// Defines the visual density of user interface components.
+///
+/// Density, in the context of a UI, is the vertical and horizontal
+/// "compactness" of the components in the UI. It is unitless, since it means
+/// different things to different UI components.
+///
+/// The default for visual densities is zero for both vertical and horizontal
+/// densities, which corresponds to the default visual density of components in
+/// the Material Design specification. It does not affect text sizes, icon
+/// sizes, or padding values.
+///
+/// For example, for buttons, it affects the spacing around the child of the
+/// button. For lists, it affects the distance between baselines of entries in
+/// the list. For chips, it only affects the vertical size, not the horizontal
+/// size.
+///
+/// See also:
+///
+///  * [ThemeData.visualDensity], where this property is used to specify the base
+///    horizontal density of Material components.
+///  * [Material design guidance on density](https://material.io/design/layout/applying-density.html).
+class VisualDensity extends Diagnosticable {
+  /// A const constructor for [VisualDensity].
+  ///
+  /// All of the arguments must be non-null, and [horizontal] and [vertical]
+  /// must be in the interval between [minimumDensity] and [maximumDensity],
+  /// inclusive.
+  const VisualDensity({
+    this.horizontal = 0.0,
+    this.vertical = 0.0,
+  }) : assert(horizontal != null),
+       assert(vertical != null),
+       assert(vertical <= maximumDensity),
+       assert(vertical >= minimumDensity),
+       assert(horizontal <= maximumDensity),
+       assert(horizontal >= minimumDensity);
+
+  /// The minimum allowed density.
+  static const double minimumDensity = -4.0;
+
+  /// The maximum allowed density.
+  static const double maximumDensity = 4.0;
+
+  /// The default profile for [VisualDensity] in [ThemeData].
+  ///
+  /// This default value represents a visual density that is less dense than
+  /// either [comfortable] or [compact], and corresponds to density values of
+  /// zero in both axes.
+  static const VisualDensity standard = VisualDensity();
+
+  /// The profile for a "comfortable" interpretation of [VisualDensity].
+  ///
+  /// Individual components will interpret the density value independently,
+  /// making themselves more visually dense than [standard] and less dense than
+  /// [compact] to different degrees based on the Material Design specification
+  /// of the "comfortable" setting for their particular use case.
+  ///
+  /// It corresponds to a density value of -1 in both axes.
+  static const VisualDensity comfortable = VisualDensity(horizontal: -1.0, vertical: -1.0);
+
+  /// The profile for a "compact" interpretation of [VisualDensity].
+  ///
+  /// Individual components will interpret the density value independently,
+  /// making themselves more visually dense than [standard] and [comfortable] to
+  /// different degrees based on the Material Design specification of the
+  /// "comfortable" setting for their particular use case.
+  ///
+  /// It corresponds to a density value of -2 in both axes.
+  static const VisualDensity compact = VisualDensity(horizontal: -2.0, vertical: -2.0);
+
+  /// Copy the current [VisualDensity] with the given values replacing the
+  /// current values.
+  VisualDensity copyWith({
+    double horizontal,
+    double vertical,
+  }) {
+    return VisualDensity(
+      horizontal: horizontal ?? this.horizontal,
+      vertical: vertical ?? this.vertical,
+    );
+  }
+
+  /// The horizontal visual density of UI components.
+  ///
+  /// This property affects only the horizontal spacing between and within
+  /// components, to allow for different UI visual densities. It does not affect
+  /// text sizes, icon sizes, or padding values. The default value is 0.0,
+  /// corresponding to the metrics specified in the Material Design
+  /// specification. The value can range from [minimumDensity] to
+  /// [maximumDensity], inclusive.
+  ///
+  /// See also:
+  ///
+  ///  * [ThemeData.visualDensity], where this property is used to specify the base
+  ///    horizontal density of Material components.
+  ///  * [Material design guidance on density](https://material.io/design/layout/applying-density.html).
+  final double horizontal;
+
+  /// The vertical visual density of UI components.
+  ///
+  /// This property affects only the vertical spacing between and within
+  /// components, to allow for different UI visual densities. It does not affect
+  /// text sizes, icon sizes, or padding values. The default value is 0.0,
+  /// corresponding to the metrics specified in the Material Design
+  /// specification. The value can range from [minimumDensity] to
+  /// [maximumDensity], inclusive.
+  ///
+  /// See also:
+  ///
+  ///  * [ThemeData.visualDensity], where this property is used to specify the base
+  ///    vertical density of Material components.
+  ///  * [Material design guidance on density](https://material.io/design/layout/applying-density.html).
+  final double vertical;
+
+  /// The base adjustment in logical pixels of the visual density of UI components.
+  ///
+  /// The input density values are multiplied by a constant to arrive at a base
+  /// size adjustment that fits material design guidelines.
+  ///
+  /// Individual components may adjust this value based upon their own
+  /// individual interpretation of density.
+  Offset get baseSizeAdjustment {
+    // The number of logical pixels represented by an increase or decrease in
+    // density by one. The Material Design guidelines say to increment/decrement
+    // sized in terms of four pixel increments.
+    const double interval = 4.0;
+
+    return Offset(horizontal, vertical) * interval;
+  }
+
+  /// Linearly interpolate between two densities.
+  static VisualDensity lerp(VisualDensity a, VisualDensity b, double t) {
+    return VisualDensity(
+      horizontal: lerpDouble(a.horizontal, b.horizontal, t),
+      vertical: lerpDouble(a.horizontal, b.horizontal, t),
+    );
+  }
+
+  @override
+  bool operator ==(dynamic other) {
+    if (other.runtimeType != runtimeType) {
+      return false;
+    }
+    final VisualDensity typedOther = other;
+    return horizontal == typedOther.horizontal
+        && vertical == typedOther.vertical;
+  }
+
+  @override
+  int get hashCode => hashValues(horizontal, vertical);
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DoubleProperty('horizontal', horizontal, defaultValue: 0.0));
+    properties.add(DoubleProperty('vertical', vertical, defaultValue: 0.0));
+  }
+
+  @override
+  String toStringShort() {
+    return '${super.toStringShort()}(h: ${debugFormatDouble(horizontal)}, v: ${debugFormatDouble(vertical)})';
   }
 }

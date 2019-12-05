@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -214,17 +214,13 @@ class Switch extends StatefulWidget {
 
 class _SwitchState extends State<Switch> with TickerProviderStateMixin {
   Map<LocalKey, ActionFactory> _actionMap;
-  bool _showHighlight = false;
 
   @override
   void initState() {
     super.initState();
     _actionMap = <LocalKey, ActionFactory>{
-      SelectAction.key: _createAction,
-      if (!kIsWeb) ActivateAction.key: _createAction,
+      ActivateAction.key: _createAction,
     };
-    _updateHighlightMode(FocusManager.instance.highlightMode);
-    FocusManager.instance.addHighlightModeListener(_handleFocusHighlightModeChange);
   }
 
   void _actionHandler(FocusNode node, Intent intent){
@@ -237,27 +233,23 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
 
   Action _createAction() {
     return CallbackAction(
-      SelectAction.key,
+      ActivateAction.key,
       onInvoke: _actionHandler,
     );
   }
 
-  void _updateHighlightMode(FocusHighlightMode mode) {
-    switch (FocusManager.instance.highlightMode) {
-      case FocusHighlightMode.touch:
-        _showHighlight = false;
-        break;
-      case FocusHighlightMode.traditional:
-        _showHighlight = true;
-        break;
+  bool _focused = false;
+  void _handleFocusHighlightChanged(bool focused) {
+    if (focused != _focused) {
+      setState(() { _focused = focused; });
     }
   }
 
-  void _handleFocusHighlightModeChange(FocusHighlightMode mode) {
-    if (!mounted) {
-      return;
+  bool _hovering = false;
+  void _handleHoverChanged(bool hovering) {
+    if (hovering != _hovering) {
+      setState(() { _hovering = hovering; });
     }
-    setState(() { _updateHighlightMode(mode); });
   }
 
   Size getSwitchSize(ThemeData theme) {
@@ -274,10 +266,6 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
   }
 
   bool get enabled => widget.onChanged != null;
-
-  bool hovering = false;
-  void _handleMouseEnter(PointerEnterEvent event) => setState(() { hovering = true; });
-  void _handleMouseExit(PointerExitEvent event) => setState(() { hovering = false; });
 
   Widget buildMaterialSwitch(BuildContext context) {
     assert(debugCheckHasMaterial(context));
@@ -300,40 +288,34 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
       inactiveTrackColor = widget.inactiveTrackColor ?? (isDark ? Colors.white10 : Colors.black12);
     }
 
-    return MouseRegion(
-      onEnter: enabled ? _handleMouseEnter : null,
-      onExit: enabled ? _handleMouseExit : null,
-      child: Actions(
-        actions: _actionMap,
-        child: Focus(
-          focusNode: widget.focusNode,
-          autofocus: widget.autofocus,
-          canRequestFocus: enabled,
-          debugLabel: '${describeIdentity(widget)}({$widget.value})',
-          child: Builder(
-            builder: (BuildContext context) {
-              final bool hasFocus = Focus.of(context).hasFocus;
-              return _SwitchRenderObjectWidget(
-                dragStartBehavior: widget.dragStartBehavior,
-                value: widget.value,
-                activeColor: activeThumbColor,
-                inactiveColor: inactiveThumbColor,
-                hoverColor: hoverColor,
-                focusColor: focusColor,
-                activeThumbImage: widget.activeThumbImage,
-                inactiveThumbImage: widget.inactiveThumbImage,
-                activeTrackColor: activeTrackColor,
-                inactiveTrackColor: inactiveTrackColor,
-                configuration: createLocalImageConfiguration(context),
-                onChanged: widget.onChanged,
-                additionalConstraints: BoxConstraints.tight(getSwitchSize(theme)),
-                hasFocus: enabled && _showHighlight && hasFocus,
-                hovering: enabled && _showHighlight && hovering,
-                vsync: this,
-              );
-            },
-          ),
-        ),
+    return FocusableActionDetector(
+      actions: _actionMap,
+      focusNode: widget.focusNode,
+      autofocus: widget.autofocus,
+      enabled: enabled,
+      onShowFocusHighlight: _handleFocusHighlightChanged,
+      onShowHoverHighlight: _handleHoverChanged,
+      child: Builder(
+        builder: (BuildContext context) {
+          return _SwitchRenderObjectWidget(
+            dragStartBehavior: widget.dragStartBehavior,
+            value: widget.value,
+            activeColor: activeThumbColor,
+            inactiveColor: inactiveThumbColor,
+            hoverColor: hoverColor,
+            focusColor: focusColor,
+            activeThumbImage: widget.activeThumbImage,
+            inactiveThumbImage: widget.inactiveThumbImage,
+            activeTrackColor: activeTrackColor,
+            inactiveTrackColor: inactiveTrackColor,
+            configuration: createLocalImageConfiguration(context),
+            onChanged: widget.onChanged,
+            additionalConstraints: BoxConstraints.tight(getSwitchSize(theme)),
+            hasFocus: _focused,
+            hovering: _hovering,
+            vsync: this,
+          );
+        },
       ),
     );
   }
@@ -352,6 +334,7 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
           value: widget.value,
           onChanged: widget.onChanged,
           activeColor: widget.activeColor,
+          trackColor: widget.inactiveTrackColor
         ),
       ),
     );
@@ -371,6 +354,7 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
           case TargetPlatform.fuchsia:
             return buildMaterialSwitch(context);
           case TargetPlatform.iOS:
+          case TargetPlatform.macOS:
             return buildCupertinoSwitch(context);
         }
       }

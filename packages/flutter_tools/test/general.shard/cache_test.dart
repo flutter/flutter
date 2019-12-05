@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -332,7 +332,7 @@ void main() {
 
       when(processManager.run(any, environment: captureAnyNamed('environment')))
         .thenAnswer((Invocation invocation) {
-          final List<String> args = invocation.positionalArguments[0];
+          final List<String> args = invocation.positionalArguments[0] as List<String>;
           expect(args.length, 6);
           expect(args[1], '-b');
           expect(args[2].endsWith('resolve_dependencies.gradle'), isTrue);
