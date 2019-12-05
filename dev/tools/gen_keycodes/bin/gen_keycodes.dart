@@ -132,61 +132,61 @@ Future<void> main(List<String> rawArguments) async {
 
   final ArgResults parsedArguments = argParser.parse(rawArguments);
 
-  if (parsedArguments['help']) {
+  if (parsedArguments['help'] as bool) {
     print(argParser.usage);
     exit(0);
   }
 
   KeyData data;
-  if (parsedArguments['collect']) {
+  if (parsedArguments['collect'] as bool) {
     String hidCodes;
     if (parsedArguments['chromium-hid-codes'] == null) {
       hidCodes = await getChromiumConversions();
     } else {
-      hidCodes = File(parsedArguments['chromium-hid-codes']).readAsStringSync();
+      hidCodes = File(parsedArguments['chromium-hid-codes'] as String).readAsStringSync();
     }
 
-    final String supplementalHidCodes = File(parsedArguments['supplemental-hid-codes']).readAsStringSync();
+    final String supplementalHidCodes = File(parsedArguments['supplemental-hid-codes'] as String).readAsStringSync();
     hidCodes = '$hidCodes\n$supplementalHidCodes';
 
     String androidKeyCodes;
     if (parsedArguments['android-keycodes'] == null) {
       androidKeyCodes = await getAndroidKeyCodes();
     } else {
-      androidKeyCodes = File(parsedArguments['android-keycodes']).readAsStringSync();
+      androidKeyCodes = File(parsedArguments['android-keycodes'] as String).readAsStringSync();
     }
 
     String androidScanCodes;
     if (parsedArguments['android-scancodes'] == null) {
       androidScanCodes = await getAndroidScanCodes();
     } else {
-      androidScanCodes = File(parsedArguments['android-scancodes']).readAsStringSync();
+      androidScanCodes = File(parsedArguments['android-scancodes'] as String).readAsStringSync();
     }
 
     String glfwKeyCodes;
     if (parsedArguments['glfw-keycodes'] == null) {
       glfwKeyCodes = await getGlfwKeyCodes();
     } else {
-      glfwKeyCodes = File(parsedArguments['glfw-keycodes']).readAsStringSync();
+      glfwKeyCodes = File(parsedArguments['glfw-keycodes'] as String).readAsStringSync();
     }
 
-    final String glfwToDomKey = File(parsedArguments['glfw-domkey']).readAsStringSync();
-    final String androidToDomKey = File(parsedArguments['android-domkey']).readAsStringSync();
+    final String glfwToDomKey = File(parsedArguments['glfw-domkey'] as String).readAsStringSync();
+    final String androidToDomKey = File(parsedArguments['android-domkey'] as String).readAsStringSync();
 
     data = KeyData(hidCodes, androidScanCodes, androidKeyCodes, androidToDomKey, glfwKeyCodes, glfwToDomKey);
 
     const JsonEncoder encoder = JsonEncoder.withIndent('  ');
-    File(parsedArguments['data']).writeAsStringSync(encoder.convert(data.toJson()));
+    File(parsedArguments['data'] as String).writeAsStringSync(encoder.convert(data.toJson()));
   } else {
-    data = KeyData.fromJson(json.decode(await File(parsedArguments['data']).readAsString()));
+    data = KeyData.fromJson(json.decode(await File(parsedArguments['data'] as String).readAsString()) as Map<String, dynamic>);
   }
 
-  final File codeFile = File(parsedArguments['code']);
+  final File codeFile = File(parsedArguments['code'] as String);
   if (!codeFile.existsSync()) {
     codeFile.createSync(recursive: true);
   }
 
-  final File mapsFile = File(parsedArguments['maps']);
+  final File mapsFile = File(parsedArguments['maps'] as String);
   if (!mapsFile.existsSync()) {
     mapsFile.createSync(recursive: true);
   }

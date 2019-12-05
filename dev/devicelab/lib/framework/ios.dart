@@ -47,7 +47,7 @@ Future<Map<String, dynamic>> measureIosCpuGpu({
     '-l',
     '${duration.inMilliseconds}',
   ]);
-  return json.decode(file('$cwd/result.json').readAsStringSync());
+  return json.decode(file('$cwd/result.json').readAsStringSync()) as Map<String, dynamic>;
 }
 
 Future<String> dylibSymbols(String pathToDylib) {

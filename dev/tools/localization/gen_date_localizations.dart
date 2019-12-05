@@ -108,7 +108,7 @@ Future<void> main(List<String> rawArgs) async {
   buffer.writeln('const Map<String, Map<String, String>> datePatterns = <String, Map<String, String>> {');
   patternFiles.forEach((String locale, File data) {
     if (_supportedLocales().contains(locale)) {
-      final Map<String, dynamic> patterns = json.decode(data.readAsStringSync());
+      final Map<String, dynamic> patterns = json.decode(data.readAsStringSync()) as Map<String, dynamic>;
       buffer.writeln("'$locale': <String, String>{");
       patterns.forEach((String key, dynamic value) {
         assert(value is String);
@@ -177,12 +177,13 @@ Set<String> _supportedLocales() {
 
 Map<String, File> _listIntlData(Directory directory) {
   final Map<String, File> localeFiles = <String, File>{};
-  for (FileSystemEntity entity in directory.listSync()) {
-    final String filePath = entity.path;
-    if (FileSystemEntity.isFileSync(filePath) && filePath.endsWith('.json')) {
-      final String locale = path.basenameWithoutExtension(filePath);
-      localeFiles[locale] = entity;
-    }
+  final Iterable<File> files = directory
+    .listSync()
+    .whereType<File>()
+    .where((File file) => file.path.endsWith('.json'));
+  for (File file in files) {
+    final String locale = path.basenameWithoutExtension(file.path);
+    localeFiles[locale] = file;
   }
 
   final List<String> locales = localeFiles.keys.toList(growable: false);

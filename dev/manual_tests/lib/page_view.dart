@@ -111,7 +111,7 @@ class PageViewAppState extends State<PageViewApp> {
     );
   }
 
-  Widget _buildAppBar() {
+  AppBar _buildAppBar() {
     return AppBar(
       title: const Text('PageView'),
       actions: <Widget>[
