@@ -358,11 +358,11 @@ void main() {
     expect(tester.testTextInput.setClientArgs['enableSuggestions'], enableSuggestions);
   });
 
-  group('enableSmartDashes and enableSmartQuotes', () {
+  group('smartDashesType and smartQuotesType', () {
     testWidgets('sent to the engine properly', (WidgetTester tester) async {
       final TextEditingController controller = TextEditingController();
-      const bool enableSmartDashes = false;
-      const bool enableSmartQuotes = true;
+      const SmartDashesType smartDashesType = SmartDashesType.disabled;
+      const SmartQuotesType smartQuotesType = SmartQuotesType.disabled;
       await tester.pumpWidget(
         MediaQuery(
           data: const MediaQueryData(devicePixelRatio: 1.0),
@@ -375,8 +375,8 @@ void main() {
                 controller: controller,
                 backgroundCursorColor: Colors.grey,
                 focusNode: focusNode,
-                enableSmartDashes: enableSmartDashes,
-                enableSmartQuotes: enableSmartQuotes,
+                smartDashesType: smartDashesType,
+                smartQuotesType: smartQuotesType,
                 style: textStyle,
                 cursorColor: cursorColor,
               ),
@@ -388,8 +388,8 @@ void main() {
       await tester.tap(find.byType(EditableText));
       await tester.showKeyboard(find.byType(EditableText));
       await tester.idle();
-      expect(tester.testTextInput.setClientArgs['enableSmartDashes'], enableSmartDashes);
-      expect(tester.testTextInput.setClientArgs['enableSmartQuotes'], enableSmartQuotes);
+      expect(tester.testTextInput.setClientArgs['smartDashesType'], smartDashesType.toString());
+      expect(tester.testTextInput.setClientArgs['smartQuotesType'], smartQuotesType.toString());
     });
 
     testWidgets('default to true when obscureText is false', (WidgetTester tester) async {
@@ -418,8 +418,8 @@ void main() {
       await tester.tap(find.byType(EditableText));
       await tester.showKeyboard(find.byType(EditableText));
       await tester.idle();
-      expect(tester.testTextInput.setClientArgs['enableSmartDashes'], true);
-      expect(tester.testTextInput.setClientArgs['enableSmartQuotes'], true);
+      expect(tester.testTextInput.setClientArgs['smartDashesType'], 'SmartDashesType.enabled');
+      expect(tester.testTextInput.setClientArgs['smartQuotesType'], 'SmartQuotesType.enabled');
     });
 
     testWidgets('default to false when obscureText is true', (WidgetTester tester) async {
@@ -448,8 +448,8 @@ void main() {
       await tester.tap(find.byType(EditableText));
       await tester.showKeyboard(find.byType(EditableText));
       await tester.idle();
-      expect(tester.testTextInput.setClientArgs['enableSmartDashes'], false);
-      expect(tester.testTextInput.setClientArgs['enableSmartQuotes'], false);
+      expect(tester.testTextInput.setClientArgs['smartDashesType'], 'SmartDashesType.disabled');
+      expect(tester.testTextInput.setClientArgs['smartQuotesType'], 'SmartQuotesType.disabled');
     });
   });
 
