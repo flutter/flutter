@@ -2795,7 +2795,7 @@ class RenderMouseRegion extends RenderProxyBox {
   // Call this method when a property has changed and might affect the
   // `_annotationIsActive` bit.
   //
-  // This method does NOT call `markNeedsPaint` unless `_annotationIsActive`
+  // This method does NOT call `markNeedsPaint` unless the `_annotationIsActive`
   // bit is changed. If there is a property that needs updating while
   // `_annotationIsActive` stays true, call `_markAnnotationDirty`.
   //

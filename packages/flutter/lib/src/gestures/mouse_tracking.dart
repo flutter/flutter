@@ -152,7 +152,7 @@ class MouseTrackerAnnotation extends Diagnosticable {
   /// annotations are considered equal if the two annotations have [key]s that
   /// are equal by [operator==].
   ///
-  /// This getter never returns empty. If [key] is not set during object
+  /// This getter never returns null. If [key] is not set during object
   /// creation, this getter will return a unique key that is different from any
   /// other annotations, which means such an annotation is only equal to itself
   /// in terms of [key].
@@ -288,7 +288,7 @@ class MouseTracker extends ChangeNotifier {
 
   // The collection of annotations that are currently being tracked. It is
   // operated on by [attachAnnotation] and [detachAnnotation].
-  final Set<Key> _trackedAnnotationKeys = HashSet<Key>();
+  final HashSet<Key> _trackedAnnotationKeys = HashSet<Key>();
 
   // Tracks the state of connected mouse devices.
   //
@@ -345,8 +345,8 @@ class MouseTracker extends ChangeNotifier {
 
   // Find the annotations that is hovered by the device of the `state`.
   //
-  // If the device is not connected or there are no annotations attached, empty
-  // is returned without calling `annotationFinder`.
+  // If the device is not connected or there are no annotations attached, an
+  // empty list is returned without calling `annotationFinder`.
   List<MouseTrackerAnnotation> _findAnnotations(_MouseState state) {
     final Offset globalPosition = state.latestEvent.position;
     final int device = state.device;
@@ -469,7 +469,7 @@ class MouseTracker extends ChangeNotifier {
     @required List<MouseTrackerAnnotation> nextAnnotations,
     @required PointerEvent handledEvent,
     @required PointerEvent unhandledEvent,
-    @required Set<Key> trackedAnnotationKeys,
+    @required HashSet<Key> trackedAnnotationKeys,
   }) {
     assert(lastAnnotations != null);
     assert(nextAnnotations != null);
@@ -518,13 +518,13 @@ class MouseTracker extends ChangeNotifier {
 
     // Send hover events to annotations that are in next, in reverse visual order.
     // We chose reverse visual order only to keep it aligned with enter events
-    // for simplicity. Feel free to change it if there is a solid reason in the
-    // future.
+    // for simplicity.
     if (unhandledEvent is PointerHoverEvent) {
       final bool pointerHasMoved = handledEvent is! PointerHoverEvent || handledEvent.position != unhandledEvent.position;
       // If the hover event follows a non-hover event, or has moved since the
-      // last hover, then trigger hover callback to all annotations. Otherwise,
-      // trigger hover callback only to annotations that it newly enters.
+      // last hover, then trigger hover the callback to all annotations.
+      // Otherwise, trigger the hover callback only to annotations that it
+      // newly enters.
       final Iterable<MouseTrackerAnnotation> hoveringAnnotations = pointerHasMoved ? nextAnnotations.reversed : enteringAnnotations;
       for (final MouseTrackerAnnotation annotation in hoveringAnnotations) {
         assert(trackedAnnotationKeys.contains(annotation.key));
@@ -580,14 +580,13 @@ class MouseTracker extends ChangeNotifier {
   ///
   /// This method is typically called by the [RenderObject] that owns an
   /// annotation, as soon as the render object is added to the render tree.
-  /// It's caller's responsibility to ensure that no annotation with the same
-  /// key is attached when calling this method; otherwise an assertion error
-  /// will be triggered.
+  /// It's the caller's responsibility to ensure that no annotation with the
+  /// same key is attached when calling this method.
   ///
   /// {@template flutter.mouseTracker.attachAnnotation}
-  /// Only the [MouseTrackerAnnotation.key] property of the annotation is used,
-  /// therefore there is no need to call this method if the object only switches
-  /// from one annotation to another with the same key.
+  /// Only the [MouseTrackerAnnotation.key] property of the annotation is used
+  /// for comparison, therefore there is no need to call this method if the
+  /// object only switches from one annotation to another with the same key.
   ///
   /// Render objects that call this method might want to schedule a frame as
   /// well, typically by calling [RenderObject.markNeedsPaint], because this
@@ -624,9 +623,8 @@ class MouseTracker extends ChangeNotifier {
   ///
   /// This method is typically called by the [RenderObject] that owns an
   /// annotation, as soon as the render object is removed from the render tree.
-  /// It's caller's responsibility to ensure that one annotation with the same
-  /// key is attached when calling this method; otherwise an assertion error
-  /// will be triggered.
+  /// It's the caller's responsibility to ensure that one annotation with the
+  /// same key is attached when calling this method.
   ///
   /// {@macro flutter.mouseTracker.attachAnnotation}
   ///  * Detaching an annotation that has not been attached will assert.

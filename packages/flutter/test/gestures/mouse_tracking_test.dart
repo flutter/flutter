@@ -635,8 +635,8 @@ void main() {
   test('annotations with the same key should inherit presence', () {
     const Key key = Key('annotation');
     final List<String> logs = <String>[];
-    // Annotation #1 and #2 has the same key. The #3 is not specified with a
-    // key, which is a different key.
+    // The annotation #1 and #2 have the same key, while annotation #3 has a
+    // different key (an empty `key` argument results in a unique key).
     final MouseTrackerAnnotation annotation1 = MouseTrackerAnnotation(
       onEnter: (PointerEnterEvent event) { logs.add('enter1'); },
       onHover: (PointerHoverEvent event) { logs.add('hover1'); },
@@ -941,13 +941,13 @@ class _EventCriticalFieldsMatcher extends Matcher {
       return mismatchDescription
         .add('is ')
         .addDescriptionOf(item.runtimeType)
-        .add(' and doesn\'t match ')
+        .add(" and doesn't match ")
         .addDescriptionOf(_expected.runtimeType);
     }
     return mismatchDescription
       .add('has ')
       .addDescriptionOf(matchState['actual'])
-      .add(' at field `${matchState['field']}`, which doesn\'t match the expected ')
+      .add(" at field `${matchState['field']}`, which doesn't match the expected ")
       .addDescriptionOf(matchState['expected']);
   }
 }
@@ -1013,7 +1013,7 @@ class _EventListCriticalFieldsMatcher extends Matcher {
       mismatchDescription
         .add('has\n  ')
         .addDescriptionOf(matchState['actual'])
-        .add('\nat index ${matchState['index']}, which doesn\'t match\n  ')
+        .add("\nat index ${matchState['index']}, which doesn't match\n  ")
         .addDescriptionOf(matchState['expected'])
         .add('\nsince it ');
       final Description subDescription = StringDescription();

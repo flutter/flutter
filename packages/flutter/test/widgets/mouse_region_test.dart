@@ -1137,7 +1137,7 @@ void main() {
     expect(bottomRegionIsHovered, isFalse);
   });
 
-  testWidgets('Changing MouseRegion\'s callbacks is effective and doesn\'t repaint', (WidgetTester tester) async {
+  testWidgets("Changing MouseRegion's callbacks is effective and doesn't repaint", (WidgetTester tester) async {
     final List<String> logs = <String>[];
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
@@ -1228,7 +1228,7 @@ void main() {
     expect(logs, <String>['paint', 'hover-enter']);
   });
 
-  testWidgets('RenderMouseRegion\'s debugFillProperties when default', (WidgetTester tester) async {
+  testWidgets("RenderMouseRegion's debugFillProperties when default", (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     RenderMouseRegion().debugFillProperties(builder);
 
@@ -1242,7 +1242,7 @@ void main() {
     ]);
   });
 
-  testWidgets('RenderMouseRegion\'s debugFillProperties when full', (WidgetTester tester) async {
+  testWidgets("RenderMouseRegion's debugFillProperties when full", (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     RenderMouseRegion(
       onEnter: (PointerEnterEvent event) {},
@@ -1295,7 +1295,8 @@ void main() {
   });
 }
 
-// Render `foreground` at the top-left corner, on top of a full-screen `background`.
+// Render widget `topLeft` at the top-left corner, stacking on top of the widget
+// `background`.
 class _Scaffold extends StatelessWidget {
   const _Scaffold({this.topLeft, this.background});
 
