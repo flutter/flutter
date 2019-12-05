@@ -61,15 +61,16 @@ Future<void> main(List<String> arguments) async {
   const local.LocalFileSystem fs = local.LocalFileSystem();
   final LocalizationsGenerator localizationsGenerator = LocalizationsGenerator(fs);
   try {
-    localizationsGenerator.initialize(
-      l10nDirectoryPath: arbPathString,
-      templateArbFileName: templateArbFileName,
-      outputFileString: outputFileString,
-      classNameString: classNameString,
-    );
-    localizationsGenerator.parseArbFiles();
-    localizationsGenerator.generateClassMethods();
-    localizationsGenerator.generateOutputFile();
+    localizationsGenerator
+      ..initialize(
+        l10nDirectoryPath: arbPathString,
+        templateArbFileName: templateArbFileName,
+        outputFileString: outputFileString,
+        classNameString: classNameString,
+      )
+      ..parseArbFiles()
+      ..generateClassMethods()
+      ..generateOutputFile();
   } on FileSystemException catch (e) {
     exitWithError(e.message);
   } on FormatException catch (e) {
@@ -85,7 +86,6 @@ Future<void> main(List<String> arguments) async {
   }
 
   final ProcessResult generateFromArbResult = await Process.run('flutter', <String>[
-    'pub',
     'pub',
     'run',
     'intl_translation:generate_from_arb',
