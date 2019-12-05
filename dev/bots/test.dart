@@ -266,24 +266,25 @@ Future<void> _runToolTests() async {
         // Due to https://github.com/dart-lang/test/issues/1116, pub or test
         // appears to be skipping all tests from the hermetic shard if not
         // explicitly specifed.
-        await _pubRunTest(
-          toolsPath,
-          testPath: path.join(kTest, '$subshard$kDotShard', 'hermetic'),
-          useBuildRunner: canUseBuildRunner,
-          tableData: bigqueryApi?.tabledata,
-          enableFlutterToolAsserts: true,
-        );
+
         // The permeable shard is currently crashing on windows.
         // https://github.com/flutter/flutter/issues/46180
         if (!Platform.isWindows) {
           await _pubRunTest(
             toolsPath,
-            testPath: path.join(kTest, '$subshard$kDotShard', 'permeable'),
+            testPath: path.join(kTest, '$subshard$kDotShard', 'hermetic'),
             useBuildRunner: canUseBuildRunner,
             tableData: bigqueryApi?.tabledata,
             enableFlutterToolAsserts: true,
           );
         }
+        await _pubRunTest(
+          toolsPath,
+          testPath: path.join(kTest, '$subshard$kDotShard', 'permeable'),
+          useBuildRunner: canUseBuildRunner,
+          tableData: bigqueryApi?.tabledata,
+          enableFlutterToolAsserts: true,
+        );
         return;
       }
       await _pubRunTest(
