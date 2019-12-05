@@ -424,7 +424,7 @@ class TextInputConfiguration {
   /// This flag only affects iOS versions 11 and above. It sets
   /// [`UITextSmartDashesType`](https://developer.apple.com/documentation/uikit/uitextsmartdashestype?language=objc)
   /// in the engine. When true, it passes
-  /// [`UITextSmartDashesTypeDefault`](https://developer.apple.com/documentation/uikit/uitextsmartdashestype/uitextsmartdashestypedefault?language=objc),
+  /// [`UITextSmartDashesTypeYes`](https://developer.apple.com/documentation/uikit/uitextsmartdashestype/uitextsmartdashestypeyes?language=objc),
   /// and when false, it passes
   /// [`UITextSmartDashesTypeNo`](https://developer.apple.com/documentation/uikit/uitextsmartdashestype/uitextsmartdashestypeno?language=objc).
   ///
@@ -449,7 +449,7 @@ class TextInputConfiguration {
   /// This flag only affects iOS. It sets
   /// [`UITextSmartQuotesType`](https://developer.apple.com/documentation/uikit/uitextsmartquotestype?language=objc)
   /// in the engine. When true, it passes
-  /// [`UITextSmartQuotesTypeDefault`](https://developer.apple.com/documentation/uikit/uitextsmartquotestype/uitextsmartquotestypedefault?language=objc),
+  /// [`UITextSmartQuotesTypeYes`](https://developer.apple.com/documentation/uikit/uitextsmartquotestype/uitextsmartquotestypeyes?language=objc),
   /// and when false, it passes
   /// [`UITextSmartQuotesTypeNo`](https://developer.apple.com/documentation/uikit/uitextsmartquotestype/uitextsmartquotestypeno?language=objc).
   ///
