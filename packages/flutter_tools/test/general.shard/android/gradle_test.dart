@@ -1811,6 +1811,7 @@ plugin2=${plugin2.path}
         project: FlutterProject.current(),
         outputDirectory: fs.directory('build/'),
         target: '',
+        buildNumber: '2.0',
       );
 
       final List<String> actualGradlewCall = verify(
@@ -1825,6 +1826,7 @@ plugin2=${plugin2.path}
       expect(actualGradlewCall, contains('-Plocal-engine-out=out/android_arm'));
       expect(actualGradlewCall, contains('-Plocal-engine-repo=/.tmp_rand0/flutter_tool_local_engine_repo.rand0'));
       expect(actualGradlewCall, contains('-Plocal-engine-build-mode=release'));
+      expect(actualGradlewCall, contains('-PbuildNumber=2.0'));
 
     }, overrides: <Type, Generator>{
       AndroidSdk: () => mockAndroidSdk,
@@ -1843,6 +1845,7 @@ plugin2=${plugin2.path}
         buildModes: const <String>{'release', 'debug', 'profile'},
         androidPackage: 'com.mycompany',
         repoDirectory: fs.directory('build/'),
+        buildNumber: '2.2',
       );
 
       expect(
@@ -1865,9 +1868,9 @@ plugin2=${plugin2.path}
           '  3. Make the host app depend on the Flutter module:\n'
           '\n'
           '    dependencies {\n'
-          '      releaseImplementation \'com.mycompany:flutter_release:1.0\n'
-          '      debugImplementation \'com.mycompany:flutter_debug:1.0\n'
-          '      profileImplementation \'com.mycompany:flutter_profile:1.0\n'
+          '      releaseImplementation \'com.mycompany:flutter_release:2.2\n'
+          '      debugImplementation \'com.mycompany:flutter_debug:2.2\n'
+          '      profileImplementation \'com.mycompany:flutter_profile:2.2\n'
           '    }\n'
           '\n'
           '\n'
@@ -1895,6 +1898,7 @@ plugin2=${plugin2.path}
         buildModes: const <String>{'release'},
         androidPackage: 'com.mycompany',
         repoDirectory: fs.directory('build/'),
+        buildNumber: '1.0',
       );
 
       expect(
@@ -1934,6 +1938,7 @@ plugin2=${plugin2.path}
         buildModes: const <String>{'debug'},
         androidPackage: 'com.mycompany',
         repoDirectory: fs.directory('build/'),
+        buildNumber: '1.0',
       );
 
       expect(
@@ -1973,6 +1978,7 @@ plugin2=${plugin2.path}
         buildModes: const <String>{'profile'},
         androidPackage: 'com.mycompany',
         repoDirectory: fs.directory('build/'),
+        buildNumber: '1.0',
       );
 
       expect(
