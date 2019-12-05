@@ -5,8 +5,6 @@
 import 'dart:async';
 import 'dart:typed_data';
 
-import 'dart:ui' as ui;
-
 import 'package:flutter/material.dart';
 
 class LargeImagesPage extends StatelessWidget {
@@ -33,6 +31,8 @@ class DummyImage extends StatelessWidget {
     return FutureBuilder<ByteData>(
       future: pngData,
       builder: (BuildContext context, AsyncSnapshot<ByteData> snapshot) {
+        // Use Image.memory instead of Image.asset to make sure that we're
+        // creating many copies of the image to trigger the memory issue.
         return snapshot.data == null
             ? Container()
             : Image.memory(snapshot.data.buffer.asUint8List());
@@ -45,20 +45,4 @@ class DummyImage extends StatelessWidget {
   Future<ByteData> _getPngData(BuildContext context) async {
     return DefaultAssetBundle.of(context).load('assets/999x1000.png');
   }
-}
-
-class ImagePainter extends CustomPainter {
-  ImagePainter(this.image);
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    canvas.drawImage(image, Offset.zero, Paint());
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldDelegate) {
-    return false;
-  }
-
-  final ui.Image image;
 }
