@@ -15,7 +15,6 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/dart/sdk.dart';
-import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/version.dart';
 
@@ -24,7 +23,6 @@ import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
-import '../../src/testbed.dart';
 
 const String frameworkRevision = '12345678';
 const String frameworkChannel = 'omega';
@@ -406,7 +404,7 @@ void main() {
     );
   }, overrides: <Type, Generator>{
     Pub: () => const Pub(),
-  }, skip: true); // https://github.com/flutter/flutter/issues/46142
+  });
 
   testUsingContext('module project with pub', () async {
     return _createProject(projectDir, <String>[
@@ -441,7 +439,7 @@ void main() {
     ]);
   }, overrides: <Type, Generator>{
     Pub: () => const Pub(),
-  }, skip: true); // https://github.com/flutter/flutter/issues/46142 .
+  });
 
 
   testUsingContext('androidx is used by default in an app project', () async {
@@ -570,11 +568,9 @@ void main() {
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
-    await runner.run(<String>['create', '--no-pub', projectDir.path]);
+    await runner.run(<String>['create', '--no-pub', '--macos', projectDir.path]);
 
     expect(projectDir.childDirectory('macos').childDirectory('Runner.xcworkspace').existsSync(), true);
-  }, overrides: <Type, Generator>{
-    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
 
   testUsingContext('app does not include macOS by default', () async {
@@ -588,8 +584,6 @@ void main() {
     await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
     expect(projectDir.childDirectory('macos').childDirectory('Runner.xcworkspace').existsSync(), false);
-  }, overrides: <Type, Generator>{
-    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: false),
   });
 
   testUsingContext('plugin supports macOS if requested', () async {
@@ -600,11 +594,9 @@ void main() {
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
-    await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--macos', projectDir.path]);
 
     expect(projectDir.childDirectory('macos').childFile('flutter_project.podspec').existsSync(), true);
-  }, overrides: <Type, Generator>{
-    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
 
   testUsingContext('plugin does not include macOS by default', () async {
@@ -618,8 +610,6 @@ void main() {
     await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
 
     expect(projectDir.childDirectory('macos').childFile('flutter_project.podspec').existsSync(), false);
-  }, overrides: <Type, Generator>{
-    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: false),
   });
 
   testUsingContext('has correct content and formatting with module template', () async {

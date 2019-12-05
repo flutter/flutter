@@ -36,10 +36,7 @@ final String toolRoot = path.join(flutterRoot, 'packages', 'flutter_tools');
 final List<String> flutterTestArgs = <String>[];
 
 final bool useFlutterTestFormatter = Platform.environment['FLUTTER_TEST_FORMATTER'] == 'true';
-
-// This is disabled due to https://github.com/dart-lang/build/issues/2562
-// Platform.environment['FLUTTER_TEST_NO_BUILD_RUNNER'] != 'true';
-const bool canUseBuildRunner = false;
+final bool canUseBuildRunner = Platform.environment['FLUTTER_TEST_NO_BUILD_RUNNER'] != 'true';
 
 /// The number of Cirrus jobs that run host-only devicelab tests in parallel.
 ///
@@ -263,27 +260,6 @@ Future<void> _runToolTests() async {
       .map<String>((String name) => path.basenameWithoutExtension(name)),
     // The `dynamic` on the next line is because Map.fromIterable isn't generic.
     value: (dynamic subshard) => () async {
-      if (subshard == 'commands') {
-        // Due to https://github.com/dart-lang/test/issues/1116 , pub or test
-        // appears to be skipping all tests from the hermetic shard if not
-        // explicitly specifed.
-        await _pubRunTest(
-          toolsPath,
-          testPath: path.join(kTest, '$subshard$kDotShard', 'hermetic'),
-          useBuildRunner: canUseBuildRunner,
-          tableData: bigqueryApi?.tabledata,
-          enableFlutterToolAsserts: true,
-        );
-        await _pubRunTest(
-          toolsPath,
-          testPath: path.join(kTest, '$subshard$kDotShard', 'permeable'),
-          useBuildRunner: canUseBuildRunner,
-          tableData: bigqueryApi?.tabledata,
-          enableFlutterToolAsserts: true,
-        );
-        return;
-      }
-
       await _pubRunTest(
         toolsPath,
         testPath: path.join(kTest, '$subshard$kDotShard'),
@@ -297,13 +273,6 @@ Future<void> _runToolTests() async {
   await selectSubshard(subshards);
 }
 
-// Example apps that should not be built by _runBuildTests`
-const List<String> _excludedExampleApplications = <String>[
-  // This application contains no platform code and cannot be built, except for
-  // as a part of a '--fast-start' Android application.
-  'splash',
-];
-
 /// Verifies that AOT, APK, and IPA (if on macOS) builds the examples apps
 /// without crashing. It does not actually launch the apps. That happens later
 /// in the devicelab. This is just a smoke-test. In particular, this will verify
@@ -313,9 +282,6 @@ Future<void> _runBuildTests() async {
   final Stream<FileSystemEntity> exampleDirectories = Directory(path.join(flutterRoot, 'examples')).list();
   await for (FileSystemEntity fileEntity in exampleDirectories) {
     if (fileEntity is! Directory) {
-      continue;
-    }
-    if (_excludedExampleApplications.any(fileEntity.path.endsWith)) {
       continue;
     }
     final String examplePath = fileEntity.path;
@@ -593,9 +559,12 @@ Future<void> _pubRunTest(String workingDirectory, {
 }) async {
   final List<String> args = <String>['run'];
   if (useBuildRunner) {
+    final String posixTestPath = path.posix.joinAll(path.split(testPath));
     args.addAll(<String>[
       'build_runner',
       'test',
+      '--build-filter=$posixTestPath/*.dill',
+      '--build-filter=$posixTestPath/**/*.dill',
       '--',
     ]);
   } else {
@@ -787,7 +756,6 @@ Future<void> _runHostOnlyDeviceLabTests() async {
     if (Platform.isMacOS) () => _runDevicelabTest('flutter_create_offline_test_mac'),
     if (Platform.isLinux) () => _runDevicelabTest('flutter_create_offline_test_linux'),
     if (Platform.isWindows) () => _runDevicelabTest('flutter_create_offline_test_windows'),
-    () => _runDevicelabTest('gradle_fast_start_test', environment: gradleEnvironment),
     // TODO(ianh): Fails on macOS looking for "dexdump", https://github.com/flutter/flutter/issues/42494
     if (!Platform.isMacOS) () => _runDevicelabTest('gradle_jetifier_test', environment: gradleEnvironment),
     () => _runDevicelabTest('gradle_non_android_plugin_test', environment: gradleEnvironment),
