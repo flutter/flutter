@@ -630,7 +630,7 @@ tasks:
     description: >
       Estimates our technical debt (TODOs, analyzer ignores, etc).
     stage: devicelab
-    required_agent_capabilities: ["linux/android"]
+    required_agent_capabilities: ["linux-vm"]
 
   flutter_gallery__start_up:
     description: >
