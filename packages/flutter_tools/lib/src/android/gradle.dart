@@ -480,16 +480,18 @@ Future<void> buildGradleAar({
   @required AndroidBuildInfo androidBuildInfo,
   @required String target,
   @required Directory outputDirectory,
-  String buildNumber = '1.0',
+  String buildNumber,
 }) async {
   assert(project != null);
   assert(target != null);
   assert(androidBuildInfo != null);
   assert(outputDirectory != null);
 
+  buildNumber ??= '1.0';
   if (androidSdk == null) {
     exitWithNoSdkMessage();
   }
+
   final FlutterManifest manifest = project.manifest;
   if (!manifest.isModule && !manifest.isPlugin) {
     throwToolExit('AARs can only be built for plugin or module projects.');
@@ -587,11 +589,12 @@ void printHowToConsumeAar({
   @required Set<String> buildModes,
   @required String androidPackage,
   @required Directory repoDirectory,
-  String buildNumber = '1.0',
+  String buildNumber,
 }) {
   assert(buildModes != null && buildModes.isNotEmpty);
   assert(androidPackage != null);
   assert(repoDirectory != null);
+  buildNumber ??= '1.0';
 
   printStatus('''
 
