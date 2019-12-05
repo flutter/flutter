@@ -345,8 +345,12 @@ class _FocusState extends State<Focus> {
       _internalNode ??= _createNode();
     }
     _focusAttachment = focusNode.attach(context, onKey: widget.onKey);
-    focusNode.skipTraversal = widget.skipTraversal ?? focusNode.skipTraversal;
-    focusNode.canRequestFocus = widget.canRequestFocus ?? focusNode.canRequestFocus;
+    if (widget.skipTraversal != null) {
+      focusNode.skipTraversal = widget.skipTraversal;
+    }
+    if (widget.canRequestFocus != null) {
+      focusNode.canRequestFocus = widget.canRequestFocus;
+    }
     _canRequestFocus = focusNode.canRequestFocus;
     _hasPrimaryFocus = focusNode.hasPrimaryFocus;
 
@@ -410,8 +414,12 @@ class _FocusState extends State<Focus> {
     }());
 
     if (oldWidget.focusNode == widget.focusNode) {
-      focusNode.skipTraversal = widget.skipTraversal ?? focusNode.skipTraversal;
-      focusNode.canRequestFocus = widget.canRequestFocus ?? focusNode.canRequestFocus;
+      if (widget.skipTraversal != null) {
+        focusNode.skipTraversal = widget.skipTraversal;
+      }
+      if (widget.canRequestFocus != null) {
+        focusNode.canRequestFocus = widget.canRequestFocus;
+      }
     } else {
       _focusAttachment.detach();
       focusNode.removeListener(_handleFocusChanged);
