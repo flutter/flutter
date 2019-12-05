@@ -53,3 +53,7 @@ Future<Map<String, dynamic>> measureIosCpuGpu({
 Future<String> dylibSymbols(String pathToDylib) {
   return eval('nm', <String>['-g', pathToDylib]);
 }
+
+Future<String> fileType(String pathToDylib) {
+  return eval('file', <String>[pathToDylib]);
+}
