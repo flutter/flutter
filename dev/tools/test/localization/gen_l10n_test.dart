@@ -142,23 +142,23 @@ void main() {
       );
     });
 
-    test('setClassName fails if input string is null', () {
+    test('setting className fails if input string is null', () {
       _standardFlutterDirectoryL10nSetup(fs);
       final LocalizationsGenerator generator = LocalizationsGenerator(fs);
       try {
-        generator.setClassName(null);
+        generator.className = null;
       } on L10nException catch (e) {
         expect(e.message, contains('cannot be null'));
         return;
       }
 
       fail(
-        'Attempting to set LocalizationsGenerator.setClassName should fail if the '
+        'Attempting to set LocalizationsGenerator.className should fail if the '
         'the input string is null.'
       );
     });
 
-    group('setClassName should only take valid Dart class names:', () {
+    group('className should only take valid Dart class names:', () {
       LocalizationsGenerator generator;
       setUp(() {
         _standardFlutterDirectoryL10nSetup(fs);
@@ -174,52 +174,52 @@ void main() {
 
       test('fails on string with spaces', () {
         try {
-          generator.setClassName('String with spaces');
+          generator.className = 'String with spaces';
         } on L10nException catch (e) {
           expect(e.message, contains('is not a valid Dart class name'));
           return;
         }
         fail(
-          'Attempting to set LocalizationsGenerator.setClassName should fail if the '
+          'Attempting to set LocalizationsGenerator.className should fail if the '
           'the input string is not a valid Dart class name.'
         );
       });
 
       test('fails on non-alphanumeric symbols', () {
         try {
-          generator.setClassName('TestClass@123');
+          generator.className = 'TestClass@123';
         } on L10nException catch (e) {
           expect(e.message, contains('is not a valid Dart class name'));
           return;
         }
         fail(
-          'Attempting to set LocalizationsGenerator.setClassName should fail if the '
+          'Attempting to set LocalizationsGenerator.className should fail if the '
           'the input string is not a valid Dart class name.'
         );
       });
 
       test('fails on camel-case', () {
         try {
-          generator.setClassName('camelCaseClassName');
+          generator.className = 'camelCaseClassName';
         } on L10nException catch (e) {
           expect(e.message, contains('is not a valid Dart class name'));
           return;
         }
         fail(
-          'Attempting to set LocalizationsGenerator.setClassName should fail if the '
+          'Attempting to set LocalizationsGenerator.className should fail if the '
           'the input string is not a valid Dart class name.'
         );
       });
 
       test('fails when starting with a number', () {
         try {
-          generator.setClassName('123ClassName');
+          generator.className = '123ClassName';
         } on L10nException catch (e) {
           expect(e.message, contains('is not a valid Dart class name'));
           return;
         }
         fail(
-          'Attempting to set LocalizationsGenerator.setClassName should fail if the '
+          'Attempting to set LocalizationsGenerator.className should fail if the '
           'the input string is not a valid Dart class name.'
         );
       });

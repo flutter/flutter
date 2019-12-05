@@ -354,7 +354,10 @@ class LocalizationsGenerator {
   /// AppLocalizations will be used for localized message lookups.
   ///
   /// The class name is specified with the [initialize] method.
-  String className;
+  String get className => _className;
+  String _className;
+  /// Sets the [className] for the localizations and localizations delegate
+  /// classes.
 
   /// The list of all arb files in [l10nDirectory].
   final List<String> arbFilenames = <String>[];
@@ -381,7 +384,8 @@ class LocalizationsGenerator {
     setL10nDirectory(l10nDirectoryPath);
     setTemplateArbFile(templateArbFileName);
     setOutputFile(outputFileString);
-    setClassName(classNameString);
+    className = classNameString;
+    print(className);
   }
 
   /// Sets the reference [Directory] for [l10nDirectory].
@@ -429,17 +433,15 @@ class LocalizationsGenerator {
     outputFile = _fs.file(path.join(l10nDirectory.path, outputFileString));
   }
 
-  /// Sets the [className] for the localizations and localizations delegate
-  /// classes.
   @visibleForTesting
-  void setClassName(String classNameString) {
+  set className(String classNameString) {
     if (classNameString == null)
       throw L10nException('classNameString argument cannot be null');
     if (!_isValidClassName(classNameString))
       throw L10nException(
         "The 'output-class', $classNameString, is not a valid Dart class name.\n"
       );
-    className = classNameString;
+    _className = classNameString;
   }
 
   /// Scans [l10nDirectory] for arb files and parses them for language and locale
