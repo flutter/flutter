@@ -238,7 +238,7 @@ String genPluralMethod(Map<String, dynamic> bundle, String key) {
     ...genIntlMethodArgs(bundle, key),
   ];
 
-  for(String pluralKey in pluralIds.keys) {
+  for (String pluralKey in pluralIds.keys) {
     final RegExp expRE = RegExp('($pluralKey){([^}]+)}');
     final RegExpMatch match = expRE.firstMatch(message);
     if (match != null && match.groupCount == 2) {
@@ -324,6 +324,10 @@ class LocalizationsGenerator {
   /// It takes in a [FileSystem] representation that the class will act upon.
   LocalizationsGenerator(this._fs);
 
+  static RegExp arbFilenameLocaleRE = RegExp(r'^[^_]*_(\w+)\.arb$');
+  static RegExp arbFilenameRE = RegExp(r'(\w+)\.arb$');
+  static RegExp pluralValueRE = RegExp(r'^\s*\{[\w\s,]*,\s*plural\s*,');
+
   final file.FileSystem _fs;
 
   /// The reference to the project's l10n directory.
@@ -375,6 +379,12 @@ class LocalizationsGenerator {
   final List<String> classMethods = <String>[];
 
   /// Initializes [l10nDirectory], [templateArbFile], [outputFile] and [className].
+  ///
+  /// Throws an [L10nException] when a provided configuration is not allowed
+  /// by [LocalizationsGenerator].
+  ///
+  /// Throws an [FileSystemException] when a file operation necessary for setting
+  /// up the [LocalizationsGenerator] cannot be completed.
   void initialize({
     String l10nDirectoryPath,
     String templateArbFileName,
@@ -385,7 +395,6 @@ class LocalizationsGenerator {
     setTemplateArbFile(templateArbFileName);
     setOutputFile(outputFileString);
     className = classNameString;
-    print(className);
   }
 
   /// Sets the reference [Directory] for [l10nDirectory].
@@ -455,12 +464,10 @@ class LocalizationsGenerator {
 
     for (File file in fileSystemEntityList) {
       final String filePath = file.path;
-      final RegExp arbFilenameRE = RegExp(r'(\w+)\.arb$');
       if (arbFilenameRE.hasMatch(filePath)) {
         final Map<String, dynamic> arbContents = json.decode(file.readAsStringSync());
         String localeString = arbContents['@@locale'];
         if (localeString == null) {
-          final RegExp arbFilenameLocaleRE = RegExp(r'^[^_]*_(\w+)\.arb$');
           final RegExpMatch arbFileMatch = arbFilenameLocaleRE.firstMatch(filePath);
           if (arbFileMatch == null) {
             throw L10nException(
@@ -510,7 +517,6 @@ class LocalizationsGenerator {
       throw FormatException('Unable to parse arb file: $e');
     }
 
-    final RegExp pluralValueRE = RegExp(r'^\s*\{[\w\s,]*,\s*plural\s*,');
     for (String key in bundle.keys.toList()..sort()) {
       if (key.startsWith('@'))
         continue;
