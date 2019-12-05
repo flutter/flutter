@@ -573,8 +573,9 @@ Future<void> _pubRunTest(String workingDirectory, {
     args.addAll(<String>[
       'build_runner',
       'test',
-      '--build-filter=$posixTestPath/*.dill',
-      '--build-filter=$posixTestPath/**/*.dill',
+      // These were disabled to diagnose seemingly skipped tests on CI.
+      // '--build-filter=$posixTestPath/*.dill',
+      // '--build-filter=$posixTestPath/**/*.dill',
       '--',
     ]);
   } else {
