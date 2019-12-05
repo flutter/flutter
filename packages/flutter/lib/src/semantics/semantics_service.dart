@@ -18,6 +18,9 @@ import 'semantics_event.dart' show AnnounceSemanticsEvent, TooltipSemanticsEvent
 /// When possible, prefer using mechanisms like [Semantics] to implicitly
 /// trigger announcements over using this event.
 class SemanticsService {
+  // This class is intended to be used as an interface, and should not be
+  // extended directly; this constructor prevents instantiation and extension.
+  // ignore: unused_element
   SemanticsService._();
 
   /// Sends a semantic announcement.

@@ -5,6 +5,9 @@
 import 'package:flutter/material.dart';
 
 class GalleryIcons {
+  // This class is intended to be used as an interface, and should not be
+  // extended directly; this constructor prevents instantiation and extension.
+  // ignore: unused_element
   GalleryIcons._();
 
   static const IconData tooltip = IconData(0xe900, fontFamily: 'GalleryIcons');

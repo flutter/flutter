@@ -32,6 +32,9 @@ int _synthesiseDownButtons(int buttons, PointerDeviceKind kind) {
 /// [dart:ui.Window.onPointerDataPacket], and converts them to [PointerEvent]
 /// objects.
 class PointerEventConverter {
+  // This class is intended to be used as an interface, and should not be
+  // extended directly; this constructor prevents instantiation and extension.
+  // ignore: unused_element
   PointerEventConverter._();
 
   /// Expand the given packet of pointer data into a sequence of framework

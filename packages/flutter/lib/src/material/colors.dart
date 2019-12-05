@@ -192,6 +192,9 @@ class MaterialAccentColor extends ColorSwatch<int> {
 /// The [Colors.transparent] color isn't shown here because it is entirely
 /// invisible!
 class Colors {
+  // This class is intended to be used as an interface, and should not be
+  // extended directly; this constructor prevents instantiation and extension.
+  // ignore: unused_element
   Colors._();
 
   /// Completely invisible.
