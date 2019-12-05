@@ -406,7 +406,7 @@ void main() {
     );
   }, overrides: <Type, Generator>{
     Pub: () => const Pub(),
-  }, skip: true); // https://github.com/flutter/flutter/issues/46142
+  }, skip: false); // https://github.com/flutter/flutter/issues/46142
 
   testUsingContext('module project with pub', () async {
     return _createProject(projectDir, <String>[
