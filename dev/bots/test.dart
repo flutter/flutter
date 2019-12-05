@@ -36,7 +36,10 @@ final String toolRoot = path.join(flutterRoot, 'packages', 'flutter_tools');
 final List<String> flutterTestArgs = <String>[];
 
 final bool useFlutterTestFormatter = Platform.environment['FLUTTER_TEST_FORMATTER'] == 'true';
-const bool canUseBuildRunner = false; //Platform.environment['FLUTTER_TEST_NO_BUILD_RUNNER'] != 'true';
+
+// This is disabled due to https://github.com/dart-lang/build/issues/2562
+// Platform.environment['FLUTTER_TEST_NO_BUILD_RUNNER'] != 'true';
+const bool canUseBuildRunner = false;
 
 /// The number of Cirrus jobs that run host-only devicelab tests in parallel.
 ///
@@ -594,11 +597,18 @@ Future<void> _pubRunTest(String workingDirectory, {
   if (!hasColor)
     args.add('--no-color');
   if (testPath != null) {
-    final Iterable<String> testPaths = Directory(path.join(workingDirectory, testPath))
-      .listSync(recursive: true)
-      .where((FileSystemEntity entity) => entity.path.endsWith('_test.dart'))
-      .map((FileSystemEntity entity) => entity.path);
-    args.addAll(testPaths);
+    // Due to https://github.com/dart-lang/test/issues/1116, we need to
+    // specify each test file to be run, otherwise tests may be skipped.
+    // We cannot use this trick on windows due to terminal line limits.
+    if (!Platform.isWindows) {
+      final Iterable<String> testPaths = Directory(path.join(workingDirectory, testPath))
+        .listSync(recursive: true)
+        .where((FileSystemEntity entity) => entity.path.endsWith('_test.dart'))
+        .map((FileSystemEntity entity) => entity.path);
+      args.addAll(testPaths);
+    } else {
+      args.add(testPath);
+    }
   }
   final Map<String, String> pubEnvironment = <String, String>{
     'FLUTTER_ROOT': flutterRoot,
