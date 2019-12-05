@@ -53,28 +53,53 @@ class CupertinoSizeClassHelper {
       return false;
   }
 
-  static bool is10Style() {}
+  // TODO: take Split View into consideration, be less resolution dependent
 
-  static bool is6Style() {}
+  /// Returns true if phone is Xs Max, 11 Pro Max
+  static bool isMaxStyle() {
+    return window.devicePixelRatio == 3 && (window.physicalSize.width == 2688 || window.physicalSize.height == 2688);
+  }
 
+  /// Returns true if phone is X, Xr, Xs, 11, 11 Pro
+  static bool is10Style() {
+    return (window.physicalSize.width == 828 || window.physicalSize.height == 828) || (window.physicalSize.width == 1125 || window.physicalSize.height == 1125);
+  }
+
+  /// Returns true if phone is 6+, 6s+, 7+, 8+
+  static bool isPlusStyle() {
+    return window.devicePixelRatio == 3 && (window.physicalSize.width == 2208 || window.physicalSize.height == 2208);
+  }
+
+  /// Returns true if phone is 6, 6s, 7, 8 (non-plus)
+  static bool is6Style() {
+    return window.devicePixelRatio == 2 && (window.physicalSize.width == 750 || window.physicalSize.height == 750);
+  }
+
+  /// Returns true if phone is 5, 5c, 5s, SE, iPod 5g
+  /// NOTE: also includes 4, 4s, iPod 4g
   static bool is5Style() {
-
+    return window.devicePixelRatio == 2 && (window.physicalSize.width == 640 || window.physicalSize.height == 640);
   }
 
-  static CupertinoSizeClass getWidthSizeClass() {
+  // TODO: create separate qualifier for iPhone/iPod series 4
+
+  // NOTE: devices from series 3 and below are not included because they don't support iOS 8
+
+  static CupertinoSizeClass getWidthSizeClass(BuildContext context) {
+    if(isTablet()) {
+      return CupertinoSizeClass.regular;
+    } else if(MediaQuery.of(context).orientation == Orientation.portrait) {
+      return isPlusStyle() || isMaxStyle() ? CupertinoSizeClass.regular : CupertinoSizeClass.compact;
+    } else {
+      return CupertinoSizeClass.compact;
+    } 
+  }
+
+  static CupertinoSizeClass getHeightSizeClass(BuildContext context) {
     if(isTablet()) {
       return CupertinoSizeClass.regular;
     } else {
-      return null;
-    }
-  }
-
-  static CupertinoSizeClass getHeightSizeClass() {
-    if(isTablet()) {
-      return CupertinoSizeClass.regular;
-    } else {
-      // TODO: implement detection on non-tablets
-      return null;
+      return MediaQuery.of(context).orientation == Orientation.portrait ? CupertinoSizeClass.regular : CupertinoSizeClass.compact;
     }
   }
 }
@@ -256,8 +281,8 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
     final Color inactive = CupertinoDynamicColor.resolve(inactiveColor, context);
 
     // TODO: allow dynamic resizing
-    final bool isIconCompact = (CupertinoSizeClassHelper.getWidthSizeClass() == CupertinoSizeClass.compact) && (CupertinoSizeClassHelper.getHeightSizeClass() == CupertinoSizeClass.compact);
-    final bool isItemVertical = (CupertinoSizeClassHelper.getWidthSizeClass() == CupertinoSizeClass.compact) && (CupertinoSizeClassHelper.getHeightSizeClass() == CupertinoSizeClass.regular);
+    final bool isIconCompact = (CupertinoSizeClassHelper.getWidthSizeClass(context) == CupertinoSizeClass.compact) && (CupertinoSizeClassHelper.getHeightSizeClass(context) == CupertinoSizeClass.compact);
+    final bool isItemVertical = (CupertinoSizeClassHelper.getWidthSizeClass(context) == CupertinoSizeClass.compact) && (CupertinoSizeClassHelper.getHeightSizeClass(context) == CupertinoSizeClass.regular);
 
     Widget result = DecoratedBox(
       decoration: BoxDecoration(
