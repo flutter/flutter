@@ -68,7 +68,7 @@ template("fuchsia_archive") {
       "$cmx_file",
     ]
     outputs = [
-      "$far_base_dir/meta/{{source_file_part}}",
+      "$far_base_dir/meta/${pkg_target_name}.cmx",
     ]
   }
 
