@@ -4,7 +4,6 @@
 
 import 'dart:ui';
 
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/semantics.dart';
@@ -1347,8 +1346,8 @@ void main() {
     Future<void> pumpTest({
       bool allowScope1 = true,
       bool allowScope2 = true,
-      bool allowFocus1,
-      bool allowFocus2,
+      bool allowFocus1 = true,
+      bool allowFocus2 = true,
     }) async {
       await tester.pumpWidget(
         FocusScope(
@@ -1385,7 +1384,6 @@ void main() {
     await tester.pumpAndSettle();
     expect(Focus.of(container1.currentContext).hasFocus, isFalse);
     await pumpTest();
-    Focus.of(container1.currentContext).canRequestFocus = true;
     Focus.of(container1.currentContext).requestFocus();
     await tester.pumpAndSettle();
     expect(Focus.of(container1.currentContext).hasFocus, isTrue);
@@ -1421,7 +1419,6 @@ void main() {
     await tester.pumpAndSettle();
     expect(Focus.of(container1.currentContext).hasFocus, isFalse);
     await pumpTest();
-    Focus.of(focus2.currentContext).canRequestFocus = true;
     // Try again, now that we've set scope2's canRequestFocus to true again.
     Focus.of(container1.currentContext).requestFocus();
     await tester.pumpAndSettle();
@@ -1443,8 +1440,6 @@ void main() {
     await tester.pumpAndSettle();
     expect(Focus.of(container1.currentContext).hasFocus, isFalse);
     await pumpTest();
-    FocusScope.of(focus1.currentContext).canRequestFocus = true;
-
     // Try again, now that we've set scope1's canRequestFocus to true again.
     Focus.of(container1.currentContext).requestFocus();
     await tester.pumpAndSettle();
