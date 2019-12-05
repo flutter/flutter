@@ -1137,28 +1137,14 @@ void main() {
     expect(bottomRegionIsHovered, isFalse);
   });
 
-  testWidgets('Changing MouseRegion\'s properties is effective and only repaints when changing strict properties', (WidgetTester tester) async {
+  testWidgets('Changing MouseRegion\'s callbacks is effective and doesn\'t repaint', (WidgetTester tester) async {
     final List<String> logs = <String>[];
-    // Render `foreground` at the top-left corner, on top of a full-screen `background`.
-    Widget scaffold({Widget topLeft, Widget background}) {
-      return Directionality(
-        textDirection: TextDirection.ltr,
-        child: Stack(
-          children: <Widget>[
-            background,
-            Align(
-              alignment: Alignment.topLeft,
-              child: topLeft,
-            ),
-          ],
-        ),
-      );
-    }
 
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer(location: const Offset(20, 20));
     addTearDown(gesture.removePointer);
-    await tester.pumpWidget(scaffold(
+
+    await tester.pumpWidget(_Scaffold(
       topLeft: Container(
         height: 10,
         width: 10,
@@ -1169,7 +1155,6 @@ void main() {
           child: _PaintDelegateWidget(onPaint: () { logs.add('paint'); })
         ),
       ),
-      background: MouseRegion(onHover: (_) { logs.add('hover-bottom'); })
     ));
     expect(logs, <String>['paint']);
     logs.clear();
@@ -1178,47 +1163,69 @@ void main() {
     expect(logs, <String>['enter1', 'hover1']);
     logs.clear();
 
-    // Change loose properties. Cache these properties so that we can make sure
-    // we only changed strict properties later.
-    final PointerEnterEventListener onEnter2 = (_) { logs.add('enter2'); };
-    final PointerHoverEventListener onHover2 = (_) { logs.add('hover2'); };
-    final PointerExitEventListener onExit2 = (_) { logs.add('exit2'); };
-
-    await tester.pumpWidget(scaffold(
+    await tester.pumpWidget(_Scaffold(
       topLeft: Container(
         height: 10,
         width: 10,
         child: MouseRegion(
-          onEnter: onEnter2,
-          onHover: onHover2,
-          onExit: onExit2,
+          onEnter: (_) { logs.add('enter2'); },
+          onHover: (_) { logs.add('hover2'); },
+          onExit: (_) { logs.add('exit2'); },
           child: _PaintDelegateWidget(onPaint: () { logs.add('paint'); })
         ),
       ),
-      background: MouseRegion(onHover: (_) { logs.add('hover-bottom'); })
     ));
+    expect(logs, isEmpty);
 
     await gesture.moveTo(const Offset(6, 6));
     expect(logs, <String>['hover2']);
     logs.clear();
+  });
 
-    // Change strict property opacity
-    await tester.pumpWidget(scaffold(
+  testWidgets('Changing MouseRegion.opaque is effective and repaints', (WidgetTester tester) async {
+    final List<String> logs = <String>[];
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: const Offset(5, 5));
+    addTearDown(gesture.removePointer);
+
+    final PointerHoverEventListener onHover = (_) {};
+    final VoidCallback onPaintChild = () { logs.add('paint'); };
+
+    await tester.pumpWidget(_Scaffold(
       topLeft: Container(
         height: 10,
         width: 10,
         child: MouseRegion(
-          onEnter: onEnter2,
-          onHover: onHover2,
-          onExit: onExit2,
-          opaque: false,
-          child: _PaintDelegateWidget(onPaint: () { logs.add('paint'); })
+          opaque: true,
+          // Dummy callback so that MouseRegion stays affective after opaque
+          // turns false.
+          onHover: onHover,
+          child: _PaintDelegateWidget(onPaint: onPaintChild),
         ),
       ),
-      background: MouseRegion(onHover: (_) { logs.add('hover-bottom'); })
+      background: MouseRegion(onEnter: (_) { logs.add('hover-enter'); })
+    ));
+    expect(logs, <String>['paint']);
+    logs.clear();
+
+    expect(logs, isEmpty);
+    logs.clear();
+
+    await tester.pumpWidget(_Scaffold(
+      topLeft: Container(
+        height: 10,
+        width: 10,
+        child: MouseRegion(
+          opaque: false,
+          onHover: onHover,
+          child: _PaintDelegateWidget(onPaint: onPaintChild),
+        ),
+      ),
+      background: MouseRegion(onEnter: (_) { logs.add('hover-enter'); })
     ));
 
-    expect(logs, <String>['paint', 'hover-bottom']);
+    expect(logs, <String>['paint', 'hover-enter']);
   });
 
   testWidgets('RenderMouseRegion\'s debugFillProperties when default', (WidgetTester tester) async {
@@ -1286,6 +1293,30 @@ void main() {
     expect(RendererBinding.instance.mouseTracker.isAnnotationAttached(annotation), isTrue);
     RendererBinding.instance.mouseTracker.detachAnnotation(annotation);
   });
+}
+
+// Render `foreground` at the top-left corner, on top of a full-screen `background`.
+class _Scaffold extends StatelessWidget {
+  const _Scaffold({this.topLeft, this.background});
+
+  final Widget topLeft;
+  final Widget background;
+
+  @override
+  Widget build(BuildContext context) {
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: Stack(
+        children: <Widget>[
+          if (background != null) background,
+          Align(
+            alignment: Alignment.topLeft,
+            child: topLeft,
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 // This widget allows you to send a callback that is called during `onPaint`.
