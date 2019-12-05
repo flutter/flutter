@@ -180,6 +180,8 @@ class FlutterWebConnection {
       String url,
       Map<String, dynamic> settings,
       {Duration timeout}) async {
+    // Use sync WebDriver because async version will create a 15 seconds
+    // overhead when quitting.
     final sync.WebDriver driver = createDriver(settings);
     driver.get(url);
 
