@@ -97,7 +97,7 @@ class _CrossFadeTransition extends AnimatedWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Animation<double> progress = listenable;
+    final Animation<double> progress = listenable as Animation<double>;
 
     final double opacity1 = CurvedAnimation(
       parent: ReverseAnimation(progress),
@@ -227,7 +227,7 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
   double get _backdropHeight {
     // Warning: this can be safely called from the event handlers but it may
     // not be called at build time.
-    final RenderBox renderBox = _backdropKey.currentContext.findRenderObject();
+    final RenderBox renderBox = _backdropKey.currentContext.findRenderObject() as RenderBox;
     return math.max(0.0, renderBox.size.height - _kBackAppBarHeight - _kFrontClosedHeight);
   }
 
