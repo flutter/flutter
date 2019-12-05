@@ -929,22 +929,22 @@ void main() async {
     .map<Object>((s) => jsonDecode(s));
   await for (Object command in commands) {
     if (command is Map<String, dynamic>) {
-    File imageFile = File(command['imageFile']);
-    Uri goldenKey = Uri.parse(command['key']);
-    bool update = command['update'];
+      File imageFile = File(command['imageFile']);
+      Uri goldenKey = Uri.parse(command['key']);
+      bool update = command['update'];
 
-    final bytes = await File(imageFile.path).readAsBytes();
-    if (update) {
-      await goldenFileComparator.update(goldenKey, bytes);
-      print(jsonEncode({'success': true}));
-    } else {
-      try {
-        bool success = await goldenFileComparator.compare(bytes, goldenKey);
-        print(jsonEncode({'success': success}));
-      } on TestFailure catch (ex) {
-        print(jsonEncode({'success': false, 'message': ex.message}));
+      final bytes = await File(imageFile.path).readAsBytes();
+      if (update) {
+        await goldenFileComparator.update(goldenKey, bytes);
+        print(jsonEncode({'success': true}));
+      } else {
+        try {
+          bool success = await goldenFileComparator.compare(bytes, goldenKey);
+          print(jsonEncode({'success': success}));
+        } catch (ex) {
+          print(jsonEncode({'success': false, 'message': '\$ex'}));
+        }
       }
-    }
     } else {
       print('object type is not right');
     }
