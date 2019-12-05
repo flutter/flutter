@@ -79,7 +79,7 @@ Future<void> main() async {
         'App',
       ));
 
-      String appFrameworkPath = path.join(
+      final String appFrameworkPath = path.join(
         outputPath,
         'Debug',
         'App.framework',
