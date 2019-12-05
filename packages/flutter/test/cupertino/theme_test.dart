@@ -186,6 +186,7 @@ void main() {
           'textStyle',
           'actionTextStyle',
           'tabLabelTextStyle',
+          'tabWideLabelTextStyle',
           'navTitleTextStyle',
           'navLargeTitleTextStyle',
           'navActionTextStyle',
