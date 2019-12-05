@@ -355,6 +355,7 @@ void sanityCheckDocs() {
     '$kPublishRoot/api/dart-io/File-class.html',
     '$kPublishRoot/api/dart-ui/Canvas-class.html',
     '$kPublishRoot/api/dart-ui/Canvas/drawRect.html',
+    '$kPublishRoot/api/flutter_driver/FlutterDriver/FlutterDriver.connectedTo.html',
     '$kPublishRoot/api/flutter_test/WidgetTester/pumpWidget.html',
     '$kPublishRoot/api/material/Material-class.html',
     '$kPublishRoot/api/material/Tooltip-class.html',
