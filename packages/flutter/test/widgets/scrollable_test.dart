@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -36,11 +35,7 @@ Future<void> pumpTest(
 
 const double dragOffset = 200.0;
 
-// TODO(gspencergoog): Change this to use TargetPlatform.macOS once that is available.
-// https://github.com/flutter/flutter/issues/31366
-// Can't be const, since Platform.macOS asserts if called in const context.
-// ignore: prefer_const_declarations
-final LogicalKeyboardKey modifierKey = (!kIsWeb && Platform.isMacOS)
+final LogicalKeyboardKey modifierKey = defaultTargetPlatform == TargetPlatform.macOS
     ? LogicalKeyboardKey.metaLeft
     : LogicalKeyboardKey.controlLeft;
 
