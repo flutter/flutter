@@ -48,7 +48,7 @@ void main() {
       Shortcuts(
         shortcuts: <LogicalKeySet, Intent>{
           LogicalKeySet(LogicalKeyboardKey.enter): const Intent(ActivateAction.key),
-          LogicalKeySet(LogicalKeyboardKey.space): const Intent(SelectAction.key),
+          LogicalKeySet(LogicalKeyboardKey.space): const Intent(ActivateAction.key),
         },
         child: Directionality(
           textDirection: TextDirection.ltr,
@@ -78,7 +78,7 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    expect(pressed, kIsWeb ? isFalse : isTrue);
+    expect(pressed, isTrue);
 
     pressed = false;
     await tester.sendKeyEvent(LogicalKeyboardKey.space);

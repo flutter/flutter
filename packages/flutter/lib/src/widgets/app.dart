@@ -4,7 +4,6 @@
 
 import 'dart:async';
 import 'dart:collection' show HashMap;
-import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -170,6 +169,8 @@ class WidgetsApp extends StatefulWidget {
     this.debugShowWidgetInspector = false,
     this.debugShowCheckedModeBanner = true,
     this.inspectorSelectButtonBuilder,
+    this.shortcuts,
+    this.actions,
   }) : assert(navigatorObservers != null),
        assert(routes != null),
        assert(
@@ -682,6 +683,103 @@ class WidgetsApp extends StatefulWidget {
   /// {@endtemplate}
   final bool debugShowCheckedModeBanner;
 
+  /// {@template flutter.widgets.widgetsApp.shortcuts}
+  /// The default map of keyboard shortcuts to intents for the application.
+  ///
+  /// By default, this is set to [WidgetsApp.defaultShortcuts].
+  /// {@endtemplate}
+  ///
+  /// {@tool sample}
+  /// This example shows how to add a single shortcut for
+  /// [LogicalKeyboardKey.select] to the default shortcuts without needing to
+  /// add your own [Shortcuts] widget.
+  ///
+  /// Alternatively, you could insert a [Shortcuts] widget with just the mapping
+  /// you want to add between the [WidgetsApp] and its child and get the same
+  /// effect.
+  ///
+  /// ```dart
+  /// Widget build(BuildContext context) {
+  ///   return WidgetsApp(
+  ///     shortcuts: <LogicalKeySet, Intent>{
+  ///       ... WidgetsApp.defaultShortcuts,
+  ///       LogicalKeySet(LogicalKeyboardKey.select): const Intent(ActivateAction.key),
+  ///     },
+  ///     color: const Color(0xFFFF0000),
+  ///     builder: (BuildContext context, Widget child) {
+  ///       return const Placeholder();
+  ///     },
+  ///   );
+  /// }
+  /// ```
+  /// {@end-tool}
+  ///
+  /// {@template flutter.widgets.widgetsApp.shortcuts.seeAlso}
+  /// See also:
+  ///
+  ///  * [LogicalKeySet], a set of [LogicalKeyboardKey]s that make up the keys
+  ///    for this map.
+  ///  * The [Shortcuts] widget, which defines a keyboard mapping.
+  ///  * The [Actions] widget, which defines the mapping from intent to action.
+  ///  * The [Intent] and [Action] classes, which allow definition of new
+  ///    actions.
+  /// {@endtemplate}
+  final Map<LogicalKeySet, Intent> shortcuts;
+
+  /// {@template flutter.widgets.widgetsApp.actions}
+  /// The default map of intent keys to actions for the application.
+  ///
+  /// By default, this is the output of [WidgetsApp.defaultActions], called with
+  /// [defaultTargetPlatform]. Specifying [actions] for an app overrides the
+  /// default, so if you wish to modify the default [actions], you can call
+  /// [WidgetsApp.defaultActions] and modify the resulting map, passing it as
+  /// the [actions] for this app. You may also add to the bindings, or override
+  /// specific bindings for a widget subtree, by adding your own [Actions]
+  /// widget.
+  /// {@endtemplate}
+  ///
+  /// {@tool sample}
+  /// This example shows how to add a single action handling an
+  /// [ActivateAction] to the default actions without needing to
+  /// add your own [Actions] widget.
+  ///
+  /// Alternatively, you could insert a [Actions] widget with just the mapping
+  /// you want to add between the [WidgetsApp] and its child and get the same
+  /// effect.
+  ///
+  /// ```dart
+  /// Widget build(BuildContext context) {
+  ///   return WidgetsApp(
+  ///     actions: <LocalKey, ActionFactory>{
+  ///       ... WidgetsApp.defaultActions,
+  ///       ActivateAction.key: () => CallbackAction(
+  ///         ActivateAction.key,
+  ///         onInvoke: (FocusNode focusNode, Intent intent) {
+  ///           // Do something here...
+  ///         },
+  ///       ),
+  ///     },
+  ///     color: const Color(0xFFFF0000),
+  ///     builder: (BuildContext context, Widget child) {
+  ///       return const Placeholder();
+  ///     },
+  ///   );
+  /// }
+  /// ```
+  /// {@end-tool}
+  ///
+  /// {@template flutter.widgets.widgetsApp.actions.seeAlso}
+  /// See also:
+  ///
+  ///  * The [shortcuts] parameter, which defines the default set of shortcuts
+  ///    for the application.
+  ///  * The [Shortcuts] widget, which defines a keyboard mapping.
+  ///  * The [Actions] widget, which defines the mapping from intent to action.
+  ///  * The [Intent] and [Action] classes, which allow definition of new
+  ///    actions.
+  /// {@endtemplate}
+  final Map<LocalKey, ActionFactory> actions;
+
   /// If true, forces the performance overlay to be visible in all instances.
   ///
   /// Used by the `showPerformanceOverlay` observatory extension.
@@ -704,6 +802,101 @@ class WidgetsApp extends StatefulWidget {
   /// This is how `flutter run` turns off the banner when you take a screen shot
   /// with "s".
   static bool debugAllowBannerOverride = true;
+
+  static final Map<LogicalKeySet, Intent> _defaultShortcuts = <LogicalKeySet, Intent>{
+    // Activation
+    LogicalKeySet(LogicalKeyboardKey.enter): const Intent(ActivateAction.key),
+    LogicalKeySet(LogicalKeyboardKey.space): const Intent(ActivateAction.key),
+
+    // Keyboard traversal.
+    LogicalKeySet(LogicalKeyboardKey.tab): const Intent(NextFocusAction.key),
+    LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.tab): const Intent(PreviousFocusAction.key),
+    LogicalKeySet(LogicalKeyboardKey.arrowLeft): const DirectionalFocusIntent(TraversalDirection.left),
+    LogicalKeySet(LogicalKeyboardKey.arrowRight): const DirectionalFocusIntent(TraversalDirection.right),
+    LogicalKeySet(LogicalKeyboardKey.arrowDown): const DirectionalFocusIntent(TraversalDirection.down),
+    LogicalKeySet(LogicalKeyboardKey.arrowUp): const DirectionalFocusIntent(TraversalDirection.up),
+
+    // Scrolling
+    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.arrowUp): const ScrollIntent(direction: AxisDirection.up),
+    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.arrowDown): const ScrollIntent(direction: AxisDirection.down),
+    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.arrowLeft): const ScrollIntent(direction: AxisDirection.left),
+    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.arrowRight): const ScrollIntent(direction: AxisDirection.right),
+    LogicalKeySet(LogicalKeyboardKey.pageUp): const ScrollIntent(direction: AxisDirection.up, type: ScrollIncrementType.page),
+    LogicalKeySet(LogicalKeyboardKey.pageDown): const ScrollIntent(direction: AxisDirection.down, type: ScrollIncrementType.page),
+  };
+
+  // Default shortcuts for the web platform.
+  static final Map<LogicalKeySet, Intent> _defaultWebShortcuts = <LogicalKeySet, Intent>{
+    // Activation
+    LogicalKeySet(LogicalKeyboardKey.space): const Intent(ActivateAction.key),
+
+    // Keyboard traversal.
+    LogicalKeySet(LogicalKeyboardKey.tab): const Intent(NextFocusAction.key),
+    LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.tab): const Intent(PreviousFocusAction.key),
+
+    // Scrolling
+    LogicalKeySet(LogicalKeyboardKey.arrowUp): const ScrollIntent(direction: AxisDirection.up),
+    LogicalKeySet(LogicalKeyboardKey.arrowDown): const ScrollIntent(direction: AxisDirection.down),
+    LogicalKeySet(LogicalKeyboardKey.arrowLeft): const ScrollIntent(direction: AxisDirection.left),
+    LogicalKeySet(LogicalKeyboardKey.arrowRight): const ScrollIntent(direction: AxisDirection.right),
+    LogicalKeySet(LogicalKeyboardKey.pageUp): const ScrollIntent(direction: AxisDirection.up, type: ScrollIncrementType.page),
+    LogicalKeySet(LogicalKeyboardKey.pageDown): const ScrollIntent(direction: AxisDirection.down, type: ScrollIncrementType.page),
+  };
+
+  // Default shortcuts for the macOS platform.
+  static final Map<LogicalKeySet, Intent> _defaultMacOsShortcuts = <LogicalKeySet, Intent>{
+    // Activation
+    LogicalKeySet(LogicalKeyboardKey.enter): const Intent(ActivateAction.key),
+    LogicalKeySet(LogicalKeyboardKey.space): const Intent(ActivateAction.key),
+
+    // Keyboard traversal
+    LogicalKeySet(LogicalKeyboardKey.tab): const Intent(NextFocusAction.key),
+    LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.tab): const Intent(PreviousFocusAction.key),
+    LogicalKeySet(LogicalKeyboardKey.arrowLeft): const DirectionalFocusIntent(TraversalDirection.left),
+    LogicalKeySet(LogicalKeyboardKey.arrowRight): const DirectionalFocusIntent(TraversalDirection.right),
+    LogicalKeySet(LogicalKeyboardKey.arrowDown): const DirectionalFocusIntent(TraversalDirection.down),
+    LogicalKeySet(LogicalKeyboardKey.arrowUp): const DirectionalFocusIntent(TraversalDirection.up),
+
+    // Scrolling
+    LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.arrowUp): const ScrollIntent(direction: AxisDirection.up),
+    LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.arrowDown): const ScrollIntent(direction: AxisDirection.down),
+    LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.arrowLeft): const ScrollIntent(direction: AxisDirection.left),
+    LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.arrowRight): const ScrollIntent(direction: AxisDirection.right),
+    LogicalKeySet(LogicalKeyboardKey.pageUp): const ScrollIntent(direction: AxisDirection.up, type: ScrollIncrementType.page),
+    LogicalKeySet(LogicalKeyboardKey.pageDown): const ScrollIntent(direction: AxisDirection.down, type: ScrollIncrementType.page),
+  };
+
+  /// Generates the default shortcut key bindings based on the
+  /// [defaultTargetPlatform].
+  ///
+  /// Used by [WidgetsApp] to assign a default value to [WidgetsApp.shortcuts].
+  static Map<LogicalKeySet, Intent> get defaultShortcuts {
+    if (kIsWeb) {
+      return _defaultWebShortcuts;
+    }
+
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        return _defaultShortcuts;
+      case TargetPlatform.macOS:
+        return _defaultMacOsShortcuts;
+      case TargetPlatform.iOS:
+        // No keyboard support on iOS yet.
+        break;
+    }
+    return <LogicalKeySet, Intent>{};
+  }
+
+  /// The default value of [WidgetsApp.actions].
+  static final Map<LocalKey, ActionFactory> defaultActions = <LocalKey, ActionFactory>{
+    DoNothingAction.key: () => const DoNothingAction(),
+    RequestFocusAction.key: () => RequestFocusAction(),
+    NextFocusAction.key: () => NextFocusAction(),
+    PreviousFocusAction.key: () => PreviousFocusAction(),
+    DirectionalFocusAction.key: () => DirectionalFocusAction(),
+    ScrollAction.key: () => ScrollAction(),
+  };
 
   @override
   _WidgetsAppState createState() => _WidgetsAppState();
@@ -817,7 +1010,6 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     navigator.pushNamed(route);
     return true;
   }
-
 
   // LOCALIZATION
 
@@ -1042,60 +1234,6 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     return true;
   }
 
-  final Map<LogicalKeySet, Intent> _keyMap = <LogicalKeySet, Intent>{
-    // Next/previous keyboard traversal.
-    LogicalKeySet(LogicalKeyboardKey.tab): const Intent(NextFocusAction.key),
-    LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.tab): const Intent(PreviousFocusAction.key),
-
-    // Directional keyboard traversal. Not available on web.
-    if (!kIsWeb) ...<LogicalKeySet, Intent>{
-      LogicalKeySet(LogicalKeyboardKey.arrowLeft): const DirectionalFocusIntent(TraversalDirection.left),
-      LogicalKeySet(LogicalKeyboardKey.arrowRight): const DirectionalFocusIntent(TraversalDirection.right),
-      LogicalKeySet(LogicalKeyboardKey.arrowDown): const DirectionalFocusIntent(TraversalDirection.down),
-      LogicalKeySet(LogicalKeyboardKey.arrowUp): const DirectionalFocusIntent(TraversalDirection.up)
-    },
-
-    // Keyboard scrolling.
-    // TODO(gspencergoog): Convert all of the Platform.isMacOS checks to be
-    // defaultTargetPlatform == TargetPlatform.macOS, once that exists.
-    // https://github.com/flutter/flutter/issues/31366
-    if (!kIsWeb && !Platform.isMacOS) ...<LogicalKeySet, Intent>{
-      LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.arrowUp): const ScrollIntent(direction: AxisDirection.up),
-      LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.arrowDown): const ScrollIntent(direction: AxisDirection.down),
-      LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.arrowLeft): const ScrollIntent(direction: AxisDirection.left),
-      LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.arrowRight): const ScrollIntent(direction: AxisDirection.right),
-    },
-    if (!kIsWeb && Platform.isMacOS) ...<LogicalKeySet, Intent>{
-      LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.arrowUp): const ScrollIntent(direction: AxisDirection.up),
-      LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.arrowDown): const ScrollIntent(direction: AxisDirection.down),
-      LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.arrowLeft): const ScrollIntent(direction: AxisDirection.left),
-      LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.arrowRight): const ScrollIntent(direction: AxisDirection.right),
-    },
-
-    // Web scrolling.
-    if (kIsWeb) ...<LogicalKeySet, Intent>{
-      LogicalKeySet(LogicalKeyboardKey.arrowUp): const ScrollIntent(direction: AxisDirection.up),
-      LogicalKeySet(LogicalKeyboardKey.arrowDown): const ScrollIntent(direction: AxisDirection.down),
-      LogicalKeySet(LogicalKeyboardKey.arrowLeft): const ScrollIntent(direction: AxisDirection.left),
-      LogicalKeySet(LogicalKeyboardKey.arrowRight): const ScrollIntent(direction: AxisDirection.right),
-    },
-
-    LogicalKeySet(LogicalKeyboardKey.pageUp): const ScrollIntent(direction: AxisDirection.up, type: ScrollIncrementType.page),
-    LogicalKeySet(LogicalKeyboardKey.pageDown): const ScrollIntent(direction: AxisDirection.down, type: ScrollIncrementType.page),
-
-    LogicalKeySet(LogicalKeyboardKey.enter): const Intent(ActivateAction.key),
-    LogicalKeySet(LogicalKeyboardKey.space): const Intent(SelectAction.key),
-  };
-
-  final Map<LocalKey, ActionFactory> _actionMap = <LocalKey, ActionFactory>{
-    DoNothingAction.key: () => const DoNothingAction(),
-    RequestFocusAction.key: () => RequestFocusAction(),
-    NextFocusAction.key: () => NextFocusAction(),
-    PreviousFocusAction.key: () => PreviousFocusAction(),
-    DirectionalFocusAction.key: () => DirectionalFocusAction(),
-    ScrollAction.key: () => ScrollAction(),
-  };
-
   @override
   Widget build(BuildContext context) {
     Widget navigator;
@@ -1207,9 +1345,9 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
 
     assert(_debugCheckLocalizations(appLocale));
     return Shortcuts(
-      shortcuts: _keyMap,
+      shortcuts: widget.shortcuts ?? WidgetsApp.defaultShortcuts,
       child: Actions(
-        actions: _actionMap,
+        actions: widget.actions ?? WidgetsApp.defaultActions,
         child: DefaultFocusTraversal(
           policy: ReadingOrderTraversalPolicy(),
           child: _MediaQueryFromWindow(

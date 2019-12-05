@@ -738,8 +738,7 @@ abstract class ActivateAction extends Action {
 /// An action that selects the currently focused control.
 ///
 /// This is an abstract class that serves as a base class for actions that
-/// select something, like a checkbox or a radio button. By default, it is bound
-/// to [LogicalKeyboardKey.space] in the default keyboard map in [WidgetsApp].
+/// select something. It is not bound to any key by default.
 abstract class SelectAction extends Action {
   /// Creates a [SelectAction] with a fixed [key];
   const SelectAction() : super(key);
