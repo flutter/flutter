@@ -265,7 +265,7 @@ class SlideTransition extends AnimatedWidget {
   /// If the current value of the position animation is `(dx, dy)`, the child
   /// will be translated horizontally by `width * dx` and vertically by
   /// `height * dy`, after applying the [textDirection] if available.
-  Animation<Offset> get position => listenable;
+  Animation<Offset> get position => listenable as Animation<Offset>;
 
   /// The direction to use for the x offset described by the [position].
   ///
@@ -337,7 +337,7 @@ class ScaleTransition extends AnimatedWidget {
   ///
   /// If the current value of the scale animation is v, the child will be
   /// painted v times its normal size.
-  Animation<double> get scale => listenable;
+  Animation<double> get scale => listenable as Animation<double>;
 
   /// The alignment of the origin of the coordinate system in which the scale
   /// takes place, relative to the size of the box.
@@ -391,7 +391,7 @@ class RotationTransition extends AnimatedWidget {
   ///
   /// If the current value of the turns animation is v, the child will be
   /// rotated v * 2 * pi radians before being painted.
-  Animation<double> get turns => listenable;
+  Animation<double> get turns => listenable as Animation<double>;
 
   /// The alignment of the origin of the coordinate system around which the
   /// rotation occurs, relative to the size of the box.
@@ -473,7 +473,7 @@ class SizeTransition extends AnimatedWidget {
   ///
   /// If the value of [sizeFactor] is less than one, the child will be clipped
   /// in the appropriate axis.
-  Animation<double> get sizeFactor => listenable;
+  Animation<double> get sizeFactor => listenable as Animation<double>;
 
   /// Describes how to align the child along the axis that [sizeFactor] is
   /// modifying.
@@ -635,7 +635,7 @@ class PositionedTransition extends AnimatedWidget {
        super(key: key, listenable: rect);
 
   /// The animation that controls the child's size and position.
-  Animation<RelativeRect> get rect => listenable;
+  Animation<RelativeRect> get rect => listenable as Animation<RelativeRect>;
 
   /// The widget below this widget in the tree.
   ///
@@ -692,7 +692,7 @@ class RelativePositionedTransition extends AnimatedWidget {
   /// The animation that controls the child's size and position.
   ///
   /// See also [size].
-  Animation<Rect> get rect => listenable;
+  Animation<Rect> get rect => listenable as Animation<Rect>;
 
   /// The [Positioned] widget's offsets are relative to a box of this
   /// size whose origin is 0,0.
@@ -806,7 +806,7 @@ class AlignTransition extends AnimatedWidget {
        super(key: key, listenable: alignment);
 
   /// The animation that controls the child's alignment.
-  Animation<AlignmentGeometry> get alignment => listenable;
+  Animation<AlignmentGeometry> get alignment => listenable as Animation<AlignmentGeometry>;
 
   /// If non-null, the child's width factor, see [Align.widthFactor].
   final double widthFactor;
@@ -855,7 +855,7 @@ class DefaultTextStyleTransition extends AnimatedWidget {
        super(key: key, listenable: style);
 
   /// The animation that controls the descendants' text style.
-  Animation<TextStyle> get style => listenable;
+  Animation<TextStyle> get style => listenable as Animation<TextStyle>;
 
   /// How the text should be aligned horizontally.
   final TextAlign textAlign;
