@@ -37,7 +37,6 @@ const List<Target> _kDefaultTargets = <Target>[
   DebugBundleLinuxAssets(),
   WebReleaseBundle(),
   DebugAndroidApplication(),
-  FastStartAndroidApplication(),
   ProfileAndroidApplication(),
   ReleaseAndroidApplication(),
   // These are one-off rules for bundle and aot compat

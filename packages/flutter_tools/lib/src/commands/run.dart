@@ -187,14 +187,6 @@ class RunCommand extends RunCommandBase {
         hide: true,
         help: 'Whether to automatically invoke webOnlyInitializePlatform.',
       )
-      ..addFlag('fast-start',
-        negatable: true,
-        defaultsTo: false,
-        hide: true,
-        help: 'Whether to quickly bootstrap applications with a minimal app. '
-              'Currently this is only supported on Android devices. This option '
-              'cannot be paired with --use-application-binary.'
-      )
       ..addOption(FlutterOptions.kExtraFrontEndOptions, hide: true)
       ..addOption(FlutterOptions.kExtraGenSnapshotOptions, hide: true)
       ..addMultiOption(FlutterOptions.kEnableExperiment,
@@ -292,9 +284,6 @@ class RunCommand extends RunCommandBase {
     if (!runningWithPrebuiltApplication) {
       await super.validateCommand();
     }
-    if (boolArg('fast-start') && runningWithPrebuiltApplication) {
-      throwToolExit('--fast-start is not supported with --use-application-binary');
-    }
     if (deviceManager.hasSpecifiedAllDevices && runningWithPrebuiltApplication) {
       throwToolExit('Using -d all with --use-application-binary is not supported');
     }
@@ -329,9 +318,6 @@ class RunCommand extends RunCommandBase {
         hostname: featureFlags.isWebEnabled ? stringArg('web-hostname') : '',
         port: featureFlags.isWebEnabled ? stringArg('web-port') : '',
         vmserviceOutFile: stringArg('vmservice-out-file'),
-        // Allow forcing fast-start to off to prevent doing more work on devices that
-        // don't support it.
-        fastStart: boolArg('fast-start') && devices.every((Device device) => device.supportsFastStart),
       );
     }
   }
@@ -399,12 +385,6 @@ class RunCommand extends RunCommandBase {
     }
 
     for (Device device in devices) {
-      if (!device.supportsFastStart && boolArg('fast-start')) {
-        printStatus(
-          'Using --fast-start option with device ${device.name}, but this device '
-          'does not support it. Overriding the setting to false.'
-        );
-      }
       if (await device.isLocalEmulator) {
         if (await device.supportsHardwareRendering) {
           final bool enableSoftwareRendering = boolArg('enable-software-rendering') == true;
