@@ -256,18 +256,17 @@ class _SemanticsDebuggerPainter extends CustomPainter {
 
     if (data.hasFlag(SemanticsFlag.hasCheckedState)) {
       annotations.add(data.hasFlag(SemanticsFlag.isChecked) ? 'checked' : 'unchecked');
-      if (!data.hasAction(SemanticsAction.tap)) {
-        annotations.add('disabled');
-      }
     } else if (data.hasFlag(SemanticsFlag.isButton)) {
       annotations.add('button');
-      if (!data.hasAction(SemanticsAction.tap)) {
-        annotations.add('disabled');
-      }
     } else if (data.hasFlag(SemanticsFlag.isTextField)) {
       annotations.add('textfield');
     } else if (data.hasAction(SemanticsAction.tap)) {
       annotations.add('tappable');
+    }
+
+    if (data.hasFlag(SemanticsFlag.hasEnabledState) &&
+        !data.hasFlag(SemanticsFlag.isEnabled)) {
+      annotations.add('disabled');
     }
 
     if (data.hasAction(SemanticsAction.longPress))
