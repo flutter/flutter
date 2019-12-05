@@ -114,10 +114,8 @@ class LocaleInfo implements Comparable<LocaleInfo> {
 
   @override
   bool operator ==(Object other) {
-    if (!(other is LocaleInfo))
-      return false;
-    final LocaleInfo otherLocale = other;
-    return originalString == otherLocale.originalString;
+    return other is LocaleInfo
+        && other.originalString == originalString;
   }
 
   @override
@@ -167,13 +165,13 @@ void loadMatchingArbsIntoBundleMaps({
       void populateResources(LocaleInfo locale, File file) {
         final Map<String, String> resources = localeToResources[locale];
         final Map<String, dynamic> attributes = localeToResourceAttributes[locale];
-        final Map<String, dynamic> bundle = json.decode(file.readAsStringSync());
+        final Map<String, dynamic> bundle = json.decode(file.readAsStringSync()) as Map<String, dynamic>;
         for (String key in bundle.keys) {
           // The ARB file resource "attributes" for foo are called @foo.
           if (key.startsWith('@'))
             attributes[key.substring(1)] = bundle[key];
           else
-            resources[key] = bundle[key];
+            resources[key] = bundle[key] as String;
         }
       }
       // Only pre-assume scriptCode if there is a country or script code to assume off of.
@@ -247,9 +245,9 @@ GeneratorOptions parseArgs(List<String> rawArgs) {
       defaultsTo: false,
     );
   final argslib.ArgResults args = argParser.parse(rawArgs);
-  final bool writeToFile = args['overwrite'];
-  final bool materialOnly = args['material'];
-  final bool cupertinoOnly = args['cupertino'];
+  final bool writeToFile = args['overwrite'] as bool;
+  final bool materialOnly = args['material'] as bool;
+  final bool cupertinoOnly = args['cupertino'] as bool;
 
   return GeneratorOptions(writeToFile: writeToFile, materialOnly: materialOnly, cupertinoOnly: cupertinoOnly);
 }

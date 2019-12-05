@@ -81,15 +81,15 @@ void main() {
       // validate the fields
       // {number: 8, startTime: 0, elapsed: 1437, build: 600, raster: 800}
       expect(event.data['number'] is int);
-      expect(event.data['number'] >= 0);
+      expect((event.data['number'] as int) >= 0);
       expect(event.data['startTime'] is int);
-      expect(event.data['startTime'] >= 0);
+      expect((event.data['startTime'] as int) >= 0);
       expect(event.data['elapsed'] is int);
-      expect(event.data['elapsed'] >= 0);
+      expect((event.data['elapsed'] as int) >= 0);
       expect(event.data['build'] is int);
-      expect(event.data['build'] >= 0);
+      expect((event.data['build'] as int) >= 0);
       expect(event.data['raster'] is int);
-      expect(event.data['raster'] >= 0);
+      expect((event.data['raster'] as int) >= 0);
 
       final Future<VMExtensionEvent> navigationFuture = navigationEvents.first;
       // This tap triggers a navigation event.
@@ -98,10 +98,10 @@ void main() {
       final VMExtensionEvent navigationEvent = await navigationFuture;
       // validate the fields
       expect(navigationEvent.data['route'] is Map<dynamic, dynamic>);
-      final Map<dynamic, dynamic> route = navigationEvent.data['route'];
+      final Map<dynamic, dynamic> route = navigationEvent.data['route'] as Map<dynamic, dynamic>;
       expect(route['description'] is String);
       expect(route['settings'] is Map<dynamic, dynamic>);
-      final Map<dynamic, dynamic> settings = route['settings'];
+      final Map<dynamic, dynamic> settings = route['settings'] as Map<dynamic, dynamic>;
       expect(settings.containsKey('name'));
       expect(settings['isInitialRoute'] is bool);
 
