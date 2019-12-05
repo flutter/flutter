@@ -479,7 +479,7 @@ void main() {
                 visualDensity: visualDensity,
                 key: key,
                 onPressed: () {},
-                icon: Icon(Icons.play_arrow),
+                icon: const Icon(Icons.play_arrow),
               ),
             ),
           ),
