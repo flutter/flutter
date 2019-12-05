@@ -38,8 +38,11 @@ class LayerTestBase : public CanvasTestBase<BaseT> {
             mutators_stack_, TestT::mock_canvas().imageInfo().colorSpace(),
             kGiantRect, /* cull_rect */
             raster_time_, ui_time_, texture_registry_,
-            false, /* checkerboard_offscreen_layers */
-            0.0f   /* total_elevation */
+            false,  /* checkerboard_offscreen_layers */
+            100.0f, /* frame_physical_depth */
+            1.0f,   /* frame_device_pixel_ratio */
+            0.0f,   /* total_elevation */
+            false,  /* has_platform_view */
         }),
         paint_context_({
             TestT::mock_canvas().internal_canvas(), /* internal_nodes_canvas */
@@ -49,6 +52,8 @@ class LayerTestBase : public CanvasTestBase<BaseT> {
             raster_time_, ui_time_, texture_registry_,
             nullptr, /* raster_cache */
             false,   /* checkerboard_offscreen_layers */
+            100.0f,  /* frame_physical_depth */
+            1.0f,    /* frame_device_pixel_ratio */
         }) {}
 
   TextureRegistry& texture_regitry() { return texture_registry_; }

@@ -5,20 +5,28 @@
 #ifndef FLUTTER_FLOW_LAYERS_PHYSICAL_SHAPE_LAYER_H_
 #define FLUTTER_FLOW_LAYERS_PHYSICAL_SHAPE_LAYER_H_
 
-#include "flutter/flow/layers/container_layer.h"
+#include "flutter/flow/layers/elevated_container_layer.h"
 
 namespace flutter {
 
-class PhysicalShapeLayer : public ContainerLayer {
+class PhysicalShapeLayerBase : public ElevatedContainerLayer {
  public:
-  PhysicalShapeLayer(SkColor color,
-                     SkColor shadow_color,
-                     SkScalar device_pixel_ratio,
-                     float viewport_depth,
-                     float elevation,
-                     const SkPath& path,
-                     Clip clip_behavior);
+  static bool can_system_composite() { return false; }
 
+  PhysicalShapeLayerBase(SkColor color, SkAlpha opacity, float elevation)
+      : ElevatedContainerLayer(elevation), color_(color) {}
+
+  void set_dimensions(SkRRect rrect) {}
+
+  SkColor color() const { return color_; }
+  SkAlpha opacity() const { return SK_AlphaOPAQUE; }
+
+ private:
+  SkColor color_;
+};
+
+class PhysicalShapeLayer : public PhysicalShapeLayerBase {
+ public:
   static SkRect ComputeShadowBounds(const SkRect& bounds,
                                     float elevation,
                                     float pixel_ratio);
@@ -29,25 +37,17 @@ class PhysicalShapeLayer : public ContainerLayer {
                          bool transparentOccluder,
                          SkScalar dpr);
 
-  void Preroll(PrerollContext* context, const SkMatrix& matrix) override;
+  PhysicalShapeLayer(SkColor color,
+                     SkColor shadow_color,
+                     float elevation,
+                     const SkPath& path,
+                     Clip clip_behavior);
 
+  void Preroll(PrerollContext* context, const SkMatrix& matrix) override;
   void Paint(PaintContext& context) const override;
 
-#if defined(OS_FUCHSIA)
-  void UpdateScene(SceneUpdateContext& context) override;
-#endif  // defined(OS_FUCHSIA)
-
-  float total_elevation() const { return total_elevation_; }
-
  private:
-  SkColor color_;
   SkColor shadow_color_;
-  SkScalar device_pixel_ratio_;
-#if defined(OS_FUCHSIA)
-  float viewport_depth_ = 0.0f;
-#endif
-  float elevation_ = 0.0f;
-  float total_elevation_ = 0.0f;
   SkPath path_;
   bool isRect_;
   SkRRect frameRRect_;

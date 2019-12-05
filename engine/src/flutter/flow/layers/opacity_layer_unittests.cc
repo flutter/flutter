@@ -20,7 +20,7 @@ TEST_F(OpacityLayerTest, LeafLayer) {
       std::make_shared<OpacityLayer>(SK_AlphaOPAQUE, SkPoint::Make(0.0f, 0.0f));
 
   EXPECT_DEATH_IF_SUPPORTED(layer->Preroll(preroll_context(), SkMatrix()),
-                            "layers\\(\\)\\.size\\(\\) > 0");
+                            "\\!container->layers\\(\\)\\.empty\\(\\)");
 }
 
 TEST_F(OpacityLayerTest, PaintingEmptyLayerDies) {

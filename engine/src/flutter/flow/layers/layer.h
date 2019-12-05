@@ -42,8 +42,6 @@ static constexpr SkRect kGiantRect = SkRect::MakeLTRB(-1E9F, -1E9F, 1E9F, 1E9F);
 // This should be an exact copy of the Clip enum in painting.dart.
 enum Clip { none, hardEdge, antiAlias, antiAliasWithSaveLayer };
 
-class ContainerLayer;
-
 struct PrerollContext {
   RasterCache* raster_cache;
   GrContext* gr_context;
@@ -52,13 +50,21 @@ struct PrerollContext {
   SkColorSpace* dst_color_space;
   SkRect cull_rect;
 
-  // The following allows us to paint in the end of subtree preroll
+  // These allow us to paint in the end of subtree Preroll.
   const Stopwatch& raster_time;
   const Stopwatch& ui_time;
   TextureRegistry& texture_registry;
   const bool checkerboard_offscreen_layers;
+
+  // These allow us to make use of the scene metrics during Preroll.
+  float frame_physical_depth;
+  float frame_device_pixel_ratio;
+
+  // These allow us to track properties like elevation, opacity, and the
+  // prescence of a platform view during Preroll.
   float total_elevation = 0.0f;
   bool has_platform_view = false;
+  bool is_opaque = true;
 };
 
 // Represents a single composited layer. Created on the UI thread but then
@@ -90,6 +96,10 @@ class Layer {
     TextureRegistry& texture_registry;
     const RasterCache* raster_cache;
     const bool checkerboard_offscreen_layers;
+
+    // These allow us to make use of the scene metrics during Paint.
+    float frame_physical_depth;
+    float frame_device_pixel_ratio;
   };
 
   // Calls SkCanvas::saveLayer and restores the layer upon destruction. Also
@@ -126,10 +136,6 @@ class Layer {
   virtual void UpdateScene(SceneUpdateContext& context);
 #endif
 
-  ContainerLayer* parent() const { return parent_; }
-
-  void set_parent(ContainerLayer* parent) { parent_ = parent; }
-
   bool needs_system_composite() const { return needs_system_composite_; }
   void set_needs_system_composite(bool value) {
     needs_system_composite_ = value;
@@ -148,10 +154,9 @@ class Layer {
   uint64_t unique_id() const { return unique_id_; }
 
  private:
-  ContainerLayer* parent_;
-  bool needs_system_composite_;
   SkRect paint_bounds_;
   uint64_t unique_id_;
+  bool needs_system_composite_;
 
   static uint64_t NextUniqueID();
 

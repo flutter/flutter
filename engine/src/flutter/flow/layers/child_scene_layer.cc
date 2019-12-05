@@ -20,10 +20,25 @@ ChildSceneLayer::ChildSceneLayer(zx_koid_t layer_id,
 void ChildSceneLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
   TRACE_EVENT0("flutter", "ChildSceneLayer::Preroll");
   set_needs_system_composite(true);
+
+  // An alpha "hole punch" is required if the frame behind us is not opaque.
+  if (!context->is_opaque) {
+    set_paint_bounds(
+        SkRect::MakeXYWH(offset_.fX, offset_.fY, size_.fWidth, size_.fHeight));
+  }
 }
 
 void ChildSceneLayer::Paint(PaintContext& context) const {
-  FML_NOTREACHED() << "This layer never needs painting.";
+  TRACE_EVENT0("flutter", "ChildSceneLayer::Paint");
+  FML_DCHECK(needs_painting());
+
+  // If we are being rendered into our own frame using the system compositor,
+  // then it is neccesary to "punch a hole" in the canvas/frame behind us so
+  // that group opacity looks correct.
+  SkPaint paint;
+  paint.setColor(SK_ColorTRANSPARENT);
+  paint.setBlendMode(SkBlendMode::kSrc);
+  context.leaf_nodes_canvas->drawRect(paint_bounds(), paint);
 }
 
 void ChildSceneLayer::UpdateScene(SceneUpdateContext& context) {
