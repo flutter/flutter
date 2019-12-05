@@ -49,17 +49,19 @@ class Firefox extends Browser {
       var args = [
         url.toString(),
         if (!debug) '--headless',
-        '-width $kMaxScreenshotWidth'
+        '-width $kMaxScreenshotWidth',
         '-height $kMaxScreenshotHeight',
         '-new-window',
         '-new-instance',
+        '-prefs { "dom.disable_beforeunload" = true, "toolkit.startup.max_resumed_crashes"=999999 } ',
         '--start-debugger-server $kDevtoolsPort',
       ];
 
-      final Process process = await Process.start(installation.executable, args);
+      final Process process =
+          await Process.start(installation.executable, args);
 
-      remoteDebuggerCompleter.complete(getRemoteDebuggerUrl(
-          Uri.parse('http://localhost:$kDevtoolsPort')));
+      remoteDebuggerCompleter.complete(
+          getRemoteDebuggerUrl(Uri.parse('http://localhost:$kDevtoolsPort')));
 
       unawaited(process.exitCode
           .then((_) => Directory(dir).deleteSync(recursive: true)));

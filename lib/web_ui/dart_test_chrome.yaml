@@ -1,11 +1,11 @@
-# Sources of inspiration for this file:
+# For more information on test and runner configurations:
 #
-# * https://github.com/dart-lang/angular/blob/master/dev/tool/test/dart_test_repo.yaml
-# * https://github.com/dart-lang/angular/blob/master/_tests/dart_test.yaml
+# * https://github.com/dart-lang/test/blob/master/pkgs/test/doc/configuration.md#platforms
 
 platforms:
   - chrome
   - vm
+
 presets:
   cirrus:
     override_platforms:
