@@ -530,37 +530,6 @@ class _MyHomePageState extends State<MyHomePage> {
           }),
         ),
       ),
-      _ControlTile(
-        label: _model.rtl ? 'زر الراديو' : 'Radio Button',
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: List<Widget>.generate(4, (int index) {
-            return Radio<int>(
-              onChanged: _model.enable
-                  ? (int value) {
-                      setState(() {
-                        radioValue = value;
-                      });
-                    }
-                  : null,
-              groupValue: radioValue,
-              value: index,
-            );
-          }),
-        ),
-      ),
-      _ControlTile(
-        label: _model.rtl ? 'زر الأيقونة' : 'Icon Button',
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: List<Widget>.generate(iconValues.length, (int index) {
-            return IconButton(
-              onPressed: _model.enable ? () {} : null,
-              icon: Icon(iconValues[index]),
-            );
-          }),
-        ),
-      ),
     ];
 
     return SafeArea(

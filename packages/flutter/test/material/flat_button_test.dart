@@ -693,6 +693,7 @@ void main() {
 
   testWidgets('FlatButton responds to density changes.', (WidgetTester tester) async {
     const Key key = Key('test');
+    const Key childKey = Key('test child');
 
     Future<void> buildTest(VisualDensity visualDensity, {bool useText = false}) async {
       return await tester.pumpWidget(
@@ -704,7 +705,7 @@ void main() {
                 visualDensity: visualDensity,
                 key: key,
                 onPressed: () {},
-                child: useText ? const Text('Text') : Container(width: 100, height: 100, color: const Color(0xffff0000)),
+                child: useText ? const Text('Text', key: childKey) : Container(key: childKey, width: 100, height: 100, color: const Color(0xffff0000)),
               ),
             ),
           ),
@@ -714,28 +715,40 @@ void main() {
 
     await buildTest(const VisualDensity());
     final RenderBox box = tester.renderObject(find.byKey(key));
+    Rect childRect = tester.getRect(find.byKey(childKey));
     await tester.pumpAndSettle();
     expect(box.size, equals(const Size(132, 100)));
+    expect(childRect, equals(const Rect.fromLTRB(350, 250, 450, 350)));
 
     await buildTest(const VisualDensity(horizontal: 3.0, vertical: 3.0));
     await tester.pumpAndSettle();
+    childRect = tester.getRect(find.byKey(childKey));
     expect(box.size, equals(const Size(156, 124)));
+    expect(childRect, equals(const Rect.fromLTRB(350, 250, 450, 350)));
 
     await buildTest(const VisualDensity(horizontal: -3.0, vertical: -3.0));
     await tester.pumpAndSettle();
+    childRect = tester.getRect(find.byKey(childKey));
     expect(box.size, equals(const Size(108, 100)));
+    expect(childRect, equals(const Rect.fromLTRB(350, 250, 450, 350)));
 
     await buildTest(const VisualDensity(), useText: true);
     await tester.pumpAndSettle();
+    childRect = tester.getRect(find.byKey(childKey));
     expect(box.size, equals(const Size(88, 48)));
+    expect(childRect, equals(const Rect.fromLTRB(372.0, 293.0, 428.0, 307.0)));
 
     await buildTest(const VisualDensity(horizontal: 3.0, vertical: 3.0), useText: true);
     await tester.pumpAndSettle();
+    childRect = tester.getRect(find.byKey(childKey));
     expect(box.size, equals(const Size(112, 60)));
+    expect(childRect, equals(const Rect.fromLTRB(372.0, 293.0, 428.0, 307.0)));
 
     await buildTest(const VisualDensity(horizontal: -3.0, vertical: -3.0), useText: true);
     await tester.pumpAndSettle();
+    childRect = tester.getRect(find.byKey(childKey));
     expect(box.size, equals(const Size(76, 36)));
+    expect(childRect, equals(const Rect.fromLTRB(372.0, 293.0, 428.0, 307.0)));
   });
 }
 
