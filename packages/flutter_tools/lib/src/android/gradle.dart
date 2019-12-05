@@ -331,9 +331,6 @@ Future<void> buildGradleApp({
     // Don't use settings.gradle from the current project since it includes the plugins as subprojects.
     command.add('--settings-file=settings_aar.gradle');
   }
-  if (androidBuildInfo.fastStart) {
-    command.add('-Pfast-start=true');
-  }
   command.add(assembleTask);
 
   GradleHandledError detectedGradleError;
