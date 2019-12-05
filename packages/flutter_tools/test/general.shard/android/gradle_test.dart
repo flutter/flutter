@@ -1025,6 +1025,7 @@ plugin2=${plugin2.path}
         FlutterProject.fromPath(androidDirectory.path),
         const AndroidBuildInfo(BuildInfo.release),
         buildDirectory: buildDirectory,
+        buildNumber: '1.0'
       );
 
       final String flutterRoot = fs.path.absolute(Cache.flutterRoot);
