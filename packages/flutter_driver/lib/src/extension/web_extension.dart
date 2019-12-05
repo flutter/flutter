@@ -4,9 +4,9 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:html' as html;    // ignore: uri_does_not_exist
-import 'dart:js';      // ignore: uri_does_not_exist
-import 'dart:js_util' as js_util; // ignore: uri_does_not_exist
+import 'dart:html' as html;
+import 'dart:js';
+import 'dart:js_util' as js_util;
 
 /// Registers Web Service Extension for Flutter Web application.
 ///

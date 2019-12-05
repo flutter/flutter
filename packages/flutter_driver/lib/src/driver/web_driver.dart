@@ -85,6 +85,11 @@ class WebFlutterDriver extends FlutterDriver {
   }
 
   @override
+  Future<void> waitUntilFirstFrameRasterized() async {
+    throw UnimplementedError();
+  }
+
+  @override
   Future<List<int>> screenshot() async {
     await Future<void>.delayed(const Duration(seconds: 2));
 
@@ -192,7 +197,7 @@ class FlutterWebConnection {
     // Wait until extension is installed.
     await waitFor<void>(() => driver.execute('return typeof(window.\$flutterDriver)', <String>[]),
         matcher: 'function',
-        timeout: timeout ?? const Duration(minutes: 10));
+        timeout: timeout ?? const Duration(days: 365));
     return FlutterWebConnection._(driver);
   }
 
@@ -209,7 +214,7 @@ class FlutterWebConnection {
       result = await waitFor<dynamic>(() => _driver.execute('r'
           'eturn \$flutterDriverResult', <String>[]),
           matcher: isNotNull,
-          timeout: duration ?? const Duration(seconds: 30));
+          timeout: duration ?? const Duration(days: 30));
     } catch (_) {
       // Returns null if exception thrown.
       return null;
