@@ -8,6 +8,7 @@ import 'browser.dart';
 import 'chrome.dart';
 import 'chrome_installer.dart';
 import 'common.dart';
+import 'environment.dart';
 import 'firefox.dart';
 import 'firefox_installer.dart'; // ignore: implementation_imports
 
@@ -28,6 +29,11 @@ class SupportedBrowsers {
   final Map<String, Runtime> supportedBrowsersToRuntimes = {
     'chrome': Runtime.chrome,
     'firefox': Runtime.firefox
+  };
+
+  final Map<String, String> browserToConfiguration = {
+    'chrome': '--configuration=${environment.webUiRootDir.path}/dart_test_chrome.yaml',
+    'firefox': '--configuration=${environment.webUiRootDir.path}/dart_test_firefox.yaml',
   };
 
   static final SupportedBrowsers _singletonInstance = SupportedBrowsers._();

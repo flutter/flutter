@@ -243,6 +243,7 @@ class TestCommand extends Command<bool> {
       if (isDebug) '--pause-after-load',
       '--platform=$browser',
       '--precompiled=${environment.webUiRootDir.path}/build',
+      SupportedBrowsers.instance.browserToConfiguration[browser],
       '--',
       ...testFiles.map((f) => f.relativeToWebUi).toList(),
     ];
