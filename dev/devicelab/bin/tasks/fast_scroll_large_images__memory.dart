@@ -1,9 +1,6 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-
-/// Measure application memory usage after pausing and resuming the app
-/// with the Android back button.
 
 import 'dart:async';
 
@@ -28,15 +25,12 @@ class FastScrollLargeImagesMemoryTest extends MemoryTest {
   @override
   int get iterationCount => 5;
 
-  /// Perform a series of back button suspend and resume cycles.
   @override
   Future<void> useMemory() async {
     await launchApp();
     await recordStart();
-    for (int iteration = 0; iteration < 4; iteration += 1) {
-      await device.shellExec('input', <String>['swipe', '0 1000 0 0 100']);
-      await Future<void>.delayed(const Duration(milliseconds: 2000));
-    }
+    await device.shellExec('input', <String>['swipe', '0 1500 0 0 50']);
+    await Future<void>.delayed(const Duration(milliseconds: 10000));
     await recordEnd();
   }
 }

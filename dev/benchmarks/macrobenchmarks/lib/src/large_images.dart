@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -18,66 +18,32 @@ class LargeImagesPage extends StatelessWidget {
     return GridView.builder(
       itemCount: 1000,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
-      itemBuilder: (BuildContext context, int index) => DummyImage(500 + index % 500, 1000),
+      itemBuilder: (BuildContext context, int index) => DummyImage(index),
     ).build(context);
   }
 }
 
-class DummyImage extends StatefulWidget {
-  const DummyImage(this.width, this.height);
-
-  final int width;
-  final int height;
-
-  @override
-  State<StatefulWidget> createState() {
-    return DummyImageState();
-  }
-}
-
-class DummyImageState extends State<DummyImage> {
-  static const int kMaxDimension = 1000;
-
-  static final Uint8List pixels = Uint8List.fromList(List<int>.generate(
-    kMaxDimension * kMaxDimension * 4, (int i) => i % 4 < 2 ? 0x00 : 0xFF, // opaque blue
-  ));
-
-  @override
-  void initState() {
-    super.initState();
-    ui.decodeImageFromPixels(
-        pixels,
-        widget.width,
-        widget.height,
-        ui.PixelFormat.rgba8888,
-            (ui.Image image) {
-          _completer.complete(image);
-        }
-    );
-  }
-
-  final Completer<void> _completer = Completer<ui.Image>();
+class DummyImage extends StatelessWidget {
+  DummyImage(this.index) : super(key: ValueKey<int>(index));
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<ui.Image>(
-      future: _completer.future,
-      builder: (BuildContext context, AsyncSnapshot<ui.Image> snapshot) {
-        Widget inner = snapshot.data == null
-            ? Container(
-          width: widget.width.toDouble(),
-          height: widget.height.toDouble(),
-        )
-            : CustomPaint(
-          size: Size(widget.width.toDouble(), widget.height.toDouble()),
-          painter: ImagePainter(snapshot.data),
-        );
-        return Container(
-          padding: const EdgeInsets.all(10),
-          child: ClipRect(child: inner),
-        );
+    final Future<ByteData> pngData = _getPngData(context);
+
+    return FutureBuilder<ByteData>(
+      future: pngData,
+      builder: (BuildContext context, AsyncSnapshot<ByteData> snapshot) {
+        return snapshot.data == null
+            ? Container()
+            : Image.memory(snapshot.data.buffer.asUint8List());
       },
     );
+  }
+
+  final int index;
+
+  Future<ByteData> _getPngData(BuildContext context) async {
+    return DefaultAssetBundle.of(context).load('assets/999x1000.png');
   }
 }
 

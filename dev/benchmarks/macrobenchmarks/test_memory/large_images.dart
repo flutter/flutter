@@ -1,8 +1,6 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-
-// See //dev/devicelab/bin/tasks/flutter_gallery__memory_nav.dart
 
 import 'dart:async';
 
@@ -29,7 +27,7 @@ class LifecycleObserver extends WidgetsBindingObserver {
 }
 
 Future<void> main() async {
-  runApp(MacrobenchmarksApp(initialRoute: kLargeImagesRouteName));
+  runApp(const MacrobenchmarksApp(initialRoute: kLargeImagesRouteName));
   await endOfAnimation();
   await Future<void>.delayed(const Duration(milliseconds: 50));
   debugPrint('==== MEMORY BENCHMARK ==== READY ====');
