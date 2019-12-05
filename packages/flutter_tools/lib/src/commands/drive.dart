@@ -73,11 +73,11 @@ class DriveCommand extends RunCommandBase {
       ..addOption('driver-port',
         defaultsTo: '4444',
         help: 'The port where Webdriver server is launched at. Defaults to 4444.',
-        valueHelp: 'n'
+        valueHelp: '4444'
       )
       ..addFlag('headless',
         defaultsTo: true,
-        help: 'Whether the driver browser is going to be launched in headless mode. Defaults to True.',
+        help: 'Whether the driver browser is going to be launched in headless mode. Defaults to true.',
       )
       ..addOption('browser-name',
         defaultsTo: 'chrome',
