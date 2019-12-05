@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 #import "PlatformViewGoldenTestManager.h"
+#import <XCTest/XCTest.h>
 
 @interface PlatformViewGoldenTestManager ()
 
@@ -31,6 +32,7 @@ NSDictionary* launchArgsMap;
         @"--platform-view-clippath" : @"platform_view_clippath",
         @"--platform-view-transform" : @"platform_view_transform",
         @"--platform-view-opacity" : @"platform_view_opacity",
+        @"--platform-view-rotate" : @"platform_view_rotate",
       };
     });
     _identifier = launchArgsMap[launchArg];

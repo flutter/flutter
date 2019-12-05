@@ -370,10 +370,13 @@ bool FlutterPlatformViewsController::SubmitFrame(GrContext* gr_context,
   for (int64_t view_id : composition_order_) {
     EnsureOverlayInitialized(view_id, gl_context, gr_context);
     auto frame = overlays_[view_id]->surface->AcquireFrame(frame_size_);
-    SkCanvas* canvas = frame->SkiaCanvas();
-    canvas->drawPicture(picture_recorders_[view_id]->finishRecordingAsPicture());
-    canvas->flush();
-    did_submit &= frame->Submit();
+    // If frame is null, AcquireFrame already printed out an error message.
+    if (frame) {
+      SkCanvas* canvas = frame->SkiaCanvas();
+      canvas->drawPicture(picture_recorders_[view_id]->finishRecordingAsPicture());
+      canvas->flush();
+      did_submit &= frame->Submit();
+    }
   }
   picture_recorders_.clear();
   if (composition_order_ == active_composition_order_) {
@@ -398,6 +401,7 @@ bool FlutterPlatformViewsController::SubmitFrame(GrContext* gr_context,
     } else {
       [flutter_view addSubview:platform_view_root];
       [flutter_view addSubview:overlay];
+      overlay.frame = flutter_view.bounds;
     }
 
     active_composition_order_.push_back(view_id);

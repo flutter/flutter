@@ -36,6 +36,7 @@
     @"--platform-view-clippath" : @"platform_view_clippath",
     @"--platform-view-transform" : @"platform_view_transform",
     @"--platform-view-opacity" : @"platform_view_opacity",
+    @"--platform-view-rotate" : @"platform_view_rotate",
   };
   __block NSString* goldenTestName = nil;
   [launchArgsMap
