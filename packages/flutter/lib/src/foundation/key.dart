@@ -19,8 +19,7 @@ import 'package:meta/meta.dart';
 ///
 /// See also:
 ///
-///  * The discussion at [Widget.key] for more information about how widgets use
-///    keys.
+///  * [Widget.key], which discusses how widgets use keys.
 @immutable
 abstract class Key {
   /// Construct a [ValueKey<String>] with the given [String].
@@ -43,8 +42,7 @@ abstract class Key {
 ///
 /// See also:
 ///
-///  * The discussion at [Widget.key] for more information about how widgets use
-///    keys.
+///  * [Widget.key], which discusses how widgets use keys.
 abstract class LocalKey extends Key {
   /// Default constructor, used by subclasses.
   const LocalKey() : super.empty();
@@ -63,8 +61,7 @@ abstract class LocalKey extends Key {
 ///
 /// See also:
 ///
-///  * The discussion at [Widget.key] for more information about how widgets use
-///    keys.
+///  * [Widget.key], which discusses how widgets use keys.
 class ValueKey<T> extends LocalKey {
   /// Creates a key that delegates its [operator==] to the given value.
   const ValueKey(this.value);

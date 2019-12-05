@@ -251,7 +251,7 @@ class Focus extends StatefulWidget {
   ///    its descendants.
   ///  * [FocusTraversalPolicy], a class that can be extended to describe a
   ///    traversal policy.
-  ///    {@endtemplate}
+  /// {@endtemplate}
   final bool canRequestFocus;
 
   /// Returns the [focusNode] of the [Focus] that most tightly encloses the

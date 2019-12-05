@@ -1515,7 +1515,7 @@ abstract class RenderBox extends RenderObject {
   ///
   /// See also:
   ///
-  ///  * Examples in the documentation for [computeMinIntrinsicWidth].
+  ///  * [computeMinIntrinsicWidth], which has usage examples.
   @protected
   double computeMaxIntrinsicWidth(double height) {
     return 0.0;
@@ -1591,7 +1591,7 @@ abstract class RenderBox extends RenderObject {
   ///
   /// See also:
   ///
-  ///  * Examples in the documentation for [computeMinIntrinsicWidth].
+  ///  * [computeMinIntrinsicWidth], which has usage examples.
   @protected
   double computeMinIntrinsicHeight(double width) {
     return 0.0;
@@ -1672,7 +1672,7 @@ abstract class RenderBox extends RenderObject {
   ///
   /// See also:
   ///
-  ///  * Examples in the documentation for [computeMinIntrinsicWidth].
+  ///  * [computeMinIntrinsicWidth], which has usage examples.
   @protected
   double computeMaxIntrinsicHeight(double width) {
     return 0.0;

@@ -513,7 +513,7 @@ final TextTreeConfiguration denseTextConfiguration = TextTreeConfiguration(
 ///    ╚═══════════
 /// ```
 ///
- /// See also:
+/// See also:
 ///
 ///  * [DiagnosticsTreeStyle.transition], uses this style for ASCII art display.
 final TextTreeConfiguration transitionTextConfiguration = TextTreeConfiguration(
