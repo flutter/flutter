@@ -435,7 +435,48 @@ void main() {
     );
   });
 
-  testWidgets('SemanticsDebugger textfield', (WidgetTester tester) async {
+  testWidgets('SemanticsDebugger button message', (WidgetTester tester) async {
+    final UniqueKey button = UniqueKey();
+    final UniqueKey disabledButton = UniqueKey();
+    final UniqueKey debugger = UniqueKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SemanticsDebugger(
+          key: debugger,
+          child: Material(
+            child: Column(
+              children: <Widget>[
+                RaisedButton(
+                  key: button,
+                  onPressed: () {},
+                ),
+                RaisedButton(
+                  key: disabledButton,
+                  onPressed: null,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final dynamic semanticsDebuggerPainter = _getSemanticsDebuggerPainter(debuggerKey: debugger, tester: tester);
+    final RenderObject renderButton = tester.renderObject(find.descendant(of: find.byKey(button), matching: find.byType(Semantics)).first);
+    final RenderObject renderDisabledButton = tester.renderObject(find.descendant(of: find.byKey(disabledButton), matching: find.byType(Semantics)).first);
+
+    expect(
+      semanticsDebuggerPainter.getMessage(renderButton.debugSemantics),
+      'button',
+    );
+    expect(
+      semanticsDebuggerPainter.getMessage(renderDisabledButton.debugSemantics),
+      'button; disabled',
+    );
+  });
+
+  testWidgets('SemanticsDebugger textfield message', (WidgetTester tester) async {
     final UniqueKey textField = UniqueKey();
     final UniqueKey debugger = UniqueKey();
 
@@ -458,6 +499,61 @@ void main() {
     expect(
       semanticsDebuggerPainter.getMessage(renderTextfield.debugSemantics),
       'textfield',
+    );
+  });
+
+  testWidgets('SemanticsDebugger tappable message', (WidgetTester tester) async {
+    final UniqueKey tappable = UniqueKey();
+    final UniqueKey debugger = UniqueKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SemanticsDebugger(
+          key: debugger,
+          child: Material(
+            child: InkWell(
+              key: tappable,
+              onTap: () {},
+              child: const Text('Label'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final dynamic semanticsDebuggerPainter = _getSemanticsDebuggerPainter(debuggerKey: debugger, tester: tester);
+    final RenderObject renderTappable = tester.renderObject(find.descendant(of: find.byKey(tappable), matching: find.byType(Semantics)).first);
+
+    expect(
+      semanticsDebuggerPainter.getMessage(renderTappable.debugSemantics),
+      'Label (tappable)',
+    );
+  });
+
+  testWidgets('SemanticsDebugger header message', (WidgetTester tester) async {
+    final UniqueKey header = UniqueKey();
+    final UniqueKey debugger = UniqueKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SemanticsDebugger(
+          key: debugger,
+          child: Material(
+            child: Semantics(
+              key: header,
+              header: true,
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final dynamic semanticsDebuggerPainter = _getSemanticsDebuggerPainter(debuggerKey: debugger, tester: tester);
+    final RenderObject renderHeader = tester.renderObject(find.byType(Semantics).last);
+
+    expect(
+      semanticsDebuggerPainter.getMessage(renderHeader.debugSemantics),
+      'header',
     );
   });
 

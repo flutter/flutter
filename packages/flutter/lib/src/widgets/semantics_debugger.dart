@@ -250,22 +250,24 @@ class _SemanticsDebuggerPainter extends CustomPainter {
     final SemanticsData data = node.getSemanticsData();
     final List<String> annotations = <String>[];
 
-    bool wantsTap = false;
-    if (data.hasFlag(SemanticsFlag.hasCheckedState)) {
-      annotations.add(data.hasFlag(SemanticsFlag.isChecked) ? 'checked' : 'unchecked');
-      wantsTap = true;
-    }
-    if (data.hasFlag(SemanticsFlag.isTextField)) {
-      annotations.add('textfield');
-      wantsTap = true;
+    if (data.hasFlag(SemanticsFlag.isHeader)) {
+      annotations.add('header');
     }
 
-    if (data.hasAction(SemanticsAction.tap)) {
-      if (!wantsTap)
-        annotations.add('button');
-    } else {
-      if (wantsTap)
+    if (data.hasFlag(SemanticsFlag.hasCheckedState)) {
+      annotations.add(data.hasFlag(SemanticsFlag.isChecked) ? 'checked' : 'unchecked');
+      if (!data.hasAction(SemanticsAction.tap)) {
         annotations.add('disabled');
+      }
+    } else if (data.hasFlag(SemanticsFlag.isButton)) {
+      annotations.add('button');
+      if (!data.hasAction(SemanticsAction.tap)) {
+        annotations.add('disabled');
+      }
+    } else if (data.hasFlag(SemanticsFlag.isTextField)) {
+      annotations.add('textfield');
+    } else if (data.hasAction(SemanticsAction.tap)) {
+      annotations.add('tappable');
     }
 
     if (data.hasAction(SemanticsAction.longPress))
