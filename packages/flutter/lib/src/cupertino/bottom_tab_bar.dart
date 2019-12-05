@@ -218,7 +218,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Size get preferredSize => _isBarCompact ? const Size.fromHeight(_kTabBarCompactHeight) : const Size.fromHeight(_kTabBarHeight);
 
-  bool get _isBarCompact => CupertinoSizeClassHelper.getHeightSizeClass() == CupertinoSizeClass.compact;
+  bool get _isBarCompact => window.physicalSize.height < 800;
 
   /// Indicates whether the tab bar is fully opaque or can have contents behind
   /// it show through it.
