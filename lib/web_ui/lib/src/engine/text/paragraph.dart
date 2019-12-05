@@ -292,19 +292,21 @@ class EngineParagraph implements ui.Paragraph {
   /// - Paragraphs that have a non-null word-spacing.
   /// - Paragraphs with a background.
   bool get _drawOnCanvas {
+    if (_measurementResult.lines == null) {
+      return false;
+    }
+
     bool canDrawTextOnCanvas;
-    if (TextMeasurementService.enableExperimentalCanvasImplementation) {
-      canDrawTextOnCanvas = _measurementResult.lines != null;
+    if (_measurementService.isCanvas) {
+      canDrawTextOnCanvas = true;
     } else {
-      canDrawTextOnCanvas = _measurementResult.isSingleLine &&
-          _plainText != null &&
-          _geometricStyle.ellipsis == null &&
-          _geometricStyle.shadows == null;
+      canDrawTextOnCanvas = _geometricStyle.ellipsis == null;
     }
 
     return canDrawTextOnCanvas &&
         _geometricStyle.decoration == null &&
-        _geometricStyle.wordSpacing == null;
+        _geometricStyle.wordSpacing == null &&
+        _geometricStyle.shadows == null;
   }
 
   /// Whether this paragraph has been laid out.

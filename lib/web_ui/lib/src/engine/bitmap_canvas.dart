@@ -661,10 +661,14 @@ class BitmapCanvas extends EngineCanvas with SaveStackTracking {
   }
 
   void _drawTextLine(
-      ParagraphGeometricStyle style, String line, double x, double y) {
+    ParagraphGeometricStyle style,
+    EngineLineMetrics line,
+    double x,
+    double y,
+  ) {
     final double letterSpacing = style.letterSpacing;
     if (letterSpacing == null || letterSpacing == 0.0) {
-      ctx.fillText(line, x, y);
+      ctx.fillText(line.text, x, y);
     } else {
       // When letter-spacing is set, we go through a more expensive code path
       // that renders each character separately with the correct spacing
@@ -676,9 +680,9 @@ class BitmapCanvas extends EngineCanvas with SaveStackTracking {
       // would put 5px before each letter and 5px after it, but on the web, we
       // put no spacing before the letter and 10px after it. This is how the DOM
       // does it.
-      final int len = line.length;
+      final int len = line.text.length;
       for (int i = 0; i < len; i++) {
-        final String char = line[i];
+        final String char = line.text[i];
         ctx.fillText(char, x, y);
         x += letterSpacing + ctx.measureText(char).width;
       }
@@ -692,8 +696,7 @@ class BitmapCanvas extends EngineCanvas with SaveStackTracking {
     final ParagraphGeometricStyle style = paragraph._geometricStyle;
 
     if (paragraph._drawOnCanvas && _childOverdraw == false) {
-      final List<String> lines =
-          paragraph._lines ?? <String>[paragraph._plainText];
+      final List<EngineLineMetrics> lines = paragraph._measurementResult.lines;
 
       final ui.PaintData backgroundPaint =
           paragraph._background?.webOnlyPaintData;
