@@ -2671,12 +2671,9 @@ class RenderMouseRegion extends RenderProxyBox {
        _onHover = onHover,
        _onExit = onExit,
        _opaque = opaque,
-       _annotationKey = _UniqueKey(),
-       super(child) {
-    _updateAnnotationActiveBit();
-  }
+       super(child);
 
-  final Key _annotationKey;
+  final Key _annotationKey = _UniqueKey();
 
   /// Whether this object should prevent [RenderMouseRegion]s visually behind it
   /// from detecting the pointer, thus affecting how their [onHover], [onEnter],
@@ -2697,8 +2694,7 @@ class RenderMouseRegion extends RenderProxyBox {
   set opaque(bool value) {
     if (_opaque != value) {
       _opaque = value;
-      _markAnnotationDirty();
-      _updateAnnotationActiveBit();
+      _markPropertyUpdated(strict: true);
     }
   }
 
@@ -2708,7 +2704,7 @@ class RenderMouseRegion extends RenderProxyBox {
   set onEnter(PointerEnterEventListener value) {
     if (_onEnter != value) {
       _onEnter = value;
-      _updateAnnotationActiveBit();
+      _markPropertyUpdated(strict: false);
     }
   }
   PointerEnterEventListener _onEnter;
@@ -2723,7 +2719,7 @@ class RenderMouseRegion extends RenderProxyBox {
   set onHover(PointerHoverEventListener value) {
     if (_onHover != value) {
       _onHover = value;
-      _updateAnnotationActiveBit();
+      _markPropertyUpdated(strict: false);
     }
   }
   PointerHoverEventListener _onHover;
@@ -2738,7 +2734,7 @@ class RenderMouseRegion extends RenderProxyBox {
   set onExit(PointerExitEventListener value) {
     if (_onExit != value) {
       _onExit = value;
-      _updateAnnotationActiveBit();
+      _markPropertyUpdated(strict: false);
     }
   }
   PointerExitEventListener _onExit;
@@ -2775,24 +2771,33 @@ class RenderMouseRegion extends RenderProxyBox {
     return null;
   }
 
-  // About updating the properties of the annotation:
+  // About updating the properties of [RenderMouseRegion]:
   //
-  // There are 2 categories of properties that `RenderMouseRegion` passes to
-  // the annotation:
+  // `RenderMouseRegion` has 2 categories of properties:
   //
-  //  * "Loose properties": The annotation cares if these properties are null
-  //    or not, but doesn't care about their exact value. Examples are all the
-  //    callbacks, since they are proxied. If their changes don't affect
-  //    `_annotationIsActive`, `markNeedsPaint` can be skipped.
-  //  * "Strict properties": The annotations needs the exact values of these
+  //  * "Loose properties": [RenderMouseRegion] cares if these properties are
+  //    effective (i.e. makes _annotationIsActive true), but doesn't care about
+  //    their exact value. Examples are all the callbacks, since they are proxied.
+  //    If their changes don't affect `_annotationIsActive`, `markNeedsPaint` can
+  //    be skipped.
+  //  * "Strict properties": [RenderMouseRegion] needs the exact values of these
   //    properties. An example is `opaque`. Their changes must be accompanied by
-  //    `markNeedsPaint` in order to reconstruct the annotation.
+  //    `markNeedsPaint` in order to update their exact values to the tree.
+
+  void _markPropertyUpdated({@required bool strict}) {
+    if (strict)
+      _markAnnotationDirty();
+    _updateAnnotationActiveBit();
+  }
 
   // Call this method when a property has changed and might affect the
   // `_annotationIsActive` bit.
   //
-  // This method does NOT reconstruct the annotation unless
-  // `_annotationIsActive` bit is changed.
+  // This method does NOT call `markNeedsPaint` unless `_annotationIsActive`
+  // bit is changed. If there is a property that needs updating while
+  // `_annotationIsActive` stays true, call `_markAnnotationDirty`.
+  //
+  // This method must not be called during `paint`.
   void _updateAnnotationActiveBit() {
     final bool annotationWasActive = _annotationIsActive;
     final MouseTrackerAnnotation lastAnnotation = _hoverAnnotation;
@@ -2808,8 +2813,7 @@ class RenderMouseRegion extends RenderProxyBox {
     }
   }
 
-  // Call this method when a property has changed and must rebuild the
-  // annotation.
+  // Call this method when a property has changed and must repaint.
   void _markAnnotationDirty() {
     _hoverAnnotationIsDirty = true;
     markNeedsPaint();
@@ -2854,6 +2858,7 @@ class RenderMouseRegion extends RenderProxyBox {
   @override
   void paint(PaintingContext context, Offset offset) {
     if (_annotationIsActive) {
+      _updateDirtyAnnotation();
       // Annotated region layers are not retained because they do not create engine layers.
       final AnnotatedRegionLayer<MouseTrackerAnnotation> layer = AnnotatedRegionLayer<MouseTrackerAnnotation>(
         _hoverAnnotation,

@@ -733,7 +733,7 @@ void main() {
         child: MouseRegion(
           onEnter: (PointerEnterEvent e) {},
           child: _PaintDelegateWidget(
-            onPaint: _VoidDelegate(() => paintCount++),
+            onPaint: () => paintCount++,
             child: const Text('123'),
           ),
         ),
@@ -756,7 +756,7 @@ void main() {
         child: MouseRegion(
           onEnter: (PointerEnterEvent e) {},
           child: _PaintDelegateWidget(
-            onPaint: _VoidDelegate(() => paintCount++),
+            onPaint: () => paintCount++,
             child: const Text('123'),
           ),
         ),
@@ -1137,21 +1137,18 @@ void main() {
     expect(bottomRegionIsHovered, isFalse);
   });
 
-  testWidgets('Changing MouseRegion\'s properties is effective', (WidgetTester tester) async {
+  testWidgets('Changing MouseRegion\'s properties is effective and only repaints when changing strict properties', (WidgetTester tester) async {
     final List<String> logs = <String>[];
-    Widget scaffold(Widget child) {
+    // Render `foreground` at the top-left corner, on top of a full-screen `background`.
+    Widget scaffold({Widget topLeft, Widget background}) {
       return Directionality(
         textDirection: TextDirection.ltr,
         child: Stack(
           children: <Widget>[
-            MouseRegion(onHover: (_) { logs.add('hover-bottom'); }),
+            background,
             Align(
               alignment: Alignment.topLeft,
-              child: Container(
-                height: 10,
-                width: 10,
-                child: child,
-              ),
+              child: topLeft,
             ),
           ],
         ),
@@ -1161,43 +1158,67 @@ void main() {
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer(location: const Offset(20, 20));
     addTearDown(gesture.removePointer);
-
-    await tester.pumpWidget(scaffold(MouseRegion(
-      onEnter: (_) { logs.add('enter1'); },
-      onHover: (_) { logs.add('hover1'); },
-      onExit: (_) { logs.add('exit1'); },
-    )));
-    expect(logs, isEmpty);
+    await tester.pumpWidget(scaffold(
+      topLeft: Container(
+        height: 10,
+        width: 10,
+        child: MouseRegion(
+          onEnter: (_) { logs.add('enter1'); },
+          onHover: (_) { logs.add('hover1'); },
+          onExit: (_) { logs.add('exit1'); },
+          child: _PaintDelegateWidget(onPaint: () { logs.add('paint'); })
+        ),
+      ),
+      background: MouseRegion(onHover: (_) { logs.add('hover-bottom'); })
+    ));
+    expect(logs, <String>['paint']);
+    logs.clear();
 
     await gesture.moveTo(const Offset(5, 5));
     expect(logs, <String>['enter1', 'hover1']);
     logs.clear();
 
-    // Change callbacks
+    // Change loose properties. Cache these properties so that we can make sure
+    // we only changed strict properties later.
     final PointerEnterEventListener onEnter2 = (_) { logs.add('enter2'); };
     final PointerHoverEventListener onHover2 = (_) { logs.add('hover2'); };
     final PointerExitEventListener onExit2 = (_) { logs.add('exit2'); };
-    await tester.pumpWidget(scaffold(MouseRegion(
-      onEnter: onEnter2,
-      onHover: onHover2,
-      onExit: onExit2,
-    )));
+
+    await tester.pumpWidget(scaffold(
+      topLeft: Container(
+        height: 10,
+        width: 10,
+        child: MouseRegion(
+          onEnter: onEnter2,
+          onHover: onHover2,
+          onExit: onExit2,
+          child: _PaintDelegateWidget(onPaint: () { logs.add('paint'); })
+        ),
+      ),
+      background: MouseRegion(onHover: (_) { logs.add('hover-bottom'); })
+    ));
 
     await gesture.moveTo(const Offset(6, 6));
     expect(logs, <String>['hover2']);
     logs.clear();
 
-    // Change opacity (default is opaque: true)
-    await tester.pumpWidget(scaffold(MouseRegion(
-      onEnter: onEnter2,
-      onHover: onHover2,
-      onExit: onExit2,
-      opaque: false,
-    )));
+    // Change strict property opacity
+    await tester.pumpWidget(scaffold(
+      topLeft: Container(
+        height: 10,
+        width: 10,
+        child: MouseRegion(
+          onEnter: onEnter2,
+          onHover: onHover2,
+          onExit: onExit2,
+          opaque: false,
+          child: _PaintDelegateWidget(onPaint: () { logs.add('paint'); })
+        ),
+      ),
+      background: MouseRegion(onHover: (_) { logs.add('hover-bottom'); })
+    ));
 
-    debugDumpLayerTree();
-
-    expect(logs, <String>['hover-bottom']);
+    expect(logs, <String>['paint', 'hover-bottom']);
   });
 
   testWidgets('RenderMouseRegion\'s debugFillProperties when default', (WidgetTester tester) async {
@@ -1270,44 +1291,31 @@ void main() {
 // This widget allows you to send a callback that is called during `onPaint`.
 @immutable
 class _PaintDelegateWidget extends SingleChildRenderObjectWidget {
-  const _PaintDelegateWidget({
-    Key key,
-    Widget child,
-    this.onPaint,
-  }) : super(key: key, child: child);
+  const _PaintDelegateWidget({Key key, Widget child, this.onPaint})
+    : super(key: key, child: child);
 
-  final _VoidDelegate onPaint;
+  final VoidCallback onPaint;
 
   @override
   RenderObject createRenderObject(BuildContext context) {
-    return _PaintCallbackObject(onPaint: onPaint?.callback);
+    return _PaintCallbackObject(onPaint: onPaint);
   }
 
   @override
   void updateRenderObject(BuildContext context, _PaintCallbackObject renderObject) {
-    renderObject..onPaint = onPaint?.callback;
+    renderObject..onPaint = onPaint;
   }
 }
 
-class _VoidDelegate {
-  _VoidDelegate(this.callback);
-
-  void Function() callback;
-}
-
 class _PaintCallbackObject extends RenderProxyBox {
-  _PaintCallbackObject({
-    RenderObject child,
-    this.onPaint,
-  }) : super(child);
+  _PaintCallbackObject({RenderObject child, this.onPaint}) : super(child);
 
   void Function() onPaint;
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (onPaint != null) {
+    if (onPaint != null)
       onPaint();
-    }
     super.paint(context, offset);
   }
 }
