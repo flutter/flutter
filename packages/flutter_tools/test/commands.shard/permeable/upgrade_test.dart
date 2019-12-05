@@ -6,10 +6,12 @@ import 'package:flutter_tools/runner.dart' as runner;
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/os.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/upgrade.dart';
+import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/persistent_tool_state.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/version.dart';
@@ -213,12 +215,7 @@ void main() {
     });
 
     group('full command', () {
-      final FakeProcessManager fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
-        const FakeCommand(command: <String>[
-          'git', 'describe', '--match', 'v*.*.*', '--first-parent', '--long', '--tags',
-        ]),
-      ]);
-
+      FakeProcessManager fakeProcessManager;
       Directory tempDir;
       File flutterToolState;
 
@@ -226,6 +223,14 @@ void main() {
 
       setUp(() {
         Cache.disableLocking();
+        fakeProcessManager = FakeProcessManager.list(<FakeCommand>[
+          const FakeCommand(
+            command: <String>[
+              'git', 'describe', '--match', 'v*.*.*', '--first-parent', '--long', '--tags',
+            ],
+            stdout: 'v1.12.16-19-gb45b676af',
+          ),
+        ]);
         tempDir = fs.systemTempDirectory.createTempSync('flutter_upgrade_test.');
         flutterToolState = tempDir.childFile('.flutter_tool_state');
         mockFlutterVersion = MockFlutterVersion(isStable: true);
@@ -238,16 +243,17 @@ void main() {
 
       testUsingContext('upgrade continue prints welcome message', () async {
         final UpgradeCommand upgradeCommand = UpgradeCommand(fakeCommandRunner);
-        await runner.run(
+        applyMocksToCommand(upgradeCommand);
+
+        await createTestCommandRunner(upgradeCommand).run(
           <String>[
             'upgrade',
             '--continue',
           ],
-          <FlutterCommand>[
-            upgradeCommand,
-          ],
         );
-        expect(testLogger.statusText, contains('Welcome to Flutter!'));
+
+        expect(json.decode(flutterToolState.readAsStringSync()),
+          containsPair('redisplay-welcome-message', true));
       }, overrides: <Type, Generator>{
         FlutterVersion: () => mockFlutterVersion,
         ProcessManager: () => fakeProcessManager,
