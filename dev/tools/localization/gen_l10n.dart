@@ -6,6 +6,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:file/file.dart' as file;
+import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
 import 'localizations_utils.dart';
@@ -384,6 +385,7 @@ class LocalizationsGenerator {
   }
 
   /// Sets the reference [Directory] for [l10nDirectory].
+  @visibleForTesting
   void setL10nDirectory(String arbPathString) {
     if (arbPathString == null)
       throw L10nException('arbPathString argument cannot be null');
@@ -403,6 +405,7 @@ class LocalizationsGenerator {
   }
 
   /// Sets the reference [File] for [templateArbFile].
+  @visibleForTesting
   void setTemplateArbFile(String templateArbFileName) {
     if (templateArbFileName == null)
       throw L10nException('templateArbFileName argument cannot be null');
@@ -419,6 +422,7 @@ class LocalizationsGenerator {
   }
 
   /// Sets the reference [File] for the localizations delegate [outputFile].
+  @visibleForTesting
   void setOutputFile(String outputFileString) {
     if (outputFileString == null)
       throw L10nException('outputFileString argument cannot be null');
@@ -427,6 +431,7 @@ class LocalizationsGenerator {
 
   /// Sets the [className] for the localizations and localizations delegate
   /// classes.
+  @visibleForTesting
   void setClassName(String classNameString) {
     if (classNameString == null)
       throw L10nException('classNameString argument cannot be null');
