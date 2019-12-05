@@ -597,6 +597,41 @@ void main() {
     ]));
   });
 
+  test('should not flip out if not all mouse events are listened to', () {
+    bool isInHitRegionOne = true;
+    bool isInHitRegionTwo = false;
+    final MouseTrackerAnnotation annotation1 = MouseTrackerAnnotation(
+      onEnter: (PointerEnterEvent event) {}
+    );
+    final MouseTrackerAnnotation annotation2 = MouseTrackerAnnotation(
+      onExit: (PointerExitEvent event) {}
+    );
+    _setUpMouseAnnotationFinder((Offset position) sync* {
+      if (isInHitRegionOne)
+        yield annotation1;
+      else if (isInHitRegionTwo)
+        yield annotation2;
+    });
+
+    final ui.PointerDataPacket packet = ui.PointerDataPacket(data: <ui.PointerData>[
+      _pointerData(PointerChange.add, const Offset(0.0, 101.0)),
+      _pointerData(PointerChange.hover, const Offset(1.0, 101.0)),
+    ]);
+
+    isInHitRegionOne = false;
+    isInHitRegionTwo = true;
+    _mouseTracker.attachAnnotation(annotation2);
+
+    ui.window.onPointerDataPacket(packet);
+
+    // Disconnect mouse
+    _mouseTracker.detachAnnotation(annotation2);
+
+    isInHitRegionTwo = false;
+
+    // Passes if no errors are thrown.
+  });
+
   test('annotations with the same key should inherit presence', () {
     const Key key = Key('annotation');
     final List<String> logs = <String>[];
