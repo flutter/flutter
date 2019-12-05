@@ -69,7 +69,7 @@ class WebEntrypointTarget extends Target {
 
     // By construction, this will only be null if the .packages file does not
     // have an entry for the user's application or if the main file is
-    // outisde of the lib/ directory.
+    // outside of the lib/ directory.
     final String mainImport = packageUriMapper.map(importPath)?.toString()
       ?? fs.file(importPath).absolute.uri.toString();
 
