@@ -472,11 +472,11 @@ class IOSDevice extends Device {
   }
 
   @override
-  void dispose() {
+  Future<void> dispose() async {
     _logReaders.forEach((IOSApp application, DeviceLogReader logReader) {
       logReader.dispose();
     });
-    _portForwarder?.dispose();
+    await _portForwarder?.dispose();
   }
 }
 

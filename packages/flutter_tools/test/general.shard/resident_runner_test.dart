@@ -550,6 +550,33 @@ void main() {
     expect(await fs.file('foo').readAsString(), testUri.toString());
   }));
 
+  test('HotRunner unforwards device ports', () => testbed.run(() async {
+    final MockDevicePortForwarder mockPortForwarder = MockDevicePortForwarder();
+    when(mockDevice.portForwarder).thenReturn(mockPortForwarder);
+    fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+    residentRunner = HotRunner(
+      <FlutterDevice>[
+        mockFlutterDevice,
+      ],
+      stayResident: false,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+    );
+    when(mockFlutterDevice.runHot(
+      hotRunner: anyNamed('hotRunner'),
+      route: anyNamed('route'),
+    )).thenAnswer((Invocation invocation) async {
+      return 0;
+    });
+
+    when(mockDevice.dispose()).thenAnswer((Invocation invocation) async {
+      await mockDevice.portForwarder.dispose();
+    });
+
+    await residentRunner.run();
+
+    verify(mockPortForwarder.dispose()).called(1);
+  }));
+
   test('HotRunner handles failure to write vmservice file', () => testbed.run(() async {
     fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     residentRunner = HotRunner(
@@ -650,6 +677,7 @@ class MockDevFS extends Mock implements DevFS {}
 class MockIsolate extends Mock implements Isolate {}
 class MockDevice extends Mock implements Device {}
 class MockDeviceLogReader extends Mock implements DeviceLogReader {}
+class MockDevicePortForwarder extends Mock implements DevicePortForwarder {}
 class MockUsage extends Mock implements Usage {}
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockServiceEvent extends Mock implements ServiceEvent {}
