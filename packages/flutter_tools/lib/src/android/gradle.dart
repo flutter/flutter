@@ -479,6 +479,7 @@ Future<void> buildGradleAar({
   @required AndroidBuildInfo androidBuildInfo,
   @required String target,
   @required Directory outputDirectory,
+  String buildNumber = '1.0',
 }) async {
   assert(project != null);
   assert(target != null);
@@ -514,6 +515,7 @@ Future<void> buildGradleAar({
     '-Pflutter-root=$flutterRoot',
     '-Poutput-dir=${outputDirectory.path}',
     '-Pis-plugin=${manifest.isPlugin}',
+    '-PbuildNumber=$buildNumber'
   ];
 
   if (target != null && target.isNotEmpty) {
@@ -584,6 +586,7 @@ void printHowToConsumeAar({
   @required Set<String> buildModes,
   @required String androidPackage,
   @required Directory repoDirectory,
+  @required String buildNumber
 }) {
   assert(buildModes != null && buildModes.isNotEmpty);
   assert(androidPackage != null);
@@ -610,7 +613,7 @@ ${terminal.bolden('Consuming the Module')}
 
   for (String buildMode in buildModes) {
     printStatus('''
-      ${buildMode}Implementation '$androidPackage:flutter_$buildMode:1.0''');
+      ${buildMode}Implementation '$androidPackage:flutter_$buildMode:$buildNumber''');
   }
 
 printStatus('''
