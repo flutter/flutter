@@ -83,7 +83,7 @@ class DriveCommand extends RunCommandBase {
         defaultsTo: 'chrome',
         help: 'Name of browser where tests will be executed. \n'
               'Following browsers are supported: \n'
-              'Chrome, Firefox, Safari and Edge. Defaults to Chrome.',
+              'Chrome, Firefox, Safari (macOS and iOS) and Edge. Defaults to Chrome.',
         allowed: <String>[
           'chrome',
           'edge',

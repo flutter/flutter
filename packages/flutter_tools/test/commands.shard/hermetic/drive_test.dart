@@ -173,6 +173,14 @@ void main() {
       });
       testRunner = expectAsync2((List<String> testArgs, Map<String, String> environment) async {
         expect(testArgs, <String>[testFile]);
+        // VM_SERVICE_URL is not set by drive command arguments
+        expect(environment, <String, String>{
+          'VM_SERVICE_URL': 'null',
+          'SELENIUM_PORT': '4567',
+          'BROWSER_NAME': 'firefox',
+          'BROWSER_DIMENSION': '1024,768',
+          'HEADLESS': 'false',
+        });
         return null;
       });
       appStopper = expectAsync1((DriveCommand command) async {
@@ -187,6 +195,10 @@ void main() {
         'drive',
         '--target=$testApp',
         '--no-pub',
+        '--no-headless',
+        '--driver-port=4567',
+        '--browser-name=firefox',
+        '--browser-dimension=1024,768',
       ];
       await createTestCommandRunner(command).run(args);
       expect(testLogger.errorText, isEmpty);
