@@ -701,6 +701,7 @@ public class FlutterView extends FrameLayout {
     isFlutterUiDisplayed = false;
     flutterRenderer.removeIsDisplayingFlutterUiListener(flutterUiDisplayListener);
     flutterRenderer.stopRenderingToSurface();
+    flutterRenderer.setSemanticsEnabled(false);
     renderSurface.detachFromRenderer();
     flutterEngine = null;
   }
