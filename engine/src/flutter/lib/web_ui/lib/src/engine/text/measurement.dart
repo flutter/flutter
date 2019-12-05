@@ -159,6 +159,12 @@ class RulerManager {
 /// in [DomTextMeasurementService], or a canvas-based approach in
 /// [CanvasTextMeasurementService].
 abstract class TextMeasurementService {
+  /// Whether this service uses a canvas to make the text measurements.
+  ///
+  /// If [isCanvas] is false, it indicates that this service uses DOM elements
+  /// to make the text measurements.
+  bool get isCanvas;
+
   /// Initializes the text measurement service with a specific
   /// [rulerCacheCapacity] that gets passed to the [RulerManager].
   static void initialize({@required int rulerCacheCapacity}) {
@@ -312,6 +318,9 @@ abstract class TextMeasurementService {
 /// needed for some cases that aren't yet supported in the canvas-based
 /// implementation such as letter-spacing, word-spacing, etc.
 class DomTextMeasurementService extends TextMeasurementService {
+  @override
+  final bool isCanvas = false;
+
   /// The text measurement service singleton.
   static DomTextMeasurementService get instance =>
       _instance ??= DomTextMeasurementService();
@@ -388,8 +397,11 @@ class DomTextMeasurementService extends TextMeasurementService {
   ///   value.
   ///
   /// This method still needs to measure `minIntrinsicWidth`.
-  MeasurementResult _measureSingleLineParagraph(ParagraphRuler ruler,
-      ui.Paragraph paragraph, ui.ParagraphConstraints constraints) {
+  MeasurementResult _measureSingleLineParagraph(
+    ParagraphRuler ruler,
+    EngineParagraph paragraph,
+    ui.ParagraphConstraints constraints,
+  ) {
     final double width = constraints.width;
     final double minIntrinsicWidth = ruler.minIntrinsicDimensions.width;
     double maxIntrinsicWidth = ruler.singleLineDimensions.width;
@@ -399,6 +411,20 @@ class DomTextMeasurementService extends TextMeasurementService {
     maxIntrinsicWidth =
         _applySubPixelRoundingHack(minIntrinsicWidth, maxIntrinsicWidth);
     final double ideographicBaseline = alphabeticBaseline * _baselineRatioHack;
+
+    List<EngineLineMetrics> lines;
+    if (paragraph._plainText != null) {
+      final double lineWidth = maxIntrinsicWidth;
+      lines = <EngineLineMetrics>[
+        EngineLineMetrics.withText(
+          paragraph._plainText,
+          hardBreak: true,
+          width: lineWidth,
+          lineNumber: 0,
+        ),
+      ];
+    }
+
     return MeasurementResult(
       constraints.width,
       isSingleLine: true,
@@ -410,7 +436,7 @@ class DomTextMeasurementService extends TextMeasurementService {
       maxIntrinsicWidth: maxIntrinsicWidth,
       alphabeticBaseline: alphabeticBaseline,
       ideographicBaseline: ideographicBaseline,
-      lines: null,
+      lines: lines,
     );
   }
 
@@ -492,6 +518,9 @@ class DomTextMeasurementService extends TextMeasurementService {
 /// This is a faster implementation than [DomTextMeasurementService] and
 /// provides line breaks information that can be useful for multi-line text.
 class CanvasTextMeasurementService extends TextMeasurementService {
+  @override
+  final bool isCanvas = true;
+
   /// The text measurement service singleton.
   static CanvasTextMeasurementService get instance =>
       _instance ??= CanvasTextMeasurementService();
