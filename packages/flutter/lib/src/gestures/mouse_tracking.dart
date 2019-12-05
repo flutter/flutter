@@ -26,23 +26,26 @@ typedef PointerExitEventListener = void Function(PointerExitEvent event);
 /// Used by [MouseTrackerAnnotation], [MouseRegion] and [RenderMouseRegion].
 typedef PointerHoverEventListener = void Function(PointerHoverEvent event);
 
-// A key, so that (_IdenticalKey<T>(a) == _IdenticalKey<T>(b)) is equivalent to
+// A key, so that (_IdenticalAnnotationKey(a) == _IdenticalAnnotationKey(b)) is equivalent to
 // identical(a, b).
-class _IdenticalKey<T> implements Key {
-  _IdenticalKey(this.value);
+class _IdenticalAnnotationKey implements Key {
+  _IdenticalAnnotationKey(this.value);
 
-  final T value;
+  final MouseTrackerAnnotation value;
 
   // Don't return `identityHashCode(value)` directly since the hash of this key
-  // needs to be different from that of its value.
+  // needs to be different from that of `value`. Do a fast conversion with a
+  // random mask, since we don't need a secure hashing algorithm for a private
+  // class.
   @override
-  int get hashCode => identityHashCode(T) ^ identityHashCode(value);
+  int get hashCode => _hashCodeMask ^ identityHashCode(value);
+  static const int _hashCodeMask = 0xc366d8df10ee8;
 
   @override
   bool operator ==(Object other) {
     if (identical(this, other))
       return true;
-    return other is _IdenticalKey<T> && identical(other.value, value);
+    return other is _IdenticalAnnotationKey && identical(other.value, value);
   }
 }
 
@@ -156,7 +159,7 @@ class MouseTrackerAnnotation extends Diagnosticable {
   /// creation, this getter will return a unique key that is different from any
   /// other annotations, which means such an annotation is only equal to itself
   /// in terms of [key].
-  Key get key => _key ?? _IdenticalKey<MouseTrackerAnnotation>(this);
+  Key get key => _key ?? _IdenticalAnnotationKey(this);
   final Key _key;
 
   @override
