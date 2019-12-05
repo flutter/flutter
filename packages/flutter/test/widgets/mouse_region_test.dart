@@ -1111,12 +1111,12 @@ void main() {
             Align(
               alignment: Alignment.topLeft,
               child: MouseRegion(
-                  onEnter: (_) { bottomRegionIsHovered = true; },
-                  onHover: (_) { bottomRegionIsHovered = true; },
-                  onExit: (_) { bottomRegionIsHovered = true; },
-                  child: Container(
-                    width: 10,
-                    height: 10,
+                onEnter: (_) { bottomRegionIsHovered = true; },
+                onHover: (_) { bottomRegionIsHovered = true; },
+                onExit: (_) { bottomRegionIsHovered = true; },
+                child: Container(
+                  width: 10,
+                  height: 10,
                 ),
               ),
             ),
@@ -1135,6 +1135,69 @@ void main() {
     await gesture.moveTo(const Offset(20, 20));
     await tester.pump();
     expect(bottomRegionIsHovered, isFalse);
+  });
+
+  testWidgets('Changing MouseRegion\'s properties is effective', (WidgetTester tester) async {
+    final List<String> logs = <String>[];
+    Widget scaffold(Widget child) {
+      return Directionality(
+        textDirection: TextDirection.ltr,
+        child: Stack(
+          children: <Widget>[
+            MouseRegion(onHover: (_) { logs.add('hover-bottom'); }),
+            Align(
+              alignment: Alignment.topLeft,
+              child: Container(
+                height: 10,
+                width: 10,
+                child: child,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: const Offset(20, 20));
+    addTearDown(gesture.removePointer);
+
+    await tester.pumpWidget(scaffold(MouseRegion(
+      onEnter: (_) { logs.add('enter1'); },
+      onHover: (_) { logs.add('hover1'); },
+      onExit: (_) { logs.add('exit1'); },
+    )));
+    expect(logs, isEmpty);
+
+    await gesture.moveTo(const Offset(5, 5));
+    expect(logs, <String>['enter1', 'hover1']);
+    logs.clear();
+
+    // Change callbacks
+    final PointerEnterEventListener onEnter2 = (_) { logs.add('enter2'); };
+    final PointerHoverEventListener onHover2 = (_) { logs.add('hover2'); };
+    final PointerExitEventListener onExit2 = (_) { logs.add('exit2'); };
+    await tester.pumpWidget(scaffold(MouseRegion(
+      onEnter: onEnter2,
+      onHover: onHover2,
+      onExit: onExit2,
+    )));
+
+    await gesture.moveTo(const Offset(6, 6));
+    expect(logs, <String>['hover2']);
+    logs.clear();
+
+    // Change opacity (default is opaque: true)
+    await tester.pumpWidget(scaffold(MouseRegion(
+      onEnter: onEnter2,
+      onHover: onHover2,
+      onExit: onExit2,
+      opaque: false,
+    )));
+
+    debugDumpLayerTree();
+
+    expect(logs, <String>['hover-bottom']);
   });
 
   testWidgets('RenderMouseRegion\'s debugFillProperties when default', (WidgetTester tester) async {
