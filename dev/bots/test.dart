@@ -36,7 +36,7 @@ final String toolRoot = path.join(flutterRoot, 'packages', 'flutter_tools');
 final List<String> flutterTestArgs = <String>[];
 
 final bool useFlutterTestFormatter = Platform.environment['FLUTTER_TEST_FORMATTER'] == 'true';
-final bool canUseBuildRunner = Platform.environment['FLUTTER_TEST_NO_BUILD_RUNNER'] != 'true';
+const bool canUseBuildRunner = false; //Platform.environment['FLUTTER_TEST_NO_BUILD_RUNNER'] != 'true';
 
 /// The number of Cirrus jobs that run host-only devicelab tests in parallel.
 ///
@@ -573,9 +573,8 @@ Future<void> _pubRunTest(String workingDirectory, {
     args.addAll(<String>[
       'build_runner',
       'test',
-      // These were disabled to diagnose seemingly skipped tests on CI.
-      // '--build-filter=$posixTestPath/*.dill',
-      // '--build-filter=$posixTestPath/**/*.dill',
+      '--build-filter=$posixTestPath/*.dill',
+      '--build-filter=$posixTestPath/**/*.dill',
       '--',
     ]);
   } else {
