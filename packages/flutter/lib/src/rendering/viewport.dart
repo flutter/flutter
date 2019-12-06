@@ -510,11 +510,16 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     }
 
     // Adjust the clip rect for this sliver by the overlap from the previous sliver.
+    final double startOfOverlap = child.constraints.viewportMainAxisExtent - child.constraints.remainingPaintExtent;
+    // We tried to subtract infinity from infinity and got NaN.
+    if (startOfOverlap.isNaN) {
+      return viewportClip;
+    }
+
     double left = viewportClip.left;
     double right = viewportClip.right;
     double top = viewportClip.top;
     double bottom = viewportClip.bottom;
-    final double startOfOverlap = child.constraints.viewportMainAxisExtent - child.constraints.remainingPaintExtent;
     final double overlapCorrection = startOfOverlap + child.constraints.overlap;
     switch (applyGrowthDirectionToAxisDirection(axisDirection, child.constraints.growthDirection)) {
       case AxisDirection.down:
