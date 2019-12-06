@@ -398,6 +398,9 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
 
   /// If non-null, the recognizer will call [didExceedDeadline] after this
   /// amount of time has elapsed since starting to track the primary pointer.
+  ///
+  /// The [didExceedDeadline] will not be called if the primary pointer is
+  /// accepted, rejected, or all pointers are up or canceled before [deadline].
   final Duration deadline;
 
   /// The maximum distance in logical pixels the gesture is allowed to drift
@@ -495,7 +498,10 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
 
   @override
   void acceptGesture(int pointer) {
-    _gestureAccepted = true;
+    if (pointer == primaryPointer) {
+      _stopTimer();
+      _gestureAccepted = true;
+    }
   }
 
   @override
