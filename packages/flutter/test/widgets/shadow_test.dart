@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 
 void main() {
   testWidgets('Shadows on BoxDecoration', (WidgetTester tester) async {
+    debugDisableShadows = true;
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
@@ -63,6 +64,7 @@ void main() {
   });
 
   testWidgets('Shadows with PhysicalLayer', (WidgetTester tester) async {
+    debugDisableShadows = true;
     await tester.pumpWidget(
       Center(
         child: RepaintBoundary(
