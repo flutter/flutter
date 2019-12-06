@@ -6822,8 +6822,8 @@ class _StatefulBuilderState extends State<StatefulBuilder> {
 ///  * [SmartQuotesType]
 ///  * <https://developer.apple.com/documentation/uikit/uitextinputtraits>
 enum SmartDashesType {
-  enabled,
   disabled,
+  enabled,
 }
 
 /// Indicates how to handle the intelligent replacement of quotes in text input.
@@ -6837,6 +6837,6 @@ enum SmartDashesType {
 ///  * [SmartDashesType]
 ///  * <https://developer.apple.com/documentation/uikit/uitextinputtraits>
 enum SmartQuotesType {
-  enabled,
   disabled,
+  enabled,
 }
