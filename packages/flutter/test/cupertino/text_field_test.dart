@@ -2596,11 +2596,10 @@ void main() {
 
       // Double tap at the end of text.
       final Offset textEndPos = textOffsetToPosition(tester, 11); // Position at the end of text.
-      final TestGesture gesture = await tester.startGesture(
+      TestGesture gesture = await tester.startGesture(
         textEndPos,
         kind: PointerDeviceKind.mouse,
       );
-      addTearDown(gesture.removePointer);
       await tester.pump(const Duration(milliseconds: 50));
       await gesture.up();
       await tester.pump();
@@ -2615,7 +2614,11 @@ void main() {
       final Offset hPos = textOffsetToPosition(tester, 9); // Position of 'h'.
 
       // Double tap on 'h' to select 'ghi'.
-      await gesture.down(hPos);
+      gesture = await tester.startGesture(
+        hPos,
+        kind: PointerDeviceKind.mouse,
+      );
+      addTearDown(gesture.removePointer);
       await tester.pump(const Duration(milliseconds: 50));
       await gesture.up();
       await tester.pump();

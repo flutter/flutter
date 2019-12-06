@@ -2720,8 +2720,7 @@ class RenderMouseRegion extends RenderProxyBox {
       _onHover(event);
   }
 
-  /// Called when a pointer leaves the region (with or without buttons pressed)
-  /// and the annotation is still attached.
+  /// Called when a pointer leaves the region (with or without buttons pressed).
   PointerExitEventListener get onExit => _onExit;
   set onExit(PointerExitEventListener value) {
     if (_onExit != value) {

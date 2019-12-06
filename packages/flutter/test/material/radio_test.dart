@@ -559,3 +559,4 @@ void main() {
     expect(box.size, equals(const Size(60, 36)));
   });
 }
+

@@ -749,7 +749,6 @@ void main() {
 
     // Start hovering
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
-    await gesture.addPointer();
     addTearDown(gesture.removePointer);
     await gesture.moveTo(tester.getCenter(find.byType(Switch)));
 

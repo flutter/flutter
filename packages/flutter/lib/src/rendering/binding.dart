@@ -281,7 +281,6 @@ mixin RendererBinding on BindingBase, ServicesBinding, SchedulerBinding, Gesture
 
   void _handlePersistentFrameCallback(Duration timeStamp) {
     drawFrame();
-    _mouseTracker.schedulePostFrameCheck();
   }
 
   int _firstFrameDeferredCount = 0;
