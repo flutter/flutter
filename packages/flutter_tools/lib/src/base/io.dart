@@ -106,7 +106,10 @@ ExitFunction _exitFunction = _defaultExitFunction;
 ExitFunction get exit {
   assert(() {
     if (_exitFunction == io.exit && io.Platform.environment['FLUTTER_INTEGRATION_TEST'] == null) {
-      throw StateError('io.exit was called with assertions active.');
+      throw StateError(
+        'io.exit was called with assertions active. If this is an integration test'
+        ', ensure that the environment variable FLUTTER_INTEGRATION_TEST is set '
+        'to a non-null String.');
     }
     return true;
   }());
