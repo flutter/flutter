@@ -24,8 +24,10 @@ class RouteNotificationMessages {
   ///
   /// There are three methods: 'routePushed', 'routePopped', 'routeReplaced'.
   ///
-  /// See also [SystemChannels.navigation], which handles subsequent navigation
-  /// requests.
+  /// See also:
+  ///
+  ///  * [SystemChannels.navigation], which handles subsequent navigation
+  ///    requests.
   static void _notifyRouteChange(String methodName, Route<dynamic> route, Route<dynamic> previousRoute) {
     final String previousRouteName = previousRoute?.settings?.name;
     final String routeName = route?.settings?.name;

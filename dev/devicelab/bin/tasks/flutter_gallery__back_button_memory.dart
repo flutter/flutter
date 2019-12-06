@@ -19,7 +19,7 @@ class BackButtonMemoryTest extends MemoryTest {
   BackButtonMemoryTest() : super('${flutterDirectory.path}/examples/flutter_gallery', 'test_memory/back_button.dart', packageName);
 
   @override
-  AndroidDevice get device => super.device;
+  AndroidDevice get device => super.device as AndroidDevice;
 
   @override
   int get iterationCount => 5;

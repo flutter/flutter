@@ -4006,7 +4006,7 @@ String _concatStrings({
 /// nodes, it is recommended to either use comparable keys for all nodes, or
 /// use null for all of them, leaving the sort order to the default algorithm.
 ///
-/// See Also:
+/// See also:
 ///
 ///  * [OrdinalSortKey] for a sort key that sorts using an ordinal.
 abstract class SemanticsSortKey extends Diagnosticable implements Comparable<SemanticsSortKey> {

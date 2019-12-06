@@ -219,11 +219,11 @@ class AssetImage extends AssetBundleImageProvider {
     if (jsonData == null)
       return SynchronousFuture<Map<String, List<String>>>(null);
     // TODO(ianh): JSON decoding really shouldn't be on the main thread.
-    final Map<String, dynamic> parsedJson = json.decode(jsonData);
+    final Map<String, dynamic> parsedJson = json.decode(jsonData) as Map<String, dynamic>;
     final Iterable<String> keys = parsedJson.keys;
     final Map<String, List<String>> parsedManifest =
         Map<String, List<String>>.fromIterables(keys,
-          keys.map<List<String>>((String key) => List<String>.from(parsedJson[key])));
+          keys.map<List<String>>((String key) => List<String>.from(parsedJson[key] as List<dynamic>)));
     // TODO(ianh): convert that data structure to the right types.
     return SynchronousFuture<Map<String, List<String>>>(parsedManifest);
   }
@@ -280,9 +280,9 @@ class AssetImage extends AssetBundleImageProvider {
   bool operator ==(dynamic other) {
     if (other.runtimeType != runtimeType)
       return false;
-    final AssetImage typedOther = other;
-    return keyName == typedOther.keyName
-        && bundle == typedOther.bundle;
+    return other is AssetImage
+        && other.keyName == keyName
+        && other.bundle == bundle;
   }
 
   @override

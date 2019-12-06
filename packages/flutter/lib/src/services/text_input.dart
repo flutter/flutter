@@ -421,6 +421,7 @@ class TextInputConfiguration {
   /// Defaults to true. Cannot be null.
   ///
   /// See also:
+  ///
   ///  * <https://developer.android.com/reference/android/text/InputType.html#TYPE_TEXT_FLAG_NO_SUGGESTIONS>
   /// {@endtemplate}
   final bool enableSuggestions;

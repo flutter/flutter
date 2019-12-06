@@ -244,7 +244,7 @@ class AOTSnapshotter {
     final String assemblyO = fs.path.join(outputPath, 'snapshot_assembly.o');
     List<String> isysrootArgs;
     if (isIOS) {
-      final String iPhoneSDKLocation = await xcode.iPhoneSdkLocation();
+      final String iPhoneSDKLocation = await xcode.sdkLocation(SdkType.iPhone);
       if (iPhoneSDKLocation != null) {
         isysrootArgs = <String>['-isysroot', iPhoneSDKLocation];
       }

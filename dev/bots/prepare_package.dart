@@ -39,7 +39,7 @@ class PreparePackageException implements Exception {
     if (message != null) {
       output += ': $message';
     }
-    final String stderr = result?.stderr ?? '';
+    final String stderr = result?.stderr as String ?? '';
     if (stderr.isNotEmpty) {
       output += ':\n$stderr';
     }
@@ -526,15 +526,15 @@ class ArchivePublisher {
     newEntry['sha256'] = await _getChecksum(outputFile);
 
     // Search for any entries with the same hash and channel and remove them.
-    final List<dynamic> releases = jsonData['releases'];
+    final List<dynamic> releases = jsonData['releases'] as List<dynamic>;
     jsonData['releases'] = <Map<String, dynamic>>[
-      for (Map<String, dynamic> entry in releases)
+      for (Map<String, dynamic> entry in releases.cast<Map<String, dynamic>>())
         if (entry['hash'] != newEntry['hash'] || entry['channel'] != newEntry['channel'])
           entry,
       newEntry,
     ]..sort((Map<String, dynamic> a, Map<String, dynamic> b) {
-      final DateTime aDate = DateTime.parse(a['release_date']);
-      final DateTime bDate = DateTime.parse(b['release_date']);
+      final DateTime aDate = DateTime.parse(a['release_date'] as String);
+      final DateTime bDate = DateTime.parse(b['release_date'] as String);
       return bDate.compareTo(aDate);
     });
     return jsonData;
@@ -556,7 +556,7 @@ class ArchivePublisher {
 
     Map<String, dynamic> jsonData;
     try {
-      jsonData = json.decode(currentMetadata);
+      jsonData = json.decode(currentMetadata) as Map<String, dynamic>;
     } on FormatException catch (e) {
       throw PreparePackageException('Unable to parse JSON metadata received from cloud: $e');
     }
@@ -665,7 +665,7 @@ Future<void> main(List<String> rawArguments) async {
 
   final ArgResults parsedArguments = argParser.parse(rawArguments);
 
-  if (parsedArguments['help']) {
+  if (parsedArguments['help'] as bool) {
     print(argParser.usage);
     exit(0);
   }
@@ -676,7 +676,7 @@ Future<void> main(List<String> rawArguments) async {
     exit(exitCode);
   }
 
-  final String revision = parsedArguments['revision'];
+  final String revision = parsedArguments['revision'] as String;
   if (revision.isEmpty) {
     errorExit('Invalid argument: --revision must be specified.');
   }
@@ -684,19 +684,20 @@ Future<void> main(List<String> rawArguments) async {
     errorExit('Invalid argument: --revision must be the entire hash, not just a prefix.');
   }
 
-  if (parsedArguments['branch'].isEmpty) {
+  if ((parsedArguments['branch'] as String).isEmpty) {
     errorExit('Invalid argument: --branch must be specified.');
   }
 
+  final String tempDirArg = parsedArguments['temp_dir'] as String;
   Directory tempDir;
   bool removeTempDir = false;
-  if (parsedArguments['temp_dir'] == null || parsedArguments['temp_dir'].isEmpty) {
+  if (tempDirArg == null || tempDirArg.isEmpty) {
     tempDir = Directory.systemTemp.createTempSync('flutter_package.');
     removeTempDir = true;
   } else {
-    tempDir = Directory(parsedArguments['temp_dir']);
+    tempDir = Directory(tempDirArg);
     if (!tempDir.existsSync()) {
-      errorExit("Temporary directory ${parsedArguments['temp_dir']} doesn't exist.");
+      errorExit("Temporary directory $tempDirArg doesn't exist.");
     }
   }
 
@@ -704,20 +705,20 @@ Future<void> main(List<String> rawArguments) async {
   if (parsedArguments['output'] == null) {
     outputDir = tempDir;
   } else {
-    outputDir = Directory(parsedArguments['output']);
+    outputDir = Directory(parsedArguments['output'] as String);
     if (!outputDir.existsSync()) {
       outputDir.createSync(recursive: true);
     }
   }
 
-  final Branch branch = fromBranchName(parsedArguments['branch']);
-  final ArchiveCreator creator = ArchiveCreator(tempDir, outputDir, revision, branch, strict: parsedArguments['publish']);
+  final Branch branch = fromBranchName(parsedArguments['branch'] as String);
+  final ArchiveCreator creator = ArchiveCreator(tempDir, outputDir, revision, branch, strict: parsedArguments['publish'] as bool);
   int exitCode = 0;
   String message;
   try {
     final String version = await creator.initializeRepo();
     final File outputFile = await creator.createArchive();
-    if (parsedArguments['publish']) {
+    if (parsedArguments['publish'] as bool) {
       final ArchivePublisher publisher = ArchivePublisher(
         tempDir,
         revision,
