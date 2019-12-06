@@ -325,13 +325,15 @@ void main() {
         fail('Setting language and locales should not fail: \n$e');
       }
 
-      // Searching for filename instead of comparing entire path string
-      // because different operating systems have different directory
-      // separators (e.g. Windows uses a backslash while Linux uses a forward
-      // slash).
-      expect(generator.arbPathStrings.first, contains('app_en_US.arb'));
-      expect(generator.arbPathStrings.elementAt(1), contains('app_es.arb'));
-      expect(generator.arbPathStrings.elementAt(2), contains('app_zh.arb'));
+      if (Platform.isWindows) {
+        expect(generator.arbPathStrings.first, 'lib\\l10n\\app_en_US.arb');
+        expect(generator.arbPathStrings.elementAt(1), 'lib\\l10n\\app_es.arb');
+        expect(generator.arbPathStrings.elementAt(2), 'lib\\l10n\\app_zh.arb');
+      } else {
+        expect(generator.arbPathStrings.first, 'lib/l10n/app_en_US.arb');
+        expect(generator.arbPathStrings.elementAt(1), 'lib/l10n/app_es.arb');
+        expect(generator.arbPathStrings.elementAt(2), 'lib/l10n/app_zh.arb');
+      }
     });
 
     test('correctly parses @@locale property in arb file', () {
