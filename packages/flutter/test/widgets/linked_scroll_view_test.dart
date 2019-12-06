@@ -37,7 +37,7 @@ class LinkedScrollController extends ScrollController {
   @override
   void attach(ScrollPosition position) {
     assert(position is LinkedScrollPosition, 'A LinkedScrollController must only be used with LinkedScrollPositions.');
-    final LinkedScrollPosition linkedPosition = position;
+    final LinkedScrollPosition linkedPosition = position as LinkedScrollPosition;
     assert(linkedPosition.owner == this, 'A LinkedScrollPosition cannot change controllers once created.');
     super.attach(position);
     _parent?.attach(position);
@@ -84,7 +84,7 @@ class LinkedScrollController extends ScrollController {
 
   Iterable<LinkedScrollActivity> link(LinkedScrollPosition driver) sync* {
     assert(hasClients);
-    for (LinkedScrollPosition position in positions)
+    for (LinkedScrollPosition position in positions.cast<LinkedScrollPosition>())
       yield position.link(driver);
   }
 
@@ -174,7 +174,7 @@ class LinkedScrollPosition extends ScrollPositionWithSingleContext {
     final double localOverscroll = setPixels(value.clamp(
       owner.canLinkWithBefore ? minScrollExtent : -double.infinity,
       owner.canLinkWithAfter ? maxScrollExtent : double.infinity,
-    ));
+    ) as double);
 
     assert(localOverscroll == 0.0 || (beforeOverscroll == 0.0 && afterOverscroll == 0.0));
   }
@@ -186,7 +186,7 @@ class LinkedScrollPosition extends ScrollPositionWithSingleContext {
   LinkedScrollActivity link(LinkedScrollPosition driver) {
     if (this.activity is! LinkedScrollActivity)
       beginActivity(LinkedScrollActivity(this));
-    final LinkedScrollActivity activity = this.activity;
+    final LinkedScrollActivity activity = this.activity as LinkedScrollActivity;
     activity.link(driver);
     return activity;
   }
@@ -211,7 +211,7 @@ class LinkedScrollActivity extends ScrollActivity {
   ) : super(delegate);
 
   @override
-  LinkedScrollPosition get delegate => super.delegate;
+  LinkedScrollPosition get delegate => super.delegate as LinkedScrollPosition;
 
   final Set<LinkedScrollPosition> drivers = HashSet<LinkedScrollPosition>();
 

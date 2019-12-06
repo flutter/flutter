@@ -236,7 +236,7 @@ void main() {
           'source': 0x101, // Keyboard source.
           'deviceId': 1,
         });
-        final RawKeyEventDataAndroid data = event.data;
+        final RawKeyEventDataAndroid data = event.data as RawKeyEventDataAndroid;
         for (ModifierKey key in ModifierKey.values) {
           if (modifierTests[modifier].key == key) {
             expect(
@@ -272,7 +272,7 @@ void main() {
           'source': 0x101, // Keyboard source.
           'deviceId': 1,
         });
-        final RawKeyEventDataAndroid data = event.data;
+        final RawKeyEventDataAndroid data = event.data as RawKeyEventDataAndroid;
         for (ModifierKey key in ModifierKey.values) {
           if (modifierTests[modifier].key == key || key == ModifierKey.functionModifier) {
             expect(
@@ -310,7 +310,7 @@ void main() {
         'source': 0x101, // Keyboard source.
         'deviceId': 1,
       });
-      final RawKeyEventDataAndroid data = keyAEvent.data;
+      final RawKeyEventDataAndroid data = keyAEvent.data as RawKeyEventDataAndroid;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.keyA));
       expect(data.logicalKey, equals(LogicalKeyboardKey.keyA));
       expect(data.keyLabel, equals('a'));
@@ -327,7 +327,7 @@ void main() {
         'source': 0x101, // Keyboard source.
         'deviceId': 1,
       });
-      final RawKeyEventDataAndroid data = escapeKeyEvent.data;
+      final RawKeyEventDataAndroid data = escapeKeyEvent.data as RawKeyEventDataAndroid;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.escape));
       expect(data.logicalKey, equals(LogicalKeyboardKey.escape));
       expect(data.keyLabel, isNull);
@@ -345,7 +345,7 @@ void main() {
         'source': 0x101, // Keyboard source.
         'deviceId': 1,
       });
-      final RawKeyEventDataAndroid data = shiftLeftKeyEvent.data;
+      final RawKeyEventDataAndroid data = shiftLeftKeyEvent.data as RawKeyEventDataAndroid;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.shiftLeft));
       expect(data.logicalKey, equals(LogicalKeyboardKey.shiftLeft));
       expect(data.keyLabel, isNull);
@@ -363,7 +363,7 @@ void main() {
         'source': 0x1000010, // Joystick source.
         'deviceId': 1,
       });
-      final RawKeyEventDataAndroid data = joystickDpadDown.data;
+      final RawKeyEventDataAndroid data = joystickDpadDown.data as RawKeyEventDataAndroid;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.arrowDown));
       expect(data.logicalKey, equals(LogicalKeyboardKey.arrowDown));
       expect(data.keyLabel, isNull);
@@ -380,7 +380,7 @@ void main() {
         'metaState': 0,
         'source': 0x101, // Keyboard source.
       });
-      final RawKeyEventDataAndroid data = joystickDpadDown.data;
+      final RawKeyEventDataAndroid data = joystickDpadDown.data as RawKeyEventDataAndroid;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.arrowDown));
       expect(data.logicalKey, equals(LogicalKeyboardKey.arrowDown));
       expect(data.keyLabel, isNull);
@@ -398,7 +398,7 @@ void main() {
         'source': 0x501, // Gamepad and keyboard source.
         'deviceId': 1,
       });
-      final RawKeyEventDataAndroid data = joystickDpadCenter.data;
+      final RawKeyEventDataAndroid data = joystickDpadCenter.data as RawKeyEventDataAndroid;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.gameButtonThumbLeft));
       expect(data.logicalKey, equals(LogicalKeyboardKey.select));
       expect(data.keyLabel, isNull);
@@ -416,7 +416,7 @@ void main() {
         'source': 0x501, // Gamepad and keyboard source.
         'deviceId': 10,
       });
-      final RawKeyEventDataAndroid data = joystickDpadCenter.data;
+      final RawKeyEventDataAndroid data = joystickDpadCenter.data as RawKeyEventDataAndroid;
       expect(data.deviceId, equals(10));
     });
     test('Repeat count is passed correctly', () {
@@ -432,7 +432,7 @@ void main() {
         'source': 0x101, // Keyboard source.
         'repeatCount': 42,
       });
-      final RawKeyEventDataAndroid data = repeatCountEvent.data;
+      final RawKeyEventDataAndroid data = repeatCountEvent.data as RawKeyEventDataAndroid;
       expect(data.repeatCount, equals(42));
     });
   });
@@ -462,7 +462,7 @@ void main() {
           'codePoint': 0x64,
           'modifiers': modifier,
         });
-        final RawKeyEventDataFuchsia data = event.data;
+        final RawKeyEventDataFuchsia data = event.data as RawKeyEventDataFuchsia;
         for (ModifierKey key in ModifierKey.values) {
           if (modifierTests[modifier].key == key) {
             expect(
@@ -493,7 +493,7 @@ void main() {
           'codePoint': 0x64,
           'modifiers': modifier | RawKeyEventDataFuchsia.modifierCapsLock,
         });
-        final RawKeyEventDataFuchsia data = event.data;
+        final RawKeyEventDataFuchsia data = event.data as RawKeyEventDataFuchsia;
         for (ModifierKey key in ModifierKey.values) {
           if (modifierTests[modifier].key == key || key == ModifierKey.capsLockModifier) {
             expect(
@@ -521,7 +521,7 @@ void main() {
         'codePoint': 'a'.codeUnitAt(0),
         'character': 'a',
       });
-      final RawKeyEventDataFuchsia data = keyAEvent.data;
+      final RawKeyEventDataFuchsia data = keyAEvent.data as RawKeyEventDataFuchsia;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.keyA));
       expect(data.logicalKey, equals(LogicalKeyboardKey.keyA));
       expect(data.keyLabel, equals('a'));
@@ -534,7 +534,7 @@ void main() {
         'codePoint': null,
         'character': null,
       });
-      final RawKeyEventDataFuchsia data = escapeKeyEvent.data;
+      final RawKeyEventDataFuchsia data = escapeKeyEvent.data as RawKeyEventDataFuchsia;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.escape));
       expect(data.logicalKey, equals(LogicalKeyboardKey.escape));
       expect(data.keyLabel, isNull);
@@ -547,7 +547,7 @@ void main() {
         'codePoint': null,
         'character': null,
       });
-      final RawKeyEventDataFuchsia data = shiftLeftKeyEvent.data;
+      final RawKeyEventDataFuchsia data = shiftLeftKeyEvent.data as RawKeyEventDataFuchsia;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.shiftLeft));
       expect(data.logicalKey, equals(LogicalKeyboardKey.shiftLeft));
       expect(data.keyLabel, isNull);
@@ -580,7 +580,7 @@ void main() {
           'charactersIgnoringModifiers': 'a',
           'modifiers': modifier,
         });
-        final RawKeyEventDataMacOs data = event.data;
+        final RawKeyEventDataMacOs data = event.data as RawKeyEventDataMacOs;
         for (ModifierKey key in ModifierKey.values) {
           if (modifierTests[modifier].key == key) {
             expect(
@@ -614,7 +614,7 @@ void main() {
           'charactersIgnoringModifiers': 'a',
           'modifiers': modifier | RawKeyEventDataMacOs.modifierCapsLock,
         });
-        final RawKeyEventDataMacOs data = event.data;
+        final RawKeyEventDataMacOs data = event.data as RawKeyEventDataMacOs;
         for (ModifierKey key in ModifierKey.values) {
           if (modifierTests[modifier].key == key || key == ModifierKey.capsLockModifier) {
             expect(
@@ -649,7 +649,7 @@ void main() {
         'charactersIgnoringModifiers': unmodifiedCharacter,
         'modifiers': 0x0,
       });
-      final RawKeyEventDataMacOs data = keyAEvent.data;
+      final RawKeyEventDataMacOs data = keyAEvent.data as RawKeyEventDataMacOs;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.keyA));
       expect(data.logicalKey, equals(LogicalKeyboardKey.keyA));
       expect(data.keyLabel, equals('a'));
@@ -664,7 +664,7 @@ void main() {
         'character': null,
         'modifiers': 0x0,
       });
-      final RawKeyEventDataMacOs data = escapeKeyEvent.data;
+      final RawKeyEventDataMacOs data = escapeKeyEvent.data as RawKeyEventDataMacOs;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.escape));
       expect(data.logicalKey, equals(LogicalKeyboardKey.escape));
       expect(data.keyLabel, isNull);
@@ -679,7 +679,7 @@ void main() {
         'character': null,
         'modifiers': RawKeyEventDataMacOs.modifierLeftShift,
       });
-      final RawKeyEventDataMacOs data = shiftLeftKeyEvent.data;
+      final RawKeyEventDataMacOs data = shiftLeftKeyEvent.data as RawKeyEventDataMacOs;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.shiftLeft));
       expect(data.logicalKey, equals(LogicalKeyboardKey.shiftLeft));
       expect(data.keyLabel, isNull);
@@ -694,7 +694,7 @@ void main() {
         'character': null,
         'modifiers': RawKeyEventDataMacOs.modifierFunction,
       });
-      final RawKeyEventDataMacOs data = leftArrowKey.data;
+      final RawKeyEventDataMacOs data = leftArrowKey.data as RawKeyEventDataMacOs;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.arrowLeft));
       expect(data.logicalKey, equals(LogicalKeyboardKey.arrowLeft));
       expect(data.logicalKey.keyLabel, isNull);
@@ -744,7 +744,7 @@ void main() {
               // GLFW modifiers don't include the current key event.
               'modifiers': isDown ? 0 : modifier,
             });
-            final RawKeyEventDataLinux data = event.data;
+            final RawKeyEventDataLinux data = event.data as RawKeyEventDataLinux;
             for (ModifierKey key in ModifierKey.values) {
               if (modifierTests[modifier].key == key) {
                 expect(
@@ -780,7 +780,7 @@ void main() {
           'unicodeScalarValues': 97,
           'modifiers': modifier | GLFWKeyHelper.modifierControl,
         });
-        final RawKeyEventDataLinux data = event.data;
+        final RawKeyEventDataLinux data = event.data as RawKeyEventDataLinux;
         for (ModifierKey key in ModifierKey.values) {
           if (modifierTests[modifier].key == key || key == ModifierKey.controlModifier) {
             expect(
@@ -815,7 +815,7 @@ void main() {
         'unicodeScalarValues': 113,
         'modifiers': 0x0,
       });
-      final RawKeyEventDataLinux data = keyAEvent.data;
+      final RawKeyEventDataLinux data = keyAEvent.data as RawKeyEventDataLinux;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.keyA));
       expect(data.logicalKey, equals(LogicalKeyboardKey.keyQ));
       expect(data.keyLabel, equals('q'));
@@ -830,7 +830,7 @@ void main() {
         'unicodeScalarValues': 0x10FFFF,
         'modifiers': 0x0,
       });
-      final RawKeyEventDataLinux data = keyAEvent.data;
+      final RawKeyEventDataLinux data = keyAEvent.data as RawKeyEventDataLinux;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.keyA));
       expect(data.logicalKey.keyId, equals(0x10FFFF));
       expect(data.keyLabel, equals('􏿿'));
@@ -861,7 +861,7 @@ void main() {
         'unicodeScalarValues': 0,
         'modifiers': 0x0,
       });
-      final RawKeyEventDataLinux data = escapeKeyEvent.data;
+      final RawKeyEventDataLinux data = escapeKeyEvent.data as RawKeyEventDataLinux;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.escape));
       expect(data.logicalKey, equals(LogicalKeyboardKey.escape));
       expect(data.keyLabel, isNull);
@@ -875,7 +875,7 @@ void main() {
         'scanCode': 0x00000032,
         'unicodeScalarValues': 0,
       });
-      final RawKeyEventDataLinux data = shiftLeftKeyEvent.data;
+      final RawKeyEventDataLinux data = shiftLeftKeyEvent.data as RawKeyEventDataLinux;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.shiftLeft));
       expect(data.logicalKey, equals(LogicalKeyboardKey.shiftLeft));
       expect(data.keyLabel, isNull);
@@ -902,7 +902,7 @@ void main() {
           'key': null,
           'metaState': modifier,
         });
-        final RawKeyEventDataWeb data = event.data;
+        final RawKeyEventDataWeb data = event.data as RawKeyEventDataWeb;
         for (ModifierKey key in ModifierKey.values) {
           if (modifierTests[modifier] == key) {
             expect(
@@ -933,7 +933,7 @@ void main() {
           'key': null,
           'metaState': modifier | RawKeyEventDataWeb.modifierMeta,
         });
-        final RawKeyEventDataWeb data = event.data;
+        final RawKeyEventDataWeb data = event.data as RawKeyEventDataWeb;
         for (ModifierKey key in ModifierKey.values) {
           if (modifierTests[modifier] == key || key == ModifierKey.metaModifier) {
             expect(
@@ -961,7 +961,7 @@ void main() {
         'key': 'a',
         'metaState': 0x0,
       });
-      final RawKeyEventDataWeb data = keyAEvent.data;
+      final RawKeyEventDataWeb data = keyAEvent.data as RawKeyEventDataWeb;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.keyA));
       expect(data.logicalKey, equals(LogicalKeyboardKey.keyA));
       expect(data.keyLabel, equals('a'));
@@ -974,7 +974,7 @@ void main() {
         'key': null,
         'metaState': 0x0,
       });
-      final RawKeyEventDataWeb data = escapeKeyEvent.data;
+      final RawKeyEventDataWeb data = escapeKeyEvent.data as RawKeyEventDataWeb;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.escape));
       expect(data.logicalKey, equals(LogicalKeyboardKey.escape));
       expect(data.keyLabel, isNull);
@@ -987,7 +987,7 @@ void main() {
         'keyLabel': null,
         'metaState': RawKeyEventDataWeb.modifierShift,
       });
-      final RawKeyEventDataWeb data = shiftKeyEvent.data;
+      final RawKeyEventDataWeb data = shiftKeyEvent.data as RawKeyEventDataWeb;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.shiftLeft));
       expect(data.logicalKey, equals(LogicalKeyboardKey.shiftLeft));
       expect(data.keyLabel, isNull);
@@ -1000,7 +1000,7 @@ void main() {
         'key': null,
         'metaState': 0x0,
       });
-      final RawKeyEventDataWeb data = arrowKeyDown.data;
+      final RawKeyEventDataWeb data = arrowKeyDown.data as RawKeyEventDataWeb;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.arrowDown));
       expect(data.logicalKey, equals(LogicalKeyboardKey.arrowDown));
       expect(data.keyLabel, isNull);

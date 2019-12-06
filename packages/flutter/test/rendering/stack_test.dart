@@ -30,7 +30,7 @@ void main() {
       textDirection: TextDirection.ltr,
       children: <RenderBox>[red, green],
     );
-    final StackParentData greenParentData = green.parentData;
+    final StackParentData greenParentData = green.parentData as StackParentData;
     greenParentData
       ..top = 0.0
       ..right = 0.0

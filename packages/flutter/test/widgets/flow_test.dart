@@ -127,7 +127,7 @@ void main() {
     );
     final dynamic exception = tester.takeException();
     expect(exception, isFlutterError);
-    final FlutterError error = exception;
+    final FlutterError error = exception as FlutterError;
     expect(error.toStringDeep(), equalsIgnoringHashCodes(
       'FlutterError\n'
       '   Cannot call paintChild twice for the same child.\n'
@@ -149,9 +149,9 @@ void main() {
     );
     ContainerLayer layer = RendererBinding.instance.renderView.debugLayer;
     while (layer != null && !(layer is OpacityLayer))
-      layer = layer.firstChild;
+      layer = layer.firstChild as ContainerLayer;
     expect(layer, isInstanceOf<OpacityLayer>());
-    final OpacityLayer opacityLayer = layer;
+    final OpacityLayer opacityLayer = layer as OpacityLayer;
     expect(opacityLayer.alpha, equals(opacity * 255));
     expect(layer.firstChild, isInstanceOf<TransformLayer>());
   });

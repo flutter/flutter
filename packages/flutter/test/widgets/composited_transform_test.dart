@@ -35,7 +35,7 @@ void main() {
         ),
       ),
     );
-    final RenderBox box = key.currentContext.findRenderObject();
+    final RenderBox box = key.currentContext.findRenderObject() as RenderBox;
     expect(box.localToGlobal(Offset.zero), const Offset(123.0, 456.0));
   });
 
@@ -74,8 +74,8 @@ void main() {
         ),
       ),
     );
-    final RenderBox box1 = key1.currentContext.findRenderObject();
-    final RenderBox box2 = key2.currentContext.findRenderObject();
+    final RenderBox box1 = key1.currentContext.findRenderObject() as RenderBox;
+    final RenderBox box2 = key2.currentContext.findRenderObject() as RenderBox;
     final Offset position1 = box1.localToGlobal(Offset.zero);
     final Offset position2 = box2.localToGlobal(Offset.zero);
     expect(position1.dx, moreOrLessEquals(position2.dx));
@@ -129,8 +129,8 @@ void main() {
         ),
       ),
     );
-    final RenderBox box1 = key1.currentContext.findRenderObject();
-    final RenderBox box2 = key2.currentContext.findRenderObject();
+    final RenderBox box1 = key1.currentContext.findRenderObject() as RenderBox;
+    final RenderBox box2 = key2.currentContext.findRenderObject() as RenderBox;
     final Offset position1 = box1.localToGlobal(Offset.zero);
     final Offset position2 = box2.localToGlobal(Offset.zero);
     expect(position1.dx, moreOrLessEquals(position2.dx));
@@ -169,7 +169,7 @@ void main() {
         ),
       ),
     );
-    final RenderBox box2 = key2.currentContext.findRenderObject();
+    final RenderBox box2 = key2.currentContext.findRenderObject() as RenderBox;
     expect(box2.size, const Size(10.0, 10.0));
     expect(_tapped, isFalse);
     await tester.tap(find.byKey(key1));

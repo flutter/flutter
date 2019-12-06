@@ -47,7 +47,7 @@ Widget boilerplate({ Widget child }) {
 }
 
 Color getBackgroundColor(WidgetTester tester, int childIndex) {
-  return getRenderSegmentedControl(tester).backgroundColors[childIndex];
+  return getRenderSegmentedControl(tester).backgroundColors[childIndex] as Color;
 }
 
 void main() {
@@ -912,7 +912,7 @@ void main() {
 
     expect(sharedValue, 1);
 
-    final double childWidth = getRenderSegmentedControl(tester).firstChild.size.width;
+    final double childWidth = getRenderSegmentedControl(tester).firstChild.size.width as double;
     final Offset centerOfSegmentedControl = tester.getCenter(find.text('Child 1'));
 
     // Tap just inside segment bounds

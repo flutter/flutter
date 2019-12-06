@@ -21,15 +21,15 @@ dynamic getRenderSegmentedControl(WidgetTester tester) {
 
 Rect currentUnscaledThumbRect(WidgetTester tester, { bool useGlobalCoordinate = false }) {
   final dynamic renderSegmentedControl = getRenderSegmentedControl(tester);
-  final Rect local = renderSegmentedControl.currentThumbRect;
+  final Rect local = renderSegmentedControl.currentThumbRect as Rect;
   if (!useGlobalCoordinate)
     return local;
 
-  final RenderBox segmentedControl = renderSegmentedControl;
+  final RenderBox segmentedControl = renderSegmentedControl as RenderBox;
   return local?.shift(segmentedControl.localToGlobal(Offset.zero));
 }
 
-double currentThumbScale(WidgetTester tester) => getRenderSegmentedControl(tester).currentThumbScale;
+double currentThumbScale(WidgetTester tester) => getRenderSegmentedControl(tester).currentThumbScale as double;
 
 Widget setupSimpleSegmentedControl() {
   const Map<int, Widget> children = <int, Widget>{
@@ -349,7 +349,7 @@ void main() {
     final BoxDecoration decoration = tester.widget<Container>(find.descendant(
       of: find.byType(UnconstrainedBox),
       matching: find.byType(Container),
-    )).decoration;
+    )).decoration as BoxDecoration;
 
     expect(getRenderSegmentedControl(tester).thumbColor.value, CupertinoColors.systemGreen.color.value);
     expect(decoration.color.value, CupertinoColors.systemRed.color.value);
@@ -360,7 +360,7 @@ void main() {
     final BoxDecoration decorationDark = tester.widget<Container>(find.descendant(
       of: find.byType(UnconstrainedBox),
       matching: find.byType(Container),
-    )).decoration;
+    )).decoration as BoxDecoration;
 
 
     expect(getRenderSegmentedControl(tester).thumbColor.value, CupertinoColors.systemGreen.darkColor.value);

@@ -117,7 +117,7 @@ void main() {
     ));
 
     // Border color is resolved correctly.
-    final BoxDecoration decoration1 = renderDecoratedBox.decoration;
+    final BoxDecoration decoration1 = renderDecoratedBox.decoration as BoxDecoration;
     expect(decoration1.border.top.color.value, 0x4C000000);
 
     // Switch to dark mode.
@@ -153,7 +153,7 @@ void main() {
     expect(actualActive.text.style.color.value, 0xFF000001);
 
     // Border color is resolved correctly.
-    final BoxDecoration decoration2 = renderDecoratedBox.decoration;
+    final BoxDecoration decoration2 = renderDecoratedBox.decoration as BoxDecoration;
     expect(decoration2.border.top.color.value, 0x29000000);
   });
 
@@ -451,7 +451,7 @@ void main() {
         ));
 
     final DecoratedBox decoratedBox = tester.widget(find.byType(DecoratedBox));
-    final BoxDecoration boxDecoration = decoratedBox.decoration;
+    final BoxDecoration boxDecoration = decoratedBox.decoration as BoxDecoration;
     expect(boxDecoration.border, isNotNull);
 
     await pumpWidgetWithBoilerplate(
@@ -481,7 +481,7 @@ void main() {
     final DecoratedBox decoratedBoxHiddenBorder =
         tester.widget(find.byType(DecoratedBox));
     final BoxDecoration boxDecorationHiddenBorder =
-        decoratedBoxHiddenBorder.decoration;
+        decoratedBoxHiddenBorder.decoration as BoxDecoration;
     expect(boxDecorationHiddenBorder.border, isNull);
   });
 }

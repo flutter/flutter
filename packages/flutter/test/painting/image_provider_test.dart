@@ -262,10 +262,10 @@ void main() {
           onError: anyNamed('onError'),
           cancelOnError: anyNamed('cancelOnError'),
         )).thenAnswer((Invocation invocation) {
-          final void Function(List<int>) onData = invocation.positionalArguments[0];
-          final void Function(Object) onError = invocation.namedArguments[#onError];
-          final void Function() onDone = invocation.namedArguments[#onDone];
-          final bool cancelOnError = invocation.namedArguments[#cancelOnError];
+          final void Function(List<int>) onData = invocation.positionalArguments[0] as void Function(List<int>);
+          final void Function(Object) onError = invocation.namedArguments[#onError] as void Function(Object);
+          final void Function() onDone = invocation.namedArguments[#onDone] as void Function();
+          final bool cancelOnError = invocation.namedArguments[#cancelOnError] as bool;
 
           return Stream<Uint8List>.fromIterable(chunks).listen(
             onData,

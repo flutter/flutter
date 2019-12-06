@@ -49,7 +49,7 @@ enum ExampleEnum {
 /// Encode and decode to JSON to make sure all objects in the JSON for the
 /// [DiagnosticsNode] are valid JSON.
 Map<String, Object> simulateJsonSerialization(DiagnosticsNode node) {
-  return json.decode(json.encode(node.toJsonMap(const DiagnosticsSerializationDelegate())));
+  return json.decode(json.encode(node.toJsonMap(const DiagnosticsSerializationDelegate()))) as Map<String, Object>;
 }
 
 void validateNodeJsonSerialization(DiagnosticsNode node) {
@@ -138,7 +138,7 @@ void validateIterableFlagsPropertyJsonSerialization(FlagsSummary<Object> propert
 void validateIterablePropertyJsonSerialization(IterableProperty<Object> property) {
   final Map<String, Object> json = simulateJsonSerialization(property);
   if (property.value != null) {
-    final List<Object> valuesJson = json['values'];
+    final List<Object> valuesJson = json['values'] as List<Object>;
     final List<String> expectedValues = property.value.map<String>((Object value) => value.toString()).toList();
     expect(listEquals(valuesJson, expectedValues), isTrue);
   } else {
@@ -1407,7 +1407,7 @@ void main() {
 
   test('object property test', () {
     const Rect rect = Rect.fromLTRB(0.0, 0.0, 20.0, 20.0);
-    final DiagnosticsNode simple = DiagnosticsProperty<Rect>(
+    final DiagnosticsProperty<Rect> simple = DiagnosticsProperty<Rect>(
       'name',
       rect,
     );
@@ -1416,7 +1416,7 @@ void main() {
     expect(simple.toString(), equals('name: Rect.fromLTRB(0.0, 0.0, 20.0, 20.0)'));
     validatePropertyJsonSerialization(simple);
 
-    final DiagnosticsNode withDescription = DiagnosticsProperty<Rect>(
+    final DiagnosticsProperty<Rect> withDescription = DiagnosticsProperty<Rect>(
       'name',
       rect,
       description: 'small rect',
@@ -1445,7 +1445,7 @@ void main() {
     expect(hideNullProperty.toString(), equals('name: null'));
     validatePropertyJsonSerialization(hideNullProperty);
 
-    final DiagnosticsNode nullDescription = DiagnosticsProperty<Object>(
+    final DiagnosticsProperty<Object> nullDescription = DiagnosticsProperty<Object>(
       'name',
       null,
       ifNull: 'missing',
@@ -1482,7 +1482,7 @@ void main() {
 
   test('lazy object property test', () {
     const Rect rect = Rect.fromLTRB(0.0, 0.0, 20.0, 20.0);
-    final DiagnosticsNode simple = DiagnosticsProperty<Rect>.lazy(
+    final DiagnosticsProperty<Rect> simple = DiagnosticsProperty<Rect>.lazy(
       'name',
       () => rect,
       description: 'small rect',
@@ -1502,7 +1502,7 @@ void main() {
     expect(nullProperty.toString(), equals('name: missing'));
     validatePropertyJsonSerialization(nullProperty);
 
-    final DiagnosticsNode hideNullProperty = DiagnosticsProperty<Object>.lazy(
+    final DiagnosticsProperty<Object> hideNullProperty = DiagnosticsProperty<Object>.lazy(
       'name',
       () => null,
       description: 'missing',
@@ -1513,7 +1513,7 @@ void main() {
     expect(hideNullProperty.toString(), equals('name: missing'));
     validatePropertyJsonSerialization(hideNullProperty);
 
-    final DiagnosticsNode hideName = DiagnosticsProperty<Rect>.lazy(
+    final DiagnosticsProperty<Rect> hideName = DiagnosticsProperty<Rect>.lazy(
       'name',
       () => rect,
       description: 'small rect',
@@ -1888,7 +1888,7 @@ void main() {
     expect(messageProperty.name, equals('diagnostics'));
     expect(messageProperty.value, isNull);
     expect(messageProperty.showName, isTrue);
-    validatePropertyJsonSerialization(messageProperty);
+    validatePropertyJsonSerialization(messageProperty as MessageProperty);
   });
 
   test('error message style wrap test', () {

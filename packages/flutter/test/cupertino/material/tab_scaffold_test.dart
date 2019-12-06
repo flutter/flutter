@@ -131,7 +131,7 @@ void main() {
     BoxDecoration tabDecoration = tester.widget<DecoratedBox>(find.descendant(
       of: find.byType(CupertinoTabBar),
       matching: find.byType(DecoratedBox),
-    )).decoration;
+    )).decoration as BoxDecoration;
 
     expect(tabDecoration.color, isSameColorAs(const Color(0xF0F9F9F9))); // Inherited from theme.
 
@@ -157,7 +157,7 @@ void main() {
     tabDecoration = tester.widget<DecoratedBox>(find.descendant(
       of: find.byType(CupertinoTabBar),
       matching: find.byType(DecoratedBox),
-    )).decoration;
+    )).decoration as BoxDecoration;
 
     expect(tabDecoration.color, isSameColorAs(const Color(0xF01D1D1D)));
 
@@ -199,7 +199,7 @@ void main() {
         of: find.byType(CupertinoTabScaffold),
         matching: find.byType(DecoratedBox),
       )
-    ).decoration;
+    ).decoration as BoxDecoration;
 
     expect(tabDecoration.color.value, backgroundColor.color.value);
 
@@ -222,7 +222,7 @@ void main() {
         of: find.byType(CupertinoTabScaffold),
         matching: find.byType(DecoratedBox),
       )
-    ).decoration;
+    ).decoration as BoxDecoration;
 
     expect(tabDecoration.color.value, backgroundColor.darkColor.value);
   });

@@ -31,8 +31,8 @@ void main() {
       key: key,
       child: Builder(
         builder: (BuildContext context) {
-          behavior = ScrollConfiguration.of(context);
-          position = Scrollable.of(context).position;
+          behavior = ScrollConfiguration.of(context) as TestScrollBehavior;
+          position = Scrollable.of(context).position as ScrollPositionWithSingleContext;
           return Container(height: 1000.0);
         },
       ),

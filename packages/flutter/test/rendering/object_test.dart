@@ -102,37 +102,37 @@ void main() {
 
   test('PaintingContext.pushClipRect reuses the layer', () {
     _testPaintingContextLayerReuse<ClipRectLayer>((PaintingContextCallback painter, PaintingContext context, Offset offset, Layer oldLayer) {
-      return context.pushClipRect(true, offset, Rect.zero, painter, oldLayer: oldLayer);
+      return context.pushClipRect(true, offset, Rect.zero, painter, oldLayer: oldLayer as ClipRectLayer);
     });
   });
 
   test('PaintingContext.pushClipRRect reuses the layer', () {
     _testPaintingContextLayerReuse<ClipRRectLayer>((PaintingContextCallback painter, PaintingContext context, Offset offset, Layer oldLayer) {
-      return context.pushClipRRect(true, offset, Rect.zero, RRect.fromRectAndRadius(Rect.zero, const Radius.circular(1.0)), painter, oldLayer: oldLayer);
+      return context.pushClipRRect(true, offset, Rect.zero, RRect.fromRectAndRadius(Rect.zero, const Radius.circular(1.0)), painter, oldLayer: oldLayer as ClipRRectLayer);
     });
   });
 
   test('PaintingContext.pushClipPath reuses the layer', () {
     _testPaintingContextLayerReuse<ClipPathLayer>((PaintingContextCallback painter, PaintingContext context, Offset offset, Layer oldLayer) {
-      return context.pushClipPath(true, offset, Rect.zero, Path(), painter, oldLayer: oldLayer);
+      return context.pushClipPath(true, offset, Rect.zero, Path(), painter, oldLayer: oldLayer as ClipPathLayer);
     });
   });
 
   test('PaintingContext.pushColorFilter reuses the layer', () {
     _testPaintingContextLayerReuse<ColorFilterLayer>((PaintingContextCallback painter, PaintingContext context, Offset offset, Layer oldLayer) {
-      return context.pushColorFilter(offset, const ColorFilter.mode(Color.fromRGBO(0, 0, 0, 1.0), BlendMode.clear), painter, oldLayer: oldLayer);
+      return context.pushColorFilter(offset, const ColorFilter.mode(Color.fromRGBO(0, 0, 0, 1.0), BlendMode.clear), painter, oldLayer: oldLayer as ColorFilterLayer);
     });
   });
 
   test('PaintingContext.pushTransform reuses the layer', () {
     _testPaintingContextLayerReuse<TransformLayer>((PaintingContextCallback painter, PaintingContext context, Offset offset, Layer oldLayer) {
-      return context.pushTransform(true, offset, Matrix4.identity(), painter, oldLayer: oldLayer);
+      return context.pushTransform(true, offset, Matrix4.identity(), painter, oldLayer: oldLayer as TransformLayer);
     });
   });
 
   test('PaintingContext.pushOpacity reuses the layer', () {
     _testPaintingContextLayerReuse<OpacityLayer>((PaintingContextCallback painter, PaintingContext context, Offset offset, Layer oldLayer) {
-      return context.pushOpacity(offset, 100, painter, oldLayer: oldLayer);
+      return context.pushOpacity(offset, 100, painter, oldLayer: oldLayer as OpacityLayer);
     });
   });
 }
@@ -172,7 +172,7 @@ class _TestCustomLayerBox extends RenderBox {
   void paint(PaintingContext context, Offset offset) {
     final Layer paintedLayer = painter(super.paint, context, offset, layer);
     paintedLayers.add(paintedLayer);
-    layer = paintedLayer;
+    layer = paintedLayer as ContainerLayer;
   }
 }
 

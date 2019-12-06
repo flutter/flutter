@@ -26,7 +26,7 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
     expect(notification, isInstanceOf<ScrollStartNotification>());
     expect(notification.depth, equals(0));
-    final ScrollStartNotification start = notification;
+    final ScrollStartNotification start = notification as ScrollStartNotification;
     expect(start.dragDetails, isNotNull);
     expect(start.dragDetails.globalPosition, equals(const Offset(100.0, 100.0)));
 
@@ -34,7 +34,7 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
     expect(notification, isInstanceOf<ScrollUpdateNotification>());
     expect(notification.depth, equals(0));
-    final ScrollUpdateNotification update = notification;
+    final ScrollUpdateNotification update = notification as ScrollUpdateNotification;
     expect(update.dragDetails, isNotNull);
     expect(update.dragDetails.globalPosition, equals(const Offset(90.0, 90.0)));
     expect(update.dragDetails.delta, equals(const Offset(0.0, -10.0)));
@@ -43,7 +43,7 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
     expect(notification, isInstanceOf<ScrollEndNotification>());
     expect(notification.depth, equals(0));
-    final ScrollEndNotification end = notification;
+    final ScrollEndNotification end = notification as ScrollEndNotification;
     expect(end.dragDetails, isNotNull);
     expect(end.dragDetails.velocity, equals(Velocity.zero));
   });

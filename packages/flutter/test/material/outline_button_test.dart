@@ -1044,12 +1044,13 @@ PhysicalModelLayer _findPhysicalLayer(Element element) {
   expect(element, isNotNull);
   RenderObject object = element.renderObject;
   while (object != null && object is! RenderRepaintBoundary && object is! RenderView) {
-    object = object.parent;
+    object = object.parent as RenderObject;
   }
   expect(object.debugLayer, isNotNull);
   expect(object.debugLayer.firstChild, isInstanceOf<PhysicalModelLayer>());
-  final PhysicalModelLayer layer = object.debugLayer.firstChild;
-  return layer.firstChild is PhysicalModelLayer ? layer.firstChild : layer;
+  final PhysicalModelLayer layer = object.debugLayer.firstChild as PhysicalModelLayer;
+  final Layer child = layer.firstChild;
+  return child is PhysicalModelLayer ? child : layer;
 }
 
 void _checkPhysicalLayer(Element element, Color expectedColor, { Path clipPath, Rect clipRect }) {

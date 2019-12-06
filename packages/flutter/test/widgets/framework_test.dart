@@ -530,12 +530,12 @@ void main() {
     element.visitChildren((Element e) {
       childElement = e;
     });
-    element.removeChild(childElement.renderObject);
+    element.removeChild(childElement.renderObject as RenderBox);
     element.createChild(0, after: null);
     element.visitChildren((Element e) {
       childElement = e;
     });
-    element.removeChild(childElement.renderObject);
+    element.removeChild(childElement.renderObject as RenderBox);
     element.createChild(0, after: null);
   });
 
@@ -597,7 +597,7 @@ void main() {
         Container(),
       ],
     ));
-    final MultiChildRenderObjectElement element = key0.currentContext;
+    final MultiChildRenderObjectElement element = key0.currentContext as MultiChildRenderObjectElement;
     expect(
       element.children.map((Element element) => element.widget.key),
       <Key>[null, key1, null, key2, null],
@@ -616,7 +616,7 @@ void main() {
         Container(),
       ],
     ));
-    final MultiChildRenderObjectElement element = key0.currentContext;
+    final MultiChildRenderObjectElement element = key0.currentContext as MultiChildRenderObjectElement;
 
     expect(element, hasAGoodToStringDeep);
     expect(

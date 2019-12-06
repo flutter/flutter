@@ -65,7 +65,7 @@ void main() {
         await tester.pumpWidget(transitionUnderTest);
         RenderDecoratedBox actualBox =
             tester.renderObject(find.byType(DecoratedBox));
-        BoxDecoration actualDecoration = actualBox.decoration;
+        BoxDecoration actualDecoration = actualBox.decoration as BoxDecoration;
 
         expect(actualDecoration.color, const Color(0xFFFFFFFF));
         expect(actualDecoration.boxShadow[0].blurRadius, 10.0);
@@ -76,11 +76,11 @@ void main() {
 
         await tester.pump();
         actualBox = tester.renderObject(find.byType(DecoratedBox));
-        actualDecoration = actualBox.decoration;
+        actualDecoration = actualBox.decoration as BoxDecoration;
 
         expect(actualDecoration.color, const Color(0xFF7F7F7F));
         expect(actualDecoration.border, isInstanceOf<Border>());
-        final Border border = actualDecoration.border;
+        final Border border = actualDecoration.border as Border;
         expect(border.left.width, 2.5);
         expect(border.left.style, BorderStyle.solid);
         expect(border.left.color, const Color(0xFF101010));
@@ -95,7 +95,7 @@ void main() {
 
         await tester.pump();
         actualBox = tester.renderObject(find.byType(DecoratedBox));
-        actualDecoration = actualBox.decoration;
+        actualDecoration = actualBox.decoration as BoxDecoration;
 
         expect(actualDecoration.color, const Color(0xFF000000));
         expect(actualDecoration.boxShadow, null);
@@ -119,7 +119,7 @@ void main() {
       await tester.pumpWidget(transitionUnderTest);
       RenderDecoratedBox actualBox =
           tester.renderObject(find.byType(DecoratedBox));
-      BoxDecoration actualDecoration = actualBox.decoration;
+      BoxDecoration actualDecoration = actualBox.decoration as BoxDecoration;
 
       expect(actualDecoration.color, const Color(0xFFFFFFFF));
       expect(actualDecoration.boxShadow[0].blurRadius, 10.0);
@@ -130,13 +130,13 @@ void main() {
 
       await tester.pump();
       actualBox = tester.renderObject(find.byType(DecoratedBox));
-      actualDecoration = actualBox.decoration;
+      actualDecoration = actualBox.decoration as BoxDecoration;
 
       // Same as the test above but the values should be much closer to the
       // tween's end values given the easeOut curve.
       expect(actualDecoration.color, const Color(0xFF505050));
       expect(actualDecoration.border, isInstanceOf<Border>());
-      final Border border = actualDecoration.border;
+      final Border border = actualDecoration.border as Border;
       expect(border.left.width, closeTo(1.9, 0.1));
       expect(border.left.style, BorderStyle.solid);
       expect(border.left.color, const Color(0xFF151515));
@@ -164,12 +164,12 @@ void main() {
 
     final RenderPositionedBox actualPositionedBox = tester.renderObject(find.byType(Align));
 
-    Alignment actualAlignment = actualPositionedBox.alignment;
+    Alignment actualAlignment = actualPositionedBox.alignment as Alignment;
     expect(actualAlignment, const Alignment(-1.0, 0.0));
 
     controller.value = 0.5;
     await tester.pump();
-    actualAlignment = actualPositionedBox.alignment;
+    actualAlignment = actualPositionedBox.alignment as Alignment;
     expect(actualAlignment, const Alignment(0.0, 0.5));
   });
 

@@ -34,7 +34,8 @@ void main() {
     List<RadioListTile<int>> findTiles() => find
       .byType(radioListTileType)
       .evaluate()
-      .map<RadioListTile<int>>((Element element) => element.widget)
+      .map<Widget>((Element element) => element.widget)
+      .cast<RadioListTile<int>>()
       .toList();
 
     Widget buildFrame() {

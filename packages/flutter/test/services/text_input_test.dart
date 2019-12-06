@@ -204,7 +204,7 @@ class FakeTextInputClient implements TextInputClient {
 class FakeTextChannel implements MethodChannel {
   FakeTextChannel(this.outgoing) : assert(outgoing != null);
 
-  Future<void> Function(MethodCall) outgoing;
+  Future<dynamic> Function(MethodCall) outgoing;
   Future<void> Function(MethodCall) incoming;
 
   List<MethodCall> outgoingCalls = <MethodCall>[];
@@ -222,10 +222,10 @@ class FakeTextChannel implements MethodChannel {
   Future<Map<K, V>> invokeMapMethod<K, V>(String method, [dynamic arguments]) => throw UnimplementedError();
 
   @override
-  Future<T> invokeMethod<T>(String method, [dynamic arguments]) {
+  Future<T> invokeMethod<T>(String method, [dynamic arguments]) async {
     final MethodCall call = MethodCall(method, arguments);
     outgoingCalls.add(call);
-    return outgoing(call);
+    return await outgoing(call) as T;
   }
 
   @override

@@ -230,8 +230,8 @@ void main() {
         ),
       );
       final List<RenderObject> listeners = tester.renderObjectList(find.byType(MouseRegion)).toList();
-      final RenderMouseRegion renderListener1 = listeners[0];
-      final RenderMouseRegion renderListener2 = listeners[1];
+      final RenderMouseRegion renderListener1 = listeners[0] as RenderMouseRegion;
+      final RenderMouseRegion renderListener2 = listeners[1] as RenderMouseRegion;
       Offset center = tester.getCenter(find.byKey(key2));
       await gesture.moveTo(center);
       await tester.pump();
@@ -315,8 +315,8 @@ void main() {
         ),
       );
       final List<RenderObject> listeners = tester.renderObjectList(find.byType(MouseRegion)).toList();
-      final RenderMouseRegion renderListener1 = listeners[0];
-      final RenderMouseRegion renderListener2 = listeners[1];
+      final RenderMouseRegion renderListener1 = listeners[0] as RenderMouseRegion;
+      final RenderMouseRegion renderListener2 = listeners[1] as RenderMouseRegion;
       final Offset center1 = tester.getCenter(find.byKey(key1));
       final Offset center2 = tester.getCenter(find.byKey(key2));
       await gesture.moveTo(center1);

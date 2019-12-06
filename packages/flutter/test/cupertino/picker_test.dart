@@ -125,7 +125,7 @@ void main() {
         ),
       );
       final Container container = tester.firstWidget(find.byType(Container));
-      final BoxDecoration boxDecoration = container.decoration;
+      final BoxDecoration boxDecoration = container.decoration as BoxDecoration;
       expect(boxDecoration.gradient.colors, <Color>[
         backgroundColor,
         backgroundColor.withAlpha(0xF2),
@@ -167,7 +167,7 @@ void main() {
         ),
       );
       final DecoratedBox decoratedBox = tester.firstWidget(find.byType(DecoratedBox));
-      final BoxDecoration boxDecoration = decoratedBox.decoration;
+      final BoxDecoration boxDecoration = decoratedBox.decoration as BoxDecoration;
       expect(boxDecoration.gradient, isNull);
       expect(boxDecoration.color, isNotNull);
     });
@@ -202,7 +202,7 @@ void main() {
       // If the background color is null, the gradient color should be white.
       const Color backgroundColor = Color(0xFFFFFFFF);
       final Container container = tester.firstWidget(find.byType(Container));
-      final BoxDecoration boxDecoration = container.decoration;
+      final BoxDecoration boxDecoration = container.decoration as BoxDecoration;
       expect(boxDecoration.gradient.colors, <Color>[
         backgroundColor,
         backgroundColor.withAlpha(0xF2),

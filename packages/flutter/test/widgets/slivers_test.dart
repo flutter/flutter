@@ -48,7 +48,7 @@ Future<void> testSliverFixedExtentList(WidgetTester tester, List<String> items) 
               },
               childCount : items.length,
               findChildIndexCallback: (Key key) {
-                final ValueKey<String> valueKey = key;
+                final ValueKey<String> valueKey = key as ValueKey<String>;
                 final String data = valueKey.value;
                 return items.indexOf(data);
               },
@@ -353,7 +353,7 @@ void main() {
       addRepaintBoundaries: false,
       addSemanticIndexes: false,
     );
-    final KeyedSubtree wrapped = builderThrowsDelegate.build(null, 0);
+    final KeyedSubtree wrapped = builderThrowsDelegate.build(null, 0) as KeyedSubtree;
     expect(wrapped.child, errorText);
     expect(tester.takeException(), 'builder');
     ErrorWidget.builder = oldBuilder;
