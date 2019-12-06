@@ -619,7 +619,7 @@ void main() {
 
     expect(projectDir.childDirectory('macos').childFile('flutter_project.podspec').existsSync(), false);
   }, overrides: <Type, Generator>{
-    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
+    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: false),
   });
 
   testUsingContext('has correct content and formatting with module template', () async {
