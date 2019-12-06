@@ -24,6 +24,7 @@ class ClipRRectLayer : public ContainerLayer {
  private:
   SkRRect clip_rrect_;
   Clip clip_behavior_;
+  bool children_inside_clip_ = false;
 
   FML_DISALLOW_COPY_AND_ASSIGN(ClipRRectLayer);
 };
