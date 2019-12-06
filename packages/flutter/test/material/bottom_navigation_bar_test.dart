@@ -119,7 +119,6 @@ void main() {
     expect(selectedIcon.fontSize, equals(24.0));
     expect(unselectedIcon.color, equals(captionColor));
     expect(unselectedIcon.fontSize, equals(24.0));
-    expect(_getOpacity(tester, 'Alarm'), equals(1.0));
     expect(_getMaterial(tester).elevation, equals(8.0));
   });
 
@@ -472,7 +471,6 @@ void main() {
     );
     expect(tester.renderObject<RenderParagraph>(find.text('AC')).text.style.color, equals(selectedColor));
     expect(tester.renderObject<RenderParagraph>(find.text('Alarm')).text.style.color, equals(unselectedColor));
-    expect(_getOpacity(tester, 'Alarm'), equals(1.0));
   });
 
 
@@ -1661,6 +1659,7 @@ Widget boilerplate({ Widget bottomNavigationBar, @required TextDirection textDir
 }
 
 double _getOpacity(WidgetTester tester, String textValue) {
+  // debugDumpApp();
   final FadeTransition opacityWidget = tester.widget<FadeTransition>(
       find.ancestor(
         of: find.text(textValue),
