@@ -64,7 +64,7 @@ class _RenderStatusBarPaddingSliver extends RenderSliver {
 
   @override
   void performLayout() {
-    final double height = (maxHeight - constraints.scrollOffset / scrollFactor).clamp(0.0, maxHeight);
+    final double height = (maxHeight - constraints.scrollOffset / scrollFactor).clamp(0.0, maxHeight) as double;
     geometry = SliverGeometry(
       paintExtent: math.min(height, constraints.remainingPaintExtent),
       scrollExtent: maxHeight,
@@ -285,7 +285,7 @@ class _AllSectionsView extends AnimatedWidget {
   final List<Widget> sectionCards;
 
   double _selectedIndexDelta(int index) {
-    return (index.toDouble() - selectedIndex.value).abs().clamp(0.0, 1.0);
+    return (index.toDouble() - selectedIndex.value).abs().clamp(0.0, 1.0) as double;
   }
 
   Widget _build(BuildContext context, BoxConstraints constraints) {
@@ -498,7 +498,7 @@ class _AnimationDemoHomeState extends State<AnimationDemoHome> {
     return ListTile.divideTiles(context: context, tiles: detailItems);
   }
 
-  Iterable<Widget> _allHeadingItems(double maxHeight, double midScrollOffset) {
+  List<Widget> _allHeadingItems(double maxHeight, double midScrollOffset) {
     final List<Widget> sectionCards = <Widget>[];
     for (int index = 0; index < allSections.length; index++) {
       sectionCards.add(LayoutId(

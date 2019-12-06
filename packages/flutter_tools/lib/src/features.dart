@@ -73,7 +73,6 @@ const List<Feature> allFeatures = <Feature>[
   flutterLinuxDesktopFeature,
   flutterMacOSDesktopFeature,
   flutterWindowsDesktopFeature,
-  flutterBuildPluginAsAarFeature,
   flutterAndroidEmbeddingV2Feature,
   flutterWebIncrementalCompiler,
 ];
@@ -91,6 +90,10 @@ const Feature flutterWebFeature = Feature(
     available: true,
     enabledByDefault: false,
   ),
+  beta: FeatureChannelSetting(
+    available: true,
+    enabledByDefault: false,
+  ),
 );
 
 /// The [Feature] for macOS desktop.
@@ -99,6 +102,10 @@ const Feature flutterMacOSDesktopFeature = Feature(
   configSetting: 'enable-macos-desktop',
   environmentOverride: 'FLUTTER_MACOS',
   master: FeatureChannelSetting(
+    available: true,
+    enabledByDefault: false,
+  ),
+  dev: FeatureChannelSetting(
     available: true,
     enabledByDefault: false,
   ),
@@ -126,22 +133,24 @@ const Feature flutterWindowsDesktopFeature = Feature(
   ),
 );
 
-/// The [Feature] for building plugins as AARs in an app project.
-const Feature flutterBuildPluginAsAarFeature = Feature(
-  name: 'Build plugins independently as AARs in app projects',
-  configSetting: 'enable-build-plugin-as-aar',
-  master: FeatureChannelSetting(
-    available: true,
-    enabledByDefault: false,
-  ),
-);
-
 /// The [Feature] for generating projects using the new Android embedding.
 const Feature flutterAndroidEmbeddingV2Feature = Feature(
   name: 'flutter create generates projects using the Android embedding V2',
   environmentOverride: 'ENABLE_ANDROID_EMBEDDING_V2',
   configSetting: 'enable-android-embedding-v2',
+  beta: FeatureChannelSetting(
+    available: true,
+    enabledByDefault: true,
+  ),
+  dev: FeatureChannelSetting(
+    available: true,
+    enabledByDefault: true,
+  ),
   master: FeatureChannelSetting(
+    available: true,
+    enabledByDefault: true,
+  ),
+  stable: FeatureChannelSetting(
     available: true,
     enabledByDefault: true,
   ),

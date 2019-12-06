@@ -257,10 +257,10 @@ class BorderSide {
       return true;
     if (runtimeType != other.runtimeType)
       return false;
-    final BorderSide typedOther = other;
-    return color == typedOther.color &&
-           width == typedOther.width &&
-           style == typedOther.style;
+    return other is BorderSide
+        && other.color == color
+        && other.width == width
+        && other.style == style;
   }
 
   @override
@@ -615,16 +615,8 @@ class _CompoundBorder extends ShapeBorder {
       return true;
     if (runtimeType != other.runtimeType)
       return false;
-    final _CompoundBorder typedOther = other;
-    if (borders == typedOther.borders)
-      return true;
-    if (borders.length != typedOther.borders.length)
-      return false;
-    for (int index = 0; index < borders.length; index += 1) {
-      if (borders[index] != typedOther.borders[index])
-        return false;
-    }
-    return true;
+    return other is _CompoundBorder
+        && listEquals<ShapeBorder>(other.borders, borders);
   }
 
   @override

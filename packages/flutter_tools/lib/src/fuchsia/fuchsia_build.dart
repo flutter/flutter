@@ -32,6 +32,15 @@ Future<void> _timedBuildStep(String name, Future<void> Function() action) async 
   flutterUsage.sendTiming('build', name, Duration(milliseconds: sw.elapsedMilliseconds));
 }
 
+Future<void> _validateCmxFile(FuchsiaProject fuchsiaProject) async {
+  final String appName = fuchsiaProject.project.manifest.appName;
+  final String cmxPath = fs.path.join(fuchsiaProject.meta.path, '$appName.cmx');
+  final File cmxFile = fs.file(cmxPath);
+  if (!await cmxFile.exists()) {
+    throwToolExit('The Fuchsia build requires a .cmx file at $cmxPath for the app: $appName.');
+  }
+}
+
 // Building a Fuchsia package has a few steps:
 // 1. Do the custom kernel compile using the kernel compiler from the Fuchsia
 //    SDK. This produces .dilp files (among others) and a manifest file.
@@ -45,6 +54,7 @@ Future<void> buildFuchsia({
   BuildInfo buildInfo = BuildInfo.debug,
   String runnerPackageSource = FuchsiaPackageServer.toolHost,
 }) async {
+  await _validateCmxFile(fuchsiaProject);
   final Directory outDir = fs.directory(getFuchsiaBuildDirectory());
   if (!outDir.existsSync()) {
     outDir.createSync(recursive: true);

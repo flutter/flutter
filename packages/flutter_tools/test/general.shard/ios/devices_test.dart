@@ -138,7 +138,7 @@ void main() {
         device.setLogReader(appPackage2, logReader2);
         device.portForwarder = portForwarder;
 
-        device.dispose();
+        await device.dispose();
 
         verify(mockProcess1.kill());
         verify(mockProcess2.kill());
@@ -247,6 +247,16 @@ void main() {
         tryToDelete(tempDir);
 
         Cache.enableLocking();
+      });
+
+      testUsingContext('disposing device disposes the portForwarder', () async {
+        final IOSDevice device = IOSDevice('123');
+        device.portForwarder = mockPortForwarder;
+        device.setLogReader(mockApp, mockLogReader);
+        await device.dispose();
+        verify(mockPortForwarder.dispose()).called(1);
+      }, overrides: <Type, Generator>{
+        Platform: () => macPlatform,
       });
 
       testUsingContext('returns failed if the IOSDevice is not found', () async {

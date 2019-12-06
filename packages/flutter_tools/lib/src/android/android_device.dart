@@ -719,6 +719,12 @@ class AndroidDevice extends Device {
   bool isSupportedForProject(FlutterProject flutterProject) {
     return flutterProject.android.existsSync();
   }
+
+  @override
+  Future<void> dispose() async {
+    _logReader?._stop();
+    await _portForwarder?.dispose();
+  }
 }
 
 Map<String, String> parseAdbDeviceProperties(String str) {
@@ -1009,7 +1015,13 @@ class _AdbLogReader extends DeviceLogReader {
   void _start() {
     final String lastTimestamp = device.lastLogcatTimestamp;
     // Start the adb logcat process and filter the most recent logs since `lastTimestamp`.
-    final List<String> args = <String>['logcat', '-v', 'time', '-T', lastTimestamp];
+    final List<String> args = <String>[
+      'logcat',
+      '-v',
+      'time',
+      '-T',
+      lastTimestamp ?? '', // Empty `-T` means the timestamp of the logcat command invocation.
+    ];
     processUtils.start(device.adbCommandForDevice(args)).then<void>((Process process) {
       _process = process;
       // We expect logcat streams to occasionally contain invalid utf-8,
@@ -1117,9 +1129,12 @@ class _AdbLogReader extends DeviceLogReader {
   }
 
   void _stop() {
-    // TODO(devoncarew): We should remove adb port forwarding here.
-
     _process?.kill();
+  }
+
+  @override
+  void dispose() {
+    _stop();
   }
 }
 
@@ -1129,7 +1144,6 @@ class _AndroidDevicePortForwarder extends DevicePortForwarder {
   final AndroidDevice device;
 
   static int _extractPort(String portString) {
-
     return int.tryParse(portString.trim());
   }
 
@@ -1240,5 +1254,12 @@ class _AndroidDevicePortForwarder extends DevicePortForwarder {
       device.adbCommandForDevice(unforwardCommand),
       throwOnError: true,
     );
+  }
+
+  @override
+  Future<void> dispose() async {
+    for (ForwardedPort port in forwardedPorts) {
+      await unforward(port);
+    }
   }
 }

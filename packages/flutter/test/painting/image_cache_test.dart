@@ -15,6 +15,7 @@ void main() {
     });
 
     tearDown(() {
+      imageCache.largeImageHandler = null;
       imageCache.clear();
       imageCache.maximumSize = 1000;
       imageCache.maximumSizeBytes = 10485760;
@@ -129,6 +130,25 @@ void main() {
       expect(imageCache.currentSize, 1);
       expect(imageCache.currentSizeBytes, 256);
       expect(imageCache.maximumSizeBytes, 256 + 1000);
+    });
+
+    test('Large image handler that rejects an image.', () async {
+      bool wasCalled = false;
+      imageCache.largeImageHandler = (ImageCache imageCache, int imageSize) { wasCalled = true; };
+      const TestImage testImage1 = TestImage(width: 8, height: 8);
+      const TestImage testImage2 = TestImage(width: 16, height: 16);
+
+      imageCache.maximumSizeBytes = 256;
+      await extractOneFrame(const TestImageProvider(1, 1, image: testImage1).resolve(ImageConfiguration.empty));
+      expect(imageCache.currentSize, 1);
+      expect(imageCache.currentSizeBytes, 256);
+      expect(imageCache.maximumSizeBytes, 256);
+
+      await extractOneFrame(const TestImageProvider(2, 2, image: testImage2).resolve(ImageConfiguration.empty));
+      expect(imageCache.currentSize, 1);
+      expect(imageCache.currentSizeBytes, 256);
+      expect(imageCache.maximumSizeBytes, 256);
+      expect(wasCalled, isTrue);
     });
 
     test('Returns null if an error is caught resolving an image', () {

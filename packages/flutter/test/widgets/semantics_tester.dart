@@ -197,8 +197,10 @@ class TestSemantics {
   /// The test screen's size in physical pixels, typically used as the [rect]
   /// for the node with id zero.
   ///
-  /// See also [new TestSemantics.root], which uses this value to describe the
-  /// root node.
+  /// See also:
+  ///
+  ///  * [new TestSemantics.root], which uses this value to describe the root
+  ///    node.
   static const Rect rootRect = Rect.fromLTWH(0.0, 0.0, 2400.0, 1800.0);
 
   /// The test screen's size in logical pixels, useful for the [rect] of

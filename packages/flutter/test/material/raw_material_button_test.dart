@@ -48,7 +48,7 @@ void main() {
       Shortcuts(
         shortcuts: <LogicalKeySet, Intent>{
           LogicalKeySet(LogicalKeyboardKey.enter): const Intent(ActivateAction.key),
-          LogicalKeySet(LogicalKeyboardKey.space): const Intent(SelectAction.key),
+          LogicalKeySet(LogicalKeyboardKey.space): const Intent(ActivateAction.key),
         },
         child: Directionality(
           textDirection: TextDirection.ltr,
@@ -78,7 +78,7 @@ void main() {
 
     await tester.pumpAndSettle();
 
-    expect(pressed, kIsWeb ? isFalse : isTrue);
+    expect(pressed, isTrue);
 
     pressed = false;
     await tester.sendKeyEvent(LogicalKeyboardKey.space);
@@ -286,7 +286,7 @@ void main() {
     expect(find.byKey(key).hitTestable(), findsOneWidget);
   });
 
-  testWidgets('$RawMaterialButton can be expanded by parent constraints', (WidgetTester tester) async {
+  testWidgets('RawMaterialButton can be expanded by parent constraints', (WidgetTester tester) async {
     const Key key = Key('test');
     await tester.pumpWidget(
       MaterialApp(
@@ -306,7 +306,7 @@ void main() {
     expect(tester.getSize(find.byKey(key)), const Size(800.0, 48.0));
   });
 
-  testWidgets('$RawMaterialButton handles focus', (WidgetTester tester) async {
+  testWidgets('RawMaterialButton handles focus', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Button Focus');
     const Key key = Key('test');
     const Color focusColor = Color(0xff00ff00);
@@ -334,7 +334,7 @@ void main() {
     expect(box, paints..rect(color: focusColor));
   });
 
-  testWidgets('$RawMaterialButton loses focus when disabled.', (WidgetTester tester) async {
+  testWidgets('RawMaterialButton loses focus when disabled.', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'RawMaterialButton');
     await tester.pumpWidget(
       MaterialApp(
@@ -368,7 +368,7 @@ void main() {
     expect(focusNode.hasPrimaryFocus, isFalse);
   });
 
-  testWidgets("Disabled $RawMaterialButton can't be traversed to when disabled.", (WidgetTester tester) async {
+  testWidgets("Disabled RawMaterialButton can't be traversed to when disabled.", (WidgetTester tester) async {
     final FocusNode focusNode1 = FocusNode(debugLabel: '$RawMaterialButton 1');
     final FocusNode focusNode2 = FocusNode(debugLabel: '$RawMaterialButton 2');
 
@@ -406,7 +406,7 @@ void main() {
     expect(focusNode2.hasPrimaryFocus, isFalse);
   });
 
-  testWidgets('$RawMaterialButton handles hover', (WidgetTester tester) async {
+  testWidgets('RawMaterialButton handles hover', (WidgetTester tester) async {
     const Key key = Key('test');
     const Color hoverColor = Color(0xff00ff00);
 
@@ -509,5 +509,65 @@ void main() {
     expect(didLongPressButton, isFalse);
     await tester.longPress(rawMaterialButton);
     expect(didLongPressButton, isTrue);
+  });
+
+  testWidgets('RawMaterialButton responds to density changes.', (WidgetTester tester) async {
+    const Key key = Key('test');
+    const Key childKey = Key('test child');
+
+    Future<void> buildTest(VisualDensity visualDensity, {bool useText = false}) async {
+      return await tester.pumpWidget(
+        MaterialApp(
+          home: Directionality(
+            textDirection: TextDirection.rtl,
+            child: Center(
+              child: RawMaterialButton(
+                visualDensity: visualDensity,
+                key: key,
+                onPressed: () {},
+                child: useText ? const Text('Text', key: childKey) : Container(key: childKey, width: 100, height: 100, color: const Color(0xffff0000)),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await buildTest(const VisualDensity());
+    final RenderBox box = tester.renderObject(find.byKey(key));
+    Rect childRect = tester.getRect(find.byKey(childKey));
+    await tester.pumpAndSettle();
+    expect(box.size, equals(const Size(100, 100)));
+    expect(childRect, equals(const Rect.fromLTRB(350, 250, 450, 350)));
+
+    await buildTest(const VisualDensity(horizontal: 3.0, vertical: 3.0));
+    await tester.pumpAndSettle();
+    childRect = tester.getRect(find.byKey(childKey));
+    expect(box.size, equals(const Size(124, 124)));
+    expect(childRect, equals(const Rect.fromLTRB(350, 250, 450, 350)));
+
+    await buildTest(const VisualDensity(horizontal: -3.0, vertical: -3.0));
+    await tester.pumpAndSettle();
+    childRect = tester.getRect(find.byKey(childKey));
+    expect(box.size, equals(const Size(100, 100)));
+    expect(childRect, equals(const Rect.fromLTRB(350, 250, 450, 350)));
+
+    await buildTest(const VisualDensity(), useText: true);
+    await tester.pumpAndSettle();
+    childRect = tester.getRect(find.byKey(childKey));
+    expect(box.size, equals(const Size(88, 48)));
+    expect(childRect, equals(const Rect.fromLTRB(372.0, 293.0, 428.0, 307.0)));
+
+    await buildTest(const VisualDensity(horizontal: 3.0, vertical: 3.0), useText: true);
+    await tester.pumpAndSettle();
+    childRect = tester.getRect(find.byKey(childKey));
+    expect(box.size, equals(const Size(100, 60)));
+    expect(childRect, equals(const Rect.fromLTRB(372.0, 293.0, 428.0, 307.0)));
+
+    await buildTest(const VisualDensity(horizontal: -3.0, vertical: -3.0), useText: true);
+    await tester.pumpAndSettle();
+    childRect = tester.getRect(find.byKey(childKey));
+    expect(box.size, equals(const Size(76, 36)));
+    expect(childRect, equals(const Rect.fromLTRB(372.0, 293.0, 428.0, 307.0)));
   });
 }

@@ -598,7 +598,7 @@ class RenderListWheelViewport
   /// Gets the index of a child by looking at its parentData.
   int indexOf(RenderBox child) {
     assert(child != null);
-    final ListWheelParentData childParentData = child.parentData;
+    final ListWheelParentData childParentData = child.parentData as ListWheelParentData;
     assert(childParentData.index != null);
     return childParentData.index;
   }
@@ -625,7 +625,7 @@ class RenderListWheelViewport
 
   void _layoutChild(RenderBox child, BoxConstraints constraints, int index) {
     child.layout(constraints, parentUsesSize: true);
-    final ListWheelParentData childParentData = child.parentData;
+    final ListWheelParentData childParentData = child.parentData as ListWheelParentData;
     // Centers the child horizontally.
     final double crossPosition = size.width / 2.0 - child.size.width / 2.0;
     childParentData.offset = Offset(crossPosition, indexToScrollOffset(index));
@@ -780,12 +780,12 @@ class RenderListWheelViewport
   /// Paints all children visible in the current viewport.
   void _paintVisibleChildren(PaintingContext context, Offset offset) {
     RenderBox childToPaint = firstChild;
-    ListWheelParentData childParentData = childToPaint?.parentData;
+    ListWheelParentData childParentData = childToPaint?.parentData as ListWheelParentData;
 
     while (childParentData != null) {
       _paintTransformedChild(childToPaint, context, offset, childParentData.offset);
       childToPaint = childAfter(childToPaint);
-      childParentData = childToPaint?.parentData;
+      childParentData = childToPaint?.parentData as ListWheelParentData;
     }
   }
 
@@ -971,7 +971,7 @@ class RenderListWheelViewport
   /// painting coordinates** system.
   @override
   void applyPaintTransform(RenderBox child, Matrix4 transform) {
-    final ListWheelParentData parentData = child?.parentData;
+    final ListWheelParentData parentData = child?.parentData as ListWheelParentData;
     transform.translate(0.0, _getUntransformedPaintingCoordinateY(parentData.offset.dy));
   }
 
@@ -997,9 +997,9 @@ class RenderListWheelViewport
     // `child` will be the last RenderObject before the viewport when walking up from `target`.
     RenderObject child = target;
     while (child.parent != this)
-      child = child.parent;
+      child = child.parent as RenderObject;
 
-    final ListWheelParentData parentData = child.parentData;
+    final ListWheelParentData parentData = child.parentData as ListWheelParentData;
     final double targetOffset = parentData.offset.dy; // the so-called "centerPosition"
 
     final Matrix4 transform = target.getTransformTo(child);

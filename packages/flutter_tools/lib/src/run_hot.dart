@@ -1031,7 +1031,7 @@ class HotRunner extends ResidentRunner {
   @override
   Future<void> cleanupAtFinish() async {
     for (FlutterDevice flutterDevice in flutterDevices) {
-      flutterDevice.device.dispose();
+      await flutterDevice.device.dispose();
     }
     await _cleanupDevFS();
     await stopEchoingDeviceLog();
