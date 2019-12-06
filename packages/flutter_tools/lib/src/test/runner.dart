@@ -51,7 +51,7 @@ Future<int> runTests(
   // Configure package:test to use the Flutter engine for child processes.
   final String shellPath = artifacts.getArtifactPath(Artifact.flutterTester);
   if (!processManager.canRun(shellPath)) {
-    throwToolExit('Cannot find Flutter shell at $shellPath');
+    throwToolExit('Cannot execute Flutter tester at $shellPath');
   }
 
   // Compute the command-line arguments for package:test.

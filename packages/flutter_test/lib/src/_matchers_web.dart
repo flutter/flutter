@@ -52,6 +52,11 @@ class MatchesGoldenFile extends AsyncMatcher {
     final Size size = renderObject.paintBounds.size;
     final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
     final Element e = binding.renderViewElement;
+
+    // Unlike `flutter_tester`, we don't have the ability to render an element
+    // to an image directly. Instead, we will use `window.render()` to render
+    // only the element being requested, and send a request to the test server
+    // requesting it to take a screenshot through the browser's debug interface.
     _renderElement(binding.window, renderObject);
     final String result = await binding.runAsync<String>(() async {
       if (autoUpdateGoldenFiles) {

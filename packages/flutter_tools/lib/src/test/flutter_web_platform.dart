@@ -214,6 +214,10 @@ class FlutterWebPlatform extends PlatformPlugin {
         final WipConnection connection = await chromeTab.connect();
         final WipResponse response = await connection.sendCommand('Page.captureScreenshot', <String, Object>{
           // Clip the screenshot to include only the element.
+          // Prior to taking a screenshot, we are calling `window.render()` in
+          // `_matchers_web.dart` to only render the element on screen. That
+          // will make sure that the element will always be displayed on the
+          // origin of the screen.
           'clip': <String, Object>{
             'x': 0.0,
             'y': 0.0,
@@ -226,6 +230,9 @@ class FlutterWebPlatform extends PlatformPlugin {
       } on WipError catch (ex) {
         printError('Caught WIPError: $ex');
         return shelf.Response.ok('WIP error: $ex');
+      } on FormatException catch (ex) {
+        printError('Caught FormatException: $ex');
+        return shelf.Response.ok('Caught exception: $ex');
       }
 
       if (bytes == null) {
@@ -872,7 +879,7 @@ class TestGoldenComparatorProcess {
           printTrace('<<< $line');
           return line.isNotEmpty && line[0] == '{';
         })
-        .map<dynamic>((String line) => jsonDecode(line))
+        .map<dynamic>(jsonDecode)
         .cast<Map<String, dynamic>>());
 
     process.stderr
@@ -926,7 +933,7 @@ void main() async {
   final commands = stdin
     .transform<String>(utf8.decoder)
     .transform<String>(const LineSplitter())
-    .map<Object>((s) => jsonDecode(s));
+    .map<Object>(jsonDecode);
   await for (Object command in commands) {
     if (command is Map<String, dynamic>) {
       File imageFile = File(command['imageFile']);

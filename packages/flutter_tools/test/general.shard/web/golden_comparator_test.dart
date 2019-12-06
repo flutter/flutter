@@ -46,7 +46,7 @@ void main() {
       });
     });
 
-    test('succeed when goldem comparison succeed', () => testbed.run(() async {
+    test('succeed when golden comparison succeed', () => testbed.run(() async {
       final Map<String, dynamic> expectedResponse = <String, dynamic>{
         'success': true,
         'message': 'some message',
@@ -69,7 +69,7 @@ void main() {
       expect(result, null);
     }));
 
-    test('fail with error message when goldem comparison failed', () => testbed.run(() async {
+    test('fail with error message when golden comparison failed', () => testbed.run(() async {
       final Map<String, dynamic> expectedResponse = <String, dynamic>{
         'success': false,
         'message': 'some message',
@@ -122,7 +122,7 @@ void main() {
       verify(mockProcessManager.start(any, environment: anyNamed('environment'))).called(1);
     }));
 
-    test('does not reuse the process for differnt test file', () => testbed.run(() async {
+    test('does not reuse the process for different test file', () => testbed.run(() async {
       final Map<String, dynamic> expectedResponse1 = <String, dynamic>{
         'success': false,
         'message': 'some message',
