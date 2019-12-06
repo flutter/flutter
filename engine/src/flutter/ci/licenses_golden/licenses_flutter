@@ -1014,6 +1014,7 @@ FILE: ../../../flutter/shell/platform/fuchsia/flutter/meta/flutter_aot_runner.cm
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/meta/flutter_jit_product_runner.cmx
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/meta/flutter_jit_runner.cmx
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/meta/flutter_runner_tests.cmx
+FILE: ../../../flutter/shell/platform/fuchsia/flutter/meta/flutter_runner_tzdata_tests.cmx
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/meta/jit_product_runtime
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/meta/jit_runtime
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/platform_view.cc
@@ -1021,6 +1022,8 @@ FILE: ../../../flutter/shell/platform/fuchsia/flutter/platform_view.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/platform_view_unittest.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/runner.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/runner.h
+FILE: ../../../flutter/shell/platform/fuchsia/flutter/runner_tzdata_unittest.cc
+FILE: ../../../flutter/shell/platform/fuchsia/flutter/runner_unittest.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/session_connection.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/session_connection.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/surface.cc

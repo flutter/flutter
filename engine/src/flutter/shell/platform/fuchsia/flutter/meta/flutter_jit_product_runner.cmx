@@ -4,9 +4,10 @@
   },
   "sandbox": {
     "features": [
+      "config-data",
+      "deprecated-ambient-replace-as-executable",
       "root-ssl-certificates",
-      "vulkan",
-      "deprecated-ambient-replace-as-executable"
+      "vulkan"
     ],
     "services": [
       "fuchsia.accessibility.SettingsManager",

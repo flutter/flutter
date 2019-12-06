@@ -10,6 +10,8 @@
 #include <zircon/status.h>
 #include <zircon/types.h>
 
+#include <fcntl.h>
+#include <stdint.h>
 #include <sstream>
 #include <utility>
 
@@ -29,6 +31,13 @@ namespace {
 
 static constexpr char kIcuDataPath[] = "/pkg/data/icudtl.dat";
 
+// Environment variable containing the path to the directory containing the
+// timezone files.
+static constexpr char kICUTZEnv[] = "ICU_TIMEZONE_FILES_DIR";
+
+// The data directory containing ICU timezone data files.
+static constexpr char kICUTZDataDir[] = "/config/data/tzdata/icu/44/le";
+
 // Map the memory into the process and return a pointer to the memory.
 uintptr_t GetICUData(const fuchsia::mem::Buffer& icu_data) {
   uint64_t data_size = icu_data.size;
@@ -46,6 +55,33 @@ uintptr_t GetICUData(const fuchsia::mem::Buffer& icu_data) {
   return 0u;
 }
 
+// Initializes the timezone data if available.  Timezone data file in Fuchsia
+// is at a fixed directory path.  Returns true on success.  As a side effect
+// sets the value of the environment variable "ICU_TIMEZONE_FILES_DIR" to a
+// fixed value which is fuchsia-specific.
+bool InitializeTZData() {
+  // We need the ability to change the env variable for testing, so not
+  // overwriting if set.
+  setenv(kICUTZEnv, kICUTZDataDir, 0 /* No overwrite */);
+
+  const std::string tzdata_dir = getenv(kICUTZEnv);
+  // Try opening the path to check if present.  No need to verify that it is a
+  // directory since ICU loading will return an error if the TZ data path is
+  // wrong.
+  int fd = openat(AT_FDCWD, tzdata_dir.c_str(), O_RDONLY);
+  if (fd < 0) {
+    FML_LOG(INFO) << "Could not open: '" << tzdata_dir
+                  << "', proceeding without loading the timezone database: "
+                  << strerror(errno);
+    return false;
+  }
+  if (!close(fd)) {
+    FML_LOG(WARNING) << "Could not close: " << tzdata_dir << ": "
+                     << strerror(errno);
+  }
+  return true;
+}
+
 // Return value indicates if initialization was successful.
 bool InitializeICU() {
   const char* data_path = kIcuDataPath;
@@ -60,10 +96,18 @@ bool InitializeICU() {
     return false;
   }
 
+  // If the loading fails, soldier on.  The loading is optional as we don't
+  // want to crash the engine in transition.
+  InitializeTZData();
+
   // Pass the data to ICU.
   UErrorCode err = U_ZERO_ERROR;
   udata_setCommonData(reinterpret_cast<const char*>(data), &err);
-  return err == U_ZERO_ERROR;
+  if (err != U_ZERO_ERROR) {
+    FML_LOG(ERROR) << "error loading ICU data: " << err;
+    return false;
+  }
+  return true;
 }
 
 }  // namespace
@@ -223,9 +267,21 @@ void Runner::OnApplicationTerminate(const Application* application) {
 }
 
 void Runner::SetupICU() {
-  if (!InitializeICU()) {
+  // Exposes the TZ data setup for testing.  Failing here is not fatal.
+  Runner::SetupTZDataInternal();
+  if (!Runner::SetupICUInternal()) {
     FML_LOG(ERROR) << "Could not initialize ICU data.";
   }
+}
+
+// static
+bool Runner::SetupICUInternal() {
+  return InitializeICU();
+}
+
+// static
+bool Runner::SetupTZDataInternal() {
+  return InitializeTZData();
 }
 
 #if !defined(DART_PRODUCT)

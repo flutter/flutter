@@ -308,6 +308,9 @@ executable("flutter_runner_unittests") {
     "platform_view.cc",
     "platform_view.h",
     "platform_view_unittest.cc",
+    "runner.cc",
+    "runner.h",
+    "runner_unittest.cc",
     "surface.cc",
     "surface.h",
     "task_observers.cc",
@@ -335,6 +338,7 @@ executable("flutter_runner_unittests") {
     "//build/fuchsia/pkg:scenic_cpp",
     "//build/fuchsia/pkg:sys_cpp_testing",
     "//flutter/lib/ui",
+    "//flutter/runtime",
     "//flutter/shell/common",
     "//flutter/shell/platform/fuchsia/runtime/dart/utils",
     "//flutter/testing",
@@ -343,11 +347,88 @@ executable("flutter_runner_unittests") {
   ]
 }
 
+executable("flutter_runner_tzdata_unittests") {
+  testonly = true
+
+  output_name = "flutter_runner_tzdata_tests"
+
+  sources = [
+    "runner.cc",
+    "runner.h",
+    "runner_tzdata_unittest.cc",
+  ]
+
+  # This is needed for //third_party/googletest for linking zircon symbols.
+  libs = [ "//fuchsia/sdk/$host_os/arch/$target_cpu/sysroot/lib/libzircon.so" ]
+
+  deps = [
+    ":aot",
+    ":flutter_runner_fixtures",
+    "//build/fuchsia/fidl:fuchsia.accessibility.semantics",
+    "//build/fuchsia/pkg:async-loop-cpp",
+    "//build/fuchsia/pkg:async-loop-default",
+    "//build/fuchsia/pkg:scenic_cpp",
+    "//build/fuchsia/pkg:sys_cpp_testing",
+    "//flutter/lib/ui",
+    "//flutter/runtime",
+    "//flutter/shell/common",
+    "//flutter/shell/platform/fuchsia/runtime/dart/utils",
+    "//flutter/testing",
+    "//third_party/dart/runtime:libdart_jit",
+    "//third_party/dart/runtime/platform:libdart_platform_jit",
+    "//third_party/icu",
+    "//third_party/skia",
+  ]
+}
+
 fuchsia_archive("flutter_runner_tests") {
   testonly = true
 
   deps = [
     ":flutter_runner_unittests",
+  ]
+
+  binary = "$target_name"
+
+  resources = [
+    {
+      path = rebase_path("//third_party/icu/common/icudtl.dat")
+      dest = "icudtl.dat"
+    },
+    {
+      path = rebase_path(
+              "$flutter_root/shell/platform/fuchsia/flutter/tests/tzdata/2019a/44/le/metaZones.res")
+      dest = "tzdata/metaZones.res"
+    },
+    {
+      path = rebase_path(
+              "$flutter_root/shell/platform/fuchsia/flutter/tests/tzdata/2019a/44/le/timezoneTypes.res")
+      dest = "tzdata/timezoneTypes.res"
+    },
+    {
+      path = rebase_path(
+              "$flutter_root/shell/platform/fuchsia/flutter/tests/tzdata/2019a/44/le/zoneinfo64.res")
+      dest = "tzdata/zoneinfo64.res"
+    },
+  ]
+
+  meta_dir = "$flutter_root/shell/platform/fuchsia/flutter/meta"
+
+  libraries = common_libs
+
+  meta = [
+    {
+      path = rebase_path("meta/$target_name.cmx")
+      dest = "$target_name.cmx"
+    },
+  ]
+}
+
+fuchsia_archive("flutter_runner_tzdata_tests") {
+  testonly = true
+
+  deps = [
+    ":flutter_runner_tzdata_unittests",
   ]
 
   binary = "$target_name"

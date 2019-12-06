@@ -4,6 +4,7 @@
   },
   "sandbox": {
     "features": [
+      "config-data",
       "deprecated-ambient-replace-as-executable",
       "root-ssl-certificates"
     ],
