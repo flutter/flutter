@@ -2795,10 +2795,8 @@ void main() {
 
       final List<FadeTransition> transitions =
         find.byType(FadeTransition).evaluate().map((Element e) => e.widget).cast<FadeTransition>().toList();
-      // On Android, an empty app contains a single FadeTransition. The following
-      // two are the left and right text selection handles, respectively.
-      final FadeTransition left = transitions[1];
-      final FadeTransition right = transitions[2];
+      final FadeTransition left = transitions[0];
+      final FadeTransition right = transitions[1];
 
       if (expectedLeftVisibleBefore)
         expect(left.opacity.value, equals(1.0));
