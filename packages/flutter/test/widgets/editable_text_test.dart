@@ -388,8 +388,8 @@ void main() {
       await tester.tap(find.byType(EditableText));
       await tester.showKeyboard(find.byType(EditableText));
       await tester.idle();
-      expect(tester.testTextInput.setClientArgs['smartDashesType'], smartDashesType.toString());
-      expect(tester.testTextInput.setClientArgs['smartQuotesType'], smartQuotesType.toString());
+      expect(tester.testTextInput.setClientArgs['smartDashesType'], smartDashesType.index.toString());
+      expect(tester.testTextInput.setClientArgs['smartQuotesType'], smartQuotesType.index.toString());
     });
 
     testWidgets('default to true when obscureText is false', (WidgetTester tester) async {
@@ -418,8 +418,8 @@ void main() {
       await tester.tap(find.byType(EditableText));
       await tester.showKeyboard(find.byType(EditableText));
       await tester.idle();
-      expect(tester.testTextInput.setClientArgs['smartDashesType'], 'SmartDashesType.enabled');
-      expect(tester.testTextInput.setClientArgs['smartQuotesType'], 'SmartQuotesType.enabled');
+      expect(tester.testTextInput.setClientArgs['smartDashesType'], '1');
+      expect(tester.testTextInput.setClientArgs['smartQuotesType'], '1');
     });
 
     testWidgets('default to false when obscureText is true', (WidgetTester tester) async {
@@ -448,8 +448,8 @@ void main() {
       await tester.tap(find.byType(EditableText));
       await tester.showKeyboard(find.byType(EditableText));
       await tester.idle();
-      expect(tester.testTextInput.setClientArgs['smartDashesType'], 'SmartDashesType.disabled');
-      expect(tester.testTextInput.setClientArgs['smartQuotesType'], 'SmartQuotesType.disabled');
+      expect(tester.testTextInput.setClientArgs['smartDashesType'], '0');
+      expect(tester.testTextInput.setClientArgs['smartQuotesType'], '0');
     });
   });
 
