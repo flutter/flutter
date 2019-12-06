@@ -157,11 +157,17 @@ class AotAssemblyProfile extends AotAssemblyBase {
 /// This framework needs to exist for the Xcode project to link/bundle,
 /// but it isn't actually executed. To generate something valid, we compile a trivial
 /// constant.
-Future<RunResult> createStubAppFramework(File outputFile, SdkType sdk) async {
+Future<RunResult> createStubAppFramework(Directory appFrameworkDirectory) async {
+  File outputFile;
   try {
+    if (!appFrameworkDirectory.existsSync()) {
+      appFrameworkDirectory.createSync(recursive: true);
+    }
+
+    outputFile = appFrameworkDirectory.childFile('App');
     outputFile.createSync(recursive: true);
   } catch (e) {
-    throwToolExit('Failed to create App.framework stub at ${outputFile.path}');
+    throwToolExit('Failed to create App.framework stub at ${appFrameworkDirectory.path}');
   }
 
   final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_stub_source.');
@@ -171,32 +177,14 @@ Future<RunResult> createStubAppFramework(File outputFile, SdkType sdk) async {
   static const int Moo = 88;
   ''');
 
-    List<String> archFlags;
-    if (sdk == SdkType.iPhone) {
-      archFlags = <String>[
-        '-arch',
-        getNameForDarwinArch(DarwinArch.armv7),
-        '-arch',
-        getNameForDarwinArch(DarwinArch.arm64),
-      ];
-    } else {
-      archFlags = <String>[
-        '-arch',
-        getNameForDarwinArch(DarwinArch.x86_64),
-      ];
-    }
-
     return await xcode.clang(<String>[
       '-x',
       'c',
-      ...archFlags,
       stubSource.path,
       '-dynamiclib',
-      '-fembed-bitcode-marker',
       '-Xlinker', '-rpath', '-Xlinker', '@executable_path/Frameworks',
       '-Xlinker', '-rpath', '-Xlinker', '@loader_path/Frameworks',
       '-install_name', '@rpath/App.framework/App',
-      '-isysroot', await xcode.sdkLocation(sdk),
       '-o', outputFile.path,
     ]);
   } finally {
@@ -204,8 +192,6 @@ Future<RunResult> createStubAppFramework(File outputFile, SdkType sdk) async {
       tempDir.deleteSync(recursive: true);
     } on FileSystemException catch (_) {
       // Best effort. Sometimes we can't delete things from system temp.
-    } catch (e) {
-      throwToolExit('Failed to create App.framework stub at ${outputFile.path}');
     }
   }
 }
