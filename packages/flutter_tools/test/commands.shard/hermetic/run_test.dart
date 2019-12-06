@@ -132,10 +132,10 @@ void main() {
         ProcessManager: () => mockProcessManager,
       });
 
-      testUsingContext('passes device to usage', () async {
+      testUsingContext('passes device target platform to usage', () async {
         final RunCommand command = RunCommand();
         applyMocksToCommand(command);
-        final MockDevice mockDevice = MockDevice(TargetPlatform.android_arm);
+        final MockDevice mockDevice = MockDevice(TargetPlatform.ios);
         when(mockDevice.isLocalEmulator).thenAnswer((Invocation invocation) => Future<bool>.value(false));
         when(mockDevice.getLogReader(app: anyNamed('app'))).thenReturn(MockDeviceLogReader());
         // App fails to start because we're only interested in usage
@@ -162,20 +162,6 @@ void main() {
         when(mockDeviceManager.findTargetDevices(any)).thenAnswer(
           (Invocation invocation) => Future<List<Device>>.value(<Device>[mockDevice])
         );
-        //int findTargetDevicesCount = 0;
-        //when(mockDeviceManager.findTargetDevices(any)).thenAnswer(
-        //  (Invocation invocation) {
-        //    List<Device> devices;
-        //    // The first invocation should return nothing, because cache isn't synced
-        //    if (findTargetDevicesCount == 0) {
-        //      devices = <Device>[];
-        //    } else {
-        //      devices = <Device>[mockDevice];
-        //    }
-        //    findTargetDevicesCount += 1;
-        //    return Future<List<Device>>.value(devices);
-        //  }
-        //);
 
         try {
           await createTestCommandRunner(command).run(<String>[
@@ -188,8 +174,7 @@ void main() {
           // We expect a ToolExit because app does not start
           expect(e.message, null);
         } catch (e) {
-          rethrow;
-          //fail('ToolExit expected');
+          fail('ToolExit expected');
         }
         final List<dynamic> captures = verify(mockUsage.sendCommand(
           captureAny,
@@ -197,7 +182,7 @@ void main() {
         )).captured;
         expect(captures[0], 'run');
         final Map<String, String> parameters = captures[1] as Map<String, String>;
-        expect(parameters['cd4'], 'android-arm');
+        expect(parameters['cd4'], 'ios');
       }, overrides: <Type, Generator>{
         ApplicationPackageFactory: () => mockApplicationPackageFactory,
         Artifacts: () => mockArtifacts,
