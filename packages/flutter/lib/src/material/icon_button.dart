@@ -13,6 +13,7 @@ import 'icons.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'theme.dart';
+import 'theme_data.dart';
 import 'tooltip.dart';
 
 // Minimum logical pixel size of the IconButton.
@@ -138,6 +139,7 @@ class IconButton extends StatelessWidget {
   const IconButton({
     Key key,
     this.iconSize = 24.0,
+    this.visualDensity,
     this.padding = const EdgeInsets.all(8.0),
     this.alignment = Alignment.center,
     @required this.icon,
@@ -170,6 +172,16 @@ class IconButton extends StatelessWidget {
   /// [Icon.size] instead, then the [IconButton] would default to 24.0 and then
   /// the [Icon] itself would likely get clipped.
   final double iconSize;
+
+  /// Defines how compact the icon button's layout will be.
+  ///
+  /// {@macro flutter.material.themedata.visualDensity}
+  ///
+  /// See also:
+  ///
+  ///  * [ThemeData.visualDensity], which specifies the [density] for all widgets
+  ///    within a [Theme].
+  final VisualDensity visualDensity;
 
   /// The padding around the button's icon. The entire padded icon will react
   /// to input gestures.
@@ -279,14 +291,16 @@ class IconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
+    final ThemeData theme = Theme.of(context);
     Color currentColor;
     if (onPressed != null)
       currentColor = color;
     else
-      currentColor = disabledColor ?? Theme.of(context).disabledColor;
+      currentColor = disabledColor ?? theme.disabledColor;
 
+    final Offset densityAdjustment = (visualDensity ?? theme.visualDensity).baseSizeAdjustment;
     Widget result = ConstrainedBox(
-      constraints: const BoxConstraints(minWidth: _kMinButtonSize, minHeight: _kMinButtonSize),
+      constraints: BoxConstraints(minWidth: _kMinButtonSize + densityAdjustment.dx, minHeight: _kMinButtonSize + densityAdjustment.dy),
       child: Padding(
         padding: padding,
         child: SizedBox(
