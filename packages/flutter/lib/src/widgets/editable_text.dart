@@ -29,7 +29,7 @@ import 'scrollable.dart';
 import 'text_selection.dart';
 import 'ticker_provider.dart';
 
-export 'package:flutter/services.dart' show TextEditingValue, TextSelection, TextInputType;
+export 'package:flutter/services.dart' show TextEditingValue, TextSelection, TextInputType, SmartQuotesType, SmartDashesType;
 export 'package:flutter/rendering.dart' show SelectionChangedCause;
 
 /// Signature for the callback that reports when the user changes the selection

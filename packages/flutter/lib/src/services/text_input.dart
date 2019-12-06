@@ -14,7 +14,6 @@ import 'dart:ui' show
   hashValues;
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart' show SmartDashesType, SmartQuotesType;
 import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
 import 'message_codec.dart';
@@ -27,6 +26,36 @@ export 'dart:ui' show TextAffinity;
 
 // Whether we're compiled to JavaScript in a web browser.
 const bool _kIsBrowser = identical(0, 0.0);
+
+/// Indicates how to handle the intelligent replacement of dashes in text input.
+///
+/// See also:
+///
+///  * [TextField.smartDashesType]
+///  * [TextFormField.smartDashesType]
+///  * [CupertinoTextField.smartDashesType]
+///  * [EditableText.smartDashesType]
+///  * [SmartQuotesType]
+///  * <https://developer.apple.com/documentation/uikit/uitextinputtraits>
+enum SmartDashesType {
+  disabled,
+  enabled,
+}
+
+/// Indicates how to handle the intelligent replacement of quotes in text input.
+///
+/// See also:
+///
+///  * [TextField.smartQuotesType]
+///  * [TextFormField.smartQuotesType]
+///  * [CupertinoTextField.smartQuotesType]
+///  * [EditableText.smartQuotesType]
+///  * [SmartDashesType]
+///  * <https://developer.apple.com/documentation/uikit/uitextinputtraits>
+enum SmartQuotesType {
+  disabled,
+  enabled,
+}
 
 /// The type of information for which to optimize the text input control.
 ///

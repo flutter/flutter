@@ -9,6 +9,8 @@ import 'input_decorator.dart';
 import 'text_field.dart';
 import 'theme.dart';
 
+export 'package:flutter/services.dart' show SmartQuotesType, SmartDashesType;
+
 /// A [FormField] that contains a [TextField].
 ///
 /// This is a convenience widget that wraps a [TextField] widget in a
