@@ -33,6 +33,7 @@ class BuildAarCommand extends BuildSubCommand {
         help: 'Build a release version of the current project.',
       );
     usesFlavorOption();
+    usesBuildNumberOption();
     usesPubOption();
     argParser
       ..addMultiOption(
@@ -85,17 +86,22 @@ class BuildAarCommand extends BuildSubCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final Set<AndroidBuildInfo> androidBuildInfo = <AndroidBuildInfo>{};
-    final Iterable<AndroidArch> targetArchitectures = stringsArg('target-platform')
-      .map<AndroidArch>(getAndroidArchForName);
+
+    final Iterable<AndroidArch> targetArchitectures =
+        stringsArg('target-platform').map<AndroidArch>(getAndroidArchForName);
+
+    final String buildNumber = argParser.options.containsKey('build-number')
+      && stringArg('build-number') != null
+      && stringArg('build-number').isNotEmpty
+      ? stringArg('build-number')
+      : '1.0';
 
     for (String buildMode in const <String>['debug', 'profile', 'release']) {
       if (boolArg(buildMode)) {
-        androidBuildInfo.add(
-          AndroidBuildInfo(
-            BuildInfo(BuildMode.fromName(buildMode), stringArg('flavor')),
-            targetArchs: targetArchitectures,
-          )
-        );
+        androidBuildInfo.add(AndroidBuildInfo(
+          BuildInfo(BuildMode.fromName(buildMode), stringArg('flavor')),
+          targetArchs: targetArchitectures,
+        ));
       }
     }
     if (androidBuildInfo.isEmpty) {
@@ -106,6 +112,7 @@ class BuildAarCommand extends BuildSubCommand {
       target: '', // Not needed because this command only builds Android's code.
       androidBuildInfo: androidBuildInfo,
       outputDirectoryPath: stringArg('output-dir'),
+      buildNumber: buildNumber,
     );
     return null;
   }

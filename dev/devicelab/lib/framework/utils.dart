@@ -623,14 +623,14 @@ Uri parseServiceUri(String line, {
 /// Checks that the file exists, otherwise throws a [FileSystemException].
 void checkFileExists(String file) {
   if (!exists(File(file))) {
-    throw FileSystemException('Expected file to exit.', file);
+    throw FileSystemException('Expected file to exist.', file);
   }
 }
 
 /// Checks that the file does not exists, otherwise throws a [FileSystemException].
 void checkFileNotExists(String file) {
   if (exists(File(file))) {
-    throw FileSystemException('Expected file to exit.', file);
+    throw FileSystemException('Expected file to not exist.', file);
   }
 }
 

@@ -474,11 +474,13 @@ Future<void> buildGradleApp({
 /// * [project] is typically [FlutterProject.current()].
 /// * [androidBuildInfo] is the build configuration.
 /// * [outputDir] is the destination of the artifacts,
+/// * [buildNumber] is the build number of the output aar,
 Future<void> buildGradleAar({
   @required FlutterProject project,
   @required AndroidBuildInfo androidBuildInfo,
   @required String target,
   @required Directory outputDirectory,
+  @required String buildNumber,
 }) async {
   assert(project != null);
   assert(target != null);
@@ -488,6 +490,7 @@ Future<void> buildGradleAar({
   if (androidSdk == null) {
     exitWithNoSdkMessage();
   }
+
   final FlutterManifest manifest = project.manifest;
   if (!manifest.isModule && !manifest.isPlugin) {
     throwToolExit('AARs can only be built for plugin or module projects.');
@@ -514,6 +517,7 @@ Future<void> buildGradleAar({
     '-Pflutter-root=$flutterRoot',
     '-Poutput-dir=${outputDirectory.path}',
     '-Pis-plugin=${manifest.isPlugin}',
+    '-PbuildNumber=$buildNumber'
   ];
 
   if (target != null && target.isNotEmpty) {
@@ -584,10 +588,12 @@ void printHowToConsumeAar({
   @required Set<String> buildModes,
   @required String androidPackage,
   @required Directory repoDirectory,
+  String buildNumber,
 }) {
   assert(buildModes != null && buildModes.isNotEmpty);
   assert(androidPackage != null);
   assert(repoDirectory != null);
+  buildNumber ??= '1.0';
 
   printStatus('''
 
@@ -610,7 +616,7 @@ ${terminal.bolden('Consuming the Module')}
 
   for (String buildMode in buildModes) {
     printStatus('''
-      ${buildMode}Implementation '$androidPackage:flutter_$buildMode:1.0''');
+      ${buildMode}Implementation '$androidPackage:flutter_$buildMode:$buildNumber''');
   }
 
 printStatus('''
@@ -718,6 +724,7 @@ Future<void> buildPluginsAsAar(
         ),
         target: '',
         outputDirectory: buildDirectory,
+        buildNumber: '1.0'
       );
     } on ToolExit {
       // Log the entire plugin entry in `.flutter-plugins` since it
