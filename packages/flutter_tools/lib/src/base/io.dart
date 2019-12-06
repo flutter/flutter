@@ -26,7 +26,7 @@
 /// increase the API surface that we have to test in Flutter tools, and the APIs
 /// in `dart:io` can sometimes be hard to use in tests.
 import 'dart:async';
-import 'dart:io' as io show exit, IOSink, Process, ProcessInfo, ProcessSignal,
+import 'dart:io' as io show exit, IOSink, Platform, Process, ProcessInfo, ProcessSignal,
     stderr, stdin, Stdin, StdinException, Stdout, stdout;
 
 import 'package:meta/meta.dart';
@@ -94,7 +94,9 @@ ExitFunction _exitFunction = _defaultExitFunction;
 ///
 /// Throws [StateError] if assertions are enabled and the dart:io exit
 /// is still active with called. This may indicate exit was called in
-/// a test without being configured correctly.
+/// a test without being configured correctly. This behavior can be
+/// removed by setting the `FLUTTER_INTEGRATION_TEST` environment
+/// variable to a non-null string.
 ///
 /// This is analogous to the `exit` function in `dart:io`, except that this
 /// function may be set to a testing-friendly value by calling
@@ -103,7 +105,7 @@ ExitFunction _exitFunction = _defaultExitFunction;
 /// `dart:io`.
 ExitFunction get exit {
   assert(() {
-    if (_exitFunction == io.exit) {
+    if (_exitFunction == io.exit && io.Platform.environment['FLUTTER_INTEGRATION_TEST'] == null) {
       throw StateError('io.exit was called with assertions active.');
     }
     return true;
