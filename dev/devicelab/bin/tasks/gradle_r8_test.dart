@@ -1,4 +1,4 @@
-// Copyright (c) 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -10,7 +10,7 @@ import 'package:flutter_devicelab/framework/utils.dart';
 import 'package:path/path.dart' as path;
 
 /// Tests that flutter build apk uses R8 by default by adding an
-/// invalid proguard rule and evaluating the error message.
+/// invalid ProGuard rule and evaluating the error message.
 Future<void> main() async {
   await task(() async {
 

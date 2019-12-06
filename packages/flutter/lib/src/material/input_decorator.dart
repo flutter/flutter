@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -10,6 +10,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
+import 'constants.dart';
 import 'input_border.dart';
 import 'theme.dart';
 
@@ -496,6 +497,7 @@ class _Decoration {
     this.counter,
     this.container,
     this.alignLabelWithHint,
+    this.isDense,
   }) : assert(contentPadding != null),
        assert(isCollapsed != null),
        assert(floatingLabelHeight != null),
@@ -508,6 +510,7 @@ class _Decoration {
   final InputBorder border;
   final _InputBorderGap borderGap;
   final bool alignLabelWithHint;
+  final bool isDense;
   final Widget icon;
   final Widget input;
   final Widget label;
@@ -904,7 +907,13 @@ class _RenderDecoration extends RenderBox {
       return 0.0;
     }
     box.layout(constraints, parentUsesSize: true);
-    final double baseline = box.getDistanceToBaseline(textBaseline);
+    // Since internally, all layout is performed against the alphabetic baseline,
+    // (eg, ascents/descents are all relative to alphabetic, even if the font is
+    // an ideographic or hanging font), we should always obtain the reference
+    // baseline from the alphabetic baseline. The ideographic baseline is for
+    // use post-layout and is derived from the alphabetic baseline combined with
+    // the font metrics.
+    final double baseline = box.getDistanceToBaseline(TextBaseline.alphabetic);
     assert(baseline != null && baseline >= 0.0);
     return baseline;
   }
@@ -1037,10 +1046,19 @@ class _RenderDecoration extends RenderBox {
       + fixBelowInput
       + contentPadding.bottom,
     );
+    final double minContainerHeight = decoration.isDense || expands
+      ? 0.0
+      : kMinInteractiveDimension;
     final double maxContainerHeight = boxConstraints.maxHeight - bottomHeight;
     final double containerHeight = expands
       ? maxContainerHeight
-      : math.min(contentHeight, maxContainerHeight);
+      : math.min(math.max(contentHeight, minContainerHeight), maxContainerHeight);
+
+    // Ensure the text is vertically centered in cases where the content is
+    // shorter than kMinInteractiveDimension.
+    final double interactiveAdjustment = minContainerHeight > contentHeight
+      ? (minContainerHeight - contentHeight) / 2.0
+      : 0.0;
 
     // Try to consider the prefix/suffix as part of the text when aligning it.
     // If the prefix/suffix overflows however, allow it to extend outside of the
@@ -1058,7 +1076,8 @@ class _RenderDecoration extends RenderBox {
     final double topInputBaseline = contentPadding.top
       + topHeight
       + inputInternalBaseline
-      + baselineAdjustment;
+      + baselineAdjustment
+      + interactiveAdjustment;
     final double maxContentHeight = containerHeight
       - contentPadding.top
       - topHeight
@@ -1768,7 +1787,7 @@ class InputDecorator extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  - [InputDecoration.hoverColor], which is also blended into the focus
+  ///  * [InputDecoration.hoverColor], which is also blended into the focus
   ///    color and fill color when the [isHovering] is true to produce the final
   ///    color.
   final bool isFocused;
@@ -1783,7 +1802,7 @@ class InputDecorator extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  - [InputDecoration.focusColor], which is also blended into the hover
+  ///  * [InputDecoration.focusColor], which is also blended into the hover
   ///    color and fill color when [isFocused] is true to produce the final
   ///    color.
   final bool isHovering;
@@ -1829,7 +1848,7 @@ class InputDecorator extends StatefulWidget {
   ///
   /// [TextField] renders ink splashes within the container.
   static RenderBox containerOf(BuildContext context) {
-    final _RenderDecoration result = context.ancestorRenderObjectOfType(const TypeMatcher<_RenderDecoration>());
+    final _RenderDecoration result = context.findAncestorRenderObjectOfType<_RenderDecoration>();
     return result?.container;
   }
 
@@ -2156,7 +2175,10 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         widthFactor: 1.0,
         heightFactor: 1.0,
         child: ConstrainedBox(
-          constraints: const BoxConstraints(minWidth: 48.0, minHeight: 48.0),
+          constraints: const BoxConstraints(
+            minWidth: kMinInteractiveDimension,
+            minHeight: kMinInteractiveDimension,
+          ),
           child: IconTheme.merge(
             data: IconThemeData(
               color: iconColor,
@@ -2172,7 +2194,10 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         widthFactor: 1.0,
         heightFactor: 1.0,
         child: ConstrainedBox(
-          constraints: const BoxConstraints(minWidth: 48.0, minHeight: 48.0),
+          constraints: const BoxConstraints(
+            minWidth: kMinInteractiveDimension,
+            minHeight: kMinInteractiveDimension,
+          ),
           child: IconTheme.merge(
             data: IconThemeData(
               color: iconColor,
@@ -2253,6 +2278,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
         input: widget.child,
         label: label,
         alignLabelWithHint: decoration.alignLabelWithHint,
+        isDense: decoration.isDense,
         hint: hint,
         prefix: prefix,
         suffix: suffix,
@@ -2277,6 +2303,94 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 /// The [TextField] and [InputDecorator] classes use [InputDecoration] objects
 /// to describe their decoration. (In fact, this class is merely the
 /// configuration of an [InputDecorator], which does all the heavy lifting.)
+///
+/// {@tool snippet --template=stateless_widget_scaffold}
+///
+/// This sample shows how to style a `TextField` using an `InputDecorator`. The
+/// TextField displays a "send message" icon to the left of the input area,
+/// which is surrounded by a border an all sides. It displays the `hintText`
+/// inside the input area to help the user understand what input is required. It
+/// displays the `helperText` and `counterText` below the input area.
+///
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/input_decoration.png)
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return TextField(
+///     decoration: InputDecoration(
+///       icon: Icon(Icons.send),
+///       hintText: 'Hint Text',
+///       helperText: 'Helper Text',
+///       counterText: '0 characters',
+///       border: const OutlineInputBorder(),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
+/// {@tool snippet --template=stateless_widget_scaffold}
+///
+/// This sample shows how to style a "collapsed" `TextField` using an
+/// `InputDecorator`. The collapsed `TextField` surrounds the hint text and
+/// input area with a border, but does not add padding around them.
+///
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/input_decoration_collapsed.png)
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return TextField(
+///     decoration: InputDecoration.collapsed(
+///       hintText: 'Hint Text',
+///       border: OutlineInputBorder(),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
+/// {@tool snippet --template=stateless_widget_scaffold}
+///
+/// This sample shows how to create a `TextField` with hint text, a red border
+/// on all sides, and an error message. To display a red border and error
+/// message, provide `errorText` to the `InputDecoration` constructor.
+///
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/input_decoration_error.png)
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return TextField(
+///     decoration: InputDecoration(
+///       hintText: 'Hint Text',
+///       errorText: 'Error Text',
+///       border: OutlineInputBorder(),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
+/// {@tool snippet --template=stateless_widget_scaffold}
+///
+/// This sample shows how to style a `TextField` with a round border and
+/// additional text before and after the input area. It displays "Prefix" before
+/// the input area, and "Suffix" after the input area.
+///
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/input_decoration_prefix_suffix.png)
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return TextFormField(
+///     initialValue: 'abc',
+///     decoration: const InputDecoration(
+///       prefix: Text('Prefix'),
+///       suffix: Text('Suffix'),
+///       border: OutlineInputBorder(),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
@@ -2945,7 +3059,7 @@ class InputDecoration {
   /// If provided, this replaces the semantic label of the [counterText].
   final String semanticCounterText;
 
-  /// Typically set to true when the [InputDecorator] contains a multi-line
+  /// Typically set to true when the [InputDecorator] contains a multiline
   /// [TextField] ([TextField.maxLines] is null or > 1) to override the default
   /// behavior of aligning the label with the center of the [TextField].
   ///
@@ -3559,7 +3673,7 @@ class InputDecorationTheme extends Diagnosticable {
   ///    rounded rectangle around the input decorator's container.
   final InputBorder border;
 
-  /// Typically set to true when the [InputDecorator] contains a multi-line
+  /// Typically set to true when the [InputDecorator] contains a multiline
   /// [TextField] ([TextField.maxLines] is null or > 1) to override the default
   /// behavior of aligning the label with the center of the [TextField].
   final bool alignLabelWithHint;

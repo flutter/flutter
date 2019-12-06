@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -123,8 +123,10 @@ class PointerRouter {
 /// Variant of [FlutterErrorDetails] with extra fields for the gestures
 /// library's pointer router ([PointerRouter]).
 ///
-/// See also [FlutterErrorDetailsForPointerEventDispatcher], which is also used
-/// by the gestures library.
+/// See also:
+///
+///  * [FlutterErrorDetailsForPointerEventDispatcher], which is also used
+///    by the gestures library.
 class FlutterErrorDetailsForPointerRouter extends FlutterErrorDetails {
   /// Creates a [FlutterErrorDetailsForPointerRouter] object with the given
   /// arguments setting the object's properties.

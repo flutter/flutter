@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -810,7 +810,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       final Element elementB = find.text('b').evaluate().first;
 
       service.disposeAllGroups();
-      service.setPubRootDirectories(<Object>[]);
+      service.setPubRootDirectories(<String>[]);
       service.setSelection(elementA, 'my-group');
       final Map<String, Object> jsonA = json.decode(service.getSelectedWidget(null, 'my-group'));
       final Map<String, Object> creationLocationA = jsonA['creationLocation'];
@@ -885,7 +885,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
         // directory.
         pubRootTest = '/' +
           segments.take(segments.length - 2).join('/');
-        service.setPubRootDirectories(<Object>[pubRootTest]);
+        service.setPubRootDirectories(<String>[pubRootTest]);
       }
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
       builder.add(StringProperty('dummy1', 'value'));
@@ -948,7 +948,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
         // directory.
         pubRootTest = '/' +
           segments.take(segments.length - 2).join('/');
-        service.setPubRootDirectories(<Object>[pubRootTest]);
+        service.setPubRootDirectories(<String>[pubRootTest]);
       }
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
       builder.add(StringProperty('dummy1', 'value'));
@@ -995,7 +995,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       final Element elementA = find.text('a').evaluate().first;
 
       service.disposeAllGroups();
-      service.setPubRootDirectories(<Object>[]);
+      service.setPubRootDirectories(<String>[]);
       service.setSelection(elementA, 'my-group');
       Map<String, Object> jsonObject = json.decode(service.getSelectedWidget(null, 'my-group'));
       Map<String, Object> creationLocation = jsonObject['creationLocation'];
@@ -1007,21 +1007,21 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       // Strip a couple subdirectories away to generate a plausible pub root
       // directory.
       final String pubRootTest = '/' + segments.take(segments.length - 2).join('/');
-      service.setPubRootDirectories(<Object>[pubRootTest]);
+      service.setPubRootDirectories(<String>[pubRootTest]);
 
       service.setSelection(elementA, 'my-group');
       expect(json.decode(service.getSelectedWidget(null, 'my-group')), contains('createdByLocalProject'));
 
-      service.setPubRootDirectories(<Object>['/invalid/$pubRootTest']);
+      service.setPubRootDirectories(<String>['/invalid/$pubRootTest']);
       expect(json.decode(service.getSelectedWidget(null, 'my-group')), isNot(contains('createdByLocalProject')));
 
-      service.setPubRootDirectories(<Object>['file://$pubRootTest']);
+      service.setPubRootDirectories(<String>['file://$pubRootTest']);
       expect(json.decode(service.getSelectedWidget(null, 'my-group')), contains('createdByLocalProject'));
 
-      service.setPubRootDirectories(<Object>['$pubRootTest/different']);
+      service.setPubRootDirectories(<String>['$pubRootTest/different']);
       expect(json.decode(service.getSelectedWidget(null, 'my-group')), isNot(contains('createdByLocalProject')));
 
-      service.setPubRootDirectories(<Object>[
+      service.setPubRootDirectories(<String>[
         '/invalid/$pubRootTest',
         pubRootTest,
       ]);
@@ -1034,7 +1034,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
         matching: find.byType(RichText),
       ).evaluate().first;
       service.setSelection(richText, 'my-group');
-      service.setPubRootDirectories(<Object>[pubRootTest]);
+      service.setPubRootDirectories(<String>[pubRootTest]);
       jsonObject = json.decode(service.getSelectedWidget(null, 'my-group'));
       expect(jsonObject, isNot(contains('createdByLocalProject')));
       creationLocation = jsonObject['creationLocation'];
@@ -1046,12 +1046,12 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
 
       // Strip off /src/widgets/text.dart.
       final String pubRootFramework = '/' + pathSegmentsFramework.take(pathSegmentsFramework.length - 3).join('/');
-      service.setPubRootDirectories(<Object>[pubRootFramework]);
+      service.setPubRootDirectories(<String>[pubRootFramework]);
       expect(json.decode(service.getSelectedWidget(null, 'my-group')), contains('createdByLocalProject'));
       service.setSelection(elementA, 'my-group');
       expect(json.decode(service.getSelectedWidget(null, 'my-group')), isNot(contains('createdByLocalProject')));
 
-      service.setPubRootDirectories(<Object>[pubRootFramework, pubRootTest]);
+      service.setPubRootDirectories(<String>[pubRootFramework, pubRootTest]);
       service.setSelection(elementA, 'my-group');
       expect(json.decode(service.getSelectedWidget(null, 'my-group')), contains('createdByLocalProject'));
       service.setSelection(richText, 'my-group');
@@ -1609,7 +1609,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
         matching: find.byType(RichText),
       ).evaluate().first;
       service.setSelection(richText, 'my-group');
-      service.setPubRootDirectories(<Object>[pubRootTest]);
+      service.setPubRootDirectories(<String>[pubRootTest]);
       jsonObject = json.decode(service.getSelectedWidget(null, 'my-group'));
       expect(jsonObject, isNot(contains('createdByLocalProject')));
       creationLocation = jsonObject['creationLocation'];
@@ -2039,10 +2039,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       expect(expectedChildLayerCount, equals(2));
       await expectLater(
         layer.toImage(renderObject.semanticBounds.inflate(50.0)),
-        matchesGoldenFile(
-          'inspector.repaint_boundary_margin.png',
-          version: null,
-        ),
+        matchesGoldenFile('inspector.repaint_boundary_margin.png'),
       );
 
       // Regression test for how rendering with a pixel scale other than 1.0
@@ -2052,10 +2049,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           renderObject.semanticBounds.inflate(50.0),
           pixelRatio: 0.5,
         ),
-        matchesGoldenFile(
-          'inspector.repaint_boundary_margin_small.png',
-          version: null,
-        ),
+        matchesGoldenFile('inspector.repaint_boundary_margin_small.png'),
       );
 
       await expectLater(
@@ -2063,10 +2057,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           renderObject.semanticBounds.inflate(50.0),
           pixelRatio: 2.0,
         ),
-        matchesGoldenFile(
-          'inspector.repaint_boundary_margin_large.png',
-          version: null,
-        ),
+        matchesGoldenFile('inspector.repaint_boundary_margin_large.png'),
       );
 
       final Layer layerParent = layer.parent;
@@ -2081,10 +2072,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           width: 300.0,
           height: 300.0,
         ),
-        matchesGoldenFile(
-          'inspector.repaint_boundary.png',
-          version: null,
-        ),
+        matchesGoldenFile('inspector.repaint_boundary.png'),
       );
 
       // Verify that taking a screenshot didn't change the layers associated with
@@ -2101,10 +2089,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           height: 500.0,
           margin: 50.0,
         ),
-        matchesGoldenFile(
-          'inspector.repaint_boundary_margin.png',
-          version: null,
-        ),
+        matchesGoldenFile('inspector.repaint_boundary_margin.png'),
       );
 
       // Verify that taking a screenshot didn't change the layers associated with
@@ -2124,10 +2109,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           height: 300.0,
           debugPaint: true,
         ),
-        matchesGoldenFile(
-          'inspector.repaint_boundary_debugPaint.png',
-          version: null,
-        ),
+        matchesGoldenFile('inspector.repaint_boundary_debugPaint.png'),
       );
       // Verify that taking a screenshot with debug paint on did not change
       // the number of children the layer has.
@@ -2137,10 +2119,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       // hasn't changed the regular render of the widget.
       await expectLater(
         find.byType(RepaintBoundaryWithDebugPaint),
-        matchesGoldenFile(
-          'inspector.repaint_boundary.png',
-          version: null,
-        ),
+        matchesGoldenFile('inspector.repaint_boundary.png'),
       );
 
       expect(renderObject.debugLayer, equals(layer));
@@ -2153,10 +2132,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           width: 100.0,
           height: 100.0,
         ),
-        matchesGoldenFile(
-          'inspector.container.png',
-          version: null,
-        ),
+        matchesGoldenFile('inspector.container.png'),
       );
 
       await expectLater(
@@ -2166,10 +2142,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           height: 100.0,
           debugPaint: true,
         ),
-        matchesGoldenFile(
-          'inspector.container_debugPaint.png',
-          version: null,
-        ),
+        matchesGoldenFile('inspector.container_debugPaint.png'),
       );
 
       {
@@ -2189,10 +2162,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
             height: 100.0,
             debugPaint: true,
           ),
-          matchesGoldenFile(
-            'inspector.container_debugPaint.png',
-            version: null,
-          ),
+          matchesGoldenFile('inspector.container_debugPaint.png'),
         );
         expect(container.debugNeedsLayout, isFalse);
       }
@@ -2204,10 +2174,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           width: 50.0,
           height: 100.0,
         ),
-        matchesGoldenFile(
-          'inspector.container_small.png',
-          version: null,
-        ),
+        matchesGoldenFile('inspector.container_small.png'),
       );
 
       await expectLater(
@@ -2217,10 +2184,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           height: 400.0,
           maxPixelRatio: 3.0,
         ),
-        matchesGoldenFile(
-          'inspector.container_large.png',
-          version: null,
-        ),
+        matchesGoldenFile('inspector.container_large.png'),
       );
 
       // This screenshot will show the clip rect debug paint but no other
@@ -2232,10 +2196,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           height: 100.0,
           debugPaint: true,
         ),
-        matchesGoldenFile(
-          'inspector.clipRect_debugPaint.png',
-          version: null,
-        ),
+        matchesGoldenFile('inspector.clipRect_debugPaint.png'),
       );
 
       final Element clipRect = find.byType(ClipRRect).evaluate().single;
@@ -2251,10 +2212,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       // This golden image is platform dependent due to the clip icon.
       await expectLater(
         clipRectScreenshot,
-        matchesGoldenFile(
-          'inspector.clipRect_debugPaint_margin.png',
-          version: null,
-        ),
+        matchesGoldenFile('inspector.clipRect_debugPaint_margin.png'),
       );
 
       // Verify we get the same image if we go through the service extension
@@ -2293,10 +2251,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           height: 300.0,
           debugPaint: true,
         ),
-        matchesGoldenFile(
-          'inspector.padding_debugPaint.png',
-          version: null,
-        ),
+        matchesGoldenFile('inspector.padding_debugPaint.png'),
       );
 
       // The bounds for this box crop its rendered content.
@@ -2307,10 +2262,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           height: 300.0,
           debugPaint: true,
         ),
-        matchesGoldenFile(
-          'inspector.sizedBox_debugPaint.png',
-          version: 1,
-        ),
+        matchesGoldenFile('inspector.sizedBox_debugPaint.png'),
       );
 
       // Verify that setting a margin includes the previously cropped content.
@@ -2322,10 +2274,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           margin: 50.0,
           debugPaint: true,
         ),
-        matchesGoldenFile(
-          'inspector.sizedBox_debugPaint_margin.png',
-          version: null,
-        ),
+        matchesGoldenFile('inspector.sizedBox_debugPaint_margin.png'),
       );
     }, skip: isBrowser);
 
@@ -2461,10 +2410,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
 
       await expectLater(
         find.byKey(mainStackKey),
-        matchesGoldenFile(
-          'inspector.composited_transform.only_offsets.png',
-          version: null,
-        ),
+        matchesGoldenFile('inspector.composited_transform.only_offsets.png'),
       );
 
       await expectLater(
@@ -2473,18 +2419,12 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           width: 5000.0,
           height: 500.0,
         ),
-        matchesGoldenFile(
-          'inspector.composited_transform.only_offsets_follower.png',
-          version: null,
-        ),
+        matchesGoldenFile('inspector.composited_transform.only_offsets_follower.png'),
       );
 
       await expectLater(
         WidgetInspectorService.instance.screenshot(find.byType(Stack).evaluate().first, width: 300.0, height: 300.0),
-        matchesGoldenFile(
-          'inspector.composited_transform.only_offsets_small.png',
-          version: 1,
-        ),
+        matchesGoldenFile('inspector.composited_transform.only_offsets_small.png'),
       );
 
       await expectLater(
@@ -2493,10 +2433,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           width: 500.0,
           height: 500.0,
         ),
-        matchesGoldenFile(
-          'inspector.composited_transform.only_offsets_target.png',
-          version: null,
-        ),
+        matchesGoldenFile('inspector.composited_transform.only_offsets_target.png'),
       );
     }, skip: isBrowser);
 
@@ -2568,10 +2505,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       // screenshots of specific subtrees are reasonable.
       await expectLater(
         find.byKey(mainStackKey),
-        matchesGoldenFile(
-          'inspector.composited_transform.with_rotations.png',
-          version: null,
-        ),
+        matchesGoldenFile('inspector.composited_transform.with_rotations.png'),
       );
 
       await expectLater(
@@ -2580,10 +2514,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           width: 500.0,
           height: 500.0,
         ),
-        matchesGoldenFile(
-          'inspector.composited_transform.with_rotations_small.png',
-          version: null,
-        ),
+        matchesGoldenFile('inspector.composited_transform.with_rotations_small.png'),
       );
 
       await expectLater(
@@ -2592,10 +2523,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           width: 500.0,
           height: 500.0,
         ),
-        matchesGoldenFile(
-          'inspector.composited_transform.with_rotations_target.png',
-          version: null,
-        ),
+        matchesGoldenFile('inspector.composited_transform.with_rotations_target.png'),
       );
 
       await expectLater(
@@ -2604,10 +2532,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
           width: 500.0,
           height: 500.0,
         ),
-        matchesGoldenFile(
-          'inspector.composited_transform.with_rotations_follower.png',
-          version: null,
-        ),
+        matchesGoldenFile('inspector.composited_transform.with_rotations_follower.png'),
       );
 
       // Make sure taking screenshots hasn't modified the positions of the
@@ -2674,6 +2599,76 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       visitChildren(detailedChildren);
       expect(appBars.single, isNot(contains('children')));
     }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // Test requires --track-widget-creation flag.
+
+    testWidgets('InspectorSerializationDelegate addAdditionalPropertiesCallback', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          title: 'Hello World!',
+          home: Scaffold(
+            appBar: AppBar(
+              title: const Text('Hello World!'),
+            ),
+            body: Center(
+              child: Column(
+                children: const <Widget>[
+                  Text('Hello World!'),
+                ],
+              ),
+            ),
+          ),
+        )
+      );
+      final Finder columnWidgetFinder = find.byType(Column);
+      expect(columnWidgetFinder, findsOneWidget);
+      final Element columnWidgetElement = columnWidgetFinder
+        .evaluate()
+        .first;
+      final DiagnosticsNode node = columnWidgetElement.toDiagnosticsNode();
+      final InspectorSerializationDelegate delegate =
+        InspectorSerializationDelegate(
+          service: service,
+          summaryTree: false,
+          includeProperties: true,
+          addAdditionalPropertiesCallback:
+            (DiagnosticsNode node, InspectorSerializationDelegate delegate) {
+              final Map<String, Object> additionalJson = <String, Object>{};
+              final Object value = node.value;
+              if (value is Element) {
+                additionalJson['renderObject'] =
+                  value.renderObject.toDiagnosticsNode().toJsonMap(
+                    delegate.copyWith(subtreeDepth: 0),
+                  );
+              }
+              additionalJson['callbackExecuted'] = true;
+              return additionalJson;
+            },
+        );
+      final Map<String, Object> json = node.toJsonMap(delegate);
+      expect(json['callbackExecuted'], true);
+      expect(json.containsKey('renderObject'), true);
+      expect(json['renderObject'], isA<Map<String, dynamic>>());
+      final Map<String, dynamic> renderObjectJson = json['renderObject'];
+      expect(renderObjectJson['description'], startsWith('RenderFlex'));
+
+      final InspectorSerializationDelegate emptyDelegate =
+        InspectorSerializationDelegate(
+          service: service,
+          summaryTree: false,
+          includeProperties: true,
+          addAdditionalPropertiesCallback:
+            (DiagnosticsNode node, InspectorSerializationDelegate delegate) {
+              return null;
+            },
+        );
+      final InspectorSerializationDelegate defaultDelegate =
+        InspectorSerializationDelegate(
+          service: service,
+          summaryTree: false,
+          includeProperties: true,
+          addAdditionalPropertiesCallback: null,
+        );
+      expect(node.toJsonMap(emptyDelegate), node.toJsonMap(defaultDelegate));
+    });
   }
 }
 

@@ -1,6 +1,7 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
 import 'dart:convert';
 
 import 'package:archive/archive.dart';
@@ -69,7 +70,7 @@ void main() {
         expect(message.message, contains('recommended minimum version'));
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
-        ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+        ProcessManager: () => FakeProcessManager.any(),
       });
 
       testUsingContext('not found', () async {
@@ -90,7 +91,7 @@ void main() {
         expect(message.message, contains('Flutter plugin not installed'));
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
-        ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+        ProcessManager: () => FakeProcessManager.any(),
       });
     });
   });

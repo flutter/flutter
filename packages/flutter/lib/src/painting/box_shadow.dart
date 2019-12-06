@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -118,11 +118,11 @@ class BoxShadow extends ui.Shadow {
       return true;
     if (runtimeType != other.runtimeType)
       return false;
-    final BoxShadow typedOther = other;
-    return color == typedOther.color &&
-           offset == typedOther.offset &&
-           blurRadius == typedOther.blurRadius &&
-           spreadRadius == typedOther.spreadRadius;
+    return other is BoxShadow
+        && other.color == color
+        && other.offset == offset
+        && other.blurRadius == blurRadius
+        && other.spreadRadius == spreadRadius;
   }
 
   @override

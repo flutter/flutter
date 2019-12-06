@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -214,5 +214,21 @@ void main() {
     expect(textColor(collapsedTitleKey), _accentColor);
     expect(iconColor(expandedIconKey), _unselectedWidgetColor);
     expect(iconColor(collapsedIconKey), _accentColor);
+  });
+
+  testWidgets('ExpansionTile subtitle', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: ExpansionTile(
+            title: Text('Title'),
+            subtitle: Text('Subtitle'),
+            children: <Widget>[ListTile(title: Text('0'))],
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Subtitle'), findsOneWidget);
   });
 }

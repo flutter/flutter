@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -1426,10 +1426,7 @@ void main() {
       await tester.pump(const Duration(milliseconds: 30));
       await expectLater(
         find.byType(BottomNavigationBar),
-        matchesGoldenFile(
-          'bottom_navigation_bar.shifting_transition.$pump.png',
-          version: 2,
-        ),
+        matchesGoldenFile('bottom_navigation_bar.shifting_transition.$pump.png'),
       );
     }
   }, skip: isBrowser);

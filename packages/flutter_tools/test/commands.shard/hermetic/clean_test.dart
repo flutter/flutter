@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -53,7 +53,7 @@ void main() {
       verify(xcodeProjectInterpreter.cleanWorkspace(any, 'Runner')).called(2);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
       Xcode: () => mockXcode,
       XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
     });
@@ -69,12 +69,28 @@ void main() {
       final MockFile mockFile = MockFile();
       when(mockFile.existsSync()).thenReturn(true);
 
-      final BufferLogger logger = context.get<Logger>();
       when(mockFile.deleteSync(recursive: true)).thenThrow(const FileSystemException('Deletion failed'));
       final CleanCommand command = CleanCommand();
       command.deleteFile(mockFile);
-      expect(logger.errorText, contains('A program may still be using a file'));
+      expect(testLogger.errorText, contains('A program may still be using a file'));
       verify(mockFile.deleteSync(recursive: true)).called(1);
+    }, overrides: <Type, Generator>{
+      Platform: () => windowsPlatform,
+      Logger: () => BufferLogger(),
+      Xcode: () => mockXcode,
+    });
+
+    testUsingContext('$CleanCommand handles missing permissions;', () async {
+      when(mockXcode.isInstalledAndMeetsVersionCheck).thenReturn(false);
+
+      final MockFile mockFile = MockFile();
+      when(mockFile.existsSync()).thenThrow(const FileSystemException('OS error: Access Denied'));
+      when(mockFile.path).thenReturn('foo.dart');
+
+      final CleanCommand command = CleanCommand();
+      command.deleteFile(mockFile);
+      expect(testLogger.errorText, contains('Cannot clean foo.dart'));
+      verifyNever(mockFile.deleteSync(recursive: true));
     }, overrides: <Type, Generator>{
       Platform: () => windowsPlatform,
       Logger: () => BufferLogger(),

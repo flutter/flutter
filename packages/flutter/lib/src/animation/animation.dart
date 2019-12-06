@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -167,7 +167,7 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
   @optionalTypeArgs
   Animation<U> drive<U>(Animatable<U> child) {
     assert(this is Animation<double>);
-    return child.animate(this as dynamic); // TODO(ianh): Clean this once https://github.com/dart-lang/sdk/issues/32120 is fixed.
+    return child.animate(this as Animation<double>);
   }
 
   @override

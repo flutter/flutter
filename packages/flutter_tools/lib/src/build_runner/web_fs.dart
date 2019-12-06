@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -33,7 +33,6 @@ import '../bundle.dart';
 import '../cache.dart';
 import '../dart/package_map.dart';
 import '../dart/pub.dart';
-import '../device.dart';
 import '../globals.dart';
 import '../platform_plugins.dart';
 import '../plugins.dart';
@@ -72,7 +71,7 @@ typedef DwdsFactory = Future<Dwds> Function({
   bool enableDebugExtension,
 });
 
-/// A function with the same signatuure as [WebFs.start].
+/// A function with the same signature as [WebFs.start].
 typedef WebFsFactory = Future<WebFs> Function({
   @required String target,
   @required FlutterProject flutterProject,
@@ -81,6 +80,7 @@ typedef WebFsFactory = Future<WebFs> Function({
   @required bool initializePlatform,
   @required String hostname,
   @required String port,
+  @required List<String> dartDefines,
 });
 
 /// The dev filesystem responsible for building and serving  web applications.
@@ -97,9 +97,10 @@ class WebFs {
     this._target,
     this._buildInfo,
     this._initializePlatform,
+    this._dartDefines,
   );
 
-  /// The server uri.
+  /// The server URL.
   final String uri;
 
   final HttpServer _server;
@@ -111,6 +112,7 @@ class WebFs {
   final String _target;
   final BuildInfo _buildInfo;
   final bool _initializePlatform;
+  final List<String> _dartDefines;
   StreamSubscription<void> _connectedApps;
 
   static const String _kHostName = 'localhost';
@@ -128,12 +130,12 @@ class WebFs {
   /// Connect and retrieve the [DebugConnection] for the current application.
   ///
   /// Only calls [AppConnection.runMain] on the subsequent connections.
-  Future<ConnectionResult> connect(DebuggingOptions debuggingOptions) {
+  Future<ConnectionResult> connect(bool useDebugExtension) {
     final Completer<ConnectionResult> firstConnection = Completer<ConnectionResult>();
     _connectedApps = _dwds.connectedApps.listen((AppConnection appConnection) async {
-      final DebugConnection debugConnection = debuggingOptions.browserLaunch
-        ? await _dwds.debugConnection(appConnection)
-        : await (_cachedExtensionFuture ??= _dwds.extensionDebugConnections.stream.first);
+      final DebugConnection debugConnection = useDebugExtension
+        ? await (_cachedExtensionFuture ??= _dwds.extensionDebugConnections.stream.first)
+        : await _dwds.debugConnection(appConnection);
       if (!firstConnection.isCompleted) {
         firstConnection.complete(ConnectionResult(appConnection, debugConnection));
       } else {
@@ -146,7 +148,7 @@ class WebFs {
   /// Recompile the web application and return whether this was successful.
   Future<bool> recompile() async {
     if (!_useBuildRunner) {
-      await buildWeb(_flutterProject, _target, _buildInfo, _initializePlatform);
+      await buildWeb(_flutterProject, _target, _buildInfo, _initializePlatform, _dartDefines);
       return true;
     }
     _client.startBuild();
@@ -173,6 +175,7 @@ class WebFs {
     @required bool initializePlatform,
     @required String hostname,
     @required String port,
+    @required List<String> dartDefines,
   }) async {
     // workaround for https://github.com/flutter/flutter/issues/38290
     if (!flutterProject.dartTool.existsSync()) {
@@ -302,7 +305,7 @@ class WebFs {
         handler = pipeline.addHandler(proxyHandler('http://localhost:$daemonAssetPort/web/'));
       }
     } else {
-      await buildWeb(flutterProject, target, buildInfo, initializePlatform);
+      await buildWeb(flutterProject, target, buildInfo, initializePlatform, dartDefines);
       firstBuildCompleter.complete(true);
     }
 
@@ -325,6 +328,7 @@ class WebFs {
       target,
       buildInfo,
       initializePlatform,
+      dartDefines,
     );
     if (!await firstBuildCompleter.future) {
       throw const BuildException();
@@ -349,32 +353,43 @@ abstract class AssetServer {
 }
 
 class ReleaseAssetServer extends AssetServer {
+  // Locations where source files, assets, or source maps may be located.
+  final List<Uri> _searchPaths = <Uri>[
+    fs.directory(getWebBuildDirectory()).uri,
+    fs.directory(Cache.flutterRoot).parent.uri,
+    fs.currentDirectory.childDirectory('lib').uri,
+  ];
+
   @override
   Future<Response> handle(Request request) async {
-    final Uri artifactUri = fs.directory(getWebBuildDirectory()).uri.resolveUri(request.url);
-    final File file = fs.file(artifactUri);
-    if (file.existsSync()) {
-      return Response.ok(file.readAsBytesSync(), headers: <String, String>{
-        'Content-Type': _guessExtension(file),
+    Uri fileUri;
+    for (Uri uri in _searchPaths) {
+      final Uri potential = uri.resolve(request.url.path);
+      if (potential == null || !fs.isFileSync(potential.toFilePath())) {
+        continue;
+      }
+      fileUri = potential;
+      break;
+    }
+
+    if (fileUri != null) {
+      final File file = fs.file(fileUri);
+      final Uint8List bytes = file.readAsBytesSync();
+      // Fallback to "application/octet-stream" on null which
+      // makes no claims as to the structure of the data.
+      final String mimeType = mime.lookupMimeType(file.path, headerBytes: bytes)
+        ?? 'application/octet-stream';
+      return Response.ok(bytes, headers: <String, String>{
+        'Content-Type': mimeType,
       });
     }
     if (request.url.path == '') {
       final File file = fs.file(fs.path.join(getWebBuildDirectory(), 'index.html'));
       return Response.ok(file.readAsBytesSync(), headers: <String, String>{
-        'Content-Type': _guessExtension(file),
+        'Content-Type': 'text/html',
       });
     }
     return Response.notFound('');
-  }
-
-  String _guessExtension(File file) {
-    switch (fs.path.extension(file.path)) {
-      case '.js':
-        return 'text/javascript';
-      case '.html':
-        return 'text/html';
-    }
-    return 'text';
   }
 }
 
@@ -427,7 +442,7 @@ class DebugAssetServer extends AssetServer {
           partFiles = fs.systemTempDirectory.createTempSync('flutter_tool.')
             ..createSync();
           for (ArchiveFile file in archive) {
-            partFiles.childFile(file.name).writeAsBytesSync(file.content);
+            partFiles.childFile(file.name).writeAsBytesSync(file.content as List<int>);
           }
         }
       }
@@ -447,6 +462,14 @@ class DebugAssetServer extends AssetServer {
       return Response.ok(file.readAsBytesSync(), headers: <String, String>{
         'Content-Type': 'text/javascript',
       });
+    } else if (request.url.path.endsWith('dart_sdk.js.map')) {
+      final File file = fs.file(fs.path.join(
+        artifacts.getArtifactPath(Artifact.flutterWebSdk),
+        'kernel',
+        'amd',
+        'dart_sdk.js.map',
+      ));
+      return Response.ok(file.readAsBytesSync());
     } else if (request.url.path.endsWith('dart_sdk.js')) {
       final File file = fs.file(fs.path.join(
         artifacts.getArtifactPath(Artifact.flutterWebSdk),
@@ -457,27 +480,31 @@ class DebugAssetServer extends AssetServer {
       return Response.ok(file.readAsBytesSync(), headers: <String, String>{
         'Content-Type': 'text/javascript',
       });
-    } else if (request.url.path.endsWith('dart_sdk.js.map')) {
-      final File file = fs.file(fs.path.join(
-        artifacts.getArtifactPath(Artifact.flutterWebSdk),
-        'kernel',
-        'amd',
-        'dart_sdk.js.map',
-      ));
-      return Response.ok(file.readAsBytesSync());
     } else if (request.url.path.endsWith('.dart')) {
       // This is likely a sourcemap request. The first segment is the
       // package name, and the rest is the path to the file relative to
       // the package uri. For example, `foo/bar.dart` would represent a
       // file at a path like `foo/lib/bar.dart`. If there is no leading
       // segment, then we assume it is from the current package.
+      String basePath = request.url.path;
+      basePath = basePath.replaceFirst('packages/build_web_compilers/', '');
+      basePath = basePath.replaceFirst('packages/', '');
 
       // Handle sdk requests that have mangled urls from engine build.
-      if (request.url.path.contains('flutter_web_sdk')) {
+      if (request.url.path.contains('dart-sdk')) {
         // Note: the request is a uri and not a file path, so they always use `/`.
-        final String sdkPath = fs.path.joinAll(request.url.path.split('flutter_web_sdk/').last.split('/'));
-        final String webSdkPath = artifacts.getArtifactPath(Artifact.flutterWebSdk);
-        return Response.ok(fs.file(fs.path.join(webSdkPath, sdkPath)).readAsBytesSync());
+        final String sdkPath = fs.path.joinAll(request.url.path.split('dart-sdk/').last.split('/'));
+        final String dartSdkPath = artifacts.getArtifactPath(Artifact.engineDartSdkPath);
+        final File candidateFile = fs.file(fs.path.join(dartSdkPath, sdkPath));
+        return Response.ok(candidateFile.readAsBytesSync());
+      }
+
+      // See if it is a flutter sdk path.
+      final String webSdkPath = artifacts.getArtifactPath(Artifact.flutterWebSdk);
+      final File candidateFile = fs.file(fs.path.join(webSdkPath,
+        basePath.split('/').join(platform.pathSeparator)));
+      if (candidateFile.existsSync()) {
+        return Response.ok(candidateFile.readAsBytesSync());
       }
 
       final String packageName = request.url.pathSegments.length == 1
@@ -531,6 +558,16 @@ class ConnectionResult {
   final DebugConnection debugConnection;
 }
 
+class WebTestTargetManifest {
+  WebTestTargetManifest(this.buildFilters);
+
+  WebTestTargetManifest.all() : buildFilters = null;
+
+  final List<String> buildFilters;
+
+  bool get hasBuildFilters => buildFilters != null && buildFilters.isNotEmpty;
+}
+
 /// A testable interface for starting a build daemon.
 class BuildDaemonCreator {
   const BuildDaemonCreator();
@@ -547,8 +584,8 @@ class BuildDaemonCreator {
     bool release = false,
     bool profile = false,
     bool hasPlugins = false,
-    bool includeTests = false,
     bool initializePlatform = true,
+    WebTestTargetManifest testTargets,
   }) async {
     try {
       final BuildDaemonClient client = await _connectClient(
@@ -557,8 +594,9 @@ class BuildDaemonCreator {
         profile: profile,
         hasPlugins: hasPlugins,
         initializePlatform: initializePlatform,
+        testTargets: testTargets,
       );
-      _registerBuildTargets(client, includeTests);
+      _registerBuildTargets(client, testTargets);
       return client;
     } on OptionsSkew {
       throwToolExit(
@@ -571,7 +609,7 @@ class BuildDaemonCreator {
 
   void _registerBuildTargets(
     BuildDaemonClient client,
-    bool includeTests,
+    WebTestTargetManifest testTargets,
   ) {
     final OutputLocation outputLocation = OutputLocation((OutputLocationBuilder b) => b
       ..output = ''
@@ -580,10 +618,15 @@ class BuildDaemonCreator {
     client.registerBuildTarget(DefaultBuildTarget((DefaultBuildTargetBuilder b) => b
       ..target = 'web'
       ..outputLocation = outputLocation?.toBuilder()));
-    if (includeTests) {
-      client.registerBuildTarget(DefaultBuildTarget((DefaultBuildTargetBuilder b) => b
-        ..target = 'test'
-        ..outputLocation = outputLocation?.toBuilder()));
+    if (testTargets != null) {
+      client.registerBuildTarget(DefaultBuildTarget((DefaultBuildTargetBuilder b) {
+        b.target = 'test';
+        b.outputLocation = outputLocation?.toBuilder();
+        if (testTargets.hasBuildFilters) {
+          b.buildFilters.addAll(testTargets.buildFilters);
+        }
+        return b;
+      }));
     }
   }
 
@@ -593,29 +636,37 @@ class BuildDaemonCreator {
     bool profile,
     bool hasPlugins,
     bool initializePlatform,
+    WebTestTargetManifest testTargets,
   }) {
     final String flutterToolsPackages = fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools', '.packages');
     final String buildScript = fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools', 'lib', 'src', 'build_runner', 'build_script.dart');
     final String flutterWebSdk = artifacts.getArtifactPath(Artifact.flutterWebSdk);
+
+    // On Windows we need to call the snapshot directly otherwise
+    // the process will start in a disjoint cmd without access to
+    // STDIO.
+    final List<String> args = <String>[
+      artifacts.getArtifactPath(Artifact.engineDartBinary),
+      '--packages=$flutterToolsPackages',
+      buildScript,
+      'daemon',
+      '--skip-build-script-check',
+      '--define', 'flutter_tools:ddc=flutterWebSdk=$flutterWebSdk',
+      '--define', 'flutter_tools:entrypoint=flutterWebSdk=$flutterWebSdk',
+      '--define', 'flutter_tools:entrypoint=release=$release',
+      '--define', 'flutter_tools:entrypoint=profile=$profile',
+      '--define', 'flutter_tools:shell=flutterWebSdk=$flutterWebSdk',
+      '--define', 'flutter_tools:shell=hasPlugins=$hasPlugins',
+      '--define', 'flutter_tools:shell=initializePlatform=$initializePlatform',
+      // The following will cause build runner to only build tests that were requested.
+      if (testTargets != null && testTargets.hasBuildFilters)
+        for (String buildFilter in testTargets.buildFilters)
+          '--build-filter=$buildFilter',
+    ];
+
     return BuildDaemonClient.connect(
       workingDirectory,
-      // On Windows we need to call the snapshot directly otherwise
-      // the process will start in a disjoint cmd without access to
-      // STDIO.
-      <String>[
-        artifacts.getArtifactPath(Artifact.engineDartBinary),
-        '--packages=$flutterToolsPackages',
-        buildScript,
-        'daemon',
-        '--skip-build-script-check',
-        '--define', 'flutter_tools:ddc=flutterWebSdk=$flutterWebSdk',
-        '--define', 'flutter_tools:entrypoint=flutterWebSdk=$flutterWebSdk',
-        '--define', 'flutter_tools:entrypoint=release=$release',
-        '--define', 'flutter_tools:entrypoint=profile=$profile',
-        '--define', 'flutter_tools:shell=flutterWebSdk=$flutterWebSdk',
-        '--define', 'flutter_tools:shell=hasPlugins=$hasPlugins',
-        '--define', 'flutter_tools:shell=initializePlatform=$initializePlatform',
-      ],
+      args,
       logHandler: (ServerLog serverLog) {
         switch (serverLog.level) {
           case Level.SEVERE:

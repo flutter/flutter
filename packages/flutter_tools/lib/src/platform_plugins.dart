@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -31,8 +31,8 @@ class AndroidPlugin extends PluginPlatform {
     assert(validate(yaml));
     return AndroidPlugin(
       name: name,
-      package: yaml['package'],
-      pluginClass: yaml['pluginClass'],
+      package: yaml['package'] as String,
+      pluginClass: yaml['pluginClass'] as String,
       pluginPath: pluginPath,
     );
   }
@@ -64,17 +64,20 @@ class AndroidPlugin extends PluginPlatform {
       'name': name,
       'package': package,
       'class': pluginClass,
-      'usesEmbedding2': _embeddingVersion == '2',
+      // Mustache doesn't support complex types.
+      'supportsEmbeddingV1': _supportedEmbedings.contains('1'),
+      'supportsEmbeddingV2': _supportedEmbedings.contains('2'),
     };
   }
 
-  String _cachedEmbeddingVersion;
+  Set<String> _cachedEmbeddingVersion;
 
   /// Returns the version of the Android embedding.
-  String get _embeddingVersion => _cachedEmbeddingVersion ??= _getEmbeddingVersion();
+  Set<String> get _supportedEmbedings => _cachedEmbeddingVersion ??= _getSupportedEmbeddings();
 
-  String _getEmbeddingVersion() {
+  Set<String> _getSupportedEmbeddings() {
     assert(pluginPath != null);
+    final Set<String> supportedEmbeddings = <String>{};
     final String baseMainPath = fs.path.join(
       pluginPath,
       'android',
@@ -113,9 +116,15 @@ class AndroidPlugin extends PluginPlatform {
     }
     if (mainClassContent
         .contains('io.flutter.embedding.engine.plugins.FlutterPlugin')) {
-      return '2';
+      supportedEmbeddings.add('2');
+    } else {
+      supportedEmbeddings.add('1');
     }
-    return '1';
+    if (mainClassContent.contains('PluginRegistry')
+        && mainClassContent.contains('registerWith')) {
+      supportedEmbeddings.add('1');
+    }
+    return supportedEmbeddings;
   }
 }
 
@@ -135,7 +144,7 @@ class IOSPlugin extends PluginPlatform {
     return IOSPlugin(
       name: name,
       classPrefix: '',
-      pluginClass: yaml['pluginClass'],
+      pluginClass: yaml['pluginClass'] as String,
     );
   }
 
@@ -179,7 +188,7 @@ class MacOSPlugin extends PluginPlatform {
     assert(validate(yaml));
     return MacOSPlugin(
       name: name,
-      pluginClass: yaml['pluginClass'],
+      pluginClass: yaml['pluginClass'] as String,
     );
   }
 
@@ -218,7 +227,7 @@ class WindowsPlugin extends PluginPlatform {
     assert(validate(yaml));
     return WindowsPlugin(
       name: name,
-      pluginClass: yaml['pluginClass'],
+      pluginClass: yaml['pluginClass'] as String,
     );
   }
 
@@ -258,7 +267,7 @@ class LinuxPlugin extends PluginPlatform {
     assert(validate(yaml));
     return LinuxPlugin(
       name: name,
-      pluginClass: yaml['pluginClass'],
+      pluginClass: yaml['pluginClass'] as String,
     );
   }
 
@@ -300,8 +309,8 @@ class WebPlugin extends PluginPlatform {
     assert(validate(yaml));
     return WebPlugin(
       name: name,
-      pluginClass: yaml['pluginClass'],
-      fileName: yaml['fileName'],
+      pluginClass: yaml['pluginClass'] as String,
+      fileName: yaml['fileName'] as String,
     );
   }
 

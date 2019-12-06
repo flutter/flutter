@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -54,14 +54,14 @@ class GalleryOptions {
   bool operator ==(dynamic other) {
     if (runtimeType != other.runtimeType)
       return false;
-    final GalleryOptions typedOther = other;
-    return themeMode == typedOther.themeMode
-        && textScaleFactor == typedOther.textScaleFactor
-        && textDirection == typedOther.textDirection
-        && platform == typedOther.platform
-        && showPerformanceOverlay == typedOther.showPerformanceOverlay
-        && showRasterCacheImagesCheckerboard == typedOther.showRasterCacheImagesCheckerboard
-        && showOffscreenLayersCheckerboard == typedOther.showRasterCacheImagesCheckerboard;
+    return other is GalleryOptions
+        && other.themeMode == themeMode
+        && other.textScaleFactor == textScaleFactor
+        && other.textDirection == textDirection
+        && other.platform == platform
+        && other.showPerformanceOverlay == showPerformanceOverlay
+        && other.showRasterCacheImagesCheckerboard == showRasterCacheImagesCheckerboard
+        && other.showOffscreenLayersCheckerboard == showRasterCacheImagesCheckerboard;
   }
 
   @override
@@ -360,6 +360,8 @@ class _PlatformItem extends StatelessWidget {
         return 'Fuchsia';
       case TargetPlatform.iOS:
         return 'Cupertino';
+      case TargetPlatform.macOS:
+        return 'Material Desktop (macOS)';
     }
     assert(false);
     return null;

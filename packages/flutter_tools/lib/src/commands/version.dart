@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -18,6 +18,7 @@ import '../version.dart';
 
 class VersionCommand extends FlutterCommand {
   VersionCommand() : super() {
+    usesPubOption(hide: true);
     argParser.addFlag('force',
       abbr: 'f',
       help: 'Force switch to older Flutter versions that do not include a version command',
@@ -72,7 +73,7 @@ class VersionCommand extends FlutterCommand {
 
     bool withForce = false;
     if (targetVersion < minSupportedVersion) {
-      if (!argResults['force']) {
+      if (!boolArg('force')) {
         printError(
           'Version command is not supported in $targetVersion and it is supported since version $minSupportedVersion'
           'which means if you switch to version $minSupportedVersion then you can not use version command.'
@@ -117,7 +118,7 @@ class VersionCommand extends FlutterCommand {
     printStatus(flutterVersion.toString());
 
     final String projectRoot = findProjectRoot();
-    if (projectRoot != null) {
+    if (projectRoot != null && shouldRunPub) {
       printStatus('');
       await pub.get(
         context: PubContext.pubUpgrade,

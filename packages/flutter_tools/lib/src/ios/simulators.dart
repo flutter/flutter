@@ -1,9 +1,11 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:async';
 import 'dart:math' as math;
+
+import 'package:meta/meta.dart';
 
 import '../application_package.dart';
 import '../base/common.dart';
@@ -372,14 +374,18 @@ class IOSSimulator extends Device {
         if (debuggingOptions.disableServiceAuthCodes) '--disable-service-auth-codes',
         if (debuggingOptions.skiaDeterministicRendering) '--skia-deterministic-rendering',
         if (debuggingOptions.useTestFonts) '--use-test-fonts',
-        '--observatory-port=${debuggingOptions.observatoryPort ?? 0}',
+        '--observatory-port=${debuggingOptions.hostVmServicePort ?? 0}',
       ],
     ];
 
     ProtocolDiscovery observatoryDiscovery;
     if (debuggingOptions.debuggingEnabled) {
       observatoryDiscovery = ProtocolDiscovery.observatory(
-          getLogReader(app: package), ipv6: ipv6);
+        getLogReader(app: package),
+        ipv6: ipv6,
+        hostPort: debuggingOptions.hostVmServicePort,
+        devicePort: debuggingOptions.deviceVmServicePort,
+      );
     }
 
     // Launch the updated application in the simulator.
@@ -417,7 +423,7 @@ class IOSSimulator extends Device {
   }
 
   Future<void> _setupUpdatedApplicationBundle(covariant BuildableIOSApp app, BuildInfo buildInfo, String mainPath) async {
-    await _sideloadUpdatedAssetsForInstalledApplicationBundle(app, buildInfo, mainPath);
+    await sideloadUpdatedAssetsForInstalledApplicationBundle(buildInfo, mainPath);
 
     // Step 1: Build the Xcode project.
     // The build mode for the simulator is always debug.
@@ -448,9 +454,11 @@ class IOSSimulator extends Device {
     await SimControl.instance.install(id, fs.path.absolute(bundle.path));
   }
 
-  Future<void> _sideloadUpdatedAssetsForInstalledApplicationBundle(ApplicationPackage app, BuildInfo buildInfo, String mainPath) {
+  @visibleForTesting
+  Future<void> sideloadUpdatedAssetsForInstalledApplicationBundle(BuildInfo buildInfo, String mainPath) {
     // Run compiler to produce kernel file for the application.
     return BundleBuilder().build(
+      platform: TargetPlatform.ios,
       mainPath: mainPath,
       precompiledSnapshot: false,
       buildMode: buildInfo.mode,
@@ -527,6 +535,16 @@ class IOSSimulator extends Device {
   @override
   bool isSupportedForProject(FlutterProject flutterProject) {
     return flutterProject.ios.existsSync();
+  }
+
+  @override
+  Future<void> dispose() async {
+    _logReaders?.forEach(
+      (ApplicationPackage application, _IOSSimulatorLogReader logReader) {
+        logReader.dispose();
+      },
+    );
+    await _portForwarder?.dispose();
   }
 }
 
@@ -713,6 +731,11 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
     _deviceProcess?.kill();
     _systemProcess?.kill();
   }
+
+  @override
+  void dispose() {
+    _stop();
+  }
 }
 
 int compareIosVersions(String v1, String v2) {
@@ -769,9 +792,7 @@ class _IOSSimulatorDevicePortForwarder extends DevicePortForwarder {
   final List<ForwardedPort> _ports = <ForwardedPort>[];
 
   @override
-  List<ForwardedPort> get forwardedPorts {
-    return _ports;
-  }
+  List<ForwardedPort> get forwardedPorts => _ports;
 
   @override
   Future<int> forward(int devicePort, { int hostPort }) async {
@@ -786,5 +807,12 @@ class _IOSSimulatorDevicePortForwarder extends DevicePortForwarder {
   @override
   Future<void> unforward(ForwardedPort forwardedPort) async {
     _ports.remove(forwardedPort);
+  }
+
+  @override
+  Future<void> dispose() async {
+    for (ForwardedPort port in _ports) {
+      await unforward(port);
+    }
   }
 }

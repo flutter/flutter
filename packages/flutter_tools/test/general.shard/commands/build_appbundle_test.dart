@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -8,10 +8,8 @@ import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_builder.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
-import 'package:flutter_tools/src/android/gradle.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_appbundle.dart';
@@ -20,6 +18,7 @@ import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
+import '../../src/android_common.dart';
 import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/mocks.dart';
@@ -139,7 +138,9 @@ void main() {
       });
 
       testUsingContext('validateSdkWellFormed() not called, sdk reinitialized', () async {
-        final Directory gradleCacheDir = memoryFileSystem.directory('/flutter_root/bin/cache/artifacts/gradle_wrapper')..createSync(recursive: true);
+        final Directory gradleCacheDir = memoryFileSystem
+          .directory('/flutter_root/bin/cache/artifacts/gradle_wrapper')
+          ..createSync(recursive: true);
         gradleCacheDir.childFile(platform.isWindows ? 'gradlew.bat' : 'gradlew').createSync();
 
         tempDir.childFile('pubspec.yaml')
@@ -158,10 +159,26 @@ flutter:
         tempDir.childFile('.packages').createSync(recursive: true);
         final Directory androidDir = tempDir.childDirectory('android');
         androidDir.childFile('build.gradle').createSync(recursive: true);
-        androidDir.childFile('gradle.properties').createSync(recursive: true);
-        androidDir.childDirectory('gradle').childDirectory('wrapper').childFile('gradle-wrapper.properties').createSync(recursive: true);
-        tempDir.childDirectory('build').childDirectory('outputs').childDirectory('repo').createSync(recursive: true);
-        tempDir.childDirectory('lib').childFile('main.dart').createSync(recursive: true);
+        androidDir
+          .childDirectory('app')
+          .childFile('build.gradle')
+          ..createSync(recursive: true)
+          ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
+        androidDir
+          .childFile('gradle.properties')
+          .createSync(recursive: true);
+        androidDir
+          .childDirectory('gradle')
+          .childDirectory('wrapper')
+          .childFile('gradle-wrapper.properties')
+          .createSync(recursive: true);
+        tempDir.childDirectory('build')
+          .childDirectory('outputs')
+          .childDirectory('repo')
+          .createSync(recursive: true);
+        tempDir.childDirectory('lib')
+          .childFile('main.dart')
+          .createSync(recursive: true);
         when(mockProcessManager.run(any,
           workingDirectory: anyNamed('workingDirectory'),
           environment: anyNamed('environment')))
@@ -169,7 +186,7 @@ flutter:
 
         await expectLater(
           runBuildAppBundleCommand(tempDir.path, arguments: <String>['--no-pub', '--flutter-root=/flutter_root']),
-          throwsToolExit(message: 'Gradle build failed: 1'),
+          throwsToolExit(message: 'Gradle task bundleRelease failed with exit code 1'),
         );
 
         verifyNever(mockAndroidSdk.validateSdkWellFormed());
@@ -177,7 +194,6 @@ flutter:
       },
       overrides: <Type, Generator>{
         AndroidSdk: () => mockAndroidSdk,
-        GradleUtils: () => GradleUtils(),
         ProcessManager: () => mockProcessManager,
         FileSystem: () => memoryFileSystem,
       });
@@ -210,7 +226,6 @@ flutter:
     overrides: <Type, Generator>{
       AndroidSdk: () => mockAndroidSdk,
       FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
-      GradleUtils: () => GradleUtils(),
       ProcessManager: () => mockProcessManager,
     });
 
@@ -243,7 +258,6 @@ flutter:
     overrides: <Type, Generator>{
       AndroidSdk: () => mockAndroidSdk,
       FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
-      GradleUtils: () => GradleUtils(),
       ProcessManager: () => mockProcessManager,
     });
 
@@ -291,13 +305,12 @@ flutter:
       verify(mockUsage.sendEvent(
         'build',
         'appbundle',
-        label: 'r8-failure',
+        label: 'gradle-r8-failure',
         parameters: anyNamed('parameters'),
       )).called(1);
     },
     overrides: <Type, Generator>{
       AndroidSdk: () => mockAndroidSdk,
-      GradleUtils: () => GradleUtils(),
       FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
       ProcessManager: () => mockProcessManager,
       Usage: () => mockUsage,
@@ -334,9 +347,8 @@ flutter:
         );
       }, throwsToolExit());
 
-      final BufferLogger logger = context.get<Logger>();
-      expect(logger.statusText, contains('[!] Your app isn\'t using AndroidX'));
-      expect(logger.statusText, contains(
+      expect(testLogger.statusText, contains('Your app isn\'t using AndroidX'));
+      expect(testLogger.statusText, contains(
         'To avoid potential build failures, you can quickly migrate your app by '
         'following the steps on https://goo.gl/CP92wY'
         )
@@ -350,7 +362,6 @@ flutter:
     },
     overrides: <Type, Generator>{
       AndroidSdk: () => mockAndroidSdk,
-      GradleUtils: () => GradleUtils(),
       FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
       ProcessManager: () => mockProcessManager,
       Usage: () => mockUsage,
@@ -387,10 +398,9 @@ flutter:
         );
       }, throwsToolExit());
 
-      final BufferLogger logger = context.get<Logger>();
-      expect(logger.statusText.contains('[!] Your app isn\'t using AndroidX'), isFalse);
+      expect(testLogger.statusText.contains('Your app isn\'t using AndroidX'), isFalse);
       expect(
-        logger.statusText.contains(
+        testLogger.statusText.contains(
           'To avoid potential build failures, you can quickly migrate your app by '
           'following the steps on https://goo.gl/CP92wY'
         ),
@@ -405,7 +415,6 @@ flutter:
     },
     overrides: <Type, Generator>{
       AndroidSdk: () => mockAndroidSdk,
-      GradleUtils: () => GradleUtils(),
       FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
       ProcessManager: () => mockProcessManager,
       Usage: () => mockUsage,

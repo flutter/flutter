@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -45,7 +45,7 @@ void main() {
       }, overrides: <Type, Generator>{
         Cache: () => Cache(rootOverride: tempDir),
         FileSystem: () => memoryFileSystem,
-        ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+        ProcessManager: () => FakeProcessManager.any(),
         Platform: () => FakePlatform(operatingSystem: 'linux'),
       });
 
@@ -65,7 +65,7 @@ void main() {
       }, overrides: <Type, Generator>{
         Cache: () => Cache(rootOverride: tempDir),
         FileSystem: () => memoryFileSystem,
-        ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+        ProcessManager: () => FakeProcessManager.any(),
         Platform: () => FakePlatform(operatingSystem: 'linux'),
       });
     });
@@ -95,7 +95,7 @@ void main() {
         );
       }, overrides: <Type, Generator>{
         FileSystem: () => memoryFileSystem,
-        ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+        ProcessManager: () => FakeProcessManager.any(),
         Platform: () => FakePlatform(operatingSystem: 'linux'),
       });
 
@@ -114,7 +114,7 @@ void main() {
         );
       }, overrides: <Type, Generator>{
         FileSystem: () => memoryFileSystem,
-        ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+        ProcessManager: () => FakeProcessManager.any(),
         Platform: () => FakePlatform(operatingSystem: 'linux'),
       });
 
@@ -122,7 +122,7 @@ void main() {
         expect(artifacts.getArtifactPath(Artifact.engineDartBinary), contains('.exe'));
       }, overrides: <Type, Generator>{
         FileSystem: () => memoryFileSystem,
-        ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+        ProcessManager: () => FakeProcessManager.any(),
         Platform: () => FakePlatform(operatingSystem: 'windows'),
       });
 
@@ -130,7 +130,7 @@ void main() {
         expect(artifacts.getArtifactPath(Artifact.engineDartBinary), isNot(contains('.exe')));
       }, overrides: <Type, Generator>{
         FileSystem: () => memoryFileSystem,
-        ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+        ProcessManager: () => FakeProcessManager.any(),
         Platform: () => FakePlatform(operatingSystem: 'linux'),
       });
     });

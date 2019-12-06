@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -23,23 +23,17 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile(
-        'shadow.BoxDecoration.disabled.png',
-        version: null,
-      ),
+      matchesGoldenFile('shadow.BoxDecoration.disabled.png'),
     );
     debugDisableShadows = false;
     tester.binding.reassembleApplication();
     await tester.pump();
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile(
-        'shadow.BoxDecoration.enabled.png',
-        version: null,
-      ),
+      matchesGoldenFile('shadow.BoxDecoration.enabled.png'),
     );
     debugDisableShadows = true;
-  }, skip: isBrowser);
+  });
 
   testWidgets('Shadows on ShapeDecoration', (WidgetTester tester) async {
     debugDisableShadows = false;
@@ -62,10 +56,7 @@ void main() {
       await tester.pumpWidget(build(elevation));
       await expectLater(
         find.byType(Container),
-        matchesGoldenFile(
-          'shadow.ShapeDecoration.$elevation.png',
-          version: null,
-        ),
+        matchesGoldenFile('shadow.ShapeDecoration.$elevation.png'),
       );
     }
     debugDisableShadows = true;
@@ -92,23 +83,17 @@ void main() {
     );
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile(
-        'shadow.PhysicalModel.disabled.png',
-        version: null,
-      ),
+      matchesGoldenFile('shadow.PhysicalModel.disabled.png'),
     );
     debugDisableShadows = false;
     tester.binding.reassembleApplication();
     await tester.pump();
     await expectLater(
       find.byType(Container),
-      matchesGoldenFile(
-        'shadow.PhysicalModel.enabled.png',
-        version: null,
-      ),
+      matchesGoldenFile('shadow.PhysicalModel.enabled.png'),
     );
     debugDisableShadows = true;
-  }, skip: isBrowser);
+  });
 
   testWidgets('Shadows with PhysicalShape', (WidgetTester tester) async {
     debugDisableShadows = false;
@@ -135,10 +120,7 @@ void main() {
       await tester.pumpWidget(build(elevation.toDouble()));
       await expectLater(
         find.byType(Container),
-        matchesGoldenFile(
-          'shadow.PhysicalShape.$elevation.png',
-          version: 1,
-        ),
+        matchesGoldenFile('shadow.PhysicalShape.$elevation.png'),
       );
     }
     debugDisableShadows = true;

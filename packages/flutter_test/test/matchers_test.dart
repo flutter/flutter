@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -234,6 +234,33 @@ void main() {
     expect(
       () => within<int>(distance: 1, from: 2, distanceFunction: (int a, int b) => -1).matches(1, <dynamic, dynamic>{}),
       throwsArgumentError,
+    );
+  });
+
+  test('isSameColorAs', () {
+    expect(
+      const Color(0x87654321),
+      isSameColorAs(_CustomColor(0x87654321)),
+    );
+
+    expect(
+      _CustomColor(0x87654321),
+      isSameColorAs(const Color(0x87654321)),
+    );
+
+    expect(
+      const Color(0x12345678),
+      isNot(isSameColorAs(_CustomColor(0x87654321))),
+    );
+
+    expect(
+      _CustomColor(0x87654321),
+      isNot(isSameColorAs(const Color(0x12345678))),
+    );
+
+    expect(
+      _CustomColor(0xFF123456),
+      isSameColorAs(_CustomColor(0xFF123456)..isEqual = false),
     );
   });
 
@@ -675,4 +702,15 @@ class _FakeSemanticsNode extends SemanticsNode {
   SemanticsData data;
   @override
   SemanticsData getSemanticsData() => data;
+}
+
+class _CustomColor extends Color {
+  _CustomColor(int value) : super(value);
+  bool isEqual;
+
+  @override
+  bool operator ==(dynamic other) => isEqual ?? super == other;
+
+  @override
+  int get hashCode => hashValues(super.hashCode, isEqual);
 }

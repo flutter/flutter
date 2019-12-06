@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -78,7 +78,7 @@ import 'theme.dart';
 ///              applicationIcon: FlutterLogo(),
 ///              applicationName: 'Show About Example',
 ///              applicationVersion: 'August 2019',
-///              applicationLegalese: '© 2019 The Chromium Authors',
+///              applicationLegalese: '© 2014 The Flutter Authors',
 ///              aboutBoxChildren: aboutBoxChildren,
 ///            ),
 ///          ),
@@ -93,7 +93,7 @@ import 'theme.dart';
 ///              applicationIcon: FlutterLogo(),
 ///              applicationName: 'Show About Example',
 ///              applicationVersion: 'August 2019',
-///              applicationLegalese: '© 2019 The Chromium Authors',
+///              applicationLegalese: '© 2014 The Flutter Authors',
 ///              children: aboutBoxChildren,
 ///            );
 ///          },
@@ -112,7 +112,7 @@ class AboutListTile extends StatelessWidget {
   /// values default to the empty string.
   const AboutListTile({
     Key key,
-    this.icon = const Icon(null),
+    this.icon,
     this.child,
     this.applicationName,
     this.applicationVersion,
@@ -223,8 +223,8 @@ class AboutListTile extends StatelessWidget {
 /// The licenses shown on the [LicensePage] are those returned by the
 /// [LicenseRegistry] API, which can be used to add more licenses to the list.
 ///
-/// The `context` argument is passed to [showDialog], the documentation for
-/// which discusses how it is used.
+/// The [context] and [useRootNavigator] arguments are passed to [showDialog],
+/// the documentation for which discusses how it is used.
 void showAboutDialog({
   @required BuildContext context,
   String applicationName,
@@ -232,10 +232,13 @@ void showAboutDialog({
   Widget applicationIcon,
   String applicationLegalese,
   List<Widget> children,
+  bool useRootNavigator = true,
 }) {
   assert(context != null);
+  assert(useRootNavigator != null);
   showDialog<void>(
     context: context,
+    useRootNavigator: useRootNavigator,
     builder: (BuildContext context) {
       return AboutDialog(
         applicationName: applicationName,
@@ -251,7 +254,13 @@ void showAboutDialog({
 /// Displays a [LicensePage], which shows licenses for software used by the
 /// application.
 ///
-/// The arguments correspond to the properties on [LicensePage].
+/// The application arguments correspond to the properties on [LicensePage].
+///
+/// The `context` argument is used to look up the [Navigator] for the page.
+///
+/// The `useRootNavigator` argument is used to determine whether to push the
+/// page to the [Navigator] furthest from or nearest to the given `context`. It
+/// is `false` by default.
 ///
 /// If the application has a [Drawer], consider using [AboutListTile] instead
 /// of calling this directly.
@@ -267,9 +276,11 @@ void showLicensePage({
   String applicationVersion,
   Widget applicationIcon,
   String applicationLegalese,
+  bool useRootNavigator = false,
 }) {
   assert(context != null);
-  Navigator.push(context, MaterialPageRoute<void>(
+  assert(useRootNavigator != null);
+  Navigator.of(context, rootNavigator: useRootNavigator).push(MaterialPageRoute<void>(
     builder: (BuildContext context) => LicensePage(
       applicationName: applicationName,
       applicationVersion: applicationVersion,
@@ -598,7 +609,7 @@ String _defaultApplicationName(BuildContext context) {
   // someone really wants their application title to change dynamically, they
   // can provide an explicit applicationName to the widgets defined in this
   // file, instead of relying on the default.
-  final Title ancestorTitle = context.ancestorWidgetOfExactType(Title);
+  final Title ancestorTitle = context.findAncestorWidgetOfExactType<Title>();
   return ancestorTitle?.title ?? Platform.resolvedExecutable.split(Platform.pathSeparator).last;
 }
 

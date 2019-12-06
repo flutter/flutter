@@ -1,7 +1,8 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -252,51 +253,48 @@ void main() {
     await gesture.up();
   }, skip: isBrowser);
 
-  testWidgets('The InkWell widget renders an ActivateAction-induced ink ripple', (WidgetTester tester) async {
+  testWidgets('The InkWell widget renders an SelectAction or ActivateAction-induced ink ripple', (WidgetTester tester) async {
     const Color highlightColor = Color(0xAAFF0000);
     const Color splashColor = Color(0xB40000FF);
     final BorderRadius borderRadius = BorderRadius.circular(6.0);
 
     final FocusNode focusNode = FocusNode(debugLabel: 'Test Node');
-    await tester.pumpWidget(
-      Shortcuts(
-        shortcuts: <LogicalKeySet, Intent>{
-          LogicalKeySet(LogicalKeyboardKey.enter): const Intent(ActivateAction.key),
-        },
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: Material(
-            child: Center(
-              child: Container(
-                width: 100.0,
-                height: 100.0,
-                child: InkWell(
-                  borderRadius: borderRadius,
-                  highlightColor: highlightColor,
-                  splashColor: splashColor,
-                  focusNode: focusNode,
-                  onTap: () { },
-                  radius: 100.0,
-                  splashFactory: InkRipple.splashFactory,
+    Future<void> buildTest(Key actionKey) async {
+      return await tester.pumpWidget(
+        Shortcuts(
+          shortcuts: <LogicalKeySet, Intent>{
+            LogicalKeySet(LogicalKeyboardKey.space): Intent(actionKey),
+          },
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Material(
+              child: Center(
+                child: Container(
+                  width: 100.0,
+                  height: 100.0,
+                  child: InkWell(
+                    borderRadius: borderRadius,
+                    highlightColor: highlightColor,
+                    splashColor: splashColor,
+                    focusNode: focusNode,
+                    onTap: () { },
+                    radius: 100.0,
+                    splashFactory: InkRipple.splashFactory,
+                  ),
                 ),
               ),
             ),
           ),
         ),
-      ),
-    );
+      );
+    }
 
-    final Offset topLeft = tester.getTopLeft(find.byType(InkWell));
-    final Offset inkWellCenter = tester.getCenter(find.byType(InkWell)) - topLeft;
-
-    // Now activate it with a keypress.
+    await buildTest(ActivateAction.key);
     focusNode.requestFocus();
     await tester.pumpAndSettle();
 
-    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
-    await tester.pump();
-
-    final RenderBox box = Material.of(tester.element(find.byType(InkWell))) as dynamic;
+    final Offset topLeft = tester.getTopLeft(find.byType(InkWell));
+    final Offset inkWellCenter = tester.getCenter(find.byType(InkWell)) - topLeft;
 
     bool offsetsAreClose(Offset a, Offset b) => (a - b).distance < 1.0;
     bool radiiAreClose(double a, double b) => (a - b).abs() < 1.0;
@@ -323,6 +321,13 @@ void main() {
         },
         );
     }
+
+    await buildTest(ActivateAction.key);
+    await tester.pumpAndSettle();
+    await tester.sendKeyEvent(LogicalKeyboardKey.space);
+    await tester.pump();
+
+    final RenderBox box = Material.of(tester.element(find.byType(InkWell))) as dynamic;
 
     // ripplePattern always add a translation of topLeft.
     expect(box, ripplePattern(30.0, 0));

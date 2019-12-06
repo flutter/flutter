@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -503,10 +503,7 @@ void main() {
 
     await expectLater(
       find.byKey(const ValueKey<int>(1)),
-      matchesGoldenFile(
-        'text_field_cursor_test.cupertino.0.png',
-        version: 3,
-      ),
+      matchesGoldenFile('text_field_cursor_test.cupertino.0.png'),
     );
   });
 
@@ -536,10 +533,7 @@ void main() {
     debugDefaultTargetPlatformOverride = null;
     await expectLater(
       find.byKey(const ValueKey<int>(1)),
-      matchesGoldenFile(
-        'text_field_cursor_test.cupertino.1.png',
-        version: 3,
-      ),
+      matchesGoldenFile('text_field_cursor_test.cupertino.1.png'),
     );
   });
 
@@ -2602,10 +2596,11 @@ void main() {
 
       // Double tap at the end of text.
       final Offset textEndPos = textOffsetToPosition(tester, 11); // Position at the end of text.
-      TestGesture gesture = await tester.startGesture(
+      final TestGesture gesture = await tester.startGesture(
         textEndPos,
         kind: PointerDeviceKind.mouse,
       );
+      addTearDown(gesture.removePointer);
       await tester.pump(const Duration(milliseconds: 50));
       await gesture.up();
       await tester.pump();
@@ -2620,11 +2615,7 @@ void main() {
       final Offset hPos = textOffsetToPosition(tester, 9); // Position of 'h'.
 
       // Double tap on 'h' to select 'ghi'.
-      gesture = await tester.startGesture(
-        hPos,
-        kind: PointerDeviceKind.mouse,
-      );
-      addTearDown(gesture.removePointer);
+      await gesture.down(hPos);
       await tester.pump(const Duration(milliseconds: 50));
       await gesture.up();
       await tester.pump();
@@ -2755,7 +2746,7 @@ void main() {
         tester.renderObject<RenderEditable>(
           find.byElementPredicate((Element element) => element.renderObject is RenderEditable)
         ).text.style.color,
-        CupertinoColors.white,
+        isSameColorAs(CupertinoColors.white),
       );
     },
   );
@@ -2905,7 +2896,7 @@ void main() {
     );
 
     await tester.pump();
-    expect(renderEditable.cursorColor, CupertinoColors.activeOrange.darkColor);
+    expect(renderEditable.cursorColor, CupertinoColors.activeBlue.darkColor);
 
     await tester.pumpWidget(
       const CupertinoApp(
@@ -3042,10 +3033,7 @@ void main() {
 
     await expectLater(
       find.byKey(const ValueKey<int>(1)),
-      matchesGoldenFile(
-        'text_field_test.disabled.png',
-        version: 1,
-      ),
+      matchesGoldenFile('text_field_test.disabled.png'),
     );
   });
 
@@ -3400,7 +3388,7 @@ void main() {
                 children: <Widget>[
                   Container(
                     height: 100,
-                    color: CupertinoColors.activeOrange,
+                    color: CupertinoColors.black,
                   ),
                   Expanded(
                     child: Navigator(

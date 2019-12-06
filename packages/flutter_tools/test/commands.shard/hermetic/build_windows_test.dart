@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -6,13 +6,12 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
 import 'package:flutter_tools/src/commands/build_windows.dart';
+import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/globals.dart';
 import 'package:flutter_tools/src/windows/visual_studio.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
@@ -51,7 +50,7 @@ void main() {
       return const Stream<List<int>>.empty();
     });
     when(mockProcess.stdout).thenAnswer((Invocation invocation) {
-      return const Stream<List<int>>.empty();
+      return Stream<List<int>>.fromIterable(<List<int>>[utf8.encode('STDOUT STUFF')]);
     });
     when(windowsPlatform.isWindows).thenReturn(true);
     when(notWindowsPlatform.isWindows).thenReturn(false);
@@ -67,7 +66,7 @@ void main() {
   }, overrides: <Type, Generator>{
     Platform: () => windowsPlatform,
     FileSystem: () => MemoryFileSystem(style: FileSystemStyle.windows),
-    ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+    ProcessManager: () => FakeProcessManager.any(),
     VisualStudio: () => mockVisualStudio,
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
   });
@@ -82,7 +81,7 @@ void main() {
   }, overrides: <Type, Generator>{
     Platform: () => windowsPlatform,
     FileSystem: () => MemoryFileSystem(style: FileSystemStyle.windows),
-    ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+    ProcessManager: () => FakeProcessManager.any(),
     VisualStudio: () => mockVisualStudio,
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
   });
@@ -102,7 +101,38 @@ void main() {
   }, overrides: <Type, Generator>{
     Platform: () => notWindowsPlatform,
     FileSystem: () => MemoryFileSystem(style: FileSystemStyle.windows),
-    ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+    ProcessManager: () => FakeProcessManager.any(),
+    VisualStudio: () => mockVisualStudio,
+    FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
+  });
+
+  testUsingContext('Windows build does not spew stdout to status logger', () async {
+    final BuildCommand command = BuildCommand();
+    applyMocksToCommand(command);
+    fs.file(solutionPath).createSync(recursive: true);
+    when(mockVisualStudio.vcvarsPath).thenReturn(vcvarsPath);
+    fs.file('pubspec.yaml').createSync();
+    fs.file('.packages').createSync();
+    fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+
+    when(mockProcessManager.start(<String>[
+      r'C:\packages\flutter_tools\bin\vs_build.bat',
+      vcvarsPath,
+      fs.path.basename(solutionPath),
+      'Release',
+    ], workingDirectory: fs.path.dirname(solutionPath))).thenAnswer((Invocation invocation) async {
+      return mockProcess;
+    });
+
+    await createTestCommandRunner(command).run(
+      const <String>['build', 'windows']
+    );
+    expect(testLogger.statusText, isNot(contains('STDOUT STUFF')));
+    expect(testLogger.traceText, contains('STDOUT STUFF'));
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem(style: FileSystemStyle.windows),
+    ProcessManager: () => mockProcessManager,
+    Platform: () => windowsPlatform,
     VisualStudio: () => mockVisualStudio,
     FeatureFlags: () => TestFeatureFlags(isWindowsEnabled: true),
   });
@@ -166,8 +196,7 @@ void main() {
       const <String>['build', 'windows']
     );
 
-    final BufferLogger bufferLogger = logger;
-    expect(bufferLogger.statusText, contains('🚧'));
+    expect(testLogger.statusText, contains('🚧'));
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(style: FileSystemStyle.windows),
     ProcessManager: () => mockProcessManager,

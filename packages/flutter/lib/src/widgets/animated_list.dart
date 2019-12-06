@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -263,8 +263,8 @@ class _ActiveItem implements Comparable<_ActiveItem> {
 ///
 /// See also:
 ///
-/// * [SliverAnimatedList], a sliver that animates items when they are inserted
-///   or removed from a list.
+///  * [SliverAnimatedList], a sliver that animates items when they are inserted
+///    or removed from a list.
 class AnimatedList extends StatefulWidget {
   /// Creates a scrolling container that animates items when they are inserted
   /// or removed.
@@ -388,19 +388,20 @@ class AnimatedList extends StatefulWidget {
   static AnimatedListState of(BuildContext context, { bool nullOk = false }) {
     assert(context != null);
     assert(nullOk != null);
-    final AnimatedListState result = context.ancestorStateOfType(const TypeMatcher<AnimatedListState>());
+    final AnimatedListState result = context.findAncestorStateOfType<AnimatedListState>();
     if (nullOk || result != null)
       return result;
-    throw FlutterError(
-      'AnimatedList.of() called with a context that does not contain an AnimatedList.\n'
-      'No AnimatedList ancestor could be found starting from the context that '
-      'was passed to AnimatedList.of(). This can happen when the context '
-      'provided is from the same StatefulWidget that built the AnimatedList. '
-      'Please see the AnimatedList documentation for examples of how to refer to '
-      'an AnimatedListState object: https://api.flutter.dev/flutter/widgets/AnimatedListState-class.html \n'
-      'The context used was:\n'
-      '  $context'
-    );
+    throw FlutterError.fromParts(<DiagnosticsNode>[
+      ErrorSummary('AnimatedList.of() called with a context that does not contain an AnimatedList.'),
+      ErrorDescription('No AnimatedList ancestor could be found starting from the context that was passed to AnimatedList.of().'),
+      ErrorHint(
+        'This can happen when the context provided is from the same StatefulWidget that '
+        'built the AnimatedList. Please see the AnimatedList documentation for examples '
+        'of how to refer to an AnimatedListState object:'
+        '  https://api.flutter.dev/flutter/widgets/AnimatedListState-class.html'
+      ),
+      context.describeElement('The context used was')
+    ]);
   }
 
   @override
@@ -726,10 +727,10 @@ class AnimatedListState extends State<AnimatedList> with TickerProviderStateMixi
 ///
 /// See also:
 ///
-/// * [SliverList], which does not animate items when they are inserted or
-///   removed.
-/// * [AnimatedList], a non-sliver scrolling container that animates items when
-///   they are inserted or removed.
+///  * [SliverList], which does not animate items when they are inserted or
+///    removed.
+///  * [AnimatedList], a non-sliver scrolling container that animates items when
+///    they are inserted or removed.
 class SliverAnimatedList extends StatefulWidget {
   /// Creates a sliver that animates items when they are inserted or removed.
   const SliverAnimatedList({
@@ -773,7 +774,7 @@ class SliverAnimatedList extends StatefulWidget {
   static SliverAnimatedListState of(BuildContext context, {bool nullOk = false}) {
     assert(context != null);
     assert(nullOk != null);
-    final SliverAnimatedListState result = context.ancestorStateOfType(const TypeMatcher<SliverAnimatedListState>());
+    final SliverAnimatedListState result = context.findAncestorStateOfType<SliverAnimatedListState>();
     if (nullOk || result != null)
       return result;
     throw FlutterError(

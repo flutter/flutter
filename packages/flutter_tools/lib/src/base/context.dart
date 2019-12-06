@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -115,17 +115,6 @@ class AppContext {
       value = _parent.get<T>();
     }
     return _unboxNull(value ?? _generateIfNecessary(T, _fallbacks)) as T;
-  }
-
-  /// Gets the value associated with the specified [type], or `null` if no
-  /// such value has been associated.
-  @Deprecated('use get<T> instead for type safety.')
-  Object operator [](Type type) {
-    dynamic value = _generateIfNecessary(type, _overrides);
-    if (value == null && _parent != null) {
-      value = _parent[type];
-    }
-    return _unboxNull(value ?? _generateIfNecessary(type, _fallbacks));
   }
 
   /// Runs [body] in a child context and returns the value returned by [body].

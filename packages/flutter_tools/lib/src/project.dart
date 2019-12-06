@@ -1,13 +1,14 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:xml/xml.dart' as xml;
 import 'package:yaml/yaml.dart';
 
-import 'android/gradle.dart' as gradle;
+import 'android/gradle_utils.dart' as gradle;
 import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
@@ -145,6 +146,10 @@ class FlutterProject {
   /// The `.flutter-plugins` file of this project.
   File get flutterPluginsFile => directory.childFile('.flutter-plugins');
 
+  /// The `.flutter-plugins-dependencies` file of this project,
+  /// which contains the dependencies each plugin depends on.
+  File get flutterPluginsDependenciesFile => directory.childFile('.flutter-plugins-dependencies');
+
   /// The `.dart-tool` directory of this project.
   Directory get dartTool => directory.childDirectory('.dart_tool');
 
@@ -230,12 +235,12 @@ class FlutterProject {
     if (!pubspecFile.existsSync()) {
       return null;
     }
-    final YamlMap pubspec = loadYaml(pubspecFile.readAsStringSync());
+    final YamlMap pubspec = loadYaml(pubspecFile.readAsStringSync()) as YamlMap;
     // If the pubspec file is empty, this will be null.
     if (pubspec == null) {
       return null;
     }
-    return pubspec['builders'];
+    return pubspec['builders'] as YamlMap;
   }
 
   /// Whether there are any builders used by this package.
@@ -574,6 +579,11 @@ class AndroidProject {
     return _firstMatchInFile(gradleFile, _groupPattern)?.group(1);
   }
 
+  /// The build directory where the Android artifacts are placed.
+  Directory get buildDirectory {
+    return parent.directory.childDirectory('build');
+  }
+
   Future<void> ensureReadyForPlatformSpecificTooling() async {
     if (isModule && _shouldRegenerateFromTemplate()) {
       _regenerateLibrary();
@@ -637,6 +647,48 @@ class AndroidProject {
       overwriteExisting: true,
     );
   }
+
+  AndroidEmbeddingVersion getEmbeddingVersion() {
+    if (isModule) {
+      // A module type's Android project is used in add-to-app scenarios and
+      // only supports the V2 embedding.
+      return AndroidEmbeddingVersion.v2;
+    }
+    if (appManifestFile == null || !appManifestFile.existsSync()) {
+      return AndroidEmbeddingVersion.v1;
+    }
+    xml.XmlDocument document;
+    try {
+      document = xml.parse(appManifestFile.readAsStringSync());
+    } on xml.XmlParserException {
+      throwToolExit('Error parsing $appManifestFile '
+                    'Please ensure that the android manifest is a valid XML document and try again.');
+    } on FileSystemException {
+      throwToolExit('Error reading $appManifestFile even though it exists. '
+                    'Please ensure that you have read permission to this file and try again.');
+    }
+    for (xml.XmlElement metaData in document.findAllElements('meta-data')) {
+      final String name = metaData.getAttribute('android:name');
+      if (name == 'flutterEmbedding') {
+        final String embeddingVersionString = metaData.getAttribute('android:value');
+        if (embeddingVersionString == '1') {
+          return AndroidEmbeddingVersion.v1;
+        }
+        if (embeddingVersionString == '2') {
+          return AndroidEmbeddingVersion.v2;
+        }
+      }
+    }
+    return AndroidEmbeddingVersion.v1;
+  }
+}
+
+/// Iteration of the embedding Java API in the engine used by the Android project.
+enum AndroidEmbeddingVersion {
+  /// V1 APIs based on io.flutter.app.FlutterActivity.
+  v1,
+  /// V2 APIs based on io.flutter.embedding.android.FlutterActivity.
+  v2,
 }
 
 /// Represents the web sub-project of a Flutter project.
@@ -845,7 +897,7 @@ class LinuxProject {
   Future<void> ensureReadyForPlatformSpecificTooling() async {}
 }
 
-/// The Fuchisa sub project
+/// The Fuchsia sub project
 class FuchsiaProject {
   FuchsiaProject._(this.project);
 

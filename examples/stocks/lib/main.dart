@@ -1,10 +1,8 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 library stocks;
-
-import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show
@@ -13,25 +11,13 @@ import 'package:flutter/rendering.dart' show
   debugPaintLayerBordersEnabled,
   debugPaintPointersEnabled,
   debugRepaintRainbowEnabled;
-import 'package:flutter_localizations/flutter_localizations.dart';
 
+import 'i18n/stock_strings.dart';
 import 'stock_data.dart';
 import 'stock_home.dart';
 import 'stock_settings.dart';
-import 'stock_strings.dart';
 import 'stock_symbol_viewer.dart';
 import 'stock_types.dart';
-
-class _StocksLocalizationsDelegate extends LocalizationsDelegate<StockStrings> {
-  @override
-  Future<StockStrings> load(Locale locale) => StockStrings.load(locale);
-
-  @override
-  bool isSupported(Locale locale) => locale.languageCode == 'es' || locale.languageCode == 'en';
-
-  @override
-  bool shouldReload(_StocksLocalizationsDelegate old) => false;
-}
 
 class StocksApp extends StatefulWidget {
   @override
@@ -85,7 +71,7 @@ class StocksAppState extends State<StocksApp> {
 
   Route<dynamic> _getRoute(RouteSettings settings) {
     if (settings.name == '/stock') {
-      final String symbol = settings.arguments;
+      final String symbol = settings.arguments as String;
       return MaterialPageRoute<void>(
         settings: settings,
         builder: (BuildContext context) => StockSymbolPage(symbol: symbol, stocks: stocks),
@@ -108,15 +94,8 @@ class StocksAppState extends State<StocksApp> {
     return MaterialApp(
       title: 'Stocks',
       theme: theme,
-      localizationsDelegates: <LocalizationsDelegate<dynamic>>[
-        _StocksLocalizationsDelegate(),
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-      ],
-      supportedLocales: const <Locale>[
-        Locale('en', 'US'),
-        Locale('es', 'ES'),
-      ],
+      localizationsDelegates: StockStrings.localizationsDelegates,
+      supportedLocales: StockStrings.supportedLocales,
       debugShowMaterialGrid: _configuration.debugShowGrid,
       showPerformanceOverlay: _configuration.showPerformanceOverlay,
       showSemanticsDebugger: _configuration.showSemanticsDebugger,

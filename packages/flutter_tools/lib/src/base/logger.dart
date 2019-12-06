@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -147,13 +147,11 @@ abstract class Logger {
     int progressIndicatorPadding = kDefaultStatusPadding,
   });
 
-  /// Send a progress notification that is instant.
+  /// Send an event to be emitted.
   ///
   /// Only surfaces a value in machine modes, Loggers may ignore this message in
-  /// non-machine modes. Like [startProgress] but with a single event.
-  void sendNotification(String message, {
-    String progressId,
-  });
+  /// non-machine modes.
+  void sendEvent(String name, [Map<String, dynamic> args]) { }
 }
 
 class StdoutLogger extends Logger {
@@ -260,7 +258,7 @@ class StdoutLogger extends Logger {
   }
 
   @override
-  void sendNotification(String message, {String progressId}) { }
+  void sendEvent(String name, [Map<String, dynamic> args]) { }
 }
 
 /// A [StdoutLogger] which replaces Unicode characters that cannot be printed to
@@ -354,17 +352,17 @@ class BufferLogger extends Logger {
   }
 
   @override
-  void sendNotification(String message, {String progressId}) { }
+  void sendEvent(String name, [Map<String, dynamic> args]) { }
 }
 
 class VerboseLogger extends Logger {
   VerboseLogger(this.parent) : assert(terminal != null) {
-    stopwatch.start();
+    _stopwatch.start();
   }
 
   final Logger parent;
 
-  Stopwatch stopwatch = Stopwatch();
+  final Stopwatch _stopwatch = context.get<Stopwatch>() ?? Stopwatch();
 
   @override
   bool get isVerbose => true;
@@ -438,8 +436,8 @@ class VerboseLogger extends Logger {
       return;
     }
 
-    final int millis = stopwatch.elapsedMilliseconds;
-    stopwatch.reset();
+    final int millis = _stopwatch.elapsedMilliseconds;
+    _stopwatch.reset();
 
     String prefix;
     const int prefixWidth = 8;
@@ -469,7 +467,7 @@ class VerboseLogger extends Logger {
   }
 
   @override
-  void sendNotification(String message, {String progressId}) { }
+  void sendEvent(String name, [Map<String, dynamic> args]) { }
 }
 
 enum _LogType { error, status, trace }

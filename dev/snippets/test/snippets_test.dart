@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -27,10 +27,11 @@ void main() {
       configuration.skeletonsDirectory.createSync(recursive: true);
       template = File(path.join(configuration.templatesDirectory.path, 'template.tmpl'));
       template.writeAsStringSync('''
+// Flutter code sample for {{element}}
 
 {{description}}
 
-{{code-preamble}}
+{{code-my-preamble}}
 
 main() {
   {{code}}
@@ -78,6 +79,7 @@ void main() {
 }
 ```
 ''');
+      final File outputFile = File(path.join(tmpDir.absolute.path, 'snippet_out.txt'));
 
       final String html = generator.generate(
         inputFile,
@@ -85,7 +87,9 @@ void main() {
         template: 'template',
         metadata: <String, Object>{
           'id': 'id',
+          'element': 'MyElement',
         },
+        output: outputFile,
       );
       expect(html, contains('<div>HTML Bits</div>'));
       expect(html, contains('<div>More HTML Bits</div>'));
@@ -97,6 +101,12 @@ void main() {
               '&#47;&#47;\n'
               '&#47;&#47; On several lines.\n'));
       expect(html, contains('void main() {'));
+
+      final String outputContents = outputFile.readAsStringSync();
+      expect(outputContents, contains('// Flutter code sample for MyElement'));
+      expect(outputContents, contains('A description of the snippet.'));
+      expect(outputContents, contains('void main() {'));
+      expect(outputContents, contains("const String name = 'snippet';"));
     });
 
     test('generates sample snippets', () async {
@@ -181,7 +191,7 @@ void main() {
         metadata: <String, Object>{'sourcePath': 'some/path.dart', 'id': 'id'},
       );
       expect(expectedMetadataFile.existsSync(), isTrue);
-      final Map<String, dynamic> json = jsonDecode(expectedMetadataFile.readAsStringSync());
+      final Map<String, dynamic> json = jsonDecode(expectedMetadataFile.readAsStringSync()) as Map<String, dynamic>;
       expect(json['id'], equals('id'));
       expect(json['file'], equals('snippet_out.dart'));
       expect(json['description'], equals('A description of the snippet.\n\nOn several lines.'));

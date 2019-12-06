@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -6,9 +6,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show debugDumpRenderTree, debugDumpLayerTree, debugDumpSemanticsTree, DebugSemanticsDumpOrder;
 import 'package:flutter/scheduler.dart' show timeDilation;
 import 'package:flutter/gestures.dart' show DragStartBehavior;
+
+import 'i18n/stock_strings.dart';
 import 'stock_data.dart';
 import 'stock_list.dart';
-import 'stock_strings.dart';
 import 'stock_symbol_viewer.dart';
 import 'stock_types.dart';
 
@@ -187,10 +188,10 @@ class StockHomeState extends State<StockHome> {
     showAboutDialog(context: context);
   }
 
-  Widget buildAppBar() {
+  AppBar buildAppBar() {
     return AppBar(
       elevation: 0.0,
-      title: Text(StockStrings.of(context).title()),
+      title: Text(StockStrings.of(context).title),
       actions: <Widget>[
         IconButton(
           icon: const Icon(Icons.search),
@@ -222,8 +223,8 @@ class StockHomeState extends State<StockHome> {
       ],
       bottom: TabBar(
         tabs: <Widget>[
-          Tab(text: StockStrings.of(context).market()),
-          Tab(text: StockStrings.of(context).portfolio()),
+          Tab(text: StockStrings.of(context).market),
+          Tab(text: StockStrings.of(context).portfolio),
         ],
       ),
     );
@@ -282,7 +283,7 @@ class StockHomeState extends State<StockHome> {
 
   static const List<String> portfolioSymbols = <String>['AAPL','FIZZ', 'FIVE', 'FLAT', 'ZINC', 'ZNGA'];
 
-  Widget buildSearchBar() {
+  AppBar buildSearchBar() {
     return AppBar(
       leading: BackButton(
         color: Theme.of(context).accentColor,

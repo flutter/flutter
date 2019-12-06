@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -110,10 +110,7 @@ void main() {
     expect(exception.diagnostics.first.toString(), startsWith('A RenderFlex overflowed by '));
     await expectLater(
       find.byKey(key),
-      matchesGoldenFile(
-        'physical_model_overflow.png',
-        version: null,
-      ),
+      matchesGoldenFile('physical_model_overflow.png'),
     );
   }, skip: isBrowser);
 

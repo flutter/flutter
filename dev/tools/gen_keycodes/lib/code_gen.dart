@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -87,7 +87,7 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
       // plane.
       final Key entry = keyData.data.firstWhere((Key item) => item.name == Key.synonyms[name][0]);
       final Set<String> unionNames = Key.synonyms[name].map<String>((dynamic name) {
-        return upperCamelToLowerCamel(name);
+        return upperCamelToLowerCamel(name as String);
       }).toSet();
       printKey(Key.synonymPlane | entry.flutterId, entry.keyLabel, name, Key.getCommentName(name),
           otherComments: wrapString('This key represents the union of the keys '
@@ -100,7 +100,7 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
   String get logicalSynonyms {
     final StringBuffer synonyms = StringBuffer();
     for (String name in Key.synonyms.keys) {
-      for (String synonym in Key.synonyms[name]) {
+      for (String synonym in Key.synonyms[name].cast<String>()) {
         final String keyName = upperCamelToLowerCamel(synonym);
         synonyms.writeln('    $keyName: $name,');
       }
@@ -111,6 +111,13 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
   List<Key> get numpadKeyData {
     return keyData.data.where((Key entry) {
       return entry.constantName.startsWith('numpad') && entry.keyLabel != null;
+    }).toList();
+  }
+
+  List<Key> get functionKeyData {
+    final RegExp functionKeyRe = RegExp(r'^f[0-9]+$');
+    return keyData.data.where((Key entry) {
+      return functionKeyRe.hasMatch(entry.constantName);
     }).toList();
   }
 
@@ -240,6 +247,16 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
     return macOsNumPadMap.toString().trimRight();
   }
 
+  String get macOsFunctionKeyMap {
+    final StringBuffer macOsFunctionKeyMap = StringBuffer();
+    for (Key entry in functionKeyData) {
+      if (entry.macOsScanCode != null) {
+        macOsFunctionKeyMap.writeln('  ${toHex(entry.macOsScanCode)}: LogicalKeyboardKey.${entry.constantName},');
+      }
+    }
+    return macOsFunctionKeyMap.toString().trimRight();
+  }
+
   /// This generates the map of Fuchsia key codes to logical keys.
   String get fuchsiaKeyCodeMap {
     final StringBuffer fuchsiaKeyCodeMap = StringBuffer();
@@ -324,6 +341,7 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
       'FUCHSIA_KEY_CODE_MAP': fuchsiaKeyCodeMap,
       'MACOS_SCAN_CODE_MAP': macOsScanCodeMap,
       'MACOS_NUMPAD_MAP': macOsNumpadMap,
+      'MACOS_FUNCTION_KEY_MAP': macOsFunctionKeyMap,
       'GLFW_KEY_CODE_MAP': glfwKeyCodeMap,
       'GLFW_NUMPAD_MAP': glfwNumpadMap,
       'XKB_SCAN_CODE_MAP': xkbScanCodeMap,

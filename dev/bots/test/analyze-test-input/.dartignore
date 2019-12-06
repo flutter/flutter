@@ -1,0 +1,6 @@
+This directory is excluded from analysis because its whole point is to
+test the analysis (so it has issues).
+
+We have to have the actual test file system in a subdirectory (root)
+because otherwise the .dartignore file in that directory would cause
+the test itself to ignore the directory.

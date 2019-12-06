@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -83,7 +83,13 @@ class CleanCommand extends FlutterCommand {
 
   @visibleForTesting
   void deleteFile(FileSystemEntity file) {
-    if (!file.existsSync()) {
+    // This will throw a FileSystemException if the directory is missing permissions.
+    try {
+      if (!file.existsSync()) {
+        return;
+      }
+    } on FileSystemException catch (err) {
+      printError('Cannot clean ${file.path}.\n$err');
       return;
     }
     final Status deletionStatus = logger.startProgress('Deleting ${file.basename}...', timeout: timeoutConfiguration.fastOperation);

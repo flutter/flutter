@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -113,7 +113,7 @@ abstract class FlutterCommand extends Command<void> {
   );
 
   @override
-  FlutterCommandRunner get runner => super.runner;
+  FlutterCommandRunner get runner => super.runner as FlutterCommandRunner;
 
   bool _requiresPubspecYaml = false;
 
@@ -126,7 +126,7 @@ abstract class FlutterCommand extends Command<void> {
 
   bool _usesIpv6Flag = false;
 
-  bool get shouldRunPub => _usesPubOption && argResults['pub'];
+  bool get shouldRunPub => _usesPubOption && boolArg('pub');
 
   bool get shouldUpdateCache => true;
 
@@ -150,14 +150,6 @@ abstract class FlutterCommand extends Command<void> {
         'will select a random open port on the host.',
       hide: hide,
     );
-    argParser.addFlag('web-browser-launch',
-      defaultsTo: true,
-      negatable: true,
-      help: 'Whether to automatically launch browsers for web devices '
-        'that do so. Setting this to true allows using the Dart debug extension '
-        'on Chrome and other browsers which support extensions.',
-      hide: hide,
-    );
   }
 
   void usesTargetOption() {
@@ -173,7 +165,7 @@ abstract class FlutterCommand extends Command<void> {
 
   String get targetFile {
     if (argResults.wasParsed('target')) {
-      return argResults['target'];
+      return stringArg('target');
     }
     if (argResults.rest.isNotEmpty) {
       return argResults.rest.first;
@@ -181,9 +173,10 @@ abstract class FlutterCommand extends Command<void> {
     return bundle.defaultMainPath;
   }
 
-  void usesPubOption() {
+  void usesPubOption({bool hide = false}) {
     argParser.addFlag('pub',
       defaultsTo: true,
+      hide: hide,
       help: 'Whether to run "flutter pub get" before executing this command.');
     _usesPubOption = true;
   }
@@ -216,23 +209,60 @@ abstract class FlutterCommand extends Command<void> {
   /// Adds options for connecting to the Dart VM observatory port.
   void usesPortOptions() {
     argParser.addOption(observatoryPortOption,
-        help: 'Listen to the given port for an observatory debugger connection.\n'
+        help: '(deprecated use host-vmservice-port instead)'
+              'Listen to the given port for an observatory debugger connection.\n'
               'Specifying port 0 (the default) will find a random free port.',
+    );
+    argParser.addOption('device-vmservice-port',
+      help: 'Look for vmservice connections only from the specified port.\n'
+            'Specifying port 0 (the default) will accept the first vmservice '
+            'discovered.',
+    );
+    argParser.addOption('host-vmservice-port',
+      help: 'When a device-side vmservice port is forwarded to a host-side '
+            'port, use this value as the host port.\nSpecifying port 0 '
+            '(the default) will find a random free host port.'
     );
     _usesPortOption = true;
   }
 
-  /// Gets the observatory port provided to in the 'observatory-port' option.
+  /// Gets the vmservice port provided to in the 'observatory-port' or
+  /// 'host-vmservice-port option.
+  ///
+  /// Only one of "host-vmservice-port" and "observatory-port" may be
+  /// specified.
   ///
   /// If no port is set, returns null.
-  int get observatoryPort {
-    if (!_usesPortOption || argResults['observatory-port'] == null) {
+  int get hostVmservicePort {
+    if (!_usesPortOption ||
+        (argResults['observatory-port'] == null &&
+      argResults['host-vmservice-port'] == null)) {
+      return null;
+    }
+    if (argResults.wasParsed('observatory-port') &&
+        argResults.wasParsed('host-vmservice-port')) {
+      throwToolExit('Only one of "--observatory-port" and '
+        '"--host-vmservice-port" may be specified.');
+    }
+    try {
+      return int.parse(stringArg('observatory-port') ?? stringArg('host-vmservice-port'));
+    } on FormatException catch (error) {
+      throwToolExit('Invalid port for `--observatory-port/--host-vmservice-port`: $error');
+    }
+    return null;
+  }
+
+  /// Gets the vmservice port provided to in the 'device-vmservice-port' option.
+  ///
+  /// If no port is set, returns null.
+  int get deviceVmservicePort {
+    if (!_usesPortOption || argResults['device-vmservice-port'] == null) {
       return null;
     }
     try {
-      return int.parse(argResults['observatory-port']);
-    } catch (error) {
-      throwToolExit('Invalid port for `--observatory-port`: $error');
+      return int.parse(stringArg('device-vmservice-port'));
+    } on FormatException catch (error) {
+      throwToolExit('Invalid port for `--device-vmservice-port`: $error');
     }
     return null;
   }
@@ -248,7 +278,7 @@ abstract class FlutterCommand extends Command<void> {
     _usesIpv6Flag = true;
   }
 
-  bool get ipv6 => _usesIpv6Flag ? argResults['ipv6'] : null;
+  bool get ipv6 => _usesIpv6Flag ? boolArg('ipv6') : null;
 
   void usesBuildNumberOption() {
     argParser.addOption('build-number',
@@ -268,6 +298,20 @@ abstract class FlutterCommand extends Command<void> {
               'On Xcode builds it is used as \'CFBundleShortVersionString\'',
         valueHelp: 'x.y.z');
   }
+
+  void usesDartDefines() {
+    argParser.addMultiOption(
+      'dart-define',
+      help: 'Passed to the Dart compiler building this application as a -D flag.\n'
+            'Values supported by this option are compiler implementation specific.\n'
+            'Multiple defines can be passed by repeating --dart-define multiple times.',
+      valueHelp: 'FOO=bar',
+      hide: true,
+    );
+  }
+
+  /// The values passed via the `--dart-define` option.
+  List<String> get dartDefines => stringsArg('dart-define');
 
   void usesIsolateFilterOption({ @required bool hide }) {
     argParser.addOption('isolate-filter',
@@ -294,6 +338,10 @@ abstract class FlutterCommand extends Command<void> {
     argParser.addFlag('release',
       negatable: false,
       help: 'Build a release version of your app${defaultToRelease ? ' (default mode)' : ''}.');
+    argParser.addFlag('jit-release',
+      negatable: false,
+      hide: !verboseHelp,
+      help: 'Build a JIT release version of your app${defaultToRelease ? ' (default mode)' : ''}.');
   }
 
   void addShrinkingFlag() {
@@ -331,19 +379,30 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   BuildMode getBuildMode() {
-    final bool debugResult = _excludeDebug ? false : argResults['debug'];
-    final List<bool> modeFlags = <bool>[debugResult, argResults['profile'], argResults['release']];
+    // No debug when _excludeDebug is true.
+    // If debug is not excluded, then take the command line flag.
+    final bool debugResult = !_excludeDebug && boolArg('debug');
+    final List<bool> modeFlags = <bool>[
+      debugResult,
+      boolArg('jit-release'),
+      boolArg('profile'),
+      boolArg('release'),
+    ];
     if (modeFlags.where((bool flag) => flag).length > 1) {
-      throw UsageException('Only one of --debug, --profile, or --release can be specified.', null);
+      throw UsageException('Only one of --debug, --profile, --jit-release, '
+                           'or --release can be specified.', null);
     }
     if (debugResult) {
       return BuildMode.debug;
     }
-    if (argResults['profile']) {
+    if (boolArg('profile')) {
       return BuildMode.profile;
     }
-    if (argResults['release']) {
+    if (boolArg('release')) {
       return BuildMode.release;
+    }
+    if (boolArg('jit-release')) {
+      return BuildMode.jitRelease;
     }
     return _defaultBuildMode;
   }
@@ -361,28 +420,27 @@ abstract class FlutterCommand extends Command<void> {
     argParser.addFlag(
       'track-widget-creation',
       hide: !hasEffect && !verboseHelp,
-      defaultsTo: false, // this will soon be changed to true
+      defaultsTo: true,
       help: 'Track widget creation locations. This enables features such as the widget inspector. '
             'This parameter is only functional in debug mode (i.e. when compiling JIT, not AOT).',
     );
   }
 
   BuildInfo getBuildInfo() {
-    final bool trackWidgetCreation = argParser.options.containsKey('track-widget-creation')
-        ? argResults['track-widget-creation']
-        : false;
+    final bool trackWidgetCreation = argParser.options.containsKey('track-widget-creation') &&
+      boolArg('track-widget-creation');
 
-    final String buildNumber = argParser.options.containsKey('build-number') && argResults['build-number'] != null
-        ? argResults['build-number']
+    final String buildNumber = argParser.options.containsKey('build-number')
+        ? stringArg('build-number')
         : null;
 
     String extraFrontEndOptions =
         argParser.options.containsKey(FlutterOptions.kExtraFrontEndOptions)
-            ? argResults[FlutterOptions.kExtraFrontEndOptions]
+            ? stringArg(FlutterOptions.kExtraFrontEndOptions)
             : null;
     if (argParser.options.containsKey(FlutterOptions.kEnableExperiment) &&
         argResults[FlutterOptions.kEnableExperiment] != null) {
-      for (String expFlag in argResults[FlutterOptions.kEnableExperiment]) {
+      for (String expFlag in stringsArg(FlutterOptions.kEnableExperiment)) {
         final String flag = '--enable-experiment=' + expFlag;
         if (extraFrontEndOptions != null) {
           extraFrontEndOptions += ',' + flag;
@@ -394,20 +452,22 @@ abstract class FlutterCommand extends Command<void> {
 
     return BuildInfo(getBuildMode(),
       argParser.options.containsKey('flavor')
-        ? argResults['flavor']
+        ? stringArg('flavor')
         : null,
       trackWidgetCreation: trackWidgetCreation,
       extraFrontEndOptions: extraFrontEndOptions,
       extraGenSnapshotOptions: argParser.options.containsKey(FlutterOptions.kExtraGenSnapshotOptions)
-          ? argResults[FlutterOptions.kExtraGenSnapshotOptions]
+          ? stringArg(FlutterOptions.kExtraGenSnapshotOptions)
           : null,
       fileSystemRoots: argParser.options.containsKey(FlutterOptions.kFileSystemRoot)
-          ? argResults[FlutterOptions.kFileSystemRoot] : null,
+          ? stringsArg(FlutterOptions.kFileSystemRoot)
+          : null,
       fileSystemScheme: argParser.options.containsKey(FlutterOptions.kFileSystemScheme)
-          ? argResults[FlutterOptions.kFileSystemScheme] : null,
+          ? stringArg(FlutterOptions.kFileSystemScheme)
+          : null,
       buildNumber: buildNumber,
       buildName: argParser.options.containsKey('build-name')
-          ? argResults['build-name']
+          ? stringArg('build-name')
           : null,
     );
   }
@@ -420,7 +480,7 @@ abstract class FlutterCommand extends Command<void> {
   /// tracking of the command.
   Future<String> get usagePath async {
     if (parent is FlutterCommand) {
-      final FlutterCommand commandParent = parent;
+      final FlutterCommand commandParent = parent as FlutterCommand;
       final String path = await commandParent.usagePath;
       // Don't report for parents that return null for usagePath.
       return path == null ? null : '$path/$name';
@@ -447,9 +507,8 @@ abstract class FlutterCommand extends Command<void> {
       name: 'command',
       overrides: <Type, Generator>{FlutterCommand: () => this},
       body: () async {
-        if (flutterUsage.isFirstRun) {
-          flutterUsage.printWelcome();
-        }
+        // Prints the welcome message if needed.
+        flutterUsage.printWelcome();
         final String commandPath = await usagePath;
         _registerSignalHandlers(commandPath, startTime);
         FlutterCommandResult commandResult;
@@ -531,9 +590,13 @@ abstract class FlutterCommand extends Command<void> {
   Future<FlutterCommandResult> verifyThenRunCommand(String commandPath) async {
     await validateCommand();
 
-    // Populate the cache. We call this before pub get below so that the sky_engine
-    // package is available in the flutter cache for pub to find.
+    // Populate the cache. We call this before pub get below so that the
+    // sky_engine package is available in the flutter cache for pub to find.
     if (shouldUpdateCache) {
+      // First always update universal artifacts, as some of these (e.g.
+      // idevice_id on macOS) are required to determine `requiredArtifacts`.
+      await cache.updateAll(<DevelopmentArtifact>{DevelopmentArtifact.universal});
+
       await cache.updateAll(await requiredArtifacts);
     }
 
@@ -559,10 +622,9 @@ abstract class FlutterCommand extends Command<void> {
 
   /// The set of development artifacts required for this command.
   ///
-  /// Defaults to [DevelopmentArtifact.universal].
-  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
-    DevelopmentArtifact.universal,
-  };
+  /// Defaults to an empty set. Including [DevelopmentArtifact.universal] is
+  /// not required as it is always updated.
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{};
 
   /// Subclasses must implement this to execute the command.
   /// Optionally provide a [FlutterCommandResult] to send more details about the
@@ -632,12 +694,8 @@ abstract class FlutterCommand extends Command<void> {
         throw ToolExit(userMessages.flutterNoPubspec);
       }
 
-      if (fs.isFileSync('flutter.yaml')) {
-        throw ToolExit(userMessages.flutterMergeYamlFiles);
-      }
-
       // Validate the current package map only if we will not be running "pub get" later.
-      if (parent?.name != 'pub' && !(_usesPubOption && argResults['pub'])) {
+      if (parent?.name != 'pub' && !(_usesPubOption && boolArg('pub'))) {
         final String error = PackageMap(PackageMap.globalPackagesPath).checkValid();
         if (error != null) {
           throw ToolExit(error);
@@ -654,6 +712,15 @@ abstract class FlutterCommand extends Command<void> {
   }
 
   ApplicationPackageStore applicationPackages;
+
+  /// Gets the parsed command-line option named [name] as `bool`.
+  bool boolArg(String name) => argResults[name] as bool;
+
+  /// Gets the parsed command-line option named [name] as `String`.
+  String stringArg(String name) => argResults[name] as String;
+
+  /// Gets the parsed command-line option named [name] as `List<String>`.
+  List<String> stringsArg(String name) => argResults[name] as List<String>;
 }
 
 /// A mixin which applies an implementation of [requiredArtifacts] that only
@@ -689,15 +756,13 @@ mixin TargetPlatformBasedDevelopmentArtifacts on FlutterCommand {
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async {
     // If there is no specified target device, fallback to the default
     // confiugration.
-    final String rawTargetPlatform = argResults['target-platform'];
+    final String rawTargetPlatform = stringArg('target-platform');
     final TargetPlatform targetPlatform = getTargetPlatformForName(rawTargetPlatform);
     if (targetPlatform == null) {
       return super.requiredArtifacts;
     }
 
-    final Set<DevelopmentArtifact> artifacts = <DevelopmentArtifact>{
-      DevelopmentArtifact.universal,
-    };
+    final Set<DevelopmentArtifact> artifacts = <DevelopmentArtifact>{};
     final DevelopmentArtifact developmentArtifact = _artifactFromTargetPlatform(targetPlatform);
     if (developmentArtifact != null) {
       artifacts.add(developmentArtifact);
@@ -710,6 +775,7 @@ mixin TargetPlatformBasedDevelopmentArtifacts on FlutterCommand {
 // if none is supported
 DevelopmentArtifact _artifactFromTargetPlatform(TargetPlatform targetPlatform) {
   switch (targetPlatform) {
+    case TargetPlatform.android:
     case TargetPlatform.android_arm:
     case TargetPlatform.android_arm64:
     case TargetPlatform.android_x64:
@@ -734,7 +800,8 @@ DevelopmentArtifact _artifactFromTargetPlatform(TargetPlatform targetPlatform) {
         return DevelopmentArtifact.linux;
       }
       return null;
-    case TargetPlatform.fuchsia:
+    case TargetPlatform.fuchsia_arm64:
+    case TargetPlatform.fuchsia_x64:
     case TargetPlatform.tester:
       // No artifacts currently supported.
       return null;

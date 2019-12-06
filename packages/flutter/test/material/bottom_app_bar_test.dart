@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -71,19 +71,13 @@ void main() {
     await pump(FloatingActionButtonLocation.endDocked);
     await expectLater(
       find.byKey(key),
-      matchesGoldenFile(
-        'bottom_app_bar.custom_shape.1.png',
-        version: null,
-      ),
+      matchesGoldenFile('bottom_app_bar.custom_shape.1.png'),
     );
     await pump(FloatingActionButtonLocation.centerDocked);
     await tester.pumpAndSettle();
     await expectLater(
       find.byKey(key),
-      matchesGoldenFile(
-        'bottom_app_bar.custom_shape.2.png',
-        version: null,
-      ),
+      matchesGoldenFile('bottom_app_bar.custom_shape.2.png'),
     );
   }, skip: isBrowser);
 

@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -20,6 +20,7 @@ import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/vscode/vscode.dart';
 import 'package:flutter_tools/src/vscode/vscode_validator.dart';
 import 'package:flutter_tools/src/web/workflow.dart';
+import 'package:flutter_tools/src/version.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 import 'package:quiver/testing/async.dart';
@@ -28,16 +29,21 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/testbed.dart';
 
-final Generator _kNoColorOutputPlatform = () => FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false;
+final Generator _kNoColorOutputPlatform = () => FakePlatform.fromPlatform(const LocalPlatform())
+  ..localeName = 'en_US.UTF-8'
+  ..stdoutSupportsAnsi = false;
+
 final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{
   Platform: _kNoColorOutputPlatform,
 };
 
 void main() {
   MockProcessManager mockProcessManager;
+  MockFlutterVersion mockFlutterVersion;
 
   setUp(() {
     mockProcessManager = MockProcessManager();
+    mockFlutterVersion = MockFlutterVersion();
   });
 
   group('doctor', () {
@@ -506,6 +512,34 @@ void main() {
       OutputPreferences: () => OutputPreferences(wrapText: false),
       ProcessManager: () => mockProcessManager,
       Platform: _kNoColorOutputPlatform,
+    });
+
+    testUsingContext('version checking does not work', () async {
+      final VersionCheckError versionCheckError = VersionCheckError('version error');
+
+      when(mockFlutterVersion.channel).thenReturn('unknown');
+      when(mockFlutterVersion.frameworkVersion).thenReturn('0.0.0');
+      when(mockFlutterVersion.frameworkDate).thenThrow(versionCheckError);
+
+      when(mockProcessManager.runSync(
+        <String>[artifacts.getArtifactPath(Artifact.genSnapshot)],
+        workingDirectory: anyNamed('workingDirectory'),
+        environment: anyNamed('environment'),
+      )).thenReturn(ProcessResult(101, 255, '', ''));
+
+      expect(await FlutterValidatorDoctor().diagnose(verbose: false), isTrue);
+
+      expect(testLogger.statusText, equals(
+        'Doctor summary (to see all details, run flutter doctor -v):\n'
+          '[!] Flutter (Channel unknown, v0.0.0, on fake OS name and version, locale en_US.UTF-8)\n'
+          '    ✗ version error\n\n'
+          '! Doctor found issues in 1 category.\n'
+      ));
+    }, overrides: <Type, Generator>{
+      OutputPreferences: () => OutputPreferences(wrapText: false),
+      ProcessManager: () => mockProcessManager,
+      Platform: _kNoColorOutputPlatform,
+      FlutterVersion: () => mockFlutterVersion,
     });
   });
 
@@ -1018,3 +1052,4 @@ class VsCodeValidatorTestTargets extends VsCodeValidator {
 }
 
 class MockProcessManager extends Mock implements ProcessManager {}
+class MockFlutterVersion extends Mock implements FlutterVersion {}

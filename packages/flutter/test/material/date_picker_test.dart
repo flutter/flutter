@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -735,9 +735,10 @@ void _tests() {
     );
 
     final Finder chevronFinder = find.byType(IconButton);
-    final List<RenderAnimatedOpacity> chevronRenderers = chevronFinder.evaluate().map(
-      (Element element) => element.ancestorRenderObjectOfType(
-        const TypeMatcher<RenderAnimatedOpacity>())).cast<RenderAnimatedOpacity>().toList();
+    final List<RenderAnimatedOpacity> chevronRenderers = chevronFinder
+      .evaluate()
+      .map((Element element) => element.findAncestorRenderObjectOfType<RenderAnimatedOpacity>())
+      .toList();
 
     // Initial chevron animation state should be dismissed
     // An AlwaysStoppedAnimation is also found and is ignored
@@ -897,4 +898,90 @@ void _tests() {
     });
   });
 
+  testWidgets('uses root navigator by default', (WidgetTester tester) async {
+    final DatePickerObserver rootObserver = DatePickerObserver();
+    final DatePickerObserver nestedObserver = DatePickerObserver();
+
+    await tester.pumpWidget(MaterialApp(
+      navigatorObservers: <NavigatorObserver>[rootObserver],
+      home: Navigator(
+        observers: <NavigatorObserver>[nestedObserver],
+        onGenerateRoute: (RouteSettings settings) {
+          return MaterialPageRoute<dynamic>(
+            builder: (BuildContext context) {
+              return RaisedButton(
+                onPressed: () {
+                  showDatePicker(
+                    context: context,
+                    initialDate: DateTime.now(),
+                    firstDate: DateTime(2018),
+                    lastDate: DateTime(2030),
+                    builder: (BuildContext context, Widget child) {
+                      return const SizedBox();
+                    },
+                  );
+                },
+                child: const Text('Show Date Picker'),
+              );
+            },
+          );
+        },
+      ),
+    ));
+
+    // Open the dialog.
+    await tester.tap(find.byType(RaisedButton));
+
+    expect(rootObserver.datePickerCount, 1);
+    expect(nestedObserver.datePickerCount, 0);
+  });
+
+  testWidgets('uses nested navigator if useRootNavigator is false', (WidgetTester tester) async {
+    final DatePickerObserver rootObserver = DatePickerObserver();
+    final DatePickerObserver nestedObserver = DatePickerObserver();
+
+    await tester.pumpWidget(MaterialApp(
+      navigatorObservers: <NavigatorObserver>[rootObserver],
+      home: Navigator(
+        observers: <NavigatorObserver>[nestedObserver],
+        onGenerateRoute: (RouteSettings settings) {
+          return MaterialPageRoute<dynamic>(
+            builder: (BuildContext context) {
+              return RaisedButton(
+                onPressed: () {
+                  showDatePicker(
+                    context: context,
+                    useRootNavigator: false,
+                    initialDate: DateTime.now(),
+                    firstDate: DateTime(2018),
+                    lastDate: DateTime(2030),
+                    builder: (BuildContext context, Widget child) => const SizedBox(),
+                  );
+                },
+                child: const Text('Show Date Picker'),
+              );
+            },
+          );
+        },
+      ),
+    ));
+
+    // Open the dialog.
+    await tester.tap(find.byType(RaisedButton));
+
+    expect(rootObserver.datePickerCount, 0);
+    expect(nestedObserver.datePickerCount, 1);
+  });
+}
+
+class DatePickerObserver extends NavigatorObserver {
+  int datePickerCount = 0;
+
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic> previousRoute) {
+    if (route.toString().contains('_DialogRoute')) {
+      datePickerCount++;
+    }
+    super.didPush(route, previousRoute);
+  }
 }

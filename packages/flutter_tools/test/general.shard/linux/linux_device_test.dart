@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -48,7 +48,7 @@ void main() {
     expect(LinuxDevice().isSupportedForProject(flutterProject), true);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
-    ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
   testUsingContext('LinuxDevice.isSupportedForProject is false with no host app', () async {
@@ -59,7 +59,7 @@ void main() {
     expect(LinuxDevice().isSupportedForProject(flutterProject), false);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
-    ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
   testUsingContext('LinuxDevice.executablePathForDevice uses the correct package executable', () async {
@@ -76,7 +76,7 @@ void main() {
     expect(LinuxDevice().executablePathForDevice(mockApp, BuildMode.release), releasePath);
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
-    ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+    ProcessManager: () => FakeProcessManager.any(),
   });
 }
 

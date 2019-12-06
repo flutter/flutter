@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -13,6 +13,7 @@ import 'package:pool/pool.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/platform.dart';
+import '../base/utils.dart';
 import '../cache.dart';
 import '../convert.dart';
 import '../globals.dart';
@@ -28,7 +29,7 @@ BuildSystem get buildSystem => context.get<BuildSystem>();
 /// A reasonable amount of files to open at the same time.
 ///
 /// This number is somewhat arbitrary - it is difficult to detect whether
-/// or not we'll run out of file descriptiors when using async dart:io
+/// or not we'll run out of file descriptors when using async dart:io
 /// APIs.
 const int kMaxOpenFiles = 64;
 
@@ -82,7 +83,7 @@ class BuildSystemConfig {
 ///
 /// ## Code review
 ///
-/// ### Targes should only depend on files that are provided as inputs
+/// ### Targets should only depend on files that are provided as inputs
 ///
 /// Example: gen_snapshot must be provided as an input to the aot_elf
 /// build steps, even though it isn't a source file. This ensures that changes
@@ -122,6 +123,9 @@ abstract class Target {
 
   /// The output [Source]s which we attempt to verify are correctly produced.
   List<Source> get outputs;
+
+  /// A list of zero or more depfiles, located directly under {BUILD_DIR}.
+  List<String> get depfiles => const <String>[];
 
   /// The action which performs this build step.
   Future<void> build(Environment environment);
@@ -177,7 +181,7 @@ abstract class Target {
   /// Resolve the set of input patterns and functions into a concrete list of
   /// files.
   ResolvedFiles resolveInputs(Environment environment) {
-    return _resolveConfiguration(inputs, environment, implicit: true, inputs: true);
+    return _resolveConfiguration(inputs, depfiles, environment, implicit: true, inputs: true);
   }
 
   /// Find the current set of declared outputs, including wildcard directories.
@@ -185,7 +189,7 @@ abstract class Target {
   /// The [implicit] flag controls whether it is safe to evaluate [Source]s
   /// which uses functions, behaviors, or patterns.
   ResolvedFiles resolveOutputs(Environment environment) {
-    return _resolveConfiguration(outputs, environment, inputs: false);
+    return _resolveConfiguration(outputs, depfiles, environment, inputs: false);
   }
 
   /// Performs a fold across this target and its dependencies.
@@ -222,13 +226,14 @@ abstract class Target {
     return environment.buildDir.childFile(fileName);
   }
 
-  static ResolvedFiles _resolveConfiguration(List<Source> config, Environment environment, {
-    bool implicit = true, bool inputs = true,
+  static ResolvedFiles _resolveConfiguration(List<Source> config,
+    List<String> depfiles, Environment environment, { bool implicit = true, bool inputs = true,
   }) {
     final SourceVisitor collector = SourceVisitor(environment, inputs);
     for (Source source in config) {
       source.accept(collector);
     }
+    depfiles.forEach(collector.visitDepfile);
     return collector;
   }
 }
@@ -406,7 +411,7 @@ class BuildSystem {
     environment.outputDir.createSync(recursive: true);
 
     // Load file hash store from previous builds.
-    final FileHashStore fileCache = FileHashStore(environment)
+    final FileHashStore fileCache = FileHashStore(environment, fs)
       ..initialize();
 
     // Perform sanity checks on build.
@@ -460,7 +465,7 @@ class _BuildInstance {
 
   final BuildSystemConfig buildSystemConfig;
   final Pool resourcePool;
-  final Map<String, AsyncMemoizer<void>> pending = <String, AsyncMemoizer<void>>{};
+  final Map<String, AsyncMemoizer<bool>> pending = <String, AsyncMemoizer<bool>>{};
   final Environment environment;
   final FileHashStore fileCache;
   final Map<String, File> inputFiles = <String, File>{};
@@ -526,17 +531,20 @@ class _BuildInstance {
       await node.target.build(environment);
       printTrace('${node.target.name}: Complete');
 
-      // If we were missing the depfile, resolve files after executing the
+      node.inputs
+        ..clear()
+        ..addAll(node.target.resolveInputs(environment).sources);
+      node.outputs
+        ..clear()
+        ..addAll(node.target.resolveOutputs(environment).sources);
+
+      // If we were missing the depfile, resolve  input files after executing the
       // target so that all file hashes are up to date on the next run.
       if (node.missingDepfile) {
-        node.inputs.clear();
-        node.outputs.clear();
-        node.inputs.addAll(node.target.resolveInputs(environment).sources);
-        node.outputs.addAll(node.target.resolveOutputs(environment).sources);
         await fileCache.hashFiles(node.inputs);
       }
 
-      // Update hashes for output files.
+      // Always update hashes for output files.
       await fileCache.hashFiles(node.outputs);
       node.target._writeStamp(node.inputs, node.outputs, environment);
       updateGraph();
@@ -553,6 +561,8 @@ class _BuildInstance {
         }
       }
     } catch (exception, stackTrace) {
+      // TODO(jonahwilliams): throw specific exception for expected errors to mark
+      // as non-fatal. All others should be fatal.
       node.target.clearStamp(environment);
       passed = false;
       skipped = false;
@@ -570,11 +580,17 @@ class _BuildInstance {
 
 /// Helper class to collect exceptions.
 class ExceptionMeasurement {
-  ExceptionMeasurement(this.target, this.exception, this.stackTrace);
+  ExceptionMeasurement(this.target, this.exception, this.stackTrace, {this.fatal = false});
 
   final String target;
   final dynamic exception;
   final StackTrace stackTrace;
+
+  /// Whether this exception was a fatal build system error.
+  final bool fatal;
+
+  @override
+  String toString() => 'target: $target\nexception:$exception\n$stackTrace';
 }
 
 /// Helper class to collect measurement data.
@@ -656,7 +672,7 @@ class Node {
     }
     Map<String, Object> values;
     try {
-      values = json.decode(content);
+      values = castStringKeyedMap(json.decode(content));
     } on FormatException {
       // The json is malformed in some way.
       _dirty = true;

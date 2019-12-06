@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -9,8 +9,12 @@ import 'package:file/memory.dart';
 
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/bundle.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/devfs.dart';
+import 'package:mockito/mockito.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -38,7 +42,7 @@ void main() {
       expect(ab.entries.length, greaterThan(0));
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('empty pubspec', () async {
@@ -56,7 +60,7 @@ void main() {
       );
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('wildcard directories are updated when filesystem changes', () async {
@@ -96,7 +100,7 @@ flutter:
       expect(bundle.entries.length, 5);
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('handle removal of wildcard directories', () async {
@@ -146,7 +150,7 @@ name: example''')
       expect(bundle.entries.length, 4);
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     // https://github.com/flutter/flutter/issues/42723
@@ -175,8 +179,22 @@ flutter:
       expect(bundle.needsBuild(manifestPath: 'pubspec.yaml'), false);
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
   });
 
+  test('Failed directory delete shows message', () async {
+    final MockDirectory mockDirectory = MockDirectory();
+    final BufferLogger bufferLogger = BufferLogger();
+    when(mockDirectory.existsSync()).thenReturn(true);
+    when(mockDirectory.deleteSync(recursive: true)).thenThrow(const FileSystemException('ABCD'));
+
+    await writeBundle(mockDirectory, <String, DevFSContent>{}, loggerOverride: bufferLogger);
+
+    verify(mockDirectory.createSync(recursive: true)).called(1);
+    expect(bufferLogger.errorText, contains('ABCD'));
+  });
 }
+
+class MockDirectory extends Mock implements Directory {}
+

@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -278,7 +278,7 @@ class AnimatedBezierState extends State<AnimatedBezier>
 
   //From http://wiki.roblox.com/index.php?title=File:Beziereq4.png
   double _getCubicPoint(double t, double p0, double p1, double p2, double p3) {
-    return pow(1 - t, 3) * p0 +
+    return (pow(1 - t, 3) as double) * p0 +
         3 * pow(1 - t, 2) * t * p1 +
         3 * (1 - t) * pow(t, 2) * p2 +
         pow(t, 3) * p3;

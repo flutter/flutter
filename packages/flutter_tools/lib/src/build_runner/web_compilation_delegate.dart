@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -30,6 +30,7 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
   Future<bool> initialize({
     Directory projectDirectory,
     String testOutputDir,
+    List<String> testFiles,
     BuildMode mode,
     String projectName,
     bool initializePlatform,
@@ -46,8 +47,15 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
       release: mode == BuildMode.release,
       profile: mode == BuildMode.profile,
       hasPlugins: hasWebPlugins,
-      includeTests: true,
       initializePlatform: initializePlatform,
+      testTargets: WebTestTargetManifest(
+        testFiles
+          .map<String>((String absolutePath) {
+            final String relativePath = path.relative(absolutePath, from: projectDirectory.path);
+            return '${path.withoutExtension(relativePath)}.*';
+          })
+          .toList(),
+      ),
     );
     client.startBuild();
     bool success = true;
@@ -86,7 +94,7 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
   }
 }
 
-/// Handles mapping a single root file scheme to a multiroot scheme.
+/// Handles mapping a single root file scheme to a multi-root scheme.
 ///
 /// This allows one build_runner build to read the output from a previous
 /// isolated build.

@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -558,5 +558,34 @@ void main() {
     await tester.pumpWidget(buildFrame(true));
     expect(tester.takeException(), isInstanceOf<Exception>());
     expect(finder, findsOneWidget);
+  });
+
+  testWidgets('ListView.builder asserts on negative childCount', (WidgetTester tester) async {
+    expect(() => ListView.builder(
+      itemBuilder: (BuildContext context, int index) {
+        return const SizedBox();
+      },
+      itemCount: -1,
+    ), throwsA(isInstanceOf<AssertionError>()));
+  });
+
+  testWidgets('ListView.builder asserts on negative semanticChildCount', (WidgetTester tester) async {
+    expect(() => ListView.builder(
+      itemBuilder: (BuildContext context, int index) {
+        return const SizedBox();
+      },
+      itemCount: 1,
+      semanticChildCount: -1,
+    ), throwsA(isInstanceOf<AssertionError>()));
+  });
+
+  testWidgets('ListView.builder asserts on nonsensical childCount/semanticChildCount', (WidgetTester tester) async {
+    expect(() => ListView.builder(
+      itemBuilder: (BuildContext context, int index) {
+        return const SizedBox();
+      },
+      itemCount: 1,
+      semanticChildCount: 4,
+    ), throwsA(isInstanceOf<AssertionError>()));
   });
 }

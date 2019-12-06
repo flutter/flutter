@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -45,7 +45,7 @@ void main() {
 
     await expectLater(
       find.byKey(key),
-      matchesGoldenFile('activityIndicator.paused.light.png', version: 0),
+      matchesGoldenFile('activityIndicator.paused.light.png'),
     );
 
     await tester.pumpWidget(
@@ -65,7 +65,7 @@ void main() {
 
     await expectLater(
       find.byKey(key),
-      matchesGoldenFile('activityIndicator.paused.dark.png', version: 0),
+      matchesGoldenFile('activityIndicator.paused.dark.png'),
     );
   });
 

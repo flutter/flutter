@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -255,42 +255,42 @@ void main() {
     expect(log, equals(<String>['left']));
   });
 
-  // This test doesn't work because the testing framework uses a fake version of
-  // the pointer event dispatch loop.
-  //
-  // TODO(abarth): Test more of the real code and enable this test.
-  // See https://github.com/flutter/flutter/issues/4771.
-  //
-  // testWidgets('Pending gestures are rejected', (WidgetTester tester) async {
-  //   List<String> log = <String>[];
-  //   final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-  //     '/': (BuildContext context) {
-  //       return new Row(
-  //         children: <Widget>[
-  //           new GestureDetector(
-  //             onTap: () {
-  //               log.add('left');
-  //               Navigator.pushNamed(context, '/second');
-  //             },
-  //             child: new Text('left')
-  //           ),
-  //           new GestureDetector(
-  //             onTap: () { log.add('right'); },
-  //             child: new Text('right')
-  //           ),
-  //         ]
-  //       );
-  //     },
-  //     '/second': (BuildContext context) => new Container(),
-  //   };
-  //   await tester.pumpWidget(new MaterialApp(routes: routes));
-  //   TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('right')), pointer: 23);
-  //   expect(log, isEmpty);
-  //   await tester.tap(find.text('left'));
-  //   expect(log, equals(<String>['left']));
-  //   await gesture.up();
-  //   expect(log, equals(<String>['left']));
-  // });
+   testWidgets('Pending gestures are rejected', (WidgetTester tester) async {
+     final List<String> log = <String>[];
+     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
+       '/': (BuildContext context) {
+         return Row(
+           children: <Widget>[
+             GestureDetector(
+               onTap: () {
+                 log.add('left');
+                 Navigator.pushNamed(context, '/second');
+               },
+               child: const Text('left')
+             ),
+             GestureDetector(
+               onTap: () { log.add('right'); },
+               child: const Text('right'),
+             ),
+           ]
+         );
+       },
+       '/second': (BuildContext context) => Container(),
+     };
+     await tester.pumpWidget(MaterialApp(routes: routes));
+     final TestGesture gesture = await tester.startGesture(tester.getCenter(find.text('right')), pointer: 23);
+     expect(log, isEmpty);
+     await tester.tap(find.text('left'));
+     expect(log, equals(<String>['left']));
+     await gesture.up();
+     expect(log, equals(<String>['left']));
+
+     // This test doesn't work because it relies on part of the pointer event
+     // dispatching mechanism that is mocked out in testing. We should use the real
+     // mechanism even during testing and enable this test.
+     // TODO(abarth): Test more of the real code and enable this test.
+     // See https://github.com/flutter/flutter/issues/4771.
+   }, skip: true);
 
   testWidgets('popAndPushNamed', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
@@ -994,15 +994,15 @@ void main() {
     );
 
     // The initial route /A/B/C should've been pushed successfully.
-    expect(find.byKey(keyRoot), findsOneWidget);
-    expect(find.byKey(keyA), findsOneWidget);
+    expect(find.byKey(keyRoot, skipOffstage: false), findsOneWidget);
+    expect(find.byKey(keyA, skipOffstage: false), findsOneWidget);
     expect(find.byKey(keyABC), findsOneWidget);
 
     keyNav.currentState.pop();
     await tester.pumpAndSettle();
-    expect(find.byKey(keyRoot), findsOneWidget);
+    expect(find.byKey(keyRoot, skipOffstage: false), findsOneWidget);
     expect(find.byKey(keyA), findsOneWidget);
-    expect(find.byKey(keyABC), findsNothing);
+    expect(find.byKey(keyABC, skipOffstage: false), findsNothing);
   });
 
   testWidgets('The full initial route has to be matched', (WidgetTester tester) async {
@@ -1033,4 +1033,167 @@ void main() {
     expect(find.byKey(keyA), findsNothing);
     expect(find.byKey(keyAB), findsNothing);
   });
+
+  group('error control test', () {
+    testWidgets('onUnknownRoute null and onGenerateRoute returns null', (WidgetTester tester) async {
+      final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+      await tester.pumpWidget(Navigator(
+        key: navigatorKey,
+        onGenerateRoute: (_) => null,
+      ));
+      final dynamic exception = tester.takeException();
+      expect(exception, isNotNull);
+      expect(exception, isFlutterError);
+      final FlutterError error = exception;
+      expect(error, isNotNull);
+      expect(error.diagnostics.last, isInstanceOf<DiagnosticsProperty<NavigatorState>>());
+      expect(
+        error.toStringDeep(),
+        equalsIgnoringHashCodes(
+          'FlutterError\n'
+          '   If a Navigator has no onUnknownRoute, then its onGenerateRoute\n'
+          '   must never return null.\n'
+          '   When trying to build the route "/", onGenerateRoute returned\n'
+          '   null, but there was no onUnknownRoute callback specified.\n'
+          '   The Navigator was:\n'
+          '     NavigatorState#4d6bf(lifecycle state: created)\n',
+        ),
+      );
+    });
+
+    testWidgets('onUnknownRoute null and onGenerateRoute returns null', (WidgetTester tester) async {
+      final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+      await tester.pumpWidget(Navigator(
+        key: navigatorKey,
+        onGenerateRoute: (_) => null,
+        onUnknownRoute: (_) => null,
+      ));
+      final dynamic exception = tester.takeException();
+      expect(exception, isNotNull);
+      expect(exception, isFlutterError);
+      final FlutterError error = exception;
+      expect(error, isNotNull);
+      expect(error.diagnostics.last, isInstanceOf<DiagnosticsProperty<NavigatorState>>());
+      expect(
+        error.toStringDeep(),
+        equalsIgnoringHashCodes(
+          'FlutterError\n'
+          '   A Navigator\'s onUnknownRoute returned null.\n'
+          '   When trying to build the route "/", both onGenerateRoute and\n'
+          '   onUnknownRoute returned null. The onUnknownRoute callback should\n'
+          '   never return null.\n'
+          '   The Navigator was:\n'
+          '     NavigatorState#38036(lifecycle state: created)\n',
+        ),
+      );
+    });
+  });
+
+  testWidgets('OverlayEntry of topmost initial route is marked as opaque', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/38038.
+
+    final Key root = UniqueKey();
+    final Key intermediate = UniqueKey();
+    final GlobalKey topmost = GlobalKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        initialRoute: '/A/B',
+        routes: <String, WidgetBuilder>{
+          '/': (BuildContext context) => Container(key: root),
+          '/A': (BuildContext context) => Container(key: intermediate),
+          '/A/B': (BuildContext context) => Container(key: topmost),
+        },
+      ),
+    );
+
+    expect(ModalRoute.of(topmost.currentContext).overlayEntries.first.opaque, isTrue);
+
+    expect(find.byKey(root), findsNothing);  // hidden by opaque Route
+    expect(find.byKey(intermediate), findsNothing);  // hidden by opaque Route
+    expect(find.byKey(topmost), findsOneWidget);
+  });
+
+  testWidgets('OverlayEntry of topmost route is set to opaque after Push', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/38038.
+
+    final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: navigator,
+        initialRoute: '/',
+        onGenerateRoute: (RouteSettings settings) {
+          return NoAnimationPageRoute(
+            pageBuilder: (_) => Container(key: ValueKey<String>(settings.name)),
+          );
+        },
+      ),
+    );
+    expect(find.byKey(const ValueKey<String>('/')), findsOneWidget);
+
+    navigator.currentState.pushNamed('/A');
+    await tester.pump();
+
+    final BuildContext topMostContext = tester.element(find.byKey(const ValueKey<String>('/A')));
+    expect(ModalRoute.of(topMostContext).overlayEntries.first.opaque, isTrue);
+
+    expect(find.byKey(const ValueKey<String>('/')), findsNothing);  // hidden by /A
+    expect(find.byKey(const ValueKey<String>('/A')), findsOneWidget);
+  });
+
+  testWidgets('OverlayEntry of topmost route is set to opaque after Replace', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/38038.
+
+    final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: navigator,
+        initialRoute: '/A/B',
+        onGenerateRoute: (RouteSettings settings) {
+          return NoAnimationPageRoute(
+            pageBuilder: (_) => Container(key: ValueKey<String>(settings.name)),
+          );
+        },
+      ),
+    );
+    expect(find.byKey(const ValueKey<String>('/')), findsNothing);
+    expect(find.byKey(const ValueKey<String>('/A')), findsNothing);
+    expect(find.byKey(const ValueKey<String>('/A/B')), findsOneWidget);
+
+    final Route<dynamic> oldRoute = ModalRoute.of(
+      tester.element(find.byKey(const ValueKey<String>('/A'), skipOffstage: false)),
+    );
+    final Route<void> newRoute = NoAnimationPageRoute(
+      pageBuilder: (_) => Container(key: const ValueKey<String>('/C')),
+    );
+
+    navigator.currentState.replace<void>(oldRoute: oldRoute, newRoute: newRoute);
+    await tester.pump();
+
+    expect(newRoute.overlayEntries.first.opaque, isTrue);
+
+    expect(find.byKey(const ValueKey<String>('/')), findsNothing);  // hidden by /A/B
+    expect(find.byKey(const ValueKey<String>('/A')), findsNothing);  // replaced
+    expect(find.byKey(const ValueKey<String>('/C')), findsNothing);  // hidden by /A/B
+    expect(find.byKey(const ValueKey<String>('/A/B')), findsOneWidget);
+
+    navigator.currentState.pop();
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const ValueKey<String>('/')), findsNothing);  // hidden by /C
+    expect(find.byKey(const ValueKey<String>('/A')), findsNothing);  // replaced
+    expect(find.byKey(const ValueKey<String>('/A/B')), findsNothing); // popped
+    expect(find.byKey(const ValueKey<String>('/C')), findsOneWidget);
+  });
+}
+
+class NoAnimationPageRoute extends PageRouteBuilder<void> {
+  NoAnimationPageRoute({WidgetBuilder pageBuilder})
+      : super(pageBuilder: (BuildContext context, __, ___) {
+          return pageBuilder(context);
+        });
+
+  @override
+  AnimationController createAnimationController() {
+    return super.createAnimationController()..value = 1.0;
+  }
 }

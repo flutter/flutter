@@ -1,4 +1,7 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# Copyright 2014 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
 
 set -e
 
@@ -17,7 +20,6 @@ function script_location() {
 # expected.
 SCRIPT_LOCATION="$(script_location)"
 FLUTTER_ROOT="$(dirname "$(dirname "$SCRIPT_LOCATION")")"
-
 export PATH="$FLUTTER_ROOT/bin:$FLUTTER_ROOT/bin/cache/dart-sdk/bin:$PATH"
 
 set -x
@@ -27,6 +29,7 @@ cd "$FLUTTER_ROOT"
 version="$(<version)"
 if [[ "$OS" == "linux" ]]; then
   echo "Building Flutter Gallery $version for Android..."
+  export BUNDLE_GEMFILE="$FLUTTER_ROOT/dev/ci/docker_linux/Gemfile"
   # ANDROID_SDK_ROOT must be set in the env.
   (
     cd examples/flutter_gallery
@@ -42,13 +45,14 @@ if [[ "$OS" == "linux" ]]; then
     set -x
     (
       cd examples/flutter_gallery/android
-      fastlane deploy_play_store
+      bundle exec fastlane deploy_play_store
     )
   else
     echo "(Not deploying; Flutter Gallery is only deployed to Play store for tagged dev branch commits.)"
   fi
 elif [[ "$OS" == "darwin" ]]; then
   echo "Building Flutter Gallery $version for iOS..."
+  export BUNDLE_GEMFILE="$FLUTTER_ROOT/dev/ci/mac/Gemfile"
   (
     cd examples/flutter_gallery
     flutter build ios --release --no-codesign -t lib/main_publish.dart
@@ -90,7 +94,7 @@ elif [[ "$OS" == "darwin" ]]; then
       (
         cd examples/flutter_gallery/ios
         export DELIVER_ITMSTRANSPORTER_ADDITIONAL_UPLOAD_PARAMETERS="-t DAV"
-        fastlane build_and_deploy_testflight upload:true
+        bundle exec fastlane build_and_deploy_testflight upload:true
       )
     else
       # On iOS the signing can break as well, so we verify this regularly (not just
@@ -99,8 +103,10 @@ elif [[ "$OS" == "darwin" ]]; then
       echo "Testing archiving with distribution profile..."
       (
         cd examples/flutter_gallery/ios
-        # TODO(fujino) re-enable after resolving https://github.com/flutter/flutter/issues/43204
-        #fastlane build_and_deploy_testflight
+        # Cirrus Mac VMs come with an old version of fastlane which was causing
+        # dependency issues (https://github.com/flutter/flutter/issues/43435),
+        # so explicitly use the version specified in $BUNDLE_GEMFILE.
+        bundle exec fastlane build_and_deploy_testflight
       )
       echo "(Not deploying; Flutter Gallery is only deployed to TestFlight for tagged dev branch commits.)"
     fi

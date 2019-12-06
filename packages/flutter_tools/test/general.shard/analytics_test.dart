@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -94,7 +94,7 @@ void main() {
     });
 
     testUsingContext('Usage records one feature in experiment setting', () async {
-      when<bool>(mockFlutterConfig.getValue(flutterWebFeature.configSetting))
+      when<bool>(mockFlutterConfig.getValue(flutterWebFeature.configSetting) as bool)
           .thenReturn(true);
       final Usage usage = Usage();
       usage.sendCommand('test');
@@ -108,15 +108,15 @@ void main() {
         'FLUTTER_ANALYTICS_LOG_FILE': 'test',
       }),
       FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('Usage records multiple features in experiment setting', () async {
-      when<bool>(mockFlutterConfig.getValue(flutterWebFeature.configSetting))
+      when<bool>(mockFlutterConfig.getValue(flutterWebFeature.configSetting) as bool)
           .thenReturn(true);
-      when<bool>(mockFlutterConfig.getValue(flutterLinuxDesktopFeature.configSetting))
+      when<bool>(mockFlutterConfig.getValue(flutterLinuxDesktopFeature.configSetting) as bool)
           .thenReturn(true);
-      when<bool>(mockFlutterConfig.getValue(flutterMacOSDesktopFeature.configSetting))
+      when<bool>(mockFlutterConfig.getValue(flutterMacOSDesktopFeature.configSetting) as bool)
           .thenReturn(true);
       final Usage usage = Usage();
       usage.sendCommand('test');
@@ -130,7 +130,7 @@ void main() {
         'FLUTTER_ANALYTICS_LOG_FILE': 'test',
       }),
       FileSystem: () => MemoryFileSystem(),
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
     });
   });
 
@@ -201,7 +201,7 @@ void main() {
 
     testUsingContext('compound command usage path', () async {
       final BuildCommand buildCommand = BuildCommand();
-      final FlutterCommand buildApkCommand = buildCommand.subcommands['apk'];
+      final FlutterCommand buildApkCommand = buildCommand.subcommands['apk'] as FlutterCommand;
       expect(await buildApkCommand.usagePath, 'build/apk');
     }, overrides: <Type, Generator>{
       Usage: () => mockUsage,
@@ -223,7 +223,7 @@ void main() {
       expect(log.contains(formatDateTime(dateTime)), isTrue);
     }, overrides: <Type, Generator>{
       FileSystem: () => memoryFileSystem,
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
       SystemClock: () => mockClock,
       Platform: () => FakePlatform(
         environment: <String, String>{
@@ -249,7 +249,7 @@ void main() {
       expect(log.contains(formatDateTime(dateTime)), isTrue);
     }, overrides: <Type, Generator>{
       FileSystem: () => memoryFileSystem,
-      ProcessManager: () => FakeProcessManager(<FakeCommand>[]),
+      ProcessManager: () => FakeProcessManager.any(),
       SystemClock: () => mockClock,
       Platform: () => FakePlatform(
         environment: <String, String>{

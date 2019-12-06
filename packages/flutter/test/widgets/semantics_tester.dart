@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -197,8 +197,10 @@ class TestSemantics {
   /// The test screen's size in physical pixels, typically used as the [rect]
   /// for the node with id zero.
   ///
-  /// See also [new TestSemantics.root], which uses this value to describe the
-  /// root node.
+  /// See also:
+  ///
+  ///  * [new TestSemantics.root], which uses this value to describe the root
+  ///    node.
   static const Rect rootRect = Rect.fromLTWH(0.0, 0.0, 2400.0, 1800.0);
 
   /// The test screen's size in logical pixels, useful for the [rect] of

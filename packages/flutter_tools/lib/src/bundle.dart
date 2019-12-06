@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -10,6 +10,7 @@ import 'package:pool/pool.dart';
 import 'asset.dart';
 import 'base/common.dart';
 import 'base/file_system.dart';
+import 'base/logger.dart';
 import 'build_info.dart';
 import 'build_system/build_system.dart';
 import 'build_system/depfile.dart';
@@ -50,7 +51,7 @@ class BundleBuilder {
   /// The default `mainPath` is `lib/main.dart`.
   /// The default  `manifestPath` is `pubspec.yaml`
   Future<void> build({
-    TargetPlatform platform,
+    @required TargetPlatform platform,
     BuildMode buildMode,
     String mainPath,
     String manifestPath = defaultManifestPath,
@@ -126,8 +127,11 @@ Future<void> buildWithAssemble({
 
   if (!result.success) {
     for (ExceptionMeasurement measurement in result.exceptions.values) {
-      printError(measurement.exception.toString());
-      printError(measurement.stackTrace.toString());
+        printError('Target ${measurement.target} failed: ${measurement.exception}',
+          stackTrace: measurement.fatal
+            ? measurement.stackTrace
+            : null,
+        );
     }
     throwToolExit('Failed to build bundle.');
   }
@@ -170,9 +174,18 @@ Future<AssetBundle> buildAssets({
 Future<void> writeBundle(
   Directory bundleDir,
   Map<String, DevFSContent> assetEntries,
+  { Logger loggerOverride }
 ) async {
+  loggerOverride ??= logger;
   if (bundleDir.existsSync()) {
-    bundleDir.deleteSync(recursive: true);
+    try {
+      bundleDir.deleteSync(recursive: true);
+    } on FileSystemException catch (err) {
+      loggerOverride.printError(
+        'Failed to clean up asset directory ${bundleDir.path}: $err\n'
+        'To clean build artifacts, use the command "flutter clean".'
+      );
+    }
   }
   bundleDir.createSync(recursive: true);
 
@@ -182,7 +195,7 @@ Future<void> writeBundle(
     assetEntries.entries.map<Future<void>>((MapEntry<String, DevFSContent> entry) async {
       final PoolResource resource = await pool.request();
       try {
-        final File file = fs.file(fs.path.join(bundleDir.path, entry.key));
+        final File file = fs.file(bundleDir.uri.resolve(entry.key));
         file.parent.createSync(recursive: true);
         await file.writeAsBytes(await entry.value.contentsAsBytes());
       } finally {
