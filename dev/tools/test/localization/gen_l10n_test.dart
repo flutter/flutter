@@ -265,9 +265,6 @@ void main() {
     });
 
     test('correctly sorts supportedLocales and supportedLanguageCodes alphabetically', () {
-      const String singleZhMessageArbFileString = '''{
-  "title": "标题"
-}''';
       final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
         ..createSync(recursive: true);
       // Write files in non-alphabetical order so that read performs in that order
@@ -298,9 +295,6 @@ void main() {
     });
 
     test('correctly sorts arbPathString alphabetically', () {
-      const String singleZhMessageArbFileString = '''{
-  "title": "标题"
-}''';
       final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
         ..createSync(recursive: true);
       // Write files in non-alphabetical order so that read performs in that order
