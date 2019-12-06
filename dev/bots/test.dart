@@ -36,7 +36,9 @@ final String toolRoot = path.join(flutterRoot, 'packages', 'flutter_tools');
 final List<String> flutterTestArgs = <String>[];
 
 final bool useFlutterTestFormatter = Platform.environment['FLUTTER_TEST_FORMATTER'] == 'true';
-final bool canUseBuildRunner = Platform.environment['FLUTTER_TEST_NO_BUILD_RUNNER'] != 'true';
+
+// This is disabled due to https://github.com/dart-lang/build/issues/2562
+const bool canUseBuildRunner = false;
 
 /// The number of Cirrus jobs that run host-only devicelab tests in parallel.
 ///
@@ -260,9 +262,14 @@ Future<void> _runToolTests() async {
       .map<String>((String name) => path.basenameWithoutExtension(name)),
     // The `dynamic` on the next line is because Map.fromIterable isn't generic.
     value: (dynamic subshard) => () async {
+      // Due to https://github.com/flutter/flutter/issues/46180, skip the hermetic directory
+      // on Windows.
+      final String suffix = Platform.isWindows && subshard == 'commands'
+        ? 'permeable'
+        : '';
       await _pubRunTest(
         toolsPath,
-        testPath: path.join(kTest, '$subshard$kDotShard'),
+        testPath: path.join(kTest, '$subshard$kDotShard', suffix),
         useBuildRunner: canUseBuildRunner,
         tableData: bigqueryApi?.tabledata,
         enableFlutterToolAsserts: true,
