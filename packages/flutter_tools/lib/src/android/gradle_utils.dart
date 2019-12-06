@@ -200,7 +200,10 @@ String getGradleVersionFor(String androidPluginVersion) {
   if (_isWithinVersionRange(androidPluginVersion, min: '3.4.0', max: '3.5.0')) {
     return '5.6.2';
   }
-  throwToolExit('Unsuported Android Plugin version: $androidPluginVersion.');
+  if (Version.parse(androidPluginVersion) > Version.parse('3.5.0')) {
+    return '5.6.4';
+  }
+  throwToolExit('Unsupported Android Plugin version: $androidPluginVersion.');
   return '';
 }
 
