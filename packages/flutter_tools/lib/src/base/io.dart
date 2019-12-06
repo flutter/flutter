@@ -93,7 +93,7 @@ ExitFunction _exitFunction = _defaultExitFunction;
 /// Exits the process.
 ///
 /// Throws [StateError] if assertions are enabled and the dart:io exit
-/// is still active with called. This may indicate exit was called in
+/// is still active when called. This may indicate exit was called in
 /// a test without being configured correctly.
 ///
 /// This is analogous to the `exit` function in `dart:io`, except that this
