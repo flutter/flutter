@@ -509,6 +509,15 @@ tasks:
     required_agent_capabilities: ["mac/ios"]
     timeout_in_minutes: 20
 
+  flutter_driver_screenshot_test_ios:
+    description: >
+      Screenshot tests running on iPhone 6s.
+    stage: devicelab_ios
+    required_agent_capabilities: ["mac/ios"]
+    #TODO(cyanglaz): The flaky flag is added because it is the first screenshot test we added.
+    # Remove the flaky flag when we are sure the test is stable.
+    flaky: true
+
   # TODO(fujino): does not pass on iOS13 https://github.com/flutter/flutter/issues/41133
   # system_debug_ios:
   #   description: >
