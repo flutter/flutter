@@ -70,7 +70,9 @@ const String fixWithDevelopmentTeamInstruction = '''
        open ios/Runner.xcworkspace
   2- Select the 'Runner' project in the navigator then the 'Runner' target
      in the project settings
-  3- In the 'General' tab, make sure a 'Development Team' is selected.\u0020
+  3- Make sure a 'Development Team' is selected.\u0020
+     - For Xcode 10, look under General > Signing > Team.
+     - For Xcode 11 and newer, look under Signing & Capabilities > Team.
      You may need to:
          - Log in with your Apple ID in Xcode first
          - Ensure you have a valid unique Bundle ID
