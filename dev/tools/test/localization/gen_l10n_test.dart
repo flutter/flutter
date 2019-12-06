@@ -51,17 +51,13 @@ void main() {
     test('happy path', () {
       _standardFlutterDirectoryL10nSetup(fs);
       expect(() {
-        try {
-          final LocalizationsGenerator generator = LocalizationsGenerator(fs);
-          generator.initialize(
-            l10nDirectoryPath: defaultArbPathString,
-            templateArbFileName: defaultTemplateArbFileName,
-            outputFileString: defaultOutputFileString,
-            classNameString: defaultClassNameString,
-          );
-        } on FileSystemException catch (e) {
-          fail('Setters should not fail: \n$e');
-        }
+        final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+        generator.initialize(
+          l10nDirectoryPath: defaultArbPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        );
       }, returnsNormally);
     });
 

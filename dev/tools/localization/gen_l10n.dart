@@ -379,7 +379,7 @@ class LocalizationsGenerator {
   /// Throws an [L10nException] when a provided configuration is not allowed
   /// by [LocalizationsGenerator].
   ///
-  /// Throws an [FileSystemException] when a file operation necessary for setting
+  /// Throws a [FileSystemException] when a file operation necessary for setting
   /// up the [LocalizationsGenerator] cannot be completed.
   void initialize({
     String l10nDirectoryPath,
@@ -452,7 +452,7 @@ class LocalizationsGenerator {
   /// Scans [l10nDirectory] for arb files and parses them for language and locale
   /// information.
   void parseArbFiles() {
-    final List<FileSystemEntity> fileSystemEntityList = l10nDirectory
+    final List<File> fileSystemEntityList = l10nDirectory
       .listSync()
       .whereType<File>()
       .toList();
@@ -503,6 +503,14 @@ class LocalizationsGenerator {
   ///
   /// For example, a message with plurals will be handled differently from
   /// a simple, singular message.
+  ///
+  /// Throws an [L10nException] when a provided configuration is not allowed
+  /// by [LocalizationsGenerator].
+  ///
+  /// Throws a [FileSystemException] when a file operation necessary for setting
+  /// up the [LocalizationsGenerator] cannot be completed.
+  ///
+  /// Throws a [FormatException] when parsing the arb file is unsuccessful.
   void generateClassMethods() {
     Map<String, dynamic> bundle;
     try {
@@ -513,7 +521,8 @@ class LocalizationsGenerator {
       throw FormatException('Unable to parse arb file: $e');
     }
 
-    for (String key in bundle.keys.toList()..sort()) {
+    final List<String> sortedArbKeys = bundle.keys.toList()..sort();
+    for (String key in sortedArbKeys) {
       if (key.startsWith('@'))
         continue;
       if (!_isValidGetterAndMethodName(key))
