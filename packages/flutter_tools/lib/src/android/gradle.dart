@@ -258,7 +258,6 @@ Future<void> buildGradleApp({
       project,
       androidBuildInfo,
       buildDirectory: buildDirectory.childDirectory('app'),
-      buildNumber: androidBuildInfo.buildInfo.buildNumber,
     );
   }
 
@@ -698,7 +697,6 @@ Future<void> buildPluginsAsAar(
   FlutterProject flutterProject,
   AndroidBuildInfo androidBuildInfo, {
   Directory buildDirectory,
-  String buildNumber
 }) async {
   final File flutterPluginFile = flutterProject.flutterPluginsFile;
   if (!flutterPluginFile.existsSync()) {
@@ -726,7 +724,7 @@ Future<void> buildPluginsAsAar(
         ),
         target: '',
         outputDirectory: buildDirectory,
-        buildNumber: buildNumber
+        buildNumber: '1.0'
       );
     } on ToolExit {
       // Log the entire plugin entry in `.flutter-plugins` since it
