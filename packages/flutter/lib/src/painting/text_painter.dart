@@ -844,10 +844,10 @@ class TextPainter {
   /// should be invalidated upon the next successful [layout].
   List<ui.LineMetrics> computeLineMetrics() {
     assert(!_needsLayout);
-    List<ui.LineMetrics> metrics = _paragraph.computeLineMetrics();
+    final List<ui.LineMetrics> metrics = _paragraph.computeLineMetrics();
     print('LineMetrics called: ${metrics.length}');
     for (ui.LineMetrics line in metrics) {
-      print('${line.lineNumber}: ${line.hardBreak}')
+      print('${line.lineNumber}: ${line.hardBreak}');
     }
     return _paragraph.computeLineMetrics();
   }
