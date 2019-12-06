@@ -18,6 +18,11 @@ class VsyncWaiter final : public flutter::VsyncWaiter {
  public:
   static constexpr zx_signals_t SessionPresentSignal = ZX_EVENT_SIGNALED;
 
+  static fml::TimePoint SnapToNextPhase(
+      const fml::TimePoint now,
+      const fml::TimePoint last_frame_presentation_time,
+      const fml::TimeDelta presentation_interval);
+
   VsyncWaiter(std::string debug_label,
               zx_handle_t session_present_handle,
               flutter::TaskRunners task_runners);
