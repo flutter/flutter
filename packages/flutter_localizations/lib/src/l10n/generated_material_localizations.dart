@@ -4,7 +4,7 @@
 
 // This file has been automatically generated. Please do not edit it manually.
 // To regenerate the file, use:
-// dart dev/tools/localization/gen_localizations.dart --overwrite
+// dart dev/tools/localization/bin/gen_localizations.dart --overwrite
 
 import 'dart:collection';
 

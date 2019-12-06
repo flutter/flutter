@@ -519,7 +519,7 @@ Future<void> verifyInternationalizations() async {
   final EvalResult materialGenResult = await _evalCommand(
     dart,
     <String>[
-      path.join('dev', 'tools', 'localization', 'gen_localizations.dart'),
+      path.join('dev', 'tools', 'localization', 'bin', 'gen_localizations.dart'),
       '--material',
     ],
     workingDirectory: flutterRoot,
@@ -527,7 +527,7 @@ Future<void> verifyInternationalizations() async {
   final EvalResult cupertinoGenResult = await _evalCommand(
     dart,
     <String>[
-      path.join('dev', 'tools', 'localization', 'gen_localizations.dart'),
+      path.join('dev', 'tools', 'localization', 'bin', 'gen_localizations.dart'),
       '--cupertino',
     ],
     workingDirectory: flutterRoot,

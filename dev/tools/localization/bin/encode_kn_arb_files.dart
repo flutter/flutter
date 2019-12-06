@@ -18,7 +18,7 @@
 // Run this program from the root of the git repository.
 //
 // ```
-// dart dev/tools/localization/encode_kn_arb_files.dart
+// dart dev/tools/localization/bin/encode_kn_arb_files.dart
 // ```
 
 import 'dart:async';
@@ -27,7 +27,7 @@ import 'dart:io';
 
 import 'package:path/path.dart' as path;
 
-import 'localizations_utils.dart';
+import '../localizations_utils.dart';
 
 Map<String, dynamic> loadBundle(File file) {
   if (!FileSystemEntity.isFileSync(file.path))
