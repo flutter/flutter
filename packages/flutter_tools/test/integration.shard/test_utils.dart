@@ -49,7 +49,7 @@ Future<void> getPackages(String folder) async {
   final ProcessResult result = await processManager.run(command,
     workingDirectory: folder,
     environment: <String, String>{
-    'FLUTTER_INTEGRATION_TEST': 'true'
+    'FLUTTER_TEST': 'true'
     },
   );
   if (result.exitCode != 0) {

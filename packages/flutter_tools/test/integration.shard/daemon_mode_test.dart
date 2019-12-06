@@ -30,7 +30,7 @@ void main() {
       <String>[flutterBin, '--show-test-device', 'daemon'],
       workingDirectory: tempDir.path,
       environment: <String, String>{
-        'FLUTTER_INTEGRATION_TEST': 'test',
+        'FLUTTER_TEST': 'true',
       }
     );
 
