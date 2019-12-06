@@ -476,9 +476,11 @@ class IosProject implements XcodeBasedProject {
       // to be in this location.
       final Directory framework = fs.directory(artifacts.getArtifactPath(Artifact.flutterFramework,
         platform: TargetPlatform.ios, mode: BuildMode.debug));
-      final File podspec = framework.parent.childFile('Flutter.podspec');
-      copyDirectorySync(framework, engineDest.childDirectory('Flutter.framework'));
-      podspec.copySync(engineDest.childFile('Flutter.podspec').path);
+      if (framework.existsSync()) {
+        final File podspec = framework.parent.childFile('Flutter.podspec');
+        copyDirectorySync(framework, engineDest.childDirectory('Flutter.framework'));
+        podspec.copySync(engineDest.childFile('Flutter.podspec').path);
+      }
     }
   }
 
