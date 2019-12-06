@@ -206,10 +206,10 @@ class HSVColor {
     if (b == null)
       return a._scaleAlpha(1.0 - t);
     return HSVColor.fromAHSV(
-      lerpDouble(a.alpha, b.alpha, t).clamp(0.0, 1.0),
+      lerpDouble(a.alpha, b.alpha, t).clamp(0.0, 1.0) as double,
       lerpDouble(a.hue, b.hue, t) % 360.0,
-      lerpDouble(a.saturation, b.saturation, t).clamp(0.0, 1.0),
-      lerpDouble(a.value, b.value, t).clamp(0.0, 1.0),
+      lerpDouble(a.saturation, b.saturation, t).clamp(0.0, 1.0) as double,
+      lerpDouble(a.value, b.value, t).clamp(0.0, 1.0) as double,
     );
   }
 
@@ -217,13 +217,11 @@ class HSVColor {
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
-    if (other is! HSVColor)
-      return false;
-    final HSVColor typedOther = other;
-    return typedOther.alpha == alpha
-        && typedOther.hue == hue
-        && typedOther.saturation == saturation
-        && typedOther.value == value;
+    return other is HSVColor
+        && other.alpha == alpha
+        && other.hue == hue
+        && other.saturation == saturation
+        && other.value == value;
   }
 
   @override
@@ -292,7 +290,7 @@ class HSLColor {
     // Saturation can exceed 1.0 with rounding errors, so clamp it.
     final double saturation = lightness == 1.0
       ? 0.0
-      : (delta / (1.0 - (2.0 * lightness - 1.0).abs())).clamp(0.0, 1.0);
+      : ((delta / (1.0 - (2.0 * lightness - 1.0).abs())).clamp(0.0, 1.0) as double);
     return HSLColor.fromAHSL(alpha, hue, saturation, lightness);
   }
 
@@ -392,10 +390,10 @@ class HSLColor {
     if (b == null)
       return a._scaleAlpha(1.0 - t);
     return HSLColor.fromAHSL(
-      lerpDouble(a.alpha, b.alpha, t).clamp(0.0, 1.0),
+      lerpDouble(a.alpha, b.alpha, t).clamp(0.0, 1.0) as double,
       lerpDouble(a.hue, b.hue, t) % 360.0,
-      lerpDouble(a.saturation, b.saturation, t).clamp(0.0, 1.0),
-      lerpDouble(a.lightness, b.lightness, t).clamp(0.0, 1.0),
+      lerpDouble(a.saturation, b.saturation, t).clamp(0.0, 1.0) as double,
+      lerpDouble(a.lightness, b.lightness, t).clamp(0.0, 1.0) as double,
     );
   }
 
@@ -403,13 +401,11 @@ class HSLColor {
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
-    if (other is! HSLColor)
-      return false;
-    final HSLColor typedOther = other;
-    return typedOther.alpha == alpha
-        && typedOther.hue == hue
-        && typedOther.saturation == saturation
-        && typedOther.lightness == lightness;
+    return other is HSLColor
+        && other.alpha == alpha
+        && other.hue == hue
+        && other.saturation == saturation
+        && other.lightness == lightness;
   }
 
   @override
@@ -450,8 +446,9 @@ class ColorSwatch<T> extends Color {
       return true;
     if (other.runtimeType != runtimeType)
       return false;
-    final ColorSwatch<T> typedOther = other;
-    return super == other && _swatch == typedOther._swatch;
+    return super == other
+        && other is ColorSwatch<T>
+        && other._swatch == _swatch;
   }
 
   @override

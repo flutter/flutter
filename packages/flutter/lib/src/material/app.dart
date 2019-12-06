@@ -308,10 +308,10 @@ class MaterialApp extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///   * [theme], which is used when a light mode is selected.
-  ///   * [darkTheme], which is used when a dark mode is selected.
-  ///   * [ThemeData.brightness], which indicates to various parts of the
-  ///     system what kind of theme is being used.
+  ///  * [theme], which is used when a light mode is selected.
+  ///  * [darkTheme], which is used when a dark mode is selected.
+  ///  * [ThemeData.brightness], which indicates to various parts of the
+  ///    system what kind of theme is being used.
   final ThemeMode themeMode;
 
   /// {@macro flutter.widgets.widgetsApp.color}

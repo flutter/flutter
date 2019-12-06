@@ -191,7 +191,7 @@ void main() {
         metadata: <String, Object>{'sourcePath': 'some/path.dart', 'id': 'id'},
       );
       expect(expectedMetadataFile.existsSync(), isTrue);
-      final Map<String, dynamic> json = jsonDecode(expectedMetadataFile.readAsStringSync());
+      final Map<String, dynamic> json = jsonDecode(expectedMetadataFile.readAsStringSync()) as Map<String, dynamic>;
       expect(json['id'], equals('id'));
       expect(json['file'], equals('snippet_out.dart'));
       expect(json['description'], equals('A description of the snippet.\n\nOn several lines.'));

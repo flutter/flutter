@@ -129,8 +129,8 @@ class SnippetGenerator {
       'code': htmlEscape.convert(result.join('\n')),
       'language': language ?? 'dart',
       'serial': '',
-      'id': metadata['id'],
-      'element': metadata['element'] ?? '',
+      'id': metadata['id'] as String,
+      'element': metadata['element'] as String ?? '',
       'app': '',
     };
     if (type == SnippetType.application) {
@@ -253,7 +253,7 @@ class SnippetGenerator {
         }
 
         snippetData.add(_ComponentTuple('app', app.split('\n')));
-        final File outputFile = output ?? getOutputFile(metadata['id']);
+        final File outputFile = output ?? getOutputFile(metadata['id'] as String);
         stderr.writeln('Writing to ${outputFile.absolute.path}');
         outputFile.writeAsStringSync(app);
 

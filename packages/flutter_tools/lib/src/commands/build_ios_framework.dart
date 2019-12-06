@@ -166,7 +166,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
       await _produceFlutterFramework(outputDirectory, mode, iPhoneBuildOutput, simulatorBuildOutput, modeDirectory);
 
       // Build aot, create module.framework and copy.
-      await _produceAppFramework(mode, iPhoneBuildOutput, modeDirectory);
+      await _produceAppFramework(mode, iPhoneBuildOutput, simulatorBuildOutput, modeDirectory);
 
       // Build and copy plugins.
       await processPodsIfNeeded(_project.ios, getIosBuildDirectory(), mode);
@@ -254,13 +254,14 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
     status.stop();
   }
 
-  Future<void> _produceAppFramework(BuildMode mode, Directory iPhoneBuildOutput, Directory modeDirectory) async {
+  Future<void> _produceAppFramework(BuildMode mode, Directory iPhoneBuildOutput, Directory simulatorBuildOutput, Directory modeDirectory) async {
     const String appFrameworkName = 'App.framework';
     final Directory destinationAppFrameworkDirectory = modeDirectory.childDirectory(appFrameworkName);
+    destinationAppFrameworkDirectory.createSync(recursive: true);
 
     if (mode == BuildMode.debug) {
       final Status status = logger.startProgress(' ├─Add placeholder App.framework for debug...', timeout: timeoutConfiguration.fastOperation);
-      await createStubAppFramework(destinationAppFrameworkDirectory);
+      await _produceStubAppFrameworkIfNeeded(mode, iPhoneBuildOutput, simulatorBuildOutput, destinationAppFrameworkDirectory);
       status.stop();
     } else {
       await _produceAotAppFrameworkIfNeeded(mode, iPhoneBuildOutput, destinationAppFrameworkDirectory);
@@ -283,6 +284,37 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
     status.stop();
   }
 
+  Future<void> _produceStubAppFrameworkIfNeeded(BuildMode mode, Directory iPhoneBuildOutput, Directory simulatorBuildOutput, Directory destinationAppFrameworkDirectory) async {
+    if (mode != BuildMode.debug) {
+      return;
+    }
+    const String appFrameworkName = 'App.framework';
+    const String binaryName = 'App';
+
+    final Directory iPhoneAppFrameworkDirectory = iPhoneBuildOutput.childDirectory(appFrameworkName);
+    final File iPhoneAppFrameworkFile = iPhoneAppFrameworkDirectory.childFile(binaryName);
+    await createStubAppFramework(iPhoneAppFrameworkFile, SdkType.iPhone);
+
+    final Directory simulatorAppFrameworkDirectory = simulatorBuildOutput.childDirectory(appFrameworkName);
+    final File simulatorAppFrameworkFile = simulatorAppFrameworkDirectory.childFile(binaryName);
+    await createStubAppFramework(simulatorAppFrameworkFile, SdkType.iPhoneSimulator);
+
+    final List<String> lipoCommand = <String>[
+      'xcrun',
+      'lipo',
+      '-create',
+      iPhoneAppFrameworkFile.path,
+      simulatorAppFrameworkFile.path,
+      '-output',
+      destinationAppFrameworkDirectory.childFile(binaryName).path
+    ];
+
+    await processUtils.run(
+      lipoCommand,
+      allowReentrantFlutter: false,
+    );
+  }
+
   Future<void> _produceAotAppFrameworkIfNeeded(BuildMode mode, Directory iPhoneBuildOutput, Directory destinationAppFrameworkDirectory) async {
     if (mode == BuildMode.debug) {
       return;
@@ -295,6 +327,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
       // Relative paths show noise in the compiler https://github.com/dart-lang/sdk/issues/37978.
       mainDartFile: fs.path.absolute(targetFile),
       quiet: true,
+      bitcode: true,
       reportTimings: false,
       iosBuildArchs: <DarwinArch>[DarwinArch.armv7, DarwinArch.arm64],
       dartDefines: dartDefines,

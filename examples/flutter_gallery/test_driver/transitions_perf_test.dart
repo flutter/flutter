@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert' show JsonEncoder, JsonDecoder;
+import 'dart:convert' show JsonEncoder, json;
 
 import 'package:file/file.dart';
 import 'package:file/local.dart';
@@ -69,14 +69,14 @@ Future<void> saveDurationsHistogram(List<Map<String, dynamic>> events, String ou
 
   // Save the duration of the first frame after each 'Start Transition' event.
   for (Map<String, dynamic> event in events) {
-    final String eventName = event['name'];
+    final String eventName = event['name'] as String;
     if (eventName == 'Start Transition') {
       assert(startEvent == null);
       startEvent = event;
     } else if (startEvent != null && eventName == 'Frame') {
-      final String routeName = startEvent['args']['to'];
+      final String routeName = startEvent['args']['to'] as String;
       durations[routeName] ??= <int>[];
-      durations[routeName].add(event['dur']);
+      durations[routeName].add(event['dur'] as int);
       startEvent = null;
     }
   }
@@ -101,13 +101,13 @@ Future<void> saveDurationsHistogram(List<Map<String, dynamic>> events, String ou
     String lastEventName = '';
     String lastRouteName = '';
     while (eventIter.moveNext()) {
-      final String eventName = eventIter.current['name'];
+      final String eventName = eventIter.current['name'] as String;
 
       if (!<String>['Start Transition', 'Frame'].contains(eventName))
         continue;
 
       final String routeName = eventName == 'Start Transition'
-        ? eventIter.current['args']['to']
+        ? eventIter.current['args']['to'] as String
         : '';
 
       if (eventName == lastEventName && routeName == lastRouteName) {
@@ -192,7 +192,7 @@ void main([List<String> args = const <String>[]]) {
       }
 
       // See _handleMessages() in transitions_perf.dart.
-      _allDemos = List<String>.from(const JsonDecoder().convert(await driver.requestData('demoNames')));
+      _allDemos = List<String>.from(json.decode(await driver.requestData('demoNames')) as List<dynamic>);
       if (_allDemos.isEmpty)
         throw 'no demo names found';
     });
@@ -221,7 +221,7 @@ void main([List<String> args = const <String>[]]) {
       await summary.writeSummaryToFile('transitions', pretty: true);
       final String histogramPath = path.join(testOutputsDirectory, 'transition_durations.timeline.json');
       await saveDurationsHistogram(
-          List<Map<String, dynamic>>.from(timeline.json['traceEvents']),
+          List<Map<String, dynamic>>.from(timeline.json['traceEvents'] as List<dynamic>),
           histogramPath);
 
       // Execute the remaining tests.

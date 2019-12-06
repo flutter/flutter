@@ -30,9 +30,9 @@ class ElevationOverlay {
   ///
   /// See also:
   ///
-  ///   * [ThemeData.applyElevationOverlayColor] which controls the whether
-  ///     an overlay color will be applied to indicate elevation.
-  ///   * [overlayColor] which computes the needed overlay color.
+  ///  * [ThemeData.applyElevationOverlayColor] which controls the whether
+  ///    an overlay color will be applied to indicate elevation.
+  ///  * [overlayColor] which computes the needed overlay color.
   static Color applyOverlay(BuildContext context, Color color, double elevation) {
     final ThemeData theme = Theme.of(context);
     if (elevation > 0.0 &&
@@ -49,8 +49,8 @@ class ElevationOverlay {
   ///
   /// See also:
   ///
-  ///   * https://material.io/design/color/dark-theme.html#properties which
-  ///     specifies the exact overlay values for a given elevation.
+  ///  * https://material.io/design/color/dark-theme.html#properties which
+  ///    specifies the exact overlay values for a given elevation.
   static Color overlayColor(BuildContext context, double elevation) {
     final ThemeData theme = Theme.of(context);
     // Compute the opacity for the given elevation

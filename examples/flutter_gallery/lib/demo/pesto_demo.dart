@@ -129,7 +129,7 @@ class _RecipeGridPageState extends State<RecipeGridPage> {
               bottom: extraPadding,
             ),
             child: Center(
-              child: PestoLogo(height: logoHeight, t: t.clamp(0.0, 1.0)),
+              child: PestoLogo(height: logoHeight, t: t.clamp(0.0, 1.0) as double),
             ),
           );
         },

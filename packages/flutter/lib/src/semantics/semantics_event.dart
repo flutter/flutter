@@ -141,11 +141,13 @@ class TapSemanticEvent extends SemanticsEvent {
 /// the label of the semantics node has changed since the last live region
 /// update. iOS does not currently support this event.
 ///
+/// Deprecated. This message was never implemented, and references to it should
+/// be removed.
+///
 /// See also:
 ///
 ///  * [SemanticsFlag.liveRegion], for a description of live regions.
 ///
-/// Deprecated. This message was never implemented, and references to it should be removed.
 @Deprecated(
   'This event has never been implemented and will be removed in a future version of Flutter. References to it should be removed. '
   'This feature was deprecated after v1.12.16.'

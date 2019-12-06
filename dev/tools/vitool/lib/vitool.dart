@@ -204,7 +204,7 @@ List<SvgPath> _interpretSvgGroup(List<XmlNode> children, _Transform transform) {
   for (XmlNode node in children) {
     if (node.nodeType != XmlNodeType.ELEMENT)
       continue;
-    final XmlElement element = node;
+    final XmlElement element = node as XmlElement;
 
     if (element.name.local == 'path') {
       paths.add(SvgPath.fromElement(element).applyTransform(transform));
@@ -270,9 +270,9 @@ class FrameData {
   bool operator ==(Object other) {
     if (runtimeType != other.runtimeType)
       return false;
-    final FrameData typedOther = other;
-    return size == typedOther.size
-        && const ListEquality<SvgPath>().equals(paths, typedOther.paths);
+    return other is FrameData
+        && other.size == size
+        && const ListEquality<SvgPath>().equals(other.paths, paths);
   }
 
   @override
@@ -322,10 +322,10 @@ class SvgPath {
   bool operator ==(Object other) {
     if (runtimeType != other.runtimeType)
       return false;
-    final SvgPath typedOther = other;
-    return id == typedOther.id
-        && opacity == typedOther.opacity
-        && const ListEquality<SvgPathCommand>().equals(commands, typedOther.commands);
+    return other is SvgPath
+        && other.id == id
+        && other.opacity == opacity
+        && const ListEquality<SvgPathCommand>().equals(other.commands, commands);
   }
 
   @override
@@ -371,9 +371,9 @@ class SvgPathCommand {
   bool operator ==(Object other) {
     if (runtimeType != other.runtimeType)
       return false;
-    final SvgPathCommand typedOther = other;
-    return type == typedOther.type
-        && const ListEquality<Point<double>>().equals(points, typedOther.points);
+    return other is SvgPathCommand
+        && other.type == type
+        && const ListEquality<Point<double>>().equals(other.points, points);
   }
 
   @override
@@ -554,7 +554,7 @@ XmlElement _extractSvgElement(XmlDocument document) {
   return document.children.singleWhere(
     (XmlNode node) => node.nodeType  == XmlNodeType.ELEMENT &&
       _asElement(node).name.local == 'svg'
-  );
+  ) as XmlElement;
 }
 
-XmlElement _asElement(XmlNode node) => node;
+XmlElement _asElement(XmlNode node) => node as XmlElement;
