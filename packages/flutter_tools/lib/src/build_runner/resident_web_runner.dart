@@ -236,7 +236,7 @@ abstract class ResidentWebRunner extends ResidentRunner {
           args: <String, Object>{
             'value': platform,
           });
-      printStatus('Switched operating system to $nextPlatform');
+      printStatus('Switched operating system to $platform');
     } on vmservice.RPCError {
       return;
     }
