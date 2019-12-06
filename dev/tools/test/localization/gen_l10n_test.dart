@@ -18,15 +18,15 @@ const String defaultTemplateArbFileName = 'app_en_US.arb';
 const String defaultOutputFileString = 'output-localization-file';
 const String defaultClassNameString = 'AppLocalizations';
 const String singleMessageArbFileString = '''{
-  "title": "Stocks",
+  "title": "Title",
   "@title": {
-    "description": "Title for the Stocks application"
+    "description": "Title for the application"
   }
 }''';
 
 const String esArbFileName = 'app_es.arb';
 const String singleEsMessageArbFileString = '''{
-  "title": "Acciones"
+  "title": "Título"
 }''';
 const String singleZhMessageArbFileString = '''{
   "title": "标题"
@@ -333,9 +333,9 @@ void main() {
     test('correctly parses @@locale property in arb file', () {
       const String arbFileWithEnLocale = '''{
   "@@locale": "en",
-  "title": "Stocks",
+  "title": "Title",
   "@title": {
-    "description": "Title for the Stocks application"
+    "description": "Title for the application"
   }
 }''';
 
@@ -343,7 +343,7 @@ void main() {
   "@@locale": "zh",
   "title": "标题",
   "@title": {
-    "description": "Title for the Stocks application"
+    "description": "Title for the application"
   }
 }''';
 
@@ -499,10 +499,10 @@ void main() {
         generator.classMethods.first,
         '''  String get title {
     return Intl.message(
-      r'Stocks',
+      r'Title',
       locale: _localeName,
       name: 'title',
-      desc: r'Title for the Stocks application'
+      desc: r'Title for the application'
     );
   }
 ''');
