@@ -1037,6 +1037,7 @@ plugin2=${plugin2.path}
           '-Pflutter-root=$flutterRoot',
           '-Poutput-dir=${buildDirectory.path}',
           '-Pis-plugin=true',
+          '-PbuildNumber=1.0',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           'assembleAarRelease',
         ],
@@ -1051,6 +1052,7 @@ plugin2=${plugin2.path}
           '-Pflutter-root=$flutterRoot',
           '-Poutput-dir=${buildDirectory.path}',
           '-Pis-plugin=true',
+          '-PbuildNumber=1.0',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           'assembleAarRelease',
         ],
@@ -1649,6 +1651,7 @@ plugin2=${plugin2.path}
         project: FlutterProject.current(),
         outputDirectory: fs.directory('build/'),
         target: '',
+        buildNumber: '1.0',
       );
 
       expect(

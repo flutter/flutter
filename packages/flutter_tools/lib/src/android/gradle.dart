@@ -475,19 +475,19 @@ Future<void> buildGradleApp({
 /// * [project] is typically [FlutterProject.current()].
 /// * [androidBuildInfo] is the build configuration.
 /// * [outputDir] is the destination of the artifacts,
+/// * [buildNumber] is the build number of the output aar,
 Future<void> buildGradleAar({
   @required FlutterProject project,
   @required AndroidBuildInfo androidBuildInfo,
   @required String target,
   @required Directory outputDirectory,
-  String buildNumber,
+  @required String buildNumber,
 }) async {
   assert(project != null);
   assert(target != null);
   assert(androidBuildInfo != null);
   assert(outputDirectory != null);
 
-  buildNumber ??= '1.0';
   if (androidSdk == null) {
     exitWithNoSdkMessage();
   }

@@ -26,8 +26,8 @@ void configureProject(Project project, String outputDir) {
     // to resolve dependencies.
     project.version = project.version.replace("-SNAPSHOT", "")
 
-    if (project.property("buildNumber")) {
-        project.version = project.buildNumber
+    if (project.hasProperty("buildNumber")) {
+        project.version = project.property("buildNumber")
     }
 
     project.android.libraryVariants.all { variant ->
