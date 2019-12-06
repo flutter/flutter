@@ -104,15 +104,12 @@ ExitFunction _exitFunction = _defaultExitFunction;
 /// with [restoreExitFunction]). The default implementation delegates to
 /// `dart:io`.
 ExitFunction get exit {
-  assert(() {
-    if (_exitFunction == io.exit && io.Platform.environment['FLUTTER_TEST'] == null) {
-      throw StateError(
-        'io.exit was called with assertions active. If this is an integration test'
-        ', ensure that the environment variable FLUTTER_TEST is set '
-        'to a non-null String.');
-    }
-    return true;
-  }());
+  assert(
+    _exitFunction != io.exit || io.Platform.environment['FLUTTER_TEST'] != null,
+    'io.exit was called with assertions active. If this is an integration test, '
+    'ensure that the environment variable FLUTTER_TEST is set '
+    'to a non-null String.',
+  );
   return _exitFunction;
 }
 
