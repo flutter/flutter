@@ -1,4 +1,4 @@
-Signature: 8c948c83f6cf605f68276543397504a4
+Signature: 576dbf072c4630d253f61b4a71884bc1
 
 UNUSED LICENSES:
 
@@ -665,7 +665,6 @@ FILE: ../../../third_party/skia/src/gpu/ops/GrRegionOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrRegionOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrShadowRRectOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrShadowRRectOp.h
-FILE: ../../../third_party/skia/src/gpu/text/GrTextBlobVertexRegenerator.cpp
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkDescriptorPool.cpp
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkDescriptorPool.h
 FILE: ../../../third_party/skia/src/gpu/vk/GrVkDescriptorSet.cpp
