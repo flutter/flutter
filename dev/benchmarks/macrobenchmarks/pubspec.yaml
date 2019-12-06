@@ -90,5 +90,6 @@ flutter:
   assets:
   - packages/flutter_gallery_assets/food/butternut_squash_soup.png
   - packages/flutter_gallery_assets/food/cherry_pie.png
+  - assets/999x1000.png
 
 # PUBSPEC CHECKSUM: 4cef
