@@ -64,6 +64,15 @@ class Runner final : public fuchsia::sys::Runner {
   void SetupTraceObserver();
 #endif  // !defined(DART_PRODUCT)
 
+  // Called from SetupICU, for testing only.  Returns false on error.
+  static bool SetupICUInternal();
+  // Called from SetupICU, for testing only.  Returns false on error.
+  static bool SetupTZDataInternal();
+#if defined(FRIEND_TEST)
+  FRIEND_TEST(RunnerTest, TZData);
+  FRIEND_TEST(RunnerTZDataTest, LoadsWithoutTZDataPresent);
+#endif  // defined(FRIEND_TEST)
+
   FML_DISALLOW_COPY_AND_ASSIGN(Runner);
 };
 

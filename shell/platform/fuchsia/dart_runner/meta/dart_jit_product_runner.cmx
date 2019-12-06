@@ -4,8 +4,9 @@
   },
   "sandbox": {
     "features": [
-      "root-ssl-certificates",
-      "deprecated-ambient-replace-as-executable"
+      "config-data",
+      "deprecated-ambient-replace-as-executable",
+      "root-ssl-certificates"
     ],
     "services": [
       "fuchsia.feedback.CrashReporter",
