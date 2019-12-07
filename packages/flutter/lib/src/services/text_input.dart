@@ -38,7 +38,16 @@ const bool _kIsBrowser = identical(0, 0.0);
 ///  * [SmartQuotesType]
 ///  * <https://developer.apple.com/documentation/uikit/uitextinputtraits>
 enum SmartDashesType {
+  /// Smart dashes is disabled.
+  ///
+  /// This corresponds to the
+  /// ["no" value of UITextSmartDashesType](https://developer.apple.com/documentation/uikit/uitextsmartdashestype/no).
   disabled,
+
+  /// Smart dashes is enabled.
+  ///
+  /// This corresponds to the
+  /// ["yes" value of UITextSmartDashesType](https://developer.apple.com/documentation/uikit/uitextsmartdashestype/yes).
   enabled,
 }
 
@@ -53,7 +62,16 @@ enum SmartDashesType {
 ///  * [SmartDashesType]
 ///  * <https://developer.apple.com/documentation/uikit/uitextinputtraits>
 enum SmartQuotesType {
+  /// Smart quotes is disabled.
+  ///
+  /// This corresponds to the
+  /// ["no" value of UITextSmartQuotesType](https://developer.apple.com/documentation/uikit/uitextsmartquotestype/no).
   disabled,
+
+  /// Smart quotes is enabled.
+  ///
+  /// This corresponds to the
+  /// ["yes" value of UITextSmartQuotesType](https://developer.apple.com/documentation/uikit/uitextsmartquotestype/yes).
   enabled,
 }
 
