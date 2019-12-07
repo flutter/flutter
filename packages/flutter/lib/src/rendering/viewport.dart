@@ -512,6 +512,8 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     // Adjust the clip rect for this sliver by the overlap from the previous sliver.
     final double startOfOverlap = child.constraints.viewportMainAxisExtent - child.constraints.remainingPaintExtent;
     // We tried to subtract infinity from infinity and got NaN.
+    // This can happen when a RenderShrinkWrappingViewport is given infinite
+    // constraints.
     if (startOfOverlap.isNaN) {
       return viewportClip;
     }
