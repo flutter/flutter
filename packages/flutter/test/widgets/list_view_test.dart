@@ -16,6 +16,12 @@ class TestSliverChildListDelegate extends SliverChildListDelegate {
   void didFinishLayout(int firstIndex, int lastIndex) {
     log.add('didFinishLayout firstIndex=$firstIndex lastIndex=$lastIndex');
   }
+
+    @override
+  void collectGarbage(List<int> indexes) {
+    log.add('collectGarbage indexes=$indexes');
+    super.collectGarbage(indexes);
+  }
 }
 
 class Alive extends StatefulWidget {
@@ -364,6 +370,59 @@ void main() {
     expect(delegate.log, equals(<String>['didFinishLayout firstIndex=1 lastIndex=6']));
     delegate.log.clear();
   });
+
+  testWidgets('collectGarbage has correct indices', (WidgetTester tester) async {
+    final TestSliverChildListDelegate delegate = TestSliverChildListDelegate(
+      List<Widget>.generate(
+        20,
+        (int i) {
+          return Container(
+            child: Text('$i', textDirection: TextDirection.ltr),
+          );
+        },
+      ),
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        title: 'Pirate app',
+        home: Scaffold(
+          appBar: AppBar(
+            title: const Text('Home'),
+          ),
+          body: ListView.custom(
+            childrenDelegate: delegate,
+            itemExtent: 100.0,
+            cacheExtent: 0.0,
+          ),
+        ),
+      ),
+    );
+
+    expect(delegate.log, isEmpty);
+
+    await tester.drag(find.byType(ListView), const Offset(0.0, -600.0));
+
+    expect(delegate.log, isEmpty);
+
+    await tester.pump();
+
+    expect(
+        delegate.log, equals(<String>['collectGarbage indexes=[0, 1, 2, 3, 4, 5]']));
+
+    delegate.log.clear();
+
+    await tester.drag(find.byType(ListView), const Offset(0.0, 100.0));
+
+    expect(delegate.log, isEmpty);
+
+    await tester.pump();
+
+    expect(delegate.log,
+        equals(<String>['collectGarbage indexes=[11]']));    
+
+  });
+
 
   testWidgets('ListView automatically pad MediaQuery on axis', (WidgetTester tester) async {
     EdgeInsets innerMediaQueryPadding;
