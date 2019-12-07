@@ -11,16 +11,16 @@ class TestSliverChildListDelegate extends SliverChildListDelegate {
   TestSliverChildListDelegate(List<Widget> children) : super(children);
 
   final List<String> log = <String>[];
+  final List<String> gcLog = <String>[];
 
   @override
   void didFinishLayout(int firstIndex, int lastIndex) {
     log.add('didFinishLayout firstIndex=$firstIndex lastIndex=$lastIndex');
   }
 
-    @override
+  @override
   void collectGarbage(List<int> indexes) {
-    log.add('collectGarbage indexes=$indexes');
-    super.collectGarbage(indexes);
+    gcLog.add('collectGarbage indexes=$indexes');
   }
 }
 
@@ -399,27 +399,26 @@ void main() {
       ),
     );
 
-    expect(delegate.log, isEmpty);
+    expect(delegate.gcLog, isEmpty);
 
     await tester.drag(find.byType(ListView), const Offset(0.0, -600.0));
 
-    expect(delegate.log, isEmpty);
+    expect(delegate.gcLog, isEmpty);
 
     await tester.pump();
 
-    expect(
-        delegate.log, equals(<String>['collectGarbage indexes=[0, 1, 2, 3, 4, 5]']));
+    expect(delegate.gcLog,
+        equals(<String>['collectGarbage indexes=[0, 1, 2, 3, 4, 5]']));
 
-    delegate.log.clear();
+    delegate.gcLog.clear();
 
     await tester.drag(find.byType(ListView), const Offset(0.0, 100.0));
 
-    expect(delegate.log, isEmpty);
+    expect(delegate.gcLog, isEmpty);
 
     await tester.pump();
 
-    expect(delegate.log,
-        equals(<String>['collectGarbage indexes=[11]']));    
+    expect(delegate.gcLog, equals(<String>['collectGarbage indexes=[11]']));
 
   });
 
