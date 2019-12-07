@@ -321,8 +321,8 @@ class ImageStream extends Diagnosticable {
 /// configure it with the right [ImageStreamCompleter] when possible.
 abstract class ImageStreamCompleter extends Diagnosticable {
   final List<ImageStreamListener> _listeners = <ImageStreamListener>[];
-  ImageInfo _currentImage;
-  FlutterErrorDetails _currentError;
+  ImageInfo currentImage;
+  FlutterErrorDetails currentError;
 
   /// Whether any listeners are currently registered.
   ///
@@ -353,9 +353,9 @@ abstract class ImageStreamCompleter extends Diagnosticable {
   /// {@macro flutter.painting.imageStream.addListener}
   void addListener(ImageStreamListener listener) {
     _listeners.add(listener);
-    if (_currentImage != null) {
+    if (currentImage != null) {
       try {
-        listener.onImage(_currentImage, true);
+        listener.onImage(currentImage, true);
       } catch (exception, stack) {
         reportError(
           context: ErrorDescription('by a synchronously-called image listener'),
@@ -364,9 +364,9 @@ abstract class ImageStreamCompleter extends Diagnosticable {
         );
       }
     }
-    if (_currentError != null && listener.onError != null) {
+    if (currentError != null && listener.onError != null) {
       try {
-        listener.onError(_currentError.exception, _currentError.stack);
+        listener.onError(currentError.exception, currentError.stack);
       } catch (exception, stack) {
         FlutterError.reportError(
           FlutterErrorDetails(
@@ -396,7 +396,7 @@ abstract class ImageStreamCompleter extends Diagnosticable {
   /// Calls all the registered listeners to notify them of a new image.
   @protected
   void setImage(ImageInfo image) {
-    _currentImage = image;
+    currentImage = image;
     if (_listeners.isEmpty)
       return;
     // Make a copy to allow for concurrent modification.
@@ -451,7 +451,7 @@ abstract class ImageStreamCompleter extends Diagnosticable {
     InformationCollector informationCollector,
     bool silent = false,
   }) {
-    _currentError = FlutterErrorDetails(
+    currentError = FlutterErrorDetails(
       exception: exception,
       stack: stack,
       library: 'image resource service',
@@ -467,7 +467,7 @@ abstract class ImageStreamCompleter extends Diagnosticable {
         .toList();
 
     if (localErrorListeners.isEmpty) {
-      FlutterError.reportError(_currentError);
+      FlutterError.reportError(currentError);
     } else {
       for (ImageErrorListener errorListener in localErrorListeners) {
         try {
@@ -491,7 +491,7 @@ abstract class ImageStreamCompleter extends Diagnosticable {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder description) {
     super.debugFillProperties(description);
-    description.add(DiagnosticsProperty<ImageInfo>('current', _currentImage, ifNull: 'unresolved', showName: false));
+    description.add(DiagnosticsProperty<ImageInfo>('current', currentImage, ifNull: 'unresolved', showName: false));
     description.add(ObjectFlagProperty<List<ImageStreamListener>>(
       'listeners',
       _listeners,
