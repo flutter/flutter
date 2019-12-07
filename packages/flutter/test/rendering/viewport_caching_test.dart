@@ -7,8 +7,6 @@
 // initialize a binding, which rendering_tester will attempt to re-initialize
 // (or vice versa).
 
-import 'dart:math';
-
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -128,7 +126,7 @@ void main() {
   });
 
   test('RenderShrinkWrappingViewport describeApproximatePaintClip with infinite viewportMainAxisExtent returns finite rect', () {
-    final RenderSliver child = CustomConstraintsRenderSliver(SliverConstraints(
+    final RenderSliver child = CustomConstraintsRenderSliver(const SliverConstraints(
       axisDirection: AxisDirection.down,
       cacheOrigin: 0.0,
       crossAxisDirection: AxisDirection.left,
