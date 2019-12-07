@@ -505,16 +505,15 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   @override
   Rect describeApproximatePaintClip(RenderSliver child) {
     final Rect viewportClip = Offset.zero & size;
-    if (child.constraints.overlap == 0) {
-      return viewportClip;
-    }
-
-    // Adjust the clip rect for this sliver by the overlap from the previous sliver.
-    final double startOfOverlap = child.constraints.viewportMainAxisExtent - child.constraints.remainingPaintExtent;
-    // We tried to subtract infinity from infinity and got NaN.
-    // This can happen when a RenderShrinkWrappingViewport is given infinite
-    // constraints.
-    if (startOfOverlap.isNaN) {
+    // The child's viewportMainAxisExtent can be infinite when a
+    // RenderShrinkWrappingViewport is given infinite constraints.
+    //
+    // For example, a shrink wrapping render sliver may have infinite
+    // constraints along the viewport's main axis but still end up scrollable
+    // because of its children. In such a case, even if the overlap is non-zero,
+    // we should just use the viewportClip - the start of the overlap is at
+    // double.infinity and so it is effectively meaningless.
+    if (child.constraints.overlap == 0 || !child.constraints.viewportMainAxisExtent.isFinite) {
       return viewportClip;
     }
 
@@ -522,6 +521,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     double right = viewportClip.right;
     double top = viewportClip.top;
     double bottom = viewportClip.bottom;
+    final double startOfOverlap = child.constraints.viewportMainAxisExtent - child.constraints.remainingPaintExtent;
     final double overlapCorrection = startOfOverlap + child.constraints.overlap;
     switch (applyGrowthDirectionToAxisDirection(axisDirection, child.constraints.growthDirection)) {
       case AxisDirection.down:
