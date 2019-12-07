@@ -495,7 +495,7 @@ abstract class Device {
   /// Clean up resources allocated by device
   ///
   /// For example log readers or port forwarders.
-  void dispose() {}
+  Future<void> dispose();
 }
 
 /// Information about an application's memory usage.
@@ -639,7 +639,7 @@ abstract class DevicePortForwarder {
   Future<void> unforward(ForwardedPort forwardedPort);
 
   /// Cleanup allocated resources, like forwardedPorts
-  Future<void> dispose() async { }
+  Future<void> dispose();
 }
 
 /// Read the log for a particular device.
@@ -660,7 +660,7 @@ abstract class DeviceLogReader {
   int appPid;
 
   // Clean up resources allocated by log reader e.g. subprocesses
-  void dispose() { }
+  void dispose();
 }
 
 /// Describes an app running on the device.

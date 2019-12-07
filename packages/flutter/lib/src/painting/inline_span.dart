@@ -40,7 +40,8 @@ typedef InlineSpanVisitor = bool Function(InlineSpan span);
 /// For [PlaceholderSpan]s, [InlineSpanSemanticsInformation.placeholder] is used by default.
 ///
 /// See also:
-///   * [InlineSpan.getSemanticsInformation]
+///
+///  * [InlineSpan.getSemanticsInformation]
 @immutable
 class InlineSpanSemanticsInformation {
   /// Constructs an object that holds the text and semantics label values of an
@@ -358,8 +359,8 @@ abstract class InlineSpan extends DiagnosticableTree {
       return true;
     if (other.runtimeType != runtimeType)
       return false;
-    final InlineSpan typedOther = other;
-    return typedOther.style == style;
+    return other is InlineSpan
+        && other.style == style;
   }
 
   @override

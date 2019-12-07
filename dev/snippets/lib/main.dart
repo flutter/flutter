@@ -99,7 +99,7 @@ void main(List<String> argList) {
 
   final ArgResults args = parser.parse(argList);
 
-  if (args[_kHelpOption]) {
+  if (args[_kHelpOption] as bool) {
     stderr.writeln(parser.usage);
     exit(0);
   }
@@ -119,28 +119,30 @@ void main(List<String> argList) {
         'line, or in the INPUT environment variable.');
   }
 
-  final File input = File(args['input']);
+  final File input = File(args['input'] as String);
   if (!input.existsSync()) {
     errorExit('The input file ${input.path} does not exist.');
   }
 
   String template;
   if (snippetType == SnippetType.application) {
-    if (args[_kTemplateOption] == null || args[_kTemplateOption].isEmpty) {
+    final String templateArg = args[_kTemplateOption] as String;
+    if (templateArg == null || templateArg.isEmpty) {
       stderr.writeln(parser.usage);
       errorExit('The --$_kTemplateOption option must be specified on the command '
           'line for application snippets.');
     }
-    template = args[_kTemplateOption].toString().replaceAll(RegExp(r'.tmpl$'), '');
+    template = templateArg.replaceAll(RegExp(r'.tmpl$'), '');
   }
 
-  final String packageName = args[_kPackageOption] != null && args[_kPackageOption].isNotEmpty ? args[_kPackageOption] : null;
-  final String libraryName = args[_kLibraryOption] != null && args[_kLibraryOption].isNotEmpty ? args[_kLibraryOption] : null;
-  final String elementName = args[_kElementOption] != null && args[_kElementOption].isNotEmpty ? args[_kElementOption] : null;
-  final String serial = args[_kSerialOption] != null && args[_kSerialOption].isNotEmpty ? args[_kSerialOption] : null;
+  String emptyToNull(String value) => value?.isEmpty ?? true ? null : value;
+  final String packageName = emptyToNull(args[_kPackageOption] as String);
+  final String libraryName = emptyToNull(args[_kLibraryOption] as String);
+  final String elementName = emptyToNull(args[_kElementOption] as String);
+  final String serial = emptyToNull(args[_kSerialOption] as String);
   final List<String> id = <String>[];
   if (args[_kOutputOption] != null) {
-    id.add(path.basename(path.basenameWithoutExtension(args[_kOutputOption])));
+    id.add(path.basename(path.basenameWithoutExtension(args[_kOutputOption] as String)));
   } else {
     if (packageName != null && packageName != 'flutter') {
       id.add(packageName);
@@ -165,9 +167,9 @@ void main(List<String> argList) {
   stdout.write(generator.generate(
     input,
     snippetType,
-    showDartPad: args[_kShowDartPad],
+    showDartPad: args[_kShowDartPad] as bool,
     template: template,
-    output: args[_kOutputOption] != null ? File(args[_kOutputOption]) : null,
+    output: args[_kOutputOption] != null ? File(args[_kOutputOption] as String) : null,
     metadata: <String, Object>{
       'sourcePath': environment['SOURCE_PATH'],
       'sourceLine': environment['SOURCE_LINE'] != null

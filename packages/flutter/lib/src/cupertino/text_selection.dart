@@ -60,8 +60,8 @@ const EdgeInsets _kToolbarButtonPadding = EdgeInsets.symmetric(vertical: 10.0, h
 ///
 /// See also:
 ///
-/// * [TextSelectionControls.buildToolbar], where [CupertinoTextSelectionToolbar]
-///   will be used to build an iOS-style toolbar.
+///  * [TextSelectionControls.buildToolbar], where [CupertinoTextSelectionToolbar]
+///    will be used to build an iOS-style toolbar.
 @visibleForTesting
 class CupertinoTextSelectionToolbar extends SingleChildRenderObjectWidget {
   const CupertinoTextSelectionToolbar._({

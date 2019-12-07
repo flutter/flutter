@@ -198,9 +198,9 @@ abstract class FakeProcessManager implements ProcessManager {
       fakeCommand.duration,
       fakeCommand.onRun,
       _pid,
-      fakeCommand.stdout,
-      null, // stdin
       fakeCommand.stderr,
+      null, // stdin
+      fakeCommand.stdout,
     );
   }
 

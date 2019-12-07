@@ -177,7 +177,7 @@ class _AndroidSemanticsMatcher extends Matcher {
   @override
   Description describeMismatch(Object item, Description mismatchDescription,
       Map<Object, Object> matchState, bool verbose) {
-    return mismatchDescription.add(matchState['failure']);
+    return mismatchDescription.add(matchState['failure'] as String);
   }
 
   bool _failWithMessage(String value, Map<dynamic, dynamic> matchState) {

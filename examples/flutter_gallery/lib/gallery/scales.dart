@@ -14,8 +14,9 @@ class GalleryTextScaleValue {
   bool operator ==(dynamic other) {
     if (runtimeType != other.runtimeType)
       return false;
-    final GalleryTextScaleValue typedOther = other;
-    return scale == typedOther.scale && label == typedOther.label;
+    return other is GalleryTextScaleValue
+        && other.scale == scale
+        && other.label == label;
   }
 
   @override
