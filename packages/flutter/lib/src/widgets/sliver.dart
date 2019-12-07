@@ -185,6 +185,19 @@ abstract class SliverChildDelegate {
   /// index of the child element with associated key, null if not found.
   int findIndexByKey(Key key) => null;
 
+  /// Called after layout with the number of children that can be garbage
+  /// collected at the head and tail of the child list.
+  ///
+  /// The 'indexes' argument is the indexes of children that can be garbage
+  /// collected.
+  /// 
+  /// Children whose [SliverMultiBoxAdaptorParentData.keepAlive] property is
+  /// true will not be included into 'indexes'.
+  ///
+  /// Useful for subclasses that which to track which children can be garbage
+  /// collected.
+  void collectGarbage(List<int> indexes) { }
+  
   @override
   String toString() {
     final List<String> description = <String>[];
@@ -1379,6 +1392,10 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
     widget.delegate.didFinishLayout(firstIndex, lastIndex);
   }
 
+  @override
+  void collectGarbage(List<int> indexes){
+    widget.delegate.collectGarbage(indexes);
+  }
   int _currentlyUpdatingChildIndex;
 
   @override

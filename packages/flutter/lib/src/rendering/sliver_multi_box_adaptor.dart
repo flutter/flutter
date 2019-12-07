@@ -111,6 +111,10 @@ abstract class RenderSliverBoxChildManager {
 
   /// Called at the end of layout to indicate that layout is now complete.
   void didFinishLayout() { }
+  
+  /// Called after layout with the number of children that can be garbage
+  /// collected at the head and tail of the child list.
+  void collectGarbage(List<int> indexes) { }
 
   /// In debug mode, asserts that this manager is not expecting any
   /// modifications to the [RenderSliverMultiBoxAdaptor]'s child list.
@@ -356,7 +360,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
     });
   }
 
-  void _destroyOrCacheChild(RenderBox child) {
+  void _destroyOrCacheChild(RenderBox child, List<int> indexes) {
     final SliverMultiBoxAdaptorParentData childParentData = child.parentData as SliverMultiBoxAdaptorParentData;
     if (childParentData.keepAlive) {
       assert(!childParentData._keptAlive);
@@ -367,6 +371,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
       childParentData._keptAlive = true;
     } else {
       assert(child.parent == this);
+      indexes.add(childParentData.index);
       _childManager.removeChild(child);
       assert(child.parent == null);
     }
@@ -510,13 +515,19 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
     assert(_debugAssertChildListLocked());
     assert(childCount >= leadingGarbage + trailingGarbage);
     invokeLayoutCallback<SliverConstraints>((SliverConstraints constraints) {
+      // indexes of Children that can be garbage collected
+      List<int> indexes = [];
       while (leadingGarbage > 0) {
-        _destroyOrCacheChild(firstChild);
+        _destroyOrCacheChild(firstChild, indexes);
         leadingGarbage -= 1;
       }
       while (trailingGarbage > 0) {
-        _destroyOrCacheChild(lastChild);
+        _destroyOrCacheChild(lastChild, indexes);
         trailingGarbage -= 1;
+      }
+      if (indexes.length != 0) {
+        indexes.sort();
+        _childManager.collectGarbage(indexes);
       }
       // Ask the child manager to remove the children that are no longer being
       // kept alive. (This should cause _keepAliveBucket to change, so we have
