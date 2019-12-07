@@ -337,16 +337,12 @@ class TestGesture {
        _dispatcher = dispatcher,
        _hitTester = hitTester,
        _pointer = TestPointer(pointer, kind, device, buttons),
-       _added = false,
        _result = null;
 
   /// Dispatch a pointer down event at the given `downLocation`, caching the
   /// hit test result.
-  ///
-  /// If the pointer has not been added, an added event will be dispatched first.
-  Future<void> down(Offset downLocation) {
+  Future<void> down(Offset downLocation) async {
     return TestAsyncUtils.guard<void>(() async {
-      await _ensureAdded(location: downLocation);
       _result = _hitTester(downLocation);
       return _dispatcher(_pointer.down(downLocation), _result);
     });
@@ -354,12 +350,9 @@ class TestGesture {
 
   /// Dispatch a pointer down event at the given `downLocation`, caching the
   /// hit test result with a custom down event.
-  ///
-  /// If the pointer has not been added, an added event will be dispatched first.
-  Future<void> downWithCustomEvent(Offset downLocation, PointerDownEvent event) {
+  Future<void> downWithCustomEvent(Offset downLocation, PointerDownEvent event) async {
+    _pointer.setDownInfo(event, downLocation);
     return TestAsyncUtils.guard<void>(() async {
-      await _ensureAdded(location: downLocation);
-      _pointer.setDownInfo(event, downLocation);
       _result = _hitTester(downLocation);
       return _dispatcher(event, _result);
     });
@@ -369,22 +362,10 @@ class TestGesture {
   final HitTester _hitTester;
   final TestPointer _pointer;
   HitTestResult _result;
-  bool _added;
-
-  Future<void> _ensureAdded({ Offset location }) async {
-    if (!_added) {
-      await addPointer(location: location ?? _pointer.location);
-    }
-  }
 
   /// In a test, send a move event that moves the pointer by the given offset.
-  ///
-  /// If the pointer has not been added, and the subject event is not an added
-  /// event, an added event will be dispatched first.
   @visibleForTesting
-  Future<void> updateWithCustomEvent(PointerEvent event, { Duration timeStamp = Duration.zero }) async {
-    if (event is! PointerAddedEvent)
-      await _ensureAdded(location: event.position);
+  Future<void> updateWithCustomEvent(PointerEvent event, { Duration timeStamp = Duration.zero }) {
     _pointer.setDownInfo(event, event.position);
     return TestAsyncUtils.guard<void>(() {
       return _dispatcher(event, _result);
@@ -392,33 +373,20 @@ class TestGesture {
   }
 
   /// In a test, send a pointer add event for this pointer.
-  ///
-  /// If a pointer has been added, the pointer will be removed first.
   Future<void> addPointer({ Duration timeStamp = Duration.zero, Offset location }) {
-    return TestAsyncUtils.guard<void>(() async {
-      if (_added) {
-        await removePointer(timeStamp: timeStamp);
-      }
-      _added = true;
+    return TestAsyncUtils.guard<void>(() {
       return _dispatcher(_pointer.addPointer(timeStamp: timeStamp, location: location ?? _pointer.location), null);
     });
   }
 
   /// In a test, send a pointer remove event for this pointer.
-  ///
-  /// If no pointer has been added, the call will be a no-op.
   Future<void> removePointer({ Duration timeStamp = Duration.zero, Offset location }) {
-    return TestAsyncUtils.guard<void>(() async {
-      if (!_added)
-        return;
-      _added = false;
-      await _dispatcher(_pointer.removePointer(timeStamp: timeStamp, location: location ?? _pointer.location), null);
+    return TestAsyncUtils.guard<void>(() {
+      return _dispatcher(_pointer.removePointer(timeStamp: timeStamp, location: location ?? _pointer.location), null);
     });
   }
 
   /// Send a move event moving the pointer by the given offset.
-  ///
-  /// If the pointer has not been added, an added event will be dispatched first.
   ///
   /// If the pointer is down, then a move event is dispatched. If the pointer is
   /// up, then a hover event is dispatched. Touch devices are not able to send
@@ -429,14 +397,11 @@ class TestGesture {
 
   /// Send a move event moving the pointer to the given location.
   ///
-  /// If the pointer has not been added, an added event will be dispatched first.
-  ///
   /// If the pointer is down, then a move event is dispatched. If the pointer is
   /// up, then a hover event is dispatched. Touch devices are not able to send
   /// hover events.
   Future<void> moveTo(Offset location, { Duration timeStamp = Duration.zero }) {
-    return TestAsyncUtils.guard<void>(() async {
-      await _ensureAdded(location: location);
+    return TestAsyncUtils.guard<void>(() {
       if (_pointer._isDown) {
         assert(_result != null,
             'Move events with the pointer down must be preceded by a down '
@@ -451,11 +416,8 @@ class TestGesture {
   }
 
   /// End the gesture by releasing the pointer.
-  ///
-  /// If the pointer has not been added, an added event will be dispatched first.
   Future<void> up() {
     return TestAsyncUtils.guard<void>(() async {
-      await _ensureAdded();
       assert(_pointer._isDown);
       await _dispatcher(_pointer.up(), _result);
       assert(!_pointer._isDown);
@@ -466,11 +428,8 @@ class TestGesture {
   /// End the gesture by canceling the pointer (as would happen if the
   /// system showed a modal dialog on top of the Flutter application,
   /// for instance).
-  ///
-  /// If the pointer has not been added, an added event will be dispatched first.
   Future<void> cancel() {
     return TestAsyncUtils.guard<void>(() async {
-      await _ensureAdded();
       assert(_pointer._isDown);
       await _dispatcher(_pointer.cancel(), _result);
       assert(!_pointer._isDown);
