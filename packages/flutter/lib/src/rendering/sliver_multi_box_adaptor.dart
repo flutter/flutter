@@ -111,7 +111,7 @@ abstract class RenderSliverBoxChildManager {
 
   /// Called at the end of layout to indicate that layout is now complete.
   void didFinishLayout() { }
-  
+
   /// Called after layout with the number of children that can be garbage
   /// collected at the head and tail of the child list.
   void collectGarbage(List<int> indexes) {}

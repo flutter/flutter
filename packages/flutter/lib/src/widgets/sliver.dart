@@ -195,7 +195,7 @@ abstract class SliverChildDelegate {
   /// Useful for subclasses that which to track which children can be garbage
   /// collected.
   void collectGarbage(List<int> indexes) {}
-  
+
   @override
   String toString() {
     final List<String> description = <String>[];
