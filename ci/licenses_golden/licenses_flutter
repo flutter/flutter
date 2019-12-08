@@ -1061,6 +1061,7 @@ FILE: ../../../flutter/shell/platform/fuchsia/runtime/dart/utils/vmservice_objec
 FILE: ../../../flutter/shell/platform/fuchsia/runtime/dart/utils/vmservice_object.h
 FILE: ../../../flutter/shell/platform/glfw/client_wrapper/flutter_window_controller.cc
 FILE: ../../../flutter/shell/platform/glfw/client_wrapper/flutter_window_controller_unittests.cc
+FILE: ../../../flutter/shell/platform/glfw/client_wrapper/flutter_window_unittests.cc
 FILE: ../../../flutter/shell/platform/glfw/client_wrapper/include/flutter/flutter_window.h
 FILE: ../../../flutter/shell/platform/glfw/client_wrapper/include/flutter/flutter_window_controller.h
 FILE: ../../../flutter/shell/platform/glfw/client_wrapper/include/flutter/plugin_registrar_glfw.h

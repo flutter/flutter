@@ -107,6 +107,14 @@ void FlutterDesktopWindowSetFrame(FlutterDesktopWindowRef flutter_window,
   }
 }
 
+void FlutterDesktopWindowSetSizeLimits(FlutterDesktopWindowRef flutter_window,
+                                       FlutterDesktopSize minimum_size,
+                                       FlutterDesktopSize maximum_size) {
+  if (s_stub_implementation) {
+    s_stub_implementation->SetSizeLimits(minimum_size, maximum_size);
+  }
+}
+
 double FlutterDesktopWindowGetScaleFactor(
     FlutterDesktopWindowRef flutter_window) {
   if (s_stub_implementation) {
