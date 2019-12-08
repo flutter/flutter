@@ -142,7 +142,7 @@ void main() {
     await tester.pumpWidget(wrap(
       child: expandIcon
     ));
-    
+
     final ExpandIcon icon = tester.firstWidget(find.byWidget(expandIcon));
     expect(icon.size, 24);
   });
@@ -156,7 +156,7 @@ void main() {
     await tester.pumpWidget(wrap(
       child: expandIcon
     ));
-    
+
     ExpandIcon icon = tester.firstWidget(find.byWidget(expandIcon));
     expect(icon.size, 36);
 
