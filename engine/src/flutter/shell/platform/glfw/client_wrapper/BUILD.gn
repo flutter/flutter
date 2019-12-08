@@ -75,6 +75,7 @@ executable("client_wrapper_glfw_unittests") {
   # TODO: Add more unit tests.
   sources = [
     "flutter_window_controller_unittests.cc",
+    "flutter_window_unittests.cc",
   ]
 
   deps = [

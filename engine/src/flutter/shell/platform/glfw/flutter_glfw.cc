@@ -34,6 +34,8 @@ using UniqueGLFWwindowPtr = std::unique_ptr<GLFWwindow, void (*)(GLFWwindow*)>;
 
 static_assert(FLUTTER_ENGINE_VERSION == 1, "");
 
+const int kFlutterDesktopDontCare = GLFW_DONT_CARE;
+
 static constexpr double kDpPerInch = 160.0;
 
 // Struct for storing state within an instance of the GLFW Window.
@@ -734,6 +736,14 @@ void FlutterDesktopWindowSetPixelRatioOverride(
     auto* state = GetSavedWindowState(flutter_window->window);
     SendWindowMetrics(state, width_px, height_px);
   }
+}
+
+void FlutterDesktopWindowSetSizeLimits(FlutterDesktopWindowRef flutter_window,
+                                       FlutterDesktopSize minimum_size,
+                                       FlutterDesktopSize maximum_size) {
+  glfwSetWindowSizeLimits(flutter_window->window, minimum_size.width,
+                          minimum_size.height, maximum_size.width,
+                          maximum_size.height);
 }
 
 bool FlutterDesktopRunWindowEventLoopWithTimeout(

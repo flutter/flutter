@@ -68,6 +68,10 @@ class StubFlutterGlfwApi {
   // Called for FlutterDesktopWindowSetPixelRatioOverride.
   virtual void SetPixelRatioOverride(double pixel_ratio) {}
 
+  // Called for FlutterDesktopWindowSetSizeLimits.
+  virtual void SetSizeLimits(FlutterDesktopSize minimum_size,
+                             FlutterDesktopSize maximum_size) {}
+
   // Called for FlutterDesktopRunWindowEventLoopWithTimeout.
   virtual bool RunWindowEventLoopWithTimeout(uint32_t millisecond_timeout) {
     return true;
