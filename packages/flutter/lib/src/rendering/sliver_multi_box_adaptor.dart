@@ -516,7 +516,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
     assert(childCount >= leadingGarbage + trailingGarbage);
     invokeLayoutCallback<SliverConstraints>((SliverConstraints constraints) {
       // indexes of Children that can be garbage collected
-      List<int> indexes = [];
+      final List<int> indexes = <int>[];
       while (leadingGarbage > 0) {
         _destroyOrCacheChild(firstChild, indexes);
         leadingGarbage -= 1;
@@ -525,7 +525,7 @@ abstract class RenderSliverMultiBoxAdaptor extends RenderSliver
         _destroyOrCacheChild(lastChild, indexes);
         trailingGarbage -= 1;
       }
-      if (indexes.length != 0) {
+      if (indexes.isNotEmpty) {
         indexes.sort();
         _childManager.collectGarbage(indexes);
       }
