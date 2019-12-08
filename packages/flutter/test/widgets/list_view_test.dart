@@ -417,7 +417,6 @@ void main() {
 
   });
 
-
   testWidgets('ListView automatically pad MediaQuery on axis', (WidgetTester tester) async {
     EdgeInsets innerMediaQueryPadding;
 

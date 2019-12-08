@@ -189,14 +189,12 @@ abstract class SliverChildDelegate {
   /// collected at the head and tail of the child list.
   ///
   /// The 'indexes' argument is the indexes of children that can be garbage
-  /// collected.
-  /// 
-  /// Children whose [SliverMultiBoxAdaptorParentData.keepAlive] property is
-  /// true will not be included into 'indexes'.
+  /// collected. Children whose [SliverMultiBoxAdaptorParentData.keepAlive]
+  /// property is true will not be included into 'indexes'.
   ///
   /// Useful for subclasses that which to track which children can be garbage
   /// collected.
-  void collectGarbage(List<int> indexes) { }
+  void collectGarbage(List<int> indexes) {}
   
   @override
   String toString() {

@@ -114,7 +114,7 @@ abstract class RenderSliverBoxChildManager {
   
   /// Called after layout with the number of children that can be garbage
   /// collected at the head and tail of the child list.
-  void collectGarbage(List<int> indexes) { }
+  void collectGarbage(List<int> indexes) {}
 
   /// In debug mode, asserts that this manager is not expecting any
   /// modifications to the [RenderSliverMultiBoxAdaptor]'s child list.
