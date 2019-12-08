@@ -384,17 +384,12 @@ void main() {
     );
 
     await tester.pumpWidget(
-      MaterialApp(
-        title: 'Pirate app',
-        home: Scaffold(
-          appBar: AppBar(
-            title: const Text('Home'),
-          ),
-          body: ListView.custom(
-            childrenDelegate: delegate,
-            itemExtent: 100.0,
-            cacheExtent: 0.0,
-          ),
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: ListView.custom(
+          childrenDelegate: delegate,
+          itemExtent: 100.0,
+          cacheExtent: 0.0,
         ),
       ),
     );
