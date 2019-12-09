@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -184,7 +184,7 @@ class PageController extends ScrollController {
       'The page property cannot be read when multiple PageViews are attached to '
       'the same PageController.',
     );
-    final _PagePosition position = this.position;
+    final _PagePosition position = this.position as _PagePosition;
     return position.page;
   }
 
@@ -199,7 +199,7 @@ class PageController extends ScrollController {
     @required Duration duration,
     @required Curve curve,
   }) {
-    final _PagePosition position = this.position;
+    final _PagePosition position = this.position as _PagePosition;
     return position.animateTo(
       position.getPixelsFromPage(page.toDouble()),
       duration: duration,
@@ -212,7 +212,7 @@ class PageController extends ScrollController {
   /// Jumps the page position from its current value to the given value,
   /// without animation, and without checking if the new value is in range.
   void jumpToPage(int page) {
-    final _PagePosition position = this.position;
+    final _PagePosition position = this.position as _PagePosition;
     position.jumpTo(position.getPixelsFromPage(page.toDouble()));
   }
 
@@ -251,7 +251,7 @@ class PageController extends ScrollController {
   @override
   void attach(ScrollPosition position) {
     super.attach(position);
-    final _PagePosition pagePosition = position;
+    final _PagePosition pagePosition = position as _PagePosition;
     pagePosition.viewportFraction = viewportFraction;
   }
 }
@@ -345,8 +345,16 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
       forcePixels(getPixelsFromPage(oldPage));
   }
 
+  // The amount of offset that will be added to [minScrollExtent] and subtracted
+  // from [maxScrollExtent], such that every page will properly snap to the center
+  // of the viewport when viewportFraction is greater than 1.
+  //
+  // The value is 0 if viewportFraction is less than or equal to 1, larger than 0
+  // otherwise.
+  double get _initialPageOffset => math.max(0, viewportDimension * (viewportFraction - 1) / 2);
+
   double getPageFromPixels(double pixels, double viewportDimension) {
-    final double actual = math.max(0.0, pixels) / math.max(1.0, viewportDimension * viewportFraction);
+    final double actual = math.max(0.0, pixels - _initialPageOffset) / math.max(1.0, viewportDimension * viewportFraction);
     final double round = actual.roundToDouble();
     if ((actual - round).abs() < precisionErrorTolerance) {
       return round;
@@ -355,7 +363,7 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
   }
 
   double getPixelsFromPage(double page) {
-    return page * viewportDimension * viewportFraction;
+    return page * viewportDimension * viewportFraction + _initialPageOffset;
   }
 
   @override
@@ -364,7 +372,7 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
       pixels == null || (minScrollExtent != null && maxScrollExtent != null),
       'Page value is only available after content dimensions are established.',
     );
-    return pixels == null ? null : getPageFromPixels(pixels.clamp(minScrollExtent, maxScrollExtent), viewportDimension);
+    return pixels == null ? null : getPageFromPixels(pixels.clamp(minScrollExtent, maxScrollExtent) as double, viewportDimension);
   }
 
   @override
@@ -375,7 +383,7 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
   @override
   void restoreScrollOffset() {
     if (pixels == null) {
-      final double value = PageStorage.of(context.storageContext)?.readState(context.storageContext);
+      final double value = PageStorage.of(context.storageContext)?.readState(context.storageContext) as double;
       if (value != null)
         _pageToUseOnStartup = value;
     }
@@ -394,6 +402,15 @@ class _PagePosition extends ScrollPositionWithSingleContext implements PageMetri
       return false;
     }
     return result;
+  }
+
+  @override
+  bool applyContentDimensions(double minScrollExtent, double maxScrollExtent) {
+    final double newMinScrollExtent = minScrollExtent + _initialPageOffset;
+    return super.applyContentDimensions(
+      newMinScrollExtent,
+      math.max(newMinScrollExtent, maxScrollExtent - _initialPageOffset),
+    );
   }
 
   @override
@@ -482,7 +499,7 @@ class PageScrollPhysics extends ScrollPhysics {
         (velocity >= 0.0 && position.pixels >= position.maxScrollExtent))
       return super.createBallisticSimulation(position, velocity);
     final Tolerance tolerance = this.tolerance;
-    final double target = _getTargetPixels(position, tolerance, velocity);
+    final double target = _getTargetPixels(position as ScrollPosition, tolerance, velocity);
     if (target != position.pixels)
       return ScrollSpringSimulation(spring, position.pixels, target, velocity, tolerance: tolerance);
     return null;
@@ -789,7 +806,7 @@ class _PageViewState extends State<PageView> {
     return NotificationListener<ScrollNotification>(
       onNotification: (ScrollNotification notification) {
         if (notification.depth == 0 && widget.onPageChanged != null && notification is ScrollUpdateNotification) {
-          final PageMetrics metrics = notification.metrics;
+          final PageMetrics metrics = notification.metrics as PageMetrics;
           final int currentPage = metrics.page.round();
           if (currentPage != _lastReportedPage) {
             _lastReportedPage = currentPage;

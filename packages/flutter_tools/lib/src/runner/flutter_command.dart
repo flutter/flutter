@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -173,9 +173,10 @@ abstract class FlutterCommand extends Command<void> {
     return bundle.defaultMainPath;
   }
 
-  void usesPubOption() {
+  void usesPubOption({bool hide = false}) {
     argParser.addFlag('pub',
       defaultsTo: true,
+      hide: hide,
       help: 'Whether to run "flutter pub get" before executing this command.');
     _usesPubOption = true;
   }

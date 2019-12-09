@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -129,10 +129,10 @@ class CustomSemanticsAction {
   bool operator ==(dynamic other) {
     if (other.runtimeType != runtimeType)
       return false;
-    final CustomSemanticsAction typedOther = other;
-    return typedOther.label == label
-      && typedOther.hint == hint
-      && typedOther.action == action;
+    return other is CustomSemanticsAction
+        && other.label == label
+        && other.hint == hint
+        && other.action == action;
   }
 
   @override
@@ -422,32 +422,30 @@ class SemanticsData extends Diagnosticable {
 
   @override
   bool operator ==(dynamic other) {
-    if (other is! SemanticsData)
-      return false;
-    final SemanticsData typedOther = other;
-    return typedOther.flags == flags
-        && typedOther.actions == actions
-        && typedOther.label == label
-        && typedOther.value == value
-        && typedOther.increasedValue == increasedValue
-        && typedOther.decreasedValue == decreasedValue
-        && typedOther.hint == hint
-        && typedOther.textDirection == textDirection
-        && typedOther.rect == rect
-        && setEquals(typedOther.tags, tags)
-        && typedOther.scrollChildCount == scrollChildCount
-        && typedOther.scrollIndex == scrollIndex
-        && typedOther.textSelection == textSelection
-        && typedOther.scrollPosition == scrollPosition
-        && typedOther.scrollExtentMax == scrollExtentMax
-        && typedOther.scrollExtentMin == scrollExtentMin
-        && typedOther.platformViewId == platformViewId
-        && typedOther.maxValueLength == maxValueLength
-        && typedOther.currentValueLength == currentValueLength
-        && typedOther.transform == transform
-        && typedOther.elevation == elevation
-        && typedOther.thickness == thickness
-        && _sortedListsEqual(typedOther.customSemanticsActionIds, customSemanticsActionIds);
+    return other is SemanticsData
+        && other.flags == flags
+        && other.actions == actions
+        && other.label == label
+        && other.value == value
+        && other.increasedValue == increasedValue
+        && other.decreasedValue == decreasedValue
+        && other.hint == hint
+        && other.textDirection == textDirection
+        && other.rect == rect
+        && setEquals(other.tags, tags)
+        && other.scrollChildCount == scrollChildCount
+        && other.scrollIndex == scrollIndex
+        && other.textSelection == textSelection
+        && other.scrollPosition == scrollPosition
+        && other.scrollExtentMax == scrollExtentMax
+        && other.scrollExtentMin == scrollExtentMin
+        && other.platformViewId == platformViewId
+        && other.maxValueLength == maxValueLength
+        && other.currentValueLength == currentValueLength
+        && other.transform == transform
+        && other.elevation == elevation
+        && other.thickness == thickness
+        && _sortedListsEqual(other.customSemanticsActionIds, customSemanticsActionIds);
   }
 
   @override
@@ -564,9 +562,9 @@ class SemanticsHintOverrides extends DiagnosticableTree {
   bool operator ==(dynamic other) {
     if (other.runtimeType != runtimeType)
       return false;
-    final SemanticsHintOverrides typedOther = other;
-    return typedOther.onTapHint == onTapHint
-      && typedOther.onLongPressHint == onLongPressHint;
+    return other is SemanticsHintOverrides
+        && other.onTapHint == onTapHint
+        && other.onLongPressHint == onLongPressHint;
   }
 
   @override
@@ -788,12 +786,10 @@ class SemanticsProperties extends DiagnosticableTree {
 
   /// If non-null, whether the node should be considered a live region.
   ///
-  /// On Android, when a live region semantics node is first created TalkBack
-  /// will make a polite announcement of the current label. This announcement
-  /// occurs even if the node is not focused. Subsequent polite announcements
-  /// can be made by sending a [UpdateLiveRegionEvent] semantics event. The
-  /// announcement will only be made if the node's label has changed since the
-  /// last update.
+  /// On Android, when the label changes on a live region semantics node,
+  /// TalkBack will make a polite announcement of the current label. This
+  /// announcement occurs even if the node is not focused, but only if the label
+  /// has changed since the last update.
   ///
   /// On iOS, no announcements are made but the node is marked as
   /// `UIAccessibilityTraitUpdatesFrequently`.
@@ -807,7 +803,6 @@ class SemanticsProperties extends DiagnosticableTree {
   ///
   ///  * [SemanticsFlag.liveRegion], the semantics flag this setting controls.
   ///  * [SemanticsConfiguration.liveRegion], for a full description of a live region.
-  ///  * [UpdateLiveRegionEvent], to trigger a polite announcement of a live region.
   final bool liveRegion;
 
   /// The maximum number of characters that can be entered into an editable
@@ -1503,10 +1498,10 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   // AbstractNode OVERRIDES
 
   @override
-  SemanticsOwner get owner => super.owner;
+  SemanticsOwner get owner => super.owner as SemanticsOwner;
 
   @override
-  SemanticsNode get parent => super.parent;
+  SemanticsNode get parent => super.parent as SemanticsNode;
 
   @override
   void redepthChildren() {
@@ -2779,11 +2774,11 @@ class SemanticsConfiguration {
   /// so in the form of explicit [SemanticsNode]s.
   ///
   /// When set to false children of the owning [RenderObject] are allowed to
-  /// annotate [SemanticNode]s of their parent with the semantic information
+  /// annotate [SemanticsNode]s of their parent with the semantic information
   /// they want to contribute to the semantic tree.
   /// When set to true the only way for children of the owning [RenderObject]
   /// to contribute semantic information to the semantic tree is to introduce
-  /// new explicit [SemanticNode]s to the tree.
+  /// new explicit [SemanticsNode]s to the tree.
   ///
   /// This setting is often used in combination with [isSemanticBoundary] to
   /// create semantic boundaries that are either writable or not for children.
@@ -2807,7 +2802,7 @@ class SemanticsConfiguration {
   bool isBlockingSemanticsOfPreviouslyPaintedNodes = false;
 
   // SEMANTIC ANNOTATIONS
-  // These will end up on [SemanticNode]s generated from
+  // These will end up on [SemanticsNode]s generated from
   // [SemanticsConfiguration]s.
 
   /// Whether this configuration is empty.
@@ -3083,7 +3078,7 @@ class SemanticsConfiguration {
   set onMoveCursorForwardByCharacter(MoveCursorHandler value) {
     assert(value != null);
     _addAction(SemanticsAction.moveCursorForwardByCharacter, (dynamic args) {
-      final bool extentSelection = args;
+      final bool extentSelection = args as bool;
       assert(extentSelection != null);
       value(extentSelection);
     });
@@ -3102,7 +3097,7 @@ class SemanticsConfiguration {
   set onMoveCursorBackwardByCharacter(MoveCursorHandler value) {
     assert(value != null);
     _addAction(SemanticsAction.moveCursorBackwardByCharacter, (dynamic args) {
-      final bool extentSelection = args;
+      final bool extentSelection = args as bool;
       assert(extentSelection != null);
       value(extentSelection);
     });
@@ -3121,7 +3116,7 @@ class SemanticsConfiguration {
   set onMoveCursorForwardByWord(MoveCursorHandler value) {
     assert(value != null);
     _addAction(SemanticsAction.moveCursorForwardByWord, (dynamic args) {
-      final bool extentSelection = args;
+      final bool extentSelection = args as bool;
       assert(extentSelection != null);
       value(extentSelection);
     });
@@ -3140,7 +3135,7 @@ class SemanticsConfiguration {
   set onMoveCursorBackwardByWord(MoveCursorHandler value) {
     assert(value != null);
     _addAction(SemanticsAction.moveCursorBackwardByWord, (dynamic args) {
-      final bool extentSelection = args;
+      final bool extentSelection = args as bool;
       assert(extentSelection != null);
       value(extentSelection);
     });
@@ -3160,7 +3155,7 @@ class SemanticsConfiguration {
     assert(value != null);
     _addAction(SemanticsAction.setSelection, (dynamic args) {
       assert(args != null && args is Map);
-      final Map<String, int> selection = args.cast<String, int>();
+      final Map<String, int> selection = (args as Map<dynamic, dynamic>).cast<String, int>();
       assert(selection != null && selection['base'] != null && selection['extent'] != null);
       value(TextSelection(
         baseOffset: selection['base'],
@@ -3359,7 +3354,7 @@ class SemanticsConfiguration {
   }
 
   void _onCustomSemanticsAction(dynamic args) {
-    final CustomSemanticsAction action = CustomSemanticsAction.getAction(args);
+    final CustomSemanticsAction action = CustomSemanticsAction.getAction(args as int);
     if (action == null)
       return;
     final VoidCallback callback = _customSemanticsActions[action];
@@ -3522,12 +3517,10 @@ class SemanticsConfiguration {
 
   /// Whether the semantics node is a live region.
   ///
-  /// On Android, when a live region semantics node is first created TalkBack
-  /// will make a polite announcement of the current label. This announcement
-  /// occurs even if the node is not focused. Subsequent polite announcements
-  /// can be made by sending a [UpdateLiveRegionEvent] semantics event. The
-  /// announcement will only be made if the node's label has changed since the
-  /// last update.
+  /// On Android, when the label changes on a live region semantics node,
+  /// TalkBack will make a polite announcement of the current label. This
+  /// announcement occurs even if the node is not focused, but only if the label
+  /// has changed since the last update.
   ///
   /// An example of a live region is the [Snackbar] widget. When it appears
   /// on the screen it may be difficult to focus to read the label. A live
@@ -4013,7 +4006,7 @@ String _concatStrings({
 /// nodes, it is recommended to either use comparable keys for all nodes, or
 /// use null for all of them, leaving the sort order to the default algorithm.
 ///
-/// See Also:
+/// See also:
 ///
 ///  * [OrdinalSortKey] for a sort key that sorts using an ordinal.
 abstract class SemanticsSortKey extends Diagnosticable implements Comparable<SemanticsSortKey> {

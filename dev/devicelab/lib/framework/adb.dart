@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -128,8 +128,8 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
   /// [workingDevice].
   @override
   Future<void> chooseWorkingDevice() async {
-    final List<Device> allDevices = (await discoverDevices())
-      .map<Device>((String id) => AndroidDevice(deviceId: id))
+    final List<AndroidDevice> allDevices = (await discoverDevices())
+      .map<AndroidDevice>((String id) => AndroidDevice(deviceId: id))
       .toList();
 
     if (allDevices.isEmpty)

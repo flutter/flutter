@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -59,9 +59,11 @@ class ChromeDevice extends Device {
   @override
   void clearLogs() { }
 
+  DeviceLogReader _logReader;
+
   @override
   DeviceLogReader getLogReader({ApplicationPackage app}) {
-    return NoOpDeviceLogReader(app?.name);
+    return _logReader ??= NoOpDeviceLogReader(app?.name);
   }
 
   @override
@@ -160,6 +162,12 @@ class ChromeDevice extends Device {
   bool isSupportedForProject(FlutterProject flutterProject) {
     return flutterProject.web.existsSync();
   }
+
+  @override
+  Future<void> dispose() async {
+    _logReader?.dispose();
+    await portForwarder?.dispose();
+  }
 }
 
 class WebDevices extends PollingDeviceDiscovery {
@@ -206,9 +214,11 @@ class WebServerDevice extends Device {
   @override
   Future<String> get emulatorId => null;
 
+  DeviceLogReader _logReader;
+
   @override
   DeviceLogReader getLogReader({ApplicationPackage app}) {
-    return NoOpDeviceLogReader(app.name);
+    return _logReader ??= NoOpDeviceLogReader(app.name);
   }
 
   @override
@@ -270,5 +280,11 @@ class WebServerDevice extends Device {
   @override
   Future<bool> uninstallApp(ApplicationPackage app) async {
     return true;
+  }
+
+  @override
+  Future<void> dispose() async {
+    _logReader?.dispose();
+    await portForwarder?.dispose();
   }
 }

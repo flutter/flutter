@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -12,6 +12,7 @@ import 'package:vector_math/vector_math_64.dart';
 import 'binding.dart';
 import 'box.dart';
 import 'debug.dart';
+import 'layer.dart';
 import 'object.dart';
 import 'viewport.dart';
 import 'viewport_offset.dart';
@@ -452,18 +453,18 @@ class SliverConstraints extends Constraints {
       return true;
     if (other is! SliverConstraints)
       return false;
-    final SliverConstraints typedOther = other;
-    assert(typedOther.debugAssertIsValid());
-    return typedOther.axisDirection == axisDirection
-        && typedOther.growthDirection == growthDirection
-        && typedOther.scrollOffset == scrollOffset
-        && typedOther.overlap == overlap
-        && typedOther.remainingPaintExtent == remainingPaintExtent
-        && typedOther.crossAxisExtent == crossAxisExtent
-        && typedOther.crossAxisDirection == crossAxisDirection
-        && typedOther.viewportMainAxisExtent == viewportMainAxisExtent
-        && typedOther.remainingCacheExtent == remainingCacheExtent
-        && typedOther.cacheOrigin == cacheOrigin;
+    assert(other is SliverConstraints && other.debugAssertIsValid());
+    return other is SliverConstraints
+        && other.axisDirection == axisDirection
+        && other.growthDirection == growthDirection
+        && other.scrollOffset == scrollOffset
+        && other.overlap == overlap
+        && other.remainingPaintExtent == remainingPaintExtent
+        && other.crossAxisExtent == crossAxisExtent
+        && other.crossAxisDirection == crossAxisDirection
+        && other.viewportMainAxisExtent == viewportMainAxisExtent
+        && other.remainingCacheExtent == remainingCacheExtent
+        && other.cacheOrigin == cacheOrigin;
   }
 
   @override
@@ -870,7 +871,7 @@ class SliverHitTestEntry extends HitTestEntry {
        super(target);
 
   @override
-  RenderSliver get target => super.target;
+  RenderSliver get target => super.target as RenderSliver;
 
   /// The distance in the [AxisDirection] from the edge of the sliver's painted
   /// area (as given by the [SliverConstraints.scrollOffset]) to the hit point.
@@ -998,6 +999,8 @@ List<DiagnosticsNode> _debugCompareFloats(String labelA, double valueA, String l
 /// or reappearing at different offsets based on the user's scroll direction
 /// ([SliverConstraints.userScrollDirection]).
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=Mz3kHQxBjGg}
+///
 /// ## Writing a RenderSliver subclass
 ///
 /// Slivers can have sliver children, or children from another coordinate
@@ -1108,7 +1111,7 @@ List<DiagnosticsNode> _debugCompareFloats(String labelA, double valueA, String l
 abstract class RenderSliver extends RenderObject {
   // layout input
   @override
-  SliverConstraints get constraints => super.constraints;
+  SliverConstraints get constraints => super.constraints as SliverConstraints;
 
   /// The amount of space this sliver occupies.
   ///
@@ -1325,7 +1328,7 @@ abstract class RenderSliver extends RenderObject {
     final double a = constraints.scrollOffset;
     final double b = constraints.scrollOffset + constraints.remainingPaintExtent;
     // the clamp on the next line is to avoid floating point rounding errors
-    return (to.clamp(a, b) - from.clamp(a, b)).clamp(0.0, constraints.remainingPaintExtent);
+    return (to.clamp(a, b) - from.clamp(a, b)).clamp(0.0, constraints.remainingPaintExtent) as double;
   }
 
   /// Computes the portion of the region from `from` to `to` that is within
@@ -1341,7 +1344,7 @@ abstract class RenderSliver extends RenderObject {
     final double a = constraints.scrollOffset + constraints.cacheOrigin;
     final double b = constraints.scrollOffset + constraints.remainingCacheExtent;
     // the clamp on the next line is to avoid floating point rounding errors
-    return (to.clamp(a, b) - from.clamp(a, b)).clamp(0.0, constraints.remainingCacheExtent);
+    return (to.clamp(a, b) - from.clamp(a, b)).clamp(0.0, constraints.remainingCacheExtent) as double;
   }
 
   /// Returns the distance from the leading _visible_ edge of the sliver to the
@@ -1717,7 +1720,7 @@ abstract class RenderSliverSingleBoxAdapter extends RenderSliver with RenderObje
   /// [SliverConstraints.growthDirection] and the given geometry.
   @protected
   void setChildParentData(RenderObject child, SliverConstraints constraints, SliverGeometry geometry) {
-    final SliverPhysicalParentData childParentData = child.parentData;
+    final SliverPhysicalParentData childParentData = child.parentData as SliverPhysicalParentData;
     assert(constraints.axisDirection != null);
     assert(constraints.growthDirection != null);
     switch (applyGrowthDirectionToAxisDirection(constraints.axisDirection, constraints.growthDirection)) {
@@ -1754,14 +1757,14 @@ abstract class RenderSliverSingleBoxAdapter extends RenderSliver with RenderObje
   void applyPaintTransform(RenderObject child, Matrix4 transform) {
     assert(child != null);
     assert(child == this.child);
-    final SliverPhysicalParentData childParentData = child.parentData;
+    final SliverPhysicalParentData childParentData = child.parentData as SliverPhysicalParentData;
     childParentData.applyPaintTransform(transform);
   }
 
   @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null && geometry.visible) {
-      final SliverPhysicalParentData childParentData = child.parentData;
+      final SliverPhysicalParentData childParentData = child.parentData as SliverPhysicalParentData;
       context.paintChild(child, offset + childParentData.paintOffset);
     }
   }
@@ -1943,7 +1946,7 @@ class RenderSliverOpacity extends RenderSliver with RenderObjectWithChildMixin<R
         offset,
         _alpha,
         _paintWithOpacity,
-        oldLayer: layer,
+        oldLayer: layer as OpacityLayer,
       );
     }
   }
@@ -1951,7 +1954,7 @@ class RenderSliverOpacity extends RenderSliver with RenderObjectWithChildMixin<R
   @override
   void applyPaintTransform(RenderObject child, Matrix4 transform) {
     assert(child != null);
-    final SliverPhysicalParentData childParentData = child.parentData;
+    final SliverPhysicalParentData childParentData = child.parentData as SliverPhysicalParentData;
     childParentData.applyPaintTransform(transform);
   }
 
@@ -2065,7 +2068,7 @@ class RenderSliverIgnorePointer extends RenderSliver with RenderObjectWithChildM
   @override
   void applyPaintTransform(RenderObject child, Matrix4 transform) {
     assert(child != null);
-    final SliverPhysicalParentData childParentData = child.parentData;
+    final SliverPhysicalParentData childParentData = child.parentData as SliverPhysicalParentData;
     childParentData.applyPaintTransform(transform);
   }
 
@@ -2172,7 +2175,7 @@ class RenderSliverOffstage extends RenderSliver with RenderObjectWithChildMixin<
   @override
   void applyPaintTransform(RenderObject child, Matrix4 transform) {
     assert(child != null);
-    final SliverPhysicalParentData childParentData = child.parentData;
+    final SliverPhysicalParentData childParentData = child.parentData as SliverPhysicalParentData;
     childParentData.applyPaintTransform(transform);
   }
 
