@@ -46,12 +46,7 @@ Future<void> getPackages(String folder) async {
     'pub',
     'get',
   ];
-  final ProcessResult result = await processManager.run(command,
-    workingDirectory: folder,
-    environment: <String, String>{
-    'FLUTTER_TEST': 'true'
-    },
-  );
+  final ProcessResult result = await processManager.run(command, workingDirectory: folder);
   if (result.exitCode != 0) {
     throw Exception('flutter pub get failed: ${result.stderr}\n${result.stdout}');
   }
