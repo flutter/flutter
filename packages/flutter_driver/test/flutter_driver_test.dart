@@ -858,20 +858,6 @@ void main() {
       });
     });
 
-    group('waitUntilFirstFrameRasterized', () {
-      test('sends the waitUntilFirstFrameRasterized command', () async {
-        when(mockConnection.sendCommand(any, any)).thenAnswer((Invocation i) async {
-          final String script = _checkAndEncode(i.positionalArguments[0]);
-          expect(Map<String, String>.from(jsonDecode(script) as Map), <String, String>{
-            'command': 'waitForCondition',
-            'conditionName': 'FirstFrameRasterizedCondition',
-          });
-          return jsonEncode(await makeMockResponse(<String, dynamic>{}));
-        });
-        await driver.waitUntilFirstFrameRasterized();
-      });
-    });
-
     group('getOffset', () {
       test('requires a target reference', () async {
         expect(driver.getCenter(null), throwsA(isInstanceOf<DriverError>()));
@@ -1010,6 +996,11 @@ void main() {
 
       test('getVmFlags', () async {
         expect(driver.getVmFlags(),
+            throwsA(isInstanceOf<UnimplementedError>()));
+      });
+
+      test('waitUntilFirstFrameRasterized', () async {
+        expect(driver.waitUntilFirstFrameRasterized(),
             throwsA(isInstanceOf<UnimplementedError>()));
       });
     });

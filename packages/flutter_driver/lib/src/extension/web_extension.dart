@@ -1,4 +1,4 @@
-// Copyright 2019 The Flutter Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -8,10 +8,16 @@ import 'dart:html' as html;
 import 'dart:js';
 import 'dart:js_util' as js_util;
 
+/// The dart:html implementation of [registerWebServiceExtension].
+///
 /// Registers Web Service Extension for Flutter Web application.
 ///
 /// window.$flutterDriver will be called by Flutter Web Driver to process
 /// Flutter Command.
+///
+/// See also:
+///
+///  * [io_extension.dart], which has the dart:io implemeantion
 void registerWebServiceExtension(Future<Map<String, dynamic>> Function(Map<String, String>) call) {
   js_util.setProperty(html.window, '\$flutterDriver', allowInterop((dynamic message) async {
     // ignore: undefined_function, undefined_identifier

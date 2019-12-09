@@ -97,7 +97,8 @@ abstract class FlutterDriver {
     return VMServiceFlutterDriver.connectedTo(serviceClient, peer, appIsolate);
   }
 
-  ///
+  /// Default constructor.
+  @visibleForTesting
   FlutterDriver();
 
   /// Connects to a Flutter application.
@@ -125,6 +126,10 @@ abstract class FlutterDriver {
   /// `isolateNumber` is set, as this is already enough information to connect
   /// to an isolate.
   ///
+  /// `browser` specifies which FlutterDriver implementation to use. If not
+  /// speicifed or set to false, [VMServiceFlutterDriver] implementation
+  /// will be used. Otherwise, [WebFlutterDriver] implementation will be used.
+  ///
   /// The return value is a future. This method never times out, though it may
   /// fail (completing with an error). A timeout can be applied by the caller
   /// using [Future.timeout] if necessary.
@@ -151,8 +156,12 @@ abstract class FlutterDriver {
   }
 
   /// Sends [command] to the Flutter Driver extensions.
-  /// This must be implemented by subclass. Check vmservice_driver and
-  /// web_driver for reference.
+  /// This must be implemented by subclass.
+  ///
+  /// See also:
+  ///
+  ///  * [VMServiceFlutterDriver], which uses vmservice to implement.
+  ///  * [WebFlutterDriver], which uses webdriver to implement.
   Future<Map<String, dynamic>> sendCommand(Command command);
 
   /// Checks the status of the Flutter Driver extension.
@@ -197,6 +206,8 @@ abstract class FlutterDriver {
   ///
   /// Use this method to wait for the first frame to be rasterized during the
   /// app launch.
+  ///
+  /// Throws [UnimplementedError] on [WebFlutterDriver] instances.
   Future<void> waitUntilFirstFrameRasterized() async {
     await sendCommand(const WaitForCondition(FirstFrameRasterized()));
   }
@@ -560,7 +571,7 @@ abstract class FlutterDriver {
   ///
   /// [getFlagList]: https://github.com/dart-lang/sdk/blob/master/runtime/vm/service/service.md#getflaglist
   ///
-  /// Calling this function on WebFlutterDriver will throw unimplemented error.
+  /// Throws [UnimplementedError] on [WebFlutterDriver] instances.
   Future<List<Map<String, dynamic>>> getVmFlags();
 
   /// Starts recording performance traces.
@@ -569,7 +580,7 @@ abstract class FlutterDriver {
   /// operation exceeds the specified timeout; it does not actually cancel the
   /// operation.
   ///
-  /// For WebFlutterDriver, this is only supported for Chrome.
+  /// For [WebFlutterDriver], this is only supported for Chrome.
   Future<void> startTracing({
     List<TimelineStream> streams = const <TimelineStream>[TimelineStream.all],
     Duration timeout = kUnusuallyLongTimeout,
@@ -581,7 +592,7 @@ abstract class FlutterDriver {
   /// operation exceeds the specified timeout; it does not actually cancel the
   /// operation.
   ///
-  /// For WebFlutterDriver, this is only supported for Chrome.
+  /// For [WebFlutterDriver], this is only supported for Chrome.
   Future<Timeline> stopTracingAndDownloadTimeline({
     Duration timeout = kUnusuallyLongTimeout,
   });
@@ -604,7 +615,7 @@ abstract class FlutterDriver {
   /// If this is run in debug mode, a warning message will be printed to suggest
   /// running the benchmark in profile mode instead.
   ///
-  /// For WebFlutterDriver, this is only supported for Chrome.
+  /// For [WebFlutterDriver], this is only supported for Chrome.
   Future<Timeline> traceAction(
     Future<dynamic> action(), {
     List<TimelineStream> streams = const <TimelineStream>[TimelineStream.all],
@@ -617,7 +628,7 @@ abstract class FlutterDriver {
   /// operation exceeds the specified timeout; it does not actually cancel the
   /// operation.
   ///
-  /// For WebFlutterDriver, this is only supported for Chrome.
+  /// For [WebFlutterDriver], this is only supported for Chrome.
   Future<void> clearTimeline({
     Duration timeout = kUnusuallyLongTimeout,
   });
@@ -651,7 +662,7 @@ abstract class FlutterDriver {
 
   /// Force a garbage collection run in the VM.
   ///
-  /// Calling this function on WebFlutterDriver will throw unimplemented error.
+  /// Throws [UnimplementedError] on [WebFlutterDriver] instances.
   Future<void> forceGC();
 
   /// Closes the underlying connection to the VM service.
