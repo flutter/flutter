@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/context.dart';
+import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/run.dart';
@@ -55,7 +56,7 @@ void main() {
       }
     });
 
-    group('cache', () {
+    group('run app', () {
       MemoryFileSystem fs;
       MockArtifacts mockArtifacts;
       MockCache mockCache;
@@ -86,7 +87,37 @@ void main() {
         when(mockDeviceManager.hasSpecifiedAllDevices).thenReturn(false);
       });
 
-      testUsingContext('updates before checking for devices', () async {
+      testUsingContext('exits with a user message when no supported devices attached', () async {
+        final RunCommand command = RunCommand();
+        applyMocksToCommand(command);
+
+        const List<Device> noDevices = <Device>[];
+        when(mockDeviceManager.getDevices()).thenAnswer(
+          (Invocation invocation) => Stream<Device>.fromIterable(noDevices)
+        );
+        when(mockDeviceManager.findTargetDevices(any)).thenAnswer(
+          (Invocation invocation) => Future<List<Device>>.value(noDevices)
+        );
+
+        try {
+          await createTestCommandRunner(command).run(<String>[
+            'run',
+            '--no-pub',
+            '--no-hot',
+          ]);
+          fail('Expect exception');
+        } on ToolExit catch (e) {
+          expect(e.message, null);
+        }
+
+        expect(testLogger.statusText, contains(userMessages.flutterNoSupportedDevices));
+      }, overrides: <Type, Generator>{
+        DeviceManager: () => mockDeviceManager,
+        FileSystem: () => fs,
+        ProcessManager: () => mockProcessManager,
+      });
+
+      testUsingContext('updates cache before checking for devices', () async {
         final RunCommand command = RunCommand();
         applyMocksToCommand(command);
 
@@ -100,7 +131,6 @@ void main() {
           (Invocation invocation) => Future<List<Device>>.value(<Device>[])
         );
 
-        ToolExit toolExit;
         try {
           await createTestCommandRunner(command).run(<String>[
             'run',
@@ -108,13 +138,11 @@ void main() {
           ]);
           fail('Exception expected');
         } on ToolExit catch (e) {
-          toolExit = e;
+          // We expect a ToolExit because no devices are attached
+          expect(e.message, null);
         } catch (e) {
           fail('ToolExit expected');
         }
-
-        // We expect a ToolExit because no devices are attached
-        expect(toolExit.message, null);
 
         verifyInOrder(<void>[
           // cache update
