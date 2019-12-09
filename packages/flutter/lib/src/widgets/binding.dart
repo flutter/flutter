@@ -327,6 +327,8 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
       );
 
       // Register the ability to quickly mark elements as dirty.
+      // The performance of this method may be improved with additional
+      // information from https://github.com/flutter/flutter/issues/46195.
       registerServiceExtension(
         name: 'fastReassemble',
         callback: (Map<String, Object> params) async {
