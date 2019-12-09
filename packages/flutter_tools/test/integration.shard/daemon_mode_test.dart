@@ -29,9 +29,6 @@ void main() {
     final Process process = await processManager.start(
       <String>[flutterBin, '--show-test-device', 'daemon'],
       workingDirectory: tempDir.path,
-      environment: <String, String>{
-        'FLUTTER_TEST': 'true',
-      }
     );
 
     final StreamController<String> stdout = StreamController<String>.broadcast();
