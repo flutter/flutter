@@ -53,10 +53,11 @@ class SkCanvas {
     bool useCenter,
     ui.Paint paint,
   ) {
+    const double toDegrees = 180 / math.pi;
     skCanvas.callMethod('drawArc', <dynamic>[
       makeSkRect(oval),
-      startAngle,
-      sweepAngle,
+      startAngle * toDegrees,
+      sweepAngle * toDegrees,
       useCenter,
       makeSkPaint(paint),
     ]);
