@@ -513,7 +513,7 @@ tasks:
     description: >
       Screenshot tests running on iPhone 6s.
     stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios"]
+    required_agent_capabilities: ["mac/ios, ios/gl-render-image"]
     #TODO(cyanglaz): The flaky flag is added because it is the first screenshot test we added.
     # Remove the flaky flag when we are sure the test is stable.
     flaky: true
