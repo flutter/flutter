@@ -80,6 +80,10 @@ typedef EvaluatorFunction = dynamic Function();
 
 /// Drives a Flutter Application running in another process.
 abstract class FlutterDriver {
+  /// Default constructor.
+  @visibleForTesting
+  FlutterDriver();
+
   /// Creates a driver that uses a connection provided by either the combination
   /// of [webConnection] and [browser], or the combination of [serviceClient],
   /// [peer] and [appIsolate]
@@ -96,10 +100,6 @@ abstract class FlutterDriver {
     }
     return VMServiceFlutterDriver.connectedTo(serviceClient, peer, appIsolate);
   }
-
-  /// Default constructor.
-  @visibleForTesting
-  FlutterDriver();
 
   /// Connects to a Flutter application.
   ///

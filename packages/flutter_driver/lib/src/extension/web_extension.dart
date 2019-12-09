@@ -22,7 +22,7 @@ void registerWebServiceExtension(Future<Map<String, dynamic>> Function(Map<Strin
   js_util.setProperty(html.window, '\$flutterDriver', allowInterop((dynamic message) async {
     // ignore: undefined_function, undefined_identifier
     final Map<String, String> params = Map<String, String>.from(
-        jsonDecode(message as String) as Map);
+        jsonDecode(message as String) as Map<String, dynamic>);
     final Map<String, dynamic> result = Map<String, dynamic>.from(
         await call(params));
     context['\$flutterDriverResult'] = json.encode(result);

@@ -2,15 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:webdriver/sync_io.dart' as sync;
+import 'package:meta/meta.dart';
+import 'package:webdriver/sync_io.dart' as sync_io;
 
 import '../common/error.dart';
 
+/// A list of supported browsers
 enum Browser {
+  /// Chrome: https://www.google.com/chrome/
   chrome,
+  /// Edge: https://www.microsoft.com/en-us/windows/microsoft-edge
   edge,
+  /// Firefox: https://www.mozilla.org/en-US/firefox/
   firefox,
+  /// Safari in iOS: https://www.apple.com/safari/
   iosSafari,
+  /// Safari in macOS: https://www.apple.com/safari/
   safari,
 }
 
@@ -27,7 +34,7 @@ Browser browserNameToEnum(String browserName){
 }
 
 /// Creates a WebDriver instance with the given [settings].
-sync.WebDriver createDriver(Map<String, dynamic> settings) {
+sync_io.WebDriver createDriver(Map<String, dynamic> settings) {
   return _createDriver(
       settings['selenium-port'] as String,
       settings['browser'] as Browser,
@@ -35,21 +42,23 @@ sync.WebDriver createDriver(Map<String, dynamic> settings) {
   );
 }
 
-sync.WebDriver _createDriver(String seleniumPort, Browser browser, bool headless) {
-  return sync.createDriver(
+sync_io.WebDriver _createDriver(String seleniumPort, Browser browser, bool headless) {
+  return sync_io.createDriver(
       uri: Uri.parse('http://localhost:$seleniumPort/wd/hub/'),
-      desired: _getDesiredCapabilities(browser, headless),
-      spec: browser != Browser.iosSafari ? sync.WebDriverSpec.JsonWire : sync.WebDriverSpec.W3c
+      desired: getDesiredCapabilities(browser, headless),
+      spec: browser != Browser.iosSafari ? sync_io.WebDriverSpec.JsonWire : sync_io.WebDriverSpec.W3c
   );
 }
 
-Map<String, dynamic> _getDesiredCapabilities(Browser browser, bool headless) {
+/// Returns desired capabilities for given [browser] and [headless].
+@visibleForTesting
+Map<String, dynamic> getDesiredCapabilities(Browser browser, bool headless) {
   switch (browser) {
     case Browser.chrome:
       return <String, dynamic>{
         'acceptInsecureCerts': true,
         'browserName': 'chrome',
-        'goog:loggingPrefs': <String, String>{ sync.LogType.performance: 'ALL'},
+        'goog:loggingPrefs': <String, String>{ sync_io.LogType.performance: 'ALL'},
         'chromeOptions': <String, dynamic>{
           'args': <String>[
             '--bwsi',
@@ -69,7 +78,7 @@ Map<String, dynamic> _getDesiredCapabilities(Browser browser, bool headless) {
               'v8,blink.console,benchmark,blink,'
               'blink.user_timing'
           }
-        },
+        }
       };
       break;
     case Browser.firefox:

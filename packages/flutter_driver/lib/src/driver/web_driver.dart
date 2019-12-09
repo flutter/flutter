@@ -9,7 +9,7 @@ import 'dart:math' as math;
 
 import 'package:matcher/matcher.dart';
 import 'package:meta/meta.dart';
-import 'package:webdriver/sync_io.dart' as sync;
+import 'package:webdriver/sync_io.dart' as sync_io;
 import 'package:webdriver/support/async.dart';
 
 import '../common/error.dart';
@@ -24,13 +24,13 @@ export 'web_driver_config.dart';
 class WebFlutterDriver extends FlutterDriver {
   /// Creates a driver that uses a connection provided by the given
   /// [_connection] and [_browserName].
-  @visibleForTesting
   WebFlutterDriver.connectedTo(this._connection, this._browser);
 
   final FlutterWebConnection _connection;
   final Browser _browser;
   DateTime _startTime;
 
+  /// Start time for tracing
   @visibleForTesting
   DateTime get startTime => _startTime;
 
@@ -114,7 +114,7 @@ class WebFlutterDriver extends FlutterDriver {
     }
 
     final List<Map<String, dynamic>> events = <Map<String, dynamic>>[];
-    for (sync.LogEntry entry in _connection.logs) {
+    for (sync_io.LogEntry entry in _connection.logs) {
       if (_startTime.isBefore(entry.timestamp)) {
         final Map<String, dynamic> data = jsonDecode(entry.message)['message'] as Map<String, dynamic>;
         if (data['method'] == 'Tracing.dataCollected') {
@@ -172,7 +172,7 @@ class WebFlutterDriver extends FlutterDriver {
 class FlutterWebConnection {
   FlutterWebConnection._(this._driver);
 
-  final sync.WebDriver _driver;
+  final sync_io.WebDriver _driver;
 
   /// Starts WebDriver with the given [capabilities] and
   /// establishes the connection to Flutter Web application.
@@ -182,7 +182,7 @@ class FlutterWebConnection {
       {Duration timeout}) async {
     // Use sync WebDriver because async version will create a 15 seconds
     // overhead when quitting.
-    final sync.WebDriver driver = createDriver(settings);
+    final sync_io.WebDriver driver = createDriver(settings);
     driver.get(url);
 
     // Configure WebDriver browser by setting its location and dimension.
@@ -192,7 +192,7 @@ class FlutterWebConnection {
     }
     final int x = int.parse(dimensions[0]);
     final int y = int.parse(dimensions[1]);
-    final sync.Window window = driver.window;
+    final sync_io.Window window = driver.window;
     window.setLocation(const math.Point<int>(0, 0));
     window.setSize(math.Rectangle<int>(0, 0, x, y));
 
@@ -230,7 +230,7 @@ class FlutterWebConnection {
   }
 
   /// Gets performance log from WebDriver.
-  List<sync.LogEntry> get logs => _driver.logs.get(sync.LogType.performance);
+  List<sync_io.LogEntry> get logs => _driver.logs.get(sync_io.LogType.performance);
 
   /// Takes screenshot via WebDriver.
   List<int> screenshot()  => _driver.captureScreenshotAsList();

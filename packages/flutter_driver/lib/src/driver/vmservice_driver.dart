@@ -29,7 +29,6 @@ import 'timeline.dart';
 class VMServiceFlutterDriver extends FlutterDriver {
   /// Creates a driver that uses a connection provided by the given
   /// [serviceClient], [_peer] and [appIsolate].
-  @visibleForTesting
   VMServiceFlutterDriver.connectedTo(
       this._serviceClient,
       this._peer,

@@ -691,7 +691,7 @@ void main() {
       test('finds by ValueKey', () async {
         when(mockConnection.sendCommand(any, any)).thenAnswer((Invocation i) async {
           final String script = _checkAndEncode(i.positionalArguments[0]);
-          expect(Map<String, String>.from(jsonDecode(script) as Map), <String, String>{
+          expect(Map<String, String>.from(jsonDecode(script) as Map<String, dynamic>), <String, String>{
             'command': 'tap',
             'timeout': _kSerializedTestTimeout,
             'finderType': 'ByValueKey',
@@ -708,7 +708,7 @@ void main() {
       test('finds by Semantic label using String', () async {
         when(mockConnection.sendCommand(any, any)).thenAnswer((Invocation i) async {
           final String script = _checkAndEncode(i.positionalArguments[0]);
-          expect(Map<String, String>.from(jsonDecode(script) as Map), <String, String>{
+          expect(Map<String, String>.from(jsonDecode(script) as Map<String, dynamic>), <String, String>{
             'command': 'tap',
             'timeout': _kSerializedTestTimeout,
             'finderType': 'BySemanticsLabel',
@@ -722,7 +722,7 @@ void main() {
       test('finds by Semantic label using RegExp', () async {
         when(mockConnection.sendCommand(any, any)).thenAnswer((Invocation i) async {
           final String script = _checkAndEncode(i.positionalArguments[0]);
-          expect(Map<String, String>.from(jsonDecode(script) as Map), <String, String>{
+          expect(Map<String, String>.from(jsonDecode(script) as Map<String, dynamic>), <String, String>{
             'command': 'tap',
             'timeout': _kSerializedTestTimeout,
             'finderType': 'BySemanticsLabel',
@@ -743,7 +743,7 @@ void main() {
       test('sends the tap command', () async {
         when(mockConnection.sendCommand(any, any)).thenAnswer((Invocation i) async {
           final String script = _checkAndEncode(i.positionalArguments[0]);
-          expect(Map<String, String>.from(jsonDecode(script) as Map), <String, String>{
+          expect(Map<String, String>.from(jsonDecode(script) as Map<String, dynamic>), <String, String>{
             'command': 'tap',
             'timeout': _kSerializedTestTimeout,
             'finderType': 'ByText',
@@ -763,7 +763,7 @@ void main() {
       test('sends the getText command', () async {
         when(mockConnection.sendCommand(any, any)).thenAnswer((Invocation i) async {
           final String script = _checkAndEncode(i.positionalArguments[0]);
-          expect(Map<String, String>.from(jsonDecode(script) as Map), <String, String>{
+          expect(Map<String, String>.from(jsonDecode(script) as Map<String, dynamic>), <String, String>{
             'command': 'get_text',
             'timeout': _kSerializedTestTimeout,
             'finderType': 'ByValueKey',
@@ -787,7 +787,7 @@ void main() {
       test('sends the waitFor command', () async {
         when(mockConnection.sendCommand(any, any)).thenAnswer((Invocation i) async {
           final String script = _checkAndEncode(i.positionalArguments[0]);
-          expect(Map<String, String>.from(jsonDecode(script) as Map), <String, String>{
+          expect(Map<String, String>.from(jsonDecode(script) as Map<String, dynamic>), <String, String>{
             'command': 'waitFor',
             'finderType': 'ByTooltipMessage',
             'text': 'foo',
@@ -803,7 +803,7 @@ void main() {
       test('sends the wait for NoPendingFrameCondition command', () async {
         when(mockConnection.sendCommand(any, any)).thenAnswer((Invocation i) async {
           final String script = _checkAndEncode(i.positionalArguments[0]);
-          expect(Map<String, String>.from(jsonDecode(script) as Map), <String, String>{
+          expect(Map<String, String>.from(jsonDecode(script) as Map<String, dynamic>), <String, String>{
             'command': 'waitForCondition',
             'timeout': _kSerializedTestTimeout,
             'conditionName': 'NoPendingFrameCondition',
@@ -816,7 +816,7 @@ void main() {
       test('sends the wait for NoPendingPlatformMessages command', () async {
         when(mockConnection.sendCommand(any, any)).thenAnswer((Invocation i) async {
           final String script = _checkAndEncode(i.positionalArguments[0]);
-          expect(Map<String, String>.from(jsonDecode(script) as Map), <String, String>{
+          expect(Map<String, String>.from(jsonDecode(script) as Map<String, dynamic>), <String, String>{
             'command': 'waitForCondition',
             'timeout': _kSerializedTestTimeout,
             'conditionName': 'NoPendingPlatformMessagesCondition',
@@ -829,7 +829,7 @@ void main() {
       test('sends the waitForCondition of combined conditions command', () async {
         when(mockConnection.sendCommand(any, any)).thenAnswer((Invocation i) async {
           final String script = _checkAndEncode(i.positionalArguments[0]);
-          expect(Map<String, String>.from(jsonDecode(script) as Map), <String, String>{
+          expect(Map<String, String>.from(jsonDecode(script) as Map<String, dynamic>), <String, String>{
             'command': 'waitForCondition',
             'timeout': _kSerializedTestTimeout,
             'conditionName': 'CombinedCondition',
@@ -847,7 +847,7 @@ void main() {
       test('sends the waitUntilNoTransientCallbacks command', () async {
         when(mockConnection.sendCommand(any, any)).thenAnswer((Invocation i) async {
           final String script = _checkAndEncode(i.positionalArguments[0]);
-          expect(Map<String, String>.from(jsonDecode(script) as Map), <String, String>{
+          expect(Map<String, String>.from(jsonDecode(script) as Map<String, dynamic>), <String, String>{
             'command': 'waitForCondition',
             'timeout': _kSerializedTestTimeout,
             'conditionName': 'NoTransientCallbacksCondition',
@@ -870,7 +870,7 @@ void main() {
       test('sends the getCenter command', () async {
         when(mockConnection.sendCommand(any, any)).thenAnswer((Invocation i) async {
           final String script = _checkAndEncode(i.positionalArguments[0]);
-          expect(Map<String, String>.from(jsonDecode(script) as Map), <String, String>{
+          expect(Map<String, String>.from(jsonDecode(script) as Map<String, dynamic>), <String, String>{
             'command': 'get_offset',
             'offsetType': 'center',
             'timeout': _kSerializedTestTimeout,
@@ -890,7 +890,7 @@ void main() {
       test('sends the getTopLeft command', () async {
         when(mockConnection.sendCommand(any, any)).thenAnswer((Invocation i) async {
           final String script = _checkAndEncode(i.positionalArguments[0]);
-          expect(Map<String, String>.from(jsonDecode(script) as Map), <String, String>{
+          expect(Map<String, String>.from(jsonDecode(script) as Map<String, dynamic>), <String, String>{
             'command': 'get_offset',
             'offsetType': 'topLeft',
             'timeout': _kSerializedTestTimeout,
@@ -910,7 +910,7 @@ void main() {
       test('sends the getTopRight command', () async {
         when(mockConnection.sendCommand(any, any)).thenAnswer((Invocation i) async {
           final String script = _checkAndEncode(i.positionalArguments[0]);
-          expect(Map<String, String>.from(jsonDecode(script) as Map), <String, String>{
+          expect(Map<String, String>.from(jsonDecode(script) as Map<String, dynamic>), <String, String>{
             'command': 'get_offset',
             'offsetType': 'topRight',
             'timeout': _kSerializedTestTimeout,
@@ -930,7 +930,7 @@ void main() {
       test('sends the getBottomLeft command', () async {
         when(mockConnection.sendCommand(any, any)).thenAnswer((Invocation i) async {
           final String script = _checkAndEncode(i.positionalArguments[0]);
-          expect(Map<String, String>.from(jsonDecode(script) as Map), <String, String>{
+          expect(Map<String, String>.from(jsonDecode(script) as Map<String, dynamic>), <String, String>{
             'command': 'get_offset',
             'offsetType': 'bottomLeft',
             'timeout': _kSerializedTestTimeout,
@@ -950,7 +950,7 @@ void main() {
       test('sends the getBottomRight command', () async {
         when(mockConnection.sendCommand(any, any)).thenAnswer((Invocation i) async {
           final String script = _checkAndEncode(i.positionalArguments[0]);
-          expect(Map<String, String>.from(jsonDecode(script) as Map), <String, String>{
+          expect(Map<String, String>.from(jsonDecode(script) as Map<String, dynamic>), <String, String>{
             'command': 'get_offset',
             'offsetType': 'bottomRight',
             'timeout': _kSerializedTestTimeout,
@@ -971,7 +971,7 @@ void main() {
     test('checks the health of the driver extension', () async {
       when(mockConnection.sendCommand(any, any)).thenAnswer((Invocation i) async {
         final String script = _checkAndEncode(i.positionalArguments[0]);
-        expect(Map<String, String>.from(jsonDecode(script) as Map), <String, String>{
+        expect(Map<String, String>.from(jsonDecode(script) as Map<String, dynamic>), <String, String>{
           'command': 'get_health',
         });
         return jsonEncode(await makeMockResponse(<String, dynamic>{'status': 'ok'}));
@@ -1016,7 +1016,7 @@ void main() {
     });
 
     test('tracing', () async {
-      expect(driver.traceAction(() {}),
+      expect(driver.traceAction(() async { return Future<dynamic>.value(); }),
           throwsA(isInstanceOf<UnimplementedError>()));
       expect(driver.startTracing(),
           throwsA(isInstanceOf<UnimplementedError>()));

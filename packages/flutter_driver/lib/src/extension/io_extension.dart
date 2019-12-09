@@ -6,7 +6,7 @@
 ///
 /// See also:
 ///
-///  * [web_extension.dart], which has the dart:html implemeantion
+///  * [web_extension.dart], which has the dart:html implementation
 void registerWebServiceExtension(Future<Map<String, dynamic>> Function(Map<String, String>) call) {
   throw UnsupportedError('Use registerServiceExtension instead');
 }
