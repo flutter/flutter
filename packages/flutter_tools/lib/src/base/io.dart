@@ -105,21 +105,21 @@ ExitFunction _exitFunction = _defaultExitFunction;
 /// with [restoreExitFunction]). The default implementation delegates to
 /// `dart:io`.
 ExitFunction get exit {
-  assert(() {
-    if (_exitFunction == io.exit) {
-      try {
-        expect(true, true);
-      } on StateError {
-        // If we catch a StateError, then we were not in a unit test.
-        return true;
-      }
-      return false;
-    }
-    return true;
-  }(),
+  assert(_exitFunction != io.exit || !_inUnitTest(),
     'io.exit was called with assertions active in a unit test'
   );
   return _exitFunction;
+}
+
+// Whether the tool is executing in a unit test.
+bool _inUnitTest() {
+  try {
+    expect(true, true);
+  } on StateError {
+    // If a StateError is caught, then this is not a unit test.
+    return false;
+  }
+  return true;
 }
 
 /// Sets the [exit] function to a function that throws an exception rather
