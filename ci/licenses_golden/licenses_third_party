@@ -1,4 +1,4 @@
-Signature: 6daeaf1ba161a771918102a7ef9c0889
+Signature: 3c0bee0502d504a936b8199a32b4caad
 
 UNUSED LICENSES:
 
@@ -7555,6 +7555,7 @@ FILE: ../../../third_party/dart/runtime/bin/entrypoints_verification_test_extens
 FILE: ../../../third_party/dart/runtime/bin/entrypoints_verification_test_extension_dllmain_win.cc
 FILE: ../../../third_party/dart/runtime/bin/ffi_test/ffi_test_dynamic_library.cc
 FILE: ../../../third_party/dart/runtime/bin/ffi_test/ffi_test_functions.cc
+FILE: ../../../third_party/dart/runtime/bin/ffi_test/ffi_test_functions_vmspecific.cc
 FILE: ../../../third_party/dart/runtime/bin/ifaddrs-android.cc
 FILE: ../../../third_party/dart/runtime/bin/ifaddrs-android.h
 FILE: ../../../third_party/dart/runtime/bin/namespace_fuchsia.h
