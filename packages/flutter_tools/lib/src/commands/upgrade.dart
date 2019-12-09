@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -52,11 +52,6 @@ class UpgradeCommand extends FlutterCommand {
   bool get shouldUpdateCache => false;
 
   @override
-  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
-    DevelopmentArtifact.universal,
-  };
-
-  @override
   Future<FlutterCommandResult> runCommand() async {
     await _commandRunner.runCommand(
       boolArg('force'),
@@ -67,7 +62,6 @@ class UpgradeCommand extends FlutterCommand {
     return null;
   }
 }
-
 
 @visibleForTesting
 class UpgradeCommandRunner {
@@ -122,8 +116,14 @@ class UpgradeCommandRunner {
     }
     await resetChanges(gitTagVersion);
     await upgradeChannel(flutterVersion);
-    await attemptFastForward();
-    await flutterUpgradeContinue();
+    final bool alreadyUpToDate = await attemptFastForward(flutterVersion);
+    if (alreadyUpToDate) {
+      // If the upgrade was a no op, then do not continue with the second half.
+      printStatus('Flutter is already up to date on channel ${flutterVersion.channel}');
+      printStatus('$flutterVersion');
+    } else {
+      await flutterUpgradeContinue();
+    }
   }
 
   Future<void> flutterUpgradeContinue() async {
@@ -194,11 +194,12 @@ class UpgradeCommandRunner {
     }
   }
 
-  /// Attempts to reset to the last known tag or branch. This should restore the
-  /// history to something that is compatible with the regular upgrade
-  /// process.
+  /// Attempts to reset to the last non-hotfix tag.
+  ///
+  /// If the git history is on a hotfix, doing a fast forward will not pick up
+  /// major or minor version upgrades. By resetting to the point before the
+  /// hotfix, doing a git fast forward should succeed.
   Future<void> resetChanges(GitTagVersion gitTagVersion) async {
-    // We only got here by using --force.
     String tag;
     if (gitTagVersion == const GitTagVersion.unknown()) {
       tag = 'v0.0.0';
@@ -234,7 +235,10 @@ class UpgradeCommandRunner {
   ///
   /// If there haven't been any hot fixes or local changes, this is equivalent
   /// to a fast-forward.
-  Future<void> attemptFastForward() async {
+  ///
+  /// If the fast forward lands us on the same channel and revision, then
+  /// returns true, otherwise returns false.
+  Future<bool> attemptFastForward(FlutterVersion oldFlutterVersion) async {
     final int code = await processUtils.stream(
       <String>['git', 'pull', '--ff'],
       workingDirectory: Cache.flutterRoot,
@@ -243,6 +247,17 @@ class UpgradeCommandRunner {
     if (code != 0) {
       throwToolExit(null, exitCode: code);
     }
+
+    // Check if the upgrade did anything.
+    bool alreadyUpToDate = false;
+    try {
+      final FlutterVersion newFlutterVersion = FlutterVersion();
+      alreadyUpToDate = newFlutterVersion.channel == oldFlutterVersion.channel &&
+        newFlutterVersion.frameworkRevision == oldFlutterVersion.frameworkRevision;
+    } catch (e) {
+      printTrace('Failed to determine FlutterVersion after upgrade fast-forward: $e');
+    }
+    return alreadyUpToDate;
   }
 
   /// Update the engine repository and precache all artifacts.

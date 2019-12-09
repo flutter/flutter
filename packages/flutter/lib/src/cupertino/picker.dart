@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -26,7 +26,7 @@ const double _kForegroundScreenOpacityFraction = 0.7;
 /// Displays its children widgets on a wheel for selection and
 /// calls back when the currently selected item changes.
 ///
-/// By default, the first child in [children] will be the initially selected child.
+/// By default, the first child in `children` will be the initially selected child.
 /// The index of a different child can be specified in [scrollController], to make
 /// that child the initially selected child.
 ///
@@ -230,6 +230,7 @@ class _CupertinoPickerState extends State<CupertinoPicker> {
         break;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
+      case TargetPlatform.macOS:
         hasSuitableHapticHardware = false;
         break;
     }

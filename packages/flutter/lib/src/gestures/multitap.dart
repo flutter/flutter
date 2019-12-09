@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -144,8 +144,8 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
   /// Called when the user has tapped the screen with a primary button at the
   /// same location twice in quick succession.
   ///
-  /// This triggers when the pointer stops contacting the device after the 2nd tap,
-  /// immediately after [onDoubleTapUp].
+  /// This triggers when the pointer stops contacting the device after the
+  /// second tap.
   ///
   /// See also:
   ///

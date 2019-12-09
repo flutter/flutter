@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -50,9 +50,9 @@ class ImageInfo {
   bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
-    final ImageInfo typedOther = other;
-    return typedOther.image == image
-        && typedOther.scale == scale;
+    return other is ImageInfo
+        && other.image == image
+        && other.scale == scale;
   }
 }
 
@@ -119,10 +119,10 @@ class ImageStreamListener {
   bool operator ==(dynamic other) {
     if (other.runtimeType != runtimeType)
       return false;
-    final ImageStreamListener typedOther = other;
-    return onImage == typedOther.onImage
-        && onChunk == typedOther.onChunk
-        && onError == typedOther.onError;
+    return other is ImageStreamListener
+        && other.onImage == onImage
+        && other.onChunk == onChunk
+        && other.onError == onError;
   }
 }
 

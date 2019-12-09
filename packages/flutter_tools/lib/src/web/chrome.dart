@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -137,6 +137,7 @@ class ChromeLauncher {
       '--no-default-browser-check',
       '--disable-default-apps',
       '--disable-translate',
+      '--window-size=2400,1800',
       if (headless)
         ...<String>['--headless', '--disable-gpu', '--no-sandbox'],
       url,
@@ -174,6 +175,7 @@ class ChromeLauncher {
     return _connect(Chrome._(
       port,
       ChromeConnection('localhost', port),
+      url: url,
       process: process,
       remoteDebuggerUri: remoteDebuggerUri,
     ), skipCheck);
@@ -225,10 +227,12 @@ class Chrome {
   Chrome._(
     this.debugPort,
     this.chromeConnection, {
+    this.url,
     Process process,
     this.remoteDebuggerUri,
   })  : _process = process;
 
+  final String url;
   final int debugPort;
   final Process _process;
   final ChromeConnection chromeConnection;

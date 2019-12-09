@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -13,7 +13,8 @@ import 'media_query.dart';
 // Examples can assume:
 // String _name;
 
-/// The text style to apply to descendant [Text] widgets without explicit style.
+/// The text style to apply to descendant [Text] widgets which don't have an
+/// explicit style.
 ///
 /// See also:
 ///
@@ -435,7 +436,7 @@ class Text extends StatelessWidget {
       text: TextSpan(
         style: effectiveTextStyle,
         text: data,
-        children: textSpan != null ? <TextSpan>[textSpan] : null,
+        children: textSpan != null ? <InlineSpan>[textSpan] : null,
       ),
     );
     if (semanticsLabel != null) {

@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -16,6 +16,31 @@ const int kXcodeRequiredVersionMajor = 10;
 const int kXcodeRequiredVersionMinor = 2;
 
 Xcode get xcode => context.get<Xcode>();
+
+enum SdkType {
+  iPhone,
+  iPhoneSimulator,
+  macOS,
+}
+
+/// SDK name passed to `xcrun --sdk`. Corresponds to undocumented Xcode
+/// SUPPORTED_PLATFORMS values.
+///
+/// Usage: xcrun [options] <tool name> ... arguments ...
+/// ...
+/// --sdk <sdk name>            find the tool for the given SDK name
+String getNameForSdk(SdkType sdk) {
+  switch (sdk) {
+    case SdkType.iPhone:
+      return 'iphoneos';
+    case SdkType.iPhoneSimulator:
+      return 'iphonesimulator';
+    case SdkType.macOS:
+      return 'macosx';
+  }
+  assert(false);
+  return null;
+}
 
 class Xcode {
   bool get isInstalledAndMeetsVersionCheck => platform.isMacOS && isInstalled && isVersionSatisfactory;
@@ -117,9 +142,10 @@ class Xcode {
     );
   }
 
-  Future<String> iPhoneSdkLocation() async {
+  Future<String> sdkLocation(SdkType sdk) async {
+    assert(sdk != null);
     final RunResult runResult = await processUtils.run(
-      <String>['xcrun', '--sdk', 'iphoneos', '--show-sdk-path'],
+      <String>['xcrun', '--sdk', getNameForSdk(sdk), '--show-sdk-path'],
       throwOnError: true,
     );
     if (runResult.exitCode != 0) {

@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -580,6 +580,51 @@ void main() {
 
     tap.dispose();
     drag.dispose();
+  });
+
+  testGesture('non-primary pointers does not trigger timeout', (GestureTester tester) {
+    // Regression test for https://github.com/flutter/flutter/issues/43310
+    // Pointer1 down, pointer2 down, then pointer 1 up, all within the timeout.
+    // In this way, `BaseTapGestureRecognizer.didExceedDeadline` can be triggered
+    // after its `_reset`.
+    final TapGestureRecognizer tap = TapGestureRecognizer();
+
+    final List<String> recognized = <String>[];
+    tap.onTapDown = (_) {
+      recognized.add('down');
+    };
+    tap.onTapUp = (_) {
+      recognized.add('up');
+    };
+    tap.onTap = () {
+      recognized.add('tap');
+    };
+    tap.onTapCancel = () {
+      recognized.add('cancel');
+    };
+
+    tap.addPointer(down1);
+    tester.closeArena(down1.pointer);
+
+    tap.addPointer(down2);
+    tester.closeArena(down2.pointer);
+
+    expect(recognized, isEmpty);
+
+    tester.route(up1);
+    GestureBinding.instance.gestureArena.sweep(down1.pointer);
+    expect(recognized, <String>['down', 'up', 'tap']);
+    recognized.clear();
+
+    // If regression happens, the following step will throw error
+    tester.async.elapse(const Duration(milliseconds: 200));
+    expect(recognized, isEmpty);
+
+    tester.route(up2);
+    GestureBinding.instance.gestureArena.sweep(down2.pointer);
+    expect(recognized, isEmpty);
+
+    tap.dispose();
   });
 
   group('Enforce consistent-button restriction:', () {

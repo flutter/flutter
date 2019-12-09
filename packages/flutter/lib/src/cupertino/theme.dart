@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -202,8 +202,8 @@ class CupertinoThemeData extends Diagnosticable {
   ///
   /// See also:
   ///
-  /// * [MaterialBasedCupertinoThemeData], a [CupertinoThemeData] that defers
-  ///   [brightness] to its Material [Theme] parent if it's unspecified.
+  ///  * [MaterialBasedCupertinoThemeData], a [CupertinoThemeData] that defers
+  ///    [brightness] to its Material [Theme] parent if it's unspecified.
   Brightness get brightness => _brightness ?? Brightness.light;
   final Brightness _brightness;
 
@@ -220,8 +220,8 @@ class CupertinoThemeData extends Diagnosticable {
   ///
   /// See also:
   ///
-  /// * [MaterialBasedCupertinoThemeData], a [CupertinoThemeData] that defers
-  ///   [primaryColor] to its Material [Theme] parent if it's unspecified.
+  ///  * [MaterialBasedCupertinoThemeData], a [CupertinoThemeData] that defers
+  ///    [primaryColor] to its Material [Theme] parent if it's unspecified.
   Color get primaryColor => _primaryColor ?? _defaults.primaryColor;
   final Color _primaryColor;
 
@@ -235,8 +235,8 @@ class CupertinoThemeData extends Diagnosticable {
   ///
   /// See also:
   ///
-  /// * [MaterialBasedCupertinoThemeData], a [CupertinoThemeData] that defers
-  ///   [primaryContrastingColor] to its Material [Theme] parent if it's unspecified.
+  ///  * [MaterialBasedCupertinoThemeData], a [CupertinoThemeData] that defers
+  ///    [primaryContrastingColor] to its Material [Theme] parent if it's unspecified.
   Color get primaryContrastingColor => _primaryContrastingColor ?? _defaults.primaryContrastingColor;
   final Color _primaryContrastingColor;
 

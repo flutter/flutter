@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -41,16 +41,17 @@ const Tolerance _kFlingTolerance = Tolerance(
   distance: 0.01,
 );
 
-/// Configures how an [AnimationController] behaves when animations are disabled.
+/// Configures how an [AnimationController] behaves when animations are
+/// disabled.
 ///
 /// When [AccessibilityFeatures.disableAnimations] is true, the device is asking
 /// Flutter to reduce or disable animations as much as possible. To honor this,
-/// we reduce the duration and the corresponding number of frames for animations.
-/// This enum is used to allow certain [AnimationController]s to opt out of this
-/// behavior.
+/// we reduce the duration and the corresponding number of frames for
+/// animations. This enum is used to allow certain [AnimationController]s to opt
+/// out of this behavior.
 ///
 /// For example, the [AnimationController] which controls the physics simulation
-/// for a scrollable list will have [AnimationBehavior.preserve] so that when
+/// for a scrollable list will have [AnimationBehavior.preserve], so that when
 /// a user attempts to scroll it does not jump to the end/beginning too quickly.
 enum AnimationBehavior {
   /// The [AnimationController] will reduce its duration when
@@ -125,12 +126,13 @@ enum AnimationBehavior {
 ///
 /// {@tool sample}
 ///
-/// Here is a stateful [Foo] widget. Its [State] uses the
+/// Here is a stateful `Foo` widget. Its [State] uses the
 /// [SingleTickerProviderStateMixin] to implement the necessary
-/// [TickerProvider], creating its controller in the [initState] method and
-/// disposing of it in the [dispose] method. The duration of the controller is
-/// configured from a property in the [Foo] widget; as that changes, the
-/// [didUpdateWidget] method is used to update the controller.
+/// [TickerProvider], creating its controller in the [State.initState] method
+/// and disposing of it in the [State.dispose] method. The duration of the
+/// controller is configured from a property in the `Foo` widget; as that
+/// changes, the [State.didUpdateWidget] method is used to update the
+/// controller.
 ///
 /// ```dart
 /// class Foo extends StatefulWidget {
@@ -392,7 +394,7 @@ class AnimationController extends Animation<double>
   }
 
   void _internalSetValue(double newValue) {
-    _value = newValue.clamp(lowerBound, upperBound);
+    _value = newValue.clamp(lowerBound, upperBound) as double;
     if (_value == lowerBound) {
       _status = AnimationStatus.dismissed;
     } else if (_value == upperBound) {
@@ -576,7 +578,7 @@ class AnimationController extends Animation<double>
     stop();
     if (simulationDuration == Duration.zero) {
       if (value != target) {
-        _value = target.clamp(lowerBound, upperBound);
+        _value = target.clamp(lowerBound, upperBound) as double;
         notifyListeners();
       }
       _status = (_direction == _AnimationDirection.forward) ?
@@ -701,7 +703,7 @@ class AnimationController extends Animation<double>
     assert(!isAnimating);
     _simulation = simulation;
     _lastElapsedDuration = Duration.zero;
-    _value = simulation.x(0.0).clamp(lowerBound, upperBound);
+    _value = simulation.x(0.0).clamp(lowerBound, upperBound) as double;
     final TickerFuture result = _ticker.start();
     _status = (_direction == _AnimationDirection.forward) ?
       AnimationStatus.forward :
@@ -778,7 +780,7 @@ class AnimationController extends Animation<double>
     _lastElapsedDuration = elapsed;
     final double elapsedInSeconds = elapsed.inMicroseconds.toDouble() / Duration.microsecondsPerSecond;
     assert(elapsedInSeconds >= 0.0);
-    _value = _simulation.x(elapsedInSeconds).clamp(lowerBound, upperBound);
+    _value = _simulation.x(elapsedInSeconds).clamp(lowerBound, upperBound) as double;
     if (_simulation.isDone(elapsedInSeconds)) {
       _status = (_direction == _AnimationDirection.forward) ?
         AnimationStatus.completed :
@@ -813,7 +815,7 @@ class _InterpolationSimulation extends Simulation {
 
   @override
   double x(double timeInSeconds) {
-    final double t = (timeInSeconds / _durationInSeconds).clamp(0.0, 1.0);
+    final double t = (timeInSeconds / _durationInSeconds).clamp(0.0, 1.0) as double;
     if (t == 0.0)
       return _begin;
     else if (t == 1.0)
