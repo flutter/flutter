@@ -423,6 +423,130 @@ void main() {
     }
   });
 
+  testWidgets('Snackbar labels can be styled', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Builder(
+              builder: (BuildContext context) {
+                return GestureDetector(
+                  onTap: () {
+                    Scaffold.of(context).showSnackBar(
+                      SnackBar(
+                        content: const Text('I am a snack bar.'),
+                        duration: const Duration(seconds: 2),
+                        action: SnackBarAction(
+                          label: 'ACTION',
+                          labelStyle: const TextStyle(color: Colors.green),
+                          onPressed: () { },
+                        ),
+                      ),
+                    );
+                  },
+                  child: const Text('X'),
+                );
+              }
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('X'));
+    await tester.pump(); // start animation
+    await tester.pump(const Duration(milliseconds: 750));
+
+    final Element actionTextBox = tester.element(find.text('ACTION'));
+    final Widget textWidget = actionTextBox.widget;
+    final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(actionTextBox);
+    if (textWidget is Text) {
+      TextStyle effectiveStyle = textWidget.style;
+      effectiveStyle = defaultTextStyle.style.merge(textWidget.style);
+      expect(effectiveStyle.color, Colors.green);
+    } else {
+      expect(false, true);
+    }
+  });
+
+  testWidgets('SnackBar labels change to disabled color after being pressed', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Builder(
+              builder: (BuildContext context) {
+                return GestureDetector(
+                  onTap: () {
+                    Scaffold.of(context).showSnackBar(
+                      SnackBar(
+                        content: const Text('I am a snack bar.'),
+                        duration: const Duration(seconds: 2),
+                        action: SnackBarAction(
+                          label: 'ACTION',
+                          labelStyle: const TextStyle(color: Colors.green),
+                          disabledTextColor: Colors.red,
+                          onPressed: () { },
+                        ),
+                      ),
+                    );
+                  },
+                  child: const Text('X'),
+                );
+              }
+          ),
+        ),
+      ),
+    );
+    await tester.tap(find.text('X'));
+    await tester.pump(); // start animation
+    await tester.pump(const Duration(milliseconds: 750));
+
+    await tester.tap(find.text('ACTION'));
+    await tester.pump();
+
+    final Element actionTextBox = tester.element(find.text('ACTION'));
+    final Widget textWidget = actionTextBox.widget;
+    final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(actionTextBox);
+    if (textWidget is Text) {
+      TextStyle effectiveStyle = textWidget.style;
+      effectiveStyle = defaultTextStyle.style.merge(textWidget.style);
+      expect(effectiveStyle.color, Colors.red);
+    } else {
+      expect(false, true);
+    }
+  });
+
+  testWidgets('Snackbar asserts if passed textColor and labelStyle', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Builder(
+              builder: (BuildContext context) {
+                return GestureDetector(
+                  onTap: () {
+                    Scaffold.of(context).showSnackBar(
+                      SnackBar(
+                        content: const Text('I am a snack bar.'),
+                        duration: const Duration(seconds: 2),
+                        action: SnackBarAction(
+                          label: 'ACTION',
+                          labelStyle: const TextStyle(color: Colors.green),
+                          textColor: Colors.blue,
+                          onPressed: () { },
+                        ),
+                      ),
+                    );
+                  },
+                  child: const Text('X'),
+                );
+              }
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('X'));
+    expect(tester.takeException(), isNotNull);
+  });
+
   testWidgets('SnackBar button text alignment', (WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       home: MediaQuery(

@@ -84,10 +84,12 @@ class SnackBarAction extends StatefulWidget {
     Key key,
     this.textColor,
     this.disabledTextColor,
+    this.labelStyle,
     @required this.label,
     @required this.onPressed,
   }) : assert(label != null),
        assert(onPressed != null),
+       assert(textColor == null || labelStyle == null),
        super(key: key);
 
   /// The button label color. If not provided, defaults to [accentColor].
@@ -99,6 +101,10 @@ class SnackBarAction extends StatefulWidget {
 
   /// The button label.
   final String label;
+
+  /// The button label style. If not provided, defaults to [textColor].
+  /// It is an error to provide [textColor] and [labelStyle].
+  final TextStyle labelStyle;
 
   /// The callback to be called when the button is pressed. Must not be null.
   ///
@@ -112,6 +118,7 @@ class SnackBarAction extends StatefulWidget {
 
 class _SnackBarActionState extends State<SnackBarAction> {
   bool _haveTriggeredAction = false;
+  TextStyle _labelStyle;
 
   void _handlePressed() {
     if (_haveTriggeredAction)
@@ -124,14 +131,27 @@ class _SnackBarActionState extends State<SnackBarAction> {
   }
 
   @override
+  void initState() {
+    super.initState();
+
+    if (widget.labelStyle != null) {
+      _labelStyle = widget.labelStyle;
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final SnackBarThemeData snackBarTheme = Theme.of(context).snackBarTheme;
     final Color textColor = widget.textColor ?? snackBarTheme.actionTextColor;
     final Color disabledTextColor = widget.disabledTextColor ?? snackBarTheme.disabledActionTextColor;
 
+    if (_labelStyle != null && _haveTriggeredAction) {
+      _labelStyle = _labelStyle.copyWith(color: disabledTextColor);
+    }
+
     return FlatButton(
       onPressed: _haveTriggeredAction ? null : _handlePressed,
-      child: Text(widget.label),
+      child: Text(widget.label, style: _labelStyle),
       textColor: textColor,
       disabledTextColor: disabledTextColor,
     );
