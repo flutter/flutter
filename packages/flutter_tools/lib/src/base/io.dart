@@ -105,7 +105,7 @@ ExitFunction _exitFunction = _defaultExitFunction;
 ExitFunction get exit {
   assert(
     _exitFunction != io.exit || !_inUnitTest(),
-    'io.exit was called with assertions active in a unit test'
+    'io.exit was called with assertions active in a unit test',
   );
   return _exitFunction;
 }
