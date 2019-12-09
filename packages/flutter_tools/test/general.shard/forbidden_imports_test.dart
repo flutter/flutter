@@ -39,6 +39,7 @@ void main() {
   test('no unauthorized imports of dart:io', () {
     final List<String> whitelistedPaths = <String>[
       fs.path.join(flutterTools, 'lib', 'src', 'base', 'io.dart'),
+      fs.path.join(flutterTools, 'lib', 'src', 'base', 'error_handling_file_system.dart'),
     ];
     bool _isNotWhitelisted(FileSystemEntity entity) => whitelistedPaths.every((String path) => path != entity.path);
 
@@ -83,6 +84,7 @@ void main() {
   test('no unauthorized imports of dart:convert', () {
     final List<String> whitelistedPaths = <String>[
       fs.path.join(flutterTools, 'lib', 'src', 'convert.dart'),
+      fs.path.join(flutterTools, 'lib', 'src', 'base', 'error_handling_file_system.dart'),
     ];
     bool _isNotWhitelisted(FileSystemEntity entity) => whitelistedPaths.every((String path) => path != entity.path);
 
