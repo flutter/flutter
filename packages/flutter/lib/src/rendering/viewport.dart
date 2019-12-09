@@ -506,7 +506,8 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   Rect describeApproximatePaintClip(RenderSliver child) {
     final Rect viewportClip = Offset.zero & size;
     // The child's viewportMainAxisExtent can be infinite when a
-    // RenderShrinkWrappingViewport is given infinite constraints.
+    // RenderShrinkWrappingViewport is given infinite constraints, such as when
+    // it is the child of a Row or Column (depending on orientation).
     //
     // For example, a shrink wrapping render sliver may have infinite
     // constraints along the viewport's main axis but still end up scrollable
@@ -517,6 +518,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
       return viewportClip;
     }
 
+    // Adjust the clip rect for this sliver by the overlap from the previous sliver.
     double left = viewportClip.left;
     double right = viewportClip.right;
     double top = viewportClip.top;
