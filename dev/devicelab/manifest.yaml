@@ -511,9 +511,10 @@ tasks:
 
   flutter_driver_screenshot_test_ios:
     description: >
-      Screenshot tests running on iPhone 6s.
+      Screenshot tests running on a specifc iPhone 6.
+      The test makes sure that there is no regression while renderring an image with gl on iOS.
     stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios, ios/gl-render-image"]
+    required_agent_capabilities: ["mac/ios", "ios/gl-render-image"]
     #TODO(cyanglaz): The flaky flag is added because it is the first screenshot test we added.
     # Remove the flaky flag when we are sure the test is stable.
     flaky: true
