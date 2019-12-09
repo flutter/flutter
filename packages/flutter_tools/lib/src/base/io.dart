@@ -26,10 +26,11 @@
 /// increase the API surface that we have to test in Flutter tools, and the APIs
 /// in `dart:io` can sometimes be hard to use in tests.
 import 'dart:async';
-import 'dart:io' as io show exit, IOSink, Platform, Process, ProcessInfo, ProcessSignal,
+import 'dart:io' as io show exit, IOSink, Process, ProcessInfo, ProcessSignal,
     stderr, stdin, Stdin, StdinException, Stdout, stdout;
 
 import 'package:meta/meta.dart';
+import 'package:test_api/test_api.dart'; // ignore: deprecated_member_use
 
 import 'context.dart';
 import 'platform.dart';
@@ -104,11 +105,19 @@ ExitFunction _exitFunction = _defaultExitFunction;
 /// with [restoreExitFunction]). The default implementation delegates to
 /// `dart:io`.
 ExitFunction get exit {
-  assert(
-    _exitFunction != io.exit || io.Platform.environment['FLUTTER_TEST'] != null,
-    'io.exit was called with assertions active. If this is an integration test, '
-    'ensure that the environment variable FLUTTER_TEST is set '
-    'to a non-null String.',
+  assert(() {
+    if (_exitFunction == io.exit) {
+      try {
+        expect(true, true);
+      } on StateError {
+        // If we catch a StateError, then we were not in a unit test.
+        return true;
+      }
+      return false;
+    }
+    return true;
+  }(),
+    'io.exit was called with assertions active in a unit test'
   );
   return _exitFunction;
 }
