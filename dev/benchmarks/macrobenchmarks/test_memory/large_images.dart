@@ -16,20 +16,9 @@ Future<void> endOfAnimation() async {
   } while (SchedulerBinding.instance.hasScheduledFrame);
 }
 
-int iteration = 0;
-
-class LifecycleObserver extends WidgetsBindingObserver {
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    debugPrint('==== MEMORY BENCHMARK ==== $state ====');
-    debugPrint('This was lifecycle event number $iteration in this instance');
-  }
-}
-
 Future<void> main() async {
   runApp(const MacrobenchmarksApp(initialRoute: kLargeImagesRouteName));
   await endOfAnimation();
   await Future<void>.delayed(const Duration(milliseconds: 50));
   debugPrint('==== MEMORY BENCHMARK ==== READY ====');
-  WidgetsBinding.instance.addObserver(LifecycleObserver());
 }
