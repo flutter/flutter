@@ -726,12 +726,12 @@ abstract class ResidentRunner {
   /// This API should only be called for UI only-changes spanning a single
   /// library/Widget.
   ///
-  /// The value [classId] should be the identifier of the StatlessWidget that
+  /// The value [classId] should be the identifier of the StatelessWidget that
   /// was invalidated, or the StatefulWidget for the corresponding State class
   /// that was invalidated. This must be provided.
   ///
   /// The value [libraryId] should be the absolute file URI for the containing
-  /// library of the widget that was invalided. This must be provided.
+  /// library of the widget that was invalidated. This must be provided.
   Future<OperationResult> reloadMethod({ String classId, String libraryId }) {
     throw UnsupportedError('Method is not supported.');
   }
