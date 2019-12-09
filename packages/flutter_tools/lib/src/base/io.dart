@@ -93,11 +93,9 @@ ExitFunction _exitFunction = _defaultExitFunction;
 
 /// Exits the process.
 ///
-/// Throws [StateError] if assertions are enabled and the dart:io exit
+/// Throws [AssertionError] if assertions are enabled and the dart:io exit
 /// is still active when called. This may indicate exit was called in
-/// a test without being configured correctly. This behavior can be
-/// removed by setting the `FLUTTER_TEST` environment
-/// variable to a non-null string.
+/// a test without being configured correctly.
 ///
 /// This is analogous to the `exit` function in `dart:io`, except that this
 /// function may be set to a testing-friendly value by calling
@@ -105,7 +103,8 @@ ExitFunction _exitFunction = _defaultExitFunction;
 /// with [restoreExitFunction]). The default implementation delegates to
 /// `dart:io`.
 ExitFunction get exit {
-  assert(_exitFunction != io.exit || !_inUnitTest(),
+  assert(
+    _exitFunction != io.exit || !_inUnitTest(),
     'io.exit was called with assertions active in a unit test'
   );
   return _exitFunction;
