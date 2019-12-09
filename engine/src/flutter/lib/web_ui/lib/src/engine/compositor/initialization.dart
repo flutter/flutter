@@ -9,7 +9,7 @@ const bool experimentalUseSkia =
     bool.fromEnvironment('FLUTTER_WEB_USE_SKIA', defaultValue: false);
 
 /// The URL to use when downloading the CanvasKit script and associated wasm.
-const String canvasKitBaseUrl = 'https://particles.skia.org/static/';
+const String canvasKitBaseUrl = 'https://unpkg.com/canvaskit-wasm@0.10.0/bin/';
 
 /// Initialize the Skia backend.
 ///
