@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/platform_plugins.dart';
 import 'package:flutter_tools/src/plugins.dart';
 import 'package:yaml/yaml.dart';
@@ -120,6 +121,17 @@ void main() {
       expect(webPlugin.pluginClass, 'WebSamplePlugin');
       expect(webPlugin.fileName, 'web_plugin.dart');
       expect(windowsPlugin.pluginClass, 'WinSamplePlugin');
+    });
+
+    test('Legacy Format and Multi-Platform Format together is not allowed and error message contains plugin name', () {
+      const String pluginYamlRaw = 'androidPackage: com.flutter.dev\n'
+          'platforms:\n'
+          ' android:\n'
+          '  package: com.flutter.dev\n';
+
+      final YamlMap pluginYaml = loadYaml(pluginYamlRaw) as YamlMap;
+      final Plugin Function() parsePlugin = () => Plugin.fromYaml(_kTestPluginName, _kTestPluginPath, pluginYaml, const <String>[]);
+      expect(parsePlugin, throwsA(predicate<ToolExit>((ToolExit e) => e.message.contains(_kTestPluginName))));
     });
 
     test('A default_package field is allowed', () {
