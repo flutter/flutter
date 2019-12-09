@@ -68,6 +68,16 @@ void main() {
   testUsingContext('ProcessSignal toString() works', () async {
     expect(io.ProcessSignal.sigint.toString(), ProcessSignal.SIGINT.toString());
   });
+
+  test('exit throws a StateError if called without being overriden', () {
+    expect(() => exit(0), throwsA(isInstanceOf<AssertionError>()));
+  });
+
+  test('exit does not throw a StateError if overriden', () {
+    setExitFunctionForTests((int value) {});
+
+    expect(() => exit(0), returnsNormally);
+  });
 }
 
 class MockIoProcessSignal extends Mock implements io.ProcessSignal {}

@@ -26,7 +26,7 @@
 /// increase the API surface that we have to test in Flutter tools, and the APIs
 /// in `dart:io` can sometimes be hard to use in tests.
 import 'dart:async';
-import 'dart:io' as io show exit, IOSink, Process, ProcessInfo, ProcessSignal,
+import 'dart:io' as io show exit, IOSink, Platform, Process, ProcessInfo, ProcessSignal,
     stderr, stdin, Stdin, StdinException, Stdout, stdout;
 
 import 'package:meta/meta.dart';
@@ -92,12 +92,26 @@ ExitFunction _exitFunction = _defaultExitFunction;
 
 /// Exits the process.
 ///
+/// Throws [StateError] if assertions are enabled and the dart:io exit
+/// is still active when called. This may indicate exit was called in
+/// a test without being configured correctly. This behavior can be
+/// removed by setting the `FLUTTER_TEST` environment
+/// variable to a non-null string.
+///
 /// This is analogous to the `exit` function in `dart:io`, except that this
 /// function may be set to a testing-friendly value by calling
 /// [setExitFunctionForTests] (and then restored to its default implementation
 /// with [restoreExitFunction]). The default implementation delegates to
 /// `dart:io`.
-ExitFunction get exit => _exitFunction;
+ExitFunction get exit {
+  assert(
+    _exitFunction != io.exit || io.Platform.environment['FLUTTER_TEST'] != null,
+    'io.exit was called with assertions active. If this is an integration test, '
+    'ensure that the environment variable FLUTTER_TEST is set '
+    'to a non-null String.',
+  );
+  return _exitFunction;
+}
 
 /// Sets the [exit] function to a function that throws an exception rather
 /// than exiting the process; this is intended for testing purposes.
