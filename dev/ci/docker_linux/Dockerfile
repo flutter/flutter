@@ -124,6 +124,7 @@ RUN $GOBINARY get -u github.com/technosophos/dashing
 RUN locale-gen en_US "en_US.UTF-8" && dpkg-reconfigure locales
 ENV LANG en_US.UTF-8
 
+# Install fastlane via pinned Gemfile & Gemfile.lock
 # Skip all the documentation (-N) since it's just on CI.
 RUN gem install bundler -N
 
@@ -131,3 +132,8 @@ COPY Gemfile /Gemfile
 COPY Gemfile.lock /Gemfile.lock
 
 RUN bundle install --system
+
+# Install goldctl, for Golden testing
+COPY download_goldctl.sh /download_goldctl.sh
+ENV GOLDCTL '/depot_tools/goldctl'
+RUN /download_goldctl.sh
