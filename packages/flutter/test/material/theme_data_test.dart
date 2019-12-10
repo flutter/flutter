@@ -201,7 +201,8 @@ void main() {
 
     final ThemeData theme = ThemeData.raw(
       brightness: Brightness.dark,
-      primarySwatch: Colors.black,
+      visualDensity: VisualDensity(),
+      primarySwatch: Colors.brown,
       primaryColor: Colors.black,
       primaryColorBrightness: Brightness.dark,
       primaryColorLight: Colors.black,
@@ -280,7 +281,8 @@ void main() {
 
     final ThemeData otherTheme = ThemeData.raw(
       brightness: Brightness.light,
-      primarySwatch: Colors.white,
+      visualDensity: VisualDensity(),
+      primarySwatch: Colors.grey,
       primaryColor: Colors.white,
       primaryColorBrightness: Brightness.light,
       primaryColorLight: Colors.white,
@@ -346,6 +348,7 @@ void main() {
 
     final ThemeData themeDataCopy = theme.copyWith(
       brightness: otherTheme.brightness,
+      primarySwatch: otherTheme.primarySwatch,
       primaryColor: otherTheme.primaryColor,
       primaryColorBrightness: otherTheme.primaryColorBrightness,
       primaryColorLight: otherTheme.primaryColorLight,
@@ -410,7 +413,7 @@ void main() {
     );
 
     expect(themeDataCopy.brightness, equals(otherTheme.brightness));
-    expect(themeDataCopy.primarySwatch, equals(otherTheme.primarySwatch))
+    expect(themeDataCopy.primarySwatch, equals(otherTheme.primarySwatch));
     expect(themeDataCopy.primaryColor, equals(otherTheme.primaryColor));
     expect(themeDataCopy.primaryColorBrightness, equals(otherTheme.primaryColorBrightness));
     expect(themeDataCopy.primaryColorLight, equals(otherTheme.primaryColorLight));
