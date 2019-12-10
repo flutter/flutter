@@ -48,12 +48,11 @@ class Firefox extends Browser {
       var dir = createTempDir();
       var args = [
         url.toString(),
-        if (!debug) '--headless',
+        '--headless',
         '-width $kMaxScreenshotWidth',
         '-height $kMaxScreenshotHeight',
         '-new-window',
         '-new-instance',
-        '-prefs { "dom.disable_beforeunload" = true, "toolkit.startup.max_resumed_crashes"=999999 } ',
         '--start-debugger-server $kDevtoolsPort',
       ];
 

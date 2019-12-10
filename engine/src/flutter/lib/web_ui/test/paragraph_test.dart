@@ -7,7 +7,7 @@ import 'package:ui/ui.dart';
 
 import 'package:test/test.dart';
 
-void testEachMeasurement(String description, VoidCallback body) {
+void testEachMeasurement(String description, VoidCallback body, {bool skip}) {
   test(description, () async {
     try {
       TextMeasurementService.initialize(rulerCacheCapacity: 2);
@@ -15,7 +15,7 @@ void testEachMeasurement(String description, VoidCallback body) {
     } finally {
       TextMeasurementService.clearCache();
     }
-  });
+  }, skip: skip);
   test('$description (canvas measurement)', () async {
     try {
       TextMeasurementService.initialize(rulerCacheCapacity: 2);
@@ -25,7 +25,7 @@ void testEachMeasurement(String description, VoidCallback body) {
       TextMeasurementService.enableExperimentalCanvasImplementation = false;
       TextMeasurementService.clearCache();
     }
-  });
+  }, skip: skip);
 }
 
 void main() async {
@@ -104,7 +104,8 @@ void main() async {
       expect(paragraph.minIntrinsicWidth, fontSize * 10.0);
       expect(paragraph.maxIntrinsicWidth, fontSize * 10.0);
     }
-  });
+  }, // TODO(nurhan): https://github.com/flutter/flutter/issues/46638
+      skip: (browserEngine == BrowserEngine.firefox));
 
   testEachMeasurement('predictably lays out a multi-line rich paragraph', () {
     for (double fontSize in <double>[10.0, 20.0, 30.0, 40.0]) {
@@ -126,7 +127,8 @@ void main() async {
       expect(paragraph.minIntrinsicWidth, fontSize * 5.0);
       expect(paragraph.maxIntrinsicWidth, fontSize * 16.0);
     }
-  });
+  }, // TODO(nurhan): https://github.com/flutter/flutter/issues/46638
+      skip: (browserEngine == BrowserEngine.firefox));
 
   testEachMeasurement('getBoxesForRange returns a box', () {
     final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle(

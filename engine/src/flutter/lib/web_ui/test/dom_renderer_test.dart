@@ -115,7 +115,8 @@ void main() {
 
     final DomRenderer renderer = DomRenderer();
     renderer.reset();
-  });
+  }, // TODO(nurhan): https://github.com/flutter/flutter/issues/46638
+      skip: (browserEngine == BrowserEngine.firefox));
 
   test('accesibility placeholder is attached after creation', () {
     DomRenderer();

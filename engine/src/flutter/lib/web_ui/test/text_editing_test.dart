@@ -186,7 +186,8 @@ void main() {
 
       // There should be no input action.
       expect(lastInputAction, isNull);
-    });
+    }, // TODO(nurhan): https://github.com/flutter/flutter/issues/46638
+        skip: (browserEngine == BrowserEngine.firefox));
 
     test('Can set editing state correctly', () {
       editingElement.enable(
@@ -217,7 +218,8 @@ void main() {
 
       // There should be no input action.
       expect(lastInputAction, isNull);
-    });
+    }, // TODO(nurhan): https://github.com/flutter/flutter/issues/46638
+        skip: (browserEngine == BrowserEngine.firefox));
 
     test('Multi-line mode also works', () {
       // The textarea element is created lazily.
@@ -262,7 +264,8 @@ void main() {
 
       // There should be no input action.
       expect(lastInputAction, isNull);
-    });
+    }, // TODO(nurhan): https://github.com/flutter/flutter/issues/46638
+        skip: (browserEngine == BrowserEngine.firefox));
 
     test('Same instance can be re-enabled with different config', () {
       // Make sure there's nothing in the DOM yet.
@@ -922,7 +925,8 @@ void main() {
       );
 
       hideKeyboard();
-    });
+    }, // TODO(nurhan): https://github.com/flutter/flutter/issues/46638
+        skip: (browserEngine == BrowserEngine.firefox));
 
     test('Multi-line mode also works', () {
       final MethodCall setClient = MethodCall(
@@ -980,7 +984,8 @@ void main() {
 
       // Confirm that [HybridTextEditing] didn't send any more messages.
       expect(spy.messages, isEmpty);
-    });
+    }, // TODO(nurhan): https://github.com/flutter/flutter/issues/46638
+        skip: (browserEngine == BrowserEngine.firefox));
 
     test('sets correct input type in Android', () {
       debugOperatingSystemOverride = OperatingSystem.android;
