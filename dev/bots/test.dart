@@ -89,7 +89,11 @@ const List<String> kWebTestFileBlacklist = <String>[
 
 /// Tests that we don't run on Driver for various reasons
 const List<String> kDriverTestFileBlacklist = <String>[
+  // Following tests require Chrome
+  // For Linux/macOS
   'test/src/web_extension_test.dart',
+  // For Windows
+  'test\\src\\web_extension_test.dart',
 ];
 
 /// When you call this, you can pass additional arguments to pass custom
@@ -423,16 +427,16 @@ Future<void> _runFrameworkTests() async {
     final Directory flutterDriverPackageTestDirectory = Directory(path.join(flutterDriverPackageDirectory.path, 'test'));
 
     final List<String> flutterDriverTests = flutterDriverPackageTestDirectory
-        .listSync()
-        .whereType<Directory>()
-        .expand((Directory directory) => directory
+      .listSync()
+      .whereType<Directory>()
+      .expand((Directory directory) => directory
         .listSync(recursive: true)
         .where((FileSystemEntity entity) => entity.path.endsWith('_test.dart'))
-    )
-        .whereType<File>()
-        .map<String>((File file) => path.relative(file.path, from: flutterDriverPackageDirectory.path))
-        .where((String filePath) => !kDriverTestFileBlacklist.contains(filePath))
-        .toList();
+      )
+      .whereType<File>()
+      .map<String>((File file) => path.relative(file.path, from: flutterDriverPackageDirectory.path))
+      .where((String filePath) => !kDriverTestFileBlacklist.contains(filePath))
+      .toList();
 
     await _pubRunTest(path.join(flutterRoot, 'dev', 'bots'), tableData: bigqueryApi?.tabledata);
     await _pubRunTest(path.join(flutterRoot, 'dev', 'devicelab'), tableData: bigqueryApi?.tabledata);
