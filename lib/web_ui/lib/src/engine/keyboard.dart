@@ -117,9 +117,6 @@ const int _modifierShift = 0x01;
 const int _modifierAlt = 0x02;
 const int _modifierControl = 0x04;
 const int _modifierMeta = 0x08;
-const int _modifierNumLock = 0x10;
-const int _modifierCapsLock = 0x20;
-const int _modifierScrollLock = 0x40;
 
 /// Creates a bitmask representing the meta state of the [event].
 int _getMetaState(html.KeyboardEvent event) {
@@ -136,15 +133,8 @@ int _getMetaState(html.KeyboardEvent event) {
   if (event.getModifierState('Meta')) {
     metaState |= _modifierMeta;
   }
-  if (event.getModifierState('NumLock')) {
-    metaState |= _modifierNumLock;
-  }
-  if (event.getModifierState('CapsLock')) {
-    metaState |= _modifierCapsLock;
-  }
-  if (event.getModifierState('ScrollLock')) {
-    metaState |= _modifierScrollLock;
-  }
+  // TODO: Re-enable lock key modifiers once there is support on Flutter
+  // Framework. https://github.com/flutter/flutter/issues/46718
   return metaState;
 }
 
