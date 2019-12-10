@@ -399,6 +399,7 @@ void main() {
               'CIRRUS_CI': 'true',
               'CIRRUS_PR': '1234',
               'GOLD_SERVICE_ACCOUNT' : 'service account...',
+              'CIRRUS_USER_PERMISSION' : 'write',
             },
             operatingSystem: 'macos'
           );
