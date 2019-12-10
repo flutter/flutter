@@ -154,6 +154,41 @@ void main() {
     expect(onAppStart.isCompleted, true);
   }));
 
+  test('ResidentRunner can attach to device successfully with --fast-start', () => testbed.run(() async {
+    when(mockDevice.supportsHotRestart).thenReturn(true);
+    when(mockDevice.sdkNameAndVersion).thenAnswer((Invocation invocation) async {
+      return 'Example';
+    });
+    when(mockDevice.targetPlatform).thenAnswer((Invocation invocation) async {
+      return TargetPlatform.android_arm;
+    });
+    when(mockDevice.isLocalEmulator).thenAnswer((Invocation invocation) async {
+      return false;
+    });
+    residentRunner = HotRunner(
+      <FlutterDevice>[
+        mockFlutterDevice,
+      ],
+      stayResident: false,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, fastStart: true, startPaused: true),
+    );
+    final Completer<DebugConnectionInfo> onConnectionInfo = Completer<DebugConnectionInfo>.sync();
+    final Completer<void> onAppStart = Completer<void>.sync();
+    final Future<int> result = residentRunner.attach(
+      appStartedCompleter: onAppStart,
+      connectionInfoCompleter: onConnectionInfo,
+    );
+    final Future<DebugConnectionInfo> connectionInfo = onConnectionInfo.future;
+
+    expect(await result, 0);
+
+    verify(mockFlutterDevice.initLogReader()).called(1);
+
+    expect(onConnectionInfo.isCompleted, true);
+    expect((await connectionInfo).baseUri, 'foo://bar');
+    expect(onAppStart.isCompleted, true);
+  }));
+
   test('ResidentRunner can handle an RPC exception from hot reload', () => testbed.run(() async {
     when(mockDevice.sdkNameAndVersion).thenAnswer((Invocation invocation) async {
       return 'Example';
