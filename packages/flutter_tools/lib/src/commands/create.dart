@@ -146,22 +146,6 @@ class CreateCommand extends FlutterCommand {
       defaultsTo: true,
       help: 'Generate a project using the AndroidX support libraries',
     );
-    // Deprecated
-    argParser.addFlag(
-      'macos',
-      negatable: true,
-      defaultsTo: false,
-      hide: true,
-      help: 'Include support for building a macOS application',
-    );
-    // Deprecated
-    argParser.addFlag(
-      'web',
-      negatable: true,
-      defaultsTo: false,
-      hide: true,
-      help: 'Deprecated',
-    );
   }
 
   @override
@@ -406,7 +390,7 @@ class CreateCommand extends FlutterCommand {
       androidLanguage: stringArg('android-language'),
       iosLanguage: stringArg('ios-language'),
       web: featureFlags.isWebEnabled,
-      macos: boolArg('macos'),
+      macos: featureFlags.isMacOSEnabled,
     );
 
     final String relativeDirPath = fs.path.relative(projectDirPath);

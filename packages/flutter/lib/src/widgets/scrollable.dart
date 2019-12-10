@@ -481,7 +481,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
       return;
     _shouldIgnorePointer = value;
     if (_ignorePointerKey.currentContext != null) {
-      final RenderIgnorePointer renderBox = _ignorePointerKey.currentContext.findRenderObject();
+      final RenderIgnorePointer renderBox = _ignorePointerKey.currentContext.findRenderObject() as RenderIgnorePointer;
       renderBox.ignoring = _shouldIgnorePointer;
     }
   }
@@ -576,7 +576,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
     if (_physics != null && !_physics.shouldAcceptUserOffset(position)) {
       return;
     }
-    final double targetScrollOffset = _targetScrollOffsetForPointerScroll(event);
+    final double targetScrollOffset = _targetScrollOffsetForPointerScroll(event as PointerScrollEvent);
     if (targetScrollOffset != position.pixels) {
       position.jumpTo(targetScrollOffset);
     }

@@ -107,7 +107,7 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
   /// the first build of that child has not completed yet.
   ParentDataElement<SliverWithKeepAliveWidget> _getChildElement() {
     assert(mounted);
-    final Element element = context;
+    final Element element = context as Element;
     Element childElement;
     // We use Element.visitChildren rather than context.visitChildElements
     // because we might be called during build, and context.visitChildElements
@@ -132,11 +132,11 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
       childElement = child;
     });
     assert(childElement == null || childElement is ParentDataElement<SliverWithKeepAliveWidget>);
-    return childElement;
+    return childElement as ParentDataElement<SliverWithKeepAliveWidget>;
   }
 
   void _updateParentDataOfChild(ParentDataElement<SliverWithKeepAliveWidget> childElement) {
-    childElement.applyWidgetOutOfTurn(build(context));
+    childElement.applyWidgetOutOfTurn(build(context) as ParentDataWidget<SliverWithKeepAliveWidget>);
   }
 
   VoidCallback _createCallback(Listenable handle) {

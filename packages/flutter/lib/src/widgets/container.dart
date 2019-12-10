@@ -312,10 +312,12 @@ class Container extends StatelessWidget {
     this.margin,
     this.transform,
     this.child,
+    this.clipBehavior = Clip.none,
   }) : assert(margin == null || margin.isNonNegative),
        assert(padding == null || padding.isNonNegative),
        assert(decoration == null || decoration.debugAssertIsValid()),
        assert(constraints == null || constraints.debugAssertIsValid()),
+       assert(clipBehavior != null),
        assert(color == null || decoration == null,
          'Cannot provide both a color and a decoration\n'
          'The color argument is just a shorthand for "decoration: new BoxDecoration(color: color)".'
@@ -388,6 +390,11 @@ class Container extends StatelessWidget {
   /// The transformation matrix to apply before painting the container.
   final Matrix4 transform;
 
+  /// The clip behavior when [Container.decoration] has a clipPath.
+  ///
+  /// Defaults to [Clip.none].
+  final Clip clipBehavior;
+
   EdgeInsetsGeometry get _paddingIncludingDecoration {
     if (decoration == null || decoration.padding == null)
       return padding;
@@ -436,6 +443,17 @@ class Container extends StatelessWidget {
     if (transform != null)
       current = Transform(transform: transform, child: current);
 
+    if (clipBehavior != Clip.none) {
+      current = ClipPath(
+        clipper: _DecorationClipper(
+          textDirection: Directionality.of(context),
+          decoration: decoration
+        ),
+        clipBehavior: clipBehavior,
+        child: current,
+      );
+    }
+
     return current;
   }
 
@@ -444,10 +462,34 @@ class Container extends StatelessWidget {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, showName: false, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
+    properties.add(DiagnosticsProperty<Clip>('clipBehavior', clipBehavior, defaultValue: Clip.none));
     properties.add(DiagnosticsProperty<Decoration>('bg', decoration, defaultValue: null));
     properties.add(DiagnosticsProperty<Decoration>('fg', foregroundDecoration, defaultValue: null));
     properties.add(DiagnosticsProperty<BoxConstraints>('constraints', constraints, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('margin', margin, defaultValue: null));
     properties.add(ObjectFlagProperty<Matrix4>.has('transform', transform));
+  }
+}
+
+/// A clipper that uses [Decoration.getClipPath] to clip.
+class _DecorationClipper extends CustomClipper<Path> {
+  _DecorationClipper({
+    TextDirection textDirection,
+    @required this.decoration
+  }) : assert (decoration != null),
+       textDirection = textDirection ?? TextDirection.ltr;
+
+  final TextDirection textDirection;
+  final Decoration decoration;
+
+  @override
+  Path getClip(Size size) {
+    return decoration.getClipPath(Offset.zero & size, textDirection);
+  }
+
+  @override
+  bool shouldReclip(_DecorationClipper oldClipper) {
+    return oldClipper.decoration != decoration
+        || oldClipper.textDirection != textDirection;
   }
 }

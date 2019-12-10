@@ -261,7 +261,7 @@ class TextSpan extends InlineSpan {
           child is TextSpan,
           'visitTextSpan is deprecated. Use visitChildren to support InlineSpans',
         );
-        final TextSpan textSpanChild = child;
+        final TextSpan textSpanChild = child as TextSpan;
         if (!textSpanChild.visitTextSpan(visitor))
           return false;
       }
@@ -388,7 +388,7 @@ class TextSpan extends InlineSpan {
       return RenderComparison.identical;
     if (other.runtimeType != runtimeType)
       return RenderComparison.layout;
-    final TextSpan textSpan = other;
+    final TextSpan textSpan = other as TextSpan;
     if (textSpan.text != text ||
         children?.length != textSpan.children?.length ||
         (style == null) != (textSpan.style == null))
@@ -423,11 +423,11 @@ class TextSpan extends InlineSpan {
       return false;
     if (super != other)
       return false;
-    final TextSpan typedOther = other;
-    return typedOther.text == text
-        && typedOther.recognizer == recognizer
-        && typedOther.semanticsLabel == semanticsLabel
-        && listEquals<InlineSpan>(typedOther.children, children);
+    return other is TextSpan
+        && other.text == text
+        && other.recognizer == recognizer
+        && other.semanticsLabel == semanticsLabel
+        && listEquals<InlineSpan>(other.children, children);
   }
 
   @override

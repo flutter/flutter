@@ -86,7 +86,7 @@ void main() {
   const String kActivityId = '$kAppId/com.yourcompany.integration_ui.MainActivity';
 
   task(() async {
-    final AndroidDevice device = await devices.workingDevice;
+    final AndroidDevice device = await devices.workingDevice as AndroidDevice;
     await device.unlock();
     final Directory appDir = dir(path.join(flutterDirectory.path, 'dev/integration_tests/ui'));
     await inDirectory(appDir, () async {

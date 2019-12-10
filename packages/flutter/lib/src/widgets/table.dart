@@ -240,10 +240,10 @@ class _TableElement extends RenderObjectElement {
   _TableElement(Table widget) : super(widget);
 
   @override
-  Table get widget => super.widget;
+  Table get widget => super.widget as Table;
 
   @override
-  RenderTable get renderObject => super.renderObject;
+  RenderTable get renderObject => super.renderObject as RenderTable;
 
   // This class ignores the child's slot entirely.
   // Instead of doing incremental updates to the child list, it replaces the entire list each frame.
@@ -276,7 +276,7 @@ class _TableElement extends RenderObjectElement {
 
   @override
   void removeChildRenderObject(RenderObject child) {
-    final TableCellParentData childParentData = child.parentData;
+    final TableCellParentData childParentData = child.parentData as TableCellParentData;
     renderObject.setChild(childParentData.x, childParentData.y, null);
   }
 
@@ -326,7 +326,7 @@ class _TableElement extends RenderObjectElement {
       _children.isNotEmpty ? _children[0].children.length : 0,
       _children.expand<RenderBox>((_TableElementRow row) {
         return row.children.map<RenderBox>((Element child) {
-          final RenderBox box = child.renderObject;
+          final RenderBox box = child.renderObject as RenderBox;
           return box;
         });
       }).toList(),
@@ -367,7 +367,7 @@ class TableCell extends ParentDataWidget<Table> {
 
   @override
   void applyParentData(RenderObject renderObject) {
-    final TableCellParentData parentData = renderObject.parentData;
+    final TableCellParentData parentData = renderObject.parentData as TableCellParentData;
     if (parentData.verticalAlignment != verticalAlignment) {
       parentData.verticalAlignment = verticalAlignment;
       final AbstractNode targetParent = renderObject.parent;

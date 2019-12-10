@@ -91,7 +91,7 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
       return;
     }
     activity.updateDelegate(this);
-    final ScrollPositionWithSingleContext typedOther = other;
+    final ScrollPositionWithSingleContext typedOther = other as ScrollPositionWithSingleContext;
     _userScrollDirection = typedOther._userScrollDirection;
     assert(_currentDrag == null);
     if (typedOther._currentDrag != null) {

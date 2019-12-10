@@ -43,7 +43,6 @@ enum _ForceState {
 ///  * [ForcePressGestureRecognizer.onStart], [ForcePressGestureRecognizer.onPeak],
 ///    [ForcePressGestureRecognizer.onEnd], and [ForcePressGestureRecognizer.onUpdate]
 ///    which use [ForcePressDetails].
-///  * [ForcePressUpdateDetails], the details for [ForcePressUpdateCallback].
 class ForcePressDetails {
   /// Creates details for a [GestureForcePressStartCallback],
   /// [GestureForcePressPeakCallback] or [GestureForcePressEndCallback].
@@ -152,7 +151,7 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
   /// of [onStart] and/or [onPeak] and before the invocation of [onEnd], no
   /// matter what the pressure is during this time period. The position and
   /// pressure of the pointer is provided in the callback's `details` argument,
-  /// which is a [ForcePressUpdateDetails] object.
+  /// which is a [ForcePressDetails] object.
   GestureForcePressUpdateCallback onUpdate;
 
   /// A pointer is in contact with the screen and has just pressed with a force
@@ -190,7 +189,7 @@ class ForcePressGestureRecognizer extends OneSequenceGestureRecognizer {
   ///
   /// This function must always return values in the range 0.0 to 1.0 given a
   /// pressure that is between the minimum and maximum pressures. It may return
-  /// [double.NaN] for values that it does not want to support.
+  /// `double.NaN` for values that it does not want to support.
   ///
   /// By default, the function is a linear interpolation; however, changing the
   /// function could be useful to accommodate variations in the way different

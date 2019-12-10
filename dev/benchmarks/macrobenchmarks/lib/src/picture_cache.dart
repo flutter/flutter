@@ -20,7 +20,7 @@ class PictureCachePage extends StatelessWidget {
             return <Widget>[
               SliverOverlapAbsorber(
                 handle: NestedScrollView.sliverOverlapAbsorberHandleFor(context),
-                child: SliverAppBar(
+                sliver: SliverAppBar(
                   title: const Text('Picture Cache'),
                   pinned: true,
                   expandedHeight: 50.0,

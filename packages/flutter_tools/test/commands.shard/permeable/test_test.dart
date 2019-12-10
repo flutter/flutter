@@ -31,7 +31,9 @@ void main() {
     testUsingContext('report nice errors for exceptions thrown within testWidgets()', () async {
       Cache.flutterRoot = '../..';
       return _testFile('exception_handling', automatedTestsDirectory, flutterTestDirectory);
-    }, skip: io.Platform.isWindows); // TODO(chunhtai): Remove Skip https://github.com/flutter/flutter/issues/35425.
+    }, skip: true); // https://github.com/flutter/flutter/issues/46142
+    // Note: was skip: skip: io.Platform.isWindows
+    // TODO(chunhtai): Remove Skip https://github.com/flutter/flutter/issues/35425.
 
     testUsingContext('report a nice error when a guarded function was called without await', () async {
       Cache.flutterRoot = '../..';
@@ -75,7 +77,8 @@ void main() {
     testUsingContext('can load assets within its own package', () async {
       Cache.flutterRoot = '../..';
       return _testFile('package_assets', automatedTestsDirectory, flutterTestDirectory, exitCode: isZero);
-    }, skip: io.Platform.isWindows);
+    }, skip: true); // https://github.com/flutter/flutter/issues/46142
+    // Note, was skip: io.Platform.isWindows
 
     testUsingContext('run a test when its name matches a regexp', () async {
       Cache.flutterRoot = '../..';

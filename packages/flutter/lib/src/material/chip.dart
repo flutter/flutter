@@ -117,6 +117,18 @@ abstract class ChipAttributes {
   /// Defaults to 4 logical pixels on all sides.
   EdgeInsetsGeometry get padding;
 
+  /// Defines how compact the chip's layout will be.
+  ///
+  /// Chips are unaffected by horizontal density changes.
+  ///
+  /// {@macro flutter.material.themedata.visualDensity}
+  ///
+  /// See also:
+  ///
+  ///  * [ThemeData.visualDensity], which specifies the [density] for all widgets
+  ///    within a [Theme].
+  VisualDensity get visualDensity;
+
   /// The padding around the [label] widget.
   ///
   /// By default, this is 4 logical pixels at the beginning and the end of the
@@ -552,6 +564,7 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
     this.autofocus = false,
     this.backgroundColor,
     this.padding,
+    this.visualDensity,
     this.materialTapTargetSize,
     this.elevation,
     this.shadowColor,
@@ -581,6 +594,8 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
   final Color backgroundColor;
   @override
   final EdgeInsetsGeometry padding;
+  @override
+  final VisualDensity visualDensity;
   @override
   final Widget deleteIcon;
   @override
@@ -615,6 +630,7 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
       autofocus: autofocus,
       backgroundColor: backgroundColor,
       padding: padding,
+      visualDensity: visualDensity,
       materialTapTargetSize: materialTapTargetSize,
       elevation: elevation,
       shadowColor: shadowColor,
@@ -709,6 +725,7 @@ class InputChip extends StatelessWidget
     this.autofocus = false,
     this.backgroundColor,
     this.padding,
+    this.visualDensity,
     this.materialTapTargetSize,
     this.elevation,
     this.shadowColor,
@@ -770,6 +787,8 @@ class InputChip extends StatelessWidget
   @override
   final EdgeInsetsGeometry padding;
   @override
+  final VisualDensity visualDensity;
+  @override
   final MaterialTapTargetSize materialTapTargetSize;
   @override
   final double elevation;
@@ -810,6 +829,7 @@ class InputChip extends StatelessWidget
       autofocus: autofocus,
       backgroundColor: backgroundColor,
       padding: padding,
+      visualDensity: visualDensity,
       materialTapTargetSize: materialTapTargetSize,
       elevation: elevation,
       shadowColor: shadowColor,
@@ -904,6 +924,7 @@ class ChoiceChip extends StatelessWidget
     this.autofocus = false,
     this.backgroundColor,
     this.padding,
+    this.visualDensity,
     this.materialTapTargetSize,
     this.elevation,
     this.shadowColor,
@@ -950,6 +971,8 @@ class ChoiceChip extends StatelessWidget
   @override
   final EdgeInsetsGeometry padding;
   @override
+  final VisualDensity visualDensity;
+  @override
   final MaterialTapTargetSize materialTapTargetSize;
   @override
   final double elevation;
@@ -986,6 +1009,7 @@ class ChoiceChip extends StatelessWidget
       selectedColor: selectedColor ?? chipTheme.secondarySelectedColor,
       backgroundColor: backgroundColor,
       padding: padding,
+      visualDensity: visualDensity,
       isEnabled: isEnabled,
       materialTapTargetSize: materialTapTargetSize,
       elevation: elevation,
@@ -1111,6 +1135,7 @@ class FilterChip extends StatelessWidget
     this.autofocus = false,
     this.backgroundColor,
     this.padding,
+    this.visualDensity,
     this.materialTapTargetSize,
     this.elevation,
     this.shadowColor,
@@ -1159,6 +1184,8 @@ class FilterChip extends StatelessWidget
   @override
   final EdgeInsetsGeometry padding;
   @override
+  final VisualDensity visualDensity;
+  @override
   final MaterialTapTargetSize materialTapTargetSize;
   @override
   final double elevation;
@@ -1196,6 +1223,7 @@ class FilterChip extends StatelessWidget
       disabledColor: disabledColor,
       selectedColor: selectedColor,
       padding: padding,
+      visualDensity: visualDensity,
       isEnabled: isEnabled,
       materialTapTargetSize: materialTapTargetSize,
       elevation: elevation,
@@ -1276,6 +1304,7 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
     this.autofocus = false,
     this.backgroundColor,
     this.padding,
+    this.visualDensity,
     this.materialTapTargetSize,
     this.elevation,
     this.shadowColor,
@@ -1318,6 +1347,8 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
   @override
   final EdgeInsetsGeometry padding;
   @override
+  final VisualDensity visualDensity;
+  @override
   final MaterialTapTargetSize materialTapTargetSize;
   @override
   final double elevation;
@@ -1340,6 +1371,7 @@ class ActionChip extends StatelessWidget implements ChipAttributes, TappableChip
       focusNode: focusNode,
       autofocus: autofocus,
       padding: padding,
+      visualDensity: visualDensity,
       labelPadding: labelPadding,
       isEnabled: true,
       materialTapTargetSize: materialTapTargetSize,
@@ -1402,6 +1434,7 @@ class RawChip extends StatefulWidget
     @required this.label,
     this.labelStyle,
     this.padding,
+    this.visualDensity,
     this.labelPadding,
     Widget deleteIcon,
     this.onDeleted,
@@ -1482,6 +1515,8 @@ class RawChip extends StatefulWidget
   final Color backgroundColor;
   @override
   final EdgeInsetsGeometry padding;
+  @override
+  final VisualDensity visualDensity;
   @override
   final MaterialTapTargetSize materialTapTargetSize;
   @override
@@ -1846,6 +1881,7 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
                 ),
                 brightness: chipTheme.brightness,
                 padding: (widget.padding ?? chipTheme.padding).resolve(textDirection),
+                visualDensity: widget.visualDensity ?? theme.visualDensity,
                 labelPadding: (widget.labelPadding ?? chipTheme.labelPadding).resolve(textDirection),
                 showAvatar: hasAvatar,
                 showCheckmark: showCheckmark,
@@ -1865,9 +1901,10 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
       ),
     );
     BoxConstraints constraints;
+    final Offset densityAdjustment = (widget.visualDensity ?? theme.visualDensity).baseSizeAdjustment;
     switch (widget.materialTapTargetSize ?? theme.materialTapTargetSize) {
       case MaterialTapTargetSize.padded:
-        constraints = const BoxConstraints(minHeight: kMinInteractiveDimension);
+        constraints = BoxConstraints(minHeight: kMinInteractiveDimension + densityAdjustment.dy);
         break;
       case MaterialTapTargetSize.shrinkWrap:
         constraints = const BoxConstraints();
@@ -2114,6 +2151,7 @@ class _ChipRenderTheme {
     @required this.deleteIcon,
     @required this.brightness,
     @required this.padding,
+    @required this.visualDensity,
     @required this.labelPadding,
     @required this.showAvatar,
     @required this.showCheckmark,
@@ -2126,6 +2164,7 @@ class _ChipRenderTheme {
   final Widget deleteIcon;
   final Brightness brightness;
   final EdgeInsets padding;
+  final VisualDensity visualDensity;
   final EdgeInsets labelPadding;
   final bool showAvatar;
   final bool showCheckmark;
@@ -2492,6 +2531,7 @@ class _RenderChip extends RenderBox {
   void performLayout() {
     final BoxConstraints contentConstraints = constraints.loosen();
     // Find out the height of the label within the constraints.
+    final Offset densityAdjustment = Offset(0.0, theme.visualDensity.baseSizeAdjustment.dy / 2.0);
     label.layout(contentConstraints, parentUsesSize: true);
     final double contentSize = math.max(
       _kChipHeight - theme.padding.vertical + theme.labelPadding.vertical,
@@ -2507,7 +2547,7 @@ class _RenderChip extends RenderBox {
     final Size overallSize = Size(
       avatarSize.width + labelSize.width + deleteIconSize.width,
       contentSize,
-    );
+    ) + densityAdjustment;
 
     // Now we have all of the dimensions. Place the children where they belong.
 
@@ -2519,10 +2559,10 @@ class _RenderChip extends RenderBox {
       Offset boxOffset;
       switch (textDirection) {
         case TextDirection.rtl:
-          boxOffset = Offset(x - boxSize.width, (contentSize - boxSize.height) / 2.0);
+          boxOffset = Offset(x - boxSize.width, (contentSize - boxSize.height + densityAdjustment.dy) / 2.0);
           break;
         case TextDirection.ltr:
-          boxOffset = Offset(x, (contentSize - boxSize.height) / 2.0);
+          boxOffset = Offset(x, (contentSize - boxSize.height + densityAdjustment.dy) / 2.0);
           break;
       }
       return boxOffset;

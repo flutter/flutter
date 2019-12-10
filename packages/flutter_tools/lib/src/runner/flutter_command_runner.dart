@@ -8,8 +8,6 @@ import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:completion/completion.dart';
 import 'package:file/file.dart';
-import 'package:platform/platform.dart';
-import 'package:process/process.dart';
 
 import '../artifacts.dart';
 import '../base/common.dart';
@@ -17,10 +15,7 @@ import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart' as io;
 import '../base/logger.dart';
-import '../base/os.dart';
 import '../base/platform.dart';
-import '../base/process.dart';
-import '../base/process_manager.dart';
 import '../base/terminal.dart';
 import '../base/user_messages.dart';
 import '../base/utils.dart';
@@ -32,7 +27,6 @@ import '../globals.dart';
 import '../reporting/reporting.dart';
 import '../tester/flutter_tester.dart';
 import '../version.dart';
-import '../vmservice.dart';
 
 const String kFlutterRootEnvironmentVariableName = 'FLUTTER_ROOT'; // should point to //flutter/ (root of flutter/flutter repo)
 const String kFlutterEngineEnvironmentVariableName = 'FLUTTER_ENGINE'; // should point to //engine/src/ (root of flutter/engine repo)
@@ -96,10 +90,6 @@ class FlutterCommandRunner extends CommandRunner<void> {
     argParser.addFlag('suppress-analytics',
         negatable: false,
         help: 'Suppress analytics reporting when this command runs.');
-    argParser.addFlag('bug-report',
-        negatable: false,
-        help: 'Captures a bug report file to submit to the Flutter team.\n'
-              'Contains local paths, device identifiers, and log snippets.');
 
     String packagesHelp;
     bool showPackagesCommand;
@@ -141,19 +131,6 @@ class FlutterCommandRunner extends CommandRunner<void> {
     if (verboseHelp) {
       argParser.addSeparator('Options for testing the "flutter" tool itself:');
     }
-
-    argParser.addOption('record-to',
-        hide: !verboseHelp,
-        help: 'Enables recording of process invocations (including stdout and stderr of all such invocations), '
-              'and file system access (reads and writes).\n'
-              'Serializes that recording to a directory with the path specified in this flag. If the '
-              'directory does not already exist, it will be created.');
-    argParser.addOption('replay-from',
-        hide: !verboseHelp,
-        help: 'Enables mocking of process invocations by replaying their stdout, stderr, and exit code from '
-              'the specified recording (obtained via --record-to). The path specified in this flag must refer '
-              'to a directory that holds serialized process invocations structured according to the output of '
-              '--record-to.');
     argParser.addFlag('show-test-device',
         negatable: false,
         hide: !verboseHelp,
@@ -289,63 +266,6 @@ class FlutterCommandRunner extends CommandRunner<void> {
     if (topLevelResults['show-test-device'] as bool ||
         topLevelResults['device-id'] == FlutterTesterDevices.kTesterDeviceId) {
       FlutterTesterDevices.showFlutterTesterDevice = true;
-    }
-
-    String recordTo = topLevelResults['record-to'] as String;
-    String replayFrom = topLevelResults['replay-from'] as String;
-
-    if (topLevelResults['bug-report'] as bool) {
-      // --bug-report implies --record-to=<tmp_path>
-      final Directory tempDir = const LocalFileSystem()
-          .systemTempDirectory
-          .createTempSync('flutter_tools_bug_report.');
-      recordTo = tempDir.path;
-
-      // Record the arguments that were used to invoke this runner.
-      final File manifest = tempDir.childFile('MANIFEST.txt');
-      final StringBuffer buffer = StringBuffer()
-        ..writeln('# arguments')
-        ..writeln(topLevelResults.arguments)
-        ..writeln()
-        ..writeln('# rest')
-        ..writeln(topLevelResults.rest);
-      manifest.writeAsStringSync(buffer.toString(), flush: true);
-
-      // ZIP the recording up once the recording has been serialized.
-      addShutdownHook(() {
-        final File zipFile = getUniqueFile(fs.currentDirectory, 'bugreport', 'zip');
-        os.zip(tempDir, zipFile);
-        printStatus(userMessages.runnerBugReportFinished(zipFile.basename));
-      }, ShutdownStage.POST_PROCESS_RECORDING);
-      addShutdownHook(() => tempDir.deleteSync(recursive: true), ShutdownStage.CLEANUP);
-    }
-
-    assert(recordTo == null || replayFrom == null);
-
-    if (recordTo != null) {
-      recordTo = recordTo.trim();
-      if (recordTo.isEmpty) {
-        throwToolExit(userMessages.runnerNoRecordTo);
-      }
-      contextOverrides.addAll(<Type, dynamic>{
-        ProcessManager: getRecordingProcessManager(recordTo),
-        FileSystem: getRecordingFileSystem(recordTo),
-        Platform: getRecordingPlatform(recordTo),
-      });
-      VMService.enableRecordingConnection(recordTo);
-    }
-
-    if (replayFrom != null) {
-      replayFrom = replayFrom.trim();
-      if (replayFrom.isEmpty) {
-        throwToolExit(userMessages.runnerNoReplayFrom);
-      }
-      contextOverrides.addAll(<Type, dynamic>{
-        ProcessManager: await getReplayProcessManager(replayFrom),
-        FileSystem: getReplayFileSystem(replayFrom),
-        Platform: getReplayPlatform(replayFrom),
-      });
-      VMService.enableReplayConnection(replayFrom);
     }
 
     // We must set Cache.flutterRoot early because other features use it (e.g.

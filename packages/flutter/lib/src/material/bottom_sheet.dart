@@ -442,6 +442,49 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
 /// Returns a `Future` that resolves to the value (if any) that was passed to
 /// [Navigator.pop] when the modal bottom sheet was closed.
 ///
+/// {@animation 350 622 https://flutter.github.io/assets-for-api-docs/assets/material/show_modal_bottom_sheet.mp4}
+///
+/// {@tool snippet --template=stateless_widget_scaffold}
+///
+/// This example demonstrates how to use `showModalBottomSheet` to display a
+/// bottom sheet that obscures the content behind it when a user taps a button.
+/// It also demonstrates how to close the bottom sheet using the [Navigator]
+/// when a user taps on a button inside the bottom sheet.
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return Center(
+///     child: RaisedButton(
+///       child: const Text('showModalBottomSheet'),
+///       onPressed: () {
+///         showModalBottomSheet<void>(
+///           context: context,
+///           builder: (BuildContext context) {
+///             return Container(
+///               height: 200,
+///               color: Colors.amber,
+///               child: Center(
+///                 child: Column(
+///                   mainAxisAlignment: MainAxisAlignment.center,
+///                   mainAxisSize: MainAxisSize.min,
+///                   children: <Widget>[
+///                     const Text('Modal BottomSheet'),
+///                     RaisedButton(
+///                       child: const Text('Close BottomSheet'),
+///                       onPressed: () => Navigator.pop(context),
+///                     )
+///                   ],
+///                 ),
+///               ),
+///             );
+///           },
+///         );
+///       },
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
 /// See also:
 ///
 ///  * [BottomSheet], which becomes the parent of the widget returned by the

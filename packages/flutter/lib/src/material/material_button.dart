@@ -69,6 +69,7 @@ class MaterialButton extends StatelessWidget {
     this.highlightElevation,
     this.disabledElevation,
     this.padding,
+    this.visualDensity,
     this.shape,
     this.clipBehavior = Clip.none,
     this.focusNode,
@@ -311,6 +312,16 @@ class MaterialButton extends StatelessWidget {
   /// [ButtonThemeData.padding].
   final EdgeInsetsGeometry padding;
 
+  /// Defines how compact the button's layout will be.
+  ///
+  /// {@macro flutter.material.themedata.visualDensity}
+  ///
+  /// See also:
+  ///
+  ///  * [ThemeData.visualDensity], which specifies the [density] for all widgets
+  ///    within a [Theme].
+  final VisualDensity visualDensity;
+
   /// The shape of the button's [Material].
   ///
   /// The button's highlight and splash are clipped to this shape. If the
@@ -387,6 +398,7 @@ class MaterialButton extends StatelessWidget {
       hoverElevation: buttonTheme.getHoverElevation(this),
       highlightElevation: buttonTheme.getHighlightElevation(this),
       padding: buttonTheme.getPadding(this),
+      visualDensity: visualDensity ?? theme.visualDensity,
       constraints: buttonTheme.getConstraints(this).copyWith(
         minWidth: minWidth,
         minHeight: height,
@@ -416,6 +428,7 @@ class MaterialButton extends StatelessWidget {
     properties.add(ColorProperty('splashColor', splashColor, defaultValue: null));
     properties.add(DiagnosticsProperty<Brightness>('colorBrightness', colorBrightness, defaultValue: null));
     properties.add(DiagnosticsProperty<EdgeInsetsGeometry>('padding', padding, defaultValue: null));
+    properties.add(DiagnosticsProperty<VisualDensity>('visualDensity', visualDensity, defaultValue: null));
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
     properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode, defaultValue: null));
     properties.add(DiagnosticsProperty<MaterialTapTargetSize>('materialTapTargetSize', materialTapTargetSize, defaultValue: null));

@@ -290,10 +290,11 @@ const Set<String> _exemptTestImports = <String>{
 Future<void> verifyNoTestImports(String workingDirectory) async {
   final List<String> errors = <String>[];
   assert("// foo\nimport 'binding_test.dart' as binding;\n'".contains(_testImportPattern));
-  for (FileSystemEntity entity in Directory(path.join(workingDirectory, 'packages'))
+  final Iterable<File> dartFiles = Directory(path.join(workingDirectory, 'packages'))
     .listSync(recursive: true)
-    .where((FileSystemEntity entity) => entity is File && path.extension(entity.path) == '.dart')) {
-    final File file = entity;
+    .whereType<File>()
+    .where((File file) => path.extension(file.path) == '.dart');
+  for (File file in dartFiles) {
     for (String line in file.readAsLinesSync()) {
       final Match match = _testImportPattern.firstMatch(line);
       if (match != null && !_exemptTestImports.contains(match.group(2)))
@@ -316,11 +317,9 @@ Future<void> verifyNoTestPackageImports(String workingDirectory) async {
   final List<String> shims = <String>[];
   final List<String> errors = Directory(workingDirectory)
     .listSync(recursive: true)
-    .where((FileSystemEntity entity) {
-      return entity is File && entity.path.endsWith('.dart');
-    })
-    .map<String>((FileSystemEntity entity) {
-      final File file = entity;
+    .whereType<File>()
+    .where((File file) => file.path.endsWith('.dart'))
+    .map<String>((File file) {
       final String name = Uri.file(path.relative(file.path,
           from: workingDirectory)).toFilePath(windows: false);
       if (name.startsWith('bin/cache') ||
@@ -395,14 +394,10 @@ Future<void> verifyGeneratedPluginRegistrants(String flutterRoot) async {
 
   final Map<String, List<File>> packageToRegistrants = <String, List<File>>{};
 
-  for (FileSystemEntity entity in flutterRootDir.listSync(recursive: true)) {
-    if (entity is! File)
-      continue;
-    if (_isGeneratedPluginRegistrant(entity)) {
-      final String package = _getPackageFor(entity, flutterRootDir);
-      final List<File> registrants = packageToRegistrants.putIfAbsent(package, () => <File>[]);
-      registrants.add(entity);
-    }
+  for (File file in flutterRootDir.listSync(recursive: true).whereType<File>().where(_isGeneratedPluginRegistrant)) {
+    final String package = _getPackageFor(file, flutterRootDir);
+    final List<File> registrants = packageToRegistrants.putIfAbsent(package, () => <File>[]);
+    registrants.add(file);
   }
 
   final Set<String> outOfDate = <String>{};
@@ -497,10 +492,11 @@ Future<void> verifyNoBadImportsInFlutter(String workingDirectory) async {
 
 Future<void> verifyNoBadImportsInFlutterTools(String workingDirectory) async {
   final List<String> errors = <String>[];
-  for (FileSystemEntity entity in Directory(path.join(workingDirectory, 'packages', 'flutter_tools', 'lib'))
+  final Iterable<File> files = Directory(path.join(workingDirectory, 'packages', 'flutter_tools', 'lib'))
     .listSync(recursive: true)
-    .where((FileSystemEntity entity) => entity is File && path.extension(entity.path) == '.dart')) {
-    final File file = entity;
+    .whereType<File>()
+    .where((File file) => path.extension(file.path) == '.dart');
+  for (File file in files) {
     if (file.readAsStringSync().contains('package:flutter_tools/')) {
       errors.add('$yellow${file.path}$reset imports flutter_tools.');
     }
@@ -745,31 +741,33 @@ final RegExp _importPattern = RegExp(r'''^\s*import (['"])package:flutter/([^.]+
 final RegExp _importMetaPattern = RegExp(r'''^\s*import (['"])package:meta/meta\.dart\1''');
 
 Set<String> _findFlutterDependencies(String srcPath, List<String> errors, { bool checkForMeta = false }) {
-  return Directory(srcPath).listSync(recursive: true).where((FileSystemEntity entity) {
-    return entity is File && path.extension(entity.path) == '.dart';
-  }).map<Set<String>>((FileSystemEntity entity) {
-    final Set<String> result = <String>{};
-    final File file = entity;
-    for (String line in file.readAsLinesSync()) {
-      Match match = _importPattern.firstMatch(line);
-      if (match != null)
-        result.add(match.group(2));
-      if (checkForMeta) {
-        match = _importMetaPattern.firstMatch(line);
-        if (match != null) {
-          errors.add(
-            '${file.path}\nThis package imports the ${yellow}meta$reset package.\n'
-            'You should instead import the "foundation.dart" library.'
-          );
+  return Directory(srcPath)
+    .listSync(recursive: true)
+    .whereType<File>()
+    .where((File file) => path.extension(file.path) == '.dart')
+    .map<Set<String>>((File file) {
+      final Set<String> result = <String>{};
+      for (String line in file.readAsLinesSync()) {
+        Match match = _importPattern.firstMatch(line);
+        if (match != null)
+          result.add(match.group(2));
+        if (checkForMeta) {
+          match = _importMetaPattern.firstMatch(line);
+          if (match != null) {
+            errors.add(
+              '${file.path}\nThis package imports the ${yellow}meta$reset package.\n'
+              'You should instead import the "foundation.dart" library.'
+            );
+          }
         }
       }
-    }
-    return result;
-  }).reduce((Set<String> value, Set<String> element) {
-    value ??= <String>{};
-    value.addAll(element);
-    return value;
-  });
+      return result;
+    })
+    .reduce((Set<String> value, Set<String> element) {
+      value ??= <String>{};
+      value.addAll(element);
+      return value;
+    });
 }
 
 List<T> _deepSearch<T>(Map<T, Set<T>> map, T start, [ Set<T> seen ]) {
