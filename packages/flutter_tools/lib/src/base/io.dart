@@ -30,6 +30,7 @@ import 'dart:io' as io show exit, IOSink, Process, ProcessInfo, ProcessSignal,
     stderr, stdin, Stdin, StdinException, Stdout, stdout;
 
 import 'package:meta/meta.dart';
+import 'package:test_api/test_api.dart'; // ignore: deprecated_member_use
 
 import 'context.dart';
 import 'platform.dart';
@@ -92,12 +93,33 @@ ExitFunction _exitFunction = _defaultExitFunction;
 
 /// Exits the process.
 ///
+/// Throws [AssertionError] if assertions are enabled and the dart:io exit
+/// is still active when called. This may indicate exit was called in
+/// a test without being configured correctly.
+///
 /// This is analogous to the `exit` function in `dart:io`, except that this
 /// function may be set to a testing-friendly value by calling
 /// [setExitFunctionForTests] (and then restored to its default implementation
 /// with [restoreExitFunction]). The default implementation delegates to
 /// `dart:io`.
-ExitFunction get exit => _exitFunction;
+ExitFunction get exit {
+  assert(
+    _exitFunction != io.exit || !_inUnitTest(),
+    'io.exit was called with assertions active in a unit test',
+  );
+  return _exitFunction;
+}
+
+// Whether the tool is executing in a unit test.
+bool _inUnitTest() {
+  try {
+    expect(true, true);
+  } on StateError {
+    // If a StateError is caught, then this is not a unit test.
+    return false;
+  }
+  return true;
+}
 
 /// Sets the [exit] function to a function that throws an exception rather
 /// than exiting the process; this is intended for testing purposes.

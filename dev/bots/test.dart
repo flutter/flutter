@@ -775,8 +775,7 @@ Future<void> _runHostOnlyDeviceLabTests() async {
     () => _runDevicelabTest('module_test', environment: gradleEnvironment, testEmbeddingV2: true),
     () => _runDevicelabTest('plugin_dependencies_test', environment: gradleEnvironment),
 
-    // TODO(jmagman): Re-enable once flakiness is resolved, https://github.com/flutter/flutter/issues/37525
-    // if (Platform.isMacOS) () => _runDevicelabTest('module_test_ios'),
+    if (Platform.isMacOS) () => _runDevicelabTest('module_test_ios'),
     if (Platform.isMacOS) () => _runDevicelabTest('build_ios_framework_module_test'),
     if (Platform.isMacOS) () => _runDevicelabTest('plugin_lint_mac'),
     () => _runDevicelabTest('plugin_test', environment: gradleEnvironment),

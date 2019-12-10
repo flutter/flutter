@@ -9,6 +9,7 @@ import 'package:xml/xml.dart' as xml;
 import 'package:yaml/yaml.dart';
 
 import 'android/gradle_utils.dart' as gradle;
+import 'artifacts.dart';
 import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
@@ -456,6 +457,11 @@ class IosProject implements XcodeBasedProject {
     if (!pubspecChanged && !toolingChanged) {
       return;
     }
+
+    final Directory engineDest = ephemeralDirectory
+      .childDirectory('Flutter')
+      .childDirectory('engine');
+
     _deleteIfExistsSync(ephemeralDirectory);
     _overwriteFromTemplate(fs.path.join('module', 'ios', 'library'), ephemeralDirectory);
     // Add ephemeral host app, if a editable host app does not already exist.
@@ -463,6 +469,17 @@ class IosProject implements XcodeBasedProject {
       _overwriteFromTemplate(fs.path.join('module', 'ios', 'host_app_ephemeral'), ephemeralDirectory);
       if (hasPlugins(parent)) {
         _overwriteFromTemplate(fs.path.join('module', 'ios', 'host_app_ephemeral_cocoapods'), ephemeralDirectory);
+      }
+      // Copy podspec and framework from engine cache. The actual build mode
+      // doesn't actually matter as it will be overwritten by xcode_backend.sh.
+      // However, cocoapods will run before that script and requires something
+      // to be in this location.
+      final Directory framework = fs.directory(artifacts.getArtifactPath(Artifact.flutterFramework,
+        platform: TargetPlatform.ios, mode: BuildMode.debug));
+      if (framework.existsSync()) {
+        final File podspec = framework.parent.childFile('Flutter.podspec');
+        copyDirectorySync(framework, engineDest.childDirectory('Flutter.framework'));
+        podspec.copySync(engineDest.childFile('Flutter.podspec').path);
       }
     }
   }
