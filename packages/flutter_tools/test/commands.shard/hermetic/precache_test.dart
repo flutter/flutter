@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -27,7 +27,7 @@ void main() {
 
     when(cache.isUpToDate()).thenReturn(false);
     when(cache.updateAll(any)).thenAnswer((Invocation invocation) {
-      artifacts = invocation.positionalArguments.first;
+      artifacts = invocation.positionalArguments.first as Set<DevelopmentArtifact>;
       return Future<void>.value(null);
     });
     flutterVersion = MockFlutterVersion();

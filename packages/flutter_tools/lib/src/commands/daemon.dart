@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -35,7 +35,9 @@ const String protocolVersion = '0.5.3';
 /// It can be shutdown with a `daemon.shutdown` command (or by killing the
 /// process).
 class DaemonCommand extends FlutterCommand {
-  DaemonCommand({ this.hidden = false });
+  DaemonCommand({ this.hidden = false }) {
+    usesDartDefines();
+  }
 
   @override
   final String name = 'daemon';
@@ -58,8 +60,10 @@ class DaemonCommand extends FlutterCommand {
     await context.run<void>(
       body: () async {
         final Daemon daemon = Daemon(
-            stdinCommandStream, stdoutCommandResponse,
-            daemonCommand: this, notifyingLogger: notifyingLogger);
+          stdinCommandStream, stdoutCommandResponse,
+          notifyingLogger: notifyingLogger,
+          dartDefines: dartDefines,
+        );
 
         final int code = await daemon.onExit;
         if (code != 0) {
@@ -82,10 +86,17 @@ class Daemon {
   Daemon(
     Stream<Map<String, dynamic>> commandStream,
     this.sendCommand, {
-    this.daemonCommand,
     this.notifyingLogger,
     this.logToStdout = false,
+    @required this.dartDefines,
   }) {
+    if (dartDefines == null) {
+      throw Exception(
+        'dartDefines must not be null. This is a bug in Flutter.\n'
+        'Please file an issue at https://github.com/flutter/flutter/issues/new/choose',
+      );
+    }
+
     // Set up domains.
     _registerDomain(daemonDomain = DaemonDomain(this));
     _registerDomain(appDomain = AppDomain(this));
@@ -110,9 +121,9 @@ class Daemon {
   StreamSubscription<Map<String, dynamic>> _commandSubscription;
 
   final DispatchCommand sendCommand;
-  final DaemonCommand daemonCommand;
   final NotifyingLogger notifyingLogger;
   final bool logToStdout;
+  final List<String> dartDefines;
 
   final Completer<int> _onExitCompleter = Completer<int>();
   final Map<String, Domain> _domainMap = <String, Domain>{};
@@ -135,7 +146,7 @@ class Daemon {
     }
 
     try {
-      final String method = request['method'];
+      final String method = request['method'] as String;
       if (!method.contains('.')) {
         throw 'method not understood: $method';
       }
@@ -146,7 +157,7 @@ class Daemon {
         throw 'no domain for method: $method';
       }
 
-      _domainMap[prefix].handleCommand(name, id, request['params'] ?? const <String, dynamic>{});
+      _domainMap[prefix].handleCommand(name, id, castStringKeyedMap(request['params']) ?? const <String, dynamic>{});
     } catch (error, trace) {
       _send(<String, dynamic>{
         'id': id,
@@ -183,8 +194,6 @@ abstract class Domain {
   void registerHandler(String name, CommandHandler handler) {
     _handlers[name] = handler;
   }
-
-  FlutterCommand get command => daemon.daemonCommand;
 
   @override
   String toString() => name;
@@ -228,7 +237,7 @@ abstract class Domain {
     if (val != null && val is! String) {
       throw '$name is not a String';
     }
-    return val;
+    return val as String;
   }
 
   bool _getBoolArg(Map<String, dynamic> args, String name, { bool required = false }) {
@@ -239,7 +248,7 @@ abstract class Domain {
     if (val != null && val is! bool) {
       throw '$name is not a bool';
     }
-    return val;
+    return val as bool;
   }
 
   int _getIntArg(Map<String, dynamic> args, String name, { bool required = false }) {
@@ -250,7 +259,7 @@ abstract class Domain {
     if (val != null && val is! int) {
       throw '$name is not an int';
     }
-    return val;
+    return val as int;
   }
 
   void dispose() { }
@@ -424,7 +433,7 @@ class AppDomain extends Domain {
       viewFilter: isolateFilter,
       target: target,
       buildMode: options.buildInfo.mode,
-      dartDefines: command?.dartDefines,
+      dartDefines: daemon.dartDefines,
     );
 
     ResidentRunner runner;
@@ -437,7 +446,7 @@ class AppDomain extends Domain {
         debuggingOptions: options,
         ipv6: ipv6,
         stayResident: true,
-        dartDefines: command?.dartDefines,
+        dartDefines: daemon.dartDefines,
       );
     } else if (enableHotReload) {
       runner = HotRunner(
@@ -681,8 +690,8 @@ class DeviceDomain extends Domain {
       return;
     }
 
-    _discoverers.add(discoverer);
     if (discoverer is PollingDeviceDiscovery) {
+      _discoverers.add(discoverer);
       discoverer.onAdded.listen(_onDeviceEvent('device.added'));
       discoverer.onRemoved.listen(_onDeviceEvent('device.removed'));
     }
@@ -786,7 +795,7 @@ Stream<Map<String, dynamic>> get stdinCommandStream => stdin
   .where((String line) => line.startsWith('[{') && line.endsWith('}]'))
   .map<Map<String, dynamic>>((String line) {
     line = line.substring(1, line.length - 1);
-    return json.decode(line);
+    return castStringKeyedMap(json.decode(line));
   });
 
 void stdoutCommandResponse(Map<String, dynamic> command) {
@@ -924,7 +933,7 @@ class AppInstance {
     _logger.close();
   }
 
-  Future<T> _runInZone<T>(AppDomain domain, dynamic method()) {
+  Future<T> _runInZone<T>(AppDomain domain, FutureOr<T> method()) {
     _logger ??= _AppRunLogger(domain, this, parent: logToStdout ? logger : null);
 
     return context.run<T>(

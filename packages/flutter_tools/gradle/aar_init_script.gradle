@@ -1,7 +1,3 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-//
 // This script is used to initialize the build in a module or plugin project.
 // During this phase, the script applies the Maven plugin and configures the
 // destination of the local repository.

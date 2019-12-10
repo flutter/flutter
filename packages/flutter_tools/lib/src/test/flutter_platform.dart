@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -29,6 +29,7 @@ import '../globals.dart';
 import '../project.dart';
 import '../vmservice.dart';
 import 'test_compiler.dart';
+import 'test_config.dart';
 import 'watcher.dart';
 
 /// The timeout we give the test process to connect to the test harness
@@ -54,14 +55,6 @@ const Duration _kTestProcessTimeout = Duration(minutes: 5);
 /// process is spawned and when dart code execution begins; we don't want to
 /// hold that against the test.
 const String _kStartTimeoutTimerMessage = 'sky_shell test process has entered main method';
-
-/// The name of the test configuration file that will be discovered by the
-/// test harness if it exists in the project directory hierarchy.
-const String _kTestConfigFileName = 'flutter_test_config.dart';
-
-/// The name of the file that signals the root of the project and that will
-/// cause the test harness to stop scanning for configuration files.
-const String _kProjectRootSentinel = 'pubspec.yaml';
 
 /// The address at which our WebSocket server resides and at which the sky_shell
 /// processes will host the Observatory server.
@@ -293,7 +286,7 @@ class FlutterPlatform extends PlatformPlugin {
 
   /// The test compiler produces dill files for each test main.
   ///
-  /// To speed up compilation, each compile is intialized from an existing
+  /// To speed up compilation, each compile is initialized from an existing
   /// dill file from previous runs, if possible.
   TestCompiler compiler;
 
@@ -428,7 +421,7 @@ class FlutterPlatform extends PlatformPlugin {
             webSocket.complete(WebSocketTransformer.upgrade(request));
           }
         },
-        onError: (dynamic error, dynamic stack) {
+        onError: (dynamic error, StackTrace stack) {
           // If you reach here, it's unlikely we're going to be able to really handle this well.
           printTrace('test $ourTestCount: test harness socket server experienced an unexpected error: $error');
           if (!controllerSinkClosed) {
@@ -595,7 +588,7 @@ class FlutterPlatform extends PlatformPlugin {
               testSocket.add(json.encode(event));
             },
             onDone: harnessDone.complete,
-            onError: (dynamic error, dynamic stack) {
+            onError: (dynamic error, StackTrace stack) {
               // If you reach here, it's unlikely we're going to be able to really handle this well.
               printError('test harness controller stream experienced an unexpected error\ntest: $testPath\nerror: $error');
               if (!controllerSinkClosed) {
@@ -611,12 +604,11 @@ class FlutterPlatform extends PlatformPlugin {
           final Completer<void> testDone = Completer<void>();
           final StreamSubscription<dynamic> testToHarness = testSocket.listen(
             (dynamic encodedEvent) {
-              assert(encodedEvent
-                  is String); // we shouldn't ever get binary messages
-              controller.sink.add(json.decode(encodedEvent));
+              assert(encodedEvent is String); // we shouldn't ever get binary messages
+              controller.sink.add(json.decode(encodedEvent as String));
             },
             onDone: testDone.complete,
-            onError: (dynamic error, dynamic stack) {
+            onError: (dynamic error, StackTrace stack) {
               // If you reach here, it's unlikely we're going to be able to really handle this well.
               printError('test socket stream experienced an unexpected error\ntest: $testPath\nerror: $error');
               if (!controllerSinkClosed) {
@@ -744,25 +736,9 @@ class FlutterPlatform extends PlatformPlugin {
     Uri testUrl,
   }) {
     assert(testUrl.scheme == 'file');
-    File testConfigFile;
-    Directory directory = fs.file(testUrl).parent;
-    while (directory.path != directory.parent.path) {
-      final File configFile = directory.childFile(_kTestConfigFileName);
-      if (configFile.existsSync()) {
-        printTrace('Discovered $_kTestConfigFileName in ${directory.path}');
-        testConfigFile = configFile;
-        break;
-      }
-      if (directory.childFile(_kProjectRootSentinel).existsSync()) {
-        printTrace('Stopping scan for $_kTestConfigFileName; '
-            'found project root at ${directory.path}');
-        break;
-      }
-      directory = directory.parent;
-    }
     return generateTestBootstrap(
       testUrl: testUrl,
-      testConfigFile: testConfigFile,
+      testConfigFile: findTestConfigFile(fs.file(testUrl)),
       host: host,
       updateGoldens: updateGoldens,
     );
@@ -970,10 +946,11 @@ class _FlutterPlatformStreamSinkWrapper<S> implements StreamSink<S> {
       (List<dynamic> futureResults) {
         assert(futureResults.length == 2);
         assert(futureResults.first == null);
-        if (futureResults.last is _AsyncError) {
-          _done.completeError(futureResults.last.error, futureResults.last.stack);
+        final dynamic lastResult = futureResults.last;
+        if (lastResult is _AsyncError) {
+          _done.completeError(lastResult.error, lastResult.stack);
         } else {
-          assert(futureResults.last == null);
+          assert(lastResult == null);
           _done.complete();
         }
       },

@@ -1,11 +1,16 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:flutter/gestures.dart';
 
+import 'basic.dart';
 import 'focus_manager.dart';
+import 'focus_scope.dart';
 import 'framework.dart';
+import 'shortcuts.dart';
 
 /// Creates actions for use in defining shortcuts.
 ///
@@ -62,11 +67,11 @@ class Intent extends Diagnosticable {
 ///
 /// See also:
 ///
-///  - [Shortcuts], which is a widget that contains a key map, in which it looks
+///  * [Shortcuts], which is a widget that contains a key map, in which it looks
 ///    up key combinations in order to invoke actions.
-///  - [Actions], which is a widget that defines a map of [Intent] to [Action]
+///  * [Actions], which is a widget that defines a map of [Intent] to [Action]
 ///    and allows redefining of actions for its descendants.
-///  - [ActionDispatcher], a class that takes an [Action] and invokes it using a
+///  * [ActionDispatcher], a class that takes an [Action] and invokes it using a
 ///    [FocusNode] for context.
 abstract class Action extends Diagnosticable {
   /// A const constructor for an [Action].
@@ -92,7 +97,6 @@ abstract class Action extends Diagnosticable {
   /// null `node`. If the information available from a focus node is
   /// needed in the action, use [ActionDispatcher.invokeFocusedAction] instead.
   @protected
-  @mustCallSuper
   void invoke(FocusNode node, covariant Intent intent);
 
   @override
@@ -110,11 +114,11 @@ typedef OnInvokeCallback = void Function(FocusNode node, Intent tag);
 ///
 /// See also:
 ///
-///  - [Shortcuts], which is a widget that contains a key map, in which it looks
+///  * [Shortcuts], which is a widget that contains a key map, in which it looks
 ///    up key combinations in order to invoke actions.
-///  - [Actions], which is a widget that defines a map of [Intent] to [Action]
+///  * [Actions], which is a widget that defines a map of [Intent] to [Action]
 ///    and allows redefining of actions for its descendants.
-///  - [ActionDispatcher], a class that takes an [Action] and invokes it using a
+///  * [ActionDispatcher], a class that takes an [Action] and invokes it using a
 ///    [FocusNode] for context.
 class CallbackAction extends Action {
   /// A const constructor for an [Action].
@@ -169,12 +173,12 @@ class ActionDispatcher extends Diagnosticable {
 ///
 /// See also:
 ///
-///   * [ActionDispatcher], the object that this widget uses to manage actions.
-///   * [Action], a class for containing and defining an invocation of a user
-///     action.
-///   * [Intent], a class that holds a unique [LocalKey] identifying an action,
-///     as well as configuration information for running the [Action].
-///   * [Shortcuts], a widget used to bind key combinations to [Intent]s.
+///  * [ActionDispatcher], the object that this widget uses to manage actions.
+///  * [Action], a class for containing and defining an invocation of a user
+///    action.
+///  * [Intent], a class that holds a unique [LocalKey] identifying an action,
+///    as well as configuration information for running the [Action].
+///  * [Shortcuts], a widget used to bind key combinations to [Intent]s.
 class Actions extends InheritedWidget {
   /// Creates an [Actions] widget.
   ///
@@ -197,19 +201,21 @@ class Actions extends InheritedWidget {
   /// default-constructed [ActionDispatcher].
   final ActionDispatcher dispatcher;
 
+  /// {@template flutter.widgets.actions.actions}
   /// A map of [Intent] keys to [ActionFactory] factory methods that defines
   /// which actions this widget knows about.
   ///
   /// For performance reasons, it is recommended that a pre-built map is
   /// passed in here (e.g. a final variable from your widget class) instead of
   /// defining it inline in the build function.
+  /// {@endtemplate}
   final Map<LocalKey, ActionFactory> actions;
 
   // Finds the nearest valid ActionDispatcher, or creates a new one if it
   // doesn't find one.
   static ActionDispatcher _findDispatcher(Element element) {
     assert(element.widget is Actions);
-    final Actions actions = element.widget;
+    final Actions actions = element.widget as Actions;
     ActionDispatcher dispatcher = actions.dispatcher;
     if (dispatcher == null) {
       bool visitAncestorElement(Element visitedElement) {
@@ -217,7 +223,7 @@ class Actions extends InheritedWidget {
           // Continue visiting.
           return true;
         }
-        final Actions actions = visitedElement.widget;
+        final Actions actions = visitedElement.widget as Actions;
         if (actions.dispatcher == null) {
           // Continue visiting.
           return true;
@@ -243,8 +249,8 @@ class Actions extends InheritedWidget {
   /// The `context` argument must not be null.
   static ActionDispatcher of(BuildContext context, {bool nullOk = false}) {
     assert(context != null);
-    final InheritedElement inheritedElement = context.ancestorInheritedElementForWidgetOfExactType(Actions);
-    final Actions inherited = context.inheritFromElement(inheritedElement);
+    final InheritedElement inheritedElement = context.getElementForInheritedWidgetOfExactType<Actions>();
+    final Actions inherited = context.dependOnInheritedElement(inheritedElement) as Actions;
     assert(() {
       if (nullOk) {
         return true;
@@ -300,7 +306,7 @@ class Actions extends InheritedWidget {
       // Below when we invoke the action, we need to use the dispatcher from the
       // Actions widget where we found the action, in case they need to match.
       actionsElement = element;
-      final Actions actions = element.widget;
+      final Actions actions = element.widget as Actions;
       action = actions.actions[intent.key]?.call();
       // Keep looking if we failed to find and create an action.
       return action == null;
@@ -355,6 +361,350 @@ class Actions extends InheritedWidget {
   }
 }
 
+/// A widget that combines the functionality of [Actions], [Shortcuts],
+/// [MouseRegion] and a [Focus] widget to create a detector that defines actions
+/// and key bindings, and provides callbacks for handling focus and hover
+/// highlights.
+///
+/// This widget can be used to give a control the required detection modes for
+/// focus and hover handling. It is most often used when authoring a new control
+/// widget, and the new control should be enabled for keyboard traversal and
+/// activation.
+///
+/// {@tool snippet --template=stateful_widget_material}
+/// This example shows how keyboard interaction can be added to a custom control
+/// that changes color when hovered and focused, and can toggle a light when
+/// activated, either by touch or by hitting the `X` key on the keyboard.
+///
+/// This example defines its own key binding for the `X` key, but in this case,
+/// there is also a default key binding for [ActivateAction] in the default key
+/// bindings created by [WidgetsApp] (the parent for [MaterialApp], and
+/// [CupertinoApp]), so the `ENTER` key will also activate the control.
+///
+/// ```dart imports
+/// import 'package:flutter/services.dart';
+/// ```
+///
+/// ```dart preamble
+/// class FadButton extends StatefulWidget {
+///   const FadButton({Key key, this.onPressed, this.child}) : super(key: key);
+///
+///   final VoidCallback onPressed;
+///   final Widget child;
+///
+///   @override
+///   _FadButtonState createState() => _FadButtonState();
+/// }
+///
+/// class _FadButtonState extends State<FadButton> {
+///   bool _focused = false;
+///   bool _hovering = false;
+///   bool _on = false;
+///   Map<LocalKey, ActionFactory> _actionMap;
+///   Map<LogicalKeySet, Intent> _shortcutMap;
+///
+///   @override
+///   void initState() {
+///     super.initState();
+///     _actionMap = <LocalKey, ActionFactory>{
+///       ActivateAction.key: () {
+///         return CallbackAction(
+///           ActivateAction.key,
+///           onInvoke: (FocusNode node, Intent intent) => _toggleState(),
+///         );
+///       },
+///     };
+///     _shortcutMap = <LogicalKeySet, Intent>{
+///       LogicalKeySet(LogicalKeyboardKey.keyX): Intent(ActivateAction.key),
+///     };
+///   }
+///
+///   Color get color {
+///     Color baseColor = Colors.lightBlue;
+///     if (_focused) {
+///       baseColor = Color.alphaBlend(Colors.black.withOpacity(0.25), baseColor);
+///     }
+///     if (_hovering) {
+///       baseColor = Color.alphaBlend(Colors.black.withOpacity(0.1), baseColor);
+///     }
+///     return baseColor;
+///   }
+///
+///   void _toggleState() {
+///     setState(() {
+///       _on = !_on;
+///     });
+///   }
+///
+///   void _handleFocusHighlight(bool value) {
+///     setState(() {
+///       _focused = value;
+///     });
+///   }
+///
+///   void _handleHoveHighlight(bool value) {
+///     setState(() {
+///       _hovering = value;
+///     });
+///   }
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return GestureDetector(
+///       onTap: _toggleState,
+///       child: FocusableActionDetector(
+///         actions: _actionMap,
+///         shortcuts: _shortcutMap,
+///         onShowFocusHighlight: _handleFocusHighlight,
+///         onShowHoverHighlight: _handleHoveHighlight,
+///         child: Row(
+///           children: <Widget>[
+///             Container(
+///               padding: EdgeInsets.all(10.0),
+///               color: color,
+///               child: widget.child,
+///             ),
+///             Container(
+///               width: 30,
+///               height: 30,
+///               margin: EdgeInsets.all(10.0),
+///               color: _on ? Colors.red : Colors.transparent,
+///             ),
+///           ],
+///         ),
+///       ),
+///     );
+///   }
+/// }
+/// ```
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return Scaffold(
+///     appBar: AppBar(
+///       title: Text('FocusableActionDetector Example'),
+///     ),
+///     body: Center(
+///       child: Row(
+///         mainAxisAlignment: MainAxisAlignment.center,
+///         children: <Widget>[
+///           Padding(
+///             padding: const EdgeInsets.all(8.0),
+///             child: FlatButton(onPressed: () {}, child: Text('Press Me')),
+///           ),
+///           Padding(
+///             padding: const EdgeInsets.all(8.0),
+///             child: FadButton(onPressed: () {}, child: Text('And Me')),
+///           ),
+///         ],
+///       ),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
+/// This widget doesn't have any visual representation, it is just a detector that
+/// provides focus and hover capabilities.
+///
+/// It hosts its own [FocusNode] or uses [focusNode], if given.
+class FocusableActionDetector extends StatefulWidget {
+  /// Create a const [FocusableActionDetector].
+  ///
+  /// The [enabled], [autofocus], and [child] arguments must not be null.
+  const FocusableActionDetector({
+    Key key,
+    this.enabled = true,
+    this.focusNode,
+    this.autofocus = false,
+    this.shortcuts,
+    this.actions,
+    this.onShowFocusHighlight,
+    this.onShowHoverHighlight,
+    this.onFocusChange,
+    @required this.child,
+  })  : assert(enabled != null),
+        assert(autofocus != null),
+        assert(child != null),
+        super(key: key);
+
+  /// Is this widget enabled or not.
+  ///
+  /// If disabled, will not send any notifications needed to update highlight or
+  /// focus state, and will not define or respond to any actions or shortcuts.
+  ///
+  /// When disabled, adds [Focus] to the widget tree, but sets
+  /// [Focus.canRequestFocus] to false.
+  final bool enabled;
+
+  /// {@macro flutter.widgets.Focus.focusNode}
+  final FocusNode focusNode;
+
+  /// {@macro flutter.widgets.Focus.autofocus}
+  final bool autofocus;
+
+  /// {@macro flutter.widgets.actions.actions}
+  final Map<LocalKey, ActionFactory> actions;
+
+  /// {@macro flutter.widgets.shortcuts.shortcuts}
+  final Map<LogicalKeySet, Intent> shortcuts;
+
+  /// A function that will be called when the focus highlight should be shown or
+  /// hidden.
+  ///
+  /// This method is not triggered at the unmount of the widget.
+  final ValueChanged<bool> onShowFocusHighlight;
+
+  /// A function that will be called when the hover highlight should be shown or hidden.
+  ///
+  /// This method is not triggered at the unmount of the widget.
+  final ValueChanged<bool> onShowHoverHighlight;
+
+  /// A function that will be called when the focus changes.
+  ///
+  /// Called with true if the [focusNode] has primary focus.
+  final ValueChanged<bool> onFocusChange;
+
+  /// The child widget for this [FocusableActionDetector] widget.
+  ///
+  /// {@macro flutter.widgets.child}
+  final Widget child;
+
+  @override
+  _FocusableActionDetectorState createState() => _FocusableActionDetectorState();
+}
+
+class _FocusableActionDetectorState extends State<FocusableActionDetector> {
+  @override
+  void initState() {
+    super.initState();
+    SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
+      _updateHighlightMode(FocusManager.instance.highlightMode);
+    });
+    FocusManager.instance.addHighlightModeListener(_handleFocusHighlightModeChange);
+  }
+
+  @override
+  void dispose() {
+    FocusManager.instance.removeHighlightModeListener(_handleFocusHighlightModeChange);
+    super.dispose();
+  }
+
+  bool _canShowHighlight = false;
+  void _updateHighlightMode(FocusHighlightMode mode) {
+    _mayTriggerCallback(task: () {
+      switch (FocusManager.instance.highlightMode) {
+        case FocusHighlightMode.touch:
+          _canShowHighlight = false;
+          break;
+        case FocusHighlightMode.traditional:
+          _canShowHighlight = true;
+          break;
+      }
+    });
+  }
+
+  // Have to have this separate from the _updateHighlightMode because it gets
+  // called in initState, where things aren't mounted yet.
+  // Since this method is a highlight mode listener, it is only called
+  // immediately following pointer events.
+  void _handleFocusHighlightModeChange(FocusHighlightMode mode) {
+    if (!mounted) {
+      return;
+    }
+    _updateHighlightMode(mode);
+  }
+
+  bool _hovering = false;
+  void _handleMouseEnter(PointerEnterEvent event) {
+    assert(widget.onShowHoverHighlight != null);
+    if (!_hovering) {
+      _mayTriggerCallback(task: () {
+        _hovering = true;
+      });
+    }
+  }
+
+  void _handleMouseExit(PointerExitEvent event) {
+    assert(widget.onShowHoverHighlight != null);
+    if (_hovering) {
+      _mayTriggerCallback(task: () {
+        _hovering = false;
+      });
+    }
+  }
+
+  bool _focused = false;
+  void _handleFocusChange(bool focused) {
+    if (_focused != focused) {
+      _mayTriggerCallback(task: () {
+        _focused = focused;
+      });
+      widget.onFocusChange?.call(_focused);
+    }
+  }
+
+  // Record old states, do `task` if not null, then compare old states with the
+  // new states, and trigger callbacks if necessary.
+  //
+  // The old states are collected from `oldWidget` if it is provided, or the
+  // current widget (before doing `task`) otherwise. The new states are always
+  // collected from the current widget.
+  void _mayTriggerCallback({VoidCallback task, FocusableActionDetector oldWidget}) {
+    bool shouldShowHoverHighlight(FocusableActionDetector target) {
+      return _hovering && target.enabled && _canShowHighlight;
+    }
+    bool shouldShowFocusHighlight(FocusableActionDetector target) {
+      return _focused && target.enabled && _canShowHighlight;
+    }
+
+    assert(SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks);
+    final FocusableActionDetector oldTarget = oldWidget ?? widget;
+    final bool didShowHoverHighlight = shouldShowHoverHighlight(oldTarget);
+    final bool didShowFocusHighlight = shouldShowFocusHighlight(oldTarget);
+    if (task != null)
+      task();
+    final bool doShowHoverHighlight = shouldShowHoverHighlight(widget);
+    final bool doShowFocusHighlight = shouldShowFocusHighlight(widget);
+    if (didShowFocusHighlight != doShowFocusHighlight)
+      widget.onShowFocusHighlight?.call(doShowFocusHighlight);
+    if (didShowHoverHighlight != doShowHoverHighlight)
+      widget.onShowHoverHighlight?.call(doShowHoverHighlight);
+  }
+
+  @override
+  void didUpdateWidget(FocusableActionDetector oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.enabled != oldWidget.enabled) {
+      SchedulerBinding.instance.addPostFrameCallback((Duration duration) {
+        _mayTriggerCallback(oldWidget: oldWidget);
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    Widget child = MouseRegion(
+      onEnter: _handleMouseEnter,
+      onExit: _handleMouseExit,
+      child: Focus(
+        focusNode: widget.focusNode,
+        autofocus: widget.autofocus,
+        canRequestFocus: widget.enabled,
+        onFocusChange: _handleFocusChange,
+        child: widget.child,
+      ),
+    );
+    if (widget.enabled && widget.actions != null && widget.actions.isNotEmpty) {
+      child = Actions(actions: widget.actions, child: child);
+    }
+    if (widget.enabled && widget.shortcuts != null && widget.shortcuts.isNotEmpty) {
+      child = Shortcuts(shortcuts: widget.shortcuts, child: child);
+    }
+    return child;
+  }
+}
+
 /// An [Action], that, as the name implies, does nothing.
 ///
 /// This action is bound to the [Intent.doNothing] intent inside of
@@ -388,8 +738,7 @@ abstract class ActivateAction extends Action {
 /// An action that selects the currently focused control.
 ///
 /// This is an abstract class that serves as a base class for actions that
-/// select something, like a checkbox or a radio button. By default, it is bound
-/// to [LogicalKeyboardKey.space] in the default keyboard map in [WidgetsApp].
+/// select something. It is not bound to any key by default.
 abstract class SelectAction extends Action {
   /// Creates a [SelectAction] with a fixed [key];
   const SelectAction() : super(key);

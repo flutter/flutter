@@ -167,6 +167,12 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
+  picture_cache_perf__timeline_summary:
+    description: >
+      Measures the runtime performance of raster caching many pictures on Android.
+    stage: devicelab
+    required_agent_capabilities: ["mac/android"]
+
   cubic_bezier_perf__timeline_summary:
     description: >
       Measures the runtime performance of cubic bezier animations on Android.
@@ -560,6 +566,14 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac-catalina/android"]
 
+  # macOS target platform tests
+  hot_mode_dev_cycle_macos_target__benchmark:
+    description: >
+      Checks the functionality and performance of hot reload on a macOS target platform
+    stage: devicelab
+    required_agent_capabilities: ["mac/ios"]
+    flaky: true
+
   # Tests running on Windows host
 
   flavors_test_win:
@@ -610,13 +624,13 @@ tasks:
     description: >
       Tracks how many members are still lacking documentation.
     stage: devicelab
-    required_agent_capabilities: ["linux/android"]
+    required_agent_capabilities: ["linux-vm"]
 
   technical_debt__cost:
     description: >
       Estimates our technical debt (TODOs, analyzer ignores, etc).
     stage: devicelab
-    required_agent_capabilities: ["linux/android"]
+    required_agent_capabilities: ["linux-vm"]
 
   flutter_gallery__start_up:
     description: >
@@ -655,6 +669,12 @@ tasks:
       Measures memory usage for a list of large red squares in smaller containers.
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
+
+  fast_scroll_large_images__memory:
+    description: >
+      Measures memory usage for scrolling through a list of large images.
+    stage: devicelab
+    required_agent_capabilities: ["mac/android"]
 
   analyzer_benchmark:
     description: >

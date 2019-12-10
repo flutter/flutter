@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -11,6 +11,7 @@ import 'asset.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
+import 'base/net.dart';
 import 'build_info.dart';
 import 'bundle.dart';
 import 'compile.dart';
@@ -58,7 +59,7 @@ class DevFSFileContent extends DevFSContent {
   DevFSFileContent(this.file);
 
   final FileSystemEntity file;
-  FileSystemEntity _linkTarget;
+  File _linkTarget;
   FileStat _fileStat;
 
   File _getFile() {
@@ -69,7 +70,7 @@ class DevFSFileContent extends DevFSContent {
       // The link target.
       return fs.file(file.resolveSymbolicLinksSync());
     }
-    return file;
+    return file as File;
   }
 
   void _stat() {
@@ -88,7 +89,7 @@ class DevFSFileContent extends DevFSContent {
     if (_fileStat != null && _fileStat.type == FileSystemEntityType.link) {
       // Resolve, stat, and maybe cache the symlink target.
       final String resolved = file.resolveSymbolicLinksSync();
-      final FileSystemEntity linkTarget = fs.file(resolved);
+      final File linkTarget = fs.file(resolved);
       // Stat the link target.
       final FileStat fileStat = linkTarget.statSync();
       if (fileStat.type == FileSystemEntityType.notFound) {
@@ -224,7 +225,7 @@ class ServiceProtocolDevFSOperations implements DevFSOperations {
   @override
   Future<Uri> create(String fsName) async {
     final Map<String, dynamic> response = await vmService.vm.createDevFS(fsName);
-    return Uri.parse(response['uri']);
+    return Uri.parse(response['uri'] as String);
   }
 
   @override
@@ -265,17 +266,20 @@ class DevFSException implements Exception {
 
 class _DevFSHttpWriter {
   _DevFSHttpWriter(this.fsName, VMService serviceProtocol)
-    : httpAddress = serviceProtocol.httpAddress;
+    : httpAddress = serviceProtocol.httpAddress,
+      _client = (context.get<HttpClientFactory>() == null)
+        ? HttpClient()
+        : context.get<HttpClientFactory>()();
 
   final String fsName;
   final Uri httpAddress;
+  final HttpClient _client;
 
   static const int kMaxInFlight = 6;
 
   int _inFlight = 0;
   Map<Uri, DevFSContent> _outstanding;
   Completer<void> _completer;
-  final HttpClient _client = HttpClient();
 
   Future<void> write(Map<Uri, DevFSContent> entries) async {
     _client.maxConnectionsPerHost = kMaxInFlight;
@@ -530,5 +534,5 @@ class DevFS {
   }
 }
 
-/// Converts a platform-specific file path to a platform-independent Uri path.
+/// Converts a platform-specific file path to a platform-independent URL path.
 String _asUriPath(String filePath) => fs.path.toUri(filePath).path + '/';

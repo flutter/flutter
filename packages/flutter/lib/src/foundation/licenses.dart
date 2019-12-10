@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -115,7 +115,7 @@ enum _LicenseEntryWithLineBreaksParserState {
 /// license per frame is reasonable; doing more at the same time is ill-advised.
 /// Consider doing all the work at once using [compute] to move the work to
 /// another thread, or spreading the work across multiple frames using
-/// [scheduleTask].
+/// [SchedulerBinding.scheduleTask].
 class LicenseEntryWithLineBreaks extends LicenseEntry {
   /// Create a license entry for a license whose text is hard-wrapped within
   /// paragraphs and has paragraph breaks denoted by blank lines or with

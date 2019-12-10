@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -208,7 +208,7 @@ void createSettingsAarGradle(Directory androidDirectory) {
 ///
 /// * [project] is typically [FlutterProject.current()].
 /// * [androidBuildInfo] is the build configuration.
-/// * [target] is the target dart entrypoint. Typically, `lib/main.dart`.
+/// * [target] is the target dart entry point. Typically, `lib/main.dart`.
 /// * If [isBuildingBundle] is `true`, then the output artifact is an `*.aab`,
 ///   otherwise the output artifact is an `*.apk`.
 /// * The plugins are built as AARs if [shouldBuildPluginAsAar] is `true`. This isn't set by default
@@ -281,7 +281,7 @@ Future<void> buildGradleApp({
     command.add('-q');
   }
   if (artifacts is LocalEngineArtifacts) {
-    final LocalEngineArtifacts localEngineArtifacts = artifacts;
+    final LocalEngineArtifacts localEngineArtifacts = artifacts as LocalEngineArtifacts;
     final Directory localEngineRepo = _getLocalEngineRepo(
       engineOutPath: localEngineArtifacts.engineOutPath,
       androidBuildInfo: androidBuildInfo,
@@ -526,7 +526,7 @@ Future<void> buildGradleAar({
     command.add('-Ptarget-platform=$targetPlatforms');
   }
   if (artifacts is LocalEngineArtifacts) {
-    final LocalEngineArtifacts localEngineArtifacts = artifacts;
+    final LocalEngineArtifacts localEngineArtifacts = artifacts as LocalEngineArtifacts;
     final Directory localEngineRepo = _getLocalEngineRepo(
       engineOutPath: localEngineArtifacts.engineOutPath,
       androidBuildInfo: androidBuildInfo,

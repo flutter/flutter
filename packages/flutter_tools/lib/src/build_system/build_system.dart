@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -13,6 +13,7 @@ import 'package:pool/pool.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/platform.dart';
+import '../base/utils.dart';
 import '../cache.dart';
 import '../convert.dart';
 import '../globals.dart';
@@ -28,7 +29,7 @@ BuildSystem get buildSystem => context.get<BuildSystem>();
 /// A reasonable amount of files to open at the same time.
 ///
 /// This number is somewhat arbitrary - it is difficult to detect whether
-/// or not we'll run out of file descriptiors when using async dart:io
+/// or not we'll run out of file descriptors when using async dart:io
 /// APIs.
 const int kMaxOpenFiles = 64;
 
@@ -82,7 +83,7 @@ class BuildSystemConfig {
 ///
 /// ## Code review
 ///
-/// ### Targes should only depend on files that are provided as inputs
+/// ### Targets should only depend on files that are provided as inputs
 ///
 /// Example: gen_snapshot must be provided as an input to the aot_elf
 /// build steps, even though it isn't a source file. This ensures that changes
@@ -464,7 +465,7 @@ class _BuildInstance {
 
   final BuildSystemConfig buildSystemConfig;
   final Pool resourcePool;
-  final Map<String, AsyncMemoizer<void>> pending = <String, AsyncMemoizer<void>>{};
+  final Map<String, AsyncMemoizer<bool>> pending = <String, AsyncMemoizer<bool>>{};
   final Environment environment;
   final FileHashStore fileCache;
   final Map<String, File> inputFiles = <String, File>{};
@@ -671,7 +672,7 @@ class Node {
     }
     Map<String, Object> values;
     try {
-      values = json.decode(content);
+      values = castStringKeyedMap(json.decode(content));
     } on FormatException {
       // The json is malformed in some way.
       _dirty = true;

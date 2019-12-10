@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -38,7 +38,6 @@ class BuildAppBundleCommand extends BuildSubCommand {
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
     DevelopmentArtifact.androidGenSnapshot,
-    DevelopmentArtifact.universal,
   };
 
   @override
@@ -53,13 +52,13 @@ class BuildAppBundleCommand extends BuildSubCommand {
     final Map<CustomDimensions, String> usage = <CustomDimensions, String>{};
 
     usage[CustomDimensions.commandBuildAppBundleTargetPlatform] =
-        (argResults['target-platform'] as List<String>).join(',');
+        stringsArg('target-platform').join(',');
 
-    if (argResults['release']) {
+    if (boolArg('release')) {
       usage[CustomDimensions.commandBuildAppBundleBuildMode] = 'release';
-    } else if (argResults['debug']) {
+    } else if (boolArg('debug')) {
       usage[CustomDimensions.commandBuildAppBundleBuildMode] = 'debug';
-    } else if (argResults['profile']) {
+    } else if (boolArg('profile')) {
       usage[CustomDimensions.commandBuildAppBundleBuildMode] = 'profile';
     } else {
       // The build defaults to release.
@@ -71,8 +70,8 @@ class BuildAppBundleCommand extends BuildSubCommand {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final AndroidBuildInfo androidBuildInfo = AndroidBuildInfo(getBuildInfo(),
-      targetArchs: argResults['target-platform'].map<AndroidArch>(getAndroidArchForName),
-      shrink: argResults['shrink'],
+      targetArchs: stringsArg('target-platform').map<AndroidArch>(getAndroidArchForName),
+      shrink: boolArg('shrink'),
     );
     await androidBuilder.buildAab(
       project: FlutterProject.current(),

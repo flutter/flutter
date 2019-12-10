@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -496,6 +496,38 @@ void main() {
         textDirection: TextDirection.ltr,
         child: ListView(children: <Widget>[Container()]),
       ),
+    );
+  });
+
+  testWidgets('giving clipBehaviour Clip.None, will not add a ClipPath to the tree', (WidgetTester tester) async {
+    await tester.pumpWidget(Container(
+      clipBehavior: Clip.none,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(1),
+      ),
+      child: const SizedBox(),
+    ));
+
+    expect(
+      find.byType(ClipPath),
+      findsNothing,
+    );
+  });
+
+  testWidgets('giving clipBehaviour not a Clip.None, will add a ClipPath to the tree', (WidgetTester tester) async {
+    final Container container = Container(
+      clipBehavior: Clip.hardEdge,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(1),
+      ),
+      child: const SizedBox(),
+    );
+
+    await tester.pumpWidget(container);
+
+    expect(
+      find.byType(ClipPath),
+      findsOneWidget,
     );
   });
 }

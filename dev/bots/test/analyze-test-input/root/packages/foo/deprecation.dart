@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -52,3 +52,9 @@ void test8() { }
  'This feature was deprecated after v1.2.3.'
 )
 void test10() { }
+
+@Deprecated(
+  'URLs are not required. '
+  'This feature was deprecated after v2.0.0.'
+)
+void test11() { }

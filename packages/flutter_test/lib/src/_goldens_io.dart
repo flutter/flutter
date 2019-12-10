@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -6,7 +6,9 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math' as math;
 import 'dart:typed_data';
+import 'dart:ui';
 
+import 'package:flutter/widgets.dart' show Element;
 import 'package:image/image.dart';
 import 'package:path/path.dart' as path;
 // ignore: deprecated_member_use
@@ -135,7 +137,7 @@ class LocalComparisonOutput {
     if (result.diffs != null) {
       additionalFeedback = '\nFailure feedback can be found at '
         '${path.join(basedir.path, 'failures')}';
-      final Map<String, Image> diffs = result.diffs;
+      final Map<String, Image> diffs = result.diffs.cast<String, Image>();
       diffs.forEach((String name, Image image) {
         final File output = getFailureFile(
           key.isEmpty ? name : name + '_' + key,
@@ -239,4 +241,17 @@ ComparisonResult compareLists(List<int> test, List<int> master) {
     );
   }
   return ComparisonResult(passed: true);
+}
+
+/// An unsupported [WebGoldenComparator] that exists for API compatibility.
+class DefaultWebGoldenComparator extends WebGoldenComparator {
+  @override
+  Future<bool> compare(Element element, Size size, Uri golden) {
+    throw UnsupportedError('DefaultWebGoldenComparator is only supported on the web.');
+  }
+
+  @override
+  Future<void> update(Uri golden, Element element, Size size) {
+    throw UnsupportedError('DefaultWebGoldenComparator is only supported on the web.');
+  }
 }

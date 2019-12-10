@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -19,6 +19,7 @@ import 'package:process/process.dart';
 const String _kFlutterRootKey = 'FLUTTER_ROOT';
 const String _kGoldctlKey = 'GOLDCTL';
 const String _kServiceAccountKey = 'GOLD_SERVICE_ACCOUNT';
+const String _kTestBrowserKey = 'FLUTTER_TEST_BROWSER';
 
 /// A client for uploading image tests and making baseline requests to the
 /// Flutter Gold Dashboard.
@@ -58,7 +59,7 @@ class SkiaGoldClient {
   final io.HttpClient httpClient;
 
   /// The local [Directory] within the [comparisonRoot] for the current test
-  /// context. In this directory, the client will create image and json files
+  /// context. In this directory, the client will create image and JSON files
   /// for the goldctl tool to use.
   ///
   /// This is informed by the [FlutterGoldenFileComparator] [basedir]. It cannot
@@ -121,10 +122,15 @@ class SkiaGoldClient {
         .path,
     ];
 
-    await io.Process.run(
+    final io.ProcessResult result = await io.Process.run(
       _goldctl,
       authArguments,
     );
+
+    if (result.exitCode != 0) {
+      print('goldctl auth stdout: ${result.stdout}');
+      print('goldctl auth stderr: ${result.stderr}');
+    }
   }
 
   /// Executes the `imgtest init` command in the goldctl tool.
@@ -158,10 +164,15 @@ class SkiaGoldClient {
       throw NonZeroExitCode(1, buf.toString());
     }
 
-    await io.Process.run(
+    final io.ProcessResult result = await io.Process.run(
       _goldctl,
       imgtestInitArguments,
     );
+
+    if (result.exitCode != 0) {
+      print('goldctl imgtest init stdout: ${result.stdout}');
+      print('goldctl imgtest init stderr: ${result.stderr}');
+    }
   }
 
   /// Executes the `imgtest add` command in the goldctl tool.
@@ -186,11 +197,107 @@ class SkiaGoldClient {
       '--png-file', goldenFile.path,
     ];
 
-    await io.Process.run(
+    final io.ProcessResult result = await io.Process.run(
       _goldctl,
       imgtestArguments,
     );
+
+    if (result.exitCode != 0) {
+      print('goldctl imgtest add stdout: ${result.stdout}');
+      print('goldctl imgtest add stderr: ${result.stderr}');
+    }
+
     return true;
+  }
+
+  /// Executes the `imgtest init` command in the goldctl tool for tryjobs.
+  ///
+  /// The `imgtest` command collects and uploads test results to the Skia Gold
+  /// backend, the `init` argument initializes the current tryjob.
+  Future<void> tryjobInit() async {
+    final File keys = workDirectory.childFile('keys.json');
+    final File failures = workDirectory.childFile('failures.json');
+
+    await keys.writeAsString(_getKeysJSON());
+    await failures.create();
+    final String commitHash = await _getCurrentCommit();
+    final String pullRequest = platform.environment['CIRRUS_PR'];
+    final String cirrusTaskID = platform.environment['CIRRUS_TASK_ID'];
+
+
+    final List<String> imgtestInitArguments = <String>[
+      'imgtest', 'init',
+      '--instance', 'flutter',
+      '--work-dir', workDirectory
+        .childDirectory('temp')
+        .path,
+      '--commit', commitHash,
+      '--keys-file', keys.path,
+      '--failure-file', failures.path,
+      '--passfail',
+      '--crs', 'github',
+      '--changelist', pullRequest,
+      '--cis', 'cirrus',
+      '--jobid', cirrusTaskID,
+      '--patchset_id', commitHash,
+    ];
+
+    if (imgtestInitArguments.contains(null)) {
+      final StringBuffer buf = StringBuffer()
+        ..writeln('Null argument for Skia Gold tryjobInit:');
+      imgtestInitArguments.forEach(buf.writeln);
+      throw NonZeroExitCode(1, buf.toString());
+    }
+
+    final io.ProcessResult result = await io.Process.run(
+      _goldctl,
+      imgtestInitArguments,
+    );
+
+    if (result.exitCode != 0) {
+      final StringBuffer buf = StringBuffer()
+        ..writeln('Skia Gold tryjobInit failure.')
+        ..writeln('stdout: ${result.stdout}')
+        ..writeln('stderr: ${result.stderr}');
+      throw NonZeroExitCode(1, buf.toString());
+    }
+  }
+
+  /// Executes the `imgtest add` command in the goldctl tool for tryjobs.
+  ///
+  /// The `imgtest` command collects and uploads test results to the Skia Gold
+  /// backend, the `add` argument uploads the current image test. A response is
+  /// returned from the invocation of this command that indicates a pass or fail
+  /// result for the tryjob.
+  ///
+  /// The testName and goldenFile parameters reference the current comparison
+  /// being evaluated by the [FlutterSkiaGoldFileComparator].
+  Future<bool> tryjobAdd(String testName, File goldenFile) async {
+    assert(testName != null);
+    assert(goldenFile != null);
+
+    final List<String> imgtestArguments = <String>[
+      'imgtest', 'add',
+      '--work-dir', workDirectory
+        .childDirectory('temp')
+        .path,
+      '--test-name', cleanTestName(testName),
+      '--png-file', goldenFile.path,
+    ];
+
+    final io.ProcessResult result = await io.Process.run(
+      _goldctl,
+      imgtestArguments,
+    );
+
+    if (result.exitCode != 0) {
+      final StringBuffer buf = StringBuffer()
+        ..writeln('Skia Gold tryjobAdd failure.')
+        ..writeln('stdout: ${result.stdout}')
+        ..writeln('stderr: ${result.stderr}\n');
+      throw NonZeroExitCode(1, buf.toString());
+    }
+    return result.exitCode == 0;
   }
 
   /// Requests and sets the [_expectations] known to Flutter Gold at head.
@@ -205,10 +312,10 @@ class SkiaGoldClient {
         final io.HttpClientRequest request = await httpClient.getUrl(requestForExpectations);
         final io.HttpClientResponse response = await request.close();
         rawResponse = await utf8.decodeStream(response);
-        final Map<String, dynamic> skiaJson = json.decode(rawResponse)['master'];
+        final Map<String, dynamic> skiaJson = json.decode(rawResponse)['master'] as Map<String, dynamic>;
 
         skiaJson.forEach((String key, dynamic value) {
-          final Map<String, dynamic> hashesMap = value;
+          final Map<String, dynamic> hashesMap = value as Map<String, dynamic>;
           _expectations[key] = hashesMap.keys.toList();
         });
       } on FormatException catch(_) {
@@ -246,69 +353,6 @@ class SkiaGoldClient {
     return imageBytes;
   }
 
-  /// Returns a boolean value for whether or not the given test and current pull
-  /// request are ignored on Flutter Gold.
-  ///
-  /// This is only relevant when used by the [FlutterPreSubmitFileComparator]
-  /// when a golden file test fails. In order to land a change to an existing
-  /// golden file, an ignore must be set up in Flutter Gold. This will serve as
-  /// a flag to permit the change to land, protect against any unwanted changes,
-  /// and ensure that changes that have landed are triaged.
-  Future<bool> testIsIgnoredForPullRequest(String pullRequest, String testName) async {
-    bool ignoreIsActive = false;
-    testName = cleanTestName(testName);
-    String rawResponse;
-    await io.HttpOverrides.runWithHttpOverrides<Future<void>>(() async {
-      final Uri requestForIgnores = Uri.parse(
-        'https://flutter-gold.skia.org/json/ignores'
-      );
-
-      try {
-        final io.HttpClientRequest request = await httpClient.getUrl(requestForIgnores);
-        final io.HttpClientResponse response = await request.close();
-        rawResponse = await utf8.decodeStream(response);
-        final List<dynamic> ignores = json.decode(rawResponse);
-        for(Map<String, dynamic> ignore in ignores) {
-          final List<String> ignoredQueries = ignore['query'].split('&');
-          final String ignoredPullRequest = ignore['note'].split('/').last;
-          final DateTime expiration = DateTime.parse(ignore['expires']);
-          // The currently failing test is in the process of modification.
-          if (ignoredQueries.contains('name=$testName')) {
-            if (expiration.isAfter(DateTime.now())) {
-              ignoreIsActive = true;
-            } else {
-              // If any ignore is expired for the given test, throw with
-              // guidance.
-              final StringBuffer buf = StringBuffer()
-                ..writeln('This test has an expired ignore in place, and the')
-                ..writeln('change has not been triaged.')
-                ..writeln('The associated pull request is:')
-                ..writeln('https://github.com/flutter/flutter/pull/$ignoredPullRequest');
-              throw NonZeroExitCode(1, buf.toString());
-            }
-          }
-        }
-      } on FormatException catch(_) {
-        if (rawResponse.contains('stream timeout')) {
-          final StringBuffer buf = StringBuffer()
-            ..writeln('Stream timeout on /ignores api.')
-            ..writeln('This may be caused by a failure to triage a change.')
-            ..writeln('Check https://flutter-gold.skia.org/ignores, or')
-            ..writeln('https://flutter-gold.skia.org/?query=source_type%3Dflutter')
-            ..writeln('for untriaged golden files.');
-          throw NonZeroExitCode(1, buf.toString());
-        } else {
-          print('Formatting error detected requesting /ignores from Flutter Gold.'
-              '\nrawResponse: $rawResponse');
-          rethrow;
-        }
-      }
-    },
-      SkiaGoldHttpOverrides(),
-    );
-    return ignoreIsActive;
-  }
-
   /// The [_expectations] retrieved from Flutter Gold do not include the
   /// parameters of the given test. This function queries the Flutter Gold
   /// details api to determine if the given expectation for a test matches the
@@ -326,8 +370,8 @@ class SkiaGoldClient {
         final io.HttpClientRequest request = await httpClient.getUrl(requestForDigest);
         final io.HttpClientResponse response = await request.close();
         rawResponse = await utf8.decodeStream(response);
-        final Map<String, dynamic> skiaJson = json.decode(rawResponse);
-        final SkiaGoldDigest digest = SkiaGoldDigest.fromJson(skiaJson['digest']);
+        final Map<String, dynamic> skiaJson = json.decode(rawResponse) as Map<String, dynamic>;
+        final SkiaGoldDigest digest = SkiaGoldDigest.fromJson(skiaJson['digest'] as Map<String, dynamic>);
         isValid = digest.isValid(platform, testName, expectation);
 
       } on FormatException catch(_) {
@@ -358,21 +402,23 @@ class SkiaGoldClient {
         <String>['git', 'rev-parse', 'HEAD'],
         workingDirectory: _flutterRoot.path,
       );
-      return revParse.exitCode == 0 ? revParse.stdout.trim() : null;
+      return revParse.exitCode == 0 ? (revParse.stdout as String).trim() : null;
     }
   }
 
   /// Returns a JSON String with keys value pairs used to uniquely identify the
   /// configuration that generated the given golden file.
   ///
-  /// Currently, the only key value pair being tracked is the platform the image
-  /// was rendered on.
+  /// Currently, the only key value pairs being tracked is the platform the
+  /// image was rendered on, and for web tests, the browser the image was
+  /// rendered on.
   String _getKeysJSON() {
-    return json.encode(
-      <String, dynamic>{
-        'Platform' : platform.operatingSystem,
-      }
-    );
+    final Map<String, dynamic> keys = <String, dynamic>{
+      'Platform' : platform.operatingSystem,
+    };
+    if (platform.environment[_kTestBrowserKey] != null)
+      keys['Browser'] = platform.environment[_kTestBrowserKey];
+    return json.encode(keys);
   }
 
   /// Removes the file extension from the [fileName] to represent the test name
@@ -404,17 +450,17 @@ class SkiaGoldDigest {
     this.status,
   });
 
-  /// Create a digest from requested json.
+  /// Create a digest from requested JSON.
   factory SkiaGoldDigest.fromJson(Map<String, dynamic> json) {
     if (json == null)
       return null;
 
     return SkiaGoldDigest(
-      imageHash: json['digest'],
-      paramSet: Map<String, dynamic>.from(json['paramset'] ??
-        <String, String>{'Platform': 'none'}),
-      testName: json['test'],
-      status: json['status'],
+      imageHash: json['digest'] as String,
+      paramSet: Map<String, dynamic>.from(json['paramset'] as Map<String, dynamic> ??
+        <String, List<String>>{'Platform': <String>[]}),
+      testName: json['test'] as String,
+      status: json['status'] as String,
     );
   }
 
@@ -424,16 +470,18 @@ class SkiaGoldDigest {
   /// Parameter set for the given test, e.g. Platform : Windows.
   final Map<String, dynamic> paramSet;
 
-  /// Test name associated with the digest, e.g. positive or untriaged.
+  /// Test name associated with the digest, e.g. positive or un-triaged.
   final String testName;
 
-  /// Status of the given digest, e.g. positive or untriaged.
+  /// Status of the given digest, e.g. positive or un-triaged.
   final String status;
 
   /// Validates a given digest against the current testing conditions.
   bool isValid(Platform platform, String name, String expectation) {
     return imageHash == expectation
-      && paramSet['Platform'].contains(platform.operatingSystem)
+      && (paramSet['Platform'] as List<dynamic>).contains(platform.operatingSystem)
+      && (platform.environment[_kTestBrowserKey] == null
+         || paramSet['Browser'] == platform.environment[_kTestBrowserKey])
       && testName == name
       && status == 'positive';
     }

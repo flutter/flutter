@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -36,7 +36,9 @@ final String toolRoot = path.join(flutterRoot, 'packages', 'flutter_tools');
 final List<String> flutterTestArgs = <String>[];
 
 final bool useFlutterTestFormatter = Platform.environment['FLUTTER_TEST_FORMATTER'] == 'true';
-final bool canUseBuildRunner = Platform.environment['FLUTTER_TEST_NO_BUILD_RUNNER'] != 'true';
+
+// This is disabled due to https://github.com/dart-lang/build/issues/2562
+const bool canUseBuildRunner = false;
 
 /// The number of Cirrus jobs that run host-only devicelab tests in parallel.
 ///
@@ -66,7 +68,6 @@ const List<String> kWebTestFileBlacklist = <String>[
   'test/widgets/selectable_text_test.dart',
   'test/widgets/color_filter_test.dart',
   'test/widgets/editable_text_cursor_test.dart',
-  'test/widgets/shadow_test.dart',
   'test/widgets/raw_keyboard_listener_test.dart',
   'test/widgets/editable_text_test.dart',
   'test/widgets/widget_inspector_test.dart',
@@ -260,14 +261,17 @@ Future<void> _runToolTests() async {
       .map<String>((String name) => path.basenameWithoutExtension(name)),
     // The `dynamic` on the next line is because Map.fromIterable isn't generic.
     value: (dynamic subshard) => () async {
+      // Due to https://github.com/flutter/flutter/issues/46180, skip the hermetic directory
+      // on Windows.
+      final String suffix = Platform.isWindows && subshard == 'commands'
+        ? 'permeable'
+        : '';
       await _pubRunTest(
         toolsPath,
-        testPath: path.join(kTest, '$subshard$kDotShard'),
+        testPath: path.join(kTest, '$subshard$kDotShard', suffix),
         useBuildRunner: canUseBuildRunner,
         tableData: bigqueryApi?.tabledata,
-        // TODO(ianh): The integration tests fail to start on Windows if asserts are enabled.
-        // See https://github.com/flutter/flutter/issues/36476
-        enableFlutterToolAsserts: !(subshard == 'integration' && Platform.isWindows),
+        enableFlutterToolAsserts: true,
       );
     },
   );
@@ -293,12 +297,20 @@ Future<void> _runBuildTests() async {
       await _flutterBuildIpa(examplePath);
     }
   }
-  // Web compilation tests.
-  await _flutterBuildDart2js(path.join('dev', 'integration_tests', 'web'), path.join('lib', 'main.dart'));
-  // Should not fail to compile with dart:io.
-  await _flutterBuildDart2js(path.join('dev', 'integration_tests', 'web_compile_tests'),
-    path.join('lib', 'dart_io_import.dart'),
-  );
+
+  final String branch = Platform.environment['CIRRUS_BRANCH'];
+  if (branch != 'beta' && branch != 'stable') {
+    // Web compilation tests.
+    await _flutterBuildDart2js(
+      path.join('dev', 'integration_tests', 'web'),
+      path.join('lib', 'main.dart'),
+    );
+    // Should not fail to compile with dart:io.
+    await _flutterBuildDart2js(
+      path.join('dev', 'integration_tests', 'web_compile_tests'),
+      path.join('lib', 'dart_io_import.dart'),
+    );
+  }
 }
 
 Future<void> _flutterBuildAot(String relativePathToApplication) async {
@@ -327,6 +339,9 @@ Future<void> _flutterBuildIpa(String relativePathToApplication) async {
     await runCommand('pod',
       <String>['install'],
       workingDirectory: podfile.parent.path,
+      environment: <String, String>{
+        'LANG': 'en_US.UTF-8',
+      },
     );
   }
   await runCommand(flutter,
@@ -407,6 +422,7 @@ Future<void> _runFrameworkTests() async {
     await _pubRunTest(path.join(flutterRoot, 'dev', 'bots'), tableData: bigqueryApi?.tabledata);
     await _pubRunTest(path.join(flutterRoot, 'dev', 'devicelab'), tableData: bigqueryApi?.tabledata);
     await _pubRunTest(path.join(flutterRoot, 'dev', 'snippets'), tableData: bigqueryApi?.tabledata);
+    await _pubRunTest(path.join(flutterRoot, 'dev', 'tools'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'android_semantics_testing'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'manual_tests'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'vitool'), tableData: bigqueryApi?.tabledata);
@@ -757,6 +773,7 @@ Future<void> _runHostOnlyDeviceLabTests() async {
 
     () => _runDevicelabTest('module_host_with_custom_build_test', environment: gradleEnvironment, testEmbeddingV2: true),
     () => _runDevicelabTest('module_test', environment: gradleEnvironment, testEmbeddingV2: true),
+    () => _runDevicelabTest('plugin_dependencies_test', environment: gradleEnvironment),
 
     // TODO(jmagman): Re-enable once flakiness is resolved, https://github.com/flutter/flutter/issues/37525
     // if (Platform.isMacOS) () => _runDevicelabTest('module_test_ios'),
@@ -963,7 +980,7 @@ Future<String> verifyVersion(File file) async {
 }
 
 /// If the CIRRUS_TASK_NAME environment variable exists, we use that to determine
-/// the shard and subshard (parsing it in the form shard-subshard-platform, ignoring
+/// the shard and sub-shard (parsing it in the form shard-subshard-platform, ignoring
 /// the platform).
 ///
 /// However, for local testing you can just set the SHARD and SUBSHARD
