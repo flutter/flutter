@@ -382,6 +382,12 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
+  time_to_development_benchmark__android:
+    description: >
+      Measures time from flutter run until resident runner setup is complete.
+    stage: devicelab
+    required_agent_capabilities: ["linux/android"]
+
   # iOS on-device tests
 
   tiles_scroll_perf_ios__timeline_summary:
