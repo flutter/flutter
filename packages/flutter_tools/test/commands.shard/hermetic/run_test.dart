@@ -235,6 +235,7 @@ void main() {
         final MockDevice mockDevice = MockDevice(TargetPlatform.ios);
         when(mockDevice.isLocalEmulator).thenAnswer((Invocation invocation) => Future<bool>.value(false));
         when(mockDevice.getLogReader(app: anyNamed('app'))).thenReturn(MockDeviceLogReader());
+        when(mockDevice.supportsFastStart).thenReturn(true);
         // App fails to start because we're only interested in usage
         when(mockDevice.startApp(
           any,
