@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -392,21 +392,15 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   // to select vertically past the end or beginning of the field. If they do,
   // then we need to keep the old cursor location so that we can go back to it
   // if they change their minds. Only used for moving selection up and down in a
-  // multi-line text field when selecting using the keyboard.
+  // multiline text field when selecting using the keyboard.
   int _cursorResetLocation = -1;
 
   // Whether we should reset the location of the cursor in the case the user
   // tries to select vertically past the end or beginning of the field. If they
   // do, then we need to keep the old cursor location so that we can go back to
   // it if they change their minds. Only used for resetting selection up and
-  // down in a multi-line text field when selecting using the keyboard.
+  // down in a multiline text field when selecting using the keyboard.
   bool _wasSelectingVerticallyWithKeyboard = false;
-
-  // This is the affinity we use when a platform-supplied value has null
-  // affinity.
-  //
-  // This affinity should never be null.
-  TextAffinity _fallbackAffinity = TextAffinity.downstream;
 
   // Call through to onSelectionChanged.
   void _handleSelectionChange(
@@ -422,17 +416,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (onSelectionChanged != null) {
       onSelectionChanged(nextSelection, this, cause);
     }
-  }
-
-  // Sets the fallback affinity to the affinity of the selection.
-  void _setFallbackAffinity(
-    TextAffinity affinity,
-  ) {
-    assert(affinity != null);
-    // Engine-computed selections will always compute affinity when necessary.
-    // Cache this affinity in the case where the platform supplied selection
-    // does not provide an affinity.
-    _fallbackAffinity = affinity;
   }
 
   static final Set<LogicalKeyboardKey> _movementKeys = <LogicalKeyboardKey>{
@@ -750,7 +733,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
 
   /// The text to display.
-  TextSpan get text => _textPainter.text;
+  TextSpan get text => _textPainter.text as TextSpan;
   final TextPainter _textPainter;
   set text(TextSpan value) {
     if (_textPainter.text == value)
@@ -980,15 +963,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   set selection(TextSelection value) {
     if (_selection == value)
       return;
-    // Use the _fallbackAffinity when the set selection has a null
-    // affinity. This happens when the platform does not supply affinity,
-    // in which case using the fallback affinity computed from dart:ui will
-    // be superior to simply defaulting to TextAffinity.downstream.
-    if (value.affinity == null) {
-      _selection = value.copyWith(affinity: _fallbackAffinity);
-    } else {
-      _selection = value;
-    }
+    _selection = value;
     _selectionRects = null;
     markNeedsPaint();
     markNeedsSemanticsUpdate();
@@ -1591,7 +1566,6 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     );
     // Call [onSelectionChanged] only when the selection actually changed.
     _handleSelectionChange(newSelection, cause);
-    _setFallbackAffinity(newSelection.affinity);
   }
 
   /// Select a word around the location of the last tap down.
@@ -1640,18 +1614,15 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       return;
     }
     final TextPosition position = _textPainter.getPositionForOffset(globalToLocal(_lastTapDownPosition - _paintOffset));
-    _setFallbackAffinity(position.affinity);
     final TextRange word = _textPainter.getWordBoundary(position);
-    final TextRange lineBoundary = _textPainter.getLineBoundary(position);
-    final bool endOfLine = lineBoundary?.end == position.offset && position.affinity != null;
     if (position.offset - word.start <= 1) {
       _handleSelectionChange(
-        TextSelection.collapsed(offset: word.start, affinity: endOfLine ? position.affinity : TextAffinity.downstream),
+        TextSelection.collapsed(offset: word.start, affinity: TextAffinity.downstream),
         cause,
       );
     } else {
       _handleSelectionChange(
-        TextSelection.collapsed(offset: word.end, affinity: endOfLine ? position.affinity : TextAffinity.upstream),
+        TextSelection.collapsed(offset: word.end, affinity: TextAffinity.upstream),
         cause,
       );
     }
@@ -1719,6 +1690,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     assert(defaultTargetPlatform != null);
     switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
         return Rect.fromLTWH(0.0, 0.0, cursorWidth, preferredLineHeight + 2);
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
@@ -1777,6 +1749,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (caretHeight != null) {
       switch (defaultTargetPlatform) {
         case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
           final double heightDiff = caretHeight - caretRect.height;
           // Center the caret vertically along the text.
           caretRect = Rect.fromLTWH(
@@ -1982,8 +1955,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   void _paintHandleLayers(PaintingContext context, List<TextSelectionPoint> endpoints) {
     Offset startPoint = endpoints[0].point;
     startPoint = Offset(
-      startPoint.dx.clamp(0.0, size.width),
-      startPoint.dy.clamp(0.0, size.height),
+      startPoint.dx.clamp(0.0, size.width) as double,
+      startPoint.dy.clamp(0.0, size.height) as double,
     );
     context.pushLayer(
       LeaderLayer(link: startHandleLayerLink, offset: startPoint),
@@ -1993,8 +1966,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (endpoints.length == 2) {
       Offset endPoint = endpoints[1].point;
       endPoint = Offset(
-        endPoint.dx.clamp(0.0, size.width),
-        endPoint.dy.clamp(0.0, size.height),
+        endPoint.dx.clamp(0.0, size.width) as double,
+        endPoint.dy.clamp(0.0, size.height) as double,
       );
       context.pushLayer(
         LeaderLayer(link: endHandleLayerLink, offset: endPoint),

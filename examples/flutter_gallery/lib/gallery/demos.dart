@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -22,8 +22,8 @@ class GalleryDemoCategory {
       return true;
     if (runtimeType != other.runtimeType)
       return false;
-    final GalleryDemoCategory typedOther = other;
-    return typedOther.name == name && typedOther.icon == icon;
+    return other is GalleryDemoCategory
+        && other.name == name && other.icon == icon;
   }
 
   @override
@@ -590,6 +590,6 @@ final Map<GalleryDemoCategory, List<GalleryDemo>> kGalleryCategoryToDemos =
 final Map<String, String> kDemoDocumentationUrl =
     Map<String, String>.fromIterable(
       kAllGalleryDemos.where((GalleryDemo demo) => demo.documentationUrl != null),
-      key: (dynamic demo) => demo.routeName,
-      value: (dynamic demo) => demo.documentationUrl,
+      key: (dynamic demo) => (demo as GalleryDemo).routeName,
+      value: (dynamic demo) => (demo as GalleryDemo).documentationUrl,
     );

@@ -1,9 +1,10 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:async';
 import 'dart:io' as io;
+import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:file/file.dart';
@@ -128,9 +129,14 @@ abstract class FlutterGoldenFileComparator extends GoldenFileComparator {
   Uri getTestUri(Uri key, int version) => key;
 
   /// Calculate the appropriate basedir for the current test context.
+  ///
+  /// The optional [suffix] argument is used by the
+  /// [FlutterSkiaGoldFileComparator] and the [FlutterPreSubmitFileComparator].
+  /// These [FlutterGoldenFileComparators] randomize their base directories to
+  /// maintain thread safety while using the `goldctl` tool.
   @protected
   @visibleForTesting
-  static Directory getBaseDirectory(LocalFileComparator defaultComparator, Platform platform) {
+  static Directory getBaseDirectory(LocalFileComparator defaultComparator, Platform platform, {String suffix = ''}) {
     const FileSystem fs = LocalFileSystem();
     final Directory flutterRoot = fs.directory(platform.environment[_kFlutterRootKey]);
     final Directory comparisonRoot = flutterRoot.childDirectory(
@@ -138,7 +144,7 @@ abstract class FlutterGoldenFileComparator extends GoldenFileComparator {
         'bin',
         'cache',
         'pkg',
-        'skia_goldens',
+        'skia_goldens$suffix',
       )
     );
     final Directory testDirectory = fs.directory(defaultComparator.basedir);
@@ -156,7 +162,7 @@ abstract class FlutterGoldenFileComparator extends GoldenFileComparator {
     return goldenFile;
   }
 
-  /// Prepends the golden Uri with the library name that encloses the current
+  /// Prepends the golden URL with the library name that encloses the current
   /// test.
   Uri _addPrefix(Uri golden) {
     final String prefix = basedir.pathSegments[basedir.pathSegments.length - 2];
@@ -214,11 +220,9 @@ class FlutterSkiaGoldFileComparator extends FlutterGoldenFileComparator {
     final Directory baseDirectory = FlutterGoldenFileComparator.getBaseDirectory(
       defaultComparator,
       platform,
+      suffix: '${math.Random().nextInt(10000)}',
     );
-
-    if(!baseDirectory.existsSync()) {
-      baseDirectory.createSync(recursive: true);
-    }
+    baseDirectory.createSync(recursive: true);
 
     goldens ??= SkiaGoldClient(baseDirectory);
     await goldens.auth();
@@ -297,47 +301,23 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
     final Directory baseDirectory = FlutterGoldenFileComparator.getBaseDirectory(
       defaultComparator,
       platform,
+      suffix: '${math.Random().nextInt(10000)}',
     );
-
-    if(!baseDirectory.existsSync()) {
-      baseDirectory.createSync(recursive: true);
-    }
+    baseDirectory.createSync(recursive: true);
 
     goldens ??= SkiaGoldClient(baseDirectory);
-    await goldens.getExpectations();
-
+    await goldens.auth();
+    await goldens.tryjobInit();
     return FlutterPreSubmitFileComparator(baseDirectory.uri, goldens);
   }
 
   @override
   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
     golden = _addPrefix(golden);
-    final String testName = skiaClient.cleanTestName(golden.path);
-    final List<String> testExpectations = skiaClient.expectations[testName];
+    await update(golden, imageBytes);
+    final File goldenFile = getGoldenFile(golden);
 
-    if (testExpectations == null) {
-      // There is no baseline for this test
-      return true;
-    }
-
-    ComparisonResult result;
-    for (String expectation in testExpectations) {
-      final List<int> goldenBytes = await skiaClient.getImageBytes(expectation);
-
-      result = GoldenFileComparator.compareLists(
-        imageBytes,
-        goldenBytes,
-      );
-
-      if (result.passed) {
-        return true;
-      }
-    }
-
-    return skiaClient.testIsIgnoredForPullRequest(
-      platform.environment['CIRRUS_PR'] ?? '',
-      golden.path,
-    );
+    return skiaClient.tryjobAdd(golden.path, goldenFile);
   }
 
   /// Decides based on the current environment whether goldens tests should be

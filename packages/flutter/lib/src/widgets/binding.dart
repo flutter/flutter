@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -214,7 +214,9 @@ abstract class WidgetsBindingObserver {
   ///    boilerplate.
   void didChangeTextScaleFactor() { }
 
-  /// {@macro on_platform_brightness_change}
+  /// Called when the platform brightness changes.
+  ///
+  /// This method exposes notifications from [Window.onPlatformBrightnessChanged].
   void didChangePlatformBrightness() { }
 
   /// Called when the system tells the app that the user's locale has
@@ -321,6 +323,27 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
             // on it returning a string and not a boolean.
             'enabled': firstFrameRasterized ? 'true' : 'false',
           };
+        },
+      );
+
+      // Register the ability to quickly mark elements as dirty.
+      // The performance of this method may be improved with additional
+      // information from https://github.com/flutter/flutter/issues/46195.
+      registerServiceExtension(
+        name: 'fastReassemble',
+        callback: (Map<String, Object> params) async {
+          final String className = params['class'];
+          void markElementsDirty(Element element) {
+            if (element == null) {
+              return;
+            }
+            if (element.widget?.runtimeType?.toString()?.startsWith(className) ?? false) {
+              element.markNeedsBuild();
+            }
+            element.visitChildElements(markElementsDirty);
+          }
+          markElementsDirty(renderViewElement);
+          return <String, String>{'Success': 'true'};
         },
       );
 
@@ -533,7 +556,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
       case 'popRoute':
         return handlePopRoute();
       case 'pushRoute':
-        return handlePushRoute(methodCall.arguments);
+        return handlePushRoute(methodCall.arguments as String);
     }
     return Future<dynamic>.value();
   }
@@ -561,8 +584,8 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   @override
   Future<void> handleSystemMessage(Object systemMessage) async {
     await super.handleSystemMessage(systemMessage);
-    final Map<String, dynamic> message = systemMessage;
-    final String type = message['type'];
+    final Map<String, dynamic> message = systemMessage as Map<String, dynamic>;
+    final String type = message['type'] as String;
     switch (type) {
       case 'memoryPressure':
         handleMemoryPressure();
@@ -813,13 +836,16 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   ///
   /// This is called by [runApp] to configure the widget tree.
   ///
-  /// See also [RenderObjectToWidgetAdapter.attachToRenderTree].
+  /// See also:
+  ///
+  ///  * [RenderObjectToWidgetAdapter.attachToRenderTree], which inflates a
+  ///    widget and attaches it to the render tree.
   void attachRootWidget(Widget rootWidget) {
     _renderViewElement = RenderObjectToWidgetAdapter<RenderBox>(
       container: renderView,
       debugShortDescription: '[root]',
       child: rootWidget,
-    ).attachToRenderTree(buildOwner, renderViewElement);
+    ).attachToRenderTree(buildOwner, renderViewElement as RenderObjectToWidgetElement<RenderBox>);
   }
 
   /// Whether the [renderViewElement] has been initialized.
@@ -974,7 +1000,7 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RootRenderObje
   RenderObjectToWidgetElement(RenderObjectToWidgetAdapter<T> widget) : super(widget);
 
   @override
-  RenderObjectToWidgetAdapter<T> get widget => super.widget;
+  RenderObjectToWidgetAdapter<T> get widget => super.widget as RenderObjectToWidgetAdapter<T>;
 
   Element _child;
 
@@ -1017,7 +1043,7 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RootRenderObje
       // due to a reassemble.
       final Widget newWidget = _newWidget;
       _newWidget = null;
-      update(newWidget);
+      update(newWidget as RenderObjectToWidgetAdapter<T>);
     }
     super.performRebuild();
     assert(_newWidget == null);
@@ -1041,13 +1067,13 @@ class RenderObjectToWidgetElement<T extends RenderObject> extends RootRenderObje
   }
 
   @override
-  RenderObjectWithChildMixin<T> get renderObject => super.renderObject;
+  RenderObjectWithChildMixin<T> get renderObject => super.renderObject as RenderObjectWithChildMixin<T>;
 
   @override
   void insertChildRenderObject(RenderObject child, dynamic slot) {
     assert(slot == _rootChildSlot);
     assert(renderObject.debugValidateChild(child));
-    renderObject.child = child;
+    renderObject.child = child as T;
   }
 
   @override

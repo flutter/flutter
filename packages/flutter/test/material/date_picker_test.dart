@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -735,9 +735,10 @@ void _tests() {
     );
 
     final Finder chevronFinder = find.byType(IconButton);
-    final List<RenderAnimatedOpacity> chevronRenderers = chevronFinder.evaluate().map(
-      (Element element) => element.ancestorRenderObjectOfType(
-        const TypeMatcher<RenderAnimatedOpacity>())).cast<RenderAnimatedOpacity>().toList();
+    final List<RenderAnimatedOpacity> chevronRenderers = chevronFinder
+      .evaluate()
+      .map((Element element) => element.findAncestorRenderObjectOfType<RenderAnimatedOpacity>())
+      .toList();
 
     // Initial chevron animation state should be dismissed
     // An AlwaysStoppedAnimation is also found and is ignored

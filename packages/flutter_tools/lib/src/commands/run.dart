@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -340,8 +340,13 @@ class RunCommand extends RunCommandBase {
       if (devices.length > 1) {
         throwToolExit('--machine does not support -d all.');
       }
-      final Daemon daemon = Daemon(stdinCommandStream, stdoutCommandResponse,
-          notifyingLogger: NotifyingLogger(), logToStdout: true);
+      final Daemon daemon = Daemon(
+        stdinCommandStream,
+        stdoutCommandResponse,
+        notifyingLogger: NotifyingLogger(),
+        logToStdout: true,
+        dartDefines: dartDefines,
+      );
       AppInstance app;
       try {
         final String applicationBinaryPath = stringArg('use-application-binary');

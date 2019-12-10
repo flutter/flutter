@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -145,13 +145,13 @@ class PopupMenuTheme extends InheritedTheme {
   /// PopupMenuThemeData theme = PopupMenuTheme.of(context);
   /// ```
   static PopupMenuThemeData of(BuildContext context) {
-    final PopupMenuTheme popupMenuTheme = context.inheritFromWidgetOfExactType(PopupMenuTheme);
+    final PopupMenuTheme popupMenuTheme = context.dependOnInheritedWidgetOfExactType<PopupMenuTheme>();
     return popupMenuTheme?.data ?? Theme.of(context).popupMenuTheme;
   }
 
   @override
   Widget wrap(BuildContext context, Widget child) {
-    final PopupMenuTheme ancestorTheme = context.ancestorWidgetOfExactType(PopupMenuTheme);
+    final PopupMenuTheme ancestorTheme = context.findAncestorWidgetOfExactType<PopupMenuTheme>();
     return identical(this, ancestorTheme) ? child : PopupMenuTheme(data: data, child: child);
   }
 

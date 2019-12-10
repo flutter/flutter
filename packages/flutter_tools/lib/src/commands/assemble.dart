@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -169,7 +169,7 @@ class AssembleCommand extends FlutterCommand {
     final Target target = targets.length == 1 ? targets.single : _CompositeTarget(targets);
     final BuildResult result = await buildSystem.build(target, environment, buildSystemConfig: BuildSystemConfig(
       resourcePoolSize: argResults.wasParsed('resource-pool-size')
-        ? int.tryParse(argResults['resource-pool-size'])
+        ? int.tryParse(stringArg('resource-pool-size'))
         : null,
     ));
     if (!result.success) {

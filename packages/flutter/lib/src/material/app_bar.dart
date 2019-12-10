@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -253,7 +253,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// If leading widget is not null, this parameter has no effect.
   final bool automaticallyImplyLeading;
 
-  /// The primary widget displayed in the appbar.
+  /// The primary widget displayed in the app bar.
   ///
   /// Typically a [Text] widget containing a description of the current contents
   /// of the app.
@@ -393,6 +393,7 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
       case TargetPlatform.fuchsia:
         return false;
       case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
         return actions == null || actions.length < 2;
     }
     return null;
@@ -483,6 +484,7 @@ class _AppBarState extends State<AppBar> {
           namesRoute = true;
           break;
         case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
           break;
       }
       title = DefaultTextStyle(
@@ -646,7 +648,7 @@ class _FloatingAppBarState extends State<_FloatingAppBar> {
   }
 
   RenderSliverFloatingPersistentHeader _headerRenderer() {
-    return context.ancestorRenderObjectOfType(const TypeMatcher<RenderSliverFloatingPersistentHeader>());
+    return context.findAncestorRenderObjectOfType<RenderSliverFloatingPersistentHeader>();
   }
 
   void _isScrollingListener() {
@@ -952,7 +954,7 @@ class SliverAppBar extends StatefulWidget {
   /// If leading widget is not null, this parameter has no effect.
   final bool automaticallyImplyLeading;
 
-  /// The primary widget displayed in the appbar.
+  /// The primary widget displayed in the app bar.
   ///
   /// Typically a [Text] widget containing a description of the current contents
   /// of the app.
@@ -997,7 +999,7 @@ class SliverAppBar extends StatefulWidget {
   /// Typically a [FlexibleSpaceBar]. See [FlexibleSpaceBar] for details.
   final Widget flexibleSpace;
 
-  /// This widget appears across the bottom of the appbar.
+  /// This widget appears across the bottom of the app bar.
   ///
   /// Typically a [TabBar]. Only widgets that implement [PreferredSizeWidget] can
   /// be used at the bottom of an app bar.
@@ -1155,7 +1157,7 @@ class SliverAppBar extends StatefulWidget {
   /// a scroll dismisses the app bar, the animation will slide the app bar
   /// completely out of view.
   ///
-  /// Snapping only applies when the app bar is floating, not when the appbar
+  /// Snapping only applies when the app bar is floating, not when the app bar
   /// appears at the top of its scroll view.
   ///
   /// ## Animated Examples

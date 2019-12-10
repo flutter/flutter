@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -55,7 +55,6 @@ class BuildAarCommand extends BuildSubCommand {
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
     DevelopmentArtifact.androidGenSnapshot,
-    DevelopmentArtifact.universal,
   };
 
   @override
@@ -111,7 +110,7 @@ class BuildAarCommand extends BuildSubCommand {
     return null;
   }
 
-  /// Returns the [FlutterProject] which is determinated from the remaining command-line
+  /// Returns the [FlutterProject] which is determined from the remaining command-line
   /// argument if any or the current working directory.
   FlutterProject _getProject() {
     if (argResults.rest.isEmpty) {

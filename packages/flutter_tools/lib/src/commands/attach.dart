@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -198,8 +198,13 @@ class AttachCommand extends FlutterCommand {
     final int devicePort = await getDevicePort();
 
     final Daemon daemon = boolArg('machine')
-      ? Daemon(stdinCommandStream, stdoutCommandResponse,
-            notifyingLogger: NotifyingLogger(), logToStdout: true)
+      ? Daemon(
+          stdinCommandStream,
+          stdoutCommandResponse,
+          notifyingLogger: NotifyingLogger(),
+          logToStdout: true,
+          dartDefines: dartDefines,
+        )
       : null;
 
     Stream<Uri> observatoryUri;
@@ -218,7 +223,7 @@ class AttachCommand extends FlutterCommand {
         FuchsiaIsolateDiscoveryProtocol isolateDiscoveryProtocol;
         try {
           isolateDiscoveryProtocol = device.getIsolateDiscoveryProtocol(module);
-          observatoryUri = Stream<Uri>.fromFuture(isolateDiscoveryProtocol.uri).asBroadcastStream();
+          observatoryUri = Stream<Uri>.value(await isolateDiscoveryProtocol.uri).asBroadcastStream();
         } catch (_) {
           isolateDiscoveryProtocol?.dispose();
           final List<ForwardedPort> ports = device.portForwarder.forwardedPorts.toList();
@@ -228,15 +233,16 @@ class AttachCommand extends FlutterCommand {
           rethrow;
         }
       } else if ((device is IOSDevice) || (device is IOSSimulator)) {
-        observatoryUri = Stream<Uri>
-          .fromFuture(
-            MDnsObservatoryDiscovery.instance.getObservatoryUri(
-              appId,
-              device,
-              usesIpv6: usesIpv6,
-              deviceVmservicePort: deviceVmservicePort,
-            )
-          ).asBroadcastStream();
+        final Uri uriFromMdns =
+          await MDnsObservatoryDiscovery.instance.getObservatoryUri(
+            appId,
+            device,
+            usesIpv6: usesIpv6,
+            deviceVmservicePort: deviceVmservicePort,
+          );
+        observatoryUri = uriFromMdns == null
+          ? null
+          : Stream<Uri>.value(uriFromMdns).asBroadcastStream();
       }
       // If MDNS discovery fails or we're not on iOS, fallback to ProtocolDiscovery.
       if (observatoryUri == null) {

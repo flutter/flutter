@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -830,6 +830,7 @@ Future<T> showMenu<T>({
   String label = semanticLabel;
   switch (Theme.of(context).platform) {
     case TargetPlatform.iOS:
+    case TargetPlatform.macOS:
       label = semanticLabel;
       break;
     case TargetPlatform.android:
@@ -1083,6 +1084,7 @@ class _PopupMenuButtonState<T> extends State<PopupMenuButton<T>> {
       case TargetPlatform.fuchsia:
         return const Icon(Icons.more_vert);
       case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
         return const Icon(Icons.more_horiz);
     }
     return null;

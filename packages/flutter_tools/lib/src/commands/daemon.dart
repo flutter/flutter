@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -35,7 +35,9 @@ const String protocolVersion = '0.5.3';
 /// It can be shutdown with a `daemon.shutdown` command (or by killing the
 /// process).
 class DaemonCommand extends FlutterCommand {
-  DaemonCommand({ this.hidden = false });
+  DaemonCommand({ this.hidden = false }) {
+    usesDartDefines();
+  }
 
   @override
   final String name = 'daemon';
@@ -58,8 +60,10 @@ class DaemonCommand extends FlutterCommand {
     await context.run<void>(
       body: () async {
         final Daemon daemon = Daemon(
-            stdinCommandStream, stdoutCommandResponse,
-            daemonCommand: this, notifyingLogger: notifyingLogger);
+          stdinCommandStream, stdoutCommandResponse,
+          notifyingLogger: notifyingLogger,
+          dartDefines: dartDefines,
+        );
 
         final int code = await daemon.onExit;
         if (code != 0) {
@@ -82,10 +86,17 @@ class Daemon {
   Daemon(
     Stream<Map<String, dynamic>> commandStream,
     this.sendCommand, {
-    this.daemonCommand,
     this.notifyingLogger,
     this.logToStdout = false,
+    @required this.dartDefines,
   }) {
+    if (dartDefines == null) {
+      throw Exception(
+        'dartDefines must not be null. This is a bug in Flutter.\n'
+        'Please file an issue at https://github.com/flutter/flutter/issues/new/choose',
+      );
+    }
+
     // Set up domains.
     _registerDomain(daemonDomain = DaemonDomain(this));
     _registerDomain(appDomain = AppDomain(this));
@@ -110,9 +121,9 @@ class Daemon {
   StreamSubscription<Map<String, dynamic>> _commandSubscription;
 
   final DispatchCommand sendCommand;
-  final DaemonCommand daemonCommand;
   final NotifyingLogger notifyingLogger;
   final bool logToStdout;
+  final List<String> dartDefines;
 
   final Completer<int> _onExitCompleter = Completer<int>();
   final Map<String, Domain> _domainMap = <String, Domain>{};
@@ -183,8 +194,6 @@ abstract class Domain {
   void registerHandler(String name, CommandHandler handler) {
     _handlers[name] = handler;
   }
-
-  FlutterCommand get command => daemon.daemonCommand;
 
   @override
   String toString() => name;
@@ -383,6 +392,7 @@ typedef _RunOrAttach = Future<void> Function({
 class AppDomain extends Domain {
   AppDomain(Daemon daemon) : super(daemon, 'app') {
     registerHandler('restart', restart);
+    registerHandler('reloadMethod', reloadMethod);
     registerHandler('callServiceExtension', callServiceExtension);
     registerHandler('stop', stop);
     registerHandler('detach', detach);
@@ -424,7 +434,7 @@ class AppDomain extends Domain {
       viewFilter: isolateFilter,
       target: target,
       buildMode: options.buildInfo.mode,
-      dartDefines: command?.dartDefines,
+      dartDefines: daemon.dartDefines,
     );
 
     ResidentRunner runner;
@@ -437,7 +447,7 @@ class AppDomain extends Domain {
         debuggingOptions: options,
         ipv6: ipv6,
         stayResident: true,
-        dartDefines: command?.dartDefines,
+        dartDefines: daemon.dartDefines,
       );
     } else if (enableHotReload) {
       runner = HotRunner(
@@ -569,6 +579,28 @@ class AppDomain extends Domain {
 
     _inProgressHotReload = app._runInZone<OperationResult>(this, () {
       return app.restart(fullRestart: fullRestart, pauseAfterRestart: pauseAfterRestart, reason: restartReason);
+    });
+    return _inProgressHotReload.whenComplete(() {
+      _inProgressHotReload = null;
+    });
+  }
+
+  Future<OperationResult> reloadMethod(Map<String, dynamic> args) async {
+    final String appId = _getStringArg(args, 'appId', required: true);
+    final String classId = _getStringArg(args, 'class', required: true);
+    final String libraryId =  _getStringArg(args, 'library', required: true);
+
+    final AppInstance app = _getApp(appId);
+    if (app == null) {
+      throw "app '$appId' not found";
+    }
+
+    if (_inProgressHotReload != null) {
+      throw 'hot restart already in progress';
+    }
+
+    _inProgressHotReload = app._runInZone<OperationResult>(this, () {
+      return app.reloadMethod(classId: classId, libraryId: libraryId);
     });
     return _inProgressHotReload.whenComplete(() {
       _inProgressHotReload = null;
@@ -915,6 +947,10 @@ class AppInstance {
 
   Future<OperationResult> restart({ bool fullRestart = false, bool pauseAfterRestart = false, String reason }) {
     return runner.restart(fullRestart: fullRestart, pauseAfterRestart: pauseAfterRestart, reason: reason);
+  }
+
+  Future<OperationResult> reloadMethod({ String classId, String libraryId }) {
+    return runner.reloadMethod(classId: classId, libraryId: libraryId);
   }
 
   Future<void> stop() => runner.exit();

@@ -1,3 +1,4 @@
+// Copyright 2019 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -474,7 +475,7 @@ class _InteractiveViewerState extends State<_InteractiveViewerSized> with Ticker
 
   // Get the offset of the current widget from the global screen coordinates.
   static Offset getOffset(BuildContext context) {
-    final RenderBox renderObject = context.findRenderObject();
+    final RenderBox renderObject = context.findRenderObject() as RenderBox;
     return renderObject.localToGlobal(Offset.zero);
   }
 
@@ -704,7 +705,7 @@ class _InteractiveViewerState extends State<_InteractiveViewerSized> with Ticker
     final double clampedTotalScale = totalScale.clamp(
       widget.minScale,
       widget.maxScale,
-    );
+    ) as double;
     final double clampedScale = clampedTotalScale / currentScale;
     final Matrix4 nextMatrix = matrix.clone()..scale(clampedScale);
 

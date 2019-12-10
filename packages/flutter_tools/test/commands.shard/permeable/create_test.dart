@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -15,6 +15,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/dart/sdk.dart';
+import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/version.dart';
 
@@ -23,6 +24,7 @@ import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
+import '../../src/testbed.dart';
 
 const String frameworkRevision = '12345678';
 const String frameworkChannel = 'omega';
@@ -414,8 +416,6 @@ void main() {
       '.android/Flutter/build.gradle',
       '.android/Flutter/flutter.iml',
       '.android/Flutter/src/main/AndroidManifest.xml',
-      '.android/Flutter/src/main/java/io/flutter/facade/Flutter.java',
-      '.android/Flutter/src/main/java/io/flutter/facade/FlutterFragment.java',
       '.android/Flutter/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
       '.android/gradle.properties',
       '.android/gradle/wrapper/gradle-wrapper.jar',
@@ -436,6 +436,8 @@ void main() {
     ], unexpectedPaths: <String>[
       'android/',
       'ios/',
+      '.android/Flutter/src/main/java/io/flutter/facade/FlutterFragment.java',
+      '.android/Flutter/src/main/java/io/flutter/facade/Flutter.java',
     ]);
   }, overrides: <Type, Generator>{
     Pub: () => const Pub(),
@@ -568,9 +570,11 @@ void main() {
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
-    await runner.run(<String>['create', '--no-pub', '--macos', projectDir.path]);
+    await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
     expect(projectDir.childDirectory('macos').childDirectory('Runner.xcworkspace').existsSync(), true);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
 
   testUsingContext('app does not include macOS by default', () async {
@@ -584,6 +588,8 @@ void main() {
     await runner.run(<String>['create', '--no-pub', projectDir.path]);
 
     expect(projectDir.childDirectory('macos').childDirectory('Runner.xcworkspace').existsSync(), false);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: false),
   });
 
   testUsingContext('plugin supports macOS if requested', () async {
@@ -594,9 +600,11 @@ void main() {
     final CreateCommand command = CreateCommand();
     final CommandRunner<void> runner = createTestCommandRunner(command);
 
-    await runner.run(<String>['create', '--no-pub', '--template=plugin', '--macos', projectDir.path]);
+    await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
 
     expect(projectDir.childDirectory('macos').childFile('flutter_project.podspec').existsSync(), true);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
 
   testUsingContext('plugin does not include macOS by default', () async {
@@ -610,6 +618,8 @@ void main() {
     await runner.run(<String>['create', '--no-pub', '--template=plugin', projectDir.path]);
 
     expect(projectDir.childDirectory('macos').childFile('flutter_project.podspec').existsSync(), false);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: false),
   });
 
   testUsingContext('has correct content and formatting with module template', () async {
@@ -1379,7 +1389,7 @@ class LoggingProcessManager extends LocalProcessManager {
 
   @override
   Future<Process> start(
-    List<dynamic> command, {
+    List<String> command, {
     String workingDirectory,
     Map<String, String> environment,
     bool includeParentEnvironment = true,

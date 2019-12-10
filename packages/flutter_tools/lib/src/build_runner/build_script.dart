@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -175,14 +175,14 @@ final List<core.BuilderApplication> builders = <core.BuilderApplication>[
       defaultGenerateFor: const InputSet()),
 ];
 
-/// The entrypoint to this build script.
+/// The entry point to this build script.
 Future<void> main(List<String> args, [SendPort sendPort]) async {
   core.overrideGeneratedOutputDirectory('flutter_web');
   final int result = await build_runner.run(args, builders);
   sendPort?.send(result);
 }
 
-/// A ddc-only entrypoint builder that respects the Flutter target flag.
+/// A ddc-only entry point builder that respects the Flutter target flag.
 class FlutterWebTestEntrypointBuilder implements Builder {
   const FlutterWebTestEntrypointBuilder();
 
@@ -208,7 +208,7 @@ class FlutterWebTestEntrypointBuilder implements Builder {
   }
 }
 
-/// A ddc-only entrypoint builder that respects the Flutter target flag.
+/// A ddc-only entry point builder that respects the Flutter target flag.
 class FlutterWebEntrypointBuilder implements Builder {
   const FlutterWebEntrypointBuilder(this.release, this.profile, this.flutterWebSdk);
 
@@ -237,7 +237,7 @@ class FlutterWebEntrypointBuilder implements Builder {
   }
 }
 
-/// Bootstraps the test entrypoint.
+/// Bootstraps the test entry point.
 class FlutterWebTestBootstrapBuilder implements Builder {
   const FlutterWebTestBootstrapBuilder();
 
@@ -255,6 +255,7 @@ class FlutterWebTestBootstrapBuilder implements Builder {
     final String assetPath = id.pathSegments.first == 'lib'
         ? path.url.join('packages', id.package, id.path)
         : id.path;
+    final Uri testUrl = path.toUri(path.absolute(assetPath));
     final Metadata metadata = parseMetadata(
         assetPath, contents, Runtime.builtIn.map((Runtime runtime) => runtime.name).toSet());
 
@@ -265,6 +266,7 @@ import 'dart:html';
 import 'dart:js';
 
 import 'package:stream_channel/stream_channel.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:test_api/src/backend/stack_trace_formatter.dart'; // ignore: implementation_imports
 import 'package:test_api/src/util/stack_trace_mapper.dart'; // ignore: implementation_imports
 import 'package:test_api/src/remote_listener.dart'; // ignore: implementation_imports
@@ -279,6 +281,7 @@ Future<void> main() async {
   // this stuff in.
   ui.debugEmulateFlutterTesterEnvironment = true;
   await ui.webOnlyInitializePlatform();
+  webGoldenComparator = DefaultWebGoldenComparator(Uri.parse('$testUrl'));
   // TODO(flutterweb): remove need for dynamic cast.
   (ui.window as dynamic).debugOverrideDevicePixelRatio(3.0);
   (ui.window as dynamic).webOnlyDebugPhysicalSizeOverride = const ui.Size(2400, 1800);
@@ -347,7 +350,7 @@ void setStackTraceMapper(StackTraceMapper mapper) {
   }
 }
 
-/// A shell builder which generates the web specific entrypoint.
+/// A shell builder which generates the web specific entry point.
 class FlutterWebShellBuilder implements Builder {
   const FlutterWebShellBuilder({this.hasPlugins = false, this.initializePlatform = true});
 
@@ -403,7 +406,7 @@ Future<void> main() async {
   };
 }
 
-/// Returns whether or not [dartId] is an app entrypoint (basically, whether
+/// Returns whether or not [dartId] is an app entry point (basically, whether
 /// or not it has a `main` function).
 Future<bool> _isAppEntryPoint(AssetId dartId, AssetReader reader) async {
   assert(dartId.extension == '.dart');

@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -12,6 +12,7 @@ import 'dart:ui' show Color;
 /// Some Material widgets track their current state in a `Set<MaterialState>`.
 ///
 /// See also:
+///
 ///  * [MaterialStateColor], a color that has a `resolve` method that can
 ///    return a different color depending on the state of the widget that it
 ///    is used in.

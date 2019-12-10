@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -69,6 +69,14 @@ void main() {
       final List<FuchsiaDevice> names = parseListDevices(example);
 
       expect(names.length, 0);
+    });
+
+    testUsingContext('disposing device disposes the portForwarder', () async {
+      final MockPortForwarder mockPortForwarder = MockPortForwarder();
+      final FuchsiaDevice device = FuchsiaDevice('123');
+      device.portForwarder = mockPortForwarder;
+      await device.dispose();
+      verify(mockPortForwarder.dispose()).called(1);
     });
 
     testUsingContext('default capabilities', () async {
@@ -147,8 +155,8 @@ void main() {
       )).thenAnswer((Invocation invocation) =>
           Future<ProcessResult>.value(mockProcessResult));
       when(mockProcessResult.exitCode).thenReturn(1);
-      when<String>(mockProcessResult.stdout).thenReturn('');
-      when<String>(mockProcessResult.stderr).thenReturn('');
+      when<String>(mockProcessResult.stdout as String).thenReturn('');
+      when<String>(mockProcessResult.stderr as String).thenReturn('');
       when(mockFile.absolute).thenReturn(mockFile);
       when(mockFile.path).thenReturn('');
 
@@ -161,8 +169,8 @@ void main() {
       )).thenAnswer((Invocation invocation) =>
           Future<ProcessResult>.value(emptyStdoutProcessResult));
       when(emptyStdoutProcessResult.exitCode).thenReturn(0);
-      when<String>(emptyStdoutProcessResult.stdout).thenReturn('');
-      when<String>(emptyStdoutProcessResult.stderr).thenReturn('');
+      when<String>(emptyStdoutProcessResult.stdout as String).thenReturn('');
+      when<String>(emptyStdoutProcessResult.stderr as String).thenReturn('');
     });
 
     testUsingContext('No vmservices found', () async {
@@ -327,7 +335,7 @@ void main() {
       when(vmService.vm).thenReturn(vm);
     });
 
-    Future<Uri> findUri(List<MockFlutterView> views, String expectedIsolateName) {
+    Future<Uri> findUri(List<MockFlutterView> views, String expectedIsolateName) async {
       when(vm.views).thenReturn(views);
       for (MockFlutterView view in views) {
         when(view.owner).thenReturn(vm);
@@ -350,7 +358,7 @@ void main() {
       when(vmService.refreshViews())
           .thenAnswer((Invocation invocation) => Future<void>.value(null));
       when(vmService.httpAddress).thenReturn(Uri.parse('example'));
-      return discoveryProtocol.uri;
+      return await discoveryProtocol.uri;
     }
 
     testUsingContext('can find flutter view with matching isolate name', () async {
@@ -659,24 +667,24 @@ void main() {
       when(mockSuccessProcessManager.run(any)).thenAnswer(
           (Invocation invocation) => Future<ProcessResult>.value(mockSuccessProcessResult));
       when(mockSuccessProcessResult.exitCode).thenReturn(0);
-      when<String>(mockSuccessProcessResult.stdout).thenReturn('version');
-      when<String>(mockSuccessProcessResult.stderr).thenReturn('');
+      when<String>(mockSuccessProcessResult.stdout as String).thenReturn('version');
+      when<String>(mockSuccessProcessResult.stderr as String).thenReturn('');
 
       mockFailureProcessManager = MockProcessManager();
       mockFailureProcessResult = MockProcessResult();
       when(mockFailureProcessManager.run(any)).thenAnswer(
           (Invocation invocation) => Future<ProcessResult>.value(mockFailureProcessResult));
       when(mockFailureProcessResult.exitCode).thenReturn(1);
-      when<String>(mockFailureProcessResult.stdout).thenReturn('');
-      when<String>(mockFailureProcessResult.stderr).thenReturn('');
+      when<String>(mockFailureProcessResult.stdout as String).thenReturn('');
+      when<String>(mockFailureProcessResult.stderr as String).thenReturn('');
 
       emptyStdoutProcessManager = MockProcessManager();
       emptyStdoutProcessResult = MockProcessResult();
       when(emptyStdoutProcessManager.run(any)).thenAnswer((Invocation invocation) =>
           Future<ProcessResult>.value(emptyStdoutProcessResult));
       when(emptyStdoutProcessResult.exitCode).thenReturn(0);
-      when<String>(emptyStdoutProcessResult.stdout).thenReturn('');
-      when<String>(emptyStdoutProcessResult.stderr).thenReturn('');
+      when<String>(emptyStdoutProcessResult.stdout as String).thenReturn('');
+      when<String>(emptyStdoutProcessResult.stderr as String).thenReturn('');
     });
 
     testUsingContext('returns what we get from the device on success', () async {

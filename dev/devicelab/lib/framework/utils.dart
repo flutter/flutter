@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -186,7 +186,7 @@ void section(String title) {
 Future<String> getDartVersion() async {
   // The Dart VM returns the version text to stderr.
   final ProcessResult result = _processManager.runSync(<String>[dartBin, '--version']);
-  String version = result.stderr.trim();
+  String version = (result.stderr as String).trim();
 
   // Convert:
   //   Dart VM version: 1.17.0-dev.2.0 (Tue May  3 12:14:52 2016) on "macos_x64"
@@ -465,7 +465,7 @@ String requireEnvVar(String name) {
 T requireConfigProperty<T>(Map<String, dynamic> map, String propertyName) {
   if (!map.containsKey(propertyName))
     fail('Configuration property not found: $propertyName');
-  final T result = map[propertyName];
+  final T result = map[propertyName] as T;
   return result;
 }
 
@@ -571,7 +571,7 @@ String extractCloudAuthTokenArg(List<String> rawArgs) {
     return null;
   }
 
-  final String token = args['cloud-auth-token'];
+  final String token = args['cloud-auth-token'] as String;
   if (token == null) {
     stderr.writeln('Required option --cloud-auth-token not found');
     return null;
@@ -602,7 +602,7 @@ int parseServicePort(String line, {
   return matches.isEmpty ? null : int.parse(matches[0].group(2));
 }
 
-/// Tries to extract a Uri from the string.
+/// Tries to extract a URL from the string.
 ///
 /// The `prefix`, if specified, is a regular expression pattern and must not contain groups.
 /// `prefix` defaults to the RegExp: `An Observatory debugger .* is available at: `.

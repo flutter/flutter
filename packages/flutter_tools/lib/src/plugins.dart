@@ -1,15 +1,17 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:async';
 
+import 'package:meta/meta.dart';
 import 'package:mustache/mustache.dart' as mustache;
 import 'package:yaml/yaml.dart';
 
 import 'android/gradle.dart';
 import 'base/common.dart';
 import 'base/file_system.dart';
+import 'convert.dart';
 import 'dart/package_map.dart';
 import 'features.dart';
 import 'globals.dart';
@@ -27,10 +29,14 @@ void _renderTemplateToFile(String template, dynamic context, String filePath) {
 
 class Plugin {
   Plugin({
-    this.name,
-    this.path,
-    this.platforms,
-  });
+    @required this.name,
+    @required this.path,
+    @required this.platforms,
+    @required this.dependencies,
+  }) : assert(name != null),
+       assert(path != null),
+       assert(platforms != null),
+       assert(dependencies != null);
 
   /// Parses [Plugin] specification from the provided pluginYaml.
   ///
@@ -60,18 +66,28 @@ class Plugin {
   ///            pluginClass: SamplePlugin
   ///          windows:
   ///            pluginClass: SamplePlugin
-  factory Plugin.fromYaml(String name, String path, YamlMap pluginYaml) {
+  factory Plugin.fromYaml(
+    String name,
+    String path,
+    YamlMap pluginYaml,
+    List<String> dependencies,
+  ) {
     final List<String> errors = validatePluginYaml(pluginYaml);
     if (errors.isNotEmpty) {
       throwToolExit('Invalid plugin specification.\n${errors.join('\n')}');
     }
     if (pluginYaml != null && pluginYaml['platforms'] != null) {
-      return Plugin._fromMultiPlatformYaml(name, path, pluginYaml);
+      return Plugin._fromMultiPlatformYaml(name, path, pluginYaml, dependencies);
     }
-    return Plugin._fromLegacyYaml(name, path, pluginYaml);
+    return Plugin._fromLegacyYaml(name, path, pluginYaml, dependencies);
   }
 
-  factory Plugin._fromMultiPlatformYaml(String name, String path, dynamic pluginYaml) {
+  factory Plugin._fromMultiPlatformYaml(
+    String name,
+    String path,
+    dynamic pluginYaml,
+    List<String> dependencies,
+  ) {
     assert (pluginYaml != null && pluginYaml['platforms'] != null,
             'Invalid multi-platform plugin specification.');
     final YamlMap platformsYaml = pluginYaml['platforms'] as YamlMap;
@@ -118,10 +134,16 @@ class Plugin {
       name: name,
       path: path,
       platforms: platforms,
+      dependencies: dependencies,
     );
   }
 
-  factory Plugin._fromLegacyYaml(String name, String path, dynamic pluginYaml) {
+  factory Plugin._fromLegacyYaml(
+    String name,
+    String path,
+    dynamic pluginYaml,
+    List<String> dependencies,
+  ) {
     final Map<String, PluginPlatform> platforms = <String, PluginPlatform>{};
     final String pluginClass = pluginYaml['pluginClass'] as String;
     if (pluginYaml != null && pluginClass != null) {
@@ -147,6 +169,7 @@ class Plugin {
       name: name,
       path: path,
       platforms: platforms,
+      dependencies: dependencies,
     );
   }
 
@@ -181,10 +204,11 @@ class Plugin {
       if (!(value is YamlMap)) {
         return false;
       }
-      if (value.containsKey('default_package')) {
+      final YamlMap yamlValue = value as YamlMap;
+      if (yamlValue.containsKey('default_package')) {
         return false;
       }
-      return !validate(value);
+      return !validate(yamlValue);
     }
     final List<String> errors = <String>[];
     if (isInvalid(AndroidPlugin.kConfigKey, AndroidPlugin.validate)) {
@@ -223,7 +247,7 @@ class Plugin {
     if (!platformsYaml.containsKey(platformKey)) {
       return false;
     }
-    if (platformsYaml[platformKey].containsKey('default_package')) {
+    if ((platformsYaml[platformKey] as YamlMap).containsKey('default_package')) {
       return false;
     }
     return true;
@@ -231,6 +255,9 @@ class Plugin {
 
   final String name;
   final String path;
+
+  /// The name of the packages this plugin depends on.
+  final List<String> dependencies;
 
   /// This is a mapping from platform config key to the plugin platform spec.
   final Map<String, PluginPlatform> platforms;
@@ -250,11 +277,13 @@ Plugin _pluginFromPubspec(String name, Uri packageRoot) {
     return null;
   }
   final String packageRootPath = fs.path.fromUri(packageRoot);
+  final YamlMap dependencies = pubspec['dependencies'] as YamlMap;
   printTrace('Found plugin $name at $packageRootPath');
   return Plugin.fromYaml(
     name,
     packageRootPath,
     flutterConfig['plugin'] as YamlMap,
+    dependencies == null ? <String>[] : <String>[...dependencies.keys.cast<String>()],
   );
 }
 
@@ -281,29 +310,60 @@ List<Plugin> findPlugins(FlutterProject project) {
   return plugins;
 }
 
-/// Returns true if .flutter-plugins has changed, otherwise returns false.
+/// Writes the .flutter-plugins and .flutter-plugins-dependencies files based on the list of plugins.
+/// If there aren't any plugins, then the files aren't written to disk.
+///
+/// Finally, returns [true] if .flutter-plugins or .flutter-plugins-dependencies have changed,
+/// otherwise returns [false].
 bool _writeFlutterPluginsList(FlutterProject project, List<Plugin> plugins) {
+  final List<dynamic> directAppDependencies = <dynamic>[];
+  const String info = 'This is a generated file; do not edit or check into version control.';
+  final StringBuffer flutterPluginsBuffer = StringBuffer('# $info\n');
+
+  final Set<String> pluginNames = <String>{};
+  for (Plugin plugin in plugins) {
+    pluginNames.add(plugin.name);
+  }
+  for (Plugin plugin in plugins) {
+    flutterPluginsBuffer.write('${plugin.name}=${escapePath(plugin.path)}\n');
+    directAppDependencies.add(<String, dynamic>{
+      'name': plugin.name,
+      // Extract the plugin dependencies which happen to be plugins.
+      'dependencies': <String>[...plugin.dependencies.where(pluginNames.contains)],
+    });
+  }
   final File pluginsFile = project.flutterPluginsFile;
-  final String oldContents = _readFlutterPluginsList(project);
-  final String pluginManifest =
-      plugins.map<String>((Plugin p) => '${p.name}=${escapePath(p.path)}').join('\n');
-  if (pluginManifest.isNotEmpty) {
-    pluginsFile.writeAsStringSync('$pluginManifest\n', flush: true);
+  final String oldPluginFileContent = _readFileContent(pluginsFile);
+  final String pluginFileContent = flutterPluginsBuffer.toString();
+  if (pluginNames.isNotEmpty) {
+    pluginsFile.writeAsStringSync(pluginFileContent, flush: true);
   } else {
     if (pluginsFile.existsSync()) {
       pluginsFile.deleteSync();
     }
   }
-  final String newContents = _readFlutterPluginsList(project);
-  return oldContents != newContents;
+
+  final File dependenciesFile = project.flutterPluginsDependenciesFile;
+  final String oldDependenciesFileContent = _readFileContent(dependenciesFile);
+  final String dependenciesFileContent = json.encode(<String, dynamic>{
+      '_info': '// $info',
+      'dependencyGraph': directAppDependencies,
+    });
+  if (pluginNames.isNotEmpty) {
+    dependenciesFile.writeAsStringSync(dependenciesFileContent, flush: true);
+  } else {
+    if (dependenciesFile.existsSync()) {
+      dependenciesFile.deleteSync();
+    }
+  }
+
+  return oldPluginFileContent != _readFileContent(pluginsFile)
+      || oldDependenciesFileContent != _readFileContent(dependenciesFile);
 }
 
-/// Returns the contents of the `.flutter-plugins` file in [project], or
-/// null if that file does not exist.
-String _readFlutterPluginsList(FlutterProject project) {
-  return project.flutterPluginsFile.existsSync()
-      ? project.flutterPluginsFile.readAsStringSync()
-      : null;
+/// Returns the contents of [File] or [null] if that file does not exist.
+String _readFileContent(File file) {
+  return file.existsSync() ? file.readAsStringSync() : null;
 }
 
 const String _androidPluginRegistryTemplateOldEmbedding = '''package io.flutter.plugins;
@@ -782,5 +842,5 @@ Future<void> injectPlugins(FlutterProject project, {bool checkProjects = false})
 ///
 /// Assumes [refreshPluginsList] has been called since last change to `pubspec.yaml`.
 bool hasPlugins(FlutterProject project) {
-  return _readFlutterPluginsList(project) != null;
+  return _readFileContent(project.flutterPluginsFile) != null;
 }
