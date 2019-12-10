@@ -143,7 +143,7 @@ void main() {
 
     final RenderShrinkWrappingViewport viewport = RenderShrinkWrappingViewport(
       crossAxisDirection: AxisDirection.left,
-      offset: ViewportOffset.fixed(-1000),
+      offset: ViewportOffset.zero(),
       children: <RenderSliver>[ child ],
     );
 

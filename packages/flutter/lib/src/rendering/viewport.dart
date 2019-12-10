@@ -510,9 +510,9 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     // it is the child of a Row or Column (depending on orientation).
     //
     // For example, a shrink wrapping render sliver may have infinite
-    // constraints along the viewport's main axis but still end up scrollable
-    // because of its children. In such a case, even if the overlap is non-zero,
-    // we should just use the viewportClip - the start of the overlap is at
+    // constraints along the viewport's main axis but may also have bouncing
+    // scroll physics, which will allow for some scrolling effect to occur.
+    // We should just use the viewportClip - the start of the overlap is at
     // double.infinity and so it is effectively meaningless.
     if (child.constraints.overlap == 0 || !child.constraints.viewportMainAxisExtent.isFinite) {
       return viewportClip;
@@ -1765,6 +1765,8 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
   }
 
   double _attemptLayout(double mainAxisExtent, double crossAxisExtent, double correctedOffset) {
+    // We can't assert mainAxisExtent is finite, because it could be infinite if
+    // it is within a column or row for example.
     assert(!mainAxisExtent.isNaN);
     assert(mainAxisExtent >= 0.0);
     assert(crossAxisExtent.isFinite);
