@@ -392,6 +392,7 @@ typedef _RunOrAttach = Future<void> Function({
 class AppDomain extends Domain {
   AppDomain(Daemon daemon) : super(daemon, 'app') {
     registerHandler('restart', restart);
+    registerHandler('reloadMethod', reloadMethod);
     registerHandler('callServiceExtension', callServiceExtension);
     registerHandler('stop', stop);
     registerHandler('detach', detach);
@@ -578,6 +579,28 @@ class AppDomain extends Domain {
 
     _inProgressHotReload = app._runInZone<OperationResult>(this, () {
       return app.restart(fullRestart: fullRestart, pauseAfterRestart: pauseAfterRestart, reason: restartReason);
+    });
+    return _inProgressHotReload.whenComplete(() {
+      _inProgressHotReload = null;
+    });
+  }
+
+  Future<OperationResult> reloadMethod(Map<String, dynamic> args) async {
+    final String appId = _getStringArg(args, 'appId', required: true);
+    final String classId = _getStringArg(args, 'class', required: true);
+    final String libraryId =  _getStringArg(args, 'library', required: true);
+
+    final AppInstance app = _getApp(appId);
+    if (app == null) {
+      throw "app '$appId' not found";
+    }
+
+    if (_inProgressHotReload != null) {
+      throw 'hot restart already in progress';
+    }
+
+    _inProgressHotReload = app._runInZone<OperationResult>(this, () {
+      return app.reloadMethod(classId: classId, libraryId: libraryId);
     });
     return _inProgressHotReload.whenComplete(() {
       _inProgressHotReload = null;
@@ -924,6 +947,10 @@ class AppInstance {
 
   Future<OperationResult> restart({ bool fullRestart = false, bool pauseAfterRestart = false, String reason }) {
     return runner.restart(fullRestart: fullRestart, pauseAfterRestart: pauseAfterRestart, reason: reason);
+  }
+
+  Future<OperationResult> reloadMethod({ String classId, String libraryId }) {
+    return runner.reloadMethod(classId: classId, libraryId: libraryId);
   }
 
   Future<void> stop() => runner.exit();
