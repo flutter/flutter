@@ -12,6 +12,10 @@ class SkCanvas {
 
   int get saveCount => skCanvas.callMethod('getSaveCount');
 
+  void clear(ui.Color color) {
+    skCanvas.callMethod('clear', <int>[color.value]);
+  }
+
   void clipPath(ui.Path path, bool doAntiAlias) {
     final SkPath skPath = path;
     final js.JsObject intersectClipOp = canvasKit['ClipOp']['Intersect'];

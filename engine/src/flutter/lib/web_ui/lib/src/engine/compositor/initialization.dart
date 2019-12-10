@@ -32,6 +32,10 @@ Future<void> initializeSkia() {
       },
     ]);
   });
+
+  /// Add a Skia scene host.
+  skiaSceneHost = html.Element.tag('flt-scene');
+  domRenderer.renderScene(skiaSceneHost);
   return canvasKitCompleter.future;
 }
 
@@ -42,3 +46,6 @@ js.JsObject canvasKit;
 
 /// The Skia font collection.
 SkiaFontCollection skiaFontCollection;
+
+/// The scene host, where the root canvas and overlay canvases are added to.
+html.Element skiaSceneHost;
