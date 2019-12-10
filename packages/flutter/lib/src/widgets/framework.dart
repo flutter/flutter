@@ -1729,17 +1729,21 @@ abstract class MultiChildRenderObjectWidget extends RenderObjectWidget {
 
   /// The widgets below this widget in the tree.
   ///
-  /// If this list is going to be mutated, it is usually wise to put [Key]s on
-  /// the widgets, so that the framework can match old configurations to new
-  /// configurations and maintain the underlying render objects.
+  /// If this list is going to be mutated, it is usually wise to put a [Key] on
+  /// each of the child widgets, so that the framework can match old
+  /// configurations to new configurations and maintain the underlying render
+  /// objects.
   ///
-  /// Here's a common example where one mutates the children but forgets to set
-  /// a different key. In such case, the mutated children may not be reflected.
-  /// ```
-  /// class SomeWidgetState extends ... {
+  /// Also, a [Widget] in Flutter is immutable, so directly modifying the
+  /// [children] such as `someMultiChildRenderObjectWidget.children.add(...)` or
+  /// as the example code below will result in incorrect behaviors. Whenever the
+  /// children list is modified, a new list object should be provided.
+  ///
+  /// ```dart
+  /// class SomeWidgetState extends State<SomeWidget> {
   ///     List<Widget> _children;
   ///
-  ///     void initState(...) {
+  ///     void initState() {
   ///         _children = [...];
   ///     }
   ///
@@ -1750,17 +1754,11 @@ abstract class MultiChildRenderObjectWidget extends RenderObjectWidget {
   ///     }
   ///
   ///     Widget build(...) {
-  ///         // A changing key is needed if someHandler modifies _children.
-  ///         return Row(children: _children/*, key: missing_key*/);
+  ///         // Reusing `List<Widget> _children` here is problematic.
+  ///         return Row(children: _children);
   ///     }
   /// }
   /// ```
-  ///
-  /// Also, a [Widget] in Flutter is immutable, so directly modifying the
-  /// [children] such as `someMultiChildRenderObjectWidget.children.add(...)`
-  /// is a violation to Flutter's contract. Although no warning or error message
-  /// is printed out for such case right now, we advice against such usages to
-  /// avoid undefined behaviors.
   final List<Widget> children;
 
   @override
