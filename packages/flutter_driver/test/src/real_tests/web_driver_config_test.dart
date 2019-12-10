@@ -5,7 +5,7 @@
 import 'package:flutter_driver/src/driver/web_driver_config.dart';
 import 'package:webdriver/sync_io.dart' as sync_io;
 
-import '../common.dart';
+import '../../common.dart';
 
 void main() {
   group('getDesiredCapabilities', () {
