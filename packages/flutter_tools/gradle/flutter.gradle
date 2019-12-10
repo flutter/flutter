@@ -472,6 +472,15 @@ class FlutterPlugin implements Plugin<Project> {
         return false
     }
 
+    /// Whether to build the debug app in "fast-start" mode.
+    private Boolean isFastStart() {
+        if (project.hasProperty("fast-start")) {
+            return project.property("fast-start").toBoolean()
+        }
+        return false
+    }
+
+
     private static Boolean shouldShrinkResources(Project project) {
         if (project.hasProperty("shrink")) {
             return project.property("shrink").toBoolean()
@@ -610,6 +619,7 @@ class FlutterPlugin implements Plugin<Project> {
                 localEngineSrcPath this.localEngineSrcPath
                 targetPath target
                 verbose isVerbose()
+                fastStart isFastStart()
                 fileSystemRoots fileSystemRootsValue
                 fileSystemScheme fileSystemSchemeValue
                 trackWidgetCreation trackWidgetCreationValue
@@ -729,6 +739,8 @@ abstract class BaseFlutterTask extends DefaultTask {
     String localEngine
     String localEngineSrcPath
     @Input
+    Boolean fastStart
+    @Input
     String targetPath
     @Optional
     Boolean verbose
@@ -769,9 +781,13 @@ abstract class BaseFlutterTask extends DefaultTask {
         // cache.
         String[] ruleNames;
         if (buildMode == "debug") {
-          ruleNames = ["debug_android_application"]
+            if (fastStart) {
+                ruleNames = ["faststart_android_application"]
+            } else {
+                ruleNames = ["debug_android_application"]
+            }
         } else {
-          ruleNames = targetPlatformValues.collect { "android_aot_bundle_${buildMode}_$it" }
+            ruleNames = targetPlatformValues.collect { "android_aot_bundle_${buildMode}_$it" }
         }
         project.exec {
             executable flutterExecutable.absolutePath
@@ -788,7 +804,11 @@ abstract class BaseFlutterTask extends DefaultTask {
             args "assemble"
             args "--depfile", "${intermediateDir}/flutter_build.d"
             args "--output", "${intermediateDir}"
-            args "-dTargetFile=${targetPath}"
+            if (!fastStart || buildMode != "debug") {
+                args "-dTargetFile=${targetPath}"
+            } else {
+                args "-dTargetFile=${Paths.get(flutterRoot.absolutePath, "examples", "splash", "lib", "main.dart")}"
+            }
             args "-dTargetPlatform=android"
             args "-dBuildMode=${buildMode}"
             if (extraFrontEndOptions != null) {

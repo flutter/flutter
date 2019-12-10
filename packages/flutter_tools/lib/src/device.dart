@@ -420,6 +420,9 @@ abstract class Device {
   /// application.
   bool get supportsScreenshot => false;
 
+  /// Whether the device supports the '--fast-start' development mode.
+  bool get supportsFastStart => false;
+
   /// Stop an app package on the current device.
   Future<bool> stopApp(covariant ApplicationPackage app);
 
@@ -534,6 +537,7 @@ class DebuggingOptions {
     this.hostname,
     this.port,
     this.vmserviceOutFile,
+    this.fastStart = false,
    }) : debuggingEnabled = true;
 
   DebuggingOptions.disabled(this.buildInfo, { this.initializePlatform = true, this.port, this.hostname, this.cacheSkSL = false, })
@@ -550,7 +554,8 @@ class DebuggingOptions {
       verboseSystemLogs = false,
       hostVmServicePort = null,
       deviceVmServicePort = null,
-      vmserviceOutFile = null;
+      vmserviceOutFile = null,
+      fastStart = false;
 
   final bool debuggingEnabled;
 
@@ -574,6 +579,7 @@ class DebuggingOptions {
   final String hostname;
   /// A file where the vmservice URL should be written after the application is started.
   final String vmserviceOutFile;
+  final bool fastStart;
 
   bool get hasObservatoryPort => hostVmServicePort != null;
 }
