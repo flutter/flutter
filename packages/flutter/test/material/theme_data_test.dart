@@ -199,10 +199,24 @@ void main() {
       },
     );
 
+    const MaterialColor white = MaterialColor(
+      0xFFFFFFFF,
+      <int, Color>{
+        50: Color(0xFFFFFFFF),
+      },
+    );
+
+    const MaterialColor black = MaterialColor(
+      0x00000000,
+      <int, Color>{
+        50: Color(0x00000000),
+      },
+    );
+
     final ThemeData theme = ThemeData.raw(
       brightness: Brightness.dark,
-      visualDensity: VisualDensity(),
-      primarySwatch: Colors.brown,
+      visualDensity: const VisualDensity(),
+      primarySwatch: black,
       primaryColor: Colors.black,
       primaryColorBrightness: Brightness.dark,
       primaryColorLight: Colors.black,
@@ -281,8 +295,8 @@ void main() {
 
     final ThemeData otherTheme = ThemeData.raw(
       brightness: Brightness.light,
-      visualDensity: VisualDensity(),
-      primarySwatch: Colors.grey,
+      visualDensity: const VisualDensity(),
+      primarySwatch: white,
       primaryColor: Colors.white,
       primaryColorBrightness: Brightness.light,
       primaryColorLight: Colors.white,
