@@ -37,8 +37,7 @@ final List<String> flutterTestArgs = <String>[];
 
 final bool useFlutterTestFormatter = Platform.environment['FLUTTER_TEST_FORMATTER'] == 'true';
 
-// This is disabled due to https://github.com/dart-lang/build/issues/2562
-const bool canUseBuildRunner = false;
+final bool canUseBuildRunner = Platform.environment['FLUTTER_TEST_NO_BUILD_RUNNER'] != 'true';
 
 /// The number of Cirrus jobs that run host-only devicelab tests in parallel.
 ///
