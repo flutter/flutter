@@ -328,7 +328,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// Triggers a frame after `duration` amount of time.
   ///
   /// This makes the framework act as if the application had janked (missed
-  /// frames) for `duration` amount of time, and then received a v-sync signal
+  /// frames) for `duration` amount of time, and then received a "Vsync" signal
   /// to paint the application.
   ///
   /// This is a convenience function that just calls
