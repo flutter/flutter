@@ -333,7 +333,7 @@ class ThemeData extends Diagnosticable {
 
     // Used as the default color (fill color) for RaisedButtons. Computing the
     // default for ButtonThemeData for the sake of backwards compatibility.
-    buttonColor ??= isDark ? primarySwatch[600] : Colors.grey[300];
+    buttonColor ??= primaryColor;
     focusColor ??= isDark ? Colors.white.withOpacity(0.12) : Colors.black.withOpacity(0.12);
     hoverColor ??= isDark ? Colors.white.withOpacity(0.04) : Colors.black.withOpacity(0.04);
     buttonTheme ??= ButtonThemeData(
