@@ -4,4 +4,4 @@ chrome:
   Linux: 695653
   Mac: 695656
 firefox:
-  version: 69.0.3
+  version: '71.0'

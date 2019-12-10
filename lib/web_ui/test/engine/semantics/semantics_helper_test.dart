@@ -21,7 +21,7 @@ void main() {
       if (_placeholder != null) {
         _placeholder.remove();
       }
-      if(desktopSemanticsEnabler?.semanticsActivationTimer != null) {
+      if (desktopSemanticsEnabler?.semanticsActivationTimer != null) {
         desktopSemanticsEnabler.semanticsActivationTimer.cancel();
         desktopSemanticsEnabler.semanticsActivationTimer = null;
       }
@@ -142,6 +142,7 @@ void main() {
           mobileSemanticsEnabler.tryEnableSemantics(event);
 
       expect(shouldForwardToFramework, true);
-    });
+    }, // TODO(nurhan): https://github.com/flutter/flutter/issues/46638
+        skip: (browserEngine == BrowserEngine.firefox));
   });
 }

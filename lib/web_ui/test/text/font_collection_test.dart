@@ -84,7 +84,7 @@ void main() {
       expect(fontFamilyList.length, equals(2));
       expect(fontFamilyList, contains('\'/Ahem\''));
       expect(fontFamilyList, contains('/Ahem'));
-    });
+    }, skip: (browserEngine == BrowserEngine.firefox));
 
     test('Register Asset twice with exclamation mark', () async {
       final String _testFontFamily = 'Ahem!!ahem';
@@ -101,7 +101,7 @@ void main() {
       expect(fontFamilyList.length, equals(2));
       expect(fontFamilyList, contains('\'Ahem!!ahem\''));
       expect(fontFamilyList, contains('Ahem!!ahem'));
-    });
+    }, skip: (browserEngine == BrowserEngine.firefox));
 
     test('Register Asset twice with coma', () async {
       final String _testFontFamily = 'Ahem ,ahem';
@@ -118,7 +118,8 @@ void main() {
       expect(fontFamilyList.length, equals(2));
       expect(fontFamilyList, contains('\'Ahem ,ahem\''));
       expect(fontFamilyList, contains('Ahem ,ahem'));
-    });
+    }, // TODO(nurhan): https://github.com/flutter/flutter/issues/46638
+        skip: (browserEngine == BrowserEngine.firefox));
 
     test('Register Asset twice with a digit at the start of a token', () async {
       final String testFontFamily = 'Ahem 1998';
@@ -136,5 +137,6 @@ void main() {
       expect(fontFamilyList, contains('Ahem 1998'));
       expect(fontFamilyList, contains('\'Ahem 1998\''));
     });
-  });
+  }, // TODO(nurhan): https://github.com/flutter/flutter/issues/46638
+      skip: (browserEngine == BrowserEngine.firefox));
 }

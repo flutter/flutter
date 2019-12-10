@@ -75,8 +75,8 @@ task:
         $ENGINE_PATH/src/out/host_debug_unopt/dart-sdk/bin/pub get
         cd $ENGINE_PATH/src/flutter/lib/web_ui
         $ENGINE_PATH/src/out/host_debug_unopt/dart-sdk/bin/pub get
-        export DART="$ENGINE_PATH/src/out/host_debug_unopt/dart-sdk/bin/dart"
-        $DART dev/firefox_installer_test.dart
+        export FELT="$ENGINE_PATH/src/out/host_debug_unopt/dart-sdk/bin/dart dev/felt.dart"
+        $FELT test --browser=firefox
     - name: build_and_test_android_unopt_debug
       env:
         USE_ANDROID: "True"
