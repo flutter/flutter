@@ -268,6 +268,10 @@ class FlutterSkiaGoldFileComparator extends FlutterGoldenFileComparator {
 ///  * [FlutterLocalFileComparator], another
 ///    [FlutterGoldenFileComparator] that tests golden images locally on your
 ///    current machine.
+// TODO(Piinks): Better handling for first-time contributors that cannot decrypt
+// the service account is needed. Gold has a new feature `goldctl imgtest check`
+// that could work. There is also the previous implementation that did not use
+// goldctl for this edge case. https://github.com/flutter/flutter/issues/46687
 class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
   /// Creates a [FlutterPreSubmitFileComparator] that will test golden file
   /// images against baselines requested from Flutter Gold.
@@ -324,9 +328,12 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
   /// performed as pre-submit tests with Skia Gold.
   static bool isAvailableForEnvironment(Platform platform) {
     final String cirrusPR = platform.environment['CIRRUS_PR'] ?? '';
+    final bool hasWritePermission = platform.environment['CIRRUS_USER_PERMISSION'] == 'admin'
+      || platform.environment['CIRRUS_USER_PERMISSION'] == 'write';
     return platform.environment.containsKey('CIRRUS_CI')
       && cirrusPR.isNotEmpty
-      && platform.environment.containsKey('GOLD_SERVICE_ACCOUNT');
+      && platform.environment.containsKey('GOLD_SERVICE_ACCOUNT')
+      && hasWritePermission;
   }
 }
 
@@ -392,8 +399,12 @@ class FlutterSkippingGoldenFileComparator extends FlutterGoldenFileComparator {
   /// Decides based on the current environment whether this comparator should be
   /// used.
   static bool isAvailableForEnvironment(Platform platform) {
-    return platform.environment.containsKey('SWARMING_TASK_ID')
-      || platform.environment.containsKey('CIRRUS_CI');
+    return (platform.environment.containsKey('SWARMING_TASK_ID')
+      || platform.environment.containsKey('CIRRUS_CI'))
+      // A service account means that this is a Gold shard. At this point, it
+      // means we don't have permission to use the account, so we will pass
+      // through to the [FlutterLocalFileComparator].
+      && !platform.environment.containsKey('GOLD_SERVICE_ACCOUNT');
   }
 }
 
