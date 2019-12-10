@@ -123,7 +123,7 @@ void main() {
     handle.dispose();
   });
 
-  testWidgets('CloseButton color test', (WidgetTester tester) async {
+  testWidgets('CloseButton color', (WidgetTester tester) async {
     await tester.pumpWidget(
       const MaterialApp(
         home: Material(
@@ -134,11 +134,15 @@ void main() {
       ),
     );
 
-    expect(
-      find.byWidgetPredicate(
-        (Widget widget) => widget is CloseButton && widget.color == Colors.red,
+    final CloseButton button = tester.firstWidget(find.byType(CloseButton));
+    expect(button.color, Colors.red);
+
+    final RichText iconText = tester.firstWidget(
+      find.descendant(
+        of: find.byType(CloseButton),
+        matching: find.byType(RichText),
       ),
-      findsOneWidget,
     );
+    expect(iconText.text.style.color, Colors.red);
   });
 }
