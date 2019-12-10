@@ -343,4 +343,8 @@ class SkPath implements ui.Path {
     throw new UnimplementedError(
         'webOnlySerializeToCssPaint is not used in the CanvasKit backend.');
   }
+
+  String toSvgString() {
+    return _skPath.callMethod('toSVGString');
+  }
 }

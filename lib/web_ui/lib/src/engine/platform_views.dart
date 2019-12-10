@@ -6,7 +6,7 @@ part of engine;
 
 /// A registry for factories that create platform views.
 class PlatformViewRegistry {
-  final Map<String, PlatformViewFactory> _registeredFactories =
+  final Map<String, PlatformViewFactory> registeredFactories =
       <String, PlatformViewFactory>{};
 
   final Map<int, html.Element> _createdViews = <int, html.Element>{};
@@ -16,10 +16,10 @@ class PlatformViewRegistry {
 
   /// Register [viewTypeId] as being creating by the given [factory].
   bool registerViewFactory(String viewTypeId, PlatformViewFactory factory) {
-    if (_registeredFactories.containsKey(viewTypeId)) {
+    if (registeredFactories.containsKey(viewTypeId)) {
       return false;
     }
-    _registeredFactories[viewTypeId] = factory;
+    registeredFactories[viewTypeId] = factory;
     return true;
   }
 
@@ -65,7 +65,7 @@ void _createPlatformView(
   const MethodCodec codec = StandardMethodCodec();
 
   // TODO(het): Use 'direction', 'width', and 'height'.
-  if (!platformViewRegistry._registeredFactories.containsKey(viewType)) {
+  if (!platformViewRegistry.registeredFactories.containsKey(viewType)) {
     callback(codec.encodeErrorEnvelope(
       code: 'Unregistered factory',
       message: "No factory registered for viewtype '$viewType'",
@@ -74,7 +74,7 @@ void _createPlatformView(
   }
   // TODO(het): Use creation parameters.
   final html.Element element =
-      platformViewRegistry._registeredFactories[viewType](id);
+      platformViewRegistry.registeredFactories[viewType](id);
 
   platformViewRegistry._createdViews[id] = element;
   callback(codec.encodeSuccessEnvelope(null));

@@ -58,6 +58,7 @@ class Engine extends RuntimeDelegate {
     }
 
     layerTree.frameSize = frameSize;
+    layerTree.devicePixelRatio = _viewportMetrics.devicePixelRatio;
     _animator.render(layerTree);
   }
 

@@ -34,18 +34,36 @@ class PrerollContext {
   /// A raster cache. Used to register candidates for caching.
   final RasterCache rasterCache;
 
-  PrerollContext(this.rasterCache);
+  /// A compositor for embedded HTML views.
+  final HtmlViewEmbedder viewEmbedder;
+
+  final MutatorsStack mutatorsStack = MutatorsStack();
+
+  PrerollContext(this.rasterCache, this.viewEmbedder);
 }
 
 /// A context shared by all layers during the paint pass.
 class PaintContext {
-  /// The canvas to paint to.
-  final SkCanvas canvas;
+  /// A multi-canvas that applies clips, transforms, and opacity
+  /// operations to all canvases (root canvas and overlay canvases for the
+  /// platform views).
+  SkNWayCanvas internalNodesCanvas;
+
+  /// The canvas for leaf nodes to paint to.
+  SkCanvas leafNodesCanvas;
 
   /// A raster cache potentially containing pre-rendered pictures.
   final RasterCache rasterCache;
 
-  PaintContext(this.canvas, this.rasterCache);
+  /// A compositor for embedded HTML views.
+  final HtmlViewEmbedder viewEmbedder;
+
+  PaintContext(
+    this.internalNodesCanvas,
+    this.leafNodesCanvas,
+    this.rasterCache,
+    this.viewEmbedder,
+  );
 }
 
 /// A layer that contains child layers.
@@ -100,9 +118,9 @@ class BackdropFilterLayer extends ContainerLayer {
 
   @override
   void paint(PaintContext context) {
-    context.canvas.saveLayerWithFilter(paintBounds, _filter);
+    context.internalNodesCanvas.saveLayerWithFilter(paintBounds, _filter);
     paintChildren(context);
-    context.canvas.restore();
+    context.internalNodesCanvas.restore();
   }
 }
 
@@ -116,29 +134,31 @@ class ClipPathLayer extends ContainerLayer {
       : assert(_clipBehavior != ui.Clip.none);
 
   @override
-  void preroll(PrerollContext prerollContext, Matrix4 matrix) {
-    final ui.Rect childPaintBounds = prerollChildren(prerollContext, matrix);
+  void preroll(PrerollContext context, Matrix4 matrix) {
+    context.mutatorsStack.pushClipPath(_clipPath);
+    final ui.Rect childPaintBounds = prerollChildren(context, matrix);
     final ui.Rect clipBounds = _clipPath.getBounds();
     if (childPaintBounds.overlaps(clipBounds)) {
       paintBounds = childPaintBounds.intersect(clipBounds);
     }
+    context.mutatorsStack.pop();
   }
 
   @override
   void paint(PaintContext paintContext) {
     assert(needsPainting);
 
-    paintContext.canvas.save();
-    paintContext.canvas.clipPath(_clipPath, _clipBehavior != ui.Clip.hardEdge);
+    paintContext.internalNodesCanvas.save();
+    paintContext.internalNodesCanvas.clipPath(_clipPath, _clipBehavior != ui.Clip.hardEdge);
 
     if (_clipBehavior == ui.Clip.antiAliasWithSaveLayer) {
-      paintContext.canvas.saveLayer(paintBounds, null);
+      paintContext.internalNodesCanvas.saveLayer(paintBounds, null);
     }
     paintChildren(paintContext);
     if (_clipBehavior == ui.Clip.antiAliasWithSaveLayer) {
-      paintContext.canvas.restore();
+      paintContext.internalNodesCanvas.restore();
     }
-    paintContext.canvas.restore();
+    paintContext.internalNodesCanvas.restore();
   }
 }
 
@@ -152,31 +172,33 @@ class ClipRectLayer extends ContainerLayer {
       : assert(_clipBehavior != ui.Clip.none);
 
   @override
-  void preroll(PrerollContext prerollContext, Matrix4 matrix) {
-    final ui.Rect childPaintBounds = prerollChildren(prerollContext, matrix);
+  void preroll(PrerollContext context, Matrix4 matrix) {
+    context.mutatorsStack.pushClipRect(_clipRect);
+    final ui.Rect childPaintBounds = prerollChildren(context, matrix);
     if (childPaintBounds.overlaps(_clipRect)) {
       paintBounds = childPaintBounds.intersect(_clipRect);
     }
+    context.mutatorsStack.pop();
   }
 
   @override
   void paint(PaintContext paintContext) {
     assert(needsPainting);
 
-    paintContext.canvas.save();
-    paintContext.canvas.clipRect(
+    paintContext.internalNodesCanvas.save();
+    paintContext.internalNodesCanvas.clipRect(
       _clipRect,
       ui.ClipOp.intersect,
       _clipBehavior != ui.Clip.hardEdge,
     );
     if (_clipBehavior == ui.Clip.antiAliasWithSaveLayer) {
-      paintContext.canvas.saveLayer(_clipRect, null);
+      paintContext.internalNodesCanvas.saveLayer(_clipRect, null);
     }
     paintChildren(paintContext);
     if (_clipBehavior == ui.Clip.antiAliasWithSaveLayer) {
-      paintContext.canvas.restore();
+      paintContext.internalNodesCanvas.restore();
     }
-    paintContext.canvas.restore();
+    paintContext.internalNodesCanvas.restore();
   }
 }
 
@@ -190,28 +212,30 @@ class ClipRRectLayer extends ContainerLayer {
       : assert(_clipBehavior != ui.Clip.none);
 
   @override
-  void preroll(PrerollContext prerollContext, Matrix4 matrix) {
-    final ui.Rect childPaintBounds = prerollChildren(prerollContext, matrix);
+  void preroll(PrerollContext context, Matrix4 matrix) {
+    context.mutatorsStack.pushClipRRect(_clipRRect);
+    final ui.Rect childPaintBounds = prerollChildren(context, matrix);
     if (childPaintBounds.overlaps(_clipRRect.outerRect)) {
       paintBounds = childPaintBounds.intersect(_clipRRect.outerRect);
     }
+    context.mutatorsStack.pop();
   }
 
   @override
   void paint(PaintContext paintContext) {
     assert(needsPainting);
 
-    paintContext.canvas.save();
-    paintContext.canvas
+    paintContext.internalNodesCanvas.save();
+    paintContext.internalNodesCanvas
         .clipRRect(_clipRRect, _clipBehavior != ui.Clip.hardEdge);
     if (_clipBehavior == ui.Clip.antiAliasWithSaveLayer) {
-      paintContext.canvas.saveLayer(paintBounds, null);
+      paintContext.internalNodesCanvas.saveLayer(paintBounds, null);
     }
     paintChildren(paintContext);
     if (_clipBehavior == ui.Clip.antiAliasWithSaveLayer) {
-      paintContext.canvas.restore();
+      paintContext.internalNodesCanvas.restore();
     }
-    paintContext.canvas.restore();
+    paintContext.internalNodesCanvas.restore();
   }
 }
 
@@ -223,12 +247,16 @@ class OpacityLayer extends ContainerLayer implements ui.OpacityEngineLayer {
   OpacityLayer(this._alpha, this._offset);
 
   @override
-  void preroll(PrerollContext prerollContext, Matrix4 matrix) {
+  void preroll(PrerollContext context, Matrix4 matrix) {
     final Matrix4 childMatrix = Matrix4.copy(matrix);
     childMatrix.translate(_offset.dx, _offset.dy);
-    final ui.Rect childPaintBounds =
-        prerollChildren(prerollContext, childMatrix);
-    paintBounds = childPaintBounds.translate(_offset.dx, _offset.dy);
+    context.mutatorsStack
+        .pushTransform(Matrix4.translationValues(_offset.dx, _offset.dy, 0.0));
+    context.mutatorsStack.pushOpacity(_alpha);
+    super.preroll(context, childMatrix);
+    context.mutatorsStack.pop();
+    context.mutatorsStack.pop();
+    paintBounds = paintBounds.translate(_offset.dx, _offset.dy);
   }
 
   @override
@@ -238,16 +266,16 @@ class OpacityLayer extends ContainerLayer implements ui.OpacityEngineLayer {
     final ui.Paint paint = ui.Paint();
     paint.color = ui.Color.fromARGB(_alpha, 0, 0, 0);
 
-    paintContext.canvas.save();
-    paintContext.canvas.translate(_offset.dx, _offset.dy);
+    paintContext.internalNodesCanvas.save();
+    paintContext.internalNodesCanvas.translate(_offset.dx, _offset.dy);
 
     final ui.Rect saveLayerBounds = paintBounds.shift(-_offset);
 
-    paintContext.canvas.saveLayer(saveLayerBounds, paint);
+    paintContext.internalNodesCanvas.saveLayer(saveLayerBounds, paint);
     paintChildren(paintContext);
     // Restore twice: once for the translate and once for the saveLayer.
-    paintContext.canvas.restore();
-    paintContext.canvas.restore();
+    paintContext.internalNodesCanvas.restore();
+    paintContext.internalNodesCanvas.restore();
   }
 }
 
@@ -260,11 +288,12 @@ class TransformLayer extends ContainerLayer
   TransformLayer(this._transform);
 
   @override
-  void preroll(PrerollContext prerollContext, Matrix4 matrix) {
+  void preroll(PrerollContext context, Matrix4 matrix) {
     final Matrix4 childMatrix = matrix * _transform;
-    final ui.Rect childPaintBounds =
-        prerollChildren(prerollContext, childMatrix);
+    context.mutatorsStack.pushTransform(_transform);
+    final ui.Rect childPaintBounds = prerollChildren(context, childMatrix);
     paintBounds = _transformRect(_transform, childPaintBounds);
+    context.mutatorsStack.pop();
   }
 
   /// Applies the given matrix as a perspective transform to the given point.
@@ -307,10 +336,10 @@ class TransformLayer extends ContainerLayer
   void paint(PaintContext paintContext) {
     assert(needsPainting);
 
-    paintContext.canvas.save();
-    paintContext.canvas.transform(_transform.storage);
+    paintContext.internalNodesCanvas.save();
+    paintContext.internalNodesCanvas.transform(_transform.storage);
     paintChildren(paintContext);
-    paintContext.canvas.restore();
+    paintContext.internalNodesCanvas.restore();
   }
 }
 
@@ -340,11 +369,11 @@ class PictureLayer extends Layer {
     assert(picture != null);
     assert(needsPainting);
 
-    paintContext.canvas.save();
-    paintContext.canvas.translate(offset.dx, offset.dy);
+    paintContext.leafNodesCanvas.save();
+    paintContext.leafNodesCanvas.translate(offset.dx, offset.dy);
 
-    paintContext.canvas.drawPicture(picture);
-    paintContext.canvas.restore();
+    paintContext.leafNodesCanvas.drawPicture(picture);
+    paintContext.leafNodesCanvas.restore();
   }
 }
 
@@ -432,26 +461,26 @@ class PhysicalShapeLayer extends ContainerLayer
     assert(needsPainting);
 
     if (_elevation != 0) {
-      drawShadow(paintContext.canvas, _path, _shadowColor, _elevation,
+      drawShadow(paintContext.leafNodesCanvas, _path, _shadowColor, _elevation,
           _color.alpha != 0xff);
     }
 
     final ui.Paint paint = ui.Paint()..color = _color;
     if (_clipBehavior != ui.Clip.antiAliasWithSaveLayer) {
-      paintContext.canvas.drawPath(_path, paint);
+      paintContext.leafNodesCanvas.drawPath(_path, paint);
     }
 
-    final int saveCount = paintContext.canvas.save();
+    final int saveCount = paintContext.internalNodesCanvas.save();
     switch (_clipBehavior) {
       case ui.Clip.hardEdge:
-        paintContext.canvas.clipPath(_path, false);
+        paintContext.internalNodesCanvas.clipPath(_path, false);
         break;
       case ui.Clip.antiAlias:
-        paintContext.canvas.clipPath(_path, true);
+        paintContext.internalNodesCanvas.clipPath(_path, true);
         break;
       case ui.Clip.antiAliasWithSaveLayer:
-        paintContext.canvas.clipPath(_path, true);
-        paintContext.canvas.saveLayer(paintBounds, null);
+        paintContext.internalNodesCanvas.clipPath(_path, true);
+        paintContext.internalNodesCanvas.saveLayer(paintBounds, null);
         break;
       case ui.Clip.none:
         break;
@@ -462,12 +491,12 @@ class PhysicalShapeLayer extends ContainerLayer
       // (https://github.com/flutter/flutter/issues/18057#issue-328003931)
       // using saveLayer, we have to call drawPaint instead of drawPath as
       // anti-aliased drawPath will always have such artifacts.
-      paintContext.canvas.drawPaint(paint);
+      paintContext.leafNodesCanvas.drawPaint(paint);
     }
 
     paintChildren(paintContext);
 
-    paintContext.canvas.restoreToCount(saveCount);
+    paintContext.internalNodesCanvas.restoreToCount(saveCount);
   }
 
   /// Draws a shadow on the given [canvas] for the given [path].
@@ -477,5 +506,34 @@ class PhysicalShapeLayer extends ContainerLayer
   static void drawShadow(SkCanvas canvas, ui.Path path, ui.Color color,
       double elevation, bool transparentOccluder) {
     canvas.drawShadow(path, color, elevation, transparentOccluder);
+  }
+}
+
+/// A layer which renders a platform view (an HTML element in this case).
+class PlatformViewLayer extends Layer {
+  PlatformViewLayer(this.viewId, this.offset, this.width, this.height);
+
+  final int viewId;
+  final ui.Offset offset;
+  final double width;
+  final double height;
+
+  @override
+  void preroll(PrerollContext context, Matrix4 matrix) {
+    paintBounds = ui.Rect.fromLTWH(offset.dx, offset.dy, width, height);
+    context.viewEmbedder.prerollCompositeEmbeddedView(
+      viewId,
+      EmbeddedViewParams(
+        offset,
+        ui.Size(width, height),
+        context.mutatorsStack,
+      ),
+    );
+  }
+
+  @override
+  void paint(PaintContext context) {
+    SkCanvas canvas = context.viewEmbedder.compositeEmbeddedView(viewId);
+    context.leafNodesCanvas = canvas;
   }
 }

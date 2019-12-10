@@ -12,6 +12,9 @@ class LayerTree {
   /// The size (in physical pixels) of the frame to paint this layer tree into.
   ui.Size frameSize;
 
+  /// The devicePixelRatio of the frame to paint this layer tree into.
+  double devicePixelRatio;
+
   /// Performs a preroll phase before painting the layer tree.
   ///
   /// In this phase, the paint boundary for each layer is computed and
@@ -19,8 +22,10 @@ class LayerTree {
   /// to raster. If [ignoreRasterCache] is `true`, then there will be no
   /// attempt to register pictures to cache.
   void preroll(Frame frame, {bool ignoreRasterCache = false}) {
-    final PrerollContext context =
-        PrerollContext(ignoreRasterCache ? null : frame.rasterCache);
+    final PrerollContext context = PrerollContext(
+      ignoreRasterCache ? null : frame.rasterCache,
+      frame.viewEmbedder,
+    );
     rootLayer.preroll(context, Matrix4.identity());
   }
 
@@ -29,8 +34,19 @@ class LayerTree {
   /// If [ignoreRasterCache] is `true`, then the raster cache will
   /// not be used.
   void paint(Frame frame, {bool ignoreRasterCache = false}) {
+    final SkNWayCanvas internalNodesCanvas = SkNWayCanvas();
+    internalNodesCanvas.addCanvas(frame.canvas);
+    final List<SkCanvas> overlayCanvases =
+        frame.viewEmbedder.getCurrentCanvases();
+    for (int i = 0; i < overlayCanvases.length; i++) {
+      internalNodesCanvas.addCanvas(overlayCanvases[i]);
+    }
     final PaintContext context = PaintContext(
-        frame.canvas, ignoreRasterCache ? null : frame.rasterCache);
+      internalNodesCanvas,
+      frame.canvas,
+      ignoreRasterCache ? null : frame.rasterCache,
+      frame.viewEmbedder,
+    );
     if (rootLayer.needsPainting) {
       rootLayer.paint(context);
     }
@@ -45,7 +61,10 @@ class Frame {
   /// A cache of pre-rastered pictures.
   final RasterCache rasterCache;
 
-  Frame(this.canvas, this.rasterCache);
+  /// The platform view embedder.
+  final HtmlViewEmbedder viewEmbedder;
+
+  Frame(this.canvas, this.rasterCache, this.viewEmbedder);
 
   /// Rasterize the given layer tree into this frame.
   bool raster(LayerTree layerTree, {bool ignoreRasterCache = false}) {
@@ -61,7 +80,7 @@ class CompositorContext {
   RasterCache rasterCache;
 
   /// Acquire a frame using this compositor's settings.
-  Frame acquireFrame(SkCanvas canvas) {
-    return Frame(canvas, rasterCache);
+  Frame acquireFrame(SkCanvas canvas, HtmlViewEmbedder viewEmbedder) {
+    return Frame(canvas, rasterCache, viewEmbedder);
   }
 }

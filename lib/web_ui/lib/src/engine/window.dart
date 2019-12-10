@@ -159,7 +159,11 @@ class EngineWindow extends ui.Window {
         return;
 
       case 'flutter/platform_views':
-        handlePlatformViewCall(data, callback);
+        if (experimentalUseSkia) {
+          _rasterizer.viewEmbedder.handlePlatformViewCall(data, callback);
+        } else {
+          handlePlatformViewCall(data, callback);
+        }
         return;
 
       case 'flutter/accessibility':
