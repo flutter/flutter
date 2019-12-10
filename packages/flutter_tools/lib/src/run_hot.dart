@@ -145,6 +145,57 @@ class HotRunner extends ResidentRunner {
     throw 'Failed to compile $expression';
   }
 
+  @override
+  Future<OperationResult> reloadMethod({String libraryId, String classId}) async {
+    final Stopwatch stopwatch = Stopwatch()..start();
+    final UpdateFSReport results = UpdateFSReport(success: true);
+    final List<Uri> invalidated =  <Uri>[Uri.parse(libraryId)];
+    for (FlutterDevice device in flutterDevices) {
+      results.incorporateResults(await device.updateDevFS(
+        mainPath: mainPath,
+        target: target,
+        bundle: assetBundle,
+        firstBuildTime: firstBuildTime,
+        bundleFirstUpload: false,
+        bundleDirty: false,
+        fullRestart: false,
+        projectRootPath: projectRootPath,
+        pathToReload: getReloadPath(fullRestart: false),
+        invalidatedFiles: invalidated,
+        dillOutputPath: dillOutputPath,
+      ));
+    }
+    if (!results.success) {
+      return OperationResult(1, 'Failed to compile');
+    }
+    try {
+      final String entryPath = fs.path.relative(
+        getReloadPath(fullRestart: false),
+        from: projectRootPath,
+      );
+      for (FlutterDevice device in flutterDevices) {
+        final List<Future<Map<String, dynamic>>> reportFutures = device.reloadSources(
+          entryPath, pause: false,
+        );
+        final List<Map<String, dynamic>> reports = await Future.wait(reportFutures);
+        final Map<String, dynamic> firstReport = reports.first;
+        await device.updateReloadStatus(validateReloadReport(firstReport, printErrors: false));
+      }
+    } catch (error) {
+      return OperationResult(1, error.toString());
+    }
+
+    for (FlutterDevice device in flutterDevices) {
+      for (FlutterView view in device.views) {
+        await view.uiIsolate.flutterFastReassemble(classId);
+      }
+    }
+
+    printStatus('reloadMethod took ${stopwatch.elapsedMilliseconds}');
+    flutterUsage.sendTiming('hot', 'ui', stopwatch.elapsed);
+    return OperationResult.ok;
+  }
+
   // Returns the exit code of the flutter tool process, like [run].
   @override
   Future<int> attach({
@@ -157,6 +208,7 @@ class HotRunner extends ResidentRunner {
         reloadSources: _reloadSourcesService,
         restart: _restartService,
         compileExpression: _compileExpressionService,
+        reloadMethod: reloadMethod,
       );
     } catch (error) {
       printError('Error connecting to the service protocol: $error');
