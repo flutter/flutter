@@ -46,6 +46,8 @@ source_set("runtime") {
   sources = [
     "dart_isolate.cc",
     "dart_isolate.h",
+    "dart_isolate_group_data.cc",
+    "dart_isolate_group_data.h",
     "dart_service_isolate.cc",
     "dart_service_isolate.h",
     "dart_snapshot.cc",
