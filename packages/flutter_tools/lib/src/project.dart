@@ -239,7 +239,8 @@ class FlutterProject {
       return null;
     }
 
-    return loadYaml(pubspecFile.readAsStringSync()) as YamlMap;
+    _cachedPubspec = loadYaml(pubspecFile.readAsStringSync()) as YamlMap;
+    return _cachedPubspec;
   }
 
   /// Return the set of builders used by this package.
@@ -261,9 +262,10 @@ class FlutterProject {
     return result != null && result.isNotEmpty;
   }
 
-  /// The direct dependencies of this project, read from the [pubspecFile]. This
-  /// doesn't include `dev_dependencies`. If the pubspec file doesn't exist,
-  /// returns null.
+  /// The direct dependencies of this project, read from the [pubspecFile].
+  ///
+  /// This doesn't include `dev_dependencies`. If the pubspec file doesn't
+  /// exist, returns null.
   List<String> get directDependencies {
     final YamlMap pubspec = _pubspecContent;
     if (pubspec == null) {
