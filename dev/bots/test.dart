@@ -87,6 +87,11 @@ const List<String> kWebTestFileBlacklist = <String>[
   'test/cupertino/activity_indicator_test.dart',
 ];
 
+/// Tests that we don't run on Driver for various reasons
+const List<String> kDriverTestFileBlacklist = <String>[
+  'test/src/web_extension_test.dart',
+];
+
 /// When you call this, you can pass additional arguments to pass custom
 /// arguments to flutter test. For example, you might want to call this
 /// script with the parameter --local-engine=host_debug_unopt to
@@ -413,28 +418,44 @@ Future<void> _runFrameworkTests() async {
 
   Future<void> runMisc() async {
     print('${green}Running package tests$reset for directories other than packages/flutter');
-    await _pubRunTest(path.join(flutterRoot, 'dev', 'bots'), tableData: bigqueryApi?.tabledata);
-    await _pubRunTest(path.join(flutterRoot, 'dev', 'devicelab'), tableData: bigqueryApi?.tabledata);
-    await _pubRunTest(path.join(flutterRoot, 'dev', 'snippets'), tableData: bigqueryApi?.tabledata);
-    await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'android_semantics_testing'), tableData: bigqueryApi?.tabledata);
-    await _runFlutterTest(path.join(flutterRoot, 'dev', 'manual_tests'), tableData: bigqueryApi?.tabledata);
-    await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'vitool'), tableData: bigqueryApi?.tabledata);
-    await _runFlutterTest(path.join(flutterRoot, 'examples', 'catalog'), tableData: bigqueryApi?.tabledata);
-    await _runFlutterTest(path.join(flutterRoot, 'examples', 'hello_world'), tableData: bigqueryApi?.tabledata);
-    await _runFlutterTest(path.join(flutterRoot, 'examples', 'layers'), tableData: bigqueryApi?.tabledata);
-    await _runFlutterTest(path.join(flutterRoot, 'examples', 'stocks'), tableData: bigqueryApi?.tabledata);
-    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'), tableData: bigqueryApi?.tabledata);
-    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_goldens'), tableData: bigqueryApi?.tabledata);
-    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'), tableData: bigqueryApi?.tabledata);
-    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'), tableData: bigqueryApi?.tabledata);
-    await _runFlutterTest(path.join(flutterRoot, 'packages', 'fuchsia_remote_debug_protocol'), tableData: bigqueryApi?.tabledata);
-    await _runFlutterTest(
-      path.join(flutterRoot, 'dev', 'integration_tests', 'codegen'),
-      tableData: bigqueryApi?.tabledata,
-      environment: <String, String>{
-        'FLUTTER_EXPERIMENTAL_BUILD': 'true',
-      },
-    );
+
+    final Directory flutterDriverPackageDirectory = Directory(path.join(flutterRoot, 'packages', 'flutter_driver'));
+    final Directory flutterDriverPackageTestDirectory = Directory(path.join(flutterDriverPackageDirectory.path, 'test'));
+
+    final List<String> flutterDriverTests = flutterDriverPackageTestDirectory
+        .listSync()
+        .whereType<Directory>()
+        .expand((Directory directory) => directory
+        .listSync(recursive: true)
+        .where((FileSystemEntity entity) => entity.path.endsWith('_test.dart'))
+    )
+        .whereType<File>()
+        .map<String>((File file) => path.relative(file.path, from: flutterDriverPackageDirectory.path))
+        .where((String filePath) => !kDriverTestFileBlacklist.contains(filePath))
+        .toList();
+
+//    await _pubRunTest(path.join(flutterRoot, 'dev', 'bots'), tableData: bigqueryApi?.tabledata);
+//    await _pubRunTest(path.join(flutterRoot, 'dev', 'devicelab'), tableData: bigqueryApi?.tabledata);
+//    await _pubRunTest(path.join(flutterRoot, 'dev', 'snippets'), tableData: bigqueryApi?.tabledata);
+//    await _runFlutterTest(path.join(flutterRoot, 'dev', 'integration_tests', 'android_semantics_testing'), tableData: bigqueryApi?.tabledata);
+//    await _runFlutterTest(path.join(flutterRoot, 'dev', 'manual_tests'), tableData: bigqueryApi?.tabledata);
+//    await _runFlutterTest(path.join(flutterRoot, 'dev', 'tools', 'vitool'), tableData: bigqueryApi?.tabledata);
+//    await _runFlutterTest(path.join(flutterRoot, 'examples', 'catalog'), tableData: bigqueryApi?.tabledata);
+//    await _runFlutterTest(path.join(flutterRoot, 'examples', 'hello_world'), tableData: bigqueryApi?.tabledata);
+//    await _runFlutterTest(path.join(flutterRoot, 'examples', 'layers'), tableData: bigqueryApi?.tabledata);
+//    await _runFlutterTest(path.join(flutterRoot, 'examples', 'stocks'), tableData: bigqueryApi?.tabledata);
+    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'), tableData: bigqueryApi?.tabledata, tests: flutterDriverTests);
+//    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_goldens'), tableData: bigqueryApi?.tabledata);
+//    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'), tableData: bigqueryApi?.tabledata);
+//    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'), tableData: bigqueryApi?.tabledata);
+//    await _runFlutterTest(path.join(flutterRoot, 'packages', 'fuchsia_remote_debug_protocol'), tableData: bigqueryApi?.tabledata);
+//    await _runFlutterTest(
+//      path.join(flutterRoot, 'dev', 'integration_tests', 'codegen'),
+//      tableData: bigqueryApi?.tabledata,
+//      environment: <String, String>{
+//        'FLUTTER_EXPERIMENTAL_BUILD': 'true',
+//      },
+//    );
   }
 
   await selectSubshard(<String, ShardRunner>{
@@ -517,6 +538,10 @@ Future<void> _runWebTests() async {
     await _runFlutterWebTest(
       path.join(flutterRoot, 'packages', 'flutter_web_plugins'),
       <String>['test'],
+    );
+    await _runFlutterWebTest(
+        path.join(flutterRoot, 'packages', 'flutter_driver'),
+        <String>['test/src/web_extension_test.dart'],
     );
   };
 
