@@ -10,7 +10,6 @@
 #include <algorithm>
 
 #include <lib/async-loop/cpp/loop.h>
-#include <lib/async/default.h>
 
 #include "flutter/fml/logging.h"
 #include "loop.h"
