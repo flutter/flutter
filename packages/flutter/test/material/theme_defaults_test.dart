@@ -40,7 +40,6 @@ void main() {
         };
       expect(raw.textStyle.color, const Color(0xdd000000));
       expect(raw.fillColor, const MaterialColor(0xff2196f3, color)); // Was Color(0xffe0e0e0)
-      // expect(raw.fillColor, const Color(0xff2196f3));
       expect(raw.highlightColor, const Color(0x29000000)); // Was Color(0x66bcbcbc)
       expect(raw.splashColor, const Color(0x1f000000)); // Was Color(0x66c8c8c8)
       expect(raw.elevation, 2.0);
