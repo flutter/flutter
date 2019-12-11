@@ -9,6 +9,7 @@ import 'package:meta/meta.dart';
 
 import 'common.dart' show throwToolExit;
 import 'context.dart';
+import 'error_handling_file_system.dart';
 import 'platform.dart';
 
 export 'package:file/file.dart';
@@ -20,7 +21,9 @@ const FileSystem _kLocalFs = LocalFileSystem();
 ///
 /// By default it uses local disk-based implementation. Override this in tests
 /// with [MemoryFileSystem].
-FileSystem get fs => context.get<FileSystem>() ?? _kLocalFs;
+FileSystem get fs => ErrorHandlingFileSystem(
+  context.get<FileSystem>() ?? _kLocalFs,
+);
 
 /// Create the ancestor directories of a file path if they do not already exist.
 void ensureDirectoryExists(String filePath) {
