@@ -92,7 +92,7 @@ static const char* kDartDisableServiceAuthCodesArgs[]{
 };
 
 static const char* kDartTraceStartupArgs[]{
-    "--timeline_streams=Compiler,Dart,Debugger,Embedder,GC,Isolate,VM",
+    "--timeline_streams=Compiler,Dart,Debugger,Embedder,GC,Isolate,VM,API",
 };
 
 static const char* kDartEndlessTraceBufferArgs[]{
@@ -108,7 +108,7 @@ static const char* kDartFuchsiaTraceArgs[] FML_ALLOW_UNUSED_TYPE = {
 };
 
 static const char* kDartTraceStreamsArgs[] = {
-    "--timeline_streams=Compiler,Dart,Debugger,Embedder,GC,Isolate,VM",
+    "--timeline_streams=Compiler,Dart,Debugger,Embedder,GC,Isolate,VM,API",
 };
 
 constexpr char kFileUriPrefix[] = "file://";
