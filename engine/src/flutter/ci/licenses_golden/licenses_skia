@@ -1,4 +1,4 @@
-Signature: da692beb732b6da3da400f6b172d8b08
+Signature: f4fd446862a83218bdd8559ce7845752
 
 UNUSED LICENSES:
 
@@ -1911,7 +1911,6 @@ FILE: ../../../third_party/skia/src/core/SkDistanceFieldGen.h
 FILE: ../../../third_party/skia/src/core/SkDrawable.cpp
 FILE: ../../../third_party/skia/src/core/SkFont.cpp
 FILE: ../../../third_party/skia/src/core/SkFont_serial.cpp
-FILE: ../../../third_party/skia/src/core/SkForceCPlusPlusLinking.cpp
 FILE: ../../../third_party/skia/src/core/SkHalf.cpp
 FILE: ../../../third_party/skia/src/core/SkImageGenerator.cpp
 FILE: ../../../third_party/skia/src/core/SkMaskCache.cpp
