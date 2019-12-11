@@ -151,7 +151,7 @@ String getGradleVersionForAndroidPlugin(Directory directory) {
   return getGradleVersionFor(androidPluginVersion);
 }
 
-const int _kExecPermissionMask = 0x8049; // u+x
+const int _kExecPermissionMask = 0x49; // a+x
 
 /// Returns [true] if [executable] has execute permission.
 bool _hasExecutePermission(File executable) {

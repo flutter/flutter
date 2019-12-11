@@ -291,7 +291,7 @@ void main() {
       when(flutterProject.android).thenReturn(androidProject);
 
       final FileStat gradleStat = MockFileStat();
-      when(gradleStat.mode).thenReturn(0x8049 /* u+x */);
+      when(gradleStat.mode).thenReturn(0x49 /* a+x */);
 
       final File gradlew = MockFile();
       when(gradlew.path).thenReturn('gradlew');
