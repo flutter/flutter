@@ -160,7 +160,6 @@ class FlutterDevice {
     ReloadSources reloadSources,
     Restart restart,
     CompileExpression compileExpression,
-    ReloadMethod reloadMethod,
   }) {
     final Completer<void> completer = Completer<void>();
     StreamSubscription<void> subscription;
@@ -178,7 +177,6 @@ class FlutterDevice {
           reloadSources: reloadSources,
           restart: restart,
           compileExpression: compileExpression,
-          reloadMethod: reloadMethod,
           device: device,
         );
       } on Exception catch (exception) {
@@ -714,26 +712,10 @@ abstract class ResidentRunner {
 
   bool get supportsRestart => false;
 
-  Future<OperationResult> restart({ bool fullRestart = false, bool pause = false, String reason }) {
+  Future<OperationResult> restart({ bool fullRestart = false, bool pauseAfterRestart = false, String reason }) {
     final String mode = isRunningProfile ? 'profile' :
         isRunningRelease ? 'release' : 'this';
     throw '${fullRestart ? 'Restart' : 'Reload'} is not supported in $mode mode';
-  }
-
-  /// The resident runner API for interaction with the reloadMethod vmservice
-  /// request.
-  ///
-  /// This API should only be called for UI only-changes spanning a single
-  /// library/Widget.
-  ///
-  /// The value [classId] should be the identifier of the StatelessWidget that
-  /// was invalidated, or the StatefulWidget for the corresponding State class
-  /// that was invalidated. This must be provided.
-  ///
-  /// The value [libraryId] should be the absolute file URI for the containing
-  /// library of the widget that was invalidated. This must be provided.
-  Future<OperationResult> reloadMethod({ String classId, String libraryId }) {
-    throw UnsupportedError('Method is not supported.');
   }
 
   @protected
@@ -914,7 +896,6 @@ abstract class ResidentRunner {
     ReloadSources reloadSources,
     Restart restart,
     CompileExpression compileExpression,
-    ReloadMethod reloadMethod,
   }) async {
     if (!debuggingOptions.debuggingEnabled) {
       throw 'The service protocol is not enabled.';
@@ -928,7 +909,6 @@ abstract class ResidentRunner {
         reloadSources: reloadSources,
         restart: restart,
         compileExpression: compileExpression,
-        reloadMethod: reloadMethod,
       );
       await device.getVMs();
       await device.refreshViews();

@@ -453,7 +453,6 @@ class DevFS {
     String projectRootPath,
     @required String pathToReload,
     @required List<Uri> invalidatedFiles,
-    bool skipAssets = false,
   }) async {
     assert(trackWidgetCreation != null);
     assert(generator != null);
@@ -464,7 +463,7 @@ class DevFS {
     final Map<Uri, DevFSContent> dirtyEntries = <Uri, DevFSContent>{};
 
     int syncedBytes = 0;
-    if (bundle != null && !skipAssets) {
+    if (bundle != null) {
       printTrace('Scanning asset files');
       // We write the assets into the AssetBundle working dir so that they
       // are in the same location in DevFS and the iOS simulator.

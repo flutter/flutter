@@ -382,12 +382,6 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["linux/android"]
 
-  time_to_development_benchmark__android:
-    description: >
-      Measures time from flutter run until resident runner setup is complete.
-    stage: devicelab
-    required_agent_capabilities: ["linux/android"]
-
   # iOS on-device tests
 
   tiles_scroll_perf_ios__timeline_summary:
@@ -514,16 +508,6 @@ tasks:
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
     timeout_in_minutes: 20
-
-  flutter_driver_screenshot_test_ios:
-    description: >
-      Screenshot tests running on a specifc iPhone 6.
-      The test makes sure that there is no regression while renderring an image with gl on iOS.
-    stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios", "ios/gl-render-image"]
-    #TODO(cyanglaz): The flaky flag is added because it is the first screenshot test we added.
-    # Remove the flaky flag when we are sure the test is stable.
-    flaky: true
 
   # TODO(fujino): does not pass on iOS13 https://github.com/flutter/flutter/issues/41133
   # system_debug_ios:

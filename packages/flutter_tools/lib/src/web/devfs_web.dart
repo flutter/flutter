@@ -280,7 +280,6 @@ class WebDevFS implements DevFS {
     String projectRootPath,
     String pathToReload,
     List<Uri> invalidatedFiles,
-    bool skipAssets = false,
   }) async {
     assert(trackWidgetCreation != null);
     assert(generator != null);

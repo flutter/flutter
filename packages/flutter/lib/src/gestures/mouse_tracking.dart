@@ -145,7 +145,7 @@ typedef _UpdatedDeviceHandler = void Function(_MouseState mouseState, LinkedHash
 // Various states of a connected mouse device used by [MouseTracker].
 class _MouseState {
   _MouseState({
-    @required PointerEvent initialEvent,
+    @required PointerAddedEvent initialEvent,
   }) : assert(initialEvent != null),
        _latestEvent = initialEvent;
 
@@ -289,7 +289,6 @@ class MouseTracker extends ChangeNotifier {
       return;
 
     final PointerEvent previousEvent = existingState?.latestEvent;
-    final Offset lastHoverPosition = previousEvent is! PointerHoverEvent ? null : previousEvent.position;
     _updateDevices(
       targetEvent: event,
       handleUpdatedDevice: (_MouseState mouseState, LinkedHashSet<MouseTrackerAnnotation> previousAnnotations) {
@@ -297,7 +296,7 @@ class MouseTracker extends ChangeNotifier {
         _dispatchDeviceCallbacks(
           lastAnnotations: previousAnnotations,
           nextAnnotations: mouseState.annotations,
-          lastHoverPosition: lastHoverPosition,
+          handledEvent: previousEvent,
           unhandledEvent: event,
           trackedAnnotations: _trackedAnnotations,
         );
@@ -328,12 +327,10 @@ class MouseTracker extends ChangeNotifier {
   void _updateAllDevices() {
     _updateDevices(
       handleUpdatedDevice: (_MouseState mouseState, LinkedHashSet<MouseTrackerAnnotation> previousAnnotations) {
-        final PointerEvent latestEvent = mouseState.latestEvent;
-        final Offset lastHoverPosition = latestEvent is PointerHoverEvent ? latestEvent.position : null;
         _dispatchDeviceCallbacks(
           lastAnnotations: previousAnnotations,
           nextAnnotations: mouseState.annotations,
-          lastHoverPosition: lastHoverPosition,
+          handledEvent: mouseState.latestEvent,
           unhandledEvent: mouseState.latestEvent,
           trackedAnnotations: _trackedAnnotations,
         );
@@ -388,11 +385,11 @@ class MouseTracker extends ChangeNotifier {
     _MouseState targetState;
     if (targetEvent != null) {
       targetState = _mouseStates[targetEvent.device];
-      if (targetState == null) {
+      assert((targetState == null) == (targetEvent is PointerAddedEvent));
+      if (targetEvent is PointerAddedEvent) {
         targetState = _MouseState(initialEvent: targetEvent);
         _mouseStates[targetState.device] = targetState;
       } else {
-        assert(targetEvent is! PointerAddedEvent);
         targetState.latestEvent = targetEvent;
         // Update mouseState to the latest devices that have not been removed,
         // so that [mouseIsConnected], which is decided by `_mouseStates`, is
@@ -427,18 +424,17 @@ class MouseTracker extends ChangeNotifier {
   // Dispatch callbacks related to a device after all necessary information
   // has been collected.
   //
-  // The `lastHoverPosition` can be null, which means the last event is not a
-  // hover. Other arguments must not be null.
+  // The `unhandledEvent` can be null. Other arguments must not be null.
   static void _dispatchDeviceCallbacks({
     @required LinkedHashSet<MouseTrackerAnnotation> lastAnnotations,
     @required LinkedHashSet<MouseTrackerAnnotation> nextAnnotations,
-    @required Offset lastHoverPosition,
+    @required PointerEvent handledEvent,
     @required PointerEvent unhandledEvent,
     @required Set<MouseTrackerAnnotation> trackedAnnotations,
   }) {
     assert(lastAnnotations != null);
     assert(nextAnnotations != null);
-    // lastHoverPosition can be null
+    // handledEvent can be null
     assert(unhandledEvent != null);
     assert(trackedAnnotations != null);
     // Order is important for mouse event callbacks. The `findAnnotations`
@@ -481,7 +477,8 @@ class MouseTracker extends ChangeNotifier {
         // or the position has changed
         assert(trackedAnnotations.contains(annotation));
         if (!lastAnnotations.contains(annotation)
-            || lastHoverPosition != unhandledEvent.position) {
+            || handledEvent is! PointerHoverEvent
+            || handledEvent.position != unhandledEvent.position) {
           if (annotation.onHover != null) {
             annotation.onHover(unhandledEvent);
           }
