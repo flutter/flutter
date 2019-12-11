@@ -11,6 +11,8 @@
 #include "gtest/gtest.h"
 #include "third_party/skia/include/core/SkRefCnt.h"
 
+#include <future>
+
 namespace flutter {
 namespace testing {
 
@@ -42,6 +44,18 @@ class SkiaGpuObjectTest : public ThreadTest {
         delayed_unref_queue_(fml::MakeRefCounted<SkiaUnrefQueue>(
             unref_task_runner(),
             fml::TimeDelta::FromSeconds(3))) {
+    // The unref queues must be created in the same thread of the
+    // unref_task_runner so the queue can access the same-thread-only WeakPtr of
+    // the GrContext constructed during the creation.
+    std::promise<bool> queuesCreated;
+    unref_task_runner_->PostTask([this, &queuesCreated]() {
+      unref_queue_ = fml::MakeRefCounted<SkiaUnrefQueue>(
+          unref_task_runner(), fml::TimeDelta::FromSeconds(0));
+      delayed_unref_queue_ = fml::MakeRefCounted<SkiaUnrefQueue>(
+          unref_task_runner(), fml::TimeDelta::FromSeconds(3));
+      queuesCreated.set_value(true);
+    });
+    queuesCreated.get_future().wait();
     ::testing::FLAGS_gtest_death_test_style = "threadsafe";
   }
 
