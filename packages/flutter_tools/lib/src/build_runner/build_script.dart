@@ -3,6 +3,10 @@
 // found in the LICENSE file.
 
 // ignore_for_file: implementation_imports
+// The "// ignore:" comments found in strings in this file are counted as _actual_ ignore comments.
+// Since the "// ignore:" comments found in strings don't actually ignore anythin in _this_ file,
+// we must allow them to be "unused." See https://github.com/dart-lang/sdk/issues/39607.
+// ignore_for_file: unused_ignore_code
 import 'dart:async';
 import 'dart:isolate';
 
@@ -265,10 +269,10 @@ import 'dart:html';
 import 'dart:js';
 
 import 'package:stream_channel/stream_channel.dart';
-import 'package:test_api/src/backend/stack_trace_formatter.dart';
-import 'package:test_api/src/util/stack_trace_mapper.dart';
-import 'package:test_api/src/remote_listener.dart';
-import 'package:test_api/src/suite_channel_manager.dart';
+import 'package:test_api/src/backend/stack_trace_formatter.dart'; // ignore: implementation_imports
+import 'package:test_api/src/util/stack_trace_mapper.dart'; // ignore: implementation_imports
+import 'package:test_api/src/remote_listener.dart'; // ignore: implementation_imports
+import 'package:test_api/src/suite_channel_manager.dart'; // ignore: implementation_imports
 
 import "${path.url.basename(id.path)}" as test;
 
