@@ -27,6 +27,34 @@ uint64_t Layer::NextUniqueID() {
 
 void Layer::Preroll(PrerollContext* context, const SkMatrix& matrix) {}
 
+Layer::AutoPrerollSaveLayerState::AutoPrerollSaveLayerState(
+    PrerollContext* preroll_context,
+    bool save_layer_is_active,
+    bool layer_itself_performs_readback)
+    : preroll_context_(preroll_context),
+      save_layer_is_active_(save_layer_is_active),
+      layer_itself_performs_readback_(layer_itself_performs_readback) {
+  if (save_layer_is_active_) {
+    prev_surface_needs_readback_ = preroll_context_->surface_needs_readback;
+    preroll_context_->surface_needs_readback = false;
+  }
+}
+
+Layer::AutoPrerollSaveLayerState Layer::AutoPrerollSaveLayerState::Create(
+    PrerollContext* preroll_context,
+    bool save_layer_is_active,
+    bool layer_itself_performs_readback) {
+  return Layer::AutoPrerollSaveLayerState(preroll_context, save_layer_is_active,
+                                          layer_itself_performs_readback);
+}
+
+Layer::AutoPrerollSaveLayerState::~AutoPrerollSaveLayerState() {
+  if (save_layer_is_active_) {
+    preroll_context_->surface_needs_readback =
+        (prev_surface_needs_readback_ || layer_itself_performs_readback_);
+  }
+}
+
 #if defined(OS_FUCHSIA)
 void Layer::UpdateScene(SceneUpdateContext& context) {}
 #endif  // defined(OS_FUCHSIA)

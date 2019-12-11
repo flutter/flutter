@@ -20,6 +20,7 @@ class ScopedFrame final : public flutter::CompositorContext::ScopedFrame {
                                                 nullptr,
                                                 root_surface_transformation,
                                                 instrumentation_enabled,
+                                                true,
                                                 nullptr),
         session_connection_(session_connection) {}
 
@@ -96,6 +97,7 @@ CompositorContext::AcquireFrame(
     flutter::ExternalViewEmbedder* view_embedder,
     const SkMatrix& root_surface_transformation,
     bool instrumentation_enabled,
+    bool surface_supports_readback,
     fml::RefPtr<fml::GpuThreadMerger> gpu_thread_merger) {
   // TODO: The AcquireFrame interface is too broad and must be refactored to get
   // rid of the context and canvas arguments as those seem to be only used for

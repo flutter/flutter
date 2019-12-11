@@ -253,5 +253,27 @@ TEST_F(ShaderMaskLayerTest, Nested) {
            MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}}));
 }
 
+TEST_F(ShaderMaskLayerTest, Readback) {
+  auto initial_transform = SkMatrix();
+  const SkRect layer_bounds = SkRect::MakeLTRB(2.0f, 4.0f, 20.5f, 20.5f);
+  auto layer_filter =
+      SkPerlinNoiseShader::MakeImprovedNoise(1.0f, 1.0f, 1, 1.0f);
+  auto layer = std::make_shared<ShaderMaskLayer>(layer_filter, layer_bounds,
+                                                 SkBlendMode::kSrc);
+
+  // ShaderMaskLayer does not read from surface
+  preroll_context()->surface_needs_readback = false;
+  layer->Preroll(preroll_context(), initial_transform);
+  EXPECT_FALSE(preroll_context()->surface_needs_readback);
+
+  // ShaderMaskLayer blocks child with readback
+  auto mock_layer =
+      std::make_shared<MockLayer>(SkPath(), SkPaint(), false, false, true);
+  layer->Add(mock_layer);
+  preroll_context()->surface_needs_readback = false;
+  layer->Preroll(preroll_context(), initial_transform);
+  EXPECT_FALSE(preroll_context()->surface_needs_readback);
+}
+
 }  // namespace testing
 }  // namespace flutter

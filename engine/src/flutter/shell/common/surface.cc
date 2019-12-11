@@ -10,8 +10,12 @@
 namespace flutter {
 
 SurfaceFrame::SurfaceFrame(sk_sp<SkSurface> surface,
+                           bool supports_readback,
                            const SubmitCallback& submit_callback)
-    : submitted_(false), surface_(surface), submit_callback_(submit_callback) {
+    : submitted_(false),
+      surface_(surface),
+      supports_readback_(supports_readback),
+      submit_callback_(submit_callback) {
   FML_DCHECK(submit_callback_);
 }
 

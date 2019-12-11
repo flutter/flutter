@@ -58,6 +58,8 @@ void OpacityLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
   child_matrix.postTranslate(offset_.fX, offset_.fY);
   context->mutators_stack.PushTransform(
       SkMatrix::MakeTrans(offset_.fX, offset_.fY));
+  Layer::AutoPrerollSaveLayerState save =
+      Layer::AutoPrerollSaveLayerState::Create(context);
   OpacityLayerBase::Preroll(context, child_matrix);
   context->mutators_stack.Pop();
 

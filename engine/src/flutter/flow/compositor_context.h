@@ -45,6 +45,7 @@ class CompositorContext {
                 ExternalViewEmbedder* view_embedder,
                 const SkMatrix& root_surface_transformation,
                 bool instrumentation_enabled,
+                bool surface_supports_readback,
                 fml::RefPtr<fml::GpuThreadMerger> gpu_thread_merger);
 
     virtual ~ScopedFrame();
@@ -59,6 +60,8 @@ class CompositorContext {
       return root_surface_transformation_;
     }
 
+    bool surface_supports_readback() { return surface_supports_readback_; }
+
     GrContext* gr_context() const { return gr_context_; }
 
     virtual RasterStatus Raster(LayerTree& layer_tree,
@@ -71,6 +74,7 @@ class CompositorContext {
     ExternalViewEmbedder* view_embedder_;
     const SkMatrix& root_surface_transformation_;
     const bool instrumentation_enabled_;
+    const bool surface_supports_readback_;
     fml::RefPtr<fml::GpuThreadMerger> gpu_thread_merger_;
 
     FML_DISALLOW_COPY_AND_ASSIGN(ScopedFrame);
@@ -86,6 +90,7 @@ class CompositorContext {
       ExternalViewEmbedder* view_embedder,
       const SkMatrix& root_surface_transformation,
       bool instrumentation_enabled,
+      bool surface_supports_readback,
       fml::RefPtr<fml::GpuThreadMerger> gpu_thread_merger);
 
   void OnGrContextCreated();
