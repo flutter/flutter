@@ -54,16 +54,9 @@ class GradleUtils {
     );
     if (gradle.existsSync()) {
       printTrace('Using gradle from ${gradle.absolute.path}.');
-
       // If the Gradle executable doesn't have execute permission,
       // then attempt to set it.
-      final FileStat gradleStat = gradle.statSync();
-      printTrace('Gradle mode: ${gradleStat.modeString()}.');
-      if (gradleStat.type != FileSystemEntityType.notFound &&
-          gradleStat.mode & 0x1 == 0) {
-        printTrace('Trying to give execute permission to Gradle.');
-        os.makeExecutable(gradle);
-      }
+      _giveExecutePermissionIfNeeded(gradle);
       return gradle.absolute.path;
     }
     throwToolExit(
@@ -113,6 +106,11 @@ class GradleUtils {
         // Don't override the existing files in the project.
         return !destinationFile.existsSync();
       },
+      onFileCopied: (File sourceFile, File destinationFile) {
+        if (_hasExecutePermission(sourceFile)) {
+          _giveExecutePermissionIfNeeded(destinationFile);
+        }
+      },
     );
     // Add the `gradle-wrapper.properties` file if it doesn't exist.
     final File propertiesFile = directory.childFile(
@@ -151,6 +149,24 @@ String getGradleVersionForAndroidPlugin(Directory directory) {
   }
   final String androidPluginVersion = pluginMatches.first.group(1);
   return getGradleVersionFor(androidPluginVersion);
+}
+
+const int _kExecPermissionMask = 0x8049; // u+x
+
+/// Returns [true] if [executable] has execute permission.
+bool _hasExecutePermission(File executable) {
+  final FileStat stat = executable.statSync();
+  assert(stat.type != FileSystemEntityType.notFound);
+  printTrace('${executable.path} mode: ${stat.mode} ${stat.modeString()}.');
+  return stat.mode & _kExecPermissionMask == _kExecPermissionMask;
+}
+
+/// Gives execute permission to [executable] if it doesn't have it already.
+void _giveExecutePermissionIfNeeded(File executable) {
+  if (!_hasExecutePermission(executable)) {
+    printTrace('Trying to give execute permission to ${executable.path}.');
+    os.makeExecutable(executable);
+  }
 }
 
 /// Returns true if [targetVersion] is within the range [min] and [max] inclusive.
