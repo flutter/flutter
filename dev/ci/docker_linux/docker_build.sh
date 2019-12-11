@@ -6,14 +6,14 @@
 # Capture the directory this script resides in
 SCRIPT_DIRECTORY="$(dirname $(readlink -f "$0"))"
 
-echo "Script directory is $SCRIPT_DIRECTORY"
+echo "Script directory is $SCRIPT_DIRECTORY" # TODO
 
-echo "Current working directory is $(pwd)"
+echo "Current working directory is $(pwd)" # TODO
 
 # Change directory to repo root
 cd "$(dirname "$0")/../../.."
 
-echo "Repo root should be... $PWD"
+echo "Repo root should be... $PWD" # TODO
 
 TAG="${CIRRUS_TAG:-latest}"
 
