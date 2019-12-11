@@ -269,6 +269,8 @@ FILE: ../../../flutter/lib/ui/dart_ui.h
 FILE: ../../../flutter/lib/ui/dart_wrapper.h
 FILE: ../../../flutter/lib/ui/fixtures/DashInNooglerHat.jpg
 FILE: ../../../flutter/lib/ui/fixtures/Horizontal.jpg
+FILE: ../../../flutter/lib/ui/fixtures/hello_loop_2.gif
+FILE: ../../../flutter/lib/ui/fixtures/hello_loop_2.webp
 FILE: ../../../flutter/lib/ui/fixtures/ui_test.dart
 FILE: ../../../flutter/lib/ui/geometry.dart
 FILE: ../../../flutter/lib/ui/hash_codes.dart

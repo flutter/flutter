@@ -9,6 +9,7 @@
 #include "flutter/testing/test_gl_surface.h"
 #include "flutter/testing/testing.h"
 #include "flutter/testing/thread_test.h"
+#include "third_party/skia/include/codec/SkCodec.h"
 
 namespace flutter {
 namespace testing {
@@ -494,6 +495,28 @@ TEST_F(ImageDecoderFixtureTest, CanResizeWithoutDecode) {
     latch.Signal();
   });
   latch.Wait();
+}
+
+// Verifies https://skia-review.googlesource.com/c/skia/+/259161 is present in
+// Flutter.
+TEST(ImageDecoderTest,
+     VerifyCodecRepeatCountsForGifAndWebPAreConsistentWithLoopCounts) {
+  auto gif_mapping = OpenFixtureAsSkData("hello_loop_2.gif");
+  auto webp_mapping = OpenFixtureAsSkData("hello_loop_2.webp");
+
+  ASSERT_TRUE(gif_mapping);
+  ASSERT_TRUE(webp_mapping);
+
+  auto gif_codec = SkCodec::MakeFromData(gif_mapping);
+  auto webp_codec = SkCodec::MakeFromData(webp_mapping);
+
+  ASSERT_TRUE(gif_codec);
+  ASSERT_TRUE(webp_codec);
+
+  // Both fixtures have a loop count of 2 which should lead to the repeat count
+  // of 1
+  ASSERT_EQ(gif_codec->getRepetitionCount(), 1);
+  ASSERT_EQ(webp_codec->getRepetitionCount(), 1);
 }
 
 }  // namespace testing
