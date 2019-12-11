@@ -4,8 +4,13 @@
 
 import 'dart:typed_data';
 
+import 'package:build_daemon/data/build_status.dart';
+import 'package:dwds/asset_handler.dart';
+import 'package:dwds/dwds.dart';
 import 'package:meta/meta.dart';
 import 'package:mime/mime.dart' as mime;
+import 'package:shelf/shelf.dart' as shelf;
+import 'package:shelf/shelf_io.dart' as shelf;
 
 import '../artifacts.dart';
 import '../asset.dart';
@@ -21,18 +26,16 @@ import '../convert.dart';
 import '../devfs.dart';
 import '../globals.dart';
 import 'bootstrap.dart';
+import 'chrome.dart';
 
 /// A web server which handles serving JavaScript and assets.
 ///
 /// This is only used in development mode.
-class WebAssetServer {
+class WebAssetServer implements AssetHandler {
   @visibleForTesting
-  WebAssetServer(this._httpServer, { @required void Function(dynamic, StackTrace) onError }) {
-    _httpServer.listen((HttpRequest request) {
-      _handleRequest(request).catchError(onError);
-      // TODO(jonahwilliams): test the onError callback when https://github.com/dart-lang/sdk/issues/39094 is fixed.
-    }, onError: onError);
-  }
+  WebAssetServer(this._httpServer);
+
+  Dwds dwds;
 
   // Fallback to "application/octet-stream" on null which
   // makes no claims as to the structure of the data.
@@ -45,10 +48,19 @@ class WebAssetServer {
   static Future<WebAssetServer> start(String hostname, int port) async {
     try {
       final HttpServer httpServer = await HttpServer.bind(hostname, port);
-      return WebAssetServer(httpServer, onError: (dynamic error, StackTrace stackTrace) {
-        httpServer.close(force: true);
-        throwToolExit('Unhandled exception in web development server:\n$error\n$stackTrace');
-      });
+      final WebAssetServer webAssetServer = WebAssetServer(httpServer);
+      final Dwds dwds = await Dwds.start(
+        assetHandler: webAssetServer,
+        buildResults: const Stream<BuildResult>.empty(),
+        chromeConnection: () async {
+          final Chrome chrome = await ChromeLauncher.connectedInstance;
+          return chrome.chromeConnection;
+        },
+        enableDebugging: true,
+      );
+      webAssetServer.dwds = dwds;
+      shelf.serveRequests(httpServer, dwds.handler);
+      return webAssetServer;
     } on SocketException catch (err) {
       throwToolExit('Failed to bind web development server:\n$err');
     }
@@ -64,27 +76,24 @@ class WebAssetServer {
 
   final RegExp _drivePath = RegExp(r'\/[A-Z]:\/');
 
-  // handle requests for JavaScript source, dart sources maps, or asset files.
-  Future<void> _handleRequest(HttpRequest request) async {
-    final HttpResponse response = request.response;
+  @override
+  shelf.Handler get handler => (shelf.Request request) async {
     // If the response is `/`, then we are requesting the index file.
-    if (request.uri.path == '/') {
+    final Map<String, String> headers = <String, String>{};
+    if (request.url.path == '/' || request.url.path.isEmpty) {
       final File indexFile = fs.currentDirectory
         .childDirectory('web')
         .childFile('index.html');
       if (indexFile.existsSync()) {
-        response.headers.add('Content-Type', 'text/html');
-        response.headers.add('Content-Length', indexFile.lengthSync());
-        await response.addStream(indexFile.openRead());
-      } else {
-        response.statusCode = HttpStatus.notFound;
+        headers['Content-Type'] = 'text/html';
+        headers['Content-Length'] = indexFile.lengthSync().toString();
+        return shelf.Response.ok(indexFile.openRead(), headers: headers);
       }
-      await response.close();
-      return;
+      return shelf.Response.notFound('');
     }
     // TODO(jonahwilliams): better path normalization in frontend_server to remove
     // this workaround.
-    String requestPath = request.uri.path;
+    String requestPath = '/${request.url.path}'; // NOTE: shelf removes trailing `/` for some reason.
     if (requestPath.startsWith(_drivePath)) {
       requestPath = requestPath.substring(3);
     }
@@ -93,35 +102,29 @@ class WebAssetServer {
     // Attempt to look up the file by URI.
     if (_files.containsKey(requestPath)) {
       final List<int> bytes = _files[requestPath];
-      response.headers
-        ..add('Content-Length', bytes.length)
-        ..add('Content-Type', 'application/javascript');
-      response.add(bytes);
-      await response.close();
-      return;
+      headers['Content-Length'] = bytes.length.toString();
+      headers['Content-Type'] = 'application/javascript';
+      return shelf.Response.ok(bytes, headers: headers);
     }
     // If this is a sourcemap file, then it might be in the in-memory cache.
     // Attempt to lookup the file by URI.
     if (_sourcemaps.containsKey(requestPath)) {
       final List<int> bytes = _sourcemaps[requestPath];
-      response.headers
-        ..add('Content-Length', bytes.length)
-        ..add('Content-Type', 'application/json');
-      response.add(bytes);
-      await response.close();
-      return;
+      headers['Content-Length'] = bytes.length.toString();
+      headers['Content-Type'] = 'application/json';
+      return shelf.Response.ok(bytes, headers: headers);
     }
 
     // If this is a dart file, it must be on the local file system and is
     // likely coming from a source map request. Attempt to look in the
     // local filesystem for it, and return a 404 if it is not found. The tool
     // doesn't currently consider the case of Dart files as assets.
-    File file = fs.file(Uri.base.resolve(request.uri.path));
+    File file = fs.file(Uri.base.resolve(requestPath));
 
     // If both of the lookups above failed, the file might have been an asset.
     // Try and resolve the path relative to the built asset directory.
     if (!file.existsSync()) {
-      final String assetPath = request.uri.path.replaceFirst('/assets/', '');
+      final String assetPath = requestPath.replaceFirst('/assets/', '');
       file = fs.file(fs.path.join(getAssetBuildDirectory(), fs.path.relative(assetPath)));
     }
 
@@ -129,18 +132,16 @@ class WebAssetServer {
     // or a flutter web SDK source.
     if (!file.existsSync()) {
       final Directory dartSdkParent = fs.directory(artifacts.getArtifactPath(Artifact.engineDartSdkPath)).parent;
-      file = fs.file(fs.path.joinAll(<String>[dartSdkParent.path, ...request.uri.pathSegments]));
+      file = fs.file(fs.path.joinAll(<String>[dartSdkParent.path, ...request.url.pathSegments]));
     }
 
     if (!file.existsSync()) {
       final String flutterWebSdk = artifacts.getArtifactPath(Artifact.flutterWebSdk);
-      file = fs.file(fs.path.joinAll(<String>[flutterWebSdk, ...request.uri.pathSegments]));
+      file = fs.file(fs.path.joinAll(<String>[flutterWebSdk, ...request.url.pathSegments]));
     }
 
     if (!file.existsSync()) {
-      response.statusCode = HttpStatus.notFound;
-      await response.close();
-      return;
+      return shelf.Response.notFound('');
     }
     final int length = file.lengthSync();
     // Attempt to determine the file's mime type. if this is not provided some
@@ -154,11 +155,10 @@ class WebAssetServer {
       );
     }
     mimeType ??= _kDefaultMimeType;
-    response.headers.add('Content-Length', length);
-    response.headers.add('Content-Type', mimeType);
-    await response.addStream(file.openRead());
-    await response.close();
-  }
+    headers['Content-Length'] = length.toString();
+    headers['Content-Type'] = mimeType;
+    return shelf.Response.ok(file.openRead(), headers: headers);
+  };
 
   /// Tear down the http server running.
   Future<void> dispose() {
@@ -221,6 +221,11 @@ class WebAssetServer {
     }
     return modules;
   }
+
+  @override
+  Future<shelf.Response> getRelativeAsset(String path) async  {
+    return handler(shelf.Request('GET', Uri.parse(path)));
+  }
 }
 
 class WebDevFS implements DevFS {
@@ -243,6 +248,8 @@ class WebDevFS implements DevFS {
 
   @override
   Uri get baseUri => null;
+
+  Dwds get dwds => _webAssetServer.dwds;
 
   @override
   Future<Uri> create() async {
@@ -317,11 +324,12 @@ class WebDevFS implements DevFS {
         mapperUrl: _filePathToUriFragment(stackTraceMapper.path),
         entrypoint: '${_filePathToUriFragment(mainPath)}.js',
       ));
-      _webAssetServer.writeFile('/main_module.js', generateMainModule(
+      _webAssetServer.writeFile('/main_module.bootstrap.js', generateMainModule(
         entrypoint: '${_filePathToUriFragment(mainPath)}.js',
       ));
       _webAssetServer.writeFile('/dart_sdk.js', dartSdk.readAsStringSync());
       _webAssetServer.writeFile('/dart_sdk.js.map', dartSdkSourcemap.readAsStringSync());
+      _webAssetServer.writeFile('/basic.digests', '{}'); // write fake digests.
       // TODO(jonahwilliams): refactor the asset code in this and the regular devfs to
       // be shared.
       await writeBundle(fs.directory(getAssetBuildDirectory()), bundle.entries);

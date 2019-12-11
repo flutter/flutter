@@ -4,6 +4,36 @@
 
 import 'package:meta/meta.dart';
 
+const String _currentDirectoryScript = r'''
+var _currentDirectory = (function () {
+  var _url;
+  var lines = new Error().stack.split('\n');
+  function lookupUrl() {
+    if (lines.length > 2) {
+      var match = lines[1].match(/^\s+at (.+):\d+:\d+$/);
+      // Chrome.
+      if (match) return match[1];
+      // Chrome nested eval case.
+      match = lines[1].match(/^\s+at eval [(](.+):\d+:\d+[)]$/);
+      if (match) return match[1];
+      // Edge.
+      match = lines[1].match(/^\s+at.+\((.+):\d+:\d+\)$/);
+      if (match) return match[1];
+      // Firefox.
+      match = lines[0].match(/[<][@](.+):\d+:\d+$/)
+      if (match) return match[1];
+    }
+    // Safari.
+    return lines[0].match(/(.+):\d+:\d+$/)[1];
+  }
+  _url = lookupUrl();
+  var lastSlash = _url.lastIndexOf('/');
+  if (lastSlash == -1) return _url;
+  var currentDirectory = _url.substring(0, lastSlash + 1);
+  return currentDirectory;
+})();
+''';
+
 /// The JavaScript bootstrap script to support in-browser hot restart.
 ///
 /// The [requireUrl] loads our cached RequireJS script file. The [mapperUrl]
@@ -34,7 +64,7 @@ requireEl.defer = true;
 requireEl.async = false;
 requireEl.src = "$requireUrl";
 // This attribute tells require JS what to load as main (defined below).
-requireEl.setAttribute("data-main", "main_module");
+requireEl.setAttribute("data-main", "main_module.bootstrap");
 document.head.appendChild(requireEl);
 
 // Invoked by connected chrome debugger for hot reload/restart support.
@@ -69,9 +99,83 @@ window.\$hotReloadHook = function(modules) {
 /// Generate a synthetic main module which captures the application's main
 /// method.
 String generateMainModule({@required String entrypoint}) {
-  return '''
+  return '''/* ENTRYPOINT_EXTENTION_MARKER */
+
+// baseUrlScript
+var baseUrl = (function () {
+  // Attempt to detect --precompiled mode for tests, and set the base url
+  // appropriately, otherwise set it to '/'.
+  var pathParts = location.pathname.split("/");
+  if (pathParts[0] == "") {
+    pathParts.shift();
+  }
+  if (pathParts.length > 1 && pathParts[1] == "test") {
+    return "/" + pathParts.slice(0, 2).join("/") + "/";
+  }
+  // Attempt to detect base url using <base href> html tag
+  // base href should start and end with "/"
+  if (typeof document !== 'undefined') {
+    var el = document.getElementsByTagName('base');
+    if (el && el[0] && el[0].getAttribute("href") && el[0].getAttribute
+    ("href").startsWith("/") && el[0].getAttribute("href").endsWith("/")){
+      return el[0].getAttribute("href");
+    }
+  }
+  // return default value
+  return "/";
+}());
+
+$_currentDirectoryScript
+
+// dart loader
+if(!window.\$dartLoader) {
+   window.\$dartLoader = {
+     appDigests: _currentDirectory + 'basic.digests',
+     moduleIdToUrl: new Map(),
+     urlToModuleId: new Map(),
+     rootDirectories: new Array(),
+     // Used in package:build_runner/src/server/build_updates_client/hot_reload_client.dart
+     moduleParentsGraph: new Map(),
+     moduleLoadingErrorCallbacks: new Map(),
+     forceLoadModule: function (moduleName, callback, onError) {
+       if (typeof onError != 'undefined') {
+         var errorCallbacks = \$dartLoader.moduleLoadingErrorCallbacks;
+         if (!errorCallbacks.has(moduleName)) {
+           errorCallbacks.set(moduleName, new Set());
+         }
+         errorCallbacks.get(moduleName).add(onError);
+       }
+       requirejs.undef(moduleName);
+       requirejs([moduleName], function() {
+         if (typeof onError != 'undefined') {
+           errorCallbacks.get(moduleName).delete(onError);
+         }
+         if (typeof callback != 'undefined') {
+           callback();
+         }
+       });
+     },
+     getModuleLibraries: null, // set up by _initializeTools
+   };
+}
+let modulePaths = {};
+let customModulePaths = {};
+window.\$dartLoader.rootDirectories.push(window.location.origin + baseUrl);
+for (let moduleName of Object.getOwnPropertyNames(modulePaths)) {
+  let modulePath = modulePaths[moduleName];
+  if (modulePath != moduleName) {
+    customModulePaths[moduleName] = modulePath;
+  }
+  var src = window.location.origin + '/' + modulePath + '.js';
+  if (window.\$dartLoader.moduleIdToUrl.has(moduleName)) {
+    continue;
+  }
+  \$dartLoader.moduleIdToUrl.set(moduleName, src);
+  \$dartLoader.urlToModuleId.set(src, moduleName);
+}
+
 // Create the main module loaded below.
-define("main_module", ["$entrypoint", "dart_sdk"], function(app, dart_sdk) {
+define("main_module.bootstrap", ["$entrypoint", "dart_sdk"], function(app, dart_sdk) {
   dart_sdk.dart.setStartAsyncSynchronously(true);
   dart_sdk._isolate_helper.startRootIsolate(() => {}, []);
   dart_sdk._debugger.registerDevtoolsFormatter();
@@ -91,9 +195,14 @@ define("main_module", ["$entrypoint", "dart_sdk"], function(app, dart_sdk) {
     }
   }
 
-  dart_sdk.ui.webOnlyInitializePlatform().then(dart_sdk.core.Null, dart_sdk.dart.fn(_ => {
-    app.main.main();
-  }, voidToNull()));
+  function main() {
+    dart_sdk.ui.webOnlyInitializePlatform().then(dart_sdk.core.Null, dart_sdk.dart.fn(_ => {
+      app.main.main();
+    }, voidToNull()));
+  }
+
+  /* MAIN_EXTENSION_MARKER */
+  main();
 });
 
 // Require JS configuration.

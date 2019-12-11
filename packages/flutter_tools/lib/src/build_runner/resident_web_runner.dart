@@ -518,6 +518,8 @@ class _ExperimentalResidentWebRunner extends ResidentWebRunner {
     return report;
   }
 
+  DebugConnection _debugConnection;
+
   @override
   Future<int> attach({
     Completer<DebugConnectionInfo> connectionInfoCompleter,
@@ -530,6 +532,13 @@ class _ExperimentalResidentWebRunner extends ResidentWebRunner {
       });
       _wipConnection = await chromeTab.connect();
     }
+    final WebDevFS webDevFS = device.devFS as WebDevFS;
+    final Dwds dwds = webDevFS.dwds;
+    dwds.connectedApps.listen((AppConnection appConnection) async {
+      appConnection.runMain();
+      _debugConnection = await dwds.debugConnection(appConnection);
+    });
+
     appStartedCompleter?.complete();
     connectionInfoCompleter?.complete();
     if (stayResident) {
