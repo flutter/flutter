@@ -520,7 +520,7 @@ Future<void> _runWebTests() async {
     );
     await _runFlutterWebTest(
         path.join(flutterRoot, 'packages', 'flutter_driver'),
-        <String>[path.join('test', 'src', 'web_extension_test.dart')],
+        <String>[path.join('test', 'src', 'web_tests', 'web_extension_test.dart')],
     );
   };
 
