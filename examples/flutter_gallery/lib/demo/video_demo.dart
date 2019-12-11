@@ -308,6 +308,8 @@ class _ConnectivityOverlayState extends State<ConnectivityOverlay> {
     super.initState();
     if (kIsWeb) {
       // Assume connectivity
+      // TODO(ditman): Remove this shortcut when `connectivity` support for web
+      // lands, https://github.com/flutter/flutter/issues/46735
       if (!widget.connectedCompleter.isCompleted) {
         widget.connectedCompleter.complete(null);
       }
@@ -331,9 +333,7 @@ class _ConnectivityOverlayState extends State<ConnectivityOverlay> {
 
   @override
   void dispose() {
-    if (connectivitySubscription != null) {
-      connectivitySubscription.cancel();
-    }
+    connectivitySubscription?.cancel();
     super.dispose();
   }
 
