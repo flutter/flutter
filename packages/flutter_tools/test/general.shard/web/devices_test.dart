@@ -58,6 +58,7 @@ void main() {
     expect(device.supportsScreenshot, false);
     expect(await device.isLocalEmulator, false);
     expect(device.getLogReader(app: mockWebApplicationPackage), isInstanceOf<NoOpDeviceLogReader>());
+    expect(device.getLogReader(), isInstanceOf<NoOpDeviceLogReader>());
     expect(await device.portForwarder.forward(1), 1);
   });
 
