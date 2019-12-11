@@ -1741,22 +1741,47 @@ abstract class MultiChildRenderObjectWidget extends RenderObjectWidget {
   ///
   /// ```dart
   /// class SomeWidgetState extends State<SomeWidget> {
-  ///     List<Widget> _children;
+  ///   List<Widget> _children;
   ///
-  ///     void initState() {
-  ///         _children = [...];
-  ///     }
+  ///   void initState() {
+  ///     _children = [];
+  ///   }
   ///
-  ///     void someHandler() {
-  ///         setState(() {
-  ///             _children.add(...);
-  ///         });
-  ///     }
+  ///   void someHandler() {
+  ///     setState(() {
+  ///         _children.add(...);
+  ///     });
+  ///   }
   ///
-  ///     Widget build(...) {
-  ///         // Reusing `List<Widget> _children` here is problematic.
-  ///         return Row(children: _children);
-  ///     }
+  ///   Widget build(...) {
+  ///     // Reusing `List<Widget> _children` here is problematic.
+  ///     return Row(children: _children);
+  ///   }
+  /// }
+  /// ```
+  ///
+  /// The following code corrects the problem mentioned above.
+  ///
+  /// ```dart
+  /// class SomeWidgetState extends State<SomeWidget> {
+  ///   List<Widget> _children;
+  ///
+  ///   void initState() {
+  ///     _children = [];
+  ///   }
+  ///
+  ///   void someHandler() {
+  ///     setState(() {
+  ///       // The key here allows Flutter to reuse the underlying render
+  ///       // objects even if the children list is recreated.
+  ///       _children.add(ChildWidget(key: ...));
+  ///     });
+  ///   }
+  ///
+  ///   Widget build(...) {
+  ///     // Always create a new list of children as a Widget is immutable.
+  ///     return Row(children: List.from(_children));
+  ///   }
   /// }
   /// ```
   final List<Widget> children;
