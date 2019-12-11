@@ -88,6 +88,7 @@ config("embedder_prefix_config") {
 test_fixtures("fixtures") {
   dart_main = "fixtures/main.dart"
   fixtures = [
+    "fixtures/arc_end_caps.png",
     "fixtures/compositor.png",
     "fixtures/compositor_root_surface_xformation.png",
     "fixtures/compositor_software.png",

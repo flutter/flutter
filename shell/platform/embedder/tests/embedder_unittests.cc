@@ -3550,5 +3550,46 @@ TEST_F(EmbedderTest, SceneWithNoRootContainerIsAcceptable) {
   latch.Wait();
 }
 
+// Verifies that https://skia-review.googlesource.com/c/skia/+/259174 is pulled
+// into the engine.
+TEST_F(EmbedderTest, ArcEndCapsAreDrawnCorrectly) {
+  auto& context = GetEmbedderContext();
+
+  EmbedderConfigBuilder builder(context);
+  builder.SetOpenGLRendererConfig(SkISize::Make(800, 1024));
+  builder.SetCompositor();
+  builder.SetDartEntrypoint("arc_end_caps_correct");
+
+  const auto root_surface_transformation = SkMatrix()
+                                               .preScale(1.0, -1.0)
+                                               .preTranslate(1024.0, -800.0)
+                                               .preRotate(90.0);
+
+  context.SetRootSurfaceTransformation(root_surface_transformation);
+
+  auto engine = builder.LaunchEngine();
+
+  fml::AutoResetWaitableEvent latch;
+  sk_sp<SkImage> scene_image;
+  context.SetNextSceneCallback([&](sk_sp<SkImage> scene) {
+    scene_image = std::move(scene);
+    latch.Signal();
+  });
+
+  ASSERT_TRUE(engine.is_valid());
+
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  event.width = 1024;
+  event.height = 800;
+  event.pixel_ratio = 1.0;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kSuccess);
+
+  latch.Wait();
+
+  ASSERT_TRUE(ImageMatchesFixture("arc_end_caps.png", scene_image));
+}
+
 }  // namespace testing
 }  // namespace flutter

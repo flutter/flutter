@@ -908,6 +908,7 @@ FILE: ../../../flutter/shell/platform/embedder/embedder_task_runner.cc
 FILE: ../../../flutter/shell/platform/embedder/embedder_task_runner.h
 FILE: ../../../flutter/shell/platform/embedder/embedder_thread_host.cc
 FILE: ../../../flutter/shell/platform/embedder/embedder_thread_host.h
+FILE: ../../../flutter/shell/platform/embedder/fixtures/arc_end_caps.png
 FILE: ../../../flutter/shell/platform/embedder/fixtures/compositor.png
 FILE: ../../../flutter/shell/platform/embedder/fixtures/compositor_root_surface_xformation.png
 FILE: ../../../flutter/shell/platform/embedder/fixtures/compositor_software.png
