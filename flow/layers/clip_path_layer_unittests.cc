@@ -192,5 +192,65 @@ TEST_F(ClipPathLayerTest, PartiallyContainedChild) {
            MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}}));
 }
 
+static bool ReadbackResult(PrerollContext* context,
+                           Clip clip_behavior,
+                           std::shared_ptr<Layer> child,
+                           bool before) {
+  const SkMatrix initial_matrix = SkMatrix();
+  const SkRect layer_bounds = SkRect::MakeXYWH(0.5, 1.0, 5.0, 6.0);
+  const SkPath layer_path = SkPath().addRect(layer_bounds);
+  auto layer = std::make_shared<ClipPathLayer>(layer_path, clip_behavior);
+  if (child != nullptr) {
+    layer->Add(child);
+  }
+  context->surface_needs_readback = before;
+  layer->Preroll(context, initial_matrix);
+  return context->surface_needs_readback;
+}
+
+TEST_F(ClipPathLayerTest, Readback) {
+  PrerollContext* context = preroll_context();
+  SkPath path;
+  SkPaint paint;
+
+  const Clip hard = Clip::hardEdge;
+  const Clip soft = Clip::antiAlias;
+  const Clip save_layer = Clip::antiAliasWithSaveLayer;
+
+  std::shared_ptr<MockLayer> nochild;
+  auto reader = std::make_shared<MockLayer>(path, paint, false, false, true);
+  auto nonreader = std::make_shared<MockLayer>(path, paint);
+
+  // No children, no prior readback -> no readback after
+  EXPECT_FALSE(ReadbackResult(context, hard, nochild, false));
+  EXPECT_FALSE(ReadbackResult(context, soft, nochild, false));
+  EXPECT_FALSE(ReadbackResult(context, save_layer, nochild, false));
+
+  // No children, prior readback -> readback after
+  EXPECT_TRUE(ReadbackResult(context, hard, nochild, true));
+  EXPECT_TRUE(ReadbackResult(context, soft, nochild, true));
+  EXPECT_TRUE(ReadbackResult(context, save_layer, nochild, true));
+
+  // Non readback child, no prior readback -> no readback after
+  EXPECT_FALSE(ReadbackResult(context, hard, nonreader, false));
+  EXPECT_FALSE(ReadbackResult(context, soft, nonreader, false));
+  EXPECT_FALSE(ReadbackResult(context, save_layer, nonreader, false));
+
+  // Non readback child, prior readback -> readback after
+  EXPECT_TRUE(ReadbackResult(context, hard, nonreader, true));
+  EXPECT_TRUE(ReadbackResult(context, soft, nonreader, true));
+  EXPECT_TRUE(ReadbackResult(context, save_layer, nonreader, true));
+
+  // Readback child, no prior readback -> readback after unless SaveLayer
+  EXPECT_TRUE(ReadbackResult(context, hard, reader, false));
+  EXPECT_TRUE(ReadbackResult(context, soft, reader, false));
+  EXPECT_FALSE(ReadbackResult(context, save_layer, reader, false));
+
+  // Readback child, prior readback -> readback after
+  EXPECT_TRUE(ReadbackResult(context, hard, reader, true));
+  EXPECT_TRUE(ReadbackResult(context, soft, reader, true));
+  EXPECT_TRUE(ReadbackResult(context, save_layer, reader, true));
+}
+
 }  // namespace testing
 }  // namespace flutter

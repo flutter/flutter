@@ -15,6 +15,8 @@ class ColorFilterLayer : public ContainerLayer {
  public:
   ColorFilterLayer(sk_sp<SkColorFilter> filter);
 
+  void Preroll(PrerollContext* context, const SkMatrix& matrix) override;
+
   void Paint(PaintContext& context) const override;
 
  private:

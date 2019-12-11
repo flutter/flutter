@@ -46,6 +46,10 @@ class PhysicalShapeLayer : public PhysicalShapeLayerBase {
   void Preroll(PrerollContext* context, const SkMatrix& matrix) override;
   void Paint(PaintContext& context) const override;
 
+  bool UsesSaveLayer() const {
+    return clip_behavior_ == Clip::antiAliasWithSaveLayer;
+  }
+
  private:
   SkColor shadow_color_;
   SkPath path_;

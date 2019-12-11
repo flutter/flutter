@@ -49,6 +49,8 @@ void PhysicalShapeLayer::Preroll(PrerollContext* context,
                                  const SkMatrix& matrix) {
   TRACE_EVENT0("flutter", "PhysicalShapeLayer::Preroll");
 
+  Layer::AutoPrerollSaveLayerState save =
+      Layer::AutoPrerollSaveLayerState::Create(context, UsesSaveLayer());
   PhysicalShapeLayerBase::Preroll(context, matrix);
 
   if (elevation() == 0) {
@@ -100,7 +102,7 @@ void PhysicalShapeLayer::Paint(PaintContext& context) const {
       break;
   }
 
-  if (clip_behavior_ == Clip::antiAliasWithSaveLayer) {
+  if (UsesSaveLayer()) {
     // If we want to avoid the bleeding edge artifact
     // (https://github.com/flutter/flutter/issues/18057#issue-328003931)
     // using saveLayer, we have to call drawPaint instead of drawPath as

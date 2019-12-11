@@ -308,5 +308,24 @@ TEST_F(OpacityLayerTest, Nested) {
   EXPECT_EQ(mock_canvas().draw_calls(), expected_draw_calls);
 }
 
+TEST_F(OpacityLayerTest, Readback) {
+  auto initial_transform = SkMatrix();
+  auto layer = std::make_shared<OpacityLayer>(kOpaque_SkAlphaType, SkPoint());
+  layer->Add(std::make_shared<MockLayer>(SkPath()));
+
+  // OpacityLayer does not read from surface
+  preroll_context()->surface_needs_readback = false;
+  layer->Preroll(preroll_context(), initial_transform);
+  EXPECT_FALSE(preroll_context()->surface_needs_readback);
+
+  // OpacityLayer blocks child with readback
+  auto mock_layer =
+      std::make_shared<MockLayer>(SkPath(), SkPaint(), false, false, true);
+  layer->Add(mock_layer);
+  preroll_context()->surface_needs_readback = false;
+  layer->Preroll(preroll_context(), initial_transform);
+  EXPECT_FALSE(preroll_context()->surface_needs_readback);
+}
+
 }  // namespace testing
 }  // namespace flutter

@@ -37,6 +37,7 @@ class LayerTestBase : public CanvasTestBase<BaseT> {
             nullptr, /* external_view_embedder */
             mutators_stack_, TestT::mock_canvas().imageInfo().colorSpace(),
             kGiantRect, /* cull_rect */
+            false,      /* layer reads from surface */
             raster_time_, ui_time_, texture_registry_,
             false,  /* checkerboard_offscreen_layers */
             100.0f, /* frame_physical_depth */

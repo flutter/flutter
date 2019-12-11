@@ -21,7 +21,9 @@ class SurfaceFrame {
   using SubmitCallback =
       std::function<bool(const SurfaceFrame& surface_frame, SkCanvas* canvas)>;
 
-  SurfaceFrame(sk_sp<SkSurface> surface, const SubmitCallback& submit_callback);
+  SurfaceFrame(sk_sp<SkSurface> surface,
+               bool supports_readback,
+               const SubmitCallback& submit_callback);
 
   ~SurfaceFrame();
 
@@ -31,9 +33,12 @@ class SurfaceFrame {
 
   sk_sp<SkSurface> SkiaSurface() const;
 
+  bool supports_readback() { return supports_readback_; }
+
  private:
   bool submitted_;
   sk_sp<SkSurface> surface_;
+  bool supports_readback_;
   SubmitCallback submit_callback_;
 
   bool PerformSubmit();

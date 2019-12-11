@@ -16,6 +16,8 @@ void ClipRRectLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
   SkRect clip_rrect_bounds = clip_rrect_.getBounds();
   children_inside_clip_ = context->cull_rect.intersect(clip_rrect_bounds);
   if (children_inside_clip_) {
+    Layer::AutoPrerollSaveLayerState save =
+        Layer::AutoPrerollSaveLayerState::Create(context, UsesSaveLayer());
     context->mutators_stack.PushClipRRect(clip_rrect_);
     SkRect child_paint_bounds = SkRect::MakeEmpty();
     PrerollChildren(context, matrix, &child_paint_bounds);
@@ -51,11 +53,11 @@ void ClipRRectLayer::Paint(PaintContext& context) const {
   context.internal_nodes_canvas->clipRRect(clip_rrect_,
                                            clip_behavior_ != Clip::hardEdge);
 
-  if (clip_behavior_ == Clip::antiAliasWithSaveLayer) {
+  if (UsesSaveLayer()) {
     context.internal_nodes_canvas->saveLayer(paint_bounds(), nullptr);
   }
   PaintChildren(context);
-  if (clip_behavior_ == Clip::antiAliasWithSaveLayer) {
+  if (UsesSaveLayer()) {
     context.internal_nodes_canvas->restore();
   }
 }

@@ -49,6 +49,7 @@ struct PrerollContext {
   MutatorsStack& mutators_stack;
   SkColorSpace* dst_color_space;
   SkRect cull_rect;
+  bool surface_needs_readback;
 
   // These allow us to paint in the end of subtree Preroll.
   const Stopwatch& raster_time;
@@ -75,6 +76,32 @@ class Layer {
   virtual ~Layer();
 
   virtual void Preroll(PrerollContext* context, const SkMatrix& matrix);
+
+  // Used during Preroll by layers that employ a saveLayer to manage the
+  // PrerollContext settings with values affected by the saveLayer mechanism.
+  // This object must be created before calling Preroll on the children to
+  // set up the state for the children and then restore the state upon
+  // destruction.
+  class AutoPrerollSaveLayerState {
+   public:
+    FML_WARN_UNUSED_RESULT static AutoPrerollSaveLayerState Create(
+        PrerollContext* preroll_context,
+        bool save_layer_is_active = true,
+        bool layer_itself_performs_readback = false);
+
+    ~AutoPrerollSaveLayerState();
+
+   private:
+    AutoPrerollSaveLayerState(PrerollContext* preroll_context,
+                              bool save_layer_is_active,
+                              bool layer_itself_performs_readback);
+
+    PrerollContext* preroll_context_;
+    bool save_layer_is_active_;
+    bool layer_itself_performs_readback_;
+
+    bool prev_surface_needs_readback_;
+  };
 
   struct PaintContext {
     // When splitting the scene into multiple canvases (e.g when embedding

@@ -152,7 +152,7 @@ std::unique_ptr<SurfaceFrame> GPUSurfaceMetal::AcquireFrame(const SkISize& size)
     return true;
   };
 
-  return std::make_unique<SurfaceFrame>(std::move(surface), submit_callback);
+  return std::make_unique<SurfaceFrame>(std::move(surface), true, submit_callback);
 }
 
 // |Surface|

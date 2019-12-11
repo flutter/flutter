@@ -26,13 +26,13 @@ void LayerTree::RecordBuildTime(fml::TimePoint start) {
   build_finish_ = fml::TimePoint::Now();
 }
 
-void LayerTree::Preroll(CompositorContext::ScopedFrame& frame,
+bool LayerTree::Preroll(CompositorContext::ScopedFrame& frame,
                         bool ignore_raster_cache) {
   TRACE_EVENT0("flutter", "LayerTree::Preroll");
 
   if (!root_layer_) {
     FML_LOG(ERROR) << "The scene did not specify any layers.";
-    return;
+    return false;
   }
 
   SkColorSpace* color_space =
@@ -47,6 +47,7 @@ void LayerTree::Preroll(CompositorContext::ScopedFrame& frame,
       stack,
       color_space,
       kGiantRect,
+      false,
       frame.context().raster_time(),
       frame.context().ui_time(),
       frame.context().texture_registry(),
@@ -55,6 +56,7 @@ void LayerTree::Preroll(CompositorContext::ScopedFrame& frame,
       frame_device_pixel_ratio_};
 
   root_layer_->Preroll(&context, frame.root_surface_transformation());
+  return context.surface_needs_readback;
 }
 
 #if defined(OS_FUCHSIA)
@@ -152,6 +154,7 @@ sk_sp<SkPicture> LayerTree::Flatten(const SkRect& bounds) {
       unused_stack,              // mutator stack
       nullptr,                   // SkColorSpace* dst_color_space
       kGiantRect,                // SkRect cull_rect
+      false,                     // layer reads from surface
       unused_stopwatch,          // frame time (dont care)
       unused_stopwatch,          // engine time (dont care)
       unused_texture_registry,   // texture registry (not supported)
