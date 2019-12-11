@@ -911,9 +911,6 @@ class AndroidMavenArtifacts extends ArtifactSet {
     final File gradle = tempDir.childFile(
         platform.isWindows ? 'gradlew.bat' : 'gradlew',
       );
-    assert(gradle.existsSync());
-    os.makeExecutable(gradle);
-
     try {
       final String gradleExecutable = gradle.absolute.path;
       final String flutterSdk = escapePath(Cache.flutterRoot);
