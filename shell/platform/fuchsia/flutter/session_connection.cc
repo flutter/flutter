@@ -63,14 +63,14 @@ void SessionConnection::Present(
     ToggleSignal(vsync_event_handle_, false);
   } else {
     PresentSession();
+
+    // Execute paint tasks and signal fences.
+    auto surfaces_to_submit = scene_update_context_.ExecutePaintTasks(frame);
+
+    // Tell the surface producer that a present has occurred so it can perform
+    // book-keeping on buffer caches.
+    surface_producer_->OnSurfacesPresented(std::move(surfaces_to_submit));
   }
-
-  // Execute paint tasks and signal fences.
-  auto surfaces_to_submit = scene_update_context_.ExecutePaintTasks(frame);
-
-  // Tell the surface producer that a present has occurred so it can perform
-  // book-keeping on buffer caches.
-  surface_producer_->OnSurfacesPresented(std::move(surfaces_to_submit));
 }
 
 void SessionConnection::OnSessionSizeChangeHint(float width_change_factor,
