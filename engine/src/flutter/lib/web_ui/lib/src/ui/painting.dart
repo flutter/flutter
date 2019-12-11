@@ -961,6 +961,10 @@ class PaintData {
 class Paint {
   PaintData _paintData = PaintData();
 
+  /// Constructs an empty [Paint] object with all fields initialized to
+  /// their defaults.
+  Paint();
+
   /// A blend mode to apply when a shape is drawn or a layer is composited.
   ///
   /// The source colors are from the shape being drawn (e.g. from
@@ -1181,6 +1185,23 @@ class Paint {
   set imageFilter(ImageFilter value) {
     // TODO(flutter/flutter#35156): Implement ImageFilter.
   }
+
+  /// Whether to dither the output when drawing images.
+  ///
+  /// If false, the default value, dithering will be enabled when the input
+  /// color depth is higher than the output color depth. For example,
+  /// drawing an RGB8 image onto an RGB565 canvas.
+  ///
+  /// This value also controls dithering of [shader]s, which can make
+  /// gradients appear smoother.
+  ///
+  /// Whether or not dithering affects the output is implementation defined.
+  /// Some implementations may choose to ignore this completely, if they're
+  /// unable to control dithering.
+  ///
+  /// To ensure that dithering is consistently enabled for your entire
+  /// application, set this to true before invoking any drawing related code.
+  static bool enableDithering = false;
 
   // True if Paint instance has used in RecordingCanvas.
   bool _frozen = false;
