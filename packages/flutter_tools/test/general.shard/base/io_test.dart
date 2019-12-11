@@ -78,6 +78,10 @@ void main() {
 
     expect(() => exit(0), returnsNormally);
   });
+
+  test('test_api defines the Declarer in a known place', () {
+    expect(Zone.current[#test.declarer], isNotNull);
+  });
 }
 
 class MockIoProcessSignal extends Mock implements io.ProcessSignal {}
