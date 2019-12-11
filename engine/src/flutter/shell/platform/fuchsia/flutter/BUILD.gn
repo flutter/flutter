@@ -333,6 +333,7 @@ executable("flutter_runner_unittests") {
     ":aot",
     ":flutter_runner_fixtures",
     "//build/fuchsia/fidl:fuchsia.accessibility.semantics",
+    "//build/fuchsia/pkg:async-default",
     "//build/fuchsia/pkg:async-loop-cpp",
     "//build/fuchsia/pkg:async-loop-default",
     "//build/fuchsia/pkg:scenic_cpp",
