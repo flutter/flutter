@@ -109,14 +109,20 @@ Future<bool> fuzzyGoldenImageCompare(
     Image image, String goldenImageName) async {
   final String imagesPath = path.join('flutter', 'testing', 'resources');
   final File file = File(path.join(imagesPath, goldenImageName));
-  final Uint8List goldenData = await file.readAsBytes();
 
-  final Codec codec = await instantiateImageCodec(goldenData);
-  final FrameInfo frame = await codec.getNextFrame();
-  expect(frame.image.height, equals(image.width));
-  expect(frame.image.width, equals(image.height));
+  bool areEqual = false;
 
-  final bool areEqual = await fuzzyCompareImages(frame.image, image);
+  if (file.existsSync()) {
+    final Uint8List goldenData = await file.readAsBytes();
+
+    final Codec codec = await instantiateImageCodec(goldenData);
+    final FrameInfo frame = await codec.getNextFrame();
+    expect(frame.image.height, equals(image.width));
+    expect(frame.image.width, equals(image.height));
+
+    areEqual = await fuzzyCompareImages(frame.image, image);
+  }
+
   if (!areEqual) {
     final ByteData pngData = await image.toByteData();
     final ByteBuffer buffer = pngData.buffer;
@@ -149,6 +155,46 @@ void main() {
 
     final bool areEqual =
         await fuzzyGoldenImageCompare(image, 'canvas_test_toImage.png');
+    expect(areEqual, true);
+  });
+
+  Gradient makeGradient() {
+    return Gradient.linear(
+      Offset.zero,
+      const Offset(100, 100),
+      const <Color>[Color(0xFF4C4D52), Color(0xFF202124)],
+    );
+  }
+
+  test('Simple gradient', () async {
+    Paint.enableDithering = false;
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+    final Paint paint = Paint()..shader = makeGradient();
+    canvas.drawPaint(paint);
+    final Picture picture = recorder.endRecording();
+    final Image image = await picture.toImage(100, 100);
+    expect(image.width, equals(100));
+    expect(image.height, equals(100));
+
+    final bool areEqual =
+        await fuzzyGoldenImageCompare(image, 'canvas_test_gradient.png');
+    expect(areEqual, true);
+  });
+
+  test('Simple dithered gradient', () async {
+    Paint.enableDithering = true;
+    final PictureRecorder recorder = PictureRecorder();
+    final Canvas canvas = Canvas(recorder);
+    final Paint paint = Paint()..shader = makeGradient();
+    canvas.drawPaint(paint);
+    final Picture picture = recorder.endRecording();
+    final Image image = await picture.toImage(100, 100);
+    expect(image.width, equals(100));
+    expect(image.height, equals(100));
+
+    final bool areEqual =
+        await fuzzyGoldenImageCompare(image, 'canvas_test_dithered_gradient.png');
     expect(areEqual, true);
   });
 }

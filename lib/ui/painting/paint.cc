@@ -32,7 +32,8 @@ constexpr int kMaskFilterIndex = 9;
 constexpr int kMaskFilterBlurStyleIndex = 10;
 constexpr int kMaskFilterSigmaIndex = 11;
 constexpr int kInvertColorIndex = 12;
-constexpr size_t kDataByteCount = 52;  // 4 * (last index + 1)
+constexpr int kDitherIndex = 13;
+constexpr size_t kDataByteCount = 56;  // 4 * (last index + 1)
 
 // Indices for objects.
 constexpr int kShaderIndex = 0;
@@ -152,6 +153,10 @@ Paint::Paint(Dart_Handle paint_objects, Dart_Handle paint_data) {
       invert_filter = invert_filter->makeComposed(current_filter);
     }
     paint_.setColorFilter(invert_filter);
+  }
+
+  if (uint_data[kDitherIndex]) {
+    paint_.setDither(true);
   }
 
   switch (uint_data[kMaskFilterIndex]) {
