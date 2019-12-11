@@ -26,8 +26,21 @@ void main() {
       );
 
       final RawMaterialButton raw = tester.widget<RawMaterialButton>(find.byType(RawMaterialButton));
+      const Map<int, Color> color = {
+          50:Color.fromRGBO(227,242,253, 1.0),
+          100:Color.fromRGBO(187,222,251, 1.0),
+          200:Color.fromRGBO(144,202,249, 1.0),
+          300:Color.fromRGBO(100,181,246, 1.0),
+          400:Color.fromRGBO(66,165,245, 1.0),
+          500:Color.fromRGBO(33,150,243, 1.0),
+          600:Color.fromRGBO(30,136,229, 1.0),
+          700:Color.fromRGBO(25,118,210, 1.0),
+          800:Color.fromRGBO(21,101,192, 1.0),
+          900:Color.fromRGBO(13,71,161, 1.0)
+        };
       expect(raw.textStyle.color, const Color(0xdd000000));
-      expect(raw.fillColor, const Color(0xffe0e0e0));
+      expect(raw.fillColor, const MaterialColor(0xff2196f3, color)); // Was Color(0xffe0e0e0)
+      // expect(raw.fillColor, const Color(0xff2196f3));
       expect(raw.highlightColor, const Color(0x29000000)); // Was Color(0x66bcbcbc)
       expect(raw.splashColor, const Color(0x1f000000)); // Was Color(0x66c8c8c8)
       expect(raw.elevation, 2.0);
