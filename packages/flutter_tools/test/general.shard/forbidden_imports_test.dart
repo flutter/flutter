@@ -61,6 +61,33 @@ void main() {
     }
   });
 
+  test('no unauthorized imports of test_api', () {
+    final List<String> whitelistedPaths = <String>[
+      fs.path.join(flutterTools, 'lib', 'src', 'build_runner', 'build_script.dart'),
+      fs.path.join(flutterTools, 'lib', 'src', 'test', 'flutter_platform.dart'),
+      fs.path.join(flutterTools, 'lib', 'src', 'test', 'flutter_web_platform.dart'),
+      fs.path.join(flutterTools, 'lib', 'src', 'test', 'runner.dart'),
+    ];
+    bool _isNotWhitelisted(FileSystemEntity entity) => whitelistedPaths.every((String path) => path != entity.path);
+
+    for (String dirName in <String>['lib']) {
+      final Iterable<File> files = fs.directory(fs.path.join(flutterTools, dirName))
+        .listSync(recursive: true)
+        .where(_isDartFile)
+        .where(_isNotWhitelisted)
+        .map(_asFile);
+      for (File file in files) {
+        for (String line in file.readAsLinesSync()) {
+          if (line.startsWith(RegExp(r'import.*package:test_api')) &&
+              !line.contains('ignore: test_api_import')) {
+            final String relativePath = fs.path.relative(file.path, from:flutterTools);
+            fail("$relativePath imports 'package:test_api/test_api.dart';");
+          }
+        }
+      }
+    }
+  });
+
   test('no unauthorized imports of package:path', () {
     final String whitelistedPath = fs.path.join(flutterTools, 'lib', 'src', 'build_runner', 'web_compilation_delegate.dart');
     for (String dirName in <String>['lib', 'bin', 'test']) {
