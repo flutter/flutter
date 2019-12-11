@@ -620,3 +620,30 @@ void scene_with_no_container() {
   };
   window.scheduleFrame();
 }
+
+Picture CreateArcEndCapsPicture() {
+  PictureRecorder baseRecorder = PictureRecorder();
+  Canvas canvas = Canvas(baseRecorder);
+
+  var style = Paint()
+    ..strokeWidth = 12.0
+    ..style = PaintingStyle.stroke
+    ..strokeCap = StrokeCap.round
+    ..strokeJoin = StrokeJoin.miter;
+
+  style.color = Color.fromARGB(255, 255, 0, 0);
+  canvas.drawArc(Rect.fromLTRB(0.0, 0.0, 500.0, 500.0), 1.57, 1.0, false, style);
+
+  return baseRecorder.endRecording();
+
+}
+
+@pragma('vm:entry-point')
+void arc_end_caps_correct() {
+  window.onBeginFrame = (Duration duration) {
+    SceneBuilder builder = SceneBuilder();
+    builder.addPicture(Offset(0.0, 0.0), CreateArcEndCapsPicture());
+    window.render(builder.build());
+  };
+  window.scheduleFrame();
+}
