@@ -123,6 +123,7 @@ class FlutterWebPlatform extends PlatformPlugin {
         artifacts.getArtifactPath(Artifact.engineDartSdkPath),
         'lib',
         'dev_compiler',
+        'kernel',
         'amd',
         'require.js',
       ));
