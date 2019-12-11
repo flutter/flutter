@@ -10,6 +10,7 @@
 #include <functional>
 
 #include <lib/async-loop/cpp/loop.h>
+#include <lib/async/default.h>
 
 #include "flutter/fml/macros.h"
 
