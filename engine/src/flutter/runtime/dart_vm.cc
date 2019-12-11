@@ -417,7 +417,7 @@ DartVM::DartVM(std::shared_ptr<const DartVMData> vm_data,
     if (engine_main_enter_ts != 0) {
       Dart_TimelineEvent("FlutterEngineMainEnter",  // label
                          engine_main_enter_ts,      // timestamp0
-                         engine_main_enter_ts,      // timestamp1_or_async_id
+                         Dart_TimelineGetMicros(),  // timestamp1_or_async_id
                          Dart_Timeline_Event_Duration,  // event type
                          0,                             // argument_count
                          nullptr,                       // argument_names
