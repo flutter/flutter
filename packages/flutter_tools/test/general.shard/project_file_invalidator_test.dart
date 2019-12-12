@@ -23,7 +23,7 @@ void main() {
   });
 
   for (bool asyncScanning in <bool>[true, false]) {
-    test('No last compile', () async {
+    test('No last compile, asyncScanning: $asyncScanning', () async {
       final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(
         MemoryFileSystem(),
         platform,
@@ -41,7 +41,7 @@ void main() {
       );
     });
 
-    test('Empty project', () async {
+    test('Empty project, asyncScanning: $asyncScanning', () async {
       final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(
         MemoryFileSystem(),
         platform,
@@ -59,7 +59,7 @@ void main() {
       );
     });
 
-    test('Non-existent files are ignored', () async {
+    test('Non-existent files are ignored, asyncScanning: $asyncScanning', () async {
       final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(
         MemoryFileSystem(),
         platform,
