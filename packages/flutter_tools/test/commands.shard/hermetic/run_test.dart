@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
+import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/run.dart';
@@ -629,6 +630,7 @@ class MockWebRunnerFactory extends Mock implements WebRunnerFactory {
     bool ipv6,
     DebuggingOptions debuggingOptions,
     List<String> dartDefines,
+    UrlTunneller urlTunneller,
   }) {
     _dartDefines = dartDefines;
     return MockWebRunner();

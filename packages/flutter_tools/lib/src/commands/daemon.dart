@@ -119,6 +119,8 @@ class Daemon {
   DeviceDomain deviceDomain;
   EmulatorDomain emulatorDomain;
   StreamSubscription<Map<String, dynamic>> _commandSubscription;
+  int _outgoingRequestId = 1;
+  final Map<String, Completer<dynamic>> _outgoingRequestCompleters = <String, Completer<dynamic>>{};
 
   final DispatchCommand sendCommand;
   final NotifyingLogger notifyingLogger;
@@ -147,17 +149,32 @@ class Daemon {
 
     try {
       final String method = request['method'] as String;
-      if (!method.contains('.')) {
-        throw 'method not understood: $method';
-      }
+      if (method != null) {
+        if (!method.contains('.')) {
+          throw 'method not understood: $method';
+        }
 
-      final String prefix = method.substring(0, method.indexOf('.'));
-      final String name = method.substring(method.indexOf('.') + 1);
-      if (_domainMap[prefix] == null) {
-        throw 'no domain for method: $method';
-      }
+        final String prefix = method.substring(0, method.indexOf('.'));
+        final String name = method.substring(method.indexOf('.') + 1);
+        if (_domainMap[prefix] == null) {
+          throw 'no domain for method: $method';
+        }
 
-      _domainMap[prefix].handleCommand(name, id, castStringKeyedMap(request['params']) ?? const <String, dynamic>{});
+        _domainMap[prefix].handleCommand(name, id, castStringKeyedMap(request['params']) ?? const <String, dynamic>{});
+      } else {
+        // If there was no 'method' field then it's a response to a daemon-to-editor request.
+        final Completer<dynamic> completer = _outgoingRequestCompleters[id.toString()];
+        if (completer == null) {
+          throw 'unexpected response with id: $id';
+        }
+        _outgoingRequestCompleters.remove(id.toString());
+
+        if (request['error'] != null) {
+          completer.completeError(request['error']);
+        } else {
+          completer.complete(request['result']);
+        }
+      }
     } catch (error, trace) {
       _send(<String, dynamic>{
         'id': id,
@@ -165,6 +182,22 @@ class Daemon {
         'trace': '$trace',
       });
     }
+  }
+
+  Future<dynamic> sendRequest(String method, [ dynamic args ]) {
+    final Map<String, dynamic> map = <String, dynamic>{'method': method};
+    if (args != null) {
+      map['params'] = _toJsonable(args);
+    }
+
+    final int id = _outgoingRequestId++;
+    final Completer<dynamic> completer = Completer<dynamic>();
+
+    map['id'] = id.toString();
+    _outgoingRequestCompleters[id.toString()] = completer;
+
+    _send(map);
+    return completer.future;
   }
 
   void _send(Map<String, dynamic> map) => sendCommand(map);
@@ -186,6 +219,7 @@ class Daemon {
 
 abstract class Domain {
   Domain(this.daemon, this.name);
+
 
   final Daemon daemon;
   final String name;
@@ -315,6 +349,21 @@ class DaemonDomain extends Domain {
 
   Future<String> version(Map<String, dynamic> args) {
     return Future<String>.value(protocolVersion);
+  }
+
+  /// Sends a request back to the client asking it to expose/tunnel a URL.
+  ///
+  /// This method should only be called if the client opted-in with the
+  /// --web-allow-expose-url switch. The client may return the same URL back if
+  /// tunnelling is not required for a given URL.
+  Future<String> exposeUrl(String url) async {
+    final dynamic res = await daemon.sendRequest('app.exposeUrl', <String, String>{'url': url});
+    if (res is Map<String, dynamic> && res['url'] is String) {
+      return res['url'] as String;
+    } else {
+      printError('Invalid response to exposeUrl - params should include a String url field');
+      return url;
+    }
   }
 
   Future<void> shutdown(Map<String, dynamic> args) {
@@ -448,6 +497,7 @@ class AppDomain extends Domain {
         ipv6: ipv6,
         stayResident: true,
         dartDefines: daemon.dartDefines,
+        urlTunneller: options.webEnableExposeUrl ? daemon.daemonDomain.exposeUrl : null,
       );
     } else if (enableHotReload) {
       runner = HotRunner(
