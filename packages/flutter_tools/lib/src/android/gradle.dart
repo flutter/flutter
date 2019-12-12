@@ -715,6 +715,10 @@ Future<void> buildPluginsAsAar(
     assert(pluginDirectory.existsSync());
 
     final String pluginName = pluginParts.first;
+    if (!pluginDirectory.childDirectory('android').existsSync()) {
+      printTrace('Skipping plugin $pluginName since it doesn\'t have an android directory');
+      continue;
+    }
     logger.printStatus('Building plugin $pluginName...');
     try {
       await buildGradleAar(
