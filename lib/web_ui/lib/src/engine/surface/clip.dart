@@ -167,7 +167,7 @@ class PersistedPhysicalShape extends PersistedContainerSurface
         shadowColor = ui.Color(shadowColor),
         super(oldLayer);
 
-  final ui.Path path;
+  final SurfacePath path;
   final double elevation;
   final ui.Color color;
   final ui.Color shadowColor;

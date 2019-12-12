@@ -151,42 +151,42 @@ class HoudiniCanvas extends EngineCanvas with SaveElementStackTracking {
   }
 
   @override
-  void drawLine(ui.Offset p1, ui.Offset p2, ui.PaintData paint) {
+  void drawLine(ui.Offset p1, ui.Offset p2, SurfacePaintData paint) {
     // Drawn using CSS Paint.
   }
 
   @override
-  void drawPaint(ui.PaintData paint) {
+  void drawPaint(SurfacePaintData paint) {
     // Drawn using CSS Paint.
   }
 
   @override
-  void drawRect(ui.Rect rect, ui.PaintData paint) {
+  void drawRect(ui.Rect rect, SurfacePaintData paint) {
     // Drawn using CSS Paint.
   }
 
   @override
-  void drawRRect(ui.RRect rrect, ui.PaintData paint) {
+  void drawRRect(ui.RRect rrect, SurfacePaintData paint) {
     // Drawn using CSS Paint.
   }
 
   @override
-  void drawDRRect(ui.RRect outer, ui.RRect inner, ui.PaintData paint) {
+  void drawDRRect(ui.RRect outer, ui.RRect inner, SurfacePaintData paint) {
     // Drawn using CSS Paint.
   }
 
   @override
-  void drawOval(ui.Rect rect, ui.PaintData paint) {
+  void drawOval(ui.Rect rect, SurfacePaintData paint) {
     // Drawn using CSS Paint.
   }
 
   @override
-  void drawCircle(ui.Offset c, double radius, ui.PaintData paint) {
+  void drawCircle(ui.Offset c, double radius, SurfacePaintData paint) {
     // Drawn using CSS Paint.
   }
 
   @override
-  void drawPath(ui.Path path, ui.PaintData paint) {
+  void drawPath(ui.Path path, SurfacePaintData paint) {
     // Drawn using CSS Paint.
   }
 
@@ -197,13 +197,13 @@ class HoudiniCanvas extends EngineCanvas with SaveElementStackTracking {
   }
 
   @override
-  void drawImage(ui.Image image, ui.Offset p, ui.PaintData paint) {
+  void drawImage(ui.Image image, ui.Offset p, SurfacePaintData paint) {
     // TODO(yjbanov): implement.
   }
 
   @override
   void drawImageRect(
-      ui.Image image, ui.Rect src, ui.Rect dst, ui.PaintData paint) {
+      ui.Image image, ui.Rect src, ui.Rect dst, SurfacePaintData paint) {
     // TODO(yjbanov): implement src rectangle
     final HtmlImage htmlImage = image;
     final html.Element imageBox = html.Element.tag('flt-img');
@@ -230,7 +230,7 @@ class HoudiniCanvas extends EngineCanvas with SaveElementStackTracking {
 
   @override
   void drawVertices(ui.Vertices vertices, ui.BlendMode blendMode,
-      ui.PaintData paint) {
+      SurfacePaintData paint) {
     // TODO(flutter_web): implement.
   }
 }

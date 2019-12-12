@@ -35,7 +35,7 @@ void main() async {
 
 void paintStrokeJoins(BitmapCanvas canvas) {
   canvas.drawRect(Rect.fromLTRB(0, 0, 300, 300),
-      PaintData()
+      SurfacePaintData()
         ..color = Color(0xFFFFFFFF)
         ..style = PaintingStyle.fill); // white
 
@@ -55,7 +55,7 @@ void paintStrokeJoins(BitmapCanvas canvas) {
       path.moveTo(start.dx, start.dy);
       path.lineTo(mid.dx, mid.dy);
       path.lineTo(end.dx, end.dy);
-      canvas.drawPath(path, PaintData()
+      canvas.drawPath(path, SurfacePaintData()
             ..style = PaintingStyle.stroke
             ..strokeWidth = 4
             ..color = color

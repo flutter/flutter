@@ -40,34 +40,34 @@ abstract class EngineCanvas {
 
   void drawColor(ui.Color color, ui.BlendMode blendMode);
 
-  void drawLine(ui.Offset p1, ui.Offset p2, ui.PaintData paint);
+  void drawLine(ui.Offset p1, ui.Offset p2, SurfacePaintData paint);
 
-  void drawPaint(ui.PaintData paint);
+  void drawPaint(SurfacePaintData paint);
 
-  void drawRect(ui.Rect rect, ui.PaintData paint);
+  void drawRect(ui.Rect rect, SurfacePaintData paint);
 
-  void drawRRect(ui.RRect rrect, ui.PaintData paint);
+  void drawRRect(ui.RRect rrect, SurfacePaintData paint);
 
-  void drawDRRect(ui.RRect outer, ui.RRect inner, ui.PaintData paint);
+  void drawDRRect(ui.RRect outer, ui.RRect inner, SurfacePaintData paint);
 
-  void drawOval(ui.Rect rect, ui.PaintData paint);
+  void drawOval(ui.Rect rect, SurfacePaintData paint);
 
-  void drawCircle(ui.Offset c, double radius, ui.PaintData paint);
+  void drawCircle(ui.Offset c, double radius, SurfacePaintData paint);
 
-  void drawPath(ui.Path path, ui.PaintData paint);
+  void drawPath(ui.Path path, SurfacePaintData paint);
 
   void drawShadow(
       ui.Path path, ui.Color color, double elevation, bool transparentOccluder);
 
-  void drawImage(ui.Image image, ui.Offset p, ui.PaintData paint);
+  void drawImage(ui.Image image, ui.Offset p, SurfacePaintData paint);
 
   void drawImageRect(
-      ui.Image image, ui.Rect src, ui.Rect dst, ui.PaintData paint);
+      ui.Image image, ui.Rect src, ui.Rect dst, SurfacePaintData paint);
 
   void drawParagraph(EngineParagraph paragraph, ui.Offset offset);
 
   void drawVertices(ui.Vertices vertices, ui.BlendMode blendMode,
-      ui.PaintData paint);
+      SurfacePaintData paint);
 }
 
 /// Adds an [offset] transformation to a [transform] matrix and returns the

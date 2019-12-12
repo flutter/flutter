@@ -32,13 +32,13 @@ void main() async {
   /// be seen depending on pixel alignment and whether antialiasing happens
   /// before or after rasterization.
   void drawMisalignedLines(BitmapCanvas canvas) {
-    final PaintData linePaint = (Paint()
+    final SurfacePaintData linePaint = (SurfacePaint()
           ..style = PaintingStyle.stroke
           ..strokeWidth = 1)
-        .webOnlyPaintData;
+        .paintData;
 
-    final PaintData fillPaint =
-        (Paint()..style = PaintingStyle.fill).webOnlyPaintData;
+    final SurfacePaintData fillPaint =
+        (SurfacePaint()..style = PaintingStyle.fill).paintData;
 
     canvas.drawRect(
       const Rect.fromLTWH(0, 0, 40, 40),
@@ -101,7 +101,7 @@ void main() async {
     canvas = BitmapCanvas(const Rect.fromLTWH(0, 0, 50, 50));
 
     canvas.translate(25, 25);
-    canvas.drawPaint(PaintData()
+    canvas.drawPaint(SurfacePaintData()
       ..color = const Color.fromRGBO(0, 255, 0, 1.0)
       ..style = PaintingStyle.fill);
 

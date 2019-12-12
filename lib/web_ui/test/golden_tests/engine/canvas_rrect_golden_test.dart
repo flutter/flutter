@@ -15,7 +15,7 @@ void main() async {
 
   BitmapCanvas canvas;
 
-  final PaintData niceRRectPaint = PaintData()
+  final SurfacePaintData niceRRectPaint = SurfacePaintData()
     ..color = const Color.fromRGBO(250, 186, 218, 1.0) // #fabada
     ..style = PaintingStyle.fill;
 

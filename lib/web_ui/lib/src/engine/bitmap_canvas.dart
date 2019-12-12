@@ -244,7 +244,7 @@ class BitmapCanvas extends EngineCanvas with SaveStackTracking {
   html.CanvasRenderingContext2D get ctx => _ctx;
 
   /// Sets the global paint styles to correspond to [paint].
-  void _applyPaint(ui.PaintData paint) {
+  void _applyPaint(SurfacePaintData paint) {
     ctx.globalCompositeOperation =
         _stringForBlendMode(paint.blendMode) ?? 'source-over';
     ctx.lineWidth = paint.strokeWidth ?? 1.0;
@@ -273,7 +273,7 @@ class BitmapCanvas extends EngineCanvas with SaveStackTracking {
     }
   }
 
-  void _strokeOrFill(ui.PaintData paint, {bool resetPaint = true}) {
+  void _strokeOrFill(SurfacePaintData paint, {bool resetPaint = true}) {
     switch (paint.style) {
       case ui.PaintingStyle.stroke:
         ctx.stroke();
@@ -448,7 +448,7 @@ class BitmapCanvas extends EngineCanvas with SaveStackTracking {
   }
 
   @override
-  void drawLine(ui.Offset p1, ui.Offset p2, ui.PaintData paint) {
+  void drawLine(ui.Offset p1, ui.Offset p2, SurfacePaintData paint) {
     _applyPaint(paint);
     ctx.beginPath();
     ctx.moveTo(p1.dx, p1.dy);
@@ -458,7 +458,7 @@ class BitmapCanvas extends EngineCanvas with SaveStackTracking {
   }
 
   @override
-  void drawPaint(ui.PaintData paint) {
+  void drawPaint(SurfacePaintData paint) {
     _applyPaint(paint);
     ctx.beginPath();
 
@@ -471,7 +471,7 @@ class BitmapCanvas extends EngineCanvas with SaveStackTracking {
   }
 
   @override
-  void drawRect(ui.Rect rect, ui.PaintData paint) {
+  void drawRect(ui.Rect rect, SurfacePaintData paint) {
     _applyPaint(paint);
     ctx.beginPath();
     ctx.rect(rect.left, rect.top, rect.width, rect.height);
@@ -479,14 +479,14 @@ class BitmapCanvas extends EngineCanvas with SaveStackTracking {
   }
 
   @override
-  void drawRRect(ui.RRect rrect, ui.PaintData paint) {
+  void drawRRect(ui.RRect rrect, SurfacePaintData paint) {
     _applyPaint(paint);
     _RRectToCanvasRenderer(ctx).render(rrect);
     _strokeOrFill(paint);
   }
 
   @override
-  void drawDRRect(ui.RRect outer, ui.RRect inner, ui.PaintData paint) {
+  void drawDRRect(ui.RRect outer, ui.RRect inner, SurfacePaintData paint) {
     _applyPaint(paint);
     _RRectRenderer renderer = _RRectToCanvasRenderer(ctx);
     renderer.render(outer);
@@ -495,7 +495,7 @@ class BitmapCanvas extends EngineCanvas with SaveStackTracking {
   }
 
   @override
-  void drawOval(ui.Rect rect, ui.PaintData paint) {
+  void drawOval(ui.Rect rect, SurfacePaintData paint) {
     _applyPaint(paint);
     ctx.beginPath();
     ctx.ellipse(rect.center.dx, rect.center.dy, rect.width / 2, rect.height / 2,
@@ -504,7 +504,7 @@ class BitmapCanvas extends EngineCanvas with SaveStackTracking {
   }
 
   @override
-  void drawCircle(ui.Offset c, double radius, ui.PaintData paint) {
+  void drawCircle(ui.Offset c, double radius, SurfacePaintData paint) {
     _applyPaint(paint);
     ctx.beginPath();
     ctx.ellipse(c.dx, c.dy, radius, radius, 0, 0, 2.0 * math.pi, false);
@@ -512,7 +512,7 @@ class BitmapCanvas extends EngineCanvas with SaveStackTracking {
   }
 
   @override
-  void drawPath(ui.Path path, ui.PaintData paint) {
+  void drawPath(ui.Path path, SurfacePaintData paint) {
     _applyPaint(paint);
     _runPath(path);
     _strokeOrFill(paint);
@@ -534,14 +534,14 @@ class BitmapCanvas extends EngineCanvas with SaveStackTracking {
           // paint the shadow without the path itself, but if we use a non-zero
           // alpha for the paint the path is painted in addition to the shadow,
           // which is undesirable.
-          final ui.Paint paint = ui.Paint()
+          final SurfacePaint paint = SurfacePaint()
             ..color = shadow.color
             ..style = ui.PaintingStyle.fill
             ..strokeWidth = 0.0
             ..maskFilter = ui.MaskFilter.blur(ui.BlurStyle.normal, shadow.blur);
           _ctx.save();
           _ctx.translate(shadow.offsetX, shadow.offsetY);
-          final ui.PaintData paintData = paint.webOnlyPaintData;
+          final SurfacePaintData paintData = paint.paintData;
           _applyPaint(paintData);
           _runPath(path);
           _strokeOrFill(paintData, resetPaint: false);
@@ -555,12 +555,12 @@ class BitmapCanvas extends EngineCanvas with SaveStackTracking {
           // the opaque occluder. For that reason, we fill with the shadow color,
           // and set the shadow color to fully opaque. This way, the visible
           // pixels are less opaque and less noticeable.
-          final ui.Paint paint = ui.Paint()
+          final SurfacePaint paint = SurfacePaint()
             ..color = shadow.color
             ..style = ui.PaintingStyle.fill
             ..strokeWidth = 0.0;
           _ctx.save();
-          final ui.PaintData paintData = paint.webOnlyPaintData;
+          final SurfacePaintData paintData = paint.paintData;
           _applyPaint(paintData);
           _ctx.shadowBlur = shadow.blur;
           _ctx.shadowColor = shadow.color.withAlpha(0xff).toCssString();
@@ -576,7 +576,7 @@ class BitmapCanvas extends EngineCanvas with SaveStackTracking {
   }
 
   @override
-  void drawImage(ui.Image image, ui.Offset p, ui.PaintData paint) {
+  void drawImage(ui.Image image, ui.Offset p, SurfacePaintData paint) {
     _applyPaint(paint);
     final HtmlImage htmlImage = image;
     final html.ImageElement imgElement = htmlImage.cloneImageElement();
@@ -607,7 +607,7 @@ class BitmapCanvas extends EngineCanvas with SaveStackTracking {
 
   @override
   void drawImageRect(
-      ui.Image image, ui.Rect src, ui.Rect dst, ui.PaintData paint) {
+      ui.Image image, ui.Rect src, ui.Rect dst, SurfacePaintData paint) {
     final HtmlImage htmlImage = image;
     final bool requiresClipping = src.left != 0 ||
         src.top != 0 ||
@@ -698,8 +698,8 @@ class BitmapCanvas extends EngineCanvas with SaveStackTracking {
     if (paragraph._drawOnCanvas && _childOverdraw == false) {
       final List<EngineLineMetrics> lines = paragraph._measurementResult.lines;
 
-      final ui.PaintData backgroundPaint =
-          paragraph._background?.webOnlyPaintData;
+      final SurfacePaintData backgroundPaint =
+          paragraph._background?.paintData;
       if (backgroundPaint != null) {
         final ui.Rect rect = ui.Rect.fromLTWH(
             offset.dx, offset.dy, paragraph.width, paragraph.height);
@@ -710,7 +710,7 @@ class BitmapCanvas extends EngineCanvas with SaveStackTracking {
         ctx.font = style.cssFontString;
         _cachedLastStyle = style;
       }
-      _applyPaint(paragraph._paint.webOnlyPaintData);
+      _applyPaint(paragraph._paint.paintData);
 
       final double x = offset.dx + paragraph._alignOffset;
       double y = offset.dy + paragraph.alphabeticBaseline;
@@ -764,7 +764,7 @@ class BitmapCanvas extends EngineCanvas with SaveStackTracking {
   /// and use a SkTriColorShader to render.
   @override
   void drawVertices(
-      ui.Vertices vertices, ui.BlendMode blendMode, ui.PaintData paint) {
+      ui.Vertices vertices, ui.BlendMode blendMode, SurfacePaintData paint) {
     // TODO(flutter_web): Implement shaders for [Paint.shader] and
     // blendMode. https://github.com/flutter/flutter/issues/40096
     // Move rendering to OffscreenCanvas so that transform is preserved
@@ -790,7 +790,7 @@ class BitmapCanvas extends EngineCanvas with SaveStackTracking {
   }
 
   /// 'Runs' the given [path] by applying all of its commands to the canvas.
-  void _runPath(ui.Path path) {
+  void _runPath(SurfacePath path) {
     ctx.beginPath();
     for (Subpath subpath in path.subpaths) {
       for (PathCommand command in subpath.commands) {

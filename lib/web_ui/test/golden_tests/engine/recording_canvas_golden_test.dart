@@ -30,7 +30,7 @@ void main() async {
       ..save()
       ..drawRect(
         rc.computePaintBounds(),
-        PaintData()
+        SurfacePaintData()
           ..color = const Color.fromRGBO(0, 0, 255, 1.0)
           ..style = PaintingStyle.stroke
           ..strokeWidth = 1.0,

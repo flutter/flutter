@@ -57,7 +57,7 @@ void paintArc(BitmapCanvas canvas, Offset offset,
       Offset(75.0 + distance + offset.dx, 75.0 + distance + offset.dy);
   canvas.drawRect(
       Rect.fromLTRB(startP.dx, startP.dy, endP.dx, endP.dy),
-      PaintData()
+      SurfacePaintData()
         ..strokeWidth = 1
         ..color = Color(0xFFFF9800) // orange
         ..style = PaintingStyle.stroke);
@@ -70,7 +70,7 @@ void paintArc(BitmapCanvas canvas, Offset offset,
       clockwise: clockwise);
   canvas.drawPath(
       path,
-      PaintData()
+      SurfacePaintData()
         ..strokeWidth = 2
         ..color = Color(0x61000000) // black38
         ..style = PaintingStyle.stroke);

@@ -34,15 +34,15 @@ void main() async {
 }
 
 void paintLines(BitmapCanvas canvas) {
-    final PaintData paint1 = PaintData()
+    final SurfacePaintData paint1 = SurfacePaintData()
       ..color = Color(0xFF9E9E9E) // Colors.grey
       ..strokeWidth = 1.0
       ..style = PaintingStyle.stroke;
-    final PaintData paint2 = PaintData()
+    final SurfacePaintData paint2 = SurfacePaintData()
       ..color = Color(0x7fff0000)
       ..strokeWidth = 1.0
       ..style = PaintingStyle.stroke;
-    final PaintData paint3 = PaintData()
+    final SurfacePaintData paint3 = SurfacePaintData()
       ..color = Color(0xFF4CAF50) //Colors.green
       ..strokeWidth = 1.0
       ..style = PaintingStyle.stroke;
