@@ -1309,6 +1309,7 @@ String nextPlatform(String currentPlatform, FeatureFlags featureFlags) {
     case 'macOS':
       return 'android';
     default:
+      assert(false); // Invalid current platform.
       return 'android';
   }
 }
