@@ -435,10 +435,10 @@ TEST_F(ShellTest, FrameRasterizedCallbackIsCalled) {
   auto configuration = RunConfiguration::InferFromSettings(settings);
   configuration.SetEntrypoint("onBeginFrameMain");
 
-  int64_t begin_frame;
-  auto nativeOnBeginFrame = [&begin_frame](Dart_NativeArguments args) {
+  int64_t frame_target_time;
+  auto nativeOnBeginFrame = [&frame_target_time](Dart_NativeArguments args) {
     Dart_Handle exception = nullptr;
-    begin_frame =
+    frame_target_time =
         tonic::DartConverter<int64_t>::FromArguments(args, 0, exception);
   };
   AddNativeCallback("NativeOnBeginFrame",
@@ -455,10 +455,11 @@ TEST_F(ShellTest, FrameRasterizedCallbackIsCalled) {
   std::vector<FrameTiming> timings = {timing};
   CheckFrameTimings(timings, start, finish);
 
-  // Check that onBeginFrame has the same timestamp as FrameTiming's build start
+  // Check that onBeginFrame, which is the frame_target_time, is after
+  // FrameTiming's build start
   int64_t build_start =
       timing.Get(FrameTiming::kBuildStart).ToEpochDelta().ToMicroseconds();
-  ASSERT_EQ(build_start, begin_frame);
+  ASSERT_GT(frame_target_time, build_start);
   DestroyShell(std::move(shell));
 }
 

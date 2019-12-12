@@ -34,7 +34,13 @@ namespace fml {
 #endif
 
 bool TimerRearm(int fd, fml::TimePoint time_point) {
-  const uint64_t nano_secs = time_point.ToEpochDelta().ToNanoseconds();
+  uint64_t nano_secs = time_point.ToEpochDelta().ToNanoseconds();
+
+  // "0" will disarm the timer, desired behavior is to immediately
+  // trigger the timer.
+  if (nano_secs < 1) {
+    nano_secs = 1;
+  }
 
   struct itimerspec spec = {};
   spec.it_value.tv_sec = (time_t)(nano_secs / NSEC_PER_SEC);

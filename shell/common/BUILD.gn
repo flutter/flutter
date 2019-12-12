@@ -159,6 +159,7 @@ if (current_toolchain == host_toolchain) {
 
   shell_host_executable("shell_unittests") {
     sources = [
+      "animator_unittests.cc",
       "canvas_spy_unittests.cc",
       "input_events_unittests.cc",
       "persistent_cache_unittests.cc",
