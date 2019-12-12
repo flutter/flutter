@@ -326,7 +326,7 @@ class MethodChannel {
   ///    for how to access method call arguments on Android.
   @optionalTypeArgs
   Future<T> invokeMethod<T>(String method, [ dynamic arguments ]) {
-    return _invokeMethod(method, missingOk: false, arguments: arguments);
+    return _invokeMethod<T>(method, missingOk: false, arguments: arguments);
   }
 
   /// An implementation of [invokeMethod] that can return typed lists.
