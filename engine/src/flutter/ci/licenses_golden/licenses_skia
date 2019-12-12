@@ -1,4 +1,4 @@
-Signature: 6bffa87a7c5c059414f1658dd2762fdf
+Signature: 1e3c9c336a7abcf29e6b685726fa4f0e
 
 UNUSED LICENSES:
 
@@ -3101,6 +3101,7 @@ FILE: ../../../third_party/skia/modules/skottie/src/effects/FillEffect.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/effects/GaussianBlurEffect.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/effects/GradientEffect.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/effects/HueSaturationEffect.cpp
+FILE: ../../../third_party/skia/modules/skottie/src/effects/InvertEffect.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/effects/LevelsEffect.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/effects/LinearWipeEffect.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/effects/MotionBlurEffect.cpp
@@ -5040,10 +5041,14 @@ FILE: ../../../third_party/skia/docs/examples/Typeface_Methods.cpp
 FILE: ../../../third_party/skia/docs/examples/Xor.cpp
 FILE: ../../../third_party/skia/docs/examples/incomplete.cpp
 FILE: ../../../third_party/skia/experimental/minimal_ios_mtl_skia_app/main.mm
+FILE: ../../../third_party/skia/experimental/skottie_ios/SkAnimationDraw.h
 FILE: ../../../third_party/skia/experimental/skottie_ios/SkMetalViewBridge.h
 FILE: ../../../third_party/skia/experimental/skottie_ios/SkMetalViewBridge.mm
+FILE: ../../../third_party/skia/experimental/skottie_ios/SkTimeKeeper.h
 FILE: ../../../third_party/skia/experimental/skottie_ios/SkottieMtkView.h
 FILE: ../../../third_party/skia/experimental/skottie_ios/SkottieMtkView.mm
+FILE: ../../../third_party/skia/experimental/skottie_ios/SkottieUIView.h
+FILE: ../../../third_party/skia/experimental/skottie_ios/SkottieUIView.mm
 FILE: ../../../third_party/skia/experimental/skottie_ios/main.mm
 FILE: ../../../third_party/skia/experimental/xform/SkShape.cpp
 FILE: ../../../third_party/skia/experimental/xform/SkShape.h
