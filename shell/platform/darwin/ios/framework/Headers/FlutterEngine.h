@@ -122,7 +122,7 @@ FLUTTER_EXPORT
  * contains `main()`), using `main()` as the entrypoint (the default for Flutter projects).
  *
  * The first call to this method will create a new Isolate. Subsequent calls will return
- * immediately.
+ * immediately and have no effect.
  *
  * @return YES if the call succeeds in creating and running a Flutter Engine instance; NO otherwise.
  */
@@ -133,7 +133,7 @@ FLUTTER_EXPORT
  * contains `main()`).
  *
  * The first call to this method will create a new Isolate. Subsequent calls will return
- * immediately.
+ * immediately and have no effect.
  *
  * @param entrypoint The name of a top-level function from the same Dart
  *   library that contains the app's main() function.  If this is FlutterDefaultDartEntrypoint (or
@@ -149,7 +149,7 @@ FLUTTER_EXPORT
  * which may not be the same as the library containing the Dart program's `main()` function.
  *
  * The first call to this method will create a new Isolate. Subsequent calls will return
- * immediately.
+ * immediately and have no effect.
  *
  * @param entrypoint The name of a top-level function from a Dart library.  If this is
  *   FlutterDefaultDartEntrypoint (or nil); this will default to `main()`.  If it is not the app's
