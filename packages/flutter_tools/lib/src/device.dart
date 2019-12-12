@@ -536,12 +536,18 @@ class DebuggingOptions {
     this.initializePlatform = true,
     this.hostname,
     this.port,
+    this.webEnableExposeUrl,
     this.vmserviceOutFile,
     this.fastStart = false,
    }) : debuggingEnabled = true;
 
-  DebuggingOptions.disabled(this.buildInfo, { this.initializePlatform = true, this.port, this.hostname, this.cacheSkSL = false, })
-    : debuggingEnabled = false,
+  DebuggingOptions.disabled(this.buildInfo, {
+      this.initializePlatform = true,
+      this.port,
+      this.hostname,
+      this.webEnableExposeUrl,
+      this.cacheSkSL = false,
+    }) : debuggingEnabled = false,
       useTestFonts = false,
       startPaused = false,
       dartFlags = '',
@@ -577,6 +583,7 @@ class DebuggingOptions {
   final int deviceVmServicePort;
   final String port;
   final String hostname;
+  final bool webEnableExposeUrl;
   /// A file where the vmservice URL should be written after the application is started.
   final String vmserviceOutFile;
   final bool fastStart;
