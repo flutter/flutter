@@ -35,7 +35,7 @@ std::future<int> ShellTestVsyncClock::NextVSync() {
 
 void ShellTestVsyncWaiter::AwaitVSync() {
   FML_DCHECK(task_runners_.GetUITaskRunner()->RunsTasksOnCurrentThread());
-  auto vsync_future = clock_.NextVSync();
+  auto vsync_future = clock_->NextVSync();
 
   auto async_wait = std::async([&vsync_future, this]() {
     vsync_future.wait();

@@ -93,7 +93,8 @@ class ShellTestPlatformView : public PlatformView, public GPUSurfaceGLDelegate {
  public:
   ShellTestPlatformView(PlatformView::Delegate& delegate,
                         TaskRunners task_runners,
-                        bool simulate_vsync = false);
+                        std::shared_ptr<ShellTestVsyncClock> vsync_clock,
+                        CreateVsyncWaiter create_vsync_waiter);
 
   ~ShellTestPlatformView() override;
 
@@ -102,8 +103,9 @@ class ShellTestPlatformView : public PlatformView, public GPUSurfaceGLDelegate {
  private:
   TestGLSurface gl_surface_;
 
-  bool simulate_vsync_ = false;
-  ShellTestVsyncClock vsync_clock_;
+  CreateVsyncWaiter create_vsync_waiter_;
+
+  std::shared_ptr<ShellTestVsyncClock> vsync_clock_;
 
   // |PlatformView|
   std::unique_ptr<Surface> CreateRenderingSurface() override;
