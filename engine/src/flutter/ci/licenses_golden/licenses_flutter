@@ -533,6 +533,7 @@ FILE: ../../../flutter/runtime/test_font_data.cc
 FILE: ../../../flutter/runtime/test_font_data.h
 FILE: ../../../flutter/shell/common/animator.cc
 FILE: ../../../flutter/shell/common/animator.h
+FILE: ../../../flutter/shell/common/animator_unittests.cc
 FILE: ../../../flutter/shell/common/canvas_spy.cc
 FILE: ../../../flutter/shell/common/canvas_spy.h
 FILE: ../../../flutter/shell/common/canvas_spy_unittests.cc

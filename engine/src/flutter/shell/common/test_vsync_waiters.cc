@@ -57,5 +57,13 @@ void ShellTestVsyncWaiter::AwaitVSync() {
   });
 }
 
+void ConstantFiringVsyncWaiter::AwaitVSync() {
+  FML_DCHECK(task_runners_.GetUITaskRunner()->RunsTasksOnCurrentThread());
+  auto async_wait = std::async([this]() {
+    task_runners_.GetPlatformTaskRunner()->PostTask(
+        [this]() { FireCallback(frame_begin_time, frame_target_time); });
+  });
+}
+
 }  // namespace testing
 }  // namespace flutter

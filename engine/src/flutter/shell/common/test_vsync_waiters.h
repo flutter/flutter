@@ -41,6 +41,21 @@ class ShellTestVsyncWaiter : public VsyncWaiter {
   std::shared_ptr<ShellTestVsyncClock> clock_;
 };
 
+class ConstantFiringVsyncWaiter : public VsyncWaiter {
+ public:
+  // both of these are set in the past so as to fire immediately.
+  static constexpr fml::TimePoint frame_begin_time =
+      fml::TimePoint::FromEpochDelta(fml::TimeDelta::FromSeconds(0));
+  static constexpr fml::TimePoint frame_target_time =
+      fml::TimePoint::FromEpochDelta(fml::TimeDelta::FromSeconds(100));
+
+  ConstantFiringVsyncWaiter(TaskRunners task_runners)
+      : VsyncWaiter(std::move(task_runners)) {}
+
+ protected:
+  void AwaitVSync() override;
+};
+
 }  // namespace testing
 }  // namespace flutter
 

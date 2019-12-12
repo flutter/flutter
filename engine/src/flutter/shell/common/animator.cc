@@ -137,7 +137,7 @@ void Animator::BeginFrame(fml::TimePoint frame_start_time,
   {
     TRACE_EVENT2("flutter", "Framework Workload", "mode", "basic", "frame",
                  FrameParity());
-    delegate_.OnAnimatorBeginFrame(last_begin_frame_time_);
+    delegate_.OnAnimatorBeginFrame(frame_target_time);
   }
 
   if (!frame_scheduled_) {
