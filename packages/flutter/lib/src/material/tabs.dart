@@ -175,14 +175,16 @@ class _TabStyle extends AnimatedWidget {
 
     final Color selectedColor = labelColor
        ?? tabBarTheme.labelColor
+       ?? textStyle.color
        ?? themeData.primaryTextTheme.body2.color;
     final Color unselectedColor = unselectedLabelColor
       ?? tabBarTheme.unselectedLabelColor
+      ?? textStyle.color
       ?? selectedColor.withAlpha(0xB2); // 70% alpha
     final Color color = selected
       ? Color.lerp(selectedColor, unselectedColor, animation.value)
       : Color.lerp(unselectedColor, selectedColor, animation.value);
-
+      
     return DefaultTextStyle(
       style: textStyle.copyWith(color: color),
       child: IconTheme.merge(
