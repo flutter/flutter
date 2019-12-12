@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include <future>
 #define FML_USED_ON_EMBEDDER
 
 #include "flutter/shell/common/shell_test.h"
@@ -159,8 +158,10 @@ void ShellTest::PumpOneFrame(Shell* shell,
   shell->GetTaskRunners().GetUITaskRunner()->PostTask(
       [&latch, engine = shell->weak_engine_, viewport_metrics]() {
         engine->SetViewportMetrics(std::move(viewport_metrics));
-        engine->animator_->BeginFrame(fml::TimePoint::Now(),
-                                      fml::TimePoint::Now());
+        const auto frame_begin_time = fml::TimePoint::Now();
+        const auto frame_end_time =
+            frame_begin_time + fml::TimeDelta::FromSecondsF(1.0 / 60.0);
+        engine->animator_->BeginFrame(frame_begin_time, frame_end_time);
         latch.Signal();
       });
   latch.Wait();
