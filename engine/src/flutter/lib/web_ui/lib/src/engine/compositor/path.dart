@@ -15,6 +15,11 @@ class SkPath implements ui.Path {
     fillType = ui.PathFillType.nonZero;
   }
 
+  // TODO(yjbanov): implement: https://github.com/flutter/flutter/issues/46812
+  SkPath.from(SkPath other) {
+    throw UnimplementedError('SkPath.from is not implemented in the CanvasKit backend');
+  }
+
   SkPath._fromSkPath(js.JsObject skPath) : _skPath = skPath;
 
   ui.PathFillType _fillType;
@@ -308,40 +313,10 @@ class SkPath implements ui.Path {
   }
 
   @override
-  List<Subpath> get subpaths {
-    throw UnimplementedError(
-        'Path.subpaths is not used in the CanvasKit backend.');
-  }
-
-  @override
   ui.Path transform(Float64List matrix4) {
     final js.JsObject newPath = _skPath.callMethod('copy');
     newPath.callMethod('transform', <js.JsArray>[makeSkMatrix(matrix4)]);
     return SkPath._fromSkPath(newPath);
-  }
-
-  @override
-  Ellipse get webOnlyPathAsCircle {
-    throw new UnimplementedError(
-        'webOnlyPathAsCircle is not used in the CanvasKit backend.');
-  }
-
-  @override
-  ui.Rect get webOnlyPathAsRect {
-    throw new UnimplementedError(
-        'webOnlyPathAsRect is not used in the CanvasKit backend.');
-  }
-
-  @override
-  ui.RRect get webOnlyPathAsRoundedRect {
-    throw new UnimplementedError(
-        'webOnlyPathAsRoundedRect is not used in the CanvasKit backend.');
-  }
-
-  @override
-  List<dynamic> webOnlySerializeToCssPaint() {
-    throw new UnimplementedError(
-        'webOnlySerializeToCssPaint is not used in the CanvasKit backend.');
   }
 
   String toSvgString() {

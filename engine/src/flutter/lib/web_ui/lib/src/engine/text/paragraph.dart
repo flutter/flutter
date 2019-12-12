@@ -127,10 +127,10 @@ class EngineParagraph implements ui.Paragraph {
   final html.HtmlElement _paragraphElement;
   final ParagraphGeometricStyle _geometricStyle;
   final String _plainText;
-  final ui.Paint _paint;
+  final SurfacePaint _paint;
   final ui.TextAlign _textAlign;
   final ui.TextDirection _textDirection;
-  final ui.Paint _background;
+  final SurfacePaint _background;
 
   @visibleForTesting
   String get plainText => _plainText;

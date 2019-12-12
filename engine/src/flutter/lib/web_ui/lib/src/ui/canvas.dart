@@ -1175,12 +1175,3 @@ class RawRecordingCanvas extends engine.BitmapCanvas
   @override
   Rect cullRect;
 }
-
-// Returns true if point is inside ellipse.
-bool _ellipseContains(double px, double py, double centerX, double centerY,
-    double radiusX, double radiusY) {
-  final double dx = px - centerX;
-  final double dy = py - centerY;
-  return ((dx * dx) / (radiusX * radiusX)) + ((dy * dy) / (radiusY * radiusY)) <
-      1.0;
-}

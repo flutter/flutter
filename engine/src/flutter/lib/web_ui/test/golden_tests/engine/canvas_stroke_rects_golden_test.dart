@@ -36,16 +36,16 @@ void main() async {
 
 void paintSideBySideRects(BitmapCanvas canvas) {
   canvas.drawRect(Rect.fromLTRB(0, 0, 300, 300),
-      PaintData()
+      SurfacePaintData()
         ..color = Color(0xFFFFFFFF)
         ..style = PaintingStyle.fill); // white
 
     canvas.drawRect(Rect.fromLTRB(0, 20, 40, 60),
-        PaintData()
+        SurfacePaintData()
           ..style = PaintingStyle.fill
           ..color = Color(0x7f0000ff));
     canvas.drawRect(Rect.fromLTRB(40, 20, 80, 60),
-        PaintData()
+        SurfacePaintData()
           ..style = PaintingStyle.stroke
           ..strokeWidth = 4
           ..color = Color(0x7fff0000));
@@ -54,11 +54,11 @@ void paintSideBySideRects(BitmapCanvas canvas) {
     canvas.transform(new Matrix4.rotationZ(30.0 * math.pi / 180.0).storage);
 
     canvas.drawRect(Rect.fromLTRB(100, 60, 140, 100),
-        PaintData()
+        SurfacePaintData()
           ..style = PaintingStyle.fill
           ..color = Color(0x7fff00ff));
     canvas.drawRect(Rect.fromLTRB(140, 60, 180, 100),
-        PaintData()
+        SurfacePaintData()
           ..style = PaintingStyle.stroke
           ..strokeWidth = 4
           ..color = Color(0x7fffff00));

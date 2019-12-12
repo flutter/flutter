@@ -20,7 +20,7 @@ void main() {
 
   group('drawDRRect', () {
     final RRect rrect = RRect.fromLTRBR(10, 10, 50, 50, Radius.circular(3));
-    final Paint somePaint = Paint()..color = const Color(0xFFFF0000);
+    final SurfacePaint somePaint = SurfacePaint()..color = const Color(0xFFFF0000);
 
     test('Happy case', () {
       underTest.drawDRRect(rrect, rrect.deflate(1), somePaint);
@@ -29,7 +29,7 @@ void main() {
       _expectDrawCall(mockCanvas, {
           'outer': rrect,
           'inner': rrect.deflate(1),
-          'paint': somePaint.webOnlyPaintData,
+          'paint': somePaint.paintData,
         });
     });
 
@@ -71,7 +71,7 @@ void main() {
       _expectDrawCall(mockCanvas, {
         'outer': outer,
         'inner': inner,
-        'paint': somePaint.webOnlyPaintData,
+        'paint': somePaint.paintData,
       });
     });
 
@@ -85,7 +85,7 @@ void main() {
       _expectDrawCall(mockCanvas, {
           'outer': outer,
           'inner': inner,
-          'paint': somePaint.webOnlyPaintData,
+          'paint': somePaint.paintData,
         });
     });
   });

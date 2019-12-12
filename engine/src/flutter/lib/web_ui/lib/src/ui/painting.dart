@@ -922,48 +922,33 @@ enum Clip {
   antiAliasWithSaveLayer,
 }
 
-/// Private Paint context data used for recording canvas commands allowing
-/// Paint to be mutated post canvas draw operations.
-class PaintData {
-  BlendMode blendMode;
-  PaintingStyle style;
-  double strokeWidth;
-  StrokeCap strokeCap;
-  StrokeJoin strokeJoin;
-  bool isAntiAlias = true;
-  Color color;
-  Shader shader;
-  MaskFilter maskFilter;
-  FilterQuality filterQuality;
-  ColorFilter colorFilter;
-
-  // Internal for recording canvas use.
-  PaintData clone() {
-    return PaintData()
-      ..blendMode = blendMode
-      ..filterQuality = filterQuality
-      ..maskFilter = maskFilter
-      ..shader = shader
-      ..isAntiAlias = isAntiAlias
-      ..color = color
-      ..colorFilter = colorFilter
-      ..strokeWidth = strokeWidth
-      ..style = style
-      ..strokeJoin = strokeJoin
-      ..strokeCap = strokeCap;
-  }
-}
-
 /// A description of the style to use when drawing on a [Canvas].
 ///
 /// Most APIs on [Canvas] take a [Paint] object to describe the style
 /// to use for that operation.
-class Paint {
-  PaintData _paintData = PaintData();
-
+abstract class Paint {
   /// Constructs an empty [Paint] object with all fields initialized to
   /// their defaults.
-  Paint();
+  factory Paint() => engine.experimentalUseSkia
+    ? engine.SkPaint()
+    : engine.SurfacePaint();
+
+  /// Whether to dither the output when drawing images.
+  ///
+  /// If false, the default value, dithering will be enabled when the input
+  /// color depth is higher than the output color depth. For example,
+  /// drawing an RGB8 image onto an RGB565 canvas.
+  ///
+  /// This value also controls dithering of [shader]s, which can make
+  /// gradients appear smoother.
+  ///
+  /// Whether or not dithering affects the output is implementation defined.
+  /// Some implementations may choose to ignore this completely, if they're
+  /// unable to control dithering.
+  ///
+  /// To ensure that dithering is consistently enabled for your entire
+  /// application, set this to true before invoking any drawing related code.
+  static bool enableDithering = false;
 
   /// A blend mode to apply when a shape is drawn or a layer is composited.
   ///
@@ -982,28 +967,14 @@ class Paint {
   ///  * [Canvas.saveLayer], which uses its [Paint]'s [blendMode] to composite
   ///    the layer when [restore] is called.
   ///  * [BlendMode], which discusses the user of [saveLayer] with [blendMode].
-  BlendMode get blendMode => _paintData.blendMode ?? BlendMode.srcOver;
-  set blendMode(BlendMode value) {
-    if (_frozen) {
-      _paintData = _paintData.clone();
-      _frozen = false;
-    }
-    _paintData.blendMode = value;
-  }
-
-  BlendMode _blendMode;
+  BlendMode get blendMode;
+  set blendMode(BlendMode value);
 
   /// Whether to paint inside shapes, the edges of shapes, or both.
   ///
   /// If null, defaults to [PaintingStyle.fill].
-  PaintingStyle get style => _paintData.style ?? PaintingStyle.fill;
-  set style(PaintingStyle value) {
-    if (_frozen) {
-      _paintData = _paintData.clone();
-      _frozen = false;
-    }
-    _paintData.style = value;
-  }
+  PaintingStyle get style;
+  set style(PaintingStyle value);
 
   /// How wide to make edges drawn when [style] is set to
   /// [PaintingStyle.stroke] or [PaintingStyle.strokeAndFill]. The
@@ -1011,78 +982,43 @@ class Paint {
   /// orthogonal to the direction of the path.
   ///
   /// The values null and 0.0 correspond to a hairline width.
-  double get strokeWidth => _paintData.strokeWidth ?? 0.0;
-  set strokeWidth(double value) {
-    if (_frozen) {
-      _paintData = _paintData.clone();
-      _frozen = false;
-    }
-    _paintData.strokeWidth = value;
-  }
+  double get strokeWidth;
+  set strokeWidth(double value);
 
   /// The kind of finish to place on the end of lines drawn when
   /// [style] is set to [PaintingStyle.stroke] or
   /// [PaintingStyle.strokeAndFill].
   ///
   /// If null, defaults to [StrokeCap.butt], i.e. no caps.
-  StrokeCap get strokeCap => _paintData.strokeCap;
-  set strokeCap(StrokeCap value) {
-    if (_frozen) {
-      _paintData = _paintData.clone();
-      _frozen = false;
-    }
-    _paintData.strokeCap = value;
-  }
+  StrokeCap get strokeCap;
+  set strokeCap(StrokeCap value);
 
   /// The kind of finish to use for line segment joins.
   /// [style] is set to [PaintingStyle.stroke] or
   /// [PaintingStyle.strokeAndFill]. Only applies to drawPath not drawPoints.
   ///
   /// If null, defaults to [StrokeCap.butt], i.e. no caps.
-  StrokeJoin get strokeJoin => _paintData.strokeJoin;
-  set strokeJoin(StrokeJoin value) {
-    if (_frozen) {
-      _paintData = _paintData.clone();
-      _frozen = false;
-    }
-    _paintData.strokeJoin = value;
-  }
+  StrokeJoin get strokeJoin;
+  set strokeJoin(StrokeJoin value);
 
   /// Whether to apply anti-aliasing to lines and images drawn on the
   /// canvas.
   ///
   /// Defaults to true. The value null is treated as false.
-  bool get isAntiAlias => _paintData.isAntiAlias;
-  set isAntiAlias(bool value) {
-    if (_frozen) {
-      _paintData = _paintData.clone();
-      _frozen = false;
-    }
-    _paintData.isAntiAlias = value;
-  }
+  bool get isAntiAlias;
+  set isAntiAlias(bool value);
 
-  Color get color => _paintData.color;
-  set color(Color value) {
-    if (_frozen) {
-      _paintData = _paintData.clone();
-      _frozen = false;
-    }
-    _paintData.color = value.runtimeType == Color ? value : Color(value.value);
-  }
+  Color get color;
+  set color(Color value);
 
   /// Whether the colors of the image are inverted when drawn.
   ///
   /// Inverting the colors of an image applies a new color filter that will
   /// be composed with any user provided color filters. This is primarily
   /// used for implementing smart invert on iOS.
-  bool get invertColors {
-    return false;
-  }
+  bool get invertColors;
 
-  set invertColors(bool value) {}
-
-  Color _color = _defaultPaintColor;
-  static const Color _defaultPaintColor = Color(0xFF000000);
+  set invertColors(bool value);
 
   /// The shader to use when stroking or filling a shape.
   ///
@@ -1094,27 +1030,15 @@ class Paint {
   ///  * [ImageShader], a shader that tiles an [Image].
   ///  * [colorFilter], which overrides [shader].
   ///  * [color], which is used if [shader] and [colorFilter] are null.
-  Shader get shader => _paintData.shader;
-  set shader(Shader value) {
-    if (_frozen) {
-      _paintData = _paintData.clone();
-      _frozen = false;
-    }
-    _paintData.shader = value;
-  }
+  Shader get shader;
+  set shader(Shader value);
 
   /// A mask filter (for example, a blur) to apply to a shape after it has been
   /// drawn but before it has been composited into the image.
   ///
   /// See [MaskFilter] for details.
-  MaskFilter get maskFilter => _paintData.maskFilter;
-  set maskFilter(MaskFilter value) {
-    if (_frozen) {
-      _paintData = _paintData.clone();
-      _frozen = false;
-    }
-    _paintData.maskFilter = value;
-  }
+  MaskFilter get maskFilter;
+  set maskFilter(MaskFilter value);
 
   /// Controls the performance vs quality trade-off to use when applying
   /// filters, such as [maskFilter], or when drawing images, as with
@@ -1122,14 +1046,8 @@ class Paint {
   ///
   /// Defaults to [FilterQuality.none].
   // TODO(ianh): verify that the image drawing methods actually respect this
-  FilterQuality get filterQuality => _paintData.filterQuality;
-  set filterQuality(FilterQuality value) {
-    if (_frozen) {
-      _paintData = _paintData.clone();
-      _frozen = false;
-    }
-    _paintData.filterQuality = value;
-  }
+  FilterQuality get filterQuality;
+  set filterQuality(FilterQuality value);
 
   /// A color filter to apply when a shape is drawn or when a layer is
   /// composited.
@@ -1137,23 +1055,11 @@ class Paint {
   /// See [ColorFilter] for details.
   ///
   /// When a shape is being drawn, [colorFilter] overrides [color] and [shader].
-  ColorFilter get colorFilter => _paintData.colorFilter;
-  set colorFilter(ColorFilter value) {
-    if (_frozen) {
-      _paintData = _paintData.clone();
-      _frozen = false;
-    }
-    _paintData.colorFilter = value;
-  }
+  ColorFilter get colorFilter;
+  set colorFilter(ColorFilter value);
 
-  // TODO(flutter_web): see https://github.com/flutter/flutter/issues/33605
-  double get strokeMiterLimit {
-    return null;
-  }
-
-  set strokeMiterLimit(double value) {
-    assert(value != null);
-  }
+  double get strokeMiterLimit;
+  set strokeMiterLimit(double value);
 
   /// The [ImageFilter] to use when drawing raster images.
   ///
@@ -1177,72 +1083,8 @@ class Paint {
   /// See also:
   ///
   ///  * [MaskFilter], which is used for drawing geometry.
-  ImageFilter get imageFilter {
-    // TODO(flutter/flutter#35156): Implement ImageFilter.
-    return null;
-  }
-
-  set imageFilter(ImageFilter value) {
-    // TODO(flutter/flutter#35156): Implement ImageFilter.
-  }
-
-  /// Whether to dither the output when drawing images.
-  ///
-  /// If false, the default value, dithering will be enabled when the input
-  /// color depth is higher than the output color depth. For example,
-  /// drawing an RGB8 image onto an RGB565 canvas.
-  ///
-  /// This value also controls dithering of [shader]s, which can make
-  /// gradients appear smoother.
-  ///
-  /// Whether or not dithering affects the output is implementation defined.
-  /// Some implementations may choose to ignore this completely, if they're
-  /// unable to control dithering.
-  ///
-  /// To ensure that dithering is consistently enabled for your entire
-  /// application, set this to true before invoking any drawing related code.
-  static bool enableDithering = false;
-
-  // True if Paint instance has used in RecordingCanvas.
-  bool _frozen = false;
-
-  // Marks this paint object as previously used.
-  PaintData get webOnlyPaintData {
-    // Flip bit so next time object gets mutated we create a clone of
-    // current paint data.
-    _frozen = true;
-    return _paintData;
-  }
-
-  @override
-  String toString() {
-    final StringBuffer result = StringBuffer();
-    String semicolon = '';
-    result.write('Paint(');
-    if (style == PaintingStyle.stroke) {
-      result.write('$style');
-      if (strokeWidth != null && strokeWidth != 0.0)
-        result.write(' $strokeWidth');
-      else
-        result.write(' hairline');
-      if (strokeCap != null && strokeCap != StrokeCap.butt)
-        result.write(' $strokeCap');
-      semicolon = '; ';
-    }
-    if (isAntiAlias != true) {
-      result.write('${semicolon}antialias off');
-      semicolon = '; ';
-    }
-    if (color != _defaultPaintColor) {
-      if (color != null)
-        result.write('$semicolon$color');
-      else
-        result.write('${semicolon}no color');
-      semicolon = '; ';
-    }
-    result.write(')');
-    return result.toString();
-  }
+  ImageFilter get imageFilter;
+  set imageFilter(ImageFilter value);
 }
 
 /// Base class for objects such as [Gradient] and [ImageShader] which

@@ -164,15 +164,15 @@ class SkTextStyle implements ui.TextStyle {
     double wordSpacing,
     double height,
     ui.Locale locale,
-    ui.Paint background,
-    ui.Paint foreground,
+    SkPaint background,
+    SkPaint foreground,
     List<ui.Shadow> shadows,
     List<ui.FontFeature> fontFeatures,
   }) {
     final Map<String, dynamic> style = <String, dynamic>{};
 
     if (background != null) {
-      style['backgroundColor'] = makeSkPaint(background);
+      style['backgroundColor'] = background.makeSkPaint();
     }
 
     if (color != null) {
@@ -221,7 +221,7 @@ class SkTextStyle implements ui.TextStyle {
     }
 
     if (foreground != null) {
-      style['foreground'] = makeSkPaint(foreground);
+      style['foreground'] = foreground.makeSkPaint();
     }
 
     // TODO(hterkelsen): Add support for

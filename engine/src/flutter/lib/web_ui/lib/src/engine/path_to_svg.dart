@@ -6,7 +6,7 @@ part of engine;
 
 /// Converts [path] to SVG path syntax to be used as "d" attribute in path
 /// element.
-void pathToSvg(ui.Path path, StringBuffer sb,
+void pathToSvg(SurfacePath path, StringBuffer sb,
     {double offsetX = 0, double offsetY = 0}) {
   for (Subpath subPath in path.subpaths) {
     for (PathCommand command in subPath.commands) {
