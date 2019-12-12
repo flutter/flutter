@@ -66,7 +66,7 @@ abstract class EngineInputType {
   html.HtmlElement createDomElement() => html.InputElement();
 
   /// Given a [domElement], set attributes that are specific to this input type.
-  void configureDomElement(html.HtmlElement domElement) {
+  void configureInputMode(html.HtmlElement domElement) {
     if (inputmodeAttribute == null) {
       return;
     }

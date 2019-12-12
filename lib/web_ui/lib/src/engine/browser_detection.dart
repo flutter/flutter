@@ -29,10 +29,23 @@ enum BrowserEngine {
 /// Lazily initialized current browser engine.
 BrowserEngine _browserEngine;
 
+/// Override the value of [browserEngine].
+///
+/// Setting this to `null` lets [browserEngine] detect the browser that the
+/// app is running on.
+///
+/// This is intended to be used for testing and debugging only.
+BrowserEngine debugBrowserEngineOverride;
+
 /// Returns the [BrowserEngine] used by the current browser.
 ///
 /// This is used to implement browser-specific behavior.
-BrowserEngine get browserEngine => _browserEngine ??= _detectBrowserEngine();
+BrowserEngine get browserEngine {
+  if (debugBrowserEngineOverride != null) {
+    return debugBrowserEngineOverride;
+  }
+  return _browserEngine ??= _detectBrowserEngine();
+}
 
 BrowserEngine _detectBrowserEngine() {
   final String vendor = html.window.navigator.vendor;

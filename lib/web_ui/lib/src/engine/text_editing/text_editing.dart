@@ -12,16 +12,6 @@ const int _kReturnKeyCode = 13;
 
 void _emptyCallback(dynamic _) {}
 
-/// Indicates whether virtual keyboard shifts the location of input element.
-///
-/// Value decided using the operating system and the browser engine.
-///
-/// In iOS, the virtual keyboard might shifts the screen up to make input
-/// visible depending on the location of the focused input element.
-bool get _doesKeyboardShiftInput =>
-    browserEngine == BrowserEngine.webkit &&
-    operatingSystem == OperatingSystem.iOs;
-
 /// These style attributes are constant throughout the life time of an input
 /// element.
 ///
@@ -222,36 +212,77 @@ class InputConfiguration {
 typedef _OnChangeCallback = void Function(EditingState editingState);
 typedef _OnActionCallback = void Function(String inputAction);
 
-/// Wraps the DOM element used to provide text editing capabilities.
+/// Interface defining the template for text editing strategies.
 ///
-/// The backing DOM element could be one of:
+/// The algorithms will be picked in the runtime depending on the concrete
+/// class implementing the interface.
+///
+/// These algorithms is expected to differ by operating system and/or browser.
+abstract class TextEditingStrategy {
+  void initializeTextEditing(
+    InputConfiguration inputConfig, {
+    @required _OnChangeCallback onChange,
+    @required _OnActionCallback onAction,
+  });
+
+  /// Place the DOM element to its initial position.
+  ///
+  /// It will be located exactly in the same place with the editable widgets,
+  /// however it's contents and cursor will be invisible.
+  ///
+  /// Users can interact with the element and use the functionalities of the
+  /// right-click menu. Such as copy,paste, cut, select, translate...
+  void initializeElementPosition();
+
+  /// Register event listeners to the DOM element.
+  ///
+  /// These event listener will be removed in [disable].
+  void addEventHandlers();
+
+  /// Update the element's position.
+  ///
+  /// The position will be updated everytime Flutter Framework sends
+  /// 'TextInput.setEditableSizeAndTransform' message.
+  void updateElementPosition(_GeometricInfo geometricInfo);
+
+  /// Set editing state of the element.
+  ///
+  /// This includes text and selection relelated states. The editing state will
+  /// be updated everytime Flutter Framework sends 'TextInput.setEditingState'
+  /// message.
+  void setEditingState(EditingState editingState);
+
+  /// Set style to the native DOM element used for text editing.
+  void updateElementStyle(_EditingStyle style);
+
+  /// Disables the element so it's no longer used for text editing.
+  ///
+  /// Calling [disable] also removes any registered event listeners.
+  void disable();
+}
+
+/// Class implementing the default editing strategies for text editing.
+///
+/// This class uses a DOM element to provide text editing capabilities.
+///
+///  The backing DOM element could be one of:
 ///
 /// 1. `<input>`.
 /// 2. `<textarea>`.
 /// 3. `<span contenteditable="true">`.
-class TextEditingElement {
-  /// Creates a non-persistent [TextEditingElement].
-  ///
-  /// See [TextEditingElement.persistent] to understand what persistent mode is.
-  TextEditingElement(this.owner);
-
-  /// Timer that times when to set the location of the input text.
-  ///
-  /// This is only used for iOS. In iOS, virtual keyboard shifts the screen.
-  /// There is no callback to know if the keyboard is up and how much the screen
-  /// has shifted. Therefore instead of listening to the shift and passing this
-  /// information to Flutter Framework, we are trying to stop the shift.
-  ///
-  /// In iOS, the virtual keyboard shifts the screen up if the focused input
-  /// element is under the keyboard or very close to the keyboard. Before the
-  /// focus is called we are positioning it offscreen. The location of the input
-  /// in iOS is set to correct place, 100ms after focus. We use this timer for
-  /// timing this delay.
-  Timer _positionInputElementTimer;
-  static const Duration _delayBeforePositioning =
-      const Duration(milliseconds: 100);
-
+///
+/// This class includes all the default behaviour for an editing element as
+/// well as the common properties such as [domElement].
+///
+/// Strategies written for different formfactor's/browser's should extend this
+/// class instead of extending the interface [TextEditingStrategy].
+///
+/// Unless a formfactor/browser requires specific implementation for a specific
+/// strategy the methods in this class should be used.
+class DefaultTextEditingStrategy implements TextEditingStrategy {
   final HybridTextEditing owner;
+
+  DefaultTextEditingStrategy(this.owner);
 
   @visibleForTesting
   bool isEnabled = false;
@@ -272,103 +303,66 @@ class TextEditingElement {
   final List<StreamSubscription<html.Event>> _subscriptions =
       <StreamSubscription<html.Event>>[];
 
-  /// Whether or not the input element can be positioned at this point in time.
-  ///
-  /// This is currently only used in iOS. It's set to false before focusing the
-  /// input field, and set back to true after a short timer. We do this because
-  /// if the input field is positioned before focus, it could be pushed to an
-  /// incorrect position by the virtual keyboard.
-  ///
-  /// See:
-  ///
-  /// * [_delayBeforePositioning] which controls how long to wait before
-  ///   positioning the input field.
-  bool _canPosition = true;
-
-  /// Enables the element so it can be used to edit text.
-  ///
-  /// Register [callback] so that it gets invoked whenever any change occurs in
-  /// the text editing element.
-  ///
-  /// Changes could be:
-  /// - Text changes, or
-  /// - Selection changes.
-  void enable(
+  @override
+  void initializeTextEditing(
     InputConfiguration inputConfig, {
     @required _OnChangeCallback onChange,
     @required _OnActionCallback onAction,
   }) {
     assert(!isEnabled);
 
-    _initDomElement(inputConfig);
+    domElement = inputConfig.inputType.createDomElement();
+    if (inputConfig.obscureText) {
+      domElement.setAttribute('type', 'password');
+    }
+
+    final String autocorrectValue = inputConfig.autocorrect ? 'on' : 'off';
+    domElement.setAttribute('autocorrect', autocorrectValue);
+
+    _setStaticStyleAttributes(domElement);
+    _style?.applyToDomElement(domElement);
+    initializeElementPosition();
+    domRenderer.glassPaneElement.append(domElement);
+
     isEnabled = true;
     _inputConfiguration = inputConfig;
     _onChange = onChange;
     _onAction = onAction;
+  }
 
-    // Chrome on Android will hide the onscreen keyboard when you tap outside
-    // the text box. Instead, we want the framework to tell us to hide the
-    // keyboard via `TextInput.clearClient` or `TextInput.hide`.
-    //
-    // Safari on iOS does not hide the keyboard as a side-effect of tapping
-    // outside the editable box. Instead it provides an explicit "done" button,
-    // which is reported as "blur", so we must not reacquire focus when we see
-    // a "blur" event and let the keyboard disappear.
-    if (browserEngine == BrowserEngine.blink ||
-        browserEngine == BrowserEngine.unknown) {
-      _subscriptions.add(domElement.onBlur.listen((_) {
-        if (isEnabled) {
-          _refocus();
-        }
-      }));
-    }
+  @override
+  void initializeElementPosition() {
+    positionElement();
+  }
 
-    if (_doesKeyboardShiftInput) {
-      _preventShiftDuringFocus();
-    }
-    domElement.focus();
-
-    if (_lastEditingState != null) {
-      setEditingState(_lastEditingState);
-    }
-
+  @override
+  void addEventHandlers() {
     // Subscribe to text and selection changes.
     _subscriptions.add(domElement.onInput.listen(_handleChange));
 
     _subscriptions.add(domElement.onKeyDown.listen(_maybeSendAction));
 
-    /// Detects changes in text selection.
-    ///
-    /// Currently only used in Firefox.
-    ///
-    /// In Firefox, when cursor moves, neither selectionChange nor onInput
-    /// events are triggered. We are listening to keyup event. Selection start,
-    /// end values are used to decide if the text cursor moved.
-    ///
-    /// Specific keycodes are not checked since users/applications can bind
-    /// their own keys to move the text cursor.
-    /// Decides if the selection has changed (cursor moved) compared to the
-    /// previous values.
-    ///
-    /// After each keyup, the start/end values of the selection is compared to the
-    /// previously saved editing state.
-    if (browserEngine == BrowserEngine.firefox) {
-      _subscriptions.add(domElement.onKeyUp.listen((event) {
-        _handleChange(event);
-      }));
+    _subscriptions.add(html.document.onSelectionChange.listen(_handleChange));
+  }
 
-      /// In Firefox the context menu item "Select All" does not work without
-      /// listening to onSelect. On the other browsers onSelectionChange is
-      /// enough for covering "Select All" functionality.
-      _subscriptions.add(domElement.onSelect.listen(_handleChange));
-    } else {
-      _subscriptions.add(html.document.onSelectionChange.listen(_handleChange));
+  @override
+  void updateElementPosition(_GeometricInfo geometricInfo) {
+    _geometricInfo = geometricInfo;
+    if (isEnabled) {
+      positionElement();
     }
   }
 
-  /// Disables the element so it's no longer used for text editing.
-  ///
-  /// Calling [disable] also removes any registered event listeners.
+  @mustCallSuper
+  @override
+  void updateElementStyle(_EditingStyle style) {
+    _style = style;
+    if (isEnabled) {
+      _style.applyToDomElement(domElement);
+    }
+  }
+
+  @override
   void disable() {
     assert(isEnabled);
 
@@ -381,104 +375,23 @@ class TextEditingElement {
       _subscriptions[i].cancel();
     }
     _subscriptions.clear();
-    _positionInputElementTimer?.cancel();
-    _positionInputElementTimer = null;
-    _removeDomElement();
-  }
-
-  void _initDomElement(InputConfiguration inputConfig) {
-    domElement = inputConfig.inputType.createDomElement();
-    inputConfig.inputType.configureDomElement(domElement);
-    if (inputConfig.obscureText) {
-      domElement.setAttribute('type', 'password');
-    }
-
-    final String autocorrectValue = inputConfig.autocorrect ? 'on' : 'off';
-    domElement.setAttribute('autocorrect', autocorrectValue);
-
-    _setStaticStyleAttributes(domElement);
-    applyAllStyles();
-    domRenderer.glassPaneElement.append(domElement);
-  }
-
-  void _removeDomElement() {
     domElement.remove();
     domElement = null;
   }
 
-  void _refocus() {
-    domElement.focus();
-  }
-
-  /// Set style to the native DOM element used for text editing.
-  ///
-  /// It will be located exactly in the same place with the editable widgets,
-  /// however it's contents and cursor will be invisible.
-  ///
-  /// Users can interact with the element and use the functionalities of the
-  /// right-click menu. Such as copy,paste, cut, select, translate...
-  void applyAllStyles() {
-    _style?.applyToDomElement(domElement);
-    _positionElement();
-  }
-
-  void _positionElement() {
-    if (_canPosition && _geometricInfo != null) {
-      _geometricInfo.applyToDomElement(domElement);
-    }
-  }
-
-  void _preventShiftDuringFocus() {
-    // Position the element outside of the page before focusing on it.
-    //
-    // See [_positionInputElementTimer].
-    owner.setStyleOutsideOfScreen(domElement);
-    _canPosition = false;
-
-    // TODO(mdebbar): Should we remove this listener after the first invocation?
-    _subscriptions.add(domElement.onFocus.listen((_) {
-      // Cancel previous timer if exists.
-      _positionInputElementTimer?.cancel();
-      _positionInputElementTimer = Timer(_delayBeforePositioning, () {
-        _canPosition = true;
-        _positionElement();
-      });
-
-      // When the virtual keyboard is closed on iOS, onBlur is triggered.
-      _subscriptions.add(domElement.onBlur.listen((_) {
-        // Cancel the timer since there is no need to set the location of the
-        // input element anymore. It needs to be focused again to be editable
-        // by the user.
-        _positionInputElementTimer?.cancel();
-        _positionInputElementTimer = null;
-      }));
-    }));
-  }
-
+  @mustCallSuper
+  @override
   void setEditingState(EditingState editingState) {
     _lastEditingState = editingState;
     if (!isEnabled || !editingState.isValid) {
       return;
     }
-
     _lastEditingState.applyToDomElement(domElement);
+  }
 
-    // Re-focuses when setting editing state.
+  void positionElement() {
+    _geometricInfo?.applyToDomElement(domElement);
     domElement.focus();
-  }
-
-  void setGeometricInfo(_GeometricInfo geometricInfo) {
-    _geometricInfo = geometricInfo;
-    if (isEnabled) {
-      _positionElement();
-    }
-  }
-
-  void setStyle(_EditingStyle style) {
-    _style = style;
-    if (isEnabled) {
-      _style.applyToDomElement(domElement);
-    }
   }
 
   void _handleChange(html.Event event) {
@@ -502,22 +415,222 @@ class TextEditingElement {
       _onAction(_inputConfiguration.inputAction);
     }
   }
+
+  /// Enables the element so it can be used to edit text.
+  ///
+  /// Register [callback] so that it gets invoked whenever any change occurs in
+  /// the text editing element.
+  ///
+  /// Changes could be:
+  /// - Text changes, or
+  /// - Selection changes.
+  void enable(
+    InputConfiguration inputConfig, {
+    @required _OnChangeCallback onChange,
+    @required _OnActionCallback onAction,
+  }) {
+    assert(!isEnabled);
+
+    initializeTextEditing(inputConfig, onChange: onChange, onAction: onAction);
+
+    addEventHandlers();
+
+    if (_lastEditingState != null) {
+      setEditingState(this._lastEditingState);
+    }
+
+    // Re-focuses after setting editing state.
+    domElement.focus();
+  }
 }
 
-/// The implementation of a persistent mode for [TextEditingElement].
+/// IOS/Safari behaviour for text editing.
 ///
-/// Persistent mode assumes the caller will own the creation, insertion and
-/// disposal of the DOM element.
+/// In iOS, the virtual keyboard might shifts the screen up to make input
+/// visible depending on the location of the focused input element.
+///
+/// Due to this [initializeElementPosition] and [updateElementPosition]
+/// strategies are different.
+///
+/// [disable] is also different since the [_positionInputElementTimer]
+/// also needs to be cleaned.
+///
+/// inputmodeAttribute needs to be set for mobile devices. Due to this
+/// [initializeTextEditing] is different.
+class IOSTextEditingStrategy extends DefaultTextEditingStrategy {
+  IOSTextEditingStrategy(HybridTextEditing owner) : super(owner);
+
+  /// Timer that times when to set the location of the input text.
+  ///
+  /// This is only used for iOS. In iOS, virtual keyboard shifts the screen.
+  /// There is no callback to know if the keyboard is up and how much the screen
+  /// has shifted. Therefore instead of listening to the shift and passing this
+  /// information to Flutter Framework, we are trying to stop the shift.
+  ///
+  /// In iOS, the virtual keyboard shifts the screen up if the focused input
+  /// element is under the keyboard or very close to the keyboard. Before the
+  /// focus is called we are positioning it offscreen. The location of the input
+  /// in iOS is set to correct place, 100ms after focus. We use this timer for
+  /// timing this delay.
+  Timer _positionInputElementTimer;
+  static const Duration _delayBeforePositioning =
+      const Duration(milliseconds: 100);
+
+  /// Whether or not the input element can be positioned at this point in time.
+  ///
+  /// This is currently only used in iOS. It's set to false before focusing the
+  /// input field, and set back to true after a short timer. We do this because
+  /// if the input field is positioned before focus, it could be pushed to an
+  /// incorrect position by the virtual keyboard.
+  ///
+  /// See:
+  ///
+  /// * [_delayBeforePositioning] which controls how long to wait before
+  ///   positioning the input field.
+  bool _canPosition = true;
+
+  @override
+  void initializeTextEditing(
+    InputConfiguration inputConfig, {
+    @required _OnChangeCallback onChange,
+    @required _OnActionCallback onAction,
+  }) {
+    super.initializeTextEditing(inputConfig,
+        onChange: onChange, onAction: onAction);
+    inputConfig.inputType.configureInputMode(domElement);
+  }
+
+  @override
+  void initializeElementPosition() {
+    /// Position the element outside of the page before focusing on it. This is
+    /// useful for not triggering a scroll when iOS virtual keyboard is
+    /// coming up.
+    domElement.style.transform = 'translate(-9999px, -9999px)';
+
+    _canPosition = false;
+
+    _subscriptions.add(domElement.onFocus.listen((_) {
+      // Cancel previous timer if exists.
+      _positionInputElementTimer?.cancel();
+      _positionInputElementTimer = Timer(_delayBeforePositioning, () {
+        _canPosition = true;
+        positionElement();
+      });
+
+      // When the virtual keyboard is closed on iOS, onBlur is triggered.
+      _subscriptions.add(domElement.onBlur.listen((_) {
+        // Cancel the timer since there is no need to set the location of the
+        // input element anymore. It needs to be focused again to be editable
+        // by the user.
+        _positionInputElementTimer?.cancel();
+        _positionInputElementTimer = null;
+      }));
+    }));
+  }
+
+  @override
+  void updateElementPosition(_GeometricInfo geometricInfo) {
+    _geometricInfo = geometricInfo;
+    if (isEnabled && _canPosition) {
+      positionElement();
+    }
+  }
+
+  @override
+  void disable() {
+    super.disable();
+    _positionInputElementTimer?.cancel();
+    _positionInputElementTimer = null;
+  }
+}
+
+/// Android behaviour for text editing.
+///
+/// inputmodeAttribute needs to be set for mobile devices. Due to this
+/// [initializeTextEditing] is different.
+///
+/// Keyboard acts differently than other devices. [addEventHandlers] handles
+/// this case as an extra.
+class AndroidTextEditingStrategy extends DefaultTextEditingStrategy {
+  AndroidTextEditingStrategy(HybridTextEditing owner) : super(owner);
+
+  @override
+  void initializeTextEditing(
+    InputConfiguration inputConfig, {
+    @required _OnChangeCallback onChange,
+    @required _OnActionCallback onAction,
+  }) {
+    super.initializeTextEditing(inputConfig,
+        onChange: onChange, onAction: onAction);
+    inputConfig.inputType.configureInputMode(domElement);
+  }
+
+  @override
+  void addEventHandlers() {
+    super.addEventHandlers();
+    // Chrome on Android will hide the onscreen keyboard when you tap outside
+    // the text box. Instead, we want the framework to tell us to hide the
+    // keyboard via `TextInput.clearClient` or `TextInput.hide`.
+    if (browserEngine == BrowserEngine.blink ||
+        browserEngine == BrowserEngine.unknown) {
+      _subscriptions.add(domElement.onBlur.listen((_) {
+        if (isEnabled) {
+          // Refocus.
+          domElement.focus();
+        }
+      }));
+    }
+  }
+}
+
+/// Firefox behaviour for text editing.
+///
+/// Selections are different in Firefox. [addEventHandlers] strategy is
+/// impelemented diefferently in Firefox.
+class FirefoxTextEditingStrategy extends DefaultTextEditingStrategy {
+  FirefoxTextEditingStrategy(HybridTextEditing owner) : super(owner);
+
+  @override
+  void addEventHandlers() {
+    // Subscribe to text and selection changes.
+    _subscriptions.add(domElement.onInput.listen(_handleChange));
+
+    _subscriptions.add(domElement.onKeyDown.listen(_maybeSendAction));
+
+    /// Detects changes in text selection.
+    ///
+    /// In Firefox, when cursor moves, neither selectionChange nor onInput
+    /// events are triggered. We are listening to keyup event. Selection start,
+    /// end values are used to decide if the text cursor moved.
+    ///
+    /// Specific keycodes are not checked since users/applications can bind
+    /// their own keys to move the text cursor.
+    /// Decides if the selection has changed (cursor moved) compared to the
+    /// previous values.
+    ///
+    /// After each keyup, the start/end values of the selection is compared to
+    /// the previously saved editing state.
+    _subscriptions.add(domElement.onKeyUp.listen((event) {
+      _handleChange(event);
+    }));
+
+    /// In Firefox the context menu item "Select All" does not work without
+    /// listening to onSelect. On the other browsers onSelectionChange is
+    /// enough for covering "Select All" functionality.
+    _subscriptions.add(domElement.onSelect.listen(_handleChange));
+  }
+}
+
+/// Text editing used by accesibilty mode.
+///
+/// [PersistentTextEditingElement] assumes the caller will own the creation,
+/// insertion and disposal of the DOM element. Due to this
+/// [initializeElementPosition], [initializeTextEditing] and
+/// [disable] strategies are handled differently.
 ///
 /// This class is still responsible for hooking up the DOM element with the
 /// [HybridTextEditing] instance so that changes are communicated to Flutter.
-///
-/// Persistent mode is useful for callers that want to have full control over
-/// the placement and lifecycle of the DOM element. An example of such a caller
-/// is Semantic's TextField that needs to put the DOM element inside the
-/// semantic tree. It also requires that the DOM element remains in the tree
-/// when the user isn't editing.
-class PersistentTextEditingElement extends TextEditingElement {
+class PersistentTextEditingElement extends DefaultTextEditingStrategy {
   /// Creates a [PersistentTextEditingElement] that eagerly instantiates
   /// [domElement] so the caller can insert it before calling
   /// [PersistentTextEditingElement.enable].
@@ -528,21 +641,13 @@ class PersistentTextEditingElement extends TextEditingElement {
     // TODO(yjbanov): move into initializer list when https://github.com/dart-lang/sdk/issues/37881 is fixed.
     assert((domElement is html.InputElement) ||
         (domElement is html.TextAreaElement));
-    this.domElement = domElement;
+    super.domElement = domElement;
   }
 
   @override
-  void _initDomElement(InputConfiguration inputConfig) {
-    // In persistent mode, the user of this class is supposed to insert the
-    // [domElement] on their own. Let's make sure they did.
-    assert(domElement != null);
-    assert(html.document.body.contains(domElement));
-  }
-
-  @override
-  void _removeDomElement() {
-    // In persistent mode, we don't want to remove the DOM element because the
-    // caller is responsible for that.
+  void disable() {
+    // We don't want to remove the DOM element because the caller is responsible
+    // for that.
     //
     // Remove focus from the editable element to cause the keyboard to hide.
     // Otherwise, the keyboard stays on screen even when the user navigates to
@@ -551,12 +656,34 @@ class PersistentTextEditingElement extends TextEditingElement {
   }
 
   @override
-  void _refocus() {
-    // The semantic text field on Android listens to the focus event in order to
-    // switch to a new text field. If we refocus here, we break that
-    // functionality and the user can't switch from one text field to another in
-    // accessibility mode.
+  void initializeElementPosition() {
+    // No-op
   }
+
+  @override
+  void initializeTextEditing(InputConfiguration inputConfig,
+      {_OnChangeCallback onChange, _OnActionCallback onAction}) {
+    // In accesibilty mode, the user of this class is supposed to insert the
+    // [domElement] on their own. Let's make sure they did.
+    assert(domElement != null);
+    assert(html.document.body.contains(domElement));
+
+    isEnabled = true;
+    _inputConfiguration = inputConfig;
+    _onChange = onChange;
+    _onAction = onAction;
+
+    domElement.focus();
+  }
+
+  @override
+  void setEditingState(EditingState editingState) {
+    super.setEditingState(editingState);
+
+    // Refocus after setting editing state.
+    domElement.focus();
+  }
+
 }
 
 /// Text editing singleton.
@@ -571,22 +698,38 @@ final HybridTextEditing textEditing = HybridTextEditing();
 /// - HTML's contentEditable feature handles typing and text changes.
 /// - HTML's selection API handles selection changes and cursor movements.
 class HybridTextEditing {
-  /// The default HTML element used to manage editing state when a custom
-  /// element is not provided via [useCustomEditableElement].
-  TextEditingElement _defaultEditingElement;
+  /// The text editing stategy used. It can change depending on the
+  /// formfactor/browser.
+  ///
+  /// It uses an HTML element to manage editing state when a custom element is
+  /// not provided via [useCustomEditableElement]
+  DefaultTextEditingStrategy _defaultEditingElement;
 
   /// Private constructor so this class can be a singleton.
+  ///
+  /// The constructor also decides which text editing strategy to use depending
+  /// on the operating system and browser engine.
   HybridTextEditing() {
-    _defaultEditingElement = TextEditingElement(this);
+    if (browserEngine == BrowserEngine.webkit &&
+        operatingSystem == OperatingSystem.iOs) {
+      this._defaultEditingElement = IOSTextEditingStrategy(this);
+    } else if (browserEngine == BrowserEngine.blink &&
+        operatingSystem == OperatingSystem.android) {
+      this._defaultEditingElement = AndroidTextEditingStrategy(this);
+    } else if (browserEngine == BrowserEngine.firefox) {
+      this._defaultEditingElement = FirefoxTextEditingStrategy(this);
+    } else {
+      this._defaultEditingElement = DefaultTextEditingStrategy(this);
+    }
   }
 
   /// The HTML element used to manage editing state.
   ///
   /// This field is populated using [useCustomEditableElement]. If `null` the
-  /// [_defaultEditableElement] is used instead.
-  TextEditingElement _customEditingElement;
+  /// [_defaultEditingElement] is used instead.
+  DefaultTextEditingStrategy _customEditingElement;
 
-  TextEditingElement get editingElement {
+  DefaultTextEditingStrategy get editingElement {
     if (_customEditingElement != null) {
       return _customEditingElement;
     }
@@ -605,7 +748,8 @@ class HybridTextEditing {
   /// instead of the hidden default element.
   ///
   /// Use [stopUsingCustomEditableElement] to switch back to default element.
-  void useCustomEditableElement(TextEditingElement customEditingElement) {
+  void useCustomEditableElement(
+      DefaultTextEditingStrategy customEditingElement) {
     if (isEditing && customEditingElement != _customEditingElement) {
       stopEditing();
     }
@@ -655,11 +799,12 @@ class HybridTextEditing {
 
       case 'TextInput.setEditableSizeAndTransform':
         editingElement
-            .setGeometricInfo(_GeometricInfo.fromFlutter(call.arguments));
+            .updateElementPosition(_GeometricInfo.fromFlutter(call.arguments));
         break;
 
       case 'TextInput.setStyle':
-        editingElement.setStyle(_EditingStyle.fromFlutter(call.arguments));
+        editingElement
+            .updateElementStyle(_EditingStyle.fromFlutter(call.arguments));
         break;
 
       case 'TextInput.clearClient':
@@ -711,19 +856,6 @@ class HybridTextEditing {
       ),
       _emptyCallback,
     );
-  }
-
-  // TODO(flutter_web): After the browser closes and re-opens the virtual
-  // shifts the page in iOS. Call this method from visibility change listener
-  // attached to body.
-  /// Set the DOM element's location somewhere outside of the screen.
-  ///
-  /// This is useful for not triggering a scroll when iOS virtual keyboard is
-  /// coming up.
-  ///
-  /// See [TextEditingElement._delayBeforePositioning].
-  void setStyleOutsideOfScreen(html.HtmlElement domElement) {
-    domElement.style.transform = 'translate(-9999px, -9999px)';
   }
 }
 

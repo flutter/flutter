@@ -18,7 +18,10 @@ const int _kReturnKeyCode = 13;
 
 const MethodCodec codec = JSONMethodCodec();
 
-TextEditingElement editingElement;
+/// Add unit tests for [FirefoxTextEditingStrategy].
+/// TODO(nurhan): https://github.com/flutter/flutter/issues/46891
+
+DefaultTextEditingStrategy editingElement;
 EditingState lastEditingState;
 String lastInputAction;
 
@@ -54,16 +57,13 @@ void main() {
     lastInputAction = null;
   });
 
-  group('$TextEditingElement', () {
+  group('$DefaultTextEditingStrategy', () {
     setUp(() {
-      editingElement = TextEditingElement(HybridTextEditing());
+      editingElement = DefaultTextEditingStrategy(HybridTextEditing());
     });
 
     tearDown(() {
-      if (editingElement.isEnabled) {
-        // Clean up all the DOM elements and event listeners.
-        editingElement.disable();
-      }
+      cleanTextEditingElement();
     });
 
     test('Creates element when enabled and removes it when disabled', () {
@@ -204,23 +204,6 @@ void main() {
       expect(lastInputAction, isNull);
     });
 
-    test('Re-acquires focus', () async {
-      editingElement.enable(
-        singlelineConfig,
-        onChange: trackEditingState,
-        onAction: trackInputAction,
-      );
-      expect(document.activeElement, editingElement.domElement);
-
-      editingElement.domElement.blur();
-      // The focus remains on [editingElement.domElement].
-      expect(document.activeElement, editingElement.domElement);
-
-      // There should be no input action.
-      expect(lastInputAction, isNull);
-    }, // TODO(nurhan): https://github.com/flutter/flutter/issues/46638
-        skip: (browserEngine == BrowserEngine.firefox));
-
     test('Multi-line mode also works', () {
       // The textarea element is created lazily.
       expect(document.getElementsByTagName('textarea'), hasLength(0));
@@ -251,10 +234,6 @@ void main() {
       editingElement.setEditingState(
           EditingState(text: 'bar\nbaz', baseOffset: 2, extentOffset: 7));
       checkTextAreaEditingState(textarea, 'bar\nbaz', 2, 7);
-
-      // Re-acquires focus.
-      textarea.blur();
-      expect(document.activeElement, textarea);
 
       editingElement.disable();
       // The textarea should be cleaned up.
@@ -355,145 +334,150 @@ void main() {
       // And default behavior of keyboard event shouldn't have been prevented.
       expect(event.defaultPrevented, isFalse);
     });
+  });
 
-    group('[persistent mode]', () {
-      test('Does not accept dom elements of a wrong type', () {
-        // A regular <span> shouldn't be accepted.
-        final HtmlElement span = SpanElement();
-        expect(
-          () => PersistentTextEditingElement(HybridTextEditing(), span),
-          throwsAssertionError,
-        );
-      });
+  group('$PersistentTextEditingElement', () {
+    InputElement testInputElement;
 
-      test('Does not re-acquire focus', () {
-        // See [PersistentTextEditingElement._refocus] for an explanation of why
-        // re-acquiring focus shouldn't happen in persistent mode.
-        final InputElement input = InputElement();
-        final PersistentTextEditingElement persistentEditingElement =
-            PersistentTextEditingElement(HybridTextEditing(), input);
-        expect(document.activeElement, document.body);
+    setUp(() {
+      testInputElement = InputElement();
+    });
 
-        document.body.append(input);
-        persistentEditingElement.enable(
+    tearDown(() {
+      cleanTextEditingElement();
+      testInputElement = null;
+    });
+
+    test('Does not accept dom elements of a wrong type', () {
+      // A regular <span> shouldn't be accepted.
+      final HtmlElement span = SpanElement();
+      expect(
+        () => PersistentTextEditingElement(HybridTextEditing(), span),
+        throwsAssertionError,
+      );
+    });
+
+    test('Does not re-acquire focus', () {
+      editingElement =
+          PersistentTextEditingElement(HybridTextEditing(), testInputElement);
+
+      expect(document.activeElement, document.body);
+
+      document.body.append(testInputElement);
+      editingElement.enable(
+        singlelineConfig,
+        onChange: trackEditingState,
+        onAction: trackInputAction,
+      );
+      expect(document.activeElement, testInputElement);
+
+      // The input should lose focus now.
+      editingElement.domElement.blur();
+      expect(document.activeElement, document.body);
+
+      editingElement.disable();
+    });
+
+    test('Does not dispose and recreate dom elements in persistent mode', () {
+      editingElement =
+          PersistentTextEditingElement(HybridTextEditing(), testInputElement);
+
+      // The DOM element should've been eagerly created.
+      expect(testInputElement, isNotNull);
+      // But doesn't have focus.
+      expect(document.activeElement, document.body);
+
+      // Can't enable before the input element is inserted into the DOM.
+      expect(
+        () => editingElement.enable(
           singlelineConfig,
           onChange: trackEditingState,
           onAction: trackInputAction,
-        );
-        expect(document.activeElement, input);
+        ),
+        throwsAssertionError,
+      );
 
-        // The input should lose focus now.
-        persistentEditingElement.domElement.blur();
-        expect(document.activeElement, document.body);
+      document.body.append(testInputElement);
+      editingElement.enable(
+        singlelineConfig,
+        onChange: trackEditingState,
+        onAction: trackInputAction,
+      );
+      expect(document.activeElement, editingElement.domElement);
+      // It doesn't create a new DOM element.
+      expect(editingElement.domElement, testInputElement);
 
-        persistentEditingElement.disable();
-      });
+      editingElement.disable();
+      // It doesn't remove the DOM element.
+      expect(editingElement.domElement, testInputElement);
+      expect(document.body.contains(editingElement.domElement), isTrue);
+      // But the DOM element loses focus.
+      expect(document.activeElement, document.body);
+    });
 
-      test('Does not dispose and recreate dom elements in persistent mode', () {
-        final InputElement input = InputElement();
-        final PersistentTextEditingElement persistentEditingElement =
-            PersistentTextEditingElement(HybridTextEditing(), input);
+    test('Refocuses when setting editing state', () {
+      editingElement =
+          PersistentTextEditingElement(HybridTextEditing(), testInputElement);
 
-        // The DOM element should've been eagerly created.
-        expect(input, isNotNull);
-        // But doesn't have focus.
-        expect(document.activeElement, document.body);
+      document.body.append(testInputElement);
+      editingElement.enable(
+        singlelineConfig,
+        onChange: trackEditingState,
+        onAction: trackInputAction,
+      );
+      expect(document.activeElement, testInputElement);
 
-        // Can't enable before the input element is inserted into the DOM.
-        expect(
-          () => persistentEditingElement.enable(
-            singlelineConfig,
-            onChange: trackEditingState,
-            onAction: trackInputAction,
-          ),
-          throwsAssertionError,
-        );
+      editingElement.domElement.blur();
+      expect(document.activeElement, document.body);
 
-        document.body.append(input);
-        persistentEditingElement.enable(
+      // The input should regain focus now.
+      editingElement.setEditingState(EditingState(text: 'foo'));
+      expect(document.activeElement, testInputElement);
+
+      editingElement.disable();
+    });
+
+    test('Works in multi-line mode', () {
+      final TextAreaElement textarea = TextAreaElement();
+      editingElement =
+          PersistentTextEditingElement(HybridTextEditing(), textarea);
+
+      expect(editingElement.domElement, textarea);
+      expect(document.activeElement, document.body);
+
+      // Can't enable before the textarea is inserted into the DOM.
+      expect(
+        () => editingElement.enable(
           singlelineConfig,
           onChange: trackEditingState,
           onAction: trackInputAction,
-        );
-        expect(document.activeElement, persistentEditingElement.domElement);
-        // It doesn't create a new DOM element.
-        expect(persistentEditingElement.domElement, input);
+        ),
+        throwsAssertionError,
+      );
 
-        persistentEditingElement.disable();
-        // It doesn't remove the DOM element.
-        expect(persistentEditingElement.domElement, input);
-        expect(document.body.contains(persistentEditingElement.domElement),
-            isTrue);
-        // But the DOM element loses focus.
-        expect(document.activeElement, document.body);
-      });
+      document.body.append(textarea);
+      editingElement.enable(
+        multilineConfig,
+        onChange: trackEditingState,
+        onAction: trackInputAction,
+      );
+      // Focuses the textarea.
+      expect(document.activeElement, textarea);
 
-      test('Refocuses when setting editing state', () {
-        final InputElement input = InputElement();
-        final PersistentTextEditingElement persistentEditingElement =
-            PersistentTextEditingElement(HybridTextEditing(), input);
+      // Doesn't re-acquire focus.
+      textarea.blur();
+      expect(document.activeElement, document.body);
 
-        document.body.append(input);
-        persistentEditingElement.enable(
-          singlelineConfig,
-          onChange: trackEditingState,
-          onAction: trackInputAction,
-        );
-        expect(document.activeElement, input);
+      // Re-focuses when setting editing state
+      editingElement.setEditingState(EditingState(text: 'foo'));
+      expect(document.activeElement, textarea);
 
-        persistentEditingElement.domElement.blur();
-        expect(document.activeElement, document.body);
-
-        // The input should regain focus now.
-        persistentEditingElement.setEditingState(EditingState(text: 'foo'));
-        expect(document.activeElement, input);
-
-        persistentEditingElement.disable();
-      });
-
-      test('Works in multi-line mode', () {
-        final TextAreaElement textarea = TextAreaElement();
-        final PersistentTextEditingElement persistentEditingElement =
-            PersistentTextEditingElement(HybridTextEditing(), textarea);
-
-        expect(persistentEditingElement.domElement, textarea);
-        expect(document.activeElement, document.body);
-
-        // Can't enable before the textarea is inserted into the DOM.
-        expect(
-          () => persistentEditingElement.enable(
-            singlelineConfig,
-            onChange: trackEditingState,
-            onAction: trackInputAction,
-          ),
-          throwsAssertionError,
-        );
-
-        document.body.append(textarea);
-        persistentEditingElement.enable(
-          multilineConfig,
-          onChange: trackEditingState,
-          onAction: trackInputAction,
-        );
-        // Focuses the textarea.
-        expect(document.activeElement, textarea);
-
-        // Doesn't re-acquire focus.
-        textarea.blur();
-        expect(document.activeElement, document.body);
-
-        // Re-focuses when setting editing state
-        persistentEditingElement.setEditingState(EditingState(text: 'foo'));
-        expect(document.activeElement, textarea);
-
-        persistentEditingElement.disable();
-        // It doesn't remove the textarea from the DOM.
-        expect(persistentEditingElement.domElement, textarea);
-        expect(document.body.contains(persistentEditingElement.domElement),
-            isTrue);
-        // But the textarea loses focus.
-        expect(document.activeElement, document.body);
-      });
+      editingElement.disable();
+      // It doesn't remove the textarea from the DOM.
+      expect(editingElement.domElement, textarea);
+      expect(document.body.contains(editingElement.domElement), isTrue);
+      // But the textarea loses focus.
+      expect(document.activeElement, document.body);
     });
   });
 
@@ -542,6 +526,8 @@ void main() {
 
     tearDown(() {
       spy.deactivate();
+      debugBrowserEngineOverride = null;
+      debugOperatingSystemOverride = null;
       if (textEditing.isEditing) {
         textEditing.stopEditing();
       }
@@ -990,6 +976,10 @@ void main() {
     test('sets correct input type in Android', () {
       debugOperatingSystemOverride = OperatingSystem.android;
 
+      /// During initialization [HybridTextEditing] will pick the correct
+      /// text editing strategy for [OperatingSystem.android].
+      textEditing = HybridTextEditing();
+
       showKeyboard(inputType: 'text');
       expect(getEditingInputMode(), 'text');
 
@@ -1008,10 +998,17 @@ void main() {
       hideKeyboard();
 
       debugOperatingSystemOverride = null;
-    });
+    },
+        // TODO(nurhan): https://github.com/flutter/flutter/issues/46638
+        skip: (browserEngine == BrowserEngine.firefox));
 
     test('sets correct input type in iOS', () {
       debugOperatingSystemOverride = OperatingSystem.iOs;
+      debugBrowserEngineOverride = BrowserEngine.webkit;
+
+      /// During initialization [HybridTextEditing] will pick the correct
+      /// text editing strategy for [OperatingSystem.iOs].
+      textEditing = HybridTextEditing();
 
       showKeyboard(inputType: 'text');
       expect(getEditingInputMode(), 'text');
@@ -1031,7 +1028,9 @@ void main() {
       hideKeyboard();
 
       debugOperatingSystemOverride = null;
-    });
+    },
+        // TODO(nurhan): https://github.com/flutter/flutter/issues/46638
+        skip: (browserEngine == BrowserEngine.firefox));
 
     test('sends the correct input action as a platform message', () {
       final int clientId = showKeyboard(
@@ -1079,6 +1078,19 @@ void main() {
   group('EditingState', () {
     EditingState _editingState;
 
+    setUp(() {
+      editingElement = DefaultTextEditingStrategy(HybridTextEditing());
+      editingElement.enable(
+        singlelineConfig,
+        onChange: trackEditingState,
+        onAction: trackInputAction,
+      );
+    });
+
+    tearDown(() {
+      cleanTextEditingElement();
+    });
+
     test('Configure input element from the editing state', () {
       final InputElement input = document.getElementsByTagName('input')[0];
       _editingState =
@@ -1092,6 +1104,13 @@ void main() {
     });
 
     test('Configure text area element from the editing state', () {
+      cleanTextEditingElement();
+      editingElement.enable(
+        multilineConfig,
+        onChange: trackEditingState,
+        onAction: trackInputAction,
+      );
+
       final TextAreaElement textArea =
           document.getElementsByTagName('textarea')[0];
       _editingState =
@@ -1118,6 +1137,13 @@ void main() {
     });
 
     test('Get Editing State from text area element', () {
+      cleanTextEditingElement();
+      editingElement.enable(
+        multilineConfig,
+        onChange: trackEditingState,
+        onAction: trackInputAction,
+      );
+
       final TextAreaElement input =
           document.getElementsByTagName('textarea')[0];
       input.value = 'Test';
@@ -1188,6 +1214,15 @@ MethodCall configureSetSizeAndTransformMethodCall(
     'height': height,
     'transform': transform
   });
+}
+
+/// Will disable editing element which will also clean the backup DOM
+/// element from the page.
+void cleanTextEditingElement() {
+  if (editingElement.isEnabled) {
+    // Clean up all the DOM elements and event listeners.
+    editingElement.disable();
+  }
 }
 
 void checkInputEditingState(
