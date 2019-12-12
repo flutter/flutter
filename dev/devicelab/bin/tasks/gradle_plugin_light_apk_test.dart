@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -178,7 +178,7 @@ Future<void> main() async {
         if (result.exitCode == 0)
           throw failure(
               'Gradle did not exit with error as expected', result);
-        final String output = result.stdout + '\n' + result.stderr;
+        final String output = '${result.stdout}\n${result.stderr}';
         if (output.contains('GradleException') ||
             output.contains('Failed to notify') ||
             output.contains('at org.gradle'))
@@ -197,7 +197,7 @@ Future<void> main() async {
         if (result.exitCode == 0)
           throw failure(
               'flutter build apk should fail when Gradle does', result);
-        final String output = result.stdout + '\n' + result.stderr;
+        final String output = '${result.stdout}\n${result.stderr}';
         if (!output.contains('Build failed') || !output.contains('builTypes'))
           throw failure(
               'flutter build apk output should contain a readable Gradle error message',

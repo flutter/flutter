@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -37,6 +37,7 @@ const List<Target> _kDefaultTargets = <Target>[
   DebugBundleLinuxAssets(),
   WebReleaseBundle(),
   DebugAndroidApplication(),
+  FastStartAndroidApplication(),
   ProfileAndroidApplication(),
   ReleaseAndroidApplication(),
   // These are one-off rules for bundle and aot compat

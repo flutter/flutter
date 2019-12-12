@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -174,6 +174,7 @@ void main() {
     FlutterVersion: () => flutterVersion,
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: false),
   });
+
   testUsingContext('precache downloads artifacts when --force is provided', () async {
     when(cache.isUpToDate()).thenReturn(true);
     final PrecacheCommand command = PrecacheCommand();

@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -50,10 +50,12 @@ typedef TaskCallback<T> = T Function();
 /// whenever the system needs to decide whether a task at a given
 /// priority needs to be run.
 ///
-/// Return true if a task with the given priority should be executed
-/// at this time, false otherwise.
+/// Return true if a task with the given priority should be executed at this
+/// time, false otherwise.
 ///
-/// See also [defaultSchedulingStrategy].
+/// See also:
+///
+///  * [defaultSchedulingStrategy], the default [SchedulingStrategy] for [SchedulerBinding.schedulingStrategy].
 typedef SchedulingStrategy = bool Function({ int priority, SchedulerBinding scheduler });
 
 class _TaskEntry<T> {
@@ -133,7 +135,10 @@ class _FrameCallbackEntry {
 /// The values of this enum are ordered in the same order as the phases occur,
 /// so their relative index values can be compared to each other.
 ///
-/// See also the discussion at [WidgetsBinding.drawFrame].
+/// See also:
+///
+///  * [WidgetsBinding.drawFrame], which pumps the build and rendering pipeline
+///    to generate a frame.
 enum SchedulerPhase {
   /// No frame is being processed. Tasks (scheduled by
   /// [WidgetsBinding.scheduleTask]), microtasks (scheduled by
@@ -417,7 +422,8 @@ mixin SchedulerBinding on BindingBase, ServicesBinding {
   // Whether this scheduler already requested to be called from the event loop.
   bool _hasRequestedAnEventLoopCallback = false;
 
-  // Ensures that the scheduler services a task scheduled by [scheduleTask].
+  // Ensures that the scheduler services a task scheduled by
+  // [SchedulerBinding.scheduleTask].
   void _ensureEventLoopCallback() {
     assert(!locked);
     assert(_taskQueue.isNotEmpty);

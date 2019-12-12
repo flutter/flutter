@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -152,7 +152,7 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
   }
 
   static final Map<LogicalKeySet, Intent> _webShortcuts =<LogicalKeySet, Intent>{
-    LogicalKeySet(LogicalKeyboardKey.enter): const Intent(SelectAction.key),
+    LogicalKeySet(LogicalKeyboardKey.enter): const Intent(ActivateAction.key),
   };
 
   @override
@@ -1059,8 +1059,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
       _internalNode ??= _createFocusNode();
     }
     _actionMap = <LocalKey, ActionFactory>{
-      SelectAction.key: _createAction,
-      if (!kIsWeb) ActivateAction.key: _createAction,
+      ActivateAction.key: _createAction,
     };
     focusNode.addListener(_handleFocusChanged);
     final FocusManager focusManager = WidgetsBinding.instance.focusManager;

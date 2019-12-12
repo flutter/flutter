@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -505,8 +505,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
   void initState() {
     super.initState();
     _actionMap = <LocalKey, ActionFactory>{
-      SelectAction.key: _createAction,
-      if (!kIsWeb) ActivateAction.key: _createAction,
+      ActivateAction.key: _createAction,
     };
     FocusManager.instance.addHighlightModeListener(_handleFocusHighlightModeChange);
   }

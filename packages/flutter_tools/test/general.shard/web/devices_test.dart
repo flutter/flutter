@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -58,6 +58,7 @@ void main() {
     expect(device.supportsScreenshot, false);
     expect(await device.isLocalEmulator, false);
     expect(device.getLogReader(app: mockWebApplicationPackage), isInstanceOf<NoOpDeviceLogReader>());
+    expect(device.getLogReader(), isInstanceOf<NoOpDeviceLogReader>());
     expect(await device.portForwarder.forward(1), 1);
   });
 

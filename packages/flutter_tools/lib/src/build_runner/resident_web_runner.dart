@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -17,6 +17,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/net.dart';
 import '../base/os.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
@@ -47,8 +48,9 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
     @required bool ipv6,
     @required DebuggingOptions debuggingOptions,
     @required List<String> dartDefines,
+    @required UrlTunneller urlTunneller,
   }) {
-    if (featureFlags.isWebIncrementalCompilerEnabled) {
+    if (featureFlags.isWebIncrementalCompilerEnabled && debuggingOptions.buildInfo.isDebug) {
       return _ExperimentalResidentWebRunner(
         device,
         target: target,
@@ -57,6 +59,7 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
         ipv6: ipv6,
         stayResident: stayResident,
         dartDefines: dartDefines,
+        // TODO(dantup): If this becomes default it may need to urlTunneller.
       );
     }
     return _DwdsResidentWebRunner(
@@ -67,6 +70,7 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
       ipv6: ipv6,
       stayResident: stayResident,
       dartDefines: dartDefines,
+      urlTunneller: urlTunneller,
     );
   }
 }
@@ -423,7 +427,7 @@ class _ExperimentalResidentWebRunner extends ResidentWebRunner {
   @override
   Future<OperationResult> restart({
     bool fullRestart = false,
-    bool pauseAfterRestart = false,
+    bool pause = false,
     String reason,
     bool benchmarkMode = false,
   }) async {
@@ -448,10 +452,10 @@ class _ExperimentalResidentWebRunner extends ResidentWebRunner {
 
     try {
       if (fullRestart) {
-        await _wipConnection.sendCommand('Page.reload');
+        await _wipConnection?.sendCommand('Page.reload');
       } else {
-        await _wipConnection.debugger
-            .sendCommand('Runtime.evaluate', params: <String, Object>{
+        await _wipConnection?.debugger
+            ?.sendCommand('Runtime.evaluate', params: <String, Object>{
           'expression': 'window.\$hotReloadHook([$modules])',
           'awaitPromise': true,
           'returnByValue': true,
@@ -523,12 +527,13 @@ class _ExperimentalResidentWebRunner extends ResidentWebRunner {
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<void> appStartedCompleter,
   }) async {
-    final Chrome chrome = await ChromeLauncher.connectedInstance;
-    final ChromeTab chromeTab =
-        await chrome.chromeConnection.getTab((ChromeTab chromeTab) {
-      return chromeTab.url.contains(debuggingOptions.hostname);
-    });
-    _wipConnection = await chromeTab.connect();
+    if (device.device is ChromeDevice) {
+      final Chrome chrome = await ChromeLauncher.connectedInstance;
+      final ChromeTab chromeTab = await chrome.chromeConnection.getTab((ChromeTab chromeTab) {
+        return chromeTab.url.contains(debuggingOptions.hostname);
+      });
+      _wipConnection = await chromeTab.connect();
+    }
     appStartedCompleter?.complete();
     connectionInfoCompleter?.complete();
     if (stayResident) {
@@ -549,6 +554,7 @@ class _DwdsResidentWebRunner extends ResidentWebRunner {
     @required FlutterProject flutterProject,
     @required bool ipv6,
     @required DebuggingOptions debuggingOptions,
+    @required this.urlTunneller,
     bool stayResident = true,
     @required List<String> dartDefines,
   }) : super(
@@ -560,6 +566,8 @@ class _DwdsResidentWebRunner extends ResidentWebRunner {
           stayResident: stayResident,
           dartDefines: dartDefines,
         );
+
+  UrlTunneller urlTunneller;
 
   @override
   Future<int> run({
@@ -605,6 +613,7 @@ class _DwdsResidentWebRunner extends ResidentWebRunner {
           initializePlatform: debuggingOptions.initializePlatform,
           hostname: debuggingOptions.hostname,
           port: debuggingOptions.port,
+          urlTunneller: urlTunneller,
           skipDwds: !_enableDwds,
           dartDefines: dartDefines,
         );
@@ -691,7 +700,7 @@ class _DwdsResidentWebRunner extends ResidentWebRunner {
   @override
   Future<OperationResult> restart({
     bool fullRestart = false,
-    bool pauseAfterRestart = false,
+    bool pause = false,
     String reason,
     bool benchmarkMode = false,
   }) async {

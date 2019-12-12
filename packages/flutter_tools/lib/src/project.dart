@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -9,6 +9,7 @@ import 'package:xml/xml.dart' as xml;
 import 'package:yaml/yaml.dart';
 
 import 'android/gradle_utils.dart' as gradle;
+import 'artifacts.dart';
 import 'base/common.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
@@ -456,6 +457,11 @@ class IosProject implements XcodeBasedProject {
     if (!pubspecChanged && !toolingChanged) {
       return;
     }
+
+    final Directory engineDest = ephemeralDirectory
+      .childDirectory('Flutter')
+      .childDirectory('engine');
+
     _deleteIfExistsSync(ephemeralDirectory);
     _overwriteFromTemplate(fs.path.join('module', 'ios', 'library'), ephemeralDirectory);
     // Add ephemeral host app, if a editable host app does not already exist.
@@ -463,6 +469,17 @@ class IosProject implements XcodeBasedProject {
       _overwriteFromTemplate(fs.path.join('module', 'ios', 'host_app_ephemeral'), ephemeralDirectory);
       if (hasPlugins(parent)) {
         _overwriteFromTemplate(fs.path.join('module', 'ios', 'host_app_ephemeral_cocoapods'), ephemeralDirectory);
+      }
+      // Copy podspec and framework from engine cache. The actual build mode
+      // doesn't actually matter as it will be overwritten by xcode_backend.sh.
+      // However, cocoapods will run before that script and requires something
+      // to be in this location.
+      final Directory framework = fs.directory(artifacts.getArtifactPath(Artifact.flutterFramework,
+        platform: TargetPlatform.ios, mode: BuildMode.debug));
+      if (framework.existsSync()) {
+        final File podspec = framework.parent.childFile('Flutter.podspec');
+        copyDirectorySync(framework, engineDest.childDirectory('Flutter.framework'));
+        podspec.copySync(engineDest.childFile('Flutter.podspec').path);
       }
     }
   }
@@ -613,7 +630,7 @@ class AndroidProject {
     _overwriteFromTemplate(fs.path.join('module', 'android', 'host_app_common'), _editableHostAppDirectory);
     _overwriteFromTemplate(fs.path.join('module', 'android', 'host_app_editable'), _editableHostAppDirectory);
     _overwriteFromTemplate(fs.path.join('module', 'android', 'gradle'), _editableHostAppDirectory);
-    gradle.injectGradleWrapperIfNeeded(_editableHostAppDirectory);
+    gradle.gradleUtils.injectGradleWrapperIfNeeded(_editableHostAppDirectory);
     gradle.writeLocalProperties(_editableHostAppDirectory.childFile('local.properties'));
     await injectPlugins(parent);
   }
@@ -630,7 +647,7 @@ class AndroidProject {
       featureFlags.isAndroidEmbeddingV2Enabled ? 'library_new_embedding' : 'library',
     ), ephemeralDirectory);
     _overwriteFromTemplate(fs.path.join('module', 'android', 'gradle'), ephemeralDirectory);
-    gradle.injectGradleWrapperIfNeeded(ephemeralDirectory);
+    gradle.gradleUtils.injectGradleWrapperIfNeeded(ephemeralDirectory);
   }
 
   void _overwriteFromTemplate(String path, Directory target) {

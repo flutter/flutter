@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -25,7 +25,7 @@ import 'raised_button.dart';
 /// widget, it aligns its buttons in a column. The key difference here
 /// is that the [MainAxisAlignment] will then be treated as a
 /// cross-axis/horizontal alignment. For example, if the buttons overflow and
-/// [ButtonBar.alignment] was set to [MainAxisAligment.start], the buttons would
+/// [ButtonBar.alignment] was set to [MainAxisAlignment.start], the buttons would
 /// align to the horizontal start of the button bar.
 ///
 /// The [ButtonBar] can be configured with a [ButtonBarTheme]. For any null

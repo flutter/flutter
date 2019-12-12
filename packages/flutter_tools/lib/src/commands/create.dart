@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -145,22 +145,6 @@ class CreateCommand extends FlutterCommand {
       negatable: true,
       defaultsTo: true,
       help: 'Generate a project using the AndroidX support libraries',
-    );
-    // Deprecated
-    argParser.addFlag(
-      'macos',
-      negatable: true,
-      defaultsTo: false,
-      hide: true,
-      help: 'Include support for building a macOS application',
-    );
-    // Deprecated
-    argParser.addFlag(
-      'web',
-      negatable: true,
-      defaultsTo: false,
-      hide: true,
-      help: 'Deprecated',
     );
   }
 
@@ -406,7 +390,7 @@ class CreateCommand extends FlutterCommand {
       androidLanguage: stringArg('android-language'),
       iosLanguage: stringArg('ios-language'),
       web: featureFlags.isWebEnabled,
-      macos: boolArg('macos'),
+      macos: featureFlags.isMacOSEnabled,
     );
 
     final String relativeDirPath = fs.path.relative(projectDirPath);
@@ -656,7 +640,8 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
       // removed, and the new schema should always be used.
       'useNewPluginSchema': macos,
       // If a desktop platform is included, add a workaround for #31366.
-      'includeTargetPlatformWorkaround': macos,
+      // When Linux and Windows are added, we will need this workaround again.
+      'includeTargetPlatformWorkaround': false,
     };
   }
 

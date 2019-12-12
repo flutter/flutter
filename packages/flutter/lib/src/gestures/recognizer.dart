@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -32,7 +32,7 @@ typedef RecognizerCallback<T> = T Function();
 ///
 /// See also:
 ///
-///   * [DragGestureRecognizer.dragStartBehavior], which gives an example for the different behaviors.
+///  * [DragGestureRecognizer.dragStartBehavior], which gives an example for the different behaviors.
 enum DragStartBehavior {
   /// Set the initial offset, at the position where the first down event was
   /// detected.
@@ -398,6 +398,9 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
 
   /// If non-null, the recognizer will call [didExceedDeadline] after this
   /// amount of time has elapsed since starting to track the primary pointer.
+  ///
+  /// The [didExceedDeadline] will not be called if the primary pointer is
+  /// accepted, rejected, or all pointers are up or canceled before [deadline].
   final Duration deadline;
 
   /// The maximum distance in logical pixels the gesture is allowed to drift
@@ -495,7 +498,10 @@ abstract class PrimaryPointerGestureRecognizer extends OneSequenceGestureRecogni
 
   @override
   void acceptGesture(int pointer) {
-    _gestureAccepted = true;
+    if (pointer == primaryPointer) {
+      _stopTimer();
+      _gestureAccepted = true;
+    }
   }
 
   @override
