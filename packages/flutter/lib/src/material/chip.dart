@@ -78,6 +78,8 @@ abstract class ChipAttributes {
 
   /// The style to be applied to the chip's label.
   ///
+  /// If null, the value of the [ChipTheme]'s [ChipThemeData.labelStyle] is used.
+  //
   /// This only has an effect on widgets that respect the [DefaultTextStyle],
   /// such as [Text].
   ///
@@ -2935,4 +2937,3 @@ bool _tapIsOnDeleteIcon({
   }
   return tapIsOnDeleteIcon;
 }
-
