@@ -11,6 +11,7 @@
 #include "flutter/fml/make_copyable.h"
 #include "flutter/fml/mapping.h"
 #include "flutter/runtime/dart_vm.h"
+#include "flutter/shell/common/vsync_waiter_fallback.h"
 #include "flutter/shell/gpu/gpu_surface_gl.h"
 #include "flutter/testing/testing.h"
 
@@ -258,11 +259,22 @@ std::unique_ptr<Shell> ShellTest::CreateShell(Settings settings,
 std::unique_ptr<Shell> ShellTest::CreateShell(Settings settings,
                                               TaskRunners task_runners,
                                               bool simulate_vsync) {
+  const auto vsync_clock = std::make_shared<ShellTestVsyncClock>();
+  CreateVsyncWaiter create_vsync_waiter = [&]() {
+    if (simulate_vsync) {
+      return static_cast<std::unique_ptr<VsyncWaiter>>(
+          std::make_unique<ShellTestVsyncWaiter>(task_runners, vsync_clock));
+    } else {
+      return static_cast<std::unique_ptr<VsyncWaiter>>(
+          std::make_unique<VsyncWaiterFallback>(task_runners));
+    }
+  };
   return Shell::Create(
       task_runners, settings,
-      [simulate_vsync](Shell& shell) {
+      [vsync_clock, &create_vsync_waiter](Shell& shell) {
         return std::make_unique<ShellTestPlatformView>(
-            shell, shell.GetTaskRunners(), simulate_vsync);
+            shell, shell.GetTaskRunners(), vsync_clock,
+            std::move(create_vsync_waiter));
       },
       [](Shell& shell) {
         return std::make_unique<Rasterizer>(shell, shell.GetTaskRunners());
@@ -289,23 +301,24 @@ void ShellTest::AddNativeCallback(std::string name,
   native_resolver_->AddNativeCallback(std::move(name), callback);
 }
 
-ShellTestPlatformView::ShellTestPlatformView(PlatformView::Delegate& delegate,
-                                             TaskRunners task_runners,
-                                             bool simulate_vsync)
+ShellTestPlatformView::ShellTestPlatformView(
+    PlatformView::Delegate& delegate,
+    TaskRunners task_runners,
+    std::shared_ptr<ShellTestVsyncClock> vsync_clock,
+    CreateVsyncWaiter create_vsync_waiter)
     : PlatformView(delegate, std::move(task_runners)),
       gl_surface_(SkISize::Make(800, 600)),
-      simulate_vsync_(simulate_vsync) {}
+      create_vsync_waiter_(std::move(create_vsync_waiter)),
+      vsync_clock_(vsync_clock) {}
 
 ShellTestPlatformView::~ShellTestPlatformView() = default;
 
 std::unique_ptr<VsyncWaiter> ShellTestPlatformView::CreateVSyncWaiter() {
-  return simulate_vsync_ ? std::make_unique<ShellTestVsyncWaiter>(task_runners_,
-                                                                  vsync_clock_)
-                         : PlatformView::CreateVSyncWaiter();
+  return create_vsync_waiter_();
 }
 
 void ShellTestPlatformView::SimulateVSync() {
-  vsync_clock_.SimulateVSync();
+  vsync_clock_->SimulateVSync();
 }
 
 // |PlatformView|

@@ -12,6 +12,8 @@
 namespace flutter {
 namespace testing {
 
+using CreateVsyncWaiter = std::function<std::unique_ptr<VsyncWaiter>()>;
+
 class ShellTestVsyncClock {
  public:
   /// Simulate that a vsync signal is triggered.
@@ -28,14 +30,15 @@ class ShellTestVsyncClock {
 
 class ShellTestVsyncWaiter : public VsyncWaiter {
  public:
-  ShellTestVsyncWaiter(TaskRunners task_runners, ShellTestVsyncClock& clock)
+  ShellTestVsyncWaiter(TaskRunners task_runners,
+                       std::shared_ptr<ShellTestVsyncClock> clock)
       : VsyncWaiter(std::move(task_runners)), clock_(clock) {}
 
  protected:
   void AwaitVSync() override;
 
  private:
-  ShellTestVsyncClock& clock_;
+  std::shared_ptr<ShellTestVsyncClock> clock_;
 };
 
 }  // namespace testing
