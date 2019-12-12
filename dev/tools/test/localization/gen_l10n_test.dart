@@ -485,6 +485,56 @@ void main() {
 ''');
     });
 
+    test('correctly generates message with dates', () {
+      const String singleDateMessageArbFileString = '''{
+  "springBegins": "Spring begins on {springStartDate}",
+  "@springBegins": {
+      "description": "The first day of spring",
+      "placeholders": {
+          "springStartDate": {
+              "type": "DateTime",
+              "format": "yMMMMEEEEd"
+          }
+      }
+  }
+}''';
+      final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+        ..createSync(recursive: true);
+      l10nDirectory.childFile(defaultTemplateArbFileName)
+        .writeAsStringSync(singleDateMessageArbFileString);
+
+      final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+      try {
+        generator.initialize(
+          l10nDirectoryPath: defaultArbPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        );
+        generator.parseArbFiles();
+        generator.generateClassMethods();
+      } on Exception catch (e) {
+        fail('Parsing template arb file should succeed: \n$e');
+      }
+
+      expect(generator.classMethods, isNotEmpty);
+      expect(
+        generator.classMethods.first,
+        '''  String springBegins(Object springStartDate) {
+    final intl.DateFormat dateFormat = intl.DateFormat.yMMMMEEEEd(_localeName);
+    final String springStartDateString = dateFormat.format(springStartDate);
+
+    return Intl.message(
+      r'Spring begins on \$springStartDate',
+      locale: _localeName,
+      name: 'springBegins',
+      desc: r'The first day of spring',
+      args: <Object>[springStartDate]
+    );
+  }
+''');
+    });
+
     test('correctly generates a plural message:', () {
       const String singlePluralMessageArbFileString = '''{
   "helloWorlds": "{count,plural, =0{Hello}=1{Hello World}=2{Hello two worlds}few{Hello {count} worlds}many{Hello all {count} worlds}other{Hello other {count} worlds}}",
