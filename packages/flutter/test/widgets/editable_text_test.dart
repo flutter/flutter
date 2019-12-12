@@ -3914,7 +3914,6 @@ void main() {
     ));
 
     await tester.showKeyboard(find.byType(EditableText));
-    expect(log.length, kIsWeb ? 7 : 6);
     // TextInput.show should be before TextInput.setEditingState
     final List<String> logOrder = <String>[
       'TextInput.setClient',
@@ -3925,6 +3924,7 @@ void main() {
       'TextInput.setEditingState',
       'TextInput.show',
     ];
+    expect(log.length, logOrder.length);
     int index = 0;
     for (MethodCall m in log) {
       expect(m.method, logOrder[index]);
