@@ -1725,10 +1725,10 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   }
 
   void _updateSizeAndTransform() {
-    if (_hasInputConnection) {
+    if (kIsWeb && _hasInputConnection) {
       final Size size = renderEditable.size;
       final Matrix4 transform = renderEditable.getTransformTo(null);
-      _textInputConnection.setEditableSizeAndTransform(size, transform);
+        _textInputConnection.setEditableSizeAndTransform(size, transform);
       SchedulerBinding.instance
           .addPostFrameCallback((Duration _) => _updateSizeAndTransform());
     }

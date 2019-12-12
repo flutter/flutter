@@ -710,7 +710,11 @@ class TextInputConnection {
   ///
   /// 2. [transform]: a matrix that maps the local paint coordinate system
   ///                 to the [PipelineOwner.rootNode].
+  ///
+  /// This method should only be called for web targets, and will result in an
+  /// exception on other platforms.
   void setEditableSizeAndTransform(Size editableBoxSize, Matrix4 transform) {
+    assert(kIsWeb);
     if (editableBoxSize != _cachedSize || transform != _cachedTransform) {
       _cachedSize = editableBoxSize;
       _cachedTransform = transform;

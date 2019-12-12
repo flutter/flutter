@@ -1316,17 +1316,24 @@ void main() {
         },
       ),
     );
-    expect(
-      log.lastWhere((MethodCall m) => m.method == 'TextInput.setEditableSizeAndTransform'),
-      isMethodCall(
-        'TextInput.setEditableSizeAndTransform',
-        arguments: <String, dynamic>{
-          'width': 800,
-          'height': 14,
-          'transform': Matrix4.translationValues(0.0, 293.0, 0.0).storage.toList(),
-        },
-      ),
-    );
+    if (kIsWeb) {
+      expect(
+        log.lastWhere((MethodCall m) => m.method == 'TextInput.setEditableSizeAndTransform'),
+        isMethodCall(
+          'TextInput.setEditableSizeAndTransform',
+          arguments: <String, dynamic>{
+            'width': 800,
+            'height': 14,
+            'transform': Matrix4.translationValues(0.0, 293.0, 0.0).storage.toList(),
+          },
+        ),
+      );
+    } else {
+      expect(
+        log.every((MethodCall m) => m.method != 'TextInput.setEditableSizeAndTransform'),
+        true,
+      );
+    }
   });
 
   testWidgets('EditableText identifies as text field (w/ focus) in semantics', (WidgetTester tester) async {
@@ -2414,15 +2421,24 @@ void main() {
     );
 
     await tester.showKeyboard(find.byType(EditableText));
-    final MethodCall methodCall = log.firstWhere((MethodCall m) => m.method == 'TextInput.setEditableSizeAndTransform');
-    expect(
-      methodCall,
-      isMethodCall('TextInput.setEditableSizeAndTransform', arguments: <String, dynamic>{
-        'width': 800,
-        'height': 600,
-        'transform': Matrix4.identity().storage.toList(),
-      }),
-    );
+    if (kIsWeb) {
+      expect(
+        log.lastWhere((MethodCall m) => m.method == 'TextInput.setEditableSizeAndTransform'),
+        isMethodCall(
+          'TextInput.setEditableSizeAndTransform',
+          arguments: <String, dynamic>{
+            'width': 800,
+            'height': 600,
+            'transform': Matrix4.identity().storage.toList(),
+          },
+        ),
+      );
+    } else {
+      expect(
+        log.every((MethodCall m) => m.method != 'TextInput.setEditableSizeAndTransform'),
+        true,
+      );
+    }
   });
 
   testWidgets('transform and size is reset when text connection opens', (WidgetTester tester) async {
@@ -2474,43 +2490,66 @@ void main() {
     );
 
     await tester.showKeyboard(find.byKey(ValueKey<String>(controller1.text)));
-    final MethodCall methodCall = log.firstWhere((MethodCall m) => m.method == 'TextInput.setEditableSizeAndTransform');
-    expect(
-      methodCall,
-      isMethodCall('TextInput.setEditableSizeAndTransform', arguments: <String, dynamic>{
-        'width': 800,
-        'height': 14,
-        'transform': Matrix4.identity().storage.toList(),
-      }),
-    );
+    if (kIsWeb) {
+      expect(
+        log.firstWhere((MethodCall m) => m.method == 'TextInput.setEditableSizeAndTransform'),
+        isMethodCall(
+          'TextInput.setEditableSizeAndTransform',
+          arguments: <String, dynamic>{
+            'width': 800,
+            'height': 14,
+            'transform': Matrix4.identity().storage.toList(),
+          },
+        ),
+      );
+    } else {
+      expect(
+        log.every((MethodCall m) => m.method != 'TextInput.setEditableSizeAndTransform'),
+        true,
+      );
+    }
 
     log.clear();
 
     // Move to the next editable text.
     await tester.showKeyboard(find.byKey(ValueKey<String>(controller2.text)));
-    final MethodCall methodCall2 = log.firstWhere((MethodCall m) => m.method == 'TextInput.setEditableSizeAndTransform');
-    expect(
-      methodCall2,
-      isMethodCall('TextInput.setEditableSizeAndTransform', arguments: <String, dynamic>{
-        'width': 800,
-        'height': 140.0,
-        'transform': <double>[1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 214.0, 0.0, 1.0],
-      }),
-    );
+    if (kIsWeb) {
+      final MethodCall methodCall2 = log.firstWhere((MethodCall m) => m.method == 'TextInput.setEditableSizeAndTransform');
+      expect(
+        methodCall2,
+        isMethodCall('TextInput.setEditableSizeAndTransform', arguments: <String, dynamic>{
+          'width': 800,
+          'height': 140.0,
+          'transform': <double>[1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 214.0, 0.0, 1.0],
+        }),
+      );
+    } else {
+      expect(
+        log.every((MethodCall m) => m.method != 'TextInput.setEditableSizeAndTransform'),
+        true,
+      );
+    }
 
     log.clear();
 
     // Move back to the first editable text.
     await tester.showKeyboard(find.byKey(ValueKey<String>(controller1.text)));
-    final MethodCall methodCall3 = log.firstWhere((MethodCall m) => m.method == 'TextInput.setEditableSizeAndTransform');
-    expect(
-      methodCall3,
-      isMethodCall('TextInput.setEditableSizeAndTransform', arguments: <String, dynamic>{
-        'width': 800,
-        'height': 14,
-        'transform': Matrix4.identity().storage.toList(),
-      }),
-    );
+    if (kIsWeb) {
+      final MethodCall methodCall3 = log.firstWhere((MethodCall m) => m.method == 'TextInput.setEditableSizeAndTransform');
+      expect(
+        methodCall3,
+        isMethodCall('TextInput.setEditableSizeAndTransform', arguments: <String, dynamic>{
+          'width': 800,
+          'height': 14,
+          'transform': Matrix4.identity().storage.toList(),
+        }),
+      );
+    } else {
+      expect(
+        log.every((MethodCall m) => m.method != 'TextInput.setEditableSizeAndTransform'),
+        true,
+      );
+    }
   });
 
   testWidgets('size and transform are sent when they change', (WidgetTester tester) async {
@@ -2529,30 +2568,44 @@ void main() {
     );
 
     await tester.showKeyboard(find.byType(EditableText));
-    MethodCall methodCall = log.firstWhere((MethodCall m) => m.method == 'TextInput.setEditableSizeAndTransform');
-    expect(
-      methodCall,
-      isMethodCall('TextInput.setEditableSizeAndTransform', arguments: <String, dynamic>{
-        'width': 800,
-        'height': 14,
-        'transform': Matrix4.identity().storage.toList(),
-      }),
-    );
+    if (kIsWeb) {
+      final MethodCall methodCall = log.firstWhere((MethodCall m) => m.method == 'TextInput.setEditableSizeAndTransform');
+      expect(
+        methodCall,
+        isMethodCall('TextInput.setEditableSizeAndTransform', arguments: <String, dynamic>{
+          'width': 800,
+          'height': 14,
+          'transform': Matrix4.identity().storage.toList(),
+        }),
+      );
+    } else {
+      expect(
+        log.every((MethodCall m) => m.method != 'TextInput.setEditableSizeAndTransform'),
+        true,
+      );
+    }
 
     log.clear();
     await tester.tap(find.byKey(transformButtonKey));
     await tester.pumpAndSettle();
 
     // There should be a new platform message updating the transform.
-    methodCall = log.firstWhere((MethodCall m) => m.method == 'TextInput.setEditableSizeAndTransform');
-    expect(
-      methodCall,
-      isMethodCall('TextInput.setEditableSizeAndTransform', arguments: <String, dynamic>{
-        'width': 800,
-        'height': 14,
-        'transform': Matrix4.translationValues(offset.dx, offset.dy, 0.0).storage.toList(),
-      }),
-    );
+    if (kIsWeb) {
+      final MethodCall methodCall = log.firstWhere((MethodCall m) => m.method == 'TextInput.setEditableSizeAndTransform');
+      expect(
+        methodCall,
+        isMethodCall('TextInput.setEditableSizeAndTransform', arguments: <String, dynamic>{
+          'width': 800,
+          'height': 14,
+          'transform': Matrix4.translationValues(offset.dx, offset.dy, 0.0).storage.toList(),
+        }),
+      );
+    } else {
+      expect(
+        log.every((MethodCall m) => m.method != 'TextInput.setEditableSizeAndTransform'),
+        true,
+      );
+    }
   });
 
   testWidgets('text styling info is sent on show keyboard', (WidgetTester tester) async {
@@ -3861,9 +3914,17 @@ void main() {
     ));
 
     await tester.showKeyboard(find.byType(EditableText));
-    expect(log.length, 7);
+    expect(log.length, kIsWeb ? 7 : 6);
     // TextInput.show should be before TextInput.setEditingState
-    final List<String> logOrder = <String>['TextInput.setClient', 'TextInput.show', 'TextInput.setEditableSizeAndTransform', 'TextInput.setStyle', 'TextInput.setEditingState', 'TextInput.setEditingState', 'TextInput.show'];
+    final List<String> logOrder = <String>[
+      'TextInput.setClient',
+      'TextInput.show',
+      if (kIsWeb) 'TextInput.setEditableSizeAndTransform',
+      'TextInput.setStyle',
+      'TextInput.setEditingState',
+      'TextInput.setEditingState',
+      'TextInput.show',
+    ];
     int index = 0;
     for (MethodCall m in log) {
       expect(m.method, logOrder[index]);
