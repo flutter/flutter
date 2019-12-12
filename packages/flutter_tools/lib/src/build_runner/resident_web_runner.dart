@@ -535,7 +535,7 @@ class _ExperimentalResidentWebRunner extends ResidentWebRunner {
       _wipConnection = await chromeTab.connect();
     }
     appStartedCompleter?.complete();
-    connectionInfoCompleter?.complete();
+    connectionInfoCompleter?.complete(DebugConnectionInfo());
     if (stayResident) {
       await waitForAppToFinish();
     } else {
