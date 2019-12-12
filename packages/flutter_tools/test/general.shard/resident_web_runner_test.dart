@@ -773,9 +773,9 @@ void main() {
 
     await residentWebRunner.debugTogglePlatform();
 
-    expect(testLogger.statusText, contains('Switched operating system to android'));
+    expect(testLogger.statusText, contains('Switched operating system to fuchsia'));
     verify(mockVmService.callServiceExtension('ext.flutter.platformOverride',
-        args: <String, Object>{'value': 'android'})).called(1);
+        args: <String, Object>{'value': 'fuchsia'})).called(1);
   }));
 
   test('cleanup of resources is safe to call multiple times', () => testbed.run(() async {

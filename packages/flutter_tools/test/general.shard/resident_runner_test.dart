@@ -704,6 +704,14 @@ void main() {
       Device device,
     }) async => mockVMService,
   }));
+
+  test('nextPlatform moves through expected platforms', () {
+    expect(nextPlatform('android', TestFeatureFlags()), 'iOS');
+    expect(nextPlatform('iOS', TestFeatureFlags()), 'fuchsia');
+    expect(nextPlatform('fuchsia', TestFeatureFlags()), 'android');
+    expect(nextPlatform('fuchsia', TestFeatureFlags(isMacOSEnabled: true)), 'macOS');
+    expect(() => nextPlatform('unknown', TestFeatureFlags()), throwsA(isInstanceOf<AssertionError>()));
+  });
 }
 
 class MockFlutterDevice extends Mock implements FlutterDevice {}

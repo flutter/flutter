@@ -235,23 +235,12 @@ abstract class ResidentWebRunner extends ResidentRunner {
       final vmservice.Response response = await _vmService
           ?.callServiceExtension('ext.flutter.platformOverride');
       final String currentPlatform = response.json['value'] as String;
-      String nextPlatform;
-      switch (currentPlatform) {
-        case 'android':
-          nextPlatform = 'iOS';
-          break;
-        case 'iOS':
-          nextPlatform = 'android';
-          break;
-      }
-      if (nextPlatform == null) {
-        return;
-      }
+      final String platform = nextPlatform(currentPlatform, featureFlags);
       await _vmService?.callServiceExtension('ext.flutter.platformOverride',
           args: <String, Object>{
-            'value': nextPlatform,
+            'value': platform,
           });
-      printStatus('Switched operating system to $nextPlatform');
+      printStatus('Switched operating system to $platform');
     } on vmservice.RPCError {
       return;
     }
