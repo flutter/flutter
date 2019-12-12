@@ -8,7 +8,6 @@ import 'package:json_rpc_2/error_code.dart' as rpc_error_code;
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:meta/meta.dart';
 import 'package:pool/pool.dart';
-import 'package:watcher/watcher.dart';
 
 import 'base/async_guard.dart';
 import 'base/context.dart';
@@ -1118,14 +1117,6 @@ class HotRunner extends ResidentRunner {
   }
 }
 
-/// A factory for constructing [Watcher] instances.
-class DirectoryWatcherFactory {
-  const DirectoryWatcherFactory();
-
-  /// Create a [Watcher] for a given [path].
-  Watcher watchDirectory(String path) =>  Watcher(path);
-}
-
 /// The [ProjectFileInvalidator] track the dependencies for a running
 /// application to determine when they are dirty.
 class ProjectFileInvalidator {
@@ -1160,7 +1151,7 @@ class ProjectFileInvalidator {
     assert(packagesPath != null);
 
     if (lastCompiled == null) {
-      // Initial load
+      // Initial load.
       assert(urisToMonitor.isEmpty);
       return <Uri>[];
     }
