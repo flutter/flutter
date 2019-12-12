@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -665,6 +665,36 @@ flutter:
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
     });
+
+    testUsingContext('disposing device disposes the portForwarder', () async {
+      bool unforwardCalled = false;
+      when(mockProcessManager.run(argThat(containsAll(<String>[
+        'forward',
+        'tcp:0',
+        'tcp:123',
+      ])))).thenAnswer((_) async {
+        return ProcessResult(0, 0, '456', '');
+      });
+      when(mockProcessManager.runSync(argThat(containsAll(<String>[
+        'forward',
+        '--list',
+      ])))).thenReturn(ProcessResult(0, 0, '1234 tcp:456 tcp:123', ''));
+      when(mockProcessManager.run(argThat(containsAll(<String>[
+        'forward',
+        '--remove',
+        'tcp:456',
+      ])))).thenAnswer((_) async {
+        unforwardCalled = true;
+        return ProcessResult(0, 0, '', '');
+      });
+      expect(await forwarder.forward(123), equals(456));
+
+      await device.dispose();
+
+      expect(unforwardCalled, isTrue);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+    });
   });
 
   group('lastLogcatTimestamp', () {
@@ -678,6 +708,136 @@ flutter:
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
     });
+  });
+
+  group('logReader', () {
+    ProcessManager mockProcessManager;
+    AndroidSdk mockAndroidSdk;
+
+    setUp(() {
+      mockAndroidSdk = MockAndroidSdk();
+      mockProcessManager = MockProcessManager();
+    });
+
+    testUsingContext('calls adb logcat with expected flags', () async {
+      const String klastLocatcatTimestamp = '11-27 15:39:04.506';
+      when(mockAndroidSdk.adbPath).thenReturn('adb');
+      when(mockProcessManager.runSync(<String>['adb', '-s', '1234', 'shell', '-x', 'logcat', '-v', 'time', '-t', '1']))
+        .thenReturn(ProcessResult(0, 0, '$klastLocatcatTimestamp I/flutter: irrelevant', ''));
+      when(mockProcessManager.start(argThat(contains('logcat'))))
+        .thenAnswer((_) => Future<Process>.value(createMockProcess()));
+
+      final AndroidDevice device = AndroidDevice('1234');
+      final DeviceLogReader logReader = device.getLogReader();
+      logReader.logLines.listen((_) {});
+
+      verify(mockProcessManager.start(const <String>['adb', '-s', '1234', 'logcat', '-v', 'time', '-T', klastLocatcatTimestamp]))
+        .called(1);
+    }, overrides: <Type, Generator>{
+      AndroidSdk: () => mockAndroidSdk,
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('calls adb logcat with expected flags when the device logs are empty', () async {
+      when(mockAndroidSdk.adbPath).thenReturn('adb');
+      when(mockProcessManager.runSync(<String>['adb', '-s', '1234', 'shell', '-x', 'logcat', '-v', 'time', '-t', '1']))
+        .thenReturn(ProcessResult(0, 0, '', ''));
+      when(mockProcessManager.start(argThat(contains('logcat'))))
+        .thenAnswer((_) => Future<Process>.value(createMockProcess()));
+
+      final AndroidDevice device = AndroidDevice('1234');
+      final DeviceLogReader logReader = device.getLogReader();
+      logReader.logLines.listen((_) {});
+
+      verify(mockProcessManager.start(const <String>['adb', '-s', '1234', 'logcat', '-v', 'time', '-T', '']))
+        .called(1);
+    }, overrides: <Type, Generator>{
+      AndroidSdk: () => mockAndroidSdk,
+      ProcessManager: () => mockProcessManager,
+    });
+  });
+
+  test('Can parse adb shell dumpsys info', () {
+    const String exampleOutput = r'''
+Applications Memory Usage (in Kilobytes):
+Uptime: 441088659 Realtime: 521464097
+
+** MEMINFO in pid 16141 [io.flutter.demo.gallery] **
+                   Pss  Private  Private  SwapPss     Heap     Heap     Heap
+                 Total    Dirty    Clean    Dirty     Size    Alloc     Free
+                ------   ------   ------   ------   ------   ------   ------
+  Native Heap     8648     8620        0       16    20480    12403     8076
+  Dalvik Heap      547      424       40       18     2628     1092     1536
+ Dalvik Other      464      464        0        0
+        Stack      496      496        0        0
+       Ashmem        2        0        0        0
+      Gfx dev      212      204        0        0
+    Other dev       48        0       48        0
+     .so mmap    10770      708     9372       25
+    .apk mmap      240        0        0        0
+    .ttf mmap       35        0       32        0
+    .dex mmap     2205        4     1172        0
+    .oat mmap       64        0        0        0
+    .art mmap     4228     3848       24        2
+   Other mmap    20713        4    20704        0
+    GL mtrack     2380     2380        0        0
+      Unknown    43971    43968        0        1
+        TOTAL    95085    61120    31392       62    23108    13495     9612
+
+ App Summary
+                       Pss(KB)
+                        ------
+           Java Heap:     4296
+         Native Heap:     8620
+                Code:    11288
+               Stack:      496
+            Graphics:     2584
+       Private Other:    65228
+              System:     2573
+
+               TOTAL:    95085       TOTAL SWAP PSS:       62
+
+ Objects
+               Views:        9         ViewRootImpl:        1
+         AppContexts:        3           Activities:        1
+              Assets:        4        AssetManagers:        3
+       Local Binders:       10        Proxy Binders:       18
+       Parcel memory:        6         Parcel count:       24
+    Death Recipients:        0      OpenSSL Sockets:        0
+            WebViews:        0
+
+ SQL
+         MEMORY_USED:        0
+  PAGECACHE_OVERFLOW:        0          MALLOC_SIZE:        0
+''';
+
+    final AndroidMemoryInfo result = parseMeminfoDump(exampleOutput);
+
+    // Parses correctly
+    expect(result.javaHeap, 4296);
+    expect(result.nativeHeap, 8620);
+    expect(result.code, 11288);
+    expect(result.stack, 496);
+    expect(result.graphics, 2584);
+    expect(result.privateOther, 65228);
+    expect(result.system, 2573);
+
+    // toJson works correctly
+    final Map<String, Object> json = result.toJson();
+
+    expect(json, containsPair('Java Heap', 4296));
+    expect(json, containsPair('Native Heap', 8620));
+    expect(json, containsPair('Code', 11288));
+    expect(json, containsPair('Stack', 496));
+    expect(json, containsPair('Graphics', 2584));
+    expect(json, containsPair('Private Other', 65228));
+    expect(json, containsPair('System', 2573));
+
+    // computed from summation of other fields.
+    expect(json, containsPair('Total', 95085));
+
+    // contains identifier for platform in memory info.
+    expect(json, containsPair('platform', 'Android'));
   });
 }
 

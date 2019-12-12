@@ -1,4 +1,4 @@
-// Copyright 2019 The Flutter Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -260,7 +260,7 @@ class _DraggableSheetExtent {
 
   set currentExtent(double value) {
     assert(value != null);
-    _currentExtent.value = value.clamp(minExtent, maxExtent);
+    _currentExtent.value = value.clamp(minExtent, maxExtent) as double;
   }
   double get currentExtent => _currentExtent.value;
 
@@ -599,7 +599,7 @@ class _InheritedResetNotifier extends InheritedNotifier<_ResetNotifier> {
       return false;
     }
     assert(widget is _InheritedResetNotifier);
-    final _InheritedResetNotifier inheritedNotifier = widget;
+    final _InheritedResetNotifier inheritedNotifier = widget as _InheritedResetNotifier;
     final bool wasCalled = inheritedNotifier.notifier._wasCalled;
     inheritedNotifier.notifier._wasCalled = false;
     return wasCalled;

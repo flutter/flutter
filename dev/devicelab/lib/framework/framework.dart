@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -194,8 +194,10 @@ class TaskResult {
   /// Constructs a successful result using JSON data stored in a file.
   factory TaskResult.successFromFile(File file,
       {List<String> benchmarkScoreKeys}) {
-    return TaskResult.success(json.decode(file.readAsStringSync()),
-        benchmarkScoreKeys: benchmarkScoreKeys);
+    return TaskResult.success(
+      json.decode(file.readAsStringSync()) as Map<String, dynamic>,
+      benchmarkScoreKeys: benchmarkScoreKeys,
+    );
   }
 
   /// Constructs an unsuccessful result.

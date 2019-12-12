@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -175,11 +175,6 @@ class CupertinoPageRoute<T> extends PageRoute<T> {
 
   @override
   String get barrierLabel => null;
-
-  @override
-  bool canTransitionFrom(TransitionRoute<dynamic> previousRoute) {
-    return previousRoute is CupertinoPageRoute;
-  }
 
   @override
   bool canTransitionTo(TransitionRoute<dynamic> nextRoute) {
@@ -888,8 +883,8 @@ class _CupertinoModalPopupRoute<T> extends PopupRoute<T> {
 ///
 /// See also:
 ///
-///  * [ActionSheet], which is the widget usually returned by the `builder`
-///    argument to [showCupertinoModalPopup].
+///  * [CupertinoActionSheet], which is the widget usually returned by the
+///    `builder` argument to [showCupertinoModalPopup].
 ///  * <https://developer.apple.com/design/human-interface-guidelines/ios/views/action-sheets/>
 Future<T> showCupertinoModalPopup<T>({
   @required BuildContext context,

@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -32,7 +32,7 @@ import 'localizations_utils.dart';
 Map<String, dynamic> loadBundle(File file) {
   if (!FileSystemEntity.isFileSync(file.path))
     exitWithError('Unable to find input file: ${file.path}');
-  return json.decode(file.readAsStringSync());
+  return json.decode(file.readAsStringSync()) as Map<String, dynamic>;
 }
 
 void encodeBundleTranslations(Map<String, dynamic> bundle) {
@@ -41,7 +41,7 @@ void encodeBundleTranslations(Map<String, dynamic> bundle) {
     // to encode them.
     if (key.startsWith('@'))
       continue;
-    final String translation = bundle[key];
+    final String translation = bundle[key] as String;
     // Rewrite the string as a series of unicode characters in JSON format.
     // Like "\u0012\u0123\u1234".
     bundle[key] = translation.runes.map((int code) {

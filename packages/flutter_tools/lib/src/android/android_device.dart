@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -475,6 +475,8 @@ class AndroidDevice extends Device {
     return true;
   }
 
+  AndroidApk _package;
+
   @override
   Future<LaunchResult> startApp(
     AndroidApk package, {
@@ -525,6 +527,7 @@ class AndroidDevice extends Device {
           androidBuildInfo: AndroidBuildInfo(
             debuggingOptions.buildInfo,
             targetArchs: <AndroidArch>[androidArch],
+            fastStart: debuggingOptions.fastStart
           ),
       );
       // Package has been built, so we can get the updated application ID and
@@ -609,6 +612,7 @@ class AndroidDevice extends Device {
       return LaunchResult.failed();
     }
 
+    _package = package;
     if (!debuggingOptions.debuggingEnabled) {
       return LaunchResult.succeeded();
     }
@@ -641,10 +645,28 @@ class AndroidDevice extends Device {
   bool get supportsHotRestart => true;
 
   @override
+  bool get supportsFastStart => true;
+
+  @override
   Future<bool> stopApp(AndroidApk app) {
     final List<String> command = adbCommandForDevice(<String>['shell', 'am', 'force-stop', app.id]);
     return processUtils.stream(command).then<bool>(
         (int exitCode) => exitCode == 0 || allowHeapCorruptionOnWindows(exitCode));
+  }
+
+  @override
+  Future<MemoryInfo> queryMemoryInfo() async {
+    final RunResult runResult = await processUtils.run(adbCommandForDevice(<String>[
+      'shell',
+      'dumpsys',
+      'meminfo',
+      _package.launchActivity,
+      '-d',
+    ]));
+    if (runResult.exitCode != 0) {
+      return const MemoryInfo.empty();
+    }
+    return parseMeminfoDump(runResult.stdout);
   }
 
   @override
@@ -670,7 +692,7 @@ class AndroidDevice extends Device {
     String output;
     try {
       output = runAdbCheckedSync(<String>[
-        'shell', '-x', 'logcat', '-v', 'time', '-t', '1',
+        'shell', '-x', 'logcat', '-v', 'time', '-t', '1'
       ]);
     } catch (error) {
       printError('Failed to extract the most recent timestamp from the Android log: $error.');
@@ -701,6 +723,12 @@ class AndroidDevice extends Device {
   bool isSupportedForProject(FlutterProject flutterProject) {
     return flutterProject.android.existsSync();
   }
+
+  @override
+  Future<void> dispose() async {
+    _logReader?._stop();
+    await _portForwarder?.dispose();
+  }
 }
 
 Map<String, String> parseAdbDeviceProperties(String str) {
@@ -710,6 +738,104 @@ Map<String, String> parseAdbDeviceProperties(String str) {
     properties[match.group(1)] = match.group(2);
   }
   return properties;
+}
+
+/// Process the dumpsys info formatted in a table-like structure.
+///
+/// Currently this only pulls information from the  "App Summary" subsection.
+///
+/// Example output:
+///
+/// Applications Memory Usage (in Kilobytes):
+/// Uptime: 441088659 Realtime: 521464097
+///
+/// ** MEMINFO in pid 16141 [io.flutter.demo.gallery] **
+///                    Pss  Private  Private  SwapPss     Heap     Heap     Heap
+///                  Total    Dirty    Clean    Dirty     Size    Alloc     Free
+///                 ------   ------   ------   ------   ------   ------   ------
+///   Native Heap     8648     8620        0       16    20480    12403     8076
+///   Dalvik Heap      547      424       40       18     2628     1092     1536
+///  Dalvik Other      464      464        0        0
+///         Stack      496      496        0        0
+///        Ashmem        2        0        0        0
+///       Gfx dev      212      204        0        0
+///     Other dev       48        0       48        0
+///      .so mmap    10770      708     9372       25
+///     .apk mmap      240        0        0        0
+///     .ttf mmap       35        0       32        0
+///     .dex mmap     2205        4     1172        0
+///     .oat mmap       64        0        0        0
+///     .art mmap     4228     3848       24        2
+///    Other mmap    20713        4    20704        0
+///     GL mtrack     2380     2380        0        0
+///       Unknown    43971    43968        0        1
+///         TOTAL    95085    61120    31392       62    23108    13495     9612
+///
+///  App Summary
+///                        Pss(KB)
+///                         ------
+///            Java Heap:     4296
+///          Native Heap:     8620
+///                 Code:    11288
+///                Stack:      496
+///             Graphics:     2584
+///        Private Other:    65228
+///               System:     2573
+///
+///                TOTAL:    95085       TOTAL SWAP PSS:       62
+///
+///  Objects
+///                Views:        9         ViewRootImpl:        1
+///          AppContexts:        3           Activities:        1
+///              Assets:        4        AssetManagers:        3
+///        Local Binders:       10        Proxy Binders:       18
+///        Parcel memory:        6         Parcel count:       24
+///     Death Recipients:        0      OpenSSL Sockets:        0
+///             WebViews:        0
+///
+///  SQL
+///          MEMORY_USED:        0
+///   PAGECACHE_OVERFLOW:        0          MALLOC_SIZE:        0
+/// ...
+///
+/// For more information, see https://developer.android.com/studio/command-line/dumpsys.
+@visibleForTesting
+AndroidMemoryInfo parseMeminfoDump(String input) {
+  final AndroidMemoryInfo androidMemoryInfo = AndroidMemoryInfo();
+  input
+    .split('\n')
+    .skipWhile((String line) => !line.contains('App Summary'))
+    .takeWhile((String line) => !line.contains('TOTAL'))
+    .where((String line) => line.contains(':'))
+    .forEach((String line) {
+      final List<String> sections = line.trim().split(':');
+      final String key = sections.first.trim();
+      final int value = int.tryParse(sections.last.trim()) ?? 0;
+      switch (key) {
+        case AndroidMemoryInfo._kJavaHeapKey:
+          androidMemoryInfo.javaHeap = value;
+          break;
+        case AndroidMemoryInfo._kNativeHeapKey:
+          androidMemoryInfo.nativeHeap = value;
+          break;
+        case AndroidMemoryInfo._kCodeKey:
+          androidMemoryInfo.code = value;
+          break;
+        case AndroidMemoryInfo._kStackKey:
+          androidMemoryInfo.stack = value;
+          break;
+        case AndroidMemoryInfo._kGraphicsKey:
+          androidMemoryInfo.graphics = value;
+          break;
+        case AndroidMemoryInfo._kPrivateOtherKey:
+          androidMemoryInfo.privateOther = value;
+          break;
+        case AndroidMemoryInfo._kSystemKey:
+          androidMemoryInfo.system = value;
+          break;
+      }
+  });
+  return androidMemoryInfo;
 }
 
 /// Return the list of connected ADB devices.
@@ -734,6 +860,42 @@ List<AndroidDevice> getAdbDevices() {
   final List<AndroidDevice> devices = <AndroidDevice>[];
   parseADBDeviceOutput(text, devices: devices);
   return devices;
+}
+
+/// Android specific implementation of memory info.
+class AndroidMemoryInfo extends MemoryInfo {
+  static const String _kJavaHeapKey = 'Java Heap';
+  static const String _kNativeHeapKey = 'Native Heap';
+  static const String _kCodeKey = 'Code';
+  static const String _kStackKey = 'Stack';
+  static const String _kGraphicsKey = 'Graphics';
+  static const String _kPrivateOtherKey = 'Private Other';
+  static const String _kSystemKey = 'System';
+  static const String _kTotalKey = 'Total';
+
+  // Each measurement has KB as a unit.
+  int javaHeap = 0;
+  int nativeHeap = 0;
+  int code = 0;
+  int stack = 0;
+  int graphics = 0;
+  int privateOther = 0;
+  int system = 0;
+
+  @override
+  Map<String, Object> toJson() {
+    return <String, Object>{
+      'platform': 'Android',
+      _kJavaHeapKey: javaHeap,
+      _kNativeHeapKey: nativeHeap,
+      _kCodeKey: code,
+      _kStackKey: stack,
+      _kGraphicsKey: graphics,
+      _kPrivateOtherKey: privateOther,
+      _kSystemKey: system,
+      _kTotalKey: javaHeap + nativeHeap + code + stack + graphics + privateOther + system,
+    };
+  }
 }
 
 /// Get diagnostics about issues with any connected devices.
@@ -855,8 +1017,15 @@ class _AdbLogReader extends DeviceLogReader {
   String get name => device.name;
 
   void _start() {
-    // Start the adb logcat process and filter logs by the "flutter" tag.
-    final List<String> args = <String>['shell', '-x', 'logcat', '-v', 'time', '-s', 'flutter'];
+    final String lastTimestamp = device.lastLogcatTimestamp;
+    // Start the adb logcat process and filter the most recent logs since `lastTimestamp`.
+    final List<String> args = <String>[
+      'logcat',
+      '-v',
+      'time',
+      '-T',
+      lastTimestamp ?? '', // Empty `-T` means the timestamp of the logcat command invocation.
+    ];
     processUtils.start(device.adbCommandForDevice(args)).then<void>((Process process) {
       _process = process;
       // We expect logcat streams to occasionally contain invalid utf-8,
@@ -964,9 +1133,12 @@ class _AdbLogReader extends DeviceLogReader {
   }
 
   void _stop() {
-    // TODO(devoncarew): We should remove adb port forwarding here.
-
     _process?.kill();
+  }
+
+  @override
+  void dispose() {
+    _stop();
   }
 }
 
@@ -976,7 +1148,6 @@ class _AndroidDevicePortForwarder extends DevicePortForwarder {
   final AndroidDevice device;
 
   static int _extractPort(String portString) {
-
     return int.tryParse(portString.trim());
   }
 
@@ -1087,5 +1258,12 @@ class _AndroidDevicePortForwarder extends DevicePortForwarder {
       device.adbCommandForDevice(unforwardCommand),
       throwOnError: true,
     );
+  }
+
+  @override
+  Future<void> dispose() async {
+    for (ForwardedPort port in forwardedPorts) {
+      await unforward(port);
+    }
   }
 }

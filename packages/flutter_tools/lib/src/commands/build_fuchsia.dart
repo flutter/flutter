@@ -1,11 +1,10 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:async';
 
 import '../base/common.dart';
-import '../base/file_system.dart';
 import '../base/platform.dart';
 import '../build_info.dart';
 import '../cache.dart';
@@ -47,7 +46,6 @@ class BuildFuchsiaCommand extends BuildSubCommand {
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
     DevelopmentArtifact.fuchsia,
-    DevelopmentArtifact.universal,
   };
 
   @override
@@ -63,13 +61,6 @@ class BuildFuchsiaCommand extends BuildSubCommand {
     }
     if (!flutterProject.fuchsia.existsSync()) {
       throwToolExit('No Fuchsia project is configured.');
-    }
-    final String appName = flutterProject.fuchsia.project.manifest.appName;
-    final String cmxPath = fs.path.join(
-        flutterProject.fuchsia.meta.path, '$appName.cmx');
-    final File cmxFile = fs.file(cmxPath);
-    if (!cmxFile.existsSync()) {
-      throwToolExit('The Fuchsia build requires a .cmx file at $cmxPath for the app.');
     }
     await buildFuchsia(
       fuchsiaProject: flutterProject.fuchsia,

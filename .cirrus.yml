@@ -1,4 +1,5 @@
 # CIRRUS CONFIGURATION FILE
+# https://cirrus-ci.org/guide/writing-tasks/
 
 use_compute_credits: $CIRRUS_USER_COLLABORATOR == 'true'
 
@@ -135,7 +136,7 @@ task:
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: tool_coverage-linux # linux-only
-      only_if: "$CIRRUS_PR == ''"
+      only_if: "$CIRRUS_BRANCH == 'master'"
       environment:
         # As of October 2019, the tool_coverage-linux shard needed at least 12G of RAM to run without
         # getting OOM-killed, and even 8 CPUs took 25 minutes.
@@ -152,7 +153,10 @@ task:
         # As of October 2019, the Web shards needed more than 6G of RAM.
         CPU: 2
         MEMORY: 8G
+        GOLDCTL: "$CIRRUS_WORKING_DIR/depot_tools/goldctl"
+        GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
       script:
+        - ./dev/bots/download_goldctl.sh
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: web_tests-1-linux
@@ -161,7 +165,10 @@ task:
         # As of October 2019, the Web shards needed more than 6G of RAM.
         CPU: 2
         MEMORY: 8G
+        GOLDCTL: "$CIRRUS_WORKING_DIR/depot_tools/goldctl"
+        GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
       script:
+        - ./dev/bots/download_goldctl.sh
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: web_tests-2-linux
@@ -170,7 +177,10 @@ task:
         # As of October 2019, the Web shards needed more than 6G of RAM.
         CPU: 2
         MEMORY: 8G
+        GOLDCTL: "$CIRRUS_WORKING_DIR/depot_tools/goldctl"
+        GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
       script:
+        - ./dev/bots/download_goldctl.sh
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: web_tests-3-linux
@@ -179,7 +189,10 @@ task:
         # As of October 2019, the Web shards needed more than 6G of RAM.
         CPU: 2
         MEMORY: 8G
+        GOLDCTL: "$CIRRUS_WORKING_DIR/depot_tools/goldctl"
+        GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
       script:
+        - ./dev/bots/download_goldctl.sh
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: web_tests-4-linux
@@ -188,7 +201,10 @@ task:
         # As of October 2019, the Web shards needed more than 6G of RAM.
         CPU: 2
         MEMORY: 8G
+        GOLDCTL: "$CIRRUS_WORKING_DIR/depot_tools/goldctl"
+        GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
       script:
+        - ./dev/bots/download_goldctl.sh
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: web_tests-5-linux
@@ -197,7 +213,10 @@ task:
         # As of October 2019, the Web shards needed more than 6G of RAM.
         CPU: 2
         MEMORY: 8G
+        GOLDCTL: "$CIRRUS_WORKING_DIR/depot_tools/goldctl"
+        GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
       script:
+        - ./dev/bots/download_goldctl.sh
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: web_tests-6-linux
@@ -206,7 +225,10 @@ task:
         # As of October 2019, the Web shards needed more than 6G of RAM.
         CPU: 2
         MEMORY: 8G
+        GOLDCTL: "$CIRRUS_WORKING_DIR/depot_tools/goldctl"
+        GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
       script:
+        - ./dev/bots/download_goldctl.sh
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: web_tests-7_last-linux # last Web shard must end with _last
@@ -215,7 +237,10 @@ task:
         # As of October 2019, the Web shards needed more than 6G of RAM.
         CPU: 2
         MEMORY: 8G
+        GOLDCTL: "$CIRRUS_WORKING_DIR/depot_tools/goldctl"
+        GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
       script:
+        - ./dev/bots/download_goldctl.sh
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: build_tests-linux
@@ -229,7 +254,6 @@ task:
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: hostonly_devicelab_tests-0-linux
-      only_if: "$CIRRUS_PR != '' || $CIRRUS_BRANCH == 'master'" # https://github.com/flutter/flutter/issues/45453
       environment:
         # Some of the host-only devicelab tests are pretty involved and need a lot of RAM.
         CPU: 2
@@ -238,7 +262,6 @@ task:
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: hostonly_devicelab_tests-1-linux
-      only_if: "$CIRRUS_PR != '' || $CIRRUS_BRANCH == 'master'" # https://github.com/flutter/flutter/issues/45453
       environment:
         # Some of the host-only devicelab tests are pretty involved and need a lot of RAM.
         CPU: 2
@@ -247,7 +270,6 @@ task:
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: hostonly_devicelab_tests-2-linux
-      only_if: "$CIRRUS_PR != '' || $CIRRUS_BRANCH == 'master'" # https://github.com/flutter/flutter/issues/45453
       environment:
         # Some of the host-only devicelab tests are pretty involved and need a lot of RAM.
         CPU: 2
@@ -256,7 +278,6 @@ task:
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: hostonly_devicelab_tests-3_last-linux
-      only_if: "$CIRRUS_PR != '' || $CIRRUS_BRANCH == 'master'" # https://github.com/flutter/flutter/issues/45453
       environment:
         # Some of the host-only devicelab tests are pretty involved and need a lot of RAM.
         CPU: 2
@@ -403,22 +424,22 @@ task:
         - dart --enable-asserts dev\bots\test.dart
 
     - name: hostonly_devicelab_tests-0-windows
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || ($CIRRUS_PR == '' && $CIRRUS_BRANCH == 'master')" # https://github.com/flutter/flutter/issues/41941 https://github.com/flutter/flutter/issues/45453
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
       script:
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: hostonly_devicelab_tests-1-windows
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || ($CIRRUS_PR == '' && $CIRRUS_BRANCH == 'master')" # https://github.com/flutter/flutter/issues/41941 https://github.com/flutter/flutter/issues/45453
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
       script:
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: hostonly_devicelab_tests-2-windows
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || ($CIRRUS_PR == '' && $CIRRUS_BRANCH == 'master')" # https://github.com/flutter/flutter/issues/41941 https://github.com/flutter/flutter/issues/45453
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
       script:
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: hostonly_devicelab_tests-3_last-windows
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || ($CIRRUS_PR == '' && $CIRRUS_BRANCH == 'master')" # https://github.com/flutter/flutter/issues/41941 https://github.com/flutter/flutter/issues/45453
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
       script:
         - dart --enable-asserts ./dev/bots/test.dart
 
@@ -516,25 +537,25 @@ task:
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: hostonly_devicelab_tests-0-macos
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || ($CIRRUS_PR == '' && $CIRRUS_BRANCH == 'master')" # https://github.com/flutter/flutter/issues/41941 https://github.com/flutter/flutter/issues/45453
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
       script:
         - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: hostonly_devicelab_tests-1-macos
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || ($CIRRUS_PR == '' && $CIRRUS_BRANCH == 'master')" # https://github.com/flutter/flutter/issues/41941 https://github.com/flutter/flutter/issues/45453
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
       script:
         - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: hostonly_devicelab_tests-2-macos
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || ($CIRRUS_PR == '' && $CIRRUS_BRANCH == 'master')" # https://github.com/flutter/flutter/issues/41941 https://github.com/flutter/flutter/issues/45453
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
       script:
         - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: hostonly_devicelab_tests-3_last-macos
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || ($CIRRUS_PR == '' && $CIRRUS_BRANCH == 'master')" # https://github.com/flutter/flutter/issues/41941 https://github.com/flutter/flutter/issues/45453
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
       script:
         - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
         - dart --enable-asserts ./dev/bots/test.dart
@@ -582,9 +603,10 @@ task:
 
 docker_builder:
   # Only build a new docker image when we tag a release (for dev, beta, or
-  # release.) Note: tagging a commit and pushing to a release branch are
+  # stable). Note: tagging a commit and pushing to a release branch are
   # different cirrus triggers. See a tag CI run at e.g.
   # https://cirrus-ci.com/github/flutter/flutter/v1.2.3
+  name: docker_build
   only_if: $CIRRUS_TAG != ''
   environment:
     GCLOUD_CREDENTIALS: ENCRYPTED[f7c098d4dd7f5ee1bfee0bb7e944cce72efbe10e97ad6440ae72de4de6a1c24d23f421a2619c668e94377fb64b0bb3e6]

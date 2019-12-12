@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -69,6 +69,14 @@ void main() {
       final List<FuchsiaDevice> names = parseListDevices(example);
 
       expect(names.length, 0);
+    });
+
+    testUsingContext('disposing device disposes the portForwarder', () async {
+      final MockPortForwarder mockPortForwarder = MockPortForwarder();
+      final FuchsiaDevice device = FuchsiaDevice('123');
+      device.portForwarder = mockPortForwarder;
+      await device.dispose();
+      verify(mockPortForwarder.dispose()).called(1);
     });
 
     testUsingContext('default capabilities', () async {

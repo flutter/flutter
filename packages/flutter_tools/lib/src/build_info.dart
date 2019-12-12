@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -103,6 +103,7 @@ class AndroidBuildInfo {
     ],
     this.splitPerAbi = false,
     this.shrink = false,
+    this.fastStart = false,
   });
 
   // The build info containing the mode and flavor.
@@ -120,6 +121,9 @@ class AndroidBuildInfo {
 
   /// The target platforms for the build.
   final Iterable<AndroidArch> targetArchs;
+
+  /// Whether to bootstrap an empty application.
+  final bool fastStart;
 }
 
 /// A summary of the compilation strategy used for Dart.

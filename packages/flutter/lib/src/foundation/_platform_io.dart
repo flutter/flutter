@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -11,6 +11,8 @@ platform.TargetPlatform get defaultTargetPlatform {
   platform.TargetPlatform result;
   if (Platform.isIOS) {
     result = platform.TargetPlatform.iOS;
+  } else if (Platform.isMacOS) {
+    result = platform.TargetPlatform.macOS;
   } else if (Platform.isAndroid) {
     result = platform.TargetPlatform.android;
   } else if (Platform.isFuchsia) {

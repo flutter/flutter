@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -420,8 +420,19 @@ abstract class Device {
   /// application.
   bool get supportsScreenshot => false;
 
+  /// Whether the device supports the '--fast-start' development mode.
+  bool get supportsFastStart => false;
+
   /// Stop an app package on the current device.
   Future<bool> stopApp(covariant ApplicationPackage app);
+
+  /// Query the current application memory usage..
+  ///
+  /// If the device does not support this callback, an empty map
+  /// is returned.
+  Future<MemoryInfo> queryMemoryInfo() {
+    return Future<MemoryInfo>.value(const MemoryInfo.empty());
+  }
 
   Future<void> takeScreenshot(File outputFile) => Future<void>.error('unimplemented');
 
@@ -484,7 +495,26 @@ abstract class Device {
   /// Clean up resources allocated by device
   ///
   /// For example log readers or port forwarders.
-  void dispose() {}
+  Future<void> dispose();
+}
+
+/// Information about an application's memory usage.
+abstract class MemoryInfo {
+  /// Const constructor to allow subclasses to be const.
+  const MemoryInfo();
+
+  /// Create a [MemoryInfo] object with no information.
+  const factory MemoryInfo.empty() = _NoMemoryInfo;
+
+  /// Convert the object to a JSON representation suitable for serialization.
+  Map<String, Object> toJson();
+}
+
+class _NoMemoryInfo implements MemoryInfo {
+  const _NoMemoryInfo();
+
+  @override
+  Map<String, Object> toJson() => <String, Object>{};
 }
 
 class DebuggingOptions {
@@ -506,11 +536,18 @@ class DebuggingOptions {
     this.initializePlatform = true,
     this.hostname,
     this.port,
+    this.webEnableExposeUrl,
     this.vmserviceOutFile,
+    this.fastStart = false,
    }) : debuggingEnabled = true;
 
-  DebuggingOptions.disabled(this.buildInfo, { this.initializePlatform = true, this.port, this.hostname, this.cacheSkSL = false, })
-    : debuggingEnabled = false,
+  DebuggingOptions.disabled(this.buildInfo, {
+      this.initializePlatform = true,
+      this.port,
+      this.hostname,
+      this.webEnableExposeUrl,
+      this.cacheSkSL = false,
+    }) : debuggingEnabled = false,
       useTestFonts = false,
       startPaused = false,
       dartFlags = '',
@@ -523,7 +560,8 @@ class DebuggingOptions {
       verboseSystemLogs = false,
       hostVmServicePort = null,
       deviceVmServicePort = null,
-      vmserviceOutFile = null;
+      vmserviceOutFile = null,
+      fastStart = false;
 
   final bool debuggingEnabled;
 
@@ -545,8 +583,10 @@ class DebuggingOptions {
   final int deviceVmServicePort;
   final String port;
   final String hostname;
+  final bool webEnableExposeUrl;
   /// A file where the vmservice URL should be written after the application is started.
   final String vmserviceOutFile;
+  final bool fastStart;
 
   bool get hasObservatoryPort => hostVmServicePort != null;
 }
@@ -606,7 +646,7 @@ abstract class DevicePortForwarder {
   Future<void> unforward(ForwardedPort forwardedPort);
 
   /// Cleanup allocated resources, like forwardedPorts
-  Future<void> dispose() async { }
+  Future<void> dispose();
 }
 
 /// Read the log for a particular device.
@@ -618,7 +658,7 @@ abstract class DeviceLogReader {
 
   /// Some logs can be obtained from a VM service stream.
   /// Set this after the VM services are connected.
-  List<VMService> connectedVMServices;
+  VMService connectedVMService;
 
   @override
   String toString() => name;
@@ -627,7 +667,7 @@ abstract class DeviceLogReader {
   int appPid;
 
   // Clean up resources allocated by log reader e.g. subprocesses
-  void dispose() { }
+  void dispose();
 }
 
 /// Describes an app running on the device.
@@ -648,7 +688,7 @@ class NoOpDeviceLogReader implements DeviceLogReader {
   int appPid;
 
   @override
-  List<VMService> connectedVMServices;
+  VMService connectedVMService;
 
   @override
   Stream<String> get logLines => const Stream<String>.empty();

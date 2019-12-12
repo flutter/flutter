@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -165,6 +165,9 @@ abstract class Decoration extends Diagnosticable {
   /// omitted if there is no chance that the painter will change (for example,
   /// if it is a [BoxDecoration] with definitely no [DecorationImage]).
   BoxPainter createBoxPainter([ VoidCallback onChanged ]);
+
+  /// Returns a closed [Path] that describes the outer edge of this decoration.
+  Path getClipPath(Rect rect, TextDirection textDirection) => null;
 }
 
 /// A stateful class that can paint a particular [Decoration].

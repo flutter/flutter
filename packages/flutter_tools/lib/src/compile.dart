@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -612,6 +612,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
     printTrace('<- recompile $mainUri$inputKey');
     for (Uri fileUri in request.invalidatedFiles) {
       _server.stdin.writeln(_mapFileUri(fileUri.toString(), packageUriMapper));
+      printTrace('${_mapFileUri(fileUri.toString(), packageUriMapper)}');
     }
     _server.stdin.writeln(inputKey);
     printTrace('<- $inputKey');

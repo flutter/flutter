@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -244,7 +244,7 @@ class AOTSnapshotter {
     final String assemblyO = fs.path.join(outputPath, 'snapshot_assembly.o');
     List<String> isysrootArgs;
     if (isIOS) {
-      final String iPhoneSDKLocation = await xcode.iPhoneSdkLocation();
+      final String iPhoneSDKLocation = await xcode.sdkLocation(SdkType.iPhone);
       if (iPhoneSDKLocation != null) {
         isysrootArgs = <String>['-isysroot', iPhoneSDKLocation];
       }
