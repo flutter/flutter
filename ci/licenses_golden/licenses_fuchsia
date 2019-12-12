@@ -1,4 +1,4 @@
-Signature: f4db1350a58dc05423f556cfae14d815
+Signature: f9b2d92b4ad5303bfe4b723150c05fc3
 
 UNUSED LICENSES:
 
@@ -501,6 +501,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.recovery.ui/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.recovery/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.scenic.scheduling/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.simplecamera/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys.test/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysinfo/meta.json
@@ -1293,6 +1294,7 @@ FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/trace_processing/metrics/comm
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/trace_processing/metrics/cpu_metrics.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/trace_processing/metrics/drm_fps.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/trace_processing/metrics/flutter_frame_stats.dart
+FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/trace_processing/metrics/input_latency.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/trace_processing/metrics/memory_metrics.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/trace_processing/metrics/scenic_frame_stats.dart
 FILE: ../../../fuchsia/sdk/linux/dart/sl4f/lib/src/trace_processing/metrics/temperature_metrics.dart
@@ -1439,6 +1441,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/privacy.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/settings.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/setup.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/system.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.simplecamera/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys.test/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys/types.fidl
@@ -1513,7 +1516,7 @@ FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/include/lib/fidl/runtime_flag.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/include/lib/fidl/transformer.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/include/lib/fidl/txn_header.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/include/lib/fidl/visitor.h
-FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/internal.cc
+FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/internal.c
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/runtime_flag.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_base/transformer.cc
@@ -1524,7 +1527,6 @@ FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp/include/lib/fidl/cpp/service_conne
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp/include/lib/fidl/cpp/service_handler_base.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_base/include/lib/fidl/cpp/transition.h
-FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_base/internal/proxy_controller_util.cc
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_base/meta.json
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_sync/include/lib/fidl/cpp/internal/message_sender.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_sync/internal/message_sender.cc
@@ -2175,6 +2177,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.recovery.ui/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.recovery/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.scenic.scheduling/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.settings/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.simplecamera/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys.test/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysinfo/meta.json
@@ -2506,7 +2509,6 @@ FILE: ../../../fuchsia/sdk/linux/dart/fidl/lib/src/message.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fidl/lib/src/struct.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fidl/lib/src/table.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fidl/lib/src/types.dart
-FILE: ../../../fuchsia/sdk/linux/dart/fidl/lib/src/union.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia/lib/src/fakes/fuchsia_fakes.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_logger/lib/logger.dart
 FILE: ../../../fuchsia/sdk/linux/dart/fuchsia_logger/lib/src/internal/_fuchsia_log_writer.dart
@@ -2610,6 +2612,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net/connectivity.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.net/net.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.process/launcher.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.process/resolver.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.simplecamera/simple_camera.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sys/job_provider.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysinfo/sysinfo.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.sysmem/allocator.fidl
@@ -2698,7 +2701,6 @@ FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_base/include/lib/fidl/cpp/comparis
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_base/include/lib/fidl/cpp/decoder.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_base/include/lib/fidl/cpp/encoder.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_base/include/lib/fidl/cpp/internal/logging.h
-FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_base/include/lib/fidl/cpp/internal/proxy_controller_util.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_base/include/lib/fidl/cpp/object_coding.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_base/include/lib/fidl/cpp/string.h
 FILE: ../../../fuchsia/sdk/linux/pkg/fidl_cpp_base/include/lib/fidl/cpp/traits.h
