@@ -339,7 +339,7 @@ class DefaultTabController extends StatefulWidget {
   /// Typical usage:
   ///
   /// ```dart
-  /// TabController controller = DefaultTabBarController.of(context);
+  /// TabController controller = DefaultTabController.of(context);
   /// ```
   static TabController of(BuildContext context) {
     final _TabControllerScope scope = context.dependOnInheritedWidgetOfExactType<_TabControllerScope>();
