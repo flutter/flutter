@@ -112,7 +112,7 @@ void main() {
       find.byKey(key),
       matchesGoldenFile('physical_model_overflow.png'),
     );
-  }, skip: isBrowser);
+  });
 
   group('PhysicalModelLayer checks elevation', () {
     Future<void> _testStackChildren(
