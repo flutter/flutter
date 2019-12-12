@@ -4,6 +4,7 @@
 
 #include "flutter/shell/platform/embedder/tests/embedder_test_context.h"
 
+#include "flutter/fml/make_copyable.h"
 #include "flutter/runtime/dart_vm.h"
 #include "flutter/shell/platform/embedder/tests/embedder_assertions.h"
 #include "third_party/dart/runtime/bin/elf_loader.h"
@@ -223,6 +224,16 @@ void EmbedderTestContext::SetNextSceneCallback(
     return;
   }
   next_scene_callback_ = next_scene_callback;
+}
+
+std::future<sk_sp<SkImage>> EmbedderTestContext::GetNextSceneImage() {
+  std::promise<sk_sp<SkImage>> promise;
+  auto future = promise.get_future();
+  SetNextSceneCallback(
+      fml::MakeCopyable([promise = std::move(promise)](auto image) mutable {
+        promise.set_value(image);
+      }));
+  return future;
 }
 
 bool EmbedderTestContext::SofwarePresent(sk_sp<SkImage> image) {

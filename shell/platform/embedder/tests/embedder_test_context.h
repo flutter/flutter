@@ -5,6 +5,7 @@
 #ifndef FLUTTER_SHELL_PLATFORM_EMBEDDER_TESTS_EMBEDDER_CONTEXT_H_
 #define FLUTTER_SHELL_PLATFORM_EMBEDDER_TESTS_EMBEDDER_CONTEXT_H_
 
+#include <future>
 #include <map>
 #include <memory>
 #include <string>
@@ -60,8 +61,7 @@ class EmbedderTestContext {
 
   EmbedderTestCompositor& GetCompositor();
 
-  using NextSceneCallback = std::function<void(sk_sp<SkImage> image)>;
-  void SetNextSceneCallback(const NextSceneCallback& next_scene_callback);
+  std::future<sk_sp<SkImage>> GetNextSceneImage();
 
   size_t GetGLSurfacePresentCount() const;
 
@@ -70,6 +70,8 @@ class EmbedderTestContext {
  private:
   // This allows the builder to access the hooks.
   friend class EmbedderConfigBuilder;
+
+  using NextSceneCallback = std::function<void(sk_sp<SkImage> image)>;
 
   std::string assets_path_;
 
@@ -128,6 +130,8 @@ class EmbedderTestContext {
 
   void FireRootSurfacePresentCallbackIfPresent(
       const std::function<sk_sp<SkImage>(void)>& image_callback);
+
+  void SetNextSceneCallback(const NextSceneCallback& next_scene_callback);
 
   FML_DISALLOW_COPY_AND_ASSIGN(EmbedderTestContext);
 };

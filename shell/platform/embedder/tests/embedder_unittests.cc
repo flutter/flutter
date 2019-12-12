@@ -1144,6 +1144,11 @@ static bool ImageMatchesFixture(const std::string& fixture_file_name,
   return images_are_same;
 }
 
+static bool ImageMatchesFixture(const std::string& fixture_file_name,
+                                std::future<sk_sp<SkImage>>& scene_image) {
+  return ImageMatchesFixture(fixture_file_name, scene_image.get());
+}
+
 //------------------------------------------------------------------------------
 /// Test the layer structure and pixels rendered when using a custom compositor.
 ///
@@ -1158,13 +1163,9 @@ TEST_F(EmbedderTest, CompositorMustBeAbleToRenderKnownScene) {
   context.GetCompositor().SetRenderTargetType(
       EmbedderTestCompositor::RenderTargetType::kOpenGLTexture);
 
-  fml::CountDownLatch latch(6);
+  fml::CountDownLatch latch(5);
 
-  sk_sp<SkImage> scene_image;
-  context.SetNextSceneCallback([&](sk_sp<SkImage> scene) {
-    scene_image = std::move(scene);
-    latch.CountDown();
-  });
+  auto scene_image = context.GetNextSceneImage();
 
   context.GetCompositor().SetNextPresentCallback(
       [&](const FlutterLayer** layers, size_t layers_count) {
@@ -1334,13 +1335,9 @@ TEST_F(EmbedderTest,
   context.GetCompositor().SetRenderTargetType(
       EmbedderTestCompositor::RenderTargetType::kSoftwareBuffer);
 
-  fml::CountDownLatch latch(6);
+  fml::CountDownLatch latch(5);
 
-  sk_sp<SkImage> scene_image;
-  context.SetNextSceneCallback([&](sk_sp<SkImage> scene) {
-    scene_image = std::move(scene);
-    latch.CountDown();
-  });
+  auto scene_image = context.GetNextSceneImage();
 
   context.GetCompositor().SetNextPresentCallback(
       [&](const FlutterLayer** layers, size_t layers_count) {
@@ -1637,13 +1634,9 @@ TEST_F(EmbedderTest, CompositorMustBeAbleToRenderWithRootLayerOnly) {
   context.GetCompositor().SetRenderTargetType(
       EmbedderTestCompositor::RenderTargetType::kOpenGLTexture);
 
-  fml::CountDownLatch latch(4);
+  fml::CountDownLatch latch(3);
 
-  sk_sp<SkImage> scene_image;
-  context.SetNextSceneCallback([&](sk_sp<SkImage> scene) {
-    scene_image = std::move(scene);
-    latch.CountDown();
-  });
+  auto scene_image = context.GetNextSceneImage();
 
   context.GetCompositor().SetNextPresentCallback(
       [&](const FlutterLayer** layers, size_t layers_count) {
@@ -1708,13 +1701,9 @@ TEST_F(EmbedderTest, CompositorMustBeAbleToRenderWithPlatformLayerOnBottom) {
   context.GetCompositor().SetRenderTargetType(
       EmbedderTestCompositor::RenderTargetType::kOpenGLTexture);
 
-  fml::CountDownLatch latch(4);
+  fml::CountDownLatch latch(3);
 
-  sk_sp<SkImage> scene_image;
-  context.SetNextSceneCallback([&](sk_sp<SkImage> scene) {
-    scene_image = std::move(scene);
-    latch.CountDown();
-  });
+  auto scene_image = context.GetNextSceneImage();
 
   context.GetCompositor().SetNextPresentCallback(
       [&](const FlutterLayer** layers, size_t layers_count) {
@@ -1831,13 +1820,9 @@ TEST_F(EmbedderTest,
 
   context.SetRootSurfaceTransformation(root_surface_transformation);
 
-  fml::CountDownLatch latch(6);
+  fml::CountDownLatch latch(5);
 
-  sk_sp<SkImage> scene_image;
-  context.SetNextSceneCallback([&](sk_sp<SkImage> scene) {
-    scene_image = std::move(scene);
-    latch.CountDown();
-  });
+  auto scene_image = context.GetNextSceneImage();
 
   context.GetCompositor().SetNextPresentCallback(
       [&](const FlutterLayer** layers, size_t layers_count) {
@@ -1997,13 +1982,7 @@ TEST_F(EmbedderTest, CanRenderSceneWithoutCustomCompositor) {
   builder.SetDartEntrypoint("can_render_scene_without_custom_compositor");
   builder.SetOpenGLRendererConfig(SkISize::Make(800, 600));
 
-  fml::CountDownLatch latch(1);
-
-  sk_sp<SkImage> renderered_scene;
-  context.SetNextSceneCallback([&](auto image) {
-    renderered_scene = std::move(image);
-    latch.CountDown();
-  });
+  auto renderered_scene = context.GetNextSceneImage();
 
   auto engine = builder.LaunchEngine();
   ASSERT_TRUE(engine.is_valid());
@@ -2016,10 +1995,6 @@ TEST_F(EmbedderTest, CanRenderSceneWithoutCustomCompositor) {
   event.pixel_ratio = 1.0;
   ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
             kSuccess);
-
-  latch.Wait();
-
-  ASSERT_NE(renderered_scene, nullptr);
 
   ASSERT_TRUE(ImageMatchesFixture("scene_without_custom_compositor.png",
                                   renderered_scene));
@@ -2038,13 +2013,7 @@ TEST_F(EmbedderTest, CanRenderSceneWithoutCustomCompositorWithTransformation) {
   builder.SetDartEntrypoint("can_render_scene_without_custom_compositor");
   builder.SetOpenGLRendererConfig(SkISize::Make(600, 800));
 
-  fml::CountDownLatch latch(1);
-
-  sk_sp<SkImage> renderered_scene;
-  context.SetNextSceneCallback([&](auto image) {
-    renderered_scene = std::move(image);
-    latch.CountDown();
-  });
+  auto renderered_scene = context.GetNextSceneImage();
 
   auto engine = builder.LaunchEngine();
   ASSERT_TRUE(engine.is_valid());
@@ -2060,10 +2029,6 @@ TEST_F(EmbedderTest, CanRenderSceneWithoutCustomCompositorWithTransformation) {
   ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
             kSuccess);
 
-  latch.Wait();
-
-  ASSERT_NE(renderered_scene, nullptr);
-
   ASSERT_TRUE(ImageMatchesFixture(
       "scene_without_custom_compositor_with_xform.png", renderered_scene));
 }
@@ -2075,13 +2040,8 @@ TEST_F(EmbedderTest, CanRenderGradientWithoutCompositor) {
 
   builder.SetDartEntrypoint("render_gradient");
   builder.SetOpenGLRendererConfig(SkISize::Make(800, 600));
-  fml::CountDownLatch latch(1);
 
-  sk_sp<SkImage> renderered_scene;
-  context.SetNextSceneCallback([&](auto image) {
-    renderered_scene = std::move(image);
-    latch.CountDown();
-  });
+  auto renderered_scene = context.GetNextSceneImage();
 
   auto engine = builder.LaunchEngine();
   ASSERT_TRUE(engine.is_valid());
@@ -2094,10 +2054,6 @@ TEST_F(EmbedderTest, CanRenderGradientWithoutCompositor) {
   event.pixel_ratio = 1.0;
   ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
             kSuccess);
-
-  latch.Wait();
-
-  ASSERT_NE(renderered_scene, nullptr);
 
   ASSERT_TRUE(ImageMatchesFixture("gradient.png", renderered_scene));
 }
@@ -2117,13 +2073,7 @@ TEST_F(EmbedderTest, CanRenderGradientWithoutCompositorWithXform) {
   builder.SetDartEntrypoint("render_gradient");
   builder.SetOpenGLRendererConfig(surface_size);
 
-  fml::CountDownLatch latch(1);
-
-  sk_sp<SkImage> renderered_scene;
-  context.SetNextSceneCallback([&](auto image) {
-    renderered_scene = std::move(image);
-    latch.CountDown();
-  });
+  auto renderered_scene = context.GetNextSceneImage();
 
   auto engine = builder.LaunchEngine();
   ASSERT_TRUE(engine.is_valid());
@@ -2138,10 +2088,6 @@ TEST_F(EmbedderTest, CanRenderGradientWithoutCompositorWithXform) {
   ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
             kSuccess);
 
-  latch.Wait();
-
-  ASSERT_NE(renderered_scene, nullptr);
-
   ASSERT_TRUE(ImageMatchesFixture("gradient_xform.png", renderered_scene));
 }
 
@@ -2153,13 +2099,8 @@ TEST_F(EmbedderTest, CanRenderGradientWithCompositor) {
   builder.SetDartEntrypoint("render_gradient");
   builder.SetOpenGLRendererConfig(SkISize::Make(800, 600));
   builder.SetCompositor();
-  fml::CountDownLatch latch(1);
 
-  sk_sp<SkImage> renderered_scene;
-  context.SetNextSceneCallback([&](auto image) {
-    renderered_scene = std::move(image);
-    latch.CountDown();
-  });
+  auto renderered_scene = context.GetNextSceneImage();
 
   auto engine = builder.LaunchEngine();
   ASSERT_TRUE(engine.is_valid());
@@ -2172,10 +2113,6 @@ TEST_F(EmbedderTest, CanRenderGradientWithCompositor) {
   event.pixel_ratio = 1.0;
   ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
             kSuccess);
-
-  latch.Wait();
-
-  ASSERT_NE(renderered_scene, nullptr);
 
   ASSERT_TRUE(ImageMatchesFixture("gradient.png", renderered_scene));
 }
@@ -2196,13 +2133,8 @@ TEST_F(EmbedderTest, CanRenderGradientWithCompositorWithXform) {
   builder.SetDartEntrypoint("render_gradient");
   builder.SetOpenGLRendererConfig(SkISize::Make(600, 800));
   builder.SetCompositor();
-  fml::CountDownLatch latch(1);
 
-  sk_sp<SkImage> renderered_scene;
-  context.SetNextSceneCallback([&](auto image) {
-    renderered_scene = std::move(image);
-    latch.CountDown();
-  });
+  auto renderered_scene = context.GetNextSceneImage();
 
   auto engine = builder.LaunchEngine();
   ASSERT_TRUE(engine.is_valid());
@@ -2217,10 +2149,6 @@ TEST_F(EmbedderTest, CanRenderGradientWithCompositorWithXform) {
   ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
             kSuccess);
 
-  latch.Wait();
-
-  ASSERT_NE(renderered_scene, nullptr);
-
   ASSERT_TRUE(ImageMatchesFixture("gradient_xform.png", renderered_scene));
 }
 
@@ -2232,7 +2160,6 @@ TEST_F(EmbedderTest, CanRenderGradientWithCompositorOnNonRootLayer) {
   builder.SetDartEntrypoint("render_gradient_on_non_root_backing_store");
   builder.SetOpenGLRendererConfig(SkISize::Make(800, 600));
   builder.SetCompositor();
-  fml::CountDownLatch latch(1);
 
   context.GetCompositor().SetNextPresentCallback(
       [&](const FlutterLayer** layers, size_t layers_count) {
@@ -2310,11 +2237,7 @@ TEST_F(EmbedderTest, CanRenderGradientWithCompositorOnNonRootLayer) {
         return surface->makeImageSnapshot();
       });
 
-  sk_sp<SkImage> renderered_scene;
-  context.SetNextSceneCallback([&](auto image) {
-    renderered_scene = std::move(image);
-    latch.CountDown();
-  });
+  auto renderered_scene = context.GetNextSceneImage();
 
   auto engine = builder.LaunchEngine();
   ASSERT_TRUE(engine.is_valid());
@@ -2327,10 +2250,6 @@ TEST_F(EmbedderTest, CanRenderGradientWithCompositorOnNonRootLayer) {
   event.pixel_ratio = 1.0;
   ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
             kSuccess);
-
-  latch.Wait();
-
-  ASSERT_NE(renderered_scene, nullptr);
 
   ASSERT_TRUE(ImageMatchesFixture("gradient.png", renderered_scene));
 }
@@ -2351,7 +2270,6 @@ TEST_F(EmbedderTest, CanRenderGradientWithCompositorOnNonRootLayerWithXform) {
   builder.SetDartEntrypoint("render_gradient_on_non_root_backing_store");
   builder.SetOpenGLRendererConfig(SkISize::Make(600, 800));
   builder.SetCompositor();
-  fml::CountDownLatch latch(1);
 
   context.GetCompositor().SetNextPresentCallback(
       [&](const FlutterLayer** layers, size_t layers_count) {
@@ -2429,11 +2347,7 @@ TEST_F(EmbedderTest, CanRenderGradientWithCompositorOnNonRootLayerWithXform) {
         return surface->makeImageSnapshot();
       });
 
-  sk_sp<SkImage> renderered_scene;
-  context.SetNextSceneCallback([&](auto image) {
-    renderered_scene = std::move(image);
-    latch.CountDown();
-  });
+  auto renderered_scene = context.GetNextSceneImage();
 
   auto engine = builder.LaunchEngine();
   ASSERT_TRUE(engine.is_valid());
@@ -2447,10 +2361,6 @@ TEST_F(EmbedderTest, CanRenderGradientWithCompositorOnNonRootLayerWithXform) {
   event.pixel_ratio = 1.0;
   ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
             kSuccess);
-
-  latch.Wait();
-
-  ASSERT_NE(renderered_scene, nullptr);
 
   ASSERT_TRUE(ImageMatchesFixture("gradient_xform.png", renderered_scene));
 }
@@ -2762,13 +2672,9 @@ TEST_F(EmbedderTest,
   context.GetCompositor().SetRenderTargetType(
       EmbedderTestCompositor::RenderTargetType::kOpenGLTexture);
 
-  sk_sp<SkImage> renderered_scene;
-  fml::CountDownLatch latch(2);
+  fml::CountDownLatch latch(1);
 
-  context.SetNextSceneCallback([&](auto image) {
-    renderered_scene = std::move(image);
-    latch.CountDown();
-  });
+  auto renderered_scene = context.GetNextSceneImage();
 
   context.GetCompositor().SetNextPresentCallback(
       [&](const FlutterLayer** layers, size_t layers_count) {
@@ -2861,13 +2767,9 @@ TEST_F(
       SkMatrix().preTranslate(0, 800).preRotate(-90, 0, 0);
 
   context.SetRootSurfaceTransformation(root_surface_transformation);
-  sk_sp<SkImage> renderered_scene;
-  fml::CountDownLatch latch(2);
 
-  context.SetNextSceneCallback([&](auto image) {
-    renderered_scene = std::move(image);
-    latch.CountDown();
-  });
+  auto renderered_scene = context.GetNextSceneImage();
+  fml::CountDownLatch latch(1);
 
   context.GetCompositor().SetNextPresentCallback(
       [&](const FlutterLayer** layers, size_t layers_count) {
@@ -3017,7 +2919,7 @@ TEST_F(EmbedderTest, VerifyB143464703WithSoftwareBackend) {
   context.GetCompositor().SetRenderTargetType(
       EmbedderTestCompositor::RenderTargetType::kSoftwareBuffer);
 
-  fml::CountDownLatch latch(2);
+  fml::CountDownLatch latch(1);
   context.GetCompositor().SetNextPresentCallback(
       [&](const FlutterLayer** layers, size_t layers_count) {
         ASSERT_EQ(layers_count, 3u);
@@ -3111,11 +3013,7 @@ TEST_F(EmbedderTest, VerifyB143464703WithSoftwareBackend) {
             kSuccess);
   ASSERT_TRUE(engine.is_valid());
 
-  sk_sp<SkImage> renderered_scene;
-  context.SetNextSceneCallback([&](auto image) {
-    renderered_scene = std::move(image);
-    latch.CountDown();
-  });
+  auto renderered_scene = context.GetNextSceneImage();
 
   latch.Wait();
   ASSERT_TRUE(ImageMatchesFixture("verifyb143464703_soft_noxform.png",
@@ -3569,12 +3467,7 @@ TEST_F(EmbedderTest, ArcEndCapsAreDrawnCorrectly) {
 
   auto engine = builder.LaunchEngine();
 
-  fml::AutoResetWaitableEvent latch;
-  sk_sp<SkImage> scene_image;
-  context.SetNextSceneCallback([&](sk_sp<SkImage> scene) {
-    scene_image = std::move(scene);
-    latch.Signal();
-  });
+  auto scene_image = context.GetNextSceneImage();
 
   ASSERT_TRUE(engine.is_valid());
 
@@ -3585,8 +3478,6 @@ TEST_F(EmbedderTest, ArcEndCapsAreDrawnCorrectly) {
   event.pixel_ratio = 1.0;
   ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
             kSuccess);
-
-  latch.Wait();
 
   ASSERT_TRUE(ImageMatchesFixture("arc_end_caps.png", scene_image));
 }
