@@ -132,7 +132,7 @@ const String getterMethodTemplate = '''
 ''';
 
 const String simpleMethodTemplate = '''
-  String @methodName(@methodParameters) {
+  String @methodName(@methodParameters) {@dateFormatting
     return Intl.message(
       @message,
       locale: _localeName,
@@ -149,6 +149,12 @@ const String pluralMethodTemplate = '''
   }
 ''';
 
+bool _isDateParameter(dynamic placeholderValue) {
+  return placeholderValue is Map<String, dynamic> &&
+    placeholderValue['type'] == 'DateTime' &&
+    placeholderValue.containsKey('format');
+}
+
 List<String> genMethodParameters(Map<String, dynamic> bundle, String key, String type) {
   final Map<String, dynamic> attributesMap = bundle['@$key'] as Map<String, dynamic>;
   if (attributesMap != null && attributesMap.containsKey('placeholders')) {
@@ -156,6 +162,29 @@ List<String> genMethodParameters(Map<String, dynamic> bundle, String key, String
     return placeholders.keys.map((String parameter) => '$type $parameter').toList();
   }
   return <String>[];
+}
+
+String generateDateFormattingLogic(Map<String, dynamic> bundle, String key) {
+  String result = '';
+  final Map<String, dynamic> attributesMap = bundle['@$key'] as Map<String, dynamic>;
+  if (attributesMap != null && attributesMap.containsKey('placeholders')) {
+    final Map<String, dynamic> placeholders = attributesMap['placeholders'] as Map<String, dynamic>;
+
+    for (String placeholder in placeholders.keys) {
+      final dynamic value = placeholders[placeholder];
+      if (_isDateParameter(value)) {
+        // TODO: iterate over allowable date formats and check if it is a valid format
+        // otherwise, throw an exception
+        result += '''
+
+    final DateFormat dateFormat = DateFormat.${value['format']}(_localeName);
+    final String ${placeholder}String = dateFormat.format($placeholder);
+''';
+      }
+    }
+  }
+
+  return result;
 }
 
 List<String> genIntlMethodArgs(Map<String, dynamic> bundle, String key) {
@@ -169,7 +198,16 @@ List<String> genIntlMethodArgs(Map<String, dynamic> bundle, String key) {
     if (attributesMap.containsKey('placeholders')) {
       final Map<String, dynamic> placeholders = attributesMap['placeholders'] as Map<String, dynamic>;
       if (placeholders.isNotEmpty) {
-        final String args = placeholders.keys.join(', ');
+        final List<String> argumentList = <String>[];
+        for (String placeholder in placeholders.keys) {
+          final dynamic value = placeholders[placeholder];
+          if (_isDateParameter(value)) {
+            argumentList.add('${placeholder}String');
+          } else {
+            argumentList.add(placeholder);
+          }
+        }
+        final String args = argumentList.join(', ');
         attributes.add('args: <Object>[$args]');
       }
     }
@@ -182,8 +220,14 @@ String genSimpleMethod(Map<String, dynamic> bundle, String key) {
     String message = bundle[key] as String;
     final Map<String, dynamic> attributesMap = bundle['@$key'] as Map<String, dynamic>;
     final Map<String, dynamic> placeholders = attributesMap['placeholders'] as Map<String, dynamic>;
-    for (String placeholder in placeholders.keys)
-      message = message.replaceAll('{$placeholder}', '\$$placeholder');
+    for (String placeholder in placeholders.keys) {
+      final dynamic value = placeholders[placeholder];
+      if (_isDateParameter(value)) {
+        message = message.replaceAll('{$placeholder}', '\$${placeholder}String');
+      } else {
+        message = message.replaceAll('{$placeholder}', '\$$placeholder');
+      }
+    }
     return generateString(message);
   }
 
@@ -198,6 +242,7 @@ String genSimpleMethod(Map<String, dynamic> bundle, String key) {
     return simpleMethodTemplate
       .replaceAll('@methodName', key)
       .replaceAll('@methodParameters', genMethodParameters(bundle, key, 'Object').join(', '))
+      .replaceAll('@dateFormatting', generateDateFormattingLogic(bundle, key))
       .replaceAll('@message', '${genSimpleMethodMessage(bundle, key)}')
       .replaceAll('@intlMethodArgs', genIntlMethodArgs(bundle, key).join(',\n      '));
   }
