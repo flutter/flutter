@@ -316,9 +316,8 @@ Application::Application(
   settings_.observatory_host = "127.0.0.1";
 #endif
 
-  // Set this to true to enable category "skia" trace events.
-  // TODO(PT-145): Explore enabling this by default.
-  settings_.trace_skia = false;
+  // Controls whether category "skia" trace events are enabled.
+  settings_.trace_skia = true;
 
   settings_.icu_data_path = "";
 
