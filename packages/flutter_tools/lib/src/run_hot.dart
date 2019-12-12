@@ -28,9 +28,9 @@ import 'vmservice.dart';
 
 ProjectFileInvalidator get projectFileInvalidator => context.get<ProjectFileInvalidator>() ?? _defaultInvalidator;
 final ProjectFileInvalidator _defaultInvalidator = ProjectFileInvalidator(
-  fs,
-  platform,
-  logger,
+  fileSystem: fs,
+  platform: platform,
+  logger: logger,
 );
 
 HotRunnerConfig get hotRunnerConfig => context.get<HotRunnerConfig>();
@@ -1120,11 +1120,13 @@ class HotRunner extends ResidentRunner {
 /// The [ProjectFileInvalidator] track the dependencies for a running
 /// application to determine when they are dirty.
 class ProjectFileInvalidator {
-  ProjectFileInvalidator(
-    this._fileSystem,
-    this._platform,
-    this._logger,
-  );
+  ProjectFileInvalidator({
+    @required FileSystem fileSystem,
+    @required Platform platform,
+    @required Logger logger,
+  }): _fileSystem = fileSystem,
+      _platform = platform,
+      _logger = logger;
 
   final FileSystem _fileSystem;
   final Platform _platform;

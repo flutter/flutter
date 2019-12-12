@@ -6,16 +6,18 @@ import 'dart:async';
 
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/base/common.dart';
+import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
-import 'package:test_api/test_api.dart' as test_package show TypeMatcher; // ignore: deprecated_member_use
+import 'package:meta/meta.dart';
+import 'package:test_api/test_api.dart' as test_package show TypeMatcher, test; // ignore: deprecated_member_use
 import 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf; // ignore: deprecated_member_use
 // ignore: deprecated_member_use
-export 'package:test_core/test_core.dart' hide TypeMatcher, isInstanceOf; // Defines a 'package:test' shim.
+export 'package:test_core/test_core.dart' hide TypeMatcher, isInstanceOf, test; // Defines a 'package:test' shim.
 
 /// A matcher that compares the type of the actual value to the type argument T.
 // TODO(ianh): Remove this once https://github.com/dart-lang/matcher/issues/98 is fixed
@@ -135,5 +137,56 @@ Future<void> expectToolExitLater(Future<dynamic> future, Matcher messageMatcher)
     expect(e.message, messageMatcher);
   } catch(e, trace) {
     fail('ToolExit expected, got $e\n$trace');
+  }
+}
+
+@isTest
+void test(String description, FutureOr<void> body(), {
+  String testOn,
+  Timeout timeout,
+  bool skip,
+  List<String> tags,
+  Map<String, dynamic> onPlatform,
+  int retry,
+  }) {
+  return runZoned(() {
+    return test_package.test(
+      description, body,
+      timeout: timeout,
+      skip: skip,
+      tags: tags,
+      onPlatform: onPlatform,
+      retry: retry,
+    );
+  }, zoneValues: <Object, Object>{
+    contextKey: const NoContext(),
+  });
+}
+
+/// An implementation of [AppContext] that throws if context.get is called in the test.
+///
+/// The intention of the class is to ensure we do not accidentally regress when
+/// moving towards more explicit dependency injection by accidentally using
+/// a Zone value in place of a constructor parameter.
+class NoContext implements AppContext {
+  const NoContext();
+
+  @override
+  T get<T>() {
+    throw UnsupportedError('context.get is not supported in this test.');
+  }
+
+  @override
+  String get name => 'No Context';
+
+  @override
+  Future<V> run<V>({
+    FutureOr<V> Function() body,
+    String name,
+    Map<Type, Generator> overrides,
+    Map<Type, Generator> fallbacks,
+    ZoneSpecification zoneSpecification,
+  }) async {
+    return body();
   }
 }

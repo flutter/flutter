@@ -11,23 +11,14 @@ import '../src/common.dart';
 
 // assumption: tests have a timeout less than 100 days
 final DateTime inFuture = DateTime.now().add(const Duration(days: 100));
-final DateTime inPast = DateTime.now().subtract(const Duration(days: 100));
 
 void main() {
-  FakePlatform platform;
-  BufferLogger logger;
-
-  setUp(() {
-    platform = FakePlatform();
-    logger = BufferLogger();
-  });
-
   for (bool asyncScanning in <bool>[true, false]) {
     test('No last compile, asyncScanning: $asyncScanning', () async {
       final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(
-        MemoryFileSystem(),
-        platform,
-        logger,
+        fileSystem: MemoryFileSystem(),
+        platform: FakePlatform(),
+        logger: BufferLogger(),
       );
 
       expect(
@@ -43,9 +34,9 @@ void main() {
 
     test('Empty project, asyncScanning: $asyncScanning', () async {
       final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(
-        MemoryFileSystem(),
-        platform,
-        logger,
+        fileSystem: MemoryFileSystem(),
+        platform: FakePlatform(),
+        logger: BufferLogger(),
       );
 
       expect(
@@ -61,9 +52,9 @@ void main() {
 
     test('Non-existent files are ignored, asyncScanning: $asyncScanning', () async {
       final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(
-        MemoryFileSystem(),
-        platform,
-        logger,
+        fileSystem: MemoryFileSystem(),
+        platform: FakePlatform(),
+        logger: BufferLogger(),
       );
 
       expect(
