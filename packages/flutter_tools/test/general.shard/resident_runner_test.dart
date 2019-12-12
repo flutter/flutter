@@ -674,7 +674,7 @@ void main() {
     expect(nextPlatform('iOS', TestFeatureFlags()), 'fuchsia');
     expect(nextPlatform('fuchsia', TestFeatureFlags()), 'android');
     expect(nextPlatform('fuchsia', TestFeatureFlags(isMacOSEnabled: true)), 'macOS');
-    expect(nextPlatform('unknown', TestFeatureFlags()), 'android');
+    expect(() => nextPlatform('unknown', TestFeatureFlags()), throwsA(isInstanceOf<AssertionError>()));
   });
 }
 
