@@ -18,7 +18,6 @@ import 'base/platform.dart';
 import 'base/terminal.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
-import 'cache.dart';
 import 'compile.dart';
 import 'convert.dart';
 import 'devfs.dart';
@@ -31,10 +30,8 @@ import 'vmservice.dart';
 ProjectFileInvalidator get projectFileInvalidator => context.get<ProjectFileInvalidator>() ?? _defaultInvalidator;
 final ProjectFileInvalidator _defaultInvalidator = ProjectFileInvalidator(
   fs,
-  const DirectoryWatcherFactory(),
   platform,
   logger,
-  Cache.flutterRoot,
 );
 
 HotRunnerConfig get hotRunnerConfig => context.get<HotRunnerConfig>();
@@ -1134,18 +1131,13 @@ class DirectoryWatcherFactory {
 class ProjectFileInvalidator {
   ProjectFileInvalidator(
     this._fileSystem,
-    this._directoryWatcherFactory,
     this._platform,
     this._logger,
-    String flutterRoot,
-  ) : _flutterSources = _fileSystem.directory(
-      _fileSystem.path.join(flutterRoot, 'packages', 'flutter'));
+  );
 
   final FileSystem _fileSystem;
-  final DirectoryWatcherFactory _directoryWatcherFactory;
   final Platform _platform;
   final Logger _logger;
-  final Directory _flutterSources;
 
   static const String _pubCachePathLinuxAndMac = '.pub-cache';
   static const String _pubCachePathWindows = 'Pub/Cache';
@@ -1157,17 +1149,6 @@ class ProjectFileInvalidator {
   // This value was chosen based on empirical tests scanning a set of
   // ~2000 files.
   static const int _kMaxPendingStats = 8;
-
-  StreamSubscription<void> _fileWatcher;
-
-  /// Whether we should monitor the flutter source tree for changes.
-  ///
-  /// To reduce the number of files that we diff for changes, we use a single
-  /// filesystem watcher to monitor the flutter directory for any changes. If
-  /// observed, we cancel the watcher and include the flutter directory for
-  /// subsequent changes.
-  bool get watchingFlutter => _watchingFlutter;
-  bool _watchingFlutter = false;
 
   Future<List<Uri>> findInvalidated({
     @required DateTime lastCompiled,
@@ -1181,17 +1162,6 @@ class ProjectFileInvalidator {
     if (lastCompiled == null) {
       // Initial load
       assert(urisToMonitor.isEmpty);
-      if (_flutterSources.existsSync()) {
-        _fileWatcher = _directoryWatcherFactory.watchDirectory(_flutterSources.path)
-          .events.listen((WatchEvent watchEvent) {
-            _logger.printTrace('Adding flutter sources to watch list.');
-            _fileWatcher.cancel();
-            _watchingFlutter = true;
-          });
-      } else {
-        // If we can't find the Flutter source directory, bail out to normal behavior.
-        _watchingFlutter = true;
-      }
       return <Uri>[];
     }
 
@@ -1199,9 +1169,7 @@ class ProjectFileInvalidator {
     final List<Uri> urisToScan = <Uri>[
       // Don't watch pub cache directories to speed things up a little.
       for (Uri uri in urisToMonitor)
-        if (_isNotInPubCache(uri) &&
-          (watchingFlutter || !uri.path.contains(_flutterSources.uri.path)))
-          uri,
+        if (_isNotInPubCache(uri)) uri,
 
       // We need to check the .packages file too since it is not used in compilation.
       _fileSystem.file(packagesPath).uri,
