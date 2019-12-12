@@ -1766,7 +1766,10 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
 
   double _attemptLayout(double mainAxisExtent, double crossAxisExtent, double correctedOffset) {
     // We can't assert mainAxisExtent is finite, because it could be infinite if
-    // it is within a column or row for example.
+    // it is within a column or row for example. In such a case, there's not
+    // even any scrolling to do, although some scroll physics (i.e.
+    // BouncingScrollPhysics) could still temporarily scroll the content in a
+    // simulation.
     assert(!mainAxisExtent.isNaN);
     assert(mainAxisExtent >= 0.0);
     assert(crossAxisExtent.isFinite);
