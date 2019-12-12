@@ -16,6 +16,7 @@ class FakeAndroidBuilder implements AndroidBuilder {
     @required Set<AndroidBuildInfo> androidBuildInfo,
     @required String target,
     @required String outputDirectoryPath,
+    @required String buildNumber,
   }) async {}
 
   @override
