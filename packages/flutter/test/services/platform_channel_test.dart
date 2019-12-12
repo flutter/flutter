@@ -42,6 +42,7 @@ void main() {
     const MessageCodec<dynamic> jsonMessage = JSONMessageCodec();
     const MethodCodec jsonMethod = JSONMethodCodec();
     const MethodChannel channel = MethodChannel('ch7', jsonMethod);
+    const OptionalMethodChannel optionalMethodChannel = OptionalMethodChannel('ch8', jsonMethod);
     test('can invoke method and get result', () async {
       ServicesBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
         'ch7',
@@ -156,6 +157,14 @@ void main() {
       } catch (e) {
         fail('MissingPluginException expected');
       }
+    });
+    test('can invoke unimplemented method (optional)', () async {
+      ServicesBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
+        'ch8',
+        (ByteData message) async => null,
+      );
+      final String result = await optionalMethodChannel.invokeMethod<String>('sayHello', 'hello');
+      expect(result, isNull);
     });
     test('can handle method call with no registered plugin', () async {
       channel.setMethodCallHandler(null);
