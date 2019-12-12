@@ -8,6 +8,7 @@ import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:meta/meta.dart';
 
 import 'debug.dart';
 import 'focus_manager.dart';
@@ -451,6 +452,13 @@ abstract class Widget extends DiagnosticableTree {
     properties.defaultDiagnosticsTreeStyle = DiagnosticsTreeStyle.dense;
   }
 
+  @override
+  @nonVirtual
+  bool operator ==(dynamic other) => super==other;
+
+  @override
+  @nonVirtual
+  int get hashCode => super.hashCode;
 
   /// Whether the `newWidget` can be used to update an [Element] that currently
   /// has the `oldWidget` as its configuration.
