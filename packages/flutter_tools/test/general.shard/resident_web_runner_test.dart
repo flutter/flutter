@@ -378,7 +378,10 @@ void main() {
     unawaited(residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
     ));
-    await connectionInfoCompleter.future;
+    final DebugConnectionInfo debugConnectionInfo = await connectionInfoCompleter.future;
+
+    expect(debugConnectionInfo, isNotNull);
+
     final OperationResult result = await residentWebRunner.restart(fullRestart: false);
 
     expect(testLogger.statusText, contains('Reloaded application in'));
