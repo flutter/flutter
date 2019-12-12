@@ -157,6 +157,7 @@ void test(String description, FutureOr<void> body(), {
       tags: tags,
       onPlatform: onPlatform,
       retry: retry,
+      testOn: testOn,
     );
   }, zoneValues: <Object, Object>{
     contextKey: const NoContext(),
