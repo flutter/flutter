@@ -46,14 +46,17 @@ class GradleUtils {
     final Directory androidDir = project.android.hostAppGradleRoot;
     // Update the project if needed.
     // TODO(egarciad): https://github.com/flutter/flutter/issues/40460
-    migrateToR8(androidDir);
-    injectGradleWrapperIfNeeded(androidDir);
+    gradleUtils.migrateToR8(androidDir);
+    gradleUtils.injectGradleWrapperIfNeeded(androidDir);
 
     final File gradle = androidDir.childFile(
       platform.isWindows ? 'gradlew.bat' : 'gradlew',
     );
     if (gradle.existsSync()) {
       printTrace('Using gradle from ${gradle.absolute.path}.');
+      // If the Gradle executable doesn't have execute permission,
+      // then attempt to set it.
+      _giveExecutePermissionIfNeeded(gradle);
       return gradle.absolute.path;
     }
     throwToolExit(
@@ -62,71 +65,69 @@ class GradleUtils {
     );
     return null;
   }
-}
 
-/// Migrates the Android's [directory] to R8.
-/// https://developer.android.com/studio/build/shrink-code
-@visibleForTesting
-void migrateToR8(Directory directory) {
-  final File gradleProperties = directory.childFile('gradle.properties');
-  if (!gradleProperties.existsSync()) {
-    throwToolExit(
-      'Expected file ${gradleProperties.path}. '
-      'Please ensure that this file exists or that ${gradleProperties.dirname} can be read.'
-    );
-  }
-  final String propertiesContent = gradleProperties.readAsStringSync();
-  if (propertiesContent.contains('android.enableR8')) {
-    printTrace('gradle.properties already sets `android.enableR8`');
-    return;
-  }
-  printTrace('set `android.enableR8=true` in gradle.properties');
-  try {
-    if (propertiesContent.isNotEmpty && !propertiesContent.endsWith('\n')) {
-      // Add a new line if the file doesn't end with a new line.
-      gradleProperties.writeAsStringSync('\n', mode: FileMode.append);
+  /// Migrates the Android's [directory] to R8.
+  /// https://developer.android.com/studio/build/shrink-code
+  @visibleForTesting
+  void migrateToR8(Directory directory) {
+    final File gradleProperties = directory.childFile('gradle.properties');
+    if (!gradleProperties.existsSync()) {
+      throwToolExit(
+        'Expected file ${gradleProperties.path}. '
+        'Please ensure that this file exists or that ${gradleProperties.dirname} can be read.'
+      );
     }
-    gradleProperties.writeAsStringSync('android.enableR8=true\n', mode: FileMode.append);
-  } on FileSystemException {
-    throwToolExit(
-      'The tool failed to add `android.enableR8=true` to ${gradleProperties.path}. '
-      'Please update the file manually and try this command again.'
-    );
-  }
-}
-
-/// Injects the Gradle wrapper files if any of these files don't exist in [directory].
-void injectGradleWrapperIfNeeded(Directory directory) {
-  copyDirectorySync(
-    cache.getArtifactDirectory('gradle_wrapper'),
-    directory,
-    shouldCopyFile: (File sourceFile, File destinationFile) {
-      // Don't override the existing files in the project.
-      return !destinationFile.existsSync();
-    },
-    onFileCopied: (File sourceFile, File destinationFile) {
-      final String modes = sourceFile.statSync().modeString();
-      if (modes != null && modes.contains('x')) {
-        os.makeExecutable(destinationFile);
+    final String propertiesContent = gradleProperties.readAsStringSync();
+    if (propertiesContent.contains('android.enableR8')) {
+      printTrace('gradle.properties already sets `android.enableR8`');
+      return;
+    }
+    printTrace('set `android.enableR8=true` in gradle.properties');
+    try {
+      if (propertiesContent.isNotEmpty && !propertiesContent.endsWith('\n')) {
+        // Add a new line if the file doesn't end with a new line.
+        gradleProperties.writeAsStringSync('\n', mode: FileMode.append);
       }
-    },
-  );
-  // Add the `gradle-wrapper.properties` file if it doesn't exist.
-  final File propertiesFile = directory.childFile(
-      fs.path.join('gradle', 'wrapper', 'gradle-wrapper.properties'));
-  if (!propertiesFile.existsSync()) {
-    final String gradleVersion = getGradleVersionForAndroidPlugin(directory);
-    propertiesFile.writeAsStringSync('''
+      gradleProperties.writeAsStringSync('android.enableR8=true\n', mode: FileMode.append);
+    } on FileSystemException {
+      throwToolExit(
+        'The tool failed to add `android.enableR8=true` to ${gradleProperties.path}. '
+        'Please update the file manually and try this command again.'
+      );
+    }
+  }
+
+  /// Injects the Gradle wrapper files if any of these files don't exist in [directory].
+  void injectGradleWrapperIfNeeded(Directory directory) {
+    copyDirectorySync(
+      cache.getArtifactDirectory('gradle_wrapper'),
+      directory,
+      shouldCopyFile: (File sourceFile, File destinationFile) {
+        // Don't override the existing files in the project.
+        return !destinationFile.existsSync();
+      },
+      onFileCopied: (File sourceFile, File destinationFile) {
+        if (_hasExecutePermission(sourceFile)) {
+          _giveExecutePermissionIfNeeded(destinationFile);
+        }
+      },
+    );
+    // Add the `gradle-wrapper.properties` file if it doesn't exist.
+    final File propertiesFile = directory.childFile(
+        fs.path.join('gradle', 'wrapper', 'gradle-wrapper.properties'));
+    if (!propertiesFile.existsSync()) {
+      final String gradleVersion = getGradleVersionForAndroidPlugin(directory);
+      propertiesFile.writeAsStringSync('''
 distributionBase=GRADLE_USER_HOME
 distributionPath=wrapper/dists
 zipStoreBase=GRADLE_USER_HOME
 zipStorePath=wrapper/dists
 distributionUrl=https\\://services.gradle.org/distributions/gradle-$gradleVersion-all.zip
 ''', flush: true,
-    );
+      );
+    }
   }
 }
-
 const String _defaultGradleVersion = '5.6.2';
 
 final RegExp _androidPluginRegExp = RegExp('com\.android\.tools\.build\:gradle\:(\\d+\.\\d+\.\\d+\)');
@@ -148,6 +149,24 @@ String getGradleVersionForAndroidPlugin(Directory directory) {
   }
   final String androidPluginVersion = pluginMatches.first.group(1);
   return getGradleVersionFor(androidPluginVersion);
+}
+
+const int _kExecPermissionMask = 0x49; // a+x
+
+/// Returns [true] if [executable] has execute permission.
+bool _hasExecutePermission(File executable) {
+  final FileStat stat = executable.statSync();
+  assert(stat.type != FileSystemEntityType.notFound);
+  printTrace('${executable.path} mode: ${stat.mode} ${stat.modeString()}.');
+  return stat.mode & _kExecPermissionMask == _kExecPermissionMask;
+}
+
+/// Gives execute permission to [executable] if it doesn't have it already.
+void _giveExecutePermissionIfNeeded(File executable) {
+  if (!_hasExecutePermission(executable)) {
+    printTrace('Trying to give execute permission to ${executable.path}.');
+    os.makeExecutable(executable);
+  }
 }
 
 /// Returns true if [targetVersion] is within the range [min] and [max] inclusive.
