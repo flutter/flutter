@@ -166,6 +166,8 @@ if (current_toolchain == host_toolchain) {
       "shell_test.cc",
       "shell_test.h",
       "shell_unittests.cc",
+      "test_vsync_waiters.cc",
+      "test_vsync_waiters.h",
     ]
 
     deps = [
