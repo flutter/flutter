@@ -615,8 +615,6 @@ class SliderThemeData extends Diagnosticable {
   final ShowValueIndicator showValueIndicator;
 
   /// The text style for the text on the value indicator.
-  ///
-  /// By default this is the [ThemeData.accentTextTheme.body2] text theme.
   final TextStyle valueIndicatorTextStyle;
 
   /// Limits the thumb's separation distance.
