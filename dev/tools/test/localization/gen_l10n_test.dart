@@ -521,15 +521,15 @@ void main() {
       expect(
         generator.classMethods.first,
         '''  String springBegins(Object springStartDate) {
-    final intl.DateFormat dateFormat = intl.DateFormat.yMMMMEEEEd(_localeName);
+    final DateFormat dateFormat = DateFormat.yMMMMEEEEd(_localeName);
     final String springStartDateString = dateFormat.format(springStartDate);
 
     return Intl.message(
-      r'Spring begins on \$springStartDate',
+      r'Spring begins on \$springStartDateString',
       locale: _localeName,
       name: 'springBegins',
       desc: r'The first day of spring',
-      args: <Object>[springStartDate]
+      args: <Object>[springStartDateString]
     );
   }
 ''');
