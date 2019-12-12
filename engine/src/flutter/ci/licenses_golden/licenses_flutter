@@ -568,6 +568,8 @@ FILE: ../../../flutter/shell/common/surface.cc
 FILE: ../../../flutter/shell/common/surface.h
 FILE: ../../../flutter/shell/common/switches.cc
 FILE: ../../../flutter/shell/common/switches.h
+FILE: ../../../flutter/shell/common/test_vsync_waiters.cc
+FILE: ../../../flutter/shell/common/test_vsync_waiters.h
 FILE: ../../../flutter/shell/common/thread_host.cc
 FILE: ../../../flutter/shell/common/thread_host.h
 FILE: ../../../flutter/shell/common/vsync_waiter.cc
