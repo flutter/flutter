@@ -630,7 +630,7 @@ class AndroidProject {
     _overwriteFromTemplate(fs.path.join('module', 'android', 'host_app_common'), _editableHostAppDirectory);
     _overwriteFromTemplate(fs.path.join('module', 'android', 'host_app_editable'), _editableHostAppDirectory);
     _overwriteFromTemplate(fs.path.join('module', 'android', 'gradle'), _editableHostAppDirectory);
-    gradle.injectGradleWrapperIfNeeded(_editableHostAppDirectory);
+    gradle.gradleUtils.injectGradleWrapperIfNeeded(_editableHostAppDirectory);
     gradle.writeLocalProperties(_editableHostAppDirectory.childFile('local.properties'));
     await injectPlugins(parent);
   }
@@ -647,7 +647,7 @@ class AndroidProject {
       featureFlags.isAndroidEmbeddingV2Enabled ? 'library_new_embedding' : 'library',
     ), ephemeralDirectory);
     _overwriteFromTemplate(fs.path.join('module', 'android', 'gradle'), ephemeralDirectory);
-    gradle.injectGradleWrapperIfNeeded(ephemeralDirectory);
+    gradle.gradleUtils.injectGradleWrapperIfNeeded(ephemeralDirectory);
   }
 
   void _overwriteFromTemplate(String path, Directory target) {
