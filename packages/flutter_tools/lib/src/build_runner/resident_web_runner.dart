@@ -372,6 +372,9 @@ class _ExperimentalResidentWebRunner extends ResidentWebRunner {
         );
 
   @override
+  bool get debuggingEnabled => false;
+
+  @override
   Future<int> run({
     Completer<DebugConnectionInfo> connectionInfoCompleter,
     Completer<void> appStartedCompleter,

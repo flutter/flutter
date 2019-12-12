@@ -486,6 +486,12 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(isWebIncrementalCompilerEnabled: true),
   }));
 
+  test('experimental resident runner is not debuggable', () => testbed.run(() {
+    expect(residentWebRunner.debuggingEnabled, false);
+  }, overrides: <Type, Generator>{
+    FeatureFlags: () => TestFeatureFlags(isWebIncrementalCompilerEnabled: true),
+  }));
+
   test('Can hot restart after attaching', () => testbed.run(() async {
     _setupMocks();
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
