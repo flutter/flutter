@@ -717,7 +717,7 @@ void main() {
         find.byKey(painterKey),
         matchesGoldenFile('material.border_paint_above.png'),
       );
-    }, skip: isBrowser);
+    });
 
     testWidgets('border is painted below child when specified', (WidgetTester tester) async {
       final Key painterKey = UniqueKey();
@@ -757,6 +757,6 @@ void main() {
         find.byKey(painterKey),
         matchesGoldenFile('material.border_paint_below.png'),
       );
-    }, skip: isBrowser);
+    });
   });
 }
