@@ -1,4 +1,4 @@
-Signature: f29b388d37d2ea1b9f4eefc18448e379
+Signature: b48f64e897d07a9966a0eafc40b79835
 
 UNUSED LICENSES:
 
@@ -7671,6 +7671,12 @@ FILE: ../../../third_party/dart/runtime/vm/type_testing_stubs_arm64.cc
 FILE: ../../../third_party/dart/runtime/vm/type_testing_stubs_x64.cc
 FILE: ../../../third_party/dart/samples/ffi/coordinate.dart
 FILE: ../../../third_party/dart/samples/ffi/dylib_utils.dart
+FILE: ../../../third_party/dart/samples/ffi/resource_management/pool.dart
+FILE: ../../../third_party/dart/samples/ffi/resource_management/pool_isolate_shutdown_sample.dart
+FILE: ../../../third_party/dart/samples/ffi/resource_management/pool_sample.dart
+FILE: ../../../third_party/dart/samples/ffi/resource_management/pool_zoned_sample.dart
+FILE: ../../../third_party/dart/samples/ffi/resource_management/resource_management_test.dart
+FILE: ../../../third_party/dart/samples/ffi/resource_management/unmanaged_sample.dart
 FILE: ../../../third_party/dart/samples/ffi/sample_ffi_bitfield.dart
 FILE: ../../../third_party/dart/samples/ffi/sample_ffi_data.dart
 FILE: ../../../third_party/dart/samples/ffi/sample_ffi_dynamic_library.dart
