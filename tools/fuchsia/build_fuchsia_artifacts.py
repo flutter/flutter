@@ -155,7 +155,7 @@ def BuildBucket(runtime_mode, arch, product):
   CopyToBucket(out_dir, bucket_dir, product)
 
 
-def ProcessCIPDPakcage(upload, engine_version):
+def ProcessCIPDPackage(upload, engine_version):
   # Copy the CIPD YAML template from the source directory to be next to the bucket
   # we are about to package.
   cipd_yaml = os.path.join(_script_dir, 'fuchsia.cipd.yaml')
@@ -278,7 +278,7 @@ def main():
     if args.engine_version is None:
       print('--upload requires --engine-version to be specified.')
       return 1
-    ProcessCIPDPakcage(args.upload, args.engine_version)
+    ProcessCIPDPackage(args.upload, args.engine_version)
   return 0
 
 
