@@ -71,6 +71,7 @@ void main() {
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       stayResident: true,
       dartDefines: const <String>[],
+      urlTunneller: null,
     ) as ResidentWebRunner;
     expect(await runner.run(), 1);
   }));

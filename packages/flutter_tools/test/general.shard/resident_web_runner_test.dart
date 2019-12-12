@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_runner/resident_web_runner.dart';
 import 'package:flutter_tools/src/build_runner/web_fs.dart';
@@ -78,6 +79,7 @@ void main() {
           ipv6: true,
           stayResident: true,
           dartDefines: const <String>[],
+          urlTunneller: null,
         ) as ResidentWebRunner;
       },
       overrides: <Type, Generator>{
@@ -90,6 +92,7 @@ void main() {
           @required String hostname,
           @required String port,
           @required List<String> dartDefines,
+          @required UrlTunneller urlTunneller,
         }) async {
           didSkipDwds = skipDwds;
           return mockWebFs;
@@ -142,6 +145,7 @@ void main() {
       ipv6: true,
       stayResident: true,
       dartDefines: const <String>[],
+      urlTunneller: null,
     ) as ResidentWebRunner;
 
     expect(profileResidentWebRunner.debuggingEnabled, false);
@@ -172,6 +176,7 @@ void main() {
       ipv6: true,
       stayResident: true,
       dartDefines: <String>[],
+      urlTunneller: null,
     );
 
     expect(profileResidentWebRunner.debuggingEnabled, true);
@@ -187,6 +192,7 @@ void main() {
       ipv6: true,
       stayResident: true,
       dartDefines: <String>[],
+      urlTunneller: null,
     ) as ResidentWebRunner;
 
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
@@ -210,6 +216,7 @@ void main() {
       ipv6: true,
       stayResident: true,
       dartDefines: const <String>[],
+      urlTunneller: null,
     );
 
     expect(profileResidentWebRunner.supportsServiceProtocol, false);
@@ -263,6 +270,7 @@ void main() {
       ipv6: true,
       stayResident: false,
       dartDefines: const <String>[],
+      urlTunneller: null,
     ) as ResidentWebRunner;
 
     expect(await residentWebRunner.run(), 0);
@@ -299,6 +307,7 @@ void main() {
       ipv6: true,
       stayResident: true,
       dartDefines: const <String>[],
+      urlTunneller: null,
     ) as ResidentWebRunner;
     _setupMocks();
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
@@ -513,6 +522,7 @@ void main() {
       ipv6: true,
       stayResident: true,
       dartDefines: const <String>[],
+      urlTunneller: null,
     ) as ResidentWebRunner;
 
     expect(residentWebRunner.runtimeType.toString(), '_DwdsResidentWebRunner');
@@ -830,6 +840,7 @@ void main() {
       ipv6: true,
       stayResident: true,
       dartDefines: const <String>[],
+      urlTunneller: null,
     ) as ResidentWebRunner;
 
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
@@ -865,6 +876,7 @@ void main() {
       ipv6: true,
       stayResident: true,
       dartDefines: const <String>[],
+      urlTunneller: null,
     ) as ResidentWebRunner;
 
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();

@@ -314,6 +314,7 @@ class RunCommand extends RunCommandBase {
         initializePlatform: boolArg('web-initialize-platform'),
         hostname: featureFlags.isWebEnabled ? stringArg('web-hostname') : '',
         port: featureFlags.isWebEnabled ? stringArg('web-port') : '',
+        webEnableExposeUrl: featureFlags.isWebEnabled && boolArg('web-allow-expose-url'),
       );
     } else {
       return DebuggingOptions.enabled(
@@ -334,6 +335,7 @@ class RunCommand extends RunCommandBase {
         initializePlatform: boolArg('web-initialize-platform'),
         hostname: featureFlags.isWebEnabled ? stringArg('web-hostname') : '',
         port: featureFlags.isWebEnabled ? stringArg('web-port') : '',
+        webEnableExposeUrl: featureFlags.isWebEnabled && boolArg('web-allow-expose-url'),
         vmserviceOutFile: stringArg('vmservice-out-file'),
         // Allow forcing fast-start to off to prevent doing more work on devices that
         // don't support it.
@@ -489,6 +491,7 @@ class RunCommand extends RunCommandBase {
         debuggingOptions: _createDebuggingOptions(),
         stayResident: stayResident,
         dartDefines: dartDefines,
+        urlTunneller: null,
       );
     } else {
       runner = ColdRunner(
