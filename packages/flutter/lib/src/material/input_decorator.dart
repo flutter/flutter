@@ -2406,7 +2406,7 @@ class InputDecoration {
   /// decorate a Material Design text field.
   ///
   /// Unless specified by [ThemeData.inputDecorationTheme],
-  /// [InputDecorator] defaults [isDense] to true, and [filled] to false,
+  /// [InputDecorator] defaults [isDense] to false, and [filled] to false,
   /// and [maxLines] to 1. The default border is an instance
   /// of [UnderlineInputBorder]. If [border] is [InputBorder.none] then
   /// no border is drawn.

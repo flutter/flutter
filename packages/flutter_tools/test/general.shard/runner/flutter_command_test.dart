@@ -6,6 +6,8 @@ import 'dart:async';
 import 'dart:io' as io;
 
 import 'package:flutter_tools/src/base/common.dart';
+import 'package:flutter_tools/src/base/error_handling_file_system.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/time.dart';
@@ -63,6 +65,16 @@ void main() {
     },
     overrides: <Type, Generator>{
       Cache: () => cache,
+    });
+
+    testUsingContext('uses the error handling file system', () async {
+      final DummyFlutterCommand flutterCommand = DummyFlutterCommand(
+        commandFunction: () async {
+          expect(fs, isA<ErrorHandlingFileSystem>());
+          return const FlutterCommandResult(ExitStatus.success);
+        }
+      );
+      await flutterCommand.run();
     });
 
     void testUsingCommandContext(String testName, dynamic Function() testBody) {

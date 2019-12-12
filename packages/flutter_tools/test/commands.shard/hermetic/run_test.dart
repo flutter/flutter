@@ -11,12 +11,15 @@ import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/context.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/run.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
+import 'package:flutter_tools/src/globals.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
@@ -55,6 +58,72 @@ void main() {
         expect(e.exitCode ?? 1, 1);
       }
     });
+
+    testUsingContext('does not support "--use-application-binary" and "--fast-start"', () async {
+      fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+      fs.file('pubspec.yaml').createSync();
+      fs.file('.packages').createSync();
+
+      final RunCommand command = RunCommand();
+      applyMocksToCommand(command);
+      try {
+        await createTestCommandRunner(command).run(<String>[
+          'run',
+          '--use-application-binary=app/bar/faz',
+          '--fast-start',
+          '--no-pub',
+          '--show-test-device',
+        ]);
+        fail('Expect exception');
+      } catch (e) {
+        expect(e.toString(), contains('--fast-start is not supported with --use-application-binary'));
+      }
+    }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    testUsingContext('Forces fast start off for devices that do not support it', () async {
+      final MockDevice mockDevice = MockDevice(TargetPlatform.android_arm);
+      when(mockDevice.name).thenReturn('mockdevice');
+      when(mockDevice.supportsFastStart).thenReturn(false);
+      when(mockDevice.supportsHotReload).thenReturn(true);
+      when(mockDevice.isLocalEmulator).thenAnswer((Invocation invocation) async => false);
+      when(deviceManager.hasSpecifiedAllDevices).thenReturn(false);
+      when(deviceManager.findTargetDevices(any)).thenAnswer((Invocation invocation) {
+        return Future<List<Device>>.value(<Device>[mockDevice]);
+      });
+      when(deviceManager.getDevices()).thenAnswer((Invocation invocation) {
+        return Stream<Device>.value(mockDevice);
+      });
+      fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+      fs.file('pubspec.yaml').createSync();
+      fs.file('.packages').createSync();
+
+      final RunCommand command = RunCommand();
+      applyMocksToCommand(command);
+      try {
+        await createTestCommandRunner(command).run(<String>[
+          'run',
+          '--fast-start',
+          '--no-pub',
+        ]);
+        fail('Expect exception');
+      } catch (e) {
+        expect(e, isInstanceOf<ToolExit>());
+      }
+
+      final BufferLogger bufferLogger = logger as BufferLogger;
+      expect(bufferLogger.statusText, contains(
+        'Using --fast-start option with device mockdevice, but this device '
+        'does not support it. Overriding the setting to false.'
+      ));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager.any(),
+      DeviceManager: () => MockDeviceManager(),
+    });
+
 
     group('run app', () {
       MemoryFileSystem fs;
@@ -166,6 +235,7 @@ void main() {
         final MockDevice mockDevice = MockDevice(TargetPlatform.ios);
         when(mockDevice.isLocalEmulator).thenAnswer((Invocation invocation) => Future<bool>.value(false));
         when(mockDevice.getLogReader(app: anyNamed('app'))).thenReturn(MockDeviceLogReader());
+        when(mockDevice.supportsFastStart).thenReturn(true);
         // App fails to start because we're only interested in usage
         when(mockDevice.startApp(
           any,
@@ -496,6 +566,9 @@ class FakeDevice extends Fake implements Device {
 
   @override
   bool get supportsHotReload => false;
+
+  @override
+  bool get supportsFastStart => false;
 
   @override
   Future<String> get sdkNameAndVersion => Future<String>.value('');

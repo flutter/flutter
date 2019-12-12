@@ -30,7 +30,6 @@ import 'dart:io' as io show exit, IOSink, Process, ProcessInfo, ProcessSignal,
     stderr, stdin, Stdin, StdinException, Stdout, stdout;
 
 import 'package:meta/meta.dart';
-import 'package:test_api/test_api.dart'; // ignore: deprecated_member_use
 
 import 'context.dart';
 import 'platform.dart';
@@ -112,13 +111,7 @@ ExitFunction get exit {
 
 // Whether the tool is executing in a unit test.
 bool _inUnitTest() {
-  try {
-    expect(true, true);
-  } on StateError {
-    // If a StateError is caught, then this is not a unit test.
-    return false;
-  }
-  return true;
+  return Zone.current[#test.declarer] != null;
 }
 
 /// Sets the [exit] function to a function that throws an exception rather
