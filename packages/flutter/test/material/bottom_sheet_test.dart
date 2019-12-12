@@ -180,7 +180,7 @@ void main() {
     expect(showBottomSheetThenCalled, isFalse);
 
     // Swipe the bottom sheet to dismiss it.
-    await tester.drag(find.text('BottomSheet'), const Offset(0.0, 20.0));
+    await tester.drag(find.text('BottomSheet'), const Offset(0.0, 150.0));
     await tester.pumpAndSettle(); // Bottom sheet dismiss animation.
     expect(showBottomSheetThenCalled, isTrue);
     expect(find.text('BottomSheet'), findsNothing);
@@ -215,7 +215,7 @@ void main() {
     expect(showBottomSheetThenCalled, isFalse);
 
     // Swipe the bottom sheet to dismiss it.
-    await tester.drag(find.text('BottomSheet'), const Offset(0.0, 20.0));
+    await tester.drag(find.text('BottomSheet'), const Offset(0.0, 150.0));
     await tester.pumpAndSettle(); // Bottom sheet dismiss animation.
     expect(showBottomSheetThenCalled, isFalse);
     expect(find.text('BottomSheet'), findsNothing);
@@ -250,7 +250,7 @@ void main() {
     expect(showBottomSheetThenCalled, isFalse);
 
     // Swipe the bottom sheet, attempting to dismiss it.
-    await tester.drag(find.text('BottomSheet'), const Offset(0.0, 20.0));
+    await tester.drag(find.text('BottomSheet'), const Offset(0.0, 150.0));
     await tester.pumpAndSettle(); // Bottom sheet should not dismiss.
     expect(showBottomSheetThenCalled, isTrue);
     expect(find.text('BottomSheet'), findsNothing);
