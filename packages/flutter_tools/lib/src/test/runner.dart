@@ -48,6 +48,12 @@ Future<int> runTests(
   Directory coverageDirectory,
   bool web = false,
 }) async {
+  // Configure package:test to use the Flutter engine for child processes.
+  final String shellPath = artifacts.getArtifactPath(Artifact.flutterTester);
+  if (!processManager.canRun(shellPath)) {
+    throwToolExit('Cannot execute Flutter tester at $shellPath');
+  }
+
   // Compute the command-line arguments for package:test.
   final List<String> testArgs = <String>[
     if (!terminal.supportsColor)
@@ -86,7 +92,12 @@ Future<int> runTests(
     hack.registerPlatformPlugin(
       <Runtime>[Runtime.chrome],
       () {
-        return FlutterWebPlatform.start(flutterProject.directory.path);
+        return FlutterWebPlatform.start(
+          flutterProject.directory.path,
+          updateGoldens: updateGoldens,
+          shellPath: shellPath,
+          flutterProject: flutterProject,
+        );
       },
     );
     await test.main(testArgs);
@@ -96,12 +107,6 @@ Future<int> runTests(
   testArgs
     ..add('--')
     ..addAll(testFiles);
-
-  // Configure package:test to use the Flutter engine for child processes.
-  final String shellPath = artifacts.getArtifactPath(Artifact.flutterTester);
-  if (!processManager.canRun(shellPath)) {
-    throwToolExit('Cannot find Flutter shell at $shellPath');
-  }
 
   final InternetAddressType serverType =
       ipv6 ? InternetAddressType.IPv6 : InternetAddressType.IPv4;

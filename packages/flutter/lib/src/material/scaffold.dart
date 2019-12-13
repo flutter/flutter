@@ -317,9 +317,9 @@ class _BodyBoxConstraints extends BoxConstraints {
   bool operator ==(dynamic other) {
     if (super != other)
       return false;
-    final _BodyBoxConstraints typedOther = other;
-    return bottomWidgetsHeight == typedOther.bottomWidgetsHeight
-        && appBarHeight == typedOther.appBarHeight;
+    return other is _BodyBoxConstraints
+        && other.bottomWidgetsHeight == bottomWidgetsHeight
+        && other.appBarHeight == appBarHeight;
   }
 
   @override
@@ -356,7 +356,7 @@ class _BodyBuilder extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
-        final _BodyBoxConstraints bodyConstraints = constraints;
+        final _BodyBoxConstraints bodyConstraints = constraints as _BodyBoxConstraints;
         final MediaQueryData metrics = MediaQuery.of(context);
 
         final double bottom = extendBody
@@ -741,10 +741,8 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
   }
 
   bool _isExtendedFloatingActionButton(Widget widget) {
-    if (widget is! FloatingActionButton)
-      return false;
-    final FloatingActionButton fab = widget;
-    return fab.isExtended;
+    return widget is FloatingActionButton
+        && widget.isExtended;
   }
 
   @override
@@ -1897,7 +1895,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         clipBehavior: clipBehavior,
       );
     });
-    return _currentBottomSheet;
+    return _currentBottomSheet as PersistentBottomSheetController<T>;
   }
 
   // Floating Action Button API
@@ -1919,7 +1917,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     _floatingActionButtonVisibilityController.value = newValue.clamp(
       _floatingActionButtonVisibilityController.lowerBound,
       _floatingActionButtonVisibilityController.upperBound,
-    );
+    ) as double;
   }
 
   /// Shows the [Scaffold.floatingActionButton].

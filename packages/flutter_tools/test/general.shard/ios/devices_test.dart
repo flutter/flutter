@@ -410,7 +410,7 @@ void main() {
         Usage: () => mockUsage,
       });
 
-      testUsingContext(' succeeds in release mode', () async {
+      testUsingContext('succeeds in release mode', () async {
         final IOSDevice device = IOSDevice('123');
         final LaunchResult launchResult = await device.startApp(mockApp,
           prebuiltApplication: true,
@@ -428,7 +428,7 @@ void main() {
         ProcessManager: () => mockProcessManager,
       });
 
-      testUsingContext(' succeeds with --cache-sksl', () async {
+      testUsingContext('succeeds with --cache-sksl', () async {
         final IOSDevice device = IOSDevice('123');
         device.setLogReader(mockApp, mockLogReader);
         final Uri uri = Uri(
@@ -460,6 +460,50 @@ void main() {
         );
         expect(launchResult.started, isTrue);
         expect(args, contains('--cache-sksl'));
+        expect(await device.stopApp(mockApp), isFalse);
+      }, overrides: <Type, Generator>{
+        Artifacts: () => mockArtifacts,
+        Cache: () => mockCache,
+        FileSystem: () => mockFileSystem,
+        MDnsObservatoryDiscovery: () => mockMDnsObservatoryDiscovery,
+        Platform: () => macPlatform,
+        ProcessManager: () => mockProcessManager,
+        Usage: () => mockUsage,
+        IOSDeploy: () => mockIosDeploy,
+      });
+
+      testUsingContext('succeeds with --device-vmservice-port', () async {
+        final IOSDevice device = IOSDevice('123');
+        device.setLogReader(mockApp, mockLogReader);
+        final Uri uri = Uri(
+          scheme: 'http',
+          host: '127.0.0.1',
+          port: 1234,
+          path: 'observatory',
+        );
+        when(mockMDnsObservatoryDiscovery.getObservatoryUri(any, any, usesIpv6: anyNamed('usesIpv6')))
+            .thenAnswer((Invocation invocation) => Future<Uri>.value(uri));
+
+        List<String> args;
+        when(mockIosDeploy.runApp(
+          deviceId: anyNamed('deviceId'),
+          bundlePath: anyNamed('bundlePath'),
+          launchArguments: anyNamed('launchArguments'),
+        )).thenAnswer((Invocation inv) {
+          args = inv.namedArguments[const Symbol('launchArguments')] as List<String>;
+          return Future<int>.value(0);
+        });
+
+        final LaunchResult launchResult = await device.startApp(mockApp,
+          prebuiltApplication: true,
+          debuggingOptions: DebuggingOptions.enabled(
+            const BuildInfo(BuildMode.debug, null),
+            deviceVmServicePort: 8181,
+          ),
+          platformArgs: <String, dynamic>{},
+        );
+        expect(launchResult.started, isTrue);
+        expect(args, contains('--observatory-port=8181'));
         expect(await device.stopApp(mockApp), isFalse);
       }, overrides: <Type, Generator>{
         Artifacts: () => mockArtifacts,
