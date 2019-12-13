@@ -17,6 +17,7 @@
 #ifndef MINIKIN_FONT_COLLECTION_H
 #define MINIKIN_FONT_COLLECTION_H
 
+#include <map>
 #include <memory>
 #include <unordered_set>
 #include <vector>
@@ -100,6 +101,9 @@ class FontCollection {
                                                       uint32_t langListId,
                                                       int variant) const;
 
+  const std::shared_ptr<FontFamily>&
+  findFallbackFont(uint32_t ch, uint32_t vs, uint32_t langListId) const;
+
   uint32_t calcFamilyScore(uint32_t ch,
                            uint32_t vs,
                            int variant,
@@ -148,6 +152,11 @@ class FontCollection {
 
   // libtxt extension: Fallback font provider.
   std::unique_ptr<FallbackFontProvider> mFallbackFontProvider;
+
+  // libtxt extension: Fallback fonts discovered after this font collection
+  // was constructed.
+  mutable std::map<std::string, std::vector<std::shared_ptr<FontFamily>>>
+      mCachedFallbackFamilies;
 };
 
 }  // namespace minikin
