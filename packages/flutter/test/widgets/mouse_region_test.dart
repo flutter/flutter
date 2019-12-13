@@ -577,20 +577,20 @@ void main() {
     addTearDown(gesture.removePointer);
     await gesture.addPointer(location: Offset.zero);
 
-    int numEntries = 0;
+    int numEntrances = 0;
     int numExits = 0;
 
     await tester.pumpWidget(
       Center(
           child: HoverFeedback(
-        onEnter: () => numEntries++,
-        onExit: () => numExits++,
+        onEnter: () { numEntrances += 1; },
+        onExit: () { numExits += 1; },
       )),
     );
 
     await gesture.moveTo(tester.getCenter(find.byType(Text)));
     await tester.pumpAndSettle();
-    expect(numEntries, equals(1));
+    expect(numEntrances, equals(1));
     expect(numExits, equals(0));
     expect(find.text('HOVERING'), findsOneWidget);
 
@@ -598,18 +598,18 @@ void main() {
       Container(),
     );
     await tester.pump();
-    expect(numEntries, equals(1));
+    expect(numEntrances, equals(1));
     expect(numExits, equals(0));
 
     await tester.pumpWidget(
       Center(
           child: HoverFeedback(
-        onEnter: () => numEntries++,
-        onExit: () => numExits++,
+        onEnter: () { numEntrances += 1; },
+        onExit: () { numExits += 1; },
       )),
     );
     await tester.pump();
-    expect(numEntries, equals(2));
+    expect(numEntrances, equals(2));
     expect(numExits, equals(0));
   });
 
@@ -619,21 +619,21 @@ void main() {
     await gesture.addPointer();
     addTearDown(gesture.removePointer);
 
-    int numEntries = 0;
+    int numEntrances = 0;
     int numExits = 0;
 
     await tester.pumpWidget(
       Center(
           child: HoverFeedback(
         key: feedbackKey,
-        onEnter: () => numEntries++,
-        onExit: () => numExits++,
+        onEnter: () { numEntrances += 1; },
+        onExit: () { numExits += 1; },
       )),
     );
 
     await gesture.moveTo(tester.getCenter(find.byType(Text)));
     await tester.pumpAndSettle();
-    expect(numEntries, equals(1));
+    expect(numEntrances, equals(1));
     expect(numExits, equals(0));
     expect(find.text('HOVERING'), findsOneWidget);
 
@@ -642,20 +642,20 @@ void main() {
         child: Container(
           child: HoverFeedback(
             key: feedbackKey,
-            onEnter: () => numEntries++,
-            onExit: () => numExits++,
+            onEnter: () { numEntrances += 1; },
+            onExit: () { numExits += 1; },
           ),
         ),
       ),
     );
     await tester.pump();
-    expect(numEntries, equals(1));
+    expect(numEntrances, equals(1));
     expect(numExits, equals(0));
     await tester.pumpWidget(
       Container(),
     );
     await tester.pump();
-    expect(numEntries, equals(1));
+    expect(numEntrances, equals(1));
     expect(numExits, equals(0));
   });
 
@@ -733,7 +733,7 @@ void main() {
         child: MouseRegion(
           onEnter: (PointerEnterEvent e) {},
           child: _PaintDelegateWidget(
-            onPaint: () => paintCount++,
+            onPaint: () { paintCount += 1; },
             child: const Text('123'),
           ),
         ),
@@ -756,7 +756,7 @@ void main() {
         child: MouseRegion(
           onEnter: (PointerEnterEvent e) {},
           child: _PaintDelegateWidget(
-            onPaint: () => paintCount++,
+            onPaint: () { paintCount += 1; },
             child: const Text('123'),
           ),
         ),

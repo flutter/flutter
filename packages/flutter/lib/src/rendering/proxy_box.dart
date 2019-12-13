@@ -2739,21 +2739,17 @@ class RenderMouseRegion extends RenderProxyBox {
       _onExit(event);
   }
 
-  // About updating the properties of [RenderMouseRegion]:
+  // Call this method when a property has changed and might affect the
+  // `_annotationIsActive` bit.
   //
-  // `RenderMouseRegion` has 2 categories of properties:
+  // If `mustRepaint` is false, this method does NOT call `markNeedsPaint`
+  // unless the `_annotationIsActive` bit is changed. If there is a property
+  // that needs updating while `_annotationIsActive` stays true, make
+  // `mustRepaint` true.
   //
-  //  * "Loose properties": [RenderMouseRegion] cares if these properties are
-  //    effective (an effective property makes _annotationIsActive true), but
-  //    doesn't care about their exact values. Examples are all the callbacks;
-  //    their actual values are not important since they are proxied. If their
-  //    changes don't affect `_annotationIsActive`, `markNeedsPaint` can be
-  //    skipped.
-  //  * "Strict properties": [RenderMouseRegion] needs the exact values of these
-  //    properties. An example is `opaque`. Their changes must be followed by
-  //    `markNeedsPaint` in order to update their exact values to the tree.
-
+  // This method must not be called during `paint`.
   void _markPropertyUpdated({@required bool mustRepaint}) {
+    assert(!owner.debugDoingPaint);
     final bool newAnnotationIsActive = (
         _onEnter != null ||
         _onHover != null ||
@@ -2765,14 +2761,7 @@ class RenderMouseRegion extends RenderProxyBox {
       markNeedsPaint();
   }
 
-  // Call this method when a property has changed and might affect the
-  // `_annotationIsActive` bit.
-  //
-  // This method does NOT call `markNeedsPaint` unless the `_annotationIsActive`
-  // bit is changed. If there is a property that needs updating while
-  // `_annotationIsActive` stays true, call `_markAnnotationDirty`.
-  //
-  // This method must not be called during `paint`.
+  bool _annotationIsActive = false;
   void _setAnnotationIsActive(bool value) {
     final bool annotationWasActive = _annotationIsActive;
     _annotationIsActive = value;
@@ -2808,8 +2797,6 @@ class RenderMouseRegion extends RenderProxyBox {
     RendererBinding.instance.mouseTracker.removeListener(_handleUpdatedMouseIsConnected);
     super.detach();
   }
-
-  bool _annotationIsActive = false;
 
   @override
   bool get needsCompositing => super.needsCompositing || _annotationIsActive;
