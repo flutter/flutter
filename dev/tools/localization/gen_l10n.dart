@@ -216,8 +216,14 @@ String generateDateFormattingLogic(Map<String, dynamic> bundle, String key) {
     for (String placeholder in placeholders.keys) {
       final dynamic value = placeholders[placeholder];
       if (_isDateParameter(value)) {
-        // TODO: iterate over allowable date formats and check if it is a valid format
-        // otherwise, throw an exception
+        if (!allowableDateFormats.contains(value['format']))
+          throw L10nException(
+            'Date format ${value['format']} for the $placeholder \n'
+            'placeholder does not have a corresponding DateFormat \n'
+            'constructor. Check the intl library\'s DateFormat class \n'
+            'constructors for allowed date formats.'
+          );
+
         result += '''
 
     final DateFormat ${placeholder}DateFormat = DateFormat.${value['format']}(_localeName);
