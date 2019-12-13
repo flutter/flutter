@@ -412,12 +412,15 @@ class DomTextMeasurementService extends TextMeasurementService {
         _applySubPixelRoundingHack(minIntrinsicWidth, maxIntrinsicWidth);
     final double ideographicBaseline = alphabeticBaseline * _baselineRatioHack;
 
+    final String text = paragraph._plainText;
     List<EngineLineMetrics> lines;
-    if (paragraph._plainText != null) {
+    if (text != null) {
       final double lineWidth = maxIntrinsicWidth;
       lines = <EngineLineMetrics>[
         EngineLineMetrics.withText(
-          paragraph._plainText,
+          text,
+          startIndex: 0,
+          endIndex: text.length,
           hardBreak: true,
           width: lineWidth,
           lineNumber: 0,
@@ -767,6 +770,8 @@ class LinesCalculator {
         );
         lines.add(EngineLineMetrics.withText(
           _text.substring(_lineStart, breakingPoint) + _style.ellipsis,
+          startIndex: _lineStart,
+          endIndex: chunkEnd,
           hardBreak: false,
           width: measureSubstring(_lineStart, breakingPoint) + _ellipsisWidth,
           lineNumber: lines.length,
@@ -823,6 +828,8 @@ class LinesCalculator {
     final int lineNumber = lines.length;
     final EngineLineMetrics metrics = EngineLineMetrics.withText(
       _text.substring(_lineStart, endWithoutNewlines),
+      startIndex: _lineStart,
+      endIndex: lineEnd,
       hardBreak: isHardBreak,
       width: measureSubstring(_lineStart, endWithoutSpace),
       lineNumber: lineNumber,
