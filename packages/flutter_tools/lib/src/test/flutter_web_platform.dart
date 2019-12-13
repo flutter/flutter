@@ -9,7 +9,7 @@ import 'dart:typed_data';
 
 import 'package:async/async.dart';
 import 'package:http_multi_server/http_multi_server.dart';
-import 'package:path/path.dart' as p; // ignore_for_flutter: package_path_import
+import 'package:path/path.dart' as p; // ignore: package_path_import
 import 'package:pool/pool.dart';
 import 'package:shelf/shelf.dart' as shelf;
 import 'package:shelf/shelf_io.dart' as shelf_io;

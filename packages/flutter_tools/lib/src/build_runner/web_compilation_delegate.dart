@@ -2,8 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// ignore_for_file: implementation_imports
 import 'dart:async';
-import 'dart:io' as io; // ignore_for_flutter: dart_io_import
+import 'dart:io' as io; // ignore: dart_io_import
 
 import 'package:build/build.dart';
 import 'package:build_daemon/client.dart';
