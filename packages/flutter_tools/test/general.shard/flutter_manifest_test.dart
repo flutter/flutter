@@ -230,7 +230,7 @@ flutter:
       expect(fooFontAsset1.style, 'italic');
 
       final Font barFont = fonts[1];
-      const String fontDescriptor = '{family: bar, fonts: [{asset: a/baz}, {weight: 400, style: italic, asset: a/baz}]}';
+      const String fontDescriptor = '{family: bar, fonts: [{asset: a/baz}, {weight: 400, style: italic, asset: a/baz}]}'; // ignore: always_specify_types
       expect(barFont.descriptor.toString(), fontDescriptor);
       expect(barFont.familyName, 'bar');
       final List<FontAsset> barAssets = barFont.fontAssets;

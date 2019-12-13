@@ -4,7 +4,7 @@
 
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io'; // ignore_for_flutter: dart_io_import
+import 'dart:io'; // ignore: dart_io_import
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
