@@ -255,12 +255,11 @@ class RunCommand extends RunCommandBase {
         }
       }
     }
-    final String modeName = getBuildInfo().modeName;
-    AndroidProject androidProject;
+
     String androidEmbeddingVersion;
     final List<String> hostLanguage = <String>[];
     if (anyAndroidDevices) {
-      androidProject = FlutterProject.current().android;
+      final AndroidProject androidProject = FlutterProject.current().android;
       if (androidProject != null && androidProject.existsSync()) {
         hostLanguage.add(androidProject.isKotlin ? 'kotlin' : 'java');
         androidEmbeddingVersion = androidProject.getEmbeddingVersion().toString().split('.').last;
@@ -278,6 +277,7 @@ class RunCommand extends RunCommandBase {
       }
     }
 
+    final String modeName = getBuildInfo().modeName;
     return <CustomDimensions, String>{
       CustomDimensions.commandRunIsEmulator: '$isEmulator',
       CustomDimensions.commandRunTargetName: deviceType,
