@@ -475,4 +475,9 @@ void main() {
     expect(themeDataCopy.buttonBarTheme, equals(otherTheme.buttonBarTheme));
   });
 
+  test('Text selection handle color defaults to accent color', () {
+    final ThemeData themeData = ThemeData(accentColor: Colors.red);
+
+    expect(themeData.textSelectionHandleColor, Colors.red);
+  });
 }
