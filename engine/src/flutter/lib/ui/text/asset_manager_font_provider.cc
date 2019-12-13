@@ -84,7 +84,10 @@ void AssetManagerFontStyleSet::getStyle(int index,
                                         SkString* name) {
   FML_DCHECK(index < static_cast<int>(assets_.size()));
   if (style) {
-    *style = assets_[index].typeface->fontStyle();
+    sk_sp<SkTypeface> typeface(createTypeface(index));
+    if (typeface) {
+      *style = typeface->fontStyle();
+    }
   }
   if (name) {
     *name = family_name_.c_str();
