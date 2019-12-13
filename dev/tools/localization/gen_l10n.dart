@@ -177,8 +177,8 @@ String generateDateFormattingLogic(Map<String, dynamic> bundle, String key) {
         // otherwise, throw an exception
         result += '''
 
-    final DateFormat dateFormat = DateFormat.${value['format']}(_localeName);
-    final String ${placeholder}String = dateFormat.format($placeholder);
+    final DateFormat ${placeholder}DateFormat = DateFormat.${value['format']}(_localeName);
+    final String ${placeholder}String = ${placeholder}DateFormat.format($placeholder);
 ''';
       }
     }

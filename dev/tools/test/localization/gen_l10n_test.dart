@@ -574,7 +574,7 @@ void main() {
       expect(generator.classMethods, isNotEmpty);
       expect(
         generator.classMethods.first,
-        '''  String springBegins(Object springStartDate, Object springEndDate) {
+        '''  String springRange(Object springStartDate, Object springEndDate) {
     final DateFormat springStartDateDateFormat = DateFormat.yMMMMEEEEd(_localeName);
     final String springStartDateString = springStartDateDateFormat.format(springStartDate);
 
