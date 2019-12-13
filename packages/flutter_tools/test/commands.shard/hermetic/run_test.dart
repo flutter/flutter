@@ -237,6 +237,7 @@ void main() {
         when(mockDevice.isLocalEmulator).thenAnswer((Invocation invocation) => Future<bool>.value(false));
         when(mockDevice.getLogReader(app: anyNamed('app'))).thenReturn(MockDeviceLogReader());
         when(mockDevice.supportsFastStart).thenReturn(true);
+        when(mockDevice.sdkNameAndVersion).thenAnswer((Invocation invocation) => Future<String>.value('iOS 13'));
         // App fails to start because we're only interested in usage
         when(mockDevice.startApp(
           any,
@@ -262,6 +263,15 @@ void main() {
           (Invocation invocation) => Future<List<Device>>.value(<Device>[mockDevice])
         );
 
+        final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_run_test.');
+        tempDir.childDirectory('ios').childFile('AppDelegate.swift').createSync(recursive: true);
+        tempDir.childFile('.packages').createSync();
+        tempDir.childDirectory('lib').childFile('main.dart').createSync(recursive: true);
+        tempDir.childFile('pubspec.yaml')
+          ..createSync()
+          ..writeAsStringSync('# Hello, World');
+        fs.currentDirectory = tempDir;
+
         try {
           await createTestCommandRunner(command).run(<String>[
             'run',
@@ -281,7 +291,14 @@ void main() {
         )).captured;
         expect(captures[0], 'run');
         final Map<String, String> parameters = captures[1] as Map<String, String>;
-        expect(parameters['cd4'], 'ios');
+
+        expect(parameters['cd3'], 'false'); // commandRunIsEmulator
+        expect(parameters['cd4'], 'ios'); // commandRunTargetName
+        expect(parameters['cd15'], 'swift'); // commandRunProjectHostLanguage
+        expect(parameters['cd22'], 'iOS 13'); // commandRunTargetOsVersion
+        expect(parameters['cd23'], 'debug'); // commandRunModeName
+        expect(parameters['cd18'], 'false'); // commandRunProjectModule
+        expect(parameters.containsKey('cd45'), false); // commandRunAndroidEmbeddingVersion
       }, overrides: <Type, Generator>{
         ApplicationPackageFactory: () => mockApplicationPackageFactory,
         Artifacts: () => mockArtifacts,
