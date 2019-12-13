@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -137,6 +137,11 @@ abstract class DesktopDevice extends Device {
     return succeeded;
   }
 
+  @override
+  Future<void> dispose() async {
+    await portForwarder?.dispose();
+  }
+
   /// Builds the current project for this device, with the given options.
   Future<void> buildForDevice(
     ApplicationPackage package, {
@@ -173,4 +178,9 @@ class DesktopLogReader extends DeviceLogReader {
 
   @override
   String get name => 'desktop';
+
+  @override
+  void dispose() {
+    // Nothing to dispose.
+  }
 }

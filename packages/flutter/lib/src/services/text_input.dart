@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -116,10 +116,10 @@ class TextInputType {
   /// Requests the default platform keyboard.
   static const TextInputType text = TextInputType._(0);
 
-  /// Optimize for multi-line textual information.
+  /// Optimize for multiline textual information.
   ///
   /// Requests the default platform keyboard, but accepts newlines when the
-  /// enter key is pressed. This is the input type used for all multi-line text
+  /// enter key is pressed. This is the input type used for all multiline text
   /// fields.
   static const TextInputType multiline = TextInputType._(1);
 
@@ -190,12 +190,10 @@ class TextInputType {
 
   @override
   bool operator ==(dynamic other) {
-    if (other is! TextInputType)
-      return false;
-    final TextInputType typedOther = other;
-    return typedOther.index == index
-        && typedOther.signed == signed
-        && typedOther.decimal == decimal;
+    return other is TextInputType
+        && other.index == index
+        && other.signed == signed
+        && other.decimal == decimal;
   }
 
   @override
@@ -460,7 +458,7 @@ class TextInputConfiguration {
   /// Defaults to false.
   final bool obscureText;
 
-  /// Whether to enable auto-correction.
+  /// Whether to enable autocorrection.
   ///
   /// Defaults to true.
   final bool autocorrect;
@@ -634,16 +632,16 @@ class TextEditingValue {
   /// Creates an instance of this class from a JSON object.
   factory TextEditingValue.fromJSON(Map<String, dynamic> encoded) {
     return TextEditingValue(
-      text: encoded['text'],
+      text: encoded['text'] as String,
       selection: TextSelection(
-        baseOffset: encoded['selectionBase'] ?? -1,
-        extentOffset: encoded['selectionExtent'] ?? -1,
-        affinity: _toTextAffinity(encoded['selectionAffinity']) ?? TextAffinity.downstream,
-        isDirectional: encoded['selectionIsDirectional'] ?? false,
+        baseOffset: encoded['selectionBase'] as int ?? -1,
+        extentOffset: encoded['selectionExtent'] as int ?? -1,
+        affinity: _toTextAffinity(encoded['selectionAffinity'] as String) ?? TextAffinity.downstream,
+        isDirectional: encoded['selectionIsDirectional'] as bool ?? false,
       ),
       composing: TextRange(
-        start: encoded['composingBase'] ?? -1,
-        end: encoded['composingExtent'] ?? -1,
+        start: encoded['composingBase'] as int ?? -1,
+        end: encoded['composingExtent'] as int ?? -1,
       ),
     );
   }
@@ -693,12 +691,10 @@ class TextEditingValue {
   bool operator ==(dynamic other) {
     if (identical(this, other))
       return true;
-    if (other is! TextEditingValue)
-      return false;
-    final TextEditingValue typedOther = other;
-    return typedOther.text == text
-        && typedOther.selection == selection
-        && typedOther.composing == composing;
+    return other is TextEditingValue
+        && other.text == text
+        && other.selection == selection
+        && other.composing == composing;
   }
 
   @override
@@ -925,7 +921,9 @@ RawFloatingCursorPoint _toTextPoint(FloatingCursorDragState state, Map<String, d
   assert(state != null, 'You must provide a state to set a new editing point.');
   assert(encoded['X'] != null, 'You must provide a value for the horizontal location of the floating cursor.');
   assert(encoded['Y'] != null, 'You must provide a value for the vertical location of the floating cursor.');
-  final Offset offset = state == FloatingCursorDragState.Update ? Offset(encoded['X'], encoded['Y']) : const Offset(0, 0);
+  final Offset offset = state == FloatingCursorDragState.Update
+    ? Offset(encoded['X'] as double, encoded['Y'] as double)
+    : const Offset(0, 0);
   return RawFloatingCursorPoint(offset: offset, state: state);
 }
 
@@ -1057,20 +1055,23 @@ class TextInput {
       return;
     }
 
-    final List<dynamic> args = methodCall.arguments;
-    final int client = args[0];
+    final List<dynamic> args = methodCall.arguments as List<dynamic>;
+    final int client = args[0] as int;
     // The incoming message was for a different client.
     if (client != _currentConnection._id)
       return;
     switch (method) {
       case 'TextInputClient.updateEditingState':
-        _currentConnection._client.updateEditingValue(TextEditingValue.fromJSON(args[1]));
+        _currentConnection._client.updateEditingValue(TextEditingValue.fromJSON(args[1] as Map<String, dynamic>));
         break;
       case 'TextInputClient.performAction':
-        _currentConnection._client.performAction(_toTextInputAction(args[1]));
+        _currentConnection._client.performAction(_toTextInputAction(args[1] as String));
         break;
       case 'TextInputClient.updateFloatingCursor':
-        _currentConnection._client.updateFloatingCursor(_toTextPoint(_toTextCursorAction(args[1]), args[2]));
+        _currentConnection._client.updateFloatingCursor(_toTextPoint(
+          _toTextCursorAction(args[1] as String),
+          args[2] as Map<String, dynamic>,
+        ));
         break;
       case 'TextInputClient.onConnectionClosed':
         _currentConnection._client.connectionClosed();

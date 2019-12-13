@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -55,10 +55,8 @@ class UnpackCommand extends FlutterCommand {
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async {
-    final Set<DevelopmentArtifact> result = <DevelopmentArtifact>{
-      DevelopmentArtifact.universal,
-    };
-    final TargetPlatform targetPlatform = getTargetPlatformForName(argResults['target-platform']);
+    final Set<DevelopmentArtifact> result = <DevelopmentArtifact>{};
+    final TargetPlatform targetPlatform = getTargetPlatformForName(stringArg('target-platform'));
     switch (targetPlatform) {
       case TargetPlatform.windows_x64:
         result.add(DevelopmentArtifact.windows);
@@ -73,8 +71,8 @@ class UnpackCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final String targetName = argResults['target-platform'];
-    final String targetDirectory = argResults['cache-dir'];
+    final String targetName = stringArg('target-platform');
+    final String targetDirectory = stringArg('cache-dir');
     if (!fs.directory(targetDirectory).existsSync()) {
       fs.directory(targetDirectory).createSync(recursive: true);
     }
@@ -82,7 +80,7 @@ class UnpackCommand extends FlutterCommand {
     final ArtifactUnpacker flutterArtifactFetcher = ArtifactUnpacker(targetPlatform);
     bool success = true;
     if (artifacts is LocalEngineArtifacts) {
-      final LocalEngineArtifacts localEngineArtifacts = artifacts;
+      final LocalEngineArtifacts localEngineArtifacts = artifacts as LocalEngineArtifacts;
       success = flutterArtifactFetcher.copyLocalBuildArtifacts(
         localEngineArtifacts.engineOutPath,
         targetDirectory,
@@ -203,8 +201,8 @@ class ArtifactUnpacker {
 
       printTrace('Copied artifacts from $sourceDirectory.');
     } catch (e, stackTrace) {
+      printError(e.message as String);
       printError(stackTrace.toString());
-      printError(e.message);
       return false;
     }
     return true;

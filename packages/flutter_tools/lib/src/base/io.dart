@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -92,12 +92,27 @@ ExitFunction _exitFunction = _defaultExitFunction;
 
 /// Exits the process.
 ///
+/// Throws [AssertionError] if assertions are enabled and the dart:io exit
+/// is still active when called. This may indicate exit was called in
+/// a test without being configured correctly.
+///
 /// This is analogous to the `exit` function in `dart:io`, except that this
 /// function may be set to a testing-friendly value by calling
 /// [setExitFunctionForTests] (and then restored to its default implementation
 /// with [restoreExitFunction]). The default implementation delegates to
 /// `dart:io`.
-ExitFunction get exit => _exitFunction;
+ExitFunction get exit {
+  assert(
+    _exitFunction != io.exit || !_inUnitTest(),
+    'io.exit was called with assertions active in a unit test',
+  );
+  return _exitFunction;
+}
+
+// Whether the tool is executing in a unit test.
+bool _inUnitTest() {
+  return Zone.current[#test.declarer] != null;
+}
 
 /// Sets the [exit] function to a function that throws an exception rather
 /// than exiting the process; this is intended for testing purposes.
@@ -198,7 +213,7 @@ class Stdio {
     if (stdin is! io.Stdin) {
       return _stdinHasTerminal = false;
     }
-    final io.Stdin ioStdin = stdin;
+    final io.Stdin ioStdin = stdin as io.Stdin;
     if (!ioStdin.hasTerminal) {
       return _stdinHasTerminal = false;
     }

@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -44,9 +44,9 @@ class EmulatorsCommand extends FlutterCommand {
     }
 
     if (argResults.wasParsed('launch')) {
-      await _launchEmulator(argResults['launch']);
+      await _launchEmulator(stringArg('launch'));
     } else if (argResults.wasParsed('create')) {
-      await _createEmulator(name: argResults['name']);
+      await _createEmulator(name: stringArg('name'));
     } else {
       final String searchText =
           argResults.rest != null && argResults.rest.isNotEmpty

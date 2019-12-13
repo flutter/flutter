@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -87,8 +87,8 @@ class TestTextInput {
     log.add(methodCall);
     switch (methodCall.method) {
       case 'TextInput.setClient':
-        _client = methodCall.arguments[0];
-        setClientArgs = methodCall.arguments[1];
+        _client = methodCall.arguments[0] as int;
+        setClientArgs = methodCall.arguments[1] as Map<String, dynamic>;
         break;
       case 'TextInput.clearClient':
         _client = 0;
@@ -97,7 +97,7 @@ class TestTextInput {
           onCleared();
         break;
       case 'TextInput.setEditingState':
-        editingState = methodCall.arguments;
+        editingState = methodCall.arguments as Map<String, dynamic>;
         break;
       case 'TextInput.show':
         _isVisible = true;

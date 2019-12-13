@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -479,11 +479,6 @@ Future<void> main() async {
 
     Navigator.pop(heroes.evaluate().first);
     await tester.pump(); // ...and removes it straight away (since it's already at 0.0)
-
-    // this is verifying that there's no crash
-
-    // TODO(ianh): once https://github.com/flutter/flutter/issues/5631 is fixed, remove this line:
-    await tester.pump(const Duration(hours: 1));
   });
 
   testWidgets('Overlapping starting and ending a hero transition works ok', (WidgetTester tester) async {
@@ -513,11 +508,6 @@ Future<void> main() async {
     Navigator.pop(heroes.evaluate().first);
     await tester.pump(const Duration(hours: 1)); // so the first transition is finished, but the second hasn't started
     await tester.pump();
-
-    // this is verifying that there's no crash
-
-    // TODO(ianh): once https://github.com/flutter/flutter/issues/5631 is fixed, remove this line:
-    await tester.pump(const Duration(hours: 1));
   });
 
   testWidgets('One route, two heroes, same tag, throws', (WidgetTester tester) async {

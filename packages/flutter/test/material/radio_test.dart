@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -180,12 +180,11 @@ void main() {
     expect(semantics, hasSemantics(TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(
-          id: 1,
+          id: 2,
           flags: <SemanticsFlag>[
-            SemanticsFlag.isInMutuallyExclusiveGroup,
             SemanticsFlag.hasCheckedState,
             SemanticsFlag.hasEnabledState,
-            SemanticsFlag.isFocusable,
+            SemanticsFlag.isInMutuallyExclusiveGroup,
           ],
         ),
       ],
@@ -202,12 +201,12 @@ void main() {
     expect(semantics, hasSemantics(TestSemantics.root(
       children: <TestSemantics>[
         TestSemantics.rootChild(
-          id: 1,
+          id: 2,
           flags: <SemanticsFlag>[
-            SemanticsFlag.isInMutuallyExclusiveGroup,
             SemanticsFlag.hasCheckedState,
             SemanticsFlag.isChecked,
             SemanticsFlag.hasEnabledState,
+            SemanticsFlag.isInMutuallyExclusiveGroup,
           ],
         ),
       ],
@@ -283,7 +282,7 @@ void main() {
       find.byKey(painterKey),
       matchesGoldenFile('radio.ink_ripple.png'),
     );
-  }, skip: isBrowser);
+  });
 
   testWidgets('Radio is focusable and has correct focus color', (WidgetTester tester) async {
     final FocusNode focusNode = FocusNode(debugLabel: 'Radio');
@@ -396,6 +395,7 @@ void main() {
     }
     await tester.pumpWidget(buildApp());
 
+    await tester.pump();
     await tester.pumpAndSettle();
     expect(
       Material.of(tester.element(find.byKey(radioKey))),
@@ -415,6 +415,7 @@ void main() {
     // Check when the radio isn't selected.
     groupValue = 1;
     await tester.pumpWidget(buildApp());
+    await tester.pump();
     await tester.pumpAndSettle();
     expect(
         Material.of(tester.element(find.byKey(radioKey))),
@@ -429,6 +430,7 @@ void main() {
     // Check when the radio is selected, but disabled.
     groupValue = 0;
     await tester.pumpWidget(buildApp(enabled: false));
+    await tester.pump();
     await tester.pumpAndSettle();
     expect(
       Material.of(tester.element(find.byKey(radioKey))),
@@ -519,5 +521,41 @@ void main() {
     expect(groupValue, equals(2));
   });
 
-}
+  testWidgets('Radio responds to density changes.', (WidgetTester tester) async {
+    const Key key = Key('test');
+    Future<void> buildTest(VisualDensity visualDensity) async {
+      return await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: Radio<int>(
+                visualDensity: visualDensity,
+                key: key,
+                onChanged: (int value) {},
+                value: 0,
+                groupValue: 0,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
 
+    await buildTest(const VisualDensity());
+    final RenderBox box = tester.renderObject(find.byKey(key));
+    await tester.pumpAndSettle();
+    expect(box.size, equals(const Size(48, 48)));
+
+    await buildTest(const VisualDensity(horizontal: 3.0, vertical: 3.0));
+    await tester.pumpAndSettle();
+    expect(box.size, equals(const Size(60, 60)));
+
+    await buildTest(const VisualDensity(horizontal: -3.0, vertical: -3.0));
+    await tester.pumpAndSettle();
+    expect(box.size, equals(const Size(36, 36)));
+
+    await buildTest(const VisualDensity(horizontal: 3.0, vertical: -3.0));
+    await tester.pumpAndSettle();
+    expect(box.size, equals(const Size(60, 36)));
+  });
+}

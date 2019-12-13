@@ -1,9 +1,8 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:collection' show SplayTreeMap, HashMap;
-import 'dart:math' as math show max;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
@@ -11,7 +10,6 @@ import 'package:flutter/rendering.dart';
 import 'automatic_keep_alive.dart';
 import 'basic.dart';
 import 'framework.dart';
-import 'sliver_layout_builder.dart';
 
 export 'package:flutter/rendering.dart' show
   SliverGridDelegate,
@@ -80,7 +78,7 @@ int _kDefaultSemanticIndexCallback(Widget _, int localIndex) => localIndex;
 ///
 ///  * Letting [KeepAlive] be the root widget of the sliver child widget subtree
 ///    that needs to be preserved. The [KeepAlive] widget marks the child
-///    subtree's top render object child for keep-alive. When the associated top
+///    subtree's top render object child for keepalive. When the associated top
 ///    render object is scrolled out of view, the sliver keeps the child's
 ///    render object (and by extension, its associated elements and states) in a
 ///    cache list instead of destroying them. When scrolled back into view, the
@@ -100,7 +98,7 @@ int _kDefaultSemanticIndexCallback(Widget _, int localIndex) => localIndex;
 ///
 ///    As an example, the [EditableText] widget signals its sliver child element
 ///    subtree to stay alive while its text field has input focus. If it doesn't
-///    have focus and no other descendants signaled for keep-alive via a
+///    have focus and no other descendants signaled for keepalive via a
 ///    [KeepAliveNotification], the sliver child element subtree will be
 ///    destroyed when scrolled away.
 ///
@@ -727,7 +725,7 @@ abstract class SliverMultiBoxAdaptorWidget extends SliverWithKeepAliveWidget {
   }) : assert(delegate != null),
        super(key: key);
 
-  /// {@template flutter.widgets.sliverChildDelegate}
+  /// {@template flutter.widgets.sliverMultiBoxAdaptor.delegate}
   /// The delegate that provides the children for this widget.
   ///
   /// The children are constructed lazily using this delegate to avoid creating
@@ -817,7 +815,7 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
 
   @override
   RenderSliverList createRenderObject(BuildContext context) {
-    final SliverMultiBoxAdaptorElement element = context;
+    final SliverMultiBoxAdaptorElement element = context as SliverMultiBoxAdaptorElement;
     return RenderSliverList(childManager: element);
   }
 }
@@ -880,7 +878,7 @@ class SliverFixedExtentList extends SliverMultiBoxAdaptorWidget {
 
   @override
   RenderSliverFixedExtentList createRenderObject(BuildContext context) {
-    final SliverMultiBoxAdaptorElement element = context;
+    final SliverMultiBoxAdaptorElement element = context as SliverMultiBoxAdaptorElement;
     return RenderSliverFixedExtentList(childManager: element, itemExtent: itemExtent);
   }
 
@@ -1000,7 +998,7 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
 
   @override
   RenderSliverGrid createRenderObject(BuildContext context) {
-    final SliverMultiBoxAdaptorElement element = context;
+    final SliverMultiBoxAdaptorElement element = context as SliverMultiBoxAdaptorElement;
     return RenderSliverGrid(childManager: element, gridDelegate: gridDelegate);
   }
 
@@ -1027,7 +1025,7 @@ class SliverGrid extends SliverMultiBoxAdaptorWidget {
   }
 }
 
-/// A sliver that contains a multiple box children that each fill the viewport.
+/// A sliver that contains multiple box children that each fills the viewport.
 ///
 /// [SliverFillViewport] places its children in a linear array along the main
 /// axis. Each child is sized to fill the viewport, both in the main and cross
@@ -1050,7 +1048,6 @@ class SliverFillViewport extends StatelessWidget {
     this.viewportFraction = 1.0,
   }) : assert(viewportFraction != null),
        assert(viewportFraction > 0.0),
-       assert(delegate != null),
        super(key: key);
 
   /// The fraction of the viewport that each child should fill in the main axis.
@@ -1060,34 +1057,112 @@ class SliverFillViewport extends StatelessWidget {
   /// the viewport in the main axis.
   final double viewportFraction;
 
-  /// {@macro flutter.widgets.sliverChildDelegate}
+  /// {@macro flutter.widgets.sliverMultiBoxAdaptor.delegate}
   final SliverChildDelegate delegate;
 
   @override
   Widget build(BuildContext context) {
-    return SliverLayoutBuilder(
-      builder: (BuildContext context, SliverConstraints constraints) {
-        final double fixedExtent = constraints.viewportMainAxisExtent * viewportFraction;
-        final double padding = math.max(0, constraints.viewportMainAxisExtent - fixedExtent) / 2;
-
-        EdgeInsets sliverPaddingValue;
-        switch (constraints.axis) {
-          case Axis.horizontal:
-            sliverPaddingValue = EdgeInsets.symmetric(horizontal: padding);
-            break;
-          case Axis.vertical:
-            sliverPaddingValue = EdgeInsets.symmetric(vertical: padding);
-        }
-
-        return SliverPadding(
-          padding: sliverPaddingValue,
-          sliver: SliverFixedExtentList(
-            delegate: delegate,
-            itemExtent: fixedExtent,
-          ),
-        );
-      }
+    return _SliverFractionalPadding(
+      viewportFraction: (1 - viewportFraction).clamp(0, 1) / 2,
+      sliver: _SliverFillViewportRenderObjectWidget(
+        viewportFraction: viewportFraction,
+        delegate: delegate,
+      ),
     );
+  }
+}
+
+class _SliverFillViewportRenderObjectWidget extends SliverMultiBoxAdaptorWidget {
+  const _SliverFillViewportRenderObjectWidget({
+    Key key,
+    @required SliverChildDelegate delegate,
+    this.viewportFraction = 1.0,
+  }) : assert(viewportFraction != null),
+       assert(viewportFraction > 0.0),
+       super(key: key, delegate: delegate);
+
+  final double viewportFraction;
+
+  @override
+  RenderSliverFillViewport createRenderObject(BuildContext context) {
+    final SliverMultiBoxAdaptorElement element = context as SliverMultiBoxAdaptorElement;
+    return RenderSliverFillViewport(childManager: element, viewportFraction: viewportFraction);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderSliverFillViewport renderObject) {
+    renderObject.viewportFraction = viewportFraction;
+  }
+}
+
+class _SliverFractionalPadding extends SingleChildRenderObjectWidget {
+  const _SliverFractionalPadding({
+    this.viewportFraction = 0,
+    Widget sliver,
+  }) : assert(viewportFraction != null),
+       assert(viewportFraction >= 0),
+       assert(viewportFraction <= 0.5),
+       super(child: sliver);
+
+  final double viewportFraction;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) => _RenderSliverFractionalPadding(viewportFraction: viewportFraction);
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderSliverFractionalPadding renderObject) {
+    renderObject.viewportFraction = viewportFraction;
+  }
+}
+
+class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
+  _RenderSliverFractionalPadding({
+    double viewportFraction = 0,
+  }) : assert(viewportFraction != null),
+       assert(viewportFraction <= 0.5),
+       assert(viewportFraction >= 0),
+       _viewportFraction = viewportFraction;
+
+  double get viewportFraction => _viewportFraction;
+  double _viewportFraction;
+  set viewportFraction(double newValue) {
+    assert(newValue != null);
+    if (_viewportFraction == newValue)
+      return;
+    _viewportFraction = newValue;
+    _markNeedsResolution();
+  }
+
+  @override
+  EdgeInsets get resolvedPadding => _resolvedPadding;
+  EdgeInsets _resolvedPadding;
+
+  void _markNeedsResolution() {
+    _resolvedPadding = null;
+    markNeedsLayout();
+  }
+
+  void _resolve() {
+    if (_resolvedPadding != null)
+      return;
+    assert(constraints.axis != null);
+    final double paddingValue = constraints.viewportMainAxisExtent * viewportFraction;
+    switch (constraints.axis) {
+      case Axis.horizontal:
+        _resolvedPadding = EdgeInsets.symmetric(horizontal: paddingValue);
+        break;
+      case Axis.vertical:
+        _resolvedPadding = EdgeInsets.symmetric(vertical: paddingValue);
+        break;
+    }
+
+    return;
+  }
+
+  @override
+  void performLayout() {
+    _resolve();
+    super.performLayout();
   }
 }
 
@@ -1100,10 +1175,10 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
   SliverMultiBoxAdaptorElement(SliverMultiBoxAdaptorWidget widget) : super(widget);
 
   @override
-  SliverMultiBoxAdaptorWidget get widget => super.widget;
+  SliverMultiBoxAdaptorWidget get widget => super.widget as SliverMultiBoxAdaptorWidget;
 
   @override
-  RenderSliverMultiBoxAdaptor get renderObject => super.renderObject;
+  RenderSliverMultiBoxAdaptor get renderObject => super.renderObject as RenderSliverMultiBoxAdaptor;
 
   @override
   void update(covariant SliverMultiBoxAdaptorWidget newWidget) {
@@ -1145,9 +1220,9 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
         final Element newChild = updateChild(newChildren[index], _build(index), index);
         if (newChild != null) {
           _childElements[index] = newChild;
-          final SliverMultiBoxAdaptorParentData parentData = newChild.renderObject.parentData;
+          final SliverMultiBoxAdaptorParentData parentData = newChild.renderObject.parentData as SliverMultiBoxAdaptorParentData;
           if (!parentData.keptAlive)
-            _currentBeforeChild = newChild.renderObject;
+            _currentBeforeChild = newChild.renderObject as RenderBox;
         } else {
           _childElements.remove(index);
         }
@@ -1191,7 +1266,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
     owner.buildScope(this, () {
       final bool insertFirst = after == null;
       assert(insertFirst || _childElements[index-1] != null);
-      _currentBeforeChild = insertFirst ? null : _childElements[index-1].renderObject;
+      _currentBeforeChild = insertFirst ? null : (_childElements[index-1].renderObject as RenderBox);
       Element newChild;
       try {
         _currentlyUpdatingChildIndex = index;
@@ -1209,9 +1284,9 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
 
   @override
   Element updateChild(Element child, Widget newWidget, dynamic newSlot) {
-    final SliverMultiBoxAdaptorParentData oldParentData = child?.renderObject?.parentData;
+    final SliverMultiBoxAdaptorParentData oldParentData = child?.renderObject?.parentData as SliverMultiBoxAdaptorParentData;
     final Element newChild = super.updateChild(child, newWidget, newSlot);
-    final SliverMultiBoxAdaptorParentData newParentData = newChild?.renderObject?.parentData;
+    final SliverMultiBoxAdaptorParentData newParentData = newChild?.renderObject?.parentData as SliverMultiBoxAdaptorParentData;
 
     // Preserve the old layoutOffset if the renderObject was swapped out.
     if (oldParentData != newParentData && oldParentData != null && newParentData != null) {
@@ -1315,7 +1390,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
   @override
   void didAdoptChild(RenderBox child) {
     assert(_currentlyUpdatingChildIndex != null);
-    final SliverMultiBoxAdaptorParentData childParentData = child.parentData;
+    final SliverMultiBoxAdaptorParentData childParentData = child.parentData as SliverMultiBoxAdaptorParentData;
     childParentData.index = _currentlyUpdatingChildIndex;
   }
 
@@ -1331,9 +1406,9 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
     assert(slot != null);
     assert(_currentlyUpdatingChildIndex == slot);
     assert(renderObject.debugValidateChild(child));
-    renderObject.insert(child, after: _currentBeforeChild);
+    renderObject.insert(child as RenderBox, after: _currentBeforeChild);
     assert(() {
-      final SliverMultiBoxAdaptorParentData childParentData = child.parentData;
+      final SliverMultiBoxAdaptorParentData childParentData = child.parentData as SliverMultiBoxAdaptorParentData;
       assert(slot == childParentData.index);
       return true;
     }());
@@ -1343,13 +1418,13 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
   void moveChildRenderObject(covariant RenderObject child, int slot) {
     assert(slot != null);
     assert(_currentlyUpdatingChildIndex == slot);
-    renderObject.move(child, after: _currentBeforeChild);
+    renderObject.move(child as RenderBox, after: _currentBeforeChild);
   }
 
   @override
   void removeChildRenderObject(covariant RenderObject child) {
     assert(_currentlyUpdatingChildIndex != null);
-    renderObject.remove(child);
+    renderObject.remove(child as RenderBox);
   }
 
   @override
@@ -1363,7 +1438,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
   @override
   void debugVisitOnstageChildren(ElementVisitor visitor) {
     _childElements.values.where((Element child) {
-      final SliverMultiBoxAdaptorParentData parentData = child.renderObject.parentData;
+      final SliverMultiBoxAdaptorParentData parentData = child.renderObject.parentData as SliverMultiBoxAdaptorParentData;
       double itemExtent;
       switch (renderObject.constraints.axis) {
         case Axis.horizontal:
@@ -1649,6 +1724,227 @@ class SliverFillRemaining extends SingleChildRenderObjectWidget {
   }
 }
 
+/// A sliver widget that makes its sliver child partially transparent.
+///
+/// This class paints its sliver child into an intermediate buffer and then
+/// blends the sliver back into the scene partially transparent.
+///
+/// For values of opacity other than 0.0 and 1.0, this class is relatively
+/// expensive because it requires painting the sliver child into an intermediate
+/// buffer. For the value 0.0, the sliver child is simply not painted at all.
+/// For the value 1.0, the sliver child is painted immediately without an
+/// intermediate buffer.
+///
+/// {@tool sample}
+///
+/// This example shows a [SliverList] when the `_visible` member field is true,
+/// and hides it when it is false:
+///
+/// ```dart
+/// bool _visible = true;
+/// List<Widget> listItems = <Widget>[
+///   Text('Now you see me,'),
+///   Text('Now you don\'t!'),
+/// ];
+///
+/// SliverOpacity(
+///   opacity: _visible ? 1.0 : 0.0,
+///   sliver: SliverList(
+///     delegate: SliverChildListDelegate(listItems),
+///   ),
+/// )
+/// ```
+/// {@end-tool}
+///
+/// This is more efficient than adding and removing the sliver child widget
+/// from the tree on demand.
+///
+/// See also:
+///
+///  * [Opacity], which can apply a uniform alpha effect to its child using the
+///    RenderBox layout protocol.
+///  * [AnimatedOpacity], which uses an animation internally to efficiently
+///    animate [Opacity].
+class SliverOpacity extends SingleChildRenderObjectWidget {
+  /// Creates a sliver that makes its sliver child partially transparent.
+  ///
+  /// The [opacity] argument must not be null and must be between 0.0 and 1.0
+  /// (inclusive).
+  const SliverOpacity({
+    Key key,
+    @required this.opacity,
+    this.alwaysIncludeSemantics = false,
+    Widget sliver,
+  })
+    : assert(opacity != null && opacity >= 0.0 && opacity <= 1.0),
+      assert(alwaysIncludeSemantics != null),
+      super(key: key, child: sliver);
+
+  /// The fraction to scale the sliver child's alpha value.
+  ///
+  /// An opacity of 1.0 is fully opaque. An opacity of 0.0 is fully transparent
+  /// (i.e. invisible).
+  ///
+  /// The opacity must not be null.
+  ///
+  /// Values 1.0 and 0.0 are painted with a fast path. Other values
+  /// require painting the sliver child into an intermediate buffer, which is
+  /// expensive.
+  final double opacity;
+
+  /// Whether the semantic information of the sliver child is always included.
+  ///
+  /// Defaults to false.
+  ///
+  /// When true, regardless of the opacity settings, the sliver child semantic
+  /// information is exposed as if the widget were fully visible. This is
+  /// useful in cases where labels may be hidden during animations that
+  /// would otherwise contribute relevant semantics.
+  final bool alwaysIncludeSemantics;
+
+  @override
+  RenderSliverOpacity createRenderObject(BuildContext context) {
+    return RenderSliverOpacity(
+      opacity: opacity,
+      alwaysIncludeSemantics: alwaysIncludeSemantics,
+    );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderSliverOpacity renderObject) {
+    renderObject
+      ..opacity = opacity
+      ..alwaysIncludeSemantics = alwaysIncludeSemantics;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<double>('opacity', opacity));
+    properties.add(FlagProperty('alwaysIncludeSemantics', value: alwaysIncludeSemantics, ifTrue: 'alwaysIncludeSemantics',));
+  }
+}
+
+/// A sliver widget that is invisible during hit testing.
+///
+/// When [ignoring] is true, this widget (and its subtree) is invisible
+/// to hit testing. It still consumes space during layout and paints its sliver
+/// child as usual. It just cannot be the target of located events, because it
+/// returns false from [RenderSliver.hitTest].
+///
+/// When [ignoringSemantics] is true, the subtree will be invisible to
+/// the semantics layer (and thus e.g. accessibility tools). If
+/// [ignoringSemantics] is null, it uses the value of [ignoring].
+class SliverIgnorePointer extends SingleChildRenderObjectWidget {
+  /// Creates a sliver widget that is invisible to hit testing.
+  ///
+  /// The [ignoring] argument must not be null. If [ignoringSemantics] is null,
+  /// this render object will be ignored for semantics if [ignoring] is true.
+  const SliverIgnorePointer({
+    Key key,
+    this.ignoring = true,
+    this.ignoringSemantics,
+    Widget sliver,
+  }) : assert(ignoring != null),
+       super(key: key, child: sliver);
+
+  /// Whether this sliver is ignored during hit testing.
+  ///
+  /// Regardless of whether this sliver is ignored during hit testing, it will
+  /// still consume space during layout and be visible during painting.
+  final bool ignoring;
+
+  /// Whether the semantics of this sliver is ignored when compiling the
+  /// semantics tree.
+  ///
+  /// If null, defaults to value of [ignoring].
+  ///
+  /// See [SemanticsNode] for additional information about the semantics tree.
+  final bool ignoringSemantics;
+
+  @override
+  RenderSliverIgnorePointer createRenderObject(BuildContext context) {
+    return RenderSliverIgnorePointer(
+      ignoring: ignoring,
+      ignoringSemantics: ignoringSemantics,
+    );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderSliverIgnorePointer renderObject) {
+    renderObject
+      ..ignoring = ignoring
+      ..ignoringSemantics = ignoringSemantics;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<bool>('ignoring', ignoring));
+    properties.add(DiagnosticsProperty<bool>('ignoringSemantics', ignoringSemantics, defaultValue: null));
+  }
+}
+
+/// A sliver that lays its sliver child out as if it was in the tree, but
+/// without painting anything, without making the sliver child available for hit
+/// testing, and without taking any room in the parent.
+///
+/// Animations continue to run in offstage sliver children, and therefore use
+/// battery and CPU time, regardless of whether the animations end up being
+/// visible.
+///
+/// To hide a sliver widget from view while it is
+/// not needed, prefer removing the widget from the tree entirely rather than
+/// keeping it alive in an [Offstage] subtree.
+class SliverOffstage extends SingleChildRenderObjectWidget {
+  /// Creates a sliver that visually hides its sliver child.
+  const SliverOffstage({
+    Key key,
+    this.offstage = true,
+    Widget sliver,
+  }) : assert(offstage != null),
+       super(key: key, child: sliver);
+
+  /// Whether the sliver child is hidden from the rest of the tree.
+  ///
+  /// If true, the sliver child is laid out as if it was in the tree, but
+  /// without painting anything, without making the child available for hit
+  /// testing, and without taking any room in the parent.
+  ///
+  /// If false, the sliver child is included in the tree as normal.
+  final bool offstage;
+
+  @override
+  RenderSliverOffstage createRenderObject(BuildContext context) => RenderSliverOffstage(offstage: offstage);
+
+  @override
+  void updateRenderObject(BuildContext context, RenderSliverOffstage renderObject) {
+    renderObject.offstage = offstage;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<bool>('offstage', offstage));
+  }
+
+  @override
+  _SliverOffstageElement createElement() => _SliverOffstageElement(this);
+}
+
+class _SliverOffstageElement extends SingleChildRenderObjectElement {
+  _SliverOffstageElement(SliverOffstage widget) : super(widget);
+
+  @override
+  SliverOffstage get widget => super.widget as SliverOffstage;
+
+  @override
+  void debugVisitOnstageChildren(ElementVisitor visitor) {
+    if (!widget.offstage)
+      super.debugVisitOnstageChildren(visitor);
+  }
+}
+
 /// Mark a child as needing to stay alive even when it's in a lazy list that
 /// would otherwise remove it.
 ///
@@ -1689,7 +1985,7 @@ class KeepAlive extends ParentDataWidget<SliverWithKeepAliveWidget> {
   @override
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is KeepAliveParentDataMixin);
-    final KeepAliveParentDataMixin parentData = renderObject.parentData;
+    final KeepAliveParentDataMixin parentData = renderObject.parentData as KeepAliveParentDataMixin;
     if (parentData.keepAlive != keepAlive) {
       parentData.keepAlive = keepAlive;
       final AbstractNode targetParent = renderObject.parent;

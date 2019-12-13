@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -810,7 +810,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       final Element elementB = find.text('b').evaluate().first;
 
       service.disposeAllGroups();
-      service.setPubRootDirectories(<Object>[]);
+      service.setPubRootDirectories(<String>[]);
       service.setSelection(elementA, 'my-group');
       final Map<String, Object> jsonA = json.decode(service.getSelectedWidget(null, 'my-group'));
       final Map<String, Object> creationLocationA = jsonA['creationLocation'];
@@ -885,7 +885,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
         // directory.
         pubRootTest = '/' +
           segments.take(segments.length - 2).join('/');
-        service.setPubRootDirectories(<Object>[pubRootTest]);
+        service.setPubRootDirectories(<String>[pubRootTest]);
       }
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
       builder.add(StringProperty('dummy1', 'value'));
@@ -948,7 +948,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
         // directory.
         pubRootTest = '/' +
           segments.take(segments.length - 2).join('/');
-        service.setPubRootDirectories(<Object>[pubRootTest]);
+        service.setPubRootDirectories(<String>[pubRootTest]);
       }
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
       builder.add(StringProperty('dummy1', 'value'));
@@ -995,7 +995,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       final Element elementA = find.text('a').evaluate().first;
 
       service.disposeAllGroups();
-      service.setPubRootDirectories(<Object>[]);
+      service.setPubRootDirectories(<String>[]);
       service.setSelection(elementA, 'my-group');
       Map<String, Object> jsonObject = json.decode(service.getSelectedWidget(null, 'my-group'));
       Map<String, Object> creationLocation = jsonObject['creationLocation'];
@@ -1007,21 +1007,21 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       // Strip a couple subdirectories away to generate a plausible pub root
       // directory.
       final String pubRootTest = '/' + segments.take(segments.length - 2).join('/');
-      service.setPubRootDirectories(<Object>[pubRootTest]);
+      service.setPubRootDirectories(<String>[pubRootTest]);
 
       service.setSelection(elementA, 'my-group');
       expect(json.decode(service.getSelectedWidget(null, 'my-group')), contains('createdByLocalProject'));
 
-      service.setPubRootDirectories(<Object>['/invalid/$pubRootTest']);
+      service.setPubRootDirectories(<String>['/invalid/$pubRootTest']);
       expect(json.decode(service.getSelectedWidget(null, 'my-group')), isNot(contains('createdByLocalProject')));
 
-      service.setPubRootDirectories(<Object>['file://$pubRootTest']);
+      service.setPubRootDirectories(<String>['file://$pubRootTest']);
       expect(json.decode(service.getSelectedWidget(null, 'my-group')), contains('createdByLocalProject'));
 
-      service.setPubRootDirectories(<Object>['$pubRootTest/different']);
+      service.setPubRootDirectories(<String>['$pubRootTest/different']);
       expect(json.decode(service.getSelectedWidget(null, 'my-group')), isNot(contains('createdByLocalProject')));
 
-      service.setPubRootDirectories(<Object>[
+      service.setPubRootDirectories(<String>[
         '/invalid/$pubRootTest',
         pubRootTest,
       ]);
@@ -1034,7 +1034,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
         matching: find.byType(RichText),
       ).evaluate().first;
       service.setSelection(richText, 'my-group');
-      service.setPubRootDirectories(<Object>[pubRootTest]);
+      service.setPubRootDirectories(<String>[pubRootTest]);
       jsonObject = json.decode(service.getSelectedWidget(null, 'my-group'));
       expect(jsonObject, isNot(contains('createdByLocalProject')));
       creationLocation = jsonObject['creationLocation'];
@@ -1046,12 +1046,12 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
 
       // Strip off /src/widgets/text.dart.
       final String pubRootFramework = '/' + pathSegmentsFramework.take(pathSegmentsFramework.length - 3).join('/');
-      service.setPubRootDirectories(<Object>[pubRootFramework]);
+      service.setPubRootDirectories(<String>[pubRootFramework]);
       expect(json.decode(service.getSelectedWidget(null, 'my-group')), contains('createdByLocalProject'));
       service.setSelection(elementA, 'my-group');
       expect(json.decode(service.getSelectedWidget(null, 'my-group')), isNot(contains('createdByLocalProject')));
 
-      service.setPubRootDirectories(<Object>[pubRootFramework, pubRootTest]);
+      service.setPubRootDirectories(<String>[pubRootFramework, pubRootTest]);
       service.setSelection(elementA, 'my-group');
       expect(json.decode(service.getSelectedWidget(null, 'my-group')), contains('createdByLocalProject'));
       service.setSelection(richText, 'my-group');
@@ -1609,7 +1609,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
         matching: find.byType(RichText),
       ).evaluate().first;
       service.setSelection(richText, 'my-group');
-      service.setPubRootDirectories(<Object>[pubRootTest]);
+      service.setPubRootDirectories(<String>[pubRootTest]);
       jsonObject = json.decode(service.getSelectedWidget(null, 'my-group'));
       expect(jsonObject, isNot(contains('createdByLocalProject')));
       creationLocation = jsonObject['creationLocation'];
@@ -2599,6 +2599,76 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       visitChildren(detailedChildren);
       expect(appBars.single, isNot(contains('children')));
     }, skip: !WidgetInspectorService.instance.isWidgetCreationTracked()); // Test requires --track-widget-creation flag.
+
+    testWidgets('InspectorSerializationDelegate addAdditionalPropertiesCallback', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          title: 'Hello World!',
+          home: Scaffold(
+            appBar: AppBar(
+              title: const Text('Hello World!'),
+            ),
+            body: Center(
+              child: Column(
+                children: const <Widget>[
+                  Text('Hello World!'),
+                ],
+              ),
+            ),
+          ),
+        )
+      );
+      final Finder columnWidgetFinder = find.byType(Column);
+      expect(columnWidgetFinder, findsOneWidget);
+      final Element columnWidgetElement = columnWidgetFinder
+        .evaluate()
+        .first;
+      final DiagnosticsNode node = columnWidgetElement.toDiagnosticsNode();
+      final InspectorSerializationDelegate delegate =
+        InspectorSerializationDelegate(
+          service: service,
+          summaryTree: false,
+          includeProperties: true,
+          addAdditionalPropertiesCallback:
+            (DiagnosticsNode node, InspectorSerializationDelegate delegate) {
+              final Map<String, Object> additionalJson = <String, Object>{};
+              final Object value = node.value;
+              if (value is Element) {
+                additionalJson['renderObject'] =
+                  value.renderObject.toDiagnosticsNode().toJsonMap(
+                    delegate.copyWith(subtreeDepth: 0),
+                  );
+              }
+              additionalJson['callbackExecuted'] = true;
+              return additionalJson;
+            },
+        );
+      final Map<String, Object> json = node.toJsonMap(delegate);
+      expect(json['callbackExecuted'], true);
+      expect(json.containsKey('renderObject'), true);
+      expect(json['renderObject'], isA<Map<String, dynamic>>());
+      final Map<String, dynamic> renderObjectJson = json['renderObject'];
+      expect(renderObjectJson['description'], startsWith('RenderFlex'));
+
+      final InspectorSerializationDelegate emptyDelegate =
+        InspectorSerializationDelegate(
+          service: service,
+          summaryTree: false,
+          includeProperties: true,
+          addAdditionalPropertiesCallback:
+            (DiagnosticsNode node, InspectorSerializationDelegate delegate) {
+              return null;
+            },
+        );
+      final InspectorSerializationDelegate defaultDelegate =
+        InspectorSerializationDelegate(
+          service: service,
+          summaryTree: false,
+          includeProperties: true,
+          addAdditionalPropertiesCallback: null,
+        );
+      expect(node.toJsonMap(emptyDelegate), node.toJsonMap(defaultDelegate));
+    });
   }
 }
 

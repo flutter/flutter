@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:ui' show Locale;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
 import 'binding.dart';
@@ -411,7 +412,7 @@ class Localizations extends StatefulWidget {
   static Locale localeOf(BuildContext context, { bool nullOk = false }) {
     assert(context != null);
     assert(nullOk != null);
-    final _LocalizationsScope scope = context.inheritFromWidgetOfExactType(_LocalizationsScope);
+    final _LocalizationsScope scope = context.dependOnInheritedWidgetOfExactType<_LocalizationsScope>();
     if (nullOk && scope == null)
       return null;
     assert(scope != null, 'a Localizations ancestor was not found');
@@ -422,7 +423,7 @@ class Localizations extends StatefulWidget {
   // Localizations.override factory constructor.
   static List<LocalizationsDelegate<dynamic>> _delegatesOf(BuildContext context) {
     assert(context != null);
-    final _LocalizationsScope scope = context.inheritFromWidgetOfExactType(_LocalizationsScope);
+    final _LocalizationsScope scope = context.dependOnInheritedWidgetOfExactType<_LocalizationsScope>();
     assert(scope != null, 'a Localizations ancestor was not found');
     return List<LocalizationsDelegate<dynamic>>.from(scope.localizationsState.widget.delegates);
   }
@@ -445,7 +446,7 @@ class Localizations extends StatefulWidget {
   static T of<T>(BuildContext context, Type type) {
     assert(context != null);
     assert(type != null);
-    final _LocalizationsScope scope = context.inheritFromWidgetOfExactType(_LocalizationsScope);
+    final _LocalizationsScope scope = context.dependOnInheritedWidgetOfExactType<_LocalizationsScope>();
     return scope?.localizationsState?.resourcesFor<T>(type);
   }
 
@@ -519,27 +520,27 @@ class _LocalizationsState extends State<Localizations> {
       // have finished loading. Until then the old locale will continue to be used.
       // - If we're running at app startup time then defer reporting the first
       // "useful" frame until after the async load has completed.
-      WidgetsBinding.instance.deferFirstFrameReport();
+      RendererBinding.instance.deferFirstFrame();
       typeToResourcesFuture.then<void>((Map<Type, dynamic> value) {
-        WidgetsBinding.instance.allowFirstFrameReport();
-        if (!mounted)
-          return;
-        setState(() {
-          _typeToResources = value;
-          _locale = locale;
-        });
+        if (mounted) {
+          setState(() {
+            _typeToResources = value;
+            _locale = locale;
+          });
+        }
+        RendererBinding.instance.allowFirstFrame();
       });
     }
   }
 
   T resourcesFor<T>(Type type) {
     assert(type != null);
-    final T resources = _typeToResources[type];
+    final T resources = _typeToResources[type] as T;
     return resources;
   }
 
   TextDirection get _textDirection {
-    final WidgetsLocalizations resources = _typeToResources[WidgetsLocalizations];
+    final WidgetsLocalizations resources = _typeToResources[WidgetsLocalizations] as WidgetsLocalizations;
     assert(resources != null);
     return resources.textDirection;
   }

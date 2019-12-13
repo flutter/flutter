@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -63,6 +63,9 @@ class DevelopmentArtifact {
   static const DevelopmentArtifact flutterRunner = DevelopmentArtifact._('flutter_runner', unstable: true);
 
   /// Artifacts required for any development platform.
+  ///
+  /// This does not need to be explicitly returned from requiredArtifacts as
+  /// it will always be downloaded.
   static const DevelopmentArtifact universal = DevelopmentArtifact._('universal');
 
   /// The values of DevelopmentArtifacts.
@@ -379,7 +382,7 @@ class Cache {
     final bool includeAllPlatformsState = cache.includeAllPlatforms;
     bool allAvailible = true;
     cache.includeAllPlatforms = includeAllPlatforms;
-    for (CachedArtifact cachedArtifact in _artifacts) {
+    for (ArtifactSet cachedArtifact in _artifacts) {
       if (cachedArtifact is EngineCachedArtifact) {
         allAvailible &= await cachedArtifact.checkForArtifacts(engineVersion);
       }
@@ -432,7 +435,8 @@ abstract class CachedArtifact extends ArtifactSet {
   /// can delete them after completion. We don't delete them right after
   /// extraction in case [update] is interrupted, so we can restart without
   /// starting from scratch.
-  final List<File> _downloadedFiles = <File>[];
+  @visibleForTesting
+  final List<File> downloadedFiles = <File>[];
 
   @override
   bool isUpToDate() {
@@ -465,8 +469,13 @@ abstract class CachedArtifact extends ArtifactSet {
 
   /// Clear any zip/gzip files downloaded.
   void _removeDownloadedFiles() {
-    for (File f in _downloadedFiles) {
-      f.deleteSync();
+    for (File f in downloadedFiles) {
+      try {
+        f.deleteSync();
+      } on FileSystemException catch (e) {
+        printError('Failed to delete "${f.path}". Please delete manually. $e');
+        continue;
+      }
       for (Directory d = f.parent; d.absolute.path != cache.getDownloadDir().absolute.path; d = d.parent) {
         if (d.listSync().isEmpty) {
           d.deleteSync();
@@ -532,10 +541,10 @@ abstract class CachedArtifact extends ArtifactSet {
   }
 
   /// Create a temporary file and invoke [onTemporaryFile] with the file as
-  /// argument, then add the temporary file to the [_downloadedFiles].
+  /// argument, then add the temporary file to the [downloadedFiles].
   Future<void> _withDownloadFile(String name, Future<void> onTemporaryFile(File file)) async {
     final File tempFile = fs.file(fs.path.join(cache.getDownloadDir().path, name));
-    _downloadedFiles.add(tempFile);
+    downloadedFiles.add(tempFile);
     await onTemporaryFile(tempFile);
   }
 }
@@ -895,16 +904,13 @@ class AndroidMavenArtifacts extends ArtifactSet {
   Future<void> update() async {
     final Directory tempDir =
         fs.systemTempDirectory.createTempSync('flutter_gradle_wrapper.');
-    injectGradleWrapperIfNeeded(tempDir);
+    gradleUtils.injectGradleWrapperIfNeeded(tempDir);
 
     final Status status = logger.startProgress('Downloading Android Maven dependencies...',
         timeout: timeoutConfiguration.slowOperation);
     final File gradle = tempDir.childFile(
         platform.isWindows ? 'gradlew.bat' : 'gradlew',
       );
-    assert(gradle.existsSync());
-    os.makeExecutable(gradle);
-
     try {
       final String gradleExecutable = gradle.absolute.path;
       final String flutterSdk = escapePath(Cache.flutterRoot);

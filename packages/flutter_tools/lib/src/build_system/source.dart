@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -81,9 +81,9 @@ class SourceVisitor implements ResolvedFiles {
         .map((String path) => fs.file(path));
   }
 
-  /// Visit a [Source] which contains a file uri.
+  /// Visit a [Source] which contains a file URL.
   ///
-  /// The uri may include constants defined in an [Environment]. If
+  /// The URL may include constants defined in an [Environment]. If
   /// [optional] is true, the file is not required to exist. In this case, it
   /// is never resolved as an input.
   void visitPattern(String pattern, bool optional) {
@@ -153,11 +153,11 @@ class SourceVisitor implements ResolvedFiles {
       } else if (wildcardSegments.length == 1) {
         if (filename.startsWith(wildcardSegments[0]) ||
             filename.endsWith(wildcardSegments[0])) {
-          sources.add(entity.absolute);
+          sources.add(fs.file(entity.absolute));
         }
       } else if (filename.startsWith(wildcardSegments[0])) {
         if (filename.substring(wildcardSegments[0].length).endsWith(wildcardSegments[1])) {
-          sources.add(entity.absolute);
+          sources.add(fs.file(entity.absolute));
         }
       }
     }
@@ -182,23 +182,13 @@ class SourceVisitor implements ResolvedFiles {
 
 /// A description of an input or output of a [Target].
 abstract class Source {
-  /// This source is a file-uri which contains some references to magic
+  /// This source is a file URL which contains some references to magic
   /// environment variables.
   const factory Source.pattern(String pattern, { bool optional }) = _PatternSource;
   /// The source is provided by an [Artifact].
   ///
   /// If [artifact] points to a directory then all child files are included.
   const factory Source.artifact(Artifact artifact, {TargetPlatform platform, BuildMode mode}) = _ArtifactSource;
-
-  /// The source is provided by a depfile generated at runtime.
-  ///
-  /// The `name` is of the file, and is expected to be output relative to the
-  /// build directory.
-  ///
-  /// Before the first build, the depfile is expected to be missing. Its
-  /// absence is interpreted as the build needing to run. Afterwards, both
-  /// input and output file hashes are updated.
-  const factory Source.depfile(String name) = _DepfileSource;
 
   /// Visit the particular source type.
   void accept(SourceVisitor visitor);
@@ -235,18 +225,6 @@ class _ArtifactSource implements Source {
 
   @override
   void accept(SourceVisitor visitor) => visitor.visitArtifact(artifact, platform, mode);
-
-  @override
-  bool get implicit => false;
-}
-
-class _DepfileSource implements Source {
-  const _DepfileSource(this.name);
-
-  final String name;
-
-  @override
-  void accept(SourceVisitor visitor) => visitor.visitDepfile(name);
 
   @override
   bool get implicit => false;

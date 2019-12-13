@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -93,6 +93,27 @@ void main() {
       memoryFileSystem = MemoryFileSystem();
     });
 
+    testUsingContext('Continues on failed delete', () async {
+      final Directory artifactDir = fs.systemTempDirectory.createTempSync('flutter_cache_test_artifact.');
+      final Directory downloadDir = fs.systemTempDirectory.createTempSync('flutter_cache_test_download.');
+      when(mockCache.getArtifactDirectory(any)).thenReturn(artifactDir);
+      when(mockCache.getDownloadDir()).thenReturn(downloadDir);
+      final File mockFile = MockFile();
+      when(mockFile.deleteSync()).thenAnswer((_) {
+        throw const FileSystemException('delete failed');
+      });
+      final FakeDownloadedArtifact artifact = FakeDownloadedArtifact(
+        mockFile,
+        mockCache,
+      );
+      await artifact.update();
+      expect(testLogger.errorText, contains('delete failed'));
+    }, overrides: <Type, Generator>{
+      Cache: () => mockCache,
+      FileSystem: () => memoryFileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
     testUsingContext('Gradle wrapper should not be up to date, if some cached artifact is not available', () {
       final GradleWrapper gradleWrapper = GradleWrapper(mockCache);
       final Directory directory = fs.directory('/Applications/flutter/bin/cache');
@@ -101,7 +122,7 @@ void main() {
       when(mockCache.getCacheDir(fs.path.join('artifacts', 'gradle_wrapper'))).thenReturn(fs.directory(fs.path.join(directory.path, 'artifacts', 'gradle_wrapper')));
       expect(gradleWrapper.isUpToDateInner(), false);
     }, overrides: <Type, Generator>{
-      Cache: ()=> mockCache,
+      Cache: () => mockCache,
       FileSystem: () => memoryFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     });
@@ -117,7 +138,7 @@ void main() {
       when(mockCache.getCacheDir(fs.path.join('artifacts', 'gradle_wrapper'))).thenReturn(fs.directory(fs.path.join(directory.path, 'artifacts', 'gradle_wrapper')));
       expect(gradleWrapper.isUpToDateInner(), true);
     }, overrides: <Type, Generator>{
-      Cache: ()=> mockCache,
+      Cache: () => mockCache,
       FileSystem: () => memoryFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
     });
@@ -174,7 +195,7 @@ void main() {
         '/path/to/alpha:/path/to/beta:/path/to/gamma:/path/to/delta:/path/to/epsilon',
       );
     }, overrides: <Type, Generator>{
-      Cache: ()=> mockCache,
+      Cache: () => mockCache,
     });
     testUsingContext('failed storage.googleapis.com download shows China warning', () async {
       final CachedArtifact artifact1 = MockCachedArtifact();
@@ -272,7 +293,7 @@ void main() {
       expect(dir.path, artifactDir.childDirectory('bin_dir').path);
       verify(mockOperatingSystemUtils.chmod(argThat(hasPath(dir.path)), 'a+r,a+x'));
     }, overrides: <Type, Generator>{
-      Cache: ()=> mockCache,
+      Cache: () => mockCache,
       FileSystem: () => memoryFileSystem,
       ProcessManager: () => FakeProcessManager.any(),
       HttpClientFactory: () => () => fakeHttpClient,
@@ -311,7 +332,7 @@ void main() {
 
       when(processManager.run(any, environment: captureAnyNamed('environment')))
         .thenAnswer((Invocation invocation) {
-          final List<String> args = invocation.positionalArguments[0];
+          final List<String> args = invocation.positionalArguments[0] as List<String>;
           expect(args.length, 6);
           expect(args[1], '-b');
           expect(args[2].endsWith('resolve_dependencies.gradle'), isTrue);
@@ -324,7 +345,7 @@ void main() {
 
       expect(mavenArtifacts.isUpToDate(), isFalse);
     }, overrides: <Type, Generator>{
-      Cache: ()=> mockCache,
+      Cache: () => mockCache,
       FileSystem: () => memoryFileSystem,
       ProcessManager: () => processManager,
     });
@@ -433,6 +454,21 @@ class FakeCachedArtifact extends EngineCachedArtifact {
 
   @override
   List<String> getPackageDirs() => packageDirs;
+}
+
+class FakeDownloadedArtifact extends CachedArtifact {
+  FakeDownloadedArtifact(this.downloadedFile, Cache cache) : super(
+    'fake',
+    cache,
+    DevelopmentArtifact.universal,
+  );
+
+  final File downloadedFile;
+
+  @override
+  Future<void> updateInner() async {
+    downloadedFiles.add(downloadedFile);
+  }
 }
 
 class MockProcessManager extends Mock implements ProcessManager {}

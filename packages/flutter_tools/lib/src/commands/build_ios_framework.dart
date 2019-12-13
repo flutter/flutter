@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -85,7 +85,6 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
-    DevelopmentArtifact.universal,
     DevelopmentArtifact.iOS,
   };
 
@@ -94,13 +93,13 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
   List<BuildMode> get buildModes {
     final List<BuildMode> buildModes = <BuildMode>[];
 
-    if (argResults['debug']) {
+    if (boolArg('debug')) {
       buildModes.add(BuildMode.debug);
     }
-    if (argResults['profile']) {
+    if (boolArg('profile')) {
       buildModes.add(BuildMode.profile);
     }
-    if (argResults['release']) {
+    if (boolArg('release')) {
       buildModes.add(BuildMode.release);
     }
 
@@ -119,10 +118,10 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
       throwToolExit('Building frameworks for iOS is only supported on the Mac.');
     }
 
-    if (!argResults['universal'] && !argResults['xcframework']) {
+    if (!boolArg('universal') && !boolArg('xcframework')) {
       throwToolExit('--universal or --xcframework is required.');
     }
-    if (argResults['xcframework'] && xcode.majorVersion < 11) {
+    if (boolArg('xcframework') && xcode.majorVersion < 11) {
       throwToolExit('--xcframework requires Xcode 11.');
     }
     if (buildModes.isEmpty) {
@@ -134,24 +133,20 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
   Future<FlutterCommandResult> runCommand() async {
     Cache.releaseLockEarly();
 
-    final String outputArgument = argResults['output']
+    final String outputArgument = stringArg('output')
         ?? fs.path.join(fs.currentDirectory.path, 'build', 'ios', 'framework');
 
     if (outputArgument.isEmpty) {
       throwToolExit('--output is required.');
     }
 
-    final BuildableIOSApp iosProject = await applicationPackages.getPackageForPlatform(TargetPlatform.ios);
+    final BuildableIOSApp iosProject = await applicationPackages.getPackageForPlatform(TargetPlatform.ios) as BuildableIOSApp;
 
     if (iosProject == null) {
       throwToolExit("Module's iOS folder missing");
     }
 
     final Directory outputDirectory = fs.directory(fs.path.normalize(outputArgument));
-
-    if (outputDirectory.existsSync()) {
-      outputDirectory.deleteSync(recursive: true);
-    }
 
     aotBuilder ??= AotBuilder();
     bundleBuilder ??= BundleBuilder();
@@ -160,6 +155,10 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
       printStatus('Building framework for $iosProject in ${getNameForBuildMode(mode)} mode...');
       final String xcodeBuildConfiguration = toTitleCase(getNameForBuildMode(mode));
       final Directory modeDirectory = outputDirectory.childDirectory(xcodeBuildConfiguration);
+
+      if (modeDirectory.existsSync()) {
+        modeDirectory.deleteSync(recursive: true);
+      }
       final Directory iPhoneBuildOutput = modeDirectory.childDirectory('iphoneos');
       final Directory simulatorBuildOutput = modeDirectory.childDirectory('iphonesimulator');
 
@@ -167,7 +166,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
       await _produceFlutterFramework(outputDirectory, mode, iPhoneBuildOutput, simulatorBuildOutput, modeDirectory);
 
       // Build aot, create module.framework and copy.
-      await _produceAppFramework(mode, iPhoneBuildOutput, modeDirectory);
+      await _produceAppFramework(mode, iPhoneBuildOutput, simulatorBuildOutput, modeDirectory);
 
       // Build and copy plugins.
       await processPodsIfNeeded(_project.ios, getIosBuildDirectory(), mode);
@@ -201,7 +200,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
     final Directory fatFlutterFrameworkCopy = modeDirectory.childDirectory(flutterFrameworkFileName);
     copyDirectorySync(fs.directory(engineCacheFlutterFrameworkDirectory), fatFlutterFrameworkCopy);
 
-    if (argResults['xcframework']) {
+    if (boolArg('xcframework')) {
       // Copy universal framework to variant directory.
       final Directory armFlutterFrameworkDirectory = iPhoneBuildOutput.childDirectory(flutterFrameworkFileName);
       final File armFlutterFrameworkBinary = armFlutterFrameworkDirectory.childFile('Flutter');
@@ -249,19 +248,20 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
       );
     }
 
-    if (!argResults['universal']) {
+    if (!boolArg('universal')) {
       fatFlutterFrameworkCopy.deleteSync(recursive: true);
     }
     status.stop();
   }
 
-  Future<void> _produceAppFramework(BuildMode mode, Directory iPhoneBuildOutput, Directory modeDirectory) async {
+  Future<void> _produceAppFramework(BuildMode mode, Directory iPhoneBuildOutput, Directory simulatorBuildOutput, Directory modeDirectory) async {
     const String appFrameworkName = 'App.framework';
     final Directory destinationAppFrameworkDirectory = modeDirectory.childDirectory(appFrameworkName);
+    destinationAppFrameworkDirectory.createSync(recursive: true);
 
     if (mode == BuildMode.debug) {
       final Status status = logger.startProgress(' ├─Add placeholder App.framework for debug...', timeout: timeoutConfiguration.fastOperation);
-      await createStubAppFramework(destinationAppFrameworkDirectory);
+      await _produceStubAppFrameworkIfNeeded(mode, iPhoneBuildOutput, simulatorBuildOutput, destinationAppFrameworkDirectory);
       status.stop();
     } else {
       await _produceAotAppFrameworkIfNeeded(mode, iPhoneBuildOutput, destinationAppFrameworkDirectory);
@@ -284,6 +284,37 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
     status.stop();
   }
 
+  Future<void> _produceStubAppFrameworkIfNeeded(BuildMode mode, Directory iPhoneBuildOutput, Directory simulatorBuildOutput, Directory destinationAppFrameworkDirectory) async {
+    if (mode != BuildMode.debug) {
+      return;
+    }
+    const String appFrameworkName = 'App.framework';
+    const String binaryName = 'App';
+
+    final Directory iPhoneAppFrameworkDirectory = iPhoneBuildOutput.childDirectory(appFrameworkName);
+    final File iPhoneAppFrameworkFile = iPhoneAppFrameworkDirectory.childFile(binaryName);
+    await createStubAppFramework(iPhoneAppFrameworkFile, SdkType.iPhone);
+
+    final Directory simulatorAppFrameworkDirectory = simulatorBuildOutput.childDirectory(appFrameworkName);
+    final File simulatorAppFrameworkFile = simulatorAppFrameworkDirectory.childFile(binaryName);
+    await createStubAppFramework(simulatorAppFrameworkFile, SdkType.iPhoneSimulator);
+
+    final List<String> lipoCommand = <String>[
+      'xcrun',
+      'lipo',
+      '-create',
+      iPhoneAppFrameworkFile.path,
+      simulatorAppFrameworkFile.path,
+      '-output',
+      destinationAppFrameworkDirectory.childFile(binaryName).path
+    ];
+
+    await processUtils.run(
+      lipoCommand,
+      allowReentrantFlutter: false,
+    );
+  }
+
   Future<void> _produceAotAppFrameworkIfNeeded(BuildMode mode, Directory iPhoneBuildOutput, Directory destinationAppFrameworkDirectory) async {
     if (mode == BuildMode.debug) {
       return;
@@ -296,6 +327,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
       // Relative paths show noise in the compiler https://github.com/dart-lang/sdk/issues/37978.
       mainDartFile: fs.path.absolute(targetFile),
       quiet: true,
+      bitcode: true,
       reportTimings: false,
       iosBuildArchs: <DarwinArch>[DarwinArch.armv7, DarwinArch.arm64],
       dartDefines: dartDefines,
@@ -359,8 +391,8 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
         final String podFrameworkName = podProduct.basename;
         if (fs.path.extension(podFrameworkName) == '.framework') {
           final String binaryName = fs.path.basenameWithoutExtension(podFrameworkName);
-          if (argResults['universal']) {
-            copyDirectorySync(podProduct, modeDirectory.childDirectory(podFrameworkName));
+          if (boolArg('universal')) {
+            copyDirectorySync(podProduct as Directory, modeDirectory.childDirectory(podFrameworkName));
             final List<String> lipoCommand = <String>[
               'xcrun',
               'lipo',
@@ -378,7 +410,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
             );
           }
 
-          if (argResults['xcframework']) {
+          if (boolArg('xcframework')) {
             final List<String> xcframeworkCommand = <String>[
               'xcrun',
               'xcodebuild',

@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -139,7 +139,8 @@ class UserMessages {
   String get xcodeEula => 'Xcode end user license agreement not signed; open Xcode or run the command \'sudo xcodebuild -license\'.';
   String get xcodeMissingSimct =>
       'Xcode requires additional components to be installed in order to run.\n'
-      'Launch Xcode and install additional required components when prompted.';
+      'Launch Xcode and install additional required components when prompted or run:\n'
+      '  sudo xcodebuild -runFirstLaunch';
   String get xcodeMissing =>
       'Xcode not installed; this is necessary for iOS development.\n'
       'Download at https://developer.apple.com/xcode/download/.';
@@ -148,7 +149,8 @@ class UserMessages {
       'Download at: https://developer.apple.com/xcode/download/\n'
       'Or install Xcode via the App Store.\n'
       'Once installed, run:\n'
-      '  sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer';
+      '  sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer\n'
+      '  sudo xcodebuild -runFirstLaunch';
 
   // Messages used in CocoaPodsValidator
   String cocoaPodsVersion(String version) => 'CocoaPods version $version';
