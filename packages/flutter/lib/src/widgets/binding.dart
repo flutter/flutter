@@ -326,6 +326,27 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
         },
       );
 
+      // Register the ability to quickly mark elements as dirty.
+      // The performance of this method may be improved with additional
+      // information from https://github.com/flutter/flutter/issues/46195.
+      registerServiceExtension(
+        name: 'fastReassemble',
+        callback: (Map<String, Object> params) async {
+          final String className = params['class'];
+          void markElementsDirty(Element element) {
+            if (element == null) {
+              return;
+            }
+            if (element.widget?.runtimeType?.toString()?.startsWith(className) ?? false) {
+              element.markNeedsBuild();
+            }
+            element.visitChildElements(markElementsDirty);
+          }
+          markElementsDirty(renderViewElement);
+          return <String, String>{'Success': 'true'};
+        },
+      );
+
       // Expose the ability to send Widget rebuilds as [Timeline] events.
       registerBoolServiceExtension(
         name: 'profileWidgetBuilds',

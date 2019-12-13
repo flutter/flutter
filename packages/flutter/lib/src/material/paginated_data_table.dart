@@ -226,7 +226,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
   @override
   void initState() {
     super.initState();
-    _firstRowIndex = PageStorage.of(context)?.readState(context) ?? widget.initialFirstRowIndex ?? 0;
+    _firstRowIndex = PageStorage.of(context)?.readState(context) as int ?? widget.initialFirstRowIndex ?? 0;
     widget.source.addListener(_handleDataSourceChanged);
     _handleDataSourceChanged();
   }
@@ -382,7 +382,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
             alignment: AlignmentDirectional.centerEnd,
             child: DropdownButtonHideUnderline(
               child: DropdownButton<int>(
-                items: availableRowsPerPage,
+                items: availableRowsPerPage.cast<DropdownMenuItem<int>>(),
                 value: widget.rowsPerPage,
                 onChanged: widget.onRowsPerPageChanged,
                 style: footerTextStyle,

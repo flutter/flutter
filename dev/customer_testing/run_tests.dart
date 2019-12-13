@@ -212,16 +212,16 @@ class TestFile {
         test.add(line.substring(5));
       } else if (line.startsWith('test.windows=')) {
         if (Platform.isWindows)
-          test.add(line.substring(5));
+          test.add(line.substring(13));
       } else if (line.startsWith('test.macos=')) {
         if (Platform.isMacOS)
-          test.add(line.substring(5));
+          test.add(line.substring(11));
       } else if (line.startsWith('test.linux=')) {
         if (Platform.isLinux)
-          test.add(line.substring(5));
+          test.add(line.substring(11));
       } else if (line.startsWith('test.posix=')) {
         if (Platform.isLinux || Platform.isMacOS)
-          test.add(line.substring(5));
+          test.add(line.substring(11));
       } else {
         throw FormatException('${errorPrefix}Unexpected directive:\n$line');
       }
