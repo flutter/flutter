@@ -1,4 +1,4 @@
-// Copyright 2014 The Flutter Authors. All rights reserved.
+ // Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -27,8 +27,7 @@ void main() {
     ]);
     expect(stdoutLines, <String>[
       'Found 7 sample code sections.',
-      'Generating snippet for known_broken_documentation.dart:38',
-      'Starting analysis of samples.',
+       'Starting analysis of samples.',
       '',
     ]);
   }, skip: Platform.isWindows);
