@@ -15,10 +15,14 @@ class EngineLineMetrics implements ui.LineMetrics {
     this.left,
     this.baseline,
     this.lineNumber,
-  }) : text = null;
+  })  : text = null,
+        startIndex = -1,
+        endIndex = -1;
 
   EngineLineMetrics.withText(
     this.text, {
+    @required this.startIndex,
+    @required this.endIndex,
     @required this.hardBreak,
     this.ascent,
     this.descent,
@@ -35,6 +39,15 @@ class EngineLineMetrics implements ui.LineMetrics {
 
   /// The textual content representing this line.
   final String text;
+
+  /// The index (inclusive) in the text where this line begins.
+  final int startIndex;
+
+  /// The index (exclusive) in the text where this line ends.
+  ///
+  /// When the line contains an overflow, then [endIndex] goes until the end of
+  /// the text and doesn't stop at the overflow cutoff.
+  final int endIndex;
 
   @override
   final bool hardBreak;
@@ -66,6 +79,8 @@ class EngineLineMetrics implements ui.LineMetrics {
   @override
   int get hashCode => ui.hashValues(
         text,
+        startIndex,
+        endIndex,
         hardBreak,
         ascent,
         descent,
@@ -88,6 +103,8 @@ class EngineLineMetrics implements ui.LineMetrics {
     }
     final EngineLineMetrics typedOther = other;
     return text == typedOther.text &&
+        startIndex == typedOther.startIndex &&
+        endIndex == typedOther.endIndex &&
         hardBreak == typedOther.hardBreak &&
         ascent == typedOther.ascent &&
         descent == typedOther.descent &&
@@ -431,9 +448,18 @@ class EngineParagraph implements ui.Paragraph {
 
   @override
   ui.TextRange getLineBoundary(ui.TextPosition position) {
-    // TODO(flutter_web): https://github.com/flutter/flutter/issues/39537
-    // Depends upon LineMetrics measurement.
-    return null;
+    final List<EngineLineMetrics> lines = _measurementResult.lines;
+    if (lines != null) {
+      final int offset = position.offset;
+
+      for (int i = 0; i < lines.length; i++) {
+        final EngineLineMetrics line = lines[i];
+        if (offset >= line.startIndex && offset < line.endIndex) {
+          return ui.TextRange(start: line.startIndex, end: line.endIndex);
+        }
+      }
+    }
+    return ui.TextRange.empty;
   }
 
   @override

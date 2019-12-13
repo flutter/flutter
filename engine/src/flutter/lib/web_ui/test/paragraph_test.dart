@@ -186,4 +186,74 @@ void main() async {
     TextMeasurementService.clearCache();
     TextMeasurementService.enableExperimentalCanvasImplementation = false;
   });
+
+  testEachMeasurement('getLineBoundary (single-line)', () {
+    final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle(
+      fontFamily: 'Ahem',
+      fontStyle: FontStyle.normal,
+      fontWeight: FontWeight.normal,
+      fontSize: 10,
+    ));
+    builder.addText('One single line');
+    final Paragraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: 400.0));
+
+    // "One single line".length == 15
+    for (int i = 0; i < 15; i++) {
+      expect(
+        paragraph.getLineBoundary(TextPosition(offset: i)),
+        TextRange(start: 0, end: 15),
+        reason: 'failed at offset $i',
+      );
+    }
+  });
+
+  test('getLineBoundary (multi-line)', () {
+    // [Paragraph.getLineBoundary] for multi-line paragraphs is only supported
+    // by canvas-based measurement.
+    TextMeasurementService.enableExperimentalCanvasImplementation = true;
+    TextMeasurementService.initialize(rulerCacheCapacity: 2);
+
+    final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle(
+      fontFamily: 'Ahem',
+      fontStyle: FontStyle.normal,
+      fontWeight: FontWeight.normal,
+      fontSize: 10,
+    ));
+    builder.addText('First line\n');
+    builder.addText('Second line\n');
+    builder.addText('Third line');
+    final Paragraph paragraph = builder.build();
+    paragraph.layout(const ParagraphConstraints(width: 400.0));
+
+    // "First line\n".length == 11
+    for (int i = 0; i < 11; i++) {
+      expect(
+        paragraph.getLineBoundary(TextPosition(offset: i)),
+        TextRange(start: 0, end: 11),
+        reason: 'failed at offset $i',
+      );
+    }
+
+    // "Second line\n".length == 12
+    for (int i = 11; i < 23; i++) {
+      expect(
+        paragraph.getLineBoundary(TextPosition(offset: i)),
+        TextRange(start: 11, end: 23),
+        reason: 'failed at offset $i',
+      );
+    }
+
+    // "Third line".length == 10
+    for (int i = 23; i < 33; i++) {
+      expect(
+        paragraph.getLineBoundary(TextPosition(offset: i)),
+        TextRange(start: 23, end: 33),
+        reason: 'failed at offset $i',
+      );
+    }
+
+    TextMeasurementService.clearCache();
+    TextMeasurementService.enableExperimentalCanvasImplementation = false;
+  });
 }
