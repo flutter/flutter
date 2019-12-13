@@ -216,11 +216,11 @@ void main() {
     expect(find.text('BottomSheet'), findsOneWidget);
     expect(showBottomSheetThenCalled, isFalse);
 
-    // Swipe the bottom sheet to dismiss it.
+    // Swipe the bottom sheet, attempting to dismiss it.
     await tester.drag(find.text('BottomSheet'), const Offset(0.0, 150.0));
-    await tester.pumpAndSettle(); // Bottom sheet dismiss animation.
+    await tester.pumpAndSettle(); // Bottom sheet should not dismiss.
     expect(showBottomSheetThenCalled, isFalse);
-    expect(find.text('BottomSheet'), findsNothing);
+    expect(find.text('BottomSheet'), findsOneWidget);
   });
 
   testWidgets('Swiping down a modal BottomSheet should dismiss it when enableDrag is true', (WidgetTester tester) async {
@@ -252,9 +252,9 @@ void main() {
     expect(find.text('BottomSheet'), findsOneWidget);
     expect(showBottomSheetThenCalled, isFalse);
 
-    // Swipe the bottom sheet, attempting to dismiss it.
+    // Swipe the bottom sheet to dismiss it.
     await tester.drag(find.text('BottomSheet'), const Offset(0.0, 150.0));
-    await tester.pumpAndSettle(); // Bottom sheet should not dismiss.
+    await tester.pumpAndSettle(); // Bottom sheet dismiss animation.
     expect(showBottomSheetThenCalled, isTrue);
     expect(find.text('BottomSheet'), findsNothing);
   });
