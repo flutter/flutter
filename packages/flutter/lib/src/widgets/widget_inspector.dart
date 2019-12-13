@@ -2498,12 +2498,7 @@ class _InspectorOverlayLayer extends Layer {
     @required this.selection,
   }) : assert(overlayRect != null),
        assert(selection != null) {
-    bool inDebugMode = false;
-    assert(() {
-      inDebugMode = true;
-      return true;
-    }());
-    if (inDebugMode == false) {
+    if (kReleaseMode) {
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary(
           'The inspector should never be used in production mode due to the '
