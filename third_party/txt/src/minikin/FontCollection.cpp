@@ -302,8 +302,7 @@ const std::shared_ptr<FontFamily>& FontCollection::getFamilyForChar(
     // libtxt: check if the fallback font provider can match this character
     if (mFallbackFontProvider) {
       const std::shared_ptr<FontFamily>& fallback =
-          mFallbackFontProvider->matchFallbackFont(ch,
-                                                   GetFontLocale(langListId));
+          findFallbackFont(ch, vs, langListId);
       if (fallback) {
         return fallback;
       }
@@ -340,8 +339,7 @@ const std::shared_ptr<FontFamily>& FontCollection::getFamilyForChar(
     // libtxt: check if the fallback font provider can match this character
     if (mFallbackFontProvider) {
       const std::shared_ptr<FontFamily>& fallback =
-          mFallbackFontProvider->matchFallbackFont(ch,
-                                                   GetFontLocale(langListId));
+          findFallbackFont(ch, vs, langListId);
       if (fallback) {
         return fallback;
       }
@@ -363,6 +361,30 @@ const std::shared_ptr<FontFamily>& FontCollection::getFamilyForChar(
   }
   return vs == 0 ? mFamilies[mFamilyVec[bestFamilyIndex]]
                  : mFamilies[bestFamilyIndex];
+}
+
+const std::shared_ptr<FontFamily>& FontCollection::findFallbackFont(
+    uint32_t ch,
+    uint32_t vs,
+    uint32_t langListId) const {
+  std::string locale = GetFontLocale(langListId);
+
+  const auto it = mCachedFallbackFamilies.find(locale);
+  if (it != mCachedFallbackFamilies.end()) {
+    for (const auto& fallbackFamily : it->second) {
+      if (calcCoverageScore(ch, vs, fallbackFamily)) {
+        return fallbackFamily;
+      }
+    }
+  }
+
+  const std::shared_ptr<FontFamily>& fallback =
+      mFallbackFontProvider->matchFallbackFont(ch, GetFontLocale(langListId));
+
+  if (fallback) {
+    mCachedFallbackFamilies[locale].push_back(fallback);
+  }
+  return fallback;
 }
 
 const uint32_t NBSP = 0x00A0;
