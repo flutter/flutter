@@ -63,7 +63,7 @@ class SkCanvas {
       startAngle * toDegrees,
       sweepAngle * toDegrees,
       useCenter,
-      paint.makeSkPaint(),
+      paint.skiaObject,
     ]);
   }
 
@@ -80,7 +80,7 @@ class SkCanvas {
       skAtlas.skImage,
       rects,
       rstTransforms,
-      paint.makeSkPaint(),
+      paint.skiaObject,
       makeSkBlendMode(blendMode),
       colors,
     ]);
@@ -91,7 +91,7 @@ class SkCanvas {
       c.dx,
       c.dy,
       radius,
-      paint.makeSkPaint(),
+      paint.skiaObject,
     ]);
   }
 
@@ -106,7 +106,7 @@ class SkCanvas {
     skCanvas.callMethod('drawDRRect', <js.JsObject>[
       makeSkRRect(outer),
       makeSkRRect(inner),
-      paint.makeSkPaint(),
+      paint.skiaObject,
     ]);
   }
 
@@ -116,7 +116,7 @@ class SkCanvas {
       skImage.skImage,
       offset.dx,
       offset.dy,
-      paint.makeSkPaint(),
+      paint.skiaObject,
     ]);
   }
 
@@ -126,7 +126,7 @@ class SkCanvas {
       skImage.skImage,
       makeSkRect(src),
       makeSkRect(dst),
-      paint.makeSkPaint(),
+      paint.skiaObject,
       false,
     ]);
   }
@@ -138,7 +138,7 @@ class SkCanvas {
       skImage.skImage,
       makeSkRect(center),
       makeSkRect(dst),
-      paint.makeSkPaint(),
+      paint.skiaObject,
     ]);
   }
 
@@ -148,19 +148,19 @@ class SkCanvas {
       p1.dy,
       p2.dx,
       p2.dy,
-      paint.makeSkPaint(),
+      paint.skiaObject,
     ]);
   }
 
   void drawOval(ui.Rect rect, SkPaint paint) {
     skCanvas.callMethod('drawOval', <js.JsObject>[
       makeSkRect(rect),
-      paint.makeSkPaint(),
+      paint.skiaObject,
     ]);
   }
 
   void drawPaint(SkPaint paint) {
-    skCanvas.callMethod('drawPaint', <js.JsObject>[paint.makeSkPaint()]);
+    skCanvas.callMethod('drawPaint', <js.JsObject>[paint.skiaObject]);
   }
 
   void drawParagraph(ui.Paragraph paragraph, ui.Offset offset) {
@@ -173,7 +173,7 @@ class SkCanvas {
   }
 
   void drawPath(ui.Path path, SkPaint paint) {
-    final js.JsObject skPaint = paint.makeSkPaint();
+    final js.JsObject skPaint = paint.skiaObject;
     final SkPath enginePath = path;
     final js.JsObject skPath = enginePath._skPath;
     skCanvas.callMethod('drawPath', <js.JsObject>[skPath, skPaint]);
@@ -188,20 +188,20 @@ class SkCanvas {
     skCanvas.callMethod('drawPoints', <dynamic>[
       makeSkPointMode(pointMode),
       points,
-      paint.makeSkPaint(),
+      paint.skiaObject,
     ]);
   }
 
   void drawRRect(ui.RRect rrect, SkPaint paint) {
     skCanvas.callMethod('drawRRect', <js.JsObject>[
       makeSkRRect(rrect),
-      paint.makeSkPaint(),
+      paint.skiaObject,
     ]);
   }
 
   void drawRect(ui.Rect rect, SkPaint paint) {
     final js.JsObject skRect = makeSkRect(rect);
-    final js.JsObject skPaint = paint.makeSkPaint();
+    final js.JsObject skPaint = paint.skiaObject;
     skCanvas.callMethod('drawRect', <js.JsObject>[skRect, skPaint]);
   }
 
@@ -217,7 +217,7 @@ class SkCanvas {
     skCanvas.callMethod('drawVertices', <js.JsObject>[
       skVertices.skVertices,
       makeSkBlendMode(blendMode),
-      paint.makeSkPaint()
+      paint.skiaObject
     ]);
   }
 
@@ -241,12 +241,12 @@ class SkCanvas {
   void saveLayer(ui.Rect bounds, SkPaint paint) {
     skCanvas.callMethod('saveLayer', <js.JsObject>[
       makeSkRect(bounds),
-      paint.makeSkPaint(),
+      paint.skiaObject,
     ]);
   }
 
   void saveLayerWithoutBounds(SkPaint paint) {
-    skCanvas.callMethod('saveLayer', <js.JsObject>[null, paint.makeSkPaint()]);
+    skCanvas.callMethod('saveLayer', <js.JsObject>[null, paint.skiaObject]);
   }
 
   void saveLayerWithFilter(ui.Rect bounds, ui.ImageFilter filter) {
