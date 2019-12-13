@@ -416,6 +416,39 @@ apply plugin: 'kotlin-android'
       });
     });
 
+    group('application bundle name', () {
+      MemoryFileSystem fs;
+      MockXcodeProjectInterpreter mockXcodeProjectInterpreter;
+      setUp(() {
+        fs = MemoryFileSystem();
+        mockXcodeProjectInterpreter = MockXcodeProjectInterpreter();
+      });
+
+      testUsingContext('app product name defaults to Runner.app', () async {
+        final FlutterProject project = await someProject();
+        expect(await project.ios.hostAppBundleName, 'Runner.app');
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        XcodeProjectInterpreter: () => mockXcodeProjectInterpreter
+      });
+
+      testUsingContext('app product name xcodebuild settings', () async {
+        final FlutterProject project = await someProject();
+        when(mockXcodeProjectInterpreter.getBuildSettings(any, any)).thenAnswer((_) {
+          return Future<Map<String,String>>.value(<String, String>{
+            'FULL_PRODUCT_NAME': 'My App.app'
+          });
+        });
+
+        expect(await project.ios.hostAppBundleName, 'My App.app');
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        XcodeProjectInterpreter: () => mockXcodeProjectInterpreter
+      });
+    });
+
     group('organization names set', () {
       testInMemory('is empty, if project not created', () async {
         final FlutterProject project = await someProject();
