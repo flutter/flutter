@@ -647,3 +647,15 @@ void arc_end_caps_correct() {
   };
   window.scheduleFrame();
 }
+
+@pragma('vm:entry-point')
+void scene_builder_with_clips() {
+  window.onBeginFrame = (Duration duration) {
+    SceneBuilder builder = SceneBuilder();
+    builder.pushClipRect(Rect.fromLTRB(10.0, 10.0, 390.0, 290.0));
+    builder.addPlatformView(42, width: 400.0, height: 300.0);
+    builder.addPicture(Offset(0.0, 0.0), CreateGradientBox(Size(400.0, 300.0)));
+    window.render(builder.build());
+  };
+  window.scheduleFrame();
+}

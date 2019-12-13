@@ -397,6 +397,19 @@ inline FlutterTransformation FlutterTransformationMake(const SkMatrix& matrix) {
   return transformation;
 }
 
+inline SkMatrix SkMatrixMake(const FlutterTransformation& xformation) {
+  return SkMatrix::MakeAll(xformation.scaleX,  //
+                           xformation.skewX,   //
+                           xformation.transX,  //
+                           xformation.skewY,   //
+                           xformation.scaleY,  //
+                           xformation.transY,  //
+                           xformation.pers0,   //
+                           xformation.pers1,   //
+                           xformation.pers2    //
+  );
+}
+
 inline flutter::EmbedderEngine* ToEmbedderEngine(const FlutterEngine& engine) {
   return reinterpret_cast<flutter::EmbedderEngine*>(engine);
 }
@@ -408,6 +421,19 @@ inline FlutterRect FlutterRectMake(const SkRect& rect) {
   r.right = rect.right();
   r.bottom = rect.bottom();
   return r;
+}
+
+inline FlutterRect FlutterRectMakeLTRB(double l, double t, double r, double b) {
+  FlutterRect rect = {};
+  rect.left = l;
+  rect.top = t;
+  rect.right = r;
+  rect.bottom = b;
+  return rect;
+}
+
+inline SkRect SkRectMake(const FlutterRect& rect) {
+  return SkRect::MakeLTRB(rect.left, rect.top, rect.right, rect.bottom);
 }
 
 inline FlutterRoundedRect FlutterRoundedRectMake(const SkRRect& rect) {
