@@ -333,7 +333,8 @@ class DefaultTabController extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.child}
   final Widget child;
-
+  
+  /// {@tool sample}
   /// The closest instance of this class that encloses the given context.
   ///
   /// Typical usage:
@@ -341,6 +342,7 @@ class DefaultTabController extends StatefulWidget {
   /// ```dart
   /// TabController controller = DefaultTabController.of(context);
   /// ```
+  /// {@end-tool}
   static TabController of(BuildContext context) {
     final _TabControllerScope scope = context.dependOnInheritedWidgetOfExactType<_TabControllerScope>();
     return scope?.controller;
