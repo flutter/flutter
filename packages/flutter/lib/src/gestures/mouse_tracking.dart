@@ -26,29 +26,6 @@ typedef PointerExitEventListener = void Function(PointerExitEvent event);
 /// Used by [MouseTrackerAnnotation], [MouseRegion] and [RenderMouseRegion].
 typedef PointerHoverEventListener = void Function(PointerHoverEvent event);
 
-// A key, so that (_IdenticalAnnotationKey(a) == _IdenticalAnnotationKey(b)) is equivalent to
-// identical(a, b).
-class _IdenticalAnnotationKey implements Key {
-  _IdenticalAnnotationKey(this.value);
-
-  final MouseTrackerAnnotation value;
-
-  // Don't return `identityHashCode(value)` directly since the hash of this key
-  // needs to be different from that of `value`. Do a fast conversion with a
-  // random mask, since we don't need a secure hashing algorithm for a private
-  // class.
-  @override
-  int get hashCode => _hashCodeMask ^ identityHashCode(value);
-  static const int _hashCodeMask = 0xc366d8df10ee8;
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other))
-      return true;
-    return other is _IdenticalAnnotationKey && identical(other.value, value);
-  }
-}
-
 /// The annotation object used to annotate layers that are interested in mouse
 /// movements.
 ///
@@ -159,7 +136,7 @@ class MouseTrackerAnnotation extends Diagnosticable {
   /// creation, this getter will return a unique key that is different from any
   /// other annotations, which means such an annotation is only equal to itself
   /// in terms of [key].
-  Key get key => _key ?? _IdenticalAnnotationKey(this);
+  Key get key => _key ?? ObjectKey(this);
   final Key _key;
 
   @override
@@ -614,7 +591,7 @@ class MouseTracker extends ChangeNotifier {
   ///    This is to prevent exceptions caused calling setState of a disposed
   ///    widget. See [MouseTrackerAnnotation.onExit] for more details.
   ///  * The [MouseTracker] also uses the attachment to track the number of
-  ///    attached annotations, and will skip mouse position checks if there is no
+  ///    attached annotations, and will skip mouse position checks if there are no
   ///    annotations attached.
   /// {@endtemplate}
   ///  * Attaching an annotation that has been attached will assert.

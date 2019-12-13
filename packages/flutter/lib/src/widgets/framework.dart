@@ -24,7 +24,7 @@ export 'package:flutter/foundation.dart' show
 export 'package:flutter/foundation.dart' show FlutterError, ErrorSummary, ErrorDescription, ErrorHint, debugPrint, debugPrintStack;
 export 'package:flutter/foundation.dart' show VoidCallback, ValueChanged, ValueGetter, ValueSetter;
 export 'package:flutter/foundation.dart' show DiagnosticsNode, DiagnosticLevel;
-export 'package:flutter/foundation.dart' show Key, LocalKey, ValueKey;
+export 'package:flutter/foundation.dart' show Key, LocalKey, ValueKey, UniqueKey, ObjectKey;
 export 'package:flutter/rendering.dart' show RenderObject, RenderBox, debugDumpRenderTree, debugDumpLayerTree;
 
 // Examples can assume:
@@ -37,59 +37,6 @@ export 'package:flutter/rendering.dart' show RenderObject, RenderBox, debugDumpR
 // abstract class FrogJarParentData extends ParentData { Size size; }
 
 // KEYS
-
-/// A key that is only equal to itself.
-///
-/// This cannot be created with a const constructor because that implies that
-/// all instantiated keys would be the same instance and therefore not be unique.
-class UniqueKey extends LocalKey {
-  /// Creates a key that is equal only to itself.
-  ///
-  /// The key cannot be created with a const constructor because that implies
-  /// that all instantiated keys would be the same instance and therefore not
-  /// be unique.
-  // ignore: prefer_const_constructors_in_immutables , never use const for this class
-  UniqueKey();
-
-  @override
-  String toString() => '[#${shortHash(this)}]';
-}
-
-/// A key that takes its identity from the object used as its value.
-///
-/// Used to tie the identity of a widget to the identity of an object used to
-/// generate that widget.
-///
-/// See also:
-///
-///  * [Key], the base class for all keys.
-///  * The discussion at [Widget.key] for more information about how widgets use
-///    keys.
-class ObjectKey extends LocalKey {
-  /// Creates a key that uses [identical] on [value] for its [operator==].
-  const ObjectKey(this.value);
-
-  /// The object whose identity is used by this key's [operator==].
-  final Object value;
-
-  @override
-  bool operator ==(dynamic other) {
-    if (other.runtimeType != runtimeType)
-      return false;
-    return other is ObjectKey
-        && identical(other.value, value);
-  }
-
-  @override
-  int get hashCode => hashValues(runtimeType, identityHashCode(value));
-
-  @override
-  String toString() {
-    if (runtimeType == ObjectKey)
-      return '[${describeIdentity(value)}]';
-    return '[$runtimeType ${describeIdentity(value)}]';
-  }
-}
 
 /// A key that is unique across the entire app.
 ///

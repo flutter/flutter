@@ -2627,16 +2627,6 @@ class RenderPointerListener extends RenderProxyBoxWithHitTestBehavior {
   }
 }
 
-/// A key that is only equal to itself.
-class _UniqueKey extends LocalKey {
-  /// Creates a key that is equal only to itself.
-  // ignore: prefer_const_constructors_in_immutables , never use const for this class
-  _UniqueKey();
-
-  @override
-  String toString() => '[#${shortHash(this)}]';
-}
-
 /// Calls callbacks in response to pointer events that are exclusive to mice.
 ///
 /// It responds to events that are related to hovering, i.e. when the mouse
@@ -2673,7 +2663,7 @@ class RenderMouseRegion extends RenderProxyBox {
        _opaque = opaque,
        super(child);
 
-  final Key _annotationKey = _UniqueKey();
+  final Key _annotationKey = UniqueKey();
   /// Object used for annotation of the layer used for hover hit detection.
   ///
   /// This is only public to allow for testing of Listener widgets. Do not call
