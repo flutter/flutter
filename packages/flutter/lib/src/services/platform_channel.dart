@@ -140,6 +140,22 @@ class MethodChannel {
   BinaryMessenger get binaryMessenger => _binaryMessenger ?? defaultBinaryMessenger; // ignore: deprecated_member_use_from_same_package
   final BinaryMessenger _binaryMessenger;
 
+  @optionalTypeArgs
+  Future<T> _invokeMethod<T>(String method, { bool missingOk, dynamic arguments }) async {
+    assert(method != null);
+    final ByteData result = await binaryMessenger.send(
+      name,
+      codec.encodeMethodCall(MethodCall(method, arguments)),
+    );
+    if (result == null) {
+      if (missingOk) {
+        return null;
+      }
+      throw MissingPluginException('No implementation found for method $method on channel $name');
+    }
+    return codec.decodeEnvelope(result) as T;
+  }
+
   /// Invokes a [method] on this channel with the specified [arguments].
   ///
   /// The static type of [arguments] is `dynamic`, but only values supported by
@@ -309,17 +325,8 @@ class MethodChannel {
   ///  * <https://api.flutter.dev/javadoc/io/flutter/plugin/common/MethodCall.html>
   ///    for how to access method call arguments on Android.
   @optionalTypeArgs
-  Future<T> invokeMethod<T>(String method, [ dynamic arguments ]) async {
-    assert(method != null);
-    final ByteData result = await binaryMessenger.send(
-      name,
-      codec.encodeMethodCall(MethodCall(method, arguments)),
-    );
-    if (result == null) {
-      throw MissingPluginException('No implementation found for method $method on channel $name');
-    }
-    final T typedResult = codec.decodeEnvelope(result) as T;
-    return typedResult;
+  Future<T> invokeMethod<T>(String method, [ dynamic arguments ]) {
+    return _invokeMethod<T>(method, missingOk: false, arguments: arguments);
   }
 
   /// An implementation of [invokeMethod] that can return typed lists.
@@ -425,12 +432,7 @@ class OptionalMethodChannel extends MethodChannel {
 
   @override
   Future<T> invokeMethod<T>(String method, [ dynamic arguments ]) async {
-    try {
-      final T result = await super.invokeMethod<T>(method, arguments);
-      return result;
-    } on MissingPluginException {
-      return null;
-    }
+    return super._invokeMethod<T>(method, missingOk: true, arguments: arguments);
   }
 
   @override

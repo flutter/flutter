@@ -152,7 +152,7 @@ class TextFormField extends FormField<String> {
     autovalidate: autovalidate,
     enabled: enabled,
     builder: (FormFieldState<String> field) {
-      final _TextFormFieldState state = field;
+      final _TextFormFieldState state = field as _TextFormFieldState;
       final InputDecoration effectiveDecoration = (decoration ?? const InputDecoration())
         .applyDefaults(Theme.of(field.context).inputDecorationTheme);
       void onChangedHandler(String value) {
@@ -218,7 +218,7 @@ class _TextFormFieldState extends FormFieldState<String> {
   TextEditingController get _effectiveController => widget.controller ?? _controller;
 
   @override
-  TextFormField get widget => super.widget;
+  TextFormField get widget => super.widget as TextFormField;
 
   @override
   void initState() {

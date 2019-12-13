@@ -123,6 +123,7 @@ class FlutterWebPlatform extends PlatformPlugin {
         artifacts.getArtifactPath(Artifact.engineDartSdkPath),
         'lib',
         'dev_compiler',
+        'kernel',
         'amd',
         'require.js',
       ));
@@ -854,7 +855,7 @@ class TestGoldenComparator {
     final TestGoldenComparatorProcess process = await _processForTestFile(testUri);
     process.sendCommand(imageFile, goldenKey, updateGoldens);
 
-    final Map<String, dynamic> result = await process.getResponse().timeout(const Duration(seconds: 10));
+    final Map<String, dynamic> result = await process.getResponse().timeout(const Duration(seconds: 20));
 
     if (result == null) {
       return 'unknown error';
