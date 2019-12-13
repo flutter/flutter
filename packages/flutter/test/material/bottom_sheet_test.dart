@@ -170,6 +170,7 @@ void main() {
     bool showBottomSheetThenCalled = false;
     showModalBottomSheet<void>(
       context: savedContext,
+      isDismissible: false,
       builder: (BuildContext context) => const Text('BottomSheet'),
     ).then<void>((void value) {
       showBottomSheetThenCalled = true;
@@ -204,6 +205,7 @@ void main() {
     bool showBottomSheetThenCalled = false;
     showModalBottomSheet<void>(
       context: savedContext,
+      isDismissible: false,
       enableDrag: false,
       builder: (BuildContext context) => const Text('BottomSheet'),
     ).then<void>((void value) {
@@ -239,6 +241,7 @@ void main() {
     bool showBottomSheetThenCalled = false;
     showModalBottomSheet<void>(
       context: savedContext,
+      isDismissible: false,
       enableDrag: true,
       builder: (BuildContext context) => const Text('BottomSheet'),
     ).then<void>((void value) {
