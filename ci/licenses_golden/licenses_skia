@@ -1,4 +1,4 @@
-Signature: ebe69910be34ee0905b4081246b51450
+Signature: da293374bf685e3104c319d3c6138266
 
 UNUSED LICENSES:
 
@@ -3063,6 +3063,7 @@ FILE: ../../../third_party/skia/experimental/ffmpeg/SkVideoEncoder.h
 FILE: ../../../third_party/skia/gm/backdrop.cpp
 FILE: ../../../third_party/skia/gm/backdrop_imagefilter_croprect.cpp
 FILE: ../../../third_party/skia/gm/bug9331.cpp
+FILE: ../../../third_party/skia/gm/clip_sierpinski_region.cpp
 FILE: ../../../third_party/skia/gm/collapsepaths.cpp
 FILE: ../../../third_party/skia/gm/compositor_quads.cpp
 FILE: ../../../third_party/skia/gm/crbug_913349.cpp
