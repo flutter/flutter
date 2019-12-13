@@ -185,6 +185,12 @@ tasks:
     stage: devicelab
     required_agent_capabilities: ["mac/android"]
 
+  post_backdrop_filter_perf__timeline_summary:
+    description: >
+      Measures the runtime performance of animations after a backdrop filter is removed on Android.
+    stage: devicelab
+    required_agent_capabilities: ["mac/android"]
+
   flavors_test:
     description: >
       Checks that flavored builds work on Android.
@@ -454,6 +460,12 @@ tasks:
   backdrop_filter_perf_ios__timeline_summary:
     description: >
       Measures the runtime performance of backdrop filter blurs on iOS.
+    stage: devicelab_ios
+    required_agent_capabilities: ["mac/ios"]
+
+  post_backdrop_filter_perf_ios__timeline_summary:
+    description: >
+      Measures the runtime performance of animations after a backdrop filter is removed on iOS.
     stage: devicelab_ios
     required_agent_capabilities: ["mac/ios"]
 
