@@ -1,4 +1,4 @@
-Signature: eb31e5476b0f278ed75cae55cda26348
+Signature: ebe69910be34ee0905b4081246b51450
 
 UNUSED LICENSES:
 
@@ -572,7 +572,6 @@ FILE: ../../../third_party/skia/src/core/SkImageFilterCache.h
 FILE: ../../../third_party/skia/src/core/SkLRUCache.h
 FILE: ../../../third_party/skia/src/core/SkLeanWindows.h
 FILE: ../../../third_party/skia/src/core/SkMSAN.h
-FILE: ../../../third_party/skia/src/core/SkMakeUnique.h
 FILE: ../../../third_party/skia/src/core/SkMatrixPriv.h
 FILE: ../../../third_party/skia/src/core/SkModeColorFilter.h
 FILE: ../../../third_party/skia/src/core/SkNormalFlatSource.cpp
