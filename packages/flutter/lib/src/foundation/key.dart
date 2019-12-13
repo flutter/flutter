@@ -5,7 +5,8 @@
 import 'dart:ui' show hashValues;
 
 import 'package:meta/meta.dart';
-import './diagnostics.dart';
+
+import 'diagnostics.dart';
 
 /// A [Key] is an identifier for [Widget]s, [Element]s and [SemanticsNode]s.
 ///
