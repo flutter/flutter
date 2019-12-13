@@ -535,6 +535,44 @@ void main() {
 ''');
     });
 
+    test('throws an exception when improperly formatted date is passed in', () {
+      const String singleDateMessageArbFileString = '''{
+  "springBegins": "Spring begins on {springStartDate}",
+  "@springBegins": {
+      "description": "The first day of spring",
+      "placeholders": {
+          "springStartDate": {
+              "type": "DateTime",
+              "format": "asdf"
+          }
+      }
+  }
+}''';
+      final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+        ..createSync(recursive: true);
+      l10nDirectory.childFile(defaultTemplateArbFileName)
+        .writeAsStringSync(singleDateMessageArbFileString);
+
+      final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+      try {
+        generator.initialize(
+          l10nDirectoryPath: defaultArbPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        );
+        generator.parseArbFiles();
+        generator.generateClassMethods();
+      } on L10nException catch (e) {
+        expect(e.message, contains('asdf'));
+        expect(e.message, contains('springStartDate'));
+        expect(e.message, contains('does not have a corresponding DateFormat'));
+        return;
+      }
+
+      fail('Improper date formatting should throw an exception');
+    });
+
     test('correctly generates simple message with date along with other placeholders', () {
       const String singleDateMessageArbFileString = '''{
   "springGreetings": "Since it's {springStartDate}, it's finally spring! {helloWorld}!",

@@ -149,6 +149,50 @@ const String pluralMethodTemplate = '''
   }
 ''';
 
+const Set<String> allowableDateFormats = <String>{
+  'd',
+  'E',
+  'EEEE',
+  'LLL',
+  'LLLL',
+  'M',
+  'Md',
+  'MEd',
+  'MMM',
+  'MMMd',
+  'MMMEd',
+  'MMMM',
+  'MMMMd',
+  'MMMMEEEEd',
+  'QQQ',
+  'QQQQ',
+  'y',
+  'yM',
+  'yMd',
+  'yMEd',
+  'yMMM',
+  'yMMMd',
+  'yMMMEd',
+  'yMMMM',
+  'yMMMMd',
+  'yMMMMEEEEd',
+  'yQQQ',
+  'yQQQQ',
+  'H',
+  'Hm',
+  'Hms',
+  'j',
+  'jm',
+  'jms',
+  'jmv',
+  'jmz',
+  'jv',
+  'jz',
+  'm',
+  'ms',
+  's',
+};
+
 bool _isDateParameter(dynamic placeholderValue) {
   return placeholderValue is Map<String, dynamic> &&
     placeholderValue['type'] == 'DateTime' &&
@@ -169,7 +213,6 @@ String generateDateFormattingLogic(Map<String, dynamic> bundle, String key) {
   final Map<String, dynamic> attributesMap = bundle['@$key'] as Map<String, dynamic>;
   if (attributesMap != null && attributesMap.containsKey('placeholders')) {
     final Map<String, dynamic> placeholders = attributesMap['placeholders'] as Map<String, dynamic>;
-
     for (String placeholder in placeholders.keys) {
       final dynamic value = placeholders[placeholder];
       if (_isDateParameter(value)) {
@@ -202,6 +245,13 @@ List<String> genIntlMethodArgs(Map<String, dynamic> bundle, String key) {
         for (String placeholder in placeholders.keys) {
           final dynamic value = placeholders[placeholder];
           if (_isDateParameter(value)) {
+            if (!allowableDateFormats.contains(value['format']))
+              throw L10nException(
+                'Date format ${value['format']} for the $placeholder \n'
+                'placeholder does not have a corresponding DateFormat \n'
+                'constructor. Check the intl library\'s DateFormat class \n'
+                'constructors for allowed date formats.'
+              );
             argumentList.add('${placeholder}String');
           } else {
             argumentList.add(placeholder);
