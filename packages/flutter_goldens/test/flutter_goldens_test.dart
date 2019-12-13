@@ -399,6 +399,7 @@ void main() {
               'CIRRUS_CI': 'true',
               'CIRRUS_PR': '1234',
               'GOLD_SERVICE_ACCOUNT' : 'service account...',
+              'CIRRUS_USER_PERMISSION' : 'write',
             },
             operatingSystem: 'macos'
           );
@@ -451,6 +452,74 @@ void main() {
             isFalse,
           );
         });
+
+        test('returns true - admin privileges', () {
+          platform = FakePlatform(
+            environment: <String, String>{
+              'FLUTTER_ROOT': _kFlutterRoot,
+              'CIRRUS_CI': 'true',
+              'CIRRUS_PR': '1234',
+              'GOLD_SERVICE_ACCOUNT' : 'service account...',
+              'CIRRUS_USER_PERMISSION' : 'admin',
+            },
+            operatingSystem: 'macos'
+          );
+          expect(
+            FlutterPreSubmitFileComparator.isAvailableForEnvironment(platform),
+            isTrue,
+          );
+        });
+
+        test('returns true - write privileges', () {
+          platform = FakePlatform(
+            environment: <String, String>{
+              'FLUTTER_ROOT': _kFlutterRoot,
+              'CIRRUS_CI': 'true',
+              'CIRRUS_PR': '1234',
+              'GOLD_SERVICE_ACCOUNT' : 'service account...',
+              'CIRRUS_USER_PERMISSION' : 'write',
+            },
+            operatingSystem: 'macos'
+          );
+          expect(
+            FlutterPreSubmitFileComparator.isAvailableForEnvironment(platform),
+            isTrue,
+          );
+        });
+
+        test('returns false - read privileges', () {
+          platform = FakePlatform(
+            environment: <String, String>{
+              'FLUTTER_ROOT': _kFlutterRoot,
+              'CIRRUS_CI': 'true',
+              'CIRRUS_PR': '1234',
+              'GOLD_SERVICE_ACCOUNT' : 'service account...',
+              'CIRRUS_USER_PERMISSION' : 'read',
+            },
+            operatingSystem: 'macos'
+          );
+          expect(
+            FlutterPreSubmitFileComparator.isAvailableForEnvironment(platform),
+            isFalse,
+          );
+        });
+
+        test('returns false - no privileges', () {
+          platform = FakePlatform(
+            environment: <String, String>{
+              'FLUTTER_ROOT': _kFlutterRoot,
+              'CIRRUS_CI': 'true',
+              'CIRRUS_PR': '1234',
+              'GOLD_SERVICE_ACCOUNT' : 'service account...',
+              'CIRRUS_USER_PERMISSION' : 'none',
+            },
+            operatingSystem: 'macos'
+          );
+          expect(
+            FlutterPreSubmitFileComparator.isAvailableForEnvironment(platform),
+            isFalse,
+          );
+        });
       });
     });
 
@@ -483,10 +552,26 @@ void main() {
             isTrue,
           );
         });
-        test('returns false', () {
+        test('returns false - no CI', () {
           platform = FakePlatform(
             environment: <String, String>{
               'FLUTTER_ROOT': _kFlutterRoot,
+            },
+            operatingSystem: 'macos'
+          );
+          expect(
+            FlutterSkippingGoldenFileComparator.isAvailableForEnvironment(
+              platform),
+            isFalse,
+          );
+        });
+
+        test('returns false - permission pass through', () {
+          platform = FakePlatform(
+            environment: <String, String>{
+              'FLUTTER_ROOT': _kFlutterRoot,
+              'CIRRUS_CI' : 'yep',
+              'GOLD_SERVICE_ACCOUNT' : 'This is a Gold shard!',
             },
             operatingSystem: 'macos'
           );

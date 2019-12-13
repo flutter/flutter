@@ -19,6 +19,7 @@ import 'package:process/process.dart';
 const String _kFlutterRootKey = 'FLUTTER_ROOT';
 const String _kGoldctlKey = 'GOLDCTL';
 const String _kServiceAccountKey = 'GOLD_SERVICE_ACCOUNT';
+const String _kTestBrowserKey = 'FLUTTER_TEST_BROWSER';
 
 /// A client for uploading image tests and making baseline requests to the
 /// Flutter Gold Dashboard.
@@ -408,14 +409,16 @@ class SkiaGoldClient {
   /// Returns a JSON String with keys value pairs used to uniquely identify the
   /// configuration that generated the given golden file.
   ///
-  /// Currently, the only key value pair being tracked is the platform the image
-  /// was rendered on.
+  /// Currently, the only key value pairs being tracked is the platform the
+  /// image was rendered on, and for web tests, the browser the image was
+  /// rendered on.
   String _getKeysJSON() {
-    return json.encode(
-      <String, dynamic>{
-        'Platform' : platform.operatingSystem,
-      }
-    );
+    final Map<String, dynamic> keys = <String, dynamic>{
+      'Platform' : platform.operatingSystem,
+    };
+    if (platform.environment[_kTestBrowserKey] != null)
+      keys['Browser'] = platform.environment[_kTestBrowserKey];
+    return json.encode(keys);
   }
 
   /// Removes the file extension from the [fileName] to represent the test name
@@ -455,7 +458,7 @@ class SkiaGoldDigest {
     return SkiaGoldDigest(
       imageHash: json['digest'] as String,
       paramSet: Map<String, dynamic>.from(json['paramset'] as Map<String, dynamic> ??
-        <String, String>{'Platform': 'none'}),
+        <String, List<String>>{'Platform': <String>[]}),
       testName: json['test'] as String,
       status: json['status'] as String,
     );
@@ -477,6 +480,8 @@ class SkiaGoldDigest {
   bool isValid(Platform platform, String name, String expectation) {
     return imageHash == expectation
       && (paramSet['Platform'] as List<dynamic>).contains(platform.operatingSystem)
+      && (platform.environment[_kTestBrowserKey] == null
+         || paramSet['Browser'] == platform.environment[_kTestBrowserKey])
       && testName == name
       && status == 'positive';
     }

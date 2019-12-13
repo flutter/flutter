@@ -342,6 +342,7 @@ void main() {
     const double elevation = 9.0;
     final ShapeBorder shape = BeveledRectangleBorder(borderRadius: BorderRadius.circular(12));
     const Clip clipBehavior = Clip.antiAlias;
+    const Color barrierColor = Colors.red;
 
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
@@ -353,6 +354,7 @@ void main() {
     showModalBottomSheet<void>(
       context: scaffoldKey.currentContext,
       backgroundColor: color,
+      barrierColor: barrierColor,
       elevation: elevation,
       shape: shape,
       clipBehavior: clipBehavior,
@@ -371,6 +373,9 @@ void main() {
     expect(bottomSheet.elevation, elevation);
     expect(bottomSheet.shape, shape);
     expect(bottomSheet.clipBehavior, clipBehavior);
+
+    final ModalBarrier modalBarrier = tester.widget(find.byType(ModalBarrier).last);
+    expect(modalBarrier.color, barrierColor);
   });
 
   testWidgets('modal BottomSheet with scrollController has semantics', (WidgetTester tester) async {
