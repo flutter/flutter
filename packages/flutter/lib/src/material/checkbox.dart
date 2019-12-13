@@ -458,7 +458,7 @@ class _RenderCheckbox extends RenderToggleable {
     paintRadialReaction(canvas, offset, size.center(Offset.zero));
 
     final Paint strokePaint = _createStrokePaint();
-    final Offset origin = offset + (size / 2.0 - const Size.square(_kEdgeSize) / 2.0);
+    final Offset origin = offset + (size / 2.0 - const Size.square(_kEdgeSize) / 2.0 as Offset);
     final AnimationStatus status = position.status;
     final double tNormalized = status == AnimationStatus.forward || status == AnimationStatus.completed
       ? position.value
