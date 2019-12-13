@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -126,6 +126,7 @@ class RaisedButton extends MaterialButton {
     double highlightElevation,
     double disabledElevation,
     EdgeInsetsGeometry padding,
+    VisualDensity visualDensity,
     ShapeBorder shape,
     Clip clipBehavior = Clip.none,
     FocusNode focusNode,
@@ -161,6 +162,7 @@ class RaisedButton extends MaterialButton {
          highlightElevation: highlightElevation,
          disabledElevation: disabledElevation,
          padding: padding,
+         visualDensity: visualDensity,
          shape: shape,
          clipBehavior: clipBehavior,
          focusNode: focusNode,
@@ -227,6 +229,7 @@ class RaisedButton extends MaterialButton {
       highlightElevation: buttonTheme.getHighlightElevation(this),
       disabledElevation: buttonTheme.getDisabledElevation(this),
       padding: buttonTheme.getPadding(this),
+      visualDensity: visualDensity ?? theme.visualDensity,
       constraints: buttonTheme.getConstraints(this),
       shape: buttonTheme.getShape(this),
       focusNode: focusNode,

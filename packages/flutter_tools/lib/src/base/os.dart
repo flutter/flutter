@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -249,7 +249,6 @@ class _WindowsUtils extends OperatingSystemUtils {
 
   @override
   void zip(Directory data, File zipFile) {
-    // TODO(jonahwilliams): investigate whether we can remove this dependency with https://github.com/flutter/flutter/issues/45278
     final Archive archive = Archive();
     for (FileSystemEntity entity in data.listSync(recursive: true)) {
       if (entity is! File) {

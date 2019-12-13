@@ -51,7 +51,7 @@ linter:
     - always_specify_types
     - annotate_overrides
     # - avoid_annotating_with_dynamic # conflicts with always_specify_types
-    - avoid_as
+    # - avoid_as # required for implicit-casts: true
     - avoid_bool_literals_in_conditional_expressions
     # - avoid_catches_without_on_clauses # we do this commonly
     # - avoid_catching_errors # we do this commonly

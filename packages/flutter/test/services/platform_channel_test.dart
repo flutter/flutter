@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -42,6 +42,7 @@ void main() {
     const MessageCodec<dynamic> jsonMessage = JSONMessageCodec();
     const MethodCodec jsonMethod = JSONMethodCodec();
     const MethodChannel channel = MethodChannel('ch7', jsonMethod);
+    const OptionalMethodChannel optionalMethodChannel = OptionalMethodChannel('ch8', jsonMethod);
     test('can invoke method and get result', () async {
       ServicesBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
         'ch7',
@@ -69,7 +70,7 @@ void main() {
           }
         },
       );
-      expect(channel.invokeMethod<List<String>>('sayHello', 'hello'), throwsA(isInstanceOf<TypeError>()));
+      expect(channel.invokeMethod<List<String>>('sayHello', 'hello'), throwsA(isInstanceOf<CastError>()));
       expect(await channel.invokeListMethod<String>('sayHello', 'hello'), <String>['hello', 'world']);
     });
 
@@ -101,7 +102,7 @@ void main() {
           }
         },
       );
-      expect(channel.invokeMethod<Map<String, String>>('sayHello', 'hello'), throwsA(isInstanceOf<TypeError>()));
+      expect(channel.invokeMethod<Map<String, String>>('sayHello', 'hello'), throwsA(isInstanceOf<CastError>()));
       expect(await channel.invokeMapMethod<String, String>('sayHello', 'hello'), <String, String>{'hello': 'world'});
     });
 
@@ -156,6 +157,14 @@ void main() {
       } catch (e) {
         fail('MissingPluginException expected');
       }
+    });
+    test('can invoke unimplemented method (optional)', () async {
+      ServicesBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
+        'ch8',
+        (ByteData message) async => null,
+      );
+      final String result = await optionalMethodChannel.invokeMethod<String>('sayHello', 'hello');
+      expect(result, isNull);
     });
     test('can handle method call with no registered plugin', () async {
       channel.setMethodCallHandler(null);

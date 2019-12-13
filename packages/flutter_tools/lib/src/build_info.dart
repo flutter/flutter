@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -59,6 +59,7 @@ class BuildInfo {
 
   static const BuildInfo debug = BuildInfo(BuildMode.debug, null);
   static const BuildInfo profile = BuildInfo(BuildMode.profile, null);
+  static const BuildInfo jitRelease = BuildInfo(BuildMode.jitRelease, null);
   static const BuildInfo release = BuildInfo(BuildMode.release, null);
 
   /// Returns whether a debug build is requested.
@@ -68,13 +69,21 @@ class BuildInfo {
 
   /// Returns whether a profile build is requested.
   ///
-  /// Exactly one of [isDebug], [isProfile], or [isRelease] is true.
+  /// Exactly one of [isDebug], [isProfile], [isJitRelease],
+  /// or [isRelease] is true.
   bool get isProfile => mode == BuildMode.profile;
 
   /// Returns whether a release build is requested.
   ///
-  /// Exactly one of [isDebug], [isProfile], or [isRelease] is true.
+  /// Exactly one of [isDebug], [isProfile], [isJitRelease],
+  /// or [isRelease] is true.
   bool get isRelease => mode == BuildMode.release;
+
+  /// Returns whether a JIT release build is requested.
+  ///
+  /// Exactly one of [isDebug], [isProfile], [isJitRelease],
+  /// or [isRelease] is true.
+  bool get isJitRelease => mode == BuildMode.jitRelease;
 
   bool get usesAot => isAotBuildMode(mode);
   bool get supportsEmulator => isEmulatorBuildMode(mode);
@@ -94,6 +103,7 @@ class AndroidBuildInfo {
     ],
     this.splitPerAbi = false,
     this.shrink = false,
+    this.fastStart = false,
   });
 
   // The build info containing the mode and flavor.
@@ -111,6 +121,9 @@ class AndroidBuildInfo {
 
   /// The target platforms for the build.
   final Iterable<AndroidArch> targetArchs;
+
+  /// Whether to bootstrap an empty application.
+  final bool fastStart;
 }
 
 /// A summary of the compilation strategy used for Dart.
@@ -164,7 +177,7 @@ class BuildMode {
   /// other development features.
   bool get isRelease => releaseModes.contains(this);
 
-  /// Whether this mode is using the jit runtime.
+  /// Whether this mode is using the JIT runtime.
   bool get isJit => jitModes.contains(this);
 
   /// Whether this mode is using the precompiled runtime.

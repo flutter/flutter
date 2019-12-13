@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -189,6 +189,12 @@ void main() {
       expect(xcode.eulaSigned, isTrue);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('SDK name', () {
+      expect(getNameForSdk(SdkType.iPhone), 'iphoneos');
+      expect(getNameForSdk(SdkType.iPhoneSimulator), 'iphonesimulator');
+      expect(getNameForSdk(SdkType.macOS), 'macosx');
     });
   });
 }

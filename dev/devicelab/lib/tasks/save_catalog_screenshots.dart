@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -43,7 +43,7 @@ class Upload {
     if (retryCount == 0)
       return const Duration(milliseconds: 1000);
     random ??= math.Random();
-    return Duration(milliseconds: random.nextInt(1000) + math.pow(2, retryCount) * 1000);
+    return Duration(milliseconds: random.nextInt(1000) + (math.pow(2, retryCount) as int) * 1000);
   }
 
   Future<bool> save(HttpClient client, String name, List<int> content) async {

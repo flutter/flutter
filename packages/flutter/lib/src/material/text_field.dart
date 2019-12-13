@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -59,6 +59,7 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
     if (delegate.selectionEnabled) {
       switch (Theme.of(_state.context).platform) {
         case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
           renderEditable.selectPositionAt(
             from: details.globalPosition,
             cause: SelectionChangedCause.longPress,
@@ -82,6 +83,7 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
     if (delegate.selectionEnabled) {
       switch (Theme.of(_state.context).platform) {
         case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
           renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
           break;
         case TargetPlatform.android:
@@ -100,6 +102,7 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
     if (delegate.selectionEnabled) {
       switch (Theme.of(_state.context).platform) {
         case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
           renderEditable.selectPositionAt(
             from: details.globalPosition,
             cause: SelectionChangedCause.longPress,
@@ -441,7 +444,7 @@ class TextField extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.textAlign}
   final TextAlign textAlign;
 
-  /// {@macro flutter.material.inputDecorator.textAlignVertical}
+  /// {@macro flutter.widgets.inputDecorator.textAlignVertical}
   final TextAlignVertical textAlignVertical;
 
   /// {@macro flutter.widgets.editableText.textDirection}
@@ -660,7 +663,7 @@ class TextField extends StatefulWidget {
   /// {@end-tool}
   final InputCounterWidgetBuilder buildCounter;
 
-  /// {@macro flutter.widgets.edtiableText.scrollPhysics}
+  /// {@macro flutter.widgets.editableText.scrollPhysics}
   final ScrollPhysics scrollPhysics;
 
   /// {@macro flutter.widgets.editableText.scrollController}
@@ -779,7 +782,7 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
     if (widget.maxLength > 0) {
       // Show the maxLength in the counter
       counterText += '/${widget.maxLength}';
-      final int remaining = (widget.maxLength - currentLength).clamp(0, widget.maxLength);
+      final int remaining = (widget.maxLength - currentLength).clamp(0, widget.maxLength) as int;
       semanticCounterText = localizations.remainingTextFieldCharacterCount(remaining);
 
       // Handle length exceeds maxLength
@@ -868,6 +871,7 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
 
     switch (Theme.of(context).platform) {
       case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
         if (cause == SelectionChangedCause.longPress) {
           _editableText?.bringIntoView(selection.base);
         }
@@ -923,6 +927,7 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
 
     switch (themeData.platform) {
       case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
         forcePressEnabled = true;
         textSelectionControls = cupertinoTextSelectionControls;
         paintCursorAboveText = true;

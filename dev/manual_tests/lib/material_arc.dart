@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -139,7 +139,7 @@ class _PointDemoState extends State<_PointDemo> {
     if (_dragTarget != null)
       return _IgnoreDrag();
 
-    final RenderBox box = _painterKey.currentContext.findRenderObject();
+    final RenderBox box = _painterKey.currentContext.findRenderObject() as RenderBox;
     final double startOffset = (box.localToGlobal(_begin) - position).distanceSquared;
     final double endOffset = (box.localToGlobal(_end) - position).distanceSquared;
     setState(() {
@@ -307,7 +307,7 @@ class _RectangleDemoState extends State<_RectangleDemo> {
     if (_dragTarget != null)
       return _IgnoreDrag();
 
-    final RenderBox box = _painterKey.currentContext.findRenderObject();
+    final RenderBox box = _painterKey.currentContext.findRenderObject() as RenderBox;
     final double startOffset = (box.localToGlobal(_begin.center) - position).distanceSquared;
     final double endOffset = (box.localToGlobal(_end.center) - position).distanceSquared;
     setState(() {
@@ -475,13 +475,17 @@ class _AnimationDemoState extends State<AnimationDemo> with TickerProviderStateM
   }
 }
 
-void main() {
-  if (!kIsWeb && Platform.isMacOS) {
-    // TODO(gspencergoog): Update this when TargetPlatform includes macOS. https://github.com/flutter/flutter/issues/31366
-    // See https://github.com/flutter/flutter/wiki/Desktop-shells#target-platform-override
+// Sets a platform override for desktop to avoid exceptions. See
+// https://flutter.dev/desktop#target-platform-override for more info.
+// TODO(gspencergoog): Remove once TargetPlatform includes all desktop platforms.
+void _enablePlatformOverrideForDesktop() {
+  if (!kIsWeb && (Platform.isWindows || Platform.isLinux)) {
     debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
   }
+}
 
+void main() {
+  _enablePlatformOverrideForDesktop();
   runApp(const MaterialApp(
     home: AnimationDemo(),
   ));

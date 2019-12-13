@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -177,7 +177,7 @@ abstract class MaterialLocalizations {
   /// Defines the localized [TextStyle] geometry for [ThemeData.textTheme].
   ///
   /// The [scriptCategory] defines the overall geometry of a [TextTheme] for
-  /// the static [MaterialTextGeometry.localizedFor] method in terms of the
+  /// the [Typography.geometryThemeFor] method in terms of the
   /// three language categories defined in https://material.io/go/design-typography.
   ///
   /// Generally speaking, font sizes for [ScriptCategory.tall] and
@@ -353,7 +353,7 @@ class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocal
 ///
 ///  * [GlobalMaterialLocalizations], which provides material localizations for
 ///    many languages.
-///  * [MaterialApp.delegates], which automatically includes
+///  * [MaterialApp.localizationsDelegates], which automatically includes
 ///    [DefaultMaterialLocalizations.delegate] by default.
 class DefaultMaterialLocalizations implements MaterialLocalizations {
   /// Constructs an object that defines the material widgets' localized strings

@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -503,11 +503,11 @@ class EditableText extends StatefulWidget {
   /// Whether to show cursor.
   ///
   /// The cursor refers to the blinking caret when the [EditableText] is focused.
+  /// {@endtemplate}
   ///
   /// See also:
   ///
   ///  * [showSelectionHandles], which controls the visibility of the selection handles.
-  /// {@endtemplate}
   final bool showCursor;
 
   /// {@template flutter.widgets.editableText.autocorrect}
@@ -544,7 +544,7 @@ class EditableText extends StatefulWidget {
   /// and CSS's [line-height](https://www.w3.org/TR/CSS2/visudet.html#line-height).
   /// {@endtemplate}
   ///
-  /// Within editable text and textfields, [StrutStyle] will not use its standalone
+  /// Within editable text and text fields, [StrutStyle] will not use its standalone
   /// default values, and will instead inherit omitted/null properties from the
   /// [TextStyle] instead. See [StrutStyle.inheritFromTextStyle].
   StrutStyle get strutStyle {
@@ -579,7 +579,7 @@ class EditableText extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///   * {@macro flutter.gestures.monodrag.dragStartExample}
+  ///  * {@macro flutter.gestures.monodrag.dragStartExample}
   ///
   /// {@endtemplate}
   final TextDirection textDirection;
@@ -1375,7 +1375,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       // Clamp the final results to prevent programmatically scrolling to
       // out-of-paragraph-bounds positions when encountering tall fonts/scripts that
       // extend past the ascent.
-      scrollOffset = scrollOffset.clamp(0.0, renderEditable.maxScrollExtent);
+      scrollOffset = scrollOffset.clamp(0.0, renderEditable.maxScrollExtent) as double;
     }
     return scrollOffset;
   }
@@ -1744,7 +1744,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   ///
   /// This property is typically used to notify the renderer of input gestures
   /// when [ignorePointer] is true. See [RenderEditable.ignorePointer].
-  RenderEditable get renderEditable => _editableKey.currentContext.findRenderObject();
+  RenderEditable get renderEditable => _editableKey.currentContext.findRenderObject() as RenderEditable;
 
   @override
   TextEditingValue get textEditingValue => _value;
