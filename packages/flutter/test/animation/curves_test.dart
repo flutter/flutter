@@ -259,20 +259,16 @@ void main() {
       startHandle: const Offset(-0.0, -0.3),
       endHandle: const Offset(1.3, 1.3),
     );
-    for (double t = 0; t <= 100; t += 1) {
-      final Offset value = curve.transform(t / 100.0);
-      print('${t / 100.0}\t${value.dx}\t${value.dy}');
-    }
     expect(curve.transform(0.0).dx, closeTo(0.0, 1e-6));
     expect(curve.transform(0.0).dy, closeTo(0.0, 1e-6));
-    expect(curve.transform(0.25).dx, closeTo(0.33, 1e-6));
-    expect(curve.transform(0.25).dy, closeTo(1.0, 1e-6));
-    expect(curve.transform(0.5).dx, closeTo(0.5, 1e-6));
-    expect(curve.transform(0.5).dy, closeTo(0.0, 1e-6));
-    expect(curve.transform(0.75).dx, closeTo(0.66, 1e-6));
-    expect(curve.transform(0.75).dy, closeTo(-1.0, 1e-6));
+    expect(curve.transform(0.25).dx, closeTo(0.0966945, 1e-6));
+    expect(curve.transform(0.25).dy, closeTo(0.2626806, 1e-6));
+    expect(curve.transform(0.5).dx, closeTo(0.33, 1e-6));
+    expect(curve.transform(0.5).dy, closeTo(0.25, 1e-6));
+    expect(curve.transform(0.75).dx, closeTo(0.570260, 1e-6));
+    expect(curve.transform(0.75).dy, closeTo(0.883085, 1e-6));
     expect(curve.transform(1.0).dx, closeTo(1.0, 1e-6));
-    expect(curve.transform(1.0).dy, closeTo(0.0, 1e-6));
+    expect(curve.transform(1.0).dy, closeTo(1.0, 1e-6));
   });
   test('CatmullRomSpline enforces contract', () {
     expect(() {
@@ -300,7 +296,6 @@ void main() {
   test('CatmullRomCurve interpolates given points correctly', () {
     final CatmullRomCurve curve = CatmullRomCurve(
       const <Offset>[
-        Offset(0.01, 0.25),
         Offset(0.2, 0.25),
         Offset(0.33, 0.25),
         Offset(0.5, 1.0),
@@ -311,11 +306,11 @@ void main() {
 //      print('${(t / 100.0).toStringAsFixed(4)}\t${curve.transform(t / 100.0).toStringAsFixed(4)}');
 //    }
     expect(curve.transform(0.0), closeTo(0.0, 1e-6));
-    expect(curve.transform(0.01), closeTo(0.25, 1e-6));
+    expect(curve.transform(0.01), closeTo(0.0128680, 1e-6));
     expect(curve.transform(0.2), closeTo(0.25, 1e-6));
     expect(curve.transform(0.33), closeTo(0.25, 1e-5));
     expect(curve.transform(0.5), closeTo(1.0, 1e-6));
-    expect(curve.transform(0.6), closeTo(0.9357596, 1e-6));
+    expect(curve.transform(0.6), closeTo(0.93575624, 1e-6));
     expect(curve.transform(0.8), closeTo(0.75, 1e-6));
     expect(curve.transform(1.0), closeTo(1.0, 1e-6));
   });

@@ -584,7 +584,6 @@ class CatmullRomCurve extends Curve {
       List<Offset> interiorPoints, {
       double tension = 0.0,
       List<String> reasons,
-      List<CatmullRomSpline> boxes,
     }) {
     assert(tension != null);
     if (interiorPoints == null) {
@@ -656,9 +655,6 @@ class CatmullRomCurve extends Curve {
         // If tension is 1.0, then the quads are all degenerate, so don't bother
         // generating/checking them.
         quads.add(_computeBoundingQuad(p1, p2, p3, v1, v2, tension));
-        if (boxes != null) {
-          boxes.add(CatmullRomSpline(quads.last.map<Offset>((Vector2 vec) => Offset(vec.x, vec.y)).toList(), tension: 1.0));
-        }
       }
 
       // Check the angle between v1 and v2.  If it's less than π/3, then it's
@@ -716,6 +712,32 @@ class CatmullRomCurve extends Curve {
           }
         }
       }
+    }
+
+    // A last empirical test to make sure things are single-valued in X.
+    const int testPoints = 100;
+    lastX = -double.infinity;
+    final CatmullRomSpline testSpline = CatmullRomSpline(<Offset>[Offset.zero, ...points, const Offset(1.0, 1.0)], tension: tension);
+    for (int i = 0; i < testPoints; i++) {
+      final double pos = i / testPoints.toDouble();
+      final double x = testSpline.transform(pos).dx;
+      if (x < lastX && x >= 0.0 && x <= 1.0) {
+        bool bail = true;
+        assert(() {
+          reasons?.add('The curve has more than one Y value at t=$pos (x=$x). Try moving '
+            'some control points further apart in X, or increasing the tension.');
+          // No need to keep going if we're not giving reasons.
+          bail = reasons == null;
+          success = false;
+          return true;
+        }());
+        if (bail) {
+          // If we're not in debug mode, then we want to bail immediately
+          // instead of checking all the segments.
+          return false;
+        }
+      }
+      lastX = x;
     }
     return success;
   }
