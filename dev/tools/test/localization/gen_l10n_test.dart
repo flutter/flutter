@@ -485,7 +485,7 @@ void main() {
 ''');
     });
 
-    test('correctly generates message with dates', () {
+    test('correctly generates simple message with dates', () {
       const String singleDateMessageArbFileString = '''{
   "springBegins": "Spring begins on {springStartDate}",
   "@springBegins": {
@@ -530,6 +530,63 @@ void main() {
       name: 'springBegins',
       desc: r'The first day of spring',
       args: <Object>[springStartDateString]
+    );
+  }
+''');
+    });
+
+    test('correctly generates simple message with multiple dates', () {
+      const String singleDateMessageArbFileString = '''{
+  "springRange": "Spring begins on {springStartDate} and ends on {springEndDate}",
+  "@springRange": {
+      "description": "The range of dates for spring in the year",
+      "placeholders": {
+          "springStartDate": {
+              "type": "DateTime",
+              "format": "yMMMMEEEEd"
+          },
+          "springEndDate": {
+              "type": "DateTime",
+              "format": "yMMMMEEEEd"
+          }
+      }
+  }
+}''';
+      final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+        ..createSync(recursive: true);
+      l10nDirectory.childFile(defaultTemplateArbFileName)
+        .writeAsStringSync(singleDateMessageArbFileString);
+
+      final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+      try {
+        generator.initialize(
+          l10nDirectoryPath: defaultArbPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        );
+        generator.parseArbFiles();
+        generator.generateClassMethods();
+      } on Exception catch (e) {
+        fail('Parsing template arb file should succeed: \n$e');
+      }
+
+      expect(generator.classMethods, isNotEmpty);
+      expect(
+        generator.classMethods.first,
+        '''  String springBegins(Object springStartDate, Object springEndDate) {
+    final DateFormat springStartDateDateFormat = DateFormat.yMMMMEEEEd(_localeName);
+    final String springStartDateString = springStartDateDateFormat.format(springStartDate);
+
+    final DateFormat springEndDateDateFormat = DateFormat.yMMMMEEEEd(_localeName);
+    final String springEndDateString = springEndDateDateFormat.format(springEndDate);
+
+    return Intl.message(
+      r\'Spring begins on \$springStartDateString and ends on \$springEndDateString\',
+      locale: _localeName,
+      name: 'springRange',
+      desc: r\'The range of dates for spring in the year\',
+      args: <Object>[springStartDateString, springEndDateString]
     );
   }
 ''');
