@@ -268,12 +268,11 @@ class RunCommand extends RunCommandBase {
     if (anyIOSDevices) {
       final IosProject iosProject = FlutterProject.current().ios;
       if (iosProject != null && iosProject.exists) {
-        final Iterable<File> files = iosProject.hostAppRoot
+        final Iterable<File> swiftFiles = iosProject.hostAppRoot
             .listSync(recursive: true, followLinks: false)
             .whereType<File>()
             .where((File file) => fs.path.extension(file.path) == '.swift');
-        final bool isSwift = files.isNotEmpty;
-        hostLanguage.add(isSwift ? 'swift' : 'objc');
+        hostLanguage.add(swiftFiles.isNotEmpty ? 'swift' : 'objc');
       }
     }
 
