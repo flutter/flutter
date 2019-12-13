@@ -521,8 +521,8 @@ void main() {
       expect(
         generator.classMethods.first,
         '''  String springBegins(Object springStartDate) {
-    final DateFormat dateFormat = DateFormat.yMMMMEEEEd(_localeName);
-    final String springStartDateString = dateFormat.format(springStartDate);
+    final DateFormat springStartDateDateFormat = DateFormat.yMMMMEEEEd(_localeName);
+    final String springStartDateString = springStartDateDateFormat.format(springStartDate);
 
     return Intl.message(
       r'Spring begins on \$springStartDateString',
