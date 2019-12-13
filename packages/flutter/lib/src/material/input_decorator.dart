@@ -1787,7 +1787,7 @@ class InputDecorator extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  - [InputDecoration.hoverColor], which is also blended into the focus
+  ///  * [InputDecoration.hoverColor], which is also blended into the focus
   ///    color and fill color when the [isHovering] is true to produce the final
   ///    color.
   final bool isFocused;
@@ -1802,7 +1802,7 @@ class InputDecorator extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  - [InputDecoration.focusColor], which is also blended into the hover
+  ///  * [InputDecoration.focusColor], which is also blended into the hover
   ///    color and fill color when [isFocused] is true to produce the final
   ///    color.
   final bool isHovering;
@@ -2406,7 +2406,7 @@ class InputDecoration {
   /// decorate a Material Design text field.
   ///
   /// Unless specified by [ThemeData.inputDecorationTheme],
-  /// [InputDecorator] defaults [isDense] to true, and [filled] to false,
+  /// [InputDecorator] defaults [isDense] to false, and [filled] to false,
   /// and [maxLines] to 1. The default border is an instance
   /// of [UnderlineInputBorder]. If [border] is [InputBorder.none] then
   /// no border is drawn.

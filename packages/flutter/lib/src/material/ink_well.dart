@@ -505,8 +505,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
   void initState() {
     super.initState();
     _actionMap = <LocalKey, ActionFactory>{
-      SelectAction.key: _createAction,
-      if (!kIsWeb) ActivateAction.key: _createAction,
+      ActivateAction.key: _createAction,
     };
     FocusManager.instance.addHighlightModeListener(_handleFocusHighlightModeChange);
   }

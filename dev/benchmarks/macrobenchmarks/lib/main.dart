@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:macrobenchmarks/src/large_images.dart';
 import 'package:macrobenchmarks/src/picture_cache.dart';
 
 import 'common.dart';
@@ -13,24 +14,29 @@ import 'src/simple_animation.dart';
 
 const String kMacrobenchmarks ='Macrobenchmarks';
 
-void main() => runApp(MacrobenchmarksApp());
+void main() => runApp(const MacrobenchmarksApp());
 
 class MacrobenchmarksApp extends StatelessWidget {
+  const MacrobenchmarksApp({this.initialRoute = '/'});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: kMacrobenchmarks,
-      initialRoute: '/',
+      initialRoute: initialRoute,
       routes: <String, WidgetBuilder>{
         '/': (BuildContext context) => HomePage(),
         kCullOpacityRouteName: (BuildContext context) => CullOpacityPage(),
         kCubicBezierRouteName: (BuildContext context) => CubicBezierPage(),
         kBackdropFilterRouteName: (BuildContext context) => BackdropFilterPage(),
         kSimpleAnimationRouteName: (BuildContext conttext) => SimpleAnimationPage(),
-        kPictureCacheRouteName: (BuildContext conttext) => PictureCachePage(),
+        kPictureCacheRouteName: (BuildContext context) => PictureCachePage(),
+        kLargeImagesRouteName: (BuildContext context) => LargeImagesPage(),
       },
     );
   }
+
+  final String initialRoute;
 }
 
 class HomePage extends StatelessWidget {
@@ -73,6 +79,13 @@ class HomePage extends StatelessWidget {
             child: const Text('Picture Cache'),
             onPressed: () {
               Navigator.pushNamed(context, kPictureCacheRouteName);
+            },
+          ),
+          RaisedButton(
+            key: const Key(kLargeImagesRouteName),
+            child: const Text('Large Images'),
+            onPressed: () {
+              Navigator.pushNamed(context, kLargeImagesRouteName);
             },
           ),
         ],

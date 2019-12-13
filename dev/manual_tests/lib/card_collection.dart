@@ -231,7 +231,7 @@ class CardCollectionState extends State<CardCollection> {
     );
   }
 
-  Widget _buildAppBar(BuildContext context) {
+  AppBar _buildAppBar(BuildContext context) {
     return AppBar(
       actions: <Widget>[
         Text(_dismissDirectionText(_dismissDirection)),

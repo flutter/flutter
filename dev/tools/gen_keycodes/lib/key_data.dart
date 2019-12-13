@@ -38,12 +38,12 @@ class KeyData {
     _nameToAndroidKeyCode = _readAndroidKeyCodes(androidKeyCodeHeader);
     _nameToGlfwKeyCode = _readGlfwKeyCodes(glfwKeyCodeHeader);
     // Cast Android dom map
-    final Map<String, List<dynamic>> dynamicAndroidNames = json.decode(androidNameMap).cast<String, List<dynamic>>();
+    final Map<String, List<dynamic>> dynamicAndroidNames = (json.decode(androidNameMap) as Map<String, List<dynamic>>).cast<String, List<dynamic>>();
     _nameToAndroidName = dynamicAndroidNames.map<String, List<String>>((String key, List<dynamic> value) {
       return MapEntry<String, List<String>>(key, value.cast<String>());
     });
     // Cast GLFW dom map
-    final Map<String, List<dynamic>> dynamicGlfwNames = json.decode(glfwNameMap).cast<String, List<dynamic>>();
+    final Map<String, List<dynamic>> dynamicGlfwNames = (json.decode(glfwNameMap) as Map<String, List<dynamic>>).cast<String, List<dynamic>>();
     _nameToGlfwName = dynamicGlfwNames.map<String, List<String>>((String key, List<dynamic> value) {
       return MapEntry<String, List<String>>(key, value.cast<String>());
     });
@@ -53,7 +53,7 @@ class KeyData {
   /// Parses the given JSON data and populates the data structure from it.
   KeyData.fromJson(Map<String, dynamic> contentMap) {
     data = <Key>[
-      for (String key in contentMap.keys) Key.fromJsonMapEntry(key, contentMap[key]),
+      for (String key in contentMap.keys) Key.fromJsonMapEntry(key, contentMap[key] as Map<String, List<dynamic>>),
     ];
   }
 
@@ -200,9 +200,9 @@ class KeyData {
     replaced.forEach((String key, dynamic value) {
       // Some definition values point to other definitions (e.g #define GLFW_KEY_LAST GLFW_KEY_MENU).
       if (value is String) {
-        result[key] = replaced[value];
+        result[key] = replaced[value] as int;
       } else {
-        result[key] = value;
+        result[key] = value as int;
       }
     });
     return result;
@@ -285,18 +285,18 @@ class Key {
   factory Key.fromJsonMapEntry(String name, Map<String, dynamic> map) {
     return Key(
       enumName: name,
-      name: map['names']['domkey'],
-      chromiumName: map['names']['chromium'],
-      usbHidCode: map['scanCodes']['usb'],
-      androidKeyNames: map['names']['android']?.cast<String>(),
-      androidScanCodes: map['scanCodes']['android']?.cast<int>(),
-      androidKeyCodes: map['keyCodes']['android']?.cast<int>(),
-      linuxScanCode: map['scanCodes']['linux'],
-      xKbScanCode: map['scanCodes']['xkb'],
-      windowsScanCode: map['scanCodes']['windows'],
-      macOsScanCode: map['scanCodes']['macos'],
-      glfwKeyNames: map['names']['glfw']?.cast<String>(),
-      glfwKeyCodes: map['keyCodes']['glfw']?.cast<int>(),
+      name: map['names']['domkey'] as String,
+      chromiumName: map['names']['chromium'] as String,
+      usbHidCode: map['scanCodes']['usb'] as int,
+      androidKeyNames: (map['names']['android'] as List<dynamic>)?.cast<String>(),
+      androidScanCodes: (map['scanCodes']['android'] as List<dynamic>)?.cast<int>(),
+      androidKeyCodes: (map['keyCodes']['android'] as List<dynamic>)?.cast<int>(),
+      linuxScanCode: map['scanCodes']['linux'] as int,
+      xKbScanCode: map['scanCodes']['xkb'] as int,
+      windowsScanCode: map['scanCodes']['windows'] as int,
+      macOsScanCode: map['scanCodes']['macos'] as int,
+      glfwKeyNames: (map['names']['glfw'] as List<dynamic>)?.cast<String>(),
+      glfwKeyCodes: (map['keyCodes']['glfw'] as List<dynamic>)?.cast<int>(),
     );
   }
 
@@ -427,7 +427,7 @@ class Key {
   static Map<String, String> get printable {
     if (_printable == null) {
       final String printableKeys = File(path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'printable.json',)).readAsStringSync();
-      final Map<String, dynamic> printable = json.decode(printableKeys);
+      final Map<String, dynamic> printable = json.decode(printableKeys) as Map<String, dynamic>;
       _printable = printable.cast<String, String>();
     }
     return _printable;
@@ -442,7 +442,7 @@ class Key {
   static Map<String, List<dynamic>> get synonyms {
     if (_synonym == null) {
       final String synonymKeys = File(path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'synonyms.json',)).readAsStringSync();
-      final Map<String, dynamic> synonym = json.decode(synonymKeys);
+      final Map<String, dynamic> synonym = json.decode(synonymKeys) as Map<String, dynamic>;
       _synonym = synonym.cast<String, List<dynamic>>();
     }
     return _synonym;

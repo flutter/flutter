@@ -212,6 +212,12 @@ class FlutterTesterDevice extends Device {
 
   @override
   bool isSupportedForProject(FlutterProject flutterProject) => true;
+
+  @override
+  Future<void> dispose() async {
+    _logReader?.dispose();
+    await _portForwarder?.dispose();
+  }
 }
 
 class FlutterTesterDevices extends PollingDeviceDiscovery {
@@ -250,6 +256,9 @@ class _FlutterTesterDeviceLogReader extends DeviceLogReader {
   String get name => 'flutter tester log reader';
 
   void addLine(String line) => _logLinesController.add(line);
+
+  @override
+  void dispose() {}
 }
 
 /// A fake port forwarder that doesn't do anything. Used by flutter tester
@@ -268,4 +277,7 @@ class _NoopPortForwarder extends DevicePortForwarder {
 
   @override
   Future<void> unforward(ForwardedPort forwardedPort) async { }
+
+  @override
+  Future<void> dispose() async { }
 }

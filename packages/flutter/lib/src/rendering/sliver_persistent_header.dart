@@ -22,7 +22,7 @@ import 'viewport_offset.dart';
 /// See also:
 ///
 ///  * [SliverAppBar], which creates a header that can be stretched into an
-///  overscroll area and trigger a callback function.
+///    overscroll area and trigger a callback function.
 class OverScrollHeaderStretchConfiguration {
   /// Creates an object that specifies how a stretched header may activate an
   /// [AsyncCallback].
@@ -111,7 +111,7 @@ abstract class RenderSliverPersistentHeader extends RenderSliver with RenderObje
   /// See also:
   ///
   ///  * [SliverAppBar], which creates a header that can stretched into an
-  ///  overscroll area and trigger a callback function.
+  ///    overscroll area and trigger a callback function.
   OverScrollHeaderStretchConfiguration stretchConfiguration;
 
   /// Update the child render object if necessary.

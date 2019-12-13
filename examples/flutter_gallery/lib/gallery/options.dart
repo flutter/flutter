@@ -54,14 +54,14 @@ class GalleryOptions {
   bool operator ==(dynamic other) {
     if (runtimeType != other.runtimeType)
       return false;
-    final GalleryOptions typedOther = other;
-    return themeMode == typedOther.themeMode
-        && textScaleFactor == typedOther.textScaleFactor
-        && textDirection == typedOther.textDirection
-        && platform == typedOther.platform
-        && showPerformanceOverlay == typedOther.showPerformanceOverlay
-        && showRasterCacheImagesCheckerboard == typedOther.showRasterCacheImagesCheckerboard
-        && showOffscreenLayersCheckerboard == typedOther.showRasterCacheImagesCheckerboard;
+    return other is GalleryOptions
+        && other.themeMode == themeMode
+        && other.textScaleFactor == textScaleFactor
+        && other.textDirection == textDirection
+        && other.platform == platform
+        && other.showPerformanceOverlay == showPerformanceOverlay
+        && other.showRasterCacheImagesCheckerboard == showRasterCacheImagesCheckerboard
+        && other.showOffscreenLayersCheckerboard == showRasterCacheImagesCheckerboard;
   }
 
   @override

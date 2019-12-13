@@ -31,7 +31,7 @@ const String kSnippetsRoot = 'dev/snippets';
 Future<void> main(List<String> arguments) async {
   final ArgParser argParser = _createArgsParser();
   final ArgResults args = argParser.parse(arguments);
-  if (args['help']) {
+  if (args['help'] as bool) {
     print ('Usage:');
     print (argParser.usage);
     exit(0);
@@ -111,7 +111,7 @@ Future<void> main(List<String> arguments) async {
   final List<String> dartdocBaseArgs = <String>[
     'global',
     'run',
-    if (args['checked']) '-c',
+    if (args['checked'] as bool) '-c',
     'dartdoc',
   ];
 
@@ -130,8 +130,8 @@ Future<void> main(List<String> arguments) async {
   final List<String> dartdocArgs = <String>[
     ...dartdocBaseArgs,
     '--allow-tools',
-    if (args['json']) '--json',
-    if (args['validate-links']) '--validate-links' else '--no-validate-links',
+    if (args['json'] as bool) '--json',
+    if (args['validate-links'] as bool) '--validate-links' else '--no-validate-links',
     '--link-to-source-excludes', '../../bin/cache',
     '--link-to-source-root', '../..',
     '--link-to-source-uri-template', 'https://github.com/flutter/flutter/blob/master/%f%#L%l%',
@@ -207,14 +207,14 @@ Future<void> main(List<String> arguments) async {
     workingDirectory: kDocsRoot,
     environment: pubEnvironment,
   ));
-  printStream(process.stdout, prefix: args['json'] ? '' : 'dartdoc:stdout: ',
-    filter: args['verbose'] ? const <Pattern>[] : <Pattern>[
+  printStream(process.stdout, prefix: args['json'] as bool ? '' : 'dartdoc:stdout: ',
+    filter: args['verbose'] as bool ? const <Pattern>[] : <Pattern>[
       RegExp(r'^generating docs for library '), // unnecessary verbosity
       RegExp(r'^pars'), // unnecessary verbosity
     ],
   );
-  printStream(process.stderr, prefix: args['json'] ? '' : 'dartdoc:stderr: ',
-    filter: args['verbose'] ? const <Pattern>[] : <Pattern>[
+  printStream(process.stderr, prefix: args['json'] as bool ? '' : 'dartdoc:stderr: ',
+    filter: args['verbose'] as bool ? const <Pattern>[] : <Pattern>[
       RegExp(r'^ warning: .+: \(.+/\.pub-cache/hosted/pub.dartlang.org/.+\)'), // packages outside our control
     ],
   );
@@ -252,7 +252,7 @@ String getBranchName() {
   if (gitResult.exitCode != 0)
     throw 'git status exit with non-zero exit code: ${gitResult.exitCode}';
   final Match gitBranchMatch = gitBranchRegexp.firstMatch(
-      gitResult.stdout.trim().split('\n').first);
+      (gitResult.stdout as String).trim().split('\n').first);
   return gitBranchMatch == null ? '' : gitBranchMatch.group(1).split('...').first;
 }
 
@@ -262,7 +262,7 @@ String gitRevision() {
   final ProcessResult gitResult = Process.runSync('git', <String>['rev-parse', 'HEAD']);
   if (gitResult.exitCode != 0)
     throw 'git rev-parse exit with non-zero exit code: ${gitResult.exitCode}';
-  final String gitRevision = gitResult.stdout.trim();
+  final String gitRevision = (gitResult.stdout as String).trim();
 
   return gitRevision.length > kGitRevisionLength ? gitRevision.substring(0, kGitRevisionLength) : gitRevision;
 }
@@ -454,7 +454,7 @@ List<String> findPackageNames() {
 }
 
 /// Finds all packages in the Flutter SDK
-List<FileSystemEntity> findPackages() {
+List<Directory> findPackages() {
   return Directory('packages')
     .listSync()
     .where((FileSystemEntity entity) {

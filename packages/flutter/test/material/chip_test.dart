@@ -474,7 +474,7 @@ void main() {
       ),
     );
     expect(tester.getSize(find.byType(Text)), const Size(40.0, 10.0));
-    expect(tester.getSize(find.byType(Chip)), const Size(64.0,48.0));
+    expect(tester.getSize(find.byType(Chip)), const Size(64.0, 48.0));
     await tester.pumpWidget(
       _wrapForChip(
         child: Row(
@@ -2243,6 +2243,111 @@ void main() {
     await tester.pump();
     expect(focusNode1.hasPrimaryFocus, isTrue);
     expect(focusNode2.hasPrimaryFocus, isFalse);
+  });
+
+  testWidgets('Chip responds to density changes.', (WidgetTester tester) async {
+    const Key key = Key('test');
+    const Key textKey = Key('test text');
+    const Key iconKey = Key('test icon');
+    const Key avatarKey = Key('test avatar');
+    Future<void> buildTest(VisualDensity visualDensity) async {
+      return await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: Column(
+                children: <Widget>[
+                  InputChip(
+                    visualDensity: visualDensity,
+                    key: key,
+                    onPressed: () {},
+                    onDeleted: () {},
+                    label: const Text('Test', key: textKey),
+                    deleteIcon: const Icon(Icons.delete, key: iconKey),
+                    avatar: const Icon(Icons.play_arrow, key: avatarKey),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // The Chips only change in size vertically in response to density, so
+    // horizontal changes aren't expected.
+    await buildTest(VisualDensity.standard);
+    Rect box = tester.getRect(find.byKey(key));
+    Rect textBox = tester.getRect(find.byKey(textKey));
+    Rect iconBox = tester.getRect(find.byKey(iconKey));
+    Rect avatarBox = tester.getRect(find.byKey(avatarKey));
+    expect(box.size, equals(const Size(128, 32.0 + 16.0)));
+    expect(textBox.size, equals(const Size(56, 14)));
+    expect(iconBox.size, equals(const Size(24, 24)));
+    expect(avatarBox.size, equals(const Size(24, 24)));
+    expect(textBox.top, equals(17));
+    expect(box.bottom - textBox.bottom, equals(17));
+    expect(textBox.left, equals(372));
+    expect(box.right - textBox.right, equals(36));
+
+    // Try decreasing density (with higher density numbers).
+    await buildTest(const VisualDensity(horizontal: 3.0, vertical: 3.0));
+    box = tester.getRect(find.byKey(key));
+    textBox = tester.getRect(find.byKey(textKey));
+    iconBox = tester.getRect(find.byKey(iconKey));
+    avatarBox = tester.getRect(find.byKey(avatarKey));
+    expect(box.size, equals(const Size(128, 60)));
+    expect(textBox.size, equals(const Size(56, 14)));
+    expect(iconBox.size, equals(const Size(24, 24)));
+    expect(avatarBox.size, equals(const Size(24, 24)));
+    expect(textBox.top, equals(23));
+    expect(box.bottom - textBox.bottom, equals(23));
+    expect(textBox.left, equals(372));
+    expect(box.right - textBox.right, equals(36));
+
+    // Try increasing density (with lower density numbers).
+    await buildTest(const VisualDensity(horizontal: -3.0, vertical: -3.0));
+    box = tester.getRect(find.byKey(key));
+    textBox = tester.getRect(find.byKey(textKey));
+    iconBox = tester.getRect(find.byKey(iconKey));
+    avatarBox = tester.getRect(find.byKey(avatarKey));
+    expect(box.size, equals(const Size(128, 36)));
+    expect(textBox.size, equals(const Size(56, 14)));
+    expect(iconBox.size, equals(const Size(24, 24)));
+    expect(avatarBox.size, equals(const Size(24, 24)));
+    expect(textBox.top, equals(11));
+    expect(box.bottom - textBox.bottom, equals(11));
+    expect(textBox.left, equals(372));
+    expect(box.right - textBox.right, equals(36));
+
+    // Now test that horizontal and vertical are wired correctly. Negating the
+    // horizontal should have no change over what's above.
+    await buildTest(const VisualDensity(horizontal: 3.0, vertical: -3.0));
+    await tester.pumpAndSettle();
+    box = tester.getRect(find.byKey(key));
+    textBox = tester.getRect(find.byKey(textKey));
+    iconBox = tester.getRect(find.byKey(iconKey));
+    avatarBox = tester.getRect(find.byKey(avatarKey));
+    expect(box.size, equals(const Size(128, 36)));
+    expect(textBox.size, equals(const Size(56, 14)));
+    expect(iconBox.size, equals(const Size(24, 24)));
+    expect(avatarBox.size, equals(const Size(24, 24)));
+    expect(textBox.top, equals(11));
+    expect(box.bottom - textBox.bottom, equals(11));
+    expect(textBox.left, equals(372));
+    expect(box.right - textBox.right, equals(36));
+
+    // Make sure the "Comfortable" setting is the spec'd size
+    await buildTest(VisualDensity.comfortable);
+    await tester.pumpAndSettle();
+    box = tester.getRect(find.byKey(key));
+    expect(box.size, equals(const Size(128, 28.0 + 16.0)));
+
+    // Make sure the "Compact" setting is the spec'd size
+    await buildTest(VisualDensity.compact);
+    await tester.pumpAndSettle();
+    box = tester.getRect(find.byKey(key));
+    expect(box.size, equals(const Size(128, 24.0 + 16.0)));
   });
 
   testWidgets('Input chip check mark color is determined by platform brightness when light', (WidgetTester tester) async {

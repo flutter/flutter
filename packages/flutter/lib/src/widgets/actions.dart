@@ -67,11 +67,11 @@ class Intent extends Diagnosticable {
 ///
 /// See also:
 ///
-///  - [Shortcuts], which is a widget that contains a key map, in which it looks
+///  * [Shortcuts], which is a widget that contains a key map, in which it looks
 ///    up key combinations in order to invoke actions.
-///  - [Actions], which is a widget that defines a map of [Intent] to [Action]
+///  * [Actions], which is a widget that defines a map of [Intent] to [Action]
 ///    and allows redefining of actions for its descendants.
-///  - [ActionDispatcher], a class that takes an [Action] and invokes it using a
+///  * [ActionDispatcher], a class that takes an [Action] and invokes it using a
 ///    [FocusNode] for context.
 abstract class Action extends Diagnosticable {
   /// A const constructor for an [Action].
@@ -114,11 +114,11 @@ typedef OnInvokeCallback = void Function(FocusNode node, Intent tag);
 ///
 /// See also:
 ///
-///  - [Shortcuts], which is a widget that contains a key map, in which it looks
+///  * [Shortcuts], which is a widget that contains a key map, in which it looks
 ///    up key combinations in order to invoke actions.
-///  - [Actions], which is a widget that defines a map of [Intent] to [Action]
+///  * [Actions], which is a widget that defines a map of [Intent] to [Action]
 ///    and allows redefining of actions for its descendants.
-///  - [ActionDispatcher], a class that takes an [Action] and invokes it using a
+///  * [ActionDispatcher], a class that takes an [Action] and invokes it using a
 ///    [FocusNode] for context.
 class CallbackAction extends Action {
   /// A const constructor for an [Action].
@@ -173,12 +173,12 @@ class ActionDispatcher extends Diagnosticable {
 ///
 /// See also:
 ///
-///   * [ActionDispatcher], the object that this widget uses to manage actions.
-///   * [Action], a class for containing and defining an invocation of a user
-///     action.
-///   * [Intent], a class that holds a unique [LocalKey] identifying an action,
-///     as well as configuration information for running the [Action].
-///   * [Shortcuts], a widget used to bind key combinations to [Intent]s.
+///  * [ActionDispatcher], the object that this widget uses to manage actions.
+///  * [Action], a class for containing and defining an invocation of a user
+///    action.
+///  * [Intent], a class that holds a unique [LocalKey] identifying an action,
+///    as well as configuration information for running the [Action].
+///  * [Shortcuts], a widget used to bind key combinations to [Intent]s.
 class Actions extends InheritedWidget {
   /// Creates an [Actions] widget.
   ///
@@ -738,8 +738,7 @@ abstract class ActivateAction extends Action {
 /// An action that selects the currently focused control.
 ///
 /// This is an abstract class that serves as a base class for actions that
-/// select something, like a checkbox or a radio button. By default, it is bound
-/// to [LogicalKeyboardKey.space] in the default keyboard map in [WidgetsApp].
+/// select something. It is not bound to any key by default.
 abstract class SelectAction extends Action {
   /// Creates a [SelectAction] with a fixed [key];
   const SelectAction() : super(key);

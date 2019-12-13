@@ -158,6 +158,7 @@ enum DiagnosticsTreeStyle {
   /// the following line.
   ///
   /// See also:
+  ///
   ///  * [singleLine], which displays the same information but keeps the
   ///    property and value on the same line.
   errorProperty,
@@ -512,7 +513,7 @@ final TextTreeConfiguration denseTextConfiguration = TextTreeConfiguration(
 ///    ╚═══════════
 /// ```
 ///
-/// /// See also:
+/// See also:
 ///
 ///  * [DiagnosticsTreeStyle.transition], uses this style for ASCII art display.
 final TextTreeConfiguration transitionTextConfiguration = TextTreeConfiguration(
@@ -1058,7 +1059,7 @@ bool _isSingleLine(DiagnosticsTreeStyle style) {
 ///
 /// See also:
 ///
-/// * [DiagnosticsNode.toStringDeep], which uses a [TextTreeRenderer] to return a
+///  * [DiagnosticsNode.toStringDeep], which uses a [TextTreeRenderer] to return a
 ///    string representation of this node and its descendants.
 class TextTreeRenderer {
   /// Creates a [TextTreeRenderer] object with the given arguments specifying

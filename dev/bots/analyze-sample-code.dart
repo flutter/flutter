@@ -78,7 +78,7 @@ void main(List<String> arguments) {
 
   final ArgResults parsedArguments = argParser.parse(arguments);
 
-  if (parsedArguments['help']) {
+  if (parsedArguments['help'] as bool) {
     print(argParser.usage);
     exit(0);
   }
@@ -93,8 +93,9 @@ void main(List<String> arguments) {
 
   Directory tempDirectory;
   if (parsedArguments.wasParsed('temp')) {
-    tempDirectory = Directory(path.join(Directory.systemTemp.absolute.path, path.basename(parsedArguments['temp'])));
-    if (path.basename(parsedArguments['temp']) != parsedArguments['temp']) {
+    final String tempArg = parsedArguments['temp'] as String;
+    tempDirectory = Directory(path.join(Directory.systemTemp.absolute.path, path.basename(tempArg)));
+    if (path.basename(tempArg) != tempArg) {
       stderr.writeln('Supplied temporary directory name should be a name, not a path. Using ${tempDirectory.absolute.path} instead.');
     }
     print('Leaving temporary output in ${tempDirectory.absolute.path}.');
@@ -106,7 +107,11 @@ void main(List<String> arguments) {
     tempDirectory.createSync();
   }
   try {
-    exitCode = SampleChecker(flutterPackage, tempDirectory: tempDirectory, verbose: parsedArguments['verbose']).checkSamples();
+    exitCode = SampleChecker(
+      flutterPackage,
+      tempDirectory: tempDirectory,
+      verbose: parsedArguments['verbose'] as bool,
+    ).checkSamples();
   } on SampleCheckerException catch (e) {
     stderr.write(e);
     exit(1);

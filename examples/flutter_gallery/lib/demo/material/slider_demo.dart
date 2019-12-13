@@ -257,7 +257,7 @@ class _SlidersState extends State<_Sliders> {
                       final double newValue = double.tryParse(value);
                       if (newValue != null && newValue != _continuousValue) {
                         setState(() {
-                          _continuousValue = newValue.clamp(0, 100);
+                          _continuousValue = newValue.clamp(0.0, 100.0) as double;
                         });
                       }
                     },

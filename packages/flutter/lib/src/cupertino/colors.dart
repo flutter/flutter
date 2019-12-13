@@ -98,8 +98,8 @@ class CupertinoColors {
   ///
   /// See also:
   ///
-  /// * [UIColor.systemBlue](https://developer.apple.com/documentation/uikit/uicolor/3173141-systemblue),
-  ///   the `UIKit` equivalent.
+  ///  * [UIColor.systemBlue](https://developer.apple.com/documentation/uikit/uicolor/3173141-systemblue),
+  ///    the `UIKit` equivalent.
   static const CupertinoDynamicColor systemBlue = CupertinoDynamicColor.withBrightnessAndContrast(
     debugLabel: 'systemBlue',
     color: Color.fromARGB(255, 0, 122, 255),
@@ -112,8 +112,8 @@ class CupertinoColors {
   ///
   /// See also:
   ///
-  /// * [UIColor.systemGreen](https://developer.apple.com/documentation/uikit/uicolor/3173144-systemgreen),
-  ///   the `UIKit` equivalent.
+  ///  * [UIColor.systemGreen](https://developer.apple.com/documentation/uikit/uicolor/3173144-systemgreen),
+  ///    the `UIKit` equivalent.
   static const CupertinoDynamicColor systemGreen = CupertinoDynamicColor.withBrightnessAndContrast(
     debugLabel: 'systemGreen',
     color: Color.fromARGB(255, 52, 199, 89),
@@ -126,8 +126,8 @@ class CupertinoColors {
   ///
   /// See also:
   ///
-  /// * [UIColor.systemIndigo](https://developer.apple.com/documentation/uikit/uicolor/3173146-systemindigo),
-  ///   the `UIKit` equivalent.
+  ///  * [UIColor.systemIndigo](https://developer.apple.com/documentation/uikit/uicolor/3173146-systemindigo),
+  ///    the `UIKit` equivalent.
   static const CupertinoDynamicColor systemIndigo = CupertinoDynamicColor.withBrightnessAndContrast(
     debugLabel: 'systemIndigo',
     color: Color.fromARGB(255, 88, 86, 214),
@@ -140,8 +140,8 @@ class CupertinoColors {
   ///
   /// See also:
   ///
-  /// * [UIColor.systemOrange](https://developer.apple.com/documentation/uikit/uicolor/3173147-systemorange),
-  ///   the `UIKit` equivalent.
+  ///  * [UIColor.systemOrange](https://developer.apple.com/documentation/uikit/uicolor/3173147-systemorange),
+  ///    the `UIKit` equivalent.
   static const CupertinoDynamicColor systemOrange = CupertinoDynamicColor.withBrightnessAndContrast(
     debugLabel: 'systemOrange',
     color: Color.fromARGB(255, 255, 149, 0),
@@ -154,8 +154,8 @@ class CupertinoColors {
   ///
   /// See also:
   ///
-  /// * [UIColor.systemPink](https://developer.apple.com/documentation/uikit/uicolor/3173148-systempink),
-  ///   the `UIKit` equivalent.
+  ///  * [UIColor.systemPink](https://developer.apple.com/documentation/uikit/uicolor/3173148-systempink),
+  ///    the `UIKit` equivalent.
   static const CupertinoDynamicColor systemPink = CupertinoDynamicColor.withBrightnessAndContrast(
     debugLabel: 'systemPink',
     color: Color.fromARGB(255, 255, 45, 85),
@@ -168,8 +168,8 @@ class CupertinoColors {
   ///
   /// See also:
   ///
-  /// * [UIColor.systemPurple](https://developer.apple.com/documentation/uikit/uicolor/3173149-systempurple),
-  ///   the `UIKit` equivalent.
+  ///  * [UIColor.systemPurple](https://developer.apple.com/documentation/uikit/uicolor/3173149-systempurple),
+  ///    the `UIKit` equivalent.
   static const CupertinoDynamicColor systemPurple = CupertinoDynamicColor.withBrightnessAndContrast(
     debugLabel: 'systemPurple',
     color: Color.fromARGB(255, 175, 82, 222),
@@ -182,8 +182,8 @@ class CupertinoColors {
   ///
   /// See also:
   ///
-  /// * [UIColor.systemRed](https://developer.apple.com/documentation/uikit/uicolor/3173150-systemred),
-  ///   the `UIKit` equivalent.
+  ///  * [UIColor.systemRed](https://developer.apple.com/documentation/uikit/uicolor/3173150-systemred),
+  ///    the `UIKit` equivalent.
   static const CupertinoDynamicColor systemRed = CupertinoDynamicColor.withBrightnessAndContrast(
     debugLabel: 'systemRed',
     color: Color.fromARGB(255, 255, 59, 48),
@@ -196,8 +196,8 @@ class CupertinoColors {
   ///
   /// See also:
   ///
-  /// * [UIColor.systemTeal](https://developer.apple.com/documentation/uikit/uicolor/3173151-systemteal),
-  ///   the `UIKit` equivalent.
+  ///  * [UIColor.systemTeal](https://developer.apple.com/documentation/uikit/uicolor/3173151-systemteal),
+  ///    the `UIKit` equivalent.
   static const CupertinoDynamicColor systemTeal = CupertinoDynamicColor.withBrightnessAndContrast(
     debugLabel: 'systemTeal',
     color: Color.fromARGB(255, 90, 200, 250),
@@ -210,8 +210,8 @@ class CupertinoColors {
   ///
   /// See also:
   ///
-  /// * [UIColor.systemYellow](https://developer.apple.com/documentation/uikit/uicolor/3173152-systemyellow),
-  ///   the `UIKit` equivalent.
+  ///  * [UIColor.systemYellow](https://developer.apple.com/documentation/uikit/uicolor/3173152-systemyellow),
+  ///    the `UIKit` equivalent.
   static const CupertinoDynamicColor systemYellow = CupertinoDynamicColor.withBrightnessAndContrast(
     debugLabel: 'systemYellow',
     color: Color.fromARGB(255, 255, 204, 0),
@@ -224,8 +224,8 @@ class CupertinoColors {
   ///
   /// See also:
   ///
-  /// * [UIColor.systemGray](https://developer.apple.com/documentation/uikit/uicolor/3173143-systemgray),
-  ///   the `UIKit` equivalent.
+  ///  * [UIColor.systemGray](https://developer.apple.com/documentation/uikit/uicolor/3173143-systemgray),
+  ///    the `UIKit` equivalent.
   static const CupertinoDynamicColor systemGrey = CupertinoDynamicColor.withBrightnessAndContrast(
     debugLabel: 'systemGrey',
     color: Color.fromARGB(255, 142, 142, 147),
@@ -238,8 +238,8 @@ class CupertinoColors {
   ///
   /// See also:
   ///
-  /// * [UIColor.systemGray2](https://developer.apple.com/documentation/uikit/uicolor/3255071-systemgray2),
-  ///   the `UIKit` equivalent.
+  ///  * [UIColor.systemGray2](https://developer.apple.com/documentation/uikit/uicolor/3255071-systemgray2),
+  ///    the `UIKit` equivalent.
   static const CupertinoDynamicColor systemGrey2 = CupertinoDynamicColor.withBrightnessAndContrast(
     debugLabel: 'systemGrey2',
     color: Color.fromARGB(255, 174, 174, 178),
@@ -252,8 +252,8 @@ class CupertinoColors {
   ///
   /// See also:
   ///
-  /// * [UIColor.systemGray3](https://developer.apple.com/documentation/uikit/uicolor/3255072-systemgray3),
-  ///   the `UIKit` equivalent.
+  ///  * [UIColor.systemGray3](https://developer.apple.com/documentation/uikit/uicolor/3255072-systemgray3),
+  ///    the `UIKit` equivalent.
   static const CupertinoDynamicColor systemGrey3 = CupertinoDynamicColor.withBrightnessAndContrast(
     debugLabel: 'systemGrey3',
     color: Color.fromARGB(255, 199, 199, 204),
@@ -266,8 +266,8 @@ class CupertinoColors {
   ///
   /// See also:
   ///
-  /// * [UIColor.systemGray4](https://developer.apple.com/documentation/uikit/uicolor/3255073-systemgray4),
-  ///   the `UIKit` equivalent.
+  ///  * [UIColor.systemGray4](https://developer.apple.com/documentation/uikit/uicolor/3255073-systemgray4),
+  ///    the `UIKit` equivalent.
   static const CupertinoDynamicColor systemGrey4 = CupertinoDynamicColor.withBrightnessAndContrast(
     debugLabel: 'systemGrey4',
     color: Color.fromARGB(255, 209, 209, 214),
@@ -280,8 +280,8 @@ class CupertinoColors {
   ///
   /// See also:
   ///
-  /// * [UIColor.systemGray5](https://developer.apple.com/documentation/uikit/uicolor/3255074-systemgray5),
-  ///   the `UIKit` equivalent.
+  ///  * [UIColor.systemGray5](https://developer.apple.com/documentation/uikit/uicolor/3255074-systemgray5),
+  ///    the `UIKit` equivalent.
   static const CupertinoDynamicColor systemGrey5 = CupertinoDynamicColor.withBrightnessAndContrast(
     debugLabel: 'systemGrey5',
     color: Color.fromARGB(255, 229, 229, 234),
@@ -294,8 +294,8 @@ class CupertinoColors {
   ///
   /// See also:
   ///
-  /// * [UIColor.systemGray6](https://developer.apple.com/documentation/uikit/uicolor/3255075-systemgray6),
-  ///   the `UIKit` equivalent.
+  ///  * [UIColor.systemGray6](https://developer.apple.com/documentation/uikit/uicolor/3255075-systemgray6),
+  ///    the `UIKit` equivalent.
   static const CupertinoDynamicColor systemGrey6 = CupertinoDynamicColor.withBrightnessAndContrast(
     debugLabel: 'systemGrey6',
     color: Color.fromARGB(255, 242, 242, 247),
@@ -667,10 +667,10 @@ class CupertinoColors {
 ///
 /// See also:
 ///
-/// * [CupertinoUserInterfaceLevel], an [InheritedWidget] that may affect color
-///   resolution of a [CupertinoDynamicColor].
-/// * [CupertinoTheme.of], a static method that retrieves the ambient [CupertinoThemeData],
-///   and then resolves [CupertinoDynamicColor]s used in the retrieved data.
+///  * [CupertinoUserInterfaceLevel], an [InheritedWidget] that may affect color
+///    resolution of a [CupertinoDynamicColor].
+///  * [CupertinoTheme.of], a static method that retrieves the ambient [CupertinoThemeData],
+///    and then resolves [CupertinoDynamicColor]s used in the retrieved data.
 @immutable
 class CupertinoDynamicColor extends Color with DiagnosticableMixin implements Diagnosticable {
   /// Creates an adaptive [Color] that changes its effective color based on the

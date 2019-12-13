@@ -302,7 +302,9 @@ class Slider extends StatefulWidget {
   /// as part of the value indicator shape.
   ///
   /// The label is rendered using the active [ThemeData]'s
-  /// [ThemeData.accentTextTheme.body2] text style.
+  /// [ThemeData.textTheme.body2] text style, with the
+  /// theme data's [ThemeData.colorScheme.onPrimaryColor]. The label's text style
+  /// can be overridden with [SliderThemeData.valueIndicatorTextStyle].
   ///
   /// If null, then the value indicator will not be displayed.
   ///

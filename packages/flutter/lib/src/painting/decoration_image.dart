@@ -141,14 +141,14 @@ class DecorationImage {
       return true;
     if (runtimeType != other.runtimeType)
       return false;
-    final DecorationImage typedOther = other;
-    return image == typedOther.image
-        && colorFilter == typedOther.colorFilter
-        && fit == typedOther.fit
-        && alignment == typedOther.alignment
-        && centerSlice == typedOther.centerSlice
-        && repeat == typedOther.repeat
-        && matchTextDirection == typedOther.matchTextDirection;
+    return other is DecorationImage
+        && other.image == image
+        && other.colorFilter == colorFilter
+        && other.fit == fit
+        && other.alignment == alignment
+        && other.centerSlice == centerSlice
+        && other.repeat == repeat
+        && other.matchTextDirection == matchTextDirection;
   }
 
   @override
@@ -392,8 +392,8 @@ void paintImage({
       centerSlice.left + inputSize.width - centerSlice.right,
       centerSlice.top + inputSize.height - centerSlice.bottom,
     );
-    outputSize -= sliceBorder;
-    inputSize -= sliceBorder;
+    outputSize = outputSize - sliceBorder as Size;
+    inputSize = inputSize - sliceBorder as Size;
   }
   fit ??= centerSlice == null ? BoxFit.scaleDown : BoxFit.fill;
   assert(centerSlice == null || (fit != BoxFit.none && fit != BoxFit.cover));

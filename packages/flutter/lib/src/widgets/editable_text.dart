@@ -579,7 +579,7 @@ class EditableText extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///   * {@macro flutter.gestures.monodrag.dragStartExample}
+  ///  * {@macro flutter.gestures.monodrag.dragStartExample}
   ///
   /// {@endtemplate}
   final TextDirection textDirection;

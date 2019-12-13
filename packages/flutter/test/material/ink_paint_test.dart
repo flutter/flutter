@@ -322,46 +322,12 @@ void main() {
         );
     }
 
-    // Now activate it with a keypress.
-    await tester.sendKeyEvent(LogicalKeyboardKey.space);
-    await tester.pump();
-
-    RenderBox box = Material.of(tester.element(find.byType(InkWell))) as dynamic;
-
-    if (kIsWeb) {
-      expect(box, isNot(ripplePattern(30.0, 0)));
-    } else {
-      // ripplePattern always add a translation of topLeft.
-      expect(box, ripplePattern(30.0, 0));
-
-      // The ripple fades in for 75ms. During that time its alpha is eased from
-      // 0 to the splashColor's alpha value.
-      await tester.pump(const Duration(milliseconds: 50));
-      expect(box, ripplePattern(56.0, 120));
-
-      // At 75ms the ripple has faded in: it's alpha matches the splashColor's
-      // alpha.
-      await tester.pump(const Duration(milliseconds: 25));
-      expect(box, ripplePattern(73.0, 180));
-
-      // At this point the splash radius has expanded to its limit: 5 past the
-      // ink well's radius parameter. The fade-out is about to start.
-      // The fade-out begins at 225ms = 50ms + 25ms + 150ms.
-      await tester.pump(const Duration(milliseconds: 150));
-      expect(box, ripplePattern(105.0, 180));
-
-      // After another 150ms the fade-out is complete.
-      await tester.pump(const Duration(milliseconds: 150));
-      expect(box, ripplePattern(105.0, 0));
-    }
-
-    // Now try it with a select action instead.
-    await buildTest(SelectAction.key);
+    await buildTest(ActivateAction.key);
     await tester.pumpAndSettle();
     await tester.sendKeyEvent(LogicalKeyboardKey.space);
     await tester.pump();
 
-    box = Material.of(tester.element(find.byType(InkWell))) as dynamic;
+    final RenderBox box = Material.of(tester.element(find.byType(InkWell))) as dynamic;
 
     // ripplePattern always add a translation of topLeft.
     expect(box, ripplePattern(30.0, 0));
