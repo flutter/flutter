@@ -102,7 +102,7 @@ class GitHubTemplateCreator {
           if (pluginParts.length != 2) {
             continue;
           }
-          description += pluginParts.first;
+          description += '${pluginParts.first}\n';
         }
       }
 
