@@ -27,6 +27,54 @@ export 'dart:ui' show TextAffinity;
 // Whether we're compiled to JavaScript in a web browser.
 const bool _kIsBrowser = identical(0, 0.0);
 
+/// Indicates how to handle the intelligent replacement of dashes in text input.
+///
+/// See also:
+///
+///  * [TextField.smartDashesType]
+///  * [TextFormField.smartDashesType]
+///  * [CupertinoTextField.smartDashesType]
+///  * [EditableText.smartDashesType]
+///  * [SmartQuotesType]
+///  * <https://developer.apple.com/documentation/uikit/uitextinputtraits>
+enum SmartDashesType {
+  /// Smart dashes is disabled.
+  ///
+  /// This corresponds to the
+  /// ["no" value of UITextSmartDashesType](https://developer.apple.com/documentation/uikit/uitextsmartdashestype/no).
+  disabled,
+
+  /// Smart dashes is enabled.
+  ///
+  /// This corresponds to the
+  /// ["yes" value of UITextSmartDashesType](https://developer.apple.com/documentation/uikit/uitextsmartdashestype/yes).
+  enabled,
+}
+
+/// Indicates how to handle the intelligent replacement of quotes in text input.
+///
+/// See also:
+///
+///  * [TextField.smartQuotesType]
+///  * [TextFormField.smartQuotesType]
+///  * [CupertinoTextField.smartQuotesType]
+///  * [EditableText.smartQuotesType]
+///  * [SmartDashesType]
+///  * <https://developer.apple.com/documentation/uikit/uitextinputtraits>
+enum SmartQuotesType {
+  /// Smart quotes is disabled.
+  ///
+  /// This corresponds to the
+  /// ["no" value of UITextSmartQuotesType](https://developer.apple.com/documentation/uikit/uitextsmartquotestype/no).
+  disabled,
+
+  /// Smart quotes is enabled.
+  ///
+  /// This corresponds to the
+  /// ["yes" value of UITextSmartQuotesType](https://developer.apple.com/documentation/uikit/uitextsmartquotestype/yes).
+  enabled,
+}
+
 /// The type of information for which to optimize the text input control.
 ///
 /// On Android, behavior may vary across device and keyboard provider.
@@ -385,6 +433,8 @@ class TextInputConfiguration {
     this.inputType = TextInputType.text,
     this.obscureText = false,
     this.autocorrect = true,
+    SmartDashesType smartDashesType,
+    SmartQuotesType smartQuotesType,
     this.enableSuggestions = true,
     this.actionLabel,
     this.inputAction = TextInputAction.done,
@@ -392,6 +442,8 @@ class TextInputConfiguration {
     this.textCapitalization = TextCapitalization.none,
   }) : assert(inputType != null),
        assert(obscureText != null),
+       smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
+       smartQuotesType = smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
        assert(autocorrect != null),
        assert(enableSuggestions != null),
        assert(keyboardAppearance != null),
@@ -410,6 +462,56 @@ class TextInputConfiguration {
   ///
   /// Defaults to true.
   final bool autocorrect;
+
+  /// {@template flutter.services.textInput.smartDashesType}
+  /// Whether to allow the platform to automatically format dashes.
+  ///
+  /// This flag only affects iOS versions 11 and above. It sets
+  /// [`UITextSmartDashesType`](https://developer.apple.com/documentation/uikit/uitextsmartdashestype?language=objc)
+  /// in the engine. When true, it passes
+  /// [`UITextSmartDashesTypeYes`](https://developer.apple.com/documentation/uikit/uitextsmartdashestype/uitextsmartdashestypeyes?language=objc),
+  /// and when false, it passes
+  /// [`UITextSmartDashesTypeNo`](https://developer.apple.com/documentation/uikit/uitextsmartdashestype/uitextsmartdashestypeno?language=objc).
+  ///
+  /// As an example of what this does, two consecutive hyphen characters will be
+  /// automatically replaced with one en dash, and three consecutive hyphens
+  /// will become one em dash.
+  ///
+  /// Defaults to true, unless [obscureText] is true, when it defaults to false.
+  /// This is to avoid the problem where password fields receive autoformatted
+  /// characters.
+  ///
+  /// See also:
+  ///
+  ///  * [smartQuotesType]
+  ///  * <https://developer.apple.com/documentation/uikit/uitextinputtraits>
+  /// {@endtemplate}
+  final SmartDashesType smartDashesType;
+
+  /// {@template flutter.services.textInput.smartQuotesType}
+  /// Whether to allow the platform to automatically format quotes.
+  ///
+  /// This flag only affects iOS. It sets
+  /// [`UITextSmartQuotesType`](https://developer.apple.com/documentation/uikit/uitextsmartquotestype?language=objc)
+  /// in the engine. When true, it passes
+  /// [`UITextSmartQuotesTypeYes`](https://developer.apple.com/documentation/uikit/uitextsmartquotestype/uitextsmartquotestypeyes?language=objc),
+  /// and when false, it passes
+  /// [`UITextSmartQuotesTypeNo`](https://developer.apple.com/documentation/uikit/uitextsmartquotestype/uitextsmartquotestypeno?language=objc).
+  ///
+  /// As an example of what this does, a standard vertical double quote
+  /// character will be automatically replaced by a left or right double quote
+  /// depending on its position in a word.
+  ///
+  /// Defaults to true, unless [obscureText] is true, when it defaults to false.
+  /// This is to avoid the problem where password fields receive autoformatted
+  /// characters.
+  ///
+  /// See also:
+  ///
+  ///  * [smartDashesType]
+  ///  * <https://developer.apple.com/documentation/uikit/uitextinputtraits>
+  /// {@endtemplate}
+  final SmartQuotesType smartQuotesType;
 
   /// {@template flutter.services.textInput.enableSuggestions}
   /// Whether to show input suggestions as the user types.
@@ -455,6 +557,8 @@ class TextInputConfiguration {
       'inputType': inputType.toJson(),
       'obscureText': obscureText,
       'autocorrect': autocorrect,
+      'smartDashesType': smartDashesType.index.toString(),
+      'smartQuotesType': smartQuotesType.index.toString(),
       'enableSuggestions': enableSuggestions,
       'actionLabel': actionLabel,
       'inputAction': inputAction.toString(),
