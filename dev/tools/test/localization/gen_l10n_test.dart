@@ -535,6 +535,57 @@ void main() {
 ''');
     });
 
+    test('correctly generates simple message with date along with other placeholders', () {
+      const String singleDateMessageArbFileString = '''{
+  "springGreetings": "Since it's {springStartDate}, it's finally spring! {helloWorld}!",
+  "@springGreetings": {
+      "description": "A realization that it's finally the spring season, followed by a greeting.",
+      "placeholders": {
+          "springStartDate": {
+              "type": "DateTime",
+              "format": "yMMMMEEEEd"
+          },
+          "helloWorld": {}
+      }
+  }
+}''';
+      final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+        ..createSync(recursive: true);
+      l10nDirectory.childFile(defaultTemplateArbFileName)
+        .writeAsStringSync(singleDateMessageArbFileString);
+
+      final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+      try {
+        generator.initialize(
+          l10nDirectoryPath: defaultArbPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        );
+        generator.parseArbFiles();
+        generator.generateClassMethods();
+      } on Exception catch (e) {
+        fail('Parsing template arb file should succeed: \n$e');
+      }
+
+      expect(generator.classMethods, isNotEmpty);
+      expect(
+        generator.classMethods.first,
+        '''  String springGreetings(Object springStartDate, Object helloWorld) {
+    final DateFormat springStartDateDateFormat = DateFormat.yMMMMEEEEd(_localeName);
+    final String springStartDateString = springStartDateDateFormat.format(springStartDate);
+
+    return Intl.message(
+      r\'Since it\' "\'" r\'s \$springStartDateString, it\' "\'" r\'s finally spring! \$helloWorld!\',
+      locale: _localeName,
+      name: 'springGreetings',
+      desc: r\'A realization that it\' "\'" r\'s finally the spring season, followed by a greeting.\',
+      args: <Object>[springStartDateString, helloWorld]
+    );
+  }
+''');
+    });
+
     test('correctly generates simple message with multiple dates', () {
       const String singleDateMessageArbFileString = '''{
   "springRange": "Spring begins on {springStartDate} and ends on {springEndDate}",
