@@ -172,7 +172,7 @@ class SkTextStyle implements ui.TextStyle {
     final Map<String, dynamic> style = <String, dynamic>{};
 
     if (background != null) {
-      style['backgroundColor'] = background.makeSkPaint();
+      style['backgroundColor'] = background.skiaObject;
     }
 
     if (color != null) {
@@ -221,7 +221,7 @@ class SkTextStyle implements ui.TextStyle {
     }
 
     if (foreground != null) {
-      style['foreground'] = foreground.makeSkPaint();
+      style['foreground'] = foreground.skiaObject;
     }
 
     // TODO(hterkelsen): Add support for

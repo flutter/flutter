@@ -160,7 +160,7 @@ class EngineWindow extends ui.Window {
 
       case 'flutter/platform_views':
         if (experimentalUseSkia) {
-          _rasterizer.viewEmbedder.handlePlatformViewCall(data, callback);
+          rasterizer.viewEmbedder.handlePlatformViewCall(data, callback);
         } else {
           handlePlatformViewCall(data, callback);
         }
@@ -279,15 +279,15 @@ class EngineWindow extends ui.Window {
   void render(ui.Scene scene) {
     if (experimentalUseSkia) {
       final LayerScene layerScene = scene;
-      _rasterizer.draw(layerScene.layerTree);
+      rasterizer.draw(layerScene.layerTree);
     } else {
       final SurfaceScene surfaceScene = scene;
       domRenderer.renderScene(surfaceScene.webOnlyRootElement);
     }
   }
 
-  final Rasterizer _rasterizer =
-      experimentalUseSkia ? Rasterizer(Surface()) : null;
+  @visibleForTesting
+  Rasterizer rasterizer = experimentalUseSkia ? Rasterizer(Surface()) : null;
 }
 
 /// The window singleton.
