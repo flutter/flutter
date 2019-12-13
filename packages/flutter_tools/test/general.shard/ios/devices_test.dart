@@ -275,7 +275,7 @@ void main() {
         Platform: () => macPlatform,
       });
 
-      testUsingContext(' succeeds in debug mode via mDNS', () async {
+      testUsingContext(' succeeds in debug mode via ipv4 mDNS', () async {
         final IOSDevice device = IOSDevice('123');
         device.portForwarder = mockPortForwarder;
         device.setLogReader(mockApp, mockLogReader);
@@ -285,13 +285,46 @@ void main() {
           port: 1234,
           path: 'observatory',
         );
-        when(mockMDnsObservatoryDiscovery.getObservatoryUri(any, any, usesIpv6: anyNamed('usesIpv6')))
+        when(mockMDnsObservatoryDiscovery.getObservatoryUri(any, any, usesIpv6: false))
           .thenAnswer((Invocation invocation) => Future<Uri>.value(uri));
 
         final LaunchResult launchResult = await device.startApp(mockApp,
           prebuiltApplication: true,
           debuggingOptions: DebuggingOptions.enabled(const BuildInfo(BuildMode.debug, null)),
           platformArgs: <String, dynamic>{},
+        );
+        verify(mockUsage.sendEvent('ios-mdns', 'success')).called(1);
+        expect(launchResult.started, isTrue);
+        expect(launchResult.hasObservatory, isTrue);
+        expect(await device.stopApp(mockApp), isFalse);
+      }, overrides: <Type, Generator>{
+        Artifacts: () => mockArtifacts,
+        Cache: () => mockCache,
+        FileSystem: () => mockFileSystem,
+        MDnsObservatoryDiscovery: () => mockMDnsObservatoryDiscovery,
+        Platform: () => macPlatform,
+        ProcessManager: () => mockProcessManager,
+        Usage: () => mockUsage,
+      });
+
+      testUsingContext(' succeeds in debug mode via ipv6 mDNS', () async {
+        final IOSDevice device = IOSDevice('123');
+        device.portForwarder = mockPortForwarder;
+        device.setLogReader(mockApp, mockLogReader);
+        final Uri uri = Uri(
+          scheme: 'http',
+          host: '::1',
+          port: 1234,
+          path: 'observatory',
+        );
+        when(mockMDnsObservatoryDiscovery.getObservatoryUri(any, any, usesIpv6: true))
+          .thenAnswer((Invocation invocation) => Future<Uri>.value(uri));
+
+        final LaunchResult launchResult = await device.startApp(mockApp,
+          prebuiltApplication: true,
+          debuggingOptions: DebuggingOptions.enabled(const BuildInfo(BuildMode.debug, null)),
+          platformArgs: <String, dynamic>{},
+          ipv6: true,
         );
         verify(mockUsage.sendEvent('ios-mdns', 'success')).called(1);
         expect(launchResult.started, isTrue);

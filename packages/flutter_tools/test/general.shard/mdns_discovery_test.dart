@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/mdns_discovery.dart';
 import 'package:mockito/mockito.dart';
 import 'package:multicast_dns/multicast_dns.dart';
@@ -18,9 +19,19 @@ void main() {
     MDnsClient getMockClient(
       List<PtrResourceRecord> ptrRecords,
       Map<String, List<SrvResourceRecord>> srvResponse, {
+      bool ipv6 = false,
       Map<String, List<TxtResourceRecord>> txtResponse = const <String, List<TxtResourceRecord>>{},
     }) {
       final MDnsClient client = MockMDnsClient();
+
+      when(client.start(
+        listenAddress: anyNamed('listenAddress'),
+      )).thenAnswer((Invocation invocation) async {
+        if ((ipv6 && invocation.namedArguments[#listenAddress] != InternetAddress.anyIPv6) ||
+            (!ipv6 && invocation.namedArguments[#listenAddress] != InternetAddress.anyIPv4)) {
+          throw ipv6 ? 'expected to listen on ipv6 any' : 'expected to listen on ipv4 any';
+        }
+      });
 
       when(client.lookup<PtrResourceRecord>(
         ResourceRecordQuery.serverPointer(MDnsObservatoryDiscovery.dartObservatoryName),
@@ -48,7 +59,7 @@ void main() {
       expect(port, isNull);
     });
 
-    testUsingContext('One port available, no appId', () async {
+    testUsingContext('One port available, no appId, ipv4', () async {
       final MDnsClient client = getMockClient(
         <PtrResourceRecord>[
           PtrResourceRecord('foo', year3000, domainName: 'bar'),
@@ -58,10 +69,29 @@ void main() {
             SrvResourceRecord('bar', year3000, port: 123, weight: 1, priority: 1, target: 'appId'),
           ],
         },
+        ipv6: false,
       );
 
       final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(mdnsClient: client);
-      final int port = (await portDiscovery.query())?.port;
+      final int port = (await portDiscovery.query(usesIpv6: false))?.port;
+      expect(port, 123);
+    });
+
+    testUsingContext('One port available, no appId, ipv6', () async {
+      final MDnsClient client = getMockClient(
+        <PtrResourceRecord>[
+          PtrResourceRecord('foo', year3000, domainName: 'bar'),
+        ],
+        <String, List<SrvResourceRecord>>{
+          'bar': <SrvResourceRecord>[
+            SrvResourceRecord('bar', year3000, port: 123, weight: 1, priority: 1, target: 'appId'),
+          ],
+        },
+        ipv6: true,
+      );
+
+      final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(mdnsClient: client);
+      final int port = (await portDiscovery.query(usesIpv6: true))?.port;
       expect(port, 123);
     });
 

@@ -51,10 +51,17 @@ class MDnsObservatoryDiscovery {
   /// it will return that instance's information regardless of what application
   /// the Observatory instance is for.
   // TODO(jonahwilliams): use `deviceVmservicePort` to filter mdns results.
-  Future<MDnsObservatoryDiscoveryResult> query({String applicationId, int deviceVmservicePort}) async {
+  Future<MDnsObservatoryDiscoveryResult> query({
+    bool usesIpv6 = false,
+    String applicationId,
+    int deviceVmservicePort,
+  }) async {
     printTrace('Checking for advertised Dart observatories...');
     try {
-      await client.start();
+      final InternetAddress listenAddress = usesIpv6
+        ? InternetAddress.anyIPv6
+        : InternetAddress.anyIPv4;
+      await client.start(listenAddress: listenAddress);
       final List<PtrResourceRecord> pointerRecords = await client
           .lookup<PtrResourceRecord>(
             ResourceRecordQuery.serverPointer(dartObservatoryName),
@@ -143,6 +150,7 @@ class MDnsObservatoryDiscovery {
     int deviceVmservicePort,
   }) async {
     final MDnsObservatoryDiscoveryResult result = await query(
+      usesIpv6: usesIpv6,
       applicationId: applicationId,
       deviceVmservicePort: deviceVmservicePort,
     );
