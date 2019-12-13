@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io'; // ignore: dart_io_import.
-import 'package:path/path.dart' as path; // ignore: package_path_import.
+import 'dart:io'; // ignore_for_flutter: dart_io_import.
+import 'package:path/path.dart' as path; // ignore_for_flutter: package_path_import.
 
 /// Executes the required flutter tasks for a desktop build.
 Future<void> main(List<String> arguments) async {

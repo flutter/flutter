@@ -2,6 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// The "// ignore:" comments found in strings in this file are counted as _actual_ ignore comments.
+// Since the "// ignore:" comments found in strings don't actually ignore anythin in _this_ file,
+// we must allow them to be "unused." See https://github.com/dart-lang/sdk/issues/39607.
+// ignore_for_file: unused_ignore_code
 import 'dart:async';
 
 import 'package:flutter_tools/src/base/file_system.dart';
