@@ -72,7 +72,7 @@ void main() {
     );
   }
 
-  final void Function() uiTestGroup = () {
+  final VoidCallback uiTestGroup = () {
     testWidgets("doesn't invoke anything without user interaction", (WidgetTester tester) async {
       debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
 
@@ -1030,7 +1030,7 @@ void main() {
     );
   };
 
-  final void Function() stateMachineTestGroup = () {
+  final VoidCallback stateMachineTestGroup = () {
     testWidgets('starts in inactive state', (WidgetTester tester) async {
       debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
 
