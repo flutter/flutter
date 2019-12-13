@@ -1199,7 +1199,7 @@ abstract class RenderSliver extends RenderObject {
           describeForError('The render object whose geometry violates the constraints is the following'),
           ..._debugCompareFloats(
             'remainingPaintExtent', constraints.remainingPaintExtent,
-            'paintExtent', geometry.paintExtent,
+            'paintOrigin + paintExtent', geometry.paintOrigin + geometry.paintExtent,
           ),
           ErrorDescription(
             'The paintExtent must cause the child sliver to paint within the viewport, and so '

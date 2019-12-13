@@ -1028,6 +1028,30 @@ void main() {
         debugDefaultTargetPlatformOverride = null;
       },
     );
+
+    testWidgets('Should not crash when dragged', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        Directionality(
+          textDirection: TextDirection.ltr,
+          child: CustomScrollView(
+            physics: const BouncingScrollPhysics(),
+            slivers: <Widget>[
+              CupertinoSliverRefreshControl(
+                onRefresh: () async => Future<void>.delayed(const Duration(days: 2000)),
+              ),
+            ],
+          ),
+        ),
+      );
+
+      await tester.dragFrom(const Offset(100, 10), const Offset(0.0, 50.0), touchSlopY: 0);
+      await tester.pump();
+
+      await tester.dragFrom(const Offset(100, 10), const Offset(0, 500), touchSlopY: 0);
+      await tester.pump();
+
+      expect(tester.takeException(), isNull);
+    });
   };
 
   final Function stateMachineTestGroup = () {
