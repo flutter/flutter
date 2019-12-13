@@ -577,14 +577,14 @@ class MouseTracker extends ChangeNotifier {
   /// This function is only public to allow for proper testing of the
   /// MouseTracker. Do not call in other contexts.
   @visibleForTesting
-  bool isAnnotationAttached(MouseTrackerAnnotation annotation) {
-    if (annotation == null)
+  bool isAnnotationAttached(Key annotationKey) {
+    if (annotationKey == null)
       return false;
-    return _trackedAnnotationKeys.contains(annotation.key);
+    return _trackedAnnotationKeys.contains(annotationKey);
   }
 
-  /// Notify [MouseTracker] that a new [MouseTrackerAnnotation] has started to
-  /// take effect.
+  /// Notify [MouseTracker] that a new [MouseTrackerAnnotation] with the provided
+  /// `key` has started to take effect.
   ///
   /// This method is typically called by the [RenderObject] that owns an
   /// annotation, as soon as the render object is added to the render tree.
@@ -593,8 +593,7 @@ class MouseTracker extends ChangeNotifier {
   ///
   /// {@template flutter.mouseTracker.attachAnnotation}
   /// Only the [MouseTrackerAnnotation.key] property of the annotation is used
-  /// for comparison, therefore there is no need to call this method if the
-  /// object only switches from one annotation to another with the same key.
+  /// for comparison, therefore we only need same key.
   ///
   /// Render objects that call this method might want to schedule a frame as
   /// well, typically by calling [RenderObject.markNeedsPaint], because this
@@ -619,15 +618,15 @@ class MouseTracker extends ChangeNotifier {
   ///    annotations attached.
   /// {@endtemplate}
   ///  * Attaching an annotation that has been attached will assert.
-  void attachAnnotation(MouseTrackerAnnotation annotation) {
+  void attachAnnotation(Key annotationKey) {
     assert(!_duringDeviceUpdate);
-    assert(annotation?.key != null);
-    assert(!_trackedAnnotationKeys.contains(annotation.key));
-    _trackedAnnotationKeys.add(annotation.key);
+    assert(annotationKey != null);
+    assert(!_trackedAnnotationKeys.contains(annotationKey));
+    _trackedAnnotationKeys.add(annotationKey);
   }
 
-  /// Notify [MouseTracker] that a mouse tracker annotation that was previously
-  /// attached has stopped taking effect.
+  /// Notify [MouseTracker] that a new [MouseTrackerAnnotation] with the provided
+  /// `key` has stopped taking effect.
   ///
   /// This method is typically called by the [RenderObject] that owns an
   /// annotation, as soon as the render object is removed from the render tree.
@@ -636,10 +635,10 @@ class MouseTracker extends ChangeNotifier {
   ///
   /// {@macro flutter.mouseTracker.attachAnnotation}
   ///  * Detaching an annotation that has not been attached will assert.
-  void detachAnnotation(MouseTrackerAnnotation annotation) {
+  void detachAnnotation(Key annotationKey) {
     assert(!_duringDeviceUpdate);
-    assert(annotation?.key != null);
-    assert(_trackedAnnotationKeys.contains(annotation.key));
-    _trackedAnnotationKeys.remove(annotation.key);
+    assert(annotationKey != null);
+    assert(_trackedAnnotationKeys.contains(annotationKey));
+    _trackedAnnotationKeys.remove(annotationKey);
   }
 }

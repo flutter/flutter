@@ -839,13 +839,13 @@ mixin _PlatformViewGestureMixin on RenderBox {
       if (_handlePointerEvent != null)
         _handlePointerEvent(event);
     });
-    RendererBinding.instance.mouseTracker.attachAnnotation(_hoverAnnotation);
+    RendererBinding.instance.mouseTracker.attachAnnotation(_hoverAnnotation.key);
   }
 
   @override
   void detach() {
     _gestureRecognizer.reset();
-    RendererBinding.instance.mouseTracker.detachAnnotation(_hoverAnnotation);
+    RendererBinding.instance.mouseTracker.detachAnnotation(_hoverAnnotation.key);
     _hoverAnnotation = null;
     super.detach();
   }

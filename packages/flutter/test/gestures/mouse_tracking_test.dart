@@ -85,7 +85,7 @@ void main() {
         yield annotation;
       },
     );
-    _mouseTracker.attachAnnotation(annotation);
+    _mouseTracker.attachAnnotation(annotation.key);
     return annotation;
   }
 
@@ -279,10 +279,10 @@ void main() {
 
     final VoidCallback firstListener = () {
       if (!_mouseTracker.mouseIsConnected) {
-        _mouseTracker.detachAnnotation(annotation);
+        _mouseTracker.detachAnnotation(annotation.key);
         isInHitRegion = false;
       } else {
-        _mouseTracker.attachAnnotation(annotation);
+        _mouseTracker.attachAnnotation(annotation.key);
         isInHitRegion = true;
       }
       mockMarkNeedsPaint();
@@ -308,7 +308,7 @@ void main() {
     _mouseTracker.removeListener(firstListener);
     _mouseTracker.addListener(() {
       if (!_mouseTracker.mouseIsConnected) {
-        _mouseTracker.detachAnnotation(annotation);
+        _mouseTracker.detachAnnotation(annotation.key);
         isInHitRegion = false;
       }
     });
@@ -379,7 +379,7 @@ void main() {
 
     // Attaching an annotation should trigger Enter event.
     isInHitRegion = true;
-    _mouseTracker.attachAnnotation(annotation);
+    _mouseTracker.attachAnnotation(annotation.key);
     expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
     ]));
     expect(_binding.postFrameCallbacks, hasLength(0));
@@ -395,7 +395,7 @@ void main() {
 
     // Detaching an annotation should not trigger events.
     isInHitRegion = false;
-    _mouseTracker.detachAnnotation(annotation);
+    _mouseTracker.detachAnnotation(annotation.key);
     expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
     ]));
     expect(_binding.postFrameCallbacks, hasLength(0));
@@ -424,7 +424,7 @@ void main() {
     });
 
     // Start with an annotation attached.
-    _mouseTracker.attachAnnotation(annotation);
+    _mouseTracker.attachAnnotation(annotation.key);
     isInHitRegion = false;
 
     // Connect a mouse.
@@ -475,7 +475,7 @@ void main() {
     });
 
     // Start with an annotation attached.
-    _mouseTracker.attachAnnotation(annotation);
+    _mouseTracker.attachAnnotation(annotation.key);
     isInHitRegion = false;
 
     // Connect a mouse in the region. Should trigger Enter.
@@ -515,7 +515,7 @@ void main() {
     });
 
     // Start with annotation and mouse attached.
-    _mouseTracker.attachAnnotation(annotation);
+    _mouseTracker.attachAnnotation(annotation.key);
     isInHitRegion = false;
     ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
       _pointerData(PointerChange.add, const Offset(200.0, 100.0)),
@@ -568,7 +568,7 @@ void main() {
     events.clear();
 
     // Attaching an annotation should not trigger events.
-    _mouseTracker.attachAnnotation(annotation);
+    _mouseTracker.attachAnnotation(annotation.key);
     expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
     ]));
     expect(_binding.postFrameCallbacks, hasLength(0));
@@ -582,7 +582,7 @@ void main() {
     events.clear();
 
     // Detaching an annotation should not trigger events.
-    _mouseTracker.detachAnnotation(annotation);
+    _mouseTracker.detachAnnotation(annotation.key);
     expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
     ]));
     expect(_binding.postFrameCallbacks, hasLength(0));
@@ -609,13 +609,13 @@ void main() {
     expect(_mouseTracker.mouseIsConnected, isFalse);
 
     // Attaching an annotation just in case
-    _mouseTracker.attachAnnotation(annotation);
+    _mouseTracker.attachAnnotation(annotation.key);
     expect(_binding.postFrameCallbacks, hasLength(0));
 
     _binding.scheduleMouseTrackerPostFrameCheck();
     expect(_binding.postFrameCallbacks, hasLength(0));
 
-    _mouseTracker.detachAnnotation(annotation);
+    _mouseTracker.detachAnnotation(annotation.key);
   });
 
   test('should not flip out if not all mouse events are listened to', () {
@@ -641,12 +641,12 @@ void main() {
 
     isInHitRegionOne = false;
     isInHitRegionTwo = true;
-    _mouseTracker.attachAnnotation(annotation2);
+    _mouseTracker.attachAnnotation(annotation2.key);
 
     ui.window.onPointerDataPacket(packet);
 
     // Disconnect mouse
-    _mouseTracker.detachAnnotation(annotation2);
+    _mouseTracker.detachAnnotation(annotation2.key);
 
     isInHitRegionTwo = false;
 
@@ -683,8 +683,8 @@ void main() {
         yield foundAnnotation;
     });
 
-    _mouseTracker.attachAnnotation(annotation1);
-    _mouseTracker.attachAnnotation(annotation3);
+    _mouseTracker.attachAnnotation(annotation1.key);
+    _mouseTracker.attachAnnotation(annotation3.key);
     expect(logs, isEmpty);
 
     // Pointer is added on annotation1
@@ -726,8 +726,8 @@ void main() {
     logs.clear();
 
     // Disconnect mouse
-    _mouseTracker.detachAnnotation(annotation2);
-    _mouseTracker.detachAnnotation(annotation3);
+    _mouseTracker.detachAnnotation(annotation2.key);
+    _mouseTracker.detachAnnotation(annotation3.key);
     expect(logs, isEmpty);
 
     // Expect there to be no annotations, so finder is no longer called
@@ -756,7 +756,7 @@ void main() {
     expect(finderCalled, 0);
 
     // Attaching should not call finder.
-    _mouseTracker.attachAnnotation(annotation);
+    _mouseTracker.attachAnnotation(annotation.key);
     _binding.flushPostFrameCallbacks(Duration.zero);
     expect(finderCalled, 0);
 
@@ -768,7 +768,7 @@ void main() {
     finderCalled = 0;
 
     // Detaching an annotation should not call finder.
-    _mouseTracker.detachAnnotation(annotation);
+    _mouseTracker.detachAnnotation(annotation.key);
     _binding.flushPostFrameCallbacks(Duration.zero);
     expect(finderCalled, 0);
 
@@ -808,8 +808,8 @@ void main() {
         yield annotationA;
       }
     });
-    _mouseTracker.attachAnnotation(annotationA);
-    _mouseTracker.attachAnnotation(annotationB);
+    _mouseTracker.attachAnnotation(annotationA.key);
+    _mouseTracker.attachAnnotation(annotationB.key);
 
     // Starts out of A.
     isInB = false;
@@ -863,8 +863,8 @@ void main() {
         yield annotationB;
       }
     });
-    _mouseTracker.attachAnnotation(annotationA);
-    _mouseTracker.attachAnnotation(annotationB);
+    _mouseTracker.attachAnnotation(annotationA.key);
+    _mouseTracker.attachAnnotation(annotationB.key);
 
     // Starts within A.
     isInA = true;
