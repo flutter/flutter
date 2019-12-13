@@ -231,28 +231,6 @@ class EngineParagraph implements ui.Paragraph {
   /// directly into a canvas without css text alignment styling.
   double _alignOffset = 0.0;
 
-  /// If not null, this list would contain the strings representing each line
-  /// in the paragraph.
-  ///
-  /// Avoid repetitively accessing this field as it generates a new list every
-  /// time.
-  List<String> get _lines {
-    if (_plainText == null) {
-      return null;
-    }
-
-    final List<EngineLineMetrics> metricsList = _measurementResult.lines;
-    if (metricsList == null) {
-      return null;
-    }
-
-    final List<String> lines = <String>[];
-    for (EngineLineMetrics metrics in metricsList) {
-      lines.add(metrics.text);
-    }
-    return lines;
-  }
-
   @override
   void layout(ui.ParagraphConstraints constraints) {
     if (constraints == _lastUsedConstraints) {
