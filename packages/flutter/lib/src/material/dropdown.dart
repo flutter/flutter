@@ -62,12 +62,12 @@ class _DropdownMenuPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final double selectedItemOffset = getSelectedItemOffset();
     final Tween<double> top = Tween<double>(
-      begin: selectedItemOffset.clamp(0.0, size.height - _kMenuItemHeight),
+      begin: selectedItemOffset.clamp(0.0, size.height - _kMenuItemHeight) as double,
       end: 0.0,
     );
 
     final Tween<double> bottom = Tween<double>(
-      begin: (top.begin + _kMenuItemHeight).clamp(_kMenuItemHeight, size.height),
+      begin: (top.begin + _kMenuItemHeight).clamp(_kMenuItemHeight, size.height) as double,
       end: size.height,
     );
 
@@ -162,8 +162,8 @@ class _DropdownMenuItemButtonState<T> extends State<_DropdownMenuItemButton<T>> 
     if (widget.itemIndex == widget.route.selectedIndex) {
       opacity = CurvedAnimation(parent: widget.route.animation, curve: const Threshold(0.0));
     } else {
-      final double start = (0.5 + (widget.itemIndex + 1) * unit).clamp(0.0, 1.0);
-      final double end = (start + 1.5 * unit).clamp(0.0, 1.0);
+      final double start = (0.5 + (widget.itemIndex + 1) * unit).clamp(0.0, 1.0) as double;
+      final double end = (start + 1.5 * unit).clamp(0.0, 1.0) as double;
       opacity = CurvedAnimation(parent: widget.route.animation, curve: Interval(start, end));
     }
     Widget child = FadeTransition(
@@ -341,10 +341,10 @@ class _DropdownMenuRouteLayout<T> extends SingleChildLayoutDelegate {
     double left;
     switch (textDirection) {
       case TextDirection.rtl:
-        left = buttonRect.right.clamp(0.0, size.width) - childSize.width;
+        left = (buttonRect.right.clamp(0.0, size.width) as double) - childSize.width;
         break;
       case TextDirection.ltr:
-        left = buttonRect.left.clamp(0.0, size.width - childSize.width);
+        left = buttonRect.left.clamp(0.0, size.width - childSize.width) as double;
         break;
     }
 
@@ -367,10 +367,8 @@ class _DropdownRouteResult<T> {
 
   @override
   bool operator ==(dynamic other) {
-    if (other is! _DropdownRouteResult<T>)
-      return false;
-    final _DropdownRouteResult<T> typedOther = other;
-    return result == typedOther.result;
+    return other is _DropdownRouteResult<T>
+        && other.result == result;
   }
 
   @override
@@ -1133,7 +1131,7 @@ class _DropdownButtonState<T> extends State<DropdownButton<T>> with WidgetsBindi
   TextStyle get _textStyle => widget.style ?? Theme.of(context).textTheme.subhead;
 
   void _handleTap() {
-    final RenderBox itemBox = context.findRenderObject();
+    final RenderBox itemBox = context.findRenderObject() as RenderBox;
     final Rect itemRect = itemBox.localToGlobal(Offset.zero) & itemBox.size;
     final TextDirection textDirection = Directionality.of(context);
     final EdgeInsetsGeometry menuMargin = ButtonTheme.of(context).alignedDropdown
@@ -1476,7 +1474,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
 
 class _DropdownButtonFormFieldState<T> extends FormFieldState<T> {
   @override
-  DropdownButtonFormField<T> get widget => super.widget;
+  DropdownButtonFormField<T> get widget => super.widget as DropdownButtonFormField<T>;
 
   @override
   void didChange(T value) {
