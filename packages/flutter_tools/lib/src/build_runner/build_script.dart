@@ -3,6 +3,10 @@
 // found in the LICENSE file.
 
 // ignore_for_file: implementation_imports
+// The "// ignore:" comments found in strings in this file are counted as _actual_ ignore comments.
+// Since the "// ignore:" comments found in strings don't actually ignore anythin in _this_ file,
+// we must allow them to be "unused." See https://github.com/dart-lang/sdk/issues/39607.
+// ignore_for_file: unused_ignore_code
 import 'dart:async';
 import 'dart:isolate';
 
@@ -22,7 +26,7 @@ import 'package:build_test/src/debug_test_builder.dart';
 import 'package:build_web_compilers/build_web_compilers.dart';
 import 'package:build_web_compilers/builders.dart';
 import 'package:build_web_compilers/src/dev_compiler_bootstrap.dart';
-import 'package:path/path.dart' as path; // ignore: package_path_import
+import 'package:path/path.dart' as path; // ignore_for_flutter: package_path_import
 import 'package:test_core/backend.dart'; // ignore: deprecated_member_use
 
 const String ddcBootstrapExtension = '.dart.bootstrap.js';

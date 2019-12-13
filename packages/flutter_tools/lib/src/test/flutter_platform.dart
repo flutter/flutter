@@ -159,8 +159,8 @@ String generateTestBootstrap({
   final StringBuffer buffer = StringBuffer();
   buffer.write('''
 import 'dart:async';
-import 'dart:convert';  // ignore: dart_convert_import
-import 'dart:io';  // ignore: dart_io_import
+import 'dart:convert';  // ignore_for_flutter: dart_convert_import
+import 'dart:io';  // ignore_for_flutter: dart_io_import
 import 'dart:isolate';
 
 import 'package:flutter_test/flutter_test.dart';
