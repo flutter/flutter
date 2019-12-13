@@ -467,7 +467,7 @@ tasks:
     description: >
       Measures the runtime performance of animations after a backdrop filter is removed on iOS.
     stage: devicelab_ios
-    required_agent_capabilities: ["mac/ios"]
+    required_agent_capabilities: ["mac/iphonexs"]
 
   complex_layout_scroll_perf_ios__timeline_summary:
     description: >
