@@ -2498,7 +2498,7 @@ class _InspectorOverlayLayer extends Layer {
     @required this.selection,
   }) : assert(overlayRect != null),
        assert(selection != null) {
-    if (kReleaseMode) {
+    if (!kDebugMode) {
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary(
           'The inspector should never be used in production mode due to the '
