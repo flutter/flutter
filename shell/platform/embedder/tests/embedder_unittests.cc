@@ -3482,5 +3482,129 @@ TEST_F(EmbedderTest, ArcEndCapsAreDrawnCorrectly) {
   ASSERT_TRUE(ImageMatchesFixture("arc_end_caps.png", scene_image));
 }
 
+static void FilterMutationsByType(
+    const FlutterPlatformViewMutation** mutations,
+    size_t count,
+    FlutterPlatformViewMutationType type,
+    std::function<void(const FlutterPlatformViewMutation& mutation)> handler) {
+  if (mutations == nullptr) {
+    return;
+  }
+
+  for (size_t i = 0; i < count; ++i) {
+    const FlutterPlatformViewMutation* mutation = mutations[i];
+    if (mutation->type != type) {
+      continue;
+    }
+
+    handler(*mutation);
+  }
+}
+
+static void FilterMutationsByType(
+    const FlutterPlatformView* view,
+    FlutterPlatformViewMutationType type,
+    std::function<void(const FlutterPlatformViewMutation& mutation)> handler) {
+  return FilterMutationsByType(view->mutations, view->mutations_count, type,
+                               handler);
+}
+
+static SkMatrix GetTotalMutationTransformationMatrix(
+    const FlutterPlatformViewMutation** mutations,
+    size_t count) {
+  SkMatrix collected;
+
+  FilterMutationsByType(
+      mutations, count, kFlutterPlatformViewMutationTypeTransformation,
+      [&](const auto& mutation) {
+        collected.preConcat(SkMatrixMake(mutation.transformation));
+      });
+
+  return collected;
+}
+
+static SkMatrix GetTotalMutationTransformationMatrix(
+    const FlutterPlatformView* view) {
+  return GetTotalMutationTransformationMatrix(view->mutations,
+                                              view->mutations_count);
+}
+
+TEST_F(EmbedderTest, ClipsAreCorrectlyCalculated) {
+  auto& context = GetEmbedderContext();
+
+  EmbedderConfigBuilder builder(context);
+  builder.SetOpenGLRendererConfig(SkISize::Make(400, 300));
+  builder.SetCompositor();
+  builder.SetDartEntrypoint("scene_builder_with_clips");
+
+  const auto root_surface_transformation =
+      SkMatrix().preTranslate(0, 400).preRotate(-90, 0, 0);
+
+  context.SetRootSurfaceTransformation(root_surface_transformation);
+
+  fml::AutoResetWaitableEvent latch;
+  context.GetCompositor().SetNextPresentCallback(
+      [&](const FlutterLayer** layers, size_t layers_count) {
+        ASSERT_EQ(layers_count, 3u);
+
+        {
+          FlutterPlatformView platform_view = *layers[1]->platform_view;
+          platform_view.struct_size = sizeof(platform_view);
+          platform_view.identifier = 42;
+
+          FlutterLayer layer = {};
+          layer.struct_size = sizeof(layer);
+          layer.type = kFlutterLayerContentTypePlatformView;
+          layer.platform_view = &platform_view;
+          layer.size = FlutterSizeMake(300.0, 400.0);
+          layer.offset = FlutterPointMake(0.0, 0.0);
+
+          ASSERT_EQ(*layers[1], layer);
+
+          bool clip_assertions_checked = false;
+
+          // The total transformation on the stack upto the platform view.
+          const auto total_xformation =
+              GetTotalMutationTransformationMatrix(layers[1]->platform_view);
+
+          FilterMutationsByType(
+              layers[1]->platform_view,
+              kFlutterPlatformViewMutationTypeClipRect,
+              [&](const auto& mutation) {
+                FlutterRect clip = mutation.clip_rect;
+
+                // The test is only setup to supply one clip. Make sure it is
+                // the one we expect.
+                const auto rect_to_compare =
+                    SkRect::MakeLTRB(10.0, 10.0, 390, 290);
+                ASSERT_EQ(clip, FlutterRectMake(rect_to_compare));
+
+                // This maps the clip from device space into surface space.
+                SkRect mapped;
+                ASSERT_TRUE(total_xformation.mapRect(&mapped, rect_to_compare));
+                ASSERT_EQ(mapped, SkRect::MakeLTRB(10, 10, 290, 390));
+                clip_assertions_checked = true;
+              });
+
+          ASSERT_TRUE(clip_assertions_checked);
+        }
+
+        latch.Signal();
+      });
+
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+
+  FlutterWindowMetricsEvent event = {};
+  event.struct_size = sizeof(event);
+  event.width = 400;
+  event.height = 300;
+  event.pixel_ratio = 1.0;
+  ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
+            kSuccess);
+
+  latch.Wait();
+}
+
 }  // namespace testing
 }  // namespace flutter
