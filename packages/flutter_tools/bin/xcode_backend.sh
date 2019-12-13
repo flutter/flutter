@@ -341,6 +341,7 @@ ThinFramework() {
   local framework_dir="$1"
   shift
 
+  local plist_path="${framework_dir}/Info.plist"
   local executable="$(GetFrameworkExecutablePath "${framework_dir}")"
   LipoExecutable "${executable}" "$@"
 }
@@ -373,7 +374,7 @@ EmbedFlutterFrameworks() {
 
   # Embed App.framework from Flutter into the app (after creating the Frameworks directory
   # if it doesn't already exist).
-  local xcode_frameworks_dir=${BUILT_PRODUCTS_DIR}"/"${FRAMEWORKS_FOLDER_PATH}
+  local xcode_frameworks_dir=${BUILT_PRODUCTS_DIR}"/"${PRODUCT_NAME}".app/Frameworks"
   RunCommand mkdir -p -- "${xcode_frameworks_dir}"
   RunCommand cp -Rv -- "${flutter_ios_out_folder}/App.framework" "${xcode_frameworks_dir}"
 
