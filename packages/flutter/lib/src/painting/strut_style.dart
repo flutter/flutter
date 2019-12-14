@@ -361,7 +361,7 @@ class StrutStyle extends Diagnosticable {
   /// Equivalent to having no strut at all. All lines will be laid out according to
   /// the properties defined in [TextStyle].
   static const StrutStyle disabled = StrutStyle(
-    height: 0.0,
+    height: 1.0,
     leading: 0.0,
   );
 

@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' show min, max;
-import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle, PlaceholderAlignment, LineMetrics;
+import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle, PlaceholderAlignment, LineMetrics, BoxHeightStyle;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -629,7 +629,7 @@ class TextPainter {
     List<TextBox> boxes = <TextBox>[];
     while (boxes.isEmpty && flattenedText != null) {
       final int prevRuneOffset = offset - graphemeClusterLength;
-      boxes = _paragraph.getBoxesForRange(prevRuneOffset, offset);
+      boxes = _paragraph.getBoxesForRange(prevRuneOffset, offset, boxHeightStyle: ui.BoxHeightStyle.strut);
       // When the range does not include a full cluster, no boxes will be returned.
       if (boxes.isEmpty) {
         // When we are at the beginning of the line, a non-surrogate position will
@@ -678,7 +678,7 @@ class TextPainter {
     List<TextBox> boxes = <TextBox>[];
     while (boxes.isEmpty && flattenedText != null) {
       final int nextRuneOffset = offset + graphemeClusterLength;
-      boxes = _paragraph.getBoxesForRange(offset, nextRuneOffset);
+      boxes = _paragraph.getBoxesForRange(offset, nextRuneOffset, boxHeightStyle: ui.BoxHeightStyle.strut);
       // When the range does not include a full cluster, no boxes will be returned.
       if (boxes.isEmpty) {
         // When we are at the end of the line, a non-surrogate position will
