@@ -25,7 +25,7 @@ void main() {
       expect(() => throwToolExit('message', exitCode: 42), throwsToolExit(exitCode: 42, message: 'message'));
     });
 
-    test('Throws if accessing the Zone', () {
+    testWithoutContext('Throws if accessing the Zone', () {
       expect(() => fs, throwsA(isInstanceOf<UnsupportedError>()));
     });
   });

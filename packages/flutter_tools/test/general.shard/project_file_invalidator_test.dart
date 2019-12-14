@@ -14,7 +14,7 @@ final DateTime inFuture = DateTime.now().add(const Duration(days: 100));
 
 void main() {
   for (bool asyncScanning in <bool>[true, false]) {
-    test('No last compile, asyncScanning: $asyncScanning', () async {
+    testWithoutContext('No last compile, asyncScanning: $asyncScanning', () async {
       final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(
         fileSystem: MemoryFileSystem(),
         platform: FakePlatform(),
@@ -32,7 +32,7 @@ void main() {
       );
     });
 
-    test('Empty project, asyncScanning: $asyncScanning', () async {
+    testWithoutContext('Empty project, asyncScanning: $asyncScanning', () async {
       final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(
         fileSystem: MemoryFileSystem(),
         platform: FakePlatform(),
@@ -50,7 +50,7 @@ void main() {
       );
     });
 
-    test('Non-existent files are ignored, asyncScanning: $asyncScanning', () async {
+    testWithoutContext('Non-existent files are ignored, asyncScanning: $asyncScanning', () async {
       final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(
         fileSystem: MemoryFileSystem(),
         platform: FakePlatform(),

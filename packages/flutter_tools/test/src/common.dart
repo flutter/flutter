@@ -17,7 +17,7 @@ import 'package:meta/meta.dart';
 import 'package:test_api/test_api.dart' as test_package show TypeMatcher, test; // ignore: deprecated_member_use
 import 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf; // ignore: deprecated_member_use
 // ignore: deprecated_member_use
-export 'package:test_core/test_core.dart' hide TypeMatcher, isInstanceOf, test; // Defines a 'package:test' shim.
+export 'package:test_core/test_core.dart' hide TypeMatcher, isInstanceOf; // Defines a 'package:test' shim.
 
 /// A matcher that compares the type of the actual value to the type argument T.
 // TODO(ianh): Remove this once https://github.com/dart-lang/matcher/issues/98 is fixed
@@ -141,7 +141,7 @@ Future<void> expectToolExitLater(Future<dynamic> future, Matcher messageMatcher)
 }
 
 @isTest
-void test(String description, FutureOr<void> body(), {
+void testWithoutContext(String description, FutureOr<void> body(), {
   String testOn,
   Timeout timeout,
   bool skip,
