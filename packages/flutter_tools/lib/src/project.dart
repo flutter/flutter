@@ -263,6 +263,8 @@ abstract class PlatformProject {
 
   /// The file containing the platform-specific plugins list.
   File get platformPluginsFile;
+
+  File get legacyPluginsFile;
 }
 
 /// Represents an Xcode-based sub-project.
@@ -343,6 +345,9 @@ class IosProject implements XcodeBasedProject, PlatformProject {
 
   @override
   File get platformPluginsFile => _flutterLibRoot.childDirectory('Flutter').childFile('.flutter-plugins');
+
+  @override 
+  File get legacyPluginsFile => parent.flutterPluginsFile;
 
   /// The root directory of the iOS wrapping of Flutter and plugins. This is the
   /// parent of the `Flutter/` folder into which Flutter artifacts are written
@@ -571,6 +576,9 @@ class AndroidProject implements PlatformProject {
   @override
   File get platformPluginsFile => hostAppGradleRoot.childFile('.flutter-plugins');
 
+  @override 
+  File get legacyPluginsFile => parent.flutterPluginsFile;
+
   /// The Gradle root directory of the Android wrapping of Flutter and plugins.
   /// This is the same as [hostAppGradleRoot] except when the project is
   /// a Flutter module with an editable host app.
@@ -754,6 +762,9 @@ class WebProject implements PlatformProject {
   @override
   File get platformPluginsFile => directory.childFile('.flutter-plugins');
 
+  @override 
+  File get legacyPluginsFile => parent.flutterPluginsFile;
+
   /// The 'lib' directory for the application.
   Directory get libDirectory => parent.directory.childDirectory('lib');
 
@@ -809,6 +820,9 @@ class MacOSProject implements XcodeBasedProject, PlatformProject {
 
   @override
   File get platformPluginsFile => ephemeralDirectory.childFile('.flutter-plugins');
+
+  @override 
+  File get legacyPluginsFile => parent.flutterPluginsFile;
 
   Directory get _macOSDirectory => parent.directory.childDirectory('macos');
 
@@ -901,6 +915,8 @@ class WindowsProject implements PlatformProject {
   @override
   File get platformPluginsFile => ephemeralDirectory.childFile('.flutter-plugins');
 
+  @override 
+  File get legacyPluginsFile => project.flutterPluginsFile;
 
   Directory get _editableDirectory => project.directory.childDirectory('windows');
 
@@ -943,6 +959,9 @@ class LinuxProject implements PlatformProject {
 
   @override
   File get platformPluginsFile => ephemeralDirectory.childFile('.flutter-plugins');
+
+  @override 
+  File get legacyPluginsFile => project.flutterPluginsFile;
 
   Directory get _editableDirectory => project.directory.childDirectory('linux');
 

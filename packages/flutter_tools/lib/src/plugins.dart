@@ -361,6 +361,57 @@ bool _writeFlutterPluginsList(FlutterProject project, List<Plugin> plugins) {
       || oldDependenciesFileContent != _readFileContent(dependenciesFile);
 }
 
+bool _writeFlutterPlatformPluginsList(PlatformProject project, List<Plugin> plugins) {
+  final Iterable<Plugin> platformPlugins = plugins.where((Plugin p) {
+    return p.platforms.containsKey(project.pluginConfigKey);
+  });
+
+  final List<dynamic> directAppDependencies = <dynamic>[];
+  const String info = 'This is a generated file; do not edit or check into version control.';
+  final StringBuffer flutterPluginsBuffer = StringBuffer('# $info\n');
+
+  final Set<String> pluginNames = <String>{};
+  for (Plugin plugin in platformPlugins) {
+    pluginNames.add(plugin.name);
+  }
+  for (Plugin plugin in platformPlugins) {
+    flutterPluginsBuffer.write('${plugin.name}=${escapePath(plugin.path)}\n');
+    directAppDependencies.add(<String, dynamic>{
+      'name': plugin.name,
+      // Extract the plugin dependencies which happen to be plugins.
+      'dependencies': <String>[...plugin.dependencies.where(pluginNames.contains)],
+    });
+  }
+  final File pluginsFile = project.platformPluginsFile;
+  final String oldPluginFileContent = _readFileContent(project.legacyPluginsFile);
+  final String pluginFileContent = flutterPluginsBuffer.toString();
+  if (pluginNames.isNotEmpty) {
+    pluginsFile.writeAsStringSync(pluginFileContent, flush: true);
+  } else {
+    if (pluginsFile.existsSync()) {
+      pluginsFile.deleteSync();
+    }
+  }
+
+  final File dependenciesFile = project.platformPluginsFile;
+  final String oldDependenciesFileContent = _readFileContent(dependenciesFile);
+  final String dependenciesFileContent = json.encode(<String, dynamic>{
+      '_info': '// $info',
+      'dependencyGraph': directAppDependencies,
+    });
+  if (pluginNames.isNotEmpty) {
+    dependenciesFile.writeAsStringSync(dependenciesFileContent, flush: true);
+  } else {
+    if (dependenciesFile.existsSync()) {
+      dependenciesFile.deleteSync();
+    }
+  }
+
+  return oldPluginFileContent != _readFileContent(pluginsFile)
+      || oldDependenciesFileContent != _readFileContent(dependenciesFile);
+}
+
+
 /// Returns the contents of [File] or [null] if that file does not exist.
 String _readFileContent(File file) {
   return file.existsSync() ? file.readAsStringSync() : null;
