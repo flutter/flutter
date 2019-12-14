@@ -21,6 +21,7 @@ import 'flutter_manifest.dart';
 import 'globals.dart';
 import 'ios/plist_parser.dart';
 import 'ios/xcodeproj.dart' as xcode;
+import 'platform_plugins.dart';
 import 'plugins.dart';
 import 'template.dart';
 
@@ -251,6 +252,19 @@ class FlutterProject {
   }
 }
 
+/// Represents a platform-specific sub-component of a FlutterProject.
+abstract class PlatformProject {
+  /// Whether the subproject exists in the Flutter project.
+  bool existsSync();
+
+  /// The pubspec.yaml key for a plugin configuration corresponding to this
+  /// platform.
+  String get pluginConfigKey;
+
+  /// The file containing the platform-specific plugins list.
+  File get platformPluginsFile;
+}
+
 /// Represents an Xcode-based sub-project.
 ///
 /// This defines interfaces common to iOS and macOS projects.
@@ -303,7 +317,7 @@ abstract class XcodeBasedProject {
 ///
 /// Instances will reflect the contents of the `ios/` sub-folder of
 /// Flutter applications and the `.ios/` sub-folder of Flutter module projects.
-class IosProject implements XcodeBasedProject {
+class IosProject implements XcodeBasedProject, PlatformProject {
   IosProject.fromFlutter(this.parent);
 
   @override
@@ -323,6 +337,12 @@ class IosProject implements XcodeBasedProject {
     }
     return ephemeralDirectory;
   }
+
+  @override
+  String get pluginConfigKey => IOSPlugin.kConfigKey;
+
+  @override
+  File get platformPluginsFile => _flutterLibRoot.childDirectory('Flutter').childFile('.flutter-plugins');
 
   /// The root directory of the iOS wrapping of Flutter and plugins. This is the
   /// parent of the `Flutter/` folder into which Flutter artifacts are written
@@ -525,7 +545,7 @@ class IosProject implements XcodeBasedProject {
 ///
 /// Instances will reflect the contents of the `android/` sub-folder of
 /// Flutter applications and the `.android/` sub-folder of Flutter module projects.
-class AndroidProject {
+class AndroidProject implements PlatformProject {
   AndroidProject._(this.parent);
 
   /// The parent of this project.
@@ -544,6 +564,12 @@ class AndroidProject {
     }
     return ephemeralDirectory;
   }
+
+  @override
+  String get pluginConfigKey => AndroidPlugin.kConfigKey;
+
+  @override
+  File get platformPluginsFile => hostAppGradleRoot.childFile('.flutter-plugins');
 
   /// The Gradle root directory of the Android wrapping of Flutter and plugins.
   /// This is the same as [hostAppGradleRoot] except when the project is
@@ -578,6 +604,7 @@ class AndroidProject {
   }
 
   /// Whether the current flutter project has an Android sub-project.
+  @override
   bool existsSync() {
     return parent.isModule || _editableHostAppDirectory.existsSync();
   }
@@ -709,16 +736,23 @@ enum AndroidEmbeddingVersion {
 }
 
 /// Represents the web sub-project of a Flutter project.
-class WebProject {
+class WebProject implements PlatformProject {
   WebProject._(this.parent);
 
   final FlutterProject parent;
 
   /// Whether this flutter project has a web sub-project.
+  @override
   bool existsSync() {
     return parent.directory.childDirectory('web').existsSync()
       && indexFile.existsSync();
   }
+
+  @override
+  String get pluginConfigKey => WebPlugin.kConfigKey;
+
+  @override
+  File get platformPluginsFile => directory.childFile('.flutter-plugins');
 
   /// The 'lib' directory for the application.
   Directory get libDirectory => parent.directory.childDirectory('lib');
@@ -759,7 +793,7 @@ Match _firstMatchInFile(File file, RegExp regExp) {
 }
 
 /// The macOS sub project.
-class MacOSProject implements XcodeBasedProject {
+class MacOSProject implements XcodeBasedProject, PlatformProject {
   MacOSProject._(this.parent);
 
   @override
@@ -769,6 +803,12 @@ class MacOSProject implements XcodeBasedProject {
 
   @override
   bool existsSync() => _macOSDirectory.existsSync();
+
+  @override
+  String get pluginConfigKey => MacOSPlugin.kConfigKey;
+
+  @override
+  File get platformPluginsFile => ephemeralDirectory.childFile('.flutter-plugins');
 
   Directory get _macOSDirectory => parent.directory.childDirectory('macos');
 
@@ -847,12 +887,20 @@ class MacOSProject implements XcodeBasedProject {
 }
 
 /// The Windows sub project
-class WindowsProject {
+class WindowsProject implements PlatformProject {
   WindowsProject._(this.project);
 
   final FlutterProject project;
 
+  @override
   bool existsSync() => _editableDirectory.existsSync();
+
+  @override
+  String get pluginConfigKey => WindowsPlugin.kConfigKey;
+
+  @override
+  File get platformPluginsFile => ephemeralDirectory.childFile('.flutter-plugins');
+
 
   Directory get _editableDirectory => project.directory.childDirectory('windows');
 
@@ -885,10 +933,16 @@ class WindowsProject {
 }
 
 /// The Linux sub project.
-class LinuxProject {
+class LinuxProject implements PlatformProject {
   LinuxProject._(this.project);
 
   final FlutterProject project;
+
+  @override
+  String get pluginConfigKey => LinuxPlugin.kConfigKey;
+
+  @override
+  File get platformPluginsFile => ephemeralDirectory.childFile('.flutter-plugins');
 
   Directory get _editableDirectory => project.directory.childDirectory('linux');
 
@@ -902,6 +956,7 @@ class LinuxProject {
   /// checked in should live here.
   Directory get ephemeralDirectory => managedDirectory.childDirectory('ephemeral');
 
+  @override
   bool existsSync() => _editableDirectory.existsSync();
 
   /// The Linux project makefile.
