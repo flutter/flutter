@@ -31,12 +31,20 @@ using closure = std::function<void()>;
 ///
 class ScopedCleanupClosure {
  public:
+  ScopedCleanupClosure() = default;
+
   ScopedCleanupClosure(const fml::closure& closure) : closure_(closure) {}
 
   ~ScopedCleanupClosure() {
     if (closure_) {
       closure_();
     }
+  }
+
+  fml::closure SetClosure(const fml::closure& closure) {
+    auto old_closure = closure_;
+    closure_ = closure;
+    return old_closure;
   }
 
   fml::closure Release() {

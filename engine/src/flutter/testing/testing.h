@@ -6,6 +6,7 @@
 #define TESTING_TESTING_H_
 
 #include <string>
+#include <vector>
 
 #include "flutter/fml/file.h"
 #include "flutter/fml/mapping.h"
@@ -61,6 +62,28 @@ std::unique_ptr<fml::Mapping> OpenFixtureAsMapping(std::string fixture_name);
 /// @return     The current test name.
 ///
 std::string GetCurrentTestName();
+
+enum class MemsetPatternOp {
+  kMemsetPatternOpSetBuffer,
+  kMemsetPatternOpCheckBuffer,
+};
+
+//------------------------------------------------------------------------------
+/// @brief      Depending on the operation, either scribbles a known pattern
+///             into the buffer or checks if that pattern is present in an
+///             existing buffer. This is a portable variant of the
+///             memset_pattern class of methods that also happen to do assert
+///             that the same pattern exists.
+///
+/// @param      buffer  The buffer
+/// @param[in]  size    The size
+/// @param[in]  op      The operation
+///
+/// @return     If the result of the operation was a success.
+///
+bool MemsetPatternSetOrCheck(uint8_t* buffer, size_t size, MemsetPatternOp op);
+
+bool MemsetPatternSetOrCheck(std::vector<uint8_t>& buffer, MemsetPatternOp op);
 
 }  // namespace testing
 }  // namespace flutter
