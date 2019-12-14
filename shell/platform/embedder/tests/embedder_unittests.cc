@@ -3606,5 +3606,204 @@ TEST_F(EmbedderTest, ClipsAreCorrectlyCalculated) {
   latch.Wait();
 }
 
+TEST_F(EmbedderTest, ObjectsCanBePostedViaPorts) {
+  auto& context = GetEmbedderContext();
+  EmbedderConfigBuilder builder(context);
+  builder.SetOpenGLRendererConfig(SkISize::Make(800, 1024));
+  builder.SetDartEntrypoint("objects_can_be_posted");
+
+  // Synchronously acquire the send port from the Dart end. We will be using
+  // this to send message. The Dart end will just echo those messages back to us
+  // for inspection.
+  FlutterEngineDartPort port = 0;
+  fml::AutoResetWaitableEvent event;
+  context.AddNativeCallback("SignalNativeCount",
+                            CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
+                              port = tonic::DartConverter<int64_t>::FromDart(
+                                  Dart_GetNativeArgument(args, 0));
+                              event.Signal();
+                            }));
+  auto engine = builder.LaunchEngine();
+  ASSERT_TRUE(engine.is_valid());
+  event.Wait();
+  ASSERT_NE(port, 0);
+
+  using Trampoline = std::function<void(Dart_Handle message)>;
+  Trampoline trampoline;
+
+  context.AddNativeCallback("SendObjectToNativeCode",
+                            CREATE_NATIVE_ENTRY([&](Dart_NativeArguments args) {
+                              FML_CHECK(trampoline);
+                              auto trampoline_copy = trampoline;
+                              trampoline = nullptr;
+                              trampoline_copy(Dart_GetNativeArgument(args, 0));
+                            }));
+
+  // Check null.
+  {
+    FlutterEngineDartObject object = {};
+    object.type = kFlutterEngineDartObjectTypeNull;
+    trampoline = [&](Dart_Handle handle) {
+      ASSERT_TRUE(Dart_IsNull(handle));
+      event.Signal();
+    };
+    ASSERT_EQ(FlutterEnginePostDartObject(engine.get(), port, &object),
+              kSuccess);
+    event.Wait();
+  }
+
+  // Check bool.
+  {
+    FlutterEngineDartObject object = {};
+    object.type = kFlutterEngineDartObjectTypeBool;
+    object.bool_value = true;
+    trampoline = [&](Dart_Handle handle) {
+      ASSERT_TRUE(tonic::DartConverter<bool>::FromDart(handle));
+      event.Signal();
+    };
+    ASSERT_EQ(FlutterEnginePostDartObject(engine.get(), port, &object),
+              kSuccess);
+    event.Wait();
+  }
+
+  // Check int32.
+  {
+    FlutterEngineDartObject object = {};
+    object.type = kFlutterEngineDartObjectTypeInt32;
+    object.int32_value = 1988;
+    trampoline = [&](Dart_Handle handle) {
+      ASSERT_EQ(tonic::DartConverter<int32_t>::FromDart(handle), 1988);
+      event.Signal();
+    };
+    ASSERT_EQ(FlutterEnginePostDartObject(engine.get(), port, &object),
+              kSuccess);
+    event.Wait();
+  }
+
+  // Check int64.
+  {
+    FlutterEngineDartObject object = {};
+    object.type = kFlutterEngineDartObjectTypeInt64;
+    object.int64_value = 1988;
+    trampoline = [&](Dart_Handle handle) {
+      ASSERT_EQ(tonic::DartConverter<int64_t>::FromDart(handle), 1988);
+      event.Signal();
+    };
+    ASSERT_EQ(FlutterEnginePostDartObject(engine.get(), port, &object),
+              kSuccess);
+    event.Wait();
+  }
+
+  // Check double.
+  {
+    FlutterEngineDartObject object = {};
+    object.type = kFlutterEngineDartObjectTypeDouble;
+    object.double_value = 1988.0;
+    trampoline = [&](Dart_Handle handle) {
+      ASSERT_DOUBLE_EQ(tonic::DartConverter<double>::FromDart(handle), 1988.0);
+      event.Signal();
+    };
+    ASSERT_EQ(FlutterEnginePostDartObject(engine.get(), port, &object),
+              kSuccess);
+    event.Wait();
+  }
+
+  // Check string.
+  {
+    const char* message = "Hello. My name is Inigo Montoya.";
+    FlutterEngineDartObject object = {};
+    object.type = kFlutterEngineDartObjectTypeString;
+    object.string_value = message;
+    trampoline = [&](Dart_Handle handle) {
+      ASSERT_EQ(tonic::DartConverter<std::string>::FromDart(handle),
+                std::string{message});
+      event.Signal();
+    };
+    ASSERT_EQ(FlutterEnginePostDartObject(engine.get(), port, &object),
+              kSuccess);
+    event.Wait();
+  }
+
+  // Check buffer (copied out).
+  {
+    std::vector<uint8_t> message;
+    message.resize(1988);
+
+    ASSERT_TRUE(MemsetPatternSetOrCheck(
+        message, MemsetPatternOp::kMemsetPatternOpSetBuffer));
+
+    FlutterEngineDartBuffer buffer = {};
+
+    buffer.struct_size = sizeof(buffer);
+    buffer.user_data = nullptr;
+    buffer.buffer_collect_callback = nullptr;
+    buffer.buffer = message.data();
+    buffer.buffer_size = message.size();
+
+    FlutterEngineDartObject object = {};
+    object.type = kFlutterEngineDartObjectTypeBuffer;
+    object.buffer_value = &buffer;
+    trampoline = [&](Dart_Handle handle) {
+      intptr_t length = 0;
+      Dart_ListLength(handle, &length);
+      ASSERT_EQ(length, 1988);
+      // TODO(chinmaygarde); The std::vector<uint8_t> specialization for
+      // DartConvertor in tonic is broken which is preventing the buffer
+      // being checked here. Fix tonic and strengthen this check. For now, just
+      // the buffer length is checked.
+      event.Signal();
+    };
+    ASSERT_EQ(FlutterEnginePostDartObject(engine.get(), port, &object),
+              kSuccess);
+    event.Wait();
+  }
+
+  std::vector<uint8_t> message;
+  fml::AutoResetWaitableEvent buffer_released_latch;
+
+  // Check buffer (caller own buffer with zero copy transfer).
+  {
+    message.resize(1988);
+
+    ASSERT_TRUE(MemsetPatternSetOrCheck(
+        message, MemsetPatternOp::kMemsetPatternOpSetBuffer));
+
+    FlutterEngineDartBuffer buffer = {};
+
+    buffer.struct_size = sizeof(buffer);
+    buffer.user_data = &buffer_released_latch;
+    buffer.buffer_collect_callback = +[](void* user_data) {
+      reinterpret_cast<fml::AutoResetWaitableEvent*>(user_data)->Signal();
+    };
+    buffer.buffer = message.data();
+    buffer.buffer_size = message.size();
+
+    FlutterEngineDartObject object = {};
+    object.type = kFlutterEngineDartObjectTypeBuffer;
+    object.buffer_value = &buffer;
+    trampoline = [&](Dart_Handle handle) {
+      intptr_t length = 0;
+      Dart_ListLength(handle, &length);
+      ASSERT_EQ(length, 1988);
+      // TODO(chinmaygarde); The std::vector<uint8_t> specialization for
+      // DartConvertor in tonic is broken which is preventing the buffer
+      // being checked here. Fix tonic and strengthen this check. For now, just
+      // the buffer length is checked.
+      event.Signal();
+    };
+    ASSERT_EQ(FlutterEnginePostDartObject(engine.get(), port, &object),
+              kSuccess);
+    event.Wait();
+  }
+
+  engine.reset();
+
+  // We cannot determine when the VM will GC objects that might have external
+  // typed data finalizers. Since we need to ensure that we correctly wired up
+  // finalizers from the embedders, we force the VM to collect all objects but
+  // just shutting it down.
+  buffer_released_latch.Wait();
+}
+
 }  // namespace testing
 }  // namespace flutter

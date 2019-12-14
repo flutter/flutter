@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui';
+import 'dart:isolate';
+import 'dart:ffi';
 import 'dart:core';
 import 'dart:convert';
 
@@ -659,3 +661,14 @@ void scene_builder_with_clips() {
   };
   window.scheduleFrame();
 }
+
+
+void sendObjectToNativeCode(dynamic object) native 'SendObjectToNativeCode';
+
+@pragma('vm:entry-point')
+void objects_can_be_posted() {
+  ReceivePort port = ReceivePort();
+  port.listen((dynamic message){ sendObjectToNativeCode(message); });
+  signalNativeCount(port.sendPort.nativePort);
+}
+

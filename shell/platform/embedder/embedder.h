@@ -861,6 +861,79 @@ typedef struct {
   const char* variant_code;
 } FlutterLocale;
 
+typedef int64_t FlutterEngineDartPort;
+
+typedef enum {
+  kFlutterEngineDartObjectTypeNull,
+  kFlutterEngineDartObjectTypeBool,
+  kFlutterEngineDartObjectTypeInt32,
+  kFlutterEngineDartObjectTypeInt64,
+  kFlutterEngineDartObjectTypeDouble,
+  kFlutterEngineDartObjectTypeString,
+  /// The object will be made available to Dart code as an instance of
+  /// Uint8List.
+  kFlutterEngineDartObjectTypeBuffer,
+} FlutterEngineDartObjectType;
+
+typedef struct {
+  /// The size of this struct. Must be sizeof(FlutterEngineDartBuffer).
+  size_t struct_size;
+  /// An opaque baton passed back to the embedder when the
+  /// buffer_collect_callback is invoked. The engine does not interpret this
+  /// field in any way.
+  void* user_data;
+  /// This is an optional field.
+  ///
+  /// When specified, the engine will assume that the buffer is owned by the
+  /// embedder. When the data is no longer needed by any isolate, this callback
+  /// will be made on an internal engine managed thread. The embedder is free to
+  /// collect the buffer here. When this field is specified, it is the embedders
+  /// responsibility to keep the buffer alive and not modify it till this
+  /// callback is invoked by the engine. The user data specified in the callback
+  /// is the value of `user_data` field in this struct.
+  ///
+  /// When NOT specified, the VM creates an internal copy of the buffer. The
+  /// caller is free to modify the buffer as necessary or collect it immediately
+  /// after the call to `FlutterEnginePostDartObject`.
+  ///
+  /// @attention      The buffer_collect_callback is will only be invoked by the
+  ///                 engine when the `FlutterEnginePostDartObject` method
+  ///                 returns kSuccess. In case of non-successful calls to this
+  ///                 method, it is the embedders responsibility to collect the
+  ///                 buffer.
+  VoidCallback buffer_collect_callback;
+  /// A pointer to the bytes of the buffer. When the buffer is owned by the
+  /// embedder (by specifying the `buffer_collect_callback`), Dart code may
+  /// modify that embedder owned buffer. For this reason, it is important that
+  /// this buffer not have page protections that restrict writing to this
+  /// buffer.
+  uint8_t* buffer;
+  /// The size of the buffer.
+  size_t buffer_size;
+} FlutterEngineDartBuffer;
+
+/// This struct specifies the native representation of a Dart object that can be
+/// sent via a send port to any isolate in the VM that has the corresponding
+/// receive port.
+///
+/// All fields in this struct are copied out in the call to
+/// `FlutterEnginePostDartObject` and the caller is free to reuse or collect
+/// this struct after that call.
+typedef struct {
+  FlutterEngineDartObjectType type;
+  union {
+    bool bool_value;
+    int32_t int32_value;
+    int64_t int64_value;
+    double double_value;
+    /// A null terminated string. This string will be copied by the VM in the
+    /// call to `FlutterEnginePostDartObject` and must be collected by the
+    /// embedder after that call is made.
+    const char* string_value;
+    const FlutterEngineDartBuffer* buffer_value;
+  };
+} FlutterEngineDartObject;
+
 typedef struct {
   /// The size of this struct. Must be sizeof(FlutterProjectArgs).
   size_t struct_size;
@@ -1534,6 +1607,37 @@ FlutterEngineResult FlutterEngineUpdateLocales(FLUTTER_API_SYMBOL(FlutterEngine)
 ///
 FLUTTER_EXPORT
 bool FlutterEngineRunsAOTCompiledDartCode(void);
+
+//------------------------------------------------------------------------------
+/// @brief      Posts a Dart object to specified send port. The corresponding
+///             receive port for send port can be in any isolate running in the
+///             VM. This isolate can also be the root isolate for an
+///             unrelated engine. The engine parameter is necessary only to
+///             ensure the call is not made when no engine (and hence no VM) is
+///             running.
+///
+///             Unlike the platform messages mechanism, there are no threading
+///             restrictions when using this API. Message can be posted on any
+///             thread and they will be made available to isolate on which the
+///             corresponding send port is listening.
+///
+///             However, it is the embedders responsibility to ensure that the
+///             call is not made during an ongoing call the
+///             `FlutterEngineDeinitialize` or `FlutterEngineShutdown` on
+///             another thread.
+///
+/// @param[in]  engine.    A running engine instance.
+/// @param[in]  port       The send port to send the object to.
+/// @param[in]  object     The object to send to the isolate with the
+///                        corresponding receive port.
+///
+/// @return     If the message was posted to the send port.
+///
+FLUTTER_EXPORT
+FlutterEngineResult FlutterEnginePostDartObject(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine,
+    FlutterEngineDartPort port,
+    const FlutterEngineDartObject* object);
 
 #if defined(__cplusplus)
 }  // extern "C"

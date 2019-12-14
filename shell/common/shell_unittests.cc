@@ -1050,67 +1050,6 @@ TEST_F(ShellTest, Screenshot) {
   DestroyShell(std::move(shell));
 }
 
-enum class MemsetPatternOp {
-  kMemsetPatternOpSetBuffer,
-  kMemsetPatternOpCheckBuffer,
-};
-
-//------------------------------------------------------------------------------
-/// @brief      Depending on the operation, either scribbles a known pattern
-///             into the buffer or checks if that pattern is present in an
-///             existing buffer. This is a portable variant of the
-///             memset_pattern class of methods that also happen to do assert
-///             that the same pattern exists.
-///
-/// @param      buffer  The buffer
-/// @param[in]  size    The size
-/// @param[in]  op      The operation
-///
-/// @return     If the result of the operation was a success.
-///
-static bool MemsetPatternSetOrCheck(uint8_t* buffer,
-                                    size_t size,
-                                    MemsetPatternOp op) {
-  if (buffer == nullptr) {
-    return false;
-  }
-
-  auto pattern = reinterpret_cast<const uint8_t*>("dErP");
-  constexpr auto pattern_length = 4;
-
-  uint8_t* start = buffer;
-  uint8_t* p = buffer;
-
-  while ((start + size) - p >= pattern_length) {
-    switch (op) {
-      case MemsetPatternOp::kMemsetPatternOpSetBuffer:
-        memmove(p, pattern, pattern_length);
-        break;
-      case MemsetPatternOp::kMemsetPatternOpCheckBuffer:
-        if (memcmp(pattern, p, pattern_length) != 0) {
-          return false;
-        }
-        break;
-    };
-    p += pattern_length;
-  }
-
-  if ((start + size) - p != 0) {
-    switch (op) {
-      case MemsetPatternOp::kMemsetPatternOpSetBuffer:
-        memmove(p, pattern, (start + size) - p);
-        break;
-      case MemsetPatternOp::kMemsetPatternOpCheckBuffer:
-        if (memcmp(pattern, p, (start + size) - p) != 0) {
-          return false;
-        }
-        break;
-    }
-  }
-
-  return true;
-}
-
 TEST_F(ShellTest, CanConvertToAndFromMappings) {
   const size_t buffer_size = 2 << 20;
 
