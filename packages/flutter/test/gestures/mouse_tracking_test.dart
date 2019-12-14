@@ -76,6 +76,7 @@ void main() {
   // the enter, hover, and exit events it received to [logEvents].
   MouseTrackerAnnotation _setUpWithOneAnnotation({List<PointerEvent> logEvents}) {
     final MouseTrackerAnnotation annotation = MouseTrackerAnnotation(
+      key: UniqueKey(),
       onEnter: (PointerEnterEvent event) => logEvents.add(event),
       onHover: (PointerHoverEvent event) => logEvents.add(event),
       onExit: (PointerExitEvent event) => logEvents.add(event),
@@ -95,26 +96,22 @@ void main() {
   });
 
   test('MouseTrackerAnnotation has correct toString', () {
+    const Key key = ValueKey<int>(10);
     final MouseTrackerAnnotation annotation1 = MouseTrackerAnnotation(
+      key: key,
       onEnter: (_) {},
       onExit: (_) {},
       onHover: (_) {},
     );
     expect(
       annotation1.toString(),
-      equals('MouseTrackerAnnotation#${shortHash(annotation1)}(callbacks: [enter, hover, exit])'),
+      equals('MouseTrackerAnnotation#${shortHash(annotation1)}(callbacks: [enter, hover, exit], key: [<10>])'),
     );
 
-    const MouseTrackerAnnotation annotation2 = MouseTrackerAnnotation();
+    const MouseTrackerAnnotation annotation2 = MouseTrackerAnnotation(key: key);
     expect(
       annotation2.toString(),
-      equals('MouseTrackerAnnotation#${shortHash(annotation2)}(callbacks: <none>)'),
-    );
-
-    const MouseTrackerAnnotation annotation3 = MouseTrackerAnnotation(key: ValueKey<int>(10));
-    expect(
-      annotation3.toString(),
-      equals('MouseTrackerAnnotation#${shortHash(annotation3)}(callbacks: <none>, key: [<10>])'),
+      equals('MouseTrackerAnnotation#${shortHash(annotation2)}(callbacks: <none>, key: [<10>])'),
     );
   });
 
@@ -263,6 +260,7 @@ void main() {
     bool isInHitRegion = false;
     final List<PointerEvent> events = <PointerEvent>[];
     final MouseTrackerAnnotation annotation = MouseTrackerAnnotation(
+      key: UniqueKey(),
       onEnter: (PointerEnterEvent event) => events.add(event),
       onHover: (PointerHoverEvent event) => events.add(event),
       onExit: (PointerExitEvent event) => events.add(event),
@@ -356,6 +354,7 @@ void main() {
     bool isInHitRegion;
     final List<Object> events = <PointerEvent>[];
     final MouseTrackerAnnotation annotation = MouseTrackerAnnotation(
+      key: UniqueKey(),
       onEnter: (PointerEnterEvent event) => events.add(event),
       onHover: (PointerHoverEvent event) => events.add(event),
       onExit: (PointerExitEvent event) => events.add(event),
@@ -413,6 +412,7 @@ void main() {
     bool isInHitRegion;
     final List<Object> events = <PointerEvent>[];
     final MouseTrackerAnnotation annotation = MouseTrackerAnnotation(
+      key: UniqueKey(),
       onEnter: (PointerEnterEvent event) => events.add(event),
       onHover: (PointerHoverEvent event) => events.add(event),
       onExit: (PointerExitEvent event) => events.add(event),
@@ -464,6 +464,7 @@ void main() {
     bool isInHitRegion;
     final List<Object> events = <PointerEvent>[];
     final MouseTrackerAnnotation annotation = MouseTrackerAnnotation(
+      key: UniqueKey(),
       onEnter: (PointerEnterEvent event) => events.add(event),
       onHover: (PointerHoverEvent event) => events.add(event),
       onExit: (PointerExitEvent event) => events.add(event),
@@ -504,6 +505,7 @@ void main() {
     bool isInHitRegion;
     final List<Object> events = <PointerEvent>[];
     final MouseTrackerAnnotation annotation = MouseTrackerAnnotation(
+      key: UniqueKey(),
       onEnter: (PointerEnterEvent event) => events.add(event),
       onHover: (PointerHoverEvent event) => events.add(event),
       onExit: (PointerExitEvent event) => events.add(event),
@@ -550,6 +552,7 @@ void main() {
   test('should correctly handle when annotation is attached or detached while not containing the pointer', () {
     final List<PointerEvent> events = <PointerEvent>[];
     final MouseTrackerAnnotation annotation = MouseTrackerAnnotation(
+      key: UniqueKey(),
       onEnter: (PointerEnterEvent event) => events.add(event),
       onHover: (PointerHoverEvent event) => events.add(event),
       onExit: (PointerExitEvent event) => events.add(event),
@@ -598,7 +601,7 @@ void main() {
   });
 
   test('should not schedule postframe callbacks when no mouse is connected', () {
-    const MouseTrackerAnnotation annotation = MouseTrackerAnnotation();
+    final MouseTrackerAnnotation annotation = MouseTrackerAnnotation(key: UniqueKey());
     _setUpMouseAnnotationFinder((Offset position) sync* {
     });
 
@@ -622,9 +625,11 @@ void main() {
     bool isInHitRegionOne = true;
     bool isInHitRegionTwo = false;
     final MouseTrackerAnnotation annotation1 = MouseTrackerAnnotation(
+      key: UniqueKey(),
       onEnter: (PointerEnterEvent event) {}
     );
     final MouseTrackerAnnotation annotation2 = MouseTrackerAnnotation(
+      key: UniqueKey(),
       onExit: (PointerExitEvent event) {}
     );
     _setUpMouseAnnotationFinder((Offset position) sync* {
@@ -674,6 +679,7 @@ void main() {
       onEnter: (PointerEnterEvent event) { logs.add('enter3'); },
       onHover: (PointerHoverEvent event) { logs.add('hover3'); },
       onExit: (PointerExitEvent event) { logs.add('exit3'); },
+      key: UniqueKey(),
     );
     MouseTrackerAnnotation foundAnnotation;
     bool finderCalled = false;
@@ -741,6 +747,7 @@ void main() {
 
   test('should not call annotationFinder when no annotations are attached', () {
     final MouseTrackerAnnotation annotation = MouseTrackerAnnotation(
+      key: UniqueKey(),
       onEnter: (PointerEnterEvent event) {},
     );
     int finderCalled = 0;
@@ -792,11 +799,13 @@ void main() {
     bool isInB;
     final List<String> logs = <String>[];
     final MouseTrackerAnnotation annotationA = MouseTrackerAnnotation(
+      key: UniqueKey(),
       onEnter: (PointerEnterEvent event) => logs.add('enterA'),
       onExit: (PointerExitEvent event) => logs.add('exitA'),
       onHover: (PointerHoverEvent event) => logs.add('hoverA'),
     );
     final MouseTrackerAnnotation annotationB = MouseTrackerAnnotation(
+      key: UniqueKey(),
       onEnter: (PointerEnterEvent event) => logs.add('enterB'),
       onExit: (PointerExitEvent event) => logs.add('exitB'),
       onHover: (PointerHoverEvent event) => logs.add('hoverB'),
@@ -847,11 +856,13 @@ void main() {
     bool isInB;
     final List<String> logs = <String>[];
     final MouseTrackerAnnotation annotationA = MouseTrackerAnnotation(
+      key: UniqueKey(),
       onEnter: (PointerEnterEvent event) => logs.add('enterA'),
       onExit: (PointerExitEvent event) => logs.add('exitA'),
       onHover: (PointerHoverEvent event) => logs.add('hoverA'),
     );
     final MouseTrackerAnnotation annotationB = MouseTrackerAnnotation(
+      key: UniqueKey(),
       onEnter: (PointerEnterEvent event) => logs.add('enterB'),
       onExit: (PointerExitEvent event) => logs.add('exitB'),
       onHover: (PointerHoverEvent event) => logs.add('hoverB'),

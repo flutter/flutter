@@ -757,10 +757,19 @@ class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
   @override
   void paint(PaintingContext context, Offset offset) {
     assert(_controller.viewId != null);
+
+
+    final MouseTrackerAnnotation annotation = MouseTrackerAnnotation(
+      key: _hoverAnnotationKey,
+      onHover: (PointerHoverEvent event) {
+        if (_handlePointerEvent != null)
+          _handlePointerEvent(event);
+      },
+    );
     context.addLayer(PlatformViewLayer(
             rect: offset & size,
             viewId: _controller.viewId,
-            hoverAnnotation: _hoverAnnotation));
+            hoverAnnotation: annotation));
   }
 
   @override
@@ -780,15 +789,16 @@ mixin _PlatformViewGestureMixin on RenderBox {
   // any newly arriving events there's nothing we need to invalidate.
   PlatformViewHitTestBehavior hitTestBehavior;
 
-  /// [MouseTrackerAnnotation] associated with the platform view layer.
+  /// The key of the [MouseTrackerAnnotation] associated with the platform view
+  /// layer.
   ///
   /// Gesture recognizers don't receive hover events due to the performance
   /// cost associated with hit testing a sequence of potentially thousands of
   /// events -- move events only hit-test the down event, then cache the result
   /// and apply it to all subsequent move events, but there is no down event
   /// for a hover. To support native hover gesture handling by platform views,
-  /// we attach/detach this layer annotation as necessary.
-  MouseTrackerAnnotation _hoverAnnotation;
+  /// we attach/detach a layer annotation as necessary.
+  Key _hoverAnnotationKey;
 
   _HandlePointerEvent _handlePointerEvent;
 
@@ -834,19 +844,16 @@ mixin _PlatformViewGestureMixin on RenderBox {
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
-    assert(_hoverAnnotation == null);
-    _hoverAnnotation = MouseTrackerAnnotation(onHover: (PointerHoverEvent event) {
-      if (_handlePointerEvent != null)
-        _handlePointerEvent(event);
-    });
-    RendererBinding.instance.mouseTracker.attachAnnotation(_hoverAnnotation.key);
+    assert(_hoverAnnotationKey == null);
+    _hoverAnnotationKey = UniqueKey();
+    RendererBinding.instance.mouseTracker.attachAnnotation(_hoverAnnotationKey);
   }
 
   @override
   void detach() {
     _gestureRecognizer.reset();
-    RendererBinding.instance.mouseTracker.detachAnnotation(_hoverAnnotation.key);
-    _hoverAnnotation = null;
+    RendererBinding.instance.mouseTracker.detachAnnotation(_hoverAnnotationKey);
+    _hoverAnnotationKey = null;
     super.detach();
   }
 }

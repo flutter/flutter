@@ -34,13 +34,13 @@ class MouseTrackerAnnotation extends Diagnosticable {
   /// Creates an annotation that can be used to find layers interested in mouse
   /// movements.
   ///
-  /// All arguments are optional.
+  /// The [key] is required and must not be null. Other arguments are optional.
   const MouseTrackerAnnotation({
     this.onEnter,
     this.onHover,
     this.onExit,
-    Key key,
-  }) : _key = key;
+    @required this.key,
+  }) : assert(key != null);
 
   /// Triggered when a mouse pointer, with or without buttons pressed, has
   /// entered the annotated region.
@@ -132,12 +132,13 @@ class MouseTrackerAnnotation extends Diagnosticable {
   /// annotations are considered equal if the two annotations have [key]s that
   /// are equal by [operator==].
   ///
-  /// This getter never returns null. If [key] is not set during object
-  /// creation, this getter will return a unique key that is different from any
-  /// other annotations, which means such an annotation is only equal to itself
-  /// in terms of [key].
-  Key get key => _key ?? ObjectKey(this);
-  final Key _key;
+  /// The [key] must not be null.
+  ///
+  /// See also:
+  ///
+  ///  * [UniqueKey], [ObjectKey], and [ValueKey], which are common classes of
+  ///    keys.
+  final Key key;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -151,7 +152,7 @@ class MouseTrackerAnnotation extends Diagnosticable {
       },
       ifEmpty: '<none>',
     ));
-    properties.add(DiagnosticsProperty<Key>('key', _key, defaultValue: null));
+    properties.add(DiagnosticsProperty<Key>('key', key));
   }
 }
 

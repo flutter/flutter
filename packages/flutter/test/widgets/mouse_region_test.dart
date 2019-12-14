@@ -1284,6 +1284,7 @@ void main() {
   testWidgets("MouseTracker's attachAnnotation doesn't schedule any frames", (WidgetTester tester) async {
     // This test is here because MouseTracker can't use testWidgets.
     final MouseTrackerAnnotation annotation = MouseTrackerAnnotation(
+      key: UniqueKey(),
       onEnter: (PointerEnterEvent event) {},
       onHover: (PointerHoverEvent event) {},
       onExit: (PointerExitEvent event) {},
