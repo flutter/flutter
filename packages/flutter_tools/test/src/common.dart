@@ -149,19 +149,19 @@ void test(String description, FutureOr<void> body(), {
   Map<String, dynamic> onPlatform,
   int retry,
   }) {
-  return runZoned(() {
-    return test_package.test(
-      description, body,
-      timeout: timeout,
-      skip: skip,
-      tags: tags,
-      onPlatform: onPlatform,
-      retry: retry,
-      testOn: testOn,
-    );
-  }, zoneValues: <Object, Object>{
-    contextKey: const NoContext(),
-  });
+  return test_package.test(
+    description, () async {
+      return runZoned(body, zoneValues: <Object, Object>{
+        contextKey: const NoContext(),
+      });
+    },
+    timeout: timeout,
+    skip: skip,
+    tags: tags,
+    onPlatform: onPlatform,
+    retry: retry,
+    testOn: testOn,
+  );
 }
 
 /// An implementation of [AppContext] that throws if context.get is called in the test.
@@ -174,7 +174,11 @@ class NoContext implements AppContext {
 
   @override
   T get<T>() {
-    throw UnsupportedError('context.get is not supported in this test.');
+    throw UnsupportedError(
+      'context.get<$T> is not supported in test methods. '
+      'Use Testbed or testUsingContext if accessing Zone injected '
+      'values.'
+    );
   }
 
   @override
