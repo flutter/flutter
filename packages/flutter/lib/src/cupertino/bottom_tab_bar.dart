@@ -290,7 +290,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
         color: backgroundColor,
       ),
       child: SizedBox(
-        height: (_isBarCompact ? _kTabBarCompactHeight : _kTabBarHeight) + bottomPadding,
+        height: preferredSize.height + bottomPadding,
         child: IconTheme.merge( // Default with the inactive state.
           data: IconThemeData(
             color: inactive,
