@@ -296,7 +296,7 @@ FLUTTER_EXPORT
 @property(nonatomic, readonly) NSObject<FlutterBinaryMessenger>* binaryMessenger;
 
 /**
- * The UI Isolate ID of of the engine.
+ * The UI Isolate ID of the engine.
  *
  * This property will be nil if the engine is not running.
  */

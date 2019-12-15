@@ -1068,7 +1068,7 @@ static flutter::PointerData::DeviceKind DeviceKindFromTouchType(UITouch* touch) 
 
 #pragma mark - Status Bar touch event handling
 
-// Standard iOS status bar height in pixels.
+// Standard iOS status bar height in points.
 constexpr CGFloat kStandardStatusBarHeight = 20.0;
 
 - (void)handleStatusBarTouches:(UIEvent*)event {
