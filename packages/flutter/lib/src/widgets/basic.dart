@@ -28,6 +28,7 @@ export 'package:flutter/rendering.dart' show
   Axis,
   BoxConstraints,
   CrossAxisAlignment,
+  CrossAxisSize,
   CustomClipper,
   CustomPainter,
   CustomPainterSemantics,
@@ -3745,8 +3746,12 @@ class PositionedDirectional extends StatelessWidget {
 ///    allocated space), and children with [Flexible.fit] properties that are
 ///    [FlexFit.loose] are given loose constraints (i.e., not forced to fill the
 ///    allocated space).
-/// 4. The cross axis extent of the [Flex] is the maximum cross axis extent of
-///    the children (which will always satisfy the incoming constraints).
+/// 4. The cross axis extent of the [Flex] is determined by the [crossAxisSize]
+///    property. If the [crossAxisSize] property is [CrossAxisSize.max], then the
+///    cross axis extent of the [Flex] is the max extent of the incoming cross
+///    axis constraints. If the [crossAxisSize] property is [CrossAxisSize.min],
+///    then the main axis extent of the [Flex] is the max of the cross axis
+///    extents of the children (subject to the incoming constraints).
 /// 5. The main axis extent of the [Flex] is determined by the [mainAxisSize]
 ///    property. If the [mainAxisSize] property is [MainAxisSize.max], then the
 ///    main axis extent of the [Flex] is the max extent of the incoming main
@@ -3788,6 +3793,7 @@ class Flex extends MultiChildRenderObjectWidget {
     this.mainAxisAlignment = MainAxisAlignment.start,
     this.mainAxisSize = MainAxisSize.max,
     this.crossAxisAlignment = CrossAxisAlignment.center,
+    this.crossAxisSize = CrossAxisSize.min,
     this.textDirection,
     this.verticalDirection = VerticalDirection.down,
     this.textBaseline,
@@ -3832,6 +3838,18 @@ class Flex extends MultiChildRenderObjectWidget {
   /// For example, [CrossAxisAlignment.center], the default, centers the
   /// children in the cross axis (e.g., horizontally for a [Column]).
   final CrossAxisAlignment crossAxisAlignment;
+
+  /// How much space should be occupied in the cross axis.
+  ///
+  /// After allocating space to children, there might be some remaining free
+  /// space. This value controls whether to maximize or minimize the amount of
+  /// free space, subject to the incoming layout constraints.
+  ///
+  /// If some children have a non-zero flex factors (and none have a fit of
+  /// [FlexFit.loose]), they will expand to consume all the available space and
+  /// there will be no remaining free space to maximize or minimize, making this
+  /// value irrelevant to the final layout.
+  final CrossAxisSize crossAxisSize;
 
   /// Determines the order to lay children out horizontally and how to interpret
   /// `start` and `end` in the horizontal direction.
@@ -3922,6 +3940,7 @@ class Flex extends MultiChildRenderObjectWidget {
       mainAxisAlignment: mainAxisAlignment,
       mainAxisSize: mainAxisSize,
       crossAxisAlignment: crossAxisAlignment,
+      crossAxisSize: crossAxisSize,
       textDirection: getEffectiveTextDirection(context),
       verticalDirection: verticalDirection,
       textBaseline: textBaseline,
@@ -3935,6 +3954,7 @@ class Flex extends MultiChildRenderObjectWidget {
       ..mainAxisAlignment = mainAxisAlignment
       ..mainAxisSize = mainAxisSize
       ..crossAxisAlignment = crossAxisAlignment
+      ..crossAxisSize = crossAxisSize
       ..textDirection = getEffectiveTextDirection(context)
       ..verticalDirection = verticalDirection
       ..textBaseline = textBaseline;
@@ -3947,6 +3967,7 @@ class Flex extends MultiChildRenderObjectWidget {
     properties.add(EnumProperty<MainAxisAlignment>('mainAxisAlignment', mainAxisAlignment));
     properties.add(EnumProperty<MainAxisSize>('mainAxisSize', mainAxisSize, defaultValue: MainAxisSize.max));
     properties.add(EnumProperty<CrossAxisAlignment>('crossAxisAlignment', crossAxisAlignment));
+    properties.add(EnumProperty<CrossAxisSize>('crossAxisSize', crossAxisSize, defaultValue: CrossAxisSize.min));
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     properties.add(EnumProperty<VerticalDirection>('verticalDirection', verticalDirection, defaultValue: VerticalDirection.down));
     properties.add(EnumProperty<TextBaseline>('textBaseline', textBaseline, defaultValue: null));
@@ -4126,6 +4147,7 @@ class Row extends Flex {
     MainAxisAlignment mainAxisAlignment = MainAxisAlignment.start,
     MainAxisSize mainAxisSize = MainAxisSize.max,
     CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.center,
+    CrossAxisSize crossAxisSize = CrossAxisSize.min,
     TextDirection textDirection,
     VerticalDirection verticalDirection = VerticalDirection.down,
     TextBaseline textBaseline,
@@ -4137,6 +4159,7 @@ class Row extends Flex {
     mainAxisAlignment: mainAxisAlignment,
     mainAxisSize: mainAxisSize,
     crossAxisAlignment: crossAxisAlignment,
+    crossAxisSize: crossAxisSize,
     textDirection: textDirection,
     verticalDirection: verticalDirection,
     textBaseline: textBaseline,
@@ -4326,6 +4349,7 @@ class Column extends Flex {
     MainAxisAlignment mainAxisAlignment = MainAxisAlignment.start,
     MainAxisSize mainAxisSize = MainAxisSize.max,
     CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.center,
+    CrossAxisSize crossAxisSize = CrossAxisSize.min,
     TextDirection textDirection,
     VerticalDirection verticalDirection = VerticalDirection.down,
     TextBaseline textBaseline,
@@ -4337,6 +4361,7 @@ class Column extends Flex {
     mainAxisAlignment: mainAxisAlignment,
     mainAxisSize: mainAxisSize,
     crossAxisAlignment: crossAxisAlignment,
+    crossAxisSize: crossAxisSize,
     textDirection: textDirection,
     verticalDirection: verticalDirection,
     textBaseline: textBaseline,

@@ -130,6 +130,7 @@ void main() {
         '   mainAxisAlignment: start\n'
         '   mainAxisSize: max\n'
         '   crossAxisAlignment: center\n'
+        '   crossAxisSize: min\n'
         '   verticalDirection: down\n'
       ),
     );
@@ -437,6 +438,68 @@ void main() {
     expect(box1.size, const Size(100.0, 100.0));
     expect(box2.size, const Size(100.0, 100.0));
     expect(box3.size, const Size(100.0, 100.0));
+  });
+
+  test('Flexible with CrossAxisSize.max horizontal', () {
+    final RenderConstrainedBox box1 = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 100.0, height: 100.0));
+    final RenderConstrainedBox box2 = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 100.0, height: 100.0));
+    final RenderConstrainedBox box3 = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 100.0, height: 100.0));
+    final RenderFlex flex = RenderFlex(
+      textDirection: TextDirection.ltr,
+      crossAxisSize: CrossAxisSize.max,
+    );
+    flex.addAll(<RenderBox>[box1, box2, box3]);
+    layout(flex, constraints: const BoxConstraints(
+        minWidth: 0.0, maxWidth: 500.0, minHeight: 0.0, maxHeight: 400.0),
+    );
+
+    expect(flex.size.height, 400.0);
+  });
+
+  test('Flexible with CrossAxisSize.max vertical', () {
+    final RenderConstrainedBox box1 = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 100.0, height: 100.0));
+    final RenderConstrainedBox box2 = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 100.0, height: 100.0));
+    final RenderConstrainedBox box3 = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 100.0, height: 100.0));
+    final RenderFlex flex = RenderFlex(
+      direction: Axis.vertical,
+      crossAxisSize: CrossAxisSize.max,
+    );
+    flex.addAll(<RenderBox>[box1, box2, box3]);
+    layout(flex, constraints: const BoxConstraints(
+        minWidth: 0.0, maxWidth: 500.0, minHeight: 0.0, maxHeight: 400.0),
+    );
+
+    expect(flex.size.width, 500.0);
+  });
+
+  test('Flexible with CrossAxisSize.min horizontal', () {
+    final RenderConstrainedBox box1 = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 100.0, height: 100.0));
+    final RenderConstrainedBox box2 = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 100.0, height: 100.0));
+    final RenderConstrainedBox box3 = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 100.0, height: 100.0));
+    final RenderFlex flex = RenderFlex(
+      textDirection: TextDirection.ltr,
+    );
+    flex.addAll(<RenderBox>[box1, box2, box3]);
+    layout(flex, constraints: const BoxConstraints(
+        minWidth: 0.0, maxWidth: 500.0, minHeight: 0.0, maxHeight: 400.0),
+    );
+
+    expect(flex.size.height, 100.0);
+  });
+
+  test('Flexible with CrossAxisSize.min vertical', () {
+    final RenderConstrainedBox box1 = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 100.0, height: 100.0));
+    final RenderConstrainedBox box2 = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 100.0, height: 100.0));
+    final RenderConstrainedBox box3 = RenderConstrainedBox(additionalConstraints: const BoxConstraints.tightFor(width: 100.0, height: 100.0));
+    final RenderFlex flex = RenderFlex(
+      direction: Axis.vertical,
+    );
+    flex.addAll(<RenderBox>[box1, box2, box3]);
+    layout(flex, constraints: const BoxConstraints(
+        minWidth: 0.0, maxWidth: 500.0, minHeight: 0.0, maxHeight: 400.0),
+    );
+
+    expect(flex.size.width, 100.0);
   });
 
   test('Flex RTL', () {

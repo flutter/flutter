@@ -8,6 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
 
+import 'framework_test.dart';
+
 void main() {
   group('PhysicalShape', () {
     testWidgets('properties', (WidgetTester tester) async {
@@ -214,6 +216,57 @@ void main() {
       const UnconstrainedBox(constrainedAxis: Axis.horizontal, textDirection: TextDirection.rtl, alignment: Alignment.topRight).toString(),
       equals('UnconstrainedBox(alignment: topRight, constrainedAxis: horizontal, textDirection: rtl)'),
     );
+  });
+
+  test('Flex has crossAxisSize', () {
+    final Flex flex = Flex(
+      direction: Axis.vertical,
+      crossAxisSize: CrossAxisSize.max,
+    );
+
+    expect(flex.crossAxisSize, CrossAxisSize.max);
+  });
+
+  test('Flex defaults crossAxisSize to CrossAxisSize.min', () {
+    final Flex flex = Flex(direction: Axis.vertical);
+
+    expect(flex.crossAxisSize, CrossAxisSize.min);
+  });
+
+  test('Flex creates RenderFlex with crossAxisSize', () {
+    final Flex flex = Flex(
+      direction: Axis.vertical,
+      crossAxisSize: CrossAxisSize.max,
+    );
+    final BuildContext buildContext = NullChildElement(Container());
+    final RenderFlex renderFlex = flex.createRenderObject(buildContext);
+
+    expect(renderFlex.crossAxisSize, CrossAxisSize.max);
+  });
+
+  test('Flex updates RenderFlex with crossAxisSize', () {
+    final Flex flex = Flex(
+      direction: Axis.vertical,
+      crossAxisSize: CrossAxisSize.max,
+    );
+    final RenderFlex renderFlex = RenderFlex();
+    final BuildContext buildContext = NullChildElement(Container());
+
+    flex.updateRenderObject(buildContext, renderFlex);
+
+    expect(renderFlex.crossAxisSize, CrossAxisSize.max);
+  });
+
+  test('Column has crossAxisSize', () {
+    final Column column = Column(crossAxisSize: CrossAxisSize.max);
+
+    expect(column.crossAxisSize, CrossAxisSize.max);
+  });
+
+  test('Row has crossAxisSize', () {
+    final Row row = Row(crossAxisSize: CrossAxisSize.max);
+
+    expect(row.crossAxisSize, CrossAxisSize.max);
   });
 }
 

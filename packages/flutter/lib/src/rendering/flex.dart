@@ -135,6 +135,47 @@ enum MainAxisAlignment {
   spaceEvenly,
 }
 
+/// How much space should be occupied in the cross axis.
+///
+/// During a flex layout, available space along the cross axis is allocated to
+/// children. After allocating space, there might be some remaining free space.
+/// This value controls whether to maximize or minimize the amount of free
+/// space, subject to the incoming layout constraints.
+///
+/// See also:
+///
+///  * [Column], [Row], and [Flex], the flex widgets.
+///  * [Expanded] and [Flexible], the widgets that controls a flex widgets'
+///    children's flex.
+///  * [RenderFlex], the flex render object.
+///  * [CrossAxisAlignment], which controls how the free space is distributed.
+enum CrossAxisSize {
+  /// Minimize the amount of free space along the cross axis, subject to the
+  /// incoming layout constraints.
+  ///
+  /// If the incoming layout constraints have a large enough
+  /// [BoxConstraints.minWidth] or [BoxConstraints.minHeight], there might still
+  /// be a non-zero amount of free space.
+  ///
+  /// If the incoming layout constraints are unbounded, and any children have a
+  /// non-zero [FlexParentData.flex] and a [FlexFit.tight] fit (as applied by
+  /// [Expanded]), the [RenderFlex] will assert, because there would be infinite
+  /// remaining free space and boxes cannot be given infinite size.
+  min,
+
+  /// Maximize the amount of free space along the cross axis, subject to the
+  /// incoming layout constraints.
+  ///
+  /// If the incoming layout constraints have a small enough
+  /// [BoxConstraints.maxWidth] or [BoxConstraints.maxHeight], there might still
+  /// be no free space.
+  ///
+  /// If the incoming layout constraints are unbounded, the [RenderFlex] will
+  /// assert, because there would be infinite remaining free space and boxes
+  /// cannot be given infinite size.
+  max,
+}
+
 /// How the children should be placed along the cross axis in a flex layout.
 ///
 /// See also:
@@ -272,6 +313,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     List<RenderBox> children,
     Axis direction = Axis.horizontal,
     MainAxisSize mainAxisSize = MainAxisSize.max,
+    CrossAxisSize crossAxisSize = CrossAxisSize.min,
     MainAxisAlignment mainAxisAlignment = MainAxisAlignment.start,
     CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.center,
     TextDirection textDirection,
@@ -285,6 +327,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
        _mainAxisAlignment = mainAxisAlignment,
        _mainAxisSize = mainAxisSize,
        _crossAxisAlignment = crossAxisAlignment,
+       _crossAxisSize = crossAxisSize,
        _textDirection = textDirection,
        _verticalDirection = verticalDirection,
        _textBaseline = textBaseline {
@@ -356,6 +399,26 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     assert(value != null);
     if (_crossAxisAlignment != value) {
       _crossAxisAlignment = value;
+      markNeedsLayout();
+    }
+  }
+
+  /// How much space should be occupied in the cross axis.
+  ///
+  /// After allocating space to children, there might be some remaining free
+  /// space. This value controls whether to maximize or minimize the amount of
+  /// free space, subject to the incoming layout constraints.
+  ///
+  /// If some children have a non-zero flex factors (and none have a fit of
+  /// [FlexFit.loose]), they will expand to consume all the available space and
+  /// there will be no remaining free space to maximize or minimize, making this
+  /// value irrelevant to the final layout.
+  CrossAxisSize get crossAxisSize => _crossAxisSize;
+  CrossAxisSize _crossAxisSize;
+  set crossAxisSize(CrossAxisSize value) {
+    assert(value != null);
+    if (_crossAxisSize != value) {
+      _crossAxisSize = value;
       markNeedsLayout();
     }
   }
@@ -641,7 +704,9 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     int totalChildren = 0;
     assert(constraints != null);
     final double maxMainSize = _direction == Axis.horizontal ? constraints.maxWidth : constraints.maxHeight;
+    final double maxCrossSize = _direction == Axis.vertical ? constraints.maxWidth : constraints.maxHeight;
     final bool canFlex = maxMainSize < double.infinity;
+    final bool canCrossFlex = maxCrossSize < double.infinity;
 
     double crossSize = 0.0;
     double allocatedSize = 0.0; // Sum of the sizes of the non-flexible children.
@@ -837,16 +902,17 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
 
     // Align items along the main axis.
     final double idealSize = canFlex && mainAxisSize == MainAxisSize.max ? maxMainSize : allocatedSize;
+    final double idealCrossSize = canCrossFlex && crossAxisSize == CrossAxisSize.max ? maxCrossSize: crossSize;
     double actualSize;
     double actualSizeDelta;
     switch (_direction) {
       case Axis.horizontal:
-        size = constraints.constrain(Size(idealSize, crossSize));
+        size = constraints.constrain(Size(idealSize, idealCrossSize));
         actualSize = size.width;
         crossSize = size.height;
         break;
       case Axis.vertical:
-        size = constraints.constrain(Size(crossSize, idealSize));
+        size = constraints.constrain(Size(idealCrossSize, idealSize));
         actualSize = size.height;
         crossSize = size.width;
         break;
@@ -1017,6 +1083,7 @@ class RenderFlex extends RenderBox with ContainerRenderObjectMixin<RenderBox, Fl
     properties.add(EnumProperty<MainAxisAlignment>('mainAxisAlignment', mainAxisAlignment));
     properties.add(EnumProperty<MainAxisSize>('mainAxisSize', mainAxisSize));
     properties.add(EnumProperty<CrossAxisAlignment>('crossAxisAlignment', crossAxisAlignment));
+    properties.add(EnumProperty<CrossAxisSize>('crossAxisSize', crossAxisSize));
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     properties.add(EnumProperty<VerticalDirection>('verticalDirection', verticalDirection, defaultValue: null));
     properties.add(EnumProperty<TextBaseline>('textBaseline', textBaseline, defaultValue: null));
