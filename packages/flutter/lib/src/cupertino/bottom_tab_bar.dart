@@ -392,7 +392,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
-      children: components
+      children: components,
     );
   }
 
