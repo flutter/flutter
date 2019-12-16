@@ -591,6 +591,27 @@ void main() {
     ]));
   });
 
+  test('should not schedule postframe callbacks when no mouse is connected', () {
+    const MouseTrackerAnnotation annotation = MouseTrackerAnnotation();
+    _setUpMouseAnnotationFinder((Offset position) sync* {
+    });
+
+    // This device only supports touching
+    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+      _pointerData(PointerChange.add, const Offset(0.0, 100.0), kind: PointerDeviceKind.touch),
+    ]));
+    expect(_mouseTracker.mouseIsConnected, isFalse);
+
+    // Attaching an annotation just in case
+    _mouseTracker.attachAnnotation(annotation);
+    expect(_binding.postFrameCallbacks, hasLength(0));
+
+    _binding.scheduleMouseTrackerPostFrameCheck();
+    expect(_binding.postFrameCallbacks, hasLength(0));
+
+    _mouseTracker.detachAnnotation(annotation);
+  });
+
   test('should not flip out if not all mouse events are listened to', () {
     bool isInHitRegionOne = true;
     bool isInHitRegionTwo = false;
@@ -782,12 +803,13 @@ ui.PointerData _pointerData(
   PointerChange change,
   Offset logicalPosition, {
   int device = 0,
+  PointerDeviceKind kind = PointerDeviceKind.mouse,
 }) {
   return ui.PointerData(
     change: change,
     physicalX: logicalPosition.dx * ui.window.devicePixelRatio,
     physicalY: logicalPosition.dy * ui.window.devicePixelRatio,
-    kind: PointerDeviceKind.mouse,
+    kind: kind,
     device: device,
   );
 }

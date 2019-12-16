@@ -68,11 +68,10 @@ class WebEntrypointTarget extends Target {
     );
 
     // By construction, this will only be null if the .packages file does not
-    // have an entry for the user's application.
-    final Uri mainImport = packageUriMapper.map(importPath);
-    if (mainImport == null) {
-      throw Exception('Missing package definition for $mainImport');
-    }
+    // have an entry for the user's application or if the main file is
+    // outside of the lib/ directory.
+    final String mainImport = packageUriMapper.map(importPath)?.toString()
+      ?? fs.file(importPath).absolute.uri.toString();
 
     String contents;
     if (hasPlugins) {

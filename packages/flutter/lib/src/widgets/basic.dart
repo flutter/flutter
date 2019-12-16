@@ -2608,6 +2608,9 @@ class SizedOverflowBox extends SingleChildRenderObjectWidget {
 /// painting anything, without making the child available for hit testing, and
 /// without taking any room in the parent.
 ///
+/// Offstage children are still active: they can receive focus and have keyboard
+/// input directed to them.
+///
 /// Animations continue to run in offstage children, and therefore use battery
 /// and CPU time, regardless of whether the animations end up being visible.
 ///
@@ -2633,6 +2636,12 @@ class Offstage extends SingleChildRenderObjectWidget {
   /// If true, the child is laid out as if it was in the tree, but without
   /// painting anything, without making the child available for hit testing, and
   /// without taking any room in the parent.
+  ///
+  /// Offstage children are still active: they can receive focus and have keyboard
+  /// input directed to them.
+  ///
+  /// Animations continue to run in offstage children, and therefore use battery
+  /// and CPU time, regardless of whether the animations end up being visible.
   ///
   /// If false, the child is included in the tree as normal.
   final bool offstage;

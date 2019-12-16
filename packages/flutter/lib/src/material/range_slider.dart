@@ -273,8 +273,9 @@ class RangeSlider extends StatefulWidget {
   /// There are two labels: one for the start thumb and one for the end thumb.
   ///
   /// Each label is rendered using the active [ThemeData]'s
-  /// [ThemeData.accentTextTheme.body2] text style, and can be overridden
-  /// by changing the [SliderThemeData.valueIndicatorTextStyle].
+  /// [ThemeData.textTheme.body2] text style, with the
+  /// theme data's [ThemeData.colorScheme.onPrimaryColor]. The label's text
+  /// style can be overridden with [SliderThemeData.valueIndicatorTextStyle].
   ///
   /// If null, then the value indicator will not be displayed.
   ///
@@ -992,7 +993,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   }
 
   double _discretize(double value) {
-    double result = value.clamp(0.0, 1.0);
+    double result = value.clamp(0.0, 1.0) as double;
     if (isDiscrete) {
       result = (result * divisions).round() / divisions;
     }
@@ -1004,7 +1005,7 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   }
 
   void _startInteraction(Offset globalPosition) {
-    final double tapValue = _getValueFromGlobalPosition(globalPosition).clamp(0.0, 1.0);
+    final double tapValue = _getValueFromGlobalPosition(globalPosition).clamp(0.0, 1.0) as double;
     _lastThumbSelection = sliderTheme.thumbSelector(textDirection, values, tapValue, _thumbSize, size, 0);
 
     if (_lastThumbSelection != null) {
@@ -1407,10 +1408,10 @@ class _RenderRangeSlider extends RenderBox with RelayoutWhenSystemFontsChangeMix
   }
 
   double _increaseValue(double value) {
-    return (value + _semanticActionUnit).clamp(0.0, 1.0);
+    return (value + _semanticActionUnit).clamp(0.0, 1.0) as double;
   }
 
   double _decreaseValue(double value) {
-    return (value - _semanticActionUnit).clamp(0.0, 1.0);
+    return (value - _semanticActionUnit).clamp(0.0, 1.0) as double;
   }
 }

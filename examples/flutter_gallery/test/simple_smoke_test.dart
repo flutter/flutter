@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_gallery/gallery/app.dart' show GalleryApp;
 
 void main() {
-  final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+  final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
   if (binding is LiveTestWidgetsFlutterBinding)
     binding.framePolicy = LiveTestWidgetsFlutterBindingFramePolicy.fullyLive;
 

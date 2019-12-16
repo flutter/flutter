@@ -494,7 +494,7 @@ void main() {
       find.byType(Overlay),
       matchesGoldenFile('text_field_opacity_test.0.png'),
     );
-  }, skip: isBrowser);
+  });
 
   testWidgets('text field toolbar options correctly changes options (iOS)',
       (WidgetTester tester) async {
@@ -544,7 +544,7 @@ void main() {
     expect(find.text('Copy'), findsOneWidget);
     expect(find.text('Cut'), findsNothing);
     expect(find.text('Select All'), findsNothing);
-  }, skip: isBrowser);
+  });
 
   testWidgets('text field toolbar options correctly changes options (Android)',
       (WidgetTester tester) async {
@@ -577,7 +577,7 @@ void main() {
     expect(find.text('COPY'), findsOneWidget);
     expect(find.text('CUT'), findsNothing);
     expect(find.text('SELECT ALL'), findsNothing);
-  }, skip: isBrowser);
+  });
 
   // TODO(hansmuller): restore these tests after the fix for #24876 has landed.
   /*
@@ -2853,7 +2853,7 @@ void main() {
     // and the left edge of the input and label.
     expect(iconRight + 28.0, equals(tester.getTopLeft(find.text('label')).dx));
     expect(iconRight + 28.0, equals(tester.getTopLeft(find.byType(EditableText)).dx));
-  }, skip: isBrowser);
+  });
 
   testWidgets('Collapsed hint text placement', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -6547,6 +6547,8 @@ void main() {
       maxLines: 10,
       maxLength: 100,
       maxLengthEnforced: false,
+      smartDashesType: SmartDashesType.disabled,
+      smartQuotesType: SmartQuotesType.disabled,
       enabled: false,
       cursorWidth: 1.0,
       cursorRadius: Radius.zero,
@@ -6567,6 +6569,8 @@ void main() {
       'style: TextStyle(inherit: true, color: Color(0xff00ff00))',
       'autofocus: true',
       'autocorrect: false',
+      'smartDashesType: disabled',
+      'smartQuotesType: disabled',
       'maxLines: 10',
       'maxLength: 100',
       'maxLength not enforced',

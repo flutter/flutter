@@ -7,6 +7,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
+import '../gestures/gesture_tester.dart';
 import '../services/fake_platform_views.dart';
 import 'rendering_tester.dart';
 
@@ -15,7 +16,7 @@ void main() {
   group('PlatformViewRenderBox', () {
     FakePlatformViewController fakePlatformViewController;
     PlatformViewRenderBox platformViewRenderBox;
-    setUp((){
+    setUp(() {
       fakePlatformViewController = FakePlatformViewController(0);
       platformViewRenderBox = PlatformViewRenderBox(
         controller: fakePlatformViewController,
@@ -68,5 +69,17 @@ void main() {
 
       semanticsHandle.dispose();
     });
+
+    testGesture('hover events are dispatched via PlatformViewController.dispatchPointerEvent', (GestureTester tester) {
+      layout(platformViewRenderBox);
+      pumpFrame(phase: EnginePhase.flushSemantics);
+
+      final TestPointer pointer = TestPointer(1, PointerDeviceKind.mouse);
+      tester.route(pointer.addPointer());
+      tester.route(pointer.hover(const Offset(10, 10)));
+
+      expect(fakePlatformViewController.dispatchedPointerEvents, isNotEmpty);
+    });
+
   }, skip: isBrowser); // TODO(yjbanov): fails on Web with obscured stack trace: https://github.com/flutter/flutter/issues/42770
 }

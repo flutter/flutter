@@ -81,7 +81,9 @@ class AndroidView extends StatefulWidget {
   /// A [PlatformViewFactory](/javadoc/io/flutter/plugin/platform/PlatformViewFactory.html)
   /// for this type must have been registered.
   ///
-  /// See also: [AndroidView] for an example of registering a platform view factory.
+  /// See also:
+  ///
+  ///  * [AndroidView] for an example of registering a platform view factory.
   final String viewType;
 
   /// {@template flutter.widgets.platformViews.createdParam}
@@ -701,7 +703,9 @@ class _UiKitPlatformView extends LeafRenderObjectWidget {
 
 /// The parameters used to create a [PlatformViewController].
 ///
-/// See also [CreatePlatformViewCallback] which uses this object to create a [PlatformViewController].
+/// See also:
+///
+///  * [CreatePlatformViewCallback] which uses this object to create a [PlatformViewController].
 class PlatformViewCreationParams {
 
   const PlatformViewCreationParams._({
@@ -737,7 +741,8 @@ class PlatformViewCreationParams {
 /// The returned widget should present the platform view associated with `controller`.
 ///
 /// See also:
-/// * [PlatformViewSurface], a common widget for presenting platform views.
+///
+///  * [PlatformViewSurface], a common widget for presenting platform views.
 typedef PlatformViewSurfaceFactory = Widget Function(BuildContext context, PlatformViewController controller);
 
 /// Constructs a [PlatformViewController].
@@ -745,7 +750,9 @@ typedef PlatformViewSurfaceFactory = Widget Function(BuildContext context, Platf
 /// The [PlatformViewController.id] field of the created controller must match the value of the
 /// params [PlatformViewCreationParams.id] field.
 ///
-/// See also [PlatformViewLink.onCreate].
+/// See also:
+///
+///  * [PlatformViewLink], which links a platform view with the Flutter framework.
 typedef CreatePlatformViewCallback = PlatformViewController Function(PlatformViewCreationParams params);
 
 /// Links a platform view with the Flutter framework.
@@ -785,8 +792,9 @@ class PlatformViewLink extends StatefulWidget {
   /// The `surfaceFactory` and the `onCreatePlatformView` must not be null.
   ///
   /// See also:
-  /// * [PlatformViewSurface] for details on the widget returned by `surfaceFactory`.
-  /// * [PlatformViewCreationParams] for how each parameter can be used when implementing `createPlatformView`.
+  ///
+  ///  * [PlatformViewSurface] for details on the widget returned by `surfaceFactory`.
+  ///  * [PlatformViewCreationParams] for how each parameter can be used when implementing `createPlatformView`.
   const PlatformViewLink({
     Key key,
     @required PlatformViewSurfaceFactory surfaceFactory,
@@ -904,8 +912,9 @@ class _PlatformViewLinkState extends State<PlatformViewLink> {
 /// If the associated platform view is not created the [PlatformViewSurface] does not paint any contents.
 ///
 /// See also:
-/// * [AndroidView] which embeds an Android platform view in the widget hierarchy.
-/// * [UIKitView] which embeds an iOS platform view in the widget hierarchy.
+///
+///  * [AndroidView] which embeds an Android platform view in the widget hierarchy.
+///  * [UIKitView] which embeds an iOS platform view in the widget hierarchy.
 // TODO(amirh): Link to the embedder's system compositor documentation once available.
 class PlatformViewSurface extends LeafRenderObjectWidget {
 

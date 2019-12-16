@@ -136,9 +136,9 @@ class BeveledRectangleBorder extends ShapeBorder {
   bool operator ==(dynamic other) {
     if (runtimeType != other.runtimeType)
       return false;
-    final BeveledRectangleBorder typedOther = other;
-    return side == typedOther.side
-        && borderRadius == typedOther.borderRadius;
+    return other is BeveledRectangleBorder
+        && other.side == side
+        && other.borderRadius == borderRadius;
   }
 
   @override

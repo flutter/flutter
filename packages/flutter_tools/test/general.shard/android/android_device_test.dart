@@ -665,6 +665,36 @@ flutter:
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
     });
+
+    testUsingContext('disposing device disposes the portForwarder', () async {
+      bool unforwardCalled = false;
+      when(mockProcessManager.run(argThat(containsAll(<String>[
+        'forward',
+        'tcp:0',
+        'tcp:123',
+      ])))).thenAnswer((_) async {
+        return ProcessResult(0, 0, '456', '');
+      });
+      when(mockProcessManager.runSync(argThat(containsAll(<String>[
+        'forward',
+        '--list',
+      ])))).thenReturn(ProcessResult(0, 0, '1234 tcp:456 tcp:123', ''));
+      when(mockProcessManager.run(argThat(containsAll(<String>[
+        'forward',
+        '--remove',
+        'tcp:456',
+      ])))).thenAnswer((_) async {
+        unforwardCalled = true;
+        return ProcessResult(0, 0, '', '');
+      });
+      expect(await forwarder.forward(123), equals(456));
+
+      await device.dispose();
+
+      expect(unforwardCalled, isTrue);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+    });
   });
 
   group('lastLogcatTimestamp', () {

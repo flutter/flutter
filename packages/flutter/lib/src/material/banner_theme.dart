@@ -73,8 +73,8 @@ class MaterialBannerThemeData extends Diagnosticable {
     return MaterialBannerThemeData(
       backgroundColor: Color.lerp(a?.backgroundColor, b?.backgroundColor, t),
       contentTextStyle: TextStyle.lerp(a?.contentTextStyle, b?.contentTextStyle, t),
-      padding: EdgeInsets.lerp(a?.padding, b?.padding, t),
-      leadingPadding: EdgeInsets.lerp(a?.leadingPadding, b?.leadingPadding, t),
+      padding: EdgeInsetsGeometry.lerp(a?.padding, b?.padding, t),
+      leadingPadding: EdgeInsetsGeometry.lerp(a?.leadingPadding, b?.leadingPadding, t),
     );
   }
 
@@ -94,11 +94,11 @@ class MaterialBannerThemeData extends Diagnosticable {
       return true;
     if (other.runtimeType != runtimeType)
       return false;
-    final MaterialBannerThemeData typedOther = other;
-    return typedOther.backgroundColor == backgroundColor
-        && typedOther.contentTextStyle == contentTextStyle
-        && typedOther.padding == padding
-        && typedOther.leadingPadding == leadingPadding;
+    return other is MaterialBannerThemeData
+        && other.backgroundColor == backgroundColor
+        && other.contentTextStyle == contentTextStyle
+        && other.padding == padding
+        && other.leadingPadding == leadingPadding;
   }
 
   @override

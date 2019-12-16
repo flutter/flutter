@@ -20,15 +20,20 @@ void configureProject(Project project, String outputDir) {
 
     project.apply plugin: "maven"
 
-    project.android.libraryVariants.all { variant ->
-        addAarTask(project, variant)
-    }
     // Snapshot versions include the timestamp in the artifact name.
     // Therefore, remove the snapshot part, so new runs of `flutter build aar` overrides existing artifacts.
     // This version isn't relevant in Flutter since the pub version is used
     // to resolve dependencies.
     project.version = project.version.replace("-SNAPSHOT", "")
 
+    if (project.hasProperty("buildNumber")) {
+        project.version = project.property("buildNumber")
+    }
+
+    project.android.libraryVariants.all { variant ->
+        addAarTask(project, variant)
+    }
+    
     project.uploadArchives {
         repositories {
             mavenDeployer {
@@ -39,6 +44,7 @@ void configureProject(Project project, String outputDir) {
     if (!project.property("is-plugin").toBoolean()) {
         return
     }
+
     if (project.hasProperty('localEngineOut')) {
         // TODO(egarciad): Support local engine.
         // This most likely requires refactoring `flutter.gradle`, so the logic can be reused.

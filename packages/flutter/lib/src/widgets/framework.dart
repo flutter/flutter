@@ -39,8 +39,15 @@ export 'package:flutter/rendering.dart' show RenderObject, RenderBox, debugDumpR
 // KEYS
 
 /// A key that is only equal to itself.
+///
+/// This cannot be created with a const constructor because that implies that
+/// all instantiated keys would be the same instance and therefore not be unique.
 class UniqueKey extends LocalKey {
   /// Creates a key that is equal only to itself.
+  ///
+  /// The key cannot be created with a const constructor because that implies
+  /// that all instantiated keys would be the same instance and therefore not
+  /// be unique.
   // ignore: prefer_const_constructors_in_immutables , never use const for this class
   UniqueKey();
 
@@ -53,7 +60,11 @@ class UniqueKey extends LocalKey {
 /// Used to tie the identity of a widget to the identity of an object used to
 /// generate that widget.
 ///
-/// See also the discussions at [Key] and [Widget.key].
+/// See also:
+///
+///  * [Key], the base class for all keys.
+///  * The discussion at [Widget.key] for more information about how widgets use
+///    keys.
 class ObjectKey extends LocalKey {
   /// Creates a key that uses [identical] on [value] for its [operator==].
   const ObjectKey(this.value);
@@ -99,7 +110,10 @@ class ObjectKey extends LocalKey {
 /// You cannot simultaneously include two widgets in the tree with the same
 /// global key. Attempting to do so will assert at runtime.
 ///
-/// See also the discussion at [Widget.key].
+/// See also:
+///
+///  * The discussion at [Widget.key] for more information about how widgets use
+///    keys.
 @optionalTypeArgs
 abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
   /// Creates a [LabeledGlobalKey], which is a [GlobalKey] with a label used for
@@ -410,7 +424,9 @@ abstract class Widget extends DiagnosticableTree {
   /// Generally, a widget that is the only child of another widget does not need
   /// an explicit key.
   ///
-  /// See also the discussions at [Key] and [GlobalKey].
+  /// See also:
+  ///
+  ///  * The discussions at [Key] and [GlobalKey].
   final Key key;
 
   /// Inflates this configuration to a concrete instance.
@@ -1188,8 +1204,10 @@ abstract class State<T extends StatefulWidget> extends Diagnosticable {
   /// If you override this, make sure to end your method with a call to
   /// super.deactivate().
   ///
-  /// See also [dispose], which is called after [deactivate] if the widget is
-  /// removed from the tree permanently.
+  /// See also:
+  ///
+  ///  * [dispose], which is called after [deactivate] if the widget is removed
+  ///    from the tree permanently.
   @protected
   @mustCallSuper
   void deactivate() { }
@@ -1210,7 +1228,9 @@ abstract class State<T extends StatefulWidget> extends Diagnosticable {
   /// If you override this, make sure to end your method with a call to
   /// super.dispose().
   ///
-  /// See also [deactivate], which is called prior to [dispose].
+  /// See also:
+  ///
+  ///  * [deactivate], which is called prior to [dispose].
   @protected
   @mustCallSuper
   void dispose() {
@@ -1709,9 +1729,61 @@ abstract class MultiChildRenderObjectWidget extends RenderObjectWidget {
 
   /// The widgets below this widget in the tree.
   ///
-  /// If this list is going to be mutated, it is usually wise to put [Key]s on
-  /// the widgets, so that the framework can match old configurations to new
-  /// configurations and maintain the underlying render objects.
+  /// If this list is going to be mutated, it is usually wise to put a [Key] on
+  /// each of the child widgets, so that the framework can match old
+  /// configurations to new configurations and maintain the underlying render
+  /// objects.
+  ///
+  /// Also, a [Widget] in Flutter is immutable, so directly modifying the
+  /// [children] such as `someMultiChildRenderObjectWidget.children.add(...)` or
+  /// as the example code below will result in incorrect behaviors. Whenever the
+  /// children list is modified, a new list object should be provided.
+  ///
+  /// ```dart
+  /// class SomeWidgetState extends State<SomeWidget> {
+  ///   List<Widget> _children;
+  ///
+  ///   void initState() {
+  ///     _children = [];
+  ///   }
+  ///
+  ///   void someHandler() {
+  ///     setState(() {
+  ///         _children.add(...);
+  ///     });
+  ///   }
+  ///
+  ///   Widget build(...) {
+  ///     // Reusing `List<Widget> _children` here is problematic.
+  ///     return Row(children: _children);
+  ///   }
+  /// }
+  /// ```
+  ///
+  /// The following code corrects the problem mentioned above.
+  ///
+  /// ```dart
+  /// class SomeWidgetState extends State<SomeWidget> {
+  ///   List<Widget> _children;
+  ///
+  ///   void initState() {
+  ///     _children = [];
+  ///   }
+  ///
+  ///   void someHandler() {
+  ///     setState(() {
+  ///       // The key here allows Flutter to reuse the underlying render
+  ///       // objects even if the children list is recreated.
+  ///       _children.add(ChildWidget(key: ...));
+  ///     });
+  ///   }
+  ///
+  ///   Widget build(...) {
+  ///     // Always create a new list of children as a Widget is immutable.
+  ///     return Row(children: List.from(_children));
+  ///   }
+  /// }
+  /// ```
   final List<Widget> children;
 
   @override
