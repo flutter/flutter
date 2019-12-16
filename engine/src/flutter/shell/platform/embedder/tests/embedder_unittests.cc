@@ -3805,5 +3805,23 @@ TEST_F(EmbedderTest, ObjectsCanBePostedViaPorts) {
   buffer_released_latch.Wait();
 }
 
+TEST_F(EmbedderTest, CanSendLowMemoryNotification) {
+  auto& context = GetEmbedderContext();
+
+  EmbedderConfigBuilder builder(context);
+  builder.SetSoftwareRendererConfig();
+
+  auto engine = builder.LaunchEngine();
+
+  ASSERT_TRUE(engine.is_valid());
+
+  // TODO(chinmaygarde): The shell ought to have a mechanism for notification
+  // dispatch that engine subsystems can register handlers to. This would allow
+  // the raster cache and the secondary context caches to respond to
+  // notifications. Once that is in place, this test can be updated to actually
+  // ensure that the dispatched message is visible to engine subsystems.
+  ASSERT_EQ(FlutterEngineNotifyLowMemoryWarning(engine.get()), kSuccess);
+}
+
 }  // namespace testing
 }  // namespace flutter
