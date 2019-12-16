@@ -24,6 +24,7 @@ import '../common/frame_sync.dart';
 import '../common/geometry.dart';
 import '../common/gesture.dart';
 import '../common/health.dart';
+import '../common/layer_tree.dart';
 import '../common/message.dart';
 import '../common/render_tree.dart';
 import '../common/request_data.dart';
@@ -107,6 +108,7 @@ class FlutterDriverExtension {
 
     _commandHandlers.addAll(<String, CommandHandlerCallback>{
       'get_health': _getHealth,
+      'get_layer_tree': _getLayerTree,
       'get_render_tree': _getRenderTree,
       'enter_text': _enterText,
       'get_text': _getText,
@@ -130,6 +132,7 @@ class FlutterDriverExtension {
 
     _commandDeserializers.addAll(<String, CommandDeserializerCallback>{
       'get_health': (Map<String, String> params) => GetHealth.deserialize(params),
+      'get_layer_tree': (Map<String, String> params) => GetLayerTree.deserialize(params),
       'get_render_tree': (Map<String, String> params) => GetRenderTree.deserialize(params),
       'enter_text': (Map<String, String> params) => EnterText.deserialize(params),
       'get_text': (Map<String, String> params) => GetText.deserialize(params),
@@ -228,6 +231,10 @@ class FlutterDriverExtension {
   }
 
   Future<Health> _getHealth(Command command) async => const Health(HealthStatus.ok);
+
+  Future<LayerTree> _getLayerTree(Command command) async {
+    return LayerTree(RendererBinding.instance?.renderView?.debugLayer?.toStringDeep());
+  }
 
   Future<RenderTree> _getRenderTree(Command command) async {
     return RenderTree(RendererBinding.instance?.renderView?.toStringDeep());
