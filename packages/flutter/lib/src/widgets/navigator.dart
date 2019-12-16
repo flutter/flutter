@@ -1626,7 +1626,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       isInitialRoute: _history.isEmpty,
       arguments: arguments,
     );
-    Route<T> route = widget.onGenerateRoute(settings);
+    Route<T> route = widget.onGenerateRoute(settings) as Route<T>;
     if (route == null && !allowNull) {
       assert(() {
         if (widget.onUnknownRoute == null) {
@@ -1641,7 +1641,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
         }
         return true;
       }());
-      route = widget.onUnknownRoute(settings);
+      route = widget.onUnknownRoute(settings) as Route<T>;
       assert(() {
         if (route == null) {
           throw FlutterError.fromParts(<DiagnosticsNode>[
@@ -2073,7 +2073,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///    to define the route's `willPop` method.
   @optionalTypeArgs
   Future<bool> maybePop<T extends Object>([ T result ]) async {
-    final Route<T> route = _history.last;
+    final Route<T> route = _history.last as Route<T>;
     assert(route._navigator == this);
     final RoutePopDisposition disposition = await route.willPop();
     if (disposition != RoutePopDisposition.bubble && mounted) {

@@ -356,7 +356,7 @@ class _DraggableState<T> extends State<Draggable<T>> {
     _recognizer = null;
   }
 
-  void _routePointer(PointerEvent event) {
+  void _routePointer(PointerDownEvent event) {
     if (widget.maxSimultaneousDrags != null && _activeCount >= widget.maxSimultaneousDrags)
       return;
     _recognizer.addPointer(event);
@@ -368,7 +368,7 @@ class _DraggableState<T> extends State<Draggable<T>> {
     Offset dragStartPoint;
     switch (widget.dragAnchor) {
       case DragAnchor.child:
-        final RenderBox renderObject = context.findRenderObject();
+        final RenderBox renderObject = context.findRenderObject() as RenderBox;
         dragStartPoint = renderObject.globalToLocal(position);
         break;
       case DragAnchor.pointer:
@@ -519,7 +519,8 @@ class _DragTargetState<T> extends State<DragTarget<T>> {
   bool didEnter(_DragAvatar<dynamic> avatar) {
     assert(!_candidateAvatars.contains(avatar));
     assert(!_rejectedAvatars.contains(avatar));
-    if (avatar.data is T && (widget.onWillAccept == null || widget.onWillAccept(avatar.data))) {
+    final dynamic data = avatar.data;
+    if (data is T && (widget.onWillAccept == null || widget.onWillAccept(data))) {
       setState(() {
         _candidateAvatars.add(avatar);
       });
@@ -670,10 +671,11 @@ class _DragAvatar<T> extends Drag {
     // Look for the RenderBoxes that corresponds to the hit target (the hit target
     // widgets build RenderMetaData boxes for us for this purpose).
     for (HitTestEntry entry in path) {
-      if (entry.target is RenderMetaData) {
-        final RenderMetaData renderMetaData = entry.target;
-        if (renderMetaData.metaData is _DragTargetState<T>)
-          yield renderMetaData.metaData;
+      final HitTestTarget target = entry.target;
+      if (target is RenderMetaData) {
+        final dynamic metaData = target.metaData;
+        if (metaData is _DragTargetState<T>)
+          yield metaData;
       }
     }
   }
@@ -701,7 +703,7 @@ class _DragAvatar<T> extends Drag {
   }
 
   Widget _build(BuildContext context) {
-    final RenderBox box = overlayState.context.findRenderObject();
+    final RenderBox box = overlayState.context.findRenderObject() as RenderBox;
     final Offset overlayTopLeft = box.localToGlobal(Offset.zero);
     return Positioned(
       left: _lastOffset.dx - overlayTopLeft.dx,

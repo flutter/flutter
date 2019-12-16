@@ -213,6 +213,21 @@ class BoxDecoration extends Decoration {
   @override
   EdgeInsetsGeometry get padding => border?.dimensions;
 
+  @override
+  Path getClipPath(Rect rect, TextDirection textDirection) {
+    Path clipPath;
+    switch (shape) {
+      case BoxShape.circle:
+        clipPath = Path()..addOval(rect);
+        break;
+      case BoxShape.rectangle:
+        if (borderRadius != null)
+          clipPath = Path()..addRRect(borderRadius.resolve(textDirection).toRRect(rect));
+        break;
+    }
+    return clipPath;
+  }
+
   /// Returns a new box decoration that is scaled by the given factor.
   BoxDecoration scale(double factor) {
     return BoxDecoration(

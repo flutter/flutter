@@ -23,6 +23,11 @@ import 'sliver.dart';
 /// replace the proxy sliver with its child. However, RenderProxySliver is a
 /// useful base class for render objects that wish to mimic most, but not all,
 /// of the properties of their sliver child.
+///
+/// See also:
+///
+///  * [RenderProxyBox], a base class for render boxes that resemble their
+///    children.
 abstract class RenderProxySliver extends RenderSliver with RenderObjectWithChildMixin<RenderSliver> {
   /// Creates a proxy render sliver.
   ///
@@ -91,10 +96,10 @@ class RenderSliverOpacity extends RenderProxySliver {
     bool alwaysIncludeSemantics = false,
     RenderSliver sliver,
   }) : assert(opacity != null && opacity >= 0.0 && opacity <= 1.0),
-      assert(alwaysIncludeSemantics != null),
-      _opacity = opacity,
-      _alwaysIncludeSemantics = alwaysIncludeSemantics,
-      _alpha = ui.Color.getAlphaFromOpacity(opacity) {
+       assert(alwaysIncludeSemantics != null),
+       _opacity = opacity,
+       _alwaysIncludeSemantics = alwaysIncludeSemantics,
+       _alpha = ui.Color.getAlphaFromOpacity(opacity) {
     child = sliver;
   }
 
@@ -204,8 +209,8 @@ class RenderSliverIgnorePointer extends RenderProxySliver {
     bool ignoring = true,
     bool ignoringSemantics,
   }) : assert(ignoring != null),
-      _ignoring = ignoring,
-      _ignoringSemantics = ignoringSemantics {
+       _ignoring = ignoring,
+       _ignoringSemantics = ignoringSemantics {
     child = sliver;
   }
 
@@ -276,7 +281,7 @@ class RenderSliverOffstage extends RenderProxySliver {
     bool offstage = true,
     RenderSliver sliver,
   }) : assert(offstage != null),
-      _offstage = offstage {
+       _offstage = offstage {
     child = sliver;
   }
 

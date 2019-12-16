@@ -335,6 +335,7 @@ class _SwitchState extends State<Switch> with TickerProviderStateMixin {
           value: widget.value,
           onChanged: widget.onChanged,
           activeColor: widget.activeColor,
+          trackColor: widget.inactiveTrackColor
         ),
       ),
     );

@@ -810,7 +810,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       final Element elementB = find.text('b').evaluate().first;
 
       service.disposeAllGroups();
-      service.setPubRootDirectories(<Object>[]);
+      service.setPubRootDirectories(<String>[]);
       service.setSelection(elementA, 'my-group');
       final Map<String, Object> jsonA = json.decode(service.getSelectedWidget(null, 'my-group'));
       final Map<String, Object> creationLocationA = jsonA['creationLocation'];
@@ -885,7 +885,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
         // directory.
         pubRootTest = '/' +
           segments.take(segments.length - 2).join('/');
-        service.setPubRootDirectories(<Object>[pubRootTest]);
+        service.setPubRootDirectories(<String>[pubRootTest]);
       }
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
       builder.add(StringProperty('dummy1', 'value'));
@@ -948,7 +948,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
         // directory.
         pubRootTest = '/' +
           segments.take(segments.length - 2).join('/');
-        service.setPubRootDirectories(<Object>[pubRootTest]);
+        service.setPubRootDirectories(<String>[pubRootTest]);
       }
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
       builder.add(StringProperty('dummy1', 'value'));
@@ -995,7 +995,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       final Element elementA = find.text('a').evaluate().first;
 
       service.disposeAllGroups();
-      service.setPubRootDirectories(<Object>[]);
+      service.setPubRootDirectories(<String>[]);
       service.setSelection(elementA, 'my-group');
       Map<String, Object> jsonObject = json.decode(service.getSelectedWidget(null, 'my-group'));
       Map<String, Object> creationLocation = jsonObject['creationLocation'];
@@ -1007,21 +1007,21 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       // Strip a couple subdirectories away to generate a plausible pub root
       // directory.
       final String pubRootTest = '/' + segments.take(segments.length - 2).join('/');
-      service.setPubRootDirectories(<Object>[pubRootTest]);
+      service.setPubRootDirectories(<String>[pubRootTest]);
 
       service.setSelection(elementA, 'my-group');
       expect(json.decode(service.getSelectedWidget(null, 'my-group')), contains('createdByLocalProject'));
 
-      service.setPubRootDirectories(<Object>['/invalid/$pubRootTest']);
+      service.setPubRootDirectories(<String>['/invalid/$pubRootTest']);
       expect(json.decode(service.getSelectedWidget(null, 'my-group')), isNot(contains('createdByLocalProject')));
 
-      service.setPubRootDirectories(<Object>['file://$pubRootTest']);
+      service.setPubRootDirectories(<String>['file://$pubRootTest']);
       expect(json.decode(service.getSelectedWidget(null, 'my-group')), contains('createdByLocalProject'));
 
-      service.setPubRootDirectories(<Object>['$pubRootTest/different']);
+      service.setPubRootDirectories(<String>['$pubRootTest/different']);
       expect(json.decode(service.getSelectedWidget(null, 'my-group')), isNot(contains('createdByLocalProject')));
 
-      service.setPubRootDirectories(<Object>[
+      service.setPubRootDirectories(<String>[
         '/invalid/$pubRootTest',
         pubRootTest,
       ]);
@@ -1034,7 +1034,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
         matching: find.byType(RichText),
       ).evaluate().first;
       service.setSelection(richText, 'my-group');
-      service.setPubRootDirectories(<Object>[pubRootTest]);
+      service.setPubRootDirectories(<String>[pubRootTest]);
       jsonObject = json.decode(service.getSelectedWidget(null, 'my-group'));
       expect(jsonObject, isNot(contains('createdByLocalProject')));
       creationLocation = jsonObject['creationLocation'];
@@ -1046,12 +1046,12 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
 
       // Strip off /src/widgets/text.dart.
       final String pubRootFramework = '/' + pathSegmentsFramework.take(pathSegmentsFramework.length - 3).join('/');
-      service.setPubRootDirectories(<Object>[pubRootFramework]);
+      service.setPubRootDirectories(<String>[pubRootFramework]);
       expect(json.decode(service.getSelectedWidget(null, 'my-group')), contains('createdByLocalProject'));
       service.setSelection(elementA, 'my-group');
       expect(json.decode(service.getSelectedWidget(null, 'my-group')), isNot(contains('createdByLocalProject')));
 
-      service.setPubRootDirectories(<Object>[pubRootFramework, pubRootTest]);
+      service.setPubRootDirectories(<String>[pubRootFramework, pubRootTest]);
       service.setSelection(elementA, 'my-group');
       expect(json.decode(service.getSelectedWidget(null, 'my-group')), contains('createdByLocalProject'));
       service.setSelection(richText, 'my-group');
@@ -1609,7 +1609,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
         matching: find.byType(RichText),
       ).evaluate().first;
       service.setSelection(richText, 'my-group');
-      service.setPubRootDirectories(<Object>[pubRootTest]);
+      service.setPubRootDirectories(<String>[pubRootTest]);
       jsonObject = json.decode(service.getSelectedWidget(null, 'my-group'));
       expect(jsonObject, isNot(contains('createdByLocalProject')));
       creationLocation = jsonObject['creationLocation'];

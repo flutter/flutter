@@ -112,7 +112,7 @@ class _CombiningGestureArenaMember extends GestureArenaMember {
 ///
 /// [AndroidView] uses a team with a captain to decide which gestures are
 /// forwarded to the native view. For example if we want to forward taps and
-/// vertical scrolls to a native Android view, [TapGestureRecognizers] and
+/// vertical scrolls to a native Android view, [TapGestureRecognizer]s and
 /// [VerticalDragGestureRecognizer] are added to a team with a captain(the captain is set to be a
 /// gesture recognizer that never explicitly claims the gesture).
 /// The captain allows [AndroidView] to know when any gestures in the team has been

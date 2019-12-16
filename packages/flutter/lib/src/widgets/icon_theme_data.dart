@@ -81,7 +81,7 @@ class IconThemeData extends Diagnosticable {
   final Color color;
 
   /// An opacity to apply to both explicit and default icon colors.
-  double get opacity => _opacity?.clamp(0.0, 1.0);
+  double get opacity => _opacity?.clamp(0.0, 1.0) as double;
   final double _opacity;
 
   /// The default size for icons.
@@ -103,10 +103,10 @@ class IconThemeData extends Diagnosticable {
   bool operator ==(dynamic other) {
     if (other.runtimeType != runtimeType)
       return false;
-    final IconThemeData typedOther = other;
-    return color == typedOther.color
-        && opacity == typedOther.opacity
-        && size == typedOther.size;
+    return other is IconThemeData
+        && other.color == color
+        && other.opacity == opacity
+        && other.size == size;
   }
 
   @override

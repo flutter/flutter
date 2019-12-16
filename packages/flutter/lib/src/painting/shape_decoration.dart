@@ -122,6 +122,11 @@ class ShapeDecoration extends Decoration {
     );
   }
 
+  @override
+  Path getClipPath(Rect rect, TextDirection textDirection) {
+    return shape.getOuterPath(rect, textDirection: textDirection);
+  }
+
   /// The color to fill in the background of the shape.
   ///
   /// The color is under the [image].

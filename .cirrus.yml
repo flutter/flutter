@@ -229,7 +229,6 @@ task:
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: hostonly_devicelab_tests-0-linux
-      only_if: "$CIRRUS_PR != '' || $CIRRUS_BRANCH == 'master'" # https://github.com/flutter/flutter/issues/45453
       environment:
         # Some of the host-only devicelab tests are pretty involved and need a lot of RAM.
         CPU: 2
@@ -238,7 +237,6 @@ task:
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: hostonly_devicelab_tests-1-linux
-      only_if: "$CIRRUS_PR != '' || $CIRRUS_BRANCH == 'master'" # https://github.com/flutter/flutter/issues/45453
       environment:
         # Some of the host-only devicelab tests are pretty involved and need a lot of RAM.
         CPU: 2
@@ -247,7 +245,6 @@ task:
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: hostonly_devicelab_tests-2-linux
-      only_if: "$CIRRUS_PR != '' || $CIRRUS_BRANCH == 'master'" # https://github.com/flutter/flutter/issues/45453
       environment:
         # Some of the host-only devicelab tests are pretty involved and need a lot of RAM.
         CPU: 2
@@ -256,7 +253,6 @@ task:
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: hostonly_devicelab_tests-3_last-linux
-      only_if: "$CIRRUS_PR != '' || $CIRRUS_BRANCH == 'master'" # https://github.com/flutter/flutter/issues/45453
       environment:
         # Some of the host-only devicelab tests are pretty involved and need a lot of RAM.
         CPU: 2
@@ -403,22 +399,22 @@ task:
         - dart --enable-asserts dev\bots\test.dart
 
     - name: hostonly_devicelab_tests-0-windows
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || ($CIRRUS_PR == '' && $CIRRUS_BRANCH == 'master')" # https://github.com/flutter/flutter/issues/41941 https://github.com/flutter/flutter/issues/45453
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
       script:
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: hostonly_devicelab_tests-1-windows
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || ($CIRRUS_PR == '' && $CIRRUS_BRANCH == 'master')" # https://github.com/flutter/flutter/issues/41941 https://github.com/flutter/flutter/issues/45453
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
       script:
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: hostonly_devicelab_tests-2-windows
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || ($CIRRUS_PR == '' && $CIRRUS_BRANCH == 'master')" # https://github.com/flutter/flutter/issues/41941 https://github.com/flutter/flutter/issues/45453
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
       script:
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: hostonly_devicelab_tests-3_last-windows
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || ($CIRRUS_PR == '' && $CIRRUS_BRANCH == 'master')" # https://github.com/flutter/flutter/issues/41941 https://github.com/flutter/flutter/issues/45453
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
       script:
         - dart --enable-asserts ./dev/bots/test.dart
 
@@ -516,25 +512,25 @@ task:
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: hostonly_devicelab_tests-0-macos
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || ($CIRRUS_PR == '' && $CIRRUS_BRANCH == 'master')" # https://github.com/flutter/flutter/issues/41941 https://github.com/flutter/flutter/issues/45453
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
       script:
         - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: hostonly_devicelab_tests-1-macos
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || ($CIRRUS_PR == '' && $CIRRUS_BRANCH == 'master')" # https://github.com/flutter/flutter/issues/41941 https://github.com/flutter/flutter/issues/45453
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
       script:
         - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: hostonly_devicelab_tests-2-macos
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || ($CIRRUS_PR == '' && $CIRRUS_BRANCH == 'master')" # https://github.com/flutter/flutter/issues/41941 https://github.com/flutter/flutter/issues/45453
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
       script:
         - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: hostonly_devicelab_tests-3_last-macos
-      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || ($CIRRUS_PR == '' && $CIRRUS_BRANCH == 'master')" # https://github.com/flutter/flutter/issues/41941 https://github.com/flutter/flutter/issues/45453
+      only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
       script:
         - ulimit -S -n 2048 # https://github.com/flutter/flutter/issues/2976
         - dart --enable-asserts ./dev/bots/test.dart

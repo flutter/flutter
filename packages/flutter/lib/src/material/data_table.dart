@@ -224,6 +224,67 @@ class DataCell {
 /// target device), it is suggested that you use a
 /// [PaginatedDataTable] which automatically splits the data into
 /// multiple pages.
+///
+/// {@tool snippet --template=stateless_widget_scaffold}
+///
+/// This sample shows how to display a [DataTable] with three columns: name, age, and
+/// role. The columns are defined by three [DataColumn] objects. The table
+/// contains three rows of data for three example users, the data for which
+/// is defined by three [DataRow] objects.
+///
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/data_table.png)
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return DataTable(
+///     columns: const <DataColumn>[
+///       DataColumn(
+///         label: Text(
+///           'Name',
+///           style: TextStyle(fontStyle: FontStyle.italic),
+///         ),
+///       ),
+///       DataColumn(
+///         label: Text(
+///           'Age',
+///           style: TextStyle(fontStyle: FontStyle.italic),
+///         ),
+///       ),
+///       DataColumn(
+///         label: Text(
+///           'Role',
+///           style: TextStyle(fontStyle: FontStyle.italic),
+///         ),
+///       ),
+///     ],
+///     rows: const <DataRow>[
+///       DataRow(
+///         cells: <DataCell>[
+///           DataCell(Text('Sarah')),
+///           DataCell(Text('19')),
+///           DataCell(Text('Student')),
+///         ],
+///       ),
+///       DataRow(
+///         cells: <DataCell>[
+///           DataCell(Text('Janine')),
+///           DataCell(Text('43')),
+///           DataCell(Text('Professor')),
+///         ],
+///       ),
+///       DataRow(
+///         cells: <DataCell>[
+///           DataCell(Text('William')),
+///           DataCell(Text('27')),
+///           DataCell(Text('Associate Professor')),
+///         ],
+///       ),
+///     ],
+///   );
+/// }
+/// ```
+///
+/// {@end-tool}
 // TODO(ianh): Also suggest [ScrollingDataTable] once we have it.
 ///
 /// See also:

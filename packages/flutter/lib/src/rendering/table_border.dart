@@ -265,13 +265,13 @@ class TableBorder {
       return true;
     if (runtimeType != other.runtimeType)
       return false;
-    final TableBorder typedOther = other;
-    return top == typedOther.top
-        && right == typedOther.right
-        && bottom == typedOther.bottom
-        && left == typedOther.left
-        && horizontalInside == typedOther.horizontalInside
-        && verticalInside == typedOther.verticalInside;
+    return other is TableBorder
+        && other.top == top
+        && other.right == right
+        && other.bottom == bottom
+        && other.left == left
+        && other.horizontalInside == horizontalInside
+        && other.verticalInside == verticalInside;
   }
 
   @override

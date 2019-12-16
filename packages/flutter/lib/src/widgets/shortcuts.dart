@@ -89,8 +89,8 @@ class KeySet<T extends KeyboardKey> extends Diagnosticable {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    final KeySet<T> typedOther = other;
-    return setEquals<T>(_keys, typedOther._keys);
+    return other is KeySet<T>
+        && setEquals<T>(other._keys, _keys);
   }
 
   @override

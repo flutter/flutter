@@ -62,8 +62,8 @@ class HitTestEntry {
   ///
   /// See also:
   ///
-  ///  * [HitTestResult.addWithPaintTransform], which is used during hit testing
-  ///    to build up the transform returned by this method.
+  ///  * [HitTestResult.pushTransform], which is used during hit
+  ///    testing to build up the transform returned by this method.
   Matrix4 get transform => _transform;
   Matrix4 _transform;
 }
@@ -129,7 +129,7 @@ class HitTestResult {
   ///  * [BoxHitTestResult.addWithPaintTransform], which is a public wrapper
   ///    around this function for hit testing on [RenderBox]s.
   ///  * [SliverHitTestResult.addWithAxisOffset], which is a public wrapper
-  ///    around this function for hit testing on [RenderSlivers]s.
+  ///    around this function for hit testing on [RenderSliver]s.
   @protected
   void pushTransform(Matrix4 transform) {
     assert(transform != null);

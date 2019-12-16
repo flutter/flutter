@@ -53,11 +53,11 @@ class IconData {
   bool operator ==(dynamic other) {
     if (runtimeType != other.runtimeType)
       return false;
-    final IconData typedOther = other;
-    return codePoint == typedOther.codePoint
-        && fontFamily == typedOther.fontFamily
-        && fontPackage == typedOther.fontPackage
-        && matchTextDirection == typedOther.matchTextDirection;
+    return other is IconData
+        && other.codePoint == codePoint
+        && other.fontFamily == fontFamily
+        && other.fontPackage == fontPackage
+        && other.matchTextDirection == matchTextDirection;
   }
 
   @override

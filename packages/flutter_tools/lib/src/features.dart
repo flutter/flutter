@@ -91,6 +91,10 @@ const Feature flutterWebFeature = Feature(
     available: true,
     enabledByDefault: false,
   ),
+  beta: FeatureChannelSetting(
+    available: true,
+    enabledByDefault: false,
+  ),
 );
 
 /// The [Feature] for macOS desktop.
@@ -99,6 +103,10 @@ const Feature flutterMacOSDesktopFeature = Feature(
   configSetting: 'enable-macos-desktop',
   environmentOverride: 'FLUTTER_MACOS',
   master: FeatureChannelSetting(
+    available: true,
+    enabledByDefault: false,
+  ),
+  dev: FeatureChannelSetting(
     available: true,
     enabledByDefault: false,
   ),
@@ -141,7 +149,19 @@ const Feature flutterAndroidEmbeddingV2Feature = Feature(
   name: 'flutter create generates projects using the Android embedding V2',
   environmentOverride: 'ENABLE_ANDROID_EMBEDDING_V2',
   configSetting: 'enable-android-embedding-v2',
+  beta: FeatureChannelSetting(
+    available: true,
+    enabledByDefault: true,
+  ),
+  dev: FeatureChannelSetting(
+    available: true,
+    enabledByDefault: true,
+  ),
   master: FeatureChannelSetting(
+    available: true,
+    enabledByDefault: true,
+  ),
+  stable: FeatureChannelSetting(
     available: true,
     enabledByDefault: true,
   ),

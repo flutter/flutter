@@ -125,12 +125,13 @@ enum AnimationBehavior {
 ///
 /// {@tool sample}
 ///
-/// Here is a stateful [Foo] widget. Its [State] uses the
+/// Here is a stateful `Foo` widget. Its [State] uses the
 /// [SingleTickerProviderStateMixin] to implement the necessary
-/// [TickerProvider], creating its controller in the [initState] method and
-/// disposing of it in the [dispose] method. The duration of the controller is
-/// configured from a property in the [Foo] widget; as that changes, the
-/// [didUpdateWidget] method is used to update the controller.
+/// [TickerProvider], creating its controller in the [State.initState] method
+/// and disposing of it in the [State.dispose] method. The duration of the
+/// controller is configured from a property in the `Foo` widget; as that
+/// changes, the [State.didUpdateWidget] method is used to update the
+/// controller.
 ///
 /// ```dart
 /// class Foo extends StatefulWidget {

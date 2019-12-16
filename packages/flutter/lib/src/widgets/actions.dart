@@ -215,7 +215,7 @@ class Actions extends InheritedWidget {
   // doesn't find one.
   static ActionDispatcher _findDispatcher(Element element) {
     assert(element.widget is Actions);
-    final Actions actions = element.widget;
+    final Actions actions = element.widget as Actions;
     ActionDispatcher dispatcher = actions.dispatcher;
     if (dispatcher == null) {
       bool visitAncestorElement(Element visitedElement) {
@@ -223,7 +223,7 @@ class Actions extends InheritedWidget {
           // Continue visiting.
           return true;
         }
-        final Actions actions = visitedElement.widget;
+        final Actions actions = visitedElement.widget as Actions;
         if (actions.dispatcher == null) {
           // Continue visiting.
           return true;
@@ -250,7 +250,7 @@ class Actions extends InheritedWidget {
   static ActionDispatcher of(BuildContext context, {bool nullOk = false}) {
     assert(context != null);
     final InheritedElement inheritedElement = context.getElementForInheritedWidgetOfExactType<Actions>();
-    final Actions inherited = context.dependOnInheritedElement(inheritedElement);
+    final Actions inherited = context.dependOnInheritedElement(inheritedElement) as Actions;
     assert(() {
       if (nullOk) {
         return true;
@@ -306,7 +306,7 @@ class Actions extends InheritedWidget {
       // Below when we invoke the action, we need to use the dispatcher from the
       // Actions widget where we found the action, in case they need to match.
       actionsElement = element;
-      final Actions actions = element.widget;
+      final Actions actions = element.widget as Actions;
       action = actions.actions[intent.key]?.call();
       // Keep looking if we failed to find and create an action.
       return action == null;

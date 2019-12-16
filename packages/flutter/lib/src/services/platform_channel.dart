@@ -318,7 +318,7 @@ class MethodChannel {
     if (result == null) {
       throw MissingPluginException('No implementation found for method $method on channel $name');
     }
-    final T typedResult = codec.decodeEnvelope(result);
+    final T typedResult = codec.decodeEnvelope(result) as T;
     return typedResult;
   }
 
