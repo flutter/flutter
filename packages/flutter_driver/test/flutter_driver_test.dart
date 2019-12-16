@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:flutter_driver/src/common/error.dart';
 import 'package:flutter_driver/src/common/health.dart';
+import 'package:flutter_driver/src/common/layer_tree.dart';
 import 'package:flutter_driver/src/common/wait.dart';
 import 'package:flutter_driver/src/driver/driver.dart';
 import 'package:flutter_driver/src/driver/timeline.dart';
@@ -228,6 +229,25 @@ void main() {
         });
         final String result = await driver.getText(find.byValueKey(123), timeout: _kTestTimeout);
         expect(result, 'hello');
+      });
+    });
+
+    group('getLayerTree', () {
+      test('sends the getLayerTree command', () async {
+        when(mockIsolate.invokeExtension(any, any)).thenAnswer((Invocation i) {
+          expect(i.positionalArguments[1], <String, dynamic>{
+            'command': 'get_layer_tree',
+            'timeout': _kSerializedTestTimeout,
+          });
+          return makeMockResponse(<String, String>{
+            'tree': 'hello',
+          });
+        });
+        final LayerTree result = await driver.getLayerTree(timeout: _kTestTimeout);
+        final LayerTree referenceTree = LayerTree.fromJson(<String, String>{
+            'tree': 'hello',
+          });
+        expect(result.tree, referenceTree.tree);
       });
     });
 
