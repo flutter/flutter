@@ -10,6 +10,7 @@ import 'common.dart';
 import 'src/backdrop_filter.dart';
 import 'src/cubic_bezier.dart';
 import 'src/cull_opacity.dart';
+import 'src/post_backdrop_filter.dart';
 import 'src/simple_animation.dart';
 
 const String kMacrobenchmarks ='Macrobenchmarks';
@@ -29,6 +30,7 @@ class MacrobenchmarksApp extends StatelessWidget {
         kCullOpacityRouteName: (BuildContext context) => CullOpacityPage(),
         kCubicBezierRouteName: (BuildContext context) => CubicBezierPage(),
         kBackdropFilterRouteName: (BuildContext context) => BackdropFilterPage(),
+        kPostBackdropFilterRouteName: (BuildContext context) => PostBackdropFilterPage(),
         kSimpleAnimationRouteName: (BuildContext conttext) => SimpleAnimationPage(),
         kPictureCacheRouteName: (BuildContext context) => PictureCachePage(),
         kLargeImagesRouteName: (BuildContext context) => LargeImagesPage(),
@@ -65,6 +67,13 @@ class HomePage extends StatelessWidget {
             child: const Text('Backdrop Filter'),
             onPressed: () {
               Navigator.pushNamed(context, kBackdropFilterRouteName);
+            },
+          ),
+          RaisedButton(
+            key: const Key(kPostBackdropFilterRouteName),
+            child: const Text('Post Backdrop Filter'),
+            onPressed: () {
+              Navigator.pushNamed(context, kPostBackdropFilterRouteName);
             },
           ),
           RaisedButton(

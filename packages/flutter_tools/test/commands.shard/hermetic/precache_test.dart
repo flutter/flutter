@@ -174,6 +174,7 @@ void main() {
     FlutterVersion: () => flutterVersion,
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: false),
   });
+
   testUsingContext('precache downloads artifacts when --force is provided', () async {
     when(cache.isUpToDate()).thenReturn(true);
     final PrecacheCommand command = PrecacheCommand();

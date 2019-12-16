@@ -363,16 +363,7 @@ class FlutterDevice {
   }
 
   Future<String> togglePlatform({ String from }) async {
-    String to;
-    switch (from) {
-      case 'iOS':
-        to = 'android';
-        break;
-      case 'android':
-      default:
-        to = 'iOS';
-        break;
-    }
+    final String to = nextPlatform(from, featureFlags);
     for (FlutterView view in views) {
       await view.uiIsolate.flutterPlatformOverride(to);
     }
@@ -714,7 +705,7 @@ abstract class ResidentRunner {
 
   bool get supportsRestart => false;
 
-  Future<OperationResult> restart({ bool fullRestart = false, bool pauseAfterRestart = false, String reason }) {
+  Future<OperationResult> restart({ bool fullRestart = false, bool pause = false, String reason }) {
     final String mode = isRunningProfile ? 'profile' :
         isRunningRelease ? 'release' : 'this';
     throw '${fullRestart ? 'Restart' : 'Reload'} is not supported in $mode mode';
@@ -1318,4 +1309,27 @@ class DebugConnectionInfo {
   final Uri httpUri;
   final Uri wsUri;
   final String baseUri;
+}
+
+/// Returns the next platform value for the switcher.
+///
+/// These values must match what is available in
+/// packages/flutter/lib/src/foundation/binding.dart
+String nextPlatform(String currentPlatform, FeatureFlags featureFlags) {
+  switch (currentPlatform) {
+    case 'android':
+      return 'iOS';
+    case 'iOS':
+      return 'fuchsia';
+    case 'fuchsia':
+      if (featureFlags.isMacOSEnabled) {
+        return 'macOS';
+      }
+      return 'android';
+    case 'macOS':
+      return 'android';
+    default:
+      assert(false); // Invalid current platform.
+      return 'android';
+  }
 }

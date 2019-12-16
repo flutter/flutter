@@ -505,7 +505,16 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   @override
   Rect describeApproximatePaintClip(RenderSliver child) {
     final Rect viewportClip = Offset.zero & size;
-    if (child.constraints.overlap == 0) {
+    // The child's viewportMainAxisExtent can be infinite when a
+    // RenderShrinkWrappingViewport is given infinite constraints, such as when
+    // it is the child of a Row or Column (depending on orientation).
+    //
+    // For example, a shrink wrapping render sliver may have infinite
+    // constraints along the viewport's main axis but may also have bouncing
+    // scroll physics, which will allow for some scrolling effect to occur.
+    // We should just use the viewportClip - the start of the overlap is at
+    // double.infinity and so it is effectively meaningless.
+    if (child.constraints.overlap == 0 || !child.constraints.viewportMainAxisExtent.isFinite) {
       return viewportClip;
     }
 
@@ -1756,6 +1765,11 @@ class RenderShrinkWrappingViewport extends RenderViewportBase<SliverLogicalConta
   }
 
   double _attemptLayout(double mainAxisExtent, double crossAxisExtent, double correctedOffset) {
+    // We can't assert mainAxisExtent is finite, because it could be infinite if
+    // it is within a column or row for example. In such a case, there's not
+    // even any scrolling to do, although some scroll physics (i.e.
+    // BouncingScrollPhysics) could still temporarily scroll the content in a
+    // simulation.
     assert(!mainAxisExtent.isNaN);
     assert(mainAxisExtent >= 0.0);
     assert(crossAxisExtent.isFinite);

@@ -416,32 +416,54 @@ class SliverConstraints extends Constraints {
     InformationCollector informationCollector,
   }) {
     assert(() {
+      bool hasErrors = false;
+      final StringBuffer errorMessage = StringBuffer('\n');
       void verify(bool check, String message) {
         if (check)
           return;
+        hasErrors = true;
+        errorMessage.writeln('  $message');
+      }
+      void verifyDouble(double property, String name, {bool mustBePositive = false, bool mustBeNegative = false}) {
+        verify(property != null, 'The "$name" is null.');
+        if (property.isNaN) {
+          String additional = '.';
+          if (mustBePositive) {
+            additional = ', expected greater than or equal to zero.';
+          } else if (mustBeNegative) {
+            additional = ', expected less than or equal to zero.';
+          }
+          verify(false, 'The "$name" is NaN$additional');
+        } else if (mustBePositive) {
+          verify(property >= 0.0, 'The "$name" is negative.');
+        } else if (mustBeNegative) {
+          verify(property <= 0.0, 'The "$name" is positive.');
+        }
+      }
+      verify(axis != null, 'The "axis" is null.');
+      verify(growthDirection != null, 'The "growthDirection" is null.');
+      verifyDouble(scrollOffset, 'scrollOffset');
+      verifyDouble(overlap, 'overlap');
+      verifyDouble(remainingPaintExtent, 'remainingPaintExtent');
+      verifyDouble(crossAxisExtent, 'crossAxisExtent');
+      verifyDouble(viewportMainAxisExtent, 'viewportMainAxisExtent');
+      verifyDouble(scrollOffset, 'scrollOffset', mustBePositive: true);
+      verify(crossAxisDirection != null, 'The "crossAxisDirection" is null.');
+      verify(axisDirectionToAxis(axisDirection) != axisDirectionToAxis(crossAxisDirection), 'The "axisDirection" and the "crossAxisDirection" are along the same axis.');
+      verifyDouble(viewportMainAxisExtent, 'viewportMainAxisExtent', mustBePositive: true);
+      verifyDouble(remainingPaintExtent, 'remainingPaintExtent', mustBePositive: true);
+      verifyDouble(remainingCacheExtent, 'remainingCacheExtent', mustBePositive: true);
+      verifyDouble(cacheOrigin, 'cacheOrigin', mustBeNegative: true);
+      verifyDouble(precedingScrollExtent, 'precedingScrollExtent', mustBePositive: true);
+      verify(isNormalized, 'The constraints are not normalized.'); // should be redundant with earlier checks
+      if (hasErrors) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
-          ErrorSummary('$runtimeType is not valid: $message'),
+          ErrorSummary('$runtimeType is not valid: $errorMessage'),
           if (informationCollector != null)
             ...informationCollector(),
           DiagnosticsProperty<SliverConstraints>('The offending constraints were', this, style: DiagnosticsTreeStyle.errorProperty),
         ]);
       }
-      verify(axis != null, 'The "axis" is null.');
-      verify(growthDirection != null, 'The "growthDirection" is null.');
-      verify(scrollOffset != null, 'The "scrollOffset" is null.');
-      verify(overlap != null, 'The "overlap" is null.');
-      verify(remainingPaintExtent != null, 'The "remainingPaintExtent" is null.');
-      verify(crossAxisExtent != null, 'The "crossAxisExtent" is null.');
-      verify(viewportMainAxisExtent != null, 'The "viewportMainAxisExtent" is null.');
-      verify(scrollOffset >= 0.0, 'The "scrollOffset" is negative.');
-      verify(crossAxisExtent >= 0.0, 'The "crossAxisExtent" is negative.');
-      verify(crossAxisDirection != null, 'The "crossAxisDirection" is null.');
-      verify(axisDirectionToAxis(axisDirection) != axisDirectionToAxis(crossAxisDirection), 'The "axisDirection" and the "crossAxisDirection" are along the same axis.');
-      verify(viewportMainAxisExtent >= 0.0, 'The "viewportMainAxisExtent" is negative.');
-      verify(remainingPaintExtent >= 0.0, 'The "remainingPaintExtent" is negative.');
-      verify(remainingCacheExtent >= 0.0, 'The "remainingCacheExtent" is negative.');
-      verify(cacheOrigin <= 0.0, 'The "cacheOrigin" is positive.');
-      verify(isNormalized, 'The constraints are not normalized.'); // should be redundant with earlier checks
       return true;
     }());
     return true;
