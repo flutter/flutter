@@ -383,7 +383,7 @@ bool _writeFlutterPlatformPluginsList(PlatformProject project, List<Plugin> plug
     });
   }
   final File pluginsFile = project.platformPluginsFile;
-  final String oldPluginFileContent = _readFileContent(project.legacyPluginsFile);
+  final String oldPluginFileContent = _readFileContent(pluginsFile);
   final String pluginFileContent = flutterPluginsBuffer.toString();
   if (pluginNames.isNotEmpty) {
     pluginsFile.writeAsStringSync(pluginFileContent, flush: true);
@@ -393,7 +393,7 @@ bool _writeFlutterPlatformPluginsList(PlatformProject project, List<Plugin> plug
     }
   }
 
-  final File dependenciesFile = project.platformPluginsFile;
+  final File dependenciesFile = project.flutterPluginsDependenciesFile;
   final String oldDependenciesFileContent = _readFileContent(dependenciesFile);
   final String dependenciesFileContent = json.encode(<String, dynamic>{
       '_info': '// $info',
@@ -832,14 +832,33 @@ Future<void> _writeWebPluginRegistrant(FlutterProject project, List<Plugin> plug
 /// Assumes `pub get` has been executed since last change to `pubspec.yaml`.
 void refreshPluginsList(FlutterProject project, {bool checkProjects = false}) {
   final List<Plugin> plugins = findPlugins(project);
-  final bool changed = _writeFlutterPluginsList(project, plugins);
-  if (changed) {
-    if (!checkProjects || project.ios.existsSync()) {
-      cocoaPods.invalidatePodInstallOutput(project.ios);
+  // Write legacy.
+  _writeFlutterPluginsList(project, plugins);
+  if (project.web.existsSync()) {
+    _writeFlutterPlatformPluginsList(project.web, plugins);
+  }
+  if (project.windows.existsSync()) {
+    _writeFlutterPlatformPluginsList(project.windows, plugins);
+  }
+  if (project.linux.existsSync()) {
+    _writeFlutterPlatformPluginsList(project.linux, plugins);
+  }
+  if (project.android.existsSync()) {
+    _writeFlutterPlatformPluginsList(project.android, plugins);
+  }
+  if (project.ios.existsSync()) {
+    final bool changed = _writeFlutterPlatformPluginsList(project.ios, plugins);
+    if (changed) {
+      if (!checkProjects) {
+        cocoaPods.invalidatePodInstallOutput(project.ios);
+      }
     }
-    // TODO(stuartmorgan): Potentially add checkProjects once a decision has
-    // made about how to handle macOS in existing projects.
-    if (project.macos.existsSync()) {
+  }
+  if (project.macos.existsSync()) {
+    final bool changed = _writeFlutterPlatformPluginsList(project.macos, plugins);
+    if (changed) {
+      // TODO(stuartmorgan): Potentially add checkProjects once a decision has
+      // made about how to handle macOS in existing projects.
       cocoaPods.invalidatePodInstallOutput(project.macos);
     }
   }

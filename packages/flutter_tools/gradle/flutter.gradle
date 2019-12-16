@@ -372,7 +372,7 @@ class FlutterPlugin implements Plugin<Project> {
     }
 
     private Properties getPluginList() {
-        File pluginsFile = new File(project.projectDir.parentFile.parentFile, '.flutter-plugins')
+        File pluginsFile = new File(project.projectDir, '.flutter-plugins')
         Properties allPlugins = readPropertiesIfExist(pluginsFile)
         Properties androidPlugins = new Properties()
         allPlugins.each { name, path ->
