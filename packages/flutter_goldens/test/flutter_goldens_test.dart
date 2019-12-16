@@ -67,7 +67,7 @@ void main() {
       );
     });
 
-    test(' auth performs minimal work if already authorized', () async {
+    test('auth performs minimal work if already authorized', () async {
       fs.file('/workDirectory/temp/auth_opt.json')
         ..createSync(recursive: true);
       when(process.run(any))
