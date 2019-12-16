@@ -2826,7 +2826,7 @@ void main() {
     final RenderEditable renderEditable = findRenderEditable(tester);
     // The actual text span is split into 3 parts with the middle part underlined.
     expect(renderEditable.text.children.length, 3);
-    final TextSpan textSpan = renderEditable.text.children[1];
+    final TextSpan textSpan = renderEditable.text.children[1] as TextSpan;
     expect(textSpan.text, 'composing');
     expect(textSpan.style.decoration, TextDecoration.underline);
 

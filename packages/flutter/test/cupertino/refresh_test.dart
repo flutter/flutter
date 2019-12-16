@@ -22,7 +22,7 @@ void main() {
 
   /// These two Functions are required to avoid tearing off of the MockHelper object,
   /// which is not supported when using Dart 2 runtime semantics.
-  final Function builder = (
+  final RefreshControlIndicatorBuilder builder = (
     BuildContext context,
     RefreshIndicatorMode refreshState,
     double pulledExtent,
@@ -39,9 +39,9 @@ void main() {
 
     when(mockHelper.builder(any, any, any, any, any))
       .thenAnswer((Invocation i) {
-        final double pulledExtent = i.positionalArguments[2];
-        final double refreshTriggerPullDistance = i.positionalArguments[3];
-        final double refreshIndicatorExtent = i.positionalArguments[4];
+        final double pulledExtent = i.positionalArguments[2] as double;
+        final double refreshTriggerPullDistance = i.positionalArguments[3] as double;
+        final double refreshIndicatorExtent = i.positionalArguments[4] as double;
         if (pulledExtent < 0.0) {
           throw TestFailure('The pulledExtent should never be less than 0.0');
         }
@@ -72,7 +72,7 @@ void main() {
     );
   }
 
-  final Function uiTestGroup = () {
+  final VoidCallback uiTestGroup = () {
     testWidgets("doesn't invoke anything without user interaction", (WidgetTester tester) async {
       debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
 
@@ -1030,7 +1030,7 @@ void main() {
     );
   };
 
-  final Function stateMachineTestGroup = () {
+  final VoidCallback stateMachineTestGroup = () {
     testWidgets('starts in inactive state', (WidgetTester tester) async {
       debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
 
