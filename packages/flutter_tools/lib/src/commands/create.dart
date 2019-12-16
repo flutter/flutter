@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:meta/meta.dart';
 import 'package:yaml/yaml.dart' as yaml;
 
 import '../android/android.dart' as android;
@@ -824,15 +825,18 @@ const Set<String> _keywords = <String>{
   'with',
   'yield',
 };
-bool _isValidPackageName(String name) {
-  return _identifierRegExp.hasMatch(name) != null &&
-    !_keywords.contains(name);
+
+/// Whether [name] is a valid Pub package.
+@visibleForTesting
+bool isValidPackageName(String name) {
+  final Match match = _identifierRegExp.matchAsPrefix(name);
+  return match != null && match.end == name.length && !_keywords.contains(name);
 }
 
 /// Return null if the project name is legal. Return a validation message if
 /// we should disallow the project name.
 String _validateProjectName(String projectName) {
-  if (!_isValidPackageName(projectName)) {
+  if (!isValidPackageName(projectName)) {
     return '"$projectName" is not a valid Dart package name.\n\n'
       'See https://dart.dev/tools/pub/pubspec#name for more information.';
   }
