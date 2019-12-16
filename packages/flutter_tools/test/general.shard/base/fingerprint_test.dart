@@ -195,48 +195,6 @@ void main() {
       expect(fingerprinter.doesFingerprintMatch(), isTrue);
     }, overrides: contextOverrides);
 
-    final Platform mockPlatformDisabledCache = MockPlatform();
-    mockPlatformDisabledCache.environment['DISABLE_FLUTTER_BUILD_CACHE']  = 'true';
-    testUsingContext('can be disabled with an environment variable', () {
-      fs.file('a.dart').createSync();
-      fs.file('b.dart').createSync();
-
-      final Fingerprinter fingerprinter = Fingerprinter(
-        fingerprintPath: 'out.fingerprint',
-        paths: <String>['a.dart', 'b.dart'],
-        properties: <String, String>{
-          'bar': 'baz',
-          'wobble': 'womble',
-        },
-      );
-      fingerprinter.writeFingerprint();
-      expect(fingerprinter.doesFingerprintMatch(), isFalse);
-    }, overrides: <Type, Generator>{
-      Platform: () => mockPlatformDisabledCache,
-      ...contextOverrides,
-    });
-
-    final Platform mockPlatformEnabledCache = MockPlatform();
-    mockPlatformEnabledCache.environment['DISABLE_FLUTTER_BUILD_CACHE']  = 'false';
-    testUsingContext('can be not-disabled with an environment variable', () {
-      fs.file('a.dart').createSync();
-      fs.file('b.dart').createSync();
-
-      final Fingerprinter fingerprinter = Fingerprinter(
-        fingerprintPath: 'out.fingerprint',
-        paths: <String>['a.dart', 'b.dart'],
-        properties: <String, String>{
-          'bar': 'baz',
-          'wobble': 'womble',
-        },
-      );
-      fingerprinter.writeFingerprint();
-      expect(fingerprinter.doesFingerprintMatch(), isTrue);
-    }, overrides: <Type, Generator>{
-      Platform: () => mockPlatformEnabledCache,
-      ...contextOverrides,
-    });
-
     testUsingContext('fails to write fingerprint if inputs are missing', () {
       final Fingerprinter fingerprinter = Fingerprinter(
         fingerprintPath: 'out.fingerprint',

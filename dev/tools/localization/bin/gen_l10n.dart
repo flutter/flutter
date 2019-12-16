@@ -92,7 +92,7 @@ Future<void> main(List<String> arguments) async {
     '--output-dir=${localizationsGenerator.l10nDirectory.path}',
     '--no-use-deferred-loading',
     localizationsGenerator.outputFile.path,
-    ...localizationsGenerator.arbFilenames,
+    ...localizationsGenerator.arbPathStrings,
   ]);
   if (generateFromArbResult.exitCode != 0) {
     stderr.write(generateFromArbResult.stderr);

@@ -1144,4 +1144,39 @@ void main() {
       '   its intrinsic dimensions.\n',
     );
   });
+
+  testWidgets('Handles infinite constraints when TargetPlatform is iOS', (WidgetTester tester) async {
+    // regression test for https://github.com/flutter/flutter/issues/45866
+    final TargetPlatform oldTargetPlatform = debugDefaultTargetPlatformOverride;
+    debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            GridView(
+              shrinkWrap: true,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3,
+                  childAspectRatio: 3,
+                  mainAxisSpacing: 3,
+                  crossAxisSpacing: 3),
+              children: const <Widget>[
+                Text('a'),
+                Text('b'),
+                Text('c'),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+
+    expect(find.text('b'), findsOneWidget);
+    await tester.drag(find.text('b'), const Offset(0, 200));
+    await tester.pumpAndSettle();
+    debugDefaultTargetPlatformOverride = oldTargetPlatform;
+  });
 }

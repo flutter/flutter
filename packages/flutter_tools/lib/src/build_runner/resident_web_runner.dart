@@ -17,6 +17,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
+import '../base/net.dart';
 import '../base/os.dart';
 import '../base/terminal.dart';
 import '../base/utils.dart';
@@ -47,6 +48,7 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
     @required bool ipv6,
     @required DebuggingOptions debuggingOptions,
     @required List<String> dartDefines,
+    @required UrlTunneller urlTunneller,
   }) {
     if (featureFlags.isWebIncrementalCompilerEnabled && debuggingOptions.buildInfo.isDebug) {
       return _ExperimentalResidentWebRunner(
@@ -57,6 +59,7 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
         ipv6: ipv6,
         stayResident: stayResident,
         dartDefines: dartDefines,
+        // TODO(dantup): If this becomes default it may need to urlTunneller.
       );
     }
     return _DwdsResidentWebRunner(
@@ -67,6 +70,7 @@ class DwdsWebRunnerFactory extends WebRunnerFactory {
       ipv6: ipv6,
       stayResident: stayResident,
       dartDefines: dartDefines,
+      urlTunneller: urlTunneller,
     );
   }
 }
@@ -231,23 +235,12 @@ abstract class ResidentWebRunner extends ResidentRunner {
       final vmservice.Response response = await _vmService
           ?.callServiceExtension('ext.flutter.platformOverride');
       final String currentPlatform = response.json['value'] as String;
-      String nextPlatform;
-      switch (currentPlatform) {
-        case 'android':
-          nextPlatform = 'iOS';
-          break;
-        case 'iOS':
-          nextPlatform = 'android';
-          break;
-      }
-      if (nextPlatform == null) {
-        return;
-      }
+      final String platform = nextPlatform(currentPlatform, featureFlags);
       await _vmService?.callServiceExtension('ext.flutter.platformOverride',
           args: <String, Object>{
-            'value': nextPlatform,
+            'value': platform,
           });
-      printStatus('Switched operating system to $nextPlatform');
+      printStatus('Switched operating system to $platform');
     } on vmservice.RPCError {
       return;
     }
@@ -366,6 +359,9 @@ class _ExperimentalResidentWebRunner extends ResidentWebRunner {
           stayResident: stayResident,
           dartDefines: dartDefines,
         );
+
+  @override
+  bool get debuggingEnabled => false;
 
   @override
   Future<int> run({
@@ -531,7 +527,7 @@ class _ExperimentalResidentWebRunner extends ResidentWebRunner {
       _wipConnection = await chromeTab.connect();
     }
     appStartedCompleter?.complete();
-    connectionInfoCompleter?.complete();
+    connectionInfoCompleter?.complete(DebugConnectionInfo());
     if (stayResident) {
       await waitForAppToFinish();
     } else {
@@ -550,6 +546,7 @@ class _DwdsResidentWebRunner extends ResidentWebRunner {
     @required FlutterProject flutterProject,
     @required bool ipv6,
     @required DebuggingOptions debuggingOptions,
+    @required this.urlTunneller,
     bool stayResident = true,
     @required List<String> dartDefines,
   }) : super(
@@ -561,6 +558,8 @@ class _DwdsResidentWebRunner extends ResidentWebRunner {
           stayResident: stayResident,
           dartDefines: dartDefines,
         );
+
+  UrlTunneller urlTunneller;
 
   @override
   Future<int> run({
@@ -606,6 +605,7 @@ class _DwdsResidentWebRunner extends ResidentWebRunner {
           initializePlatform: debuggingOptions.initializePlatform,
           hostname: debuggingOptions.hostname,
           port: debuggingOptions.port,
+          urlTunneller: urlTunneller,
           skipDwds: !_enableDwds,
           dartDefines: dartDefines,
         );

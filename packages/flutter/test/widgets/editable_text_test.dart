@@ -358,6 +358,101 @@ void main() {
     expect(tester.testTextInput.setClientArgs['enableSuggestions'], enableSuggestions);
   });
 
+  group('smartDashesType and smartQuotesType', () {
+    testWidgets('sent to the engine properly', (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController();
+      const SmartDashesType smartDashesType = SmartDashesType.disabled;
+      const SmartQuotesType smartQuotesType = SmartQuotesType.disabled;
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(devicePixelRatio: 1.0),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: FocusScope(
+              node: focusScopeNode,
+              autofocus: true,
+              child: EditableText(
+                controller: controller,
+                backgroundCursorColor: Colors.grey,
+                focusNode: focusNode,
+                smartDashesType: smartDashesType,
+                smartQuotesType: smartQuotesType,
+                style: textStyle,
+                cursorColor: cursorColor,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(EditableText));
+      await tester.showKeyboard(find.byType(EditableText));
+      await tester.idle();
+      expect(tester.testTextInput.setClientArgs['smartDashesType'], smartDashesType.index.toString());
+      expect(tester.testTextInput.setClientArgs['smartQuotesType'], smartQuotesType.index.toString());
+    });
+
+    testWidgets('default to true when obscureText is false', (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController();
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(devicePixelRatio: 1.0),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: FocusScope(
+              node: focusScopeNode,
+              autofocus: true,
+              child: EditableText(
+                controller: controller,
+                backgroundCursorColor: Colors.grey,
+                focusNode: focusNode,
+                style: textStyle,
+                cursorColor: cursorColor,
+                obscureText: false,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(EditableText));
+      await tester.showKeyboard(find.byType(EditableText));
+      await tester.idle();
+      expect(tester.testTextInput.setClientArgs['smartDashesType'], '1');
+      expect(tester.testTextInput.setClientArgs['smartQuotesType'], '1');
+    });
+
+    testWidgets('default to false when obscureText is true', (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController();
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(devicePixelRatio: 1.0),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: FocusScope(
+              node: focusScopeNode,
+              autofocus: true,
+              child: EditableText(
+                controller: controller,
+                backgroundCursorColor: Colors.grey,
+                focusNode: focusNode,
+                style: textStyle,
+                cursorColor: cursorColor,
+                obscureText: true,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(EditableText));
+      await tester.showKeyboard(find.byType(EditableText));
+      await tester.idle();
+      expect(tester.testTextInput.setClientArgs['smartDashesType'], '0');
+      expect(tester.testTextInput.setClientArgs['smartQuotesType'], '0');
+    });
+  });
+
   testWidgets('selection overlay will update when text grow bigger', (WidgetTester tester) async {
     final TextEditingController controller = TextEditingController.fromValue(
         const TextEditingValue(
