@@ -374,7 +374,7 @@ abstract class RenderSliverPinnedPersistentHeader extends RenderSliverPersistent
     excludeFromSemanticsScrolling = overlapsContent || (constraints.scrollOffset > maxExtent - minExtent);
     layoutChild(constraints.scrollOffset, maxExtent, overlapsContent: overlapsContent);
     final double effectiveRemainingPaintExtent = math.max(0, constraints.remainingPaintExtent - constraints.overlap);
-    final double layoutExtent = (maxExtent - constraints.scrollOffset).clamp(0.0, effectiveRemainingPaintExtent);
+    final double layoutExtent = (maxExtent - constraints.scrollOffset).clamp(0.0, effectiveRemainingPaintExtent) as double;
     final double stretchOffset = stretchConfiguration != null ?
       constraints.overlap.abs() :
       0.0;
