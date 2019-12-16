@@ -59,8 +59,8 @@ import 'package:flutter/widgets.dart';
 ///  * [IconButton]
 ///  * <https://design.google.com/icons/>
 class Icons {
-  // This class is intended to be used as an interface, and should not be
-  // extended directly; this constructor prevents instantiation and extension.
+  // This class is not meant to be instatiated or extended; this constructor
+  // prevents instantiation and extension.
   // ignore: unused_element
   Icons._();
 
