@@ -11,7 +11,6 @@ import 'package:vector_math/vector_math_64.dart';
 import 'binding.dart';
 import 'box.dart';
 import 'debug.dart';
-import 'layer.dart';
 import 'object.dart';
 import 'viewport.dart';
 import 'viewport_offset.dart';
