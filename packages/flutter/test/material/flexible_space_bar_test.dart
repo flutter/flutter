@@ -65,7 +65,7 @@ void main() {
           collapseMode: CollapseMode.pin,
         ),
       ),
-    );
+    ) as FlexibleSpaceBarSettings;
 
     await tester.pumpWidget(
       MaterialApp(
@@ -101,7 +101,7 @@ void main() {
     expect(clipRect.size.height, maxExtent);
 
     final Element actionTextBox = tester.element(find.text('title'));
-    final Text textWidget = actionTextBox.widget;
+    final Text textWidget = actionTextBox.widget as Text;
     final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(actionTextBox);
 
     TextStyle effectiveStyle = textWidget.style;

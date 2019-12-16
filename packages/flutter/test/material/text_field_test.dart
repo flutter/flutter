@@ -3815,7 +3815,7 @@ void main() {
     SystemChannels.platform
       .setMockMethodCallHandler((MethodCall methodCall) async {
         if (methodCall.method == 'Clipboard.setData')
-          clipboardContent = methodCall.arguments['text'];
+          clipboardContent = methodCall.arguments['text'] as String;
         else if (methodCall.method == 'Clipboard.getData')
           return <String, dynamic>{'text': clipboardContent};
         return null;
@@ -3887,7 +3887,7 @@ void main() {
     SystemChannels.platform
       .setMockMethodCallHandler((MethodCall methodCall) async {
         if (methodCall.method == 'Clipboard.setData')
-          clipboardContent = methodCall.arguments['text'];
+          clipboardContent = methodCall.arguments['text'] as String;
         else if (methodCall.method == 'Clipboard.getData')
           return <String, dynamic>{'text': clipboardContent};
         return null;
@@ -6909,8 +6909,8 @@ void main() {
     renderEditable.selectWord(cause: SelectionChangedCause.longPress);
     await tester.pumpAndSettle();
 
-    final List<Widget> transitions =
-      find.byType(FadeTransition).evaluate().map((Element e) => e.widget).toList();
+    final List<FadeTransition> transitions =
+      find.byType(FadeTransition).evaluate().map((Element e) => e.widget).cast<FadeTransition>().toList();
     // On Android, an empty app contains a single FadeTransition. The following
     // two are the left and right text selection handles, respectively.
     expect(transitions.length, 3);
@@ -6943,8 +6943,8 @@ void main() {
     renderEditable.selectWord(cause: SelectionChangedCause.longPress);
     await tester.pumpAndSettle();
 
-    final List<Widget> transitions =
-      find.byType(FadeTransition).evaluate().map((Element e) => e.widget).toList();
+    final List<FadeTransition> transitions =
+      find.byType(FadeTransition).evaluate().map((Element e) => e.widget).cast<FadeTransition>().toList();
     expect(transitions.length, 2);
     final FadeTransition left = transitions[0];
     final FadeTransition right = transitions[1];

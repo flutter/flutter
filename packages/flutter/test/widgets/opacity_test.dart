@@ -189,7 +189,7 @@ void main() {
     final Element element = find.byType(RepaintBoundary).first.evaluate().single;
     // The following line will send the layer to engine and cause crash if an
     // empty opacity layer is sent.
-    final OffsetLayer offsetLayer = element.renderObject.debugLayer;
+    final OffsetLayer offsetLayer = element.renderObject.debugLayer as OffsetLayer;
     await offsetLayer.toImage(const Rect.fromLTRB(0.0, 0.0, 1.0, 1.0));
   }, skip: isBrowser); // `Layer.toImage()` doesn't work on web
 }

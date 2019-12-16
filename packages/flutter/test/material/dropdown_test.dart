@@ -462,7 +462,7 @@ void main() {
       // The selected dropdown item is both in menu we just popped up, and in
       // the IndexedStack contained by the dropdown button. Both of them should
       // have the same origin and height as the dropdown button.
-      final List<RenderObject> itemBoxes = tester.renderObjectList<RenderBox>(find.byKey(const ValueKey<String>('two'))).toList();
+      final List<RenderBox> itemBoxes = tester.renderObjectList<RenderBox>(find.byKey(const ValueKey<String>('two'))).toList();
       expect(itemBoxes.length, equals(2));
       for (RenderBox itemBox in itemBoxes) {
         assert(itemBox.attached);
@@ -855,7 +855,7 @@ void main() {
       Rect menuRect;
       tester.element(find.byType(ListView)).visitAncestorElements((Element element) {
         if (element.toString().startsWith('_DropdownMenu')) {
-          final RenderBox box = element.findRenderObject();
+          final RenderBox box = element.findRenderObject() as RenderBox;
           assert(box != null);
           menuRect = box.localToGlobal(Offset.zero) & box.size;
           return false;
@@ -1460,7 +1460,7 @@ void main() {
 
     double getMenuScroll() {
       double scrollPosition;
-      final ListView listView = tester.element(find.byType(ListView)).widget;
+      final ListView listView = tester.element(find.byType(ListView)).widget as ListView;
       final ScrollController scrollController = listView.controller;
       assert(scrollController != null);
       scrollPosition = scrollController.position.pixels;
@@ -1497,7 +1497,7 @@ void main() {
 
     double getMenuScroll() {
       double scrollPosition;
-      final ListView listView = tester.element(find.byType(ListView)).widget;
+      final ListView listView = tester.element(find.byType(ListView)).widget as ListView;
       final ScrollController scrollController = listView.controller;
       assert(scrollController != null);
       scrollPosition = scrollController.position.pixels;
@@ -1534,7 +1534,7 @@ void main() {
 
     double getMenuScroll() {
       double scrollPosition;
-      final ListView listView = tester.element(find.byType(ListView)).widget;
+      final ListView listView = tester.element(find.byType(ListView)).widget as ListView;
       final ScrollController scrollController = listView.controller;
       assert(scrollController != null);
       scrollPosition = scrollController.position.pixels;
@@ -1571,7 +1571,7 @@ void main() {
 
     double getMenuScroll() {
       double scrollPosition;
-      final ListView listView = tester.element(find.byType(ListView)).widget;
+      final ListView listView = tester.element(find.byType(ListView)).widget as ListView;
       final ScrollController scrollController = listView.controller;
       assert(scrollController != null);
       scrollPosition = scrollController.position.pixels;

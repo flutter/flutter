@@ -32,7 +32,7 @@ class KeyedWrapper extends StatelessWidget {
   const KeyedWrapper(this.key1, this.key2);
 
   final Key key1;
-  final Key key2;
+  final GlobalKey key2;
 
   @override
   Widget build(BuildContext context) {
