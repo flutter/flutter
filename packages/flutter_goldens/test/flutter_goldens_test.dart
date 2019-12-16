@@ -81,7 +81,7 @@ void main() {
       ));
     });
 
-    test(' throws for error state from auth', () async {
+    test('throws for error state from auth', () async {
       platform = FakePlatform(
         environment: <String, String>{
           'FLUTTER_ROOT': _kFlutterRoot,
