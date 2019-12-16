@@ -330,7 +330,7 @@ void main() {
     // Now we toggle the visibility off and on a few times to make sure that
     // works.
 
-    // visible: true, maintain state/
+    // visible: true, maintain state
     await tester.pumpWidget(_boilerPlate(SliverVisibility(
       sliver: testChild,
       visible: true,

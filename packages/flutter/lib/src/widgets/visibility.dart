@@ -308,10 +308,13 @@ class SliverVisibility extends StatelessWidget {
     this.maintainSemantics = false,
     this.maintainInteractivity = false,
   }) : assert(sliver != null),
+       assert(replacementSliver != null),
        assert(visible != null),
        assert(maintainState != null),
        assert(maintainAnimation != null),
        assert(maintainSize != null),
+       assert(maintainSemantics != null),
+       assert(maintainInteractivity != null),
        assert(
          maintainState == true || maintainAnimation == false,
          'Cannot maintain animations if the state is not also maintained.',
