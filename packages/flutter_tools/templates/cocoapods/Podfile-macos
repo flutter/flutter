@@ -57,7 +57,7 @@ target 'Runner' do
   }
 
   # Plugin Pods
-  plugin_pods = parse_KV_file('.Flutter/ephemeral/.flutter-plugins')
+  plugin_pods = parse_KV_file('./Flutter/ephemeral/.flutter-plugins')
   plugin_pods.map { |p|
     symlink = File.join(symlink_plugins_dir, p[:name])
     File.symlink(p[:path], symlink)
