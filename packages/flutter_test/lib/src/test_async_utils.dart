@@ -7,9 +7,6 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 
 class _AsyncScope {
-  // This class is intended to be used as an interface, and should not be
-  // extended directly; this constructor prevents instantiation and extension.
-  // ignore: unused_element
   _AsyncScope(this.creationStack, this.zone);
   final StackTrace creationStack;
   final Zone zone;
@@ -48,6 +45,9 @@ class _AsyncScope {
 /// });
 /// ```
 class TestAsyncUtils {
+  // This class is not meant to be instatiated or extended; this constructor
+  // prevents instantiation and extension.
+  // ignore: unused_element
   TestAsyncUtils._();
   static const String _className = 'TestAsyncUtils';
 
