@@ -15,9 +15,6 @@
 FROM debian:stretch
 MAINTAINER Flutter Developers <flutter-dev@googlegroups.com>
 
-# TODO remove debugging
-RUN ls; pwd
-
 RUN apt-get update -y
 RUN apt-get upgrade -y
 
@@ -110,7 +107,7 @@ RUN dpkg-query -L nodejs
 RUN /usr/bin/npm --verbose install -g firebase-tools
 # TODO(dnfield): Remove this once Firebase has a fix upstream for
 # https://github.com/flutter/flutter/issues/34435
-COPY dev/ci/docker_linux/patch_firebase.sh /root/patch_firebase.sh
+COPY ci/docker_linux/patch_firebase.sh /root/patch_firebase.sh
 RUN /root/patch_firebase.sh
 
 # Install golang more recent than in repo (necessary for dashing to build)
@@ -131,12 +128,12 @@ ENV LANG en_US.UTF-8
 # Skip all the documentation (-N) since it's just on CI.
 RUN gem install bundler -N
 
-COPY dev/ci/docker_linux/Gemfile /Gemfile
-COPY dev/ci/docker_linux/Gemfile.lock /Gemfile.lock
+COPY ci/docker_linux/Gemfile /Gemfile
+COPY ci/docker_linux/Gemfile.lock /Gemfile.lock
 
 RUN bundle install --system
 
 # Install goldctl, for Golden testing
-COPY dev/bots/download_goldctl.sh /download_goldctl.sh
+COPY bots/download_goldctl.sh /download_goldctl.sh
 ENV GOLDCTL '/depot_tools/goldctl'
 RUN /download_goldctl.sh
