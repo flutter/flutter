@@ -67,7 +67,7 @@ target 'Runner' do
   # referring to absolute paths on developers' machines.
   system('rm -rf .symlinks')
   system('mkdir -p .symlinks/plugins')
-  plugin_pods = parse_KV_file('../.flutter-plugins')
+  plugin_pods = parse_KV_file('./Flutter/.flutter-plugins')
   plugin_pods.each do |name, path|
     symlink = File.join('.symlinks', 'plugins', name)
     File.symlink(path, symlink)
