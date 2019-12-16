@@ -13,7 +13,16 @@ in the source code into API documentation, as seen on https://api.flutter.dev/.
   - [Snippet tool](#snippet-tool)
 - [Skeletons](#skeletons)
 - [Test Doc Generation Workflow](#test-doc-generation-workflow)
+
 ## Types of code blocks
+
+There's two kinds of code blocks.
+
+* samples, which are more or less context-free snippets that we
+  magically determine how to analyze, and
+
+* snippets, which get placed into a full-fledged application, and can
+  be actually executed inline in the documentation using DartPad.
 
 ### Sample Tool
 
@@ -39,7 +48,48 @@ code. Here is an example of the code `sample` tool in use:
 This will generate sample code that can be copied to the clipboard and added
 to existing applications.
 
-This uses the skeleton for [sample](config/skeletons/sample.html) snippets.
+This uses the skeleton for [sample](config/skeletons/sample.html)
+snippets when generating the HTML to put into the Dart docs.
+
+#### Analysis
+
+The `../bots/analyze-sample-code.dart` script finds code inside the
+`@tool sample` sections and uses the Dart analyzer to check them.
+
+There are several kinds of sample code you can specify:
+
+* Constructor calls, typically showing what might exist in a build
+  method. These will be inserted into an assignment expression
+  assigning to a variable of type "dynamic" and followed by a
+  semicolon, for the purposes of analysis.
+
+* Class definitions. These start with "class", and are analyzed
+  verbatim.
+
+* Other code. It gets included verbatim, though any line that says
+  `// ...` is considered to separate the block into multiple blocks
+  to be processed individually.
+
+The above means that it's tricky to include verbatim imperative code
+(e.g. a call to a method), since it won't be valid to have such code
+at the top level. Instead, wrap it in a function or even a whole
+class, or make it a valid variable declaration.
+
+You can declare code that should be included in the analysis but not
+shown in the API docs by adding a comment "// Examples can assume:" to
+the file (usually at the top of the file, after the imports),
+following by one or more commented-out lines of code. That code is
+included verbatim in the analysis. For example:
+
+```dart
+// Examples can assume:
+// final BuildContext context;
+// final String userAvatarUrl;
+```
+
+You can assume that the entire Flutter framework and most common
+`dart:*` packages are imported and in scope; `dart:math` as `math` and
+`dart:ui` as `ui`.
 
 ### Snippet Tool
 
@@ -98,6 +148,12 @@ flutter app package.
 
 For more information about how to create, use, or update templates, see
 [config/templates/README.md](config/templates/README.md).
+
+#### Analysis
+
+The `../bots/analyze-sample-code.dart` script finds code inside the
+`@tool snippet` sections and uses the Dart analyzer to check them
+after applying the specified template.
 
 ## Skeletons
 

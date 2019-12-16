@@ -442,9 +442,7 @@ class SliverConstraints extends Constraints {
       verify(growthDirection != null, 'The "growthDirection" is null.');
       verifyDouble(scrollOffset, 'scrollOffset');
       verifyDouble(overlap, 'overlap');
-      verifyDouble(remainingPaintExtent, 'remainingPaintExtent');
       verifyDouble(crossAxisExtent, 'crossAxisExtent');
-      verifyDouble(viewportMainAxisExtent, 'viewportMainAxisExtent');
       verifyDouble(scrollOffset, 'scrollOffset', mustBePositive: true);
       verify(crossAxisDirection != null, 'The "crossAxisDirection" is null.');
       verify(axisDirectionToAxis(axisDirection) != axisDirectionToAxis(crossAxisDirection), 'The "axisDirection" and the "crossAxisDirection" are along the same axis.');
