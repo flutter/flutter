@@ -386,6 +386,9 @@ bool _writeFlutterPlatformPluginsList(PlatformProject project, List<Plugin> plug
   final String oldPluginFileContent = _readFileContent(pluginsFile);
   final String pluginFileContent = flutterPluginsBuffer.toString();
   if (pluginNames.isNotEmpty) {
+    if (!pluginsFile.existsSync()) {
+      pluginsFile.createSync(recursive: true);
+    }
     pluginsFile.writeAsStringSync(pluginFileContent, flush: true);
   } else {
     if (pluginsFile.existsSync()) {
@@ -833,7 +836,7 @@ Future<void> _writeWebPluginRegistrant(FlutterProject project, List<Plugin> plug
 void refreshPluginsList(FlutterProject project, {bool checkProjects = false}) {
   final List<Plugin> plugins = findPlugins(project);
   // Write legacy.
-  _writeFlutterPluginsList(project, plugins);
+  // _writeFlutterPluginsList(project, plugins);
   if (project.web.existsSync()) {
     _writeFlutterPlatformPluginsList(project.web, plugins);
   }
