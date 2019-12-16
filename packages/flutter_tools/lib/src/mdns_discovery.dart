@@ -10,8 +10,10 @@ import 'package:multicast_dns/multicast_dns.dart';
 import 'base/common.dart';
 import 'base/context.dart';
 import 'base/io.dart';
+import 'build_info.dart';
 import 'device.dart';
 import 'globals.dart';
+import 'reporting/reporting.dart';
 
 /// A wrapper around [MDnsClient] to find a Dart observatory instance.
 class MDnsObservatoryDiscovery {
@@ -146,20 +148,71 @@ class MDnsObservatoryDiscovery {
       applicationId: applicationId,
       deviceVmservicePort: deviceVmservicePort,
     );
-    Uri observatoryUri;
-    if (result != null) {
-      final String host = usesIpv6
-        ? InternetAddress.loopbackIPv6.address
-        : InternetAddress.loopbackIPv4.address;
-      observatoryUri = await buildObservatoryUri(
-        device,
-        host,
-        result.port,
-        hostVmservicePort,
-        result.authCode,
-      );
+    if (result == null) {
+      await _checkForIPv4LinkLocal(device);
+      return null;
     }
-    return observatoryUri;
+
+    final String host = usesIpv6
+      ? InternetAddress.loopbackIPv6.address
+      : InternetAddress.loopbackIPv4.address;
+    return await buildObservatoryUri(
+      device,
+      host,
+      result.port,
+      hostVmservicePort,
+      result.authCode,
+    );
+  }
+
+  // If there's not an ipv4 link local address in `NetworkInterfaces.list`,
+  // then request user interventions with a `printError()` if possible.
+  Future<void> _checkForIPv4LinkLocal(Device device) async {
+    printTrace(
+      'mDNS query failed. Checking for an interface with a ipv4 link local address.'
+    );
+    final List<NetworkInterface> interfaces = await listNetworkInterfaces(
+      includeLinkLocal: true,
+      type: InternetAddressType.IPv4,
+    );
+    if (logger.isVerbose) {
+      _logInterfaces(interfaces);
+    }
+    final bool hasIPv4LinkLocal = interfaces.any(
+      (NetworkInterface interface) => interface.addresses.any(
+        (InternetAddress address) => address.isLinkLocal,
+      ),
+    );
+    if (hasIPv4LinkLocal) {
+      printTrace('An interface with an ipv4 link local address was found.');
+      return;
+    }
+    final TargetPlatform targetPlatform = await device.targetPlatform;
+    switch (targetPlatform) {
+      case TargetPlatform.ios:
+        UsageEvent('ios-mdns', 'no-ipv4-link-local').send();
+        printError(
+          'The mDNS query for an attached iOS device failed. It may '
+          'be necessary to disable the "Personal Hotspot" on the device. '
+          'See https://github.com/flutter/flutter/issues/46698 for details.'
+        );
+        break;
+      default:
+        printTrace('No interface with an ipv4 link local address was found.');
+        break;
+    }
+  }
+
+  void _logInterfaces(List<NetworkInterface> interfaces) {
+    for (NetworkInterface interface in interfaces) {
+      if (logger.isVerbose) {
+        printTrace('Found interface "${interface.name}":');
+        for (InternetAddress address in interface.addresses) {
+          final String linkLocal = address.isLinkLocal ? 'link local' : '';
+          printTrace('\tBound address: "${address.address}" $linkLocal');
+        }
+      }
+    }
   }
 }
 

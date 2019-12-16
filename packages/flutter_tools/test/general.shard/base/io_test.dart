@@ -82,6 +82,20 @@ void main() {
   test('test_api defines the Declarer in a known place', () {
     expect(Zone.current[#test.declarer], isNotNull);
   });
+
+  test('listNetworkInterfaces() uses overrides', () async {
+    setNetworkInterfaceLister(
+      ({
+        bool includeLoopback,
+        bool includeLinkLocal,
+        InternetAddressType type,
+      }) async => <NetworkInterface>[],
+    );
+
+    expect(await listNetworkInterfaces(), isEmpty);
+
+    resetNetworkInterfaceLister();
+  });
 }
 
 class MockIoProcessSignal extends Mock implements io.ProcessSignal {}
