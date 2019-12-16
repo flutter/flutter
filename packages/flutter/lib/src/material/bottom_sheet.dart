@@ -265,7 +265,9 @@ class _ModalBottomSheet<T> extends StatefulWidget {
     this.shape,
     this.clipBehavior,
     this.isScrollControlled = false,
+    this.enableDrag = true,
   }) : assert(isScrollControlled != null),
+       assert(enableDrag != null),
        super(key: key);
 
   final _ModalBottomSheetRoute<T> route;
@@ -274,6 +276,7 @@ class _ModalBottomSheet<T> extends StatefulWidget {
   final double elevation;
   final ShapeBorder shape;
   final Clip clipBehavior;
+  final bool enableDrag;
 
   @override
   _ModalBottomSheetState<T> createState() => _ModalBottomSheetState<T>();
@@ -326,6 +329,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
                 elevation: widget.elevation,
                 shape: widget.shape,
                 clipBehavior: widget.clipBehavior,
+                enableDrag: widget.enableDrag,
               ),
             ),
           ),
@@ -346,10 +350,12 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
     this.clipBehavior,
     this.modalBarrierColor,
     this.isDismissible = true,
+    this.enableDrag = true,
     @required this.isScrollControlled,
     RouteSettings settings,
   }) : assert(isScrollControlled != null),
        assert(isDismissible != null),
+       assert(enableDrag != null),
        super(settings: settings);
 
   final WidgetBuilder builder;
@@ -361,6 +367,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
   final Clip clipBehavior;
   final Color modalBarrierColor;
   final bool isDismissible;
+  final bool enableDrag;
 
   @override
   Duration get transitionDuration => _bottomSheetDuration;
@@ -399,6 +406,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
         shape: shape,
         clipBehavior: clipBehavior,
         isScrollControlled: isScrollControlled,
+        enableDrag: enableDrag,
       ),
     );
     if (theme != null)
@@ -436,6 +444,9 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
 ///
 /// The [isDismissible] parameter specifies whether the bottom sheet will be
 /// dismissed when user taps on the scrim.
+///
+/// The [enableDrag] parameter specifies whether the bottom sheet can be
+/// dragged up and down and dismissed by swiping downards.
 ///
 /// The optional [backgroundColor], [elevation], [shape], and [clipBehavior]
 /// parameters can be passed in to customize the appearance and behavior of
@@ -507,12 +518,14 @@ Future<T> showModalBottomSheet<T>({
   bool isScrollControlled = false,
   bool useRootNavigator = false,
   bool isDismissible = true,
+  bool enableDrag = true,
 }) {
   assert(context != null);
   assert(builder != null);
   assert(isScrollControlled != null);
   assert(useRootNavigator != null);
   assert(isDismissible != null);
+  assert(enableDrag != null);
   assert(debugCheckHasMediaQuery(context));
   assert(debugCheckHasMaterialLocalizations(context));
 
@@ -526,7 +539,8 @@ Future<T> showModalBottomSheet<T>({
     shape: shape,
     clipBehavior: clipBehavior,
     isDismissible: isDismissible,
-    modalBarrierColor: barrierColor
+    modalBarrierColor: barrierColor,
+    enableDrag: enableDrag,
   ));
 }
 
