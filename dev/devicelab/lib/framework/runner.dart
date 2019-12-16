@@ -69,7 +69,7 @@ Future<Map<String, dynamic>> runTask(
 
   try {
     final VMIsolateRef isolate = await _connectToRunnerIsolate(await uri.future);
-    final Map<String, dynamic> taskResult = await isolate.invokeExtension('ext.cocoonRunTask');
+    final Map<String, dynamic> taskResult = await isolate.invokeExtension('ext.cocoonRunTask') as Map<String, dynamic>;
     await runner.exitCode;
     return taskResult;
   } finally {
@@ -100,7 +100,7 @@ Future<VMIsolateRef> _connectToRunnerIsolate(Uri vmServiceUri) async {
       final VMServiceClient client = VMServiceClient.connect(url);
       final VM vm = await client.getVM();
       final VMIsolateRef isolate = vm.isolates.single;
-      final String response = await isolate.invokeExtension('ext.cocoonRunnerReady');
+      final String response = await isolate.invokeExtension('ext.cocoonRunnerReady') as String;
       if (response != 'ready')
         throw 'not ready yet';
       return isolate;

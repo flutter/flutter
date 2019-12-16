@@ -93,6 +93,12 @@ class _FuchsiaLogReader extends DeviceLogReader {
 
   @override
   String toString() => name;
+
+  @override
+  void dispose() {
+    // The Fuchsia SDK syslog process is killed when the subscription to the
+    // logLines Stream is canceled.
+  }
 }
 
 class _FuchsiaLogSink implements EventSink<String> {
@@ -458,7 +464,12 @@ class FuchsiaDevice extends Device {
   @override
   DevicePortForwarder get portForwarder =>
       _portForwarder ??= _FuchsiaPortForwarder(this);
-  _FuchsiaPortForwarder _portForwarder;
+  DevicePortForwarder _portForwarder;
+
+  @visibleForTesting
+  set portForwarder(DevicePortForwarder forwarder) {
+    _portForwarder = forwarder;
+  }
 
   @override
   void clearLogs() {}
@@ -582,6 +593,11 @@ class FuchsiaDevice extends Device {
   @override
   bool isSupportedForProject(FlutterProject flutterProject) {
     return flutterProject.fuchsia.existsSync();
+  }
+
+  @override
+  Future<void> dispose() async {
+    await _portForwarder?.dispose();
   }
 }
 
@@ -734,6 +750,13 @@ class _FuchsiaPortForwarder extends DevicePortForwarder {
     final ProcessResult result = await processManager.run(command);
     if (result.exitCode != 0) {
       throwToolExit('Unforward command failed: $result');
+    }
+  }
+
+  @override
+  Future<void> dispose() async {
+    for (ForwardedPort port in forwardedPorts) {
+      await unforward(port);
     }
   }
 }

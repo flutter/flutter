@@ -127,12 +127,10 @@ abstract class AlignmentGeometry {
 
   @override
   bool operator ==(dynamic other) {
-    if (other is! AlignmentGeometry)
-      return false;
-    final AlignmentGeometry typedOther = other;
-    return _x == typedOther._x &&
-           _start == typedOther._start &&
-           _y == typedOther._y;
+    return other is AlignmentGeometry
+        && other._x == _x
+        && other._start == _start
+        && other._y == _y;
   }
 
   @override

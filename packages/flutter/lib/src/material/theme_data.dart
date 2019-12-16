@@ -1297,71 +1297,71 @@ class ThemeData extends Diagnosticable {
   bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
-    final ThemeData otherData = other;
     // Warning: make sure these properties are in the exact same order as in
     // hashValues() and in the raw constructor and in the order of fields in
     // the class and in the lerp() method.
-    return (otherData.brightness == brightness) &&
-           (otherData.visualDensity == visualDensity) &&
-           (otherData.primaryColor == primaryColor) &&
-           (otherData.primaryColorBrightness == primaryColorBrightness) &&
-           (otherData.primaryColorLight == primaryColorLight) &&
-           (otherData.primaryColorDark == primaryColorDark) &&
-           (otherData.accentColor == accentColor) &&
-           (otherData.accentColorBrightness == accentColorBrightness) &&
-           (otherData.canvasColor == canvasColor) &&
-           (otherData.scaffoldBackgroundColor == scaffoldBackgroundColor) &&
-           (otherData.bottomAppBarColor == bottomAppBarColor) &&
-           (otherData.cardColor == cardColor) &&
-           (otherData.dividerColor == dividerColor) &&
-           (otherData.highlightColor == highlightColor) &&
-           (otherData.splashColor == splashColor) &&
-           (otherData.splashFactory == splashFactory) &&
-           (otherData.selectedRowColor == selectedRowColor) &&
-           (otherData.unselectedWidgetColor == unselectedWidgetColor) &&
-           (otherData.disabledColor == disabledColor) &&
-           (otherData.buttonTheme == buttonTheme) &&
-           (otherData.buttonColor == buttonColor) &&
-           (otherData.toggleButtonsTheme == toggleButtonsTheme) &&
-           (otherData.secondaryHeaderColor == secondaryHeaderColor) &&
-           (otherData.textSelectionColor == textSelectionColor) &&
-           (otherData.cursorColor == cursorColor) &&
-           (otherData.textSelectionHandleColor == textSelectionHandleColor) &&
-           (otherData.backgroundColor == backgroundColor) &&
-           (otherData.dialogBackgroundColor == dialogBackgroundColor) &&
-           (otherData.indicatorColor == indicatorColor) &&
-           (otherData.hintColor == hintColor) &&
-           (otherData.errorColor == errorColor) &&
-           (otherData.toggleableActiveColor == toggleableActiveColor) &&
-           (otherData.textTheme == textTheme) &&
-           (otherData.primaryTextTheme == primaryTextTheme) &&
-           (otherData.accentTextTheme == accentTextTheme) &&
-           (otherData.inputDecorationTheme == inputDecorationTheme) &&
-           (otherData.iconTheme == iconTheme) &&
-           (otherData.primaryIconTheme == primaryIconTheme) &&
-           (otherData.accentIconTheme == accentIconTheme) &&
-           (otherData.sliderTheme == sliderTheme) &&
-           (otherData.tabBarTheme == tabBarTheme) &&
-           (otherData.tooltipTheme == tooltipTheme) &&
-           (otherData.cardTheme == cardTheme) &&
-           (otherData.chipTheme == chipTheme) &&
-           (otherData.platform == platform) &&
-           (otherData.materialTapTargetSize == materialTapTargetSize) &&
-           (otherData.applyElevationOverlayColor == applyElevationOverlayColor) &&
-           (otherData.pageTransitionsTheme == pageTransitionsTheme) &&
-           (otherData.appBarTheme == appBarTheme) &&
-           (otherData.bottomAppBarTheme == bottomAppBarTheme) &&
-           (otherData.colorScheme == colorScheme) &&
-           (otherData.dialogTheme == dialogTheme) &&
-           (otherData.floatingActionButtonTheme == floatingActionButtonTheme) &&
-           (otherData.typography == typography) &&
-           (otherData.cupertinoOverrideTheme == cupertinoOverrideTheme) &&
-           (otherData.snackBarTheme == snackBarTheme) &&
-           (otherData.bottomSheetTheme == bottomSheetTheme) &&
-           (otherData.popupMenuTheme == popupMenuTheme) &&
-           (otherData.bannerTheme == bannerTheme) &&
-           (otherData.dividerTheme == dividerTheme) &&
-           (otherData.buttonBarTheme == buttonBarTheme);
+    return other is ThemeData
+        && other.brightness == brightness
+        && other.visualDensity == visualDensity
+        && other.primaryColor == primaryColor
+        && other.primaryColorBrightness == primaryColorBrightness
+        && other.primaryColorLight == primaryColorLight
+        && other.primaryColorDark == primaryColorDark
+        && other.accentColor == accentColor
+        && other.accentColorBrightness == accentColorBrightness
+        && other.canvasColor == canvasColor
+        && other.scaffoldBackgroundColor == scaffoldBackgroundColor
+        && other.bottomAppBarColor == bottomAppBarColor
+        && other.cardColor == cardColor
+        && other.dividerColor == dividerColor
+        && other.highlightColor == highlightColor
+        && other.splashColor == splashColor
+        && other.splashFactory == splashFactory
+        && other.selectedRowColor == selectedRowColor
+        && other.unselectedWidgetColor == unselectedWidgetColor
+        && other.disabledColor == disabledColor
+        && other.buttonTheme == buttonTheme
+        && other.buttonColor == buttonColor
+        && other.toggleButtonsTheme == toggleButtonsTheme
+        && other.secondaryHeaderColor == secondaryHeaderColor
+        && other.textSelectionColor == textSelectionColor
+        && other.cursorColor == cursorColor
+        && other.textSelectionHandleColor == textSelectionHandleColor
+        && other.backgroundColor == backgroundColor
+        && other.dialogBackgroundColor == dialogBackgroundColor
+        && other.indicatorColor == indicatorColor
+        && other.hintColor == hintColor
+        && other.errorColor == errorColor
+        && other.toggleableActiveColor == toggleableActiveColor
+        && other.textTheme == textTheme
+        && other.primaryTextTheme == primaryTextTheme
+        && other.accentTextTheme == accentTextTheme
+        && other.inputDecorationTheme == inputDecorationTheme
+        && other.iconTheme == iconTheme
+        && other.primaryIconTheme == primaryIconTheme
+        && other.accentIconTheme == accentIconTheme
+        && other.sliderTheme == sliderTheme
+        && other.tabBarTheme == tabBarTheme
+        && other.tooltipTheme == tooltipTheme
+        && other.cardTheme == cardTheme
+        && other.chipTheme == chipTheme
+        && other.platform == platform
+        && other.materialTapTargetSize == materialTapTargetSize
+        && other.applyElevationOverlayColor == applyElevationOverlayColor
+        && other.pageTransitionsTheme == pageTransitionsTheme
+        && other.appBarTheme == appBarTheme
+        && other.bottomAppBarTheme == bottomAppBarTheme
+        && other.colorScheme == colorScheme
+        && other.dialogTheme == dialogTheme
+        && other.floatingActionButtonTheme == floatingActionButtonTheme
+        && other.typography == typography
+        && other.cupertinoOverrideTheme == cupertinoOverrideTheme
+        && other.snackBarTheme == snackBarTheme
+        && other.bottomSheetTheme == bottomSheetTheme
+        && other.popupMenuTheme == popupMenuTheme
+        && other.bannerTheme == bannerTheme
+        && other.dividerTheme == dividerTheme
+        && other.buttonBarTheme == buttonBarTheme;
   }
 
   @override
@@ -1636,8 +1636,9 @@ class _IdentityThemeDataCacheKey {
   bool operator ==(Object other) {
     // We are explicitly ignoring the possibility that the types might not
     // match in the interests of speed.
-    final _IdentityThemeDataCacheKey otherKey = other;
-    return identical(baseTheme, otherKey.baseTheme) && identical(localTextGeometry, otherKey.localTextGeometry);
+    return other is _IdentityThemeDataCacheKey
+        && identical(other.baseTheme, baseTheme)
+        && identical(other.localTextGeometry, localTextGeometry);
   }
 }
 
@@ -1819,9 +1820,9 @@ class VisualDensity extends Diagnosticable {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    final VisualDensity typedOther = other;
-    return horizontal == typedOther.horizontal
-        && vertical == typedOther.vertical;
+    return other is VisualDensity
+        && other.horizontal == horizontal
+        && other.vertical == vertical;
   }
 
   @override

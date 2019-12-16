@@ -53,8 +53,8 @@ class _GalleryAppState extends State<GalleryApp> {
     // https://docs.flutter.io/flutter/widgets/Navigator-class.html
     return Map<String, WidgetBuilder>.fromIterable(
       kAllGalleryDemos,
-      key: (dynamic demo) => '${demo.routeName}',
-      value: (dynamic demo) => demo.buildRoute,
+      key: (dynamic demo) => '${(demo as GalleryDemo).routeName}',
+      value: (dynamic demo) => (demo as GalleryDemo).buildRoute,
     );
   }
 
@@ -68,6 +68,12 @@ class _GalleryAppState extends State<GalleryApp> {
       platform: defaultTargetPlatform,
     );
     model = AppStateModel()..loadProducts();
+  }
+
+  @override
+  void reassemble() {
+    _options = _options.copyWith(platform: defaultTargetPlatform);
+    super.reassemble();
   }
 
   @override

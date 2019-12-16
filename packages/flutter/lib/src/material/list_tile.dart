@@ -975,10 +975,10 @@ class _ListTileElement extends RenderObjectElement {
   final Map<Element, _ListTileSlot> childToSlot = <Element, _ListTileSlot>{};
 
   @override
-  _ListTile get widget => super.widget;
+  _ListTile get widget => super.widget as _ListTile;
 
   @override
-  _RenderListTile get renderObject => super.renderObject;
+  _RenderListTile get renderObject => super.renderObject as _RenderListTile;
 
   @override
   void visitChildren(ElementVisitor visitor) {
@@ -1039,7 +1039,7 @@ class _ListTileElement extends RenderObjectElement {
     _updateChild(widget.trailing, _ListTileSlot.trailing);
   }
 
-  void _updateRenderObject(RenderObject child, _ListTileSlot slot) {
+  void _updateRenderObject(RenderBox child, _ListTileSlot slot) {
     switch (slot) {
       case _ListTileSlot.leading:
         renderObject.leading = child;
@@ -1060,8 +1060,8 @@ class _ListTileElement extends RenderObjectElement {
   void insertChildRenderObject(RenderObject child, dynamic slotValue) {
     assert(child is RenderBox);
     assert(slotValue is _ListTileSlot);
-    final _ListTileSlot slot = slotValue;
-    _updateRenderObject(child, slot);
+    final _ListTileSlot slot = slotValue as _ListTileSlot;
+    _updateRenderObject(child as RenderBox, slot);
     assert(renderObject.childToSlot.keys.contains(child));
     assert(renderObject.slotToChild.keys.contains(slot));
   }
@@ -1303,7 +1303,7 @@ class _RenderListTile extends RenderBox {
   @override
   double computeDistanceToActualBaseline(TextBaseline baseline) {
     assert(title != null);
-    final BoxParentData parentData = title.parentData;
+    final BoxParentData parentData = title.parentData as BoxParentData;
     return parentData.offset.dy + title.getDistanceToActualBaseline(baseline);
   }
 
@@ -1319,7 +1319,7 @@ class _RenderListTile extends RenderBox {
   }
 
   static void _positionBox(RenderBox box, Offset offset) {
-    final BoxParentData parentData = box.parentData;
+    final BoxParentData parentData = box.parentData as BoxParentData;
     parentData.offset = offset;
   }
 
@@ -1463,7 +1463,7 @@ class _RenderListTile extends RenderBox {
   void paint(PaintingContext context, Offset offset) {
     void doPaint(RenderBox child) {
       if (child != null) {
-        final BoxParentData parentData = child.parentData;
+        final BoxParentData parentData = child.parentData as BoxParentData;
         context.paintChild(child, parentData.offset + offset);
       }
     }
@@ -1480,7 +1480,7 @@ class _RenderListTile extends RenderBox {
   bool hitTestChildren(BoxHitTestResult result, { @required Offset position }) {
     assert(position != null);
     for (RenderBox child in _children) {
-      final BoxParentData parentData = child.parentData;
+      final BoxParentData parentData = child.parentData as BoxParentData;
       final bool isHit = result.addWithPaintOffset(
         offset: parentData.offset,
         position: position,

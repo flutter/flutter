@@ -46,7 +46,7 @@ class TestStepResult {
         if (snapshot.hasData) {
           return snapshot.data;
         } else {
-          final TestStepResult result = snapshot.error;
+          final TestStepResult result = snapshot.error as TestStepResult;
           return result;
         }
         break;

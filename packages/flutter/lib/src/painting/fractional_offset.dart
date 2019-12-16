@@ -137,7 +137,7 @@ class FractionalOffset extends Alignment {
   Alignment operator -(Alignment other) {
     if (other is! FractionalOffset)
       return super - other;
-    final FractionalOffset typedOther = other;
+    final FractionalOffset typedOther = other as FractionalOffset;
     return FractionalOffset(dx - typedOther.dx, dy - typedOther.dy);
   }
 
@@ -145,7 +145,7 @@ class FractionalOffset extends Alignment {
   Alignment operator +(Alignment other) {
     if (other is! FractionalOffset)
       return super + other;
-    final FractionalOffset typedOther = other;
+    final FractionalOffset typedOther = other as FractionalOffset;
     return FractionalOffset(dx + typedOther.dx, dy + typedOther.dy);
   }
 

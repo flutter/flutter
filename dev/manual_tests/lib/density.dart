@@ -116,12 +116,12 @@ class OptionModel extends ChangeNotifier {
 
   void reset() {
     final OptionModel defaultModel = OptionModel();
-    _size = defaultModel._size;
-    _enable = defaultModel._enable;
-    _slowAnimations = defaultModel._slowAnimations;
-    _longText = defaultModel._longText;
-    _density = defaultModel._density;
-    _rtl = defaultModel._rtl;
+    _size = defaultModel.size;
+    _enable = defaultModel.enable;
+    _slowAnimations = defaultModel.slowAnimations;
+    _longText = defaultModel.longText;
+    _density = defaultModel.density;
+    _rtl = defaultModel.rtl;
     notifyListeners();
   }
 }
@@ -190,11 +190,9 @@ class _OptionsState extends State<Options> {
   String _densityToProfile(VisualDensity density) {
     if (density == VisualDensity.standard) {
       return 'standard';
-    }
-    if (density == VisualDensity.compact) {
+    } else if (density == VisualDensity.compact) {
       return 'compact';
-    }
-    if (density == VisualDensity.comfortable) {
+    } else if (density == VisualDensity.comfortable) {
       return 'comfortable';
     }
     return 'custom';
@@ -239,13 +237,14 @@ class _OptionsState extends State<Options> {
                       child: SliderTheme(
                         data: controlTheme,
                         child: Slider(
-                            label: '${widget.model.size}',
-                            min: 0.5,
-                            max: 3.0,
-                            onChanged: (double value) {
-                              widget.model.size = value;
-                            },
-                            value: widget.model.size),
+                          label: '${widget.model.size}',
+                          min: 0.5,
+                          max: 3.0,
+                          onChanged: (double value) {
+                            widget.model.size = value;
+                          },
+                          value: widget.model.size,
+                        ),
                       ),
                     ),
                     Text(
@@ -264,13 +263,14 @@ class _OptionsState extends State<Options> {
                       child: SliderTheme(
                         data: controlTheme,
                         child: Slider(
-                            label: '${widget.model.density.horizontal.toStringAsFixed(1)}',
-                            min: VisualDensity.minimumDensity,
-                            max: VisualDensity.maximumDensity,
-                            onChanged: (double value) {
-                              widget.model.density = widget.model.density.copyWith(horizontal: value, vertical: widget.model.density.vertical);
-                            },
-                            value: widget.model.density.horizontal),
+                          label: '${widget.model.density.horizontal.toStringAsFixed(1)}',
+                          min: VisualDensity.minimumDensity,
+                          max: VisualDensity.maximumDensity,
+                          onChanged: (double value) {
+                            widget.model.density = widget.model.density.copyWith(horizontal: value, vertical: widget.model.density.vertical);
+                          },
+                          value: widget.model.density.horizontal,
+                        ),
                       ),
                     ),
                     Text(
@@ -289,13 +289,14 @@ class _OptionsState extends State<Options> {
                       child: SliderTheme(
                         data: controlTheme,
                         child: Slider(
-                            label: '${widget.model.density.vertical.toStringAsFixed(1)}',
-                            min: VisualDensity.minimumDensity,
-                            max: VisualDensity.maximumDensity,
-                            onChanged: (double value) {
-                              widget.model.density = widget.model.density.copyWith(horizontal: widget.model.density.horizontal, vertical: value);
-                            },
-                            value: widget.model.density.vertical),
+                          label: '${widget.model.density.vertical.toStringAsFixed(1)}',
+                          min: VisualDensity.minimumDensity,
+                          max: VisualDensity.maximumDensity,
+                          onChanged: (double value) {
+                            widget.model.density = widget.model.density.copyWith(horizontal: widget.model.density.horizontal, vertical: value);
+                          },
+                          value: widget.model.density.vertical,
+                        ),
                       ),
                     ),
                     Text(
@@ -318,7 +319,10 @@ class _OptionsState extends State<Options> {
                         widget.model.density = _profileToDensity(value);
                       },
                       items: const <DropdownMenuItem<String>>[
-                        DropdownMenuItem<String>(child: Text('Standard'), value: 'standard',),
+                        DropdownMenuItem<String>(
+                          child: Text('Standard'),
+                          value: 'standard',
+                        ),
                         DropdownMenuItem<String>(child: Text('Comfortable'), value: 'comfortable'),
                         DropdownMenuItem<String>(child: Text('Compact'), value: 'compact'),
                         DropdownMenuItem<String>(child: Text('Custom'), value: 'custom'),
@@ -417,6 +421,10 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   double sliderValue = 0.0;
+  List<bool> checkboxValues = <bool>[false, false, false, false];
+  List<IconData> iconValues = <IconData>[Icons.arrow_back, Icons.play_arrow, Icons.arrow_forward];
+  List<String> chipValues = <String>['Potato', 'Computer'];
+  int radioValue = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -426,6 +434,21 @@ class _MyHomePageState extends State<MyHomePage> {
     final Widget label = Text(_model.rtl ? 'اضغط علي' : 'Press Me');
 
     final List<Widget> tiles = <Widget>[
+      _ControlTile(
+        label: _model.rtl ? 'رقائق' : 'Chips',
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List<Widget>.generate(chipValues.length, (int index) {
+            return InputChip(
+              onPressed: _model.enable ? () {} : null,
+              onDeleted: _model.enable ? () {} : null,
+              label: Text(chipValues[index]),
+              deleteIcon: const Icon(Icons.delete),
+              avatar: const Icon(Icons.play_arrow),
+            );
+          }),
+        ),
+      ),
       _ControlTile(
         label: _model.rtl ? 'زر المواد' : 'Material Button',
         child: MaterialButton(
@@ -456,6 +479,55 @@ class _MyHomePageState extends State<MyHomePage> {
           color: m2Swatch[500],
           onPressed: _model.enable ? () {} : null,
           child: label,
+        ),
+      ),
+      _ControlTile(
+        label: _model.rtl ? 'خانات الاختيار' : 'Checkboxes',
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List<Widget>.generate(checkboxValues.length, (int index) {
+            return Checkbox(
+              onChanged: _model.enable
+                  ? (bool value) {
+                      setState(() {
+                        checkboxValues[index] = value;
+                      });
+                    }
+                  : null,
+              value: checkboxValues[index],
+            );
+          }),
+        ),
+      ),
+      _ControlTile(
+        label: _model.rtl ? 'زر الراديو' : 'Radio Button',
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List<Widget>.generate(4, (int index) {
+            return Radio<int>(
+              onChanged: _model.enable
+                  ? (int value) {
+                      setState(() {
+                        radioValue = value;
+                      });
+                    }
+                  : null,
+              groupValue: radioValue,
+              value: index,
+            );
+          }),
+        ),
+      ),
+      _ControlTile(
+        label: _model.rtl ? 'زر الأيقونة' : 'Icon Button',
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List<Widget>.generate(iconValues.length, (int index) {
+            return IconButton(
+              onPressed: _model.enable ? () {} : null,
+              icon: Icon(iconValues[index]),
+            );
+          }),
         ),
       ),
     ];

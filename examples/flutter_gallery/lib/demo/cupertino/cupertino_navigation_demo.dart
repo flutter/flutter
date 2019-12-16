@@ -293,9 +293,9 @@ class Tab1ItemPageState extends State<Tab1ItemPage> {
       final math.Random random = math.Random();
       return Color.fromARGB(
         255,
-      (widget.color.red + random.nextInt(100) - 50).clamp(0, 255),
-        (widget.color.green + random.nextInt(100) - 50).clamp(0, 255),
-        (widget.color.blue + random.nextInt(100) - 50).clamp(0, 255),
+        (widget.color.red + random.nextInt(100) - 50).clamp(0, 255) as int,
+        (widget.color.green + random.nextInt(100) - 50).clamp(0, 255) as int,
+        (widget.color.blue + random.nextInt(100) - 50).clamp(0, 255) as int,
       );
     });
   }
@@ -635,9 +635,9 @@ class Tab2ConversationAvatar extends StatelessWidget {
             color,
             Color.fromARGB(
               color.alpha,
-              (color.red - 60).clamp(0, 255),
-              (color.green - 60).clamp(0, 255),
-              (color.blue - 60).clamp(0, 255),
+              (color.red - 60).clamp(0, 255) as int,
+              (color.green - 60).clamp(0, 255) as int,
+              (color.blue - 60).clamp(0, 255) as int,
             ),
           ],
         ),
