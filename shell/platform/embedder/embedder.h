@@ -1626,7 +1626,7 @@ bool FlutterEngineRunsAOTCompiledDartCode(void);
 ///             `FlutterEngineDeinitialize` or `FlutterEngineShutdown` on
 ///             another thread.
 ///
-/// @param[in]  engine.    A running engine instance.
+/// @param[in]  engine     A running engine instance.
 /// @param[in]  port       The send port to send the object to.
 /// @param[in]  object     The object to send to the isolate with the
 ///                        corresponding receive port.
@@ -1638,6 +1638,27 @@ FlutterEngineResult FlutterEnginePostDartObject(
     FLUTTER_API_SYMBOL(FlutterEngine) engine,
     FlutterEngineDartPort port,
     const FlutterEngineDartObject* object);
+
+//------------------------------------------------------------------------------
+/// @brief      Posts a low memory notification to a running engine instance.
+///             The engine will do its best to release non-critical resources in
+///             response. It is not guaranteed that the resource would have been
+///             collected by the time this call returns however. The
+///             notification is posted to engine subsystems that may be
+///             operating on other threads.
+///
+///             Flutter applications can respond to these notifications by
+///             setting `WidgetsBindingObserver.didHaveMemoryPressure`
+///             observers.
+///
+/// @param[in]  engine     A running engine instance.
+///
+/// @return     If the low memory notification was sent to the running engine
+///             instance.
+///
+FLUTTER_EXPORT
+FlutterEngineResult FlutterEngineNotifyLowMemoryWarning(
+    FLUTTER_API_SYMBOL(FlutterEngine) engine);
 
 #if defined(__cplusplus)
 }  // extern "C"

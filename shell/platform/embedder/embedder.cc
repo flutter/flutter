@@ -1503,6 +1503,37 @@ FlutterEngineResult FlutterEngineRunTask(FLUTTER_API_SYMBOL(FlutterEngine)
                                   "Could not run the specified task.");
 }
 
+static bool DispatchJSONPlatformMessage(FLUTTER_API_SYMBOL(FlutterEngine)
+                                            engine,
+                                        rapidjson::Document document,
+                                        const std::string& channel_name) {
+  if (channel_name.size() == 0) {
+    return false;
+  }
+
+  rapidjson::StringBuffer buffer;
+  rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
+
+  if (!document.Accept(writer)) {
+    return false;
+  }
+
+  const char* message = buffer.GetString();
+
+  if (message == nullptr || buffer.GetSize() == 0) {
+    return false;
+  }
+
+  auto platform_message = fml::MakeRefCounted<flutter::PlatformMessage>(
+      channel_name.c_str(),                                       // channel
+      std::vector<uint8_t>{message, message + buffer.GetSize()},  // message
+      nullptr                                                     // response
+  );
+
+  return reinterpret_cast<flutter::EmbedderEngine*>(engine)
+      ->SendPlatformMessage(std::move(platform_message));
+}
+
 FlutterEngineResult FlutterEngineUpdateLocales(FLUTTER_API_SYMBOL(FlutterEngine)
                                                    engine,
                                                const FlutterLocale** locales,
@@ -1555,27 +1586,8 @@ FlutterEngineResult FlutterEngineUpdateLocales(FLUTTER_API_SYMBOL(FlutterEngine)
   }
   document.AddMember("args", args, allocator);
 
-  rapidjson::StringBuffer buffer;
-  rapidjson::Writer<rapidjson::StringBuffer> writer(buffer);
-  if (!document.Accept(writer)) {
-    return LOG_EMBEDDER_ERROR(kInternalInconsistency,
-                              "Could not create locale payload.");
-  }
-
-  const char* message = buffer.GetString();
-
-  if (message == nullptr || buffer.GetSize() == 0) {
-    return LOG_EMBEDDER_ERROR(kInternalInconsistency,
-                              "Could not create locale update message.");
-  }
-
-  auto platform_message = fml::MakeRefCounted<flutter::PlatformMessage>(
-      "flutter/localization",                                     // channel
-      std::vector<uint8_t>{message, message + buffer.GetSize()},  // message
-      nullptr                                                     // response
-  );
-  return reinterpret_cast<flutter::EmbedderEngine*>(engine)
-                 ->SendPlatformMessage(std::move(platform_message))
+  return DispatchJSONPlatformMessage(engine, std::move(document),
+                                     "flutter/localization")
              ? kSuccess
              : LOG_EMBEDDER_ERROR(kInternalInconsistency,
                                   "Could not send message to update locale of "
@@ -1709,4 +1721,28 @@ FlutterEngineResult FlutterEnginePostDartObject(
   // invoking the finalizer.
   typed_data_finalizer.Release();
   return kSuccess;
+}
+
+FLUTTER_EXPORT
+FlutterEngineResult FlutterEngineNotifyLowMemoryWarning(
+    FLUTTER_API_SYMBOL(FlutterEngine) raw_engine) {
+  auto engine = reinterpret_cast<flutter::EmbedderEngine*>(raw_engine);
+  if (engine == nullptr || !engine->IsValid()) {
+    return LOG_EMBEDDER_ERROR(kInvalidArguments, "Engine was invalid.");
+  }
+
+  engine->GetShell().NotifyLowMemoryWarning();
+
+  rapidjson::Document document;
+  auto& allocator = document.GetAllocator();
+
+  document.SetObject();
+  document.AddMember("type", "memoryPressure", allocator);
+
+  return DispatchJSONPlatformMessage(raw_engine, std::move(document),
+                                     "flutter/system")
+             ? kSuccess
+             : LOG_EMBEDDER_ERROR(
+                   kInternalInconsistency,
+                   "Could not dispatch the low memory notification message.");
 }
