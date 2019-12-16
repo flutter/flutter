@@ -4,6 +4,7 @@
 
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/context.dart';
 
 import '../../src/common.dart';
 
@@ -26,7 +27,7 @@ void main() {
     });
 
     testWithoutContext('Throws if accessing the Zone', () {
-      expect(() => fs, throwsA(isInstanceOf<UnsupportedError>()));
+      expect(() => context.get<Object>(), throwsA(isInstanceOf<UnsupportedError>()));
     });
   });
 }

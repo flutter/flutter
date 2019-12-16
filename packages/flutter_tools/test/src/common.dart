@@ -140,6 +140,14 @@ Future<void> expectToolExitLater(Future<dynamic> future, Matcher messageMatcher)
   }
 }
 
+/// Executes a test body in zone that does not allow context-based injection.
+///
+/// For classes which have been refactored to excluded context-based injection
+/// or globals like [fs] or [platform], prefer using this test method as it
+/// will prevent accidentally including these context getters in future code
+/// changes.
+///
+/// For more information, see https://github.com/flutter/flutter/issues/47161
 @isTest
 void testWithoutContext(String description, FutureOr<void> body(), {
   String testOn,
