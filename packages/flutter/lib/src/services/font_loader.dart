@@ -7,6 +7,7 @@ import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 
 /// A class that enables the dynamic loading of fonts at runtime.
 ///
@@ -62,7 +63,19 @@ class FontLoader {
             (Uint8List list) => loadFont(list, family)
         )
     );
-    return Future.wait(loadFutures.toList());
+    return Future.wait(loadFutures.toList()).then((List<void> futures) async {
+      if (ServicesBinding.instance != null) {
+        final BasicMessageChannel<dynamic> systemChannel = SystemChannels.system;
+        await systemChannel.binaryMessenger.handlePlatformMessage(
+          systemChannel.name,
+          systemChannel.codec.encodeMessage(
+            <String, dynamic>{'type': 'fontsChange'}
+          ),
+          null,
+        );
+      }
+      return futures;
+    });
   }
 
   /// Hook called to load a font asset into the engine.
