@@ -264,8 +264,7 @@ abstract class PlatformProject {
   /// The file containing the platform-specific plugins list.
   File get platformPluginsFile;
 
-  /// The `.flutter-plugins-dependencies` file of this project,
-  /// which contains the dependencies each plugin depends on.
+  /// The file containing the platform-specific plugins dependencies graph.
   File get flutterPluginsDependenciesFile;
 }
 
@@ -574,10 +573,14 @@ class AndroidProject implements PlatformProject {
 
   @override
   String get pluginConfigKey => AndroidPlugin.kConfigKey;
-
+  
+  // TODO(franciscojma): Change this values to the location of the android project. Currently setting
+  // to the parent's value to avoid breaking changes in the gradle setup.
   @override
   File get platformPluginsFile => parent.flutterPluginsFile;
 
+  // TODO(franciscojma): Change this values to the location of the android project. Currently setting
+  // to the parent's value to avoid breaking changes in the gradle setup.
   @override
   File get flutterPluginsDependenciesFile => parent.flutterPluginsDependenciesFile;
 
