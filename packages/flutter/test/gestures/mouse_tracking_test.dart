@@ -945,7 +945,7 @@ class _EventCriticalFieldsMatcher extends Matcher {
       return false;
     }
 
-    final PointerEvent actual = untypedItem;
+    final PointerEvent actual = untypedItem as PointerEvent;
     if (!(
       _matchesField(matchState, 'kind', actual.kind, PointerDeviceKind.mouse) &&
       _matchesField(matchState, 'position', actual.position, _expected.position) &&
@@ -994,7 +994,7 @@ class _EventListCriticalFieldsMatcher extends Matcher {
   bool matches(dynamic untypedItem, Map<dynamic, dynamic> matchState) {
     if (untypedItem is! Iterable<PointerEvent>)
       return false;
-    final Iterable<PointerEvent> item = untypedItem;
+    final Iterable<PointerEvent> item = untypedItem as Iterable<PointerEvent>;
     final Iterator<PointerEvent> iterator = item.iterator;
     if (item.length != _expected.length)
       return false;
@@ -1050,9 +1050,9 @@ class _EventListCriticalFieldsMatcher extends Matcher {
         .addDescriptionOf(matchState['expected'])
         .add('\nsince it ');
       final Description subDescription = StringDescription();
-      final Matcher matcher = matchState['matcher'];
+      final Matcher matcher = matchState['matcher'] as Matcher;
       matcher.describeMismatch(matchState['actual'], subDescription,
-        matchState['state'], verbose);
+        matchState['state'] as Map<dynamic, dynamic>, verbose);
       mismatchDescription.add(subDescription.toString());
       return mismatchDescription;
     }

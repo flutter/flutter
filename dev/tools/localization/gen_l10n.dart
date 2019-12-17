@@ -94,6 +94,10 @@ class @className {
   /// Returns a list of localizations delegates containing this delegate along with
   /// GlobalMaterialLocalizations.delegate, GlobalCupertinoLocalizations.delegate,
   /// and GlobalWidgetsLocalizations.delegate.
+  ///
+  /// Additional delegates can be added by appending to this list in
+  /// MaterialApp. This list does not have to be used at all if a custom list
+  /// of delegates is preferred or required.
   static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = <LocalizationsDelegate<dynamic>>[
     delegate,
     GlobalMaterialLocalizations.delegate,
@@ -359,8 +363,8 @@ class LocalizationsGenerator {
   /// Sets the [className] for the localizations and localizations delegate
   /// classes.
 
-  /// The list of all arb files in [l10nDirectory].
-  final List<String> arbFilenames = <String>[];
+  /// The list of all arb path strings in [l10nDirectory].
+  final List<String> arbPathStrings = <String>[];
 
   /// The supported language codes as found in the arb files located in
   /// [l10nDirectory].
@@ -477,7 +481,7 @@ class LocalizationsGenerator {
           localeString = arbFilenameLocaleRE.firstMatch(filePath)[1];
         }
 
-        arbFilenames.add(filePath);
+        arbPathStrings.add(filePath);
         final LocaleInfo localeInfo = LocaleInfo.fromString(localeString);
         if (localeInfoList.contains(localeInfo))
           throw L10nException(
@@ -488,6 +492,7 @@ class LocalizationsGenerator {
       }
     }
 
+    arbPathStrings.sort();
     localeInfoList.sort();
     supportedLocales.addAll(localeInfoList);
     supportedLanguageCodes.addAll(localeInfoList.map((LocaleInfo localeInfo) {

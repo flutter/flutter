@@ -1341,7 +1341,10 @@ class _PaintDelegateWidget extends SingleChildRenderObjectWidget {
 }
 
 class _PaintCallbackObject extends RenderProxyBox {
-  _PaintCallbackObject({RenderObject child, this.onPaint}) : super(child);
+  _PaintCallbackObject({
+    RenderBox child,
+    this.onPaint,
+  }) : super(child);
 
   void Function() onPaint;
 

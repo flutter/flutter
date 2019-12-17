@@ -1532,7 +1532,7 @@ class RawChip extends StatefulWidget
   @override
   final Color checkmarkColor;
   @override
-  final CircleBorder avatarBorder;
+  final ShapeBorder avatarBorder;
 
   /// If set, this indicates that the chip should be disabled if all of the
   /// tap callbacks ([onSelected], [onPressed]) are null.
@@ -2045,10 +2045,10 @@ class _RenderChipElement extends RenderObjectElement {
   final Map<Element, _ChipSlot> childToSlot = <Element, _ChipSlot>{};
 
   @override
-  _ChipRenderWidget get widget => super.widget;
+  _ChipRenderWidget get widget => super.widget as _ChipRenderWidget;
 
   @override
-  _RenderChip get renderObject => super.renderObject;
+  _RenderChip get renderObject => super.renderObject as _RenderChip;
 
   @override
   void visitChildren(ElementVisitor visitor) {
@@ -2110,13 +2110,13 @@ class _RenderChipElement extends RenderObjectElement {
   void _updateRenderObject(RenderObject child, _ChipSlot slot) {
     switch (slot) {
       case _ChipSlot.avatar:
-        renderObject.avatar = child;
+        renderObject.avatar = child as RenderBox;
         break;
       case _ChipSlot.label:
-        renderObject.label = child;
+        renderObject.label = child as RenderBox;
         break;
       case _ChipSlot.deleteIcon:
-        renderObject.deleteIcon = child;
+        renderObject.deleteIcon = child as RenderBox;
         break;
     }
   }
@@ -2125,7 +2125,7 @@ class _RenderChipElement extends RenderObjectElement {
   void insertChildRenderObject(RenderObject child, dynamic slotValue) {
     assert(child is RenderBox);
     assert(slotValue is _ChipSlot);
-    final _ChipSlot slot = slotValue;
+    final _ChipSlot slot = slotValue as _ChipSlot;
     _updateRenderObject(child, slot);
     assert(renderObject.childToSlot.keys.contains(child));
     assert(renderObject.slotToChild.keys.contains(slot));
@@ -2181,17 +2181,17 @@ class _ChipRenderTheme {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    final _ChipRenderTheme typedOther = other;
-    return typedOther.avatar == avatar
-        && typedOther.label == label
-        && typedOther.deleteIcon == deleteIcon
-        && typedOther.brightness == brightness
-        && typedOther.padding == padding
-        && typedOther.labelPadding == labelPadding
-        && typedOther.showAvatar == showAvatar
-        && typedOther.showCheckmark == showCheckmark
-        && typedOther.checkmarkColor == checkmarkColor
-        && typedOther.canTapBody == canTapBody;
+    return other is _ChipRenderTheme
+        && other.avatar == avatar
+        && other.label == label
+        && other.deleteIcon == deleteIcon
+        && other.brightness == brightness
+        && other.padding == padding
+        && other.labelPadding == labelPadding
+        && other.showAvatar == showAvatar
+        && other.showCheckmark == showCheckmark
+        && other.checkmarkColor == checkmarkColor
+        && other.canTapBody == canTapBody;
   }
 
   @override
@@ -2373,7 +2373,7 @@ class _RenderChip extends RenderBox {
 
   static Rect _boxRect(RenderBox box) => box == null ? Rect.zero : _boxParentData(box).offset & box.size;
 
-  static BoxParentData _boxParentData(RenderBox box) => box.parentData;
+  static BoxParentData _boxParentData(RenderBox box) => box.parentData as BoxParentData;
 
   @override
   double computeMinIntrinsicWidth(double height) {
@@ -2895,7 +2895,7 @@ class _LocationAwareInkRippleFactory extends InteractiveInkFeatureFactory {
 
     if (tapIsOnDeleteIcon) {
       final RenderBox currentBox = referenceBox;
-      referenceBox = deleteIconKey.currentContext.findRenderObject();
+      referenceBox = deleteIconKey.currentContext.findRenderObject() as RenderBox;
       position = referenceBox.globalToLocal(currentBox.localToGlobal(position));
       containedInkWell = false;
     }

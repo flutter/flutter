@@ -47,7 +47,7 @@ void main() {
       ServicesBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
         'ch7',
         (ByteData message) async {
-          final Map<dynamic, dynamic> methodCall = jsonMessage.decodeMessage(message);
+          final Map<dynamic, dynamic> methodCall = jsonMessage.decodeMessage(message) as Map<dynamic, dynamic>;
           if (methodCall['method'] == 'sayHello') {
             return jsonMessage.encodeMessage(<dynamic>['${methodCall['args']} world']);
           } else {
@@ -62,7 +62,7 @@ void main() {
       ServicesBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
         'ch7',
         (ByteData message) async {
-          final Map<dynamic, dynamic> methodCall = jsonMessage.decodeMessage(message);
+          final Map<dynamic, dynamic> methodCall = jsonMessage.decodeMessage(message) as Map<dynamic, dynamic>;
           if (methodCall['method'] == 'sayHello') {
             return jsonMessage.encodeMessage(<dynamic>[<String>['${methodCall['args']}', 'world']]);
           } else {
@@ -78,7 +78,7 @@ void main() {
       ServicesBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
         'ch7',
         (ByteData message) async {
-          final Map<dynamic, dynamic> methodCall = jsonMessage.decodeMessage(message);
+          final Map<dynamic, dynamic> methodCall = jsonMessage.decodeMessage(message) as Map<dynamic, dynamic>;
           if (methodCall['method'] == 'sayHello') {
             return jsonMessage.encodeMessage(<dynamic>[null]);
           } else {
@@ -94,7 +94,7 @@ void main() {
       ServicesBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
         'ch7',
         (ByteData message) async {
-          final Map<dynamic, dynamic> methodCall = jsonMessage.decodeMessage(message);
+          final Map<dynamic, dynamic> methodCall = jsonMessage.decodeMessage(message) as Map<dynamic, dynamic>;
           if (methodCall['method'] == 'sayHello') {
             return jsonMessage.encodeMessage(<dynamic>[<String, String>{'${methodCall['args']}': 'world'}]);
           } else {
@@ -110,7 +110,7 @@ void main() {
       ServicesBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
         'ch7',
         (ByteData message) async {
-          final Map<dynamic, dynamic> methodCall = jsonMessage.decodeMessage(message);
+          final Map<dynamic, dynamic> methodCall = jsonMessage.decodeMessage(message) as Map<dynamic, dynamic>;
           if (methodCall['method'] == 'sayHello') {
             return jsonMessage.encodeMessage(<dynamic>[null]);
           } else {
@@ -238,11 +238,11 @@ void main() {
     const MessageCodec<dynamic> jsonMessage = JSONMessageCodec();
     const MethodCodec jsonMethod = JSONMethodCodec();
     const EventChannel channel = EventChannel('ch', jsonMethod);
-    void emitEvent(dynamic event) {
+    void emitEvent(ByteData event) {
       ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
         'ch',
         event,
-            (ByteData reply) { },
+        (ByteData reply) { },
       );
     }
     test('can receive event stream', () async {
@@ -250,9 +250,9 @@ void main() {
       ServicesBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
         'ch',
         (ByteData message) async {
-          final Map<dynamic, dynamic> methodCall = jsonMessage.decodeMessage(message);
+          final Map<dynamic, dynamic> methodCall = jsonMessage.decodeMessage(message) as Map<dynamic, dynamic>;
           if (methodCall['method'] == 'listen') {
-            final String argument = methodCall['args'];
+            final String argument = methodCall['args'] as String;
             emitEvent(jsonMethod.encodeSuccessEnvelope(argument + '1'));
             emitEvent(jsonMethod.encodeSuccessEnvelope(argument + '2'));
             emitEvent(null);
@@ -274,9 +274,9 @@ void main() {
       ServicesBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
         'ch',
         (ByteData message) async {
-          final Map<dynamic, dynamic> methodCall = jsonMessage.decodeMessage(message);
+          final Map<dynamic, dynamic> methodCall = jsonMessage.decodeMessage(message) as Map<dynamic, dynamic>;
           if (methodCall['method'] == 'listen') {
-            final String argument = methodCall['args'];
+            final String argument = methodCall['args'] as String;
             emitEvent(jsonMethod.encodeErrorEnvelope(code: '404', message: 'Not Found.', details: argument));
             return jsonMethod.encodeSuccessEnvelope(null);
           } else if (methodCall['method'] == 'cancel') {
@@ -293,7 +293,7 @@ void main() {
       expect(events, isEmpty);
       expect(errors, hasLength(1));
       expect(errors[0], isInstanceOf<PlatformException>());
-      final PlatformException error = errors[0];
+      final PlatformException error = errors[0] as PlatformException;
       expect(error.code, '404');
       expect(error.message, 'Not Found.');
       expect(error.details, 'hello');

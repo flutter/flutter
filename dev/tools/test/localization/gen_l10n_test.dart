@@ -18,15 +18,18 @@ const String defaultTemplateArbFileName = 'app_en_US.arb';
 const String defaultOutputFileString = 'output-localization-file';
 const String defaultClassNameString = 'AppLocalizations';
 const String singleMessageArbFileString = '''{
-  "title": "Stocks",
+  "title": "Title",
   "@title": {
-    "description": "Title for the Stocks application"
+    "description": "Title for the application"
   }
 }''';
 
 const String esArbFileName = 'app_es.arb';
 const String singleEsMessageArbFileString = '''{
-  "title": "Acciones"
+  "title": "Título"
+}''';
+const String singleZhMessageArbFileString = '''{
+  "title": "标题"
 }''';
 
 void _standardFlutterDirectoryL10nSetup(FileSystem fs) {
@@ -261,20 +264,86 @@ void main() {
       expect(generator.supportedLocales.contains(LocaleInfo.fromString('es')), true);
     });
 
+    test('correctly sorts supportedLocales and supportedLanguageCodes alphabetically', () {
+      final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+        ..createSync(recursive: true);
+      // Write files in non-alphabetical order so that read performs in that order
+      l10nDirectory.childFile('app_zh.arb')
+        .writeAsStringSync(singleZhMessageArbFileString);
+      l10nDirectory.childFile('app_es.arb')
+        .writeAsStringSync(singleEsMessageArbFileString);
+      l10nDirectory.childFile('app_en_US.arb')
+        .writeAsStringSync(singleMessageArbFileString);
+
+      LocalizationsGenerator generator;
+      try {
+        generator = LocalizationsGenerator(fs);
+        generator.initialize(
+          l10nDirectoryPath: defaultArbPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        );
+        generator.parseArbFiles();
+      } on L10nException catch (e) {
+        fail('Setting language and locales should not fail: \n$e');
+      }
+
+      expect(generator.supportedLocales.first, LocaleInfo.fromString('en_US'));
+      expect(generator.supportedLocales.elementAt(1), LocaleInfo.fromString('es'));
+      expect(generator.supportedLocales.elementAt(2), LocaleInfo.fromString('zh'));
+    });
+
+    test('correctly sorts arbPathString alphabetically', () {
+      final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+        ..createSync(recursive: true);
+      // Write files in non-alphabetical order so that read performs in that order
+      l10nDirectory.childFile('app_zh.arb')
+        .writeAsStringSync(singleZhMessageArbFileString);
+      l10nDirectory.childFile('app_es.arb')
+        .writeAsStringSync(singleEsMessageArbFileString);
+      l10nDirectory.childFile('app_en_US.arb')
+        .writeAsStringSync(singleMessageArbFileString);
+
+      LocalizationsGenerator generator;
+      try {
+        generator = LocalizationsGenerator(fs);
+        generator.initialize(
+          l10nDirectoryPath: defaultArbPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        );
+        generator.parseArbFiles();
+      } on L10nException catch (e) {
+        fail('Setting language and locales should not fail: \n$e');
+      }
+
+      if (Platform.isWindows) {
+        expect(generator.arbPathStrings.first, 'lib\\l10n\\app_en_US.arb');
+        expect(generator.arbPathStrings.elementAt(1), 'lib\\l10n\\app_es.arb');
+        expect(generator.arbPathStrings.elementAt(2), 'lib\\l10n\\app_zh.arb');
+      } else {
+        expect(generator.arbPathStrings.first, 'lib/l10n/app_en_US.arb');
+        expect(generator.arbPathStrings.elementAt(1), 'lib/l10n/app_es.arb');
+        expect(generator.arbPathStrings.elementAt(2), 'lib/l10n/app_zh.arb');
+      }
+    });
+
     test('correctly parses @@locale property in arb file', () {
       const String arbFileWithEnLocale = '''{
   "@@locale": "en",
-  "title": "Stocks",
+  "title": "Title",
   "@title": {
-    "description": "Title for the Stocks application"
+    "description": "Title for the application"
   }
 }''';
 
       const String arbFileWithZhLocale = '''{
   "@@locale": "zh",
-  "title": "Stocks",
+  "title": "标题",
   "@title": {
-    "description": "Title for the Stocks application"
+    "description": "Title for the application"
   }
 }''';
 
@@ -314,7 +383,7 @@ void main() {
 
       const String arbFileWithZhLocale = '''{
   "@@locale": "zh",
-  "title": "Stocks",
+  "title": "标题",
   "@title": {
     "description": "Title for the Stocks application"
   }
@@ -430,10 +499,10 @@ void main() {
         generator.classMethods.first,
         '''  String get title {
     return Intl.message(
-      r'Stocks',
+      r'Title',
       locale: _localeName,
       name: 'title',
-      desc: r'Title for the Stocks application'
+      desc: r'Title for the application'
     );
   }
 ''');
