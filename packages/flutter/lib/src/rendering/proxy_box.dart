@@ -2676,6 +2676,7 @@ class RenderMouseRegion extends RenderProxyBox {
       onEnter: _handleEnter,
       onHover: _handleHover,
       onExit: _handleExit,
+      getTransform: () => getTransformTo(null),
     );
   }
 

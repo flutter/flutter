@@ -269,7 +269,7 @@ class Cubic extends Curve {
   }
 }
 
-/// Abstract class that defines an API for evaluating 2D curves.
+/// Abstract class that defines an API for evaluating 2D parametric curves.
 abstract class Curve2D {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
@@ -277,8 +277,8 @@ abstract class Curve2D {
 
   /// Returns the position of the curve at point `t`.
   ///
-  /// This function must ensure that the value of `t` must be between 0.0 and
-  /// 1.0
+  /// This function must ensure that the value of `t` is between 0.0 and
+  /// 1.0, inclusive.
   ///
   /// It is recommended that subclasses override [transformInternal] instead of
   /// this function, as the above case is already enforced in the default
@@ -473,12 +473,12 @@ class CatmullRomCurve extends Curve {
   /// See also:
   ///
   ///  * This [paper on using Catmull-Rom splines](http://faculty.cs.tamu.edu/schaefer/research/cr_cad.pdf).
-  CatmullRomCurve(List<Offset> points, {double tension = 0.0})
+  CatmullRomCurve(this.controlPoints, {this.tension = 0.0})
       : assert(tension != null),
         assert(() {
           final List<String> reasons = <String>[];
           final bool valid = validateControlPoints(
-            points,
+            controlPoints,
             tension: tension,
             reasons: reasons,
           );
@@ -489,12 +489,24 @@ class CatmullRomCurve extends Curve {
             }
           }
           return valid;
-        }(), 'control points $points could not be validated.'),
+        }(), 'control points $controlPoints could not be validated.'),
         // Synthesize the first and last points to make sure the curve always goes
         // from (0,0) to (1,1), which is part of the Curve contract.
-        valueSpline = CatmullRomSpline(<Offset>[Offset.zero, ...points, const Offset(1.0, 1.0)], tension: tension);
+        valueSpline = CatmullRomSpline(<Offset>[Offset.zero, ...controlPoints, const Offset(1.0, 1.0)], tension: tension);
 
+  /// The 2D spline created for this curve.
   final CatmullRomSpline valueSpline;
+
+  /// The control points used to create this curve.
+  final List<Offset> controlPoints;
+
+  /// The "tension" of the curve.
+  ///
+  /// The optional `tension` argument controls how tightly the curve approaches
+  /// the given `points`. It must be in the range 0.0 to 1.0, inclusive. It
+  /// defaults to 0.0, which provides the smoothest curve. A value of 1.0
+  /// is equivalent to a linear interpolation between points.
+  final double tension;
 
   // Computes the minimum bounding rectangle (not necessarily axis-aligned) that can
   // contain a CatmullRom spline defined by these control points (The fourth
