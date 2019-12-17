@@ -254,7 +254,7 @@ abstract class AotElfBase extends Target {
       throw MissingDefineException(kTargetPlatform, 'aot_elf');
     }
     final List<String> extraGenSnapshotOptions = environment.defines[kExtraGenSnapshotOptions]?.split(',')
-      ?? <String>[];
+      ?? const <String>[];
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final TargetPlatform targetPlatform = getTargetPlatformForName(environment.defines[kTargetPlatform]);
     final int snapshotExitCode = await snapshotter.build(

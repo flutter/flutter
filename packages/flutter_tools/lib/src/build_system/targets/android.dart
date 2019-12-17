@@ -208,6 +208,8 @@ class AndroidAot extends AotElfBase {
     if (!output.existsSync()) {
       output.createSync(recursive: true);
     }
+    final List<String> extraGenSnapshotOptions = environment.defines[kExtraGenSnapshotOptions]?.split(',')
+      ?? const <String>[];
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final int snapshotExitCode = await snapshotter.build(
       platform: targetPlatform,
@@ -216,6 +218,7 @@ class AndroidAot extends AotElfBase {
       packagesPath: environment.projectDir.childFile('.packages').path,
       outputPath: output.path,
       bitcode: false,
+      extraGenSnapshotOptions: extraGenSnapshotOptions,
     );
     if (snapshotExitCode != 0) {
       throw Exception('AOT snapshotter exited with code $snapshotExitCode');

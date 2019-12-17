@@ -415,7 +415,7 @@ flutter_tools:lib/''');
   }));
 
   test('kExtraGenSnapshotOptions passes values to gen_snapshot', () => testbed.run(() async {
-    androidEnvironment.defines[kExtraGenSnapshotOptions] = 'foo,bar,baz';
+    androidEnvironment.defines[kExtraGenSnapshotOptions] = 'foo,bar,baz=2';
 
     when(genSnapshot.run(
       snapshotType: anyNamed('snapshotType'),
@@ -425,7 +425,7 @@ flutter_tools:lib/''');
       expect(invocation.namedArguments[#additionalArgs], containsAll(<String>[
         'foo',
         'bar',
-        'baz',
+        'baz=2',
       ]));
       return 0;
     });
