@@ -43,6 +43,7 @@ class TestTextInput {
   /// Installs this object as a mock handler for [SystemChannels.textInput].
   void register() {
     SystemChannels.textInput.setMockMethodCallHandler(_handleTextInputCall);
+    _isRegistered = true;
   }
 
   /// Removes this object as a mock handler for [SystemChannels.textInput].
@@ -52,6 +53,7 @@ class TestTextInput {
   /// on-screen keyboard provided by the operating system.
   void unregister() {
     SystemChannels.textInput.setMockMethodCallHandler(null);
+    _isRegistered = false;
   }
 
   /// Log for method calls.
@@ -63,19 +65,8 @@ class TestTextInput {
   /// Whether this [TestTextInput] is registered with [SystemChannels.textInput].
   ///
   /// Use [register] and [unregister] methods to control this value.
-  // Someone could have unregistered us by calling
-  // `SystemChannels.textInput.setMockMethodCallHandler` in the test. Actually
-  // check if we're registered by calling the method, which should work
-  // immediately if we are registered since that method does no real async work.
-  bool get isRegistered {
-    final int oldLogLength = log.length;
-    unawaited(SystemChannels.textInput.invokeMethod<void>('__isRegistered'));
-    if (log.length == oldLogLength) {
-      return false;
-    }
-    log.removeLast();
-    return true;
-  }
+  bool get isRegistered => _isRegistered;
+  bool _isRegistered = false;
 
   /// Whether there are any active clients listening to text input.
   bool get hasAnyClients => _client > 0;
