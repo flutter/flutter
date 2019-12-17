@@ -23,6 +23,7 @@ import '../common/fuchsia_compat.dart';
 import '../common/geometry.dart';
 import '../common/gesture.dart';
 import '../common/health.dart';
+import '../common/layer_tree.dart';
 import '../common/message.dart';
 import '../common/render_tree.dart';
 import '../common/request_data.dart';
@@ -473,6 +474,11 @@ class FlutterDriver {
   /// Returns a dump of the render tree.
   Future<RenderTree> getRenderTree({ Duration timeout }) async {
     return RenderTree.fromJson(await _sendCommand(GetRenderTree(timeout: timeout)));
+  }
+
+  /// Returns a dump of the layer tree.
+  Future<LayerTree> getLayerTree({ Duration timeout }) async {
+    return LayerTree.fromJson(await _sendCommand(GetLayerTree(timeout: timeout)));
   }
 
   /// Taps at the center of the widget located by [finder].

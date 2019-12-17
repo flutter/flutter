@@ -56,7 +56,7 @@ void main() {
     await tester.pumpWidget(outer1);
 
     final StatefulElement innerElement = tester.element(find.byKey(innerKey));
-    final InnerWidgetState innerElementState = innerElement.state;
+    final InnerWidgetState innerElementState = innerElement.state as InnerWidgetState;
     expect(innerElementState.widget, equals(inner1));
     expect(innerElementState._didInitState, isTrue);
     expect(innerElement.renderObject.attached, isTrue);

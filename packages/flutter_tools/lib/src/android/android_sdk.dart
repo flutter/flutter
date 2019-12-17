@@ -55,7 +55,7 @@ String getAdbPath([ AndroidSdk existingSdk ]) {
   if (sdk?.latestVersion == null) {
     return os.which('adb')?.path;
   } else {
-    return sdk.adbPath;
+    return sdk?.adbPath;
   }
 }
 

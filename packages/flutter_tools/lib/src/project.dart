@@ -29,14 +29,15 @@ FlutterProjectFactory get projectFactory => context.get<FlutterProjectFactory>()
 class FlutterProjectFactory {
   FlutterProjectFactory();
 
-  final Map<String, FlutterProject> _projects =
+  @visibleForTesting
+  final Map<String, FlutterProject> projects =
       <String, FlutterProject>{};
 
   /// Returns a [FlutterProject] view of the given directory or a ToolExit error,
   /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
   FlutterProject fromDirectory(Directory directory) {
     assert(directory != null);
-    return _projects.putIfAbsent(directory.path, /* ifAbsent */ () {
+    return projects.putIfAbsent(directory.path, /* ifAbsent */ () {
       final FlutterManifest manifest = FlutterProject._readManifest(
         directory.childFile(bundle.defaultManifestPath).path,
       );
@@ -292,9 +293,6 @@ abstract class XcodeBasedProject {
   /// The CocoaPods 'Manifest.lock'.
   File get podManifestLock;
 
-  /// True if the host app project is using Swift.
-  Future<bool> get isSwift;
-
   /// Directory containing symlinks to pub cache plugins source generated on `pod install`.
   Directory get symlinks;
 }
@@ -409,10 +407,6 @@ class IosProject implements XcodeBasedProject {
     }
     return null;
   }
-
-  @override
-  Future<bool> get isSwift async =>
-    (await buildSettings)?.containsKey('SWIFT_VERSION') ?? false;
 
   /// The build settings for the host app of this project, as a detached map.
   ///
@@ -819,9 +813,6 @@ class MacOSProject implements XcodeBasedProject {
 
   @override
   Directory get symlinks => ephemeralDirectory.childDirectory('.symlinks');
-
-  @override
-  Future<bool> get isSwift async => true;
 
   /// The file where the Xcode build will write the name of the built app.
   ///

@@ -149,7 +149,7 @@ Future<void> checkGradleDependencies() async {
     workingDirectory: flutterProject.android.hostAppGradleRoot.path,
     environment: gradleEnvironment,
   );
-  androidSdk.reinitialize();
+  androidSdk?.reinitialize();
   progress.stop();
 }
 
@@ -224,9 +224,13 @@ Future<void> buildGradleApp({
   bool shouldBuildPluginAsAar = false,
   int retries = 1,
 }) async {
-  if (androidSdk == null) {
-    exitWithNoSdkMessage();
-  }
+  assert(project != null);
+  assert(androidBuildInfo != null);
+  assert(target != null);
+  assert(isBuildingBundle != null);
+  assert(localGradleErrors != null);
+  assert(androidSdk != null);
+
   if (!project.android.isUsingGradle) {
     _exitWithProjectNotUsingGradleMessage();
   }
@@ -489,10 +493,7 @@ Future<void> buildGradleAar({
   assert(target != null);
   assert(androidBuildInfo != null);
   assert(outputDirectory != null);
-
-  if (androidSdk == null) {
-    exitWithNoSdkMessage();
-  }
+  assert(androidSdk != null);
 
   final FlutterManifest manifest = project.manifest;
   if (!manifest.isModule && !manifest.isPlugin) {

@@ -1402,7 +1402,7 @@ class DropdownButtonFormField<T> extends FormField<T> {
     Color iconDisabledColor,
     Color iconEnabledColor,
     double iconSize = 24.0,
-    bool isDense = false,
+    bool isDense = true,
     bool isExpanded = false,
     double itemHeight,
   }) : assert(items == null || items.isEmpty || value == null ||

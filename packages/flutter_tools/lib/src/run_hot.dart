@@ -26,7 +26,12 @@ import 'reporting/reporting.dart';
 import 'resident_runner.dart';
 import 'vmservice.dart';
 
-ProjectFileInvalidator get projectFileInvalidator => context.get<ProjectFileInvalidator>() ?? const ProjectFileInvalidator();
+ProjectFileInvalidator get projectFileInvalidator => context.get<ProjectFileInvalidator>() ?? _defaultInvalidator;
+final ProjectFileInvalidator _defaultInvalidator = ProjectFileInvalidator(
+  fileSystem: fs,
+  platform: platform,
+  logger: logger,
+);
 
 HotRunnerConfig get hotRunnerConfig => context.get<HotRunnerConfig>();
 
@@ -1112,8 +1117,20 @@ class HotRunner extends ResidentRunner {
   }
 }
 
+/// The [ProjectFileInvalidator] track the dependencies for a running
+/// application to determine when they are dirty.
 class ProjectFileInvalidator {
-  const ProjectFileInvalidator();
+  ProjectFileInvalidator({
+    @required FileSystem fileSystem,
+    @required Platform platform,
+    @required Logger logger,
+  }): _fileSystem = fileSystem,
+      _platform = platform,
+      _logger = logger;
+
+  final FileSystem _fileSystem;
+  final Platform _platform;
+  final Logger _logger;
 
   static const String _pubCachePathLinuxAndMac = '.pub-cache';
   static const String _pubCachePathWindows = 'Pub/Cache';
@@ -1142,13 +1159,13 @@ class ProjectFileInvalidator {
     }
 
     final Stopwatch stopwatch = Stopwatch()..start();
-
     final List<Uri> urisToScan = <Uri>[
       // Don't watch pub cache directories to speed things up a little.
-      ...urisToMonitor.where(_isNotInPubCache),
+      for (Uri uri in urisToMonitor)
+        if (_isNotInPubCache(uri)) uri,
 
       // We need to check the .packages file too since it is not used in compilation.
-      fs.file(packagesPath).uri,
+      _fileSystem.file(packagesPath).uri,
     ];
     final List<Uri> invalidatedFiles = <Uri>[];
 
@@ -1157,8 +1174,8 @@ class ProjectFileInvalidator {
       final List<Future<void>> waitList = <Future<void>>[];
       for (final Uri uri in urisToScan) {
         waitList.add(pool.withResource<void>(
-          () => fs
-            .stat(uri.toFilePath(windows: platform.isWindows))
+          () => _fileSystem
+            .stat(uri.toFilePath(windows: _platform.isWindows))
             .then((FileStat stat) {
               final DateTime updatedAt = stat.modified;
               if (updatedAt != null && updatedAt.isAfter(lastCompiled)) {
@@ -1170,14 +1187,14 @@ class ProjectFileInvalidator {
       await Future.wait<void>(waitList);
     } else {
       for (final Uri uri in urisToScan) {
-        final DateTime updatedAt = fs.statSync(
-            uri.toFilePath(windows: platform.isWindows)).modified;
+        final DateTime updatedAt = _fileSystem.statSync(
+            uri.toFilePath(windows: _platform.isWindows)).modified;
         if (updatedAt != null && updatedAt.isAfter(lastCompiled)) {
           invalidatedFiles.add(uri);
         }
       }
     }
-    printTrace(
+    _logger.printTrace(
       'Scanned through ${urisToScan.length} files in '
       '${stopwatch.elapsedMilliseconds}ms'
       '${asyncScanning ? " (async)" : ""}',
@@ -1185,8 +1202,8 @@ class ProjectFileInvalidator {
     return invalidatedFiles;
   }
 
-  static bool _isNotInPubCache(Uri uri) {
-    return !(platform.isWindows && uri.path.contains(_pubCachePathWindows))
+  bool _isNotInPubCache(Uri uri) {
+    return !(_platform.isWindows && uri.path.contains(_pubCachePathWindows))
         && !uri.path.contains(_pubCachePathLinuxAndMac);
   }
 }

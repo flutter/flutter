@@ -416,9 +416,9 @@ bool _hitTestInteractive(GlobalKey customPaintKey, Offset offset) {
   if (customPaintKey.currentContext == null) {
     return false;
   }
-  final CustomPaint customPaint = customPaintKey.currentContext.widget;
-  final ScrollbarPainter painter = customPaint.foregroundPainter;
-  final RenderBox renderBox = customPaintKey.currentContext.findRenderObject();
+  final CustomPaint customPaint = customPaintKey.currentContext.widget as CustomPaint;
+  final ScrollbarPainter painter = customPaint.foregroundPainter as ScrollbarPainter;
+  final RenderBox renderBox = customPaintKey.currentContext.findRenderObject() as RenderBox;
   final Offset localOffset = renderBox.globalToLocal(offset);
   return painter.hitTestInteractive(localOffset);
 }
