@@ -121,6 +121,8 @@ void testWidgets(
       return binding.runTest(
         () async {
           debugResetSemanticsIdCounter();
+          tester.testTextInput.register();
+          tester.testTextInput.log.clear();
           await callback(tester);
           semanticsHandle?.dispose();
         },
