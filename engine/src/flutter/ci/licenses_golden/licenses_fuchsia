@@ -1,4 +1,4 @@
-Signature: 1131af9ff3e6085611431ab4bf27d8dd
+Signature: 7f6945d9fea2c9241f83e240aae8deb0
 
 UNUSED LICENSES:
 
@@ -1473,6 +1473,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.scenic/pointer_capture.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.types/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.types/types.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.vectorial/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.views/focuser.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.views/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.views/view.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.ui.views/view_token.fidl
