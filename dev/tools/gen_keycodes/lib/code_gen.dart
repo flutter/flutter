@@ -87,7 +87,7 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
       // plane.
       final Key entry = keyData.data.firstWhere((Key item) => item.name == Key.synonyms[name][0]);
       final Set<String> unionNames = Key.synonyms[name].map<String>((dynamic name) {
-        return upperCamelToLowerCamel(name);
+        return upperCamelToLowerCamel(name as String);
       }).toSet();
       printKey(Key.synonymPlane | entry.flutterId, entry.keyLabel, name, Key.getCommentName(name),
           otherComments: wrapString('This key represents the union of the keys '
@@ -100,7 +100,7 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
   String get logicalSynonyms {
     final StringBuffer synonyms = StringBuffer();
     for (String name in Key.synonyms.keys) {
-      for (String synonym in Key.synonyms[name]) {
+      for (String synonym in Key.synonyms[name].cast<String>()) {
         final String keyName = upperCamelToLowerCamel(synonym);
         synonyms.writeln('    $keyName: $name,');
       }

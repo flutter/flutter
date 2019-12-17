@@ -716,16 +716,16 @@ class _CupertinoEdgeShadowDecoration extends Decoration {
 
   @override
   _CupertinoEdgeShadowDecoration lerpFrom(Decoration a, double t) {
-    if (a is! _CupertinoEdgeShadowDecoration)
-      return _CupertinoEdgeShadowDecoration.lerp(null, this, t);
-    return _CupertinoEdgeShadowDecoration.lerp(a, this, t);
+    if (a is _CupertinoEdgeShadowDecoration)
+      return _CupertinoEdgeShadowDecoration.lerp(a, this, t);
+    return _CupertinoEdgeShadowDecoration.lerp(null, this, t);
   }
 
   @override
   _CupertinoEdgeShadowDecoration lerpTo(Decoration b, double t) {
-    if (b is! _CupertinoEdgeShadowDecoration)
-      return _CupertinoEdgeShadowDecoration.lerp(this, null, t);
-    return _CupertinoEdgeShadowDecoration.lerp(this, b, t);
+    if (b is _CupertinoEdgeShadowDecoration)
+      return _CupertinoEdgeShadowDecoration.lerp(this, b, t);
+    return _CupertinoEdgeShadowDecoration.lerp(this, null, t);
   }
 
   @override
@@ -737,8 +737,8 @@ class _CupertinoEdgeShadowDecoration extends Decoration {
   bool operator ==(dynamic other) {
     if (runtimeType != other.runtimeType)
       return false;
-    final _CupertinoEdgeShadowDecoration typedOther = other;
-    return edgeGradient == typedOther.edgeGradient;
+    return other is _CupertinoEdgeShadowDecoration
+        && other.edgeGradient == edgeGradient;
   }
 
   @override
@@ -883,8 +883,8 @@ class _CupertinoModalPopupRoute<T> extends PopupRoute<T> {
 ///
 /// See also:
 ///
-///  * [ActionSheet], which is the widget usually returned by the `builder`
-///    argument to [showCupertinoModalPopup].
+///  * [CupertinoActionSheet], which is the widget usually returned by the
+///    `builder` argument to [showCupertinoModalPopup].
 ///  * <https://developer.apple.com/design/human-interface-guidelines/ios/views/action-sheets/>
 Future<T> showCupertinoModalPopup<T>({
   @required BuildContext context,

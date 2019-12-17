@@ -833,7 +833,7 @@ class TextStyle extends Diagnosticable {
       fontFamily: fontFamily ?? this.fontFamily,
       fontFamilyFallback: fontFamilyFallback ?? this.fontFamilyFallback,
       fontSize: fontSize == null ? null : fontSize * fontSizeFactor + fontSizeDelta,
-      fontWeight: fontWeight == null ? null : FontWeight.values[(fontWeight.index + fontWeightDelta).clamp(0, FontWeight.values.length - 1)],
+      fontWeight: fontWeight == null ? null : FontWeight.values[(fontWeight.index + fontWeightDelta).clamp(0, FontWeight.values.length - 1) as int],
       fontStyle: fontStyle,
       letterSpacing: letterSpacing == null ? null : letterSpacing * letterSpacingFactor + letterSpacingDelta,
       wordSpacing: wordSpacing == null ? null : wordSpacing * wordSpacingFactor + wordSpacingDelta,
@@ -1144,28 +1144,28 @@ class TextStyle extends Diagnosticable {
       return true;
     if (other.runtimeType != runtimeType)
       return false;
-    final TextStyle typedOther = other;
-    return inherit == typedOther.inherit &&
-           color == typedOther.color &&
-           backgroundColor == typedOther.backgroundColor &&
-           fontFamily == typedOther.fontFamily &&
-           fontSize == typedOther.fontSize &&
-           fontWeight == typedOther.fontWeight &&
-           fontStyle == typedOther.fontStyle &&
-           letterSpacing == typedOther.letterSpacing &&
-           wordSpacing == typedOther.wordSpacing &&
-           textBaseline == typedOther.textBaseline &&
-           height == typedOther.height &&
-           locale == typedOther.locale &&
-           foreground == typedOther.foreground &&
-           background == typedOther.background &&
-           decoration == typedOther.decoration &&
-           decorationColor == typedOther.decorationColor &&
-           decorationStyle == typedOther.decorationStyle &&
-           decorationThickness == typedOther.decorationThickness &&
-           listEquals(shadows, typedOther.shadows) &&
-           listEquals(fontFeatures, typedOther.fontFeatures) &&
-           listEquals(fontFamilyFallback, typedOther.fontFamilyFallback);
+    return other is TextStyle
+        && other.inherit == inherit
+        && other.color == color
+        && other.backgroundColor == backgroundColor
+        && other.fontFamily == fontFamily
+        && other.fontSize == fontSize
+        && other.fontWeight == fontWeight
+        && other.fontStyle == fontStyle
+        && other.letterSpacing == letterSpacing
+        && other.wordSpacing == wordSpacing
+        && other.textBaseline == textBaseline
+        && other.height == height
+        && other.locale == locale
+        && other.foreground == foreground
+        && other.background == background
+        && other.decoration == decoration
+        && other.decorationColor == decorationColor
+        && other.decorationStyle == decorationStyle
+        && other.decorationThickness == decorationThickness
+        && listEquals(other.shadows, shadows)
+        && listEquals(other.fontFeatures, fontFeatures)
+        && listEquals(other.fontFamilyFallback, fontFamilyFallback);
   }
 
   @override

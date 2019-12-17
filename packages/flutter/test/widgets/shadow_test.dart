@@ -6,6 +6,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
 void main() {
+  tearDown(() {
+    debugDisableShadows = true;
+  });
+
   testWidgets('Shadows on BoxDecoration', (WidgetTester tester) async {
     await tester.pumpWidget(
       Center(
@@ -33,7 +37,7 @@ void main() {
       matchesGoldenFile('shadow.BoxDecoration.enabled.png'),
     );
     debugDisableShadows = true;
-  }, skip: isBrowser);
+  });
 
   testWidgets('Shadows on ShapeDecoration', (WidgetTester tester) async {
     debugDisableShadows = false;
@@ -93,7 +97,7 @@ void main() {
       matchesGoldenFile('shadow.PhysicalModel.enabled.png'),
     );
     debugDisableShadows = true;
-  }, skip: isBrowser);
+  });
 
   testWidgets('Shadows with PhysicalShape', (WidgetTester tester) async {
     debugDisableShadows = false;

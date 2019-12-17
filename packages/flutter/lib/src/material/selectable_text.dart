@@ -376,7 +376,7 @@ class SelectableText extends StatefulWidget {
   /// selectable text's internal gesture detector, use a [Listener].
   final GestureTapCallback onTap;
 
-  /// {@macro flutter.widgets.edtiableText.scrollPhysics}
+  /// {@macro flutter.widgets.editableText.scrollPhysics}
   final ScrollPhysics scrollPhysics;
 
   /// {@macro flutter.painting.textPainter.textWidthBasis}

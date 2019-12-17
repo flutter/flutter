@@ -23,7 +23,7 @@ import 'package:flutter/widgets.dart';
 ///
 /// {@tool sample}
 /// This example shows how to create a [Row] of [Icon]s in different colors and
-/// sizes. The first [Icon] uses a [semanticLabel] to announce in accessibility
+/// sizes. The first [Icon] uses a [Icon.semanticLabel] to announce in accessibility
 /// modes like TalkBack and VoiceOver.
 ///
 /// ![A row of icons representing a pink heart, a green musical note, and a blue umbrella](https://flutter.github.io/assets-for-api-docs/assets/widgets/icon.png)

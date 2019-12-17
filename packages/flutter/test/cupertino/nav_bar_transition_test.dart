@@ -51,7 +51,7 @@ Future<void> startTransitionBetween(
 CupertinoPageScaffold scaffoldForNavBar(Widget navBar) {
   if (navBar is CupertinoNavigationBar || navBar == null) {
     return CupertinoPageScaffold(
-      navigationBar: navBar ?? const CupertinoNavigationBar(),
+      navigationBar: navBar as CupertinoNavigationBar ?? const CupertinoNavigationBar(),
       child: const Placeholder(),
     );
   } else if (navBar is CupertinoSliverNavigationBar) {

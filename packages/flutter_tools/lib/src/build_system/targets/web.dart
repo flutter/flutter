@@ -53,16 +53,25 @@ class WebEntrypointTarget extends Target {
     final bool shouldInitializePlatform = environment.defines[kInitializePlatform] == 'true';
     final bool hasPlugins = environment.defines[kHasWebPlugins] == 'true';
     final String importPath = fs.path.absolute(targetFile);
+
+    // Use the package uri mapper to find the correct package-scheme import path
+    // for the user application. If the application has a mix of package-scheme
+    // and relative imports for a library, then importing the entrypoint as a
+    // file-scheme will cause said library to be recognized as two distinct
+    // libraries. This can cause surprising behavior as types from that library
+    // will be considered distinct from each other.
     final PackageUriMapper packageUriMapper = PackageUriMapper(
       importPath,
       PackageMap.globalPackagesPath,
       null,
       null,
     );
-    final Uri mainImport = packageUriMapper.map(importPath);
-    if (mainImport == null) {
-      throw Exception('Missing package definition for $mainImport');
-    }
+
+    // By construction, this will only be null if the .packages file does not
+    // have an entry for the user's application or if the main file is
+    // outside of the lib/ directory.
+    final String mainImport = packageUriMapper.map(importPath)?.toString()
+      ?? fs.file(importPath).absolute.uri.toString();
 
     String contents;
     if (hasPlugins) {

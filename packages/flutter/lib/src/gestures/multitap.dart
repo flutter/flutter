@@ -144,8 +144,8 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
   /// Called when the user has tapped the screen with a primary button at the
   /// same location twice in quick succession.
   ///
-  /// This triggers when the pointer stops contacting the device after the 2nd tap,
-  /// immediately after [onDoubleTapUp].
+  /// This triggers when the pointer stops contacting the device after the
+  /// second tap.
   ///
   /// See also:
   ///

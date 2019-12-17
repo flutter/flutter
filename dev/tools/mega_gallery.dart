@@ -25,7 +25,7 @@ void main(List<String> args) {
 
   final ArgResults results = argParser.parse(args);
 
-  if (results['help']) {
+  if (results['help'] as bool) {
     print('Generate n copies of flutter_gallery.\n');
     print('usage: dart mega_gallery.dart <options>');
     print(argParser.usage);
@@ -33,9 +33,9 @@ void main(List<String> args) {
   }
 
   final Directory source = Directory(_normalize('examples/flutter_gallery'));
-  final Directory out = Directory(_normalize(results['out']));
+  final Directory out = Directory(_normalize(results['out'] as String));
 
-  if (results['delete']) {
+  if (results['delete'] as bool) {
     if (out.existsSync()) {
       print('Deleting ${out.path}');
       out.deleteSync(recursive: true);
@@ -55,7 +55,7 @@ void main(List<String> args) {
     final SourceStats stats = getStatsFor(_dir(source, 'lib'));
     copies = (kTargetLineCount / stats.lines).round();
   } else {
-    copies = int.parse(results['copies']);
+    copies = int.parse(results['copies'] as String);
   }
 
   print('Making $copies copies of flutter_gallery.');
@@ -89,7 +89,7 @@ void main(List<String> args) {
   _file(out, '.dartignore').writeAsStringSync('');
 
   // Count source lines and number of files; tell how to run it.
-  print('  ${path.relative(results["out"])} : ${getStatsFor(out)}');
+  print('  ${path.relative(results["out"] as String)} : ${getStatsFor(out)}');
 }
 
 // TODO(devoncarew): Create an entry-point that builds a UI with all `n` copies.

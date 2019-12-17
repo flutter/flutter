@@ -16,14 +16,14 @@
 /// The following outputs the generated Dart code to the console as a dry run:
 ///
 /// ```
-/// dart dev/tools/localization/gen_date_localizations.dart
+/// dart dev/tools/localization/bin/gen_date_localizations.dart
 /// ```
 ///
 /// If the data looks good, use the `--overwrite` option to overwrite the
 /// lib/src/l10n/date_localizations.dart file:
 ///
 /// ```
-/// dart dev/tools/localization/gen_date_localizations.dart --overwrite
+/// dart dev/tools/localization/bin/gen_date_localizations.dart --overwrite
 /// ```
 
 import 'dart:async';
@@ -32,7 +32,7 @@ import 'dart:io';
 
 import 'package:path/path.dart' as path;
 
-import 'localizations_utils.dart';
+import '../localizations_utils.dart';
 
 const String _kCommandName = 'gen_date_localizations.dart';
 
@@ -84,7 +84,7 @@ Future<void> main(List<String> rawArgs) async {
 
 // This file has been automatically generated. Please do not edit it manually.
 // To regenerate run (omit --overwrite to print to console instead of the file):
-// dart --enable-asserts dev/tools/localization/gen_date_localizations.dart --overwrite
+// dart --enable-asserts dev/tools/localization/bin/gen_date_localizations.dart --overwrite
 
 '''
 );
@@ -108,7 +108,7 @@ Future<void> main(List<String> rawArgs) async {
   buffer.writeln('const Map<String, Map<String, String>> datePatterns = <String, Map<String, String>> {');
   patternFiles.forEach((String locale, File data) {
     if (_supportedLocales().contains(locale)) {
-      final Map<String, dynamic> patterns = json.decode(data.readAsStringSync());
+      final Map<String, dynamic> patterns = json.decode(data.readAsStringSync()) as Map<String, dynamic>;
       buffer.writeln("'$locale': <String, String>{");
       patterns.forEach((String key, dynamic value) {
         assert(value is String);
@@ -177,12 +177,13 @@ Set<String> _supportedLocales() {
 
 Map<String, File> _listIntlData(Directory directory) {
   final Map<String, File> localeFiles = <String, File>{};
-  for (FileSystemEntity entity in directory.listSync()) {
-    final String filePath = entity.path;
-    if (FileSystemEntity.isFileSync(filePath) && filePath.endsWith('.json')) {
-      final String locale = path.basenameWithoutExtension(filePath);
-      localeFiles[locale] = entity;
-    }
+  final Iterable<File> files = directory
+    .listSync()
+    .whereType<File>()
+    .where((File file) => file.path.endsWith('.json'));
+  for (File file in files) {
+    final String locale = path.basenameWithoutExtension(file.path);
+    localeFiles[locale] = file;
   }
 
   final List<String> locales = localeFiles.keys.toList(growable: false);

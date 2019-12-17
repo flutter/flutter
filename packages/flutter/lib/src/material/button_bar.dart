@@ -25,7 +25,7 @@ import 'raised_button.dart';
 /// widget, it aligns its buttons in a column. The key difference here
 /// is that the [MainAxisAlignment] will then be treated as a
 /// cross-axis/horizontal alignment. For example, if the buttons overflow and
-/// [ButtonBar.alignment] was set to [MainAxisAligment.start], the buttons would
+/// [ButtonBar.alignment] was set to [MainAxisAlignment.start], the buttons would
 /// align to the horizontal start of the button bar.
 ///
 /// The [ButtonBar] can be configured with a [ButtonBarTheme]. For any null
@@ -316,7 +316,7 @@ class _RenderButtonBarRow extends RenderFlex {
       double currentHeight = 0.0;
 
       while (child != null) {
-        final FlexParentData childParentData = child.parentData;
+        final FlexParentData childParentData = child.parentData as FlexParentData;
 
         // Lay out the child with the button bar's original constraints, but
         // with minimum width set to zero.

@@ -196,13 +196,13 @@ class SystemUiOverlayStyle {
   bool operator ==(dynamic other) {
     if (other.runtimeType != runtimeType)
       return false;
-    final SystemUiOverlayStyle typedOther = other;
-    return typedOther.systemNavigationBarColor == systemNavigationBarColor
-      && typedOther.systemNavigationBarDividerColor == systemNavigationBarDividerColor
-      && typedOther.statusBarColor == statusBarColor
-      && typedOther.statusBarIconBrightness == statusBarIconBrightness
-      && typedOther.statusBarBrightness == statusBarBrightness
-      && typedOther.systemNavigationBarIconBrightness == systemNavigationBarIconBrightness;
+    return other is SystemUiOverlayStyle
+        && other.systemNavigationBarColor == systemNavigationBarColor
+        && other.systemNavigationBarDividerColor == systemNavigationBarDividerColor
+        && other.statusBarColor == statusBarColor
+        && other.statusBarIconBrightness == statusBarIconBrightness
+        && other.statusBarBrightness == statusBarBrightness
+        && other.systemNavigationBarIconBrightness == systemNavigationBarIconBrightness;
   }
 }
 
@@ -380,7 +380,8 @@ class SystemChrome {
   /// {@end-tool}
   ///
   /// See also:
-  ///   * [AnnotatedRegion], the widget used to place data into the layer tree.
+  ///
+  ///  * [AnnotatedRegion], the widget used to place data into the layer tree.
   static void setSystemUIOverlayStyle(SystemUiOverlayStyle style) {
     assert(style != null);
     if (_pendingStyle != null) {

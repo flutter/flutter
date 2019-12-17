@@ -18,7 +18,7 @@
 // Run this program from the root of the git repository.
 //
 // ```
-// dart dev/tools/localization/encode_kn_arb_files.dart
+// dart dev/tools/localization/bin/encode_kn_arb_files.dart
 // ```
 
 import 'dart:async';
@@ -27,12 +27,12 @@ import 'dart:io';
 
 import 'package:path/path.dart' as path;
 
-import 'localizations_utils.dart';
+import '../localizations_utils.dart';
 
 Map<String, dynamic> loadBundle(File file) {
   if (!FileSystemEntity.isFileSync(file.path))
     exitWithError('Unable to find input file: ${file.path}');
-  return json.decode(file.readAsStringSync());
+  return json.decode(file.readAsStringSync()) as Map<String, dynamic>;
 }
 
 void encodeBundleTranslations(Map<String, dynamic> bundle) {
@@ -41,7 +41,7 @@ void encodeBundleTranslations(Map<String, dynamic> bundle) {
     // to encode them.
     if (key.startsWith('@'))
       continue;
-    final String translation = bundle[key];
+    final String translation = bundle[key] as String;
     // Rewrite the string as a series of unicode characters in JSON format.
     // Like "\u0012\u0123\u1234".
     bundle[key] = translation.runes.map((int code) {
