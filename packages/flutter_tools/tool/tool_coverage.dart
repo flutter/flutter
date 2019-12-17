@@ -9,9 +9,9 @@ import 'dart:isolate';
 
 import 'package:async/async.dart';
 import 'package:coverage/coverage.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/context_runner.dart';
 import 'package:path/path.dart' as path;
-import 'package:pedantic/pedantic.dart';
 import 'package:stream_channel/isolate_channel.dart';
 import 'package:stream_channel/stream_channel.dart';
 import 'package:test_core/src/runner/hack_register_platform.dart' as hack; // ignore: implementation_imports
