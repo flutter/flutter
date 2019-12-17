@@ -59,8 +59,8 @@ import 'theme.dart';
 ///
 /// See also:
 ///
-/// * [CupertinoTabScaffold], a tabbed application root layout that can be
-///   controlled by a [CupertinoTabController].
+///  * [CupertinoTabScaffold], a tabbed application root layout that can be
+///    controlled by a [CupertinoTabController].
 class CupertinoTabController extends ChangeNotifier {
   /// Creates a [CupertinoTabController] to control the tab index of [CupertinoTabScaffold]
   /// and [CupertinoTabBar].
@@ -380,6 +380,7 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
       // obstructed area.
       if (widget.tabBar.opaque(context)) {
         contentPadding = EdgeInsets.only(bottom: bottomPadding);
+        newMediaQuery = newMediaQuery.removePadding(removeBottom: true);
       } else {
         newMediaQuery = newMediaQuery.copyWith(
           padding: newMediaQuery.padding.copyWith(

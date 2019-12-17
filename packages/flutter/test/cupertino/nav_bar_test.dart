@@ -322,8 +322,8 @@ void main() {
     List<Element> titles = tester.elementList(find.text('Title'))
         .toList()
         ..sort((Element a, Element b) {
-          final RenderParagraph aParagraph = a.renderObject;
-          final RenderParagraph bParagraph = b.renderObject;
+          final RenderParagraph aParagraph = a.renderObject as RenderParagraph;
+          final RenderParagraph bParagraph = b.renderObject as RenderParagraph;
           return aParagraph.text.style.fontSize.compareTo(bParagraph.text.style.fontSize);
         });
 
@@ -347,8 +347,8 @@ void main() {
     titles = tester.elementList(find.text('Title'))
         .toList()
         ..sort((Element a, Element b) {
-          final RenderParagraph aParagraph = a.renderObject;
-          final RenderParagraph bParagraph = b.renderObject;
+          final RenderParagraph aParagraph = a.renderObject as RenderParagraph;
+          final RenderParagraph bParagraph = b.renderObject as RenderParagraph;
           return aParagraph.text.style.fontSize.compareTo(bParagraph.text.style.fontSize);
         });
 
@@ -604,10 +604,10 @@ void main() {
     final DecoratedBox decoratedBox = tester.widgetList(find.descendant(
       of: find.byType(CupertinoNavigationBar),
       matching: find.byType(DecoratedBox),
-    )).first;
+    )).first as DecoratedBox;
     expect(decoratedBox.decoration.runtimeType, BoxDecoration);
 
-    final BoxDecoration decoration = decoratedBox.decoration;
+    final BoxDecoration decoration = decoratedBox.decoration as BoxDecoration;
     expect(decoration.border, isNotNull);
 
     final BorderSide side = decoration.border.bottom;
@@ -632,10 +632,10 @@ void main() {
     final DecoratedBox decoratedBox = tester.widgetList(find.descendant(
       of: find.byType(CupertinoNavigationBar),
       matching: find.byType(DecoratedBox),
-    )).first;
+    )).first as DecoratedBox;
     expect(decoratedBox.decoration.runtimeType, BoxDecoration);
 
-    final BoxDecoration decoration = decoratedBox.decoration;
+    final BoxDecoration decoration = decoratedBox.decoration as BoxDecoration;
     expect(decoration.border, isNotNull);
 
     final BorderSide side = decoration.border.bottom;
@@ -656,10 +656,10 @@ void main() {
     final DecoratedBox decoratedBox = tester.widgetList(find.descendant(
       of: find.byType(CupertinoNavigationBar),
       matching: find.byType(DecoratedBox),
-    )).first;
+    )).first as DecoratedBox;
     expect(decoratedBox.decoration.runtimeType, BoxDecoration);
 
-    final BoxDecoration decoration = decoratedBox.decoration;
+    final BoxDecoration decoration = decoratedBox.decoration as BoxDecoration;
     expect(decoration.border, isNull);
   });
 
@@ -681,10 +681,10 @@ void main() {
     final DecoratedBox decoratedBox = tester.widgetList(find.descendant(
       of: find.byType(CupertinoSliverNavigationBar),
       matching: find.byType(DecoratedBox),
-    )).first;
+    )).first as DecoratedBox;
     expect(decoratedBox.decoration.runtimeType, BoxDecoration);
 
-    final BoxDecoration decoration = decoratedBox.decoration;
+    final BoxDecoration decoration = decoratedBox.decoration as BoxDecoration;
     expect(decoration.border, isNotNull);
 
     final BorderSide bottom = decoration.border.bottom;
@@ -710,10 +710,10 @@ void main() {
     final DecoratedBox decoratedBox = tester.widgetList(find.descendant(
       of: find.byType(CupertinoSliverNavigationBar),
       matching: find.byType(DecoratedBox),
-    )).first;
+    )).first as DecoratedBox;
     expect(decoratedBox.decoration.runtimeType, BoxDecoration);
 
-    final BoxDecoration decoration = decoratedBox.decoration;
+    final BoxDecoration decoration = decoratedBox.decoration as BoxDecoration;
     expect(decoration.border, isNull);
   });
 
@@ -787,10 +787,10 @@ void main() {
     final DecoratedBox decoratedBox = tester.widgetList(find.descendant(
       of: find.byType(CupertinoSliverNavigationBar),
       matching: find.byType(DecoratedBox),
-    )).first;
+    )).first as DecoratedBox;
     expect(decoratedBox.decoration.runtimeType, BoxDecoration);
 
-    final BoxDecoration decoration = decoratedBox.decoration;
+    final BoxDecoration decoration = decoratedBox.decoration as BoxDecoration;
     expect(decoration.border, isNotNull);
 
     final BorderSide top = decoration.border.top;

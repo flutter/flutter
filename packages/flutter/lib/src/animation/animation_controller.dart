@@ -41,16 +41,17 @@ const Tolerance _kFlingTolerance = Tolerance(
   distance: 0.01,
 );
 
-/// Configures how an [AnimationController] behaves when animations are disabled.
+/// Configures how an [AnimationController] behaves when animations are
+/// disabled.
 ///
 /// When [AccessibilityFeatures.disableAnimations] is true, the device is asking
 /// Flutter to reduce or disable animations as much as possible. To honor this,
-/// we reduce the duration and the corresponding number of frames for animations.
-/// This enum is used to allow certain [AnimationController]s to opt out of this
-/// behavior.
+/// we reduce the duration and the corresponding number of frames for
+/// animations. This enum is used to allow certain [AnimationController]s to opt
+/// out of this behavior.
 ///
 /// For example, the [AnimationController] which controls the physics simulation
-/// for a scrollable list will have [AnimationBehavior.preserve] so that when
+/// for a scrollable list will have [AnimationBehavior.preserve], so that when
 /// a user attempts to scroll it does not jump to the end/beginning too quickly.
 enum AnimationBehavior {
   /// The [AnimationController] will reduce its duration when

@@ -41,7 +41,7 @@ class UnpublishException implements Exception {
     if (message != null) {
       output += ': $message';
     }
-    final String stderr = result?.stderr ?? '';
+    final String stderr = result?.stderr as String ?? '';
     if (stderr.isNotEmpty) {
       output += ':\n$stderr';
     }
@@ -242,8 +242,8 @@ class ArchiveUnpublisher {
   /// Remove the archive from Google Storage.
   Future<void> unpublishArchive() async {
     final Map<String, dynamic> jsonData = await _loadMetadata();
-    final List<Map<String, String>> releases = jsonData['releases'].map<Map<String, String>>((dynamic entry) {
-      final Map<String, dynamic> mapEntry = entry;
+    final List<Map<String, String>> releases = (jsonData['releases'] as List<dynamic>).map<Map<String, String>>((dynamic entry) {
+      final Map<String, dynamic> mapEntry = entry as Map<String, dynamic>;
       return mapEntry.cast<String, String>();
     }).toList();
     final Map<Channel, Map<String, String>> paths = await _getArchivePaths(releases);
@@ -306,7 +306,7 @@ class ArchiveUnpublisher {
 
     Map<String, dynamic> jsonData;
     try {
-      jsonData = json.decode(currentMetadata);
+      jsonData = json.decode(currentMetadata) as Map<String, dynamic>;
     } on FormatException catch (e) {
       throw UnpublishException('Unable to parse JSON metadata received from cloud: $e');
     }
@@ -449,7 +449,7 @@ Future<void> main(List<String> rawArguments) async {
 
   final ArgResults parsedArguments = argParser.parse(rawArguments);
 
-  if (parsedArguments['help']) {
+  if (parsedArguments['help'] as bool) {
     print(argParser.usage);
     exit(0);
   }
@@ -460,7 +460,7 @@ Future<void> main(List<String> rawArguments) async {
     exit(exitCode);
   }
 
-  final List<String> revisions = parsedArguments['revision'];
+  final List<String> revisions = parsedArguments['revision'] as List<String>;
   if (revisions.isEmpty) {
     errorExit('Invalid argument: at least one --revision must be specified.');
   }
@@ -473,25 +473,28 @@ Future<void> main(List<String> rawArguments) async {
     }
   }
 
+  final String tempDirArg = parsedArguments['temp_dir'] as String;
   Directory tempDir;
   bool removeTempDir = false;
-  if (parsedArguments['temp_dir'] == null || parsedArguments['temp_dir'].isEmpty) {
+  if (tempDirArg == null || tempDirArg.isEmpty) {
     tempDir = Directory.systemTemp.createTempSync('flutter_package.');
     removeTempDir = true;
   } else {
-    tempDir = Directory(parsedArguments['temp_dir']);
+    tempDir = Directory(tempDirArg);
     if (!tempDir.existsSync()) {
-      errorExit("Temporary directory ${parsedArguments['temp_dir']} doesn't exist.");
+      errorExit("Temporary directory $tempDirArg doesn't exist.");
     }
   }
 
-  if (!parsedArguments['confirm']) {
+  if (!(parsedArguments['confirm'] as bool)) {
     _printBanner('This will be just a dry run.  To actually perform the changes below, re-run with --confirm argument.');
   }
 
-  final List<String> channelOptions = parsedArguments['channel'].isNotEmpty ? parsedArguments['channel'] : allowedChannelValues;
+  final List<String> channelArg = parsedArguments['channel'] as List<String>;
+  final List<String> channelOptions = channelArg.isNotEmpty ? channelArg : allowedChannelValues;
   final Set<Channel> channels = channelOptions.map<Channel>((String value) => fromChannelName(value)).toSet();
-  final List<String> platformOptions = parsedArguments['platform'].isNotEmpty ? parsedArguments['platform'] : allowedPlatformNames;
+  final List<String> platformArg = parsedArguments['platform'] as List<String>;
+  final List<String> platformOptions = platformArg.isNotEmpty ? platformArg : allowedPlatformNames;
   final List<PublishedPlatform> platforms = platformOptions.map<PublishedPlatform>((String value) => fromPublishedPlatform(value)).toList();
   int exitCode = 0;
   String message;
@@ -503,7 +506,7 @@ Future<void> main(List<String> rawArguments) async {
         revisions.toSet(),
         channels,
         platform,
-        confirmed: parsedArguments['confirm'],
+        confirmed: parsedArguments['confirm'] as bool,
       );
       await publisher.unpublishArchive();
     }
@@ -522,7 +525,7 @@ Future<void> main(List<String> rawArguments) async {
     if (exitCode != 0) {
       errorExit('$message\n$stack', exitCode: exitCode);
     }
-    if (!parsedArguments['confirm']) {
+    if (!(parsedArguments['confirm'] as bool)) {
       _printBanner('This was just a dry run.  To actually perform the above changes, re-run with --confirm argument.');
     }
     exit(0);

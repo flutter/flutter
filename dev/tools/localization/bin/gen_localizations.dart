@@ -29,7 +29,7 @@
 // The following outputs the generated Dart code to the console as a dry run:
 //
 // ```
-// dart dev/tools/localization/gen_localizations.dart
+// dart dev/tools/localization/bin/gen_localizations.dart
 // ```
 //
 // If the data looks good, use the `-w` or `--overwrite` option to overwrite the
@@ -37,7 +37,7 @@
 // and packages/flutter_localizations/lib/src/l10n/generated_cupertino_localizations.dart file:
 //
 // ```
-// dart dev/tools/localization/gen_localizations.dart --overwrite
+// dart dev/tools/localization/bin/gen_localizations.dart --overwrite
 // ```
 
 import 'dart:async';
@@ -46,10 +46,10 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 import 'package:meta/meta.dart';
 
-import 'gen_cupertino_localizations.dart';
-import 'gen_material_localizations.dart';
-import 'localizations_utils.dart';
-import 'localizations_validator.dart';
+import '../gen_cupertino_localizations.dart';
+import '../gen_material_localizations.dart';
+import '../localizations_utils.dart';
+import '../localizations_validator.dart';
 
 /// This is the core of this script; it generates the code used for translations.
 String generateArbBasedLocalizationSubclasses({
@@ -78,7 +78,7 @@ String generateArbBasedLocalizationSubclasses({
   assert(supportedLanguagesDocMacro.isNotEmpty);
 
   final StringBuffer output = StringBuffer();
-  output.writeln(generateHeader('dart dev/tools/localization/gen_localizations.dart --overwrite'));
+  output.writeln(generateHeader('dart dev/tools/localization/bin/gen_localizations.dart --overwrite'));
 
   final StringBuffer supportedLocales = StringBuffer();
 
@@ -136,7 +136,7 @@ String generateArbBasedLocalizationSubclasses({
 
     final Map<String, String> languageResources = localeToResources[languageLocale];
     for (String key in allKeys) {
-      final Map<String, dynamic> attributes = localeToResourceAttributes[canonicalLocale][key];
+      final Map<String, dynamic> attributes = localeToResourceAttributes[canonicalLocale][key] as Map<String, dynamic>;
       output.writeln(generateGetter(key, languageResources[key], attributes, languageLocale));
     }
     output.writeln('}');
@@ -158,7 +158,7 @@ String generateArbBasedLocalizationSubclasses({
         for (String key in scriptResources.keys.toList()..sort()) {
           if (languageResources[key] == scriptResources[key])
             continue;
-          final Map<String, dynamic> attributes = localeToResourceAttributes[canonicalLocale][key];
+          final Map<String, dynamic> attributes = localeToResourceAttributes[canonicalLocale][key] as Map<String, dynamic>;
           output.writeln(generateGetter(key, scriptResources[key], attributes, languageLocale));
         }
         output.writeln('}');
@@ -183,7 +183,7 @@ String generateArbBasedLocalizationSubclasses({
             // When script fallback contains the key, we compare to it instead of language fallback.
             if (scriptResources.containsKey(key) ? scriptResources[key] == localeResources[key] : languageResources[key] == localeResources[key])
               continue;
-            final Map<String, dynamic> attributes = localeToResourceAttributes[canonicalLocale][key];
+            final Map<String, dynamic> attributes = localeToResourceAttributes[canonicalLocale][key] as Map<String, dynamic>;
             output.writeln(generateGetter(key, localeResources[key], attributes, languageLocale));
           }
          output.writeln('}');
@@ -207,7 +207,7 @@ String generateArbBasedLocalizationSubclasses({
         for (String key in localeResources.keys) {
           if (languageResources[key] == localeResources[key])
             continue;
-          final Map<String, dynamic> attributes = localeToResourceAttributes[canonicalLocale][key];
+          final Map<String, dynamic> attributes = localeToResourceAttributes[canonicalLocale][key] as Map<String, dynamic>;
           output.writeln(generateGetter(key, localeResources[key], attributes, languageLocale));
         }
        output.writeln('}');
@@ -380,7 +380,7 @@ $factoryDeclaration
 /// Used by [generateGetter] below.
 String generateType(Map<String, dynamic> attributes) {
   if (attributes != null) {
-    switch (attributes['x-flutter-type']) {
+    switch (attributes['x-flutter-type'] as String) {
       case 'icuShortTimePattern':
         return 'TimeOfDayFormat';
       case 'scriptCategory':
@@ -401,7 +401,7 @@ String generateKey(String key, Map<String, dynamic> attributes) {
   if (attributes != null) {
     if (attributes.containsKey('parameters'))
       return '${key}Raw';
-    switch (attributes['x-flutter-type']) {
+    switch (attributes['x-flutter-type'] as String) {
       case 'icuShortTimePattern':
         return '${key}Raw';
     }
@@ -443,7 +443,7 @@ String generateValue(String value, Map<String, dynamic> attributes, LocaleInfo l
     return null;
   // cupertino_en.arb doesn't use x-flutter-type.
   if (attributes != null) {
-    switch (attributes['x-flutter-type']) {
+    switch (attributes['x-flutter-type'] as String) {
       case 'icuShortTimePattern':
         if (!_icuTimeOfDayToEnum.containsKey(value)) {
           throw Exception(

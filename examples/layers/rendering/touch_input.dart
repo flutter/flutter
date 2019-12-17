@@ -65,7 +65,7 @@ class RenderDots extends RenderBox {
   @override
   void handleEvent(PointerEvent event, BoxHitTestEntry entry) {
     if (event is PointerDownEvent) {
-      final Color color = _kColors[event.pointer.remainder(_kColors.length)];
+      final Color color = _kColors[event.pointer.remainder(_kColors.length) as int];
       _dots[event.pointer] = Dot(color: color)..update(event);
       // We call markNeedsPaint to indicate that our painting commands have
       // changed and that paint needs to be called before displaying a new frame
@@ -126,7 +126,7 @@ void main() {
   //
   // We use the StackParentData of the paragraph to position the text in the top
   // left corner of the screen.
-  final StackParentData paragraphParentData = paragraph.parentData;
+  final StackParentData paragraphParentData = paragraph.parentData as StackParentData;
   paragraphParentData
     ..top = 40.0
     ..left = 20.0;

@@ -280,15 +280,13 @@ abstract class EdgeInsetsGeometry {
 
   @override
   bool operator ==(dynamic other) {
-    if (other is! EdgeInsetsGeometry)
-      return false;
-    final EdgeInsetsGeometry typedOther = other;
-    return _left == typedOther._left
-        && _right == typedOther._right
-        && _start == typedOther._start
-        && _end == typedOther._end
-        && _top == typedOther._top
-        && _bottom == typedOther._bottom;
+    return other is EdgeInsetsGeometry
+        && other._left == _left
+        && other._right == _right
+        && other._start == _start
+        && other._end == _end
+        && other._top == _top
+        && other._bottom == _bottom;
   }
 
   @override

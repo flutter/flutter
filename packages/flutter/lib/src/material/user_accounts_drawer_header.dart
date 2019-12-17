@@ -232,7 +232,7 @@ class _AccountDetailsLayout extends MultiChildLayoutDelegate {
     final String bottomLine = hasChild(accountEmail) ? accountEmail : (hasChild(accountName) ? accountName : null);
 
     if (bottomLine != null) {
-      final Size constraintSize = iconSize == null ? size : size - Offset(iconSize.width, 0.0);
+      final Size constraintSize = iconSize == null ? size : Size(size.width - iconSize.width, size.height);
       iconSize ??= const Size(_kAccountDetailsHeight, _kAccountDetailsHeight);
 
       // place bottom line center at same height as icon center
