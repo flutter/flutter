@@ -292,13 +292,13 @@ void main() {
         expect(captures[0], 'run');
         final Map<String, String> parameters = captures[1] as Map<String, String>;
 
-        expect(parameters['cd3'], 'false'); // commandRunIsEmulator
-        expect(parameters['cd4'], 'ios'); // commandRunTargetName
-        expect(parameters['cd15'], 'swift'); // commandRunProjectHostLanguage
-        expect(parameters['cd22'], 'iOS 13'); // commandRunTargetOsVersion
-        expect(parameters['cd23'], 'debug'); // commandRunModeName
-        expect(parameters['cd18'], 'false'); // commandRunProjectModule
-        expect(parameters.containsKey('cd45'), false); // commandRunAndroidEmbeddingVersion
+        expect(parameters[cdKey(CustomDimensions.commandRunIsEmulator)], 'false');
+        expect(parameters[cdKey(CustomDimensions.commandRunTargetName)], 'ios');
+        expect(parameters[cdKey(CustomDimensions.commandRunProjectHostLanguage)], 'swift');
+        expect(parameters[cdKey(CustomDimensions.commandRunTargetOsVersion)], 'iOS 13');
+        expect(parameters[cdKey(CustomDimensions.commandRunModeName)], 'debug');
+        expect(parameters[cdKey(CustomDimensions.commandRunProjectModule)], 'false');
+        expect(parameters.containsKey(cdKey(CustomDimensions.commandRunAndroidEmbeddingVersion)), false);
       }, overrides: <Type, Generator>{
         ApplicationPackageFactory: () => mockApplicationPackageFactory,
         Artifacts: () => mockArtifacts,
