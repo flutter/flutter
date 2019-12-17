@@ -4004,6 +4004,7 @@ void main() {
       expect(m.method, logOrder[index]);
       index++;
     }
+    expect(tester.testTextInput.editingState['text'], '...');
   });
 }
 
