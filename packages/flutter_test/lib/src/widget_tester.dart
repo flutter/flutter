@@ -697,7 +697,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// reset.
   ///
   /// This is called by the testing framework before test runs, so that if a
-  /// test has set its own handler on [SystemChannels.textInput], the
+  /// previous test has set its own handler on [SystemChannels.textInput], the
   /// [testTextInput] regains control and the log is fresh for the new test.
   /// It should not typically need to be called by tests.
   void resetTestTextInput() {
