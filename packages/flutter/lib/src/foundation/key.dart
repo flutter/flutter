@@ -17,7 +17,9 @@ import 'package:meta/meta.dart';
 ///
 /// Subclasses of [Key] should either subclass [LocalKey] or [GlobalKey].
 ///
-/// See also the discussion at [Widget.key].
+/// See also:
+///
+///  * [Widget.key], which discusses how widgets use keys.
 @immutable
 abstract class Key {
   /// Construct a [ValueKey<String>] with the given [String].
@@ -38,7 +40,9 @@ abstract class Key {
 /// Keys must be unique amongst the [Element]s with the same parent. By
 /// contrast, [GlobalKey]s must be unique across the entire app.
 ///
-/// See also the discussion at [Widget.key].
+/// See also:
+///
+///  * [Widget.key], which discusses how widgets use keys.
 abstract class LocalKey extends Key {
   /// Default constructor, used by subclasses.
   const LocalKey() : super.empty();
@@ -55,7 +59,9 @@ abstract class LocalKey extends Key {
 /// other sources, which could be useful, for example, if the keys are being
 /// used as fallbacks in the same scope as keys supplied from another widget.
 ///
-/// See also the discussion at [Widget.key].
+/// See also:
+///
+///  * [Widget.key], which discusses how widgets use keys.
 class ValueKey<T> extends LocalKey {
   /// Creates a key that delegates its [operator==] to the given value.
   const ValueKey(this.value);

@@ -49,14 +49,14 @@ class StockData extends ChangeNotifier {
   final List<String> _symbols = <String>[];
   final Map<String, Stock> _stocks = <String, Stock>{};
 
-  Iterable<String> get allSymbols => _symbols;
+  List<String> get allSymbols => _symbols;
 
   Stock operator [](String symbol) => _stocks[symbol];
 
   bool get loading => _httpClient != null;
 
   void add(List<dynamic> data) {
-    for (List<dynamic> fields in data) {
+    for (List<dynamic> fields in data.cast<List<dynamic>>()) {
       final Stock stock = Stock.fromFields(fields.cast<String>());
       _symbols.add(stock.symbol);
       _stocks[stock.symbol] = stock;
@@ -85,7 +85,7 @@ class StockData extends ChangeNotifier {
         return;
       }
       const JsonDecoder decoder = JsonDecoder();
-      add(decoder.convert(json));
+      add(decoder.convert(json) as List<dynamic>);
       if (_nextChunk < _chunkCount) {
         _fetchNextChunk();
       } else {

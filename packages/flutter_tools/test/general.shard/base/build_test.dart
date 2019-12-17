@@ -244,7 +244,7 @@ void main() {
       mockAndroidSdk = MockAndroidSdk();
       mockArtifacts = MockArtifacts();
       mockXcode = MockXcode();
-      when(mockXcode.iPhoneSdkLocation()).thenAnswer((_) => Future<String>.value(kSDKPath));
+      when(mockXcode.sdkLocation(any)).thenAnswer((_) => Future<String>.value(kSDKPath));
 
       bufferLogger = BufferLogger();
       for (BuildMode mode in BuildMode.values) {

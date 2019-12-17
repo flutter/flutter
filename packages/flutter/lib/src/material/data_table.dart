@@ -750,14 +750,14 @@ class TableRowInkWell extends InkResponse {
       AbstractNode table = cell.parent;
       final Matrix4 transform = Matrix4.identity();
       while (table is RenderObject && table is! RenderTable) {
-        final RenderTable parentBox = table;
+        final RenderObject parentBox = table as RenderObject;
         parentBox.applyPaintTransform(cell, transform);
         assert(table == cell.parent);
-        cell = table;
+        cell = parentBox;
         table = table.parent;
       }
       if (table is RenderTable) {
-        final TableCellParentData cellParentData = cell.parentData;
+        final TableCellParentData cellParentData = cell.parentData as TableCellParentData;
         assert(cellParentData.y != null);
         final Rect rect = table.getRowBox(cellParentData.y);
         // The rect is in the table's coordinate space. We need to change it to the

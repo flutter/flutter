@@ -59,7 +59,7 @@ void main() {
     StackParentData parentData;
 
     container = tester.element(find.byKey(key));
-    parentData = container.renderObject.parentData;
+    parentData = container.renderObject.parentData as StackParentData;
     expect(parentData.top, isNull);
     expect(parentData.right, isNull);
     expect(parentData.bottom, isNull);
@@ -84,7 +84,7 @@ void main() {
     );
 
     container = tester.element(find.byKey(key));
-    parentData = container.renderObject.parentData;
+    parentData = container.renderObject.parentData as StackParentData;
     expect(parentData.top, isNull);
     expect(parentData.right, equals(10.0));
     expect(parentData.bottom, isNull);
@@ -106,7 +106,7 @@ void main() {
     Element containerElement = tester.element(find.byKey(key));
 
     StackParentData parentData;
-    parentData = containerElement.renderObject.parentData;
+    parentData = containerElement.renderObject.parentData as StackParentData;
     expect(parentData.top, isNull);
     expect(parentData.right, isNull);
     expect(parentData.bottom, isNull);
@@ -122,7 +122,7 @@ void main() {
     );
     containerElement = tester.element(find.byKey(key));
 
-    parentData = containerElement.renderObject.parentData;
+    parentData = containerElement.renderObject.parentData as StackParentData;
     expect(parentData.top, isNull);
     expect(parentData.right, isNull);
     expect(parentData.bottom, isNull);
@@ -151,11 +151,11 @@ void main() {
     );
 
     final Element child0 = tester.element(find.byKey(child0Key));
-    final StackParentData child0RenderObjectParentData = child0.renderObject.parentData;
+    final StackParentData child0RenderObjectParentData = child0.renderObject.parentData as StackParentData;
     expect(child0RenderObjectParentData.offset, equals(const Offset(0.0, 0.0)));
 
     final Element child1 = tester.element(find.byKey(child1Key));
-    final StackParentData child1RenderObjectParentData = child1.renderObject.parentData;
+    final StackParentData child1RenderObjectParentData = child1.renderObject.parentData as StackParentData;
     expect(child1RenderObjectParentData.offset, equals(const Offset(5.0, 5.0)));
 
     await tester.pumpWidget(
@@ -197,11 +197,11 @@ void main() {
     );
 
     final Element child0 = tester.element(find.byKey(child0Key));
-    final StackParentData child0RenderObjectParentData = child0.renderObject.parentData;
+    final StackParentData child0RenderObjectParentData = child0.renderObject.parentData as StackParentData;
     expect(child0RenderObjectParentData.offset, equals(const Offset(0.0, 0.0)));
 
     final Element child1 = tester.element(find.byKey(child1Key));
-    final StackParentData child1RenderObjectParentData = child1.renderObject.parentData;
+    final StackParentData child1RenderObjectParentData = child1.renderObject.parentData as StackParentData;
     expect(child1RenderObjectParentData.offset, equals(const Offset(5.0, 5.0)));
 
     await tester.pumpWidget(
@@ -334,8 +334,8 @@ void main() {
     StackParentData parentData;
 
     box = tester.element(find.byKey(key));
-    renderBox = box.renderObject;
-    parentData = renderBox.parentData;
+    renderBox = box.renderObject as RenderBox;
+    parentData = renderBox.parentData as StackParentData;
     expect(parentData.top, isNull);
     expect(parentData.right, isNull);
     expect(parentData.bottom, isNull);
@@ -362,8 +362,8 @@ void main() {
     );
 
     box = tester.element(find.byKey(key));
-    renderBox = box.renderObject;
-    parentData = renderBox.parentData;
+    renderBox = box.renderObject as RenderBox;
+    parentData = renderBox.parentData as StackParentData;
     expect(parentData.top, isNull);
     expect(parentData.right, equals(10.0));
     expect(parentData.bottom, isNull);

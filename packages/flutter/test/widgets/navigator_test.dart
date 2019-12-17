@@ -510,8 +510,8 @@ void main() {
 
     final TestObserver observer = TestObserver()
       ..onRemoved = (Route<dynamic> route, Route<dynamic> previous) {
-        removedRoute = route;
-        previousRoute = previous;
+        removedRoute = route as Route<String>;
+        previousRoute = previous as Route<String>;
       };
 
     await tester.pumpWidget(MaterialApp(
@@ -1044,7 +1044,7 @@ void main() {
       final dynamic exception = tester.takeException();
       expect(exception, isNotNull);
       expect(exception, isFlutterError);
-      final FlutterError error = exception;
+      final FlutterError error = exception as FlutterError;
       expect(error, isNotNull);
       expect(error.diagnostics.last, isInstanceOf<DiagnosticsProperty<NavigatorState>>());
       expect(
@@ -1071,7 +1071,7 @@ void main() {
       final dynamic exception = tester.takeException();
       expect(exception, isNotNull);
       expect(exception, isFlutterError);
-      final FlutterError error = exception;
+      final FlutterError error = exception as FlutterError;
       expect(error, isNotNull);
       expect(error.diagnostics.last, isInstanceOf<DiagnosticsProperty<NavigatorState>>());
       expect(

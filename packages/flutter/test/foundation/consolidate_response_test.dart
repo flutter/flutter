@@ -28,10 +28,10 @@ void main() {
          onError: anyNamed('onError'),
          cancelOnError: anyNamed('cancelOnError'),
       )).thenAnswer((Invocation invocation) {
-        final void Function(List<int>) onData = invocation.positionalArguments[0];
-        final void Function(Object) onError = invocation.namedArguments[#onError];
-        final void Function() onDone = invocation.namedArguments[#onDone];
-        final bool cancelOnError = invocation.namedArguments[#cancelOnError];
+        final void Function(List<int>) onData = invocation.positionalArguments[0] as void Function(List<int>);
+        final void Function(Object) onError = invocation.namedArguments[#onError] as void Function(Object);
+        final VoidCallback onDone = invocation.namedArguments[#onDone] as VoidCallback;
+        final bool cancelOnError = invocation.namedArguments[#cancelOnError] as bool;
 
         return Stream<Uint8List>.fromIterable(
             <Uint8List>[chunkOne, chunkTwo]).listen(
@@ -94,10 +94,10 @@ void main() {
         onError: anyNamed('onError'),
         cancelOnError: anyNamed('cancelOnError'),
       )).thenAnswer((Invocation invocation) {
-        final void Function(List<int>) onData = invocation.positionalArguments[0];
-        final void Function(Object) onError = invocation.namedArguments[#onError];
-        final void Function() onDone = invocation.namedArguments[#onDone];
-        final bool cancelOnError = invocation.namedArguments[#cancelOnError];
+        final void Function(List<int>) onData = invocation.positionalArguments[0] as void Function(List<int>);
+        final void Function(Object) onError = invocation.namedArguments[#onError] as void Function(Object);
+        final VoidCallback onDone = invocation.namedArguments[#onDone] as VoidCallback;
+        final bool cancelOnError = invocation.namedArguments[#cancelOnError] as bool;
 
         return Stream<Uint8List>.fromFuture(
                 Future<Uint8List>.error(Exception('Test Error')))
@@ -127,9 +127,9 @@ void main() {
     });
 
     group('when gzipped', () {
-      final Uint8List gzipped = gzip.encode(chunkOne.followedBy(chunkTwo).toList());
-      final Uint8List gzippedChunkOne = gzipped.sublist(0, gzipped.length ~/ 2);
-      final Uint8List gzippedChunkTwo = gzipped.sublist(gzipped.length ~/ 2);
+      final List<int> gzipped = gzip.encode(chunkOne.followedBy(chunkTwo).toList());
+      final List<int> gzippedChunkOne = gzipped.sublist(0, gzipped.length ~/ 2);
+      final List<int> gzippedChunkTwo = gzipped.sublist(gzipped.length ~/ 2);
 
       setUp(() {
         when(response.compressionState).thenReturn(HttpClientResponseCompressionState.compressed);
@@ -139,13 +139,13 @@ void main() {
           onError: anyNamed('onError'),
           cancelOnError: anyNamed('cancelOnError'),
         )).thenAnswer((Invocation invocation) {
-          final void Function(List<int>) onData = invocation.positionalArguments[0];
-          final void Function(Object) onError = invocation.namedArguments[#onError];
-          final void Function() onDone = invocation.namedArguments[#onDone];
-          final bool cancelOnError = invocation.namedArguments[#cancelOnError];
+          final void Function(List<int>) onData = invocation.positionalArguments[0] as void Function(List<int>);
+          final void Function(Object) onError = invocation.namedArguments[#onError] as void Function(Object);
+          final VoidCallback onDone = invocation.namedArguments[#onDone] as VoidCallback;
+          final bool cancelOnError = invocation.namedArguments[#cancelOnError] as bool;
 
-          return Stream<Uint8List>.fromIterable(
-              <Uint8List>[gzippedChunkOne, gzippedChunkTwo]).listen(
+          return Stream<List<int>>.fromIterable(
+              <List<int>>[gzippedChunkOne, gzippedChunkTwo]).listen(
             onData,
             onDone: onDone,
             onError: onError,

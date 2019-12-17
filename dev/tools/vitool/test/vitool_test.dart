@@ -622,7 +622,7 @@ class PathMatcher extends Matcher {
     if (item.runtimeType != actual.runtimeType)
       return false;
 
-    final SvgPath other = item;
+    final SvgPath other = item as SvgPath;
     if (other.id != actual.id || other.opacity != actual.opacity)
       return false;
 
@@ -666,7 +666,7 @@ class PathAnimationMatcher extends Matcher {
     if (item.runtimeType != expected.runtimeType)
       return false;
 
-    final PathAnimation other = item;
+    final PathAnimation other = item as PathAnimation;
 
     if (!const ListEquality<double>().equals(other.opacities, expected.opacities))
       return false;

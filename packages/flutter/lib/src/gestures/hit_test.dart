@@ -126,6 +126,7 @@ class HitTestResult {
   /// [popTransform] has to be called to remove the child-specific `transform`.
   ///
   /// See also:
+  ///
   ///  * [BoxHitTestResult.addWithPaintTransform], which is a public wrapper
   ///    around this function for hit testing on [RenderBox]s.
   ///  * [SliverHitTestResult.addWithAxisOffset], which is a public wrapper

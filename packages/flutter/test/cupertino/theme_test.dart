@@ -209,7 +209,7 @@ void main() {
     }
   }
 
-  final Function dynamicColorsTestGroup = () {
+  final VoidCallback dynamicColorsTestGroup = () {
     testWidgets('CupertinoTheme.of resolves colors', (WidgetTester tester) async {
       final CupertinoThemeData data = CupertinoThemeData(brightness: currentBrightness, primaryColor: CupertinoColors.systemRed);
       final CupertinoThemeData theme = await testTheme(tester, data);
