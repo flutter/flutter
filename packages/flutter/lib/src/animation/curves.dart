@@ -747,8 +747,24 @@ class CatmullRomCurve extends Curve {
     final CatmullRomSpline testSpline = CatmullRomSpline(controlPoints, tension: tension);
     for (int i = 0; i < testPoints; i++) {
       final double pos = i / testPoints.toDouble();
-      final double x = testSpline.transform(pos).dx;
-      if (x < lastX && x >= 0.0 && x <= 1.0) {
+      final Offset result = testSpline.transform(_findInverse(pos, testSpline));
+      final double x = result.dx;
+      if (x < -1e-3 || x > 1.0 + 1e-3) {
+        bool bail = true;
+        assert(() {
+          reasons?.add('The resulting curve has an X value ($x) which is outside of the range [0.0, 1.0], inclusive.');
+          // No need to keep going if we're not giving reasons.
+          bail = reasons == null;
+          success = false;
+          return true;
+        }());
+        if (bail) {
+          // If we're not in debug mode, then we want to bail immediately
+          // instead of checking all the segments.
+          return false;
+        }
+      }
+      if (x < lastX) {
         bool bail = true;
         assert(() {
           reasons?.add('The curve has more than one Y value at t=$pos (x=$x). Try moving '
@@ -771,11 +787,11 @@ class CatmullRomCurve extends Curve {
 
   // Finds the time that corresponds to the x value of the spline at parametric
   // value t.
-  double _findInverse(double t) {
+  static double _findInverse(double t, CatmullRomSpline spine) {
     double start = 0.0;
     double end = 1.0;
     double mid;
-    double offsetToOrigin(double pos) => t - valueSpline.transform(pos).dx;
+    double offsetToOrigin(double pos) => t - spine.transform(pos).dx;
     // Use a binary search to find the inverse point within 1e-6, or 100
     // subdivisions, whichever comes first.
     const double errorLimit = 1e-6;
@@ -795,7 +811,7 @@ class CatmullRomCurve extends Curve {
   }
 
   @override
-  double transformInternal(double t) => valueSpline.transform(_findInverse(t)).dy;
+  double transformInternal(double t) => valueSpline.transform(_findInverse(t, valueSpline)).dy;
 }
 
 /// A curve that is the reversed inversion of its given curve.
