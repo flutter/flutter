@@ -89,7 +89,7 @@ Future<int> runTests(
       ..add('--precompiled=$tempBuildDir')
       ..add('--')
       ..addAll(testFiles);
-    hack.registerPlatformPlugin(
+    test.registerPlatformPlugin(
       <Runtime>[Runtime.chrome],
       () {
         return FlutterWebPlatform.start(

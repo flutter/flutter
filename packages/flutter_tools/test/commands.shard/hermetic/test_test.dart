@@ -1,6 +1,8 @@
-// Copyright 2019 The Flutter Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+import 'dart:async';
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
@@ -24,7 +26,10 @@ void main() {
     fakePackageTest = FakePackageTest();
     fs = MemoryFileSystem();
     fs.file('pubspec.yaml').createSync();
-    fs.directory('test').childFile('some_test.dart').createSync(recursive: true);
+    fs
+        .directory('test')
+        .childFile('some_test.dart')
+        .createSync(recursive: true);
   });
 
   testUsingContext('Pipes test-randomize-ordering-seed to package:test',
@@ -43,18 +48,24 @@ void main() {
       contains('--test-randomize-ordering-seed=random'),
     );
   }, overrides: <Type, Generator>{
-    Test: () => fakePackageTest,
+    TestWrapper: () => fakePackageTest,
     FileSystem: () => fs,
     ProcessManager: () => FakeProcessManager.any(),
     Cache: () => FakeCache(),
   });
 }
 
-class FakePackageTest extends Test {
+class FakePackageTest extends TestWrapper {
   List<String> lastArgs;
 
   @override
   Future<void> main(List<String> args) async {
     lastArgs = args;
   }
+
+  @override
+  void registerPlatformPlugin(
+    Iterable<Runtime> runtimes,
+    FutureOr<PlatformPlugin> Function() platforms,
+  ) {}
 }
