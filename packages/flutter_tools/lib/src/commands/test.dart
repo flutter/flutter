@@ -100,6 +100,13 @@ class TestCommand extends FastFlutterCommand {
         allowed: const <String>['tester', 'chrome'],
         defaultsTo: 'tester',
         help: 'The platform to run the unit tests on. Defaults to "tester".',
+      )
+      ..addOption('test-randomize-ordering-seed',
+        defaultsTo: '0',
+        help: 'If positive, use this as a seed to randomize the execution of '
+              'test cases (must be a 32bit unsigned integer).\n'
+              'If "random", pick a random seed to use.\n'
+              'If 0 or not set, do not randomize test case execution order.',
       );
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
   }
@@ -240,6 +247,7 @@ class TestCommand extends FastFlutterCommand {
       buildTestAssets: buildTestAssets,
       flutterProject: flutterProject,
       web: stringArg('platform') == 'chrome',
+      randomSeed: stringArg('test-randomize-ordering-seed'),
     );
 
     if (collector != null) {

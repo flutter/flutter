@@ -5,9 +5,6 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
-import 'package:test_api/backend.dart'; // ignore: deprecated_member_use
-import 'package:test_core/src/executable.dart' as test; // ignore: implementation_imports
-import 'package:test_core/src/runner/hack_register_platform.dart' as hack; // ignore: implementation_imports
 
 import '../artifacts.dart';
 import '../base/common.dart';
@@ -22,6 +19,7 @@ import '../project.dart';
 import '../web/compile.dart';
 import 'flutter_platform.dart' as loader;
 import 'flutter_web_platform.dart';
+import 'test_wrapper.dart';
 import 'watcher.dart';
 
 /// Runs tests using package:test and the Flutter engine.
@@ -47,6 +45,7 @@ Future<int> runTests(
   String icudtlPath,
   Directory coverageDirectory,
   bool web = false,
+  String randomSeed = '0',
 }) async {
   // Configure package:test to use the Flutter engine for child processes.
   final String shellPath = artifacts.getArtifactPath(Artifact.flutterTester);
@@ -67,6 +66,7 @@ Future<int> runTests(
       ...<String>['--name', name],
     for (String plainName in plainNames)
       ...<String>['--plain-name', plainName],
+    '--test-randomize-ordering-seed=$randomSeed',
   ];
   if (web) {
     final String tempBuildDir = fs.systemTempDirectory
