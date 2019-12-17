@@ -55,6 +55,12 @@ void main() {
     expect(const NotAColor(123), equals(const NotAColor(123)));
   });
 
+  test('Color.fromRGBO', () {
+    expect(const Color.fromRGBO(0, 0, 0, 1.0), const Color(0xFF000000));
+    expect(const Color.fromRGBO(0, 0, 0, 0.5), const Color(0x80000000));
+    expect(const Color.fromRGBO(0, 0, 0, 0.0), const Color(0x00000000));
+  });
+
   test('Color.lerp', () {
     expect(
       Color.lerp(const Color(0x00000000), const Color(0xFFFFFFFF), 0.0),

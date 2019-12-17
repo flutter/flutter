@@ -129,17 +129,17 @@ class Color {
   /// * `r` is [red], from 0 to 255.
   /// * `g` is [green], from 0 to 255.
   /// * `b` is [blue], from 0 to 255.
-  /// * `opacity` is alpha channel of this color as a double, with 0.0 being
+  /// * `opacity` is the alpha channel of this color as a double, with 0.0 being
   ///   transparent and 1.0 being fully opaque.
   ///
   /// Out of range values are brought into range using modulo 255.
   ///
   /// See also [fromARGB], which takes the opacity as an integer value.
   const Color.fromRGBO(int r, int g, int b, double opacity) :
-    value = ((((opacity * 0xff ~/ 1) & 0xff) << 24) |
-              ((r                    & 0xff) << 16) |
-              ((g                    & 0xff) << 8)  |
-              ((b                    & 0xff) << 0)) & 0xFFFFFFFF;
+    value = (((((opacity * 0xff + 0.5) ~/ 1) & 0xff) << 24) | // Since colors are canonicalized we need to round the alpha value manually
+              ((r                            & 0xff) << 16) |
+              ((g                            & 0xff) << 8)  |
+              ((b                            & 0xff) << 0)) & 0xFFFFFFFF;
 
   /// A 32 bit value representing this color.
   ///
