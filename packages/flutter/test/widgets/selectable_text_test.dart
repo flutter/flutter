@@ -3201,20 +3201,6 @@ void main() {
   testWidgets('SelectableText implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
-//    properties.add(DiagnosticsProperty<String>('data', data, defaultValue: null));
-//    properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode, defaultValue: null));
-//    properties.add(DiagnosticsProperty<TextStyle>('style', style, defaultValue: null));
-//    properties.add(DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
-//    properties.add(DiagnosticsProperty<bool>('showCursor', showCursor, defaultValue: false));
-//    properties.add(IntProperty('maxLines', maxLines, defaultValue: null));
-//    properties.add(EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
-//    properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
-//    properties.add(DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: null));
-//    properties.add(DoubleProperty('cursorWidth', cursorWidth, defaultValue: 2.0));
-//    properties.add(DiagnosticsProperty<Radius>('cursorRadius', cursorRadius, defaultValue: null));
-//    properties.add(DiagnosticsProperty<Color>('cursorColor', cursorColor, defaultValue: null));
-//    properties.add(FlagProperty('selectionEnabled', value: selectionEnabled, defaultValue: true, ifFalse: 'selection disabled'));
-//    properties.add(DiagnosticsProperty<ScrollPhysics>('scrollPhysics', scrollPhysics, defaultValue: null));
     // Not checking controller, inputFormatters, focusNode
     const SelectableText(
       'something',
