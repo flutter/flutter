@@ -701,8 +701,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// [testTextInput] regains control and the log is fresh for the new test.
   /// It should not typically need to be called by tests.
   void resetTestTextInput() {
-    testTextInput.register();
-    testTextInput.log.clear();
+    testTextInput.resetAndRegister();
   }
 
   /// Give the text input widget specified by [finder] the focus, as if the

@@ -39,6 +39,18 @@ class TestTextInput {
   /// The messenger which sends the bytes for this channel, not null.
   BinaryMessenger get _binaryMessenger => ServicesBinding.instance.defaultBinaryMessenger;
 
+  /// Resets any internal state of this object and calls [register].
+  ///
+  /// This method is invoked by the testing framework between tests. It should
+  /// not ordinarily be called by tests directly.
+  void resetAndRegister() {
+    log.clear();
+    editingState = null;
+    setClientArgs = null;
+    _client = 0;
+    _isVisible = false;
+    register();
+  }
   /// Installs this object as a mock handler for [SystemChannels.textInput].
   void register() {
     SystemChannels.textInput.setMockMethodCallHandler(_handleTextInputCall);
