@@ -476,6 +476,37 @@ void main() {
     expect(initialPoint, finalPoint);
   });
 
+  testWidgets(
+    'Opaque tab bar consumes bottom padding while non opaque tab bar does not',
+    (WidgetTester tester) async {
+      // Regression test for https://github.com/flutter/flutter/issues/43581.
+      Future<EdgeInsets> getContentPaddingWithTabBarColor(Color color) async {
+        EdgeInsets contentPadding;
+
+        await tester.pumpWidget(
+          CupertinoApp(
+            home: MediaQuery(
+              data: const MediaQueryData(padding: EdgeInsets.only(bottom: 50)),
+              child: CupertinoTabScaffold(
+                tabBar: CupertinoTabBar(
+                  backgroundColor: color,
+                  items: List<BottomNavigationBarItem>.generate(2, tabGenerator),
+                ),
+                tabBuilder: (BuildContext context, int index) {
+                  contentPadding = MediaQuery.of(context).padding;
+                  return const Placeholder();
+                }
+              ),
+            ),
+          ),
+        );
+        return contentPadding;
+      }
+
+      expect(await getContentPaddingWithTabBarColor(const Color(0xAAFFFFFF)), isNot(EdgeInsets.zero));
+      expect(await getContentPaddingWithTabBarColor(const Color(0xFFFFFFFF)), EdgeInsets.zero);
+  });
+
   testWidgets('Tab and page scaffolds do not double stack view insets', (WidgetTester tester) async {
     BuildContext innerContext;
 
