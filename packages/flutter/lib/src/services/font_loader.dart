@@ -7,7 +7,10 @@ import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart';
+
+import 'binding.dart';
+import 'platform_channel.dart';
+import 'system_channels.dart';
 
 /// A class that enables the dynamic loading of fonts at runtime.
 ///
