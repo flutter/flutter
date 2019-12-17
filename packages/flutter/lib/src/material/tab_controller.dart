@@ -8,6 +8,9 @@ import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
 
+// Examples can assume:
+// BuildContext context;
+
 /// Coordinates tab selection between a [TabBar] and a [TabBarView].
 ///
 /// The [index] property is the index of the selected tab and the [animation]
