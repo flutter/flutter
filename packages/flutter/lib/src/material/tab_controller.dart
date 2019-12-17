@@ -333,7 +333,7 @@ class DefaultTabController extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.child}
   final Widget child;
-  
+
   /// The closest instance of this class that encloses the given context.
   ///
   /// {@tool sample}
