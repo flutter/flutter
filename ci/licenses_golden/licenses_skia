@@ -1,4 +1,4 @@
-Signature: 2461e804dabf60a3bd139b1d1aaa3255
+Signature: 1e6fcdddc72ce369432b8ef3f4d067d5
 
 UNUSED LICENSES:
 
@@ -633,8 +633,6 @@ FILE: ../../../third_party/skia/src/gpu/GrSurfaceProxy.h
 FILE: ../../../third_party/skia/src/gpu/GrSwizzle.h
 FILE: ../../../third_party/skia/src/gpu/GrTextureAdjuster.cpp
 FILE: ../../../third_party/skia/src/gpu/GrTextureAdjuster.h
-FILE: ../../../third_party/skia/src/gpu/GrTextureContext.cpp
-FILE: ../../../third_party/skia/src/gpu/GrTextureContext.h
 FILE: ../../../third_party/skia/src/gpu/GrTextureMaker.cpp
 FILE: ../../../third_party/skia/src/gpu/GrTextureMaker.h
 FILE: ../../../third_party/skia/src/gpu/GrTextureProducer.cpp
@@ -2963,6 +2961,8 @@ FILE: ../../../third_party/skia/src/core/SkColorFilterPriv.h
 FILE: ../../../third_party/skia/src/core/SkImageFilterTypes.cpp
 FILE: ../../../third_party/skia/src/core/SkImageFilterTypes.h
 FILE: ../../../third_party/skia/src/core/SkImageFilter_Base.h
+FILE: ../../../third_party/skia/src/core/SkRuntimeEffect.cpp
+FILE: ../../../third_party/skia/src/core/SkRuntimeEffect.h
 FILE: ../../../third_party/skia/src/core/SkVM.cpp
 FILE: ../../../third_party/skia/src/core/SkVM.h
 FILE: ../../../third_party/skia/src/effects/imagefilters/SkImageFilters.cpp
@@ -3542,7 +3542,6 @@ FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlUniformHandler.mm
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlVaryingHandler.h
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlVaryingHandler.mm
 FILE: ../../../third_party/skia/src/gpu/ops/GrClearStencilClipOp.cpp
-FILE: ../../../third_party/skia/src/gpu/ops/GrDebugMarkerOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrDrawableOp.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrDrawableOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrFillRRectOp.cpp
@@ -3870,7 +3869,6 @@ FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlTrampoline.mm
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlUtil.h
 FILE: ../../../third_party/skia/src/gpu/mtl/GrMtlUtil.mm
 FILE: ../../../third_party/skia/src/gpu/ops/GrClearOp.cpp
-FILE: ../../../third_party/skia/src/gpu/ops/GrDebugMarkerOp.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrSimpleMeshDrawOpHelper.cpp
 FILE: ../../../third_party/skia/src/gpu/ops/GrSimpleMeshDrawOpHelper.h
 FILE: ../../../third_party/skia/src/gpu/ops/GrStencilPathOp.cpp
@@ -5041,15 +5039,6 @@ FILE: ../../../third_party/skia/docs/examples/Typeface_Methods.cpp
 FILE: ../../../third_party/skia/docs/examples/Xor.cpp
 FILE: ../../../third_party/skia/docs/examples/incomplete.cpp
 FILE: ../../../third_party/skia/experimental/minimal_ios_mtl_skia_app/main.mm
-FILE: ../../../third_party/skia/experimental/skottie_ios/SkAnimationDraw.h
-FILE: ../../../third_party/skia/experimental/skottie_ios/SkMetalViewBridge.h
-FILE: ../../../third_party/skia/experimental/skottie_ios/SkMetalViewBridge.mm
-FILE: ../../../third_party/skia/experimental/skottie_ios/SkTimeKeeper.h
-FILE: ../../../third_party/skia/experimental/skottie_ios/SkottieMtkView.h
-FILE: ../../../third_party/skia/experimental/skottie_ios/SkottieMtkView.mm
-FILE: ../../../third_party/skia/experimental/skottie_ios/SkottieUIView.h
-FILE: ../../../third_party/skia/experimental/skottie_ios/SkottieUIView.mm
-FILE: ../../../third_party/skia/experimental/skottie_ios/main.mm
 FILE: ../../../third_party/skia/experimental/xform/SkShape.cpp
 FILE: ../../../third_party/skia/experimental/xform/SkShape.h
 FILE: ../../../third_party/skia/experimental/xform/SkXform.cpp
@@ -5223,7 +5212,6 @@ FILE: ../../../third_party/skia/fuzz/FuzzEncoders.cpp
 FILE: ../../../third_party/skia/fuzz/FuzzPolyUtils.cpp
 FILE: ../../../third_party/skia/modules/canvaskit/canvaskit_bindings.cpp
 FILE: ../../../third_party/skia/modules/pathkit/pathkit_wasm_bindings.cpp
-FILE: ../../../third_party/skia/src/gpu/GrSkSLFPFactoryCache.h
 FILE: ../../../third_party/skia/src/gpu/ccpr/GrCoverageCountingPathRenderer_none.cpp
 ----------------------------------------------------------------------------------------------------
 Copyright 2018 Google LLC
