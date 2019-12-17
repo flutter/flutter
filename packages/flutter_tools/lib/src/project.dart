@@ -570,10 +570,10 @@ class AndroidProject implements PlatformProject {
   String get pluginConfigKey => AndroidPlugin.kConfigKey;
 
   @override
-  File get platformPluginsFile => hostAppGradleRoot.childFile('.flutter-plugins');
+  File get platformPluginsFile => parent.flutterPluginsFile;
 
   @override
-  File get flutterPluginsDependenciesFile => hostAppGradleRoot.childFile('.flutter-plugins-dependencies');
+  File get flutterPluginsDependenciesFile => parent.flutterPluginsDependenciesFile;
 
   /// The Gradle root directory of the Android wrapping of Flutter and plugins.
   /// This is the same as [hostAppGradleRoot] except when the project is
