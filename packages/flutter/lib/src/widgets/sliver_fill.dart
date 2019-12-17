@@ -5,6 +5,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
+import '../../widgets.dart';
 import 'basic.dart';
 import 'framework.dart';
 import 'sliver.dart';
@@ -372,15 +373,19 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
 ///    size of the viewport, regardless of what else is in the scroll view.
 ///  * [SliverList], which shows a list of variable-sized children in a
 ///    viewport.
-class SliverFillRemaining extends SingleChildRenderObjectWidget {
+class SliverFillRemaining extends StatelessWidget {
   /// Creates a sliver that fills the remaining space in the viewport.
   const SliverFillRemaining({
     Key key,
-    Widget child,
+    this.child,
     this.hasScrollBody = true,
     this.fillOverscroll = false,
   }) : assert(hasScrollBody != null),
-      super(key: key, child: child);
+       assert(fillOverscroll != null),
+       super(key: key);
+
+  /// Doc
+  final Widget child;
 
   /// Indicates whether the child has a scrollable body, this value cannot be
   /// null.
@@ -390,7 +395,7 @@ class SliverFillRemaining extends SingleChildRenderObjectWidget {
   ///
   /// Setting this value to false will allow the child to fill the remainder of
   /// the viewport and not extend further. However, if the
-  /// [precedingScrollExtent] of the [SliverContraints] and/or the [child]'s
+  /// [precedingScrollExtent] of the [SliverConstraints] and/or the [child]'s
   /// extent exceeds the size of the viewport, the sliver will defer to the
   /// child's size rather than overriding it.
   final bool hasScrollBody;
@@ -405,16 +410,59 @@ class SliverFillRemaining extends SingleChildRenderObjectWidget {
   final bool fillOverscroll;
 
   @override
-  RenderSliverFillRemaining createRenderObject(BuildContext context) {
-    return RenderSliverFillRemaining(
-      hasScrollBody: hasScrollBody,
-      fillOverscroll: fillOverscroll,
-    );
+  Widget build(BuildContext context) {
+    if (hasScrollBody)
+      return _SliverFillRemainingWithScrollable(child: child);
+    if (!fillOverscroll)
+      return _SliverFillRemainingWithoutScrollable(child: child);
+    return _SliverFillRemainingAndOverscroll(child: child);
   }
 
   @override
-  void updateRenderObject(BuildContext context, RenderSliverFillRemaining renderObject) {
-    renderObject.hasScrollBody = hasScrollBody;
-    renderObject.fillOverscroll = fillOverscroll;
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(
+      DiagnosticsProperty<Widget>(
+        'child',
+        child,
+      )
+    );
+    final List<String> flags = <String>[
+      if (hasScrollBody) 'scrollable',
+      if (fillOverscroll) 'fillOverscroll',
+    ];
+    if (flags.isEmpty)
+      flags.add('nonscrollable');
+    properties.add(IterableProperty<String>('mode', flags));
   }
+}
+
+class _SliverFillRemainingWithScrollable extends SingleChildRenderObjectWidget {
+  const _SliverFillRemainingWithScrollable({
+    Key key,
+    Widget child,
+  }) : super(key: key, child: child);
+
+  @override
+  RenderSliverFillRemainingWithScrollable createRenderObject(BuildContext context) => RenderSliverFillRemainingWithScrollable();
+}
+
+class _SliverFillRemainingWithoutScrollable extends SingleChildRenderObjectWidget {
+  const _SliverFillRemainingWithoutScrollable({
+    Key key,
+    Widget child,
+  }) : super(key: key, child: child);
+
+  @override
+  RenderSliverFillRemainingWithoutScrollable createRenderObject(BuildContext context) => RenderSliverFillRemainingWithoutScrollable();
+}
+
+class _SliverFillRemainingAndOverscroll extends SingleChildRenderObjectWidget {
+  const _SliverFillRemainingAndOverscroll({
+    Key key,
+    Widget child,
+  }) : super(key: key, child: child);
+
+  @override
+  RenderSliverFillRemainingAndOverscroll createRenderObject(BuildContext context) => RenderSliverFillRemainingAndOverscroll();
 }

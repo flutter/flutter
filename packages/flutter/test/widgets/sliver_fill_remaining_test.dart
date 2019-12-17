@@ -445,5 +445,48 @@ void main() {
       expect(tester.getBottomLeft(button).dy, equals(550.0));
       expect(tester.getCenter(button).dx, equals(400.0));
     });
+
+    testWidgets('fillOverscroll works when child has no size and precedingScrollExtent > viewportMainAxisExtent', (WidgetTester tester) async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+      final GlobalKey key = GlobalKey();
+      final ScrollController controller = ScrollController();
+      final List<Widget> slivers = <Widget>[
+        SliverFixedExtentList(
+          itemExtent: 150,
+          delegate: SliverChildBuilderDelegate(
+              (BuildContext context, int index) => Container(color: Colors.amber),
+            childCount: 5,
+          ),
+        ),
+        SliverFillRemaining(
+          hasScrollBody: false,
+          fillOverscroll: true,
+          child: Container(
+            key: key,
+            color: Colors.blue,
+          ),
+        ),
+      ];
+
+      await tester.pumpWidget(boilerplate(slivers, controller: controller));
+      const BoxDecoration amberBox = BoxDecoration(color: Colors.amber);
+      const BoxDecoration blueBox = BoxDecoration(color: Colors.blue);
+
+      // Scroll to bottom
+      controller.jumpTo(controller.position.maxScrollExtent);
+      await tester.pump();
+
+      // End of list
+      expect(find.byKey(key), findsNothing);
+      expect(tester.widgetList<DecoratedBox>(find.byType(DecoratedBox)).last.decoration, amberBox);
+
+      // Overscroll
+      await tester.drag(find.byType(Scrollable), const Offset(0.0, -50.0));
+      await tester.pump();
+
+      expect(find.byKey(key), findsOneWidget);
+      expect(tester.widgetList<DecoratedBox>(find.byType(DecoratedBox)).last.decoration, blueBox);
+      debugDefaultTargetPlatformOverride = null;
+    });
   });
 }
