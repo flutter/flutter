@@ -32,6 +32,7 @@ import 'package:flutter_tools/src/test/coverage_collector.dart';
 Future<void> main(List<String> arguments) async {
   return runInContext(() async {
     final VMPlatform vmPlatform = VMPlatform();
+    const TestWrapper test = PackageTestTestWrapper();
     test.registerPlatformPlugin(
       <Runtime>[Runtime.vm],
       () => vmPlatform,

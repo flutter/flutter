@@ -24,6 +24,7 @@ import 'watcher.dart';
 
 /// Runs tests using package:test and the Flutter engine.
 Future<int> runTests(
+  TestWrapper testWrapper,
   List<String> testFiles, {
   Directory workDir,
   List<String> names = const <String>[],
@@ -89,7 +90,7 @@ Future<int> runTests(
       ..add('--precompiled=$tempBuildDir')
       ..add('--')
       ..addAll(testFiles);
-    test.registerPlatformPlugin(
+    testWrapper.registerPlatformPlugin(
       <Runtime>[Runtime.chrome],
       () {
         return FlutterWebPlatform.start(
@@ -100,7 +101,7 @@ Future<int> runTests(
         );
       },
     );
-    await test.main(testArgs);
+    await testWrapper.main(testArgs);
     return exitCode;
   }
 
@@ -112,6 +113,7 @@ Future<int> runTests(
       ipv6 ? InternetAddressType.IPv6 : InternetAddressType.IPv4;
 
   final loader.FlutterPlatform platform = loader.installHook(
+    testWrapper: testWrapper,
     shellPath: shellPath,
     watcher: watcher,
     enableObservatory: enableObservatory,
@@ -144,7 +146,7 @@ Future<int> runTests(
     }
 
     printTrace('running test package with arguments: $testArgs');
-    await test.main(testArgs);
+    await testWrapper.main(testArgs);
 
     // test.main() sets dart:io's exitCode global.
     printTrace('test package returned with exit code $exitCode');

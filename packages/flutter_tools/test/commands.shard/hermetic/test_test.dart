@@ -18,23 +18,19 @@ import '../../src/testbed.dart';
 
 void main() {
   Cache.disableLocking();
-
-  FakePackageTest fakePackageTest;
   MemoryFileSystem fs;
 
   setUp(() {
-    fakePackageTest = FakePackageTest();
     fs = MemoryFileSystem();
     fs.file('pubspec.yaml').createSync();
-    fs
-        .directory('test')
-        .childFile('some_test.dart')
-        .createSync(recursive: true);
+    fs.directory('test').childFile('some_test.dart').createSync(recursive: true);
   });
 
   testUsingContext('Pipes test-randomize-ordering-seed to package:test',
       () async {
-    final TestCommand testCommand = TestCommand();
+    final FakePackageTest fakePackageTest = FakePackageTest();
+
+    final TestCommand testCommand = TestCommand(testWrapper: fakePackageTest);
     final CommandRunner<void> commandRunner =
         createTestCommandRunner(testCommand);
 
@@ -48,7 +44,6 @@ void main() {
       contains('--test-randomize-ordering-seed=random'),
     );
   }, overrides: <Type, Generator>{
-    TestWrapper: () => fakePackageTest,
     FileSystem: () => fs,
     ProcessManager: () => FakeProcessManager.any(),
     Cache: () => FakeCache(),

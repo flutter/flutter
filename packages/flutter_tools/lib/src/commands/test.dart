@@ -21,10 +21,14 @@ import '../runner/flutter_command.dart';
 import '../test/coverage_collector.dart';
 import '../test/event_printer.dart';
 import '../test/runner.dart';
+import '../test/test_wrapper.dart';
 import '../test/watcher.dart';
 
 class TestCommand extends FastFlutterCommand {
-  TestCommand({ bool verboseHelp = false }) {
+  TestCommand({
+    bool verboseHelp = false,
+    this.testWrapper = const PackageTestTestWrapper(),
+  }) : assert(testWrapper != null) {
     requiresPubspecYaml();
     usesPubOption();
     argParser
@@ -110,6 +114,9 @@ class TestCommand extends FastFlutterCommand {
       );
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
   }
+
+  /// The interface for starting and configuring the tester.
+  final TestWrapper testWrapper;
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async {
@@ -230,6 +237,7 @@ class TestCommand extends FastFlutterCommand {
       boolArg('disable-service-auth-codes');
 
     final int result = await runTests(
+      testWrapper,
       files,
       workDir: workDir,
       names: names,
