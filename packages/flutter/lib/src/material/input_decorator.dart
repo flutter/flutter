@@ -2443,7 +2443,10 @@ class InputDecoration {
     this.errorText,
     this.errorStyle,
     this.errorMaxLines,
-    @Deprecated('Use floatLabelBehaviour instead.')
+    @Deprecated(
+      'Use floatLabelBehaviour instead. '
+      'This feature was deprecated after v1.13.2.'
+    )
     this.hasFloatingPlaceholder = true,
     this.floatLabelBehavior = FloatLabelBehavior.auto,
     this.isDense,
@@ -2484,7 +2487,10 @@ class InputDecoration {
   /// Sets the [isCollapsed] property to true.
   const InputDecoration.collapsed({
     @required this.hintText,
-    @Deprecated('Use floatLabelBehaviour instead.')
+    @Deprecated(
+      'Use floatLabelBehaviour instead. '
+      'This feature was deprecated after v1.13.2.'
+    )
     this.hasFloatingPlaceholder = true,
     this.floatLabelBehavior = FloatLabelBehavior.auto,
     this.hintStyle,
@@ -2651,7 +2657,10 @@ class InputDecoration {
   ///
   /// Defaults to true.
   ///
-  @Deprecated('Use floatLabelBehaviour instead.')
+  @Deprecated(
+    'Use floatLabelBehaviour instead. '
+    'This feature was deprecated after v1.13.2.'
+  )
   final bool hasFloatingPlaceholder;
 
   /// Defines how the floating label should be displayed.
@@ -3395,7 +3404,10 @@ class InputDecorationTheme extends Diagnosticable {
     this.hintStyle,
     this.errorStyle,
     this.errorMaxLines,
-    @Deprecated('Use floatLabelBehaviour instead.')
+    @Deprecated(
+      'Use floatLabelBehaviour instead. '
+      'This feature was deprecated after v1.13.2.'
+    )
     this.hasFloatingPlaceholder = true,
     this.floatLabelBehavior = FloatLabelBehavior.auto,
     this.isDense = false,
@@ -3483,7 +3495,10 @@ class InputDecorationTheme extends Diagnosticable {
   /// the input has focus or text has been entered.
   ///
   /// Defaults to true.
-  @Deprecated('Use floatLabelBehaviour instead.')
+  @Deprecated(
+    'Use floatLabelBehaviour instead. '
+    'This feature was deprecated after v1.13.2.'
+  )
   final bool hasFloatingPlaceholder;
 
   /// Defines how the floating label should be displayed.
@@ -3748,7 +3763,10 @@ class InputDecorationTheme extends Diagnosticable {
     TextStyle hintStyle,
     TextStyle errorStyle,
     int errorMaxLines,
-    @Deprecated('Use floatLabelBehaviour instead.')
+    @Deprecated(
+      'Use floatLabelBehaviour instead. '
+      'This feature was deprecated after v1.13.2.'
+    )
     bool hasFloatingPlaceholder,
     FloatLabelBehavior floatLabelBehavior,
     bool isDense,
