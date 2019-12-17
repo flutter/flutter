@@ -413,6 +413,60 @@ class CatmullRomSpline extends Curve2D {
          + controlPoints[2] * localT
          + controlPoints[3];
   }
+
+  /// Generates a list of samples with a recursive subdivision until either all
+  /// the points are less than the given `maxDistance` apart, or a recursion
+  /// depth of `maxDepth` is reached.
+  List<Offset> generateSamples({double maxDistance = 0.01, int maxDepth = 100, double start = 0.0, double end = 1.0}) {
+    final double maxDistanceSquared = maxDistance * maxDistance;
+
+    Offset subdivideIfNeeded(double midpoint, Offset p1, Offset p2) {
+      final double distanceSquared = (p2 - p1).distanceSquared;
+      if (distanceSquared > maxDistanceSquared) {
+        return transform(midpoint);
+      }
+      return null;
+    }
+
+    List<Offset> subdivide(double t1, double t2, Offset p1, Offset p2, [int depth = 0]) {
+      final double midpoint = (t1 + t2) / 2.0;
+      final Offset between = subdivideIfNeeded(midpoint, p1, p2);
+      if (depth < maxDepth && between != null) {
+        return <Offset>[
+          ...subdivide(t1, midpoint, p1, between, depth + 1),
+          ...subdivide(midpoint, t2, between, p2, depth + 1),
+        ];
+      }
+      return <Offset>[p1, p2];
+    }
+    return subdivide(start, end, transform(start), transform(end));
+  }
+
+  /// Finds the time that corresponds to the x value of the spline at parametric
+  /// value t.
+  double findInverse(double t) {
+    double start = 0.0;
+    double end = 1.0;
+    double mid;
+    double offsetToOrigin(double pos) => t - transform(pos).dx;
+    // Use a binary search to find the inverse point within 1e-6, or 100
+    // subdivisions, whichever comes first.
+    const double errorLimit = 1e-6;
+    int count = 100;
+    final double startValue = offsetToOrigin(start);
+    while ((end - start) / 2.0 > errorLimit && count > 0) {
+      mid = (end + start) / 2.0;
+      final double value = offsetToOrigin(mid);
+      if (value.sign == startValue.sign) {
+        start = mid;
+      } else {
+        end = mid;
+      }
+      count--;
+    }
+    return mid;
+  }
+
 }
 
 /// A curve that passes smoothly through the given control points using a
@@ -591,14 +645,17 @@ class CatmullRomCurve extends Curve {
 
     bool success = true;
 
+
     // A last empirical test to make sure things are single-valued in X.
-    const int testPoints = 100;
     lastX = -double.infinity;
     final CatmullRomSpline testSpline = CatmullRomSpline(controlPoints, tension: tension);
-    for (int i = 0; i < testPoints; i++) {
-      final double pos = i / testPoints.toDouble();
-      final Offset result = testSpline.transform(_findInverse(pos, testSpline));
-      final double x = result.dx;
+    final double start = testSpline.findInverse(0.0);
+    final double end = testSpline.findInverse(1.0);
+    final List<Offset> adaptivePoints = testSpline.generateSamples(maxDistance: 0.1, start: start, end: end);
+    print('points: $adaptivePoints');
+    for (int i = 0; i < adaptivePoints.length; i++) {
+      final Offset point = adaptivePoints[i];
+      final double x = point.dx;
       if (x < -1e-3 || x > 1.0 + 1e-3) {
         bool bail = true;
         assert(() {
@@ -617,7 +674,7 @@ class CatmullRomCurve extends Curve {
       if (x < lastX) {
         bool bail = true;
         assert(() {
-          reasons?.add('The curve has more than one Y value at t=$pos (x=$x). Try moving '
+          reasons?.add('The curve has more than one Y value at x = $x. Try moving '
             'some control points further apart in X, or increasing the tension.');
           // No need to keep going if we're not giving reasons.
           bail = reasons == null;
@@ -635,33 +692,8 @@ class CatmullRomCurve extends Curve {
     return success;
   }
 
-  // Finds the time that corresponds to the x value of the spline at parametric
-  // value t.
-  static double _findInverse(double t, CatmullRomSpline spine) {
-    double start = 0.0;
-    double end = 1.0;
-    double mid;
-    double offsetToOrigin(double pos) => t - spine.transform(pos).dx;
-    // Use a binary search to find the inverse point within 1e-6, or 100
-    // subdivisions, whichever comes first.
-    const double errorLimit = 1e-6;
-    int count = 100;
-    final double startValue = offsetToOrigin(start);
-    while ((end - start) / 2.0 > errorLimit && count > 0) {
-      mid = (end + start) / 2.0;
-      final double value = offsetToOrigin(mid);
-      if (value.sign == startValue.sign) {
-        start = mid;
-      } else {
-        end = mid;
-      }
-      count--;
-    }
-    return mid;
-  }
-
   @override
-  double transformInternal(double t) => valueSpline.transform(_findInverse(t, valueSpline)).dy;
+  double transformInternal(double t) => valueSpline.transform(valueSpline.findInverse(t)).dy;
 }
 
 /// A curve that is the reversed inversion of its given curve.
