@@ -57,7 +57,6 @@ void main() {
     }
     expect(notifiedRebuild, false);
     await tfl.load();
-
     expect(notifiedRebuild, true);
   });
 }
