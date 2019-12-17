@@ -61,9 +61,7 @@ class FuchsiaKernelCompiler {
       // AOT/JIT:
       if (buildInfo.usesAot) ...<String>['--aot', '--tfa']
       else ...<String>[
-        // TODO(zra): Add back when this is supported again.
-        // See: https://github.com/flutter/flutter/issues/44925
-        // '--no-link-platform',
+        '--no-link-platform',
         '--split-output-by-packages',
         '--manifest', manifestPath
       ],
