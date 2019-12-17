@@ -661,6 +661,9 @@ class TextField extends StatefulWidget {
   /// }
   /// ```
   /// {@end-tool}
+  ///
+  /// If buildCounter returns null, then no counter and no Semantics widget will
+  /// be created at all.
   final InputCounterWidgetBuilder buildCounter;
 
   /// {@macro flutter.widgets.edtiableText.scrollPhysics}
@@ -759,18 +762,18 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
         && effectiveDecoration.counterText == null
         && widget.buildCounter != null) {
       final bool isFocused = _effectiveFocusNode.hasFocus;
-      final Widget buildCounter = widget.buildCounter(
+      final Widget builtCounter = widget.buildCounter(
         context,
         currentLength: currentLength,
         maxLength: widget.maxLength,
         isFocused: isFocused,
       );
-      // If buildCounter returns null, the counter widget should return nothing.
-      if (buildCounter != null) {
+      // If buildCounter returns null, don't add a counter widget to the field.
+      if (builtCounter != null) {
         counter = Semantics(
           container: true,
           liveRegion: isFocused,
-          child: buildCounter,
+          child: builtCounter,
         );
       }
       return effectiveDecoration.copyWith(counter: counter);

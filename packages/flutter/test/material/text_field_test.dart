@@ -7399,25 +7399,22 @@ void main() {
     expect(focusNode3.hasPrimaryFocus, isTrue);
   });
 
-  testWidgets('test empty widget when the buildCounter returns null',
-      (WidgetTester tester) async {
+  testWidgets("A buildCounter that returns null doesn't affect the size of the TextField", (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/44909
 
-    final GlobalKey textField1State = GlobalKey();
-    final GlobalKey textField2State = GlobalKey();
+    final GlobalKey textField1Key = GlobalKey();
+    final GlobalKey textField2Key = GlobalKey();
 
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
           body: Column(
             children: <Widget>[
-              TextField(key: textField1State),
+              TextField(key: textField1Key),
               TextField(
-                key: textField2State,
+                key: textField2Key,
                 maxLength: 1,
-                buildCounter: (BuildContext context,
-                        {int currentLength, bool isFocused, int maxLength}) =>
-                    null,
+                buildCounter: (BuildContext context, {int currentLength, bool isFocused, int maxLength}) => null,
               ),
             ],
           ),
@@ -7426,8 +7423,8 @@ void main() {
     );
 
     await tester.pumpAndSettle();
-    final Size textFieldSize1 = tester.getSize(find.byKey(textField1State));
-    final Size textFieldSize2 = tester.getSize(find.byKey(textField2State));
+    final Size textFieldSize1 = tester.getSize(find.byKey(textField1Key));
+    final Size textFieldSize2 = tester.getSize(find.byKey(textField2Key));
 
     expect(textFieldSize1, equals(textFieldSize2));
   });
