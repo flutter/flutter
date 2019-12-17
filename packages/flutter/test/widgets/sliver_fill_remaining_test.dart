@@ -252,6 +252,12 @@ void main() {
       await tester.pump();
       final RenderBox box2 = tester.renderObject<RenderBox>(find.byType(Container).last);
       expect(box2.size.height, greaterThan(450));
+
+      // Ensure overscroll retracts to original size after releasing gesture
+      await tester.pumpAndSettle();
+      final RenderBox box3 = tester.renderObject<RenderBox>(find.byType(Container).last);
+      expect(box3.size.height, equals(450));
+
       debugDefaultTargetPlatformOverride = null;
     });
 
@@ -288,6 +294,11 @@ void main() {
       final Finder button = find.byType(RaisedButton);
       expect(tester.getBottomLeft(button).dy, equals(600.0));
       expect(tester.getCenter(button).dx, equals(400.0));
+
+      // Ensure overscroll retracts to original size after releasing gesture
+      await tester.pumpAndSettle();
+      expect(tester.renderObject<RenderBox>(find.byKey(key)).size.height, equals(450));
+
       debugDefaultTargetPlatformOverride = null;
     });
 
@@ -341,6 +352,11 @@ void main() {
       // Check that the button alignment is still centered in stretched child
       expect(tester.getBottomLeft(button).dy, lessThan(550.0));
       expect(tester.getCenter(button).dx, equals(400.0));
+
+      // Ensure overscroll retracts to original size after releasing gesture
+      await tester.pumpAndSettle();
+      expect(tester.renderObject<RenderBox>(find.byKey(key)).size.height, equals(148.0));
+
       debugDefaultTargetPlatformOverride = null;
     });
 
@@ -486,7 +502,20 @@ void main() {
 
       expect(find.byKey(key), findsOneWidget);
       expect(tester.widgetList<DecoratedBox>(find.byType(DecoratedBox)).last.decoration, blueBox);
+
+      // Ensure overscroll retracts to original size after releasing gesture
+      await tester.pumpAndSettle();
+      expect(find.byKey(key), findsNothing);
+      expect(tester.widgetList<DecoratedBox>(find.byType(DecoratedBox)).last.decoration, amberBox);
+
+
       debugDefaultTargetPlatformOverride = null;
     });
+
+    testWidgets('fillOverscroll ignored for other scroll physics when child has no size and precedingScrollExtent > viewportMainAxisExtent', (WidgetTester tester) async {
+      // TODO(Piinks):
+    });
+
+    //TODO(Piinks): Add more alignment tests
   });
 }
