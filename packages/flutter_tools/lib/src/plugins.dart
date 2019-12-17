@@ -316,8 +316,11 @@ Iterable<Plugin> _pluginsForPlatform(List<Plugin>plugins, String platform) {
   });
 }
 
-/// Writes the .flutter-plugins and .flutter-plugins-dependencies files based on the list of plugins.
-/// If there aren't any plugins, then the files aren't written to disk.
+/// Writes the .flutter-plugins and .flutter-plugins-dependencies files based on the list of plugins for
+/// a given [PlatformProject]. If there aren't any plugins, then the files aren't written to disk.
+/// 
+/// Set [filter] to [false] to use all the plugins in the Flutter project.
+/// This is used for Android since the whole dependency graph is passed to gradle to configure the project.
 ///
 /// Finally, returns [true] if .flutter-plugins or .flutter-plugins-dependencies have changed,
 /// otherwise returns [false].
@@ -374,7 +377,6 @@ bool _writeFlutterPlatformPluginsList(PlatformProject project, List<Plugin> plug
   return oldPluginFileContent != _readFileContent(pluginsFile)
       || oldDependenciesFileContent != _readFileContent(dependenciesFile);
 }
-
 
 /// Returns the contents of [File] or [null] if that file does not exist.
 String _readFileContent(File file) {
@@ -806,15 +808,20 @@ void refreshPluginsList(FlutterProject project, {bool checkProjects = false}) {
   if (project.linux.existsSync()) {
     _writeFlutterPlatformPluginsList(project.linux, plugins);
   }
-  if (project.macos.existsSync()) {
-    _writeFlutterPlatformPluginsList(project.macos, plugins);
-  }
   if (project.android.existsSync()) {
     _writeFlutterPlatformPluginsList(project.android, plugins, false);
   }
   if (project.ios.existsSync()) {
     final bool changed = _writeFlutterPlatformPluginsList(project.ios, plugins);
     if (changed && !checkProjects) {
+      cocoaPods.invalidatePodInstallOutput(project.ios);
+    }
+  }
+  if (project.macos.existsSync()) {
+    final bool changed =_writeFlutterPlatformPluginsList(project.macos, plugins);
+    if (changed) {
+      // TODO(stuartmorgan): Potentially add checkProjects once a decision has
+      // made about how to handle macOS in existing projects.
       cocoaPods.invalidatePodInstallOutput(project.ios);
     }
   }
