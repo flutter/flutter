@@ -177,7 +177,7 @@ abstract class FlutterDriver {
 
   /// Returns a dump of the layer tree.
   Future<LayerTree> getLayerTree({ Duration timeout }) async {
-    return LayerTree.fromJson(await _sendCommand(GetLayerTree(timeout: timeout)));
+    return LayerTree.fromJson(await sendCommand(GetLayerTree(timeout: timeout)));
   }
 
   /// Taps at the center of the widget located by [finder].
