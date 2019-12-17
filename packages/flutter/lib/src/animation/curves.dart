@@ -300,6 +300,12 @@ abstract class Curve2D {
   String toString() => '$runtimeType';
 }
 
+class Curve2DSample {
+  const Curve2DSample(this.t, this.value);
+  final double t;
+  final Offset value;
+}
+
 /// A spline that passes smoothly through the given control points using a
 /// centripetal Catmull-Rom spline.
 ///
@@ -417,7 +423,7 @@ class CatmullRomSpline extends Curve2D {
   /// Generates a list of samples with a recursive subdivision until either all
   /// the points are less than the given `maxDistance` apart, or a recursion
   /// depth of `maxDepth` is reached.
-  List<Offset> generateSamples({double maxDistance = 0.01, int maxDepth = 100, double start = 0.0, double end = 1.0}) {
+  List<Curve2DSample> generateSamples({double maxDistance = 0.01, int maxDepth = 100, double start = 0.0, double end = 1.0}) {
     final double maxDistanceSquared = maxDistance * maxDistance;
 
     Offset subdivideIfNeeded(double midpoint, Offset p1, Offset p2) {
@@ -428,18 +434,19 @@ class CatmullRomSpline extends Curve2D {
       return null;
     }
 
-    List<Offset> subdivide(double t1, double t2, Offset p1, Offset p2, [int depth = 0]) {
-      final double midpoint = (t1 + t2) / 2.0;
-      final Offset between = subdivideIfNeeded(midpoint, p1, p2);
+    List<Curve2DSample> subdivide(Curve2DSample p1, Curve2DSample p2, [int depth = 0]) {
+      final double midpoint = (p1.t + p2.t) / 2.0;
+      final Offset between = subdivideIfNeeded(midpoint, p1.value, p2.value);
       if (depth < maxDepth && between != null) {
-        return <Offset>[
-          ...subdivide(t1, midpoint, p1, between, depth + 1),
-          ...subdivide(midpoint, t2, between, p2, depth + 1),
+        final Curve2DSample newSample = Curve2DSample(midpoint, between);
+        return <Curve2DSample>[
+          ...subdivide(p1, newSample, depth + 1),
+          ...subdivide(newSample, p2, depth + 1),
         ];
       }
-      return <Offset>[p1, p2];
+      return <Curve2DSample>[p1, p2];
     }
-    return subdivide(start, end, transform(start), transform(end));
+    return subdivide(Curve2DSample(start, transform(start)), Curve2DSample(end, transform(end)));
   }
 
   /// Finds the time that corresponds to the x value of the spline at parametric
@@ -645,18 +652,18 @@ class CatmullRomCurve extends Curve {
 
     bool success = true;
 
-
-    // A last empirical test to make sure things are single-valued in X.
+    // An empirical test to make sure things are single-valued in X.
     lastX = -double.infinity;
     final CatmullRomSpline testSpline = CatmullRomSpline(controlPoints, tension: tension);
     final double start = testSpline.findInverse(0.0);
     final double end = testSpline.findInverse(1.0);
-    final List<Offset> adaptivePoints = testSpline.generateSamples(maxDistance: 0.1, start: start, end: end);
-    print('points: $adaptivePoints');
+    final List<Curve2DSample> adaptivePoints = testSpline.generateSamples(maxDistance: 0.1, start: start, end: end);
     for (int i = 0; i < adaptivePoints.length; i++) {
-      final Offset point = adaptivePoints[i];
+      final Curve2DSample sample = adaptivePoints[i];
+      final Offset point = sample.value;
+      final double t = sample.t;
       final double x = point.dx;
-      if (x < -1e-3 || x > 1.0 + 1e-3) {
+      if (t >= start && t <= end && (x < -1e-3 || x > 1.0 + 1e-3)) {
         bool bail = true;
         assert(() {
           reasons?.add('The resulting curve has an X value ($x) which is outside of the range [0.0, 1.0], inclusive.');
