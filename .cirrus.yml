@@ -352,10 +352,8 @@ task:
     cpu: $CPU
     memory: $MEMORY
   environment:
-    # It's not clear that changing the cpu/memory fields here has any impact, so we use
-    # small numbers...
-    CPU: 4 # 1-8 without compute credits, 1-30 with
-    MEMORY: 12G # 256M-24G without compute credits, 256M-90G with
+    CPU: 1 # 1-8 without compute credits, 1-30 with
+    MEMORY: 2G # 256M-24G without compute credits, 256M-90G with
     CIRRUS_WORKING_DIR: "C:\\Windows\\Temp\\$FLUTTER_SDK_PATH_WITH_SPACE"
     PATH: "$CIRRUS_WORKING_DIR/bin;$CIRRUS_WORKING_DIR/bin/cache/dart-sdk/bin;$PATH"
   pub_cache:
@@ -380,6 +378,12 @@ task:
     - name: framework_tests-widgets-windows
       only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/internal/**') || $CIRRUS_PR == ''"
       environment:
+        # As of December 2019, framework_tests-widgets-windows needs 4 CPUs to pass reliably.
+        # With a min of 4 CPUs and 4 GB of RAM, it ran in about 50 minutes. Increasing to 8 CPUs and
+        # 8 GB RAM sped that up to ~25 minutes, and increasing either beyond that yielded no
+        # further speed increase. Cirrus requires >= 8GM RAM for 8 CPUs.
+        CPU: 8
+        MEMORY: 8G
         GOLDCTL: "C:\\Windows\\Temp\\depot_tools\\goldctl.exe"
         GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
       script:
@@ -389,6 +393,12 @@ task:
     - name: framework_tests-libraries-windows
       only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/internal/**') || $CIRRUS_PR == ''"
       environment:
+        # As of December 2019, the framework_tests-libraries-windows shard needed 2 CPUs to pass.
+        # With a min of 2 CPUs and 2 GB RAM, it ran in about 60 minutes. Increasing to 8 CPUs made
+        # it run in ~20 minutes, and Cirrus requires 8 CPUs to have at least 8 GB RAM. Increasing
+        # beyond this yielded no gains.
+        CPU: 8
+        MEMORY: 8G
         GOLDCTL: "C:\\Windows\\Temp\\depot_tools\\goldctl.exe"
         GOLD_SERVICE_ACCOUNT: ENCRYPTED[3afeea5ac7201151c3d0dc9648862f0462b5e4f55dc600ca8b692319622f7c3eda3d577b1b16cc2ef0311b7314c1c095]
       script:
@@ -398,21 +408,45 @@ task:
     - name: framework_tests-misc-windows
       # this includes the tests for directories in dev/
       only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter/**', 'packages/flutter_goldens/**', 'packages/flutter_test/**', 'packages/flutter_tools/lib/src/test/**', 'bin/internal/**') || $CIRRUS_PR == ''"
+      environment:
+        # As of December 2019, the framework_tests-misc-windows shard needed 2 CPUs and 3 GB RAM
+        # to pass (taking ~40 minutes). Increasing to 4 CPUs (necessitating 4 GB RAM per Cirrus)
+        # sped that up to ~30 minutes, with further overprovisioning yielding no further gain.
+        CPU: 4
+        MEMORY: 4G
       script:
         - dart --enable-asserts dev\bots\test.dart
 
     - name: tool_tests-general-windows
       only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter_tools/**', 'bin/internal/**') || $CIRRUS_PR == ''"
+      environment:
+        # As of December 2019, the tool_tests-general-windows shard required 2 CPUs and 8 GB RAM to
+        # pass. Raising that to 4 CPUs sped it up to ~30 minutes, with further provisioning yielding
+        # no gain.
+        CPU: 4
+        MEMORY: 8G
       script:
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: tool_tests-commands-windows
       only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter_tools/**', 'bin/internal/**') || $CIRRUS_PR == ''"
+      environment:
+        # As of December 2019, the tool_tests-commands-windows shard needed 4 CPUs and 8 GB RAM to
+        # reliably pass and not be the long pole, running in about 25 minutes. Bumping beyond these
+        # numbers yielded no extra gain.
+        CPU: 4
+        MEMORY: 8G
       script:
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: tool_tests-integration-windows
       only_if: "changesInclude('.cirrus.yml', 'dev/**', 'packages/flutter_tools/**', 'bin/internal/**') || $CIRRUS_PR == ''"
+      environment:
+        # As of December 2019, the tool_tests-integration-windows shard required 6 GB RAM to pass.
+        # Emperically, 4 CPUs and 10 GB RAM yielded optimal results (~22 minutes); bumping beyond
+        # these amounts yielded no extra gain.
+        CPU: 4
+        MEMORY: 10G
       script:
         - dart --enable-asserts ./dev/bots/test.dart
 
@@ -420,32 +454,67 @@ task:
 
     - name: build_tests-windows
       only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
+      environment:
+        # As of December 2019, the build_tests-windows shard requires 6 GB RAM to pass.
+        # Emperically, using 6 CPUs and 10 GB RAM yielded optimal results (~33 minutes);
+        # bumping beyond these limits yielded no extra gain.
+        CPU: 6
+        MEMORY: 10G
       script:
         - dart --enable-asserts dev\bots\test.dart
 
     - name: hostonly_devicelab_tests-0-windows
       only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
+      environment:
+        # As of December 2019, the hostonly_devicelab_tests-0-windows shard needs at least 6G RAM to
+        # succeed. The shard got faster with more CPUs up to 6 CPUs and more RAM up to 8 GB
+        # (running in about 30 minutes).
+        CPU: 6
+        MEMORY: 8G
       script:
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: hostonly_devicelab_tests-1-windows
       only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
+      environment:
+        # As of December 2019, the hostonly_devicelab_tests-1-windows shard requires 4 GB RAM to
+        # succeed. The optimal configuration was 4 CPUs and 6 GB RAM, running in ~26 minutes.
+        # Less CPU or RAM ran slower, and more CPU or RAM yielded no extra gain.
+        CPU: 4
+        MEMORY: 6G
       script:
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: hostonly_devicelab_tests-2-windows
       only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
+      environment:
+        # As of December 2019, the hostonly_devicelab_tests-2-windows shard required 2 GB RAM to
+        # succeed. The optimal configuration was 4 CPUs and 8 GB RAM, running in ~33 minutes.
+        # Less CPU or RAM ran slower, and more CPU or RAM yielded no extra gain.
+        CPU: 4
+        MEMORY: 8G
       script:
         - dart --enable-asserts ./dev/bots/test.dart
 
     - name: hostonly_devicelab_tests-3_last-windows
       only_if: "changesInclude('.cirrus.yml', 'dev/**', 'bin/internal/**') || $CIRRUS_PR == ''" # https://github.com/flutter/flutter/issues/41941
+      environment:
+        # As of December 2019, the hostonly_devicelab_tests-3_last-windows shard required 6 GB RAM
+        # to succeed. The optimal configuration was 4 CPUs and 6 GB RAM, running in ~43 minutes.
+        # Less CPU or RAM ran slower, and more CPU or RAM yielded no extra gain.
+        CPU: 4
+        MEMORY: 6G
       script:
         - dart --enable-asserts ./dev/bots/test.dart
 
     # TODO(ianh): name: add_to_app_tests-windows
 
     - name: customer_testing-windows
+      environment:
+        # As of December 2019, the customer_testing-windows shard got faster with more CPUs up to 4
+        # CPUs (which requires >=4G RAM), and needed at least 2G of RAM to not run out of memory.
+        CPU: 4
+        MEMORY: 4G
       script:
         - CMD /S /C "IF EXIST "bin\cache\pkg\tests\" RMDIR /S /Q bin\cache\pkg\tests"
         - git clone https://github.com/flutter/tests.git bin\cache\pkg\tests
