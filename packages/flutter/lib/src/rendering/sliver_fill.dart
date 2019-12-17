@@ -138,8 +138,9 @@ class RenderSliverFillRemainingWithoutScrollable extends RenderSliverFillRemaini
   @override
   void performLayout() {
     double childExtent;
+    // The remaining space in the viewportMainAxisExtent. Can be <= 0 if we have
+    // scrolled beyond the extent of the screen.
     double extent = constraints.viewportMainAxisExtent - constraints.precedingScrollExtent;
-    double maxExtent = constraints.remainingPaintExtent - math.min(constraints.overlap, 0.0);
 
     if (child != null) {
       switch (constraints.axis) {
@@ -151,14 +152,10 @@ class RenderSliverFillRemainingWithoutScrollable extends RenderSliverFillRemaini
           break;
       }
 
-      if (constraints.precedingScrollExtent > constraints.viewportMainAxisExtent || childExtent > extent)
-        extent = childExtent;
-      if (maxExtent < extent)
-        maxExtent = extent;
-      if (extent > childExtent)
-        child.layout(constraints.asBoxConstraints(minExtent: extent, maxExtent: extent));
-      else
-        child.layout(constraints.asBoxConstraints());
+      // If the childExtent is greater than the computed extent, we want to use
+      // that instead of potentially cutting off the child.
+      extent = math.max(extent, childExtent);
+      child.layout(constraints.asBoxConstraints(minExtent: extent, maxExtent: extent));
     }
 
     assert(extent.isFinite,

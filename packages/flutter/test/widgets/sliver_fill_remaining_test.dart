@@ -65,7 +65,7 @@ void main() {
     expect(tester.renderObject<RenderBox>(find.byType(Container)).size.height, equals(500.0));
   });
 
-  group('SliverFillRemaining - hasScrollBody', () {
+  group('SliverFillRemaining - hasScrollBody & fillOverscroll properties', () {
     final Widget sliverBox = SliverToBoxAdapter(
       child: Container(
         color: Colors.amber,
@@ -165,6 +165,7 @@ void main() {
       expect(tester.renderObject<RenderBox>(find.byKey(key)).size.height, equals(450));
 
       // Also check that the button alignment is true to expectations
+      // TODO(Piinks): Check alignment here
       final Finder button = find.byType(RaisedButton);
       expect(tester.getBottomLeft(button).dy, equals(600.0));
       expect(tester.getCenter(button).dx, equals(400.0));
@@ -228,6 +229,7 @@ void main() {
       expect(tester.renderObject<RenderBox>(find.byKey(key)).size.height, equals(148.0));
 
       // Also check that the button alignment is true to expectations
+      // TODO(Piinks): Check alignment here
       final Finder button = find.byType(RaisedButton);
       expect(tester.getBottomLeft(button).dy, equals(550.0));
       expect(tester.getCenter(button).dx, equals(400.0));
@@ -291,6 +293,7 @@ void main() {
 
       // Also check that the button alignment is true to expectations, even with
       // child stretching to fill overscroll
+      // TODO(Piinks): Check alignment here
       final Finder button = find.byType(RaisedButton);
       expect(tester.getBottomLeft(button).dy, equals(600.0));
       expect(tester.getCenter(button).dx, equals(400.0));
@@ -334,11 +337,14 @@ void main() {
         ),
       ];
       await tester.pumpWidget(boilerplate(slivers, controller: controller));
+
       // Scroll to the end
       controller.jumpTo(controller.position.maxScrollExtent);
       await tester.pump();
       expect(tester.renderObject<RenderBox>(find.byKey(key)).size.height, equals(148.0));
+
       // Check that the button alignment is true to expectations
+      // TODO(Piinks): Check alignment here
       final Finder button = find.byType(RaisedButton);
       expect(tester.getBottomLeft(button).dy, equals(550.0));
       expect(tester.getCenter(button).dx, equals(400.0));
@@ -408,6 +414,7 @@ void main() {
       expect(tester.renderObject<RenderBox>(find.byKey(key)).size.height, equals(450));
 
       // Also check that the button alignment is true to expectations
+      // TODO(Piinks): Check alignment here
       final Finder button = find.byType(RaisedButton);
       expect(tester.getBottomLeft(button).dy, equals(600.0));
       expect(tester.getCenter(button).dx, equals(400.0));
@@ -513,9 +520,45 @@ void main() {
     });
 
     testWidgets('fillOverscroll ignored for other scroll physics when child has no size and precedingScrollExtent > viewportMainAxisExtent', (WidgetTester tester) async {
-      // TODO(Piinks):
+      final GlobalKey key = GlobalKey();
+      final ScrollController controller = ScrollController();
+      final List<Widget> slivers = <Widget>[
+        SliverFixedExtentList(
+          itemExtent: 150,
+          delegate: SliverChildBuilderDelegate(
+              (BuildContext context, int index) => Container(color: Colors.amber),
+            childCount: 5,
+          ),
+        ),
+        SliverFillRemaining(
+          hasScrollBody: false,
+          fillOverscroll: true,
+          child: Container(
+            key: key,
+            color: Colors.blue,
+          ),
+        ),
+      ];
+
+      await tester.pumpWidget(boilerplate(slivers, controller: controller));
+      const BoxDecoration amberBox = BoxDecoration(color: Colors.amber);
+
+      // Scroll to bottom
+      controller.jumpTo(controller.position.maxScrollExtent);
+      await tester.pump();
+
+      // End of list
+      expect(find.byKey(key), findsNothing);
+      expect(tester.widgetList<DecoratedBox>(find.byType(DecoratedBox)).last.decoration, amberBox);
+
+      // Overscroll
+      await tester.drag(find.byType(Scrollable), const Offset(0.0, -50.0));
+      await tester.pump();
+
+      expect(find.byKey(key), findsNothing);
+      expect(tester.widgetList<DecoratedBox>(find.byType(DecoratedBox)).last.decoration, amberBox);
     });
 
-    //TODO(Piinks): Add more alignment tests
+    // TODO(Piinks): Add more alignment tests, or fix the ones that are here (see above TODOs)
   });
 }
