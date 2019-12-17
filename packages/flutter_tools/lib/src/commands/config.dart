@@ -173,7 +173,7 @@ class ConfigCommand extends FlutterCommand {
       results['android-studio-dir'] = androidStudio.directory;
     }
     if (results['android-sdk'] == null && androidSdk != null) {
-      results['android-sdk'] = androidSdk?.directory;
+      results['android-sdk'] = androidSdk.directory;
     }
 
     printStatus(const JsonEncoder.withIndent('  ').convert(results));

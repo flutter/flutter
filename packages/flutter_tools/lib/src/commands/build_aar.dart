@@ -5,6 +5,8 @@
 import 'dart:async';
 
 import '../android/android_builder.dart';
+import '../android/android_sdk.dart';
+import '../android/gradle_utils.dart';
 import '../base/common.dart';
 import '../base/os.dart';
 import '../build_info.dart';
@@ -85,6 +87,9 @@ class BuildAarCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    if (androidSdk == null) {
+      exitWithNoSdkMessage();
+    }
     final Set<AndroidBuildInfo> androidBuildInfo = <AndroidBuildInfo>{};
 
     final Iterable<AndroidArch> targetArchitectures =
