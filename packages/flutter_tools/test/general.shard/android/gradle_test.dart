@@ -976,7 +976,7 @@ plugin2=${plugin2.path}
       GradleUtils: () => FakeGradleUtils(),
     });
 
-    testUsingContext('skips plugin without an android directory', () async {
+    testUsingContext('skips plugin without a android/build.gradle file', () async {
       final Directory androidDirectory = fs.directory('android.');
       androidDirectory.createSync();
       androidDirectory
@@ -999,6 +999,10 @@ flutter:
         .writeAsStringSync('''
 plugin1=${plugin1.path}
 ''');
+      // Create an empty android directory.
+      // https://github.com/flutter/flutter/issues/46898
+      plugin1.childDirectory('android').createSync();
+
       final Directory buildDirectory = androidDirectory.childDirectory('build');
 
       buildDirectory
