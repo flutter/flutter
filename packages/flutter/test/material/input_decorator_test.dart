@@ -141,14 +141,29 @@ void main() {
     expect(getBorderBottom(tester), 56.0);
     expect(getBorderWeight(tester), 1.0);
 
-    // The label appears above the input text when empty and alwaysFloatLabel
+    // The label appears within the input when there is no text content
     await tester.pumpWidget(
       buildInputDecorator(
         isEmpty: true,
         // isFocused: false (default)
         decoration: const InputDecoration(
           labelText: 'label',
-          alwaysFloatLabel: true
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final double labelYPosition = tester.getTopLeft(find.text('label')).dy;
+    expect(labelYPosition, 20.0);
+
+    // The label appears above the input text when there is not content and floatLabelBehavior is always
+    await tester.pumpWidget(
+      buildInputDecorator(
+        isEmpty: true,
+        // isFocused: false (default)
+        decoration: const InputDecoration(
+          labelText: 'label',
+          floatLabelBehavior: FloatLabelBehavior.always
         ),
       ),
     );
@@ -168,6 +183,29 @@ void main() {
     expect(tester.getBottomLeft(find.text('label')).dy, 24.0);
     expect(getBorderBottom(tester), 56.0);
     expect(getBorderWeight(tester), 1.0);
+
+    // The label appears within the input when hasFloatingPlaceholder is false
+    await tester.pumpWidget(
+      buildInputDecorator(
+        isEmpty: true,
+        // isFocused: false (default)
+        decoration: const InputDecoration(
+          labelText: 'label',
+          hasFloatingPlaceholder: false,
+          floatLabelBehavior: FloatLabelBehavior.always
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // Overall height for this InputDecorator is 56dps:
+    //   12 - top padding
+    //   12 - floating label (ahem font size 16dps * 0.75 = 12)
+    //    4 - floating label / input text gap
+    //   16 - input text (ahem font size 16dps)
+    //   12 - bottom padding
+
+    expect(tester.getTopLeft(find.text('label')).dy, 20.0);
 
     // isFocused: true increases the border's weight from 1.0 to 2.0
     // but does not change the overall height.
@@ -2708,7 +2746,7 @@ void main() {
     );
     expect(
       child.toString(),
-      "InputDecorator-[<'key'>](decoration: InputDecoration(), baseStyle: TextStyle(<all styles inherited>), isFocused: false, isEmpty: false)",
+      "InputDecorator-[<'key'>](decoration: InputDecoration(floatLabelBehavior: FloatLabelBehavior.auto), baseStyle: TextStyle(<all styles inherited>), isFocused: false, isEmpty: false)",
     );
   });
 
@@ -3539,7 +3577,7 @@ void main() {
       hintStyle: TextStyle(),
       errorMaxLines: 5,
       hasFloatingPlaceholder: false,
-      alwaysFloatLabel: true,
+      floatLabelBehavior: FloatLabelBehavior.always,
       contentPadding: EdgeInsetsDirectional.only(start: 40.0, top: 12.0, bottom: 12.0),
       prefixStyle: TextStyle(),
       suffixStyle: TextStyle(),
@@ -3565,7 +3603,7 @@ void main() {
       'hintStyle: TextStyle(<all styles inherited>)',
       'errorMaxLines: 5',
       'hasFloatingPlaceholder: false',
-      'alwaysFloatLabel: true',
+      'floatLabelBehavior: FloatLabelBehavior.always',
       'contentPadding: EdgeInsetsDirectional(40.0, 12.0, 0.0, 12.0)',
       'prefixStyle: TextStyle(<all styles inherited>)',
       'suffixStyle: TextStyle(<all styles inherited>)',
