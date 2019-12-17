@@ -70,6 +70,9 @@ class PlatformView final : public flutter::PlatformView,
   // |flutter_runner::AccessibilityBridge::Delegate|
   void SetSemanticsEnabled(bool enabled) override;
 
+  // |PlatformView|
+  flutter::PointerDataDispatcherMaker GetDispatcherMaker() override;
+
  private:
   const std::string debug_label_;
   // TODO(MI4-2490): remove once ViewRefControl is passed to Scenic and kept

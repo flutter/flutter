@@ -766,4 +766,10 @@ void PlatformView::HandleFlutterPlatformViewsChannelPlatformMessage(
   }
 }
 
+flutter::PointerDataDispatcherMaker PlatformView::GetDispatcherMaker() {
+  return [](flutter::DefaultPointerDataDispatcher::Delegate& delegate) {
+    return std::make_unique<flutter::SmoothPointerDataDispatcher>(delegate);
+  };
+}
+
 }  // namespace flutter_runner
