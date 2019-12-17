@@ -64,6 +64,7 @@ class TestTextInput {
   /// Whether this [TestTextInput] is registered with [SystemChannels.textInput].
   ///
   /// Use [register] and [unregister] methods to control this value.
+  // TODO(dnfield): This is unreliable. https://github.com/flutter/flutter/issues/47180
   bool get isRegistered => _isRegistered;
   bool _isRegistered = false;
 
