@@ -69,7 +69,7 @@ class TestTextInput {
   // immediately if we are registered since that method does no real async work.
   bool get isRegistered {
     final int oldLogLength = log.length;
-    SystemChannels.textInput.invokeMethod<void>('__isRegistered');
+    unawaited(SystemChannels.textInput.invokeMethod<void>('__isRegistered'));
     if (log.length == oldLogLength) {
       return false;
     }
