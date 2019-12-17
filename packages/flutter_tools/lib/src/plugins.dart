@@ -315,7 +315,7 @@ List<Plugin> findPlugins(FlutterProject project) {
 ///
 /// Finally, returns [true] if .flutter-plugins or .flutter-plugins-dependencies have changed,
 /// otherwise returns [false].
-bool _writeFlutterPluginsList(FlutterProject project, List<Plugin> plugins) {
+bool _legacyWriteFlutterPluginsList(FlutterProject project, List<Plugin> plugins) {
   final List<dynamic> directAppDependencies = <dynamic>[];
   const String info = 'This is a generated file; do not edit or check into version control.';
   final StringBuffer flutterPluginsBuffer = StringBuffer('# $info\n');
@@ -836,6 +836,12 @@ Future<void> _writeWebPluginRegistrant(FlutterProject project, List<Plugin> plug
 /// Assumes `pub get` has been executed since last change to `pubspec.yaml`.
 void refreshPluginsList(FlutterProject project, {bool checkProjects = false}) {
   final List<Plugin> plugins = findPlugins(project);
+
+  // TODO(franciscojma): Using the legacy method for Android since there is some
+  // gradle work to be done (update the generated settins.gradle on projects).
+  if (project.android.existsSync()) {
+    _legacyWriteFlutterPluginsList(project, plugins);
+  }
   if (project.web.existsSync()) {
     _writeFlutterPlatformPluginsList(project.web, plugins);
   }
@@ -844,9 +850,6 @@ void refreshPluginsList(FlutterProject project, {bool checkProjects = false}) {
   }
   if (project.linux.existsSync()) {
     _writeFlutterPlatformPluginsList(project.linux, plugins);
-  }
-  if (project.android.existsSync()) {
-    _writeFlutterPlatformPluginsList(project.android, plugins);
   }
   if (project.macos.existsSync()) {
     _writeFlutterPlatformPluginsList(project.macos, plugins);
