@@ -310,25 +310,16 @@ List<Plugin> findPlugins(FlutterProject project) {
   return plugins;
 }
 
-Iterable<Plugin> _pluginsForPlatform(List<Plugin>plugins, String platform) {
-  return plugins.where((Plugin p) {
-    return p.platforms.containsKey(platform);
-  });
-}
-
 /// Writes the .flutter-plugins and .flutter-plugins-dependencies files based on the list of plugins for
 /// a given [PlatformProject]. If there aren't any plugins, then the files aren't written to disk.
-/// 
-/// Set [filter] to [false] to use all the plugins in the Flutter project.
-/// This is used for Android since the whole dependency graph is passed to gradle to configure the project.
 ///
 /// Finally, returns [true] if .flutter-plugins or .flutter-plugins-dependencies have changed,
 /// otherwise returns [false].
-bool _writeFlutterPlatformPluginsList(PlatformProject project, List<Plugin> plugins, [bool filter = true]) {
+bool _writeFlutterPlatformPluginsList(PlatformProject project, List<Plugin> plugins) {
   // Gets only the plugins supported by the project platform.
-  final Iterable<Plugin> platformPlugins = filter ?
-     _pluginsForPlatform(plugins, project.pluginConfigKey) :
-     plugins;
+  final Iterable<Plugin> platformPlugins = plugins.where((Plugin p) {
+    return p.platforms.containsKey(project.pluginConfigKey);
+  });
 
   final List<dynamic> directAppDependencies = <dynamic>[];
   const String info = 'This is a generated file; do not edit or check into version control.';
@@ -809,7 +800,7 @@ void refreshPluginsList(FlutterProject project, {bool checkProjects = false}) {
     _writeFlutterPlatformPluginsList(project.linux, plugins);
   }
   if (project.android.existsSync()) {
-    _writeFlutterPlatformPluginsList(project.android, plugins, false);
+    _writeFlutterPlatformPluginsList(project.android, plugins);
   }
   if (project.ios.existsSync()) {
     final bool changed = _writeFlutterPlatformPluginsList(project.ios, plugins);
