@@ -334,10 +334,10 @@ class DefaultTabController extends StatefulWidget {
   /// {@macro flutter.widgets.child}
   final Widget child;
   
-  /// {@tool sample}
   /// The closest instance of this class that encloses the given context.
   ///
-  /// Typical usage:
+  /// {@tool sample}
+  /// Typical usage is as follows:
   ///
   /// ```dart
   /// TabController controller = DefaultTabController.of(context);
