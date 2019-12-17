@@ -461,6 +461,27 @@ void main() {
       expect(theme.textTheme.textStyle.fontSize, 17.0);
     });
 
+    testWidgets('MaterialTheme overrides the brightness', (WidgetTester tester) async {
+      CupertinoThemeData theme = await testTheme(tester, ThemeData.dark());
+      expect(theme.noDefault().brightness, Brightness.dark);
+
+      theme = await testTheme(tester, ThemeData.light());
+      expect(theme.noDefault().brightness, Brightness.light);
+
+      // Overridable by cupertinoOverrideTheme.
+      theme = await testTheme(tester, ThemeData(
+        brightness: Brightness.light,
+        cupertinoOverrideTheme: const CupertinoThemeData(brightness: Brightness.dark),
+      ));
+      expect(theme.noDefault().brightness, Brightness.dark);
+
+      theme = await testTheme(tester, ThemeData(
+          brightness: Brightness.dark,
+          cupertinoOverrideTheme: const CupertinoThemeData(brightness: Brightness.light),
+      ));
+      expect(theme.noDefault().brightness, Brightness.light);
+    });
+
     testWidgets('Can override material theme', (WidgetTester tester) async {
       final CupertinoThemeData theme = await testTheme(tester, ThemeData(
         cupertinoOverrideTheme: const CupertinoThemeData(

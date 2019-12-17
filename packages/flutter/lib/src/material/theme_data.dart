@@ -1554,7 +1554,7 @@ class MaterialBasedCupertinoThemeData extends CupertinoThemeData {
       // like barBackgroundColor can still behave like a normal
       // CupertinoThemeData.
       super.raw(
-        _cupertinoOverrideTheme.brightness,
+        _cupertinoOverrideTheme.brightness ?? _materialTheme.brightness,
         _cupertinoOverrideTheme.primaryColor,
         _cupertinoOverrideTheme.primaryContrastingColor,
         _cupertinoOverrideTheme.textTheme,
