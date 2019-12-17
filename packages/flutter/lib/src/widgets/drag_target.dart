@@ -541,6 +541,7 @@ class _DragTargetState<T> extends State<DragTarget<T>> {
       _rejectedAvatars.remove(avatar);
     });
     if (widget.onLeave != null)
+      // TODO(dnfield): avatar may come from _rejectedAvatars and is not guarantee to be a T
       widget.onLeave(avatar.data as T);
   }
 
