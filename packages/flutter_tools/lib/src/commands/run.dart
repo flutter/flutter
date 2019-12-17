@@ -228,30 +228,55 @@ class RunCommand extends RunCommandBase {
   Future<Map<CustomDimensions, String>> get usageValues async {
     String deviceType, deviceOsVersion;
     bool isEmulator;
+    bool anyAndroidDevices = false;
+    bool anyIOSDevices = false;
 
     if (devices == null || devices.isEmpty) {
       deviceType = 'none';
       deviceOsVersion = 'none';
       isEmulator = false;
     } else if (devices.length == 1) {
-      deviceType = getNameForTargetPlatform(await devices[0].targetPlatform);
+      final TargetPlatform platform = await devices[0].targetPlatform;
+      anyAndroidDevices = platform == TargetPlatform.android;
+      anyIOSDevices = platform == TargetPlatform.ios;
+      deviceType = getNameForTargetPlatform(platform);
       deviceOsVersion = await devices[0].sdkNameAndVersion;
       isEmulator = await devices[0].isLocalEmulator;
     } else {
       deviceType = 'multiple';
       deviceOsVersion = 'multiple';
       isEmulator = false;
+      for (Device device in devices) {
+        final TargetPlatform platform = await device.targetPlatform;
+        anyAndroidDevices = anyAndroidDevices || (platform == TargetPlatform.android);
+        anyIOSDevices = anyIOSDevices || (platform == TargetPlatform.ios);
+        if (anyAndroidDevices && anyIOSDevices) {
+          break;
+        }
+      }
     }
-    final String modeName = getBuildInfo().modeName;
-    final AndroidProject androidProject = FlutterProject.current().android;
-    final IosProject iosProject = FlutterProject.current().ios;
-    final List<String> hostLanguage = <String>[
-      if (androidProject != null && androidProject.existsSync())
-        if (androidProject.isKotlin) 'kotlin' else 'java',
-      if (iosProject != null && iosProject.exists)
-        if (await iosProject.isSwift) 'swift' else 'objc',
-    ];
 
+    String androidEmbeddingVersion;
+    final List<String> hostLanguage = <String>[];
+    if (anyAndroidDevices) {
+      final AndroidProject androidProject = FlutterProject.current().android;
+      if (androidProject != null && androidProject.existsSync()) {
+        hostLanguage.add(androidProject.isKotlin ? 'kotlin' : 'java');
+        androidEmbeddingVersion = androidProject.getEmbeddingVersion().toString().split('.').last;
+      }
+    }
+    if (anyIOSDevices) {
+      final IosProject iosProject = FlutterProject.current().ios;
+      if (iosProject != null && iosProject.exists) {
+        final Iterable<File> swiftFiles = iosProject.hostAppRoot
+            .listSync(recursive: true, followLinks: false)
+            .whereType<File>()
+            .where((File file) => fs.path.extension(file.path) == '.swift');
+        hostLanguage.add(swiftFiles.isNotEmpty ? 'swift' : 'objc');
+      }
+    }
+
+    final String modeName = getBuildInfo().modeName;
     return <CustomDimensions, String>{
       CustomDimensions.commandRunIsEmulator: '$isEmulator',
       CustomDimensions.commandRunTargetName: deviceType,
@@ -259,7 +284,8 @@ class RunCommand extends RunCommandBase {
       CustomDimensions.commandRunModeName: modeName,
       CustomDimensions.commandRunProjectModule: '${FlutterProject.current().isModule}',
       CustomDimensions.commandRunProjectHostLanguage: hostLanguage.join(','),
-      CustomDimensions.commandRunAndroidEmbeddingVersion: androidProject.getEmbeddingVersion().toString().split('.').last,
+      if (androidEmbeddingVersion != null)
+        CustomDimensions.commandRunAndroidEmbeddingVersion: androidEmbeddingVersion,
     };
   }
 
