@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -16,9 +16,9 @@ import 'build.dart';
 
 /// A command to build a macOS desktop target through a build shell script.
 class BuildMacosCommand extends BuildSubCommand {
-  BuildMacosCommand({bool verboseHelp}) {
+  BuildMacosCommand() {
     usesTargetOption();
-    addBuildModeFlags(verboseHelp: verboseHelp);
+    addBuildModeFlags();
   }
 
   @override
@@ -30,7 +30,6 @@ class BuildMacosCommand extends BuildSubCommand {
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
     DevelopmentArtifact.macOS,
-    DevelopmentArtifact.universal,
   };
 
   @override

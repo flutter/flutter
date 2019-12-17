@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -67,6 +67,34 @@ void main() {
 
   testUsingContext('ProcessSignal toString() works', () async {
     expect(io.ProcessSignal.sigint.toString(), ProcessSignal.SIGINT.toString());
+  });
+
+  test('exit throws a StateError if called without being overriden', () {
+    expect(() => exit(0), throwsA(isInstanceOf<AssertionError>()));
+  });
+
+  test('exit does not throw a StateError if overriden', () {
+    setExitFunctionForTests((int value) {});
+
+    expect(() => exit(0), returnsNormally);
+  });
+
+  test('test_api defines the Declarer in a known place', () {
+    expect(Zone.current[#test.declarer], isNotNull);
+  });
+
+  test('listNetworkInterfaces() uses overrides', () async {
+    setNetworkInterfaceLister(
+      ({
+        bool includeLoopback,
+        bool includeLinkLocal,
+        InternetAddressType type,
+      }) async => <NetworkInterface>[],
+    );
+
+    expect(await listNetworkInterfaces(), isEmpty);
+
+    resetNetworkInterfaceLister();
   });
 }
 

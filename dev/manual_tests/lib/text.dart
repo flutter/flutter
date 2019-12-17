@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -12,13 +12,17 @@ import 'package:flutter/scheduler.dart';
 
 int seed = 0;
 
-void main() {
-  if (!kIsWeb && Platform.isMacOS) {
-    // TODO(gspencergoog): Update this when TargetPlatform includes macOS. https://github.com/flutter/flutter/issues/31366
-    // See https://github.com/flutter/flutter/wiki/Desktop-shells#target-platform-override
+// Sets a platform override for desktop to avoid exceptions. See
+// https://flutter.dev/desktop#target-platform-override for more info.
+// TODO(gspencergoog): Remove once TargetPlatform includes all desktop platforms.
+void _enablePlatformOverrideForDesktop() {
+  if (!kIsWeb && (Platform.isWindows || Platform.isLinux)) {
     debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
   }
+}
 
+void main() {
+  _enablePlatformOverrideForDesktop();
   runApp(MaterialApp(
     title: 'Text tester',
     home: const Home(),
@@ -152,7 +156,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
     return TextSpan(
       text: _fiddleWithText(node.text),
       style: _fiddleWithStyle(node.style),
-      children: _fiddleWithChildren(node.children?.map((InlineSpan child) => _fiddleWith(child))?.toList() ?? <InlineSpan>[]),
+      children: _fiddleWithChildren(node.children?.map((InlineSpan child) => _fiddleWith(child as TextSpan))?.toList() ?? <TextSpan>[]),
     );
   }
 
@@ -339,7 +343,7 @@ class _FuzzerState extends State<Fuzzer> with SingleTickerProviderStateMixin {
     if (node.children == null || node.children.isEmpty)
       return 0;
     int result = 0;
-    for (TextSpan child in node.children)
+    for (TextSpan child in node.children.cast<TextSpan>())
       result = math.max(result, depthOf(child));
     return result;
   }

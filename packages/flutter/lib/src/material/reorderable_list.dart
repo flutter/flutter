@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -52,6 +52,8 @@ typedef ReorderCallback = void Function(int oldIndex, int newIndex);
 /// those children that are actually visible.
 ///
 /// All [children] must have a key.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=3fB1mxOsqJE}
 class ReorderableListView extends StatefulWidget {
 
   /// Creates a reorderable list.

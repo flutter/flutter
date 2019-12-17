@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -53,16 +53,16 @@ enum TraversalDirection {
 ///
 /// See also:
 ///
-///   * [FocusNode], for a description of the focus system.
-///   * [DefaultFocusTraversal], a widget that imposes a traversal policy on the
-///     [Focus] nodes below it in the widget hierarchy.
-///   * [FocusNode], which is affected by the traversal policy.
-///   * [WidgetOrderFocusTraversalPolicy], a policy that relies on the widget
-///     creation order to describe the order of traversal.
-///   * [ReadingOrderTraversalPolicy], a policy that describes the order as the
-///     natural "reading order" for the current [Directionality].
-///   * [DirectionalFocusTraversalPolicyMixin] a mixin class that implements
-///     focus traversal in a direction.
+///  * [FocusNode], for a description of the focus system.
+///  * [DefaultFocusTraversal], a widget that imposes a traversal policy on the
+///    [Focus] nodes below it in the widget hierarchy.
+///  * [FocusNode], which is affected by the traversal policy.
+///  * [WidgetOrderFocusTraversalPolicy], a policy that relies on the widget
+///    creation order to describe the order of traversal.
+///  * [ReadingOrderTraversalPolicy], a policy that describes the order as the
+///    natural "reading order" for the current [Directionality].
+///  * [DirectionalFocusTraversalPolicyMixin] a mixin class that implements
+///    focus traversal in a direction.
 abstract class FocusTraversalPolicy {
   /// Returns the node that should receive focus if there is no current focus
   /// in the [FocusScopeNode] that [currentNode] belongs to.
@@ -101,7 +101,7 @@ abstract class FocusTraversalPolicy {
   @protected
   void invalidateScopeData(FocusScopeNode node) {}
 
-  /// This is called whenever the given [node] is reparented into a new scope,
+  /// This is called whenever the given [node] is re-parented into a new scope,
   /// so that the policy has a chance to update or invalidate any cached data
   /// that it maintains per scope about the node.
   ///
@@ -191,13 +191,13 @@ class _DirectionalPolicyData {
 ///
 /// See also:
 ///
-///   * [FocusNode], for a description of the focus system.
-///   * [DefaultFocusTraversal], a widget that imposes a traversal policy on the
-///     [Focus] nodes below it in the widget hierarchy.
-///   * [WidgetOrderFocusTraversalPolicy], a policy that relies on the widget
-///     creation order to describe the order of traversal.
-///   * [ReadingOrderTraversalPolicy], a policy that describes the order as the
-///     natural "reading order" for the current [Directionality].
+///  * [FocusNode], for a description of the focus system.
+///  * [DefaultFocusTraversal], a widget that imposes a traversal policy on the
+///    [Focus] nodes below it in the widget hierarchy.
+///  * [WidgetOrderFocusTraversalPolicy], a policy that relies on the widget
+///    creation order to describe the order of traversal.
+///  * [ReadingOrderTraversalPolicy], a policy that describes the order as the
+///    natural "reading order" for the current [Directionality].
 mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
   final Map<FocusScopeNode, _DirectionalPolicyData> _policyData = <FocusScopeNode, _DirectionalPolicyData>{};
 
@@ -559,13 +559,13 @@ mixin DirectionalFocusTraversalPolicyMixin on FocusTraversalPolicy {
 ///
 /// See also:
 ///
-///   * [FocusNode], for a description of the focus system.
-///   * [DefaultFocusTraversal], a widget that imposes a traversal policy on the
-///     [Focus] nodes below it in the widget hierarchy.
-///   * [ReadingOrderTraversalPolicy], a policy that describes the order as the
-///     natural "reading order" for the current [Directionality].
-///   * [DirectionalFocusTraversalPolicyMixin] a mixin class that implements
-///     focus traversal in a direction.
+///  * [FocusNode], for a description of the focus system.
+///  * [DefaultFocusTraversal], a widget that imposes a traversal policy on the
+///    [Focus] nodes below it in the widget hierarchy.
+///  * [ReadingOrderTraversalPolicy], a policy that describes the order as the
+///    natural "reading order" for the current [Directionality].
+///  * [DirectionalFocusTraversalPolicyMixin] a mixin class that implements
+///    focus traversal in a direction.
 class WidgetOrderFocusTraversalPolicy extends FocusTraversalPolicy with DirectionalFocusTraversalPolicyMixin {
   /// Creates a const [WidgetOrderFocusTraversalPolicy].
   WidgetOrderFocusTraversalPolicy();
@@ -587,7 +587,7 @@ class WidgetOrderFocusTraversalPolicy extends FocusTraversalPolicy with Directio
       }
     }
     while (candidate is FocusScopeNode && candidate.focusedChild != null) {
-      final FocusScopeNode candidateScope = candidate;
+      final FocusScopeNode candidateScope = candidate as FocusScopeNode;
       candidate = candidateScope.focusedChild;
     }
     return candidate;
@@ -687,13 +687,13 @@ class _SortData {
 ///
 /// See also:
 ///
-///   * [FocusNode], for a description of the focus system.
-///   * [DefaultFocusTraversal], a widget that imposes a traversal policy on the
-///     [Focus] nodes below it in the widget hierarchy.
-///   * [WidgetOrderFocusTraversalPolicy], a policy that relies on the widget
-///     creation order to describe the order of traversal.
-///   * [DirectionalFocusTraversalPolicyMixin] a mixin class that implements
-///     focus traversal in a direction.
+///  * [FocusNode], for a description of the focus system.
+///  * [DefaultFocusTraversal], a widget that imposes a traversal policy on the
+///    [Focus] nodes below it in the widget hierarchy.
+///  * [WidgetOrderFocusTraversalPolicy], a policy that relies on the widget
+///    creation order to describe the order of traversal.
+///  * [DirectionalFocusTraversalPolicyMixin] a mixin class that implements
+///    focus traversal in a direction.
 class ReadingOrderTraversalPolicy extends FocusTraversalPolicy with DirectionalFocusTraversalPolicyMixin {
   @override
   FocusNode findFirstFocus(FocusNode currentNode) {
@@ -829,13 +829,13 @@ class ReadingOrderTraversalPolicy extends FocusTraversalPolicy with DirectionalF
 ///
 /// See also:
 ///
-///   * [FocusNode], for a description of the focus system.
-///   * [WidgetOrderFocusTraversalPolicy], a policy that relies on the widget
-///     creation order to describe the order of traversal.
-///   * [ReadingOrderTraversalPolicy], a policy that describes the order as the
-///     natural "reading order" for the current [Directionality].
-///   * [DirectionalFocusTraversalPolicyMixin] a mixin class that implements
-///     focus traversal in a direction.
+///  * [FocusNode], for a description of the focus system.
+///  * [WidgetOrderFocusTraversalPolicy], a policy that relies on the widget
+///    creation order to describe the order of traversal.
+///  * [ReadingOrderTraversalPolicy], a policy that describes the order as the
+///    natural "reading order" for the current [Directionality].
+///  * [DirectionalFocusTraversalPolicyMixin] a mixin class that implements
+///    focus traversal in a direction.
 class DefaultFocusTraversal extends InheritedWidget {
   /// Creates a [DefaultFocusTraversal] object.
   ///
@@ -868,7 +868,7 @@ class DefaultFocusTraversal extends InheritedWidget {
   /// The [context] argument must not be null.
   static FocusTraversalPolicy of(BuildContext context, { bool nullOk = false }) {
     assert(context != null);
-    final DefaultFocusTraversal inherited = context.inheritFromWidgetOfExactType(DefaultFocusTraversal);
+    final DefaultFocusTraversal inherited = context.dependOnInheritedWidgetOfExactType<DefaultFocusTraversal>();
     assert(() {
       if (nullOk) {
         return true;
@@ -1002,8 +1002,8 @@ class DirectionalFocusIntent extends Intent {
   final bool ignoreTextFields;
 }
 
-/// An [Action] that moves the focus to the focusable node in the given
-/// [direction] configured by the associated [DirectionalFocusIntent].
+/// An [Action] that moves the focus to the focusable node in the direction
+/// configured by the associated [DirectionalFocusIntent.direction].
 ///
 /// This is the [Action] associated with the [key] and bound by default to the
 /// [LogicalKeyboardKey.arrowUp], [LogicalKeyboardKey.arrowDown],
@@ -1015,9 +1015,6 @@ class DirectionalFocusAction extends _RequestFocusActionBase {
 
   /// The [LocalKey] that uniquely identifies this action to [DirectionalFocusIntent].
   static const LocalKey key = ValueKey<Type>(DirectionalFocusAction);
-
-  /// The direction in which to look for the next focusable node when invoked.
-  TraversalDirection direction;
 
   @override
   void invoke(FocusNode node, DirectionalFocusIntent intent) {

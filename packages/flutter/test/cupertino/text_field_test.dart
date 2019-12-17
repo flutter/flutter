@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -68,7 +68,7 @@ class PathBoundsMatcher extends Matcher {
   @override
   Description describeMismatch(covariant Path item, Description mismatchDescription, Map<dynamic, dynamic> matchState, bool verbose) {
     final Description description = super.describeMismatch(item, mismatchDescription, matchState, verbose);
-    final Map<Matcher, dynamic> map = matchState['failedMatcher'];
+    final Map<Matcher, dynamic> map = matchState['failedMatcher'] as Map<Matcher, dynamic>;
     final Iterable<String> descriptions = map.entries
       .map<String>(
         (MapEntry<Matcher, dynamic> entry) => entry.key.describeMismatch(entry.value, StringDescription(), matchState, verbose).toString()
@@ -105,8 +105,8 @@ class PathPointsMatcher extends Matcher {
 
   @override
   Description describeMismatch(covariant Path item, Description mismatchDescription, Map<dynamic, dynamic> matchState, bool verbose) {
-    final Offset notIncluded = matchState['notIncluded'];
-    final Offset notExcluded = matchState['notExcluded'];
+    final Offset notIncluded = matchState['notIncluded'] as Offset;
+    final Offset notExcluded = matchState['notExcluded'] as Offset;
     final Description desc = super.describeMismatch(item, mismatchDescription, matchState, verbose);
 
     if ((notExcluded ?? notIncluded) != null) {
@@ -332,7 +332,7 @@ void main() {
           of: find.byType(CupertinoTextField),
           matching: find.byType(DecoratedBox),
         ),
-      ).decoration;
+      ).decoration as BoxDecoration;
 
       expect(
         decoration.borderRadius,
@@ -358,7 +358,7 @@ void main() {
           of: find.byType(CupertinoTextField),
           matching: find.byType(DecoratedBox),
         ),
-      ).decoration;
+      ).decoration as BoxDecoration;
 
       expect(
         decoration.borderRadius,
@@ -2596,10 +2596,11 @@ void main() {
 
       // Double tap at the end of text.
       final Offset textEndPos = textOffsetToPosition(tester, 11); // Position at the end of text.
-      TestGesture gesture = await tester.startGesture(
+      final TestGesture gesture = await tester.startGesture(
         textEndPos,
         kind: PointerDeviceKind.mouse,
       );
+      addTearDown(gesture.removePointer);
       await tester.pump(const Duration(milliseconds: 50));
       await gesture.up();
       await tester.pump();
@@ -2614,11 +2615,7 @@ void main() {
       final Offset hPos = textOffsetToPosition(tester, 9); // Position of 'h'.
 
       // Double tap on 'h' to select 'ghi'.
-      gesture = await tester.startGesture(
-        hPos,
-        kind: PointerDeviceKind.mouse,
-      );
-      addTearDown(gesture.removePointer);
+      await gesture.down(hPos);
       await tester.pump(const Duration(milliseconds: 50));
       await gesture.up();
       await tester.pump();
@@ -2735,7 +2732,7 @@ void main() {
           of: find.byType(CupertinoTextField),
           matching: find.byType(DecoratedBox),
         ),
-      ).decoration;
+      ).decoration as BoxDecoration;
 
       expect(
         decoration.border.bottom.color.value,
@@ -2975,8 +2972,8 @@ void main() {
     final List<Widget> transitions =
       find.byType(FadeTransition).evaluate().map((Element e) => e.widget).toList();
     expect(transitions.length, 2);
-    final FadeTransition left = transitions[0];
-    final FadeTransition right = transitions[1];
+    final FadeTransition left = transitions[0] as FadeTransition;
+    final FadeTransition right = transitions[1] as FadeTransition;
 
     expect(left.opacity.value, equals(1.0));
     expect(right.opacity.value, equals(1.0));

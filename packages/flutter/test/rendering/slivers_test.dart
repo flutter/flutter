@@ -1,7 +1,8 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
@@ -287,11 +288,11 @@ void main() {
     expect(root.size.width, equals(800.0));
     expect(root.size.height, equals(600.0));
 
-    final RenderSliver sliverA = a.parent;
-    final RenderSliver sliverB = b.parent;
-    final RenderSliver sliverC = c.parent;
-    final RenderSliver sliverD = d.parent;
-    final RenderSliver sliverE = e.parent;
+    final RenderSliver sliverA = a.parent as RenderSliver;
+    final RenderSliver sliverB = b.parent as RenderSliver;
+    final RenderSliver sliverC = c.parent as RenderSliver;
+    final RenderSliver sliverD = d.parent as RenderSliver;
+    final RenderSliver sliverE = e.parent as RenderSliver;
 
     expect(a.localToGlobal(const Offset(0.0, 0.0)), const Offset(0.0, 0.0));
     expect(b.localToGlobal(const Offset(0.0, 0.0)), const Offset(400.0, 0.0));
@@ -920,6 +921,82 @@ void main() {
       mainAxisPositions.clear();
       crossAxisPositions.clear();
     });
+  });
+
+  test('SliverConstraints check for NaN on all double properties', () {
+    const SliverConstraints constraints = SliverConstraints(
+      axisDirection: AxisDirection.down,
+      cacheOrigin: double.nan,
+      crossAxisDirection: AxisDirection.left,
+      crossAxisExtent: double.nan,
+      growthDirection: GrowthDirection.forward,
+      overlap: double.nan,
+      precedingScrollExtent: double.nan,
+      remainingCacheExtent: double.nan,
+      remainingPaintExtent: double.nan,
+      scrollOffset: double.nan,
+      userScrollDirection: ScrollDirection.idle,
+      viewportMainAxisExtent: double.nan,
+    );
+    bool threw = false;
+    try {
+      constraints.debugAssertIsValid();
+    } on FlutterError catch (error) {
+      expect(
+        error.message,
+        'SliverConstraints is not valid:\n'
+        '  The "scrollOffset" is NaN.\n'
+        '  The "overlap" is NaN.\n'
+        '  The "crossAxisExtent" is NaN.\n'
+        '  The "scrollOffset" is NaN, expected greater than or equal to zero.\n'
+        '  The "viewportMainAxisExtent" is NaN, expected greater than or equal to zero.\n'
+        '  The "remainingPaintExtent" is NaN, expected greater than or equal to zero.\n'
+        '  The "remainingCacheExtent" is NaN, expected greater than or equal to zero.\n'
+        '  The "cacheOrigin" is NaN, expected less than or equal to zero.\n'
+        '  The "precedingScrollExtent" is NaN, expected greater than or equal to zero.\n'
+        '  The constraints are not normalized.\n'
+        'The offending constraints were:\n'
+        '  SliverConstraints(AxisDirection.down, GrowthDirection.forward, ScrollDirection.idle, scrollOffset: NaN, remainingPaintExtent: NaN, overlap: NaN, crossAxisExtent: NaN, crossAxisDirection: AxisDirection.left, viewportMainAxisExtent: NaN, remainingCacheExtent: NaN cacheOrigin: NaN )',
+      );
+      threw = true;
+    }
+    expect(threw, true);
+  });
+
+  test('SliverConstraints check for sign on relevant double properties', () {
+    const SliverConstraints constraints = SliverConstraints(
+      axisDirection: AxisDirection.down,
+      cacheOrigin: 1.0,
+      crossAxisDirection: AxisDirection.left,
+      crossAxisExtent: 0.0,
+      growthDirection: GrowthDirection.forward,
+      overlap: 0.0,
+      precedingScrollExtent: -1.0,
+      remainingCacheExtent: -1.0,
+      remainingPaintExtent: -1.0,
+      scrollOffset: -1.0,
+      userScrollDirection: ScrollDirection.idle,
+      viewportMainAxisExtent: 0.0,
+    );
+    bool threw = false;
+    try {
+      constraints.debugAssertIsValid();
+    } on FlutterError catch (error) {
+      expect(
+        error.message,
+        'SliverConstraints is not valid:\n'
+        '  The "scrollOffset" is negative.\n'
+        '  The "remainingPaintExtent" is negative.\n'
+        '  The "remainingCacheExtent" is negative.\n'
+        '  The "cacheOrigin" is positive.\n'
+        '  The "precedingScrollExtent" is negative.\n'
+        '  The constraints are not normalized.\n'
+        'The offending constraints were:\n'
+        '  SliverConstraints(AxisDirection.down, GrowthDirection.forward, ScrollDirection.idle, scrollOffset: -1.0, remainingPaintExtent: -1.0, crossAxisExtent: 0.0, crossAxisDirection: AxisDirection.left, viewportMainAxisExtent: 0.0, remainingCacheExtent: -1.0 cacheOrigin: 1.0 )',
+      );
+      threw = true;
+    }
+    expect(threw, true);
   });
 }
 

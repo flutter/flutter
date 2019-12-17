@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -25,7 +25,7 @@ import 'inherited_notifier.dart';
 ///
 /// See also:
 ///
-///  - [ShortcutManager], which uses [LogicalKeySet] (a [KeySet] subclass) to
+///  * [ShortcutManager], which uses [LogicalKeySet] (a [KeySet] subclass) to
 ///    define its key map.
 class KeySet<T extends KeyboardKey> extends Diagnosticable {
   /// A constructor for making a [KeySet] of up to four keys.
@@ -89,8 +89,8 @@ class KeySet<T extends KeyboardKey> extends Diagnosticable {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    final KeySet<T> typedOther = other;
-    return setEquals<T>(_keys, typedOther._keys);
+    return other is KeySet<T>
+        && setEquals<T>(other._keys, _keys);
   }
 
   @override
@@ -231,9 +231,9 @@ class ShortcutManager extends ChangeNotifier with DiagnosticableMixin {
 ///
 /// See also:
 ///
-///   * [Intent], a class for containing a description of a user
-///     action to be invoked.
-///   * [Action], a class for defining an invocation of a user action.
+///  * [Intent], a class for containing a description of a user action to be
+///    invoked.
+///  * [Action], a class for defining an invocation of a user action.
 class Shortcuts extends StatefulWidget {
   /// Creates a ActionManager object.
   ///
@@ -274,7 +274,7 @@ class Shortcuts extends StatefulWidget {
   /// The [context] argument must not be null.
   static ShortcutManager of(BuildContext context, {bool nullOk = false}) {
     assert(context != null);
-    final _ShortcutsMarker inherited = context.inheritFromWidgetOfExactType(_ShortcutsMarker);
+    final _ShortcutsMarker inherited = context.dependOnInheritedWidgetOfExactType<_ShortcutsMarker>();
     assert(() {
       if (nullOk) {
         return true;

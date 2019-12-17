@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -187,6 +187,14 @@ class RunCommand extends RunCommandBase {
         hide: true,
         help: 'Whether to automatically invoke webOnlyInitializePlatform.',
       )
+      ..addFlag('fast-start',
+        negatable: true,
+        defaultsTo: false,
+        hide: true,
+        help: 'Whether to quickly bootstrap applications with a minimal app. '
+              'Currently this is only supported on Android devices. This option '
+              'cannot be paired with --use-application-binary.'
+      )
       ..addOption(FlutterOptions.kExtraFrontEndOptions, hide: true)
       ..addOption(FlutterOptions.kExtraGenSnapshotOptions, hide: true)
       ..addMultiOption(FlutterOptions.kEnableExperiment,
@@ -284,6 +292,11 @@ class RunCommand extends RunCommandBase {
     if (!runningWithPrebuiltApplication) {
       await super.validateCommand();
     }
+
+    if (boolArg('fast-start') && runningWithPrebuiltApplication) {
+      throwToolExit('--fast-start is not supported with --use-application-binary');
+    }
+
     devices = await findAllTargetDevices();
     if (devices == null) {
       throwToolExit(null);
@@ -295,12 +308,13 @@ class RunCommand extends RunCommandBase {
 
   DebuggingOptions _createDebuggingOptions() {
     final BuildInfo buildInfo = getBuildInfo();
-    if (buildInfo.isRelease) {
+    if (buildInfo.mode.isRelease) {
       return DebuggingOptions.disabled(
         buildInfo,
         initializePlatform: boolArg('web-initialize-platform'),
         hostname: featureFlags.isWebEnabled ? stringArg('web-hostname') : '',
         port: featureFlags.isWebEnabled ? stringArg('web-port') : '',
+        webEnableExposeUrl: featureFlags.isWebEnabled && boolArg('web-allow-expose-url'),
       );
     } else {
       return DebuggingOptions.enabled(
@@ -321,7 +335,11 @@ class RunCommand extends RunCommandBase {
         initializePlatform: boolArg('web-initialize-platform'),
         hostname: featureFlags.isWebEnabled ? stringArg('web-hostname') : '',
         port: featureFlags.isWebEnabled ? stringArg('web-port') : '',
+        webEnableExposeUrl: featureFlags.isWebEnabled && boolArg('web-allow-expose-url'),
         vmserviceOutFile: stringArg('vmservice-out-file'),
+        // Allow forcing fast-start to off to prevent doing more work on devices that
+        // don't support it.
+        fastStart: boolArg('fast-start') && devices.every((Device device) => device.supportsFastStart),
       );
     }
   }
@@ -340,8 +358,13 @@ class RunCommand extends RunCommandBase {
       if (devices.length > 1) {
         throwToolExit('--machine does not support -d all.');
       }
-      final Daemon daemon = Daemon(stdinCommandStream, stdoutCommandResponse,
-          notifyingLogger: NotifyingLogger(), logToStdout: true);
+      final Daemon daemon = Daemon(
+        stdinCommandStream,
+        stdoutCommandResponse,
+        notifyingLogger: NotifyingLogger(),
+        logToStdout: true,
+        dartDefines: dartDefines,
+      );
       AppInstance app;
       try {
         final String applicationBinaryPath = stringArg('use-application-binary');
@@ -379,6 +402,12 @@ class RunCommand extends RunCommandBase {
     }
 
     for (Device device in devices) {
+      if (!device.supportsFastStart && boolArg('fast-start')) {
+        printStatus(
+          'Using --fast-start option with device ${device.name}, but this device '
+          'does not support it. Overriding the setting to false.'
+        );
+      }
       if (await device.isLocalEmulator) {
         if (await device.supportsHardwareRendering) {
           final bool enableSoftwareRendering = boolArg('enable-software-rendering') == true;
@@ -462,6 +491,7 @@ class RunCommand extends RunCommandBase {
         debuggingOptions: _createDebuggingOptions(),
         stayResident: stayResident,
         dartDefines: dartDefines,
+        urlTunneller: null,
       );
     } else {
       runner = ColdRunner(

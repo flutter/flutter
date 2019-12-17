@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -10,8 +10,10 @@ import 'basic_types.dart';
 
 /// How a box should be inscribed into another box.
 ///
-/// See also [applyBoxFit], which applies the sizing semantics of these values
-/// (though not the alignment semantics).
+/// See also:
+///
+///  * [applyBoxFit], which applies the sizing semantics of these values (though
+///    not the alignment semantics).
 enum BoxFit {
   /// Fill the target box by distorting the source's aspect ratio.
   ///

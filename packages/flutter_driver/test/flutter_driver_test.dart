@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:flutter_driver/src/common/error.dart';
 import 'package:flutter_driver/src/common/health.dart';
+import 'package:flutter_driver/src/common/layer_tree.dart';
 import 'package:flutter_driver/src/common/wait.dart';
 import 'package:flutter_driver/src/driver/driver.dart';
 import 'package:flutter_driver/src/driver/timeline.dart';
@@ -21,21 +22,23 @@ const Duration _kTestTimeout = Duration(milliseconds: 1234);
 const String _kSerializedTestTimeout = '1234';
 
 void main() {
+  final List<String> log = <String>[];
+  driverLog = (String source, String message) {
+    log.add('$source: $message');
+  };
+
   group('FlutterDriver.connect', () {
-    List<LogRecord> log;
-    StreamSubscription<LogRecord> logSub;
     MockVMServiceClient mockClient;
     MockVM mockVM;
     MockIsolate mockIsolate;
     MockPeer mockPeer;
 
     void expectLogContains(String message) {
-      expect(log.map<String>((LogRecord r) => '$r'), anyElement(contains(message)));
+      expect(log, anyElement(contains(message)));
     }
 
     setUp(() {
-      log = <LogRecord>[];
-      logSub = flutterDriverLog.listen(log.add);
+      log.clear();
       mockClient = MockVMServiceClient();
       mockVM = MockVM();
       mockIsolate = MockIsolate();
@@ -53,7 +56,6 @@ void main() {
     });
 
     tearDown(() async {
-      await logSub.cancel();
       restoreVmServiceConnectFunction();
     });
 
@@ -230,6 +232,25 @@ void main() {
       });
     });
 
+    group('getLayerTree', () {
+      test('sends the getLayerTree command', () async {
+        when(mockIsolate.invokeExtension(any, any)).thenAnswer((Invocation i) {
+          expect(i.positionalArguments[1], <String, dynamic>{
+            'command': 'get_layer_tree',
+            'timeout': _kSerializedTestTimeout,
+          });
+          return makeMockResponse(<String, String>{
+            'tree': 'hello',
+          });
+        });
+        final LayerTree result = await driver.getLayerTree(timeout: _kTestTimeout);
+        final LayerTree referenceTree = LayerTree.fromJson(<String, String>{
+            'tree': 'hello',
+          });
+        expect(result.tree, referenceTree.tree);
+      });
+    });
+
     group('waitFor', () {
       test('requires a target reference', () async {
         expect(driver.waitFor(null), throwsA(isInstanceOf<DriverError>()));
@@ -246,6 +267,42 @@ void main() {
           return makeMockResponse(<String, dynamic>{});
         });
         await driver.waitFor(find.byTooltip('foo'), timeout: _kTestTimeout);
+      });
+    });
+
+    group('getWidgetDiagnostics', () {
+      test('sends the getWidgetDiagnostics command', () async {
+        when(mockIsolate.invokeExtension(any, any)).thenAnswer((Invocation i) {
+          expect(i.positionalArguments[1], <String, dynamic>{
+            'command': 'get_diagnostics_tree',
+            'diagnosticsType': 'widget',
+            'finderType': 'ByTooltipMessage',
+            'text': 'foo',
+            'includeProperties': 'true',
+            'subtreeDepth': '0',
+            'timeout': _kSerializedTestTimeout,
+          });
+          return makeMockResponse(<String, dynamic>{});
+        });
+        await driver.getWidgetDiagnostics(find.byTooltip('foo'), timeout: _kTestTimeout);
+      });
+    });
+
+    group('getRenderObjectDiagnostics', () {
+      test('sends the getRenderObjectDiagnostics command', () async {
+        when(mockIsolate.invokeExtension(any, any)).thenAnswer((Invocation i) {
+          expect(i.positionalArguments[1], <String, dynamic>{
+            'command': 'get_diagnostics_tree',
+            'diagnosticsType': 'renderObject',
+            'finderType': 'ByTooltipMessage',
+            'text': 'foo',
+            'includeProperties': 'true',
+            'subtreeDepth': '0',
+            'timeout': _kSerializedTestTimeout,
+          });
+          return makeMockResponse(<String, dynamic>{});
+        });
+        await driver.getRenderObjectDiagnostics(find.byTooltip('foo'), timeout: _kTestTimeout);
       });
     });
 
@@ -548,8 +605,7 @@ void main() {
 
     group('sendCommand error conditions', () {
       test('local default timeout', () async {
-        final List<String> log = <String>[];
-        final StreamSubscription<LogRecord> logSub = flutterDriverLog.listen((LogRecord s) => log.add(s.toString()));
+        log.clear();
         when(mockIsolate.invokeExtension(any, any)).thenAnswer((Invocation i) {
           // completer never completed to trigger timeout
           return Completer<Map<String, dynamic>>().future;
@@ -559,13 +615,11 @@ void main() {
           expect(log, <String>[]);
           time.elapse(kUnusuallyLongTimeout);
         });
-        expect(log, <String>['[warning] FlutterDriver: waitFor message is taking a long time to complete...']);
-        await logSub.cancel();
+        expect(log, <String>['FlutterDriver: waitFor message is taking a long time to complete...']);
       });
 
       test('local custom timeout', () async {
-        final List<String> log = <String>[];
-        final StreamSubscription<LogRecord> logSub = flutterDriverLog.listen((LogRecord s) => log.add(s.toString()));
+        log.clear();
         when(mockIsolate.invokeExtension(any, any)).thenAnswer((Invocation i) {
           // completer never completed to trigger timeout
           return Completer<Map<String, dynamic>>().future;
@@ -576,8 +630,7 @@ void main() {
           expect(log, <String>[]);
           time.elapse(customTimeout);
         });
-        expect(log, <String>['[warning] FlutterDriver: waitFor message is taking a long time to complete...']);
-        await logSub.cancel();
+        expect(log, <String>['FlutterDriver: waitFor message is taking a long time to complete...']);
       });
 
       test('remote error', () async {

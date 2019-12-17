@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -48,7 +48,7 @@ void main() {
     mockProcessUtils = MockProcessUtils();
     when(mockBuildDaemonCreator.startBuildDaemon(any, release: anyNamed('release'), initializePlatform: anyNamed('initializePlatform')))
       .thenAnswer((Invocation invocation) async {
-        lastInitializePlatform = invocation.namedArguments[#initializePlatform];
+        lastInitializePlatform = invocation.namedArguments[#initializePlatform] as bool;
         return mockBuildDaemonClient;
       });
     when(mockOperatingSystemUtils.findFreePort()).thenAnswer((Invocation _) async {
@@ -60,7 +60,7 @@ void main() {
       mapFunction: anyNamed('mapFunction'),
       environment: anyNamed('environment'),
     )).thenAnswer((Invocation invocation) async {
-      final String workingDirectory = invocation.namedArguments[#workingDirectory];
+      final String workingDirectory = invocation.namedArguments[#workingDirectory] as String;
       fs.file(fs.path.join(workingDirectory, '.packages')).createSync(recursive: true);
       return 0;
     });
@@ -109,6 +109,7 @@ void main() {
           LogWriter logWriter,
           bool verbose,
           bool enableDebugExtension,
+          UrlEncoder urlEncoder,
         }) async {
           return mockDwds;
         },
@@ -126,6 +127,7 @@ void main() {
       initializePlatform: true,
       hostname: null,
       port: null,
+      urlTunneller: null,
       dartDefines: const <String>[],
     );
     // Since the .packages file is missing in the memory filesystem, this should
@@ -156,6 +158,7 @@ void main() {
       initializePlatform: false,
       hostname: null,
       port: null,
+      urlTunneller: null,
       dartDefines: const <String>[],
     );
 
@@ -177,6 +180,7 @@ void main() {
       initializePlatform: false,
       hostname: 'foo',
       port: '1234',
+      urlTunneller: null,
       dartDefines: const <String>[],
     );
 
@@ -210,6 +214,7 @@ void main() {
       initializePlatform: false,
       hostname: 'foo',
       port: '1234',
+      urlTunneller: null,
       dartDefines: const <String>[],
     ), throwsA(isInstanceOf<Exception>()));
   }));

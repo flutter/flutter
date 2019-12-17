@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -143,11 +143,11 @@ void main() {
       right: ProbeWidget(),
     ));
     expect(ProbeWidgetState.buildCount, equals(2));
-    final FlipWidgetState flipState1 = flipKey.currentState;
+    final FlipWidgetState flipState1 = flipKey.currentState as FlipWidgetState;
     flipState1.flip();
     await tester.pump();
     expect(ProbeWidgetState.buildCount, equals(3));
-    final FlipWidgetState flipState2 = flipKey.currentState;
+    final FlipWidgetState flipState2 = flipKey.currentState as FlipWidgetState;
     flipState2.flip();
     await tester.pump();
     expect(ProbeWidgetState.buildCount, equals(3));

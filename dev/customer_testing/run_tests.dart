@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -65,11 +65,11 @@ Future<bool> run(List<String> arguments) async {
     exit(1);
   }
 
-  final int repeat = int.tryParse(parsedArguments['repeat']);
-  final bool skipOnFetchFailure = parsedArguments['skip-on-fetch-failure'];
-  final bool skipTemplate = parsedArguments['skip-template'];
-  final bool verbose = parsedArguments['verbose'];
-  final bool help = parsedArguments['help'];
+  final int repeat = int.tryParse(parsedArguments['repeat'] as String);
+  final bool skipOnFetchFailure = parsedArguments['skip-on-fetch-failure'] as bool;
+  final bool skipTemplate = parsedArguments['skip-template'] as bool;
+  final bool verbose = parsedArguments['verbose'] as bool;
+  final bool help = parsedArguments['help'] as bool;
   final List<File> files = parsedArguments
     .rest
     .expand((String path) => Glob(path).listSync())
@@ -212,16 +212,16 @@ class TestFile {
         test.add(line.substring(5));
       } else if (line.startsWith('test.windows=')) {
         if (Platform.isWindows)
-          test.add(line.substring(5));
+          test.add(line.substring(13));
       } else if (line.startsWith('test.macos=')) {
         if (Platform.isMacOS)
-          test.add(line.substring(5));
+          test.add(line.substring(11));
       } else if (line.startsWith('test.linux=')) {
         if (Platform.isLinux)
-          test.add(line.substring(5));
+          test.add(line.substring(11));
       } else if (line.startsWith('test.posix=')) {
         if (Platform.isLinux || Platform.isMacOS)
-          test.add(line.substring(5));
+          test.add(line.substring(11));
       } else {
         throw FormatException('${errorPrefix}Unexpected directive:\n$line');
       }

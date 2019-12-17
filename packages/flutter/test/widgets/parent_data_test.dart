@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -23,19 +23,19 @@ void checkTree(WidgetTester tester, List<TestParentData> expectedParentData) {
   );
   expect(element, isNotNull);
   expect(element.renderObject is RenderStack, isTrue);
-  final RenderStack renderObject = element.renderObject;
+  final RenderStack renderObject = element.renderObject as RenderStack;
   try {
     RenderObject child = renderObject.firstChild;
     for (TestParentData expected in expectedParentData) {
       expect(child is RenderDecoratedBox, isTrue);
-      final RenderDecoratedBox decoratedBox = child;
+      final RenderDecoratedBox decoratedBox = child as RenderDecoratedBox;
       expect(decoratedBox.parentData is StackParentData, isTrue);
-      final StackParentData parentData = decoratedBox.parentData;
+      final StackParentData parentData = decoratedBox.parentData as StackParentData;
       expect(parentData.top, equals(expected.top));
       expect(parentData.right, equals(expected.right));
       expect(parentData.bottom, equals(expected.bottom));
       expect(parentData.left, equals(expected.left));
-      final StackParentData decoratedBoxParentData = decoratedBox.parentData;
+      final StackParentData decoratedBoxParentData = decoratedBox.parentData as StackParentData;
       child = decoratedBoxParentData.nextSibling;
     }
     expect(child, isNull);

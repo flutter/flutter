@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -47,7 +47,7 @@ void main() {
       '--no-pub',
     ]);
 
-    final Environment environment = verify(buildSystem.build(any, captureAny)).captured.single;
+    final Environment environment = verify(buildSystem.build(any, captureAny)).captured.single as Environment;
     expect(environment.defines, <String, String>{
       kTargetFile: fs.path.absolute(fs.path.join('lib', 'main.dart')),
       kBuildMode: 'release',

@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -59,6 +59,15 @@ TaskFunction createBackdropFilterPerfTest({bool needsMeasureCpuGpu = false}) {
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
     'test_driver/backdrop_filter_perf.dart',
     'backdrop_filter_perf',
+    needsMeasureCpuGPu: needsMeasureCpuGpu,
+  ).run;
+}
+
+TaskFunction createPostBackdropFilterPerfTest({bool needsMeasureCpuGpu = false}) {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/post_backdrop_filter_perf.dart',
+    'post_backdrop_filter_perf',
     needsMeasureCpuGPu: needsMeasureCpuGpu,
   ).run;
 }
@@ -167,7 +176,9 @@ class StartupTest {
         '-d',
         deviceId,
       ]);
-      final Map<String, dynamic> data = json.decode(file('$testDirectory/build/start_up_info.json').readAsStringSync());
+      final Map<String, dynamic> data = json.decode(
+        file('$testDirectory/build/start_up_info.json').readAsStringSync(),
+      ) as Map<String, dynamic>;
 
       if (!reportMetrics)
         return TaskResult.success(data);
@@ -211,9 +222,11 @@ class PerfTest {
         '-d',
         deviceId,
       ]);
-      final Map<String, dynamic> data = json.decode(file('$testDirectory/build/$timelineFileName.timeline_summary.json').readAsStringSync());
+      final Map<String, dynamic> data = json.decode(
+        file('$testDirectory/build/$timelineFileName.timeline_summary.json').readAsStringSync(),
+      ) as Map<String, dynamic>;
 
-      if (data['frame_count'] < 5) {
+      if (data['frame_count'] as int < 5) {
         return TaskResult.failure(
           'Timeline contains too few frames: ${data['frame_count']}. Possibly '
           'trace events are not being captured.',
@@ -285,7 +298,7 @@ class WebCompileTest {
     rmTree(sampleDir);
 
     await inDirectory<void>(Directory.systemTemp, () async {
-      await flutter('create', options: <String>['--template=app', '--web', sampleAppName], environment: <String, String>{
+      await flutter('create', options: <String>['--template=app', sampleAppName], environment: <String, String>{
           'FLUTTER_WEB': 'true',
         });
       await inDirectory(sampleDir, () async {
@@ -308,8 +321,8 @@ class WebCompileTest {
     final ProcessResult result = await Process.run('du', <String>['-k', output]);
     await Process.run('gzip',<String>['-k', '9', output]);
     final ProcessResult resultGzip = await Process.run('du', <String>['-k', output + '.gz']);
-    metrics['${metric}_dart2js_size'] = _parseDu(result.stdout);
-    metrics['${metric}_dart2js_size_gzip'] = _parseDu(resultGzip.stdout);
+    metrics['${metric}_dart2js_size'] = _parseDu(result.stdout as String);
+    metrics['${metric}_dart2js_size_gzip'] = _parseDu(resultGzip.stdout as String);
   }
 
   static int _parseDu(String source) {
@@ -342,7 +355,6 @@ class CompileTest {
   }
 
   static Future<Map<String, dynamic>> _compileAot() async {
-    // Generate blobs instead of assembly.
     await flutter('clean');
     final Stopwatch watch = Stopwatch()..start();
     final List<String> options = <String>[
@@ -637,9 +649,9 @@ class MemoryTest {
     assert(_startMemoryUsage != null);
     print('snapshotting memory usage...');
     final Map<String, dynamic> endMemoryUsage = await device.getMemoryStats(package);
-    _startMemory.add(_startMemoryUsage['total_kb']);
-    _endMemory.add(endMemoryUsage['total_kb']);
-    _diffMemory.add(endMemoryUsage['total_kb'] - _startMemoryUsage['total_kb']);
+    _startMemory.add(_startMemoryUsage['total_kb'] as int);
+    _endMemory.add(endMemoryUsage['total_kb'] as int);
+    _diffMemory.add((endMemoryUsage['total_kb'] as int) - (_startMemoryUsage['total_kb'] as int));
   }
 }
 

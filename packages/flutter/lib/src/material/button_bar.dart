@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -25,7 +25,7 @@ import 'raised_button.dart';
 /// widget, it aligns its buttons in a column. The key difference here
 /// is that the [MainAxisAlignment] will then be treated as a
 /// cross-axis/horizontal alignment. For example, if the buttons overflow and
-/// [ButtonBar.alignment] was set to [MainAxisAligment.start], the buttons would
+/// [ButtonBar.alignment] was set to [MainAxisAlignment.start], the buttons would
 /// align to the horizontal start of the button bar.
 ///
 /// The [ButtonBar] can be configured with a [ButtonBarTheme]. For any null
@@ -186,7 +186,7 @@ class ButtonBar extends StatelessWidget {
 /// there is not enough horizontal space.
 ///
 /// It first attempts to lay out its buttons as though there were no
-/// maximumm width constraints on the widget. If the button bar's width is
+/// maximum width constraints on the widget. If the button bar's width is
 /// less than the maximum width constraints of the widget, it then lays
 /// out the widget as though it were placed in a [Row].
 ///
@@ -249,7 +249,7 @@ class _ButtonBarRow extends Flex {
 /// there is not enough horizontal space.
 ///
 /// It first attempts to lay out its buttons as though there were no
-/// maximumm width constraints on the widget. If the button bar's width is
+/// maximum width constraints on the widget. If the button bar's width is
 /// less than the maximum width constraints of the widget, it then lays
 /// out the widget as though it were placed in a [Row].
 ///
@@ -316,7 +316,7 @@ class _RenderButtonBarRow extends RenderFlex {
       double currentHeight = 0.0;
 
       while (child != null) {
-        final FlexParentData childParentData = child.parentData;
+        final FlexParentData childParentData = child.parentData as FlexParentData;
 
         // Lay out the child with the button bar's original constraints, but
         // with minimum width set to zero.

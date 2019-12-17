@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -717,7 +717,7 @@ void main() {
         find.byKey(painterKey),
         matchesGoldenFile('material.border_paint_above.png'),
       );
-    }, skip: isBrowser);
+    });
 
     testWidgets('border is painted below child when specified', (WidgetTester tester) async {
       final Key painterKey = UniqueKey();
@@ -757,6 +757,6 @@ void main() {
         find.byKey(painterKey),
         matchesGoldenFile('material.border_paint_below.png'),
       );
-    }, skip: isBrowser);
+    });
   });
 }
