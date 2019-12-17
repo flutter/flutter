@@ -21,6 +21,12 @@ import 'web_driver_config.dart';
 export 'web_driver_config.dart';
 
 /// An implementation of the Flutter Driver using the WebDriver.
+///
+/// Example of how to test WebFlutterDriver:
+///   1. Have Selenium server (https://bit.ly/2TlkRyu) and WebDriver binary (https://chromedriver.chromium.org/downloads) downloaded and placed under the same folder
+///   2. Launch WebDriver Server: java -jar selenium-server-standalone-3.141.59.jar
+///   3. Launch Flutter Web application: flutter run -v -d chrome --target=test_driver/scroll_perf_web.dart
+///   4. Run test script: flutter drive --target=test_driver/scroll_perf.dart -v --use-existing-app=/application address/
 class WebFlutterDriver extends FlutterDriver {
   /// Creates a driver that uses a connection provided by the given
   /// [_connection] and [_browserName].
