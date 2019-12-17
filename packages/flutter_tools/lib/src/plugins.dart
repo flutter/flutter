@@ -310,62 +310,22 @@ List<Plugin> findPlugins(FlutterProject project) {
   return plugins;
 }
 
+Iterable<Plugin> _pluginsForPlatform(List<Plugin>plugins, String platform) {
+  return plugins.where((Plugin p) {
+    return p.platforms.containsKey(platform);
+  });
+}
+
 /// Writes the .flutter-plugins and .flutter-plugins-dependencies files based on the list of plugins.
 /// If there aren't any plugins, then the files aren't written to disk.
 ///
 /// Finally, returns [true] if .flutter-plugins or .flutter-plugins-dependencies have changed,
 /// otherwise returns [false].
-bool _legacyWriteFlutterPluginsList(FlutterProject project, List<Plugin> plugins) {
-  final List<dynamic> directAppDependencies = <dynamic>[];
-  const String info = 'This is a generated file; do not edit or check into version control.';
-  final StringBuffer flutterPluginsBuffer = StringBuffer('# $info\n');
-
-  final Set<String> pluginNames = <String>{};
-  for (Plugin plugin in plugins) {
-    pluginNames.add(plugin.name);
-  }
-  for (Plugin plugin in plugins) {
-    flutterPluginsBuffer.write('${plugin.name}=${escapePath(plugin.path)}\n');
-    directAppDependencies.add(<String, dynamic>{
-      'name': plugin.name,
-      // Extract the plugin dependencies which happen to be plugins.
-      'dependencies': <String>[...plugin.dependencies.where(pluginNames.contains)],
-    });
-  }
-  final File pluginsFile = project.flutterPluginsFile;
-  final String oldPluginFileContent = _readFileContent(pluginsFile);
-  final String pluginFileContent = flutterPluginsBuffer.toString();
-  if (pluginNames.isNotEmpty) {
-    pluginsFile.writeAsStringSync(pluginFileContent, flush: true);
-  } else {
-    if (pluginsFile.existsSync()) {
-      pluginsFile.deleteSync();
-    }
-  }
-
-  final File dependenciesFile = project.flutterPluginsDependenciesFile;
-  final String oldDependenciesFileContent = _readFileContent(dependenciesFile);
-  final String dependenciesFileContent = json.encode(<String, dynamic>{
-      '_info': '// $info',
-      'dependencyGraph': directAppDependencies,
-    });
-  if (pluginNames.isNotEmpty) {
-    dependenciesFile.writeAsStringSync(dependenciesFileContent, flush: true);
-  } else {
-    if (dependenciesFile.existsSync()) {
-      dependenciesFile.deleteSync();
-    }
-  }
-
-  return oldPluginFileContent != _readFileContent(pluginsFile)
-      || oldDependenciesFileContent != _readFileContent(dependenciesFile);
-}
-
-bool _writeFlutterPlatformPluginsList(PlatformProject project, List<Plugin> plugins) {
+bool _writeFlutterPlatformPluginsList(PlatformProject project, List<Plugin> plugins, [bool filter = true]) {
   // Gets only the plugins supported by the project platform.
-  final Iterable<Plugin> platformPlugins = plugins.where((Plugin p) {
-    return p.platforms.containsKey(project.pluginConfigKey);
-  });
+  final Iterable<Plugin> platformPlugins = filter ?
+     _pluginsForPlatform(plugins, project.pluginConfigKey) :
+     plugins;
 
   final List<dynamic> directAppDependencies = <dynamic>[];
   const String info = 'This is a generated file; do not edit or check into version control.';
@@ -837,11 +797,6 @@ Future<void> _writeWebPluginRegistrant(FlutterProject project, List<Plugin> plug
 void refreshPluginsList(FlutterProject project, {bool checkProjects = false}) {
   final List<Plugin> plugins = findPlugins(project);
 
-  // TODO(franciscojma): Using the legacy method for Android since there is some
-  // gradle work to be done (update the generated settins.gradle on projects).
-  if (project.android.existsSync()) {
-    _legacyWriteFlutterPluginsList(project, plugins);
-  }
   if (project.web.existsSync()) {
     _writeFlutterPlatformPluginsList(project.web, plugins);
   }
@@ -853,6 +808,9 @@ void refreshPluginsList(FlutterProject project, {bool checkProjects = false}) {
   }
   if (project.macos.existsSync()) {
     _writeFlutterPlatformPluginsList(project.macos, plugins);
+  }
+  if (project.android.existsSync()) {
+    _writeFlutterPlatformPluginsList(project.android, plugins, false);
   }
   if (project.ios.existsSync()) {
     final bool changed = _writeFlutterPlatformPluginsList(project.ios, plugins);
