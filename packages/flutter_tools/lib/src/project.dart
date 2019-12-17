@@ -29,14 +29,15 @@ FlutterProjectFactory get projectFactory => context.get<FlutterProjectFactory>()
 class FlutterProjectFactory {
   FlutterProjectFactory();
 
-  final Map<String, FlutterProject> _projects =
+  @visibleForTesting
+  final Map<String, FlutterProject> projects =
       <String, FlutterProject>{};
 
   /// Returns a [FlutterProject] view of the given directory or a ToolExit error,
   /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
   FlutterProject fromDirectory(Directory directory) {
     assert(directory != null);
-    return _projects.putIfAbsent(directory.path, /* ifAbsent */ () {
+    return projects.putIfAbsent(directory.path, /* ifAbsent */ () {
       final FlutterManifest manifest = FlutterProject._readManifest(
         directory.childFile(bundle.defaultManifestPath).path,
       );

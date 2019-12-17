@@ -149,7 +149,7 @@ Future<void> checkGradleDependencies() async {
     workingDirectory: flutterProject.android.hostAppGradleRoot.path,
     environment: gradleEnvironment,
   );
-  androidSdk.reinitialize();
+  androidSdk?.reinitialize();
   progress.stop();
 }
 
