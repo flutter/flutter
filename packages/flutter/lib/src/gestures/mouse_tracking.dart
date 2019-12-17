@@ -138,7 +138,7 @@ class MouseTrackerAnnotation extends Diagnosticable {
   ///
   ///  * [UniqueKey], [ObjectKey], and [ValueKey], which are common classes of
   ///    keys.
-  final Key key;
+  final LocalKey key;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -152,7 +152,7 @@ class MouseTrackerAnnotation extends Diagnosticable {
       },
       ifEmpty: '<none>',
     ));
-    properties.add(DiagnosticsProperty<Key>('key', key));
+    properties.add(DiagnosticsProperty<LocalKey>('key', key));
   }
 }
 
@@ -269,7 +269,7 @@ class MouseTracker extends ChangeNotifier {
 
   // The collection of annotations that are currently being tracked. It is
   // operated on by [attachAnnotation] and [detachAnnotation].
-  final HashSet<Key> _trackedAnnotationKeys = HashSet<Key>();
+  final HashSet<LocalKey> _trackedAnnotationKeys = HashSet<LocalKey>();
 
   // Tracks the state of connected mouse devices.
   //
@@ -454,7 +454,7 @@ class MouseTracker extends ChangeNotifier {
     @required List<MouseTrackerAnnotation> nextAnnotations,
     @required Offset lastHoverPosition,
     @required PointerEvent unhandledEvent,
-    @required HashSet<Key> trackedAnnotationKeys,
+    @required HashSet<LocalKey> trackedAnnotationKeys,
   }) {
     assert(lastAnnotations != null);
     assert(nextAnnotations != null);
@@ -467,11 +467,11 @@ class MouseTracker extends ChangeNotifier {
     // The algorithm here is explained in
     // https://github.com/flutter/flutter/issues/41420
 
-    final HashSet<Key> lastKeys = HashSet<Key>.from(
-      lastAnnotations.map<Key>((MouseTrackerAnnotation value) => value.key),
+    final HashSet<LocalKey> lastKeys = HashSet<LocalKey>.from(
+      lastAnnotations.map<LocalKey>((MouseTrackerAnnotation value) => value.key),
     );
-    final HashSet<Key> nextKeys = HashSet<Key>.from(
-      nextAnnotations.map<Key>((MouseTrackerAnnotation value) => value.key),
+    final HashSet<LocalKey> nextKeys = HashSet<LocalKey>.from(
+      nextAnnotations.map<LocalKey>((MouseTrackerAnnotation value) => value.key),
     );
 
     // Send exit events to annotations that are in last but not in next, in
@@ -555,7 +555,7 @@ class MouseTracker extends ChangeNotifier {
   /// This function is only public to allow for proper testing of the
   /// MouseTracker. Do not call in other contexts.
   @visibleForTesting
-  bool isAnnotationAttached(Key annotationKey) {
+  bool isAnnotationAttached(LocalKey annotationKey) {
     if (annotationKey == null)
       return false;
     return _trackedAnnotationKeys.contains(annotationKey);
@@ -596,7 +596,7 @@ class MouseTracker extends ChangeNotifier {
   ///    annotations attached.
   /// {@endtemplate}
   ///  * Attaching an annotation that has been attached will assert.
-  void attachAnnotation(Key annotationKey) {
+  void attachAnnotation(LocalKey annotationKey) {
     assert(!_duringDeviceUpdate);
     assert(annotationKey != null);
     assert(!_trackedAnnotationKeys.contains(annotationKey));
@@ -613,7 +613,7 @@ class MouseTracker extends ChangeNotifier {
   ///
   /// {@macro flutter.mouseTracker.attachAnnotation}
   ///  * Detaching an annotation that has not been attached will assert.
-  void detachAnnotation(Key annotationKey) {
+  void detachAnnotation(LocalKey annotationKey) {
     assert(!_duringDeviceUpdate);
     assert(annotationKey != null);
     assert(_trackedAnnotationKeys.contains(annotationKey));
