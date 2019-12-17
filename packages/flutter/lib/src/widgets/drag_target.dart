@@ -519,8 +519,7 @@ class _DragTargetState<T> extends State<DragTarget<T>> {
   bool didEnter(_DragAvatar<dynamic> avatar) {
     assert(!_candidateAvatars.contains(avatar));
     assert(!_rejectedAvatars.contains(avatar));
-    final dynamic data = avatar.data;
-    if (data is T && (widget.onWillAccept == null || widget.onWillAccept(data))) {
+    if (avatar is _DragAvatar<T> && (widget.onWillAccept == null || widget.onWillAccept(avatar.data))) {
       setState(() {
         _candidateAvatars.add(avatar);
       });
@@ -542,7 +541,7 @@ class _DragTargetState<T> extends State<DragTarget<T>> {
       _rejectedAvatars.remove(avatar);
     });
     if (widget.onLeave != null)
-      widget.onLeave(avatar.data);
+      widget.onLeave(avatar.data as T);
   }
 
   void didDrop(_DragAvatar<dynamic> avatar) {
@@ -553,7 +552,7 @@ class _DragTargetState<T> extends State<DragTarget<T>> {
       _candidateAvatars.remove(avatar);
     });
     if (widget.onAccept != null)
-      widget.onAccept(avatar.data);
+      widget.onAccept(avatar.data as T);
   }
 
   @override
