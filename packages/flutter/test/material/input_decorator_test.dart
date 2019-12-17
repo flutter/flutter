@@ -153,10 +153,9 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    final double labelYPosition = tester.getTopLeft(find.text('label')).dy;
-    expect(labelYPosition, 20.0);
+    expect(tester.getTopLeft(find.text('label')).dy, 20.0);
 
-    // The label appears above the input text when there is not content and floatLabelBehavior is always
+    // The label appears above the input text when there is no content and floatLabelBehavior is always
     await tester.pumpWidget(
       buildInputDecorator(
         isEmpty: true,
@@ -169,22 +168,24 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    // Overall height for this InputDecorator is 56dps:
-    //   12 - top padding
-    //   12 - floating label (ahem font size 16dps * 0.75 = 12)
-    //    4 - floating label / input text gap
-    //   16 - input text (ahem font size 16dps)
-    //   12 - bottom padding
-
-    expect(tester.getSize(find.byType(InputDecorator)), const Size(800.0, 56.0));
-    expect(tester.getTopLeft(find.text('text')).dy, 28.0);
-    expect(tester.getBottomLeft(find.text('text')).dy, 44.0);
     expect(tester.getTopLeft(find.text('label')).dy, 12.0);
-    expect(tester.getBottomLeft(find.text('label')).dy, 24.0);
-    expect(getBorderBottom(tester), 56.0);
-    expect(getBorderWeight(tester), 1.0);
 
-    // The label appears within the input when hasFloatingPlaceholder is false
+    // The label appears within the input text when there is content and floatLabelBehavior is never
+    await tester.pumpWidget(
+      buildInputDecorator(
+        isEmpty: false,
+        // isFocused: false (default)
+        decoration: const InputDecoration(
+          labelText: 'label',
+          floatLabelBehavior: FloatLabelBehavior.never
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(tester.getTopLeft(find.text('label')).dy, 20.0);
+
+    // The label appears within the input when hasFloatingPlaceholder is false and floatLabelBehavior is always
     await tester.pumpWidget(
       buildInputDecorator(
         isEmpty: true,

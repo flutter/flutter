@@ -464,6 +464,8 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
 
 /// Defines the behaviour of the floating label
 enum FloatLabelBehavior {
+  /// the label will always be positioned within the content, or hidden
+  never,
   /// the label will float when the input is focused, or has content
   auto,
   /// the label will always float above the content
@@ -1925,19 +1927,20 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   bool get isHovering => widget.isHovering && decoration.enabled;
   bool get isEmpty => widget.isEmpty;
 
+  bool get floatLabelEnabled => decoration.hasFloatingPlaceholder && decoration.floatLabelBehavior != FloatLabelBehavior.never;
+
   @override
   void didUpdateWidget(InputDecorator old) {
     super.didUpdateWidget(old);
     if (widget.decoration != old.decoration)
       _effectiveDecoration = null;
 
-    final bool floatBehaviourChanged = widget.decoration.floatLabelBehavior != old.decoration.floatLabelBehavior;
-    final bool hasFloatingPlaceholderChanged = widget.decoration.hasFloatingPlaceholder != old.decoration.hasFloatingPlaceholder;
+    final bool floatBehaviourChanged = widget.decoration.floatLabelBehavior != old.decoration.floatLabelBehavior || widget.decoration.hasFloatingPlaceholder != old.decoration.hasFloatingPlaceholder;
 
-    if (widget._labelShouldWithdraw != old._labelShouldWithdraw || floatBehaviourChanged || hasFloatingPlaceholderChanged) {
-      if (widget._labelShouldWithdraw || (widget.decoration.floatLabelBehavior == FloatLabelBehavior.always && widget.decoration.hasFloatingPlaceholder))
+    if (widget._labelShouldWithdraw != old._labelShouldWithdraw || floatBehaviourChanged) {
+      if ((widget._labelShouldWithdraw || widget.decoration.floatLabelBehavior == FloatLabelBehavior.always) && floatLabelEnabled)
         _floatingLabelController.forward();
-      else if (widget.decoration.floatLabelBehavior != FloatLabelBehavior.always || !widget.decoration.hasFloatingPlaceholder)
+      else
         _floatingLabelController.reverse();
     }
 
@@ -2031,7 +2034,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   bool get _hasInlineLabel => !widget._labelShouldWithdraw && decoration.labelText != null;
 
   // If the label is a floating placeholder, it's always shown.
-  bool get _shouldShowLabel => _hasInlineLabel || decoration.hasFloatingPlaceholder;
+  bool get _shouldShowLabel => _hasInlineLabel || floatLabelEnabled;
 
   // The base style for the inline label or hint when they're displayed "inline",
   // i.e. when they appear in place of the empty text field.
@@ -2440,6 +2443,7 @@ class InputDecoration {
     this.errorText,
     this.errorStyle,
     this.errorMaxLines,
+    @Deprecated('Use floatLabelBehaviour instead.')
     this.hasFloatingPlaceholder = true,
     this.floatLabelBehavior = FloatLabelBehavior.auto,
     this.isDense,
@@ -2480,6 +2484,7 @@ class InputDecoration {
   /// Sets the [isCollapsed] property to true.
   const InputDecoration.collapsed({
     @required this.hintText,
+    @Deprecated('Use floatLabelBehaviour instead.')
     this.hasFloatingPlaceholder = true,
     this.floatLabelBehavior = FloatLabelBehavior.auto,
     this.hintStyle,
@@ -2645,6 +2650,8 @@ class InputDecoration {
   /// the input has focus or text has been entered.
   ///
   /// Defaults to true.
+  ///
+  @Deprecated('Use floatLabelBehaviour instead.')
   final bool hasFloatingPlaceholder;
 
   /// Defines how the floating label should be displayed.
@@ -2655,6 +2662,9 @@ class InputDecoration {
   ///
   /// When [FloatLabelBehavior.always] the label will always float at the top
   /// of the field above the content.
+  ///
+  /// When [FloatLabelBehavior.never] the label will always will appear
+  /// in the field in place of the content.
   ///
   /// Defaults to [FloatLabelBehavior.auto].
   ///
@@ -3385,6 +3395,7 @@ class InputDecorationTheme extends Diagnosticable {
     this.hintStyle,
     this.errorStyle,
     this.errorMaxLines,
+    @Deprecated('Use floatLabelBehaviour instead.')
     this.hasFloatingPlaceholder = true,
     this.floatLabelBehavior = FloatLabelBehavior.auto,
     this.isDense = false,
@@ -3472,12 +3483,10 @@ class InputDecorationTheme extends Diagnosticable {
   /// the input has focus or text has been entered.
   ///
   /// Defaults to true.
+  @Deprecated('Use floatLabelBehaviour instead.')
   final bool hasFloatingPlaceholder;
 
   /// Defines how the floating label should be displayed.
-  ///
-  /// When [FloatLabelBehavior.never] the label will always appear
-  /// in the field in place of the content, or disappear when there is text content.
   ///
   /// When [FloatLabelBehavior.auto] the label will float to the top only when
   /// the field is focused or has some text content, otherwise it will appear
@@ -3485,6 +3494,9 @@ class InputDecorationTheme extends Diagnosticable {
   ///
   /// When [FloatLabelBehavior.always] the label will always float at the top
   /// of the field above the content.
+  ///
+  /// When [FloatLabelBehavior.never] the label will always will appear
+  /// in the field in place of the content.
   ///
   /// Defaults to [FloatLabelBehavior.auto].
   ///
@@ -3736,6 +3748,7 @@ class InputDecorationTheme extends Diagnosticable {
     TextStyle hintStyle,
     TextStyle errorStyle,
     int errorMaxLines,
+    @Deprecated('Use floatLabelBehaviour instead.')
     bool hasFloatingPlaceholder,
     FloatLabelBehavior floatLabelBehavior,
     bool isDense,
