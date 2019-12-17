@@ -88,19 +88,19 @@ void main() {
     expect(_getDecoration(tester).color, _kBackgroundColor);
   });
 
-  testWidgets('icon and textStyle colors are right out of the box',(WidgetTester tester) async {
+  testWidgets('icon and textStyle colors are correct out of the box', (WidgetTester tester) async {
     await tester.pumpWidget(_getApp());
     expect(_getTextStyle(tester).color, _kRegularActionColor);
     expect(_getIcon(tester).color, _kRegularActionColor);
   });
 
-  testWidgets('icon and textStyle colors are right for destructive actions',(WidgetTester tester) async {
+  testWidgets('icon and textStyle colors are correct for destructive actions', (WidgetTester tester) async {
     await tester.pumpWidget(_getApp(isDestructiveAction: true));
     expect(_getTextStyle(tester).color, _kDestructiveActionColor);
     expect(_getIcon(tester).color, _kDestructiveActionColor);
   });
 
-  testWidgets('textStyle is right for defaultAction',(WidgetTester tester) async {
+  testWidgets('textStyle is correct for defaultAction', (WidgetTester tester) async {
     await tester.pumpWidget(_getApp(isDefaultAction: true));
     expect(_getTextStyle(tester).fontWeight, _kDefaultActionWeight);
   });
