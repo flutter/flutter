@@ -492,7 +492,7 @@ class CatmullRomCurve extends Curve {
         }(), 'control points $controlPoints could not be validated.'),
         // Synthesize the first and last points to make sure the curve always goes
         // from (0,0) to (1,1), which is part of the Curve contract.
-        valueSpline = CatmullRomSpline(<Offset>[Offset.zero, ...controlPoints, const Offset(1.0, 1.0)], tension: tension);
+        valueSpline = CatmullRomSpline(controlPoints, tension: tension);
 
   /// The 2D spline created for this curve.
   final CatmullRomSpline valueSpline;
@@ -593,51 +593,66 @@ class CatmullRomCurve extends Curve {
   /// In debug mode, and `reasons` is non-null, this function will fill in
   /// `reasons` with descriptions of the problems encountered.
   static bool validateControlPoints(
-      List<Offset> interiorPoints, {
+      List<Offset> controlPoints, {
       double tension = 0.0,
       List<String> reasons,
     }) {
     assert(tension != null);
-    if (interiorPoints == null) {
+    if (controlPoints == null) {
       assert(() {
-        reasons?.add('Supplied interior points cannot be null');
+        reasons?.add('Supplied control points cannot be null');
         return true;
       }());
       return false;
     }
 
-    if (interiorPoints.length < 2) {
+    if (controlPoints.length < 4) {
       assert(() {
-        reasons?.add('There must be at least two points supplied to create a valid curve.');
+        reasons?.add('There must be at least four points supplied to create a valid curve.');
         return true;
       }());
       return false;
     }
 
-    List<Offset> points = <Offset>[Offset.zero, ...interiorPoints, const Offset(1.0, 1.0)];
-    final Offset startHandle = points[0] * 2.0 - points[1];
-    final Offset endHandle = points.last * 2.0 - points[points.length - 2];
-    points = <Offset>[startHandle, ...points, endHandle];
+    if (controlPoints[0] != Offset.zero) {
+      assert(() {
+        reasons?.add('The first control point must be Offset(0.0, 0.0), not ${controlPoints[0]}.');
+        return true;
+      }());
+      return false;
+    }
+
+    if (controlPoints.last != const Offset(1.0, 1.0)) {
+      assert(() {
+        reasons?.add('The last control point must be Offset(1.0, 1.0), not ${controlPoints[0]}.');
+        return true;
+      }());
+      return false;
+    }
+
+    final Offset startHandle = controlPoints[0] * 2.0 - controlPoints[1];
+    final Offset endHandle = controlPoints.last * 2.0 - controlPoints[controlPoints.length - 2];
+    controlPoints = <Offset>[startHandle, ...controlPoints, endHandle];
     double lastX = -double.infinity;
-    for (int i = 0; i < points.length; ++i) {
-      if (i > 1 && i < points.length - 2 && (points[i].dx <= 0.0 || points[i].dx >= 1.0)) {
+    for (int i = 0; i < controlPoints.length; ++i) {
+      if (i > 1 && i < controlPoints.length - 2 && (controlPoints[i].dx <= 0.0 || controlPoints[i].dx >= 1.0)) {
         assert(() {
           reasons?.add('Points must have X values between 0.0 and 1.0, exclusive. '
-              'Point $i has an x value (${points[i].dx}) which is outside the range.');
+              'Point $i has an x value (${controlPoints[i].dx}) which is outside the range.');
           return true;
         }());
         return false;
       }
-      if (points[i].dx <= lastX) {
+      if (controlPoints[i].dx <= lastX) {
         assert(() {
           reasons?.add('Each X coordinate must be greater than the preceding X coordinate '
-              '(i.e. must be monotonically increasing in X). Point $i has x value of ${points[i].dx}, '
+              '(i.e. must be monotonically increasing in X). Point $i has x value of ${controlPoints[i].dx}, '
               'which is not greater than $lastX');
           return true;
         }());
         return false;
       }
-      lastX = points[i].dx;
+      lastX = controlPoints[i].dx;
     }
 
     final List<List<Vector2>> quads = <List<Vector2>>[];
@@ -649,17 +664,17 @@ class CatmullRomCurve extends Curve {
     bool success = true;
 
     // Step through each set of four control points.
-    for (int i = 0; i < points.length - 3; ++i) {
-      final Vector2 p1 = toVector(points[i]);
-      final Vector2 p2 = toVector(points[i + 1]);
-      final Vector2 p3 = toVector(points[i + 2]);
+    for (int i = 0; i < controlPoints.length - 3; ++i) {
+      final Vector2 p1 = toVector(controlPoints[i]);
+      final Vector2 p2 = toVector(controlPoints[i + 1]);
+      final Vector2 p3 = toVector(controlPoints[i + 2]);
       // This is the initial control point that leads to the first point on the
       // interpolated curve.
       final Vector2 v1 = p1 - p2;
       // This is the segment which defines the two ends of the interpolated curve.
       final Vector2 v2 = p3 - p2;
 
-      if (points.length > 5 && tension != 1.0) {
+      if (controlPoints.length > 5 && tension != 1.0) {
         // We only need to compute the quads if we have three or more spline
         // segments: Only the bounding quads of non-adjacent segments need to be
         // compared, and if there are fewer than three spline segments, there
@@ -677,7 +692,7 @@ class CatmullRomCurve extends Curve {
         bool bail = true;
         assert(() {
           reasons?.add('The included angle between segments $i and ${i + 1} (defined '
-              'by points ${<Offset>[points[i], points[i + 1], points[i + 2]]}) is less '
+              'by points ${<Offset>[controlPoints[i], controlPoints[i + 1], controlPoints[i + 2]]}) is less '
               'than 60 degrees (it is ${(180.0 * angle / math.pi).toStringAsFixed(2)} '
               'degrees).');
           // No need to keep going if we're not giving reasons.
@@ -729,7 +744,7 @@ class CatmullRomCurve extends Curve {
     // A last empirical test to make sure things are single-valued in X.
     const int testPoints = 100;
     lastX = -double.infinity;
-    final CatmullRomSpline testSpline = CatmullRomSpline(<Offset>[Offset.zero, ...points, const Offset(1.0, 1.0)], tension: tension);
+    final CatmullRomSpline testSpline = CatmullRomSpline(controlPoints, tension: tension);
     for (int i = 0; i < testPoints; i++) {
       final double pos = i / testPoints.toDouble();
       final double x = testSpline.transform(pos).dx;
