@@ -77,7 +77,6 @@ class TestTextInput {
     return true;
   }
 
-
   /// Whether there are any active clients listening to text input.
   bool get hasAnyClients => _client > 0;
 
