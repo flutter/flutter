@@ -554,6 +554,237 @@ void main() {
 ''');
     });
 
+    test('correctly generates simple message with dates', () {
+      const String singleDateMessageArbFileString = '''{
+  "springBegins": "Spring begins on {springStartDate}",
+  "@springBegins": {
+      "description": "The first day of spring",
+      "placeholders": {
+          "springStartDate": {
+              "type": "DateTime",
+              "format": "yMMMMEEEEd"
+          }
+      }
+  }
+}''';
+      final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+        ..createSync(recursive: true);
+      l10nDirectory.childFile(defaultTemplateArbFileName)
+        .writeAsStringSync(singleDateMessageArbFileString);
+
+      final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+      try {
+        generator.initialize(
+          l10nDirectoryPath: defaultArbPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        );
+        generator.parseArbFiles();
+        generator.generateClassMethods();
+      } on Exception catch (e) {
+        fail('Parsing template arb file should succeed: \n$e');
+      }
+
+      expect(generator.classMethods, isNotEmpty);
+      expect(
+        generator.classMethods.first,
+        '''  String springBegins(Object springStartDate) {
+    final DateFormat springStartDateDateFormat = DateFormat.yMMMMEEEEd(_localeName);
+    final String springStartDateString = springStartDateDateFormat.format(springStartDate);
+
+    return Intl.message(
+      r'Spring begins on \$springStartDateString',
+      locale: _localeName,
+      name: 'springBegins',
+      desc: r'The first day of spring',
+      args: <Object>[springStartDateString]
+    );
+  }
+''');
+    });
+
+    test('throws an exception when improperly formatted date is passed in', () {
+      const String singleDateMessageArbFileString = '''{
+  "springBegins": "Spring begins on {springStartDate}",
+  "@springBegins": {
+      "description": "The first day of spring",
+      "placeholders": {
+          "springStartDate": {
+              "type": "DateTime",
+              "format": "asdf"
+          }
+      }
+  }
+}''';
+      final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+        ..createSync(recursive: true);
+      l10nDirectory.childFile(defaultTemplateArbFileName)
+        .writeAsStringSync(singleDateMessageArbFileString);
+
+      final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+      try {
+        generator.initialize(
+          l10nDirectoryPath: defaultArbPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        );
+        generator.parseArbFiles();
+        generator.generateClassMethods();
+      } on L10nException catch (e) {
+        expect(e.message, contains('asdf'));
+        expect(e.message, contains('springStartDate'));
+        expect(e.message, contains('does not have a corresponding DateFormat'));
+        return;
+      }
+
+      fail('Improper date formatting should throw an exception');
+    });
+
+    test('throws an exception when no format attribute is passed in', () {
+      const String singleDateMessageArbFileString = '''{
+  "springBegins": "Spring begins on {springStartDate}",
+  "@springBegins": {
+      "description": "The first day of spring",
+      "placeholders": {
+          "springStartDate": {
+              "type": "DateTime"
+          }
+      }
+  }
+}''';
+      final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+        ..createSync(recursive: true);
+      l10nDirectory.childFile(defaultTemplateArbFileName)
+        .writeAsStringSync(singleDateMessageArbFileString);
+
+      final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+      try {
+        generator.initialize(
+          l10nDirectoryPath: defaultArbPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        );
+        generator.parseArbFiles();
+        generator.generateClassMethods();
+      } on L10nException catch (e) {
+        expect(e.message, contains('the "format" attribute needs to be set'));
+        return;
+      }
+
+      fail('Improper date formatting should throw an exception');
+    });
+
+    test('correctly generates simple message with date along with other placeholders', () {
+      const String singleDateMessageArbFileString = '''{
+  "springGreetings": "Since it's {springStartDate}, it's finally spring! {helloWorld}!",
+  "@springGreetings": {
+      "description": "A realization that it's finally the spring season, followed by a greeting.",
+      "placeholders": {
+          "springStartDate": {
+              "type": "DateTime",
+              "format": "yMMMMEEEEd"
+          },
+          "helloWorld": {}
+      }
+  }
+}''';
+      final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+        ..createSync(recursive: true);
+      l10nDirectory.childFile(defaultTemplateArbFileName)
+        .writeAsStringSync(singleDateMessageArbFileString);
+
+      final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+      try {
+        generator.initialize(
+          l10nDirectoryPath: defaultArbPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        );
+        generator.parseArbFiles();
+        generator.generateClassMethods();
+      } on Exception catch (e) {
+        fail('Parsing template arb file should succeed: \n$e');
+      }
+
+      expect(generator.classMethods, isNotEmpty);
+      expect(
+        generator.classMethods.first,
+        '''  String springGreetings(Object springStartDate, Object helloWorld) {
+    final DateFormat springStartDateDateFormat = DateFormat.yMMMMEEEEd(_localeName);
+    final String springStartDateString = springStartDateDateFormat.format(springStartDate);
+
+    return Intl.message(
+      r\'Since it\' "\'" r\'s \$springStartDateString, it\' "\'" r\'s finally spring! \$helloWorld!\',
+      locale: _localeName,
+      name: 'springGreetings',
+      desc: r\'A realization that it\' "\'" r\'s finally the spring season, followed by a greeting.\',
+      args: <Object>[springStartDateString, helloWorld]
+    );
+  }
+''');
+    });
+
+    test('correctly generates simple message with multiple dates', () {
+      const String singleDateMessageArbFileString = '''{
+  "springRange": "Spring begins on {springStartDate} and ends on {springEndDate}",
+  "@springRange": {
+      "description": "The range of dates for spring in the year",
+      "placeholders": {
+          "springStartDate": {
+              "type": "DateTime",
+              "format": "yMMMMEEEEd"
+          },
+          "springEndDate": {
+              "type": "DateTime",
+              "format": "yMMMMEEEEd"
+          }
+      }
+  }
+}''';
+      final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+        ..createSync(recursive: true);
+      l10nDirectory.childFile(defaultTemplateArbFileName)
+        .writeAsStringSync(singleDateMessageArbFileString);
+
+      final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+      try {
+        generator.initialize(
+          l10nDirectoryPath: defaultArbPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        );
+        generator.parseArbFiles();
+        generator.generateClassMethods();
+      } on Exception catch (e) {
+        fail('Parsing template arb file should succeed: \n$e');
+      }
+
+      expect(generator.classMethods, isNotEmpty);
+      expect(
+        generator.classMethods.first,
+        '''  String springRange(Object springStartDate, Object springEndDate) {
+    final DateFormat springStartDateDateFormat = DateFormat.yMMMMEEEEd(_localeName);
+    final String springStartDateString = springStartDateDateFormat.format(springStartDate);
+
+    final DateFormat springEndDateDateFormat = DateFormat.yMMMMEEEEd(_localeName);
+    final String springEndDateString = springEndDateDateFormat.format(springEndDate);
+
+    return Intl.message(
+      r\'Spring begins on \$springStartDateString and ends on \$springEndDateString\',
+      locale: _localeName,
+      name: 'springRange',
+      desc: r\'The range of dates for spring in the year\',
+      args: <Object>[springStartDateString, springEndDateString]
+    );
+  }
+''');
+    });
+
     test('correctly generates a plural message:', () {
       const String singlePluralMessageArbFileString = '''{
   "helloWorlds": "{count,plural, =0{Hello}=1{Hello World}=2{Hello two worlds}few{Hello {count} worlds}many{Hello all {count} worlds}other{Hello other {count} worlds}}",
