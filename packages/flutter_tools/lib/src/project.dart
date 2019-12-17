@@ -347,7 +347,7 @@ class IosProject implements XcodeBasedProject, PlatformProject {
   File get platformPluginsFile => _flutterLibRoot.childDirectory('Flutter').childFile('.flutter-plugins');
 
   @override
-  File get flutterPluginsDependenciesFile => parent.flutterPluginsDependenciesFile;
+  File get flutterPluginsDependenciesFile => _flutterLibRoot.childDirectory('Flutter').childFile('.flutter-plugins-dependencies');
 
   /// The root directory of the iOS wrapping of Flutter and plugins. This is the
   /// parent of the `Flutter/` folder into which Flutter artifacts are written
@@ -573,7 +573,7 @@ class AndroidProject implements PlatformProject {
   File get platformPluginsFile => hostAppGradleRoot.childFile('.flutter-plugins');
 
   @override
-  File get flutterPluginsDependenciesFile => parent.flutterPluginsDependenciesFile;
+  File get flutterPluginsDependenciesFile => hostAppGradleRoot.childFile('.flutter-plugins-dependencies');
 
   /// The Gradle root directory of the Android wrapping of Flutter and plugins.
   /// This is the same as [hostAppGradleRoot] except when the project is
@@ -759,7 +759,7 @@ class WebProject implements PlatformProject {
   File get platformPluginsFile => directory.childFile('.flutter-plugins');
 
   @override
-  File get flutterPluginsDependenciesFile => parent.flutterPluginsDependenciesFile;
+  File get flutterPluginsDependenciesFile => directory.childFile('.flutter-plugins-dependencies');
 
   /// The 'lib' directory for the application.
   Directory get libDirectory => parent.directory.childDirectory('lib');
@@ -818,7 +818,7 @@ class MacOSProject implements XcodeBasedProject, PlatformProject {
   File get platformPluginsFile => ephemeralDirectory.childFile('.flutter-plugins');
 
   @override
-  File get flutterPluginsDependenciesFile => parent.flutterPluginsDependenciesFile;
+  File get flutterPluginsDependenciesFile => ephemeralDirectory.childFile('.flutter-plugins-dependencies');
 
   Directory get _macOSDirectory => parent.directory.childDirectory('macos');
 
@@ -909,7 +909,7 @@ class WindowsProject implements PlatformProject {
   File get platformPluginsFile => ephemeralDirectory.childFile('.flutter-plugins');
 
   @override
-  File get flutterPluginsDependenciesFile => project.flutterPluginsDependenciesFile;
+  File get flutterPluginsDependenciesFile => ephemeralDirectory.childFile('.flutter-plugins-dependencies');
 
   Directory get _editableDirectory => project.directory.childDirectory('windows');
 
@@ -954,7 +954,7 @@ class LinuxProject implements PlatformProject {
   File get platformPluginsFile => ephemeralDirectory.childFile('.flutter-plugins');
 
   @override
-  File get flutterPluginsDependenciesFile => project.flutterPluginsDependenciesFile;
+  File get flutterPluginsDependenciesFile => ephemeralDirectory.childFile('.flutter-plugins-dependencies');
 
   Directory get _editableDirectory => project.directory.childDirectory('linux');
 
