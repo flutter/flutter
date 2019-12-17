@@ -2,7 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/platform_plugins.dart';
 import 'package:flutter_tools/src/plugins.dart';
 import 'package:yaml/yaml.dart';
@@ -130,8 +129,10 @@ void main() {
           '  package: com.flutter.dev\n';
 
       final YamlMap pluginYaml = loadYaml(pluginYamlRaw) as YamlMap;
-      final Plugin Function() parsePlugin = () => Plugin.fromYaml(_kTestPluginName, _kTestPluginPath, pluginYaml, const <String>[]);
-      expect(parsePlugin, throwsA(predicate<ToolExit>((ToolExit e) => e.message.contains(_kTestPluginName))));
+      expect(
+        () => Plugin.fromYaml(_kTestPluginName, _kTestPluginPath, pluginYaml, const <String>[]),
+        throwsToolExit(message: _kTestPluginName),
+      );
     });
 
     test('A default_package field is allowed', () {
