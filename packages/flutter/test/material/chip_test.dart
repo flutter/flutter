@@ -1428,7 +1428,7 @@ void main() {
         matching: find.byType(CustomPaint),
       ),
     );
-    print(chipTheme.disabledColor);
+
     expect(materialBox, paints..rect(color: chipTheme.disabledColor));
   });
 
