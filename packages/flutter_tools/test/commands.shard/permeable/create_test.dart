@@ -1114,16 +1114,6 @@ void main() {
     Pub: () => const Pub(),
   });
 
-  testUsingContext('fails when invalid package name', () async {
-    Cache.flutterRoot = '../..';
-    final CreateCommand command = CreateCommand();
-    final CommandRunner<void> runner = createTestCommandRunner(command);
-    expect(
-      runner.run(<String>['create', fs.path.join(projectDir.path, 'invalidName')]),
-      throwsToolExit(message: '"invalidName" is not a valid Dart package name.'),
-    );
-  });
-
   testUsingContext(
     'invokes pub offline when requested',
     () async {
