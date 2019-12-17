@@ -4,8 +4,8 @@
 
 #define FML_USED_ON_EMBEDDER
 
-#ifndef FLUTTER_SHELL_COMMON_TEST_VSYNC_WAITERS_H_
-#define FLUTTER_SHELL_COMMON_TEST_VSYNC_WAITERS_H_
+#ifndef FLUTTER_SHELL_COMMON_VSYNC_WAITERS_TEST_H_
+#define FLUTTER_SHELL_COMMON_VSYNC_WAITERS_TEST_H_
 
 #include "flutter/shell/common/shell.h"
 
@@ -59,4 +59,4 @@ class ConstantFiringVsyncWaiter : public VsyncWaiter {
 }  // namespace testing
 }  // namespace flutter
 
-#endif  // FLUTTER_SHELL_COMMON_TEST_VSYNC_WAITERS_H_
+#endif  // FLUTTER_SHELL_COMMON_VSYNC_WAITERS_TEST_H_

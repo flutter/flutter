@@ -572,14 +572,14 @@ FILE: ../../../flutter/shell/common/surface.cc
 FILE: ../../../flutter/shell/common/surface.h
 FILE: ../../../flutter/shell/common/switches.cc
 FILE: ../../../flutter/shell/common/switches.h
-FILE: ../../../flutter/shell/common/test_vsync_waiters.cc
-FILE: ../../../flutter/shell/common/test_vsync_waiters.h
 FILE: ../../../flutter/shell/common/thread_host.cc
 FILE: ../../../flutter/shell/common/thread_host.h
 FILE: ../../../flutter/shell/common/vsync_waiter.cc
 FILE: ../../../flutter/shell/common/vsync_waiter.h
 FILE: ../../../flutter/shell/common/vsync_waiter_fallback.cc
 FILE: ../../../flutter/shell/common/vsync_waiter_fallback.h
+FILE: ../../../flutter/shell/common/vsync_waiters_test.cc
+FILE: ../../../flutter/shell/common/vsync_waiters_test.h
 FILE: ../../../flutter/shell/gpu/gpu_surface_delegate.h
 FILE: ../../../flutter/shell/gpu/gpu_surface_gl.cc
 FILE: ../../../flutter/shell/gpu/gpu_surface_gl.h
