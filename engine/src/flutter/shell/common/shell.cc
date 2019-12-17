@@ -393,6 +393,12 @@ Shell::~Shell() {
 }
 
 void Shell::NotifyLowMemoryWarning() const {
+  // This does not require a current isolate but does require a running VM.
+  // Since a valid shell will not be returned to the embedder without a valid
+  // DartVMRef, we can be certain that this is a safe spot to assume a VM is
+  // running.
+  ::Dart_NotifyLowMemory();
+
   task_runners_.GetGPUTaskRunner()->PostTask(
       [rasterizer = rasterizer_->GetWeakPtr()]() {
         if (rasterizer) {
