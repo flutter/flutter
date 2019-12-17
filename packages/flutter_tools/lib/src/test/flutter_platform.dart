@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools/src/test/test_wrapper.dart';
 import 'package:meta/meta.dart';
 import 'package:stream_channel/stream_channel.dart';
 
@@ -25,6 +24,7 @@ import '../convert.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
 import '../project.dart';
+import '../test/test_wrapper.dart';
 import '../vmservice.dart';
 import 'test_compiler.dart';
 import 'test_config.dart';
