@@ -424,53 +424,32 @@ class CatmullRomSpline extends Curve2D {
   /// the points are less than the given `maxDistance` apart, or a recursion
   /// depth of `maxDepth` is reached.
   List<Curve2DSample> generateSamples({double maxDistance = 0.01, int maxDepth = 100, double start = 0.0, double end = 1.0}) {
-    double triangleArea(Offset p1, Offset p2, Offset p3) {
-      return p1.dx * (p2.dy - p3.dy) +
-          p2.dx * (p3.dy - p1.dy) +
-          p3.dx * (p1.dy - p2.dy);
+    const double tolerance = 1e-10;
+    final Curve2DSample first = Curve2DSample(start, transform(start));
+    final List<Curve2DSample> samples = <Curve2DSample>[first];
+    final math.Random rand = math.Random((_controlPoints[0][1].dx * 1000).round());
+    bool flat(Offset p, Offset q, Offset r) {
+      final Offset pr = p - r;
+      final Offset qr = q - r;
+      final double z = pr.dx * qr.dy - qr.dx * pr.dy;
+      return (z * z) < tolerance;
     }
 
-    final double maxDistanceSquared = maxDistance * maxDistance;
+    void sample(Curve2DSample p, Curve2DSample q) {
+      // Pick a random point somewhat near the center.
+      double t = p.t + (0.45 + 0.1 * rand.nextDouble()) * (q.t - p.t);
+      final Curve2DSample r = Curve2DSample(t, transform(t));
 
-    Offset subdivideIfNeeded(double midpoint, Offset p1, Offset p2) {
-      final double distanceSquared = (p2 - p1).distanceSquared;
-      if (distanceSquared > maxDistanceSquared) {
-        return transform(midpoint);
+      if (flat(p.value, q.value, r.value)) {
+        samples.add(q);
+      } else {
+        sample(p, r);
+        sample(r, q);
       }
-      return null;
     }
-
-    List<Curve2DSample> subdivide(Curve2DSample p1, Curve2DSample p2, [int depth = 0]) {
-      final double midpoint = (p1.t + p2.t) / 2.0;
-      final Offset between = subdivideIfNeeded(midpoint, p1.value, p2.value);
-      if (between == null) {
-        return <Curve2DSample>[p1, p2];
-      }
-      final Curve2DSample newSample = Curve2DSample(midpoint, between);
-      if (depth < maxDepth) {
-        return <Curve2DSample>[
-          ...subdivide(p1, newSample, depth + 1),
-          ...subdivide(newSample, p2, depth + 1),
-        ];
-      }
-      return <Curve2DSample>[p1, p2];
-    }
-    final List<Curve2DSample> list = subdivide(Curve2DSample(start, transform(start)), Curve2DSample(end, transform(end)));
-    final List<Curve2DSample> reduced = <Curve2DSample>[list[0]];
-    int j = 0;
-    const double minArea = 1e-10;
-    for (int i = 0; i < list.length - 2; ++i) {
-      j = i + 1;
-      double area = triangleArea(list[i].value, list[j].value, list[j + 1].value);
-      while (area < minArea && j < list.length - 2) {
-        j += 1;
-        area = triangleArea(list[i].value, list[j].value, list[j + 1].value);
-      }
-      i = j;
-      reduced.add(list[j]);
-    }
-    reduced.add(list.last);
-    return reduced;
+    final Curve2DSample last = Curve2DSample(end, transform(end));
+    sample(first, last);
+    return samples;
   }
 
   /// Finds the time that corresponds to the x value of the spline at parametric
