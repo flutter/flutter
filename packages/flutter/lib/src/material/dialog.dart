@@ -319,6 +319,7 @@ class AlertDialog extends StatelessWidget {
     'was introduced to migrate AlertDialog to be scrollable by '
     'default. For more information, see '
     'https://flutter.dev/docs/release/breaking-changes/scrollable_alert_dialog'
+    'This feature was deprecated after 1.12.4-pre.9.'
   )
   final bool scrollable;
 
