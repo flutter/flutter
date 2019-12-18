@@ -112,7 +112,10 @@ class RenderSliverFillRemainingWithScrollable extends RenderSliverFillRemaining 
     final double extent = constraints.remainingPaintExtent - math.min(constraints.overlap, 0.0);
 
     if (child != null)
-      child.layout(constraints.asBoxConstraints(minExtent: extent, maxExtent: extent));
+      child.layout(constraints.asBoxConstraints(
+        minExtent: extent,
+        maxExtent: extent,
+      ));
 
     final double paintedChildSize = calculatePaintOffset(constraints, from: 0.0, to: extent);
     assert(paintedChildSize.isFinite);
@@ -131,9 +134,7 @@ class RenderSliverFillRemainingWithScrollable extends RenderSliverFillRemaining 
 /// Doc
 class RenderSliverFillRemainingWithoutScrollable extends RenderSliverFillRemaining {
   /// Doc
-  RenderSliverFillRemainingWithoutScrollable({
-    RenderBox child,
-  }) : super(child: child);
+  RenderSliverFillRemainingWithoutScrollable({ RenderBox child }) : super(child: child);
 
   @override
   void performLayout() {
@@ -153,9 +154,13 @@ class RenderSliverFillRemainingWithoutScrollable extends RenderSliverFillRemaini
       }
 
       // If the childExtent is greater than the computed extent, we want to use
-      // that instead of potentially cutting off the child.
+      // that instead of potentially cutting off the child. This allows us to
+      // safely specify a maxExtent.
       extent = math.max(extent, childExtent);
-      child.layout(constraints.asBoxConstraints(minExtent: extent, maxExtent: extent));
+      child.layout(constraints.asBoxConstraints(
+        minExtent: extent,
+        maxExtent: extent,
+      ));
     }
 
     assert(extent.isFinite,
