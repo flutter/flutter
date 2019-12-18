@@ -104,6 +104,9 @@ class InteractiveViewer extends StatelessWidget {
 
   /// The child to perform the transformations on.
   ///
+  /// [child] should usually have an intrinsic size. This is used to calculate
+  /// the boundary (see [boundaryMargin]).
+  ///
   /// Cannot be null.
   final Widget child;
 
@@ -202,6 +205,8 @@ class InteractiveViewer extends StatelessWidget {
   /// A pre-transformation proxy for [GestureDetector.onPanUpdate].
   final GestureDragUpdateCallback onPanUpdate;
 
+  // TODO(justinmc): This seems hacky, find a better way, or make the user do
+  // the animation themselves.
   /// Called when the transform finishes resetting to its initial value.
   ///
   /// Resetting happens when [reset] is set to true. This callback should set
@@ -479,19 +484,64 @@ class _InteractiveViewerState extends State<_InteractiveViewerSized> with Ticker
     return renderObject.localToGlobal(Offset.zero);
   }
 
+  double _cachedChildWidth;
+  double _cachedChildHeight;
+
+  // Get the size of the child given its RenderBox and the viewport's Size.
+  //
+  // In some cases (i.e. a Table that's wider and/or taller than the viewport),
+  // renderBox.size will give the size of the viewport, even though the child is
+  // drawn beyond the viewport. The intrinsic size can then be used to set the
+  // boundary to the full size of the child.
+  //
+  // In other cases (i.e. an Image whose original size is larger than the
+  // viewport but is being fit to the viewport), renderBox.size will also give
+  // the size of the viewport, and the boundary should remain at the viewport.
+  // The intrinsic size is not used.
+  Size _getChildSize(RenderBox renderBox, Size viewportSize) {
+    // TODO(justinmc): This try/catch feels dirty, is there a better way? I'm
+    // using it because without it I hit the debug assertion in RenderBox about
+    // only the parent being able to access the child's size (but only in cases
+    // where I rerender the CustomPaint and then use a reset animation).
+    double width;
+    double height;
+    try {
+      width = renderBox.size.width;
+      height = renderBox.size.height;
+      _cachedChildWidth = width;
+      _cachedChildHeight = height;
+    } catch(error, stacktrace) {
+      width = _cachedChildWidth;
+      width = _cachedChildHeight;
+    }
+
+    final double minIntrinsicWidth = renderBox.getMinIntrinsicWidth(viewportSize.height);
+    final double maxIntrinsicWidth = renderBox.getMaxIntrinsicWidth(viewportSize.height);
+    final double minIntrinsicHeight = renderBox.getMinIntrinsicHeight(viewportSize.width);
+    final double maxIntrinsicHeight = renderBox.getMaxIntrinsicHeight(viewportSize.width);
+    if (minIntrinsicWidth == maxIntrinsicWidth) {
+      width = minIntrinsicWidth;
+    }
+    if (minIntrinsicHeight == maxIntrinsicHeight) {
+      height = minIntrinsicHeight;
+    }
+
+    return Size(width, height);
+  }
+
   Rect _boundaryRectCached;
   Rect get _boundaryRect {
     if (_boundaryRectCached != null) {
       return _boundaryRectCached;
     }
     assert(_childKey.currentContext != null);
-    final RenderBox renderBoxContainer = _childKey.currentContext.findRenderObject();
-    final Size childSize = Size(
-      renderBoxContainer.getMaxIntrinsicWidth(double.infinity),
-      renderBoxContainer.getMaxIntrinsicHeight(double.infinity),
+
+    
+    final Size childSize = _getChildSize(
+      _childKey.currentContext.findRenderObject(),
+      widget.size,
     );
-    // TODO(justinmc): Document. Child must have intrinsic size.
-    // Issue. Why doesn't RenderProxyBox return a valid size?
+    final RenderBox renderBoxContainer = _childKey.currentContext.findRenderObject();
     _boundaryRectCached = Rect.fromLTRB(
       -widget.boundaryMargin.left,
       -widget.boundaryMargin.top,
@@ -529,7 +579,6 @@ class _InteractiveViewerState extends State<_InteractiveViewerSized> with Ticker
     super.didUpdateWidget(oldWidget);
     if (widget.child != oldWidget.child
       || widget.boundaryMargin != oldWidget.boundaryMargin) {
-      print('justin clear _boundaryRectCached b/c ${widget.child != oldWidget.child} ${widget.boundaryMargin != oldWidget.boundaryMargin}');
       _boundaryRectCached = null;
     }
     if (widget.reset && !oldWidget.reset && _animationReset == null) {
@@ -614,18 +663,17 @@ class _InteractiveViewerState extends State<_InteractiveViewerSized> with Ticker
       onScaleEnd: _onScaleEnd,
       onScaleStart: _onScaleStart,
       onScaleUpdate: _onScaleUpdate,
+
+      // Wrapping a Widget in an InteractiveViewer does not change how the
+      // widget is initially rendered. It should look identical whether or not
+      // the InteractiveViewer is there.
       // TODO(justinmc): Do I need this ClipRect?
       child: ClipRect(
         child: Transform(
           transform: _transform,
-          child: OverflowBox(
-            alignment: Alignment.topLeft,
-            maxWidth: double.infinity,
-            maxHeight: double.infinity,
-            child: KeyedSubtree(
-              key: _childKey,
-              child: widget.child,
-            ),
+          child: KeyedSubtree(
+            key: _childKey,
+            child: widget.child,
           ),
         ),
       ),
@@ -634,7 +682,12 @@ class _InteractiveViewerState extends State<_InteractiveViewerSized> with Ticker
 
   // Return a new matrix representing the given matrix after applying the given
   // translation.
+  // TODO(justinmc): This widget needs to update itself if the screen
+  // orientation/size changes. Currently, if you rotate the screen, the boundary
+  // may be off.
   Matrix4 matrixTranslate(Matrix4 matrix, Offset translation) {
+    // TODO(justinmc): Why can I translate the Grid pics when they're smaller
+    // than the screen?
     if (widget.disableTranslation || translation == Offset.zero) {
       return matrix;
     }
@@ -692,6 +745,8 @@ class _InteractiveViewerState extends State<_InteractiveViewerSized> with Ticker
 
   // Return a new matrix representing the given matrix after applying the given
   // scale transform.
+  // TODO(justinmc): This needs to allow scaling in one direction even if the
+  // other direction is blocked. Similar to matrixTranslate.
   Matrix4 matrixScale(Matrix4 matrix, double scale) {
     if (widget.disableScale || scale == 1) {
       return matrix;

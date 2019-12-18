@@ -73,15 +73,14 @@ class GridDemoPhotoItem extends StatelessWidget {
           appBar: AppBar(
             title: Text(photo.title),
           ),
-          body: SizedBox.expand(
-            child: Hero(
-              tag: photo.tag,
-              child: InteractiveViewer(
-                disableRotation: true,
+          body: Hero(
+            tag: photo.tag,
+            child: InteractiveViewer(
+              disableRotation: true,
+              child: Center(
                 child: Image.asset(
                   photo.assetName,
                   package: photo.assetPackage,
-                  fit: BoxFit.cover,
                 ),
               ),
             ),

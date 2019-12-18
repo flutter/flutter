@@ -38,6 +38,15 @@ class _TableDemoState extends State<TableDemo> {
           ),
         ],
       ),
+      /*
+      body: OverflowBox(
+        alignment: Alignment.topLeft,
+        maxWidth: double.infinity,
+        maxHeight: double.infinity,
+        child: _getTable(10, 2),
+      ),
+      */
+      //body: _getTable(10, 2),
       body: InteractiveViewer(
         child: _getTable(10, 2),
       ),

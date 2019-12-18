@@ -32,8 +32,8 @@ class _TransformationsDemoState extends State<TransformationsDemo> {
   CustomPaint _childCached;
   CustomPaint get _child {
     if (_childCached != null) {
-      final _BoardPainter painter = _childCached.painter;
-      if (painter.board == _board) {
+      final _BoardPainter cachedPainter = _childCached.painter;
+      if (cachedPainter.board == _board) {
         return _childCached;
       }
     }
@@ -41,6 +41,11 @@ class _TransformationsDemoState extends State<TransformationsDemo> {
       size: _board.size,
       painter: _BoardPainter(
         board: _board,
+      ),
+      // This child gives the CustomPaint an intrinsic size.
+      child: SizedBox(
+        width: _board.size.width,
+        height: _board.size.height,
       ),
     );
     return _childCached;
@@ -98,11 +103,7 @@ class _TransformationsDemoState extends State<TransformationsDemo> {
               viewportSize.height / 2,
             ),
             onTapUp: _onTapUp,
-            child: SizedBox(
-              width: _board.size.width,
-              height: _board.size.height,
-              child: _child,
-            ),
+            child: _child,
           );
         },
       ),
