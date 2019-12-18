@@ -710,7 +710,7 @@ void main() {
       } else {
         numberOfVariationsRun += 1;
       }
-    }, variants: <TestVariant<dynamic>>[ TargetPlatformVariant.all(), const DefaultTestVariant() ]);
+    }, variant: TargetPlatformVariant(TargetPlatform.values.toSet()));
 
     testWidgets('variant tests have descriptions with details', (WidgetTester tester) async {
       if (debugDefaultTargetPlatformOverride == null) {
@@ -718,7 +718,7 @@ void main() {
       } else {
         expect(tester.testDescription, equals('variant tests have descriptions with details ($debugDefaultTargetPlatformOverride)'));
       }
-    }, variants: <TestVariant<dynamic>>[ TargetPlatformVariant.all(), const DefaultTestVariant() ]);
+    }, variant: TargetPlatformVariant(TargetPlatform.values.toSet()));
   });
 
   group('TargetPlatformVariant', () {
@@ -736,7 +736,7 @@ void main() {
     testWidgets('TargetPlatformVariant.only tests given value', (WidgetTester tester) async {
       expect(debugDefaultTargetPlatformOverride, equals(TargetPlatform.iOS));
       expect(defaultTargetPlatform, equals(TargetPlatform.iOS));
-    }, variants: <TestVariant<dynamic>>[ TargetPlatformVariant.only(TargetPlatform.iOS) ]);
+    }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
     testWidgets('TargetPlatformVariant.all tests run all variants', (WidgetTester tester) async {
       if (debugDefaultTargetPlatformOverride == null) {
@@ -744,7 +744,7 @@ void main() {
       } else {
         numberOfVariationsRun += 1;
       }
-    }, variants: <TestVariant<dynamic>>[ TargetPlatformVariant.all(), const DefaultTestVariant() ]);
+    }, variant: TargetPlatformVariant.all());
   });
 
 }

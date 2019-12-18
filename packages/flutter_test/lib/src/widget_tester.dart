@@ -111,17 +111,18 @@ void testWidgets(
   test_package.Timeout timeout,
   Duration initialTimeout,
   bool semanticsEnabled = true,
-  Iterable<TestVariant<Object>> variants = const <DefaultTestVariant>[ DefaultTestVariant() ],
+  TestVariant<Object> variant = const DefaultTestVariant(),
 }) {
-  assert(variants != null);
-  assert(variants.isNotEmpty, 'There must be at least on variant in the testing variants');
+  assert(variant != null);
+  assert(variant.values.isNotEmpty, 'There must be at least on value to test in the testing variant');
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
   final WidgetTester tester = WidgetTester._(binding);
-  for (TestVariant<Object> variant in variants) {
-    for (dynamic value in variant.values) {
-      final String variationDescription = variant.describeValue(value);
-      final String combinedDescription = variationDescription.isNotEmpty ? '$description ($variationDescription)' : description;
-      test(combinedDescription, () {
+  for (dynamic value in variant.values) {
+    final String variationDescription = variant.describeValue(value);
+    final String combinedDescription = variationDescription.isNotEmpty ? '$description ($variationDescription)' : description;
+    test(
+      combinedDescription,
+      () {
         tester._testDescription = combinedDescription;
         SemanticsHandle semanticsHandle;
         if (semanticsEnabled == true) {
@@ -146,10 +147,10 @@ void testWidgets(
           description: combinedDescription ?? '',
           timeout: initialTimeout,
         );
-      }, skip: skip,
-         timeout: timeout ?? binding.defaultTestTimeout,
-      );
-    }
+      },
+      skip: skip,
+      timeout: timeout ?? binding.defaultTestTimeout,
+    );
   }
 }
 
