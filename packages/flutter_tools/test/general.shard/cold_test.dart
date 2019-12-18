@@ -122,29 +122,16 @@ void main() {
   });
 
   group('cold run', () {
-    BufferLogger mockLogger;
-
-    setUp(() {
-      mockLogger = BufferLogger(
-        terminal: AnsiTerminal(
-          stdio: null,
-          platform: const LocalPlatform(),
-        ),
-        outputPreferences: OutputPreferences.test(),
-      );
-    });
-
     testUsingContext('returns 1 if not prebuilt mode & mainPath does not exist', () async {
       final MockDevice mockDevice = MockDevice();
       final MockFlutterDevice mockFlutterDevice = MockFlutterDevice();
       when(mockFlutterDevice.device).thenReturn(mockDevice);
       final List<FlutterDevice> devices = <FlutterDevice>[mockFlutterDevice];
       final int result = await ColdRunner(devices).run();
+
       expect(result, 1);
-      expect(mockLogger.errorText, matches(r'Tried to run .*, but that file does not exist\.'));
-      expect(mockLogger.errorText, matches(r'Consider using the -t option to specify the Dart file to start\.'));
-    }, overrides: <Type, Generator>{
-      Logger: () => mockLogger,
+      expect(testLogger.errorText, matches(r'Tried to run .*, but that file does not exist\.'));
+      expect(testLogger.errorText, matches(r'Consider using the -t option to specify the Dart file to start\.'));
     });
 
     testUsingContext('calls runCold on attached device', () async {
@@ -162,13 +149,12 @@ void main() {
         applicationBinary: applicationBinary,
         debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
       ).run();
+
       expect(result, 1);
       verify(mockFlutterDevice.runCold(
           coldRunner: anyNamed('coldRunner'),
           route: anyNamed('route'),
       ));
-    }, overrides: <Type, Generator>{
-      Logger: () => mockLogger,
     });
   });
 }

@@ -14,18 +14,24 @@ import '../src/common.dart';
 final DateTime inFuture = DateTime.now().add(const Duration(days: 100));
 
 void main() {
+  BufferLogger bufferLogger;
+
+  setUp(() {
+    bufferLogger = BufferLogger(
+      terminal: AnsiTerminal(
+        stdio: null,
+        platform: FakePlatform(),
+      ),
+      outputPreferences: OutputPreferences.test(),
+    );
+  });
+
   for (bool asyncScanning in <bool>[true, false]) {
     testWithoutContext('No last compile, asyncScanning: $asyncScanning', () async {
       final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(
         fileSystem: MemoryFileSystem(),
         platform: FakePlatform(),
-        logger: BufferLogger(
-          terminal: AnsiTerminal(
-            stdio: null,
-            platform: const LocalPlatform(),
-          ),
-          outputPreferences: OutputPreferences.test(),
-        ),
+        logger: bufferLogger,
       );
 
       expect(
@@ -43,13 +49,7 @@ void main() {
       final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(
         fileSystem: MemoryFileSystem(),
         platform: FakePlatform(),
-        logger: BufferLogger(
-          terminal: AnsiTerminal(
-            stdio: null,
-            platform: const LocalPlatform(),
-          ),
-          outputPreferences: OutputPreferences.test(),
-        ),
+        logger: bufferLogger,
       );
 
       expect(
@@ -67,13 +67,7 @@ void main() {
       final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(
         fileSystem: MemoryFileSystem(),
         platform: FakePlatform(),
-        logger: BufferLogger(
-          terminal: AnsiTerminal(
-            stdio: null,
-            platform: const LocalPlatform(),
-          ),
-          outputPreferences: OutputPreferences.test(),
-        ),
+        logger: bufferLogger,
       );
 
       expect(
