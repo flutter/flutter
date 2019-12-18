@@ -7,9 +7,9 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 void verifyPaintPosition(GlobalKey key, Offset ideal, bool visible) {
-  final RenderSliver target = key.currentContext.findRenderObject();
+  final RenderSliver target = key.currentContext.findRenderObject() as RenderSliver;
   expect(target.parent, isInstanceOf<RenderViewport>());
-  final SliverPhysicalParentData parentData = target.parentData;
+  final SliverPhysicalParentData parentData = target.parentData as SliverPhysicalParentData;
   final Offset actual = parentData.paintOffset;
   expect(actual, ideal);
   final SliverGeometry geometry = target.geometry;
@@ -174,7 +174,7 @@ void main() {
         ),
       ),
     );
-    final ScrollPositionWithSingleContext position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
+    final ScrollPositionWithSingleContext position = tester.state<ScrollableState>(find.byType(Scrollable)).position as ScrollPositionWithSingleContext;
 
     verifyPaintPosition(key1, const Offset(0.0, 0.0), true);
     verifyPaintPosition(key2, const Offset(0.0, 1000.0), false);
@@ -257,7 +257,7 @@ class RenderBigSliver extends RenderSliver {
     markNeedsLayout();
   }
 
-  double get paintExtent => (height - constraints.scrollOffset).clamp(0.0, constraints.remainingPaintExtent);
+  double get paintExtent => (height - constraints.scrollOffset).clamp(0.0, constraints.remainingPaintExtent) as double;
 
   @override
   void performLayout() {

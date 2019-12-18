@@ -18,7 +18,7 @@ import 'selectable_text.dart' show iOSHorizontalOffset;
 import 'text_selection.dart';
 import 'theme.dart';
 
-export 'package:flutter/services.dart' show TextInputType, TextInputAction, TextCapitalization;
+export 'package:flutter/services.dart' show TextInputType, TextInputAction, TextCapitalization, SmartQuotesType, SmartDashesType;
 
 /// Signature for the [TextField.buildCounter] callback.
 typedef InputCounterWidgetBuilder = Widget Function(
@@ -280,8 +280,8 @@ class TextField extends StatefulWidget {
   /// is null (the default) and [readOnly] is true.
   ///
   /// The [textAlign], [autofocus], [obscureText], [readOnly], [autocorrect],
-  /// [maxLengthEnforced], [scrollPadding], [maxLines], [maxLength], and
-  /// [enableSuggestions] arguments must not be null.
+  /// [maxLengthEnforced], [scrollPadding], [maxLines], [maxLength],
+  /// and [enableSuggestions] arguments must not be null.
   ///
   /// See also:
   ///
@@ -306,6 +306,8 @@ class TextField extends StatefulWidget {
     this.autofocus = false,
     this.obscureText = false,
     this.autocorrect = true,
+    SmartDashesType smartDashesType,
+    SmartQuotesType smartQuotesType,
     this.enableSuggestions = true,
     this.maxLines = 1,
     this.minLines,
@@ -333,6 +335,8 @@ class TextField extends StatefulWidget {
        assert(autofocus != null),
        assert(obscureText != null),
        assert(autocorrect != null),
+       smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
+       smartQuotesType = smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
        assert(enableSuggestions != null),
        assert(enableInteractiveSelection != null),
        assert(maxLengthEnforced != null),
@@ -458,6 +462,12 @@ class TextField extends StatefulWidget {
 
   /// {@macro flutter.widgets.editableText.autocorrect}
   final bool autocorrect;
+
+  /// {@macro flutter.services.textInput.smartDashesType}
+  final SmartDashesType smartDashesType;
+
+  /// {@macro flutter.services.textInput.smartQuotesType}
+  final SmartQuotesType smartQuotesType;
 
   /// {@macro flutter.services.textInput.enableSuggestions}
   final bool enableSuggestions;
@@ -684,6 +694,8 @@ class TextField extends StatefulWidget {
     properties.add(DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
     properties.add(DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));
     properties.add(DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: true));
+    properties.add(EnumProperty<SmartDashesType>('smartDashesType', smartDashesType, defaultValue: obscureText ? SmartDashesType.disabled : SmartDashesType.enabled));
+    properties.add(EnumProperty<SmartQuotesType>('smartQuotesType', smartQuotesType, defaultValue: obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled));
     properties.add(DiagnosticsProperty<bool>('enableSuggestions', enableSuggestions, defaultValue: true));
     properties.add(IntProperty('maxLines', maxLines, defaultValue: 1));
     properties.add(IntProperty('minLines', minLines, defaultValue: null));
@@ -923,6 +935,7 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
     bool cursorOpacityAnimates;
     Offset cursorOffset;
     Color cursorColor = widget.cursorColor;
+    Color autocorrectionTextRectColor;
     Radius cursorRadius = widget.cursorRadius;
 
     switch (themeData.platform) {
@@ -935,6 +948,7 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
         cursorColor ??= CupertinoTheme.of(context).primaryColor;
         cursorRadius ??= const Radius.circular(2.0);
         cursorOffset = Offset(iOSHorizontalOffset / MediaQuery.of(context).devicePixelRatio, 0);
+        autocorrectionTextRectColor = themeData.textSelectionColor;
         break;
 
       case TargetPlatform.android:
@@ -966,6 +980,8 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
         autofocus: widget.autofocus,
         obscureText: widget.obscureText,
         autocorrect: widget.autocorrect,
+        smartDashesType: widget.smartDashesType,
+        smartQuotesType: widget.smartQuotesType,
         enableSuggestions: widget.enableSuggestions,
         maxLines: widget.maxLines,
         minLines: widget.minLines,
@@ -992,6 +1008,7 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
         dragStartBehavior: widget.dragStartBehavior,
         scrollController: widget.scrollController,
         scrollPhysics: widget.scrollPhysics,
+        autocorrectionTextRectColor: autocorrectionTextRectColor,
       ),
     );
 

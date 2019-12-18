@@ -38,7 +38,7 @@ class TestServiceExtensionsBinding extends BindingBase
   }
 
   @override
-  void postEvent(String eventKind, Map<dynamic, dynamic> eventData) {
+  void postEvent(String eventKind, Map<String, dynamic> eventData) {
     getEventsDispatched(eventKind).add(eventData);
   }
 
@@ -687,7 +687,7 @@ void main() {
   test('Service extensions - saveCompilationTrace', () async {
     Map<String, dynamic> result;
     result = await binding.testExtension('saveCompilationTrace', <String, String>{});
-    final String trace = String.fromCharCodes(result['value']);
+    final String trace = String.fromCharCodes((result['value'] as List<dynamic>).cast<int>());
     expect(trace, contains('dart:core,Object,Object.\n'));
     expect(trace, contains('package:test_api/test_api.dart,::,test\n'));
     expect(trace, contains('service_extensions_test.dart,::,main\n'));

@@ -72,6 +72,10 @@ void main() {
   });
 
   group('TextInputConfiguration', () {
+    tearDown(() {
+      TextInputConnection.debugResetId();
+    });
+
     test('sets expected defaults', () {
       const TextInputConfiguration configuration = TextInputConfiguration();
       expect(configuration.inputType, TextInputType.text);
@@ -172,6 +176,28 @@ void main() {
 
       expect(client.latestMethodCall, 'connectionClosed');
     });
+
+    test('TextInputClient showAutocorrectionPromptRect method is called', () async {
+      // Assemble a TextInputConnection so we can verify its change in state.
+      final FakeTextInputClient client = FakeTextInputClient();
+      const TextInputConfiguration configuration = TextInputConfiguration();
+      TextInput.attach(client, configuration);
+
+      expect(client.latestMethodCall, isEmpty);
+
+      // Send onConnectionClosed message.
+      final ByteData messageBytes = const JSONMessageCodec().encodeMessage(<String, dynamic>{
+        'args': <dynamic>[1, 0, 1],
+        'method': 'TextInputClient.showAutocorrectionPromptRect',
+      });
+      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+        'flutter/textinput',
+        messageBytes,
+        (ByteData _) {},
+      );
+
+      expect(client.latestMethodCall, 'showAutocorrectionPromptRect');
+    });
   });
 }
 
@@ -198,13 +224,18 @@ class FakeTextInputClient implements TextInputClient {
     latestMethodCall = 'connectionClosed';
   }
 
+  @override
+  void showAutocorrectionPromptRect(int start, int end) {
+    latestMethodCall = 'showAutocorrectionPromptRect';
+  }
+
   TextInputConfiguration get configuration => const TextInputConfiguration();
 }
 
 class FakeTextChannel implements MethodChannel {
   FakeTextChannel(this.outgoing) : assert(outgoing != null);
 
-  Future<void> Function(MethodCall) outgoing;
+  Future<dynamic> Function(MethodCall) outgoing;
   Future<void> Function(MethodCall) incoming;
 
   List<MethodCall> outgoingCalls = <MethodCall>[];
@@ -222,10 +253,10 @@ class FakeTextChannel implements MethodChannel {
   Future<Map<K, V>> invokeMapMethod<K, V>(String method, [dynamic arguments]) => throw UnimplementedError();
 
   @override
-  Future<T> invokeMethod<T>(String method, [dynamic arguments]) {
+  Future<T> invokeMethod<T>(String method, [dynamic arguments]) async {
     final MethodCall call = MethodCall(method, arguments);
     outgoingCalls.add(call);
-    return outgoing(call);
+    return await outgoing(call) as T;
   }
 
   @override

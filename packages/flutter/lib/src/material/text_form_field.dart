@@ -9,6 +9,8 @@ import 'input_decorator.dart';
 import 'text_field.dart';
 import 'theme.dart';
 
+export 'package:flutter/services.dart' show SmartQuotesType, SmartDashesType;
+
 /// A [FormField] that contains a [TextField].
 ///
 /// This is a convenience widget that wraps a [TextField] widget in a
@@ -98,6 +100,8 @@ class TextFormField extends FormField<String> {
     bool showCursor,
     bool obscureText = false,
     bool autocorrect = true,
+    SmartDashesType smartDashesType,
+    SmartQuotesType smartQuotesType,
     bool enableSuggestions = true,
     bool autovalidate = false,
     bool maxLengthEnforced = true,
@@ -179,6 +183,8 @@ class TextFormField extends FormField<String> {
         showCursor: showCursor,
         obscureText: obscureText,
         autocorrect: autocorrect,
+        smartDashesType: smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
+        smartQuotesType: smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
         enableSuggestions: enableSuggestions,
         maxLengthEnforced: maxLengthEnforced,
         maxLines: maxLines,

@@ -271,14 +271,14 @@ class TestSemantics {
     final SemanticsData nodeData = node.getSemanticsData();
 
     final int flagsBitmask = flags is int
-      ? flags
-      : flags.fold<int>(0, (int bitmask, SemanticsFlag flag) => bitmask | flag.index);
+      ? flags as int
+      : (flags as List<SemanticsFlag>).fold<int>(0, (int bitmask, SemanticsFlag flag) => bitmask | flag.index);
     if (flagsBitmask != nodeData.flags)
       return fail('expected node id $id to have flags $flags but found flags ${nodeData.flags}.');
 
     final int actionsBitmask = actions is int
-        ? actions
-        : actions.fold<int>(0, (int bitmask, SemanticsAction action) => bitmask | action.index);
+        ? actions as int
+        : (actions as List<SemanticsAction>).fold<int>(0, (int bitmask, SemanticsAction action) => bitmask | action.index);
     if (actionsBitmask != nodeData.actions)
       return fail('expected node id $id to have actions $actions but found actions ${nodeData.actions}.');
 
@@ -351,9 +351,9 @@ class TestSemantics {
     buf.writeln('$indent$runtimeType(');
     if (id != null)
       buf.writeln('$indent  id: $id,');
-    if (flags is int && flags != 0 || flags is List<SemanticsFlag> && flags.isNotEmpty)
+    if (flags is int && flags != 0 || flags is List<SemanticsFlag> && (flags as List<SemanticsFlag>).isNotEmpty)
       buf.writeln('$indent  flags: ${SemanticsTester._flagsToSemanticsFlagExpression(flags)},');
-    if (actions is int && actions != 0 || actions is List<SemanticsAction> && actions.isNotEmpty)
+    if (actions is int && actions != 0 || actions is List<SemanticsAction> && (actions as List<SemanticsAction>).isNotEmpty)
       buf.writeln('$indent  actions: ${SemanticsTester._actionsToSemanticsActionExpression(actions)},');
     if (label != null && label != '')
       buf.writeln('$indent  label: \'$label\',');
@@ -559,7 +559,7 @@ class SemanticsTester {
       list = SemanticsFlag.values.values
           .where((SemanticsFlag flag) => (flag.index & flags) != 0);
     } else {
-      list = flags;
+      list = flags as List<SemanticsFlag>;
     }
     return '<SemanticsFlag>[${list.join(', ')}]';
   }
@@ -574,7 +574,7 @@ class SemanticsTester {
       list = SemanticsAction.values.values
           .where((SemanticsAction action) => (action.index & actions) != 0);
     } else {
-      list = actions;
+      list = actions as List<SemanticsAction>;
     }
     return '<SemanticsAction>[${list.join(', ')}]';
   }
@@ -685,11 +685,11 @@ class _HasSemantics extends Matcher {
       .add(_indent(RendererBinding.instance?.renderView?.debugSemantics?.toStringDeep(childOrder: childOrder)))
       .add('\n')
       .add('The semantics tree would have matched the following configuration:\n')
-      .add(_indent(matchState['would-match']));
+      .add(_indent(matchState['would-match'] as String));
     if (matchState.containsKey('additional-notes')) {
       result = result
         .add('\n')
-        .add(matchState['additional-notes']);
+        .add(matchState['additional-notes'] as String);
     }
     return result;
   }
