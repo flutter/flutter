@@ -101,6 +101,7 @@ class Card extends StatelessWidget {
   const Card({
     Key key,
     this.color,
+    this.shadowColor,
     this.elevation,
     this.shape,
     this.borderOnForeground = true,
@@ -119,6 +120,11 @@ class Card extends StatelessWidget {
   /// If this property is null then [ThemeData.cardTheme.color] is used,
   /// if that's null then [ThemeData.cardColor] is used.
   final Color color;
+
+  /// The color to paint the shadow below the card.
+  ///
+  /// Defaults to fully opaque black.
+  final Color shadowColor;
 
   /// The z-coordinate at which to place this card. This controls the size of
   /// the shadow below the card.
@@ -189,6 +195,7 @@ class Card extends StatelessWidget {
         margin: margin ?? cardTheme.margin ?? const EdgeInsets.all(4.0),
         child: Material(
           type: MaterialType.card,
+          shadowColor: shadowColor ?? cardTheme.shadowColor ?? const Color(0xFF000000),
           color: color ?? cardTheme.color ?? Theme.of(context).cardColor,
           elevation: elevation ?? cardTheme.elevation ?? _defaultElevation,
           shape: shape ?? cardTheme.shape ?? const RoundedRectangleBorder(
