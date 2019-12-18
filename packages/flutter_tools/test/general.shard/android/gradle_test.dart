@@ -897,7 +897,10 @@ flutter:
     androidPackage: irrelevant
 ''');
 
-      plugin1.childDirectory('android').createSync();
+      plugin1
+        .childDirectory('android')
+        .childFile('build.gradle')
+        .createSync(recursive: true);
 
       final Directory plugin2 = fs.directory('plugin2.');
       plugin2
@@ -910,7 +913,10 @@ flutter:
     androidPackage: irrelevant
 ''');
 
-      plugin2.childDirectory('android').createSync();
+      plugin2
+        .childDirectory('android')
+        .childFile('build.gradle')
+        .createSync(recursive: true);
 
       androidDirectory
         .childFile('.flutter-plugins')
