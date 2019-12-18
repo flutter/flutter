@@ -147,6 +147,14 @@ TaskFunction createBasicMaterialCompileTest() {
   };
 }
 
+TaskFunction createTextfieldPerfTest() {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/textfield_perf.dart',
+    'textfield_perf',
+  ).run;
+}
+
 
 /// Measure application startup performance.
 class StartupTest {
