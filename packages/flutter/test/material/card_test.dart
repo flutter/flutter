@@ -198,7 +198,7 @@ void main() {
     expect(_getCardMaterial(tester).shadowColor, const Color(0xFF000000));
 
     await tester.pumpWidget(
-      Card(
+      const Card(
         shadowColor: Colors.red,
       ),
     );
