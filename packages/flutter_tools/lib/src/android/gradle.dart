@@ -716,8 +716,9 @@ Future<void> buildPluginsAsAar(
     assert(pluginDirectory.existsSync());
 
     final String pluginName = pluginParts.first;
-    if (!pluginDirectory.childDirectory('android').existsSync()) {
-      printTrace('Skipping plugin $pluginName since it doesn\'t have an android directory');
+    final File buildGradleFile = pluginDirectory.childDirectory('android').childFile('build.gradle');
+    if (!buildGradleFile.existsSync()) {
+      printTrace('Skipping plugin $pluginName since it doesn\'t have a android/build.gradle file');
       continue;
     }
     logger.printStatus('Building plugin $pluginName...');
