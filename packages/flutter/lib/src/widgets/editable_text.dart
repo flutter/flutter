@@ -395,7 +395,6 @@ class EditableText extends StatefulWidget {
     this.enableInteractiveSelection = true,
     this.scrollController,
     this.scrollPhysics,
-    this.autocorrectionTextRectColor,
     this.toolbarOptions = const ToolbarOptions(
       copy: true,
       cut: true,
@@ -635,18 +634,6 @@ class EditableText extends StatefulWidget {
   /// Cannot be null.
   final Color cursorColor;
 
-  /// The color to use when painting the autocorrection Rect.
-  ///
-  /// For [CupertinoTextField]s, the value is set to the ambient
-  /// [CupertinoThemeData.primaryColor] with 20% opacity. For [TextField]s, the
-  /// value is null on non-iOS platforms and the same color used in [CupertinoTextField]
-  /// on iOS.
-  ///
-  /// Currently the autocorrection Rect only appears on iOS.
-  ///
-  /// Defaults to null, which disables autocorrection Rect painting.
-  final Color autocorrectionTextRectColor;
-
   /// The color to use when painting the background cursor aligned with the text
   /// while rendering the floating cursor.
   ///
@@ -750,10 +737,6 @@ class EditableText extends StatefulWidget {
   final bool autofocus;
 
   /// The color to use when painting the selection.
-  ///
-  /// For [CupertinoTextField]s, the value is set to the ambient
-  /// [CupertinoThemeData.primaryColor] with 20% opacity. For [TextField]s, the
-  /// value is set to the ambient [ThemeData.textSelectionColor].
   final Color selectionColor;
 
   /// Optional delegate for building the text selection handles and toolbar.
@@ -1229,7 +1212,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (value.text != _value.text) {
       hideToolbar();
       _showCaretOnScreen();
-      _currentPromptRectRange = null;
       if (widget.obscureText && value.text.length == _value.text.length + 1) {
         _obscureShowCharTicksPending = _kObscureShowLatestCharCursorTicks;
         _obscureLatestCharIndex = _value.selection.baseOffset;
@@ -1752,7 +1734,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       WidgetsBinding.instance.removeObserver(this);
       // Clear the selection and composition state if this widget lost focus.
       _value = TextEditingValue(text: _value.text);
-      _currentPromptRectRange = null;
     }
     updateKeepAlive();
   }
@@ -1829,16 +1810,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     } else {
       showToolbar();
     }
-  }
-
-  // null if no promptRect should be shown.
-  TextRange _currentPromptRectRange;
-
-  @override
-  void showAutocorrectionPromptRect(int start, int end) {
-    setState(() {
-      _currentPromptRectRange = TextRange(start: start, end: end);
-    });
   }
 
   VoidCallback _semanticsOnCopy(TextSelectionControls controls) {
@@ -1919,8 +1890,6 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               enableInteractiveSelection: widget.enableInteractiveSelection,
               textSelectionDelegate: this,
               devicePixelRatio: _devicePixelRatio,
-              promptRectRange: _currentPromptRectRange,
-              promptRectColor: widget.autocorrectionTextRectColor,
             ),
           ),
         );
@@ -1989,8 +1958,6 @@ class _Editable extends LeafRenderObjectWidget {
     this.textSelectionDelegate,
     this.paintCursorAboveText,
     this.devicePixelRatio,
-    this.promptRectRange,
-    this.promptRectColor,
   }) : assert(textDirection != null),
        assert(rendererIgnoresPointer != null),
        super(key: key);
@@ -2031,8 +1998,6 @@ class _Editable extends LeafRenderObjectWidget {
   final TextSelectionDelegate textSelectionDelegate;
   final double devicePixelRatio;
   final bool paintCursorAboveText;
-  final TextRange promptRectRange;
-  final Color promptRectColor;
 
   @override
   RenderEditable createRenderObject(BuildContext context) {
@@ -2069,8 +2034,6 @@ class _Editable extends LeafRenderObjectWidget {
       enableInteractiveSelection: enableInteractiveSelection,
       textSelectionDelegate: textSelectionDelegate,
       devicePixelRatio: devicePixelRatio,
-      promptRectRange: promptRectRange,
-      promptRectColor: promptRectColor,
     );
   }
 
@@ -2106,8 +2069,6 @@ class _Editable extends LeafRenderObjectWidget {
       ..cursorOffset = cursorOffset
       ..textSelectionDelegate = textSelectionDelegate
       ..devicePixelRatio = devicePixelRatio
-      ..paintCursorAboveText = paintCursorAboveText
-      ..promptRectColor = promptRectColor
-      ..setPromptRectRange(promptRectRange);
+      ..paintCursorAboveText = paintCursorAboveText;
   }
 }

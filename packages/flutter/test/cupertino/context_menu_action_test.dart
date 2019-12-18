@@ -9,13 +9,19 @@ void main() {
   // Constants taken from _ContextMenuActionState.
   const Color _kBackgroundColor = Color(0xFFEEEEEE);
   const Color _kBackgroundColorPressed = Color(0xFFDDDDDD);
+  const Color _kRegularActionColor = CupertinoColors.black;
+  const Color _kDestructiveActionColor = CupertinoColors.destructiveRed;
+  const FontWeight _kDefaultActionWeight = FontWeight.w600;
 
-  Widget _getApp([VoidCallback onPressed]) {
+  Widget _getApp({VoidCallback onPressed, bool isDestructiveAction = false, bool isDefaultAction = false}) {
     final UniqueKey actionKey = UniqueKey();
     final CupertinoContextMenuAction action = CupertinoContextMenuAction(
       key: actionKey,
       child: const Text('I am a CupertinoContextMenuAction'),
       onPressed: onPressed,
+      trailingIcon: CupertinoIcons.home,
+      isDestructiveAction: isDestructiveAction,
+      isDefaultAction: isDefaultAction,
     );
 
     return CupertinoApp(
@@ -37,9 +43,29 @@ void main() {
     return container.decoration as BoxDecoration;
   }
 
+  TextStyle _getTextStyle(WidgetTester tester) {
+    final Finder finder = find.descendant(
+      of: find.byType(CupertinoContextMenuAction),
+      matching: find.byType(DefaultTextStyle),
+    );
+    expect(finder, findsOneWidget);
+    final DefaultTextStyle defaultStyle = tester.widget(finder);
+    return defaultStyle.style;
+  }
+
+  Icon _getIcon(WidgetTester tester) {
+    final Finder finder = find.descendant(
+      of: find.byType(CupertinoContextMenuAction),
+      matching: find.byType(Icon),
+    );
+    expect(finder, findsOneWidget);
+    final Icon icon = tester.widget(finder);
+    return icon;
+  }
+
   testWidgets('responds to taps', (WidgetTester tester) async {
     bool wasPressed = false;
-    await tester.pumpWidget(_getApp(() {
+    await tester.pumpWidget(_getApp(onPressed: () {
       wasPressed = true;
     }));
 
@@ -61,4 +87,22 @@ void main() {
     await tester.pump();
     expect(_getDecoration(tester).color, _kBackgroundColor);
   });
+
+  testWidgets('icon and textStyle colors are correct out of the box', (WidgetTester tester) async {
+    await tester.pumpWidget(_getApp());
+    expect(_getTextStyle(tester).color, _kRegularActionColor);
+    expect(_getIcon(tester).color, _kRegularActionColor);
+  });
+
+  testWidgets('icon and textStyle colors are correct for destructive actions', (WidgetTester tester) async {
+    await tester.pumpWidget(_getApp(isDestructiveAction: true));
+    expect(_getTextStyle(tester).color, _kDestructiveActionColor);
+    expect(_getIcon(tester).color, _kDestructiveActionColor);
+  });
+
+  testWidgets('textStyle is correct for defaultAction', (WidgetTester tester) async {
+    await tester.pumpWidget(_getApp(isDefaultAction: true));
+    expect(_getTextStyle(tester).fontWeight, _kDefaultActionWeight);
+  });
+
 }
