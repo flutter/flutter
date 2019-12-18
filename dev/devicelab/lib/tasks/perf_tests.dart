@@ -402,7 +402,7 @@ class CompileTest {
         watch.start();
         await flutter('build', options: options);
         watch.stop();
-        final String appPath =  '$cwd/build/ios/Release-iphoneos/sample_flutter_app.app/';
+        final String appPath =  '$cwd/build/ios/Release-iphoneos/Runner.app/';
         // IPAs are created manually, https://flutter.dev/ios-release/
         await exec('tar', <String>['-zcf', 'build/app.ipa', appPath]);
         releaseSizeInBytes = await file('$cwd/build/app.ipa').length();
