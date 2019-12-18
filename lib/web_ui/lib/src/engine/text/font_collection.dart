@@ -200,6 +200,10 @@ class FontManager {
     final html.FontFace fontFace = html.FontFace(family, list);
     return fontFace.load().then((_) {
       html.document.fonts.add(fontFace);
+      // There might be paragraph measurements for this new font before it is
+      // loaded. They were measured using fallback font, so we should clear the
+      // cache.
+      TextMeasurementService.clearCache();
     }, onError: (dynamic exception) {
       // Failures here will throw an html.DomException which confusingly
       // does not implement Exception or Error. Rethrow an Exception so it can

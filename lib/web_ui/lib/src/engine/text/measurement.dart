@@ -168,7 +168,8 @@ abstract class TextMeasurementService {
   /// Initializes the text measurement service with a specific
   /// [rulerCacheCapacity] that gets passed to the [RulerManager].
   static void initialize({@required int rulerCacheCapacity}) {
-    clearCache();
+    rulerManager?.dispose();
+    rulerManager = null;
     rulerManager = RulerManager(rulerCacheCapacity: rulerCacheCapacity);
   }
 
@@ -211,11 +212,10 @@ abstract class TextMeasurementService {
     return domInstance;
   }
 
-  /// Clears the cache of paragraph rulers.
-  @visibleForTesting
+  /// Clears the cache of paragraph rulers that are used for measuring paragraph
+  /// metrics.
   static void clearCache() {
-    rulerManager?.dispose();
-    rulerManager = null;
+    rulerManager?._evictAllRulers();
   }
 
   static bool _canUseCanvasMeasurement(EngineParagraph paragraph) {
