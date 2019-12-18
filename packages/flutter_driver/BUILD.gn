@@ -22,6 +22,7 @@ dart_library("flutter_driver") {
     "//third_party/dart-pkg/pub/path",
     "//third_party/dart-pkg/pub/vm_service_client",
     "//third_party/dart-pkg/pub/web_socket_channel",
+    "//third_party/dart-pkg/pub/webdriver",
   ]
 
   if (is_fuchsia) {
