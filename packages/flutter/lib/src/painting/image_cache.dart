@@ -175,7 +175,7 @@ class ImageCache {
         pendingImage.removeListener();
       }
 
-      if (_currentSizeBytes + imageSize <= maximumSizeBytes) {
+      if (imageSize <= maximumSizeBytes) {
         _currentSizeBytes += imageSize;
         _cache[key] = image;
         _checkCacheSize();
