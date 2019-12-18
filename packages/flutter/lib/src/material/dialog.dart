@@ -314,6 +314,12 @@ class AlertDialog extends StatelessWidget {
   /// to overflow. Both [title] and [content] is wrapped in a scroll view,
   /// allowing all overflowed content to be visible while still showing the
   /// button bar.
+  @Deprecated(
+    'Set scrollable to `true`. This parameter will be removed and '
+    'was introduced to migrate AlertDialog to be scrollable by '
+    'default. For more information, see '
+    'https://flutter.dev/docs/release/breaking-changes/scrollable_alert_dialog'
+  )
   final bool scrollable;
 
   @override
