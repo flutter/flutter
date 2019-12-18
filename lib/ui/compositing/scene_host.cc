@@ -85,9 +85,10 @@ namespace flutter {
 
 IMPLEMENT_WRAPPERTYPEINFO(ui, SceneHost);
 
-#define FOR_EACH_BINDING(V) \
-  V(SceneHost, dispose)     \
-  V(SceneHost, setProperties)
+#define FOR_EACH_BINDING(V)   \
+  V(SceneHost, dispose)       \
+  V(SceneHost, setProperties) \
+  V(SceneHost, setOpacity)
 
 FOR_EACH_BINDING(DART_NATIVE_CALLBACK)
 
@@ -201,6 +202,15 @@ void SceneHost::setProperties(double width,
 
     view_holder->SetProperties(width, height, insetTop, insetRight, insetBottom,
                                insetLeft, focusable);
+  });
+}
+
+void SceneHost::setOpacity(double opacity) {
+  gpu_task_runner_->PostTask([id = koid_, opacity]() {
+    auto* view_holder = flutter::ViewHolder::FromId(id);
+    FML_DCHECK(view_holder);
+
+    view_holder->SetOpacity(opacity);
   });
 }
 

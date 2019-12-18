@@ -14,11 +14,18 @@ const SkScalar kLightRadius = 800;
 
 PhysicalShapeLayer::PhysicalShapeLayer(SkColor color,
                                        SkColor shadow_color,
+                                       SkScalar device_pixel_ratio,
+                                       float viewport_depth,
                                        float elevation,
                                        const SkPath& path,
                                        Clip clip_behavior)
-    : PhysicalShapeLayerBase(color, SK_AlphaOPAQUE, elevation),
+    : color_(color),
       shadow_color_(shadow_color),
+      device_pixel_ratio_(device_pixel_ratio),
+#if defined(OS_FUCHSIA)
+      viewport_depth_(viewport_depth),
+#endif
+      elevation_(elevation),
       path_(path),
       isRect_(false),
       clip_behavior_(clip_behavior) {
@@ -41,46 +48,82 @@ PhysicalShapeLayer::PhysicalShapeLayer(SkColor color,
     // an SkPath.
     frameRRect_ = SkRRect::MakeRect(path.getBounds());
   }
-
-  set_dimensions(frameRRect_);
 }
 
 void PhysicalShapeLayer::Preroll(PrerollContext* context,
                                  const SkMatrix& matrix) {
   TRACE_EVENT0("flutter", "PhysicalShapeLayer::Preroll");
-
   Layer::AutoPrerollSaveLayerState save =
       Layer::AutoPrerollSaveLayerState::Create(context, UsesSaveLayer());
-  PhysicalShapeLayerBase::Preroll(context, matrix);
 
-  if (elevation() == 0) {
+  context->total_elevation += elevation_;
+  total_elevation_ = context->total_elevation;
+  SkRect child_paint_bounds;
+  PrerollChildren(context, matrix, &child_paint_bounds);
+  context->total_elevation -= elevation_;
+
+  if (elevation_ == 0) {
     set_paint_bounds(path_.getBounds());
   } else {
-    if (PhysicalShapeLayerBase::can_system_composite()) {
-      set_needs_system_composite(true);
-      return;
-    }
-
+#if defined(OS_FUCHSIA)
+    // Let the system compositor draw all shadows for us.
+    set_needs_system_composite(true);
+#else
     // We will draw the shadow in Paint(), so add some margin to the paint
     // bounds to leave space for the shadow. We fill this whole region and clip
     // children to it so we don't need to join the child paint bounds.
-    set_paint_bounds(ComputeShadowBounds(path_.getBounds(), elevation(),
-                                         context->frame_device_pixel_ratio));
+    set_paint_bounds(ComputeShadowBounds(path_.getBounds(), elevation_,
+                                         device_pixel_ratio_));
+#endif  // defined(OS_FUCHSIA)
   }
 }
+
+#if defined(OS_FUCHSIA)
+
+void PhysicalShapeLayer::UpdateScene(SceneUpdateContext& context) {
+  FML_DCHECK(needs_system_composite());
+  TRACE_EVENT0("flutter", "PhysicalShapeLayer::UpdateScene");
+
+  // Retained rendering: speedup by reusing a retained entity node if possible.
+  // When an entity node is reused, no paint layer is added to the frame so we
+  // won't call PhysicalShapeLayer::Paint.
+  LayerRasterCacheKey key(unique_id(), context.Matrix());
+  if (context.HasRetainedNode(key)) {
+    TRACE_EVENT_INSTANT0("flutter", "retained layer cache hit");
+    const scenic::EntityNode& retained_node = context.GetRetainedNode(key);
+    FML_DCHECK(context.top_entity());
+    FML_DCHECK(retained_node.session() == context.session());
+    context.top_entity()->entity_node().AddChild(retained_node);
+    return;
+  }
+
+  TRACE_EVENT_INSTANT0("flutter", "cache miss, creating");
+  // If we can't find an existing retained surface, create one.
+  SceneUpdateContext::Frame frame(context, frameRRect_, color_, elevation_,
+                                  total_elevation_, viewport_depth_, this);
+  for (auto& layer : layers()) {
+    if (layer->needs_painting()) {
+      frame.AddPaintLayer(layer.get());
+    }
+  }
+
+  UpdateSceneChildren(context);
+}
+
+#endif  // defined(OS_FUCHSIA)
 
 void PhysicalShapeLayer::Paint(PaintContext& context) const {
   TRACE_EVENT0("flutter", "PhysicalShapeLayer::Paint");
   FML_DCHECK(needs_painting());
 
-  if (elevation() != 0) {
-    DrawShadow(context.leaf_nodes_canvas, path_, shadow_color_, elevation(),
-               SkColorGetA(color()) != 0xff, context.frame_device_pixel_ratio);
+  if (elevation_ != 0) {
+    DrawShadow(context.leaf_nodes_canvas, path_, shadow_color_, elevation_,
+               SkColorGetA(color_) != 0xff, device_pixel_ratio_);
   }
 
   // Call drawPath without clip if possible for better performance.
   SkPaint paint;
-  paint.setColor(color());
+  paint.setColor(color_);
   paint.setAntiAlias(true);
   if (clip_behavior_ != Clip::antiAliasWithSaveLayer) {
     context.leaf_nodes_canvas->drawPath(path_, paint);

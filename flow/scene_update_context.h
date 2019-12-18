@@ -89,20 +89,25 @@ class SceneUpdateContext {
               float scale_x,
               float scale_y,
               float scale_z);
-    ~Transform() override;
+    virtual ~Transform();
 
    private:
     float const previous_scale_x_;
     float const previous_scale_y_;
   };
 
-  class Clip : public Entity {
+  class Shape : public Entity {
    public:
-    Clip(SceneUpdateContext& context, const SkRect& shape_bounds);
-    ~Clip() override = default;
+    Shape(SceneUpdateContext& context);
+    virtual ~Shape() = default;
+
+    scenic::ShapeNode& shape_node() { return shape_node_; }
+
+   private:
+    scenic::ShapeNode shape_node_;
   };
 
-  class Frame : public Entity {
+  class Frame : public Shape {
    public:
     // When layer is not nullptr, the frame is associated with a layer subtree
     // rooted with that layer. The frame may then create a surface that will be
@@ -110,25 +115,27 @@ class SceneUpdateContext {
     Frame(SceneUpdateContext& context,
           const SkRRect& rrect,
           SkColor color,
-          float opacity = 1.0f,
-          float elevation = 0.0f,
+          float local_elevation = 0.0f,
+          float parent_elevation = 0.0f,
+          float depth = 0.0f,
           Layer* layer = nullptr);
-    ~Frame() override;
+    virtual ~Frame();
 
-    scenic::ContainerNode& embedder_node() override { return opacity_node_; }
     void AddPaintLayer(Layer* layer);
 
    private:
-    scenic::OpacityNodeHACK opacity_node_;
-    scenic::ShapeNode shape_node_;
+    const SkRRect rrect_;
+    SkColor const color_;
 
     std::vector<Layer*> paint_layers_;
-    Layer* layer_;
-
-    SkRRect rrect_;
     SkRect paint_bounds_;
-    SkColor color_;
-    float opacity_;
+    Layer* layer_;
+  };
+
+  class Clip : public Entity {
+   public:
+    Clip(SceneUpdateContext& context, const SkRect& shape_bounds);
+    ~Clip() = default;
   };
 
   SceneUpdateContext(scenic::Session* session,
@@ -144,17 +151,6 @@ class SceneUpdateContext {
     metrics_ = std::move(metrics);
   }
   const fuchsia::ui::gfx::MetricsPtr& metrics() const { return metrics_; }
-
-  void set_dimensions(const SkISize& frame_physical_size,
-                      float frame_physical_depth,
-                      float frame_device_pixel_ratio) {
-    frame_physical_size_ = frame_physical_size;
-    frame_physical_depth_ = frame_physical_depth;
-    frame_device_pixel_ratio_ = frame_device_pixel_ratio;
-  }
-  const SkISize& frame_size() const { return frame_physical_size_; }
-  float frame_physical_depth() const { return frame_physical_depth_; }
-  float frame_device_pixel_ratio() const { return frame_device_pixel_ratio_; }
 
   // TODO(chinmaygarde): This method must submit the surfaces as soon as paint
   // tasks are done. However, given that there is no support currently for
@@ -201,7 +197,6 @@ class SceneUpdateContext {
                    scenic::ShapeNode shape_node,
                    const SkRRect& rrect,
                    SkColor color,
-                   float opacity,
                    const SkRect& paint_bounds,
                    std::vector<Layer*> paint_layers,
                    Layer* layer);
@@ -213,9 +208,7 @@ class SceneUpdateContext {
                                std::vector<Layer*> paint_layers,
                                Layer* layer,
                                scenic::EntityNode entity_node);
-  void SetMaterialColor(scenic::Material& material,
-                        SkColor color,
-                        float opacity);
+  void SetShapeColor(scenic::ShapeNode& shape_node, SkColor color);
   scenic::Image* GenerateImageIfNeeded(SkColor color,
                                        SkScalar scale_x,
                                        SkScalar scale_y,
@@ -232,10 +225,6 @@ class SceneUpdateContext {
   SurfaceProducer* const surface_producer_;
 
   fuchsia::ui::gfx::MetricsPtr metrics_;
-  SkISize frame_physical_size_;
-  float frame_physical_depth_ = 0.0f;
-  float frame_device_pixel_ratio_ =
-      1.0f;  // Ratio between logical and physical pixels.
 
   std::vector<PaintTask> paint_tasks_;
 

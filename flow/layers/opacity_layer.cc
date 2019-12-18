@@ -4,103 +4,66 @@
 
 #include "flutter/flow/layers/opacity_layer.h"
 
-#include "flutter/fml/trace_event.h"
-#include "third_party/skia/include/core/SkPaint.h"
+#include "flutter/flow/layers/transform_layer.h"
 
 namespace flutter {
 
-// The OpacityLayer has no real "elevation", but we want to avoid Z-fighting
-// when using the system compositor.  Choose a small but non-zero value for
-// this.
-constexpr float kOpacityElevationWhenUsingSystemCompositor = 0.01f;
+OpacityLayer::OpacityLayer(int alpha, const SkPoint& offset)
+    : alpha_(alpha), offset_(offset) {}
 
-#if !defined(OS_FUCHSIA)
-void OpacityLayerBase::Preroll(PrerollContext* context,
-                               const SkMatrix& matrix) {
-  const float parent_is_opaque = context->is_opaque;
+void OpacityLayer::EnsureSingleChild() {
+  FML_DCHECK(layers().size() > 0);  // OpacityLayer should never be a leaf
 
-  context->mutators_stack.PushOpacity(opacity_);
-  context->is_opaque = parent_is_opaque && (opacity_ == SK_AlphaOPAQUE);
-  ContainerLayer::Preroll(context, matrix);
-  context->is_opaque = parent_is_opaque;
-  context->mutators_stack.Pop();
-}
-#endif
+  if (layers().size() == 1) {
+    return;
+  }
 
-OpacityLayer::OpacityLayer(SkAlpha opacity, const SkPoint& offset)
-    : OpacityLayerBase(SK_ColorTRANSPARENT,
-                       opacity,
-                       kOpacityElevationWhenUsingSystemCompositor),
-      offset_(offset) {
-  // Ensure OpacityLayer has only one direct child.
-  //
-  // This is needed to ensure that retained rendering can always be applied to
-  // save the costly saveLayer.
-  //
-  // Any children will be actually added as children of this empty
-  // ContainerLayer.
-  ContainerLayer::Add(std::make_shared<ContainerLayer>());
-}
+  // Be careful: SkMatrix's default constructor doesn't initialize the matrix to
+  // identity. Hence we have to explicitly call SkMatrix::setIdentity.
+  SkMatrix identity;
+  identity.setIdentity();
+  auto new_child = std::make_shared<flutter::TransformLayer>(identity);
 
-void OpacityLayer::Add(std::shared_ptr<Layer> layer) {
-  GetChildContainer()->Add(std::move(layer));
+  for (auto& child : layers()) {
+    new_child->Add(child);
+  }
+  ClearChildren();
+  Add(new_child);
 }
 
 void OpacityLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
   TRACE_EVENT0("flutter", "OpacityLayer::Preroll");
-
-  ContainerLayer* container = GetChildContainer();
-  FML_DCHECK(!container->layers().empty());  // OpacityLayer can't be a leaf.
-
-  // Factor in the offset during Preroll.  |OpacityLayerBase| will handle the
-  // opacity.
+  EnsureSingleChild();
   SkMatrix child_matrix = matrix;
   child_matrix.postTranslate(offset_.fX, offset_.fY);
   context->mutators_stack.PushTransform(
       SkMatrix::MakeTrans(offset_.fX, offset_.fY));
+  context->mutators_stack.PushOpacity(alpha_);
   Layer::AutoPrerollSaveLayerState save =
       Layer::AutoPrerollSaveLayerState::Create(context);
-  OpacityLayerBase::Preroll(context, child_matrix);
+  ContainerLayer::Preroll(context, child_matrix);
   context->mutators_stack.Pop();
-
-  // When using the system compositor, do not include the offset since we are
-  // rendering as a separate piece of geometry and the offset will be baked into
-  // that geometry's transform.
-  if (OpacityLayerBase::can_system_composite()) {
-    set_dimensions(SkRRect::MakeRect(paint_bounds()));
-    set_needs_system_composite(true);
-  } else {
-    set_paint_bounds(paint_bounds().makeOffset(offset_.fX, offset_.fY));
-
-    if (!context->has_platform_view && context->raster_cache &&
-        SkRect::Intersects(context->cull_rect, paint_bounds())) {
-      SkMatrix ctm = child_matrix;
+  context->mutators_stack.Pop();
+  set_paint_bounds(paint_bounds().makeOffset(offset_.fX, offset_.fY));
+  // See |EnsureSingleChild|.
+  FML_DCHECK(layers().size() == 1);
+  if (!context->has_platform_view && context->raster_cache &&
+      SkRect::Intersects(context->cull_rect, paint_bounds())) {
+    Layer* child = layers()[0].get();
+    SkMatrix ctm = child_matrix;
 #ifndef SUPPORT_FRACTIONAL_TRANSLATION
-      ctm = RasterCache::GetIntegralTransCTM(ctm);
+    ctm = RasterCache::GetIntegralTransCTM(ctm);
 #endif
-      context->raster_cache->Prepare(context, container, ctm);
-    }
+    context->raster_cache->Prepare(context, child, ctm);
   }
 }
-
-#if defined(OS_FUCHSIA)
-
-void OpacityLayer::UpdateScene(SceneUpdateContext& context) {
-  SceneUpdateContext::Transform transform(
-      context, SkMatrix::MakeTrans(offset_.fX, offset_.fY));
-
-  // OpacityLayerBase will handle applying the opacity itself.
-  OpacityLayerBase::UpdateScene(context);
-}
-
-#endif
 
 void OpacityLayer::Paint(PaintContext& context) const {
   TRACE_EVENT0("flutter", "OpacityLayer::Paint");
   FML_DCHECK(needs_painting());
 
   SkPaint paint;
-  paint.setAlpha(opacity());
+  paint.setAlpha(alpha_);
 
   SkAutoCanvasRestore save(context.internal_nodes_canvas, true);
   context.internal_nodes_canvas->translate(offset_.fX, offset_.fY);
@@ -110,10 +73,13 @@ void OpacityLayer::Paint(PaintContext& context) const {
       context.leaf_nodes_canvas->getTotalMatrix()));
 #endif
 
+  // See |EnsureSingleChild|.
+  FML_DCHECK(layers().size() == 1);
+
   if (context.raster_cache) {
-    ContainerLayer* container = GetChildContainer();
     const SkMatrix& ctm = context.leaf_nodes_canvas->getTotalMatrix();
-    RasterCacheResult child_cache = context.raster_cache->Get(container, ctm);
+    RasterCacheResult child_cache =
+        context.raster_cache->Get(layers()[0].get(), ctm);
     if (child_cache.is_valid()) {
       child_cache.draw(*context.leaf_nodes_canvas, &paint);
       return;
@@ -127,7 +93,8 @@ void OpacityLayer::Paint(PaintContext& context) const {
   // RasterCache::GetIntegralTransCTM optimization.
   //
   // Note that the following lines are only accessible when the raster cache is
-  // not available, or when a cache miss occurs.
+  // not available (e.g., when we're using the software backend in golden
+  // tests).
   SkRect saveLayerBounds;
   paint_bounds()
       .makeOffset(-offset_.fX, -offset_.fY)
@@ -135,13 +102,7 @@ void OpacityLayer::Paint(PaintContext& context) const {
 
   Layer::AutoSaveLayer save_layer =
       Layer::AutoSaveLayer::Create(context, saveLayerBounds, &paint);
-  OpacityLayerBase::Paint(context);
-}
-
-ContainerLayer* OpacityLayer::GetChildContainer() const {
-  FML_DCHECK(layers().size() == 1);
-
-  return static_cast<ContainerLayer*>(layers()[0].get());
+  PaintChildren(context);
 }
 
 }  // namespace flutter

@@ -1601,6 +1601,7 @@ TEST_F(EmbedderTest, CustomCompositorMustWorkWithCustomTaskRunner) {
     event.width = 800;
     event.height = 600;
     event.pixel_ratio = 1.0;
+
     ASSERT_EQ(FlutterEngineSendWindowMetricsEvent(engine.get(), &event),
               kSuccess);
     ASSERT_TRUE(engine.is_valid());
