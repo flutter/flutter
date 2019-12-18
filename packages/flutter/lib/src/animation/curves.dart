@@ -424,6 +424,12 @@ class CatmullRomSpline extends Curve2D {
   /// the points are less than the given `maxDistance` apart, or a recursion
   /// depth of `maxDepth` is reached.
   List<Curve2DSample> generateSamples({double maxDistance = 0.01, int maxDepth = 100, double start = 0.0, double end = 1.0}) {
+    double triangleArea(Offset p1, Offset p2, Offset p3) {
+      return p1.dx * (p2.dy - p3.dy) +
+          p2.dx * (p3.dy - p1.dy) +
+          p3.dx * (p1.dy - p2.dy);
+    }
+
     final double maxDistanceSquared = maxDistance * maxDistance;
 
     Offset subdivideIfNeeded(double midpoint, Offset p1, Offset p2) {
@@ -437,8 +443,11 @@ class CatmullRomSpline extends Curve2D {
     List<Curve2DSample> subdivide(Curve2DSample p1, Curve2DSample p2, [int depth = 0]) {
       final double midpoint = (p1.t + p2.t) / 2.0;
       final Offset between = subdivideIfNeeded(midpoint, p1.value, p2.value);
-      if (depth < maxDepth && between != null) {
-        final Curve2DSample newSample = Curve2DSample(midpoint, between);
+      if (between == null) {
+        return <Curve2DSample>[p1, p2];
+      }
+      final Curve2DSample newSample = Curve2DSample(midpoint, between);
+      if (depth < maxDepth) {
         return <Curve2DSample>[
           ...subdivide(p1, newSample, depth + 1),
           ...subdivide(newSample, p2, depth + 1),
@@ -446,7 +455,22 @@ class CatmullRomSpline extends Curve2D {
       }
       return <Curve2DSample>[p1, p2];
     }
-    return subdivide(Curve2DSample(start, transform(start)), Curve2DSample(end, transform(end)));
+    final List<Curve2DSample> list = subdivide(Curve2DSample(start, transform(start)), Curve2DSample(end, transform(end)));
+    final List<Curve2DSample> reduced = <Curve2DSample>[list[0]];
+    int j = 0;
+    const double minArea = 1e-10;
+    for (int i = 0; i < list.length - 2; ++i) {
+      j = i + 1;
+      double area = triangleArea(list[i].value, list[j].value, list[j + 1].value);
+      while (area < minArea && j < list.length - 2) {
+        j += 1;
+        area = triangleArea(list[i].value, list[j].value, list[j + 1].value);
+      }
+      i = j;
+      reduced.add(list[j]);
+    }
+    reduced.add(list.last);
+    return reduced;
   }
 
   /// Finds the time that corresponds to the x value of the spline at parametric
