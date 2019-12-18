@@ -143,7 +143,7 @@ Future<void> run(List<String> args) async {
     }
 
     exitCode = await runTests(
-      TestWrapper.packageTest,
+      const TestWrapper(),
       tests.keys.toList(),
       workDir: testDirectory,
       watcher: collector,
