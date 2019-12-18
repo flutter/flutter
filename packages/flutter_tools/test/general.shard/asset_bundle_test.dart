@@ -182,7 +182,7 @@ flutter:
     });
   });
 
-  test('Failed directory delete shows message', () async {
+  testUsingContext('Failed directory delete shows message', () async {
     final MockDirectory mockDirectory = MockDirectory();
     when(mockDirectory.existsSync()).thenReturn(true);
     when(mockDirectory.deleteSync(recursive: true)).thenThrow(const FileSystemException('ABCD'));
