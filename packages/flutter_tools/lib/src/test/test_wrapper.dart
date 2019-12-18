@@ -15,12 +15,14 @@ export 'package:test_core/src/runner/platform.dart' show PlatformPlugin; // igno
 abstract class TestWrapper {
   const TestWrapper();
 
+  static const TestWrapper packageTest = _DefaultTestWrapper();
+
   Future<void> main(List<String> args);
   void registerPlatformPlugin(Iterable<Runtime> runtimes, FutureOr<PlatformPlugin> Function() platforms);
 }
 
-class PackageTestTestWrapper implements TestWrapper {
-  const PackageTestTestWrapper();
+class _DefaultTestWrapper implements TestWrapper {
+  const _DefaultTestWrapper();
 
   @override
   Future<void> main(List<String> args) async {

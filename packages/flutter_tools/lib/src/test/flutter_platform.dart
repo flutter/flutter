@@ -69,7 +69,7 @@ typedef PlatformPluginRegistration = void Function(FlutterPlatform platform);
 /// (that is, one Dart file with a `*_test.dart` file name and a single `void
 /// main()`), you can set an observatory port explicitly.
 FlutterPlatform installHook({
-  TestWrapper testWrapper = const PackageTestTestWrapper(),
+  TestWrapper testWrapper = TestWrapper.packageTest,
   @required String shellPath,
   TestWatcher watcher,
   bool enableObservatory = false,
@@ -90,6 +90,7 @@ FlutterPlatform installHook({
   String icudtlPath,
   PlatformPluginRegistration platformPluginRegistration,
 }) {
+  assert(testWrapper != null);
   assert(enableObservatory || (!startPaused && observatoryPort == null));
 
   // registerPlatformPlugin can be injected for testing since it's not very mock-friendly.
