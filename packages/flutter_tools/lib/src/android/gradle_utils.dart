@@ -158,7 +158,7 @@ bool _hasExecutePermission(File executable) {
   final FileStat stat = executable.statSync();
   assert(stat.type != FileSystemEntityType.notFound);
   printTrace('${executable.path} mode: ${stat.mode} ${stat.modeString()}.');
-  return stat.mode & _kExecPermissionMask == _kExecPermissionMask;
+  return stat.mode & _kExecPermissionMask != 0;
 }
 
 /// Gives execute permission to [executable] if it doesn't have it already.
