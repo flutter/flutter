@@ -185,20 +185,6 @@ void main() {
 
     expect(tester.getTopLeft(find.text('label')).dy, 20.0);
 
-    // The label appears within the input when hasFloatingPlaceholder is false and floatLabelBehavior is always
-    await tester.pumpWidget(
-      buildInputDecorator(
-        isEmpty: true,
-        // isFocused: false (default)
-        decoration: const InputDecoration(
-          labelText: 'label',
-          hasFloatingPlaceholder: false,
-          floatLabelBehavior: FloatLabelBehavior.always
-        ),
-      ),
-    );
-    await tester.pumpAndSettle();
-
     // Overall height for this InputDecorator is 56dps:
     //   12 - top padding
     //   12 - floating label (ahem font size 16dps * 0.75 = 12)
@@ -3578,7 +3564,7 @@ void main() {
       hintStyle: TextStyle(),
       errorMaxLines: 5,
       hasFloatingPlaceholder: false,
-      floatLabelBehavior: FloatLabelBehavior.always,
+      floatLabelBehavior: FloatLabelBehavior.never,
       contentPadding: EdgeInsetsDirectional.only(start: 40.0, top: 12.0, bottom: 12.0),
       prefixStyle: TextStyle(),
       suffixStyle: TextStyle(),
@@ -3604,7 +3590,7 @@ void main() {
       'hintStyle: TextStyle(<all styles inherited>)',
       'errorMaxLines: 5',
       'hasFloatingPlaceholder: false',
-      'floatLabelBehavior: FloatLabelBehavior.always',
+      'floatLabelBehavior: FloatLabelBehavior.never',
       'contentPadding: EdgeInsetsDirectional(40.0, 12.0, 0.0, 12.0)',
       'prefixStyle: TextStyle(<all styles inherited>)',
       'suffixStyle: TextStyle(<all styles inherited>)',

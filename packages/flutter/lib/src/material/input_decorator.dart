@@ -6,6 +6,7 @@ import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
@@ -464,12 +465,12 @@ class _HelperErrorState extends State<_HelperError> with SingleTickerProviderSta
 
 /// Defines the behaviour of the floating label
 enum FloatLabelBehavior {
-  /// the label will always be positioned within the content, or hidden
+  /// The label will always be positioned within the content, or hidden.
   never,
-  /// the label will float when the input is focused, or has content
+  /// The label will float when the input is focused, or has content.
   auto,
-  /// the label will always float above the content
-  always
+  /// The label will always float above the content.
+  always,
 }
 
 // Identifies the children of a _RenderDecorationElement.
@@ -1926,8 +1927,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   bool get isFocused => widget.isFocused && decoration.enabled;
   bool get isHovering => widget.isHovering && decoration.enabled;
   bool get isEmpty => widget.isEmpty;
-
-  bool get floatLabelEnabled => decoration.hasFloatingPlaceholder && decoration.floatLabelBehavior != FloatLabelBehavior.never;
+  bool get _floatLabelEnabled => decoration.hasFloatingPlaceholder && decoration.floatLabelBehavior != FloatLabelBehavior.never;
 
   @override
   void didUpdateWidget(InputDecorator old) {
@@ -1938,7 +1938,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
     final bool floatBehaviourChanged = widget.decoration.floatLabelBehavior != old.decoration.floatLabelBehavior || widget.decoration.hasFloatingPlaceholder != old.decoration.hasFloatingPlaceholder;
 
     if (widget._labelShouldWithdraw != old._labelShouldWithdraw || floatBehaviourChanged) {
-      if ((widget._labelShouldWithdraw || widget.decoration.floatLabelBehavior == FloatLabelBehavior.always) && floatLabelEnabled)
+      if ((widget._labelShouldWithdraw || widget.decoration.floatLabelBehavior == FloatLabelBehavior.always) && _floatLabelEnabled)
         _floatingLabelController.forward();
       else
         _floatingLabelController.reverse();
@@ -2034,7 +2034,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
   bool get _hasInlineLabel => !widget._labelShouldWithdraw && decoration.labelText != null;
 
   // If the label is a floating placeholder, it's always shown.
-  bool get _shouldShowLabel => _hasInlineLabel || floatLabelEnabled;
+  bool get _shouldShowLabel => _hasInlineLabel || _floatLabelEnabled;
 
   // The base style for the inline label or hint when they're displayed "inline",
   // i.e. when they appear in place of the empty text field.
@@ -2478,6 +2478,8 @@ class InputDecoration {
   }) : assert(enabled != null),
        assert(!(prefix != null && prefixText != null), 'Declaring both prefix and prefixText is not supported.'),
        assert(!(suffix != null && suffixText != null), 'Declaring both suffix and suffixText is not supported.'),
+       assert(!(!hasFloatingPlaceholder && identical(floatLabelBehavior, FloatLabelBehavior.always)),
+            'hasFloatingPlaceholder=false conflicts with FloatLabelBehavior.always'),
        isCollapsed = false;
 
   /// Defines an [InputDecorator] that is the same size as the input field.
@@ -2501,6 +2503,8 @@ class InputDecoration {
     this.border = InputBorder.none,
     this.enabled = true,
   }) : assert(enabled != null),
+       assert(!(!hasFloatingPlaceholder && identical(floatLabelBehavior, FloatLabelBehavior.always)),
+        'hasFloatingPlaceholder=false conflicts with FloatLabelBehavior.always'),
        icon = null,
        labelText = null,
        labelStyle = null,
@@ -2663,6 +2667,7 @@ class InputDecoration {
   )
   final bool hasFloatingPlaceholder;
 
+  /// {@template flutter.material.inputDecoration.floatLabelBehavior}
   /// Defines how the floating label should be displayed.
   ///
   /// When [FloatLabelBehavior.auto] the label will float to the top only when
@@ -2672,11 +2677,11 @@ class InputDecoration {
   /// When [FloatLabelBehavior.always] the label will always float at the top
   /// of the field above the content.
   ///
-  /// When [FloatLabelBehavior.never] the label will always will appear
-  /// in the field in place of the content.
+  /// When [FloatLabelBehavior.never] the label will always appear in an empty
+  /// field in place of the content.
   ///
   /// Defaults to [FloatLabelBehavior.auto].
-  ///
+  /// {@endtemplate}
   final FloatLabelBehavior floatLabelBehavior;
 
   /// Whether the input [child] is part of a dense form (i.e., uses less vertical
@@ -3430,7 +3435,9 @@ class InputDecorationTheme extends Diagnosticable {
   }) : assert(isDense != null),
        assert(isCollapsed != null),
        assert(filled != null),
-       assert(alignLabelWithHint != null);
+       assert(alignLabelWithHint != null),
+       assert(!(!hasFloatingPlaceholder && identical(floatLabelBehavior, FloatLabelBehavior.always)),
+        'hasFloatingPlaceholder=false conflicts with FloatLabelBehavior.always');
 
   /// The style to use for [InputDecoration.labelText] when the label is
   /// above (i.e., vertically adjacent to) the input field.
@@ -3501,20 +3508,7 @@ class InputDecorationTheme extends Diagnosticable {
   )
   final bool hasFloatingPlaceholder;
 
-  /// Defines how the floating label should be displayed.
-  ///
-  /// When [FloatLabelBehavior.auto] the label will float to the top only when
-  /// the field is focused or has some text content, otherwise it will appear
-  /// in the field in place of the content.
-  ///
-  /// When [FloatLabelBehavior.always] the label will always float at the top
-  /// of the field above the content.
-  ///
-  /// When [FloatLabelBehavior.never] the label will always will appear
-  /// in the field in place of the content.
-  ///
-  /// Defaults to [FloatLabelBehavior.auto].
-  ///
+  /// {@macro flutter.material.inputDecoration.floatLabelBehavior}
   final FloatLabelBehavior floatLabelBehavior;
 
   /// Whether the input decorator's child is part of a dense form (i.e., uses
