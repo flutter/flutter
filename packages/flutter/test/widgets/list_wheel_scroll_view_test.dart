@@ -329,7 +329,7 @@ void main() {
         ),
       );
 
-      final RenderListWheelViewport viewport = tester.firstRenderObject(find.byType(Text)).parent.parent;
+      final RenderListWheelViewport viewport = tester.firstRenderObject(find.byType(Text)).parent.parent as RenderListWheelViewport;
 
       // Item 0 is in the middle. There are 3 children visible after it, so the
       // value of childCount should be 4.
@@ -366,7 +366,7 @@ void main() {
         ),
       );
 
-      final RenderListWheelViewport viewport = tester.firstRenderObject(find.byType(Text)).parent.parent;
+      final RenderListWheelViewport viewport = tester.firstRenderObject(find.byType(Text)).parent.parent as RenderListWheelViewport;
 
       // The screen is vertically 600px. Since the middle item is centered,
       // half of the first and last items are visible, making 7 children visible.
@@ -537,7 +537,7 @@ void main() {
         find.byKey(const Key('list_wheel_scroll_view')),
         matchesGoldenFile('list_wheel_scroll_view.center_child.magnified.png'),
       );
-    }, skip: isBrowser);
+    });
 
     testWidgets('Default middle transform', (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -557,7 +557,7 @@ void main() {
         ),
       );
 
-      final RenderListWheelViewport viewport = tester.firstRenderObject(find.byType(Container)).parent.parent;
+      final RenderListWheelViewport viewport = tester.firstRenderObject(find.byType(Container)).parent.parent as RenderListWheelViewport;
       expect(viewport, paints..transform(
         matrix4: equals(<dynamic>[
           1.0, 0.0, 0.0, 0.0,
@@ -591,7 +591,7 @@ void main() {
         find.byKey(const Key('list_wheel_scroll_view')),
         matchesGoldenFile('list_wheel_scroll_view.curved_wheel.left.png'),
       );
-    }, skip: isBrowser);
+    });
 
     testWidgets('Scrolling, diameterRatio, perspective all changes matrix', (WidgetTester tester) async {
       final ScrollController controller = ScrollController(initialScrollOffset: 200.0);
@@ -614,7 +614,7 @@ void main() {
         ),
       );
 
-      final RenderListWheelViewport viewport = tester.firstRenderObject(find.byType(Container)).parent.parent;
+      final RenderListWheelViewport viewport = tester.firstRenderObject(find.byType(Container)).parent.parent as RenderListWheelViewport;
       expect(viewport, paints..transform(
         matrix4: equals(<dynamic>[
           1.0, 0.0, 0.0, 0.0,
@@ -735,7 +735,7 @@ void main() {
         ),
       );
 
-      final RenderListWheelViewport viewport = tester.firstRenderObject(find.byType(Container)).parent.parent;
+      final RenderListWheelViewport viewport = tester.firstRenderObject(find.byType(Container)).parent.parent as RenderListWheelViewport;
       expect(viewport, paints
         ..transform(
           matrix4: equals(<dynamic>[
@@ -1231,7 +1231,7 @@ void main() {
       ),
     );
 
-    final RenderListWheelViewport viewport = tester.allRenderObjects.firstWhere((RenderObject r) => r is RenderListWheelViewport);
+    final RenderListWheelViewport viewport = tester.allRenderObjects.whereType<RenderListWheelViewport>().first;
 
     // direct child of viewport
     RenderObject target = tester.renderObject(find.byWidget(outerChildren[5]));

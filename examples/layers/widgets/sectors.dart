@@ -9,7 +9,7 @@ import 'package:flutter/rendering.dart';
 
 import '../rendering/src/sector_layout.dart';
 
-RenderBox initCircle() {
+RenderBoxToRenderSectorAdapter initCircle() {
   return RenderBoxToRenderSectorAdapter(
     innerRadius: 25.0,
     child: RenderSectorRing(padding: 0.0),
@@ -54,7 +54,7 @@ class SectorAppState extends State<SectorApp> {
     int index = 0;
     while (index < actualSectorSizes.length && index < wantedSectorSizes.length && actualSectorSizes[index] == wantedSectorSizes[index])
       index += 1;
-    final RenderSectorRing ring = sectors.child;
+    final RenderSectorRing ring = sectors.child as RenderSectorRing;
     while (index < actualSectorSizes.length) {
       ring.remove(ring.lastChild);
       actualSectorSizes.removeLast();
@@ -67,7 +67,7 @@ class SectorAppState extends State<SectorApp> {
     }
   }
 
-  static RenderBox initSector(Color color) {
+  static RenderBoxToRenderSectorAdapter initSector(Color color) {
     final RenderSectorRing ring = RenderSectorRing(padding: 1.0);
     ring.add(RenderSolidColor(const Color(0xFF909090), desiredDeltaTheta: kTwoPi * 0.15));
     ring.add(RenderSolidColor(const Color(0xFF909090), desiredDeltaTheta: kTwoPi * 0.15));

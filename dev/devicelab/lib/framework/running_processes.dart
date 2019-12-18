@@ -100,7 +100,7 @@ Stream<RunningProcessInfo> windowsRunningProcesses(String processName) async* {
     print(result.stdout);
     return;
   }
-  for (RunningProcessInfo info in processPowershellOutput(result.stdout)) {
+  for (RunningProcessInfo info in processPowershellOutput(result.stdout as String)) {
     yield info;
   }
 }
@@ -191,7 +191,7 @@ Stream<RunningProcessInfo> posixRunningProcesses(
     print(result.stdout);
     return;
   }
-  for (RunningProcessInfo info in processPsOutput(result.stdout, processName)) {
+  for (RunningProcessInfo info in processPsOutput(result.stdout as String, processName)) {
     yield info;
   }
 }

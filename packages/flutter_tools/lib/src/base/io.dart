@@ -26,8 +26,22 @@
 /// increase the API surface that we have to test in Flutter tools, and the APIs
 /// in `dart:io` can sometimes be hard to use in tests.
 import 'dart:async';
-import 'dart:io' as io show exit, IOSink, Process, ProcessInfo, ProcessSignal,
-    stderr, stdin, Stdin, StdinException, Stdout, stdout;
+import 'dart:io' as io
+  show
+    exit,
+    InternetAddress,
+    InternetAddressType,
+    IOSink,
+    NetworkInterface,
+    Process,
+    ProcessInfo,
+    ProcessSignal,
+    stderr,
+    stdin,
+    Stdin,
+    StdinException,
+    Stdout,
+    stdout;
 
 import 'package:meta/meta.dart';
 
@@ -60,6 +74,7 @@ export 'dart:io'
         IOException,
         IOSink,
         // Link              NO! Use `file_system.dart`
+        // NetworkInterface  NO! Use `io.dart`
         pid,
         // Platform          NO! use `platform.dart`
         Process,
@@ -92,12 +107,27 @@ ExitFunction _exitFunction = _defaultExitFunction;
 
 /// Exits the process.
 ///
+/// Throws [AssertionError] if assertions are enabled and the dart:io exit
+/// is still active when called. This may indicate exit was called in
+/// a test without being configured correctly.
+///
 /// This is analogous to the `exit` function in `dart:io`, except that this
 /// function may be set to a testing-friendly value by calling
 /// [setExitFunctionForTests] (and then restored to its default implementation
 /// with [restoreExitFunction]). The default implementation delegates to
 /// `dart:io`.
-ExitFunction get exit => _exitFunction;
+ExitFunction get exit {
+  assert(
+    _exitFunction != io.exit || !_inUnitTest(),
+    'io.exit was called with assertions active in a unit test',
+  );
+  return _exitFunction;
+}
+
+// Whether the tool is executing in a unit test.
+bool _inUnitTest() {
+  return Zone.current[#test.declarer] != null;
+}
 
 /// Sets the [exit] function to a function that throws an exception rather
 /// than exiting the process; this is intended for testing purposes.
@@ -243,4 +273,67 @@ class _DefaultProcessInfo implements ProcessInfo {
 
   @override
   int get maxRss => io.ProcessInfo.maxRss;
+}
+
+/// The return type for [listNetworkInterfaces].
+class NetworkInterface implements io.NetworkInterface {
+  NetworkInterface(this._delegate);
+
+  final io.NetworkInterface _delegate;
+
+  @override
+  List<io.InternetAddress> get addresses => _delegate.addresses;
+
+  @override
+  int get index => _delegate.index;
+
+  @override
+  String get name => _delegate.name;
+
+  @override
+  String toString() => "NetworkInterface('$name', $addresses)";
+}
+
+typedef NetworkInterfaceLister = Future<List<NetworkInterface>> Function({
+  bool includeLoopback,
+  bool includeLinkLocal,
+  io.InternetAddressType type,
+});
+
+NetworkInterfaceLister _networkInterfaceListerOverride;
+
+// Tests can set up a non-default network interface lister.
+@visibleForTesting
+void setNetworkInterfaceLister(NetworkInterfaceLister lister) {
+  _networkInterfaceListerOverride = lister;
+}
+
+@visibleForTesting
+void resetNetworkInterfaceLister() {
+  _networkInterfaceListerOverride = null;
+}
+
+/// This calls [NetworkInterface.list] from `dart:io` unless it is overridden by
+/// [setNetworkInterfaceLister] for a test. If it is overridden for a test,
+/// it should be reset with [resetNetworkInterfaceLister].
+Future<List<NetworkInterface>> listNetworkInterfaces({
+  bool includeLoopback = false,
+  bool includeLinkLocal = false,
+  io.InternetAddressType type = io.InternetAddressType.any,
+}) async {
+  if (_networkInterfaceListerOverride != null) {
+    return _networkInterfaceListerOverride(
+      includeLoopback: includeLoopback,
+      includeLinkLocal: includeLinkLocal,
+      type: type,
+    );
+  }
+  final List<io.NetworkInterface> interfaces = await io.NetworkInterface.list(
+    includeLoopback: includeLoopback,
+    includeLinkLocal: includeLinkLocal,
+    type: type,
+  );
+  return interfaces.map(
+    (io.NetworkInterface interface) => NetworkInterface(interface),
+  ).toList();
 }

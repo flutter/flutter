@@ -29,7 +29,7 @@ import 'scrollable.dart';
 import 'text_selection.dart';
 import 'ticker_provider.dart';
 
-export 'package:flutter/services.dart' show TextEditingValue, TextSelection, TextInputType;
+export 'package:flutter/services.dart' show TextEditingValue, TextSelection, TextInputType, SmartQuotesType, SmartDashesType;
 export 'package:flutter/rendering.dart' show SelectionChangedCause;
 
 /// Signature for the callback that reports when the user changes the selection
@@ -342,9 +342,10 @@ class EditableText extends StatefulWidget {
   /// The [controller], [focusNode], [obscureText], [autocorrect], [autofocus],
   /// [showSelectionHandles], [enableInteractiveSelection], [forceLine],
   /// [style], [cursorColor], [cursorOpacityAnimates],[backgroundCursorColor],
-  /// [enableSuggestions], [paintCursorAboveText], [textAlign], [dragStartBehavior],
-  /// [scrollPadding], [dragStartBehavior], [toolbarOptions],
-  /// [rendererIgnoresPointer], and [readOnly] arguments must not be null.
+  /// [enableSuggestions], [paintCursorAboveText], [textAlign],
+  /// [dragStartBehavior], [scrollPadding], [dragStartBehavior],
+  /// [toolbarOptions], [rendererIgnoresPointer], and [readOnly] arguments must
+  /// not be null.
   EditableText({
     Key key,
     @required this.controller,
@@ -352,6 +353,8 @@ class EditableText extends StatefulWidget {
     this.readOnly = false,
     this.obscureText = false,
     this.autocorrect = true,
+    SmartDashesType smartDashesType,
+    SmartQuotesType smartQuotesType,
     this.enableSuggestions = true,
     @required this.style,
     StrutStyle strutStyle,
@@ -392,6 +395,7 @@ class EditableText extends StatefulWidget {
     this.enableInteractiveSelection = true,
     this.scrollController,
     this.scrollPhysics,
+    this.autocorrectionTextRectColor,
     this.toolbarOptions = const ToolbarOptions(
       copy: true,
       cut: true,
@@ -402,6 +406,8 @@ class EditableText extends StatefulWidget {
        assert(focusNode != null),
        assert(obscureText != null),
        assert(autocorrect != null),
+       smartDashesType = smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
+       smartQuotesType = smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
        assert(enableSuggestions != null),
        assert(showSelectionHandles != null),
        assert(enableInteractiveSelection != null),
@@ -503,11 +509,11 @@ class EditableText extends StatefulWidget {
   /// Whether to show cursor.
   ///
   /// The cursor refers to the blinking caret when the [EditableText] is focused.
+  /// {@endtemplate}
   ///
   /// See also:
   ///
   ///  * [showSelectionHandles], which controls the visibility of the selection handles.
-  /// {@endtemplate}
   final bool showCursor;
 
   /// {@template flutter.widgets.editableText.autocorrect}
@@ -516,6 +522,12 @@ class EditableText extends StatefulWidget {
   /// Defaults to true. Cannot be null.
   /// {@endtemplate}
   final bool autocorrect;
+
+  /// {@macro flutter.services.textInput.smartDashesType}
+  final SmartDashesType smartDashesType;
+
+  /// {@macro flutter.services.textInput.smartQuotesType}
+  final SmartQuotesType smartQuotesType;
 
   /// {@macro flutter.services.textInput.enableSuggestions}
   final bool enableSuggestions;
@@ -579,7 +591,7 @@ class EditableText extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///   * {@macro flutter.gestures.monodrag.dragStartExample}
+  ///  * {@macro flutter.gestures.monodrag.dragStartExample}
   ///
   /// {@endtemplate}
   final TextDirection textDirection;
@@ -622,6 +634,18 @@ class EditableText extends StatefulWidget {
   ///
   /// Cannot be null.
   final Color cursorColor;
+
+  /// The color to use when painting the autocorrection Rect.
+  ///
+  /// For [CupertinoTextField]s, the value is set to the ambient
+  /// [CupertinoThemeData.primaryColor] with 20% opacity. For [TextField]s, the
+  /// value is null on non-iOS platforms and the same color used in [CupertinoTextField]
+  /// on iOS.
+  ///
+  /// Currently the autocorrection Rect only appears on iOS.
+  ///
+  /// Defaults to null, which disables autocorrection Rect painting.
+  final Color autocorrectionTextRectColor;
 
   /// The color to use when painting the background cursor aligned with the text
   /// while rendering the floating cursor.
@@ -726,6 +750,10 @@ class EditableText extends StatefulWidget {
   final bool autofocus;
 
   /// The color to use when painting the selection.
+  ///
+  /// For [CupertinoTextField]s, the value is set to the ambient
+  /// [CupertinoThemeData.primaryColor] with 20% opacity. For [TextField]s, the
+  /// value is set to the ambient [ThemeData.textSelectionColor].
   final Color selectionColor;
 
   /// Optional delegate for building the text selection handles and toolbar.
@@ -1042,6 +1070,8 @@ class EditableText extends StatefulWidget {
     properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode));
     properties.add(DiagnosticsProperty<bool>('obscureText', obscureText, defaultValue: false));
     properties.add(DiagnosticsProperty<bool>('autocorrect', autocorrect, defaultValue: true));
+    properties.add(EnumProperty<SmartDashesType>('smartDashesType', smartDashesType, defaultValue: obscureText ? SmartDashesType.disabled : SmartDashesType.enabled));
+    properties.add(EnumProperty<SmartQuotesType>('smartQuotesType', smartQuotesType, defaultValue: obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled));
     properties.add(DiagnosticsProperty<bool>('enableSuggestions', enableSuggestions, defaultValue: true));
     style?.debugFillProperties(properties);
     properties.add(EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
@@ -1199,12 +1229,12 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     if (value.text != _value.text) {
       hideToolbar();
       _showCaretOnScreen();
+      _currentPromptRectRange = null;
       if (widget.obscureText && value.text.length == _value.text.length + 1) {
         _obscureShowCharTicksPending = _kObscureShowLatestCharCursorTicks;
         _obscureLatestCharIndex = _value.selection.baseOffset;
       }
     }
-    _lastKnownRemoteTextEditingValue = value;
     _formatAndSetValue(value);
 
     // To keep the cursor from blinking while typing, we want to restart the
@@ -1375,7 +1405,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       // Clamp the final results to prevent programmatically scrolling to
       // out-of-paragraph-bounds positions when encountering tall fonts/scripts that
       // extend past the ascent.
-      scrollOffset = scrollOffset.clamp(0.0, renderEditable.maxScrollExtent);
+      scrollOffset = scrollOffset.clamp(0.0, renderEditable.maxScrollExtent) as double;
     }
     return scrollOffset;
   }
@@ -1401,6 +1431,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
           inputType: widget.keyboardType,
           obscureText: widget.obscureText,
           autocorrect: widget.autocorrect,
+          smartDashesType: widget.smartDashesType ?? (widget.obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
+          smartQuotesType: widget.smartQuotesType ?? (widget.obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
           enableSuggestions: widget.enableSuggestions,
           inputAction: widget.textInputAction ?? (widget.keyboardType == TextInputType.multiline
               ? TextInputAction.newline
@@ -1720,6 +1752,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       WidgetsBinding.instance.removeObserver(this);
       // Clear the selection and composition state if this widget lost focus.
       _value = TextEditingValue(text: _value.text);
+      _currentPromptRectRange = null;
     }
     updateKeepAlive();
   }
@@ -1744,7 +1777,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   ///
   /// This property is typically used to notify the renderer of input gestures
   /// when [ignorePointer] is true. See [RenderEditable.ignorePointer].
-  RenderEditable get renderEditable => _editableKey.currentContext.findRenderObject();
+  RenderEditable get renderEditable => _editableKey.currentContext.findRenderObject() as RenderEditable;
 
   @override
   TextEditingValue get textEditingValue => _value;
@@ -1796,6 +1829,16 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     } else {
       showToolbar();
     }
+  }
+
+  // null if no promptRect should be shown.
+  TextRange _currentPromptRectRange;
+
+  @override
+  void showAutocorrectionPromptRect(int start, int end) {
+    setState(() {
+      _currentPromptRectRange = TextRange(start: start, end: end);
+    });
   }
 
   VoidCallback _semanticsOnCopy(TextSelectionControls controls) {
@@ -1862,6 +1905,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               textWidthBasis: widget.textWidthBasis,
               obscureText: widget.obscureText,
               autocorrect: widget.autocorrect,
+              smartDashesType: widget.smartDashesType,
+              smartQuotesType: widget.smartQuotesType,
               enableSuggestions: widget.enableSuggestions,
               offset: offset,
               onSelectionChanged: _handleSelectionChanged,
@@ -1874,6 +1919,8 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
               enableInteractiveSelection: widget.enableInteractiveSelection,
               textSelectionDelegate: this,
               devicePixelRatio: _devicePixelRatio,
+              promptRectRange: _currentPromptRectRange,
+              promptRectColor: widget.autocorrectionTextRectColor,
             ),
           ),
         );
@@ -1928,6 +1975,8 @@ class _Editable extends LeafRenderObjectWidget {
     this.locale,
     this.obscureText,
     this.autocorrect,
+    this.smartDashesType,
+    this.smartQuotesType,
     this.enableSuggestions,
     this.offset,
     this.onSelectionChanged,
@@ -1940,6 +1989,8 @@ class _Editable extends LeafRenderObjectWidget {
     this.textSelectionDelegate,
     this.paintCursorAboveText,
     this.devicePixelRatio,
+    this.promptRectRange,
+    this.promptRectColor,
   }) : assert(textDirection != null),
        assert(rendererIgnoresPointer != null),
        super(key: key);
@@ -1966,6 +2017,8 @@ class _Editable extends LeafRenderObjectWidget {
   final bool obscureText;
   final TextWidthBasis textWidthBasis;
   final bool autocorrect;
+  final SmartDashesType smartDashesType;
+  final SmartQuotesType smartQuotesType;
   final bool enableSuggestions;
   final ViewportOffset offset;
   final SelectionChangedHandler onSelectionChanged;
@@ -1978,6 +2031,8 @@ class _Editable extends LeafRenderObjectWidget {
   final TextSelectionDelegate textSelectionDelegate;
   final double devicePixelRatio;
   final bool paintCursorAboveText;
+  final TextRange promptRectRange;
+  final Color promptRectColor;
 
   @override
   RenderEditable createRenderObject(BuildContext context) {
@@ -2014,6 +2069,8 @@ class _Editable extends LeafRenderObjectWidget {
       enableInteractiveSelection: enableInteractiveSelection,
       textSelectionDelegate: textSelectionDelegate,
       devicePixelRatio: devicePixelRatio,
+      promptRectRange: promptRectRange,
+      promptRectColor: promptRectColor,
     );
   }
 
@@ -2049,6 +2106,8 @@ class _Editable extends LeafRenderObjectWidget {
       ..cursorOffset = cursorOffset
       ..textSelectionDelegate = textSelectionDelegate
       ..devicePixelRatio = devicePixelRatio
-      ..paintCursorAboveText = paintCursorAboveText;
+      ..paintCursorAboveText = paintCursorAboveText
+      ..promptRectColor = promptRectColor
+      ..setPromptRectRange(promptRectRange);
   }
 }

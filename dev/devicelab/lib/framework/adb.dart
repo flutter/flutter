@@ -128,8 +128,8 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
   /// [workingDevice].
   @override
   Future<void> chooseWorkingDevice() async {
-    final List<Device> allDevices = (await discoverDevices())
-      .map<Device>((String id) => AndroidDevice(deviceId: id))
+    final List<AndroidDevice> allDevices = (await discoverDevices())
+      .map<AndroidDevice>((String id) => AndroidDevice(deviceId: id))
       .toList();
 
     if (allDevices.isEmpty)

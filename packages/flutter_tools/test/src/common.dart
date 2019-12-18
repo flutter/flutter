@@ -6,13 +6,15 @@ import 'dart:async';
 
 import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/base/common.dart';
+import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
-import 'package:test_api/test_api.dart' as test_package show TypeMatcher; // ignore: deprecated_member_use
+import 'package:meta/meta.dart';
+import 'package:test_api/test_api.dart' as test_package show TypeMatcher, test; // ignore: deprecated_member_use
 import 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf; // ignore: deprecated_member_use
 // ignore: deprecated_member_use
 export 'package:test_core/test_core.dart' hide TypeMatcher, isInstanceOf; // Defines a 'package:test' shim.
@@ -135,5 +137,69 @@ Future<void> expectToolExitLater(Future<dynamic> future, Matcher messageMatcher)
     expect(e.message, messageMatcher);
   } catch(e, trace) {
     fail('ToolExit expected, got $e\n$trace');
+  }
+}
+
+/// Executes a test body in zone that does not allow context-based injection.
+///
+/// For classes which have been refactored to excluded context-based injection
+/// or globals like [fs] or [platform], prefer using this test method as it
+/// will prevent accidentally including these context getters in future code
+/// changes.
+///
+/// For more information, see https://github.com/flutter/flutter/issues/47161
+@isTest
+void testWithoutContext(String description, FutureOr<void> body(), {
+  String testOn,
+  Timeout timeout,
+  bool skip,
+  List<String> tags,
+  Map<String, dynamic> onPlatform,
+  int retry,
+  }) {
+  return test_package.test(
+    description, () async {
+      return runZoned(body, zoneValues: <Object, Object>{
+        contextKey: const NoContext(),
+      });
+    },
+    timeout: timeout,
+    skip: skip,
+    tags: tags,
+    onPlatform: onPlatform,
+    retry: retry,
+    testOn: testOn,
+  );
+}
+
+/// An implementation of [AppContext] that throws if context.get is called in the test.
+///
+/// The intention of the class is to ensure we do not accidentally regress when
+/// moving towards more explicit dependency injection by accidentally using
+/// a Zone value in place of a constructor parameter.
+class NoContext implements AppContext {
+  const NoContext();
+
+  @override
+  T get<T>() {
+    throw UnsupportedError(
+      'context.get<$T> is not supported in test methods. '
+      'Use Testbed or testUsingContext if accessing Zone injected '
+      'values.'
+    );
+  }
+
+  @override
+  String get name => 'No Context';
+
+  @override
+  Future<V> run<V>({
+    FutureOr<V> Function() body,
+    String name,
+    Map<Type, Generator> overrides,
+    Map<Type, Generator> fallbacks,
+    ZoneSpecification zoneSpecification,
+  }) async {
+    return body();
   }
 }

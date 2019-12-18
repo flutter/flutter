@@ -345,6 +345,8 @@ class IOSDevice extends Device {
       if (debuggingOptions.dumpSkpOnShaderCompilation) '--dump-skp-on-shader-compilation',
       if (debuggingOptions.verboseSystemLogs) '--verbose-logging',
       if (debuggingOptions.cacheSkSL) '--cache-sksl',
+      if (debuggingOptions.deviceVmServicePort != null)
+        '--observatory-port=${debuggingOptions.deviceVmServicePort}',
       if (platformArgs['trace-startup'] as bool ?? false) '--trace-startup',
     ];
 
@@ -472,11 +474,11 @@ class IOSDevice extends Device {
   }
 
   @override
-  void dispose() {
+  Future<void> dispose() async {
     _logReaders.forEach((IOSApp application, DeviceLogReader logReader) {
       logReader.dispose();
     });
-    _portForwarder?.dispose();
+    await _portForwarder?.dispose();
   }
 }
 

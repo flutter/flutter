@@ -107,7 +107,7 @@ void main() {
 
     final RenderBox materialBox = getMaterialBox(tester);
 
-    expect(materialBox, paints..path(color: chipTheme.backgroundColor));
+    expect(materialBox, paints..rect(color: chipTheme.backgroundColor));
   });
 
   testWidgets('Chip overrides ThemeData theme if ChipTheme present', (WidgetTester tester) async {
@@ -161,7 +161,7 @@ void main() {
     final RenderBox materialBox = getMaterialBox(tester);
     final Material material = getMaterial(tester);
 
-    expect(materialBox, paints..path(color: Color(customTheme.backgroundColor.value)));
+    expect(materialBox, paints..rect(color: Color(customTheme.backgroundColor.value)));
     expect(material.elevation, customTheme.elevation);
     expect(material.shadowColor, customTheme.shadowColor);
   }, skip: isBrowser);
@@ -169,7 +169,7 @@ void main() {
   testWidgets('ChipThemeData generates correct opacities for defaults', (WidgetTester tester) async {
     const Color customColor1 = Color(0xcafefeed);
     const Color customColor2 = Color(0xdeadbeef);
-    final TextStyle customStyle = ThemeData.fallback().accentTextTheme.body2.copyWith(color: customColor2);
+    final TextStyle customStyle = ThemeData.fallback().textTheme.body2.copyWith(color: customColor2);
 
     final ChipThemeData lightTheme = ChipThemeData.fromDefaults(
       secondaryColor: customColor1,
@@ -230,7 +230,7 @@ void main() {
     final ChipThemeData chipThemeBlack = ChipThemeData.fromDefaults(
       secondaryColor: Colors.black,
       brightness: Brightness.dark,
-      labelStyle: ThemeData.fallback().accentTextTheme.body2.copyWith(color: Colors.black),
+      labelStyle: ThemeData.fallback().textTheme.body2.copyWith(color: Colors.black),
     ).copyWith(
       elevation: 1.0,
       pressElevation: 4.0,
@@ -241,7 +241,7 @@ void main() {
     final ChipThemeData chipThemeWhite = ChipThemeData.fromDefaults(
       secondaryColor: Colors.white,
       brightness: Brightness.light,
-      labelStyle: ThemeData.fallback().accentTextTheme.body2.copyWith(color: Colors.white),
+      labelStyle: ThemeData.fallback().textTheme.body2.copyWith(color: Colors.white),
     ).copyWith(
       padding: const EdgeInsets.all(2.0),
       labelPadding: const EdgeInsets.only(top: 8.0, bottom: 8.0),

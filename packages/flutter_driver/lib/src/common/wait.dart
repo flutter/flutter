@@ -159,7 +159,7 @@ class NoTransientCallbacks extends SerializableWaitCondition {
   /// given JSON map.
   ///
   /// The [json] argument must not be null.
-  factory NoTransientCallbacks.deserialize(Map<String, dynamic> json) {
+  factory NoTransientCallbacks.deserialize(Map<String, String> json) {
     assert(json != null);
     if (json['conditionName'] != 'NoTransientCallbacksCondition')
       throw SerializationException('Error occurred during deserializing the NoTransientCallbacksCondition JSON string: $json');
@@ -179,7 +179,7 @@ class NoPendingFrame extends SerializableWaitCondition {
   /// JSON map.
   ///
   /// The [json] argument must not be null.
-  factory NoPendingFrame.deserialize(Map<String, dynamic> json) {
+  factory NoPendingFrame.deserialize(Map<String, String> json) {
     assert(json != null);
     if (json['conditionName'] != 'NoPendingFrameCondition')
       throw SerializationException('Error occurred during deserializing the NoPendingFrameCondition JSON string: $json');
@@ -199,7 +199,7 @@ class FirstFrameRasterized extends SerializableWaitCondition {
   /// given JSON map.
   ///
   /// The [json] argument must not be null.
-  factory FirstFrameRasterized.deserialize(Map<String, dynamic> json) {
+  factory FirstFrameRasterized.deserialize(Map<String, String> json) {
     assert(json != null);
     if (json['conditionName'] != 'FirstFrameRasterizedCondition')
       throw SerializationException('Error occurred during deserializing the FirstFrameRasterizedCondition JSON string: $json');
@@ -219,7 +219,7 @@ class NoPendingPlatformMessages extends SerializableWaitCondition {
   /// given JSON map.
   ///
   /// The [json] argument must not be null.
-  factory NoPendingPlatformMessages.deserialize(Map<String, dynamic> json) {
+  factory NoPendingPlatformMessages.deserialize(Map<String, String> json) {
     assert(json != null);
     if (json['conditionName'] != 'NoPendingPlatformMessagesCondition')
       throw SerializationException('Error occurred during deserializing the NoPendingPlatformMessagesCondition JSON string: $json');
@@ -242,7 +242,7 @@ class CombinedCondition extends SerializableWaitCondition {
   /// given JSON map.
   ///
   /// The [jsonMap] argument must not be null.
-  factory CombinedCondition.deserialize(Map<String, dynamic> jsonMap) {
+  factory CombinedCondition.deserialize(Map<String, String> jsonMap) {
     assert(jsonMap != null);
     if (jsonMap['conditionName'] != 'CombinedCondition')
       throw SerializationException('Error occurred during deserializing the CombinedCondition JSON string: $jsonMap');
@@ -252,7 +252,7 @@ class CombinedCondition extends SerializableWaitCondition {
 
     final List<SerializableWaitCondition> conditions = <SerializableWaitCondition>[];
     for (Map<String, dynamic> condition in json.decode(jsonMap['conditions'])) {
-      conditions.add(_deserialize(condition));
+      conditions.add(_deserialize(condition.cast<String, String>()));
     }
     return CombinedCondition(conditions);
   }
@@ -279,7 +279,7 @@ class CombinedCondition extends SerializableWaitCondition {
 /// Parses a [SerializableWaitCondition] or its subclass from the given [json] map.
 ///
 /// The [json] argument must not be null.
-SerializableWaitCondition _deserialize(Map<String, dynamic> json) {
+SerializableWaitCondition _deserialize(Map<String, String> json) {
   assert(json != null);
   final String conditionName = json['conditionName'];
   switch (conditionName) {

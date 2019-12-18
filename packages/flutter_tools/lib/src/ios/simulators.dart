@@ -536,6 +536,16 @@ class IOSSimulator extends Device {
   bool isSupportedForProject(FlutterProject flutterProject) {
     return flutterProject.ios.existsSync();
   }
+
+  @override
+  Future<void> dispose() async {
+    _logReaders?.forEach(
+      (ApplicationPackage application, _IOSSimulatorLogReader logReader) {
+        logReader.dispose();
+      },
+    );
+    await _portForwarder?.dispose();
+  }
 }
 
 /// Launches the device log reader process on the host.
@@ -721,6 +731,11 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
     _deviceProcess?.kill();
     _systemProcess?.kill();
   }
+
+  @override
+  void dispose() {
+    _stop();
+  }
 }
 
 int compareIosVersions(String v1, String v2) {
@@ -777,9 +792,7 @@ class _IOSSimulatorDevicePortForwarder extends DevicePortForwarder {
   final List<ForwardedPort> _ports = <ForwardedPort>[];
 
   @override
-  List<ForwardedPort> get forwardedPorts {
-    return _ports;
-  }
+  List<ForwardedPort> get forwardedPorts => _ports;
 
   @override
   Future<int> forward(int devicePort, { int hostPort }) async {
@@ -794,5 +807,12 @@ class _IOSSimulatorDevicePortForwarder extends DevicePortForwarder {
   @override
   Future<void> unforward(ForwardedPort forwardedPort) async {
     _ports.remove(forwardedPort);
+  }
+
+  @override
+  Future<void> dispose() async {
+    for (ForwardedPort port in _ports) {
+      await unforward(port);
+    }
   }
 }

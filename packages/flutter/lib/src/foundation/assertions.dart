@@ -92,12 +92,12 @@ abstract class _ErrorDiagnostic extends DiagnosticsProperty<List<Object>> {
 ///
 /// See also:
 ///
-/// * [ErrorSummary], which provides a short (one line) description of the
-///   problem that was detected.
-/// * [ErrorHint], which provides specific, non-obvious advice that may be
-///   applicable.
-/// * [FlutterError], which is the most common place to use an
-///   [ErrorDescription].
+///  * [ErrorSummary], which provides a short (one line) description of the
+///    problem that was detected.
+///  * [ErrorHint], which provides specific, non-obvious advice that may be
+///    applicable.
+///  * [FlutterError], which is the most common place to use an
+///    [ErrorDescription].
 class ErrorDescription extends _ErrorDiagnostic {
   /// A lint enforces that this constructor can only be called with a string
   /// literal to match the limitations of the Dart Kernel transformer that
@@ -126,12 +126,12 @@ class ErrorDescription extends _ErrorDiagnostic {
 ///
 /// See also:
 ///
-/// * [ErrorDescription], which provides an explanation of the problem and its
-///   cause, any information that may help track down the problem, background
-///   information, etc.
-/// * [ErrorHint], which provides specific, non-obvious advice that may be
-///   applicable.
-/// * [FlutterError], which is the most common place to use an [ErrorSummary].
+///  * [ErrorDescription], which provides an explanation of the problem and its
+///    cause, any information that may help track down the problem, background
+///    information, etc.
+///  * [ErrorHint], which provides specific, non-obvious advice that may be
+///    applicable.
+///  * [FlutterError], which is the most common place to use an [ErrorSummary].
 class ErrorSummary extends _ErrorDiagnostic {
   /// A lint enforces that this constructor can only be called with a string
   /// literal to match the limitations of the Dart Kernel transformer that
@@ -156,12 +156,12 @@ class ErrorSummary extends _ErrorDiagnostic {
 ///
 /// See also:
 ///
-/// * [ErrorSummary], which provides a short (one line) description of the
-///   problem that was detected.
-/// * [ErrorDescription], which provides an explanation of the problem and its
-///   cause, any information that may help track down the problem, background
-///   information, etc.
-/// * [FlutterError], which is the most common place to use an [ErrorHint].
+///  * [ErrorSummary], which provides a short (one line) description of the
+///    problem that was detected.
+///  * [ErrorDescription], which provides an explanation of the problem and its
+///    cause, any information that may help track down the problem, background
+///    information, etc.
+///  * [FlutterError], which is the most common place to use an [ErrorHint].
 class ErrorHint extends _ErrorDiagnostic {
   /// A lint enforces that this constructor can only be called with a string
   /// literal to match the limitations of the Dart Kernel transformer that
@@ -182,7 +182,7 @@ class ErrorHint extends _ErrorDiagnostic {
 /// An [ErrorSpacer] creates an empty [DiagnosticsNode], that can be used to
 /// tune the spacing between other [DiagnosticsNode] objects.
 class ErrorSpacer extends DiagnosticsProperty<void> {
-  /// Creates an empty space to insert into a list of [DiagnosticNode] objects
+  /// Creates an empty space to insert into a list of [DiagnosticsNode] objects
   /// typically within a [FlutterError] object.
   ErrorSpacer() : super(
     '',
@@ -516,7 +516,7 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
 
   /// Create an error message from a list of [DiagnosticsNode]s.
   ///
-  /// By convention, there should be exactly one [FlutterSummary] in the list,
+  /// By convention, there should be exactly one [ErrorSummary] in the list,
   /// and it should be the first entry.
   ///
   /// Other entries are typically [ErrorDescription]s (for material that is
@@ -774,11 +774,6 @@ void debugPrintStack({StackTrace stackTrace, String label, int maxFrames}) {
 
 /// Diagnostic with a [StackTrace] [value] suitable for displaying stack traces
 /// as part of a [FlutterError] object.
-///
-/// See also:
-///
-/// * [FlutterErrorBuilder.addStackTrace], which is the typical way [StackTrace]
-///   objects are added to a [FlutterError].
 class DiagnosticsStackTrace extends DiagnosticsBlock {
   /// Creates a diagnostic for a stack trace.
   ///

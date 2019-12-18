@@ -74,7 +74,7 @@ class Plugin {
   ) {
     final List<String> errors = validatePluginYaml(pluginYaml);
     if (errors.isNotEmpty) {
-      throwToolExit('Invalid plugin specification.\n${errors.join('\n')}');
+      throwToolExit('Invalid plugin specification $name.\n${errors.join('\n')}');
     }
     if (pluginYaml != null && pluginYaml['platforms'] != null) {
       return Plugin._fromMultiPlatformYaml(name, path, pluginYaml, dependencies);
@@ -89,11 +89,11 @@ class Plugin {
     List<String> dependencies,
   ) {
     assert (pluginYaml != null && pluginYaml['platforms'] != null,
-            'Invalid multi-platform plugin specification.');
+            'Invalid multi-platform plugin specification $name.');
     final YamlMap platformsYaml = pluginYaml['platforms'] as YamlMap;
 
     assert (_validateMultiPlatformYaml(platformsYaml).isEmpty,
-            'Invalid multi-platform plugin specification.');
+            'Invalid multi-platform plugin specification $name.');
 
     final Map<String, PluginPlatform> platforms = <String, PluginPlatform>{};
 

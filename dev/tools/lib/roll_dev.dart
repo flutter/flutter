@@ -66,12 +66,12 @@ void main(List<String> args) {
     exit(1);
   }
 
-  final String level = argResults[kIncrement];
-  final String commit = argResults[kCommit];
-  final String origin = argResults[kOrigin];
-  final bool justPrint = argResults[kJustPrint];
-  final bool autoApprove = argResults[kYes];
-  final bool help = argResults[kHelp];
+  final String level = argResults[kIncrement] as String;
+  final String commit = argResults[kCommit] as String;
+  final String origin = argResults[kOrigin] as String;
+  final bool justPrint = argResults[kJustPrint] as bool;
+  final bool autoApprove = argResults[kYes] as bool;
+  final bool help = argResults[kHelp] as bool;
 
   if (help || level == null) {
     print('roll_dev.dart --increment=level --commit=hash • update the version tags and roll a new dev build.\n');
@@ -174,8 +174,8 @@ Match parseFullTag(String version) {
 
 String getGitOutput(String command, String explanation) {
   final ProcessResult result = _runGit(command);
-  if (result.stderr.isEmpty && result.exitCode == 0)
-    return result.stdout.trim();
+  if ((result.stderr as String).isEmpty && result.exitCode == 0)
+    return (result.stdout as String).trim();
   _reportGitFailureAndExit(result, explanation);
   return null; // for the analyzer's sake
 }
@@ -196,9 +196,9 @@ void _reportGitFailureAndExit(ProcessResult result, String explanation) {
   } else {
     print('Failed to $explanation.');
   }
-  if (result.stdout.isNotEmpty)
+  if ((result.stdout as String).isNotEmpty)
     print('stdout from git:\n${result.stdout}\n');
-  if (result.stderr.isNotEmpty)
+  if ((result.stderr as String).isNotEmpty)
     print('stderr from git:\n${result.stderr}\n');
   exit(1);
 }

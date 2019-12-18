@@ -141,14 +141,14 @@ class DecorationImage {
       return true;
     if (runtimeType != other.runtimeType)
       return false;
-    final DecorationImage typedOther = other;
-    return image == typedOther.image
-        && colorFilter == typedOther.colorFilter
-        && fit == typedOther.fit
-        && alignment == typedOther.alignment
-        && centerSlice == typedOther.centerSlice
-        && repeat == typedOther.repeat
-        && matchTextDirection == typedOther.matchTextDirection;
+    return other is DecorationImage
+        && other.image == image
+        && other.colorFilter == colorFilter
+        && other.fit == fit
+        && other.alignment == alignment
+        && other.centerSlice == centerSlice
+        && other.repeat == repeat
+        && other.matchTextDirection == matchTextDirection;
   }
 
   @override
@@ -222,7 +222,7 @@ class DecorationImagePainter {
         // when the image is ready.
         if (configuration.textDirection == null) {
           throw FlutterError.fromParts(<DiagnosticsNode>[
-            ErrorSummary('ImageDecoration.matchTextDirection can only be used when a TextDirection is available.'),
+            ErrorSummary('DecorationImage.matchTextDirection can only be used when a TextDirection is available.'),
             ErrorDescription(
               'When DecorationImagePainter.paint() was called, there was no text direction provided '
               'in the ImageConfiguration object to match.'
@@ -392,8 +392,8 @@ void paintImage({
       centerSlice.left + inputSize.width - centerSlice.right,
       centerSlice.top + inputSize.height - centerSlice.bottom,
     );
-    outputSize -= sliceBorder;
-    inputSize -= sliceBorder;
+    outputSize = outputSize - sliceBorder as Size;
+    inputSize = inputSize - sliceBorder as Size;
   }
   fit ??= centerSlice == null ? BoxFit.scaleDown : BoxFit.fill;
   assert(centerSlice == null || (fit != BoxFit.none && fit != BoxFit.cover));

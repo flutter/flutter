@@ -150,7 +150,7 @@ int nthStylusButton(int number) => (kPrimaryStylusButton << (number - 1)) & kMax
 ///
 /// See also:
 ///
-///   * [isSingleButton], which checks if a `buttons` contains exactly one button.
+///  * [isSingleButton], which checks if a `buttons` contains exactly one button.
 int smallestButton(int buttons) => buttons & (-buttons);
 
 /// Returns whether `buttons` contains one and only one button.
@@ -170,8 +170,8 @@ int smallestButton(int buttons) => buttons & (-buttons);
 ///
 /// See also:
 ///
-///   * [smallestButton], which returns the button in a `buttons` bit field with
-///     the smallest integer button.
+///  * [smallestButton], which returns the button in a `buttons` bit field with
+///    the smallest integer button.
 bool isSingleButton(int buttons) => buttons != 0 && (smallestButton(buttons) == buttons);
 
 /// Base class for touch, stylus, or mouse events.
@@ -257,11 +257,10 @@ abstract class PointerEvent extends Diagnosticable {
   /// system according to [transform].
   ///
   /// If this event has not been transformed, [position] is returned as-is.
-  ///
   /// See also:
   ///
-  ///  * [globalPosition], which is the position in the global coordinate
-  ///    system of the screen.
+  ///  * [position], which is the position in the global coordinate system of
+  ///    the screen.
   final Offset localPosition;
 
   /// Distance in logical pixels that the pointer moved since the last
@@ -420,7 +419,7 @@ abstract class PointerEvent extends Diagnosticable {
   /// Set if the event was synthesized by Flutter.
   ///
   /// We occasionally synthesize PointerEvents that aren't exact translations
-  /// of [ui.PointerData] from the engine to cover small cross-OS discrepancies
+  /// of [PointerData] from the engine to cover small cross-OS discrepancies
   /// in pointer behaviors.
   ///
   /// For instance, on end events, Android always drops any location changes

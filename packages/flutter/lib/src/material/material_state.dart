@@ -12,6 +12,7 @@ import 'dart:ui' show Color;
 /// Some Material widgets track their current state in a `Set<MaterialState>`.
 ///
 /// See also:
+///
 ///  * [MaterialStateColor], a color that has a `resolve` method that can
 ///    return a different color depending on the state of the widget that it
 ///    is used in.
