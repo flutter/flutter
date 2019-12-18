@@ -1,10 +1,12 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:async';
 
 import '../android/android_builder.dart';
+import '../android/android_sdk.dart';
+import '../android/gradle_utils.dart';
 import '../base/common.dart';
 import '../base/os.dart';
 import '../build_info.dart';
@@ -33,6 +35,7 @@ class BuildAarCommand extends BuildSubCommand {
         help: 'Build a release version of the current project.',
       );
     usesFlavorOption();
+    usesBuildNumberOption();
     usesPubOption();
     argParser
       ..addMultiOption(
@@ -55,7 +58,6 @@ class BuildAarCommand extends BuildSubCommand {
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
     DevelopmentArtifact.androidGenSnapshot,
-    DevelopmentArtifact.universal,
   };
 
   @override
@@ -72,8 +74,7 @@ class BuildAarCommand extends BuildSubCommand {
     } else {
       usage[CustomDimensions.commandBuildAarProjectType] = 'app';
     }
-    usage[CustomDimensions.commandBuildAarTargetPlatform] =
-        (argResults['target-platform'] as List<String>).join(',');
+    usage[CustomDimensions.commandBuildAarTargetPlatform] = stringsArg('target-platform').join(',');
     return usage;
   }
 
@@ -86,18 +87,26 @@ class BuildAarCommand extends BuildSubCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    if (androidSdk == null) {
+      exitWithNoSdkMessage();
+    }
     final Set<AndroidBuildInfo> androidBuildInfo = <AndroidBuildInfo>{};
-    final Iterable<AndroidArch> targetArchitectures = argResults['target-platform']
-      .map<AndroidArch>(getAndroidArchForName);
+
+    final Iterable<AndroidArch> targetArchitectures =
+        stringsArg('target-platform').map<AndroidArch>(getAndroidArchForName);
+
+    final String buildNumber = argParser.options.containsKey('build-number')
+      && stringArg('build-number') != null
+      && stringArg('build-number').isNotEmpty
+      ? stringArg('build-number')
+      : '1.0';
 
     for (String buildMode in const <String>['debug', 'profile', 'release']) {
-      if (argResults[buildMode]) {
-        androidBuildInfo.add(
-          AndroidBuildInfo(
-            BuildInfo(BuildMode.fromName(buildMode), argResults['flavor']),
-            targetArchs: targetArchitectures,
-          )
-        );
+      if (boolArg(buildMode)) {
+        androidBuildInfo.add(AndroidBuildInfo(
+          BuildInfo(BuildMode.fromName(buildMode), stringArg('flavor')),
+          targetArchs: targetArchitectures,
+        ));
       }
     }
     if (androidBuildInfo.isEmpty) {
@@ -107,12 +116,13 @@ class BuildAarCommand extends BuildSubCommand {
       project: _getProject(),
       target: '', // Not needed because this command only builds Android's code.
       androidBuildInfo: androidBuildInfo,
-      outputDirectoryPath: argResults['output-dir'],
+      outputDirectoryPath: stringArg('output-dir'),
+      buildNumber: buildNumber,
     );
     return null;
   }
 
-  /// Returns the [FlutterProject] which is determinated from the remaining command-line
+  /// Returns the [FlutterProject] which is determined from the remaining command-line
   /// argument if any or the current working directory.
   FlutterProject _getProject() {
     if (argResults.rest.isEmpty) {

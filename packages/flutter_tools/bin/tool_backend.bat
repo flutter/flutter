@@ -1,7 +1,7 @@
-:: Copyright 2019 The Chromium Authors. All rights reserved.
-:: Use of this source code is governed by a BSD-style license that can be
-:: found in the LICENSE file.
-@echo off
+@ECHO off
+REM Copyright 2014 The Flutter Authors. All rights reserved.
+REM Use of this source code is governed by a BSD-style license that can be
+REM found in the LICENSE file.
 
 set FLUTTER_BIN_DIR=%FLUTTER_ROOT%\bin
 set DART_BIN_DIR=%FLUTTER_BIN_DIR%\cache\dart-sdk\bin

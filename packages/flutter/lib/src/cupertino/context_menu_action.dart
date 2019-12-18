@@ -1,9 +1,10 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
+
 import 'colors.dart';
 
 /// A button in a _ContextMenuSheet.
@@ -20,10 +21,10 @@ class CupertinoContextMenuAction extends StatefulWidget {
     this.isDestructiveAction = false,
     this.onPressed,
     this.trailing,
-  }) : assert(child != null),
-       assert(isDefaultAction != null),
-       assert(isDestructiveAction != null),
-       super(key: key);
+  })  : assert(child != null),
+        assert(isDefaultAction != null),
+        assert(isDestructiveAction != null),
+        super(key: key);
 
   /// The widget that will be placed inside the action.
   final Widget child;
@@ -96,7 +97,6 @@ class _CupertinoContextMenuActionState extends State<CupertinoContextMenuAction>
     }
     return _kActionSheetActionStyle;
   }
-
 
   @override
   Widget build(BuildContext context) {

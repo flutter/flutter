@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -37,12 +37,20 @@ const List<Target> _kDefaultTargets = <Target>[
   DebugBundleLinuxAssets(),
   WebReleaseBundle(),
   DebugAndroidApplication(),
+  FastStartAndroidApplication(),
   ProfileAndroidApplication(),
   ReleaseAndroidApplication(),
   // These are one-off rules for bundle and aot compat
   ReleaseCopyFlutterAotBundle(),
   ProfileCopyFlutterAotBundle(),
   CopyFlutterBundle(),
+  // Android ABI specific AOT rules.
+  androidArmProfileBundle,
+  androidArm64ProfileBundle,
+  androidx64ProfileBundle,
+  androidArmReleaseBundle,
+  androidArm64ReleaseBundle,
+  androidx64ReleaseBundle,
 ];
 
 /// Assemble provides a low level API to interact with the flutter tool build
@@ -99,24 +107,31 @@ class AssembleCommand extends FlutterCommand {
     return const <CustomDimensions, String>{};
   }
 
-  /// The target we are building.
-  Target get target {
+  /// The target(s) we are building.
+  List<Target> get targets {
     if (argResults.rest.isEmpty) {
       throwToolExit('missing target name for flutter assemble.');
     }
     final String name = argResults.rest.first;
-    final Target result = _kDefaultTargets
-        .firstWhere((Target target) => target.name == name, orElse: () => null);
-    if (result == null) {
+    final Map<String, Target> targetMap = <String, Target>{
+      for (Target target in _kDefaultTargets)
+        target.name: target
+    };
+    final List<Target> results = <Target>[
+      for (String targetName in argResults.rest)
+        if (targetMap.containsKey(targetName))
+          targetMap[targetName]
+    ];
+    if (results.isEmpty) {
       throwToolExit('No target named "$name" defined.');
     }
-    return result;
+    return results;
   }
 
   /// The environmental configuration for a build invocation.
   Environment get environment {
     final FlutterProject flutterProject = FlutterProject.current();
-    String output = argResults['output'];
+    String output = stringArg('output');
     if (output == null) {
       throwToolExit('--output directory is required for assemble.');
     }
@@ -130,7 +145,7 @@ class AssembleCommand extends FlutterCommand {
           .childDirectory('.dart_tool')
           .childDirectory('flutter_build'),
       projectDir: flutterProject.directory,
-      defines: _parseDefines(argResults['define']),
+      defines: _parseDefines(stringsArg('define')),
     );
     return result;
   }
@@ -151,24 +166,32 @@ class AssembleCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
+    final List<Target> targets = this.targets;
+    final Target target = targets.length == 1 ? targets.single : _CompositeTarget(targets);
     final BuildResult result = await buildSystem.build(target, environment, buildSystemConfig: BuildSystemConfig(
-      resourcePoolSize: argResults['resource-pool-size'],
+      resourcePoolSize: argResults.wasParsed('resource-pool-size')
+        ? int.tryParse(stringArg('resource-pool-size'))
+        : null,
     ));
     if (!result.success) {
-      for (MapEntry<String, ExceptionMeasurement> data in result.exceptions.entries) {
-        printError('Target ${data.key} failed: ${data.value.exception}', stackTrace: data.value.stackTrace);
+      for (ExceptionMeasurement measurement in result.exceptions.values) {
+        printError('Target ${measurement.target} failed: ${measurement.exception}',
+          stackTrace: measurement.fatal
+            ? measurement.stackTrace
+            : null,
+        );
       }
       throwToolExit('build failed.');
     }
     printTrace('build succeeded.');
     if (argResults.wasParsed('build-inputs')) {
-      writeListIfChanged(result.inputFiles, argResults['build-inputs']);
+      writeListIfChanged(result.inputFiles, stringArg('build-inputs'));
     }
     if (argResults.wasParsed('build-outputs')) {
-      writeListIfChanged(result.outputFiles, argResults['build-outputs']);
+      writeListIfChanged(result.outputFiles, stringArg('build-outputs'));
     }
     if (argResults.wasParsed('depfile')) {
-      final File depfileFile = fs.file(argResults['depfile']);
+      final File depfileFile = fs.file(stringArg('depfile'));
       final Depfile depfile = Depfile(result.inputFiles, result.outputFiles);
       depfile.writeToFile(fs.file(depfileFile));
     }
@@ -192,4 +215,23 @@ void writeListIfChanged(List<File> files, String path) {
   if (currentContents != newContents) {
     file.writeAsStringSync(newContents);
   }
+}
+
+class _CompositeTarget extends Target {
+  _CompositeTarget(this.dependencies);
+
+  @override
+  final List<Target> dependencies;
+
+  @override
+  String get name => '_composite';
+
+  @override
+  Future<void> build(Environment environment) async { }
+
+  @override
+  List<Source> get inputs => <Source>[];
+
+  @override
+  List<Source> get outputs => <Source>[];
 }

@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -494,7 +494,7 @@ void main() {
       find.byType(Overlay),
       matchesGoldenFile('text_field_opacity_test.0.png'),
     );
-  }, skip: isBrowser);
+  });
 
   testWidgets('text field toolbar options correctly changes options (iOS)',
       (WidgetTester tester) async {
@@ -544,7 +544,7 @@ void main() {
     expect(find.text('Copy'), findsOneWidget);
     expect(find.text('Cut'), findsNothing);
     expect(find.text('Select All'), findsNothing);
-  }, skip: isBrowser);
+  });
 
   testWidgets('text field toolbar options correctly changes options (Android)',
       (WidgetTester tester) async {
@@ -577,7 +577,7 @@ void main() {
     expect(find.text('COPY'), findsOneWidget);
     expect(find.text('CUT'), findsNothing);
     expect(find.text('SELECT ALL'), findsNothing);
-  }, skip: isBrowser);
+  });
 
   // TODO(hansmuller): restore these tests after the fix for #24876 has landed.
   /*
@@ -1713,13 +1713,13 @@ void main() {
 
     // Toolbar should fade in. Starting at 0% opacity.
     final Element target = tester.element(find.text('SELECT ALL'));
-    final FadeTransition opacity = target.ancestorWidgetOfExactType(FadeTransition);
+    final FadeTransition opacity = target.findAncestorWidgetOfExactType<FadeTransition>();
     expect(opacity, isNotNull);
     expect(opacity.opacity.value, equals(0.0));
 
     // Still fading in.
     await tester.pump(const Duration(milliseconds: 50));
-    final FadeTransition opacity2 = target.ancestorWidgetOfExactType(FadeTransition);
+    final FadeTransition opacity2 = target.findAncestorWidgetOfExactType<FadeTransition>();
     expect(opacity, same(opacity2));
     expect(opacity.opacity.value, greaterThan(0.0));
     expect(opacity.opacity.value, lessThan(1.0));
@@ -1947,9 +1947,6 @@ void main() {
     // minLines can't be greater than maxLines.
     expect(() async {
       await tester.pumpWidget(textFieldBuilder(minLines: 3, maxLines: 2));
-    }, throwsAssertionError);
-    expect(() async {
-      await tester.pumpWidget(textFieldBuilder(minLines: 3));
     }, throwsAssertionError);
 
     // maxLines defaults to 1 and can't be less than minLines
@@ -2856,7 +2853,7 @@ void main() {
     // and the left edge of the input and label.
     expect(iconRight + 28.0, equals(tester.getTopLeft(find.text('label')).dx));
     expect(iconRight + 28.0, equals(tester.getTopLeft(find.byType(EditableText)).dx));
-  }, skip: isBrowser);
+  });
 
   testWidgets('Collapsed hint text placement', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -2964,7 +2961,7 @@ void main() {
         ),
       ),
     );
-    expect(tester.testTextInput.editingState['text'], isEmpty);
+    expect(tester.testTextInput.editingState, isNull);
 
     // Initial state with null controller.
     await tester.tap(find.byType(TextField));
@@ -3818,7 +3815,7 @@ void main() {
     SystemChannels.platform
       .setMockMethodCallHandler((MethodCall methodCall) async {
         if (methodCall.method == 'Clipboard.setData')
-          clipboardContent = methodCall.arguments['text'];
+          clipboardContent = methodCall.arguments['text'] as String;
         else if (methodCall.method == 'Clipboard.getData')
           return <String, dynamic>{'text': clipboardContent};
         return null;
@@ -3890,7 +3887,7 @@ void main() {
     SystemChannels.platform
       .setMockMethodCallHandler((MethodCall methodCall) async {
         if (methodCall.method == 'Clipboard.setData')
-          clipboardContent = methodCall.arguments['text'];
+          clipboardContent = methodCall.arguments['text'] as String;
         else if (methodCall.method == 'Clipboard.getData')
           return <String, dynamic>{'text': clipboardContent};
         return null;
@@ -6550,6 +6547,8 @@ void main() {
       maxLines: 10,
       maxLength: 100,
       maxLengthEnforced: false,
+      smartDashesType: SmartDashesType.disabled,
+      smartQuotesType: SmartQuotesType.disabled,
       enabled: false,
       cursorWidth: 1.0,
       cursorRadius: Radius.zero,
@@ -6570,6 +6569,8 @@ void main() {
       'style: TextStyle(inherit: true, color: Color(0xff00ff00))',
       'autofocus: true',
       'autocorrect: false',
+      'smartDashesType: disabled',
+      'smartQuotesType: disabled',
       'maxLines: 10',
       'maxLength: 100',
       'maxLength not enforced',
@@ -6908,8 +6909,8 @@ void main() {
     renderEditable.selectWord(cause: SelectionChangedCause.longPress);
     await tester.pumpAndSettle();
 
-    final List<Widget> transitions =
-      find.byType(FadeTransition).evaluate().map((Element e) => e.widget).toList();
+    final List<FadeTransition> transitions =
+      find.byType(FadeTransition).evaluate().map((Element e) => e.widget).cast<FadeTransition>().toList();
     // On Android, an empty app contains a single FadeTransition. The following
     // two are the left and right text selection handles, respectively.
     expect(transitions.length, 3);
@@ -6942,8 +6943,8 @@ void main() {
     renderEditable.selectWord(cause: SelectionChangedCause.longPress);
     await tester.pumpAndSettle();
 
-    final List<Widget> transitions =
-      find.byType(FadeTransition).evaluate().map((Element e) => e.widget).toList();
+    final List<FadeTransition> transitions =
+      find.byType(FadeTransition).evaluate().map((Element e) => e.widget).cast<FadeTransition>().toList();
     expect(transitions.length, 2);
     final FadeTransition left = transitions[0];
     final FadeTransition right = transitions[1];
@@ -7400,5 +7401,35 @@ void main() {
     await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
     await tester.pump();
     expect(focusNode3.hasPrimaryFocus, isTrue);
+  });
+
+  testWidgets("A buildCounter that returns null doesn't affect the size of the TextField", (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/44909
+
+    final GlobalKey textField1Key = GlobalKey();
+    final GlobalKey textField2Key = GlobalKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Column(
+            children: <Widget>[
+              TextField(key: textField1Key),
+              TextField(
+                key: textField2Key,
+                maxLength: 1,
+                buildCounter: (BuildContext context, {int currentLength, bool isFocused, int maxLength}) => null,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+    final Size textFieldSize1 = tester.getSize(find.byKey(textField1Key));
+    final Size textFieldSize2 = tester.getSize(find.byKey(textField2Key));
+
+    expect(textFieldSize1, equals(textFieldSize2));
   });
 }

@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -38,7 +38,7 @@ Material _getMaterialFromDialog(WidgetTester tester) {
 }
 
 RenderParagraph _getTextRenderObjectFromDialog(WidgetTester tester, String text) {
-  return tester.element<StatelessElement>(find.descendant(of: find.byType(AlertDialog), matching: find.text(text))).renderObject;
+  return tester.element<StatelessElement>(find.descendant(of: find.byType(AlertDialog), matching: find.text(text))).renderObject as RenderParagraph;
 }
 
 void main() {
@@ -132,7 +132,7 @@ void main() {
       find.byKey(_painterKey),
       matchesGoldenFile('dialog_theme.dialog_with_custom_border.png'),
     );
-  }, skip: isBrowser);
+  });
 
   testWidgets('Custom Title Text Style - Constructor Param', (WidgetTester tester) async {
     const String titleText = 'Title';

@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -77,7 +77,12 @@ class CocoaPods {
       processUtils.exitsHappy(<String>['which', 'pod']);
 
   Future<String> get cocoaPodsVersionText {
-    _versionText ??= processUtils.run(<String>['pod', '--version']).then<String>((RunResult result) {
+    _versionText ??= processUtils.run(
+      <String>['pod', '--version'],
+      environment: <String, String>{
+        'LANG': 'en_US.UTF-8',
+      },
+    ).then<String>((RunResult result) {
       return result.exitCode == 0 ? result.stdout.trim() : null;
     }, onError: (dynamic _) => null);
     return _versionText;
@@ -133,7 +138,6 @@ class CocoaPods {
     @required XcodeBasedProject xcodeProject,
     // For backward compatibility with previously created Podfile only.
     @required String engineDir,
-    bool isSwift = false,
     bool dependenciesChanged = true,
   }) async {
     if (!xcodeProject.podfile.existsSync()) {
@@ -305,17 +309,20 @@ class CocoaPods {
         // See https://github.com/flutter/flutter/issues/10873.
         // CocoaPods analytics adds a lot of latency.
         'COCOAPODS_DISABLE_STATS': 'true',
+        'LANG': 'en_US.UTF-8',
       },
     );
     status.stop();
     if (logger.isVerbose || result.exitCode != 0) {
-      if (result.stdout.isNotEmpty) {
+      final String stdout = result.stdout as String;
+      if (stdout.isNotEmpty) {
         printStatus('CocoaPods\' output:\n↳');
-        printStatus(result.stdout, indent: 4);
+        printStatus(stdout, indent: 4);
       }
-      if (result.stderr.isNotEmpty) {
+      final String stderr = result.stderr as String;
+      if (stderr.isNotEmpty) {
         printStatus('Error output from CocoaPods:\n↳');
-        printStatus(result.stderr, indent: 4);
+        printStatus(stderr, indent: 4);
       }
     }
     if (result.exitCode != 0) {
@@ -326,7 +333,8 @@ class CocoaPods {
   }
 
   void _diagnosePodInstallFailure(ProcessResult result) {
-    if (result.stdout is String && result.stdout.contains('out-of-date source repos')) {
+    final dynamic stdout = result.stdout;
+    if (stdout is String && stdout.contains('out-of-date source repos')) {
       printError(
         "Error: CocoaPods's specs repository is too out-of-date to satisfy dependencies.\n"
         'To update the CocoaPods specs, run:\n'

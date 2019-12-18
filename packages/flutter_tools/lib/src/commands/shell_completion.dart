@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -53,7 +53,7 @@ class ShellCompletionCommand extends FlutterCommand {
     }
 
     final File outputFile = fs.file(argResults.rest.first);
-    if (outputFile.existsSync() && !argResults['overwrite']) {
+    if (outputFile.existsSync() && !boolArg('overwrite')) {
       throwToolExit(
         'Output file ${outputFile.path} already exists, will not overwrite. '
             'Use --overwrite to force overwriting existing output file.',

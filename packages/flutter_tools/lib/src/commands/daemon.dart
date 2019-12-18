@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -35,7 +35,9 @@ const String protocolVersion = '0.5.3';
 /// It can be shutdown with a `daemon.shutdown` command (or by killing the
 /// process).
 class DaemonCommand extends FlutterCommand {
-  DaemonCommand({ this.hidden = false });
+  DaemonCommand({ this.hidden = false }) {
+    usesDartDefines();
+  }
 
   @override
   final String name = 'daemon';
@@ -58,8 +60,10 @@ class DaemonCommand extends FlutterCommand {
     await context.run<void>(
       body: () async {
         final Daemon daemon = Daemon(
-            stdinCommandStream, stdoutCommandResponse,
-            daemonCommand: this, notifyingLogger: notifyingLogger);
+          stdinCommandStream, stdoutCommandResponse,
+          notifyingLogger: notifyingLogger,
+          dartDefines: dartDefines,
+        );
 
         final int code = await daemon.onExit;
         if (code != 0) {
@@ -82,10 +86,17 @@ class Daemon {
   Daemon(
     Stream<Map<String, dynamic>> commandStream,
     this.sendCommand, {
-    this.daemonCommand,
     this.notifyingLogger,
     this.logToStdout = false,
+    @required this.dartDefines,
   }) {
+    if (dartDefines == null) {
+      throw Exception(
+        'dartDefines must not be null. This is a bug in Flutter.\n'
+        'Please file an issue at https://github.com/flutter/flutter/issues/new/choose',
+      );
+    }
+
     // Set up domains.
     _registerDomain(daemonDomain = DaemonDomain(this));
     _registerDomain(appDomain = AppDomain(this));
@@ -108,11 +119,13 @@ class Daemon {
   DeviceDomain deviceDomain;
   EmulatorDomain emulatorDomain;
   StreamSubscription<Map<String, dynamic>> _commandSubscription;
+  int _outgoingRequestId = 1;
+  final Map<String, Completer<dynamic>> _outgoingRequestCompleters = <String, Completer<dynamic>>{};
 
   final DispatchCommand sendCommand;
-  final DaemonCommand daemonCommand;
   final NotifyingLogger notifyingLogger;
   final bool logToStdout;
+  final List<String> dartDefines;
 
   final Completer<int> _onExitCompleter = Completer<int>();
   final Map<String, Domain> _domainMap = <String, Domain>{};
@@ -135,18 +148,33 @@ class Daemon {
     }
 
     try {
-      final String method = request['method'];
-      if (!method.contains('.')) {
-        throw 'method not understood: $method';
-      }
+      final String method = request['method'] as String;
+      if (method != null) {
+        if (!method.contains('.')) {
+          throw 'method not understood: $method';
+        }
 
-      final String prefix = method.substring(0, method.indexOf('.'));
-      final String name = method.substring(method.indexOf('.') + 1);
-      if (_domainMap[prefix] == null) {
-        throw 'no domain for method: $method';
-      }
+        final String prefix = method.substring(0, method.indexOf('.'));
+        final String name = method.substring(method.indexOf('.') + 1);
+        if (_domainMap[prefix] == null) {
+          throw 'no domain for method: $method';
+        }
 
-      _domainMap[prefix].handleCommand(name, id, request['params'] ?? const <String, dynamic>{});
+        _domainMap[prefix].handleCommand(name, id, castStringKeyedMap(request['params']) ?? const <String, dynamic>{});
+      } else {
+        // If there was no 'method' field then it's a response to a daemon-to-editor request.
+        final Completer<dynamic> completer = _outgoingRequestCompleters[id.toString()];
+        if (completer == null) {
+          throw 'unexpected response with id: $id';
+        }
+        _outgoingRequestCompleters.remove(id.toString());
+
+        if (request['error'] != null) {
+          completer.completeError(request['error']);
+        } else {
+          completer.complete(request['result']);
+        }
+      }
     } catch (error, trace) {
       _send(<String, dynamic>{
         'id': id,
@@ -154,6 +182,22 @@ class Daemon {
         'trace': '$trace',
       });
     }
+  }
+
+  Future<dynamic> sendRequest(String method, [ dynamic args ]) {
+    final Map<String, dynamic> map = <String, dynamic>{'method': method};
+    if (args != null) {
+      map['params'] = _toJsonable(args);
+    }
+
+    final int id = _outgoingRequestId++;
+    final Completer<dynamic> completer = Completer<dynamic>();
+
+    map['id'] = id.toString();
+    _outgoingRequestCompleters[id.toString()] = completer;
+
+    _send(map);
+    return completer.future;
   }
 
   void _send(Map<String, dynamic> map) => sendCommand(map);
@@ -176,6 +220,7 @@ class Daemon {
 abstract class Domain {
   Domain(this.daemon, this.name);
 
+
   final Daemon daemon;
   final String name;
   final Map<String, CommandHandler> _handlers = <String, CommandHandler>{};
@@ -183,8 +228,6 @@ abstract class Domain {
   void registerHandler(String name, CommandHandler handler) {
     _handlers[name] = handler;
   }
-
-  FlutterCommand get command => daemon.daemonCommand;
 
   @override
   String toString() => name;
@@ -228,7 +271,7 @@ abstract class Domain {
     if (val != null && val is! String) {
       throw '$name is not a String';
     }
-    return val;
+    return val as String;
   }
 
   bool _getBoolArg(Map<String, dynamic> args, String name, { bool required = false }) {
@@ -239,7 +282,7 @@ abstract class Domain {
     if (val != null && val is! bool) {
       throw '$name is not a bool';
     }
-    return val;
+    return val as bool;
   }
 
   int _getIntArg(Map<String, dynamic> args, String name, { bool required = false }) {
@@ -250,7 +293,7 @@ abstract class Domain {
     if (val != null && val is! int) {
       throw '$name is not an int';
     }
-    return val;
+    return val as int;
   }
 
   void dispose() { }
@@ -306,6 +349,21 @@ class DaemonDomain extends Domain {
 
   Future<String> version(Map<String, dynamic> args) {
     return Future<String>.value(protocolVersion);
+  }
+
+  /// Sends a request back to the client asking it to expose/tunnel a URL.
+  ///
+  /// This method should only be called if the client opted-in with the
+  /// --web-allow-expose-url switch. The client may return the same URL back if
+  /// tunnelling is not required for a given URL.
+  Future<String> exposeUrl(String url) async {
+    final dynamic res = await daemon.sendRequest('app.exposeUrl', <String, String>{'url': url});
+    if (res is Map<String, dynamic> && res['url'] is String) {
+      return res['url'] as String;
+    } else {
+      printError('Invalid response to exposeUrl - params should include a String url field');
+      return url;
+    }
   }
 
   Future<void> shutdown(Map<String, dynamic> args) {
@@ -383,6 +441,7 @@ typedef _RunOrAttach = Future<void> Function({
 class AppDomain extends Domain {
   AppDomain(Daemon daemon) : super(daemon, 'app') {
     registerHandler('restart', restart);
+    registerHandler('reloadMethod', reloadMethod);
     registerHandler('callServiceExtension', callServiceExtension);
     registerHandler('stop', stop);
     registerHandler('detach', detach);
@@ -424,7 +483,7 @@ class AppDomain extends Domain {
       viewFilter: isolateFilter,
       target: target,
       buildMode: options.buildInfo.mode,
-      dartDefines: command?.dartDefines,
+      dartDefines: daemon.dartDefines,
     );
 
     ResidentRunner runner;
@@ -437,7 +496,8 @@ class AppDomain extends Domain {
         debuggingOptions: options,
         ipv6: ipv6,
         stayResident: true,
-        dartDefines: command?.dartDefines,
+        dartDefines: daemon.dartDefines,
+        urlTunneller: options.webEnableExposeUrl ? daemon.daemonDomain.exposeUrl : null,
       );
     } else if (enableHotReload) {
       runner = HotRunner(
@@ -568,7 +628,29 @@ class AppDomain extends Domain {
     }
 
     _inProgressHotReload = app._runInZone<OperationResult>(this, () {
-      return app.restart(fullRestart: fullRestart, pauseAfterRestart: pauseAfterRestart, reason: restartReason);
+      return app.restart(fullRestart: fullRestart, pause: pauseAfterRestart, reason: restartReason);
+    });
+    return _inProgressHotReload.whenComplete(() {
+      _inProgressHotReload = null;
+    });
+  }
+
+  Future<OperationResult> reloadMethod(Map<String, dynamic> args) async {
+    final String appId = _getStringArg(args, 'appId', required: true);
+    final String classId = _getStringArg(args, 'class', required: true);
+    final String libraryId =  _getStringArg(args, 'library', required: true);
+
+    final AppInstance app = _getApp(appId);
+    if (app == null) {
+      throw "app '$appId' not found";
+    }
+
+    if (_inProgressHotReload != null) {
+      throw 'hot restart already in progress';
+    }
+
+    _inProgressHotReload = app._runInZone<OperationResult>(this, () {
+      return app.reloadMethod(classId: classId, libraryId: libraryId);
     });
     return _inProgressHotReload.whenComplete(() {
       _inProgressHotReload = null;
@@ -681,8 +763,8 @@ class DeviceDomain extends Domain {
       return;
     }
 
-    _discoverers.add(discoverer);
     if (discoverer is PollingDeviceDiscovery) {
+      _discoverers.add(discoverer);
       discoverer.onAdded.listen(_onDeviceEvent('device.added'));
       discoverer.onRemoved.listen(_onDeviceEvent('device.removed'));
     }
@@ -786,7 +868,7 @@ Stream<Map<String, dynamic>> get stdinCommandStream => stdin
   .where((String line) => line.startsWith('[{') && line.endsWith('}]'))
   .map<Map<String, dynamic>>((String line) {
     line = line.substring(1, line.length - 1);
-    return json.decode(line);
+    return castStringKeyedMap(json.decode(line));
   });
 
 void stdoutCommandResponse(Map<String, dynamic> command) {
@@ -900,7 +982,7 @@ class NotifyingLogger extends Logger {
   }
 
   @override
-  void sendNotification(String message, {String progressId}) { }
+  void sendEvent(String name, [Map<String, dynamic> args]) { }
 }
 
 /// A running application, started by this daemon.
@@ -913,8 +995,12 @@ class AppInstance {
 
   _AppRunLogger _logger;
 
-  Future<OperationResult> restart({ bool fullRestart = false, bool pauseAfterRestart = false, String reason }) {
-    return runner.restart(fullRestart: fullRestart, pauseAfterRestart: pauseAfterRestart, reason: reason);
+  Future<OperationResult> restart({ bool fullRestart = false, bool pause = false, String reason }) {
+    return runner.restart(fullRestart: fullRestart, pause: pause, reason: reason);
+  }
+
+  Future<OperationResult> reloadMethod({ String classId, String libraryId }) {
+    return runner.reloadMethod(classId: classId, libraryId: libraryId);
   }
 
   Future<void> stop() => runner.exit();
@@ -924,7 +1010,7 @@ class AppInstance {
     _logger.close();
   }
 
-  Future<T> _runInZone<T>(AppDomain domain, dynamic method()) {
+  Future<T> _runInZone<T>(AppDomain domain, FutureOr<T> method()) {
     _logger ??= _AppRunLogger(domain, this, parent: logToStdout ? logger : null);
 
     return context.run<T>(
@@ -1113,13 +1199,12 @@ class _AppRunLogger extends Logger {
   }
 
   @override
-  void sendNotification(String message, {String progressId}) {
-    final int id = _nextProgressId++;
-    _sendProgressEvent(<String, dynamic>{
-      'id': id.toString(),
-      'progressId': progressId,
-      'finished': true,
-    });
+  void sendEvent(String name, [Map<String, dynamic> args]) {
+    if (domain == null) {
+      printStatus('event sent after app closed: $name');
+    } else {
+      domain.sendEvent(name, args);
+    }
   }
 }
 

@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -40,10 +40,11 @@ typedef InlineSpanVisitor = bool Function(InlineSpan span);
 /// For [PlaceholderSpan]s, [InlineSpanSemanticsInformation.placeholder] is used by default.
 ///
 /// See also:
-///   * [InlineSpan.getSemanticsInformation]
+///
+///  * [InlineSpan.getSemanticsInformation]
 @immutable
 class InlineSpanSemanticsInformation {
-  /// Constructs an object that holds the text and sematnics label values of an
+  /// Constructs an object that holds the text and semantics label values of an
   /// [InlineSpan].
   ///
   /// The text parameter must not be null.
@@ -283,7 +284,7 @@ abstract class InlineSpan extends DiagnosticableTree {
   /// represented as a 0xFFFC 'object replacement character'.
   ///
   /// The plain-text representation of this [InlineSpan] is written into the `buffer`.
-  /// This method will then recursively call [computeToPlainText] on its childen
+  /// This method will then recursively call [computeToPlainText] on its children
   /// [InlineSpan]s if available.
   @protected
   void computeToPlainText(StringBuffer buffer, {bool includeSemanticsLabels = true, bool includePlaceholders = true});
@@ -358,8 +359,8 @@ abstract class InlineSpan extends DiagnosticableTree {
       return true;
     if (other.runtimeType != runtimeType)
       return false;
-    final InlineSpan typedOther = other;
-    return typedOther.style == style;
+    return other is InlineSpan
+        && other.style == style;
   }
 
   @override

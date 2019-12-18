@@ -1,54 +1,16 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-// This script analyzes all the sample code in API docs in the Flutter source.
-//
-// It uses the following conventions:
-//
-// Code is denoted by markdown ```dart / ``` markers.
-//
-// Only code in "## Sample code" or "### Sample code" sections is examined.
-// Subheadings can also be specified, as in "## Sample code: foo".
-//
-// Additionally, code inside of dartdoc snippet and sample blocks
-// ({@tool snippet ...}{@end-tool}, and {@tool sample ...}{@end-tool})
-// is recognized as sample code. Snippets are processed as separate programs,
-// and samples are processed in the same way as "## Sample code" blocks are.
-//
-// There are several kinds of sample code you can specify:
-//
-// * Constructor calls, typically showing what might exist in a build method.
-//   These start with "new" or "const", and will be inserted into an assignment
-//   expression assigning to a variable of type "dynamic" and followed by a
-//   semicolon, for the purposes of analysis.
-//
-// * Class definitions. These start with "class", and are analyzed verbatim.
-//
-// * Other code. It gets included verbatim, though any line that says "// ..."
-//   is considered to separate the block into multiple blocks to be processed
-//   individually.
-//
-// In addition, you can declare code that should be included in the analysis but
-// not shown in the API docs by adding a comment "// Examples can assume:" to
-// the file (usually at the top of the file, after the imports), following by
-// one or more commented-out lines of code. That code is included verbatim in
-// the analysis.
-//
-// All the sample code of every file is analyzed together. This means you can't
-// have two pieces of sample code that define the same example class.
-//
-// Also, the above means that it's tricky to include verbatim imperative code
-// (e.g. a call to a method), since it won't be valid to have such code at the
-// top level. Instead, wrap it in a function or even a whole class, or make it a
-// valid variable declaration.
+// See ../snippets/README.md for documentation.
+
+// To run this, from the root of the Flutter repository:
+//   bin/cache/dart-sdk/bin/dart dev/bots/analyze-sample-code.dart
 
 import 'dart:io';
 
 import 'package:args/args.dart';
 import 'package:path/path.dart' as path;
-
-// To run this: bin/cache/dart-sdk/bin/dart dev/bots/analyze-sample-code.dart
 
 final String _flutterRoot = path.dirname(path.dirname(path.dirname(path.fromUri(Platform.script))));
 final String _defaultFlutterPackage = path.join(_flutterRoot, 'packages', 'flutter', 'lib');
@@ -60,8 +22,14 @@ void main(List<String> arguments) {
     'temp',
     defaultsTo: null,
     help: 'A location where temporary files may be written. Defaults to a '
-        'directory in the system temp folder. If specified, will not be '
-        'automatically removed at the end of execution.',
+          'directory in the system temp folder. If specified, will not be '
+          'automatically removed at the end of execution.',
+  );
+  argParser.addFlag(
+    'verbose',
+    defaultsTo: false,
+    negatable: false,
+    help: 'Print verbose output for the analysis process.',
   );
   argParser.addFlag(
     'help',
@@ -72,8 +40,9 @@ void main(List<String> arguments) {
 
   final ArgResults parsedArguments = argParser.parse(arguments);
 
-  if (parsedArguments['help']) {
+  if (parsedArguments['help'] as bool) {
     print(argParser.usage);
+    print('See dev/snippets/README.md for documentation.');
     exit(0);
   }
 
@@ -87,8 +56,9 @@ void main(List<String> arguments) {
 
   Directory tempDirectory;
   if (parsedArguments.wasParsed('temp')) {
-    tempDirectory = Directory(path.join(Directory.systemTemp.absolute.path, path.basename(parsedArguments['temp'])));
-    if (path.basename(parsedArguments['temp']) != parsedArguments['temp']) {
+    final String tempArg = parsedArguments['temp'] as String;
+    tempDirectory = Directory(path.join(Directory.systemTemp.absolute.path, path.basename(tempArg)));
+    if (path.basename(tempArg) != tempArg) {
       stderr.writeln('Supplied temporary directory name should be a name, not a path. Using ${tempDirectory.absolute.path} instead.');
     }
     print('Leaving temporary output in ${tempDirectory.absolute.path}.');
@@ -100,7 +70,11 @@ void main(List<String> arguments) {
     tempDirectory.createSync();
   }
   try {
-    exitCode = SampleChecker(flutterPackage, tempDirectory: tempDirectory).checkSamples();
+    exitCode = SampleChecker(
+      flutterPackage,
+      tempDirectory: tempDirectory,
+      verbose: parsedArguments['verbose'] as bool,
+    ).checkSamples();
   } on SampleCheckerException catch (e) {
     stderr.write(e);
     exit(1);
@@ -140,7 +114,7 @@ class SampleCheckerException implements Exception {
 /// don't necessarily match. It does, however, print the source of the
 /// problematic line.
 class SampleChecker {
-  SampleChecker(this._flutterPackage, {Directory tempDirectory})
+  SampleChecker(this._flutterPackage, {Directory tempDirectory, this.verbose = false})
       : _tempDirectory = tempDirectory,
         _keepTmp = tempDirectory != null {
     _tempDirectory ??= Directory.systemTemp.createTempSync('flutter_analyze_sample_code.');
@@ -153,7 +127,7 @@ class SampleChecker {
   static const String _dartDocPrefixWithSpace = '$_dartDocPrefix ';
 
   /// A RegExp that matches the beginning of a dartdoc snippet or sample.
-  static final RegExp _dartDocSampleBeginRegex = RegExp(r'{@tool (sample|snippet)(?:| ([^}]*))}');
+  static final RegExp _dartDocSampleBeginRegex = RegExp(r'{@tool (sample|snippet|dartpad)(?:| ([^}]*))}');
 
   /// A RegExp that matches the end of a dartdoc snippet or sample.
   static final RegExp _dartDocSampleEndRegex = RegExp(r'{@end-tool}');
@@ -166,6 +140,9 @@ class SampleChecker {
 
   /// A RegExp that matches a Dart constructor.
   static final RegExp _constructorRegExp = RegExp(r'(const\s+)?_*[A-Z][a-zA-Z0-9<>._]*\(');
+
+  /// Whether or not to print verbose output.
+  final bool verbose;
 
   /// Whether or not to keep the temp directory around after running.
   ///
@@ -311,8 +288,11 @@ class SampleChecker {
       '--input=${inputFile.absolute.path}',
       ...snippet.args,
     ];
-    print('Generating snippet for ${snippet.start?.filename}:${snippet.start?.line}');
+    if (verbose)
+      print('Generating snippet for ${snippet.start?.filename}:${snippet.start?.line}');
     final ProcessResult process = _runSnippetsScript(args);
+    if (verbose)
+      stderr.write('${process.stderr}');
     if (process.exitCode != 0) {
       throw SampleCheckerException(
         'Unable to create snippet for ${snippet.start.filename}:${snippet.start.line} '
@@ -427,7 +407,7 @@ class SampleChecker {
             startLine = Line('', filename: relativeFilePath, line: lineNumber + 1, indent: 3);
             inPreamble = true;
           } else if (sampleMatch != null) {
-            inSnippet = sampleMatch != null && sampleMatch[1] == 'snippet';
+            inSnippet = sampleMatch != null && (sampleMatch[1] == 'snippet' || sampleMatch[1] == 'dartpad');
             if (inSnippet) {
               startLine = Line(
                 '',
@@ -814,8 +794,7 @@ class Line {
   String toString() => '$filename:$line: $code';
 }
 
-/// A class to represent a section of sample code, either marked by
-/// "/// ## Sample code" in the comment, or by "{@tool sample}...{@end-tool}".
+/// A class to represent a section of sample code, marked by "{@tool sample}...{@end-tool}".
 class Section {
   const Section(this.code);
   factory Section.combine(List<Section> sections) {

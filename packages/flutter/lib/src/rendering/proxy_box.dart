@@ -1,10 +1,10 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:async';
 
-import 'dart:ui' as ui show ImageFilter, Gradient, Image;
+import 'dart:ui' as ui show ImageFilter, Gradient, Image, Color;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
@@ -26,7 +26,7 @@ export 'package:flutter/gestures.dart' show
   PointerUpEvent,
   PointerCancelEvent;
 
-/// A base class for render objects that resemble their children.
+/// A base class for render boxes that resemble their children.
 ///
 /// A proxy box has a single child and simply mimics all the properties of that
 /// child by calling through to the child for each function in the render box
@@ -37,6 +37,11 @@ export 'package:flutter/gestures.dart' show
 /// the proxy box with its child. However, RenderProxyBox is a useful base class
 /// for render objects that wish to mimic most, but not all, of the properties
 /// of their child.
+///
+/// See also:
+///
+///  * [RenderProxySliver], a base class for render slivers that resemble their
+///    children.
 class RenderProxyBox extends RenderBox with RenderObjectWithChildMixin<RenderBox>, RenderProxyBoxMixin<RenderBox> {
   /// Creates a proxy render box.
   ///
@@ -713,8 +718,6 @@ class RenderIntrinsicHeight extends RenderProxyBox {
 
 }
 
-int _getAlphaFromOpacity(double opacity) => (opacity * 255).round();
-
 /// Makes its child partially transparent.
 ///
 /// This class paints its child into an intermediate buffer and then blends the
@@ -737,7 +740,7 @@ class RenderOpacity extends RenderProxyBox {
        assert(alwaysIncludeSemantics != null),
        _opacity = opacity,
        _alwaysIncludeSemantics = alwaysIncludeSemantics,
-       _alpha = _getAlphaFromOpacity(opacity),
+       _alpha = ui.Color.getAlphaFromOpacity(opacity),
        super(child);
 
   @override
@@ -765,11 +768,11 @@ class RenderOpacity extends RenderProxyBox {
     final bool didNeedCompositing = alwaysNeedsCompositing;
     final bool wasVisible = _alpha != 0;
     _opacity = value;
-    _alpha = _getAlphaFromOpacity(_opacity);
+    _alpha = ui.Color.getAlphaFromOpacity(_opacity);
     if (didNeedCompositing != alwaysNeedsCompositing)
       markNeedsCompositingBitsUpdate();
     markNeedsPaint();
-    if (wasVisible != (_alpha != 0))
+    if (wasVisible != (_alpha != 0) && !alwaysIncludeSemantics)
       markNeedsSemanticsUpdate();
   }
 
@@ -802,7 +805,7 @@ class RenderOpacity extends RenderProxyBox {
         return;
       }
       assert(needsCompositing);
-      layer = context.pushOpacity(offset, _alpha, super.paint, oldLayer: layer);
+      layer = context.pushOpacity(offset, _alpha, super.paint, oldLayer: layer as OpacityLayer);
     }
   }
 
@@ -895,7 +898,7 @@ class RenderAnimatedOpacity extends RenderProxyBox {
 
   void _updateOpacity() {
     final int oldAlpha = _alpha;
-    _alpha = _getAlphaFromOpacity(_opacity.value.clamp(0.0, 1.0));
+    _alpha = ui.Color.getAlphaFromOpacity(_opacity.value);
     if (oldAlpha != _alpha) {
       final bool didNeedCompositing = _currentlyNeedsCompositing;
       _currentlyNeedsCompositing = _alpha > 0 && _alpha < 255;
@@ -922,7 +925,7 @@ class RenderAnimatedOpacity extends RenderProxyBox {
         return;
       }
       assert(needsCompositing);
-      layer = context.pushOpacity(offset, _alpha, super.paint, oldLayer: layer);
+      layer = context.pushOpacity(offset, _alpha, super.paint, oldLayer: layer as OpacityLayer);
     }
   }
 
@@ -964,12 +967,15 @@ class RenderShaderMask extends RenderProxyBox {
        super(child);
 
   @override
-  ShaderMaskLayer get layer => super.layer;
+  ShaderMaskLayer get layer => super.layer as ShaderMaskLayer;
 
   /// Called to creates the [Shader] that generates the mask.
   ///
   /// The shader callback is called with the current size of the child so that
   /// it can customize the shader to the size and location of the child.
+  ///
+  /// The rectangle will always be at the origin when called by
+  /// [RenderShaderMask].
   // TODO(abarth): Use the delegate pattern here to avoid generating spurious
   // repaints when the ShaderCallback changes identity.
   ShaderCallback get shaderCallback => _shaderCallback;
@@ -1029,7 +1035,7 @@ class RenderBackdropFilter extends RenderProxyBox {
       super(child);
 
   @override
-  BackdropFilterLayer get layer => super.layer;
+  BackdropFilterLayer get layer => super.layer as BackdropFilterLayer;
 
   /// The image filter to apply to the existing painted content before painting
   /// the child.
@@ -1162,7 +1168,7 @@ class ShapeBorderClipper extends CustomClipper<Path> {
   bool shouldReclip(CustomClipper<Path> oldClipper) {
     if (oldClipper.runtimeType != ShapeBorderClipper)
       return true;
-    final ShapeBorderClipper typedOldClipper = oldClipper;
+    final ShapeBorderClipper typedOldClipper = oldClipper as ShapeBorderClipper;
     return typedOldClipper.shape != shape
         || typedOldClipper.textDirection != textDirection;
   }
@@ -1314,7 +1320,14 @@ class RenderClipRect extends _RenderCustomClip<Rect> {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       _updateClip();
-      layer = context.pushClipRect(needsCompositing, offset, _clip, super.paint, clipBehavior: clipBehavior, oldLayer: layer);
+      layer = context.pushClipRect(
+        needsCompositing,
+        offset,
+        _clip,
+        super.paint,
+        clipBehavior: clipBehavior,
+        oldLayer: layer as ClipRectLayer,
+      );
     } else {
       layer = null;
     }
@@ -1393,7 +1406,13 @@ class RenderClipRRect extends _RenderCustomClip<RRect> {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       _updateClip();
-      layer = context.pushClipRRect(needsCompositing, offset, _clip.outerRect, _clip, super.paint, clipBehavior: clipBehavior, oldLayer: layer);
+      layer = context.pushClipRRect(
+        needsCompositing,
+        offset,
+        _clip.outerRect,
+        _clip,
+        super.paint, clipBehavior: clipBehavior, oldLayer: layer as ClipRRectLayer,
+      );
     } else {
       layer = null;
     }
@@ -1464,7 +1483,15 @@ class RenderClipOval extends _RenderCustomClip<Rect> {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       _updateClip();
-      layer = context.pushClipPath(needsCompositing, offset, _clip, _getClipPath(_clip), super.paint, clipBehavior: clipBehavior, oldLayer: layer);
+      layer = context.pushClipPath(
+        needsCompositing,
+        offset,
+        _clip,
+        _getClipPath(_clip),
+        super.paint,
+        clipBehavior: clipBehavior,
+        oldLayer: layer as ClipPathLayer,
+      );
     } else {
       layer = null;
     }
@@ -1529,7 +1556,15 @@ class RenderClipPath extends _RenderCustomClip<Path> {
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
       _updateClip();
-      layer = context.pushClipPath(needsCompositing, offset, Offset.zero & size, _clip, super.paint, clipBehavior: clipBehavior, oldLayer: layer);
+      layer = context.pushClipPath(
+        needsCompositing,
+        offset,
+        Offset.zero & size,
+        _clip,
+        super.paint,
+        clipBehavior: clipBehavior,
+        oldLayer: layer as ClipPathLayer,
+      );
     } else {
       layer = null;
     }
@@ -1666,7 +1701,7 @@ class RenderPhysicalModel extends _RenderPhysicalModelBase<RRect> {
        );
 
   @override
-  PhysicalModelLayer get layer => super.layer;
+  PhysicalModelLayer get layer => super.layer as PhysicalModelLayer;
 
   /// The shape of the layer.
   ///
@@ -1808,7 +1843,7 @@ class RenderPhysicalShape extends _RenderPhysicalModelBase<Path> {
        );
 
   @override
-  PhysicalModelLayer get layer => super.layer;
+  PhysicalModelLayer get layer => super.layer as PhysicalModelLayer;
 
   @override
   Path get _defaultClip => Path()..addRect(Offset.zero & size);
@@ -2190,7 +2225,13 @@ class RenderTransform extends RenderProxyBox {
       final Matrix4 transform = _effectiveTransform;
       final Offset childOffset = MatrixUtils.getAsTranslation(transform);
       if (childOffset == null) {
-        layer = context.pushTransform(needsCompositing, offset, transform, super.paint, oldLayer: layer);
+        layer = context.pushTransform(
+          needsCompositing,
+          offset,
+          transform,
+          super.paint,
+          oldLayer: layer as TransformLayer,
+        );
       } else {
         super.paint(context, offset + childOffset);
         layer = null;
@@ -2208,7 +2249,7 @@ class RenderTransform extends RenderProxyBox {
     super.debugFillProperties(properties);
     properties.add(TransformProperty('transform matrix', _transform));
     properties.add(DiagnosticsProperty<Offset>('origin', origin));
-    properties.add(DiagnosticsProperty<Alignment>('alignment', alignment));
+    properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment));
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
     properties.add(DiagnosticsProperty<bool>('transformHitTests', transformHitTests));
   }
@@ -2338,7 +2379,7 @@ class RenderFittedBox extends RenderProxyBox {
     final Offset childOffset = MatrixUtils.getAsTranslation(_transform);
     if (childOffset == null)
       return context.pushTransform(needsCompositing, offset, _transform, super.paint,
-          oldLayer: layer is TransformLayer ? layer : null);
+          oldLayer: layer is TransformLayer ? layer as TransformLayer : null);
     else
       super.paint(context, offset + childOffset);
     return null;
@@ -2352,7 +2393,7 @@ class RenderFittedBox extends RenderProxyBox {
     if (child != null) {
       if (_hasVisualOverflow)
         layer = context.pushClipRect(needsCompositing, offset, Offset.zero & size, _paintChildWithTransform,
-            oldLayer: layer is ClipRectLayer ? layer : null);
+            oldLayer: layer is ClipRectLayer ? layer as ClipRectLayer : null);
       else
         layer = _paintChildWithTransform(context, offset);
     }
@@ -2386,7 +2427,7 @@ class RenderFittedBox extends RenderProxyBox {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(EnumProperty<BoxFit>('fit', fit));
-    properties.add(DiagnosticsProperty<Alignment>('alignment', alignment));
+    properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment));
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
   }
 }
@@ -2684,7 +2725,8 @@ class RenderMouseRegion extends RenderProxyBox {
       _onHover(event);
   }
 
-  /// Called when a pointer leaves the region (with or without buttons pressed).
+  /// Called when a pointer leaves the region (with or without buttons pressed)
+  /// and the annotation is still attached.
   PointerExitEventListener get onExit => _onExit;
   set onExit(PointerExitEventListener value) {
     if (_onExit != value) {
@@ -2904,7 +2946,7 @@ class RenderRepaintBoundary extends RenderProxyBox {
   ///  * [dart:ui.Scene.toImage] for more information about the image returned.
   Future<ui.Image> toImage({ double pixelRatio = 1.0 }) {
     assert(!debugNeedsPaint);
-    final OffsetLayer offsetLayer = layer;
+    final OffsetLayer offsetLayer = layer as OffsetLayer;
     return offsetLayer.toImage(Offset.zero & size, pixelRatio: pixelRatio);
   }
 
@@ -3016,8 +3058,8 @@ class RenderRepaintBoundary extends RenderProxyBox {
 class RenderIgnorePointer extends RenderProxyBox {
   /// Creates a render object that is invisible to hit testing.
   ///
-  /// The [ignoring] argument must not be null. If [ignoringSemantics], this
-  /// render object will be ignored for semantics if [ignoring] is true.
+  /// The [ignoring] argument must not be null. If [ignoringSemantics] is null,
+  /// this render object will be ignored for semantics if [ignoring] is true.
   RenderIgnorePointer({
     RenderBox child,
     bool ignoring = true,
@@ -3039,7 +3081,7 @@ class RenderIgnorePointer extends RenderProxyBox {
     if (value == _ignoring)
       return;
     _ignoring = value;
-    if (ignoringSemantics == null)
+    if (_ignoringSemantics == null || !_ignoringSemantics)
       markNeedsSemanticsUpdate();
   }
 
@@ -3634,15 +3676,16 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
   /// Whether descendants of this [RenderObject] are allowed to add semantic
   /// information to the [SemanticsNode] annotated by this widget.
   ///
-  /// When set to false descendants are allowed to annotate [SemanticNode]s of
+  /// When set to false descendants are allowed to annotate [SemanticsNode]s of
   /// their parent with the semantic information they want to contribute to the
   /// semantic tree.
   /// When set to true the only way for descendants to contribute semantic
   /// information to the semantic tree is to introduce new explicit
-  /// [SemanticNode]s to the tree.
+  /// [SemanticsNode]s to the tree.
   ///
-  /// This setting is often used in combination with [isSemanticBoundary] to
-  /// create semantic boundaries that are either writable or not for children.
+  /// This setting is often used in combination with
+  /// [SemanticsConfiguration.isSemanticBoundary] to create semantic boundaries
+  /// that are either writable or not for children.
   bool get explicitChildNodes => _explicitChildNodes;
   bool _explicitChildNodes;
   set explicitChildNodes(bool value) {
@@ -3669,8 +3712,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
-  /// If non-null, sets the [SemanticsNode.hasCheckedState] semantic to true and
-  /// the [SemanticsNode.isChecked] semantic to the given value.
+  /// If non-null, sets the [SemanticsFlag.hasCheckedState] semantic to true and
+  /// the [SemanticsConfiguration.isChecked] semantic to the given value.
   bool get checked => _checked;
   bool _checked;
   set checked(bool value) {
@@ -3680,8 +3723,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
-  /// If non-null, sets the [SemanticsNode.hasEnabledState] semantic to true and
-  /// the [SemanticsNode.isEnabled] semantic to the given value.
+  /// If non-null, sets the [SemanticsFlag.hasEnabledState] semantic to true and
+  /// the [SemanticsConfiguration.isEnabled] semantic to the given value.
   bool get enabled => _enabled;
   bool _enabled;
   set enabled(bool value) {
@@ -3691,8 +3734,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
-  /// If non-null, sets the [SemanticsNode.isSelected] semantic to the given
-  /// value.
+  /// If non-null, sets the [SemanticsConfiguration.isSelected] semantic to the
+  /// given value.
   bool get selected => _selected;
   bool _selected;
   set selected(bool value) {
@@ -3702,7 +3745,8 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     markNeedsSemanticsUpdate();
   }
 
-  /// If non-null, sets the [SemanticsNode.isButton] semantic to the given value.
+  /// If non-null, sets the [SemanticsConfiguration.isButton] semantic to the
+  /// given value.
   bool get button => _button;
   bool _button;
   set button(bool value) {
@@ -3846,7 +3890,7 @@ class RenderSemanticsAnnotations extends RenderProxyBox {
     _image = value;
   }
 
-  /// If non-null, sets the [SemanticsNode.isLiveRegion] semantic to the given
+  /// If non-null, sets the [SemanticsFlag.isLiveRegion] semantic to the given
   /// value.
   bool get liveRegion => _liveRegion;
   bool _liveRegion;
@@ -4790,7 +4834,7 @@ class RenderLeaderLayer extends RenderProxyBox {
     if (layer == null) {
       layer = LeaderLayer(link: link, offset: offset);
     } else {
-      final LeaderLayer leaderLayer = layer;
+      final LeaderLayer leaderLayer = layer as LeaderLayer;
       leaderLayer
         ..link = link
         ..offset = offset;
@@ -4891,7 +4935,7 @@ class RenderFollowerLayer extends RenderProxyBox {
 
   /// The layer we created when we were last painted.
   @override
-  FollowerLayer get layer => super.layer;
+  FollowerLayer get layer => super.layer as FollowerLayer;
 
   /// Return the transform that was used in the last composition phase, if any.
   ///

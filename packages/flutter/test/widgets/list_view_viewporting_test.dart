@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -260,7 +260,7 @@ void main() {
     );
 
     DecoratedBox widget = tester.firstWidget(find.byType(DecoratedBox));
-    BoxDecoration decoration = widget.decoration;
+    BoxDecoration decoration = widget.decoration as BoxDecoration;
     expect(decoration.color, equals(Colors.blue));
 
     setState(() {
@@ -270,7 +270,7 @@ void main() {
     await tester.pump();
 
     widget = tester.firstWidget(find.byType(DecoratedBox));
-    decoration = widget.decoration;
+    decoration = widget.decoration as BoxDecoration;
     expect(decoration.color, equals(Colors.green));
   });
 

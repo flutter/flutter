@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -171,8 +171,8 @@ class LogicalKeyboardKey extends KeyboardKey {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    final LogicalKeyboardKey typedOther = other;
-    return keyId == typedOther.keyId;
+    return other is LogicalKeyboardKey
+        && other.keyId == keyId;
   }
 
   /// Returns the [LogicalKeyboardKey] constant that matches the given ID, or
@@ -2073,8 +2073,8 @@ class PhysicalKeyboardKey extends KeyboardKey {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    final PhysicalKeyboardKey typedOther = other;
-    return usbHidUsage == typedOther.usbHidUsage;
+    return other is PhysicalKeyboardKey
+        && other.usbHidUsage == usbHidUsage;
   }
 
   @override

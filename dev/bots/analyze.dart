@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -49,6 +49,7 @@ PrintCallback print = core_internals.print;
 /// For example:
 /// bin/cache/dart-sdk/bin/dart dev/bots/analyze.dart --dart-sdk=/tmp/dart-sdk
 Future<void> main(List<String> arguments) async {
+  print('$clock STARTING ANALYSIS');
   try {
     await run(arguments);
   } on ExitException catch (error) {
@@ -65,28 +66,48 @@ Future<void> run(List<String> arguments) async {
     exit(1);
   }
 
+  print('$clock Deprecations...');
   await verifyDeprecations(flutterRoot);
+
+  print('$clock Licenses...');
   await verifyNoMissingLicense(flutterRoot);
+
+  print('$clock Test imports...');
   await verifyNoTestImports(flutterRoot);
+
+  print('$clock Test package imports...');
   await verifyNoTestPackageImports(flutterRoot);
+
+  print('$clock Generated plugin registrants...');
   await verifyGeneratedPluginRegistrants(flutterRoot);
+
+  print('$clock Bad imports (framework)...');
   await verifyNoBadImportsInFlutter(flutterRoot);
+
+  print('$clock Bad imports (tools)...');
   await verifyNoBadImportsInFlutterTools(flutterRoot);
+
+  print('$clock Internationalization...');
   await verifyInternationalizations();
+
+  print('$clock Trailing spaces...');
   await verifyNoTrailingSpaces();
 
   // Ensure that all package dependencies are in sync.
+  print('$clock Package dependencies...');
   await runCommand(flutter, <String>['update-packages', '--verify-only'],
     workingDirectory: flutterRoot,
   );
 
   // Analyze all the sample code in the repo
+  print('$clock Sample code...');
   await runCommand(dart,
     <String>[path.join(flutterRoot, 'dev', 'bots', 'analyze-sample-code.dart')],
     workingDirectory: flutterRoot,
   );
 
   // Analyze all the Dart code in the repo.
+  print('$clock Dart analysis...');
   await _runFlutterAnalyze(flutterRoot, options: <String>[
     '--flutter-repo',
     ...arguments,
@@ -94,6 +115,7 @@ Future<void> run(List<String> arguments) async {
 
   // Try with the --watch analyzer, to make sure it returns success also.
   // The --benchmark argument exits after one run.
+  print('$clock Dart analysis (with --watch)...');
   await _runFlutterAnalyze(flutterRoot, options: <String>[
     '--flutter-repo',
     '--watch',
@@ -102,8 +124,8 @@ Future<void> run(List<String> arguments) async {
   ]);
 
   // Try analysis against a big version of the gallery; generate into a temporary directory.
+  print('$clock Dart analysis (mega gallery)...');
   final Directory outDir = Directory.systemTemp.createTempSync('flutter_mega_gallery.');
-
   try {
     await runCommand(dart,
       <String>[
@@ -113,13 +135,11 @@ Future<void> run(List<String> arguments) async {
       ],
       workingDirectory: flutterRoot,
     );
-    {
-      await _runFlutterAnalyze(outDir.path, options: <String>[
-        '--watch',
-        '--benchmark',
-        ...arguments,
-      ]);
-    }
+    await _runFlutterAnalyze(outDir.path, options: <String>[
+      '--watch',
+      '--benchmark',
+      ...arguments,
+    ]);
   } finally {
     outDir.deleteSync(recursive: true);
   }
@@ -131,7 +151,7 @@ Future<void> run(List<String> arguments) async {
 final RegExp _findDeprecationPattern = RegExp(r'@[Dd]eprecated');
 final RegExp _deprecationPattern1 = RegExp(r'^( *)@Deprecated\($'); // ignore: flutter_deprecation_syntax (see analyze.dart)
 final RegExp _deprecationPattern2 = RegExp(r"^ *'(.+) '$");
-final RegExp _deprecationPattern3 = RegExp(r"^ *'This feature was deprecated after v([0-9]+)\.([0-9]+)\.([0-9]+)\.(?: See: (https://flutter.dev/.+))?'$");
+final RegExp _deprecationPattern3 = RegExp(r"^ *'This feature was deprecated after v([0-9]+)\.([0-9]+)\.([0-9]+)\.'$");
 final RegExp _deprecationPattern4 = RegExp(r'^ *\)$');
 
 /// Some deprecation notices are special, for example they're used to annotate members that
@@ -146,7 +166,7 @@ final RegExp _grandfatheredDeprecation = RegExp(r' // ignore: flutter_deprecatio
 
 Future<void> verifyDeprecations(String workingDirectory) async {
   final List<String> errors = <String>[];
-  for (File file in _dartFiles(workingDirectory)) {
+  for (File file in _allFiles(workingDirectory, 'dart')) {
     int lineNumber = 0;
     final List<String> lines = file.readAsLinesSync();
     final List<int> linesWithDeprecations = <int>[];
@@ -190,10 +210,6 @@ Future<void> verifyDeprecations(String workingDirectory) async {
           throw 'Deprecation notice should be a grammatically correct sentence and end with a period.';
         if (!lines[lineNumber].startsWith("$indent  '"))
           throw 'Unexpected deprecation notice indent.';
-        if (int.parse(match3[1]) > 1 || int.parse(match3[2]) > 11) {
-          if (match3[4] == null)
-            throw 'A URL to the deprecation notice is required.';
-        }
         lineNumber += 1;
         if (lineNumber >= lines.length)
           throw 'Incomplete deprecation notice.';
@@ -216,24 +232,50 @@ Future<void> verifyDeprecations(String workingDirectory) async {
   }
 }
 
+String _generateLicense(String prefix) {
+  assert(prefix != null);
+  return '${prefix}Copyright 2014 The Flutter Authors. All rights reserved.\n'
+         '${prefix}Use of this source code is governed by a BSD-style license that can be\n'
+         '${prefix}found in the LICENSE file.';
+}
+
 Future<void> verifyNoMissingLicense(String workingDirectory) async {
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'dart', _generateLicense('// '));
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'java', _generateLicense('// '));
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'h', _generateLicense('// '));
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'm', _generateLicense('// '));
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'swift', _generateLicense('// '));
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'gradle', _generateLicense('// '));
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'gn', _generateLicense('# '));
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'sh', '#!/usr/bin/env bash\n' + _generateLicense('# '));
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'bat', '@ECHO off\n' + _generateLicense('REM '));
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'ps1', _generateLicense('# '));
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'html', '<!DOCTYPE HTML>\n<!-- ${_generateLicense('')} -->', trailingBlank: false);
+  await _verifyNoMissingLicenseForExtension(workingDirectory, 'xml', '<!-- ${_generateLicense('')} -->');
+}
+
+Future<void> _verifyNoMissingLicenseForExtension(String workingDirectory, String extension, String license, { bool trailingBlank = true }) async {
+  assert(!license.endsWith('\n'));
+  final String licensePattern = license + '\n' + (trailingBlank ? '\n' : '');
   final List<String> errors = <String>[];
-  for (FileSystemEntity entity in _dartFiles(workingDirectory)) {
-    final File file = entity;
-    bool hasLicense = false;
-    final List<String> lines = file.readAsLinesSync();
-    if (lines.isNotEmpty)
-      hasLicense = lines.first.startsWith(RegExp(r'// Copyright \d{4}'));
-    if (!hasLicense)
+  for (File file in _allFiles(workingDirectory, extension)) {
+    final String contents = file.readAsStringSync().replaceAll('\r\n', '\n');
+    if (contents.isEmpty)
+      continue; // let's not go down the /bin/true rabbit hole
+    if (!contents.startsWith(licensePattern))
       errors.add(file.path);
   }
   // Fail if any errors
   if (errors.isNotEmpty) {
     print('$redLine');
-    final String s = errors.length == 1 ? '' : 's';
-    print('${bold}License headers cannot be found at the beginning of the following file$s.$reset\n');
+    final String s = errors.length == 1 ? ' does' : 's do';
+    print('${bold}The following ${errors.length} file$s not have the right license header:$reset\n');
     print(errors.join('\n'));
     print('$redLine\n');
+    print('The expected license header is:');
+    print('$license');
+    if (trailingBlank)
+      print('...followed by a blank line.');
     exit(1);
   }
 }
@@ -248,10 +290,11 @@ const Set<String> _exemptTestImports = <String>{
 Future<void> verifyNoTestImports(String workingDirectory) async {
   final List<String> errors = <String>[];
   assert("// foo\nimport 'binding_test.dart' as binding;\n'".contains(_testImportPattern));
-  for (FileSystemEntity entity in Directory(path.join(workingDirectory, 'packages'))
+  final Iterable<File> dartFiles = Directory(path.join(workingDirectory, 'packages'))
     .listSync(recursive: true)
-    .where((FileSystemEntity entity) => entity is File && path.extension(entity.path) == '.dart')) {
-    final File file = entity;
+    .whereType<File>()
+    .where((File file) => path.extension(file.path) == '.dart');
+  for (File file in dartFiles) {
     for (String line in file.readAsLinesSync()) {
       final Match match = _testImportPattern.firstMatch(line);
       if (match != null && !_exemptTestImports.contains(match.group(2)))
@@ -274,11 +317,9 @@ Future<void> verifyNoTestPackageImports(String workingDirectory) async {
   final List<String> shims = <String>[];
   final List<String> errors = Directory(workingDirectory)
     .listSync(recursive: true)
-    .where((FileSystemEntity entity) {
-      return entity is File && entity.path.endsWith('.dart');
-    })
-    .map<String>((FileSystemEntity entity) {
-      final File file = entity;
+    .whereType<File>()
+    .where((File file) => file.path.endsWith('.dart'))
+    .map<String>((File file) {
       final String name = Uri.file(path.relative(file.path,
           from: workingDirectory)).toFilePath(windows: false);
       if (name.startsWith('bin/cache') ||
@@ -353,14 +394,10 @@ Future<void> verifyGeneratedPluginRegistrants(String flutterRoot) async {
 
   final Map<String, List<File>> packageToRegistrants = <String, List<File>>{};
 
-  for (FileSystemEntity entity in flutterRootDir.listSync(recursive: true)) {
-    if (entity is! File)
-      continue;
-    if (_isGeneratedPluginRegistrant(entity)) {
-      final String package = _getPackageFor(entity, flutterRootDir);
-      final List<File> registrants = packageToRegistrants.putIfAbsent(package, () => <File>[]);
-      registrants.add(entity);
-    }
+  for (File file in flutterRootDir.listSync(recursive: true).whereType<File>().where(_isGeneratedPluginRegistrant)) {
+    final String package = _getPackageFor(file, flutterRootDir);
+    final List<File> registrants = packageToRegistrants.putIfAbsent(package, () => <File>[]);
+    registrants.add(file);
   }
 
   final Set<String> outOfDate = <String>{};
@@ -455,10 +492,11 @@ Future<void> verifyNoBadImportsInFlutter(String workingDirectory) async {
 
 Future<void> verifyNoBadImportsInFlutterTools(String workingDirectory) async {
   final List<String> errors = <String>[];
-  for (FileSystemEntity entity in Directory(path.join(workingDirectory, 'packages', 'flutter_tools', 'lib'))
+  final Iterable<File> files = Directory(path.join(workingDirectory, 'packages', 'flutter_tools', 'lib'))
     .listSync(recursive: true)
-    .where((FileSystemEntity entity) => entity is File && path.extension(entity.path) == '.dart')) {
-    final File file = entity;
+    .whereType<File>()
+    .where((File file) => path.extension(file.path) == '.dart');
+  for (File file in files) {
     if (file.readAsStringSync().contains('package:flutter_tools/')) {
       errors.add('$yellow${file.path}$reset imports flutter_tools.');
     }
@@ -481,7 +519,7 @@ Future<void> verifyInternationalizations() async {
   final EvalResult materialGenResult = await _evalCommand(
     dart,
     <String>[
-      path.join('dev', 'tools', 'localization', 'gen_localizations.dart'),
+      path.join('dev', 'tools', 'localization', 'bin', 'gen_localizations.dart'),
       '--material',
     ],
     workingDirectory: flutterRoot,
@@ -489,7 +527,7 @@ Future<void> verifyInternationalizations() async {
   final EvalResult cupertinoGenResult = await _evalCommand(
     dart,
     <String>[
-      path.join('dev', 'tools', 'localization', 'gen_localizations.dart'),
+      path.join('dev', 'tools', 'localization', 'bin', 'gen_localizations.dart'),
       '--cupertino',
     ],
     workingDirectory: flutterRoot,
@@ -579,13 +617,21 @@ bool _listEquals<T>(List<T> a, List<T> b) {
   return true;
 }
 
-Iterable<File> _dartFiles(String workingDirectory) sync* {
+Iterable<File> _allFiles(String workingDirectory, String extension) sync* {
   final Set<FileSystemEntity> pending = <FileSystemEntity>{ Directory(workingDirectory) };
   while (pending.isNotEmpty) {
     final FileSystemEntity entity = pending.first;
     pending.remove(entity);
+    if (path.extension(entity.path) == '.tmpl')
+      continue;
     if (entity is File) {
-      if (path.extension(entity.path) == '.dart')
+      if (_isGeneratedPluginRegistrant(entity))
+        continue;
+      if (path.basename(entity.path) == 'flutter_export_environment.sh')
+        continue;
+      if (path.basename(entity.path) == 'gradlew.bat')
+        continue;
+      if (path.extension(entity.path) == '.$extension')
         yield entity;
     } else if (entity is Directory) {
       if (File(path.join(entity.path, '.dartignore')).existsSync())
@@ -593,6 +639,8 @@ Iterable<File> _dartFiles(String workingDirectory) sync* {
       if (path.basename(entity.path) == '.git')
         continue;
       if (path.basename(entity.path) == '.dart_tool')
+        continue;
+      if (path.basename(entity.path) == 'build')
         continue;
       pending.addAll(entity.listSync());
     }
@@ -693,31 +741,33 @@ final RegExp _importPattern = RegExp(r'''^\s*import (['"])package:flutter/([^.]+
 final RegExp _importMetaPattern = RegExp(r'''^\s*import (['"])package:meta/meta\.dart\1''');
 
 Set<String> _findFlutterDependencies(String srcPath, List<String> errors, { bool checkForMeta = false }) {
-  return Directory(srcPath).listSync(recursive: true).where((FileSystemEntity entity) {
-    return entity is File && path.extension(entity.path) == '.dart';
-  }).map<Set<String>>((FileSystemEntity entity) {
-    final Set<String> result = <String>{};
-    final File file = entity;
-    for (String line in file.readAsLinesSync()) {
-      Match match = _importPattern.firstMatch(line);
-      if (match != null)
-        result.add(match.group(2));
-      if (checkForMeta) {
-        match = _importMetaPattern.firstMatch(line);
-        if (match != null) {
-          errors.add(
-            '${file.path}\nThis package imports the ${yellow}meta$reset package.\n'
-            'You should instead import the "foundation.dart" library.'
-          );
+  return Directory(srcPath)
+    .listSync(recursive: true)
+    .whereType<File>()
+    .where((File file) => path.extension(file.path) == '.dart')
+    .map<Set<String>>((File file) {
+      final Set<String> result = <String>{};
+      for (String line in file.readAsLinesSync()) {
+        Match match = _importPattern.firstMatch(line);
+        if (match != null)
+          result.add(match.group(2));
+        if (checkForMeta) {
+          match = _importMetaPattern.firstMatch(line);
+          if (match != null) {
+            errors.add(
+              '${file.path}\nThis package imports the ${yellow}meta$reset package.\n'
+              'You should instead import the "foundation.dart" library.'
+            );
+          }
         }
       }
-    }
-    return result;
-  }).reduce((Set<String> value, Set<String> element) {
-    value ??= <String>{};
-    value.addAll(element);
-    return value;
-  });
+      return result;
+    })
+    .reduce((Set<String> value, Set<String> element) {
+      value ??= <String>{};
+      value.addAll(element);
+      return value;
+    });
 }
 
 List<T> _deepSearch<T>(Map<T, Set<T>> map, T start, [ Set<T> seen ]) {

@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -178,7 +178,7 @@ abstract class CachingAssetBundle extends AssetBundle {
     assert(key != null);
     assert(parser != null);
     if (_structuredDataCache.containsKey(key))
-      return _structuredDataCache[key];
+      return _structuredDataCache[key] as Future<T>;
     Completer<T> completer;
     Future<T> result;
     loadString(key, cache: false).then<T>(parser).then<void>((T value) {

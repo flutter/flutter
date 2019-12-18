@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -72,7 +72,7 @@ abstract class ShaderWarmUp {
   /// Alternatively, one may run the app with `flutter run --trace-skia` and
   /// then examine the GPU thread in the observatory timeline to see which
   /// Skia draw operations are commonly used, and which shader compilations
-  /// are causing janks.
+  /// are causing jank.
   @protected
   Future<void> warmUpOnCanvas(ui.Canvas canvas);
 

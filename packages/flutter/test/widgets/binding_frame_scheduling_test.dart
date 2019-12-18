@@ -1,4 +1,4 @@
-// Copyright 2019 The Flutter Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -19,7 +19,7 @@ void main() {
     expect(window.onDrawFrame, isNull);
 
     // Instantiation does nothing with regards to frame scheduling.
-    final WidgetsFlutterBinding binding = WidgetsFlutterBinding.ensureInitialized();
+    final WidgetsFlutterBinding binding = WidgetsFlutterBinding.ensureInitialized() as WidgetsFlutterBinding;
     expect(binding.hasScheduledFrame, isFalse);
     expect(window.onBeginFrame, isNull);
     expect(window.onDrawFrame, isNull);

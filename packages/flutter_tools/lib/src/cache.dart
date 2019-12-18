@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -63,6 +63,9 @@ class DevelopmentArtifact {
   static const DevelopmentArtifact flutterRunner = DevelopmentArtifact._('flutter_runner', unstable: true);
 
   /// Artifacts required for any development platform.
+  ///
+  /// This does not need to be explicitly returned from requiredArtifacts as
+  /// it will always be downloaded.
   static const DevelopmentArtifact universal = DevelopmentArtifact._('universal');
 
   /// The values of DevelopmentArtifacts.
@@ -379,7 +382,7 @@ class Cache {
     final bool includeAllPlatformsState = cache.includeAllPlatforms;
     bool allAvailible = true;
     cache.includeAllPlatforms = includeAllPlatforms;
-    for (CachedArtifact cachedArtifact in _artifacts) {
+    for (ArtifactSet cachedArtifact in _artifacts) {
       if (cachedArtifact is EngineCachedArtifact) {
         allAvailible &= await cachedArtifact.checkForArtifacts(engineVersion);
       }
@@ -901,16 +904,13 @@ class AndroidMavenArtifacts extends ArtifactSet {
   Future<void> update() async {
     final Directory tempDir =
         fs.systemTempDirectory.createTempSync('flutter_gradle_wrapper.');
-    injectGradleWrapperIfNeeded(tempDir);
+    gradleUtils.injectGradleWrapperIfNeeded(tempDir);
 
     final Status status = logger.startProgress('Downloading Android Maven dependencies...',
         timeout: timeoutConfiguration.slowOperation);
     final File gradle = tempDir.childFile(
         platform.isWindows ? 'gradlew.bat' : 'gradlew',
       );
-    assert(gradle.existsSync());
-    os.makeExecutable(gradle);
-
     try {
       final String gradleExecutable = gradle.absolute.path;
       final String flutterSdk = escapePath(Cache.flutterRoot);

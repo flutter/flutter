@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -705,10 +705,9 @@ void main() {
     });
 
     testUsingContext('sequential startProgress calls with BufferLogger', () async {
-      final BufferLogger logger = context.get<Logger>();
-      logger.startProgress('AAA', timeout: timeoutConfiguration.fastOperation)..stop();
-      logger.startProgress('BBB', timeout: timeoutConfiguration.fastOperation)..stop();
-      expect(logger.statusText, 'AAA\nBBB\n');
+      testLogger.startProgress('AAA', timeout: timeoutConfiguration.fastOperation)..stop();
+      testLogger.startProgress('BBB', timeout: timeoutConfiguration.fastOperation)..stop();
+      expect(testLogger.statusText, 'AAA\nBBB\n');
     }, overrides: <Type, Generator>{
       Logger: () => BufferLogger(),
       Platform: _kNoAnsiPlatform,

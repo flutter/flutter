@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -69,6 +69,34 @@ class DriveCommand extends RunCommandBase {
       ..addFlag('build',
         defaultsTo: true,
         help: 'Build the app before running.',
+      )
+      ..addOption('driver-port',
+        defaultsTo: '4444',
+        help: 'The port where Webdriver server is launched at. Defaults to 4444.',
+        valueHelp: '4444'
+      )
+      ..addFlag('headless',
+        defaultsTo: true,
+        help: 'Whether the driver browser is going to be launched in headless mode. Defaults to true.',
+      )
+      ..addOption('browser-name',
+        defaultsTo: 'chrome',
+        help: 'Name of browser where tests will be executed. \n'
+              'Following browsers are supported: \n'
+              'Chrome, Firefox, Safari (macOS and iOS) and Edge. Defaults to Chrome.',
+        allowed: <String>[
+          'chrome',
+          'edge',
+          'firefox',
+          'ios-safari',
+          'safari',
+        ]
+      )
+      ..addOption('browser-dimension',
+        defaultsTo: '1600,1024',
+        help: 'The dimension of browser when running Flutter Web test. \n'
+              'This will affect screenshot and all offset-related actions. \n'
+              'By default. it is set to 1600,1024 (1600 by 1024).',
       );
   }
 
@@ -83,9 +111,9 @@ class DriveCommand extends RunCommandBase {
 
   Device _device;
   Device get device => _device;
-  bool get shouldBuild => argResults['build'];
+  bool get shouldBuild => boolArg('build');
 
-  bool get verboseSystemLogs => argResults['verbose-system-logs'];
+  bool get verboseSystemLogs => boolArg('verbose-system-logs');
 
   /// Subscription to log messages printed on the device or simulator.
   // ignore: cancel_subscriptions
@@ -128,20 +156,28 @@ class DriveCommand extends RunCommandBase {
       observatoryUri = result.observatoryUri.toString();
     } else {
       printStatus('Will connect to already running application instance.');
-      observatoryUri = argResults['use-existing-app'];
+      observatoryUri = stringArg('use-existing-app');
     }
 
     Cache.releaseLockEarly();
 
+    final Map<String, String> environment = <String, String>{
+      'VM_SERVICE_URL': observatoryUri,
+      'SELENIUM_PORT': argResults['driver-port'].toString(),
+      'BROWSER_NAME': argResults['browser-name'].toString(),
+      'BROWSER_DIMENSION': argResults['browser-dimension'].toString(),
+      'HEADLESS': argResults['headless'].toString(),
+    };
+
     try {
-      await testRunner(<String>[testFile], observatoryUri);
+      await testRunner(<String>[testFile], environment);
     } catch (error, stackTrace) {
       if (error is ToolExit) {
         rethrow;
       }
       throwToolExit('CAUGHT EXCEPTION: $error\n$stackTrace');
     } finally {
-      if (argResults['keep-app-running'] ?? (argResults['use-existing-app'] != null)) {
+      if (boolArg('keep-app-running') ?? (argResults['use-existing-app'] != null)) {
         printStatus('Leaving the application running.');
       } else {
         printStatus('Stopping application instance.');
@@ -154,7 +190,7 @@ class DriveCommand extends RunCommandBase {
 
   String _getTestFile() {
     if (argResults['driver'] != null) {
-      return argResults['driver'];
+      return stringArg('driver');
     }
 
     // If the --driver argument wasn't provided, then derive the value from
@@ -291,13 +327,13 @@ Future<LaunchResult> _startApp(DriveCommand command) async {
 }
 
 /// Runs driver tests.
-typedef TestRunner = Future<void> Function(List<String> testArgs, String observatoryUri);
+typedef TestRunner = Future<void> Function(List<String> testArgs, Map<String, String> environment);
 TestRunner testRunner = _runTests;
 void restoreTestRunner() {
   testRunner = _runTests;
 }
 
-Future<void> _runTests(List<String> testArgs, String observatoryUri) async {
+Future<void> _runTests(List<String> testArgs, Map<String, String> environment) async {
   printTrace('Running driver tests.');
 
   PackageMap.globalPackagesPath = fs.path.normalize(fs.path.absolute(PackageMap.globalPackagesPath));
@@ -310,7 +346,7 @@ Future<void> _runTests(List<String> testArgs, String observatoryUri) async {
       '--packages=${PackageMap.globalPackagesPath}',
       '-rexpanded',
     ],
-    environment: <String, String>{'VM_SERVICE_URL': observatoryUri},
+    environment: environment,
   );
   if (result != 0) {
     throwToolExit('Driver tests failed: $result', exitCode: result);

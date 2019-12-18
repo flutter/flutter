@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -90,7 +90,7 @@ class BottomSheet extends StatefulWidget {
   final WidgetBuilder builder;
 
   /// If true, the bottom sheet can be dragged up and down and dismissed by
-  /// swiping downards.
+  /// swiping downwards.
   ///
   /// Default is true.
   final bool enableDrag;
@@ -152,7 +152,7 @@ class _BottomSheetState extends State<BottomSheet> {
   final GlobalKey _childKey = GlobalKey(debugLabel: 'BottomSheet child');
 
   double get _childHeight {
-    final RenderBox renderBox = _childKey.currentContext.findRenderObject();
+    final RenderBox renderBox = _childKey.currentContext.findRenderObject() as RenderBox;
     return renderBox.size.height;
   }
 
@@ -265,7 +265,9 @@ class _ModalBottomSheet<T> extends StatefulWidget {
     this.shape,
     this.clipBehavior,
     this.isScrollControlled = false,
+    this.enableDrag = true,
   }) : assert(isScrollControlled != null),
+       assert(enableDrag != null),
        super(key: key);
 
   final _ModalBottomSheetRoute<T> route;
@@ -274,6 +276,7 @@ class _ModalBottomSheet<T> extends StatefulWidget {
   final double elevation;
   final ShapeBorder shape;
   final Clip clipBehavior;
+  final bool enableDrag;
 
   @override
   _ModalBottomSheetState<T> createState() => _ModalBottomSheetState<T>();
@@ -283,6 +286,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
   String _getRouteLabel(MaterialLocalizations localizations) {
     switch (Theme.of(context).platform) {
       case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
         return '';
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
@@ -325,6 +329,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
                 elevation: widget.elevation,
                 shape: widget.shape,
                 clipBehavior: widget.clipBehavior,
+                enableDrag: widget.enableDrag,
               ),
             ),
           ),
@@ -343,11 +348,14 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
     this.elevation,
     this.shape,
     this.clipBehavior,
+    this.modalBarrierColor,
     this.isDismissible = true,
+    this.enableDrag = true,
     @required this.isScrollControlled,
     RouteSettings settings,
   }) : assert(isScrollControlled != null),
        assert(isDismissible != null),
+       assert(enableDrag != null),
        super(settings: settings);
 
   final WidgetBuilder builder;
@@ -357,7 +365,9 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
   final double elevation;
   final ShapeBorder shape;
   final Clip clipBehavior;
+  final Color modalBarrierColor;
   final bool isDismissible;
+  final bool enableDrag;
 
   @override
   Duration get transitionDuration => _bottomSheetDuration;
@@ -369,7 +379,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
   final String barrierLabel;
 
   @override
-  Color get barrierColor => Colors.black54;
+  Color get barrierColor => modalBarrierColor ?? Colors.black54;
 
   AnimationController _animationController;
 
@@ -396,6 +406,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
         shape: shape,
         clipBehavior: clipBehavior,
         isScrollControlled: isScrollControlled,
+        enableDrag: enableDrag,
       ),
     );
     if (theme != null)
@@ -434,6 +445,9 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
 /// The [isDismissible] parameter specifies whether the bottom sheet will be
 /// dismissed when user taps on the scrim.
 ///
+/// The [enableDrag] parameter specifies whether the bottom sheet can be
+/// dragged up and down and dismissed by swiping downards.
+///
 /// The optional [backgroundColor], [elevation], [shape], and [clipBehavior]
 /// parameters can be passed in to customize the appearance and behavior of
 /// modal bottom sheets.
@@ -441,6 +455,49 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
 /// Returns a `Future` that resolves to the value (if any) that was passed to
 /// [Navigator.pop] when the modal bottom sheet was closed.
 ///
+/// {@animation 350 622 https://flutter.github.io/assets-for-api-docs/assets/material/show_modal_bottom_sheet.mp4}
+///
+/// {@tool snippet --template=stateless_widget_scaffold}
+///
+/// This example demonstrates how to use `showModalBottomSheet` to display a
+/// bottom sheet that obscures the content behind it when a user taps a button.
+/// It also demonstrates how to close the bottom sheet using the [Navigator]
+/// when a user taps on a button inside the bottom sheet.
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return Center(
+///     child: RaisedButton(
+///       child: const Text('showModalBottomSheet'),
+///       onPressed: () {
+///         showModalBottomSheet<void>(
+///           context: context,
+///           builder: (BuildContext context) {
+///             return Container(
+///               height: 200,
+///               color: Colors.amber,
+///               child: Center(
+///                 child: Column(
+///                   mainAxisAlignment: MainAxisAlignment.center,
+///                   mainAxisSize: MainAxisSize.min,
+///                   children: <Widget>[
+///                     const Text('Modal BottomSheet'),
+///                     RaisedButton(
+///                       child: const Text('Close BottomSheet'),
+///                       onPressed: () => Navigator.pop(context),
+///                     )
+///                   ],
+///                 ),
+///               ),
+///             );
+///           },
+///         );
+///       },
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
 /// See also:
 ///
 ///  * [BottomSheet], which becomes the parent of the widget returned by the
@@ -457,15 +514,18 @@ Future<T> showModalBottomSheet<T>({
   double elevation,
   ShapeBorder shape,
   Clip clipBehavior,
+  Color barrierColor,
   bool isScrollControlled = false,
   bool useRootNavigator = false,
   bool isDismissible = true,
+  bool enableDrag = true,
 }) {
   assert(context != null);
   assert(builder != null);
   assert(isScrollControlled != null);
   assert(useRootNavigator != null);
   assert(isDismissible != null);
+  assert(enableDrag != null);
   assert(debugCheckHasMediaQuery(context));
   assert(debugCheckHasMaterialLocalizations(context));
 
@@ -479,6 +539,8 @@ Future<T> showModalBottomSheet<T>({
     shape: shape,
     clipBehavior: clipBehavior,
     isDismissible: isDismissible,
+    modalBarrierColor: barrierColor,
+    enableDrag: enableDrag,
   ));
 }
 
@@ -497,11 +559,11 @@ Future<T> showModalBottomSheet<T>({
 /// this method.
 ///
 /// The new bottom sheet becomes a [LocalHistoryEntry] for the enclosing
-/// [ModalRoute] and a back button is added to the appbar of the [Scaffold]
+/// [ModalRoute] and a back button is added to the app bar of the [Scaffold]
 /// that closes the bottom sheet.
 ///
 /// To create a persistent bottom sheet that is not a [LocalHistoryEntry] and
-/// does not add a back button to the enclosing Scaffold's appbar, use the
+/// does not add a back button to the enclosing Scaffold's app bar, use the
 /// [Scaffold.bottomSheet] constructor parameter.
 ///
 /// A closely related widget is a modal bottom sheet, which is an alternative

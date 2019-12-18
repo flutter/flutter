@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -212,6 +212,8 @@ class DataCell {
 
 /// A material design data table.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=ktTajqbhIcY}
+///
 /// Displaying data in a table is expensive, because to lay out the
 /// table all the data must be measured twice, once to negotiate the
 /// dimensions to use for each column, and once to actually lay out
@@ -222,6 +224,67 @@ class DataCell {
 /// target device), it is suggested that you use a
 /// [PaginatedDataTable] which automatically splits the data into
 /// multiple pages.
+///
+/// {@tool snippet --template=stateless_widget_scaffold}
+///
+/// This sample shows how to display a [DataTable] with three columns: name, age, and
+/// role. The columns are defined by three [DataColumn] objects. The table
+/// contains three rows of data for three example users, the data for which
+/// is defined by three [DataRow] objects.
+///
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/data_table.png)
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return DataTable(
+///     columns: const <DataColumn>[
+///       DataColumn(
+///         label: Text(
+///           'Name',
+///           style: TextStyle(fontStyle: FontStyle.italic),
+///         ),
+///       ),
+///       DataColumn(
+///         label: Text(
+///           'Age',
+///           style: TextStyle(fontStyle: FontStyle.italic),
+///         ),
+///       ),
+///       DataColumn(
+///         label: Text(
+///           'Role',
+///           style: TextStyle(fontStyle: FontStyle.italic),
+///         ),
+///       ),
+///     ],
+///     rows: const <DataRow>[
+///       DataRow(
+///         cells: <DataCell>[
+///           DataCell(Text('Sarah')),
+///           DataCell(Text('19')),
+///           DataCell(Text('Student')),
+///         ],
+///       ),
+///       DataRow(
+///         cells: <DataCell>[
+///           DataCell(Text('Janine')),
+///           DataCell(Text('43')),
+///           DataCell(Text('Professor')),
+///         ],
+///       ),
+///       DataRow(
+///         cells: <DataCell>[
+///           DataCell(Text('William')),
+///           DataCell(Text('27')),
+///           DataCell(Text('Associate Professor')),
+///         ],
+///       ),
+///     ],
+///   );
+/// }
+/// ```
+///
+/// {@end-tool}
 // TODO(ianh): Also suggest [ScrollingDataTable] once we have it.
 ///
 /// See also:
@@ -687,14 +750,14 @@ class TableRowInkWell extends InkResponse {
       AbstractNode table = cell.parent;
       final Matrix4 transform = Matrix4.identity();
       while (table is RenderObject && table is! RenderTable) {
-        final RenderTable parentBox = table;
+        final RenderObject parentBox = table as RenderObject;
         parentBox.applyPaintTransform(cell, transform);
         assert(table == cell.parent);
-        cell = table;
+        cell = parentBox;
         table = table.parent;
       }
       if (table is RenderTable) {
-        final TableCellParentData cellParentData = cell.parentData;
+        final TableCellParentData cellParentData = cell.parentData as TableCellParentData;
         assert(cellParentData.y != null);
         final Rect rect = table.getRowBox(cellParentData.y);
         // The rect is in the table's coordinate space. We need to change it to the
