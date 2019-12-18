@@ -2,8 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   // Constants taken from _ContextMenuActionState.
@@ -13,13 +13,17 @@ void main() {
   const Color _kDestructiveActionColor = CupertinoColors.destructiveRed;
   const FontWeight _kDefaultActionWeight = FontWeight.w600;
 
-  Widget _getApp({VoidCallback onPressed, bool isDestructiveAction = false, bool isDefaultAction = false}) {
+  Widget _getApp({
+    VoidCallback onPressed,
+    bool isDestructiveAction = false,
+    bool isDefaultAction = false,
+  }) {
     final UniqueKey actionKey = UniqueKey();
     final CupertinoContextMenuAction action = CupertinoContextMenuAction(
       key: actionKey,
       child: const Text('I am a CupertinoContextMenuAction'),
       onPressed: onPressed,
-      trailingIcon: CupertinoIcons.home,
+      trailing: Icon(CupertinoIcons.home),
       isDestructiveAction: isDestructiveAction,
       isDefaultAction: isDefaultAction,
     );
@@ -94,7 +98,8 @@ void main() {
     expect(_getIcon(tester).color, _kRegularActionColor);
   });
 
-  testWidgets('icon and textStyle colors are correct for destructive actions', (WidgetTester tester) async {
+  testWidgets('icon and textStyle colors are correct for destructive actions',
+      (WidgetTester tester) async {
     await tester.pumpWidget(_getApp(isDestructiveAction: true));
     expect(_getTextStyle(tester).color, _kDestructiveActionColor);
     expect(_getIcon(tester).color, _kDestructiveActionColor);
@@ -104,5 +109,4 @@ void main() {
     await tester.pumpWidget(_getApp(isDefaultAction: true));
     expect(_getTextStyle(tester).fontWeight, _kDefaultActionWeight);
   });
-
 }
