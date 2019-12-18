@@ -598,6 +598,43 @@ void main() {
       expect(spy.messages, isEmpty);
     });
 
+    test('close connection on blur', () async {
+      final MethodCall setClient = MethodCall(
+          'TextInput.setClient', <dynamic>[123, flutterSinglelineConfig]);
+      textEditing.handleTextInput(codec.encodeMethodCall(setClient));
+
+      const MethodCall setEditingState =
+          MethodCall('TextInput.setEditingState', <String, dynamic>{
+        'text': 'abcd',
+        'selectionBase': 2,
+        'selectionExtent': 3,
+      });
+      textEditing.handleTextInput(codec.encodeMethodCall(setEditingState));
+
+      // Editing shouldn't have started yet.
+      expect(document.activeElement, document.body);
+
+      const MethodCall show = MethodCall('TextInput.show');
+      textEditing.handleTextInput(codec.encodeMethodCall(show));
+
+      checkInputEditingState(
+          textEditing.editingElement.domElement, 'abcd', 2, 3);
+
+      // DOM element is blurred.
+      textEditing.editingElement.domElement.blur();
+
+      expect(spy.messages, hasLength(1));
+      MethodCall call = spy.messages[0];
+      spy.messages.clear();
+      expect(call.method, 'TextInputClient.onConnectionClosed');
+      expect(
+        call.arguments,
+        <dynamic>[
+          123, // Client ID
+        ],
+      );
+    });
+
     test('setClient, setEditingState, show, setClient', () {
       final MethodCall setClient = MethodCall(
           'TextInput.setClient', <dynamic>[123, flutterSinglelineConfig]);
