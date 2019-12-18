@@ -43,7 +43,7 @@ void main() {
            //      0       12345678      9      101234567       18     90123456       27
       style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
     );
-    TextSpan textSpan = painter.text;
+    TextSpan textSpan = painter.text as TextSpan;
     expect(textSpan.text.length, 28);
     painter.layout();
 
@@ -127,7 +127,7 @@ void main() {
       // The list is currently in the wrong order (so selection boxes will paint in the wrong order).
     );
 
-    textSpan = painter.text;
+    textSpan = painter.text as TextSpan;
     final List<List<TextBox>> list = <List<TextBox>>[
       for (int index = 0; index < textSpan.text.length; index += 1)
         painter.getBoxesForSelection(TextSelection(baseOffset: index, extentOffset: index + 1)),
@@ -175,7 +175,7 @@ void main() {
            //      0       12345678      9      101234567       18     90123456       27
       style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
     );
-    final TextSpan textSpan = painter.text;
+    final TextSpan textSpan = painter.text as TextSpan;
     expect(textSpan.text.length, 28);
     painter.layout();
 
@@ -265,7 +265,7 @@ void main() {
       text: 'A\u05D0', // A, Alef
       style: TextStyle(fontFamily: 'Ahem', fontSize: 10.0),
     );
-    final TextSpan textSpan = painter.text;
+    final TextSpan textSpan = painter.text as TextSpan;
     expect(textSpan.text.length, 2);
     painter.layout(maxWidth: 10.0);
 

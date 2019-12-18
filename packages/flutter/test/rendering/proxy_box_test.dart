@@ -218,7 +218,7 @@ void main() {
     expect(getPixel(0, 0), equals(0x00000080));
     expect(getPixel(image.width - 1, 0 ), equals(0xffffffff));
 
-    final OffsetLayer layer = boundary.debugLayer;
+    final OffsetLayer layer = boundary.debugLayer as OffsetLayer;
 
     image = await layer.toImage(Offset.zero & const Size(20.0, 20.0));
     expect(image.width, equals(20));
@@ -541,7 +541,7 @@ class _FakeTicker implements Ticker {
 // Forces two frames and checks that:
 // - a layer is created on the first frame
 // - the layer is reused on the second frame
-void _testLayerReuse<L extends Layer>(RenderObject renderObject) {
+void _testLayerReuse<L extends Layer>(RenderBox renderObject) {
   expect(L, isNot(Layer));
   expect(renderObject.debugLayer, null);
   layout(renderObject, phase: EnginePhase.paint, constraints: BoxConstraints.tight(const Size(10, 10)));

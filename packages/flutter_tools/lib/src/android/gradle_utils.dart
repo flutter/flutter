@@ -107,7 +107,7 @@ class GradleUtils {
         return !destinationFile.existsSync();
       },
       onFileCopied: (File sourceFile, File destinationFile) {
-        if (_hasExecutePermission(sourceFile)) {
+        if (_hasAnyExecutableFlagSet(sourceFile)) {
           _giveExecutePermissionIfNeeded(destinationFile);
         }
       },
@@ -153,17 +153,25 @@ String getGradleVersionForAndroidPlugin(Directory directory) {
 
 const int _kExecPermissionMask = 0x49; // a+x
 
-/// Returns [true] if [executable] has execute permission.
-bool _hasExecutePermission(File executable) {
+/// Returns [true] if [executable] has all executable flag set.
+bool _hasAllExecutableFlagSet(File executable) {
   final FileStat stat = executable.statSync();
   assert(stat.type != FileSystemEntityType.notFound);
   printTrace('${executable.path} mode: ${stat.mode} ${stat.modeString()}.');
   return stat.mode & _kExecPermissionMask == _kExecPermissionMask;
 }
 
+/// Returns [true] if [executable] has any executable flag set.
+bool _hasAnyExecutableFlagSet(File executable) {
+  final FileStat stat = executable.statSync();
+  assert(stat.type != FileSystemEntityType.notFound);
+  printTrace('${executable.path} mode: ${stat.mode} ${stat.modeString()}.');
+  return stat.mode & _kExecPermissionMask != 0;
+}
+
 /// Gives execute permission to [executable] if it doesn't have it already.
 void _giveExecutePermissionIfNeeded(File executable) {
-  if (!_hasExecutePermission(executable)) {
+  if (!_hasAllExecutableFlagSet(executable)) {
     printTrace('Trying to give execute permission to ${executable.path}.');
     os.makeExecutable(executable);
   }

@@ -442,9 +442,7 @@ class SliverConstraints extends Constraints {
       verify(growthDirection != null, 'The "growthDirection" is null.');
       verifyDouble(scrollOffset, 'scrollOffset');
       verifyDouble(overlap, 'overlap');
-      verifyDouble(remainingPaintExtent, 'remainingPaintExtent');
       verifyDouble(crossAxisExtent, 'crossAxisExtent');
-      verifyDouble(viewportMainAxisExtent, 'viewportMainAxisExtent');
       verifyDouble(scrollOffset, 'scrollOffset', mustBePositive: true);
       verify(crossAxisDirection != null, 'The "crossAxisDirection" is null.');
       verify(axisDirectionToAxis(axisDirection) != axisDirectionToAxis(crossAxisDirection), 'The "axisDirection" and the "crossAxisDirection" are along the same axis.');
@@ -1213,17 +1211,17 @@ abstract class RenderSliver extends RenderObject {
       }
     ));
     assert(() {
-      if (geometry.paintExtent > constraints.remainingPaintExtent) {
+      if (geometry.paintOrigin + geometry.paintExtent > constraints.remainingPaintExtent) {
         throw FlutterError.fromParts(<DiagnosticsNode>[
           ErrorSummary('SliverGeometry has a paintOffset that exceeds the remainingPaintExtent from the constraints.'),
           describeForError('The render object whose geometry violates the constraints is the following'),
           ..._debugCompareFloats(
             'remainingPaintExtent', constraints.remainingPaintExtent,
-            'paintExtent', geometry.paintExtent,
+            'paintOrigin + paintExtent', geometry.paintOrigin + geometry.paintExtent,
           ),
           ErrorDescription(
-            'The paintExtent must cause the child sliver to paint within the viewport, and so '
-            'cannot exceed the remainingPaintExtent.',
+            'The paintOrigin and paintExtent must cause the child sliver to paint '
+            'within the viewport, and so cannot exceed the remainingPaintExtent.',
           ),
         ]);
       }

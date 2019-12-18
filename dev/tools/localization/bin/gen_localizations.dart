@@ -29,7 +29,7 @@
 // The following outputs the generated Dart code to the console as a dry run:
 //
 // ```
-// dart dev/tools/localization/gen_localizations.dart
+// dart dev/tools/localization/bin/gen_localizations.dart
 // ```
 //
 // If the data looks good, use the `-w` or `--overwrite` option to overwrite the
@@ -37,7 +37,7 @@
 // and packages/flutter_localizations/lib/src/l10n/generated_cupertino_localizations.dart file:
 //
 // ```
-// dart dev/tools/localization/gen_localizations.dart --overwrite
+// dart dev/tools/localization/bin/gen_localizations.dart --overwrite
 // ```
 
 import 'dart:async';
@@ -46,10 +46,10 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 import 'package:meta/meta.dart';
 
-import 'gen_cupertino_localizations.dart';
-import 'gen_material_localizations.dart';
-import 'localizations_utils.dart';
-import 'localizations_validator.dart';
+import '../gen_cupertino_localizations.dart';
+import '../gen_material_localizations.dart';
+import '../localizations_utils.dart';
+import '../localizations_validator.dart';
 
 /// This is the core of this script; it generates the code used for translations.
 String generateArbBasedLocalizationSubclasses({
@@ -78,7 +78,7 @@ String generateArbBasedLocalizationSubclasses({
   assert(supportedLanguagesDocMacro.isNotEmpty);
 
   final StringBuffer output = StringBuffer();
-  output.writeln(generateHeader('dart dev/tools/localization/gen_localizations.dart --overwrite'));
+  output.writeln(generateHeader('dart dev/tools/localization/bin/gen_localizations.dart --overwrite'));
 
   final StringBuffer supportedLocales = StringBuffer();
 

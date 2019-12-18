@@ -34,7 +34,7 @@ void main() {
     );
     expect(finder, findsOneWidget);
     final Container container = tester.widget(finder);
-    return container.decoration;
+    return container.decoration as BoxDecoration;
   }
 
   testWidgets('responds to taps', (WidgetTester tester) async {

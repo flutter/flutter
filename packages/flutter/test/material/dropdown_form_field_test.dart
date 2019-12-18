@@ -13,6 +13,10 @@ import '../rendering/mock_canvas.dart';
 
 const List<String> menuItems = <String>['one', 'two', 'three', 'four'];
 final ValueChanged<String> onChanged = (_) { };
+final Type dropdownButtonType = DropdownButton<String>(
+  onChanged: (_) { },
+  items: const <DropdownMenuItem<String>>[],
+).runtimeType;
 
 Finder _iconRichText(Key iconKey) {
   return find.descendant(
@@ -31,7 +35,7 @@ Widget buildFormFrame({
   Color iconDisabledColor,
   Color iconEnabledColor,
   double iconSize = 24.0,
-  bool isDense = false,
+  bool isDense = true,
   bool isExpanded = false,
   Widget hint,
   Widget disabledHint,
@@ -227,7 +231,6 @@ void main() {
       buildFormFrame(
         buttonKey: buttonKey,
         value: value,
-        isDense: true,
         onChanged: onChanged,
       ),
     );
@@ -260,6 +263,35 @@ void main() {
       final Offset itemBoxCenter = itemBox.size.center(itemBox.localToGlobal(Offset.zero));
       expect(buttonBoxCenter.dy, equals(itemBoxCenter.dy));
     }
+  });
+
+  testWidgets('DropdownButtonFormField.isDense is true by default', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/46844
+    final Key buttonKey = UniqueKey();
+    const String value = 'two';
+
+    await tester.pumpWidget(
+      TestApp(
+        textDirection: TextDirection.ltr,
+        child: Material(
+          child: DropdownButtonFormField<String>(
+            key: buttonKey,
+            value: value,
+            onChanged: onChanged,
+            items: menuItems.map<DropdownMenuItem<String>>((String item) {
+              return DropdownMenuItem<String>(
+                key: ValueKey<String>(item),
+                value: item,
+                child: Text(item, key: ValueKey<String>(item + 'Text')),
+              );
+            }).toList(),
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox box = tester.renderObject<RenderBox>(find.byType(dropdownButtonType));
+    expect(box.size.height, 24.0);
   });
 
   testWidgets('DropdownButtonFormField - custom text style', (WidgetTester tester) async {

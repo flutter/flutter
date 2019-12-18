@@ -285,6 +285,37 @@ void main() {
       GradleUtils: () => gradleUtils,
     });
 
+    testUsingContext('gives execute permission to gradle even when not all permission flags are set', () {
+      final FlutterProject flutterProject = MockFlutterProject();
+      final AndroidProject androidProject = MockAndroidProject();
+      when(flutterProject.android).thenReturn(androidProject);
+
+      final FileStat gradleStat = MockFileStat();
+      when(gradleStat.mode).thenReturn(400);
+
+      final File gradlew = MockFile();
+      when(gradlew.path).thenReturn('gradlew');
+      when(gradlew.absolute).thenReturn(gradlew);
+      when(gradlew.statSync()).thenReturn(gradleStat);
+      when(gradlew.existsSync()).thenReturn(true);
+
+      final Directory androidDirectory = MockDirectory();
+      when(androidDirectory.childFile(gradlewFilename)).thenReturn(gradlew);
+      when(androidProject.hostAppGradleRoot).thenReturn(androidDirectory);
+
+      when(gradleUtils.injectGradleWrapperIfNeeded(any)).thenReturn(null);
+      when(gradleUtils.migrateToR8(any)).thenReturn(null);
+
+      GradleUtils().getExecutable(flutterProject);
+
+      verify(operatingSystemUtils.makeExecutable(gradlew)).called(1);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => memoryFileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+      OperatingSystemUtils: () => operatingSystemUtils,
+      GradleUtils: () => gradleUtils,
+    });
+
     testUsingContext('doesn\'t give execute permission to gradle if not needed', () {
       final FlutterProject flutterProject = MockFlutterProject();
       final AndroidProject androidProject = MockAndroidProject();

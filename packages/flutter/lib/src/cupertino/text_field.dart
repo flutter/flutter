@@ -98,7 +98,7 @@ class _CupertinoTextFieldSelectionGestureDetectorBuilder extends TextSelectionGe
     // this handler. If the clear button widget recognizes the up event,
     // then do not handle it.
     if (_state._clearGlobalKey.currentContext != null) {
-      final RenderBox renderBox = _state._clearGlobalKey.currentContext.findRenderObject();
+      final RenderBox renderBox = _state._clearGlobalKey.currentContext.findRenderObject() as RenderBox;
       final Offset localOffset = renderBox.globalToLocal(details.globalPosition);
       if (renderBox.hitTest(BoxHitTestResult(), position: localOffset)) {
         return;
@@ -854,7 +854,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
     final Color decorationColor = CupertinoDynamicColor.resolve(widget.decoration?.color, context);
 
     final BoxBorder border = widget.decoration?.border;
-    Border resolvedBorder = border;
+    Border resolvedBorder = border as Border;
     if (border is Border) {
       BorderSide resolveBorderSide(BorderSide side) {
         return side == BorderSide.none
@@ -875,6 +875,8 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
       border: resolvedBorder,
       color: enabled ? decorationColor : (decorationColor ?? disabledColor),
     );
+
+    final Color selectionColor = CupertinoTheme.of(context).primaryColor.withOpacity(0.2);
 
     final Widget paddedEditable = Padding(
       padding: widget.padding,
@@ -902,7 +904,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
           maxLines: widget.maxLines,
           minLines: widget.minLines,
           expands: widget.expands,
-          selectionColor: CupertinoTheme.of(context).primaryColor.withOpacity(0.2),
+          selectionColor: selectionColor,
           selectionControls: widget.selectionEnabled
             ? cupertinoTextSelectionControls : null,
           onChanged: widget.onChanged,
@@ -917,6 +919,7 @@ class _CupertinoTextFieldState extends State<CupertinoTextField> with AutomaticK
           cursorOpacityAnimates: true,
           cursorOffset: cursorOffset,
           paintCursorAboveText: true,
+          autocorrectionTextRectColor: selectionColor,
           backgroundCursorColor: CupertinoDynamicColor.resolve(CupertinoColors.inactiveGray, context),
           scrollPadding: widget.scrollPadding,
           keyboardAppearance: keyboardAppearance,

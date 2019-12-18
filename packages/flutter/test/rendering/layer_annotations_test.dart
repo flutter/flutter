@@ -740,7 +740,7 @@ class _TestAnnotatedLayer extends Layer {
     if (size != null && !(offset & size).contains(localPosition))
       return false;
     final Object untypedValue = value;
-    final S typedValue = untypedValue;
+    final S typedValue = untypedValue as S;
     result.add(AnnotationEntry<S>(annotation: typedValue, localPosition: localPosition));
     return opaque;
   }

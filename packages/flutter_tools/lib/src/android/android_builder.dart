@@ -86,7 +86,7 @@ class _AndroidBuilderImpl extends AndroidBuilder {
         buildNumber: buildNumber,
       );
     } finally {
-      androidSdk.reinitialize();
+      androidSdk?.reinitialize();
     }
   }
 
@@ -106,7 +106,7 @@ class _AndroidBuilderImpl extends AndroidBuilder {
         localGradleErrors: gradleErrors,
       );
     } finally {
-      androidSdk.reinitialize();
+      androidSdk?.reinitialize();
     }
   }
 
@@ -126,7 +126,7 @@ class _AndroidBuilderImpl extends AndroidBuilder {
         localGradleErrors: gradleErrors,
       );
     } finally {
-      androidSdk.reinitialize();
+      androidSdk?.reinitialize();
     }
   }
 }
