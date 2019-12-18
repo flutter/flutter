@@ -333,10 +333,11 @@ class PointerDataConverter {
           final _PointerState state = _ensureStateForPointer(
             device, physicalX, physicalY);
           assert(!state.down);
+          state.startNewPointer();
           if (!alreadyAdded) {
             // Synthesizes an add pointer data.
             result.add(
-                _synthesizePointerData(
+              _synthesizePointerData(
                 timeStamp: timeStamp,
                 change: ui.PointerChange.add,
                 kind: kind,
@@ -364,7 +365,6 @@ class PointerDataConverter {
             );
           }
           assert(!_locationHasChanged(device, physicalX, physicalY));
-          state.startNewPointer();
           state.down = true;
           result.add(
             _generateCompletePointerData(
@@ -433,6 +433,15 @@ class PointerDataConverter {
           assert(_pointers.containsKey(device));
           final _PointerState state = _pointers[device];
           assert(state.down);
+          // Cancel events can have different coordinates due to various
+          // reasons (window lost focus which is accompanied by window
+          // movement, or PointerEvent simply always gives 0). Instead of
+          // caring about the coordinates, we want to cancel the pointers as
+          // soon as possible.
+          if (change == ui.PointerChange.cancel) {
+            physicalX = state.x;
+            physicalY = state.y;
+          }
           assert(!_locationHasChanged(device, physicalX, physicalY));
           state.down = false;
           result.add(
@@ -468,8 +477,6 @@ class PointerDataConverter {
           assert(_pointers.containsKey(device));
           final _PointerState state = _pointers[device];
           assert(!state.down);
-          assert(!_locationHasChanged(device, physicalX, physicalY));
-          _pointers.remove(device);
           result.add(
             _generateCompletePointerData(
               timeStamp: timeStamp,
@@ -477,8 +484,8 @@ class PointerDataConverter {
               kind: kind,
               signalKind: signalKind,
               device: device,
-              physicalX: physicalX,
-              physicalY: physicalY,
+              physicalX: state.x,
+              physicalY: state.y,
               buttons: buttons,
               obscured: obscured,
               pressure: pressure,
@@ -498,6 +505,7 @@ class PointerDataConverter {
               scrollDeltaY: scrollDeltaY,
             )
           );
+          _pointers.remove(device);
           break;
       }
     } else {
