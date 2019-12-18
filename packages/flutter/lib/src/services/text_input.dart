@@ -753,12 +753,6 @@ abstract class TextInputClient {
   /// Updates the floating cursor position and state.
   void updateFloatingCursor(RawFloatingCursorPoint point);
 
-  /// Requests that this client display a prompt rectangle for the given text range,
-  /// to indicate the range of text that will be changed by a pending autocorrection.
-  ///
-  /// This method will only be called on iOS.
-  void showAutocorrectionPromptRect(int start, int end);
-
   /// Platform notified framework of closed connection.
   ///
   /// [TextInputClient] should cleanup its connection and finalize editing.
@@ -1081,9 +1075,6 @@ class TextInput {
         break;
       case 'TextInputClient.onConnectionClosed':
         _currentConnection._client.connectionClosed();
-        break;
-      case 'TextInputClient.showAutocorrectionPromptRect':
-        _currentConnection._client.showAutocorrectionPromptRect(args[1], args[2]);
         break;
       default:
         throw MissingPluginException();
