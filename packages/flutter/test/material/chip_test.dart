@@ -178,7 +178,13 @@ Future<void> _pumpCheckmarkChip(
 void _expectCheckmarkColor(Finder finder, Color color) {
   expect(
     finder,
-    paints..path(color: color)
+    paints
+      // The first path that is painted is the selection overlay. We do not care
+      // how it is painted but it has to be added it to this pattern so that the
+      // check mark can be checked next.
+      ..path()
+      // The second path that is painted is the check mark.
+      ..path(color: color),
   );
 }
 
@@ -1429,7 +1435,7 @@ void main() {
       ),
     );
 
-    expect(materialBox, paints..rect(color: chipTheme.disabledColor));
+    expect(materialBox, paints..path(color: chipTheme.disabledColor));
   });
 
   testWidgets('Chip size is configurable by ThemeData.materialTapTargetSize', (WidgetTester tester) async {
@@ -1529,13 +1535,13 @@ void main() {
     DefaultTextStyle labelStyle = getLabelStyle(tester);
 
     // Check default theme for enabled widget.
-    expect(materialBox, paints..rect(color: defaultChipTheme.backgroundColor));
+    expect(materialBox, paints..path(color: defaultChipTheme.backgroundColor));
     expect(iconData.color, equals(const Color(0xde000000)));
     expect(labelStyle.style.color, equals(Colors.black.withAlpha(0xde)));
     await tester.tap(find.byType(RawChip));
     await tester.pumpAndSettle();
     materialBox = getMaterialBox(tester);
-    expect(materialBox, paints..rect(color: defaultChipTheme.selectedColor));
+    expect(materialBox, paints..path(color: defaultChipTheme.selectedColor));
     await tester.tap(find.byType(RawChip));
     await tester.pumpAndSettle();
 
@@ -1544,7 +1550,7 @@ void main() {
     await tester.pumpAndSettle();
     materialBox = getMaterialBox(tester);
     labelStyle = getLabelStyle(tester);
-    expect(materialBox, paints..rect(color: defaultChipTheme.disabledColor));
+    expect(materialBox, paints..path(color: defaultChipTheme.disabledColor));
     expect(labelStyle.style.color, equals(Colors.black.withAlpha(0xde)));
 
     // Apply a custom theme.
@@ -1566,13 +1572,13 @@ void main() {
     labelStyle = getLabelStyle(tester);
 
     // Check custom theme for enabled widget.
-    expect(materialBox, paints..rect(color: customTheme.backgroundColor));
+    expect(materialBox, paints..path(color: customTheme.backgroundColor));
     expect(iconData.color, equals(customTheme.deleteIconColor));
     expect(labelStyle.style.color, equals(Colors.black.withAlpha(0xde)));
     await tester.tap(find.byType(RawChip));
     await tester.pumpAndSettle();
     materialBox = getMaterialBox(tester);
-    expect(materialBox, paints..rect(color: customTheme.selectedColor));
+    expect(materialBox, paints..path(color: customTheme.selectedColor));
     await tester.tap(find.byType(RawChip));
     await tester.pumpAndSettle();
 
@@ -1586,7 +1592,7 @@ void main() {
     await tester.pumpAndSettle();
     materialBox = getMaterialBox(tester);
     labelStyle = getLabelStyle(tester);
-    expect(materialBox, paints..rect(color: customTheme.disabledColor));
+    expect(materialBox, paints..path(color: customTheme.disabledColor));
     expect(labelStyle.style.color, equals(Colors.black.withAlpha(0xde)));
   });
 
