@@ -7,6 +7,7 @@ import 'dart:typed_data';
 
 import 'package:test/test.dart';
 import 'package:ui/ui.dart' as ui;
+import 'package:ui/src/engine.dart';
 
 Future<void> main() async {
   await ui.webOnlyInitializeTestDomRenderer();
@@ -33,6 +34,29 @@ Future<void> main() async {
           fontFamily: 'Blehm');
 
       expect(_containsFontFamily('Blehm'), true);
+    });
+
+    test('loads font should clear measurement caches', () async {
+      final ui.ParagraphStyle style = ui.ParagraphStyle();
+      final ui.ParagraphBuilder builder = ui.ParagraphBuilder(style);
+      final ui.ParagraphConstraints constraints = ui.ParagraphConstraints(width: 30.0);
+      builder.addText('test');
+      final ui.Paragraph paragraph = builder.build();
+      // Triggers the measuring and verifies the result has been cached.
+      paragraph.layout(constraints);
+      expect(TextMeasurementService.rulerManager.rulers.length, 1);
+
+      // Now, loads a new font using loadFontFromList. This should clear the
+      // cache
+      final html.HttpRequest response = await html.HttpRequest.request(
+        _testFontUrl,
+        responseType: 'arraybuffer');
+      await ui.loadFontFromList(Uint8List.view(response.response),
+        fontFamily: 'Blehm');
+
+      // Verifies the font is loaded, and the cache is cleaned.
+      expect(_containsFontFamily('Blehm'), true);
+      expect(TextMeasurementService.rulerManager.rulers.length, 0);
     });
   });
 }
