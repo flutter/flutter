@@ -73,7 +73,13 @@ void main() {
 
     setUp(() {
       mockProcessManager = MockProcessManager();
-      mockLogger = BufferLogger();
+      mockLogger = BufferLogger(
+        terminal: AnsiTerminal(
+          stdio: null,
+          platform: FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false,
+        ),
+        outputPreferences: OutputPreferences.test(),
+      );
     });
 
     MockProcess Function(List<String>) processMetaFactory(List<String> stdout, { List<String> stderr = const <String>[] }) {
@@ -94,7 +100,6 @@ void main() {
       Logger: () => mockLogger,
       ProcessManager: () => mockProcessManager,
       OutputPreferences: () => OutputPreferences(wrapText: true, wrapColumn: 40),
-      Platform: () => FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false,
     });
   });
 

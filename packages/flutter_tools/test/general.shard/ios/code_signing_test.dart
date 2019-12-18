@@ -11,6 +11,7 @@ import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/ios/code_signing.dart';
 import 'package:flutter_tools/src/globals.dart';
@@ -654,6 +655,8 @@ class MockConfig extends Mock implements Config {}
 Stream<String> mockTerminalStdInStream;
 
 class TestTerminal extends AnsiTerminal {
+  TestTerminal() : super(stdio: stdio, platform: platform);
+
   @override
   String bolden(String message) => '<bold>$message</bold>';
 

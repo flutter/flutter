@@ -147,13 +147,16 @@ class FlutterCommandRunner extends CommandRunner<void> {
 
   @override
   String get usageFooter {
-    return wrapText('Run "flutter help -v" for verbose help output, including less commonly used options.');
+    return wrapText('Run "flutter help -v" for verbose help output, including less commonly used options.',
+      columnWidth: outputPreferences.wrapColumn,
+      shouldWrap: outputPreferences.wrapText,
+    );
   }
 
   @override
   String get usage {
     final String usageWithoutDescription = super.usage.substring(description.length + 2);
-    return  '${wrapText(description)}\n\n$usageWithoutDescription';
+    return '${wrapText(description, shouldWrap: outputPreferences.wrapText, columnWidth: outputPreferences.wrapColumn)}\n\n$usageWithoutDescription';
   }
 
   static String get defaultFlutterRoot {
@@ -234,7 +237,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
     // Check for verbose.
     if (topLevelResults['verbose'] as bool) {
       // Override the logger.
-      contextOverrides[Logger] = VerboseLogger(logger);
+      contextOverrides[Logger] = VerboseLogger(logger, stopwatch: Stopwatch());
     }
 
     // Don't set wrapColumns unless the user said to: if it's set, then all

@@ -4,11 +4,14 @@
 
 import 'dart:async';
 
+import 'package:meta/meta.dart';
+
 import '../convert.dart';
-import '../globals.dart';
 import 'context.dart';
 import 'io.dart' as io;
-import 'platform.dart';
+import 'logger.dart';
+import 'platform.dart' hide platform;
+import 'platform.dart' as globals show platform;
 
 enum TerminalColor {
   red,
@@ -34,7 +37,10 @@ String get successMark {
   return terminal.bolden(terminal.color('✓', TerminalColor.green));
 }
 
-final AnsiTerminal _defaultAnsiTerminal = AnsiTerminal();
+final AnsiTerminal _defaultAnsiTerminal = AnsiTerminal(
+  stdio: io.stdio,
+  platform: globals.platform,
+);
 
 OutputPreferences get outputPreferences {
   return context?.get<OutputPreferences>() ?? _defaultOutputPreferences;
@@ -50,10 +56,11 @@ class OutputPreferences {
     bool showColor,
   }) : wrapText = wrapText ?? io.stdio.hasTerminal,
        _overrideWrapColumn = wrapColumn,
-       showColor = showColor ?? platform.stdoutSupportsAnsi ?? false;
+       showColor = showColor ?? globals.platform.stdoutSupportsAnsi ?? false;
 
   /// A version of this class for use in tests.
-  OutputPreferences.test() : wrapText = false, _overrideWrapColumn = null, showColor = false;
+  OutputPreferences.test({this.wrapText = false, int wrapColumn = kDefaultTerminalColumns, this.showColor = false})
+    : _overrideWrapColumn = wrapColumn;
 
   /// If [wrapText] is true, then any text sent to the context's [Logger]
   /// instance (e.g. from the [printError] or [printStatus] functions) will be
@@ -88,6 +95,13 @@ class OutputPreferences {
 }
 
 class AnsiTerminal {
+  AnsiTerminal({@required io.Stdio stdio, @required Platform platform})
+    : _stdio = stdio,
+      _platform = platform;
+
+  final io.Stdio _stdio;
+  final Platform _platform;
+
   static const String bold = '\u001B[1m';
   static const String resetAll = '\u001B[0m';
   static const String resetColor = '\u001B[39m';
@@ -114,7 +128,8 @@ class AnsiTerminal {
 
   static String colorCode(TerminalColor color) => _colorMap[color];
 
-  bool get supportsColor => platform.stdoutSupportsAnsi ?? false;
+  bool get supportsColor => _platform.stdoutSupportsAnsi ?? false;
+
   final RegExp _boldControls = RegExp('(${RegExp.escape(resetBold)}|${RegExp.escape(bold)})');
 
   /// Whether we are interacting with the flutter tool via the terminal.
@@ -166,10 +181,10 @@ class AnsiTerminal {
   String clearScreen() => supportsColor ? clear : '\n\n';
 
   set singleCharMode(bool value) {
-    if (!io.stdinHasTerminal) {
+    if (!_stdio.stdinHasTerminal) {
       return;
     }
-    final io.Stdin stdin = io.stdin as io.Stdin;
+    final io.Stdin stdin = _stdio.stdin as io.Stdin;
     // The order of setting lineMode and echoMode is important on Windows.
     if (value) {
       stdin.echoMode = false;
@@ -186,7 +201,7 @@ class AnsiTerminal {
   ///
   /// Useful when the console is in [singleCharMode].
   Stream<String> get keystrokes {
-    _broadcastStdInString ??= io.stdin.transform<String>(const AsciiDecoder(allowInvalid: true)).asBroadcastStream();
+    _broadcastStdInString ??= _stdio.stdin.transform<String>(const AsciiDecoder(allowInvalid: true)).asBroadcastStream();
     return _broadcastStdInString;
   }
 
@@ -205,6 +220,7 @@ class AnsiTerminal {
   /// If [usesTerminalUi] is false, throws a [StateError].
   Future<String> promptForCharInput(
     List<String> acceptedCharacters, {
+    @required Logger logger,
     String prompt,
     int defaultChoiceIndex,
     bool displayAcceptedCharacters = true,
@@ -227,14 +243,14 @@ class AnsiTerminal {
     singleCharMode = true;
     while (choice == null || choice.length > 1 || !acceptedCharacters.contains(choice)) {
       if (prompt != null) {
-        printStatus(prompt, emphasis: true, newline: false);
+        logger.printStatus(prompt, emphasis: true, newline: false);
         if (displayAcceptedCharacters) {
-          printStatus(' [${charactersToDisplay.join("|")}]', newline: false);
+          logger.printStatus(' [${charactersToDisplay.join("|")}]', newline: false);
         }
-        printStatus(': ', emphasis: true, newline: false);
+        logger.printStatus(': ', emphasis: true, newline: false);
       }
       choice = await keystrokes.first;
-      printStatus(choice);
+      logger.printStatus(choice);
     }
     singleCharMode = false;
     if (defaultChoiceIndex != null && choice == '\n') {

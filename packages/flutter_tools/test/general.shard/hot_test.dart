@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
@@ -16,6 +17,7 @@ import 'package:flutter_tools/src/run_hot.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
+import 'package:platform/platform.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -274,7 +276,13 @@ void main() {
 
     setUp(() {
       residentCompiler = MockResidentCompiler();
-      mockLogger = BufferLogger();
+      mockLogger = BufferLogger(
+        terminal: AnsiTerminal(
+          stdio: null,
+          platform: const LocalPlatform(),
+        ),
+        outputPreferences: OutputPreferences.test(),
+      );
       mockArtifacts = MockLocalEngineArtifacts();
     });
 

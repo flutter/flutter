@@ -285,6 +285,7 @@ class XcodeProjectInterpreter {
   }) async {
     final Status status = Status.withSpinner(
       timeout: timeoutConfiguration.fastOperation,
+      timeoutConfiguration: timeoutConfiguration,
     );
     final List<String> showBuildSettingsCommand = <String>[
       _executable,

@@ -9,8 +9,10 @@ import 'package:file/memory.dart';
 
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/bundle.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/devfs.dart';
@@ -185,7 +187,13 @@ flutter:
 
   test('Failed directory delete shows message', () async {
     final MockDirectory mockDirectory = MockDirectory();
-    final BufferLogger bufferLogger = BufferLogger();
+    final BufferLogger bufferLogger = BufferLogger(
+      terminal: AnsiTerminal(
+        stdio: stdio, // Danger, using real stdio.
+        platform: platform,
+      ),
+      outputPreferences: OutputPreferences.test(),
+    );
     when(mockDirectory.existsSync()).thenReturn(true);
     when(mockDirectory.deleteSync(recursive: true)).thenThrow(const FileSystemException('ABCD'));
 

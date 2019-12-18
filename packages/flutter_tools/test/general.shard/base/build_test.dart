@@ -13,7 +13,6 @@ import 'package:flutter_tools/src/base/build.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/version.dart';
@@ -224,7 +223,6 @@ void main() {
     MockAndroidSdk mockAndroidSdk;
     MockArtifacts mockArtifacts;
     MockXcode mockXcode;
-    BufferLogger bufferLogger;
 
     setUp(() async {
       fs = MemoryFileSystem();
@@ -246,7 +244,6 @@ void main() {
       mockXcode = MockXcode();
       when(mockXcode.sdkLocation(any)).thenAnswer((_) => Future<String>.value(kSDKPath));
 
-      bufferLogger = BufferLogger();
       for (BuildMode mode in BuildMode.values) {
         when(mockArtifacts.getArtifactPath(Artifact.snapshotDart,
             platform: anyNamed('platform'), mode: mode)).thenReturn(kSnapshotDart);
@@ -260,7 +257,6 @@ void main() {
       ProcessManager: () => FakeProcessManager.any(),
       GenSnapshot: () => genSnapshot,
       Xcode: () => mockXcode,
-      Logger: () => bufferLogger,
     };
 
     testUsingContext('iOS debug AOT snapshot is invalid', () async {
@@ -657,7 +653,7 @@ void main() {
 
       expect(genSnapshotExitCode, 0);
       expect(genSnapshot.callCount, 1);
-      expect(bufferLogger.statusText, matches(RegExp(r'snapshot\(CompileTime\): \d+ ms.')));
+      expect(testLogger.statusText, matches(RegExp(r'snapshot\(CompileTime\): \d+ ms.')));
     }, overrides: contextOverrides);
   });
 }

@@ -5,6 +5,7 @@
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -12,6 +13,7 @@ import 'package:flutter_tools/src/ios/bitcode.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:mockito/mockito.dart';
+import 'package:platform/platform.dart';
 import 'package:process/process.dart';
 
 import '../../src/common.dart';
@@ -29,7 +31,13 @@ void main() {
     mockXcode = MockXcode();
     memoryFileSystem = MemoryFileSystem(style: FileSystemStyle.posix);
     mockProcessManager = MockProcessManager();
-    bufferLogger = BufferLogger();
+    bufferLogger = BufferLogger(
+      terminal: AnsiTerminal(
+        stdio: null,
+        platform: const LocalPlatform(),
+      ),
+      outputPreferences: OutputPreferences.test(),
+    );
     mockPlistUtils = MockPlistUtils();
   });
 

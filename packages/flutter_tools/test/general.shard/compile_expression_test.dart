@@ -103,7 +103,13 @@ void main() {
   }, overrides: <Type, Generator>{
     ProcessManager: () => mockProcessManager,
     OutputPreferences: () => OutputPreferences(showColor: false),
-    Logger: () => BufferLogger(),
+    Logger: () => BufferLogger(
+      terminal: AnsiTerminal(
+        stdio: null,
+        platform: const LocalPlatform(),
+      ),
+      outputPreferences: OutputPreferences.test(),
+    ),
     Platform: kNoColorTerminalPlatform,
   });
 

@@ -244,6 +244,7 @@ Future<String> _chooseSigningIdentity(List<String> validCodeSigningIdentities) a
       prompt: 'Please select a certificate for code signing',
       displayAcceptedCharacters: true,
       defaultChoiceIndex: 0, // Just pressing enter chooses the first one.
+      logger: logger,
     );
 
     if (choice == 'a') {

@@ -20,6 +20,7 @@ import 'base/os.dart';
 import 'base/platform.dart';
 import 'base/process.dart';
 import 'base/signals.dart';
+import 'base/terminal.dart';
 import 'base/time.dart';
 import 'base/user_messages.dart';
 import 'base/utils.dart';
@@ -101,7 +102,19 @@ Future<T> runInContext<T>(
       IOSWorkflow: () => const IOSWorkflow(),
       KernelCompilerFactory: () => const KernelCompilerFactory(),
       LinuxWorkflow: () => const LinuxWorkflow(),
-      Logger: () => platform.isWindows ? WindowsStdoutLogger() : StdoutLogger(),
+      Logger: () => platform.isWindows
+        ? WindowsStdoutLogger(
+            terminal: terminal,
+            stdio: stdio,
+            outputPreferences: outputPreferences,
+            timeoutConfiguration: timeoutConfiguration,
+          )
+        : StdoutLogger(
+            terminal: terminal,
+            stdio: stdio,
+            outputPreferences: outputPreferences,
+            timeoutConfiguration: timeoutConfiguration,
+          ),
       MacOSWorkflow: () => const MacOSWorkflow(),
       MDnsObservatoryDiscovery: () => MDnsObservatoryDiscovery(),
       OperatingSystemUtils: () => OperatingSystemUtils(),

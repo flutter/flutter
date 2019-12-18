@@ -5,6 +5,7 @@
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/run_hot.dart';
 
 import '../src/common.dart';
@@ -18,7 +19,13 @@ void main() {
       final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(
         fileSystem: MemoryFileSystem(),
         platform: FakePlatform(),
-        logger: BufferLogger(),
+        logger: BufferLogger(
+          terminal: AnsiTerminal(
+            stdio: null,
+            platform: const LocalPlatform(),
+          ),
+          outputPreferences: OutputPreferences.test(),
+        ),
       );
 
       expect(
@@ -36,7 +43,13 @@ void main() {
       final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(
         fileSystem: MemoryFileSystem(),
         platform: FakePlatform(),
-        logger: BufferLogger(),
+        logger: BufferLogger(
+          terminal: AnsiTerminal(
+            stdio: null,
+            platform: const LocalPlatform(),
+          ),
+          outputPreferences: OutputPreferences.test(),
+        ),
       );
 
       expect(
@@ -54,7 +67,13 @@ void main() {
       final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(
         fileSystem: MemoryFileSystem(),
         platform: FakePlatform(),
-        logger: BufferLogger(),
+        logger: BufferLogger(
+          terminal: AnsiTerminal(
+            stdio: null,
+            platform: const LocalPlatform(),
+          ),
+          outputPreferences: OutputPreferences.test(),
+        ),
       );
 
       expect(

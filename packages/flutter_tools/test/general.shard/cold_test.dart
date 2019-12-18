@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/device.dart';
@@ -15,6 +16,7 @@ import 'package:flutter_tools/src/run_cold.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
+import 'package:platform/platform.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -26,7 +28,13 @@ void main() {
     BufferLogger mockLogger;
 
     setUp(() {
-      mockLogger = BufferLogger();
+      mockLogger = BufferLogger(
+        terminal: AnsiTerminal(
+          stdio: null,
+          platform: const LocalPlatform(),
+        ),
+        outputPreferences: OutputPreferences.test(),
+    );
       residentCompiler = MockResidentCompiler();
     });
 
@@ -117,7 +125,13 @@ void main() {
     BufferLogger mockLogger;
 
     setUp(() {
-      mockLogger = BufferLogger();
+      mockLogger = BufferLogger(
+        terminal: AnsiTerminal(
+          stdio: null,
+          platform: const LocalPlatform(),
+        ),
+        outputPreferences: OutputPreferences.test(),
+      );
     });
 
     testUsingContext('returns 1 if not prebuilt mode & mainPath does not exist', () async {

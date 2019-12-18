@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
+import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/base/time.dart';
@@ -91,6 +92,7 @@ void testUsingContext(
       return context.run<dynamic>(
         name: 'mocks',
         overrides: <Type, Generator>{
+          AnsiTerminal: () => AnsiTerminal(platform: platform, stdio: stdio),
           Config: () => buildConfig(fs),
           DeviceManager: () => FakeDeviceManager(),
           Doctor: () => FakeDoctor(),
@@ -102,7 +104,10 @@ void testUsingContext(
             return mock;
           },
           OutputPreferences: () => OutputPreferences.test(),
-          Logger: () => BufferLogger(),
+          Logger: () => BufferLogger(
+            terminal: terminal,
+            outputPreferences: outputPreferences,
+          ),
           OperatingSystemUtils: () => FakeOperatingSystemUtils(),
           PersistentToolState: () => buildPersistentToolState(fs),
           SimControl: () => MockSimControl(),
