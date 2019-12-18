@@ -170,12 +170,6 @@ class ImageCache {
       // Images that fail to load don't contribute to cache size.
       final int imageSize = info?.image == null ? 0 : info.image.height * info.image.width * 4;
       final _CachedImage image = _CachedImage(result, imageSize);
-      // If the image is bigger than the maximum cache size, and the cache size
-      // is not zero, then increase the cache size to the size of the image plus
-      // some change.
-      if (maximumSizeBytes > 0 && imageSize > maximumSizeBytes) {
-        _maximumSizeBytes = imageSize + 1000;
-      }
       _currentSizeBytes += imageSize;
       final _PendingImage pendingImage = _pendingImages.remove(key);
       if (pendingImage != null) {
@@ -197,7 +191,7 @@ class ImageCache {
   // Remove images from the cache until both the length and bytes are below
   // maximum, or the cache is empty.
   void _checkCacheSize() {
-    while (_currentSizeBytes > _maximumSizeBytes || _cache.length > _maximumSize) {
+    while (_cache.length > 1 && (_currentSizeBytes > _maximumSizeBytes || _cache.length > _maximumSize)) {
       final Object key = _cache.keys.first;
       final _CachedImage image = _cache[key];
       _currentSizeBytes -= image.sizeBytes;
@@ -205,7 +199,6 @@ class ImageCache {
     }
     assert(_currentSizeBytes >= 0);
     assert(_cache.length <= maximumSize);
-    assert(_currentSizeBytes <= maximumSizeBytes);
   }
 }
 
