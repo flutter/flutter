@@ -20,6 +20,7 @@ import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/ios_workflow.dart';
+import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/mdns_discovery.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -575,23 +576,32 @@ void main() {
           Cache.flutterRoot = '../..';
           final CreateCommand command = CreateCommand();
           final CommandRunner<void> runner = createTestCommandRunner(command);
-          await runner.run(<String>[
-            'create',
-            '--no-pub',
-            projectDir.path,
-          ]);
+
+          FakeAsync().run((FakeAsync time) {
+            runner.run(<String>[
+              'create',
+              '--no-pub',
+              projectDir.path,
+            ]);
+            time.flushMicrotasks();
+            time.elapse(const Duration(seconds: 65));
+          });
 
           if (additionalSetup != null) {
             additionalSetup();
           }
 
-          final IOSApp app = await AbsoluteBuildableIOSApp.fromProject(
-            FlutterProject.fromDirectory(projectDir).ios);
+          final IOSApp app = AbsoluteBuildableIOSApp(
+            FlutterProject.fromDirectory(projectDir).ios,
+            'io.flutter.flutter.app',
+            'My Super Awesome App.app',
+          );
+
           final IOSDevice device = IOSDevice('123');
 
           // Pre-create the expected build products.
           targetBuildDir.createSync(recursive: true);
-          projectDir.childDirectory('build/ios/iphoneos/Runner.app').createSync(recursive: true);
+          projectDir.childDirectory('build/ios/iphoneos/My Super Awesome App.app').createSync(recursive: true);
 
           final Completer<LaunchResult> completer = Completer<LaunchResult>();
           FakeAsync().run((FakeAsync time) {
@@ -620,6 +630,7 @@ void main() {
           IOSDeploy: () => mockIosDeploy,
           Platform: () => macPlatform,
           ProcessManager: () => mockProcessManager,
+          XcodeProjectInterpreter: () => FakeWithBuildSettingsXcodeProjectInterpreter(),
         });
       }
 
@@ -865,11 +876,11 @@ f577a7903cc54959be2e34bc4f7f80b7009efcf4
       when(mockIMobileDevice.startLogger('123456')).thenAnswer((Invocation invocation) {
         final Process mockProcess = MockProcess(
           stdout: Stream<List<int>>.fromIterable(<List<int>>['''
-Runner(Flutter)[297] <Notice>: A is for ari
-Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt MobileGestaltSupport.m:153: pid 123 (Runner) does not have sandbox access for frZQaeyWLUvLjeuEK43hmg and IS NOT appropriately entitled
-Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt MobileGestalt.c:550: no access to InverseDeviceID (see <rdar://problem/11744455>)
-Runner(Flutter)[297] <Notice>: I is for ichigo
-Runner(UIKit)[297] <Notice>: E is for enpitsu"
+My Super Awesome App(Flutter)[297] <Notice>: A is for ari
+My Super Awesome App(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt MobileGestaltSupport.m:153: pid 123 (Runner) does not have sandbox access for frZQaeyWLUvLjeuEK43hmg and IS NOT appropriately entitled
+My Super Awesome App(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt MobileGestalt.c:550: no access to InverseDeviceID (see <rdar://problem/11744455>)
+My Super Awesome App(Flutter)[297] <Notice>: I is for ichigo
+My Super Awesome App(UIKit)[297] <Notice>: E is for enpitsu"
 '''.codeUnits])
         );
         return Future<Process>.value(mockProcess);
@@ -890,11 +901,11 @@ Runner(UIKit)[297] <Notice>: E is for enpitsu"
       when(mockIMobileDevice.startLogger('123456')).thenAnswer((Invocation invocation) {
         final Process mockProcess = MockProcess(
           stdout: Stream<List<int>>.fromIterable(<List<int>>['''
-Runner(Flutter)[297] <Notice>: This is a multi-line message,
+My Super Awesome App(Flutter)[297] <Notice>: This is a multi-line message,
   with another Flutter message following it.
-Runner(Flutter)[297] <Notice>: This is a multi-line message,
+My Super Awesome App(Flutter)[297] <Notice>: This is a multi-line message,
   with a non-Flutter log message following it.
-Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
+My Super Awesome App(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
 '''.codeUnits]),
         );
         return Future<Process>.value(mockProcess);
@@ -963,13 +974,8 @@ flutter:
 }
 
 class AbsoluteBuildableIOSApp extends BuildableIOSApp {
-  AbsoluteBuildableIOSApp(IosProject project, String projectBundleId) :
-    super(project, projectBundleId);
-
-  static Future<AbsoluteBuildableIOSApp> fromProject(IosProject project) async {
-    final String projectBundleId = await project.productBundleIdentifier;
-    return AbsoluteBuildableIOSApp(project, projectBundleId);
-  }
+  AbsoluteBuildableIOSApp(IosProject project, String projectBundleId, String hostAppBundleName) :
+    super(project, projectBundleId, hostAppBundleName);
 
   @override
   String get deviceBundlePath =>
@@ -994,3 +1000,31 @@ class FakeIosDoctorProvider implements DoctorValidatorsProvider {
     return _workflows;
   }
 }
+
+class FakeWithBuildSettingsXcodeProjectInterpreter extends XcodeProjectInterpreter {
+  @override
+  bool get isInstalled => true;
+
+  @override
+  String get versionText => 'Xcode 10.2';
+
+  @override
+  int get majorVersion => 10;
+
+  @override
+  int get minorVersion => 2;
+
+  @override
+  void cleanWorkspace(String workspacePath, String scheme) {
+  }
+
+  @override
+  Future<XcodeProjectInfo> getInfo(String projectPath, {String projectFilename}) async {
+    return XcodeProjectInfo(
+      <String>['Runner'],
+      <String>['Debug', 'Release'],
+      <String>['Runner'],
+    );
+  }
+}
+
