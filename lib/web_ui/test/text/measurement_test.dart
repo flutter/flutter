@@ -156,7 +156,7 @@ void main() async {
         expect(result.minIntrinsicWidth, 30);
         expect(result.height, 10);
         expect(result.lines, <EngineLineMetrics>[
-          line('   abc', 0, 6, hardBreak: true, width: 60.0, lineNumber: 0),
+          line('   abc', 0, 6, hardBreak: true, width: 60.0, lineNumber: 0, left: 0.0),
         ]);
 
         // trailing whitespaces
@@ -167,13 +167,13 @@ void main() async {
         expect(result.height, 10);
         if (instance.isCanvas) {
           expect(result.lines, <EngineLineMetrics>[
-            line('abc   ', 0, 6, hardBreak: true, width: 30.0, lineNumber: 0),
+            line('abc   ', 0, 6, hardBreak: true, width: 30.0, lineNumber: 0, left: 0.0),
           ]);
         } else {
           // DOM-based measurement always includes trailing whitespace in the
           // width, while Flutter and Canvas-based measurement don't.
           expect(result.lines, <EngineLineMetrics>[
-            line('abc   ', 0, 6, hardBreak: true, width: 60.0, lineNumber: 0),
+            line('abc   ', 0, 6, hardBreak: true, width: 60.0, lineNumber: 0, left: 0.0),
           ]);
         }
 
@@ -185,13 +185,13 @@ void main() async {
         expect(result.height, 10);
         if (instance.isCanvas) {
           expect(result.lines, <EngineLineMetrics>[
-            line('  ab   c  ', 0, 10, hardBreak: true, width: 80.0, lineNumber: 0),
+            line('  ab   c  ', 0, 10, hardBreak: true, width: 80.0, lineNumber: 0, left: 0.0),
           ]);
         } else {
           // DOM-based measurement always includes trailing whitespace in the
           // width, while Flutter and Canvas-based measurement don't.
           expect(result.lines, <EngineLineMetrics>[
-            line('  ab   c  ', 0, 10, hardBreak: true, width: 100.0, lineNumber: 0),
+            line('  ab   c  ', 0, 10, hardBreak: true, width: 100.0, lineNumber: 0, left: 0.0),
           ]);
         }
 
@@ -203,13 +203,13 @@ void main() async {
         expect(result.height, 10);
         if (instance.isCanvas) {
           expect(result.lines, <EngineLineMetrics>[
-            line(' ', 0, 1, hardBreak: true, width: 0.0, lineNumber: 0),
+            line(' ', 0, 1, hardBreak: true, width: 0.0, lineNumber: 0, left: 0.0),
           ]);
         } else {
           // DOM-based measurement always includes trailing whitespace in the
           // width, while Flutter and Canvas-based measurement don't.
           expect(result.lines, <EngineLineMetrics>[
-            line(' ', 0, 1, hardBreak: true, width: 10.0, lineNumber: 0),
+            line(' ', 0, 1, hardBreak: true, width: 10.0, lineNumber: 0, left: 0.0),
           ]);
         }
 
@@ -221,13 +221,13 @@ void main() async {
         expect(result.height, 10);
         if (instance.isCanvas) {
           expect(result.lines, <EngineLineMetrics>[
-            line('     ', 0, 5, hardBreak: true, width: 0.0, lineNumber: 0),
+            line('     ', 0, 5, hardBreak: true, width: 0.0, lineNumber: 0, left: 0.0),
           ]);
         } else {
           // DOM-based measurement always includes trailing whitespace in the
           // width, while Flutter and Canvas-based measurement don't.
           expect(result.lines, <EngineLineMetrics>[
-            line('     ', 0, 5, hardBreak: true, width: 50.0, lineNumber: 0),
+            line('     ', 0, 5, hardBreak: true, width: 50.0, lineNumber: 0, left: 0.0),
           ]);
         }
       },
@@ -246,7 +246,7 @@ void main() async {
         expect(result.width, 50);
         expect(result.height, 10);
         expect(result.lines, <EngineLineMetrics>[
-          line('12345', 0, 5, hardBreak: true, width: 50.0, lineNumber: 0),
+          line('12345', 0, 5, hardBreak: true, width: 50.0, lineNumber: 0, left: 0.0),
         ]);
       },
     );
@@ -267,8 +267,8 @@ void main() async {
         expect(result.height, 20);
         if (instance.isCanvas) {
           expect(result.lines, <EngineLineMetrics>[
-            line('foo bar ', 0, 8, hardBreak: false, width: 70.0, lineNumber: 0),
-            line('baz', 8, 11, hardBreak: true, width: 30.0, lineNumber: 1),
+            line('foo bar ', 0, 8, hardBreak: false, width: 70.0, lineNumber: 0, left: 0.0),
+            line('baz', 8, 11, hardBreak: true, width: 30.0, lineNumber: 1, left: 0.0),
           ]);
         } else {
           // DOM-based measurement can't produce line metrics for multi-line
@@ -292,8 +292,8 @@ void main() async {
         expect(result.height, 20);
         if (instance.isCanvas) {
           expect(result.lines, <EngineLineMetrics>[
-            line('12345', 0, 5, hardBreak: false, width: 50.0, lineNumber: 0),
-            line('67890', 5, 10, hardBreak: true, width: 50.0, lineNumber: 1),
+            line('12345', 0, 5, hardBreak: false, width: 50.0, lineNumber: 0, left: 0.0),
+            line('67890', 5, 10, hardBreak: true, width: 50.0, lineNumber: 1, left: 0.0),
           ]);
         } else {
           // DOM-based measurement can't produce line metrics for multi-line
@@ -311,9 +311,9 @@ void main() async {
         expect(result.height, 30);
         if (instance.isCanvas) {
           expect(result.lines, <EngineLineMetrics>[
-            line('abcde', 0, 5, hardBreak: false, width: 50.0, lineNumber: 0),
-            line('fghij', 5, 10, hardBreak: false, width: 50.0, lineNumber: 1),
-            line('k lm', 10, 14, hardBreak: true, width: 40.0, lineNumber: 2),
+            line('abcde', 0, 5, hardBreak: false, width: 50.0, lineNumber: 0, left: 0.0),
+            line('fghij', 5, 10, hardBreak: false, width: 50.0, lineNumber: 1, left: 0.0),
+            line('k lm', 10, 14, hardBreak: true, width: 40.0, lineNumber: 2, left: 0.0),
           ]);
         } else {
           // DOM-based measurement can't produce line metrics for multi-line
@@ -333,8 +333,8 @@ void main() async {
         expect(result.height, 20);
         if (instance.isCanvas) {
           expect(result.lines, <EngineLineMetrics>[
-            line('A', 0, 1, hardBreak: false, width: 10.0, lineNumber: 0),
-            line('A', 1, 2, hardBreak: true, width: 10.0, lineNumber: 1),
+            line('A', 0, 1, hardBreak: false, width: 10.0, lineNumber: 0, left: 0.0),
+            line('A', 1, 2, hardBreak: true, width: 10.0, lineNumber: 1, left: 0.0),
           ]);
         } else {
           // DOM-based measurement can't produce line metrics for multi-line
@@ -351,9 +351,9 @@ void main() async {
         expect(result.height, 30);
         if (instance.isCanvas) {
           expect(result.lines, <EngineLineMetrics>[
-            line('A', 0, 1, hardBreak: false, width: 10.0, lineNumber: 0),
-            line('A', 1, 3, hardBreak: true, width: 10.0, lineNumber: 1),
-            line('A', 3, 4, hardBreak: true, width: 10.0, lineNumber: 2),
+            line('A', 0, 1, hardBreak: false, width: 10.0, lineNumber: 0, left: 0.0),
+            line('A', 1, 3, hardBreak: true, width: 10.0, lineNumber: 1, left: 0.0),
+            line('A', 3, 4, hardBreak: true, width: 10.0, lineNumber: 2, left: 0.0),
           ]);
         } else {
           // DOM-based measurement can't produce line metrics for multi-line
@@ -370,10 +370,10 @@ void main() async {
         expect(result.height, 40);
         if (instance.isCanvas) {
           expect(result.lines, <EngineLineMetrics>[
-            line('A', 0, 1, hardBreak: false, width: 10.0, lineNumber: 0),
-            line('A', 1, 2, hardBreak: false, width: 10.0, lineNumber: 1),
-            line('A', 2, 4, hardBreak: true, width: 10.0, lineNumber: 2),
-            line('', 4, 4, hardBreak: true, width: 0.0, lineNumber: 3),
+            line('A', 0, 1, hardBreak: false, width: 10.0, lineNumber: 0, left: 0.0),
+            line('A', 1, 2, hardBreak: false, width: 10.0, lineNumber: 1, left: 0.0),
+            line('A', 2, 4, hardBreak: true, width: 10.0, lineNumber: 2, left: 0.0),
+            line('', 4, 4, hardBreak: true, width: 0.0, lineNumber: 3, left: 0.0),
           ]);
         } else {
           // DOM-based measurement can't produce line metrics for multi-line
@@ -397,8 +397,8 @@ void main() async {
         expect(result.height, 20);
         if (instance.isCanvas) {
           expect(result.lines, <EngineLineMetrics>[
-            line('12', 0, 3, hardBreak: true, width: 20.0, lineNumber: 0),
-            line('34', 3, 5, hardBreak: true, width: 20.0, lineNumber: 1),
+            line('12', 0, 3, hardBreak: true, width: 20.0, lineNumber: 0, left: 0.0),
+            line('34', 3, 5, hardBreak: true, width: 20.0, lineNumber: 1, left: 0.0),
           ]);
         } else {
           // DOM-based measurement can't produce line metrics for multi-line
@@ -418,9 +418,9 @@ void main() async {
       expect(result.height, 30);
       if (instance.isCanvas) {
         expect(result.lines, <EngineLineMetrics>[
-          line('', 0, 1, hardBreak: true, width: 0.0, lineNumber: 0),
-          line('', 1, 2, hardBreak: true, width: 0.0, lineNumber: 1),
-          line('1234', 2, 6, hardBreak: true, width: 40.0, lineNumber: 2),
+          line('', 0, 1, hardBreak: true, width: 0.0, lineNumber: 0, left: 0.0),
+          line('', 1, 2, hardBreak: true, width: 0.0, lineNumber: 1, left: 0.0),
+          line('1234', 2, 6, hardBreak: true, width: 40.0, lineNumber: 2, left: 0.0),
         ]);
       } else {
         // DOM-based measurement can't produce line metrics for multi-line
@@ -435,9 +435,9 @@ void main() async {
       expect(result.height, 30);
       if (instance.isCanvas) {
         expect(result.lines, <EngineLineMetrics>[
-          line('12', 0, 3, hardBreak: true, width: 20.0, lineNumber: 0),
-          line('', 3, 4, hardBreak: true, width: 0.0, lineNumber: 1),
-          line('345', 4, 7, hardBreak: true, width: 30.0, lineNumber: 2),
+          line('12', 0, 3, hardBreak: true, width: 20.0, lineNumber: 0, left: 0.0),
+          line('', 3, 4, hardBreak: true, width: 0.0, lineNumber: 1, left: 0.0),
+          line('345', 4, 7, hardBreak: true, width: 30.0, lineNumber: 2, left: 0.0),
         ]);
       } else {
         // DOM-based measurement can't produce line metrics for multi-line
@@ -453,9 +453,9 @@ void main() async {
         // This can only be done correctly in the canvas-based implementation.
         expect(result.height, 30);
         expect(result.lines, <EngineLineMetrics>[
-          line('1234', 0, 5, hardBreak: true, width: 40.0, lineNumber: 0),
-          line('', 5, 6, hardBreak: true, width: 0.0, lineNumber: 1),
-          line('', 6, 6, hardBreak: true, width: 0.0, lineNumber: 2),
+          line('1234', 0, 5, hardBreak: true, width: 40.0, lineNumber: 0, left: 0.0),
+          line('', 5, 6, hardBreak: true, width: 0.0, lineNumber: 1, left: 0.0),
+          line('', 6, 6, hardBreak: true, width: 0.0, lineNumber: 2, left: 0.0),
         ]);
       } else {
         // DOM-based measurement can't produce line metrics for multi-line
@@ -479,8 +479,8 @@ void main() async {
 
         if (instance.isCanvas) {
           expect(result.lines, <EngineLineMetrics>[
-            line('123', 0, 4, hardBreak: true, width: 30.0, lineNumber: 0),
-            line('456 789', 4, 11, hardBreak: true, width: 70.0, lineNumber: 1),
+            line('123', 0, 4, hardBreak: true, width: 30.0, lineNumber: 0, left: 0.0),
+            line('456 789', 4, 11, hardBreak: true, width: 70.0, lineNumber: 1, left: 0.0),
           ]);
         } else {
           // DOM-based measurement can't produce line metrics for multi-line
@@ -544,9 +544,9 @@ void main() async {
       expect(result.minIntrinsicWidth, 40);
       if (instance.isCanvas) {
         expect(result.lines, <EngineLineMetrics>[
-          line('abc ', 0, 4, hardBreak: false, width: 30.0, lineNumber: 0),
-          line('de ', 4, 7, hardBreak: false, width: 20.0, lineNumber: 1),
-          line('fghi', 7, 11, hardBreak: true, width: 40.0, lineNumber: 2),
+          line('abc ', 0, 4, hardBreak: false, width: 30.0, lineNumber: 0, left: 0.0),
+          line('de ', 4, 7, hardBreak: false, width: 20.0, lineNumber: 1, left: 0.0),
+          line('fghi', 7, 11, hardBreak: true, width: 40.0, lineNumber: 2, left: 0.0),
         ]);
       } else {
         // DOM-based measurement can't produce line metrics for multi-line
@@ -559,9 +559,9 @@ void main() async {
       expect(result.minIntrinsicWidth, 40);
       if (instance.isCanvas) {
         expect(result.lines, <EngineLineMetrics>[
-          line('abcd', 0, 5, hardBreak: true, width: 40.0, lineNumber: 0),
-          line('ef', 5, 8, hardBreak: true, width: 20.0, lineNumber: 1),
-          line('ghi', 8, 11, hardBreak: true, width: 30.0, lineNumber: 2),
+          line('abcd', 0, 5, hardBreak: true, width: 40.0, lineNumber: 0, left: 0.0),
+          line('ef', 5, 8, hardBreak: true, width: 20.0, lineNumber: 1, left: 0.0),
+          line('ghi', 8, 11, hardBreak: true, width: 30.0, lineNumber: 2, left: 0.0),
         ]);
       } else {
         // DOM-based measurement can't produce line metrics for multi-line
@@ -574,8 +574,8 @@ void main() async {
       expect(result.minIntrinsicWidth, 40);
       if (instance.isCanvas) {
         expect(result.lines, <EngineLineMetrics>[
-          line('abcd      ', 0, 10, hardBreak: false, width: 40.0, lineNumber: 0),
-          line('efg', 10, 13, hardBreak: true, width: 30.0, lineNumber: 1),
+          line('abcd      ', 0, 10, hardBreak: false, width: 40.0, lineNumber: 0, left: 0.0),
+          line('efg', 10, 13, hardBreak: true, width: 30.0, lineNumber: 1, left: 0.0),
         ]);
       } else {
         // DOM-based measurement can't produce line metrics for multi-line
@@ -588,8 +588,8 @@ void main() async {
       expect(result.minIntrinsicWidth, 40);
       if (instance.isCanvas) {
         expect(result.lines, <EngineLineMetrics>[
-          line('abc    ', 0, 8, hardBreak: true, width: 30.0, lineNumber: 0),
-          line('defg', 8, 12, hardBreak: true, width: 40.0, lineNumber: 1),
+          line('abc    ', 0, 8, hardBreak: true, width: 30.0, lineNumber: 0, left: 0.0),
+          line('defg', 8, 12, hardBreak: true, width: 40.0, lineNumber: 1, left: 0.0),
         ]);
       } else {
         // DOM-based measurement can't produce line metrics for multi-line
@@ -602,9 +602,9 @@ void main() async {
       expect(result.minIntrinsicWidth, 120);
       if (instance.isCanvas) {
         expect(result.lines, <EngineLineMetrics>[
-          line('AAAAA', 0, 5, hardBreak: false, width: 50.0, lineNumber: 0),
-          line('AAAAA', 5, 10, hardBreak: false, width: 50.0, lineNumber: 1),
-          line('AA', 10, 12, hardBreak: true, width: 20.0, lineNumber: 2),
+          line('AAAAA', 0, 5, hardBreak: false, width: 50.0, lineNumber: 0, left: 0.0),
+          line('AAAAA', 5, 10, hardBreak: false, width: 50.0, lineNumber: 1, left: 0.0),
+          line('AA', 10, 12, hardBreak: true, width: 20.0, lineNumber: 2, left: 0.0),
         ]);
       } else {
         // DOM-based measurement can't produce line metrics for multi-line
@@ -621,9 +621,9 @@ void main() async {
       expect(result.maxIntrinsicWidth, 110);
       if (instance.isCanvas) {
         expect(result.lines, <EngineLineMetrics>[
-          line('abc ', 0, 4, hardBreak: false, width: 30.0, lineNumber: 0),
-          line('de ', 4, 7, hardBreak: false, width: 20.0, lineNumber: 1),
-          line('fghi', 7, 11, hardBreak: true, width: 40.0, lineNumber: 2),
+          line('abc ', 0, 4, hardBreak: false, width: 30.0, lineNumber: 0, left: 0.0),
+          line('de ', 4, 7, hardBreak: false, width: 20.0, lineNumber: 1, left: 0.0),
+          line('fghi', 7, 11, hardBreak: true, width: 40.0, lineNumber: 2, left: 0.0),
         ]);
       } else {
         // DOM-based measurement can't produce line metrics for multi-line
@@ -636,9 +636,9 @@ void main() async {
       expect(result.maxIntrinsicWidth, 40);
       if (instance.isCanvas) {
         expect(result.lines, <EngineLineMetrics>[
-          line('abcd', 0, 5, hardBreak: true, width: 40.0, lineNumber: 0),
-          line('ef', 5, 8, hardBreak: true, width: 20.0, lineNumber: 1),
-          line('ghi', 8, 11, hardBreak: true, width: 30.0, lineNumber: 2),
+          line('abcd', 0, 5, hardBreak: true, width: 40.0, lineNumber: 0, left: 0.0),
+          line('ef', 5, 8, hardBreak: true, width: 20.0, lineNumber: 1, left: 0.0),
+          line('ghi', 8, 11, hardBreak: true, width: 30.0, lineNumber: 2, left: 0.0),
         ]);
       } else {
         // DOM-based measurement can't produce line metrics for multi-line
@@ -651,8 +651,8 @@ void main() async {
       expect(result.maxIntrinsicWidth, 100);
       if (instance.isCanvas) {
         expect(result.lines, <EngineLineMetrics>[
-          line('abcd   ', 0, 7, hardBreak: false, width: 40.0, lineNumber: 0),
-          line('efg', 7, 10, hardBreak: true, width: 30.0, lineNumber: 1),
+          line('abcd   ', 0, 7, hardBreak: false, width: 40.0, lineNumber: 0, left: 0.0),
+          line('efg', 7, 10, hardBreak: true, width: 30.0, lineNumber: 1, left: 0.0),
         ]);
       } else {
         // DOM-based measurement can't produce line metrics for multi-line
@@ -665,8 +665,8 @@ void main() async {
       expect(result.maxIntrinsicWidth, 100);
       if (instance.isCanvas) {
         expect(result.lines, <EngineLineMetrics>[
-          line('abc ', 0, 4, hardBreak: false, width: 30.0, lineNumber: 0),
-          line('def   ', 4, 10, hardBreak: true, width: 30.0, lineNumber: 1),
+          line('abc ', 0, 4, hardBreak: false, width: 30.0, lineNumber: 0, left: 0.0),
+          line('def   ', 4, 10, hardBreak: true, width: 30.0, lineNumber: 1, left: 0.0),
         ]);
       } else {
         // DOM-based measurement can't produce line metrics for multi-line
@@ -679,8 +679,8 @@ void main() async {
       expect(result.maxIntrinsicWidth, 60);
       if (instance.isCanvas) {
         expect(result.lines, <EngineLineMetrics>[
-          line('abc ', 0, 5, hardBreak: true, width: 30.0, lineNumber: 0),
-          line('def   ', 5, 11, hardBreak: true, width: 30.0, lineNumber: 1),
+          line('abc ', 0, 5, hardBreak: true, width: 30.0, lineNumber: 0, left: 0.0),
+          line('def   ', 5, 11, hardBreak: true, width: 30.0, lineNumber: 1, left: 0.0),
         ]);
       } else {
         // DOM-based measurement can't produce line metrics for multi-line
@@ -693,9 +693,9 @@ void main() async {
       expect(result.maxIntrinsicWidth, 120);
       if (instance.isCanvas) {
         expect(result.lines, <EngineLineMetrics>[
-          line('AAAAA', 0, 5, hardBreak: false, width: 50.0, lineNumber: 0),
-          line('AAAAA', 5, 10, hardBreak: false, width: 50.0, lineNumber: 1),
-          line('AA', 10, 12, hardBreak: true, width: 20.0, lineNumber: 2),
+          line('AAAAA', 0, 5, hardBreak: false, width: 50.0, lineNumber: 0, left: 0.0),
+          line('AAAAA', 5, 10, hardBreak: false, width: 50.0, lineNumber: 1, left: 0.0),
+          line('AA', 10, 12, hardBreak: true, width: 20.0, lineNumber: 2, left: 0.0),
         ]);
       } else {
         // DOM-based measurement can't produce line metrics for multi-line
@@ -727,7 +727,7 @@ void main() async {
         expect(result.height, 10);
         if (instance.isCanvas) {
           expect(result.lines, <EngineLineMetrics>[
-            line('AA...', 0, 48, hardBreak: false, width: 50.0, lineNumber: 0),
+            line('AA...', 0, 48, hardBreak: false, width: 50.0, lineNumber: 0, left: 0.0),
           ]);
         } else {
           // DOM-based measurement can't handle the ellipsis case very well. The
@@ -747,8 +747,8 @@ void main() async {
         expect(result.height, 20);
         if (instance.isCanvas) {
           expect(result.lines, <EngineLineMetrics>[
-            line('AAA', 0, 4, hardBreak: true, width: 30.0, lineNumber: 0),
-            line('AA...', 4, 49, hardBreak: false, width: 50.0, lineNumber: 1),
+            line('AAA', 0, 4, hardBreak: true, width: 30.0, lineNumber: 0, left: 0.0),
+            line('AA...', 4, 49, hardBreak: false, width: 50.0, lineNumber: 1, left: 0.0),
           ]);
         } else {
           // DOM-based measurement can't handle the ellipsis case very well. The
@@ -766,7 +766,7 @@ void main() async {
         expect(result.height, 10);
         if (instance.isCanvas) {
           expect(result.lines, <EngineLineMetrics>[
-            line('...', 0, 4, hardBreak: false, width: 30.0, lineNumber: 0),
+            line('...', 0, 4, hardBreak: false, width: 30.0, lineNumber: 0, left: 0.0),
           ]);
         } else {
           // DOM-based measurement can't handle the ellipsis case very well. The
@@ -784,10 +784,10 @@ void main() async {
         if (instance.isCanvas) {
           // TODO(flutter_web): https://github.com/flutter/flutter/issues/34346
           // expect(result.lines, <EngineLineMetrics>[
-          //   line('.', hardBreak: false, width: 10.0, lineNumber: 0),
+          //   line('.', 0, 4, hardBreak: false, width: 10.0, lineNumber: 0, left: 0.0),
           // ]);
           expect(result.lines, <EngineLineMetrics>[
-            line('...', 0, 4, hardBreak: false, width: 30.0, lineNumber: 0),
+            line('...', 0, 4, hardBreak: false, width: 30.0, lineNumber: 0, left: 0.0),
           ]);
         } else {
           // DOM-based measurement can't handle the ellipsis case very well. The
@@ -811,7 +811,7 @@ void main() async {
       result = instance.measure(oneline, infiniteConstraints);
       expect(result.height, 10);
       expect(result.lines, <EngineLineMetrics>[
-        line('One line', 0, 8, hardBreak: true, width: 80.0, lineNumber: 0),
+        line('One line', 0, 8, hardBreak: true, width: 80.0, lineNumber: 0, left: 0.0),
       ]);
 
       // The height should respect max lines and be limited to two lines here.
@@ -821,8 +821,8 @@ void main() async {
       expect(result.height, 20);
       if (instance.isCanvas) {
         expect(result.lines, <EngineLineMetrics>[
-          line('First', 0, 6, hardBreak: true, width: 50.0, lineNumber: 0),
-          line('Second', 6, 13, hardBreak: true, width: 60.0, lineNumber: 1),
+          line('First', 0, 6, hardBreak: true, width: 50.0, lineNumber: 0, left: 0.0),
+          line('Second', 6, 13, hardBreak: true, width: 60.0, lineNumber: 1, left: 0.0),
         ]);
       } else {
         // DOM-based measurement can't produce line metrics for multi-line
@@ -839,8 +839,8 @@ void main() async {
       expect(result.height, 20);
       if (instance.isCanvas) {
         expect(result.lines, <EngineLineMetrics>[
-          line('Lorem ', 0, 6, hardBreak: false, width: 50.0, lineNumber: 0),
-          line('ipsum ', 6, 12, hardBreak: false, width: 50.0, lineNumber: 1),
+          line('Lorem ', 0, 6, hardBreak: false, width: 50.0, lineNumber: 0, left: 0.0),
+          line('ipsum ', 6, 12, hardBreak: false, width: 50.0, lineNumber: 1, left: 0.0),
         ]);
       } else {
         // DOM-based measurement can't produce line metrics for multi-line
@@ -857,8 +857,8 @@ void main() async {
       expect(result.height, 20);
       if (instance.isCanvas) {
         expect(result.lines, <EngineLineMetrics>[
-          line('AAA ', 0, 4, hardBreak: false, width: 30.0, lineNumber: 0),
-          line('AAAAA', 4, 9, hardBreak: false, width: 50.0, lineNumber: 1),
+          line('AAA ', 0, 4, hardBreak: false, width: 30.0, lineNumber: 0, left: 0.0),
+          line('AAAAA', 4, 9, hardBreak: false, width: 50.0, lineNumber: 1, left: 0.0),
         ]);
       } else {
         // DOM-based measurement can't produce line metrics for multi-line
@@ -893,7 +893,7 @@ void main() async {
         result = instance.measure(p, constraints);
         expect(result.height, 10);
         expect(result.lines, <EngineLineMetrics>[
-          line('abcdef', 0, 6, hardBreak: true, width: 60.0, lineNumber: 0),
+          line('abcdef', 0, 6, hardBreak: true, width: 60.0, lineNumber: 0, left: 0.0),
         ]);
 
         // Simple overflow case.
@@ -902,7 +902,7 @@ void main() async {
         expect(result.height, 10);
         if (instance.isCanvas) {
           expect(result.lines, <EngineLineMetrics>[
-            line('abc...', 0, 8, hardBreak: false, width: 60.0, lineNumber: 0),
+            line('abc...', 0, 8, hardBreak: false, width: 60.0, lineNumber: 0, left: 0.0),
           ]);
         } else {
           // DOM-based measurement can't handle the ellipsis case very well. The
@@ -916,7 +916,7 @@ void main() async {
         expect(result.height, 10);
         if (instance.isCanvas) {
           expect(result.lines, <EngineLineMetrics>[
-            line('a b...', 0, 10, hardBreak: false, width: 60.0, lineNumber: 0),
+            line('a b...', 0, 10, hardBreak: false, width: 60.0, lineNumber: 0, left: 0.0),
           ]);
         } else {
           // DOM-based measurement can't handle the ellipsis case very well. The
@@ -933,8 +933,8 @@ void main() async {
           expect(result.height, 20);
 
           expect(result.lines, <EngineLineMetrics>[
-            line('abcdef ', 0, 7, hardBreak: false, width: 60.0, lineNumber: 0),
-            line('ghijkl', 7, 13, hardBreak: true, width: 60.0, lineNumber: 1),
+            line('abcdef ', 0, 7, hardBreak: false, width: 60.0, lineNumber: 0, left: 0.0),
+            line('ghijkl', 7, 13, hardBreak: true, width: 60.0, lineNumber: 1, left: 0.0),
           ]);
         } else {
           // DOM-based measurement can't produce line metrics for multi-line
@@ -950,8 +950,8 @@ void main() async {
           expect(result.height, 20);
 
           expect(result.lines, <EngineLineMetrics>[
-            line('abcd ', 0, 5, hardBreak: false, width: 40.0, lineNumber: 0),
-            line('efg...', 5, 13, hardBreak: false, width: 60.0, lineNumber: 1),
+            line('abcd ', 0, 5, hardBreak: false, width: 40.0, lineNumber: 0, left: 0.0),
+            line('efg...', 5, 13, hardBreak: false, width: 60.0, lineNumber: 1, left: 0.0),
           ]);
         } else {
           // DOM-based measurement can't produce line metrics for multi-line
@@ -968,8 +968,8 @@ void main() async {
           expect(result.height, 20);
 
           expect(result.lines, <EngineLineMetrics>[
-            line('abcde ', 0, 6, hardBreak: false, width: 50.0, lineNumber: 0),
-            line('f g...', 6, 14, hardBreak: false, width: 60.0, lineNumber: 1),
+            line('abcde ', 0, 6, hardBreak: false, width: 50.0, lineNumber: 0, left: 0.0),
+            line('f g...', 6, 14, hardBreak: false, width: 60.0, lineNumber: 1, left: 0.0),
           ]);
         } else {
           // DOM-based measurement can't produce line metrics for multi-line
@@ -985,8 +985,8 @@ void main() async {
           expect(result.height, 20);
 
           expect(result.lines, <EngineLineMetrics>[
-            line('abcdef', 0, 6, hardBreak: false, width: 60.0, lineNumber: 0),
-            line('g hijk', 6, 12, hardBreak: true, width: 60.0, lineNumber: 1),
+            line('abcdef', 0, 6, hardBreak: false, width: 60.0, lineNumber: 0, left: 0.0),
+            line('g hijk', 6, 12, hardBreak: true, width: 60.0, lineNumber: 1, left: 0.0),
           ]);
         } else {
           // DOM-based measurement can't produce line metrics for multi-line
@@ -1002,14 +1002,127 @@ void main() async {
           expect(result.height, 20);
 
           expect(result.lines, <EngineLineMetrics>[
-            line('abcdef', 0, 6, hardBreak: false, width: 60.0, lineNumber: 0),
-            line('g h...', 6, 17, hardBreak: false, width: 60.0, lineNumber: 1),
+            line('abcdef', 0, 6, hardBreak: false, width: 60.0, lineNumber: 0, left: 0.0),
+            line('g h...', 6, 17, hardBreak: false, width: 60.0, lineNumber: 1, left: 0.0),
           ]);
         } else {
           // DOM-based measurement can't produce line metrics for multi-line
           // paragraphs.
           expect(result.lines, isNull);
         }
+      },
+    );
+
+    test('handles textAlign', () {
+      TextMeasurementService instance = TextMeasurementService.canvasInstance;
+      ui.Paragraph p;
+      MeasurementResult result;
+
+      ui.ParagraphStyle createStyle(ui.TextAlign textAlign) {
+        return ui.ParagraphStyle(
+          fontFamily: 'ahem',
+          fontSize: 10,
+          textAlign: textAlign,
+          textDirection: ui.TextDirection.ltr,
+        );
+      }
+
+      p = build(createStyle(ui.TextAlign.start), 'abc\ndefghi');
+      result = instance.measure(p, constraints);
+      expect(result.lines, <EngineLineMetrics>[
+        line('abc', 0, 4, hardBreak: true, width: 30.0, lineNumber: 0, left: 0.0),
+        line('defgh', 4, 9, hardBreak: false, width: 50.0, lineNumber: 1, left: 0.0),
+        line('i', 9, 10, hardBreak: true, width: 10.0, lineNumber: 2, left: 0.0),
+      ]);
+
+      p = build(createStyle(ui.TextAlign.end), 'abc\ndefghi');
+      result = instance.measure(p, constraints);
+      expect(result.lines, <EngineLineMetrics>[
+        line('abc', 0, 4, hardBreak: true, width: 30.0, lineNumber: 0, left: 20.0),
+        line('defgh', 4, 9, hardBreak: false, width: 50.0, lineNumber: 1, left: 0.0),
+        line('i', 9, 10, hardBreak: true, width: 10.0, lineNumber: 2, left: 40.0),
+      ]);
+
+      p = build(createStyle(ui.TextAlign.center), 'abc\ndefghi');
+      result = instance.measure(p, constraints);
+      expect(result.lines, <EngineLineMetrics>[
+        line('abc', 0, 4, hardBreak: true, width: 30.0, lineNumber: 0, left: 10.0),
+        line('defgh', 4, 9, hardBreak: false, width: 50.0, lineNumber: 1, left: 0.0),
+        line('i', 9, 10, hardBreak: true, width: 10.0, lineNumber: 2, left: 20.0),
+      ]);
+
+      p = build(createStyle(ui.TextAlign.left), 'abc\ndefghi');
+      result = instance.measure(p, constraints);
+      expect(result.lines, <EngineLineMetrics>[
+        line('abc', 0, 4, hardBreak: true, width: 30.0, lineNumber: 0, left: 0.0),
+        line('defgh', 4, 9, hardBreak: false, width: 50.0, lineNumber: 1, left: 0.0),
+        line('i', 9, 10, hardBreak: true, width: 10.0, lineNumber: 2, left: 0.0),
+      ]);
+
+      p = build(createStyle(ui.TextAlign.right), 'abc\ndefghi');
+      result = instance.measure(p, constraints);
+      expect(result.lines, <EngineLineMetrics>[
+        line('abc', 0, 4, hardBreak: true, width: 30.0, lineNumber: 0, left: 20.0),
+        line('defgh', 4, 9, hardBreak: false, width: 50.0, lineNumber: 1, left: 0.0),
+        line('i', 9, 10, hardBreak: true, width: 10.0, lineNumber: 2, left: 40.0),
+      ]);
+    });
+
+    testMeasurements(
+      'handles rtl with textAlign',
+      (TextMeasurementService instance) {
+        TextMeasurementService instance = TextMeasurementService.canvasInstance;
+        ui.Paragraph p;
+        MeasurementResult result;
+
+        ui.ParagraphStyle createStyle(ui.TextAlign textAlign) {
+          return ui.ParagraphStyle(
+            fontFamily: 'ahem',
+            fontSize: 10,
+            textAlign: textAlign,
+            textDirection: ui.TextDirection.rtl,
+          );
+        }
+
+        p = build(createStyle(ui.TextAlign.start), 'abc\ndefghi');
+        result = instance.measure(p, constraints);
+        expect(result.lines, <EngineLineMetrics>[
+          line('abc', 0, 4, hardBreak: true, width: 30.0, lineNumber: 0, left: 20.0),
+          line('defgh', 4, 9, hardBreak: false, width: 50.0, lineNumber: 1, left: 0.0),
+          line('i', 9, 10, hardBreak: true, width: 10.0, lineNumber: 2, left: 40.0),
+        ]);
+
+        p = build(createStyle(ui.TextAlign.end), 'abc\ndefghi');
+        result = instance.measure(p, constraints);
+        expect(result.lines, <EngineLineMetrics>[
+          line('abc', 0, 4, hardBreak: true, width: 30.0, lineNumber: 0, left: 0.0),
+          line('defgh', 4, 9, hardBreak: false, width: 50.0, lineNumber: 1, left: 0.0),
+          line('i', 9, 10, hardBreak: true, width: 10.0, lineNumber: 2, left: 0.0),
+        ]);
+
+        p = build(createStyle(ui.TextAlign.center), 'abc\ndefghi');
+        result = instance.measure(p, constraints);
+        expect(result.lines, <EngineLineMetrics>[
+          line('abc', 0, 4, hardBreak: true, width: 30.0, lineNumber: 0, left: 10.0),
+          line('defgh', 4, 9, hardBreak: false, width: 50.0, lineNumber: 1, left: 0.0),
+          line('i', 9, 10, hardBreak: true, width: 10.0, lineNumber: 2, left: 20.0),
+        ]);
+
+        p = build(createStyle(ui.TextAlign.left), 'abc\ndefghi');
+        result = instance.measure(p, constraints);
+        expect(result.lines, <EngineLineMetrics>[
+          line('abc', 0, 4, hardBreak: true, width: 30.0, lineNumber: 0, left: 0.0),
+          line('defgh', 4, 9, hardBreak: false, width: 50.0, lineNumber: 1, left: 0.0),
+          line('i', 9, 10, hardBreak: true, width: 10.0, lineNumber: 2, left: 0.0),
+        ]);
+
+        p = build(createStyle(ui.TextAlign.right), 'abc\ndefghi');
+        result = instance.measure(p, constraints);
+        expect(result.lines, <EngineLineMetrics>[
+          line('abc', 0, 4, hardBreak: true, width: 30.0, lineNumber: 0, left: 20.0),
+          line('defgh', 4, 9, hardBreak: false, width: 50.0, lineNumber: 1, left: 0.0),
+          line('i', 9, 10, hardBreak: true, width: 10.0, lineNumber: 2, left: 40.0),
+        ]);
       },
     );
   });
@@ -1023,6 +1136,7 @@ EngineLineMetrics line(
   double width,
   int lineNumber,
   bool hardBreak,
+  double left,
 }) {
   return EngineLineMetrics.withText(
     text,
@@ -1031,5 +1145,6 @@ EngineLineMetrics line(
     hardBreak: hardBreak,
     width: width,
     lineNumber: lineNumber,
+    left: left,
   );
 }
