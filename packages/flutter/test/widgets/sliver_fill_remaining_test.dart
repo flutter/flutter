@@ -282,8 +282,7 @@ void main() {
         expect(tester.getCenter(button).dx, equals(400.0));
       });
 
-      testWidgets('alignment with a flexible works', (
-        WidgetTester tester) async {
+      testWidgets('alignment with a flexible works', (WidgetTester tester) async {
         debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
         final GlobalKey key = GlobalKey();
         final List<Widget> slivers = <Widget>[
