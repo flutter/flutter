@@ -331,15 +331,24 @@ class FlutterPlugin implements Plugin<Project> {
         }
     }
 
+    // Returns `true` if the given path contains an `android/build.gradle` file.
+    //
+    // TODO(egarciad): Fix https://github.com/flutter/flutter/issues/39657.
+    // Android Studio may create empty android directories due to the logic in <app>/android/settings.gradle,
+    // which imports all plugins regardless of whether they support the android platform.
+    private Boolean doesSupportAndroidPlatform(String path) {
+        File editableAndroidProject = new File(path, 'android' + File.separator + 'build.gradle')
+        return editableAndroidProject.exists()
+    }
+
     // Add the dependencies on other plugin projects to the plugin project.
     // A plugin A can depend on plugin B. As a result, this dependency must be surfaced by
     // making the Gradle plugin project A depend on the Gradle plugin project B.
     private void configurePluginDependencies(Object dependencyObject) {
         assert dependencyObject.name instanceof String
         Project pluginProject = project.rootProject.findProject(":${dependencyObject.name}")
-        if (pluginProject == null) {
-            // Ignore plugins that don't have a project since most likely they don't
-            // have an android/ directory.
+        if (pluginProject == null ||
+            !doesSupportAndroidPlatform(pluginProject.projectDir.parentFile.path)) {
             return
         }
         assert dependencyObject.dependencies instanceof List
@@ -349,7 +358,8 @@ class FlutterPlugin implements Plugin<Project> {
                 return
             }
             Project dependencyProject = project.rootProject.findProject(":$pluginDependencyName")
-            if (!dependencyProject.projectDir.exists() || dependencyProject == null) {
+            if (dependencyProject == null ||
+                !doesSupportAndroidPlatform(dependencyProject.projectDir.parentFile.path)) {
                 return
             }
             // Wait for the Android plugin to load and add the dependency to the plugin project.
@@ -366,8 +376,7 @@ class FlutterPlugin implements Plugin<Project> {
         Properties allPlugins = readPropertiesIfExist(pluginsFile)
         Properties androidPlugins = new Properties()
         allPlugins.each { name, path ->
-            File editableAndroidProject = new File(path, 'android' + File.separator + 'build.gradle')
-            if (editableAndroidProject.exists()) {
+            if (doesSupportAndroidPlatform(path)) {
                 androidPlugins.setProperty(name, path)
             }
             // TODO(amirh): log an error if this plugin was specified to be an Android
