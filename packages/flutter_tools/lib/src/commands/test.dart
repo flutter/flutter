@@ -27,7 +27,7 @@ import '../test/watcher.dart';
 class TestCommand extends FastFlutterCommand {
   TestCommand({
     bool verboseHelp = false,
-    this.testWrapper = TestWrapper.packageTest,
+    this.testWrapper = const TestWrapper(),
   }) : assert(testWrapper != null) {
     requiresPubspecYaml();
     usesPubOption();

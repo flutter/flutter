@@ -13,9 +13,7 @@ export 'package:test_api/backend.dart' show Runtime; // ignore: deprecated_membe
 export 'package:test_core/src/runner/platform.dart' show PlatformPlugin; // ignore: implementation_imports
 
 abstract class TestWrapper {
-  const TestWrapper();
-
-  static const TestWrapper packageTest = _DefaultTestWrapper();
+  const factory TestWrapper() = _DefaultTestWrapper;
 
   Future<void> main(List<String> args);
   void registerPlatformPlugin(Iterable<Runtime> runtimes, FutureOr<PlatformPlugin> Function() platforms);

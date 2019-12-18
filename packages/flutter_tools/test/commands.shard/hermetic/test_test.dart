@@ -50,7 +50,7 @@ void main() {
   });
 }
 
-class FakePackageTest extends TestWrapper {
+class FakePackageTest implements TestWrapper {
   List<String> lastArgs;
 
   @override
