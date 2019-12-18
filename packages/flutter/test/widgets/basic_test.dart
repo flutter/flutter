@@ -230,7 +230,7 @@ class HitsRenderBox extends Matcher {
 
   @override
   bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
-    final HitTestResult hitTestResult = item;
+    final HitTestResult hitTestResult = item as HitTestResult;
     return hitTestResult.path.where(
       (HitTestEntry entry) => entry.target == renderBox
     ).isNotEmpty;
@@ -250,7 +250,7 @@ class DoesNotHitRenderBox extends Matcher {
 
   @override
   bool matches(dynamic item, Map<dynamic, dynamic> matchState) {
-    final HitTestResult hitTestResult = item;
+    final HitTestResult hitTestResult = item as HitTestResult;
     return hitTestResult.path.where(
       (HitTestEntry entry) => entry.target == renderBox
     ).isEmpty;

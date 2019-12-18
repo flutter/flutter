@@ -136,7 +136,7 @@ const String getterMethodTemplate = '''
 ''';
 
 const String simpleMethodTemplate = '''
-  String @methodName(@methodParameters) {
+  String @methodName(@methodParameters) {@dateFormatting
     return Intl.message(
       @message,
       locale: _localeName,
@@ -153,6 +153,96 @@ const String pluralMethodTemplate = '''
   }
 ''';
 
+// The set of date formats that can be automatically localized.
+//
+// The localizations generation tool makes use of the intl library's
+// DateFormat class to properly format dates based on the locale, the
+// desired format, as well as the passed in [DateTime]. For example, using
+// DateFormat.yMMMMd("en_US").format(DateTime.utc(1996, 7, 10)) results
+// in the string "July 10, 1996".
+//
+// Since the tool generates code that uses DateFormat's constructor, it is
+// necessary to verify that the constructor exists, or the
+// tool will generate code that may cause a compile-time error.
+//
+// See also:
+//
+// * <https://pub.dev/packages/intl>
+// * <https://pub.dev/documentation/intl/latest/intl/DateFormat-class.html>
+// * <https://api.dartlang.org/stable/2.7.0/dart-core/DateTime-class.html>
+const Set<String> allowableDateFormats = <String>{
+  'd',
+  'E',
+  'EEEE',
+  'LLL',
+  'LLLL',
+  'M',
+  'Md',
+  'MEd',
+  'MMM',
+  'MMMd',
+  'MMMEd',
+  'MMMM',
+  'MMMMd',
+  'MMMMEEEEd',
+  'QQQ',
+  'QQQQ',
+  'y',
+  'yM',
+  'yMd',
+  'yMEd',
+  'yMMM',
+  'yMMMd',
+  'yMMMEd',
+  'yMMMM',
+  'yMMMMd',
+  'yMMMMEEEEd',
+  'yQQQ',
+  'yQQQQ',
+  'H',
+  'Hm',
+  'Hms',
+  'j',
+  'jm',
+  'jms',
+  'jmv',
+  'jmz',
+  'jv',
+  'jz',
+  'm',
+  'ms',
+  's',
+};
+
+bool _isDateParameter(dynamic placeholderValue) {
+  return placeholderValue is Map<String, dynamic> &&
+    placeholderValue['type'] == 'DateTime';
+}
+
+bool _dateParameterIsValid(Map<String, dynamic> placeholderValue, String placeholder) {
+  if (allowableDateFormats.contains(placeholderValue['format']))
+    return true;
+  throw L10nException(
+    'Date format ${placeholderValue['format']} for the $placeholder \n'
+    'placeholder does not have a corresponding DateFormat \n'
+    'constructor. Check the intl library\'s DateFormat class \n'
+    'constructors for allowed date formats.'
+  );
+}
+
+bool _containsFormatKey(Map<String, dynamic> placeholderValue, String placeholder) {
+  if (placeholderValue.containsKey('format'))
+    return true;
+  throw L10nException(
+    'The placeholder, $placeholder, has its "type" resource attribute set to '
+    'the "DateTime" type. To properly resolve for the right DateTime format, '
+    'the "format" attribute needs to be set to determine which DateFormat to '
+    'use. \n'
+    'Check the intl library\'s DateFormat class constructors for allowed '
+    'date formats.'
+  );
+}
+
 List<String> genMethodParameters(Map<String, dynamic> bundle, String key, String type) {
   final Map<String, dynamic> attributesMap = bundle['@$key'] as Map<String, dynamic>;
   if (attributesMap != null && attributesMap.containsKey('placeholders')) {
@@ -160,6 +250,30 @@ List<String> genMethodParameters(Map<String, dynamic> bundle, String key, String
     return placeholders.keys.map((String parameter) => '$type $parameter').toList();
   }
   return <String>[];
+}
+
+String generateDateFormattingLogic(Map<String, dynamic> bundle, String key) {
+  String result = '';
+  final Map<String, dynamic> attributesMap = bundle['@$key'] as Map<String, dynamic>;
+  if (attributesMap != null && attributesMap.containsKey('placeholders')) {
+    final Map<String, dynamic> placeholders = attributesMap['placeholders'] as Map<String, dynamic>;
+    for (String placeholder in placeholders.keys) {
+      final dynamic value = placeholders[placeholder];
+      if (
+        _isDateParameter(value) &&
+        _containsFormatKey(value, placeholder) &&
+        _dateParameterIsValid(value, placeholder)
+      ) {
+        result += '''
+
+    final DateFormat ${placeholder}DateFormat = DateFormat.${value['format']}(_localeName);
+    final String ${placeholder}String = ${placeholder}DateFormat.format($placeholder);
+''';
+      }
+    }
+  }
+
+  return result;
 }
 
 List<String> genIntlMethodArgs(Map<String, dynamic> bundle, String key) {
@@ -173,7 +287,20 @@ List<String> genIntlMethodArgs(Map<String, dynamic> bundle, String key) {
     if (attributesMap.containsKey('placeholders')) {
       final Map<String, dynamic> placeholders = attributesMap['placeholders'] as Map<String, dynamic>;
       if (placeholders.isNotEmpty) {
-        final String args = placeholders.keys.join(', ');
+        final List<String> argumentList = <String>[];
+        for (String placeholder in placeholders.keys) {
+          final dynamic value = placeholders[placeholder];
+          if (
+            _isDateParameter(value) &&
+            _containsFormatKey(value, placeholder) &&
+            _dateParameterIsValid(value, placeholder)
+          ) {
+            argumentList.add('${placeholder}String');
+          } else {
+            argumentList.add(placeholder);
+          }
+        }
+        final String args = argumentList.join(', ');
         attributes.add('args: <Object>[$args]');
       }
     }
@@ -186,8 +313,14 @@ String genSimpleMethod(Map<String, dynamic> bundle, String key) {
     String message = bundle[key] as String;
     final Map<String, dynamic> attributesMap = bundle['@$key'] as Map<String, dynamic>;
     final Map<String, dynamic> placeholders = attributesMap['placeholders'] as Map<String, dynamic>;
-    for (String placeholder in placeholders.keys)
-      message = message.replaceAll('{$placeholder}', '\$$placeholder');
+    for (String placeholder in placeholders.keys) {
+      final dynamic value = placeholders[placeholder];
+      if (_isDateParameter(value)) {
+        message = message.replaceAll('{$placeholder}', '\$${placeholder}String');
+      } else {
+        message = message.replaceAll('{$placeholder}', '\$$placeholder');
+      }
+    }
     return generateString(message);
   }
 
@@ -202,6 +335,7 @@ String genSimpleMethod(Map<String, dynamic> bundle, String key) {
     return simpleMethodTemplate
       .replaceAll('@methodName', key)
       .replaceAll('@methodParameters', genMethodParameters(bundle, key, 'Object').join(', '))
+      .replaceAll('@dateFormatting', generateDateFormattingLogic(bundle, key))
       .replaceAll('@message', '${genSimpleMethodMessage(bundle, key)}')
       .replaceAll('@intlMethodArgs', genIntlMethodArgs(bundle, key).join(',\n      '));
   }

@@ -5,13 +5,12 @@
 import 'dart:io' show Process, ProcessResult;
 
 import 'package:args/command_runner.dart';
-import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_builder.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_aar.dart';
+import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
@@ -90,18 +89,14 @@ void main() {
     Directory tempDir;
     AndroidSdk mockAndroidSdk;
     Usage mockUsage;
-    FileSystem memoryFileSystem;
 
     setUp(() {
       mockUsage = MockUsage();
       when(mockUsage.isFirstRun).thenReturn(true);
 
-      memoryFileSystem = MemoryFileSystem();
-      tempDir = memoryFileSystem.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
-      memoryFileSystem.currentDirectory = tempDir;
+      tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
 
       mockProcessManager = MockProcessManager();
-
       when(mockProcessManager.run(any,
           workingDirectory: anyNamed('workingDirectory'),
           environment: anyNamed('environment')))
@@ -118,65 +113,49 @@ void main() {
       when(mockAndroidSdk.directory).thenReturn('irrelevant');
     });
 
+    tearDown(() {
+      tryToDelete(tempDir);
+    });
+
     group('AndroidSdk', () {
       testUsingContext('validateSdkWellFormed() not called, sdk reinitialized', () async {
-        final Directory gradleCacheDir = memoryFileSystem
-          .directory('/flutter_root/bin/cache/artifacts/gradle_wrapper')
-          ..createSync(recursive: true);
-        gradleCacheDir.childFile(platform.isWindows ? 'gradlew.bat' : 'gradlew').createSync();
+        final String projectPath = await createProject(tempDir,
+            arguments: <String>['--no-pub', '--template=module']);
 
-        tempDir.childFile('pubspec.yaml')
-            ..createSync(recursive: true)
-            ..writeAsStringSync('''name: test
-environment:
-  sdk: ">=2.1.0 <3.0.0"
-dependencies:
-  flutter:
-    sdk: flutter
-dev_dependencies:
-  flutter_test:
-    sdk: flutter
-flutter:
-  plugin:
-    androidPackage: com.example.blah
-    pluginClass: BlahPlugin
-''');
-        tempDir.childFile('.packages').createSync(recursive: true);
-        final Directory androidDir = tempDir.childDirectory('android');
-        androidDir
-          .childFile('build.gradle')
-          .createSync(recursive: true);
-        androidDir
-          .childDirectory('app')
-          .childFile('build.gradle')
-          ..createSync(recursive: true)
-          ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
-        androidDir
-          .childFile('gradle.properties')
-          .createSync(recursive: true);
-        androidDir
-          .childDirectory('gradle')
-          .childDirectory('wrapper')
-          .childFile('gradle-wrapper.properties')
-          .createSync(recursive: true);
-        tempDir
-          .childDirectory('build')
-          .childDirectory('outputs')
-          .childDirectory('repo')
-          .createSync(recursive: true);
-        tempDir
-          .childDirectory('lib')
-          .childFile('main.dart')
-          .createSync(recursive: true);
-        await runBuildAarCommand(tempDir.path);
+        await expectLater(
+          runBuildAarCommand(
+            projectPath,
+            arguments: <String>['--no-pub'],
+          ),
+          throwsToolExit(),
+        );
 
         verifyNever(mockAndroidSdk.validateSdkWellFormed());
         verify(mockAndroidSdk.reinitialize()).called(1);
       },
       overrides: <Type, Generator>{
         AndroidSdk: () => mockAndroidSdk,
+        FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
         ProcessManager: () => mockProcessManager,
-        FileSystem: () => memoryFileSystem,
+      });
+
+      testUsingContext('throws throwsToolExit if AndroidSdk is null', () async {
+        final String projectPath = await createProject(tempDir,
+            arguments: <String>['--no-pub', '--template=module']);
+
+        await expectLater(() async {
+          await runBuildAarCommand(
+            projectPath,
+            arguments: <String>['--no-pub'],
+          );
+        }, throwsToolExit(
+          message: '[!] No Android SDK found. Try setting the ANDROID_HOME environment variable',
+        ));
+      },
+      overrides: <Type, Generator>{
+        AndroidSdk: () => null,
+        FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
+        ProcessManager: () => mockProcessManager,
       });
     });
   });
@@ -191,7 +170,6 @@ Future<BuildAarCommand> runBuildAarCommand(
   await runner.run(<String>[
     'aar',
     '--no-pub',
-    '--flutter-root=/flutter_root',
     ...?arguments,
     fs.path.join(target, 'lib', 'main.dart'),
   ]);

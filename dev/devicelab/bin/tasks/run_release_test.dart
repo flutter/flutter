@@ -38,7 +38,11 @@ void main() {
             !line.startsWith('Running "flutter pub get" in ui...') &&
             !line.startsWith('Initializing gradle...') &&
             !line.contains('settings_aar.gradle') &&
-            !line.startsWith('Resolving dependencies...')
+            !line.startsWith('Resolving dependencies...') &&
+            // Catch engine piped output from unrelated concurrent Flutter apps
+            !line.contains(RegExp(r'[A-Z]\/flutter \([0-9]+\):')) &&
+            // Empty lines could be due to the progress spinner breaking up.
+            line.length > 1
           ) {
             stdout.add(line);
           }
@@ -65,26 +69,70 @@ void main() {
       if (stderr.isNotEmpty) {
         throw 'flutter run --release had output on standard error.';
       }
-      if (!(stdout.first.startsWith('Launching lib/main.dart on ') && stdout.first.endsWith(' in release mode...'))){
-        throw 'flutter run --release had unexpected first line: ${stdout.first}';
-      }
-      stdout.removeAt(0);
-      if (!stdout.first.startsWith('Running Gradle task \'assembleRelease\'...')) {
-        throw 'flutter run --release had unexpected second line: ${stdout.first}';
-      }
-      stdout.removeAt(0);
-      if (!(stdout.first.contains('Built build/app/outputs/apk/release/app-release.apk (') && stdout.first.contains('MB).'))) {
-        throw 'flutter run --release had unexpected third line: ${stdout.first}';
-      }
-      stdout.removeAt(0);
-      if (stdout.first.startsWith('Installing build/app/outputs/apk/app.apk...')) {
-        stdout.removeAt(0);
-      }
-      if (stdout.join('\n') != '\nTo quit, press "q".\n\nApplication finished.') {
-        throw 'flutter run --release had unexpected output after third line:\n'
-            '${stdout.join('\n')}';
-      }
+
+      _findNextMatcherInList(
+        stdout,
+        (String line) => line.startsWith('Launching lib/main.dart on ') && line.endsWith(' in release mode...'),
+        'Launching lib/main.dart on',
+      );
+
+      _findNextMatcherInList(
+        stdout,
+        (String line) => line.startsWith('Running Gradle task \'assembleRelease\'...'),
+        'Running Gradle task \'assembleRelease\'...',
+      );
+
+      _findNextMatcherInList(
+        stdout,
+        (String line) => line.contains('Built build/app/outputs/apk/release/app-release.apk (') && line.contains('MB).'),
+        'Built build/app/outputs/apk/release/app-release.apk',
+      );
+
+      _findNextMatcherInList(
+        stdout,
+        (String line) => line.startsWith('Installing build/app/outputs/apk/app.apk...'),
+        'Installing build/app/outputs/apk/app.apk...',
+      );
+
+      _findNextMatcherInList(
+        stdout,
+        (String line) => line == 'To quit, press "q".',
+        'To quit, press "q".',
+      );
+
+      _findNextMatcherInList(
+        stdout,
+        (String line) => line == 'Application finished.',
+        'Application finished.',
+      );
     });
     return TaskResult.success(null);
   });
+}
+
+void _findNextMatcherInList(
+  List<String> list,
+  bool Function(String testLine) matcher,
+  String errorMessageExpectedLine
+) {
+  final List<String> copyOfListForErrorMessage = List<String>.from(list);
+
+  while (list.isNotEmpty) {
+    final String nextLine = list.first;
+    list.removeAt(0);
+
+    if (matcher(nextLine)) {
+      return;
+    }
+  }
+
+  throw '''
+Did not find expected line
+
+$errorMessageExpectedLine
+
+in flutter run --release stdout
+
+$copyOfListForErrorMessage
+  ''';
 }

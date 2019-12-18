@@ -13,7 +13,7 @@ class TestDataSource extends DataTableSource {
     this.onSelectChanged,
   });
 
-  final Function onSelectChanged;
+  final void Function(bool) onSelectChanged;
 
   int get generation => _generation;
   int _generation = 0;

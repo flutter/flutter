@@ -671,6 +671,9 @@ class TextField extends StatefulWidget {
   /// }
   /// ```
   /// {@end-tool}
+  ///
+  /// If buildCounter returns null, then no counter and no Semantics widget will
+  /// be created at all.
   final InputCounterWidgetBuilder buildCounter;
 
   /// {@macro flutter.widgets.editableText.scrollPhysics}
@@ -771,16 +774,20 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
         && effectiveDecoration.counterText == null
         && widget.buildCounter != null) {
       final bool isFocused = _effectiveFocusNode.hasFocus;
-      counter = Semantics(
-        container: true,
-        liveRegion: isFocused,
-        child: widget.buildCounter(
-          context,
-          currentLength: currentLength,
-          maxLength: widget.maxLength,
-          isFocused: isFocused,
-        ),
+      final Widget builtCounter = widget.buildCounter(
+        context,
+        currentLength: currentLength,
+        maxLength: widget.maxLength,
+        isFocused: isFocused,
       );
+      // If buildCounter returns null, don't add a counter widget to the field.
+      if (builtCounter != null) {
+        counter = Semantics(
+          container: true,
+          liveRegion: isFocused,
+          child: builtCounter,
+        );
+      }
       return effectiveDecoration.copyWith(counter: counter);
     }
 
@@ -935,6 +942,7 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
     bool cursorOpacityAnimates;
     Offset cursorOffset;
     Color cursorColor = widget.cursorColor;
+    Color autocorrectionTextRectColor;
     Radius cursorRadius = widget.cursorRadius;
 
     switch (themeData.platform) {
@@ -947,6 +955,7 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
         cursorColor ??= CupertinoTheme.of(context).primaryColor;
         cursorRadius ??= const Radius.circular(2.0);
         cursorOffset = Offset(iOSHorizontalOffset / MediaQuery.of(context).devicePixelRatio, 0);
+        autocorrectionTextRectColor = themeData.textSelectionColor;
         break;
 
       case TargetPlatform.android:
@@ -1006,6 +1015,7 @@ class _TextFieldState extends State<TextField> implements TextSelectionGestureDe
         dragStartBehavior: widget.dragStartBehavior,
         scrollController: widget.scrollController,
         scrollPhysics: widget.scrollPhysics,
+        autocorrectionTextRectColor: autocorrectionTextRectColor,
       ),
     );
 
