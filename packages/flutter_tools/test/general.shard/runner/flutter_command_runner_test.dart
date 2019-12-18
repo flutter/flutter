@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -50,13 +50,13 @@ void main() {
         version: '1 2 3 4 5',
       );
 
-      runner = createTestCommandRunner(DummyFlutterCommand());
+      runner = createTestCommandRunner(DummyFlutterCommand()) as FlutterCommandRunner;
       processManager = MockProcessManager();
     });
 
     group('run', () {
       testUsingContext('checks that Flutter installation is up-to-date', () async {
-        final MockFlutterVersion version = FlutterVersion.instance;
+        final MockFlutterVersion version = FlutterVersion.instance as MockFlutterVersion;
         bool versionChecked = false;
         when(version.checkFlutterVersionFreshness()).thenAnswer((_) async {
           versionChecked = true;
@@ -72,7 +72,7 @@ void main() {
       }, initializeFlutterRoot: false);
 
       testUsingContext('throw tool exit if the version file cannot be written', () async {
-        final MockFlutterVersion version = FlutterVersion.instance;
+        final MockFlutterVersion version = FlutterVersion.instance as MockFlutterVersion;
         when(version.ensureVersionFile()).thenThrow(const FileSystemException());
 
         expect(() async => await runner.run(<String>['dummy']), throwsA(isA<ToolExit>()));

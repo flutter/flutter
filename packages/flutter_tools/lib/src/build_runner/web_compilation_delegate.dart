@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -94,7 +94,7 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
   }
 }
 
-/// Handles mapping a single root file scheme to a multiroot scheme.
+/// Handles mapping a single root file scheme to a multi-root scheme.
 ///
 /// This allows one build_runner build to read the output from a previous
 /// isolated build.

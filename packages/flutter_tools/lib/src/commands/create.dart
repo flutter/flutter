@@ -1,11 +1,10 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:async';
 
-import 'package:linter/src/rules/pub/package_names.dart' as package_names; // ignore: implementation_imports
-import 'package:linter/src/utils.dart' as linter_utils; // ignore: implementation_imports
+import 'package:meta/meta.dart';
 import 'package:yaml/yaml.dart' as yaml;
 
 import '../android/android.dart' as android;
@@ -145,22 +144,6 @@ class CreateCommand extends FlutterCommand {
       negatable: true,
       defaultsTo: true,
       help: 'Generate a project using the AndroidX support libraries',
-    );
-    // Deprecated
-    argParser.addFlag(
-      'macos',
-      negatable: true,
-      defaultsTo: false,
-      hide: true,
-      help: 'Include support for building a macOS application',
-    );
-    // Deprecated
-    argParser.addFlag(
-      'web',
-      negatable: true,
-      defaultsTo: false,
-      hide: true,
-      help: 'Deprecated',
     );
   }
 
@@ -337,8 +320,6 @@ class CreateCommand extends FlutterCommand {
         'variable was specified. Unable to find package:flutter.', exitCode: 2);
     }
 
-    await Cache.instance.updateAll(<DevelopmentArtifact>{ DevelopmentArtifact.universal });
-
     final String flutterRoot = fs.path.absolute(Cache.flutterRoot);
 
     final String flutterPackagesDirectory = fs.path.join(flutterRoot, 'packages');
@@ -408,7 +389,7 @@ class CreateCommand extends FlutterCommand {
       androidLanguage: stringArg('android-language'),
       iosLanguage: stringArg('ios-language'),
       web: featureFlags.isWebEnabled,
-      macos: boolArg('macos'),
+      macos: featureFlags.isMacOSEnabled,
     );
 
     final String relativeDirPath = fs.path.relative(projectDirPath);
@@ -658,7 +639,8 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
       // removed, and the new schema should always be used.
       'useNewPluginSchema': macos,
       // If a desktop platform is included, add a workaround for #31366.
-      'includeTargetPlatformWorkaround': macos,
+      // When Linux and Windows are added, we will need this workaround again.
+      'includeTargetPlatformWorkaround': false,
     };
   }
 
@@ -766,12 +748,97 @@ const Set<String> _packageDependencies = <String>{
   'yaml',
 };
 
+// A valid Dart identifier.
+// https://dart.dev/guides/language/language-tour#important-concepts
+final RegExp _identifierRegExp = RegExp('[a-zA-Z_][a-zA-Z0-9_]*');
+
+// non-contextual dart keywords.
+//' https://dart.dev/guides/language/language-tour#keywords
+const Set<String> _keywords = <String>{
+  'abstract',
+  'as',
+  'assert',
+  'async',
+  'await',
+  'break',
+  'case',
+  'catch',
+  'class',
+  'const',
+  'continue',
+  'covariant',
+  'default',
+  'deferred',
+  'do',
+  'dynamic',
+  'else',
+  'enum',
+  'export',
+  'extends',
+  'extension',
+  'external',
+  'factory',
+  'false',
+  'final',
+  'finally',
+  'for',
+  'function',
+  'get',
+  'hide',
+  'if',
+  'implements',
+  'import',
+  'in',
+  'inout',
+  'interface',
+  'is',
+  'late',
+  'library',
+  'mixin',
+  'native',
+  'new',
+  'null',
+  'of',
+  'on',
+  'operator',
+  'out',
+  'part',
+  'patch',
+  'required',
+  'rethrow',
+  'return',
+  'set',
+  'show',
+  'source',
+  'static',
+  'super',
+  'switch',
+  'sync',
+  'this',
+  'throw',
+  'true',
+  'try',
+  'typedef',
+  'var',
+  'void',
+  'while',
+  'with',
+  'yield',
+};
+
+/// Whether [name] is a valid Pub package.
+@visibleForTesting
+bool isValidPackageName(String name) {
+  final Match match = _identifierRegExp.matchAsPrefix(name);
+  return match != null && match.end == name.length && !_keywords.contains(name);
+}
+
 /// Return null if the project name is legal. Return a validation message if
 /// we should disallow the project name.
 String _validateProjectName(String projectName) {
-  if (!linter_utils.isValidPackageName(projectName)) {
-    final String packageNameDetails = package_names.PubPackageNames().details;
-    return '"$projectName" is not a valid Dart package name.\n\n$packageNameDetails';
+  if (!isValidPackageName(projectName)) {
+    return '"$projectName" is not a valid Dart package name.\n\n'
+      'See https://dart.dev/tools/pub/pubspec#name for more information.';
   }
   if (_packageDependencies.contains(projectName)) {
     return "Invalid project name: '$projectName' - this will conflict with Flutter "

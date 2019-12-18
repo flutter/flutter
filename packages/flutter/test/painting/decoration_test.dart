@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -98,13 +98,13 @@ void main() {
     const BoxDecoration a = BoxDecoration(color: Color(0xFFFFFFFF));
     const BoxDecoration b = BoxDecoration(color: Color(0x00000000));
 
-    BoxDecoration c = Decoration.lerp(a, b, 0.0);
+    BoxDecoration c = Decoration.lerp(a, b, 0.0) as BoxDecoration;
     expect(c.color, equals(a.color));
 
-    c = Decoration.lerp(a, b, 0.25);
+    c = Decoration.lerp(a, b, 0.25) as BoxDecoration;
     expect(c.color, equals(Color.lerp(const Color(0xFFFFFFFF), const Color(0x00000000), 0.25)));
 
-    c = Decoration.lerp(a, b, 1.0);
+    c = Decoration.lerp(a, b, 1.0) as BoxDecoration;
     expect(c.color, equals(b.color));
   });
 
@@ -257,7 +257,7 @@ void main() {
     expect(error.diagnostics[3], isInstanceOf<DiagnosticsProperty<ImageConfiguration>>());
     expect(error.toStringDeep(),
       'FlutterError\n'
-      '   ImageDecoration.matchTextDirection can only be used when a\n'
+      '   DecorationImage.matchTextDirection can only be used when a\n'
       '   TextDirection is available.\n'
       '   When DecorationImagePainter.paint() was called, there was no text\n'
       '   direction provided in the ImageConfiguration object to match.\n'

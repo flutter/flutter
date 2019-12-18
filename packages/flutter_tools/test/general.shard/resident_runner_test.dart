@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -10,7 +10,6 @@ import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' as io;
-import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
@@ -105,9 +104,7 @@ void main() {
       .thenAnswer((Invocation invocation) async {
         return testUri;
       });
-    when(mockFlutterDevice.vmServices).thenReturn(<VMService>[
-      mockVMService,
-    ]);
+    when(mockFlutterDevice.vmService).thenReturn(mockVMService);
     when(mockFlutterDevice.refreshViews()).thenAnswer((Invocation invocation) async { });
     when(mockFlutterDevice.reloadSources(any, pause: anyNamed('pause'))).thenReturn(<Future<Map<String, dynamic>>>[
       Future<Map<String, dynamic>>.value(<String, dynamic>{
@@ -140,6 +137,41 @@ void main() {
   });
 
   test('ResidentRunner can attach to device successfully', () => testbed.run(() async {
+    final Completer<DebugConnectionInfo> onConnectionInfo = Completer<DebugConnectionInfo>.sync();
+    final Completer<void> onAppStart = Completer<void>.sync();
+    final Future<int> result = residentRunner.attach(
+      appStartedCompleter: onAppStart,
+      connectionInfoCompleter: onConnectionInfo,
+    );
+    final Future<DebugConnectionInfo> connectionInfo = onConnectionInfo.future;
+
+    expect(await result, 0);
+
+    verify(mockFlutterDevice.initLogReader()).called(1);
+
+    expect(onConnectionInfo.isCompleted, true);
+    expect((await connectionInfo).baseUri, 'foo://bar');
+    expect(onAppStart.isCompleted, true);
+  }));
+
+  test('ResidentRunner can attach to device successfully with --fast-start', () => testbed.run(() async {
+    when(mockDevice.supportsHotRestart).thenReturn(true);
+    when(mockDevice.sdkNameAndVersion).thenAnswer((Invocation invocation) async {
+      return 'Example';
+    });
+    when(mockDevice.targetPlatform).thenAnswer((Invocation invocation) async {
+      return TargetPlatform.android_arm;
+    });
+    when(mockDevice.isLocalEmulator).thenAnswer((Invocation invocation) async {
+      return false;
+    });
+    residentRunner = HotRunner(
+      <FlutterDevice>[
+        mockFlutterDevice,
+      ],
+      stayResident: false,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug, fastStart: true, startPaused: true),
+    );
     final Completer<DebugConnectionInfo> onConnectionInfo = Completer<DebugConnectionInfo>.sync();
     final Completer<void> onAppStart = Completer<void>.sync();
     final Future<int> result = residentRunner.attach(
@@ -330,35 +362,33 @@ void main() {
     when(mockDevice.supportsScreenshot).thenReturn(true);
 
     residentRunner.printHelp(details: true);
-    final BufferLogger bufferLogger = context.get<Logger>();
 
     // supports service protocol
     expect(residentRunner.supportsServiceProtocol, true);
-    expect(bufferLogger.statusText, contains('"w"'));
-    expect(bufferLogger.statusText, contains('"t"'));
-    expect(bufferLogger.statusText, contains('"P"'));
-    expect(bufferLogger.statusText, contains('"a"'));
+    expect(testLogger.statusText, contains('"w"'));
+    expect(testLogger.statusText, contains('"t"'));
+    expect(testLogger.statusText, contains('"P"'));
+    expect(testLogger.statusText, contains('"a"'));
     // isRunningDebug
     expect(residentRunner.isRunningDebug, true);
-    expect(bufferLogger.statusText, contains('"L"'));
-    expect(bufferLogger.statusText, contains('"S"'));
-    expect(bufferLogger.statusText, contains('"U"'));
-    expect(bufferLogger.statusText, contains('"i"'));
-    expect(bufferLogger.statusText, contains('"p"'));
-    expect(bufferLogger.statusText, contains('"o"'));
-    expect(bufferLogger.statusText, contains('"z"'));
+    expect(testLogger.statusText, contains('"L"'));
+    expect(testLogger.statusText, contains('"S"'));
+    expect(testLogger.statusText, contains('"U"'));
+    expect(testLogger.statusText, contains('"i"'));
+    expect(testLogger.statusText, contains('"p"'));
+    expect(testLogger.statusText, contains('"o"'));
+    expect(testLogger.statusText, contains('"z"'));
     // screenshot
-    expect(bufferLogger.statusText, contains('"s"'));
+    expect(testLogger.statusText, contains('"s"'));
   }));
 
   test('ResidentRunner can take screenshot on debug device', () => testbed.run(() async {
     when(mockDevice.supportsScreenshot).thenReturn(true);
     when(mockDevice.takeScreenshot(any))
       .thenAnswer((Invocation invocation) async {
-        final File file = invocation.positionalArguments.first;
+        final File file = invocation.positionalArguments.first as File;
         file.writeAsBytesSync(List<int>.generate(1024, (int i) => i));
       });
-    final BufferLogger bufferLogger = context.get<Logger>();
 
     await residentRunner.screenshot(mockFlutterDevice);
 
@@ -366,37 +396,34 @@ void main() {
     verify(mockIsolate.flutterDebugAllowBanner(false)).called(1);
     // Enables debug banner.
     verify(mockIsolate.flutterDebugAllowBanner(true)).called(1);
-    expect(bufferLogger.statusText, contains('1kB'));
+    expect(testLogger.statusText, contains('1kB'));
   }));
 
   test('ResidentRunner bails taking screenshot on debug device if debugAllowBanner throws pre', () => testbed.run(() async {
     when(mockDevice.supportsScreenshot).thenReturn(true);
     when(mockIsolate.flutterDebugAllowBanner(false)).thenThrow(Exception());
-    final BufferLogger bufferLogger = context.get<Logger>();
 
     await residentRunner.screenshot(mockFlutterDevice);
 
-    expect(bufferLogger.errorText, contains('Error'));
+    expect(testLogger.errorText, contains('Error'));
   }));
 
   test('ResidentRunner bails taking screenshot on debug device if debugAllowBanner throws post', () => testbed.run(() async {
     when(mockDevice.supportsScreenshot).thenReturn(true);
     when(mockIsolate.flutterDebugAllowBanner(true)).thenThrow(Exception());
-    final BufferLogger bufferLogger = context.get<Logger>();
 
     await residentRunner.screenshot(mockFlutterDevice);
 
-    expect(bufferLogger.errorText, contains('Error'));
+    expect(testLogger.errorText, contains('Error'));
   }));
 
   test('ResidentRunner bails taking screenshot on debug device if takeScreenshot throws', () => testbed.run(() async {
     when(mockDevice.supportsScreenshot).thenReturn(true);
     when(mockDevice.takeScreenshot(any)).thenThrow(Exception());
-    final BufferLogger bufferLogger = context.get<Logger>();
 
     await residentRunner.screenshot(mockFlutterDevice);
 
-    expect(bufferLogger.errorText, contains('Error'));
+    expect(testLogger.errorText, contains('Error'));
   }));
 
   test('ResidentRunner can\'t take screenshot on device without support', () => testbed.run(() {
@@ -417,10 +444,9 @@ void main() {
     when(mockDevice.supportsScreenshot).thenReturn(true);
     when(mockDevice.takeScreenshot(any))
       .thenAnswer((Invocation invocation) async {
-        final File file = invocation.positionalArguments.first;
+        final File file = invocation.positionalArguments.first as File;
         file.writeAsBytesSync(List<int>.generate(1024, (int i) => i));
       });
-    final BufferLogger bufferLogger = context.get<Logger>();
 
     await residentRunner.screenshot(mockFlutterDevice);
 
@@ -428,7 +454,7 @@ void main() {
     verifyNever(mockIsolate.flutterDebugAllowBanner(false));
     // doesn't enable debug banner.
     verifyNever(mockIsolate.flutterDebugAllowBanner(true));
-    expect(bufferLogger.statusText, contains('1kB'));
+    expect(testLogger.statusText, contains('1kB'));
   }));
 
   test('FlutterDevice will not exit a paused isolate', () => testbed.run(() async {
@@ -559,8 +585,34 @@ void main() {
     expect(await fs.file('foo').readAsString(), testUri.toString());
   }));
 
+  test('HotRunner unforwards device ports', () => testbed.run(() async {
+    final MockDevicePortForwarder mockPortForwarder = MockDevicePortForwarder();
+    when(mockDevice.portForwarder).thenReturn(mockPortForwarder);
+    fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+    residentRunner = HotRunner(
+      <FlutterDevice>[
+        mockFlutterDevice,
+      ],
+      stayResident: false,
+      debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+    );
+    when(mockFlutterDevice.runHot(
+      hotRunner: anyNamed('hotRunner'),
+      route: anyNamed('route'),
+    )).thenAnswer((Invocation invocation) async {
+      return 0;
+    });
+
+    when(mockDevice.dispose()).thenAnswer((Invocation invocation) async {
+      await mockDevice.portForwarder.dispose();
+    });
+
+    await residentRunner.run();
+
+    verify(mockPortForwarder.dispose()).called(1);
+  }));
+
   test('HotRunner handles failure to write vmservice file', () => testbed.run(() async {
-    final BufferLogger bufferLogger = logger;
     fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     residentRunner = HotRunner(
       <FlutterDevice>[
@@ -577,7 +629,7 @@ void main() {
     });
     await residentRunner.run();
 
-    expect(bufferLogger.errorText, contains('Failed to write vmservice-out-file at foo'));
+    expect(testLogger.errorText, contains('Failed to write vmservice-out-file at foo'));
   }, overrides: <Type, Generator>{
     FileSystem: () => ThrowingForwardingFileSystem(MemoryFileSystem()),
   }));
@@ -615,13 +667,16 @@ void main() {
       flutterProject: FlutterProject.current(),
       target: null,
       trackWidgetCreation: true,
-    )).generator;
+    )).generator as DefaultResidentCompiler;
 
     expect(residentCompiler.targetModel, TargetModel.dartdevc);
     expect(residentCompiler.sdkRoot,
       artifacts.getArtifactPath(Artifact.flutterWebSdk, mode: BuildMode.debug) + '/');
-    expect(residentCompiler.platformDill,
-      artifacts.getArtifactPath(Artifact.webPlatformKernelDill, mode: BuildMode.debug));
+    expect(
+      residentCompiler.platformDill,
+      fs.file(artifacts.getArtifactPath(Artifact.webPlatformKernelDill, mode: BuildMode.debug))
+        .absolute.uri.toString(),
+    );
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWebIncrementalCompilerEnabled: true),
   }));
@@ -638,10 +693,25 @@ void main() {
     );
 
     await flutterDevice.connect();
-    verify(mockLogReader.connectedVMServices = <VMService>[ mockVMService ]);
+    verify(mockLogReader.connectedVMService = mockVMService);
   }, overrides: <Type, Generator>{
-    VMServiceConnector: () => (Uri httpUri, { ReloadSources reloadSources, Restart restart, CompileExpression compileExpression, io.CompressionOptions compression }) async => mockVMService,
+    VMServiceConnector: () => (Uri httpUri, {
+      ReloadSources reloadSources,
+      Restart restart,
+      CompileExpression compileExpression,
+      ReloadMethod reloadMethod,
+      io.CompressionOptions compression,
+      Device device,
+    }) async => mockVMService,
   }));
+
+  test('nextPlatform moves through expected platforms', () {
+    expect(nextPlatform('android', TestFeatureFlags()), 'iOS');
+    expect(nextPlatform('iOS', TestFeatureFlags()), 'fuchsia');
+    expect(nextPlatform('fuchsia', TestFeatureFlags()), 'android');
+    expect(nextPlatform('fuchsia', TestFeatureFlags(isMacOSEnabled: true)), 'macOS');
+    expect(() => nextPlatform('unknown', TestFeatureFlags()), throwsA(isInstanceOf<AssertionError>()));
+  });
 }
 
 class MockFlutterDevice extends Mock implements FlutterDevice {}
@@ -651,6 +721,7 @@ class MockDevFS extends Mock implements DevFS {}
 class MockIsolate extends Mock implements Isolate {}
 class MockDevice extends Mock implements Device {}
 class MockDeviceLogReader extends Mock implements DeviceLogReader {}
+class MockDevicePortForwarder extends Mock implements DevicePortForwarder {}
 class MockUsage extends Mock implements Usage {}
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockServiceEvent extends Mock implements ServiceEvent {}

@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -31,9 +31,12 @@ abstract class AndroidAssetBundle extends Target {
   List<Source> get outputs => const <Source>[];
 
   @override
-  List<String> get depfiles => const <String>[
-    'flutter_assets.d',
+  List<String> get depfiles => <String>[
+    if (_copyAssets)
+      'flutter_assets.d',
   ];
+
+  bool get _copyAssets => true;
 
   @override
   Future<void> build(Environment environment) async {
@@ -56,8 +59,10 @@ abstract class AndroidAssetBundle extends Target {
       fs.file(isolateSnapshotData)
           .copySync(outputDirectory.childFile('isolate_snapshot_data').path);
     }
-    final Depfile assetDepfile = await copyAssets(environment, outputDirectory);
-    assetDepfile.writeToFile(environment.buildDir.childFile('flutter_assets.d'));
+    if (_copyAssets) {
+      final Depfile assetDepfile = await copyAssets(environment, outputDirectory);
+      assetDepfile.writeToFile(environment.buildDir.childFile('flutter_assets.d'));
+    }
   }
 
   @override
@@ -88,6 +93,17 @@ class DebugAndroidApplication extends AndroidAssetBundle {
     const Source.pattern('{OUTPUT_DIR}/isolate_snapshot_data'),
     const Source.pattern('{OUTPUT_DIR}/kernel_blob.bin'),
   ];
+}
+
+/// A minimal android application that does not include assets.
+class FastStartAndroidApplication extends DebugAndroidApplication {
+  const FastStartAndroidApplication();
+
+  @override
+  String get name => 'faststart_android_application';
+
+  @override
+  bool get _copyAssets => false;
 }
 
 /// An implementation of [AndroidAssetBundle] that only includes assets.
@@ -208,12 +224,12 @@ class AndroidAot extends AotElfBase {
 }
 
 // AndroidAot instances used by the bundle rules below.
-const Target androidArmProfile = AndroidAot(TargetPlatform.android_arm,  BuildMode.profile);
-const Target androidArm64Profile = AndroidAot(TargetPlatform.android_arm64, BuildMode.profile);
-const Target androidx64Profile = AndroidAot(TargetPlatform.android_x64, BuildMode.profile);
-const Target androidArmRelease = AndroidAot(TargetPlatform.android_arm,  BuildMode.release);
-const Target androidArm64Release = AndroidAot(TargetPlatform.android_arm64, BuildMode.release);
-const Target androidx64Release = AndroidAot(TargetPlatform.android_x64, BuildMode.release);
+const AndroidAot androidArmProfile = AndroidAot(TargetPlatform.android_arm,  BuildMode.profile);
+const AndroidAot androidArm64Profile = AndroidAot(TargetPlatform.android_arm64, BuildMode.profile);
+const AndroidAot androidx64Profile = AndroidAot(TargetPlatform.android_x64, BuildMode.profile);
+const AndroidAot androidArmRelease = AndroidAot(TargetPlatform.android_arm,  BuildMode.release);
+const AndroidAot androidArm64Release = AndroidAot(TargetPlatform.android_arm64, BuildMode.release);
+const AndroidAot androidx64Release = AndroidAot(TargetPlatform.android_x64, BuildMode.release);
 
 /// A rule paired with [AndroidAot] that copies the produced so files into the output directory.
 class AndroidAotBundle extends Target {

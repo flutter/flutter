@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -356,6 +356,101 @@ void main() {
     await tester.showKeyboard(find.byType(EditableText));
     await tester.idle();
     expect(tester.testTextInput.setClientArgs['enableSuggestions'], enableSuggestions);
+  });
+
+  group('smartDashesType and smartQuotesType', () {
+    testWidgets('sent to the engine properly', (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController();
+      const SmartDashesType smartDashesType = SmartDashesType.disabled;
+      const SmartQuotesType smartQuotesType = SmartQuotesType.disabled;
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(devicePixelRatio: 1.0),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: FocusScope(
+              node: focusScopeNode,
+              autofocus: true,
+              child: EditableText(
+                controller: controller,
+                backgroundCursorColor: Colors.grey,
+                focusNode: focusNode,
+                smartDashesType: smartDashesType,
+                smartQuotesType: smartQuotesType,
+                style: textStyle,
+                cursorColor: cursorColor,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(EditableText));
+      await tester.showKeyboard(find.byType(EditableText));
+      await tester.idle();
+      expect(tester.testTextInput.setClientArgs['smartDashesType'], smartDashesType.index.toString());
+      expect(tester.testTextInput.setClientArgs['smartQuotesType'], smartQuotesType.index.toString());
+    });
+
+    testWidgets('default to true when obscureText is false', (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController();
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(devicePixelRatio: 1.0),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: FocusScope(
+              node: focusScopeNode,
+              autofocus: true,
+              child: EditableText(
+                controller: controller,
+                backgroundCursorColor: Colors.grey,
+                focusNode: focusNode,
+                style: textStyle,
+                cursorColor: cursorColor,
+                obscureText: false,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(EditableText));
+      await tester.showKeyboard(find.byType(EditableText));
+      await tester.idle();
+      expect(tester.testTextInput.setClientArgs['smartDashesType'], '1');
+      expect(tester.testTextInput.setClientArgs['smartQuotesType'], '1');
+    });
+
+    testWidgets('default to false when obscureText is true', (WidgetTester tester) async {
+      final TextEditingController controller = TextEditingController();
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(devicePixelRatio: 1.0),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: FocusScope(
+              node: focusScopeNode,
+              autofocus: true,
+              child: EditableText(
+                controller: controller,
+                backgroundCursorColor: Colors.grey,
+                focusNode: focusNode,
+                style: textStyle,
+                cursorColor: cursorColor,
+                obscureText: true,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(EditableText));
+      await tester.showKeyboard(find.byType(EditableText));
+      await tester.idle();
+      expect(tester.testTextInput.setClientArgs['smartDashesType'], '0');
+      expect(tester.testTextInput.setClientArgs['smartQuotesType'], '0');
+    });
   });
 
   testWidgets('selection overlay will update when text grow bigger', (WidgetTester tester) async {
@@ -756,7 +851,7 @@ void main() {
 
   /// Toolbar is not used in Flutter Web. Skip this check.
   ///
-  /// Web is using native dom elements (it is also used as platform input)
+  /// Web is using native DOM elements (it is also used as platform input)
   /// to enable clipboard functionality of the toolbar: copy, paste, select,
   /// cut. It might also provide additional functionality depending on the
   /// browser (such as translation). Due to this, in browsers, we should not
@@ -1589,8 +1684,7 @@ void main() {
       ),
     );
 
-    final RenderEditable render = tester.allRenderObjects
-        .firstWhere((RenderObject o) => o.runtimeType == RenderEditable);
+    final RenderEditable render = tester.allRenderObjects.whereType<RenderEditable>().first;
     final int semanticsId = render.debugSemantics.id;
 
     expect(controller.selection.baseOffset, 4);
@@ -1682,8 +1776,7 @@ void main() {
       ),
     );
 
-    final RenderEditable render = tester.allRenderObjects
-        .firstWhere((RenderObject o) => o.runtimeType == RenderEditable);
+    final RenderEditable render = tester.allRenderObjects.whereType<RenderEditable>().first;
     final int semanticsId = render.debugSemantics.id;
 
     expect(controller.selection.baseOffset, 14);
@@ -1784,8 +1877,7 @@ void main() {
       ),
     );
 
-    final RenderEditable render = tester.allRenderObjects
-        .firstWhere((RenderObject o) => o.runtimeType == RenderEditable);
+    final RenderEditable render = tester.allRenderObjects.whereType<RenderEditable>().first;
     final int semanticsId = render.debugSemantics.id;
 
     expect(controller.selection.baseOffset, 4);
@@ -1885,8 +1977,7 @@ void main() {
       ),
     );
 
-    final RenderEditable render = tester.allRenderObjects
-        .firstWhere((RenderObject o) => o.runtimeType == RenderEditable);
+    final RenderEditable render = tester.allRenderObjects.whereType<RenderEditable>().first;
     final int semanticsId = render.debugSemantics.id;
 
     expect(controller.selection.baseOffset, 14);
@@ -2311,8 +2402,7 @@ void main() {
     ));
 
     // Simulate selection change via tap to show handles.
-    final RenderEditable render = tester.allRenderObjects
-        .firstWhere((RenderObject o) => o.runtimeType == RenderEditable);
+    final RenderEditable render = tester.allRenderObjects.whereType<RenderEditable>().first;
     expect(render.text.style.fontStyle, FontStyle.italic);
   });
 
@@ -2736,7 +2826,7 @@ void main() {
     final RenderEditable renderEditable = findRenderEditable(tester);
     // The actual text span is split into 3 parts with the middle part underlined.
     expect(renderEditable.text.children.length, 3);
-    final TextSpan textSpan = renderEditable.text.children[1];
+    final TextSpan textSpan = renderEditable.text.children[1] as TextSpan;
     expect(textSpan.text, 'composing');
     expect(textSpan.style.decoration, TextDecoration.underline);
 
@@ -2798,8 +2888,8 @@ void main() {
       // Check that the animations are functional and going in the right
       // direction.
 
-      final List<Widget> transitions =
-        find.byType(FadeTransition).evaluate().map((Element e) => e.widget).toList();
+      final List<FadeTransition> transitions =
+        find.byType(FadeTransition).evaluate().map((Element e) => e.widget).cast<FadeTransition>().toList();
       // On Android, an empty app contains a single FadeTransition. The following
       // two are the left and right text selection handles, respectively.
       final FadeTransition left = transitions[1];
@@ -3637,8 +3727,8 @@ void main() {
       // Check that the animations are functional and going in the right
       // direction.
 
-      final List<Widget> transitions =
-        find.byType(FadeTransition).evaluate().map((Element e) => e.widget).toList();
+      final List<FadeTransition> transitions =
+        find.byType(FadeTransition).evaluate().map((Element e) => e.widget).cast<FadeTransition>().toList();
       final FadeTransition left = transitions[0];
       final FadeTransition right = transitions[1];
 
@@ -3838,10 +3928,6 @@ void main() {
   });
 
   testWidgets('input imm channel calls are ordered correctly', (WidgetTester tester) async {
-    final List<MethodCall> log = <MethodCall>[];
-    SystemChannels.textInput.setMockMethodCallHandler((MethodCall methodCall) async {
-      log.add(methodCall);
-    });
     const String testText = 'flutter is the best!';
     final TextEditingController controller = TextEditingController(text: testText);
     final EditableText et = EditableText(
@@ -3866,14 +3952,59 @@ void main() {
     ));
 
     await tester.showKeyboard(find.byType(EditableText));
-    expect(log.length, 7);
     // TextInput.show should be before TextInput.setEditingState
     final List<String> logOrder = <String>['TextInput.setClient', 'TextInput.show', 'TextInput.setEditableSizeAndTransform', 'TextInput.setStyle', 'TextInput.setEditingState', 'TextInput.setEditingState', 'TextInput.show'];
+    expect(tester.testTextInput.log.length, 7);
     int index = 0;
-    for (MethodCall m in log) {
+    for (MethodCall m in tester.testTextInput.log) {
       expect(m.method, logOrder[index]);
       index++;
     }
+  });
+
+  testWidgets('setEditingState is called when text changes', (WidgetTester tester) async {
+    const String testText = 'flutter is the best!';
+    final TextEditingController controller = TextEditingController(text: testText);
+    final EditableText et = EditableText(
+      showSelectionHandles: true,
+      maxLines: 2,
+      controller: controller,
+      focusNode: FocusNode(),
+      cursorColor: Colors.red,
+      backgroundCursorColor: Colors.blue,
+      style: Typography(platform: TargetPlatform.android).black.subhead.copyWith(fontFamily: 'Roboto'),
+      keyboardType: TextInputType.text,
+    );
+
+    await tester.pumpWidget(MaterialApp(
+      home: Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: 100,
+          child: et,
+        ),
+      ),
+    ));
+
+    await tester.enterText(find.byType(EditableText), '...');
+
+    final List<String> logOrder = <String>[
+      'TextInput.setClient',
+      'TextInput.show',
+      'TextInput.setEditableSizeAndTransform',
+      'TextInput.setStyle',
+      'TextInput.setEditingState',
+      'TextInput.setEditingState',
+      'TextInput.show',
+      'TextInput.setEditingState',
+    ];
+    expect(tester.testTextInput.log.length, logOrder.length);
+    int index = 0;
+    for (MethodCall m in tester.testTextInput.log) {
+      expect(m.method, logOrder[index]);
+      index++;
+    }
+    expect(tester.testTextInput.editingState['text'], '...');
   });
 }
 

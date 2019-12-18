@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -32,7 +32,7 @@ class KeyedWrapper extends StatelessWidget {
   const KeyedWrapper(this.key1, this.key2);
 
   final Key key1;
-  final Key key2;
+  final GlobalKey key2;
 
   @override
   Widget build(BuildContext context) {

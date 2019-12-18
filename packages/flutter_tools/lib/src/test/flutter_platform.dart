@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -7,10 +7,7 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 import 'package:stream_channel/stream_channel.dart';
 
-import 'package:test_api/src/backend/runtime.dart'; // ignore: implementation_imports
 import 'package:test_api/src/backend/suite_platform.dart'; // ignore: implementation_imports
-import 'package:test_core/src/runner/platform.dart'; // ignore: implementation_imports
-import 'package:test_core/src/runner/hack_register_platform.dart' as hack; // ignore: implementation_imports
 import 'package:test_core/src/runner/runner_suite.dart'; // ignore: implementation_imports
 import 'package:test_core/src/runner/suite.dart'; // ignore: implementation_imports
 import 'package:test_core/src/runner/plugin/platform_helpers.dart'; // ignore: implementation_imports
@@ -27,8 +24,10 @@ import '../convert.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
 import '../project.dart';
+import '../test/test_wrapper.dart';
 import '../vmservice.dart';
 import 'test_compiler.dart';
+import 'test_config.dart';
 import 'watcher.dart';
 
 /// The timeout we give the test process to connect to the test harness
@@ -55,14 +54,6 @@ const Duration _kTestProcessTimeout = Duration(minutes: 5);
 /// hold that against the test.
 const String _kStartTimeoutTimerMessage = 'sky_shell test process has entered main method';
 
-/// The name of the test configuration file that will be discovered by the
-/// test harness if it exists in the project directory hierarchy.
-const String _kTestConfigFileName = 'flutter_test_config.dart';
-
-/// The name of the file that signals the root of the project and that will
-/// cause the test harness to stop scanning for configuration files.
-const String _kProjectRootSentinel = 'pubspec.yaml';
-
 /// The address at which our WebSocket server resides and at which the sky_shell
 /// processes will host the Observatory server.
 final Map<InternetAddressType, InternetAddress> _kHosts = <InternetAddressType, InternetAddress>{
@@ -78,6 +69,7 @@ typedef PlatformPluginRegistration = void Function(FlutterPlatform platform);
 /// (that is, one Dart file with a `*_test.dart` file name and a single `void
 /// main()`), you can set an observatory port explicitly.
 FlutterPlatform installHook({
+  TestWrapper testWrapper = const TestWrapper(),
   @required String shellPath,
   TestWatcher watcher,
   bool enableObservatory = false,
@@ -98,11 +90,12 @@ FlutterPlatform installHook({
   String icudtlPath,
   PlatformPluginRegistration platformPluginRegistration,
 }) {
+  assert(testWrapper != null);
   assert(enableObservatory || (!startPaused && observatoryPort == null));
 
   // registerPlatformPlugin can be injected for testing since it's not very mock-friendly.
   platformPluginRegistration ??= (FlutterPlatform platform) {
-    hack.registerPlatformPlugin(
+    testWrapper.registerPlatformPlugin(
       <Runtime>[Runtime.vm],
       () {
         return platform;
@@ -293,7 +286,7 @@ class FlutterPlatform extends PlatformPlugin {
 
   /// The test compiler produces dill files for each test main.
   ///
-  /// To speed up compilation, each compile is intialized from an existing
+  /// To speed up compilation, each compile is initialized from an existing
   /// dill file from previous runs, if possible.
   TestCompiler compiler;
 
@@ -743,25 +736,9 @@ class FlutterPlatform extends PlatformPlugin {
     Uri testUrl,
   }) {
     assert(testUrl.scheme == 'file');
-    File testConfigFile;
-    Directory directory = fs.file(testUrl).parent;
-    while (directory.path != directory.parent.path) {
-      final File configFile = directory.childFile(_kTestConfigFileName);
-      if (configFile.existsSync()) {
-        printTrace('Discovered $_kTestConfigFileName in ${directory.path}');
-        testConfigFile = configFile;
-        break;
-      }
-      if (directory.childFile(_kProjectRootSentinel).existsSync()) {
-        printTrace('Stopping scan for $_kTestConfigFileName; '
-            'found project root at ${directory.path}');
-        break;
-      }
-      directory = directory.parent;
-    }
     return generateTestBootstrap(
       testUrl: testUrl,
-      testConfigFile: testConfigFile,
+      testConfigFile: findTestConfigFile(fs.file(testUrl)),
       host: host,
       updateGoldens: updateGoldens,
     );

@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -29,6 +29,7 @@ abstract class AndroidBuilder {
     @required Set<AndroidBuildInfo> androidBuildInfo,
     @required String target,
     @required String outputDirectoryPath,
+    @required String buildNumber,
   });
 
   /// Builds an APK artifact.
@@ -57,6 +58,7 @@ class _AndroidBuilderImpl extends AndroidBuilder {
     @required Set<AndroidBuildInfo> androidBuildInfo,
     @required String target,
     @required String outputDirectoryPath,
+    @required String buildNumber,
   }) async {
     try {
       Directory outputDirectory =
@@ -71,6 +73,7 @@ class _AndroidBuilderImpl extends AndroidBuilder {
           androidBuildInfo: androidBuildInfo,
           target: target,
           outputDirectory: outputDirectory,
+          buildNumber: buildNumber,
         );
       }
       printHowToConsumeAar(
@@ -80,9 +83,10 @@ class _AndroidBuilderImpl extends AndroidBuilder {
           }).toSet(),
         androidPackage: project.manifest.androidPackage,
         repoDirectory: getRepoDirectory(outputDirectory),
+        buildNumber: buildNumber,
       );
     } finally {
-      androidSdk.reinitialize();
+      androidSdk?.reinitialize();
     }
   }
 
@@ -102,7 +106,7 @@ class _AndroidBuilderImpl extends AndroidBuilder {
         localGradleErrors: gradleErrors,
       );
     } finally {
-      androidSdk.reinitialize();
+      androidSdk?.reinitialize();
     }
   }
 
@@ -122,7 +126,7 @@ class _AndroidBuilderImpl extends AndroidBuilder {
         localGradleErrors: gradleErrors,
       );
     } finally {
-      androidSdk.reinitialize();
+      androidSdk?.reinitialize();
     }
   }
 }

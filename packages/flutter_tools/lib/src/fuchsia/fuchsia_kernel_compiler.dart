@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -16,7 +16,7 @@ import '../project.dart';
 /// This is a simple wrapper around the custom kernel compiler from the Fuchsia
 /// SDK.
 class FuchsiaKernelCompiler {
-  /// Compiles the [fuchsiaProject] with entrypoint [target] to a collection of
+  /// Compiles the [fuchsiaProject] with entry point [target] to a collection of
   /// .dilp files (consisting of the app split along package: boundaries, but
   /// the Flutter tool should make no use of that fact), and a manifest that
   /// refers to them.
@@ -61,9 +61,7 @@ class FuchsiaKernelCompiler {
       // AOT/JIT:
       if (buildInfo.usesAot) ...<String>['--aot', '--tfa']
       else ...<String>[
-        // TODO(zra): Add back when this is supported again.
-        // See: https://github.com/flutter/flutter/issues/44925
-        // '--no-link-platform',
+        '--no-link-platform',
         '--split-output-by-packages',
         '--manifest', manifestPath
       ],

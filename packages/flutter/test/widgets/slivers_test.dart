@@ -1,10 +1,14 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
+
+import '../rendering/mock_canvas.dart';
+import 'semantics_tester.dart';
 
 Future<void> test(WidgetTester tester, double offset, { double anchor = 0.0 }) {
   return tester.pumpWidget(
@@ -44,7 +48,7 @@ Future<void> testSliverFixedExtentList(WidgetTester tester, List<String> items) 
               },
               childCount : items.length,
               findChildIndexCallback: (Key key) {
-                final ValueKey<String> valueKey = key;
+                final ValueKey<String> valueKey = key as ValueKey<String>;
                 final String data = valueKey.value;
                 return items.indexOf(data);
               },
@@ -349,7 +353,7 @@ void main() {
       addRepaintBoundaries: false,
       addSemanticIndexes: false,
     );
-    final KeyedSubtree wrapped = builderThrowsDelegate.build(null, 0);
+    final KeyedSubtree wrapped = builderThrowsDelegate.build(null, 0) as KeyedSubtree;
     expect(wrapped.child, errorText);
     expect(tester.takeException(), 'builder');
     ErrorWidget.builder = oldBuilder;
@@ -417,6 +421,277 @@ void main() {
     await tester.pumpAndSettle();
     // It will be corrected after a auto scroll animation.
     expect(controller.offset, 800.0);
+  });
+
+  Widget _boilerPlate(Widget sliver) {
+    return Localizations(
+      locale: const Locale('en', 'us'),
+      delegates: const <LocalizationsDelegate<dynamic>>[
+        DefaultWidgetsLocalizations.delegate,
+        DefaultMaterialLocalizations.delegate,
+      ],
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(),
+          child: CustomScrollView(slivers: <Widget>[sliver])
+        )
+      )
+    );
+  }
+
+  group('SliverOffstage - ', () {
+    testWidgets('offstage true', (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
+      await tester.pumpWidget(_boilerPlate(
+        const SliverOffstage(
+          offstage: true,
+          sliver: SliverToBoxAdapter(
+            child: Text('a'),
+          )
+        )
+      ));
+
+      expect(semantics.nodesWith(label: 'a'), hasLength(0));
+      expect(find.byType(Text), findsNothing);
+      final RenderViewport renderViewport = tester.renderObject(find.byType(Viewport));
+      final RenderSliver renderSliver = renderViewport.lastChild;
+      expect(renderSliver.geometry.scrollExtent, 0.0);
+      expect(find.byType(SliverOffstage), findsNothing);
+    });
+
+    testWidgets('offstage false', (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
+      await tester.pumpWidget(_boilerPlate(
+        const SliverOffstage(
+          offstage: false,
+          sliver: SliverToBoxAdapter(
+            child: Text('a'),
+          )
+        )
+      ));
+
+      expect(semantics.nodesWith(label: 'a'), hasLength(1));
+      expect(find.byType(Text), findsOneWidget);
+      final RenderViewport renderViewport = tester.renderObject(find.byType(Viewport));
+      final RenderSliver renderSliver = renderViewport.lastChild;
+      expect(renderSliver.geometry.scrollExtent, 14.0);
+      expect(find.byType(SliverOffstage), paints..paragraph());
+    });
+  });
+
+  group('SliverOpacity - ', () {
+    testWidgets('painting & semantics', (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
+
+      // Opacity 1.0: Semantics and painting
+      await tester.pumpWidget(_boilerPlate(
+        const SliverOpacity(
+          sliver: SliverToBoxAdapter(
+            child: Text(
+              'a',
+              textDirection: TextDirection.rtl,
+            )
+          ),
+          opacity: 1.0,
+        ),
+      ));
+
+      expect(semantics.nodesWith(label: 'a'), hasLength(1));
+      expect(find.byType(SliverOpacity), paints..paragraph());
+
+      // Opacity 0.0: Nothing
+      await tester.pumpWidget(_boilerPlate(
+        const SliverOpacity(
+          sliver: SliverToBoxAdapter(
+            child: Text(
+              'a',
+              textDirection: TextDirection.rtl,
+            )
+          ),
+          opacity: 0.0,
+        )
+      ));
+
+      expect(semantics.nodesWith(label: 'a'), hasLength(0));
+      expect(find.byType(SliverOpacity), paintsNothing);
+
+      // Opacity 0.0 with semantics: Just semantics
+      await tester.pumpWidget(_boilerPlate(
+        const SliverOpacity(
+          sliver: SliverToBoxAdapter(
+            child: Text(
+              'a',
+              textDirection: TextDirection.rtl,
+            )
+          ),
+          opacity: 0.0,
+          alwaysIncludeSemantics: true,
+        ),
+      ));
+
+      expect(semantics.nodesWith(label: 'a'), hasLength(1));
+      expect(find.byType(SliverOpacity), paintsNothing);
+
+      // Opacity 0.0 without semantics: Nothing
+      await tester.pumpWidget(_boilerPlate(
+        const SliverOpacity(
+          sliver: SliverToBoxAdapter(
+            child: Text(
+              'a',
+              textDirection: TextDirection.rtl,
+            )
+          ),
+          opacity: 0.0,
+          alwaysIncludeSemantics: false,
+        ),
+      ));
+
+      expect(semantics.nodesWith(label: 'a'), hasLength(0));
+      expect(find.byType(SliverOpacity), paintsNothing);
+
+      // Opacity 0.1: Semantics and painting
+      await tester.pumpWidget(_boilerPlate(
+        const SliverOpacity(
+          sliver: SliverToBoxAdapter(
+            child: Text(
+              'a',
+              textDirection: TextDirection.rtl,
+            )
+          ),
+          opacity: 0.1,
+        ),
+      ));
+
+      expect(semantics.nodesWith(label: 'a'), hasLength(1));
+      expect(find.byType(SliverOpacity), paints..paragraph());
+
+      // Opacity 0.1 without semantics: Still has semantics and painting
+      await tester.pumpWidget(_boilerPlate(
+        const SliverOpacity(
+          sliver: SliverToBoxAdapter(
+            child: Text(
+              'a',
+              textDirection: TextDirection.rtl,
+            )
+          ),
+          opacity: 0.1,
+          alwaysIncludeSemantics: false,
+        ),
+      ));
+
+      expect(semantics.nodesWith(label: 'a'), hasLength(1));
+      expect(find.byType(SliverOpacity), paints..paragraph());
+
+      // Opacity 0.1 with semantics: Semantics and painting
+      await tester.pumpWidget(_boilerPlate(
+        const SliverOpacity(
+          sliver: SliverToBoxAdapter(
+            child: Text(
+              'a',
+              textDirection: TextDirection.rtl,
+            )
+          ),
+          opacity: 0.1,
+          alwaysIncludeSemantics: true,
+        ),
+      ));
+
+      expect(semantics.nodesWith(label: 'a'), hasLength(1));
+      expect(find.byType(SliverOpacity), paints..paragraph());
+
+      semantics.dispose();
+    });
+  });
+
+  group('SliverIgnorePointer - ', () {
+    testWidgets('ignores pointer events', (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
+      final List<String> events = <String>[];
+      await tester.pumpWidget(_boilerPlate(
+        SliverIgnorePointer(
+          ignoring: true,
+          ignoringSemantics: false,
+          sliver: SliverToBoxAdapter(
+            child: GestureDetector(
+              child: const Text('a'),
+              onTap: () {
+                events.add('tap');
+              },
+            )
+          )
+        )
+      ));
+      expect(semantics.nodesWith(label: 'a'), hasLength(1));
+      await tester.tap(find.byType(GestureDetector));
+      expect(events, equals(<String>[]));
+    });
+
+    testWidgets('ignores semantics', (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
+      final List<String> events = <String>[];
+      await tester.pumpWidget(_boilerPlate(
+        SliverIgnorePointer(
+          ignoring: false,
+          ignoringSemantics: true,
+          sliver: SliverToBoxAdapter(
+            child: GestureDetector(
+              child: const Text('a'),
+              onTap: () {
+                events.add('tap');
+              },
+            )
+          )
+        )
+      ));
+      expect(semantics.nodesWith(label: 'a'), hasLength(0));
+      await tester.tap(find.byType(GestureDetector));
+      expect(events, equals(<String>['tap']));
+    });
+
+    testWidgets('ignores pointer events & semantics', (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
+      final List<String> events = <String>[];
+      await tester.pumpWidget(_boilerPlate(
+        SliverIgnorePointer(
+          ignoring: true,
+          ignoringSemantics: true,
+          sliver: SliverToBoxAdapter(
+            child: GestureDetector(
+              child: const Text('a'),
+              onTap: () {
+                events.add('tap');
+              },
+            )
+          )
+        )
+      ));
+      expect(semantics.nodesWith(label: 'a'), hasLength(0));
+      await tester.tap(find.byType(GestureDetector));
+      expect(events, equals(<String>[]));
+    });
+
+    testWidgets('ignores nothing', (WidgetTester tester) async {
+      final SemanticsTester semantics = SemanticsTester(tester);
+      final List<String> events = <String>[];
+      await tester.pumpWidget(_boilerPlate(
+        SliverIgnorePointer(
+          ignoring: false,
+          ignoringSemantics: false,
+          sliver: SliverToBoxAdapter(
+            child: GestureDetector(
+              child: const Text('a'),
+              onTap: () {
+                events.add('tap');
+              },
+            )
+          )
+        )
+      ));
+      expect(semantics.nodesWith(label: 'a'), hasLength(1));
+      await tester.tap(find.byType(GestureDetector));
+      expect(events, equals(<String>['tap']));
+    });
   });
 }
 

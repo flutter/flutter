@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -187,6 +187,14 @@ class RunCommand extends RunCommandBase {
         hide: true,
         help: 'Whether to automatically invoke webOnlyInitializePlatform.',
       )
+      ..addFlag('fast-start',
+        negatable: true,
+        defaultsTo: false,
+        hide: true,
+        help: 'Whether to quickly bootstrap applications with a minimal app. '
+              'Currently this is only supported on Android devices. This option '
+              'cannot be paired with --use-application-binary.'
+      )
       ..addOption(FlutterOptions.kExtraFrontEndOptions, hide: true)
       ..addOption(FlutterOptions.kExtraGenSnapshotOptions, hide: true)
       ..addMultiOption(FlutterOptions.kEnableExperiment,
@@ -220,30 +228,55 @@ class RunCommand extends RunCommandBase {
   Future<Map<CustomDimensions, String>> get usageValues async {
     String deviceType, deviceOsVersion;
     bool isEmulator;
+    bool anyAndroidDevices = false;
+    bool anyIOSDevices = false;
 
     if (devices == null || devices.isEmpty) {
       deviceType = 'none';
       deviceOsVersion = 'none';
       isEmulator = false;
     } else if (devices.length == 1) {
-      deviceType = getNameForTargetPlatform(await devices[0].targetPlatform);
+      final TargetPlatform platform = await devices[0].targetPlatform;
+      anyAndroidDevices = platform == TargetPlatform.android;
+      anyIOSDevices = platform == TargetPlatform.ios;
+      deviceType = getNameForTargetPlatform(platform);
       deviceOsVersion = await devices[0].sdkNameAndVersion;
       isEmulator = await devices[0].isLocalEmulator;
     } else {
       deviceType = 'multiple';
       deviceOsVersion = 'multiple';
       isEmulator = false;
+      for (Device device in devices) {
+        final TargetPlatform platform = await device.targetPlatform;
+        anyAndroidDevices = anyAndroidDevices || (platform == TargetPlatform.android);
+        anyIOSDevices = anyIOSDevices || (platform == TargetPlatform.ios);
+        if (anyAndroidDevices && anyIOSDevices) {
+          break;
+        }
+      }
     }
-    final String modeName = getBuildInfo().modeName;
-    final AndroidProject androidProject = FlutterProject.current().android;
-    final IosProject iosProject = FlutterProject.current().ios;
-    final List<String> hostLanguage = <String>[
-      if (androidProject != null && androidProject.existsSync())
-        if (androidProject.isKotlin) 'kotlin' else 'java',
-      if (iosProject != null && iosProject.exists)
-        if (await iosProject.isSwift) 'swift' else 'objc',
-    ];
 
+    String androidEmbeddingVersion;
+    final List<String> hostLanguage = <String>[];
+    if (anyAndroidDevices) {
+      final AndroidProject androidProject = FlutterProject.current().android;
+      if (androidProject != null && androidProject.existsSync()) {
+        hostLanguage.add(androidProject.isKotlin ? 'kotlin' : 'java');
+        androidEmbeddingVersion = androidProject.getEmbeddingVersion().toString().split('.').last;
+      }
+    }
+    if (anyIOSDevices) {
+      final IosProject iosProject = FlutterProject.current().ios;
+      if (iosProject != null && iosProject.exists) {
+        final Iterable<File> swiftFiles = iosProject.hostAppRoot
+            .listSync(recursive: true, followLinks: false)
+            .whereType<File>()
+            .where((File file) => fs.path.extension(file.path) == '.swift');
+        hostLanguage.add(swiftFiles.isNotEmpty ? 'swift' : 'objc');
+      }
+    }
+
+    final String modeName = getBuildInfo().modeName;
     return <CustomDimensions, String>{
       CustomDimensions.commandRunIsEmulator: '$isEmulator',
       CustomDimensions.commandRunTargetName: deviceType,
@@ -251,7 +284,8 @@ class RunCommand extends RunCommandBase {
       CustomDimensions.commandRunModeName: modeName,
       CustomDimensions.commandRunProjectModule: '${FlutterProject.current().isModule}',
       CustomDimensions.commandRunProjectHostLanguage: hostLanguage.join(','),
-      CustomDimensions.commandRunAndroidEmbeddingVersion: androidProject.getEmbeddingVersion().toString().split('.').last,
+      if (androidEmbeddingVersion != null)
+        CustomDimensions.commandRunAndroidEmbeddingVersion: androidEmbeddingVersion,
     };
   }
 
@@ -284,6 +318,11 @@ class RunCommand extends RunCommandBase {
     if (!runningWithPrebuiltApplication) {
       await super.validateCommand();
     }
+
+    if (boolArg('fast-start') && runningWithPrebuiltApplication) {
+      throwToolExit('--fast-start is not supported with --use-application-binary');
+    }
+
     devices = await findAllTargetDevices();
     if (devices == null) {
       throwToolExit(null);
@@ -301,6 +340,7 @@ class RunCommand extends RunCommandBase {
         initializePlatform: boolArg('web-initialize-platform'),
         hostname: featureFlags.isWebEnabled ? stringArg('web-hostname') : '',
         port: featureFlags.isWebEnabled ? stringArg('web-port') : '',
+        webEnableExposeUrl: featureFlags.isWebEnabled && boolArg('web-allow-expose-url'),
       );
     } else {
       return DebuggingOptions.enabled(
@@ -321,7 +361,11 @@ class RunCommand extends RunCommandBase {
         initializePlatform: boolArg('web-initialize-platform'),
         hostname: featureFlags.isWebEnabled ? stringArg('web-hostname') : '',
         port: featureFlags.isWebEnabled ? stringArg('web-port') : '',
+        webEnableExposeUrl: featureFlags.isWebEnabled && boolArg('web-allow-expose-url'),
         vmserviceOutFile: stringArg('vmservice-out-file'),
+        // Allow forcing fast-start to off to prevent doing more work on devices that
+        // don't support it.
+        fastStart: boolArg('fast-start') && devices.every((Device device) => device.supportsFastStart),
       );
     }
   }
@@ -340,8 +384,13 @@ class RunCommand extends RunCommandBase {
       if (devices.length > 1) {
         throwToolExit('--machine does not support -d all.');
       }
-      final Daemon daemon = Daemon(stdinCommandStream, stdoutCommandResponse,
-          notifyingLogger: NotifyingLogger(), logToStdout: true);
+      final Daemon daemon = Daemon(
+        stdinCommandStream,
+        stdoutCommandResponse,
+        notifyingLogger: NotifyingLogger(),
+        logToStdout: true,
+        dartDefines: dartDefines,
+      );
       AppInstance app;
       try {
         final String applicationBinaryPath = stringArg('use-application-binary');
@@ -379,6 +428,12 @@ class RunCommand extends RunCommandBase {
     }
 
     for (Device device in devices) {
+      if (!device.supportsFastStart && boolArg('fast-start')) {
+        printStatus(
+          'Using --fast-start option with device ${device.name}, but this device '
+          'does not support it. Overriding the setting to false.'
+        );
+      }
       if (await device.isLocalEmulator) {
         if (await device.supportsHardwareRendering) {
           final bool enableSoftwareRendering = boolArg('enable-software-rendering') == true;
@@ -462,6 +517,7 @@ class RunCommand extends RunCommandBase {
         debuggingOptions: _createDebuggingOptions(),
         stayResident: stayResident,
         dartDefines: dartDefines,
+        urlTunneller: null,
       );
     } else {
       runner = ColdRunner(

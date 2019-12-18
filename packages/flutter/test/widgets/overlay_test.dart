@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -19,7 +19,7 @@ void main() {
             OverlayEntry(
               builder: (BuildContext context) {
                 didBuild = true;
-                final Overlay overlay = context.ancestorWidgetOfExactType(Overlay);
+                final Overlay overlay = context.findAncestorWidgetOfExactType<Overlay>();
                 expect(overlay, isNotNull);
                 expect(overlay.key, equals(overlayKey));
                 return Container();
@@ -184,7 +184,7 @@ void main() {
     expect(buildOrder, <String>['Base']);
 
     buildOrder.clear();
-    final OverlayState overlay = overlayKey.currentState;
+    final OverlayState overlay = overlayKey.currentState as OverlayState;
     overlay.insert(
       OverlayEntry(
         builder: (BuildContext context) {
@@ -222,7 +222,7 @@ void main() {
     expect(buildOrder, <String>['Base']);
 
     buildOrder.clear();
-    final OverlayState overlay = overlayKey.currentState;
+    final OverlayState overlay = overlayKey.currentState as OverlayState;
     overlay.insert(
       OverlayEntry(
           builder: (BuildContext context) {
@@ -267,7 +267,7 @@ void main() {
     expect(buildOrder, <String>['Base', 'Top']);
 
     buildOrder.clear();
-    final OverlayState overlay = overlayKey.currentState;
+    final OverlayState overlay = overlayKey.currentState as OverlayState;
     overlay.insert(
       OverlayEntry(
           builder: (BuildContext context) {
@@ -320,7 +320,7 @@ void main() {
     ];
 
     buildOrder.clear();
-    final OverlayState overlay = overlayKey.currentState;
+    final OverlayState overlay = overlayKey.currentState as OverlayState;
     overlay.insertAll(entries);
     await tester.pump();
 
@@ -366,7 +366,7 @@ void main() {
     ];
 
     buildOrder.clear();
-    final OverlayState overlay = overlayKey.currentState;
+    final OverlayState overlay = overlayKey.currentState as OverlayState;
     overlay.insertAll(entries, below: base);
     await tester.pump();
 
@@ -418,7 +418,7 @@ void main() {
     ];
 
     buildOrder.clear();
-    final OverlayState overlay = overlayKey.currentState;
+    final OverlayState overlay = overlayKey.currentState as OverlayState;
     overlay.insertAll(entries, above: base);
     await tester.pump();
 
@@ -481,7 +481,7 @@ void main() {
     ];
 
     buildOrder.clear();
-    final OverlayState overlay = overlayKey.currentState;
+    final OverlayState overlay = overlayKey.currentState as OverlayState;
     overlay.rearrange(rearranged);
     await tester.pump();
 
@@ -544,7 +544,7 @@ void main() {
     ];
 
     buildOrder.clear();
-    final OverlayState overlay = overlayKey.currentState;
+    final OverlayState overlay = overlayKey.currentState as OverlayState;
     overlay.rearrange(rearranged, above: initialEntries[2]);
     await tester.pump();
 
@@ -607,7 +607,7 @@ void main() {
     ];
 
     buildOrder.clear();
-    final OverlayState overlay = overlayKey.currentState;
+    final OverlayState overlay = overlayKey.currentState as OverlayState;
     overlay.rearrange(rearranged, below: initialEntries[2]);
     await tester.pump();
 

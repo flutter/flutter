@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -9,6 +9,7 @@ import '../base/utils.dart';
 import '../base/version.dart';
 import '../convert.dart';
 import '../doctor.dart';
+import '../globals.dart';
 
 // Include VS Code insiders (useful for debugging).
 const bool _includeInsiders = false;
@@ -224,8 +225,13 @@ class VsCode {
       return null;
     }
     final String jsonString = fs.file(packageJsonPath).readAsStringSync();
-    final Map<String, dynamic> jsonObject = castStringKeyedMap(json.decode(jsonString));
-    return jsonObject['version'] as String;
+    try {
+      final Map<String, dynamic> jsonObject = castStringKeyedMap(json.decode(jsonString));
+      return jsonObject['version'] as String;
+    } on FormatException catch (err) {
+      printTrace('Error parsing VSCode $packageJsonPath:\n$err');
+      return null;
+    }
   }
 }
 

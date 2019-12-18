@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -257,11 +257,11 @@ class _Asset {
 
   final String baseDir;
 
-  /// A platform-independent Uri where this asset can be found on disk on the
+  /// A platform-independent URL where this asset can be found on disk on the
   /// host system relative to [baseDir].
   final Uri relativeUri;
 
-  /// A platform-independent Uri representing the entry for the asset manifest.
+  /// A platform-independent URL representing the entry for the asset manifest.
   final Uri entryUri;
 
   File get assetFile {

@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -173,37 +173,6 @@ void main() {
       expect(client.latestMethodCall, 'connectionClosed');
     });
   });
-
-  test('TextEditingValue handles JSON affinity', () async {
-    final Map<String, dynamic> json = <String, dynamic>{};
-    json['text'] = 'Xiaomuqiao';
-
-    TextEditingValue val = TextEditingValue.fromJSON(json);
-    expect(val.text, 'Xiaomuqiao');
-    expect(val.selection.baseOffset, -1);
-    expect(val.selection.extentOffset, -1);
-    expect(val.selection.affinity, null);
-    expect(val.selection.isDirectional, false);
-    expect(val.composing.start, -1);
-    expect(val.composing.end, -1);
-
-    json['text'] = 'Xiaomuqiao';
-    json['selectionBase'] = 5;
-    json['selectionExtent'] = 6;
-    json['selectionAffinity'] = 'TextAffinity.upstream';
-    json['selectionIsDirectional'] = true;
-    json['composingBase'] = 7;
-    json['composingExtent'] = 8;
-
-    val = TextEditingValue.fromJSON(json);
-    expect(val.text, 'Xiaomuqiao');
-    expect(val.selection.baseOffset, 5);
-    expect(val.selection.extentOffset, 6);
-    expect(val.selection.affinity, TextAffinity.upstream);
-    expect(val.selection.isDirectional, true);
-    expect(val.composing.start, 7);
-    expect(val.composing.end, 8);
-  });
 }
 
 class FakeTextInputClient implements TextInputClient {
@@ -235,7 +204,7 @@ class FakeTextInputClient implements TextInputClient {
 class FakeTextChannel implements MethodChannel {
   FakeTextChannel(this.outgoing) : assert(outgoing != null);
 
-  Future<void> Function(MethodCall) outgoing;
+  Future<dynamic> Function(MethodCall) outgoing;
   Future<void> Function(MethodCall) incoming;
 
   List<MethodCall> outgoingCalls = <MethodCall>[];
@@ -253,10 +222,10 @@ class FakeTextChannel implements MethodChannel {
   Future<Map<K, V>> invokeMapMethod<K, V>(String method, [dynamic arguments]) => throw UnimplementedError();
 
   @override
-  Future<T> invokeMethod<T>(String method, [dynamic arguments]) {
+  Future<T> invokeMethod<T>(String method, [dynamic arguments]) async {
     final MethodCall call = MethodCall(method, arguments);
     outgoingCalls.add(call);
-    return outgoing(call);
+    return await outgoing(call) as T;
   }
 
   @override
