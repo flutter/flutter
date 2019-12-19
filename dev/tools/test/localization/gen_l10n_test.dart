@@ -839,8 +839,8 @@ void main() {
   "helloWorlds": "{count,plural, =0{Hello}=1{Hello {adjective} World}=2{Hello two {adjective} worlds}few{Hello {count} {adjective} worlds}many{Hello all {count} {adjective} worlds}other{Hello other {count} {adjective} worlds}}",
   "@helloWorlds": {
     "placeholders": {
-      "adjective": {},
-      "count": {}
+      "count": {},
+      "adjective": {}
     }
   }
 }''';

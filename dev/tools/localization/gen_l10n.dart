@@ -249,6 +249,21 @@ List<String> genMethodParameters(Map<String, dynamic> bundle, String key, String
   return <String>[];
 }
 
+List<String> genPluralMethodParameters(Map<String, dynamic> bundle, String key, String countPlaceholder) {
+  final Map<String, dynamic> attributesMap = bundle['@$key'] as Map<String, dynamic>;
+
+  if (attributesMap != null && attributesMap.containsKey('placeholders')) {
+    final Map<String, dynamic> placeholders = attributesMap['placeholders'] as Map<String, dynamic>;
+    return placeholders.keys.map((String parameter) {
+      if (parameter == countPlaceholder) {
+        return 'int $parameter';
+      }
+      return 'Object $parameter';
+    }).toList();
+  }
+  return <String>[];
+}
+
 String generateDateFormattingLogic(Map<String, dynamic> bundle, String key) {
   String result = '';
   final Map<String, dynamic> attributesMap = bundle['@$key'] as Map<String, dynamic>;
@@ -350,6 +365,10 @@ String genPluralMethod(Map<String, dynamic> bundle, String key) {
   assert(attributesMap != null && attributesMap.containsKey('placeholders'));
   final Iterable<String> placeholders = attributesMap['placeholders'].keys as Iterable<String>;
 
+  // Used to determine which placeholder is the plural count placeholder
+  final String resourceValue = bundle[key] as String;
+  final String countPlaceholder = resourceValue.split(',')[0].substring(1);
+
   // To make it easier to parse the plurals message, temporarily replace each
   // "{placeholder}" parameter with "#placeholder#".
   String message = bundle[key] as String;
@@ -366,7 +385,7 @@ String genPluralMethod(Map<String, dynamic> bundle, String key) {
   };
 
   final List<String> methodArgs = <String>[
-    ...placeholders,
+    countPlaceholder,
     'locale: _localeName',
     ...genIntlMethodArgs(bundle, key),
   ];
@@ -385,7 +404,7 @@ String genPluralMethod(Map<String, dynamic> bundle, String key) {
 
   return pluralMethodTemplate
     .replaceAll('@methodName', key)
-    .replaceAll('@methodParameters', genMethodParameters(bundle, key, 'int').join(', '))
+    .replaceAll('@methodParameters', genPluralMethodParameters(bundle, key, countPlaceholder).join(', '))
     .replaceAll('@intlMethodArgs', methodArgs.join(',\n      '));
 }
 
