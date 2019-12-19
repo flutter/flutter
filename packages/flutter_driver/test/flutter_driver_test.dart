@@ -1023,6 +1023,11 @@ void main() {
         expect(driver.waitUntilFirstFrameRasterized(),
             throwsA(isInstanceOf<UnimplementedError>()));
       });
+
+      test('appIsoloate', () async {
+        expect(() => driver.appIsolate.invokeExtension('abc', <String, String>{'abc': '123'}),
+            throwsA(isInstanceOf<UnsupportedError>()));
+      });
     });
   });
 

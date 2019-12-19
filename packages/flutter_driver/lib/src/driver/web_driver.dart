@@ -35,10 +35,14 @@ class WebFlutterDriver extends FlutterDriver {
   final FlutterWebConnection _connection;
   final Browser _browser;
   DateTime _startTime;
+  final _WebIsolate _appIsolate = _WebIsolate();
 
   /// Start time for tracing
   @visibleForTesting
   DateTime get startTime => _startTime;
+
+  @override
+  Isolate get appIsolate => _appIsolate;
 
   /// Creates a driver that uses a connection provided by the given
   /// [hostUrl] which would fallback to environment variable VM_SERVICE_URL.
@@ -244,5 +248,14 @@ class FlutterWebConnection {
   /// Closes the WebDriver.
   Future<void> close() async {
     _driver.quit();
+  }
+}
+
+/// An implementation of [Isolate] for Flutter Web Driver.
+class _WebIsolate implements Isolate {
+  /// Invokes extension is not implemented for _WebIsolate.
+  @override
+  Future<Object> invokeExtension(String method, [Map<String, String> params]) {
+    throw UnsupportedError('WebIsolate does not support invokeExtension');
   }
 }

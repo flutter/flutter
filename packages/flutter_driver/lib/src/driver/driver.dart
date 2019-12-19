@@ -156,6 +156,9 @@ abstract class FlutterDriver {
     );
   }
 
+  /// Getter of appIsolate
+  Isolate get appIsolate;
+
   /// Sends [command] to the Flutter Driver extensions.
   /// This must be implemented by subclass.
   ///
@@ -753,4 +756,10 @@ class DriverOffset {
 
   @override
   int get hashCode => dx.hashCode ^ dy.hashCode;
+}
+
+/// An Isolate used by Flutter Driver.
+abstract class Isolate {
+  /// Invoke extension with [method] and [params].
+  Future<Object> invokeExtension(String method, [Map<String, String> params]);
 }

@@ -32,10 +32,11 @@ class VMServiceFlutterDriver extends FlutterDriver {
   VMServiceFlutterDriver.connectedTo(
       this._serviceClient,
       this._peer,
-      this._appIsolate, {
+      VMIsolate appIsolate, {
         bool printCommunication = false,
         bool logCommunicationToFile = true,
-      }) : _printCommunication = printCommunication,
+      }) : _appIsolate = _VMServiceIsolate(appIsolate),
+        _printCommunication = printCommunication,
         _logCommunicationToFile = logCommunicationToFile,
         _driverId = _nextDriverId++;
 
@@ -295,12 +296,15 @@ class VMServiceFlutterDriver extends FlutterDriver {
     )..listen();
   }
 
+  @override
+  Isolate get appIsolate => _appIsolate;
+
   /// The main isolate hosting the Flutter application.
   ///
   /// If you used the [registerExtension] API to instrument your application,
   /// you can use this [VMIsolate] to call these extension methods via
   /// [invokeExtension].
-  final VMIsolate _appIsolate;
+  final _VMServiceIsolate _appIsolate;
 
   /// Whether to print communication between host and app to `stdout`.
   final bool _printCommunication;
@@ -386,7 +390,6 @@ class VMServiceFlutterDriver extends FlutterDriver {
       );
     }
   }
-
 
   @override
   Future<Timeline> stopTracingAndDownloadTimeline({
@@ -474,7 +477,7 @@ class VMServiceFlutterDriver extends FlutterDriver {
     try {
       await _peer
           .sendRequest(_collectAllGarbageMethodName, <String, String>{
-        'isolateId': 'isolates/${_appIsolate.numberAsString}',
+        'isolateId': 'isolates/${_appIsolate._vmIsolate.numberAsString}',
       });
     } catch (error, stackTrace) {
       throw DriverError(
@@ -647,3 +650,18 @@ class VMServiceClientConnection {
 
 /// A function that connects to a Dart VM service given the [url].
 typedef VMServiceConnectFunction = Future<VMServiceClientConnection> Function(String url);
+
+/// An implementation of [Isolate] for VMService Driver using VMIsolate.
+class _VMServiceIsolate implements Isolate {
+  final VMIsolate _vmIsolate;
+
+  /// Creates a [_VMServiceIsolate] with [_vmIsolate].
+  _VMServiceIsolate(this._vmIsolate);
+
+  /// Invokes extension by calling invokeExtension on [_vmIsolate] with [method]
+  /// and [params].
+  @override
+  Future<Object> invokeExtension(String method, [Map<String, String> params]) async {
+    return Future<Object>.value(_vmIsolate.invokeExtension(method, params));
+  }
+}
