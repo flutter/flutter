@@ -653,10 +653,10 @@ typedef VMServiceConnectFunction = Future<VMServiceClientConnection> Function(St
 
 /// An implementation of [Isolate] for VMService Driver using VMIsolate.
 class _VMServiceIsolate implements Isolate {
-  final VMIsolate _vmIsolate;
-
   /// Creates a [_VMServiceIsolate] with [_vmIsolate].
   _VMServiceIsolate(this._vmIsolate);
+
+  final VMIsolate _vmIsolate;
 
   /// Invokes extension by calling invokeExtension on [_vmIsolate] with [method]
   /// and [params].
