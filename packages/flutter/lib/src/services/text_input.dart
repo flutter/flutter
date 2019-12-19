@@ -1000,23 +1000,15 @@ class TextInput {
   /// This method actually notifies the embedding of the client. It is utilized
   /// by [attach] and by [_handleTextInputInvocation] for the
   /// `TextInputClient.requestExistingInputState` method.
-  void _attach(
-    TextInputConnection connection,
-    TextInputConfiguration configuration, {
-    bool setEditingState = false,
-  }) {
+  void _attach(TextInputConnection connection, TextInputConfiguration configuration) {
     assert(connection != null);
     assert(connection._client != null);
     assert(configuration != null);
-    assert(setEditingState != null);
     assert(_debugEnsureInputActionWorksOnPlatform(configuration.inputAction));
     _channel.invokeMethod<void>(
       'TextInput.setClient',
       <dynamic>[ connection._id, configuration.toJson() ],
     );
-    if (setEditingState) {
-      _setEditingState(connection._client.currentTextEditingValue);
-    }
     _currentConnection = connection;
     _currentConfiguration = configuration;
   }
@@ -1057,7 +1049,11 @@ class TextInput {
     // the client ID, as long as we have a _currentConnection.
     if (method == 'TextInputClient.requestExistingInputState') {
       assert(_currentConnection._client != null);
-      _attach(_currentConnection, _currentConfiguration, setEditingState: true);
+      _attach(_currentConnection, _currentConfiguration);
+      final TextEditingValue editingValue = _currentConnection._client.currentTextEditingValue;
+      if (editingValue != null) {
+        _setEditingState(editingValue);
+      }
       return;
     }
 

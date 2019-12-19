@@ -42,6 +42,24 @@ void main() {
         MethodCall('TextInput.setEditingState', client.currentTextEditingValue.toJSON()),
       ]);
     });
+
+    test('text input client handler responds to reattach with setClient (null TextEditingValue)', () async {
+      final FakeTextInputClient client = FakeTextInputClient(null);
+      TextInput.attach(client, client.configuration);
+      fakeTextChannel.validateOutgoingMethodCalls(<MethodCall>[
+        MethodCall('TextInput.setClient', <dynamic>[1, client.configuration.toJson()]),
+      ]);
+
+      fakeTextChannel.incoming(const MethodCall('TextInputClient.requestExistingInputState', null));
+
+      expect(fakeTextChannel.outgoingCalls.length, 2);
+      fakeTextChannel.validateOutgoingMethodCalls(<MethodCall>[
+        // From original attach
+        MethodCall('TextInput.setClient', <dynamic>[1, client.configuration.toJson()]),
+        // From requestExistingInputState
+        MethodCall('TextInput.setClient', <dynamic>[1, client.configuration.toJson()]),
+      ]);
+    });
   });
 
   group('TextInputConfiguration', () {
