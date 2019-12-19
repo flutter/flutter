@@ -14,17 +14,20 @@ class FuchsiaSystemCompositedLayer : public ElevatedContainerLayer {
  public:
   static bool can_system_composite() { return true; }
 
-  FuchsiaSystemCompositedLayer(SkColor color, float elevation);
+  FuchsiaSystemCompositedLayer(SkColor color, SkAlpha opacity, float elevation);
 
+  void Preroll(PrerollContext* context, const SkMatrix& matrix) override;
   void UpdateScene(SceneUpdateContext& context) override;
 
   void set_dimensions(SkRRect rrect) { rrect_ = rrect; }
 
   SkColor color() const { return color_; }
+  SkAlpha opacity() const { return opacity_; }
 
  private:
   SkRRect rrect_ = SkRRect::MakeEmpty();
   SkColor color_ = SK_ColorTRANSPARENT;
+  SkAlpha opacity_ = SK_AlphaOPAQUE;
 
   FML_DISALLOW_COPY_AND_ASSIGN(FuchsiaSystemCompositedLayer);
 };
