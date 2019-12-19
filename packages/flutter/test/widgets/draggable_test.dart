@@ -90,21 +90,13 @@ void main() {
             builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
               return Container(height: 100.0, child: const Text('Target 1'));
             },
-            onLeave: (Object data) {
-              if (data is int) {
-                leftBehind['Target 1'] = leftBehind['Target 1'] + data;
-              }
-            },
+            onLeave: (int data) => leftBehind['Target 1'] = leftBehind['Target 1'] + data,
           ),
           DragTarget<int>(
             builder: (BuildContext context, List<int> data, List<dynamic> rejects) {
               return Container(height: 100.0, child: const Text('Target 2'));
             },
-            onLeave: (Object data) {
-              if (data is int) {
-                leftBehind['Target 2'] = leftBehind['Target 2'] + data;
-              }
-            },
+            onLeave: (int data) => leftBehind['Target 2'] = leftBehind['Target 2'] + data,
           ),
         ],
       ),
