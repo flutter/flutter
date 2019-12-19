@@ -38,12 +38,12 @@ void main() {
       command = DriveCommand();
       applyMocksToCommand(command);
       fs = MemoryFileSystem();
-      tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_drive_test.');
-      globals.fs.currentDirectory = tempDir;
-      globals.fs.directory('test').createSync();
-      globals.fs.directory('test_driver').createSync();
-      globals.fs.file('pubspec.yaml')..createSync();
-      globals.fs.file('.packages').createSync();
+      tempDir = fs.systemTempDirectory.createTempSync('flutter_drive_test.');
+      fs.currentDirectory = tempDir;
+      fs.directory('test').createSync();
+      fs.directory('test_driver').createSync();
+      fs.file('pubspec.yaml')..createSync();
+      fs.file('.packages').createSync();
       setExitFunctionForTests();
       appStarter = (DriveCommand command) {
         throw 'Unexpected call to appStarter';

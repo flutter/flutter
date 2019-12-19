@@ -14,7 +14,6 @@ import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -25,7 +24,7 @@ void main() {
     final MockXcodeProjectInterpreter mockXcodeProjectInterpreter = MockXcodeProjectInterpreter();
     final MockXcode mockXcode = MockXcode();
 
-    final Directory currentDirectory = globals.fs.currentDirectory;
+    final Directory currentDirectory = fs.currentDirectory;
     final Directory buildDirectory = currentDirectory.childDirectory('build');
     buildDirectory.createSync(recursive: true);
 

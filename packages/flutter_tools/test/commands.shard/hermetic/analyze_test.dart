@@ -19,9 +19,9 @@ void main() {
 
   setUp(() {
     fs = MemoryFileSystem();
-    globals.fs.directory(_kFlutterRoot).createSync(recursive: true);
+    fs.directory(_kFlutterRoot).createSync(recursive: true);
     Cache.flutterRoot = _kFlutterRoot;
-    tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_analysis_test.');
+    tempDir = fs.systemTempDirectory.createTempSync('flutter_analysis_test.');
   });
 
   tearDown(() {

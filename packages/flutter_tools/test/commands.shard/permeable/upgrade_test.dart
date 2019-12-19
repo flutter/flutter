@@ -37,7 +37,7 @@ void main() {
       fakeCommandRunner = FakeUpgradeCommandRunner();
       realCommandRunner = UpgradeCommandRunner();
       processManager = MockProcessManager();
-      when(globals.processManager.start(
+      when(processManager.start(
         <String>[
           globals.fs.path.join('bin', 'flutter'),
           'upgrade',

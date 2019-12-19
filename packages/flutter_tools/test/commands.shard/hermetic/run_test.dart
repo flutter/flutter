@@ -141,8 +141,8 @@ void main() {
         fs = MemoryFileSystem();
         mockProcessManager = MockProcessManager();
 
-        tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_run_test.');
-        globals.fs.currentDirectory = tempDir;
+        tempDir = fs.systemTempDirectory.createTempSync('flutter_run_test.');
+        fs.currentDirectory = tempDir;
 
         tempDir.childFile('pubspec.yaml')
           ..writeAsStringSync('name: flutter_app');
