@@ -306,6 +306,10 @@ class SkiaGoldClient {
     return result.exitCode == 0;
   }
 
+  Future<bool> tryjobCheck(String testName, File goldenFile) async {
+
+  }
+
   /// Requests and sets the [_expectations] known to Flutter Gold at head.
   Future<void> getExpectations() async {
     _expectations = <String, List<String>>{};
@@ -357,6 +361,69 @@ class SkiaGoldClient {
       SkiaGoldHttpOverrides(),
     );
     return imageBytes;
+  }
+
+  /// Returns a boolean value for whether or not the given test and current pull
+  /// request are ignored on Flutter Gold.
+  ///
+  /// This is only relevant when used by the [FlutterPreSubmitFileComparator]
+  /// when a golden file test fails. In order to land a change to an existing
+  /// golden file, an ignore must be set up in Flutter Gold. This will serve as
+  /// a flag to permit the change to land, protect against any unwanted changes,
+  /// and ensure that changes that have landed are triaged.
+  Future<bool> testIsIgnoredForPullRequest(String pullRequest, String testName) async {
+    bool ignoreIsActive = false;
+    testName = cleanTestName(testName);
+    String rawResponse;
+    await io.HttpOverrides.runWithHttpOverrides<Future<void>>(() async {
+      final Uri requestForIgnores = Uri.parse(
+        'https://flutter-gold.skia.org/json/ignores'
+      );
+
+      try {
+        final io.HttpClientRequest request = await httpClient.getUrl(requestForIgnores);
+        final io.HttpClientResponse response = await request.close();
+        rawResponse = await utf8.decodeStream(response);
+        final List<dynamic> ignores = json.decode(rawResponse) as List<dynamic>;
+        for(dynamic ignore in ignores) {
+          final List<String> ignoredQueries = (ignore['query'] as String).split('&');
+          final String ignoredPullRequest = (ignore['note'] as String).split('/').last;
+          final DateTime expiration = DateTime.parse(ignore['expires'] as String);
+          // The currently failing test is in the process of modification.
+          if (ignoredQueries.contains('name=$testName')) {
+            if (expiration.isAfter(DateTime.now())) {
+              ignoreIsActive = true;
+            } else {
+              // If any ignore is expired for the given test, throw with
+              // guidance.
+              final StringBuffer buf = StringBuffer()
+                ..writeln('This test has an expired ignore in place, and the')
+                ..writeln('change has not been triaged.')
+                ..writeln('The associated pull request is:')
+                ..writeln('https://github.com/flutter/flutter/pull/$ignoredPullRequest');
+              throw NonZeroExitCode(1, buf.toString());
+            }
+          }
+        }
+      } on FormatException catch(_) {
+        if (rawResponse.contains('stream timeout')) {
+          final StringBuffer buf = StringBuffer()
+            ..writeln('Stream timeout on /ignores api.')
+            ..writeln('This may be caused by a failure to triage a change.')
+            ..writeln('Check https://flutter-gold.skia.org/ignores, or')
+            ..writeln('https://flutter-gold.skia.org/?query=source_type%3Dflutter')
+            ..writeln('for untriaged golden files.');
+          throw NonZeroExitCode(1, buf.toString());
+        } else {
+          print('Formatting error detected requesting /ignores from Flutter Gold.'
+            '\nrawResponse: $rawResponse');
+          rethrow;
+        }
+      }
+    },
+      SkiaGoldHttpOverrides(),
+    );
+    return ignoreIsActive;
   }
 
   /// The [_expectations] retrieved from Flutter Gold do not include the

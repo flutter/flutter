@@ -310,10 +310,46 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
     baseDirectory.createSync(recursive: true);
 
     goldens ??= SkiaGoldClient(baseDirectory);
-    await goldens.auth();
-    await goldens.tryjobInit();
-    return FlutterPreSubmitFileComparator(baseDirectory.uri, goldens);
+
+    final bool hasWritePermission = platform.environment['CIRRUS_USER_PERMISSION'] == 'admin'
+      || platform.environment['CIRRUS_USER_PERMISSION'] == 'write';
+    if (hasWritePermission) {
+      await goldens.auth();
+      await goldens.tryjobInit();
+      return _AuthorizedFlutterPreSubmitComparator(baseDirectory.uri, goldens);
+    } else {
+      return _UnauthorizedFlutterPreSubmitComparator(baseDirectory.uri, goldens);
+    }
   }
+
+  @override
+  Future<bool> compare(Uint8List imageBytes, Uri golden) async {
+    assert(false);
+    return false;
+  }
+
+  /// Decides based on the current environment whether goldens tests should be
+  /// performed as pre-submit tests with Skia Gold.
+  static bool isAvailableForEnvironment(Platform platform) {
+    final String cirrusPR = platform.environment['CIRRUS_PR'] ?? '';
+    return platform.environment.containsKey('CIRRUS_CI')
+      && cirrusPR.isNotEmpty
+      && platform.environment.containsKey('GOLD_SERVICE_ACCOUNT');
+  }
+}
+
+class _AuthorizedFlutterPreSubmitComparator extends FlutterPreSubmitFileComparator {
+  _AuthorizedFlutterPreSubmitComparator(
+    final Uri basedir,
+    final SkiaGoldClient skiaClient, {
+    final FileSystem fs = const LocalFileSystem(),
+    final Platform platform = const LocalPlatform(),
+  }) : super(
+    basedir,
+    skiaClient,
+    fs: fs,
+    platform: platform,
+  );
 
   @override
   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
@@ -323,17 +359,36 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
 
     return skiaClient.tryjobAdd(golden.path, goldenFile);
   }
+}
 
-  /// Decides based on the current environment whether goldens tests should be
-  /// performed as pre-submit tests with Skia Gold.
-  static bool isAvailableForEnvironment(Platform platform) {
-    final String cirrusPR = platform.environment['CIRRUS_PR'] ?? '';
-    final bool hasWritePermission = platform.environment['CIRRUS_USER_PERMISSION'] == 'admin'
-      || platform.environment['CIRRUS_USER_PERMISSION'] == 'write';
-    return platform.environment.containsKey('CIRRUS_CI')
-      && cirrusPR.isNotEmpty
-      && platform.environment.containsKey('GOLD_SERVICE_ACCOUNT')
-      && hasWritePermission;
+class _UnauthorizedFlutterPreSubmitComparator extends FlutterPreSubmitFileComparator {
+  _UnauthorizedFlutterPreSubmitComparator(
+    final Uri basedir,
+    final SkiaGoldClient skiaClient, {
+    final FileSystem fs = const LocalFileSystem(),
+    final Platform platform = const LocalPlatform(),
+  }) : super(
+    basedir,
+    skiaClient,
+    fs: fs,
+    platform: platform,
+  );
+
+  @override
+  Future<bool> compare(Uint8List imageBytes, Uri golden) async {
+    golden = _addPrefix(golden);
+    await update(golden, imageBytes);
+    final File goldenFile = getGoldenFile(golden);
+
+    final bool checkPassed = await skiaClient.tryjobCheck(golden.path, goldenFile);
+
+    if (checkPassed)
+      return true;
+
+    return skiaClient.testIsIgnoredForPullRequest(
+      platform.environment['CIRRUS_PR'] ?? '',
+      golden.path,
+    );
   }
 }
 
@@ -399,12 +454,8 @@ class FlutterSkippingGoldenFileComparator extends FlutterGoldenFileComparator {
   /// Decides based on the current environment whether this comparator should be
   /// used.
   static bool isAvailableForEnvironment(Platform platform) {
-    return (platform.environment.containsKey('SWARMING_TASK_ID')
-      || platform.environment.containsKey('CIRRUS_CI'))
-      // A service account means that this is a Gold shard. At this point, it
-      // means we don't have permission to use the account, so we will pass
-      // through to the [FlutterLocalFileComparator].
-      && !platform.environment.containsKey('GOLD_SERVICE_ACCOUNT');
+    return platform.environment.containsKey('SWARMING_TASK_ID')
+      || platform.environment.containsKey('CIRRUS_CI');
   }
 }
 
