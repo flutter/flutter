@@ -98,3 +98,10 @@ void printStatus(
 /// Use this for verbose tracing output. Users can turn this output on in order
 /// to help diagnose issues with the toolchain or with their setup.
 void printTrace(String message) => logger.printTrace(message);
+
+AnsiTerminal get terminal {
+  return context?.get<AnsiTerminal>() ?? _defaultAnsiTerminal;
+}
+
+final AnsiTerminal _defaultAnsiTerminal = AnsiTerminal();
+

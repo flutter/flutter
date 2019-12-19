@@ -11,7 +11,6 @@ import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
-import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../cache.dart';
 import '../commands/daemon.dart';
@@ -272,7 +271,7 @@ class AttachCommand extends FlutterCommand {
         ).asBroadcastStream();
     }
 
-    terminal.usesTerminalUi = daemon == null;
+    globals.terminal.usesTerminalUi = daemon == null;
 
     try {
       int result;

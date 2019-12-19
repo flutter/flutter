@@ -315,9 +315,11 @@ class Doctor {
     }
 
     if (issues > 0) {
-      globals.printStatus('${showColor ? terminal.color('!', TerminalColor.yellow) : '!'} Doctor found issues in $issues categor${issues > 1 ? "ies" : "y"}.', hangingIndent: 2);
+      globals.printStatus('${showColor ? globals.terminal.color('!', TerminalColor.yellow) : '!'}'
+        ' Doctor found issues in $issues categor${issues > 1 ? "ies" : "y"}.', hangingIndent: 2);
     } else {
-      globals.printStatus('${showColor ? terminal.color('•', TerminalColor.green) : '•'} No issues found!', hangingIndent: 2);
+      globals.printStatus('${showColor ? globals.terminal.color('•', TerminalColor.green) : '•'}'
+        ' No issues found!', hangingIndent: 2);
     }
 
     return doctorResult;
@@ -499,14 +501,14 @@ class ValidationResult {
     assert(type != null);
     switch (type) {
       case ValidationType.crash:
-        return terminal.color(leadingBox, TerminalColor.red);
+        return globals.terminal.color(leadingBox, TerminalColor.red);
       case ValidationType.missing:
-        return terminal.color(leadingBox, TerminalColor.red);
+        return globals.terminal.color(leadingBox, TerminalColor.red);
       case ValidationType.installed:
-        return terminal.color(leadingBox, TerminalColor.green);
+        return globals.terminal.color(leadingBox, TerminalColor.green);
       case ValidationType.notAvailable:
       case ValidationType.partial:
-        return terminal.color(leadingBox, TerminalColor.yellow);
+        return globals.terminal.color(leadingBox, TerminalColor.yellow);
     }
     return null;
   }
@@ -555,11 +557,11 @@ class ValidationMessage {
   String get coloredIndicator {
     switch (type) {
       case ValidationMessageType.error:
-        return terminal.color(indicator, TerminalColor.red);
+        return globals.terminal.color(indicator, TerminalColor.red);
       case ValidationMessageType.hint:
-        return terminal.color(indicator, TerminalColor.yellow);
+        return globals.terminal.color(indicator, TerminalColor.yellow);
       case ValidationMessageType.information:
-        return terminal.color(indicator, TerminalColor.green);
+        return globals.terminal.color(indicator, TerminalColor.green);
     }
     return null;
   }

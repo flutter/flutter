@@ -14,7 +14,6 @@ import 'base/file_system.dart';
 import 'base/io.dart' as io;
 import 'base/logger.dart';
 import 'base/signals.dart';
-import 'base/terminal.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'codegen.dart';
@@ -1091,8 +1090,8 @@ class TerminalHandler {
       globals.printStatus('');
       residentRunner.printHelp(details: false);
     }
-    terminal.singleCharMode = true;
-    subscription = terminal.keystrokes.listen(processTerminalInput);
+    globals.terminal.singleCharMode = true;
+    subscription = globals.terminal.keystrokes.listen(processTerminalInput);
   }
 
 
@@ -1295,7 +1294,7 @@ class TerminalHandler {
   }
 
   Future<void> _cleanUp(io.ProcessSignal signal) async {
-    terminal.singleCharMode = false;
+    globals.terminal.singleCharMode = false;
     await subscription?.cancel();
     await residentRunner.cleanupAfterSignal();
   }

@@ -601,7 +601,7 @@ void printHowToConsumeAar({
 
   globals.printStatus('''
 
-${terminal.bolden('Consuming the Module')}
+${globals.terminal.bolden('Consuming the Module')}
   1. Open ${globals.fs.path.join('<host>', 'app', 'build.gradle')}
   2. Ensure you have the repositories configured, otherwise add them:
 

@@ -171,9 +171,9 @@ class AnalysisError implements Comparable<AnalysisError> {
   String get colorSeverity {
     switch(_severityLevel) {
       case _AnalysisSeverity.error:
-        return terminal.color(severity, TerminalColor.red);
+        return globals.terminal.color(severity, TerminalColor.red);
       case _AnalysisSeverity.warning:
-        return terminal.color(severity, TerminalColor.yellow);
+        return globals.terminal.color(severity, TerminalColor.yellow);
       case _AnalysisSeverity.info:
       case _AnalysisSeverity.none:
         return severity;

@@ -8,7 +8,6 @@ import 'package:args/command_runner.dart';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
-import '../base/terminal.dart';
 import '../base/time.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
@@ -420,7 +419,7 @@ class RunCommand extends RunCommandBase {
         endTimeOverride: appStartedTime,
       );
     }
-    terminal.usesTerminalUi = true;
+    globals.terminal.usesTerminalUi = true;
 
     if (argResults['dart-flags'] != null && !FlutterVersion.instance.isMaster) {
       throw UsageException('--dart-flags is not available on the stable '

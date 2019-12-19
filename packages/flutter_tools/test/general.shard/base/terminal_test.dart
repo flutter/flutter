@@ -174,7 +174,7 @@ void main() {
       when(stdio.stdin).thenThrow(StateError('This should not be called'));
       when(stdio.stdinHasTerminal).thenReturn(false);
 
-      terminal.singleCharMode = true;
+      globals.terminal.singleCharMode = true;
     }, overrides: <Type, Generator>{
       Stdio: () => MockStdio(),
     });

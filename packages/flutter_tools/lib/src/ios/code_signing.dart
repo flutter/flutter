@@ -10,7 +10,6 @@ import '../application_package.dart';
 import '../base/common.dart';
 import '../base/io.dart';
 import '../base/process.dart';
-import '../base/terminal.dart';
 import '../convert.dart' show utf8;
 import '../globals.dart' as globals;
 
@@ -224,7 +223,7 @@ Future<String> _chooseSigningIdentity(List<String> validCodeSigningIdentities) a
 
     // If terminal UI can't be used, just attempt with the first valid certificate
     // since we can't ask the user.
-    if (!terminal.usesTerminalUi) {
+    if (!globals.terminal.usesTerminalUi) {
       return validCodeSigningIdentities.first;
     }
 
@@ -238,7 +237,7 @@ Future<String> _chooseSigningIdentity(List<String> validCodeSigningIdentities) a
     }
     globals.printStatus('  a) Abort', emphasis: true);
 
-    final String choice = await terminal.promptForCharInput(
+    final String choice = await globals.terminal.promptForCharInput(
       List<String>.generate(count, (int number) => '${number + 1}')
           ..add('a'),
       prompt: 'Please select a certificate for code signing',

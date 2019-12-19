@@ -1050,8 +1050,8 @@ class HotRunner extends ResidentRunner {
     if (canHotRestart) {
       rawMessage += 'To hot restart (and rebuild state), press "R".';
     }
-    final String message = terminal.color(
-      fire + terminal.bolden(rawMessage),
+    final String message = globals.terminal.color(
+      fire + globals.terminal.bolden(rawMessage),
       TerminalColor.red,
     );
     globals.printStatus(message);

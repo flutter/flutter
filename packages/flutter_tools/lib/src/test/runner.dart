@@ -13,7 +13,6 @@ import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
-import '../base/terminal.dart';
 import '../build_info.dart';
 import '../dart/package_map.dart';
 import '../globals.dart' as globals;
@@ -55,7 +54,7 @@ Future<int> runTests(
 
   // Compute the command-line arguments for package:test.
   final List<String> testArgs = <String>[
-    if (!terminal.supportsColor)
+    if (!globals.terminal.supportsColor)
       '--no-color',
     if (machine)
       ...<String>['-r', 'json']

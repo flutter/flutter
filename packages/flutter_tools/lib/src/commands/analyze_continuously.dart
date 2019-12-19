@@ -10,7 +10,6 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../cache.dart';
 import '../dart/analysis.dart';
@@ -88,7 +87,7 @@ class AnalyzeContinuously extends AnalyzeBase {
       analysisStatus = null;
       analysisTimer.stop();
 
-      globals.logger.printStatus(terminal.clearScreen(), newline: false);
+      globals.logger.printStatus(globals.terminal.clearScreen(), newline: false);
 
       // Remove errors for deleted files, sort, and print errors.
       final List<AnalysisError> errors = <AnalysisError>[];
