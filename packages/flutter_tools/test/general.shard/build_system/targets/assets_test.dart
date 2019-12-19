@@ -27,6 +27,8 @@ void main() {
         ..createSync(recursive: true);
       fs.file(fs.path.join('assets', 'foo', 'bar.png'))
         ..createSync(recursive: true);
+      fs.file(fs.path.join('assets', 'wildcard', '#bar.png'))
+        ..createSync(recursive: true);
       fs.file('.packages')
         ..createSync();
       fs.file('pubspec.yaml')
@@ -37,6 +39,7 @@ name: example
 flutter:
   assets:
     - assets/foo/bar.png
+    - assets/wildcard/
 ''');
     });
   });
@@ -49,6 +52,8 @@ flutter:
     expect(fs.file(fs.path.join(environment.buildDir.path, 'flutter_assets', 'LICENSE')).existsSync(), true);
     // See https://github.com/flutter/flutter/issues/35293
     expect(fs.file(fs.path.join(environment.buildDir.path, 'flutter_assets', 'assets/foo/bar.png')).existsSync(), true);
+    // See https://github.com/flutter/flutter/issues/46163
+    expect(fs.file(fs.path.join(environment.buildDir.path, 'flutter_assets', 'assets/wildcard/%23bar.png')).existsSync(), true);
   }));
 
   test('Does not leave stale files in build directory', () => testbed.run(() async {
