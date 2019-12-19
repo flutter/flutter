@@ -13,7 +13,6 @@ import 'package:flutter/services.dart';
 import 'package:mockito/mockito.dart';
 import 'package:flutter/foundation.dart';
 
-import '../rendering/mock_canvas.dart';
 import 'editable_text_utils.dart';
 import 'semantics_tester.dart';
 
@@ -1337,86 +1336,6 @@ void main() {
     // These callbacks shouldn't have been triggered.
     assert(!onSubmittedCalled);
     assert(!onEditingCompleteCalled);
-  });
-
-  testWidgets(
-    'iOS autocorrection rectangle should appear on demand'
-    'and dismiss when the text changes or when focus is lost',
-    (WidgetTester tester) async {
-      const Color rectColor = Color(0xFFFF0000);
-
-      void verifyAutocorrectionRectVisibility({ bool expectVisible }) {
-        PaintPattern evaluate() {
-          if (expectVisible) {
-            return paints..something(((Symbol method, List<dynamic> arguments) {
-              if (method != #drawRect)
-                return false;
-              final Paint paint = arguments[1];
-              return paint.color == rectColor;
-            }));
-          } else {
-            return paints..everything(((Symbol method, List<dynamic> arguments) {
-              if (method != #drawRect)
-                return true;
-              final Paint paint = arguments[1];
-              if (paint.color != rectColor)
-                return true;
-              throw 'Expected: autocorrection rect not visible, found: ${arguments[0]}';
-            }));
-          }
-        }
-
-        expect(findRenderEditable(tester), evaluate());
-      }
-
-      final FocusNode focusNode = FocusNode();
-      final TextEditingController controller = TextEditingController(text: 'ABCDEFG');
-
-      final Widget widget = MaterialApp(
-        home: EditableText(
-          backgroundCursorColor: Colors.grey,
-          controller: controller,
-          focusNode: focusNode,
-          style: Typography(platform: TargetPlatform.android).black.subhead,
-          cursorColor: Colors.blue,
-          autocorrect: true,
-          autocorrectionTextRectColor: rectColor,
-          showCursor: false,
-          onEditingComplete: () { },
-        ),
-      );
-
-      await tester.pumpWidget(widget);
-
-      await tester.tap(find.byType(EditableText));
-      await tester.pump();
-      final EditableTextState state = tester.state<EditableTextState>(find.byType(EditableText));
-
-      assert(focusNode.hasFocus);
-
-      // The prompt rect should be invisible initially.
-      verifyAutocorrectionRectVisibility(expectVisible: false);
-
-      state.showAutocorrectionPromptRect(0, 1);
-      await tester.pump();
-
-      // Show prompt rect when told to.
-      verifyAutocorrectionRectVisibility(expectVisible: true);
-
-      // Text changed, prompt rect goes away.
-      controller.text = '12345';
-      await tester.pump();
-      verifyAutocorrectionRectVisibility(expectVisible: false);
-
-      state.showAutocorrectionPromptRect(0, 1);
-      await tester.pump();
-
-      verifyAutocorrectionRectVisibility(expectVisible: true);
-
-      // Unfocus, prompt rect should go away.
-      focusNode.unfocus();
-      await tester.pump();
-      verifyAutocorrectionRectVisibility(expectVisible: false);
   });
 
   testWidgets('Changing controller updates EditableText', (WidgetTester tester) async {
@@ -4009,6 +3928,10 @@ void main() {
   });
 
   testWidgets('input imm channel calls are ordered correctly', (WidgetTester tester) async {
+    final List<MethodCall> log = <MethodCall>[];
+    SystemChannels.textInput.setMockMethodCallHandler((MethodCall methodCall) async {
+      log.add(methodCall);
+    });
     const String testText = 'flutter is the best!';
     final TextEditingController controller = TextEditingController(text: testText);
     final EditableText et = EditableText(
@@ -4033,59 +3956,14 @@ void main() {
     ));
 
     await tester.showKeyboard(find.byType(EditableText));
+    expect(log.length, 7);
     // TextInput.show should be before TextInput.setEditingState
     final List<String> logOrder = <String>['TextInput.setClient', 'TextInput.show', 'TextInput.setEditableSizeAndTransform', 'TextInput.setStyle', 'TextInput.setEditingState', 'TextInput.setEditingState', 'TextInput.show'];
-    expect(tester.testTextInput.log.length, 7);
     int index = 0;
-    for (MethodCall m in tester.testTextInput.log) {
+    for (MethodCall m in log) {
       expect(m.method, logOrder[index]);
       index++;
     }
-  });
-
-  testWidgets('setEditingState is called when text changes', (WidgetTester tester) async {
-    const String testText = 'flutter is the best!';
-    final TextEditingController controller = TextEditingController(text: testText);
-    final EditableText et = EditableText(
-      showSelectionHandles: true,
-      maxLines: 2,
-      controller: controller,
-      focusNode: FocusNode(),
-      cursorColor: Colors.red,
-      backgroundCursorColor: Colors.blue,
-      style: Typography(platform: TargetPlatform.android).black.subhead.copyWith(fontFamily: 'Roboto'),
-      keyboardType: TextInputType.text,
-    );
-
-    await tester.pumpWidget(MaterialApp(
-      home: Align(
-        alignment: Alignment.topLeft,
-        child: SizedBox(
-          width: 100,
-          child: et,
-        ),
-      ),
-    ));
-
-    await tester.enterText(find.byType(EditableText), '...');
-
-    final List<String> logOrder = <String>[
-      'TextInput.setClient',
-      'TextInput.show',
-      'TextInput.setEditableSizeAndTransform',
-      'TextInput.setStyle',
-      'TextInput.setEditingState',
-      'TextInput.setEditingState',
-      'TextInput.show',
-      'TextInput.setEditingState',
-    ];
-    expect(tester.testTextInput.log.length, logOrder.length);
-    int index = 0;
-    for (MethodCall m in tester.testTextInput.log) {
-      expect(m.method, logOrder[index]);
-      index++;
-    }
-    expect(tester.testTextInput.editingState['text'], '...');
   });
 }
 

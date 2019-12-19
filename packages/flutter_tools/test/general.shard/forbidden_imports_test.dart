@@ -88,7 +88,7 @@ void main() {
       globals.fs.path.join(flutterTools, 'lib', 'src', 'build_runner', 'build_script.dart'),
       globals.fs.path.join(flutterTools, 'lib', 'src', 'test', 'flutter_platform.dart'),
       globals.fs.path.join(flutterTools, 'lib', 'src', 'test', 'flutter_web_platform.dart'),
-      globals.fs.path.join(flutterTools, 'lib', 'src', 'test', 'runner.dart'),
+      globals.fs.path.join(flutterTools, 'lib', 'src', 'test', 'test_wrapper.dart'),
     ];
     bool _isNotWhitelisted(FileSystemEntity entity) => whitelistedPaths.every((String path) => path != entity.path);
 

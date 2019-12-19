@@ -214,10 +214,7 @@ const Set<String> allowableDateFormats = <String>{
   's',
 };
 
-bool _isDateParameter(dynamic placeholderValue) {
-  return placeholderValue is Map<String, dynamic> &&
-    placeholderValue['type'] == 'DateTime';
-}
+bool _isDateParameter(Map<String, dynamic> placeholderValue) => placeholderValue['type'] == 'DateTime';
 
 bool _dateParameterIsValid(Map<String, dynamic> placeholderValue, String placeholder) {
   if (allowableDateFormats.contains(placeholderValue['format']))
@@ -260,6 +257,7 @@ String generateDateFormattingLogic(Map<String, dynamic> bundle, String key) {
     for (String placeholder in placeholders.keys) {
       final dynamic value = placeholders[placeholder];
       if (
+        value is Map<String, dynamic> &&
         _isDateParameter(value) &&
         _containsFormatKey(value, placeholder) &&
         _dateParameterIsValid(value, placeholder)
@@ -291,6 +289,7 @@ List<String> genIntlMethodArgs(Map<String, dynamic> bundle, String key) {
         for (String placeholder in placeholders.keys) {
           final dynamic value = placeholders[placeholder];
           if (
+            value is Map<String, dynamic> &&
             _isDateParameter(value) &&
             _containsFormatKey(value, placeholder) &&
             _dateParameterIsValid(value, placeholder)
@@ -315,7 +314,7 @@ String genSimpleMethod(Map<String, dynamic> bundle, String key) {
     final Map<String, dynamic> placeholders = attributesMap['placeholders'] as Map<String, dynamic>;
     for (String placeholder in placeholders.keys) {
       final dynamic value = placeholders[placeholder];
-      if (_isDateParameter(value)) {
+      if (value is Map<String, dynamic> && _isDateParameter(value)) {
         message = message.replaceAll('{$placeholder}', '\$${placeholder}String');
       } else {
         message = message.replaceAll('{$placeholder}', '\$$placeholder');
@@ -599,8 +598,8 @@ class LocalizationsGenerator {
     for (File file in fileSystemEntityList) {
       final String filePath = file.path;
       if (arbFilenameRE.hasMatch(filePath)) {
-        final Map<String, dynamic> arbContents = json.decode(file.readAsStringSync());
-        String localeString = arbContents['@@locale'];
+        final Map<String, dynamic> arbContents = json.decode(file.readAsStringSync()) as Map<String, dynamic>;
+        String localeString = arbContents['@@locale'] as String;
         if (localeString == null) {
           final RegExpMatch arbFileMatch = arbFilenameLocaleRE.firstMatch(filePath);
           if (arbFileMatch == null) {
@@ -653,7 +652,7 @@ class LocalizationsGenerator {
   void generateClassMethods() {
     Map<String, dynamic> bundle;
     try {
-      bundle = json.decode(templateArbFile.readAsStringSync());
+      bundle = json.decode(templateArbFile.readAsStringSync()) as Map<String, dynamic>;
     } on FileSystemException catch (e) {
       throw FileSystemException('Unable to read input arb file: $e');
     } on FormatException catch (e) {
@@ -669,7 +668,7 @@ class LocalizationsGenerator {
           'Invalid key format: $key \n It has to be in camel case, cannot start '
           'with a number, and cannot contain non-alphanumeric characters.'
         );
-      if (pluralValueRE.hasMatch(bundle[key]))
+      if (pluralValueRE.hasMatch(bundle[key] as String))
         classMethods.add(genPluralMethod(bundle, key));
       else
         classMethods.add(genSimpleMethod(bundle, key));

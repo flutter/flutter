@@ -195,7 +195,7 @@ Future<void> writeBundle(
     assetEntries.entries.map<Future<void>>((MapEntry<String, DevFSContent> entry) async {
       final PoolResource resource = await pool.request();
       try {
-        final File file = globals.fs.file(bundleDir.uri.resolve(entry.key));
+        final File file = globals.fs.file(globals.fs.path.join(bundleDir.path, entry.key));
         file.parent.createSync(recursive: true);
         await file.writeAsBytes(await entry.value.contentsAsBytes());
       } finally {

@@ -35,7 +35,7 @@ Future<Depfile> copyAssets(Environment environment, Directory outputDirectory) a
     assetBundle.entries.entries.map<Future<void>>((MapEntry<String, DevFSContent> entry) async {
       final PoolResource resource = await pool.request();
       try {
-        final File file = globals.fs.file(outputDirectory.uri.resolve(entry.key));
+        final File file = globals.fs.file(globals.fs.path.join(outputDirectory.path, entry.key));
         outputs.add(file);
         file.parent.createSync(recursive: true);
         final DevFSContent content = entry.value;
