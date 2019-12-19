@@ -8,8 +8,9 @@
 #include <stdint.h>
 
 #include <memory>
-#include <stack>
+#include <vector>
 
+#include "flutter/flow/layers/container_layer.h"
 #include "flutter/lib/ui/compositing/scene.h"
 #include "flutter/lib/ui/dart_wrapper.h"
 #include "flutter/lib/ui/painting/color_filter.h"
@@ -35,7 +36,6 @@ class SceneBuilder : public RefCountedDartWrappable<SceneBuilder> {
   static fml::RefPtr<SceneBuilder> create() {
     return fml::MakeRefCounted<SceneBuilder>();
   }
-
   ~SceneBuilder() override;
 
   fml::RefPtr<EngineLayer> pushTransform(tonic::Float64List& matrix4);
@@ -98,7 +98,6 @@ class SceneBuilder : public RefCountedDartWrappable<SceneBuilder> {
 #endif
 
   void setRasterizerTracingThreshold(uint32_t frameInterval);
-
   void setCheckerboardRasterCacheImages(bool checkerboard);
   void setCheckerboardOffscreenLayers(bool checkerboard);
 
@@ -109,14 +108,14 @@ class SceneBuilder : public RefCountedDartWrappable<SceneBuilder> {
  private:
   SceneBuilder();
 
-  std::shared_ptr<flutter::ContainerLayer> root_layer_;
-  flutter::ContainerLayer* current_layer_ = nullptr;
+  void AddLayer(std::shared_ptr<Layer> layer);
+  void PushLayer(std::shared_ptr<ContainerLayer> layer);
+  void PopLayer();
 
+  std::vector<std::shared_ptr<ContainerLayer>> layer_stack_;
   int rasterizer_tracing_threshold_ = 0;
   bool checkerboard_raster_cache_images_ = false;
   bool checkerboard_offscreen_layers_ = false;
-
-  void PushLayer(std::shared_ptr<flutter::ContainerLayer> layer);
 
   FML_DISALLOW_COPY_AND_ASSIGN(SceneBuilder);
 };

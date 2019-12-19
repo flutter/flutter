@@ -115,9 +115,7 @@ class SceneUpdateContext {
     Frame(SceneUpdateContext& context,
           const SkRRect& rrect,
           SkColor color,
-          float local_elevation = 0.0f,
-          float parent_elevation = 0.0f,
-          float depth = 0.0f,
+          float elevation = 0.0f,
           Layer* layer = nullptr);
     virtual ~Frame();
 
@@ -151,6 +149,17 @@ class SceneUpdateContext {
     metrics_ = std::move(metrics);
   }
   const fuchsia::ui::gfx::MetricsPtr& metrics() const { return metrics_; }
+
+  void set_dimensions(const SkISize& frame_physical_size,
+                      float frame_physical_depth,
+                      float frame_device_pixel_ratio) {
+    frame_physical_size_ = frame_physical_size;
+    frame_physical_depth_ = frame_physical_depth;
+    frame_device_pixel_ratio_ = frame_device_pixel_ratio;
+  }
+  const SkISize& frame_size() const { return frame_physical_size_; }
+  float frame_physical_depth() const { return frame_physical_depth_; }
+  float frame_device_pixel_ratio() const { return frame_device_pixel_ratio_; }
 
   // TODO(chinmaygarde): This method must submit the surfaces as soon as paint
   // tasks are done. However, given that there is no support currently for
@@ -225,6 +234,10 @@ class SceneUpdateContext {
   SurfaceProducer* const surface_producer_;
 
   fuchsia::ui::gfx::MetricsPtr metrics_;
+  SkISize frame_physical_size_;
+  float frame_physical_depth_ = 0.0f;
+  float frame_device_pixel_ratio_ =
+      1.0f;  // Ratio between logical and physical pixels.
 
   std::vector<PaintTask> paint_tasks_;
 

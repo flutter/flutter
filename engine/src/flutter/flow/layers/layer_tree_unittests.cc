@@ -17,14 +17,17 @@ namespace testing {
 
 class LayerTreeTest : public CanvasTest {
  public:
-  void SetUp() override {
-    root_transform_ = SkMatrix::MakeTrans(1.0f, 1.0f);
-    scoped_frame_ =
-        compositor_context_.AcquireFrame(nullptr, &mock_canvas(), nullptr,
-                                         root_transform_, false, true, nullptr);
-  }
-
-  void TearDown() override { scoped_frame_ = nullptr; }
+  LayerTreeTest()
+      : layer_tree_(SkISize::Make(64, 64), 100.0f, 1.0f),
+        compositor_context_(fml::kDefaultFrameBudget),
+        root_transform_(SkMatrix::MakeTrans(1.0f, 1.0f)),
+        scoped_frame_(compositor_context_.AcquireFrame(nullptr,
+                                                       &mock_canvas(),
+                                                       nullptr,
+                                                       root_transform_,
+                                                       false,
+                                                       true,
+                                                       nullptr)) {}
 
   LayerTree& layer_tree() { return layer_tree_; }
   CompositorContext::ScopedFrame& frame() { return *scoped_frame_.get(); }

@@ -59,7 +59,9 @@ class ShellTest : public ThreadTest {
                            double width = 1,
                            double height = 1,
                            LayerTreeBuilder = {});
-
+  static void PumpOneFrame(Shell* shell,
+                           flutter::ViewportMetrics viewport_metrics,
+                           LayerTreeBuilder = {});
   static void DispatchFakePointerData(Shell* shell);
   static void DispatchPointerData(Shell* shell,
                                   std::unique_ptr<PointerDataPacket> packet);

@@ -694,13 +694,6 @@ class SceneHost extends NativeFieldWrapperClass2 {
       void Function(bool) viewStateChangedCallback) {
     _constructor(viewHolderToken, viewConnectedCallback, viewDisconnectedCallback, viewStateChangedCallback);
   }
-  SceneHost.fromViewHolderToken(
-      dynamic viewHolderToken,
-      void Function() viewConnectedCallback,
-      void Function() viewDisconnectedCallback,
-      void Function(bool) viewStateChangedCallback) {
-    _constructor(viewHolderToken, viewConnectedCallback, viewDisconnectedCallback, viewStateChangedCallback);
-  }
 
   void _constructor(dynamic viewHolderToken, void Function() viewConnectedCallback, void Function() viewDisconnectedCallback, void Function(bool) viewStateChangedCallback)
       native 'SceneHost_constructor';
@@ -720,8 +713,4 @@ class SceneHost extends NativeFieldWrapperClass2 {
       double insetBottom,
       double insetLeft,
       bool focusable) native 'SceneHost_setProperties';
-
-  /// Set the opacity of the linked scene.  This opacity value is applied only
-  /// once, when the child scene is composited into our own.
-  void setOpacity(double opacity) native 'SceneHost_setOpacity';
 }

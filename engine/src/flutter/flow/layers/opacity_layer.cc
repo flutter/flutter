@@ -4,36 +4,33 @@
 
 #include "flutter/flow/layers/opacity_layer.h"
 
-#include "flutter/flow/layers/transform_layer.h"
+#include "flutter/fml/trace_event.h"
+#include "third_party/skia/include/core/SkPaint.h"
 
 namespace flutter {
 
 OpacityLayer::OpacityLayer(int alpha, const SkPoint& offset)
-    : alpha_(alpha), offset_(offset) {}
+    : alpha_(alpha), offset_(offset) {
+  // Ensure OpacityLayer has only one direct child.
+  //
+  // This is needed to ensure that retained rendering can always be applied to
+  // save the costly saveLayer.
+  //
+  // Any children will be actually added as children of this empty
+  // ContainerLayer.
+  ContainerLayer::Add(std::make_shared<ContainerLayer>());
+}
 
-void OpacityLayer::EnsureSingleChild() {
-  FML_DCHECK(layers().size() > 0);  // OpacityLayer should never be a leaf
-
-  if (layers().size() == 1) {
-    return;
-  }
-
-  // Be careful: SkMatrix's default constructor doesn't initialize the matrix to
-  // identity. Hence we have to explicitly call SkMatrix::setIdentity.
-  SkMatrix identity;
-  identity.setIdentity();
-  auto new_child = std::make_shared<flutter::TransformLayer>(identity);
-
-  for (auto& child : layers()) {
-    new_child->Add(child);
-  }
-  ClearChildren();
-  Add(new_child);
+void OpacityLayer::Add(std::shared_ptr<Layer> layer) {
+  GetChildContainer()->Add(std::move(layer));
 }
 
 void OpacityLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
   TRACE_EVENT0("flutter", "OpacityLayer::Preroll");
-  EnsureSingleChild();
+
+  ContainerLayer* container = GetChildContainer();
+  FML_DCHECK(!container->layers().empty());  // OpacityLayer can't be a leaf.
+
   SkMatrix child_matrix = matrix;
   child_matrix.postTranslate(offset_.fX, offset_.fY);
   context->mutators_stack.PushTransform(
@@ -45,16 +42,14 @@ void OpacityLayer::Preroll(PrerollContext* context, const SkMatrix& matrix) {
   context->mutators_stack.Pop();
   context->mutators_stack.Pop();
   set_paint_bounds(paint_bounds().makeOffset(offset_.fX, offset_.fY));
-  // See |EnsureSingleChild|.
-  FML_DCHECK(layers().size() == 1);
+
   if (!context->has_platform_view && context->raster_cache &&
       SkRect::Intersects(context->cull_rect, paint_bounds())) {
-    Layer* child = layers()[0].get();
     SkMatrix ctm = child_matrix;
 #ifndef SUPPORT_FRACTIONAL_TRANSLATION
     ctm = RasterCache::GetIntegralTransCTM(ctm);
 #endif
-    context->raster_cache->Prepare(context, child, ctm);
+    context->raster_cache->Prepare(context, container, ctm);
   }
 }
 
@@ -73,13 +68,10 @@ void OpacityLayer::Paint(PaintContext& context) const {
       context.leaf_nodes_canvas->getTotalMatrix()));
 #endif
 
-  // See |EnsureSingleChild|.
-  FML_DCHECK(layers().size() == 1);
-
   if (context.raster_cache) {
+    ContainerLayer* container = GetChildContainer();
     const SkMatrix& ctm = context.leaf_nodes_canvas->getTotalMatrix();
-    RasterCacheResult child_cache =
-        context.raster_cache->Get(layers()[0].get(), ctm);
+    RasterCacheResult child_cache = context.raster_cache->Get(container, ctm);
     if (child_cache.is_valid()) {
       child_cache.draw(*context.leaf_nodes_canvas, &paint);
       return;
@@ -103,6 +95,12 @@ void OpacityLayer::Paint(PaintContext& context) const {
   Layer::AutoSaveLayer save_layer =
       Layer::AutoSaveLayer::Create(context, saveLayerBounds, &paint);
   PaintChildren(context);
+}
+
+ContainerLayer* OpacityLayer::GetChildContainer() const {
+  FML_DCHECK(layers().size() == 1);
+
+  return static_cast<ContainerLayer*>(layers()[0].get());
 }
 
 }  // namespace flutter
