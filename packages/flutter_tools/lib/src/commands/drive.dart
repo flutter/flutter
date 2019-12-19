@@ -69,34 +69,6 @@ class DriveCommand extends RunCommandBase {
       ..addFlag('build',
         defaultsTo: true,
         help: 'Build the app before running.',
-      )
-      ..addOption('driver-port',
-        defaultsTo: '4444',
-        help: 'The port where Webdriver server is launched at. Defaults to 4444.',
-        valueHelp: '4444'
-      )
-      ..addFlag('headless',
-        defaultsTo: true,
-        help: 'Whether the driver browser is going to be launched in headless mode. Defaults to true.',
-      )
-      ..addOption('browser-name',
-        defaultsTo: 'chrome',
-        help: 'Name of browser where tests will be executed. \n'
-              'Following browsers are supported: \n'
-              'Chrome, Firefox, Safari (macOS and iOS) and Edge. Defaults to Chrome.',
-        allowed: <String>[
-          'chrome',
-          'edge',
-          'firefox',
-          'ios-safari',
-          'safari',
-        ]
-      )
-      ..addOption('browser-dimension',
-        defaultsTo: '1600,1024',
-        help: 'The dimension of browser when running Flutter Web test. \n'
-              'This will affect screenshot and all offset-related actions. \n'
-              'By default. it is set to 1600,1024 (1600 by 1024).',
       );
   }
 
@@ -161,16 +133,8 @@ class DriveCommand extends RunCommandBase {
 
     Cache.releaseLockEarly();
 
-    final Map<String, String> environment = <String, String>{
-      'VM_SERVICE_URL': observatoryUri,
-      'SELENIUM_PORT': argResults['driver-port'].toString(),
-      'BROWSER_NAME': argResults['browser-name'].toString(),
-      'BROWSER_DIMENSION': argResults['browser-dimension'].toString(),
-      'HEADLESS': argResults['headless'].toString(),
-    };
-
     try {
-      await testRunner(<String>[testFile], environment);
+      await testRunner(<String>[testFile], observatoryUri);
     } catch (error, stackTrace) {
       if (error is ToolExit) {
         rethrow;
@@ -327,13 +291,13 @@ Future<LaunchResult> _startApp(DriveCommand command) async {
 }
 
 /// Runs driver tests.
-typedef TestRunner = Future<void> Function(List<String> testArgs, Map<String, String> environment);
+typedef TestRunner = Future<void> Function(List<String> testArgs, String observatoryUri);
 TestRunner testRunner = _runTests;
 void restoreTestRunner() {
   testRunner = _runTests;
 }
 
-Future<void> _runTests(List<String> testArgs, Map<String, String> environment) async {
+Future<void> _runTests(List<String> testArgs, String observatoryUri) async {
   printTrace('Running driver tests.');
 
   PackageMap.globalPackagesPath = fs.path.normalize(fs.path.absolute(PackageMap.globalPackagesPath));
@@ -346,7 +310,7 @@ Future<void> _runTests(List<String> testArgs, Map<String, String> environment) a
       '--packages=${PackageMap.globalPackagesPath}',
       '-rexpanded',
     ],
-    environment: environment,
+    environment: <String, String>{'VM_SERVICE_URL': observatoryUri},
   );
   if (result != 0) {
     throwToolExit('Driver tests failed: $result', exitCode: result);

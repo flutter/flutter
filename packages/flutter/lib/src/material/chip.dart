@@ -1851,7 +1851,10 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
           animation: Listenable.merge(<Listenable>[selectController, enableController]),
           builder: (BuildContext context, Widget child) {
             return Container(
-              color: getBackgroundColor(chipTheme),
+              decoration: ShapeDecoration(
+                shape: shape,
+                color: getBackgroundColor(chipTheme),
+              ),
               child: child,
             );
           },

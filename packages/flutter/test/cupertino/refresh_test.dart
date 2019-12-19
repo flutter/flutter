@@ -1028,30 +1028,6 @@ void main() {
         debugDefaultTargetPlatformOverride = null;
       },
     );
-
-    testWidgets('Should not crash when dragged', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: CustomScrollView(
-            physics: const BouncingScrollPhysics(),
-            slivers: <Widget>[
-              CupertinoSliverRefreshControl(
-                onRefresh: () async => Future<void>.delayed(const Duration(days: 2000)),
-              ),
-            ],
-          ),
-        ),
-      );
-
-      await tester.dragFrom(const Offset(100, 10), const Offset(0.0, 50.0), touchSlopY: 0);
-      await tester.pump();
-
-      await tester.dragFrom(const Offset(100, 10), const Offset(0, 500), touchSlopY: 0);
-      await tester.pump();
-
-      expect(tester.takeException(), isNull);
-    });
   };
 
   final VoidCallback stateMachineTestGroup = () {
@@ -1489,36 +1465,6 @@ void main() {
   // Test the internal state machine directly to make sure the UI aren't just
   // correct by coincidence.
   group('state machine test short list', stateMachineTestGroup);
-
-  testWidgets(
-    'Does not crash when paintExtent > remainingPaintExtent',
-    (WidgetTester tester) async {
-      // Regression test for https://github.com/flutter/flutter/issues/46871.
-      await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: CustomScrollView(
-            physics: const BouncingScrollPhysics(),
-            slivers: <Widget>[
-              const CupertinoSliverRefreshControl(),
-              SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (BuildContext context, int index) => const SizedBox(height: 100),
-                  childCount: 20,
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-
-      // Drag the content down far enough so that
-      // geometry.paintExent > constraints.maxPaintExtent
-      await tester.dragFrom(const Offset(10, 10), const Offset(0, 500));
-      await tester.pump();
-
-      expect(tester.takeException(), isNull);
-  });
 }
 
 class MockHelper extends Mock {
