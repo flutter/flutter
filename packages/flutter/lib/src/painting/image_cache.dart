@@ -35,14 +35,16 @@ const int _kDefaultSizeBytes = 100 << 20; // 100 MiB
 /// global [imageCache] varible.
 ///
 /// ```dart
-/// import 'package:flutter/foundation.dart' as foundation;
-/// import 'package:flutter/gestures.dart' as gestures;
-/// import 'package:flutter/rendering.dart' as rendering;
-/// import 'package:flutter/scheduler.dart' as scheduler;
-/// import 'package:flutter/services.dart' as services;
-/// import 'package:flutter/widgets.dart' as widgets;
+/// import 'package:flutter/foundation.dart' show BindingBase;
+/// import 'package:flutter/gestures.dart' show GestureBinding;
+/// import 'package:flutter/rendering.dart' show PaintingBinding, SemanticsBinding,
+///     RendererBinding;
+/// import 'package:flutter/scheduler.dart' show SchedulerBinding;
+/// import 'package:flutter/services.dart' show ServicesBinding;
+/// import 'package:flutter/widgets.dart' show ImageCache, runApp, StatelessWidget,
+///     Widget, Container, BuildContext, WidgetsBinding;
 ///
-/// class MyImageCache extends widgets.ImageCache {
+/// class MyImageCache extends ImageCache {
 ///   @override
 ///   void clear() {
 ///     print("Clearing cache!");
@@ -50,30 +52,30 @@ const int _kDefaultSizeBytes = 100 << 20; // 100 MiB
 ///   }
 /// }
 ///
-/// class MyWidgetsBinding extends foundation.BindingBase
+/// class MyWidgetsBinding extends BindingBase
 ///     with
-///         gestures.GestureBinding,
-///         services.ServicesBinding,
-///         scheduler.SchedulerBinding,
-///         rendering.PaintingBinding,
-///         rendering.SemanticsBinding,
-///         rendering.RendererBinding,
-///         widgets.WidgetsBinding {
+///         GestureBinding,
+///         ServicesBinding,
+///         SchedulerBinding,
+///         PaintingBinding,
+///         SemanticsBinding,
+///         RendererBinding,
+///         WidgetsBinding {
 ///
 ///   @override
-///   widgets.ImageCache createImageCache() => MyImageCache();
+///   ImageCache createImageCache() => MyImageCache();
 /// }
 ///
 /// void main() {
-///   // Magic happens in the constructor to set global variables.
+///   // The constructor sets global variables.
 ///   MyWidgetsBinding();
-///   widgets.runApp(MyApp());
+///   runApp(MyApp());
 /// }
 ///
-/// class MyApp extends widgets.StatelessWidget {
+/// class MyApp extends StatelessWidget {
 ///   @override
-///   widgets.Widget build(widgets.BuildContext context) {
-///     return widgets.Container();
+///   Widget build(BuildContext context) {
+///     return Container();
 ///   }
 /// }
 /// ```
