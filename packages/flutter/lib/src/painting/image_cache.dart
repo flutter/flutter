@@ -37,7 +37,7 @@ const int _kDefaultSizeBytes = 100 << 20; // 100 MiB
 /// ```dart
 /// import 'package:flutter/widgets.dart' show ImageCache, runApp, StatelessWidget,
 ///     Widget, Container, BuildContext, WidgetsFlutterBinding;
-/// 
+///
 /// class MyImageCache extends ImageCache {
 ///   @override
 ///   void clear() {
@@ -45,18 +45,18 @@ const int _kDefaultSizeBytes = 100 << 20; // 100 MiB
 ///     super.clear();
 ///   }
 /// }
-/// 
+///
 /// class MyWidgetsBinding extends WidgetsFlutterBinding {
 ///   @override
 ///   ImageCache createImageCache() => MyImageCache();
 /// }
-///                                                                                 
+///
 /// void main() {
 ///   // The constructor sets global variables.
 ///   MyWidgetsBinding();
 ///   runApp(MyApp());
 /// }
-/// 
+///
 /// class MyApp extends StatelessWidget {
 ///   @override
 ///   Widget build(BuildContext context) {
