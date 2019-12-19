@@ -568,7 +568,11 @@ class AndroidProject implements PlatformProject {
 
   @override
   String get pluginConfigKey => AndroidPlugin.kConfigKey;
+<<<<<<< HEAD
 
+=======
+
+>>>>>>> 71ed112c0329fffc9e80f7f3a3d3fbea7ec55029
   // TODO(franciscojma): Change this values to the location of the android project. Currently setting
   // to the parent's value to avoid breaking changes in the gradle setup.
   @override
