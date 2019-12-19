@@ -1204,6 +1204,45 @@ class Transform extends SingleChildRenderObjectWidget {
   }) : transform = Matrix4.diagonal3Values(scale, scale, 1.0),
        super(key: key, child: child);
 
+  /// Creates a widget that scales its child uniformly.
+  ///
+  /// The `scale` argument must not be null. It specifies the `x` and `y`
+  /// axes.
+  ///
+  /// The [alignment] controls the origin of the scale; by default, this is
+  /// the center of the box.
+  ///
+  /// {@tool sample}
+  ///
+  /// This example extends a green box that contains Text by Offset given.
+  /// 
+  ///
+  /// ```dart
+  /// Transform.scale(
+  ///   scale: Offset(2, 2),
+  ///   child: Container(
+  ///     padding: const EdgeInsets.all(8.0),
+  ///     color: const Color(0xFF4CAF50),
+  ///     child: const Text('Good Ideas'),
+  ///   ),
+  /// )
+  /// ```
+  /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  ///  * [ScaleTransition], which animates changes in scale smoothly
+  ///    over a given duration.
+  Transform.scaleXY({
+    Key key,
+    @required Offset scale,
+    this.origin,
+    this.alignment = Alignment.center,
+    this.transformHitTests = true,
+    Widget child,
+  }) : transform = Matrix4.diagonal3Values(scale.dx, scale.dy, 1.0),
+       super(key: key, child: child);
+
   /// The matrix to transform the child by during painting.
   final Matrix4 transform;
 
