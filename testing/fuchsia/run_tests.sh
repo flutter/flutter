@@ -39,3 +39,11 @@ trap reboot EXIT
     -f flutter_runner_tests-0.far  \
     -t flutter_runner_tests
 
+./fuchsia_ctl -d $device_name test \
+    -f fml_tests-0.far  \
+    -t fml_tests
+
+./fuchsia_ctl -d $device_name test \
+    -f flow_tests-0.far  \
+    -t flow_tests
+

@@ -53,7 +53,6 @@ template("runner") {
     deps = [
              "$flutter_root/common",
              "$flutter_root/fml",
-             "$flutter_root/runtime:libdart",
              "$flutter_root/shell/platform/fuchsia/dart-pkg/fuchsia",
              "$flutter_root/shell/platform/fuchsia/dart-pkg/zircon",
              "$fuchsia_sdk_root/pkg:async",
