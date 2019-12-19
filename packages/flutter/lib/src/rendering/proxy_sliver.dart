@@ -385,7 +385,7 @@ class RenderSliverAnimatedOpacity extends RenderProxySliver with RenderAnimatedO
     bool alwaysIncludeSemantics = false,
     RenderSliver sliver,
   }) : assert(opacity != null),
-      assert(alwaysIncludeSemantics != null) {
+       assert(alwaysIncludeSemantics != null) {
     this.opacity = opacity;
     this.alwaysIncludeSemantics = alwaysIncludeSemantics;
     child = sliver;
