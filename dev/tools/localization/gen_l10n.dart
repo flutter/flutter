@@ -214,10 +214,7 @@ const Set<String> allowableDateFormats = <String>{
   's',
 };
 
-bool _isDateParameter(dynamic placeholderValue) {
-  return placeholderValue is Map<String, dynamic> &&
-    placeholderValue['type'] == 'DateTime';
-}
+bool _isDateParameter(Map<String, dynamic> placeholderValue) => placeholderValue['type'] == 'DateTime';
 
 bool _dateParameterIsValid(Map<String, dynamic> placeholderValue, String placeholder) {
   if (allowableDateFormats.contains(placeholderValue['format']))
@@ -260,6 +257,7 @@ String generateDateFormattingLogic(Map<String, dynamic> bundle, String key) {
     for (String placeholder in placeholders.keys) {
       final dynamic value = placeholders[placeholder];
       if (
+        value is Map<String, dynamic> &&
         _isDateParameter(value) &&
         _containsFormatKey(value, placeholder) &&
         _dateParameterIsValid(value, placeholder)
@@ -291,6 +289,7 @@ List<String> genIntlMethodArgs(Map<String, dynamic> bundle, String key) {
         for (String placeholder in placeholders.keys) {
           final dynamic value = placeholders[placeholder];
           if (
+            value is Map<String, dynamic> &&
             _isDateParameter(value) &&
             _containsFormatKey(value, placeholder) &&
             _dateParameterIsValid(value, placeholder)
@@ -315,7 +314,7 @@ String genSimpleMethod(Map<String, dynamic> bundle, String key) {
     final Map<String, dynamic> placeholders = attributesMap['placeholders'] as Map<String, dynamic>;
     for (String placeholder in placeholders.keys) {
       final dynamic value = placeholders[placeholder];
-      if (_isDateParameter(value)) {
+      if (value is Map<String, dynamic> && _isDateParameter(value)) {
         message = message.replaceAll('{$placeholder}', '\$${placeholder}String');
       } else {
         message = message.replaceAll('{$placeholder}', '\$$placeholder');
