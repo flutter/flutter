@@ -828,7 +828,7 @@ class RenderOpacity extends RenderProxyBox {
 /// Use this mixin in situations where the proxying behavior
 /// of [RenderProxyBox] or [RenderProxySliver] is desired for animating opacity,
 /// but would like to use the same methods for both types of render objects.
-mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObject, RenderObjectWithChildMixin<T> {
+mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChildMixin<T> {
   int _alpha;
 
   @override
@@ -956,7 +956,10 @@ class RenderAnimatedOpacity extends RenderProxyBox with RenderAnimatedOpacityMix
   }
 
   @override
-  void paintWithOpacity(PaintingContext context, Offset offset) => super.paint;
+  void paintWithOpacity(PaintingContext context, Offset offset) {
+    if (child != null)
+      context.paintChild(child, offset);
+  }
 }
 
 /// Signature for a function that creates a [Shader] for a given [Rect].
