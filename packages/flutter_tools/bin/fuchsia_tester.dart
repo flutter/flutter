@@ -22,6 +22,7 @@ import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/test/coverage_collector.dart';
 import 'package:flutter_tools/src/test/runner.dart';
+import 'package:flutter_tools/src/test/test_wrapper.dart';
 
 // This was largely inspired by lib/src/commands/test.dart.
 
@@ -142,6 +143,7 @@ Future<void> run(List<String> args) async {
     }
 
     exitCode = await runTests(
+      const TestWrapper(),
       tests.keys.toList(),
       workDir: testDirectory,
       watcher: collector,

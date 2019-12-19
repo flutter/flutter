@@ -48,7 +48,7 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
   _SelectableTextSelectionGestureDetectorBuilder({
     @required _SelectableTextState state,
   }) : _state = state,
-      super(delegate: state);
+       super(delegate: state);
 
   final _SelectableTextState _state;
 
@@ -201,6 +201,7 @@ class SelectableText extends StatefulWidget {
     this.strutStyle,
     this.textAlign,
     this.textDirection,
+    this.textScaleFactor,
     this.showCursor = false,
     this.autofocus = false,
     ToolbarOptions toolbarOptions,
@@ -243,6 +244,7 @@ class SelectableText extends StatefulWidget {
     this.strutStyle,
     this.textAlign,
     this.textDirection,
+    this.textScaleFactor,
     this.showCursor = false,
     this.autofocus = false,
     ToolbarOptions toolbarOptions,
@@ -321,6 +323,9 @@ class SelectableText extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.textDirection}
   final TextDirection textDirection;
 
+  /// {@macro flutter.widgets.editableText.textScaleFactor}
+  final double textScaleFactor;
+
   /// {@macro flutter.widgets.editableText.autofocus}
   final bool autofocus;
 
@@ -396,6 +401,7 @@ class SelectableText extends StatefulWidget {
     properties.add(IntProperty('maxLines', maxLines, defaultValue: null));
     properties.add(EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
+    properties.add(DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: null));
     properties.add(DoubleProperty('cursorWidth', cursorWidth, defaultValue: 2.0));
     properties.add(DiagnosticsProperty<Radius>('cursorRadius', cursorRadius, defaultValue: null));
     properties.add(DiagnosticsProperty<Color>('cursorColor', cursorColor, defaultValue: null));
@@ -572,6 +578,7 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
         strutStyle: widget.strutStyle ?? StrutStyle.disabled,
         textAlign: widget.textAlign ?? defaultTextStyle.textAlign ?? TextAlign.start,
         textDirection: widget.textDirection,
+        textScaleFactor: widget.textScaleFactor,
         autofocus: widget.autofocus,
         forceLine: false,
         toolbarOptions: widget.toolbarOptions,

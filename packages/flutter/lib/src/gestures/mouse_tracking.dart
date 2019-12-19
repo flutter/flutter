@@ -314,7 +314,7 @@ class MouseTracker extends ChangeNotifier {
     final int device = state.device;
     return (_mouseStates.containsKey(device) && _trackedAnnotations.isNotEmpty)
       ? LinkedHashSet<MouseTrackerAnnotation>.from(annotationFinder(globalPosition))
-      : <MouseTrackerAnnotation>{};
+      : <MouseTrackerAnnotation>{} as LinkedHashSet<MouseTrackerAnnotation>;
   }
 
   static bool get _duringBuildPhase {

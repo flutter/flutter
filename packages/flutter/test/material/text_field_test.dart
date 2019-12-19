@@ -7402,4 +7402,34 @@ void main() {
     await tester.pump();
     expect(focusNode3.hasPrimaryFocus, isTrue);
   });
+
+  testWidgets("A buildCounter that returns null doesn't affect the size of the TextField", (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/44909
+
+    final GlobalKey textField1Key = GlobalKey();
+    final GlobalKey textField2Key = GlobalKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Column(
+            children: <Widget>[
+              TextField(key: textField1Key),
+              TextField(
+                key: textField2Key,
+                maxLength: 1,
+                buildCounter: (BuildContext context, {int currentLength, bool isFocused, int maxLength}) => null,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+    final Size textFieldSize1 = tester.getSize(find.byKey(textField1Key));
+    final Size textFieldSize2 = tester.getSize(find.byKey(textField2Key));
+
+    expect(textFieldSize1, equals(textFieldSize2));
+  });
 }

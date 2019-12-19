@@ -21,10 +21,14 @@ import '../runner/flutter_command.dart';
 import '../test/coverage_collector.dart';
 import '../test/event_printer.dart';
 import '../test/runner.dart';
+import '../test/test_wrapper.dart';
 import '../test/watcher.dart';
 
 class TestCommand extends FastFlutterCommand {
-  TestCommand({ bool verboseHelp = false }) {
+  TestCommand({
+    bool verboseHelp = false,
+    this.testWrapper = const TestWrapper(),
+  }) : assert(testWrapper != null) {
     requiresPubspecYaml();
     usesPubOption();
     argParser
@@ -100,9 +104,19 @@ class TestCommand extends FastFlutterCommand {
         allowed: const <String>['tester', 'chrome'],
         defaultsTo: 'tester',
         help: 'The platform to run the unit tests on. Defaults to "tester".',
+      )
+      ..addOption('test-randomize-ordering-seed',
+        defaultsTo: '0',
+        help: 'If positive, use this as a seed to randomize the execution of '
+              'test cases (must be a 32bit unsigned integer).\n'
+              'If "random", pick a random seed to use.\n'
+              'If 0 or not set, do not randomize test case execution order.',
       );
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
   }
+
+  /// The interface for starting and configuring the tester.
+  final TestWrapper testWrapper;
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async {
@@ -223,6 +237,7 @@ class TestCommand extends FastFlutterCommand {
       boolArg('disable-service-auth-codes');
 
     final int result = await runTests(
+      testWrapper,
       files,
       workDir: workDir,
       names: names,
@@ -240,6 +255,7 @@ class TestCommand extends FastFlutterCommand {
       buildTestAssets: buildTestAssets,
       flutterProject: flutterProject,
       web: stringArg('platform') == 'chrome',
+      randomSeed: stringArg('test-randomize-ordering-seed'),
     );
 
     if (collector != null) {
