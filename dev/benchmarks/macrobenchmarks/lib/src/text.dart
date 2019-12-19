@@ -8,12 +8,12 @@ class TextPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
-      children: [
+      children: <Widget>[
         Container(
           width: 200,
           height: 100,
-          child: TextField(
-            key: const Key('basic-textfield'),
+          child: const TextField(
+            key: Key('basic-textfield'),
           ),
         ),
       ],
