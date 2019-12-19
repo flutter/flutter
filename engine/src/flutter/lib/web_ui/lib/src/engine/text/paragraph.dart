@@ -29,13 +29,12 @@ class EngineLineMetrics implements ui.LineMetrics {
     this.unscaledAscent,
     this.height,
     @required this.width,
-    @required this.left,
+    this.left,
     this.baseline,
     @required this.lineNumber,
   })  : assert(text != null),
         assert(hardBreak != null),
         assert(width != null),
-        assert(left != null),
         assert(lineNumber != null && lineNumber >= 0);
 
   /// The textual content representing this line.
