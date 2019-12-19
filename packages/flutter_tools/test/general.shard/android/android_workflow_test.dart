@@ -33,7 +33,7 @@ void main() {
   setUp(() {
     sdk = MockAndroidSdk();
     fs = MemoryFileSystem();
-    globals.fs.directory('/home/me').createSync(recursive: true);
+    fs.directory('/home/me').createSync(recursive: true);
     processManager = MockProcessManager();
     stdio = MockStdio();
   });

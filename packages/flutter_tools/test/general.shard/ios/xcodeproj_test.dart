@@ -36,7 +36,7 @@ void main() {
       xcodeProjectInterpreter = XcodeProjectInterpreter();
       macOS = fakePlatform('macos');
       fs = MemoryFileSystem();
-      globals.fs.file(xcodebuild).createSync(recursive: true);
+      fs.file(xcodebuild).createSync(recursive: true);
     });
 
     void testUsingOsxContext(String description, dynamic testMethod()) {
@@ -110,14 +110,14 @@ void main() {
     });
 
     testUsingContext('isInstalled is false when not on MacOS', () {
-      globals.fs.file(xcodebuild).deleteSync();
+      fs.file(xcodebuild).deleteSync();
       expect(xcodeProjectInterpreter.isInstalled, isFalse);
     }, overrides: <Type, Generator>{
       Platform: () => fakePlatform('notMacOS'),
     });
 
     testUsingOsxContext('isInstalled is false when xcodebuild does not exist', () {
-      globals.fs.file(xcodebuild).deleteSync();
+      fs.file(xcodebuild).deleteSync();
       expect(xcodeProjectInterpreter.isInstalled, isFalse);
     });
 
@@ -233,7 +233,7 @@ void main() {
       mockProcessManager = mocks.MockProcessManager();
       macOS = fakePlatform('macos');
       fs = MemoryFileSystem();
-      globals.fs.file(xcodebuild).createSync(recursive: true);
+      fs.file(xcodebuild).createSync(recursive: true);
     });
 
     void testUsingOsxContext(String description, dynamic testMethod()) {

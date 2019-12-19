@@ -84,7 +84,6 @@ void main() {
     String gradlew;
     Usage mockUsage;
 
-
     setUp(() {
       mockUsage = MockUsage();
       when(mockUsage.isFirstRun).thenReturn(true);
@@ -156,7 +155,7 @@ void main() {
             arguments: <String>['--no-pub'],
           );
         }, throwsToolExit(
-          message: '[!] No Android SDK found. Try setting the ANDROID_HOME environment variable',
+          message: 'No Android SDK found. Try setting the ANDROID_HOME environment variable',
         ));
       },
       overrides: <Type, Generator>{

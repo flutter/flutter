@@ -229,15 +229,15 @@ void main() {
 
     setUp(() async {
       fs = MemoryFileSystem();
-      globals.fs.file(kSnapshotDart).createSync();
-      globals.fs.file('.packages').writeAsStringSync('sky_engine:file:///flutter/bin/cache/pkg/sky_engine/lib/');
+      fs.file(kSnapshotDart).createSync();
+      fs.file('.packages').writeAsStringSync('sky_engine:file:///flutter/bin/cache/pkg/sky_engine/lib/');
 
-      skyEnginePath = globals.fs.path.fromUri(Uri.file('/flutter/bin/cache/pkg/sky_engine'));
-      globals.fs.directory(globals.fs.path.join(skyEnginePath, 'lib', 'ui')).createSync(recursive: true);
-      globals.fs.directory(globals.fs.path.join(skyEnginePath, 'sdk_ext')).createSync(recursive: true);
-      globals.fs.file(globals.fs.path.join(skyEnginePath, '.packages')).createSync();
-      globals.fs.file(globals.fs.path.join(skyEnginePath, 'lib', 'ui', 'ui.dart')).createSync();
-      globals.fs.file(globals.fs.path.join(skyEnginePath, 'sdk_ext', 'vmservice_io.dart')).createSync();
+      skyEnginePath = fs.path.fromUri(Uri.file('/flutter/bin/cache/pkg/sky_engine'));
+      fs.directory(fs.path.join(skyEnginePath, 'lib', 'ui')).createSync(recursive: true);
+      fs.directory(fs.path.join(skyEnginePath, 'sdk_ext')).createSync(recursive: true);
+      fs.file(fs.path.join(skyEnginePath, '.packages')).createSync();
+      fs.file(fs.path.join(skyEnginePath, 'lib', 'ui', 'ui.dart')).createSync();
+      fs.file(fs.path.join(skyEnginePath, 'sdk_ext', 'vmservice_io.dart')).createSync();
 
       genSnapshot = _FakeGenSnapshot();
       snapshotter = AOTSnapshotter();
