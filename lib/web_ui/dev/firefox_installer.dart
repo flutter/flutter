@@ -15,7 +15,7 @@ import 'environment.dart';
 class FirefoxArgParser extends BrowserArgParser {
   static final FirefoxArgParser _singletonInstance = FirefoxArgParser._();
 
-  /// The [ChromeArgParser] singleton.
+  /// The [FirefoxArgParser] singleton.
   static FirefoxArgParser get instance => _singletonInstance;
 
   String _version;
