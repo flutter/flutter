@@ -5,41 +5,59 @@
 assert(is_fuchsia)
 
 import("//build/fuchsia/sdk.gni")
+import("$flutter_root/common/config.gni")
 
 config("utils_config") {
   include_dirs = [ "../../.." ]
 }
 
-source_set("utils") {
-  sources = [
-    "files.cc",
-    "files.h",
-    "handle_exception.cc",
-    "handle_exception.h",
-    "inlines.h",
-    "logging.h",
-    "tempfs.cc",
-    "tempfs.h",
-    "vmo.cc",
-    "vmo.h",
-    "vmservice_object.cc",
-    "vmservice_object.h",
-  ]
+template("make_utils") {
+  source_set(target_name) {
+    sources = [
+      "files.cc",
+      "files.h",
+      "handle_exception.cc",
+      "handle_exception.h",
+      "inlines.h",
+      "logging.h",
+      "mapped_resource.cc",
+      "mapped_resource.h",
+      "tempfs.cc",
+      "tempfs.h",
+      "vmo.cc",
+      "vmo.h",
+      "vmservice_object.cc",
+      "vmservice_object.h",
+    ]
 
+    deps = invoker.deps + [
+             "$fuchsia_sdk_root/fidl:fuchsia.feedback",
+             "$fuchsia_sdk_root/fidl:fuchsia.mem",
+             "$fuchsia_sdk_root/pkg:async-loop",
+             "$fuchsia_sdk_root/pkg:async-loop-cpp",
+             "$fuchsia_sdk_root/pkg:async-loop-default",
+             "$fuchsia_sdk_root/pkg:fdio",
+             "$fuchsia_sdk_root/pkg:memfs",
+             "$fuchsia_sdk_root/pkg:sys_cpp",
+             "$fuchsia_sdk_root/pkg:syslog",
+             "$fuchsia_sdk_root/pkg:trace",
+             "$fuchsia_sdk_root/pkg:vfs_cpp",
+             "$fuchsia_sdk_root/pkg:zx",
+             "//third_party/tonic",
+           ]
+
+    public_configs = [ ":utils_config" ]
+  }
+}
+
+make_utils("utils") {
   deps = [
-    "$fuchsia_sdk_root/fidl:fuchsia.feedback",
-    "$fuchsia_sdk_root/fidl:fuchsia.mem",
-    "$fuchsia_sdk_root/pkg:async-loop",
-    "$fuchsia_sdk_root/pkg:async-loop-cpp",
-    "$fuchsia_sdk_root/pkg:async-loop-default",
-    "$fuchsia_sdk_root/pkg:fdio",
-    "$fuchsia_sdk_root/pkg:memfs",
-    "$fuchsia_sdk_root/pkg:sys_cpp",
-    "$fuchsia_sdk_root/pkg:syslog",
-    "$fuchsia_sdk_root/pkg:vfs_cpp",
-    "$fuchsia_sdk_root/pkg:zx",
-    "//third_party/tonic",
+    "//third_party/dart/runtime/bin:elf_loader",
   ]
+}
 
-  public_configs = [ ":utils_config" ]
+make_utils("utils_product") {
+  deps = [
+    "//third_party/dart/runtime/bin:elf_loader_product",
+  ]
 }

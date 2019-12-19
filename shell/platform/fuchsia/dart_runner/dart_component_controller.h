@@ -16,7 +16,7 @@
 #include <lib/zx/timer.h>
 
 #include "lib/fidl/cpp/binding.h"
-#include "mapped_resource.h"
+#include "runtime/dart/utils/mapped_resource.h"
 #include "third_party/dart/runtime/include/dart_api.h"
 
 namespace dart_runner {
@@ -72,9 +72,10 @@ class DartComponentController : public fuchsia::sys::ComponentController {
   fdio_ns_t* namespace_ = nullptr;
   int stdoutfd_ = -1;
   int stderrfd_ = -1;
-  MappedResource isolate_snapshot_data_;
-  MappedResource isolate_snapshot_instructions_;
-  std::vector<MappedResource> kernel_peices_;
+  dart_utils::ElfSnapshot elf_snapshot_;                      // AOT snapshot
+  dart_utils::MappedResource isolate_snapshot_data_;          // JIT snapshot
+  dart_utils::MappedResource isolate_snapshot_instructions_;  // JIT snapshot
+  std::vector<dart_utils::MappedResource> kernel_peices_;
 
   Dart_Isolate isolate_;
   int32_t return_code_ = 0;
