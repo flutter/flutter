@@ -823,25 +823,12 @@ class RenderOpacity extends RenderProxyBox {
   }
 }
 
-/// Makes its child partially transparent, driven from an [Animation].
+/// Implementation of [RenderAnimatedOpacity] and [RenderSliverAnimatedOpacity].
 ///
-/// This is a variant of [RenderOpacity] that uses an [Animation<double>] rather
-/// than a [double] to control the opacity.
-class RenderAnimatedOpacity extends RenderProxyBox {
-  /// Creates a partially transparent render object.
-  ///
-  /// The [opacity] argument must not be null.
-  RenderAnimatedOpacity({
-    @required Animation<double> opacity,
-    bool alwaysIncludeSemantics = false,
-    RenderBox child,
-  }) : assert(opacity != null),
-       assert(alwaysIncludeSemantics != null),
-       _alwaysIncludeSemantics = alwaysIncludeSemantics,
-       super(child) {
-    this.opacity = opacity;
-  }
-
+/// Use this mixin in situations where the proxying behavior
+/// of [RenderProxyBox] or [RenderProxySliver] is desired for animating opacity,
+/// but would like to use the same methods for both types of render objects.
+mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChildMixin<T> {
   int _alpha;
 
   @override
@@ -910,6 +897,12 @@ class RenderAnimatedOpacity extends RenderProxyBox {
     }
   }
 
+  /// Paint method to be implemented for the inheriting [RenderProxySliver]
+  /// and [RenderProxyBox].
+  ///
+  /// Must be implemented by the class that is using the mixin.
+  void paintWithOpacity(PaintingContext context, Offset offset);
+
   @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
@@ -925,7 +918,7 @@ class RenderAnimatedOpacity extends RenderProxyBox {
         return;
       }
       assert(needsCompositing);
-      layer = context.pushOpacity(offset, _alpha, super.paint, oldLayer: layer as OpacityLayer);
+      layer = context.pushOpacity(offset, _alpha, paintWithOpacity, oldLayer: layer as OpacityLayer);
     }
   }
 
@@ -940,6 +933,32 @@ class RenderAnimatedOpacity extends RenderProxyBox {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Animation<double>>('opacity', opacity));
     properties.add(FlagProperty('alwaysIncludeSemantics', value: alwaysIncludeSemantics, ifTrue: 'alwaysIncludeSemantics'));
+  }
+}
+
+/// Makes its child partially transparent, driven from an [Animation].
+///
+/// This is a variant of [RenderOpacity] that uses an [Animation<double>] rather
+/// than a [double] to control the opacity.
+class RenderAnimatedOpacity extends RenderProxyBox with RenderAnimatedOpacityMixin<RenderBox> {
+  /// Creates a partially transparent render object.
+  ///
+  /// The [opacity] argument must not be null.
+  RenderAnimatedOpacity({
+    @required Animation<double> opacity,
+    bool alwaysIncludeSemantics = false,
+    RenderBox child,
+  }) : assert(opacity != null),
+       assert(alwaysIncludeSemantics != null),
+       super(child) {
+    this.opacity = opacity;
+    this.alwaysIncludeSemantics = alwaysIncludeSemantics;
+  }
+
+  @override
+  void paintWithOpacity(PaintingContext context, Offset offset) {
+    if (child != null)
+      context.paintChild(child, offset);
   }
 }
 

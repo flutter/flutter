@@ -5,9 +5,6 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
-import 'package:test_api/backend.dart'; // ignore: deprecated_member_use
-import 'package:test_core/src/executable.dart' as test; // ignore: implementation_imports
-import 'package:test_core/src/runner/hack_register_platform.dart' as hack; // ignore: implementation_imports
 
 import '../artifacts.dart';
 import '../base/common.dart';
@@ -22,10 +19,12 @@ import '../project.dart';
 import '../web/compile.dart';
 import 'flutter_platform.dart' as loader;
 import 'flutter_web_platform.dart';
+import 'test_wrapper.dart';
 import 'watcher.dart';
 
 /// Runs tests using package:test and the Flutter engine.
 Future<int> runTests(
+  TestWrapper testWrapper,
   List<String> testFiles, {
   Directory workDir,
   List<String> names = const <String>[],
@@ -47,6 +46,7 @@ Future<int> runTests(
   String icudtlPath,
   Directory coverageDirectory,
   bool web = false,
+  String randomSeed = '0',
 }) async {
   // Configure package:test to use the Flutter engine for child processes.
   final String shellPath = artifacts.getArtifactPath(Artifact.flutterTester);
@@ -67,6 +67,7 @@ Future<int> runTests(
       ...<String>['--name', name],
     for (String plainName in plainNames)
       ...<String>['--plain-name', plainName],
+    '--test-randomize-ordering-seed=$randomSeed',
   ];
   if (web) {
     final String tempBuildDir = fs.systemTempDirectory
@@ -89,7 +90,7 @@ Future<int> runTests(
       ..add('--precompiled=$tempBuildDir')
       ..add('--')
       ..addAll(testFiles);
-    hack.registerPlatformPlugin(
+    testWrapper.registerPlatformPlugin(
       <Runtime>[Runtime.chrome],
       () {
         return FlutterWebPlatform.start(
@@ -100,7 +101,7 @@ Future<int> runTests(
         );
       },
     );
-    await test.main(testArgs);
+    await testWrapper.main(testArgs);
     return exitCode;
   }
 
@@ -112,6 +113,7 @@ Future<int> runTests(
       ipv6 ? InternetAddressType.IPv6 : InternetAddressType.IPv4;
 
   final loader.FlutterPlatform platform = loader.installHook(
+    testWrapper: testWrapper,
     shellPath: shellPath,
     watcher: watcher,
     enableObservatory: enableObservatory,
@@ -144,7 +146,7 @@ Future<int> runTests(
     }
 
     printTrace('running test package with arguments: $testArgs');
-    await test.main(testArgs);
+    await testWrapper.main(testArgs);
 
     // test.main() sets dart:io's exitCode global.
     printTrace('test package returned with exit code $exitCode');
