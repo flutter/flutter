@@ -129,9 +129,7 @@ if (is_fuchsia) {
 
     deps = [
       "$flutter_root/flow:flow_tests",
-
-      # TODO(gw280): Re-enable fml_tests on Fuchsia (https://github.com/flutter/flutter/issues/46122)
-      #     "$flutter_root/fml:fml_tests",
+      "$flutter_root/fml:fml_tests",
       "$flutter_root/shell/platform/fuchsia/flutter:flutter_runner_tests",
     ]
   }
