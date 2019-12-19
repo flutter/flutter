@@ -232,7 +232,7 @@ Application::Application(
                          << "): " << zx_status_get_string(status);
           return;
         }
-        const char* other_dirs[] = {"debug", "ctrl", "diagnostics"};
+        const char* other_dirs[] = {"debug", "ctrl"};
         // add other directories as RemoteDirs.
         for (auto& dir_str : other_dirs) {
           fidl::InterfaceHandle<fuchsia::io::Directory> dir;
