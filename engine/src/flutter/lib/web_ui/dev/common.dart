@@ -48,6 +48,7 @@ abstract class PlatformBinding {
   String getChromeExecutablePath(io.Directory versionDir);
   String getFirefoxExecutablePath(io.Directory versionDir);
   String getFirefoxLatestVersionUrl();
+  String getSafariSystemExecutablePath();
 }
 
 const String _kBaseDownloadUrl =
@@ -79,6 +80,10 @@ class _LinuxBinding implements PlatformBinding {
   @override
   String getFirefoxLatestVersionUrl() =>
       'https://download.mozilla.org/?product=firefox-latest&os=linux64&lang=en-US';
+
+  @override
+  String getSafariSystemExecutablePath() =>
+      throw UnsupportedError('Safari is not supported on Linux');
 }
 
 class _MacBinding implements PlatformBinding {
@@ -112,6 +117,10 @@ class _MacBinding implements PlatformBinding {
   @override
   String getFirefoxLatestVersionUrl() =>
       'https://download.mozilla.org/?product=firefox-latest&os=osx&lang=en-US';
+
+  @override
+  String getSafariSystemExecutablePath() =>
+      '/Applications/Safari.app/Contents/MacOS/Safari';
 }
 
 class BrowserInstallation {
