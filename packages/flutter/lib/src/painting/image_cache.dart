@@ -35,7 +35,8 @@ const int _kDefaultSizeBytes = 100 << 20; // 100 MiB
 /// global [imageCache] varible.
 ///
 /// ```dart
-/// import 'package:flutter/widgets.dart';
+/// import 'package:flutter/widgets.dart' show ImageCache, runApp, StatelessWidget,
+///     Widget, Container, BuildContext, WidgetsFlutterBinding;
 ///
 /// /// This is the custom implementation of [ImageCache] where we can override
 /// /// the logic.
