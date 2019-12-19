@@ -779,13 +779,9 @@ void main() {
       // Pop page three while replacement push is ongoing.
       navigator.currentState.pop();
       await tester.pump();
-      expect(secondaryAnimationPageOne.parent, isA<TrainHoppingAnimation>());
-      final TrainHoppingAnimation trainHopper2 = secondaryAnimationPageOne.parent as TrainHoppingAnimation;
-      expect(trainHopper2.currentTrain, animationPageTwo.parent);
-      expect(trainHopper.currentTrain, isNull); // Has been disposed.
-      await tester.pumpAndSettle();
-      expect(secondaryAnimationPageOne.parent, kAlwaysDismissedAnimation);
-      expect(trainHopper2.currentTrain, isNull); // Has been disposed.
+      // It should jump to the other train because train hopping will never
+      // happen
+      expect(secondaryAnimationPageOne.parent, isA<CurvedAnimation>());
     });
 
     testWidgets('secondary animation is triggered when pop initial route', (WidgetTester tester) async {
