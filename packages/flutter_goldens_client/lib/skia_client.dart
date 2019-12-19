@@ -296,17 +296,25 @@ class SkiaGoldClient {
       imgtestArguments,
     );
 
+    bool checkPassed;
     if (result.exitCode != 0) {
+      // This branch may just be out of date, this is useful when someone has
+      // landed a golden file change elsewhere.
+      checkPassed = await imgtestCheck(testName, goldenFile);
+      if (checkPassed)
+        return true;
+
       final StringBuffer buf = StringBuffer()
         ..writeln('Skia Gold tryjobAdd failure.')
         ..writeln('stdout: ${result.stdout}')
         ..writeln('stderr: ${result.stderr}\n');
       throw NonZeroExitCode(1, buf.toString());
     }
-    return result.exitCode == 0;
+
+    return result.exitCode == 0 || checkPassed;
   }
 
-  Future<bool> tryjobCheck(String testName, File goldenFile) async {
+  Future<bool> imgtestCheck(String testName, File goldenFile) async {
 
   }
 

@@ -299,15 +299,18 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
     final Platform platform, {
     SkiaGoldClient goldens,
     LocalFileComparator defaultComparator,
+    final Directory testBasedir,
   }) async {
 
     defaultComparator ??= goldenFileComparator as LocalFileComparator;
-    final Directory baseDirectory = FlutterGoldenFileComparator.getBaseDirectory(
+    final Directory baseDirectory = testBasedir ?? FlutterGoldenFileComparator.getBaseDirectory(
       defaultComparator,
       platform,
       suffix: '${math.Random().nextInt(10000)}',
     );
-    baseDirectory.createSync(recursive: true);
+
+    if (!baseDirectory.existsSync())
+      baseDirectory.createSync(recursive: true);
 
     goldens ??= SkiaGoldClient(baseDirectory);
 
@@ -380,7 +383,7 @@ class _UnauthorizedFlutterPreSubmitComparator extends FlutterPreSubmitFileCompar
     await update(golden, imageBytes);
     final File goldenFile = getGoldenFile(golden);
 
-    final bool checkPassed = await skiaClient.tryjobCheck(golden.path, goldenFile);
+    final bool checkPassed = await skiaClient.imgtestCheck(golden.path, goldenFile);
 
     if (checkPassed)
       return true;

@@ -650,6 +650,8 @@ void main() {
 
       group('_UnAuthorized', () {
         setUp(() async {
+          final Directory basedir = fs.directory('flutter/test/library/')
+            ..createSync(recursive: true);
           comparator = await FlutterPreSubmitFileComparator.fromDefaultComparator(
             FakePlatform(
               environment: <String, String>{
@@ -661,6 +663,7 @@ void main() {
               },
               operatingSystem: 'macos'
             ),
+            testBasedir: basedir,
           );
         });
 
