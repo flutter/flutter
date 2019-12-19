@@ -35,7 +35,6 @@ const int _kDefaultSizeBytes = 100 << 20; // 100 MiB
 /// global [imageCache] varible.
 ///
 /// ```dart
-/// import 'package:flutter/material.dart';
 /// import 'package:flutter/foundation.dart' as foundation;
 /// import 'package:flutter/gestures.dart' as gestures;
 /// import 'package:flutter/rendering.dart' as rendering;
@@ -43,7 +42,13 @@ const int _kDefaultSizeBytes = 100 << 20; // 100 MiB
 /// import 'package:flutter/services.dart' as services;
 /// import 'package:flutter/widgets.dart' as widgets;
 ///
-/// class MyImageCache extends ImageCache {}
+/// class MyImageCache extends widgets.ImageCache {
+///   @override
+///   void clear() {
+///     print("Clearing cache!");
+///     super.clear();
+///   }
+/// }
 ///
 /// class MyWidgetsBinding extends foundation.BindingBase
 ///     with
@@ -62,13 +67,13 @@ const int _kDefaultSizeBytes = 100 << 20; // 100 MiB
 /// void main() {
 ///   // Magic happens in the constructor to set global variables.
 ///   MyWidgetsBinding();
-///   runApp(MyApp());
+///   widgets.runApp(MyApp());
 /// }
 ///
-/// class MyApp extends StatelessWidget {
+/// class MyApp extends widgets.StatelessWidget {
 ///   @override
-///   Widget build(BuildContext context) {
-///     return MaterialApp();
+///   widgets.Widget build(widgets.BuildContext context) {
+///     return widgets.Container();
 ///   }
 /// }
 /// ```
