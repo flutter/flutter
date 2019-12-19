@@ -121,7 +121,6 @@ void testWidgets(
       return binding.runTest(
         () async {
           debugResetSemanticsIdCounter();
-          tester.resetTestTextInput();
           await callback(tester);
           semanticsHandle?.dispose();
         },
@@ -692,17 +691,6 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   /// Typical app tests will not need to use this value. To add text to widgets
   /// like [TextField] or [TextFormField], call [enterText].
   TestTextInput get testTextInput => binding.testTextInput;
-
-  /// Ensures that [testTextInput] is registered and [TestTextInput.log] is
-  /// reset.
-  ///
-  /// This is called by the testing framework before test runs, so that if a
-  /// previous test has set its own handler on [SystemChannels.textInput], the
-  /// [testTextInput] regains control and the log is fresh for the new test.
-  /// It should not typically need to be called by tests.
-  void resetTestTextInput() {
-    testTextInput.resetAndRegister();
-  }
 
   /// Give the text input widget specified by [finder] the focus, as if the
   /// onscreen keyboard had appeared.
