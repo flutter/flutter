@@ -1,4 +1,4 @@
-Signature: 9711a332eacc05c13292bd2d25e6839f
+Signature: 478a2e454ac0c63fde4c421adb33fa9f
 
 UNUSED LICENSES:
 
@@ -4391,12 +4391,9 @@ FILE: ../../../third_party/skia/docs/examples/Matrix_SetAffineIdentity.cpp
 FILE: ../../../third_party/skia/docs/examples/Matrix_TypeMask.cpp
 FILE: ../../../third_party/skia/docs/examples/Matrix_array_operator.cpp
 FILE: ../../../third_party/skia/docs/examples/Matrix_asAffine.cpp
-FILE: ../../../third_party/skia/docs/examples/Matrix_cheapEqualTo.cpp
 FILE: ../../../third_party/skia/docs/examples/Matrix_decomposeScale.cpp
 FILE: ../../../third_party/skia/docs/examples/Matrix_dirtyMatrixTypeCache.cpp
 FILE: ../../../third_party/skia/docs/examples/Matrix_dump.cpp
-FILE: ../../../third_party/skia/docs/examples/Matrix_equal_operator.cpp
-FILE: ../../../third_party/skia/docs/examples/Matrix_fixedStepInX.cpp
 FILE: ../../../third_party/skia/docs/examples/Matrix_get.cpp
 FILE: ../../../third_party/skia/docs/examples/Matrix_get9.cpp
 FILE: ../../../third_party/skia/docs/examples/Matrix_getMaxScale.cpp
@@ -4414,7 +4411,6 @@ FILE: ../../../third_party/skia/docs/examples/Matrix_getType.cpp
 FILE: ../../../third_party/skia/docs/examples/Matrix_hasPerspective.cpp
 FILE: ../../../third_party/skia/docs/examples/Matrix_invert.cpp
 FILE: ../../../third_party/skia/docs/examples/Matrix_isFinite.cpp
-FILE: ../../../third_party/skia/docs/examples/Matrix_isFixedStepInX.cpp
 FILE: ../../../third_party/skia/docs/examples/Matrix_isIdentity.cpp
 FILE: ../../../third_party/skia/docs/examples/Matrix_isScaleTranslate.cpp
 FILE: ../../../third_party/skia/docs/examples/Matrix_isSimilarity.cpp
@@ -4434,7 +4430,6 @@ FILE: ../../../third_party/skia/docs/examples/Matrix_mapVectors.cpp
 FILE: ../../../third_party/skia/docs/examples/Matrix_mapVectors_2.cpp
 FILE: ../../../third_party/skia/docs/examples/Matrix_mapXY.cpp
 FILE: ../../../third_party/skia/docs/examples/Matrix_mapXY_2.cpp
-FILE: ../../../third_party/skia/docs/examples/Matrix_notequal_operator.cpp
 FILE: ../../../third_party/skia/docs/examples/Matrix_postConcat.cpp
 FILE: ../../../third_party/skia/docs/examples/Matrix_postRotate.cpp
 FILE: ../../../third_party/skia/docs/examples/Matrix_postRotate_2.cpp
