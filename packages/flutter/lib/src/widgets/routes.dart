@@ -256,13 +256,27 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
     super.didChangeNext(nextRoute);
   }
 
+  bool _shouldJumpTrain(Animation<double> firstTrain, Animation<double> secondTrain) {
+    // We should jump to the other train if two trains will never cross in the
+    // future.
+    if (firstTrain.value == secondTrain.value)
+      return true;
+    else if (firstTrain.value < secondTrain.value)
+      return firstTrain.status != AnimationStatus.forward &&
+             secondTrain.status != AnimationStatus.reverse;
+    else
+      return firstTrain.status != AnimationStatus.reverse &&
+             secondTrain.status != AnimationStatus.forward;
+  }
+
+
   void _updateSecondaryAnimation(Route<dynamic> nextRoute) {
     if (nextRoute is TransitionRoute<dynamic> && canTransitionTo(nextRoute) && nextRoute.canTransitionFrom(this)) {
       final Animation<double> current = _secondaryAnimation.parent;
       if (current != null) {
         final Animation<double> currentTrain = current is TrainHoppingAnimation ? current.currentTrain : current;
         final Animation<double> nextTrain = nextRoute._animation;
-        if (currentTrain.value == nextTrain.value) {
+        if (_shouldJumpTrain(currentTrain, nextTrain)) {
           _setSecondaryAnimation(nextTrain, nextRoute.completed);
         } else {
           TrainHoppingAnimation newAnimation;
