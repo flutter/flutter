@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 import 'package:flutter_tools/src/version.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
@@ -39,9 +40,9 @@ void main() {
 
     setUp(() {
       fs = MemoryFileSystem();
-      fs.directory(_kFlutterRoot).createSync(recursive: true);
-      fs.directory(_kProjectRoot).createSync(recursive: true);
-      fs.currentDirectory = _kProjectRoot;
+      globals.fs.directory(_kFlutterRoot).createSync(recursive: true);
+      globals.fs.directory(_kProjectRoot).createSync(recursive: true);
+      globals.fs.currentDirectory = _kProjectRoot;
 
       platform = FakePlatform(
         environment: <String, String>{
@@ -84,14 +85,14 @@ void main() {
       }, initializeFlutterRoot: false);
 
       testUsingContext('works if --local-engine is specified and --local-engine-src-path is determined by sky_engine', () async {
-        fs.directory('$_kArbitraryEngineRoot/src/out/ios_debug/gen/dart-pkg/sky_engine/lib/').createSync(recursive: true);
-        fs.directory('$_kArbitraryEngineRoot/src/out/host_debug').createSync(recursive: true);
-        fs.file(_kDotPackages).writeAsStringSync('sky_engine:file://$_kArbitraryEngineRoot/src/out/ios_debug/gen/dart-pkg/sky_engine/lib/');
+        globals.fs.directory('$_kArbitraryEngineRoot/src/out/ios_debug/gen/dart-pkg/sky_engine/lib/').createSync(recursive: true);
+        globals.fs.directory('$_kArbitraryEngineRoot/src/out/host_debug').createSync(recursive: true);
+        globals.fs.file(_kDotPackages).writeAsStringSync('sky_engine:file://$_kArbitraryEngineRoot/src/out/ios_debug/gen/dart-pkg/sky_engine/lib/');
         await runner.run(<String>['dummy', '--local-engine=ios_debug']);
 
         // Verify that this also works if the sky_engine path is a symlink to the engine root.
-        fs.link('/symlink').createSync('$_kArbitraryEngineRoot');
-        fs.file(_kDotPackages).writeAsStringSync('sky_engine:file:///symlink/src/out/ios_debug/gen/dart-pkg/sky_engine/lib/');
+        globals.fs.link('/symlink').createSync('$_kArbitraryEngineRoot');
+        globals.fs.file(_kDotPackages).writeAsStringSync('sky_engine:file:///symlink/src/out/ios_debug/gen/dart-pkg/sky_engine/lib/');
         await runner.run(<String>['dummy', '--local-engine=ios_debug']);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
@@ -100,8 +101,8 @@ void main() {
       }, initializeFlutterRoot: false);
 
       testUsingContext('works if --local-engine is specified and --local-engine-src-path is specified', () async {
-        fs.directory('$_kArbitraryEngineRoot/src/out/ios_debug').createSync(recursive: true);
-        fs.directory('$_kArbitraryEngineRoot/src/out/host_debug').createSync(recursive: true);
+        globals.fs.directory('$_kArbitraryEngineRoot/src/out/ios_debug').createSync(recursive: true);
+        globals.fs.directory('$_kArbitraryEngineRoot/src/out/host_debug').createSync(recursive: true);
         await runner.run(<String>['dummy', '--local-engine-src-path=$_kArbitraryEngineRoot/src', '--local-engine=ios_debug']);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
@@ -110,8 +111,8 @@ void main() {
       }, initializeFlutterRoot: false);
 
       testUsingContext('works if --local-engine is specified and --local-engine-src-path is determined by flutter root', () async {
-        fs.directory('$_kEngineRoot/src/out/ios_debug').createSync(recursive: true);
-        fs.directory('$_kEngineRoot/src/out/host_debug').createSync(recursive: true);
+        globals.fs.directory('$_kEngineRoot/src/out/ios_debug').createSync(recursive: true);
+        globals.fs.directory('$_kEngineRoot/src/out/host_debug').createSync(recursive: true);
         await runner.run(<String>['dummy', '--local-engine=ios_debug']);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
@@ -121,8 +122,8 @@ void main() {
     });
 
     testUsingContext('Doesnt crash on invalid .packages file', () async {
-      fs.file('pubspec.yaml').createSync();
-      fs.file('.packages')
+      globals.fs.file('pubspec.yaml').createSync();
+      globals.fs.file('.packages')
         ..createSync()
         ..writeAsStringSync('Not a valid package');
 
@@ -138,19 +139,19 @@ void main() {
       testUsingContext('checks that Flutter toJson output reports the flutter framework version', () async {
         final ProcessResult result = ProcessResult(0, 0, 'random', '0');
 
-        when(processManager.runSync(FlutterVersion.gitLog('-n 1 --pretty=format:%H'.split(' ')),
+        when(globals.processManager.runSync(FlutterVersion.gitLog('-n 1 --pretty=format:%H'.split(' ')),
           workingDirectory: Cache.flutterRoot)).thenReturn(result);
-        when(processManager.runSync('git rev-parse --abbrev-ref --symbolic @{u}'.split(' '),
+        when(globals.processManager.runSync('git rev-parse --abbrev-ref --symbolic @{u}'.split(' '),
           workingDirectory: Cache.flutterRoot)).thenReturn(result);
-        when(processManager.runSync('git rev-parse --abbrev-ref HEAD'.split(' '),
+        when(globals.processManager.runSync('git rev-parse --abbrev-ref HEAD'.split(' '),
           workingDirectory: Cache.flutterRoot)).thenReturn(result);
-        when(processManager.runSync('git ls-remote --get-url master'.split(' '),
+        when(globals.processManager.runSync('git ls-remote --get-url master'.split(' '),
           workingDirectory: Cache.flutterRoot)).thenReturn(result);
-        when(processManager.runSync(FlutterVersion.gitLog('-n 1 --pretty=format:%ar'.split(' ')),
+        when(globals.processManager.runSync(FlutterVersion.gitLog('-n 1 --pretty=format:%ar'.split(' ')),
           workingDirectory: Cache.flutterRoot)).thenReturn(result);
-        when(processManager.runSync('git describe --match v*.*.* --first-parent --long --tags'.split(' '),
+        when(globals.processManager.runSync('git describe --match v*.*.* --first-parent --long --tags'.split(' '),
           workingDirectory: Cache.flutterRoot)).thenReturn(result);
-        when(processManager.runSync(FlutterVersion.gitLog('-n 1 --pretty=format:%ad --date=iso'.split(' ')),
+        when(globals.processManager.runSync(FlutterVersion.gitLog('-n 1 --pretty=format:%ad --date=iso'.split(' ')),
           workingDirectory: Cache.flutterRoot)).thenReturn(result);
 
         final FakeFlutterVersion version = FakeFlutterVersion();
@@ -166,16 +167,16 @@ void main() {
 
     group('getRepoPackages', () {
       setUp(() {
-        fs.directory(fs.path.join(_kFlutterRoot, 'examples'))
+        globals.fs.directory(globals.fs.path.join(_kFlutterRoot, 'examples'))
             .createSync(recursive: true);
-        fs.directory(fs.path.join(_kFlutterRoot, 'packages'))
+        globals.fs.directory(globals.fs.path.join(_kFlutterRoot, 'packages'))
             .createSync(recursive: true);
-        fs.directory(fs.path.join(_kFlutterRoot, 'dev', 'tools', 'aatool'))
+        globals.fs.directory(globals.fs.path.join(_kFlutterRoot, 'dev', 'tools', 'aatool'))
             .createSync(recursive: true);
 
-        fs.file(fs.path.join(_kFlutterRoot, 'dev', 'tools', 'pubspec.yaml'))
+        globals.fs.file(globals.fs.path.join(_kFlutterRoot, 'dev', 'tools', 'pubspec.yaml'))
             .createSync();
-        fs.file(fs.path.join(_kFlutterRoot, 'dev', 'tools', 'aatool', 'pubspec.yaml'))
+        globals.fs.file(globals.fs.path.join(_kFlutterRoot, 'dev', 'tools', 'aatool', 'pubspec.yaml'))
             .createSync();
       });
 
@@ -183,8 +184,8 @@ void main() {
         final List<String> packagePaths = runner.getRepoPackages()
             .map((Directory d) => d.path).toList();
         expect(packagePaths, <String>[
-          fs.directory(fs.path.join(_kFlutterRoot, 'dev', 'tools', 'aatool')).path,
-          fs.directory(fs.path.join(_kFlutterRoot, 'dev', 'tools')).path,
+          globals.fs.directory(globals.fs.path.join(_kFlutterRoot, 'dev', 'tools', 'aatool')).path,
+          globals.fs.directory(globals.fs.path.join(_kFlutterRoot, 'dev', 'tools')).path,
         ]);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,

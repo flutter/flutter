@@ -8,10 +8,10 @@ import 'dart:math' show Random, max;
 import 'package:intl/intl.dart';
 
 import '../convert.dart';
+import '../globals.dart' as globals;
 import 'context.dart';
 import 'file_system.dart';
 import 'io.dart' as io;
-import 'platform.dart';
 import 'terminal.dart';
 
 const BotDetector _kBotDetector = BotDetector();
@@ -22,40 +22,40 @@ class BotDetector {
   bool get isRunningOnBot {
     if (
         // Explicitly stated to not be a bot.
-        platform.environment['BOT'] == 'false'
+        globals.platform.environment['BOT'] == 'false'
 
         // Set by the IDEs to the IDE name, so a strong signal that this is not a bot.
-        || platform.environment.containsKey('FLUTTER_HOST')
+        || globals.platform.environment.containsKey('FLUTTER_HOST')
         // When set, GA logs to a local file (normally for tests) so we don't need to filter.
-        || platform.environment.containsKey('FLUTTER_ANALYTICS_LOG_FILE')
+        || globals.platform.environment.containsKey('FLUTTER_ANALYTICS_LOG_FILE')
     ) {
       return false;
     }
 
-    return platform.environment['BOT'] == 'true'
+    return globals.platform.environment['BOT'] == 'true'
 
         // https://docs.travis-ci.com/user/environment-variables/#Default-Environment-Variables
-        || platform.environment['TRAVIS'] == 'true'
-        || platform.environment['CONTINUOUS_INTEGRATION'] == 'true'
-        || platform.environment.containsKey('CI') // Travis and AppVeyor
+        || globals.platform.environment['TRAVIS'] == 'true'
+        || globals.platform.environment['CONTINUOUS_INTEGRATION'] == 'true'
+        || globals.platform.environment.containsKey('CI') // Travis and AppVeyor
 
         // https://www.appveyor.com/docs/environment-variables/
-        || platform.environment.containsKey('APPVEYOR')
+        || globals.platform.environment.containsKey('APPVEYOR')
 
         // https://cirrus-ci.org/guide/writing-tasks/#environment-variables
-        || platform.environment.containsKey('CIRRUS_CI')
+        || globals.platform.environment.containsKey('CIRRUS_CI')
 
         // https://docs.aws.amazon.com/codebuild/latest/userguide/build-env-ref-env-vars.html
-        || (platform.environment.containsKey('AWS_REGION') &&
-            platform.environment.containsKey('CODEBUILD_INITIATOR'))
+        || (globals.platform.environment.containsKey('AWS_REGION') &&
+            globals.platform.environment.containsKey('CODEBUILD_INITIATOR'))
 
         // https://wiki.jenkins.io/display/JENKINS/Building+a+software+project#Buildingasoftwareproject-belowJenkinsSetEnvironmentVariables
-        || platform.environment.containsKey('JENKINS_URL')
+        || globals.platform.environment.containsKey('JENKINS_URL')
 
         // Properties on Flutter's Chrome Infra bots.
-        || platform.environment['CHROME_HEADLESS'] == '1'
-        || platform.environment.containsKey('BUILDBOT_BUILDERNAME')
-        || platform.environment.containsKey('SWARMING_TASK_ID');
+        || globals.platform.environment['CHROME_HEADLESS'] == '1'
+        || globals.platform.environment.containsKey('BUILDBOT_BUILDERNAME')
+        || globals.platform.environment.containsKey('SWARMING_TASK_ID');
   }
 }
 
@@ -107,7 +107,7 @@ File getUniqueFile(Directory dir, String baseName, String ext) {
 
   while (true) {
     final String name = '${baseName}_${i.toString().padLeft(2, '0')}.$ext';
-    final File file = fs.file(fs.path.join(dir.path, name));
+    final File file = fs.file(globals.fs.path.join(dir.path, name));
     if (!file.existsSync()) {
       return file;
     }
@@ -139,7 +139,7 @@ String getElapsedAsMilliseconds(Duration duration) {
 /// Return a relative path if [fullPath] is contained by the cwd, else return an
 /// absolute path.
 String getDisplayPath(String fullPath) {
-  final String cwd = fs.currentDirectory.path + fs.path.separator;
+  final String cwd = globals.fs.currentDirectory.path + globals.fs.path.separator;
   return fullPath.startsWith(cwd) ? fullPath.substring(cwd.length) : fullPath;
 }
 
@@ -368,7 +368,7 @@ String wrapText(String text, { int columnWidth, int hangingIndent, int indent, b
 void writePidFile(String pidFile) {
   if (pidFile != null) {
     // Write our pid to the file.
-    fs.file(pidFile).writeAsStringSync(io.pid.toString());
+    globals.fs.file(pidFile).writeAsStringSync(io.pid.toString());
   }
 }
 

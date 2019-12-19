@@ -11,7 +11,7 @@ import '../base/io.dart';
 import '../base/net.dart';
 import '../convert.dart';
 import '../flutter_manifest.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
 import '../project.dart';
 
 /// Provide suggested GitHub issue templates to user when Flutter encounters an error.
@@ -118,7 +118,7 @@ class GitHubTemplateCreator {
   Future<String> _shortURL(String fullURL) async {
     String url;
     try {
-      printTrace('Attempting git.io shortener: $fullURL');
+      globals.printTrace('Attempting git.io shortener: $fullURL');
       final List<int> bodyBytes = utf8.encode('url=${Uri.encodeQueryComponent(fullURL)}');
       final HttpClientRequest request = await _client.postUrl(Uri.parse('https://git.io'));
       request.headers.set(HttpHeaders.contentLengthHeader, bodyBytes.length.toString());
@@ -128,10 +128,10 @@ class GitHubTemplateCreator {
       if (response.statusCode == 201) {
         url = response.headers[HttpHeaders.locationHeader]?.first;
       } else {
-        printTrace('Failed to shorten GitHub template URL. Server responded with HTTP status code ${response.statusCode}');
+        globals.printTrace('Failed to shorten GitHub template URL. Server responded with HTTP status code ${response.statusCode}');
       }
     } catch (sendError) {
-      printTrace('Failed to shorten GitHub template URL: $sendError');
+      globals.printTrace('Failed to shorten GitHub template URL: $sendError');
     }
 
     return url ?? fullURL;

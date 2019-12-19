@@ -15,7 +15,7 @@ import '../build_info.dart';
 import '../cache.dart';
 import '../device.dart';
 import '../features.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../resident_runner.dart';
@@ -271,7 +271,7 @@ class RunCommand extends RunCommandBase {
         final Iterable<File> swiftFiles = iosProject.hostAppRoot
             .listSync(recursive: true, followLinks: false)
             .whereType<File>()
-            .where((File file) => fs.path.extension(file.path) == '.swift');
+            .where((File file) => globals.fs.path.extension(file.path) == '.swift');
         hostLanguage.add(swiftFiles.isNotEmpty ? 'swift' : 'objc');
       }
     }
@@ -395,11 +395,11 @@ class RunCommand extends RunCommandBase {
       try {
         final String applicationBinaryPath = stringArg('use-application-binary');
         app = await daemon.appDomain.startApp(
-          devices.first, fs.currentDirectory.path, targetFile, route,
+          devices.first, globals.fs.currentDirectory.path, targetFile, route,
           _createDebuggingOptions(), hotMode,
           applicationBinary: applicationBinaryPath == null
               ? null
-              : fs.file(applicationBinaryPath),
+              : globals.fs.file(applicationBinaryPath),
           trackWidgetCreation: boolArg('track-widget-creation'),
           projectRootPath: stringArg('project-root'),
           packagesFilePath: globalResults['packages'] as String,
@@ -429,7 +429,7 @@ class RunCommand extends RunCommandBase {
 
     for (Device device in devices) {
       if (!device.supportsFastStart && boolArg('fast-start')) {
-        printStatus(
+        globals.printStatus(
           'Using --fast-start option with device ${device.name}, but this device '
           'does not support it. Overriding the setting to false.'
         );
@@ -438,12 +438,12 @@ class RunCommand extends RunCommandBase {
         if (await device.supportsHardwareRendering) {
           final bool enableSoftwareRendering = boolArg('enable-software-rendering') == true;
           if (enableSoftwareRendering) {
-            printStatus(
+            globals.printStatus(
               'Using software rendering with device ${device.name}. You may get better performance '
               'with hardware mode by configuring hardware rendering for your device.'
             );
           } else {
-            printStatus(
+            globals.printStatus(
               'Using hardware rendering with device ${device.name}. If you get graphics artifacts, '
               'consider enabling software rendering with "--enable-software-rendering".'
             );
@@ -501,7 +501,7 @@ class RunCommand extends RunCommandBase {
         benchmarkMode: boolArg('benchmark'),
         applicationBinary: applicationBinaryPath == null
             ? null
-            : fs.file(applicationBinaryPath),
+            : globals.fs.file(applicationBinaryPath),
         projectRootPath: stringArg('project-root'),
         packagesFilePath: globalResults['packages'] as String,
         dillOutputPath: stringArg('output-dill'),
@@ -528,7 +528,7 @@ class RunCommand extends RunCommandBase {
         awaitFirstFrameWhenTracing: awaitFirstFrameWhenTracing,
         applicationBinary: applicationBinaryPath == null
             ? null
-            : fs.file(applicationBinaryPath),
+            : globals.fs.file(applicationBinaryPath),
         ipv6: ipv6,
         stayResident: stayResident,
       );

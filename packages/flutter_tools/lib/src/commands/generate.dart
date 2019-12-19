@@ -6,7 +6,7 @@ import '../base/file_system.dart';
 import '../cache.dart';
 import '../codegen.dart';
 import '../convert.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../runner/flutter_command.dart';
 
@@ -28,7 +28,7 @@ class GenerateCommand extends FlutterCommand {
     codegenDaemon.startBuild();
     await for (CodegenStatus codegenStatus in codegenDaemon.buildResults) {
       if (codegenStatus == CodegenStatus.Failed) {
-        printError('Code generation failed.');
+        globals.printError('Code generation failed.');
         break;
       }
       if (codegenStatus ==CodegenStatus.Succeeded) {
@@ -48,12 +48,12 @@ class GenerateCommand extends FlutterCommand {
       try {
         final List<Object> errorData = json.decode(errorFile.readAsStringSync()) as List<Object>;
         final List<Object> stackData = errorData[1] as List<Object>;
-        printError(errorData.first as String);
-        printError(stackData[0] as String);
-        printError(stackData[1] as String);
-        printError(StackTrace.fromString(stackData[2] as String).toString());
+        globals.printError(errorData.first as String);
+        globals.printError(stackData[0] as String);
+        globals.printError(stackData[1] as String);
+        globals.printError(StackTrace.fromString(stackData[2] as String).toString());
       } catch (err) {
-        printError('Error reading error in ${errorFile.path}');
+        globals.printError('Error reading error in ${errorFile.path}');
       }
     }
     return const FlutterCommandResult(ExitStatus.fail);

@@ -4,10 +4,10 @@
 
 import 'package:archive/archive.dart';
 
-import '../base/file_system.dart';
 import '../base/version.dart';
 import '../convert.dart';
 import '../doctor.dart';
+import '../globals.dart' as globals;
 
 class IntelliJPlugins {
   IntelliJPlugins(this.pluginsPath);
@@ -45,22 +45,22 @@ class IntelliJPlugins {
   }
 
   bool _hasPackage(String packageName) {
-    final String packagePath = fs.path.join(pluginsPath, packageName);
+    final String packagePath = globals.fs.path.join(pluginsPath, packageName);
     if (packageName.endsWith('.jar')) {
-      return fs.isFileSync(packagePath);
+      return globals.fs.isFileSync(packagePath);
     }
-    return fs.isDirectorySync(packagePath);
+    return globals.fs.isDirectorySync(packagePath);
   }
 
   String _readPackageVersion(String packageName) {
     final String jarPath = packageName.endsWith('.jar')
-        ? fs.path.join(pluginsPath, packageName)
-        : fs.path.join(pluginsPath, packageName, 'lib', '$packageName.jar');
+        ? globals.fs.path.join(pluginsPath, packageName)
+        : globals.fs.path.join(pluginsPath, packageName, 'lib', '$packageName.jar');
     // TODO(danrubel): look for a better way to extract a single 2K file from the zip
     // rather than reading the entire file into memory.
     try {
       final Archive archive =
-          ZipDecoder().decodeBytes(fs.file(jarPath).readAsBytesSync());
+          ZipDecoder().decodeBytes(globals.fs.file(jarPath).readAsBytesSync());
       final ArchiveFile file = archive.findFile('META-INF/plugin.xml');
       final String content = utf8.decode(file.content as List<int>);
       const String versionStartTag = '<version>';

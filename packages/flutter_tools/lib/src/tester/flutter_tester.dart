@@ -11,20 +11,19 @@ import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
-import '../base/process_manager.dart';
 import '../build_info.dart';
 import '../bundle.dart';
 import '../convert.dart';
 import '../dart/package_map.dart';
 import '../device.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../protocol_discovery.dart';
 import '../version.dart';
 
 class FlutterTesterApp extends ApplicationPackage {
   factory FlutterTesterApp.fromCurrentDirectory() {
-    return FlutterTesterApp._(fs.currentDirectory);
+    return FlutterTesterApp._(globals.fs.currentDirectory);
   }
 
   FlutterTesterApp._(Directory directory)
@@ -110,12 +109,12 @@ class FlutterTesterDevice extends Device {
     final BuildInfo buildInfo = debuggingOptions.buildInfo;
 
     if (!buildInfo.isDebug) {
-      printError('This device only supports debug mode.');
+      globals.printError('This device only supports debug mode.');
       return LaunchResult.failed();
     }
 
-    final String shellPath = artifacts.getArtifactPath(Artifact.flutterTester);
-    if (!fs.isFileSync(shellPath)) {
+    final String shellPath = globals.artifacts.getArtifactPath(Artifact.flutterTester);
+    if (!globals.fs.isFileSync(shellPath)) {
       throwToolExit('Cannot find Flutter shell at $shellPath');
     }
 
@@ -141,7 +140,7 @@ class FlutterTesterDevice extends Device {
     // Build assets and perform initial compilation.
     final String assetDirPath = getAssetBuildDirectory();
     final String applicationKernelFilePath = getKernelPathForTransformerOptions(
-      fs.path.join(getBuildDirectory(), 'flutter-tester-app.dill'),
+      globals.fs.path.join(getBuildDirectory(), 'flutter-tester-app.dill'),
       trackWidgetCreation: buildInfo.trackWidgetCreation,
     );
     await BundleBuilder().build(
@@ -158,10 +157,10 @@ class FlutterTesterDevice extends Device {
     command.add(applicationKernelFilePath);
 
     try {
-      printTrace(command.join(' '));
+      globals.printTrace(command.join(' '));
 
       _isRunning = true;
-      _process = await processManager.start(command,
+      _process = await globals.processManager.start(command,
         environment: <String, String>{
           'FLUTTER_TEST': 'true',
         },
@@ -195,7 +194,7 @@ class FlutterTesterDevice extends Device {
       final Uri observatoryUri = await observatoryDiscovery.uri;
       return LaunchResult.succeeded(observatoryUri: observatoryUri);
     } catch (error) {
-      printError('Failed to launch $package: $error');
+      globals.printError('Failed to launch $package: $error');
       return LaunchResult.failed();
     }
   }

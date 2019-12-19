@@ -3,11 +3,10 @@
 // found in the LICENSE file.
 
 import '../base/context.dart';
-import '../base/file_system.dart';
 import '../base/io.dart';
-import '../base/platform.dart';
 import '../base/process.dart';
 import '../convert.dart';
+import '../globals.dart' as globals;
 
 VisualStudio get visualStudio => context.get<VisualStudio>();
 
@@ -96,7 +95,7 @@ class VisualStudio {
     if (details.isEmpty) {
       return null;
     }
-    return fs.path.join(
+    return globals.fs.path.join(
       _usableVisualStudioDetails[_installationPathKey] as String,
       'VC',
       'Auxiliary',
@@ -111,8 +110,8 @@ class VisualStudio {
   /// present then there isn't a new enough installation of VS. This path is
   /// not user-controllable, unlike the install location of Visual Studio
   /// itself.
-  final String _vswherePath = fs.path.join(
-    platform.environment['PROGRAMFILES(X86)'],
+  final String _vswherePath = globals.fs.path.join(
+    globals.platform.environment['PROGRAMFILES(X86)'],
     'Microsoft Visual Studio',
     'Installer',
     'vswhere.exe',

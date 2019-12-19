@@ -18,7 +18,7 @@ import '../commands/daemon.dart';
 import '../compile.dart';
 import '../device.dart';
 import '../fuchsia/fuchsia_device.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
 import '../ios/devices.dart';
 import '../ios/simulators.dart';
 import '../mdns_discovery.dart';
@@ -172,11 +172,11 @@ class AttachCommand extends FlutterCommand {
 
     final Device device = await findTargetDevice();
 
-    final Artifacts artifacts = device.artifactOverrides ?? Artifacts.instance;
+    final Artifacts overrideArtifacts = device.artifactOverrides ?? globals.artifacts;
     await context.run<void>(
       body: () => _attachToDevice(device),
       overrides: <Type, Generator>{
-        Artifacts: () => artifacts,
+        Artifacts: () => overrideArtifacts,
     });
 
     return null;
@@ -254,7 +254,7 @@ class AttachCommand extends FlutterCommand {
             devicePort: deviceVmservicePort,
             hostPort: hostVmservicePort,
           );
-        printStatus('Waiting for a connection from Flutter on ${device.name}...');
+        globals.printStatus('Waiting for a connection from Flutter on ${device.name}...');
         observatoryUri = observatoryDiscovery.uris;
         // Determine ipv6 status from the scanned logs.
         usesIpv6 = observatoryDiscovery.ipv6;
@@ -291,7 +291,7 @@ class AttachCommand extends FlutterCommand {
             device,
             null,
             true,
-            fs.currentDirectory,
+            globals.fs.currentDirectory,
             LaunchMode.attach,
           );
         } catch (error) {
@@ -326,7 +326,7 @@ class AttachCommand extends FlutterCommand {
         if (runner.exited || !runner.isWaitingForObservatory) {
           break;
         }
-        printStatus('Waiting for a new connection from Flutter on ${device.name}...');
+        globals.printStatus('Waiting for a new connection from Flutter on ${device.name}...');
       }
     } finally {
       final List<ForwardedPort> ports = device.portForwarder.forwardedPorts.toList();

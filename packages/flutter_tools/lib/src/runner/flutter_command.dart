@@ -12,7 +12,6 @@ import 'package:quiver/strings.dart';
 import '../application_package.dart';
 import '../base/common.dart';
 import '../base/context.dart';
-import '../base/file_system.dart';
 import '../base/io.dart' as io;
 import '../base/signals.dart';
 import '../base/terminal.dart';
@@ -27,7 +26,7 @@ import '../dart/pub.dart';
 import '../device.dart';
 import '../doctor.dart';
 import '../features.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
 import 'flutter_command_runner.dart';
@@ -525,7 +524,7 @@ abstract class FlutterCommand extends Command<void> {
           rethrow;
         } finally {
           final DateTime endTime = systemClock.now();
-          printTrace(userMessages.flutterElapsedTime(name, getElapsedAsMilliseconds(endTime.difference(startTime))));
+          globals.printTrace(userMessages.flutterElapsedTime(name, getElapsedAsMilliseconds(endTime.difference(startTime))));
           _sendPostUsage(commandPath, commandResult, startTime, endTime);
         }
       },
@@ -599,9 +598,9 @@ abstract class FlutterCommand extends Command<void> {
     if (shouldUpdateCache) {
       // First always update universal artifacts, as some of these (e.g.
       // idevice_id on macOS) are required to determine `requiredArtifacts`.
-      await cache.updateAll(<DevelopmentArtifact>{DevelopmentArtifact.universal});
+      await globals.cache.updateAll(<DevelopmentArtifact>{DevelopmentArtifact.universal});
 
-      await cache.updateAll(await requiredArtifacts);
+      await globals.cache.updateAll(await requiredArtifacts);
     }
 
     await validateCommand();
@@ -643,29 +642,29 @@ abstract class FlutterCommand extends Command<void> {
   /// then print an error message and return null.
   Future<List<Device>> findAllTargetDevices() async {
     if (!doctor.canLaunchAnything) {
-      printError(userMessages.flutterNoDevelopmentDevice);
+      globals.printError(userMessages.flutterNoDevelopmentDevice);
       return null;
     }
 
     List<Device> devices = await deviceManager.findTargetDevices(FlutterProject.current());
 
     if (devices.isEmpty && deviceManager.hasSpecifiedDeviceId) {
-      printStatus(userMessages.flutterNoMatchingDevice(deviceManager.specifiedDeviceId));
+      globals.printStatus(userMessages.flutterNoMatchingDevice(deviceManager.specifiedDeviceId));
       return null;
     } else if (devices.isEmpty && deviceManager.hasSpecifiedAllDevices) {
-      printStatus(userMessages.flutterNoDevicesFound);
+      globals.printStatus(userMessages.flutterNoDevicesFound);
       return null;
     } else if (devices.isEmpty) {
-      printStatus(userMessages.flutterNoSupportedDevices);
+      globals.printStatus(userMessages.flutterNoSupportedDevices);
       return null;
     } else if (devices.length > 1 && !deviceManager.hasSpecifiedAllDevices) {
       if (deviceManager.hasSpecifiedDeviceId) {
-        printStatus(userMessages.flutterFoundSpecifiedDevices(devices.length, deviceManager.specifiedDeviceId));
+       globals.printStatus(userMessages.flutterFoundSpecifiedDevices(devices.length, deviceManager.specifiedDeviceId));
       } else {
-        printStatus(userMessages.flutterSpecifyDeviceWithAllOption);
+        globals.printStatus(userMessages.flutterSpecifyDeviceWithAllOption);
         devices = await deviceManager.getAllConnectedDevices().toList();
       }
-      printStatus('');
+      globals.printStatus('');
       await Device.printDevices(devices);
       return null;
     }
@@ -682,9 +681,9 @@ abstract class FlutterCommand extends Command<void> {
       return null;
     }
     if (deviceList.length > 1) {
-      printStatus(userMessages.flutterSpecifyDevice);
+      globals.printStatus(userMessages.flutterSpecifyDevice);
       deviceList = await deviceManager.getAllConnectedDevices().toList();
-      printStatus('');
+      globals.printStatus('');
       await Device.printDevices(deviceList);
       return null;
     }
@@ -696,7 +695,7 @@ abstract class FlutterCommand extends Command<void> {
   Future<void> validateCommand() async {
     if (_requiresPubspecYaml && !PackageMap.isUsingCustomPackagesPath) {
       // Don't expect a pubspec.yaml file if the user passed in an explicit .packages file path.
-      if (!fs.isFileSync('pubspec.yaml')) {
+      if (!globals.fs.isFileSync('pubspec.yaml')) {
         throw ToolExit(userMessages.flutterNoPubspec);
       }
 
@@ -711,7 +710,7 @@ abstract class FlutterCommand extends Command<void> {
 
     if (_usesTargetOption) {
       final String targetPath = targetFile;
-      if (!fs.isFileSync(targetPath)) {
+      if (!globals.fs.isFileSync(targetPath)) {
         throw ToolExit(userMessages.flutterTargetFileMissing(targetPath));
       }
     }

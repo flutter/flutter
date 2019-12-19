@@ -4,9 +4,9 @@
 
 import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/version.dart';
 import 'package:mockito/mockito.dart';
+import 'package:platform/platform.dart';
 
 import '../src/common.dart';
 import '../src/testbed.dart';

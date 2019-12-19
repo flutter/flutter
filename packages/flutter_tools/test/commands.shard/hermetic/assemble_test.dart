@@ -9,6 +9,7 @@ import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/assemble.dart';
 import 'package:mockito/mockito.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -75,8 +76,8 @@ void main() {
       .thenAnswer((Invocation invocation) async {
         return BuildResult(
           success: true,
-          inputFiles: <File>[fs.file('foo')..createSync()],
-          outputFiles: <File>[fs.file('bar')..createSync()],
+          inputFiles: <File>[globals.fs.file('foo')..createSync()],
+          outputFiles: <File>[globals.fs.file('bar')..createSync()],
         );
       });
 
@@ -89,8 +90,8 @@ void main() {
       'debug_macos_bundle_flutter_assets',
     ]);
 
-    final File inputs = fs.file('inputs');
-    final File outputs = fs.file('outputs');
+    final File inputs = globals.fs.file('inputs');
+    final File outputs = globals.fs.file('outputs');
     expect(inputs.readAsStringSync(), contains('foo'));
     expect(outputs.readAsStringSync(), contains('bar'));
 
@@ -112,8 +113,8 @@ void main() {
       .thenAnswer((Invocation invocation) async {
         return BuildResult(
           success: true,
-          inputFiles: <File>[fs.file('foo'), fs.file('fizz')..createSync()],
-          outputFiles: <File>[fs.file('bar'), fs.file(fs.path.join('.dart_tool', 'fizz2'))..createSync(recursive: true)]);
+          inputFiles: <File>[globals.fs.file('foo'), globals.fs.file('fizz')..createSync()],
+          outputFiles: <File>[globals.fs.file('bar'), globals.fs.file(globals.fs.path.join('.dart_tool', 'fizz2'))..createSync(recursive: true)]);
       });
     await commandRunner.run(<String>[
       'assemble',

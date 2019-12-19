@@ -9,6 +9,7 @@ import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/plugins.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 
@@ -31,7 +32,7 @@ void main() {
 
       // Add basic properties to the Flutter project and subprojects
       flutterProject = MockFlutterProject();
-      when(flutterProject.directory).thenReturn(fs.directory('/'));
+      when(flutterProject.directory).thenReturn(globals.fs.directory('/'));
       when(flutterProject.flutterPluginsFile).thenReturn(flutterProject.directory.childFile('.flutter-plugins'));
       when(flutterProject.flutterPluginsDependenciesFile).thenReturn(flutterProject.directory.childFile('.flutter-plugins-dependencies'));
       iosProject = MockIosProject();
@@ -53,8 +54,8 @@ void main() {
       when(webProject.existsSync()).thenReturn(true);
 
       // Set up a simple .packages file for all the tests to use, pointing to one package.
-      dummyPackageDirectory = fs.directory('/pubcache/apackage/lib/');
-      packagesFile = fs.file(fs.path.join(flutterProject.directory.path, PackageMap.globalPackagesPath));
+      dummyPackageDirectory = globals.fs.directory('/pubcache/apackage/lib/');
+      packagesFile = globals.fs.file(globals.fs.path.join(flutterProject.directory.path, PackageMap.globalPackagesPath));
       packagesFile..createSync(recursive: true)
           ..writeAsStringSync('apackage:file://${dummyPackageDirectory.path}\n');
     });
@@ -73,7 +74,7 @@ void main() {
 
     void createNewJavaPlugin1() {
       final Directory pluginUsingJavaAndNewEmbeddingDir =
-              fs.systemTempDirectory.createTempSync('flutter_plugin_using_java_and_new_embedding_dir.');
+              globals.fs.systemTempDirectory.createTempSync('flutter_plugin_using_java_and_new_embedding_dir.');
       pluginUsingJavaAndNewEmbeddingDir
         .childFile('pubspec.yaml')
         .writeAsStringSync('''
@@ -102,7 +103,7 @@ flutter:
 
     void createNewKotlinPlugin2() {
       final Directory pluginUsingKotlinAndNewEmbeddingDir =
-          fs.systemTempDirectory.createTempSync('flutter_plugin_using_kotlin_and_new_embedding_dir.');
+          globals.fs.systemTempDirectory.createTempSync('flutter_plugin_using_kotlin_and_new_embedding_dir.');
       pluginUsingKotlinAndNewEmbeddingDir
         .childFile('pubspec.yaml')
         .writeAsStringSync('''
@@ -131,7 +132,7 @@ flutter:
 
     void createOldJavaPlugin3() {
       final Directory pluginUsingOldEmbeddingDir =
-        fs.systemTempDirectory.createTempSync('flutter_plugin_using_old_embedding_dir.');
+        globals.fs.systemTempDirectory.createTempSync('flutter_plugin_using_old_embedding_dir.');
       pluginUsingOldEmbeddingDir
         .childFile('pubspec.yaml')
         .writeAsStringSync('''
@@ -159,7 +160,7 @@ flutter:
 
     void createDualSupportJavaPlugin4() {
       final Directory pluginUsingJavaAndNewEmbeddingDir =
-        fs.systemTempDirectory.createTempSync('flutter_plugin_using_java_and_new_embedding_dir.');
+        globals.fs.systemTempDirectory.createTempSync('flutter_plugin_using_java_and_new_embedding_dir.');
       pluginUsingJavaAndNewEmbeddingDir
         .childFile('pubspec.yaml')
         .writeAsStringSync('''
@@ -197,7 +198,7 @@ flutter:
       assert(name != null);
       assert(dependencies != null);
 
-      final Directory pluginDirectory = fs.systemTempDirectory.createTempSync('plugin.');
+      final Directory pluginDirectory = globals.fs.systemTempDirectory.createTempSync('plugin.');
       pluginDirectory
         .childFile('pubspec.yaml')
         .writeAsStringSync('''
@@ -340,7 +341,7 @@ dependencies:
         await injectPlugins(flutterProject);
 
         final File registrant = flutterProject.directory
-          .childDirectory(fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
+          .childDirectory(globals.fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
           .childFile('GeneratedPluginRegistrant.java');
 
         expect(registrant.existsSync(), isTrue);
@@ -360,7 +361,7 @@ dependencies:
         await injectPlugins(flutterProject);
 
         final File registrant = flutterProject.directory
-          .childDirectory(fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
+          .childDirectory(globals.fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
           .childFile('GeneratedPluginRegistrant.java');
 
         expect(registrant.existsSync(), isTrue);
@@ -384,7 +385,7 @@ dependencies:
         await injectPlugins(flutterProject);
 
         final File registrant = flutterProject.directory
-          .childDirectory(fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
+          .childDirectory(globals.fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
           .childFile('GeneratedPluginRegistrant.java');
 
         expect(registrant.readAsStringSync(),
@@ -434,7 +435,7 @@ dependencies:
         await injectPlugins(flutterProject);
 
         final File registrant = flutterProject.directory
-          .childDirectory(fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
+          .childDirectory(globals.fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
           .childFile('GeneratedPluginRegistrant.java');
 
         expect(registrant.existsSync(), isTrue);
@@ -458,7 +459,7 @@ dependencies:
         await injectPlugins(flutterProject);
 
         final File registrant = flutterProject.directory
-          .childDirectory(fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
+          .childDirectory(globals.fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
           .childFile('GeneratedPluginRegistrant.java');
 
         expect(registrant.existsSync(), isTrue);
@@ -480,7 +481,7 @@ dependencies:
         await injectPlugins(flutterProject);
 
         final File registrant = flutterProject.directory
-          .childDirectory(fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
+          .childDirectory(globals.fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
           .childFile('GeneratedPluginRegistrant.java');
 
         expect(registrant.existsSync(), isTrue);
@@ -502,7 +503,7 @@ dependencies:
         await injectPlugins(flutterProject);
 
         final File registrant = flutterProject.directory
-          .childDirectory(fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
+          .childDirectory(globals.fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
           .childFile('GeneratedPluginRegistrant.java');
         expect(registrant.readAsStringSync(),
           contains('plugin3.UseOldEmbedding.registerWith(shimPluginRegistry.registrarFor("plugin3.UseOldEmbedding"));'));
@@ -523,7 +524,7 @@ dependencies:
         await injectPlugins(flutterProject);
 
         final File registrant = flutterProject.directory
-          .childDirectory(fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
+          .childDirectory(globals.fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
           .childFile('GeneratedPluginRegistrant.java');
         expect(registrant.readAsStringSync(),
           contains('flutterEngine.getPlugins().add(new plugin1.UseNewEmbedding());'));
@@ -545,7 +546,7 @@ dependencies:
         await injectPlugins(flutterProject);
 
         final File registrant = flutterProject.directory
-          .childDirectory(fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
+          .childDirectory(globals.fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
           .childFile('GeneratedPluginRegistrant.java');
         expect(registrant.readAsStringSync(),
           contains('flutterEngine.getPlugins().add(new plugin4.UseBothEmbedding());'));
@@ -577,7 +578,7 @@ dependencies:
         when(featureFlags.isWebEnabled).thenReturn(true);
 
         final Directory webPluginWithNestedFile =
-            fs.systemTempDirectory.createTempSync('web_plugin_with_nested');
+            globals.fs.systemTempDirectory.createTempSync('web_plugin_with_nested');
         webPluginWithNestedFile.childFile('pubspec.yaml').writeAsStringSync('''
   flutter:
     plugin:

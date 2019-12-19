@@ -6,13 +6,14 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io' as io show IOSink, ProcessSignal, Stdout, StdoutException;
 
+import 'package:platform/platform.dart';
+
 import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart' show AndroidSdk;
 import 'package:flutter_tools/src/application_package.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart' hide IOSink;
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
@@ -21,6 +22,7 @@ import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
@@ -36,7 +38,7 @@ class MockApplicationPackageStore extends ApplicationPackageStore {
   MockApplicationPackageStore() : super(
     android: AndroidApk(
       id: 'io.flutter.android.mock',
-      file: fs.file('/mock/path/to/android/SkyShell.apk'),
+      file: globals.fs.file('/mock/path/to/android/SkyShell.apk'),
       versionCode: 1,
       launchActivity: 'io.flutter.android.mock.MockActivity',
     ),
@@ -67,9 +69,9 @@ class MockAndroidSdk extends Mock implements AndroidSdk {
     bool withPlatformTools = true,
     bool withBuildTools = true,
   }) {
-    final Directory dir = fs.systemTempDirectory.createTempSync('flutter_mock_android_sdk.');
-    final String exe = platform.isWindows ? '.exe' : '';
-    final String bat = platform.isWindows ? '.bat' : '';
+    final Directory dir = globals.fs.systemTempDirectory.createTempSync('flutter_mock_android_sdk.');
+    final String exe = globals.platform.isWindows ? '.exe' : '';
+    final String bat = globals.platform.isWindows ? '.bat' : '';
 
     _createDir(dir, 'licenses');
 
@@ -98,7 +100,7 @@ class MockAndroidSdk extends Mock implements AndroidSdk {
     }
 
     if (withNdkDir != null) {
-      final String ndkToolchainBin = fs.path.join(
+      final String ndkToolchainBin = globals.fs.path.join(
         'ndk-bundle',
         'toolchains',
         'arm-linux-androideabi-4.9',
@@ -106,24 +108,24 @@ class MockAndroidSdk extends Mock implements AndroidSdk {
         withNdkDir,
         'bin',
       );
-      final String ndkCompiler = fs.path.join(
+      final String ndkCompiler = globals.fs.path.join(
         ndkToolchainBin,
         'arm-linux-androideabi-gcc',
       );
-      final String ndkLinker = fs.path.join(
+      final String ndkLinker = globals.fs.path.join(
         ndkToolchainBin,
         'arm-linux-androideabi-ld',
       );
       _createSdkFile(dir, ndkCompiler);
       _createSdkFile(dir, ndkLinker);
-      _createSdkFile(dir, fs.path.join('ndk-bundle', 'source.properties'), contents: '''
+      _createSdkFile(dir, globals.fs.path.join('ndk-bundle', 'source.properties'), contents: '''
 Pkg.Desc = Android NDK[]
 Pkg.Revision = $ndkVersion.1.5063045
 
 ''');
     }
     if (withNdkSysroot) {
-      final String armPlatform = fs.path.join(
+      final String armPlatform = globals.fs.path.join(
         'ndk-bundle',
         'platforms',
         'android-9',
@@ -144,7 +146,7 @@ Pkg.Revision = $ndkVersion.1.5063045
   }
 
   static void _createDir(Directory dir, String path) {
-    final Directory directory = fs.directory(fs.path.join(dir.path, path));
+    final Directory directory = globals.fs.directory(globals.fs.path.join(dir.path, path));
     directory.createSync(recursive: true);
   }
 
@@ -675,8 +677,8 @@ class MockResidentCompiler extends BasicMock implements ResidentCompiler {
   }
   @override
   Future<CompilerOutput> recompile(String mainPath, List<Uri> invalidatedFiles, { String outputPath, String packagesFilePath }) async {
-    fs.file(outputPath).createSync(recursive: true);
-    fs.file(outputPath).writeAsStringSync('compiled_kernel_output');
+    globals.fs.file(outputPath).createSync(recursive: true);
+    globals.fs.file(outputPath).writeAsStringSync('compiled_kernel_output');
     return CompilerOutput(outputPath, 0, <Uri>[]);
   }
 }

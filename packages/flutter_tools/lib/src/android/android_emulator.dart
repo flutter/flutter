@@ -12,6 +12,7 @@ import '../base/file_system.dart';
 import '../base/process.dart';
 import '../device.dart';
 import '../emulator.dart';
+import '../globals.dart' as globals;
 import 'android_sdk.dart';
 
 class AndroidEmulators extends EmulatorDiscovery {
@@ -93,12 +94,12 @@ AndroidEmulator _loadEmulatorInfo(String id) {
   id = id.trim();
   final String avdPath = getAvdPath();
   if (avdPath != null) {
-    final File iniFile = fs.file(fs.path.join(avdPath, '$id.ini'));
+    final File iniFile = globals.fs.file(globals.fs.path.join(avdPath, '$id.ini'));
     if (iniFile.existsSync()) {
       final Map<String, String> ini = parseIniLines(iniFile.readAsLinesSync());
       if (ini['path'] != null) {
         final File configFile =
-            fs.file(fs.path.join(ini['path'], 'config.ini'));
+            globals.fs.file(globals.fs.path.join(ini['path'], 'config.ini'));
         if (configFile.existsSync()) {
           final Map<String, String> properties =
               parseIniLines(configFile.readAsLinesSync());

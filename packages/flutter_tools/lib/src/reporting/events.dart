@@ -195,7 +195,7 @@ class CommandResultEvent extends UsageEvent {
       );
     } catch (error) {
       // If grabbing the maxRss fails for some reason, just don't send an event.
-      printTrace('Querying maxRss failed with error: $error');
+      globals.printTrace('Querying maxRss failed with error: $error');
     }
   }
 }

@@ -7,7 +7,7 @@ import 'package:meta/meta.dart';
 import 'package:quiver/core.dart' show hash2;
 
 import '../convert.dart' show json;
-import '../globals.dart';
+import '../globals.dart' as globals;
 import '../version.dart';
 import 'file_system.dart';
 import 'utils.dart';
@@ -50,17 +50,17 @@ class Fingerprinter {
 
   bool doesFingerprintMatch() {
     try {
-      final File fingerprintFile = fs.file(fingerprintPath);
+      final File fingerprintFile = globals.fs.file(fingerprintPath);
       if (!fingerprintFile.existsSync()) {
         return false;
       }
 
-      if (!_depfilePaths.every(fs.isFileSync)) {
+      if (!_depfilePaths.every(globals.fs.isFileSync)) {
         return false;
       }
 
       final List<String> paths = _getPaths();
-      if (!paths.every(fs.isFileSync)) {
+      if (!paths.every(globals.fs.isFileSync)) {
         return false;
       }
 
@@ -69,7 +69,7 @@ class Fingerprinter {
       return oldFingerprint == newFingerprint;
     } catch (e) {
       // Log exception and continue, fingerprinting is only a performance improvement.
-      printTrace('Fingerprint check error: $e');
+      globals.printTrace('Fingerprint check error: $e');
     }
     return false;
   }
@@ -77,10 +77,10 @@ class Fingerprinter {
   void writeFingerprint() {
     try {
       final Fingerprint fingerprint = buildFingerprint();
-      fs.file(fingerprintPath).writeAsStringSync(fingerprint.toJson());
+      globals.fs.file(fingerprintPath).writeAsStringSync(fingerprint.toJson());
     } catch (e) {
       // Log exception and continue, fingerprinting is only a performance improvement.
-      printTrace('Fingerprint write error: $e');
+      globals.printTrace('Fingerprint write error: $e');
     }
   }
 
@@ -101,7 +101,7 @@ class Fingerprinter {
 /// See [Fingerprinter].
 class Fingerprint {
   Fingerprint.fromBuildInputs(Map<String, String> properties, Iterable<String> inputPaths) {
-    final Iterable<File> files = inputPaths.map<File>(fs.file);
+    final Iterable<File> files = inputPaths.map<File>(globals.fs.file);
     final Iterable<File> missingInputs = files.where((File file) => !file.existsSync());
     if (missingInputs.isNotEmpty) {
       throw ArgumentError('Missing input files:\n' + missingInputs.join('\n'));
@@ -181,7 +181,7 @@ final RegExp _escapeExpr = RegExp(r'\\(.)');
 Set<String> readDepfile(String depfilePath) {
   // Depfile format:
   // outfile1 outfile2 : file1.dart file2.dart file3.dart
-  final String contents = fs.file(depfilePath).readAsStringSync();
+  final String contents = globals.fs.file(depfilePath).readAsStringSync();
 
   final String dependencies = contents.split(': ')[1];
   return dependencies

@@ -4,7 +4,7 @@
 
 import '../base/common.dart';
 import '../base/process.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
 import 'fuchsia_sdk.dart';
 
 // Usage: dev_finder <flags> <subcommand> <subcommand args>
@@ -34,7 +34,7 @@ class FuchsiaDevFinder {
     ];
     final RunResult result = await processUtils.run(command);
     if (result.exitCode != 0) {
-      printError('dev_finder failed: ${result.stderr}');
+      globals.printError('dev_finder failed: ${result.stderr}');
       return null;
     }
     return result.stdout.split('\n');
@@ -61,7 +61,7 @@ class FuchsiaDevFinder {
     ];
     final RunResult result = await processUtils.run(command);
     if (result.exitCode != 0) {
-      printError('dev_finder failed: ${result.stderr}');
+      globals.printError('dev_finder failed: ${result.stderr}');
       return null;
     }
     return result.stdout.trim();

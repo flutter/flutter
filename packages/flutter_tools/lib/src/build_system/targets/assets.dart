@@ -7,6 +7,7 @@ import 'package:pool/pool.dart';
 import '../../asset.dart';
 import '../../base/file_system.dart';
 import '../../devfs.dart';
+import '../../globals.dart' as globals;
 import '../../plugins.dart';
 import '../../project.dart';
 import '../build_system.dart';
@@ -34,12 +35,12 @@ Future<Depfile> copyAssets(Environment environment, Directory outputDirectory) a
     assetBundle.entries.entries.map<Future<void>>((MapEntry<String, DevFSContent> entry) async {
       final PoolResource resource = await pool.request();
       try {
-        final File file = fs.file(outputDirectory.uri.resolve(entry.key));
+        final File file = globals.fs.file(outputDirectory.uri.resolve(entry.key));
         outputs.add(file);
         file.parent.createSync(recursive: true);
         final DevFSContent content = entry.value;
         if (content is DevFSFileContent && content.file is File) {
-          inputs.add(fs.file(content.file.path));
+          inputs.add(globals.fs.file(content.file.path));
           await (content.file as File).copy(file.path);
         } else {
           await file.writeAsBytes(await entry.value.contentsAsBytes());

@@ -3,10 +3,11 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
+import 'package:platform/platform.dart';
+
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
 import 'package:flutter_tools/src/commands/build_windows.dart';
@@ -16,6 +17,7 @@ import 'package:flutter_tools/src/windows/visual_studio.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 import 'package:xml/xml.dart' as xml;
+import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -59,7 +61,7 @@ void main() {
   testUsingContext('Windows build fails when there is no vcvars64.bat', () async {
     final BuildCommand command = BuildCommand();
     applyMocksToCommand(command);
-    fs.file(solutionPath).createSync(recursive: true);
+    globals.fs.file(solutionPath).createSync(recursive: true);
     expect(createTestCommandRunner(command).run(
       const <String>['build', 'windows']
     ), throwsA(isInstanceOf<ToolExit>()));
@@ -89,11 +91,11 @@ void main() {
   testUsingContext('Windows build fails on non windows platform', () async {
     final BuildCommand command = BuildCommand();
     applyMocksToCommand(command);
-    fs.file(solutionPath).createSync(recursive: true);
+    globals.fs.file(solutionPath).createSync(recursive: true);
     when(mockVisualStudio.vcvarsPath).thenReturn(vcvarsPath);
-    fs.file('pubspec.yaml').createSync();
-    fs.file('.packages').createSync();
-    fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+    globals.fs.file('pubspec.yaml').createSync();
+    globals.fs.file('.packages').createSync();
+    globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
 
     expect(createTestCommandRunner(command).run(
       const <String>['build', 'windows']
@@ -109,18 +111,18 @@ void main() {
   testUsingContext('Windows build does not spew stdout to status logger', () async {
     final BuildCommand command = BuildCommand();
     applyMocksToCommand(command);
-    fs.file(solutionPath).createSync(recursive: true);
+    globals.fs.file(solutionPath).createSync(recursive: true);
     when(mockVisualStudio.vcvarsPath).thenReturn(vcvarsPath);
-    fs.file('pubspec.yaml').createSync();
-    fs.file('.packages').createSync();
-    fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+    globals.fs.file('pubspec.yaml').createSync();
+    globals.fs.file('.packages').createSync();
+    globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
 
     when(mockProcessManager.start(<String>[
       r'C:\packages\flutter_tools\bin\vs_build.bat',
       vcvarsPath,
-      fs.path.basename(solutionPath),
+      globals.fs.path.basename(solutionPath),
       'Release',
-    ], workingDirectory: fs.path.dirname(solutionPath))).thenAnswer((Invocation invocation) async {
+    ], workingDirectory: globals.fs.path.dirname(solutionPath))).thenAnswer((Invocation invocation) async {
       return mockProcess;
     });
 
@@ -140,18 +142,18 @@ void main() {
   testUsingContext('Windows build invokes msbuild and writes generated files', () async {
     final BuildCommand command = BuildCommand();
     applyMocksToCommand(command);
-    fs.file(solutionPath).createSync(recursive: true);
+    globals.fs.file(solutionPath).createSync(recursive: true);
     when(mockVisualStudio.vcvarsPath).thenReturn(vcvarsPath);
-    fs.file('pubspec.yaml').createSync();
-    fs.file('.packages').createSync();
-    fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+    globals.fs.file('pubspec.yaml').createSync();
+    globals.fs.file('.packages').createSync();
+    globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
 
     when(mockProcessManager.start(<String>[
       r'C:\packages\flutter_tools\bin\vs_build.bat',
       vcvarsPath,
-      fs.path.basename(solutionPath),
+      globals.fs.path.basename(solutionPath),
       'Release',
-    ], workingDirectory: fs.path.dirname(solutionPath))).thenAnswer((Invocation invocation) async {
+    ], workingDirectory: globals.fs.path.dirname(solutionPath))).thenAnswer((Invocation invocation) async {
       return mockProcess;
     });
 
@@ -160,7 +162,7 @@ void main() {
     );
 
     // Spot-check important elements from the properties file.
-    final File propsFile = fs.file(r'C:\windows\flutter\ephemeral\Generated.props');
+    final File propsFile = globals.fs.file(r'C:\windows\flutter\ephemeral\Generated.props');
     expect(propsFile.existsSync(), true);
     final xml.XmlDocument props = xml.parse(propsFile.readAsStringSync());
     expect(props.findAllElements('PropertyGroup').first.getAttribute('Label'), 'UserMacros');
@@ -177,18 +179,18 @@ void main() {
   testUsingContext('Release build prints an under-construction warning', () async {
     final BuildCommand command = BuildCommand();
     applyMocksToCommand(command);
-    fs.file(solutionPath).createSync(recursive: true);
+    globals.fs.file(solutionPath).createSync(recursive: true);
     when(mockVisualStudio.vcvarsPath).thenReturn(vcvarsPath);
-    fs.file('pubspec.yaml').createSync();
-    fs.file('.packages').createSync();
-    fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+    globals.fs.file('pubspec.yaml').createSync();
+    globals.fs.file('.packages').createSync();
+    globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
 
     when(mockProcessManager.start(<String>[
       r'C:\packages\flutter_tools\bin\vs_build.bat',
       vcvarsPath,
-      fs.path.basename(solutionPath),
+      globals.fs.path.basename(solutionPath),
       'Release',
-    ], workingDirectory: fs.path.dirname(solutionPath))).thenAnswer((Invocation invocation) async {
+    ], workingDirectory: globals.fs.path.dirname(solutionPath))).thenAnswer((Invocation invocation) async {
       return mockProcess;
     });
 
@@ -206,7 +208,7 @@ void main() {
   });
 
   testUsingContext('hidden when not enabled on Windows host', () {
-    when(platform.isWindows).thenReturn(true);
+    when(globals.platform.isWindows).thenReturn(true);
 
     expect(BuildWindowsCommand().hidden, true);
   }, overrides: <Type, Generator>{
@@ -215,7 +217,7 @@ void main() {
   });
 
   testUsingContext('Not hidden when enabled and on Windows host', () {
-    when(platform.isWindows).thenReturn(true);
+    when(globals.platform.isWindows).thenReturn(true);
 
     expect(BuildWindowsCommand().hidden, false);
   }, overrides: <Type, Generator>{

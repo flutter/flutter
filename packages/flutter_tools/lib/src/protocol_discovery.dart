@@ -8,7 +8,7 @@ import 'package:meta/meta.dart';
 
 import 'base/io.dart';
 import 'device.dart';
-import 'globals.dart';
+import 'globals.dart' as globals;
 
 /// Discovers a specific service protocol on a device, and forwards the service
 /// protocol device port to the host.
@@ -117,20 +117,20 @@ class ProtocolDiscovery {
       return;
     }
     if (devicePort != null && uri.port != devicePort) {
-      printTrace('skipping potential observatory $uri due to device port mismatch');
+      globals.printTrace('skipping potential observatory $uri due to device port mismatch');
       return;
     }
     _uriStreamController.add(uri);
   }
 
   Future<Uri> _forwardPort(Uri deviceUri) async {
-    printTrace('$serviceName URL on device: $deviceUri');
+    globals.printTrace('$serviceName URL on device: $deviceUri');
     Uri hostUri = deviceUri;
 
     if (portForwarder != null) {
       final int actualDevicePort = deviceUri.port;
       final int actualHostPort = await portForwarder.forward(actualDevicePort, hostPort: hostPort);
-      printTrace('Forwarded host port $actualHostPort to device port $actualDevicePort for $serviceName');
+      globals.printTrace('Forwarded host port $actualHostPort to device port $actualDevicePort for $serviceName');
       hostUri = deviceUri.replace(port: actualHostPort);
     }
 

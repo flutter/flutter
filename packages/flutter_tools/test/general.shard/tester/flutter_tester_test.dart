@@ -7,13 +7,14 @@ import 'dart:async';
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/tester/flutter_tester.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
+import 'package:platform/platform.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -29,12 +30,12 @@ void main() {
   group('FlutterTesterApp', () {
     testUsingContext('fromCurrentDirectory', () async {
       const String projectPath = '/home/my/projects/my_project';
-      await fs.directory(projectPath).create(recursive: true);
-      fs.currentDirectory = projectPath;
+      await globals.fs.directory(projectPath).create(recursive: true);
+      globals.fs.currentDirectory = projectPath;
 
       final FlutterTesterApp app = FlutterTesterApp.fromCurrentDirectory();
       expect(app.name, 'my_project');
-      expect(app.packagesFile.path, fs.path.join(projectPath, '.packages'));
+      expect(app.packagesFile.path, globals.fs.path.join(projectPath, '.packages'));
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
       ProcessManager: () => FakeProcessManager.any(),
@@ -114,23 +115,23 @@ void main() {
 
       setUp(() {
         mockBuildSystem = MockBuildSystem();
-        flutterRoot = fs.path.join('home', 'me', 'flutter');
-        flutterTesterPath = fs.path.join(flutterRoot, 'bin', 'cache',
+        flutterRoot = globals.fs.path.join('home', 'me', 'flutter');
+        flutterTesterPath = globals.fs.path.join(flutterRoot, 'bin', 'cache',
             'artifacts', 'engine', 'linux-x64', 'flutter_tester');
-        final File flutterTesterFile = fs.file(flutterTesterPath);
+        final File flutterTesterFile = globals.fs.file(flutterTesterPath);
         flutterTesterFile.parent.createSync(recursive: true);
         flutterTesterFile.writeAsBytesSync(const <int>[]);
 
-        projectPath = fs.path.join('home', 'me', 'hello');
-        mainPath = fs.path.join(projectPath, 'lin', 'main.dart');
+        projectPath = globals.fs.path.join('home', 'me', 'hello');
+        mainPath = globals.fs.path.join(projectPath, 'lin', 'main.dart');
 
         mockProcessManager = MockProcessManager();
         mockProcessManager.processFactory =
             (List<String> commands) => mockProcess;
 
         mockArtifacts = MockArtifacts();
-        final String artifactPath = fs.path.join(flutterRoot, 'artifact');
-        fs.file(artifactPath).createSync(recursive: true);
+        final String artifactPath = globals.fs.path.join(flutterRoot, 'artifact');
+        globals.fs.file(artifactPath).createSync(recursive: true);
         when(mockArtifacts.getArtifactPath(
           any,
           mode: anyNamed('mode')
@@ -140,7 +141,7 @@ void main() {
           any,
           any,
         )).thenAnswer((_) async {
-          fs.file('$mainPath.dill').createSync(recursive: true);
+          globals.fs.file('$mainPath.dill').createSync(recursive: true);
           return BuildResult(success: true);
         });
       });

@@ -6,16 +6,18 @@ import 'dart:async';
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:platform/platform.dart';
+import 'package:mockito/mockito.dart';
+import 'package:process/process.dart';
+
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/cocoapods.dart';
 import 'package:flutter_tools/src/plugins.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:mockito/mockito.dart';
-import 'package:process/process.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -39,12 +41,12 @@ void main() {
   }
 
   void podsIsInHomeDir() {
-    fs.directory(fs.path.join(homeDirPath, '.cocoapods', 'repos', 'master')).createSync(recursive: true);
+    globals.fs.directory(globals.fs.path.join(homeDirPath, '.cocoapods', 'repos', 'master')).createSync(recursive: true);
   }
 
   String podsIsInCustomDir({String cocoapodsReposDir}) {
-    cocoapodsReposDir ??= fs.path.join(homeDirPath, 'cache', 'cocoapods', 'repos');
-    fs.directory(fs.path.join(cocoapodsReposDir, 'master')).createSync(recursive: true);
+    cocoapodsReposDir ??= globals.fs.path.join(homeDirPath, 'cache', 'cocoapods', 'repos');
+    globals.fs.directory(globals.fs.path.join(cocoapodsReposDir, 'master')).createSync(recursive: true);
     return cocoapodsReposDir;
   }
 
@@ -53,21 +55,21 @@ void main() {
     fs = MemoryFileSystem();
     mockProcessManager = MockProcessManager();
     mockXcodeProjectInterpreter = MockXcodeProjectInterpreter();
-    projectUnderTest = FlutterProject.fromDirectory(fs.directory('project'));
+    projectUnderTest = FlutterProject.fromDirectory(globals.fs.directory('project'));
     projectUnderTest.ios.xcodeProject.createSync(recursive: true);
     cocoaPodsUnderTest = CocoaPods();
     pretendPodVersionIs('1.6.0');
-    fs.file(fs.path.join(
+    globals.fs.file(globals.fs.path.join(
       Cache.flutterRoot, 'packages', 'flutter_tools', 'templates', 'cocoapods', 'Podfile-ios-objc',
     ))
         ..createSync(recursive: true)
         ..writeAsStringSync('Objective-C iOS podfile template');
-    fs.file(fs.path.join(
+    globals.fs.file(globals.fs.path.join(
       Cache.flutterRoot, 'packages', 'flutter_tools', 'templates', 'cocoapods', 'Podfile-ios-swift',
     ))
         ..createSync(recursive: true)
         ..writeAsStringSync('Swift iOS podfile template');
-    fs.file(fs.path.join(
+    globals.fs.file(globals.fs.path.join(
       Cache.flutterRoot, 'packages', 'flutter_tools', 'templates', 'cocoapods', 'Podfile-macos',
     ))
         ..createSync(recursive: true)
@@ -317,7 +319,7 @@ void main() {
     testUsingContext('prints warning, if Podfile is out of date', () async {
       pretendPodIsInstalled();
 
-      fs.file(fs.path.join('project', 'ios', 'Podfile'))
+      globals.fs.file(globals.fs.path.join('project', 'ios', 'Podfile'))
         ..createSync()
         ..writeAsStringSync('Existing Podfile');
 
@@ -358,7 +360,7 @@ void main() {
 
     testUsingContext('throws, if specs repo is outdated.', () async {
       pretendPodIsInstalled();
-      fs.file(fs.path.join('project', 'ios', 'Podfile'))
+      globals.fs.file(globals.fs.path.join('project', 'ios', 'Podfile'))
         ..createSync()
         ..writeAsStringSync('Existing Podfile');
 
@@ -633,7 +635,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
 
     testUsingContext('succeeds, if specs repo is in CP_REPOS_DIR.', () async {
       pretendPodIsInstalled();
-      fs.file(fs.path.join('project', 'ios', 'Podfile'))
+      globals.fs.file(globals.fs.path.join('project', 'ios', 'Podfile'))
         ..createSync()
         ..writeAsStringSync('Existing Podfile');
       when(mockProcessManager.run(

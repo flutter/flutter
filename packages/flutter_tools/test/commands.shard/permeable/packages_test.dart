@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:process/process.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -42,7 +43,7 @@ void main() {
     Directory tempDir;
 
     setUp(() {
-      tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
+      tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
     });
 
     tearDown(() {
@@ -51,7 +52,7 @@ void main() {
 
     Future<String> createProjectWithPlugin(String plugin, { List<String> arguments }) async {
       final String projectPath = await createProject(tempDir, arguments: arguments);
-      final File pubspec = fs.file(fs.path.join(projectPath, 'pubspec.yaml'));
+      final File pubspec = globals.fs.file(globals.fs.path.join(projectPath, 'pubspec.yaml'));
       String content = await pubspec.readAsString();
       content = content.replaceFirst(
         '\ndependencies:\n',
@@ -75,7 +76,7 @@ void main() {
 
     void expectExists(String projectPath, String relPath) {
       expect(
-        fs.isFileSync(fs.path.join(projectPath, relPath)),
+        globals.fs.isFileSync(globals.fs.path.join(projectPath, relPath)),
         true,
         reason: '$projectPath/$relPath should exist, but does not',
       );
@@ -84,7 +85,7 @@ void main() {
     void expectContains(String projectPath, String relPath, String substring) {
       expectExists(projectPath, relPath);
       expect(
-        fs.file(fs.path.join(projectPath, relPath)).readAsStringSync(),
+        globals.fs.file(globals.fs.path.join(projectPath, relPath)).readAsStringSync(),
         contains(substring),
         reason: '$projectPath/$relPath has unexpected content',
       );
@@ -92,7 +93,7 @@ void main() {
 
     void expectNotExists(String projectPath, String relPath) {
       expect(
-        fs.isFileSync(fs.path.join(projectPath, relPath)),
+        globals.fs.isFileSync(globals.fs.path.join(projectPath, relPath)),
         false,
         reason: '$projectPath/$relPath should not exist, but does',
       );
@@ -101,7 +102,7 @@ void main() {
     void expectNotContains(String projectPath, String relPath, String substring) {
       expectExists(projectPath, relPath);
       expect(
-        fs.file(fs.path.join(projectPath, relPath)).readAsStringSync(),
+        globals.fs.file(globals.fs.path.join(projectPath, relPath)).readAsStringSync(),
         isNot(contains(substring)),
         reason: '$projectPath/$relPath has unexpected content',
       );
@@ -193,7 +194,7 @@ void main() {
         pluginWitnesses,
       ].expand<String>((List<String> list) => list);
       for (String path in allFiles) {
-        final File file = fs.file(fs.path.join(projectPath, path));
+        final File file = globals.fs.file(globals.fs.path.join(projectPath, path));
         if (file.existsSync()) {
           file.deleteSync();
         }
@@ -329,7 +330,7 @@ void main() {
         tempDir,
         arguments: <String>['--template=plugin', '--no-pub'],
       );
-      final String exampleProjectPath = fs.path.join(projectPath, 'example');
+      final String exampleProjectPath = globals.fs.path.join(projectPath, 'example');
       removeGeneratedFiles(projectPath);
       removeGeneratedFiles(exampleProjectPath);
 

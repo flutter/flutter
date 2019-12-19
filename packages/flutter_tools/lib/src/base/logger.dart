@@ -7,8 +7,8 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 
 import '../base/context.dart';
+import '../globals.dart' as globals;
 import 'io.dart';
-import 'platform.dart';
 import 'terminal.dart';
 import 'utils.dart';
 
@@ -663,7 +663,7 @@ class AnsiSpinner extends Status {
   Timer timer;
 
   // Windows console font has a limited set of Unicode characters.
-  List<String> get _animation => platform.isWindows
+  List<String> get _animation => globals.platform.isWindows
       ? <String>[r'-', r'\', r'|', r'/']
       : <String>['⣾', '⣽', '⣻', '⢿', '⡿', '⣟', '⣯', '⣷'];
 

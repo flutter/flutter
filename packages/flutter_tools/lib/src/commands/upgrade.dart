@@ -7,14 +7,12 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 
 import '../base/common.dart';
-import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/os.dart';
-import '../base/platform.dart';
 import '../base/process.dart';
 import '../cache.dart';
 import '../dart/pub.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
 import '../persistent_tool_state.dart';
 import '../runner/flutter_command.dart';
 import '../version.dart';
@@ -119,8 +117,8 @@ class UpgradeCommandRunner {
     final bool alreadyUpToDate = await attemptFastForward(flutterVersion);
     if (alreadyUpToDate) {
       // If the upgrade was a no op, then do not continue with the second half.
-      printStatus('Flutter is already up to date on channel ${flutterVersion.channel}');
-      printStatus('$flutterVersion');
+      globals.printStatus('Flutter is already up to date on channel ${flutterVersion.channel}');
+      globals.printStatus('$flutterVersion');
     } else {
       await flutterUpgradeContinue();
     }
@@ -129,14 +127,14 @@ class UpgradeCommandRunner {
   Future<void> flutterUpgradeContinue() async {
     final int code = await processUtils.stream(
       <String>[
-        fs.path.join('bin', 'flutter'),
+        globals.fs.path.join('bin', 'flutter'),
         'upgrade',
         '--continue',
         '--no-version-check',
       ],
       workingDirectory: Cache.flutterRoot,
       allowReentrantFlutter: true,
-      environment: Map<String, String>.of(platform.environment),
+      environment: Map<String, String>.of(globals.platform.environment),
     );
     if (code != 0) {
       throwToolExit(null, exitCode: code);
@@ -227,7 +225,7 @@ class UpgradeCommandRunner {
   /// If the user is on a deprecated channel, attempts to migrate them off of
   /// it.
   Future<void> upgradeChannel(FlutterVersion flutterVersion) async {
-    printStatus('Upgrading Flutter from ${Cache.flutterRoot}...');
+    globals.printStatus('Upgrading Flutter from ${Cache.flutterRoot}...');
     await ChannelCommand.upgradeChannel();
   }
 
@@ -255,7 +253,7 @@ class UpgradeCommandRunner {
       alreadyUpToDate = newFlutterVersion.channel == oldFlutterVersion.channel &&
         newFlutterVersion.frameworkRevision == oldFlutterVersion.frameworkRevision;
     } catch (e) {
-      printTrace('Failed to determine FlutterVersion after upgrade fast-forward: $e');
+      globals.printTrace('Failed to determine FlutterVersion after upgrade fast-forward: $e');
     }
     return alreadyUpToDate;
   }
@@ -266,15 +264,15 @@ class UpgradeCommandRunner {
   /// shell script re-entrantly here so that it will download the updated
   /// Dart and so forth if necessary.
   Future<void> precacheArtifacts() async {
-    printStatus('');
-    printStatus('Upgrading engine...');
+    globals.printStatus('');
+    globals.printStatus('Upgrading engine...');
     final int code = await processUtils.stream(
       <String>[
-        fs.path.join('bin', 'flutter'), '--no-color', '--no-version-check', 'precache',
+        globals.fs.path.join('bin', 'flutter'), '--no-color', '--no-version-check', 'precache',
       ],
       workingDirectory: Cache.flutterRoot,
       allowReentrantFlutter: true,
-      environment: Map<String, String>.of(platform.environment),
+      environment: Map<String, String>.of(globals.platform.environment),
     );
     if (code != 0) {
       throwToolExit(null, exitCode: code);
@@ -283,22 +281,22 @@ class UpgradeCommandRunner {
 
   /// Update the user's packages.
   Future<void> updatePackages(FlutterVersion flutterVersion) async {
-    printStatus('');
-    printStatus(flutterVersion.toString());
+    globals.printStatus('');
+    globals.printStatus(flutterVersion.toString());
     final String projectRoot = findProjectRoot();
     if (projectRoot != null) {
-      printStatus('');
+      globals.printStatus('');
       await pub.get(context: PubContext.pubUpgrade, directory: projectRoot, upgrade: true, checkLastModified: false);
     }
   }
 
   /// Run flutter doctor in case requirements have changed.
   Future<void> runDoctor() async {
-    printStatus('');
-    printStatus('Running flutter doctor...');
+    globals.printStatus('');
+    globals.printStatus('Running flutter doctor...');
     await processUtils.stream(
       <String>[
-        fs.path.join('bin', 'flutter'), '--no-version-check', 'doctor',
+        globals.fs.path.join('bin', 'flutter'), '--no-version-check', 'doctor',
       ],
       workingDirectory: Cache.flutterRoot,
       allowReentrantFlutter: true,
