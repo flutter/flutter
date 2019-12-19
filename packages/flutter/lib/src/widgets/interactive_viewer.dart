@@ -40,13 +40,9 @@ class InteractiveViewer extends StatelessWidget {
     // exceeding the boundaries, or a strong enough gesture causes a navigation
     // change.
     this.boundaryMargin = EdgeInsets.zero,
-    this.initialTranslation,
-    this.initialScale,
-    this.initialRotation,
-    this.disableTranslation = false,
-    this.disableScale = false,
     this.disableRotation = false,
-    this.reset = false,
+    this.disableScale = false,
+    this.disableTranslation = false,
     this.onTapDown,
     this.onTapUp,
     this.onTap,
@@ -69,21 +65,16 @@ class InteractiveViewer extends StatelessWidget {
     this.onPanUpdate,
     this.onPanEnd,
     this.onPanCancel,
-    this.onResetEnd,
     this.onScaleStart,
     this.onScaleUpdate,
     this.onScaleEnd,
+    this.transformationController,
   }) : assert(child != null),
        assert(minScale != null),
        assert(minScale > 0),
        assert(disableTranslation != null),
        assert(disableScale != null),
        assert(disableRotation != null),
-       assert(reset != null),
-       assert(
-         !reset || onResetEnd != null,
-         'Must implement onResetEnd to use reset.',
-       ),
        super(key: key);
 
   // TODO(justinmc): Is this the best way to specify boundaries? I wanted to
@@ -136,21 +127,6 @@ class InteractiveViewer extends StatelessWidget {
   ///   * [disableTranslation]
   ///   * [disableScale]
   final bool disableRotation;
-
-  /// Sets the initial translation value of the transform.
-  ///
-  /// Defaults to Offset.zero.
-  final Offset initialTranslation;
-
-  /// Sets the initial scale value of the transform.
-  ///
-  /// Defaults to 1.0.
-  final double initialScale;
-
-  /// Sets the initial rotation value of the transform.
-  ///
-  /// Defaults to 0.0.
-  final double initialRotation;
 
   /// The maximum allowed scale.
   ///
@@ -205,14 +181,6 @@ class InteractiveViewer extends StatelessWidget {
   /// A pre-transformation proxy for [GestureDetector.onPanUpdate].
   final GestureDragUpdateCallback onPanUpdate;
 
-  // TODO(justinmc): This seems hacky, find a better way, or make the user do
-  // the animation themselves.
-  /// Called when the transform finishes resetting to its initial value.
-  ///
-  /// Resetting happens when [reset] is set to true. This callback should set
-  /// [reset] to false.
-  final VoidCallback onResetEnd;
-
   /// A pre-transformation proxy for [GestureDetector.onScaleEnd].
   final GestureScaleEndCallback onScaleEnd;
 
@@ -249,14 +217,8 @@ class InteractiveViewer extends StatelessWidget {
   /// A pre-transformation proxy for [GestureDetector.onVerticalDragStart].
   final GestureDragUpdateCallback onVerticalDragUpdate;
 
-  /// Whether to reset the child to its original transformation state.
-  ///
-  /// If set to true, this widget will animate back to its initial transform
-  /// and call [onResetEnd] when done. When utilizing reset, [onResetEnd] should
-  /// also be implemented, and it should set reset to false when called.
-  ///
-  /// Defaults to false.
-  final bool reset;
+  // TODO(justinmc): Document.
+  final ValueNotifier<Matrix4> transformationController;
 
   @override
   Widget build(BuildContext context) {
@@ -267,13 +229,9 @@ class InteractiveViewer extends StatelessWidget {
           maxScale: maxScale,
           minScale: minScale,
           boundaryMargin: boundaryMargin,
-          initialTranslation: initialTranslation,
-          initialScale: initialScale,
-          initialRotation: initialRotation,
           disableTranslation: disableTranslation,
           disableScale: disableScale,
           disableRotation: disableRotation,
-          reset: reset,
           onTapDown: onTapDown,
           onTapUp: onTapUp,
           onTap: onTap,
@@ -296,11 +254,11 @@ class InteractiveViewer extends StatelessWidget {
           onPanUpdate: onPanUpdate,
           onPanEnd: onPanEnd,
           onPanCancel: onPanCancel,
-          onResetEnd: onResetEnd,
           onScaleStart: onScaleStart,
           onScaleUpdate: onScaleUpdate,
           onScaleEnd: onScaleEnd,
           size: Size(constraints.maxWidth, constraints.maxHeight),
+          transformationController: transformationController ?? ValueNotifier<Matrix4>(Matrix4.identity()),
         );
       },
     );
@@ -315,13 +273,9 @@ class _InteractiveViewerSized extends StatefulWidget {
     this.maxScale,
     @required this.minScale,
     this.boundaryMargin,
-    this.initialTranslation,
-    this.initialScale,
-    this.initialRotation,
     @required this.disableTranslation,
     @required this.disableScale,
     @required this.disableRotation,
-    @required this.reset,
     this.onTapDown,
     this.onTapUp,
     this.onTap,
@@ -344,27 +298,22 @@ class _InteractiveViewerSized extends StatefulWidget {
     this.onPanUpdate,
     this.onPanEnd,
     this.onPanCancel,
-    this.onResetEnd,
     this.onScaleStart,
     this.onScaleUpdate,
     this.onScaleEnd,
+    this.transformationController,
   }) : assert(child != null),
        assert(minScale != null),
        assert(minScale > 0),
        assert(disableTranslation != null),
        assert(disableScale != null),
        assert(disableRotation != null),
-       assert(reset != null),
-       assert(
-         !reset || onResetEnd != null,
-         'Must implement onResetEnd to use reset.',
-       );
+       assert(transformationController != null);
 
   final Widget child;
   // TODO(justinmc): This is the size of the viewport, so consider naming it as
   // such.
   final Size size;
-  final bool reset;
   final GestureTapDownCallback onTapDown;
   final GestureTapUpCallback onTapUp;
   final GestureTapCallback onTap;
@@ -387,7 +336,6 @@ class _InteractiveViewerSized extends StatefulWidget {
   final GestureDragUpdateCallback onPanUpdate;
   final GestureDragEndCallback onPanEnd;
   final GestureDragCancelCallback onPanCancel;
-  final VoidCallback onResetEnd;
   final GestureScaleStartCallback onScaleStart;
   final GestureScaleUpdateCallback onScaleUpdate;
   final GestureScaleEndCallback onScaleEnd;
@@ -397,9 +345,7 @@ class _InteractiveViewerSized extends StatefulWidget {
   final bool disableTranslation;
   final bool disableScale;
   final bool disableRotation;
-  final Offset initialTranslation;
-  final double initialScale;
-  final double initialRotation;
+  final ValueNotifier<Matrix4> transformationController;
 
   @override _InteractiveViewerState createState() => _InteractiveViewerState();
 }
@@ -408,15 +354,12 @@ class _InteractiveViewerSized extends StatefulWidget {
 class _InteractiveViewerState extends State<_InteractiveViewerSized> with TickerProviderStateMixin {
   Animation<Offset> _animation;
   AnimationController _controller;
-  Animation<Matrix4> _animationReset;
-  AnimationController _controllerReset;
   // The translation that will be applied to the scene (not viewport).
   // A positive x offset moves the scene right, viewport left.
   // A positive y offset moves the scene down, viewport up.
   Offset _translateFromScene; // Point where a single translation began.
   double _scaleStart; // Scale value at start of scaling gesture.
   double _rotationStart = 0.0; // Rotation at start of rotation gesture.
-  Matrix4 _transform = Matrix4.identity();
   double _currentRotation = 0.0;
   _GestureType gestureType;
 
@@ -450,21 +393,6 @@ class _InteractiveViewerState extends State<_InteractiveViewerSized> with Ticker
     return Offset(nextTranslation.x, nextTranslation.y);
   }
 
-  // The transformation matrix that gives the initial home position.
-  Matrix4 get _initialTransform {
-    Matrix4 matrix = Matrix4.identity();
-    if (widget.initialTranslation != null) {
-      matrix = matrixTranslate(matrix, widget.initialTranslation);
-    }
-    if (widget.initialScale != null) {
-      matrix = matrixScale(matrix, widget.initialScale);
-    }
-    if (widget.initialRotation != null) {
-      matrix = matrixRotate(matrix, widget.initialRotation, Offset.zero);
-    }
-    return matrix;
-  }
-
   // Return the scene point at the given viewport point.
   static Offset fromViewport(Offset viewportPoint, Matrix4 transform) {
     // On viewportPoint, perform the inverse transformation of the scene to get
@@ -484,9 +412,6 @@ class _InteractiveViewerState extends State<_InteractiveViewerSized> with Ticker
     return renderObject.localToGlobal(Offset.zero);
   }
 
-  double _cachedChildWidth;
-  double _cachedChildHeight;
-
   // Get the size of the child given its RenderBox and the viewport's Size.
   //
   // In some cases (i.e. a Table that's wider and/or taller than the viewport),
@@ -499,26 +424,13 @@ class _InteractiveViewerState extends State<_InteractiveViewerSized> with Ticker
   // the size of the viewport, and the boundary should remain at the viewport.
   // The intrinsic size is not used.
   Size _getChildSize(RenderBox renderBox, Size viewportSize) {
-    // TODO(justinmc): This try/catch feels dirty, is there a better way? I'm
-    // using it because without it I hit the debug assertion in RenderBox about
-    // only the parent being able to access the child's size (but only in cases
-    // where I rerender the CustomPaint and then use a reset animation).
-    double width;
-    double height;
-    try {
-      width = renderBox.size.width;
-      height = renderBox.size.height;
-      _cachedChildWidth = width;
-      _cachedChildHeight = height;
-    } catch(error, stacktrace) {
-      width = _cachedChildWidth;
-      width = _cachedChildHeight;
-    }
-
+    double width = renderBox.size.width;
+    double height = renderBox.size.height;
     final double minIntrinsicWidth = renderBox.getMinIntrinsicWidth(viewportSize.height);
     final double maxIntrinsicWidth = renderBox.getMaxIntrinsicWidth(viewportSize.height);
     final double minIntrinsicHeight = renderBox.getMinIntrinsicHeight(viewportSize.width);
     final double maxIntrinsicHeight = renderBox.getMaxIntrinsicHeight(viewportSize.width);
+
     if (minIntrinsicWidth == maxIntrinsicWidth) {
       width = minIntrinsicWidth;
     }
@@ -555,23 +467,9 @@ class _InteractiveViewerState extends State<_InteractiveViewerSized> with Ticker
   void initState() {
     super.initState();
 
-    // _initialTransform depends on the size of the child, which isn't available
-    // until after the initial render.
-    SchedulerBinding.instance.addPostFrameCallback((Duration timestamp) {
-      setState(() {
-        _transform = _initialTransform;
-      });
-    });
-
     _controller = AnimationController(
       vsync: this,
     );
-    _controllerReset = AnimationController(
-      vsync: this,
-    );
-    if (widget.reset) {
-      _animateResetInitialize();
-    }
   }
 
   @override
@@ -580,11 +478,6 @@ class _InteractiveViewerState extends State<_InteractiveViewerSized> with Ticker
     if (widget.child != oldWidget.child
       || widget.boundaryMargin != oldWidget.boundaryMargin) {
       _boundaryRectCached = null;
-    }
-    if (widget.reset && !oldWidget.reset && _animationReset == null) {
-      _animateResetInitialize();
-    } else if (!widget.reset && oldWidget.reset && _animationReset != null) {
-      _animateResetStop();
     }
   }
 
@@ -596,12 +489,18 @@ class _InteractiveViewerState extends State<_InteractiveViewerSized> with Ticker
       behavior: HitTestBehavior.opaque, // Necessary when translating off screen
       onTapDown: widget.onTapDown == null ? null : (TapDownDetails details) {
         widget.onTapDown(TapDownDetails(
-          globalPosition: fromViewport(details.globalPosition - getOffset(context), _transform),
+          globalPosition: fromViewport(
+            details.globalPosition - getOffset(context),
+            widget.transformationController.value,
+          ),
         ));
       },
       onTapUp: widget.onTapUp == null ? null : (TapUpDetails details) {
         widget.onTapUp(TapUpDetails(
-          globalPosition: fromViewport(details.globalPosition - getOffset(context), _transform),
+          globalPosition: fromViewport(
+            details.globalPosition - getOffset(context),
+            widget.transformationController.value,
+          ),
         ));
       },
       onTap: widget.onTap,
@@ -611,51 +510,78 @@ class _InteractiveViewerState extends State<_InteractiveViewerSized> with Ticker
       onLongPressUp: widget.onLongPressUp,
       onVerticalDragDown: widget.onVerticalDragDown == null ? null : (DragDownDetails details) {
         widget.onVerticalDragDown(DragDownDetails(
-          globalPosition: fromViewport(details.globalPosition - getOffset(context), _transform),
+          globalPosition: fromViewport(
+            details.globalPosition - getOffset(context),
+            widget.transformationController.value,
+          ),
         ));
       },
       onVerticalDragStart: widget.onVerticalDragStart == null ? null : (DragStartDetails details) {
         widget.onVerticalDragStart(DragStartDetails(
-          globalPosition: fromViewport(details.globalPosition - getOffset(context), _transform),
+          globalPosition: fromViewport(
+            details.globalPosition - getOffset(context),
+            widget.transformationController.value,
+          ),
         ));
       },
       onVerticalDragUpdate: widget.onVerticalDragUpdate == null ? null : (DragUpdateDetails details) {
         widget.onVerticalDragUpdate(DragUpdateDetails(
-          globalPosition: fromViewport(details.globalPosition - getOffset(context), _transform),
+          globalPosition: fromViewport(
+            details.globalPosition - getOffset(context),
+            widget.transformationController.value,
+          ),
         ));
       },
       onVerticalDragEnd: widget.onVerticalDragEnd,
       onVerticalDragCancel: widget.onVerticalDragCancel,
       onHorizontalDragDown: widget.onHorizontalDragDown == null ? null : (DragDownDetails details) {
         widget.onHorizontalDragDown(DragDownDetails(
-          globalPosition: fromViewport(details.globalPosition - getOffset(context), _transform),
+          globalPosition: fromViewport(
+            details.globalPosition - getOffset(context),
+            widget.transformationController.value,
+          ),
         ));
       },
       onHorizontalDragStart: widget.onHorizontalDragStart == null ? null : (DragStartDetails details) {
         widget.onHorizontalDragStart(DragStartDetails(
-          globalPosition: fromViewport(details.globalPosition - getOffset(context), _transform),
+          globalPosition: fromViewport(
+            details.globalPosition - getOffset(context),
+            widget.transformationController.value,
+          ),
         ));
       },
       onHorizontalDragUpdate: widget.onHorizontalDragUpdate == null ? null : (DragUpdateDetails details) {
         widget.onHorizontalDragUpdate(DragUpdateDetails(
-          globalPosition: fromViewport(details.globalPosition - getOffset(context), _transform),
+          globalPosition: fromViewport(
+            details.globalPosition - getOffset(context),
+            widget.transformationController.value,
+          ),
         ));
       },
       onHorizontalDragEnd: widget.onHorizontalDragEnd,
       onHorizontalDragCancel: widget.onHorizontalDragCancel,
       onPanDown: widget.onPanDown == null ? null : (DragDownDetails details) {
         widget.onPanDown(DragDownDetails(
-          globalPosition: fromViewport(details.globalPosition - getOffset(context), _transform),
+          globalPosition: fromViewport(
+            details.globalPosition - getOffset(context),
+            widget.transformationController.value,
+          ),
         ));
       },
       onPanStart: widget.onPanStart == null ? null : (DragStartDetails details) {
         widget.onPanStart(DragStartDetails(
-          globalPosition: fromViewport(details.globalPosition - getOffset(context), _transform),
+          globalPosition: fromViewport(
+            details.globalPosition - getOffset(context),
+            widget.transformationController.value,
+          ),
         ));
       },
       onPanUpdate: widget.onPanUpdate == null ? null : (DragUpdateDetails details) {
         widget.onPanUpdate(DragUpdateDetails(
-          globalPosition: fromViewport(details.globalPosition - getOffset(context), _transform),
+          globalPosition: fromViewport(
+            details.globalPosition - getOffset(context),
+            widget.transformationController.value,
+          ),
         ));
       },
       onPanEnd: widget.onPanEnd,
@@ -670,7 +596,7 @@ class _InteractiveViewerState extends State<_InteractiveViewerSized> with Ticker
       // TODO(justinmc): Do I need this ClipRect?
       child: ClipRect(
         child: Transform(
-          transform: _transform,
+          transform: widget.transformationController.value,
           child: KeyedSubtree(
             key: _childKey,
             child: widget.child,
@@ -693,7 +619,7 @@ class _InteractiveViewerState extends State<_InteractiveViewerSized> with Ticker
     }
 
     // Clamp translation so the viewport remains inside _boundaryRect.
-    final double scale = _transform.getMaxScaleOnAxis();
+    final double scale = widget.transformationController.value.getMaxScaleOnAxis();
     final Size scaledSize = widget.size / scale;
     // Add 1 pixel because Rect.contains excludes its bottom and right edges.
     final Rect viewportBoundaries = Rect.fromLTRB(
@@ -755,7 +681,7 @@ class _InteractiveViewerState extends State<_InteractiveViewerSized> with Ticker
 
     // Don't allow a scale that results in an overall scale beyond min/max
     // scale.
-    final double currentScale = _transform.getMaxScaleOnAxis();
+    final double currentScale = widget.transformationController.value.getMaxScaleOnAxis();
     final double totalScale = currentScale * scale;
     final double clampedTotalScale = totalScale.clamp(
       widget.minScale,
@@ -816,31 +742,34 @@ class _InteractiveViewerState extends State<_InteractiveViewerSized> with Ticker
       _animation?.removeListener(_onAnimate);
       _animation = null;
     }
-    if (_controllerReset.isAnimating) {
-      _animateResetStop();
-    }
 
     gestureType = null;
     setState(() {
-      _scaleStart = _transform.getMaxScaleOnAxis();
-      _translateFromScene = fromViewport(details.focalPoint, _transform);
+      _scaleStart = widget.transformationController.value.getMaxScaleOnAxis();
+      _translateFromScene = fromViewport(
+        details.focalPoint,
+        widget.transformationController.value,
+      );
       _rotationStart = _currentRotation;
     });
   }
 
   // Handle an update to an ongoing gesture of _GestureType.
   void _onScaleUpdate(ScaleUpdateDetails details) {
-    double scale = _transform.getMaxScaleOnAxis();
+    double scale = widget.transformationController.value.getMaxScaleOnAxis();
     if (widget.onScaleUpdate != null) {
       widget.onScaleUpdate(ScaleUpdateDetails(
-        focalPoint: fromViewport(details.focalPoint, _transform),
+        focalPoint: fromViewport(
+          details.focalPoint,
+          widget.transformationController.value,
+        ),
         scale: details.scale,
         rotation: details.rotation,
       ));
     }
     final Offset focalPointScene = fromViewport(
       details.focalPoint,
-      _transform,
+      widget.transformationController.value,
     );
     gestureType ??= _getGestureType(
       widget.disableScale ? 1.0 : details.scale,
@@ -853,8 +782,11 @@ class _InteractiveViewerState extends State<_InteractiveViewerSized> with Ticker
         // previous call to _onScaleUpdate.
         final double desiredScale = _scaleStart * details.scale;
         final double scaleChange = desiredScale / scale;
-        _transform = matrixScale(_transform, scaleChange);
-        scale = _transform.getMaxScaleOnAxis();
+        widget.transformationController.value = matrixScale(
+          widget.transformationController.value,
+          scaleChange,
+        );
+        scale = widget.transformationController.value.getMaxScaleOnAxis();
 
         // While scaling, translate such that the user's two fingers stay on the
         // same places in the scene. That means that the focal point of the
@@ -862,19 +794,32 @@ class _InteractiveViewerState extends State<_InteractiveViewerSized> with Ticker
         // scale.
         final Offset focalPointSceneNext = fromViewport(
           details.focalPoint,
-          _transform,
+          widget.transformationController.value,
         );
-        _transform = matrixTranslate(_transform, focalPointSceneNext - focalPointScene);
+        widget.transformationController.value = matrixTranslate(
+          widget.transformationController.value,
+          focalPointSceneNext - focalPointScene,
+        );
       } else if (gestureType == _GestureType.rotate && details.rotation != 0.0) {
         final double desiredRotation = _rotationStart + details.rotation;
-        _transform = matrixRotate(_transform, _currentRotation - desiredRotation, details.focalPoint);
+        widget.transformationController.value = matrixRotate(
+          widget.transformationController.value,
+          _currentRotation - desiredRotation,
+          details.focalPoint,
+        );
         _currentRotation = desiredRotation;
       } else if (_translateFromScene != null && details.scale == 1.0) {
         // Translate so that the same point in the scene is underneath the
         // focal point before and after the movement.
         final Offset translationChange = focalPointScene - _translateFromScene;
-        _transform = matrixTranslate(_transform, translationChange);
-        _translateFromScene = fromViewport(details.focalPoint, _transform);
+        widget.transformationController.value = matrixTranslate(
+          widget.transformationController.value,
+          translationChange,
+        );
+        _translateFromScene = fromViewport(
+          details.focalPoint,
+          widget.transformationController.value,
+        );
       }
     });
   }
@@ -898,7 +843,7 @@ class _InteractiveViewerState extends State<_InteractiveViewerSized> with Ticker
       return;
     }
 
-    final Vector3 translationVector = _transform.getTranslation();
+    final Vector3 translationVector = widget.transformationController.value.getTranslation();
     final Offset translation = Offset(translationVector.x, translationVector.y);
     final FrictionSimulation frictionSimulationX = FrictionSimulation(
       _kDrag,
@@ -935,55 +880,28 @@ class _InteractiveViewerState extends State<_InteractiveViewerSized> with Ticker
       return;
     }
     setState(() {
-      // Translate _transform such that the resulting translation is
-      // _animation.value.
-      final Vector3 translationVector = _transform.getTranslation();
+      // Translate such that the resulting translation is _animation.value.
+      final Vector3 translationVector = widget.transformationController.value.getTranslation();
       final Offset translation = Offset(translationVector.x, translationVector.y);
-      final Offset translationScene = fromViewport(translation, _transform);
-      final Offset animationScene = fromViewport(_animation.value, _transform);
+      final Offset translationScene = fromViewport(
+        translation,
+        widget.transformationController.value,
+      );
+      final Offset animationScene = fromViewport(
+        _animation.value,
+        widget.transformationController.value,
+      );
       final Offset translationChangeScene = animationScene - translationScene;
-      _transform = matrixTranslate(_transform, translationChangeScene);
+      widget.transformationController.value = matrixTranslate(
+        widget.transformationController.value,
+        translationChangeScene,
+      );
     });
-  }
-
-  // Handle reset to home transform animation.
-  void _onAnimateReset() {
-    setState(() {
-      _transform = _animationReset.value;
-    });
-    if (!_controllerReset.isAnimating) {
-      _animationReset?.removeListener(_onAnimateReset);
-      _animationReset = null;
-      _controllerReset.reset();
-      widget.onResetEnd();
-    }
-  }
-
-  // Initialize the reset to home transform animation.
-  void _animateResetInitialize() {
-    _controllerReset.reset();
-    _animationReset = Matrix4Tween(
-      begin: _transform,
-      end: _initialTransform,
-    ).animate(_controllerReset);
-    _controllerReset.duration = const Duration(milliseconds: 400);
-    _animationReset.addListener(_onAnimateReset);
-    _controllerReset.forward();
-  }
-
-  // Stop a running reset to home transform animation.
-  void _animateResetStop() {
-    _controllerReset.stop();
-    _animationReset?.removeListener(_onAnimateReset);
-    _animationReset = null;
-    _controllerReset.reset();
-    widget.onResetEnd();
   }
 
   @override
   void dispose() {
     _controller.dispose();
-    _controllerReset.dispose();
     super.dispose();
   }
 }

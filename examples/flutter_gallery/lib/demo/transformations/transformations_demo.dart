@@ -14,7 +14,7 @@ class TransformationsDemo extends StatefulWidget {
 
   @override _TransformationsDemoState createState() => _TransformationsDemoState();
 }
-class _TransformationsDemoState extends State<TransformationsDemo> {
+class _TransformationsDemoState extends State<TransformationsDemo> with TickerProviderStateMixin {
   // The radius of a hexagon tile in pixels.
   static const double _kHexagonRadius = 32.0;
   // The margin between hexagons.
@@ -22,33 +22,70 @@ class _TransformationsDemoState extends State<TransformationsDemo> {
   // The radius of the entire board in hexagons, not including the center.
   static const int _kBoardRadius = 8;
 
-  bool _reset = false;
   Board _board = Board(
     boardRadius: _kBoardRadius,
     hexagonRadius: _kHexagonRadius,
     hexagonMargin: _kHexagonMargin,
   );
 
-  CustomPaint _childCached;
-  CustomPaint get _child {
-    if (_childCached != null) {
-      final _BoardPainter cachedPainter = _childCached.painter;
-      if (cachedPainter.board == _board) {
-        return _childCached;
-      }
+  Matrix4 _homeTransformation;
+  ValueNotifier<Matrix4> _transformationController = ValueNotifier<Matrix4>(null);
+  Animation<Matrix4> _animationReset;
+  AnimationController _controllerReset;
+
+  // Handle reset to home transform animation.
+  void _onAnimateReset() {
+    setState(() {
+      _transformationController.value = _animationReset.value;
+    });
+    if (!_controllerReset.isAnimating) {
+      _animationReset?.removeListener(_onAnimateReset);
+      _animationReset = null;
+      _controllerReset.reset();
     }
-    _childCached = CustomPaint(
-      size: _board.size,
-      painter: _BoardPainter(
-        board: _board,
-      ),
-      // This child gives the CustomPaint an intrinsic size.
-      child: SizedBox(
-        width: _board.size.width,
-        height: _board.size.height,
-      ),
+  }
+
+  // Initialize the reset to home transform animation.
+  void _animateResetInitialize() {
+    _controllerReset.reset();
+    _animationReset = Matrix4Tween(
+      begin: _transformationController.value,
+      end: _homeTransformation,
+    ).animate(_controllerReset);
+    _controllerReset.duration = const Duration(milliseconds: 400);
+    _animationReset.addListener(_onAnimateReset);
+    _controllerReset.forward();
+  }
+
+  // Stop a running reset to home transform animation.
+  void _animateResetStop() {
+    _controllerReset.stop();
+    _animationReset?.removeListener(_onAnimateReset);
+    _animationReset = null;
+    _controllerReset.reset();
+  }
+
+  void _onScaleStart(ScaleStartDetails details) {
+    // If the user tries to cause a transformation while the reset animation is
+    // running, cancel the reset animation.
+    if (_controllerReset.status == AnimationStatus.forward) {
+      _animateResetStop();
+    }
+  }
+
+  void _onTapUp(TapUpDetails details) {
+    final Offset scenePoint = details.globalPosition;
+    final BoardPoint boardPoint = _board.pointToBoardPoint(scenePoint);
+    setState(() {
+      _board = _board.copyWithSelected(boardPoint);
+    });
+  }
+
+  @override
+  void initState() {
+    _controllerReset = AnimationController(
+      vsync: this,
     );
-    return _childCached;
   }
 
   @override
@@ -80,30 +117,46 @@ class _TransformationsDemoState extends State<TransformationsDemo> {
         builder: (BuildContext context, BoxConstraints constraints) {
           // Draw the scene as big as is available, but allow the user to
           // translate beyond that to a visibleSize that's a bit bigger.
-          final Size viewportSize = Size(constraints.maxWidth, constraints.maxHeight);
+          final Size viewportSize = Size(
+            constraints.maxWidth,
+            constraints.maxHeight,
+          );
+
+          // The board is drawn centered at the origin, which is the top left
+          // corner in InteractiveViewer, so shift it to the center of the
+          // viewport initially.
+          if (_transformationController.value == null) {
+            _homeTransformation = Matrix4.identity()..translate(
+              viewportSize.width / 2,
+              viewportSize.height / 2,
+            );
+            _transformationController.value = _homeTransformation;
+          }
+
           return InteractiveViewer(
-            reset: _reset,
-            onResetEnd: () {
-              setState(() {
-                _reset = false;
-              });
-            },
-            // The board is drawn centered at the origin, which is the top left
-            // corner in InteractiveViewer, so set boundaryMargin to accommodate
-            // that, and shift it to the center of the viewport
-            // with initialTranslation.
+            transformationController: _transformationController,
+            // boundaryMargin also takes into consideration the fact that the
+            // board is centered at the origin. These values provide a nice
+            // amount of space for typical interaction.
             boundaryMargin: const EdgeInsets.fromLTRB(
               840.0,
               840.0,
               -100.0,
               0,
             ),
-            initialTranslation: Offset(
-              viewportSize.width / 2,
-              viewportSize.height / 2,
-            ),
+            onScaleStart: _onScaleStart,
             onTapUp: _onTapUp,
-            child: _child,
+            child: CustomPaint(
+              size: _board.size,
+              painter: _BoardPainter(
+                board: _board,
+              ),
+              // This child gives the CustomPaint an intrinsic size.
+              child: SizedBox(
+                width: _board.size.width,
+                height: _board.size.height,
+              ),
+            ),
           );
         },
       ),
@@ -140,7 +193,8 @@ class _TransformationsDemoState extends State<TransformationsDemo> {
     return FloatingActionButton(
       onPressed: () {
         setState(() {
-          _reset = true;
+          //_transformationController.value = _homeTransformation;
+          _animateResetInitialize();
         });
       },
       tooltip: 'Reset Transform',
@@ -177,12 +231,10 @@ class _TransformationsDemoState extends State<TransformationsDemo> {
     );
   }
 
-  void _onTapUp(TapUpDetails details) {
-    final Offset scenePoint = details.globalPosition;
-    final BoardPoint boardPoint = _board.pointToBoardPoint(scenePoint);
-    setState(() {
-      _board = _board.copyWithSelected(boardPoint);
-    });
+  @override
+  void dispose() {
+    _controllerReset.dispose();
+    super.dispose();
   }
 }
 
