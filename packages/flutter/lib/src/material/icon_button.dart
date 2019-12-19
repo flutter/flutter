@@ -154,6 +154,7 @@ class IconButton extends StatelessWidget {
     this.autofocus = false,
     this.tooltip,
     this.enableFeedback = true,
+    this.constraints,
   }) : assert(iconSize != null),
        assert(padding != null),
        assert(alignment != null),
@@ -288,6 +289,9 @@ class IconButton extends StatelessWidget {
   ///  * [Feedback] for providing platform-specific feedback to certain actions.
   final bool enableFeedback;
 
+  /// Box constraints for the button.
+  final BoxConstraints constraints;
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
@@ -300,7 +304,10 @@ class IconButton extends StatelessWidget {
 
     final Offset densityAdjustment = (visualDensity ?? theme.visualDensity).baseSizeAdjustment;
     Widget result = ConstrainedBox(
-      constraints: BoxConstraints(minWidth: _kMinButtonSize + densityAdjustment.dx, minHeight: _kMinButtonSize + densityAdjustment.dy),
+      constraints: constraints ?? BoxConstraints(
+        minWidth: _kMinButtonSize + densityAdjustment.dx,
+        minHeight: _kMinButtonSize + densityAdjustment.dy,
+      ),
       child: Padding(
         padding: padding,
         child: SizedBox(
