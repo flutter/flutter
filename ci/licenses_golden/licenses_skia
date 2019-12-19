@@ -1,4 +1,4 @@
-Signature: 16d60f1f9a1cb2c19639e7bae712c515
+Signature: 02c604df832226af3bbce0a7266d6a21
 
 UNUSED LICENSES:
 
@@ -1486,6 +1486,7 @@ FILE: ../../../third_party/skia/specs/web-img-decode/proposed/impl/impl.js
 FILE: ../../../third_party/skia/specs/web-img-decode/proposed/index.html
 FILE: ../../../third_party/skia/src/core/SkOrderedReadBuffer.h
 FILE: ../../../third_party/skia/src/sksl/lex/sksl.lex
+FILE: ../../../third_party/skia/src/sksl/sksl_blend.inc
 FILE: ../../../third_party/skia/src/sksl/sksl_fp.inc
 FILE: ../../../third_party/skia/src/sksl/sksl_frag.inc
 FILE: ../../../third_party/skia/src/sksl/sksl_geom.inc
