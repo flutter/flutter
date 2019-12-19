@@ -672,9 +672,9 @@ class PlatformViewLayer extends Layer {
     if (hoverAnnotation == null || !rect.contains(localPosition)) {
       return false;
     }
-    if (S == MouseTrackerAnnotation) {
+    if (MouseTrackerAnnotation == S) {
       final Object untypedValue = hoverAnnotation;
-      final S typedValue = untypedValue as S;
+      final S typedValue = untypedValue;
       result.add(AnnotationEntry<S>(
         annotation: typedValue,
         localPosition: localPosition,
