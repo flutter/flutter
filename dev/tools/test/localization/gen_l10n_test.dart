@@ -834,6 +834,56 @@ void main() {
       );
     });
 
+    test('correctly generates a plural message with placeholders:', () {
+      const String pluralMessageWithPlaceholderArbFileString = '''{
+  "helloWorlds": "{count,plural, =0{Hello}=1{Hello {adjective} World}=2{Hello two {adjective} worlds}few{Hello {count} {adjective} worlds}many{Hello all {count} {adjective} worlds}other{Hello other {count} {adjective} worlds}}",
+  "@helloWorlds": {
+    "placeholders": {
+      "adjective": {},
+      "count": {}
+    }
+  }
+}''';
+      final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+        ..createSync(recursive: true);
+      l10nDirectory.childFile(defaultTemplateArbFileName)
+        .writeAsStringSync(pluralMessageWithPlaceholderArbFileString);
+
+      final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+      try {
+        generator.initialize(
+          l10nDirectoryPath: defaultArbPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        );
+        generator.parseArbFiles();
+        generator.generateClassMethods();
+      } on Exception catch (e) {
+        fail('Parsing template arb file should succeed: \n$e');
+      }
+
+      expect(generator.classMethods, isNotEmpty);
+      expect(
+        generator.classMethods.first,
+        '''  String helloWorlds(int count, Object adjective) {
+    return Intl.plural(
+      count,
+      locale: _localeName,
+      name: 'helloWorlds',
+      args: <Object>[count, adjective],
+      zero: 'Hello',
+      one: 'Hello \$adjective World',
+      two: 'Hello two \$adjective worlds',
+      few: 'Hello \$count \$adjective worlds',
+      many: 'Hello all \$count \$adjective worlds',
+      other: 'Hello other \$count \$adjective worlds'
+    );
+  }
+'''
+      );
+    });
+
     test('should throw when failing to parse the arb file:', () {
       const String arbFileWithTrailingComma = '''{
   "title": "Stocks",
