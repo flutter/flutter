@@ -9,8 +9,7 @@ class SurfaceSceneBuilder implements ui.SceneBuilder {
     _surfaceStack.add(PersistedScene(_lastFrameScene));
   }
 
-  final List<PersistedContainerSurface> _surfaceStack =
-      <PersistedContainerSurface>[];
+  final List<PersistedContainerSurface> _surfaceStack = <PersistedContainerSurface>[];
 
   /// The scene built by this scene builder.
   ///
@@ -19,8 +18,7 @@ class SurfaceSceneBuilder implements ui.SceneBuilder {
     assert(() {
       if (_surfaceStack.length != 1) {
         final String surfacePrintout = _surfaceStack
-            .map<Type>((PersistedContainerSurface surface) =>
-                surface.runtimeType)
+            .map<Type>((PersistedContainerSurface surface) => surface.runtimeType)
             .toList()
             .join(', ');
         throw Exception('Incorrect sequence of push/pop operations while '
@@ -65,8 +63,11 @@ class SurfaceSceneBuilder implements ui.SceneBuilder {
   ///
   /// See [pop] for details about the operation stack.
   @override
-  ui.OffsetEngineLayer pushOffset(double dx, double dy,
-      {ui.OffsetEngineLayer oldLayer}) {
+  ui.OffsetEngineLayer pushOffset(
+    double dx,
+    double dy, {
+    ui.OffsetEngineLayer oldLayer,
+  }) {
     return _pushSurface(PersistedOffset(oldLayer, dx, dy));
   }
 
@@ -76,8 +77,10 @@ class SurfaceSceneBuilder implements ui.SceneBuilder {
   ///
   /// See [pop] for details about the operation stack.
   @override
-  ui.TransformEngineLayer pushTransform(Float64List matrix4,
-      {ui.TransformEngineLayer oldLayer}) {
+  ui.TransformEngineLayer pushTransform(
+    Float64List matrix4, {
+    ui.TransformEngineLayer oldLayer,
+  }) {
     if (matrix4 == null) {
       throw ArgumentError('"matrix4" argument cannot be null');
     }
@@ -94,8 +97,11 @@ class SurfaceSceneBuilder implements ui.SceneBuilder {
   /// See [pop] for details about the operation stack, and [Clip] for different clip modes.
   /// By default, the clip will be anti-aliased (clip = [Clip.antiAlias]).
   @override
-  ui.ClipRectEngineLayer pushClipRect(ui.Rect rect,
-      {ui.Clip clipBehavior = ui.Clip.antiAlias, ui.ClipRectEngineLayer oldLayer}) {
+  ui.ClipRectEngineLayer pushClipRect(
+    ui.Rect rect, {
+    ui.Clip clipBehavior = ui.Clip.antiAlias,
+    ui.ClipRectEngineLayer oldLayer,
+  }) {
     assert(clipBehavior != null);
     assert(clipBehavior != ui.Clip.none);
     return _pushSurface(PersistedClipRect(oldLayer, rect));
@@ -107,10 +113,12 @@ class SurfaceSceneBuilder implements ui.SceneBuilder {
   ///
   /// See [pop] for details about the operation stack.
   @override
-  ui.ClipRRectEngineLayer pushClipRRect(ui.RRect rrect,
-      {ui.Clip clipBehavior, ui.ClipRRectEngineLayer oldLayer}) {
-    return _pushSurface(
-        PersistedClipRRect(oldLayer, rrect, clipBehavior));
+  ui.ClipRRectEngineLayer pushClipRRect(
+    ui.RRect rrect, {
+    ui.Clip clipBehavior,
+    ui.ClipRRectEngineLayer oldLayer,
+  }) {
+    return _pushSurface(PersistedClipRRect(oldLayer, rrect, clipBehavior));
   }
 
   /// Pushes a path clip operation onto the operation stack.
@@ -119,8 +127,11 @@ class SurfaceSceneBuilder implements ui.SceneBuilder {
   ///
   /// See [pop] for details about the operation stack.
   @override
-  ui.ClipPathEngineLayer pushClipPath(ui.Path path,
-      {ui.Clip clipBehavior = ui.Clip.antiAlias, ui.ClipPathEngineLayer oldLayer}) {
+  ui.ClipPathEngineLayer pushClipPath(
+    ui.Path path, {
+    ui.Clip clipBehavior = ui.Clip.antiAlias,
+    ui.ClipPathEngineLayer oldLayer,
+  }) {
     assert(clipBehavior != null);
     assert(clipBehavior != ui.Clip.none);
     return _pushSurface(PersistedClipPath(oldLayer, path, clipBehavior));
@@ -135,8 +146,11 @@ class SurfaceSceneBuilder implements ui.SceneBuilder {
   ///
   /// See [pop] for details about the operation stack.
   @override
-  ui.OpacityEngineLayer pushOpacity(int alpha,
-      {ui.Offset offset = ui.Offset.zero, ui.OpacityEngineLayer oldLayer}) {
+  ui.OpacityEngineLayer pushOpacity(
+    int alpha, {
+    ui.Offset offset = ui.Offset.zero,
+    ui.OpacityEngineLayer oldLayer,
+  }) {
     return _pushSurface(PersistedOpacity(oldLayer, alpha, offset));
   }
 
@@ -151,8 +165,10 @@ class SurfaceSceneBuilder implements ui.SceneBuilder {
   ///
   /// See [pop] for details about the operation stack.
   @override
-  ui.ColorFilterEngineLayer pushColorFilter(ui.ColorFilter filter,
-      {ui.ColorFilterEngineLayer oldLayer}) {
+  ui.ColorFilterEngineLayer pushColorFilter(
+    ui.ColorFilter filter, {
+    ui.ColorFilterEngineLayer oldLayer,
+  }) {
     assert(filter != null);
     throw UnimplementedError();
   }
@@ -164,8 +180,10 @@ class SurfaceSceneBuilder implements ui.SceneBuilder {
   ///
   /// See [pop] for details about the operation stack.
   @override
-  ui.BackdropFilterEngineLayer pushBackdropFilter(ui.ImageFilter filter,
-      {ui.BackdropFilterEngineLayer oldLayer}) {
+  ui.BackdropFilterEngineLayer pushBackdropFilter(
+    ui.ImageFilter filter, {
+    ui.BackdropFilterEngineLayer oldLayer,
+  }) {
     return _pushSurface(PersistedBackdropFilter(oldLayer, filter));
   }
 
@@ -177,8 +195,11 @@ class SurfaceSceneBuilder implements ui.SceneBuilder {
   /// See [pop] for details about the operation stack.
   @override
   ui.ShaderMaskEngineLayer pushShaderMask(
-      ui.Shader shader, ui.Rect maskRect, ui.BlendMode blendMode,
-      {ui.ShaderMaskEngineLayer oldLayer}) {
+    ui.Shader shader,
+    ui.Rect maskRect,
+    ui.BlendMode blendMode, {
+    ui.ShaderMaskEngineLayer oldLayer,
+  }) {
     throw UnimplementedError();
   }
 
@@ -266,8 +287,7 @@ class SurfaceSceneBuilder implements ui.SceneBuilder {
   /// for more details.
   @override
   void addPerformanceOverlay(int enabledOptions, ui.Rect bounds) {
-    _addPerformanceOverlay(
-        enabledOptions, bounds.left, bounds.right, bounds.top, bounds.bottom);
+    _addPerformanceOverlay(enabledOptions, bounds.left, bounds.right, bounds.top, bounds.bottom);
   }
 
   /// Whether we've already warned the user about the lack of the performance
@@ -276,12 +296,16 @@ class SurfaceSceneBuilder implements ui.SceneBuilder {
   /// We use this to avoid spamming the console with redundant warning messages.
   static bool _webOnlyDidWarnAboutPerformanceOverlay = false;
 
-  void _addPerformanceOverlay(int enabledOptions, double left, double right,
-      double top, double bottom) {
+  void _addPerformanceOverlay(
+    int enabledOptions,
+    double left,
+    double right,
+    double top,
+    double bottom,
+  ) {
     if (!_webOnlyDidWarnAboutPerformanceOverlay) {
       _webOnlyDidWarnAboutPerformanceOverlay = true;
-      html.window.console
-          .warn('The performance overlay isn\'t supported on the web');
+      html.window.console.warn('The performance overlay isn\'t supported on the web');
     }
   }
 
@@ -302,8 +326,7 @@ class SurfaceSceneBuilder implements ui.SceneBuilder {
     if (willChangeHint) {
       hints |= 2;
     }
-    _addSurface(
-        persistedPictureFactory(offset.dx, offset.dy, picture, hints));
+    _addSurface(persistedPictureFactory(offset.dx, offset.dy, picture, hints));
   }
 
   /// Adds a backend texture to the scene.
@@ -311,17 +334,18 @@ class SurfaceSceneBuilder implements ui.SceneBuilder {
   /// The texture is scaled to the given size and rasterized at the given
   /// offset.
   @override
-  void addTexture(int textureId,
-      {ui.Offset offset = ui.Offset.zero,
-      double width = 0.0,
-      double height = 0.0,
-      bool freeze = false}) {
+  void addTexture(
+    int textureId, {
+    ui.Offset offset = ui.Offset.zero,
+    double width = 0.0,
+    double height = 0.0,
+    bool freeze = false,
+  }) {
     assert(offset != null, 'Offset argument was null');
     _addTexture(offset.dx, offset.dy, width, height, textureId);
   }
 
-  void _addTexture(
-      double dx, double dy, double width, double height, int textureId) {
+  void _addTexture(double dx, double dy, double width, double height, int textureId) {
     // In test mode, allow this to be a no-op.
     if (!ui.debugEmulateFlutterTesterEnvironment) {
       throw UnimplementedError('Textures are not supported in Flutter Web');
@@ -368,17 +392,24 @@ class SurfaceSceneBuilder implements ui.SceneBuilder {
   /// (Fuchsia-only) Adds a scene rendered by another application to the scene
   /// for this application.
   @override
-  void addChildScene(
-      {ui.Offset offset = ui.Offset.zero,
-      double width = 0.0,
-      double height = 0.0,
-      ui.SceneHost sceneHost,
-      bool hitTestable = true}) {
+  void addChildScene({
+    ui.Offset offset = ui.Offset.zero,
+    double width = 0.0,
+    double height = 0.0,
+    ui.SceneHost sceneHost,
+    bool hitTestable = true,
+  }) {
     _addChildScene(offset.dx, offset.dy, width, height, sceneHost, hitTestable);
   }
 
-  void _addChildScene(double dx, double dy, double width, double height,
-      ui.SceneHost sceneHost, bool hitTestable) {
+  void _addChildScene(
+    double dx,
+    double dy,
+    double width,
+    double height,
+    ui.SceneHost sceneHost,
+    bool hitTestable,
+  ) {
     throw UnimplementedError();
   }
 
@@ -475,8 +506,15 @@ class SurfaceSceneBuilder implements ui.SceneBuilder {
   /// Set properties on the linked scene.  These properties include its bounds,
   /// as well as whether it can be the target of focus events or not.
   @override
-  void setProperties(double width, double height, double insetTop,
-      double insetRight, double insetBottom, double insetLeft, bool focusable) {
+  void setProperties(
+    double width,
+    double height,
+    double insetTop,
+    double insetRight,
+    double insetBottom,
+    double insetLeft,
+    bool focusable,
+  ) {
     throw UnimplementedError();
   }
 }
