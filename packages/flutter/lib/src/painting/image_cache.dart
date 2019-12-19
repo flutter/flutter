@@ -35,15 +35,9 @@ const int _kDefaultSizeBytes = 100 << 20; // 100 MiB
 /// global [imageCache] varible.
 ///
 /// ```dart
-/// import 'package:flutter/foundation.dart' show BindingBase;
-/// import 'package:flutter/gestures.dart' show GestureBinding;
-/// import 'package:flutter/rendering.dart' show PaintingBinding, SemanticsBinding,
-///     RendererBinding;
-/// import 'package:flutter/scheduler.dart' show SchedulerBinding;
-/// import 'package:flutter/services.dart' show ServicesBinding;
 /// import 'package:flutter/widgets.dart' show ImageCache, runApp, StatelessWidget,
-///     Widget, Container, BuildContext, WidgetsBinding;
-///
+///     Widget, Container, BuildContext, WidgetsFlutterBinding;
+/// 
 /// class MyImageCache extends ImageCache {
 ///   @override
 ///   void clear() {
@@ -51,27 +45,18 @@ const int _kDefaultSizeBytes = 100 << 20; // 100 MiB
 ///     super.clear();
 ///   }
 /// }
-///
-/// class MyWidgetsBinding extends BindingBase
-///     with
-///         GestureBinding,
-///         ServicesBinding,
-///         SchedulerBinding,
-///         PaintingBinding,
-///         SemanticsBinding,
-///         RendererBinding,
-///         WidgetsBinding {
-///
+/// 
+/// class MyWidgetsBinding extends WidgetsFlutterBinding {
 ///   @override
 ///   ImageCache createImageCache() => MyImageCache();
 /// }
-///
+///                                                                                 
 /// void main() {
 ///   // The constructor sets global variables.
 ///   MyWidgetsBinding();
 ///   runApp(MyApp());
 /// }
-///
+/// 
 /// class MyApp extends StatelessWidget {
 ///   @override
 ///   Widget build(BuildContext context) {
