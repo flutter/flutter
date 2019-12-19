@@ -2961,7 +2961,7 @@ void main() {
         ),
       ),
     );
-    expect(tester.testTextInput.editingState, isNull);
+    expect(tester.testTextInput.editingState['text'], isEmpty);
 
     // Initial state with null controller.
     await tester.tap(find.byType(TextField));
