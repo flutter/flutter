@@ -219,6 +219,125 @@ void main() async {
         thirdSpanStartPosition);
   });
 
+  test('hit test on the nested text span and returns correct span offset', () {
+    const fontFamily = 'sans-serif';
+    const fontSize = 20.0;
+    final style = TextStyle(fontFamily: fontFamily, fontSize: fontSize);
+    final ParagraphBuilder builder = ParagraphBuilder(ParagraphStyle(
+      fontFamily: fontFamily,
+      fontSize: fontSize,
+    ));
+
+    const text00 = 'test test test test test te00 ';
+    const text010 = 'test010 ';
+    const text02 = 'test test test test te02 ';
+    const text030 = 'test030 ';
+    const text04 = 'test test test test test test test test test test te04 ';
+    const text050 = 'test050 ';
+
+    /* Logical arrangement: Tree
+
+    Root TextSpan: 0
+    */
+    builder.pushStyle(style);
+    {
+      // 1st child TextSpan of Root: 0.0
+      builder.pushStyle(style);
+      builder.addText(text00);
+      builder.pop();
+
+      // 2nd child TextSpan of Root: 0.1
+      builder.pushStyle(style);
+      {
+        // 1st child TextSpan of 0.1: 0.1.0
+        builder.pushStyle(style);
+        builder.addText(text010);
+        builder.pop();
+      }
+      builder.pop();
+
+      // 3rd child TextSpan of Root: 0.2
+      builder.pushStyle(style);
+      builder.addText(text02);
+      builder.pop();
+
+      // 4th child TextSpan of Root: 0.3
+      builder.pushStyle(style);
+      {
+        // 1st child TextSpan of 0.3: 0.3.0
+        builder.pushStyle(style);
+        builder.addText(text030);
+        builder.pop();
+      }
+      builder.pop();
+
+      // 5th child TextSpan of Root: 0.4
+      builder.pushStyle(style);
+      builder.addText(text04);
+      builder.pop();
+
+      // 6th child TextSpan of Root: 0.5
+      builder.pushStyle(style);
+      {
+        // 1st child TextSpan of 0.5: 0.5.0
+        builder.pushStyle(style);
+        builder.addText(text050);
+        builder.pop();
+      }
+      builder.pop();
+    }
+    builder.pop();
+
+    /* Display arrangement: Visible texts
+
+    Because `const fontSize = 20.0`, the width of each character is 20 and the
+    height is 20. `Display arrangement` squashes `Logical arrangement` to the
+    (x, y) plane. That means `Display arrangement` only shows the visible texts.
+    The order of texts is text00 --> text010 --> text02 --> text030 --> text04
+    --> text050.
+
+    The output is like that.
+
+     |------------ 600 ------------| Begin of test010
+     |--------------- 760 ----------------| End of test010
+     |---------- 500 ---------| Begin of test030
+     |------------- 660 -------------| End of test030
+     |-- 180 --| Begin of test050
+     |------ 360 -----| End of test050
+    'test test test test test te00 test010 '
+    'test test test test te02 test030 test '
+    'test test test test test test test test '
+    'test te04 test050 '
+    */
+
+    final Paragraph paragraph = builder.build();
+    paragraph.layout(ParagraphConstraints(width: 800));
+
+    // Reference the offsets with the output of `Display arrangement`.
+    const offset010 = text00.length;
+    const offset030 = offset010 + text010.length + text02.length;
+    const offset04 = offset030 + text030.length;
+    const offset050 = offset04 + text04.length;
+    // Tap text010.
+    expect(paragraph.getPositionForOffset(Offset(700, 10)).offset, offset010);
+    // Tap text030
+    expect(paragraph.getPositionForOffset(Offset(600, 30)).offset, offset030);
+    // Tap text050
+    expect(paragraph.getPositionForOffset(Offset(220, 70)).offset, offset050);
+    // Tap the left neighbor of text050
+    expect(paragraph.getPositionForOffset(Offset(199, 70)).offset, offset04);
+    // Tap the right neighbor of text050. No matter who the right neighbor of
+    // text0505 is, it must not be text050 itself.
+    expect(paragraph.getPositionForOffset(Offset(360, 70)).offset,
+        isNot(offset050));
+    // Tap the neighbor above text050
+    expect(paragraph.getPositionForOffset(Offset(220, 59)).offset, offset04);
+    // Tap the neighbor below text050. No matter who the neighbor above text050,
+    // it must not be text050 itself.
+    expect(paragraph.getPositionForOffset(Offset(220, 80)).offset,
+        isNot(offset050));
+  });
+
   // Regression test for https://github.com/flutter/flutter/issues/38972
   test(
       'should not set fontFamily to effectiveFontFamily for spans in rich text',
