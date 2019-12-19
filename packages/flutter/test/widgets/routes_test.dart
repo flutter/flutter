@@ -790,8 +790,8 @@ void main() {
 
     testWidgets('secondary animation is triggered when pop initial route', (WidgetTester tester) async {
       final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
-      ProxyAnimation secondaryAnimationOfRouteOne;
-      ProxyAnimation primaryAnimationOfRouteTwo;
+      Animation<double> secondaryAnimationOfRouteOne;
+      Animation<double> primaryAnimationOfRouteTwo;
       await tester.pumpWidget(
         MaterialApp(
           navigatorKey: navigator,
