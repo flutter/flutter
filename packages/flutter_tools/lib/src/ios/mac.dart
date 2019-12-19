@@ -736,7 +736,7 @@ bool upgradePbxProjWithFlutterAssets(IosProject project) {
     final Match match = oldAssets.firstMatch(line);
     if (match != null) {
       if (printedStatuses.add(match.group(1))) {
-        printStatus('Removing obsolete reference to ${match.group(1)} from ${project.hostAppBundleName}');
+        printStatus('Removing obsolete reference to ${match.group(1)} from ${project.xcodeProject?.basename}');
       }
     } else {
       buffer.writeln(line);
