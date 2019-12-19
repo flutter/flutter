@@ -255,6 +255,9 @@ class FlutterProject {
 
 /// Represents a platform-specific sub-component of a FlutterProject.
 abstract class PlatformProject {
+  // The parent project of this platform project
+  FlutterProject get parent;
+
   /// Whether the subproject exists in the Flutter project.
   bool existsSync();
 
@@ -273,9 +276,6 @@ abstract class PlatformProject {
 ///
 /// This defines interfaces common to iOS and macOS projects.
 abstract class XcodeBasedProject {
-  /// The parent of this project.
-  FlutterProject get parent;
-
   /// Whether the subproject (either iOS or macOS) exists in the Flutter project.
   bool existsSync();
 
@@ -549,6 +549,7 @@ class AndroidProject implements PlatformProject {
   AndroidProject._(this.parent);
 
   /// The parent of this project.
+  @override
   final FlutterProject parent;
 
   static final RegExp _applicationIdPattern = RegExp('^\\s*applicationId\\s+[\'\"](.*)[\'\"]\\s*\$');
@@ -567,7 +568,7 @@ class AndroidProject implements PlatformProject {
 
   @override
   String get pluginConfigKey => AndroidPlugin.kConfigKey;
-  
+
   // TODO(franciscojma): Change this values to the location of the android project. Currently setting
   // to the parent's value to avoid breaking changes in the gradle setup.
   @override
@@ -746,6 +747,7 @@ enum AndroidEmbeddingVersion {
 class WebProject implements PlatformProject {
   WebProject._(this.parent);
 
+  @override
   final FlutterProject parent;
 
   /// Whether this flutter project has a web sub-project.
@@ -898,9 +900,10 @@ class MacOSProject implements XcodeBasedProject, PlatformProject {
 
 /// The Windows sub project
 class WindowsProject implements PlatformProject {
-  WindowsProject._(this.project);
+  WindowsProject._(this.parent);
 
-  final FlutterProject project;
+  @override
+  final FlutterProject parent;
 
   @override
   bool existsSync() => _editableDirectory.existsSync();
@@ -914,7 +917,7 @@ class WindowsProject implements PlatformProject {
   @override
   File get flutterPluginsDependenciesFile => ephemeralDirectory.childFile('.flutter-plugins-dependencies');
 
-  Directory get _editableDirectory => project.directory.childDirectory('windows');
+  Directory get _editableDirectory => parent.directory.childDirectory('windows');
 
   /// The directory in the project that is managed by Flutter. As much as
   /// possible, files that are edited by Flutter tooling after initial project
@@ -948,7 +951,8 @@ class WindowsProject implements PlatformProject {
 class LinuxProject implements PlatformProject {
   LinuxProject._(this.project);
 
-  final FlutterProject project;
+  @override
+  final FlutterProject parent;
 
   @override
   String get pluginConfigKey => LinuxPlugin.kConfigKey;
@@ -959,7 +963,7 @@ class LinuxProject implements PlatformProject {
   @override
   File get flutterPluginsDependenciesFile => ephemeralDirectory.childFile('.flutter-plugins-dependencies');
 
-  Directory get _editableDirectory => project.directory.childDirectory('linux');
+  Directory get _editableDirectory => parent.directory.childDirectory('linux');
 
   /// The directory in the project that is managed by Flutter. As much as
   /// possible, files that are edited by Flutter tooling after initial project
@@ -986,13 +990,13 @@ class LinuxProject implements PlatformProject {
 
 /// The Fuchsia sub project
 class FuchsiaProject {
-  FuchsiaProject._(this.project);
+  FuchsiaProject._(this.parent);
 
-  final FlutterProject project;
+  final FlutterProject parent;
 
   Directory _editableHostAppDirectory;
   Directory get editableHostAppDirectory =>
-      _editableHostAppDirectory ??= project.directory.childDirectory('fuchsia');
+      _editableHostAppDirectory ??= parent.directory.childDirectory('fuchsia');
 
   bool existsSync() => editableHostAppDirectory.existsSync();
 

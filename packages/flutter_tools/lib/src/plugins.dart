@@ -315,12 +315,21 @@ List<Plugin> findPlugins(FlutterProject project) {
 ///
 /// Finally, returns [true] if .flutter-plugins or .flutter-plugins-dependencies have changed,
 /// otherwise returns [false].
-bool _writeFlutterPlatformPluginsList(PlatformProject project, List<Plugin> plugins) {
-  // Gets only the plugins supported by the project platform.
+bool _writeFlutterPlatformPluginsList(
+  PlatformProject project,
+  List<Plugin> plugins
+) {
   final Iterable<Plugin> platformPlugins = plugins.where((Plugin p) {
     return p.platforms.containsKey(project.pluginConfigKey);
   });
+  return _writeFlutterPluginsListAndDependencyGraph(
+    platformPlugins,
+    project.platformPluginsFile,
+    project.flutterPluginsDependenciesFile
+  );
+}
 
+bool _writeFlutterPluginsListAndDependencyGraph(Iterable<Plugin>platformPlugins, File pluginsFile, File dependenciesFile) {
   final List<dynamic> directAppDependencies = <dynamic>[];
   const String info = 'This is a generated file; do not edit or check into version control.';
   final StringBuffer flutterPluginsBuffer = StringBuffer('# $info\n');
@@ -337,7 +346,6 @@ bool _writeFlutterPlatformPluginsList(PlatformProject project, List<Plugin> plug
       'dependencies': <String>[...plugin.dependencies.where(pluginNames.contains)],
     });
   }
-  final File pluginsFile = project.platformPluginsFile;
   final String oldPluginFileContent = _readFileContent(pluginsFile);
   final String pluginFileContent = flutterPluginsBuffer.toString();
   if (pluginNames.isNotEmpty) {
@@ -351,7 +359,6 @@ bool _writeFlutterPlatformPluginsList(PlatformProject project, List<Plugin> plug
     }
   }
 
-  final File dependenciesFile = project.flutterPluginsDependenciesFile;
   final String oldDependenciesFileContent = _readFileContent(dependenciesFile);
   final String dependenciesFileContent = json.encode(<String, dynamic>{
       '_info': '// $info',
@@ -789,6 +796,13 @@ Future<void> _writeWebPluginRegistrant(FlutterProject project, List<Plugin> plug
 /// Assumes `pub get` has been executed since last change to `pubspec.yaml`.
 void refreshPluginsList(FlutterProject project, {bool checkProjects = false}) {
   final List<Plugin> plugins = findPlugins(project);
+
+  // Write legacy plugins list and dependency graph.
+  _writeFlutterPluginsListAndDependencyGraph(
+    plugins,
+    project.flutterPluginsFile,
+    project.flutterPluginsDependenciesFile
+  );
 
   if (project.web.existsSync()) {
     _writeFlutterPlatformPluginsList(project.web, plugins);
