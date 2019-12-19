@@ -9,6 +9,7 @@ import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'object.dart';
+import 'proxy_box.dart';
 import 'sliver.dart';
 
 /// A base class for sliver render objects that resemble their children.
@@ -375,7 +376,7 @@ class RenderSliverOffstage extends RenderProxySliver {
 ///
 /// This is a variant of [RenderSliverOpacity] that uses an [Animation<double>]
 /// rather than a [double] to control the opacity.
-class RenderSliverAnimatedOpacity extends RenderProxySliver {
+class RenderSliverAnimatedOpacity extends RenderProxySliver with RenderAnimatedOpacityMixin<RenderSliver>{
   /// Creates a partially transparent render object.
   ///
   /// The [opacity] argument must not be null.
@@ -384,110 +385,12 @@ class RenderSliverAnimatedOpacity extends RenderProxySliver {
     bool alwaysIncludeSemantics = false,
     RenderSliver sliver,
   }) : assert(opacity != null),
-      assert(alwaysIncludeSemantics != null),
-      _alwaysIncludeSemantics = alwaysIncludeSemantics {
+      assert(alwaysIncludeSemantics != null) {
     this.opacity = opacity;
+    this.alwaysIncludeSemantics = alwaysIncludeSemantics;
     child = sliver;
   }
 
-  int _alpha;
-
   @override
-  bool get alwaysNeedsCompositing => child != null && _currentlyNeedsCompositing;
-  bool _currentlyNeedsCompositing;
-
-  /// The animation that drives this render object's opacity.
-  ///
-  /// An opacity of 1.0 is fully opaque. An opacity of 0.0 is fully transparent
-  /// (i.e., invisible).
-  ///
-  /// To change the opacity of a child in a static manner, not animated,
-  /// consider [RenderOpacity] instead.
-  Animation<double> get opacity => _opacity;
-  Animation<double> _opacity;
-  set opacity(Animation<double> value) {
-    assert(value != null);
-    if (_opacity == value)
-      return;
-    if (attached && _opacity != null)
-      _opacity.removeListener(_updateOpacity);
-    _opacity = value;
-    if (attached)
-      _opacity.addListener(_updateOpacity);
-    _updateOpacity();
-  }
-
-  /// Whether child semantics are included regardless of the opacity.
-  ///
-  /// If false, semantics are excluded when [opacity] is 0.0.
-  ///
-  /// Defaults to false.
-  bool get alwaysIncludeSemantics => _alwaysIncludeSemantics;
-  bool _alwaysIncludeSemantics;
-  set alwaysIncludeSemantics(bool value) {
-    if (value == _alwaysIncludeSemantics)
-      return;
-    _alwaysIncludeSemantics = value;
-    markNeedsSemanticsUpdate();
-  }
-
-  @override
-  void attach(PipelineOwner owner) {
-    super.attach(owner);
-    _opacity.addListener(_updateOpacity);
-    _updateOpacity(); // in case it changed while we weren't listening
-  }
-
-  @override
-  void detach() {
-    _opacity.removeListener(_updateOpacity);
-    super.detach();
-  }
-
-  void _updateOpacity() {
-    final int oldAlpha = _alpha;
-    _alpha = ui.Color.getAlphaFromOpacity(_opacity.value.clamp(0.0, 1.0));
-    if (oldAlpha != _alpha) {
-      final bool didNeedCompositing = _currentlyNeedsCompositing;
-      _currentlyNeedsCompositing = _alpha > 0 && _alpha < 255;
-      if (child != null && didNeedCompositing != _currentlyNeedsCompositing)
-        markNeedsCompositingBitsUpdate();
-      markNeedsPaint();
-      if (oldAlpha == 0 || _alpha == 0)
-        markNeedsSemanticsUpdate();
-    }
-  }
-
-  @override
-  void paint(PaintingContext context, Offset offset) {
-    void _paintWithOpacity(PaintingContext context, Offset offset) => context.paintChild(child, offset);
-    if (child != null && child.geometry.visible) {
-      if (_alpha == 0) {
-        // No need to keep the layer. We'll create a new one if necessary.
-        layer = null;
-        return;
-      }
-      if (_alpha == 255) {
-        // No need to keep the layer. We'll create a new one if necessary.
-        layer = null;
-        context.paintChild(child, offset);
-        return;
-      }
-      assert(needsCompositing);
-      layer = context.pushOpacity(offset, _alpha, _paintWithOpacity, oldLayer: layer);
-    }
-  }
-
-  @override
-  void visitChildrenForSemantics(RenderObjectVisitor visitor) {
-    if (child != null && (_alpha != 0 || alwaysIncludeSemantics))
-      visitor(child);
-  }
-
-  @override
-  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-    super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<Animation<double>>('opacity', opacity));
-    properties.add(FlagProperty('alwaysIncludeSemantics', value: alwaysIncludeSemantics, ifTrue: 'alwaysIncludeSemantics'));
-  }
+  void paintWithOpacity(PaintingContext context, Offset offset) => context.paintChild(child, offset);
 }
