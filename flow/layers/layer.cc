@@ -10,10 +10,9 @@
 namespace flutter {
 
 Layer::Layer()
-    : parent_(nullptr),
-      needs_system_composite_(false),
-      paint_bounds_(SkRect::MakeEmpty()),
-      unique_id_(NextUniqueID()) {}
+    : paint_bounds_(SkRect::MakeEmpty()),
+      unique_id_(NextUniqueID()),
+      needs_system_composite_(false) {}
 
 Layer::~Layer() = default;
 

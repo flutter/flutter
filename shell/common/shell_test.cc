@@ -143,14 +143,22 @@ void ShellTest::PumpOneFrame(Shell* shell,
                              double width,
                              double height,
                              LayerTreeBuilder builder) {
+  PumpOneFrame(shell,
+               flutter::ViewportMetrics{1, width, height, flutter::kUnsetDepth,
+                                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+               std::move(builder));
+}
+
+void ShellTest::PumpOneFrame(Shell* shell,
+                             flutter::ViewportMetrics viewport_metrics,
+                             LayerTreeBuilder builder) {
   // Set viewport to nonempty, and call Animator::BeginFrame to make the layer
   // tree pipeline nonempty. Without either of this, the layer tree below
   // won't be rasterized.
   fml::AutoResetWaitableEvent latch;
   shell->GetTaskRunners().GetUITaskRunner()->PostTask(
-      [&latch, engine = shell->weak_engine_, width, height]() {
-        engine->SetViewportMetrics(
-            {1, width, height, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0});
+      [&latch, engine = shell->weak_engine_, viewport_metrics]() {
+        engine->SetViewportMetrics(std::move(viewport_metrics));
         const auto frame_begin_time = fml::TimePoint::Now();
         const auto frame_end_time =
             frame_begin_time + fml::TimeDelta::FromSecondsF(1.0 / 60.0);
@@ -163,8 +171,12 @@ void ShellTest::PumpOneFrame(Shell* shell,
   // Call |Render| to rasterize a layer tree and trigger |OnFrameRasterized|
   fml::WeakPtr<RuntimeDelegate> runtime_delegate = shell->weak_engine_;
   shell->GetTaskRunners().GetUITaskRunner()->PostTask(
-      [&latch, runtime_delegate, &builder]() {
-        auto layer_tree = std::make_unique<LayerTree>();
+      [&latch, runtime_delegate, &builder, viewport_metrics]() {
+        auto layer_tree = std::make_unique<LayerTree>(
+            SkISize::Make(viewport_metrics.physical_width,
+                          viewport_metrics.physical_height),
+            static_cast<float>(viewport_metrics.physical_depth),
+            static_cast<float>(viewport_metrics.device_pixel_ratio));
         SkMatrix identity;
         identity.setIdentity();
         auto root_layer = std::make_shared<TransformLayer>(identity);

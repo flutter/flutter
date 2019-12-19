@@ -18,8 +18,6 @@ using PhysicalShapeLayerTest = LayerTest;
 TEST_F(PhysicalShapeLayerTest, PaintingEmptyLayerDies) {
   auto layer =
       std::make_shared<PhysicalShapeLayer>(SK_ColorBLACK, SK_ColorBLACK,
-                                           1.0f,  // pixel ratio
-                                           1.0f,  // depth
                                            0.0f,  // elevation
                                            SkPath(), Clip::none);
 
@@ -38,8 +36,6 @@ TEST_F(PhysicalShapeLayerTest, PaintBeforePreollDies) {
   auto mock_layer = std::make_shared<MockLayer>(child_path, SkPaint());
   auto layer =
       std::make_shared<PhysicalShapeLayer>(SK_ColorBLACK, SK_ColorBLACK,
-                                           1.0f,  // pixel ratio
-                                           1.0f,  // depth
                                            0.0f,  // elevation
                                            SkPath(), Clip::none);
   layer->Add(mock_layer);
@@ -54,8 +50,6 @@ TEST_F(PhysicalShapeLayerTest, NonEmptyLayer) {
   layer_path.addRect(5.0f, 6.0f, 20.5f, 21.5f);
   auto layer =
       std::make_shared<PhysicalShapeLayer>(SK_ColorGREEN, SK_ColorBLACK,
-                                           1.0f,  // pixel ratio
-                                           1.0f,  // depth
                                            0.0f,  // elevation
                                            layer_path, Clip::none);
   layer->Preroll(preroll_context(), SkMatrix());
@@ -80,20 +74,14 @@ TEST_F(PhysicalShapeLayerTest, ChildrenLargerThanPath) {
   SkPath child2_path;
   child2_path.addRect(3, 2, 5, 15).close();
   auto child1 = std::make_shared<PhysicalShapeLayer>(SK_ColorRED, SK_ColorBLACK,
-                                                     1.0f,  // pixel ratio
-                                                     1.0f,  // depth
                                                      0.0f,  // elevation
                                                      child1_path, Clip::none);
   auto child2 =
       std::make_shared<PhysicalShapeLayer>(SK_ColorBLUE, SK_ColorBLACK,
-                                           1.0f,  // pixel ratio
-                                           1.0f,  // depth
                                            0.0f,  // elevation
                                            child2_path, Clip::none);
   auto layer =
       std::make_shared<PhysicalShapeLayer>(SK_ColorGREEN, SK_ColorBLACK,
-                                           1.0f,  // pixel ratio
-                                           1.0f,  // depth
                                            0.0f,  // elevation
                                            layer_path, Clip::none);
   layer->Add(child1);
@@ -133,10 +121,7 @@ TEST_F(PhysicalShapeLayerTest, ElevationSimple) {
   SkPath layer_path;
   layer_path.addRect(0, 0, 8, 8).close();
   auto layer = std::make_shared<PhysicalShapeLayer>(
-      SK_ColorGREEN, SK_ColorBLACK,
-      1.0f,  // pixel ratio
-      1.0f,  // depth
-      initial_elevation, layer_path, Clip::none);
+      SK_ColorGREEN, SK_ColorBLACK, initial_elevation, layer_path, Clip::none);
 
   layer->Preroll(preroll_context(), SkMatrix());
   // The Fuchsia system compositor handles all elevated PhysicalShapeLayers and
@@ -190,10 +175,8 @@ TEST_F(PhysicalShapeLayerTest, ElevationComplex) {
   std::shared_ptr<PhysicalShapeLayer> layers[4];
   for (int i = 0; i < 4; i += 1) {
     layers[i] = std::make_shared<PhysicalShapeLayer>(
-        SK_ColorBLACK, SK_ColorBLACK,
-        1.0f,  // pixel ratio
-        1.0f,  // depth
-        initial_elevations[i], layer_path, Clip::none);
+        SK_ColorBLACK, SK_ColorBLACK, initial_elevations[i], layer_path,
+        Clip::none);
   }
   layers[0]->Add(layers[1]);
   layers[0]->Add(layers[2]);
@@ -251,10 +234,10 @@ static bool ReadbackResult(PrerollContext* context,
   const SkMatrix initial_matrix = SkMatrix();
   const SkRect layer_bounds = SkRect::MakeXYWH(0.5, 1.0, 5.0, 6.0);
   const SkPath layer_path = SkPath().addRect(layer_bounds);
-  auto layer = std::make_shared<PhysicalShapeLayer>(SK_ColorGREEN,
-                                                    SK_ColorBLACK, 1.0f, 1.0f,
-                                                    0.0f,  // elevation
-                                                    layer_path, clip_behavior);
+  auto layer =
+      std::make_shared<PhysicalShapeLayer>(SK_ColorGREEN, SK_ColorBLACK,
+                                           0.0f,  // elevation
+                                           layer_path, clip_behavior);
   if (child != nullptr) {
     layer->Add(child);
   }

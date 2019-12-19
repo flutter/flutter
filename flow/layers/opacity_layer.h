@@ -11,8 +11,8 @@ namespace flutter {
 
 // Don't add an OpacityLayer with no children to the layer tree. Painting an
 // OpacityLayer is very costly due to the saveLayer call. If there's no child,
-// having the OpacityLayer or not has the same effect. In debug_unopt build, the
-// |EnsureSingleChild| will assert if there are no children.
+// having the OpacityLayer or not has the same effect. In debug_unopt build,
+// |Preroll| will assert if there are no children.
 class OpacityLayer : public ContainerLayer {
  public:
   // An offset is provided here because OpacityLayer.addToScene method in the
@@ -27,6 +27,8 @@ class OpacityLayer : public ContainerLayer {
   // the propagation as repainting the OpacityLayer is expensive.
   OpacityLayer(int alpha, const SkPoint& offset);
 
+  void Add(std::shared_ptr<Layer> layer) override;
+
   void Preroll(PrerollContext* context, const SkMatrix& matrix) override;
 
   void Paint(PaintContext& context) const override;
@@ -35,18 +37,10 @@ class OpacityLayer : public ContainerLayer {
   // session scene hierarchy.
 
  private:
+  ContainerLayer* GetChildContainer() const;
+
   int alpha_;
   SkPoint offset_;
-
-  // Restructure (if necessary) OpacityLayer to have only one child.
-  //
-  // This is needed to ensure that retained rendering can always be applied to
-  // save the costly saveLayer.
-  //
-  // If there are multiple children, this creates a new identity TransformLayer,
-  // sets all children to be the TransformLayer's children, and sets that
-  // TransformLayer as the single child of this OpacityLayer.
-  void EnsureSingleChild();
 
   FML_DISALLOW_COPY_AND_ASSIGN(OpacityLayer);
 };
