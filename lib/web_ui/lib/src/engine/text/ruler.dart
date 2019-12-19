@@ -629,30 +629,45 @@ class ParagraphRuler {
       final double dx = offset.dx;
       final double dy = offset.dy;
       if (dx >= bounds.left &&
-          dy < bounds.right &&
+          dx < bounds.right &&
           dy >= bounds.top &&
           dy < bounds.bottom) {
         // We found the element bounds that contains offset.
         // Calculate text position for this node.
-        int textPosition = 0;
-        for (int nodeIndex = 0; nodeIndex < i; nodeIndex++) {
-          textPosition += textNodes[nodeIndex].text.length;
-        }
-        return textPosition;
+        return _countTextPosition(el.childNodes, textNodes[i]);
       }
     }
     return 0;
   }
 
   void _collectTextNodes(Iterable<html.Node> nodes, List<html.Node> textNodes) {
+    if (nodes.isEmpty) {
+      return;
+    }
+    final List<html.Node> childNodes = [];
     for (html.Node node in nodes) {
       if (node.nodeType == html.Node.TEXT_NODE) {
         textNodes.add(node);
       }
-      if (node.hasChildNodes()) {
-        _collectTextNodes(node.childNodes, textNodes);
+      childNodes.addAll(node.childNodes);
+    }
+    _collectTextNodes(childNodes, textNodes);
+  }
+
+  int _countTextPosition(List<html.Node> nodes, html.Node endNode) {
+    int position = 0;
+    final List<html.Node> stack = nodes.reversed.toList();
+    while (true) {
+      var node = stack.removeLast();
+      stack.addAll(node.childNodes.reversed);
+      if (node == endNode) {
+        break;
+      }
+      if (node.nodeType == html.Node.TEXT_NODE) {
+        position += node.text.length;
       }
     }
+    return position;
   }
 
   /// Performs clean-up after a measurement is done, preparing this ruler for
