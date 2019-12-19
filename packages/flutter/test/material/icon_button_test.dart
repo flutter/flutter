@@ -75,6 +75,39 @@ void main() {
     expect(iconButton.size, const Size(70.0, 70.0));
   });
 
+  testWidgets('Small icons with non-null constraints can be <48dp', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      wrap(
+        child: IconButton(
+          iconSize: 10.0,
+          onPressed: mockOnPressedFunction,
+          icon: const Icon(Icons.link),
+          constraints: const BoxConstraints(),
+        ),
+      ),
+    );
+
+    final RenderBox iconButton = tester.renderObject(find.byType(IconButton));
+    expect(iconButton.size, const Size(26.0, 26.0));
+  });
+
+  testWidgets('Small icons with non-null constraints and custom padding can be <48dp', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      wrap(
+        child: IconButton(
+          iconSize: 10.0,
+          padding: const EdgeInsets.all(3.0),
+          onPressed: mockOnPressedFunction,
+          icon: const Icon(Icons.link),
+          constraints: const BoxConstraints(),
+        ),
+      ),
+    );
+
+    final RenderBox iconButton = tester.renderObject(find.byType(IconButton));
+    expect(iconButton.size, const Size(16.0, 16.0));
+  });
+
   testWidgets('test default icon buttons are constrained', (WidgetTester tester) async {
     await tester.pumpWidget(
       wrap(
