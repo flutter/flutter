@@ -7,7 +7,6 @@ import 'dart:ui' as ui show Color;
 import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart';
 
-import 'layer.dart';
 import 'object.dart';
 import 'sliver.dart';
 
@@ -72,7 +71,7 @@ abstract class RenderProxySliver extends RenderSliver with RenderObjectWithChild
   @override
   void applyPaintTransform(RenderObject child, Matrix4 transform) {
     assert(child != null);
-    final SliverPhysicalParentData childParentData = child.parentData as SliverPhysicalParentData;
+    final SliverPhysicalParentData childParentData = child.parentData;
     childParentData.applyPaintTransform(transform);
   }
 }
@@ -170,7 +169,7 @@ class RenderSliverOpacity extends RenderProxySliver {
         offset,
         _alpha,
         _paintWithOpacity,
-        oldLayer: layer as OpacityLayer,
+        oldLayer: layer,
       );
     }
   }

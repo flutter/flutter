@@ -4,11 +4,10 @@
 
 import 'dart:async';
 import 'dart:io' show File;
-
-import 'package:flutter/foundation.dart';
-import 'package:flutter_driver/flutter_driver.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
+import 'package:flutter_driver/flutter_driver.dart';
+import 'package:collection/collection.dart';
 
 const String _kPathParent = 'test_driver/goldens/';
 
@@ -44,7 +43,8 @@ class DriverScreenShotTester {
   Future<bool> compareScreenshots(List<int> screenshot) async {
     final File file = File(_getImageFilePath());
     final List<int> matcher = await file.readAsBytes();
-    return listEquals<int>(screenshot, matcher);
+    final Function listEquals = const ListEquality<int>().equals;
+    return listEquals(screenshot, matcher);
   }
 
   /// Returns a bytes representation of a screenshot on the current screen.

@@ -53,10 +53,10 @@ Future<void> main(List<String> arguments) async {
     exit(0);
   }
 
-  final String arbPathString = results['arb-dir'] as String;
-  final String outputFileString = results['output-localization-file'] as String;
-  final String templateArbFileName = results['template-arb-file'] as String;
-  final String classNameString = results['output-class'] as String;
+  final String arbPathString = results['arb-dir'];
+  final String outputFileString = results['output-localization-file'];
+  final String templateArbFileName = results['template-arb-file'];
+  final String classNameString = results['output-class'];
 
   const local.LocalFileSystem fs = local.LocalFileSystem();
   final LocalizationsGenerator localizationsGenerator = LocalizationsGenerator(fs);
