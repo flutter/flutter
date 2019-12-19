@@ -1,4 +1,4 @@
-Signature: 31b5f3029d0fe100a46adb2e89d271cf
+Signature: 16d60f1f9a1cb2c19639e7bae712c515
 
 UNUSED LICENSES:
 
@@ -1459,9 +1459,20 @@ FILE: ../../../third_party/skia/site/dev/design/conical/lemma4.ggb!/geogebra.xml
 FILE: ../../../third_party/skia/site/dev/design/conical/lemma4.ggb!/geogebra_javascript.js
 FILE: ../../../third_party/skia/site/dev/design/conical/lemma4.ggb!/geogebra_thumbnail.png
 FILE: ../../../third_party/skia/site/dev/design/conical/lemma4.svg
+FILE: ../../../third_party/skia/site/dev/tools/buttons.png
+FILE: ../../../third_party/skia/site/dev/tools/calendar.mskp
+FILE: ../../../third_party/skia/site/dev/tools/crosshair.png
 FILE: ../../../third_party/skia/site/dev/tools/debugger.png
+FILE: ../../../third_party/skia/site/dev/tools/end.png
+FILE: ../../../third_party/skia/site/dev/tools/expand.png
+FILE: ../../../third_party/skia/site/dev/tools/frameplayback.png
+FILE: ../../../third_party/skia/site/dev/tools/gpuop.png
 FILE: ../../../third_party/skia/site/dev/tools/image.png
+FILE: ../../../third_party/skia/site/dev/tools/layers.png
 FILE: ../../../third_party/skia/site/dev/tools/onlinedebugger.png
+FILE: ../../../third_party/skia/site/dev/tools/playcommands.png
+FILE: ../../../third_party/skia/site/dev/tools/resources.png
+FILE: ../../../third_party/skia/site/dev/tools/settings.png
 FILE: ../../../third_party/skia/site/dev/tools/tracing.png
 FILE: ../../../third_party/skia/site/dev/tools/tracing_load.png
 FILE: ../../../third_party/skia/site/favicon.ico
