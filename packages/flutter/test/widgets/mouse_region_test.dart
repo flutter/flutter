@@ -143,6 +143,73 @@ void main() {
     expect(exit.position, equals(const Offset(1.0, 1.0)));
   });
 
+  testWidgets('triggers pointer enter when a mouse is connected', (WidgetTester tester) async {
+    PointerEnterEvent enter;
+    PointerHoverEvent move;
+    PointerExitEvent exit;
+    await tester.pumpWidget(Center(
+      child: MouseRegion(
+        child: Container(
+          width: 100.0,
+          height: 100.0,
+        ),
+        onEnter: (PointerEnterEvent details) => enter = details,
+        onHover: (PointerHoverEvent details) => move = details,
+        onExit: (PointerExitEvent details) => exit = details,
+      ),
+    ));
+    await tester.pump();
+
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: const Offset(400, 300));
+    addTearDown(gesture.removePointer);
+    expect(move, isNull);
+    expect(enter, isNull);
+    expect(exit, isNull);
+    await tester.pump();
+    expect(move, isNull);
+    expect(enter, isNotNull);
+    expect(enter.position, equals(const Offset(400.0, 300.0)));
+    expect(exit, isNull);
+  });
+
+  testWidgets('triggers pointer exit when a mouse is disconnected', (WidgetTester tester) async {
+    PointerEnterEvent enter;
+    PointerHoverEvent move;
+    PointerExitEvent exit;
+    await tester.pumpWidget(Center(
+      child: MouseRegion(
+        child: Container(
+          width: 100.0,
+          height: 100.0,
+        ),
+        onEnter: (PointerEnterEvent details) => enter = details,
+        onHover: (PointerHoverEvent details) => move = details,
+        onExit: (PointerExitEvent details) => exit = details,
+      ),
+    ));
+    await tester.pump();
+
+    TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer(location: const Offset(400, 300));
+    addTearDown(() => gesture?.removePointer);
+    await tester.pump();
+    move = null;
+    enter = null;
+    exit = null;
+    await gesture.removePointer();
+    gesture = null;
+    expect(move, isNull);
+    expect(enter, isNull);
+    expect(exit, isNotNull);
+    expect(exit.position, equals(const Offset(400.0, 300.0)));
+    exit = null;
+    await tester.pump();
+    expect(move, isNull);
+    expect(enter, isNull);
+    expect(exit, isNull);
+  });
+
   testWidgets('triggers pointer enter when widget appears', (WidgetTester tester) async {
     PointerEnterEvent enter;
     PointerHoverEvent move;
