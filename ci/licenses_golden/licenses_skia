@@ -1,4 +1,4 @@
-Signature: fde2668228aeb20d848ae8ea0bfb47d9
+Signature: 3215dfe60cf004adf931273b6db77ec7
 
 UNUSED LICENSES:
 
@@ -3236,6 +3236,8 @@ FILE: ../../../third_party/skia/src/sksl/SkSLDefines.h
 FILE: ../../../third_party/skia/src/sksl/SkSLOutputStream.cpp
 FILE: ../../../third_party/skia/src/utils/SkCharToGlyphCache.cpp
 FILE: ../../../third_party/skia/src/utils/SkCharToGlyphCache.h
+FILE: ../../../third_party/skia/src/utils/SkClipStackUtils.cpp
+FILE: ../../../third_party/skia/src/utils/SkClipStackUtils.h
 FILE: ../../../third_party/skia/src/utils/SkShaperJSONWriter.cpp
 FILE: ../../../third_party/skia/src/utils/SkShaperJSONWriter.h
 FILE: ../../../third_party/skia/src/utils/win/SkObjBase.h
@@ -3847,15 +3849,14 @@ FILE: ../../../third_party/skia/src/gpu/effects/GrAtlasedShaderHelpers.h
 FILE: ../../../third_party/skia/src/gpu/effects/GrBlurredEdgeFragmentProcessor.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrCircleEffect.fp
 FILE: ../../../third_party/skia/src/gpu/effects/GrEllipseEffect.fp
-FILE: ../../../third_party/skia/src/gpu/effects/GrSimpleTextureEffect.fp
+FILE: ../../../third_party/skia/src/gpu/effects/GrSimpleTextureEffect.cpp
+FILE: ../../../third_party/skia/src/gpu/effects/GrSimpleTextureEffect.h
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrBlurredEdgeFragmentProcessor.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrBlurredEdgeFragmentProcessor.h
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrCircleEffect.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrCircleEffect.h
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrEllipseEffect.cpp
 FILE: ../../../third_party/skia/src/gpu/effects/generated/GrEllipseEffect.h
-FILE: ../../../third_party/skia/src/gpu/effects/generated/GrSimpleTextureEffect.cpp
-FILE: ../../../third_party/skia/src/gpu/effects/generated/GrSimpleTextureEffect.h
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLOpsRenderPass.cpp
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLSemaphore.cpp
 FILE: ../../../third_party/skia/src/gpu/gl/GrGLSemaphore.h
