@@ -1203,6 +1203,9 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
   TextEditingValue _lastKnownRemoteTextEditingValue;
 
   @override
+  TextEditingValue get currentTextEditingValue => _value;
+
+  @override
   void updateEditingValue(TextEditingValue value) {
     // Since we still have to support keyboard select, this is the best place
     // to disable text updating.
