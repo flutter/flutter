@@ -143,6 +143,14 @@ class LayerSceneBuilder implements ui.SceneBuilder {
     throw UnimplementedError();
   }
 
+  ui.ImageFilterEngineLayer pushImageFilter(
+    ui.ImageFilter filter, {
+    ui.ImageFilterEngineLayer oldLayer,
+  }) {
+    assert(filter != null);
+    throw UnimplementedError();
+  }
+
   @override
   ui.OffsetEngineLayer pushOffset(
     double dx,

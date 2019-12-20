@@ -359,6 +359,23 @@ void main() {
         oldLayer: oldLayer,
       );
     });
+    testNoSharing((SceneBuilder builder, EngineLayer oldLayer) {
+      return builder.pushImageFilter(
+        ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
+        oldLayer: oldLayer,
+      );
+    });
+    testNoSharing((SceneBuilder builder, EngineLayer oldLayer) {
+      return builder.pushImageFilter(
+        ImageFilter.matrix(Float64List.fromList(<double>[
+          1, 0, 0, 0,
+          0, 1, 0, 0,
+          0, 0, 1, 0,
+          0, 0, 0, 1,
+        ])),
+        oldLayer: oldLayer,
+      );
+    });
   });
 }
 
