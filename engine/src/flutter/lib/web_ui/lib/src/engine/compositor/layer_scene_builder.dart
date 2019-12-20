@@ -147,7 +147,8 @@ class LayerSceneBuilder implements ui.SceneBuilder {
     ui.ImageFilterEngineLayer oldLayer,
   }) {
     assert(filter != null);
-    throw UnimplementedError();
+    pushLayer(ImageFilterLayer(filter));
+    return null;
   }
 
   @override

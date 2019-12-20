@@ -452,6 +452,7 @@ FILE: ../../../flutter/lib/web_ui/lib/src/engine/shadow.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/surface/backdrop_filter.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/surface/clip.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/surface/debug_canvas_reuse_overlay.dart
+FILE: ../../../flutter/lib/web_ui/lib/src/engine/surface/image_filter.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/surface/offset.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/surface/opacity.dart
 FILE: ../../../flutter/lib/web_ui/lib/src/engine/surface/painting.dart

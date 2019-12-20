@@ -100,10 +100,6 @@ class PersistedHoudiniPicture extends PersistedPicture {
     return existingSurface.picture == picture ? 0.0 : 1.0;
   }
 
-  @override
-  Matrix4 get localTransformInverse =>
-      _localTransformInverse ??= Matrix4.identity();
-
   static void _registerCssPainter() {
     _cssPainterRegistered = true;
     final dynamic css = js_util.getProperty(html.window, 'CSS');

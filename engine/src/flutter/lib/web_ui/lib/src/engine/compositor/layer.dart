@@ -343,6 +343,23 @@ class TransformLayer extends ContainerLayer
   }
 }
 
+/// A layer that applies an [ui.ImageFilter] to its children.
+class ImageFilterLayer extends ContainerLayer implements ui.OpacityEngineLayer {
+  ImageFilterLayer(this._filter);
+
+  final ui.ImageFilter _filter;
+
+  @override
+  void paint(PaintContext paintContext) {
+    assert(needsPainting);
+    final ui.Paint paint = ui.Paint();
+    paint.imageFilter = _filter;
+    paintContext.internalNodesCanvas.saveLayer(paintBounds, paint);
+    paintChildren(paintContext);
+    paintContext.internalNodesCanvas.restore();
+  }
+}
+
 /// A layer containing a [Picture].
 class PictureLayer extends Layer {
   /// The picture to paint into the canvas.

@@ -98,6 +98,19 @@ void main() async {
     await matchGoldenFile('compositing_shifted_physical_shape_clip.png', region: region);
   }, timeout: const Timeout(Duration(seconds: 10)));
 
+  test('pushImageFilter', () async {
+    final SurfaceSceneBuilder builder = SurfaceSceneBuilder();
+    builder.pushImageFilter(
+      ImageFilter.blur(sigmaX: 1, sigmaY: 3),
+    );
+    _drawTestPicture(builder);
+    builder.pop();
+
+    html.document.body.append(builder.build().webOnlyRootElement);
+
+    await matchGoldenFile('compositing_image_filter.png', region: region);
+  }, timeout: const Timeout(Duration(seconds: 10)));
+
   group('Cull rect computation', () {
     _testCullRectComputation();
   });
