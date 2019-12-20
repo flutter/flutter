@@ -999,37 +999,6 @@ void main() {
       fail('Generating class methods without placeholders should not succeed');
     });
 
-    test('should throw when plural message resource value format is incorrect:', () {
-      const String pluralMessageWithMissingCurlyBrackets = '''{
-  "helloWorlds": "{count,plural, =0{Hello}=1{Hello World}=2{Hello two worlds}few{Hello {count} worlds}many{Hello all {count} worlds}other{Hello other {count} worlds}}",
-  "@helloWorlds": {
-    "description": "Improperly formatted since it has no placeholder attribute.",
-    "placeholders": {}
-  }
-}''';
-
-      final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
-        ..createSync(recursive: true);
-      l10nDirectory.childFile(defaultTemplateArbFileName)
-        .writeAsStringSync(pluralMessageWithMissingCurlyBrackets);
-
-      final LocalizationsGenerator generator = LocalizationsGenerator(fs);
-      try {
-        generator.initialize(
-          l10nDirectoryPath: defaultArbPathString,
-          templateArbFileName: defaultTemplateArbFileName,
-          outputFileString: defaultOutputFileString,
-          classNameString: defaultClassNameString,
-        );
-        generator.parseArbFiles();
-        generator.generateClassMethods();
-      } on L10nException catch (e) {
-        expect(e.message, contains('is improperly formatted for plural message parsing'));
-        return;
-      }
-      fail('Generating class methods with improper plural resource value should not succeed');
-    });
-
     test('should throw when failing to parse the arb file:', () {
       const String arbFileWithTrailingComma = '''{
   "title": "Stocks",
