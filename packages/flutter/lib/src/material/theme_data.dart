@@ -1554,7 +1554,6 @@ class MaterialBasedCupertinoThemeData extends CupertinoThemeData {
       // like barBackgroundColor can still behave like a normal
       // CupertinoThemeData.
       super.raw(
-        _cupertinoOverrideTheme.interfaceStyle,
         _cupertinoOverrideTheme.brightness,
         _cupertinoOverrideTheme.primaryColor,
         _cupertinoOverrideTheme.primaryContrastingColor,
@@ -1591,7 +1590,6 @@ class MaterialBasedCupertinoThemeData extends CupertinoThemeData {
   /// instead.
   @override
   MaterialBasedCupertinoThemeData copyWith({
-    CupertinoUserInterfaceStyle interfaceStyle,
     Brightness brightness,
     Color primaryColor,
     Color primaryContrastingColor,
@@ -1602,7 +1600,6 @@ class MaterialBasedCupertinoThemeData extends CupertinoThemeData {
     return MaterialBasedCupertinoThemeData._(
       _materialTheme,
       _cupertinoOverrideTheme.copyWith(
-        interfaceStyle: interfaceStyle,
         brightness: brightness,
         primaryColor: primaryColor,
         primaryContrastingColor: primaryContrastingColor,

@@ -52,7 +52,7 @@ void main() {
   testWidgets('Default theme has defaults', (WidgetTester tester) async {
     final CupertinoThemeData theme = await testTheme(tester, const CupertinoThemeData());
 
-    expect(theme.brightness, Brightness.light);
+    expect(theme.brightness, isNull);
     expect(theme.primaryColor, CupertinoColors.activeBlue);
     expect(theme.textTheme.textStyle.fontSize, 17.0);
   });

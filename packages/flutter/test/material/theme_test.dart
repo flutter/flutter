@@ -418,12 +418,14 @@ void main() {
     int buildCount;
     CupertinoThemeData actualTheme;
     IconThemeData actualIconTheme;
+    BuildContext context;
 
     final Widget singletonThemeSubtree = Builder(
-      builder: (BuildContext context) {
+      builder: (BuildContext localContext) {
         buildCount++;
-        actualTheme = CupertinoTheme.of(context);
-        actualIconTheme = IconTheme.of(context);
+        actualTheme = CupertinoTheme.of(localContext);
+        actualIconTheme = IconTheme.of(localContext);
+        context = localContext;
         return const Placeholder();
       },
     );
@@ -437,6 +439,7 @@ void main() {
       buildCount = 0;
       actualTheme = null;
       actualIconTheme = null;
+      context = null;
     });
 
     testWidgets('Default theme has defaults', (WidgetTester tester) async {
@@ -462,24 +465,24 @@ void main() {
     });
 
     testWidgets('MaterialTheme overrides the brightness', (WidgetTester tester) async {
-      CupertinoThemeData theme = await testTheme(tester, ThemeData.dark());
-      expect(theme.noDefault().brightness, Brightness.dark);
+      await testTheme(tester, ThemeData.dark());
+      expect(CupertinoTheme.brightnessOf(context), Brightness.dark);
 
-      theme = await testTheme(tester, ThemeData.light());
-      expect(theme.noDefault().brightness, Brightness.light);
+      await testTheme(tester, ThemeData.light());
+      expect(CupertinoTheme.brightnessOf(context), Brightness.light);
 
       // Overridable by cupertinoOverrideTheme.
-      theme = await testTheme(tester, ThemeData(
+      await testTheme(tester, ThemeData(
         brightness: Brightness.light,
         cupertinoOverrideTheme: const CupertinoThemeData(brightness: Brightness.dark),
       ));
-      expect(theme.noDefault().brightness, Brightness.dark);
+      expect(CupertinoTheme.brightnessOf(context), Brightness.dark);
 
-      theme = await testTheme(tester, ThemeData(
-          brightness: Brightness.dark,
-          cupertinoOverrideTheme: const CupertinoThemeData(brightness: Brightness.light),
+      await testTheme(tester, ThemeData(
+        brightness: Brightness.dark,
+        cupertinoOverrideTheme: const CupertinoThemeData(brightness: Brightness.light),
       ));
-      expect(theme.noDefault().brightness, Brightness.light);
+      expect(CupertinoTheme.brightnessOf(context), Brightness.light);
     });
 
     testWidgets('Can override material theme', (WidgetTester tester) async {

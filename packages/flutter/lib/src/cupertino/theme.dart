@@ -26,26 +26,6 @@ const _CupertinoThemeDefaults _kDefaultTheme = _CupertinoThemeDefaults(
   _CupertinoTextThemeDefaults(CupertinoColors.label, CupertinoColors.inactiveGray),
 );
 
-/// Indicates the interface style for a piece of content.
-///
-/// See also:
-///
-///  * [`UIUserInterfaceStyle`][https://developer.apple.com/documentation/uikit/uiuserinterfacestyle],
-///    the UIKit equivalent.
-enum CupertinoUserInterfaceStyle {
-  /// Indicates that content should follow the interface style in the closest
-  /// ambient [MediaQueryData.platformBrightness].
-  inherited,
-
-  /// Enforces the content to use the light interface style, as if the closest
-  /// ambient [MediaQueryData.platformBrightness] is [Brightness.light].
-  light,
-
-  /// Enforces the content to use the dark interface style, as if the closest
-  /// ambient [MediaQueryData.platformBrightness] is [Brightness.dark].
-  dark,
-}
-
 /// Applies a visual styling theme to descendant Cupertino widgets.
 ///
 /// Affects the color and text styles of Cupertino widgets whose styling
@@ -91,17 +71,22 @@ class CupertinoTheme extends StatelessWidget {
     return (inheritedTheme?.theme?.data ?? const CupertinoThemeData()).resolveFrom(context, nullOk: true);
   }
 
-  /// Retrieves the [Brightness] value from the closest ancestor [CupertinoTheme]
-  /// widget.
+  /// Retrieves the [Brightness] to use for descendant Cupertino widgets, based
+  /// on the value of [CupertinoThemeData.brightness] in the given [context].
   ///
-  /// If no [CupertinoTheme] ancestor with an explicit brightness value could be
-  /// found, this method will resort to the closest ancestor [MediaQuery] widget.
+  /// If no [CupertinoTheme] can be found in the given [context], or its `brightness`
+  /// is null, it will fall back to [MediaQueryData.brightness].
   ///
-  /// Throws an exception if no such [CupertinoTheme] or [MediaQuery] widgets exist
-  /// in the ancestry tree, unless [nullOk] is set to true.
+  /// Throws an exception if no valid [CupertinoTheme] or [MediaQuery] widgets
+  /// exist in the ancestry tree, unless [nullOk] is set to true.
+  ///
+  /// See also:
+  ///
+  /// * [CupertinoUserInterfaceStyle], the [CupertinoThemeData] property that
+  ///   determines the [Brightness] of descendant Cupertino widgets.
   static Brightness brightnessOf(BuildContext context, { bool nullOk = false }) {
     final _InheritedCupertinoTheme inheritedTheme = context.dependOnInheritedWidgetOfExactType<_InheritedCupertinoTheme>();
-    return inheritedTheme?.theme?.data?._brightness ?? MediaQuery.of(context, nullOk: nullOk)?.platformBrightness;
+    return inheritedTheme?.theme?.data?.brightness ?? MediaQuery.of(context, nullOk: nullOk)?.platformBrightness;
   }
 
   /// The widget below this widget in the tree.
@@ -141,16 +126,10 @@ class _InheritedCupertinoTheme extends InheritedWidget {
   bool updateShouldNotify(_InheritedCupertinoTheme old) => theme.data != old.theme.data;
 }
 
-enum CupertinoUserInterfaceStyle {
-  inherited,
-  light,
-  dark,
-}
-
 /// Styling specifications for a [CupertinoTheme].
 ///
-/// All constructor parameters except [interfaceStyle] can be null, in which case
-/// a [CupertinoColors.activeBlue] based default iOS theme styling is used.
+/// All constructor parameters can be null, in which case a
+/// [CupertinoColors.activeBlue] based default iOS theme styling is used.
 ///
 /// Parameters can also be partially specified, in which case some parameters
 /// will cascade down to other dependent parameters to create a cohesive
@@ -169,7 +148,6 @@ class CupertinoThemeData extends Diagnosticable {
   ///
   /// Unspecified parameters default to a reasonable iOS default style.
   const CupertinoThemeData({
-    CupertinoUserInterfaceStyle interfaceStyle = CupertinoUserInterfaceStyle.inherited,
     Brightness brightness,
     Color primaryColor,
     Color primaryContrastingColor,
@@ -177,7 +155,6 @@ class CupertinoThemeData extends Diagnosticable {
     Color barBackgroundColor,
     Color scaffoldBackgroundColor,
   }) : this.raw(
-        interfaceStyle,
         brightness,
         primaryColor,
         primaryContrastingColor,
@@ -192,8 +169,6 @@ class CupertinoThemeData extends Diagnosticable {
   /// Used by subclasses to get the superclass's defaulting behaviors.
   @protected
   const CupertinoThemeData.raw(
-    CupertinoUserInterfaceStyle interfaceStyle,
-    @Deprecated('Use interfaceStyle instead.')
     Brightness brightness,
     Color primaryColor,
     Color primaryContrastingColor,
@@ -201,7 +176,6 @@ class CupertinoThemeData extends Diagnosticable {
     Color barBackgroundColor,
     Color scaffoldBackgroundColor,
   ) : this._rawWithDefaults(
-    interfaceStyle,
     brightness,
     primaryColor,
     primaryContrastingColor,
@@ -212,24 +186,21 @@ class CupertinoThemeData extends Diagnosticable {
   );
 
   const CupertinoThemeData._rawWithDefaults(
-    this.interfaceStyle,
-    this._brightness,
+    this.brightness,
     this._primaryColor,
     this._primaryContrastingColor,
     this._textTheme,
     this._barBackgroundColor,
     this._scaffoldBackgroundColor,
     this._defaults,
-  ) : assert(interfaceStyle != null);
+  );
 
   final _CupertinoThemeDefaults _defaults;
 
-  final CupertinoUserInterfaceStyle interfaceStyle;
-
   /// The general brightness theme of the [CupertinoThemeData].
   ///
-  /// Overrides the ambient [MediaQueryData.platformBrightness] when specified.
-  /// Defaults to [Brightness.light].
+  /// Defaults to null. Overrides the ambient [MediaQueryData.platformBrightness]
+  /// if a non-null [Brightness] is specified.
   ///
   /// If coming from a Material [Theme] and unspecified, [brightness] will be
   /// derived from the Material [ThemeData]'s `brightness`.
@@ -238,11 +209,11 @@ class CupertinoThemeData extends Diagnosticable {
   ///
   ///  * [MaterialBasedCupertinoThemeData], a [CupertinoThemeData] that defers
   ///    [brightness] to its Material [Theme] parent if it's unspecified.
-  @Deprecated('Use interfaceStyle instead.')
-  Brightness get brightness => _brightness ?? Brightness.light;
-  final Brightness _brightness;
+  ///
+  ///  * [CupertinoTheme.brightnessOf], a method used to retrieve the overall
+  ///    [Brightness] from a [BuildContext], for Cupertino widgets.
+  final Brightness brightness;
 
-  final CupertinoUserInterfaceStyle interfaceStyle;
   /// A color used on interactive elements of the theme.
   ///
   /// This color is generally used on text and icons in buttons and tappable
@@ -304,8 +275,7 @@ class CupertinoThemeData extends Diagnosticable {
   /// theme properties instead of iOS defaults.
   CupertinoThemeData noDefault() {
     return _NoDefaultCupertinoThemeData(
-      interfaceStyle,
-      _brightness,
+      brightness,
       _primaryColor,
       _primaryContrastingColor,
       _textTheme,
@@ -324,8 +294,7 @@ class CupertinoThemeData extends Diagnosticable {
     Color convertColor(Color color) => CupertinoDynamicColor.resolve(color, context, nullOk: nullOk);
 
     return CupertinoThemeData._rawWithDefaults(
-      interfaceStyle,
-      _brightness,
+      brightness,
       convertColor(_primaryColor),
       convertColor(_primaryContrastingColor),
       _textTheme?.resolveFrom(context, nullOk: nullOk),
@@ -343,7 +312,6 @@ class CupertinoThemeData extends Diagnosticable {
   /// copying with a different [primaryColor] will also change the copy's implied
   /// [textTheme].
   CupertinoThemeData copyWith({
-    CupertinoUserInterfaceStyle interfaceStyle,
     Brightness brightness,
     Color primaryColor,
     Color primaryContrastingColor,
@@ -352,8 +320,7 @@ class CupertinoThemeData extends Diagnosticable {
     Color scaffoldBackgroundColor,
   }) {
     return CupertinoThemeData._rawWithDefaults(
-      interfaceStyle ?? this.interfaceStyle,
-      brightness ?? _brightness,
+      brightness ?? this.brightness,
       primaryColor ?? _primaryColor,
       primaryContrastingColor ?? _primaryContrastingColor,
       textTheme ?? _textTheme,
@@ -367,7 +334,7 @@ class CupertinoThemeData extends Diagnosticable {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     const CupertinoThemeData defaultData = CupertinoThemeData();
-    properties.add(EnumProperty<CupertinoUserInterfaceStyle>('interfaceStyle', interfaceStyle, defaultValue: CupertinoUserInterfaceStyle.inherited));
+    properties.add(EnumProperty<Brightness>('brightness', brightness, defaultValue: null));
     properties.add(createCupertinoColorProperty('primaryColor', primaryColor, defaultValue: defaultData.primaryColor));
     properties.add(createCupertinoColorProperty('primaryContrastingColor', primaryContrastingColor, defaultValue: defaultData.primaryContrastingColor));
     properties.add(createCupertinoColorProperty('barBackgroundColor', barBackgroundColor, defaultValue: defaultData.barBackgroundColor));
@@ -378,15 +345,13 @@ class CupertinoThemeData extends Diagnosticable {
 
 class _NoDefaultCupertinoThemeData extends CupertinoThemeData {
   const _NoDefaultCupertinoThemeData(
-    CupertinoUserInterfaceStyle interfaceStyle,
-    this.brightness,
+    Brightness brightness,
     this.primaryColor,
     this.primaryContrastingColor,
     this.textTheme,
     this.barBackgroundColor,
     this.scaffoldBackgroundColor,
   ) : super._rawWithDefaults(
-        interfaceStyle,
         brightness,
         primaryColor,
         primaryContrastingColor,
@@ -396,8 +361,6 @@ class _NoDefaultCupertinoThemeData extends CupertinoThemeData {
         null,
       );
 
-  @override
-  final Brightness brightness;
   @override
   final Color primaryColor;
   @override
@@ -414,7 +377,6 @@ class _NoDefaultCupertinoThemeData extends CupertinoThemeData {
     Color convertColor(Color color) => CupertinoDynamicColor.resolve(color, context, nullOk: nullOk);
 
     return _NoDefaultCupertinoThemeData(
-      interfaceStyle,
       brightness,
       convertColor(primaryColor),
       convertColor(primaryContrastingColor),
@@ -426,7 +388,6 @@ class _NoDefaultCupertinoThemeData extends CupertinoThemeData {
 
   @override
   CupertinoThemeData copyWith({
-    CupertinoUserInterfaceStyle interfaceStyle,
     Brightness brightness,
     Color primaryColor,
     Color primaryContrastingColor,
@@ -435,7 +396,6 @@ class _NoDefaultCupertinoThemeData extends CupertinoThemeData {
     Color scaffoldBackgroundColor,
   }) {
     return _NoDefaultCupertinoThemeData(
-      interfaceStyle ?? this.interfaceStyle,
       brightness ?? this.brightness,
       primaryColor ?? this.primaryColor,
       primaryContrastingColor ?? this.primaryContrastingColor,
