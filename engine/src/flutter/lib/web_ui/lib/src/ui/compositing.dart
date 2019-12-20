@@ -74,6 +74,13 @@ abstract class OpacityEngineLayer implements EngineLayer {}
 /// {@macro dart.ui.sceneBuilder.oldLayerCompatibility}
 abstract class ColorFilterEngineLayer implements EngineLayer {}
 
+/// An opaque handle to an image filter engine layer.
+///
+/// Instances of this class are created by [SceneBuilder.pushImageFilter].
+///
+/// {@macro dart.ui.sceneBuilder.oldLayerCompatibility}
+abstract class ImageFilterEngineLayer implements EngineLayer {}
+
 /// An opaque handle to a backdrop filter engine layer.
 ///
 /// Instances of this class are created by [SceneBuilder.pushBackdropFilter].
@@ -194,6 +201,21 @@ abstract class SceneBuilder {
   ColorFilterEngineLayer pushColorFilter(
     ColorFilter filter, {
     ColorFilterEngineLayer oldLayer,
+  });
+
+  /// Pushes an image filter operation onto the operation stack.
+  ///
+  /// The given filter is applied to the children's rasterization before compositing them into
+  /// the scene.
+  ///
+  /// {@macro dart.ui.sceneBuilder.oldLayer}
+  ///
+  /// {@macro dart.ui.sceneBuilder.oldLayerVsRetained}
+  ///
+  /// See [pop] for details about the operation stack.
+  ImageFilterEngineLayer pushImageFilter(
+    ImageFilter filter, {
+    ImageFilterEngineLayer oldLayer,
   });
 
   /// Pushes a backdrop filter operation onto the operation stack.

@@ -139,6 +139,15 @@ class ColorFilterEngineLayer extends _EngineLayerWrapper {
   ColorFilterEngineLayer._(EngineLayer nativeLayer) : super._(nativeLayer);
 }
 
+/// An opaque handle to an image filter engine layer.
+///
+/// Instances of this class are created by [SceneBuilder.pushImageFilter].
+///
+/// {@macro dart.ui.sceneBuilder.oldLayerCompatibility}
+class ImageFilterEngineLayer extends _EngineLayerWrapper {
+  ImageFilterEngineLayer._(EngineLayer nativeLayer) : super._(nativeLayer);
+}
+
 /// An opaque handle to a backdrop filter engine layer.
 ///
 /// Instances of this class are created by [SceneBuilder.pushBackdropFilter].
@@ -430,6 +439,31 @@ class SceneBuilder extends NativeFieldWrapperClass2 {
   }
 
   EngineLayer _pushColorFilter(_ColorFilter filter) native 'SceneBuilder_pushColorFilter';
+
+  /// Pushes an image filter operation onto the operation stack.
+  ///
+  /// The given filter is applied to the children's rasterization before compositing them into
+  /// the scene.
+  ///
+  /// {@macro dart.ui.sceneBuilder.oldLayer}
+  ///
+  /// {@macro dart.ui.sceneBuilder.oldLayerVsRetained}
+  ///
+  /// See [pop] for details about the operation stack.
+  ImageFilterEngineLayer pushImageFilter(
+    ImageFilter filter, {
+    ImageFilterEngineLayer oldLayer,
+  }) {
+    assert(filter != null);
+    assert(_debugCheckCanBeUsedAsOldLayer(oldLayer, 'pushImageFilter'));
+    final _ImageFilter nativeFilter = filter._toNativeImageFilter();
+    assert(nativeFilter != null);
+    final ImageFilterEngineLayer layer = ImageFilterEngineLayer._(_pushImageFilter(nativeFilter));
+    assert(_debugPushLayer(layer));
+    return layer;
+  }
+
+  EngineLayer _pushImageFilter(_ImageFilter filter) native 'SceneBuilder_pushImageFilter';
 
   /// Pushes a backdrop filter operation onto the operation stack.
   ///

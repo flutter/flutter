@@ -2746,8 +2746,11 @@ class _ColorFilter extends NativeFieldWrapperClass2 {
 /// See also:
 ///
 ///  * [BackdropFilter], a widget that applies [ImageFilter] to its rendering.
+///  * [ImageFiltered], a widget that applies [ImageFilter] to its children.
 ///  * [SceneBuilder.pushBackdropFilter], which is the low-level API for using
-///    this class.
+///    this class as a backdrop filter.
+///  * [SceneBuilder.pushImageFilter], which is the low-level API for using
+///    this class as a child layer filter.
 class ImageFilter {
   /// Creates an image filter that applies a Gaussian blur.
   ImageFilter.blur({ double sigmaX = 0.0, double sigmaY = 0.0 })

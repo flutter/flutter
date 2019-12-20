@@ -2,23 +2,22 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-#include "flutter/flow/layers/color_filter_layer.h"
+#include "flutter/flow/layers/image_filter_layer.h"
 
 #include "flutter/flow/testing/layer_test.h"
 #include "flutter/flow/testing/mock_layer.h"
 #include "flutter/fml/macros.h"
 #include "flutter/testing/mock_canvas.h"
-#include "third_party/skia/include/core/SkColorFilter.h"
-#include "third_party/skia/include/effects/SkColorMatrixFilter.h"
+#include "third_party/skia/include/core/SkImageFilter.h"
 
 namespace flutter {
 namespace testing {
 
-using ColorFilterLayerTest = LayerTest;
+using ImageFilterLayerTest = LayerTest;
 
 #ifndef NDEBUG
-TEST_F(ColorFilterLayerTest, PaintingEmptyLayerDies) {
-  auto layer = std::make_shared<ColorFilterLayer>(sk_sp<SkColorFilter>());
+TEST_F(ImageFilterLayerTest, PaintingEmptyLayerDies) {
+  auto layer = std::make_shared<ImageFilterLayer>(sk_sp<SkImageFilter>());
 
   layer->Preroll(preroll_context(), SkMatrix());
   EXPECT_EQ(layer->paint_bounds(), kEmptyRect);
@@ -29,11 +28,11 @@ TEST_F(ColorFilterLayerTest, PaintingEmptyLayerDies) {
                             "needs_painting\\(\\)");
 }
 
-TEST_F(ColorFilterLayerTest, PaintBeforePrerollDies) {
+TEST_F(ImageFilterLayerTest, PaintBeforePrerollDies) {
   const SkRect child_bounds = SkRect::MakeLTRB(5.0f, 6.0f, 20.5f, 21.5f);
   const SkPath child_path = SkPath().addRect(child_bounds);
   auto mock_layer = std::make_shared<MockLayer>(child_path);
-  auto layer = std::make_shared<ColorFilterLayer>(sk_sp<SkColorFilter>());
+  auto layer = std::make_shared<ImageFilterLayer>(sk_sp<SkImageFilter>());
   layer->Add(mock_layer);
 
   EXPECT_EQ(layer->paint_bounds(), kEmptyRect);
@@ -42,13 +41,13 @@ TEST_F(ColorFilterLayerTest, PaintBeforePrerollDies) {
 }
 #endif
 
-TEST_F(ColorFilterLayerTest, EmptyFilter) {
+TEST_F(ImageFilterLayerTest, EmptyFilter) {
   const SkMatrix initial_transform = SkMatrix::MakeTrans(0.5f, 1.0f);
   const SkRect child_bounds = SkRect::MakeLTRB(5.0f, 6.0f, 20.5f, 21.5f);
   const SkPath child_path = SkPath().addRect(child_bounds);
   const SkPaint child_paint = SkPaint(SkColors::kYellow);
   auto mock_layer = std::make_shared<MockLayer>(child_path, child_paint);
-  auto layer = std::make_shared<ColorFilterLayer>(nullptr);
+  auto layer = std::make_shared<ImageFilterLayer>(nullptr);
   layer->Add(mock_layer);
 
   layer->Preroll(preroll_context(), initial_transform);
@@ -57,27 +56,31 @@ TEST_F(ColorFilterLayerTest, EmptyFilter) {
   EXPECT_EQ(mock_layer->parent_matrix(), initial_transform);
 
   SkPaint filter_paint;
-  filter_paint.setColorFilter(nullptr);
+  filter_paint.setImageFilter(nullptr);
   layer->Paint(paint_context());
-  EXPECT_EQ(
-      mock_canvas().draw_calls(),
-      std::vector({MockCanvas::DrawCall{
-                       0, MockCanvas::SaveLayerData{child_bounds, filter_paint,
-                                                    nullptr, 1}},
-                   MockCanvas::DrawCall{
-                       1, MockCanvas::DrawPathData{child_path, child_paint}},
-                   MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}}));
+  EXPECT_EQ(mock_canvas().draw_calls(),
+            std::vector({
+                MockCanvas::DrawCall{0, MockCanvas::SaveData{1}},
+                MockCanvas::DrawCall{1, MockCanvas::SetMatrixData{SkMatrix()}},
+                MockCanvas::DrawCall{
+                    1, MockCanvas::SaveLayerData{child_bounds, filter_paint,
+                                                 nullptr, 2}},
+                MockCanvas::DrawCall{
+                    2, MockCanvas::DrawPathData{child_path, child_paint}},
+                MockCanvas::DrawCall{2, MockCanvas::RestoreData{1}},
+                MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}},
+            }));
 }
 
-TEST_F(ColorFilterLayerTest, SimpleFilter) {
+TEST_F(ImageFilterLayerTest, SimpleFilter) {
   const SkMatrix initial_transform = SkMatrix::MakeTrans(0.5f, 1.0f);
   const SkRect child_bounds = SkRect::MakeLTRB(5.0f, 6.0f, 20.5f, 21.5f);
   const SkPath child_path = SkPath().addRect(child_bounds);
   const SkPaint child_paint = SkPaint(SkColors::kYellow);
-  auto layer_filter =
-      SkColorMatrixFilter::MakeLightingFilter(SK_ColorGREEN, SK_ColorYELLOW);
+  auto layer_filter = SkImageFilter::MakeMatrixFilter(
+      SkMatrix(), SkFilterQuality::kMedium_SkFilterQuality, nullptr);
   auto mock_layer = std::make_shared<MockLayer>(child_path, child_paint);
-  auto layer = std::make_shared<ColorFilterLayer>(layer_filter);
+  auto layer = std::make_shared<ImageFilterLayer>(layer_filter);
   layer->Add(mock_layer);
 
   layer->Preroll(preroll_context(), initial_transform);
@@ -86,19 +89,23 @@ TEST_F(ColorFilterLayerTest, SimpleFilter) {
   EXPECT_EQ(mock_layer->parent_matrix(), initial_transform);
 
   SkPaint filter_paint;
-  filter_paint.setColorFilter(layer_filter);
+  filter_paint.setImageFilter(layer_filter);
   layer->Paint(paint_context());
-  EXPECT_EQ(
-      mock_canvas().draw_calls(),
-      std::vector({MockCanvas::DrawCall{
-                       0, MockCanvas::SaveLayerData{child_bounds, filter_paint,
-                                                    nullptr, 1}},
-                   MockCanvas::DrawCall{
-                       1, MockCanvas::DrawPathData{child_path, child_paint}},
-                   MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}}));
+  EXPECT_EQ(mock_canvas().draw_calls(),
+            std::vector({
+                MockCanvas::DrawCall{0, MockCanvas::SaveData{1}},
+                MockCanvas::DrawCall{1, MockCanvas::SetMatrixData{SkMatrix()}},
+                MockCanvas::DrawCall{
+                    1, MockCanvas::SaveLayerData{child_bounds, filter_paint,
+                                                 nullptr, 2}},
+                MockCanvas::DrawCall{
+                    2, MockCanvas::DrawPathData{child_path, child_paint}},
+                MockCanvas::DrawCall{2, MockCanvas::RestoreData{1}},
+                MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}},
+            }));
 }
 
-TEST_F(ColorFilterLayerTest, MultipleChildren) {
+TEST_F(ImageFilterLayerTest, MultipleChildren) {
   const SkMatrix initial_transform = SkMatrix::MakeTrans(0.5f, 1.0f);
   const SkRect child_bounds = SkRect::MakeLTRB(5.0f, 6.0f, 2.5f, 3.5f);
   const SkPath child_path1 = SkPath().addRect(child_bounds);
@@ -106,11 +113,11 @@ TEST_F(ColorFilterLayerTest, MultipleChildren) {
       SkPath().addRect(child_bounds.makeOffset(3.0f, 0.0f));
   const SkPaint child_paint1 = SkPaint(SkColors::kYellow);
   const SkPaint child_paint2 = SkPaint(SkColors::kCyan);
-  auto layer_filter =
-      SkColorMatrixFilter::MakeLightingFilter(SK_ColorGREEN, SK_ColorYELLOW);
+  auto layer_filter = SkImageFilter::MakeMatrixFilter(
+      SkMatrix(), SkFilterQuality::kMedium_SkFilterQuality, nullptr);
   auto mock_layer1 = std::make_shared<MockLayer>(child_path1, child_paint1);
   auto mock_layer2 = std::make_shared<MockLayer>(child_path2, child_paint2);
-  auto layer = std::make_shared<ColorFilterLayer>(layer_filter);
+  auto layer = std::make_shared<ImageFilterLayer>(layer_filter);
   layer->Add(mock_layer1);
   layer->Add(mock_layer2);
 
@@ -127,21 +134,24 @@ TEST_F(ColorFilterLayerTest, MultipleChildren) {
   EXPECT_EQ(mock_layer2->parent_matrix(), initial_transform);
 
   SkPaint filter_paint;
-  filter_paint.setColorFilter(layer_filter);
+  filter_paint.setImageFilter(layer_filter);
   layer->Paint(paint_context());
-  EXPECT_EQ(
-      mock_canvas().draw_calls(),
-      std::vector({MockCanvas::DrawCall{
-                       0, MockCanvas::SaveLayerData{children_bounds,
-                                                    filter_paint, nullptr, 1}},
-                   MockCanvas::DrawCall{
-                       1, MockCanvas::DrawPathData{child_path1, child_paint1}},
-                   MockCanvas::DrawCall{
-                       1, MockCanvas::DrawPathData{child_path2, child_paint2}},
-                   MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}}));
+  EXPECT_EQ(mock_canvas().draw_calls(),
+            std::vector(
+                {MockCanvas::DrawCall{0, MockCanvas::SaveData{1}},
+                 MockCanvas::DrawCall{1, MockCanvas::SetMatrixData{SkMatrix()}},
+                 MockCanvas::DrawCall{
+                     1, MockCanvas::SaveLayerData{children_bounds, filter_paint,
+                                                  nullptr, 2}},
+                 MockCanvas::DrawCall{
+                     2, MockCanvas::DrawPathData{child_path1, child_paint1}},
+                 MockCanvas::DrawCall{
+                     2, MockCanvas::DrawPathData{child_path2, child_paint2}},
+                 MockCanvas::DrawCall{2, MockCanvas::RestoreData{1}},
+                 MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}}));
 }
 
-TEST_F(ColorFilterLayerTest, Nested) {
+TEST_F(ImageFilterLayerTest, Nested) {
   const SkMatrix initial_transform = SkMatrix::MakeTrans(0.5f, 1.0f);
   const SkRect child_bounds = SkRect::MakeLTRB(5.0f, 6.0f, 2.5f, 3.5f);
   const SkPath child_path1 = SkPath().addRect(child_bounds);
@@ -149,14 +159,14 @@ TEST_F(ColorFilterLayerTest, Nested) {
       SkPath().addRect(child_bounds.makeOffset(3.0f, 0.0f));
   const SkPaint child_paint1 = SkPaint(SkColors::kYellow);
   const SkPaint child_paint2 = SkPaint(SkColors::kCyan);
-  auto layer_filter1 =
-      SkColorMatrixFilter::MakeLightingFilter(SK_ColorGREEN, SK_ColorYELLOW);
-  auto layer_filter2 =
-      SkColorMatrixFilter::MakeLightingFilter(SK_ColorMAGENTA, SK_ColorBLUE);
+  auto layer_filter1 = SkImageFilter::MakeMatrixFilter(
+      SkMatrix(), SkFilterQuality::kMedium_SkFilterQuality, nullptr);
+  auto layer_filter2 = SkImageFilter::MakeMatrixFilter(
+      SkMatrix(), SkFilterQuality::kMedium_SkFilterQuality, nullptr);
   auto mock_layer1 = std::make_shared<MockLayer>(child_path1, child_paint1);
   auto mock_layer2 = std::make_shared<MockLayer>(child_path2, child_paint2);
-  auto layer1 = std::make_shared<ColorFilterLayer>(layer_filter1);
-  auto layer2 = std::make_shared<ColorFilterLayer>(layer_filter2);
+  auto layer1 = std::make_shared<ImageFilterLayer>(layer_filter1);
+  auto layer2 = std::make_shared<ImageFilterLayer>(layer_filter2);
   layer2->Add(mock_layer2);
   layer1->Add(mock_layer1);
   layer1->Add(layer2);
@@ -176,36 +186,44 @@ TEST_F(ColorFilterLayerTest, Nested) {
   EXPECT_EQ(mock_layer2->parent_matrix(), initial_transform);
 
   SkPaint filter_paint1, filter_paint2;
-  filter_paint1.setColorFilter(layer_filter1);
-  filter_paint2.setColorFilter(layer_filter2);
+  filter_paint1.setImageFilter(layer_filter1);
+  filter_paint2.setImageFilter(layer_filter2);
   layer1->Paint(paint_context());
-  EXPECT_EQ(
-      mock_canvas().draw_calls(),
-      std::vector({MockCanvas::DrawCall{
-                       0, MockCanvas::SaveLayerData{children_bounds,
-                                                    filter_paint1, nullptr, 1}},
-                   MockCanvas::DrawCall{
-                       1, MockCanvas::DrawPathData{child_path1, child_paint1}},
-                   MockCanvas::DrawCall{
-                       1, MockCanvas::SaveLayerData{child_path2.getBounds(),
-                                                    filter_paint2, nullptr, 2}},
-                   MockCanvas::DrawCall{
-                       2, MockCanvas::DrawPathData{child_path2, child_paint2}},
-                   MockCanvas::DrawCall{2, MockCanvas::RestoreData{1}},
-                   MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}}}));
+  EXPECT_EQ(mock_canvas().draw_calls(),
+            std::vector({
+                MockCanvas::DrawCall{0, MockCanvas::SaveData{1}},
+                MockCanvas::DrawCall{1, MockCanvas::SetMatrixData{SkMatrix()}},
+                MockCanvas::DrawCall{
+                    1, MockCanvas::SaveLayerData{children_bounds, filter_paint1,
+                                                 nullptr, 2}},
+                MockCanvas::DrawCall{
+                    2, MockCanvas::DrawPathData{child_path1, child_paint1}},
+                MockCanvas::DrawCall{2, MockCanvas::SaveData{3}},
+                MockCanvas::DrawCall{3, MockCanvas::SetMatrixData{SkMatrix()}},
+                MockCanvas::DrawCall{
+                    3, MockCanvas::SaveLayerData{child_path2.getBounds(),
+                                                 filter_paint2, nullptr, 4}},
+                MockCanvas::DrawCall{
+                    4, MockCanvas::DrawPathData{child_path2, child_paint2}},
+                MockCanvas::DrawCall{4, MockCanvas::RestoreData{3}},
+                MockCanvas::DrawCall{3, MockCanvas::RestoreData{2}},
+                MockCanvas::DrawCall{2, MockCanvas::RestoreData{1}},
+                MockCanvas::DrawCall{1, MockCanvas::RestoreData{0}},
+            }));
 }
 
-TEST_F(ColorFilterLayerTest, Readback) {
-  auto layer_filter = SkColorFilters::LinearToSRGBGamma();
+TEST_F(ImageFilterLayerTest, Readback) {
+  auto layer_filter = SkImageFilter::MakeMatrixFilter(
+      SkMatrix(), SkFilterQuality::kMedium_SkFilterQuality, nullptr);
   auto initial_transform = SkMatrix();
 
-  // ColorFilterLayer does not read from surface
-  auto layer = std::make_shared<ColorFilterLayer>(layer_filter);
+  // ImageFilterLayer does not read from surface
+  auto layer = std::make_shared<ImageFilterLayer>(layer_filter);
   preroll_context()->surface_needs_readback = false;
   layer->Preroll(preroll_context(), initial_transform);
   EXPECT_FALSE(preroll_context()->surface_needs_readback);
 
-  // ColorFilterLayer blocks child with readback
+  // ImageFilterLayer blocks child with readback
   auto mock_layer =
       std::make_shared<MockLayer>(SkPath(), SkPaint(), false, false, true);
   layer->Add(mock_layer);

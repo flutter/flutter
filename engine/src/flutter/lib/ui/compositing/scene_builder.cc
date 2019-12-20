@@ -10,6 +10,7 @@
 #include "flutter/flow/layers/clip_rrect_layer.h"
 #include "flutter/flow/layers/color_filter_layer.h"
 #include "flutter/flow/layers/container_layer.h"
+#include "flutter/flow/layers/image_filter_layer.h"
 #include "flutter/flow/layers/layer.h"
 #include "flutter/flow/layers/layer_tree.h"
 #include "flutter/flow/layers/opacity_layer.h"
@@ -49,6 +50,7 @@ IMPLEMENT_WRAPPERTYPEINFO(ui, SceneBuilder);
   V(SceneBuilder, pushClipPath)                     \
   V(SceneBuilder, pushOpacity)                      \
   V(SceneBuilder, pushColorFilter)                  \
+  V(SceneBuilder, pushImageFilter)                  \
   V(SceneBuilder, pushBackdropFilter)               \
   V(SceneBuilder, pushShaderMask)                   \
   V(SceneBuilder, pushPhysicalShape)                \
@@ -148,6 +150,14 @@ fml::RefPtr<EngineLayer> SceneBuilder::pushColorFilter(
     const ColorFilter* color_filter) {
   auto layer =
       std::make_shared<flutter::ColorFilterLayer>(color_filter->filter());
+  PushLayer(layer);
+  return EngineLayer::MakeRetained(layer);
+}
+
+fml::RefPtr<EngineLayer> SceneBuilder::pushImageFilter(
+    const ImageFilter* image_filter) {
+  auto layer =
+      std::make_shared<flutter::ImageFilterLayer>(image_filter->filter());
   PushLayer(layer);
   return EngineLayer::MakeRetained(layer);
 }

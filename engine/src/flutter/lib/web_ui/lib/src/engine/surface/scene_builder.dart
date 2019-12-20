@@ -173,6 +173,25 @@ class SurfaceSceneBuilder implements ui.SceneBuilder {
     throw UnimplementedError();
   }
 
+  /// Pushes an image filter operation onto the operation stack.
+  ///
+  /// The given filter is applied to the children's rasterization before compositing them into
+  /// the scene.
+  ///
+  /// {@macro dart.ui.sceneBuilder.oldLayer}
+  ///
+  /// {@macro dart.ui.sceneBuilder.oldLayerVsRetained}
+  ///
+  /// See [pop] for details about the operation stack.
+  @override
+  ui.ImageFilterEngineLayer pushImageFilter(
+    ui.ImageFilter filter, {
+    ui.ImageFilterEngineLayer oldLayer,
+  }) {
+    assert(filter != null);
+    throw UnimplementedError();
+  }
+
   /// Pushes a backdrop filter operation onto the operation stack.
   ///
   /// The given filter is applied to the current contents of the scene prior to
