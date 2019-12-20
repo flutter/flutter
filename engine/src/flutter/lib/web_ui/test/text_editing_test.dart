@@ -55,6 +55,9 @@ void main() {
   tearDown(() {
     lastEditingState = null;
     lastInputAction = null;
+    cleanTextEditingElement();
+    cleanTestFlags();
+    clearBackUpDomElementIfExists();
   });
 
   group('$GloballyPositionedTextEditingStrategy', () {
@@ -64,10 +67,6 @@ void main() {
       testTextEditing = HybridTextEditing();
       editingElement = GloballyPositionedTextEditingStrategy(testTextEditing);
       testTextEditing.useCustomEditableElement(editingElement);
-    });
-
-    tearDown(() {
-      cleanTextEditingElement();
     });
 
     test('Creates element when enabled and removes it when disabled', () {
@@ -190,8 +189,7 @@ void main() {
 
       // There should be no input action.
       expect(lastInputAction, isNull);
-    }, // TODO(nurhan): https://github.com/flutter/flutter/issues/46638
-        skip: (browserEngine == BrowserEngine.firefox));
+    });
 
     test('Can set editing state correctly', () {
       editingElement.enable(
@@ -247,8 +245,7 @@ void main() {
 
       // There should be no input action.
       expect(lastInputAction, isNull);
-    }, // TODO(nurhan): https://github.com/flutter/flutter/issues/46638
-        skip: (browserEngine == BrowserEngine.firefox));
+    });
 
     test('Same instance can be re-enabled with different config', () {
       // Make sure there's nothing in the DOM yet.
@@ -376,7 +373,6 @@ void main() {
     });
 
     tearDown(() {
-      cleanTextEditingElement();
       testInputElement = null;
     });
 
@@ -585,11 +581,10 @@ void main() {
 
     tearDown(() {
       spy.deactivate();
-      debugBrowserEngineOverride = null;
-      debugOperatingSystemOverride = null;
       if (textEditing.isEditing) {
         textEditing.stopEditing();
       }
+      textEditing = null;
     });
 
     test('setClient, show, setEditingState, hide', () {
@@ -692,6 +687,8 @@ void main() {
           123, // Client ID
         ],
       );
+      // Input element is removed from DOM.
+      expect(document.getElementsByTagName('input'), hasLength(0));
     });
 
     test('setClient, setEditingState, show, setClient', () {
@@ -987,7 +984,12 @@ void main() {
       );
 
       input.setSelectionRange(2, 5);
-      document.dispatchEvent(Event.eventType('Event', 'selectionchange'));
+      if (browserEngine == BrowserEngine.firefox) {
+        Event keyup = KeyboardEvent('keyup');
+        textEditing.editingElement.domElement.dispatchEvent(keyup);
+      } else {
+        document.dispatchEvent(Event.eventType('Event', 'selectionchange'));
+      }
 
       expect(spy.messages, hasLength(1));
       call = spy.messages[0];
@@ -1006,8 +1008,7 @@ void main() {
       );
 
       hideKeyboard();
-    }, // TODO(nurhan): https://github.com/flutter/flutter/issues/46638
-        skip: (browserEngine == BrowserEngine.firefox));
+    });
 
     test('Multi-line mode also works', () {
       final MethodCall setClient = MethodCall(
@@ -1033,11 +1034,16 @@ void main() {
       sendFrameworkMessage(codec.encodeMethodCall(setEditingState));
       checkTextAreaEditingState(textarea, 'foo\nbar', 2, 3);
 
-      // Sends the changes back to Flutter.
       textarea.value = 'something\nelse';
+
       textarea.dispatchEvent(Event.eventType('Event', 'input'));
       textarea.setSelectionRange(2, 5);
-      document.dispatchEvent(Event.eventType('Event', 'selectionchange'));
+      if (browserEngine == BrowserEngine.firefox) {
+        textEditing.editingElement.domElement
+            .dispatchEvent(KeyboardEvent('keyup'));
+      } else {
+        document.dispatchEvent(Event.eventType('Event', 'selectionchange'));
+      }
 
       // Two messages should've been sent. One for the 'input' event and one for
       // the 'selectionchange' event.
@@ -1065,11 +1071,11 @@ void main() {
 
       // Confirm that [HybridTextEditing] didn't send any more messages.
       expect(spy.messages, isEmpty);
-    }, // TODO(nurhan): https://github.com/flutter/flutter/issues/46638
-        skip: (browserEngine == BrowserEngine.firefox));
+    });
 
     test('sets correct input type in Android', () {
       debugOperatingSystemOverride = OperatingSystem.android;
+      debugBrowserEngineOverride = BrowserEngine.blink;
 
       /// During initialization [HybridTextEditing] will pick the correct
       /// text editing strategy for [OperatingSystem.android].
@@ -1091,11 +1097,7 @@ void main() {
       expect(getEditingInputMode(), 'url');
 
       hideKeyboard();
-
-      debugOperatingSystemOverride = null;
-    },
-        // TODO(nurhan): https://github.com/flutter/flutter/issues/46638
-        skip: (browserEngine == BrowserEngine.firefox));
+    });
 
     test('sets correct input type in iOS', () {
       debugOperatingSystemOverride = OperatingSystem.iOs;
@@ -1121,11 +1123,7 @@ void main() {
       expect(getEditingInputMode(), 'url');
 
       hideKeyboard();
-
-      debugOperatingSystemOverride = null;
-    },
-        // TODO(nurhan): https://github.com/flutter/flutter/issues/46638
-        skip: (browserEngine == BrowserEngine.firefox));
+    });
 
     test('sends the correct input action as a platform message', () {
       final int clientId = showKeyboard(
@@ -1180,10 +1178,6 @@ void main() {
         onChange: trackEditingState,
         onAction: trackInputAction,
       );
-    });
-
-    tearDown(() {
-      cleanTextEditingElement();
     });
 
     test('Configure input element from the editing state', () {
@@ -1320,12 +1314,29 @@ void cleanTextEditingElement() {
   }
 }
 
+void cleanTestFlags() {
+  debugBrowserEngineOverride = null;
+  debugOperatingSystemOverride = null;
+}
+
 void checkInputEditingState(
     InputElement input, String text, int start, int end) {
   expect(document.activeElement, input);
   expect(input.value, text);
   expect(input.selectionStart, start);
   expect(input.selectionEnd, end);
+}
+
+/// In case of an exception backup DOM element(s) can still stay on the DOM.
+void clearBackUpDomElementIfExists() {
+  List<Node> domElementsToRemove = List<Node>();
+  if (document.getElementsByTagName('input').length > 0) {
+    domElementsToRemove..addAll(document.getElementsByTagName('input'));
+  }
+  if (document.getElementsByTagName('textarea').length > 0) {
+    domElementsToRemove..addAll(document.getElementsByTagName('textarea'));
+  }
+  domElementsToRemove.forEach((Node n) => n.remove());
 }
 
 void checkTextAreaEditingState(
