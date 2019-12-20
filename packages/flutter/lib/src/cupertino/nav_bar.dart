@@ -87,13 +87,15 @@ class _HeroTag {
 Widget _wrapWithBackground({
   Border border,
   Color backgroundColor,
+  Brightness brightness,
   Widget child,
   bool updateSystemUiOverlay = true,
 }) {
   Widget result = child;
   if (updateSystemUiOverlay) {
     final bool darkBackground = backgroundColor.computeLuminance() < 0.179;
-    final SystemUiOverlayStyle overlayStyle = darkBackground
+    final SystemUiOverlayStyle overlayStyle = (brightness ??
+        (darkBackground ? Brightness.dark : Brightness.light)) == Brightness.dark
         ? SystemUiOverlayStyle.light
         : SystemUiOverlayStyle.dark;
     result = AnnotatedRegion<SystemUiOverlayStyle>(
@@ -206,6 +208,7 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
     this.trailing,
     this.border = _kDefaultNavBarBorder,
     this.backgroundColor,
+    this.brightness,
     this.padding,
     this.actionsForegroundColor,
     this.transitionBetweenRoutes = true,
@@ -300,6 +303,13 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
   /// Defaults to [CupertinoTheme]'s `barBackgroundColor` if null.
   /// {@endtemplate}
   final Color backgroundColor;
+
+  /// {@template flutter.cupertino.navBar.brightness}
+  /// The brightness of the app bar's background color.
+  ///
+  /// If this property is null, then depends on relative luminance of [backgroundColor].
+  /// {@endtemplate}
+  final Brightness brightness;
 
   /// {@template flutter.cupertino.navBar.padding}
   /// Padding for the contents of the navigation bar.
@@ -427,6 +437,7 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
     final Widget navBar = _wrapWithBackground(
       border: widget.border,
       backgroundColor: backgroundColor,
+      brightness: widget.brightness,
       child: DefaultTextStyle(
         style: CupertinoTheme.of(context).textTheme.textStyle,
         child: _PersistentNavigationBar(
@@ -547,6 +558,7 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
     this.trailing,
     this.border = _kDefaultNavBarBorder,
     this.backgroundColor,
+    this.brightness,
     this.padding,
     this.actionsForegroundColor,
     this.transitionBetweenRoutes = true,
@@ -619,6 +631,9 @@ class CupertinoSliverNavigationBar extends StatefulWidget {
 
   /// {@macro flutter.cupertino.navBar.backgroundColor}
   final Color backgroundColor;
+
+  /// {@macro flutter.cupertino.navBar.brightness}
+  final Brightness brightness;
 
   /// {@macro flutter.cupertino.navBar.padding}
   final EdgeInsetsDirectional padding;
@@ -694,6 +709,7 @@ class _CupertinoSliverNavigationBarState extends State<CupertinoSliverNavigation
             components: components,
             userMiddle: widget.middle,
             backgroundColor: CupertinoDynamicColor.resolve(widget.backgroundColor, context) ?? CupertinoTheme.of(context).barBackgroundColor,
+            brightness: widget.brightness,
             border: widget.border,
             padding: widget.padding,
             actionsForegroundColor: actionsForegroundColor,
@@ -715,6 +731,7 @@ class _LargeTitleNavigationBarSliverDelegate
     @required this.components,
     @required this.userMiddle,
     @required this.backgroundColor,
+    @required this.brightness,
     @required this.border,
     @required this.padding,
     @required this.actionsForegroundColor,
@@ -730,6 +747,7 @@ class _LargeTitleNavigationBarSliverDelegate
   final _NavigationBarStaticComponents components;
   final Widget userMiddle;
   final Color backgroundColor;
+  final Brightness brightness;
   final Border border;
   final EdgeInsetsDirectional padding;
   final Color actionsForegroundColor;
@@ -760,6 +778,7 @@ class _LargeTitleNavigationBarSliverDelegate
     final Widget navBar = _wrapWithBackground(
       border: border,
       backgroundColor: CupertinoDynamicColor.resolve(backgroundColor, context),
+      brightness: brightness,
       child: DefaultTextStyle(
         style: CupertinoTheme.of(context).textTheme.textStyle,
         child: Stack(

@@ -136,6 +136,34 @@ void main() {
     expect(tester.getCenter(find.text('Title')).dx, 400.0);
   });
 
+  testWidgets('Can specify custom brightness', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: CupertinoNavigationBar(
+          backgroundColor: Color(0xF0F9F9F9),
+          brightness: Brightness.dark,
+        ),
+      ),
+    );
+
+    final AnnotatedRegion<SystemUiOverlayStyle> region1 = tester.allWidgets.singleWhere((
+        Widget widget) => widget is AnnotatedRegion);
+    expect(region1.value, SystemUiOverlayStyle.light);
+
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: CupertinoNavigationBar(
+          backgroundColor: Color(0xF01D1D1D),
+          brightness: Brightness.light,
+        ),
+      ),
+    );
+
+    final AnnotatedRegion<SystemUiOverlayStyle> region2 = tester.allWidgets.singleWhere((
+        Widget widget) => widget is AnnotatedRegion);
+    expect(region2.value, SystemUiOverlayStyle.dark);
+  });
+
   testWidgets('Padding works in RTL', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
