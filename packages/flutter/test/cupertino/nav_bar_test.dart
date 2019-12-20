@@ -162,6 +162,40 @@ void main() {
     final AnnotatedRegion<SystemUiOverlayStyle> region2 = tester.allWidgets.singleWhere((
         Widget widget) => widget is AnnotatedRegion);
     expect(region2.value, SystemUiOverlayStyle.dark);
+
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: CustomScrollView(
+          slivers: <Widget>[
+            CupertinoSliverNavigationBar(
+              backgroundColor: Color(0xF0F9F9F9),
+              brightness: Brightness.dark,
+            )
+          ],
+        ),
+      ),
+    );
+
+    final AnnotatedRegion<SystemUiOverlayStyle> region3 = tester.allWidgets.singleWhere((
+        Widget widget) => widget is AnnotatedRegion);
+    expect(region3.value, SystemUiOverlayStyle.light);
+
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: CustomScrollView(
+          slivers: <Widget>[
+            CupertinoSliverNavigationBar(
+              backgroundColor: Color(0xF01D1D1D),
+              brightness: Brightness.light,
+            )
+          ],
+        ),
+      ),
+    );
+
+    final AnnotatedRegion<SystemUiOverlayStyle> region4 = tester.allWidgets.singleWhere((
+        Widget widget) => widget is AnnotatedRegion);
+    expect(region4.value, SystemUiOverlayStyle.dark);
   });
 
   testWidgets('Padding works in RTL', (WidgetTester tester) async {
