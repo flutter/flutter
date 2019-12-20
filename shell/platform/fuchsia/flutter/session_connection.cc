@@ -15,12 +15,17 @@ namespace flutter_runner {
 SessionConnection::SessionConnection(
     std::string debug_label,
     fuchsia::ui::views::ViewToken view_token,
+    scenic::ViewRefPair view_ref_pair,
     fidl::InterfaceHandle<fuchsia::ui::scenic::Session> session,
     fml::closure session_error_callback,
     zx_handle_t vsync_event_handle)
     : debug_label_(std::move(debug_label)),
       session_wrapper_(session.Bind(), nullptr),
-      root_view_(&session_wrapper_, std::move(view_token.value), debug_label),
+      root_view_(&session_wrapper_,
+                 std::move(view_token),
+                 std::move(view_ref_pair.control_ref),
+                 std::move(view_ref_pair.view_ref),
+                 debug_label),
       root_node_(&session_wrapper_),
       surface_producer_(
           std::make_unique<VulkanSurfaceProducer>(&session_wrapper_)),

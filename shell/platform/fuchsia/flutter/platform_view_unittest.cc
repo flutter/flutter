@@ -92,9 +92,6 @@ TEST_F(PlatformViewTests, ChangesAccessibilitySettings) {
   auto view_ref = fuchsia::ui::views::ViewRef({
       .reference = std::move(a),
   });
-  auto view_ref_control = fuchsia::ui::views::ViewRefControl({
-      .reference = std::move(b),
-  });
   flutter::TaskRunners task_runners =
       flutter::TaskRunners("test_runners", nullptr, nullptr, nullptr, nullptr);
 
@@ -104,7 +101,6 @@ TEST_F(PlatformViewTests, ChangesAccessibilitySettings) {
   auto platform_view = flutter_runner::PlatformView(
       delegate,                               // delegate
       "test_platform_view",                   // label
-      std::move(view_ref_control),            // view_ref_control
       std::move(view_ref),                    // view_ref
       std::move(task_runners),                // task_runners
       services_provider.service_directory(),  // runner_services
@@ -143,9 +139,6 @@ TEST_F(PlatformViewTests, EnableWireframeTest) {
   auto view_ref = fuchsia::ui::views::ViewRef({
       .reference = std::move(a),
   });
-  auto view_ref_control = fuchsia::ui::views::ViewRefControl({
-      .reference = std::move(b),
-  });
   flutter::TaskRunners task_runners =
       flutter::TaskRunners("test_runners", nullptr, nullptr, nullptr, nullptr);
 
@@ -160,7 +153,6 @@ TEST_F(PlatformViewTests, EnableWireframeTest) {
   auto platform_view = flutter_runner::PlatformView(
       delegate,                               // delegate
       "test_platform_view",                   // label
-      std::move(view_ref_control),            // view_ref_control
       std::move(view_ref),                    // view_refs
       std::move(task_runners),                // task_runners
       services_provider.service_directory(),  // runner_services

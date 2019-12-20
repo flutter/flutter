@@ -80,7 +80,6 @@ void SetInterfaceErrorHandler(fidl::Binding<T>& binding, std::string name) {
 PlatformView::PlatformView(
     flutter::PlatformView::Delegate& delegate,
     std::string debug_label,
-    fuchsia::ui::views::ViewRefControl view_ref_control,
     fuchsia::ui::views::ViewRef view_ref,
     flutter::TaskRunners task_runners,
     std::shared_ptr<sys::ServiceDirectory> runner_services,
@@ -95,7 +94,6 @@ PlatformView::PlatformView(
     zx_handle_t vsync_event_handle)
     : flutter::PlatformView(delegate, std::move(task_runners)),
       debug_label_(std::move(debug_label)),
-      view_ref_control_(std::move(view_ref_control)),
       view_ref_(std::move(view_ref)),
       session_listener_binding_(this, std::move(session_listener_request)),
       session_listener_error_callback_(
