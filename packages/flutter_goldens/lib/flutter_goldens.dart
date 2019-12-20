@@ -310,17 +310,18 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
 
     goldens ??= SkiaGoldClient(baseDirectory);
 
-    final bool hasWritePermission = platform.environment['CIRRUS_USER_PERMISSION'] == 'admin'
-      || platform.environment['CIRRUS_USER_PERMISSION'] == 'write';
-    if (hasWritePermission) {
-      await goldens.auth();
-      await goldens.tryjobInit();
-      return _AuthorizedFlutterPreSubmitComparator(
-        baseDirectory.uri,
-        goldens,
-        platform: platform,
-      );
-    }
+//    Temp - Testing Cirrus
+//    final bool hasWritePermission = platform.environment['CIRRUS_USER_PERMISSION'] == 'admin'
+//      || platform.environment['CIRRUS_USER_PERMISSION'] == 'write';
+//    if (hasWritePermission) {
+//      await goldens.auth();
+//      await goldens.tryjobInit();
+//      return _AuthorizedFlutterPreSubmitComparator(
+//        baseDirectory.uri,
+//        goldens,
+//        platform: platform,
+//      );
+//    }
 
     goldens.emptyAuth();
     goldens.getExpectations();
