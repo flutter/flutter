@@ -136,6 +136,29 @@ class SkiaGoldClient {
     }
   }
 
+  /// Doc
+  Future<void> emptyAuth() async {
+    final List<String> authArguments = <String>[
+      'auth',
+      '--work-dir', workDirectory
+        .childDirectory('temp')
+        .path,
+    ];
+
+    final io.ProcessResult result = await io.Process.run(
+      _goldctl,
+      authArguments,
+    );
+
+    if (result.exitCode != 0) {
+      final StringBuffer buf = StringBuffer()
+        ..writeln('Skia Gold auth failed.')
+        ..writeln('stdout: ${result.stdout}')
+        ..writeln('stderr: ${result.stderr}');
+      throw NonZeroExitCode(1, buf.toString());
+    }
+  }
+
   /// Executes the `imgtest init` command in the goldctl tool.
   ///
   /// The `imgtest` command collects and uploads test results to the Skia Gold
@@ -314,8 +337,27 @@ class SkiaGoldClient {
     return result.exitCode == 0 || checkPassed;
   }
 
+  /// Doc
   Future<bool> imgtestCheck(String testName, File goldenFile) async {
+    assert(testName != null);
+    assert(goldenFile != null);
 
+    final List<String> imgtestArguments = <String>[
+      'imgtest', 'check',
+      '--work-dir', workDirectory
+        .childDirectory('temp')
+        .path,
+      '--test-name', cleanTestName(testName),
+      '--png-file', goldenFile.path,
+      '--instance', 'flutter',
+    ];
+
+    final io.ProcessResult result = await io.Process.run(
+      _goldctl,
+      imgtestArguments,
+    );
+
+    return result.exitCode == 0;
   }
 
   /// Requests and sets the [_expectations] known to Flutter Gold at head.
@@ -380,6 +422,7 @@ class SkiaGoldClient {
   /// a flag to permit the change to land, protect against any unwanted changes,
   /// and ensure that changes that have landed are triaged.
   Future<bool> testIsIgnoredForPullRequest(String pullRequest, String testName) async {
+    print('$pullRequest $testName');
     bool ignoreIsActive = false;
     testName = cleanTestName(testName);
     String rawResponse;

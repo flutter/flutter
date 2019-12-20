@@ -663,13 +663,18 @@ void main() {
               },
               operatingSystem: 'macos'
             ),
+            goldens: mockSkiaClient,
             testBasedir: basedir,
           );
+          when(mockSkiaClient.cleanTestName('library.flutter.golden_test.1.png'))
+            .thenReturn('flutter.golden_test.1');
+          when(mockSkiaClient.expectations)
+            .thenReturn(expectationsTemplate());
         });
 
         test('comparison passes test that is ignored for this PR', () async {
-          when(mockSkiaClient.getImageBytes('55109a4bed52acc780530f7a9aeff6c0'))
-            .thenAnswer((_) => Future<List<int>>.value(_kTestPngBytes));
+          when(mockSkiaClient.imgtestCheck(any, any))
+            .thenAnswer((_) => Future<bool>.value(false));
           when(mockSkiaClient.testIsIgnoredForPullRequest(
             '1234',
             'library.flutter.golden_test.1.png',
@@ -702,6 +707,8 @@ void main() {
         });
 
         test('passes non-existent baseline for new test', () async {
+          when(mockSkiaClient.cleanTestName('library.flutter.new_golden_test.1.png'))
+            .thenReturn('flutter.new_golden_test.1');
           expect(
             await comparator.compare(
               Uint8List.fromList(_kFailPngBytes),

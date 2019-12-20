@@ -268,10 +268,6 @@ class FlutterSkiaGoldFileComparator extends FlutterGoldenFileComparator {
 ///  * [FlutterLocalFileComparator], another
 ///    [FlutterGoldenFileComparator] that tests golden images locally on your
 ///    current machine.
-// TODO(Piinks): Better handling for first-time contributors that cannot decrypt
-// the service account is needed. Gold has a new feature `goldctl imgtest check`
-// that could work. There is also the previous implementation that did not use
-// goldctl for this edge case. https://github.com/flutter/flutter/issues/46687
 class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
   /// Creates a [FlutterPreSubmitFileComparator] that will test golden file
   /// images against baselines requested from Flutter Gold.
@@ -319,10 +315,20 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
     if (hasWritePermission) {
       await goldens.auth();
       await goldens.tryjobInit();
-      return _AuthorizedFlutterPreSubmitComparator(baseDirectory.uri, goldens);
-    } else {
-      return _UnauthorizedFlutterPreSubmitComparator(baseDirectory.uri, goldens);
+      return _AuthorizedFlutterPreSubmitComparator(
+        baseDirectory.uri,
+        goldens,
+        platform: platform,
+      );
     }
+
+    goldens.emptyAuth();
+    goldens.getExpectations();
+    return _UnauthorizedFlutterPreSubmitComparator(
+      baseDirectory.uri,
+      goldens,
+      platform: platform,
+    );
   }
 
   @override
@@ -383,15 +389,31 @@ class _UnauthorizedFlutterPreSubmitComparator extends FlutterPreSubmitFileCompar
     await update(golden, imageBytes);
     final File goldenFile = getGoldenFile(golden);
 
+    // If this is a new test, there will not be an expectation
+    final String testName = skiaClient.cleanTestName(golden.path);
+    final List<String> testExpectations = skiaClient.expectations[testName];
+    print(testExpectations);
+    if (testExpectations == null) {
+      // There is no baseline for this test
+      print('No expectations provided by Skia Gold for test: $golden. '
+        'This may be a new test. If this is an unexpected result, check '
+        'https://flutter-gold.skia.org.\n'
+      );
+      return true;
+    }
+
+    // This is not a new test, so check for matching baseline.
     final bool checkPassed = await skiaClient.imgtestCheck(golden.path, goldenFile);
 
     if (checkPassed)
       return true;
 
-    return skiaClient.testIsIgnoredForPullRequest(
+    final bool ignoreResult = await skiaClient.testIsIgnoredForPullRequest(
       platform.environment['CIRRUS_PR'] ?? '',
       golden.path,
     );
+
+    return ignoreResult;
   }
 }
 
