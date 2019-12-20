@@ -108,8 +108,8 @@ void main() {
         onSelectAll: (bool value) {
           log.add('select-all: $value');
         },
-        columns: <DataColumn>[
-          const DataColumn(
+        columns: const <DataColumn>[
+          DataColumn(
             label: Text('Name'),
             tooltip: 'Name',
           ),
