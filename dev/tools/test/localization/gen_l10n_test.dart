@@ -884,6 +884,60 @@ void main() {
       );
     });
 
+    test('correctly generates a plural message with DateTime placeholders:', () {
+      const String pluralMessageWithPlaceholderArbFileString = '''{
+  "helloWorlds": "{count,plural, =1{Hello World, today is {currentDate}}=2{Hello two worlds, today is {currentDate}}many{Hello all {count} worlds, today is {currentDate}}other{Hello other {count} worlds, today is {currentDate}}}",
+  "@helloWorlds": {
+    "placeholders": {
+      "count": {},
+      "currentDate": {
+        "type": "DateTime",
+        "format": "yMMMMEEEEd"
+      }
+    }
+  }
+}''';
+      final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+        ..createSync(recursive: true);
+      l10nDirectory.childFile(defaultTemplateArbFileName)
+        .writeAsStringSync(pluralMessageWithPlaceholderArbFileString);
+
+      final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+      try {
+        generator.initialize(
+          l10nDirectoryPath: defaultArbPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        );
+        generator.parseArbFiles();
+        generator.generateClassMethods();
+      } on Exception catch (e) {
+        fail('Parsing template arb file should succeed: \n$e');
+      }
+
+      expect(generator.classMethods, isNotEmpty);
+      expect(
+        generator.classMethods.first,
+        '''  String helloWorlds(int count, Object currentDate) {
+    final DateFormat currentDateDateFormat = DateFormat.yMMMMEEEEd(_localeName);
+    final String currentDateString = currentDateDateFormat.format(currentDate);
+
+    return Intl.plural(
+      count,
+      locale: _localeName,
+      name: 'helloWorlds',
+      args: <Object>[count, currentDateString],
+      one: 'Hello World, today is \$currentDateString',
+      two: 'Hello two worlds, today is \$currentDateString',
+      many: 'Hello all \$count worlds, today is \$currentDateString',
+      other: 'Hello other \$count worlds, today is \$currentDateString'
+    );
+  }
+'''
+      );
+    });
+
     test('should throw when failing to parse the arb file:', () {
       const String arbFileWithTrailingComma = '''{
   "title": "Stocks",
