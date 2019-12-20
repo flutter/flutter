@@ -27,13 +27,14 @@ class PointerSignalResolver {
 
   /// Registers interest in handling [event].
   void register(PointerSignalEvent event, PointerSignalResolvedCallback callback) {
-    assert(event != null);
+    final PointerSignalEvent original = event.original as PointerSignalEvent;
+    assert(original != null);
     assert(callback != null);
-    assert(_currentEvent == null || _currentEvent == event);
+    assert(_currentEvent == null || _currentEvent == original);
     if (_firstRegisteredCallback != null) {
       return;
     }
-    _currentEvent = event;
+    _currentEvent = original;
     _firstRegisteredCallback = callback;
   }
 
