@@ -4,15 +4,14 @@
 
 import 'dart:async';
 
-import 'package:flutter/semantics.dart';
 import 'package:meta/meta.dart';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show RendererBinding, SemanticsHandle;
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -31,6 +30,7 @@ import '../common/request_data.dart';
 import '../common/semantics.dart';
 import '../common/text.dart';
 import '../common/wait.dart';
+import 'io_extension.dart' if (dart.library.html) 'web_extension.dart';
 import 'wait_conditions.dart';
 
 const String _extensionMethodName = 'driver';
@@ -56,6 +56,9 @@ class _DriverBinding extends BindingBase with ServicesBinding, SchedulerBinding,
       name: _extensionMethodName,
       callback: extension.call,
     );
+    if (kIsWeb) {
+      registerWebServiceExtension(extension.call);
+    }
   }
 
   @override
