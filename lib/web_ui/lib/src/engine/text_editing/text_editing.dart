@@ -549,12 +549,10 @@ class IOSTextEditingStrategy extends DefaultTextEditingStrategy {
     // Position the DOM element after it is focused.
     _subscriptions.add(domElement.onFocus.listen((_) {
       // Cancel previous timer if exists.
-      _positionInputElementTimer?.cancel();
-      _positionInputElementTimer = Timer(_delayBeforePositioning, () {
-        _canPosition = true;
-        positionElement();
-      });
+      _schedulePositioning();
     }));
+
+     _addTapListener();
 
     // On iOS, blur is trigerred if the virtual keyboard is closed or the
     // browser is sent to background or the browser tab is changed.
@@ -579,6 +577,46 @@ class IOSTextEditingStrategy extends DefaultTextEditingStrategy {
     super.disable();
     _positionInputElementTimer?.cancel();
     _positionInputElementTimer = null;
+  }
+
+  /// On iOS long press works differently than a single tap.
+  ///
+  /// On a normal tap the virtual keyboard comes up and users can enter text
+  /// using the keyboard.
+  ///
+  /// The long press on the other hand focuses on the element without bringing
+  /// up the virtual keyboard. It allows the users to modify the field by using
+  /// copy/cut/select/paste etc.
+  ///
+  /// After a long press [domElement] is positioned to the correct place. If the
+  /// user later single-tap on the [domElement] the virtual keyboard will come
+  /// and might shift the page up.
+  ///
+  /// In order to prevent this shift, on a `click` event the position of the
+  /// element is again set somewhere outside of the page and
+  /// [_positionInputElementTimer] timer is restarted. The element will be
+  /// placed to its correct position after [_delayBeforePositioning].
+  void _addTapListener() {
+    _subscriptions.add(domElement.onClick.listen((_) {
+      // Check if the element is already positioned. If not this does not fall
+      // under `The user was using the long press, now they want to enter text
+      // via keyboard` journey.
+      if (_canPosition) {
+        // Re-place the element somewhere outside of the screen.
+        initializeElementPosition();
+
+        // Re-configure the timer to place the element.
+        _schedulePositioning();
+      }
+    }));
+  }
+
+  void _schedulePositioning() {
+    _positionInputElementTimer?.cancel();
+    _positionInputElementTimer = Timer(_delayBeforePositioning, () {
+      _canPosition = true;
+      positionElement();
+    });
   }
 }
 
