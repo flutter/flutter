@@ -249,19 +249,20 @@ List<String> genMethodParameters(Map<String, dynamic> bundle, String key, String
   return <String>[];
 }
 
-List<String> genPluralMethodParameters(Map<String, dynamic> bundle, String key, String countPlaceholder) {
-  final Map<String, dynamic> attributesMap = bundle['@$key'] as Map<String, dynamic>;
+List<String> genPluralMethodParameters(Map<String, dynamic> placeholdersMap, String countPlaceholder, String key) {
+  if (placeholdersMap.keys.isEmpty)
+    throw L10nException(
+      'Placeholders map for the $key message is empty.\n'
+      'Check to see if the plural message is in the proper ICU syntax format '
+      'and ensure that placeholders are properly specified.'
+    );
 
-  if (attributesMap != null && attributesMap.containsKey('placeholders')) {
-    final Map<String, dynamic> placeholders = attributesMap['placeholders'] as Map<String, dynamic>;
-    return placeholders.keys.map((String parameter) {
-      if (parameter == countPlaceholder) {
-        return 'int $parameter';
-      }
-      return 'Object $parameter';
-    }).toList();
-  }
-  return <String>[];
+  return placeholdersMap.keys.map((String parameter) {
+    if (parameter == countPlaceholder) {
+      return 'int $parameter';
+    }
+    return 'Object $parameter';
+  }).toList();
 }
 
 String generateDateFormattingLogic(Map<String, dynamic> bundle, String key) {
@@ -363,8 +364,18 @@ String genSimpleMethod(Map<String, dynamic> bundle, String key) {
 String genPluralMethod(Map<String, dynamic> bundle, String key) {
   final Map<String, dynamic> attributesMap = bundle['@$key'] as Map<String, dynamic>;
   assert(attributesMap != null && attributesMap.containsKey('placeholders'));
-  final Map<String, dynamic> placeholdersMap = attributesMap['placeholders'] as Map<String, dynamic>;
-  final Iterable<String> placeholders = placeholdersMap.keys;
+  Map<String, dynamic> placeholdersMap;
+  Iterable<String> placeholders;
+  try {
+    placeholdersMap = attributesMap['placeholders'] as Map<String, dynamic>;
+    placeholders = placeholdersMap.keys;
+  } on NoSuchMethodError {
+    throw L10nException(
+      'Unable to find placeholders for the plural message: $key.\n'
+      'Check to see if the plural message is in the proper ICU syntax format '
+      'and ensure that placeholders are properly specified.'
+    );
+  }
 
   // Used to determine which placeholder is the plural count placeholder
   final String resourceValue = bundle[key] as String;
@@ -410,7 +421,7 @@ String genPluralMethod(Map<String, dynamic> bundle, String key) {
 
   return pluralMethodTemplate
     .replaceAll('@methodName', key)
-    .replaceAll('@methodParameters', genPluralMethodParameters(bundle, key, countPlaceholder).join(', '))
+    .replaceAll('@methodParameters', genPluralMethodParameters(placeholdersMap, countPlaceholder, key).join(', '))
     .replaceAll('@dateFormatting', generateDateFormattingLogic(bundle, key))
     .replaceAll('@intlMethodArgs', methodArgs.join(',\n      '));
 }
