@@ -804,7 +804,12 @@ abstract class PersistedSurface implements ui.EngineLayer {
   // Matrix only contains local transform (not chain multiplied since root).
   Matrix4 _localTransformInverse;
 
-  Matrix4 get localTransformInverse;
+  /// The inverse of the local transform that this surface applies to its children.
+  ///
+  /// The default implementation is identity transform. Concrete
+  /// implementations may override this getter to supply a different transform.
+  Matrix4 get localTransformInverse =>
+      _localTransformInverse ??= Matrix4.identity();
 
   /// Recomputes [transform] and [globalClip] fields.
   ///

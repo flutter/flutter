@@ -189,7 +189,7 @@ class SurfaceSceneBuilder implements ui.SceneBuilder {
     ui.ImageFilterEngineLayer oldLayer,
   }) {
     assert(filter != null);
-    throw UnimplementedError();
+    return _pushSurface(PersistedImageFilter(oldLayer, filter));
   }
 
   /// Pushes a backdrop filter operation onto the operation stack.
@@ -536,4 +536,11 @@ class SurfaceSceneBuilder implements ui.SceneBuilder {
   ) {
     throw UnimplementedError();
   }
+}
+
+// TODO(yjbanov): in HTML the blur looks too aggressive. The current
+//                implementation was copied from the existing backdrop-filter
+//                but probably needs a revision.
+String _imageFilterToCss(EngineImageFilter filter) {
+  return 'blur(${math.max(filter.sigmaX, filter.sigmaY) * 2}px)';
 }

@@ -72,10 +72,6 @@ class PersistedClipRect extends PersistedContainerSurface
   }
 
   @override
-  Matrix4 get localTransformInverse =>
-      _localTransformInverse ??= Matrix4.identity();
-
-  @override
   html.Element createElement() {
     return super.createElement()..setAttribute('clip-type', 'rect');
   }
@@ -121,10 +117,6 @@ class PersistedClipRRect extends PersistedContainerSurface
     _localTransformInverse = null;
     _projectedClip = null;
   }
-
-  @override
-  Matrix4 get localTransformInverse =>
-      _localTransformInverse ??= Matrix4.identity();
 
   @override
   html.Element createElement() {
@@ -192,10 +184,6 @@ class PersistedPhysicalShape extends PersistedContainerSurface
     _localTransformInverse = null;
     _projectedClip = null;
   }
-
-  @override
-  Matrix4 get localTransformInverse =>
-      _localTransformInverse ??= Matrix4.identity();
 
   void _applyColor() {
     rootElement.style.backgroundColor = color.toCssString();
@@ -349,10 +337,6 @@ class PersistedClipPath extends PersistedContainerSurface
     super.recomputeTransformAndClip();
     _localClipBounds ??= clipPath.getBounds();
   }
-
-  @override
-  Matrix4 get localTransformInverse =>
-      _localTransformInverse ??= Matrix4.identity();
 
   @override
   void apply() {

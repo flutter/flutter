@@ -10,7 +10,7 @@ class PersistedBackdropFilter extends PersistedContainerSurface
   PersistedBackdropFilter(PersistedBackdropFilter oldLayer, this.filter)
       : super(oldLayer);
 
-  final ui.ImageFilter filter;
+  final EngineImageFilter filter;
 
   /// The dedicated child container element that's separate from the
   /// [rootElement] is used to host child in front of [filterElement] that
@@ -23,10 +23,6 @@ class PersistedBackdropFilter extends PersistedContainerSurface
   Matrix4 _invertedTransform;
   // Reference to transform last used to cache [_invertedTransform].
   Matrix4 _previousTransform;
-
-  @override
-  Matrix4 get localTransformInverse =>
-      _localTransformInverse ??= Matrix4.identity();
 
   @override
   void adoptElements(PersistedBackdropFilter oldSurface) {
@@ -85,12 +81,10 @@ class PersistedBackdropFilter extends PersistedContainerSurface
         ..backgroundColor = '#000'
         ..opacity = '0.2';
     } else {
-      final EngineImageFilter engineFilter = filter;
       // CSS uses pixel radius for blur. Flutter & SVG use sigma parameters. For
       // Gaussian blur with standard deviation (normal distribution),
       // the blur will fall within 2 * sigma pixels.
-      domRenderer.setElementStyle(_filterElement, 'backdrop-filter',
-          'blur(${math.max(engineFilter.sigmaX, engineFilter.sigmaY) * 2}px)');
+      domRenderer.setElementStyle(_filterElement, 'backdrop-filter', _imageFilterToCss(filter));
     }
   }
 
