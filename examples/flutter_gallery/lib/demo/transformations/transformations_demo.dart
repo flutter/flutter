@@ -194,7 +194,6 @@ class _TransformationsDemoState extends State<TransformationsDemo> with TickerPr
     return FloatingActionButton(
       onPressed: () {
         setState(() {
-          //_transformationController.value = _homeTransformation;
           _animateResetInitialize();
         });
       },

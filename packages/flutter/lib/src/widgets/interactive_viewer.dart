@@ -216,7 +216,68 @@ class InteractiveViewer extends StatelessWidget {
   /// A pre-transformation proxy for [GestureDetector.onVerticalDragStart].
   final GestureDragUpdateCallback onVerticalDragUpdate;
 
-  // TODO(justinmc): Document.
+  /// A controller for the transformation performed on the child.
+  ///
+  /// Whenever the child is transformed, the [Matrix4] value is updated and all
+  /// listeners are notified. The value can also be set by the parent.
+  ///
+  /// {@tool sample}
+  /// This example shows how transformationController can be used to animate the
+  /// transformation back to its starting position.
+  ///
+  /// ```dart
+  /// final ValueNotifier<Matrix4> _transformationController = ValueNotifier<Matrix4>(null);
+  /// Animation<Matrix4> _animationHome;
+  /// AnimationController _controllerHome;
+  ///
+  /// @override
+  /// void initState() {
+  ///   super.initState();
+  ///   _controllerReset = AnimationController(
+  ///     vsync: this,
+  ///   );
+  /// }
+  ///
+  /// // Calling this will animate the child from whatever transformation it's
+  /// // currently in back to its starting position (the identity matrix).
+  /// void _animateHome() {
+  ///   _controllerHome.reset();
+  ///   _animationHome = Matrix4Tween(
+  ///     begin: _transformationController.value,
+  ///     end: Matrix4.identity(),
+  ///   ).animate(_controllerHome);
+  ///   _controllerHome.duration = const Duration(milliseconds: 400);
+  ///   _animationHome.addListener(_onAnimateHome);
+  ///   _controllerHome.forward();
+  /// }
+  ///
+  /// // Every time the animation sends a new value, set it to the controller's
+  /// // value.
+  /// void _onAnimateHome() {
+  ///   setState(() {
+  ///     _transformationController.value = _animationHome.value;
+  ///   });
+  ///   if (!_controllerHome.isAnimating) {
+  ///     _animationHome?.removeListener(_onAnimateHome);
+  ///     _animationHome = null;
+  ///     _controllerHome.reset();
+  ///   }
+  /// }
+  ///
+  /// @override
+  /// Widget build(BuildContext context) {
+  ///   return InteractiveViewer(
+  ///     transformationController: _transformationController,
+  ///     child: child,
+  ///   );
+  /// }
+  /// ```
+  /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  ///  * [ValueNotifier].
+  ///  * [TextEditingController] for an example of another similar pattern.
   final ValueNotifier<Matrix4> transformationController;
 
   @override
