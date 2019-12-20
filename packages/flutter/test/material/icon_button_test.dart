@@ -88,6 +88,9 @@ void main() {
     );
 
     final RenderBox iconButton = tester.renderObject(find.byType(IconButton));
+
+    // By default IconButton has a padding of 8.0 on all sides, so both
+    // width and height are 10.0 + 2 * 8.0 = 26.0
     expect(iconButton.size, const Size(26.0, 26.0));
   });
 
@@ -105,6 +108,9 @@ void main() {
     );
 
     final RenderBox iconButton = tester.renderObject(find.byType(IconButton));
+
+    // This IconButton has a padding of 3.0 on all sides, so both
+    // width and height are 10.0 + 2 * 3.0 = 16.0
     expect(iconButton.size, const Size(16.0, 16.0));
   });
 
