@@ -16,6 +16,8 @@ class SkVertices implements ui.Vertices {
   final Int32List _colors;
   final Float32List _positions;
   final ui.VertexMode _mode;
+  final Float32List _textureCoordinates;
+  final Uint16List _indices;
 
   SkVertices(
     ui.VertexMode mode,
@@ -28,7 +30,10 @@ class SkVertices implements ui.Vertices {
         _colors =
             Int32List.fromList(colors.map((ui.Color c) => c.value).toList()),
         _positions = encodePointList(positions),
-        _mode = mode {
+        _mode = mode,
+        _textureCoordinates = (textureCoordinates != null)
+          ? encodePointList(textureCoordinates) : null,
+        _indices = indices != null ? Uint16List.fromList(indices) : null {
     if (textureCoordinates != null &&
         textureCoordinates.length != positions.length)
       throw ArgumentError(
@@ -41,16 +46,10 @@ class SkVertices implements ui.Vertices {
           '"indices" values must be valid indices in the positions list.');
 
     final Float32List encodedPositions = encodePointList(positions);
-    final Float32List encodedTextureCoordinates = (textureCoordinates != null)
-        ? encodePointList(textureCoordinates)
-        : null;
     final Int32List encodedColors =
         colors != null ? _encodeColorList(colors) : null;
-    final Uint16List encodedIndices =
-        indices != null ? Uint16List.fromList(indices) : null;
-
-    if (!_init(mode, encodedPositions, encodedTextureCoordinates, encodedColors,
-        encodedIndices))
+    if (!_init(mode, encodedPositions, _textureCoordinates, encodedColors,
+        _indices))
       throw ArgumentError('Invalid configuration for vertices.');
   }
 
@@ -64,7 +63,9 @@ class SkVertices implements ui.Vertices {
         assert(positions != null),
         _colors = colors,
         _positions = positions,
-        _mode = mode {
+        _mode = mode,
+        _textureCoordinates = textureCoordinates,
+        _indices = indices {
     if (textureCoordinates != null &&
         textureCoordinates.length != positions.length)
       throw ArgumentError(
@@ -134,4 +135,8 @@ class SkVertices implements ui.Vertices {
 
   @override
   ui.VertexMode get mode => _mode;
+
+  Float32List get textureCoordinates => _textureCoordinates;
+
+  Uint16List get indices => _indices;
 }

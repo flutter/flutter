@@ -52,7 +52,7 @@ class Surface {
 
     SubmitCallback submitCallback =
         (SurfaceFrame surfaceFrame, SkCanvas canvas) {
-      _presentSurface(canvas);
+      return _presentSurface(canvas);
     };
 
     return SurfaceFrame(surface, submitCallback);

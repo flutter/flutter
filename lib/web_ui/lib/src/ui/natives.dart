@@ -5,6 +5,7 @@
 part of ui;
 
 // Corelib 'print' implementation.
+// ignore: unused_element
 void _print(dynamic arg) {
   _Logger._printString(arg.toString());
 }

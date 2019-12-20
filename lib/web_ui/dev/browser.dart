@@ -12,7 +12,7 @@ import 'package:typed_data/typed_buffers.dart';
 
 import 'package:test_api/src/utils.dart';
 
-import 'common.dart'; // ignore: implementation_imports
+import 'common.dart'; // ignore: unused_import
 
 /// An interface for running browser instances.
 ///

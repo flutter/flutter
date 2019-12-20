@@ -16,7 +16,6 @@ void main() async {
   const double screenWidth = 600.0;
   const double screenHeight = 800.0;
   const Rect screenRect = Rect.fromLTWH(0, 0, screenWidth, screenHeight);
-  final Paint testPaint = Paint()..color = const Color(0xFFFF0000);
 
   // Commit a recording canvas to a bitmap, and compare with the expected
   Future<void> _checkScreenshot(RecordingCanvas rc, String fileName,

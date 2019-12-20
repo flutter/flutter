@@ -20,8 +20,6 @@ class SurfacePaint implements ui.Paint {
     _paintData.blendMode = value;
   }
 
-  ui.BlendMode _blendMode;
-
   @override
   ui.PaintingStyle get style => _paintData.style ?? ui.PaintingStyle.fill;
 
@@ -101,9 +99,6 @@ class SurfacePaint implements ui.Paint {
 
   @override
   set invertColors(bool value) {}
-
-  @override
-  ui.Color _color = _defaultPaintColor;
 
   static const ui.Color _defaultPaintColor = ui.Color(0xFF000000);
 

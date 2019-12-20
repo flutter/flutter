@@ -17,7 +17,6 @@ class LayerScene implements ui.Scene {
   @override
   Future<ui.Image> toImage(int width, int height) => null;
 
-  @override
   html.Element get webOnlyRootElement => null;
 }
 

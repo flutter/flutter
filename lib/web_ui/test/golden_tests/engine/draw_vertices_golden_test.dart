@@ -72,6 +72,7 @@ void main() async {
   test('Should draw black hairline triangles when colors array is null'
       ' and Paint() has no color.',
           () async {
+    // ignore: unused_local_variable
     final Int32List colors = Int32List.fromList(<int>[
         0xFFFF0000, 0xFF00FF00, 0xFF0000FF,
         0xFFFF0000, 0xFF00FF00, 0xFF0000FF,
