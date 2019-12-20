@@ -844,7 +844,6 @@ mixin _PlatformViewGestureMixin on RenderBox {
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
-    assert(_hoverAnnotationKey == null);
     RendererBinding.instance.mouseTracker.attachAnnotation(_hoverAnnotationKey);
   }
 
