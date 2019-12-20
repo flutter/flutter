@@ -361,29 +361,33 @@ String genSimpleMethod(Map<String, dynamic> bundle, String key) {
     .replaceAll('@intlMethodArgs', genIntlMethodArgs(bundle, key).join(',\n      '));
 }
 
-String genPluralMethod(Map<String, dynamic> bundle, String resourceId) {
-  final Map<String, dynamic> attributesMap = bundle['@$resourceId'] as Map<String, dynamic>;
-  assert(attributesMap != null && attributesMap.containsKey('placeholders'));
-  Map<String, dynamic> placeholdersMap;
-  Iterable<String> placeholders;
-  try {
-    placeholdersMap = attributesMap['placeholders'] as Map<String, dynamic>;
-    placeholders = placeholdersMap.keys;
-  } on NoSuchMethodError {
+String genPluralMethod(Map<String, dynamic> arbBundle, String resourceId) {
+  final Map<String, dynamic> attributesMap = arbBundle['@$resourceId'] as Map<String, dynamic>;
+  if (attributesMap == null)
+    throw L10nException('Resource attribute for $resourceId does not exist.');
+  if (!attributesMap.containsKey('placeholders'))
     throw L10nException(
       'Unable to find placeholders for the plural message: $resourceId.\n'
       'Check to see if the plural message is in the proper ICU syntax format '
       'and ensure that placeholders are properly specified.'
     );
-  }
+  if (attributesMap['placeholders'] is! Map<String, dynamic>)
+    throw L10nException(
+      'The "placeholders" resource attribute for the message, $resourceId, '
+      'is not properly formatted. Ensure that it is a map with keys that are '
+      'strings.'
+    );
+
+  final Map<String, dynamic> placeholdersMap = attributesMap['placeholders'] as Map<String, dynamic>;
+  final Iterable<String> placeholders = placeholdersMap.keys;
 
   // Used to determine which placeholder is the plural count placeholder
-  final String resourceValue = bundle[resourceId] as String;
+  final String resourceValue = arbBundle[resourceId] as String;
   final String countPlaceholder = resourceValue.split(',')[0].substring(1);
 
   // To make it easier to parse the plurals message, temporarily replace each
   // "{placeholder}" parameter with "#placeholder#".
-  String message = bundle[resourceId] as String;
+  String message = arbBundle[resourceId] as String;
   for (String placeholder in placeholders)
     message = message.replaceAll('{$placeholder}', '#$placeholder#');
 
@@ -399,7 +403,7 @@ String genPluralMethod(Map<String, dynamic> bundle, String resourceId) {
   final List<String> methodArgs = <String>[
     countPlaceholder,
     'locale: _localeName',
-    ...genIntlMethodArgs(bundle, resourceId),
+    ...genIntlMethodArgs(arbBundle, resourceId),
   ];
 
   for (String pluralKey in pluralIds.keys) {
@@ -422,7 +426,7 @@ String genPluralMethod(Map<String, dynamic> bundle, String resourceId) {
   return pluralMethodTemplate
     .replaceAll('@methodName', resourceId)
     .replaceAll('@methodParameters', genPluralMethodParameters(placeholders, countPlaceholder, resourceId).join(', '))
-    .replaceAll('@dateFormatting', generateDateFormattingLogic(bundle, resourceId))
+    .replaceAll('@dateFormatting', generateDateFormattingLogic(arbBundle, resourceId))
     .replaceAll('@intlMethodArgs', methodArgs.join(',\n      '));
 }
 

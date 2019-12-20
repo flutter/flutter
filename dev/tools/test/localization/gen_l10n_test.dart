@@ -999,6 +999,65 @@ void main() {
       fail('Generating class methods without placeholders should not succeed');
     });
 
+    test('should throw attempting to generate a plural message with no resource attributes:', () {
+      const String pluralMessageWithoutResourceAttributes = '''{
+  "helloWorlds": "{count,plural, =0{Hello}=1{Hello World}=2{Hello two worlds}few{Hello {count} worlds}many{Hello all {count} worlds}other{Hello other {count} worlds}}"
+}''';
+
+      final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+        ..createSync(recursive: true);
+      l10nDirectory.childFile(defaultTemplateArbFileName)
+        .writeAsStringSync(pluralMessageWithoutResourceAttributes);
+
+      final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+      try {
+        generator.initialize(
+          l10nDirectoryPath: defaultArbPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        );
+        generator.parseArbFiles();
+        generator.generateClassMethods();
+      } on L10nException catch (e) {
+        expect(e.message, contains('Resource attribute'));
+        expect(e.message, contains('does not exist'));
+        return;
+      }
+      fail('Generating plural class method without resource attributes should not succeed');
+    });
+
+    test('should throw attempting to generate a plural message with empty placeholders map:', () {
+      const String pluralMessageWithIncorrectPlaceholderFormat = '''{
+  "helloWorlds": "{count,plural, =0{Hello}=1{Hello World}=2{Hello two worlds}few{Hello {count} worlds}many{Hello all {count} worlds}other{Hello other {count} worlds}}",
+  "@helloWorlds": {
+    "placeholders": "Incorrectly a string, should be a map."
+  }
+}''';
+
+      final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+        ..createSync(recursive: true);
+      l10nDirectory.childFile(defaultTemplateArbFileName)
+        .writeAsStringSync(pluralMessageWithIncorrectPlaceholderFormat);
+
+      final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+      try {
+        generator.initialize(
+          l10nDirectoryPath: defaultArbPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        );
+        generator.parseArbFiles();
+        generator.generateClassMethods();
+      } on L10nException catch (e) {
+        expect(e.message, contains('is not properly formatted'));
+        expect(e.message, contains('Esnure that it is a map with keys that are strings'));
+        return;
+      }
+      fail('Generating class methods with incorrect placeholder format should not succeed');
+    });
+
     test('should throw when failing to parse the arb file:', () {
       const String arbFileWithTrailingComma = '''{
   "title": "Stocks",
@@ -1032,7 +1091,7 @@ void main() {
       );
     });
 
-    test('should throw when resource is is missing resource attribute:', () {
+    test('should throw when resource is missing resource attribute:', () {
       const String arbFileWithMissingResourceAttribute = '''{
   "title": "Stocks"
 }''';
