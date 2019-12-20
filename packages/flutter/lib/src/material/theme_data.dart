@@ -1815,6 +1815,16 @@ class VisualDensity extends Diagnosticable {
     );
   }
 
+  /// Calculate effective constraints for a widget with constraints [constraints].
+  ///
+  /// Used in the widgets [RawMaterialButton] and [IconButton].
+  BoxConstraints effectiveConstraints(BoxConstraints constraints){
+    return constraints.copyWith(
+      minWidth: (constraints.minWidth + baseSizeAdjustment.dx).clamp(0.0, double.infinity).toDouble(),
+      minHeight: (constraints.minHeight + baseSizeAdjustment.dy).clamp(0.0, double.infinity).toDouble(),
+    );
+  }
+
   @override
   bool operator ==(dynamic other) {
     if (other.runtimeType != runtimeType) {
