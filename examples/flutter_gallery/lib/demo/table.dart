@@ -12,16 +12,6 @@ class TableDemo extends StatefulWidget {
 class _TableDemoState extends State<TableDemo> {
   @override
   Widget build(BuildContext context) {
-    const BoxDecoration decoration = BoxDecoration(
-      gradient: LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.topRight,
-        colors: <Color>[
-          Colors.red,
-          Colors.green,
-        ],
-      ),
-    );
     return Scaffold(
       appBar: AppBar(
         title: const Text('Scrollable Table'),
@@ -38,15 +28,6 @@ class _TableDemoState extends State<TableDemo> {
           ),
         ],
       ),
-      /*
-      body: OverflowBox(
-        alignment: Alignment.topLeft,
-        maxWidth: double.infinity,
-        maxHeight: double.infinity,
-        child: _getTable(10, 2),
-      ),
-      */
-      //body: _getTable(10, 2),
       body: InteractiveViewer(
         child: _getTable(10, 2),
       ),
@@ -55,13 +36,17 @@ class _TableDemoState extends State<TableDemo> {
 
   Table _getTable(int rowCount, int columnCount) {
     return Table(
+      // ignore: prefer_const_literals_to_create_immutables
       columnWidths: <int, TableColumnWidth>{
         for (int column = 0; column < columnCount; column++)
-          column: FixedColumnWidth(300.0),
+          column: const FixedColumnWidth(300.0),
       },
+      // ignore: prefer_const_literals_to_create_immutables
       children: <TableRow>[
         for (int row = 0; row < rowCount; row++)
+          // ignore: prefer_const_constructors
           TableRow(
+            // ignore: prefer_const_literals_to_create_immutables
             children: <Widget>[
               for (int column = 0; column < columnCount; column++)
                 Container(

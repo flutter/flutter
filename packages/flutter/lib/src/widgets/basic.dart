@@ -14,7 +14,6 @@ import 'framework.dart';
 import 'localizations.dart';
 import 'widget_span.dart';
 
-export 'interactive_viewer.dart';
 export 'package:flutter/animation.dart';
 export 'package:flutter/foundation.dart' show
   ChangeNotifier,
@@ -64,6 +63,7 @@ export 'package:flutter/rendering.dart' show
   ValueGetter,
   WrapAlignment,
   WrapCrossAlignment;
+export 'interactive_viewer.dart';
 
 // Examples can assume:
 // class TestWidget extends StatelessWidget { @override Widget build(BuildContext context) => const Placeholder(); }

@@ -29,7 +29,7 @@ class _TransformationsDemoState extends State<TransformationsDemo> with TickerPr
   );
 
   Matrix4 _homeTransformation;
-  ValueNotifier<Matrix4> _transformationController = ValueNotifier<Matrix4>(null);
+  final ValueNotifier<Matrix4> _transformationController = ValueNotifier<Matrix4>(null);
   Animation<Matrix4> _animationReset;
   AnimationController _controllerReset;
 
@@ -83,6 +83,7 @@ class _TransformationsDemoState extends State<TransformationsDemo> with TickerPr
 
   @override
   void initState() {
+    super.initState();
     _controllerReset = AnimationController(
       vsync: this,
     );

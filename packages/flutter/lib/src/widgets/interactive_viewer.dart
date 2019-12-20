@@ -7,7 +7,6 @@ import 'package:vector_math/vector_math_64.dart' show Vector3;
 import 'package:flutter/gestures.dart' show kMinFlingVelocity;
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
-import 'package:flutter/scheduler.dart';
 
 // A single user event can only represent one of these gestures. The user can't
 // do multiple at the same time, which results in more precise transformations.
@@ -268,14 +267,13 @@ class InteractiveViewer extends StatelessWidget {
 @immutable
 class _InteractiveViewerSized extends StatefulWidget {
   const _InteractiveViewerSized({
+    this.boundaryMargin,
     @required this.child,
-    @required this.size,
+    @required this.disableRotation,
+    @required this.disableScale,
+    @required this.disableTranslation,
     this.maxScale,
     @required this.minScale,
-    this.boundaryMargin,
-    @required this.disableTranslation,
-    @required this.disableScale,
-    @required this.disableRotation,
     this.onTapDown,
     this.onTapUp,
     this.onTap,
@@ -301,7 +299,8 @@ class _InteractiveViewerSized extends StatefulWidget {
     this.onScaleStart,
     this.onScaleUpdate,
     this.onScaleEnd,
-    this.transformationController,
+    @required this.size,
+    @required this.transformationController,
   }) : assert(child != null),
        assert(minScale != null),
        assert(minScale > 0),
@@ -453,7 +452,6 @@ class _InteractiveViewerState extends State<_InteractiveViewerSized> with Ticker
       _childKey.currentContext.findRenderObject(),
       widget.size,
     );
-    final RenderBox renderBoxContainer = _childKey.currentContext.findRenderObject();
     _boundaryRectCached = Rect.fromLTRB(
       -widget.boundaryMargin.left,
       -widget.boundaryMargin.top,
