@@ -74,6 +74,7 @@ class PaginatedDataTable extends StatefulWidget {
     this.headingRowHeight = 56.0,
     this.horizontalMargin = 24.0,
     this.columnSpacing = 56.0,
+    this.showCheckboxColumn = true,
     this.initialFirstRowIndex = 0,
     this.onPageChanged,
     this.rowsPerPage = defaultRowsPerPage,
@@ -91,6 +92,7 @@ class PaginatedDataTable extends StatefulWidget {
        assert(headingRowHeight != null),
        assert(horizontalMargin != null),
        assert(columnSpacing != null),
+       assert(showCheckboxColumn != null),
        assert(rowsPerPage != null),
        assert(rowsPerPage > 0),
        assert(() {
@@ -163,6 +165,14 @@ class PaginatedDataTable extends StatefulWidget {
   ///
   /// This value defaults to 56.0 to adhere to the Material Design specifications.
   final double columnSpacing;
+
+  /// Whether the widget should display checkboxes for selectable rows.
+  ///
+  /// If true, a [CheckBox] will be placed at the beginning of each row that is
+  /// selectable.
+  ///
+  /// If false, all rows will not display a [CheckBox].
+  final bool showCheckboxColumn;
 
   /// The index of the first row to display when the widget is first created.
   final int initialFirstRowIndex;
@@ -465,6 +475,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
               headingRowHeight: widget.headingRowHeight,
               horizontalMargin: widget.horizontalMargin,
               columnSpacing: widget.columnSpacing,
+              showCheckboxColumn: widget.showCheckboxColumn,
               rows: _getRows(_firstRowIndex, widget.rowsPerPage),
             ),
           ),

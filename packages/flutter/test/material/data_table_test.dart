@@ -99,6 +99,85 @@ void main() {
     log.clear();
   });
 
+  testWidgets('DataTable control test - no checkboxes', (WidgetTester tester) async {
+    final List<String> log = <String>[];
+
+    Widget buildTable({ int sortColumnIndex, bool sortAscending = true }) {
+      return DataTable(
+        sortColumnIndex: sortColumnIndex,
+        sortAscending: sortAscending,
+        showCheckboxColumn: false,
+        columns: <DataColumn>[
+          const DataColumn(
+            label: Text('Name'),
+            tooltip: 'Name',
+          ),
+          DataColumn(
+            label: const Text('Calories'),
+            tooltip: 'Calories',
+            numeric: true,
+            onSort: (int columnIndex, bool ascending) {
+              log.add('column-sort: $columnIndex $ascending');
+            },
+          ),
+        ],
+        rows: kDesserts.map<DataRow>((Dessert dessert) {
+          return DataRow(
+            key: ValueKey<String>(dessert.name),
+            onSelectChanged: (bool selected) {
+              log.add('row-selected: ${dessert.name}');
+            },
+            cells: <DataCell>[
+              DataCell(
+                Text(dessert.name),
+              ),
+              DataCell(
+                Text('${dessert.calories}'),
+                showEditIcon: true,
+                onTap: () {
+                  log.add('cell-tap: ${dessert.calories}');
+                },
+              ),
+            ],
+          );
+        }).toList(),
+      );
+    }
+
+    await tester.pumpWidget(MaterialApp(
+      home: Material(child: buildTable()),
+    ));
+
+    await tester.tap(find.text('Cupcake'));
+
+    expect(log, <String>['row-selected: Cupcake']);
+    log.clear();
+
+    await tester.tap(find.text('Calories'));
+
+    expect(log, <String>['column-sort: 1 true']);
+    log.clear();
+
+    await tester.pumpWidget(MaterialApp(
+      home: Material(child: buildTable(sortColumnIndex: 1)),
+    ));
+    await tester.pumpAndSettle(const Duration(milliseconds: 200));
+    await tester.tap(find.text('Calories'));
+
+    expect(log, <String>['column-sort: 1 false']);
+    log.clear();
+
+    await tester.pumpWidget(MaterialApp(
+      home: Material(child: buildTable(sortColumnIndex: 1, sortAscending: false)),
+    ));
+    await tester.pumpAndSettle(const Duration(milliseconds: 200));
+
+    await tester.tap(find.text('375'));
+
+    expect(log, <String>['cell-tap: 375']);
+    log.clear();
+  });
+
   testWidgets('DataTable overflow test - header', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
