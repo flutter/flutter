@@ -152,7 +152,7 @@ class SkiaGoldClient {
 
     if (result.exitCode != 0) {
       final StringBuffer buf = StringBuffer()
-        ..writeln('Skia Gold auth failed.')
+        ..writeln('Skia Gold emptyAuth failed.')
         ..writeln('stdout: ${result.stdout}')
         ..writeln('stderr: ${result.stderr}');
       throw NonZeroExitCode(1, buf.toString());
@@ -232,6 +232,8 @@ class SkiaGoldClient {
     );
 
     if (result.exitCode != 0) {
+      // We do not want to throw for non-zero exit codes here, as an intentional
+      // change or new golden file test may be expected.
       print('goldctl imgtest add stdout: ${result.stdout}');
       print('goldctl imgtest add stderr: ${result.stderr}');
     }
@@ -422,7 +424,6 @@ class SkiaGoldClient {
   /// a flag to permit the change to land, protect against any unwanted changes,
   /// and ensure that changes that have landed are triaged.
   Future<bool> testIsIgnoredForPullRequest(String pullRequest, String testName) async {
-    print('$pullRequest $testName');
     bool ignoreIsActive = false;
     testName = cleanTestName(testName);
     String rawResponse;
