@@ -1052,7 +1052,7 @@ void main() {
         generator.generateClassMethods();
       } on L10nException catch (e) {
         expect(e.message, contains('is not properly formatted'));
-        expect(e.message, contains('Esnure that it is a map with keys that are strings'));
+        expect(e.message, contains('Ensure that it is a map with keys that are strings'));
         return;
       }
       fail('Generating class methods with incorrect placeholder format should not succeed');
