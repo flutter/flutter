@@ -285,6 +285,7 @@ Map<String, js.JsObject> toSkFontStyle(
         break;
     }
   }
+  return style;
 }
 
 class SkParagraph implements ui.Paragraph {

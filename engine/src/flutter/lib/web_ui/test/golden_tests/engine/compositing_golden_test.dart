@@ -480,7 +480,7 @@ void _testCullRectComputation() {
 
     await matchGoldenFile('compositing_3d_rotate1.png', region: region);
 
-    final PersistedStandardPicture picture = enumeratePictures().single;
+    final PersistedStandardPicture picture = enumeratePictures().single; // ignore: unused_local_variable
     // TODO(https://github.com/flutter/flutter/issues/40395):
     //   Needs ability to set iframe to 500,100 size. Current screen seems to be 500,500.
     // expect(

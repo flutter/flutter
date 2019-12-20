@@ -778,7 +778,7 @@ abstract class Window {
   /// no later frames to batch.
   TimingsCallback get onReportTimings => _onReportTimings;
   TimingsCallback _onReportTimings;
-  Zone _onReportTimingsZone;
+  Zone _onReportTimingsZone; // ignore: unused_field
   set onReportTimings(TimingsCallback callback) {
     _onReportTimings = callback;
   }
