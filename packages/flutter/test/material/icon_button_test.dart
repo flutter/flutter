@@ -114,6 +114,30 @@ void main() {
     expect(iconButton.size, const Size(16.0, 16.0));
   });
 
+  testWidgets('Small icons comply with VisualDensity requirements', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      wrap(
+        child: Theme(
+          data: ThemeData(visualDensity: const VisualDensity(horizontal: 1, vertical: -1)),
+          child: IconButton(
+            iconSize: 10.0,
+            onPressed: mockOnPressedFunction,
+            icon: const Icon(Icons.link),
+            constraints: const BoxConstraints(minWidth: 32.0, minHeight: 32.0),
+          ),
+        ),
+      ),
+    );
+
+    final RenderBox iconButton = tester.renderObject(find.byType(IconButton));
+
+    // VisualDensity(horizontal: 1, vertical: -1) increases the icon's
+    // width by 4 pixels and decreases its height by 4 pixels, giving
+    // final width 32.0 + 4.0 = 36.0 and
+    // final height 32.0 - 4.0 = 28.0
+    expect(iconButton.size, const Size(36.0, 28.0));
+  });
+
   testWidgets('test default icon buttons are constrained', (WidgetTester tester) async {
     await tester.pumpWidget(
       wrap(
