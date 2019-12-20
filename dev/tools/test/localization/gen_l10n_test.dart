@@ -1027,7 +1027,7 @@ void main() {
       fail('Generating plural class method without resource attributes should not succeed');
     });
 
-    test('should throw attempting to generate a plural message with empty placeholders map:', () {
+    test('should throw attempting to generate a plural message with incorrect placeholders format:', () {
       const String pluralMessageWithIncorrectPlaceholderFormat = '''{
   "helloWorlds": "{count,plural, =0{Hello}=1{Hello World}=2{Hello two worlds}few{Hello {count} worlds}many{Hello all {count} worlds}other{Hello other {count} worlds}}",
   "@helloWorlds": {
