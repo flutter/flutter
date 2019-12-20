@@ -1011,7 +1011,7 @@ class RenderShaderMask extends RenderProxyBox {
       assert(needsCompositing);
       layer ??= ShaderMaskLayer();
       layer
-        ..shader = _shaderCallback(offset & size)
+        ..shader = _shaderCallback(Offset.zero & size)
         ..maskRect = offset & size
         ..blendMode = _blendMode;
       context.pushLayer(layer, super.paint, offset);
@@ -2668,13 +2668,13 @@ class RenderMouseRegion extends RenderProxyBox {
        _opaque = opaque,
        super(child);
 
-  final Key _annotationKey = UniqueKey();
+  final LocalKey _annotationKey = UniqueKey();
   /// Object used for annotation of the layer used for hover hit detection.
   ///
   /// This is only public to allow for testing of Listener widgets. Do not call
   /// in other contexts.
   @visibleForTesting
-  Key get annotationKey => _annotationKey;
+  LocalKey get annotationKey => _annotationKey;
 
   /// Whether this object should prevent [RenderMouseRegion]s visually behind it
   /// from detecting the pointer, thus affecting how their [onHover], [onEnter],

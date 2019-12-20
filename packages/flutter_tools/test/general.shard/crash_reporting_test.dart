@@ -9,6 +9,7 @@ import 'package:file/file.dart';
 import 'package:file/local.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/runner.dart' as tools;
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/platform.dart';
@@ -18,7 +19,6 @@ import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:http/http.dart';
 import 'package:http/testing.dart';
-import 'package:pedantic/pedantic.dart';
 import 'package:quiver/testing/async.dart';
 
 import '../src/common.dart';

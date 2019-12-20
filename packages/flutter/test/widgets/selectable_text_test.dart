@@ -177,10 +177,7 @@ void main() {
     debugResetSemanticsIdCounter();
   });
 
-  Widget selectableTextBuilder({
-    String text = '',
-    int maxLines = 1,
-  }) {
+  Widget selectableTextBuilder({String text = '', int maxLines = 1}) {
     return boilerplate(
       child: SelectableText(
         text,
@@ -192,17 +189,12 @@ void main() {
 
   testWidgets('has expected defaults', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MediaQuery(
-        data: MediaQueryData(devicePixelRatio: 1.0),
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: SelectableText('selectable text'),
-        ),
+      boilerplate(
+          child: const SelectableText('selectable text'),
       ),
     );
 
-    final SelectableText selectableText =
-    tester.firstWidget(find.byType(SelectableText));
+    final SelectableText selectableText = tester.firstWidget(find.byType(SelectableText));
     expect(selectableText.showCursor, false);
     expect(selectableText.autofocus, false);
     expect(selectableText.dragStartBehavior, DragStartBehavior.start);
@@ -326,6 +318,29 @@ void main() {
 
     final RenderBox longtextBox = findSelectableTextBox();
     expect(longtextBox.size, const Size(199.0, 14.0));
+  });
+
+  testWidgets('can scale with textScaleFactor', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      boilerplate(
+        child: const SelectableText('selectable text'),
+      ),
+    );
+
+    final RenderBox renderBox = tester.renderObject(find.byType(SelectableText));
+    expect(renderBox.size.height, 14.0);
+
+    await tester.pumpWidget(
+      boilerplate(
+        child: const SelectableText(
+          'selectable text',
+          textScaleFactor: 1.9,
+        ),
+      ),
+    );
+
+    final RenderBox scaledBox = tester.renderObject(find.byType(SelectableText));
+    expect(scaledBox.size.height, 27.0);
   });
 
   testWidgets('can switch between textWidthBasis', (WidgetTester tester) async {
@@ -3186,25 +3201,13 @@ void main() {
   testWidgets('SelectableText implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
-//    properties.add(DiagnosticsProperty<String>('data', data, defaultValue: null));
-//    properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode, defaultValue: null));
-//    properties.add(DiagnosticsProperty<TextStyle>('style', style, defaultValue: null));
-//    properties.add(DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
-//    properties.add(DiagnosticsProperty<bool>('showCursor', showCursor, defaultValue: false));
-//    properties.add(IntProperty('maxLines', maxLines, defaultValue: null));
-//    properties.add(EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
-//    properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
-//    properties.add(DoubleProperty('cursorWidth', cursorWidth, defaultValue: 2.0));
-//    properties.add(DiagnosticsProperty<Radius>('cursorRadius', cursorRadius, defaultValue: null));
-//    properties.add(DiagnosticsProperty<Color>('cursorColor', cursorColor, defaultValue: null));
-//    properties.add(FlagProperty('selectionEnabled', value: selectionEnabled, defaultValue: true, ifFalse: 'selection disabled'));
-//    properties.add(DiagnosticsProperty<ScrollPhysics>('scrollPhysics', scrollPhysics, defaultValue: null));
     // Not checking controller, inputFormatters, focusNode
     const SelectableText(
       'something',
       style: TextStyle(color: Color(0xff00ff00)),
       textAlign: TextAlign.end,
       textDirection: TextDirection.ltr,
+      textScaleFactor: 1.0,
       autofocus: true,
       showCursor: true,
       maxLines: 10,
@@ -3227,6 +3230,7 @@ void main() {
       'maxLines: 10',
       'textAlign: end',
       'textDirection: ltr',
+      'textScaleFactor: 1.0',
       'cursorWidth: 1.0',
       'cursorRadius: Radius.circular(0.0)',
       'cursorColor: Color(0xff00ff00)',

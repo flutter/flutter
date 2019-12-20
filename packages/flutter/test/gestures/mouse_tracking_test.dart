@@ -96,7 +96,7 @@ void main() {
   });
 
   test('MouseTrackerAnnotation has correct toString', () {
-    const Key key = ValueKey<int>(10);
+    const LocalKey key = ValueKey<int>(10);
     final MouseTrackerAnnotation annotation1 = MouseTrackerAnnotation(
       key: key,
       onEnter: (_) {},
@@ -659,7 +659,7 @@ void main() {
   });
 
   test('annotations with the same key should inherit presence', () {
-    const Key key = Key('annotation');
+    const LocalKey key = ValueKey<String>('annotation');
     final List<String> logs = <String>[];
     // The annotation #1 and #2 have the same key, while annotation #3 has a
     // different key (an empty `key` argument results in a unique key).

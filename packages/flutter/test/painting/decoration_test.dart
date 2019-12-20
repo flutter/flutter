@@ -257,7 +257,7 @@ void main() {
     expect(error.diagnostics[3], isInstanceOf<DiagnosticsProperty<ImageConfiguration>>());
     expect(error.toStringDeep(),
       'FlutterError\n'
-      '   ImageDecoration.matchTextDirection can only be used when a\n'
+      '   DecorationImage.matchTextDirection can only be used when a\n'
       '   TextDirection is available.\n'
       '   When DecorationImagePainter.paint() was called, there was no text\n'
       '   direction provided in the ImageConfiguration object to match.\n'
