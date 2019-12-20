@@ -46,13 +46,16 @@ import 'framework.dart';
 ///    recent interaction is needed for widget building.
 abstract class StreamBuilderBase<T, S> extends StatefulWidget {
   /// Creates a [StreamBuilderBase] connected to the specified [stream].
-  const StreamBuilderBase({ Key key, this.stream }) : super(key: key);
+  const StreamBuilderBase({ Key key, this.stream, this.onNewData }) : super(key: key);
 
   /// The asynchronous computation to which this builder is currently connected,
   /// possibly null. When changed, the current summary is updated using
   /// [afterDisconnected], if the previous stream was not null, followed by
   /// [afterConnected], if the new stream is not null.
   final Stream<T> stream;
+  
+  /// A function called when new data is added to the stream.
+  final void Function(T data) onNewData;
 
   /// Returns the initial summary of stream interaction, typically representing
   /// the fact that no interaction has happened at all.
@@ -133,6 +136,7 @@ class _StreamBuilderBaseState<T, S> extends State<StreamBuilderBase<T, S>> {
   void _subscribe() {
     if (widget.stream != null) {
       _subscription = widget.stream.listen((T data) {
+        widget.onNewData?.call(data);
         setState(() {
           _summary = widget.afterData(_summary, data);
         });
@@ -466,11 +470,15 @@ class StreamBuilder<T> extends StreamBuilderBase<T, AsyncSnapshot<T>> {
     this.initialData,
     Stream<T> stream,
     @required this.builder,
+    this.onNewData,
   }) : assert(builder != null),
-       super(key: key, stream: stream);
+       super(key: key, stream: stream, onNewData: onNewData);
 
   /// The build strategy currently used by this builder.
   final AsyncWidgetBuilder<T> builder;
+  
+  /// A function called when new data is added to the stream.
+  final void Function(T data) onNewData;
 
   /// The data that will be used to create the initial snapshot.
   ///
