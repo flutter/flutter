@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -435,7 +435,7 @@ Could not build the precompiled application for the device.''',
       final MockFile pbxprojFile = MockFile();
 
       when(project.xcodeProjectInfoFile).thenReturn(pbxprojFile);
-      when(project.hostAppBundleName).thenReturn('UnitTestRunner.app');
+      when(project.hostAppBundleName).thenAnswer((_) => Future<String>.value('UnitTestRunner.app'));
       when(pbxprojFile.readAsLinesSync())
           .thenAnswer((_) => flutterAssetPbxProjLines);
       when(pbxprojFile.existsSync())

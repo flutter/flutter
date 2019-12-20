@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -31,9 +31,12 @@ abstract class AndroidAssetBundle extends Target {
   List<Source> get outputs => const <Source>[];
 
   @override
-  List<String> get depfiles => const <String>[
-    'flutter_assets.d',
+  List<String> get depfiles => <String>[
+    if (_copyAssets)
+      'flutter_assets.d',
   ];
+
+  bool get _copyAssets => true;
 
   @override
   Future<void> build(Environment environment) async {
@@ -56,8 +59,10 @@ abstract class AndroidAssetBundle extends Target {
       fs.file(isolateSnapshotData)
           .copySync(outputDirectory.childFile('isolate_snapshot_data').path);
     }
-    final Depfile assetDepfile = await copyAssets(environment, outputDirectory);
-    assetDepfile.writeToFile(environment.buildDir.childFile('flutter_assets.d'));
+    if (_copyAssets) {
+      final Depfile assetDepfile = await copyAssets(environment, outputDirectory);
+      assetDepfile.writeToFile(environment.buildDir.childFile('flutter_assets.d'));
+    }
   }
 
   @override
@@ -88,6 +93,17 @@ class DebugAndroidApplication extends AndroidAssetBundle {
     const Source.pattern('{OUTPUT_DIR}/isolate_snapshot_data'),
     const Source.pattern('{OUTPUT_DIR}/kernel_blob.bin'),
   ];
+}
+
+/// A minimal android application that does not include assets.
+class FastStartAndroidApplication extends DebugAndroidApplication {
+  const FastStartAndroidApplication();
+
+  @override
+  String get name => 'faststart_android_application';
+
+  @override
+  bool get _copyAssets => false;
 }
 
 /// An implementation of [AndroidAssetBundle] that only includes assets.
@@ -192,6 +208,8 @@ class AndroidAot extends AotElfBase {
     if (!output.existsSync()) {
       output.createSync(recursive: true);
     }
+    final List<String> extraGenSnapshotOptions = environment.defines[kExtraGenSnapshotOptions]?.split(',')
+      ?? const <String>[];
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final int snapshotExitCode = await snapshotter.build(
       platform: targetPlatform,
@@ -200,6 +218,7 @@ class AndroidAot extends AotElfBase {
       packagesPath: environment.projectDir.childFile('.packages').path,
       outputPath: output.path,
       bitcode: false,
+      extraGenSnapshotOptions: extraGenSnapshotOptions,
     );
     if (snapshotExitCode != 0) {
       throw Exception('AOT snapshotter exited with code $snapshotExitCode');

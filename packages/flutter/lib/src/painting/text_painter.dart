@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -170,6 +170,8 @@ class TextPainter {
   void markNeedsLayout() {
     _paragraph = null;
     _needsLayout = true;
+    _previousCaretPosition = null;
+    _previousCaretPrototype = null;
   }
 
   /// The (potentially styled) text to paint.
@@ -549,7 +551,7 @@ class TextPainter {
     _lastMaxWidth = maxWidth;
     _paragraph.layout(ui.ParagraphConstraints(width: maxWidth));
     if (minWidth != maxWidth) {
-      final double newWidth = maxIntrinsicWidth.clamp(minWidth, maxWidth);
+      final double newWidth = maxIntrinsicWidth.clamp(minWidth, maxWidth) as double;
       if (newWidth != width) {
         _paragraph.layout(ui.ParagraphConstraints(width: newWidth));
       }
@@ -819,14 +821,9 @@ class TextPainter {
     return _paragraph.getWordBoundary(position);
   }
 
-  /// Returns the [TextRange] of the line at the given [TextPosition].
+  /// Returns the text range of the line at the given offset.
   ///
-  /// The newline, if any, is returned as part of the range.
-  ///
-  /// Not valid until after layout.
-  ///
-  /// This can potentially be expensive, since it needs to compute the full
-  /// layout before it is available.
+  /// The newline, if any, is included in the range.
   TextRange getLineBoundary(TextPosition position) {
     assert(!_needsLayout);
     return _paragraph.getLineBoundary(position);

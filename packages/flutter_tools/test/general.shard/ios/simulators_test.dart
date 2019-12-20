@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -344,9 +344,9 @@ void main() {
           when(mockProcess.stdout)
             .thenAnswer((Invocation invocation) {
               return Stream<List<int>>.fromIterable(<List<int>>['''
-2017-09-13 15:26:57.228948-0700  localhost Runner[37195]: (Flutter) Observatory listening on http://127.0.0.1:57701/
-2017-09-13 15:26:57.228948-0700  localhost Runner[37195]: (Flutter) ))))))))))
-2017-09-13 15:26:57.228948-0700  localhost Runner[37195]: (Flutter) #0      Object.noSuchMethod (dart:core-patch/dart:core/object_patch.dart:46)'''
+2017-09-13 15:26:57.228948-0700  localhost My Super Awesome App[37195]: (Flutter) Observatory listening on http://127.0.0.1:57701/
+2017-09-13 15:26:57.228948-0700  localhost My Super Awesome App[37195]: (Flutter) ))))))))))
+2017-09-13 15:26:57.228948-0700  localhost My Super Awesome App[37195]: (Flutter) #0      Object.noSuchMethod (dart:core-patch/dart:core/object_patch.dart:46)'''
                 .codeUnits]);
             });
           when(mockProcess.stderr)

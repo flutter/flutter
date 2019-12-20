@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -61,9 +61,7 @@ class FuchsiaKernelCompiler {
       // AOT/JIT:
       if (buildInfo.usesAot) ...<String>['--aot', '--tfa']
       else ...<String>[
-        // TODO(zra): Add back when this is supported again.
-        // See: https://github.com/flutter/flutter/issues/44925
-        // '--no-link-platform',
+        '--no-link-platform',
         '--split-output-by-packages',
         '--manifest', manifestPath
       ],

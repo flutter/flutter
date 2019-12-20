@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -33,6 +33,18 @@ abstract class EdgeInsetsGeometry {
   double get _right;
   double get _start;
   double get _top;
+
+  /// An [EdgeInsetsGeometry] with infinite offsets in each direction.
+  ///
+  /// Can be used as an infinite upper bound for [clamp].
+  static const EdgeInsetsGeometry infinity = _MixedEdgeInsets.fromLRSETB(
+    double.infinity,
+    double.infinity,
+    double.infinity,
+    double.infinity,
+    double.infinity,
+    double.infinity,
+  );
 
   /// Whether every dimension is non-negative.
   bool get isNonNegative {
@@ -146,6 +158,19 @@ abstract class EdgeInsetsGeometry {
     );
   }
 
+  /// Returns the a new [EdgeInsetsGeometry] object with all values greater than
+  /// or equal to `min`, and less than or equal to `max`.
+  EdgeInsetsGeometry clamp(EdgeInsetsGeometry min, EdgeInsetsGeometry max) {
+    return _MixedEdgeInsets.fromLRSETB(
+      _left.clamp(min._left, max._left) as double,
+      _right.clamp(min._right, max._right) as double,
+      _start.clamp(min._start, max._start) as double,
+      _end.clamp(min._end, max._end) as double,
+      _top.clamp(min._top, max._top) as double,
+      _bottom.clamp(min._bottom, max._bottom) as double,
+    );
+  }
+
   /// Returns the [EdgeInsetsGeometry] object with each dimension negated.
   ///
   /// This is the same as multiplying the object by -1.0.
@@ -255,15 +280,13 @@ abstract class EdgeInsetsGeometry {
 
   @override
   bool operator ==(dynamic other) {
-    if (other is! EdgeInsetsGeometry)
-      return false;
-    final EdgeInsetsGeometry typedOther = other;
-    return _left == typedOther._left
-        && _right == typedOther._right
-        && _start == typedOther._start
-        && _end == typedOther._end
-        && _top == typedOther._top
-        && _bottom == typedOther._bottom;
+    return other is EdgeInsetsGeometry
+        && other._left == _left
+        && other._right == _right
+        && other._start == _start
+        && other._end == _end
+        && other._top == _top
+        && other._bottom == _bottom;
   }
 
   @override

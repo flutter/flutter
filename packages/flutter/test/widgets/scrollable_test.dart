@@ -1,8 +1,7 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io';
 import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
@@ -36,11 +35,7 @@ Future<void> pumpTest(
 
 const double dragOffset = 200.0;
 
-// TODO(gspencergoog): Change this to use TargetPlatform.macOS once that is available.
-// https://github.com/flutter/flutter/issues/31366
-// Can't be const, since Platform.macOS asserts if called in const context.
-// ignore: prefer_const_declarations
-final LogicalKeyboardKey modifierKey = (!kIsWeb && Platform.isMacOS)
+final LogicalKeyboardKey modifierKey = defaultTargetPlatform == TargetPlatform.macOS
     ? LogicalKeyboardKey.metaLeft
     : LogicalKeyboardKey.controlLeft;
 
@@ -51,13 +46,13 @@ double getScrollOffset(WidgetTester tester) {
 
 double getScrollVelocity(WidgetTester tester) {
   final RenderViewport viewport = tester.renderObject(find.byType(Viewport));
-  final ScrollPosition position = viewport.offset;
+  final ScrollPosition position = viewport.offset as ScrollPosition;
   return position.activity.velocity;
 }
 
 void resetScrollOffset(WidgetTester tester) {
   final RenderViewport viewport = tester.renderObject(find.byType(Viewport));
-  final ScrollPosition position = viewport.offset;
+  final ScrollPosition position = viewport.offset as ScrollPosition;
   position.jumpTo(0.0);
 }
 

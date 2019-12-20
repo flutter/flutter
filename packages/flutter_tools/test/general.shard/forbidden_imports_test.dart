@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -39,6 +39,7 @@ void main() {
   test('no unauthorized imports of dart:io', () {
     final List<String> whitelistedPaths = <String>[
       fs.path.join(flutterTools, 'lib', 'src', 'base', 'io.dart'),
+      fs.path.join(flutterTools, 'lib', 'src', 'base', 'error_handling_file_system.dart'),
     ];
     bool _isNotWhitelisted(FileSystemEntity entity) => whitelistedPaths.every((String path) => path != entity.path);
 
@@ -54,6 +55,33 @@ void main() {
               !line.contains('ignore: dart_io_import')) {
             final String relativePath = fs.path.relative(file.path, from:flutterTools);
             fail("$relativePath imports 'dart:io'; import 'lib/src/base/io.dart' instead");
+          }
+        }
+      }
+    }
+  });
+
+  test('no unauthorized imports of test_api', () {
+    final List<String> whitelistedPaths = <String>[
+      fs.path.join(flutterTools, 'lib', 'src', 'build_runner', 'build_script.dart'),
+      fs.path.join(flutterTools, 'lib', 'src', 'test', 'flutter_platform.dart'),
+      fs.path.join(flutterTools, 'lib', 'src', 'test', 'flutter_web_platform.dart'),
+      fs.path.join(flutterTools, 'lib', 'src', 'test', 'test_wrapper.dart'),
+    ];
+    bool _isNotWhitelisted(FileSystemEntity entity) => whitelistedPaths.every((String path) => path != entity.path);
+
+    for (String dirName in <String>['lib']) {
+      final Iterable<File> files = fs.directory(fs.path.join(flutterTools, dirName))
+        .listSync(recursive: true)
+        .where(_isDartFile)
+        .where(_isNotWhitelisted)
+        .map(_asFile);
+      for (File file in files) {
+        for (String line in file.readAsLinesSync()) {
+          if (line.startsWith(RegExp(r'import.*package:test_api')) &&
+              !line.contains('ignore: test_api_import')) {
+            final String relativePath = fs.path.relative(file.path, from:flutterTools);
+            fail("$relativePath imports 'package:test_api/test_api.dart';");
           }
         }
       }
@@ -83,6 +111,7 @@ void main() {
   test('no unauthorized imports of dart:convert', () {
     final List<String> whitelistedPaths = <String>[
       fs.path.join(flutterTools, 'lib', 'src', 'convert.dart'),
+      fs.path.join(flutterTools, 'lib', 'src', 'base', 'error_handling_file_system.dart'),
     ];
     bool _isNotWhitelisted(FileSystemEntity entity) => whitelistedPaths.every((String path) => path != entity.path);
 

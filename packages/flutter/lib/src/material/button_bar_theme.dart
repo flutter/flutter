@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -20,10 +20,10 @@ import 'theme.dart';
 ///
 /// See also:
 ///
-///   * [ButtonBarTheme], an [InheritedWidget] that propagates the theme down
-///     its subtree.
-///   * [ButtonBar], which uses this to configure itself and its children
-///     button widgets.
+///  * [ButtonBarTheme], an [InheritedWidget] that propagates the theme down
+///    its subtree.
+///  * [ButtonBar], which uses this to configure itself and its children
+///    button widgets.
 class ButtonBarThemeData extends Diagnosticable {
   /// Constructs the set of properties used to configure [ButtonBar] widgets.
   ///
@@ -136,7 +136,7 @@ class ButtonBarThemeData extends Diagnosticable {
       buttonTextTheme: t < 0.5 ? a.buttonTextTheme : b.buttonTextTheme,
       buttonMinWidth: lerpDouble(a?.buttonMinWidth, b?.buttonMinWidth, t),
       buttonHeight: lerpDouble(a?.buttonHeight, b?.buttonHeight, t),
-      buttonPadding: EdgeInsets.lerp(a?.buttonPadding, b?.buttonPadding, t),
+      buttonPadding: EdgeInsetsGeometry.lerp(a?.buttonPadding, b?.buttonPadding, t),
       buttonAlignedDropdown: t < 0.5 ? a.buttonAlignedDropdown : b.buttonAlignedDropdown,
       layoutBehavior: t < 0.5 ? a.layoutBehavior : b.layoutBehavior,
     );
@@ -162,15 +162,15 @@ class ButtonBarThemeData extends Diagnosticable {
       return true;
     if (other.runtimeType != runtimeType)
       return false;
-    final ButtonBarThemeData typedOther = other;
-    return typedOther.alignment == alignment
-        && typedOther.mainAxisSize == mainAxisSize
-        && typedOther.buttonTextTheme == buttonTextTheme
-        && typedOther.buttonMinWidth == buttonMinWidth
-        && typedOther.buttonHeight == buttonHeight
-        && typedOther.buttonPadding == buttonPadding
-        && typedOther.buttonAlignedDropdown == buttonAlignedDropdown
-        && typedOther.layoutBehavior == layoutBehavior;
+    return other is ButtonBarThemeData
+        && other.alignment == alignment
+        && other.mainAxisSize == mainAxisSize
+        && other.buttonTextTheme == buttonTextTheme
+        && other.buttonMinWidth == buttonMinWidth
+        && other.buttonHeight == buttonHeight
+        && other.buttonPadding == buttonPadding
+        && other.buttonAlignedDropdown == buttonAlignedDropdown
+        && other.layoutBehavior == layoutBehavior;
   }
 
   @override

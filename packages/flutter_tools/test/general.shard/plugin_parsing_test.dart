@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -120,6 +120,19 @@ void main() {
       expect(webPlugin.pluginClass, 'WebSamplePlugin');
       expect(webPlugin.fileName, 'web_plugin.dart');
       expect(windowsPlugin.pluginClass, 'WinSamplePlugin');
+    });
+
+    test('Legacy Format and Multi-Platform Format together is not allowed and error message contains plugin name', () {
+      const String pluginYamlRaw = 'androidPackage: com.flutter.dev\n'
+          'platforms:\n'
+          ' android:\n'
+          '  package: com.flutter.dev\n';
+
+      final YamlMap pluginYaml = loadYaml(pluginYamlRaw) as YamlMap;
+      expect(
+        () => Plugin.fromYaml(_kTestPluginName, _kTestPluginPath, pluginYaml, const <String>[]),
+        throwsToolExit(message: _kTestPluginName),
+      );
     });
 
     test('A default_package field is allowed', () {

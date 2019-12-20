@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -41,7 +41,7 @@ class ApplicationPackageFactory {
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x64:
       case TargetPlatform.android_x86:
-        if (androidSdk?.licensesAvailable == true  && androidSdk.latestVersion == null) {
+        if (androidSdk?.licensesAvailable == true  && androidSdk?.latestVersion == null) {
           await checkGradleDependencies();
         }
         return applicationBinary == null
@@ -358,18 +358,21 @@ abstract class IOSApp extends ApplicationPackage {
 }
 
 class BuildableIOSApp extends IOSApp {
-  BuildableIOSApp(this.project, String projectBundleId)
+  BuildableIOSApp(this.project, String projectBundleId, this._hostAppBundleName)
     : super(projectBundleId: projectBundleId);
 
   static Future<BuildableIOSApp> fromProject(IosProject project) async {
     final String projectBundleId = await project.productBundleIdentifier;
-    return BuildableIOSApp(project, projectBundleId);
+    final String hostAppBundleName = await project.hostAppBundleName;
+    return BuildableIOSApp(project, projectBundleId, hostAppBundleName);
   }
 
   final IosProject project;
 
+  final String _hostAppBundleName;
+
   @override
-  String get name => project.hostAppBundleName;
+  String get name => _hostAppBundleName;
 
   @override
   String get simulatorBundlePath => _buildAppPath('iphonesimulator');
@@ -378,7 +381,7 @@ class BuildableIOSApp extends IOSApp {
   String get deviceBundlePath => _buildAppPath('iphoneos');
 
   String _buildAppPath(String type) {
-    return fs.path.join(getIosBuildDirectory(), type, name);
+    return fs.path.join(getIosBuildDirectory(), type, _hostAppBundleName);
   }
 }
 

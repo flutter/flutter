@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -345,6 +345,8 @@ class IOSDevice extends Device {
       if (debuggingOptions.dumpSkpOnShaderCompilation) '--dump-skp-on-shader-compilation',
       if (debuggingOptions.verboseSystemLogs) '--verbose-logging',
       if (debuggingOptions.cacheSkSL) '--cache-sksl',
+      if (debuggingOptions.deviceVmServicePort != null)
+        '--observatory-port=${debuggingOptions.deviceVmServicePort}',
       if (platformArgs['trace-startup'] as bool ?? false) '--trace-startup',
     ];
 
@@ -472,11 +474,11 @@ class IOSDevice extends Device {
   }
 
   @override
-  void dispose() {
+  Future<void> dispose() async {
     _logReaders.forEach((IOSApp application, DeviceLogReader logReader) {
       logReader.dispose();
     });
-    _portForwarder?.dispose();
+    await _portForwarder?.dispose();
   }
 }
 
@@ -578,33 +580,30 @@ class IOSDeviceLogReader extends DeviceLogReader {
   String get name => device.name;
 
   @override
-  List<VMService> get connectedVMServices => _connectedVMServices;
-  List<VMService> _connectedVMServices;
+  VMService get connectedVMService => _connectedVMService;
+  VMService _connectedVMService;
 
   @override
-  set connectedVMServices(List<VMService> connectedVMServices) {
-    _listenToUnifiedLoggingEvents(connectedVMServices);
-    _connectedVMServices = connectedVMServices;
+  set connectedVMService(VMService connectedVmService) {
+    _listenToUnifiedLoggingEvents(connectedVmService);
+    _connectedVMService = connectedVmService;
   }
 
   static const int _minimumUniversalLoggingSdkVersion = 13;
 
-  Future<void> _listenToUnifiedLoggingEvents(List<VMService> vmServices) async {
+  Future<void> _listenToUnifiedLoggingEvents(VMService connectedVmService) async {
     if (device.majorSdkVersion < _minimumUniversalLoggingSdkVersion) {
       return;
     }
-    for (VMService vmService in vmServices) {
-      // The VM service will not publish logging events unless the debug stream is being listened to.
-      // onDebugEvent listens to this stream as a side effect.
-      unawaited(vmService.onDebugEvent);
-      _loggingSubscriptions.add((await vmService.onStdoutEvent).listen((ServiceEvent event) {
-        final String logMessage = event.message;
-        if (logMessage.isNotEmpty) {
-          _linesController.add(logMessage);
-        }
-      }));
-    }
-    _connectedVMServices = connectedVMServices;
+    // The VM service will not publish logging events unless the debug stream is being listened to.
+    // onDebugEvent listens to this stream as a side effect.
+    unawaited(connectedVmService.onDebugEvent);
+    _loggingSubscriptions.add((await connectedVmService.onStdoutEvent).listen((ServiceEvent event) {
+      final String logMessage = event.message;
+      if (logMessage.isNotEmpty) {
+        _linesController.add(logMessage);
+      }
+    }));
   }
 
   void _listenToSysLog () {

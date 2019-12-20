@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -302,7 +302,7 @@ void main() {
       padding: const EdgeInsets.all(10.0),
     );
     layout(paddedBox);
-    final BoxParentData parentData = coloredBox.parentData;
+    final BoxParentData parentData = coloredBox.parentData as BoxParentData;
     expect(parentData.offset.dx, isNot(equals(0.0)));
     paddedBox.child = null;
 
@@ -629,7 +629,7 @@ void main() {
       ),
       alignment: Alignment.center,
     );
-    final FlexParentData flexParentData = flexible.parentData;
+    final FlexParentData flexParentData = flexible.parentData as FlexParentData;
     flexParentData.flex = 1;
     flexParentData.fit = FlexFit.tight;
 
@@ -653,7 +653,7 @@ void main() {
       ),
       alignment: Alignment.center,
     );
-    final FlexParentData flexParentData = flexible.parentData;
+    final FlexParentData flexParentData = flexible.parentData as FlexParentData;
     flexParentData.flex = 1;
     flexParentData.fit = FlexFit.tight;
 

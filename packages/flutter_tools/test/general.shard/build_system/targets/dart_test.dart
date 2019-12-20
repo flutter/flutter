@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -413,10 +413,32 @@ flutter_tools:lib/''');
 
     expect(androidEnvironment.outputDir.childFile('app.so').existsSync(), true);
   }));
+
+  test('kExtraGenSnapshotOptions passes values to gen_snapshot', () => testbed.run(() async {
+    androidEnvironment.defines[kExtraGenSnapshotOptions] = 'foo,bar,baz=2';
+
+    when(genSnapshot.run(
+      snapshotType: anyNamed('snapshotType'),
+      darwinArch: anyNamed('darwinArch'),
+      additionalArgs: captureAnyNamed('additionalArgs'),
+    )).thenAnswer((Invocation invocation) async {
+      expect(invocation.namedArguments[#additionalArgs], containsAll(<String>[
+        'foo',
+        'bar',
+        'baz=2',
+      ]));
+      return 0;
+    });
+
+
+    await const AotElfRelease().build(androidEnvironment);
+  }, overrides: <Type, Generator>{
+    GenSnapshot: () => MockGenSnapshot(),
+  }));
 }
 
 class MockProcessManager extends Mock implements ProcessManager {}
-
+class MockGenSnapshot extends Mock implements GenSnapshot {}
 class MockXcode extends Mock implements Xcode {}
 
 class FakeGenSnapshot implements GenSnapshot {

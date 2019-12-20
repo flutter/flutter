@@ -1,10 +1,10 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 // This file has been automatically generated. Please do not edit it manually.
 // To regenerate run (omit --overwrite to print to console instead of the file):
-// dart --enable-asserts dev/tools/localization/gen_date_localizations.dart --overwrite
+// dart --enable-asserts dev/tools/localization/bin/gen_date_localizations.dart --overwrite
 
 /// The subset of date symbols supported by the intl package which are also
 /// supported by flutter_localizations.

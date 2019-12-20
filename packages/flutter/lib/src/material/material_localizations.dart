@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -31,8 +31,9 @@ import 'typography.dart';
 //    you must add it to every other language (all the other *.arb files in that
 //    same directory), listing the translation as `TBD`. After that you have to
 //    re-generate lib/src/l10n/localizations.dart by running
-//    `dart dev/tools/localization/gen_localizations.dart --overwrite`. There is
-//    a README file with further information in the lib/src/l10n/ directory.
+//    `dart dev/tools/localization/bin/gen_localizations.dart --overwrite`.
+//    There is a README file with further information in the lib/src/l10n/
+//    directory.
 //
 // 5. If you are a Google employee, you should then also follow the instructions
 //    at go/flutter-l10n. If you're not, don't worry about it.
@@ -177,7 +178,7 @@ abstract class MaterialLocalizations {
   /// Defines the localized [TextStyle] geometry for [ThemeData.textTheme].
   ///
   /// The [scriptCategory] defines the overall geometry of a [TextTheme] for
-  /// the static [MaterialTextGeometry.localizedFor] method in terms of the
+  /// the [Typography.geometryThemeFor] method in terms of the
   /// three language categories defined in https://material.io/go/design-typography.
   ///
   /// Generally speaking, font sizes for [ScriptCategory.tall] and
@@ -353,7 +354,7 @@ class _MaterialLocalizationsDelegate extends LocalizationsDelegate<MaterialLocal
 ///
 ///  * [GlobalMaterialLocalizations], which provides material localizations for
 ///    many languages.
-///  * [MaterialApp.delegates], which automatically includes
+///  * [MaterialApp.localizationsDelegates], which automatically includes
 ///    [DefaultMaterialLocalizations.delegate] by default.
 class DefaultMaterialLocalizations implements MaterialLocalizations {
   /// Constructs an object that defines the material widgets' localized strings

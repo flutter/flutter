@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -59,6 +59,45 @@ Future<void> main() async {
         );
       });
 
+      section('Create plugin C without android/ directory');
+
+      final Directory pluginCDirectory = Directory(path.join(tempDir.path, 'plugin_c'));
+      await inDirectory(tempDir, () async {
+        await flutter(
+          'create',
+          options: <String>[
+            '--org',
+            'io.flutter.devicelab.plugin_c',
+            '--template=plugin',
+            pluginCDirectory.path,
+          ],
+        );
+      });
+
+      // https://github.com/flutter/flutter/issues/46898
+      // https://github.com/flutter/flutter/issues/39657
+      File(path.join(pluginCDirectory.path, 'android', 'build.gradle')).deleteSync();
+
+      final File pluginCpubspec = File(path.join(pluginCDirectory.path, 'pubspec.yaml'));
+      await pluginCpubspec.writeAsString('''
+name: plugin_c
+version: 0.0.1
+
+flutter:
+  plugin:
+    platforms:
+      ios:
+        pluginClass: Plugin_cPlugin
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+environment:
+  sdk: ">=2.0.0-dev.28.0 <3.0.0"
+  flutter: ">=1.5.0 <2.0.0"
+''', flush: true);
+
       section('Write dummy Kotlin code in plugin B');
 
       final File pluginBKotlinClass = File(path.join(
@@ -81,17 +120,19 @@ public class DummyPluginBClass {
 }
 ''', flush: true);
 
-      section('Make plugin A depend on plugin B');
+      section('Make plugin A depend on plugin B and plugin C');
 
-      final File pubspec = File(path.join(pluginADirectory.path, 'pubspec.yaml'));
-      String content = await pubspec.readAsString();
-      content = content.replaceFirst(
+      final File pluginApubspec = File(path.join(pluginADirectory.path, 'pubspec.yaml'));
+      String pluginApubspecContent = await pluginApubspec.readAsString();
+      pluginApubspecContent = pluginApubspecContent.replaceFirst(
         '\ndependencies:\n',
         '\ndependencies:\n'
         '  plugin_b:\n'
-        '    path: ${pluginBDirectory.path}\n',
+        '    path: ${pluginBDirectory.path}\n'
+        '  plugin_c:\n'
+        '    path: ${pluginCDirectory.path}\n',
       );
-      await pubspec.writeAsString(content, flush: true);
+      await pluginApubspec.writeAsString(pluginApubspecContent, flush: true);
 
       section('Write Kotlin code in plugin A that references Kotlin code from plugin B');
 
@@ -142,10 +183,14 @@ public class DummyPluginAClass {
           '\"dependencyGraph\":['
             '{'
               '\"name\":\"plugin_a\",'
-              '\"dependencies\":[\"plugin_b\"]'
+              '\"dependencies\":[\"plugin_b\",\"plugin_c\"]'
             '},'
             '{'
               '\"name\":\"plugin_b\",'
+              '\"dependencies\":[]'
+            '},'
+            '{'
+              '\"name\":\"plugin_c\",'
               '\"dependencies\":[]'
             '}'
           ']'

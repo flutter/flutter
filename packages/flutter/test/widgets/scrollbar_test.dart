@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -11,7 +11,7 @@ const Color _kScrollbarColor = Color(0xFF123456);
 const double _kThickness = 2.5;
 const double _kMinThumbExtent = 18.0;
 
-CustomPainter _buildPainter({
+ScrollbarPainter _buildPainter({
   TextDirection textDirection = TextDirection.ltr,
   EdgeInsets padding = EdgeInsets.zero,
   Color color = _kScrollbarColor,
@@ -42,7 +42,7 @@ class _DrawRectOnceCanvas extends Mock implements Canvas { }
 void main() {
   final _DrawRectOnceCanvas testCanvas = _DrawRectOnceCanvas();
   ScrollbarPainter painter;
-  Rect captureRect() => verify(testCanvas.drawRect(captureAny, any)).captured.single;
+  Rect captureRect() => verify(testCanvas.drawRect(captureAny, any)).captured.single as Rect;
 
   tearDown(() => painter = null);
 

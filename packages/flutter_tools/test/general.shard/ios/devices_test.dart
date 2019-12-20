@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -20,6 +20,7 @@ import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/ios/devices.dart';
 import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/ios_workflow.dart';
+import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/mdns_discovery.dart';
 import 'package:flutter_tools/src/project.dart';
@@ -138,7 +139,7 @@ void main() {
         device.setLogReader(appPackage2, logReader2);
         device.portForwarder = portForwarder;
 
-        device.dispose();
+        await device.dispose();
 
         verify(mockProcess1.kill());
         verify(mockProcess2.kill());
@@ -247,6 +248,16 @@ void main() {
         tryToDelete(tempDir);
 
         Cache.enableLocking();
+      });
+
+      testUsingContext('disposing device disposes the portForwarder', () async {
+        final IOSDevice device = IOSDevice('123');
+        device.portForwarder = mockPortForwarder;
+        device.setLogReader(mockApp, mockLogReader);
+        await device.dispose();
+        verify(mockPortForwarder.dispose()).called(1);
+      }, overrides: <Type, Generator>{
+        Platform: () => macPlatform,
       });
 
       testUsingContext('returns failed if the IOSDevice is not found', () async {
@@ -400,7 +411,7 @@ void main() {
         Usage: () => mockUsage,
       });
 
-      testUsingContext(' succeeds in release mode', () async {
+      testUsingContext('succeeds in release mode', () async {
         final IOSDevice device = IOSDevice('123');
         final LaunchResult launchResult = await device.startApp(mockApp,
           prebuiltApplication: true,
@@ -418,7 +429,7 @@ void main() {
         ProcessManager: () => mockProcessManager,
       });
 
-      testUsingContext(' succeeds with --cache-sksl', () async {
+      testUsingContext('succeeds with --cache-sksl', () async {
         final IOSDevice device = IOSDevice('123');
         device.setLogReader(mockApp, mockLogReader);
         final Uri uri = Uri(
@@ -462,11 +473,57 @@ void main() {
         IOSDeploy: () => mockIosDeploy,
       });
 
-      void testNonPrebuilt({
+      testUsingContext('succeeds with --device-vmservice-port', () async {
+        final IOSDevice device = IOSDevice('123');
+        device.setLogReader(mockApp, mockLogReader);
+        final Uri uri = Uri(
+          scheme: 'http',
+          host: '127.0.0.1',
+          port: 1234,
+          path: 'observatory',
+        );
+        when(mockMDnsObservatoryDiscovery.getObservatoryUri(any, any, usesIpv6: anyNamed('usesIpv6')))
+            .thenAnswer((Invocation invocation) => Future<Uri>.value(uri));
+
+        List<String> args;
+        when(mockIosDeploy.runApp(
+          deviceId: anyNamed('deviceId'),
+          bundlePath: anyNamed('bundlePath'),
+          launchArguments: anyNamed('launchArguments'),
+        )).thenAnswer((Invocation inv) {
+          args = inv.namedArguments[const Symbol('launchArguments')] as List<String>;
+          return Future<int>.value(0);
+        });
+
+        final LaunchResult launchResult = await device.startApp(mockApp,
+          prebuiltApplication: true,
+          debuggingOptions: DebuggingOptions.enabled(
+            const BuildInfo(BuildMode.debug, null),
+            deviceVmServicePort: 8181,
+          ),
+          platformArgs: <String, dynamic>{},
+        );
+        expect(launchResult.started, isTrue);
+        expect(args, contains('--observatory-port=8181'));
+        expect(await device.stopApp(mockApp), isFalse);
+      }, overrides: <Type, Generator>{
+        Artifacts: () => mockArtifacts,
+        Cache: () => mockCache,
+        FileSystem: () => mockFileSystem,
+        MDnsObservatoryDiscovery: () => mockMDnsObservatoryDiscovery,
+        Platform: () => macPlatform,
+        ProcessManager: () => mockProcessManager,
+        Usage: () => mockUsage,
+        IOSDeploy: () => mockIosDeploy,
+      });
+
+      void testNonPrebuilt(
+        String name, {
         @required bool showBuildSettingsFlakes,
+        void Function() additionalSetup,
+        void Function() additionalExpectations,
       }) {
-        const String name = ' non-prebuilt succeeds in debug mode';
-        testUsingContext(name + ' flaky: $showBuildSettingsFlakes', () async {
+        testUsingContext('non-prebuilt succeeds in debug mode $name', () async {
           final Directory targetBuildDir =
               projectDir.childDirectory('build/ios/iphoneos/Debug-arm64');
 
@@ -519,19 +576,32 @@ void main() {
           Cache.flutterRoot = '../..';
           final CreateCommand command = CreateCommand();
           final CommandRunner<void> runner = createTestCommandRunner(command);
-          await runner.run(<String>[
-            'create',
-            '--no-pub',
-            projectDir.path,
-          ]);
 
-          final IOSApp app = await AbsoluteBuildableIOSApp.fromProject(
-            FlutterProject.fromDirectory(projectDir).ios);
+          FakeAsync().run((FakeAsync time) {
+            runner.run(<String>[
+              'create',
+              '--no-pub',
+              projectDir.path,
+            ]);
+            time.flushMicrotasks();
+            time.elapse(const Duration(seconds: 65));
+          });
+
+          if (additionalSetup != null) {
+            additionalSetup();
+          }
+
+          final IOSApp app = AbsoluteBuildableIOSApp(
+            FlutterProject.fromDirectory(projectDir).ios,
+            'io.flutter.flutter.app',
+            'My Super Awesome App.app',
+          );
+
           final IOSDevice device = IOSDevice('123');
 
           // Pre-create the expected build products.
           targetBuildDir.createSync(recursive: true);
-          projectDir.childDirectory('build/ios/iphoneos/Runner.app').createSync(recursive: true);
+          projectDir.childDirectory('build/ios/iphoneos/My Super Awesome App.app').createSync(recursive: true);
 
           final Completer<LaunchResult> completer = Completer<LaunchResult>();
           FakeAsync().run((FakeAsync time) {
@@ -550,17 +620,58 @@ void main() {
           expect(launchResult.started, isTrue);
           expect(launchResult.hasObservatory, isFalse);
           expect(await device.stopApp(mockApp), isFalse);
+
+          if (additionalExpectations != null) {
+            additionalExpectations();
+          }
         }, overrides: <Type, Generator>{
           DoctorValidatorsProvider: () => FakeIosDoctorProvider(),
           IMobileDevice: () => mockIMobileDevice,
           IOSDeploy: () => mockIosDeploy,
           Platform: () => macPlatform,
           ProcessManager: () => mockProcessManager,
+          XcodeProjectInterpreter: () => FakeWithBuildSettingsXcodeProjectInterpreter(),
         });
       }
 
-      testNonPrebuilt(showBuildSettingsFlakes: false);
-      testNonPrebuilt(showBuildSettingsFlakes: true);
+      testNonPrebuilt('flaky: false', showBuildSettingsFlakes: false);
+      testNonPrebuilt('flaky: true', showBuildSettingsFlakes: true);
+      testNonPrebuilt('with concurrent build failiure',
+        showBuildSettingsFlakes: false,
+        additionalSetup: () {
+          int callCount = 0;
+          when(mockProcessManager.run(
+            argThat(allOf(
+              contains('xcodebuild'),
+              contains('-configuration'),
+              contains('Debug'),
+            )),
+            workingDirectory: anyNamed('workingDirectory'),
+            environment: anyNamed('environment'),
+          )).thenAnswer((Invocation inv) {
+            // Succeed after 2 calls.
+            if (++callCount > 2) {
+              return Future<ProcessResult>.value(ProcessResult(0, 0, '', ''));
+            }
+            // Otherwise fail with the Xcode concurrent error.
+            return Future<ProcessResult>.value(ProcessResult(
+              0,
+              1,
+              '''
+                "/Developer/Xcode/DerivedData/foo/XCBuildData/build.db":
+                database is locked
+                Possibly there are two concurrent builds running in the same filesystem location.
+                ''',
+              '',
+            ));
+          });
+        },
+        additionalExpectations: () {
+          expect(testLogger.statusText, contains('will retry in 2 seconds'));
+          expect(testLogger.statusText, contains('will retry in 4 seconds'));
+          expect(testLogger.statusText, contains('Xcode build done.'));
+        },
+      );
     });
 
     group('Process calls', () {
@@ -765,11 +876,11 @@ f577a7903cc54959be2e34bc4f7f80b7009efcf4
       when(mockIMobileDevice.startLogger('123456')).thenAnswer((Invocation invocation) {
         final Process mockProcess = MockProcess(
           stdout: Stream<List<int>>.fromIterable(<List<int>>['''
-Runner(Flutter)[297] <Notice>: A is for ari
-Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt MobileGestaltSupport.m:153: pid 123 (Runner) does not have sandbox access for frZQaeyWLUvLjeuEK43hmg and IS NOT appropriately entitled
-Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt MobileGestalt.c:550: no access to InverseDeviceID (see <rdar://problem/11744455>)
-Runner(Flutter)[297] <Notice>: I is for ichigo
-Runner(UIKit)[297] <Notice>: E is for enpitsu"
+My Super Awesome App(Flutter)[297] <Notice>: A is for ari
+My Super Awesome App(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt MobileGestaltSupport.m:153: pid 123 (Runner) does not have sandbox access for frZQaeyWLUvLjeuEK43hmg and IS NOT appropriately entitled
+My Super Awesome App(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt MobileGestalt.c:550: no access to InverseDeviceID (see <rdar://problem/11744455>)
+My Super Awesome App(Flutter)[297] <Notice>: I is for ichigo
+My Super Awesome App(UIKit)[297] <Notice>: E is for enpitsu"
 '''.codeUnits])
         );
         return Future<Process>.value(mockProcess);
@@ -790,11 +901,11 @@ Runner(UIKit)[297] <Notice>: E is for enpitsu"
       when(mockIMobileDevice.startLogger('123456')).thenAnswer((Invocation invocation) {
         final Process mockProcess = MockProcess(
           stdout: Stream<List<int>>.fromIterable(<List<int>>['''
-Runner(Flutter)[297] <Notice>: This is a multi-line message,
+My Super Awesome App(Flutter)[297] <Notice>: This is a multi-line message,
   with another Flutter message following it.
-Runner(Flutter)[297] <Notice>: This is a multi-line message,
+My Super Awesome App(Flutter)[297] <Notice>: This is a multi-line message,
   with a non-Flutter log message following it.
-Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
+My Super Awesome App(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
 '''.codeUnits]),
         );
         return Future<Process>.value(mockProcess);
@@ -863,13 +974,8 @@ flutter:
 }
 
 class AbsoluteBuildableIOSApp extends BuildableIOSApp {
-  AbsoluteBuildableIOSApp(IosProject project, String projectBundleId) :
-    super(project, projectBundleId);
-
-  static Future<AbsoluteBuildableIOSApp> fromProject(IosProject project) async {
-    final String projectBundleId = await project.productBundleIdentifier;
-    return AbsoluteBuildableIOSApp(project, projectBundleId);
-  }
+  AbsoluteBuildableIOSApp(IosProject project, String projectBundleId, String hostAppBundleName) :
+    super(project, projectBundleId, hostAppBundleName);
 
   @override
   String get deviceBundlePath =>
@@ -894,3 +1000,31 @@ class FakeIosDoctorProvider implements DoctorValidatorsProvider {
     return _workflows;
   }
 }
+
+class FakeWithBuildSettingsXcodeProjectInterpreter extends XcodeProjectInterpreter {
+  @override
+  bool get isInstalled => true;
+
+  @override
+  String get versionText => 'Xcode 10.2';
+
+  @override
+  int get majorVersion => 10;
+
+  @override
+  int get minorVersion => 2;
+
+  @override
+  void cleanWorkspace(String workspacePath, String scheme) {
+  }
+
+  @override
+  Future<XcodeProjectInfo> getInfo(String projectPath, {String projectFilename}) async {
+    return XcodeProjectInfo(
+      <String>['Runner'],
+      <String>['Debug', 'Release'],
+      <String>['Runner'],
+    );
+  }
+}
+

@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -36,7 +36,6 @@ Future<void> processPodsIfNeeded(XcodeBasedProject xcodeProject, String buildDir
   final bool didPodInstall = await cocoaPods.processPods(
     xcodeProject: xcodeProject,
     engineDir: flutterFrameworkDir(buildMode),
-    isSwift: await xcodeProject.isSwift,
     dependenciesChanged: !fingerprinter.doesFingerprintMatch(),
   );
   if (didPodInstall) {

@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -15,6 +15,8 @@ import 'platform.dart';
 const int kNetworkProblemExitCode = 50;
 
 typedef HttpClientFactory = HttpClient Function();
+
+typedef UrlTunneller = Future<String> Function(String url);
 
 /// Download a file from the given URL.
 ///

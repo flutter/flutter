@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -44,8 +44,9 @@ class _InputBorderGap extends ChangeNotifier {
       return true;
     if (runtimeType != other.runtimeType)
       return false;
-    final _InputBorderGap typedOther = other;
-    return typedOther.start == start && typedOther.extent == extent;
+    return other is _InputBorderGap
+        && other.start == start
+        && other.extent == extent;
   }
 
   @override
@@ -57,7 +58,7 @@ class _InputBorderTween extends Tween<InputBorder> {
   _InputBorderTween({InputBorder begin, InputBorder end}) : super(begin: begin, end: end);
 
   @override
-  InputBorder lerp(double t) => ShapeBorder.lerp(begin, end, t);
+  InputBorder lerp(double t) => ShapeBorder.lerp(begin, end, t) as InputBorder;
 }
 
 // Passes the _InputBorderGap parameters along to an InputBorder's paint method.
@@ -253,7 +254,7 @@ class _Shaker extends AnimatedWidget {
 
   final Widget child;
 
-  Animation<double> get animation => listenable;
+  Animation<double> get animation => listenable as Animation<double>;
 
   double get translateX {
     const double shakeDelta = 4.0;
@@ -529,24 +530,24 @@ class _Decoration {
       return true;
     if (other.runtimeType != runtimeType)
       return false;
-    final _Decoration typedOther = other;
-    return typedOther.contentPadding == contentPadding
-        && typedOther.floatingLabelHeight == floatingLabelHeight
-        && typedOther.floatingLabelProgress == floatingLabelProgress
-        && typedOther.border == border
-        && typedOther.borderGap == borderGap
-        && typedOther.icon == icon
-        && typedOther.input == input
-        && typedOther.label == label
-        && typedOther.hint == hint
-        && typedOther.prefix == prefix
-        && typedOther.suffix == suffix
-        && typedOther.prefixIcon == prefixIcon
-        && typedOther.suffixIcon == suffixIcon
-        && typedOther.helperError == helperError
-        && typedOther.counter == counter
-        && typedOther.container == container
-        && typedOther.alignLabelWithHint == alignLabelWithHint;
+    return other is _Decoration
+        && other.contentPadding == contentPadding
+        && other.floatingLabelHeight == floatingLabelHeight
+        && other.floatingLabelProgress == floatingLabelProgress
+        && other.border == border
+        && other.borderGap == borderGap
+        && other.icon == icon
+        && other.input == input
+        && other.label == label
+        && other.hint == hint
+        && other.prefix == prefix
+        && other.suffix == suffix
+        && other.prefixIcon == prefixIcon
+        && other.suffixIcon == suffixIcon
+        && other.helperError == helperError
+        && other.counter == counter
+        && other.container == container
+        && other.alignLabelWithHint == alignLabelWithHint;
   }
 
   @override
@@ -897,9 +898,9 @@ class _RenderDecoration extends RenderBox {
 
   static Size _boxSize(RenderBox box) => box == null ? Size.zero : box.size;
 
-  static BoxParentData _boxParentData(RenderBox box) => box.parentData;
+  static BoxParentData _boxParentData(RenderBox box) => box.parentData as BoxParentData;
 
-  EdgeInsets get contentPadding => decoration.contentPadding;
+  EdgeInsets get contentPadding => decoration.contentPadding as EdgeInsets;
 
   // Lay out the given box if needed, and return its baseline.
   double _layoutLineBox(RenderBox box, BoxConstraints constraints) {
@@ -1483,10 +1484,10 @@ class _RenderDecorationElement extends RenderObjectElement {
   final Map<Element, _DecorationSlot> childToSlot = <Element, _DecorationSlot>{};
 
   @override
-  _Decorator get widget => super.widget;
+  _Decorator get widget => super.widget as _Decorator;
 
   @override
-  _RenderDecoration get renderObject => super.renderObject;
+  _RenderDecoration get renderObject => super.renderObject as _RenderDecoration;
 
   @override
   void visitChildren(ElementVisitor visitor) {
@@ -1561,7 +1562,7 @@ class _RenderDecorationElement extends RenderObjectElement {
     _updateChild(widget.decoration.container, _DecorationSlot.container);
   }
 
-  void _updateRenderObject(RenderObject child, _DecorationSlot slot) {
+  void _updateRenderObject(RenderBox child, _DecorationSlot slot) {
     switch (slot) {
       case _DecorationSlot.icon:
         renderObject.icon = child;
@@ -1603,8 +1604,8 @@ class _RenderDecorationElement extends RenderObjectElement {
   void insertChildRenderObject(RenderObject child, dynamic slotValue) {
     assert(child is RenderBox);
     assert(slotValue is _DecorationSlot);
-    final _DecorationSlot slot = slotValue;
-    _updateRenderObject(child, slot);
+    final _DecorationSlot slot = slotValue as _DecorationSlot;
+    _updateRenderObject(child as RenderBox, slot);
     assert(renderObject.childToSlot.keys.contains(child));
     assert(renderObject.slotToChild.keys.contains(slot));
   }
@@ -1787,7 +1788,7 @@ class InputDecorator extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  - [InputDecoration.hoverColor], which is also blended into the focus
+  ///  * [InputDecoration.hoverColor], which is also blended into the focus
   ///    color and fill color when the [isHovering] is true to produce the final
   ///    color.
   final bool isFocused;
@@ -1802,7 +1803,7 @@ class InputDecorator extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  - [InputDecoration.focusColor], which is also blended into the hover
+  ///  * [InputDecoration.focusColor], which is also blended into the hover
   ///    color and fill color when [isFocused] is true to produce the final
   ///    color.
   final bool isHovering;
@@ -2304,6 +2305,94 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 /// to describe their decoration. (In fact, this class is merely the
 /// configuration of an [InputDecorator], which does all the heavy lifting.)
 ///
+/// {@tool snippet --template=stateless_widget_scaffold}
+///
+/// This sample shows how to style a `TextField` using an `InputDecorator`. The
+/// TextField displays a "send message" icon to the left of the input area,
+/// which is surrounded by a border an all sides. It displays the `hintText`
+/// inside the input area to help the user understand what input is required. It
+/// displays the `helperText` and `counterText` below the input area.
+///
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/input_decoration.png)
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return TextField(
+///     decoration: InputDecoration(
+///       icon: Icon(Icons.send),
+///       hintText: 'Hint Text',
+///       helperText: 'Helper Text',
+///       counterText: '0 characters',
+///       border: const OutlineInputBorder(),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
+/// {@tool snippet --template=stateless_widget_scaffold}
+///
+/// This sample shows how to style a "collapsed" `TextField` using an
+/// `InputDecorator`. The collapsed `TextField` surrounds the hint text and
+/// input area with a border, but does not add padding around them.
+///
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/input_decoration_collapsed.png)
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return TextField(
+///     decoration: InputDecoration.collapsed(
+///       hintText: 'Hint Text',
+///       border: OutlineInputBorder(),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
+/// {@tool snippet --template=stateless_widget_scaffold}
+///
+/// This sample shows how to create a `TextField` with hint text, a red border
+/// on all sides, and an error message. To display a red border and error
+/// message, provide `errorText` to the `InputDecoration` constructor.
+///
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/input_decoration_error.png)
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return TextField(
+///     decoration: InputDecoration(
+///       hintText: 'Hint Text',
+///       errorText: 'Error Text',
+///       border: OutlineInputBorder(),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
+/// {@tool snippet --template=stateless_widget_scaffold}
+///
+/// This sample shows how to style a `TextField` with a round border and
+/// additional text before and after the input area. It displays "Prefix" before
+/// the input area, and "Suffix" after the input area.
+///
+/// ![](https://flutter.github.io/assets-for-api-docs/assets/material/input_decoration_prefix_suffix.png)
+///
+/// ```dart
+/// Widget build(BuildContext context) {
+///   return TextFormField(
+///     initialValue: 'abc',
+///     decoration: const InputDecoration(
+///       prefix: Text('Prefix'),
+///       suffix: Text('Suffix'),
+///       border: OutlineInputBorder(),
+///     ),
+///   );
+/// }
+/// ```
+/// {@end-tool}
+///
 /// See also:
 ///
 ///  * [TextField], which is a text input widget that uses an
@@ -2318,7 +2407,7 @@ class InputDecoration {
   /// decorate a Material Design text field.
   ///
   /// Unless specified by [ThemeData.inputDecorationTheme],
-  /// [InputDecorator] defaults [isDense] to true, and [filled] to false,
+  /// [InputDecorator] defaults [isDense] to false, and [filled] to false,
   /// and [maxLines] to 1. The default border is an instance
   /// of [UnderlineInputBorder]. If [border] is [InputBorder.none] then
   /// no border is drawn.
@@ -3105,47 +3194,47 @@ class InputDecoration {
       return true;
     if (other.runtimeType != runtimeType)
       return false;
-    final InputDecoration typedOther = other;
-    return typedOther.icon == icon
-        && typedOther.labelText == labelText
-        && typedOther.labelStyle == labelStyle
-        && typedOther.helperText == helperText
-        && typedOther.helperStyle == helperStyle
-        && typedOther.helperMaxLines == helperMaxLines
-        && typedOther.hintText == hintText
-        && typedOther.hintStyle == hintStyle
-        && typedOther.hintMaxLines == hintMaxLines
-        && typedOther.errorText == errorText
-        && typedOther.errorStyle == errorStyle
-        && typedOther.errorMaxLines == errorMaxLines
-        && typedOther.hasFloatingPlaceholder == hasFloatingPlaceholder
-        && typedOther.isDense == isDense
-        && typedOther.contentPadding == contentPadding
-        && typedOther.isCollapsed == isCollapsed
-        && typedOther.prefixIcon == prefixIcon
-        && typedOther.prefix == prefix
-        && typedOther.prefixText == prefixText
-        && typedOther.prefixStyle == prefixStyle
-        && typedOther.suffixIcon == suffixIcon
-        && typedOther.suffix == suffix
-        && typedOther.suffixText == suffixText
-        && typedOther.suffixStyle == suffixStyle
-        && typedOther.counter == counter
-        && typedOther.counterText == counterText
-        && typedOther.counterStyle == counterStyle
-        && typedOther.filled == filled
-        && typedOther.fillColor == fillColor
-        && typedOther.focusColor == focusColor
-        && typedOther.hoverColor == hoverColor
-        && typedOther.errorBorder == errorBorder
-        && typedOther.focusedBorder == focusedBorder
-        && typedOther.focusedErrorBorder == focusedErrorBorder
-        && typedOther.disabledBorder == disabledBorder
-        && typedOther.enabledBorder == enabledBorder
-        && typedOther.border == border
-        && typedOther.enabled == enabled
-        && typedOther.semanticCounterText == semanticCounterText
-        && typedOther.alignLabelWithHint == alignLabelWithHint;
+    return other is InputDecoration
+        && other.icon == icon
+        && other.labelText == labelText
+        && other.labelStyle == labelStyle
+        && other.helperText == helperText
+        && other.helperStyle == helperStyle
+        && other.helperMaxLines == helperMaxLines
+        && other.hintText == hintText
+        && other.hintStyle == hintStyle
+        && other.hintMaxLines == hintMaxLines
+        && other.errorText == errorText
+        && other.errorStyle == errorStyle
+        && other.errorMaxLines == errorMaxLines
+        && other.hasFloatingPlaceholder == hasFloatingPlaceholder
+        && other.isDense == isDense
+        && other.contentPadding == contentPadding
+        && other.isCollapsed == isCollapsed
+        && other.prefixIcon == prefixIcon
+        && other.prefix == prefix
+        && other.prefixText == prefixText
+        && other.prefixStyle == prefixStyle
+        && other.suffixIcon == suffixIcon
+        && other.suffix == suffix
+        && other.suffixText == suffixText
+        && other.suffixStyle == suffixStyle
+        && other.counter == counter
+        && other.counterText == counterText
+        && other.counterStyle == counterStyle
+        && other.filled == filled
+        && other.fillColor == fillColor
+        && other.focusColor == focusColor
+        && other.hoverColor == hoverColor
+        && other.errorBorder == errorBorder
+        && other.focusedBorder == focusedBorder
+        && other.focusedErrorBorder == focusedErrorBorder
+        && other.disabledBorder == disabledBorder
+        && other.enabledBorder == enabledBorder
+        && other.border == border
+        && other.enabled == enabled
+        && other.semanticCounterText == semanticCounterText
+        && other.alignLabelWithHint == alignLabelWithHint;
   }
 
   @override
@@ -3682,31 +3771,31 @@ class InputDecorationTheme extends Diagnosticable {
       return true;
     if (other.runtimeType != runtimeType)
       return false;
-    final InputDecorationTheme typedOther = other;
-    return typedOther.labelStyle == labelStyle
-        && typedOther.helperStyle == helperStyle
-        && typedOther.helperMaxLines == helperMaxLines
-        && typedOther.hintStyle == hintStyle
-        && typedOther.errorStyle == errorStyle
-        && typedOther.errorMaxLines == errorMaxLines
-        && typedOther.isDense == isDense
-        && typedOther.contentPadding == contentPadding
-        && typedOther.isCollapsed == isCollapsed
-        && typedOther.prefixStyle == prefixStyle
-        && typedOther.suffixStyle == suffixStyle
-        && typedOther.counterStyle == counterStyle
-        && typedOther.filled == filled
-        && typedOther.fillColor == fillColor
-        && typedOther.focusColor == focusColor
-        && typedOther.hoverColor == hoverColor
-        && typedOther.errorBorder == errorBorder
-        && typedOther.focusedBorder == focusedBorder
-        && typedOther.focusedErrorBorder == focusedErrorBorder
-        && typedOther.disabledBorder == disabledBorder
-        && typedOther.enabledBorder == enabledBorder
-        && typedOther.border == border
-        && typedOther.alignLabelWithHint == alignLabelWithHint
-        && typedOther.disabledBorder == disabledBorder;
+    return other is InputDecorationTheme
+        && other.labelStyle == labelStyle
+        && other.helperStyle == helperStyle
+        && other.helperMaxLines == helperMaxLines
+        && other.hintStyle == hintStyle
+        && other.errorStyle == errorStyle
+        && other.errorMaxLines == errorMaxLines
+        && other.isDense == isDense
+        && other.contentPadding == contentPadding
+        && other.isCollapsed == isCollapsed
+        && other.prefixStyle == prefixStyle
+        && other.suffixStyle == suffixStyle
+        && other.counterStyle == counterStyle
+        && other.filled == filled
+        && other.fillColor == fillColor
+        && other.focusColor == focusColor
+        && other.hoverColor == hoverColor
+        && other.errorBorder == errorBorder
+        && other.focusedBorder == focusedBorder
+        && other.focusedErrorBorder == focusedErrorBorder
+        && other.disabledBorder == disabledBorder
+        && other.enabledBorder == enabledBorder
+        && other.border == border
+        && other.alignLabelWithHint == alignLabelWithHint
+        && other.disabledBorder == disabledBorder;
   }
 
   @override

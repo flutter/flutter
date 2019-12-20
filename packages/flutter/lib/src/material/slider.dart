@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -302,7 +302,9 @@ class Slider extends StatefulWidget {
   /// as part of the value indicator shape.
   ///
   /// The label is rendered using the active [ThemeData]'s
-  /// [ThemeData.accentTextTheme.body2] text style.
+  /// [ThemeData.textTheme.body2] text style, with the
+  /// theme data's [ThemeData.colorScheme.onPrimaryColor]. The label's text style
+  /// can be overridden with [SliderThemeData.valueIndicatorTextStyle].
   ///
   /// If null, then the value indicator will not be displayed.
   ///
@@ -502,6 +504,7 @@ class _SliderState extends State<Slider> with TickerProviderStateMixin {
           case TargetPlatform.fuchsia:
             return _buildMaterialSlider(context);
           case TargetPlatform.iOS:
+          case TargetPlatform.macOS:
             return _buildCupertinoSlider(context);
         }
       }
@@ -888,14 +891,15 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   double get _adjustmentUnit {
     switch (_platform) {
       case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
       // Matches iOS implementation of material slider.
         return 0.1;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
-      default:
       // Matches Android implementation of material slider.
         return 0.05;
     }
+    return 0.0;
   }
 
   void _updateLabelPainter() {
@@ -958,7 +962,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
 
   double _discretize(double value) {
-    double result = value.clamp(0.0, 1.0);
+    double result = value.clamp(0.0, 1.0) as double;
     if (isDiscrete) {
       result = (result * divisions).round() / divisions;
     }
@@ -1187,8 +1191,8 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       config.onDecrease = _decreaseAction;
       if (semanticFormatterCallback != null) {
         config.value = semanticFormatterCallback(_state._lerp(value));
-        config.increasedValue = semanticFormatterCallback(_state._lerp((value + _semanticActionUnit).clamp(0.0, 1.0)));
-        config.decreasedValue = semanticFormatterCallback(_state._lerp((value - _semanticActionUnit).clamp(0.0, 1.0)));
+        config.increasedValue = semanticFormatterCallback(_state._lerp((value + _semanticActionUnit).clamp(0.0, 1.0) as double));
+        config.decreasedValue = semanticFormatterCallback(_state._lerp((value - _semanticActionUnit).clamp(0.0, 1.0) as double));
       } else {
         config.value = '${(value * 100).round()}%';
         config.increasedValue = '${((value + _semanticActionUnit).clamp(0.0, 1.0) * 100).round()}%';
@@ -1201,13 +1205,13 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
   void _increaseAction() {
     if (isInteractive) {
-      onChanged((value + _semanticActionUnit).clamp(0.0, 1.0));
+      onChanged((value + _semanticActionUnit).clamp(0.0, 1.0) as double);
     }
   }
 
   void _decreaseAction() {
     if (isInteractive) {
-      onChanged((value - _semanticActionUnit).clamp(0.0, 1.0));
+      onChanged((value - _semanticActionUnit).clamp(0.0, 1.0) as double);
     }
   }
 }

@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -546,14 +546,14 @@ class StrutStyle extends Diagnosticable {
       return true;
     if (other.runtimeType != runtimeType)
       return false;
-    final StrutStyle typedOther = other;
-    return fontFamily == typedOther.fontFamily &&
-           fontSize == typedOther.fontSize &&
-           fontWeight == typedOther.fontWeight &&
-           fontStyle == typedOther.fontStyle &&
-           height == typedOther.height &&
-           leading == typedOther.leading &&
-           forceStrutHeight == typedOther.forceStrutHeight;
+    return other is StrutStyle
+        && other.fontFamily == fontFamily
+        && other.fontSize == fontSize
+        && other.fontWeight == fontWeight
+        && other.fontStyle == fontStyle
+        && other.height == height
+        && other.leading == leading
+        && other.forceStrutHeight == forceStrutHeight;
   }
 
   @override

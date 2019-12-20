@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -37,6 +37,7 @@ const List<Target> _kDefaultTargets = <Target>[
   DebugBundleLinuxAssets(),
   WebReleaseBundle(),
   DebugAndroidApplication(),
+  FastStartAndroidApplication(),
   ProfileAndroidApplication(),
   ReleaseAndroidApplication(),
   // These are one-off rules for bundle and aot compat
@@ -76,6 +77,7 @@ class AssembleCommand extends FlutterCommand {
         'files will be written. Must be either absolute or relative from the '
         'root of the current Flutter project.',
     );
+    argParser.addOption(kExtraGenSnapshotOptions);
     argParser.addOption(
       'resource-pool-size',
       help: 'The maximum number of concurrent tasks the build system will run.',
@@ -149,16 +151,20 @@ class AssembleCommand extends FlutterCommand {
     return result;
   }
 
-  static Map<String, String> _parseDefines(List<String> values) {
+  Map<String, String> _parseDefines(List<String> values) {
     final Map<String, String> results = <String, String>{};
     for (String chunk in values) {
-      final List<String> parts = chunk.split('=');
-      if (parts.length != 2) {
+      final int indexEquals = chunk.indexOf('=');
+      if (indexEquals == -1) {
         throwToolExit('Improperly formatted define flag: $chunk');
       }
-      final String key = parts[0];
-      final String value = parts[1];
+      final String key = chunk.substring(0, indexEquals);
+      final String value = chunk.substring(indexEquals + 1);
       results[key] = value;
+    }
+    // Workaround for extraGenSnapshot formatting.
+    if (argResults.wasParsed(kExtraGenSnapshotOptions)) {
+      results[kExtraGenSnapshotOptions] = argResults[kExtraGenSnapshotOptions] as String;
     }
     return results;
   }

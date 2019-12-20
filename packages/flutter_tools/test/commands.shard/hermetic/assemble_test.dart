@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -28,6 +28,18 @@ void main() {
       });
     final CommandRunner<void> commandRunner = createTestCommandRunner(AssembleCommand());
     await commandRunner.run(<String>['assemble', '-o Output', 'debug_macos_bundle_flutter_assets']);
+
+    expect(testLogger.traceText, contains('build succeeded.'));
+  });
+
+  testbed.test('Can parse defines whose values contain =', () async {
+    when(buildSystem.build(any, any, buildSystemConfig: anyNamed('buildSystemConfig')))
+      .thenAnswer((Invocation invocation) async {
+        expect((invocation.positionalArguments[1] as Environment).defines, containsPair('FooBar', 'fizz=2'));
+        return BuildResult(success: true);
+      });
+    final CommandRunner<void> commandRunner = createTestCommandRunner(AssembleCommand());
+    await commandRunner.run(<String>['assemble', '-o Output', '-dFooBar=fizz=2', 'debug_macos_bundle_flutter_assets']);
 
     expect(testLogger.traceText, contains('build succeeded.'));
   });

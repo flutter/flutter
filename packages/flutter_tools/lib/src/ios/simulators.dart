@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -536,6 +536,16 @@ class IOSSimulator extends Device {
   bool isSupportedForProject(FlutterProject flutterProject) {
     return flutterProject.ios.existsSync();
   }
+
+  @override
+  Future<void> dispose() async {
+    _logReaders?.forEach(
+      (ApplicationPackage application, _IOSSimulatorLogReader logReader) {
+        logReader.dispose();
+      },
+    );
+    await _portForwarder?.dispose();
+  }
 }
 
 /// Launches the device log reader process on the host.
@@ -612,9 +622,8 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
   }
 
   // Match the log prefix (in order to shorten it):
-  // * Xcode 8: Sep 13 15:28:51 cbracken-macpro localhost Runner[37195]: (Flutter) Observatory listening on http://127.0.0.1:57701/
-  // * Xcode 9: 2017-09-13 15:26:57.228948-0700  localhost Runner[37195]: (Flutter) Observatory listening on http://127.0.0.1:57701/
-  static final RegExp _mapRegex = RegExp(r'\S+ +\S+ +\S+ +(\S+ +)?(\S+)\[\d+\]\)?: (\(.*?\))? *(.*)$');
+  // * Xcode 9: 2017-09-13 15:26:57.228948-0700  localhost My App[37195]: (Flutter) Observatory listening on http://127.0.0.1:57701/
+  static final RegExp _mapRegex = RegExp(r'\S+ +\S+ +(?:\S+) (.+?(?=\[))\[\d+\]\)?: (\(.*?\))? *(.*)$');
 
   // Jan 31 19:23:28 --- last message repeated 1 time ---
   static final RegExp _lastMessageSingleRegex = RegExp(r'\S+ +\S+ +\S+ --- last message repeated 1 time ---$');
@@ -625,9 +634,9 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
   String _filterDeviceLine(String string) {
     final Match match = _mapRegex.matchAsPrefix(string);
     if (match != null) {
-      final String category = match.group(2);
-      final String tag = match.group(3);
-      final String content = match.group(4);
+      final String category = match.group(1);
+      final String tag = match.group(2);
+      final String content = match.group(3);
 
       // Filter out non-Flutter originated noise from the engine.
       if (_appName != null && category != _appName) {
@@ -721,6 +730,11 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
     _deviceProcess?.kill();
     _systemProcess?.kill();
   }
+
+  @override
+  void dispose() {
+    _stop();
+  }
 }
 
 int compareIosVersions(String v1, String v2) {
@@ -777,9 +791,7 @@ class _IOSSimulatorDevicePortForwarder extends DevicePortForwarder {
   final List<ForwardedPort> _ports = <ForwardedPort>[];
 
   @override
-  List<ForwardedPort> get forwardedPorts {
-    return _ports;
-  }
+  List<ForwardedPort> get forwardedPorts => _ports;
 
   @override
   Future<int> forward(int devicePort, { int hostPort }) async {
@@ -794,5 +806,12 @@ class _IOSSimulatorDevicePortForwarder extends DevicePortForwarder {
   @override
   Future<void> unforward(ForwardedPort forwardedPort) async {
     _ports.remove(forwardedPort);
+  }
+
+  @override
+  Future<void> dispose() async {
+    for (ForwardedPort port in _ports) {
+      await unforward(port);
+    }
   }
 }

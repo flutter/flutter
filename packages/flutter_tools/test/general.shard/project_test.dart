@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -304,19 +304,12 @@ void main() {
 
       testInMemory('default host app language', () async {
         final FlutterProject project = await someProject();
-        expect(await project.ios.isSwift, isFalse);
         expect(project.android.isKotlin, isFalse);
       });
 
-      testUsingContext('swift and kotlin host app language', () async {
+      testUsingContext('kotlin host app language', () async {
         final FlutterProject project = await someProject();
 
-        when(mockXcodeProjectInterpreter.getBuildSettings(any, any)).thenAnswer(
-          (_) {
-            return Future<Map<String, String>>.value(<String, String>{
-              'SWIFT_VERSION': '5.0',
-            });
-        });
         addAndroidGradleFile(project.directory,
           gradleFileContent: () {
             return '''
@@ -324,7 +317,6 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 ''';
         });
-        expect(await project.ios.isSwift, isTrue);
         expect(project.android.isKotlin, isTrue);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
@@ -413,6 +405,39 @@ apply plugin: 'kotlin-android'
           return projectFileWithBundleId('io.flutter.someProject', qualifier: '\'');
         });
         expect(await project.ios.productBundleIdentifier, 'io.flutter.someProject');
+      });
+    });
+
+    group('application bundle name', () {
+      MemoryFileSystem fs;
+      MockXcodeProjectInterpreter mockXcodeProjectInterpreter;
+      setUp(() {
+        fs = MemoryFileSystem();
+        mockXcodeProjectInterpreter = MockXcodeProjectInterpreter();
+      });
+
+      testUsingContext('app product name defaults to Runner.app', () async {
+        final FlutterProject project = await someProject();
+        expect(await project.ios.hostAppBundleName, 'Runner.app');
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        XcodeProjectInterpreter: () => mockXcodeProjectInterpreter
+      });
+
+      testUsingContext('app product name xcodebuild settings', () async {
+        final FlutterProject project = await someProject();
+        when(mockXcodeProjectInterpreter.getBuildSettings(any, any)).thenAnswer((_) {
+          return Future<Map<String,String>>.value(<String, String>{
+            'FULL_PRODUCT_NAME': 'My App.app'
+          });
+        });
+
+        expect(await project.ios.hostAppBundleName, 'My App.app');
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        XcodeProjectInterpreter: () => mockXcodeProjectInterpreter
       });
     });
 
