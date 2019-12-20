@@ -798,7 +798,7 @@ mixin _PlatformViewGestureMixin on RenderBox {
   /// and apply it to all subsequent move events, but there is no down event
   /// for a hover. To support native hover gesture handling by platform views,
   /// we attach/detach a layer annotation as necessary.
-  Key _hoverAnnotationKey;
+  final LocalKey _hoverAnnotationKey = UniqueKey();
 
   _HandlePointerEvent _handlePointerEvent;
 
@@ -845,7 +845,6 @@ mixin _PlatformViewGestureMixin on RenderBox {
   void attach(PipelineOwner owner) {
     super.attach(owner);
     assert(_hoverAnnotationKey == null);
-    _hoverAnnotationKey = UniqueKey();
     RendererBinding.instance.mouseTracker.attachAnnotation(_hoverAnnotationKey);
   }
 
@@ -853,7 +852,6 @@ mixin _PlatformViewGestureMixin on RenderBox {
   void detach() {
     _gestureRecognizer.reset();
     RendererBinding.instance.mouseTracker.detachAnnotation(_hoverAnnotationKey);
-    _hoverAnnotationKey = null;
     super.detach();
   }
 }
