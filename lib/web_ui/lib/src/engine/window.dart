@@ -155,7 +155,7 @@ class EngineWindow extends ui.Window {
         break;
 
       case 'flutter/textinput':
-        textEditing.handleTextInput(data);
+        textEditing.channel.handleTextInput(data);
         return;
 
       case 'flutter/platform_views':
