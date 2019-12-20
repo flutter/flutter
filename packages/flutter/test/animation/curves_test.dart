@@ -296,25 +296,23 @@ void main() {
   test('CatmullRomCurve interpolates given points correctly', () {
     final CatmullRomCurve curve = CatmullRomCurve(
       const <Offset>[
-        Offset.zero,
         Offset(0.2, 0.25),
         Offset(0.33, 0.25),
         Offset(0.5, 1.0),
         Offset(0.8, 0.75),
-        Offset(1.0, 1.0),
       ],
     );
-//    for (double t = 0; t <= 100; t += 1) {
-//      print('${(t / 100.0).toStringAsFixed(4)}\t${curve.transform(t / 100.0).toStringAsFixed(4)}');
-//    }
-    expect(curve.transform(0.0), closeTo(0.0, 1e-6));
-    expect(curve.transform(0.01), closeTo(0.0128680, 1e-6));
-    expect(curve.transform(0.2), closeTo(0.25, 1e-6));
-    expect(curve.transform(0.33), closeTo(0.25, 1e-5));
-    expect(curve.transform(0.5), closeTo(1.0, 1e-6));
-    expect(curve.transform(0.6), closeTo(0.93575624, 1e-6));
-    expect(curve.transform(0.8), closeTo(0.75, 1e-6));
-    expect(curve.transform(1.0), closeTo(1.0, 1e-6));
+
+    // These values are approximations.
+    const double tolerance = 1e-6;
+    expect(curve.transform(0.0), closeTo(0.0, tolerance));
+    expect(curve.transform(0.01), closeTo(0.012874734350170863, tolerance));
+    expect(curve.transform(0.2), closeTo(0.24989646045277542, tolerance));
+    expect(curve.transform(0.33), closeTo(0.250037698527661, tolerance));
+    expect(curve.transform(0.5), closeTo(0.9999057323235939, tolerance));
+    expect(curve.transform(0.6), closeTo(0.9357294964536621, tolerance));
+    expect(curve.transform(0.8), closeTo(0.7500423402378034, tolerance));
+    expect(curve.transform(1.0), closeTo(1.0, tolerance));
   });
   test('CatmullRomCurve enforces contract', () {
     expect(() {
@@ -370,47 +368,68 @@ void main() {
       );
     }, throwsAssertionError);
 
-    // Angle less than 60 degrees.
+    // Not multi-valued in Y at x=0.0.
     expect(
-        CatmullRomCurve.validateControlPoints(
-          const <Offset>[
-            Offset(0.19, 0.0),
-            Offset(0.2, 0.25),
-            Offset(0.21, 0.0),
-          ],
-          tension: 0.0,
-        ),
-        isFalse);
+      CatmullRomCurve.validateControlPoints(
+        const <Offset>[
+          Offset(0.05, 0.50),
+          Offset(0.50, 0.50),
+          Offset(0.75, 0.75),
+        ],
+        tension: 0.0,
+      ),
+      isFalse,
+    );
     expect(() {
       CatmullRomCurve(
         const <Offset>[
-          Offset(0.19, 0.0),
-          Offset(0.2, 0.25),
-          Offset(0.21, 0.0),
+          Offset(0.05, 0.50),
+          Offset(0.50, 0.50),
+          Offset(0.75, 0.75),
         ],
         tension: 0.0,
       );
     }, throwsAssertionError);
 
-    // Non-adjacent bounding boxes intersect.
+    // Not multi-valued in Y at x=1.0.
     expect(
-        CatmullRomCurve.validateControlPoints(
-          const <Offset>[
-            Offset(0.1, 0.25),
-            Offset(0.39, 0.25),
-            Offset(0.41, 0.27),
-            Offset(0.5, 1.0),
-          ],
-          tension: 0.0,
-        ),
-        isFalse);
+      CatmullRomCurve.validateControlPoints(
+        const <Offset>[
+          Offset(0.25, 0.25),
+          Offset(0.50, 0.50),
+          Offset(0.95, 0.51),
+        ],
+        tension: 0.0,
+      ),
+      isFalse,
+    );
     expect(() {
       CatmullRomCurve(
         const <Offset>[
-          Offset(0.1, 0.25),
-          Offset(0.39, 0.25),
-          Offset(0.41, 0.27),
-          Offset(0.5, 1.0),
+          Offset(0.25, 0.25),
+          Offset(0.50, 0.50),
+          Offset(0.95, 0.51),
+        ],
+        tension: 0.0,
+      );
+    }, throwsAssertionError);
+
+    // Not multi-valued in Y in between x = 0.0 and x = 1.0.
+    expect(
+      CatmullRomCurve.validateControlPoints(
+        const <Offset>[
+          Offset(0.5, 0.05),
+          Offset(0.5, 0.95),
+        ],
+        tension: 0.0,
+      ),
+      isFalse,
+    );
+    expect(() {
+      CatmullRomCurve(
+        const <Offset>[
+          Offset(0.5, 0.05),
+          Offset(0.5, 0.95),
         ],
         tension: 0.0,
       );

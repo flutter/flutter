@@ -6,7 +6,6 @@ import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
-import 'package:vector_math/vector_math.dart' show Vector2;
 
 /// An easing curve, i.e. a mapping of the unit interval to the unit interval.
 ///
@@ -202,6 +201,11 @@ class Threshold extends Curve {
 /// {@animation 464 192 https://flutter.github.io/assets-for-api-docs/assets/animation/curve_ease_in_out.mp4}
 ///
 /// The [Cubic] class implements third-order Bézier curves.
+///
+/// See also:
+///
+///  * [Curves], where many more curves are available.
+///  * [CatmullRomCurve], a curve which passes through specific values.
 class Cubic extends Curve {
   /// Creates a cubic curve.
   ///
@@ -300,10 +304,28 @@ abstract class Curve2D {
   String toString() => '$runtimeType';
 }
 
+/// A class that holds a sample of a 2D curve, containing the X,Y coordinate of
+/// the curve at the parametric value T.
+///
+/// See also:
+///
+///  * [CatmullRomSpline.generateSamples], which generates samples of this type.
 class Curve2DSample {
-  const Curve2DSample(this.t, this.value);
+  /// A const constructor for the sample so that subclasses can be const.
+  ///
+  /// All arguments must not be null.
+  const Curve2DSample(this.t, this.value) : assert(t != null), assert(value != null);
+
+  /// The parametric value of this sample point.
   final double t;
+
+  /// The location of the curve at parametric value [t].
   final Offset value;
+
+  @override
+  String toString() {
+    return '[(${value.dx.toStringAsFixed(2)}, ${value.dy.toStringAsFixed(2)}), ${t.toStringAsFixed(2)}]';
+  }
 }
 
 /// A spline that passes smoothly through the given control points using a
@@ -313,18 +335,22 @@ class Curve2DSample {
 /// smoothly from one control point to the next, passing through the control
 /// points.
 ///
-/// Unlike Bezier splines, Catmull-Rom splines have the advantage that their
-/// curves pass through the control points given to them. They are both cubic
+/// {@template flutter.animation.curves.catmull_rom_description}
+/// Unlike most cubic splines, Catmull-Rom splines have the advantage that their
+/// curves pass through the control points given to them. They are cubic
 /// polynomial representations, and, in fact, Catmull-Rom splines can be
-/// converted mathematically into Bezier splines. This class implements a
+/// converted mathematically into cubic splines. This class implements a
 /// "centripetal" Catmull-Rom spline implementation. The term centripetal
 /// implies that it won't form loops or self-intersections within a single
 /// segment.
+/// {@endtemplate}
 ///
 /// See also:
 ///
 ///  * A Wikipedia article on [centripetal Catmull-Rom splines](https://en.wikipedia.org/wiki/Centripetal_Catmull%E2%80%93Rom_spline).
 ///  * This [paper on using Catmull-Rom splines](http://faculty.cs.tamu.edu/schaefer/research/cr_cad.pdf).
+///  * [CatmullRomCurve], an animation curve that uses a [CatmullRomSpline] as its
+///    representation.
 class CatmullRomSpline extends Curve2D {
   /// Constructs a centripetal Catmull-Rom spline curve.
   ///
@@ -344,23 +370,23 @@ class CatmullRomSpline extends Curve2D {
   /// The `tension` and `points` arguments must not be null, and the `points`
   /// list must contain at least four points to interpolate.
   CatmullRomSpline(
-      List<Offset> points, {
+      List<Offset> controlPoints, {
         double tension = 0.0,
         Offset startHandle,
         Offset endHandle,
-      })  : assert(points != null),
+      })  : assert(controlPoints != null),
         assert(tension != null),
         assert(tension <= 1.0, 'tension $tension must not be greater than 1.0.'),
         assert(tension >= 0.0, 'tension $tension must not be negative.'),
-        assert(points.length > 3, 'There must be at least four points to create a CatmullRom curve.') {
+        assert(controlPoints.length > 3, 'There must be at least four control points to create a CatmullRomSpline.') {
     // If not specified, select the first and last control points (which are
     // handles: they are not intersected by the resulting curve) so that they
     // extend the first and last segments, respectively.
-    startHandle ??= points[0] * 2.0 - points[1];
-    endHandle ??= points.last * 2.0 - points[points.length - 2];
+    startHandle ??= controlPoints[0] * 2.0 - controlPoints[1];
+    endHandle ??= controlPoints.last * 2.0 - controlPoints[controlPoints.length - 2];
     final List<Offset> allPoints = <Offset>[
       startHandle,
-      ...points,
+      ...controlPoints,
       endHandle,
     ];
 
@@ -384,22 +410,22 @@ class CatmullRomSpline extends Curve2D {
       final Offset m2 = (diffCurve21 + (diffCurve32 / t23 - (curve[3] - curve[1]) / (t12 + t23)) * t12) * reverseTension;
       final Offset sumM12 = m1 + m2;
 
-      final List<Offset> controls = <Offset>[
+      final List<Offset> segment = <Offset>[
         diffCurve21 * -2.0 + sumM12,
         diffCurve21 * 3.0 - m1 - sumM12,
         m1,
         curve[1],
       ];
-      _controlPoints.add(controls);
+      _cubicSegments.add(segment);
     }
   }
 
-  final List<List<Offset>> _controlPoints = <List<Offset>>[];
+  final List<List<Offset>> _cubicSegments = <List<Offset>>[];
 
   @override
   Offset transformInternal(double t) {
     assert(t >= 0.0 && t <= 1.0, 'parametric value $t is outside of [0, 1] range.');
-    final double length = _controlPoints.length.toDouble();
+    final double length = _cubicSegments.length.toDouble();
     double position;
     double localT;
     int index;
@@ -410,9 +436,9 @@ class CatmullRomSpline extends Curve2D {
     } else {
       position = length;
       localT = 1.0;
-      index = _controlPoints.length - 1;
+      index = _cubicSegments.length - 1;
     }
-    final List<Offset> controlPoints = _controlPoints[index];
+    final List<Offset> controlPoints = _cubicSegments[index];
     final double localT2 = localT * localT;
     return controlPoints[0] * localT2 * localT
          + controlPoints[1] * localT2
@@ -422,15 +448,36 @@ class CatmullRomSpline extends Curve2D {
 
   /// Generates a list of samples with a recursive subdivision until a tolerance
   /// of `tolerance` is reached.
-  List<Curve2DSample> generateSamples({double tolerance = 1e-10, double start = 0.0, double end = 1.0}) {
+  ///
+  /// The tolerance is computed as the area of a triangle formed by a new point
+  /// and the preceding and following point.
+  ///
+  /// See also:
+  ///
+  ///  * Luiz Henrique de Figueire's Graphics Gem on [the algorithm](http://ariel.chronotext.org/dd/defigueiredo93adaptive.pdf).
+  List<Curve2DSample> generateSamples({double start = 0.0, double end = 1.0, double tolerance = 1e-10}) {
+    // The sampling  algorithm is:
+    // 1. Evaluate the area of the triangle (a proxy for the "flatness" of the
+    //    curve) formed by two points and a test point.
+    // 2. If the area of the triangle is small enough (below tolerance), then
+    //    the two points form the final segment.
+    // 3. If the area is still too large, divide the interval into two parts
+    //    using a random subdivision point to avoid aliasing.
+    // 4. Recursively sample the two parts.
+    //
+    // This algorithm concentrates samples in areas of high curvature.
     assert(tolerance != null);
     assert(start != null);
     assert(end != null);
     assert(end > start);
     final Curve2DSample first = Curve2DSample(start, transform(start));
     final List<Curve2DSample> samples = <Curve2DSample>[first];
-    final math.Random rand = math.Random((_controlPoints[0][1].dx * 1000).round());
-    bool flat(Offset p, Offset q, Offset r) {
+    // We want to pick a random seed that will keep the result stable if
+    // evaluated again, so we use the first non-generated control point.
+    final Offset seedPoint = _cubicSegments[0][1];
+    final math.Random rand = math.Random(((seedPoint.dx + seedPoint.dy) * 10000).round());
+    bool isFlat(Offset p, Offset q, Offset r) {
+      // Calculates the area of the triangle given by the three points.
       final Offset pr = p - r;
       final Offset qr = q - r;
       final double z = pr.dx * qr.dy - qr.dx * pr.dy;
@@ -438,11 +485,12 @@ class CatmullRomSpline extends Curve2D {
     }
 
     void sample(Curve2DSample p, Curve2DSample q) {
-      // Pick a random point somewhat near the center.
-      double t = p.t + (0.45 + 0.1 * rand.nextDouble()) * (q.t - p.t);
+      // Pick a random point somewhat near the center, which avoids aliasing
+      // problems with periodic curves.
+      final double t = p.t + (0.45 + 0.1 * rand.nextDouble()) * (q.t - p.t);
       final Curve2DSample r = Curve2DSample(t, transform(t));
 
-      if (flat(p.value, q.value, r.value)) {
+      if (isFlat(p.value, q.value, r.value)) {
         samples.add(q);
       } else {
         sample(p, r);
@@ -488,20 +536,20 @@ class CatmullRomSpline extends Curve2D {
 /// A curve that passes smoothly through the given control points using a
 /// centripetal Catmull-Rom spline.
 ///
-/// When the curve is evaluated with [transform], the values will interpolate
+/// When this curve is evaluated with [transform], the values will interpolate
 /// smoothly from one control point to the next, passing through (0.0, 0.0), the
-/// given points, and (1.0, 1.0).
+/// given points, and then (1.0, 1.0).
 ///
-/// Unlike [Bezier] curves, Catmull-Rom curves have the advantage that their
-/// curves pass through the control points given to them. They are both cubic
-/// polynomial representations, and, in fact, Catmull-Rom splines can be
-/// converted mathematically into Bezier splines. This class implements a
-/// centripetal Catmull-Rom curve. The term centripetal implies that it won't
-/// form loops or self-intersections within a single segment, and corresponds to
-/// a Catmull-Rom α (alpha) value of 0.5.
+/// {@macro flutter.animation.curves.catmull_rom_description}
+///
+/// This class uses a centripetal Catmull-Rom curve (a [CatmullRomSpline]) as
+/// its internal representation. The term centripetal implies that it won't form
+/// loops or self-intersections within a single segment, and corresponds to a
+/// Catmull-Rom α (alpha) value of 0.5.
 ///
 /// See also:
 ///
+///  * [CatmullRomSpline], the 2D spline that this curve uses to generate its values.
 ///  * A Wikipedia article on [centripetal Catmull-Rom splines](https://en.wikipedia.org/wiki/Centripetal_Catmull%E2%80%93Rom_spline).
 ///  * [new CatmullRomCurve] for a description of the constraints put on the
 ///    input control points.
@@ -510,35 +558,15 @@ class CatmullRomCurve extends Curve {
   /// Constructs a centripetal [CatmullRomCurve].
   ///
   /// It takes a list of two or more points that describe the points that the
-  /// curve must pass through.
+  /// curve must pass through. See [controlPoints] for a description of the
+  /// restrictions placed on control points.
   ///
-  /// The `points` list must meet the following criteria:
-  ///
-  ///  * The `points` and `tension` arguments must not be null.
-  ///  * The list of `points` must contain at least two points.
-  ///  * The X value of each point must be greater than 0.0 and less then 1.0.
-  ///  * The X values of each point must be greater than the
-  ///    previous point's X value (i.e. monotonically increasing).
-  ///  * The angle between two adjacent segments must not be less than 60
-  ///    degrees. As the `tension` increases, this value decreases, and angles of
-  ///    zero degrees are accepted at a tension of 1.0.
-  ///  * The (non-axis-aligned) non-adjacent bounding rectangles, parallel to
-  ///    the control segments of the curve must not overlap.
-  ///
-  /// The static function [validateControlPoints] can be used to check that
-  /// these conditions are met, and will return true if they are. In debug mode,
-  /// it will also optionally return a list of reasons in text form. In debug
-  /// mode, this constructor will assert that these conditions are met and print
-  /// the reasons.
-  ///
-  /// When the curve is evaluated with [transform], the values will interpolate
-  /// smoothly from one control point to the next, passing through (0.0, 0.0), the
-  /// given points, and (1.0, 1.0).
-  ///
-  /// The optional `tension` argument controls how tightly the curve approaches
+  /// The optional [tension] argument controls how tightly the curve approaches
   /// the given `points`. It must be in the range 0.0 to 1.0, inclusive. It
   /// defaults to 0.0, which provides the smoothest curve. A value of 1.0
   /// is equivalent to a linear interpolation between points.
+  ///
+  /// All of the arguments must not be null.
   ///
   /// See also:
   ///
@@ -546,57 +574,75 @@ class CatmullRomCurve extends Curve {
   CatmullRomCurve(this.controlPoints, {this.tension = 0.0})
       : assert(tension != null),
         assert(() {
-          final List<String> reasons = <String>[];
-          final bool valid = validateControlPoints(
+          return validateControlPoints(
             controlPoints,
             tension: tension,
-            reasons: reasons,
+            reasons: _assertReasons..clear(),
           );
-          if (!valid) {
-            debugPrint('Validation of $runtimeType failed:');
-            for (String reason in reasons) {
-              debugPrint('  $reason');
-            }
-          }
-          return valid;
-        }(), 'control points $controlPoints could not be validated.') {
-    _valueSpline = CatmullRomSpline(controlPoints, tension: tension);
-    _precomputedSamples = _valueSpline.generateSamples(start: 0.0, end: 1.0);
-  }
+        }(), 'control points $controlPoints could not be validated:\n  ${_assertReasons.join('\n  ')}'),
+        // Pre-compute samples so that we don't have to evaluate the spline's inverse
+        // all the time in transformInternal.
+        _precomputedSamples = CatmullRomSpline(
+          // Force the first and last control points for the spline to be (0, 0)
+          // and (1, 1), respectively.
+          <Offset>[Offset.zero, ...controlPoints, const Offset(1.0, 1.0)],
+          tension: tension,
+        ).generateSamples(start: 0.0, end: 1.0, tolerance: 1e-12);
 
-  /// The 2D spline created for this curve.
-  CatmullRomSpline get valueSpline => _valueSpline;
-  CatmullRomSpline _valueSpline;
+  /// A static accumulator for assertion failures. Not used in release mode.
+  static final List<String> _assertReasons = <String>[];
+
+  // The precomputed approximation curve, so that evaluation of the curve is
+  // efficient.
+  final List<Curve2DSample> _precomputedSamples;
 
   /// The control points used to create this curve.
+  ///
+  /// The `dx` value of each [Offset] in [controlPoints] represents the
+  /// animation value at which the curve should pass through the `dy` value of
+  /// the same control point.
+  ///
+  /// The [controlPoints] list must meet the following criteria:
+  ///
+  ///  * The `points` and `tension` arguments must not be null.
+  ///  * The list of `points` must contain at least two points.
+  ///  * The X value of each point must be greater than 0.0 and less then 1.0.
+  ///  * The X values of each point must be greater than the
+  ///    previous point's X value (i.e. monotonically increasing). The Y values
+  ///    are not constrained.
+  ///  * The resulting spline must be single-valued in X. That is, for each X
+  ///    value, there must be exactly one Y value. This means that the control
+  ///    points must not generated a spline that loops or overlaps itself.
+  ///
+  /// The static function [validateControlPoints] can be used to check that
+  /// these conditions are met, and will return true if they are. In debug mode,
+  /// it will also optionally return a list of reasons in text form. In debug
+  /// mode, this constructor will assert that these conditions are met and print
+  /// the reasons if the assert fires.
+  ///
+  /// When the curve is evaluated with [transform], the values will interpolate
+  /// smoothly from one control point to the next, passing through (0.0, 0.0), the
+  /// given control points, and (1.0, 1.0).
   final List<Offset> controlPoints;
 
   /// The "tension" of the curve.
   ///
   /// The optional `tension` argument controls how tightly the curve approaches
-  /// the given `points`. It must be in the range 0.0 to 1.0, inclusive. It
+  /// the given [controlPoints]. It must be in the range 0.0 to 1.0, inclusive. It
   /// defaults to 0.0, which provides the smoothest curve. A value of 1.0
-  /// is equivalent to a linear interpolation between points.
+  /// is equivalent to a linear interpolation between control points.
   final double tension;
 
   /// Validates that a given set of control points for a [CatmullRomCurve] is
   /// well-formed and will not produce a spline that self-intersects.
   ///
-  /// This is used in debug mode to validate a curve to make sure that it won't
-  /// violate the contract for a [Curve], in that it be non-self-intersecting
-  /// and single-valued.
+  /// This method is also used in debug mode to validate a curve to make sure
+  /// that it won't violate the contract for the [new CatmullRomCurve]
+  /// constructor.
   ///
-  /// It uses the methodology laid out in [this paper](http://faculty.cs.tamu.edu/schaefer/research/cr_cad.pdf).
-  ///
-  /// First, it calculates the maximum extent bounding boxes of the values that
-  /// the curve can take on, and makes sure that non-adjacent control point
-  /// segments do not have overlapping bounding boxes. Then, for the adjacent
-  /// segments, ensures that they have an angle between them of greater than 60
-  /// degrees. These conditions together ensure that the curve won't be
-  /// self-intersecting.
-  ///
-  /// In debug mode, and `reasons` is non-null, this function will fill in
-  /// `reasons` with descriptions of the problems encountered.
+  /// If in debug mode, and `reasons` is non-null, this function will fill in
+  /// `reasons` with descriptions of the problems encountered. The `reasons`
+  /// argument is ignored in release mode.
   static bool validateControlPoints(
       List<Offset> controlPoints, {
       double tension = 0.0,
@@ -611,30 +657,15 @@ class CatmullRomCurve extends Curve {
       return false;
     }
 
-    if (controlPoints.length < 4) {
+    if (controlPoints.length < 2) {
       assert(() {
-        reasons?.add('There must be at least four points supplied to create a valid curve.');
+        reasons?.add('There must be at least two points supplied to create a valid curve.');
         return true;
       }());
       return false;
     }
 
-    if (controlPoints[0] != Offset.zero) {
-      assert(() {
-        reasons?.add('The first control point must be Offset(0.0, 0.0), not ${controlPoints[0]}.');
-        return true;
-      }());
-      return false;
-    }
-
-    if (controlPoints.last != const Offset(1.0, 1.0)) {
-      assert(() {
-        reasons?.add('The last control point must be Offset(1.0, 1.0), not ${controlPoints[0]}.');
-        return true;
-      }());
-      return false;
-    }
-
+    controlPoints = <Offset>[Offset.zero, ...controlPoints, const Offset(1.0, 1.0)];
     final Offset startHandle = controlPoints[0] * 2.0 - controlPoints[1];
     final Offset endHandle = controlPoints.last * 2.0 - controlPoints[controlPoints.length - 2];
     controlPoints = <Offset>[startHandle, ...controlPoints, endHandle];
@@ -642,7 +673,7 @@ class CatmullRomCurve extends Curve {
     for (int i = 0; i < controlPoints.length; ++i) {
       if (i > 1 && i < controlPoints.length - 2 && (controlPoints[i].dx <= 0.0 || controlPoints[i].dx >= 1.0)) {
         assert(() {
-          reasons?.add('Points must have X values between 0.0 and 1.0, exclusive. '
+          reasons?.add('Control points must have X values between 0.0 and 1.0, exclusive. '
               'Point $i has an x value (${controlPoints[i].dx}) which is outside the range.');
           return true;
         }());
@@ -651,8 +682,8 @@ class CatmullRomCurve extends Curve {
       if (controlPoints[i].dx <= lastX) {
         assert(() {
           reasons?.add('Each X coordinate must be greater than the preceding X coordinate '
-              '(i.e. must be monotonically increasing in X). Point $i has x value of ${controlPoints[i].dx}, '
-              'which is not greater than $lastX');
+              '(i.e. must be monotonically increasing in X). Point $i has an x value of '
+              '${controlPoints[i].dx}, which is not greater than $lastX');
           return true;
         }());
         return false;
@@ -664,22 +695,43 @@ class CatmullRomCurve extends Curve {
 
     // An empirical test to make sure things are single-valued in X.
     lastX = -double.infinity;
+    const double tolerance = 1e-3;
     final CatmullRomSpline testSpline = CatmullRomSpline(controlPoints, tension: tension);
     final double start = testSpline.findInverse(0.0);
     final double end = testSpline.findInverse(1.0);
-    final List<Curve2DSample> adaptivePoints = testSpline.generateSamples(start: start, end: end);
-    for (int i = 0; i < adaptivePoints.length; i++) {
-      final Curve2DSample sample = adaptivePoints[i];
+    final List<Curve2DSample> samplePoints = testSpline.generateSamples(start: start, end: end);
+    /// If the first and last points in the samples aren't at (0,0) or (1,1)
+    /// respectively, then the curve is multi-valued at the ends.
+    if (samplePoints[0].value.dy.abs() > tolerance || (1.0 - samplePoints.last.value.dy).abs() > tolerance) {
+      bool bail = true;
+      success = false;
+      assert(() {
+        reasons?.add('The curve has more than one Y value at X = ${samplePoints[0].value.dx}. '
+            'Try moving some control points further away from this value of X, or increasing '
+            'the tension.');
+        // No need to keep going if we're not giving reasons.
+        bail = reasons == null;
+        return true;
+      }());
+      if (bail) {
+        // If we're not in debug mode, then we want to bail immediately
+        // instead of checking everything else.
+        return false;
+      }
+    }
+    for (int i = 0; i < samplePoints.length; i++) {
+      final Curve2DSample sample = samplePoints[i];
       final Offset point = sample.value;
       final double t = sample.t;
       final double x = point.dx;
       if (t >= start && t <= end && (x < -1e-3 || x > 1.0 + 1e-3)) {
         bool bail = true;
+        success = false;
         assert(() {
-          reasons?.add('The resulting curve has an X value ($x) which is outside of the range [0.0, 1.0], inclusive.');
+          reasons?.add('The resulting curve has an X value ($x) which is outside '
+              'the range [0.0, 1.0], inclusive.');
           // No need to keep going if we're not giving reasons.
           bail = reasons == null;
-          success = false;
           return true;
         }());
         if (bail) {
@@ -690,12 +742,12 @@ class CatmullRomCurve extends Curve {
       }
       if (x < lastX) {
         bool bail = true;
+        success = false;
         assert(() {
           reasons?.add('The curve has more than one Y value at x = $x. Try moving '
             'some control points further apart in X, or increasing the tension.');
           // No need to keep going if we're not giving reasons.
           bail = reasons == null;
-          success = false;
           return true;
         }());
         if (bail) {
@@ -709,10 +761,11 @@ class CatmullRomCurve extends Curve {
     return success;
   }
 
-  List<Curve2DSample> _precomputedSamples;
-
   @override
   double transformInternal(double t) {
+    // Linearly interpolate between the two closest samples generated when the
+    // curve was created.
+
     assert(t != null);
     int start = 0;
     int end = _precomputedSamples.length - 1;
