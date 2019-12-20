@@ -13,6 +13,7 @@
 #include <lib/fit/function.h>
 #include <lib/ui/scenic/cpp/resources.h>
 #include <lib/ui/scenic/cpp/session.h>
+#include <lib/ui/scenic/cpp/view_ref_pair.h>
 
 #include "flutter/flow/compositor_context.h"
 #include "flutter/flow/scene_update_context.h"
@@ -29,6 +30,7 @@ class SessionConnection final {
  public:
   SessionConnection(std::string debug_label,
                     fuchsia::ui::views::ViewToken view_token,
+                    scenic::ViewRefPair view_ref_pair,
                     fidl::InterfaceHandle<fuchsia::ui::scenic::Session> session,
                     fml::closure session_error_callback,
                     zx_handle_t vsync_event_handle);

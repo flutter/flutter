@@ -8,6 +8,7 @@
 #include <fuchsia/ui/scenic/cpp/fidl.h>
 #include <fuchsia/ui/views/cpp/fidl.h>
 #include <lib/fit/function.h>
+#include <lib/ui/scenic/cpp/view_ref_pair.h>
 
 #include "flutter/flow/compositor_context.h"
 #include "flutter/flow/embedded_views.h"
@@ -22,6 +23,7 @@ class CompositorContext final : public flutter::CompositorContext {
  public:
   CompositorContext(std::string debug_label,
                     fuchsia::ui::views::ViewToken view_token,
+                    scenic::ViewRefPair view_ref_pair,
                     fidl::InterfaceHandle<fuchsia::ui::scenic::Session> session,
                     fml::closure session_error_callback,
                     zx_handle_t vsync_event_handle);
@@ -36,6 +38,7 @@ class CompositorContext final : public flutter::CompositorContext {
 
  private:
   const std::string debug_label_;
+  scenic::ViewRefPair view_ref_pair_;
   SessionConnection session_connection_;
 
   // |flutter::CompositorContext|
