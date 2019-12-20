@@ -323,7 +323,6 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
     }
 
     goldens.emptyAuth();
-    goldens.getExpectations();
     return _UnauthorizedFlutterPreSubmitComparator(
       baseDirectory.uri,
       goldens,
@@ -389,12 +388,18 @@ class _UnauthorizedFlutterPreSubmitComparator extends FlutterPreSubmitFileCompar
     await update(golden, imageBytes);
     final File goldenFile = getGoldenFile(golden);
 
-    // If this is a new test, there will not be an expectation
+    // Check for match to existing baseline.
+    if (await skiaClient.imgtestCheck(golden.path, goldenFile))
+      return true;
+
+    // We do not have a matching image, so we need to check a few things
+    // manually. We wait until this point to do this work so request traffic
+    // low.
+    skiaClient.getExpectations();
     final String testName = skiaClient.cleanTestName(golden.path);
     final List<String> testExpectations = skiaClient.expectations[testName];
-    print(testExpectations);
     if (testExpectations == null) {
-      // There is no baseline for this test
+      // This is a new test.
       print('No expectations provided by Skia Gold for test: $golden. '
         'This may be a new test. If this is an unexpected result, check '
         'https://flutter-gold.skia.org.\n'
@@ -402,17 +407,11 @@ class _UnauthorizedFlutterPreSubmitComparator extends FlutterPreSubmitFileCompar
       return true;
     }
 
-    // This is not a new test, so check for matching baseline.
-    final bool checkPassed = await skiaClient.imgtestCheck(golden.path, goldenFile);
-
-    if (checkPassed)
-      return true;
-
     final bool ignoreResult = await skiaClient.testIsIgnoredForPullRequest(
       platform.environment['CIRRUS_PR'] ?? '',
       golden.path,
     );
-
+    // If true, this is an intended change.
     return ignoreResult;
   }
 }
