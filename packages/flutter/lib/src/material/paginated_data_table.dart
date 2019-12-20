@@ -166,12 +166,7 @@ class PaginatedDataTable extends StatefulWidget {
   /// This value defaults to 56.0 to adhere to the Material Design specifications.
   final double columnSpacing;
 
-  /// Whether the widget should display checkboxes for selectable rows.
-  ///
-  /// If true, a [CheckBox] will be placed at the beginning of each row that is
-  /// selectable.
-  ///
-  /// If false, all rows will not display a [CheckBox].
+  /// {@macro flutter.material.dataTable.showCheckboxColumn}
   final bool showCheckboxColumn;
 
   /// The index of the first row to display when the widget is first created.

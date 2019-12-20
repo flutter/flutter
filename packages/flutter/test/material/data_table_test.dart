@@ -102,11 +102,12 @@ void main() {
   testWidgets('DataTable control test - no checkboxes', (WidgetTester tester) async {
     final List<String> log = <String>[];
 
-    Widget buildTable({ int sortColumnIndex, bool sortAscending = true }) {
+    Widget buildTable({ bool checkboxes = false }) {
       return DataTable(
-        sortColumnIndex: sortColumnIndex,
-        sortAscending: sortAscending,
-        showCheckboxColumn: false,
+        showCheckboxColumn: checkboxes,
+        onSelectAll: (bool value) {
+          log.add('select-all: $value');
+        },
         columns: <DataColumn>[
           const DataColumn(
             label: Text('Name'),
@@ -116,9 +117,6 @@ void main() {
             label: const Text('Calories'),
             tooltip: 'Calories',
             numeric: true,
-            onSort: (int columnIndex, bool ascending) {
-              log.add('column-sort: $columnIndex $ascending');
-            },
           ),
         ],
         rows: kDesserts.map<DataRow>((Dessert dessert) {
@@ -153,28 +151,14 @@ void main() {
     expect(log, <String>['row-selected: Cupcake']);
     log.clear();
 
-    await tester.tap(find.text('Calories'));
-
-    expect(log, <String>['column-sort: 1 true']);
-    log.clear();
-
     await tester.pumpWidget(MaterialApp(
-      home: Material(child: buildTable(sortColumnIndex: 1)),
+      home: Material(child: buildTable(checkboxes: true)),
     ));
+
     await tester.pumpAndSettle(const Duration(milliseconds: 200));
-    await tester.tap(find.text('Calories'));
+    await tester.tap(find.byType(Checkbox).first);
 
-    expect(log, <String>['column-sort: 1 false']);
-    log.clear();
-
-    await tester.pumpWidget(MaterialApp(
-      home: Material(child: buildTable(sortColumnIndex: 1, sortAscending: false)),
-    ));
-    await tester.pumpAndSettle(const Duration(milliseconds: 200));
-
-    await tester.tap(find.text('375'));
-
-    expect(log, <String>['cell-tap: 375']);
+    expect(log, <String>['select-all: true']);
     log.clear();
   });
 
