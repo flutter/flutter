@@ -296,10 +296,12 @@ void main() {
   test('CatmullRomCurve interpolates given points correctly', () {
     final CatmullRomCurve curve = CatmullRomCurve(
       const <Offset>[
+        Offset.zero,
         Offset(0.2, 0.25),
         Offset(0.33, 0.25),
         Offset(0.5, 1.0),
         Offset(0.8, 0.75),
+        Offset(1.0, 1.0),
       ],
     );
 //    for (double t = 0; t <= 100; t += 1) {

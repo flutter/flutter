@@ -375,9 +375,9 @@ class CatmullRomSpline extends Curve2D {
       final Offset diffCurve10 = curve[1] - curve[0];
       final Offset diffCurve21 = curve[2] - curve[1];
       final Offset diffCurve32 = curve[3] - curve[2];
-      final double t01 = math.pow(diffCurve10.distance, alpha);
-      final double t12 = math.pow(diffCurve21.distance, alpha);
-      final double t23 = math.pow(diffCurve32.distance, alpha);
+      final double t01 = math.pow(diffCurve10.distance, alpha).toDouble();
+      final double t12 = math.pow(diffCurve21.distance, alpha).toDouble();
+      final double t23 = math.pow(diffCurve32.distance, alpha).toDouble();
       final double reverseTension = 1.0 - tension;
 
       final Offset m1 = (diffCurve21 + (diffCurve10 / t01 - (curve[2] - curve[0]) / (t01 + t12)) * t12) * reverseTension;
@@ -420,11 +420,13 @@ class CatmullRomSpline extends Curve2D {
          + controlPoints[3];
   }
 
-  /// Generates a list of samples with a recursive subdivision until either all
-  /// the points are less than the given `maxDistance` apart, or a recursion
-  /// depth of `maxDepth` is reached.
-  List<Curve2DSample> generateSamples({double maxDistance = 0.01, int maxDepth = 100, double start = 0.0, double end = 1.0}) {
-    const double tolerance = 1e-10;
+  /// Generates a list of samples with a recursive subdivision until a tolerance
+  /// of `tolerance` is reached.
+  List<Curve2DSample> generateSamples({double tolerance = 1e-10, double start = 0.0, double end = 1.0}) {
+    assert(tolerance != null);
+    assert(start != null);
+    assert(end != null);
+    assert(end > start);
     final Curve2DSample first = Curve2DSample(start, transform(start));
     final List<Curve2DSample> samples = <Curve2DSample>[first];
     final math.Random rand = math.Random((_controlPoints[0][1].dx * 1000).round());
@@ -454,7 +456,12 @@ class CatmullRomSpline extends Curve2D {
 
   /// Finds the time that corresponds to the x value of the spline at parametric
   /// value t.
+  ///
+  /// Note that this will only work properly for curves which are single-valued
+  /// in X. For curves that are not single-valued, it will return only one of
+  /// the values.
   double findInverse(double t) {
+    assert(t != null);
     double start = 0.0;
     double end = 1.0;
     double mid;
@@ -476,7 +483,6 @@ class CatmullRomSpline extends Curve2D {
     }
     return mid;
   }
-
 }
 
 /// A curve that passes smoothly through the given control points using a
@@ -553,13 +559,14 @@ class CatmullRomCurve extends Curve {
             }
           }
           return valid;
-        }(), 'control points $controlPoints could not be validated.'),
-        // Synthesize the first and last points to make sure the curve always goes
-        // from (0,0) to (1,1), which is part of the Curve contract.
-        valueSpline = CatmullRomSpline(controlPoints, tension: tension);
+        }(), 'control points $controlPoints could not be validated.') {
+    _valueSpline = CatmullRomSpline(controlPoints, tension: tension);
+    _precomputedSamples = _valueSpline.generateSamples(start: 0.0, end: 1.0);
+  }
 
   /// The 2D spline created for this curve.
-  final CatmullRomSpline valueSpline;
+  CatmullRomSpline get valueSpline => _valueSpline;
+  CatmullRomSpline _valueSpline;
 
   /// The control points used to create this curve.
   final List<Offset> controlPoints;
@@ -660,7 +667,7 @@ class CatmullRomCurve extends Curve {
     final CatmullRomSpline testSpline = CatmullRomSpline(controlPoints, tension: tension);
     final double start = testSpline.findInverse(0.0);
     final double end = testSpline.findInverse(1.0);
-    final List<Curve2DSample> adaptivePoints = testSpline.generateSamples(maxDistance: 0.1, start: start, end: end);
+    final List<Curve2DSample> adaptivePoints = testSpline.generateSamples(start: start, end: end);
     for (int i = 0; i < adaptivePoints.length; i++) {
       final Curve2DSample sample = adaptivePoints[i];
       final Offset point = sample.value;
@@ -702,8 +709,35 @@ class CatmullRomCurve extends Curve {
     return success;
   }
 
+  List<Curve2DSample> _precomputedSamples;
+
   @override
-  double transformInternal(double t) => valueSpline.transform(valueSpline.findInverse(t)).dy;
+  double transformInternal(double t) {
+    assert(t != null);
+    int start = 0;
+    int end = _precomputedSamples.length - 1;
+    int mid;
+    Offset value;
+    Offset startValue = _precomputedSamples[start].value;
+    Offset endValue = _precomputedSamples[end].value;
+    // Use a binary search to find the index of the sample point that is just
+    // before t.
+    while (end - start > 1) {
+      mid = (end + start) ~/ 2;
+      value = _precomputedSamples[mid].value;
+      if (t >= value.dx) {
+        start = mid;
+        startValue = value;
+      } else {
+        end = mid;
+        endValue = value;
+      }
+    }
+
+    // Now interpolate between the found sample and the next one.
+    final double t2 = (t - startValue.dx) / (endValue.dx - startValue.dx);
+    return lerpDouble(startValue.dy, endValue.dy, t2);
+  }
 }
 
 /// A curve that is the reversed inversion of its given curve.
