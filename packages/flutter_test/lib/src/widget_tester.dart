@@ -85,8 +85,8 @@ typedef WidgetTesterCallback = Future<void> Function(WidgetTester widgetTester);
 /// provides convenient widget [Finder]s for use with the
 /// [WidgetTester].
 ///
-/// When the [variants] argument is set, [testWidgets] will run one test for
-/// each value of each variant in [variants]. If [variants] is empty, the test
+/// When the [variant] argument is set, [testWidgets] will run the test once for
+/// each value of the [TestVariant.values]. If [variant] is not set, the test
 /// will be run once using the base test environment.
 ///
 /// See also:
