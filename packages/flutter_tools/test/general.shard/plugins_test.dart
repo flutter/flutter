@@ -23,6 +23,8 @@ void main() {
     MockMacOSProject macosProject;
     MockAndroidProject androidProject;
     MockWebProject webProject;
+    MockWindowsProject windowsProject;
+    MockLinuxProject linuxProject;
     File packagesFile;
     Directory dummyPackageDirectory;
 
@@ -39,18 +41,39 @@ void main() {
       when(iosProject.pluginRegistrantHost).thenReturn(flutterProject.directory.childDirectory('Runner'));
       when(iosProject.podfile).thenReturn(flutterProject.directory.childDirectory('ios').childFile('Podfile'));
       when(iosProject.podManifestLock).thenReturn(flutterProject.directory.childDirectory('ios').childFile('Podfile.lock'));
+      when(iosProject.existsSync()).thenReturn(true);
+      when(iosProject.platformPluginsFile).thenReturn(flutterProject.directory.childDirectory('ios').childDirectory('Flutter').childFile('.flutter-plugins'));
+      when(iosProject.flutterPluginsDependenciesFile).thenReturn(flutterProject.directory.childDirectory('ios').childDirectory('Flutter').childFile('.flutter-plugins-dependencies'));
       macosProject = MockMacOSProject();
       when(flutterProject.macos).thenReturn(macosProject);
       when(macosProject.podfile).thenReturn(flutterProject.directory.childDirectory('macos').childFile('Podfile'));
       when(macosProject.podManifestLock).thenReturn(flutterProject.directory.childDirectory('macos').childFile('Podfile.lock'));
+      when(macosProject.existsSync()).thenReturn(true);
+      when(macosProject.platformPluginsFile).thenReturn(flutterProject.directory.childDirectory('Flutter').childFile('.flutter-plugins'));
+      when(macosProject.flutterPluginsDependenciesFile).thenReturn(flutterProject.directory.childDirectory('macos').childDirectory('Flutter').childFile('.flutter-plugins-dependencies'));
       androidProject = MockAndroidProject();
       when(flutterProject.android).thenReturn(androidProject);
       when(androidProject.pluginRegistrantHost).thenReturn(flutterProject.directory.childDirectory('android').childDirectory('app'));
       when(androidProject.hostAppGradleRoot).thenReturn(flutterProject.directory.childDirectory('android'));
+      when(androidProject.existsSync()).thenReturn(true);
+      when(androidProject.platformPluginsFile).thenReturn(flutterProject.flutterPluginsFile);
+      when(androidProject.flutterPluginsDependenciesFile).thenReturn(flutterProject.flutterPluginsDependenciesFile);
       webProject = MockWebProject();
       when(flutterProject.web).thenReturn(webProject);
       when(webProject.libDirectory).thenReturn(flutterProject.directory.childDirectory('lib'));
       when(webProject.existsSync()).thenReturn(true);
+      when(webProject.platformPluginsFile).thenReturn(flutterProject.directory.childDirectory('web').childFile('.flutter-plugins'));
+      when(webProject.flutterPluginsDependenciesFile).thenReturn(flutterProject.directory.childDirectory('web').childFile('.flutter-plugins-dependencies'));
+      windowsProject = MockWindowsProject();
+      when(flutterProject.windows).thenReturn(windowsProject);
+      when(windowsProject.existsSync()).thenReturn(true);
+      when(windowsProject.platformPluginsFile).thenReturn(flutterProject.directory.childDirectory('flutter').childDirectory('ephemeral').childFile('.flutter-plugins'));
+      when(windowsProject.flutterPluginsDependenciesFile).thenReturn(flutterProject.directory.childDirectory('windows').childDirectory('flutter').childDirectory('ephemeral').childFile('.flutter-plugins-dependencies'));
+      linuxProject = MockLinuxProject();
+      when(flutterProject.linux).thenReturn(linuxProject);
+      when(linuxProject.existsSync()).thenReturn(true);
+      when(linuxProject.platformPluginsFile).thenReturn(flutterProject.directory.childDirectory('flutter').childDirectory('ephemeral').childFile('.flutter-plugins'));
+      when(linuxProject.flutterPluginsDependenciesFile).thenReturn(flutterProject.directory.childDirectory('linux').childDirectory('flutter').childDirectory('ephemeral').childFile('.flutter-plugins-dependencies'));
 
       // Set up a simple .packages file for all the tests to use, pointing to one package.
       dummyPackageDirectory = fs.directory('/pubcache/apackage/lib/');
@@ -67,6 +90,10 @@ void main() {
       platforms:
         ios:
           pluginClass: FLESomePlugin
+        macos:
+          pluginClass: FLESomePlugin
+        web:
+          pluginClass: SomePlugin
   ''');
     }
 
@@ -230,20 +257,52 @@ dependencies:
     group('refreshPlugins', () {
       testUsingContext('Refreshing the plugin list is a no-op when the plugins list stays empty', () {
         refreshPluginsList(flutterProject);
+        // TODO(franciscojma): Remove once legacy support for a root-project-level plugins file is removed.
         expect(flutterProject.flutterPluginsFile.existsSync(), false);
         expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), false);
+
+        expect(flutterProject.ios.platformPluginsFile.existsSync(), false);
+        expect(flutterProject.ios.flutterPluginsDependenciesFile.existsSync(), false);
+        expect(flutterProject.macos.platformPluginsFile.existsSync(), false);
+        expect(flutterProject.macos.flutterPluginsDependenciesFile.existsSync(), false);
+        expect(flutterProject.android.platformPluginsFile.existsSync(), false);
+        expect(flutterProject.android.flutterPluginsDependenciesFile.existsSync(), false);
+        expect(flutterProject.web.platformPluginsFile.existsSync(), false);
+        expect(flutterProject.web.flutterPluginsDependenciesFile.existsSync(), false);
+        expect(flutterProject.windows.platformPluginsFile.existsSync(), false);
+        expect(flutterProject.windows.flutterPluginsDependenciesFile.existsSync(), false);
+        expect(flutterProject.linux.platformPluginsFile.existsSync(), false);
+        expect(flutterProject.linux.flutterPluginsDependenciesFile.existsSync(), false);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
       });
 
       testUsingContext('Refreshing the plugin list deletes the plugin file when there were plugins but no longer are', () {
+        // TODO(franciscojma): Remove once legacy support for a root-project-level plugins file is removed.
         flutterProject.flutterPluginsFile.createSync();
+
         when(iosProject.existsSync()).thenReturn(false);
         when(macosProject.existsSync()).thenReturn(false);
+        when(androidProject.existsSync()).thenReturn(false);
+        when(webProject.existsSync()).thenReturn(false);
+        when(windowsProject.existsSync()).thenReturn(false);
+        when(linuxProject.existsSync()).thenReturn(false);
         refreshPluginsList(flutterProject);
         expect(flutterProject.flutterPluginsFile.existsSync(), false);
         expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), false);
+        expect(iosProject.platformPluginsFile.existsSync(), false);
+        expect(iosProject.flutterPluginsDependenciesFile.existsSync(), false);
+        expect(macosProject.platformPluginsFile.existsSync(), false);
+        expect(macosProject.flutterPluginsDependenciesFile.existsSync(), false);
+        expect(androidProject.platformPluginsFile.existsSync(), false);
+        expect(androidProject.flutterPluginsDependenciesFile.existsSync(), false);
+        expect(webProject.platformPluginsFile.existsSync(), false);
+        expect(webProject.flutterPluginsDependenciesFile.existsSync(), false);
+        expect(windowsProject.platformPluginsFile.existsSync(), false);
+        expect(windowsProject.flutterPluginsDependenciesFile.existsSync(), false);
+        expect(linuxProject.platformPluginsFile.existsSync(), false);
+        expect(linuxProject.flutterPluginsDependenciesFile.existsSync(), false);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -253,9 +312,29 @@ dependencies:
         configureDummyPackageAsPlugin();
         when(iosProject.existsSync()).thenReturn(false);
         when(macosProject.existsSync()).thenReturn(false);
+        when(androidProject.existsSync()).thenReturn(false);
+        when(webProject.existsSync()).thenReturn(false);
+        when(windowsProject.existsSync()).thenReturn(false);
+        when(linuxProject.existsSync()).thenReturn(false);
+
         refreshPluginsList(flutterProject);
+        // TODO(franciscojma): Remove once legacy support for a root-project-level plugins file is removed.
         expect(flutterProject.flutterPluginsFile.existsSync(), true);
         expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), true);
+
+        expect(iosProject.platformPluginsFile.existsSync(), true);
+        expect(iosProject.flutterPluginsDependenciesFile.existsSync(), true);
+        expect(macosProject.platformPluginsFile.existsSync(), true);
+        expect(macosProject.flutterPluginsDependenciesFile.existsSync(), true);
+        expect(androidProject.platformPluginsFile.existsSync(), false);
+        expect(androidProject.flutterPluginsDependenciesFile.existsSync(), false);
+        expect(webProject.platformPluginsFile.existsSync(), true);
+        expect(webProject.flutterPluginsDependenciesFile.existsSync(), true);
+        expect(windowsProject.platformPluginsFile.existsSync(), false);
+        expect(windowsProject.flutterPluginsDependenciesFile.existsSync(), false);
+        expect(linuxProject.platformPluginsFile.existsSync(), false);
+        expect(linuxProject.flutterPluginsDependenciesFile.existsSync(), false);
+
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -623,3 +702,5 @@ class MockIosProject extends Mock implements IosProject {}
 class MockMacOSProject extends Mock implements MacOSProject {}
 class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {}
 class MockWebProject extends Mock implements WebProject {}
+class MockWindowsProject extends Mock implements WindowsProject {}
+class MockLinuxProject extends Mock implements LinuxProject {}
