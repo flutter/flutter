@@ -16,21 +16,52 @@ Future<void> pumpTest(
   bool scrollable = true,
   bool reverse = false,
   ScrollController controller,
+  Widget Function(Widget) wrapper,
 }) async {
+  final Widget scrollview = CustomScrollView(
+    controller: controller,
+    reverse: reverse,
+    physics: scrollable ? null : const NeverScrollableScrollPhysics(),
+    slivers: const <Widget>[
+      SliverToBoxAdapter(child: SizedBox(height: 2000.0)),
+    ],
+  );
+  final Widget child = wrapper == null ? scrollview : wrapper(scrollview);
   await tester.pumpWidget(MaterialApp(
     theme: ThemeData(
       platform: platform,
     ),
-    home: CustomScrollView(
-      controller: controller,
-      reverse: reverse,
-      physics: scrollable ? null : const NeverScrollableScrollPhysics(),
-      slivers: const <Widget>[
-        SliverToBoxAdapter(child: SizedBox(height: 2000.0)),
-      ],
-    ),
+    home: child,
   ));
   await tester.pump(const Duration(seconds: 5)); // to let the theme animate
+}
+
+Future<void> pumpDoubleScrollableTest(
+  WidgetTester tester,
+  TargetPlatform platform, {
+  ScrollController controller,
+  ScrollController controller2,
+}) async {
+  return pumpTest(
+    tester,
+    platform,
+    controller: controller,
+    reverse: false,
+    wrapper: (Widget child) => CustomScrollView(
+      controller: controller2,
+      reverse: false,
+      physics: null,
+      slivers: <Widget>[
+        SliverToBoxAdapter(
+          child: Container(
+            height: 300,
+            child: child,
+          ),
+        ),
+        const SliverToBoxAdapter(child: SizedBox(height: 2000.0)),
+      ],
+    ),
+  );
 }
 
 const double dragOffset = 200.0;
@@ -40,18 +71,18 @@ final LogicalKeyboardKey modifierKey = defaultTargetPlatform == TargetPlatform.m
     : LogicalKeyboardKey.controlLeft;
 
 double getScrollOffset(WidgetTester tester) {
-  final RenderViewport viewport = tester.renderObject(find.byType(Viewport));
+  final RenderViewport viewport = tester.renderObject(find.byType(Viewport).last);
   return viewport.offset.pixels;
 }
 
 double getScrollVelocity(WidgetTester tester) {
-  final RenderViewport viewport = tester.renderObject(find.byType(Viewport));
+  final RenderViewport viewport = tester.renderObject(find.byType(Viewport).last);
   final ScrollPosition position = viewport.offset as ScrollPosition;
   return position.activity.velocity;
 }
 
 void resetScrollOffset(WidgetTester tester) {
-  final RenderViewport viewport = tester.renderObject(find.byType(Viewport));
+  final RenderViewport viewport = tester.renderObject(find.byType(Viewport).last);
   final ScrollPosition position = viewport.offset as ScrollPosition;
   position.jumpTo(0.0);
 }
@@ -241,6 +272,24 @@ void main() {
   testWidgets('Scroll pointer signals are handled', (WidgetTester tester) async {
     await pumpTest(tester, TargetPlatform.fuchsia);
     final Offset scrollEventLocation = tester.getCenter(find.byType(Viewport));
+    final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
+    // Create a hover event so that |testPointer| has a location when generating the scroll.
+    testPointer.hover(scrollEventLocation);
+    final HitTestResult result = tester.hitTestOnBinding(scrollEventLocation);
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)), result);
+    expect(getScrollOffset(tester), 20.0);
+    // Pointer signals should not cause overscroll.
+    await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, -30.0)), result);
+    expect(getScrollOffset(tester), 0.0);
+  });
+
+  testWidgets('Scroll pointer signals are handled when there is competion', (WidgetTester tester) async {
+    // This is a regression test. When there are multiple scrollables listening
+    // to the same event, for example when scrollables are nested, there used
+    // to be exceptions at scrolling events.
+
+    await pumpDoubleScrollableTest(tester, TargetPlatform.fuchsia);
+    final Offset scrollEventLocation = tester.getCenter(find.byType(Viewport).last);
     final TestPointer testPointer = TestPointer(1, ui.PointerDeviceKind.mouse);
     // Create a hover event so that |testPointer| has a location when generating the scroll.
     testPointer.hover(scrollEventLocation);
