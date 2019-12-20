@@ -302,12 +302,16 @@ class IconButton extends StatelessWidget {
     else
       currentColor = disabledColor ?? theme.disabledColor;
 
-    final Offset densityAdjustment = (visualDensity ?? theme.visualDensity).baseSizeAdjustment;
+    final VisualDensity effectiveVisualDensity = visualDensity ?? theme.visualDensity;
+
+    final BoxConstraints unadjustedConstraints = constraints ?? const BoxConstraints(
+      minWidth: _kMinButtonSize,
+      minHeight: _kMinButtonSize,
+    );
+    final BoxConstraints adjustedConstraints = effectiveVisualDensity.effectiveConstraints(unadjustedConstraints);
+
     Widget result = ConstrainedBox(
-      constraints: constraints ?? BoxConstraints(
-        minWidth: _kMinButtonSize + densityAdjustment.dx,
-        minHeight: _kMinButtonSize + densityAdjustment.dy,
-      ),
+      constraints: adjustedConstraints,
       child: Padding(
         padding: padding,
         child: SizedBox(
