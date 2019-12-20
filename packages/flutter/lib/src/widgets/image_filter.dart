@@ -55,6 +55,15 @@ class _ImageFilterRenderObject extends RenderProxyBox {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    layer = context.pushImageFilter(offset, imageFilter, super.paint, oldLayer: layer as ImageFilterLayer);
+    assert(imageFilter != null);
+    if (layer == null) {
+      layer = ImageFilterLayer(imageFilter: imageFilter);
+    } else {
+      final ImageFilterLayer filterLayer = layer as ImageFilterLayer;
+      filterLayer
+        ..imageFilter = imageFilter;
+    }
+    context.pushLayer(layer, super.paint, offset);
+    assert(layer != null);
   }
 }

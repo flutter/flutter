@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:developer';
-import 'dart:ui' as ui show PictureRecorder, ImageFilter;
+import 'dart:ui' as ui show PictureRecorder;
 
 import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
@@ -544,30 +544,6 @@ class PaintingContext extends ClipContext {
     assert(colorFilter != null);
     final ColorFilterLayer layer = oldLayer ?? ColorFilterLayer();
     layer.colorFilter = colorFilter;
-    pushLayer(layer, painter, offset);
-    return layer;
-  }
-
-  /// Blend further painting with an image filter.
-  ///
-  /// {@macro flutter.rendering.object.pushLayer.offset}
-  ///
-  /// The `imageFilter` argument is the [ImageFilter] value to use when blending
-  /// the painting done by `painter`.
-  ///
-  /// The `painter` callback will be called while the `imageFilter` is applied.
-  /// It is called synchronously during the call to [pushImageFilter].
-  ///
-  /// {@macro flutter.rendering.object.oldLayer}
-  ///
-  /// A [RenderObject] that uses this function is very likely to require its
-  /// [RenderObject.alwaysNeedsCompositing] property to return true. That informs
-  /// ancestor render objects that this render object will include a composited
-  /// layer, which, for example, causes them to use composited clips.
-  ImageFilterLayer pushImageFilter(Offset offset, ui.ImageFilter imageFilter, PaintingContextCallback painter, { ImageFilterLayer oldLayer }) {
-    assert(imageFilter != null);
-    final ImageFilterLayer layer = oldLayer ?? ImageFilterLayer();
-    layer.imageFilter = imageFilter;
     pushLayer(layer, painter, offset);
     return layer;
   }
