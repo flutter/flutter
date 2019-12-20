@@ -146,7 +146,7 @@ const String simpleMethodTemplate = '''
 ''';
 
 const String pluralMethodTemplate = '''
-  String @methodName(@methodParameters) {
+  String @methodName(@methodParameters) {@dateFormatting
     return Intl.plural(
       @intlMethodArgs
     );
@@ -363,7 +363,8 @@ String genSimpleMethod(Map<String, dynamic> bundle, String key) {
 String genPluralMethod(Map<String, dynamic> bundle, String key) {
   final Map<String, dynamic> attributesMap = bundle['@$key'] as Map<String, dynamic>;
   assert(attributesMap != null && attributesMap.containsKey('placeholders'));
-  final Iterable<String> placeholders = attributesMap['placeholders'].keys as Iterable<String>;
+  final Map<String, dynamic> placeholdersMap = attributesMap['placeholders'] as Map<String, dynamic>;
+  final Iterable<String> placeholders = placeholdersMap.keys;
 
   // Used to determine which placeholder is the plural count placeholder
   final String resourceValue = bundle[key] as String;
@@ -395,9 +396,14 @@ String genPluralMethod(Map<String, dynamic> bundle, String key) {
     final RegExpMatch match = expRE.firstMatch(message);
     if (match != null && match.groupCount == 2) {
       String argValue = match.group(2);
-      for (String placeholder in placeholders)
-        argValue = argValue.replaceAll('#$placeholder#', '\$$placeholder');
-
+      for (String placeholder in placeholders) {
+        final dynamic value = placeholdersMap[placeholder];
+        if (value is Map<String, dynamic> && _isDateParameter(value)) {
+          argValue = argValue.replaceAll('#$placeholder#', '\$${placeholder}String');
+        } else {
+          argValue = argValue.replaceAll('#$placeholder#', '\$$placeholder');
+        }
+      }
       methodArgs.add("${pluralIds[pluralKey]}: '$argValue'");
     }
   }
@@ -405,6 +411,7 @@ String genPluralMethod(Map<String, dynamic> bundle, String key) {
   return pluralMethodTemplate
     .replaceAll('@methodName', key)
     .replaceAll('@methodParameters', genPluralMethodParameters(bundle, key, countPlaceholder).join(', '))
+    .replaceAll('@dateFormatting', generateDateFormattingLogic(bundle, key))
     .replaceAll('@intlMethodArgs', methodArgs.join(',\n      '));
 }
 
