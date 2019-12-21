@@ -47,8 +47,9 @@ class GalleryVisualDensityValue {
   bool operator ==(dynamic other) {
     if (runtimeType != other.runtimeType)
       return false;
-    final GalleryVisualDensityValue typedOther = other;
-    return visualDensity == typedOther.visualDensity && label == typedOther.label;
+    return other is GalleryVisualDensityValue
+        && visualDensity == other.visualDensity
+        && label == other.label;
   }
 
   @override
