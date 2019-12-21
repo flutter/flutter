@@ -70,7 +70,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Compact'));
     await tester.pumpAndSettle();
-    app = find.byType(MaterialApp).evaluate().first.widget;
+    app = find.byType(MaterialApp).evaluate().first.widget as MaterialApp;
     expect(app.theme.visualDensity, equals(VisualDensity.compact));
 
     await tester.tap(find.byIcon(Icons.arrow_drop_down).at(2));
@@ -80,7 +80,7 @@ void main() {
         matching: find.text('System Default')
     ));
     await tester.pumpAndSettle();
-    app = find.byType(MaterialApp).evaluate().first.widget;
+    app = find.byType(MaterialApp).evaluate().first.widget as MaterialApp;
     expect(app.theme.visualDensity, equals(const VisualDensity()));
 
     // Verify platform settings
