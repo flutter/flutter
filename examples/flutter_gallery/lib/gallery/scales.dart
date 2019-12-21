@@ -36,3 +36,34 @@ const List<GalleryTextScaleValue> kAllGalleryTextScaleValues = <GalleryTextScale
   GalleryTextScaleValue(1.3, 'Large'),
   GalleryTextScaleValue(2.0, 'Huge'),
 ];
+
+class GalleryVisualDensityValue {
+  const GalleryVisualDensityValue(this.visualDensity, this.label);
+
+  final VisualDensity visualDensity;
+  final String label;
+
+  @override
+  bool operator ==(dynamic other) {
+    if (runtimeType != other.runtimeType)
+      return false;
+    final GalleryVisualDensityValue typedOther = other;
+    return visualDensity == typedOther.visualDensity && label == typedOther.label;
+  }
+
+  @override
+  int get hashCode => hashValues(visualDensity, label);
+
+  @override
+  String toString() {
+    return '$runtimeType($label)';
+  }
+
+}
+
+const List<GalleryVisualDensityValue> kAllGalleryVisualDensityValues = <GalleryVisualDensityValue>[
+  GalleryVisualDensityValue(VisualDensity(), 'System Default'),
+  GalleryVisualDensityValue(VisualDensity.comfortable, 'Comfortable'),
+  GalleryVisualDensityValue(VisualDensity.compact, 'Compact'),
+  GalleryVisualDensityValue(VisualDensity(horizontal: -3, vertical: -3), 'Very Compact'),
+];
