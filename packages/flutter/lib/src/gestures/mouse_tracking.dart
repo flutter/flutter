@@ -7,7 +7,6 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:vector_math/vector_math_64.dart';
 
 import 'events.dart';
 import 'pointer_router.dart';
@@ -27,8 +26,6 @@ typedef PointerExitEventListener = void Function(PointerExitEvent event);
 /// Used by [MouseTrackerAnnotation], [MouseRegion] and [RenderMouseRegion].
 typedef PointerHoverEventListener = void Function(PointerHoverEvent event);
 
-typedef PointTransform = Matrix4 Function();
-
 /// The annotation object used to annotate layers that are interested in mouse
 /// movements.
 ///
@@ -36,11 +33,7 @@ typedef PointTransform = Matrix4 Function();
 class MouseTrackerAnnotation {
   /// Creates an annotation that can be used to find layers interested in mouse
   /// movements.
-  const MouseTrackerAnnotation({this.onEnter, this.onHover, this.onExit, this.getTransform});
-
-  /// A function that returns the local transform of the client that this
-  /// annotation is attached to.
-  final PointTransform getTransform;
+  const MouseTrackerAnnotation({this.onEnter, this.onHover, this.onExit});
 
   /// Triggered when a mouse pointer, with or without buttons pressed, has
   /// entered the annotated region.
@@ -463,11 +456,7 @@ class MouseTracker extends ChangeNotifier {
       // trigger may cause exceptions and has safer alternatives. See
       // [MouseRegion.onExit] for details.
       if (annotation.onExit != null && attached) {
-        if (annotation.getTransform != null) {
-          annotation.onExit(PointerExitEvent.fromMouseEvent(unhandledEvent).transformed(annotation.getTransform()..invert()));
-        } else {
-          annotation.onExit(PointerExitEvent.fromMouseEvent(unhandledEvent));
-        }
+        annotation.onExit(PointerExitEvent.fromMouseEvent(unhandledEvent));
       }
     }
 
@@ -475,9 +464,8 @@ class MouseTracker extends ChangeNotifier {
     final Iterable<MouseTrackerAnnotation> enteringAnnotations =
       nextAnnotations.difference(lastAnnotations).toList().reversed;
     for (final MouseTrackerAnnotation annotation in enteringAnnotations) {
+      assert(trackedAnnotations.contains(annotation));
       if (annotation.onEnter != null) {
-        annotation.onEnter(PointerEnterEvent.fromMouseEvent(unhandledEvent).transformed(annotation.getTransform()..invert()));
-      } else {
         annotation.onEnter(PointerEnterEvent.fromMouseEvent(unhandledEvent));
       }
     }
@@ -495,11 +483,7 @@ class MouseTracker extends ChangeNotifier {
         if (!lastAnnotations.contains(annotation)
             || lastHoverPosition != unhandledEvent.position) {
           if (annotation.onHover != null) {
-            if (annotation.getTransform != null) {
-              annotation.onHover(unhandledEvent.transformed(annotation.getTransform()..invert()));
-            } else {
-              annotation.onHover(unhandledEvent);
-            }
+            annotation.onHover(unhandledEvent);
           }
         }
       }
