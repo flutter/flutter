@@ -29,6 +29,8 @@ class _TableDemoState extends State<TableDemo> {
         ],
       ),
       body: InteractiveViewer(
+        disableRotation: true,
+        disableScale: true,
         child: _getTable(10, 2),
       ),
     );

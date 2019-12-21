@@ -18,11 +18,14 @@ enum _GestureType {
 
 final GlobalKey _childKey = GlobalKey();
 
-/// This widget allows 2D transform interactions on its child in relation to its
-/// parent. The user can transform the child by dragging to pan or pinching to
-/// zoom and rotate. All event callbacks for GestureDetector are supported, and
-/// the coordinates that are given are untransformed and in relation to the
-/// original position of the child.
+/// A widget that enables pan, zoom, and rotate interactions with its child.
+///
+/// The user can transform the child by dragging to pan or pinching to zoom and
+/// rotate.
+///
+/// All event callbacks for GestureDetector are supported, and the coordinates
+/// that are given are untransformed and in relation to the original position of
+/// the child.
 @immutable
 class InteractiveViewer extends StatelessWidget {
   /// Create an InteractiveViewer.
@@ -371,8 +374,7 @@ class _InteractiveViewerSized extends StatefulWidget {
        assert(transformationController != null);
 
   final Widget child;
-  // TODO(justinmc): This is the size of the viewport, so consider naming it as
-  // such.
+  // The size available to the widget.
   final Size size;
   final GestureTapDownCallback onTapDown;
   final GestureTapUpCallback onTapUp;
@@ -651,15 +653,12 @@ class _InteractiveViewerState extends State<_InteractiveViewerSized> with Ticker
 
       // Wrapping a Widget in an InteractiveViewer does not change how the
       // widget is initially rendered. It should look identical whether or not
-      // the InteractiveViewer is there.
-      // TODO(justinmc): Do I need this ClipRect?
-      child: ClipRect(
-        child: Transform(
-          transform: widget.transformationController.value,
-          child: KeyedSubtree(
-            key: _childKey,
-            child: widget.child,
-          ),
+      // the InteractiveViewer is there, until the transformation is changed.
+      child: Transform(
+        transform: widget.transformationController.value,
+        child: KeyedSubtree(
+          key: _childKey,
+          child: widget.child,
         ),
       ),
     );
@@ -671,8 +670,6 @@ class _InteractiveViewerState extends State<_InteractiveViewerSized> with Ticker
   // orientation/size changes. Currently, if you rotate the screen, the boundary
   // may be off.
   Matrix4 matrixTranslate(Matrix4 matrix, Offset translation) {
-    // TODO(justinmc): Why can I translate the Grid pics when they're smaller
-    // than the screen?
     if (widget.disableTranslation || translation == Offset.zero) {
       return matrix;
     }
@@ -701,37 +698,29 @@ class _InteractiveViewerState extends State<_InteractiveViewerSized> with Ticker
       translation.dx,
       translation.dy,
     );
-    final Offset nextTranslation = _getMatrixTranslation(nextMatrix);
-    if (translationBoundaries.contains(nextTranslation)) {
+    final Offset nextTotalTranslation = _getMatrixTranslation(nextMatrix);
+    if (translationBoundaries.contains(nextTotalTranslation)) {
       return nextMatrix;
     }
 
-    // x and y translation together doesn't fit, but does just x?
-    if (translationBoundaries.left <= nextTranslation.dx
-      && translationBoundaries.right >= nextTranslation.dx) {
-      return matrix.clone()..translate(
-        translation.dx,
-        0.0,
-      );
-    }
-
-    // Neither of above fit, so try if just y translation fits.
-    if (translationBoundaries.top <= nextTranslation.dy
-      && translationBoundaries.bottom >= nextTranslation.dy) {
-      return matrix.clone()..translate(
-        0.0,
-        translation.dy,
-      );
-    }
-
-    // Nothing fits, so return the unmodified original matrix.
-    return matrix;
+    // Translation goes out of bounds, so translate to the nearest in-bounds
+    // point.
+    // TODO(justinmc): This is buggy after rotation.
+    final Offset currentTotalTranslation = _getMatrixTranslation(matrix);
+    return matrix.clone()..translate(
+      (nextTotalTranslation.dx.clamp(
+        translationBoundaries.left,
+        translationBoundaries.right,
+      ) - currentTotalTranslation.dx) / scale,
+      (nextTotalTranslation.dy.clamp(
+        translationBoundaries.top,
+        translationBoundaries.bottom,
+      ) - currentTotalTranslation.dy) / scale,
+    );
   }
 
   // Return a new matrix representing the given matrix after applying the given
   // scale transform.
-  // TODO(justinmc): This needs to allow scaling in one direction even if the
-  // other direction is blocked. Similar to matrixTranslate.
   Matrix4 matrixScale(Matrix4 matrix, double scale) {
     if (widget.disableScale || scale == 1) {
       return matrix;
@@ -749,27 +738,16 @@ class _InteractiveViewerState extends State<_InteractiveViewerSized> with Ticker
     final double clampedScale = clampedTotalScale / currentScale;
     final Matrix4 nextMatrix = matrix.clone()..scale(clampedScale);
 
-    // Don't allow a scale that moves the viewport outside of _boundaryRect.
-    // Add 1 pixel because Rect.contains excludes its bottom and right edges.
-    final Rect boundaryRect = Rect.fromLTRB(
-      _boundaryRect.left,
-      _boundaryRect.top,
-      _boundaryRect.right + 1.0,
-      _boundaryRect.bottom + 1.0,
+    // Ensure that the scale cannot make the child so big that it can't fit
+    // inside the boundaries (in either direction).
+    final Size currentViewportSize = widget.size / currentScale;
+    final double minScale = math.max(
+      widget.size.width / _boundaryRect.width,
+      widget.size.height / _boundaryRect.height,
     );
-    // TODO(justinmc): This needs to be updated to use childSize too I think.
-    final Offset tl = fromViewport(const Offset(0, 0), nextMatrix);
-    final Offset tr = fromViewport(Offset(widget.size.width, 0), nextMatrix);
-    final Offset bl = fromViewport(Offset(0, widget.size.height), nextMatrix);
-    final Offset br = fromViewport(
-      Offset(widget.size.width, widget.size.height),
-      nextMatrix,
-    );
-    if (!boundaryRect.contains(tl)
-      || !boundaryRect.contains(tr)
-      || !boundaryRect.contains(bl)
-      || !boundaryRect.contains(br)) {
-      return matrix;
+    if (clampedTotalScale < minScale) {
+      final double minCurrentScale = minScale / currentScale;
+      return matrix.clone()..scale(minCurrentScale);
     }
 
     return nextMatrix;
