@@ -168,6 +168,7 @@ void main() {
         home: CustomScrollView(
           slivers: <Widget>[
             CupertinoSliverNavigationBar(
+              largeTitle: Text('Title'),
               backgroundColor: Color(0xF0F9F9F9),
               brightness: Brightness.dark,
             )
@@ -185,6 +186,7 @@ void main() {
         home: CustomScrollView(
           slivers: <Widget>[
             CupertinoSliverNavigationBar(
+              largeTitle: Text('Title'),
               backgroundColor: Color(0xF01D1D1D),
               brightness: Brightness.light,
             )

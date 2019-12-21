@@ -93,11 +93,18 @@ Widget _wrapWithBackground({
 }) {
   Widget result = child;
   if (updateSystemUiOverlay) {
-    final bool darkBackground = backgroundColor.computeLuminance() < 0.179;
-    final SystemUiOverlayStyle overlayStyle = (brightness ??
-        (darkBackground ? Brightness.dark : Brightness.light)) == Brightness.dark
-        ? SystemUiOverlayStyle.light
-        : SystemUiOverlayStyle.dark;
+    final bool isDark = backgroundColor.computeLuminance() < 0.179;
+    final Brightness newBrightness = brightness ?? (isDark ? Brightness.dark : Brightness.light);
+    SystemUiOverlayStyle overlayStyle;
+    switch (newBrightness) {
+      case Brightness.dark:
+        overlayStyle = SystemUiOverlayStyle.light;
+        break;
+      case Brightness.light:
+      default:
+        overlayStyle = SystemUiOverlayStyle.dark;
+        break;
+    }
     result = AnnotatedRegion<SystemUiOverlayStyle>(
       value: overlayStyle,
       sized: true,
@@ -305,9 +312,14 @@ class CupertinoNavigationBar extends StatefulWidget implements ObstructingPrefer
   final Color backgroundColor;
 
   /// {@template flutter.cupertino.navBar.brightness}
-  /// The brightness of the app bar's background color.
+  /// The brightness of the specified [backgroundColor].
   ///
-  /// If this property is null, then depends on relative luminance of [backgroundColor].
+  /// Setting this value changes the style of the system status bar. Typically
+  /// used to increase the contrast ratio of the system status bar over
+  /// [backgroundColor].
+  ///
+  /// If set to null, the value of the property will be inferred from the relative
+  /// luminance of [backgroundColor].
   /// {@endtemplate}
   final Brightness brightness;
 
