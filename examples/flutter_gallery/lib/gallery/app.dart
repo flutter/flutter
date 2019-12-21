@@ -64,7 +64,6 @@ class _GalleryAppState extends State<GalleryApp> {
     _options = GalleryOptions(
       themeMode: ThemeMode.system,
       textScaleFactor: kAllGalleryTextScaleValues[0],
-      visualDensity: kAllGalleryVisualDensityValues[0],
       timeDilation: timeDilation,
       platform: defaultTargetPlatform,
     );
@@ -141,8 +140,8 @@ class _GalleryAppState extends State<GalleryApp> {
     return ScopedModel<AppStateModel>(
       model: model,
       child: MaterialApp(
-        theme: kLightGalleryTheme.copyWith(platform: _options.platform, visualDensity: _options.visualDensity.visualDensity),
-        darkTheme: kDarkGalleryTheme.copyWith(platform: _options.platform, visualDensity: _options.visualDensity.visualDensity),
+        theme: kLightGalleryTheme.copyWith(platform: _options.platform),
+        darkTheme: kDarkGalleryTheme.copyWith(platform: _options.platform),
         themeMode: _options.themeMode,
         title: 'Flutter Gallery',
         color: Colors.grey,
