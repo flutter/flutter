@@ -1555,8 +1555,8 @@ class ImageFilterLayer extends ContainerLayer {
   /// The [imageFilter] property must be non-null before the compositing phase
   /// of the pipeline.
   ImageFilterLayer({
-                     ui.ImageFilter imageFilter,
-                   }) : _imageFilter = imageFilter;
+    ui.ImageFilter imageFilter,
+  }) : _imageFilter = imageFilter;
 
   /// The image filter to apply to children.
   ///
