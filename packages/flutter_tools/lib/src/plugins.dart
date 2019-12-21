@@ -827,7 +827,7 @@ void refreshPluginsList(FlutterProject project, {bool checkProjects = false}) {
     if (changed) {
       // TODO(stuartmorgan): Potentially add checkProjects once a decision has
       // made about how to handle macOS in existing projects.
-      cocoaPods.invalidatePodInstallOutput(project.ios);
+      cocoaPods.invalidatePodInstallOutput(project.macos);
     }
   }
 }
