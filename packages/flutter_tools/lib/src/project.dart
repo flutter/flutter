@@ -309,7 +309,7 @@ class IosProject implements XcodeBasedProject {
 
   static final RegExp _productBundleIdPattern = RegExp(r'''^\s*PRODUCT_BUNDLE_IDENTIFIER\s*=\s*(["']?)(.*?)\1;\s*$''');
   static const String _productBundleIdVariable = r'$(PRODUCT_BUNDLE_IDENTIFIER)';
-  static const String _hostAppProjectName = 'Runner';
+  static const String _hostAppBundleName = 'Runner';
 
   Directory get ephemeralDirectory => parent.directory.childDirectory('.ios');
   Directory get _editableDirectory => parent.directory.childDirectory('ios');
@@ -329,6 +329,9 @@ class IosProject implements XcodeBasedProject {
   /// This is the same as [hostAppRoot] except when the project is
   /// a Flutter module with an editable host app.
   Directory get _flutterLibRoot => isModule ? ephemeralDirectory : _editableDirectory;
+
+  /// The bundle name of the host app, `Runner.app`.
+  String get hostAppBundleName => '$_hostAppBundleName.app';
 
   /// True, if the parent Flutter project is a module project.
   bool get isModule => parent.isModule;
@@ -352,19 +355,19 @@ class IosProject implements XcodeBasedProject {
   File get podManifestLock => hostAppRoot.childDirectory('Pods').childFile('Manifest.lock');
 
   /// The 'Info.plist' file of the host app.
-  File get hostInfoPlist => hostAppRoot.childDirectory(_hostAppProjectName).childFile('Info.plist');
+  File get hostInfoPlist => hostAppRoot.childDirectory(_hostAppBundleName).childFile('Info.plist');
 
   @override
   Directory get symlinks => _flutterLibRoot.childDirectory('.symlinks');
 
   @override
-  Directory get xcodeProject => hostAppRoot.childDirectory('$_hostAppProjectName.xcodeproj');
+  Directory get xcodeProject => hostAppRoot.childDirectory('$_hostAppBundleName.xcodeproj');
 
   @override
   File get xcodeProjectInfoFile => xcodeProject.childFile('project.pbxproj');
 
   @override
-  Directory get xcodeWorkspace => hostAppRoot.childDirectory('$_hostAppProjectName.xcworkspace');
+  Directory get xcodeWorkspace => hostAppRoot.childDirectory('$_hostAppBundleName.xcworkspace');
 
   /// Xcode workspace shared data directory for the host app.
   Directory get xcodeWorkspaceSharedData => xcodeWorkspace.childDirectory('xcshareddata');
@@ -405,26 +408,6 @@ class IosProject implements XcodeBasedProject {
     return null;
   }
 
-  /// The bundle name of the host app, `My App.app`.
-  Future<String> get hostAppBundleName async {
-    // The product name and bundle name are derived from the display name, which the user
-    // is instructed to change in Xcode as part of deploying to the App Store.
-    // https://flutter.dev/docs/deployment/ios#review-xcode-project-settings
-    // It may be expensive, but the only source of truth for the name is
-    // Xcode's interpretation of the build settings.
-    String productName;
-    if (xcode.xcodeProjectInterpreter.isInstalled) {
-      final Map<String, String> xcodeBuildSettings = await buildSettings;
-      if (xcodeBuildSettings != null) {
-        productName = xcodeBuildSettings['FULL_PRODUCT_NAME'];
-      }
-    }
-    if (productName == null) {
-      printTrace('FULL_PRODUCT_NAME not present, defaulting to $_hostAppProjectName');
-    }
-    return productName ?? '$_hostAppProjectName.app';
-  }
-
   /// The build settings for the host app of this project, as a detached map.
   ///
   /// Returns null, if iOS tooling is unavailable.
@@ -432,16 +415,11 @@ class IosProject implements XcodeBasedProject {
     if (!xcode.xcodeProjectInterpreter.isInstalled) {
       return null;
     }
-    Map<String, String> buildSettings = _buildSettings;
-    buildSettings ??= await xcode.xcodeProjectInterpreter.getBuildSettings(
+    _buildSettings ??= await xcode.xcodeProjectInterpreter.getBuildSettings(
       xcodeProject.path,
-      _hostAppProjectName,
+      _hostAppBundleName,
     );
-    if (buildSettings != null && buildSettings.isNotEmpty) {
-      // No timeouts, flakes, or errors.
-      _buildSettings = buildSettings;
-    }
-    return buildSettings;
+    return _buildSettings;
   }
 
   Map<String, String> _buildSettings;
@@ -520,7 +498,7 @@ class IosProject implements XcodeBasedProject {
   Directory get pluginRegistrantHost {
     return isModule
         ? _flutterLibRoot.childDirectory('Flutter').childDirectory('FlutterPluginRegistrant')
-        : hostAppRoot.childDirectory(_hostAppProjectName);
+        : hostAppRoot.childDirectory(_hostAppBundleName);
   }
 
   void _overwriteFromTemplate(String path, Directory target) {
@@ -781,7 +759,7 @@ class MacOSProject implements XcodeBasedProject {
   @override
   final FlutterProject parent;
 
-  static const String _hostAppProjectName = 'Runner';
+  static const String _hostAppBundleName = 'Runner';
 
   @override
   bool existsSync() => _macOSDirectory.existsSync();
@@ -825,13 +803,13 @@ class MacOSProject implements XcodeBasedProject {
   File get podManifestLock => _macOSDirectory.childDirectory('Pods').childFile('Manifest.lock');
 
   @override
-  Directory get xcodeProject => _macOSDirectory.childDirectory('$_hostAppProjectName.xcodeproj');
+  Directory get xcodeProject => _macOSDirectory.childDirectory('$_hostAppBundleName.xcodeproj');
 
   @override
   File get xcodeProjectInfoFile => xcodeProject.childFile('project.pbxproj');
 
   @override
-  Directory get xcodeWorkspace => _macOSDirectory.childDirectory('$_hostAppProjectName.xcworkspace');
+  Directory get xcodeWorkspace => _macOSDirectory.childDirectory('$_hostAppBundleName.xcworkspace');
 
   @override
   Directory get symlinks => ephemeralDirectory.childDirectory('.symlinks');
