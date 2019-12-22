@@ -20,7 +20,7 @@ import 'transitions.dart';
 /// This is typically used with a [HeroController] to provide an animation for
 /// [Hero] positions that looks nicer than a linear movement. For example, see
 /// [MaterialRectArcTween].
-typedef CreateRectTween = Tween<Rect> Function(Rect begin, Rect end);
+typedef CreateRectTween = Animatable<Rect> Function(Rect begin, Rect end);
 
 /// Signature for a function that builds a [Hero] placeholder widget given a
 /// child and a [Size].
@@ -456,7 +456,7 @@ class _HeroFlight {
 
   final _OnFlightEnded onFlightEnded;
 
-  Tween<Rect> heroRectTween;
+  Animatable<Rect> heroRectTween;
   Widget shuttle;
 
   Animation<double> _heroOpacity = kAlwaysCompleteAnimation;
@@ -465,7 +465,7 @@ class _HeroFlight {
   OverlayEntry overlayEntry;
   bool _aborted = false;
 
-  Tween<Rect> _doCreateRectTween(Rect begin, Rect end) {
+  Animatable<Rect> _doCreateRectTween(Rect begin, Rect end) {
     final CreateRectTween createRectTween = manifest.toHero.widget.createRectTween ?? manifest.createRectTween;
     if (createRectTween != null)
       return createRectTween(begin, end);
@@ -504,9 +504,9 @@ class _HeroFlight {
           // supposed to end up then recreate the heroRect tween.
           final RenderBox finalRouteBox = manifest.toRoute.subtreeContext?.findRenderObject() as RenderBox;
           final Offset toHeroOrigin = toHeroBox.localToGlobal(Offset.zero, ancestor: finalRouteBox);
-          if (toHeroOrigin != heroRectTween.end.topLeft) {
-            final Rect heroRectEnd = toHeroOrigin & heroRectTween.end.size;
-            heroRectTween = _doCreateRectTween(heroRectTween.begin, heroRectEnd);
+          if (toHeroOrigin != heroRectTween.transform(1.0).topLeft) {
+            final Rect heroRectEnd = toHeroOrigin & heroRectTween.transform(1.0).size;
+            heroRectTween = _doCreateRectTween(heroRectTween.transform(0.0), heroRectEnd);
           }
         }
 
@@ -609,7 +609,7 @@ class _HeroFlight {
       // path for swapped begin and end parameters. We want the pop flight
       // path to be the same (in reverse) as the push flight path.
       _proxyAnimation.parent = ReverseAnimation(newManifest.animation);
-      heroRectTween = ReverseTween<Rect>(heroRectTween);
+      heroRectTween = heroRectTween.chain(Tween<double>(begin: 1.0, end: 0.0));
     } else if (manifest.type == HeroFlightDirection.pop && newManifest.type == HeroFlightDirection.push) {
       // A pop flight was interrupted by a push.
       assert(newManifest.animation.status == AnimationStatus.forward);
@@ -626,12 +626,12 @@ class _HeroFlight {
         manifest.fromHero.endFlight(keepPlaceholder: true);
         newManifest.toHero.startFlight();
         heroRectTween = _doCreateRectTween(
-            heroRectTween.end,
+            heroRectTween.transform(1.0),
             _boundingBoxFor(newManifest.toHero.context, newManifest.toRoute.subtreeContext),
         );
       } else {
         // TODO(hansmuller): Use ReverseTween here per github.com/flutter/flutter/pull/12203.
-        heroRectTween = _doCreateRectTween(heroRectTween.end, heroRectTween.begin);
+        heroRectTween = _doCreateRectTween(heroRectTween.transform(1.0), heroRectTween.transform(0.0));
       }
     } else {
       // A push or a pop flight is heading to a new route, i.e.
