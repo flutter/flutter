@@ -637,7 +637,7 @@ void main() {
     (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
         theme: ThemeData(
-          snackBarTheme: const SnackBarThemeData(behavior: SnackBarBehavior.floating,)
+          snackBarTheme: const SnackBarThemeData(behavior: SnackBarBehavior.floating)
         ),
         home: MediaQuery(
           data: const MediaQueryData(
@@ -708,8 +708,8 @@ void main() {
         ),
         child: Scaffold(
           floatingActionButton: FloatingActionButton(
-              child: const Icon(Icons.send),
-              onPressed: () {},
+            child: const Icon(Icons.send),
+            onPressed: () {},
           ),
           body: Builder(
             builder: (BuildContext context) {
@@ -1161,5 +1161,178 @@ void main() {
 
     expect(find.text('hello'), findsOneWidget);
     expect(called, 1);
+  });
+
+  group('SnackBar position', () {
+    for (final SnackBarBehavior behavior in SnackBarBehavior.values) {
+      final SnackBar snackBar = SnackBar(
+        content: const Text('SnackBar text'),
+        behavior: behavior,
+      );
+
+      testWidgets(
+        '$behavior should align SnackBar with the bottom of Scaffold '
+        'when Scaffold has no other elements',
+        (WidgetTester tester) async {
+          await tester.pumpWidget(
+            MaterialApp(
+              home: Scaffold(
+                body: Container(),
+              ),
+            ),
+          );
+
+          final ScaffoldState scaffoldState = tester.state(find.byType(Scaffold));
+          scaffoldState.showSnackBar(snackBar);
+
+          await tester.pumpAndSettle(); // Have the SnackBar fully animate out.
+
+          final Offset snackBarBottomRight = tester.getBottomRight(find.byType(SnackBar));
+          final Offset scaffoldBottomRight = tester.getBottomRight(find.byType(Scaffold));
+
+          expect(snackBarBottomRight, equals(scaffoldBottomRight));
+
+          final Offset snackBarBottomLeft = tester.getBottomLeft(find.byType(SnackBar));
+          final Offset scaffoldBottomLeft = tester.getBottomLeft(find.byType(Scaffold));
+
+          expect(snackBarBottomLeft, equals(scaffoldBottomLeft));
+        },
+      );
+
+      testWidgets(
+        '$behavior should align SnackBar with the top of BottomNavigationBar '
+        'when Scaffold has no FloatingActionButton',
+        (WidgetTester tester) async {
+          final UniqueKey boxKey = UniqueKey();
+          await tester.pumpWidget(
+            MaterialApp(
+              home: Scaffold(
+                body: Container(),
+                bottomNavigationBar: SizedBox(key: boxKey, width: 800, height: 60),
+              ),
+            ),
+          );
+
+          final ScaffoldState scaffoldState = tester.state(find.byType(Scaffold));
+          scaffoldState.showSnackBar(snackBar);
+
+          await tester.pumpAndSettle(); // Have the SnackBar fully animate out.
+
+          final Offset snackBarBottomRight = tester.getBottomRight(find.byType(SnackBar));
+          final Offset bottomNavigationBarTopRight = tester.getTopRight(find.byKey(boxKey));
+
+          expect(snackBarBottomRight, equals(bottomNavigationBarTopRight));
+
+          final Offset snackBarBottomLeft = tester.getBottomLeft(find.byType(SnackBar));
+          final Offset bottomNavigationBarTopLeft = tester.getTopLeft(find.byKey(boxKey));
+
+          expect(snackBarBottomLeft, equals(bottomNavigationBarTopLeft));
+        },
+      );
+    }
+
+    testWidgets(
+      '${SnackBarBehavior.fixed} should align SnackBar with the bottom of Scaffold '
+      'when Scaffold has a FloatingActionButton',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: Container(),
+              floatingActionButton: FloatingActionButton(onPressed: () {}),
+            ),
+          ),
+        );
+
+        final ScaffoldState scaffoldState = tester.state(find.byType(Scaffold));
+        scaffoldState.showSnackBar(
+          const SnackBar(
+            content: Text('Snackbar text'),
+            behavior: SnackBarBehavior.fixed,
+          ),
+        );
+
+        await tester.pumpAndSettle(); // Have the SnackBar fully animate out.
+
+        final Offset snackBarBottomRight = tester.getBottomRight(find.byType(SnackBar));
+        final Offset scaffoldBottomRight = tester.getBottomRight(find.byType(Scaffold));
+
+        expect(snackBarBottomRight, equals(scaffoldBottomRight));
+
+        final Offset snackBarBottomLeft = tester.getBottomLeft(find.byType(SnackBar));
+        final Offset scaffoldBottomLeft = tester.getBottomLeft(find.byType(Scaffold));
+
+        expect(snackBarBottomLeft, equals(scaffoldBottomLeft));
+      },
+    );
+
+    testWidgets(
+      '${SnackBarBehavior.fixed} should align SnackBar with the top of BottomNavigationBar '
+      'when Scaffold has a BottomNavigationBar and FloatingActionButton',
+      (WidgetTester tester) async {
+        final UniqueKey boxKey = UniqueKey();
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: Container(),
+              bottomNavigationBar: SizedBox(key: boxKey, width: 800, height: 60),
+              floatingActionButton: FloatingActionButton(onPressed: () {}),
+            ),
+          ),
+        );
+
+        final ScaffoldState scaffoldState = tester.state(find.byType(Scaffold));
+        scaffoldState.showSnackBar(
+          const SnackBar(
+            content: Text('SnackBar text'),
+            behavior: SnackBarBehavior.fixed,
+          ),
+        );
+
+        await tester.pumpAndSettle(); // Have the SnackBar fully animate out.
+
+        final Offset snackBarBottomRight = tester.getBottomRight(find.byType(SnackBar));
+        final Offset bottomNavigationBarTopRight = tester.getTopRight(find.byKey(boxKey));
+
+        expect(snackBarBottomRight, equals(bottomNavigationBarTopRight));
+
+        final Offset snackBarBottomLeft = tester.getBottomLeft(find.byType(SnackBar));
+        final Offset bottomNavigationBarTopLeft = tester.getTopLeft(find.byKey(boxKey));
+
+        expect(snackBarBottomLeft, equals(bottomNavigationBarTopLeft));
+      },
+    );
+
+    testWidgets(
+      '${SnackBarBehavior.floating} should align SnackBar with the top of FloatingActionButton '
+      'when Scaffold has BottomNavigationBar and FloatingActionButton',
+      (WidgetTester tester) async {
+        final UniqueKey boxKey = UniqueKey();
+        await tester.pumpWidget(
+          MaterialApp(
+            home: Scaffold(
+              body: Container(),
+              bottomNavigationBar: SizedBox(key: boxKey, width: 800, height: 60),
+              floatingActionButton: FloatingActionButton(onPressed: () {}),
+            ),
+          ),
+        );
+
+        final ScaffoldState scaffoldState = tester.state(find.byType(Scaffold));
+        scaffoldState.showSnackBar(
+          const SnackBar(
+            content: Text('SnackBar text'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+
+        await tester.pumpAndSettle(); // Have the SnackBar fully animate out.
+
+        final Offset snackBarBottomRight = tester.getBottomRight(find.byType(SnackBar));
+        final Offset fabTopRight = tester.getTopRight(find.byType(FloatingActionButton));
+
+        expect(snackBarBottomRight.dy, equals(fabTopRight.dy));
+      },
+    );
   });
 }
