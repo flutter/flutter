@@ -1104,10 +1104,9 @@ class TerminalHandler {
 
   void registerSignalHandlers() {
     assert(residentRunner.stayResident);
-
     _addSignalHandler(io.ProcessSignal.SIGINT, _cleanUp);
     _addSignalHandler(io.ProcessSignal.SIGTERM, _cleanUp);
-    if (!residentRunner.supportsServiceProtocol || !residentRunner.supportsRestart) {
+    if ((!residentRunner.canHotReload) && (!residentRunner.canHotRestart  || !residentRunner.hotMode)) {
       return;
     }
     _addSignalHandler(io.ProcessSignal.SIGUSR1, _handleSignal);
