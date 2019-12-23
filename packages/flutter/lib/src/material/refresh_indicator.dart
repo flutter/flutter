@@ -425,10 +425,10 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
     if (_mode == null) {
       assert(_dragOffset == null);
       assert(_isIndicatorAtTop == null);
-      return child;
+    } else {
+      assert(_dragOffset != null);
+      assert(_isIndicatorAtTop != null);
     }
-    assert(_dragOffset != null);
-    assert(_isIndicatorAtTop != null);
 
     final bool showIndeterminateIndicator =
       _mode == _RefreshIndicatorMode.refresh || _mode == _RefreshIndicatorMode.done;
@@ -436,7 +436,7 @@ class RefreshIndicatorState extends State<RefreshIndicator> with TickerProviderS
     return Stack(
       children: <Widget>[
         child,
-        Positioned(
+        if (_mode != null) Positioned(
           top: _isIndicatorAtTop ? 0.0 : null,
           bottom: !_isIndicatorAtTop ? 0.0 : null,
           left: 0.0,
