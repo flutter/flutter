@@ -235,6 +235,34 @@ class Cache {
   }
   String _engineRevision;
 
+  String get storageBaseUrl {
+    final String overrideUrl = platform.environment['FLUTTER_STORAGE_BASE_URL'];
+    if (overrideUrl == null) {
+      return 'https://storage.googleapis.com';
+    }
+    // verify that this is a valid URI.
+    try {
+      Uri.parse(overrideUrl);
+    } on FormatException catch (err) {
+      throwToolExit('"FLUTTER_STORAGE_BASE_URL" contains an invalid URI:\n$err');
+    }
+    _maybeWarnAboutStorageOverride(overrideUrl);
+    return overrideUrl;
+  }
+
+  bool _hasWarnedAboutStorageOverride = false;
+
+  void _maybeWarnAboutStorageOverride(String overrideUrl) {
+    if (_hasWarnedAboutStorageOverride) {
+      return;
+    }
+    logger.printStatus(
+      'Flutter assets will be downloaded from $overrideUrl. Make sure you trust this source!',
+      emphasis: true,
+    );
+    _hasWarnedAboutStorageOverride = true;
+  }
+
   static Cache get instance => context.get<Cache>();
 
   /// Return the top-level directory in the cache; this is `bin/cache`.
@@ -261,6 +289,9 @@ class Cache {
 
   /// Return the top-level mutable directory in the cache; this is `bin/cache/artifacts`.
   Directory getCacheArtifacts() => getCacheDir('artifacts');
+
+  /// Location of LICENSE file.
+  File getLicenseFile() => fs.file(fs.path.join(flutterRoot, 'LICENSE'));
 
   /// Get a named directory from with the cache's artifact directory; for example,
   /// `material_fonts` would return `bin/cache/artifacts/material_fonts`.
@@ -492,23 +523,7 @@ abstract class CachedArtifact extends ArtifactSet {
   /// Template method to perform artifact update.
   Future<void> updateInner();
 
-  @visibleForTesting
-  String get storageBaseUrl {
-    final String overrideUrl = platform.environment['FLUTTER_STORAGE_BASE_URL'];
-    if (overrideUrl == null) {
-      return 'https://storage.googleapis.com';
-    }
-    // verify that this is a valid URI.
-    try {
-      Uri.parse(overrideUrl);
-    } on FormatException catch (err) {
-      throwToolExit('"FLUTTER_STORAGE_BASE_URL" contains an invalid URI:\n$err');
-    }
-    _maybeWarnAboutStorageOverride(overrideUrl);
-    return overrideUrl;
-  }
-
-  Uri _toStorageUri(String path) => Uri.parse('$storageBaseUrl/$path');
+  Uri _toStorageUri(String path) => Uri.parse('${cache.storageBaseUrl}/$path');
 
   /// Download an archive from the given [url] and unzip it to [location].
   Future<void> _downloadArchive(String message, Uri url, Directory location, bool verifier(File f), void extractor(File f, Directory d)) {
@@ -547,19 +562,6 @@ abstract class CachedArtifact extends ArtifactSet {
     downloadedFiles.add(tempFile);
     await onTemporaryFile(tempFile);
   }
-}
-
-bool _hasWarnedAboutStorageOverride = false;
-
-void _maybeWarnAboutStorageOverride(String overrideUrl) {
-  if (_hasWarnedAboutStorageOverride) {
-    return;
-  }
-  logger.printStatus(
-    'Flutter assets will be downloaded from $overrideUrl. Make sure you trust this source!',
-    emphasis: true,
-  );
-  _hasWarnedAboutStorageOverride = true;
 }
 
 /// A cached artifact containing fonts used for Material Design.
@@ -604,7 +606,7 @@ class FlutterWebSdk extends CachedArtifact {
     } else if (platform.isWindows) {
       platformName += 'windows-x64';
     }
-    final Uri url = Uri.parse('$storageBaseUrl/flutter_infra/flutter/$version/$platformName.zip');
+    final Uri url = Uri.parse('${cache.storageBaseUrl}/flutter_infra/flutter/$version/$platformName.zip');
     await _downloadZipArchive('Downloading Web SDK...', url, location);
     // This is a temporary work-around for not being able to safely download into a shared directory.
     for (FileSystemEntity entity in location.listSync(recursive: true)) {
@@ -669,7 +671,7 @@ abstract class EngineCachedArtifact extends CachedArtifact {
 
   @override
   Future<void> updateInner() async {
-    final String url = '$storageBaseUrl/flutter_infra/flutter/$version/';
+    final String url = '${cache.storageBaseUrl}/flutter_infra/flutter/$version/';
 
     final Directory pkgDir = cache.getCacheDir('pkg');
     for (String pkgName in getPackageDirs()) {
@@ -695,7 +697,7 @@ abstract class EngineCachedArtifact extends CachedArtifact {
       }
     }
 
-    final File licenseSource = fs.file(fs.path.join(Cache.flutterRoot, 'LICENSE'));
+    final File licenseSource = cache.getLicenseFile();
     for (String licenseDir in getLicenseDirs()) {
       final String licenseDestinationPath = fs.path.join(location.path, licenseDir, 'LICENSE');
       await licenseSource.copy(licenseDestinationPath);
@@ -704,7 +706,7 @@ abstract class EngineCachedArtifact extends CachedArtifact {
 
   Future<bool> checkForArtifacts(String engineVersion) async {
     engineVersion ??= version;
-    final String url = '$storageBaseUrl/flutter_infra/flutter/$engineVersion/';
+    final String url = '${cache.storageBaseUrl}/flutter_infra/flutter/$engineVersion/';
 
     bool exists = false;
     for (String pkgName in getPackageDirs()) {
@@ -1210,7 +1212,7 @@ class IosUsbArtifacts extends CachedArtifact {
   }
 
   @visibleForTesting
-  Uri get archiveUri => Uri.parse('$storageBaseUrl/flutter_infra/ios-usb-dependencies${cache.useUnsignedMacBinaries ? '/unsigned' : ''}/$name/$version/$name.zip');
+  Uri get archiveUri => Uri.parse('${cache.storageBaseUrl}/flutter_infra/ios-usb-dependencies${cache.useUnsignedMacBinaries ? '/unsigned' : ''}/$name/$version/$name.zip');
 }
 
 // Many characters are problematic in filenames, especially on Windows.
