@@ -687,8 +687,7 @@ class _MotionEventsDispatcher {
     return AndroidPointerProperties(id: pointerId, toolType: toolType);
   }
 
-  bool isSinglePointerAction(PointerEvent event) =>
-      !(event is PointerDownEvent) && !(event is PointerUpEvent);
+  bool isSinglePointerAction(PointerEvent event) => event is! PointerDownEvent && event is! PointerUpEvent;
 }
 
 /// A render object for embedding a platform view.
