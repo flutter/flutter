@@ -11,6 +11,21 @@ import 'package:flutter_test/flutter_test.dart';
 import '../widgets/semantics_tester.dart';
 
 void main() {
+  Material _getCardMaterial(WidgetTester tester) {
+    return tester.widget<Material>(
+      find.descendant(
+        of: find.byType(Card),
+        matching: find.byType(Material),
+      ),
+    );
+  }
+
+  Card _getCard(WidgetTester tester) {
+    return tester.widget<Card>(
+        find.byType(Card)
+    );
+  }
+
   testWidgets('Card can take semantic text from multiple children', (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
     await tester.pumpWidget(
@@ -206,20 +221,4 @@ void main() {
     expect(_getCardMaterial(tester).shadowColor, _getCard(tester).shadowColor);
     expect(_getCardMaterial(tester).shadowColor, Colors.red);
   });
-}
-
-
-Material _getCardMaterial(WidgetTester tester) {
-  return tester.widget<Material>(
-    find.descendant(
-      of: find.byType(Card),
-      matching: find.byType(Material),
-    ),
-  );
-}
-
-Card _getCard(WidgetTester tester) {
-  return tester.widget<Card>(
-    find.byType(Card)
-  );
 }
