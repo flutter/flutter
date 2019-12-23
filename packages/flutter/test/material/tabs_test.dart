@@ -256,7 +256,23 @@ void main() {
 
   testWidgets('Tab sizing - icon, iconMargin and text', (WidgetTester tester) async {
     await tester.pumpWidget(
-      MaterialApp(theme: ThemeData(fontFamily: 'Ahem'), home: const Center(child: Material(child: Tab(icon: SizedBox(width: 10.0, height: 10.0), iconMargin: EdgeInsets.symmetric(horizontal: 100.0), text: 'x')))),
+      MaterialApp(
+        theme: ThemeData(fontFamily: 'Ahem'),
+        home: const Center(
+          child: Material(
+            child: Tab(
+              icon: SizedBox(
+                width: 10.0,
+                height: 10.0,
+              ),
+              iconMargin: EdgeInsets.symmetric(
+                horizontal: 100.0,
+              ),
+              text: 'x',
+            ),
+          ),
+        ),
+      ),
     );
     expect(tester.renderObject<RenderParagraph>(find.byType(RichText)).text.style.fontFamily, 'Ahem');
     expect(tester.getSize(find.byType(Tab)), const Size(210.0, 72.0));
