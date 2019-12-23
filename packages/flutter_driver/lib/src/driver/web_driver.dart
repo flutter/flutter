@@ -9,6 +9,7 @@ import 'dart:math' as math;
 
 import 'package:matcher/matcher.dart';
 import 'package:meta/meta.dart';
+import 'package:vm_service_client/vm_service_client.dart';
 import 'package:webdriver/sync_io.dart' as sync_io;
 import 'package:webdriver/support/async.dart';
 
@@ -35,14 +36,16 @@ class WebFlutterDriver extends FlutterDriver {
   final FlutterWebConnection _connection;
   final Browser _browser;
   DateTime _startTime;
-  final _WebIsolate _appIsolate = _WebIsolate();
 
   /// Start time for tracing
   @visibleForTesting
   DateTime get startTime => _startTime;
 
   @override
-  Isolate get appIsolate => _appIsolate;
+  VMIsolate get appIsolate => throw UnsupportedError('WebFlutterDriver does not support appIsolate');
+
+  @override
+  VMServiceClient get serviceClient => throw UnsupportedError('WebFlutterDriver does not support serviceClient');
 
   /// Creates a driver that uses a connection provided by the given
   /// [hostUrl] which would fallback to environment variable VM_SERVICE_URL.
@@ -248,14 +251,5 @@ class FlutterWebConnection {
   /// Closes the WebDriver.
   Future<void> close() async {
     _driver.quit();
-  }
-}
-
-/// An implementation of [Isolate] for Flutter Web Driver.
-class _WebIsolate implements Isolate {
-  /// Invokes extension is not implemented for _WebIsolate.
-  @override
-  Future<Object> invokeExtension(String method, [Map<String, String> params]) {
-    throw UnsupportedError('WebIsolate does not support invokeExtension');
   }
 }

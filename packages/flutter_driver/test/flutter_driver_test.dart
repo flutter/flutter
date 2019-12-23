@@ -1028,6 +1028,11 @@ void main() {
         expect(() => driver.appIsolate.invokeExtension('abc', <String, String>{'abc': '123'}),
             throwsA(isInstanceOf<UnsupportedError>()));
       });
+
+      test('serviceClient', () async {
+        expect(() => driver.serviceClient.getVM(),
+            throwsA(isInstanceOf<UnsupportedError>()));
+      });
     });
   });
 
