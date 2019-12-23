@@ -5,7 +5,7 @@
 import 'dart:async';
 import 'dart:io' show File;
 
-import 'package:flutter/foundation.dart';
+import 'package:flutter/src/foundation/collections.dart';
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
