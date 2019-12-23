@@ -938,6 +938,58 @@ void main() {
       );
     });
 
+    test('correctly generates simple message with numbers', () {
+      const String singleNumberMessage = '''{
+  "courseCompletion": "You have completed {progress} of the course.",
+  "@courseCompletion": {
+    "description": "The amount of progress the student has made in their class.",
+    "placeholders": {
+      "progress": {
+        "type": "Number",
+        "format": "percentPattern",
+      }
+    }
+  }
+}''';
+      final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+        ..createSync(recursive: true);
+      l10nDirectory.childFile(defaultTemplateArbFileName)
+        .writeAsStringSync(singleNumberMessage);
+
+      final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+      try {
+        generator.initialize(
+          l10nDirectoryPath: defaultArbPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        );
+        generator.parseArbFiles();
+        generator.generateClassMethods();
+      } on Exception catch (e) {
+        fail('Parsing template arb file should succeed: \n$e');
+      }
+
+      expect(generator.classMethods, isNotEmpty);
+      expect(
+        generator.classMethods.first,
+        '''  String courseCompletion(Object progress) {
+    final NumberFormat progressNumberFormat = NumberFormat.percentPattern({
+      locale: _locale,
+    });
+    final String progressString = progressNumberFormat.format(progress);
+
+    return Intl.message(
+      r'You have completed \$progress of the course.',
+      locale: _localeName,
+      name: 'courseCompletion',
+      desc: r'The amount of progress the student has made in their class.',
+      args: <Object>[progress]
+    );
+  }
+''');
+    });
+
     test('should throw attempting to generate a plural message without placeholders:', () {
       const String pluralMessageWithoutPlaceholdersAttribute = '''{
   "helloWorlds": "{count,plural, =0{Hello}=1{Hello World}=2{Hello two worlds}few{Hello {count} worlds}many{Hello all {count} worlds}other{Hello other {count} worlds}}",
