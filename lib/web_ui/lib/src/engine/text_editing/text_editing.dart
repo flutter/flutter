@@ -387,6 +387,8 @@ abstract class DefaultTextEditingStrategy implements TextEditingStrategy {
         domElement.focus();
       }
     }));
+
+    preventDefaultForMouseEvents();
   }
 
   @override
@@ -487,6 +489,25 @@ abstract class DefaultTextEditingStrategy implements TextEditingStrategy {
 
     // Re-focuses after setting editing state.
     domElement.focus();
+  }
+
+  /// Prevent default behavior for mouse down, up and move.
+  ///
+  /// When normal mouse events are not prevented, in desktop browsers, mouse
+  /// selection conflicts with selection sent from the framework, which creates
+  /// flickering during selection by mouse.
+  void preventDefaultForMouseEvents() {
+    _subscriptions.add(domElement.onMouseDown.listen((_) {
+      _.preventDefault();
+    }));
+
+    _subscriptions.add(domElement.onMouseUp.listen((_) {
+      _.preventDefault();
+    }));
+
+    _subscriptions.add(domElement.onMouseMove.listen((_) {
+      _.preventDefault();
+    }));
   }
 }
 
@@ -740,6 +761,8 @@ class FirefoxTextEditingStrategy extends GloballyPositionedTextEditingStrategy {
         domElement.focus();
       }
     }));
+
+    preventDefaultForMouseEvents();
   }
 }
 
