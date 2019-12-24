@@ -258,7 +258,7 @@ bool _dateParameterIsValid(Map<String, dynamic> placeholderValue, String placeho
   if (allowableDateFormats.contains(placeholderValue['format']))
     return true;
   throw L10nException(
-    'Date format ${placeholderValue['format']} for the $placeholder \n'
+    'Date format ${placeholderValue['format']} for $placeholder \n'
     'placeholder does not have a corresponding DateFormat \n'
     'constructor. Check the intl library\'s DateFormat class \n'
     'constructors for allowed date formats.'
