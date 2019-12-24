@@ -946,7 +946,7 @@ void main() {
     "placeholders": {
       "progress": {
         "type": "Number",
-        "format": "percentPattern",
+        "format": "percentPattern"
       }
     }
   }
@@ -975,7 +975,7 @@ void main() {
         generator.classMethods.first,
         '''  String courseCompletion(Object progress) {
     final NumberFormat progressNumberFormat = NumberFormat.percentPattern({
-      locale: _locale,
+      locale: _localeName,
     });
     final String progressString = progressNumberFormat.format(progress);
 
