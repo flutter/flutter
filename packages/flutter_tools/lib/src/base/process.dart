@@ -78,11 +78,11 @@ Future<void> runShutdownHooks() async {
   globals.printTrace('Running shutdown hooks');
   _shutdownHooksRunning = true;
   try {
-    for (ShutdownStage stage in _shutdownHooks.keys.toList()..sort()) {
+    for (final ShutdownStage stage in _shutdownHooks.keys.toList()..sort()) {
       globals.printTrace('Shutdown hook priority ${stage.priority}');
       final List<ShutdownHook> hooks = _shutdownHooks.remove(stage);
       final List<Future<dynamic>> futures = <Future<dynamic>>[];
-      for (ShutdownHook shutdownHook in hooks) {
+      for (final ShutdownHook shutdownHook in hooks) {
         final FutureOr<dynamic> result = shutdownHook();
         if (result is Future<dynamic>) {
           futures.add(result);

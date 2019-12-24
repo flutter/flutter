@@ -618,7 +618,7 @@ class WidgetOrderFocusTraversalPolicy extends FocusTraversalPolicy with Directio
     FocusNode firstNode;
     FocusNode lastNode;
     bool visit(FocusNode node) {
-      for (FocusNode visited in node.traversalChildren) {
+      for (final FocusNode visited in node.traversalChildren) {
         firstNode ??= visited;
         if (!visit(visited)) {
           return false;
@@ -750,7 +750,7 @@ class ReadingOrderTraversalPolicy extends FocusTraversalPolicy with DirectionalF
     }
 
     final List<_SortData> data = <_SortData>[
-      for (FocusNode node in nodes) _SortData(node),
+      for (final FocusNode node in nodes) _SortData(node),
     ];
 
     // Pick the initial widget as the one that is leftmost in the band of the
@@ -800,7 +800,7 @@ class ReadingOrderTraversalPolicy extends FocusTraversalPolicy with DirectionalF
 
     final Iterable<FocusNode> maybeFlipped = forward ? sortedNodes : sortedNodes.reversed;
     FocusNode previousNode;
-    for (FocusNode node in maybeFlipped) {
+    for (final FocusNode node in maybeFlipped) {
       if (previousNode == focusedChild) {
         _focusAndEnsureVisible(
           node,

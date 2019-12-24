@@ -70,8 +70,8 @@ $fontsSection
     final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
     await bundle.build(manifestPath: 'pubspec.yaml');
 
-    for (String packageName in packages) {
-      for (String packageFont in packageFonts) {
+    for (final String packageName in packages) {
+      for (final String packageFont in packageFonts) {
         final String entryKey = 'packages/$packageName/$packageFont';
         expect(bundle.entries.containsKey(entryKey), true);
         expect(
@@ -80,7 +80,7 @@ $fontsSection
         );
       }
 
-      for (String localFont in localFonts) {
+      for (final String localFont in localFonts) {
         expect(bundle.entries.containsKey(localFont), true);
         expect(
           utf8.decode(await bundle.entries[localFont].contentsAsBytes()),

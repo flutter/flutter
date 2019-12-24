@@ -37,7 +37,7 @@ Future<double> findCostsForFile(File file) async {
     return 0.0;
   final bool isTest = file.path.endsWith('_test.dart');
   double total = 0.0;
-  for (String line in await file.readAsLines()) {
+  for (final String line in await file.readAsLines()) {
     if (line.contains(todoPattern))
       total += todoCost;
     if (line.contains(ignorePattern))
@@ -60,7 +60,7 @@ Future<int> findGlobalsForFile(File file) async {
   if (path.extension(file.path) != '.dart')
     return 0;
   int total = 0;
-  for (String line in await file.readAsLines()) {
+  for (final String line in await file.readAsLines()) {
     if (line.contains(globalsPattern))
       total += 1;
   }
@@ -74,7 +74,7 @@ Future<double> findCostsForRepo() async {
     workingDirectory: flutterDirectory.path,
   );
   double total = 0.0;
-  await for (String entry in git.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()))
+  await for (final String entry in git.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()))
     total += await findCostsForFile(File(path.join(flutterDirectory.path, entry)));
   final int gitExitCode = await git.exitCode;
   if (gitExitCode != 0)
@@ -89,7 +89,7 @@ Future<int> findGlobalsForTool() async {
     workingDirectory: flutterDirectory.path,
   );
   int total = 0;
-  await for (String entry in git.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()))
+  await for (final String entry in git.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()))
     total += await findGlobalsForFile(File(path.join(flutterDirectory.path, entry)));
   final int gitExitCode = await git.exitCode;
   if (gitExitCode != 0)

@@ -581,7 +581,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   }
 
   void _paintContents(PaintingContext context, Offset offset) {
-    for (RenderSliver child in childrenInPaintOrder) {
+    for (final RenderSliver child in childrenInPaintOrder) {
       if (child.geometry.visible)
         context.paintChild(child, offset + paintOffsetOf(child));
     }
@@ -631,7 +631,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     assert(mainAxisPosition != null);
     assert(crossAxisPosition != null);
     final SliverHitTestResult sliverResult = SliverHitTestResult.wrap(result);
-    for (RenderSliver child in childrenInHitTestOrder) {
+    for (final RenderSliver child in childrenInHitTestOrder) {
       if (!child.geometry.visible) {
         continue;
       }

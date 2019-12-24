@@ -42,7 +42,7 @@ void copyDirectorySync(
     destDir.createSync(recursive: true);
   }
 
-  for (FileSystemEntity entity in srcDir.listSync()) {
+  for (final FileSystemEntity entity in srcDir.listSync()) {
     final String newPath = destDir.fileSystem.path.join(destDir.path, entity.basename);
     if (entity is File) {
       final File newFile = destDir.fileSystem.file(newPath);

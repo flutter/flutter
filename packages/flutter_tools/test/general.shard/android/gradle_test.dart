@@ -441,10 +441,10 @@ void main() {
         'See https://goo.gl/CP92wY for more information on the problem and how to fix it.',
         'This warning prints for all Android build failures. The real root cause of the error may be unrelated.',
       ];
-      for (String m in nonMatchingLines) {
+      for (final String m in nonMatchingLines) {
         expect(androidXPluginWarningRegex.hasMatch(m), isFalse);
       }
-      for (String m in matchingLines) {
+      for (final String m in matchingLines) {
         expect(androidXPluginWarningRegex.hasMatch(m), isTrue);
       }
     });

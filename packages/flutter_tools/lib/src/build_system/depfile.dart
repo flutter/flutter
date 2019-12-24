@@ -31,7 +31,7 @@ class Depfile {
   /// file must be manually specified.
   factory Depfile.parseDart2js(File file, File output) {
     final List<File> inputs = <File>[];
-    for (String rawUri in file.readAsLinesSync()) {
+    for (final String rawUri in file.readAsLinesSync()) {
       if (rawUri.trim().isEmpty) {
         continue;
       }
@@ -72,7 +72,7 @@ class Depfile {
   }
 
   void _writeFilesToBuffer(List<File> files, StringBuffer buffer) {
-    for (File outputFile in files) {
+    for (final File outputFile in files) {
       if (globals.platform.isWindows) {
         // Paths in a depfile have to be escaped on windows.
         final String escapedPath = outputFile.path.replaceAll(r'\', r'\\');

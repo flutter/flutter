@@ -123,7 +123,7 @@ class WebFlutterDriver extends FlutterDriver {
     _checkBrowserSupportsTimeline();
 
     final List<Map<String, dynamic>> events = <Map<String, dynamic>>[];
-    for (sync_io.LogEntry entry in _connection.logs) {
+    for (final sync_io.LogEntry entry in _connection.logs) {
       if (_startTime.isBefore(entry.timestamp)) {
         final Map<String, dynamic> data = jsonDecode(entry.message)['message'] as Map<String, dynamic>;
         if (data['method'] == 'Tracing.dataCollected') {

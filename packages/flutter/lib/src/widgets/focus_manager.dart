@@ -24,7 +24,7 @@ bool _focusDebug(String message, [Iterable<String> details]) {
   if (_kDebugFocus) {
     debugPrint('FOCUS: $message');
     if (details != null && details.isNotEmpty) {
-      for (String detail in details) {
+      for (final String detail in details) {
         debugPrint('    $detail');
       }
     }
@@ -507,7 +507,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   Iterable<FocusNode> get descendants {
     if (_descendants == null) {
       final List<FocusNode> result = <FocusNode>[];
-      for (FocusNode child in _children) {
+      for (final FocusNode child in _children) {
         result.addAll(child.descendants);
         result.add(child);
       }
@@ -732,7 +732,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
 
     node._parent = null;
     _children.remove(node);
-    for (FocusNode ancestor in ancestors) {
+    for (final FocusNode ancestor in ancestors) {
       ancestor._descendants = null;
     }
     _descendants = null;
@@ -741,7 +741,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
 
   void _updateManager(FocusManager manager) {
     _manager = manager;
-    for (FocusNode descendant in descendants) {
+    for (final FocusNode descendant in descendants) {
       descendant._manager = manager;
       descendant._ancestors = null;
     }
@@ -766,7 +766,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     child._parent = this;
     child._ancestors = null;
     child._updateManager(_manager);
-    for (FocusNode ancestor in child.ancestors) {
+    for (final FocusNode ancestor in child.ancestors) {
       ancestor._descendants = null;
     }
     if (hadFocus) {
@@ -869,7 +869,7 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// child in that scope is removed, the previous focus returns.
   void _setAsFocusedChild() {
     FocusNode scopeFocus = this;
-    for (FocusScopeNode ancestor in ancestors.whereType<FocusScopeNode>()) {
+    for (final FocusScopeNode ancestor in ancestors.whereType<FocusScopeNode>()) {
       assert(scopeFocus != ancestor, 'Somehow made a loop by setting focusedChild to its scope.');
       assert(_focusDebug('Setting $scopeFocus as focused child for scope:', <String>[ancestor.toString()]));
       // Remove it anywhere in the focused child history.
@@ -1258,7 +1258,7 @@ class FocusManager with DiagnosticableTreeMixin {
       return;
     }
     final List<ValueChanged<FocusHighlightMode>> localListeners = List<ValueChanged<FocusHighlightMode>>.from(_listeners);
-    for (ValueChanged<FocusHighlightMode> listener in localListeners) {
+    for (final ValueChanged<FocusHighlightMode> listener in localListeners) {
       try {
         if (_listeners.contains(listener)) {
           listener(_highlightMode);
@@ -1322,7 +1322,7 @@ class FocusManager with DiagnosticableTreeMixin {
       return;
     }
     bool handled = false;
-    for (FocusNode node in <FocusNode>[_primaryFocus, ..._primaryFocus.ancestors]) {
+    for (final FocusNode node in <FocusNode>[_primaryFocus, ..._primaryFocus.ancestors]) {
       if (node.onKey != null && node.onKey(node, event)) {
         assert(_focusDebug('Node $node handled key event $event.'));
         handled = true;
@@ -1409,7 +1409,7 @@ class FocusManager with DiagnosticableTreeMixin {
       }
     }
     assert(_focusDebug('Notifying ${_dirtyNodes.length} dirty nodes:', _dirtyNodes.toList().map<String>((FocusNode node) => node.toString())));
-    for (FocusNode node in _dirtyNodes) {
+    for (final FocusNode node in _dirtyNodes) {
       node._notify();
     }
     _dirtyNodes.clear();

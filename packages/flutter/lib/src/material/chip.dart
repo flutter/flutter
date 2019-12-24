@@ -216,7 +216,7 @@ abstract class DeletableChipAttributes {
   ///   ];
   ///
   ///   Iterable<Widget> get actorWidgets sync* {
-  ///     for (Actor actor in _cast) {
+  ///     for (final Actor actor in _cast) {
   ///       yield Padding(
   ///         padding: const EdgeInsets.all(4.0),
   ///         child: Chip(
@@ -1056,7 +1056,7 @@ class ChoiceChip extends StatelessWidget
 ///   List<String> _filters = <String>[];
 ///
 ///   Iterable<Widget> get actorWidgets sync* {
-///     for (ActorFilterEntry actor in _cast) {
+///     for (final ActorFilterEntry actor in _cast) {
 ///       yield Padding(
 ///         padding: const EdgeInsets.all(4.0),
 ///         child: FilterChip(
@@ -2316,7 +2316,7 @@ class _RenderChip extends RenderBox {
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
-    for (RenderBox child in _children) {
+    for (final RenderBox child in _children) {
       child.attach(owner);
     }
   }
@@ -2324,7 +2324,7 @@ class _RenderChip extends RenderBox {
   @override
   void detach() {
     super.detach();
-    for (RenderBox child in _children) {
+    for (final RenderBox child in _children) {
       child.detach();
     }
   }

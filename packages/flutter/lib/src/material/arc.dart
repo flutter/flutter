@@ -199,7 +199,7 @@ typedef _KeyFunc<T> = double Function(T input);
 T _maxBy<T>(Iterable<T> input, _KeyFunc<T> keyFunc) {
   T maxValue;
   double maxKey;
-  for (T value in input) {
+  for (final T value in input) {
     final double key = keyFunc(value);
     if (maxKey == null || key > maxKey) {
       maxValue = value;

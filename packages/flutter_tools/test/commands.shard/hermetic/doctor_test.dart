@@ -499,11 +499,11 @@ void main() {
 
       expect(await FlutterValidatorDoctor().diagnose(verbose: false), isTrue);
       final List<String> statusLines = testLogger.statusText.split('\n');
-      for (String msg in userMessages.flutterBinariesDoNotRun.split('\n')) {
+      for (final String msg in userMessages.flutterBinariesDoNotRun.split('\n')) {
         expect(statusLines, contains(contains(msg)));
       }
       if (globals.platform.isLinux) {
-        for (String msg in userMessages.flutterBinariesLinuxRepairCommands.split('\n')) {
+        for (final String msg in userMessages.flutterBinariesLinuxRepairCommands.split('\n')) {
           expect(statusLines, contains(contains(msg)));
         }
       }

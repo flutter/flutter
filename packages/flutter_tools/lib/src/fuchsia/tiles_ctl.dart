@@ -26,7 +26,7 @@ class FuchsiaTilesCtl {
       globals.printTrace('tiles_ctl is not running');
       return -1;
     }
-    for (MapEntry<int, String> entry in runningApps.entries) {
+    for (final MapEntry<int, String> entry in runningApps.entries) {
       if (entry.value.contains('$appName#meta')) {
         return entry.key;
       }
@@ -70,7 +70,7 @@ class FuchsiaTilesCtl {
       return null;
     }
     // Find lines beginning with 'Tile'
-    for (String line in result.stdout.split('\n')) {
+    for (final String line in result.stdout.split('\n')) {
       final List<String> words = line.split(' ');
       if (words.isNotEmpty && words[0] == 'Tile') {
         final int key = int.tryParse(words[2]);

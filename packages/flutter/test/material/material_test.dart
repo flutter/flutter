@@ -251,7 +251,7 @@ void main() {
         ElevationColor(24.0, Color(0xFF20362B)),
       ];
 
-      for (ElevationColor test in elevationColors) {
+      for (final ElevationColor test in elevationColors) {
         await tester.pumpWidget(
             Theme(
               data: ThemeData(

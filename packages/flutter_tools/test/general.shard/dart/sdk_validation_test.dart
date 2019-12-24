@@ -64,7 +64,7 @@ Future<int> analyze(AnalysisServer server) async {
   int errorCount = 0;
   final Future<bool> onDone = server.onAnalyzing.where((bool analyzing) => analyzing == false).first;
   server.onErrors.listen((FileAnalysisErrors result) {
-    for (AnalysisError error in result.errors) {
+    for (final AnalysisError error in result.errors) {
       print(error.toString().trim());
     }
     errorCount += result.errors.length;

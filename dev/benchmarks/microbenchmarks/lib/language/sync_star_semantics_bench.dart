@@ -71,7 +71,7 @@ void main() {
 
 String consumeSpan(Iterable<InlineSpanSemanticsInformation> items) {
   String result = '';
-  for (InlineSpanSemanticsInformation span in items) {
+  for (final InlineSpanSemanticsInformation span in items) {
     result += span.text;
   }
   return result;
@@ -81,7 +81,7 @@ String consumeSpan(Iterable<InlineSpanSemanticsInformation> items) {
 Iterable<InlineSpanSemanticsInformation> combineSemanticsInfoSyncStar(List<InlineSpanSemanticsInformation> inputs) sync* {
   String workingText = '';
   String workingLabel;
-  for (InlineSpanSemanticsInformation info in inputs) {
+  for (final InlineSpanSemanticsInformation info in inputs) {
     if (info.requiresOwnNode) {
       if (workingText != null) {
         yield InlineSpanSemanticsInformation(workingText, semanticsLabel: workingLabel ?? workingText);
@@ -110,7 +110,7 @@ Iterable<InlineSpanSemanticsInformation> combineSemanticsInfoList(List<InlineSpa
   String workingText = '';
   String workingLabel;
   final List<InlineSpanSemanticsInformation> result = <InlineSpanSemanticsInformation>[];
-  for (InlineSpanSemanticsInformation info in inputs) {
+  for (final InlineSpanSemanticsInformation info in inputs) {
     if (info.requiresOwnNode) {
       if (workingText != null) {
         result.add(InlineSpanSemanticsInformation(workingText, semanticsLabel: workingLabel ?? workingText));

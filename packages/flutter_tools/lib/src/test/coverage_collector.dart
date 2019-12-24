@@ -188,7 +188,7 @@ Future<Map<String, dynamic>> collect(Uri serviceUri, bool Function(String) libra
 Future<Map<String, dynamic>> _getAllCoverage(VMService service, bool Function(String) libraryPredicate) async {
   await service.getVM();
   final List<Map<String, dynamic>> coverage = <Map<String, dynamic>>[];
-  for (Isolate isolateRef in service.vm.isolates) {
+  for (final Isolate isolateRef in service.vm.isolates) {
     await isolateRef.load();
     final Map<String, dynamic> scriptList = await isolateRef.invokeRpcRaw('getScripts', params: <String, dynamic>{'isolateId': isolateRef.id});
     final List<Future<void>> futures = <Future<void>>[];
@@ -204,7 +204,7 @@ Future<Map<String, dynamic>> _getAllCoverage(VMService service, bool Function(St
     if (scriptList['scripts'] == null) {
       continue;
     }
-    for (Map<String, dynamic> script in scriptList['scripts']) {
+    for (final Map<String, dynamic> script in scriptList['scripts']) {
       if (!libraryPredicate(script['uri'] as String)) {
         continue;
       }
@@ -243,9 +243,9 @@ void _buildCoverageMap(
   List<Map<String, dynamic>> coverage,
 ) {
   final Map<String, Map<int, int>> hitMaps = <String, Map<int, int>>{};
-  for (String scriptId in scripts.keys) {
+  for (final String scriptId in scripts.keys) {
     final Map<String, dynamic> sourceReport = sourceReports[scriptId];
-    for (Map<String, dynamic> range in sourceReport['ranges']) {
+    for (final Map<String, dynamic> range in sourceReport['ranges']) {
       final Map<String, dynamic> coverage = castStringKeyedMap(range['coverage']);
       // Coverage reports may sometimes be null for a Script.
       if (coverage == null) {
@@ -264,14 +264,14 @@ void _buildCoverageMap(
         continue;
       }
       if (hits != null) {
-        for (int hit in hits) {
+        for (final int hit in hits) {
           final int line = _lineAndColumn(hit, tokenPositions)[0];
           final int current = hitMap[line] ?? 0;
           hitMap[line] = current + 1;
         }
       }
       if (misses != null) {
-        for (int miss in misses) {
+        for (final int miss in misses) {
           final int line = _lineAndColumn(miss, tokenPositions)[0];
           hitMap[line] ??= 0;
         }

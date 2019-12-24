@@ -26,7 +26,7 @@ void checkTree(WidgetTester tester, List<TestParentData> expectedParentData) {
   final RenderStack renderObject = element.renderObject as RenderStack;
   try {
     RenderObject child = renderObject.firstChild;
-    for (TestParentData expected in expectedParentData) {
+    for (final TestParentData expected in expectedParentData) {
       expect(child is RenderDecoratedBox, isTrue);
       final RenderDecoratedBox decoratedBox = child as RenderDecoratedBox;
       expect(decoratedBox.parentData is StackParentData, isTrue);

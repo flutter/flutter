@@ -301,7 +301,7 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
       vsync: this,
     );
 
-    for (T currentKey in widget.children.keys) {
+    for (final T currentKey in widget.children.keys) {
       _highlightControllers[currentKey] = _createHighlightAnimationController(
         isCompleted: currentKey == widget.groupValue,  // Highlight the current selection.
       );
@@ -314,7 +314,7 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
     super.didUpdateWidget(oldWidget);
 
     // Update animation controllers.
-    for (T oldKey in oldWidget.children.keys) {
+    for (final T oldKey in oldWidget.children.keys) {
       if (!widget.children.containsKey(oldKey)) {
         _highlightControllers[oldKey].dispose();
         _pressControllers[oldKey].dispose();
@@ -324,7 +324,7 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
       }
     }
 
-    for (T newKey in widget.children.keys) {
+    for (final T newKey in widget.children.keys) {
       if (!_highlightControllers.keys.contains(newKey)) {
         _highlightControllers[newKey] = _createHighlightAnimationController();
         _pressControllers[newKey] = _createFadeoutAnimationController();
@@ -336,11 +336,11 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
 
   @override
   void dispose() {
-    for (AnimationController animationController in _highlightControllers.values) {
+    for (final AnimationController animationController in _highlightControllers.values) {
       animationController.dispose();
     }
 
-    for (AnimationController animationController in _pressControllers.values) {
+    for (final AnimationController animationController in _pressControllers.values) {
       animationController.dispose();
     }
 
@@ -413,7 +413,7 @@ class _SegmentedControlState<T> extends State<CupertinoSlidingSegmentedControl<T
       ]),
       builder: (BuildContext context, Widget child) {
         final List<Widget> children = <Widget>[];
-        for (T currentKey in keys) {
+        for (final T currentKey in keys) {
           final TextStyle textStyle = DefaultTextStyle.of(context).style.copyWith(
             fontWeight: _highlightTween.evaluate(_highlightControllers[currentKey]),
           );
@@ -829,7 +829,7 @@ class _RenderSegmentedControl<T> extends RenderBox
     double childWidth = (constraints.minWidth - totalSeparatorWidth) / childCount;
     double maxHeight = _kMinSegmentedControlHeight;
 
-    for (RenderBox child in getChildrenAsList()) {
+    for (final RenderBox child in getChildrenAsList()) {
       childWidth = math.max(childWidth, child.getMaxIntrinsicWidth(double.infinity) + 2 * _kSegmentMinPadding);
     }
 
@@ -999,7 +999,7 @@ class _RenderSegmentedControl<T> extends RenderBox
 
     final RRect thumbRRect = RRect.fromRectAndRadius(thumbRect.shift(offset), _kThumbRadius);
 
-    for (BoxShadow shadow in thumbShadow) {
+    for (final BoxShadow shadow in thumbShadow) {
       context.canvas.drawRRect(thumbRRect.shift(shadow.offset), shadow.toPaint());
     }
 

@@ -103,7 +103,7 @@ void main() {
       } while (doThis());
     }
 
-    for (String testOs in testPlatforms) {
+    for (final String testOs in testPlatforms) {
       testUsingContext('AnsiSpinner works for $testOs (1)', () async {
         bool done = false;
         mockStopwatch = FakeStopwatch();
@@ -255,7 +255,7 @@ void main() {
           expect(outputStdout().join('\n'), contains('This is taking an unexpectedly long time.'));
 
           // Test that the number of '\b' is correct.
-          for (String line in outputStdout()) {
+          for (final String line in outputStdout()) {
             int currLength = 0;
             for (int i = 0; i < line.length; i += 1) {
               currLength += line[i] == '\b' ? -1 : 1;

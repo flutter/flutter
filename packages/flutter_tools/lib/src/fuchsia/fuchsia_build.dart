@@ -148,7 +148,7 @@ Future<void> _buildAssets(
   await destFile.create(recursive: true);
   final IOSink outFile = destFile.openWrite();
 
-  for (String path in assets.entries.keys) {
+  for (final String path in assets.entries.keys) {
     outFile.write('data/$appName/$path=$assetDir/$path\n');
   }
   await outFile.flush();

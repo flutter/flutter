@@ -282,7 +282,7 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
     }
 
     final List<_OverflowRegionData> overflowRegions = _calculateOverflowRegions(overflow, containerRect);
-    for (_OverflowRegionData region in overflowRegions) {
+    for (final _OverflowRegionData region in overflowRegions) {
       context.canvas.drawRect(region.rect.shift(offset), _indicatorPaint);
       final TextSpan textSpan = _indicatorLabel[region.side.index].text as TextSpan;
       if (textSpan?.text != region.label) {

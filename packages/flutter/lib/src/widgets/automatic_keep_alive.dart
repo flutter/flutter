@@ -66,7 +66,7 @@ class _AutomaticKeepAliveState extends State<AutomaticKeepAlive> {
   @override
   void dispose() {
     if (_handles != null) {
-      for (Listenable handle in _handles.keys)
+      for (final Listenable handle in _handles.keys)
         handle.removeListener(_handles[handle]);
     }
     super.dispose();
