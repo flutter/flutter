@@ -19,6 +19,9 @@ task:
     FRAMEWORK_PATH: "/tmp/master_framework"
     PATH: "$FLUTTER_ENGINE/third_party/dart/tools/sdks/dart-sdk/bin:$DEPOT_TOOLS:$PATH"
     USE_ANDROID: "False"
+    # TODO(liyuqian): currently we're using flutter-cirrus GCP project. Migrate
+    # to flutter-infra project once the metrics_center service is stabilized,
+    BENCHMARK_GCP_CREDENTIALS: ENCRYPTED[da76d2b7b39894de70fae1fc9182c97cc41400adc93f0f1c49bc7442f15fb933da8d756ed88523810a9a77c34f51a693]
   setup_script: |
     git clone --depth 1 https://chromium.googlesource.com/chromium/tools/depot_tools.git $DEPOT_TOOLS
     mkdir -p $ENGINE_PATH/src
@@ -29,6 +32,18 @@ task:
     mv $CIRRUS_WORKING_DIR flutter
     gclient sync
   matrix:
+    - name: build_and_benchmark_linux_release
+      only_if: $CIRRUS_BRANCH == 'master' # Only run for post-submit commits.
+      compile_host_script: |
+        cd $ENGINE_PATH/src
+        ./flutter/tools/gn --runtime-mode=release
+        ninja -C out/host_release
+      benchmark_host_script: |
+        cd $ENGINE_PATH/src/out/host_release/
+        ./txt_benchmarks --benchmark_format=json > txt_benchmarks.json
+        cd $ENGINE_PATH/src/flutter/testing/benchmark
+        pub get
+        dart bin/parse_and_send.dart ../../../out/host_release/txt_benchmarks.json
     - name: build_and_test_linux_unopt_debug
       compile_host_script: |
         cd $ENGINE_PATH/src
