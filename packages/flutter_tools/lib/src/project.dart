@@ -307,8 +307,6 @@ class IosProject implements XcodeBasedProject {
   @override
   final FlutterProject parent;
 
-  static final RegExp _productBundleIdPattern = RegExp(r'''^\s*PRODUCT_BUNDLE_IDENTIFIER\s*=\s*(["']?)(.*?)\1;\s*$''');
-  static const String _productBundleIdVariable = r'$(PRODUCT_BUNDLE_IDENTIFIER)';
   static const String _hostAppBundleName = 'Runner';
 
   Directory get ephemeralDirectory => parent.directory.childDirectory('.ios');
@@ -354,8 +352,8 @@ class IosProject implements XcodeBasedProject {
   @override
   File get podManifestLock => hostAppRoot.childDirectory('Pods').childFile('Manifest.lock');
 
-  /// The 'Info.plist' file of the host app.
-  File get hostInfoPlist => hostAppRoot.childDirectory(_hostAppBundleName).childFile('Info.plist');
+  /// The default 'Info.plist' file of the host app. The developer can change this location.
+  File get defaultHostInfoPlist => hostAppRoot.childDirectory(_hostAppBundleName).childFile('Info.plist');
 
   @override
   Directory get symlinks => _flutterLibRoot.childDirectory('.symlinks');
@@ -384,26 +382,30 @@ class IosProject implements XcodeBasedProject {
   /// iOS tooling needed to read it is not installed.
   Future<String> get productBundleIdentifier async {
     String fromPlist;
-    try {
-      fromPlist = PlistParser.instance.getValueFromFile(
-        hostInfoPlist.path,
-        PlistParser.kCFBundleIdentifierKey,
-      );
-    } on FileNotFoundException {
-      // iOS tooling not found; likely not running OSX; let [fromPlist] be null
+    final File defaultInfoPlist = defaultHostInfoPlist;
+    // Users can change the location of the Info.plist.
+    // Try parsing the default, first.
+    if (defaultInfoPlist.existsSync()) {
+      try {
+        fromPlist = PlistParser.instance.getValueFromFile(
+          defaultHostInfoPlist.path,
+          PlistParser.kCFBundleIdentifierKey,
+        );
+      } on FileNotFoundException {
+        // iOS tooling not found; likely not running OSX; let [fromPlist] be null
+      }
+      if (fromPlist != null && !fromPlist.contains('\$')) {
+        // Info.plist has no build variables in product bundle ID.
+        return fromPlist;
+      }
     }
-    if (fromPlist != null && !fromPlist.contains('\$')) {
-      // Info.plist has no build variables in product bundle ID.
-      return fromPlist;
-    }
-    final String fromPbxproj = _firstMatchInFile(xcodeProjectInfoFile, _productBundleIdPattern)?.group(2);
-    if (fromPbxproj != null && (fromPlist == null || fromPlist == _productBundleIdVariable)) {
-      // Common case. Avoids parsing build settings.
-      return fromPbxproj;
-    }
-    if (fromPlist != null && xcode.xcodeProjectInterpreter.isInstalled) {
-      // General case: perform variable substitution using build settings.
-      return xcode.substituteXcodeVariables(fromPlist, await buildSettings);
+    final Map<String, String> allBuildSettings = await buildSettings;
+    if (allBuildSettings != null) {
+      if (fromPlist != null) {
+        // Perform variable substitution using build settings.
+        return xcode.substituteXcodeVariables(fromPlist, allBuildSettings);
+      }
+      return allBuildSettings['PRODUCT_BUNDLE_IDENTIFIER'];
     }
     return null;
   }
