@@ -337,9 +337,9 @@ String generateNumberFormattingLogic(Map<String, dynamic> arbBundle, String reso
       ) {
         result += '''
 
-    final NumberFormat ${placeholder}NumberFormat = NumberFormat.${value['format']}({
+    final NumberFormat ${placeholder}NumberFormat = NumberFormat.${value['format']}(
       locale: _localeName,
-    });
+    );
     final String ${placeholder}String = ${placeholder}NumberFormat.format($placeholder);
 ''';
       }

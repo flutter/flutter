@@ -871,9 +871,9 @@ void main() {
       expect(
         generator.classMethods.first,
         '''  String courseCompletion(Object progress) {
-    final NumberFormat progressNumberFormat = NumberFormat.percentPattern({
+    final NumberFormat progressNumberFormat = NumberFormat.percentPattern(
       locale: _localeName,
-    });
+    );
     final String progressString = progressNumberFormat.format(progress);
 
     return Intl.message(
@@ -1065,9 +1065,9 @@ void main() {
       expect(
         generator.classMethods.first,
         '''  String helloWorlds(int count, Object population) {
-    final NumberFormat populationNumberFormat = NumberFormat.compactLong({
+    final NumberFormat populationNumberFormat = NumberFormat.compactLong(
       locale: _localeName,
-    });
+    );
     final String populationString = populationNumberFormat.format(population);
 
     return Intl.plural(
