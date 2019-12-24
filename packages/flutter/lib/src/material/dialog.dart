@@ -221,6 +221,8 @@ class AlertDialog extends StatelessWidget {
     this.contentPadding = const EdgeInsets.fromLTRB(24.0, 20.0, 24.0, 24.0),
     this.contentTextStyle,
     this.actions,
+    this.actionsPadding = EdgeInsets.zero,
+    this.buttonPadding,
     this.backgroundColor,
     this.elevation,
     this.semanticLabel,
@@ -289,6 +291,37 @@ class AlertDialog extends StatelessWidget {
   /// from the [actions].
   final List<Widget> actions;
 
+  /// Padding around the the set of [actions] at the bottom of the dialog.
+  ///
+  /// Typically used to provide padding to the button bar between the edge
+  /// of the dialog.
+  ///
+  /// If there is no [actions], no padding will be provided. The padding around
+  /// the button bar defaults to zero.
+  ///
+  /// {@tool sample}
+  /// This is an example of a set of actions aligned with the content widget.
+  /// ```dart
+  /// AlertDialog(
+  ///   title: Text('Title'),
+  ///   content: Container(width: 200, height: 200, color: Colors.green),
+  ///   actions: <Widget>[
+  ///     RaisedButton(onPressed: () {}, child: Text('Button 1')),
+  ///     RaisedButton(onPressed: () {}, child: Text('Button 2')),
+  ///   ],
+  ///   actionsPadding: EdgeInsets.symmetric(horizontal: 8.0),
+  /// );
+  /// ```
+  /// {@end-tool}
+  final EdgeInsetsGeometry actionsPadding;
+
+  /// Defines the padding for a button's child (typically the button's label).
+  ///
+  /// If null then it will use the surrounding [ButtonBarTheme.buttonPadding].
+  /// If that is null, it will default to 8.0 logical pixels on the left
+  /// and right.
+  final EdgeInsetsGeometry buttonPadding;
+
   /// {@macro flutter.material.dialog.backgroundColor}
   final Color backgroundColor;
 
@@ -349,6 +382,7 @@ class AlertDialog extends StatelessWidget {
 
     Widget titleWidget;
     Widget contentWidget;
+    Widget actionsWidget;
     if (title != null)
      titleWidget = Padding(
         padding: titlePadding ?? EdgeInsets.fromLTRB(24.0, 24.0, 24.0, content == null ? 20.0 : 0.0),
@@ -371,6 +405,15 @@ class AlertDialog extends StatelessWidget {
         ),
       );
 
+    if (actions != null)
+      actionsWidget = Padding(
+        padding: actionsPadding,
+        child: ButtonBar(
+          buttonPadding: buttonPadding,
+          children: actions,
+        ),
+      );
+
     List<Widget> columnChildren;
     if (scrollable) {
       columnChildren = <Widget>[
@@ -390,7 +433,7 @@ class AlertDialog extends StatelessWidget {
             ),
           ),
         if (actions != null)
-          ButtonBar(children: actions),
+          actionsWidget,
       ];
     } else {
       columnChildren = <Widget>[
@@ -399,7 +442,7 @@ class AlertDialog extends StatelessWidget {
         if (content != null)
           Flexible(child: contentWidget),
         if (actions != null)
-          ButtonBar(children: actions),
+          actionsWidget,
       ];
     }
 
