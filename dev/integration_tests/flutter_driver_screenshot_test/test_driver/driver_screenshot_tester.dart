@@ -5,7 +5,6 @@
 import 'dart:async';
 import 'dart:io' show File;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter_driver/flutter_driver.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
@@ -42,9 +41,28 @@ class DriverScreenShotTester {
   /// The golden image should exists at `test_driver/goldens/<testName>/<deviceModel>.png`
   /// prior to this call.
   Future<bool> compareScreenshots(List<int> screenshot) async {
+    if (screenshot == null) {
+      return false;
+    }
     final File file = File(_getImageFilePath());
     final List<int> matcher = await file.readAsBytes();
-    return listEquals<int>(screenshot, matcher);
+
+    if (matcher == null) {
+      return false;
+    }
+    return _bytesEqual(screenshot, matcher);
+  }
+
+  bool _bytesEqual(List<int> a, List<int> b) {
+    if (a.length != b.length) {
+      return false;
+    }
+    for (int index = 0; index < a.length; index += 1) {
+      if (a[index] != b[index]) {
+        return false;
+      }
+    }
+    return true;
   }
 
   /// Returns a bytes representation of a screenshot on the current screen.
