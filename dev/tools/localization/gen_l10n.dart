@@ -379,8 +379,9 @@ List<String> genIntlMethodArgs(Map<String, dynamic> bundle, String key) {
         final List<String> argumentList = <String>[];
         for (String placeholder in placeholders.keys) {
           final dynamic value = placeholders[placeholder];
-          if (value is Map<String, dynamic>
-              && _isFormattedPlaceholder(value, placeholder)
+          if (
+            value is Map<String, dynamic> &&
+            _isFormattedPlaceholder(value, placeholder)
           ) {
             argumentList.add('${placeholder}String');
           } else {
