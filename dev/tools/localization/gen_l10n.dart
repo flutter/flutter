@@ -146,7 +146,7 @@ const String simpleMethodTemplate = '''
 ''';
 
 const String pluralMethodTemplate = '''
-  String @methodName(@methodParameters) {@dateFormatting
+  String @methodName(@methodParameters) {@dateFormatting@numberFormatting
     return Intl.plural(
       @intlMethodArgs
     );
@@ -254,7 +254,7 @@ bool _containsFormatKey(Map<String, dynamic> placeholderValue, String placeholde
   );
 }
 
-bool _dateParameterIsValid(Map<String, dynamic> placeholderValue, String placeholder) {
+bool _isDateParameterValid(Map<String, dynamic> placeholderValue, String placeholder) {
   if (allowableDateFormats.contains(placeholderValue['format']))
     return true;
   throw L10nException(
@@ -265,7 +265,7 @@ bool _dateParameterIsValid(Map<String, dynamic> placeholderValue, String placeho
   );
 }
 
-bool _numberParameterIsValid(Map<String, dynamic> placeholderValue, String placeholder) {
+bool _isNumberParameterValid(Map<String, dynamic> placeholderValue, String placeholder) {
   if (allowableNumberFormats.contains(placeholderValue['format']))
     return true;
   throw L10nException(
@@ -310,9 +310,7 @@ String generateDateFormattingLogic(Map<String, dynamic> bundle, String key) {
       final dynamic value = placeholders[placeholder];
       if (
         value is Map<String, dynamic> &&
-        _isDateParameter(value) &&
-        _containsFormatKey(value, placeholder) &&
-        _dateParameterIsValid(value, placeholder)
+        _isProperDateFormat(value, placeholder)
       ) {
         result += '''
 
@@ -335,9 +333,7 @@ String generateNumberFormattingLogic(Map<String, dynamic> bundle, String key) {
       final dynamic value = placeholders[placeholder];
       if (
         value is Map<String, dynamic> &&
-        _isNumberParameter(value) &&
-        _containsFormatKey(value, placeholder) &&
-        _numberParameterIsValid(value, placeholder)
+        _isProperNumberFormat(value, placeholder)
       ) {
         result += '''
 
@@ -351,6 +347,22 @@ String generateNumberFormattingLogic(Map<String, dynamic> bundle, String key) {
   }
 
   return result;
+}
+
+bool _isProperDateFormat(Map<String, dynamic> value, String placeholder) {
+  return _isDateParameter(value)
+      && _containsFormatKey(value, placeholder)
+      && _isDateParameterValid(value, placeholder);
+}
+
+bool _isProperNumberFormat(Map<String, dynamic> value, String placeholder) {
+  return _isNumberParameter(value)
+      && _containsFormatKey(value, placeholder)
+      && _isNumberParameterValid(value, placeholder);
+}
+
+bool _isFormattedPlaceholder(Map<String, dynamic> value, String placeholder) {
+  return _isProperDateFormat(value, placeholder) || _isProperNumberFormat(value, placeholder);
 }
 
 List<String> genIntlMethodArgs(Map<String, dynamic> bundle, String key) {
@@ -367,11 +379,8 @@ List<String> genIntlMethodArgs(Map<String, dynamic> bundle, String key) {
         final List<String> argumentList = <String>[];
         for (String placeholder in placeholders.keys) {
           final dynamic value = placeholders[placeholder];
-          if (
-            value is Map<String, dynamic> &&
-            _isDateParameter(value) &&
-            _containsFormatKey(value, placeholder) &&
-            _dateParameterIsValid(value, placeholder)
+          if (value is Map<String, dynamic>
+              && _isFormattedPlaceholder(value, placeholder)
           ) {
             argumentList.add('${placeholder}String');
           } else {
@@ -393,7 +402,7 @@ String genSimpleMethod(Map<String, dynamic> arbBundle, String resourceId) {
     final Map<String, dynamic> placeholders = attributesMap['placeholders'] as Map<String, dynamic>;
     for (String placeholder in placeholders.keys) {
       final dynamic value = placeholders[placeholder];
-      if (value is Map<String, dynamic> && _isDateParameter(value)) {
+      if (value is Map<String, dynamic> && (_isDateParameter(value) || _isNumberParameter(value))) {
         message = message.replaceAll('{$placeholder}', '\$${placeholder}String');
       } else {
         message = message.replaceAll('{$placeholder}', '\$$placeholder');
@@ -477,7 +486,7 @@ String genPluralMethod(Map<String, dynamic> arbBundle, String resourceId) {
       String argValue = match.group(2);
       for (String placeholder in placeholders) {
         final dynamic value = placeholdersMap[placeholder];
-        if (value is Map<String, dynamic> && _isDateParameter(value)) {
+        if (value is Map<String, dynamic> && (_isDateParameter(value) || _isNumberParameter(value))) {
           argValue = argValue.replaceAll('#$placeholder#', '\$${placeholder}String');
         } else {
           argValue = argValue.replaceAll('#$placeholder#', '\$$placeholder');
@@ -491,6 +500,7 @@ String genPluralMethod(Map<String, dynamic> arbBundle, String resourceId) {
     .replaceAll('@methodName', resourceId)
     .replaceAll('@methodParameters', genPluralMethodParameters(placeholders, countPlaceholder, resourceId).join(', '))
     .replaceAll('@dateFormatting', generateDateFormattingLogic(arbBundle, resourceId))
+    .replaceAll('@numberFormatting', generateNumberFormattingLogic(arbBundle, resourceId))
     .replaceAll('@intlMethodArgs', methodArgs.join(',\n      '));
 }
 

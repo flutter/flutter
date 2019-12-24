@@ -877,11 +877,11 @@ void main() {
     final String progressString = progressNumberFormat.format(progress);
 
     return Intl.message(
-      r'You have completed \$progress of the course.',
+      r'You have completed \$progressString of the course.',
       locale: _localeName,
       name: 'courseCompletion',
       desc: r'The amount of progress the student has made in their class.',
-      args: <Object>[progress]
+      args: <Object>[progressString]
     );
   }
 ''');
@@ -1065,7 +1065,9 @@ void main() {
       expect(
         generator.classMethods.first,
         '''  String helloWorlds(int count, Object population) {
-    final NumberFormat populationNumberFormat = NumberFormat.yMMMMEEEEd(_localeName);
+    final NumberFormat populationNumberFormat = NumberFormat.compactLong({
+      locale: _localeName,
+    });
     final String populationString = populationNumberFormat.format(population);
 
     return Intl.plural(
@@ -1073,10 +1075,10 @@ void main() {
       locale: _localeName,
       name: 'helloWorlds',
       args: <Object>[count, populationString],
-      one: 'Hello World, today is \$populationString',
-      two: 'Hello two worlds, today is \$populationString',
-      many: 'Hello all \$count worlds, today is \$populationString',
-      other: 'Hello other \$count worlds, today is \$populationString'
+      one: 'Hello World of \$populationString citizens',
+      two: 'Hello two worlds with \$populationString total citizens',
+      many: 'Hello all \$count worlds, with a total of \$populationString citizens',
+      other: 'Hello other \$count worlds, with a total of \$populationString citizens'
     );
   }
 '''
