@@ -834,6 +834,97 @@ void main() {
       );
     });
 
+
+    test('correctly generates simple message with numbers', () {
+      const String singleNumberMessage = '''{
+  "courseCompletion": "You have completed {progress} of the course.",
+  "@courseCompletion": {
+    "description": "The amount of progress the student has made in their class.",
+    "placeholders": {
+      "progress": {
+        "type": "Number",
+        "format": "percentPattern"
+      }
+    }
+  }
+}''';
+      final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+        ..createSync(recursive: true);
+      l10nDirectory.childFile(defaultTemplateArbFileName)
+        .writeAsStringSync(singleNumberMessage);
+
+      final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+      try {
+        generator.initialize(
+          l10nDirectoryPath: defaultArbPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        );
+        generator.parseArbFiles();
+        generator.generateClassMethods();
+      } on Exception catch (e) {
+        fail('Parsing template arb file should succeed: \n$e');
+      }
+
+      expect(generator.classMethods, isNotEmpty);
+      expect(
+        generator.classMethods.first,
+        '''  String courseCompletion(Object progress) {
+    final NumberFormat progressNumberFormat = NumberFormat.percentPattern({
+      locale: _localeName,
+    });
+    final String progressString = progressNumberFormat.format(progress);
+
+    return Intl.message(
+      r'You have completed \$progress of the course.',
+      locale: _localeName,
+      name: 'courseCompletion',
+      desc: r'The amount of progress the student has made in their class.',
+      args: <Object>[progress]
+    );
+  }
+''');
+    });
+
+    test('throws an exception when improperly formatted number is passed in', () {
+      const String singleDateMessageArbFileString = '''{
+  "courseCompletion": "You have completed {progress} of the course.",
+  "@courseCompletion": {
+    "description": "The amount of progress the student has made in their class.",
+    "placeholders": {
+      "progress": {
+        "type": "Number",
+        "format": "asdf"
+      }
+    }
+  }
+}''';
+      final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+        ..createSync(recursive: true);
+      l10nDirectory.childFile(defaultTemplateArbFileName)
+        .writeAsStringSync(singleDateMessageArbFileString);
+
+      final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+      try {
+        generator.initialize(
+          l10nDirectoryPath: defaultArbPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        );
+        generator.parseArbFiles();
+        generator.generateClassMethods();
+      } on L10nException catch (e) {
+        expect(e.message, contains('asdf'));
+        expect(e.message, contains('progress'));
+        expect(e.message, contains('does not have a corresponding NumberFormat'));
+        return;
+      }
+
+      fail('Improper date formatting should throw an exception');
+    });
+
     test('correctly generates a plural message with placeholders:', () {
       const String pluralMessageWithMultiplePlaceholders = '''{
   "helloWorlds": "{count,plural, =0{Hello}=1{Hello {adjective} World}=2{Hello two {adjective} worlds}few{Hello {count} {adjective} worlds}many{Hello all {count} {adjective} worlds}other{Hello other {count} {adjective} worlds}}",
@@ -938,15 +1029,15 @@ void main() {
       );
     });
 
-    test('correctly generates simple message with numbers', () {
-      const String singleNumberMessage = '''{
-  "courseCompletion": "You have completed {progress} of the course.",
-  "@courseCompletion": {
-    "description": "The amount of progress the student has made in their class.",
+    test('correctly generates a plural message with number placeholders:', () {
+      const String pluralMessageWithDateTimePlaceholder = '''{
+  "helloWorlds": "{count,plural, =1{Hello World of {population} citizens}=2{Hello two worlds with {population} total citizens}many{Hello all {count} worlds, with a total of {population} citizens}other{Hello other {count} worlds, with a total of {population} citizens}}",
+  "@helloWorlds": {
     "placeholders": {
-      "progress": {
+      "count": {},
+      "population": {
         "type": "Number",
-        "format": "percentPattern"
+        "format": "compactLong"
       }
     }
   }
@@ -954,7 +1045,7 @@ void main() {
       final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
         ..createSync(recursive: true);
       l10nDirectory.childFile(defaultTemplateArbFileName)
-        .writeAsStringSync(singleNumberMessage);
+        .writeAsStringSync(pluralMessageWithDateTimePlaceholder);
 
       final LocalizationsGenerator generator = LocalizationsGenerator(fs);
       try {
@@ -973,59 +1064,23 @@ void main() {
       expect(generator.classMethods, isNotEmpty);
       expect(
         generator.classMethods.first,
-        '''  String courseCompletion(Object progress) {
-    final NumberFormat progressNumberFormat = NumberFormat.percentPattern({
-      locale: _localeName,
-    });
-    final String progressString = progressNumberFormat.format(progress);
+        '''  String helloWorlds(int count, Object population) {
+    final NumberFormat populationNumberFormat = NumberFormat.yMMMMEEEEd(_localeName);
+    final String populationString = populationNumberFormat.format(population);
 
-    return Intl.message(
-      r'You have completed \$progress of the course.',
+    return Intl.plural(
+      count,
       locale: _localeName,
-      name: 'courseCompletion',
-      desc: r'The amount of progress the student has made in their class.',
-      args: <Object>[progress]
+      name: 'helloWorlds',
+      args: <Object>[count, populationString],
+      one: 'Hello World, today is \$populationString',
+      two: 'Hello two worlds, today is \$populationString',
+      many: 'Hello all \$count worlds, today is \$populationString',
+      other: 'Hello other \$count worlds, today is \$populationString'
     );
   }
-''');
-    });
-
-    test('throws an exception when improperly formatted number is passed in', () {
-      const String singleDateMessageArbFileString = '''{
-  "courseCompletion": "You have completed {progress} of the course.",
-  "@courseCompletion": {
-    "description": "The amount of progress the student has made in their class.",
-    "placeholders": {
-      "progress": {
-        "type": "Number",
-        "format": "asdf"
-      }
-    }
-  }
-}''';
-      final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
-        ..createSync(recursive: true);
-      l10nDirectory.childFile(defaultTemplateArbFileName)
-        .writeAsStringSync(singleDateMessageArbFileString);
-
-      final LocalizationsGenerator generator = LocalizationsGenerator(fs);
-      try {
-        generator.initialize(
-          l10nDirectoryPath: defaultArbPathString,
-          templateArbFileName: defaultTemplateArbFileName,
-          outputFileString: defaultOutputFileString,
-          classNameString: defaultClassNameString,
-        );
-        generator.parseArbFiles();
-        generator.generateClassMethods();
-      } on L10nException catch (e) {
-        expect(e.message, contains('asdf'));
-        expect(e.message, contains('progress'));
-        expect(e.message, contains('does not have a corresponding NumberFormat'));
-        return;
-      }
-
-      fail('Improper date formatting should throw an exception');
+'''
+      );
     });
 
     test('should throw attempting to generate a plural message without placeholders:', () {
