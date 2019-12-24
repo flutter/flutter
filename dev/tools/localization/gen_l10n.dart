@@ -329,21 +329,30 @@ String generateNumberFormattingLogic(Map<String, dynamic> arbBundle, String reso
   final Map<String, dynamic> attributesMap = arbBundle['@$resourceId'] as Map<String, dynamic>;
   if (attributesMap != null && attributesMap.containsKey('placeholders')) {
     final Map<String, dynamic> placeholders = attributesMap['placeholders'] as Map<String, dynamic>;
+    String optionalParametersString = '';
     for (String placeholder in placeholders.keys) {
       final dynamic value = placeholders[placeholder];
       if (
         value is Map<String, dynamic> &&
         _isProperNumberFormat(value, placeholder)
       ) {
+        if (value.containsKey('optionalParameters')) {
+          final Map<String, dynamic> optionalParameters = value['optionalParameters'] as Map<String, dynamic>;
+          for (String parameter in optionalParameters.keys)
+            optionalParametersString += '\n      $parameter: ${optionalParameters[parameter]},';
+        }
+
         result += '''
 
     final NumberFormat ${placeholder}NumberFormat = NumberFormat.${value['format']}(
-      locale: _localeName,
+      locale: _localeName,@optionalParameters
     );
     final String ${placeholder}String = ${placeholder}NumberFormat.format($placeholder);
 ''';
       }
     }
+
+    result = result.replaceAll('@optionalParameters', optionalParametersString);
   }
 
   return result;
