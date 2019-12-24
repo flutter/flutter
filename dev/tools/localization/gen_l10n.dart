@@ -276,8 +276,8 @@ bool _isNumberParameterValid(Map<String, dynamic> placeholderValue, String place
   );
 }
 
-List<String> genMethodParameters(Map<String, dynamic> bundle, String key, String type) {
-  final Map<String, dynamic> attributesMap = bundle['@$key'] as Map<String, dynamic>;
+List<String> genMethodParameters(Map<String, dynamic> bundle, String resourceId, String type) {
+  final Map<String, dynamic> attributesMap = bundle['@$resourceId'] as Map<String, dynamic>;
   if (attributesMap != null && attributesMap.containsKey('placeholders')) {
     final Map<String, dynamic> placeholders = attributesMap['placeholders'] as Map<String, dynamic>;
     return placeholders.keys.map((String parameter) => '$type $parameter').toList();
@@ -301,9 +301,9 @@ List<String> genPluralMethodParameters(Iterable<String> placeholderKeys, String 
   }).toList();
 }
 
-String generateDateFormattingLogic(Map<String, dynamic> bundle, String key) {
+String generateDateFormattingLogic(Map<String, dynamic> arbBundle, String resourceId) {
   String result = '';
-  final Map<String, dynamic> attributesMap = bundle['@$key'] as Map<String, dynamic>;
+  final Map<String, dynamic> attributesMap = arbBundle['@$resourceId'] as Map<String, dynamic>;
   if (attributesMap != null && attributesMap.containsKey('placeholders')) {
     final Map<String, dynamic> placeholders = attributesMap['placeholders'] as Map<String, dynamic>;
     for (String placeholder in placeholders.keys) {
@@ -324,9 +324,9 @@ String generateDateFormattingLogic(Map<String, dynamic> bundle, String key) {
   return result;
 }
 
-String generateNumberFormattingLogic(Map<String, dynamic> bundle, String key) {
+String generateNumberFormattingLogic(Map<String, dynamic> arbBundle, String resourceId) {
   String result = '';
-  final Map<String, dynamic> attributesMap = bundle['@$key'] as Map<String, dynamic>;
+  final Map<String, dynamic> attributesMap = arbBundle['@$resourceId'] as Map<String, dynamic>;
   if (attributesMap != null && attributesMap.containsKey('placeholders')) {
     final Map<String, dynamic> placeholders = attributesMap['placeholders'] as Map<String, dynamic>;
     for (String placeholder in placeholders.keys) {
@@ -365,9 +365,9 @@ bool _isFormattedPlaceholder(Map<String, dynamic> value, String placeholder) {
   return _isProperDateFormat(value, placeholder) || _isProperNumberFormat(value, placeholder);
 }
 
-List<String> genIntlMethodArgs(Map<String, dynamic> bundle, String key) {
-  final List<String> attributes = <String>['name: \'$key\''];
-  final Map<String, dynamic> attributesMap = bundle['@$key'] as Map<String, dynamic>;
+List<String> genIntlMethodArgs(Map<String, dynamic> arbBundle, String resourceId) {
+  final List<String> attributes = <String>['name: \'$resourceId\''];
+  final Map<String, dynamic> attributesMap = arbBundle['@$resourceId'] as Map<String, dynamic>;
   if (attributesMap != null) {
     if (attributesMap.containsKey('description')) {
       final String description = attributesMap['description'] as String;
