@@ -1,0 +1,15 @@
+name: flutter_engine_benchmark
+
+dependencies:
+  git: any
+  metrics_center:
+    # TODO(liyuqian): once metrics_center is properly reviewed, add it to
+    # flutter/packages, publish on pub.dev, and use the published package here.
+    git: https://github.com/liyuqian/metrics_center.git
+
+dev_dependencies:
+  test: any
+  pedantic: ^1.8.0
+
+environment:
+  sdk: ">=2.2.2 <3.0.0"
