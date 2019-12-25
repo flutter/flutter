@@ -93,6 +93,7 @@ Future<void> saveDurationsHistogram(List<Map<String, dynamic>> events, String ou
 
   if (unexpectedValueCounts.isNotEmpty) {
     final StringBuffer error = StringBuffer('Some routes recorded wrong number of values (expected 2 values/route):\n\n');
+    error.write('You must add the --trace-startup parameter to run the test. \n\n');
     unexpectedValueCounts.forEach((String routeName, int count) {
       error.writeln(' - $routeName recorded $count values.');
     });
