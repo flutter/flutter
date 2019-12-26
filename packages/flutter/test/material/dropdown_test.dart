@@ -182,7 +182,7 @@ void main() {
       find.ancestor(of: buttonFinder, matching: find.byType(RepaintBoundary)).first,
       matchesGoldenFile('dropdown_test.default.png'),
     );
-  });
+  }, skip: isBrowser);
 
   testWidgets('Expanded dropdown golden', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
@@ -194,7 +194,7 @@ void main() {
       find.ancestor(of: buttonFinder, matching: find.byType(RepaintBoundary)).first,
       matchesGoldenFile('dropdown_test.expanded.png'),
     );
-  });
+  }, skip: isBrowser);
 
   testWidgets('Dropdown button control test', (WidgetTester tester) async {
     String value = 'one';

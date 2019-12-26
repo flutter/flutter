@@ -32,6 +32,18 @@ void main() {
     expect(testLogger.traceText, contains('build succeeded.'));
   });
 
+  testbed.test('Can parse defines whose values contain =', () async {
+    when(buildSystem.build(any, any, buildSystemConfig: anyNamed('buildSystemConfig')))
+      .thenAnswer((Invocation invocation) async {
+        expect((invocation.positionalArguments[1] as Environment).defines, containsPair('FooBar', 'fizz=2'));
+        return BuildResult(success: true);
+      });
+    final CommandRunner<void> commandRunner = createTestCommandRunner(AssembleCommand());
+    await commandRunner.run(<String>['assemble', '-o Output', '-dFooBar=fizz=2', 'debug_macos_bundle_flutter_assets']);
+
+    expect(testLogger.traceText, contains('build succeeded.'));
+  });
+
   testbed.test('Throws ToolExit if not provided with output', () async {
     when(buildSystem.build(any, any, buildSystemConfig: anyNamed('buildSystemConfig')))
       .thenAnswer((Invocation invocation) async {
