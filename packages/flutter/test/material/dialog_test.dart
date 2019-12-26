@@ -13,26 +13,26 @@ import '../widgets/semantics_tester.dart';
 
 MaterialApp _appWithAlertDialog(WidgetTester tester, AlertDialog dialog, { ThemeData theme }) {
   return MaterialApp(
-      theme: theme,
-      home: Material(
-        child: Builder(
-          builder: (BuildContext context) {
-            return Center(
-              child: RaisedButton(
-                child: const Text('X'),
-                onPressed: () {
-                  showDialog<void>(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return dialog;
-                    },
-                  );
-                },
-              ),
-            );
-          }
-        ),
+    theme: theme,
+    home: Material(
+      child: Builder(
+        builder: (BuildContext context) {
+          return Center(
+            child: RaisedButton(
+              child: const Text('X'),
+              onPressed: () {
+                showDialog<void>(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return dialog;
+                  },
+                );
+              },
+            ),
+          );
+        }
       ),
+    ),
   );
 }
 
@@ -338,6 +338,73 @@ void main() {
     expect(semantics, isNot(includesNodeWith(label: buttonText)));
 
     semantics.dispose();
+  });
+
+  testWidgets('AlertDialog.actionsPadding defaults to zero', (WidgetTester tester) async {
+    final AlertDialog dialog = AlertDialog(
+      title: const Text('title'),
+      content: const Text('content'),
+      actions: <Widget>[
+        RaisedButton(
+          onPressed: () {},
+          child: const Text('button'),
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(
+      _appWithAlertDialog(tester, dialog),
+    );
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    // The [AlertDialog] is the entire screen, since it also contains the scrim.
+    // The first [Material] child of [AlertDialog] is the actual dialog
+    // itself.
+    final Size dialogSize = tester.getSize(
+      find.descendant(
+        of: find.byType(AlertDialog),
+        matching: find.byType(Material),
+      ).first,
+    );
+    final Size actionsSize = tester.getSize(find.byType(ButtonBar));
+
+    expect(actionsSize.width, dialogSize.width);
+  });
+
+  testWidgets('AlertDialog.actionsPadding surrounds actions with padding', (WidgetTester tester) async {
+    final AlertDialog dialog = AlertDialog(
+      title: const Text('title'),
+      content: const Text('content'),
+      actions: <Widget>[
+        RaisedButton(
+          onPressed: () {},
+          child: const Text('button'),
+        ),
+      ],
+      actionsPadding: const EdgeInsets.all(30.0), // custom padding value
+    );
+
+    await tester.pumpWidget(
+      _appWithAlertDialog(tester, dialog),
+    );
+
+    await tester.tap(find.text('X'));
+    await tester.pumpAndSettle();
+
+    // The [AlertDialog] is the entire screen, since it also contains the scrim.
+    // The first [Material] child of [AlertDialog] is the actual dialog
+    // itself.
+    final Size dialogSize = tester.getSize(
+      find.descendant(
+        of: find.byType(AlertDialog),
+        matching: find.byType(Material),
+      ).first,
+    );
+    final Size actionsSize = tester.getSize(find.byType(ButtonBar));
+
+    expect(actionsSize.width, dialogSize.width - (30.0 * 2));
   });
 
   testWidgets('Dialogs removes MediaQuery padding and view insets', (WidgetTester tester) async {

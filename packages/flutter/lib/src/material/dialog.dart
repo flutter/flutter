@@ -297,7 +297,9 @@ class AlertDialog extends StatelessWidget {
   /// of the dialog.
   ///
   /// If there is no [actions], no padding will be provided. The padding around
-  /// the button bar defaults to zero.
+  /// the button bar defaults to zero. It is also important to note that
+  /// [buttonPadding] may contribute to the padding on the edges of [actions] as
+  /// well.
   ///
   /// {@tool sample}
   /// This is an example of a set of actions aligned with the content widget.
@@ -317,9 +319,9 @@ class AlertDialog extends StatelessWidget {
 
   /// Defines the padding for a button's child (typically the button's label).
   ///
-  /// If null then it will use the surrounding [ButtonBarTheme.buttonPadding].
-  /// If that is null, it will default to 8.0 logical pixels on the left
-  /// and right.
+  /// If this property is null, then it will use the surrounding
+  /// [ButtonBarTheme.buttonPadding]. If that is null, it will default to
+  /// 8.0 logical pixels on the left and right.
   final EdgeInsetsGeometry buttonPadding;
 
   /// {@macro flutter.material.dialog.backgroundColor}
