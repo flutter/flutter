@@ -312,7 +312,7 @@ class AlertDialog extends StatelessWidget {
   ///     RaisedButton(onPressed: () {}, child: Text('Button 2')),
   ///   ],
   ///   actionsPadding: EdgeInsets.symmetric(horizontal: 8.0),
-  /// );
+  /// )
   /// ```
   /// {@end-tool}
   final EdgeInsetsGeometry actionsPadding;
