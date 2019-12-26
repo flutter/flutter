@@ -340,7 +340,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('AlertDialog.actionsPadding defaults to zero', (WidgetTester tester) async {
+  testWidgets('AlertDialog.actionsPadding defaults', (WidgetTester tester) async {
     final AlertDialog dialog = AlertDialog(
       title: const Text('title'),
       content: const Text('content'),
@@ -407,7 +407,7 @@ void main() {
     expect(actionsSize.width, dialogSize.width - (30.0 * 2));
   });
 
-  testWidgets('AlertDialog.buttonPadding defaults to 8.0 on every side', (WidgetTester tester) async {
+  testWidgets('AlertDialog.buttonPadding defaults', (WidgetTester tester) async {
     final GlobalKey key1 = GlobalKey();
     final GlobalKey key2 = GlobalKey();
 
