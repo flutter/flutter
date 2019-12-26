@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:args/args.dart' as argslib;
@@ -46,6 +47,15 @@ Future<void> main(List<String> arguments) async {
     help: 'The Dart class name to use for the output localization and '
       'localizations delegate classes.',
   );
+  parser.addOption(
+    'preferred-supported-locale',
+    help: 'The list of preferred supported locales for the application. '
+      'By default, the tool will generate the supported locales list in '
+      'alphabetical order. Use this flag if you would like to default to '
+      'a different locale. \n\n'
+      'For example, pass in [\'en_US\'] of you would like your app to '
+      'default to American English if a device supports it.',
+  );
 
   final argslib.ArgResults results = parser.parse(arguments);
   if (results['help'] == true) {
@@ -58,6 +68,13 @@ Future<void> main(List<String> arguments) async {
   final String templateArbFileName = results['template-arb-file'] as String;
   final String classNameString = results['output-class'] as String;
 
+  final List<String> preferredLocalesStringList = json.decode(
+    results['preferred-supported-locale'] as String
+  ) as List<String>;
+  final List<LocaleInfo> inputPreferredLocales = preferredLocalesStringList.map((String localeString) {
+    return LocaleInfo.fromString(localeString);
+  }).toList();
+
   const local.LocalFileSystem fs = local.LocalFileSystem();
   final LocalizationsGenerator localizationsGenerator = LocalizationsGenerator(fs);
   try {
@@ -67,6 +84,7 @@ Future<void> main(List<String> arguments) async {
         templateArbFileName: templateArbFileName,
         outputFileString: outputFileString,
         classNameString: classNameString,
+        preferredSupportedLocales: inputPreferredLocales,
       )
       ..parseArbFiles()
       ..generateClassMethods()
