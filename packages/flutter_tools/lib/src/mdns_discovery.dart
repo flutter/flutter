@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -10,8 +10,10 @@ import 'package:multicast_dns/multicast_dns.dart';
 import 'base/common.dart';
 import 'base/context.dart';
 import 'base/io.dart';
+import 'build_info.dart';
 import 'device.dart';
 import 'globals.dart';
+import 'reporting/reporting.dart';
 
 /// A wrapper around [MDnsClient] to find a Dart observatory instance.
 class MDnsObservatoryDiscovery {
@@ -50,7 +52,8 @@ class MDnsObservatoryDiscovery {
   /// If it is null and there is only one available instance of Observatory,
   /// it will return that instance's information regardless of what application
   /// the Observatory instance is for.
-  Future<MDnsObservatoryDiscoveryResult> query({String applicationId}) async {
+  // TODO(jonahwilliams): use `deviceVmservicePort` to filter mdns results.
+  Future<MDnsObservatoryDiscoveryResult> query({String applicationId, int deviceVmservicePort}) async {
     printTrace('Checking for advertised Dart observatories...');
     try {
       await client.start();
@@ -136,16 +139,82 @@ class MDnsObservatoryDiscovery {
     }
   }
 
-  Future<Uri> getObservatoryUri(String applicationId, Device device, [bool usesIpv6 = false, int observatoryPort]) async {
-    final MDnsObservatoryDiscoveryResult result = await query(applicationId: applicationId);
-    Uri observatoryUri;
-    if (result != null) {
-      final String host = usesIpv6
-        ? InternetAddress.loopbackIPv6.address
-        : InternetAddress.loopbackIPv4.address;
-      observatoryUri = await buildObservatoryUri(device, host, result.port, observatoryPort, result.authCode);
+  Future<Uri> getObservatoryUri(String applicationId, Device device, {
+    bool usesIpv6 = false,
+    int hostVmservicePort,
+    int deviceVmservicePort,
+  }) async {
+    final MDnsObservatoryDiscoveryResult result = await query(
+      applicationId: applicationId,
+      deviceVmservicePort: deviceVmservicePort,
+    );
+    if (result == null) {
+      await _checkForIPv4LinkLocal(device);
+      return null;
     }
-    return observatoryUri;
+
+    final String host = usesIpv6
+      ? InternetAddress.loopbackIPv6.address
+      : InternetAddress.loopbackIPv4.address;
+    return await buildObservatoryUri(
+      device,
+      host,
+      result.port,
+      hostVmservicePort,
+      result.authCode,
+    );
+  }
+
+  // If there's not an ipv4 link local address in `NetworkInterfaces.list`,
+  // then request user interventions with a `printError()` if possible.
+  Future<void> _checkForIPv4LinkLocal(Device device) async {
+    printTrace(
+      'mDNS query failed. Checking for an interface with a ipv4 link local address.'
+    );
+    final List<NetworkInterface> interfaces = await listNetworkInterfaces(
+      includeLinkLocal: true,
+      type: InternetAddressType.IPv4,
+    );
+    if (logger.isVerbose) {
+      _logInterfaces(interfaces);
+    }
+    final bool hasIPv4LinkLocal = interfaces.any(
+      (NetworkInterface interface) => interface.addresses.any(
+        (InternetAddress address) => address.isLinkLocal,
+      ),
+    );
+    if (hasIPv4LinkLocal) {
+      printTrace('An interface with an ipv4 link local address was found.');
+      return;
+    }
+    final TargetPlatform targetPlatform = await device.targetPlatform;
+    switch (targetPlatform) {
+      case TargetPlatform.ios:
+        UsageEvent('ios-mdns', 'no-ipv4-link-local').send();
+        printError(
+          'The mDNS query for an attached iOS device failed. It may '
+          'be necessary to disable the "Personal Hotspot" on the device, and '
+          'to ensure that the "Disable unless needed" setting is unchecked '
+          'under System Preferences > Network > iPhone USB.'
+          'See https://github.com/flutter/flutter/issues/46698 for details.'
+        );
+        break;
+      default:
+        printTrace('No interface with an ipv4 link local address was found.');
+        break;
+    }
+  }
+
+  void _logInterfaces(List<NetworkInterface> interfaces) {
+    for (NetworkInterface interface in interfaces) {
+      if (logger.isVerbose) {
+        printTrace('Found interface "${interface.name}":');
+        for (InternetAddress address in interface.addresses) {
+          final String linkLocal = address.isLinkLocal ? 'link local' : '';
+          printTrace('\tBound address: "${address.address}" $linkLocal');
+        }
+      }
+    }
   }
 }
 
@@ -159,7 +228,7 @@ Future<Uri> buildObservatoryUri(
   Device device,
   String host,
   int devicePort, [
-  int observatoryPort,
+  int hostVmservicePort,
   String authCode,
 ]) async {
   String path = '/';
@@ -171,7 +240,7 @@ Future<Uri> buildObservatoryUri(
   if (!path.endsWith('/')) {
     path += '/';
   }
-  final int localPort = observatoryPort
-      ?? await device.portForwarder.forward(devicePort);
-  return Uri(scheme: 'http', host: host, port: localPort, path: path);
+  final int actualHostPort = hostVmservicePort ?? await device
+    .portForwarder.forward(devicePort);
+  return Uri(scheme: 'http', host: host, port: actualHostPort, path: path);
 }

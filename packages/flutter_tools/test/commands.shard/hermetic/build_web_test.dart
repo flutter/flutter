@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -57,18 +57,22 @@ void main() {
       fs.path.join('lib', 'main.dart'),
       BuildInfo.debug,
       false,
+      const <String>[],
     ), throwsA(isInstanceOf<ToolExit>()));
   }));
 
   test('Refuses to build using runner when missing index.html', () => testbed.run(() async {
     fs.file(fs.path.join('web', 'index.html')).deleteSync();
 
-    final ResidentWebRunner runner = ResidentWebRunner(
+    final ResidentWebRunner runner = DwdsWebRunnerFactory().createWebRunner(
       null,
       flutterProject: FlutterProject.current(),
       ipv6: false,
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-    );
+      stayResident: true,
+      dartDefines: const <String>[],
+      urlTunneller: null,
+    ) as ResidentWebRunner;
     expect(await runner.run(), 1);
   }));
 

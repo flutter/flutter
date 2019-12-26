@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -249,51 +249,51 @@ abstract class RawKeyEvent extends Diagnosticable {
   factory RawKeyEvent.fromMessage(Map<String, dynamic> message) {
     RawKeyEventData data;
 
-    final String keymap = message['keymap'];
+    final String keymap = message['keymap'] as String;
     switch (keymap) {
       case 'android':
         data = RawKeyEventDataAndroid(
-          flags: message['flags'] ?? 0,
-          codePoint: message['codePoint'] ?? 0,
-          keyCode: message['keyCode'] ?? 0,
-          plainCodePoint: message['plainCodePoint'] ?? 0,
-          scanCode: message['scanCode'] ?? 0,
-          metaState: message['metaState'] ?? 0,
-          eventSource: message['source'] ?? 0,
-          vendorId: message['vendorId'] ?? 0,
-          productId: message['productId'] ?? 0,
-          deviceId: message['deviceId'] ?? 0,
-          repeatCount: message['repeatCount'] ?? 0,
+          flags: message['flags'] as int ?? 0,
+          codePoint: message['codePoint'] as int ?? 0,
+          keyCode: message['keyCode'] as int ?? 0,
+          plainCodePoint: message['plainCodePoint'] as int ?? 0,
+          scanCode: message['scanCode'] as int ?? 0,
+          metaState: message['metaState'] as int ?? 0,
+          eventSource: message['source'] as int ?? 0,
+          vendorId: message['vendorId'] as int ?? 0,
+          productId: message['productId'] as int ?? 0,
+          deviceId: message['deviceId'] as int ?? 0,
+          repeatCount: message['repeatCount'] as int ?? 0,
         );
         break;
       case 'fuchsia':
         data = RawKeyEventDataFuchsia(
-          hidUsage: message['hidUsage'] ?? 0,
-          codePoint: message['codePoint'] ?? 0,
-          modifiers: message['modifiers'] ?? 0,
+          hidUsage: message['hidUsage'] as int ?? 0,
+          codePoint: message['codePoint'] as int ?? 0,
+          modifiers: message['modifiers'] as int ?? 0,
         );
         break;
       case 'macos':
         data = RawKeyEventDataMacOs(
-            characters: message['characters'] ?? '',
-            charactersIgnoringModifiers:
-                message['charactersIgnoringModifiers'] ?? '',
-            keyCode: message['keyCode'] ?? 0,
-            modifiers: message['modifiers'] ?? 0);
+            characters: message['characters'] as String ?? '',
+            charactersIgnoringModifiers: message['charactersIgnoringModifiers'] as String ?? '',
+            keyCode: message['keyCode'] as int ?? 0,
+            modifiers: message['modifiers'] as int ?? 0);
         break;
       case 'linux':
         data = RawKeyEventDataLinux(
-            keyHelper: KeyHelper(message['toolkit'] ?? ''),
-            unicodeScalarValues: message['unicodeScalarValues'] ?? 0,
-            keyCode: message['keyCode'] ?? 0,
-            scanCode: message['scanCode'] ?? 0,
-            modifiers: message['modifiers'] ?? 0);
+            keyHelper: KeyHelper(message['toolkit'] as String ?? ''),
+            unicodeScalarValues: message['unicodeScalarValues'] as int ?? 0,
+            keyCode: message['keyCode'] as int ?? 0,
+            scanCode: message['scanCode'] as int ?? 0,
+            modifiers: message['modifiers'] as int ?? 0,
+            isDown: message['type'] == 'keydown');
         break;
       case 'web':
         data = RawKeyEventDataWeb(
-          code: message['code'],
-          key: message['key'],
-          metaState: message['metaState'],
+          code: message['code'] as String,
+          key: message['key'] as String,
+          metaState: message['metaState'] as int,
         );
         break;
       default:
@@ -303,10 +303,10 @@ abstract class RawKeyEvent extends Diagnosticable {
         throw FlutterError('Unknown keymap for key events: $keymap');
     }
 
-    final String type = message['type'];
+    final String type = message['type'] as String;
     switch (type) {
       case 'keydown':
-        return RawKeyDownEvent(data: data, character: message['character']);
+        return RawKeyDownEvent(data: data, character: message['character'] as String);
       case 'keyup':
         return RawKeyUpEvent(data: data);
       default:
@@ -498,8 +498,17 @@ class RawKeyboard {
   }
 
   Future<dynamic> _handleKeyEvent(dynamic message) async {
-    final RawKeyEvent event = RawKeyEvent.fromMessage(message);
+    final RawKeyEvent event = RawKeyEvent.fromMessage(message as Map<String, dynamic>);
     if (event == null) {
+      return;
+    }
+    if (event.data is RawKeyEventDataMacOs && event.logicalKey == LogicalKeyboardKey.fn) {
+      // On macOS laptop keyboards, the fn key is used to generate home/end and
+      // f1-f12, but it ALSO generates a separate down/up event for the fn key
+      // itself. Other platforms hide the fn key, and just produce the key that
+      // it is combined with, so to keep it possible to write cross platform
+      // code that looks at which keys are pressed, the fn key is ignored on
+      // macOS.
       return;
     }
     if (event is RawKeyDownEvent) {
@@ -561,7 +570,6 @@ class RawKeyboard {
     LogicalKeyboardKey.capsLock,
     LogicalKeyboardKey.numLock,
     LogicalKeyboardKey.scrollLock,
-    LogicalKeyboardKey.fn,
   };
 
   void _synchronizeModifiers(RawKeyEvent event) {
@@ -580,6 +588,10 @@ class RawKeyboard {
     // pressed/released while the app doesn't have focus, to make sure that
     // _keysPressed reflects reality at all times.
     _keysPressed.removeAll(_allModifiers);
+    if (event.data is! RawKeyEventDataFuchsia && event.data is! RawKeyEventDataMacOs) {
+      // On Fuchsia and macOS, the Fn key is not considered a modifier key.
+      _keysPressed.remove(LogicalKeyboardKey.fn);
+    }
     _keysPressed.addAll(modifierKeys);
   }
 

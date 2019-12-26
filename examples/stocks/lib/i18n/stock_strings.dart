@@ -30,8 +30,7 @@ import 'messages_all.dart';
 ///
 /// ```
 /// dependencies:
-///   # rest of dependencies
-///
+///   # Internationalization support.
 ///   flutter_localizations:
 ///     sdk: flutter
 ///   intl: 0.16.0
@@ -60,13 +59,13 @@ import 'messages_all.dart';
 /// be consistent with the languages listed in the StockStrings.supportedLocales
 /// property.
 class StockStrings {
-  StockStrings(Locale locale) : _localeName = locale.toString();
+  StockStrings(Locale locale) : _localeName = Intl.canonicalizedLocale(locale.toString());
 
   final String _localeName;
 
   static Future<StockStrings> load(Locale locale) {
     return initializeMessages(locale.toString())
-      .then<StockStrings>((void _) => StockStrings(locale));
+      .then<StockStrings>((_) => StockStrings(locale));
   }
 
   static StockStrings of(BuildContext context) {
@@ -94,33 +93,30 @@ class StockStrings {
     Locale('es', 'ES'),
   ];
 
-  String title() {
-    return Intl.message(
-      r'Stocks',
-      locale: _localeName,
-      name: 'title',
-      desc: 'Title for the Stocks application',
-      args: <Object>[]
-    );
-  }
-
-  String market() {
+  String get market {
     return Intl.message(
       r'MARKET',
       locale: _localeName,
       name: 'market',
-      desc: 'Label for the Market tab',
-      args: <Object>[]
+      desc: r'Label for the Market tab'
     );
   }
 
-  String portfolio() {
+  String get portfolio {
     return Intl.message(
       r'PORTFOLIO',
       locale: _localeName,
       name: 'portfolio',
-      desc: 'Label for the Portfolio tab',
-      args: <Object>[]
+      desc: r'Label for the Portfolio tab'
+    );
+  }
+
+  String get title {
+    return Intl.message(
+      r'Stocks',
+      locale: _localeName,
+      name: 'title',
+      desc: r'Title for the Stocks application'
     );
   }
 

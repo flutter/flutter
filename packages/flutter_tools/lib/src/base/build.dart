@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -158,11 +158,11 @@ class AOTSnapshotter {
 
     genSnapshotArgs.add(mainPath);
 
-    // Verify that all required inputs exist.
+    // TODO(jonahwilliams): fully remove input checks once all callers are
+    // using assemble.
     final Iterable<String> missingInputs = inputPaths.where((String p) => !fs.isFileSync(p));
     if (missingInputs.isNotEmpty) {
-      printError('Missing input files: $missingInputs from $inputPaths');
-      return 1;
+      printTrace('Missing input files: $missingInputs from $inputPaths');
     }
 
     final SnapshotType snapshotType = SnapshotType(platform, buildMode);
@@ -197,6 +197,7 @@ class AOTSnapshotter {
 
     // Write path to gen_snapshot, since snapshots have to be re-generated when we roll
     // the Dart SDK.
+    // TODO(jonahwilliams): remove when all callers are using assemble.
     final String genSnapshotPath = GenSnapshot.getSnapshotterPath(snapshotType);
     outputDir.childFile('gen_snapshot.d').writeAsStringSync('gen_snapshot.d: $genSnapshotPath\n');
 
@@ -241,8 +242,16 @@ class AOTSnapshotter {
 
     const String embedBitcodeArg = '-fembed-bitcode';
     final String assemblyO = fs.path.join(outputPath, 'snapshot_assembly.o');
+    List<String> isysrootArgs;
+    if (isIOS) {
+      final String iPhoneSDKLocation = await xcode.sdkLocation(SdkType.iPhone);
+      if (iPhoneSDKLocation != null) {
+        isysrootArgs = <String>['-isysroot', iPhoneSDKLocation];
+      }
+    }
     final RunResult compileResult = await xcode.cc(<String>[
       '-arch', targetArch,
+      if (isysrootArgs != null) ...isysrootArgs,
       if (bitcode) embedBitcodeArg,
       '-c',
       assemblyPath,
@@ -264,7 +273,7 @@ class AOTSnapshotter {
       '-Xlinker', '-rpath', '-Xlinker', '@loader_path/Frameworks',
       '-install_name', '@rpath/App.framework/App',
       if (bitcode) embedBitcodeArg,
-      if (bitcode && isIOS) ...<String>[embedBitcodeArg, '-isysroot', await xcode.iPhoneSdkLocation()],
+      if (isysrootArgs != null) ...isysrootArgs,
       '-o', appLib,
       assemblyO,
     ];
@@ -285,6 +294,7 @@ class AOTSnapshotter {
     @required String packagesPath,
     @required String outputPath,
     @required bool trackWidgetCreation,
+    @required List<String> dartDefines,
     List<String> extraFrontEndOptions = const <String>[],
   }) async {
     final FlutterProject flutterProject = FlutterProject.current();
@@ -315,6 +325,7 @@ class AOTSnapshotter {
       aot: true,
       buildMode: buildMode,
       trackWidgetCreation: trackWidgetCreation,
+      dartDefines: dartDefines,
     ));
 
     // Write path to frontend_server, since things need to be re-generated when that changes.

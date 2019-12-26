@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -257,11 +257,11 @@ class _Asset {
 
   final String baseDir;
 
-  /// A platform-independent Uri where this asset can be found on disk on the
+  /// A platform-independent URL where this asset can be found on disk on the
   /// host system relative to [baseDir].
   final Uri relativeUri;
 
-  /// A platform-independent Uri representing the entry for the asset manifest.
+  /// A platform-independent URL representing the entry for the asset manifest.
   final Uri entryUri;
 
   File get assetFile {
@@ -291,10 +291,10 @@ class _Asset {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    final _Asset otherAsset = other;
-    return otherAsset.baseDir == baseDir
-        && otherAsset.relativeUri == relativeUri
-        && otherAsset.entryUri == entryUri;
+    return other is _Asset
+        && other.baseDir == baseDir
+        && other.relativeUri == relativeUri
+        && other.entryUri == entryUri;
   }
 
   @override
@@ -315,7 +315,7 @@ Map<String, dynamic> _readMaterialFontsManifest() {
 final Map<String, dynamic> _materialFontsManifest = _readMaterialFontsManifest();
 
 List<Map<String, dynamic>> _getMaterialFonts(String fontSet) {
-  final List<dynamic> fontsList = _materialFontsManifest[fontSet];
+  final List<dynamic> fontsList = _materialFontsManifest[fontSet] as List<dynamic>;
   return fontsList?.map<Map<String, dynamic>>(castStringKeyedMap)?.toList();
 }
 
@@ -324,7 +324,7 @@ List<_Asset> _getMaterialAssets(String fontSet) {
 
   for (Map<String, dynamic> family in _getMaterialFonts(fontSet)) {
     for (Map<dynamic, dynamic> font in family['fonts']) {
-      final Uri entryUri = fs.path.toUri(font['asset']);
+      final Uri entryUri = fs.path.toUri(font['asset'] as String);
       result.add(_Asset(
         baseDir: fs.path.join(Cache.flutterRoot, 'bin', 'cache', 'artifacts', 'material_fonts'),
         relativeUri: Uri(path: entryUri.pathSegments.last),

@@ -1,4 +1,4 @@
-// Copyright (c) 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -12,6 +12,8 @@ import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 import 'package:process/process.dart';
 import 'package:stack_trace/stack_trace.dart';
+
+import 'framework.dart';
 
 /// Virtual current working directory, which affect functions, such as [exec].
 String cwd = Directory.current.path;
@@ -119,7 +121,7 @@ void recursiveCopy(Directory source, Directory target) {
 
   for (FileSystemEntity entity in source.listSync(followLinks: false)) {
     final String name = path.basename(entity.path);
-    if (entity is Directory)
+    if (entity is Directory && !entity.path.contains('.dart_tool'))
       recursiveCopy(entity, Directory(path.join(target.path, name)));
     else if (entity is File) {
       final File dest = File(path.join(target.path, name));
@@ -184,7 +186,7 @@ void section(String title) {
 Future<String> getDartVersion() async {
   // The Dart VM returns the version text to stderr.
   final ProcessResult result = _processManager.runSync(<String>[dartBin, '--version']);
-  String version = result.stderr.trim();
+  String version = (result.stderr as String).trim();
 
   // Convert:
   //   Dart VM version: 1.17.0-dev.2.0 (Tue May  3 12:14:52 2016) on "macos_x64"
@@ -463,7 +465,7 @@ String requireEnvVar(String name) {
 T requireConfigProperty<T>(Map<String, dynamic> map, String propertyName) {
   if (!map.containsKey(propertyName))
     fail('Configuration property not found: $propertyName');
-  final T result = map[propertyName];
+  final T result = map[propertyName] as T;
   return result;
 }
 
@@ -569,7 +571,7 @@ String extractCloudAuthTokenArg(List<String> rawArgs) {
     return null;
   }
 
-  final String token = args['cloud-auth-token'];
+  final String token = args['cloud-auth-token'] as String;
   if (token == null) {
     stderr.writeln('Required option --cloud-auth-token not found');
     return null;
@@ -600,7 +602,7 @@ int parseServicePort(String line, {
   return matches.isEmpty ? null : int.parse(matches[0].group(2));
 }
 
-/// Tries to extract a Uri from the string.
+/// Tries to extract a URL from the string.
 ///
 /// The `prefix`, if specified, is a regular expression pattern and must not contain groups.
 /// `prefix` defaults to the RegExp: `An Observatory debugger .* is available at: `.
@@ -621,56 +623,45 @@ Uri parseServiceUri(String line, {
 /// Checks that the file exists, otherwise throws a [FileSystemException].
 void checkFileExists(String file) {
   if (!exists(File(file))) {
-    throw FileSystemException('Expected file to exit.', file);
+    throw FileSystemException('Expected file to exist.', file);
   }
 }
 
 /// Checks that the file does not exists, otherwise throws a [FileSystemException].
 void checkFileNotExists(String file) {
   if (exists(File(file))) {
-    throw FileSystemException('Expected file to exit.', file);
+    throw FileSystemException('Expected file to not exist.', file);
   }
 }
 
-void _checkExitCode(int code) {
-  if (code != 0) {
-    throw Exception(
-      'Unexpected exit code = $code!',
-    );
+/// Check that `collection` contains all entries in `values`.
+void checkCollectionContains<T>(Iterable<T> values, Iterable<T> collection) {
+  for (T value in values) {
+    if (!collection.contains(value)) {
+      throw TaskResult.failure('Expected to find `$value` in `${collection.toString()}`.');
+    }
   }
 }
 
-Future<void> _execAndCheck(String executable, List<String> args) async {
-  _checkExitCode(await exec(executable, args));
+/// Check that `collection` does not contain any entries in `values`
+void checkCollectionDoesNotContain<T>(Iterable<T> values, Iterable<T> collection) {
+  for (T value in values) {
+    if (collection.contains(value)) {
+      throw TaskResult.failure('Did not expect to find `$value` in `$collection`.');
+    }
+  }
 }
 
-// Measure the CPU/GPU percentage for [duration] while a Flutter app is running
-// on an iOS device (e.g., right after a Flutter driver test has finished, which
-// doesn't close the Flutter app, and the Flutter app has an indefinite
-// animation). The return should have a format like the following json
-// ```
-// {"gpu_percentage":12.6,"cpu_percentage":18.15}
-// ```
-Future<Map<String, dynamic>> measureIosCpuGpu({
-    Duration duration = const Duration(seconds: 10),
-    String deviceId,
-}) async {
-  await _execAndCheck('pub', <String>[
-    'global',
-    'activate',
-    'gauge',
-    '0.1.4',
-  ]);
-
-  await _execAndCheck('pub', <String>[
-    'global',
-    'run',
-    'gauge',
-    'ioscpugpu',
-    'new',
-    if (deviceId != null) ...<String>['-w', deviceId],
-    '-l',
-    '${duration.inMilliseconds}',
-  ]);
-  return json.decode(file('$cwd/result.json').readAsStringSync());
+/// Checks that the contents of a [File] at `filePath` contains the specified
+/// [Pattern]s, otherwise throws a [TaskResult].
+void checkFileContains(List<Pattern> patterns, String filePath) {
+  final String fileContent = File(filePath).readAsStringSync();
+  for (Pattern pattern in patterns) {
+    if (!fileContent.contains(pattern)) {
+      throw TaskResult.failure(
+        'Expected to find `$pattern` in `$filePath` '
+        'instead it found:\n$fileContent'
+      );
+    }
+  }
 }

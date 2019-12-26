@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -42,7 +42,7 @@ void main() {
       begin: const BoxDecoration(color: Color(0xFF00FF00)),
       end: const BoxDecoration(color: Color(0xFFFFFF00)),
     );
-    final BoxDecoration result = tween.lerp(0.25);
+    final BoxDecoration result = tween.lerp(0.25) as BoxDecoration;
     expect(result.color, const Color(0xFF3FFF00));
   });
 

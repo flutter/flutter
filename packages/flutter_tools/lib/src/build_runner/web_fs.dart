@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -26,6 +26,7 @@ import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
+import '../base/net.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../build_info.dart';
@@ -33,7 +34,6 @@ import '../bundle.dart';
 import '../cache.dart';
 import '../dart/package_map.dart';
 import '../dart/pub.dart';
-import '../device.dart';
 import '../globals.dart';
 import '../platform_plugins.dart';
 import '../plugins.dart';
@@ -70,9 +70,10 @@ typedef DwdsFactory = Future<Dwds> Function({
   LogWriter logWriter,
   bool verbose,
   bool enableDebugExtension,
+  UrlEncoder urlEncoder,
 });
 
-/// A function with the same signatuure as [WebFs.start].
+/// A function with the same signature as [WebFs.start].
 typedef WebFsFactory = Future<WebFs> Function({
   @required String target,
   @required FlutterProject flutterProject,
@@ -81,6 +82,8 @@ typedef WebFsFactory = Future<WebFs> Function({
   @required bool initializePlatform,
   @required String hostname,
   @required String port,
+  @required UrlTunneller urlTunneller,
+  @required List<String> dartDefines,
 });
 
 /// The dev filesystem responsible for building and serving  web applications.
@@ -97,9 +100,10 @@ class WebFs {
     this._target,
     this._buildInfo,
     this._initializePlatform,
+    this._dartDefines,
   );
 
-  /// The server uri.
+  /// The server URL.
   final String uri;
 
   final HttpServer _server;
@@ -111,6 +115,7 @@ class WebFs {
   final String _target;
   final BuildInfo _buildInfo;
   final bool _initializePlatform;
+  final List<String> _dartDefines;
   StreamSubscription<void> _connectedApps;
 
   static const String _kHostName = 'localhost';
@@ -128,12 +133,12 @@ class WebFs {
   /// Connect and retrieve the [DebugConnection] for the current application.
   ///
   /// Only calls [AppConnection.runMain] on the subsequent connections.
-  Future<ConnectionResult> connect(DebuggingOptions debuggingOptions) {
+  Future<ConnectionResult> connect(bool useDebugExtension) {
     final Completer<ConnectionResult> firstConnection = Completer<ConnectionResult>();
     _connectedApps = _dwds.connectedApps.listen((AppConnection appConnection) async {
-      final DebugConnection debugConnection = debuggingOptions.browserLaunch
-        ? await _dwds.debugConnection(appConnection)
-        : await (_cachedExtensionFuture ??= _dwds.extensionDebugConnections.stream.first);
+      final DebugConnection debugConnection = useDebugExtension
+        ? await (_cachedExtensionFuture ??= _dwds.extensionDebugConnections.stream.first)
+        : await _dwds.debugConnection(appConnection);
       if (!firstConnection.isCompleted) {
         firstConnection.complete(ConnectionResult(appConnection, debugConnection));
       } else {
@@ -146,7 +151,7 @@ class WebFs {
   /// Recompile the web application and return whether this was successful.
   Future<bool> recompile() async {
     if (!_useBuildRunner) {
-      await buildWeb(_flutterProject, _target, _buildInfo, _initializePlatform);
+      await buildWeb(_flutterProject, _target, _buildInfo, _initializePlatform, _dartDefines);
       return true;
     }
     _client.startBuild();
@@ -173,6 +178,8 @@ class WebFs {
     @required bool initializePlatform,
     @required String hostname,
     @required String port,
+    @required UrlTunneller urlTunneller,
+    @required List<String> dartDefines,
   }) async {
     // workaround for https://github.com/flutter/flutter/issues/38290
     if (!flutterProject.dartTool.existsSync()) {
@@ -295,6 +302,7 @@ class WebFs {
           serveDevTools: false,
           verbose: false,
           enableDebugExtension: true,
+          urlEncoder: urlTunneller,
           logWriter: (dynamic level, String message) => printTrace(message),
         );
         handler = pipeline.addHandler(dwds.handler);
@@ -302,7 +310,7 @@ class WebFs {
         handler = pipeline.addHandler(proxyHandler('http://localhost:$daemonAssetPort/web/'));
       }
     } else {
-      await buildWeb(flutterProject, target, buildInfo, initializePlatform);
+      await buildWeb(flutterProject, target, buildInfo, initializePlatform, dartDefines);
       firstBuildCompleter.complete(true);
     }
 
@@ -325,6 +333,7 @@ class WebFs {
       target,
       buildInfo,
       initializePlatform,
+      dartDefines,
     );
     if (!await firstBuildCompleter.future) {
       throw const BuildException();
@@ -349,11 +358,27 @@ abstract class AssetServer {
 }
 
 class ReleaseAssetServer extends AssetServer {
+  // Locations where source files, assets, or source maps may be located.
+  final List<Uri> _searchPaths = <Uri>[
+    fs.directory(getWebBuildDirectory()).uri,
+    fs.directory(Cache.flutterRoot).parent.uri,
+    fs.currentDirectory.childDirectory('lib').uri,
+  ];
+
   @override
   Future<Response> handle(Request request) async {
-    final Uri artifactUri = fs.directory(getWebBuildDirectory()).uri.resolveUri(request.url);
-    final File file = fs.file(artifactUri);
-    if (file.existsSync()) {
+    Uri fileUri;
+    for (Uri uri in _searchPaths) {
+      final Uri potential = uri.resolve(request.url.path);
+      if (potential == null || !fs.isFileSync(potential.toFilePath())) {
+        continue;
+      }
+      fileUri = potential;
+      break;
+    }
+
+    if (fileUri != null) {
+      final File file = fs.file(fileUri);
       final Uint8List bytes = file.readAsBytesSync();
       // Fallback to "application/octet-stream" on null which
       // makes no claims as to the structure of the data.
@@ -422,7 +447,7 @@ class DebugAssetServer extends AssetServer {
           partFiles = fs.systemTempDirectory.createTempSync('flutter_tool.')
             ..createSync();
           for (ArchiveFile file in archive) {
-            partFiles.childFile(file.name).writeAsBytesSync(file.content);
+            partFiles.childFile(file.name).writeAsBytesSync(file.content as List<int>);
           }
         }
       }

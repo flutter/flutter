@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -7,18 +7,16 @@ import 'package:meta/meta.dart';
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
-import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../build_info.dart';
-import '../convert.dart';
 import '../globals.dart';
 import '../project.dart';
 
 /// This is a simple wrapper around the custom kernel compiler from the Fuchsia
 /// SDK.
 class FuchsiaKernelCompiler {
-  /// Compiles the [fuchsiaProject] with entrypoint [target] to a collection of
+  /// Compiles the [fuchsiaProject] with entry point [target] to a collection of
   /// .dilp files (consisting of the app split along package: boundaries, but
   /// the Flutter tool should make no use of that fact), and a manifest that
   /// refers to them.
@@ -37,7 +35,7 @@ class FuchsiaKernelCompiler {
     final String manifestPath = fs.path.join(outDir, '$appName.dilpmanifest');
     final String kernelCompiler = artifacts.getArtifactPath(
       Artifact.fuchsiaKernelCompiler,
-      platform: TargetPlatform.fuchsia_x64,  // This file is not arch-specific.
+      platform: TargetPlatform.fuchsia_arm64,  // This file is not arch-specific.
       mode: buildInfo.mode,
     );
     if (!fs.isFileSync(kernelCompiler)) {
@@ -45,7 +43,7 @@ class FuchsiaKernelCompiler {
     }
     final String platformDill = artifacts.getArtifactPath(
       Artifact.platformKernelDill,
-      platform: TargetPlatform.fuchsia_x64,  // This file is not arch-specific.
+      platform: TargetPlatform.fuchsia_arm64,  // This file is not arch-specific.
       mode: buildInfo.mode,
     );
     if (!fs.isFileSync(platformDill)) {
@@ -58,33 +56,29 @@ class FuchsiaKernelCompiler {
       '--filesystem-root', fsRoot,
       '--packages', '$multiRootScheme:///$relativePackagesFile',
       '--output', fs.path.join(outDir, '$appName.dil'),
-      '--no-link-platform',
-      '--split-output-by-packages',
-      '--manifest', manifestPath,
       '--component-name', appName,
-    ];
 
-    if (buildInfo.isDebug) {
-      flags += <String>[
-        '--embed-sources',
-      ];
-    } else if (buildInfo.isProfile) {
-      flags += <String>[
-        '--no-embed-sources',
-        '-Ddart.vm.profile=true',
+      // AOT/JIT:
+      if (buildInfo.usesAot) ...<String>['--aot', '--tfa']
+      else ...<String>[
+        '--no-link-platform',
+        '--split-output-by-packages',
+        '--manifest', manifestPath
+      ],
+
+      // debug, profile, jit release, release:
+      if (buildInfo.isDebug) '--embed-sources'
+      else '--no-embed-sources',
+
+      if (buildInfo.isProfile) '-Ddart.vm.profile=true',
+      if (buildInfo.mode.isRelease) '-Ddart.vm.release=true',
+
+      // Use bytecode and drop the ast in JIT release mode.
+      if (buildInfo.isJitRelease) ...<String>[
         '--gen-bytecode',
         '--drop-ast',
-      ];
-    } else if (buildInfo.isRelease) {
-      flags += <String>[
-        '--no-embed-sources',
-        '-Ddart.vm.release=true',
-        '--gen-bytecode',
-        '--drop-ast',
-      ];
-    } else {
-      throwToolExit('Expected build type to be debug, profile, or release');
-    }
+      ],
+    ];
 
     flags += <String>[
       '$multiRootScheme:///$target',
@@ -95,22 +89,13 @@ class FuchsiaKernelCompiler {
       kernelCompiler,
       ...flags,
     ];
-    final Process process = await processUtils.start(command);
     final Status status = logger.startProgress(
       'Building Fuchsia application...',
       timeout: null,
     );
     int result;
     try {
-      process.stderr
-          .transform(utf8.decoder)
-          .transform(const LineSplitter())
-          .listen(printError);
-      process.stdout
-          .transform(utf8.decoder)
-          .transform(const LineSplitter())
-          .listen(printTrace);
-      result = await process.exitCode;
+      result = await processUtils.stream(command, trace: true);
     } finally {
       status.cancel();
     }

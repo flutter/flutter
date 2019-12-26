@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -24,7 +24,13 @@ Future<void> main() async {
       '$platformViewDirectoryPath/ios',
     );
     await inDirectory(iosDirectory, () async {
-      await exec('pod', <String>['install']);
+      await exec(
+        'pod',
+        <String>['install'],
+        environment: <String, String>{
+          'LANG': 'en_US.UTF-8',
+        },
+      );
     });
 
     final TaskFunction taskFunction = createPlatformViewStartupTest();

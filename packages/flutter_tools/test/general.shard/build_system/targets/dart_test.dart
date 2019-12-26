@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -118,7 +118,7 @@ flutter_tools:lib/''');
   }));
 
   test('kernel_snapshot handles null result from kernel compilation', () => testbed.run(() async {
-    final FakeKernelCompilerFactory fakeKernelCompilerFactory = kernelCompilerFactory;
+    final FakeKernelCompilerFactory fakeKernelCompilerFactory = kernelCompilerFactory as FakeKernelCompilerFactory;
     fakeKernelCompilerFactory.kernelCompiler = MockKernelCompiler();
     when(fakeKernelCompilerFactory.kernelCompiler.compile(
       sdkRoot: anyNamed('sdkRoot'),
@@ -136,6 +136,7 @@ flutter_tools:lib/''');
       fileSystemScheme: anyNamed('fileSystemScheme'),
       platformDill: anyNamed('platformDill'),
       initializeFromDill: anyNamed('initializeFromDill'),
+      dartDefines: anyNamed('dartDefines'),
     )).thenAnswer((Invocation invocation) async {
       return null;
     });
@@ -159,7 +160,11 @@ flutter_tools:lib/''');
       depFilePath: anyNamed('depFilePath'),
       packagesPath: anyNamed('packagesPath'),
       mainPath: anyNamed('mainPath'),
+      extraFrontEndOptions: anyNamed('extraFrontEndOptions'),
+      fileSystemRoots: anyNamed('fileSystemRoots'),
+      fileSystemScheme: anyNamed('fileSystemScheme'),
       linkPlatformKernelIn: anyNamed('linkPlatformKernelIn'),
+      dartDefines: anyNamed('dartDefines'),
     )).thenAnswer((Invocation _) async {
       return const CompilerOutput('example', 0, <Uri>[]);
     });
@@ -184,7 +189,11 @@ flutter_tools:lib/''');
       depFilePath: anyNamed('depFilePath'),
       packagesPath: anyNamed('packagesPath'),
       mainPath: anyNamed('mainPath'),
+      extraFrontEndOptions: anyNamed('extraFrontEndOptions'),
+      fileSystemRoots: anyNamed('fileSystemRoots'),
+      fileSystemScheme: anyNamed('fileSystemScheme'),
       linkPlatformKernelIn: false,
+      dartDefines: anyNamed('dartDefines'),
     )).thenAnswer((Invocation _) async {
       return const CompilerOutput('example', 0, <Uri>[]);
     });
@@ -195,6 +204,40 @@ flutter_tools:lib/''');
   }, overrides: <Type, Generator>{
     KernelCompilerFactory: () => MockKernelCompilerFactory(),
   }));
+
+  test('kernel_snapshot forces platform linking on debug for darwin target platforms', () => testbed.run(() async {
+    final MockKernelCompiler mockKernelCompiler = MockKernelCompiler();
+    when(kernelCompilerFactory.create(any)).thenAnswer((Invocation _) async {
+      return mockKernelCompiler;
+    });
+    when(mockKernelCompiler.compile(
+      sdkRoot: anyNamed('sdkRoot'),
+      aot: anyNamed('aot'),
+      buildMode: anyNamed('buildMode'),
+      trackWidgetCreation: anyNamed('trackWidgetCreation'),
+      targetModel: anyNamed('targetModel'),
+      outputFilePath: anyNamed('outputFilePath'),
+      depFilePath: anyNamed('depFilePath'),
+      packagesPath: anyNamed('packagesPath'),
+      mainPath: anyNamed('mainPath'),
+      extraFrontEndOptions: anyNamed('extraFrontEndOptions'),
+      fileSystemRoots: anyNamed('fileSystemRoots'),
+      fileSystemScheme: anyNamed('fileSystemScheme'),
+      linkPlatformKernelIn: true,
+      dartDefines: anyNamed('dartDefines'),
+    )).thenAnswer((Invocation _) async {
+      return const CompilerOutput('example', 0, <Uri>[]);
+    });
+
+    await const KernelSnapshot().build(androidEnvironment
+      ..defines[kTargetPlatform]  = 'darwin-x64'
+      ..defines[kBuildMode] = 'debug'
+      ..defines[kTrackWidgetCreation] = 'false'
+    );
+  }, overrides: <Type, Generator>{
+    KernelCompilerFactory: () => MockKernelCompilerFactory(),
+  }));
+
 
   test('kernel_snapshot does use track widget creation on debug builds', () => testbed.run(() async {
     final MockKernelCompiler mockKernelCompiler = MockKernelCompiler();
@@ -211,7 +254,11 @@ flutter_tools:lib/''');
       depFilePath: anyNamed('depFilePath'),
       packagesPath: anyNamed('packagesPath'),
       mainPath: anyNamed('mainPath'),
+      extraFrontEndOptions: anyNamed('extraFrontEndOptions'),
+      fileSystemRoots: anyNamed('fileSystemRoots'),
+      fileSystemScheme: anyNamed('fileSystemScheme'),
       linkPlatformKernelIn: false,
+      dartDefines: anyNamed('dartDefines'),
     )).thenAnswer((Invocation _) async {
       return const CompilerOutput('example', 0, <Uri>[]);
     });
@@ -366,10 +413,32 @@ flutter_tools:lib/''');
 
     expect(androidEnvironment.outputDir.childFile('app.so').existsSync(), true);
   }));
+
+  test('kExtraGenSnapshotOptions passes values to gen_snapshot', () => testbed.run(() async {
+    androidEnvironment.defines[kExtraGenSnapshotOptions] = 'foo,bar,baz=2';
+
+    when(genSnapshot.run(
+      snapshotType: anyNamed('snapshotType'),
+      darwinArch: anyNamed('darwinArch'),
+      additionalArgs: captureAnyNamed('additionalArgs'),
+    )).thenAnswer((Invocation invocation) async {
+      expect(invocation.namedArguments[#additionalArgs], containsAll(<String>[
+        'foo',
+        'bar',
+        'baz=2',
+      ]));
+      return 0;
+    });
+
+
+    await const AotElfRelease().build(androidEnvironment);
+  }, overrides: <Type, Generator>{
+    GenSnapshot: () => MockGenSnapshot(),
+  }));
 }
 
 class MockProcessManager extends Mock implements ProcessManager {}
-
+class MockGenSnapshot extends Mock implements GenSnapshot {}
 class MockXcode extends Mock implements Xcode {}
 
 class FakeGenSnapshot implements GenSnapshot {
@@ -422,6 +491,7 @@ class FakeKernelCompiler implements KernelCompiler {
     String fileSystemScheme,
     String platformDill,
     String initializeFromDill,
+    List<String> dartDefines,
   }) async {
     fs.file(outputFilePath).createSync(recursive: true);
     return CompilerOutput(outputFilePath, 0, null);

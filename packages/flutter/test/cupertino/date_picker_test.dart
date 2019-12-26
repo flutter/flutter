@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -694,7 +694,7 @@ void main() {
         // 2017 has 28 days in Feb so 29 is greyed out.
         expect(
           tester.widget<Text>(find.text('29')).style.color,
-          isSameColorAs(CupertinoColors.inactiveGray),
+          isSameColorAs(CupertinoColors.inactiveGray.color),
         );
 
         await tester.drag(find.text('2017'), const Offset(0.0, 32.0), touchSlopY: 0.0);
@@ -709,7 +709,7 @@ void main() {
         // 2016 has 29 days in Feb so 29 is not greyed out.
         expect(
           tester.widget<Text>(find.text('29')).style.color,
-          isNot(isSameColorAs(CupertinoColors.inactiveGray)),
+          isNot(isSameColorAs(CupertinoColors.inactiveGray.color)),
         );
 
         await tester.drag(find.text('2016'), const Offset(0.0, -32.0), touchSlopY: 0.0);
@@ -723,7 +723,7 @@ void main() {
 
         expect(
           tester.widget<Text>(find.text('29')).style.color,
-          isSameColorAs(CupertinoColors.inactiveGray),
+          isSameColorAs(CupertinoColors.inactiveGray.color),
         );
     });
 

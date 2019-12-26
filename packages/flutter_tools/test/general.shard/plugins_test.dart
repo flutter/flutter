@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -9,7 +9,7 @@ import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/plugins.dart';
 import 'package:flutter_tools/src/project.dart';
-
+import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 
 import '../src/common.dart';
@@ -32,7 +32,8 @@ void main() {
       // Add basic properties to the Flutter project and subprojects
       flutterProject = MockFlutterProject();
       when(flutterProject.directory).thenReturn(fs.directory('/'));
-      when(flutterProject.flutterPluginsFile).thenReturn(flutterProject.directory.childFile('.plugins'));
+      when(flutterProject.flutterPluginsFile).thenReturn(flutterProject.directory.childFile('.flutter-plugins'));
+      when(flutterProject.flutterPluginsDependenciesFile).thenReturn(flutterProject.directory.childFile('.flutter-plugins-dependencies'));
       iosProject = MockIosProject();
       when(flutterProject.ios).thenReturn(iosProject);
       when(iosProject.pluginRegistrantHost).thenReturn(flutterProject.directory.childDirectory('Runner'));
@@ -55,7 +56,7 @@ void main() {
       dummyPackageDirectory = fs.directory('/pubcache/apackage/lib/');
       packagesFile = fs.file(fs.path.join(flutterProject.directory.path, PackageMap.globalPackagesPath));
       packagesFile..createSync(recursive: true)
-          ..writeAsStringSync('apackage:file://${dummyPackageDirectory.path}');
+          ..writeAsStringSync('apackage:file://${dummyPackageDirectory.path}\n');
     });
 
     // Makes the dummy package pointed to by packagesFile look like a plugin.
@@ -69,6 +70,157 @@ void main() {
   ''');
     }
 
+
+    void createNewJavaPlugin1() {
+      final Directory pluginUsingJavaAndNewEmbeddingDir =
+              fs.systemTempDirectory.createTempSync('flutter_plugin_using_java_and_new_embedding_dir.');
+      pluginUsingJavaAndNewEmbeddingDir
+        .childFile('pubspec.yaml')
+        .writeAsStringSync('''
+flutter:
+  plugin:
+    androidPackage: plugin1
+    pluginClass: UseNewEmbedding
+              ''');
+      pluginUsingJavaAndNewEmbeddingDir
+        .childDirectory('android')
+        .childDirectory('src')
+        .childDirectory('main')
+        .childDirectory('java')
+        .childDirectory('plugin1')
+        .childFile('UseNewEmbedding.java')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('import io.flutter.embedding.engine.plugins.FlutterPlugin;');
+
+      flutterProject.directory
+        .childFile('.packages')
+        .writeAsStringSync(
+          'plugin1:${pluginUsingJavaAndNewEmbeddingDir.childDirectory('lib').uri.toString()}\n',
+          mode: FileMode.append,
+        );
+    }
+
+    void createNewKotlinPlugin2() {
+      final Directory pluginUsingKotlinAndNewEmbeddingDir =
+          fs.systemTempDirectory.createTempSync('flutter_plugin_using_kotlin_and_new_embedding_dir.');
+      pluginUsingKotlinAndNewEmbeddingDir
+        .childFile('pubspec.yaml')
+        .writeAsStringSync('''
+flutter:
+  plugin:
+    androidPackage: plugin2
+    pluginClass: UseNewEmbedding
+          ''');
+      pluginUsingKotlinAndNewEmbeddingDir
+        .childDirectory('android')
+        .childDirectory('src')
+        .childDirectory('main')
+        .childDirectory('kotlin')
+        .childDirectory('plugin2')
+        .childFile('UseNewEmbedding.kt')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('import io.flutter.embedding.engine.plugins.FlutterPlugin');
+
+      flutterProject.directory
+        .childFile('.packages')
+        .writeAsStringSync(
+          'plugin2:${pluginUsingKotlinAndNewEmbeddingDir.childDirectory('lib').uri.toString()}\n',
+          mode: FileMode.append,
+        );
+    }
+
+    void createOldJavaPlugin3() {
+      final Directory pluginUsingOldEmbeddingDir =
+        fs.systemTempDirectory.createTempSync('flutter_plugin_using_old_embedding_dir.');
+      pluginUsingOldEmbeddingDir
+        .childFile('pubspec.yaml')
+        .writeAsStringSync('''
+flutter:
+  plugin:
+    androidPackage: plugin3
+    pluginClass: UseOldEmbedding
+        ''');
+      pluginUsingOldEmbeddingDir
+        .childDirectory('android')
+        .childDirectory('src')
+        .childDirectory('main')
+        .childDirectory('java')
+        .childDirectory('plugin3')
+        .childFile('UseOldEmbedding.java')
+        ..createSync(recursive: true);
+
+      flutterProject.directory
+        .childFile('.packages')
+        .writeAsStringSync(
+          'plugin3:${pluginUsingOldEmbeddingDir.childDirectory('lib').uri.toString()}\n',
+          mode: FileMode.append,
+        );
+    }
+
+    void createDualSupportJavaPlugin4() {
+      final Directory pluginUsingJavaAndNewEmbeddingDir =
+        fs.systemTempDirectory.createTempSync('flutter_plugin_using_java_and_new_embedding_dir.');
+      pluginUsingJavaAndNewEmbeddingDir
+        .childFile('pubspec.yaml')
+        .writeAsStringSync('''
+flutter:
+  plugin:
+    androidPackage: plugin4
+    pluginClass: UseBothEmbedding
+''');
+      pluginUsingJavaAndNewEmbeddingDir
+        .childDirectory('android')
+        .childDirectory('src')
+        .childDirectory('main')
+        .childDirectory('java')
+        .childDirectory('plugin4')
+        .childFile('UseBothEmbedding.java')
+        ..createSync(recursive: true)
+        ..writeAsStringSync(
+          'import io.flutter.embedding.engine.plugins.FlutterPlugin;\n'
+          'PluginRegistry\n'
+          'registerWith(Irrelevant registrar)\n'
+        );
+
+      flutterProject.directory
+        .childFile('.packages')
+        .writeAsStringSync(
+          'plugin4:${pluginUsingJavaAndNewEmbeddingDir.childDirectory('lib').uri.toString()}',
+          mode: FileMode.append,
+        );
+    }
+
+    void createPluginWithDependencies({
+      @required String name,
+      @required List<String> dependencies,
+    }) {
+      assert(name != null);
+      assert(dependencies != null);
+
+      final Directory pluginDirectory = fs.systemTempDirectory.createTempSync('plugin.');
+      pluginDirectory
+        .childFile('pubspec.yaml')
+        .writeAsStringSync('''
+name: $name
+flutter:
+  plugin:
+    androidPackage: plugin2
+    pluginClass: UseNewEmbedding
+dependencies:
+''');
+      for (String dependency in dependencies) {
+        pluginDirectory
+          .childFile('pubspec.yaml')
+          .writeAsStringSync('  $dependency:\n', mode: FileMode.append);
+      }
+      flutterProject.directory
+        .childFile('.packages')
+        .writeAsStringSync(
+          '$name:${pluginDirectory.childDirectory('lib').uri.toString()}\n',
+          mode: FileMode.append,
+        );
+    }
+
     // Creates the files that would indicate that pod install has run for the
     // given project.
     void simulatePodInstallRun(XcodeBasedProject project) {
@@ -79,6 +231,7 @@ void main() {
       testUsingContext('Refreshing the plugin list is a no-op when the plugins list stays empty', () {
         refreshPluginsList(flutterProject);
         expect(flutterProject.flutterPluginsFile.existsSync(), false);
+        expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), false);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -90,6 +243,7 @@ void main() {
         when(macosProject.existsSync()).thenReturn(false);
         refreshPluginsList(flutterProject);
         expect(flutterProject.flutterPluginsFile.existsSync(), false);
+        expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), false);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -101,6 +255,49 @@ void main() {
         when(macosProject.existsSync()).thenReturn(false);
         refreshPluginsList(flutterProject);
         expect(flutterProject.flutterPluginsFile.existsSync(), true);
+        expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), true);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+      });
+
+      testUsingContext('Refreshing the plugin list modifies .flutter-plugins and .flutter-plugins-dependencies when there are plugins', () {
+        createPluginWithDependencies(name: 'plugin-a', dependencies: const <String>['plugin-b', 'plugin-c', 'random-package']);
+        createPluginWithDependencies(name: 'plugin-b', dependencies: const <String>['plugin-c']);
+        createPluginWithDependencies(name: 'plugin-c', dependencies: const <String>[]);
+        when(iosProject.existsSync()).thenReturn(false);
+        when(macosProject.existsSync()).thenReturn(false);
+
+        refreshPluginsList(flutterProject);
+
+        expect(flutterProject.flutterPluginsFile.existsSync(), true);
+        expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), true);
+        expect(flutterProject.flutterPluginsFile.readAsStringSync(),
+          '# This is a generated file; do not edit or check into version control.\n'
+          'plugin-a=/.tmp_rand0/plugin.rand0/\n'
+          'plugin-b=/.tmp_rand0/plugin.rand1/\n'
+          'plugin-c=/.tmp_rand0/plugin.rand2/\n'
+          ''
+        );
+        expect(flutterProject.flutterPluginsDependenciesFile.readAsStringSync(),
+          '{'
+            '"_info":"// This is a generated file; do not edit or check into version control.",'
+            '"dependencyGraph":['
+              '{'
+                '"name":"plugin-a",'
+                '"dependencies":["plugin-b","plugin-c"]'
+              '},'
+              '{'
+                '"name":"plugin-b",'
+                '"dependencies":["plugin-c"]'
+              '},'
+              '{'
+                '"name":"plugin-c",'
+                '"dependencies":[]'
+              '}'
+            ']'
+          '}'
+        );
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -149,6 +346,7 @@ void main() {
         expect(registrant.existsSync(), isTrue);
         expect(registrant.readAsStringSync(), contains('package io.flutter.plugins'));
         expect(registrant.readAsStringSync(), contains('class GeneratedPluginRegistrant'));
+        expect(registrant.readAsStringSync(), contains('public static void registerWith(PluginRegistry registry)'));
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -168,6 +366,7 @@ void main() {
         expect(registrant.existsSync(), isTrue);
         expect(registrant.readAsStringSync(), contains('package io.flutter.plugins'));
         expect(registrant.readAsStringSync(), contains('class GeneratedPluginRegistrant'));
+        expect(registrant.readAsStringSync(), contains('public static void registerWith(@NonNull FlutterEngine flutterEngine)'));
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -178,72 +377,9 @@ void main() {
         when(flutterProject.isModule).thenReturn(false);
         when(androidProject.getEmbeddingVersion()).thenReturn(AndroidEmbeddingVersion.v2);
 
-        final Directory pluginUsingJavaAndNewEmbeddingDir =
-          fs.systemTempDirectory.createTempSync('flutter_plugin_using_java_and_new_embedding_dir.');
-        pluginUsingJavaAndNewEmbeddingDir
-          .childFile('pubspec.yaml')
-          .writeAsStringSync('''
-  flutter:
-    plugin:
-      androidPackage: plugin1
-      pluginClass: UseNewEmbedding
-  ''');
-        pluginUsingJavaAndNewEmbeddingDir
-          .childDirectory('android')
-          .childDirectory('src')
-          .childDirectory('main')
-          .childDirectory('java')
-          .childDirectory('plugin1')
-          .childFile('UseNewEmbedding.java')
-          ..createSync(recursive: true)
-          ..writeAsStringSync('import io.flutter.embedding.engine.plugins.FlutterPlugin;');
-
-        final Directory pluginUsingKotlinAndNewEmbeddingDir =
-          fs.systemTempDirectory.createTempSync('flutter_plugin_using_kotlin_and_new_embedding_dir.');
-        pluginUsingKotlinAndNewEmbeddingDir
-          .childFile('pubspec.yaml')
-          .writeAsStringSync('''
-  flutter:
-    plugin:
-      androidPackage: plugin2
-      pluginClass: UseNewEmbedding
-  ''');
-        pluginUsingKotlinAndNewEmbeddingDir
-          .childDirectory('android')
-          .childDirectory('src')
-          .childDirectory('main')
-          .childDirectory('kotlin')
-          .childDirectory('plugin2')
-          .childFile('UseNewEmbedding.kt')
-          ..createSync(recursive: true)
-          ..writeAsStringSync('import io.flutter.embedding.engine.plugins.FlutterPlugin');
-
-        final Directory pluginUsingOldEmbeddingDir =
-          fs.systemTempDirectory.createTempSync('flutter_plugin_using_old_embedding_dir.');
-        pluginUsingOldEmbeddingDir
-          .childFile('pubspec.yaml')
-          .writeAsStringSync('''
-  flutter:
-    plugin:
-      androidPackage: plugin3
-      pluginClass: UseOldEmbedding
-  ''');
-        pluginUsingOldEmbeddingDir
-          .childDirectory('android')
-          .childDirectory('src')
-          .childDirectory('main')
-          .childDirectory('java')
-          .childDirectory('plugin3')
-          .childFile('UseOldEmbedding.java')
-          ..createSync(recursive: true);
-
-        flutterProject.directory
-          .childFile('.packages')
-          .writeAsStringSync('''
-plugin1:${pluginUsingJavaAndNewEmbeddingDir.childDirectory('lib').uri.toString()}
-plugin2:${pluginUsingKotlinAndNewEmbeddingDir.childDirectory('lib').uri.toString()}
-plugin3:${pluginUsingOldEmbeddingDir.childDirectory('lib').uri.toString()}
-''');
+        createNewJavaPlugin1();
+        createNewKotlinPlugin2();
+        createOldJavaPlugin3();
 
         await injectPlugins(flutterProject);
 
@@ -258,6 +394,8 @@ plugin3:${pluginUsingOldEmbeddingDir.childDirectory('lib').uri.toString()}
         expect(registrant.readAsStringSync(),
           contains('plugin3.UseOldEmbedding.registerWith(shimPluginRegistry.registrarFor("plugin3.UseOldEmbedding"));'));
 
+        // There should be no warning message
+        expect(testLogger.statusText, isNot(contains('go/android-plugin-migration')));
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -265,29 +403,34 @@ plugin3:${pluginUsingOldEmbeddingDir.childDirectory('lib').uri.toString()}
         XcodeProjectInterpreter: () => xcodeProjectInterpreter,
       });
 
-      testUsingContext('Registrant doesn\'t use new embedding if app doesn\'t use new embedding', () async {
+      testUsingContext('exits the tool if an app uses the v1 embedding and a plugin only supports the v2 embedding', () async {
         when(flutterProject.isModule).thenReturn(false);
         when(androidProject.getEmbeddingVersion()).thenReturn(AndroidEmbeddingVersion.v1);
 
-        await injectPlugins(flutterProject);
+        createNewJavaPlugin1();
 
-        final File registrant = flutterProject.directory
-          .childDirectory(fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
-          .childFile('GeneratedPluginRegistrant.java');
-
-        expect(registrant.existsSync(), isTrue);
-        expect(registrant.readAsStringSync(), contains('package io.flutter.plugins'));
-        expect(registrant.readAsStringSync(), contains('class GeneratedPluginRegistrant'));
+        await expectLater(
+          () async {
+            await injectPlugins(flutterProject);
+          },
+          throwsToolExit(
+            message: 'The plugin `plugin1` requires your app to be migrated to the Android embedding v2. '
+                     'Follow the steps on https://flutter.dev/go/android-project-migration and re-run this command.'
+          ),
+        );
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
         FeatureFlags: () => featureFlags,
+        XcodeProjectInterpreter: () => xcodeProjectInterpreter,
       });
 
-      testUsingContext('Registrant uses old embedding in module project', () async {
-        when(flutterProject.isModule).thenReturn(true);
+      testUsingContext('old embedding app uses a plugin that supports v1 and v2 embedding', () async {
+        when(flutterProject.isModule).thenReturn(false);
         when(androidProject.getEmbeddingVersion()).thenReturn(AndroidEmbeddingVersion.v1);
 
+        createDualSupportJavaPlugin4();
+
         await injectPlugins(flutterProject);
 
         final File registrant = flutterProject.directory
@@ -297,13 +440,40 @@ plugin3:${pluginUsingOldEmbeddingDir.childDirectory('lib').uri.toString()}
         expect(registrant.existsSync(), isTrue);
         expect(registrant.readAsStringSync(), contains('package io.flutter.plugins'));
         expect(registrant.readAsStringSync(), contains('class GeneratedPluginRegistrant'));
+        expect(registrant.readAsStringSync(),
+          contains('UseBothEmbedding.registerWith(registry.registrarFor("plugin4.UseBothEmbedding"));'));
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
         FeatureFlags: () => featureFlags,
+        XcodeProjectInterpreter: () => xcodeProjectInterpreter,
       });
 
-      testUsingContext('Registrant uses new embedding if module uses new embedding', () async {
+      testUsingContext('new embedding app uses a plugin that supports v1 and v2 embedding', () async {
+        when(flutterProject.isModule).thenReturn(false);
+        when(androidProject.getEmbeddingVersion()).thenReturn(AndroidEmbeddingVersion.v2);
+
+        createDualSupportJavaPlugin4();
+
+        await injectPlugins(flutterProject);
+
+        final File registrant = flutterProject.directory
+          .childDirectory(fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
+          .childFile('GeneratedPluginRegistrant.java');
+
+        expect(registrant.existsSync(), isTrue);
+        expect(registrant.readAsStringSync(), contains('package io.flutter.plugins'));
+        expect(registrant.readAsStringSync(), contains('class GeneratedPluginRegistrant'));
+        expect(registrant.readAsStringSync(),
+          contains('flutterEngine.getPlugins().add(new plugin4.UseBothEmbedding());'));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: () => featureFlags,
+        XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+      });
+
+      testUsingContext('Modules use new embedding', () async {
         when(flutterProject.isModule).thenReturn(true);
         when(androidProject.getEmbeddingVersion()).thenReturn(AndroidEmbeddingVersion.v2);
 
@@ -316,29 +486,76 @@ plugin3:${pluginUsingOldEmbeddingDir.childDirectory('lib').uri.toString()}
         expect(registrant.existsSync(), isTrue);
         expect(registrant.readAsStringSync(), contains('package io.flutter.plugins'));
         expect(registrant.readAsStringSync(), contains('class GeneratedPluginRegistrant'));
+        expect(registrant.readAsStringSync(), contains('public static void registerWith(@NonNull FlutterEngine flutterEngine)'));
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
         FeatureFlags: () => featureFlags,
       });
 
-      testUsingContext('Registrant doesn\'t use new embedding if module doesn\'t use new embedding', () async {
+      testUsingContext('Module using old plugin shows warning', () async {
         when(flutterProject.isModule).thenReturn(true);
-        when(androidProject.getEmbeddingVersion()).thenReturn(AndroidEmbeddingVersion.v1);
+        when(androidProject.getEmbeddingVersion()).thenReturn(AndroidEmbeddingVersion.v2);
+
+        createOldJavaPlugin3();
 
         await injectPlugins(flutterProject);
 
         final File registrant = flutterProject.directory
           .childDirectory(fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
           .childFile('GeneratedPluginRegistrant.java');
-
-        expect(registrant.existsSync(), isTrue);
-        expect(registrant.readAsStringSync(), contains('package io.flutter.plugins'));
-        expect(registrant.readAsStringSync(), contains('class GeneratedPluginRegistrant'));
+        expect(registrant.readAsStringSync(),
+          contains('plugin3.UseOldEmbedding.registerWith(shimPluginRegistry.registrarFor("plugin3.UseOldEmbedding"));'));
+        expect(testLogger.statusText, contains('The plugin `plugin3` is built using an older version of the Android plugin API'));
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
         FeatureFlags: () => featureFlags,
+        XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+      });
+
+      testUsingContext('Module using new plugin shows no warnings', () async {
+        when(flutterProject.isModule).thenReturn(true);
+        when(androidProject.getEmbeddingVersion()).thenReturn(AndroidEmbeddingVersion.v2);
+
+        createNewJavaPlugin1();
+
+        await injectPlugins(flutterProject);
+
+        final File registrant = flutterProject.directory
+          .childDirectory(fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
+          .childFile('GeneratedPluginRegistrant.java');
+        expect(registrant.readAsStringSync(),
+          contains('flutterEngine.getPlugins().add(new plugin1.UseNewEmbedding());'));
+
+        expect(testLogger.statusText, isNot(contains('go/android-plugin-migration')));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: () => featureFlags,
+        XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+      });
+
+      testUsingContext('Module using plugin with v1 and v2 support shows no warning', () async {
+        when(flutterProject.isModule).thenReturn(true);
+        when(androidProject.getEmbeddingVersion()).thenReturn(AndroidEmbeddingVersion.v2);
+
+        createDualSupportJavaPlugin4();
+
+        await injectPlugins(flutterProject);
+
+        final File registrant = flutterProject.directory
+          .childDirectory(fs.path.join('android', 'app', 'src', 'main', 'java', 'io', 'flutter', 'plugins'))
+          .childFile('GeneratedPluginRegistrant.java');
+        expect(registrant.readAsStringSync(),
+          contains('flutterEngine.getPlugins().add(new plugin4.UseBothEmbedding());'));
+
+        expect(testLogger.statusText, isNot(contains('go/android-plugin-migration')));
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: () => featureFlags,
+        XcodeProjectInterpreter: () => xcodeProjectInterpreter,
       });
 
       testUsingContext('Does not throw when AndroidManifest.xml is not found', () async {

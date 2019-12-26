@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -311,7 +311,7 @@ class __ZoomPageTransitionState extends State<_ZoomPageTransition> {
 /// Used by [PageTransitionsTheme] to define a [MaterialPageRoute] page
 /// transition animation.
 ///
-/// Apps can configure the map of builders for [ThemeData.platformTheme]
+/// Apps can configure the map of builders for [ThemeData.pageTransitionsTheme]
 /// to customize the default [MaterialPageRoute] page transition animation
 /// for different platforms.
 ///
@@ -486,14 +486,15 @@ class CupertinoPageTransitionsBuilder extends PageTransitionsBuilder {
 class PageTransitionsTheme extends Diagnosticable {
   /// Construct a PageTransitionsTheme.
   ///
-  /// By default the list of builders is: [FadeUpwardsPageTransitionsBuilder],
-  /// [CupertinoPageTransitionsBuilder] for [TargetPlatform.android]
-  /// and [TargetPlatform.iOS] respectively.
+  /// By default the list of builders is: [FadeUpwardsPageTransitionsBuilder]
+  /// for [TargetPlatform.android], and [CupertinoPageTransitionsBuilder] for
+  /// [TargetPlatform.iOS] and [TargetPlatform.macOS].
   const PageTransitionsTheme({ Map<TargetPlatform, PageTransitionsBuilder> builders }) : _builders = builders;
 
   static const Map<TargetPlatform, PageTransitionsBuilder> _defaultBuilders = <TargetPlatform, PageTransitionsBuilder>{
     TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
     TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+    TargetPlatform.macOS: CupertinoPageTransitionsBuilder(),
   };
 
   /// The [PageTransitionsBuilder]s supported by this theme.
@@ -533,10 +534,10 @@ class PageTransitionsTheme extends Diagnosticable {
       return true;
     if (other.runtimeType != runtimeType)
       return false;
-    final PageTransitionsTheme typedOther = other;
     if (identical(builders, other.builders))
       return true;
-    return listEquals<PageTransitionsBuilder>(_all(builders), _all(typedOther.builders));
+    return other is PageTransitionsTheme
+        && listEquals<PageTransitionsBuilder>(_all(other.builders), _all(builders));
   }
 
   @override

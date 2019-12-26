@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -7,12 +7,20 @@ import 'dart:typed_data';
 import 'package:meta/meta.dart';
 import 'package:mime/mime.dart' as mime;
 
+import '../artifacts.dart';
+import '../asset.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
+import '../base/platform.dart';
+import '../base/utils.dart';
 import '../build_info.dart';
+import '../bundle.dart';
+import '../compile.dart';
 import '../convert.dart';
+import '../devfs.dart';
 import '../globals.dart';
+import 'bootstrap.dart';
 
 /// A web server which handles serving JavaScript and assets.
 ///
@@ -49,7 +57,12 @@ class WebAssetServer {
   }
 
   final HttpServer _httpServer;
+  // If holding these in memory is too much overhead, this can be switched to a
+  // RandomAccessFile and read on demand.
   final Map<String, Uint8List> _files = <String, Uint8List>{};
+  final Map<String, Uint8List> _sourcemaps = <String, Uint8List>{};
+
+  final RegExp _drivePath = RegExp(r'\/[A-Z]:\/');
 
   // handle requests for JavaScript source, dart sources maps, or asset files.
   Future<void> _handleRequest(HttpRequest request) async {
@@ -69,12 +82,17 @@ class WebAssetServer {
       await response.close();
       return;
     }
+    // TODO(jonahwilliams): better path normalization in frontend_server to remove
+    // this workaround.
+    String requestPath = request.uri.path;
+    if (requestPath.startsWith(_drivePath)) {
+      requestPath = requestPath.substring(3);
+    }
 
     // If this is a JavaScript file, it must be in the in-memory cache.
-    // Attempt to look up the file by URI, returning a 404 if it is not
-    // found.
-    if (_files.containsKey(request.uri.path)) {
-      final List<int> bytes = _files[request.uri.path];
+    // Attempt to look up the file by URI.
+    if (_files.containsKey(requestPath)) {
+      final List<int> bytes = _files[requestPath];
       response.headers
         ..add('Content-Length', bytes.length)
         ..add('Content-Type', 'application/javascript');
@@ -82,6 +100,18 @@ class WebAssetServer {
       await response.close();
       return;
     }
+    // If this is a sourcemap file, then it might be in the in-memory cache.
+    // Attempt to lookup the file by URI.
+    if (_sourcemaps.containsKey(requestPath)) {
+      final List<int> bytes = _sourcemaps[requestPath];
+      response.headers
+        ..add('Content-Length', bytes.length)
+        ..add('Content-Type', 'application/json');
+      response.add(bytes);
+      await response.close();
+      return;
+    }
+
     // If this is a dart file, it must be on the local file system and is
     // likely coming from a source map request. Attempt to look in the
     // local filesystem for it, and return a 404 if it is not found. The tool
@@ -93,6 +123,18 @@ class WebAssetServer {
     if (!file.existsSync()) {
       final String assetPath = request.uri.path.replaceFirst('/assets/', '');
       file = fs.file(fs.path.join(getAssetBuildDirectory(), fs.path.relative(assetPath)));
+    }
+
+    // If it isn't a project source or an asset, it must be a dart SDK source.
+    // or a flutter web SDK source.
+    if (!file.existsSync()) {
+      final Directory dartSdkParent = fs.directory(artifacts.getArtifactPath(Artifact.engineDartSdkPath)).parent;
+      file = fs.file(fs.path.joinAll(<String>[dartSdkParent.path, ...request.uri.pathSegments]));
+    }
+
+    if (!file.existsSync()) {
+      final String flutterWebSdk = artifacts.getArtifactPath(Artifact.flutterWebSdk);
+      file = fs.file(fs.path.joinAll(<String>[flutterWebSdk, ...request.uri.pathSegments]));
     }
 
     if (!file.existsSync()) {
@@ -131,30 +173,204 @@ class WebAssetServer {
   /// Update the in-memory asset server with the provided source and manifest files.
   ///
   /// Returns a list of updated modules.
-  List<String> write(File sourceFile, File manifestFile) {
+  List<String> write(File codeFile, File manifestFile, File sourcemapFile) {
     final List<String> modules = <String>[];
-    final Uint8List bytes = sourceFile.readAsBytesSync();
-    final Map<String, Object> manifest = json.decode(manifestFile.readAsStringSync());
+    final Uint8List codeBytes = codeFile.readAsBytesSync();
+    final Uint8List sourcemapBytes = sourcemapFile.readAsBytesSync();
+    final Map<String, dynamic> manifest = castStringKeyedMap(json.decode(manifestFile.readAsStringSync()));
     for (String filePath in manifest.keys) {
       if (filePath == null) {
         printTrace('Invalid manfiest file: $filePath');
         continue;
       }
-      final List<Object> offsets = manifest[filePath];
-      if (offsets.length != 2) {
+      final Map<String, dynamic> offsets = castStringKeyedMap(manifest[filePath]);
+      final List<int> codeOffsets = (offsets['code'] as List<dynamic>).cast<int>();
+      final List<int> sourcemapOffsets = (offsets['sourcemap'] as List<dynamic>).cast<int>();
+      if (codeOffsets.length != 2 || sourcemapOffsets.length != 2) {
         printTrace('Invalid manifest byte offsets: $offsets');
         continue;
       }
-      final int start = offsets[0];
-      final int end = offsets[1];
-      if (start < 0 || end > bytes.lengthInBytes) {
-        printTrace('Invalid byte index: [$start, $end]');
+
+      final int codeStart = codeOffsets[0];
+      final int codeEnd = codeOffsets[1];
+      if (codeStart < 0 || codeEnd > codeBytes.lengthInBytes) {
+        printTrace('Invalid byte index: [$codeStart, $codeEnd]');
         continue;
       }
-      final Uint8List byteView = Uint8List.view(bytes.buffer, start, end - start);
-      _files[filePath] = byteView;
+      final Uint8List byteView = Uint8List.view(
+        codeBytes.buffer,
+        codeStart,
+        codeEnd - codeStart,
+      );
+      _files[_filePathToUriFragment(filePath)] = byteView;
+
+      final int sourcemapStart = sourcemapOffsets[0];
+      final int sourcemapEnd = sourcemapOffsets[1];
+      if (sourcemapStart < 0 || sourcemapEnd > sourcemapBytes.lengthInBytes) {
+        printTrace('Invalid byte index: [$sourcemapStart, $sourcemapEnd]');
+        continue;
+      }
+      final Uint8List sourcemapView = Uint8List.view(
+        sourcemapBytes.buffer,
+        sourcemapStart,
+        sourcemapEnd - sourcemapStart ,
+      );
+      _sourcemaps['${_filePathToUriFragment(filePath)}.map'] = sourcemapView;
+
       modules.add(filePath);
     }
     return modules;
   }
+}
+
+class WebDevFS implements DevFS {
+  WebDevFS(this.hostname, this.port, this._packagesFilePath);
+
+  final String hostname;
+  final int port;
+  final String _packagesFilePath;
+  WebAssetServer _webAssetServer;
+
+  @override
+  List<Uri> sources = <Uri>[];
+
+  @override
+  DateTime lastCompiled;
+
+  // We do not evict assets on the web.
+  @override
+  Set<String> get assetPathsToEvict => const <String>{};
+
+  @override
+  Uri get baseUri => null;
+
+  @override
+  Future<Uri> create() async {
+    _webAssetServer = await WebAssetServer.start(hostname, port);
+   return Uri.base;
+  }
+
+  @override
+  Future<void> destroy() async {
+    await _webAssetServer.dispose();
+  }
+
+  @override
+  Uri deviceUriToHostUri(Uri deviceUri) {
+    return deviceUri;
+  }
+
+  @override
+  String get fsName => 'web_asset';
+
+  @override
+  Directory get rootDirectory => null;
+
+  @override
+  Future<UpdateFSReport> update({
+    String mainPath,
+    String target,
+    AssetBundle bundle,
+    DateTime firstBuildTime,
+    bool bundleFirstUpload = false,
+    @required ResidentCompiler generator,
+    String dillOutputPath,
+    @required bool trackWidgetCreation,
+    bool fullRestart = false,
+    String projectRootPath,
+    String pathToReload,
+    List<Uri> invalidatedFiles,
+    bool skipAssets = false,
+  }) async {
+    assert(trackWidgetCreation != null);
+    assert(generator != null);
+    if (bundleFirstUpload) {
+      final File requireJS = fs.file(fs.path.join(
+        artifacts.getArtifactPath(Artifact.engineDartSdkPath),
+        'lib',
+        'dev_compiler',
+        'kernel',
+        'amd',
+        'require.js',
+      ));
+      final File dartSdk = fs.file(fs.path.join(
+        artifacts.getArtifactPath(Artifact.flutterWebSdk),
+        'kernel',
+        'amd',
+        'dart_sdk.js',
+      ));
+      final File dartSdkSourcemap = fs.file(fs.path.join(
+        artifacts.getArtifactPath(Artifact.flutterWebSdk),
+        'kernel',
+        'amd',
+        'dart_sdk.js.map',
+      ));
+      final File stackTraceMapper = fs.file(fs.path.join(
+        artifacts.getArtifactPath(Artifact.engineDartSdkPath),
+        'lib',
+        'dev_compiler',
+        'web',
+        'dart_stack_trace_mapper.js',
+      ));
+      _webAssetServer.writeFile('/main.dart.js', generateBootstrapScript(
+        requireUrl: _filePathToUriFragment(requireJS.path),
+        mapperUrl: _filePathToUriFragment(stackTraceMapper.path),
+        entrypoint: '${_filePathToUriFragment(mainPath)}.js',
+      ));
+      _webAssetServer.writeFile('/main_module.js', generateMainModule(
+        entrypoint: '${_filePathToUriFragment(mainPath)}.js',
+      ));
+      _webAssetServer.writeFile('/dart_sdk.js', dartSdk.readAsStringSync());
+      _webAssetServer.writeFile('/dart_sdk.js.map', dartSdkSourcemap.readAsStringSync());
+      // TODO(jonahwilliams): refactor the asset code in this and the regular devfs to
+      // be shared.
+      await writeBundle(fs.directory(getAssetBuildDirectory()), bundle.entries);
+    }
+    final DateTime candidateCompileTime = DateTime.now();
+    if (fullRestart) {
+      generator.reset();
+    }
+     final CompilerOutput compilerOutput = await generator.recompile(
+      mainPath,
+      invalidatedFiles,
+      outputPath:  dillOutputPath ?? getDefaultApplicationKernelPath(trackWidgetCreation: trackWidgetCreation),
+      packagesFilePath : _packagesFilePath,
+    );
+    if (compilerOutput == null || compilerOutput.errorCount > 0) {
+      return UpdateFSReport(success: false);
+    }
+    // Only update the last compiled time if we successfully compiled.
+    lastCompiled = candidateCompileTime;
+    // list of sources that needs to be monitored are in [compilerOutput.sources]
+    sources = compilerOutput.sources;
+    File codeFile;
+    File manifestFile;
+    File sourcemapFile;
+    List<String> modules;
+    try {
+      codeFile = fs.file('${compilerOutput.outputFilename}.sources');
+      manifestFile = fs.file('${compilerOutput.outputFilename}.json');
+      sourcemapFile = fs.file('${compilerOutput.outputFilename}.map');
+      modules = _webAssetServer.write(codeFile, manifestFile, sourcemapFile);
+    } on FileSystemException catch (err) {
+      throwToolExit('Failed to load recompiled sources:\n$err');
+    }
+    return UpdateFSReport(success: true, syncedBytes: codeFile.lengthSync(),
+      invalidatedSourcesCount: invalidatedFiles.length)
+        ..invalidatedModules = modules.map(_filePathToUriFragment).toList();
+  }
+}
+
+String _filePathToUriFragment(String path) {
+  if (platform.isWindows) {
+    final bool startWithSlash = path.startsWith('/');
+    final String partial = fs.path
+      .split(path)
+      .skip(startWithSlash ? 2 : 1).join('/');
+    if (partial.startsWith('/')) {
+      return partial;
+    }
+    return '/$partial';
+  }
+  return path;
 }

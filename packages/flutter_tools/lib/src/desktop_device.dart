@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -109,7 +109,11 @@ abstract class DesktopDevice extends Device {
       return LaunchResult.succeeded();
     }
     _deviceLogReader.initializeProcess(process);
-    final ProtocolDiscovery observatoryDiscovery = ProtocolDiscovery.observatory(_deviceLogReader);
+    final ProtocolDiscovery observatoryDiscovery = ProtocolDiscovery.observatory(_deviceLogReader,
+      devicePort: debuggingOptions?.deviceVmServicePort,
+      hostPort: debuggingOptions?.hostVmServicePort,
+      ipv6: ipv6,
+    );
     try {
       final Uri observatoryUri = await observatoryDiscovery.uri;
       onAttached(package, buildMode, process);
@@ -131,6 +135,11 @@ abstract class DesktopDevice extends Device {
       succeeded &= process.kill();
     }
     return succeeded;
+  }
+
+  @override
+  Future<void> dispose() async {
+    await portForwarder?.dispose();
   }
 
   /// Builds the current project for this device, with the given options.
@@ -169,4 +178,9 @@ class DesktopLogReader extends DeviceLogReader {
 
   @override
   String get name => 'desktop';
+
+  @override
+  void dispose() {
+    // Nothing to dispose.
+  }
 }

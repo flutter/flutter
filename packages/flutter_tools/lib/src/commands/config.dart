@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -100,12 +100,12 @@ class ConfigCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    if (argResults['machine']) {
+    if (boolArg('machine')) {
       await handleMachine();
       return null;
     }
 
-    if (argResults['clear-features']) {
+    if (boolArg('clear-features')) {
       for (Feature feature in allFeatures) {
         if (feature.configSetting != null) {
           config.removeValue(feature.configSetting);
@@ -115,18 +115,18 @@ class ConfigCommand extends FlutterCommand {
     }
 
     if (argResults.wasParsed('analytics')) {
-      final bool value = argResults['analytics'];
+      final bool value = boolArg('analytics');
       flutterUsage.enabled = value;
       AnalyticsConfigEvent(enabled: value).send();
       printStatus('Analytics reporting ${value ? 'enabled' : 'disabled'}.');
     }
 
     if (argResults.wasParsed('android-sdk')) {
-      _updateConfig('android-sdk', argResults['android-sdk']);
+      _updateConfig('android-sdk', stringArg('android-sdk'));
     }
 
     if (argResults.wasParsed('android-studio-dir')) {
-      _updateConfig('android-studio-dir', argResults['android-studio-dir']);
+      _updateConfig('android-studio-dir', stringArg('android-studio-dir'));
     }
 
     if (argResults.wasParsed('clear-ios-signing-cert')) {
@@ -134,7 +134,7 @@ class ConfigCommand extends FlutterCommand {
     }
 
     if (argResults.wasParsed('build-dir')) {
-      final String buildDir = argResults['build-dir'];
+      final String buildDir = stringArg('build-dir');
       if (fs.path.isAbsolute(buildDir)) {
         throwToolExit('build-dir should be a relative path');
       }
@@ -146,7 +146,7 @@ class ConfigCommand extends FlutterCommand {
         continue;
       }
       if (argResults.wasParsed(feature.configSetting)) {
-        final bool keyValue = argResults[feature.configSetting];
+        final bool keyValue = boolArg(feature.configSetting);
         config.setValue(feature.configSetting, keyValue);
         printStatus('Setting "${feature.configSetting}" value to "$keyValue".');
       }
@@ -154,6 +154,8 @@ class ConfigCommand extends FlutterCommand {
 
     if (argResults.arguments.isEmpty) {
       printStatus(usage);
+    } else {
+      printStatus('\nYou may need to restart any open editors for them to read new settings.');
     }
 
     return null;

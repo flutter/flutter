@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -51,7 +51,7 @@ void main() {
       headers = MockHttpHeaders();
       closeCompleter = Completer<void>();
       when(mockHttpServer.listen(any, onError: anyNamed('onError'))).thenAnswer((Invocation invocation) {
-        final Function callback = invocation.positionalArguments.first;
+        final void Function(HttpRequest) callback = invocation.positionalArguments.first as void Function(HttpRequest);
         return requestController.stream.listen(callback);
       });
       when(request.response).thenReturn(response);
@@ -89,28 +89,36 @@ void main() {
   test('Handles against malformed manifest', () => testbed.run(() async {
     final File source = fs.file('source')
       ..writeAsStringSync('main() {}');
+    final File sourcemap = fs.file('sourcemap')
+      ..writeAsStringSync('{}');
 
     // Missing ending offset.
     final File manifestMissingOffset = fs.file('manifestA')
-      ..writeAsStringSync(json.encode(<String, Object>{'/foo.js': <int>[0]}));
-    // Non-file URI.
-    final File manifestNonFileScheme = fs.file('manifestA')
-      ..writeAsStringSync(json.encode(<String, Object>{'/foo.js': <int>[0, 10]}));
-
+      ..writeAsStringSync(json.encode(<String, Object>{'/foo.js': <String, Object>{
+        'code': <int>[0],
+        'sourcemap': <int>[0],
+      }}));
     final File manifestOutOfBounds = fs.file('manifest')
-      ..writeAsStringSync(json.encode(<String, Object>{'/foo.js': <int>[0, 100]}));
+      ..writeAsStringSync(json.encode(<String, Object>{'/foo.js': <String, Object>{
+        'code': <int>[0, 100],
+        'sourcemap': <int>[0],
+      }}));
 
-    expect(webAssetServer.write(source, manifestMissingOffset), isEmpty);
-    expect(webAssetServer.write(source, manifestNonFileScheme), isEmpty);
-    expect(webAssetServer.write(source, manifestOutOfBounds), isEmpty);
+    expect(webAssetServer.write(source, manifestMissingOffset, sourcemap), isEmpty);
+    expect(webAssetServer.write(source, manifestOutOfBounds, sourcemap), isEmpty);
   }));
 
   test('serves JavaScript files from in memory cache', () => testbed.run(() async {
     final File source = fs.file('source')
       ..writeAsStringSync('main() {}');
+    final File sourcemap = fs.file('sourcemap')
+      ..writeAsStringSync('{}');
     final File manifest = fs.file('manifest')
-      ..writeAsStringSync(json.encode(<String, Object>{'/foo.js': <int>[0, source.lengthSync()]}));
-    webAssetServer.write(source, manifest);
+      ..writeAsStringSync(json.encode(<String, Object>{'/foo.js': <String, Object>{
+        'code': <int>[0, source.lengthSync()],
+        'sourcemap': <int>[0, 2],
+      }}));
+    webAssetServer.write(source, manifest, sourcemap);
 
     when(request.uri).thenReturn(Uri.parse('http://foobar/foo.js'));
     requestController.add(request);
@@ -119,6 +127,31 @@ void main() {
     verify(headers.add('Content-Length', source.lengthSync())).called(1);
     verify(headers.add('Content-Type', 'application/javascript')).called(1);
     verify(response.add(source.readAsBytesSync())).called(1);
+  }, overrides: <Type, Generator>{
+    Platform: () => linux,
+  }));
+
+  test('serves JavaScript files from in memory cache on Windows', () => testbed.run(() async {
+    final File source = fs.file('source')
+      ..writeAsStringSync('main() {}');
+    final File sourcemap = fs.file('sourcemap')
+      ..writeAsStringSync('{}');
+    final File manifest = fs.file('manifest')
+      ..writeAsStringSync(json.encode(<String, Object>{'/C:/foo.js': <String, Object>{
+        'code': <int>[0, source.lengthSync()],
+        'sourcemap': <int>[0, 2],
+      }}));
+    webAssetServer.write(source, manifest, sourcemap);
+
+    when(request.uri).thenReturn(Uri.parse('http://foobar/C:/foo.js'));
+    requestController.add(request);
+    await closeCompleter.future;
+
+    verify(headers.add('Content-Length', source.lengthSync())).called(1);
+    verify(headers.add('Content-Type', 'application/javascript')).called(1);
+    verify(response.add(source.readAsBytesSync())).called(1);
+  }, overrides: <Type, Generator>{
+    Platform: () => windows,
   }));
 
   test('serves JavaScript files from in memory cache not from manifest', () => testbed.run(() async {
@@ -136,9 +169,14 @@ void main() {
   test('handles missing JavaScript files from in memory cache', () => testbed.run(() async {
     final File source = fs.file('source')
       ..writeAsStringSync('main() {}');
+    final File sourcemap = fs.file('sourcemap')
+      ..writeAsStringSync('{}');
     final File manifest = fs.file('manifest')
-      ..writeAsStringSync(json.encode(<String, Object>{'/foo.js': <int>[0, source.lengthSync()]}));
-    webAssetServer.write(source, manifest);
+      ..writeAsStringSync(json.encode(<String, Object>{'/foo.js': <String, Object>{
+        'code': <int>[0, source.lengthSync()],
+        'sourcemap': <int>[0, 2],
+      }}));
+    webAssetServer.write(source, manifest, sourcemap);
 
     when(request.uri).thenReturn(Uri.parse('http://foobar/bar.js'));
     requestController.add(request);

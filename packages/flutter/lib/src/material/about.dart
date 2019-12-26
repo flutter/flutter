@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -78,7 +78,7 @@ import 'theme.dart';
 ///              applicationIcon: FlutterLogo(),
 ///              applicationName: 'Show About Example',
 ///              applicationVersion: 'August 2019',
-///              applicationLegalese: '© 2019 The Chromium Authors',
+///              applicationLegalese: '© 2014 The Flutter Authors',
 ///              aboutBoxChildren: aboutBoxChildren,
 ///            ),
 ///          ),
@@ -93,7 +93,7 @@ import 'theme.dart';
 ///              applicationIcon: FlutterLogo(),
 ///              applicationName: 'Show About Example',
 ///              applicationVersion: 'August 2019',
-///              applicationLegalese: '© 2019 The Chromium Authors',
+///              applicationLegalese: '© 2014 The Flutter Authors',
 ///              children: aboutBoxChildren,
 ///            );
 ///          },
@@ -112,7 +112,7 @@ class AboutListTile extends StatelessWidget {
   /// values default to the empty string.
   const AboutListTile({
     Key key,
-    this.icon = const Icon(null),
+    this.icon,
     this.child,
     this.applicationName,
     this.applicationVersion,
@@ -609,7 +609,7 @@ String _defaultApplicationName(BuildContext context) {
   // someone really wants their application title to change dynamically, they
   // can provide an explicit applicationName to the widgets defined in this
   // file, instead of relying on the default.
-  final Title ancestorTitle = context.ancestorWidgetOfExactType(Title);
+  final Title ancestorTitle = context.findAncestorWidgetOfExactType<Title>();
   return ancestorTitle?.title ?? Platform.resolvedExecutable.split(Platform.pathSeparator).last;
 }
 

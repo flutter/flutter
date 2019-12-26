@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -26,9 +26,10 @@ abstract class AndroidBuilder {
   /// Builds an AAR artifact.
   Future<void> buildAar({
     @required FlutterProject project,
-    @required AndroidBuildInfo androidBuildInfo,
+    @required Set<AndroidBuildInfo> androidBuildInfo,
     @required String target,
-    @required String outputDir,
+    @required String outputDirectoryPath,
+    @required String buildNumber,
   });
 
   /// Builds an APK artifact.
@@ -54,25 +55,38 @@ class _AndroidBuilderImpl extends AndroidBuilder {
   @override
   Future<void> buildAar({
     @required FlutterProject project,
-    @required AndroidBuildInfo androidBuildInfo,
+    @required Set<AndroidBuildInfo> androidBuildInfo,
     @required String target,
-    @required String outputDir,
+    @required String outputDirectoryPath,
+    @required String buildNumber,
   }) async {
     try {
       Directory outputDirectory =
-        fs.directory(outputDir ?? project.android.buildDirectory);
+        fs.directory(outputDirectoryPath ?? project.android.buildDirectory);
       if (project.isModule) {
         // Module projects artifacts are located in `build/host`.
         outputDirectory = outputDirectory.childDirectory('host');
       }
-      await buildGradleAar(
-        project: project,
-        androidBuildInfo: androidBuildInfo,
-        target: target,
-        outputDir: outputDirectory,
+      for (AndroidBuildInfo androidBuildInfo in androidBuildInfo) {
+        await buildGradleAar(
+          project: project,
+          androidBuildInfo: androidBuildInfo,
+          target: target,
+          outputDirectory: outputDirectory,
+          buildNumber: buildNumber,
+        );
+      }
+      printHowToConsumeAar(
+        buildModes: androidBuildInfo
+          .map<String>((AndroidBuildInfo androidBuildInfo) {
+            return androidBuildInfo.buildInfo.modeName;
+          }).toSet(),
+        androidPackage: project.manifest.androidPackage,
+        repoDirectory: getRepoDirectory(outputDirectory),
+        buildNumber: buildNumber,
       );
     } finally {
-      androidSdk.reinitialize();
+      androidSdk?.reinitialize();
     }
   }
 
@@ -92,7 +106,7 @@ class _AndroidBuilderImpl extends AndroidBuilder {
         localGradleErrors: gradleErrors,
       );
     } finally {
-      androidSdk.reinitialize();
+      androidSdk?.reinitialize();
     }
   }
 
@@ -112,7 +126,7 @@ class _AndroidBuilderImpl extends AndroidBuilder {
         localGradleErrors: gradleErrors,
       );
     } finally {
-      androidSdk.reinitialize();
+      androidSdk?.reinitialize();
     }
   }
 }

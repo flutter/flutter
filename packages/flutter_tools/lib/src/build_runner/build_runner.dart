@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -80,14 +80,14 @@ class BuildRunner extends CodeGenerator {
       stringBuffer.writeln('dependencies:');
       final YamlMap builders = flutterProject.builders;
       if (builders != null) {
-        for (String name in builders.keys) {
+        for (String name in builders.keys.cast<String>()) {
           final Object node = builders[name];
           // For relative paths, make sure it is accounted for
           // parent directories.
           if (node is YamlMap && node['path'] != null) {
-            final String path = node['path'];
+            final String path = node['path'] as String;
             if (fs.path.isRelative(path)) {
-              final String convertedPath = fs.path.join('..', '..', node['path']);
+              final String convertedPath = fs.path.join('..', '..', path);
               stringBuffer.writeln('  $name:');
               stringBuffer.writeln('    path: $convertedPath');
             } else {

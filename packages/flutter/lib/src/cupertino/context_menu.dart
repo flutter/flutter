@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -39,7 +39,7 @@ typedef _ContextMenuPreviewBuilderChildless = Widget Function(
 // paintBounds in global coordinates.
 Rect _getRect(GlobalKey globalKey) {
   assert(globalKey.currentContext != null);
-  final RenderBox renderBoxContainer = globalKey.currentContext.findRenderObject();
+  final RenderBox renderBoxContainer = globalKey.currentContext.findRenderObject() as RenderBox;
   final Offset containerOffset = renderBoxContainer.localToGlobal(
     renderBoxContainer.paintBounds.topLeft,
   );
@@ -79,10 +79,13 @@ enum _ContextMenuLocation {
 /// This sample shows a very simple CupertinoContextMenu for an empty red
 /// 100x100 Container. Simply long press on it to open.
 ///
+/// ```dart imports
+/// import 'package:flutter/cupertino.dart';
+/// ```
+///
 /// ```dart
 /// Widget build(BuildContext context) {
 ///   return Scaffold(
-///     key: scaffoldKey,
 ///     body: Center(
 ///       child: Container(
 ///         width: 100,
@@ -115,7 +118,7 @@ enum _ContextMenuLocation {
 ///
 /// See also:
 ///
-///   * [Apple's HIG for Context Menus](https://developer.apple.com/design/human-interface-guidelines/ios/controls/context-menus/)
+///  * [Apple's HIG for Context Menus](https://developer.apple.com/design/human-interface-guidelines/ios/controls/context-menus/)
 class CupertinoContextMenu extends StatefulWidget {
   /// Create a context menu.
   ///
@@ -868,8 +871,6 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
   static const double _kDamping = 400.0;
   static const Duration _kMoveControllerDuration = Duration(milliseconds: 600);
 
-  final GlobalKey _childGlobalKey = GlobalKey();
-
   Offset _dragOffset;
   double _lastScale = 1.0;
   AnimationController _moveController;
@@ -989,7 +990,7 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
       _moveAnimation = Tween<Offset>(
         begin: Offset.zero,
         end: Offset(
-          endX.clamp(-_kPadding, _kPadding),
+          endX.clamp(-_kPadding, _kPadding) as double,
           endY,
         ),
       ).animate(

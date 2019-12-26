@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -71,6 +71,11 @@ void resetChromeForTesting() {
   ChromeLauncher._currentCompleter = Completer<Chrome>();
 }
 
+@visibleForTesting
+void launchChromeInstance(Chrome chrome) {
+  ChromeLauncher._currentCompleter.complete(chrome);
+}
+
 /// Responsible for launching chrome with devtools configured.
 class ChromeLauncher {
   const ChromeLauncher();
@@ -132,6 +137,7 @@ class ChromeLauncher {
       '--no-default-browser-check',
       '--disable-default-apps',
       '--disable-translate',
+      '--window-size=2400,1800',
       if (headless)
         ...<String>['--headless', '--disable-gpu', '--no-sandbox'],
       url,
@@ -169,6 +175,7 @@ class ChromeLauncher {
     return _connect(Chrome._(
       port,
       ChromeConnection('localhost', port),
+      url: url,
       process: process,
       remoteDebuggerUri: remoteDebuggerUri,
     ), skipCheck);
@@ -205,8 +212,8 @@ class ChromeLauncher {
       final HttpClient client = HttpClient();
       final HttpClientRequest request = await client.getUrl(base.resolve('/json/list'));
       final HttpClientResponse response = await request.close();
-      final List<dynamic> jsonObject = await json.fuse(utf8).decoder.bind(response).single;
-      return base.resolve(jsonObject.first['devtoolsFrontendUrl']);
+      final List<dynamic> jsonObject = await json.fuse(utf8).decoder.bind(response).single as List<dynamic>;
+      return base.resolve(jsonObject.first['devtoolsFrontendUrl'] as String);
     } catch (_) {
       // If we fail to talk to the remote debugger protocol, give up and return
       // the raw URL rather than crashing.
@@ -220,10 +227,12 @@ class Chrome {
   Chrome._(
     this.debugPort,
     this.chromeConnection, {
+    this.url,
     Process process,
     this.remoteDebuggerUri,
   })  : _process = process;
 
+  final String url;
   final int debugPort;
   final Process _process;
   final ChromeConnection chromeConnection;

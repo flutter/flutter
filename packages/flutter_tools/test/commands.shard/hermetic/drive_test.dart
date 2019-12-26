@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -485,7 +485,7 @@ void main() {
           platformArgs: anyNamed('platformArgs'),
           prebuiltApplication: anyNamed('prebuiltApplication'),
         )).thenAnswer((Invocation invocation) async {
-          debuggingOptions = invocation.namedArguments[#debuggingOptions];
+          debuggingOptions = invocation.namedArguments[#debuggingOptions] as DebuggingOptions;
           return mockLaunchResult;
         });
         when(mockDevice.isAppInstalled(any))
