@@ -846,7 +846,7 @@ class RenderListWheelViewport
     // Offset that helps painting everything in the center (e.g. angle = 0).
     final Offset offsetToCenter = Offset(
       untransformedPaintingCoordinates.dx,
-      -_topScrollMarginExtent
+      -_topScrollMarginExtent,
     );
 
     final bool shouldApplyOffCenterDim = overAndUnderCenterOpacity < 1;
@@ -944,7 +944,7 @@ class RenderListWheelViewport
     Matrix4 cylindricalTransform,
     Offset offsetToCenter,
   ) {
-    // Paint child with cylindrically.
+    // Paint child cylindrically, without [overAndUnderCenterOpacity].
     final PaintingContextCallback painter = (PaintingContext context, Offset offset) {
       context.paintChild(
         child,
@@ -953,7 +953,7 @@ class RenderListWheelViewport
       );
     };
 
-    // Paint child with cylindrically, with [overAndUnderCenterOpacity].
+    // Paint child cylindrically, with [overAndUnderCenterOpacity].
     final PaintingContextCallback opacityPainter = (PaintingContext context, Offset offset) {
       context.pushOpacity(offset, (overAndUnderCenterOpacity * 255).round(), painter);
     };
