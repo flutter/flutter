@@ -294,6 +294,38 @@ void main() {
       expect(generator.supportedLocales.elementAt(2), LocaleInfo.fromString('zh'));
     });
 
+    test('adds preferred locales to the top of supportedLocales and supportedLanguageCodes', () {
+      final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+        ..createSync(recursive: true);
+      l10nDirectory.childFile('app_en_US.arb')
+        .writeAsStringSync(singleMessageArbFileString);
+      l10nDirectory.childFile('app_es.arb')
+        .writeAsStringSync(singleEsMessageArbFileString);
+      l10nDirectory.childFile('app_zh.arb')
+        .writeAsStringSync(singleZhMessageArbFileString);
+
+      final List<String> preferredSupportedLocales = <String>['zh', 'es'];
+
+      LocalizationsGenerator generator;
+      try {
+        generator = LocalizationsGenerator(fs);
+        generator.initialize(
+          l10nDirectoryPath: defaultArbPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+          preferredSupportedLocales: preferredSupportedLocales,
+        );
+        generator.parseArbFiles();
+      } on L10nException catch (e) {
+        fail('Setting language and locales should not fail: \n$e');
+      }
+
+      expect(generator.supportedLocales.first, LocaleInfo.fromString('zh'));
+      expect(generator.supportedLocales.elementAt(1), LocaleInfo.fromString('es'));
+      expect(generator.supportedLocales.elementAt(2), LocaleInfo.fromString('en_US'));
+    });
+
     test('correctly sorts arbPathString alphabetically', () {
       final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
         ..createSync(recursive: true);
