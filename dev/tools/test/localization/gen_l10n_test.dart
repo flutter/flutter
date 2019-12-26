@@ -304,7 +304,10 @@ void main() {
       l10nDirectory.childFile('app_zh.arb')
         .writeAsStringSync(singleZhMessageArbFileString);
 
-      final List<String> preferredSupportedLocales = <String>['zh', 'es'];
+      final List<LocaleInfo> preferredSupportedLocales = <LocaleInfo>[
+        LocaleInfo.fromString('zh'),
+        LocaleInfo.fromString('es'),
+      ];
 
       LocalizationsGenerator generator;
       try {
@@ -325,6 +328,51 @@ void main() {
       expect(generator.supportedLocales.elementAt(1), LocaleInfo.fromString('es'));
       expect(generator.supportedLocales.elementAt(2), LocaleInfo.fromString('en_US'));
     });
+
+    test(
+      'throws an error attempting to add preferred locales '
+      'when there is no corresponding arb file for that '
+      'locale',
+      () {
+        final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+          ..createSync(recursive: true);
+        l10nDirectory.childFile('app_en_US.arb')
+          .writeAsStringSync(singleMessageArbFileString);
+        l10nDirectory.childFile('app_es.arb')
+          .writeAsStringSync(singleEsMessageArbFileString);
+        l10nDirectory.childFile('app_zh.arb')
+          .writeAsStringSync(singleZhMessageArbFileString);
+
+        final List<LocaleInfo> preferredSupportedLocales = <LocaleInfo>[
+          LocaleInfo.fromString('am'),
+          LocaleInfo.fromString('es'),
+        ];
+
+        LocalizationsGenerator generator;
+        try {
+          generator = LocalizationsGenerator(fs);
+          generator.initialize(
+            l10nDirectoryPath: defaultArbPathString,
+            templateArbFileName: defaultTemplateArbFileName,
+            outputFileString: defaultOutputFileString,
+            classNameString: defaultClassNameString,
+            preferredSupportedLocales: preferredSupportedLocales,
+          );
+          generator.parseArbFiles();
+        } on L10nException catch (e) {
+          expect(
+            e.message,
+            contains("The preferred supported locale, 'am', cannot be added."),
+          );
+          return;
+        }
+
+        fail(
+          'Should fail since an unsupported locale was added '
+          'to the preferredSupportedLocales list.'
+        );
+      },
+    );
 
     test('correctly sorts arbPathString alphabetically', () {
       final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')

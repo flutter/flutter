@@ -534,8 +534,17 @@ class LocalizationsGenerator {
   /// The class name is specified with the [initialize] method.
   String get className => _className;
   String _className;
-  /// Sets the [className] for the localizations and localizations delegate
-  /// classes.
+
+  /// The list of preferred supported locales.
+  ///
+  /// By default, the list of supported locales in the localizations class
+  /// will be sorted in alphabetical order. However, this option
+  /// allows for a set of preferred locales to appear at the top of the
+  /// list.
+  ///
+  /// The list of preferred locales is specified with the [initialize] method.
+  List<LocaleInfo> get preferredSupportedLocales => _preferredSupportedLocales;
+  List<LocaleInfo> _preferredSupportedLocales;
 
   /// The list of all arb path strings in [l10nDirectory].
   final List<String> arbPathStrings = <String>[];
@@ -564,10 +573,12 @@ class LocalizationsGenerator {
     String templateArbFileName,
     String outputFileString,
     String classNameString,
+    List<LocaleInfo> preferredSupportedLocales,
   }) {
     setL10nDirectory(l10nDirectoryPath);
     setTemplateArbFile(templateArbFileName);
     setOutputFile(outputFileString);
+    _preferredSupportedLocales = preferredSupportedLocales;
     className = classNameString;
   }
 
@@ -616,6 +627,8 @@ class LocalizationsGenerator {
     outputFile = _fs.file(path.join(l10nDirectory.path, outputFileString));
   }
 
+  /// Sets the [className] for the localizations and localizations delegate
+  /// classes.
   @visibleForTesting
   set className(String classNameString) {
     if (classNameString == null)
@@ -668,6 +681,23 @@ class LocalizationsGenerator {
 
     arbPathStrings.sort();
     localeInfoList.sort();
+
+    if (preferredSupportedLocales != null) {
+      for (LocaleInfo preferredLocale in preferredSupportedLocales) {
+        if (!localeInfoList.contains(preferredLocale))
+          throw L10nException(
+            'The preferred supported locale, \'$preferredLocale\', cannot be '
+            'added. Please make sure that there is a corresponding arb file '
+            'with translations for the locale, or remove the locale from the '
+            'preferred supported locale list if there is no intent to support '
+            'it.'
+          );
+
+        localeInfoList.removeWhere((LocaleInfo localeInfo) => localeInfo == preferredLocale);
+      }
+      localeInfoList.insertAll(0, preferredSupportedLocales);
+    }
+
     supportedLocales.addAll(localeInfoList);
     supportedLanguageCodes.addAll(localeInfoList.map((LocaleInfo localeInfo) {
       return '\'${localeInfo.languageCode}\'';
