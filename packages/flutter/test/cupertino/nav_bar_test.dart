@@ -147,7 +147,7 @@ void main() {
     );
 
     final AnnotatedRegion<SystemUiOverlayStyle> region1 = tester.allWidgets.singleWhere((
-        Widget widget) => widget is AnnotatedRegion);
+        Widget widget) => widget is AnnotatedRegion) as AnnotatedRegion<SystemUiOverlayStyle>;
     expect(region1.value, SystemUiOverlayStyle.light);
 
     await tester.pumpWidget(
@@ -160,7 +160,7 @@ void main() {
     );
 
     final AnnotatedRegion<SystemUiOverlayStyle> region2 = tester.allWidgets.singleWhere((
-        Widget widget) => widget is AnnotatedRegion);
+        Widget widget) => widget is AnnotatedRegion) as AnnotatedRegion<SystemUiOverlayStyle>;
     expect(region2.value, SystemUiOverlayStyle.dark);
 
     await tester.pumpWidget(
@@ -178,7 +178,7 @@ void main() {
     );
 
     final AnnotatedRegion<SystemUiOverlayStyle> region3 = tester.allWidgets.singleWhere((
-        Widget widget) => widget is AnnotatedRegion);
+        Widget widget) => widget is AnnotatedRegion) as AnnotatedRegion<SystemUiOverlayStyle>;
     expect(region3.value, SystemUiOverlayStyle.light);
 
     await tester.pumpWidget(
@@ -196,7 +196,7 @@ void main() {
     );
 
     final AnnotatedRegion<SystemUiOverlayStyle> region4 = tester.allWidgets.singleWhere((
-        Widget widget) => widget is AnnotatedRegion);
+        Widget widget) => widget is AnnotatedRegion) as AnnotatedRegion<SystemUiOverlayStyle>;
     expect(region4.value, SystemUiOverlayStyle.dark);
   });
 
