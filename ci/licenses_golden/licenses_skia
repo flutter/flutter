@@ -1,4 +1,4 @@
-Signature: d56d875bcfe5933af9f114eaf9e2798d
+Signature: fd011a0e9443cba8e33e568e762fab98
 
 UNUSED LICENSES:
 
@@ -3092,6 +3092,7 @@ FILE: ../../../third_party/skia/gm/samplelocations.cpp
 FILE: ../../../third_party/skia/gm/skbug_8664.cpp
 FILE: ../../../third_party/skia/gm/skbug_8955.cpp
 FILE: ../../../third_party/skia/gm/skvm.cpp
+FILE: ../../../third_party/skia/gm/tessellation.cpp
 FILE: ../../../third_party/skia/gm/video_decoder.cpp
 FILE: ../../../third_party/skia/gm/yuv420_odd_dim.cpp
 FILE: ../../../third_party/skia/include/core/SkTileMode.h
