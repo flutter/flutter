@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -84,6 +85,10 @@ typedef WidgetTesterCallback = Future<void> Function(WidgetTester widgetTester);
 /// provides convenient widget [Finder]s for use with the
 /// [WidgetTester].
 ///
+/// When the [variant] argument is set, [testWidgets] will run the test once for
+/// each value of the [TestVariant.values]. If [variant] is not set, the test
+/// will be run once using the base test environment.
+///
 /// See also:
 ///
 ///  * [AutomatedTestWidgetsFlutterBinding.addTime] to learn more about
@@ -106,33 +111,141 @@ void testWidgets(
   test_package.Timeout timeout,
   Duration initialTimeout,
   bool semanticsEnabled = true,
+  TestVariant<Object> variant = const DefaultTestVariant(),
 }) {
+  assert(variant != null);
+  assert(variant.values.isNotEmpty, 'There must be at least on value to test in the testing variant');
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
   final WidgetTester tester = WidgetTester._(binding);
-  test(
-    description,
-    () {
-      SemanticsHandle semanticsHandle;
-      if (semanticsEnabled == true) {
-        semanticsHandle = tester.ensureSemantics();
-      }
-      tester._recordNumberOfSemanticsHandles();
-      test_package.addTearDown(binding.postTest);
-      return binding.runTest(
-        () async {
-          debugResetSemanticsIdCounter();
-          tester.resetTestTextInput();
-          await callback(tester);
-          semanticsHandle?.dispose();
-        },
-        tester._endOfTestVerifications,
-        description: description ?? '',
-        timeout: initialTimeout,
-      );
-    },
-    skip: skip,
-    timeout: timeout ?? binding.defaultTestTimeout,
-  );
+  for (dynamic value in variant.values) {
+    final String variationDescription = variant.describeValue(value);
+    final String combinedDescription = variationDescription.isNotEmpty ? '$description ($variationDescription)' : description;
+    test(
+      combinedDescription,
+      () {
+        tester._testDescription = combinedDescription;
+        SemanticsHandle semanticsHandle;
+        if (semanticsEnabled == true) {
+          semanticsHandle = tester.ensureSemantics();
+        }
+        tester._recordNumberOfSemanticsHandles();
+        test_package.addTearDown(binding.postTest);
+        return binding.runTest(
+          () async {
+            debugResetSemanticsIdCounter();
+            tester.resetTestTextInput();
+            Object memento;
+            try {
+              memento = await variant.setUp(value);
+              await callback(tester);
+            } finally {
+              await variant.tearDown(value, memento);
+            }
+            semanticsHandle?.dispose();
+          },
+          tester._endOfTestVerifications,
+          description: combinedDescription ?? '',
+          timeout: initialTimeout,
+        );
+      },
+      skip: skip,
+      timeout: timeout ?? binding.defaultTestTimeout,
+    );
+  }
+}
+
+/// An abstract base class for describing test environment variants.
+///
+/// These serve as elements of the `variants` argument to [testWidgets].
+///
+/// Use care when adding more testing variants: it multiplies the number of
+/// tests which run. This can drastically increase the time it takes to run all
+/// the tests.
+abstract class TestVariant<T> {
+  /// A const constructor so that subclasses can be const.
+  const TestVariant();
+
+  /// Returns an iterable of the variations that this test dimension represents.
+  ///
+  /// The variations returned should be unique so that the same variation isn't
+  /// needlessly run twice.
+  Iterable<T> get values;
+
+  /// Returns the string that will be used to both add to the test description, and
+  /// be printed when a test fails for this variation.
+  String describeValue(T value);
+
+  /// A function that will be called before each value is tested, with the
+  /// value that will be tested.
+  ///
+  /// This function should preserve any state needed to restore the testing
+  /// environment back to its base state when [tearDown] is called in the
+  /// `Object` that is returned. The returned object will then be passed to
+  /// [tearDown] as a `memento` when the test is complete.
+  Future<Object> setUp(T value);
+
+  /// A function that is guaranteed to be called after a value is tested, even
+  /// if it throws an exception.
+  ///
+  /// Calling this function must return the testing environment back to the base
+  /// state it was in before [setUp] was called. The [memento] is the object
+  /// returned from [setUp] when it was called.
+  Future<void> tearDown(T value, covariant Object memento);
+}
+
+/// The [TestVariant] that represents the "default" test that is run if no
+/// `variants` iterable is specified for [testWidgets].
+///
+/// This variant can be added into a list of other test variants to provide
+/// a "control" test where nothing is changed from the base test environment.
+class DefaultTestVariant extends TestVariant<void> {
+  /// A const constructor for a [DefaultTestVariant].
+  const DefaultTestVariant();
+
+  @override
+  Iterable<void> get values => const <void>[null];
+
+  @override
+  String describeValue(void value) => '';
+
+  @override
+  Future<void> setUp(void value) async {}
+
+  @override
+  Future<void> tearDown(void value, void memento) async {}
+}
+
+/// A [TestVariant] that runs tests with [debugDefaultTargetPlatformOverride]
+/// set to different values of [TargetPlatform].
+class TargetPlatformVariant extends TestVariant<TargetPlatform> {
+  /// Creates a [TargetPlatformVariant] that tests the given [values].
+  const TargetPlatformVariant(this.values);
+
+  /// Creates a [TargetPlatformVariant] that tests all values from
+  /// the [TargetPlatform] enum.
+  TargetPlatformVariant.all() : values = TargetPlatform.values.toSet();
+
+  /// Creates a [TargetPlatformVariant] that tests only the given value of
+  /// [TargetPlatform].
+  TargetPlatformVariant.only(TargetPlatform platform) : values = <TargetPlatform>{platform};
+
+  @override
+  final Set<TargetPlatform> values;
+
+  @override
+  String describeValue(TargetPlatform value) => value.toString();
+
+  @override
+  Future<TargetPlatform> setUp(TargetPlatform value) async {
+    final TargetPlatform previousTargetPlatform = debugDefaultTargetPlatformOverride;
+    debugDefaultTargetPlatformOverride = value;
+    return previousTargetPlatform;
+  }
+
+  @override
+  Future<void> tearDown(TargetPlatform value, TargetPlatform memento) async {
+    debugDefaultTargetPlatformOverride = memento;
+  }
 }
 
 /// Runs the [callback] inside the Flutter benchmark environment.
@@ -282,6 +395,10 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
     if (binding is LiveTestWidgetsFlutterBinding)
       binding.deviceEventDispatcher = this;
   }
+
+  /// The description string of the test currently being run.
+  String get testDescription => _testDescription;
+  String _testDescription = '';
 
   /// The binding instance used by the testing framework.
   @override

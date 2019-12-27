@@ -162,12 +162,12 @@ abstract class EdgeInsetsGeometry {
   /// or equal to `min`, and less than or equal to `max`.
   EdgeInsetsGeometry clamp(EdgeInsetsGeometry min, EdgeInsetsGeometry max) {
     return _MixedEdgeInsets.fromLRSETB(
-      _left.clamp(min._left, max._left),
-      _right.clamp(min._right, max._right),
-      _start.clamp(min._start, max._start),
-      _end.clamp(min._end, max._end),
-      _top.clamp(min._top, max._top),
-      _bottom.clamp(min._bottom, max._bottom),
+      _left.clamp(min._left, max._left) as double,
+      _right.clamp(min._right, max._right) as double,
+      _start.clamp(min._start, max._start) as double,
+      _end.clamp(min._end, max._end) as double,
+      _top.clamp(min._top, max._top) as double,
+      _bottom.clamp(min._bottom, max._bottom) as double,
     );
   }
 

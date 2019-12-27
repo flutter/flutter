@@ -146,7 +146,7 @@ const String simpleMethodTemplate = '''
 ''';
 
 const String pluralMethodTemplate = '''
-  String @methodName(@methodParameters) {
+  String @methodName(@methodParameters) {@dateFormatting
     return Intl.plural(
       @intlMethodArgs
     );
@@ -214,10 +214,7 @@ const Set<String> allowableDateFormats = <String>{
   's',
 };
 
-bool _isDateParameter(dynamic placeholderValue) {
-  return placeholderValue is Map<String, dynamic> &&
-    placeholderValue['type'] == 'DateTime';
-}
+bool _isDateParameter(Map<String, dynamic> placeholderValue) => placeholderValue['type'] == 'DateTime';
 
 bool _dateParameterIsValid(Map<String, dynamic> placeholderValue, String placeholder) {
   if (allowableDateFormats.contains(placeholderValue['format']))
@@ -252,6 +249,22 @@ List<String> genMethodParameters(Map<String, dynamic> bundle, String key, String
   return <String>[];
 }
 
+List<String> genPluralMethodParameters(Iterable<String> placeholderKeys, String countPlaceholder, String resourceId) {
+  if (placeholderKeys.isEmpty)
+    throw L10nException(
+      'Placeholders map for the $resourceId message is empty.\n'
+      'Check to see if the plural message is in the proper ICU syntax format '
+      'and ensure that placeholders are properly specified.'
+    );
+
+  return placeholderKeys.map((String parameter) {
+    if (parameter == countPlaceholder) {
+      return 'int $parameter';
+    }
+    return 'Object $parameter';
+  }).toList();
+}
+
 String generateDateFormattingLogic(Map<String, dynamic> bundle, String key) {
   String result = '';
   final Map<String, dynamic> attributesMap = bundle['@$key'] as Map<String, dynamic>;
@@ -260,6 +273,7 @@ String generateDateFormattingLogic(Map<String, dynamic> bundle, String key) {
     for (String placeholder in placeholders.keys) {
       final dynamic value = placeholders[placeholder];
       if (
+        value is Map<String, dynamic> &&
         _isDateParameter(value) &&
         _containsFormatKey(value, placeholder) &&
         _dateParameterIsValid(value, placeholder)
@@ -291,6 +305,7 @@ List<String> genIntlMethodArgs(Map<String, dynamic> bundle, String key) {
         for (String placeholder in placeholders.keys) {
           final dynamic value = placeholders[placeholder];
           if (
+            value is Map<String, dynamic> &&
             _isDateParameter(value) &&
             _containsFormatKey(value, placeholder) &&
             _dateParameterIsValid(value, placeholder)
@@ -315,7 +330,7 @@ String genSimpleMethod(Map<String, dynamic> bundle, String key) {
     final Map<String, dynamic> placeholders = attributesMap['placeholders'] as Map<String, dynamic>;
     for (String placeholder in placeholders.keys) {
       final dynamic value = placeholders[placeholder];
-      if (_isDateParameter(value)) {
+      if (value is Map<String, dynamic> && _isDateParameter(value)) {
         message = message.replaceAll('{$placeholder}', '\$${placeholder}String');
       } else {
         message = message.replaceAll('{$placeholder}', '\$$placeholder');
@@ -346,14 +361,33 @@ String genSimpleMethod(Map<String, dynamic> bundle, String key) {
     .replaceAll('@intlMethodArgs', genIntlMethodArgs(bundle, key).join(',\n      '));
 }
 
-String genPluralMethod(Map<String, dynamic> bundle, String key) {
-  final Map<String, dynamic> attributesMap = bundle['@$key'] as Map<String, dynamic>;
-  assert(attributesMap != null && attributesMap.containsKey('placeholders'));
-  final Iterable<String> placeholders = attributesMap['placeholders'].keys as Iterable<String>;
+String genPluralMethod(Map<String, dynamic> arbBundle, String resourceId) {
+  final Map<String, dynamic> attributesMap = arbBundle['@$resourceId'] as Map<String, dynamic>;
+  if (attributesMap == null)
+    throw L10nException('Resource attribute for $resourceId does not exist.');
+  if (!attributesMap.containsKey('placeholders'))
+    throw L10nException(
+      'Unable to find placeholders for the plural message: $resourceId.\n'
+      'Check to see if the plural message is in the proper ICU syntax format '
+      'and ensure that placeholders are properly specified.'
+    );
+  if (attributesMap['placeholders'] is! Map<String, dynamic>)
+    throw L10nException(
+      'The "placeholders" resource attribute for the message, $resourceId, '
+      'is not properly formatted. Ensure that it is a map with keys that are '
+      'strings.'
+    );
+
+  final Map<String, dynamic> placeholdersMap = attributesMap['placeholders'] as Map<String, dynamic>;
+  final Iterable<String> placeholders = placeholdersMap.keys;
+
+  // Used to determine which placeholder is the plural count placeholder
+  final String resourceValue = arbBundle[resourceId] as String;
+  final String countPlaceholder = resourceValue.split(',')[0].substring(1);
 
   // To make it easier to parse the plurals message, temporarily replace each
   // "{placeholder}" parameter with "#placeholder#".
-  String message = bundle[key] as String;
+  String message = arbBundle[resourceId] as String;
   for (String placeholder in placeholders)
     message = message.replaceAll('{$placeholder}', '#$placeholder#');
 
@@ -367,9 +401,9 @@ String genPluralMethod(Map<String, dynamic> bundle, String key) {
   };
 
   final List<String> methodArgs = <String>[
-    ...placeholders,
+    countPlaceholder,
     'locale: _localeName',
-    ...genIntlMethodArgs(bundle, key),
+    ...genIntlMethodArgs(arbBundle, resourceId),
   ];
 
   for (String pluralKey in pluralIds.keys) {
@@ -377,16 +411,22 @@ String genPluralMethod(Map<String, dynamic> bundle, String key) {
     final RegExpMatch match = expRE.firstMatch(message);
     if (match != null && match.groupCount == 2) {
       String argValue = match.group(2);
-      for (String placeholder in placeholders)
-        argValue = argValue.replaceAll('#$placeholder#', '\$$placeholder');
-
+      for (String placeholder in placeholders) {
+        final dynamic value = placeholdersMap[placeholder];
+        if (value is Map<String, dynamic> && _isDateParameter(value)) {
+          argValue = argValue.replaceAll('#$placeholder#', '\$${placeholder}String');
+        } else {
+          argValue = argValue.replaceAll('#$placeholder#', '\$$placeholder');
+        }
+      }
       methodArgs.add("${pluralIds[pluralKey]}: '$argValue'");
     }
   }
 
   return pluralMethodTemplate
-    .replaceAll('@methodName', key)
-    .replaceAll('@methodParameters', genMethodParameters(bundle, key, 'int').join(', '))
+    .replaceAll('@methodName', resourceId)
+    .replaceAll('@methodParameters', genPluralMethodParameters(placeholders, countPlaceholder, resourceId).join(', '))
+    .replaceAll('@dateFormatting', generateDateFormattingLogic(arbBundle, resourceId))
     .replaceAll('@intlMethodArgs', methodArgs.join(',\n      '));
 }
 
@@ -599,8 +639,8 @@ class LocalizationsGenerator {
     for (File file in fileSystemEntityList) {
       final String filePath = file.path;
       if (arbFilenameRE.hasMatch(filePath)) {
-        final Map<String, dynamic> arbContents = json.decode(file.readAsStringSync());
-        String localeString = arbContents['@@locale'];
+        final Map<String, dynamic> arbContents = json.decode(file.readAsStringSync()) as Map<String, dynamic>;
+        String localeString = arbContents['@@locale'] as String;
         if (localeString == null) {
           final RegExpMatch arbFileMatch = arbFilenameLocaleRE.firstMatch(filePath);
           if (arbFileMatch == null) {
@@ -653,7 +693,7 @@ class LocalizationsGenerator {
   void generateClassMethods() {
     Map<String, dynamic> bundle;
     try {
-      bundle = json.decode(templateArbFile.readAsStringSync());
+      bundle = json.decode(templateArbFile.readAsStringSync()) as Map<String, dynamic>;
     } on FileSystemException catch (e) {
       throw FileSystemException('Unable to read input arb file: $e');
     } on FormatException catch (e) {
@@ -669,7 +709,7 @@ class LocalizationsGenerator {
           'Invalid key format: $key \n It has to be in camel case, cannot start '
           'with a number, and cannot contain non-alphanumeric characters.'
         );
-      if (pluralValueRE.hasMatch(bundle[key]))
+      if (pluralValueRE.hasMatch(bundle[key] as String))
         classMethods.add(genPluralMethod(bundle, key));
       else
         classMethods.add(genSimpleMethod(bundle, key));
