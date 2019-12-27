@@ -30,26 +30,26 @@ class TimelineSummary {
   ///
   /// Returns null if no frames were recorded.
   double computeAverageFrameBuildTimeMillis() {
-    return _averageInMillis(_extractDuration(_extractFrameEvents()));
+    return _averageInMillis(_extractFrameDurations());
   }
 
   /// The [p]-th percentile frame rasterization time in milliseconds.
   ///
   /// Returns null if no frames were recorded.
   double computePercentileFrameBuildTimeMillis(double p) {
-    return _percentileInMillis(_extractDuration(_extractFrameEvents()), p);
+    return _percentileInMillis(_extractFrameDurations(), p);
   }
 
   /// The longest frame build time in milliseconds.
   ///
   /// Returns null if no frames were recorded.
   double computeWorstFrameBuildTimeMillis() {
-    return _maxInMillis(_extractDuration(_extractFrameEvents()));
+    return _maxInMillis(_extractFrameDurations());
   }
 
   /// The number of frames that missed the [kBuildBudget] and therefore are
   /// in the danger of missing frames.
-  int computeMissedFrameBuildBudgetCount([ Duration frameBuildBudget = kBuildBudget ]) => _extractDuration(_extractFrameEvents())
+  int computeMissedFrameBuildBudgetCount([ Duration frameBuildBudget = kBuildBudget ]) => _extractFrameDurations()
     .where((Duration duration) => duration > kBuildBudget)
     .length;
 
@@ -81,7 +81,7 @@ class TimelineSummary {
       .length;
 
   /// The total number of frames recorded in the timeline.
-  int countFrames() => _extractFrameEvents().length;
+  int countFrames() => _extractFrameDurations().length;
 
   /// Encodes this summary as JSON.
   Map<String, dynamic> get summaryJson {
@@ -97,7 +97,7 @@ class TimelineSummary {
       'worst_frame_rasterizer_time_millis': computeWorstFrameRasterizerTimeMillis(),
       'missed_frame_rasterizer_budget_count': computeMissedFrameRasterizerBudgetCount(),
       'frame_count': countFrames(),
-      'frame_build_times': _extractDuration(_extractFrameEvents())
+      'frame_build_times': _extractFrameDurations()
         .map<int>((Duration duration) => duration.inMicroseconds)
         .toList(),
       'frame_rasterizer_times': _extractGpuRasterizerDrawEvents()
@@ -140,6 +140,10 @@ class TimelineSummary {
     return _timeline.events
       .where((TimelineEvent event) => event.name == name)
       .toList();
+  }
+
+  List<Duration> _extractDurations(String name) {
+    return _extractNamedEvents(name).map<Duration>((TimelineEvent event) => event.duration).toList();
   }
 
   /// Extracts timed events that are reported as a pair of begin/end events.
@@ -192,7 +196,7 @@ class TimelineSummary {
 
   List<TimedEvent> _extractGpuRasterizerDrawEvents() => _extractBeginEndEvents('GPURasterizer::Draw');
 
-  List<TimedEvent> _extractFrameEvents() => _extractBeginEndEvents('Frame');
+  List<Duration> _extractFrameDurations() => _extractDurations('Frame');
 
   Iterable<Duration> _extractDuration(Iterable<TimedEvent> events) {
     return events.map<Duration>((TimedEvent e) => e.duration);
