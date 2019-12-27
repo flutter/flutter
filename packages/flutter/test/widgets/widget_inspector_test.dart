@@ -18,6 +18,7 @@ import 'package:flutter_test/flutter_test.dart';
 // columns will impact whether tests pass.
 
 class ClockDemo extends StatefulWidget {
+  const ClockDemo({ Key key }) : super(key: key);
   @override
   _ClockDemoState createState() => _ClockDemoState();
 }
@@ -1634,7 +1635,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
     testWidgets('ext.flutter.inspector.trackRebuildDirtyWidgets', (WidgetTester tester) async {
       service.rebuildCount = 0;
 
-      await tester.pumpWidget(ClockDemo());
+      await tester.pumpWidget(const ClockDemo());
 
       final Element clockDemoElement = find.byType(ClockDemo).evaluate().first;
 
@@ -1833,7 +1834,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
     testWidgets('ext.flutter.inspector.trackRepaintWidgets', (WidgetTester tester) async {
       service.rebuildCount = 0;
 
-      await tester.pumpWidget(ClockDemo());
+      await tester.pumpWidget(const ClockDemo());
 
       final Element clockDemoElement = find.byType(ClockDemo).evaluate().first;
 

@@ -650,7 +650,7 @@ void main() {
 
 int testBuildCalled;
 class Test extends StatefulWidget {
-  const Test();
+  const Test({ Key key }) : super(key: key);
 
   @override
   _TestState createState() => _TestState();
