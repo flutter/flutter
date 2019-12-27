@@ -78,6 +78,7 @@ const int _kObscureShowLatestCharCursorTicks = 3;
 /// ```dart
 /// final _controller = TextEditingController();
 ///
+/// @override
 /// void initState() {
 ///   _controller.addListener(() {
 ///     final text = _controller.text.toLowerCase();
@@ -90,6 +91,7 @@ const int _kObscureShowLatestCharCursorTicks = 3;
 ///   super.initState();
 /// }
 ///
+/// @override
 /// void dispose() {
 ///   _controller.dispose();
 ///   super.dispose();
@@ -787,11 +789,13 @@ class EditableText extends StatefulWidget {
   /// ```dart
   /// TextEditingController _controller;
   ///
+  /// @override
   /// void initState() {
   ///   super.initState();
   ///   _controller = TextEditingController();
   /// }
   ///
+  /// @override
   /// void dispose() {
   ///   _controller.dispose();
   ///   super.dispose();
