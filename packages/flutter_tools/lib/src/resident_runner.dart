@@ -611,6 +611,7 @@ abstract class ResidentRunner {
     if (!artifactDirectory.existsSync()) {
       artifactDirectory.createSync(recursive: true);
     }
+    _defaultDillPath = fs.path.join(artifactDirectory.path, 'app.dill');
     // TODO(jonahwilliams): this is a temporary work around to regain some of
     // the initialize from dill performance. Longer term, we should have a
     // better way to determine where the appropriate dill file is, as this
@@ -651,7 +652,8 @@ abstract class ResidentRunner {
     });
   }
 
-  String get dillOutputPath => _dillOutputPath ?? fs.path.join(artifactDirectory.path, 'app.dill');
+  String _defaultDillPath;
+  String get dillOutputPath => _dillOutputPath ?? _defaultDillPath;
   String getReloadPath({ bool fullRestart }) => mainPath + (fullRestart ? '' : '.incremental') + '.dill';
 
   bool get debuggingEnabled => debuggingOptions.debuggingEnabled;

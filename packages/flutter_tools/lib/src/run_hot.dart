@@ -506,12 +506,12 @@ class HotRunner extends ResidentRunner {
     }
     await Future.wait(futures);
 
-    // We are now running from source.
+    // Flutter has loaded assets from the application binary.
     _runningFromSnapshot = false;
     await _launchFromDevFS(mainPath + '.dill');
     restartTimer.stop();
     printTrace('Hot restart performed in ${getElapsedAsMilliseconds(restartTimer.elapsed)}.');
-    // We are now running from sources.
+    // Flutter has loaded assets from the devfs.s
     _runningFromSnapshot = false;
     _addBenchmarkData('hotRestartMillisecondsToFrame',
         restartTimer.elapsed.inMilliseconds);
@@ -739,6 +739,8 @@ class HotRunner extends ResidentRunner {
     return result;
   }
 
+  String _entryPath;
+
   Future<OperationResult> _reloadSources({
     String targetPlatform,
     String sdkName,
@@ -755,19 +757,10 @@ class HotRunner extends ResidentRunner {
       }
     }
 
-    // The initial launch is from a script snapshot. When we reload from source
-    // on top of a script snapshot, the first reload will be a worst case reload
-    // because all of the sources will end up being dirty (library paths will
-    // change from host path to a device path). Subsequent reloads will
-    // not be affected, so we resume reporting reload times on the second
-    // reload.
+
     bool shouldReportReloadTime = !_runningFromSnapshot;
     final Stopwatch reloadTimer = Stopwatch()..start();
 
-    if (!_isPaused()) {
-      printTrace('Refreshing active FlutterViews before reloading.');
-      await refreshViews();
-    }
 
     final Stopwatch devFSTimer = Stopwatch()..start();
     final UpdateFSReport updatedDevFS = await _updateDevFS();
@@ -780,7 +773,7 @@ class HotRunner extends ResidentRunner {
     final Stopwatch vmReloadTimer = Stopwatch()..start();
     Map<String, dynamic> firstReloadDetails;
     try {
-      final String entryPath = fs.path.relative(
+      _entryPath ??= fs.path.relative(
         getReloadPath(fullRestart: false),
         from: projectRootPath,
       );
@@ -792,7 +785,7 @@ class HotRunner extends ResidentRunner {
           await device.resetAssetDirectory();
         }
         final List<Future<Map<String, dynamic>>> reportFutures = device.reloadSources(
-          entryPath, pause: pause,
+          _entryPath, pause: pause,
         );
         allReportsFutures.add(Future.wait(reportFutures).then(
           (List<Map<String, dynamic>> reports) async {
@@ -860,10 +853,9 @@ class HotRunner extends ResidentRunner {
     // Reload the isolate.
     final List<Future<void>> allDevices = <Future<void>>[];
     for (FlutterDevice device in flutterDevices) {
-      printTrace('Sending reload events to ${device.device.name}');
       final List<Future<ServiceObject>> futuresViews = <Future<ServiceObject>>[];
       for (FlutterView view in device.views) {
-        printTrace('Sending reload event to "${view.uiIsolate.name}"');
+        printTrace('Sending reload event to "${view.uiIsolate.name}" on ${device.device.name}');
         futuresViews.add(view.uiIsolate.reload());
       }
       allDevices.add(Future.wait(futuresViews).whenComplete(() {

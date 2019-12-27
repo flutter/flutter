@@ -460,23 +460,27 @@ class DevFS {
     final DateTime candidateCompileTime = DateTime.now();
 
     // Update modified files
-    final String assetBuildDirPrefix = _asUriPath(getAssetBuildDirectory());
     final Map<Uri, DevFSContent> dirtyEntries = <Uri, DevFSContent>{};
 
     int syncedBytes = 0;
     if (bundle != null && !skipAssets) {
-      printTrace('Scanning asset files');
       // We write the assets into the AssetBundle working dir so that they
       // are in the same location in DevFS and the iOS simulator.
-      final String assetDirectory = getAssetBuildDirectory();
+      String assetDirectory;
+      String assetBuildDirPrefix;
       bundle.entries.forEach((String archivePath, DevFSContent content) {
-        final Uri deviceUri = fs.path.toUri(fs.path.join(assetDirectory, archivePath));
-        if (deviceUri.path.startsWith(assetBuildDirPrefix)) {
-          archivePath = deviceUri.path.substring(assetBuildDirPrefix.length);
-        }
         // Only update assets if they have been modified, or if this is the
         // first upload of the asset bundle.
-        if (content.isModified || (bundleFirstUpload && archivePath != null)) {
+        if (content.isModified || bundleFirstUpload) {
+          assetDirectory ??= getAssetBuildDirectory();
+          assetBuildDirPrefix  ??= _asUriPath(getAssetBuildDirectory());
+          final Uri deviceUri = fs.path.toUri(fs.path.join(assetDirectory, archivePath));
+          if (deviceUri.path.startsWith(assetBuildDirPrefix)) {
+            archivePath = deviceUri.path.substring(assetBuildDirPrefix.length);
+          }
+          if (archivePath == null) {
+            return;
+          }
           dirtyEntries[deviceUri] = content;
           syncedBytes += content.size;
           if (archivePath != null && !bundleFirstUpload) {

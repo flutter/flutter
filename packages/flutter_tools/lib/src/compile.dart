@@ -580,14 +580,17 @@ class DefaultResidentCompiler implements ResidentCompiler {
     return completer.future;
   }
 
+  // Technically the packages file which determines this URI can change, but
+  // the main entrypoint used to run the application cannot without restarting.
+  PackageUriMapper _packageUriMapper;
+
   Future<CompilerOutput> _recompile(_RecompileRequest request) async {
     _stdoutHandler.reset();
 
     // First time recompile is called we actually have to compile the app from
     // scratch ignoring list of invalidated files.
-    PackageUriMapper packageUriMapper;
     if (request.packagesFilePath != null || packagesPath != null) {
-      packageUriMapper = PackageUriMapper(
+      _packageUriMapper ??= PackageUriMapper(
         request.mainPath,
         request.packagesFilePath ?? packagesPath,
         fileSystemScheme,
@@ -599,7 +602,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
 
     if (_server == null) {
       return _compile(
-        _mapFilename(request.mainPath, packageUriMapper),
+        _mapFilename(request.mainPath, _packageUriMapper),
         request.outputPath,
         _mapFilename(request.packagesFilePath ?? packagesPath, /* packageUriMapper= */ null),
       );
@@ -607,13 +610,12 @@ class DefaultResidentCompiler implements ResidentCompiler {
 
     final String inputKey = Uuid().generateV4();
     final String mainUri = request.mainPath != null
-        ? _mapFilename(request.mainPath, packageUriMapper) + ' '
+        ? _mapFilename(request.mainPath, _packageUriMapper) + ' '
         : '';
     _server.stdin.writeln('recompile $mainUri$inputKey');
     printTrace('<- recompile $mainUri$inputKey');
     for (Uri fileUri in request.invalidatedFiles) {
-      _server.stdin.writeln(_mapFileUri(fileUri.toString(), packageUriMapper));
-      printTrace('${_mapFileUri(fileUri.toString(), packageUriMapper)}');
+      _server.stdin.writeln(_mapFileUri(fileUri.toString(), _packageUriMapper));
     }
     _server.stdin.writeln(inputKey);
     printTrace('<- $inputKey');
