@@ -181,11 +181,13 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 /// ```dart
 /// TextEditingController _controller;
 ///
+/// @override
 /// void initState() {
 ///   super.initState();
 ///   _controller = TextEditingController();
 /// }
 ///
+/// @override
 /// void dispose() {
 ///   _controller.dispose();
 ///   super.dispose();
