@@ -85,7 +85,7 @@ void main() {
       find.byType(FlexibleSpaceBar),
       matchesGoldenFile('flexible_space_bar_stretch_mode.blur_background.png'),
     );
-  });
+  }, skip: isBrowser);
 
   testWidgets('FlexibleSpaceBar stretch mode fadeTitle', (WidgetTester tester) async {
     await tester.pumpWidget(
