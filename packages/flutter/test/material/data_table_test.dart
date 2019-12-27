@@ -114,7 +114,7 @@ void main() {
             tooltip: 'Name',
           ),
           DataColumn(
-            label: const Text('Calories'),
+            label: Text('Calories'),
             tooltip: 'Calories',
             numeric: true,
           ),
