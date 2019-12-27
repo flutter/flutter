@@ -6,6 +6,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
+import 'icon_theme_data.dart';
 
 /// A button in a _ContextMenuSheet.
 ///
@@ -135,7 +136,7 @@ class _CupertinoContextMenuActionState extends State<CupertinoContextMenuAction>
                   if (widget.trailing != null)
                     IconTheme(
                       child: widget.trailing,
-                      data: IconThemeData(
+                      data: CupertinoIconThemeData(
                         color: _textStyle.color,
                       ),
                     ),
