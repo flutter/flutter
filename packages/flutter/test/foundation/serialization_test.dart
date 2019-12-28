@@ -29,11 +29,11 @@ void main() {
     });
     test('of 32-bit integer in big endian', () {
       final WriteBuffer write = WriteBuffer();
-      write.putInt32(-9, Endian.big);
+      write.putInt32(-9, endian: Endian.big);
       final ByteData written = write.done();
       expect(written.lengthInBytes, equals(4));
       final ReadBuffer read = ReadBuffer(written);
-      expect(read.getInt32(Endian.big), equals(-9));
+      expect(read.getInt32(endian: Endian.big), equals(-9));
     });
     test('of 64-bit integer', () {
       final WriteBuffer write = WriteBuffer();
@@ -45,11 +45,11 @@ void main() {
     });
     test('of 64-bit integer in big endian', () {
       final WriteBuffer write = WriteBuffer();
-      write.putInt64(-9000000000000, Endian.big);
+      write.putInt64(-9000000000000, endian: Endian.big);
       final ByteData written = write.done();
       expect(written.lengthInBytes, equals(8));
       final ReadBuffer read = ReadBuffer(written);
-      expect(read.getInt64(Endian.big), equals(-9000000000000));
+      expect(read.getInt64(endian: Endian.big), equals(-9000000000000));
     });
     test('of double', () {
       final WriteBuffer write = WriteBuffer();
@@ -61,11 +61,11 @@ void main() {
     });
     test('of double in big endian', () {
       final WriteBuffer write = WriteBuffer();
-      write.putFloat64(3.14, Endian.big);
+      write.putFloat64(3.14, endian: Endian.big);
       final ByteData written = write.done();
       expect(written.lengthInBytes, equals(8));
       final ReadBuffer read = ReadBuffer(written);
-      expect(read.getFloat64(Endian.big), equals(3.14));
+      expect(read.getFloat64(endian: Endian.big), equals(3.14));
     });
     test('of 32-bit int list when unaligned', () {
       final Int32List integers = Int32List.fromList(<int>[-99, 2, 99]);
