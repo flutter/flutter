@@ -383,7 +383,7 @@ Future<void> main() async {
 
   });
 
-  testWidgets('BoxDecoration not tap outside rounded angles - top Left', (WidgetTester tester) async {
+  testWidgets('BoxDecoration not tap outside rounded angles - Top Left', (WidgetTester tester) async {
     const double height = 50.0;
     const double width = 50.0;
     const double radius = 12.3;
@@ -427,23 +427,23 @@ Future<void> main() async {
     const Offset fartherBorderRadiusPoint = Offset(borderDiagonalOffset,borderDiagonalOffset);
 
     await tester.tapAt(topLeft);
-    expect(itemsTapped, isEmpty,reason: "top left tapped");
+    expect(itemsTapped, isEmpty,reason: 'top left tapped');
 
     await tester.tapAt(borderTopTangent);
-    expect(itemsTapped, isEmpty,reason: "border Top tapped");
+    expect(itemsTapped, isEmpty,reason: 'border top tapped');
 
     await tester.tapAt(borderLeftTangent);
-    expect(itemsTapped, isEmpty,reason: "border Left tapped");
+    expect(itemsTapped, isEmpty,reason: 'border left tapped');
 
     await tester.tapAt(fartherBorderRadiusPoint);
-    expect(itemsTapped, isEmpty,reason: "border center tapped");
+    expect(itemsTapped, isEmpty,reason: 'border center tapped');
 
     await tester.tap(find.byKey(key));
     expect(itemsTapped, <int>[1]);
 
   });
 
-  testWidgets('BoxDecoration tap inside rounded angles - Top left', (WidgetTester tester) async {
+  testWidgets('BoxDecoration tap inside rounded angles - Top Left', (WidgetTester tester) async {
     const double height = 50.0;
     const double width = 50.0;
     const double radius = 12.3;
@@ -479,20 +479,20 @@ Future<void> main() async {
     const Offset fartherBorderRadiusPoint = Offset(borderDiagonalOffset+1,borderDiagonalOffset+1);
 
     await tester.tapAt(borderTopTangent);
-    expect(itemsTapped, <int>[1],reason: "border Top not tapped");
+    expect(itemsTapped, <int>[1],reason: 'border Top not tapped');
 
     await tester.tapAt(borderLeftTangent);
-    expect(itemsTapped, <int>[1,1],reason: "border Left not tapped");
+    expect(itemsTapped, <int>[1,1],reason: 'border Left not tapped');
 
     await tester.tapAt(fartherBorderRadiusPoint);
-    expect(itemsTapped, <int>[1,1,1],reason: "border center not tapped");
+    expect(itemsTapped, <int>[1,1,1],reason: 'border center not tapped');
 
     await tester.tap(find.byKey(key));
     expect(itemsTapped, <int>[1,1,1,1]);
 
   });
 
-  testWidgets('BoxDecoration rounded angles other corner woks', (WidgetTester tester) async {
+  testWidgets('BoxDecoration rounded angles other corner works', (WidgetTester tester) async {
     const double height = 50.0;
     const double width = 50.0;
     const double radius = 20;
@@ -536,28 +536,28 @@ Future<void> main() async {
     const Offset topLeftInside = Offset(radius, radius);
 
     await tester.tapAt(topRightInside);
-    expect(itemsTapped, <int>[1,1],reason: "top right not tapped");
+    expect(itemsTapped, <int>[1,1],reason: 'top right not tapped');
 
     await tester.tapAt(topRightOutside);
-    expect(itemsTapped, <int>[1,1],reason: "top right tapped");
+    expect(itemsTapped, <int>[1,1],reason: 'top right tapped');
 
     await tester.tapAt(bottomRightInside);
-    expect(itemsTapped, <int>[1,1,1],reason: "bottom right not tapped");
+    expect(itemsTapped, <int>[1,1,1],reason: 'bottom right not tapped');
 
     await tester.tapAt(bottomRightOutside);
-    expect(itemsTapped, <int>[1,1,1],reason: "bottom right tapped");
+    expect(itemsTapped, <int>[1,1,1],reason: 'bottom right tapped');
 
     await tester.tapAt(bottomLeftInside);
-    expect(itemsTapped, <int>[1,1,1,1],reason: "bottom left not tapped");
+    expect(itemsTapped, <int>[1,1,1,1],reason: 'bottom left not tapped');
 
     await tester.tapAt(bottomLeftOutside);
-    expect(itemsTapped, <int>[1,1,1,1],reason: "bottom left tapped");
+    expect(itemsTapped, <int>[1,1,1,1],reason: 'bottom left tapped');
 
     await tester.tapAt(topLeftInside);
-    expect(itemsTapped, <int>[1,1,1,1,1],reason: "top left not tapped");
+    expect(itemsTapped, <int>[1,1,1,1,1],reason: 'top left not tapped');
 
     await tester.tapAt(topLeftOutside);
-    expect(itemsTapped, <int>[1,1,1,1,1],reason: "top left tapped");
+    expect(itemsTapped, <int>[1,1,1,1,1],reason: 'top left tapped');
   });
 
 }
