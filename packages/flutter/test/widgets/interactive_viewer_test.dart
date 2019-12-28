@@ -111,7 +111,7 @@ void main() {
       );
       final Vector3 point = Vector3(5.0, 5.0, 0.0);
       
-      expect(pointIsInside(quad, point), true);
+      expect(pointIsInside(point, quad), true);
     });
 
     test('outside', () {
@@ -123,7 +123,7 @@ void main() {
       );
       final Vector3 point = Vector3(12.0, 0.0, 0.0);
       
-      expect(pointIsInside(quad, point), false);
+      expect(pointIsInside(point, quad), false);
     });
 
     test('on the edge', () {
@@ -135,7 +135,7 @@ void main() {
       );
       final Vector3 point = Vector3(0.0, 0.0, 0.0);
       
-      expect(pointIsInside(quad, point), true);
+      expect(pointIsInside(point, quad), true);
     });
   });
 

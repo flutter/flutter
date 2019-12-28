@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'package:vector_math/vector_math_64.dart' show Quad, Vector3;
+import 'package:vector_math/vector_math_64.dart' show Quad, Vector3, Matrix3;
 import 'package:flutter/gestures.dart' show kMinFlingVelocity;
 import 'package:flutter/material.dart';
 import 'package:flutter/physics.dart';
@@ -92,7 +92,7 @@ Quad getAxisAlignedBoundingBox(Quad quad) {
 // inclusively.
 // Algorithm from https://math.stackexchange.com/a/190373.
 @visibleForTesting
-bool pointIsInside(Quad quad, Vector3 point) {
+bool pointIsInside(Vector3 point, Quad quad) {
   final Vector3 AM = point - quad.point0;
   final Vector3 AB = quad.point1 - quad.point0;
   final Vector3 AD = quad.point3 - quad.point0;
@@ -105,25 +105,37 @@ bool pointIsInside(Quad quad, Vector3 point) {
   return 0 <= AMAB && AMAB <= ABAB && 0 <= AMAD && AMAD <= ADAD;
 }
 
+Rect quadToRect(Quad quad) {
+  return Rect.fromLTRB(
+    math.min(quad.point0.x, math.min(quad.point1.x, math.min(quad.point2.x, quad.point3.x))),
+    math.min(quad.point0.y, math.min(quad.point1.y, math.min(quad.point2.y, quad.point3.y))),
+    math.max(quad.point0.x, math.max(quad.point1.x, math.max(quad.point2.x, quad.point3.x))),
+    math.max(quad.point0.y, math.max(quad.point1.y, math.max(quad.point2.y, quad.point3.y))),
+  );
+}
+
 // Get the point inside (inclusively) the given Quad that is nearest to the
 // given Vector3.
 @visibleForTesting
 Vector3 getNearestPointInside(Vector3 point, Quad quad) {
   // If the point is inside the axis aligned bounding box, then it's ok where
   // it is.
-  if (pointIsInside(quad, point)) {
+  if (pointIsInside(point, quad)) {
     return point;
   }
 
-  // Otherwise, return the nearest point on the axis aligned bounding box.
+  // Otherwise, return the nearest point on the quad.
   final List<Vector3> closestPoints = <Vector3>[
     getNearestPointOnLine(point, quad.point0, quad.point1),
     getNearestPointOnLine(point, quad.point1, quad.point2),
     getNearestPointOnLine(point, quad.point2, quad.point3),
     getNearestPointOnLine(point, quad.point3, quad.point0),
   ];
+  // TODO(justinmc): I confirmed that getNearestPointOnLine is returning the
+  // right values in practice.
   double minDistance = double.infinity;
   Vector3 closestOverall;
+  // TODO(justinmc): I also confirmed that this closest point finding is right.
   for (Vector3 closePoint in closestPoints) {
     final double distance = math.sqrt(
       math.pow(point.x - closePoint.x, 2) + math.pow(point.y - closePoint.y, 2),
@@ -782,30 +794,22 @@ class _InteractiveViewerState extends State<_InteractiveViewerSized> with Ticker
     );
   }
 
-  // Get the bounding box for the rect that is axis aligned after
-  // transformation. This is useful because the boundary is always aligned to
-  // the viewport, even after the child has been rotated.
-  static Quad _getTransformedAabb(Matrix4 transformation, Rect rect) {
-    final Quad transformedRect = Quad.points(
-      transformation.transform3(Vector3(rect.topLeft.dx, rect.topLeft.dy, 0)),
-      transformation.transform3(Vector3(rect.topRight.dx, rect.topRight.dy, 0)),
-      transformation.transform3(Vector3(rect.bottomRight.dx, rect.bottomRight.dy, 0)),
-      transformation.transform3(Vector3(rect.bottomLeft.dx, rect.bottomLeft.dy, 0)),
+  // Given the viewport boundaries, return a Quad representing the boundaries
+  // for translation values.
+  static Quad _getTranslationBoundaries(Rect viewportBoundaries, double scale, Matrix3 rotation) {
+    // Translation is reversed (a positive translation moves the scene to the
+    // right, viewport to the left).
+    final Rect rect = Rect.fromLTRB(
+      -viewportBoundaries.right,
+      -viewportBoundaries.bottom,
+      -viewportBoundaries.left,
+      -viewportBoundaries.top,
     );
-
-    // Calculate the axis aligned bounding box for the rect after the
-    // transformation, because the boundary does not rotate with the scene.
-    final Quad aabb = getAxisAlignedBoundingBox(transformedRect);
-
-    // Transform the axis aligned bounding box back to the viewport. If there
-    // was any rotation not a multiple of pi/2, then it will no longer be axis
-    // aligned from the viewport's perspective.
-    final Matrix4 inverseTransformation = transformation.clone()..invert();
     return Quad.points(
-      inverseTransformation.transform3(aabb.point0.clone()),
-      inverseTransformation.transform3(aabb.point1.clone()),
-      inverseTransformation.transform3(aabb.point2.clone()),
-      inverseTransformation.transform3(aabb.point3.clone()),
+      rotation.transform(Vector3(rect.topLeft.dx, rect.topLeft.dy, 0)),
+      rotation.transform(Vector3(rect.topRight.dx, rect.topRight.dy, 0)),
+      rotation.transform(Vector3(rect.bottomRight.dx, rect.bottomRight.dy, 0)),
+      rotation.transform(Vector3(rect.bottomLeft.dx, rect.bottomLeft.dy, 0)),
     );
   }
 
@@ -829,56 +833,33 @@ class _InteractiveViewerState extends State<_InteractiveViewerSized> with Ticker
       _boundaryRect.right - scaledSize.width,
       _boundaryRect.bottom - scaledSize.height,
     );
-    // Translation is reversed (a positive translation moves the scene to the
-    // right, viewport to the left).
-    final Rect translationBoundaries = Rect.fromLTRB(
-      -scale * viewportBoundaries.right,
-      -scale * viewportBoundaries.bottom,
-      -scale * viewportBoundaries.left,
-      -scale * viewportBoundaries.top,
-    );
 
-    // Does both the x and y translation fit in the boundaries?
+    final Quad translationBoundaries = _getTranslationBoundaries(
+      viewportBoundaries,
+      scale,
+      matrix.getRotation(),
+    );
+    // TODO(justinmc): Can I simplify the aabb calculation like quadToRect?
+    final Quad translationBoundariesAabb = getAxisAlignedBoundingBox(translationBoundaries);
+
+    // If the translation fits within the boundaries then it's valid.
     final Matrix4 nextMatrix = matrix.clone()..translate(
       translation.dx,
       translation.dy,
     );
     final Offset nextTotalTranslation = _getMatrixTranslation(nextMatrix);
-    if (translationBoundaries.contains(nextTotalTranslation)) {
+    if (quadToRect(translationBoundaries).contains(nextTotalTranslation)) {
       return nextMatrix;
     }
 
-    // Translation goes out of bounds, so translate to the nearest in-bounds
-    // point.
-    final Quad transformedAabb = _getTransformedAabb(matrix, viewportBoundaries);
+    // Desired translation goes out of bounds, so translate to the nearest
+    // in-bounds point instead.
     final Vector3 validTotalTranslation = getNearestPointInside(
       Vector3(nextTotalTranslation.dx, nextTotalTranslation.dy, 0),
-      transformedAabb,
+      translationBoundariesAabb,
     );
 
-    print('justin the original nextTotalTranslation was $nextTotalTranslation, but I want to put it at $validTotalTranslation');
-
-    final Offset currentTotalTranslation = _getMatrixTranslation(matrix);
-    return matrix.clone()..translate(
-      (validTotalTranslation.x.clamp(
-        translationBoundaries.left,
-        translationBoundaries.right,
-      ) - currentTotalTranslation.dx) / scale,
-      (validTotalTranslation.y.clamp(
-        translationBoundaries.top,
-        translationBoundaries.bottom,
-      ) - currentTotalTranslation.dy) / scale,
-        /*
-      (nextTotalTranslation.dx.clamp(
-        translationBoundaries.left,
-        translationBoundaries.right,
-      ) - currentTotalTranslation.dx) / scale,
-      (nextTotalTranslation.dy.clamp(
-        translationBoundaries.top,
-        translationBoundaries.bottom,
-      ) - currentTotalTranslation.dy) / scale,
-      */
-    );
+    return matrix.clone()..setTranslation(validTotalTranslation);
   }
 
   // Return a new matrix representing the given matrix after applying the given
