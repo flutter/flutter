@@ -19,10 +19,8 @@
 namespace dart_runner {
 namespace {
 
-dart_utils::ElfSnapshot elf_snapshot;                     // AOT snapshot
-dart_utils::MappedResource mapped_isolate_snapshot_data;  // JIT snapshot
-dart_utils::MappedResource
-    mapped_isolate_snapshot_instructions;  // JIT snapshot
+MappedResource mapped_isolate_snapshot_data;
+MappedResource mapped_isolate_snapshot_instructions;
 tonic::DartLibraryNatives* service_natives = nullptr;
 
 Dart_NativeFunction GetNativeFunction(Dart_Handle name,
@@ -78,23 +76,12 @@ Dart_Isolate CreateServiceIsolate(const char* uri,
                                   char** error) {
   Dart_SetEmbedderInformationCallback(EmbedderInformationCallback);
 
-  const uint8_t *vmservice_data = nullptr, *vmservice_instructions = nullptr;
-
 #if defined(AOT_RUNTIME)
   // The VM service was compiled as a separate app.
-  const char* snapshot_path = "pkg/data/vmservice_snapshot.so";
-  if (elf_snapshot.Load(nullptr, snapshot_path)) {
-    vmservice_data = elf_snapshot.IsolateData();
-    vmservice_instructions = elf_snapshot.IsolateInstrs();
-    if (vmservice_data == nullptr || vmservice_instructions == nullptr) {
-      return nullptr;
-    }
-  } else {
-    // The VM service was compiled as a separate app.
-    const char* snapshot_data_path =
-        "pkg/data/vmservice_isolate_snapshot_data.bin";
-    const char* snapshot_instructions_path =
-        "pkg/data/vmservice_isolate_snapshot_instructions.bin";
+  const char* snapshot_data_path =
+      "pkg/data/vmservice_isolate_snapshot_data.bin";
+  const char* snapshot_instructions_path =
+      "pkg/data/vmservice_isolate_snapshot_instructions.bin";
 #else
   // The VM service is embedded in the core snapshot.
   const char* snapshot_data_path = "pkg/data/isolate_core_snapshot_data.bin";
@@ -102,30 +89,25 @@ Dart_Isolate CreateServiceIsolate(const char* uri,
       "pkg/data/isolate_core_snapshot_instructions.bin";
 #endif
 
-    if (!dart_utils::MappedResource::LoadFromNamespace(
-            nullptr, snapshot_data_path, mapped_isolate_snapshot_data)) {
-      *error = strdup("Failed to load snapshot for service isolate");
-      FX_LOG(ERROR, LOG_TAG, *error);
-      return nullptr;
-    }
-    if (!dart_utils::MappedResource::LoadFromNamespace(
-            nullptr, snapshot_instructions_path,
-            mapped_isolate_snapshot_instructions, true /* executable */)) {
-      *error = strdup("Failed to load snapshot for service isolate");
-      FX_LOG(ERROR, LOG_TAG, *error);
-      return nullptr;
-    }
-
-    vmservice_data = mapped_isolate_snapshot_data.address();
-    vmservice_instructions = mapped_isolate_snapshot_instructions.address();
-#if defined(AOT_RUNTIME)
+  if (!MappedResource::LoadFromNamespace(nullptr, snapshot_data_path,
+                                         mapped_isolate_snapshot_data)) {
+    *error = strdup("Failed to load snapshot for service isolate");
+    FX_LOG(ERROR, LOG_TAG, *error);
+    return nullptr;
   }
-#endif
+  if (!MappedResource::LoadFromNamespace(nullptr, snapshot_instructions_path,
+                                         mapped_isolate_snapshot_instructions,
+                                         true /* executable */)) {
+    *error = strdup("Failed to load snapshot for service isolate");
+    FX_LOG(ERROR, LOG_TAG, *error);
+    return nullptr;
+  }
 
   auto state = new std::shared_ptr<tonic::DartState>(new tonic::DartState());
   Dart_Isolate isolate = Dart_CreateIsolateGroup(
-      uri, DART_VM_SERVICE_ISOLATE_NAME, vmservice_data, vmservice_instructions,
-      nullptr /* flags */, state, state, error);
+      uri, DART_VM_SERVICE_ISOLATE_NAME, mapped_isolate_snapshot_data.address(),
+      mapped_isolate_snapshot_instructions.address(), nullptr /* flags */,
+      state, state, error);
   if (!isolate) {
     FX_LOGF(ERROR, LOG_TAG, "Dart_CreateIsolateGroup failed: %s", *error);
     return nullptr;
@@ -194,14 +176,14 @@ Dart_Isolate CreateServiceIsolate(const char* uri,
 }  // namespace dart_runner
 
 Dart_Handle GetVMServiceAssetsArchiveCallback() {
-  dart_utils::MappedResource observatory_tar;
-  if (!dart_utils::MappedResource::LoadFromNamespace(
-          nullptr, "pkg/data/observatory.tar", observatory_tar)) {
+  MappedResource observatory_tar;
+  if (!MappedResource::LoadFromNamespace(nullptr, "pkg/data/observatory.tar",
+                                         observatory_tar)) {
     FX_LOG(ERROR, LOG_TAG, "Failed to load Observatory assets");
     return nullptr;
   }
-  // TODO(rmacnak): Should we avoid copying the tar? Or does the service
-  // library not hold onto it anyway?
+  // TODO(rmacnak): Should we avoid copying the tar? Or does the service library
+  // not hold onto it anyway?
   return tonic::DartConverter<tonic::Uint8List>::ToDart(
       reinterpret_cast<const uint8_t*>(observatory_tar.address()),
       observatory_tar.size());
