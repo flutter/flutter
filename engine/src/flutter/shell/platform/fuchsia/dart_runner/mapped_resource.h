@@ -7,44 +7,8 @@
 
 #include <fuchsia/mem/cpp/fidl.h>
 #include <lib/fdio/namespace.h>
-#include <third_party/dart/runtime/bin/elf_loader.h>
 
-namespace dart_utils {
-
-class ElfSnapshot {
- public:
-  ElfSnapshot() {}
-  ~ElfSnapshot();
-  ElfSnapshot(ElfSnapshot&& other) : handle_(other.handle_) {
-    other.handle_ = nullptr;
-  }
-  ElfSnapshot& operator=(ElfSnapshot&& other) {
-    std::swap(handle_, other.handle_);
-    return *this;
-  }
-
-  bool Load(fdio_ns_t* namespc, const std::string& path);
-  bool Load(int dirfd, const std::string& path);
-
-  const uint8_t* VmData() const { return vm_data_; }
-  const uint8_t* VmInstrs() const { return vm_instrs_; }
-  const uint8_t* IsolateData() const { return isolate_data_; }
-  const uint8_t* IsolateInstrs() const { return isolate_instrs_; }
-
- private:
-  bool Load(int fd);
-
-  Dart_LoadedElf* handle_ = nullptr;
-
-  const uint8_t* vm_data_ = nullptr;
-  const uint8_t* vm_instrs_ = nullptr;
-  const uint8_t* isolate_data_ = nullptr;
-  const uint8_t* isolate_instrs_ = nullptr;
-
-  // Disallow copy and assignment.
-  ElfSnapshot(const ElfSnapshot&) = delete;
-  ElfSnapshot& operator=(const ElfSnapshot&) = delete;
-};
+namespace dart_runner {
 
 class MappedResource {
  public:
@@ -73,13 +37,6 @@ class MappedResource {
                                 MappedResource& resource,
                                 bool executable = false);
 
-  // Same as LoadFromNamespace, but takes a file descriptor to an opened
-  // directory instead of a namespace.
-  static bool LoadFromDir(int dirfd,
-                          const std::string& path,
-                          MappedResource& resource,
-                          bool executable = false);
-
   // Maps a VMO into the current process's address space. The content is
   // unmapped when the MappedResource goes out of scope. Returns true on
   // success. The path is used only for error messages.
@@ -102,6 +59,6 @@ class MappedResource {
   MappedResource& operator=(const MappedResource&) = delete;
 };
 
-}  // namespace dart_utils
+}  // namespace dart_runner
 
 #endif  // APPS_DART_RUNNER_MAPPED_RESOURCE_H_

@@ -155,11 +155,11 @@ DartRunner::DartRunner() : context_(sys::ComponentContext::Create()) {
   params.vm_snapshot_data = ::_kDartVmSnapshotData;
   params.vm_snapshot_instructions = ::_kDartVmSnapshotInstructions;
 #else
-  if (!dart_utils::MappedResource::LoadFromNamespace(
+  if (!MappedResource::LoadFromNamespace(
           nullptr, "pkg/data/vm_snapshot_data.bin", vm_snapshot_data_)) {
     FX_LOG(FATAL, LOG_TAG, "Failed to load vm snapshot data");
   }
-  if (!dart_utils::MappedResource::LoadFromNamespace(
+  if (!MappedResource::LoadFromNamespace(
           nullptr, "pkg/data/vm_snapshot_instructions.bin",
           vm_snapshot_instructions_, true /* executable */)) {
     FX_LOG(FATAL, LOG_TAG, "Failed to load vm snapshot instructions");

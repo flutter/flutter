@@ -986,6 +986,8 @@ FILE: ../../../flutter/shell/platform/fuchsia/dart_runner/integration/meta/dart_
 FILE: ../../../flutter/shell/platform/fuchsia/dart_runner/kernel/libraries.json
 FILE: ../../../flutter/shell/platform/fuchsia/dart_runner/logging.h
 FILE: ../../../flutter/shell/platform/fuchsia/dart_runner/main.cc
+FILE: ../../../flutter/shell/platform/fuchsia/dart_runner/mapped_resource.cc
+FILE: ../../../flutter/shell/platform/fuchsia/dart_runner/mapped_resource.h
 FILE: ../../../flutter/shell/platform/fuchsia/dart_runner/meta/aot_product_runtime
 FILE: ../../../flutter/shell/platform/fuchsia/dart_runner/meta/aot_runtime
 FILE: ../../../flutter/shell/platform/fuchsia/dart_runner/meta/dart_aot_product_runner.cmx
@@ -1068,8 +1070,6 @@ FILE: ../../../flutter/shell/platform/fuchsia/runtime/dart/utils/handle_exceptio
 FILE: ../../../flutter/shell/platform/fuchsia/runtime/dart/utils/handle_exception.h
 FILE: ../../../flutter/shell/platform/fuchsia/runtime/dart/utils/inlines.h
 FILE: ../../../flutter/shell/platform/fuchsia/runtime/dart/utils/logging.h
-FILE: ../../../flutter/shell/platform/fuchsia/runtime/dart/utils/mapped_resource.cc
-FILE: ../../../flutter/shell/platform/fuchsia/runtime/dart/utils/mapped_resource.h
 FILE: ../../../flutter/shell/platform/fuchsia/runtime/dart/utils/tempfs.cc
 FILE: ../../../flutter/shell/platform/fuchsia/runtime/dart/utils/tempfs.h
 FILE: ../../../flutter/shell/platform/fuchsia/runtime/dart/utils/vmo.cc

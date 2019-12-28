@@ -24,7 +24,6 @@
 #include <regex>
 #include <utility>
 
-#include "runtime/dart/utils/files.h"
 #include "runtime/dart/utils/handle_exception.h"
 #include "runtime/dart/utils/inlines.h"
 #include "runtime/dart/utils/tempfs.h"
@@ -194,18 +193,18 @@ bool DartComponentController::SetupNamespace() {
 }
 
 bool DartComponentController::SetupFromKernel() {
-  dart_utils::MappedResource manifest;
-  if (!dart_utils::MappedResource::LoadFromNamespace(
+  MappedResource manifest;
+  if (!MappedResource::LoadFromNamespace(
           namespace_, data_path_ + "/app.dilplist", manifest)) {
     return false;
   }
 
-  if (!dart_utils::MappedResource::LoadFromNamespace(
+  if (!MappedResource::LoadFromNamespace(
           nullptr, "pkg/data/isolate_core_snapshot_data.bin",
           isolate_snapshot_data_)) {
     return false;
   }
-  if (!dart_utils::MappedResource::LoadFromNamespace(
+  if (!MappedResource::LoadFromNamespace(
           nullptr, "pkg/data/isolate_core_snapshot_instructions.bin",
           isolate_snapshot_instructions_, true /* executable */)) {
     return false;
@@ -232,9 +231,8 @@ bool DartComponentController::SetupFromKernel() {
     std::string path = data_path_ + "/" + str.substr(start, end - start);
     start = end + 1;
 
-    dart_utils::MappedResource kernel;
-    if (!dart_utils::MappedResource::LoadFromNamespace(namespace_, path,
-                                                       kernel)) {
+    MappedResource kernel;
+    if (!MappedResource::LoadFromNamespace(namespace_, path, kernel)) {
       FX_LOGF(ERROR, LOG_TAG, "Failed to find kernel: %s", path.c_str());
       Dart_ExitScope();
       return false;
@@ -264,30 +262,25 @@ bool DartComponentController::SetupFromKernel() {
 
 bool DartComponentController::SetupFromAppSnapshot() {
 #if !defined(AOT_RUNTIME)
+  // If we start generating app-jit snapshots, the code below should be able
+  // handle that case without modification.
   return false;
 #else
-  // Load the ELF snapshot as available, and fall back to a blobs snapshot
-  // otherwise.
-  const uint8_t *isolate_data, *isolate_instructions;
-  if (elf_snapshot_.Load(namespace_, data_path_ + "/app_aot_snapshot.so")) {
-    isolate_data = elf_snapshot_.IsolateData();
-    isolate_instructions = elf_snapshot_.IsolateInstrs();
-    if (isolate_data == nullptr || isolate_instructions == nullptr) {
-      return false;
-    }
-  } else {
-    if (!dart_utils::MappedResource::LoadFromNamespace(
-            namespace_, data_path_ + "/isolate_snapshot_data.bin",
-            isolate_snapshot_data_)) {
-      return false;
-    }
-    if (!dart_utils::MappedResource::LoadFromNamespace(
-            namespace_, data_path_ + "/isolate_snapshot_instructions.bin",
-            isolate_snapshot_instructions_, true /* executable */)) {
-      return false;
-    }
+
+  if (!MappedResource::LoadFromNamespace(
+          namespace_, data_path_ + "/isolate_snapshot_data.bin",
+          isolate_snapshot_data_)) {
+    return false;
   }
-  return CreateIsolate(isolate_data, isolate_instructions);
+
+  if (!MappedResource::LoadFromNamespace(
+          namespace_, data_path_ + "/isolate_snapshot_instructions.bin",
+          isolate_snapshot_instructions_, true /* executable */)) {
+    return false;
+  }
+
+  return CreateIsolate(isolate_snapshot_data_.address(),
+                       isolate_snapshot_instructions_.address());
 #endif  // defined(AOT_RUNTIME)
 }
 
