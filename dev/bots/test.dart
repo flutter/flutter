@@ -604,6 +604,7 @@ Future<void> _pubRunTest(String workingDirectory, {
     args.add('--no-color');
   if (testPath != null)
     args.add(testPath);
+  args.add('--test-randomize-ordering-seed=random');
   final Map<String, String> pubEnvironment = <String, String>{
     'FLUTTER_ROOT': flutterRoot,
   };
