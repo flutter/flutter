@@ -1174,7 +1174,7 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
       final TextStyle style = widget.style;
       // The _textInputConnection will pick up the new style when it attaches in
       // _openInputConnection.
-      if (_textInputConnection.attached) {
+      if (_textInputConnection != null && _textInputConnection.attached) {
         _textInputConnection?.setStyle(
           fontFamily: style.fontFamily,
           fontSize: style.fontSize,
