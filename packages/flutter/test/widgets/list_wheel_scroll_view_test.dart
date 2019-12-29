@@ -64,6 +64,63 @@ void main() {
         throwsAssertionError,
       );
     });
+
+    testWidgets('ListWheelScrollView needs valid overAndUnderCenterOpacity', (WidgetTester tester) async {
+      expect(
+        () {
+          ListWheelScrollView(
+            overAndUnderCenterOpacity: null,
+            itemExtent: 20.0,
+            children: <Widget>[Container()],
+          );
+        },
+        throwsAssertionError,
+      );
+
+      expect(
+        () {
+          ListWheelScrollView(
+            overAndUnderCenterOpacity: -1,
+            itemExtent: 20.0,
+            children: <Widget>[Container()],
+          );
+        },
+        throwsAssertionError,
+      );
+
+      expect(
+        () {
+          ListWheelScrollView(
+            overAndUnderCenterOpacity: 2,
+            itemExtent: 20.0,
+            children: <Widget>[Container()],
+          );
+        },
+        throwsAssertionError,
+      );
+
+      expect(
+        () {
+          ListWheelScrollView(
+            overAndUnderCenterOpacity: 1,
+            itemExtent: 20.0,
+            children: <Widget>[Container()],
+          );
+        },
+        isNot(throwsAssertionError),
+      );
+
+      expect(
+        () {
+          ListWheelScrollView(
+            overAndUnderCenterOpacity: 0,
+            itemExtent: 20.0,
+            children: <Widget>[Container()],
+          );
+        },
+        isNot(throwsAssertionError),
+      );
+    });
   });
 
   group('infinite scrolling', () {

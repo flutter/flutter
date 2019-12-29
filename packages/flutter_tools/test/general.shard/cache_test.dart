@@ -230,9 +230,7 @@ void main() {
         'FLUTTER_STORAGE_BASE_URL': ' http://foo',
       });
       final Cache cache = Cache();
-      final CachedArtifact artifact = MaterialFonts(cache);
-
-      expect(() => artifact.storageBaseUrl, throwsA(isInstanceOf<ToolExit>()));
+      expect(() => cache.storageBaseUrl, throwsA(isInstanceOf<ToolExit>()));
     }, overrides: <Type, Generator>{
       Platform: () => MockPlatform(),
     });
