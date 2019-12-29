@@ -1255,4 +1255,60 @@ void main() {
     expect(find.text('C'), findsOneWidget);
     expect(find.text('D'), findsNothing);
   });
+
+  testWidgets('Correct custom expanded padding', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SingleChildScrollView(
+          child: ExpansionPanelList(
+            expansionCallback: (int _index, bool _isExpanded) {},
+            children: <ExpansionPanel>[
+              ExpansionPanel(
+                headerBuilder: (BuildContext context, bool isExpanded) {
+                  return Text(isExpanded ? 'B' : 'A');
+                },
+                body: const SizedBox(height: 100.0),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('A'), findsOneWidget);
+    expect(find.text('B'), findsNothing);
+    RenderBox box = tester.renderObject(find.byType(ExpansionPanelList));
+    final double oldHeight = box.size.height;
+    expect(box.size.height, equals(oldHeight));
+
+    // Now, expand the child panel.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SingleChildScrollView(
+          child: ExpansionPanelList(
+            expansionCallback: (int _index, bool _isExpanded) {},
+            expandedPadding: const EdgeInsets.symmetric(vertical: 40.0),
+            children: <ExpansionPanel>[
+              ExpansionPanel(
+                headerBuilder: (BuildContext context, bool isExpanded) {
+                  return Text(isExpanded ? 'B' : 'A');
+                },
+                body: const SizedBox(height: 100.0),
+                isExpanded: true, // this is the addition
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    await tester.pump(const Duration(milliseconds: 200));
+
+    expect(find.text('A'), findsNothing);
+    expect(find.text('B'), findsOneWidget);
+    box = tester.renderObject(find.byType(ExpansionPanelList));
+
+    final double heightDelta = box.size.height - oldHeight;
+    expect(heightDelta, greaterThanOrEqualTo(170.0));
+    expect(heightDelta, lessThanOrEqualTo(180.0));
+  });
 }
