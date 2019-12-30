@@ -55,6 +55,12 @@ abstract class RenderProxySliver extends RenderSliver with RenderObjectWithChild
   }
 
   @override
+  void paint(PaintingContext context, Offset offset) {
+    if (child != null)
+      context.paintChild(child, offset);
+  }
+
+  @override
   bool hitTestChildren(SliverHitTestResult result, {double mainAxisPosition, double crossAxisPosition}) {
     return child != null
       && child.geometry.hitTestExtent > 0
@@ -126,7 +132,9 @@ class RenderSliverOpacity extends RenderProxySliver {
   set opacity(double value) {
     assert(value != null);
     assert(value >= 0.0 && value <= 1.0);
-    if (_opacity == value)
+    assert(value != null);
+    final SliverMultiBoxAdaptorParentData parentData = child.parentData as SliverMultiBoxAdaptorParentData;
+    if (_opacity == value || parentData.keptAlive)
       return;
     final bool didNeedCompositing = alwaysNeedsCompositing;
     final bool wasVisible = _alpha != 0;
@@ -400,7 +408,4 @@ class RenderSliverAnimatedOpacity extends RenderProxySliver with RenderAnimatedO
     if (!parentData.keptAlive)
       super.opacity = value;
   }
-
-  @override
-  void paintWithOpacity(PaintingContext context, Offset offset) => context.paintChild(child, offset);
 }

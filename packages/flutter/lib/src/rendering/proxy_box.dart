@@ -897,12 +897,6 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
     }
   }
 
-  /// Paint method to be implemented for the inheriting [RenderProxySliver]
-  /// and [RenderProxyBox].
-  ///
-  /// Must be implemented by the class that is using the mixin.
-  void paintWithOpacity(PaintingContext context, Offset offset);
-
   @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
@@ -918,7 +912,7 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
         return;
       }
       assert(needsCompositing);
-      layer = context.pushOpacity(offset, _alpha, paintWithOpacity, oldLayer: layer as OpacityLayer);
+      layer = context.pushOpacity(offset, _alpha, super.paint, oldLayer: layer as OpacityLayer);
     }
   }
 
@@ -954,13 +948,6 @@ class RenderAnimatedOpacity extends RenderProxyBox with RenderProxyBoxMixin, Ren
     this.opacity = opacity;
     this.alwaysIncludeSemantics = alwaysIncludeSemantics;
   }
-
-  @override
-  void paintWithOpacity(PaintingContext context, Offset offset) => super.paint;
-//  {
-//    if (child != null)
-//      context.paintChild(child, offset);
-//  }
 }
 
 /// Signature for a function that creates a [Shader] for a given [Rect].
