@@ -136,6 +136,74 @@ void main() {
     expect(tester.getCenter(find.text('Title')).dx, 400.0);
   });
 
+  testWidgets('Can specify custom brightness', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: CupertinoNavigationBar(
+          backgroundColor: Color(0xF0F9F9F9),
+          brightness: Brightness.dark,
+        ),
+      ),
+    );
+
+    final AnnotatedRegion<SystemUiOverlayStyle> region1 = tester.allWidgets
+        .whereType<AnnotatedRegion<SystemUiOverlayStyle>>()
+        .single;
+    expect(region1.value, SystemUiOverlayStyle.light);
+
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: CupertinoNavigationBar(
+          backgroundColor: Color(0xF01D1D1D),
+          brightness: Brightness.light,
+        ),
+      ),
+    );
+
+    final AnnotatedRegion<SystemUiOverlayStyle> region2 = tester.allWidgets
+        .whereType<AnnotatedRegion<SystemUiOverlayStyle>>()
+        .single;
+    expect(region2.value, SystemUiOverlayStyle.dark);
+
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: CustomScrollView(
+          slivers: <Widget>[
+            CupertinoSliverNavigationBar(
+              largeTitle: Text('Title'),
+              backgroundColor: Color(0xF0F9F9F9),
+              brightness: Brightness.dark,
+            )
+          ],
+        ),
+      ),
+    );
+
+    final AnnotatedRegion<SystemUiOverlayStyle> region3 = tester.allWidgets
+        .whereType<AnnotatedRegion<SystemUiOverlayStyle>>()
+        .single;
+    expect(region3.value, SystemUiOverlayStyle.light);
+
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: CustomScrollView(
+          slivers: <Widget>[
+            CupertinoSliverNavigationBar(
+              largeTitle: Text('Title'),
+              backgroundColor: Color(0xF01D1D1D),
+              brightness: Brightness.light,
+            )
+          ],
+        ),
+      ),
+    );
+
+    final AnnotatedRegion<SystemUiOverlayStyle> region4 = tester.allWidgets
+        .whereType<AnnotatedRegion<SystemUiOverlayStyle>>()
+        .single;
+    expect(region4.value, SystemUiOverlayStyle.dark);
+  });
+
   testWidgets('Padding works in RTL', (WidgetTester tester) async {
     await tester.pumpWidget(
       const CupertinoApp(
