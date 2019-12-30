@@ -223,7 +223,7 @@ class AndroidApk extends ApplicationPackage {
         String actionName = '';
         String categoryName = '';
         for (xml.XmlNode node in element.children) {
-          if (!(node is xml.XmlElement)) {
+          if (node is! xml.XmlElement) {
             continue;
           }
           final xml.XmlElement xmlElement = node as xml.XmlElement;

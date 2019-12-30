@@ -4,7 +4,7 @@
 
 import 'package:flutter_driver/src/common/find.dart';
 
-import '../../common.dart';
+import '../common.dart';
 
 void main() {
   test('Ancestor finder serialize', () {

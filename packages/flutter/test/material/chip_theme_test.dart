@@ -107,7 +107,7 @@ void main() {
 
     final RenderBox materialBox = getMaterialBox(tester);
 
-    expect(materialBox, paints..rect(color: chipTheme.backgroundColor));
+    expect(materialBox, paints..path(color: chipTheme.backgroundColor));
   });
 
   testWidgets('Chip overrides ThemeData theme if ChipTheme present', (WidgetTester tester) async {
@@ -161,7 +161,7 @@ void main() {
     final RenderBox materialBox = getMaterialBox(tester);
     final Material material = getMaterial(tester);
 
-    expect(materialBox, paints..rect(color: Color(customTheme.backgroundColor.value)));
+    expect(materialBox, paints..path(color: Color(customTheme.backgroundColor.value)));
     expect(material.elevation, customTheme.elevation);
     expect(material.shadowColor, customTheme.shadowColor);
   }, skip: isBrowser);
