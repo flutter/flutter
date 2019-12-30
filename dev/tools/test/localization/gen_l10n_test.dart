@@ -359,8 +359,8 @@ void main() {
         }
 
         fail(
-          'Should fail since an unsupported locale was added '
-          'to the preferredSupportedLocales list.'
+          'Should fail since an incorrect runtime type was used '
+          'in the preferredSupportedLocales list.'
         );
       },
     );
