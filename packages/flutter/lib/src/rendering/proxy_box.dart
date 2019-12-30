@@ -897,12 +897,6 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
     }
   }
 
-  /// Paint method to be implemented for the inheriting [RenderProxySliver]
-  /// and [RenderProxyBox].
-  ///
-  /// Must be implemented by the class that is using the mixin.
-  void paintWithOpacity(PaintingContext context, Offset offset);
-
   @override
   void paint(PaintingContext context, Offset offset) {
     if (child != null) {
@@ -918,7 +912,7 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
         return;
       }
       assert(needsCompositing);
-      layer = context.pushOpacity(offset, _alpha, paintWithOpacity, oldLayer: layer as OpacityLayer);
+      layer = context.pushOpacity(offset, _alpha, super.paint, oldLayer: layer as OpacityLayer);
     }
   }
 
@@ -940,7 +934,7 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
 ///
 /// This is a variant of [RenderOpacity] that uses an [Animation<double>] rather
 /// than a [double] to control the opacity.
-class RenderAnimatedOpacity extends RenderProxyBox with RenderAnimatedOpacityMixin<RenderBox> {
+class RenderAnimatedOpacity extends RenderProxyBox with RenderProxyBoxMixin, RenderAnimatedOpacityMixin<RenderBox> {
   /// Creates a partially transparent render object.
   ///
   /// The [opacity] argument must not be null.
@@ -953,12 +947,6 @@ class RenderAnimatedOpacity extends RenderProxyBox with RenderAnimatedOpacityMix
        super(child) {
     this.opacity = opacity;
     this.alwaysIncludeSemantics = alwaysIncludeSemantics;
-  }
-
-  @override
-  void paintWithOpacity(PaintingContext context, Offset offset) {
-    if (child != null)
-      context.paintChild(child, offset);
   }
 }
 
@@ -1030,7 +1018,7 @@ class RenderShaderMask extends RenderProxyBox {
       assert(needsCompositing);
       layer ??= ShaderMaskLayer();
       layer
-        ..shader = _shaderCallback(offset & size)
+        ..shader = _shaderCallback(Offset.zero & size)
         ..maskRect = offset & size
         ..blendMode = _blendMode;
       context.pushLayer(layer, super.paint, offset);

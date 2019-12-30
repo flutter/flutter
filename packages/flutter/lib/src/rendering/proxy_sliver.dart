@@ -12,6 +12,7 @@ import 'layer.dart';
 import 'object.dart';
 import 'proxy_box.dart';
 import 'sliver.dart';
+import 'sliver_multi_box_adaptor.dart';
 
 /// A base class for sliver render objects that resemble their children.
 ///
@@ -51,6 +52,12 @@ abstract class RenderProxySliver extends RenderSliver with RenderObjectWithChild
     assert(child != null);
     child.layout(constraints, parentUsesSize: true);
     geometry = child.geometry;
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    if (child != null)
+      context.paintChild(child, offset);
   }
 
   @override
@@ -125,7 +132,9 @@ class RenderSliverOpacity extends RenderProxySliver {
   set opacity(double value) {
     assert(value != null);
     assert(value >= 0.0 && value <= 1.0);
-    if (_opacity == value)
+    assert(value != null);
+    final SliverMultiBoxAdaptorParentData parentData = child?.parentData as SliverMultiBoxAdaptorParentData;
+    if (_opacity == value || (parentData != null && parentData.keptAlive))
       return;
     final bool didNeedCompositing = alwaysNeedsCompositing;
     final bool wasVisible = _alpha != 0;
@@ -393,5 +402,11 @@ class RenderSliverAnimatedOpacity extends RenderProxySliver with RenderAnimatedO
   }
 
   @override
-  void paintWithOpacity(PaintingContext context, Offset offset) => context.paintChild(child, offset);
+  set opacity(Animation<double> value) {
+    assert(value != null);
+    final SliverMultiBoxAdaptorParentData parentData = child?.parentData as SliverMultiBoxAdaptorParentData;
+    if (parentData != null && parentData.keptAlive)
+      return;
+    super.opacity = value;
+  }
 }
