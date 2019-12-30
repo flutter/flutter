@@ -443,9 +443,13 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
 
   void _handleDragEnd(DragEndDetails details) {
     if (_position.value >= 0.5)
-      _positionController.forward();
+      _positionController.forward().whenComplete(() {
+        if (!_value) _positionController.reverse();
+      });
     else
-      _positionController.reverse();
+      _positionController.reverse().whenComplete(() {
+        if (_value) _positionController.forward();
+      });
     _reactionController.reverse();
   }
 
