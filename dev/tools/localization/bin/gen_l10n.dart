@@ -48,7 +48,7 @@ Future<void> main(List<String> arguments) async {
       'localizations delegate classes.',
   );
   parser.addOption(
-    'preferred-supported-locale',
+    'preferred-supported-locales',
     help: 'The list of preferred supported locales for the application. '
       'By default, the tool will generate the supported locales list in '
       'alphabetical order. Use this flag if you would like to default to '
@@ -67,13 +67,18 @@ Future<void> main(List<String> arguments) async {
   final String outputFileString = results['output-localization-file'] as String;
   final String templateArbFileName = results['template-arb-file'] as String;
   final String classNameString = results['output-class'] as String;
+  final String preferredSupportedLocaleString = results['preferred-supported-locales'] as String;
 
-  final List<String> preferredLocalesStringList = json.decode(
-    results['preferred-supported-locale'] as String
-  ) as List<String>;
-  final List<LocaleInfo> inputPreferredLocales = preferredLocalesStringList.map((String localeString) {
-    return LocaleInfo.fromString(localeString);
-  }).toList();
+  List<LocaleInfo> inputPreferredLocales;
+  if (preferredSupportedLocaleString != null) {
+    final List<dynamic> preferredLocalesStringList = json.decode(preferredSupportedLocaleString);
+    inputPreferredLocales = preferredLocalesStringList.map((dynamic localeString) {
+      if (localeString.runtimeType != String) {
+        throw L10nException('Incorrect runtime type for $localeString');
+      }
+      return LocaleInfo.fromString(localeString);
+    }).toList();
+  }
 
   const local.LocalFileSystem fs = local.LocalFileSystem();
   final LocalizationsGenerator localizationsGenerator = LocalizationsGenerator(fs);
