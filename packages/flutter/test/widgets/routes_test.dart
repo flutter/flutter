@@ -49,7 +49,7 @@ class TestRoute extends Route<String> with LocalHistoryRoute<String> {
   @override
   void didReplace(Route<dynamic> oldRoute) {
     expect(oldRoute, isInstanceOf<TestRoute>());
-    final TestRoute castRoute = oldRoute;
+    final TestRoute castRoute = oldRoute as TestRoute;
     log('didReplace ${castRoute.name}');
     super.didReplace(castRoute);
   }
@@ -66,7 +66,7 @@ class TestRoute extends Route<String> with LocalHistoryRoute<String> {
   @override
   void didPopNext(Route<dynamic> nextRoute) {
     expect(nextRoute, isInstanceOf<TestRoute>());
-    final TestRoute castRoute = nextRoute;
+    final TestRoute castRoute = nextRoute as TestRoute;
     log('didPopNext ${castRoute.name}');
     super.didPopNext(castRoute);
   }
@@ -74,7 +74,7 @@ class TestRoute extends Route<String> with LocalHistoryRoute<String> {
   @override
   void didChangeNext(Route<dynamic> nextRoute) {
     expect(nextRoute, anyOf(isNull, isInstanceOf<TestRoute>()));
-    final TestRoute castRoute = nextRoute;
+    final TestRoute castRoute = nextRoute as TestRoute;
     log('didChangeNext ${castRoute?.name}');
     super.didChangeNext(castRoute);
   }
@@ -550,15 +550,15 @@ void main() {
       navigator.currentState.push(
         PageRouteBuilder<void>(
           pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
-            secondaryAnimationProxyPageOne = secondaryAnimation;
-            animationPageOne = animation;
+            secondaryAnimationProxyPageOne = secondaryAnimation as ProxyAnimation;
+            animationPageOne = animation as ProxyAnimation;
             return const Text('Page One');
           },
         ),
       );
       await tester.pump();
       await tester.pumpAndSettle();
-      final ProxyAnimation secondaryAnimationPageOne = secondaryAnimationProxyPageOne.parent;
+      final ProxyAnimation secondaryAnimationPageOne = secondaryAnimationProxyPageOne.parent as ProxyAnimation;
       expect(animationPageOne.value, 1.0);
       expect(secondaryAnimationPageOne.parent, kAlwaysDismissedAnimation);
 
@@ -569,15 +569,15 @@ void main() {
       navigator.currentState.push(
         PageRouteBuilder<void>(
           pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
-            secondaryAnimationProxyPageTwo = secondaryAnimation;
-            animationPageTwo = animation;
+            secondaryAnimationProxyPageTwo = secondaryAnimation as ProxyAnimation;
+            animationPageTwo = animation as ProxyAnimation;
             return const Text('Page Two');
           },
         ),
       );
       await tester.pump();
       await tester.pumpAndSettle();
-      final ProxyAnimation secondaryAnimationPageTwo = secondaryAnimationProxyPageTwo.parent;
+      final ProxyAnimation secondaryAnimationPageTwo = secondaryAnimationProxyPageTwo.parent as ProxyAnimation;
       expect(animationPageTwo.value, 1.0);
       expect(secondaryAnimationPageTwo.parent, kAlwaysDismissedAnimation);
       expect(secondaryAnimationPageOne.parent, animationPageTwo.parent);
@@ -608,15 +608,15 @@ void main() {
       navigator.currentState.push(
         PageRouteBuilder<void>(
           pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
-            secondaryAnimationProxyPageOne = secondaryAnimation;
-            animationPageOne = animation;
+            secondaryAnimationProxyPageOne = secondaryAnimation as ProxyAnimation;
+            animationPageOne = animation as ProxyAnimation;
             return const Text('Page One');
           },
         ),
       );
       await tester.pump();
       await tester.pumpAndSettle();
-      final ProxyAnimation secondaryAnimationPageOne = secondaryAnimationProxyPageOne.parent;
+      final ProxyAnimation secondaryAnimationPageOne = secondaryAnimationProxyPageOne.parent as ProxyAnimation;
       expect(animationPageOne.value, 1.0);
       expect(secondaryAnimationPageOne.parent, kAlwaysDismissedAnimation);
 
@@ -628,15 +628,15 @@ void main() {
       navigator.currentState.push(
         secondRoute = PageRouteBuilder<void>(
           pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
-            secondaryAnimationProxyPageTwo = secondaryAnimation;
-            animationPageTwo = animation;
+            secondaryAnimationProxyPageTwo = secondaryAnimation as ProxyAnimation;
+            animationPageTwo = animation as ProxyAnimation;
             return const Text('Page Two');
           },
         ),
       );
       await tester.pump();
       await tester.pumpAndSettle();
-      final ProxyAnimation secondaryAnimationPageTwo = secondaryAnimationProxyPageTwo.parent;
+      final ProxyAnimation secondaryAnimationPageTwo = secondaryAnimationProxyPageTwo.parent as ProxyAnimation;
       expect(animationPageTwo.value, 1.0);
       expect(secondaryAnimationPageTwo.parent, kAlwaysDismissedAnimation);
       expect(secondaryAnimationPageOne.parent, animationPageTwo.parent);
@@ -663,15 +663,15 @@ void main() {
       navigator.currentState.push(
         PageRouteBuilder<void>(
           pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
-            secondaryAnimationProxyPageOne = secondaryAnimation;
-            animationPageOne = animation;
+            secondaryAnimationProxyPageOne = secondaryAnimation as ProxyAnimation;
+            animationPageOne = animation as ProxyAnimation;
             return const Text('Page One');
           },
         ),
       );
       await tester.pump();
       await tester.pumpAndSettle();
-      final ProxyAnimation secondaryAnimationPageOne = secondaryAnimationProxyPageOne.parent;
+      final ProxyAnimation secondaryAnimationPageOne = secondaryAnimationProxyPageOne.parent as ProxyAnimation;
       expect(animationPageOne.value, 1.0);
       expect(secondaryAnimationPageOne.parent, kAlwaysDismissedAnimation);
 
@@ -681,7 +681,7 @@ void main() {
       navigator.currentState.push(
         PageRouteBuilder<void>(
           pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
-            animationPageTwo = animation;
+            animationPageTwo = animation as ProxyAnimation;
             return const Text('Page Two');
           },
         ),
@@ -696,7 +696,7 @@ void main() {
       navigator.currentState.pushReplacement(
         TestPageRouteBuilder(
           pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
-            animationPageThree = animation;
+            animationPageThree = animation as ProxyAnimation;
             return const Text('Page Three');
           },
         ),
@@ -704,7 +704,7 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 1));
       expect(secondaryAnimationPageOne.parent, isA<TrainHoppingAnimation>());
-      final TrainHoppingAnimation trainHopper = secondaryAnimationPageOne.parent;
+      final TrainHoppingAnimation trainHopper = secondaryAnimationPageOne.parent as TrainHoppingAnimation;
       expect(trainHopper.currentTrain, animationPageTwo.parent);
       await tester.pump(const Duration(milliseconds: 100));
       expect(secondaryAnimationPageOne.parent, isNot(isA<TrainHoppingAnimation>()));
@@ -735,15 +735,15 @@ void main() {
       navigator.currentState.push(
         PageRouteBuilder<void>(
           pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
-            secondaryAnimationProxyPageOne = secondaryAnimation;
-            animationPageOne = animation;
+            secondaryAnimationProxyPageOne = secondaryAnimation as ProxyAnimation;
+            animationPageOne = animation as ProxyAnimation;
             return const Text('Page One');
           },
         ),
       );
       await tester.pump();
       await tester.pumpAndSettle();
-      final ProxyAnimation secondaryAnimationPageOne = secondaryAnimationProxyPageOne.parent;
+      final ProxyAnimation secondaryAnimationPageOne = secondaryAnimationProxyPageOne.parent as ProxyAnimation;
       expect(animationPageOne.value, 1.0);
       expect(secondaryAnimationPageOne.parent, kAlwaysDismissedAnimation);
 
@@ -753,7 +753,7 @@ void main() {
       navigator.currentState.push(
         PageRouteBuilder<void>(
           pageBuilder: (_, Animation<double> animation, Animation<double> secondaryAnimation) {
-            animationPageTwo = animation;
+            animationPageTwo = animation as ProxyAnimation;
             return const Text('Page Two');
           },
         ),
@@ -774,14 +774,14 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 10));
       expect(secondaryAnimationPageOne.parent, isA<TrainHoppingAnimation>());
-      final TrainHoppingAnimation trainHopper = secondaryAnimationPageOne.parent;
+      final TrainHoppingAnimation trainHopper = secondaryAnimationPageOne.parent as TrainHoppingAnimation;
       expect(trainHopper.currentTrain, animationPageTwo.parent);
 
       // Pop page three while replacement push is ongoing.
       navigator.currentState.pop();
       await tester.pump();
       expect(secondaryAnimationPageOne.parent, isA<TrainHoppingAnimation>());
-      final TrainHoppingAnimation trainHopper2 = secondaryAnimationPageOne.parent;
+      final TrainHoppingAnimation trainHopper2 = secondaryAnimationPageOne.parent as TrainHoppingAnimation;
       expect(trainHopper2.currentTrain, animationPageTwo.parent);
       expect(trainHopper.currentTrain, isNull); // Has been disposed.
       await tester.pumpAndSettle();

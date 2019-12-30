@@ -138,7 +138,6 @@ class CocoaPods {
     @required XcodeBasedProject xcodeProject,
     // For backward compatibility with previously created Podfile only.
     @required String engineDir,
-    bool isSwift = false,
     bool dependenciesChanged = true,
   }) async {
     if (!xcodeProject.podfile.existsSync()) {

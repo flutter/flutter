@@ -45,19 +45,20 @@ Future<void> main() async {
       // This builds all build modes' frameworks by default
       section('Build frameworks');
 
+      const String outputDirectoryName = 'flutter-frameworks';
+
       await inDirectory(projectDir, () async {
         await flutter(
           'build',
-          options: <String>['ios-framework'],
+          options: <String>[
+            'ios-framework',
+            '--xcframework',
+            '--output=$outputDirectoryName'
+          ],
         );
       });
 
-      final String outputPath = path.join(
-        projectDir.path,
-        'build',
-        'ios',
-        'framework',
-      );
+      final String outputPath = path.join(projectDir.path, outputDirectoryName);
 
       section('Check debug build has Dart snapshot as asset');
 
@@ -157,6 +158,22 @@ Future<void> main() async {
           'Flutter.framework',
           'Flutter',
         ));
+        checkFileExists(path.join(
+          outputPath,
+          mode,
+          'Flutter.xcframework',
+          'ios-armv7_arm64',
+          'Flutter.framework',
+          'Flutter',
+        ));
+        checkFileExists(path.join(
+          outputPath,
+          mode,
+          'Flutter.xcframework',
+          'ios-x86_64-simulator',
+          'Flutter.framework',
+          'Flutter',
+        ));
       }
 
       section("Check all modes' engine header");
@@ -177,6 +194,22 @@ Future<void> main() async {
           'device_info.framework',
           'device_info',
         ));
+        checkFileExists(path.join(
+          outputPath,
+          mode,
+          'device_info.xcframework',
+          'ios-armv7_arm64',
+          'device_info.framework',
+          'device_info',
+        ));
+        checkFileExists(path.join(
+          outputPath,
+          mode,
+          'device_info.xcframework',
+          'ios-x86_64-simulator',
+          'device_info.framework',
+          'device_info',
+        ));
       }
 
       section("Check all modes' have generated plugin registrant");
@@ -185,6 +218,24 @@ Future<void> main() async {
         checkFileExists(path.join(
           outputPath,
           mode,
+          'FlutterPluginRegistrant.framework',
+          'Headers',
+          'GeneratedPluginRegistrant.h',
+        ));
+        checkFileExists(path.join(
+          outputPath,
+          mode,
+          'FlutterPluginRegistrant.xcframework',
+          'ios-armv7_arm64',
+          'FlutterPluginRegistrant.framework',
+          'Headers',
+          'GeneratedPluginRegistrant.h',
+        ));
+        checkFileExists(path.join(
+          outputPath,
+          mode,
+          'FlutterPluginRegistrant.xcframework',
+          'ios-x86_64-simulator',
           'FlutterPluginRegistrant.framework',
           'Headers',
           'GeneratedPluginRegistrant.h',

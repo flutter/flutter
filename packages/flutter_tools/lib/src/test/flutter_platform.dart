@@ -7,10 +7,7 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 import 'package:stream_channel/stream_channel.dart';
 
-import 'package:test_api/src/backend/runtime.dart'; // ignore: implementation_imports
 import 'package:test_api/src/backend/suite_platform.dart'; // ignore: implementation_imports
-import 'package:test_core/src/runner/platform.dart'; // ignore: implementation_imports
-import 'package:test_core/src/runner/hack_register_platform.dart' as hack; // ignore: implementation_imports
 import 'package:test_core/src/runner/runner_suite.dart'; // ignore: implementation_imports
 import 'package:test_core/src/runner/suite.dart'; // ignore: implementation_imports
 import 'package:test_core/src/runner/plugin/platform_helpers.dart'; // ignore: implementation_imports
@@ -27,6 +24,7 @@ import '../convert.dart';
 import '../dart/package_map.dart';
 import '../globals.dart';
 import '../project.dart';
+import '../test/test_wrapper.dart';
 import '../vmservice.dart';
 import 'test_compiler.dart';
 import 'test_config.dart';
@@ -71,6 +69,7 @@ typedef PlatformPluginRegistration = void Function(FlutterPlatform platform);
 /// (that is, one Dart file with a `*_test.dart` file name and a single `void
 /// main()`), you can set an observatory port explicitly.
 FlutterPlatform installHook({
+  TestWrapper testWrapper = const TestWrapper(),
   @required String shellPath,
   TestWatcher watcher,
   bool enableObservatory = false,
@@ -91,11 +90,12 @@ FlutterPlatform installHook({
   String icudtlPath,
   PlatformPluginRegistration platformPluginRegistration,
 }) {
+  assert(testWrapper != null);
   assert(enableObservatory || (!startPaused && observatoryPort == null));
 
   // registerPlatformPlugin can be injected for testing since it's not very mock-friendly.
   platformPluginRegistration ??= (FlutterPlatform platform) {
-    hack.registerPlatformPlugin(
+    testWrapper.registerPlatformPlugin(
       <Runtime>[Runtime.vm],
       () {
         return platform;

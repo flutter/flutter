@@ -123,6 +123,41 @@ void main() {
     GenSnapshot: () => MockGenSnapshot(),
   });
 
+  testbed.test('kExtraGenSnapshotOptions passes values to gen_snapshot', () async {
+    final Environment environment = Environment(
+      outputDir: fs.directory('out')..createSync(),
+      projectDir: fs.currentDirectory,
+      buildDir: fs.currentDirectory,
+      defines: <String, String>{
+        kBuildMode: 'release',
+        kExtraGenSnapshotOptions: 'foo,bar,baz=2',
+        kTargetPlatform: 'android-arm',
+      }
+    );
+    environment.buildDir.createSync(recursive: true);
+    environment.buildDir.childFile('app.dill').createSync();
+    environment.projectDir.childFile('.packages')
+      .writeAsStringSync('sky_engine:file:///\n');
+
+    when(genSnapshot.run(
+      snapshotType: anyNamed('snapshotType'),
+      darwinArch: anyNamed('darwinArch'),
+      additionalArgs: captureAnyNamed('additionalArgs'),
+    )).thenAnswer((Invocation invocation) async {
+      expect(invocation.namedArguments[#additionalArgs], containsAll(<String>[
+        'foo',
+        'bar',
+        'baz=2',
+      ]));
+      return 0;
+    });
+
+    await const AndroidAot(TargetPlatform.android_arm64, BuildMode.release)
+      .build(environment);
+  }, overrides: <Type, Generator>{
+    GenSnapshot: () => MockGenSnapshot(),
+  });
+
   testbed.test('android aot bundle copies so from abi directory', () async {
     final Environment environment = Environment(
       outputDir: fs.directory('out')..createSync(),

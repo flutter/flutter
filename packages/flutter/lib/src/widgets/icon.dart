@@ -113,14 +113,16 @@ class Icon extends StatelessWidget {
   /// See [Theme] to set the current theme and [ThemeData.brightness]
   /// for setting the current theme's brightness.
   ///
+  /// {@tool sample}
   /// Typically, a material design color will be used, as follows:
   ///
   /// ```dart
   /// Icon(
-  ///   icon: Icons.widgets,
+  ///   Icons.widgets,
   ///   color: Colors.blue.shade400,
   /// )
   /// ```
+  /// {@end-tool}
   final Color color;
 
   /// Semantic label for the icon.

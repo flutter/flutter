@@ -170,6 +170,8 @@ class TextPainter {
   void markNeedsLayout() {
     _paragraph = null;
     _needsLayout = true;
+    _previousCaretPosition = null;
+    _previousCaretPrototype = null;
   }
 
   /// The (potentially styled) text to paint.

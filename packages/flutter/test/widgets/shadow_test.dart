@@ -6,6 +6,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
 void main() {
+  tearDown(() {
+    debugDisableShadows = true;
+  });
+
   testWidgets('Shadows on BoxDecoration', (WidgetTester tester) async {
     await tester.pumpWidget(
       Center(

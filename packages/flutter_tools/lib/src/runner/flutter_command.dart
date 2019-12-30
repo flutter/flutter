@@ -150,6 +150,12 @@ abstract class FlutterCommand extends Command<void> {
         'will select a random open port on the host.',
       hide: hide,
     );
+    argParser.addFlag('web-allow-expose-url',
+      defaultsTo: false,
+      help: 'Enables daemon-to-editor requests (app.exposeUrl) for exposing URLs '
+        'when running on remote machines.',
+      hide: hide,
+    );
   }
 
   void usesTargetOption() {
@@ -588,8 +594,6 @@ abstract class FlutterCommand extends Command<void> {
   /// rather than calling [runCommand] directly.
   @mustCallSuper
   Future<FlutterCommandResult> verifyThenRunCommand(String commandPath) async {
-    await validateCommand();
-
     // Populate the cache. We call this before pub get below so that the
     // sky_engine package is available in the flutter cache for pub to find.
     if (shouldUpdateCache) {
@@ -599,6 +603,8 @@ abstract class FlutterCommand extends Command<void> {
 
       await cache.updateAll(await requiredArtifacts);
     }
+
+    await validateCommand();
 
     if (shouldRunPub) {
       await pub.get(context: PubContext.getVerifyContext(name));

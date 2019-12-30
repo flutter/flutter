@@ -94,6 +94,10 @@ class @className {
   /// Returns a list of localizations delegates containing this delegate along with
   /// GlobalMaterialLocalizations.delegate, GlobalCupertinoLocalizations.delegate,
   /// and GlobalWidgetsLocalizations.delegate.
+  ///
+  /// Additional delegates can be added by appending to this list in
+  /// MaterialApp. This list does not have to be used at all if a custom list
+  /// of delegates is preferred or required.
   static const List<LocalizationsDelegate<dynamic>> localizationsDelegates = <LocalizationsDelegate<dynamic>>[
     delegate,
     GlobalMaterialLocalizations.delegate,
@@ -132,7 +136,7 @@ const String getterMethodTemplate = '''
 ''';
 
 const String simpleMethodTemplate = '''
-  String @methodName(@methodParameters) {
+  String @methodName(@methodParameters) {@dateFormatting
     return Intl.message(
       @message,
       locale: _localeName,
@@ -142,12 +146,99 @@ const String simpleMethodTemplate = '''
 ''';
 
 const String pluralMethodTemplate = '''
-  String @methodName(@methodParameters) {
+  String @methodName(@methodParameters) {@dateFormatting
     return Intl.plural(
       @intlMethodArgs
     );
   }
 ''';
+
+// The set of date formats that can be automatically localized.
+//
+// The localizations generation tool makes use of the intl library's
+// DateFormat class to properly format dates based on the locale, the
+// desired format, as well as the passed in [DateTime]. For example, using
+// DateFormat.yMMMMd("en_US").format(DateTime.utc(1996, 7, 10)) results
+// in the string "July 10, 1996".
+//
+// Since the tool generates code that uses DateFormat's constructor, it is
+// necessary to verify that the constructor exists, or the
+// tool will generate code that may cause a compile-time error.
+//
+// See also:
+//
+// * <https://pub.dev/packages/intl>
+// * <https://pub.dev/documentation/intl/latest/intl/DateFormat-class.html>
+// * <https://api.dartlang.org/stable/2.7.0/dart-core/DateTime-class.html>
+const Set<String> allowableDateFormats = <String>{
+  'd',
+  'E',
+  'EEEE',
+  'LLL',
+  'LLLL',
+  'M',
+  'Md',
+  'MEd',
+  'MMM',
+  'MMMd',
+  'MMMEd',
+  'MMMM',
+  'MMMMd',
+  'MMMMEEEEd',
+  'QQQ',
+  'QQQQ',
+  'y',
+  'yM',
+  'yMd',
+  'yMEd',
+  'yMMM',
+  'yMMMd',
+  'yMMMEd',
+  'yMMMM',
+  'yMMMMd',
+  'yMMMMEEEEd',
+  'yQQQ',
+  'yQQQQ',
+  'H',
+  'Hm',
+  'Hms',
+  'j',
+  'jm',
+  'jms',
+  'jmv',
+  'jmz',
+  'jv',
+  'jz',
+  'm',
+  'ms',
+  's',
+};
+
+bool _isDateParameter(Map<String, dynamic> placeholderValue) => placeholderValue['type'] == 'DateTime';
+
+bool _dateParameterIsValid(Map<String, dynamic> placeholderValue, String placeholder) {
+  if (allowableDateFormats.contains(placeholderValue['format']))
+    return true;
+  throw L10nException(
+    'Date format ${placeholderValue['format']} for the $placeholder \n'
+    'placeholder does not have a corresponding DateFormat \n'
+    'constructor. Check the intl library\'s DateFormat class \n'
+    'constructors for allowed date formats.'
+  );
+}
+
+bool _containsFormatKey(Map<String, dynamic> placeholderValue, String placeholder) {
+  if (placeholderValue.containsKey('format'))
+    return true;
+  throw L10nException(
+    'The placeholder, $placeholder, has its "type" resource attribute set to '
+    'the "DateTime" type. To properly resolve for the right DateTime format, '
+    'the "format" attribute needs to be set to determine which DateFormat to '
+    'use. \n'
+    'Check the intl library\'s DateFormat class constructors for allowed '
+    'date formats.'
+  );
+}
 
 List<String> genMethodParameters(Map<String, dynamic> bundle, String key, String type) {
   final Map<String, dynamic> attributesMap = bundle['@$key'] as Map<String, dynamic>;
@@ -156,6 +247,47 @@ List<String> genMethodParameters(Map<String, dynamic> bundle, String key, String
     return placeholders.keys.map((String parameter) => '$type $parameter').toList();
   }
   return <String>[];
+}
+
+List<String> genPluralMethodParameters(Iterable<String> placeholderKeys, String countPlaceholder, String resourceId) {
+  if (placeholderKeys.isEmpty)
+    throw L10nException(
+      'Placeholders map for the $resourceId message is empty.\n'
+      'Check to see if the plural message is in the proper ICU syntax format '
+      'and ensure that placeholders are properly specified.'
+    );
+
+  return placeholderKeys.map((String parameter) {
+    if (parameter == countPlaceholder) {
+      return 'int $parameter';
+    }
+    return 'Object $parameter';
+  }).toList();
+}
+
+String generateDateFormattingLogic(Map<String, dynamic> bundle, String key) {
+  String result = '';
+  final Map<String, dynamic> attributesMap = bundle['@$key'] as Map<String, dynamic>;
+  if (attributesMap != null && attributesMap.containsKey('placeholders')) {
+    final Map<String, dynamic> placeholders = attributesMap['placeholders'] as Map<String, dynamic>;
+    for (String placeholder in placeholders.keys) {
+      final dynamic value = placeholders[placeholder];
+      if (
+        value is Map<String, dynamic> &&
+        _isDateParameter(value) &&
+        _containsFormatKey(value, placeholder) &&
+        _dateParameterIsValid(value, placeholder)
+      ) {
+        result += '''
+
+    final DateFormat ${placeholder}DateFormat = DateFormat.${value['format']}(_localeName);
+    final String ${placeholder}String = ${placeholder}DateFormat.format($placeholder);
+''';
+      }
+    }
+  }
+
+  return result;
 }
 
 List<String> genIntlMethodArgs(Map<String, dynamic> bundle, String key) {
@@ -169,7 +301,21 @@ List<String> genIntlMethodArgs(Map<String, dynamic> bundle, String key) {
     if (attributesMap.containsKey('placeholders')) {
       final Map<String, dynamic> placeholders = attributesMap['placeholders'] as Map<String, dynamic>;
       if (placeholders.isNotEmpty) {
-        final String args = placeholders.keys.join(', ');
+        final List<String> argumentList = <String>[];
+        for (String placeholder in placeholders.keys) {
+          final dynamic value = placeholders[placeholder];
+          if (
+            value is Map<String, dynamic> &&
+            _isDateParameter(value) &&
+            _containsFormatKey(value, placeholder) &&
+            _dateParameterIsValid(value, placeholder)
+          ) {
+            argumentList.add('${placeholder}String');
+          } else {
+            argumentList.add(placeholder);
+          }
+        }
+        final String args = argumentList.join(', ');
         attributes.add('args: <Object>[$args]');
       }
     }
@@ -182,8 +328,14 @@ String genSimpleMethod(Map<String, dynamic> bundle, String key) {
     String message = bundle[key] as String;
     final Map<String, dynamic> attributesMap = bundle['@$key'] as Map<String, dynamic>;
     final Map<String, dynamic> placeholders = attributesMap['placeholders'] as Map<String, dynamic>;
-    for (String placeholder in placeholders.keys)
-      message = message.replaceAll('{$placeholder}', '\$$placeholder');
+    for (String placeholder in placeholders.keys) {
+      final dynamic value = placeholders[placeholder];
+      if (value is Map<String, dynamic> && _isDateParameter(value)) {
+        message = message.replaceAll('{$placeholder}', '\$${placeholder}String');
+      } else {
+        message = message.replaceAll('{$placeholder}', '\$$placeholder');
+      }
+    }
     return generateString(message);
   }
 
@@ -198,6 +350,7 @@ String genSimpleMethod(Map<String, dynamic> bundle, String key) {
     return simpleMethodTemplate
       .replaceAll('@methodName', key)
       .replaceAll('@methodParameters', genMethodParameters(bundle, key, 'Object').join(', '))
+      .replaceAll('@dateFormatting', generateDateFormattingLogic(bundle, key))
       .replaceAll('@message', '${genSimpleMethodMessage(bundle, key)}')
       .replaceAll('@intlMethodArgs', genIntlMethodArgs(bundle, key).join(',\n      '));
   }
@@ -208,14 +361,33 @@ String genSimpleMethod(Map<String, dynamic> bundle, String key) {
     .replaceAll('@intlMethodArgs', genIntlMethodArgs(bundle, key).join(',\n      '));
 }
 
-String genPluralMethod(Map<String, dynamic> bundle, String key) {
-  final Map<String, dynamic> attributesMap = bundle['@$key'] as Map<String, dynamic>;
-  assert(attributesMap != null && attributesMap.containsKey('placeholders'));
-  final Iterable<String> placeholders = attributesMap['placeholders'].keys as Iterable<String>;
+String genPluralMethod(Map<String, dynamic> arbBundle, String resourceId) {
+  final Map<String, dynamic> attributesMap = arbBundle['@$resourceId'] as Map<String, dynamic>;
+  if (attributesMap == null)
+    throw L10nException('Resource attribute for $resourceId does not exist.');
+  if (!attributesMap.containsKey('placeholders'))
+    throw L10nException(
+      'Unable to find placeholders for the plural message: $resourceId.\n'
+      'Check to see if the plural message is in the proper ICU syntax format '
+      'and ensure that placeholders are properly specified.'
+    );
+  if (attributesMap['placeholders'] is! Map<String, dynamic>)
+    throw L10nException(
+      'The "placeholders" resource attribute for the message, $resourceId, '
+      'is not properly formatted. Ensure that it is a map with keys that are '
+      'strings.'
+    );
+
+  final Map<String, dynamic> placeholdersMap = attributesMap['placeholders'] as Map<String, dynamic>;
+  final Iterable<String> placeholders = placeholdersMap.keys;
+
+  // Used to determine which placeholder is the plural count placeholder
+  final String resourceValue = arbBundle[resourceId] as String;
+  final String countPlaceholder = resourceValue.split(',')[0].substring(1);
 
   // To make it easier to parse the plurals message, temporarily replace each
   // "{placeholder}" parameter with "#placeholder#".
-  String message = bundle[key] as String;
+  String message = arbBundle[resourceId] as String;
   for (String placeholder in placeholders)
     message = message.replaceAll('{$placeholder}', '#$placeholder#');
 
@@ -229,9 +401,9 @@ String genPluralMethod(Map<String, dynamic> bundle, String key) {
   };
 
   final List<String> methodArgs = <String>[
-    ...placeholders,
+    countPlaceholder,
     'locale: _localeName',
-    ...genIntlMethodArgs(bundle, key),
+    ...genIntlMethodArgs(arbBundle, resourceId),
   ];
 
   for (String pluralKey in pluralIds.keys) {
@@ -239,16 +411,22 @@ String genPluralMethod(Map<String, dynamic> bundle, String key) {
     final RegExpMatch match = expRE.firstMatch(message);
     if (match != null && match.groupCount == 2) {
       String argValue = match.group(2);
-      for (String placeholder in placeholders)
-        argValue = argValue.replaceAll('#$placeholder#', '\$$placeholder');
-
+      for (String placeholder in placeholders) {
+        final dynamic value = placeholdersMap[placeholder];
+        if (value is Map<String, dynamic> && _isDateParameter(value)) {
+          argValue = argValue.replaceAll('#$placeholder#', '\$${placeholder}String');
+        } else {
+          argValue = argValue.replaceAll('#$placeholder#', '\$$placeholder');
+        }
+      }
       methodArgs.add("${pluralIds[pluralKey]}: '$argValue'");
     }
   }
 
   return pluralMethodTemplate
-    .replaceAll('@methodName', key)
-    .replaceAll('@methodParameters', genMethodParameters(bundle, key, 'int').join(', '))
+    .replaceAll('@methodName', resourceId)
+    .replaceAll('@methodParameters', genPluralMethodParameters(placeholders, countPlaceholder, resourceId).join(', '))
+    .replaceAll('@dateFormatting', generateDateFormattingLogic(arbBundle, resourceId))
     .replaceAll('@intlMethodArgs', methodArgs.join(',\n      '));
 }
 
@@ -359,8 +537,8 @@ class LocalizationsGenerator {
   /// Sets the [className] for the localizations and localizations delegate
   /// classes.
 
-  /// The list of all arb files in [l10nDirectory].
-  final List<String> arbFilenames = <String>[];
+  /// The list of all arb path strings in [l10nDirectory].
+  final List<String> arbPathStrings = <String>[];
 
   /// The supported language codes as found in the arb files located in
   /// [l10nDirectory].
@@ -461,8 +639,8 @@ class LocalizationsGenerator {
     for (File file in fileSystemEntityList) {
       final String filePath = file.path;
       if (arbFilenameRE.hasMatch(filePath)) {
-        final Map<String, dynamic> arbContents = json.decode(file.readAsStringSync());
-        String localeString = arbContents['@@locale'];
+        final Map<String, dynamic> arbContents = json.decode(file.readAsStringSync()) as Map<String, dynamic>;
+        String localeString = arbContents['@@locale'] as String;
         if (localeString == null) {
           final RegExpMatch arbFileMatch = arbFilenameLocaleRE.firstMatch(filePath);
           if (arbFileMatch == null) {
@@ -477,7 +655,7 @@ class LocalizationsGenerator {
           localeString = arbFilenameLocaleRE.firstMatch(filePath)[1];
         }
 
-        arbFilenames.add(filePath);
+        arbPathStrings.add(filePath);
         final LocaleInfo localeInfo = LocaleInfo.fromString(localeString);
         if (localeInfoList.contains(localeInfo))
           throw L10nException(
@@ -488,6 +666,7 @@ class LocalizationsGenerator {
       }
     }
 
+    arbPathStrings.sort();
     localeInfoList.sort();
     supportedLocales.addAll(localeInfoList);
     supportedLanguageCodes.addAll(localeInfoList.map((LocaleInfo localeInfo) {
@@ -514,7 +693,7 @@ class LocalizationsGenerator {
   void generateClassMethods() {
     Map<String, dynamic> bundle;
     try {
-      bundle = json.decode(templateArbFile.readAsStringSync());
+      bundle = json.decode(templateArbFile.readAsStringSync()) as Map<String, dynamic>;
     } on FileSystemException catch (e) {
       throw FileSystemException('Unable to read input arb file: $e');
     } on FormatException catch (e) {
@@ -530,7 +709,7 @@ class LocalizationsGenerator {
           'Invalid key format: $key \n It has to be in camel case, cannot start '
           'with a number, and cannot contain non-alphanumeric characters.'
         );
-      if (pluralValueRE.hasMatch(bundle[key]))
+      if (pluralValueRE.hasMatch(bundle[key] as String))
         classMethods.add(genPluralMethod(bundle, key));
       else
         classMethods.add(genSimpleMethod(bundle, key));

@@ -2,6 +2,11 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+// TODO(shihaohong): remove ignoring deprecated member use analysis
+// when AlertDialog.scrollable parameter is removed. See
+// https://flutter.dev/go/scrollable-alert-dialog for more details.
+// ignore_for_file: deprecated_member_use_from_same_package
+
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -220,6 +225,7 @@ class AlertDialog extends StatelessWidget {
     this.elevation,
     this.semanticLabel,
     this.shape,
+    this.scrollable = false,
   }) : assert(contentPadding != null),
        super(key: key);
 
@@ -306,6 +312,22 @@ class AlertDialog extends StatelessWidget {
   /// {@macro flutter.material.dialog.shape}
   final ShapeBorder shape;
 
+  /// Determines whether the [title] and [content] widgets are wrapped in a
+  /// scrollable.
+  ///
+  /// This configuration is used when the [title] and [content] are expected
+  /// to overflow. Both [title] and [content] are wrapped in a scroll view,
+  /// allowing all overflowed content to be visible while still showing the
+  /// button bar.
+  @Deprecated(
+    'Set scrollable to `true`. This parameter will be removed and '
+    'was introduced to migrate AlertDialog to be scrollable by '
+    'default. For more information, see '
+    'https://flutter.dev/docs/release/breaking-changes/scrollable_alert_dialog. '
+    'This feature was deprecated after v1.13.2.'
+  )
+  final bool scrollable;
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
@@ -325,38 +347,67 @@ class AlertDialog extends StatelessWidget {
       }
     }
 
+    Widget titleWidget;
+    Widget contentWidget;
+    if (title != null)
+     titleWidget = Padding(
+        padding: titlePadding ?? EdgeInsets.fromLTRB(24.0, 24.0, 24.0, content == null ? 20.0 : 0.0),
+        child: DefaultTextStyle(
+          style: titleTextStyle ?? dialogTheme.titleTextStyle ?? theme.textTheme.title,
+          child: Semantics(
+            child: title,
+            namesRoute: true,
+            container: true,
+          ),
+        ),
+      );
+
+    if (content != null)
+      contentWidget = Padding(
+        padding: contentPadding,
+        child: DefaultTextStyle(
+          style: contentTextStyle ?? dialogTheme.contentTextStyle ?? theme.textTheme.subhead,
+          child: content,
+        ),
+      );
+
+    List<Widget> columnChildren;
+    if (scrollable) {
+      columnChildren = <Widget>[
+        if (title != null || content != null)
+          Flexible(
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  if (title != null)
+                    titleWidget,
+                  if (content != null)
+                    contentWidget,
+                ],
+              ),
+            ),
+          ),
+        if (actions != null)
+          ButtonBar(children: actions),
+      ];
+    } else {
+      columnChildren = <Widget>[
+        if (title != null)
+          titleWidget,
+        if (content != null)
+          Flexible(child: contentWidget),
+        if (actions != null)
+          ButtonBar(children: actions),
+      ];
+    }
+
     Widget dialogChild = IntrinsicWidth(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-        if (title != null)
-          Padding(
-            padding: titlePadding ?? EdgeInsets.fromLTRB(24.0, 24.0, 24.0, content == null ? 20.0 : 0.0),
-            child: DefaultTextStyle(
-              style: titleTextStyle ?? dialogTheme.titleTextStyle ?? theme.textTheme.title,
-              child: Semantics(
-                child: title,
-                namesRoute: true,
-                container: true,
-              ),
-            ),
-          ),
-          if (content != null)
-            Flexible(
-              child: Padding(
-                padding: contentPadding,
-                child: DefaultTextStyle(
-                  style: contentTextStyle ?? dialogTheme.contentTextStyle ?? theme.textTheme.subhead,
-                  child: content,
-                ),
-              ),
-            ),
-          if (actions != null)
-            ButtonBar(
-              children: actions,
-            ),
-        ],
+        children: columnChildren,
       ),
     );
 

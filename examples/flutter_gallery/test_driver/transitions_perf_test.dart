@@ -66,6 +66,7 @@ List<String> _allDemos = <String>[];
 Future<void> saveDurationsHistogram(List<Map<String, dynamic>> events, String outputPath) async {
   final Map<String, List<int>> durations = <String, List<int>>{};
   Map<String, dynamic> startEvent;
+  int frameStart;
 
   // Save the duration of the first frame after each 'Start Transition' event.
   for (Map<String, dynamic> event in events) {
@@ -74,10 +75,19 @@ Future<void> saveDurationsHistogram(List<Map<String, dynamic>> events, String ou
       assert(startEvent == null);
       startEvent = event;
     } else if (startEvent != null && eventName == 'Frame') {
-      final String routeName = startEvent['args']['to'] as String;
-      durations[routeName] ??= <int>[];
-      durations[routeName].add(event['dur'] as int);
-      startEvent = null;
+      final String phase = event['ph'] as String;
+      final int timestamp = event['ts'] as int;
+      if (phase == 'B') {
+        assert(frameStart == null);
+        frameStart = timestamp;
+      } else {
+        assert(phase == 'E');
+        final String routeName = startEvent['args']['to'] as String;
+        durations[routeName] ??= <int>[];
+        durations[routeName].add(timestamp - frameStart);
+        startEvent = null;
+        frameStart = null;
+      }
     }
   }
 

@@ -454,7 +454,7 @@ class _PathMatcher extends Matcher {
       matchState[this] = 'The given object ($object) was not a Path.';
       return false;
     }
-    final Path path = object;
+    final Path path = object as Path;
     final List<String> errors = <String>[
       for (Offset offset in includes)
         if (!path.contains(offset))
@@ -487,7 +487,7 @@ class _PathMatcher extends Matcher {
     Map<dynamic, dynamic> matchState,
     bool verbose,
   ) {
-    return description.add(matchState[this]);
+    return description.add(matchState[this] as String);
   }
 }
 
@@ -508,7 +508,7 @@ bool _evaluatePainter(Object object, Canvas canvas, PaintingContext context) {
   } else {
     if (object is Finder) {
       TestAsyncUtils.guardSync();
-      final Finder finder = object;
+      final Finder finder = object as Finder;
       object = finder.evaluate().single.renderObject;
     }
     if (object is RenderObject) {
@@ -563,7 +563,7 @@ abstract class _TestRecordingCanvasMatcher extends Matcher {
     Map<dynamic, dynamic> matchState,
     bool verbose,
   ) {
-    return description.add(matchState[this]);
+    return description.add(matchState[this] as String);
   }
 }
 
@@ -671,7 +671,7 @@ class _TestRecordingCanvasPaintsAssertionMatcher extends Matcher {
     Map<dynamic, dynamic> matchState,
     bool verbose,
   ) {
-    return description.add(matchState[this]);
+    return description.add(matchState[this] as String);
   }
 }
 
@@ -910,7 +910,7 @@ abstract class _DrawCommandPaintPredicate extends _PaintPredicate {
   @protected
   @mustCallSuper
   void verifyArguments(List<dynamic> arguments) {
-    final Paint paintArgument = arguments[paintArgumentIndex];
+    final Paint paintArgument = arguments[paintArgumentIndex] as Paint;
     if (color != null && paintArgument.color != color)
       throw 'It called $methodName with a paint whose color, ${paintArgument.color}, was not exactly the expected color ($color).';
     if (strokeWidth != null && paintArgument.strokeWidth != strokeWidth)
@@ -966,7 +966,7 @@ class _OneParameterPaintPredicate<T> extends _DrawCommandPaintPredicate {
   @override
   void verifyArguments(List<dynamic> arguments) {
     super.verifyArguments(arguments);
-    final T actual = arguments[0];
+    final T actual = arguments[0] as T;
     if (expected != null && actual != expected)
       throw 'It called $methodName with $T, $actual, which was not exactly the expected $T ($expected).';
   }
@@ -1004,10 +1004,10 @@ class _TwoParameterPaintPredicate<T1, T2> extends _DrawCommandPaintPredicate {
   @override
   void verifyArguments(List<dynamic> arguments) {
     super.verifyArguments(arguments);
-    final T1 actual1 = arguments[0];
+    final T1 actual1 = arguments[0] as T1;
     if (expected1 != null && actual1 != expected1)
       throw 'It called $methodName with its first argument (a $T1), $actual1, which was not exactly the expected $T1 ($expected1).';
-    final T2 actual2 = arguments[1];
+    final T2 actual2 = arguments[1] as T2;
     if (expected2 != null && actual2 != expected2)
       throw 'It called $methodName with its second argument (a $T2), $actual2, which was not exactly the expected $T2 ($expected2).';
   }
@@ -1062,7 +1062,7 @@ class _RRectPaintPredicate extends _DrawCommandPaintPredicate {
   void verifyArguments(List<dynamic> arguments) {
     super.verifyArguments(arguments);
     const double eps = .0001;
-    final RRect actual = arguments[0];
+    final RRect actual = arguments[0] as RRect;
     if (rrect != null &&
        ((actual.left - rrect.left).abs() > eps ||
         (actual.right - rrect.right).abs() > eps ||
@@ -1114,7 +1114,7 @@ class _CirclePaintPredicate extends _DrawCommandPaintPredicate {
   @override
   void verifyArguments(List<dynamic> arguments) {
     super.verifyArguments(arguments);
-    final Offset pointArgument = arguments[0];
+    final Offset pointArgument = arguments[0] as Offset;
     if (x != null && y != null) {
       final Offset point = Offset(x, y);
       if (point != pointArgument)
@@ -1125,7 +1125,7 @@ class _CirclePaintPredicate extends _DrawCommandPaintPredicate {
       if (y != null && pointArgument.dy != y)
         throw 'It called $methodName with a center coordinate, $pointArgument, whose y-coordinate not exactly the expected coordinate (${y.toStringAsFixed(1)}).';
     }
-    final double radiusArgument = arguments[1];
+    final double radiusArgument = arguments[1] as double;
     if (radius != null && radiusArgument != radius)
       throw 'It called $methodName with radius, ${radiusArgument.toStringAsFixed(1)}, which was not exactly the expected radius (${radius.toStringAsFixed(1)}).';
   }
@@ -1157,7 +1157,7 @@ class _PathPaintPredicate extends _DrawCommandPaintPredicate {
   @override
   void verifyArguments(List<dynamic> arguments) {
     super.verifyArguments(arguments);
-    final Path pathArgument = arguments[0];
+    final Path pathArgument = arguments[0] as Path;
     if (includes != null) {
       for (Offset offset in includes) {
         if (!pathArgument.contains(offset))
@@ -1199,8 +1199,8 @@ class _LinePaintPredicate extends _DrawCommandPaintPredicate {
     super.verifyArguments(arguments); // Checks the 3rd argument, a Paint
     if (arguments.length != 3)
       throw 'It called $methodName with ${arguments.length} arguments; expected 3.';
-    final Offset p1Argument = arguments[0];
-    final Offset p2Argument = arguments[1];
+    final Offset p1Argument = arguments[0] as Offset;
+    final Offset p2Argument = arguments[1] as Offset;
     if (p1 != null && p1Argument != p1) {
       throw 'It called $methodName with p1 endpoint, $p1Argument, which was not exactly the expected endpoint ($p1).';
     }
@@ -1241,7 +1241,7 @@ class _ShadowPredicate extends _PaintPredicate {
   void verifyArguments(List<dynamic> arguments) {
     if (arguments.length != 4)
       throw 'It called $methodName with ${arguments.length} arguments; expected 4.';
-    final Path pathArgument = arguments[0];
+    final Path pathArgument = arguments[0] as Path;
     if (includes != null) {
       for (Offset offset in includes) {
         if (!pathArgument.contains(offset))
@@ -1254,13 +1254,13 @@ class _ShadowPredicate extends _PaintPredicate {
           throw 'It called $methodName with a path that unexpectedly contained $offset.';
       }
     }
-    final Color actualColor = arguments[1];
+    final Color actualColor = arguments[1] as Color;
     if (color != null && actualColor != color)
       throw 'It called $methodName with a color, $actualColor, which was not exactly the expected color ($color).';
-    final double actualElevation = arguments[2];
+    final double actualElevation = arguments[2] as double;
     if (elevation != null && actualElevation != elevation)
       throw 'It called $methodName with an elevation, $actualElevation, which was not exactly the expected value ($elevation).';
-    final bool actualTransparentOccluder = arguments[3];
+    final bool actualTransparentOccluder = arguments[3] as bool;
     if (transparentOccluder != null && actualTransparentOccluder != transparentOccluder)
       throw 'It called $methodName with a transparentOccluder value, $actualTransparentOccluder, which was not exactly the expected value ($transparentOccluder).';
   }
@@ -1312,10 +1312,10 @@ class _DrawImagePaintPredicate extends _DrawCommandPaintPredicate {
   @override
   void verifyArguments(List<dynamic> arguments) {
     super.verifyArguments(arguments);
-    final ui.Image imageArgument = arguments[0];
+    final ui.Image imageArgument = arguments[0] as ui.Image;
     if (image != null && imageArgument != image)
       throw 'It called $methodName with an image, $imageArgument, which was not exactly the expected image ($image).';
-    final Offset pointArgument = arguments[0];
+    final Offset pointArgument = arguments[0] as Offset;
     if (x != null && y != null) {
       final Offset point = Offset(x, y);
       if (point != pointArgument)
@@ -1356,13 +1356,13 @@ class _DrawImageRectPaintPredicate extends _DrawCommandPaintPredicate {
   @override
   void verifyArguments(List<dynamic> arguments) {
     super.verifyArguments(arguments);
-    final ui.Image imageArgument = arguments[0];
+    final ui.Image imageArgument = arguments[0] as ui.Image;
     if (image != null && imageArgument != image)
       throw 'It called $methodName with an image, $imageArgument, which was not exactly the expected image ($image).';
-    final Rect sourceArgument = arguments[1];
+    final Rect sourceArgument = arguments[1] as Rect;
     if (source != null && sourceArgument != source)
       throw 'It called $methodName with a source rectangle, $sourceArgument, which was not exactly the expected rectangle ($source).';
-    final Rect destinationArgument = arguments[2];
+    final Rect destinationArgument = arguments[2] as Rect;
     if (destination != null && destinationArgument != destination)
       throw 'It called $methodName with a destination rectangle, $destinationArgument, which was not exactly the expected rectangle ($destination).';
   }
