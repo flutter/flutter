@@ -4,6 +4,7 @@
 
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:file/file.dart' as file;
 import 'package:meta/meta.dart';
@@ -640,11 +641,12 @@ class LocalizationsGenerator {
     _className = classNameString;
   }
 
-  // TODO: documentation
+  /// Sets the
   @visibleForTesting
   void setPreferredSupportedLocales(String inputLocales) {
     if (inputLocales != null) {
-      final List<dynamic> preferredLocalesStringList = json.decode(inputLocales) as List<dynamic>;
+      List<dynamic> preferredLocalesStringList;
+      preferredLocalesStringList = json.decode(inputLocales) as List<dynamic>;
       _preferredSupportedLocales = preferredLocalesStringList.map((dynamic localeString) {
         if (localeString.runtimeType != String) {
           throw L10nException('Incorrect runtime type for $localeString');

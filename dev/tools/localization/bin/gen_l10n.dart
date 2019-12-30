@@ -78,7 +78,7 @@ Future<void> main(List<String> arguments) async {
         templateArbFileName: templateArbFileName,
         outputFileString: outputFileString,
         classNameString: classNameString,
-        preferredSupportedLocales: preferredSupportedLocaleString,
+        preferredSupportedLocaleString: preferredSupportedLocaleString,
       )
       ..parseArbFiles()
       ..generateClassMethods()
