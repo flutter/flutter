@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import 'package:file/file.dart';
+import 'package:meta/meta.dart';
 
 import '../aot.dart';
 import '../application_package.dart';
@@ -25,6 +26,7 @@ import '../macos/xcode.dart';
 import '../plugins.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart' show DevelopmentArtifact, FlutterCommandResult;
+import '../version.dart';
 import 'build.dart';
 
 /// Produces a .framework for integration into a host iOS app. The .framework
@@ -32,7 +34,7 @@ import 'build.dart';
 /// be integrated into plain Xcode projects without using or other package
 /// managers.
 class BuildIOSFrameworkCommand extends BuildSubCommand {
-  BuildIOSFrameworkCommand({this.aotBuilder, this.bundleBuilder}) {
+  BuildIOSFrameworkCommand({this.aotBuilder, this.bundleBuilder, this.flutterVersion, this.cache}) {
     usesTargetOption();
     usesFlavorOption();
     usesPubOption();
@@ -65,6 +67,9 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
       ..addFlag('xcframework',
         help: 'Produce xcframeworks that include all valid architectures (Xcode 11 or later).',
       )
+      ..addFlag('cocoapods',
+        help: 'Produce a Flutter.podspec instead of an engine Flutter.framework (recomended if host app uses CocoaPods).',
+      )
       ..addOption('output',
         abbr: 'o',
         valueHelp: 'path/to/directory/',
@@ -74,6 +79,8 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
 
   AotBuilder aotBuilder;
   BundleBuilder bundleBuilder;
+  FlutterVersion flutterVersion;
+  Cache cache;
 
   @override
   final String name = 'ios-framework';
@@ -150,6 +157,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
 
     aotBuilder ??= AotBuilder();
     bundleBuilder ??= BundleBuilder();
+    cache ??= Cache.instance;
 
     for (BuildMode mode in buildModes) {
       printStatus('Building framework for $iosProject in ${getNameForBuildMode(mode)} mode...');
@@ -162,8 +170,14 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
       final Directory iPhoneBuildOutput = modeDirectory.childDirectory('iphoneos');
       final Directory simulatorBuildOutput = modeDirectory.childDirectory('iphonesimulator');
 
-      // Copy Flutter.framework.
-      await _produceFlutterFramework(outputDirectory, mode, iPhoneBuildOutput, simulatorBuildOutput, modeDirectory);
+      if (boolArg('cocoapods')) {
+        // FlutterVersion.instance kicks off git processing which can sometimes fail, so don't try it until needed.
+        flutterVersion ??= FlutterVersion.instance;
+        produceFlutterPodspec(mode, modeDirectory);
+      } else {
+        // Copy Flutter.framework.
+        await _produceFlutterFramework(outputDirectory, mode, iPhoneBuildOutput, simulatorBuildOutput, modeDirectory);
+      }
 
       // Build aot, create module.framework and copy.
       await _produceAppFramework(mode, iPhoneBuildOutput, simulatorBuildOutput, modeDirectory);
@@ -192,6 +206,64 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
     printStatus('Frameworks written to ${outputDirectory.path}.');
 
     return null;
+  }
+
+  /// Create podspec that will download and unzip remote engine assets so host apps can leverage CocoaPods
+  /// vendored framework caching.
+  @visibleForTesting
+  void produceFlutterPodspec(BuildMode mode, Directory modeDirectory) {
+    final Status status = logger.startProgress(' ├─Creating Flutter.podspec...', timeout: timeoutConfiguration.fastOperation);
+    try {
+      final GitTagVersion gitTagVersion = flutterVersion.gitTagVersion;
+      if (gitTagVersion.x == null || gitTagVersion.y == null || gitTagVersion.z == null || gitTagVersion.commits != 0) {
+        throwToolExit(
+            '--cocoapods is only supported on the dev, beta, or stable channels. Detected version is ${flutterVersion.frameworkVersion}');
+      }
+
+      // Podspecs use semantic versioning, which don't support hotfixes.
+      // Fake out a semantic version with major.minor.(patch * 100) + hotfix.
+      // A real increasing version is required to prompt CocoaPods to fetch
+      // new artifacts when the source URL changes.
+      final int minorHotfixVersion = gitTagVersion.z * 100 + (gitTagVersion.hotfix ?? 0);
+
+      final File license = cache.getLicenseFile();
+      if (!license.existsSync()) {
+        throwToolExit('Could not find license at ${license.path}');
+      }
+      final String licenseSource = license.readAsStringSync();
+      final String artifactsMode = mode == BuildMode.debug ? 'ios' : 'ios-${mode.name}';
+
+      final String podspecContents = '''
+Pod::Spec.new do |s|
+  s.name                  = 'Flutter'
+  s.version               = '${gitTagVersion.x}.${gitTagVersion.y}.$minorHotfixVersion' # ${flutterVersion.frameworkVersion}
+  s.summary               = 'Flutter Engine Framework'
+  s.description           = <<-DESC
+Flutter is Google’s UI toolkit for building beautiful, natively compiled applications for mobile, web, and desktop from a single codebase.
+This pod vends the iOS Flutter engine framework. It is compatible with application frameworks created with this version of the engine and tools.
+The pod version matches Flutter version major.minor.(patch * 100) + hotfix.
+DESC
+  s.homepage              = 'https://flutter.dev'
+  s.license               = { :type => 'MIT', :text => <<-LICENSE
+$licenseSource
+LICENSE
+  }
+  s.author                = { 'Flutter Dev Team' => 'flutter-dev@googlegroups.com' }
+  s.source                = { :http => '${cache.storageBaseUrl}/flutter_infra/flutter/${cache.engineRevision}/$artifactsMode/artifacts.zip' }
+  s.documentation_url     = 'https://flutter.dev/docs'
+  s.platform              = :ios, '8.0'
+  s.vendored_frameworks   = 'Flutter.framework'
+  s.prepare_command       = <<-CMD
+unzip Flutter.framework -d Flutter.framework
+CMD
+end
+''';
+
+      final File podspec = modeDirectory.childFile('Flutter.podspec')..createSync(recursive: true);
+      podspec.writeAsStringSync(podspecContents);
+    } finally {
+      status.stop();
+    }
   }
 
   Future<void> _produceFlutterFramework(Directory outputDirectory, BuildMode mode, Directory iPhoneBuildOutput, Directory simulatorBuildOutput, Directory modeDirectory) async {
@@ -278,7 +350,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
     destinationAppFrameworkDirectory.createSync(recursive: true);
 
     if (mode == BuildMode.debug) {
-      final Status status = logger.startProgress(' ├─Add placeholder App.framework for debug...', timeout: timeoutConfiguration.fastOperation);
+      final Status status = logger.startProgress(' ├─Adding placeholder App.framework for debug...', timeout: timeoutConfiguration.fastOperation);
       try {
         await _produceStubAppFrameworkIfNeeded(mode, iPhoneBuildOutput, simulatorBuildOutput, destinationAppFrameworkDirectory);
       } finally {

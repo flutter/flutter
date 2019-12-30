@@ -1011,7 +1011,7 @@ class RenderShaderMask extends RenderProxyBox {
       assert(needsCompositing);
       layer ??= ShaderMaskLayer();
       layer
-        ..shader = _shaderCallback(offset & size)
+        ..shader = _shaderCallback(Offset.zero & size)
         ..maskRect = offset & size
         ..blendMode = _blendMode;
       context.pushLayer(layer, super.paint, offset);

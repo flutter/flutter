@@ -834,6 +834,230 @@ void main() {
       );
     });
 
+    test('correctly generates a plural message with placeholders:', () {
+      const String pluralMessageWithMultiplePlaceholders = '''{
+  "helloWorlds": "{count,plural, =0{Hello}=1{Hello {adjective} World}=2{Hello two {adjective} worlds}few{Hello {count} {adjective} worlds}many{Hello all {count} {adjective} worlds}other{Hello other {count} {adjective} worlds}}",
+  "@helloWorlds": {
+    "placeholders": {
+      "count": {},
+      "adjective": {}
+    }
+  }
+}''';
+      final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+        ..createSync(recursive: true);
+      l10nDirectory.childFile(defaultTemplateArbFileName)
+        .writeAsStringSync(pluralMessageWithMultiplePlaceholders);
+
+      final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+      try {
+        generator.initialize(
+          l10nDirectoryPath: defaultArbPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        );
+        generator.parseArbFiles();
+        generator.generateClassMethods();
+      } on Exception catch (e) {
+        fail('Parsing template arb file should succeed: \n$e');
+      }
+
+      expect(generator.classMethods, isNotEmpty);
+      expect(
+        generator.classMethods.first,
+        '''  String helloWorlds(int count, Object adjective) {
+    return Intl.plural(
+      count,
+      locale: _localeName,
+      name: 'helloWorlds',
+      args: <Object>[count, adjective],
+      zero: 'Hello',
+      one: 'Hello \$adjective World',
+      two: 'Hello two \$adjective worlds',
+      few: 'Hello \$count \$adjective worlds',
+      many: 'Hello all \$count \$adjective worlds',
+      other: 'Hello other \$count \$adjective worlds'
+    );
+  }
+'''
+      );
+    });
+
+    test('correctly generates a plural message with DateTime placeholders:', () {
+      const String pluralMessageWithDateTimePlaceholder = '''{
+  "helloWorlds": "{count,plural, =1{Hello World, today is {currentDate}}=2{Hello two worlds, today is {currentDate}}many{Hello all {count} worlds, today is {currentDate}}other{Hello other {count} worlds, today is {currentDate}}}",
+  "@helloWorlds": {
+    "placeholders": {
+      "count": {},
+      "currentDate": {
+        "type": "DateTime",
+        "format": "yMMMMEEEEd"
+      }
+    }
+  }
+}''';
+      final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+        ..createSync(recursive: true);
+      l10nDirectory.childFile(defaultTemplateArbFileName)
+        .writeAsStringSync(pluralMessageWithDateTimePlaceholder);
+
+      final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+      try {
+        generator.initialize(
+          l10nDirectoryPath: defaultArbPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        );
+        generator.parseArbFiles();
+        generator.generateClassMethods();
+      } on Exception catch (e) {
+        fail('Parsing template arb file should succeed: \n$e');
+      }
+
+      expect(generator.classMethods, isNotEmpty);
+      expect(
+        generator.classMethods.first,
+        '''  String helloWorlds(int count, Object currentDate) {
+    final DateFormat currentDateDateFormat = DateFormat.yMMMMEEEEd(_localeName);
+    final String currentDateString = currentDateDateFormat.format(currentDate);
+
+    return Intl.plural(
+      count,
+      locale: _localeName,
+      name: 'helloWorlds',
+      args: <Object>[count, currentDateString],
+      one: 'Hello World, today is \$currentDateString',
+      two: 'Hello two worlds, today is \$currentDateString',
+      many: 'Hello all \$count worlds, today is \$currentDateString',
+      other: 'Hello other \$count worlds, today is \$currentDateString'
+    );
+  }
+'''
+      );
+    });
+
+    test('should throw attempting to generate a plural message without placeholders:', () {
+      const String pluralMessageWithoutPlaceholdersAttribute = '''{
+  "helloWorlds": "{count,plural, =0{Hello}=1{Hello World}=2{Hello two worlds}few{Hello {count} worlds}many{Hello all {count} worlds}other{Hello other {count} worlds}}",
+  "@helloWorlds": {
+    "description": "Improperly formatted since it has no placeholder attribute."
+  }
+}''';
+
+      final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+        ..createSync(recursive: true);
+      l10nDirectory.childFile(defaultTemplateArbFileName)
+        .writeAsStringSync(pluralMessageWithoutPlaceholdersAttribute);
+
+      final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+      try {
+        generator.initialize(
+          l10nDirectoryPath: defaultArbPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        );
+        generator.parseArbFiles();
+        generator.generateClassMethods();
+      } on L10nException catch (e) {
+        expect(e.message, contains('Check to see if the plural message is in the proper ICU syntax format'));
+        return;
+      }
+      fail('Generating class methods without placeholders should not succeed');
+    });
+
+    test('should throw attempting to generate a plural message with empty placeholders map:', () {
+      const String pluralMessageWithEmptyPlaceholdersMap = '''{
+  "helloWorlds": "{count,plural, =0{Hello}=1{Hello World}=2{Hello two worlds}few{Hello {count} worlds}many{Hello all {count} worlds}other{Hello other {count} worlds}}",
+  "@helloWorlds": {
+    "description": "Improperly formatted since it has no placeholder attribute.",
+    "placeholders": {}
+  }
+}''';
+
+      final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+        ..createSync(recursive: true);
+      l10nDirectory.childFile(defaultTemplateArbFileName)
+        .writeAsStringSync(pluralMessageWithEmptyPlaceholdersMap);
+
+      final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+      try {
+        generator.initialize(
+          l10nDirectoryPath: defaultArbPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        );
+        generator.parseArbFiles();
+        generator.generateClassMethods();
+      } on L10nException catch (e) {
+        expect(e.message, contains('Check to see if the plural message is in the proper ICU syntax format'));
+        return;
+      }
+      fail('Generating class methods without placeholders should not succeed');
+    });
+
+    test('should throw attempting to generate a plural message with no resource attributes:', () {
+      const String pluralMessageWithoutResourceAttributes = '''{
+  "helloWorlds": "{count,plural, =0{Hello}=1{Hello World}=2{Hello two worlds}few{Hello {count} worlds}many{Hello all {count} worlds}other{Hello other {count} worlds}}"
+}''';
+
+      final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+        ..createSync(recursive: true);
+      l10nDirectory.childFile(defaultTemplateArbFileName)
+        .writeAsStringSync(pluralMessageWithoutResourceAttributes);
+
+      final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+      try {
+        generator.initialize(
+          l10nDirectoryPath: defaultArbPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        );
+        generator.parseArbFiles();
+        generator.generateClassMethods();
+      } on L10nException catch (e) {
+        expect(e.message, contains('Resource attribute'));
+        expect(e.message, contains('does not exist'));
+        return;
+      }
+      fail('Generating plural class method without resource attributes should not succeed');
+    });
+
+    test('should throw attempting to generate a plural message with incorrect placeholders format:', () {
+      const String pluralMessageWithIncorrectPlaceholderFormat = '''{
+  "helloWorlds": "{count,plural, =0{Hello}=1{Hello World}=2{Hello two worlds}few{Hello {count} worlds}many{Hello all {count} worlds}other{Hello other {count} worlds}}",
+  "@helloWorlds": {
+    "placeholders": "Incorrectly a string, should be a map."
+  }
+}''';
+
+      final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+        ..createSync(recursive: true);
+      l10nDirectory.childFile(defaultTemplateArbFileName)
+        .writeAsStringSync(pluralMessageWithIncorrectPlaceholderFormat);
+
+      final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+      try {
+        generator.initialize(
+          l10nDirectoryPath: defaultArbPathString,
+          templateArbFileName: defaultTemplateArbFileName,
+          outputFileString: defaultOutputFileString,
+          classNameString: defaultClassNameString,
+        );
+        generator.parseArbFiles();
+        generator.generateClassMethods();
+      } on L10nException catch (e) {
+        expect(e.message, contains('is not properly formatted'));
+        expect(e.message, contains('Ensure that it is a map with keys that are strings'));
+        return;
+      }
+      fail('Generating class methods with incorrect placeholder format should not succeed');
+    });
+
     test('should throw when failing to parse the arb file:', () {
       const String arbFileWithTrailingComma = '''{
   "title": "Stocks",
@@ -867,7 +1091,7 @@ void main() {
       );
     });
 
-    test('should throw when resource is is missing resource attribute:', () {
+    test('should throw when resource is missing resource attribute:', () {
       const String arbFileWithMissingResourceAttribute = '''{
   "title": "Stocks"
 }''';
