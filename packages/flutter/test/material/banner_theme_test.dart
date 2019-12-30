@@ -182,7 +182,7 @@ Finder _containerFinder() {
 }
 
 RenderParagraph _getTextRenderObjectFromDialog(WidgetTester tester, String text) {
-  return tester.element<StatelessElement>(_textFinder(text)).renderObject as RenderParagraph;
+  return tester.element<StatelessElement>(_textFinder(text)).renderObject;
 }
 
 Finder _textFinder(String text) {

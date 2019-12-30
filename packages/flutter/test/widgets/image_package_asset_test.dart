@@ -29,7 +29,7 @@ void main() {
       package: 'test_package',
     );
     assert(imageWidget.image is AssetImage);
-    final AssetImage assetImage = imageWidget.image as AssetImage;
+    final AssetImage assetImage = imageWidget.image;
     expect(assetImage.keyName, 'packages/test_package/assets/image.png');
   });
 
@@ -40,7 +40,7 @@ void main() {
       package: 'test_package',
     );
     assert(imageWidget.image is ExactAssetImage);
-    final ExactAssetImage assetImage = imageWidget.image as ExactAssetImage;
+    final ExactAssetImage assetImage = imageWidget.image;
     expect(assetImage.keyName, 'packages/test_package/assets/image.png');
   });
 }

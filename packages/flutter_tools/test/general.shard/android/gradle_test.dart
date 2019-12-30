@@ -814,6 +814,107 @@ flutter:
     });
   });
 
+  group('migrateToR8', () {
+    MemoryFileSystem memoryFileSystem;
+
+    setUp(() {
+      memoryFileSystem = MemoryFileSystem();
+    });
+
+    testUsingContext('throws ToolExit if gradle.properties doesn\'t exist', () {
+      final Directory sampleAppAndroid = fs.directory('/sample-app/android');
+      sampleAppAndroid.createSync(recursive: true);
+
+      expect(() {
+        migrateToR8(sampleAppAndroid);
+      }, throwsToolExit(message: 'Expected file ${sampleAppAndroid.path}'));
+
+    }, overrides: <Type, Generator>{
+      FileSystem: () => memoryFileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    testUsingContext('throws ToolExit if it cannot write gradle.properties', () {
+      final MockDirectory sampleAppAndroid = MockDirectory();
+      final MockFile gradleProperties = MockFile();
+
+      when(gradleProperties.path).thenReturn('foo/gradle.properties');
+      when(gradleProperties.existsSync()).thenReturn(true);
+      when(gradleProperties.readAsStringSync()).thenReturn('');
+      when(gradleProperties.writeAsStringSync('android.enableR8=true\n', mode: FileMode.append))
+        .thenThrow(const FileSystemException());
+
+      when(sampleAppAndroid.childFile('gradle.properties'))
+        .thenReturn(gradleProperties);
+
+      expect(() {
+        migrateToR8(sampleAppAndroid);
+      },
+      throwsToolExit(message:
+        'The tool failed to add `android.enableR8=true` to foo/gradle.properties. '
+        'Please update the file manually and try this command again.'));
+    });
+
+    testUsingContext('does not update gradle.properties if it already uses R8', () {
+      final Directory sampleAppAndroid = fs.directory('/sample-app/android');
+      sampleAppAndroid.createSync(recursive: true);
+      sampleAppAndroid.childFile('gradle.properties')
+        .writeAsStringSync('android.enableR8=true');
+
+      migrateToR8(sampleAppAndroid);
+
+      expect(testLogger.traceText,
+        contains('gradle.properties already sets `android.enableR8`'));
+      expect(sampleAppAndroid.childFile('gradle.properties').readAsStringSync(),
+        equals('android.enableR8=true'));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => memoryFileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    testUsingContext('sets android.enableR8=true', () {
+      final Directory sampleAppAndroid = fs.directory('/sample-app/android');
+      sampleAppAndroid.createSync(recursive: true);
+      sampleAppAndroid.childFile('gradle.properties')
+        .writeAsStringSync('org.gradle.jvmargs=-Xmx1536M\n');
+
+      migrateToR8(sampleAppAndroid);
+
+      expect(testLogger.traceText, contains('set `android.enableR8=true` in gradle.properties'));
+      expect(
+        sampleAppAndroid.childFile('gradle.properties').readAsStringSync(),
+        equals(
+          'org.gradle.jvmargs=-Xmx1536M\n'
+          'android.enableR8=true\n'
+        ),
+      );
+    }, overrides: <Type, Generator>{
+      FileSystem: () => memoryFileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+
+    testUsingContext('appends android.enableR8=true to the new line', () {
+      final Directory sampleAppAndroid = fs.directory('/sample-app/android');
+      sampleAppAndroid.createSync(recursive: true);
+      sampleAppAndroid.childFile('gradle.properties')
+        .writeAsStringSync('org.gradle.jvmargs=-Xmx1536M');
+
+      migrateToR8(sampleAppAndroid);
+
+      expect(testLogger.traceText, contains('set `android.enableR8=true` in gradle.properties'));
+      expect(
+        sampleAppAndroid.childFile('gradle.properties').readAsStringSync(),
+        equals(
+          'org.gradle.jvmargs=-Xmx1536M\n'
+          'android.enableR8=true\n'
+        ),
+      );
+    }, overrides: <Type, Generator>{
+      FileSystem: () => memoryFileSystem,
+      ProcessManager: () => FakeProcessManager.any()
+    });
+  });
+
   group('isAppUsingAndroidX', () {
     FileSystem fs;
 
@@ -896,12 +997,6 @@ flutter:
   plugin:
     androidPackage: irrelevant
 ''');
-
-      plugin1
-        .childDirectory('android')
-        .childFile('build.gradle')
-        .createSync(recursive: true);
-
       final Directory plugin2 = fs.directory('plugin2.');
       plugin2
         ..createSync()
@@ -912,11 +1007,6 @@ flutter:
   plugin:
     androidPackage: irrelevant
 ''');
-
-      plugin2
-        .childDirectory('android')
-        .childFile('build.gradle')
-        .createSync(recursive: true);
 
       androidDirectory
         .childFile('.flutter-plugins')
@@ -938,13 +1028,8 @@ plugin2=${plugin2.path}
       );
 
       final String flutterRoot = fs.path.absolute(Cache.flutterRoot);
-      final String initScript = fs.path.join(
-        flutterRoot,
-        'packages',
-        'flutter_tools',
-        'gradle',
-        'aar_init_script.gradle',
-      );
+      final String initScript = fs.path.join(flutterRoot, 'packages',
+          'flutter_tools', 'gradle', 'aar_init_script.gradle');
       verify(mockProcessManager.run(
         <String>[
           'gradlew',
@@ -952,7 +1037,6 @@ plugin2=${plugin2.path}
           '-Pflutter-root=$flutterRoot',
           '-Poutput-dir=${buildDirectory.path}',
           '-Pis-plugin=true',
-          '-PbuildNumber=1.0',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           'assembleAarRelease',
         ],
@@ -967,7 +1051,6 @@ plugin2=${plugin2.path}
           '-Pflutter-root=$flutterRoot',
           '-Poutput-dir=${buildDirectory.path}',
           '-Pis-plugin=true',
-          '-PbuildNumber=1.0',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           'assembleAarRelease',
         ],
@@ -975,74 +1058,6 @@ plugin2=${plugin2.path}
         workingDirectory: plugin2.childDirectory('android').path),
       ).called(1);
 
-    }, overrides: <Type, Generator>{
-      AndroidSdk: () => mockAndroidSdk,
-      FileSystem: () => fs,
-      ProcessManager: () => mockProcessManager,
-      GradleUtils: () => FakeGradleUtils(),
-    });
-
-    testUsingContext('skips plugin without a android/build.gradle file', () async {
-      final Directory androidDirectory = fs.directory('android.');
-      androidDirectory.createSync();
-      androidDirectory
-        .childFile('pubspec.yaml')
-        .writeAsStringSync('name: irrelevant');
-
-      final Directory plugin1 = fs.directory('plugin1.');
-      plugin1
-        ..createSync()
-        ..childFile('pubspec.yaml')
-        .writeAsStringSync('''
-name: irrelevant
-flutter:
-  plugin:
-    androidPackage: irrelevant
-''');
-
-      androidDirectory
-        .childFile('.flutter-plugins')
-        .writeAsStringSync('''
-plugin1=${plugin1.path}
-''');
-      // Create an empty android directory.
-      // https://github.com/flutter/flutter/issues/46898
-      plugin1.childDirectory('android').createSync();
-
-      final Directory buildDirectory = androidDirectory.childDirectory('build');
-
-      buildDirectory
-        .childDirectory('outputs')
-        .childDirectory('repo')
-        .createSync(recursive: true);
-
-      await buildPluginsAsAar(
-        FlutterProject.fromPath(androidDirectory.path),
-        const AndroidBuildInfo(BuildInfo.release),
-        buildDirectory: buildDirectory,
-      );
-
-      final String flutterRoot = fs.path.absolute(Cache.flutterRoot);
-      final String initScript = fs.path.join(
-        flutterRoot,
-        'packages',
-        'flutter_tools',
-        'gradle',
-        'aar_init_script.gradle',
-      );
-      verifyNever(mockProcessManager.run(
-        <String>[
-          'gradlew',
-          '-I=$initScript',
-          '-Pflutter-root=$flutterRoot',
-          '-Poutput-dir=${buildDirectory.path}',
-          '-Pis-plugin=true',
-          '-Ptarget-platform=android-arm,android-arm64,android-x64',
-          'assembleAarRelease',
-        ],
-        environment: anyNamed('environment'),
-        workingDirectory: plugin1.childDirectory('android').path),
-      );
     }, overrides: <Type, Generator>{
       AndroidSdk: () => mockAndroidSdk,
       FileSystem: () => fs,
@@ -1634,7 +1649,6 @@ plugin1=${plugin1.path}
         project: FlutterProject.current(),
         outputDirectory: fs.directory('build/'),
         target: '',
-        buildNumber: '1.0',
       );
 
       expect(
@@ -1797,7 +1811,6 @@ plugin1=${plugin1.path}
         project: FlutterProject.current(),
         outputDirectory: fs.directory('build/'),
         target: '',
-        buildNumber: '2.0',
       );
 
       final List<String> actualGradlewCall = verify(
@@ -1812,7 +1825,6 @@ plugin1=${plugin1.path}
       expect(actualGradlewCall, contains('-Plocal-engine-out=out/android_arm'));
       expect(actualGradlewCall, contains('-Plocal-engine-repo=/.tmp_rand0/flutter_tool_local_engine_repo.rand0'));
       expect(actualGradlewCall, contains('-Plocal-engine-build-mode=release'));
-      expect(actualGradlewCall, contains('-PbuildNumber=2.0'));
 
     }, overrides: <Type, Generator>{
       AndroidSdk: () => mockAndroidSdk,
@@ -1831,7 +1843,6 @@ plugin1=${plugin1.path}
         buildModes: const <String>{'release', 'debug', 'profile'},
         androidPackage: 'com.mycompany',
         repoDirectory: fs.directory('build/'),
-        buildNumber: '2.2',
       );
 
       expect(
@@ -1854,9 +1865,9 @@ plugin1=${plugin1.path}
           '  3. Make the host app depend on the Flutter module:\n'
           '\n'
           '    dependencies {\n'
-          '      releaseImplementation \'com.mycompany:flutter_release:2.2\n'
-          '      debugImplementation \'com.mycompany:flutter_debug:2.2\n'
-          '      profileImplementation \'com.mycompany:flutter_profile:2.2\n'
+          '      releaseImplementation \'com.mycompany:flutter_release:1.0\n'
+          '      debugImplementation \'com.mycompany:flutter_debug:1.0\n'
+          '      profileImplementation \'com.mycompany:flutter_profile:1.0\n'
           '    }\n'
           '\n'
           '\n'
@@ -1962,7 +1973,6 @@ plugin1=${plugin1.path}
         buildModes: const <String>{'profile'},
         androidPackage: 'com.mycompany',
         repoDirectory: fs.directory('build/'),
-        buildNumber: '1.0',
       );
 
       expect(

@@ -77,7 +77,7 @@ void main() {
       ),
     );
     final dynamic state = tester.state(find.byType(CupertinoDatePicker));
-    final Map<int, double> cache = state.estimatedColumnWidths as Map<int, double>;
+    final Map<int, double> cache = state.estimatedColumnWidths;
     expect(cache.isNotEmpty, isTrue);
     const Map<String, dynamic> data = <String, dynamic>{
       'type': 'fontsChange',
@@ -103,7 +103,7 @@ void main() {
       ),
     );
     final dynamic state = tester.state(find.byType(CupertinoDatePicker));
-    final Map<int, double> cache = state.estimatedColumnWidths as Map<int, double>;
+    final Map<int, double> cache = state.estimatedColumnWidths;
     // Simulates font missing.
     cache.clear();
     const Map<String, dynamic> data = <String, dynamic>{

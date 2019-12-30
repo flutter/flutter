@@ -875,7 +875,7 @@ void main() {
       ),
     );
     await tester.pumpWidget(table);
-    final RenderObjectElement element = key0.currentContext as RenderObjectElement;
+    final RenderObjectElement element = key0.currentContext;
     expect(element, hasAGoodToStringDeep);
     expect(
       element.toStringDeep(minLevel: DiagnosticLevel.info),

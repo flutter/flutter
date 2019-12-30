@@ -19,7 +19,7 @@ class TestTransition extends AnimatedWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Animation<double> animation = listenable as Animation<double>;
+    final Animation<double> animation = listenable;
     if (animation.value >= 0.5)
       return childSecondHalf;
     return childFirstHalf;
@@ -86,7 +86,7 @@ void main() {
                 child: Builder(
                   key: insideKey,
                   builder: (BuildContext context) {
-                    final PageRoute<void> route = ModalRoute.of(context) as PageRoute<void>;
+                    final PageRoute<void> route = ModalRoute.of(context);
                     return Column(
                       children: <Widget>[
                         TestTransition(

@@ -668,7 +668,7 @@ class TestRender extends RenderProxyBox {
     this.hasScrollUpAction = false,
     this.hasScrollDownAction = false,
     this.isSemanticBoundary,
-    RenderBox child,
+    RenderObject child,
   }) : super(child);
 
   bool hasTapAction;

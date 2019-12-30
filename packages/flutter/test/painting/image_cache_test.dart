@@ -15,6 +15,7 @@ void main() {
     });
 
     tearDown(() {
+      imageCache.largeImageHandler = null;
       imageCache.clear();
       imageCache.maximumSize = 1000;
       imageCache.maximumSizeBytes = 10485760;
@@ -23,69 +24,69 @@ void main() {
     test('maintains cache size', () async {
       imageCache.maximumSize = 3;
 
-      final TestImageInfo a = await extractOneFrame(const TestImageProvider(1, 1).resolve(ImageConfiguration.empty)) as TestImageInfo;
+      final TestImageInfo a = await extractOneFrame(const TestImageProvider(1, 1).resolve(ImageConfiguration.empty));
       expect(a.value, equals(1));
-      final TestImageInfo b = await extractOneFrame(const TestImageProvider(1, 2).resolve(ImageConfiguration.empty)) as TestImageInfo;
+      final TestImageInfo b = await extractOneFrame(const TestImageProvider(1, 2).resolve(ImageConfiguration.empty));
       expect(b.value, equals(1));
-      final TestImageInfo c = await extractOneFrame(const TestImageProvider(1, 3).resolve(ImageConfiguration.empty)) as TestImageInfo;
+      final TestImageInfo c = await extractOneFrame(const TestImageProvider(1, 3).resolve(ImageConfiguration.empty));
       expect(c.value, equals(1));
-      final TestImageInfo d = await extractOneFrame(const TestImageProvider(1, 4).resolve(ImageConfiguration.empty)) as TestImageInfo;
+      final TestImageInfo d = await extractOneFrame(const TestImageProvider(1, 4).resolve(ImageConfiguration.empty));
       expect(d.value, equals(1));
-      final TestImageInfo e = await extractOneFrame(const TestImageProvider(1, 5).resolve(ImageConfiguration.empty)) as TestImageInfo;
+      final TestImageInfo e = await extractOneFrame(const TestImageProvider(1, 5).resolve(ImageConfiguration.empty));
       expect(e.value, equals(1));
-      final TestImageInfo f = await extractOneFrame(const TestImageProvider(1, 6).resolve(ImageConfiguration.empty)) as TestImageInfo;
+      final TestImageInfo f = await extractOneFrame(const TestImageProvider(1, 6).resolve(ImageConfiguration.empty));
       expect(f.value, equals(1));
 
       expect(f, equals(a));
 
       // cache still only has one entry in it: 1(1)
 
-      final TestImageInfo g = await extractOneFrame(const TestImageProvider(2, 7).resolve(ImageConfiguration.empty)) as TestImageInfo;
+      final TestImageInfo g = await extractOneFrame(const TestImageProvider(2, 7).resolve(ImageConfiguration.empty));
       expect(g.value, equals(7));
 
       // cache has two entries in it: 1(1), 2(7)
 
-      final TestImageInfo h = await extractOneFrame(const TestImageProvider(1, 8).resolve(ImageConfiguration.empty)) as TestImageInfo;
+      final TestImageInfo h = await extractOneFrame(const TestImageProvider(1, 8).resolve(ImageConfiguration.empty));
       expect(h.value, equals(1));
 
       // cache still has two entries in it: 2(7), 1(1)
 
-      final TestImageInfo i = await extractOneFrame(const TestImageProvider(3, 9).resolve(ImageConfiguration.empty)) as TestImageInfo;
+      final TestImageInfo i = await extractOneFrame(const TestImageProvider(3, 9).resolve(ImageConfiguration.empty));
       expect(i.value, equals(9));
 
       // cache has three entries in it: 2(7), 1(1), 3(9)
 
-      final TestImageInfo j = await extractOneFrame(const TestImageProvider(1, 10).resolve(ImageConfiguration.empty)) as TestImageInfo;
+      final TestImageInfo j = await extractOneFrame(const TestImageProvider(1, 10).resolve(ImageConfiguration.empty));
       expect(j.value, equals(1));
 
       // cache still has three entries in it: 2(7), 3(9), 1(1)
 
-      final TestImageInfo k = await extractOneFrame(const TestImageProvider(4, 11).resolve(ImageConfiguration.empty)) as TestImageInfo;
+      final TestImageInfo k = await extractOneFrame(const TestImageProvider(4, 11).resolve(ImageConfiguration.empty));
       expect(k.value, equals(11));
 
       // cache has three entries: 3(9), 1(1), 4(11)
 
-      final TestImageInfo l = await extractOneFrame(const TestImageProvider(1, 12).resolve(ImageConfiguration.empty)) as TestImageInfo;
+      final TestImageInfo l = await extractOneFrame(const TestImageProvider(1, 12).resolve(ImageConfiguration.empty));
       expect(l.value, equals(1));
 
       // cache has three entries: 3(9), 4(11), 1(1)
 
-      final TestImageInfo m = await extractOneFrame(const TestImageProvider(2, 13).resolve(ImageConfiguration.empty)) as TestImageInfo;
+      final TestImageInfo m = await extractOneFrame(const TestImageProvider(2, 13).resolve(ImageConfiguration.empty));
       expect(m.value, equals(13));
 
       // cache has three entries: 4(11), 1(1), 2(13)
 
-      final TestImageInfo n = await extractOneFrame(const TestImageProvider(3, 14).resolve(ImageConfiguration.empty)) as TestImageInfo;
+      final TestImageInfo n = await extractOneFrame(const TestImageProvider(3, 14).resolve(ImageConfiguration.empty));
       expect(n.value, equals(14));
 
       // cache has three entries: 1(1), 2(13), 3(14)
 
-      final TestImageInfo o = await extractOneFrame(const TestImageProvider(4, 15).resolve(ImageConfiguration.empty)) as TestImageInfo;
+      final TestImageInfo o = await extractOneFrame(const TestImageProvider(4, 15).resolve(ImageConfiguration.empty));
       expect(o.value, equals(15));
 
       // cache has three entries: 2(13), 3(14), 4(15)
 
-      final TestImageInfo p = await extractOneFrame(const TestImageProvider(1, 16).resolve(ImageConfiguration.empty)) as TestImageInfo;
+      final TestImageInfo p = await extractOneFrame(const TestImageProvider(1, 16).resolve(ImageConfiguration.empty));
       expect(p.value, equals(16));
 
       // cache has three entries: 3(14), 4(15), 1(16)
@@ -131,6 +132,25 @@ void main() {
       expect(imageCache.maximumSizeBytes, 256 + 1000);
     });
 
+    test('Large image handler that rejects an image.', () async {
+      bool wasCalled = false;
+      imageCache.largeImageHandler = (ImageCache imageCache, int imageSize) { wasCalled = true; };
+      const TestImage testImage1 = TestImage(width: 8, height: 8);
+      const TestImage testImage2 = TestImage(width: 16, height: 16);
+
+      imageCache.maximumSizeBytes = 256;
+      await extractOneFrame(const TestImageProvider(1, 1, image: testImage1).resolve(ImageConfiguration.empty));
+      expect(imageCache.currentSize, 1);
+      expect(imageCache.currentSizeBytes, 256);
+      expect(imageCache.maximumSizeBytes, 256);
+
+      await extractOneFrame(const TestImageProvider(2, 2, image: testImage2).resolve(ImageConfiguration.empty));
+      expect(imageCache.currentSize, 1);
+      expect(imageCache.currentSizeBytes, 256);
+      expect(imageCache.maximumSizeBytes, 256);
+      expect(wasCalled, isTrue);
+    });
+
     test('Returns null if an error is caught resolving an image', () {
       final ErrorImageProvider errorImage = ErrorImageProvider();
       expect(() => imageCache.putIfAbsent(errorImage, () => errorImage.load(errorImage, null)), throwsA(isInstanceOf<Error>()));
@@ -150,10 +170,10 @@ void main() {
 
       final TestImageStreamCompleter resultingCompleter1 = imageCache.putIfAbsent(testImage, () {
         return completer1;
-      }) as TestImageStreamCompleter;
+      });
       final TestImageStreamCompleter resultingCompleter2 = imageCache.putIfAbsent(testImage, () {
         return completer2;
-      }) as TestImageStreamCompleter;
+      });
 
       expect(resultingCompleter1, completer1);
       expect(resultingCompleter2, completer1);
@@ -167,13 +187,13 @@ void main() {
 
       final TestImageStreamCompleter resultingCompleter1 = imageCache.putIfAbsent(testImage, () {
         return completer1;
-      }) as TestImageStreamCompleter;
+      });
 
       imageCache.clear();
 
       final TestImageStreamCompleter resultingCompleter2 = imageCache.putIfAbsent(testImage, () {
         return completer2;
-      }) as TestImageStreamCompleter;
+      });
 
       expect(resultingCompleter1, completer1);
       expect(resultingCompleter2, completer2);
@@ -187,13 +207,13 @@ void main() {
 
       final TestImageStreamCompleter resultingCompleter1 = imageCache.putIfAbsent(testImage, () {
         return completer1;
-      }) as TestImageStreamCompleter;
+      });
 
       imageCache.evict(testImage);
 
       final TestImageStreamCompleter resultingCompleter2 = imageCache.putIfAbsent(testImage, () {
         return completer2;
-      }) as TestImageStreamCompleter;
+      });
 
       expect(resultingCompleter1, completer1);
       expect(resultingCompleter2, completer2);

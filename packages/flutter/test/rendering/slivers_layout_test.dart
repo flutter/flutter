@@ -23,7 +23,7 @@ void main() {
     RenderSliverToBoxAdapter sliver;
     RenderViewport viewport;
     RenderBox box;
-    final RenderLayoutWatcher root = RenderLayoutWatcher(
+    final RenderObject root = RenderLayoutWatcher(
       viewport = RenderViewport(
         crossAxisDirection: AxisDirection.right,
         offset: ViewportOffset.zero(),

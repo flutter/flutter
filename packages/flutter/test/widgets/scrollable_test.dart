@@ -46,13 +46,13 @@ double getScrollOffset(WidgetTester tester) {
 
 double getScrollVelocity(WidgetTester tester) {
   final RenderViewport viewport = tester.renderObject(find.byType(Viewport));
-  final ScrollPosition position = viewport.offset as ScrollPosition;
+  final ScrollPosition position = viewport.offset;
   return position.activity.velocity;
 }
 
 void resetScrollOffset(WidgetTester tester) {
   final RenderViewport viewport = tester.renderObject(find.byType(Viewport));
-  final ScrollPosition position = viewport.offset as ScrollPosition;
+  final ScrollPosition position = viewport.offset;
   position.jumpTo(0.0);
 }
 

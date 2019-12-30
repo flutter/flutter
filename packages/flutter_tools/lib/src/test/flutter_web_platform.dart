@@ -17,6 +17,7 @@ import 'package:shelf_packages_handler/shelf_packages_handler.dart';
 import 'package:shelf_static/shelf_static.dart';
 import 'package:shelf_web_socket/shelf_web_socket.dart';
 import 'package:stream_channel/stream_channel.dart';
+import 'package:test_api/backend.dart'; // ignore: deprecated_member_use
 import 'package:test_api/src/backend/runtime.dart';
 import 'package:test_api/src/backend/suite_platform.dart';
 import 'package:test_api/src/util/stack_trace_mapper.dart';
@@ -122,7 +123,6 @@ class FlutterWebPlatform extends PlatformPlugin {
         artifacts.getArtifactPath(Artifact.engineDartSdkPath),
         'lib',
         'dev_compiler',
-        'kernel',
         'amd',
         'require.js',
       ));
@@ -854,7 +854,7 @@ class TestGoldenComparator {
     final TestGoldenComparatorProcess process = await _processForTestFile(testUri);
     process.sendCommand(imageFile, goldenKey, updateGoldens);
 
-    final Map<String, dynamic> result = await process.getResponse().timeout(const Duration(seconds: 20));
+    final Map<String, dynamic> result = await process.getResponse().timeout(const Duration(seconds: 10));
 
     if (result == null) {
       return 'unknown error';

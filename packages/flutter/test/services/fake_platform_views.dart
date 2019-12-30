@@ -4,8 +4,8 @@
 
 import 'dart:async';
 import 'dart:typed_data';
+import 'package:collection/collection.dart';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -100,13 +100,13 @@ class FakeAndroidPlatformViewsController {
   }
 
   Future<dynamic> _create(MethodCall call) async {
-    final Map<dynamic, dynamic> args = call.arguments as Map<dynamic, dynamic>;
-    final int id = args['id'] as int;
-    final String viewType = args['viewType'] as String;
-    final double width = args['width'] as double;
-    final double height = args['height'] as double;
-    final int layoutDirection = args['direction'] as int;
-    final Uint8List creationParams = args['params'] as Uint8List;
+    final Map<dynamic, dynamic> args = call.arguments;
+    final int id = args['id'];
+    final String viewType = args['viewType'];
+    final double width = args['width'];
+    final double height = args['height'];
+    final int layoutDirection = args['direction'];
+    final Uint8List creationParams = args['params'];
 
     if (_views.containsKey(id))
       throw PlatformException(
@@ -130,7 +130,7 @@ class FakeAndroidPlatformViewsController {
   }
 
   Future<dynamic> _dispose(MethodCall call) {
-    final int id = call.arguments as int;
+    final int id = call.arguments;
 
     if (!_views.containsKey(id))
       throw PlatformException(
@@ -143,10 +143,10 @@ class FakeAndroidPlatformViewsController {
   }
 
   Future<dynamic> _resize(MethodCall call) async {
-    final Map<dynamic, dynamic> args = call.arguments as Map<dynamic, dynamic>;
-    final int id = args['id'] as int;
-    final double width = args['width'] as double;
-    final double height = args['height'] as double;
+    final Map<dynamic, dynamic> args = call.arguments;
+    final int id = args['id'];
+    final double width = args['width'];
+    final double height = args['height'];
 
     if (!_views.containsKey(id))
       throw PlatformException(
@@ -163,17 +163,17 @@ class FakeAndroidPlatformViewsController {
   }
 
   Future<dynamic> _touch(MethodCall call) {
-    final List<dynamic> args = call.arguments as List<dynamic>;
-    final int id = args[0] as int;
-    final int action = args[3] as int;
-    final List<List<dynamic>> pointerProperties = (args[5] as List<dynamic>).cast<List<dynamic>>();
-    final List<List<dynamic>> pointerCoords = (args[6] as List<dynamic>).cast<List<dynamic>>();
+    final List<dynamic> args = call.arguments;
+    final int id = args[0];
+    final int action = args[3];
+    final List<List<dynamic>> pointerProperties = args[5].cast<List<dynamic>>();
+    final List<List<dynamic>> pointerCoords = args[6].cast<List<dynamic>>();
     final List<Offset> pointerOffsets = <Offset> [];
     final List<int> pointerIds = <int> [];
     for (int i = 0; i < pointerCoords.length; i++) {
-      pointerIds.add(pointerProperties[i][0] as int);
-      final double x = pointerCoords[i][7] as double;
-      final double y = pointerCoords[i][8] as double;
+      pointerIds.add(pointerProperties[i][0]);
+      final double x = pointerCoords[i][7];
+      final double y = pointerCoords[i][8];
       pointerOffsets.add(Offset(x, y));
     }
 
@@ -185,9 +185,9 @@ class FakeAndroidPlatformViewsController {
   }
 
   Future<dynamic> _setDirection(MethodCall call) async {
-    final Map<dynamic, dynamic> args = call.arguments as Map<dynamic, dynamic>;
-    final int id = args['id'] as int;
-    final int layoutDirection = args['direction'] as int;
+    final Map<dynamic, dynamic> args = call.arguments;
+    final int id = args['id'];
+    final int layoutDirection = args['direction'];
 
     if (!_views.containsKey(id))
       throw PlatformException(
@@ -201,7 +201,7 @@ class FakeAndroidPlatformViewsController {
   }
 
   Future<dynamic> _clearFocus(MethodCall call) {
-    final int id = call.arguments as int;
+    final int id = call.arguments;
 
     if (!_views.containsKey(id))
       throw PlatformException(
@@ -256,10 +256,10 @@ class FakeIosPlatformViewsController {
   Future<dynamic> _create(MethodCall call) async {
     if (creationDelay != null)
       await creationDelay.future;
-    final Map<dynamic, dynamic> args = call.arguments as Map<dynamic, dynamic>;
-    final int id = args['id'] as int;
-    final String viewType = args['viewType'] as String;
-    final Uint8List creationParams = args['params'] as Uint8List;
+    final Map<dynamic, dynamic> args = call.arguments;
+    final int id = args['id'];
+    final String viewType = args['viewType'];
+    final Uint8List creationParams = args['params'];
 
     if (_views.containsKey(id)) {
       throw PlatformException(
@@ -282,21 +282,21 @@ class FakeIosPlatformViewsController {
   }
 
   Future<dynamic> _acceptGesture(MethodCall call) async {
-    final Map<dynamic, dynamic> args = call.arguments as Map<dynamic, dynamic>;
-    final int id = args['id'] as int;
+    final Map<dynamic, dynamic> args = call.arguments;
+    final int id = args['id'];
     gesturesAccepted[id] += 1;
     return Future<int>.sync(() => null);
   }
 
   Future<dynamic> _rejectGesture(MethodCall call) async {
-    final Map<dynamic, dynamic> args = call.arguments as Map<dynamic, dynamic>;
-    final int id = args['id'] as int;
+    final Map<dynamic, dynamic> args = call.arguments;
+    final int id = args['id'];
     gesturesRejected[id] += 1;
     return Future<int>.sync(() => null);
   }
 
   Future<dynamic> _dispose(MethodCall call) {
-    final int id = call.arguments as int;
+    final int id = call.arguments;
 
     if (!_views.containsKey(id)) {
       throw PlatformException(
@@ -339,9 +339,9 @@ class FakeHtmlPlatformViewsController {
   }
 
   Future<dynamic> _create(MethodCall call) async {
-    final Map<dynamic, dynamic> args = call.arguments as Map<dynamic, dynamic>;
-    final int id = args['id'] as int;
-    final String viewType = args['viewType'] as String;
+    final Map<dynamic, dynamic> args = call.arguments;
+    final int id = args['id'];
+    final String viewType = args['viewType'];
 
     if (_views.containsKey(id))
       throw PlatformException(
@@ -364,7 +364,7 @@ class FakeHtmlPlatformViewsController {
   }
 
   Future<dynamic> _dispose(MethodCall call) {
-    final int id = call.arguments as int;
+    final int id = call.arguments;
 
     if (!_views.containsKey(id))
       throw PlatformException(
@@ -390,11 +390,11 @@ class FakeAndroidPlatformView {
   bool operator ==(dynamic other) {
     if (other.runtimeType != FakeAndroidPlatformView)
       return false;
-    return other is FakeAndroidPlatformView
-        && other.id == id
-        && other.type == type
-        && other.creationParams == creationParams
-        && other.size == size;
+    final FakeAndroidPlatformView typedOther = other;
+    return id == typedOther.id &&
+           type == typedOther.type &&
+           creationParams == typedOther.creationParams &&
+           size == typedOther.size;
   }
 
   @override
@@ -418,10 +418,12 @@ class FakeAndroidMotionEvent {
   bool operator ==(dynamic other) {
     if (other is! FakeAndroidMotionEvent)
       return false;
-    return other is FakeAndroidMotionEvent
-        && listEquals<int>(other.pointerIds, pointerIds)
-        && other.action == action
-        && listEquals<Offset>(other.pointers, pointers);
+    final FakeAndroidMotionEvent typedOther = other;
+    const ListEquality<Offset> offsetsEq = ListEquality<Offset>();
+    const ListEquality<int> pointersEq = ListEquality<int>();
+    return pointersEq.equals(pointerIds, typedOther.pointerIds) &&
+        action == typedOther.action &&
+        offsetsEq.equals(pointers, typedOther.pointers);
   }
 
   @override
@@ -444,10 +446,10 @@ class FakeUiKitView {
   bool operator ==(dynamic other) {
     if (other.runtimeType != FakeUiKitView)
       return false;
-    return other is FakeUiKitView
-        && other.id == id
-        && other.type == type
-        && other.creationParams == creationParams;
+    final FakeUiKitView typedOther = other;
+    return id == typedOther.id &&
+           type == typedOther.type &&
+           creationParams == typedOther.creationParams;
   }
 
   @override
@@ -469,9 +471,9 @@ class FakeHtmlPlatformView {
   bool operator ==(dynamic other) {
     if (other.runtimeType != FakeHtmlPlatformView)
       return false;
-    return other is FakeHtmlPlatformView
-        && other.id == id
-        && other.type == type;
+    final FakeHtmlPlatformView typedOther = other;
+    return id == typedOther.id &&
+           type == typedOther.type;
   }
 
   @override

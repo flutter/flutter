@@ -45,8 +45,8 @@ void main() {
       ),
     );
 
-    final RenderDecoratedBox box = key.currentContext.findRenderObject() as RenderDecoratedBox;
-    actualDecoration = box.decoration as BoxDecoration;
+    final RenderDecoratedBox box = key.currentContext.findRenderObject();
+    actualDecoration = box.decoration;
     expect(actualDecoration.color, equals(decorationA.color));
 
     await tester.pumpWidget(
@@ -58,12 +58,12 @@ void main() {
     );
 
     expect(key.currentContext.findRenderObject(), equals(box));
-    actualDecoration = box.decoration as BoxDecoration;
+    actualDecoration = box.decoration;
     expect(actualDecoration.color, equals(decorationA.color));
 
     await tester.pump(const Duration(seconds: 1));
 
-    actualDecoration = box.decoration as BoxDecoration;
+    actualDecoration = box.decoration;
     expect(actualDecoration.color, equals(decorationB.color));
 
     expect(box, hasAGoodToStringDeep);

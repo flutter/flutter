@@ -26,7 +26,7 @@ class RealRoot extends AbstractNode {
   @override
   void attach(Object owner) {
     super.attach(owner);
-    child?.attach(owner as PipelineOwner);
+    child?.attach(owner);
   }
 
   @override
@@ -36,7 +36,7 @@ class RealRoot extends AbstractNode {
   }
 
   @override
-  PipelineOwner get owner => super.owner as PipelineOwner;
+  PipelineOwner get owner => super.owner;
 
   void layout() {
     child?.layout(BoxConstraints.tight(const Size(500.0, 500.0)));

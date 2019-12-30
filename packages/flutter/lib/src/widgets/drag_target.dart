@@ -48,7 +48,7 @@ typedef DragEndCallback = void Function(DraggableDetails details);
 /// Signature for when a [Draggable] leaves a [DragTarget].
 ///
 /// Used by [DragTarget.onLeave].
-typedef DragTargetLeave = void Function(Object data);
+typedef DragTargetLeave<T> = void Function(T data);
 
 /// Where the [Draggable] should be anchored during a drag.
 enum DragAnchor {
@@ -502,7 +502,7 @@ class DragTarget<T> extends StatefulWidget {
 
   /// Called when a given piece of data being dragged over this target leaves
   /// the target.
-  final DragTargetLeave onLeave;
+  final DragTargetLeave<T> onLeave;
 
   @override
   _DragTargetState<T> createState() => _DragTargetState<T>();
@@ -514,12 +514,13 @@ List<T> _mapAvatarsToData<T>(List<_DragAvatar<T>> avatars) {
 
 class _DragTargetState<T> extends State<DragTarget<T>> {
   final List<_DragAvatar<T>> _candidateAvatars = <_DragAvatar<T>>[];
-  final List<_DragAvatar<Object>> _rejectedAvatars = <_DragAvatar<Object>>[];
+  final List<_DragAvatar<dynamic>> _rejectedAvatars = <_DragAvatar<dynamic>>[];
 
-  bool didEnter(_DragAvatar<Object> avatar) {
+  bool didEnter(_DragAvatar<dynamic> avatar) {
     assert(!_candidateAvatars.contains(avatar));
     assert(!_rejectedAvatars.contains(avatar));
-    if (avatar is _DragAvatar<T> && (widget.onWillAccept == null || widget.onWillAccept(avatar.data))) {
+    final dynamic data = avatar.data;
+    if (data is T && (widget.onWillAccept == null || widget.onWillAccept(data))) {
       setState(() {
         _candidateAvatars.add(avatar);
       });
@@ -532,7 +533,7 @@ class _DragTargetState<T> extends State<DragTarget<T>> {
     }
   }
 
-  void didLeave(_DragAvatar<Object> avatar) {
+  void didLeave(_DragAvatar<dynamic> avatar) {
     assert(_candidateAvatars.contains(avatar) || _rejectedAvatars.contains(avatar));
     if (!mounted)
       return;
@@ -544,7 +545,7 @@ class _DragTargetState<T> extends State<DragTarget<T>> {
       widget.onLeave(avatar.data);
   }
 
-  void didDrop(_DragAvatar<Object> avatar) {
+  void didDrop(_DragAvatar<dynamic> avatar) {
     assert(_candidateAvatars.contains(avatar));
     if (!mounted)
       return;
@@ -552,7 +553,7 @@ class _DragTargetState<T> extends State<DragTarget<T>> {
       _candidateAvatars.remove(avatar);
     });
     if (widget.onAccept != null)
-      widget.onAccept(avatar.data as T);
+      widget.onAccept(avatar.data);
   }
 
   @override
@@ -561,7 +562,7 @@ class _DragTargetState<T> extends State<DragTarget<T>> {
     return MetaData(
       metaData: this,
       behavior: HitTestBehavior.translucent,
-      child: widget.builder(context, _mapAvatarsToData<T>(_candidateAvatars), _mapAvatarsToData<Object>(_rejectedAvatars)),
+      child: widget.builder(context, _mapAvatarsToData<T>(_candidateAvatars), _mapAvatarsToData<dynamic>(_rejectedAvatars)),
     );
   }
 }

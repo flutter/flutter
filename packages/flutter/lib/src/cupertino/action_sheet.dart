@@ -416,10 +416,10 @@ class _CupertinoAlertRenderElement extends RenderObjectElement {
   Element _actionsElement;
 
   @override
-  _CupertinoAlertRenderWidget get widget => super.widget as _CupertinoAlertRenderWidget;
+  _CupertinoAlertRenderWidget get widget => super.widget;
 
   @override
-  _RenderCupertinoAlert get renderObject => super.renderObject as _RenderCupertinoAlert;
+  _RenderCupertinoAlert get renderObject => super.renderObject;
 
   @override
   void visitChildren(ElementVisitor visitor) {
@@ -483,10 +483,10 @@ class _CupertinoAlertRenderElement extends RenderObjectElement {
     assert(slot != null);
     switch (slot) {
       case _AlertSections.contentSection:
-        renderObject.contentSection = child as RenderBox;
+        renderObject.contentSection = child;
         break;
       case _AlertSections.actionsSection:
-        renderObject.actionsSection = child as RenderBox;
+        renderObject.actionsSection = child;
         break;
     }
   }
@@ -694,13 +694,13 @@ class _RenderCupertinoAlert extends RenderBox {
     // Set the position of the actions box to sit at the bottom of the alert.
     // The content box defaults to the top left, which is where we want it.
     assert(actionsSection.parentData is MultiChildLayoutParentData);
-    final MultiChildLayoutParentData actionParentData = actionsSection.parentData as MultiChildLayoutParentData;
+    final MultiChildLayoutParentData actionParentData = actionsSection.parentData;
     actionParentData.offset = Offset(0.0, contentSize.height + dividerThickness);
   }
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    final MultiChildLayoutParentData contentParentData = contentSection.parentData as MultiChildLayoutParentData;
+    final MultiChildLayoutParentData contentParentData = contentSection.parentData;
     contentSection.paint(context, offset + contentParentData.offset);
 
     final bool hasDivider = contentSection.size.height > 0.0 && actionsSection.size.height > 0.0;
@@ -708,7 +708,7 @@ class _RenderCupertinoAlert extends RenderBox {
       _paintDividerBetweenContentAndActions(context.canvas, offset);
     }
 
-    final MultiChildLayoutParentData actionsParentData = actionsSection.parentData as MultiChildLayoutParentData;
+    final MultiChildLayoutParentData actionsParentData = actionsSection.parentData;
     actionsSection.paint(context, offset + actionsParentData.offset);
   }
 
@@ -726,8 +726,8 @@ class _RenderCupertinoAlert extends RenderBox {
 
   @override
   bool hitTestChildren(BoxHitTestResult result, { Offset position }) {
-    final MultiChildLayoutParentData contentSectionParentData = contentSection.parentData as MultiChildLayoutParentData;
-    final MultiChildLayoutParentData actionsSectionParentData = actionsSection.parentData as MultiChildLayoutParentData;
+    final MultiChildLayoutParentData contentSectionParentData = contentSection.parentData;
+    final MultiChildLayoutParentData actionsSectionParentData = actionsSection.parentData;
     return result.addWithPaintOffset(
              offset: contentSectionParentData.offset,
              position: position,
@@ -965,7 +965,7 @@ class _ActionButtonParentDataWidget extends ParentDataWidget<_CupertinoAlertActi
   @override
   void applyParentData(RenderObject renderObject) {
     assert(renderObject.parentData is _ActionButtonParentData);
-    final _ActionButtonParentData parentData = renderObject.parentData as _ActionButtonParentData;
+    final _ActionButtonParentData parentData = renderObject.parentData;
     if (parentData.isPressed != isPressed) {
       parentData.isPressed = isPressed;
 
@@ -1217,7 +1217,7 @@ class _RenderCupertinoAlertActions extends RenderBox
       );
 
       assert(child.parentData is MultiChildLayoutParentData);
-      final MultiChildLayoutParentData parentData = child.parentData as MultiChildLayoutParentData;
+      final MultiChildLayoutParentData parentData = child.parentData;
       parentData.offset = Offset(0.0, verticalOffset);
 
       verticalOffset += child.size.height;
@@ -1259,13 +1259,14 @@ class _RenderCupertinoAlertActions extends RenderBox
     RenderBox prevChild;
     while (child != null) {
       assert(child.parentData is _ActionButtonParentData);
-      final _ActionButtonParentData currentButtonParentData = child.parentData as _ActionButtonParentData;
+      final _ActionButtonParentData currentButtonParentData = child.parentData;
       final bool isButtonPressed = currentButtonParentData.isPressed;
 
       bool isPrevButtonPressed = false;
       if (prevChild != null) {
         assert(prevChild.parentData is _ActionButtonParentData);
-        final _ActionButtonParentData previousButtonParentData = prevChild.parentData as _ActionButtonParentData;
+        final _ActionButtonParentData previousButtonParentData = prevChild
+            .parentData;
         isPrevButtonPressed = previousButtonParentData.isPressed;
       }
 
@@ -1315,7 +1316,7 @@ class _RenderCupertinoAlertActions extends RenderBox
   void _drawButtons(PaintingContext context, Offset offset) {
     RenderBox child = firstChild;
     while (child != null) {
-      final MultiChildLayoutParentData childParentData = child.parentData as MultiChildLayoutParentData;
+      final MultiChildLayoutParentData childParentData = child.parentData;
       context.paintChild(child, childParentData.offset + offset);
       child = childAfter(child);
     }

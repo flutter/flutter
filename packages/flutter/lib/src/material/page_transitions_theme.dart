@@ -534,10 +534,10 @@ class PageTransitionsTheme extends Diagnosticable {
       return true;
     if (other.runtimeType != runtimeType)
       return false;
+    final PageTransitionsTheme typedOther = other;
     if (identical(builders, other.builders))
       return true;
-    return other is PageTransitionsTheme
-        && listEquals<PageTransitionsBuilder>(_all(other.builders), _all(builders));
+    return listEquals<PageTransitionsBuilder>(_all(builders), _all(typedOther.builders));
   }
 
   @override

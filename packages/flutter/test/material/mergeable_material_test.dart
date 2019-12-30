@@ -58,10 +58,10 @@ BorderRadius getBorderRadius(WidgetTester tester, int index) {
   final List<Element> containers = tester.elementList(find.byType(Container))
                                    .toList();
 
-  final Container container = containers[index].widget as Container;
-  final BoxDecoration boxDecoration = container.decoration as BoxDecoration;
+  final Container container = containers[index].widget;
+  final BoxDecoration boxDecoration = container.decoration;
 
-  return boxDecoration.borderRadius as BorderRadius;
+  return boxDecoration.borderRadius;
 }
 
 void main() {
@@ -1045,7 +1045,7 @@ void main() {
   });
 
   bool isDivider(Widget widget, bool top, bool bottom) {
-    final DecoratedBox box = widget as DecoratedBox;
+    final DecoratedBox box = widget;
     const BorderSide side = BorderSide(color: Color(0x1F000000), width: 0.5);
 
     return box.decoration == BoxDecoration(

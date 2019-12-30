@@ -60,11 +60,6 @@ typedef CompileExpression = Future<String> Function(
   bool isStatic,
 );
 
-typedef ReloadMethod = Future<void> Function({
-  String classId,
-  String libraryId,
-});
-
 Future<StreamChannel<String>> _defaultOpenChannel(Uri uri, {io.CompressionOptions compression = io.CompressionOptions.compressionDefault}) async {
   Duration delay = const Duration(milliseconds: 100);
   int attempts = 0;
@@ -107,7 +102,6 @@ typedef VMServiceConnector = Future<VMService> Function(Uri httpUri, {
   ReloadSources reloadSources,
   Restart restart,
   CompileExpression compileExpression,
-  ReloadMethod reloadMethod,
   io.CompressionOptions compression,
   Device device,
 });
@@ -123,7 +117,6 @@ class VMService {
     Restart restart,
     CompileExpression compileExpression,
     Device device,
-    ReloadMethod reloadMethod,
   ) {
     _vm = VM._empty(this);
     _peer.listen().catchError(_connectionError.completeError);
@@ -157,21 +150,15 @@ class VMService {
         'alias': 'Flutter Tools',
       });
 
-    }
-
-    if (reloadMethod != null) {
       // Register a special method for hot UI. while this is implemented
       // currently in the same way as hot reload, it leaves the tool free
       // to change to a more efficient implementation in the future.
-      //
-      // `library` should be the file URI of the updated code.
-      // `class` should be the name of the Widget subclass to be marked dirty. For example,
-      // if the build method of a StatelessWidget is updated, this is the name of class.
-      // If the build method of a StatefulWidget is updated, then this is the name
-      // of the Widget class that created the State object.
       _peer.registerMethod('reloadMethod', (rpc.Parameters params) async {
+        final String isolateId = params['isolateId'].value as String;
         final String libraryId = params['library'].value as String;
         final String classId = params['class'].value as String;
+        final String methodId = params['method'].value as String;
+        final String methodBody = params['methodBody'].value as String;
 
         if (libraryId.isEmpty) {
           throw rpc.RpcException.invalidParams('Invalid \'libraryId\': $libraryId');
@@ -179,14 +166,17 @@ class VMService {
         if (classId.isEmpty) {
           throw rpc.RpcException.invalidParams('Invalid \'classId\': $classId');
         }
+        if (methodId.isEmpty) {
+          throw rpc.RpcException.invalidParams('Invalid \'methodId\': $methodId');
+        }
+        if (methodBody.isEmpty) {
+          throw rpc.RpcException.invalidParams('Invalid \'methodBody\': $methodBody');
+        }
 
         printTrace('reloadMethod not yet supported, falling back to hot reload');
 
         try {
-          await reloadMethod(
-            libraryId: libraryId,
-            classId: classId,
-          );
+          await reloadSources(isolateId);
           return <String, String>{'type': 'Success'};
         } on rpc.RpcException {
           rethrow;
@@ -308,7 +298,6 @@ class VMService {
       ReloadSources reloadSources,
       Restart restart,
       CompileExpression compileExpression,
-      ReloadMethod reloadMethod,
       io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
       Device device,
     }) async {
@@ -319,7 +308,6 @@ class VMService {
       compileExpression: compileExpression,
       compression: compression,
       device: device,
-      reloadMethod: reloadMethod,
     );
   }
 
@@ -328,23 +316,13 @@ class VMService {
     ReloadSources reloadSources,
     Restart restart,
     CompileExpression compileExpression,
-    ReloadMethod reloadMethod,
     io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
     Device device,
   }) async {
     final Uri wsUri = httpUri.replace(scheme: 'ws', path: fs.path.join(httpUri.path, 'ws'));
     final StreamChannel<String> channel = await _openChannel(wsUri, compression: compression);
     final rpc.Peer peer = rpc.Peer.withoutJson(jsonDocument.bind(channel), onUnhandledError: _unhandledError);
-    final VMService service = VMService(
-      peer,
-      httpUri,
-      wsUri,
-      reloadSources,
-      restart,
-      compileExpression,
-      device,
-      reloadMethod,
-    );
+    final VMService service = VMService(peer, httpUri, wsUri, reloadSources, restart, compileExpression, device);
     // This call is to ensure we are able to establish a connection instead of
     // keeping on trucking and failing farther down the process.
     await service._sendRequest('getVersion', const <String, dynamic>{});
@@ -1356,12 +1334,6 @@ class Isolate extends ServiceObjectOwner {
 
   Future<Map<String, dynamic>> flutterReassemble() {
     return invokeFlutterExtensionRpcRaw('ext.flutter.reassemble');
-  }
-
-  Future<Map<String, dynamic>> flutterFastReassemble(String classId) {
-    return invokeFlutterExtensionRpcRaw('ext.flutter.fastReassemble', params: <String, Object>{
-      'class': classId,
-    });
   }
 
   Future<bool> flutterAlreadyPaintedFirstUsefulFrame() async {

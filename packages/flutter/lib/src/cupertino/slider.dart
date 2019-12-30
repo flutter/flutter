@@ -426,7 +426,7 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
   double _currentDragValue = 0.0;
 
   double get _discretizedCurrentDragValue {
-    double dragValue = _currentDragValue.clamp(0.0, 1.0) as double;
+    double dragValue = _currentDragValue.clamp(0.0, 1.0);
     if (divisions != null)
       dragValue = (dragValue * divisions).round() / divisions;
     return dragValue;
@@ -558,11 +558,11 @@ class _RenderCupertinoSlider extends RenderConstrainedBox {
 
   void _increaseAction() {
     if (isInteractive)
-      onChanged((value + _semanticActionUnit).clamp(0.0, 1.0) as double);
+      onChanged((value + _semanticActionUnit).clamp(0.0, 1.0));
   }
 
   void _decreaseAction() {
     if (isInteractive)
-      onChanged((value - _semanticActionUnit).clamp(0.0, 1.0) as double);
+      onChanged((value - _semanticActionUnit).clamp(0.0, 1.0));
   }
 }

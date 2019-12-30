@@ -1232,7 +1232,7 @@ class _VoidDelegate {
 
 class _PaintCallbackObject extends RenderProxyBox {
   _PaintCallbackObject({
-    RenderBox child,
+    RenderObject child,
     this.onPaint,
   }) : super(child);
 

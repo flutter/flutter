@@ -997,7 +997,7 @@ RenderBox findScrollableActionsSectionRenderBox(WidgetTester tester) {
     }),
   );
   assert(actionsSection is RenderBox);
-  return actionsSection as RenderBox;
+  return actionsSection;
 }
 
 Widget createAppWithButtonThatLaunchesActionSheet(Widget actionSheet) {

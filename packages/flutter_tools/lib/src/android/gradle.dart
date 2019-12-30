@@ -149,7 +149,7 @@ Future<void> checkGradleDependencies() async {
     workingDirectory: flutterProject.android.hostAppGradleRoot.path,
     environment: gradleEnvironment,
   );
-  androidSdk?.reinitialize();
+  androidSdk.reinitialize();
   progress.stop();
 }
 
@@ -224,13 +224,9 @@ Future<void> buildGradleApp({
   bool shouldBuildPluginAsAar = false,
   int retries = 1,
 }) async {
-  assert(project != null);
-  assert(androidBuildInfo != null);
-  assert(target != null);
-  assert(isBuildingBundle != null);
-  assert(localGradleErrors != null);
-  assert(androidSdk != null);
-
+  if (androidSdk == null) {
+    exitWithNoSdkMessage();
+  }
   if (!project.android.isUsingGradle) {
     _exitWithProjectNotUsingGradleMessage();
   }
@@ -334,9 +330,6 @@ Future<void> buildGradleApp({
     command.add('-Dbuild-plugins-as-aars=true');
     // Don't use settings.gradle from the current project since it includes the plugins as subprojects.
     command.add('--settings-file=settings_aar.gradle');
-  }
-  if (androidBuildInfo.fastStart) {
-    command.add('-Pfast-start=true');
   }
   command.add(assembleTask);
 
@@ -481,20 +474,20 @@ Future<void> buildGradleApp({
 /// * [project] is typically [FlutterProject.current()].
 /// * [androidBuildInfo] is the build configuration.
 /// * [outputDir] is the destination of the artifacts,
-/// * [buildNumber] is the build number of the output aar,
 Future<void> buildGradleAar({
   @required FlutterProject project,
   @required AndroidBuildInfo androidBuildInfo,
   @required String target,
   @required Directory outputDirectory,
-  @required String buildNumber,
 }) async {
   assert(project != null);
   assert(target != null);
   assert(androidBuildInfo != null);
   assert(outputDirectory != null);
-  assert(androidSdk != null);
 
+  if (androidSdk == null) {
+    exitWithNoSdkMessage();
+  }
   final FlutterManifest manifest = project.manifest;
   if (!manifest.isModule && !manifest.isPlugin) {
     throwToolExit('AARs can only be built for plugin or module projects.');
@@ -521,7 +514,6 @@ Future<void> buildGradleAar({
     '-Pflutter-root=$flutterRoot',
     '-Poutput-dir=${outputDirectory.path}',
     '-Pis-plugin=${manifest.isPlugin}',
-    '-PbuildNumber=$buildNumber'
   ];
 
   if (target != null && target.isNotEmpty) {
@@ -592,12 +584,10 @@ void printHowToConsumeAar({
   @required Set<String> buildModes,
   @required String androidPackage,
   @required Directory repoDirectory,
-  String buildNumber,
 }) {
   assert(buildModes != null && buildModes.isNotEmpty);
   assert(androidPackage != null);
   assert(repoDirectory != null);
-  buildNumber ??= '1.0';
 
   printStatus('''
 
@@ -620,7 +610,7 @@ ${terminal.bolden('Consuming the Module')}
 
   for (String buildMode in buildModes) {
     printStatus('''
-      ${buildMode}Implementation '$androidPackage:flutter_$buildMode:$buildNumber''');
+      ${buildMode}Implementation '$androidPackage:flutter_$buildMode:1.0''');
   }
 
 printStatus('''
@@ -716,11 +706,6 @@ Future<void> buildPluginsAsAar(
     assert(pluginDirectory.existsSync());
 
     final String pluginName = pluginParts.first;
-    final File buildGradleFile = pluginDirectory.childDirectory('android').childFile('build.gradle');
-    if (!buildGradleFile.existsSync()) {
-      printTrace('Skipping plugin $pluginName since it doesn\'t have a android/build.gradle file');
-      continue;
-    }
     logger.printStatus('Building plugin $pluginName...');
     try {
       await buildGradleAar(
@@ -733,7 +718,6 @@ Future<void> buildPluginsAsAar(
         ),
         target: '',
         outputDirectory: buildDirectory,
-        buildNumber: '1.0'
       );
     } on ToolExit {
       // Log the entire plugin entry in `.flutter-plugins` since it

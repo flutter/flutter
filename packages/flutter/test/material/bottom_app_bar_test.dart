@@ -404,7 +404,7 @@ class ClipCachePainter extends CustomPainter {
       final RenderObject renderObject = e.findRenderObject();
       if (renderObject.runtimeType == RenderPhysicalShape) {
         assert(result == null);
-        result = renderObject as RenderPhysicalShape;
+        result = renderObject;
       } else {
         result = findPhysicalShapeChild(e);
       }

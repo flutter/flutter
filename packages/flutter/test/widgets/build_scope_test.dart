@@ -143,11 +143,11 @@ void main() {
       right: ProbeWidget(),
     ));
     expect(ProbeWidgetState.buildCount, equals(2));
-    final FlipWidgetState flipState1 = flipKey.currentState as FlipWidgetState;
+    final FlipWidgetState flipState1 = flipKey.currentState;
     flipState1.flip();
     await tester.pump();
     expect(ProbeWidgetState.buildCount, equals(3));
-    final FlipWidgetState flipState2 = flipKey.currentState as FlipWidgetState;
+    final FlipWidgetState flipState2 = flipKey.currentState;
     flipState2.flip();
     await tester.pump();
     expect(ProbeWidgetState.buildCount, equals(3));

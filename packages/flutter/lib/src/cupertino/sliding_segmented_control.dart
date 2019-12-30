@@ -686,9 +686,9 @@ class _RenderSegmentedControl<T> extends RenderBox
     return childCount == 0
       ? null
       // This assumes all children have the same width.
-      : ((location.dx / (size.width / childCount))
+      : (location.dx / (size.width / childCount))
         .floor()
-        .clamp(0, childCount - 1) as int);
+        .clamp(0, childCount - 1);
   }
 
   void _onTapUp(TapUpDetails details) {
@@ -761,8 +761,7 @@ class _RenderSegmentedControl<T> extends RenderBox
     RenderBox child = firstChild;
     double maxMinChildWidth = 0;
     while (child != null) {
-      final _SegmentedControlContainerBoxParentData childParentData =
-        child.parentData as _SegmentedControlContainerBoxParentData;
+      final _SegmentedControlContainerBoxParentData childParentData = child.parentData;
       final double childWidth = child.getMinIntrinsicWidth(height);
       maxMinChildWidth = math.max(maxMinChildWidth, childWidth);
       child = childParentData.nextSibling;
@@ -775,8 +774,7 @@ class _RenderSegmentedControl<T> extends RenderBox
     RenderBox child = firstChild;
     double maxMaxChildWidth = 0;
     while (child != null) {
-      final _SegmentedControlContainerBoxParentData childParentData =
-        child.parentData as _SegmentedControlContainerBoxParentData;
+      final _SegmentedControlContainerBoxParentData childParentData = child.parentData;
       final double childWidth = child.getMaxIntrinsicWidth(height);
       maxMaxChildWidth = math.max(maxMaxChildWidth, childWidth);
       child = childParentData.nextSibling;
@@ -789,8 +787,7 @@ class _RenderSegmentedControl<T> extends RenderBox
     RenderBox child = firstChild;
     double maxMinChildHeight = 0;
     while (child != null) {
-      final _SegmentedControlContainerBoxParentData childParentData =
-        child.parentData as _SegmentedControlContainerBoxParentData;
+      final _SegmentedControlContainerBoxParentData childParentData = child.parentData;
       final double childHeight = child.getMinIntrinsicHeight(width);
       maxMinChildHeight = math.max(maxMinChildHeight, childHeight);
       child = childParentData.nextSibling;
@@ -803,8 +800,7 @@ class _RenderSegmentedControl<T> extends RenderBox
     RenderBox child = firstChild;
     double maxMaxChildHeight = 0;
     while (child != null) {
-      final _SegmentedControlContainerBoxParentData childParentData =
-        child.parentData as _SegmentedControlContainerBoxParentData;
+      final _SegmentedControlContainerBoxParentData childParentData = child.parentData;
       final double childHeight = child.getMaxIntrinsicHeight(width);
       maxMaxChildHeight = math.max(maxMaxChildHeight, childHeight);
       child = childParentData.nextSibling;
@@ -863,8 +859,7 @@ class _RenderSegmentedControl<T> extends RenderBox
     child = firstChild;
 
     while (child != null) {
-      final _SegmentedControlContainerBoxParentData childParentData =
-        child.parentData as _SegmentedControlContainerBoxParentData;
+      final _SegmentedControlContainerBoxParentData childParentData = child.parentData;
       final Offset childOffset = Offset(start, 0);
       childParentData.offset = childOffset;
       start += child.size.width + _kSeparatorWidth + _kSeparatorInset.horizontal;
@@ -893,8 +888,7 @@ class _RenderSegmentedControl<T> extends RenderBox
 
       final RenderBox selectedChild = children[highlightedIndex];
 
-      final _SegmentedControlContainerBoxParentData childParentData =
-        selectedChild.parentData as _SegmentedControlContainerBoxParentData;
+      final _SegmentedControlContainerBoxParentData childParentData = selectedChild.parentData;
       final Rect unscaledThumbTargetRect = _kThumbInsets.inflateRect(childParentData.offset & selectedChild.size);
 
       // Update related Tweens before animation update phase.
@@ -954,8 +948,7 @@ class _RenderSegmentedControl<T> extends RenderBox
   // Paint the separator to the right of the given child.
   void _paintSeparator(PaintingContext context, Offset offset, RenderBox child) {
     assert(child != null);
-    final _SegmentedControlContainerBoxParentData childParentData =
-      child.parentData as _SegmentedControlContainerBoxParentData;
+    final _SegmentedControlContainerBoxParentData childParentData = child.parentData;
 
     final Paint paint = Paint();
 
@@ -977,8 +970,7 @@ class _RenderSegmentedControl<T> extends RenderBox
 
   void _paintChild(PaintingContext context, Offset offset, RenderBox child, int childIndex) {
     assert(child != null);
-    final _SegmentedControlContainerBoxParentData childParentData =
-      child.parentData as _SegmentedControlContainerBoxParentData;
+    final _SegmentedControlContainerBoxParentData childParentData = child.parentData;
     context.paintChild(child, childParentData.offset + offset);
   }
 
@@ -1019,8 +1011,7 @@ class _RenderSegmentedControl<T> extends RenderBox
     assert(position != null);
     RenderBox child = lastChild;
     while (child != null) {
-      final _SegmentedControlContainerBoxParentData childParentData =
-        child.parentData as _SegmentedControlContainerBoxParentData;
+      final _SegmentedControlContainerBoxParentData childParentData = child.parentData;
       if ((childParentData.offset & child.size).contains(position)) {
         final Offset center = (Offset.zero & child.size).center;
         return result.addWithRawTransform(

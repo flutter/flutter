@@ -15,7 +15,7 @@ void main() {
       ..label = 'hello'
       ..textDirection = TextDirection.ltr;
 
-    final RenderConstrainedBox tree = RenderConstrainedBox(
+    final RenderObject tree = RenderConstrainedBox(
       additionalConstraints: const BoxConstraints.tightFor(height: 20.0, width: 20.0),
       child: testRender,
     );

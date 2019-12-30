@@ -152,113 +152,6 @@ void main() {
     expect(find.text('BottomSheet'), findsOneWidget);
   });
 
-  testWidgets('Swiping down a modal BottomSheet should dismiss it by default', (WidgetTester tester) async {
-    BuildContext savedContext;
-
-    await tester.pumpWidget(MaterialApp(
-      home: Builder(
-        builder: (BuildContext context) {
-          savedContext = context;
-          return Container();
-        },
-      ),
-    ));
-
-    await tester.pump();
-    expect(find.text('BottomSheet'), findsNothing);
-
-    bool showBottomSheetThenCalled = false;
-    showModalBottomSheet<void>(
-      context: savedContext,
-      isDismissible: false,
-      builder: (BuildContext context) => const Text('BottomSheet'),
-    ).then<void>((void value) {
-      showBottomSheetThenCalled = true;
-    });
-
-    await tester.pumpAndSettle();
-    expect(find.text('BottomSheet'), findsOneWidget);
-    expect(showBottomSheetThenCalled, isFalse);
-
-    // Swipe the bottom sheet to dismiss it.
-    await tester.drag(find.text('BottomSheet'), const Offset(0.0, 150.0));
-    await tester.pumpAndSettle(); // Bottom sheet dismiss animation.
-    expect(showBottomSheetThenCalled, isTrue);
-    expect(find.text('BottomSheet'), findsNothing);
-  });
-
-  testWidgets('Swiping down a modal BottomSheet should not dismiss it when enableDrag is false', (WidgetTester tester) async {
-    BuildContext savedContext;
-
-    await tester.pumpWidget(MaterialApp(
-      home: Builder(
-        builder: (BuildContext context) {
-          savedContext = context;
-          return Container();
-        },
-      ),
-    ));
-
-    await tester.pump();
-    expect(find.text('BottomSheet'), findsNothing);
-
-    bool showBottomSheetThenCalled = false;
-    showModalBottomSheet<void>(
-      context: savedContext,
-      isDismissible: false,
-      enableDrag: false,
-      builder: (BuildContext context) => const Text('BottomSheet'),
-    ).then<void>((void value) {
-      showBottomSheetThenCalled = true;
-    });
-
-    await tester.pumpAndSettle();
-    expect(find.text('BottomSheet'), findsOneWidget);
-    expect(showBottomSheetThenCalled, isFalse);
-
-    // Swipe the bottom sheet, attempting to dismiss it.
-    await tester.drag(find.text('BottomSheet'), const Offset(0.0, 150.0));
-    await tester.pumpAndSettle(); // Bottom sheet should not dismiss.
-    expect(showBottomSheetThenCalled, isFalse);
-    expect(find.text('BottomSheet'), findsOneWidget);
-  });
-
-  testWidgets('Swiping down a modal BottomSheet should dismiss it when enableDrag is true', (WidgetTester tester) async {
-    BuildContext savedContext;
-
-    await tester.pumpWidget(MaterialApp(
-      home: Builder(
-        builder: (BuildContext context) {
-          savedContext = context;
-          return Container();
-        },
-      ),
-    ));
-
-    await tester.pump();
-    expect(find.text('BottomSheet'), findsNothing);
-
-    bool showBottomSheetThenCalled = false;
-    showModalBottomSheet<void>(
-      context: savedContext,
-      isDismissible: false,
-      enableDrag: true,
-      builder: (BuildContext context) => const Text('BottomSheet'),
-    ).then<void>((void value) {
-      showBottomSheetThenCalled = true;
-    });
-
-    await tester.pumpAndSettle();
-    expect(find.text('BottomSheet'), findsOneWidget);
-    expect(showBottomSheetThenCalled, isFalse);
-
-    // Swipe the bottom sheet to dismiss it.
-    await tester.drag(find.text('BottomSheet'), const Offset(0.0, 150.0));
-    await tester.pumpAndSettle(); // Bottom sheet dismiss animation.
-    expect(showBottomSheetThenCalled, isTrue);
-    expect(find.text('BottomSheet'), findsNothing);
-  });
-
   testWidgets('Verify that a downwards fling dismisses a persistent BottomSheet', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     bool showBottomSheetThenCalled = false;
@@ -449,7 +342,6 @@ void main() {
     const double elevation = 9.0;
     final ShapeBorder shape = BeveledRectangleBorder(borderRadius: BorderRadius.circular(12));
     const Clip clipBehavior = Clip.antiAlias;
-    const Color barrierColor = Colors.red;
 
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
@@ -461,7 +353,6 @@ void main() {
     showModalBottomSheet<void>(
       context: scaffoldKey.currentContext,
       backgroundColor: color,
-      barrierColor: barrierColor,
       elevation: elevation,
       shape: shape,
       clipBehavior: clipBehavior,
@@ -480,9 +371,6 @@ void main() {
     expect(bottomSheet.elevation, elevation);
     expect(bottomSheet.shape, shape);
     expect(bottomSheet.clipBehavior, clipBehavior);
-
-    final ModalBarrier modalBarrier = tester.widget(find.byType(ModalBarrier).last);
-    expect(modalBarrier.color, barrierColor);
   });
 
   testWidgets('modal BottomSheet with scrollController has semantics', (WidgetTester tester) async {

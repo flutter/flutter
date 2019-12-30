@@ -23,7 +23,7 @@ void main() {
     final dynamic exception = tester.takeException();
     expect(exception, isNotNull);
     expect(exception ,isFlutterError);
-    final FlutterError error = exception as FlutterError;
+    final FlutterError error = exception;
     expect(error.diagnostics.length, 3);
     expect(error.diagnostics.last, isInstanceOf<DiagnosticsProperty<Element>>());
     expect(

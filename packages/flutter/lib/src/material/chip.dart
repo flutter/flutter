@@ -78,8 +78,6 @@ abstract class ChipAttributes {
 
   /// The style to be applied to the chip's label.
   ///
-  /// If null, the value of the [ChipTheme]'s [ChipThemeData.labelStyle] is used.
-  //
   /// This only has an effect on widgets that respect the [DefaultTextStyle],
   /// such as [Text].
   ///
@@ -1532,7 +1530,7 @@ class RawChip extends StatefulWidget
   @override
   final Color checkmarkColor;
   @override
-  final ShapeBorder avatarBorder;
+  final CircleBorder avatarBorder;
 
   /// If set, this indicates that the chip should be disabled if all of the
   /// tap callbacks ([onSelected], [onPressed]) are null.
@@ -2045,10 +2043,10 @@ class _RenderChipElement extends RenderObjectElement {
   final Map<Element, _ChipSlot> childToSlot = <Element, _ChipSlot>{};
 
   @override
-  _ChipRenderWidget get widget => super.widget as _ChipRenderWidget;
+  _ChipRenderWidget get widget => super.widget;
 
   @override
-  _RenderChip get renderObject => super.renderObject as _RenderChip;
+  _RenderChip get renderObject => super.renderObject;
 
   @override
   void visitChildren(ElementVisitor visitor) {
@@ -2110,13 +2108,13 @@ class _RenderChipElement extends RenderObjectElement {
   void _updateRenderObject(RenderObject child, _ChipSlot slot) {
     switch (slot) {
       case _ChipSlot.avatar:
-        renderObject.avatar = child as RenderBox;
+        renderObject.avatar = child;
         break;
       case _ChipSlot.label:
-        renderObject.label = child as RenderBox;
+        renderObject.label = child;
         break;
       case _ChipSlot.deleteIcon:
-        renderObject.deleteIcon = child as RenderBox;
+        renderObject.deleteIcon = child;
         break;
     }
   }
@@ -2125,7 +2123,7 @@ class _RenderChipElement extends RenderObjectElement {
   void insertChildRenderObject(RenderObject child, dynamic slotValue) {
     assert(child is RenderBox);
     assert(slotValue is _ChipSlot);
-    final _ChipSlot slot = slotValue as _ChipSlot;
+    final _ChipSlot slot = slotValue;
     _updateRenderObject(child, slot);
     assert(renderObject.childToSlot.keys.contains(child));
     assert(renderObject.slotToChild.keys.contains(slot));
@@ -2181,17 +2179,17 @@ class _ChipRenderTheme {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is _ChipRenderTheme
-        && other.avatar == avatar
-        && other.label == label
-        && other.deleteIcon == deleteIcon
-        && other.brightness == brightness
-        && other.padding == padding
-        && other.labelPadding == labelPadding
-        && other.showAvatar == showAvatar
-        && other.showCheckmark == showCheckmark
-        && other.checkmarkColor == checkmarkColor
-        && other.canTapBody == canTapBody;
+    final _ChipRenderTheme typedOther = other;
+    return typedOther.avatar == avatar
+        && typedOther.label == label
+        && typedOther.deleteIcon == deleteIcon
+        && typedOther.brightness == brightness
+        && typedOther.padding == padding
+        && typedOther.labelPadding == labelPadding
+        && typedOther.showAvatar == showAvatar
+        && typedOther.showCheckmark == showCheckmark
+        && typedOther.checkmarkColor == checkmarkColor
+        && typedOther.canTapBody == canTapBody;
   }
 
   @override
@@ -2373,7 +2371,7 @@ class _RenderChip extends RenderBox {
 
   static Rect _boxRect(RenderBox box) => box == null ? Rect.zero : _boxParentData(box).offset & box.size;
 
-  static BoxParentData _boxParentData(RenderBox box) => box.parentData as BoxParentData;
+  static BoxParentData _boxParentData(RenderBox box) => box.parentData;
 
   @override
   double computeMinIntrinsicWidth(double height) {
@@ -2895,7 +2893,7 @@ class _LocationAwareInkRippleFactory extends InteractiveInkFeatureFactory {
 
     if (tapIsOnDeleteIcon) {
       final RenderBox currentBox = referenceBox;
-      referenceBox = deleteIconKey.currentContext.findRenderObject() as RenderBox;
+      referenceBox = deleteIconKey.currentContext.findRenderObject();
       position = referenceBox.globalToLocal(currentBox.localToGlobal(position));
       containedInkWell = false;
     }
@@ -2937,3 +2935,4 @@ bool _tapIsOnDeleteIcon({
   }
   return tapIsOnDeleteIcon;
 }
+

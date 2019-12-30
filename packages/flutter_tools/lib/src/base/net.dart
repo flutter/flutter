@@ -16,8 +16,6 @@ const int kNetworkProblemExitCode = 50;
 
 typedef HttpClientFactory = HttpClient Function();
 
-typedef UrlTunneller = Future<String> Function(String url);
-
 /// Download a file from the given URL.
 ///
 /// If a destination file is not provided, returns the bytes.

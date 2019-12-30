@@ -302,7 +302,7 @@ void main() {
       padding: const EdgeInsets.all(10.0),
     );
     layout(paddedBox);
-    final BoxParentData parentData = coloredBox.parentData as BoxParentData;
+    final BoxParentData parentData = coloredBox.parentData;
     expect(parentData.offset.dx, isNot(equals(0.0)));
     paddedBox.child = null;
 
@@ -629,7 +629,7 @@ void main() {
       ),
       alignment: Alignment.center,
     );
-    final FlexParentData flexParentData = flexible.parentData as FlexParentData;
+    final FlexParentData flexParentData = flexible.parentData;
     flexParentData.flex = 1;
     flexParentData.fit = FlexFit.tight;
 
@@ -653,7 +653,7 @@ void main() {
       ),
       alignment: Alignment.center,
     );
-    final FlexParentData flexParentData = flexible.parentData as FlexParentData;
+    final FlexParentData flexParentData = flexible.parentData;
     flexParentData.flex = 1;
     flexParentData.fit = FlexFit.tight;
 

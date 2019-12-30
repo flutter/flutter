@@ -39,7 +39,7 @@ class TestTree {
       ),
     );
   }
-  RenderBox root;
+  RenderObject root;
   RenderConstrainedBox child;
   bool painted = false;
 }
@@ -75,7 +75,7 @@ class TestCompositingBitsTree {
       ),
     );
   }
-  RenderBox root;
+  RenderObject root;
   MutableCompositor compositor;
   RenderConstrainedBox child;
   bool painted = false;

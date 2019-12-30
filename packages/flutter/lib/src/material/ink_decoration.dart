@@ -252,7 +252,7 @@ class _InkState extends State<Ink> {
         decoration: widget.decoration,
         configuration: createLocalImageConfiguration(context),
         controller: Material.of(context),
-        referenceBox: context.findRenderObject() as RenderBox,
+        referenceBox: context.findRenderObject(),
         onRemoved: _handleRemoved,
       );
     } else {

@@ -39,7 +39,7 @@ typedef _ContextMenuPreviewBuilderChildless = Widget Function(
 // paintBounds in global coordinates.
 Rect _getRect(GlobalKey globalKey) {
   assert(globalKey.currentContext != null);
-  final RenderBox renderBoxContainer = globalKey.currentContext.findRenderObject() as RenderBox;
+  final RenderBox renderBoxContainer = globalKey.currentContext.findRenderObject();
   final Offset containerOffset = renderBoxContainer.localToGlobal(
     renderBoxContainer.paintBounds.topLeft,
   );
@@ -990,7 +990,7 @@ class _ContextMenuRouteStaticState extends State<_ContextMenuRouteStatic> with T
       _moveAnimation = Tween<Offset>(
         begin: Offset.zero,
         end: Offset(
-          endX.clamp(-_kPadding, _kPadding) as double,
+          endX.clamp(-_kPadding, _kPadding),
           endY,
         ),
       ).animate(

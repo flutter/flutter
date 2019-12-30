@@ -71,7 +71,7 @@ void main() {
 
   test('works with transformed events', () {
     final PointerSignalResolver resolver = PointerSignalResolver();
-    const PointerScrollEvent originalEvent = PointerScrollEvent();
+    const PointerSignalEvent originalEvent = PointerScrollEvent();
     final PointerSignalEvent transformedEvent = originalEvent
         .transformed(Matrix4.translationValues(10.0, 20.0, 0.0));
 

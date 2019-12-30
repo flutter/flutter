@@ -777,7 +777,7 @@ void main() {
     final dynamic exception =  tester.takeException();
     expect(exception, isNotNull);
     expect(exception, isFlutterError);
-    final FlutterError error = exception as FlutterError;
+    final FlutterError error = exception;
     expect(error.diagnostics.last.level, DiagnosticLevel.hint);
     expect(
       error.diagnostics.last.toStringDeep(),

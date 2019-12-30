@@ -73,7 +73,7 @@ void main() {
       isComplex: true,
       painter: TestCustomPainter(log: log),
     ));
-    final RenderCustomPaint renderCustom = target.currentContext.findRenderObject() as RenderCustomPaint;
+    final RenderCustomPaint renderCustom = target.currentContext.findRenderObject();
     final Canvas canvas = MockCanvas();
     int saveCount = 0;
     when(canvas.getSaveCount()).thenAnswer((_) => saveCount++);
@@ -132,8 +132,8 @@ void main() {
       isComplex: true,
       painter: TestCustomPainter(log: log),
     ));
-    final RenderCustomPaint renderCustom = target.currentContext.findRenderObject() as RenderCustomPaint;
-    dynamic error;
+    final RenderCustomPaint renderCustom = target.currentContext.findRenderObject();
+    FlutterError error;
     try {
       renderCustom.assembleSemanticsNode(
         null,
@@ -210,7 +210,7 @@ void main() {
       isComplex: true,
       painter: TestCustomPainter(log: log),
     ));
-    RenderCustomPaint renderCustom = target.currentContext.findRenderObject() as RenderCustomPaint;
+    RenderCustomPaint renderCustom = target.currentContext.findRenderObject();
     expect(renderCustom.isComplex, true);
     expect(renderCustom.willChange, false);
 
@@ -219,7 +219,7 @@ void main() {
       willChange: true,
       foregroundPainter: TestCustomPainter(log: log),
     ));
-    renderCustom = target.currentContext.findRenderObject() as RenderCustomPaint;
+    renderCustom = target.currentContext.findRenderObject();
     expect(renderCustom.isComplex, false);
     expect(renderCustom.willChange, true);
   });

@@ -3,69 +3,67 @@
 // found in the LICENSE file.
 
 import 'package:file/memory.dart';
-import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/run_hot.dart';
+import 'package:meta/meta.dart';
 
 import '../src/common.dart';
+import '../src/context.dart';
 
 // assumption: tests have a timeout less than 100 days
 final DateTime inFuture = DateTime.now().add(const Duration(days: 100));
 
 void main() {
-  for (bool asyncScanning in <bool>[true, false]) {
-    testWithoutContext('No last compile, asyncScanning: $asyncScanning', () async {
-      final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(
-        fileSystem: MemoryFileSystem(),
-        platform: FakePlatform(),
-        logger: BufferLogger(),
-      );
+  group('ProjectFileInvalidator', () {
+    _testProjectFileInvalidator(asyncScanning: false);
+  });
+  group('ProjectFileInvalidator (async scanning)', () {
+    _testProjectFileInvalidator(asyncScanning: true);
+  });
+}
 
-      expect(
-        await projectFileInvalidator.findInvalidated(
-          lastCompiled: null,
-          urisToMonitor: <Uri>[],
-          packagesPath: '',
-          asyncScanning: asyncScanning,
-        ),
-        isEmpty,
-      );
-    });
+void _testProjectFileInvalidator({@required bool asyncScanning}) {
+  const ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator();
 
-    testWithoutContext('Empty project, asyncScanning: $asyncScanning', () async {
-      final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(
-        fileSystem: MemoryFileSystem(),
-        platform: FakePlatform(),
-        logger: BufferLogger(),
-      );
+  testUsingContext('No last compile', () async {
+    expect(
+      await projectFileInvalidator.findInvalidated(
+        lastCompiled: null,
+        urisToMonitor: <Uri>[],
+        packagesPath: '',
+        asyncScanning: asyncScanning,
+      ),
+      isEmpty,
+    );
+  });
 
-      expect(
-        await projectFileInvalidator.findInvalidated(
-          lastCompiled: inFuture,
-          urisToMonitor: <Uri>[],
-          packagesPath: '',
-          asyncScanning: asyncScanning,
-        ),
-        isEmpty,
-      );
-    });
+  testUsingContext('Empty project', () async {
+    expect(
+      await projectFileInvalidator.findInvalidated(
+        lastCompiled: inFuture,
+        urisToMonitor: <Uri>[],
+        packagesPath: '',
+        asyncScanning: asyncScanning,
+      ),
+      isEmpty,
+    );
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem(),
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 
-    testWithoutContext('Non-existent files are ignored, asyncScanning: $asyncScanning', () async {
-      final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(
-        fileSystem: MemoryFileSystem(),
-        platform: FakePlatform(),
-        logger: BufferLogger(),
-      );
-
-      expect(
-        await projectFileInvalidator.findInvalidated(
-          lastCompiled: inFuture,
-          urisToMonitor: <Uri>[Uri.parse('/not-there-anymore'),],
-          packagesPath: '',
-          asyncScanning: asyncScanning,
-        ),
-        isEmpty,
-      );
-    });
-  }
+  testUsingContext('Non-existent files are ignored', () async {
+    expect(
+      await projectFileInvalidator.findInvalidated(
+        lastCompiled: inFuture,
+        urisToMonitor: <Uri>[Uri.parse('/not-there-anymore'),],
+        packagesPath: '',
+        asyncScanning: asyncScanning,
+      ),
+      isEmpty,
+    );
+  }, overrides: <Type, Generator>{
+    FileSystem: () => MemoryFileSystem(),
+    ProcessManager: () => FakeProcessManager.any(),
+  });
 }

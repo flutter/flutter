@@ -37,7 +37,8 @@ final List<String> flutterTestArgs = <String>[];
 
 final bool useFlutterTestFormatter = Platform.environment['FLUTTER_TEST_FORMATTER'] == 'true';
 
-final bool canUseBuildRunner = Platform.environment['FLUTTER_TEST_NO_BUILD_RUNNER'] != 'true';
+// This is disabled due to https://github.com/dart-lang/build/issues/2562
+const bool canUseBuildRunner = false;
 
 /// The number of Cirrus jobs that run host-only devicelab tests in parallel.
 ///
@@ -278,13 +279,6 @@ Future<void> _runToolTests() async {
   await selectSubshard(subshards);
 }
 
-// Example apps that should not be built by _runBuildTests`
-const List<String> _excludedExampleApplications = <String>[
-  // This application contains no platform code and cannot be built, except for
-  // as a part of a '--fast-start' Android application.
-  'splash',
-];
-
 /// Verifies that AOT, APK, and IPA (if on macOS) builds the examples apps
 /// without crashing. It does not actually launch the apps. That happens later
 /// in the devicelab. This is just a smoke-test. In particular, this will verify
@@ -294,9 +288,6 @@ Future<void> _runBuildTests() async {
   final Stream<FileSystemEntity> exampleDirectories = Directory(path.join(flutterRoot, 'examples')).list();
   await for (FileSystemEntity fileEntity in exampleDirectories) {
     if (fileEntity is! Directory) {
-      continue;
-    }
-    if (_excludedExampleApplications.any(fileEntity.path.endsWith)) {
       continue;
     }
     final String examplePath = fileEntity.path;
@@ -772,7 +763,6 @@ Future<void> _runHostOnlyDeviceLabTests() async {
     if (Platform.isMacOS) () => _runDevicelabTest('flutter_create_offline_test_mac'),
     if (Platform.isLinux) () => _runDevicelabTest('flutter_create_offline_test_linux'),
     if (Platform.isWindows) () => _runDevicelabTest('flutter_create_offline_test_windows'),
-    () => _runDevicelabTest('gradle_fast_start_test', environment: gradleEnvironment),
     // TODO(ianh): Fails on macOS looking for "dexdump", https://github.com/flutter/flutter/issues/42494
     if (!Platform.isMacOS) () => _runDevicelabTest('gradle_jetifier_test', environment: gradleEnvironment),
     () => _runDevicelabTest('gradle_non_android_plugin_test', environment: gradleEnvironment),
@@ -785,7 +775,8 @@ Future<void> _runHostOnlyDeviceLabTests() async {
     () => _runDevicelabTest('module_test', environment: gradleEnvironment, testEmbeddingV2: true),
     () => _runDevicelabTest('plugin_dependencies_test', environment: gradleEnvironment),
 
-    if (Platform.isMacOS) () => _runDevicelabTest('module_test_ios'),
+    // TODO(jmagman): Re-enable once flakiness is resolved, https://github.com/flutter/flutter/issues/37525
+    // if (Platform.isMacOS) () => _runDevicelabTest('module_test_ios'),
     if (Platform.isMacOS) () => _runDevicelabTest('build_ios_framework_module_test'),
     if (Platform.isMacOS) () => _runDevicelabTest('plugin_lint_mac'),
     () => _runDevicelabTest('plugin_test', environment: gradleEnvironment),

@@ -38,7 +38,7 @@ void main() {
     });
 
     test('send semantics update if id is changed', (){
-      final RenderConstrainedBox tree = RenderConstrainedBox(
+      final RenderObject tree = RenderConstrainedBox(
         additionalConstraints: const BoxConstraints.tightFor(height: 20.0, width: 20.0),
         child: platformViewRenderBox,
       );

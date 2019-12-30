@@ -39,15 +39,8 @@ export 'package:flutter/rendering.dart' show RenderObject, RenderBox, debugDumpR
 // KEYS
 
 /// A key that is only equal to itself.
-///
-/// This cannot be created with a const constructor because that implies that
-/// all instantiated keys would be the same instance and therefore not be unique.
 class UniqueKey extends LocalKey {
   /// Creates a key that is equal only to itself.
-  ///
-  /// The key cannot be created with a const constructor because that implies
-  /// that all instantiated keys would be the same instance and therefore not
-  /// be unique.
   // ignore: prefer_const_constructors_in_immutables , never use const for this class
   UniqueKey();
 
@@ -1729,61 +1722,9 @@ abstract class MultiChildRenderObjectWidget extends RenderObjectWidget {
 
   /// The widgets below this widget in the tree.
   ///
-  /// If this list is going to be mutated, it is usually wise to put a [Key] on
-  /// each of the child widgets, so that the framework can match old
-  /// configurations to new configurations and maintain the underlying render
-  /// objects.
-  ///
-  /// Also, a [Widget] in Flutter is immutable, so directly modifying the
-  /// [children] such as `someMultiChildRenderObjectWidget.children.add(...)` or
-  /// as the example code below will result in incorrect behaviors. Whenever the
-  /// children list is modified, a new list object should be provided.
-  ///
-  /// ```dart
-  /// class SomeWidgetState extends State<SomeWidget> {
-  ///   List<Widget> _children;
-  ///
-  ///   void initState() {
-  ///     _children = [];
-  ///   }
-  ///
-  ///   void someHandler() {
-  ///     setState(() {
-  ///         _children.add(...);
-  ///     });
-  ///   }
-  ///
-  ///   Widget build(...) {
-  ///     // Reusing `List<Widget> _children` here is problematic.
-  ///     return Row(children: _children);
-  ///   }
-  /// }
-  /// ```
-  ///
-  /// The following code corrects the problem mentioned above.
-  ///
-  /// ```dart
-  /// class SomeWidgetState extends State<SomeWidget> {
-  ///   List<Widget> _children;
-  ///
-  ///   void initState() {
-  ///     _children = [];
-  ///   }
-  ///
-  ///   void someHandler() {
-  ///     setState(() {
-  ///       // The key here allows Flutter to reuse the underlying render
-  ///       // objects even if the children list is recreated.
-  ///       _children.add(ChildWidget(key: ...));
-  ///     });
-  ///   }
-  ///
-  ///   Widget build(...) {
-  ///     // Always create a new list of children as a Widget is immutable.
-  ///     return Row(children: List.from(_children));
-  ///   }
-  /// }
-  /// ```
+  /// If this list is going to be mutated, it is usually wise to put [Key]s on
+  /// the widgets, so that the framework can match old configurations to new
+  /// configurations and maintain the underlying render objects.
   final List<Widget> children;
 
   @override

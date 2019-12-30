@@ -92,10 +92,10 @@ class BottomAppBarTheme extends Diagnosticable {
       return true;
     if (other.runtimeType != runtimeType)
       return false;
-    return other is BottomAppBarTheme
-        && other.color == color
-        && other.elevation == elevation
-        && other.shape == shape;
+    final BottomAppBarTheme typedOther = other;
+    return typedOther.color == color
+        && typedOther.elevation == elevation
+        && typedOther.shape == shape;
   }
 
   @override

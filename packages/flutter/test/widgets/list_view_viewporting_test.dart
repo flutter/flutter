@@ -260,7 +260,7 @@ void main() {
     );
 
     DecoratedBox widget = tester.firstWidget(find.byType(DecoratedBox));
-    BoxDecoration decoration = widget.decoration as BoxDecoration;
+    BoxDecoration decoration = widget.decoration;
     expect(decoration.color, equals(Colors.blue));
 
     setState(() {
@@ -270,7 +270,7 @@ void main() {
     await tester.pump();
 
     widget = tester.firstWidget(find.byType(DecoratedBox));
-    decoration = widget.decoration as BoxDecoration;
+    decoration = widget.decoration;
     expect(decoration.color, equals(Colors.green));
   });
 

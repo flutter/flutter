@@ -116,8 +116,10 @@ void main() {
           of: find.descendant(
             of: find.byType(DrawerController),
             matching: find.byWidgetPredicate((Widget widget) {
-              return widget is Semantics
-                  && widget.properties.label == 'Dismiss';
+              if (widget is! Semantics)
+                return false;
+              final Semantics semantics = widget;
+              return semantics.properties.label == 'Dismiss';
             }),
           ),
           matching: find.byType(Container),
@@ -150,7 +152,7 @@ void main() {
     scaffoldKey.currentState.openDrawer();
     await tester.pumpAndSettle();
 
-    BoxDecoration decoration = getScrim().decoration as BoxDecoration;
+    BoxDecoration decoration = getScrim().decoration;
     expect(decoration.color, Colors.black54);
     expect(decoration.shape, BoxShape.rectangle);
 
@@ -164,7 +166,7 @@ void main() {
     scaffoldKey.currentState.openDrawer();
     await tester.pumpAndSettle();
 
-    decoration = getScrim().decoration as BoxDecoration;
+    decoration = getScrim().decoration;
     expect(decoration.color, const Color(0xFF323232));
     expect(decoration.shape, BoxShape.rectangle);
 

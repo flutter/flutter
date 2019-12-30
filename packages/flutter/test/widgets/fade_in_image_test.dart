@@ -27,7 +27,7 @@ class FadeInImageParts {
     StatefulElement animatedFadeOutFadeInElement;
     fadeInImageElement.visitChildren((Element child) {
       expect(animatedFadeOutFadeInElement, isNull);
-      animatedFadeOutFadeInElement = child as StatefulElement;
+      animatedFadeOutFadeInElement = child;
     });
     expect(animatedFadeOutFadeInElement, isNotNull);
     return animatedFadeOutFadeInElement.state;
@@ -49,8 +49,8 @@ class FadeInImageElements {
   final Element rawImageElement;
   final Element fadeTransitionElement;
 
-  RawImage get rawImage => rawImageElement.widget as RawImage;
-  FadeTransition get fadeTransition => fadeTransitionElement?.widget as FadeTransition;
+  RawImage get rawImage => rawImageElement.widget;
+  FadeTransition get fadeTransition => fadeTransitionElement?.widget;
   double get opacity => fadeTransition == null ? 1 : fadeTransition.opacity.value;
 }
 
@@ -85,7 +85,7 @@ FadeInImageParts findFadeInImage(WidgetTester tester) {
         fadeTransitionElement = ancestor;
       } else if (ancestor.widget is FadeInImage) {
         if (fadeInImageElement == null) {
-          fadeInImageElement = ancestor as ComponentElement;
+          fadeInImageElement = ancestor;
         } else {
           expect(fadeInImageElement, same(ancestor));
         }

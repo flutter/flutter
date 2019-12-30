@@ -5,7 +5,6 @@
 import 'dart:async';
 
 import 'package:flutter_tools/src/android/android_workflow.dart';
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/commands/daemon.dart';
@@ -279,35 +278,6 @@ void main() {
       expect(response['result'], isList);
       await responses.close();
       await commands.close();
-    });
-
-    testUsingContext('daemon can send exposeUrl requests to the client', () async {
-      const String originalUrl = 'http://localhost:1234/';
-      const String mappedUrl = 'https://publichost:4321/';
-      final StreamController<Map<String, dynamic>> input = StreamController<Map<String, dynamic>>();
-      final StreamController<Map<String, dynamic>> output = StreamController<Map<String, dynamic>>();
-
-      daemon = Daemon(
-        input.stream,
-        output.add,
-        notifyingLogger: notifyingLogger,
-        dartDefines: const <String>[],
-      );
-
-      // Respond to any requests from the daemon to expose a URL.
-      unawaited(output.stream
-        .firstWhere((Map<String, dynamic> request) => request['method'] == 'app.exposeUrl')
-        .then((Map<String, dynamic> request) {
-          expect(request['params']['url'], equals(originalUrl));
-          input.add(<String, dynamic>{'id': request['id'], 'result': <String, dynamic>{'url': mappedUrl}});
-        })
-      );
-
-      final String exposedUrl = await daemon.daemonDomain.exposeUrl(originalUrl);
-      expect(exposedUrl, equals(mappedUrl));
-
-      await output.close();
-      await input.close();
     });
   });
 

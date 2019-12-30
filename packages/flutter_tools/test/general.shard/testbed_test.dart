@@ -5,11 +5,9 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/error_handling_file_system.dart';
 
 import '../src/common.dart';
 import '../src/testbed.dart';
@@ -25,9 +23,7 @@ void main() {
         localFileSystem = fs;
       });
 
-      expect(localFileSystem, isA<ErrorHandlingFileSystem>());
-      expect((localFileSystem as ErrorHandlingFileSystem).fileSystem,
-             isA<MemoryFileSystem>());
+      expect(localFileSystem, isA<MemoryFileSystem>());
     });
 
     test('Can provide setup interfaces', () async {

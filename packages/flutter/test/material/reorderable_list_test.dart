@@ -304,7 +304,7 @@ void main() {
           final Semantics semantics = find.ancestor(
             of: find.byKey(Key(listItems[index])),
             matching: find.byType(Semantics),
-          ).evaluate().first.widget as Semantics;
+          ).evaluate().first.widget;
           return semantics.properties.customSemanticsActions;
         }
 
@@ -661,7 +661,7 @@ void main() {
           final Semantics semantics = find.ancestor(
             of: find.byKey(Key(listItems[index])),
             matching: find.byType(Semantics),
-          ).evaluate().first.widget as Semantics;
+          ).evaluate().first.widget;
           return semantics.properties.customSemanticsActions;
         }
 

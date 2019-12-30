@@ -36,6 +36,7 @@ Future<void> processPodsIfNeeded(XcodeBasedProject xcodeProject, String buildDir
   final bool didPodInstall = await cocoaPods.processPods(
     xcodeProject: xcodeProject,
     engineDir: flutterFrameworkDir(buildMode),
+    isSwift: await xcodeProject.isSwift,
     dependenciesChanged: !fingerprinter.doesFingerprintMatch(),
   );
   if (didPodInstall) {

@@ -429,7 +429,7 @@ void main() {
         ),
         home: Builder(
           builder: (BuildContext context) {
-            color = CupertinoTheme.of(context).primaryColor as CupertinoDynamicColor;
+            color = CupertinoTheme.of(context).primaryColor;
             return const Placeholder();
           }
         ),
@@ -447,7 +447,7 @@ void main() {
         ),
         home: Builder(
           builder: (BuildContext context) {
-            color = CupertinoTheme.of(context).primaryColor as CupertinoDynamicColor;
+            color = CupertinoTheme.of(context).primaryColor;
             return const Placeholder();
           }
         ),
@@ -466,7 +466,7 @@ void main() {
             data: CupertinoUserInterfaceLevelData.base,
             child: Builder(
               builder: (BuildContext context) {
-                color = CupertinoTheme.of(context).primaryColor as CupertinoDynamicColor;
+                color = CupertinoTheme.of(context).primaryColor;
                 return const Placeholder();
               }
             ),
@@ -488,7 +488,7 @@ void main() {
             data: CupertinoUserInterfaceLevelData.elevated,
             child: Builder(
               builder: (BuildContext context) {
-                color = CupertinoTheme.of(context).primaryColor as CupertinoDynamicColor;
+                color = CupertinoTheme.of(context).primaryColor;
                 return const Placeholder();
               }
             ),
@@ -505,7 +505,7 @@ void main() {
     setUp(() { color = null; });
 
     testWidgets('dynamic color works in cupertino override theme', (WidgetTester tester) async {
-      final CupertinoDynamicColor Function() typedColor = () => color as CupertinoDynamicColor;
+      final CupertinoDynamicColor Function() typedColor = () => color;
 
       await tester.pumpWidget(
         MaterialApp(

@@ -110,12 +110,12 @@ class DividerThemeData extends Diagnosticable {
       return true;
     if (other.runtimeType != runtimeType)
       return false;
-    return other is DividerThemeData
-        && other.color == color
-        && other.space == space
-        && other.thickness == thickness
-        && other.indent == indent
-        && other.endIndent == endIndent;
+    final DividerThemeData typedOther = other;
+    return typedOther.color == color
+        && typedOther.space == space
+        && typedOther.thickness == thickness
+        && typedOther.indent == indent
+        && typedOther.endIndent == endIndent;
   }
 
   @override

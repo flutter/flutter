@@ -14,14 +14,14 @@ void checkTree(WidgetTester tester, List<BoxDecoration> expectedDecorations) {
   ));
   expect(element, isNotNull);
   expect(element.renderObject is RenderStack, isTrue);
-  final RenderStack renderObject = element.renderObject as RenderStack;
+  final RenderStack renderObject = element.renderObject;
   try {
     RenderObject child = renderObject.firstChild;
     for (BoxDecoration decoration in expectedDecorations) {
       expect(child is RenderDecoratedBox, isTrue);
-      final RenderDecoratedBox decoratedBox = child as RenderDecoratedBox;
+      final RenderDecoratedBox decoratedBox = child;
       expect(decoratedBox.decoration, equals(decoration));
-      final StackParentData decoratedBoxParentData = decoratedBox.parentData as StackParentData;
+      final StackParentData decoratedBoxParentData = decoratedBox.parentData;
       child = decoratedBoxParentData.nextSibling;
     }
     expect(child, isNull);

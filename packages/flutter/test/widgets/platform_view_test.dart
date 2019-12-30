@@ -129,7 +129,7 @@ void main() {
 
       final Layer textureParentLayer = tester.layers[tester.layers.length - 2];
       expect(textureParentLayer, isInstanceOf<ClipRectLayer>());
-      final ClipRectLayer clipRect = textureParentLayer as ClipRectLayer;
+      final ClipRectLayer clipRect = textureParentLayer;
       expect(clipRect.clipRect, const Rect.fromLTWH(0.0, 0.0, 100.0, 50.0));
       expect(
         viewsController.views,
@@ -957,7 +957,7 @@ void main() {
       int lastPlatformViewTextClient;
       SystemChannels.textInput.setMockMethodCallHandler((MethodCall call) {
         if (call.method == 'TextInput.setPlatformViewClient') {
-          lastPlatformViewTextClient = call.arguments as int;
+          lastPlatformViewTextClient = call.arguments;
         }
         return null;
       });
@@ -1689,7 +1689,10 @@ void main() {
         hitTestBehavior: PlatformViewHitTestBehavior.opaque,
         gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},);
       await tester.pumpWidget(surface);
-      expect(() => tester.layers.whereType<PlatformViewLayer>().first, returnsNormally);
+      final PlatformViewLayer layer = tester.layers.firstWhere((Layer layer){
+        return layer is PlatformViewLayer;
+      });
+      expect(layer, isNotNull);
     });
 
     testWidgets('PlatformViewSurface can lose gesture arenas', (WidgetTester tester) async {
@@ -1961,13 +1964,15 @@ void main() {
       });
 
       await tester.pumpWidget(platformViewLink);
-      expect(() => tester.allWidgets.whereType<SizedBox>().first, returnsNormally);
+      final SizedBox sizedBox = tester.allWidgets.firstWhere((Widget widget) => widget is SizedBox);
+      expect(sizedBox, isNotNull);
 
       onPlatformViewCreatedCallBack(createdPlatformViewId);
 
       await tester.pump();
 
-      expect(() => tester.allWidgets.whereType<PlatformViewSurface>().first, returnsNormally);
+      final PlatformViewSurface surface = tester.allWidgets.firstWhere((Widget widget) => widget is PlatformViewSurface);
+      expect(surface, isNotNull);
 
       expect(createdPlatformViewId, currentViewId+1);
     });
@@ -2133,7 +2138,10 @@ void main() {
 
       await tester.pumpWidget(platformViewLink);
 
-      expect(() => tester.allWidgets.whereType<Container>().first, returnsNormally);
+      final Container container = tester.allWidgets.firstWhere((Widget widget){
+        return widget is Container;
+      });
+      expect(container, isNotNull);
     });
 
     testWidgets('PlatformViewLink manages the focus properly', (WidgetTester tester) async {

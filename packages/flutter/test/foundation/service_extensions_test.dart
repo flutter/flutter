@@ -38,7 +38,7 @@ class TestServiceExtensionsBinding extends BindingBase
   }
 
   @override
-  void postEvent(String eventKind, Map<String, dynamic> eventData) {
+  void postEvent(String eventKind, Map<dynamic, dynamic> eventData) {
     getEventsDispatched(eventKind).add(eventData);
   }
 
@@ -170,7 +170,7 @@ void main() {
     const int disabledExtensions = kIsWeb ? 3 : 0;
     // If you add a service extension... TEST IT! :-)
     // ...then increment this number.
-    expect(binding.extensions.length, 28 + widgetInspectorExtensionCount - disabledExtensions);
+    expect(binding.extensions.length, 27 + widgetInspectorExtensionCount - disabledExtensions);
 
     expect(console, isEmpty);
     debugPrint = debugPrintThrottled;
@@ -687,16 +687,9 @@ void main() {
   test('Service extensions - saveCompilationTrace', () async {
     Map<String, dynamic> result;
     result = await binding.testExtension('saveCompilationTrace', <String, String>{});
-    final String trace = String.fromCharCodes((result['value'] as List<dynamic>).cast<int>());
+    final String trace = String.fromCharCodes(result['value']);
     expect(trace, contains('dart:core,Object,Object.\n'));
     expect(trace, contains('package:test_api/test_api.dart,::,test\n'));
     expect(trace, contains('service_extensions_test.dart,::,main\n'));
-  }, skip: isBrowser);
-
-  test('Service extensions - fastReassemble', () async {
-    Map<String, dynamic> result;
-    result = await binding.testExtension('fastReassemble', <String, String>{'class': 'Foo'});
-
-    expect(result, containsPair('Success', 'true'));
   }, skip: isBrowser);
 }

@@ -71,12 +71,6 @@ class _GalleryAppState extends State<GalleryApp> {
   }
 
   @override
-  void reassemble() {
-    _options = _options.copyWith(platform: defaultTargetPlatform);
-    super.reassemble();
-  }
-
-  @override
   void dispose() {
     _timeDilationTimer?.cancel();
     _timeDilationTimer = null;

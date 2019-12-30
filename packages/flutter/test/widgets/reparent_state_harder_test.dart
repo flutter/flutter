@@ -156,9 +156,9 @@ void main() {
 
     keyRoot.currentState.switchChildren();
     final List<State> states = tester.stateList(find.byType(RekeyableDummyStatefulWidgetWrapper)).toList();
-    final RekeyableDummyStatefulWidgetWrapperState a = states[0] as RekeyableDummyStatefulWidgetWrapperState;
+    final RekeyableDummyStatefulWidgetWrapperState a = states[0];
     a._setChild(null);
-    final RekeyableDummyStatefulWidgetWrapperState b = states[1] as RekeyableDummyStatefulWidgetWrapperState;
+    final RekeyableDummyStatefulWidgetWrapperState b = states[1];
     b._setChild(keyC);
     await tester.pump();
 

@@ -11,7 +11,6 @@ import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_runner/resident_web_runner.dart';
 import 'package:flutter_tools/src/build_runner/web_fs.dart';
@@ -79,7 +78,6 @@ void main() {
           ipv6: true,
           stayResident: true,
           dartDefines: const <String>[],
-          urlTunneller: null,
         ) as ResidentWebRunner;
       },
       overrides: <Type, Generator>{
@@ -92,7 +90,6 @@ void main() {
           @required String hostname,
           @required String port,
           @required List<String> dartDefines,
-          @required UrlTunneller urlTunneller,
         }) async {
           didSkipDwds = skipDwds;
           return mockWebFs;
@@ -145,7 +142,6 @@ void main() {
       ipv6: true,
       stayResident: true,
       dartDefines: const <String>[],
-      urlTunneller: null,
     ) as ResidentWebRunner;
 
     expect(profileResidentWebRunner.debuggingEnabled, false);
@@ -176,7 +172,6 @@ void main() {
       ipv6: true,
       stayResident: true,
       dartDefines: <String>[],
-      urlTunneller: null,
     );
 
     expect(profileResidentWebRunner.debuggingEnabled, true);
@@ -192,7 +187,6 @@ void main() {
       ipv6: true,
       stayResident: true,
       dartDefines: <String>[],
-      urlTunneller: null,
     ) as ResidentWebRunner;
 
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
@@ -216,7 +210,6 @@ void main() {
       ipv6: true,
       stayResident: true,
       dartDefines: const <String>[],
-      urlTunneller: null,
     );
 
     expect(profileResidentWebRunner.supportsServiceProtocol, false);
@@ -270,7 +263,6 @@ void main() {
       ipv6: true,
       stayResident: false,
       dartDefines: const <String>[],
-      urlTunneller: null,
     ) as ResidentWebRunner;
 
     expect(await residentWebRunner.run(), 0);
@@ -307,7 +299,6 @@ void main() {
       ipv6: true,
       stayResident: true,
       dartDefines: const <String>[],
-      urlTunneller: null,
     ) as ResidentWebRunner;
     _setupMocks();
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
@@ -378,10 +369,7 @@ void main() {
     unawaited(residentWebRunner.run(
       connectionInfoCompleter: connectionInfoCompleter,
     ));
-    final DebugConnectionInfo debugConnectionInfo = await connectionInfoCompleter.future;
-
-    expect(debugConnectionInfo, isNotNull);
-
+    await connectionInfoCompleter.future;
     final OperationResult result = await residentWebRunner.restart(fullRestart: false);
 
     expect(testLogger.statusText, contains('Reloaded application in'));
@@ -486,12 +474,6 @@ void main() {
     FeatureFlags: () => TestFeatureFlags(isWebIncrementalCompilerEnabled: true),
   }));
 
-  test('experimental resident runner is not debuggable', () => testbed.run(() {
-    expect(residentWebRunner.debuggingEnabled, false);
-  }, overrides: <Type, Generator>{
-    FeatureFlags: () => TestFeatureFlags(isWebIncrementalCompilerEnabled: true),
-  }));
-
   test('Can hot restart after attaching', () => testbed.run(() async {
     _setupMocks();
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
@@ -531,7 +513,6 @@ void main() {
       ipv6: true,
       stayResident: true,
       dartDefines: const <String>[],
-      urlTunneller: null,
     ) as ResidentWebRunner;
 
     expect(residentWebRunner.runtimeType.toString(), '_DwdsResidentWebRunner');
@@ -779,9 +760,9 @@ void main() {
 
     await residentWebRunner.debugTogglePlatform();
 
-    expect(testLogger.statusText, contains('Switched operating system to fuchsia'));
+    expect(testLogger.statusText, contains('Switched operating system to android'));
     verify(mockVmService.callServiceExtension('ext.flutter.platformOverride',
-        args: <String, Object>{'value': 'fuchsia'})).called(1);
+        args: <String, Object>{'value': 'android'})).called(1);
   }));
 
   test('cleanup of resources is safe to call multiple times', () => testbed.run(() async {
@@ -849,7 +830,6 @@ void main() {
       ipv6: true,
       stayResident: true,
       dartDefines: const <String>[],
-      urlTunneller: null,
     ) as ResidentWebRunner;
 
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();
@@ -885,7 +865,6 @@ void main() {
       ipv6: true,
       stayResident: true,
       dartDefines: const <String>[],
-      urlTunneller: null,
     ) as ResidentWebRunner;
 
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();

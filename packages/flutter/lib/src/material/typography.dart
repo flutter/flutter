@@ -234,12 +234,12 @@ class Typography extends Diagnosticable {
       return true;
     if (other.runtimeType != runtimeType)
       return false;
-    return other is Typography
-        && other.black == black
-        && other.white == white
-        && other.englishLike == englishLike
-        && other.dense == dense
-        && other.tall == tall;
+    final Typography otherTypography = other;
+    return otherTypography.black == black
+        && otherTypography.white == white
+        && otherTypography.englishLike == englishLike
+        && otherTypography.dense == dense
+        && otherTypography.tall == tall;
   }
 
   @override

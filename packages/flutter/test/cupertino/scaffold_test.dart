@@ -407,10 +407,10 @@ void main() {
       ),
     );
 
-    final DecoratedBox decoratedBox = tester.widgetList(find.byType(DecoratedBox)).elementAt(1) as DecoratedBox;
+    final DecoratedBox decoratedBox = tester.widgetList(find.byType(DecoratedBox)).elementAt(1);
     expect(decoratedBox.decoration.runtimeType, BoxDecoration);
 
-    final BoxDecoration decoration = decoratedBox.decoration as BoxDecoration;
+    final BoxDecoration decoration = decoratedBox.decoration;
     expect(decoration.color, isSameColorAs(CupertinoColors.white));
   });
 
@@ -424,10 +424,10 @@ void main() {
       ),
     );
 
-    final DecoratedBox decoratedBox = tester.widgetList(find.byType(DecoratedBox)).elementAt(1) as DecoratedBox;
+    final DecoratedBox decoratedBox = tester.widgetList(find.byType(DecoratedBox)).elementAt(1);
     expect(decoratedBox.decoration.runtimeType, BoxDecoration);
 
-    final BoxDecoration decoration = decoratedBox.decoration as BoxDecoration;
+    final BoxDecoration decoration = decoratedBox.decoration;
     expect(decoration.color, const Color(0xFF010203));
   });
 

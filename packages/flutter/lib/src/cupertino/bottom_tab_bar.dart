@@ -271,7 +271,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
     Color backgroundColor,
     Color activeColor,
     Color inactiveColor,
-    double iconSize,
+    Size iconSize,
     Border border,
     int currentIndex,
     ValueChanged<int> onTap,

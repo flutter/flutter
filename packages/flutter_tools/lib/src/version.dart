@@ -20,8 +20,7 @@ import 'globals.dart';
 class FlutterVersion {
   FlutterVersion([this._clock = const SystemClock()]) {
     _frameworkRevision = _runGit(gitLog(<String>['-n', '1', '--pretty=format:%H']).join(' '));
-    _gitTagVersion = GitTagVersion.determine();
-    _frameworkVersion = gitTagVersion.frameworkVersionFor(_frameworkRevision);
+    _frameworkVersion = GitTagVersion.determine().frameworkVersionFor(_frameworkRevision);
   }
 
   final SystemClock _clock;
@@ -75,9 +74,6 @@ class FlutterVersion {
     }
     return _channel;
   }
-
-  GitTagVersion _gitTagVersion;
-  GitTagVersion get gitTagVersion => _gitTagVersion;
 
   /// The name of the local branch.
   /// Use getBranchName() to read this.

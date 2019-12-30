@@ -63,15 +63,6 @@ TaskFunction createBackdropFilterPerfTest({bool needsMeasureCpuGpu = false}) {
   ).run;
 }
 
-TaskFunction createPostBackdropFilterPerfTest({bool needsMeasureCpuGpu = false}) {
-  return PerfTest(
-    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
-    'test_driver/post_backdrop_filter_perf.dart',
-    'post_backdrop_filter_perf',
-    needsMeasureCpuGPu: needsMeasureCpuGpu,
-  ).run;
-}
-
 TaskFunction createSimpleAnimationPerfTest({bool needsMeasureCpuGpu = false}) {
   return PerfTest(
     '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
@@ -154,14 +145,6 @@ TaskFunction createBasicMaterialCompileTest() {
 
     return CompileTest(sampleDir.path).run();
   };
-}
-
-TaskFunction createTextfieldPerfTest() {
-  return PerfTest(
-    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
-    'test_driver/textfield_perf.dart',
-    'textfield_perf',
-  ).run;
 }
 
 

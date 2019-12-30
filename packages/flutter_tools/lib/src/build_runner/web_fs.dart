@@ -26,7 +26,6 @@ import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
-import '../base/net.dart';
 import '../base/os.dart';
 import '../base/platform.dart';
 import '../build_info.dart';
@@ -70,7 +69,6 @@ typedef DwdsFactory = Future<Dwds> Function({
   LogWriter logWriter,
   bool verbose,
   bool enableDebugExtension,
-  UrlEncoder urlEncoder,
 });
 
 /// A function with the same signature as [WebFs.start].
@@ -82,7 +80,6 @@ typedef WebFsFactory = Future<WebFs> Function({
   @required bool initializePlatform,
   @required String hostname,
   @required String port,
-  @required UrlTunneller urlTunneller,
   @required List<String> dartDefines,
 });
 
@@ -178,7 +175,6 @@ class WebFs {
     @required bool initializePlatform,
     @required String hostname,
     @required String port,
-    @required UrlTunneller urlTunneller,
     @required List<String> dartDefines,
   }) async {
     // workaround for https://github.com/flutter/flutter/issues/38290
@@ -302,7 +298,6 @@ class WebFs {
           serveDevTools: false,
           verbose: false,
           enableDebugExtension: true,
-          urlEncoder: urlTunneller,
           logWriter: (dynamic level, String message) => printTrace(message),
         );
         handler = pipeline.addHandler(dwds.handler);

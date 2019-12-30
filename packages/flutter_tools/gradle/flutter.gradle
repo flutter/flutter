@@ -331,24 +331,15 @@ class FlutterPlugin implements Plugin<Project> {
         }
     }
 
-    // Returns `true` if the given path contains an `android/build.gradle` file.
-    //
-    // TODO(egarciad): Fix https://github.com/flutter/flutter/issues/39657.
-    // Android Studio may create empty android directories due to the logic in <app>/android/settings.gradle,
-    // which imports all plugins regardless of whether they support the android platform.
-    private Boolean doesSupportAndroidPlatform(String path) {
-        File editableAndroidProject = new File(path, 'android' + File.separator + 'build.gradle')
-        return editableAndroidProject.exists()
-    }
-
     // Add the dependencies on other plugin projects to the plugin project.
     // A plugin A can depend on plugin B. As a result, this dependency must be surfaced by
     // making the Gradle plugin project A depend on the Gradle plugin project B.
     private void configurePluginDependencies(Object dependencyObject) {
         assert dependencyObject.name instanceof String
         Project pluginProject = project.rootProject.findProject(":${dependencyObject.name}")
-        if (pluginProject == null ||
-            !doesSupportAndroidPlatform(pluginProject.projectDir.parentFile.path)) {
+        if (pluginProject == null) {
+            // Ignore plugins that don't have a project since most likely they don't
+            // have an android/ directory.
             return
         }
         assert dependencyObject.dependencies instanceof List
@@ -358,8 +349,7 @@ class FlutterPlugin implements Plugin<Project> {
                 return
             }
             Project dependencyProject = project.rootProject.findProject(":$pluginDependencyName")
-            if (dependencyProject == null ||
-                !doesSupportAndroidPlatform(dependencyProject.projectDir.parentFile.path)) {
+            if (!dependencyProject.projectDir.exists() || dependencyProject == null) {
                 return
             }
             // Wait for the Android plugin to load and add the dependency to the plugin project.
@@ -376,7 +366,8 @@ class FlutterPlugin implements Plugin<Project> {
         Properties allPlugins = readPropertiesIfExist(pluginsFile)
         Properties androidPlugins = new Properties()
         allPlugins.each { name, path ->
-            if (doesSupportAndroidPlatform(path)) {
+            File editableAndroidProject = new File(path, 'android' + File.separator + 'build.gradle')
+            if (editableAndroidProject.exists()) {
                 androidPlugins.setProperty(name, path)
             }
             // TODO(amirh): log an error if this plugin was specified to be an Android
@@ -480,15 +471,6 @@ class FlutterPlugin implements Plugin<Project> {
         }
         return false
     }
-
-    /// Whether to build the debug app in "fast-start" mode.
-    private Boolean isFastStart() {
-        if (project.hasProperty("fast-start")) {
-            return project.property("fast-start").toBoolean()
-        }
-        return false
-    }
-
 
     private static Boolean shouldShrinkResources(Project project) {
         if (project.hasProperty("shrink")) {
@@ -628,7 +610,6 @@ class FlutterPlugin implements Plugin<Project> {
                 localEngineSrcPath this.localEngineSrcPath
                 targetPath target
                 verbose isVerbose()
-                fastStart isFastStart()
                 fileSystemRoots fileSystemRootsValue
                 fileSystemScheme fileSystemSchemeValue
                 trackWidgetCreation trackWidgetCreationValue
@@ -748,8 +729,6 @@ abstract class BaseFlutterTask extends DefaultTask {
     String localEngine
     String localEngineSrcPath
     @Input
-    Boolean fastStart
-    @Input
     String targetPath
     @Optional
     Boolean verbose
@@ -790,13 +769,9 @@ abstract class BaseFlutterTask extends DefaultTask {
         // cache.
         String[] ruleNames;
         if (buildMode == "debug") {
-            if (fastStart) {
-                ruleNames = ["faststart_android_application"]
-            } else {
-                ruleNames = ["debug_android_application"]
-            }
+          ruleNames = ["debug_android_application"]
         } else {
-            ruleNames = targetPlatformValues.collect { "android_aot_bundle_${buildMode}_$it" }
+          ruleNames = targetPlatformValues.collect { "android_aot_bundle_${buildMode}_$it" }
         }
         project.exec {
             executable flutterExecutable.absolutePath
@@ -813,18 +788,14 @@ abstract class BaseFlutterTask extends DefaultTask {
             args "assemble"
             args "--depfile", "${intermediateDir}/flutter_build.d"
             args "--output", "${intermediateDir}"
-            if (!fastStart || buildMode != "debug") {
-                args "-dTargetFile=${targetPath}"
-            } else {
-                args "-dTargetFile=${Paths.get(flutterRoot.absolutePath, "examples", "splash", "lib", "main.dart")}"
-            }
+            args "-dTargetFile=${targetPath}"
             args "-dTargetPlatform=android"
             args "-dBuildMode=${buildMode}"
             if (extraFrontEndOptions != null) {
                 args "-dExtraFrontEndOptions=${extraFrontEndOptions}"
             }
             if (extraGenSnapshotOptions != null) {
-                args "--ExtraGenSnapshotOptions=${extraGenSnapshotOptions}"
+                args "-dExtraGenSnapshotOptions=${extraGenSnapshotOptions}"
             }
             args ruleNames
         }

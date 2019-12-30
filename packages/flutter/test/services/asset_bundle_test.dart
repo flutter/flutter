@@ -40,7 +40,7 @@ void main() {
 
     expect(bundle.loadCallCount['one'], 1);
 
-    Object loadException;
+    FlutterError loadException;
     try {
       await bundle.loadString('foo');
     } catch (e) {

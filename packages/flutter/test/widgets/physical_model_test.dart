@@ -71,10 +71,10 @@ void main() {
     );
     await tester.pump();
 
-    final RenderPhysicalModel renderPhysicalModel = tester.allRenderObjects.whereType<RenderPhysicalModel>().first;
+    final RenderPhysicalModel renderPhysicalModel = tester.allRenderObjects.firstWhere((RenderObject object) => object is RenderPhysicalModel);
     expect(renderPhysicalModel.needsCompositing, true);
 
-    final PhysicalModelLayer physicalModelLayer = tester.layers.whereType<PhysicalModelLayer>().first;
+    final PhysicalModelLayer physicalModelLayer = tester.layers.firstWhere((Layer layer) => layer is PhysicalModelLayer);
     expect(physicalModelLayer.shadowColor, Colors.red);
     expect(physicalModelLayer.color, Colors.grey);
     expect(physicalModelLayer.elevation, 1.0);
@@ -129,7 +129,7 @@ void main() {
       }
       debugDisableShadows = false;
       int count = 0;
-      final void Function(FlutterErrorDetails) oldOnError = FlutterError.onError;
+      final Function oldOnError = FlutterError.onError;
       FlutterError.onError = (FlutterErrorDetails details) {
         count++;
       };

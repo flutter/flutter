@@ -1002,27 +1002,27 @@ void main() {
 
     // Exit animation, look at reverse FadeTransition.
     await tester.pump(const Duration(milliseconds: 25));
-    transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1) as FadeTransition;
+    transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1);
     expect(transition.opacity.value, closeTo(0.500, 0.001));
 
     await tester.pump(const Duration(milliseconds: 25));
-    transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1) as FadeTransition;
+    transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1);
     expect(transition.opacity.value, closeTo(0.332, 0.001));
 
     await tester.pump(const Duration(milliseconds: 25));
-    transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1) as FadeTransition;
+    transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1);
     expect(transition.opacity.value, closeTo(0.188, 0.001));
 
     await tester.pump(const Duration(milliseconds: 25));
-    transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1) as FadeTransition;
+    transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1);
     expect(transition.opacity.value, closeTo(0.081, 0.001));
 
     await tester.pump(const Duration(milliseconds: 25));
-    transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1) as FadeTransition;
+    transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1);
     expect(transition.opacity.value, closeTo(0.019, 0.001));
 
     await tester.pump(const Duration(milliseconds: 25));
-    transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1) as FadeTransition;
+    transition = tester.widgetList(find.byType(FadeTransition)).elementAt(1);
     expect(transition.opacity.value, closeTo(0.0, 0.001));
   });
 
@@ -1090,7 +1090,7 @@ void main() {
 RenderBox findActionButtonRenderBoxByTitle(WidgetTester tester, String title) {
   final RenderObject buttonBox = tester.renderObject(find.widgetWithText(CupertinoDialogAction, title));
   assert(buttonBox is RenderBox);
-  return buttonBox as RenderBox;
+  return buttonBox;
 }
 
 RenderBox findScrollableActionsSectionRenderBox(WidgetTester tester) {
@@ -1100,7 +1100,7 @@ RenderBox findScrollableActionsSectionRenderBox(WidgetTester tester) {
     }),
   );
   assert(actionsSection is RenderBox);
-  return actionsSection as RenderBox;
+  return actionsSection;
 }
 
 Widget createAppWithButtonThatLaunchesDialog({ WidgetBuilder dialogBuilder }) {

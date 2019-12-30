@@ -74,9 +74,7 @@ Future<void> main() async {
         );
       });
 
-      // https://github.com/flutter/flutter/issues/46898
-      // https://github.com/flutter/flutter/issues/39657
-      File(path.join(pluginCDirectory.path, 'android', 'build.gradle')).deleteSync();
+      File(path.join(pluginCDirectory.path, 'android')).deleteSync(recursive: true);
 
       final File pluginCpubspec = File(path.join(pluginCDirectory.path, 'pubspec.yaml'));
       await pluginCpubspec.writeAsString('''

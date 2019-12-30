@@ -22,7 +22,7 @@ void main() {
 
   /// These two Functions are required to avoid tearing off of the MockHelper object,
   /// which is not supported when using Dart 2 runtime semantics.
-  final RefreshControlIndicatorBuilder builder = (
+  final Function builder = (
     BuildContext context,
     RefreshIndicatorMode refreshState,
     double pulledExtent,
@@ -39,9 +39,9 @@ void main() {
 
     when(mockHelper.builder(any, any, any, any, any))
       .thenAnswer((Invocation i) {
-        final double pulledExtent = i.positionalArguments[2] as double;
-        final double refreshTriggerPullDistance = i.positionalArguments[3] as double;
-        final double refreshIndicatorExtent = i.positionalArguments[4] as double;
+        final double pulledExtent = i.positionalArguments[2];
+        final double refreshTriggerPullDistance = i.positionalArguments[3];
+        final double refreshIndicatorExtent = i.positionalArguments[4];
         if (pulledExtent < 0.0) {
           throw TestFailure('The pulledExtent should never be less than 0.0');
         }
@@ -72,7 +72,7 @@ void main() {
     );
   }
 
-  final VoidCallback uiTestGroup = () {
+  final Function uiTestGroup = () {
     testWidgets("doesn't invoke anything without user interaction", (WidgetTester tester) async {
       debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
 
@@ -1028,33 +1028,9 @@ void main() {
         debugDefaultTargetPlatformOverride = null;
       },
     );
-
-    testWidgets('Should not crash when dragged', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: CustomScrollView(
-            physics: const BouncingScrollPhysics(),
-            slivers: <Widget>[
-              CupertinoSliverRefreshControl(
-                onRefresh: () async => Future<void>.delayed(const Duration(days: 2000)),
-              ),
-            ],
-          ),
-        ),
-      );
-
-      await tester.dragFrom(const Offset(100, 10), const Offset(0.0, 50.0), touchSlopY: 0);
-      await tester.pump();
-
-      await tester.dragFrom(const Offset(100, 10), const Offset(0, 500), touchSlopY: 0);
-      await tester.pump();
-
-      expect(tester.takeException(), isNull);
-    });
   };
 
-  final VoidCallback stateMachineTestGroup = () {
+  final Function stateMachineTestGroup = () {
     testWidgets('starts in inactive state', (WidgetTester tester) async {
       debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
 
@@ -1489,36 +1465,6 @@ void main() {
   // Test the internal state machine directly to make sure the UI aren't just
   // correct by coincidence.
   group('state machine test short list', stateMachineTestGroup);
-
-  testWidgets(
-    'Does not crash when paintExtent > remainingPaintExtent',
-    (WidgetTester tester) async {
-      // Regression test for https://github.com/flutter/flutter/issues/46871.
-      await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: CustomScrollView(
-            physics: const BouncingScrollPhysics(),
-            slivers: <Widget>[
-              const CupertinoSliverRefreshControl(),
-              SliverList(
-                delegate: SliverChildBuilderDelegate(
-                  (BuildContext context, int index) => const SizedBox(height: 100),
-                  childCount: 20,
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-
-      // Drag the content down far enough so that
-      // geometry.paintExent > constraints.maxPaintExtent
-      await tester.dragFrom(const Offset(10, 10), const Offset(0, 500));
-      await tester.pump();
-
-      expect(tester.takeException(), isNull);
-  });
 }
 
 class MockHelper extends Mock {

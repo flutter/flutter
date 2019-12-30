@@ -575,7 +575,6 @@ class ListWheelScrollView extends StatefulWidget {
     this.offAxisFraction = 0.0,
     this.useMagnifier = false,
     this.magnification = 1.0,
-    this.overAndUnderCenterOpacity = 1.0,
     @required this.itemExtent,
     this.squeeze = 1.0,
     this.onSelectedItemChanged,
@@ -589,8 +588,6 @@ class ListWheelScrollView extends StatefulWidget {
        assert(perspective > 0),
        assert(perspective <= 0.01, RenderListWheelViewport.perspectiveTooHighMessage),
        assert(magnification > 0),
-       assert(overAndUnderCenterOpacity != null),
-       assert(overAndUnderCenterOpacity >= 0 && overAndUnderCenterOpacity <= 1),
        assert(itemExtent != null),
        assert(itemExtent > 0),
        assert(squeeze != null),
@@ -615,7 +612,6 @@ class ListWheelScrollView extends StatefulWidget {
     this.offAxisFraction = 0.0,
     this.useMagnifier = false,
     this.magnification = 1.0,
-    this.overAndUnderCenterOpacity = 1.0,
     @required this.itemExtent,
     this.squeeze = 1.0,
     this.onSelectedItemChanged,
@@ -629,8 +625,6 @@ class ListWheelScrollView extends StatefulWidget {
        assert(perspective > 0),
        assert(perspective <= 0.01, RenderListWheelViewport.perspectiveTooHighMessage),
        assert(magnification > 0),
-       assert(overAndUnderCenterOpacity != null),
-       assert(overAndUnderCenterOpacity >= 0 && overAndUnderCenterOpacity <= 1),
        assert(itemExtent != null),
        assert(itemExtent > 0),
        assert(squeeze != null),
@@ -682,9 +676,6 @@ class ListWheelScrollView extends StatefulWidget {
 
   /// {@macro flutter.rendering.wheelList.magnification}
   final double magnification;
-
-  /// {@macro flutter.rendering.wheelList.overAndUnderCenterOpacity}
-  final double overAndUnderCenterOpacity;
 
   /// Size of each child in the main axis. Must not be null and must be
   /// positive.
@@ -766,7 +757,6 @@ class _ListWheelScrollViewState extends State<ListWheelScrollView> {
             offAxisFraction: widget.offAxisFraction,
             useMagnifier: widget.useMagnifier,
             magnification: widget.magnification,
-            overAndUnderCenterOpacity: widget.overAndUnderCenterOpacity,
             itemExtent: widget.itemExtent,
             squeeze: widget.squeeze,
             clipToSize: widget.clipToSize,
@@ -962,7 +952,6 @@ class ListWheelViewport extends RenderObjectWidget {
     this.offAxisFraction = 0.0,
     this.useMagnifier = false,
     this.magnification = 1.0,
-    this.overAndUnderCenterOpacity = 1.0,
     @required this.itemExtent,
     this.squeeze = 1.0,
     this.clipToSize = true,
@@ -976,8 +965,6 @@ class ListWheelViewport extends RenderObjectWidget {
        assert(perspective != null),
        assert(perspective > 0),
        assert(perspective <= 0.01, RenderListWheelViewport.perspectiveTooHighMessage),
-       assert(overAndUnderCenterOpacity != null),
-       assert(overAndUnderCenterOpacity >= 0 && overAndUnderCenterOpacity <= 1),
        assert(itemExtent != null),
        assert(itemExtent > 0),
        assert(squeeze != null),
@@ -1004,9 +991,6 @@ class ListWheelViewport extends RenderObjectWidget {
 
   /// {@macro flutter.rendering.wheelList.magnification}
   final double magnification;
-
-  /// {@macro flutter.rendering.wheelList.overAndUnderCenterOpacity}
-  final double overAndUnderCenterOpacity;
 
   /// {@macro flutter.rendering.wheelList.itemExtent}
   final double itemExtent;
@@ -1043,7 +1027,6 @@ class ListWheelViewport extends RenderObjectWidget {
       offAxisFraction: offAxisFraction,
       useMagnifier: useMagnifier,
       magnification: magnification,
-      overAndUnderCenterOpacity: overAndUnderCenterOpacity,
       itemExtent: itemExtent,
       squeeze: squeeze,
       clipToSize: clipToSize,
@@ -1060,7 +1043,6 @@ class ListWheelViewport extends RenderObjectWidget {
       ..offAxisFraction = offAxisFraction
       ..useMagnifier = useMagnifier
       ..magnification = magnification
-      ..overAndUnderCenterOpacity = overAndUnderCenterOpacity
       ..itemExtent = itemExtent
       ..squeeze = squeeze
       ..clipToSize = clipToSize

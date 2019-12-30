@@ -76,8 +76,8 @@ void main() {
     final GlobalKey key = GlobalKey();
 
     void recordMetrics() {
-      final RenderBox box = key.currentContext.findRenderObject() as RenderBox;
-      final BoxParentData boxParentData = box.parentData as BoxParentData;
+      final RenderBox box = key.currentContext.findRenderObject();
+      final BoxParentData boxParentData = box.parentData;
       sizes.add(box.size);
       positions.add(boxParentData.offset);
     }

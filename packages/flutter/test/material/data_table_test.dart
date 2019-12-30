@@ -34,7 +34,7 @@ void main() {
         ],
         rows: kDesserts.map<DataRow>((Dessert dessert) {
           return DataRow(
-            key: ValueKey<String>(dessert.name),
+            key: Key(dessert.name),
             onSelectChanged: (bool selected) {
               log.add('row-selected: ${dessert.name}');
             },
@@ -294,7 +294,7 @@ void main() {
         ],
         rows: kDesserts.map<DataRow>((Dessert dessert) {
           return DataRow(
-            key: ValueKey<String>(dessert.name),
+            key: Key(dessert.name),
             onSelectChanged: (bool selected) {},
             cells: <DataCell>[
               DataCell(
@@ -330,7 +330,7 @@ void main() {
           ],
           rows: kDesserts.map<DataRow>((Dessert dessert) {
             return DataRow(
-              key: ValueKey<String>(dessert.name),
+              key: Key(dessert.name),
               onSelectChanged: (bool selected) {},
               cells: <DataCell>[
                 DataCell(
@@ -421,7 +421,7 @@ void main() {
         ],
         rows: kDesserts.map<DataRow>((Dessert dessert) {
           return DataRow(
-            key: ValueKey<String>(dessert.name),
+            key: Key(dessert.name),
             onSelectChanged: (bool selected) {},
             cells: <DataCell>[
               DataCell(
@@ -528,7 +528,7 @@ void main() {
         ],
         rows: kDesserts.map<DataRow>((Dessert dessert) {
           return DataRow(
-            key: ValueKey<String>(dessert.name),
+            key: Key(dessert.name),
             onSelectChanged: (bool selected) {},
             cells: <DataCell>[
               DataCell(
@@ -642,7 +642,7 @@ void main() {
         ],
         rows: kDesserts.map<DataRow>((Dessert dessert) {
           return DataRow(
-            key: ValueKey<String>(dessert.name),
+            key: Key(dessert.name),
             cells: <DataCell>[
               DataCell(
                 Text(dessert.name),
@@ -735,7 +735,7 @@ void main() {
         ],
         rows: kDesserts.map<DataRow>((Dessert dessert) {
           return DataRow(
-            key: ValueKey<String>(dessert.name),
+            key: Key(dessert.name),
             cells: <DataCell>[
               DataCell(
                 Text(dessert.name),

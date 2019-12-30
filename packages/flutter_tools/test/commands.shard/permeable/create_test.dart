@@ -406,7 +406,7 @@ void main() {
     );
   }, overrides: <Type, Generator>{
     Pub: () => const Pub(),
-  });
+  }, skip: true); // https://github.com/flutter/flutter/issues/46142
 
   testUsingContext('module project with pub', () async {
     return _createProject(projectDir, <String>[
@@ -416,6 +416,8 @@ void main() {
       '.android/Flutter/build.gradle',
       '.android/Flutter/flutter.iml',
       '.android/Flutter/src/main/AndroidManifest.xml',
+      '.android/Flutter/src/main/java/io/flutter/facade/Flutter.java',
+      '.android/Flutter/src/main/java/io/flutter/facade/FlutterFragment.java',
       '.android/Flutter/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java',
       '.android/gradle.properties',
       '.android/gradle/wrapper/gradle-wrapper.jar',
@@ -436,12 +438,10 @@ void main() {
     ], unexpectedPaths: <String>[
       'android/',
       'ios/',
-      '.android/Flutter/src/main/java/io/flutter/facade/FlutterFragment.java',
-      '.android/Flutter/src/main/java/io/flutter/facade/Flutter.java',
     ]);
   }, overrides: <Type, Generator>{
     Pub: () => const Pub(),
-  });
+  }, skip: true); // https://github.com/flutter/flutter/issues/46142
 
 
   testUsingContext('androidx is used by default in an app project', () async {
@@ -1112,6 +1112,16 @@ void main() {
     );
   }, overrides: <Type, Generator>{
     Pub: () => const Pub(),
+  });
+
+  testUsingContext('fails when invalid package name', () async {
+    Cache.flutterRoot = '../..';
+    final CreateCommand command = CreateCommand();
+    final CommandRunner<void> runner = createTestCommandRunner(command);
+    expect(
+      runner.run(<String>['create', fs.path.join(projectDir.path, 'invalidName')]),
+      throwsToolExit(message: '"invalidName" is not a valid Dart package name.'),
+    );
   });
 
   testUsingContext(

@@ -5,8 +5,6 @@
 const String kCullOpacityRouteName = '/cull_opacity';
 const String kCubicBezierRouteName = '/cubic_bezier';
 const String kBackdropFilterRouteName = '/backdrop_filter';
-const String kPostBackdropFilterRouteName = '/post_backdrop_filter';
 const String kSimpleAnimationRouteName = '/simple_animation';
 const String kPictureCacheRouteName = '/picture_cache';
 const String kLargeImagesRouteName = '/large_images';
-const String kTextRouteName = '/text';
