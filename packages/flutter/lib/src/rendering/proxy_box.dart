@@ -940,7 +940,7 @@ mixin RenderAnimatedOpacityMixin<T extends RenderObject> on RenderObjectWithChil
 ///
 /// This is a variant of [RenderOpacity] that uses an [Animation<double>] rather
 /// than a [double] to control the opacity.
-class RenderAnimatedOpacity extends RenderProxyBox with RenderAnimatedOpacityMixin<RenderBox> {
+class RenderAnimatedOpacity extends RenderProxyBox with RenderProxyBoxMixin, RenderAnimatedOpacityMixin<RenderBox> {
   /// Creates a partially transparent render object.
   ///
   /// The [opacity] argument must not be null.
@@ -956,10 +956,11 @@ class RenderAnimatedOpacity extends RenderProxyBox with RenderAnimatedOpacityMix
   }
 
   @override
-  void paintWithOpacity(PaintingContext context, Offset offset) {
-    if (child != null)
-      context.paintChild(child, offset);
-  }
+  void paintWithOpacity(PaintingContext context, Offset offset) => super.paint;
+//  {
+//    if (child != null)
+//      context.paintChild(child, offset);
+//  }
 }
 
 /// Signature for a function that creates a [Shader] for a given [Rect].
