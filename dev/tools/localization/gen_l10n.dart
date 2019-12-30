@@ -543,6 +543,10 @@ class LocalizationsGenerator {
   /// allows for a set of preferred locales to appear at the top of the
   /// list.
   ///
+  /// The order of locales in this list will also be the order of locale
+  /// priority. For example, if a device supports 'en' and 'es' and
+  /// ['es', 'en'] is passed in, the 'es' locale will take priority over 'en'.
+  ///
   /// The list of preferred locales is specified with the [initialize] method.
   List<LocaleInfo> get preferredSupportedLocales => _preferredSupportedLocales;
   List<LocaleInfo> _preferredSupportedLocales;
@@ -641,7 +645,8 @@ class LocalizationsGenerator {
     _className = classNameString;
   }
 
-  /// Sets the
+  /// Sets [preferredSupportedLocales] so that this particular list of locales
+  /// will take priority over the other locales.
   @visibleForTesting
   void setPreferredSupportedLocales(String inputLocales) {
     if (inputLocales != null) {
