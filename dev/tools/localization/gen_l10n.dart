@@ -701,6 +701,9 @@ class LocalizationsGenerator {
 
     arbPathStrings.sort();
     localeInfoList.sort();
+    supportedLanguageCodes.addAll(localeInfoList.map((LocaleInfo localeInfo) {
+      return '\'${localeInfo.languageCode}\'';
+    }));
 
     if (preferredSupportedLocales != null) {
       for (LocaleInfo preferredLocale in preferredSupportedLocales) {
@@ -718,11 +721,7 @@ class LocalizationsGenerator {
       }
       localeInfoList.insertAll(0, preferredSupportedLocales);
     }
-
     supportedLocales.addAll(localeInfoList);
-    supportedLanguageCodes.addAll(localeInfoList.map((LocaleInfo localeInfo) {
-      return '\'${localeInfo.languageCode}\'';
-    }));
   }
 
   /// Generates the methods for the localizations class.
