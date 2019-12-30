@@ -649,8 +649,7 @@ class LocalizationsGenerator {
   @visibleForTesting
   void setPreferredSupportedLocales(String inputLocales) {
     if (inputLocales != null) {
-      List<dynamic> preferredLocalesStringList;
-      preferredLocalesStringList = json.decode(inputLocales) as List<dynamic>;
+      final List<dynamic> preferredLocalesStringList = json.decode(inputLocales) as List<dynamic>;
       _preferredSupportedLocales = preferredLocalesStringList.map((dynamic localeString) {
         if (localeString.runtimeType != String) {
           throw L10nException('Incorrect runtime type for $localeString');
