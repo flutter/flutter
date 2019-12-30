@@ -573,12 +573,12 @@ class LocalizationsGenerator {
     String templateArbFileName,
     String outputFileString,
     String classNameString,
-    List<LocaleInfo> preferredSupportedLocales,
+    String preferredSupportedLocaleString,
   }) {
     setL10nDirectory(l10nDirectoryPath);
     setTemplateArbFile(templateArbFileName);
     setOutputFile(outputFileString);
-    _preferredSupportedLocales = preferredSupportedLocales;
+    setPreferredSupportedLocales(preferredSupportedLocaleString);
     className = classNameString;
   }
 
@@ -638,6 +638,20 @@ class LocalizationsGenerator {
         "The 'output-class', $classNameString, is not a valid Dart class name.\n"
       );
     _className = classNameString;
+  }
+
+  // TODO: documentation
+  @visibleForTesting
+  void setPreferredSupportedLocales(String inputLocales) {
+    if (inputLocales != null) {
+      final List<dynamic> preferredLocalesStringList = json.decode(inputLocales) as List<dynamic>;
+      _preferredSupportedLocales = preferredLocalesStringList.map((dynamic localeString) {
+        if (localeString.runtimeType != String) {
+          throw L10nException('Incorrect runtime type for $localeString');
+        }
+        return LocaleInfo.fromString(localeString.toString());
+      }).toList();
+    }
   }
 
   /// Scans [l10nDirectory] for arb files and parses them for language and locale

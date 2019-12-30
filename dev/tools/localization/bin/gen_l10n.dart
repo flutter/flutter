@@ -69,17 +69,6 @@ Future<void> main(List<String> arguments) async {
   final String classNameString = results['output-class'] as String;
   final String preferredSupportedLocaleString = results['preferred-supported-locales'] as String;
 
-  List<LocaleInfo> inputPreferredLocales;
-  if (preferredSupportedLocaleString != null) {
-    final List<dynamic> preferredLocalesStringList = json.decode(preferredSupportedLocaleString);
-    inputPreferredLocales = preferredLocalesStringList.map((dynamic localeString) {
-      if (localeString.runtimeType != String) {
-        throw L10nException('Incorrect runtime type for $localeString');
-      }
-      return LocaleInfo.fromString(localeString);
-    }).toList();
-  }
-
   const local.LocalFileSystem fs = local.LocalFileSystem();
   final LocalizationsGenerator localizationsGenerator = LocalizationsGenerator(fs);
   try {
@@ -89,7 +78,7 @@ Future<void> main(List<String> arguments) async {
         templateArbFileName: templateArbFileName,
         outputFileString: outputFileString,
         classNameString: classNameString,
-        preferredSupportedLocales: inputPreferredLocales,
+        preferredSupportedLocales: preferredSupportedLocaleString,
       )
       ..parseArbFiles()
       ..generateClassMethods()
