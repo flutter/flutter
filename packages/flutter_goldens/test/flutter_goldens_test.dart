@@ -645,7 +645,31 @@ void main() {
       });
 
       group('_Authorized', () {
+        setUp(() async {
+          final Directory basedir = fs.directory('flutter/test/library/')
+            ..createSync(recursive: true);
+          comparator = await FlutterPreSubmitFileComparator.fromDefaultComparator(
+            FakePlatform(
+              environment: <String, String>{
+                'FLUTTER_ROOT': _kFlutterRoot,
+                'CIRRUS_CI' : 'true',
+                'CIRRUS_PR' : '1234',
+                'GOLD_SERVICE_ACCOUNT' : 'service account...',
+                'CIRRUS_USER_PERMISSION' : 'admin',
+              },
+              operatingSystem: 'macos'
+            ),
+            goldens: mockSkiaClient,
+            testBasedir: basedir,
+          );
+        });
 
+        test('fromDefaultComparator chooses correct comparator', () async {
+          expect(
+            comparator.runtimeType.toString(),
+            '_AuthorizedFlutterPreSubmitComparator',
+          );
+        });
       });
 
       group('_UnAuthorized', () {
@@ -670,6 +694,13 @@ void main() {
             .thenReturn('flutter.golden_test.1');
           when(mockSkiaClient.expectations)
             .thenReturn(expectationsTemplate());
+        });
+
+        test('fromDefaultComparator chooses correct comparator', () async {
+          expect(
+            comparator.runtimeType.toString(),
+            '_UnauthorizedFlutterPreSubmitComparator',
+          );
         });
 
         test('comparison passes test that is ignored for this PR', () async {

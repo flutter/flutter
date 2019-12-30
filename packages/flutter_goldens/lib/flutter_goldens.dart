@@ -312,7 +312,7 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
 
     final bool hasWritePermission = platform.environment['CIRRUS_USER_PERMISSION'] == 'admin'
       || platform.environment['CIRRUS_USER_PERMISSION'] == 'write';
-    if (!hasWritePermission) { // TEMP - TESTING CIRRUS
+    if (hasWritePermission) {
       await goldens.auth();
       await goldens.tryjobInit();
       return _AuthorizedFlutterPreSubmitComparator(
@@ -407,6 +407,8 @@ class _UnauthorizedFlutterPreSubmitComparator extends FlutterPreSubmitFileCompar
       return true;
     }
 
+    // Contributors without the proper permissions to execute a tryjob can make
+    // a golden file change through Gold's ignore feature instead.
     final bool ignoreResult = await skiaClient.testIsIgnoredForPullRequest(
       platform.environment['CIRRUS_PR'] ?? '',
       golden.path,

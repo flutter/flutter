@@ -97,10 +97,6 @@ class SkiaGoldClient {
   /// This ensures that the goldctl tool is authorized and ready for testing. It
   /// will only be called once for each instance of
   /// [FlutterSkiaGoldFileComparator].
-  ///
-  /// The [workDirectory] parameter specifies the current directory that golden
-  /// tests are executing in, relative to the library of the given test. It is
-  /// informed by the basedir of the [FlutterSkiaGoldFileComparator].
   Future<void> auth() async {
     if (_clientIsAuthorized())
       return;
@@ -130,13 +126,22 @@ class SkiaGoldClient {
     if (result.exitCode != 0) {
       final StringBuffer buf = StringBuffer()
         ..writeln('Skia Gold auth failed.')
+        ..writeln('This could be caused by incorrect user permissions, if the ')
+        ..writeln('debug information below contains ENCRYPTED, the wrong ')
+        ..writeln('comparator was chosen for the test case.')
+        ..writeln()
+        ..writeln('Debug information for Gold:')
         ..writeln('stdout: ${result.stdout}')
         ..writeln('stderr: ${result.stderr}');
       throw NonZeroExitCode(1, buf.toString());
     }
   }
 
-  /// Doc
+  /// Prepares the local work space for an unauthorized client to lookup golden
+  /// file expectations using [imgtestCheck].
+  ///
+  /// It will only be called once for each instance of an
+  /// [_UnauthorizedFlutterPreSubmitComparator].
   Future<void> emptyAuth() async {
     final List<String> authArguments = <String>[
       'auth',
@@ -153,6 +158,8 @@ class SkiaGoldClient {
     if (result.exitCode != 0) {
       final StringBuffer buf = StringBuffer()
         ..writeln('Skia Gold emptyAuth failed.')
+        ..writeln()
+        ..writeln('Debug information for Gold:')
         ..writeln('stdout: ${result.stdout}')
         ..writeln('stderr: ${result.stderr}');
       throw NonZeroExitCode(1, buf.toString());
@@ -185,7 +192,9 @@ class SkiaGoldClient {
 
     if (imgtestInitArguments.contains(null)) {
       final StringBuffer buf = StringBuffer()
-        ..writeln('Null argument for Skia Gold imgtest init:');
+        ..writeln('A null argument was provided for Skia Gold imgtest init.')
+        ..writeln('Confirm the settings of your goldenf file test.')
+        ..writeln('Arguments provided:');
       imgtestInitArguments.forEach(buf.writeln);
       throw NonZeroExitCode(1, buf.toString());
     }
@@ -198,6 +207,10 @@ class SkiaGoldClient {
     if (result.exitCode != 0) {
       final StringBuffer buf = StringBuffer()
         ..writeln('Skia Gold imgtest init failed.')
+        ..writeln('An error occured when initializing golden file test with ')
+        ..writeln('goldctl.')
+        ..writeln()
+        ..writeln('Debug information for Gold:')
         ..writeln('stdout: ${result.stdout}')
         ..writeln('stderr: ${result.stderr}');
       throw NonZeroExitCode(1, buf.toString());
@@ -211,8 +224,8 @@ class SkiaGoldClient {
   /// returned from the invocation of this command that indicates a pass or fail
   /// result.
   ///
-  /// The testName and goldenFile parameters reference the current comparison
-  /// being evaluated by the [FlutterSkiaGoldFileComparator].
+  /// The [testName] and [goldenFile] parameters reference the current
+  /// comparison being evaluated by the [FlutterSkiaGoldFileComparator].
   Future<bool> imgtestAdd(String testName, File goldenFile) async {
     assert(testName != null);
     assert(goldenFile != null);
@@ -233,7 +246,8 @@ class SkiaGoldClient {
 
     if (result.exitCode != 0) {
       // We do not want to throw for non-zero exit codes here, as an intentional
-      // change or new golden file test may be expected.
+      // change or new golden file test expect non-zero exit codes. Logging here
+      // is meant to inform when an unexpected result occurs.
       print('goldctl imgtest add stdout: ${result.stdout}');
       print('goldctl imgtest add stderr: ${result.stderr}');
     }
@@ -288,6 +302,10 @@ class SkiaGoldClient {
     if (result.exitCode != 0) {
       final StringBuffer buf = StringBuffer()
         ..writeln('Skia Gold tryjobInit failure.')
+        ..writeln('An error occured when initializing golden file tryjob with ')
+        ..writeln('goldctl.')
+        ..writeln()
+        ..writeln('Debug information for Gold:')
         ..writeln('stdout: ${result.stdout}')
         ..writeln('stderr: ${result.stderr}');
       throw NonZeroExitCode(1, buf.toString());
@@ -301,8 +319,8 @@ class SkiaGoldClient {
   /// returned from the invocation of this command that indicates a pass or fail
   /// result for the tryjob.
   ///
-  /// The testName and goldenFile parameters reference the current comparison
-  /// being evaluated by the [FlutterSkiaGoldFileComparator].
+  /// The [testName] and [goldenFile] parameters reference the current
+  /// comparison being evaluated by the [_AuthorizedFlutterPreSubmitComparator].
   Future<bool> tryjobAdd(String testName, File goldenFile) async {
     assert(testName != null);
     assert(goldenFile != null);
@@ -321,25 +339,52 @@ class SkiaGoldClient {
       imgtestArguments,
     );
 
-    bool checkPassed;
     if (result.exitCode != 0) {
       // This branch may just be out of date, this is useful when someone has
       // landed a golden file change elsewhere.
-      checkPassed = await imgtestCheck(testName, goldenFile);
-      if (checkPassed)
+      if (await imgtestCheck(testName, goldenFile))
         return true;
 
-      final StringBuffer buf = StringBuffer()
-        ..writeln('Skia Gold tryjobAdd failure.')
-        ..writeln('stdout: ${result.stdout}')
-        ..writeln('stderr: ${result.stderr}\n');
-      throw NonZeroExitCode(1, buf.toString());
+      final String resultStdout = result.stdout.toString();
+      if (resultStdout.contains('Untriaged') || resultStdout.contains('negative image')) {
+        final StringBuffer buf = StringBuffer()
+          ..writeln('Golden file test $testName failed.')
+          ..writeln('To view the comparison and approve/reject the image,')
+          ..writeln('visit the Changelists section of')
+          ..writeln('https://flutter-gold.skia.org/')
+          ..writeln('and select your pull request.');
+        throw NonZeroExitCode(1, buf.toString());
+      } else {
+        final StringBuffer buf = StringBuffer()
+          ..writeln('Unexpected Gold tryjobAdd failure.')
+          ..writeln('Tryjob execution for golden file test $testName failed for')
+          ..writeln('a reason unrelated to pixel comparison.')
+          ..writeln()
+          ..writeln('Debug information for Gold:')
+          ..writeln('stdout: ${result.stdout}')
+          ..writeln('stderr: ${result.stderr}\n');
+        throw NonZeroExitCode(1, buf.toString());
+      }
     }
 
-    return result.exitCode == 0 || checkPassed;
+    return result.exitCode == 0;
   }
 
-  /// Doc
+  /// Executes the `imgtest check` command in the goldctl tool for unauthorized
+  /// clients.
+  ///
+  /// Using the `check` command hashes the current test images and checks that
+  /// hash against Gold's known expectation hashes. A response is returned from
+  /// the invocation of this command that indicates a pass or fail result,
+  /// indicating if Gold has seen this image before.
+  ///
+  /// This will not allow for state change on the Gold dashboard, it is
+  /// essentially a lookup function. If an unauthorized change needs to be made,
+  /// use Gold's ignore feature.
+  ///
+  /// The [testName] and [goldenFile] parameters reference the current
+  /// comparison being evaluated by the
+  /// [_UnauthorizedFlutterPreSubmitComparator].
   Future<bool> imgtestCheck(String testName, File goldenFile) async {
     assert(testName != null);
     assert(goldenFile != null);
