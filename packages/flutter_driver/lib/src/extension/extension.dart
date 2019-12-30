@@ -30,7 +30,7 @@ import '../common/request_data.dart';
 import '../common/semantics.dart';
 import '../common/text.dart';
 import '../common/wait.dart';
-import 'io_extension.dart' if (dart.library.html) 'web_extension.dart';
+import '_io_extension.dart' if (dart.library.html) '_web_extension.dart';
 import 'wait_conditions.dart';
 
 const String _extensionMethodName = 'driver';
