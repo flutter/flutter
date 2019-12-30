@@ -133,8 +133,8 @@ class RenderSliverOpacity extends RenderProxySliver {
     assert(value != null);
     assert(value >= 0.0 && value <= 1.0);
     assert(value != null);
-    final SliverMultiBoxAdaptorParentData parentData = child.parentData as SliverMultiBoxAdaptorParentData;
-    if (_opacity == value || parentData.keptAlive)
+    final SliverMultiBoxAdaptorParentData parentData = child?.parentData as SliverMultiBoxAdaptorParentData;
+    if (_opacity == value || (parentData != null && parentData.keptAlive))
       return;
     final bool didNeedCompositing = alwaysNeedsCompositing;
     final bool wasVisible = _alpha != 0;
@@ -404,8 +404,9 @@ class RenderSliverAnimatedOpacity extends RenderProxySliver with RenderAnimatedO
   @override
   set opacity(Animation<double> value) {
     assert(value != null);
-    final SliverMultiBoxAdaptorParentData parentData = child.parentData as SliverMultiBoxAdaptorParentData;
-    if (!parentData.keptAlive)
-      super.opacity = value;
+    final SliverMultiBoxAdaptorParentData parentData = child?.parentData as SliverMultiBoxAdaptorParentData;
+    if (parentData != null && parentData.keptAlive)
+      return;
+    super.opacity = value;
   }
 }
