@@ -684,7 +684,7 @@ class LocalizationsGenerator {
 
     if (preferredSupportedLocales != null) {
       for (LocaleInfo preferredLocale in preferredSupportedLocales) {
-        if (!localeInfoList.contains(preferredLocale))
+        if (!localeInfoList.contains(preferredLocale)) {
           throw L10nException(
             'The preferred supported locale, \'$preferredLocale\', cannot be '
             'added. Please make sure that there is a corresponding arb file '
@@ -692,6 +692,7 @@ class LocalizationsGenerator {
             'preferred supported locale list if there is no intent to support '
             'it.'
           );
+        }
 
         localeInfoList.removeWhere((LocaleInfo localeInfo) => localeInfo == preferredLocale);
       }
