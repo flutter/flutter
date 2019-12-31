@@ -307,6 +307,8 @@ class IosProject implements XcodeBasedProject {
   @override
   final FlutterProject parent;
 
+  static final RegExp _productBundleIdPattern = RegExp(r'''^\s*PRODUCT_BUNDLE_IDENTIFIER\s*=\s*(["']?)(.*?)\1;\s*$''');
+  static const String _productBundleIdVariable = r'$(PRODUCT_BUNDLE_IDENTIFIER)';
   static const String _hostAppBundleName = 'Runner';
 
   Directory get ephemeralDirectory => parent.directory.childDirectory('.ios');
@@ -352,7 +354,7 @@ class IosProject implements XcodeBasedProject {
   @override
   File get podManifestLock => hostAppRoot.childDirectory('Pods').childFile('Manifest.lock');
 
-  /// The default 'Info.plist' file of the host app. The developer can change this location.
+  /// The default 'Info.plist' file of the host app. The developer can change this location in Xcode.
   File get defaultHostInfoPlist => hostAppRoot.childDirectory(_hostAppBundleName).childFile('Info.plist');
 
   @override
@@ -407,6 +409,18 @@ class IosProject implements XcodeBasedProject {
       }
       return allBuildSettings['PRODUCT_BUNDLE_IDENTIFIER'];
     }
+
+    // On non-macOS platforms, parse the first PRODUCT_BUNDLE_IDENTIFIER from
+    // the project file. This can return the wrong bundle identifier if additional
+    // bundles have been added to the project and are found first, like frameworks
+    // or companion watchOS projects. However, on non-macOS platforms this is
+    // only used for display purposes and to regenerate organization names, so
+    // best-effort is probably fine.
+    final String fromPbxproj = _firstMatchInFile(xcodeProjectInfoFile, _productBundleIdPattern)?.group(2);
+    if (fromPbxproj != null && (fromPlist == null || fromPlist == _productBundleIdVariable)) {
+      return fromPbxproj;
+    }
+
     return null;
   }
 
@@ -417,11 +431,17 @@ class IosProject implements XcodeBasedProject {
     if (!xcode.xcodeProjectInterpreter.isInstalled) {
       return null;
     }
-    _buildSettings ??= await xcode.xcodeProjectInterpreter.getBuildSettings(
+    Map<String, String> buildSettings = _buildSettings;
+    buildSettings ??= await xcode.xcodeProjectInterpreter.getBuildSettings(
       xcodeProject.path,
       _hostAppBundleName,
     );
-    return _buildSettings;
+    if (buildSettings != null && buildSettings.isNotEmpty) {
+      // No timeouts, flakes, or errors.
+      _buildSettings = buildSettings;
+      return buildSettings;
+    }
+    return null;
   }
 
   Map<String, String> _buildSettings;
