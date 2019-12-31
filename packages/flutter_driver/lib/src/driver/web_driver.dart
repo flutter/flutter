@@ -31,7 +31,8 @@ export 'web_driver_config.dart';
 class WebFlutterDriver extends FlutterDriver {
   /// Creates a driver that uses a connection provided by the given
   /// [_connection] and [_browserName].
-  WebFlutterDriver.connectedTo(this._connection, this._browser);
+  WebFlutterDriver.connectedTo(this._connection, this._browser) :
+        _startTime = DateTime.now();
 
   final FlutterWebConnection _connection;
   final Browser _browser;
@@ -115,16 +116,11 @@ class WebFlutterDriver extends FlutterDriver {
     Duration timeout = kUnusuallyLongTimeout,
   }) async {
     _checkBrowserSupportsTimeline();
-
-    _startTime = DateTime.now();
   }
 
   @override
   Future<Timeline> stopTracingAndDownloadTimeline({Duration timeout = kUnusuallyLongTimeout}) async {
     _checkBrowserSupportsTimeline();
-    if (_startTime == null) {
-      return null;
-    }
 
     final List<Map<String, dynamic>> events = <Map<String, dynamic>>[];
     for (sync_io.LogEntry entry in _connection.logs) {
@@ -146,7 +142,6 @@ class WebFlutterDriver extends FlutterDriver {
     final Map<String, dynamic> json = <String, dynamic>{
       'traceEvents': events,
     };
-    _startTime = null;
     return Timeline.fromJson(json);
   }
 
@@ -170,7 +165,7 @@ class WebFlutterDriver extends FlutterDriver {
     _checkBrowserSupportsTimeline();
 
     // Reset start time
-    _startTime = null;
+    _startTime = DateTime.now();
   }
 
   /// Checks whether browser supports Timeline related operations
