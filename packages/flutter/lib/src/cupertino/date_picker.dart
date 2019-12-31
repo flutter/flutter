@@ -777,7 +777,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
     }
 
     return MediaQuery(
-      data: const MediaQueryData(textScaleFactor: 1.0),
+      data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
       child: DefaultTextStyle.merge(
         style: _kDefaultPickerTextStyle,
         child: CustomMultiChildLayout(
@@ -1145,7 +1145,7 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
     }
 
     return MediaQuery(
-      data: const MediaQueryData(textScaleFactor: 1.0),
+      data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
       child: DefaultTextStyle.merge(
         style: _kDefaultPickerTextStyle,
         child: CustomMultiChildLayout(
@@ -1669,11 +1669,9 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
     }
     final CupertinoThemeData themeData = CupertinoTheme.of(context);
     return MediaQuery(
-      data: const MediaQueryData(
-        // The native iOS picker's text scaling is fixed, so we will also fix it
-        // as well in our picker.
-        textScaleFactor: 1.0,
-      ),
+      // The native iOS picker's text scaling is fixed, so we will also fix it
+      // as well in our picker.
+      data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
       child: CupertinoTheme(
         data: themeData.copyWith(
           textTheme: themeData.textTheme.copyWith(
