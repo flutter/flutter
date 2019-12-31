@@ -38,6 +38,9 @@ void main() {
       fs.file(fs.path.join(projectPath, '.packages',))
           ..createSync(recursive: true)
           ..writeAsStringSync(dotPackagesSrc);
+    });
+
+    setUp(() {
       libMain = fs.file(fs.path.join(projectPath, 'lib', 'main.dart'))
           ..createSync(recursive: true)
           ..writeAsStringSync(mainDartSrc);
