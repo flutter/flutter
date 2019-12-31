@@ -115,6 +115,7 @@ class TextFormField extends FormField<String> {
     ValueChanged<String> onFieldSubmitted,
     FormFieldSetter<String> onSaved,
     FormFieldValidator<String> validator,
+    ErrorStateMatcher<String> errorStateMatcher,
     List<TextInputFormatter> inputFormatters,
     bool enabled = true,
     double cursorWidth = 2.0,
@@ -153,6 +154,7 @@ class TextFormField extends FormField<String> {
     initialValue: controller != null ? controller.text : (initialValue ?? ''),
     onSaved: onSaved,
     validator: validator,
+    errorStateMatcher: errorStateMatcher,
     autovalidate: autovalidate,
     enabled: enabled,
     builder: (FormFieldState<String> field) {
@@ -168,7 +170,9 @@ class TextFormField extends FormField<String> {
       return TextField(
         controller: state._effectiveController,
         focusNode: focusNode,
-        decoration: effectiveDecoration.copyWith(errorText: field.errorText),
+        decoration: field.isErrorState
+            ? effectiveDecoration.copyWith(errorText: field.errorText)
+            : effectiveDecoration,
         keyboardType: keyboardType,
         textInputAction: textInputAction,
         style: style,

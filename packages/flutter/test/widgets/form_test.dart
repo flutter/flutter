@@ -83,6 +83,107 @@ void main() {
     await checkText('');
   });
 
+  testWidgets('touched is updated', (WidgetTester tester) async {
+    final GlobalKey<FormFieldState<String>> formFieldKey = GlobalKey<FormFieldState<String>>();
+
+    Widget builder() {
+      return MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(devicePixelRatio: 1.0),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: Material(
+                child: Form(
+                  child: TextFormField(
+                    key: formFieldKey,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(builder());
+
+    expect(formFieldKey.currentState.touched, false);
+    await tester.enterText(find.byType(TextFormField), 'test');
+    expect(formFieldKey.currentState.touched, true);
+    formFieldKey.currentState.reset();
+    expect(formFieldKey.currentState.touched, false);
+  });
+
+  testWidgets('saved is updated', (WidgetTester tester) async {
+    final GlobalKey<FormFieldState<String>> formFieldKey = GlobalKey<FormFieldState<String>>();
+
+    Widget builder() {
+      return MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(devicePixelRatio: 1.0),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: Material(
+                child: Form(
+                  child: TextFormField(
+                    key: formFieldKey,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await tester.pumpWidget(builder());
+
+    expect(formFieldKey.currentState.saved, false);
+    formFieldKey.currentState.save();
+    expect(formFieldKey.currentState.saved, true);
+    formFieldKey.currentState.reset();
+    expect(formFieldKey.currentState.saved, false);
+  });
+
+  testWidgets('isErrorState returns result from errorStateMatcher', (WidgetTester tester) async {
+    final GlobalKey<FormFieldState<String>> formFieldKey = GlobalKey<FormFieldState<String>>();
+
+    Widget builder(ErrorStateMatcher<String> errorStateMatcher) {
+      return MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(devicePixelRatio: 1.0),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Center(
+              child: Material(
+                child: Form(
+                  child: TextFormField(
+                    key: formFieldKey,
+                    errorStateMatcher: errorStateMatcher,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // With null errorStateMatcher
+    await tester.pumpWidget(builder(null));
+    expect(formFieldKey.currentState.isErrorState, false);
+
+    // Perpetual true errorStateMatcher
+    await tester.pumpWidget(builder((FormFieldState<String> state) => true));
+    expect(formFieldKey.currentState.isErrorState, true);
+
+    // Perpetual false errorStateMatcher
+    await tester.pumpWidget(builder((FormFieldState<String> state) => false));
+    expect(formFieldKey.currentState.isErrorState, false);
+  });
+
   testWidgets('Validator sets the error text only when validate is called', (WidgetTester tester) async {
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
     String errorText(String value) => value + '/error';

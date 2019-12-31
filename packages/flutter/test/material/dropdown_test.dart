@@ -703,6 +703,63 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('DropdownButtonFormField creates InputDecorator with decoration indicating error state', (WidgetTester tester) async {
+    const UnderlineInputBorder border = UnderlineInputBorder(
+      borderSide: BorderSide(width: 42599.0),
+    );
+    await tester.pumpWidget(TestApp(
+      textDirection: TextDirection.ltr,
+      child: Material(
+        child: DropdownButtonFormField<String>(
+          hint: const Text('Dropdown Form Field'),
+          value: 'hideError',
+          autovalidate: true,
+          validator: (String value) => 'errorMessage',
+          errorStateMatcher: (FormFieldState<String> state) =>
+              state.value == 'showError',
+          decoration: const InputDecoration(border: border),
+          onChanged: (_) {},
+          items: const <DropdownMenuItem<String>>[
+            DropdownMenuItem<String>(
+              value: 'hideError',
+              child: Text('Hide Error'),
+            ),
+            DropdownMenuItem<String>(
+              value: 'showError',
+              child: Text('Show Error'),
+            ),
+          ],
+        ),
+      ),
+    ));
+
+    final Finder inputDecoratorFinder = find.byType(InputDecorator);
+    expect(inputDecoratorFinder, findsOneWidget);
+
+    // Initial value is 'hideError'.
+    final InputDecorator inputDecorator = tester.widget(inputDecoratorFinder);
+    expect(inputDecorator.decoration.border, border);
+    expect(inputDecorator.decoration.errorText, null);
+
+    // Tap on 'Show Error' and the decoration.errorText becomes 'errorMessage'
+    await tester.tap(find.text('Dropdown Form Field'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Show Error').last);
+    await tester.pumpAndSettle();
+    final InputDecorator showErrorInputDecorator = tester.widget(inputDecoratorFinder);
+    expect(showErrorInputDecorator.decoration.border, border);
+    expect(showErrorInputDecorator.decoration.errorText, 'errorMessage');
+
+    // Tap on 'Hide Error' and the decoration.errorText goes back to null
+    await tester.tap(find.text('Dropdown Form Field'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Hide Error').last);
+    await tester.pumpAndSettle();
+    final InputDecorator hideErrorInputDecorator = tester.widget(inputDecoratorFinder);
+    expect(hideErrorInputDecorator.decoration.border, border);
+    expect(hideErrorInputDecorator.decoration.errorText, null);
+  });
+
   testWidgets('Dropdown menu scrolls to first item in long lists', (WidgetTester tester) async {
     // Open the dropdown menu
     final Key buttonKey = UniqueKey();

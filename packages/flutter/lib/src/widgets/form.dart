@@ -234,6 +234,11 @@ class _FormScope extends InheritedWidget {
   bool updateShouldNotify(_FormScope old) => _generation != old._generation;
 }
 
+/// Signature for determining whether errors should be shown on a form field.
+///
+/// Used by [FormField.errorStateMatcher].
+typedef ErrorStateMatcher<T> = bool Function(FormFieldState<T> state);
+
 /// Signature for validating a form field.
 ///
 /// Returns an error string to display if the input is invalid, or null
@@ -282,6 +287,7 @@ class FormField<T> extends StatefulWidget {
     @required this.builder,
     this.onSaved,
     this.validator,
+    this.errorStateMatcher,
     this.initialValue,
     this.autovalidate = false,
     this.enabled = true,
@@ -306,6 +312,29 @@ class FormField<T> extends StatefulWidget {
   /// height parent like [SizedBox], or set the [TextFormField.helperText]
   /// parameter to a space.
   final FormFieldValidator<T> validator;
+
+  /// An optional callback function that defines whether the validation error
+  /// generated from [FormFieldState.validate] should be shown. The function
+  /// should return a boolean which indicates whether the form field is in
+  /// error state. See: [FormFieldState.isErrorState].
+  ///
+  /// [FormFieldState] is passed as a parameter to this callback method. You
+  /// can use attributes like [FormFieldState.touched], [FormFieldState.saved],
+  /// etc. to define this callback. For example:
+  ///
+  /// ```dart
+  /// // show error only after the user has touched the form field
+  /// errorStateMatcher: (state) => state.touched
+  /// ```
+  ///
+  /// Only perform a minuscule amount of calculation in this callback function
+  /// because this will be called every time [FormFieldState.isErrorState] is
+  /// accessed. Anything more complex or heavyweight should not be in this
+  /// function.
+  ///
+  /// If this is null, no confining condition will apply, so any error will be
+  /// shown immediately.
+  final ErrorStateMatcher<T> errorStateMatcher;
 
   /// Function that returns the widget representing this form field. It is
   /// passed the form field state as input, containing the current value and
@@ -337,6 +366,8 @@ class FormField<T> extends StatefulWidget {
 class FormFieldState<T> extends State<FormField<T>> {
   T _value;
   String _errorText;
+  bool _touched;
+  bool _saved;
 
   /// The current value of the form field.
   T get value => _value;
@@ -349,8 +380,31 @@ class FormFieldState<T> extends State<FormField<T>> {
   /// True if this field has any validation errors.
   bool get hasError => _errorText != null;
 
+  /// The current error state returned by the [FormField.errorStateMatcher]
+  /// callback. If [FormField.errorStateMatcher] is null, then this simply
+  /// returns [hasError].
+  ///
+  /// If true, the [FormFieldState.errorText] should be shown. Otherwise, the
+  /// error text should be hidden, though its value still exists.
+  bool get isErrorState => widget.errorStateMatcher != null
+      ? widget.errorStateMatcher(this)
+      : hasError;
+
+  /// True if this field has been touched by the user so [didChange] has been
+  /// called since the field's initialization or reset.
+  ///
+  /// Manually setting the [value] does not trigger an update on [touched].
+  bool get touched => _touched;
+
+  /// True if [FormField.save] has ever been called since its initialization or
+  /// reset.
+  bool get saved => _saved;
+
   /// Calls the [FormField]'s onSaved method with the current value.
   void save() {
+    setState(() {
+      _saved = true;
+    });
     if (widget.onSaved != null)
       widget.onSaved(value);
   }
@@ -360,6 +414,8 @@ class FormFieldState<T> extends State<FormField<T>> {
     setState(() {
       _value = widget.initialValue;
       _errorText = null;
+      _touched = false;
+      _saved = false;
     });
   }
 
@@ -385,6 +441,7 @@ class FormFieldState<T> extends State<FormField<T>> {
   void didChange(T value) {
     setState(() {
       _value = value;
+      _touched = true;
     });
     Form.of(context)?._fieldDidChange();
   }
@@ -405,6 +462,8 @@ class FormFieldState<T> extends State<FormField<T>> {
   void initState() {
     super.initState();
     _value = widget.initialValue;
+    _touched = false;
+    _saved = false;
   }
 
   @override

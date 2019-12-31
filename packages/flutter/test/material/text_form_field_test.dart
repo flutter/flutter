@@ -74,6 +74,40 @@ void main() {
     expect(textFieldWidget.textInputAction, TextInputAction.next);
   });
 
+  testWidgets('Passes decoration to underlying TextField', (WidgetTester tester) async {
+    const UnderlineInputBorder border = UnderlineInputBorder(
+      borderSide: BorderSide(width: 4259.0),
+    );
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextFormField(
+              autovalidate: true,
+              validator: (String value) => 'errorMessage',
+              errorStateMatcher: (FormFieldState<String> state) =>
+                  state.value == 'showError',
+              decoration: const InputDecoration(border: border),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    final Finder textFieldFinder = find.byType(TextField);
+    expect(textFieldFinder, findsOneWidget);
+
+    final TextField textFieldWidget = tester.widget(textFieldFinder);
+    expect(textFieldWidget.decoration.border, border);
+    expect(textFieldWidget.decoration.errorText, null);
+
+    await tester.enterText(textFieldFinder, 'showError');
+    await tester.pump();
+    final TextField newTextFieldWidget = tester.widget(textFieldFinder);
+    expect(newTextFieldWidget.decoration.border, border);
+    expect(newTextFieldWidget.decoration.errorText, 'errorMessage');
+  });
+
   testWidgets('Passes onEditingComplete to underlying TextField', (WidgetTester tester) async {
     final VoidCallback onEditingComplete = () { };
 
@@ -216,6 +250,30 @@ void main() {
     await tester.enterText(find.byType(TextField), 'a');
     await tester.pump();
     expect(_validateCalled, 2);
+  });
+
+  testWidgets('errorStateMatcher is called', (WidgetTester tester) async {
+    int _errorStateMatcherCalled = 0;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: Center(
+            child: TextFormField(
+              errorStateMatcher: (FormFieldState<String> state) {
+                _errorStateMatcherCalled += 1;
+                return true;
+              },
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(_errorStateMatcherCalled, 1);
+    await tester.enterText(find.byType(TextField), 'a');
+    await tester.pump();
+    expect(_errorStateMatcherCalled, 2);
   });
 
   testWidgets('passing a buildCounter shows returned widget', (WidgetTester tester) async {
