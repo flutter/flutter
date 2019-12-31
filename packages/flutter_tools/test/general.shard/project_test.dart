@@ -444,7 +444,7 @@ apply plugin: 'kotlin-android'
         final FlutterProject project = await someProject();
         addIosProjectFile(project.directory, projectFileContent: () {
           return projectFileWithBundleId('io.flutter.someProject', qualifier: '\'');
-              });
+        });
         expect(await project.organizationNames, <String>['io.flutter']);
       });
       testInMemory('is populated from Android application ID', () async {
@@ -459,7 +459,7 @@ apply plugin: 'kotlin-android'
         final FlutterProject project = await someProject();
         addIosProjectFile(project.example.directory, projectFileContent: () {
           return projectFileWithBundleId('io.flutter.someProject', qualifier: '\'');
-              });
+        });
         expect(await project.organizationNames, <String>['io.flutter']);
       });
       testInMemory('is populated from Android application ID in plugin example', () async {
@@ -479,7 +479,7 @@ apply plugin: 'kotlin-android'
         final FlutterProject project = await someProject();
         addIosProjectFile(project.directory, projectFileContent: () {
           return projectFileWithBundleId('io.flutter.someProject');
-              });
+        });
         addAndroidGradleFile(project.directory,
           gradleFileContent: () {
             return gradleFileWithApplicationId('io.flutter.someproject');
@@ -490,7 +490,7 @@ apply plugin: 'kotlin-android'
         final FlutterProject project = await someProject();
         addIosProjectFile(project.directory, projectFileContent: () {
           return projectFileWithBundleId('io.flutter.someProject');
-              });
+        });
         addAndroidGradleFile(project.directory,
           gradleFileContent: () {
             return gradleFileWithApplicationId('io.clutter.someproject');
