@@ -999,15 +999,6 @@ void main() {
       await driver.checkHealth();
     });
 
-    group('clearTimeline', () {
-      test('clears timeline', () async {
-        await driver.startTracing();
-        expect(driver.startTime, isNotNull);
-        await driver.clearTimeline();
-        expect(driver.startTime, isNull);
-      });
-    });
-
     group('WebFlutterDriver Unimplemented error', () {
       test('forceGC', () async {
         expect(driver.forceGC(),
