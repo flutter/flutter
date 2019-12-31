@@ -466,4 +466,3 @@ class RectangularNotch extends NotchedShape {
       ..close();
   }
 }
-
