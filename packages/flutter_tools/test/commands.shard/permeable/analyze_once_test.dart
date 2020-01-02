@@ -31,6 +31,8 @@ void main() {
     setUpAll(() {
       Cache.disableLocking();
       tempDir = fs.systemTempDirectory.createTempSync('flutter_analyze_once_test_1.').absolute;
+      print('Using $tempDir as temporary directory.');
+      print('${tempDir.listSync(recursive: true)}');
       projectPath = fs.path.join(tempDir.path, 'flutter_project');
       fs.file(fs.path.join(projectPath, 'pubspec.yaml'))
           ..createSync(recursive: true)
