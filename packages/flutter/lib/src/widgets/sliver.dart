@@ -1097,13 +1097,12 @@ class _SliverFillViewportRenderObjectWidget extends SliverMultiBoxAdaptorWidget 
 
 class _SliverFractionalPadding extends SingleChildRenderObjectWidget {
   const _SliverFractionalPadding({
-    Key key,
     this.viewportFraction = 0,
     Widget sliver,
   }) : assert(viewportFraction != null),
        assert(viewportFraction >= 0),
        assert(viewportFraction <= 0.5),
-       super(key: key, child: sliver);
+       super(child: sliver);
 
   final double viewportFraction;
 
