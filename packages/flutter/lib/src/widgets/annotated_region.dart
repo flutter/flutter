@@ -54,3 +54,4 @@ class AnnotatedRegion<T> extends SingleChildRenderObjectWidget {
       ..sized = sized;
   }
 }
+

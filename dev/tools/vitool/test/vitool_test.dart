@@ -696,3 +696,4 @@ class PathAnimationMatcher extends Matcher {
 String testAsset(String name) {
   return path.join(kPackagePath, 'test_assets', name);
 }
+
