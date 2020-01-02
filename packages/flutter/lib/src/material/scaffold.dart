@@ -2574,11 +2574,12 @@ class PersistentBottomSheetController<T> extends ScaffoldFeatureController<_Stan
 
 class _ScaffoldScope extends InheritedWidget {
   const _ScaffoldScope({
+    Key key,
     @required this.hasDrawer,
     @required this.geometryNotifier,
     @required Widget child,
   }) : assert(hasDrawer != null),
-       super(child: child);
+       super(key: key, child: child);
 
   final bool hasDrawer;
   final _ScaffoldGeometryNotifier geometryNotifier;
