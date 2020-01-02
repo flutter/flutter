@@ -30,7 +30,7 @@ class MultiChildLayoutParentData extends ContainerBoxParentData<RenderBox> {
 ///
 /// Override [getSize] to control the overall size of the layout. The size of
 /// the layout cannot depend on layout properties of the children.
-/// If you want to do build a custom layout where you define the size of that widget
+/// If you want to build a custom layout where you define the size of that widget
 /// based on its children, then you will have to create a custom render object.
 /// See [MultiChildRenderObjectWidget] with [ContainerRenderObjectMixin] and
 /// [RenderBoxContainerDefaultsMixin] to get started or [RenderStack] for an
