@@ -275,11 +275,12 @@ class UpdatePackagesCommand extends FlutterCommand {
       // here.
       for (PubspecYaml pubspec in pubspecs) {
         final String package = pubspec.name;
-        final String version = pubspec.version;
+        specialDependencies.add(package);
+        tree._versions[package] = pubspec.version;
+        assert(!tree._dependencyTree.containsKey(package));
+        tree._dependencyTree[package] = <String>{};
         for (PubspecDependency dependency in pubspec.dependencies) {
           if (dependency.kind == DependencyKind.normal) {
-            tree._versions[package] = version;
-            tree._dependencyTree[package] ??= <String>{};
             tree._dependencyTree[package].add(dependency.name);
           }
         }
@@ -765,12 +766,16 @@ class PubspecYaml {
     final List<String> transitiveDependenciesAsList = transitiveDependencies.toList()..sort();
     final List<String> transitiveDevDependenciesAsList = transitiveDevDependencies.toList()..sort();
 
+    String computeTransitiveDependencyLineFor(String package) {
+      return '  $package: ${versions.versionFor(package)} $kTransitiveMagicString';
+    }
+
     // Add a line for each transitive dependency and transitive dev dependency using our magic string to recognize them later.
     for (String package in transitiveDependenciesAsList) {
-      transitiveDependencyOutput.add('  $package: ${versions.versionFor(package)} $kTransitiveMagicString');
+      transitiveDependencyOutput.add(computeTransitiveDependencyLineFor(package));
     }
     for (String package in transitiveDevDependenciesAsList) {
-      transitiveDevDependencyOutput.add('  $package: ${versions.versionFor(package)} $kTransitiveMagicString');
+      transitiveDevDependencyOutput.add(computeTransitiveDependencyLineFor(package));
     }
 
     // Build a sorted list of all dependencies for the checksum.
@@ -1239,7 +1244,7 @@ class PubDependencyTree {
   }
 
   /// The transitive closure of all the dependencies for the given package,
-  /// excluding any listen in `seen`.
+  /// excluding any listed in `seen`.
   Iterable<String> getTransitiveDependenciesFor(
     String package, {
     @required Set<String> seen,
