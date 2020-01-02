@@ -185,4 +185,3 @@ void main() {
 }
 
 class MockGenSnapshot extends Mock implements GenSnapshot {}
-
