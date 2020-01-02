@@ -293,10 +293,10 @@ class AlertDialog extends StatelessWidget {
 
   /// Padding around the the set of [actions] at the bottom of the dialog.
   ///
-  /// Typically used to provide padding to the button bar between the edge
-  /// of the dialog.
+  /// Typically used to provide padding to the button bar between the button bar
+  /// and the edges of the dialog.
   ///
-  /// If there is no [actions], no padding will be provided. The padding around
+  /// If are no [actions], then no padding will be included. The padding around
   /// the button bar defaults to zero. It is also important to note that
   /// [buttonPadding] may contribute to the padding on the edges of [actions] as
   /// well.
@@ -317,7 +317,10 @@ class AlertDialog extends StatelessWidget {
   /// {@end-tool}
   final EdgeInsetsGeometry actionsPadding;
 
-  /// Defines the padding for a button's child (typically the button's label).
+  /// The padding that surrounds each button in [actions].
+  ///
+  /// This is different from [actionsPadding], which defines the padding
+  /// between the entire button bar and the edges of the dialog.
   ///
   /// If this property is null, then it will use the surrounding
   /// [ButtonBarTheme.buttonPadding]. If that is null, it will default to
