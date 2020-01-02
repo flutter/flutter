@@ -132,9 +132,8 @@ class RenderSliverOpacity extends RenderProxySliver {
   set opacity(double value) {
     assert(value != null);
     assert(value >= 0.0 && value <= 1.0);
-    assert(value != null);
-    final SliverMultiBoxAdaptorParentData parentData = child?.parentData as SliverMultiBoxAdaptorParentData;
-    if (_opacity == value || (parentData != null && parentData.keptAlive))
+
+    if (_opacity == value)
       return;
     final bool didNeedCompositing = alwaysNeedsCompositing;
     final bool wasVisible = _alpha != 0;
@@ -163,7 +162,6 @@ class RenderSliverOpacity extends RenderProxySliver {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    void _paintWithOpacity(PaintingContext context, Offset offset) => context.paintChild(child, offset);
     if (child != null && child.geometry.visible) {
       if (_alpha == 0) {
         // No need to keep the layer. We'll create a new one if necessary.
@@ -180,7 +178,7 @@ class RenderSliverOpacity extends RenderProxySliver {
       layer = context.pushOpacity(
         offset,
         _alpha,
-        _paintWithOpacity,
+        super.paint,
         oldLayer: layer as OpacityLayer,
       );
     }
@@ -399,14 +397,5 @@ class RenderSliverAnimatedOpacity extends RenderProxySliver with RenderAnimatedO
     this.opacity = opacity;
     this.alwaysIncludeSemantics = alwaysIncludeSemantics;
     child = sliver;
-  }
-
-  @override
-  set opacity(Animation<double> value) {
-    assert(value != null);
-    final SliverMultiBoxAdaptorParentData parentData = child?.parentData as SliverMultiBoxAdaptorParentData;
-    if (parentData != null && parentData.keptAlive)
-      return;
-    super.opacity = value;
   }
 }
