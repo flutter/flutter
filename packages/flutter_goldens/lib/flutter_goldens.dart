@@ -334,7 +334,7 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
     assert(
       false,
-      'The FlutterPreSubmitComparator has been used to execute a golden '
+      'The FlutterPreSubmitFileComparator has been used to execute a golden '
       'file test; this should never happen. Presubmit golden file testing '
       'should be executed by either the _AuthorizedFlutterPreSubmitComparator '
       'or the _UnauthorizedFlutterPreSubmitComparator based on contributor '
