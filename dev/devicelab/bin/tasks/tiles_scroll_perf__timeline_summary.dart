@@ -12,4 +12,3 @@ Future<void> main() async {
   deviceOperatingSystem = DeviceOperatingSystem.android;
   await task(createTilesScrollPerfTest());
 }
-

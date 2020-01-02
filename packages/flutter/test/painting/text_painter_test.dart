@@ -745,6 +745,15 @@ void main() {
 
     expect(lines.length, 4);
 
+    // TODO(garyq): This data dump is for debugging a test flake. This should
+    // be removed when it is no longer useful.
+    if (lines[1].hardBreak == true) {
+      print('LineMetrics called: ${lines.length}');
+      for (ui.LineMetrics line in lines) {
+        print('${line.lineNumber}: ${line.hardBreak}');
+      }
+    }
+
     expect(lines[0].hardBreak, true);
     expect(lines[1].hardBreak, false);
     expect(lines[2].hardBreak, true);
