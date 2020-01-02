@@ -348,32 +348,54 @@ apply plugin: 'kotlin-android'
         });
       }
 
-      testWithMocks('null, if no pbxproj or plist entries', () async {
+      testWithMocks('null, if no build settings or plist entries', () async {
         final FlutterProject project = await someProject();
         expect(await project.ios.productBundleIdentifier, isNull);
       });
-      testWithMocks('from pbxproj file, if no plist', () async {
+
+      testWithMocks('from build settings, if no plist', () async {
+        final FlutterProject project = await someProject();
+        when(mockXcodeProjectInterpreter.getBuildSettings(any, any)).thenAnswer(
+                (_) {
+              return Future<Map<String,String>>.value(<String, String>{
+                'PRODUCT_BUNDLE_IDENTIFIER': 'io.flutter.someProject',
+              });
+            }
+        );
+        expect(await project.ios.productBundleIdentifier, 'io.flutter.someProject');
+      });
+
+      testWithMocks('from project file, if no plist or build settings', () async {
         final FlutterProject project = await someProject();
         addIosProjectFile(project.directory, projectFileContent: () {
           return projectFileWithBundleId('io.flutter.someProject');
         });
         expect(await project.ios.productBundleIdentifier, 'io.flutter.someProject');
       });
+
       testWithMocks('from plist, if no variables', () async {
         final FlutterProject project = await someProject();
+        project.ios.defaultHostInfoPlist.createSync(recursive: true);
         when(mockPlistUtils.getValueFromFile(any, any)).thenReturn('io.flutter.someProject');
         expect(await project.ios.productBundleIdentifier, 'io.flutter.someProject');
       });
-      testWithMocks('from pbxproj and plist, if default variable', () async {
+
+      testWithMocks('from build settings and plist, if default variable', () async {
         final FlutterProject project = await someProject();
-        addIosProjectFile(project.directory, projectFileContent: () {
-          return projectFileWithBundleId('io.flutter.someProject');
-        });
+        when(mockXcodeProjectInterpreter.getBuildSettings(any, any)).thenAnswer(
+                (_) {
+              return Future<Map<String,String>>.value(<String, String>{
+                'PRODUCT_BUNDLE_IDENTIFIER': 'io.flutter.someProject',
+              });
+            }
+        );
         when(mockPlistUtils.getValueFromFile(any, any)).thenReturn('\$(PRODUCT_BUNDLE_IDENTIFIER)');
         expect(await project.ios.productBundleIdentifier, 'io.flutter.someProject');
       });
-      testWithMocks('from pbxproj and plist, by substitution', () async {
+
+      testWithMocks('from build settings and plist, by substitution', () async {
         final FlutterProject project = await someProject();
+        project.ios.defaultHostInfoPlist.createSync(recursive: true);
         when(mockXcodeProjectInterpreter.getBuildSettings(any, any)).thenAnswer(
           (_) {
             return Future<Map<String,String>>.value(<String, String>{
