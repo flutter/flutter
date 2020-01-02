@@ -332,7 +332,14 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
 
   @override
   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
-    assert(false);
+    assert(
+      false,
+      'The FlutterPreSubmitComparator has been used to execute a golden '
+      'file test; this should never happen. Presubmit golden file testing '
+      'should be executed by either the _AuthorizedFlutterPreSubmitComparator '
+      'or the _UnauthorizedFlutterPreSubmitComparator based on contributor '
+      'permissions.'
+    );
     return false;
   }
 
@@ -364,6 +371,11 @@ class _AuthorizedFlutterPreSubmitComparator extends FlutterPreSubmitFileComparat
     golden = _addPrefix(golden);
     await update(golden, imageBytes);
     final File goldenFile = getGoldenFile(golden);
+
+    // This branch may just be out of date, this is useful when someone has
+    // landed a golden file change elsewhere.
+    if (await skiaClient.imgtestCheck(golden.path, goldenFile))
+      return true;
 
     return skiaClient.tryjobAdd(golden.path, goldenFile);
   }

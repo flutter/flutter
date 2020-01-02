@@ -340,11 +340,6 @@ class SkiaGoldClient {
     );
 
     if (result.exitCode != 0) {
-      // This branch may just be out of date, this is useful when someone has
-      // landed a golden file change elsewhere.
-      if (await imgtestCheck(testName, goldenFile))
-        return true;
-
       final String resultStdout = result.stdout.toString();
       if (resultStdout.contains('Untriaged') || resultStdout.contains('negative image')) {
         final StringBuffer buf = StringBuffer()
