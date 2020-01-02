@@ -530,16 +530,6 @@ void main() {
       findsOneWidget,
     );
   });
-
-  testWidgets('Test for tryjob triage', (WidgetTester tester) async {
-    await tester.pumpWidget(RepaintBoundary(
-      child: Container(
-        color: const Color(0xFF00FF00)
-      )
-    ));
-    final Finder finder = find.byType(RepaintBoundary);
-    await expectLater(finder, matchesGoldenFile('test.tryjob.png'));
-  });
 }
 
 class _MockPaintingContext extends Mock implements PaintingContext {}
