@@ -31,8 +31,6 @@ void main() {
     setUpAll(() {
       Cache.disableLocking();
       tempDir = fs.systemTempDirectory.createTempSync('flutter_analyze_once_test_1.').absolute;
-      print('Using $tempDir as temporary directory.');
-      print('${tempDir.listSync(recursive: true)}');
       projectPath = fs.path.join(tempDir.path, 'flutter_project');
       fs.file(fs.path.join(projectPath, 'pubspec.yaml'))
           ..createSync(recursive: true)
@@ -115,13 +113,13 @@ void main() {
       // Insert an analysis_options.yaml file in the project
       // which will trigger a lint for broken code that was inserted earlier
       final File optionsFile = fs.file(fs.path.join(projectPath, 'analysis_options.yaml'));
-      await optionsFile.writeAsString('''
+      optionsFile.writeAsStringSync('''
   include: package:flutter/analysis_options_user.yaml
   linter:
     rules:
       - only_throw_errors
   ''');
-      String source = await libMain.readAsString();
+      String source = libMain.readAsStringSync();
       source = source.replaceFirst(
         'onPressed: _incrementCounter,',
         '// onPressed: _incrementCounter,',
@@ -130,7 +128,7 @@ void main() {
         '_counter++;',
         '_counter++; throw "an error message";',
       );
-      await libMain.writeAsString(source);
+      libMain.writeAsStringSync(source);
 
       // Analyze in the current directory - no arguments
       await runCommand(
