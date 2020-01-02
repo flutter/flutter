@@ -124,7 +124,7 @@ i.material-icons.md-48 {
 
 /* thinify the inherited names in lists */
 li.inherited a {
-  font-weight: 200;
+  font-weight: 300;
 }
 
 /* address a style issue with the background of code sections */
