@@ -2007,3 +2007,4 @@ const Map<String, LogicalKeyboardKey> kWebNumPadMap = <String, LogicalKeyboardKe
   'NumpadParenLeft': LogicalKeyboardKey.numpadParenLeft,
   'NumpadParenRight': LogicalKeyboardKey.numpadParenRight,
 };
+

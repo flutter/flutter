@@ -13,7 +13,6 @@ import 'package:path/path.dart' as path;
 
 import 'flutter_compact_formatter.dart';
 import 'run_command.dart';
-import 'utils.dart';
 
 typedef ShardRunner = Future<void> Function();
 
@@ -99,28 +98,22 @@ const List<String> kWebTestFileBlacklist = <String>[
 /// SHARD=tool_tests bin/cache/dart-sdk/bin/dart dev/bots/test.dart
 /// bin/cache/dart-sdk/bin/dart dev/bots/test.dart --local-engine=host_debug_unopt
 Future<void> main(List<String> args) async {
-  print('$clock STARTING ANALYSIS');
-  try {
-    flutterTestArgs.addAll(args);
-    if (Platform.environment.containsKey(CIRRUS_TASK_NAME))
-      print('Running task: ${Platform.environment[CIRRUS_TASK_NAME]}');
-    print('═' * 80);
-    await _runSmokeTests();
-    print('═' * 80);
-    await selectShard(const <String, ShardRunner>{
-      'add_to_app_tests': _runAddToAppTests,
-      'build_tests': _runBuildTests,
-      'framework_coverage': _runFrameworkCoverage,
-      'framework_tests': _runFrameworkTests,
-      'hostonly_devicelab_tests': _runHostOnlyDeviceLabTests,
-      'tool_coverage': _runToolCoverage,
-      'tool_tests': _runToolTests,
-      'web_tests': _runWebTests,
-    });
-  } on ExitException catch (error) {
-    error.apply();
-  }
-  print('$clock ${bold}Test successful.$reset');
+  flutterTestArgs.addAll(args);
+  if (Platform.environment.containsKey(CIRRUS_TASK_NAME))
+    print('Running task: ${Platform.environment[CIRRUS_TASK_NAME]}');
+  print('═' * 80);
+  await _runSmokeTests();
+  print('═' * 80);
+  await selectShard(const <String, ShardRunner>{
+    'add_to_app_tests': _runAddToAppTests,
+    'build_tests': _runBuildTests,
+    'framework_coverage': _runFrameworkCoverage,
+    'framework_tests': _runFrameworkTests,
+    'hostonly_devicelab_tests': _runHostOnlyDeviceLabTests,
+    'tool_coverage': _runToolCoverage,
+    'tool_tests': _runToolTests,
+    'web_tests': _runWebTests,
+  });
 }
 
 Future<void> _runSmokeTests() async {
@@ -202,8 +195,12 @@ Future<void> _runSmokeTests() async {
 
   // Verify that we correctly generated the version file.
   final String versionError = await verifyVersion(File(path.join(flutterRoot, 'version')));
-  if (versionError != null)
-    exitWithError(<String>[versionError]);
+  if (versionError != null) {
+    print(redLine);
+    print(versionError);
+    print(redLine);
+    exit(1);
+  }
 }
 
 Future<bq.BigqueryApi> _getBigqueryApi() async {
@@ -627,17 +624,13 @@ Future<void> _pubRunTest(String workingDirectory, {
   }
   if (useFlutterTestFormatter) {
     final FlutterCompactFormatter formatter = FlutterCompactFormatter();
-    Stream<String> testOutput;
-    try {
-      testOutput = runAndGetStdout(
-        pub,
-        args,
-        workingDirectory: workingDirectory,
-        environment: pubEnvironment,
-      );
-    } finally {
-      formatter.finish();
-    }
+    final Stream<String> testOutput = runAndGetStdout(
+      pub,
+      args,
+      workingDirectory: workingDirectory,
+      environment: pubEnvironment,
+      beforeExit: formatter.finish,
+    );
     await _processTestOutput(formatter, testOutput, tableData);
   } else {
     await runCommand(
@@ -714,26 +707,26 @@ Future<void> _runFlutterTest(String workingDirectory, {
 
     if (outputChecker != null) {
       final String message = outputChecker(output);
-      if (message != null)
-        exitWithError(<String>[message]);
+      if (message != null) {
+        print('$redLine');
+        print(message);
+        print('$redLine');
+        exit(1);
+      }
     }
     return;
   }
 
   if (useFlutterTestFormatter) {
     final FlutterCompactFormatter formatter = FlutterCompactFormatter();
-    Stream<String> testOutput;
-    try {
-      testOutput = runAndGetStdout(
-        flutter,
-        args,
-        workingDirectory: workingDirectory,
-        expectNonZeroExit: expectFailure,
-        environment: environment,
-      );
-    } finally {
-      formatter.finish();
-    }
+    final Stream<String> testOutput = runAndGetStdout(
+      flutter,
+      args,
+      workingDirectory: workingDirectory,
+      expectNonZeroExit: expectFailure,
+      beforeExit: formatter.finish,
+      environment: environment,
+    );
     await _processTestOutput(formatter, testOutput, tableData);
   } else {
     await runCommand(
