@@ -100,6 +100,36 @@ flutter:
         );
     }
 
+    void createPluginWithInvalidAndroidPackage() {
+      final Directory pluginUsingJavaAndNewEmbeddingDir =
+              fs.systemTempDirectory.createTempSync('flutter_plugin_invalid_package.');
+      pluginUsingJavaAndNewEmbeddingDir
+        .childFile('pubspec.yaml')
+        .writeAsStringSync('''
+flutter:
+  plugin:
+    androidPackage: plugin1.invalid
+    pluginClass: UseNewEmbedding
+              ''');
+      pluginUsingJavaAndNewEmbeddingDir
+        .childDirectory('android')
+        .childDirectory('src')
+        .childDirectory('main')
+        .childDirectory('java')
+        .childDirectory('plugin1')
+        .childDirectory('correct')
+        .childFile('UseNewEmbedding.java')
+        ..createSync(recursive: true)
+        ..writeAsStringSync('import io.flutter.embedding.engine.plugins.FlutterPlugin;');
+
+      flutterProject.directory
+        .childFile('.packages')
+        .writeAsStringSync(
+          'plugin1:${pluginUsingJavaAndNewEmbeddingDir.childDirectory('lib').uri.toString()}\n',
+          mode: FileMode.append,
+        );
+    }
+
     void createNewKotlinPlugin2() {
       final Directory pluginUsingKotlinAndNewEmbeddingDir =
           fs.systemTempDirectory.createTempSync('flutter_plugin_using_kotlin_and_new_embedding_dir.');
@@ -416,6 +446,32 @@ dependencies:
           throwsToolExit(
             message: 'The plugin `plugin1` requires your app to be migrated to the Android embedding v2. '
                      'Follow the steps on https://flutter.dev/go/android-project-migration and re-run this command.'
+          ),
+        );
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+        FeatureFlags: () => featureFlags,
+        XcodeProjectInterpreter: () => xcodeProjectInterpreter,
+      });
+
+      // Issue: https://github.com/flutter/flutter/issues/47803
+      testUsingContext('exits the tool if a plugin sets an invalid android package in pubspec.yaml', () async {
+        when(flutterProject.isModule).thenReturn(false);
+        when(androidProject.getEmbeddingVersion()).thenReturn(AndroidEmbeddingVersion.v1);
+
+        createPluginWithInvalidAndroidPackage();
+
+        await expectLater(
+          () async {
+            await injectPlugins(flutterProject);
+          },
+          throwsToolExit(
+            message: 'The plugin plugin1 doesn\'t have a main class defined in '
+                     '/.tmp_rand0/flutter_plugin_invalid_package.rand0/android/src/main/java/plugin1/invalid/UseNewEmbedding.java or '
+                     '/.tmp_rand0/flutter_plugin_invalid_package.rand0/android/src/main/kotlin/plugin1/invalid/UseNewEmbedding.kt. '
+                     'This is likely to due to an incorrect `androidPackage: plugin1.invalid` entry in the plugin\'s pubspec.yaml. '
+                     'Please contact the author of this plugin and consider using a different plugin in the meanwhile.'
           ),
         );
       }, overrides: <Type, Generator>{
