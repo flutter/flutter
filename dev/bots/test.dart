@@ -442,7 +442,7 @@ Future<void> _runFrameworkTests() async {
     await _runFlutterTest(path.join(flutterRoot, 'examples', 'hello_world'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'examples', 'layers'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'examples', 'stocks'), tableData: bigqueryApi?.tabledata);
-    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'), tableData: bigqueryApi?.tabledata);
+    await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_driver'), tableData: bigqueryApi?.tabledata, tests: <String>[path.join('test', 'src', 'real_tests')]);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_goldens'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_localizations'), tableData: bigqueryApi?.tabledata);
     await _runFlutterTest(path.join(flutterRoot, 'packages', 'flutter_test'), tableData: bigqueryApi?.tabledata);
@@ -536,6 +536,10 @@ Future<void> _runWebTests() async {
     await _runFlutterWebTest(
       path.join(flutterRoot, 'packages', 'flutter_web_plugins'),
       <String>['test'],
+    );
+    await _runFlutterWebTest(
+        path.join(flutterRoot, 'packages', 'flutter_driver'),
+        <String>[path.join('test', 'src', 'web_tests', 'web_extension_test.dart')],
     );
   };
 
