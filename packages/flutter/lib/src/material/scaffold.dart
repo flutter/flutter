@@ -1135,18 +1135,19 @@ class Scaffold extends StatefulWidget {
   ///
   /// Typically a [Drawer].
   ///
-  /// To open the drawer manually, use the [ScaffoldState.openDrawer] function.
+  /// To open the drawer manually, use the [ScaffoldState.openEndDrawer]
+  /// function.
   ///
   /// {@tool snippet --template=stateful_widget_material}
   /// To disable the drawer edge swipe, set the [Scaffold.drawerEdgeWidth]
-  /// to 0. Then, use [ScaffoldState.openDrawer] to programmatically open the
-  /// drawer.
+  /// to 0. Then, use [ScaffoldState.openEndDrawer] to programmatically open
+  /// the drawer.
   ///
   /// ```dart
   /// final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   ///
-  /// void _openDrawer() {
-  ///   _scaffoldKey.currentState.openDrawer();
+  /// void _openEndDrawer() {
+  ///   _scaffoldKey.currentState.openEndDrawer();
   /// }
   ///
   /// @override
