@@ -1172,13 +1172,17 @@ class EditableTextState extends State<EditableText> with AutomaticKeepAliveClien
     }
     if (widget.style != oldWidget.style) {
       final TextStyle style = widget.style;
-      _textInputConnection?.setStyle(
-        fontFamily: style.fontFamily,
-        fontSize: style.fontSize,
-        fontWeight: style.fontWeight,
-        textDirection: _textDirection,
-        textAlign: widget.textAlign,
-      );
+      // The _textInputConnection will pick up the new style when it attaches in
+      // _openInputConnection.
+      if (_textInputConnection != null && _textInputConnection.attached) {
+        _textInputConnection.setStyle(
+          fontFamily: style.fontFamily,
+          fontSize: style.fontSize,
+          fontWeight: style.fontWeight,
+          textDirection: _textDirection,
+          textAlign: widget.textAlign,
+        );
+      }
     }
   }
 
