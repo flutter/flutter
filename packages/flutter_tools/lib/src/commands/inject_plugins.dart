@@ -38,6 +38,6 @@ class InjectPluginsCommand extends FlutterCommand {
       globals.printStatus('This project does not use plugins, no GeneratedPluginRegistrants have been created.');
     }
 
-    return null;
+    return FlutterCommandResult.success();
   }
 }

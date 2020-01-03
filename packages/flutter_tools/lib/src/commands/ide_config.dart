@@ -243,7 +243,7 @@ class IdeConfigCommand extends FlutterCommand {
     globals.printStatus('Your IntelliJ configuration is now up to date. It is prudent to '
         'restart IntelliJ, if running.');
 
-    return null;
+    return FlutterCommandResult.success();
   }
 
   int _renderTemplate(String templateName, String dirPath, Map<String, dynamic> context) {

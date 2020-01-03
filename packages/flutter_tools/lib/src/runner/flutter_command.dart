@@ -50,6 +50,16 @@ class FlutterCommandResult {
     this.endTimeOverride,
   });
 
+  /// A successful command result. This is used to log the result of a command invocation.
+  factory FlutterCommandResult.success() {
+    return const FlutterCommandResult(ExitStatus.success);
+  }
+
+  /// A warning command result. This is used to log the result of a command invocation.
+  factory FlutterCommandResult.warning() {
+    return const FlutterCommandResult(ExitStatus.warning);
+  }
+
   final ExitStatus exitStatus;
 
   /// Optional data that can be appended to the timing event.

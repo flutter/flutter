@@ -50,14 +50,13 @@ class UpgradeCommand extends FlutterCommand {
   bool get shouldUpdateCache => false;
 
   @override
-  Future<FlutterCommandResult> runCommand() async {
-    await _commandRunner.runCommand(
+  Future<FlutterCommandResult> runCommand() {
+    return _commandRunner.runCommand(
       boolArg('force'),
       boolArg('continue'),
       GitTagVersion.determine(),
       FlutterVersion.instance,
     );
-    return null;
   }
 }
 

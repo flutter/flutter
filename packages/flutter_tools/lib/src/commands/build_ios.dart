@@ -92,6 +92,6 @@ class BuildIOSCommand extends BuildSubCommand {
       globals.printStatus('Built ${result.output}.');
     }
 
-    return null;
+    return FlutterCommandResult.success();
   }
 }

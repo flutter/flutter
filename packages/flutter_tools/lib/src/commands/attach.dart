@@ -178,7 +178,7 @@ class AttachCommand extends FlutterCommand {
         Artifacts: () => overrideArtifacts,
     });
 
-    return null;
+    return FlutterCommandResult.success();
   }
 
   Future<void> _attachToDevice(Device device) async {

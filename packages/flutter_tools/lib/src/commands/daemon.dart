@@ -74,7 +74,7 @@ class DaemonCommand extends FlutterCommand {
         Logger: () => notifyingLogger,
       },
     );
-    return null;
+    return FlutterCommandResult.success();
   }
 }
 

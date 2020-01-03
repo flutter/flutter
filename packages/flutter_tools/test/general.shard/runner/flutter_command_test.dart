@@ -217,6 +217,14 @@ void main() {
       }
     });
 
+    test('FlutterCommandResult.success()', () async {
+      expect(FlutterCommandResult.success().exitStatus, ExitStatus.success);
+    });
+
+    test('FlutterCommandResult.warning()', () async {
+      expect(FlutterCommandResult.warning().exitStatus, ExitStatus.warning);
+    });
+
     group('signals tests', () {
       MockIoProcessSignal mockSignal;
       ProcessSignal signalUnderTest;
