@@ -467,11 +467,12 @@ dependencies:
             await injectPlugins(flutterProject);
           },
           throwsToolExit(
-            message: 'The plugin plugin1 doesn\'t have a main class defined in '
-                     '/.tmp_rand0/flutter_plugin_invalid_package.rand0/android/src/main/java/plugin1/invalid/UseNewEmbedding.java or '
-                     '/.tmp_rand0/flutter_plugin_invalid_package.rand0/android/src/main/kotlin/plugin1/invalid/UseNewEmbedding.kt. '
-                     'This is likely to due to an incorrect `androidPackage: plugin1.invalid` entry in the plugin\'s pubspec.yaml. '
-                     'Please contact the author of this plugin and consider using a different plugin in the meanwhile.'
+            message: 'The plugin `plugin1` doesn\'t have a main class defined in '
+                     '/.tmp_rand2/flutter_plugin_invalid_package.rand2/android/src/main/java/plugin1/invalid/UseNewEmbedding.java or '
+                     '/.tmp_rand2/flutter_plugin_invalid_package.rand2/android/src/main/kotlin/plugin1/invalid/UseNewEmbedding.kt. '
+                     'This is likely to due to an incorrect `androidPackage: plugin1.invalid` or `mainClass` entry in the plugin\'s pubspec.yaml.\n'
+                     'If you are the author of this plugin, fix the `androidPackage` entry or move the main class to any of locations used above. '
+                     'Otherwise, please contact the author of this plugin and consider using a different plugin in the meanwhile.',
           ),
         );
       }, overrides: <Type, Generator>{
@@ -675,6 +676,7 @@ class MockAndroidProject extends Mock implements AndroidProject {}
 class MockFeatureFlags extends Mock implements FeatureFlags {}
 class MockFlutterProject extends Mock implements FlutterProject {}
 class MockFile extends Mock implements File {}
+class MockFileSystem extends Mock implements FileSystem {}
 class MockIosProject extends Mock implements IosProject {}
 class MockMacOSProject extends Mock implements MacOSProject {}
 class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterpreter {}
