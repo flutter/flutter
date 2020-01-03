@@ -104,7 +104,7 @@ void main() {
 
     testWidgets('animations work with curves test', (WidgetTester tester) async {
       final Animation<Decoration> curvedDecorationAnimation =
-      decorationTween.animate(CurvedAnimation(
+        decorationTween.animate(CurvedAnimation(
         parent: controller,
         curve: Curves.easeOut,
       ));
