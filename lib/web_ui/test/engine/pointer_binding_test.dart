@@ -376,7 +376,7 @@ void main() {
 
   // ALL ADAPTERS
 
-  _testEach(
+  _testEach<_BasicEventContext>(
     [_PointerEventContext(), _MouseEventContext(), _TouchEventContext()],
     'can receive pointer events on the glass pane',
     (_BasicEventContext context) {
@@ -393,7 +393,7 @@ void main() {
     },
   );
 
-  _testEach(
+  _testEach<_BasicEventContext>(
     [_PointerEventContext(), _MouseEventContext(), _TouchEventContext()],
     'does create an add event if got a pointerdown',
     (_BasicEventContext context) {
@@ -438,7 +438,7 @@ void main() {
 
   _testEach<_ButtonedEventMixin>(
     [_PointerEventContext(), _MouseEventContext()],
-    'synthesizes a pointerup event on two pointerdowns in a row',
+    'sends a pointermove event instead of the second pointerdown in a row',
     (_ButtonedEventMixin context) {
       PointerBinding.instance.debugOverrideDetector(context);
       List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
@@ -446,24 +446,33 @@ void main() {
         packets.add(packet);
       };
 
-      glassPane.dispatchEvent(context.primaryDown());
-
-      glassPane.dispatchEvent(context.primaryDown());
-
-      expect(packets, hasLength(2));
+      glassPane.dispatchEvent(context.primaryDown(
+        clientX: 10.0,
+        clientY: 10.0,
+      ));
+      expect(packets, hasLength(1));
       // An add will be synthesized.
       expect(packets[0].data, hasLength(2));
       expect(packets[0].data[0].change, equals(ui.PointerChange.add));
       expect(packets[0].data[0].synthesized, equals(true));
       expect(packets[0].data[1].change, equals(ui.PointerChange.down));
-      expect(packets[1].data[0].change, equals(ui.PointerChange.up));
-      expect(packets[1].data[1].change, equals(ui.PointerChange.down));
+      packets.clear();
+
+      glassPane.dispatchEvent(context.primaryDown(
+        clientX: 20.0,
+        clientY: 20.0,
+      ));
+      expect(packets, hasLength(1));
+      expect(packets[0].data, hasLength(1));
+      expect(packets[0].data[0].change, equals(ui.PointerChange.move));
+      expect(packets[0].data[0].buttons, equals(1));
+      packets.clear();
     },
   );
 
   _testEach<_ButtonedEventMixin>(
     [_PointerEventContext(), _MouseEventContext()],
-    'does synthesize add or hover or more for scroll',
+    'does synthesize add or hover or move for scroll',
     (_ButtonedEventMixin context) {
       PointerBinding.instance.debugOverrideDetector(context);
       List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
@@ -1080,6 +1089,362 @@ void main() {
     },
   );
 
+  _testEach<_ButtonedEventMixin>(
+    [_PointerEventContext(), _MouseEventContext()],
+    'handles RMB click when the browser sends it as a move',
+    (_ButtonedEventMixin context) {
+      PointerBinding.instance.debugOverrideDetector(context);
+      // When the user clicks the RMB and moves the mouse quickly (before the
+      // context menu shows up), the browser sends a move event before down.
+      // The move event will have "button:-1, buttons:2".
+
+      List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
+      ui.window.onPointerDataPacket = (ui.PointerDataPacket packet) {
+        packets.add(packet);
+      };
+
+      // Press RMB and hold, popping up the context menu.
+      glassPane.dispatchEvent(context.mouseMove(
+        button: -1,
+        buttons: 2,
+        clientX: 10.0,
+        clientY: 10.0,
+      ));
+      expect(packets, hasLength(1));
+      expect(packets[0].data, hasLength(2));
+      expect(packets[0].data[0].change, equals(ui.PointerChange.add));
+      expect(packets[0].data[0].synthesized, equals(true));
+
+      expect(packets[0].data[1].change, equals(ui.PointerChange.hover));
+      expect(packets[0].data[1].synthesized, equals(false));
+      expect(packets[0].data[1].buttons, equals(0));
+      packets.clear();
+    },
+  );
+
+  _testEach<_ButtonedEventMixin>(
+    [_PointerEventContext(), _MouseEventContext()],
+    'correctly handles hover after RMB click',
+    (_ButtonedEventMixin context) {
+      PointerBinding.instance.debugOverrideDetector(context);
+      // This can happen with the following gesture sequence:
+      //
+      //  - Pops up the context menu by right clicking, but holds RMB;
+      //  - Move the pointer to hover.
+
+      List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
+      ui.window.onPointerDataPacket = (ui.PointerDataPacket packet) {
+        packets.add(packet);
+      };
+
+      // Press RMB and hold, popping up the context menu.
+      glassPane.dispatchEvent(context.mouseDown(
+        button: 2,
+        buttons: 2,
+        clientX: 10.0,
+        clientY: 10.0,
+      ));
+      expect(packets, hasLength(1));
+      expect(packets[0].data, hasLength(2));
+      expect(packets[0].data[0].change, equals(ui.PointerChange.add));
+      expect(packets[0].data[0].synthesized, equals(true));
+
+      expect(packets[0].data[1].change, equals(ui.PointerChange.down));
+      expect(packets[0].data[1].synthesized, equals(false));
+      expect(packets[0].data[1].buttons, equals(2));
+      packets.clear();
+
+      // Move the mouse. The event will have "buttons: 0" because RMB was
+      // released but the browser didn't send a pointerup/mouseup event.
+      // The hover is also triggered at a different position.
+      glassPane.dispatchEvent(context.hover(
+        clientX: 20.0,
+        clientY: 20.0,
+      ));
+      expect(packets, hasLength(1));
+      expect(packets[0].data, hasLength(1));
+      expect(packets[0].data[0].change, equals(ui.PointerChange.move));
+      expect(packets[0].data[0].synthesized, equals(false));
+      expect(packets[0].data[0].buttons, equals(2));
+      packets.clear();
+    },
+  );
+
+  _testEach<_ButtonedEventMixin>(
+    [_PointerEventContext(), _MouseEventContext()],
+    'correctly handles LMB click after RMB click',
+    (_ButtonedEventMixin context) {
+      PointerBinding.instance.debugOverrideDetector(context);
+      // This can happen with the following gesture sequence:
+      //
+      //  - Pops up the context menu by right clicking, but holds RMB;
+      //  - Clicks LMB in a different location;
+      //  - Release LMB.
+      //
+      // The LMB click occurs in a different location because when RMB is
+      // clicked, and the contextmenu is shown, the browser stops sending
+      // `pointermove`/`mousemove` events. Then when the LMB click comes in, it
+      // could be in a different location without any `*move` events in between.
+
+      List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
+      ui.window.onPointerDataPacket = (ui.PointerDataPacket packet) {
+        packets.add(packet);
+      };
+
+      // Press RMB and hold, popping up the context menu.
+      glassPane.dispatchEvent(context.mouseDown(
+        button: 2,
+        buttons: 2,
+        clientX: 10.0,
+        clientY: 10.0,
+      ));
+      expect(packets, hasLength(1));
+      expect(packets[0].data, hasLength(2));
+      expect(packets[0].data[0].change, equals(ui.PointerChange.add));
+      expect(packets[0].data[0].synthesized, equals(true));
+
+      expect(packets[0].data[1].change, equals(ui.PointerChange.down));
+      expect(packets[0].data[1].synthesized, equals(false));
+      expect(packets[0].data[1].buttons, equals(2));
+      packets.clear();
+
+      // Press LMB.
+      glassPane.dispatchEvent(context.mouseDown(
+        button: 0,
+        buttons: 3,
+        clientX: 20.0,
+        clientY: 20.0,
+      ));
+      expect(packets, hasLength(1));
+      expect(packets[0].data, hasLength(1));
+      expect(packets[0].data[0].change, equals(ui.PointerChange.move));
+      expect(packets[0].data[0].synthesized, equals(false));
+      expect(packets[0].data[0].buttons, equals(3));
+      packets.clear();
+
+      // Release LMB.
+      glassPane.dispatchEvent(context.primaryUp(
+        clientX: 20.0,
+        clientY: 20.0,
+      ));
+      expect(packets, hasLength(1));
+      expect(packets[0].data, hasLength(1));
+      expect(packets[0].data[0].change, equals(ui.PointerChange.up));
+      expect(packets[0].data[0].synthesized, equals(false));
+      expect(packets[0].data[0].buttons, equals(0));
+      packets.clear();
+    },
+  );
+
+  _testEach<_ButtonedEventMixin>(
+    [_PointerEventContext(), _MouseEventContext()],
+    'correctly handles two consecutive RMB clicks with no up in between',
+    (_ButtonedEventMixin context) {
+      PointerBinding.instance.debugOverrideDetector(context);
+      // This can happen with the following gesture sequence:
+      //
+      //  - Pops up the context menu by right clicking, but holds RMB;
+      //  - Clicks RMB again in a different location;
+
+      List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
+      ui.window.onPointerDataPacket = (ui.PointerDataPacket packet) {
+        packets.add(packet);
+      };
+
+      // Press RMB and hold, popping up the context menu.
+      glassPane.dispatchEvent(context.mouseDown(
+        button: 2,
+        buttons: 2,
+        clientX: 10.0,
+        clientY: 10.0,
+      ));
+      expect(packets, hasLength(1));
+      expect(packets[0].data, hasLength(2));
+      expect(packets[0].data[0].change, equals(ui.PointerChange.add));
+      expect(packets[0].data[0].synthesized, equals(true));
+      expect(packets[0].data[1].change, equals(ui.PointerChange.down));
+      expect(packets[0].data[1].synthesized, equals(false));
+      expect(packets[0].data[1].buttons, equals(2));
+      packets.clear();
+
+      // Press RMB again. In Chrome, when RMB is clicked again while the
+      // context menu is still active, it sends a pointerdown/mousedown event
+      // with "buttons:0".
+      glassPane.dispatchEvent(context.mouseDown(
+        button: 2,
+        buttons: 0,
+        clientX: 20.0,
+        clientY: 20.0,
+      ));
+      expect(packets, hasLength(1));
+      expect(packets[0].data, hasLength(1));
+      expect(packets[0].data[0].change, equals(ui.PointerChange.move));
+      expect(packets[0].data[0].synthesized, equals(false));
+      expect(packets[0].data[0].buttons, equals(2));
+      packets.clear();
+
+      // Release RMB.
+      glassPane.dispatchEvent(context.mouseUp(
+        button: 2,
+        clientX: 20.0,
+        clientY: 20.0,
+      ));
+      expect(packets, hasLength(1));
+      expect(packets[0].data, hasLength(1));
+      expect(packets[0].data[0].change, equals(ui.PointerChange.up));
+      expect(packets[0].data[0].synthesized, equals(false));
+      expect(packets[0].data[0].buttons, equals(0));
+      packets.clear();
+    },
+  );
+
+  _testEach<_ButtonedEventMixin>(
+    [_PointerEventContext(), _MouseEventContext()],
+    'correctly handles two consecutive RMB clicks with up in between',
+    (_ButtonedEventMixin context) {
+      PointerBinding.instance.debugOverrideDetector(context);
+      // This can happen with the following gesture sequence:
+      //
+      //  - Pops up the context menu by right clicking, but doesn't hold RMB;
+      //  - Clicks RMB again in a different location;
+      //
+      // This seems to be happening sometimes when using RMB on the Mac trackpad.
+
+      List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
+      ui.window.onPointerDataPacket = (ui.PointerDataPacket packet) {
+        packets.add(packet);
+      };
+
+      // Press RMB, popping up the context menu.
+      glassPane.dispatchEvent(context.mouseDown(
+        button: 2,
+        buttons: 2,
+        clientX: 10.0,
+        clientY: 10.0,
+      ));
+      expect(packets, hasLength(1));
+      expect(packets[0].data, hasLength(2));
+      expect(packets[0].data[0].change, equals(ui.PointerChange.add));
+      expect(packets[0].data[0].synthesized, equals(true));
+      expect(packets[0].data[1].change, equals(ui.PointerChange.down));
+      expect(packets[0].data[1].synthesized, equals(false));
+      expect(packets[0].data[1].buttons, equals(2));
+      packets.clear();
+
+      // RMB up.
+      glassPane.dispatchEvent(context.mouseUp(
+        button: 2,
+        clientX: 10.0,
+        clientY: 10.0,
+      ));
+      expect(packets, hasLength(1));
+      expect(packets[0].data, hasLength(1));
+      expect(packets[0].data[0].change, equals(ui.PointerChange.up));
+      expect(packets[0].data[0].synthesized, equals(false));
+      expect(packets[0].data[0].buttons, equals(0));
+      packets.clear();
+
+      // Press RMB again. In Chrome, when RMB is clicked again while the
+      // context menu is still active, it sends a pointerdown/mousedown event
+      // with "buttons:0".
+      glassPane.dispatchEvent(context.mouseDown(
+        button: 2,
+        buttons: 0,
+        clientX: 20.0,
+        clientY: 20.0,
+      ));
+      expect(packets, hasLength(1));
+      expect(packets[0].data, hasLength(2));
+      expect(packets[0].data[0].change, equals(ui.PointerChange.hover));
+      expect(packets[0].data[0].synthesized, equals(true));
+      expect(packets[0].data[0].buttons, equals(0));
+      expect(packets[0].data[1].change, equals(ui.PointerChange.down));
+      expect(packets[0].data[1].synthesized, equals(false));
+      expect(packets[0].data[1].buttons, equals(2));
+      packets.clear();
+
+      // Release RMB.
+      glassPane.dispatchEvent(context.mouseUp(
+        button: 2,
+        clientX: 20.0,
+        clientY: 20.0,
+      ));
+      expect(packets, hasLength(1));
+      expect(packets[0].data, hasLength(1));
+      expect(packets[0].data[0].change, equals(ui.PointerChange.up));
+      expect(packets[0].data[0].synthesized, equals(false));
+      expect(packets[0].data[0].buttons, equals(0));
+      packets.clear();
+    },
+  );
+
+  _testEach<_ButtonedEventMixin>(
+    [_PointerEventContext(), _MouseEventContext()],
+    'correctly handles two consecutive RMB clicks in two different locations',
+    (_ButtonedEventMixin context) {
+      PointerBinding.instance.debugOverrideDetector(context);
+      // This can happen with the following gesture sequence:
+      //
+      //  - Pops up the context menu by right clicking;
+      //  - The browser sends RMB up event;
+      //  - Click RMB again in a different location;
+      //
+      // This scenario happens occasionally. I'm still not sure why, but in some
+      // cases, the browser actually sends an `up` event for the RMB click even
+      // when the context menu is shown.
+
+      List<ui.PointerDataPacket> packets = <ui.PointerDataPacket>[];
+      ui.window.onPointerDataPacket = (ui.PointerDataPacket packet) {
+        packets.add(packet);
+      };
+
+      // Press RMB and hold, popping up the context menu.
+      glassPane.dispatchEvent(context.mouseDown(
+        button: 2,
+        buttons: 2,
+        clientX: 10.0,
+        clientY: 10.0,
+      ));
+      expect(packets, hasLength(1));
+      expect(packets[0].data, hasLength(2));
+      expect(packets[0].data[0].change, equals(ui.PointerChange.add));
+      expect(packets[0].data[0].synthesized, equals(true));
+      expect(packets[0].data[1].change, equals(ui.PointerChange.down));
+      expect(packets[0].data[1].synthesized, equals(false));
+      expect(packets[0].data[1].buttons, equals(2));
+      packets.clear();
+
+      // Release RMB.
+      glassPane.dispatchEvent(context.mouseUp(
+        button: 2,
+        clientX: 10.0,
+        clientY: 10.0,
+      ));
+      expect(packets, hasLength(1));
+      expect(packets[0].data, hasLength(1));
+      expect(packets[0].data[0].change, equals(ui.PointerChange.up));
+      expect(packets[0].data[0].buttons, equals(0));
+      packets.clear();
+
+      // Press RMB again, in a different location.
+      glassPane.dispatchEvent(context.mouseDown(
+        button: 2,
+        buttons: 2,
+        clientX: 20.0,
+        clientY: 20.0,
+      ));
+      expect(packets, hasLength(1));
+      expect(packets[0].data, hasLength(2));
+      expect(packets[0].data[0].change, equals(ui.PointerChange.hover));
+      expect(packets[0].data[0].synthesized, equals(true));
+      expect(packets[0].data[0].buttons, equals(0));
+      expect(packets[0].data[1].change, equals(ui.PointerChange.down));
+      expect(packets[0].data[1].synthesized, equals(false));
+      expect(packets[0].data[1].buttons, equals(2));
+      packets.clear();
+    },
+  );
+
   // MULTIPOINTER ADAPTERS
 
   _testEach<_MultiPointerEventMixin>(
@@ -1314,7 +1679,7 @@ void main() {
 
   // POINTER ADAPTER
 
-  _testEach(
+  _testEach<_PointerEventContext>(
     [_PointerEventContext()],
     'does not synthesize pointer up if from different device',
     (_PointerEventContext context) {
