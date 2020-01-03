@@ -364,7 +364,38 @@ class PointerDataConverter {
               )
             );
           }
-          assert(!_locationHasChanged(device, physicalX, physicalY));
+          if (_locationHasChanged(device, physicalX, physicalY)) {
+            assert(alreadyAdded);
+            // Synthesize a hover of the pointer to the down location before
+            // sending the down event, if necessary.
+            result.add(
+              _synthesizePointerData(
+                timeStamp: timeStamp,
+                change: ui.PointerChange.hover,
+                kind: kind,
+                device: device,
+                physicalX: physicalX,
+                physicalY: physicalY,
+                buttons: 0,
+                obscured: obscured,
+                pressure: 0.0,
+                pressureMin: pressureMin,
+                pressureMax: pressureMax,
+                distance: distance,
+                distanceMax: distanceMax,
+                size: size,
+                radiusMajor: radiusMajor,
+                radiusMinor: radiusMinor,
+                radiusMin: radiusMin,
+                radiusMax: radiusMax,
+                orientation: orientation,
+                tilt: tilt,
+                platformData: platformData,
+                scrollDeltaX: scrollDeltaX,
+                scrollDeltaY: scrollDeltaY,
+              )
+            );
+          }
           state.down = true;
           result.add(
             _generateCompletePointerData(
@@ -442,7 +473,37 @@ class PointerDataConverter {
             physicalX = state.x;
             physicalY = state.y;
           }
-          assert(!_locationHasChanged(device, physicalX, physicalY));
+          if (_locationHasChanged(device, physicalX, physicalY)) {
+            // Synthesize a move of the pointer to the up location before
+            // sending the up event, if necessary.
+            result.add(
+              _synthesizePointerData(
+                timeStamp: timeStamp,
+                change: ui.PointerChange.move,
+                kind: kind,
+                device: device,
+                physicalX: physicalX,
+                physicalY: physicalY,
+                buttons: buttons,
+                obscured: obscured,
+                pressure: pressure,
+                pressureMin: pressureMin,
+                pressureMax: pressureMax,
+                distance: distance,
+                distanceMax: distanceMax,
+                size: size,
+                radiusMajor: radiusMajor,
+                radiusMinor: radiusMinor,
+                radiusMin: radiusMin,
+                radiusMax: radiusMax,
+                orientation: orientation,
+                tilt: tilt,
+                platformData: platformData,
+                scrollDeltaX: scrollDeltaX,
+                scrollDeltaY: scrollDeltaY,
+              )
+            );
+          }
           state.down = false;
           result.add(
             _generateCompletePointerData(

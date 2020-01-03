@@ -288,7 +288,7 @@ class _SanitizedDetails {
 class _ButtonSanitizer {
   int _pressedButtons = 0;
 
-  // Transform html.PointerEvent.buttons to Flutter's PointerEvent buttons.
+  /// Transform [html.PointerEvent.buttons] to Flutter's PointerEvent buttons.
   int _htmlButtonsToFlutterButtons(int buttons) {
     // Flutter's button definition conveniently matches that of JavaScript
     // from primary button (0x1) to forward button (0x10), which allows us to
@@ -296,33 +296,73 @@ class _ButtonSanitizer {
     return buttons & _kButtonsMask;
   }
 
-  List<_SanitizedDetails> sanitizeDownEvent({@required int buttons}) {
-    final List<_SanitizedDetails> result = <_SanitizedDetails>[];
-    // TODO(flutter_web): Remove this temporary fix for right click
-    // on web platform once context gesture is implemented.
-    if (_pressedButtons != 0) {
-      _pressedButtons = 0;
-      result.add(_SanitizedDetails(
-        change: ui.PointerChange.up,
-        buttons: 0,
-      ));
+  /// Given [html.PointerEvent.button] and [html.PointerEvent.buttons], tries to
+  /// infer the correct value for Flutter buttons.
+  int _inferDownFlutterButtons(int button, int buttons) {
+    if (buttons == 0 && button > -1) {
+      // In some cases, the browser sends `buttons:0` in a down event. In such
+      // case, we try to infer the value from `button`.
+      buttons = convertButtonToButtons(button);
     }
-    _pressedButtons = _htmlButtonsToFlutterButtons(buttons);
-    result.add(_SanitizedDetails(
-      change: ui.PointerChange.down,
-      buttons: _pressedButtons,
-    ));
-    return result;
+    return _htmlButtonsToFlutterButtons(buttons);
+  }
+
+  List<_SanitizedDetails> sanitizeDownEvent({
+    @required int button,
+    @required int buttons,
+  }) {
+    // If the pointer is already down, we just send a move event with the new
+    // `buttons` value.
+    if (_pressedButtons != 0) {
+      return sanitizeMoveEvent(buttons: buttons);
+    }
+
+    _pressedButtons = _inferDownFlutterButtons(button, buttons);
+    return <_SanitizedDetails>[
+      _SanitizedDetails(
+        change: ui.PointerChange.down,
+        buttons: _pressedButtons,
+      )
+    ];
   }
 
   List<_SanitizedDetails> sanitizeMoveEvent({@required int buttons}) {
-    _pressedButtons = _htmlButtonsToFlutterButtons(buttons);
-    return <_SanitizedDetails>[_SanitizedDetails(
-      change: _pressedButtons == 0
-          ? ui.PointerChange.hover
-          : ui.PointerChange.move,
-      buttons: _pressedButtons,
-    )];
+    final int newPressedButtons = _htmlButtonsToFlutterButtons(buttons);
+    // This could happen when the context menu is active and the user clicks
+    // RMB somewhere else. The browser sends a down event with `buttons:0`.
+    //
+    // In this case, we keep the old `buttons` value so we don't confuse the
+    // framework.
+    if (_pressedButtons != 0 && newPressedButtons == 0) {
+      return <_SanitizedDetails>[
+        _SanitizedDetails(
+          change: ui.PointerChange.move,
+          buttons: _pressedButtons,
+        )
+      ];
+    }
+
+    // This could happen when the user clicks RMB then moves the mouse quickly.
+    // The brower sends a move event with `buttons:2` even though there's no
+    // buttons down yet.
+    if (_pressedButtons == 0 && newPressedButtons != 0) {
+      return <_SanitizedDetails>[
+        _SanitizedDetails(
+          change: ui.PointerChange.hover,
+          buttons: _pressedButtons,
+        )
+      ];
+    }
+
+    _pressedButtons = newPressedButtons;
+    return <_SanitizedDetails>[
+      _SanitizedDetails(
+        change: _pressedButtons == 0
+            ? ui.PointerChange.hover
+            : ui.PointerChange.move,
+        buttons: _pressedButtons,
+      )
+    ];
   }
 
   List<_SanitizedDetails> sanitizeUpEvent() {
@@ -396,7 +436,11 @@ class _PointerAdapter extends _BaseAdapter with _WheelEventListenerMixin {
     _addPointerEventListener('pointerdown', (html.PointerEvent event) {
       final int device = event.pointerId;
       final List<ui.PointerData> pointerData = <ui.PointerData>[];
-      final List<_SanitizedDetails> detailsList = _ensureSanitizer(device).sanitizeDownEvent(buttons: event.buttons);
+      final List<_SanitizedDetails> detailsList =
+        _ensureSanitizer(device).sanitizeDownEvent(
+          button: event.button,
+          buttons: event.buttons,
+        );
       _convertEventsToPointerData(data: pointerData, event: event, detailsList: detailsList);
       _callback(pointerData);
     });
@@ -697,10 +741,11 @@ class _MouseAdapter extends _BaseAdapter with _WheelEventListenerMixin {
   void setup() {
     _addMouseEventListener('mousedown', (html.MouseEvent event) {
       final List<ui.PointerData> pointerData = <ui.PointerData>[];
-      final bool isStartOfDrag = event.buttons == convertButtonToButtons(event.button);
-      final List<_SanitizedDetails> sanitizedDetails = isStartOfDrag ?
-        _sanitizer.sanitizeDownEvent(buttons: event.buttons) :
-        _sanitizer.sanitizeMoveEvent(buttons: event.buttons);
+      final List<_SanitizedDetails> sanitizedDetails =
+        _sanitizer.sanitizeDownEvent(
+          button: event.button,
+          buttons: event.buttons,
+        );
       _convertEventsToPointerData(data: pointerData, event: event, detailsList: sanitizedDetails);
       _callback(pointerData);
     });
