@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -27,7 +27,6 @@ import 'sliver_multi_box_adaptor.dart';
 ///  * [RenderSliverFixedExtentList], which has a configurable [itemExtent].
 ///  * [RenderSliverList], which does not require its children to have the same
 ///    extent in the main axis.
-@Deprecated('Use SliverLayoutBuilder instead.')
 class RenderSliverFillViewport extends RenderSliverFixedExtentBoxAdaptor {
   /// Creates a sliver that contains multiple box children that each fill the
   /// viewport.
@@ -58,41 +57,6 @@ class RenderSliverFillViewport extends RenderSliverFixedExtentBoxAdaptor {
     _viewportFraction = value;
     markNeedsLayout();
   }
-
-  double get _padding => (1.0 - viewportFraction) * constraints.viewportMainAxisExtent * 0.5;
-
-  @override
-  double indexToLayoutOffset(double itemExtent, int index) {
-    return _padding + super.indexToLayoutOffset(itemExtent, index);
-  }
-
-  @override
-  int getMinChildIndexForScrollOffset(double scrollOffset, double itemExtent) {
-    return super.getMinChildIndexForScrollOffset(math.max(scrollOffset - _padding, 0.0), itemExtent);
-  }
-
-  @override
-  int getMaxChildIndexForScrollOffset(double scrollOffset, double itemExtent) {
-    return super.getMaxChildIndexForScrollOffset(math.max(scrollOffset - _padding, 0.0), itemExtent);
-  }
-
-  @override
-  double estimateMaxScrollOffset(
-    SliverConstraints constraints, {
-    int firstIndex,
-    int lastIndex,
-    double leadingScrollOffset,
-    double trailingScrollOffset,
-  }) {
-    final double padding = _padding;
-    return childManager.estimateMaxScrollOffset(
-      constraints,
-      firstIndex: firstIndex,
-      lastIndex: lastIndex,
-      leadingScrollOffset: leadingScrollOffset - padding,
-      trailingScrollOffset: trailingScrollOffset - padding,
-    ) + padding + padding;
-  }
 }
 
 /// A sliver that contains a single box child that fills the remaining space in
@@ -106,6 +70,8 @@ class RenderSliverFillViewport extends RenderSliverFixedExtentBoxAdaptor {
 ///
 /// See also:
 ///
+///  * [RenderSliverFillViewport], which sizes its children based on the
+///    size of the viewport, regardless of what else is in the scroll view.
 ///  * [RenderSliverList], which shows a list of variable-sized children in a
 ///    viewport.
 class RenderSliverFillRemaining extends RenderSliverSingleBoxAdapter {
@@ -156,16 +122,15 @@ class RenderSliverFillRemaining extends RenderSliverSingleBoxAdapter {
           parentUsesSize: true,
         );
     } else if (child != null) {
-      child.layout(constraints.asBoxConstraints(), parentUsesSize: true);
-
       switch (constraints.axis) {
         case Axis.horizontal:
-          childExtent = child.size.width;
+          childExtent = child.getMaxIntrinsicWidth(constraints.crossAxisExtent);
           break;
         case Axis.vertical:
-          childExtent = child.size.height;
+          childExtent = child.getMaxIntrinsicHeight(constraints.crossAxisExtent);
           break;
       }
+
       if (constraints.precedingScrollExtent > constraints.viewportMainAxisExtent || childExtent > extent)
         extent = childExtent;
       if (maxExtent < extent)
@@ -178,6 +143,8 @@ class RenderSliverFillRemaining extends RenderSliverSingleBoxAdapter {
           ),
           parentUsesSize: true,
         );
+      } else {
+        child.layout(constraints.asBoxConstraints(), parentUsesSize: true);
       }
     }
 

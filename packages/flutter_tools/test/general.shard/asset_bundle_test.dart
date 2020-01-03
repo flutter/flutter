@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -9,8 +9,12 @@ import 'package:file/memory.dart';
 
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/platform.dart';
+import 'package:flutter_tools/src/bundle.dart';
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/devfs.dart';
+import 'package:mockito/mockito.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -179,4 +183,17 @@ flutter:
     });
   });
 
+  test('Failed directory delete shows message', () async {
+    final MockDirectory mockDirectory = MockDirectory();
+    final BufferLogger bufferLogger = BufferLogger();
+    when(mockDirectory.existsSync()).thenReturn(true);
+    when(mockDirectory.deleteSync(recursive: true)).thenThrow(const FileSystemException('ABCD'));
+
+    await writeBundle(mockDirectory, <String, DevFSContent>{}, loggerOverride: bufferLogger);
+
+    verify(mockDirectory.createSync(recursive: true)).called(1);
+    expect(bufferLogger.errorText, contains('ABCD'));
+  });
 }
+
+class MockDirectory extends Mock implements Directory {}

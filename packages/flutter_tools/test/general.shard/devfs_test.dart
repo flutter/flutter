@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -10,6 +10,7 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
+import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/vmservice.dart';
@@ -25,7 +26,6 @@ void main() {
   String filePath;
   Directory tempDir;
   String basePath;
-  DevFS devFS;
 
   setUpAll(() {
     fs = MemoryFileSystem();
@@ -141,7 +141,7 @@ void main() {
         return Future<HttpClientResponse>.value(httpClientResponse);
       });
 
-      devFS = DevFS(vmService, 'test', tempDir);
+      final DevFS devFS = DevFS(vmService, 'test', tempDir);
       await devFS.create();
 
       final MockResidentCompiler residentCompiler = MockResidentCompiler();
@@ -159,6 +159,7 @@ void main() {
       verify(httpRequest.close()).called(kFailedAttempts + 1);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
+      HttpClientFactory: () => () => httpClient,
       ProcessManager: () => FakeProcessManager.any(),
     });
   });
@@ -166,12 +167,18 @@ void main() {
   group('devfs remote', () {
     MockVMService vmService;
     final MockResidentCompiler residentCompiler = MockResidentCompiler();
+    DevFS devFS;
 
     setUpAll(() async {
       tempDir = _newTempDir(fs);
       basePath = tempDir.path;
       vmService = MockVMService();
       await vmService.setUp();
+    });
+
+    setUp(() {
+      vmService.resetState();
+      devFS = DevFS(vmService, 'test', tempDir);
     });
 
     tearDownAll(() async {
@@ -188,7 +195,6 @@ void main() {
       // simulate package
       await _createPackage(fs, 'somepkg', 'somefile.txt');
 
-      devFS = DevFS(vmService, 'test', tempDir);
       await devFS.create();
       vmService.expectMessages(<String>['create test']);
       expect(devFS.assetPathsToEvict, isEmpty);
@@ -208,6 +214,7 @@ void main() {
       expect(report.success, true);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
+      HttpClient: () => () => HttpClient(),
       ProcessManager: () => FakeProcessManager.any(),
     });
 
@@ -229,8 +236,6 @@ void main() {
 
       // simulate package
       await _createPackage(fs, 'somepkg', 'somefile.txt');
-
-      devFS = DevFS(vmService, 'test', tempDir);
       await devFS.create();
       vmService.expectMessages(<String>['create test']);
       expect(devFS.assetPathsToEvict, isEmpty);
@@ -250,7 +255,6 @@ void main() {
     });
 
     testUsingContext('reports unsuccessful compile when errors are returned', () async {
-      devFS = DevFS(vmService, 'test', tempDir);
       await devFS.create();
       final DateTime previousCompile = devFS.lastCompiled;
 
@@ -280,7 +284,6 @@ void main() {
     });
 
     testUsingContext('correctly updates last compiled time when compilation does not fail', () async {
-      devFS = DevFS(vmService, 'test', tempDir);
       // simulate package
       final File sourceFile = await _createPackage(fs, 'somepkg', 'main.dart');
 
@@ -310,6 +313,7 @@ void main() {
       expect(devFS.lastCompiled, isNot(previousCompile));
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
+      HttpClient: () => () => HttpClient(),
       ProcessManager: () => FakeProcessManager.any(),
     });
   });
@@ -355,8 +359,14 @@ class MockVMService extends BasicMock implements VMService {
     await _server?.close();
   }
 
+  void resetState() {
+    _vm = MockVM(this);
+    messages.clear();
+  }
+
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+
 }
 
 class MockVM implements VM {

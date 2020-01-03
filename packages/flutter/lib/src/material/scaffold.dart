@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -317,9 +317,9 @@ class _BodyBoxConstraints extends BoxConstraints {
   bool operator ==(dynamic other) {
     if (super != other)
       return false;
-    final _BodyBoxConstraints typedOther = other;
-    return bottomWidgetsHeight == typedOther.bottomWidgetsHeight
-        && appBarHeight == typedOther.appBarHeight;
+    return other is _BodyBoxConstraints
+        && other.bottomWidgetsHeight == bottomWidgetsHeight
+        && other.appBarHeight == appBarHeight;
   }
 
   @override
@@ -356,7 +356,7 @@ class _BodyBuilder extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (BuildContext context, BoxConstraints constraints) {
-        final _BodyBoxConstraints bodyConstraints = constraints;
+        final _BodyBoxConstraints bodyConstraints = constraints as _BodyBoxConstraints;
         final MediaQueryData metrics = MediaQuery.of(context);
 
         final double bottom = extendBody
@@ -741,10 +741,8 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
   }
 
   bool _isExtendedFloatingActionButton(Widget widget) {
-    if (widget is! FloatingActionButton)
-      return false;
-    final FloatingActionButton fab = widget;
-    return fab.isExtended;
+    return widget is FloatingActionButton
+        && widget.isExtended;
   }
 
   @override
@@ -1166,7 +1164,10 @@ class Scaffold extends StatefulWidget {
   /// Originally the name referred [MediaQueryData.padding]. Now it refers
   /// [MediaQueryData.viewInsets], so using [resizeToAvoidBottomInset]
   /// should be clearer to readers.
-  @Deprecated('Use resizeToAvoidBottomInset to specify if the body should resize when the keyboard appears')
+  @Deprecated(
+    'Use resizeToAvoidBottomInset to specify if the body should resize when the keyboard appears. '
+    'This feature was deprecated after v1.1.9.'
+  )
   final bool resizeToAvoidBottomPadding;
 
   /// If true the [body] and the scaffold's floating widgets should size
@@ -1307,7 +1308,7 @@ class Scaffold extends StatefulWidget {
   static ScaffoldState of(BuildContext context, { bool nullOk = false }) {
     assert(nullOk != null);
     assert(context != null);
-    final ScaffoldState result = context.ancestorStateOfType(const TypeMatcher<ScaffoldState>());
+    final ScaffoldState result = context.findAncestorStateOfType<ScaffoldState>();
     if (nullOk || result != null)
       return result;
     throw FlutterError.fromParts(<DiagnosticsNode>[
@@ -1359,7 +1360,7 @@ class Scaffold extends StatefulWidget {
   /// the listener, and register a listener to the new [ScaffoldGeometry]
   /// listenable.
   static ValueListenable<ScaffoldGeometry> geometryOf(BuildContext context) {
-    final _ScaffoldScope scaffoldScope = context.inheritFromWidgetOfExactType(_ScaffoldScope);
+    final _ScaffoldScope scaffoldScope = context.dependOnInheritedWidgetOfExactType<_ScaffoldScope>();
     if (scaffoldScope == null)
       throw FlutterError.fromParts(<DiagnosticsNode>[
         ErrorSummary(
@@ -1403,10 +1404,10 @@ class Scaffold extends StatefulWidget {
     assert(registerForUpdates != null);
     assert(context != null);
     if (registerForUpdates) {
-      final _ScaffoldScope scaffold = context.inheritFromWidgetOfExactType(_ScaffoldScope);
+      final _ScaffoldScope scaffold = context.dependOnInheritedWidgetOfExactType<_ScaffoldScope>();
       return scaffold?.hasDrawer ?? false;
     } else {
-      final ScaffoldState scaffold = context.ancestorStateOfType(const TypeMatcher<ScaffoldState>());
+      final ScaffoldState scaffold = context.findAncestorStateOfType<ScaffoldState>();
       return scaffold?.hasDrawer ?? false;
     }
   }
@@ -1796,11 +1797,11 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   /// this method.
   ///
   /// The new bottom sheet becomes a [LocalHistoryEntry] for the enclosing
-  /// [ModalRoute] and a back button is added to the appbar of the [Scaffold]
+  /// [ModalRoute] and a back button is added to the app bar of the [Scaffold]
   /// that closes the bottom sheet.
   ///
   /// To create a persistent bottom sheet that is not a [LocalHistoryEntry] and
-  /// does not add a back button to the enclosing Scaffold's appbar, use the
+  /// does not add a back button to the enclosing Scaffold's app bar, use the
   /// [Scaffold.bottomSheet] constructor parameter.
   ///
   /// A persistent bottom sheet shows information that supplements the primary
@@ -1812,6 +1813,47 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   /// of the app. Modal bottom sheets can be created and displayed with the
   /// [showModalBottomSheet] function.
   ///
+  /// {@animation 350 622 https://flutter.github.io/assets-for-api-docs/assets/material/show_bottom_sheet.mp4}
+  ///
+  /// {@tool snippet --template=stateless_widget_scaffold}
+  ///
+  /// This example demonstrates how to use `showBottomSheet` to display a
+  /// bottom sheet when a user taps a button. It also demonstrates how to
+  /// close a bottom sheet using the Navigator.
+  ///
+  /// ```dart
+  /// Widget build(BuildContext context) {
+  ///   return Center(
+  ///     child: RaisedButton(
+  ///       child: const Text('showBottomSheet'),
+  ///       onPressed: () {
+  ///         Scaffold.of(context).showBottomSheet<void>(
+  ///           (BuildContext context) {
+  ///             return Container(
+  ///               height: 200,
+  ///               color: Colors.amber,
+  ///               child: Center(
+  ///                 child: Column(
+  ///                   mainAxisAlignment: MainAxisAlignment.center,
+  ///                   mainAxisSize: MainAxisSize.min,
+  ///                   children: <Widget>[
+  ///                     const Text('BottomSheet'),
+  ///                     RaisedButton(
+  ///                       child: const Text('Close BottomSheet'),
+  ///                       onPressed: () => Navigator.pop(context),
+  ///                     )
+  ///                   ],
+  ///                 ),
+  ///               ),
+  ///             );
+  ///           },
+  ///         );
+  ///       },
+  ///     ),
+  ///   );
+  /// }
+  /// ```
+  /// {@end-tool}
   /// See also:
   ///
   ///  * [BottomSheet], which becomes the parent of the widget returned by the
@@ -1853,7 +1895,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
         clipBehavior: clipBehavior,
       );
     });
-    return _currentBottomSheet;
+    return _currentBottomSheet as PersistentBottomSheetController<T>;
   }
 
   // Floating Action Button API
@@ -1875,7 +1917,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     _floatingActionButtonVisibilityController.value = newValue.clamp(
       _floatingActionButtonVisibilityController.lowerBound,
       _floatingActionButtonVisibilityController.upperBound,
-    );
+    ) as double;
   }
 
   /// Shows the [Scaffold.floatingActionButton].
@@ -2296,6 +2338,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
 
     switch (themeData.platform) {
       case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
         _addIfNonNull(
           children,
           GestureDetector(
@@ -2531,11 +2574,12 @@ class PersistentBottomSheetController<T> extends ScaffoldFeatureController<_Stan
 
 class _ScaffoldScope extends InheritedWidget {
   const _ScaffoldScope({
+    Key key,
     @required this.hasDrawer,
     @required this.geometryNotifier,
     @required Widget child,
   }) : assert(hasDrawer != null),
-       super(child: child);
+       super(key: key, child: child);
 
   final bool hasDrawer;
   final _ScaffoldGeometryNotifier geometryNotifier;

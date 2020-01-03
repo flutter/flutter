@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -32,8 +32,9 @@ import 'package:flutter/foundation.dart';
 /// `CircularRRectOp`) would suggest Xyz draw operations are causing the
 /// shaders to be compiled. A useful shader warm-up draw operation would
 /// eliminate such long compilation calls in the animation. To double-check
-/// the warm-up, trace with `flutter run --profile --trace-skia --start-
-/// paused`. The `GrGLProgramBuilder` with the associated `XyzOp` should
+/// the warm-up, trace with
+/// `flutter run --profile --trace-skia --start-paused`.
+/// The `GrGLProgramBuilder` with the associated `XyzOp` should
 /// appear during startup rather than in the middle of a later animation.
 
 ///
@@ -67,12 +68,13 @@ abstract class ShaderWarmUp {
   /// compilation cache.
   ///
   /// To decide which draw operations to be added to your custom warm up
-  /// process, try capture an skp using `flutter screenshot --observatory-
-  /// port=<port> --type=skia` and analyze it with https://debugger.skia.org.
+  /// process, try capture an skp using
+  /// `flutter screenshot --observatory-uri=<uri> --type=skia`
+  /// and analyze it with https://debugger.skia.org.
   /// Alternatively, one may run the app with `flutter run --trace-skia` and
   /// then examine the GPU thread in the observatory timeline to see which
   /// Skia draw operations are commonly used, and which shader compilations
-  /// are causing janks.
+  /// are causing jank.
   @protected
   Future<void> warmUpOnCanvas(ui.Canvas canvas);
 

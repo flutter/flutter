@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -24,8 +24,6 @@ const double _kDatePickerPadSize = 12.0;
 // The density of a date picker is different from a generic picker.
 // Eyeballed from iOS.
 const double _kSqueeze = 1.25;
-// Considers setting the default background color from the theme, in the future.
-const Color _kBackgroundColor = CupertinoColors.white;
 
 const TextStyle _kDefaultPickerTextStyle = TextStyle(
   letterSpacing: -0.83,
@@ -241,12 +239,11 @@ class CupertinoDatePicker extends StatefulWidget {
     this.maximumYear,
     this.minuteInterval = 1,
     this.use24hFormat = false,
-    this.backgroundColor = _kBackgroundColor,
+    this.backgroundColor,
   }) : initialDateTime = initialDateTime ?? DateTime.now(),
        assert(mode != null),
        assert(onDateTimeChanged != null),
        assert(minimumYear != null),
-       assert(backgroundColor != null),
        assert(
          minuteInterval > 0 && 60 % minuteInterval == 0,
          'minute interval is not a positive integer factor of 60',
@@ -324,7 +321,7 @@ class CupertinoDatePicker extends StatefulWidget {
 
   /// Background color of date picker.
   ///
-  /// Defaults to [CupertinoColors.white] when null.
+  /// Defaults to null, which disables background painting entirely.
   final Color backgroundColor;
 
   @override
@@ -986,7 +983,7 @@ class _CupertinoDatePickerDateTimeState extends State<CupertinoDatePicker> {
     }
 
     return MediaQuery(
-      data: const MediaQueryData(textScaleFactor: 1.0),
+      data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
       child: DefaultTextStyle.merge(
         style: _kDefaultPickerTextStyle,
         child: CustomMultiChildLayout(
@@ -1342,7 +1339,7 @@ class _CupertinoDatePickerDateState extends State<CupertinoDatePicker> {
     }
 
     return MediaQuery(
-      data: const MediaQueryData(textScaleFactor: 1.0),
+      data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
       child: DefaultTextStyle.merge(
         style: _kDefaultPickerTextStyle,
         child: CustomMultiChildLayout(
@@ -1436,7 +1433,7 @@ class CupertinoTimerPicker extends StatefulWidget {
     this.minuteInterval = 1,
     this.secondInterval = 1,
     this.alignment = Alignment.center,
-    this.backgroundColor = _kBackgroundColor,
+    this.backgroundColor,
     @required this.onTimerDurationChanged,
   }) : assert(mode != null),
        assert(onTimerDurationChanged != null),
@@ -1446,7 +1443,6 @@ class CupertinoTimerPicker extends StatefulWidget {
        assert(secondInterval > 0 && 60 % secondInterval == 0),
        assert(initialTimerDuration.inMinutes % minuteInterval == 0),
        assert(initialTimerDuration.inSeconds % secondInterval == 0),
-       assert(backgroundColor != null),
        assert(alignment != null),
        super(key: key);
 
@@ -1467,14 +1463,14 @@ class CupertinoTimerPicker extends StatefulWidget {
   /// Callback called when the timer duration changes.
   final ValueChanged<Duration> onTimerDurationChanged;
 
-  /// Defines how the timper picker should be positioned within its parent.
+  /// Defines how the timer picker should be positioned within its parent.
   ///
   /// This property must not be null. It defaults to [Alignment.center].
   final AlignmentGeometry alignment;
 
   /// Background color of timer picker.
   ///
-  /// Defaults to [CupertinoColors.white] when null.
+  /// Defaults to null, which disables background painting entirely.
   final Color backgroundColor;
 
   @override
@@ -1867,11 +1863,9 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
     }
     final CupertinoThemeData themeData = CupertinoTheme.of(context);
     return MediaQuery(
-      data: const MediaQueryData(
-        // The native iOS picker's text scaling is fixed, so we will also fix it
-        // as well in our picker.
-        textScaleFactor: 1.0,
-      ),
+      // The native iOS picker's text scaling is fixed, so we will also fix it
+      // as well in our picker.
+      data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
       child: CupertinoTheme(
         data: themeData.copyWith(
           textTheme: themeData.textTheme.copyWith(
@@ -1881,7 +1875,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
         child: Align(
           alignment: widget.alignment,
           child: Container(
-            color: _kBackgroundColor,
+            color: CupertinoDynamicColor.resolve(widget.backgroundColor, context),
             width: totalWidth,
             height: _kPickerHeight,
             child: DefaultTextStyle(

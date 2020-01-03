@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -85,7 +85,7 @@ void main() {
 
     await chromeLauncher.launch('example_url', skipCheck: true, dataDir: dataDir);
     final VerificationResult result = verify(processManager.start(captureAny));
-    final String arg = result.captured.single
+    final String arg = (result.captured.single as List<String>)
       .firstWhere((String arg) => arg.startsWith('--user-data-dir='));
     final Directory tempDirectory = fs.directory(arg.split('=')[1]);
     final File tempFile = tempDirectory
@@ -107,4 +107,3 @@ void main() {
 class MockProcessManager extends Mock implements ProcessManager {}
 class MockPlatform extends Mock implements Platform {}
 class MockOperatingSystemUtils extends Mock implements OperatingSystemUtils {}
-

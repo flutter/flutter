@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -193,7 +193,7 @@ void main() {
     await simulator.sideloadUpdatedAssetsForInstalledApplicationBundle(BuildInfo.debug, 'lib/main.dart');
 
     final VerificationResult result = verify(buildSystem.build(any, captureAny));
-    final Environment environment = result.captured.single;
+    final Environment environment = result.captured.single as Environment;
     expect(environment.defines, <String, String>{
       kTargetFile: 'lib/main.dart',
       kTargetPlatform: 'ios',

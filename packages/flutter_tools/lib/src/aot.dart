@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -226,8 +226,11 @@ class AotBuilder {
     status?.stop();
     if (!result.success) {
       for (ExceptionMeasurement measurement in result.exceptions.values) {
-        printError(measurement.exception.toString());
-        printError(measurement.stackTrace.toString());
+        printError('Target ${measurement.target} failed: ${measurement.exception}',
+          stackTrace: measurement.fatal
+            ? measurement.stackTrace
+            : null,
+        );
       }
       throwToolExit('Failed to build aot.');
     }

@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -10,16 +10,9 @@ import '../convert.dart' show json;
 import '../globals.dart';
 import '../version.dart';
 import 'file_system.dart';
-import 'platform.dart';
+import 'utils.dart';
 
 typedef FingerprintPathFilter = bool Function(String path);
-
-/// Whether to completely disable build caching.
-///
-/// This is done by always returning false from fingerprinter invocations. This
-/// is safe to do generally, because fingerprinting is only a performance
-/// improvement.
-bool get _disableBuildCache => platform.environment['DISABLE_FLUTTER_BUILD_CACHE']?.toLowerCase() == 'true';
 
 /// A tool that can be used to compute, compare, and write [Fingerprint]s for a
 /// set of input files and associated build settings.
@@ -56,9 +49,6 @@ class Fingerprinter {
   }
 
   bool doesFingerprintMatch() {
-    if (_disableBuildCache) {
-      return false;
-    }
     try {
       final File fingerprintFile = fs.file(fingerprintPath);
       if (!fingerprintFile.existsSync()) {
@@ -130,14 +120,14 @@ class Fingerprint {
   /// Throws [ArgumentError], if there is a version mismatch between the
   /// serializing framework and this framework.
   Fingerprint.fromJson(String jsonData) {
-    final Map<String, dynamic> content = json.decode(jsonData);
+    final Map<String, dynamic> content = castStringKeyedMap(json.decode(jsonData));
 
-    final String version = content['version'];
+    final String version = content['version'] as String;
     if (version != FlutterVersion.instance.frameworkRevision) {
       throw ArgumentError('Incompatible fingerprint version: $version');
     }
-    _checksums = content['files']?.cast<String,String>() ?? <String, String>{};
-    _properties = content['properties']?.cast<String,String>() ?? <String, String>{};
+    _checksums = castStringKeyedMap(content['files'])?.cast<String,String>() ?? <String, String>{};
+    _properties = castStringKeyedMap(content['properties'])?.cast<String,String>() ?? <String, String>{};
   }
 
   Map<String, String> _checksums;
@@ -157,9 +147,9 @@ class Fingerprint {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    final Fingerprint typedOther = other;
-    return _equalMaps(typedOther._checksums, _checksums)
-        && _equalMaps(typedOther._properties, _properties);
+    return other is Fingerprint
+        && _equalMaps(other._checksums, _checksums)
+        && _equalMaps(other._properties, _properties);
   }
 
   bool _equalMaps(Map<String, String> a, Map<String, String> b) {
@@ -201,5 +191,3 @@ Set<String> readDepfile(String depfilePath) {
       .where((String path) => path.isNotEmpty)
       .toSet();
 }
-
-

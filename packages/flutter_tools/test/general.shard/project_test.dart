@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -304,19 +304,12 @@ void main() {
 
       testInMemory('default host app language', () async {
         final FlutterProject project = await someProject();
-        expect(await project.ios.isSwift, isFalse);
         expect(project.android.isKotlin, isFalse);
       });
 
-      testUsingContext('swift and kotlin host app language', () async {
+      testUsingContext('kotlin host app language', () async {
         final FlutterProject project = await someProject();
 
-        when(mockXcodeProjectInterpreter.getBuildSettings(any, any)).thenAnswer(
-          (_) {
-            return Future<Map<String, String>>.value(<String, String>{
-              'SWIFT_VERSION': '5.0',
-            });
-        });
         addAndroidGradleFile(project.directory,
           gradleFileContent: () {
             return '''
@@ -324,7 +317,6 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 ''';
         });
-        expect(await project.ios.isSwift, isTrue);
         expect(project.android.isKotlin, isTrue);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
@@ -356,32 +348,54 @@ apply plugin: 'kotlin-android'
         });
       }
 
-      testWithMocks('null, if no pbxproj or plist entries', () async {
+      testWithMocks('null, if no build settings or plist entries', () async {
         final FlutterProject project = await someProject();
         expect(await project.ios.productBundleIdentifier, isNull);
       });
-      testWithMocks('from pbxproj file, if no plist', () async {
+
+      testWithMocks('from build settings, if no plist', () async {
+        final FlutterProject project = await someProject();
+        when(mockXcodeProjectInterpreter.getBuildSettings(any, any)).thenAnswer(
+                (_) {
+              return Future<Map<String,String>>.value(<String, String>{
+                'PRODUCT_BUNDLE_IDENTIFIER': 'io.flutter.someProject',
+              });
+            }
+        );
+        expect(await project.ios.productBundleIdentifier, 'io.flutter.someProject');
+      });
+
+      testWithMocks('from project file, if no plist or build settings', () async {
         final FlutterProject project = await someProject();
         addIosProjectFile(project.directory, projectFileContent: () {
           return projectFileWithBundleId('io.flutter.someProject');
         });
         expect(await project.ios.productBundleIdentifier, 'io.flutter.someProject');
       });
+
       testWithMocks('from plist, if no variables', () async {
         final FlutterProject project = await someProject();
+        project.ios.defaultHostInfoPlist.createSync(recursive: true);
         when(mockPlistUtils.getValueFromFile(any, any)).thenReturn('io.flutter.someProject');
         expect(await project.ios.productBundleIdentifier, 'io.flutter.someProject');
       });
-      testWithMocks('from pbxproj and plist, if default variable', () async {
+
+      testWithMocks('from build settings and plist, if default variable', () async {
         final FlutterProject project = await someProject();
-        addIosProjectFile(project.directory, projectFileContent: () {
-          return projectFileWithBundleId('io.flutter.someProject');
-        });
+        when(mockXcodeProjectInterpreter.getBuildSettings(any, any)).thenAnswer(
+                (_) {
+              return Future<Map<String,String>>.value(<String, String>{
+                'PRODUCT_BUNDLE_IDENTIFIER': 'io.flutter.someProject',
+              });
+            }
+        );
         when(mockPlistUtils.getValueFromFile(any, any)).thenReturn('\$(PRODUCT_BUNDLE_IDENTIFIER)');
         expect(await project.ios.productBundleIdentifier, 'io.flutter.someProject');
       });
-      testWithMocks('from pbxproj and plist, by substitution', () async {
+
+      testWithMocks('from build settings and plist, by substitution', () async {
         final FlutterProject project = await someProject();
+        project.ios.defaultHostInfoPlist.createSync(recursive: true);
         when(mockXcodeProjectInterpreter.getBuildSettings(any, any)).thenAnswer(
           (_) {
             return Future<Map<String,String>>.value(<String, String>{

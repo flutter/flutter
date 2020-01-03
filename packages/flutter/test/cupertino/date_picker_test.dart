@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -115,19 +115,20 @@ void main() {
       );
 
       final Iterable<CupertinoPicker> pickers = tester.allWidgets.whereType<CupertinoPicker>();
-      expect(pickers.any((CupertinoPicker picker) => picker.backgroundColor != CupertinoColors.white), false);
+      expect(pickers.any((CupertinoPicker picker) => picker.backgroundColor != null), false);
     });
 
-    testWidgets('background color is not null', (WidgetTester tester) async {
-      expect(
-        () {
-          CupertinoTimerPicker(
+    testWidgets('background color can be null', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoTimerPicker(
             onTimerDurationChanged: (_) { },
             backgroundColor: null,
-          );
-        },
-        throwsAssertionError,
+          ),
+        ),
       );
+
+      expect(tester.takeException(), isNull);
     });
 
     testWidgets('specified background color is applied', (WidgetTester tester) async {
@@ -316,19 +317,20 @@ void main() {
       );
 
       final Iterable<CupertinoPicker> pickers = tester.allWidgets.whereType<CupertinoPicker>();
-      expect(pickers.any((CupertinoPicker picker) => picker.backgroundColor != CupertinoColors.white), false);
+      expect(pickers.any((CupertinoPicker picker) => picker.backgroundColor != null), false);
     });
 
-    testWidgets('background color is not null', (WidgetTester tester) async {
-      expect(
-        () {
-          CupertinoDatePicker(
+    testWidgets('background color can be null', (WidgetTester tester) async {
+      await tester.pumpWidget(
+        CupertinoApp(
+          home: CupertinoDatePicker(
             onDateTimeChanged: (_) { },
             backgroundColor: null,
-          );
-        },
-        throwsAssertionError,
+          ),
+        ),
       );
+
+      expect(tester.takeException(), isNull);
     });
 
     testWidgets('specified background color is applied', (WidgetTester tester) async {
@@ -1337,6 +1339,51 @@ void main() {
     expect(lastSelectedItem, 3);
 
     handle.dispose();
+  });
+
+  testWidgets('CupertinoDataPicker does not provide invalid MediaQuery', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/47989.
+    Brightness brightness = Brightness.light;
+    StateSetter setState;
+
+    await tester.pumpWidget(
+      CupertinoApp(
+        theme: const CupertinoThemeData(
+          textTheme: CupertinoTextThemeData(
+            dateTimePickerTextStyle: TextStyle(
+              color: CupertinoDynamicColor.withBrightness(
+                color: Color(0xFFFFFFFF),
+                darkColor: Color(0xFF000000),
+              ),
+            ),
+          ),
+        ),
+        home: StatefulBuilder(builder: (BuildContext context, StateSetter stateSetter) {
+          setState = stateSetter;
+          return MediaQuery(
+            data: MediaQuery.of(context).copyWith(platformBrightness: brightness),
+            child: CupertinoDatePicker(
+              initialDateTime: DateTime(2019),
+              mode: CupertinoDatePickerMode.date,
+              onDateTimeChanged: (DateTime date) {},
+            ),
+          );
+        }),
+      ),
+    );
+
+    expect(
+      tester.widget<Text>(find.text('2019')).style.color,
+      isSameColorAs(const Color(0xFFFFFFFF)),
+    );
+
+    setState(() { brightness = Brightness.dark; });
+    await tester.pump();
+
+    expect(
+      tester.widget<Text>(find.text('2019')).style.color,
+      isSameColorAs(const Color(0xFF000000)),
+    );
   });
 
   testWidgets('picker exports semantics', (WidgetTester tester) async {

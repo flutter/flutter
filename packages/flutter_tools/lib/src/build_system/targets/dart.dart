@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -42,7 +42,7 @@ const String kExtraGenSnapshotOptions = 'ExtraGenSnapshotOptions';
 
 /// Alternative scheme for file URIs.
 ///
-/// May be used along with [kFileSystemRoots] to support a multiroot
+/// May be used along with [kFileSystemRoots] to support a multi-root
 /// filesystem.
 const String kFileSystemScheme = 'FileSystemScheme';
 
@@ -62,7 +62,7 @@ const String kDartDefines = 'DartDefines';
 /// The other supported value is armv7, the 32-bit iOS architecture.
 const String kIosArchs = 'IosArchs';
 
-/// Copies the prebuilt flutter bundle.
+/// Copies the pre-built flutter bundle.
 // This is a one-off rule for implementing build bundle in terms of assemble.
 class CopyFlutterBundle extends Target {
   const CopyFlutterBundle();
@@ -75,7 +75,6 @@ class CopyFlutterBundle extends Target {
     Source.artifact(Artifact.vmSnapshotData, mode: BuildMode.debug),
     Source.artifact(Artifact.isolateSnapshotData, mode: BuildMode.debug),
     Source.pattern('{BUILD_DIR}/app.dill'),
-    Source.depfile('flutter_assets.d'),
   ];
 
   @override
@@ -83,7 +82,11 @@ class CopyFlutterBundle extends Target {
     Source.pattern('{OUTPUT_DIR}/vm_snapshot_data'),
     Source.pattern('{OUTPUT_DIR}/isolate_snapshot_data'),
     Source.pattern('{OUTPUT_DIR}/kernel_blob.bin'),
-    Source.depfile('flutter_assets.d'),
+  ];
+
+  @override
+  List<String> get depfiles => <String>[
+    'flutter_assets.d'
   ];
 
   @override
@@ -115,7 +118,7 @@ class CopyFlutterBundle extends Target {
   ];
 }
 
-/// Copies the prebuilt flutter bundle for release mode.
+/// Copies the pre-built flutter bundle for release mode.
 class ReleaseCopyFlutterBundle extends CopyFlutterBundle {
   const ReleaseCopyFlutterBundle();
 
@@ -123,13 +126,14 @@ class ReleaseCopyFlutterBundle extends CopyFlutterBundle {
   String get name => 'release_flutter_bundle';
 
   @override
-  List<Source> get inputs => const <Source>[
-    Source.depfile('flutter_assets.d'),
-  ];
+  List<Source> get inputs => const <Source>[];
 
   @override
-  List<Source> get outputs => const <Source>[
-    Source.depfile('flutter_assets.d'),
+  List<Source> get outputs => const <Source>[];
+
+  @override
+  List<String> get depfiles => const <String>[
+    'flutter_assets.d',
   ];
 
   @override
@@ -151,12 +155,14 @@ class KernelSnapshot extends Target {
     Source.artifact(Artifact.platformKernelDill),
     Source.artifact(Artifact.engineDartBinary),
     Source.artifact(Artifact.frontendServerSnapshotForEngineDartSdk),
-    Source.depfile('kernel_snapshot.d'),
   ];
 
   @override
-  List<Source> get outputs => const <Source>[
-    Source.depfile('kernel_snapshot.d'),
+  List<Source> get outputs => const <Source>[];
+
+  @override
+  List<String> get depfiles => <String>[
+    'kernel_snapshot.d',
   ];
 
   @override
@@ -247,6 +253,8 @@ abstract class AotElfBase extends Target {
     if (environment.defines[kTargetPlatform] == null) {
       throw MissingDefineException(kTargetPlatform, 'aot_elf');
     }
+    final List<String> extraGenSnapshotOptions = environment.defines[kExtraGenSnapshotOptions]?.split(',')
+      ?? const <String>[];
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final TargetPlatform targetPlatform = getTargetPlatformForName(environment.defines[kTargetPlatform]);
     final int snapshotExitCode = await snapshotter.build(
@@ -256,6 +264,7 @@ abstract class AotElfBase extends Target {
       packagesPath: environment.projectDir.childFile('.packages').path,
       outputPath: outputPath,
       bitcode: false,
+      extraGenSnapshotOptions: extraGenSnapshotOptions,
     );
     if (snapshotExitCode != 0) {
       throw Exception('AOT snapshotter exited with code $snapshotExitCode');
@@ -325,7 +334,7 @@ class AotElfRelease extends AotElfBase {
   ];
 }
 
-/// Copies the prebuilt flutter aot bundle.
+/// Copies the pre-built flutter aot bundle.
 // This is a one-off rule for implementing build aot in terms of assemble.
 abstract class CopyFlutterAotBundle extends Target {
   const CopyFlutterAotBundle();
@@ -384,7 +393,7 @@ List<String> parseDartDefines(Environment environment) {
 
   final String dartDefinesJson = environment.defines[kDartDefines];
   try {
-    final List<Object> parsedDefines = jsonDecode(dartDefinesJson);
+    final List<Object> parsedDefines = jsonDecode(dartDefinesJson) as List<Object>;
     return parsedDefines.cast<String>();
   } on FormatException catch (_) {
     throw Exception(

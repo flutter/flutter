@@ -2,6 +2,7 @@
 
 [![Build Status - Cirrus][]][Build status]
 [![Gitter Channel][]][Gitter badge]
+[![Twitter handle][]][Twitter badge]
 
 Flutter is Google's SDK for crafting beautiful, fast user experiences for
 mobile, web and desktop from a single codebase. Flutter works with existing
@@ -60,7 +61,7 @@ Flutter works with any development tool (or none at all), but includes editor
 plug-ins for both [Visual Studio Code] and [IntelliJ / Android Studio]. Flutter
 provides [thousands of packages][Flutter packages] to speed your development,
 regardless of your target platform. And accessing other native code is easy,
-with support for both [FFI] and [platform-specific APIs][platform channels]. 
+with support for both [FFI] and [platform-specific APIs][platform channels].
 
 Flutter is a fully open source project, and we welcome contributions.
 Information on how to get started can be found at our
@@ -72,6 +73,8 @@ Information on how to get started can be found at our
 [Build status]: https://cirrus-ci.com/github/flutter/flutter/master
 [Gitter Channel]: https://badges.gitter.im/flutter/flutter.svg
 [Gitter badge]: https://gitter.im/flutter/flutter?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
+[Twitter handle]: https://img.shields.io/twitter/follow/flutterdev.svg?style=social&label=Follow
+[Twitter badge]: https://twitter.com/intent/follow?screen_name=flutterdev
 [layered architecture]: https://flutter.dev/docs/resources/inside-flutter
 [widget catalog]: https://flutter.dev/widgets/
 [Reflectly hero image]: https://github.com/flutter/website/blob/master/src/images/homepage/reflectly-hero-600px.png
