@@ -1092,20 +1092,82 @@ class Scaffold extends StatefulWidget {
   /// devices. Swipes in from either left-to-right ([TextDirection.ltr]) or
   /// right-to-left ([TextDirection.rtl])
   ///
-  /// In the uncommon case that you wish to open the drawer manually, use the
-  /// [ScaffoldState.openDrawer] function.
-  ///
   /// Typically a [Drawer].
+  ///
+  /// To open the drawer programmatically, use the [ScaffoldState.openDrawer]
+  /// function.
+  ///
+  /// {@tool snippet --template=stateful_widget_material}
+  /// To disable the drawer edge swipe, set the [Scaffold.drawerEdgeWidth]
+  /// to 0. Then, use [ScaffoldState.openDrawer] to open the drawer.
+  ///
+  /// ```dart
+  /// final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  ///
+  /// void _openDrawer() {
+  ///   _scaffoldKey.currentState.openDrawer();
+  /// }
+  ///
+  /// @override
+  /// Widget build(BuildContext context) {
+  ///   return Scaffold(
+  ///     key: _scaffoldKey,
+  ///     appBar: AppBar(title: Text('Drawer Demo')),
+  ///     body: Center(
+  ///       child: RaisedButton(
+  ///         onPressed: _openDrawer,
+  ///         child: Text('Open Drawer'),
+  ///       ),
+  ///     ),
+  ///     drawer: Drawer(
+  ///       child: Center(child: Text('This is the Drawer')),
+  ///     ),
+  ///     drawerEdgeDragWidth: 0.0, // Disable opening the drawer with a swipe gesture.
+  ///   );
+  /// }
+  /// ```
+  /// {@end-tool}
   final Widget drawer;
 
   /// A panel displayed to the side of the [body], often hidden on mobile
   /// devices. Swipes in from right-to-left ([TextDirection.ltr]) or
   /// left-to-right ([TextDirection.rtl])
   ///
-  /// In the uncommon case that you wish to open the drawer manually, use the
-  /// [ScaffoldState.openEndDrawer] function.
-  ///
   /// Typically a [Drawer].
+  ///
+  /// To open the drawer programmatically, use the [ScaffoldState.openEndDrawer]
+  /// function.
+  ///
+  /// {@tool snippet --template=stateful_widget_material}
+  /// To disable the drawer edge swipe, set the [Scaffold.drawerEdgeWidth]
+  /// to 0. Then, use [ScaffoldState.openEndDrawer] to open the drawer.
+  ///
+  /// ```dart
+  /// final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  ///
+  /// void _openEndDrawer() {
+  ///   _scaffoldKey.currentState.openEndDrawer();
+  /// }
+  ///
+  /// @override
+  /// Widget build(BuildContext context) {
+  ///   return Scaffold(
+  ///     key: _scaffoldKey,
+  ///     appBar: AppBar(title: Text('Drawer Demo')),
+  ///     body: Center(
+  ///       child: RaisedButton(
+  ///         onPressed: _openEndDrawer,
+  ///         child: Text('Open End Drawer'),
+  ///       ),
+  ///     ),
+  ///     endDrawer: Drawer(
+  ///       child: Center(child: Text('This is the Drawer')),
+  ///     ),
+  ///     drawerEdgeDragWidth: 0.0, // Disable opening the drawer with a swipe gesture.
+  ///   );
+  /// }
+  /// ```
+  /// {@end-tool}
   final Widget endDrawer;
 
   /// The color to use for the scrim that obscures primary content while a drawer is open.
