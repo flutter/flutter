@@ -26,7 +26,6 @@ void main() {
   String filePath;
   Directory tempDir;
   String basePath;
-  DevFS devFS;
 
   setUpAll(() {
     fs = MemoryFileSystem();
@@ -142,7 +141,7 @@ void main() {
         return Future<HttpClientResponse>.value(httpClientResponse);
       });
 
-      devFS = DevFS(vmService, 'test', tempDir);
+      final DevFS devFS = DevFS(vmService, 'test', tempDir);
       await devFS.create();
 
       final MockResidentCompiler residentCompiler = MockResidentCompiler();
@@ -168,12 +167,18 @@ void main() {
   group('devfs remote', () {
     MockVMService vmService;
     final MockResidentCompiler residentCompiler = MockResidentCompiler();
+    DevFS devFS;
 
     setUpAll(() async {
       tempDir = _newTempDir(fs);
       basePath = tempDir.path;
       vmService = MockVMService();
       await vmService.setUp();
+    });
+
+    setUp(() {
+      devFS = DevFS(vmService, 'test', tempDir);
+      vmService.resetVm();
     });
 
     tearDownAll(() async {
@@ -190,7 +195,6 @@ void main() {
       // simulate package
       await _createPackage(fs, 'somepkg', 'somefile.txt');
 
-      devFS = DevFS(vmService, 'test', tempDir);
       await devFS.create();
       vmService.expectMessages(<String>['create test']);
       expect(devFS.assetPathsToEvict, isEmpty);
@@ -232,8 +236,6 @@ void main() {
 
       // simulate package
       await _createPackage(fs, 'somepkg', 'somefile.txt');
-
-      devFS = DevFS(vmService, 'test', tempDir);
       await devFS.create();
       vmService.expectMessages(<String>['create test']);
       expect(devFS.assetPathsToEvict, isEmpty);
@@ -253,7 +255,6 @@ void main() {
     });
 
     testUsingContext('reports unsuccessful compile when errors are returned', () async {
-      devFS = DevFS(vmService, 'test', tempDir);
       await devFS.create();
       final DateTime previousCompile = devFS.lastCompiled;
 
@@ -283,7 +284,6 @@ void main() {
     });
 
     testUsingContext('correctly updates last compiled time when compilation does not fail', () async {
-      devFS = DevFS(vmService, 'test', tempDir);
       // simulate package
       final File sourceFile = await _createPackage(fs, 'somepkg', 'main.dart');
 
@@ -321,7 +321,7 @@ void main() {
 
 class MockVMService extends BasicMock implements VMService {
   MockVMService() {
-    _vm = MockVM(this);
+    resetVm();
   }
 
   Uri _httpAddress;
@@ -333,6 +333,10 @@ class MockVMService extends BasicMock implements VMService {
 
   @override
   VM get vm => _vm;
+
+  void resetVm() {
+    _vm = MockVM(this);
+  }
 
   Future<void> setUp() async {
     try {
