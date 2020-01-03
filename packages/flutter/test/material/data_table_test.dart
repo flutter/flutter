@@ -158,8 +158,8 @@ void main() {
     ));
 
     await tester.pumpAndSettle(const Duration(milliseconds: 200));
-    final checkboxes = find.byType(Checkbox);
-    expect(checkboxes.allCandidates.length > 0, true);
+    final Finder checkboxes = find.byType(Checkbox);
+    expect(checkboxes.evaluate().length, 11);
     await tester.tap(checkboxes.first);
 
     expect(log, <String>['select-all: true']);

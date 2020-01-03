@@ -621,7 +621,7 @@ class DataTable extends StatelessWidget {
       border: Border(bottom: Divider.createBorderSide(context, width: 1.0)),
     );
 
-    final bool displayCheckboxColumn = showCheckboxColumn && rows.any((DataRow row) => row.onSelectChanged != null);;
+    final bool displayCheckboxColumn = showCheckboxColumn && rows.any((DataRow row) => row.onSelectChanged != null);
     final bool allChecked = displayCheckboxColumn && !rows.any((DataRow row) => row.onSelectChanged != null && !row.selected);
 
     final List<TableColumnWidth> tableColumns = List<TableColumnWidth>(columns.length + (displayCheckboxColumn ? 1 : 0));
