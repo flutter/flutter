@@ -10,6 +10,10 @@ import 'events.dart';
 /// interest in a pointer signal event.
 typedef PointerSignalResolvedCallback = void Function(PointerSignalEvent event);
 
+bool _isSameEvent(PointerSignalEvent event1, PointerSignalEvent event2) {
+  return (event1.original ?? event1) == (event2.original ?? event2);
+}
+
 /// An resolver for pointer signal events.
 ///
 /// Objects interested in a [PointerSignalEvent] should register a callback to
@@ -29,7 +33,7 @@ class PointerSignalResolver {
   void register(PointerSignalEvent event, PointerSignalResolvedCallback callback) {
     assert(event != null);
     assert(callback != null);
-    assert(_currentEvent == null || _currentEvent == event);
+    assert(_currentEvent == null || _isSameEvent(_currentEvent, event));
     if (_firstRegisteredCallback != null) {
       return;
     }
@@ -47,7 +51,7 @@ class PointerSignalResolver {
       assert(_currentEvent == null);
       return;
     }
-    assert((_currentEvent.original ?? _currentEvent) == event);
+    assert(_isSameEvent(_currentEvent, event));
     try {
       _firstRegisteredCallback(_currentEvent);
     } catch (exception, stack) {
