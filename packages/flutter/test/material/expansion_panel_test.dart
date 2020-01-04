@@ -11,11 +11,15 @@ class SimpleExpansionPanelListTestWidget extends StatefulWidget {
     this.firstPanelKey,
     this.secondPanelKey,
     this.canTapOnHeader = false,
+    this.expandedHeaderPadding,
   }) : super(key: key);
 
   final Key firstPanelKey;
   final Key secondPanelKey;
   final bool canTapOnHeader;
+
+  /// Gets passed to PanelList if not null
+  final EdgeInsets expandedHeaderPadding;
 
   @override
   _SimpleExpansionPanelListTestWidgetState createState() => _SimpleExpansionPanelListTestWidgetState();
@@ -26,31 +30,34 @@ class _SimpleExpansionPanelListTestWidgetState extends State<SimpleExpansionPane
 
   @override
   Widget build(BuildContext context) {
-    return ExpansionPanelList(
-      expansionCallback: (int _index, bool _isExpanded) {
-        setState(() {
-          extendedState[_index] = !extendedState[_index];
-        });
-      },
-      children: <ExpansionPanel>[
-        ExpansionPanel(
-          headerBuilder: (BuildContext context, bool isExpanded) {
-            return Text(isExpanded ? 'B' : 'A', key: widget.firstPanelKey);
-          },
-          body: const SizedBox(height: 100.0),
-          canTapOnHeader: widget.canTapOnHeader,
-          isExpanded: extendedState[0],
-        ),
-        ExpansionPanel(
-          headerBuilder: (BuildContext context, bool isExpanded) {
-            return Text(isExpanded ? 'D' : 'C', key: widget.secondPanelKey);
-          },
-          body: const SizedBox(height: 100.0),
-          canTapOnHeader: widget.canTapOnHeader,
-          isExpanded: extendedState[1],
-        ),
-      ],
-    );
+    final ExpansionPanelCallback expansionPanelCallback = (int _index, bool _isExpanded) {
+      setState(() {
+        extendedState[_index] = !extendedState[_index];
+      });
+    };
+
+    final List<ExpansionPanel> children = <ExpansionPanel>[
+      ExpansionPanel(
+        headerBuilder: (BuildContext context, bool isExpanded) {
+          return Text(isExpanded ? 'B' : 'A', key: widget.firstPanelKey);
+        },
+        body: const SizedBox(height: 100.0),
+        canTapOnHeader: widget.canTapOnHeader,
+        isExpanded: extendedState[0],
+      ),
+      ExpansionPanel(
+        headerBuilder: (BuildContext context, bool isExpanded) {
+          return Text(isExpanded ? 'D' : 'C', key: widget.secondPanelKey);
+        },
+        body: const SizedBox(height: 100.0),
+        canTapOnHeader: widget.canTapOnHeader,
+        isExpanded: extendedState[1],
+      ),
+    ];
+
+    return widget.expandedHeaderPadding == null
+        ? ExpansionPanelList(expansionCallback: expansionPanelCallback, children: children)
+        : ExpansionPanelList(expansionCallback: expansionPanelCallback, children: children, expandedPadding: widget.expandedHeaderPadding);
   }
 }
 
@@ -1257,24 +1264,21 @@ void main() {
   });
 
   testWidgets('Correct custom expanded padding', (WidgetTester tester) async {
+    const Key firstPanelKey = Key('firstPanelKey');
+
     await tester.pumpWidget(
-      MaterialApp(
+      const MaterialApp(
         home: SingleChildScrollView(
-          child: ExpansionPanelList(
-            expansionCallback: (int _index, bool _isExpanded) {},
-            children: <ExpansionPanel>[
-              ExpansionPanel(
-                headerBuilder: (BuildContext context, bool isExpanded) {
-                  return Text(isExpanded ? 'B' : 'A');
-                },
-                body: const SizedBox(height: 100.0),
-              ),
-            ],
+          child: SimpleExpansionPanelListTestWidget(
+            firstPanelKey: firstPanelKey,
+            canTapOnHeader: true,
+            expandedHeaderPadding: EdgeInsets.symmetric(vertical: 40.0),
           ),
         ),
       ),
     );
 
+    // The panel is closed
     expect(find.text('A'), findsOneWidget);
     expect(find.text('B'), findsNothing);
     RenderBox box = tester.renderObject(find.byType(ExpansionPanelList));
@@ -1282,33 +1286,16 @@ void main() {
     expect(box.size.height, equals(oldHeight));
 
     // Now, expand the child panel.
-    await tester.pumpWidget(
-      MaterialApp(
-        home: SingleChildScrollView(
-          child: ExpansionPanelList(
-            expansionCallback: (int _index, bool _isExpanded) {},
-            expandedPadding: const EdgeInsets.symmetric(vertical: 40.0),
-            children: <ExpansionPanel>[
-              ExpansionPanel(
-                headerBuilder: (BuildContext context, bool isExpanded) {
-                  return Text(isExpanded ? 'B' : 'A');
-                },
-                body: const SizedBox(height: 100.0),
-                isExpanded: true, // this is the addition
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-    await tester.pump(const Duration(milliseconds: 200));
+    await tester.tap(find.byKey(firstPanelKey));
+    await tester.pumpAndSettle();
 
+    // The panel is expanded
     expect(find.text('A'), findsNothing);
     expect(find.text('B'), findsOneWidget);
     box = tester.renderObject(find.byType(ExpansionPanelList));
 
-    final double heightDelta = box.size.height - oldHeight;
-    expect(heightDelta, greaterThanOrEqualTo(170.0));
-    expect(heightDelta, lessThanOrEqualTo(180.0));
+    // Padding is added to top and bottom of expanded header (subtracting body height)
+    final double heightDelta = box.size.height - oldHeight - 107.0;
+    expect(heightDelta, equals(80.0)); // Double of symmetric padding value
   });
 }
