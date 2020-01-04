@@ -355,7 +355,11 @@ class ExpansionPanelList extends StatefulWidget {
   /// constructor.)
   final Object initialOpenPanelValue;
 
-  /// Padding is applied to entire panel when expanded
+  /// Padding is applied to panel header when expanded.
+  /// By default, some space is added to the header vertically above and below
+  /// during expansion.
+  /// This property can be used to adjust this behavior, for example to achieve
+  /// a more compact representation or an indentation of the header.
   final EdgeInsets expandedPadding;
 
   @override
