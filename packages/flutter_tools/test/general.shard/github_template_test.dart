@@ -16,12 +16,6 @@ const String _kShortURL = 'https://www.example.com/short';
 
 void main() {
   group('GitHub template creator', () {
-    FileSystem fs;
-
-    setUp(() async {
-      fs = MemoryFileSystem();
-    });
-
     testUsingContext('similar issues URL', () async {
       final GitHubTemplateCreator creator = GitHubTemplateCreator();
       expect(
@@ -52,9 +46,11 @@ void main() {
       const String errorString = 'this is a 100% error';
       const String exception = 'failing to succeed!!!';
       const String doctorText = ' [✓] Flutter (Channel report';
+      FileSystem fs;
 
       setUp(() async {
         stackTrace = StackTrace.fromString('trace');
+        fs = MemoryFileSystem();
       });
 
       testUsingContext('shortened', () async {
