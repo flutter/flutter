@@ -41,26 +41,26 @@ class GitHubTemplateCreator {
     ) async {
     final String title = '[tool_crash] $errorString';
     final String body = '''## Command
-  ```
-  $command
-  ```
+```
+$command
+```
 
-  ## Steps to Reproduce
-  1. ...
-  2. ...
-  3. ...
+## Steps to Reproduce
+1. ...
+2. ...
+3. ...
 
-  ## Logs
-  $exception
-  ```
-  ${LineSplitter.split(stackTrace.toString()).take(20).join('\n')}
-  ```
-  ```
-  $doctorText
-  ```
+## Logs
+$exception
+```
+${LineSplitter.split(stackTrace.toString()).take(20).join('\n')}
+```
+```
+$doctorText
+```
 
-  ## Flutter Application Metadata
-  ${_projectMetadataInformation()}
+## Flutter Application Metadata
+${_projectMetadataInformation()}
 ''';
 
     final String fullURL = 'https://github.com/flutter/flutter/issues/new?'

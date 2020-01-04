@@ -70,10 +70,10 @@ void main() {
         expect(
             await creator.toolCrashIssueTemplateGitHubURL(command, errorString, exception, stackTrace, doctorText),
             'https://github.com/flutter/flutter/issues/new?title=%5Btool_crash%5D+this+is+a+100%25+error&body=%23%'
-                '23+Command%0A++%60%60%60%0A++flutter+test%0A++%60%60%60%0A%0A++%23%23+Steps+to+Reproduce%0A++1.+...'
-                '%0A++2.+...%0A++3.+...%0A%0A++%23%23+Logs%0A++failing+to+succeed%21%21%21%0A++%60%60%60%0A++trace%0A'
-                '++%60%60%60%0A++%60%60%60%0A+++%5B%E2%9C%93%5D+Flutter+%28Channel+report%0A++%60%60%60%0A%0A++%23%23'
-                '+Flutter+Application+Metadata%0A++No+pubspec+in+working+directory.%0A&labels=tool%2Csevere%3A+crash'
+                '23+Command%0A%60%60%60%0Aflutter+test%0A%60%60%60%0A%0A%23%23+Steps+to+Reproduce%0A1.+...'
+                '%0A2.+...%0A3.+...%0A%0A%23%23+Logs%0Afailing+to+succeed%21%21%21%0A%60%60%60%0Atrace%0A'
+                '%60%60%60%0A%60%60%60%0A+%5B%E2%9C%93%5D+Flutter+%28Channel+report%0A%60%60%60%0A%0A%23%23'
+                '+Flutter+Application+Metadata%0ANo+pubspec+in+working+directory.%0A&labels=tool%2Csevere%3A+crash'
         );
       }, overrides: <Type, Generator>{
         HttpClientFactory: () => () => FakeHttpClient(),
@@ -108,26 +108,26 @@ device_info=/fake/pub.dartlang.org/pub.dartlang.org/device_info-0.4.1+4/
         final String actualURL = await creator.toolCrashIssueTemplateGitHubURL(command, errorString, exception, stackTrace, doctorText);
         final String actualBody = Uri.parse(actualURL).queryParameters['body'];
         const String expectedBody = '''## Command
-  ```
-  flutter test
-  ```
+```
+flutter test
+```
 
-  ## Steps to Reproduce
-  1. ...
-  2. ...
-  3. ...
+## Steps to Reproduce
+1. ...
+2. ...
+3. ...
 
-  ## Logs
-  failing to succeed!!!
-  ```
-  trace
-  ```
-  ```
-   [✓] Flutter (Channel report
-  ```
+## Logs
+failing to succeed!!!
+```
+trace
+```
+```
+ [✓] Flutter (Channel report
+```
 
-  ## Flutter Application Metadata
-  **Version**: 2.0.1+100
+## Flutter Application Metadata
+**Version**: 2.0.1+100
 **Material**: true
 **Android X**: true
 **Module**: true
