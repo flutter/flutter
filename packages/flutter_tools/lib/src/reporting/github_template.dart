@@ -7,6 +7,7 @@ import 'dart:async';
 import 'package:file/file.dart';
 
 import '../base/context.dart';
+import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/net.dart';
 import '../convert.dart';
@@ -40,27 +41,27 @@ class GitHubTemplateCreator {
     ) async {
     final String title = '[tool_crash] $errorString';
     final String body = '''## Command
-  ```
-  $command
-  ```
+```
+$command
+```
 
-  ## Steps to Reproduce
-  1. ...
-  2. ...
-  3. ...
+## Steps to Reproduce
+1. ...
+2. ...
+3. ...
 
-  ## Logs
-  $exception
-  ```
-  ${LineSplitter.split(stackTrace.toString()).take(20).join('\n')}
-  ```
-  ```
-  $doctorText
-  ```
+## Logs
+$exception
+```
+${LineSplitter.split(stackTrace.toString()).take(20).join('\n')}
+```
+```
+$doctorText
+```
 
-  ## Flutter Application Metadata
-  ${_projectMetadataInformation()}
-  ''';
+## Flutter Application Metadata
+${_projectMetadataInformation()}
+''';
 
     final String fullURL = 'https://github.com/flutter/flutter/issues/new?'
       'title=${Uri.encodeQueryComponent(title)}'
@@ -84,29 +85,33 @@ class GitHubTemplateCreator {
       if (project == null || manifest == null || manifest.isEmpty) {
         return 'No pubspec in working directory.';
       }
-      String description = '';
-      description += '''
-**Version**: ${manifest.appVersion}
-**Material**: ${manifest.usesMaterialDesign}
-**Android X**: ${manifest.usesAndroidX}
-**Module**: ${manifest.isModule}
-**Plugin**: ${manifest.isPlugin}
-**Android package**: ${manifest.androidPackage}
-**iOS bundle identifier**: ${manifest.iosBundleIdentifier}
-''';
+      final StringBuffer description = StringBuffer()
+        ..writeln('**Version**: ${manifest.appVersion}')
+        ..writeln('**Material**: ${manifest.usesMaterialDesign}')
+        ..writeln('**Android X**: ${manifest.usesAndroidX}')
+        ..writeln('**Module**: ${manifest.isModule}')
+        ..writeln('**Plugin**: ${manifest.isPlugin}')
+        ..writeln('**Android package**: ${manifest.androidPackage}')
+        ..writeln('**iOS bundle identifier**: ${manifest.iosBundleIdentifier}');
+
       final File file = project.flutterPluginsFile;
       if (file.existsSync()) {
-        description += '### Plugins\n';
+        description.writeln('### Plugins');
+        // Format is:
+        // camera=/path/to/.pub-cache/hosted/pub.dartlang.org/camera-0.5.7+2/
         for (String plugin in project.flutterPluginsFile.readAsLinesSync()) {
           final List<String> pluginParts = plugin.split('=');
           if (pluginParts.length != 2) {
             continue;
           }
-          description += pluginParts.first;
+          // Write the last part of the path, which includes the plugin name and version.
+          // Example: camera-0.5.7+2
+          final List<String> pathParts = fs.path.split(pluginParts[1]);
+          description.writeln(pathParts.isEmpty ? pluginParts.first : pathParts.last);
         }
       }
 
-      return description;
+      return description.toString();
     } on Exception catch (exception) {
       return exception.toString();
     }
