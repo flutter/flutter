@@ -9,6 +9,7 @@ import 'dart:math' as math;
 
 import 'package:matcher/matcher.dart';
 import 'package:meta/meta.dart';
+import 'package:vm_service_client/vm_service_client.dart';
 import 'package:webdriver/sync_io.dart' as sync_io;
 import 'package:webdriver/support/async.dart';
 
@@ -30,19 +31,22 @@ export 'web_driver_config.dart';
 class WebFlutterDriver extends FlutterDriver {
   /// Creates a driver that uses a connection provided by the given
   /// [_connection] and [_browserName].
-  WebFlutterDriver.connectedTo(this._connection, this._browser);
+  WebFlutterDriver.connectedTo(this._connection, this._browser) :
+        _startTime = DateTime.now();
 
   final FlutterWebConnection _connection;
   final Browser _browser;
   DateTime _startTime;
-  final _WebIsolate _appIsolate = _WebIsolate();
 
   /// Start time for tracing
   @visibleForTesting
   DateTime get startTime => _startTime;
 
   @override
-  Isolate get appIsolate => _appIsolate;
+  VMIsolate get appIsolate => throw UnsupportedError('WebFlutterDriver does not support appIsolate');
+
+  @override
+  VMServiceClient get serviceClient => throw UnsupportedError('WebFlutterDriver does not support serviceClient');
 
   /// Creates a driver that uses a connection provided by the given
   /// [hostUrl] which would fallback to environment variable VM_SERVICE_URL.
@@ -112,16 +116,11 @@ class WebFlutterDriver extends FlutterDriver {
     Duration timeout = kUnusuallyLongTimeout,
   }) async {
     _checkBrowserSupportsTimeline();
-
-    _startTime = DateTime.now();
   }
 
   @override
   Future<Timeline> stopTracingAndDownloadTimeline({Duration timeout = kUnusuallyLongTimeout}) async {
     _checkBrowserSupportsTimeline();
-    if (_startTime == null) {
-      return null;
-    }
 
     final List<Map<String, dynamic>> events = <Map<String, dynamic>>[];
     for (sync_io.LogEntry entry in _connection.logs) {
@@ -143,7 +142,6 @@ class WebFlutterDriver extends FlutterDriver {
     final Map<String, dynamic> json = <String, dynamic>{
       'traceEvents': events,
     };
-    _startTime = null;
     return Timeline.fromJson(json);
   }
 
@@ -167,7 +165,7 @@ class WebFlutterDriver extends FlutterDriver {
     _checkBrowserSupportsTimeline();
 
     // Reset start time
-    _startTime = null;
+    _startTime = DateTime.now();
   }
 
   /// Checks whether browser supports Timeline related operations
@@ -248,14 +246,5 @@ class FlutterWebConnection {
   /// Closes the WebDriver.
   Future<void> close() async {
     _driver.quit();
-  }
-}
-
-/// An implementation of [Isolate] for Flutter Web Driver.
-class _WebIsolate implements Isolate {
-  /// Invokes extension is not implemented for _WebIsolate.
-  @override
-  Future<Object> invokeExtension(String method, [Map<String, String> params]) {
-    throw UnsupportedError('WebIsolate does not support invokeExtension');
   }
 }

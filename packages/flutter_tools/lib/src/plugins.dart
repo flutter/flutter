@@ -617,6 +617,8 @@ end
 const String _dartPluginRegistryTemplate = '''//
 // Generated file. Do not edit.
 //
+
+// ignore: unused_import
 import 'dart:ui';
 
 {{#plugins}}
