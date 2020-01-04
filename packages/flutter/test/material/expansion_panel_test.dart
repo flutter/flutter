@@ -57,7 +57,7 @@ class _SimpleExpansionPanelListTestWidgetState extends State<SimpleExpansionPane
 
     return widget.expandedHeaderPadding == null
         ? ExpansionPanelList(expansionCallback: expansionPanelCallback, children: children)
-        : ExpansionPanelList(expansionCallback: expansionPanelCallback, children: children, expandedPadding: widget.expandedHeaderPadding);
+        : ExpansionPanelList(expansionCallback: expansionPanelCallback, children: children, expandedHeaderPadding: widget.expandedHeaderPadding);
   }
 }
 

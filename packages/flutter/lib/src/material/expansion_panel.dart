@@ -227,7 +227,7 @@ class ExpansionPanelList extends StatefulWidget {
     this.children = const <ExpansionPanel>[],
     this.expansionCallback,
     this.animationDuration = kThemeAnimationDuration,
-    this.expandedPadding = _kPanelHeaderExpandedDefaultPadding
+    this.expandedHeaderPadding = _kPanelHeaderExpandedDefaultPadding
   }) : assert(children != null),
        assert(animationDuration != null),
        _allowOnlyOnePanelOpen = false,
@@ -316,7 +316,7 @@ class ExpansionPanelList extends StatefulWidget {
     this.expansionCallback,
     this.animationDuration = kThemeAnimationDuration,
     this.initialOpenPanelValue,
-    this.expandedPadding = _kPanelHeaderExpandedDefaultPadding
+    this.expandedHeaderPadding = _kPanelHeaderExpandedDefaultPadding
   }) : assert(children != null),
        assert(animationDuration != null),
        _allowOnlyOnePanelOpen = true,
@@ -360,7 +360,7 @@ class ExpansionPanelList extends StatefulWidget {
   /// during expansion.
   /// This property can be used to adjust this behavior, for example to achieve
   /// a more compact representation or an indentation of the header.
-  final EdgeInsets expandedPadding;
+  final EdgeInsets expandedHeaderPadding;
 
   @override
   State<StatefulWidget> createState() => _ExpansionPanelListState();
@@ -483,7 +483,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
             child: AnimatedContainer(
               duration: widget.animationDuration,
               curve: Curves.fastOutSlowIn,
-              margin: _isChildExpanded(index) ? widget.expandedPadding : EdgeInsets.zero,
+              margin: _isChildExpanded(index) ? widget.expandedHeaderPadding : EdgeInsets.zero,
               child: ConstrainedBox(
                 constraints: const BoxConstraints(minHeight: _kPanelHeaderCollapsedHeight),
                 child: headerWidget,
