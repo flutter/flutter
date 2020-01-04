@@ -73,7 +73,7 @@ void main() {
                 '23+Command%0A++%60%60%60%0A++flutter+test%0A++%60%60%60%0A%0A++%23%23+Steps+to+Reproduce%0A++1.+...'
                 '%0A++2.+...%0A++3.+...%0A%0A++%23%23+Logs%0A++failing+to+succeed%21%21%21%0A++%60%60%60%0A++trace%0A'
                 '++%60%60%60%0A++%60%60%60%0A+++%5B%E2%9C%93%5D+Flutter+%28Channel+report%0A++%60%60%60%0A%0A++%23%23'
-                '+Flutter+Application+Metadata%0A++No+pubspec+in+working+directory.%0A++&labels=tool%2Csevere%3A+crash'
+                '+Flutter+Application+Metadata%0A++No+pubspec+in+working+directory.%0A&labels=tool%2Csevere%3A+crash'
         );
       }, overrides: <Type, Generator>{
         HttpClientFactory: () => () => FakeHttpClient(),
@@ -106,16 +106,41 @@ device_info=/fake/pub.dartlang.org/pub.dartlang.org/device_info-0.4.1+4/
         ''');
 
         final String actualURL = await creator.toolCrashIssueTemplateGitHubURL(command, errorString, exception, stackTrace, doctorText);
-        final String body = Uri.parse(actualURL).queryParameters['body'];
-        expect(body, contains('**Version**: 2.0.1+100\n'));
-        expect(body, contains('**Material**: true\n'));
-        expect(body, contains('**Android X**: true\n'));
-        expect(body, contains('**Module**: true\n'));
-        expect(body, contains('**Plugin**: false\n'));
-        expect(body, contains('**Android package**: com.example.failing.android\n'));
-        expect(body, contains('**iOS bundle identifier**: com.example.failing.ios\n'));
-        expect(body, contains('camera-0.5.7+2\n'));
-        expect(body, contains('device_info-0.4.1+4\n'));
+        final String actualBody = Uri.parse(actualURL).queryParameters['body'];
+        const String expectedBody = '''## Command
+  ```
+  flutter test
+  ```
+
+  ## Steps to Reproduce
+  1. ...
+  2. ...
+  3. ...
+
+  ## Logs
+  failing to succeed!!!
+  ```
+  trace
+  ```
+  ```
+   [✓] Flutter (Channel report
+  ```
+
+  ## Flutter Application Metadata
+  **Version**: 2.0.1+100
+**Material**: true
+**Android X**: true
+**Module**: true
+**Plugin**: false
+**Android package**: com.example.failing.android
+**iOS bundle identifier**: com.example.failing.ios
+### Plugins
+camera-0.5.7+2
+device_info-0.4.1+4
+
+''';
+
+        expect(actualBody, expectedBody);
       }, overrides: <Type, Generator>{
         HttpClientFactory: () => () => FakeHttpClient(),
         FileSystem: () => fs,

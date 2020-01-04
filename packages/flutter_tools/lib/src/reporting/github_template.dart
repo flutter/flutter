@@ -61,7 +61,7 @@ class GitHubTemplateCreator {
 
   ## Flutter Application Metadata
   ${_projectMetadataInformation()}
-  ''';
+''';
 
     final String fullURL = 'https://github.com/flutter/flutter/issues/new?'
       'title=${Uri.encodeQueryComponent(title)}'
@@ -85,14 +85,14 @@ class GitHubTemplateCreator {
       if (project == null || manifest == null || manifest.isEmpty) {
         return 'No pubspec in working directory.';
       }
-      final StringBuffer description = StringBuffer();
-      description.writeln('**Version**: ${manifest.appVersion}');
-      description.writeln('**Material**: ${manifest.usesMaterialDesign}');
-      description.writeln('**Android X**: ${manifest.usesAndroidX}');
-      description.writeln('**Module**: ${manifest.isModule}');
-      description.writeln('**Plugin**: ${manifest.isPlugin}');
-      description.writeln('**Android package**: ${manifest.androidPackage}');
-      description.writeln('**iOS bundle identifier**: ${manifest.iosBundleIdentifier}');
+      final StringBuffer description = StringBuffer()
+        ..writeln('**Version**: ${manifest.appVersion}')
+        ..writeln('**Material**: ${manifest.usesMaterialDesign}')
+        ..writeln('**Android X**: ${manifest.usesAndroidX}')
+        ..writeln('**Module**: ${manifest.isModule}')
+        ..writeln('**Plugin**: ${manifest.isPlugin}')
+        ..writeln('**Android package**: ${manifest.androidPackage}')
+        ..writeln('**iOS bundle identifier**: ${manifest.iosBundleIdentifier}');
 
       final File file = project.flutterPluginsFile;
       if (file.existsSync()) {
