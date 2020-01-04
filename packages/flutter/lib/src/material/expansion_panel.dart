@@ -13,7 +13,7 @@ import 'mergeable_material.dart';
 import 'theme.dart';
 
 const double _kPanelHeaderCollapsedHeight = kMinInteractiveDimension;
-const EdgeInsets _kPanelExpandedDefaultPadding = EdgeInsets.symmetric(
+const EdgeInsets _kPanelHeaderExpandedDefaultPadding = EdgeInsets.symmetric(
     vertical: 64.0 - _kPanelHeaderCollapsedHeight
 );
 
@@ -227,7 +227,7 @@ class ExpansionPanelList extends StatefulWidget {
     this.children = const <ExpansionPanel>[],
     this.expansionCallback,
     this.animationDuration = kThemeAnimationDuration,
-    this.expandedPadding = _kPanelExpandedDefaultPadding
+    this.expandedPadding = _kPanelHeaderExpandedDefaultPadding
   }) : assert(children != null),
        assert(animationDuration != null),
        _allowOnlyOnePanelOpen = false,
@@ -316,7 +316,7 @@ class ExpansionPanelList extends StatefulWidget {
     this.expansionCallback,
     this.animationDuration = kThemeAnimationDuration,
     this.initialOpenPanelValue,
-    this.expandedPadding = _kPanelExpandedDefaultPadding
+    this.expandedPadding = _kPanelHeaderExpandedDefaultPadding
   }) : assert(children != null),
        assert(animationDuration != null),
        _allowOnlyOnePanelOpen = true,
