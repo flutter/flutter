@@ -5,11 +5,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-// Mirrored from expansion_panel.dart
-const double _kPanelHeaderCollapsedHeight = kMinInteractiveDimension;
-const EdgeInsets _kPanelHeaderExpandedDefaultPadding = EdgeInsets.symmetric(
-    vertical: 64.0 - _kPanelHeaderCollapsedHeight
-);
 
 class SimpleExpansionPanelListTestWidget extends StatefulWidget {
   const SimpleExpansionPanelListTestWidget({
@@ -17,13 +12,21 @@ class SimpleExpansionPanelListTestWidget extends StatefulWidget {
     this.firstPanelKey,
     this.secondPanelKey,
     this.canTapOnHeader = false,
-    this.expandedHeaderPadding = _kPanelHeaderExpandedDefaultPadding
+    this.expandedHeaderPadding
   }) : super(key: key);
 
   final Key firstPanelKey;
   final Key secondPanelKey;
   final bool canTapOnHeader;
+
+  /// If null the below default is applied
   final EdgeInsets expandedHeaderPadding;
+
+  /// Mirrors the default expanded header padding as its source constants are private
+  static EdgeInsets defaultExpandedHeaderPadding()
+  {
+    return const ExpansionPanelList().expandedHeaderPadding;
+  }
 
   @override
   _SimpleExpansionPanelListTestWidgetState createState() => _SimpleExpansionPanelListTestWidgetState();
@@ -35,7 +38,7 @@ class _SimpleExpansionPanelListTestWidgetState extends State<SimpleExpansionPane
   @override
   Widget build(BuildContext context) {
     return ExpansionPanelList(
-      expandedHeaderPadding: widget.expandedHeaderPadding,
+      expandedHeaderPadding: widget.expandedHeaderPadding ?? SimpleExpansionPanelListTestWidget.defaultExpandedHeaderPadding(),
       expansionCallback: (int _index, bool _isExpanded) {
         setState(() {
           extendedState[_index] = !extendedState[_index];
@@ -1265,7 +1268,44 @@ void main() {
     expect(find.text('D'), findsNothing);
   });
 
-  testWidgets('Correct custom expanded padding', (WidgetTester tester) async {
+  testWidgets('Correct default header padding', (WidgetTester tester) async {
+    const Key firstPanelKey = Key('firstPanelKey');
+
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: SingleChildScrollView(
+          child: SimpleExpansionPanelListTestWidget(
+              firstPanelKey: firstPanelKey,
+              canTapOnHeader: true
+          ),
+        ),
+      ),
+    );
+
+    // The panel is closed
+    expect(find.text('A'), findsOneWidget);
+    expect(find.text('B'), findsNothing);
+
+    // No padding applied to closed header
+    RenderBox box = tester.renderObject(find.ancestor(of: find.byKey(firstPanelKey), matching: find.byType(AnimatedContainer)).first);
+    expect(box.size.height, equals(48.0)); // _kPanelHeaderCollapsedHeight
+    expect(box.size.width, equals(736.0));
+
+    // Now, expand the child panel.
+    await tester.tap(find.byKey(firstPanelKey));
+    await tester.pumpAndSettle();
+
+    // The panel is expanded
+    expect(find.text('A'), findsNothing);
+    expect(find.text('B'), findsOneWidget);
+
+    // Padding is added to expanded header
+    box = tester.renderObject(find.ancestor(of: find.byKey(firstPanelKey), matching: find.byType(AnimatedContainer)).first);
+    expect(box.size.height, equals(80.0)); // _kPanelHeaderCollapsedHeight + 32.0 (double default padding)
+    expect(box.size.width, equals(736.0));
+  });
+
+  testWidgets('Correct custom header padding', (WidgetTester tester) async {
     const Key firstPanelKey = Key('firstPanelKey');
 
     await tester.pumpWidget(
@@ -1286,7 +1326,7 @@ void main() {
 
     // No padding applied to closed header
     RenderBox box = tester.renderObject(find.ancestor(of: find.byKey(firstPanelKey), matching: find.byType(AnimatedContainer)).first);
-    expect(box.size.height, equals(_kPanelHeaderCollapsedHeight));
+    expect(box.size.height, equals(48.0)); // _kPanelHeaderCollapsedHeight
     expect(box.size.width, equals(736.0));
 
     // Now, expand the child panel.
@@ -1299,7 +1339,7 @@ void main() {
 
     // Padding is added to expanded header
     box = tester.renderObject(find.ancestor(of: find.byKey(firstPanelKey), matching: find.byType(AnimatedContainer)).first);
-    expect(box.size.height, equals(_kPanelHeaderCollapsedHeight + 80.0));
+    expect(box.size.height, equals(128.0)); // _kPanelHeaderCollapsedHeight + 80.0 (double padding)
     expect(box.size.width, equals(736.0));
   });
 }
