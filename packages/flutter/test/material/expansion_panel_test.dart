@@ -5,20 +5,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+// Mirrored from expansion_panel.dart
+const double _kPanelHeaderCollapsedHeight = kMinInteractiveDimension;
+const EdgeInsets _kPanelHeaderExpandedDefaultPadding = EdgeInsets.symmetric(
+    vertical: 64.0 - _kPanelHeaderCollapsedHeight
+);
+
 class SimpleExpansionPanelListTestWidget extends StatefulWidget {
   const SimpleExpansionPanelListTestWidget({
     Key key,
     this.firstPanelKey,
     this.secondPanelKey,
     this.canTapOnHeader = false,
-    this.expandedHeaderPadding,
+    this.expandedHeaderPadding = _kPanelHeaderExpandedDefaultPadding
   }) : super(key: key);
 
   final Key firstPanelKey;
   final Key secondPanelKey;
   final bool canTapOnHeader;
-
-  /// Gets passed to PanelList if not null
   final EdgeInsets expandedHeaderPadding;
 
   @override
@@ -30,34 +34,32 @@ class _SimpleExpansionPanelListTestWidgetState extends State<SimpleExpansionPane
 
   @override
   Widget build(BuildContext context) {
-    final ExpansionPanelCallback expansionPanelCallback = (int _index, bool _isExpanded) {
-      setState(() {
-        extendedState[_index] = !extendedState[_index];
-      });
-    };
-
-    final List<ExpansionPanel> children = <ExpansionPanel>[
-      ExpansionPanel(
-        headerBuilder: (BuildContext context, bool isExpanded) {
-          return Text(isExpanded ? 'B' : 'A', key: widget.firstPanelKey);
-        },
-        body: const SizedBox(height: 100.0),
-        canTapOnHeader: widget.canTapOnHeader,
-        isExpanded: extendedState[0],
-      ),
-      ExpansionPanel(
-        headerBuilder: (BuildContext context, bool isExpanded) {
-          return Text(isExpanded ? 'D' : 'C', key: widget.secondPanelKey);
-        },
-        body: const SizedBox(height: 100.0),
-        canTapOnHeader: widget.canTapOnHeader,
-        isExpanded: extendedState[1],
-      ),
-    ];
-
-    return widget.expandedHeaderPadding == null
-        ? ExpansionPanelList(expansionCallback: expansionPanelCallback, children: children)
-        : ExpansionPanelList(expansionCallback: expansionPanelCallback, children: children, expandedHeaderPadding: widget.expandedHeaderPadding);
+    return ExpansionPanelList(
+      expandedHeaderPadding: widget.expandedHeaderPadding,
+      expansionCallback: (int _index, bool _isExpanded) {
+        setState(() {
+          extendedState[_index] = !extendedState[_index];
+        });
+      },
+      children: <ExpansionPanel>[
+        ExpansionPanel(
+          headerBuilder: (BuildContext context, bool isExpanded) {
+            return Text(isExpanded ? 'B' : 'A', key: widget.firstPanelKey);
+          },
+          body: const SizedBox(height: 100.0),
+          canTapOnHeader: widget.canTapOnHeader,
+          isExpanded: extendedState[0],
+        ),
+        ExpansionPanel(
+          headerBuilder: (BuildContext context, bool isExpanded) {
+            return Text(isExpanded ? 'D' : 'C', key: widget.secondPanelKey);
+          },
+          body: const SizedBox(height: 100.0),
+          canTapOnHeader: widget.canTapOnHeader,
+          isExpanded: extendedState[1],
+        ),
+      ],
+    );
   }
 }
 
@@ -1281,9 +1283,11 @@ void main() {
     // The panel is closed
     expect(find.text('A'), findsOneWidget);
     expect(find.text('B'), findsNothing);
-    RenderBox box = tester.renderObject(find.byType(ExpansionPanelList));
-    final double oldHeight = box.size.height;
-    expect(box.size.height, equals(oldHeight));
+
+    // No padding applied to closed header
+    RenderBox box = tester.renderObject(find.ancestor(of: find.byKey(firstPanelKey), matching: find.byType(AnimatedContainer)).first);
+    expect(box.size.height, equals(_kPanelHeaderCollapsedHeight));
+    expect(box.size.width, equals(736.0));
 
     // Now, expand the child panel.
     await tester.tap(find.byKey(firstPanelKey));
@@ -1292,10 +1296,10 @@ void main() {
     // The panel is expanded
     expect(find.text('A'), findsNothing);
     expect(find.text('B'), findsOneWidget);
-    box = tester.renderObject(find.byType(ExpansionPanelList));
 
-    // Padding is added to top and bottom of expanded header (subtracting body height)
-    final double heightDelta = box.size.height - oldHeight - 107.0;
-    expect(heightDelta, equals(80.0)); // Double of symmetric padding value
+    // Padding is added to expanded header
+    box = tester.renderObject(find.ancestor(of: find.byKey(firstPanelKey), matching: find.byType(AnimatedContainer)).first);
+    expect(box.size.height, equals(_kPanelHeaderCollapsedHeight + 80.0));
+    expect(box.size.width, equals(736.0));
   });
 }
