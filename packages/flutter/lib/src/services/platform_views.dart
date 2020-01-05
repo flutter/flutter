@@ -422,7 +422,6 @@ enum _AndroidViewState {
   waitingForSize,
   creating,
   created,
-  createFailed,
   disposed,
 }
 

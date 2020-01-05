@@ -7,7 +7,7 @@
 import 'package:flutter/foundation.dart';
 import '../flutter_test_alternative.dart';
 
-enum _TestEnum { a, b, c, d, e, f, g, h, }
+enum _TestEnum { c, d, e, }
 
 void main() {
   test('BitField control test', () {
