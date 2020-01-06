@@ -95,7 +95,6 @@ unlinked_spec.ds
 
 # macOS
 **/macos/Flutter/GeneratedPluginRegistrant.swift
-**/macos/Podfile
 
 # Coverage
 coverage/
