@@ -60,7 +60,7 @@ class RenderSliverFillViewport extends RenderSliverFixedExtentBoxAdaptor {
 }
 
 /// A sliver that contains a single box child that contains a scrollable and
-/// fills the remaining space in the viewport.
+/// fills the viewport.
 ///
 /// [RenderSliverFillRemainingWithScrollable] sizes its child to fill the
 /// viewport in the cross axis and to fill the remaining space in the viewport
@@ -72,7 +72,7 @@ class RenderSliverFillViewport extends RenderSliverFixedExtentBoxAdaptor {
 /// See also:
 ///
 ///  * [NestedScrollView], which uses this sliver for the inner scrollable.
-///  * [RenderSliverFillRemainingWithoutScrollable], which lays out its
+///  * [RenderSliverFillRemaining], which lays out its
 ///    non-scrollable child slightly different than this widget.
 ///  * [RenderSliverFillRemainingAndOverscroll], which incorporates the
 ///    overscroll into the remaining space to fill.
@@ -113,7 +113,7 @@ class RenderSliverFillRemainingWithScrollable extends RenderSliverSingleBoxAdapt
 /// A sliver that contains a single box child that is non-scrollable and fills
 /// the remaining space in the viewport.
 ///
-/// [RenderSliverFillRemainingWithoutScrollable] sizes its child to fill the
+/// [RenderSliverFillRemaining] sizes its child to fill the
 /// viewport in the cross axis and to fill the remaining space in the viewport
 /// in the main axis.
 ///
@@ -130,10 +130,10 @@ class RenderSliverFillRemainingWithScrollable extends RenderSliverSingleBoxAdapt
 ///    size of the viewport, regardless of what else is in the scroll view.
 ///  * [RenderSliverList], which shows a list of variable-sized children in a
 ///    viewport.
-class RenderSliverFillRemainingWithoutScrollable extends RenderSliverSingleBoxAdapter {
+class RenderSliverFillRemaining extends RenderSliverSingleBoxAdapter {
   /// Creates a [RenderSliver] that wraps a non-scrollable [RenderBox] which is
   /// sized to fit the remaining space in the viewport.
-  RenderSliverFillRemainingWithoutScrollable({ RenderBox child }) : super(child: child);
+  RenderSliverFillRemaining({ RenderBox child }) : super(child: child);
 
   @override
   void performLayout() {
@@ -196,7 +196,7 @@ class RenderSliverFillRemainingWithoutScrollable extends RenderSliverSingleBoxAd
 ///
 ///  * [RenderSliverFillRemainingWithScrollable], which lays out its scrollable
 ///    child without overscroll.
-///  * [RenderSliverFillRemainingWithoutScrollable], which lays out its
+///  * [RenderSliverFillRemaining], which lays out its
 ///    non-scrollable child without overscroll.
 ///  * [RenderSliverFillViewport], which sizes its children based on the
 ///    size of the viewport, regardless of what else is in the scroll view.

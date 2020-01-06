@@ -5,7 +5,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 
-import '../../widgets.dart';
 import 'basic.dart';
 import 'framework.dart';
 import 'sliver.dart';
@@ -173,14 +172,14 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
 /// ### When [SliverFillRemaining] does not have a scrollable child
 ///
 /// When [hasScrollBody] is set to false, the child's size is taken into account
-/// when considering the extent to which it should fill the space. The
-/// [precedingScrollExtent] of the [SliverConstraints] is also taken into
-/// account in deciding how to layout the sliver.
+/// when considering the extent to which it should fill the space. The extent to
+/// which the preceding slivers have been scrolled is also taken into
+/// account in deciding how to layout this sliver.
 ///
-///   * [SliverFillRemaining] will size its [child] to fill the viewport in the
-///     main axis if that space is larger than the child's extent, and the
-///     [precedingScrollExtent] has not exceeded the main axis extent of the
-///     viewport.
+/// [SliverFillRemaining] will size its [child] to fill the viewport in the
+/// main axis if that space is larger than the child's extent, and the
+/// the amount of space that has been scrolled beforehand has not exceeded the
+/// main axis extent of the viewport.
 ///
 /// {@animation 250 500 https://flutter.github.io/assets-for-api-docs/assets/widgets/sliver_fill_remaining_sizes_child.mp4}
 ///
@@ -217,8 +216,8 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
 /// ```
 /// {@end-tool}
 ///
-///  * [SliverFillRemaining] will defer to the size of its [child] if the
-///    child's size exceeds the remaining space in the viewport.
+/// [SliverFillRemaining] will defer to the size of its [child] if the
+/// child's size exceeds the remaining space in the viewport.
 ///
 /// {@animation 250 500 https://flutter.github.io/assets-for-api-docs/assets/widgets/sliver_fill_remaining_defers_to_child.mp4}
 ///
@@ -261,8 +260,8 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
 /// ```
 /// {@end-tool}
 ///
-/// * [SliverFillRemaining] will defer to the size of its [child] if the
-///   [precedingScrollExtent] exceeded the length of the viewport's main axis.
+/// [SliverFillRemaining] will defer to the size of its [child] if the
+/// [precedingScrollExtent] exceeded the length of the viewport's main axis.
 ///
 /// {@animation 250 500 https://flutter.github.io/assets-for-api-docs/assets/widgets/sliver_fill_remaining_scrolled_beyond.mp4}
 ///
@@ -308,10 +307,10 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
 /// ```
 /// {@end-tool}
 ///
-/// * For [ScrollPhysics] that allow overscroll, such as
-///   [BouncingScrollPhysics], setting the [fillOverscroll] flag to true allows
-///   the size of the [child] to _stretch_, filling the overscroll area. It does
-///   this regardless of the path chosen to provide the child's size.
+/// For [ScrollPhysics] that allow overscroll, such as
+/// [BouncingScrollPhysics], setting the [fillOverscroll] flag to true allows
+/// the size of the [child] to _stretch_, filling the overscroll area. It does
+/// this regardless of the path chosen to provide the child's size.
 ///
 /// {@animation 250 500 https://flutter.github.io/assets-for-api-docs/assets/widgets/sliver_fill_remaining_fill_overscroll.mp4}
 ///
@@ -454,7 +453,7 @@ class _SliverFillRemainingWithoutScrollable extends SingleChildRenderObjectWidge
   }) : super(key: key, child: child);
 
   @override
-  RenderSliverFillRemainingWithoutScrollable createRenderObject(BuildContext context) => RenderSliverFillRemainingWithoutScrollable();
+  RenderSliverFillRemaining createRenderObject(BuildContext context) => RenderSliverFillRemaining();
 }
 
 class _SliverFillRemainingAndOverscroll extends SingleChildRenderObjectWidget {
