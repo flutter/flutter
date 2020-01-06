@@ -12,6 +12,7 @@ import 'observer_tester.dart';
 import 'semantics_tester.dart';
 
 class FirstWidget extends StatelessWidget {
+  const FirstWidget({ Key key }) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
@@ -27,6 +28,7 @@ class FirstWidget extends StatelessWidget {
 }
 
 class SecondWidget extends StatefulWidget {
+  const SecondWidget({ Key key }) : super(key: key);
   @override
   SecondWidgetState createState() => SecondWidgetState();
 }
@@ -47,7 +49,7 @@ class SecondWidgetState extends State<SecondWidget> {
 typedef ExceptionCallback = void Function(dynamic exception);
 
 class ThirdWidget extends StatelessWidget {
-  const ThirdWidget({ this.targetKey, this.onException });
+  const ThirdWidget({ Key key, this.targetKey, this.onException }) : super(key: key);
 
   final Key targetKey;
   final ExceptionCallback onException;
@@ -94,8 +96,8 @@ class OnTapPage extends StatelessWidget {
 void main() {
   testWidgets('Can navigator navigate to and from a stateful widget', (WidgetTester tester) async {
     final Map<String, WidgetBuilder> routes = <String, WidgetBuilder>{
-      '/': (BuildContext context) => FirstWidget(), // X
-      '/second': (BuildContext context) => SecondWidget(), // Y
+      '/': (BuildContext context) => const FirstWidget(), // X
+      '/second': (BuildContext context) => const SecondWidget(), // Y
     };
 
     await tester.pumpWidget(MaterialApp(routes: routes));

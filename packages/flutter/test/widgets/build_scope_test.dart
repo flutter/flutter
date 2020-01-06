@@ -8,6 +8,7 @@ import 'package:flutter/widgets.dart';
 import 'test_widgets.dart';
 
 class ProbeWidget extends StatefulWidget {
+  const ProbeWidget({ Key key }) : super(key: key);
   @override
   ProbeWidgetState createState() => ProbeWidgetState();
 }
@@ -36,7 +37,7 @@ class ProbeWidgetState extends State<ProbeWidget> {
 }
 
 class BadWidget extends StatelessWidget {
-  const BadWidget(this.parentState);
+  const BadWidget(this.parentState, { Key key }) : super(key: key);
 
   final BadWidgetParentState parentState;
 
@@ -48,6 +49,7 @@ class BadWidget extends StatelessWidget {
 }
 
 class BadWidgetParent extends StatefulWidget {
+  const BadWidgetParent({ Key key }) : super(key: key);
   @override
   BadWidgetParentState createState() => BadWidgetParentState();
 }
@@ -67,6 +69,7 @@ class BadWidgetParentState extends State<BadWidgetParent> {
 }
 
 class BadDisposeWidget extends StatefulWidget {
+  const BadDisposeWidget({ Key key }) : super(key: key);
   @override
   BadDisposeWidgetState createState() => BadDisposeWidgetState();
 }
@@ -133,14 +136,14 @@ void main() {
   testWidgets('Legal times for setState', (WidgetTester tester) async {
     final GlobalKey flipKey = GlobalKey();
     expect(ProbeWidgetState.buildCount, equals(0));
-    await tester.pumpWidget(ProbeWidget());
+    await tester.pumpWidget(const ProbeWidget(key: Key('a')));
     expect(ProbeWidgetState.buildCount, equals(1));
-    await tester.pumpWidget(ProbeWidget());
+    await tester.pumpWidget(const ProbeWidget(key: Key('b')));
     expect(ProbeWidgetState.buildCount, equals(2));
     await tester.pumpWidget(FlipWidget(
       key: flipKey,
       left: Container(),
-      right: ProbeWidget(),
+      right: const ProbeWidget(key: Key('c')),
     ));
     expect(ProbeWidgetState.buildCount, equals(2));
     final FlipWidgetState flipState1 = flipKey.currentState as FlipWidgetState;
@@ -156,13 +159,13 @@ void main() {
   });
 
   testWidgets('Setting parent state during build is forbidden', (WidgetTester tester) async {
-    await tester.pumpWidget(BadWidgetParent());
+    await tester.pumpWidget(const BadWidgetParent());
     expect(tester.takeException(), isFlutterError);
     await tester.pumpWidget(Container());
   });
 
   testWidgets('Setting state during dispose is forbidden', (WidgetTester tester) async {
-    await tester.pumpWidget(BadDisposeWidget());
+    await tester.pumpWidget(const BadDisposeWidget());
     expect(tester.takeException(), isNull);
     await tester.pumpWidget(Container());
     expect(tester.takeException(), isNotNull);
