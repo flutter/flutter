@@ -146,7 +146,7 @@ void main() {
       home: Material(child: buildTable()),
     ));
 
-    //expect(find.byType(Checkbox).allCandidates.isEmpty, true);
+    expect(find.byType(Checkbox), findsNothing);
     await tester.tap(find.text('Cupcake'));
 
     expect(log, <String>['row-selected: Cupcake']);
@@ -158,7 +158,7 @@ void main() {
 
     await tester.pumpAndSettle(const Duration(milliseconds: 200));
     final Finder checkboxes = find.byType(Checkbox);
-    expect(checkboxes.evaluate().length, 11);
+    expect(checkboxes, findsNWidgets(11));
     await tester.tap(checkboxes.first);
 
     expect(log, <String>['select-all: true']);
