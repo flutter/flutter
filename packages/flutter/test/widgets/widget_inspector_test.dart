@@ -1725,7 +1725,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       _CreationLocation location = knownLocations[id];
       expect(location.file, equals(file));
       // ClockText widget.
-      expect(location.line, equals(50));
+      expect(location.line, equals(51));
       expect(location.column, equals(9));
       expect(count, equals(1));
 
@@ -1734,7 +1734,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       location = knownLocations[id];
       expect(location.file, equals(file));
       // Text widget in _ClockTextState build method.
-      expect(location.line, equals(88));
+      expect(location.line, equals(89));
       expect(location.column, equals(12));
       expect(count, equals(1));
 
@@ -1759,7 +1759,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       location = knownLocations[id];
       expect(location.file, equals(file));
       // ClockText widget.
-      expect(location.line, equals(50));
+      expect(location.line, equals(51));
       expect(location.column, equals(9));
       expect(count, equals(3)); // 3 clock widget instances rebuilt.
 
@@ -1768,7 +1768,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       location = knownLocations[id];
       expect(location.file, equals(file));
       // Text widget in _ClockTextState build method.
-      expect(location.line, equals(88));
+      expect(location.line, equals(89));
       expect(location.column, equals(12));
       expect(count, equals(3)); // 3 clock widget instances rebuilt.
 
