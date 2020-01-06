@@ -16,7 +16,7 @@ import 'base/io.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'fuchsia/fuchsia_device.dart';
-import 'globals.dart';
+import 'globals.dart' as globals;
 import 'ios/devices.dart';
 import 'ios/simulators.dart';
 import 'linux/linux_device.dart';
@@ -269,7 +269,7 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
         final List<Device> devices = await pollingGetDevices().timeout(_pollingTimeout);
         _items.updateWithNewList(devices);
       } on TimeoutException {
-        printTrace('Device poll timed out. Will retry.');
+        globals.printTrace('Device poll timed out. Will retry.');
       }
       _timer = _initTimer();
     });
@@ -489,7 +489,7 @@ abstract class Device {
   }
 
   static Future<void> printDevices(List<Device> devices) async {
-    await descriptions(devices).forEach(printStatus);
+    await descriptions(devices).forEach(globals.printStatus);
   }
 
   /// Clean up resources allocated by device

@@ -4,14 +4,16 @@
 
 import 'dart:async';
 
+import 'package:platform/platform.dart';
+
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/analyze.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -22,7 +24,7 @@ final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{
 };
 
 void main() {
-  final String analyzerSeparator = platform.isWindows ? '-' : '•';
+  final String analyzerSeparator = globals.platform.isWindows ? '-' : '•';
 
   group('analyze once', () {
     Directory tempDir;
@@ -31,9 +33,9 @@ void main() {
 
     setUpAll(() {
       Cache.disableLocking();
-      tempDir = fs.systemTempDirectory.createTempSync('flutter_analyze_once_test_1.').absolute;
-      projectPath = fs.path.join(tempDir.path, 'flutter_project');
-      libMain = fs.file(fs.path.join(projectPath, 'lib', 'main.dart'));
+      tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_analyze_once_test_1.').absolute;
+      projectPath = globals.fs.path.join(tempDir.path, 'flutter_project');
+      libMain = globals.fs.file(globals.fs.path.join(projectPath, 'lib', 'main.dart'));
     });
 
     tearDownAll(() {
@@ -47,7 +49,7 @@ void main() {
         arguments: <String>['--no-wrap', 'create', projectPath],
         statusTextContains: <String>[
           'All done!',
-          'Your application code is in ${fs.path.normalize(fs.path.join(fs.path.relative(projectPath), 'lib', 'main.dart'))}',
+          'Your application code is in ${globals.fs.path.normalize(globals.fs.path.join(globals.fs.path.relative(projectPath), 'lib', 'main.dart'))}',
         ],
       );
       expect(libMain.existsSync(), isTrue);
@@ -58,7 +60,7 @@ void main() {
     // Analyze in the current directory - no arguments
     testUsingContext('working directory', () async {
       await runCommand(
-        command: AnalyzeCommand(workingDirectory: fs.directory(projectPath)),
+        command: AnalyzeCommand(workingDirectory: globals.fs.directory(projectPath)),
         arguments: <String>['analyze'],
         statusTextContains: <String>['No issues found!'],
       );
@@ -98,7 +100,7 @@ void main() {
 
       // Analyze in the current directory - no arguments
       await runCommand(
-        command: AnalyzeCommand(workingDirectory: fs.directory(projectPath)),
+        command: AnalyzeCommand(workingDirectory: globals.fs.directory(projectPath)),
         arguments: <String>['analyze'],
         statusTextContains: <String>[
           'Analyzing',
@@ -117,7 +119,7 @@ void main() {
     testUsingContext('working directory with local options', () async {
       // Insert an analysis_options.yaml file in the project
       // which will trigger a lint for broken code that was inserted earlier
-      final File optionsFile = fs.file(fs.path.join(projectPath, 'analysis_options.yaml'));
+      final File optionsFile = globals.fs.file(globals.fs.path.join(projectPath, 'analysis_options.yaml'));
       await optionsFile.writeAsString('''
   include: package:flutter/analysis_options_user.yaml
   linter:
@@ -127,7 +129,7 @@ void main() {
 
       // Analyze in the current directory - no arguments
       await runCommand(
-        command: AnalyzeCommand(workingDirectory: fs.directory(projectPath)),
+        command: AnalyzeCommand(workingDirectory: globals.fs.directory(projectPath)),
         arguments: <String>['analyze'],
         statusTextContains: <String>[
           'Analyzing',
@@ -144,17 +146,17 @@ void main() {
     });
 
     testUsingContext('no duplicate issues', () async {
-      final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_analyze_once_test_2.').absolute;
+      final Directory tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_analyze_once_test_2.').absolute;
 
       try {
-        final File foo = fs.file(fs.path.join(tempDir.path, 'foo.dart'));
+        final File foo = globals.fs.file(globals.fs.path.join(tempDir.path, 'foo.dart'));
         foo.writeAsStringSync('''
 import 'bar.dart';
 
 void foo() => bar();
 ''');
 
-        final File bar = fs.file(fs.path.join(tempDir.path, 'bar.dart'));
+        final File bar = globals.fs.file(globals.fs.path.join(tempDir.path, 'bar.dart'));
         bar.writeAsStringSync('''
 import 'dart:async'; // unused
 
@@ -184,11 +186,11 @@ void bar() {
       const String contents = '''
 StringBuffer bar = StringBuffer('baz');
 ''';
-      final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_analyze_once_test_3.');
+      final Directory tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_analyze_once_test_3.');
       tempDir.childFile('main.dart').writeAsStringSync(contents);
       try {
         await runCommand(
-          command: AnalyzeCommand(workingDirectory: fs.directory(tempDir)),
+          command: AnalyzeCommand(workingDirectory: globals.fs.directory(tempDir)),
           arguments: <String>['analyze'],
           statusTextContains: <String>['No issues found!'],
         );
@@ -205,11 +207,11 @@ StringBuffer bar = StringBuffer('baz');
 // TODO(foobar):
 StringBuffer bar = StringBuffer('baz');
 ''';
-      final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_analyze_once_test_4.');
+      final Directory tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_analyze_once_test_4.');
       tempDir.childFile('main.dart').writeAsStringSync(contents);
       try {
         await runCommand(
-          command: AnalyzeCommand(workingDirectory: fs.directory(tempDir)),
+          command: AnalyzeCommand(workingDirectory: globals.fs.directory(tempDir)),
           arguments: <String>['analyze'],
           statusTextContains: <String>['No issues found!'],
         );

@@ -3,11 +3,11 @@
 // found in the LICENSE file.
 
 import 'package:args/command_runner.dart';
-import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -24,15 +24,15 @@ void main() {
     setUp(() {
       testbed = Testbed(setup: () {
         final List<String> paths = <String>[
-          fs.path.join('flutter', 'packages', 'flutter', 'pubspec.yaml'),
-          fs.path.join('flutter', 'packages', 'flutter_driver', 'pubspec.yaml'),
-          fs.path.join('flutter', 'packages', 'flutter_test', 'pubspec.yaml'),
-          fs.path.join('flutter', 'bin', 'cache', 'artifacts', 'gradle_wrapper', 'wrapper'),
-          fs.path.join('usr', 'local', 'bin', 'adb'),
-          fs.path.join('Android', 'platform-tools', 'adb.exe'),
+          globals.fs.path.join('flutter', 'packages', 'flutter', 'pubspec.yaml'),
+          globals.fs.path.join('flutter', 'packages', 'flutter_driver', 'pubspec.yaml'),
+          globals.fs.path.join('flutter', 'packages', 'flutter_test', 'pubspec.yaml'),
+          globals.fs.path.join('flutter', 'bin', 'cache', 'artifacts', 'gradle_wrapper', 'wrapper'),
+          globals.fs.path.join('usr', 'local', 'bin', 'adb'),
+          globals.fs.path.join('Android', 'platform-tools', 'adb.exe'),
         ];
         for (String path in paths) {
-          fs.file(path).createSync(recursive: true);
+          globals.fs.file(path).createSync(recursive: true);
         }
       }, overrides: <Type, Generator>{
         DoctorValidatorsProvider: () => FakeDoctorValidatorsProvider(),

@@ -1194,9 +1194,15 @@ void main() {
 }
 
 class TestApp extends StatefulWidget {
-  const TestApp({ this.textDirection, this.child });
+  const TestApp({
+    Key key,
+    this.textDirection,
+    this.child,
+  }) : super(key: key);
+
   final TextDirection textDirection;
   final Widget child;
+
   @override
   _TestAppState createState() => _TestAppState();
 }

@@ -12,7 +12,7 @@ import 'base/context.dart';
 import 'base/io.dart';
 import 'build_info.dart';
 import 'device.dart';
-import 'globals.dart';
+import 'globals.dart' as globals;
 import 'reporting/reporting.dart';
 
 /// A wrapper around [MDnsClient] to find a Dart observatory instance.
@@ -54,7 +54,7 @@ class MDnsObservatoryDiscovery {
   /// the Observatory instance is for.
   // TODO(jonahwilliams): use `deviceVmservicePort` to filter mdns results.
   Future<MDnsObservatoryDiscoveryResult> query({String applicationId, int deviceVmservicePort}) async {
-    printTrace('Checking for advertised Dart observatories...');
+    globals.printTrace('Checking for advertised Dart observatories...');
     try {
       await client.start();
       final List<PtrResourceRecord> pointerRecords = await client
@@ -63,7 +63,7 @@ class MDnsObservatoryDiscovery {
           )
           .toList();
       if (pointerRecords.isEmpty) {
-        printTrace('No pointer records found.');
+        globals. printTrace('No pointer records found.');
         return null;
       }
       // We have no guarantee that we won't get multiple hits from the same
@@ -96,7 +96,7 @@ class MDnsObservatoryDiscovery {
       } else {
         domainName = pointerRecords[0].domainName;
       }
-      printTrace('Checking for available port on $domainName');
+      globals.printTrace('Checking for available port on $domainName');
       // Here, if we get more than one, it should just be a duplicate.
       final List<SrvResourceRecord> srv = await client
           .lookup<SrvResourceRecord>(
@@ -107,10 +107,10 @@ class MDnsObservatoryDiscovery {
         return null;
       }
       if (srv.length > 1) {
-        printError('Unexpectedly found more than one observatory report for $domainName '
+        globals.printError('Unexpectedly found more than one observatory report for $domainName '
                    '- using first one (${srv.first.port}).');
       }
-      printTrace('Checking for authentication code for $domainName');
+      globals.printTrace('Checking for authentication code for $domainName');
       final List<TxtResourceRecord> txt = await client
         .lookup<TxtResourceRecord>(
             ResourceRecordQuery.text(domainName),
@@ -168,14 +168,14 @@ class MDnsObservatoryDiscovery {
   // If there's not an ipv4 link local address in `NetworkInterfaces.list`,
   // then request user interventions with a `printError()` if possible.
   Future<void> _checkForIPv4LinkLocal(Device device) async {
-    printTrace(
+    globals.printTrace(
       'mDNS query failed. Checking for an interface with a ipv4 link local address.'
     );
     final List<NetworkInterface> interfaces = await listNetworkInterfaces(
       includeLinkLocal: true,
       type: InternetAddressType.IPv4,
     );
-    if (logger.isVerbose) {
+    if (globals.logger.isVerbose) {
       _logInterfaces(interfaces);
     }
     final bool hasIPv4LinkLocal = interfaces.any(
@@ -184,14 +184,14 @@ class MDnsObservatoryDiscovery {
       ),
     );
     if (hasIPv4LinkLocal) {
-      printTrace('An interface with an ipv4 link local address was found.');
+      globals.printTrace('An interface with an ipv4 link local address was found.');
       return;
     }
     final TargetPlatform targetPlatform = await device.targetPlatform;
     switch (targetPlatform) {
       case TargetPlatform.ios:
         UsageEvent('ios-mdns', 'no-ipv4-link-local').send();
-        printError(
+        globals.printError(
           'The mDNS query for an attached iOS device failed. It may '
           'be necessary to disable the "Personal Hotspot" on the device, and '
           'to ensure that the "Disable unless needed" setting is unchecked '
@@ -200,18 +200,18 @@ class MDnsObservatoryDiscovery {
         );
         break;
       default:
-        printTrace('No interface with an ipv4 link local address was found.');
+        globals.printTrace('No interface with an ipv4 link local address was found.');
         break;
     }
   }
 
   void _logInterfaces(List<NetworkInterface> interfaces) {
     for (NetworkInterface interface in interfaces) {
-      if (logger.isVerbose) {
-        printTrace('Found interface "${interface.name}":');
+      if (globals.logger.isVerbose) {
+        globals.printTrace('Found interface "${interface.name}":');
         for (InternetAddress address in interface.addresses) {
           final String linkLocal = address.isLinkLocal ? 'link local' : '';
-          printTrace('\tBound address: "${address.address}" $linkLocal');
+          globals.printTrace('\tBound address: "${address.address}" $linkLocal');
         }
       }
     }

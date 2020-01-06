@@ -10,7 +10,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/net.dart';
-import 'package:flutter_tools/src/base/platform.dart';
+
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/attach.dart';
@@ -26,6 +26,7 @@ import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 import 'package:quiver/testing/async.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -41,7 +42,7 @@ void main() {
       Cache.disableLocking();
       logger = StreamLogger();
       testFileSystem = MemoryFileSystem(
-      style: platform.isWindows
+      style: globals.platform.isWindows
           ? FileSystemStyle.windows
           : FileSystemStyle.posix,
       );
@@ -403,11 +404,11 @@ void main() {
               'Observatory listening on http://127.0.0.1:$devicePort');
           return mockLogReader;
         });
-      final File foo = fs.file('lib/foo.dart')
+      final File foo = globals.fs.file('lib/foo.dart')
         ..createSync();
 
       // Delete the main.dart file to be sure that attach works without it.
-      fs.file(fs.path.join('lib', 'main.dart')).deleteSync();
+      globals.fs.file(globals.fs.path.join('lib', 'main.dart')).deleteSync();
 
       final AttachCommand command = AttachCommand(hotRunnerFactory: mockHotRunnerFactory);
       await createTestCommandRunner(command).run(<String>['attach', '-t', foo.path, '-v']);
@@ -456,10 +457,10 @@ void main() {
 
       testDeviceManager.addDevice(device);
 
-      final File foo = fs.file('lib/foo.dart')..createSync();
+      final File foo = globals.fs.file('lib/foo.dart')..createSync();
 
       // Delete the main.dart file to be sure that attach works without it.
-      fs.file(fs.path.join('lib', 'main.dart')).deleteSync();
+      globals.fs.file(globals.fs.path.join('lib', 'main.dart')).deleteSync();
 
       final AttachCommand command = AttachCommand(hotRunnerFactory: mockHotRunnerFactory);
       await createTestCommandRunner(command).run(<String>['attach', '-t', foo.path, '-v']);

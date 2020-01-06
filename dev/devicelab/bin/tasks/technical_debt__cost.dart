@@ -25,6 +25,7 @@ final RegExp ignorePattern = RegExp(r'// *ignore:');
 final RegExp ignoreForFilePattern = RegExp(r'// *ignore_for_file:');
 final RegExp asDynamicPattern = RegExp(r'\bas dynamic\b');
 final RegExp deprecationPattern = RegExp(r'^ *@[dD]eprecated');
+const Pattern globalsPattern = 'globals.';
 const String grandfatheredDeprecationPattern = '// ignore: flutter_deprecation_syntax, https';
 
 Future<double> findCostsForFile(File file) async {
@@ -55,6 +56,17 @@ Future<double> findCostsForFile(File file) async {
   return total;
 }
 
+Future<int> findGlobalsForFile(File file) async {
+  if (path.extension(file.path) != '.dart')
+    return 0;
+  int total = 0;
+  for (String line in await file.readAsLines()) {
+    if (line.contains(globalsPattern))
+      total += 1;
+  }
+  return total;
+}
+
 Future<double> findCostsForRepo() async {
   final Process git = await startProcess(
     'git',
@@ -64,6 +76,21 @@ Future<double> findCostsForRepo() async {
   double total = 0.0;
   await for (String entry in git.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()))
     total += await findCostsForFile(File(path.join(flutterDirectory.path, entry)));
+  final int gitExitCode = await git.exitCode;
+  if (gitExitCode != 0)
+    throw Exception('git exit with unexpected error code $gitExitCode');
+  return total;
+}
+
+Future<int> findGlobalsForTool() async {
+  final Process git = await startProcess(
+    'git',
+    <String>['ls-files', '--full-name', path.join(flutterDirectory.path, 'packages', 'flutter_tools')],
+    workingDirectory: flutterDirectory.path,
+  );
+  int total = 0;
+  await for (String entry in git.stdout.transform<String>(utf8.decoder).transform<String>(const LineSplitter()))
+    total += await findGlobalsForFile(File(path.join(flutterDirectory.path, entry)));
   final int gitExitCode = await git.exitCode;
   if (gitExitCode != 0)
     throw Exception('git exit with unexpected error code $gitExitCode');
@@ -95,6 +122,7 @@ Future<int> countConsumerDependencies() async {
 const String _kCostBenchmarkKey = 'technical_debt_in_dollars';
 const String _kNumberOfDependenciesKey = 'dependencies_count';
 const String _kNumberOfConsumerDependenciesKey = 'consumer_dependencies_count';
+const String _kNumberOfFlutterToolGlobals = 'flutter_tool_globals_count';
 
 Future<void> main() async {
   await task(() async {
@@ -103,6 +131,7 @@ Future<void> main() async {
         _kCostBenchmarkKey: await findCostsForRepo(),
         _kNumberOfDependenciesKey: await countDependencies(),
         _kNumberOfConsumerDependenciesKey: await countConsumerDependencies(),
+        _kNumberOfFlutterToolGlobals: await findGlobalsForTool(),
       },
       benchmarkScoreKeys: <String>[
         _kCostBenchmarkKey,
