@@ -131,7 +131,6 @@ class RenderSliverOpacity extends RenderProxySliver {
   set opacity(double value) {
     assert(value != null);
     assert(value >= 0.0 && value <= 1.0);
-
     if (_opacity == value)
       return;
     final bool didNeedCompositing = alwaysNeedsCompositing;
