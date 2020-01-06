@@ -4,8 +4,8 @@ dartdoc:
   # The dev/tools/dartdoc.dart script does this automatically.
   tools:
     sample:
-      command: ["dev/snippets/lib/main.dart", "--type=application"]
-      description: "Creates application sample code documentation output from embedded documentation samples."
+      command: ["dev/snippets/lib/main.dart", "--type=sample", "--dartpad"]
+      description: "Creates full application sample code documentation output from embedded documentation samples, and displays it in an embedded DartPad."
     snippet:
-      command: ["dev/snippets/lib/main.dart", "--type=application", "--dartpad"]
+      command: ["dev/snippets/lib/main.dart", "--type=snippet"]
       description: "Creates sample code documentation output from embedded documentation samples."
