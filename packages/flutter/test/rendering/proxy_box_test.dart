@@ -277,7 +277,7 @@ void main() {
 
   test('RenderAnimatedOpacity does not composite if it is transparent', () async {
     final Animation<double> opacityAnimation = AnimationController(
-      vsync: _FakeTickerProvider(),
+      vsync: FakeTickerProvider(),
     )..value = 0.0;
 
     final RenderAnimatedOpacity renderAnimatedOpacity = RenderAnimatedOpacity(
@@ -292,7 +292,7 @@ void main() {
 
   test('RenderAnimatedOpacity does not composite if it is opaque', () {
     final Animation<double> opacityAnimation = AnimationController(
-      vsync: _FakeTickerProvider(),
+      vsync: FakeTickerProvider(),
     )..value = 1.0;
 
     final RenderAnimatedOpacity renderAnimatedOpacity = RenderAnimatedOpacity(
@@ -307,7 +307,7 @@ void main() {
 
   test('RenderAnimatedOpacity reuses its layer', () {
     final Animation<double> opacityAnimation = AnimationController(
-      vsync: _FakeTickerProvider(),
+      vsync: FakeTickerProvider(),
     )..value = 0.5;  // must not be 0 or 1.0. Otherwise, it won't create a layer
 
     _testLayerReuse<OpacityLayer>(RenderAnimatedOpacity(
@@ -483,14 +483,14 @@ class _TestRRectClipper extends CustomClipper<RRect> {
   bool shouldReclip(_TestRRectClipper oldClipper) => true;
 }
 
-class _FakeTickerProvider implements TickerProvider {
+class FakeTickerProvider implements TickerProvider {
   @override
   Ticker createTicker(TickerCallback onTick, [ bool disableAnimations = false ]) {
-    return _FakeTicker();
+    return FakeTicker();
   }
 }
 
-class _FakeTicker implements Ticker {
+class FakeTicker implements Ticker {
   @override
   bool muted;
 

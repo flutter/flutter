@@ -1775,10 +1775,9 @@ class SliverOpacity extends SingleChildRenderObjectWidget {
     @required this.opacity,
     this.alwaysIncludeSemantics = false,
     Widget sliver,
-  })
-    : assert(opacity != null && opacity >= 0.0 && opacity <= 1.0),
-      assert(alwaysIncludeSemantics != null),
-      super(key: key, child: sliver);
+  }) : assert(opacity != null && opacity >= 0.0 && opacity <= 1.0),
+       assert(alwaysIncludeSemantics != null),
+       super(key: key, child: sliver);
 
   /// The fraction to scale the sliver child's alpha value.
   ///
