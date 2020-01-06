@@ -32,7 +32,15 @@ void main() {
     });
 
     void _createDotPackages(String projectPath) {
-      final String flutterRootUri = 'file://${globals.fs.path.canonicalize(Cache.flutterRoot).replaceAll('\\', '/')}';
+      final StringBuffer flutterRootUri = StringBuffer('file://');
+      final String canonicalizedFlutterRootPath = globals.fs.path.canonicalize(Cache.flutterRoot);
+      if (globals.platform.isWindows) {
+        flutterRootUri
+            ..write('/')
+            ..write(canonicalizedFlutterRootPath.replaceAll('\\', '/'));
+      } else {
+        flutterRootUri.write(canonicalizedflutterRootPath);
+      }
       final String dotPackagesSrc = '''# Generated
 flutter:$flutterRootUri/packages/flutter/lib/
 sky_engine:$flutterRootUri/bin/cache/pkg/sky_engine/lib/
