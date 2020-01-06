@@ -154,7 +154,11 @@ class FlutterCommandRunner extends CommandRunner<void> {
   @override
   String get usage {
     final String usageWithoutDescription = super.usage.substring(description.length + 2);
-    return '${wrapText(description, shouldWrap: outputPreferences.wrapText, columnWidth: outputPreferences.wrapColumn)}\n\n$usageWithoutDescription';
+    final String prefix = wrapText(description,
+      shouldWrap: outputPreferences.wrapText,
+      columnWidth: outputPreferences.wrapColumn,
+    );
+    return '$prefix\n\n$usageWithoutDescription';
   }
 
   static String get defaultFlutterRoot {
