@@ -7,7 +7,7 @@ import 'dart:io' as io show Directory, File, Link;
 
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
-import 'package:path/path.dart' as p;
+import 'package:path/path.dart' as p; // ignore: package_path_import
 
 import 'common.dart' show throwToolExit;
 import 'platform.dart';

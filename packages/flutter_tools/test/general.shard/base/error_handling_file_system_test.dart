@@ -6,7 +6,7 @@ import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/error_handling_file_system.dart';
 import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
-import 'package:path/path.dart' as path;
+import 'package:path/path.dart' as path; // ignore: package_path_import
 
 import '../../src/common.dart';
 import '../../src/context.dart';
