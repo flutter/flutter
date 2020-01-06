@@ -682,6 +682,9 @@ class FakeFlutterVersion implements FlutterVersion {
   String get frameworkVersion => null;
 
   @override
+  GitTagVersion get gitTagVersion => null;
+
+  @override
   String getBranchName({bool redactUnknownBranches = false}) {
     return 'master';
   }
@@ -831,6 +834,9 @@ class FakeCache implements Cache {
   String get dartSdkVersion => null;
 
   @override
+  String get storageBaseUrl => null;
+
+  @override
   MapEntry<String, String> get dyLdLibEntry => null;
 
   @override
@@ -859,6 +865,11 @@ class FakeCache implements Cache {
   @override
   Directory getRoot() {
     return globals.fs.currentDirectory;
+  }
+
+  @override
+  File getLicenseFile() {
+    return globals.fs.currentDirectory.childFile('LICENSE');
   }
 
   @override

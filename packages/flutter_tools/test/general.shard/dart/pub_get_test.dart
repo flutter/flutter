@@ -32,6 +32,10 @@ void main() {
     Cache.flutterRoot = getFlutterRoot();
   });
 
+  tearDown(() {
+    MockDirectory.findCache = false;
+  });
+
   testUsingContext('pub get 69', () async {
     String error;
 

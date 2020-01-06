@@ -9,7 +9,7 @@ import 'package:flutter/widgets.dart';
 int globalGeneration = 0;
 
 class GenerationText extends StatefulWidget {
-  const GenerationText(this.value);
+  const GenerationText(this.value, { Key key }) : super(key: key);
   final int value;
   @override
   _GenerationTextState createState() => _GenerationTextState();

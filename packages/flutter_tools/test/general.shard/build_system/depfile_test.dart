@@ -136,4 +136,3 @@ file:///Users/foo/canonicalized_map.dart
     FileSystem: () => MemoryFileSystem(style: FileSystemStyle.posix)
   }));
 }
-

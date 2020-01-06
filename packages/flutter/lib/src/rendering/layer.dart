@@ -1548,6 +1548,48 @@ class ColorFilterLayer extends ContainerLayer {
   }
 }
 
+/// A composite layer that applies an [ImageFilter] to its children.
+class ImageFilterLayer extends ContainerLayer {
+  /// Creates a layer that applies an [ImageFilter] to its children.
+  ///
+  /// The [imageFilter] property must be non-null before the compositing phase
+  /// of the pipeline.
+  ImageFilterLayer({
+    ui.ImageFilter imageFilter,
+  }) : _imageFilter = imageFilter;
+
+  /// The image filter to apply to children.
+  ///
+  /// The scene must be explicitly recomposited after this property is changed
+  /// (as described at [Layer]).
+  ui.ImageFilter get imageFilter => _imageFilter;
+  ui.ImageFilter _imageFilter;
+  set imageFilter(ui.ImageFilter value) {
+    assert(value != null);
+    if (value != _imageFilter) {
+      _imageFilter = value;
+      markNeedsAddToScene();
+    }
+  }
+
+  @override
+  void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+    assert(imageFilter != null);
+    engineLayer = builder.pushImageFilter(
+      imageFilter,
+      oldLayer: _engineLayer as ui.ImageFilterEngineLayer,
+    );
+    addChildrenToScene(builder, layerOffset);
+    builder.pop();
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<ui.ImageFilter>('imageFilter', imageFilter));
+  }
+}
+
 /// A composited layer that applies a given transformation matrix to its
 /// children.
 ///

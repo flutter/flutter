@@ -11,6 +11,7 @@ import '../rendering/mock_canvas.dart';
 import '../widgets/test_border.dart' show TestBorder;
 
 class NotifyMaterial extends StatelessWidget {
+  const NotifyMaterial({ Key key }) : super(key: key);
   @override
   Widget build(BuildContext context) {
     LayoutChangedNotification().dispatch(context);
@@ -101,7 +102,7 @@ void main() {
 
   testWidgets('LayoutChangedNotification test', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Material(
+      const Material(
         child: NotifyMaterial(),
       ),
     );

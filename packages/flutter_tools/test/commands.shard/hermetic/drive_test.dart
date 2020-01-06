@@ -48,7 +48,7 @@ void main() {
       appStarter = (DriveCommand command) {
         throw 'Unexpected call to appStarter';
       };
-      testRunner = (List<String> testArgs, String observatoryUri) {
+      testRunner = (List<String> testArgs, Map<String, String> environment) {
         throw 'Unexpected call to testRunner';
       };
       appStopper = (DriveCommand command) {
@@ -173,8 +173,16 @@ void main() {
       appStarter = expectAsync1((DriveCommand command) async {
         return LaunchResult.succeeded();
       });
-      testRunner = expectAsync2((List<String> testArgs, String observatoryUri) async {
+      testRunner = expectAsync2((List<String> testArgs, Map<String, String> environment) async {
         expect(testArgs, <String>[testFile]);
+        // VM_SERVICE_URL is not set by drive command arguments
+        expect(environment, <String, String>{
+          'VM_SERVICE_URL': 'null',
+          'SELENIUM_PORT': '4567',
+          'BROWSER_NAME': 'firefox',
+          'BROWSER_DIMENSION': '1024,768',
+          'HEADLESS': 'false',
+        });
         return null;
       });
       appStopper = expectAsync1((DriveCommand command) async {
@@ -189,6 +197,10 @@ void main() {
         'drive',
         '--target=$testApp',
         '--no-pub',
+        '--no-headless',
+        '--driver-port=4567',
+        '--browser-name=firefox',
+        '--browser-dimension=1024,768',
       ];
       await createTestCommandRunner(command).run(args);
       expect(testLogger.errorText, isEmpty);
@@ -206,7 +218,7 @@ void main() {
       appStarter = expectAsync1((DriveCommand command) async {
         return LaunchResult.succeeded();
       });
-      testRunner = (List<String> testArgs, String observatoryUri) async {
+      testRunner = (List<String> testArgs, Map<String, String> environment) async {
         throwToolExit(null, exitCode: 123);
       };
       appStopper = expectAsync1((DriveCommand command) async {
@@ -363,7 +375,7 @@ void main() {
         testApp = globals.fs.path.join(tempDir.path, 'test', 'e2e.dart');
         testFile = globals.fs.path.join(tempDir.path, 'test_driver', 'e2e_test.dart');
 
-        testRunner = (List<String> testArgs, String observatoryUri) async {
+        testRunner = (List<String> testArgs, Map<String, String> environment) async {
           throwToolExit(null, exitCode: 123);
         };
         appStopper = expectAsync1(
@@ -496,7 +508,7 @@ void main() {
         testApp = globals.fs.path.join(tempDir.path, 'test', 'e2e.dart');
         testFile = globals.fs.path.join(tempDir.path, 'test_driver', 'e2e_test.dart');
 
-        testRunner = (List<String> testArgs, String observatoryUri) async {
+        testRunner = (List<String> testArgs, Map<String, String> environment) async {
           throwToolExit(null, exitCode: 123);
         };
         appStopper = expectAsync1(
