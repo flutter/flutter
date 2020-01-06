@@ -643,7 +643,6 @@ class BuildDaemonCreator {
         if (testTargets.hasBuildFilters) {
           b.buildFilters.addAll(testTargets.buildFilters);
         }
-        return b;
       }));
     }
   }
