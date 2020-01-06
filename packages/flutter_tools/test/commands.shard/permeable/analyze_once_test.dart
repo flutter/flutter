@@ -113,54 +113,59 @@ void main() {
       // Insert an analysis_options.yaml file in the project
       // which will trigger a lint for broken code that was inserted earlier
       final File optionsFile = fs.file(fs.path.join(projectPath, 'analysis_options.yaml'));
-      optionsFile.writeAsStringSync('''
-  include: package:flutter/analysis_options_user.yaml
-  linter:
-    rules:
-      - only_throw_errors
-  ''');
-      String source = libMain.readAsStringSync();
-      source = source.replaceFirst(
-        'onPressed: _incrementCounter,',
-        '// onPressed: _incrementCounter,',
-      );
-      source = source.replaceFirst(
-        '_counter++;',
-        '_counter++; throw "an error message";',
-      );
-      libMain.writeAsStringSync(source);
+      try {
+        optionsFile.writeAsStringSync('''
+    include: package:flutter/analysis_options_user.yaml
+    linter:
+      rules:
+        - only_throw_errors
+    ''');
+        String source = libMain.readAsStringSync();
+        source = source.replaceFirst(
+          'onPressed: _incrementCounter,',
+          '// onPressed: _incrementCounter,',
+        );
+        source = source.replaceFirst(
+          '_counter++;',
+          '_counter++; throw "an error message";',
+        );
+        libMain.writeAsStringSync(source);
 
-      // Analyze in the current directory - no arguments
-      await runCommand(
-        command: AnalyzeCommand(workingDirectory: fs.directory(projectPath)),
-        arguments: <String>['analyze'],
-        statusTextContains: <String>[
-          'Analyzing',
-          'warning $analyzerSeparator The parameter \'onPressed\' is required',
-          'info $analyzerSeparator The declaration \'_incrementCounter\' isn\'t',
-          'info $analyzerSeparator Only throw instances of classes extending either Exception or Error',
-        ],
-        exitMessageContains: '3 issues found.',
-        toolExit: true,
-      );
-      optionsFile.deleteSync();
+        // Analyze in the current directory - no arguments
+        await runCommand(
+          command: AnalyzeCommand(workingDirectory: fs.directory(projectPath)),
+          arguments: <String>['analyze'],
+          statusTextContains: <String>[
+            'Analyzing',
+            'warning $analyzerSeparator The parameter \'onPressed\' is required',
+            'info $analyzerSeparator The declaration \'_incrementCounter\' isn\'t',
+            'info $analyzerSeparator Only throw instances of classes extending either Exception or Error',
+          ],
+          exitMessageContains: '3 issues found.',
+          toolExit: true,
+        );
+      } finally {
+        if (optionsFile.existsSync()) {
+          optionsFile.deleteSync();
+        }
+      }
     }, overrides: <Type, Generator>{
       Pub: () => const Pub(),
       ...noColorTerminalOverride
     });
 
     testUsingContext('no duplicate issues', () async {
-      final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_analyze_once_test_2.').absolute;
+      final Directory localTempDir = fs.systemTempDirectory.createTempSync('flutter_analyze_once_test_2.').absolute;
 
       try {
-        final File foo = fs.file(fs.path.join(tempDir.path, 'foo.dart'));
+        final File foo = fs.file(fs.path.join(localTempDir.path, 'foo.dart'));
         foo.writeAsStringSync('''
 import 'bar.dart';
 
 void foo() => bar();
 ''');
 
-        final File bar = fs.file(fs.path.join(tempDir.path, 'bar.dart'));
+        final File bar = fs.file(fs.path.join(localTempDir.path, 'bar.dart'));
         bar.writeAsStringSync('''
 import 'dart:async'; // unused
 
@@ -170,7 +175,7 @@ void bar() {
 
         // Analyze in the current directory - no arguments
         await runCommand(
-          command: AnalyzeCommand(workingDirectory: tempDir),
+          command: AnalyzeCommand(workingDirectory: localTempDir),
           arguments: <String>['analyze'],
           statusTextContains: <String>[
             'Analyzing',
@@ -179,7 +184,7 @@ void bar() {
           toolExit: true,
         );
       } finally {
-        tryToDelete(tempDir);
+        tryToDelete(localTempDir);
       }
     }, overrides: <Type, Generator>{
       Pub: () => const Pub(),
@@ -190,16 +195,16 @@ void bar() {
       const String contents = '''
 StringBuffer bar = StringBuffer('baz');
 ''';
-      final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_analyze_once_test_3.');
-      tempDir.childFile('main.dart').writeAsStringSync(contents);
+      final Directory localTempDir = fs.systemTempDirectory.createTempSync('flutter_analyze_once_test_3.');
+      localTempDir.childFile('main.dart').writeAsStringSync(contents);
       try {
         await runCommand(
-          command: AnalyzeCommand(workingDirectory: fs.directory(tempDir)),
+          command: AnalyzeCommand(workingDirectory: fs.directory(localTempDir)),
           arguments: <String>['analyze'],
           statusTextContains: <String>['No issues found!'],
         );
       } finally {
-        tryToDelete(tempDir);
+        tryToDelete(localTempDir);
       }
     }, overrides: <Type, Generator>{
       Pub: () => const Pub(),
@@ -211,16 +216,16 @@ StringBuffer bar = StringBuffer('baz');
 // TODO(foobar):
 StringBuffer bar = StringBuffer('baz');
 ''';
-      final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_analyze_once_test_4.');
-      tempDir.childFile('main.dart').writeAsStringSync(contents);
+      final Directory localTempDir = fs.systemTempDirectory.createTempSync('flutter_analyze_once_test_4.');
+      localTempDir.childFile('main.dart').writeAsStringSync(contents);
       try {
         await runCommand(
-          command: AnalyzeCommand(workingDirectory: fs.directory(tempDir)),
+          command: AnalyzeCommand(workingDirectory: fs.directory(localTempDir)),
           arguments: <String>['analyze'],
           statusTextContains: <String>['No issues found!'],
         );
       } finally {
-        tryToDelete(tempDir);
+        tryToDelete(localTempDir);
       }
     }, overrides: <Type, Generator>{
       Pub: () => const Pub(),
