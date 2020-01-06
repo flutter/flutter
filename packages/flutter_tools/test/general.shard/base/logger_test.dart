@@ -78,7 +78,6 @@ void main() {
     final RegExp secondDigits = RegExp(r'[0-9,.]*[0-9]m?s');
 
     AnsiStatus _createAnsiStatus() {
-      mockStopwatch = FakeStopwatch();
       return AnsiStatus(
         message: 'Hello world',
         timeout: const Duration(seconds: 2),
@@ -88,6 +87,7 @@ void main() {
     }
 
     setUp(() {
+      mockStopwatch = FakeStopwatch();
       mockStdio = MockStdio();
       called = 0;
     });
@@ -199,6 +199,7 @@ void main() {
       testUsingContext('Stdout startProgress on colored terminal pauses on $testOs', () async {
         bool done = false;
         FakeAsync().run((FakeAsync time) {
+          mockStopwatch.elapsed = const Duration(seconds: 5);
           final Logger logger = context.get<Logger>();
           final Status status = logger.startProgress(
             'Knock Knock, Who\'s There',
