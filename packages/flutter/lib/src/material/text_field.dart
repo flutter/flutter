@@ -149,7 +149,7 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 /// Remember to [dispose] of the [TextEditingController] when it is no longer needed.
 /// This will ensure we discard any resources used by the object.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 /// This example shows how to create a [TextField] that will obscure input. The
 /// [InputDecoration] surrounds the field in a border using [OutlineInputBorder]
 /// and adds a label.
@@ -173,7 +173,7 @@ class _TextFieldSelectionGestureDetectorBuilder extends TextSelectionGestureDete
 /// callback. This callback is applied to the text field's current value when
 /// the user finishes editing.
 ///
-/// {@tool dartpad --template=stateful_widget_material}
+/// {@tool sample --template=stateful_widget_material}
 ///
 /// This sample shows how to get a value from a TextField via the [onSubmitted]
 /// callback.
@@ -654,7 +654,7 @@ class TextField extends StatefulWidget {
   /// accessibility, but it also needs to be accessible itself.  For example,
   /// if returning a Text widget, set the [semanticsLabel] property.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   /// ```dart
   /// Widget counter(
   ///   BuildContext context,

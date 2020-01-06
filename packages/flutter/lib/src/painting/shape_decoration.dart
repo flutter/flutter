@@ -24,7 +24,7 @@ import 'rounded_rectangle_border.dart';
 /// optionally filling it with a color or a gradient, optionally painting an
 /// image into it, and optionally casting a shadow.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// The following example uses the [Container] widget from the widgets layer to
 /// draw a white rectangle with a 24-pixel multicolor outline, with the text

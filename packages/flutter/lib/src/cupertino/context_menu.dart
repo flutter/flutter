@@ -74,7 +74,7 @@ enum _ContextMenuLocation {
 /// child's corners and allowing its aspect ratio to expand, similar to the
 /// Photos app on iOS.
 ///
-/// {@tool dartpad --template=stateless_widget_material}
+/// {@tool sample --template=stateless_widget_material}
 ///
 /// This sample shows a very simple CupertinoContextMenu for an empty red
 /// 100x100 Container. Simply long press on it to open.
@@ -172,7 +172,7 @@ class CupertinoContextMenu extends StatefulWidget {
   /// child parameter provides access to the child displayed when the
   /// CupertinoContextMenu is closed.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// Below is an example of using `previewBuilder` to show an image tile that's
   /// similar to each tile in the iOS iPhoto app's context menu. Several of

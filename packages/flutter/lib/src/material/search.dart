@@ -92,7 +92,7 @@ abstract class SearchDelegate<T> {
   /// Constructor to be called by subclasses which may specify [searchFieldLabel], [keyboardType] and/or
   /// [textInputAction].
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   /// ```dart
   /// class CustomSearchHintDelegate extends SearchDelegate {
   ///   CustomSearchHintDelegate({

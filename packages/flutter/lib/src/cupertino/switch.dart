@@ -26,7 +26,7 @@ import 'thumb_painter.dart';
 /// that use a switch will listen for the [onChanged] callback and rebuild the
 /// switch with a new [value] to update the visual appearance of the switch.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This sample shows how to use a [CupertinoSwitch] in a [ListTile]. The
 /// [MergeSemantics] is used to turn the entire [ListTile] into a single item

@@ -425,7 +425,7 @@ class SampleChecker {
             inSampleSection = !inSnippet;
           } else if (RegExp(r'///\s*#+\s+[Ss]ample\s+[Cc]ode:?$').hasMatch(trimmedLine)) {
             throw SampleCheckerException(
-              "Found deprecated '## Sample code' section: use {@tool sample}...{@end-tool} instead.",
+              "Found deprecated '## Sample code' section: use {@tool snippet}...{@end-tool} instead.",
               file: relativeFilePath,
               line: lineNumber,
             );
@@ -794,7 +794,7 @@ class Line {
   String toString() => '$filename:$line: $code';
 }
 
-/// A class to represent a section of sample code, marked by "{@tool sample}...{@end-tool}".
+/// A class to represent a section of sample code, marked by "{@tool snippet}...{@end-tool}".
 class Section {
   const Section(this.code);
   factory Section.combine(List<Section> sections) {
@@ -842,7 +842,7 @@ class Section {
 }
 
 /// A class to represent a snippet in the dartdoc comments, marked by
-/// "{@tool snippet ...}...{@end-tool}". Snippets are processed separately from
+/// "{@tool sample ...}...{@end-tool}". Snippets are processed separately from
 /// regular samples, because they must be injected into templates in order to be
 /// analyzed.
 class Snippet {

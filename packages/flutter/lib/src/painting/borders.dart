@@ -29,7 +29,7 @@ enum BorderStyle {
 /// Note that setting [BorderSide.width] to 0.0 will result in hairline
 /// rendering. A more involved explanation is present in [BorderSide.width].
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This sample shows how [BorderSide] objects can be used in a [Container], via
 /// a [BoxDecoration] and a [Border], to decorate some [Text]. In this example,
