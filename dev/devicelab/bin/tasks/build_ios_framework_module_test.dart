@@ -45,19 +45,20 @@ Future<void> main() async {
       // This builds all build modes' frameworks by default
       section('Build frameworks');
 
+      const String outputDirectoryName = 'flutter-frameworks';
+
       await inDirectory(projectDir, () async {
         await flutter(
           'build',
-          options: <String>['ios-framework'],
+          options: <String>[
+            'ios-framework',
+            '--xcframework',
+            '--output=$outputDirectoryName'
+          ],
         );
       });
 
-      final String outputPath = path.join(
-        projectDir.path,
-        'build',
-        'ios',
-        'framework',
-      );
+      final String outputPath = path.join(projectDir.path, outputDirectoryName);
 
       section('Check debug build has Dart snapshot as asset');
 
@@ -79,61 +80,51 @@ Future<void> main() async {
         'App',
       ));
 
-      final String appFrameworkPath = path.join(
+      final String debugAppFrameworkPath = path.join(
         outputPath,
         'Debug',
         'App.framework',
         'App',
       );
-      final String aotSymbols = await dylibSymbols(appFrameworkPath);
+      final String aotSymbols = await dylibSymbols(debugAppFrameworkPath);
 
       if (aotSymbols.contains('architecture') ||
           aotSymbols.contains('_kDartVmSnapshot')) {
         throw TaskResult.failure('Debug App.framework contains AOT');
       }
+      await _checkFrameworkArchs(debugAppFrameworkPath, 'Debug');
 
-      final String debugAppArchs = await fileType(appFrameworkPath);
+      checkFileExists(path.join(
+        outputPath,
+        'Debug',
+        'App.xcframework',
+        'ios-armv7_arm64',
+        'App.framework',
+        'App',
+      ));
 
-      if (!debugAppArchs.contains('armv7')) {
-        throw TaskResult.failure('Debug App.framework armv7 architecture missing');
-      }
-
-      if (!debugAppArchs.contains('arm64')) {
-        throw TaskResult.failure('Debug App.framework arm64 architecture missing');
-      }
-
-      if (!debugAppArchs.contains('x86_64')) {
-        throw TaskResult.failure('Debug App.framework x86_64 architecture missing');
-      }
+      checkFileExists(path.join(
+        outputPath,
+        'Debug',
+        'App.xcframework',
+        'ios-x86_64-simulator',
+        'App.framework',
+        'App',
+      ));
 
       section('Check profile, release builds has Dart AOT dylib');
 
       for (String mode in <String>['Profile', 'Release']) {
-        checkFileExists(path.join(
+        final String appFrameworkPath = path.join(
           outputPath,
           mode,
           'App.framework',
           'App',
-        ));
+        );
 
-        final String aotSymbols = await dylibSymbols(path.join(
-          outputPath,
-          mode,
-          'App.framework',
-          'App',
-        ));
+        await _checkFrameworkArchs(appFrameworkPath, mode);
 
-        if (!aotSymbols.contains('armv7')) {
-          throw TaskResult.failure('$mode App.framework armv7 architecture missing');
-        }
-
-        if (!aotSymbols.contains('arm64')) {
-          throw TaskResult.failure('$mode App.framework arm64 architecture missing');
-        }
-
-        if (aotSymbols.contains('x86_64')) {
-          throw TaskResult.failure('$mode App.framework contains x86_64 architecture');
-        }
+        final String aotSymbols = await dylibSymbols(appFrameworkPath);
 
         if (!aotSymbols.contains('_kDartVmSnapshot')) {
           throw TaskResult.failure('$mode App.framework missing Dart AOT');
@@ -146,17 +137,59 @@ Future<void> main() async {
           'flutter_assets',
           'vm_snapshot_data',
         ));
+
+        checkFileExists(path.join(
+          outputPath,
+          mode,
+          'App.xcframework',
+          'ios-armv7_arm64',
+          'App.framework',
+          'App',
+        ));
+
+        checkFileNotExists(path.join(
+          outputPath,
+          mode,
+          'App.xcframework',
+          'ios-x86_64-simulator',
+          'App.framework',
+          'App',
+        ));
       }
 
       section("Check all modes' engine dylib");
 
       for (String mode in <String>['Debug', 'Profile', 'Release']) {
-        checkFileExists(path.join(
+        final String engineFrameworkPath = path.join(
           outputPath,
           mode,
           'Flutter.framework',
           'Flutter',
+        );
+
+        await _checkFrameworkArchs(engineFrameworkPath, mode);
+
+        checkFileExists(path.join(
+          outputPath,
+          mode,
+          'Flutter.xcframework',
+          'ios-armv7_arm64',
+          'Flutter.framework',
+          'Flutter',
         ));
+        final String simulatorFrameworkPath = path.join(
+          outputPath,
+          mode,
+          'Flutter.xcframework',
+          'ios-x86_64-simulator',
+          'Flutter.framework',
+          'Flutter',
+        );
+        if (mode == 'Debug') {
+          checkFileExists(simulatorFrameworkPath);
+        } else {
+          checkFileNotExists(simulatorFrameworkPath);
+        }
       }
 
       section("Check all modes' engine header");
@@ -171,17 +204,49 @@ Future<void> main() async {
       section("Check all modes' have plugin dylib");
 
       for (String mode in <String>['Debug', 'Profile', 'Release']) {
-        checkFileExists(path.join(
+        final String pluginFrameworkPath = path.join(
           outputPath,
           mode,
           'device_info.framework',
           'device_info',
+        );
+        await _checkFrameworkArchs(pluginFrameworkPath, mode);
+
+        checkFileExists(path.join(
+          outputPath,
+          mode,
+          'device_info.xcframework',
+          'ios-armv7_arm64',
+          'device_info.framework',
+          'device_info',
         ));
+        final String simulatorFrameworkPath = path.join(
+          outputPath,
+          mode,
+          'device_info.xcframework',
+          'ios-x86_64-simulator',
+          'device_info.framework',
+          'device_info',
+        );
+        if (mode == 'Debug') {
+          checkFileExists(simulatorFrameworkPath);
+        } else {
+          checkFileNotExists(simulatorFrameworkPath);
+        }
       }
 
       section("Check all modes' have generated plugin registrant");
 
       for (String mode in <String>['Debug', 'Profile', 'Release']) {
+        final String registrantFrameworkPath = path.join(
+          outputPath,
+          mode,
+          'FlutterPluginRegistrant.framework',
+          'FlutterPluginRegistrant'
+        );
+
+        await _checkFrameworkArchs(registrantFrameworkPath, mode);
+
         checkFileExists(path.join(
           outputPath,
           mode,
@@ -189,6 +254,29 @@ Future<void> main() async {
           'Headers',
           'GeneratedPluginRegistrant.h',
         ));
+        checkFileExists(path.join(
+          outputPath,
+          mode,
+          'FlutterPluginRegistrant.xcframework',
+          'ios-armv7_arm64',
+          'FlutterPluginRegistrant.framework',
+          'Headers',
+          'GeneratedPluginRegistrant.h',
+        ));
+        final String simulatorHeaderPath = path.join(
+          outputPath,
+          mode,
+          'FlutterPluginRegistrant.xcframework',
+          'ios-x86_64-simulator',
+          'FlutterPluginRegistrant.framework',
+          'Headers',
+          'GeneratedPluginRegistrant.h',
+        );
+        if (mode == 'Debug') {
+          checkFileExists(simulatorHeaderPath);
+        } else {
+          checkFileNotExists(simulatorHeaderPath);
+        }
       }
 
       return TaskResult.success(null);
@@ -200,4 +288,25 @@ Future<void> main() async {
       rmTree(tempDir);
     }
   });
+}
+
+Future<void> _checkFrameworkArchs(String frameworkPath, String mode) async {
+  checkFileExists(frameworkPath);
+
+  final String archs = await fileType(frameworkPath);
+  if (!archs.contains('armv7')) {
+    throw TaskResult.failure('$mode $frameworkPath armv7 architecture missing');
+  }
+
+  if (!archs.contains('arm64')) {
+    throw TaskResult.failure('$mode $frameworkPath arm64 architecture missing');
+  }
+  final bool containsSimulator = archs.contains('x86_64');
+  final bool isDebug = mode == 'Debug';
+
+  // Debug should contain the simulator archs.
+  // Release and Profile should not.
+  if (containsSimulator != isDebug) {
+    throw TaskResult.failure('$mode $frameworkPath x86_64 architecture ${isDebug ? 'missing' : 'present'}');
+  }
 }

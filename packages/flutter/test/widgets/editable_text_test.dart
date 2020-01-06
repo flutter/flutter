@@ -3962,7 +3962,8 @@ void main() {
     }
   });
 
-  testWidgets('setEditingState is called when text changes', (WidgetTester tester) async {
+  testWidgets('setEditingState is not called when text changes', (WidgetTester tester) async {
+    // We shouldn't get a message here because this change is owned by the platform side.
     const String testText = 'flutter is the best!';
     final TextEditingController controller = TextEditingController(text: testText);
     final EditableText et = EditableText(
@@ -3996,6 +3997,53 @@ void main() {
       'TextInput.setEditingState',
       'TextInput.setEditingState',
       'TextInput.show',
+    ];
+    expect(tester.testTextInput.log.length, logOrder.length);
+    int index = 0;
+    for (MethodCall m in tester.testTextInput.log) {
+      expect(m.method, logOrder[index]);
+      index++;
+    }
+    expect(tester.testTextInput.editingState['text'], 'flutter is the best!');
+  });
+
+  testWidgets('setEditingState is called when text changes on controller', (WidgetTester tester) async {
+    // We should get a message here because this change is owned by the framework side.
+    const String testText = 'flutter is the best!';
+    final TextEditingController controller = TextEditingController(text: testText);
+    final EditableText et = EditableText(
+      showSelectionHandles: true,
+      maxLines: 2,
+      controller: controller,
+      focusNode: FocusNode(),
+      cursorColor: Colors.red,
+      backgroundCursorColor: Colors.blue,
+      style: Typography(platform: TargetPlatform.android).black.subhead.copyWith(fontFamily: 'Roboto'),
+      keyboardType: TextInputType.text,
+    );
+
+    await tester.pumpWidget(MaterialApp(
+      home: Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: 100,
+          child: et,
+        ),
+      ),
+    ));
+
+    await tester.showKeyboard(find.byType(EditableText));
+    controller.text += '...';
+    await tester.idle();
+
+    final List<String> logOrder = <String>[
+      'TextInput.setClient',
+      'TextInput.show',
+      'TextInput.setEditableSizeAndTransform',
+      'TextInput.setStyle',
+      'TextInput.setEditingState',
+      'TextInput.setEditingState',
+      'TextInput.show',
       'TextInput.setEditingState',
     ];
     expect(tester.testTextInput.log.length, logOrder.length);
@@ -4004,7 +4052,7 @@ void main() {
       expect(m.method, logOrder[index]);
       index++;
     }
-    expect(tester.testTextInput.editingState['text'], '...');
+    expect(tester.testTextInput.editingState['text'], 'flutter is the best!...');
   });
 }
 
