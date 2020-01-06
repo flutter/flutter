@@ -257,6 +257,7 @@ class LinkedScrollActivity extends ScrollActivity {
 }
 
 class Test extends StatefulWidget {
+  const Test({ Key key }) : super(key: key);
   @override
   _TestState createState() => _TestState();
 }
@@ -372,7 +373,7 @@ class _TestState extends State<Test> {
 
 void main() {
   testWidgets('LinkedScrollController - 1', (WidgetTester tester) async {
-    await tester.pumpWidget(Test());
+    await tester.pumpWidget(const Test());
     expect(find.text('Hello A'), findsOneWidget);
     expect(find.text('Hello 1'), findsOneWidget);
     expect(find.text('Hello D'), findsNothing);
@@ -450,7 +451,7 @@ void main() {
     expect(find.text('Hello 4'), findsOneWidget);
   });
   testWidgets('LinkedScrollController - 2', (WidgetTester tester) async {
-    await tester.pumpWidget(Test());
+    await tester.pumpWidget(const Test());
     expect(find.text('Hello A'), findsOneWidget);
     expect(find.text('Hello B'), findsOneWidget);
     expect(find.text('Hello C'), findsNothing);
