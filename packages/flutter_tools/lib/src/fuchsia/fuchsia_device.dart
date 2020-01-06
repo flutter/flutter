@@ -14,13 +14,11 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
-import '../base/platform.dart';
 import '../base/process.dart';
-import '../base/process_manager.dart';
 import '../base/time.dart';
 import '../build_info.dart';
 import '../device.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../vmservice.dart';
 
@@ -141,7 +139,7 @@ class FuchsiaDevices extends PollingDeviceDiscovery {
   FuchsiaDevices() : super('Fuchsia devices');
 
   @override
-  bool get supportsPlatform => platform.isLinux || platform.isMacOS;
+  bool get supportsPlatform => globals.platform.isLinux || globals.platform.isMacOS;
 
   @override
   bool get canListAnything => fuchsiaWorkflow.canListDevices;
@@ -248,32 +246,32 @@ class FuchsiaDevice extends Device {
       local: true,
     );
     if (host == null) {
-      printError('Failed to resolve host for Fuchsia device');
+      globals.printError('Failed to resolve host for Fuchsia device');
       return LaunchResult.failed();
     }
     final int port = await os.findFreePort();
     if (port == 0) {
-      printError('Failed to find a free port');
+      globals.printError('Failed to find a free port');
       return LaunchResult.failed();
     }
 
     // Try Start with a fresh package repo in case one was left over from a
     // previous run.
     final Directory packageRepo =
-        fs.directory(fs.path.join(getFuchsiaBuildDirectory(), '.pkg-repo'));
+        globals.fs.directory(globals.fs.path.join(getFuchsiaBuildDirectory(), '.pkg-repo'));
     try {
       if (packageRepo.existsSync()) {
         packageRepo.deleteSync(recursive: true);
       }
       packageRepo.createSync(recursive: true);
     } catch (e) {
-      printError('Failed to create Fuchisa package repo directory '
+      globals.printError('Failed to create Fuchisa package repo directory '
                  'at ${packageRepo.path}: $e');
       return LaunchResult.failed();
     }
 
     final String appName = FlutterProject.current().manifest.appName;
-    final Status status = logger.startProgress(
+    final Status status = globals.logger.startProgress(
       'Starting Fuchsia application $appName...',
       timeout: null,
     );
@@ -284,11 +282,11 @@ class FuchsiaDevice extends Device {
       // package server. This is to avoid relying on amber correctly using
       // multiple package servers, support for which is in flux.
       if (!await fuchsiaDeviceTools.amberCtl.getUp(this, 'tiles')) {
-        printError('Failed to get amber to prefetch tiles');
+        globals.printError('Failed to get amber to prefetch tiles');
         return LaunchResult.failed();
       }
       if (!await fuchsiaDeviceTools.amberCtl.getUp(this, 'tiles_ctl')) {
-        printError('Failed to get amber to prefetch tiles_ctl');
+        globals.printError('Failed to get amber to prefetch tiles_ctl');
         return LaunchResult.failed();
       }
 
@@ -297,7 +295,7 @@ class FuchsiaDevice extends Device {
       fuchsiaPackageServer = FuchsiaPackageServer(
           packageRepo.path, packageServerName, host, port);
       if (!await fuchsiaPackageServer.start()) {
-        printError('Failed to start the Fuchsia package server');
+        globals.printError('Failed to start the Fuchsia package server');
         return LaunchResult.failed();
       }
 
@@ -305,24 +303,24 @@ class FuchsiaDevice extends Device {
       final File farArchive = package.farArchive(
           debuggingOptions.buildInfo.mode);
       if (!await fuchsiaPackageServer.addPackage(farArchive)) {
-        printError('Failed to add package to the package server');
+        globals.printError('Failed to add package to the package server');
         return LaunchResult.failed();
       }
 
       // Serve the flutter_runner.
-      final File flutterRunnerArchive = fs.file(artifacts.getArtifactPath(
+      final File flutterRunnerArchive = globals.fs.file(globals.artifacts.getArtifactPath(
         Artifact.fuchsiaFlutterRunner,
         platform: await targetPlatform,
         mode: debuggingOptions.buildInfo.mode,
       ));
       if (!await fuchsiaPackageServer.addPackage(flutterRunnerArchive)) {
-        printError('Failed to add flutter_runner package to the package server');
+        globals.printError('Failed to add flutter_runner package to the package server');
         return LaunchResult.failed();
       }
 
       // Teach the package controller about the package server.
       if (!await fuchsiaDeviceTools.amberCtl.addRepoCfg(this, fuchsiaPackageServer)) {
-        printError('Failed to teach amber about the package server');
+        globals.printError('Failed to teach amber about the package server');
         return LaunchResult.failed();
       }
       serverRegistered = true;
@@ -344,27 +342,27 @@ class FuchsiaDevice extends Device {
       }
       if (!await fuchsiaDeviceTools.amberCtl.pkgCtlResolve(
           this, fuchsiaPackageServer, flutterRunnerName)) {
-        printError('Failed to get pkgctl to prefetch the flutter_runner');
+        globals.printError('Failed to get pkgctl to prefetch the flutter_runner');
         return LaunchResult.failed();
       }
 
       // Tell the package controller to prefetch the app.
       if (!await fuchsiaDeviceTools.amberCtl.pkgCtlResolve(
           this, fuchsiaPackageServer, appName)) {
-        printError('Failed to get pkgctl to prefetch the package');
+        globals.printError('Failed to get pkgctl to prefetch the package');
         return LaunchResult.failed();
       }
 
       // Ensure tiles_ctl is started, and start the app.
       if (!await FuchsiaTilesCtl.ensureStarted(this)) {
-        printError('Failed to ensure that tiles is started on the device');
+        globals.printError('Failed to ensure that tiles is started on the device');
         return LaunchResult.failed();
       }
 
       // Instruct tiles_ctl to start the app.
       final String fuchsiaUrl = 'fuchsia-pkg://$packageServerName/$appName#meta/$appName.cmx';
       if (!await fuchsiaDeviceTools.tilesCtl.add(this, fuchsiaUrl, <String>[])) {
-        printError('Failed to add the app to tiles');
+        globals.printError('Failed to add the app to tiles');
         return LaunchResult.failed();
       }
     } finally {
@@ -374,23 +372,23 @@ class FuchsiaDevice extends Device {
         await fuchsiaDeviceTools.amberCtl.pkgCtlRepoRemove(this, fuchsiaPackageServer);
       }
       // Shutdown the package server and delete the package repo;
-      printTrace('Shutting down the tool\'s package server.');
+      globals.printTrace('Shutting down the tool\'s package server.');
       fuchsiaPackageServer?.stop();
-      printTrace('Removing the tool\'s package repo: at ${packageRepo.path}');
+      globals.printTrace('Removing the tool\'s package repo: at ${packageRepo.path}');
       try {
         packageRepo.deleteSync(recursive: true);
       } catch (e) {
-        printError('Failed to remove Fuchsia package repo directory '
+        globals.printError('Failed to remove Fuchsia package repo directory '
                    'at ${packageRepo.path}: $e.');
       }
       status.cancel();
     }
 
     if (debuggingOptions.buildInfo.mode.isRelease) {
-      printTrace('App succesfully started in a release mode.');
+      globals.printTrace('App succesfully started in a release mode.');
       return LaunchResult.succeeded();
     }
-    printTrace('App started in a non-release mode. Setting up vmservice connection.');
+    globals.printTrace('App started in a non-release mode. Setting up vmservice connection.');
 
     // In a debug or profile build, try to find the observatory uri.
     final FuchsiaIsolateDiscoveryProtocol discovery =
@@ -408,7 +406,7 @@ class FuchsiaDevice extends Device {
     final int appKey = await FuchsiaTilesCtl.findAppKey(this, app.id);
     if (appKey != -1) {
       if (!await fuchsiaDeviceTools.tilesCtl.remove(this, appKey)) {
-        printError('tiles_ctl remove on ${app.id} failed.');
+        globals.printError('tiles_ctl remove on ${app.id} failed.');
         return false;
       }
     }
@@ -420,7 +418,7 @@ class FuchsiaDevice extends Device {
   Future<TargetPlatform> _queryTargetPlatform() async {
     final RunResult result = await shell('uname -m');
     if (result.exitCode != 0) {
-      printError('Could not determine Fuchsia target platform type:\n$result\n'
+      globals.printError('Could not determine Fuchsia target platform type:\n$result\n'
                  'Defaulting to arm64.');
       return TargetPlatform.fuchsia_arm64;
     }
@@ -431,7 +429,7 @@ class FuchsiaDevice extends Device {
       case 'x86_64':
         return TargetPlatform.fuchsia_x64;
       default:
-        printError('Unknown Fuchsia target platform "$machine". '
+        globals.printError('Unknown Fuchsia target platform "$machine". '
                    'Defaulting to arm64.');
         return TargetPlatform.fuchsia_arm64;
     }
@@ -445,12 +443,12 @@ class FuchsiaDevice extends Device {
     const String versionPath = '/pkgfs/packages/build-info/0/data/version';
     final RunResult catResult = await shell('cat $versionPath');
     if (catResult.exitCode != 0) {
-      printTrace('Failed to cat $versionPath: ${catResult.stderr}');
+      globals.printTrace('Failed to cat $versionPath: ${catResult.stderr}');
       return 'Fuchsia';
     }
     final String version = catResult.stdout.trim();
     if (version.isEmpty) {
-      printTrace('$versionPath was empty');
+      globals.printTrace('$versionPath was empty');
       return 'Fuchsia';
     }
     return 'Fuchsia $version';
@@ -579,7 +577,7 @@ class FuchsiaDevice extends Device {
           }
         }
       } on SocketException catch (err) {
-        printTrace('Failed to connect to $port: $err');
+        globals.printTrace('Failed to connect to $port: $err');
       }
     }
     throwToolExit('No ports found running $isolateName');
@@ -624,7 +622,7 @@ class FuchsiaIsolateDiscoveryProtocol {
     if (_uri != null) {
       return _uri;
     }
-    _status ??= logger.startProgress(
+    _status ??= globals.logger.startProgress(
       'Waiting for a connection from $_isolateName on ${_device.name}...',
       timeout: null, // could take an arbitrary amount of time
     );
@@ -660,7 +658,7 @@ class FuchsiaIsolateDiscoveryProtocol {
           service = await _vmServiceConnector(uri);
           _ports[port] = service;
         } on SocketException catch (err) {
-          printTrace('Failed to connect to $localPort: $err');
+          globals.printTrace('Failed to connect to $localPort: $err');
           continue;
         }
       }
@@ -716,7 +714,7 @@ class _FuchsiaPortForwarder extends DevicePortForwarder {
       await device._resolvedIp,
       'true',
     ];
-    final Process process = await processManager.start(command);
+    final Process process = await globals.processManager.start(command);
     unawaited(process.exitCode.then((int exitCode) {
       if (exitCode != 0) {
         throwToolExit('Failed to forward port:$devicePort');
@@ -747,7 +745,7 @@ class _FuchsiaPortForwarder extends DevicePortForwarder {
       '${forwardedPort.hostPort}:$_ipv4Loopback:${forwardedPort.devicePort}',
       await device._resolvedIp,
     ];
-    final ProcessResult result = await processManager.run(command);
+    final ProcessResult result = await globals.processManager.run(command);
     if (result.exitCode != 0) {
       throwToolExit('Unforward command failed: $result');
     }

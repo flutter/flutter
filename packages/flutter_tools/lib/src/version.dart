@@ -11,11 +11,10 @@ import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/io.dart';
 import 'base/process.dart';
-import 'base/process_manager.dart';
 import 'base/time.dart';
 import 'cache.dart';
 import 'convert.dart';
-import 'globals.dart';
+import 'globals.dart' as globals;
 
 class FlutterVersion {
   FlutterVersion([this._clock = const SystemClock()]) {
@@ -97,13 +96,13 @@ class FlutterVersion {
 
   String get frameworkDate => frameworkCommitDate;
 
-  String get dartSdkVersion => Cache.instance.dartSdkVersion;
+  String get dartSdkVersion => globals.cache.dartSdkVersion;
 
-  String get engineRevision => Cache.instance.engineRevision;
+  String get engineRevision => globals.cache.engineRevision;
   String get engineRevisionShort => _shortGitRevision(engineRevision);
 
   Future<void> ensureVersionFile() {
-    fs.file(fs.path.join(Cache.flutterRoot, 'version')).writeAsStringSync(_frameworkVersion);
+    globals.fs.file(globals.fs.path.join(Cache.flutterRoot, 'version')).writeAsStringSync(_frameworkVersion);
     return Future<void>.value();
   }
 
@@ -161,7 +160,7 @@ class FlutterVersion {
     } on VersionCheckError catch (e) {
       if (lenient) {
         final DateTime dummyDate = DateTime.fromMillisecondsSinceEpoch(0);
-        printError('Failed to find the latest git commit date: $e\n'
+        globals.printError('Failed to find the latest git commit date: $e\n'
           'Returning $dummyDate instead.');
         // Return something that DateTime.parse() can parse.
         return dummyDate.toString();
@@ -249,7 +248,7 @@ class FlutterVersion {
     String tentativeDescendantRevision,
     String tentativeAncestorRevision,
   }) {
-    final ProcessResult result = processManager.runSync(
+    final ProcessResult result = globals.processManager.runSync(
       <String>[
         'git',
         'merge-base',
@@ -309,7 +308,7 @@ class FlutterVersion {
   /// channel doesn't linger.
   static Future<void> resetFlutterVersionFreshnessCheck() async {
     try {
-      await Cache.instance.getStampFileFor(
+      await globals.cache.getStampFileFor(
         VersionCheckStamp.flutterVersionCheckStampFile,
       ).delete();
     } on FileSystemException {
@@ -368,7 +367,7 @@ class FlutterVersion {
         remoteVersionStatus == VersionCheckResult.newVersionAvailable
           ? newVersionAvailableMessage()
           : versionOutOfDateMessage(frameworkAge);
-      printStatus(updateMessage, emphasis: true);
+      globals.printStatus(updateMessage, emphasis: true);
       await Future.wait<void>(<Future<void>>[
         stamp.store(
           newTimeWarningWasPrinted: _clock.now(),
@@ -448,7 +447,7 @@ class FlutterVersion {
       // This happens when any of the git commands fails, which can happen when
       // there's no Internet connectivity. Remote version check is best effort
       // only. We do not prevent the command from running when it fails.
-      printTrace('Failed to check Flutter version in the remote repository: $error');
+      globals.printTrace('Failed to check Flutter version in the remote repository: $error');
       // Still update the timestamp to avoid us hitting the server on every single
       // command if for some reason we cannot connect (eg. we may be offline).
       await versionCheckStamp.store(
@@ -477,7 +476,7 @@ class VersionCheckStamp {
   static const String flutterVersionCheckStampFile = 'flutter_version_check';
 
   static Future<VersionCheckStamp> load() async {
-    final String versionCheckStamp = Cache.instance.getStampFor(flutterVersionCheckStampFile);
+    final String versionCheckStamp = globals.cache.getStampFor(flutterVersionCheckStampFile);
 
     if (versionCheckStamp != null) {
       // Attempt to parse stamp JSON.
@@ -486,11 +485,11 @@ class VersionCheckStamp {
         if (jsonObject is Map<String, dynamic>) {
           return fromJson(jsonObject);
         } else {
-          printTrace('Warning: expected version stamp to be a Map but found: $jsonObject');
+          globals.printTrace('Warning: expected version stamp to be a Map but found: $jsonObject');
         }
       } catch (error, stackTrace) {
         // Do not crash if JSON is malformed.
-        printTrace('${error.runtimeType}: $error\n$stackTrace');
+        globals.printTrace('${error.runtimeType}: $error\n$stackTrace');
       }
     }
 
@@ -532,7 +531,7 @@ class VersionCheckStamp {
     }
 
     const JsonEncoder prettyJsonEncoder = JsonEncoder.withIndent('  ');
-    Cache.instance.setStampFor(flutterVersionCheckStampFile, prettyJsonEncoder.convert(jsonData));
+    globals.cache.setStampFor(flutterVersionCheckStampFile, prettyJsonEncoder.convert(jsonData));
   }
 
   Map<String, String> toJson({
@@ -582,7 +581,7 @@ class VersionCheckError implements Exception {
 /// If [lenient] is true and the command fails, returns an empty string.
 /// Otherwise, throws a [ToolExit] exception.
 String _runSync(List<String> command, { bool lenient = true }) {
-  final ProcessResult results = processManager.runSync(
+  final ProcessResult results = globals.processManager.runSync(
     command,
     workingDirectory: Cache.flutterRoot,
   );
@@ -614,7 +613,7 @@ String _runGit(String command) {
 ///
 /// If the command fails, throws a [ToolExit] exception.
 Future<String> _run(List<String> command) async {
-  final ProcessResult results = await processManager.run(command, workingDirectory: Cache.flutterRoot);
+  final ProcessResult results = await globals.processManager.run(command, workingDirectory: Cache.flutterRoot);
 
   if (results.exitCode == 0) {
     return (results.stdout as String).trim();
@@ -669,7 +668,7 @@ class GitTagVersion {
     final RegExp versionPattern = RegExp(r'^v([0-9]+)\.([0-9]+)\.([0-9]+)(?:\+hotfix\.([0-9]+))?-([0-9]+)-g([a-f0-9]+)$');
     final List<String> parts = versionPattern.matchAsPrefix(version)?.groups(<int>[1, 2, 3, 4, 5, 6]);
     if (parts == null) {
-      printTrace('Could not interpret results of "git describe": $version');
+      globals.printTrace('Could not interpret results of "git describe": $version');
       return const GitTagVersion.unknown();
     }
     final List<int> parsedParts = parts.take(5).map<int>((String source) => source == null ? null : int.tryParse(source)).toList();

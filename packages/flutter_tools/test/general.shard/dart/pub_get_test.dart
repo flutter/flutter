@@ -11,15 +11,16 @@ import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 import 'package:quiver/testing/async.dart';
+import 'package:platform/platform.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -258,7 +259,7 @@ void main() {
           '--no-precompile',
         ],
         onRun: () {
-          fs.file('.packages')
+          globals.fs.file('.packages')
             ..setLastModifiedSync(DateTime(2002));
         }
       ),
@@ -278,7 +279,7 @@ void main() {
           '--no-precompile',
         ],
         onRun: () {
-          fs.file('pubspec.yaml')
+          globals.fs.file('pubspec.yaml')
             ..setLastModifiedSync(DateTime(2002));
         }
       ),
@@ -293,35 +294,35 @@ void main() {
     ]);
     await Testbed().run(() async {
       // the good scenario: .packages is old, pub updates the file.
-      fs.file('.packages')
+      globals.fs.file('.packages')
         ..createSync()
         ..setLastModifiedSync(DateTime(2000));
-      fs.file('pubspec.yaml')
+      globals.fs.file('pubspec.yaml')
         ..createSync()
         ..setLastModifiedSync(DateTime(2001));
       await pub.get(context: PubContext.flutterTests, checkLastModified: true); // pub sets date of .packages to 2002
       expect(testLogger.statusText, 'Running "flutter pub get" in /...\n');
       expect(testLogger.errorText, isEmpty);
-      expect(fs.file('pubspec.yaml').lastModifiedSync(), DateTime(2001)); // because nothing should touch it
-      expect(fs.file('.packages').lastModifiedSync(), isNot(DateTime(2000))); // because pub changes it to 2002
-      expect(fs.file('.packages').lastModifiedSync(), isNot(DateTime(2002))); // because we set the timestamp again after pub
+      expect(globals.fs.file('pubspec.yaml').lastModifiedSync(), DateTime(2001)); // because nothing should touch it
+      expect(globals.fs.file('.packages').lastModifiedSync(), isNot(DateTime(2000))); // because pub changes it to 2002
+      expect(globals.fs.file('.packages').lastModifiedSync(), isNot(DateTime(2002))); // because we set the timestamp again after pub
       testLogger.clear();
       // bad scenario 1: pub doesn't update file; doesn't matter, because we do instead
-      fs.file('.packages')
+      globals.fs.file('.packages')
         ..setLastModifiedSync(DateTime(2000));
-      fs.file('pubspec.yaml')
+      globals.fs.file('pubspec.yaml')
         ..setLastModifiedSync(DateTime(2001));
       await pub.get(context: PubContext.flutterTests, checkLastModified: true); // pub does nothing
       expect(testLogger.statusText, 'Running "flutter pub get" in /...\n');
       expect(testLogger.errorText, isEmpty);
-      expect(fs.file('pubspec.yaml').lastModifiedSync(), DateTime(2001)); // because nothing should touch it
-      expect(fs.file('.packages').lastModifiedSync(), isNot(DateTime(2000))); // because we set the timestamp
-      expect(fs.file('.packages').lastModifiedSync(), isNot(DateTime(2002))); // just in case FakeProcessManager is buggy
+      expect(globals.fs.file('pubspec.yaml').lastModifiedSync(), DateTime(2001)); // because nothing should touch it
+      expect(globals.fs.file('.packages').lastModifiedSync(), isNot(DateTime(2000))); // because we set the timestamp
+      expect(globals.fs.file('.packages').lastModifiedSync(), isNot(DateTime(2002))); // just in case FakeProcessManager is buggy
       testLogger.clear();
       // bad scenario 2: pub changes pubspec.yaml instead
-      fs.file('.packages')
+      globals.fs.file('.packages')
         ..setLastModifiedSync(DateTime(2000));
-      fs.file('pubspec.yaml')
+      globals.fs.file('pubspec.yaml')
         ..setLastModifiedSync(DateTime(2001));
       try {
         await pub.get(context: PubContext.flutterTests, checkLastModified: true);
@@ -332,12 +333,12 @@ void main() {
       }
       expect(testLogger.statusText, 'Running "flutter pub get" in /...\n');
       expect(testLogger.errorText, isEmpty);
-      expect(fs.file('pubspec.yaml').lastModifiedSync(), DateTime(2002)); // because fake pub above touched it
-      expect(fs.file('.packages').lastModifiedSync(), DateTime(2000)); // because nothing touched it
+      expect(globals.fs.file('pubspec.yaml').lastModifiedSync(), DateTime(2002)); // because fake pub above touched it
+      expect(globals.fs.file('.packages').lastModifiedSync(), DateTime(2000)); // because nothing touched it
       // bad scenario 3: pubspec.yaml was created in the future
-      fs.file('.packages')
+      globals.fs.file('.packages')
         ..setLastModifiedSync(DateTime(2000));
-      fs.file('pubspec.yaml')
+      globals.fs.file('pubspec.yaml')
         ..setLastModifiedSync(DateTime(9999));
       assert(DateTime(9999).isAfter(DateTime.now()));
       await pub.get(context: PubContext.flutterTests, checkLastModified: true); // pub does nothing

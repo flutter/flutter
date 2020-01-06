@@ -10,7 +10,7 @@ import 'android/android_sdk.dart';
 import 'base/context.dart';
 import 'base/process.dart';
 import 'device.dart';
-import 'globals.dart';
+import 'globals.dart' as globals;
 import 'ios/ios_emulators.dart';
 
 EmulatorManager get emulatorManager => context.get<EmulatorManager>();
@@ -280,7 +280,7 @@ abstract class Emulator {
   }
 
   static void printEmulators(List<Emulator> emulators) {
-    descriptions(emulators).forEach(printStatus);
+    descriptions(emulators).forEach(globals.printStatus);
   }
 }
 

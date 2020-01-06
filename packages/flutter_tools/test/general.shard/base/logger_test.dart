@@ -4,11 +4,12 @@
 
 import 'dart:convert' show jsonEncode;
 
+import 'package:platform/platform.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:quiver/testing/async.dart';
 
 import '../../src/common.dart';
@@ -113,7 +114,7 @@ void main() {
           doWhileAsync(time, () => ansiSpinner.ticks < 10);
           List<String> lines = outputStdout();
           expect(lines[0], startsWith(
-            platform.isWindows
+            globals.platform.isWindows
               ? ' \b\\\b|\b/\b-\b\\\b|\b/\b-'
               : ' \b⣽\b⣻\b⢿\b⡿\b⣟\b⣯\b⣷\b⣾\b⣽\b⣻'
             ),
@@ -181,10 +182,10 @@ void main() {
           expect(outputStderr().length, equals(1));
           expect(outputStderr().first, isEmpty);
           // the 5 below is the margin that is always included between the message and the time.
-          expect(outputStdout().join('\n'), matches(platform.isWindows ? r'^Hello {15} {5} {8}[\b]{8} {7}\\$' :
+          expect(outputStdout().join('\n'), matches(globals.platform.isWindows ? r'^Hello {15} {5} {8}[\b]{8} {7}\\$' :
                                                                          r'^Hello {15} {5} {8}[\b]{8} {7}⣽$'));
           status.stop();
-          expect(outputStdout().join('\n'), matches(platform.isWindows ? r'^Hello {15} {5} {8}[\b]{8} {7}\\[\b]{8} {8}[\b]{8}[\d, ]{4}[\d]\.[\d]s[\n]$' :
+          expect(outputStdout().join('\n'), matches(globals.platform.isWindows ? r'^Hello {15} {5} {8}[\b]{8} {7}\\[\b]{8} {8}[\b]{8}[\d, ]{4}[\d]\.[\d]s[\n]$' :
                                                                          r'^Hello {15} {5} {8}[\b]{8} {7}⣽[\b]{8} {8}[\b]{8}[\d, ]{4}[\d]\.[\d]s[\n]$'));
           done = true;
         });
@@ -208,8 +209,8 @@ void main() {
           );
           logger.printStatus('Rude Interrupting Cow');
           status.stop();
-          final String a = platform.isWindows ? '\\' : '⣽';
-          final String b = platform.isWindows ? '|' : '⣻';
+          final String a = globals.platform.isWindows ? '\\' : '⣽';
+          final String b = globals.platform.isWindows ? '|' : '⣻';
           expect(
             outputStdout().join('\n'),
             'Knock Knock, Who\'s There     ' // initial message
@@ -281,7 +282,7 @@ void main() {
           mockStopwatch.elapsed = const Duration(seconds: 1);
           doWhileAsync(time, () => ansiStatus.ticks < 10);
           List<String> lines = outputStdout();
-          expect(lines[0], startsWith(platform.isWindows
+          expect(lines[0], startsWith(globals.platform.isWindows
               ? 'Hello world                      \b\b\b\b\b\b\b\b       \\\b\b\b\b\b\b\b\b       |\b\b\b\b\b\b\b\b       /\b\b\b\b\b\b\b\b       -\b\b\b\b\b\b\b\b       \\\b\b\b\b\b\b\b\b       |\b\b\b\b\b\b\b\b       /\b\b\b\b\b\b\b\b       -\b\b\b\b\b\b\b\b       \\\b\b\b\b\b\b\b\b       |'
               : 'Hello world                      \b\b\b\b\b\b\b\b       ⣽\b\b\b\b\b\b\b\b       ⣻\b\b\b\b\b\b\b\b       ⢿\b\b\b\b\b\b\b\b       ⡿\b\b\b\b\b\b\b\b       ⣟\b\b\b\b\b\b\b\b       ⣯\b\b\b\b\b\b\b\b       ⣷\b\b\b\b\b\b\b\b       ⣾\b\b\b\b\b\b\b\b       ⣽\b\b\b\b\b\b\b\b       ⣻'));
           expect(lines.length, equals(1));
@@ -292,7 +293,7 @@ void main() {
           lines = outputStdout();
           final List<Match> matches = secondDigits.allMatches(lines[0]).toList();
           expect(matches, isEmpty);
-          final String x = platform.isWindows ? '|' : '⣻';
+          final String x = globals.platform.isWindows ? '|' : '⣻';
           expect(lines[0], endsWith('$x\b\b\b\b\b\b\b\b        \b\b\b\b\b\b\b\b'));
           expect(called, equals(1));
           expect(lines.length, equals(2));
@@ -320,7 +321,7 @@ void main() {
           List<String> lines = outputStdout();
           expect(lines, hasLength(1));
           expect(lines[0],
-            platform.isWindows
+            globals.platform.isWindows
               ? 'Hello world                      \b\b\b\b\b\b\b\b       \\\b\b\b\b\b\b\b\b       |\b\b\b\b\b\b\b\b       /\b\b\b\b\b\b\b\b       -\b\b\b\b\b\b\b\b       \\\b\b\b\b\b\b\b\b       |\b\b\b\b\b\b\b\b       /\b\b\b\b\b\b\b\b       -\b\b\b\b\b\b\b\b       \\\b\b\b\b\b\b\b\b       |'
               : 'Hello world                      \b\b\b\b\b\b\b\b       ⣽\b\b\b\b\b\b\b\b       ⣻\b\b\b\b\b\b\b\b       ⢿\b\b\b\b\b\b\b\b       ⡿\b\b\b\b\b\b\b\b       ⣟\b\b\b\b\b\b\b\b       ⣯\b\b\b\b\b\b\b\b       ⣷\b\b\b\b\b\b\b\b       ⣾\b\b\b\b\b\b\b\b       ⣽\b\b\b\b\b\b\b\b       ⣻',
           );
@@ -330,7 +331,7 @@ void main() {
           lines = outputStdout();
           expect(lines, hasLength(2));
           expect(lines[0], matches(
-            platform.isWindows
+            globals.platform.isWindows
               ? r'Hello world               {8}[\b]{8} {7}\\[\b]{8} {7}|[\b]{8} {7}/[\b]{8} {7}-[\b]{8} {7}\\[\b]{8} {7}|[\b]{8} {7}/[\b]{8} {7}-[\b]{8} {7}\\[\b]{8} {7}|[\b]{8} {7} [\b]{8}[\d., ]{6}[\d]ms$'
               : r'Hello world               {8}[\b]{8} {7}⣽[\b]{8} {7}⣻[\b]{8} {7}⢿[\b]{8} {7}⡿[\b]{8} {7}⣟[\b]{8} {7}⣯[\b]{8} {7}⣷[\b]{8} {7}⣾[\b]{8} {7}⣽[\b]{8} {7}⣻[\b]{8} {7} [\b]{8}[\d., ]{5}[\d]ms$'
           ));
@@ -610,10 +611,10 @@ void main() {
         expect(outputStderr().length, equals(1));
         expect(outputStderr().first, isEmpty);
         // the 5 below is the margin that is always included between the message and the time.
-        expect(outputStdout().join('\n'), matches(platform.isWindows ? r'^Hello {15} {5}$' :
+        expect(outputStdout().join('\n'), matches(globals.platform.isWindows ? r'^Hello {15} {5}$' :
                                                                        r'^Hello {15} {5}$'));
         status.stop();
-        expect(outputStdout().join('\n'), matches(platform.isWindows ? r'^Hello {15} {5}[\d, ]{4}[\d]\.[\d]s[\n]$' :
+        expect(outputStdout().join('\n'), matches(globals.platform.isWindows ? r'^Hello {15} {5}[\d, ]{4}[\d]\.[\d]s[\n]$' :
                                                                        r'^Hello {15} {5}[\d, ]{4}[\d]\.[\d]s[\n]$'));
         done = true;
       });

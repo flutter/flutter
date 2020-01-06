@@ -16,6 +16,7 @@ import 'package:path/path.dart' as path;
 import '../base/file_system.dart';
 import '../build_info.dart';
 import '../convert.dart';
+import '../globals.dart' as globals;
 import '../platform_plugins.dart';
 import '../plugins.dart';
 import '../project.dart';
@@ -81,14 +82,14 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
         .listSync()
         .whereType<Directory>();
       for (Directory childDirectory in childDirectories) {
-        final String path = fs.path.join(testOutputDir, 'packages',
-            fs.path.basename(childDirectory.path));
-        copyDirectorySync(childDirectory.childDirectory('lib'), fs.directory(path));
+        final String path = globals.fs.path.join(testOutputDir, 'packages',
+            globals.fs.path.basename(childDirectory.path));
+        copyDirectorySync(childDirectory.childDirectory('lib'), globals.fs.directory(path));
       }
       final Directory outputDirectory = rootDirectory
           .childDirectory(projectName)
           .childDirectory('test');
-      copyDirectorySync(outputDirectory, fs.directory(fs.path.join(testOutputDir)));
+      copyDirectorySync(outputDirectory, globals.fs.directory(globals.fs.path.join(testOutputDir)));
     }
     return success;
   }
@@ -133,18 +134,18 @@ class MultirootFileBasedAssetReader extends core.FileBasedAssetReader {
   @override
   Stream<AssetId> findAssets(Glob glob, {String package}) async* {
     if (package == null || packageGraph.root.name == package) {
-      final String generatedRoot = fs.path.join(generatedDirectory.path, packageGraph.root.name);
+      final String generatedRoot = globals.fs.path.join(generatedDirectory.path, packageGraph.root.name);
       await for (io.FileSystemEntity entity in glob.list(followLinks: true, root: packageGraph.root.path)) {
-        if (entity is io.File && _isNotHidden(entity) && !fs.path.isWithin(generatedRoot, entity.path)) {
+        if (entity is io.File && _isNotHidden(entity) && !globals.fs.path.isWithin(generatedRoot, entity.path)) {
           yield _fileToAssetId(entity, packageGraph.root);
         }
       }
-      if (!fs.isDirectorySync(generatedRoot)) {
+      if (!globals.fs.isDirectorySync(generatedRoot)) {
         return;
       }
       await for (io.FileSystemEntity entity in glob.list(followLinks: true, root: generatedRoot)) {
         if (entity is io.File && _isNotHidden(entity)) {
-          yield _fileToAssetId(entity, packageGraph.root, fs.path.relative(generatedRoot), true);
+          yield _fileToAssetId(entity, packageGraph.root, globals.fs.path.relative(generatedRoot), true);
         }
       }
       return;
@@ -157,11 +158,11 @@ class MultirootFileBasedAssetReader extends core.FileBasedAssetReader {
   }
 
   bool _missingSource(AssetId id) {
-    return !fs.file(path.joinAll(<String>[packageGraph.root.path, ...id.pathSegments])).existsSync();
+    return !globals.fs.file(path.joinAll(<String>[packageGraph.root.path, ...id.pathSegments])).existsSync();
   }
 
   File _generatedFile(AssetId id) {
-    return fs.file(
+    return globals.fs.file(
       path.joinAll(<String>[generatedDirectory.path, packageGraph.root.name, ...id.pathSegments])
     );
   }

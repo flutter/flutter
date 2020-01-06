@@ -12,15 +12,13 @@ import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
-import '../base/platform.dart';
 import '../base/process.dart';
-import '../base/process_manager.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../bundle.dart';
 import '../convert.dart';
 import '../device.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
 import '../macos/xcode.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
@@ -35,7 +33,7 @@ class IOSSimulators extends PollingDeviceDiscovery {
   IOSSimulators() : super('iOS simulators');
 
   @override
-  bool get supportsPlatform => platform.isMacOS;
+  bool get supportsPlatform => globals.platform.isMacOS;
 
   @override
   bool get canListAnything => iosWorkflow.canListDevices;
@@ -86,10 +84,10 @@ class SimControl {
     //   "pairs": { ... },
 
     final List<String> command = <String>[_xcrunPath, 'simctl', 'list', '--json', section.name];
-    printTrace(command.join(' '));
-    final ProcessResult results = await processManager.run(command);
+    globals.printTrace(command.join(' '));
+    final ProcessResult results = await globals.processManager.run(command);
     if (results.exitCode != 0) {
-      printError('Error executing simctl: ${results.exitCode}\n${results.stderr}');
+      globals.printError('Error executing simctl: ${results.exitCode}\n${results.stderr}');
       return <String, Map<String, dynamic>>{};
     }
     try {
@@ -97,13 +95,13 @@ class SimControl {
       if (decodeResult is Map<String, dynamic>) {
         return decodeResult;
       }
-      printError('simctl returned unexpected JSON response: ${results.stdout}');
+      globals.printError('simctl returned unexpected JSON response: ${results.stdout}');
       return <String, dynamic>{};
     } on FormatException {
       // We failed to parse the simctl output, or it returned junk.
       // One known message is "Install Started" isn't valid JSON but is
       // returned sometimes.
-      printError('simctl returned non-JSON response: ${results.stdout}');
+      globals.printError('simctl returned non-JSON response: ${results.stdout}');
       return <String, dynamic>{};
     }
   }
@@ -278,7 +276,7 @@ class IOSSimulator extends Device {
   Map<ApplicationPackage, _IOSSimulatorLogReader> _logReaders;
   _IOSSimulatorDevicePortForwarder _portForwarder;
 
-  String get xcrunPath => fs.path.join('/usr', 'bin', 'xcrun');
+  String get xcrunPath => globals.fs.path.join('/usr', 'bin', 'xcrun');
 
   @override
   Future<bool> isAppInstalled(ApplicationPackage app) {
@@ -311,7 +309,7 @@ class IOSSimulator extends Device {
 
   @override
   bool isSupported() {
-    if (!platform.isMacOS) {
+    if (!globals.platform.isMacOS) {
       _supportMessage = 'iOS devices require a Mac host machine.';
       return false;
     }
@@ -348,12 +346,12 @@ class IOSSimulator extends Device {
     bool ipv6 = false,
   }) async {
     if (!prebuiltApplication && package is BuildableIOSApp) {
-      printTrace('Building ${package.name} for $id.');
+      globals.printTrace('Building ${package.name} for $id.');
 
       try {
         await _setupUpdatedApplicationBundle(package, debuggingOptions.buildInfo, mainPath);
       } on ToolExit catch (e) {
-        printError(e.message);
+        globals.printError(e.message);
         return LaunchResult.failed();
       }
     } else {
@@ -394,12 +392,12 @@ class IOSSimulator extends Device {
       // which should always yield the correct value and does not require
       // parsing the xcodeproj or configuration files.
       // See https://github.com/flutter/flutter/issues/31037 for more information.
-      final String plistPath = fs.path.join(package.simulatorBundlePath, 'Info.plist');
+      final String plistPath = globals.fs.path.join(package.simulatorBundlePath, 'Info.plist');
       final String bundleIdentifier = PlistParser.instance.getValueFromFile(plistPath, PlistParser.kCFBundleIdentifierKey);
 
       await SimControl.instance.launch(id, bundleIdentifier, args);
     } catch (error) {
-      printError('$error');
+      globals.printError('$error');
       return LaunchResult.failed();
     }
 
@@ -409,13 +407,13 @@ class IOSSimulator extends Device {
 
     // Wait for the service protocol port here. This will complete once the
     // device has printed "Observatory is listening on..."
-    printTrace('Waiting for observatory port to be available...');
+    globals.printTrace('Waiting for observatory port to be available...');
 
     try {
       final Uri deviceUri = await observatoryDiscovery.uri;
       return LaunchResult.succeeded(observatoryUri: deviceUri);
     } catch (error) {
-      printError('Error waiting for a debug connection: $error');
+      globals.printError('Error waiting for a debug connection: $error');
       return LaunchResult.failed();
     } finally {
       await observatoryDiscovery.cancel();
@@ -444,14 +442,14 @@ class IOSSimulator extends Device {
     }
 
     // Step 2: Assert that the Xcode project was successfully built.
-    final Directory bundle = fs.directory(app.simulatorBundlePath);
+    final Directory bundle = globals.fs.directory(app.simulatorBundlePath);
     final bool bundleExists = bundle.existsSync();
     if (!bundleExists) {
       throwToolExit('Could not find the built application bundle at ${bundle.path}.');
     }
 
     // Step 3: Install the updated bundle to the simulator.
-    await SimControl.instance.install(id, fs.path.absolute(bundle.path));
+    await SimControl.instance.install(id, globals.fs.path.absolute(bundle.path));
   }
 
   @visibleForTesting
@@ -473,9 +471,9 @@ class IOSSimulator extends Device {
   }
 
   String get logFilePath {
-    return platform.environment.containsKey('IOS_SIMULATOR_LOG_FILE_PATH')
-        ? platform.environment['IOS_SIMULATOR_LOG_FILE_PATH'].replaceAll('%{id}', id)
-        : fs.path.join(homeDirPath, 'Library', 'Logs', 'CoreSimulator', id, 'system.log');
+    return globals.platform.environment.containsKey('IOS_SIMULATOR_LOG_FILE_PATH')
+        ? globals.platform.environment['IOS_SIMULATOR_LOG_FILE_PATH'].replaceAll('%{id}', id)
+        : globals.fs.path.join(homeDirPath, 'Library', 'Logs', 'CoreSimulator', id, 'system.log');
   }
 
   @override
@@ -503,7 +501,7 @@ class IOSSimulator extends Device {
 
   @override
   void clearLogs() {
-    final File logFile = fs.file(logFilePath);
+    final File logFile = globals.fs.file(logFilePath);
     if (logFile.existsSync()) {
       final RandomAccessFile randomFile = logFile.openSync(mode: FileMode.write);
       randomFile.truncateSync(0);
@@ -513,7 +511,7 @@ class IOSSimulator extends Device {
 
   Future<void> ensureLogsExists() async {
     if (await sdkMajorVersion < 11) {
-      final File logFile = fs.file(logFilePath);
+      final File logFile = globals.fs.file(logFilePath);
       if (!logFile.existsSync()) {
         logFile.writeAsBytesSync(<int>[]);
       }
@@ -689,7 +687,7 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
   String _lastLine;
 
   void _onDeviceLine(String line) {
-    printTrace('[DEVICE LOG] $line');
+    globals.printTrace('[DEVICE LOG] $line');
     final Match multi = _lastMessageMultipleRegex.matchAsPrefix(line);
 
     if (multi != null) {
@@ -714,7 +712,7 @@ class _IOSSimulatorLogReader extends DeviceLogReader {
   }
 
   void _onSystemLine(String line) {
-    printTrace('[SYS LOG] $line');
+    globals.printTrace('[SYS LOG] $line');
     if (!_flutterRunnerRegex.hasMatch(line)) {
       return;
     }

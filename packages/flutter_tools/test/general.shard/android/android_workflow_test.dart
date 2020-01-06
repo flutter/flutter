@@ -12,6 +12,8 @@ import 'package:flutter_tools/src/android/android_workflow.dart';
 import 'package:flutter_tools/src/base/user_messages.dart';
 import 'package:flutter_tools/src/base/version.dart';
 import 'package:flutter_tools/src/doctor.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
+
 import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
@@ -291,7 +293,7 @@ void main() {
 
     //Test with older version of JDK
     const String javaVersionText = 'openjdk version "1.7.0_212"';
-    when(processManager.run(argThat(contains('-version')))).thenAnswer((_) =>
+    when(globals.processManager.run(argThat(contains('-version')))).thenAnswer((_) =>
       Future<ProcessResult>.value(ProcessResult(0, 0, null, javaVersionText)));
     final String errorMessage = userMessages.androidJavaMinimumVersion(javaVersionText);
 

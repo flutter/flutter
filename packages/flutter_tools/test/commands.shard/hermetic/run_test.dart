@@ -20,7 +20,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/run.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/globals.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
@@ -61,9 +61,9 @@ void main() {
     });
 
     testUsingContext('does not support "--use-application-binary" and "--fast-start"', () async {
-      fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
-      fs.file('pubspec.yaml').createSync();
-      fs.file('.packages').createSync();
+      globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+      globals.fs.file('pubspec.yaml').createSync();
+      globals.fs.file('.packages').createSync();
 
       final RunCommand command = RunCommand();
       applyMocksToCommand(command);
@@ -97,9 +97,9 @@ void main() {
       when(deviceManager.getDevices()).thenAnswer((Invocation invocation) {
         return Stream<Device>.value(mockDevice);
       });
-      fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
-      fs.file('pubspec.yaml').createSync();
-      fs.file('.packages').createSync();
+      globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+      globals.fs.file('pubspec.yaml').createSync();
+      globals.fs.file('.packages').createSync();
 
       final RunCommand command = RunCommand();
       applyMocksToCommand(command);
@@ -114,7 +114,7 @@ void main() {
         expect(e, isInstanceOf<ToolExit>());
       }
 
-      final BufferLogger bufferLogger = logger as BufferLogger;
+      final BufferLogger bufferLogger = globals.logger as BufferLogger;
       expect(bufferLogger.statusText, contains(
         'Using --fast-start option with device mockdevice, but this device '
         'does not support it. Overriding the setting to false.'
@@ -263,14 +263,14 @@ void main() {
           (Invocation invocation) => Future<List<Device>>.value(<Device>[mockDevice])
         );
 
-        final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_run_test.');
+        final Directory tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_run_test.');
         tempDir.childDirectory('ios').childFile('AppDelegate.swift').createSync(recursive: true);
         tempDir.childFile('.packages').createSync();
         tempDir.childDirectory('lib').childFile('main.dart').createSync(recursive: true);
         tempDir.childFile('pubspec.yaml')
           ..createSync()
           ..writeAsStringSync('# Hello, World');
-        fs.currentDirectory = tempDir;
+        globals.fs.currentDirectory = tempDir;
 
         try {
           await createTestCommandRunner(command).run(<String>[
@@ -482,8 +482,8 @@ void main() {
       });
 
       testUsingContext('populates the environment', () async {
-        final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_run_test.');
-        fs.currentDirectory = tempDir;
+        final Directory tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_run_test.');
+        globals.fs.currentDirectory = tempDir;
 
         final Directory libDir = tempDir.childDirectory('lib');
         libDir.createSync();
@@ -509,8 +509,8 @@ void main() {
       });
 
       testUsingContext('populates dartDefines in --machine mode', () async {
-        final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_run_test.');
-        fs.currentDirectory = tempDir;
+        final Directory tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_run_test.');
+        globals.fs.currentDirectory = tempDir;
 
         final Directory libDir = tempDir.childDirectory('lib');
         libDir.createSync();

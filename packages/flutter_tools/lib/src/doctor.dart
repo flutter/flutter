@@ -13,7 +13,6 @@ import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/os.dart';
-import 'base/platform.dart';
 import 'base/process.dart';
 import 'base/terminal.dart';
 import 'base/user_messages.dart';
@@ -22,7 +21,7 @@ import 'base/version.dart';
 import 'cache.dart';
 import 'device.dart';
 import 'fuchsia/fuchsia_workflow.dart';
-import 'globals.dart';
+import 'globals.dart' as globals;
 import 'intellij/intellij.dart';
 import 'ios/ios_workflow.dart';
 import 'ios/plist_parser.dart';
@@ -170,7 +169,7 @@ class Doctor {
 
   /// Print a summary of the state of the tooling, as well as how to get more info.
   Future<void> summary() async {
-    printStatus(await _summaryText());
+    globals.printStatus(await _summaryText());
   }
 
   Future<String> _summaryText() async {
@@ -234,7 +233,7 @@ class Doctor {
   }
 
   Future<bool> checkRemoteArtifacts(String engineRevision) async {
-    return Cache.instance.areRemoteArtifactsAvailable(engineVersion: engineRevision);
+    return globals.cache.areRemoteArtifactsAvailable(engineVersion: engineRevision);
   }
 
   /// Print information about the state of installed tooling.
@@ -244,7 +243,7 @@ class Doctor {
     }
 
     if (!verbose) {
-      printStatus('Doctor summary (to see all details, run flutter doctor -v):');
+      globals.printStatus('Doctor summary (to see all details, run flutter doctor -v):');
     }
     bool doctorResult = true;
     int issues = 0;
@@ -285,10 +284,10 @@ class Doctor {
 
       final String leadingBox = showColor ? result.coloredLeadingBox : result.leadingBox;
       if (result.statusInfo != null) {
-        printStatus('$leadingBox ${validator.title} (${result.statusInfo})',
+        globals.printStatus('$leadingBox ${validator.title} (${result.statusInfo})',
             hangingIndent: result.leadingBox.length + 1);
       } else {
-        printStatus('$leadingBox ${validator.title}',
+        globals.printStatus('$leadingBox ${validator.title}',
             hangingIndent: result.leadingBox.length + 1);
       }
 
@@ -298,7 +297,7 @@ class Doctor {
           int indent = 4;
           final String indicator = showColor ? message.coloredIndicator : message.indicator;
           for (String line in '$indicator ${message.message}'.split('\n')) {
-            printStatus(line, hangingIndent: hangingIndent, indent: indent, emphasis: true);
+            globals.printStatus(line, hangingIndent: hangingIndent, indent: indent, emphasis: true);
             // Only do hanging indent for the first line.
             hangingIndent = 0;
             indent = 6;
@@ -306,19 +305,21 @@ class Doctor {
         }
       }
       if (verbose) {
-        printStatus('');
+        globals.printStatus('');
       }
     }
 
     // Make sure there's always one line before the summary even when not verbose.
     if (!verbose) {
-      printStatus('');
+      globals.printStatus('');
     }
 
     if (issues > 0) {
-      printStatus('${showColor ? terminal.color('!', TerminalColor.yellow) : '!'} Doctor found issues in $issues categor${issues > 1 ? "ies" : "y"}.', hangingIndent: 2);
+      globals.printStatus('${showColor ? globals.terminal.color('!', TerminalColor.yellow) : '!'}'
+        ' Doctor found issues in $issues categor${issues > 1 ? "ies" : "y"}.', hangingIndent: 2);
     } else {
-      printStatus('${showColor ? terminal.color('•', TerminalColor.green) : '•'} No issues found!', hangingIndent: 2);
+      globals.printStatus('${showColor ? globals.terminal.color('•', TerminalColor.green) : '•'}'
+        ' No issues found!', hangingIndent: 2);
     }
 
     return doctorResult;
@@ -500,14 +501,14 @@ class ValidationResult {
     assert(type != null);
     switch (type) {
       case ValidationType.crash:
-        return terminal.color(leadingBox, TerminalColor.red);
+        return globals.terminal.color(leadingBox, TerminalColor.red);
       case ValidationType.missing:
-        return terminal.color(leadingBox, TerminalColor.red);
+        return globals.terminal.color(leadingBox, TerminalColor.red);
       case ValidationType.installed:
-        return terminal.color(leadingBox, TerminalColor.green);
+        return globals.terminal.color(leadingBox, TerminalColor.green);
       case ValidationType.notAvailable:
       case ValidationType.partial:
-        return terminal.color(leadingBox, TerminalColor.yellow);
+        return globals.terminal.color(leadingBox, TerminalColor.yellow);
     }
     return null;
   }
@@ -556,11 +557,11 @@ class ValidationMessage {
   String get coloredIndicator {
     switch (type) {
       case ValidationMessageType.error:
-        return terminal.color(indicator, TerminalColor.red);
+        return globals.terminal.color(indicator, TerminalColor.red);
       case ValidationMessageType.hint:
-        return terminal.color(indicator, TerminalColor.yellow);
+        return globals.terminal.color(indicator, TerminalColor.yellow);
       case ValidationMessageType.information:
-        return terminal.color(indicator, TerminalColor.green);
+        return globals.terminal.color(indicator, TerminalColor.green);
     }
     return null;
   }
@@ -613,13 +614,13 @@ class FlutterValidator extends DoctorValidator {
     }
 
     final String genSnapshotPath =
-      artifacts.getArtifactPath(Artifact.genSnapshot);
+      globals.artifacts.getArtifactPath(Artifact.genSnapshot);
 
     // Check that the binaries we downloaded for this platform actually run on it.
     if (!_genSnapshotRuns(genSnapshotPath)) {
       final StringBuffer buf = StringBuffer();
       buf.writeln(userMessages.flutterBinariesDoNotRun);
-      if (platform.isLinux) {
+      if (globals.platform.isLinux) {
         buf.writeln(userMessages.flutterBinariesLinuxRepairCommands);
       }
       messages.add(ValidationMessage.error(buf.toString()));
@@ -627,7 +628,8 @@ class FlutterValidator extends DoctorValidator {
     }
 
     return ValidationResult(valid, messages,
-      statusInfo: userMessages.flutterStatusInfo(versionChannel, frameworkVersion, os.name, platform.localeName),
+      statusInfo: userMessages.flutterStatusInfo(
+        versionChannel, frameworkVersion, os.name, globals.platform.localeName),
     );
   }
 }
@@ -668,10 +670,10 @@ abstract class IntelliJValidator extends DoctorValidator {
   static final Version kMinIdeaVersion = Version(2017, 1, 0);
 
   static Iterable<DoctorValidator> get installedValidators {
-    if (platform.isLinux || platform.isWindows) {
+    if (globals.platform.isLinux || globals.platform.isWindows) {
       return IntelliJValidatorOnLinuxAndWindows.installed;
     }
-    if (platform.isMacOS) {
+    if (globals.platform.isMacOS) {
       return IntelliJValidatorOnMac.installed;
     }
     return <DoctorValidator>[];
@@ -751,20 +753,20 @@ class IntelliJValidatorOnLinuxAndWindows extends IntelliJValidator {
       validators.add(validator);
     }
 
-    for (FileSystemEntity dir in fs.directory(homeDirPath).listSync()) {
+    for (FileSystemEntity dir in globals.fs.directory(homeDirPath).listSync()) {
       if (dir is Directory) {
-        final String name = fs.path.basename(dir.path);
+        final String name = globals.fs.path.basename(dir.path);
         IntelliJValidator._idToTitle.forEach((String id, String title) {
           if (name.startsWith('.$id')) {
             final String version = name.substring(id.length + 1);
             String installPath;
             try {
-              installPath = fs.file(fs.path.join(dir.path, 'system', '.home')).readAsStringSync();
+              installPath = globals.fs.file(globals.fs.path.join(dir.path, 'system', '.home')).readAsStringSync();
             } catch (e) {
               // ignored
             }
-            if (installPath != null && fs.isDirectorySync(installPath)) {
-              final String pluginsPath = fs.path.join(dir.path, 'config', 'plugins');
+            if (installPath != null && globals.fs.isDirectorySync(installPath)) {
+              final String pluginsPath = globals.fs.path.join(dir.path, 'config', 'plugins');
               addValidator(title, version, installPath, pluginsPath);
             }
           }
@@ -788,10 +790,10 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
 
   static Iterable<DoctorValidator> get installed {
     final List<DoctorValidator> validators = <DoctorValidator>[];
-    final List<String> installPaths = <String>['/Applications', fs.path.join(homeDirPath, 'Applications')];
+    final List<String> installPaths = <String>['/Applications', globals.fs.path.join(homeDirPath, 'Applications')];
 
     void checkForIntelliJ(Directory dir) {
-      final String name = fs.path.basename(dir.path);
+      final String name = globals.fs.path.basename(dir.path);
       _dirNameToId.forEach((String dirName, String id) {
         if (name == dirName) {
           final String title = IntelliJValidator._idToTitle[id];
@@ -802,7 +804,7 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
 
     try {
       final Iterable<Directory> installDirs = installPaths
-              .map<Directory>((String installPath) => fs.directory(installPath))
+              .map<Directory>((String installPath) => globals.fs.directory(installPath))
               .map<List<FileSystemEntity>>((Directory dir) => dir.existsSync() ? dir.listSync() : <FileSystemEntity>[])
               .expand<FileSystemEntity>((List<FileSystemEntity> mappedDirs) => mappedDirs)
               .whereType<Directory>();
@@ -830,7 +832,7 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
   @override
   String get version {
     if (_version == null) {
-      final String plistFile = fs.path.join(installPath, 'Contents', 'Info.plist');
+      final String plistFile = globals.fs.path.join(installPath, 'Contents', 'Info.plist');
       _version = PlistParser.instance.getValueFromFile(
         plistFile,
         PlistParser.kCFBundleShortVersionStringKey,
@@ -845,7 +847,7 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
     final List<String> split = version.split('.');
     final String major = split[0];
     final String minor = split[1];
-    return fs.path.join(homeDirPath, 'Library', 'Application Support', '$id$major.$minor');
+    return globals.fs.path.join(homeDirPath, 'Library', 'Application Support', '$id$major.$minor');
   }
 }
 

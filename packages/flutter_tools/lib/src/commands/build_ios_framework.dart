@@ -13,14 +13,13 @@ import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/logger.dart';
-import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
 import '../build_system/targets/ios.dart';
 import '../bundle.dart';
 import '../cache.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
 import '../macos/cocoapod_utils.dart';
 import '../macos/xcode.dart';
 import '../plugins.dart';
@@ -121,7 +120,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
       throwToolExit('Building frameworks for iOS is only supported from a module.');
     }
 
-    if (!platform.isMacOS) {
+    if (!globals.platform.isMacOS) {
       throwToolExit('Building frameworks for iOS is only supported on the Mac.');
     }
 
@@ -141,7 +140,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
     Cache.releaseLockEarly();
 
     final String outputArgument = stringArg('output')
-        ?? fs.path.join(fs.currentDirectory.path, 'build', 'ios', 'framework');
+        ?? globals.fs.path.join(globals.fs.currentDirectory.path, 'build', 'ios', 'framework');
 
     if (outputArgument.isEmpty) {
       throwToolExit('--output is required.');
@@ -153,14 +152,14 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
       throwToolExit("Module's iOS folder missing");
     }
 
-    final Directory outputDirectory = fs.directory(fs.path.absolute(fs.path.normalize(outputArgument)));
+    final Directory outputDirectory = globals.fs.directory(globals.fs.path.absolute(globals.fs.path.normalize(outputArgument)));
 
     aotBuilder ??= AotBuilder();
     bundleBuilder ??= BundleBuilder();
-    cache ??= Cache.instance;
+    cache ??= globals.cache;
 
     for (BuildMode mode in buildModes) {
-      printStatus('Building framework for $iosProject in ${getNameForBuildMode(mode)} mode...');
+      globals.printStatus('Building framework for $iosProject in ${getNameForBuildMode(mode)} mode...');
       final String xcodeBuildConfiguration = toTitleCase(getNameForBuildMode(mode));
       final Directory modeDirectory = outputDirectory.childDirectory(xcodeBuildConfiguration);
 
@@ -188,7 +187,8 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
         await _producePlugins(mode, xcodeBuildConfiguration, iPhoneBuildOutput, simulatorBuildOutput, modeDirectory, outputDirectory);
       }
 
-      final Status status = logger.startProgress(' └─Moving to ${fs.path.relative(modeDirectory.path)}', timeout: timeoutConfiguration.slowOperation);
+      final Status status = globals.logger.startProgress(
+        ' └─Moving to ${globals.fs.path.relative(modeDirectory.path)}', timeout: timeoutConfiguration.slowOperation);
       try {
         // Delete the intermediaries since they would have been copied into our
         // output frameworks.
@@ -203,7 +203,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
       }
     }
 
-    printStatus('Frameworks written to ${outputDirectory.path}.');
+    globals.printStatus('Frameworks written to ${outputDirectory.path}.');
 
     return null;
   }
@@ -212,7 +212,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
   /// vendored framework caching.
   @visibleForTesting
   void produceFlutterPodspec(BuildMode mode, Directory modeDirectory) {
-    final Status status = logger.startProgress(' ├─Creating Flutter.podspec...', timeout: timeoutConfiguration.fastOperation);
+    final Status status = globals.logger.startProgress(' ├─Creating Flutter.podspec...', timeout: timeoutConfiguration.fastOperation);
     try {
       final GitTagVersion gitTagVersion = flutterVersion.gitTagVersion;
       if (gitTagVersion.x == null || gitTagVersion.y == null || gitTagVersion.z == null || gitTagVersion.commits != 0) {
@@ -267,14 +267,14 @@ end
   }
 
   Future<void> _produceFlutterFramework(Directory outputDirectory, BuildMode mode, Directory iPhoneBuildOutput, Directory simulatorBuildOutput, Directory modeDirectory) async {
-    final Status status = logger.startProgress(' ├─Populating Flutter.framework...', timeout: timeoutConfiguration.slowOperation);
-    final String engineCacheFlutterFrameworkDirectory = artifacts.getArtifactPath(Artifact.flutterFramework, platform: TargetPlatform.ios, mode: mode);
-    final String flutterFrameworkFileName = fs.path.basename(engineCacheFlutterFrameworkDirectory);
+    final Status status = globals.logger.startProgress(' ├─Populating Flutter.framework...', timeout: timeoutConfiguration.slowOperation);
+    final String engineCacheFlutterFrameworkDirectory = globals.artifacts.getArtifactPath(Artifact.flutterFramework, platform: TargetPlatform.ios, mode: mode);
+    final String flutterFrameworkFileName = globals.fs.path.basename(engineCacheFlutterFrameworkDirectory);
     final Directory fatFlutterFrameworkCopy = modeDirectory.childDirectory(flutterFrameworkFileName);
 
     try {
       // Copy universal engine cache framework to mode directory.
-      copyDirectorySync(fs.directory(engineCacheFlutterFrameworkDirectory), fatFlutterFrameworkCopy);
+      copyDirectorySync(globals.fs.directory(engineCacheFlutterFrameworkDirectory), fatFlutterFrameworkCopy);
 
       if (mode != BuildMode.debug) {
         final File fatFlutterFrameworkBinary = fatFlutterFrameworkCopy.childFile('Flutter');
@@ -312,7 +312,7 @@ end
     destinationAppFrameworkDirectory.createSync(recursive: true);
 
     if (mode == BuildMode.debug) {
-      final Status status = logger.startProgress(' ├─Adding placeholder App.framework for debug...', timeout: timeoutConfiguration.fastOperation);
+      final Status status = globals.logger.startProgress(' ├─Adding placeholder App.framework for debug...', timeout: timeoutConfiguration.fastOperation);
       try {
         await _produceStubAppFrameworkIfNeeded(mode, iPhoneBuildOutput, simulatorBuildOutput, destinationAppFrameworkDirectory);
       } finally {
@@ -327,13 +327,14 @@ end
 
     destinationInfoPlist.writeAsBytesSync(sourceInfoPlist.readAsBytesSync());
 
-    final Status status = logger.startProgress(' ├─Assembling Flutter resources for App.framework...', timeout: timeoutConfiguration.slowOperation);
+    final Status status = globals.logger.startProgress(
+      ' ├─Assembling Flutter resources for App.framework...', timeout: timeoutConfiguration.slowOperation);
     try {
       await bundleBuilder.build(
         platform: TargetPlatform.ios,
         buildMode: mode,
         // Relative paths show noise in the compiler https://github.com/dart-lang/sdk/issues/37978.
-        mainPath: fs.path.absolute(targetFile),
+        mainPath: globals.fs.path.absolute(targetFile),
         assetDirPath: destinationAppFrameworkDirectory.childDirectory('flutter_assets').path,
         precompiledSnapshot: mode != BuildMode.debug,
       );
@@ -382,14 +383,15 @@ end
     if (mode == BuildMode.debug) {
       return;
     }
-    final Status status = logger.startProgress(' ├─Building Dart AOT for App.framework...', timeout: timeoutConfiguration.slowOperation);
+    final Status status = globals.logger.startProgress(
+      ' ├─Building Dart AOT for App.framework...', timeout: timeoutConfiguration.slowOperation);
     try {
       await aotBuilder.build(
         platform: TargetPlatform.ios,
         outputPath: iPhoneBuildOutput.path,
         buildMode: mode,
         // Relative paths show noise in the compiler https://github.com/dart-lang/sdk/issues/37978.
-        mainDartFile: fs.path.absolute(targetFile),
+        mainDartFile: globals.fs.path.absolute(targetFile),
         quiet: true,
         bitcode: true,
         reportTimings: false,
@@ -412,7 +414,8 @@ end
     Directory modeDirectory,
     Directory outputDirectory,
   ) async {
-    final Status status = logger.startProgress(' ├─Building plugins...', timeout: timeoutConfiguration.slowOperation);
+    final Status status = globals.logger.startProgress(
+      ' ├─Building plugins...', timeout: timeoutConfiguration.slowOperation);
     try {
       List<String> pluginsBuildCommand = <String>[
         'xcrun',
@@ -470,15 +473,15 @@ end
       for (Directory builtProduct in iPhoneBuildConfiguration.listSync(followLinks: false).whereType<Directory>()) {
         for (FileSystemEntity podProduct in builtProduct.listSync(followLinks: false)) {
           final String podFrameworkName = podProduct.basename;
-          if (fs.path.extension(podFrameworkName) == '.framework') {
-            final String binaryName = fs.path.basenameWithoutExtension(podFrameworkName);
+          if (globals.fs.path.extension(podFrameworkName) == '.framework') {
+            final String binaryName = globals.fs.path.basenameWithoutExtension(podFrameworkName);
             if (boolArg('universal')) {
               copyDirectorySync(podProduct as Directory, modeDirectory.childDirectory(podFrameworkName));
               final List<String> lipoCommand = <String>[
                 'xcrun',
                 'lipo',
                 '-create',
-                fs.path.join(podProduct.path, binaryName),
+                globals.fs.path.join(podProduct.path, binaryName),
                 if (mode == BuildMode.debug)
                   simulatorBuildConfiguration.childDirectory(binaryName).childDirectory(podFrameworkName).childFile(binaryName).path,
                 '-output',
@@ -531,10 +534,10 @@ end
 
   void _produceXCFramework(BuildMode mode, Directory fatFramework) {
     if (boolArg('xcframework')) {
-      final String frameworkBinaryName = fs.path.basenameWithoutExtension(
+      final String frameworkBinaryName = globals.fs.path.basenameWithoutExtension(
           fatFramework.basename);
 
-      final Status status = logger.startProgress(' ├─Creating $frameworkBinaryName.xcframework...', timeout: timeoutConfiguration.fastOperation);
+      final Status status = globals.logger.startProgress(' ├─Creating $frameworkBinaryName.xcframework...', timeout: timeoutConfiguration.fastOperation);
       try {
         if (mode == BuildMode.debug) {
           _produceDebugXCFramework(fatFramework, frameworkBinaryName);
@@ -555,7 +558,7 @@ end
     final String frameworkFileName = fatFramework.basename;
     final File fatFlutterFrameworkBinary = fatFramework.childFile(
         frameworkBinaryName);
-    final Directory temporaryOutput = fs.systemTempDirectory.createTempSync(
+    final Directory temporaryOutput = globals.fs.systemTempDirectory.createTempSync(
         'flutter_tool_build_ios_framework.');
     try {
       // Copy universal framework to variant directory.

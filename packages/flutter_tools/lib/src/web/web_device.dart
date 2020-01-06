@@ -7,12 +7,10 @@ import 'package:meta/meta.dart';
 import '../application_package.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
-import '../base/platform.dart';
-import '../base/process_manager.dart';
 import '../build_info.dart';
 import '../device.dart';
 import '../features.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
 import '../project.dart';
 import 'chrome.dart';
 
@@ -100,8 +98,8 @@ class ChromeDevice extends Device {
     }
     // See https://bugs.chromium.org/p/chromium/issues/detail?id=158372
     String version = 'unknown';
-    if (platform.isWindows) {
-      final ProcessResult result = await processManager.run(<String>[
+    if (globals.platform.isWindows) {
+      final ProcessResult result = await globals.processManager.run(<String>[
         r'reg', 'query', 'HKEY_CURRENT_USER\\Software\\Google\\Chrome\\BLBeacon', '/v', 'version',
       ]);
       if (result.exitCode == 0) {
@@ -112,7 +110,7 @@ class ChromeDevice extends Device {
       }
     } else {
       final String chrome = findChromeExecutable();
-      final ProcessResult result = await processManager.run(<String>[
+      final ProcessResult result = await globals.processManager.run(<String>[
         chrome,
         '--version',
       ]);
@@ -137,11 +135,11 @@ class ChromeDevice extends Device {
     // for the web initialization and server logic.
     final String url = platformArgs['uri'] as String;
     _chrome = await chromeLauncher.launch(url,
-      dataDir: fs.currentDirectory
+      dataDir: globals.fs.currentDirectory
         .childDirectory('.dart_tool')
         .childDirectory('chrome-device'));
 
-    logger.sendEvent('app.webLaunchUrl', <String, dynamic>{'url': url, 'launched': true});
+    globals.logger.sendEvent('app.webLaunchUrl', <String, dynamic>{'url': url, 'launched': true});
 
     return LaunchResult.succeeded(observatoryUri: null);
   }
@@ -261,11 +259,11 @@ class WebServerDevice extends Device {
   }) async {
     final String url = platformArgs['uri'] as String;
     if (debuggingOptions.startPaused) {
-      printStatus('Waiting for connection from Dart debug extension at $url', emphasis: true);
+      globals.printStatus('Waiting for connection from Dart debug extension at $url', emphasis: true);
     } else {
-      printStatus('$mainPath is being served at $url', emphasis: true);
+      globals.printStatus('$mainPath is being served at $url', emphasis: true);
     }
-    logger.sendEvent('app.webLaunchUrl', <String, dynamic>{'url': url, 'launched': false});
+    globals.logger.sendEvent('app.webLaunchUrl', <String, dynamic>{'url': url, 'launched': false});
     return LaunchResult.succeeded(observatoryUri: null);
   }
 

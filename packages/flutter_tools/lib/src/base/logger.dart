@@ -7,8 +7,8 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 
 import '../base/context.dart';
+import '../globals.dart' as globals;
 import 'io.dart';
-import 'platform.dart';
 import 'terminal.dart';
 import 'utils.dart';
 
@@ -44,7 +44,7 @@ abstract class Logger {
 
   bool quiet = false;
 
-  bool get supportsColor => terminal.supportsColor;
+  bool get supportsColor => globals.terminal.supportsColor;
 
   bool get hasTerminal => stdio.hasTerminal;
 
@@ -174,9 +174,9 @@ class StdoutLogger extends Logger {
     message ??= '';
     message = wrapText(message, indent: indent, hangingIndent: hangingIndent, shouldWrap: wrap);
     if (emphasis == true) {
-      message = terminal.bolden(message);
+      message = globals.terminal.bolden(message);
     }
-    message = terminal.color(message, color ?? TerminalColor.red);
+    message = globals.terminal.color(message, color ?? TerminalColor.red);
     stderr.writeln(message);
     if (stackTrace != null) {
       stderr.writeln(stackTrace.toString());
@@ -198,10 +198,10 @@ class StdoutLogger extends Logger {
     message ??= '';
     message = wrapText(message, indent: indent, hangingIndent: hangingIndent, shouldWrap: wrap);
     if (emphasis == true) {
-      message = terminal.bolden(message);
+      message = globals.terminal.bolden(message);
     }
     if (color != null) {
-      message = terminal.color(message, color);
+      message = globals.terminal.color(message, color);
     }
     if (newline != false) {
       message = '$message\n';
@@ -234,7 +234,7 @@ class StdoutLogger extends Logger {
         onFinish: _clearStatus,
       )..start();
     }
-    if (terminal.supportsColor) {
+    if (globals.terminal.supportsColor) {
       _status = AnsiStatus(
         message: message,
         timeout: timeout,
@@ -305,7 +305,7 @@ class BufferLogger extends Logger {
     int hangingIndent,
     bool wrap,
   }) {
-    _error.writeln(terminal.color(
+    _error.writeln(globals.terminal.color(
       wrapText(message, indent: indent, hangingIndent: hangingIndent, shouldWrap: wrap),
       color ?? TerminalColor.red,
     ));
@@ -356,7 +356,7 @@ class BufferLogger extends Logger {
 }
 
 class VerboseLogger extends Logger {
-  VerboseLogger(this.parent) : assert(terminal != null) {
+  VerboseLogger(this.parent) : assert(globals.terminal != null) {
     _stopwatch.start();
   }
 
@@ -446,7 +446,7 @@ class VerboseLogger extends Logger {
     } else {
       prefix = '+$millis ms'.padLeft(prefixWidth);
       if (millis >= 100) {
-        prefix = terminal.bolden(prefix);
+        prefix = globals.terminal.bolden(prefix);
       }
     }
     prefix = '[$prefix] ';
@@ -455,12 +455,12 @@ class VerboseLogger extends Logger {
     final String indentMessage = message.replaceAll('\n', '\n$indent');
 
     if (type == _LogType.error) {
-      parent.printError(prefix + terminal.bolden(indentMessage));
+      parent.printError(prefix + globals.terminal.bolden(indentMessage));
       if (stackTrace != null) {
         parent.printError(indent + stackTrace.toString().replaceAll('\n', '\n$indent'));
       }
     } else if (type == _LogType.status) {
-      parent.printStatus(prefix + terminal.bolden(indentMessage));
+      parent.printStatus(prefix + globals.terminal.bolden(indentMessage));
     } else {
       parent.printStatus(prefix + indentMessage);
     }
@@ -504,7 +504,7 @@ abstract class Status {
     VoidCallback onFinish,
     SlowWarningCallback slowWarningCallback,
   }) {
-    if (terminal.supportsColor) {
+    if (globals.terminal.supportsColor) {
       return AnsiSpinner(
         timeout: timeout,
         onFinish: onFinish,
@@ -663,7 +663,7 @@ class AnsiSpinner extends Status {
   Timer timer;
 
   // Windows console font has a limited set of Unicode characters.
-  List<String> get _animation => platform.isWindows
+  List<String> get _animation => globals.platform.isWindows
       ? <String>[r'-', r'\', r'|', r'/']
       : <String>['⣾', '⣽', '⣻', '⢿', '⡿', '⣟', '⣯', '⣷'];
 

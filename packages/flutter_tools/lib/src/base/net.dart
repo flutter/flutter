@@ -6,11 +6,10 @@ import 'dart:async';
 
 import '../base/context.dart';
 import '../convert.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
 import 'common.dart';
 import 'file_system.dart';
 import 'io.dart';
-import 'platform.dart';
 
 const int kNetworkProblemExitCode = 50;
 
@@ -52,10 +51,10 @@ Future<List<int>> fetchUrl(Uri url, {
     }
 
     if (maxAttempts != null && attempts >= maxAttempts) {
-      printStatus('Download failed -- retry $attempts');
+      globals.printStatus('Download failed -- retry $attempts');
       return null;
     }
-    printStatus('Download failed -- attempting retry $attempts in '
+    globals.printStatus('Download failed -- attempting retry $attempts in '
         '$durationSeconds second${ durationSeconds == 1 ? "" : "s"}...');
     await Future<void>.delayed(Duration(seconds: durationSeconds));
     if (durationSeconds < 64) {
@@ -73,7 +72,7 @@ Future<bool> _attempt(Uri url, {
   bool onlyHeaders = false,
 }) async {
   assert(onlyHeaders || destSink != null);
-  printTrace('Downloading: $url');
+  globals.printTrace('Downloading: $url');
   HttpClient httpClient;
   if (context.get<HttpClientFactory>() != null) {
     httpClient = context.get<HttpClientFactory>()();
@@ -90,9 +89,9 @@ Future<bool> _attempt(Uri url, {
     }
     response = await request.close();
   } on ArgumentError catch (error) {
-    final String overrideUrl = platform.environment['FLUTTER_STORAGE_BASE_URL'];
+    final String overrideUrl = globals.platform.environment['FLUTTER_STORAGE_BASE_URL'];
     if (overrideUrl != null && url.toString().contains(overrideUrl)) {
-      printError(error.toString());
+      globals.printError(error.toString());
       throwToolExit(
         'The value of FLUTTER_STORAGE_BASE_URL ($overrideUrl) could not be '
         'parsed as a valid url. Please see https://flutter.dev/community/china '
@@ -100,10 +99,10 @@ Future<bool> _attempt(Uri url, {
         'Full URL: $url',
         exitCode: kNetworkProblemExitCode,);
     }
-    printError(error.toString());
+    globals.printError(error.toString());
     rethrow;
   } on HandshakeException catch (error) {
-    printTrace(error.toString());
+    globals.printTrace(error.toString());
     throwToolExit(
       'Could not authenticate download server. You may be experiencing a man-in-the-middle attack,\n'
       'your network may be compromised, or you may have malware installed on your computer.\n'
@@ -111,10 +110,10 @@ Future<bool> _attempt(Uri url, {
       exitCode: kNetworkProblemExitCode,
     );
   } on SocketException catch (error) {
-    printTrace('Download error: $error');
+    globals.printTrace('Download error: $error');
     return false;
   } on HttpException catch (error) {
-    printTrace('Download error: $error');
+    globals.printTrace('Download error: $error');
     return false;
   }
   assert(response != null);
@@ -134,16 +133,16 @@ Future<bool> _attempt(Uri url, {
       );
     }
     // 5xx errors are server errors and we can try again
-    printTrace('Download error: ${response.statusCode} ${response.reasonPhrase}');
+    globals.printTrace('Download error: ${response.statusCode} ${response.reasonPhrase}');
     return false;
   }
-  printTrace('Received response from server, collecting bytes...');
+  globals.printTrace('Received response from server, collecting bytes...');
   try {
     assert(destSink != null);
     await response.forEach(destSink.add);
     return true;
   } on IOException catch (error) {
-    printTrace('Download error: $error');
+    globals.printTrace('Download error: $error');
     return false;
   } finally {
     await destSink?.flush();
