@@ -12,6 +12,7 @@ library foundation;
 export 'package:meta/meta.dart' show
   immutable,
   mustCallSuper,
+  nonVirtual,
   optionalTypeArgs,
   protected,
   required,
