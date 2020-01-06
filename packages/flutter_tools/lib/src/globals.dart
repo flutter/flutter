@@ -104,4 +104,3 @@ AnsiTerminal get terminal {
 }
 
 final AnsiTerminal _defaultAnsiTerminal = AnsiTerminal();
-
