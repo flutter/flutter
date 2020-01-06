@@ -70,19 +70,22 @@ final LogicalKeyboardKey modifierKey = defaultTargetPlatform == TargetPlatform.m
     ? LogicalKeyboardKey.metaLeft
     : LogicalKeyboardKey.controlLeft;
 
-double getScrollOffset(WidgetTester tester) {
-  final RenderViewport viewport = tester.renderObject(find.byType(Viewport).last);
+double getScrollOffset(WidgetTester tester, {bool last = true}) {
+  Finder viewportFinder = find.byType(Viewport);
+  if (last)
+    viewportFinder = viewportFinder.last;
+  final RenderViewport viewport = tester.renderObject(viewportFinder);
   return viewport.offset.pixels;
 }
 
 double getScrollVelocity(WidgetTester tester) {
-  final RenderViewport viewport = tester.renderObject(find.byType(Viewport).last);
+  final RenderViewport viewport = tester.renderObject(find.byType(Viewport));
   final ScrollPosition position = viewport.offset as ScrollPosition;
   return position.activity.velocity;
 }
 
 void resetScrollOffset(WidgetTester tester) {
-  final RenderViewport viewport = tester.renderObject(find.byType(Viewport).last);
+  final RenderViewport viewport = tester.renderObject(find.byType(Viewport));
   final ScrollPosition position = viewport.offset as ScrollPosition;
   position.jumpTo(0.0);
 }
@@ -295,10 +298,10 @@ void main() {
     testPointer.hover(scrollEventLocation);
     final HitTestResult result = tester.hitTestOnBinding(scrollEventLocation);
     await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, 20.0)), result);
-    expect(getScrollOffset(tester), 20.0);
+    expect(getScrollOffset(tester, last: true), 20.0);
     // Pointer signals should not cause overscroll.
     await tester.sendEventToBinding(testPointer.scroll(const Offset(0.0, -30.0)), result);
-    expect(getScrollOffset(tester), 0.0);
+    expect(getScrollOffset(tester, last: true), 0.0);
   });
 
   testWidgets('Scroll pointer signals are ignored when scrolling is disabled', (WidgetTester tester) async {
