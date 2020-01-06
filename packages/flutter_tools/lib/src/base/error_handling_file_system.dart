@@ -38,6 +38,11 @@ class ErrorHandlingFileSystem extends ForwardingFileSystem {
   @override
   File file(dynamic path) => ErrorHandlingFile(delegate, delegate.file(path));
 
+  // Caching the path context here and clearing when the currentDirectory setter
+  // is updated works since the flutter tool restricts usage of dart:io directly
+  // via the forbidden import tests. Otherwise, the path context's current
+  // working directory might get out of sync, leading to unexpected results from
+  // methods like `path.relative`.
   @override
   p.Context get path => _cachedPath ??= delegate.path;
   p.Context _cachedPath;
