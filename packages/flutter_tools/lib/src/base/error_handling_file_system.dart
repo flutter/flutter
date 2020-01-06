@@ -7,6 +7,7 @@ import 'dart:io' as io show Directory, File, Link;
 
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
+import 'package:path/path.dart' as p; // ignore: package_path_import
 
 import '../globals.dart' as globals;
 import 'common.dart' show throwToolExit;
@@ -36,6 +37,21 @@ class ErrorHandlingFileSystem extends ForwardingFileSystem {
 
   @override
   File file(dynamic path) => ErrorHandlingFile(delegate, delegate.file(path));
+
+  // Caching the path context here and clearing when the currentDirectory setter
+  // is updated works since the flutter tool restricts usage of dart:io directly
+  // via the forbidden import tests. Otherwise, the path context's current
+  // working directory might get out of sync, leading to unexpected results from
+  // methods like `path.relative`.
+  @override
+  p.Context get path => _cachedPath ??= delegate.path;
+  p.Context _cachedPath;
+
+  @override
+  set currentDirectory(dynamic path) {
+    _cachedPath = null;
+    delegate.currentDirectory = path;
+  }
 }
 
 class ErrorHandlingFile
