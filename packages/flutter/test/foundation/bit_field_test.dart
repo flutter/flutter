@@ -7,7 +7,8 @@
 import 'package:flutter/foundation.dart';
 import '../flutter_test_alternative.dart';
 
-enum _TestEnum { c, d, e, }
+// ignore: unused_field
+enum _TestEnum { a, b, c, d, e, f, g, h, }
 
 void main() {
   test('BitField control test', () {
