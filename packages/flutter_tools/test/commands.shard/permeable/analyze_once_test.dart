@@ -39,7 +39,7 @@ void main() {
             ..write('/')
             ..write(canonicalizedFlutterRootPath.replaceAll('\\', '/'));
       } else {
-        flutterRootUri.write(canonicalizedflutterRootPath);
+        flutterRootUri.write(canonicalizedFlutterRootPath);
       }
       final String dotPackagesSrc = '''# Generated
 flutter:$flutterRootUri/packages/flutter/lib/
