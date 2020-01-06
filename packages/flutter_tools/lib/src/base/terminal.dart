@@ -5,13 +5,13 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:platform/platform.dart';
 
 import '../convert.dart';
+import '../globals.dart' as globals;
 import 'context.dart';
 import 'io.dart' as io;
 import 'logger.dart';
-import 'platform.dart' hide platform;
-import 'platform.dart' as globals show platform;
 
 enum TerminalColor {
   red,
@@ -23,24 +23,15 @@ enum TerminalColor {
   grey,
 }
 
-AnsiTerminal get terminal {
-  return context?.get<AnsiTerminal>() ?? _defaultAnsiTerminal;
-}
-
 /// Warning mark to use in stdout or stderr.
 String get warningMark {
-  return terminal.bolden(terminal.color('[!]', TerminalColor.red));
+  return globals.terminal.bolden(globals.terminal.color('[!]', TerminalColor.red));
 }
 
 /// Success mark to use in stdout.
 String get successMark {
-  return terminal.bolden(terminal.color('✓', TerminalColor.green));
+  return globals.terminal.bolden(globals.terminal.color('✓', TerminalColor.green));
 }
-
-final AnsiTerminal _defaultAnsiTerminal = AnsiTerminal(
-  stdio: io.stdio,
-  platform: globals.platform,
-);
 
 OutputPreferences get outputPreferences {
   return context?.get<OutputPreferences>() ?? _defaultOutputPreferences;
@@ -54,7 +45,7 @@ class OutputPreferences {
     bool wrapText,
     int wrapColumn,
     bool showColor,
-  }) : wrapText = wrapText ?? io.stdio.hasTerminal,
+  }) : wrapText = wrapText ?? globals.stdio.hasTerminal,
        _overrideWrapColumn = wrapColumn,
        showColor = showColor ?? globals.platform.stdoutSupportsAnsi ?? false;
 
@@ -80,7 +71,7 @@ class OutputPreferences {
   /// terminal, or to [kDefaultTerminalColumns] if not writing to a terminal.
   final int _overrideWrapColumn;
   int get wrapColumn {
-    return _overrideWrapColumn ?? io.stdio.terminalColumns ?? kDefaultTerminalColumns;
+    return _overrideWrapColumn ?? globals.stdio.terminalColumns ?? kDefaultTerminalColumns;
   }
 
   /// Whether or not to output ANSI color codes when writing to the output

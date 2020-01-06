@@ -513,6 +513,89 @@ void main() {
     expect(handles[1].localToGlobal(Offset.zero), const Offset(197.0, 17.0));
   });
 
+  testWidgets('can update style of previous activated EditableText', (WidgetTester tester) async {
+    final Key key1 = UniqueKey();
+    final Key key2 = UniqueKey();
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: Column(
+              children: <Widget>[
+                EditableText(
+                  key: key1,
+                  controller: TextEditingController(),
+                  backgroundCursorColor: Colors.grey,
+                  focusNode: focusNode,
+                  style: const TextStyle(fontSize: 9),
+                  cursorColor: cursorColor,
+                ),
+                EditableText(
+                  key: key2,
+                  controller: TextEditingController(),
+                  backgroundCursorColor: Colors.grey,
+                  focusNode: focusNode,
+                  style: const TextStyle(fontSize: 9),
+                  cursorColor: cursorColor,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byKey(key1));
+    await tester.showKeyboard(find.byKey(key1));
+    controller.text = 'test';
+    await tester.idle();
+    RenderBox renderEditable = tester.renderObject(find.byKey(key1));
+    expect(renderEditable.size.height, 9.0);
+    // Taps the other EditableText to deactivate the first one.
+    await tester.tap(find.byKey(key2));
+    await tester.showKeyboard(find.byKey(key2));
+    // Updates the style.
+    await tester.pumpWidget(
+      MediaQuery(
+        data: const MediaQueryData(devicePixelRatio: 1.0),
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: FocusScope(
+            node: focusScopeNode,
+            autofocus: true,
+            child: Column(
+              children: <Widget>[
+                EditableText(
+                  key: key1,
+                  controller: TextEditingController(),
+                  backgroundCursorColor: Colors.grey,
+                  focusNode: focusNode,
+                  style: const TextStyle(fontSize: 20),
+                  cursorColor: cursorColor,
+                ),
+                EditableText(
+                  key: key2,
+                  controller: TextEditingController(),
+                  backgroundCursorColor: Colors.grey,
+                  focusNode: focusNode,
+                  style: const TextStyle(fontSize: 9),
+                  cursorColor: cursorColor,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    renderEditable = tester.renderObject(find.byKey(key1));
+    expect(renderEditable.size.height, 20.0);
+    expect(tester.takeException(), null);
+  });
+
   testWidgets('Multiline keyboard with newline action is requested when maxLines = null', (WidgetTester tester) async {
     await tester.pumpWidget(
       MediaQuery(
@@ -3928,10 +4011,6 @@ void main() {
   });
 
   testWidgets('input imm channel calls are ordered correctly', (WidgetTester tester) async {
-    final List<MethodCall> log = <MethodCall>[];
-    SystemChannels.textInput.setMockMethodCallHandler((MethodCall methodCall) async {
-      log.add(methodCall);
-    });
     const String testText = 'flutter is the best!';
     final TextEditingController controller = TextEditingController(text: testText);
     final EditableText et = EditableText(
@@ -3956,14 +4035,107 @@ void main() {
     ));
 
     await tester.showKeyboard(find.byType(EditableText));
-    expect(log.length, 7);
     // TextInput.show should be before TextInput.setEditingState
     final List<String> logOrder = <String>['TextInput.setClient', 'TextInput.show', 'TextInput.setEditableSizeAndTransform', 'TextInput.setStyle', 'TextInput.setEditingState', 'TextInput.setEditingState', 'TextInput.show'];
+    expect(tester.testTextInput.log.length, 7);
     int index = 0;
-    for (MethodCall m in log) {
+    for (MethodCall m in tester.testTextInput.log) {
       expect(m.method, logOrder[index]);
       index++;
     }
+  });
+
+  testWidgets('setEditingState is not called when text changes', (WidgetTester tester) async {
+    // We shouldn't get a message here because this change is owned by the platform side.
+    const String testText = 'flutter is the best!';
+    final TextEditingController controller = TextEditingController(text: testText);
+    final EditableText et = EditableText(
+      showSelectionHandles: true,
+      maxLines: 2,
+      controller: controller,
+      focusNode: FocusNode(),
+      cursorColor: Colors.red,
+      backgroundCursorColor: Colors.blue,
+      style: Typography(platform: TargetPlatform.android).black.subhead.copyWith(fontFamily: 'Roboto'),
+      keyboardType: TextInputType.text,
+    );
+
+    await tester.pumpWidget(MaterialApp(
+      home: Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: 100,
+          child: et,
+        ),
+      ),
+    ));
+
+    await tester.enterText(find.byType(EditableText), '...');
+
+    final List<String> logOrder = <String>[
+      'TextInput.setClient',
+      'TextInput.show',
+      'TextInput.setEditableSizeAndTransform',
+      'TextInput.setStyle',
+      'TextInput.setEditingState',
+      'TextInput.setEditingState',
+      'TextInput.show',
+    ];
+    expect(tester.testTextInput.log.length, logOrder.length);
+    int index = 0;
+    for (MethodCall m in tester.testTextInput.log) {
+      expect(m.method, logOrder[index]);
+      index++;
+    }
+    expect(tester.testTextInput.editingState['text'], 'flutter is the best!');
+  });
+
+  testWidgets('setEditingState is called when text changes on controller', (WidgetTester tester) async {
+    // We should get a message here because this change is owned by the framework side.
+    const String testText = 'flutter is the best!';
+    final TextEditingController controller = TextEditingController(text: testText);
+    final EditableText et = EditableText(
+      showSelectionHandles: true,
+      maxLines: 2,
+      controller: controller,
+      focusNode: FocusNode(),
+      cursorColor: Colors.red,
+      backgroundCursorColor: Colors.blue,
+      style: Typography(platform: TargetPlatform.android).black.subhead.copyWith(fontFamily: 'Roboto'),
+      keyboardType: TextInputType.text,
+    );
+
+    await tester.pumpWidget(MaterialApp(
+      home: Align(
+        alignment: Alignment.topLeft,
+        child: SizedBox(
+          width: 100,
+          child: et,
+        ),
+      ),
+    ));
+
+    await tester.showKeyboard(find.byType(EditableText));
+    controller.text += '...';
+    await tester.idle();
+
+    final List<String> logOrder = <String>[
+      'TextInput.setClient',
+      'TextInput.show',
+      'TextInput.setEditableSizeAndTransform',
+      'TextInput.setStyle',
+      'TextInput.setEditingState',
+      'TextInput.setEditingState',
+      'TextInput.show',
+      'TextInput.setEditingState',
+    ];
+    expect(tester.testTextInput.log.length, logOrder.length);
+    int index = 0;
+    for (MethodCall m in tester.testTextInput.log) {
+      expect(m.method, logOrder[index]);
+      index++;
+    }
+    expect(tester.testTextInput.editingState['text'], 'flutter is the best!...');
   });
 }
 
@@ -3981,11 +4153,13 @@ class MockTextSelectionControls extends Mock implements TextSelectionControls {
 
 class CustomStyleEditableText extends EditableText {
   CustomStyleEditableText({
+    Key key,
     TextEditingController controller,
     Color cursorColor,
     FocusNode focusNode,
     TextStyle style,
   }) : super(
+          key: key,
           controller: controller,
           cursorColor: cursorColor,
           backgroundCursorColor: Colors.grey,
@@ -4008,7 +4182,11 @@ class CustomStyleEditableTextState extends EditableTextState {
 }
 
 class TransformedEditableText extends StatefulWidget {
-  const TransformedEditableText({ this.offset, this.transformButtonKey });
+  const TransformedEditableText({
+    Key key,
+    this.offset,
+    this.transformButtonKey,
+  }) : super(key: key);
 
   final Offset offset;
   final Key transformButtonKey;

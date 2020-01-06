@@ -11,7 +11,7 @@ import '../build_info.dart';
 import '../bundle.dart';
 import '../compile.dart';
 import '../dart/package_map.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
 import '../macos/xcode.dart';
 import '../project.dart';
 import '../reporting/reporting.dart';
@@ -39,7 +39,7 @@ class GenSnapshot {
   const GenSnapshot();
 
   static String getSnapshotterPath(SnapshotType snapshotType) {
-    return artifacts.getArtifactPath(
+    return globals.artifacts.getArtifactPath(
         Artifact.genSnapshot, platform: snapshotType.platform, mode: snapshotType.mode);
   }
 
@@ -97,12 +97,12 @@ class AOTSnapshotter {
     bool quiet = false,
   }) async {
     if (bitcode && platform != TargetPlatform.ios) {
-      printError('Bitcode is only supported for iOS.');
+      globals.printError('Bitcode is only supported for iOS.');
       return 1;
     }
 
     if (!_isValidAotPlatform(platform, buildMode)) {
-      printError('${getNameForTargetPlatform(platform)} does not support AOT compilation.');
+      globals.printError('${getNameForTargetPlatform(platform)} does not support AOT compilation.');
       return 1;
     }
     // TODO(cbracken): replace IOSArch with TargetPlatform.ios_{armv7,arm64}.
@@ -111,16 +111,16 @@ class AOTSnapshotter {
     final PackageMap packageMap = PackageMap(packagesPath);
     final String packageMapError = packageMap.checkValid();
     if (packageMapError != null) {
-      printError(packageMapError);
+      globals.printError(packageMapError);
       return 1;
     }
 
-    final Directory outputDir = fs.directory(outputPath);
+    final Directory outputDir = globals.fs.directory(outputPath);
     outputDir.createSync(recursive: true);
 
     final String skyEnginePkg = _getPackagePath(packageMap, 'sky_engine');
-    final String uiPath = fs.path.join(skyEnginePkg, 'lib', 'ui', 'ui.dart');
-    final String vmServicePath = fs.path.join(skyEnginePkg, 'sdk_ext', 'vmservice_io.dart');
+    final String uiPath = globals.fs.path.join(skyEnginePkg, 'lib', 'ui', 'ui.dart');
+    final String vmServicePath = globals.fs.path.join(skyEnginePkg, 'sdk_ext', 'vmservice_io.dart');
 
     final List<String> inputPaths = <String>[uiPath, vmServicePath, mainPath];
     final Set<String> outputPaths = <String>{};
@@ -128,18 +128,18 @@ class AOTSnapshotter {
       '--deterministic',
     ];
     if (extraGenSnapshotOptions != null && extraGenSnapshotOptions.isNotEmpty) {
-      printTrace('Extra gen_snapshot options: $extraGenSnapshotOptions');
+      globals.printTrace('Extra gen_snapshot options: $extraGenSnapshotOptions');
       genSnapshotArgs.addAll(extraGenSnapshotOptions);
     }
 
-    final String assembly = fs.path.join(outputDir.path, 'snapshot_assembly.S');
+    final String assembly = globals.fs.path.join(outputDir.path, 'snapshot_assembly.S');
     if (platform == TargetPlatform.ios || platform == TargetPlatform.darwin_x64) {
       // Assembly AOT snapshot.
       outputPaths.add(assembly);
       genSnapshotArgs.add('--snapshot_kind=app-aot-assembly');
       genSnapshotArgs.add('--assembly=$assembly');
     } else {
-      final String aotSharedLibrary = fs.path.join(outputDir.path, 'app.so');
+      final String aotSharedLibrary = globals.fs.path.join(outputDir.path, 'app.so');
       outputPaths.add(aotSharedLibrary);
       genSnapshotArgs.add('--snapshot_kind=app-aot-elf');
       genSnapshotArgs.add('--elf=$aotSharedLibrary');
@@ -160,9 +160,9 @@ class AOTSnapshotter {
 
     // TODO(jonahwilliams): fully remove input checks once all callers are
     // using assemble.
-    final Iterable<String> missingInputs = inputPaths.where((String p) => !fs.isFileSync(p));
+    final Iterable<String> missingInputs = inputPaths.where((String p) => !globals.fs.isFileSync(p));
     if (missingInputs.isNotEmpty) {
-      printTrace('Missing input files: $missingInputs from $inputPaths');
+      globals.printTrace('Missing input files: $missingInputs from $inputPaths');
     }
 
     final SnapshotType snapshotType = SnapshotType(platform, buildMode);
@@ -174,7 +174,7 @@ class AOTSnapshotter {
       darwinArch: darwinArch,
     ));
     if (genSnapshotExitCode != 0) {
-      printError('Dart snapshot generator failed with exit code $genSnapshotExitCode');
+      globals.printError('Dart snapshot generator failed with exit code $genSnapshotExitCode');
       return genSnapshotExitCode;
     }
 
@@ -184,8 +184,8 @@ class AOTSnapshotter {
     // gen_snapshot would provide an argument to do this automatically.
     final bool stripSymbols = platform == TargetPlatform.ios && buildMode == BuildMode.release && bitcode;
     if (stripSymbols) {
-      final IOSink sink = fs.file('$assembly.stripped.S').openWrite();
-      for (String line in fs.file(assembly).readAsLinesSync()) {
+      final IOSink sink = globals.fs.file('$assembly.stripped.S').openWrite();
+      for (String line in globals.fs.file(assembly).readAsLinesSync()) {
         if (line.startsWith('.section __DWARF')) {
           break;
         }
@@ -231,7 +231,7 @@ class AOTSnapshotter {
   }) async {
     final String targetArch = getNameForDarwinArch(appleArch);
     if (!quiet) {
-      printStatus('Building App.framework for $targetArch...');
+      globals.printStatus('Building App.framework for $targetArch...');
     }
 
     final List<String> commonBuildOptions = <String>[
@@ -241,7 +241,7 @@ class AOTSnapshotter {
     ];
 
     const String embedBitcodeArg = '-fembed-bitcode';
-    final String assemblyO = fs.path.join(outputPath, 'snapshot_assembly.o');
+    final String assemblyO = globals.fs.path.join(outputPath, 'snapshot_assembly.o');
     List<String> isysrootArgs;
     if (isIOS) {
       final String iPhoneSDKLocation = await xcode.sdkLocation(SdkType.iPhone);
@@ -259,13 +259,13 @@ class AOTSnapshotter {
       assemblyO,
     ]);
     if (compileResult.exitCode != 0) {
-      printError('Failed to compile AOT snapshot. Compiler terminated with exit code ${compileResult.exitCode}');
+      globals.printError('Failed to compile AOT snapshot. Compiler terminated with exit code ${compileResult.exitCode}');
       return compileResult;
     }
 
-    final String frameworkDir = fs.path.join(outputPath, 'App.framework');
-    fs.directory(frameworkDir).createSync(recursive: true);
-    final String appLib = fs.path.join(frameworkDir, 'App');
+    final String frameworkDir = globals.fs.path.join(outputPath, 'App.framework');
+    globals.fs.directory(frameworkDir).createSync(recursive: true);
+    final String appLib = globals.fs.path.join(frameworkDir, 'App');
     final List<String> linkArgs = <String>[
       ...commonBuildOptions,
       '-dynamiclib',
@@ -279,7 +279,7 @@ class AOTSnapshotter {
     ];
     final RunResult linkResult = await xcode.clang(linkArgs);
     if (linkResult.exitCode != 0) {
-      printError('Failed to link AOT snapshot. Linker terminated with exit code ${compileResult.exitCode}');
+      globals.printError('Failed to link AOT snapshot. Linker terminated with exit code ${compileResult.exitCode}');
     }
     return linkResult;
   }
@@ -298,25 +298,25 @@ class AOTSnapshotter {
     List<String> extraFrontEndOptions = const <String>[],
   }) async {
     final FlutterProject flutterProject = FlutterProject.current();
-    final Directory outputDir = fs.directory(outputPath);
+    final Directory outputDir = globals.fs.directory(outputPath);
     outputDir.createSync(recursive: true);
 
-    printTrace('Compiling Dart to kernel: $mainPath');
+    globals.printTrace('Compiling Dart to kernel: $mainPath');
 
     if ((extraFrontEndOptions != null) && extraFrontEndOptions.isNotEmpty) {
-      printTrace('Extra front-end options: $extraFrontEndOptions');
+      globals.printTrace('Extra front-end options: $extraFrontEndOptions');
     }
 
-    final String depfilePath = fs.path.join(outputPath, 'kernel_compile.d');
+    final String depfilePath = globals.fs.path.join(outputPath, 'kernel_compile.d');
     final KernelCompiler kernelCompiler = await kernelCompilerFactory.create(flutterProject);
     final CompilerOutput compilerOutput =
       await _timedStep('frontend(CompileTime)', 'aot-kernel',
         () => kernelCompiler.compile(
-      sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath, mode: buildMode),
+      sdkRoot: globals.artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath, mode: buildMode),
       mainPath: mainPath,
       packagesPath: packagesPath,
       outputFilePath: getKernelPathForTransformerOptions(
-        fs.path.join(outputPath, 'app.dill'),
+        globals.fs.path.join(outputPath, 'app.dill'),
         trackWidgetCreation: trackWidgetCreation,
       ),
       depFilePath: depfilePath,
@@ -329,8 +329,8 @@ class AOTSnapshotter {
     ));
 
     // Write path to frontend_server, since things need to be re-generated when that changes.
-    final String frontendPath = artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk);
-    fs.directory(outputPath).childFile('frontend_server.d').writeAsStringSync('frontend_server.d: $frontendPath\n');
+    final String frontendPath = globals.artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk);
+    globals.fs.directory(outputPath).childFile('frontend_server.d').writeAsStringSync('frontend_server.d: $frontendPath\n');
 
     return compilerOutput?.outputFilename;
   }
@@ -349,7 +349,7 @@ class AOTSnapshotter {
   }
 
   String _getPackagePath(PackageMap packageMap, String package) {
-    return fs.path.dirname(fs.path.fromUri(packageMap.map[package]));
+    return globals.fs.path.dirname(globals.fs.path.fromUri(packageMap.map[package]));
   }
 
   /// This method is used to measure duration of an action and emit it into
@@ -361,7 +361,7 @@ class AOTSnapshotter {
     final Stopwatch sw = Stopwatch()..start();
     final T value = await action();
     if (reportTimings) {
-      printStatus('$marker: ${sw.elapsedMilliseconds} ms.');
+      globals.printStatus('$marker: ${sw.elapsedMilliseconds} ms.');
     }
     flutterUsage.sendTiming('build', analyticsVar, Duration(milliseconds: sw.elapsedMilliseconds));
     return value;

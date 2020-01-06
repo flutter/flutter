@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:file/file.dart';
+import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/reporting/github_template.dart';
@@ -14,7 +16,6 @@ const String _kShortURL = 'https://www.example.com/short';
 
 void main() {
   group('GitHub template creator', () {
-
     testUsingContext('similar issues URL', () async {
       final GitHubTemplateCreator creator = GitHubTemplateCreator();
       expect(
@@ -23,6 +24,8 @@ void main() {
       );
     }, overrides: <Type, Generator>{
       HttpClientFactory: () => () => SuccessShortenURLFakeHttpClient(),
+      FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('similar issues URL with network failure', () async {
@@ -33,45 +36,116 @@ void main() {
       );
     }, overrides: <Type, Generator>{
       HttpClientFactory: () => () => FakeHttpClient(),
+      FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testUsingContext('new issue template URL', () async {
-      final GitHubTemplateCreator creator = GitHubTemplateCreator();
+    group('new issue template URL', () {
+      StackTrace stackTrace;
       const String command = 'flutter test';
       const String errorString = 'this is a 100% error';
       const String exception = 'failing to succeed!!!';
-      final StackTrace stackTrace = StackTrace.fromString('trace');
       const String doctorText = ' [✓] Flutter (Channel report';
+      FileSystem fs;
 
-      expect(
-        await creator.toolCrashIssueTemplateGitHubURL(command, errorString, exception, stackTrace, doctorText),
-        _kShortURL
-      );
-    }, overrides: <Type, Generator>{
-      HttpClientFactory: () => () => SuccessShortenURLFakeHttpClient(),
-    });
+      setUp(() async {
+        stackTrace = StackTrace.fromString('trace');
+        fs = MemoryFileSystem();
+      });
 
-    testUsingContext('new issue template URL with network failure', () async {
-      final GitHubTemplateCreator creator = GitHubTemplateCreator();
-      const String command = 'flutter test';
-      const String errorString = 'this is a 100% error';
-      const String exception = 'failing to succeed!!!';
-      final StackTrace stackTrace = StackTrace.fromString('trace');
-      const String doctorText = ' [✓] Flutter (Channel report';
+      testUsingContext('shortened', () async {
+        final GitHubTemplateCreator creator = GitHubTemplateCreator();
+        expect(
+            await creator.toolCrashIssueTemplateGitHubURL(command, errorString, exception, stackTrace, doctorText),
+            _kShortURL
+        );
+      }, overrides: <Type, Generator>{
+        HttpClientFactory: () => () => SuccessShortenURLFakeHttpClient(),
+        FileSystem: () => MemoryFileSystem(),
+        ProcessManager: () => FakeProcessManager.any(),
+      });
 
-      expect(
-        await creator.toolCrashIssueTemplateGitHubURL(command, errorString, exception, stackTrace, doctorText),
-        'https://github.com/flutter/flutter/issues/new?title=%5Btool_crash%5D+this+is+a+100%25+error&body=%23%'
-          '23+Command%0A++%60%60%60%0A++flutter+test%0A++%60%60%60%0A%0A++%23%23+Steps+to+Reproduce%0A++1.+...'
-          '%0A++2.+...%0A++3.+...%0A%0A++%23%23+Logs%0A++failing+to+succeed%21%21%21%0A++%60%60%60%0A++trace%0A'
-          '++%60%60%60%0A++%60%60%60%0A+++%5B%E2%9C%93%5D+Flutter+%28Channel+report%0A++%60%60%60%0A%0A++%23%23'
-          '+Flutter+Application+Metadata%0A++%2A%2AVersion%2A%2A%3A+null%0A%2A%2AMaterial%2A%2A%3A+false%0A%2A'
-          '%2AAndroid+X%2A%2A%3A+false%0A%2A%2AModule%2A%2A%3A+false%0A%2A%2APlugin%2A%2A%3A+false%0A%2A%2AAndr'
-          'oid+package%2A%2A%3A+null%0A%2A%2AiOS+bundle+identifier%2A%2A%3A+null%0A%0A++&labels=tool%2Csevere%3'
-          'A+crash'
-      );
-    }, overrides: <Type, Generator>{
-      HttpClientFactory: () => () => FakeHttpClient(),
+      testUsingContext('with network failure', () async {
+        final GitHubTemplateCreator creator = GitHubTemplateCreator();
+        expect(
+            await creator.toolCrashIssueTemplateGitHubURL(command, errorString, exception, stackTrace, doctorText),
+            'https://github.com/flutter/flutter/issues/new?title=%5Btool_crash%5D+this+is+a+100%25+error&body=%23%'
+                '23+Command%0A%60%60%60%0Aflutter+test%0A%60%60%60%0A%0A%23%23+Steps+to+Reproduce%0A1.+...'
+                '%0A2.+...%0A3.+...%0A%0A%23%23+Logs%0Afailing+to+succeed%21%21%21%0A%60%60%60%0Atrace%0A'
+                '%60%60%60%0A%60%60%60%0A+%5B%E2%9C%93%5D+Flutter+%28Channel+report%0A%60%60%60%0A%0A%23%23'
+                '+Flutter+Application+Metadata%0ANo+pubspec+in+working+directory.%0A&labels=tool%2Csevere%3A+crash'
+        );
+      }, overrides: <Type, Generator>{
+        HttpClientFactory: () => () => FakeHttpClient(),
+        FileSystem: () => MemoryFileSystem(),
+        ProcessManager: () => FakeProcessManager.any(),
+      });
+
+      testUsingContext('app metadata', () async {
+        final GitHubTemplateCreator creator = GitHubTemplateCreator();
+        final Directory projectDirectory = fs.currentDirectory;
+        final File pluginsFile = projectDirectory.childFile('.flutter-plugins');
+
+        projectDirectory
+            .childFile('pubspec.yaml')
+            .writeAsStringSync('''
+name: failing_app
+version: 2.0.1+100
+flutter:
+  uses-material-design: true
+  module:
+    androidX: true
+    androidPackage: com.example.failing.android
+    iosBundleIdentifier: com.example.failing.ios
+''');
+
+        pluginsFile
+            .writeAsStringSync('''
+camera=/fake/pub.dartlang.org/camera-0.5.7+2/
+device_info=/fake/pub.dartlang.org/pub.dartlang.org/device_info-0.4.1+4/
+        ''');
+
+        final String actualURL = await creator.toolCrashIssueTemplateGitHubURL(command, errorString, exception, stackTrace, doctorText);
+        final String actualBody = Uri.parse(actualURL).queryParameters['body'];
+        const String expectedBody = '''## Command
+```
+flutter test
+```
+
+## Steps to Reproduce
+1. ...
+2. ...
+3. ...
+
+## Logs
+failing to succeed!!!
+```
+trace
+```
+```
+ [✓] Flutter (Channel report
+```
+
+## Flutter Application Metadata
+**Version**: 2.0.1+100
+**Material**: true
+**Android X**: true
+**Module**: true
+**Plugin**: false
+**Android package**: com.example.failing.android
+**iOS bundle identifier**: com.example.failing.ios
+### Plugins
+camera-0.5.7+2
+device_info-0.4.1+4
+
+''';
+
+        expect(actualBody, expectedBody);
+      }, overrides: <Type, Generator>{
+        HttpClientFactory: () => () => FakeHttpClient(),
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+      });
     });
   });
 }

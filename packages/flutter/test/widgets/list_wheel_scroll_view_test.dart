@@ -64,6 +64,63 @@ void main() {
         throwsAssertionError,
       );
     });
+
+    testWidgets('ListWheelScrollView needs valid overAndUnderCenterOpacity', (WidgetTester tester) async {
+      expect(
+        () {
+          ListWheelScrollView(
+            overAndUnderCenterOpacity: null,
+            itemExtent: 20.0,
+            children: <Widget>[Container()],
+          );
+        },
+        throwsAssertionError,
+      );
+
+      expect(
+        () {
+          ListWheelScrollView(
+            overAndUnderCenterOpacity: -1,
+            itemExtent: 20.0,
+            children: <Widget>[Container()],
+          );
+        },
+        throwsAssertionError,
+      );
+
+      expect(
+        () {
+          ListWheelScrollView(
+            overAndUnderCenterOpacity: 2,
+            itemExtent: 20.0,
+            children: <Widget>[Container()],
+          );
+        },
+        throwsAssertionError,
+      );
+
+      expect(
+        () {
+          ListWheelScrollView(
+            overAndUnderCenterOpacity: 1,
+            itemExtent: 20.0,
+            children: <Widget>[Container()],
+          );
+        },
+        isNot(throwsAssertionError),
+      );
+
+      expect(
+        () {
+          ListWheelScrollView(
+            overAndUnderCenterOpacity: 0,
+            itemExtent: 20.0,
+            children: <Widget>[Container()],
+          );
+        },
+        isNot(throwsAssertionError),
+      );
+    });
   });
 
   group('infinite scrolling', () {
@@ -537,7 +594,7 @@ void main() {
         find.byKey(const Key('list_wheel_scroll_view')),
         matchesGoldenFile('list_wheel_scroll_view.center_child.magnified.png'),
       );
-    });
+    }, skip: isBrowser);
 
     testWidgets('Default middle transform', (WidgetTester tester) async {
       await tester.pumpWidget(
@@ -591,7 +648,7 @@ void main() {
         find.byKey(const Key('list_wheel_scroll_view')),
         matchesGoldenFile('list_wheel_scroll_view.curved_wheel.left.png'),
       );
-    });
+    }, skip: isBrowser);
 
     testWidgets('Scrolling, diameterRatio, perspective all changes matrix', (WidgetTester tester) async {
       final ScrollController controller = ScrollController(initialScrollOffset: 200.0);

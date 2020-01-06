@@ -12,11 +12,10 @@ import 'package:pool/pool.dart';
 
 import '../base/context.dart';
 import '../base/file_system.dart';
-import '../base/platform.dart';
 import '../base/utils.dart';
 import '../cache.dart';
 import '../convert.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
 import 'exceptions.dart';
 import 'file_hash_store.dart';
 import 'source.dart';
@@ -256,7 +255,7 @@ abstract class Target {
 /// Use a hard-coded path or directory relative to the current working
 /// directory to write an output file.
 ///
-///   fs.file('build/linux/out')
+///   globals.fs.file('build/linux/out')
 ///     ..createSync()
 ///     ..writeAsStringSync('output data');
 ///
@@ -309,9 +308,9 @@ class Environment {
       projectDir: projectDir,
       buildDir: buildDirectory,
       rootBuildDir: rootBuildDir,
-      cacheDir: Cache.instance.getRoot(),
+      cacheDir: globals.cache.getRoot(),
       defines: defines,
-      flutterRootDir: fs.directory(Cache.flutterRoot),
+      flutterRootDir: globals.fs.directory(Cache.flutterRoot),
     );
   }
 
@@ -411,7 +410,7 @@ class BuildSystem {
     environment.outputDir.createSync(recursive: true);
 
     // Load file hash store from previous builds.
-    final FileHashStore fileCache = FileHashStore(environment, fs)
+    final FileHashStore fileCache = FileHashStore(environment, globals.fs)
       ..initialize();
 
     // Perform sanity checks on build.
@@ -461,7 +460,7 @@ class BuildSystem {
 /// An active instance of a build.
 class _BuildInstance {
   _BuildInstance(this.environment, this.fileCache, this.buildSystemConfig)
-    : resourcePool = Pool(buildSystemConfig.resourcePoolSize ?? platform?.numberOfProcessors ?? 1);
+    : resourcePool = Pool(buildSystemConfig.resourcePoolSize ?? globals.platform?.numberOfProcessors ?? 1);
 
   final BuildSystemConfig buildSystemConfig;
   final Pool resourcePool;
@@ -523,13 +522,13 @@ class _BuildInstance {
 
       if (canSkip) {
         skipped = true;
-        printTrace('Skipping target: ${node.target.name}');
+        globals.printTrace('Skipping target: ${node.target.name}');
         updateGraph();
         return passed;
       }
-      printTrace('${node.target.name}: Starting due to ${node.invalidatedReasons}');
+      globals.printTrace('${node.target.name}: Starting due to ${node.invalidatedReasons}');
       await node.target.build(environment);
-      printTrace('${node.target.name}: Complete');
+      globals.printTrace('${node.target.name}: Complete');
 
       node.inputs
         ..clear()
@@ -555,7 +554,7 @@ class _BuildInstance {
         if (outputFiles.containsKey(previousOutput)) {
           continue;
         }
-        final File previousFile = fs.file(previousOutput);
+        final File previousFile = globals.fs.file(previousOutput);
         if (previousFile.existsSync()) {
           previousFile.deleteSync();
         }
@@ -769,7 +768,7 @@ class Node {
         // if this isn't a current output file there is no reason to compute the hash.
         continue;
       }
-      final File file = fs.file(previousOutput);
+      final File file = globals.fs.file(previousOutput);
       if (!file.existsSync()) {
         invalidatedReasons.add(InvalidatedReason.outputMissing);
         _dirty = true;
@@ -794,7 +793,7 @@ class Node {
     if (missingInputs.isNotEmpty) {
       _dirty = true;
       final String missingMessage = missingInputs.map((File file) => file.path).join(', ');
-      printTrace('invalidated build due to missing files: $missingMessage');
+      globals.printTrace('invalidated build due to missing files: $missingMessage');
       invalidatedReasons.add(InvalidatedReason.inputMissing);
     }
 

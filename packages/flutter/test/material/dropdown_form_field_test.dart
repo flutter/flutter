@@ -107,10 +107,17 @@ class _TestAppState extends State<TestApp> {
 }
 
 class TestApp extends StatefulWidget {
-  const TestApp({ this.textDirection, this.child, this.mediaSize });
+  const TestApp({
+    Key key,
+    this.textDirection,
+    this.child,
+    this.mediaSize,
+  }) : super(key: key);
+
   final TextDirection textDirection;
   final Widget child;
   final Size mediaSize;
+
   @override
   _TestAppState createState() => _TestAppState();
 }

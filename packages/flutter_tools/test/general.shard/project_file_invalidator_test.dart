@@ -4,9 +4,10 @@
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/run_hot.dart';
+
+import 'package:platform/platform.dart';
 
 import '../src/common.dart';
 

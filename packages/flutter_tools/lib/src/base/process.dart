@@ -5,12 +5,10 @@
 import 'dart:async';
 
 import '../convert.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
 import 'common.dart';
 import 'context.dart';
-import 'file_system.dart';
 import 'io.dart';
-import 'process_manager.dart';
 import 'utils.dart';
 
 typedef StringConverter = String Function(String string);
@@ -77,11 +75,11 @@ void addShutdownHook(
 /// guaranteed to run to completion before shutdown hooks in the next stage are
 /// started.
 Future<void> runShutdownHooks() async {
-  printTrace('Running shutdown hooks');
+  globals.printTrace('Running shutdown hooks');
   _shutdownHooksRunning = true;
   try {
     for (ShutdownStage stage in _shutdownHooks.keys.toList()..sort()) {
-      printTrace('Shutdown hook priority ${stage.priority}');
+      globals.printTrace('Shutdown hook priority ${stage.priority}');
       final List<ShutdownHook> hooks = _shutdownHooks.remove(stage);
       final List<Future<dynamic>> futures = <Future<dynamic>>[];
       for (ShutdownHook shutdownHook in hooks) {
@@ -96,7 +94,7 @@ Future<void> runShutdownHooks() async {
     _shutdownHooksRunning = false;
   }
   assert(_shutdownHooks.isEmpty);
-  printTrace('Shutdown hooks complete');
+  globals.printTrace('Shutdown hooks complete');
 }
 
 class ProcessExit implements Exception {
@@ -261,15 +259,15 @@ class _DefaultProcessUtils implements ProcessUtils {
     _traceCommand(cmd, workingDirectory: workingDirectory);
 
     // When there is no timeout, there's no need to kill a running process, so
-    // we can just use processManager.run().
+    // we can just use globals.processManager.run().
     if (timeout == null) {
-      final ProcessResult results = await processManager.run(
+      final ProcessResult results = await globals.processManager.run(
         cmd,
         workingDirectory: workingDirectory,
         environment: _environment(allowReentrantFlutter, environment),
       );
       final RunResult runResult = RunResult(results, cmd);
-      printTrace(runResult.toString());
+      globals.printTrace(runResult.toString());
       if (throwOnError && runResult.exitCode != 0 &&
           (whiteListFailures == null || !whiteListFailures(runResult.exitCode))) {
         runResult.throwException('Process exited abnormally:\n$runResult');
@@ -278,7 +276,7 @@ class _DefaultProcessUtils implements ProcessUtils {
     }
 
     // When there is a timeout, we have to kill the running process, so we have
-    // to use processManager.start() through _runCommand() above.
+    // to use globals.processManager.start() through _runCommand() above.
     while (true) {
       assert(timeoutRetries >= 0);
       timeoutRetries = timeoutRetries - 1;
@@ -304,7 +302,7 @@ class _DefaultProcessUtils implements ProcessUtils {
       int exitCode;
       exitCode = await process.exitCode.timeout(timeout, onTimeout: () {
         // The process timed out. Kill it.
-        processManager.killPid(process.pid);
+        globals.processManager.killPid(process.pid);
         return null;
       });
 
@@ -333,7 +331,7 @@ class _DefaultProcessUtils implements ProcessUtils {
 
       // If the process did not timeout. We are done.
       if (exitCode != null) {
-        printTrace(runResult.toString());
+        globals.printTrace(runResult.toString());
         if (throwOnError && runResult.exitCode != 0 &&
             (whiteListFailures == null || !whiteListFailures(exitCode))) {
           runResult.throwException('Process exited abnormally:\n$runResult');
@@ -347,7 +345,7 @@ class _DefaultProcessUtils implements ProcessUtils {
       }
 
       // Log the timeout with a trace message in verbose mode.
-      printTrace('Process "${cmd[0]}" timed out. $timeoutRetries attempts left:\n'
+      globals.printTrace('Process "${cmd[0]}" timed out. $timeoutRetries attempts left:\n'
                  '$runResult');
     }
 
@@ -365,14 +363,14 @@ class _DefaultProcessUtils implements ProcessUtils {
     bool allowReentrantFlutter = false,
   }) {
     _traceCommand(cmd, workingDirectory: workingDirectory);
-    final ProcessResult results = processManager.runSync(
+    final ProcessResult results = globals.processManager.runSync(
       cmd,
       workingDirectory: workingDirectory,
       environment: _environment(allowReentrantFlutter, environment),
     );
     final RunResult runResult = RunResult(results, cmd);
 
-    printTrace('Exit code ${runResult.exitCode} from: ${cmd.join(' ')}');
+    globals.printTrace('Exit code ${runResult.exitCode} from: ${cmd.join(' ')}');
 
     bool failedExitCode = runResult.exitCode != 0;
     if (whiteListFailures != null && failedExitCode) {
@@ -381,17 +379,17 @@ class _DefaultProcessUtils implements ProcessUtils {
 
     if (runResult.stdout.isNotEmpty && !hideStdout) {
       if (failedExitCode && throwOnError) {
-        printStatus(runResult.stdout.trim());
+        globals.printStatus(runResult.stdout.trim());
       } else {
-        printTrace(runResult.stdout.trim());
+        globals.printTrace(runResult.stdout.trim());
       }
     }
 
     if (runResult.stderr.isNotEmpty) {
       if (failedExitCode && throwOnError) {
-        printError(runResult.stderr.trim());
+        globals.printError(runResult.stderr.trim());
       } else {
-        printTrace(runResult.stderr.trim());
+        globals.printTrace(runResult.stderr.trim());
       }
     }
 
@@ -410,7 +408,7 @@ class _DefaultProcessUtils implements ProcessUtils {
     Map<String, String> environment,
   }) {
     _traceCommand(cmd, workingDirectory: workingDirectory);
-    return processManager.start(
+    return globals.processManager.start(
       cmd,
       workingDirectory: workingDirectory,
       environment: _environment(allowReentrantFlutter, environment),
@@ -445,9 +443,9 @@ class _DefaultProcessUtils implements ProcessUtils {
         if (line != null) {
           final String message = '$prefix$line';
           if (trace) {
-            printTrace(message);
+            globals.printTrace(message);
           } else {
-            printStatus(message, wrap: false);
+            globals.printStatus(message, wrap: false);
           }
         }
       });
@@ -460,7 +458,7 @@ class _DefaultProcessUtils implements ProcessUtils {
           line = mapFunction(line);
         }
         if (line != null) {
-          printError('$prefix$line', wrap: false);
+          globals.printError('$prefix$line', wrap: false);
         }
       });
 
@@ -489,9 +487,9 @@ class _DefaultProcessUtils implements ProcessUtils {
   }) {
     _traceCommand(cli);
     try {
-      return processManager.runSync(cli, environment: environment).exitCode == 0;
+      return globals.processManager.runSync(cli, environment: environment).exitCode == 0;
     } catch (error) {
-      printTrace('$cli failed with $error');
+      globals.printTrace('$cli failed with $error');
       return false;
     }
   }
@@ -503,9 +501,9 @@ class _DefaultProcessUtils implements ProcessUtils {
   }) async {
     _traceCommand(cli);
     try {
-      return (await processManager.run(cli, environment: environment)).exitCode == 0;
+      return (await globals.processManager.run(cli, environment: environment)).exitCode == 0;
     } catch (error) {
-      printTrace('$cli failed with $error');
+      globals.printTrace('$cli failed with $error');
       return false;
     }
   }
@@ -527,9 +525,9 @@ class _DefaultProcessUtils implements ProcessUtils {
   void _traceCommand(List<String> args, { String workingDirectory }) {
     final String argsText = args.join(' ');
     if (workingDirectory == null) {
-      printTrace('executing: $argsText');
+      globals.printTrace('executing: $argsText');
     } else {
-      printTrace('executing: [$workingDirectory${fs.path.separator}] $argsText');
+      globals.printTrace('executing: [$workingDirectory${globals.fs.path.separator}] $argsText');
     }
   }
 }

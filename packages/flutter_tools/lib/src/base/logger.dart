@@ -7,11 +7,9 @@ import 'dart:async';
 import 'package:meta/meta.dart';
 
 import '../base/context.dart';
-import 'io.dart' hide stdio, stderr, stdin, stdout;
-import 'io.dart' as globals show stdio;
-import 'platform.dart';
+import '../globals.dart' as globals;
+import 'io.dart' hide stderr, stdin, stdout;
 import 'terminal.dart' show AnsiTerminal, TerminalColor, OutputPreferences;
-import 'terminal.dart' as globals show terminal;
 import 'utils.dart';
 
 const int kDefaultStatusPadding = 59;
@@ -48,7 +46,7 @@ abstract class Logger {
 
   bool get supportsColor;
 
-  bool get hasTerminal => globals.stdio.hasTerminal;
+  bool get hasTerminal;
 
   AnsiTerminal get _terminal;
 
@@ -591,6 +589,9 @@ class VerboseLogger extends Logger {
 
   @override
   bool get supportsColor => parent.supportsColor;
+
+  @override
+  bool get hasTerminal => parent.hasTerminal;
 }
 
 enum _LogType { error, status, trace }
@@ -810,7 +811,7 @@ class AnsiSpinner extends Status {
   Timer timer;
 
   // Windows console font has a limited set of Unicode characters.
-  List<String> get _animation => platform.isWindows
+  List<String> get _animation => globals.platform.isWindows
       ? <String>[r'-', r'\', r'|', r'/']
       : <String>['⣾', '⣽', '⣻', '⢿', '⡿', '⣟', '⣯', '⣷'];
 

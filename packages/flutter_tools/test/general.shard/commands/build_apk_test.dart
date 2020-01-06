@@ -5,16 +5,16 @@
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
-import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_builder.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/platform.dart';
+
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_apk.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
@@ -30,7 +30,7 @@ void main() {
     Directory tempDir;
 
     setUp(() {
-      tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
+      tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
     });
 
     tearDown(() {
@@ -105,9 +105,9 @@ void main() {
       mockUsage = MockUsage();
       when(mockUsage.isFirstRun).thenReturn(true);
 
-      tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
-      gradlew = fs.path.join(tempDir.path, 'flutter_project', 'android',
-          platform.isWindows ? 'gradlew.bat' : 'gradlew');
+      tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
+      gradlew = globals.fs.path.join(tempDir.path, 'flutter_project', 'android',
+          globals.platform.isWindows ? 'gradlew.bat' : 'gradlew');
 
       mockProcessManager = MockProcessManager();
       when(mockProcessManager.run(<String>[gradlew, '-v'],
@@ -140,70 +140,15 @@ void main() {
     });
 
     group('AndroidSdk', () {
-      FileSystem memoryFileSystem;
-      setUp(() {
-        memoryFileSystem = MemoryFileSystem();
-
-        tempDir = memoryFileSystem.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
-        memoryFileSystem.currentDirectory = tempDir;
-
-        gradlew = memoryFileSystem.path.join(tempDir.path, 'flutter_project', 'android',
-            platform.isWindows ? 'gradlew.bat' : 'gradlew');
-      });
       testUsingContext('validateSdkWellFormed() not called, sdk reinitialized', () async {
-        final Directory gradleCacheDir = memoryFileSystem
-          .directory('/flutter_root/bin/cache/artifacts/gradle_wrapper')
-          ..createSync(recursive: true);
-
-        gradleCacheDir.childFile(platform.isWindows ? 'gradlew.bat' : 'gradlew').createSync();
-
-        tempDir.childFile('pubspec.yaml')
-            ..createSync(recursive: true)
-            ..writeAsStringSync('''name: test
-environment:
-  sdk: ">=2.1.0 <3.0.0"
-dependencies:
-  flutter:
-    sdk: flutter
-dev_dependencies:
-  flutter_test:
-    sdk: flutter
-flutter:
-''');
-        tempDir.childFile('.packages').createSync(recursive: true);
-        final Directory androidDir = tempDir.childDirectory('android');
-        androidDir
-          .childFile('build.gradle')
-          .createSync(recursive: true);
-        androidDir
-          .childDirectory('app')
-          .childFile('build.gradle')
-          ..createSync(recursive: true)
-          ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
-        androidDir
-          .childFile('gradle.properties')
-          .createSync(recursive: true);
-        androidDir
-          .childDirectory('gradle')
-          .childDirectory('wrapper')
-          .childFile('gradle-wrapper.properties')
-          .createSync(recursive: true);
-        tempDir
-          .childDirectory('build')
-          .childDirectory('outputs')
-          .childDirectory('repo')
-          .createSync(recursive: true);
-        tempDir
-          .childDirectory('lib')
-          .childFile('main.dart')
-          .createSync(recursive: true);
-        when(mockProcessManager.run(any,
-          workingDirectory: anyNamed('workingDirectory'),
-          environment: anyNamed('environment')))
-        .thenAnswer((_) => Future<ProcessResult>.value(ProcessResult(0, 0, 'any', '')));
+        final String projectPath = await createProject(tempDir,
+            arguments: <String>['--no-pub', '--template=app']);
 
         await expectLater(
-          runBuildApkCommand(tempDir.path, arguments: <String>['--no-pub', '--flutter-root=/flutter_root']),
+          runBuildApkCommand(
+            projectPath,
+            arguments: <String>['--no-pub'],
+          ),
           throwsToolExit(message: 'Gradle task assembleRelease failed with exit code 1'),
         );
 
@@ -212,7 +157,26 @@ flutter:
       },
       overrides: <Type, Generator>{
         AndroidSdk: () => mockAndroidSdk,
-        FileSystem: () => memoryFileSystem,
+        FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
+        ProcessManager: () => mockProcessManager,
+      });
+
+      testUsingContext('throws throwsToolExit if AndroidSdk is null', () async {
+        final String projectPath = await createProject(tempDir,
+            arguments: <String>['--no-pub', '--template=app']);
+
+        await expectLater(() async {
+          await runBuildApkCommand(
+            projectPath,
+            arguments: <String>['--no-pub'],
+          );
+        }, throwsToolExit(
+          message: 'No Android SDK found. Try setting the ANDROID_HOME environment variable',
+        ));
+      },
+      overrides: <Type, Generator>{
+        AndroidSdk: () => null,
+        FlutterProjectFactory: () => FakeFlutterProjectFactory(tempDir),
         ProcessManager: () => mockProcessManager,
       });
     });
@@ -229,7 +193,7 @@ flutter:
         <String>[
           gradlew,
           '-q',
-          '-Ptarget=${fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
+          '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
           '-Ptrack-widget-creation=true',
           '-Pshrink=true',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
@@ -260,7 +224,7 @@ flutter:
         <String>[
           gradlew,
           '-q',
-          '-Ptarget=${fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
+          '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
           '-Ptrack-widget-creation=true',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           'assembleRelease',
@@ -283,7 +247,7 @@ flutter:
         <String>[
           gradlew,
           '-q',
-          '-Ptarget=${fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
+          '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
           '-Ptrack-widget-creation=true',
           '-Pshrink=true',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
@@ -338,7 +302,7 @@ flutter:
         <String>[
           gradlew,
           '-q',
-          '-Ptarget=${fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
+          '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
           '-Ptrack-widget-creation=true',
           '-Pshrink=true',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
@@ -389,7 +353,7 @@ flutter:
         <String>[
           gradlew,
           '-q',
-          '-Ptarget=${fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
+          '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
           '-Ptrack-widget-creation=true',
           '-Pshrink=true',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
@@ -446,21 +410,9 @@ Future<BuildApkCommand> runBuildApkCommand(
     'apk',
     ...?arguments,
     '--no-pub',
-    fs.path.join(target, 'lib', 'main.dart'),
+    globals.fs.path.join(target, 'lib', 'main.dart'),
   ]);
   return command;
-}
-
-class FakeFlutterProjectFactory extends FlutterProjectFactory {
-  FakeFlutterProjectFactory(this.directoryOverride) :
-    assert(directoryOverride != null);
-
-  final Directory directoryOverride;
-
-  @override
-  FlutterProject fromDirectory(Directory _) {
-    return super.fromDirectory(directoryOverride.childDirectory('flutter_project'));
-  }
 }
 
 class MockAndroidSdk extends Mock implements AndroidSdk {}

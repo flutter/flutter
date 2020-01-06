@@ -753,6 +753,9 @@ abstract class TextInputClient {
   /// Updates the floating cursor position and state.
   void updateFloatingCursor(RawFloatingCursorPoint point);
 
+  /// The current state of the [TextEditingValue] held by this client.
+  TextEditingValue get currentTextEditingValue;
+
   /// Platform notified framework of closed connection.
   ///
   /// [TextInputClient] should cleanup its connection and finalize editing.
@@ -1036,7 +1039,6 @@ class TextInput {
 
   TextInputConnection _currentConnection;
   TextInputConfiguration _currentConfiguration;
-  TextEditingValue _currentTextEditingValue;
 
   Future<dynamic> _handleTextInputInvocation(MethodCall methodCall) async {
     if (_currentConnection == null)
@@ -1048,9 +1050,9 @@ class TextInput {
     if (method == 'TextInputClient.requestExistingInputState') {
       assert(_currentConnection._client != null);
       _attach(_currentConnection, _currentConfiguration);
-      // This will be null if we've never had a call to [_setEditingState].
-      if (_currentTextEditingValue != null) {
-        _setEditingState(_currentTextEditingValue);
+      final TextEditingValue editingValue = _currentConnection._client.currentTextEditingValue;
+      if (editingValue != null) {
+        _setEditingState(editingValue);
       }
       return;
     }
@@ -1110,7 +1112,6 @@ class TextInput {
       'TextInput.setEditingState',
       value.toJSON(),
     );
-    _currentTextEditingValue = value;
   }
 
   void _show() {

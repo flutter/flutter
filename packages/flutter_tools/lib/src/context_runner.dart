@@ -17,7 +17,6 @@ import 'base/context.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/os.dart';
-import 'base/platform.dart';
 import 'base/process.dart';
 import 'base/signals.dart';
 import 'base/terminal.dart';
@@ -36,6 +35,7 @@ import 'features.dart';
 import 'fuchsia/fuchsia_device.dart' show FuchsiaDeviceTools;
 import 'fuchsia/fuchsia_sdk.dart' show FuchsiaSdk, FuchsiaArtifacts;
 import 'fuchsia/fuchsia_workflow.dart' show FuchsiaWorkflow;
+import 'globals.dart' as globals;
 import 'ios/devices.dart' show IOSDeploy;
 import 'ios/ios_workflow.dart';
 import 'ios/mac.dart';
@@ -102,16 +102,16 @@ Future<T> runInContext<T>(
       IOSWorkflow: () => const IOSWorkflow(),
       KernelCompilerFactory: () => const KernelCompilerFactory(),
       LinuxWorkflow: () => const LinuxWorkflow(),
-      Logger: () => platform.isWindows
+      Logger: () => globals.platform.isWindows
         ? WindowsStdoutLogger(
-            terminal: terminal,
-            stdio: stdio,
+            terminal: globals.terminal,
+            stdio: globals.stdio,
             outputPreferences: outputPreferences,
             timeoutConfiguration: timeoutConfiguration,
           )
         : StdoutLogger(
-            terminal: terminal,
-            stdio: stdio,
+            terminal: globals.terminal,
+            stdio: globals.stdio,
             outputPreferences: outputPreferences,
             timeoutConfiguration: timeoutConfiguration,
           ),
