@@ -146,7 +146,6 @@ void main() {
       home: Material(child: buildTable()),
     ));
 
-    //print(find.byType(Checkbox).allCandidates.length);
     //expect(find.byType(Checkbox).allCandidates.isEmpty, true);
     await tester.tap(find.text('Cupcake'));
 
