@@ -305,6 +305,10 @@ class Hero extends StatefulWidget {
             inviteHero(hero, tag);
           }
         }
+      } else if (widget is HeroMode) {
+        if (!widget.enabled) {
+          return;
+        }
       }
       element.visitChildren(visitor);
     }
@@ -916,4 +920,39 @@ class HeroController extends NavigatorObserver {
     final Hero toHero = toHeroContext.widget as Hero;
     return toHero.child;
   };
+}
+
+/// Enables or disables heroes in the widget subtree.
+class HeroMode extends StatelessWidget {
+  /// Creates a widget that enables or disables heroes.
+  ///
+  /// The [enabled] argument must not be null.
+  const HeroMode({
+    Key key,
+    @required this.child,
+    this.enabled = true,
+  }) : assert(child != null),
+       assert(enabled != null),
+       super(key: key);
+
+  /// The subtree to place inside the [HeroMode].
+  final Widget child;
+
+  /// The current hero mode of this subtree.
+  ///
+  /// If true, then heroes in this subtree will perform.
+  ///
+  /// If false, then heroes in this subtree will not perform.
+  final bool enabled;
+
+  @override
+  Widget build(BuildContext context) {
+    return child;
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(FlagProperty('mode', value: enabled, ifTrue: 'enabled', ifFalse: 'disabled', showName: true));
+  }
 }
