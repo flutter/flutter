@@ -18,50 +18,49 @@ Future<void> pumpTest(
   ScrollController controller,
   Widget Function(Widget) wrapper,
 }) async {
-  final Widget scrollview = CustomScrollView(
-    controller: controller,
-    reverse: reverse,
-    physics: scrollable ? null : const NeverScrollableScrollPhysics(),
-    slivers: const <Widget>[
-      SliverToBoxAdapter(child: SizedBox(height: 2000.0)),
-    ],
-  );
-  final Widget child = wrapper == null ? scrollview : wrapper(scrollview);
   await tester.pumpWidget(MaterialApp(
     theme: ThemeData(
       platform: platform,
     ),
-    home: child,
+    home: CustomScrollView(
+      controller: controller,
+      reverse: reverse,
+      physics: scrollable ? null : const NeverScrollableScrollPhysics(),
+      slivers: const <Widget>[
+        SliverToBoxAdapter(child: SizedBox(height: 2000.0)),
+      ],
+    ),
   ));
   await tester.pump(const Duration(seconds: 5)); // to let the theme animate
 }
 
+// Pump a nested scrollable. The outer scrollable contains a sliver of a
+// 300-pixel-long scrollable followed by a 2000-pixel-long content.
 Future<void> pumpDoubleScrollableTest(
   WidgetTester tester,
-  TargetPlatform platform, {
-  ScrollController controller,
-  ScrollController controller2,
-}) async {
-  return pumpTest(
-    tester,
-    platform,
-    controller: controller,
-    reverse: false,
-    wrapper: (Widget child) => CustomScrollView(
-      controller: controller2,
-      reverse: false,
-      physics: null,
+  TargetPlatform platform,
+) async {
+  await tester.pumpWidget(MaterialApp(
+    theme: ThemeData(
+      platform: platform,
+    ),
+    home: CustomScrollView(
       slivers: <Widget>[
         SliverToBoxAdapter(
           child: Container(
             height: 300,
-            child: child,
+            child: const CustomScrollView(
+              slivers: <Widget>[
+                SliverToBoxAdapter(child: SizedBox(height: 2000.0)),
+              ],
+            ),
           ),
         ),
         const SliverToBoxAdapter(child: SizedBox(height: 2000.0)),
       ],
     ),
-  );
+  ));
+  await tester.pump(const Duration(seconds: 5)); // to let the theme animate
 }
 
 const double dragOffset = 200.0;
