@@ -74,14 +74,29 @@ void main() {
     const PointerScrollEvent originalEvent = PointerScrollEvent();
     final PointerSignalEvent transformedEvent = originalEvent
         .transformed(Matrix4.translationValues(10.0, 20.0, 0.0));
+    final PointerSignalEvent anotherTransformedEvent = originalEvent
+        .transformed(Matrix4.translationValues(30.0, 50.0, 0.0));
 
     expect(originalEvent, isNot(same(transformedEvent)));
     expect(transformedEvent.original, same(originalEvent));
+
+    expect(originalEvent, isNot(same(anotherTransformedEvent)));
+    expect(anotherTransformedEvent.original, same(originalEvent));
 
     final List<PointerSignalEvent> events = <PointerSignalEvent>[];
     resolver.register(transformedEvent, (PointerSignalEvent event) {
       events.add(event);
     });
+
+    // Registering a second transformed event should not throw an assertion.
+    expect(() {
+      resolver.register(anotherTransformedEvent, (PointerSignalEvent event) {
+        // This shouldn't be called because only the first registered callback is
+        // invoked.
+        events.add(event);
+      });
+    }, returnsNormally);
+
     resolver.resolve(originalEvent);
 
     expect(events.single, same(transformedEvent));
