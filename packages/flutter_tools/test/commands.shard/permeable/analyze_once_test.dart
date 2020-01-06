@@ -24,7 +24,6 @@ final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{
 
 void main() {
   final String analyzerSeparator = platform.isWindows ? '-' : '•';
-  const Pub pub = Pub();
 
   group('analyze once', () {
     setUpAll(() {
@@ -72,23 +71,19 @@ flutter_project:lib/
       testUsingContext('working directory', () async {
         await runCommand(
           command: AnalyzeCommand(workingDirectory: fs.directory(projectPath)),
-          arguments: <String>['analyze'],
+          arguments: <String>['analyze', '--no-pub'],
           statusTextContains: <String>['No issues found!'],
         );
-      }, overrides: <Type, Generator>{
-        Pub: () => pub,
       });
 
       // Analyze a specific file outside the current directory
       testUsingContext('passing one file throws', () async {
         await runCommand(
           command: AnalyzeCommand(),
-          arguments: <String>['analyze', libMain.path],
+          arguments: <String>['analyze', '--no-pub', libMain.path],
           toolExit: true,
           exitMessageContains: 'is not a directory',
         );
-      }, overrides: <Type, Generator>{
-        Pub: () => pub,
       });
 
       // Analyze in the current directory - no arguments
@@ -116,7 +111,7 @@ flutter_project:lib/
         // Analyze in the current directory - no arguments
         await runCommand(
           command: AnalyzeCommand(workingDirectory: fs.directory(projectPath)),
-          arguments: <String>['analyze'],
+          arguments: <String>['analyze', '--no-pub'],
           statusTextContains: <String>[
             'Analyzing',
             'info $analyzerSeparator Avoid empty else statements',
@@ -126,9 +121,6 @@ flutter_project:lib/
           exitMessageContains: '3 issues found.',
           toolExit: true,
         );
-      }, overrides: <Type, Generator>{
-        Pub: () => pub,
-        ...noColorTerminalOverride,
       });
 
       // Analyze in the current directory - no arguments
@@ -157,7 +149,7 @@ flutter_project:lib/
           // Analyze in the current directory - no arguments
           await runCommand(
             command: AnalyzeCommand(workingDirectory: fs.directory(projectPath)),
-            arguments: <String>['analyze'],
+            arguments: <String>['analyze', '--no-pub'],
             statusTextContains: <String>[
               'Analyzing',
               'info $analyzerSeparator The declaration \'_incrementCounter\' isn\'t',
@@ -171,9 +163,6 @@ flutter_project:lib/
             optionsFile.deleteSync();
           }
         }
-      }, overrides: <Type, Generator>{
-        Pub: () => const Pub(),
-        ...noColorTerminalOverride
       });
     });
 
@@ -200,7 +189,7 @@ void bar() {
         // Analyze in the current directory - no arguments
         await runCommand(
           command: AnalyzeCommand(workingDirectory: tempDir),
-          arguments: <String>['analyze'],
+          arguments: <String>['analyze', '--no-pub'],
           statusTextContains: <String>[
             'Analyzing',
           ],
@@ -210,9 +199,6 @@ void bar() {
       } finally {
         tryToDelete(tempDir);
       }
-    }, overrides: <Type, Generator>{
-      Pub: () => pub,
-      ...noColorTerminalOverride
     });
 
     testUsingContext('returns no issues when source is error-free', () async {
@@ -226,14 +212,13 @@ StringBuffer bar = StringBuffer('baz');
       try {
         await runCommand(
           command: AnalyzeCommand(workingDirectory: fs.directory(tempDir)),
-          arguments: <String>['analyze'],
+          arguments: <String>['analyze', '--no-pub'],
           statusTextContains: <String>['No issues found!'],
         );
       } finally {
         tryToDelete(tempDir);
       }
     }, overrides: <Type, Generator>{
-      Pub: () => pub,
       ...noColorTerminalOverride
     });
 
@@ -249,14 +234,13 @@ StringBuffer bar = StringBuffer('baz');
       try {
         await runCommand(
           command: AnalyzeCommand(workingDirectory: fs.directory(tempDir)),
-          arguments: <String>['analyze'],
+          arguments: <String>['analyze', '--no-pub'],
           statusTextContains: <String>['No issues found!'],
         );
       } finally {
         tryToDelete(tempDir);
       }
     }, overrides: <Type, Generator>{
-      Pub: () => pub,
       ...noColorTerminalOverride
     });
   });
