@@ -999,15 +999,6 @@ void main() {
       await driver.checkHealth();
     });
 
-    group('clearTimeline', () {
-      test('clears timeline', () async {
-        await driver.startTracing();
-        expect(driver.startTime, isNotNull);
-        await driver.clearTimeline();
-        expect(driver.startTime, isNull);
-      });
-    });
-
     group('WebFlutterDriver Unimplemented error', () {
       test('forceGC', () async {
         expect(driver.forceGC(),
@@ -1026,6 +1017,11 @@ void main() {
 
       test('appIsoloate', () async {
         expect(() => driver.appIsolate.invokeExtension('abc', <String, String>{'abc': '123'}),
+            throwsA(isInstanceOf<UnsupportedError>()));
+      });
+
+      test('serviceClient', () async {
+        expect(() => driver.serviceClient.getVM(),
             throwsA(isInstanceOf<UnsupportedError>()));
       });
     });

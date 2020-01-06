@@ -10,6 +10,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/error_handling_file_system.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../src/common.dart';
 import '../src/testbed.dart';
@@ -22,7 +23,7 @@ void main() {
 
       FileSystem localFileSystem;
       await testbed.run(() {
-        localFileSystem = fs;
+        localFileSystem = globals.fs;
       });
 
       expect(localFileSystem, isA<ErrorHandlingFileSystem>());

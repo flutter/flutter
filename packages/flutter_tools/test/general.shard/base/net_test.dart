@@ -7,10 +7,12 @@ import 'dart:convert';
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:platform/platform.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' as io;
 import 'package:flutter_tools/src/base/net.dart';
-import 'package:flutter_tools/src/base/platform.dart';
+
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:quiver/testing/async.dart';
 
 import '../../src/common.dart';
@@ -33,7 +35,7 @@ void main() {
     });
 
     testUsingContext('fetchUrl(destFile) writes the data to a file', () async {
-      final File destFile = fs.file('dest_file')..createSync();
+      final File destFile = globals.fs.file('dest_file')..createSync();
       final List<int> data = await fetchUrl(
         Uri.parse('http://example.invalid/'),
         destFile: destFile,

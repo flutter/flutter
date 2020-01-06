@@ -330,6 +330,7 @@ class DataTable extends StatelessWidget {
     this.headingRowHeight = 56.0,
     this.horizontalMargin = 24.0,
     this.columnSpacing = 56.0,
+    this.showCheckboxColumn = true,
     @required this.rows,
   }) : assert(columns != null),
        assert(columns.isNotEmpty),
@@ -339,6 +340,7 @@ class DataTable extends StatelessWidget {
        assert(headingRowHeight != null),
        assert(horizontalMargin != null),
        assert(columnSpacing != null),
+       assert(showCheckboxColumn != null),
        assert(rows != null),
        assert(!rows.any((DataRow row) => row.cells.length != columns.length)),
        _onlyTextColumn = _initOnlyTextColumn(columns),
@@ -407,6 +409,17 @@ class DataTable extends StatelessWidget {
   ///
   /// This value defaults to 56.0 to adhere to the Material Design specifications.
   final double columnSpacing;
+
+  /// {@template flutter.material.dataTable.showCheckboxColumn}
+  /// Whether the widget should display checkboxes for selectable rows.
+  ///
+  /// If true, a [CheckBox] will be placed at the beginning of each row that is
+  /// selectable. However, if [DataRow.onSelectChanged] is not set for any row,
+  /// checkboxes will not be placed, even if this value is true.
+  ///
+  /// If false, all rows will not display a [CheckBox].
+  /// {@endtemplate}
+  final bool showCheckboxColumn;
 
   /// The data to show in each row (excluding the row that contains
   /// the column headings).
@@ -608,10 +621,10 @@ class DataTable extends StatelessWidget {
       border: Border(bottom: Divider.createBorderSide(context, width: 1.0)),
     );
 
-    final bool showCheckboxColumn = rows.any((DataRow row) => row.onSelectChanged != null);
-    final bool allChecked = showCheckboxColumn && !rows.any((DataRow row) => row.onSelectChanged != null && !row.selected);
+    final bool displayCheckboxColumn = showCheckboxColumn && rows.any((DataRow row) => row.onSelectChanged != null);
+    final bool allChecked = displayCheckboxColumn && !rows.any((DataRow row) => row.onSelectChanged != null && !row.selected);
 
-    final List<TableColumnWidth> tableColumns = List<TableColumnWidth>(columns.length + (showCheckboxColumn ? 1 : 0));
+    final List<TableColumnWidth> tableColumns = List<TableColumnWidth>(columns.length + (displayCheckboxColumn ? 1 : 0));
     final List<TableRow> tableRows = List<TableRow>.generate(
       rows.length + 1, // the +1 is for the header row
       (int index) {
@@ -627,7 +640,7 @@ class DataTable extends StatelessWidget {
     int rowIndex;
 
     int displayColumnIndex = 0;
-    if (showCheckboxColumn) {
+    if (displayCheckboxColumn) {
       tableColumns[0] = FixedColumnWidth(horizontalMargin + Checkbox.width + horizontalMargin / 2.0);
       tableRows[0].children[0] = _buildCheckbox(
         color: theme.accentColor,
@@ -651,9 +664,9 @@ class DataTable extends StatelessWidget {
       final DataColumn column = columns[dataColumnIndex];
 
       double paddingStart;
-      if (dataColumnIndex == 0 && showCheckboxColumn) {
+      if (dataColumnIndex == 0 && displayCheckboxColumn) {
         paddingStart = horizontalMargin / 2.0;
-      } else if (dataColumnIndex == 0 && !showCheckboxColumn) {
+      } else if (dataColumnIndex == 0 && !displayCheckboxColumn) {
         paddingStart = horizontalMargin;
       } else {
         paddingStart = columnSpacing / 2.0;

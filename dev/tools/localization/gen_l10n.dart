@@ -146,7 +146,7 @@ const String simpleMethodTemplate = '''
 ''';
 
 const String pluralMethodTemplate = '''
-  String @methodName(@methodParameters) {
+  String @methodName(@methodParameters) {@dateFormatting
     return Intl.plural(
       @intlMethodArgs
     );
@@ -249,6 +249,22 @@ List<String> genMethodParameters(Map<String, dynamic> bundle, String key, String
   return <String>[];
 }
 
+List<String> genPluralMethodParameters(Iterable<String> placeholderKeys, String countPlaceholder, String resourceId) {
+  if (placeholderKeys.isEmpty)
+    throw L10nException(
+      'Placeholders map for the $resourceId message is empty.\n'
+      'Check to see if the plural message is in the proper ICU syntax format '
+      'and ensure that placeholders are properly specified.'
+    );
+
+  return placeholderKeys.map((String parameter) {
+    if (parameter == countPlaceholder) {
+      return 'int $parameter';
+    }
+    return 'Object $parameter';
+  }).toList();
+}
+
 String generateDateFormattingLogic(Map<String, dynamic> bundle, String key) {
   String result = '';
   final Map<String, dynamic> attributesMap = bundle['@$key'] as Map<String, dynamic>;
@@ -345,14 +361,33 @@ String genSimpleMethod(Map<String, dynamic> bundle, String key) {
     .replaceAll('@intlMethodArgs', genIntlMethodArgs(bundle, key).join(',\n      '));
 }
 
-String genPluralMethod(Map<String, dynamic> bundle, String key) {
-  final Map<String, dynamic> attributesMap = bundle['@$key'] as Map<String, dynamic>;
-  assert(attributesMap != null && attributesMap.containsKey('placeholders'));
-  final Iterable<String> placeholders = attributesMap['placeholders'].keys as Iterable<String>;
+String genPluralMethod(Map<String, dynamic> arbBundle, String resourceId) {
+  final Map<String, dynamic> attributesMap = arbBundle['@$resourceId'] as Map<String, dynamic>;
+  if (attributesMap == null)
+    throw L10nException('Resource attribute for $resourceId does not exist.');
+  if (!attributesMap.containsKey('placeholders'))
+    throw L10nException(
+      'Unable to find placeholders for the plural message: $resourceId.\n'
+      'Check to see if the plural message is in the proper ICU syntax format '
+      'and ensure that placeholders are properly specified.'
+    );
+  if (attributesMap['placeholders'] is! Map<String, dynamic>)
+    throw L10nException(
+      'The "placeholders" resource attribute for the message, $resourceId, '
+      'is not properly formatted. Ensure that it is a map with keys that are '
+      'strings.'
+    );
+
+  final Map<String, dynamic> placeholdersMap = attributesMap['placeholders'] as Map<String, dynamic>;
+  final Iterable<String> placeholders = placeholdersMap.keys;
+
+  // Used to determine which placeholder is the plural count placeholder
+  final String resourceValue = arbBundle[resourceId] as String;
+  final String countPlaceholder = resourceValue.split(',')[0].substring(1);
 
   // To make it easier to parse the plurals message, temporarily replace each
   // "{placeholder}" parameter with "#placeholder#".
-  String message = bundle[key] as String;
+  String message = arbBundle[resourceId] as String;
   for (String placeholder in placeholders)
     message = message.replaceAll('{$placeholder}', '#$placeholder#');
 
@@ -366,9 +401,9 @@ String genPluralMethod(Map<String, dynamic> bundle, String key) {
   };
 
   final List<String> methodArgs = <String>[
-    ...placeholders,
+    countPlaceholder,
     'locale: _localeName',
-    ...genIntlMethodArgs(bundle, key),
+    ...genIntlMethodArgs(arbBundle, resourceId),
   ];
 
   for (String pluralKey in pluralIds.keys) {
@@ -376,16 +411,22 @@ String genPluralMethod(Map<String, dynamic> bundle, String key) {
     final RegExpMatch match = expRE.firstMatch(message);
     if (match != null && match.groupCount == 2) {
       String argValue = match.group(2);
-      for (String placeholder in placeholders)
-        argValue = argValue.replaceAll('#$placeholder#', '\$$placeholder');
-
+      for (String placeholder in placeholders) {
+        final dynamic value = placeholdersMap[placeholder];
+        if (value is Map<String, dynamic> && _isDateParameter(value)) {
+          argValue = argValue.replaceAll('#$placeholder#', '\$${placeholder}String');
+        } else {
+          argValue = argValue.replaceAll('#$placeholder#', '\$$placeholder');
+        }
+      }
       methodArgs.add("${pluralIds[pluralKey]}: '$argValue'");
     }
   }
 
   return pluralMethodTemplate
-    .replaceAll('@methodName', key)
-    .replaceAll('@methodParameters', genMethodParameters(bundle, key, 'int').join(', '))
+    .replaceAll('@methodName', resourceId)
+    .replaceAll('@methodParameters', genPluralMethodParameters(placeholders, countPlaceholder, resourceId).join(', '))
+    .replaceAll('@dateFormatting', generateDateFormattingLogic(arbBundle, resourceId))
     .replaceAll('@intlMethodArgs', methodArgs.join(',\n      '));
 }
 
@@ -493,8 +534,21 @@ class LocalizationsGenerator {
   /// The class name is specified with the [initialize] method.
   String get className => _className;
   String _className;
-  /// Sets the [className] for the localizations and localizations delegate
-  /// classes.
+
+  /// The list of preferred supported locales.
+  ///
+  /// By default, the list of supported locales in the localizations class
+  /// will be sorted in alphabetical order. However, this option
+  /// allows for a set of preferred locales to appear at the top of the
+  /// list.
+  ///
+  /// The order of locales in this list will also be the order of locale
+  /// priority. For example, if a device supports 'en' and 'es' and
+  /// ['es', 'en'] is passed in, the 'es' locale will take priority over 'en'.
+  ///
+  /// The list of preferred locales is specified with the [initialize] method.
+  List<LocaleInfo> get preferredSupportedLocales => _preferredSupportedLocales;
+  List<LocaleInfo> _preferredSupportedLocales;
 
   /// The list of all arb path strings in [l10nDirectory].
   final List<String> arbPathStrings = <String>[];
@@ -523,10 +577,12 @@ class LocalizationsGenerator {
     String templateArbFileName,
     String outputFileString,
     String classNameString,
+    String preferredSupportedLocaleString,
   }) {
     setL10nDirectory(l10nDirectoryPath);
     setTemplateArbFile(templateArbFileName);
     setOutputFile(outputFileString);
+    setPreferredSupportedLocales(preferredSupportedLocaleString);
     className = classNameString;
   }
 
@@ -575,6 +631,8 @@ class LocalizationsGenerator {
     outputFile = _fs.file(path.join(l10nDirectory.path, outputFileString));
   }
 
+  /// Sets the [className] for the localizations and localizations delegate
+  /// classes.
   @visibleForTesting
   set className(String classNameString) {
     if (classNameString == null)
@@ -584,6 +642,21 @@ class LocalizationsGenerator {
         "The 'output-class', $classNameString, is not a valid Dart class name.\n"
       );
     _className = classNameString;
+  }
+
+  /// Sets [preferredSupportedLocales] so that this particular list of locales
+  /// will take priority over the other locales.
+  @visibleForTesting
+  void setPreferredSupportedLocales(String inputLocales) {
+    if (inputLocales != null) {
+      final List<dynamic> preferredLocalesStringList = json.decode(inputLocales) as List<dynamic>;
+      _preferredSupportedLocales = preferredLocalesStringList.map((dynamic localeString) {
+        if (localeString.runtimeType != String) {
+          throw L10nException('Incorrect runtime type for $localeString');
+        }
+        return LocaleInfo.fromString(localeString.toString());
+      }).toList();
+    }
   }
 
   /// Scans [l10nDirectory] for arb files and parses them for language and locale
@@ -627,10 +700,27 @@ class LocalizationsGenerator {
 
     arbPathStrings.sort();
     localeInfoList.sort();
-    supportedLocales.addAll(localeInfoList);
     supportedLanguageCodes.addAll(localeInfoList.map((LocaleInfo localeInfo) {
       return '\'${localeInfo.languageCode}\'';
     }));
+
+    if (preferredSupportedLocales != null) {
+      for (LocaleInfo preferredLocale in preferredSupportedLocales) {
+        if (!localeInfoList.contains(preferredLocale)) {
+          throw L10nException(
+            'The preferred supported locale, \'$preferredLocale\', cannot be '
+            'added. Please make sure that there is a corresponding arb file '
+            'with translations for the locale, or remove the locale from the '
+            'preferred supported locale list if there is no intent to support '
+            'it.'
+          );
+        }
+
+        localeInfoList.removeWhere((LocaleInfo localeInfo) => localeInfo == preferredLocale);
+      }
+      localeInfoList.insertAll(0, preferredSupportedLocales);
+    }
+    supportedLocales.addAll(localeInfoList);
   }
 
   /// Generates the methods for the localizations class.

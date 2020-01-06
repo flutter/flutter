@@ -7,7 +7,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../build_info.dart';
 import '../cache.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 
 /// The directory in the Flutter cache for each platform's artifacts.
@@ -73,14 +73,14 @@ class UnpackCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     final String targetName = stringArg('target-platform');
     final String targetDirectory = stringArg('cache-dir');
-    if (!fs.directory(targetDirectory).existsSync()) {
-      fs.directory(targetDirectory).createSync(recursive: true);
+    if (!globals.fs.directory(targetDirectory).existsSync()) {
+      globals.fs.directory(targetDirectory).createSync(recursive: true);
     }
     final TargetPlatform targetPlatform = getTargetPlatformForName(targetName);
     final ArtifactUnpacker flutterArtifactFetcher = ArtifactUnpacker(targetPlatform);
     bool success = true;
-    if (artifacts is LocalEngineArtifacts) {
-      final LocalEngineArtifacts localEngineArtifacts = artifacts as LocalEngineArtifacts;
+    if (globals.artifacts is LocalEngineArtifacts) {
+      final LocalEngineArtifacts localEngineArtifacts = globals.artifacts as LocalEngineArtifacts;
       success = flutterArtifactFetcher.copyLocalBuildArtifacts(
         localEngineArtifacts.engineOutPath,
         targetDirectory,
@@ -124,9 +124,9 @@ class ArtifactUnpacker {
         throwToolExit('Unsupported target platform: $platform');
     }
     final String targetHash =
-        readHashFileIfPossible(Cache.instance.getStampFileFor(cacheStamp));
+        readHashFileIfPossible(globals.cache.getStampFileFor(cacheStamp));
     if (targetHash == null) {
-      printError('Failed to find engine stamp file');
+      globals.printError('Failed to find engine stamp file');
       return false;
     }
 
@@ -134,7 +134,7 @@ class ArtifactUnpacker {
       final String currentHash = _lastCopiedHash(targetDirectory);
       if (currentHash == null || targetHash != currentHash) {
         // Copy them to the target directory.
-        final String flutterCacheDirectory = fs.path.join(
+        final String flutterCacheDirectory = globals.fs.path.join(
           Cache.flutterRoot,
           'bin',
           'cache',
@@ -146,13 +146,13 @@ class ArtifactUnpacker {
           return false;
         }
         _setLastCopiedHash(targetDirectory, targetHash);
-        printTrace('Copied artifacts for version $targetHash.');
+        globals.printTrace('Copied artifacts for version $targetHash.');
       } else {
-        printTrace('Artifacts for version $targetHash already present.');
+        globals.printTrace('Artifacts for version $targetHash already present.');
       }
     } catch (error, stackTrace) {
-      printError(stackTrace.toString());
-      printError(error.toString());
+      globals.printError(stackTrace.toString());
+      globals.printError(error.toString());
       return false;
     }
     return true;
@@ -179,30 +179,30 @@ class ArtifactUnpacker {
   bool _copyArtifactFiles(String sourceDirectory, String targetDirectory) {
     final List<String> artifactFiles = artifactFilesByPlatform[platform];
     if (artifactFiles == null) {
-      printError('Unsupported platform: $platform.');
+      globals.printError('Unsupported platform: $platform.');
       return false;
     }
 
     try {
-      fs.directory(targetDirectory).createSync(recursive: true);
+      globals.fs.directory(targetDirectory).createSync(recursive: true);
       for (final String entityName in artifactFiles) {
-        final String sourcePath = fs.path.join(sourceDirectory, entityName);
-        final String targetPath = fs.path.join(targetDirectory, entityName);
+        final String sourcePath = globals.fs.path.join(sourceDirectory, entityName);
+        final String targetPath = globals.fs.path.join(targetDirectory, entityName);
         if (entityName.endsWith('/')) {
           copyDirectorySync(
-            fs.directory(sourcePath),
-            fs.directory(targetPath),
+            globals.fs.directory(sourcePath),
+            globals.fs.directory(targetPath),
           );
         } else {
-          fs.file(sourcePath)
-            .copySync(fs.path.join(targetDirectory, entityName));
+          globals.fs.file(sourcePath)
+            .copySync(globals.fs.path.join(targetDirectory, entityName));
         }
       }
 
-      printTrace('Copied artifacts from $sourceDirectory.');
+      globals.printTrace('Copied artifacts from $sourceDirectory.');
     } catch (e, stackTrace) {
-      printError(e.message as String);
-      printError(stackTrace.toString());
+      globals.printError(e.message as String);
+      globals.printError(stackTrace.toString());
       return false;
     }
     return true;
@@ -211,7 +211,7 @@ class ArtifactUnpacker {
   /// Returns a File object for the file containing the last copied hash
   /// in [directory].
   File _lastCopiedHashFile(String directory) {
-    return fs.file(fs.path.join(directory, '.last_artifact_version'));
+    return globals.fs.file(globals.fs.path.join(directory, '.last_artifact_version'));
   }
 
   /// Returns the hash of the artifacts last copied to [directory], or null if
@@ -220,11 +220,11 @@ class ArtifactUnpacker {
     // Sanity check that at least one file is present; this won't catch every
     // case, but handles someone deleting all the non-hidden cached files to
     // force fresh copy.
-    final String artifactFilePath = fs.path.join(
+    final String artifactFilePath = globals.fs.path.join(
       directory,
       artifactFilesByPlatform[platform].first,
     );
-    if (!fs.file(artifactFilePath).existsSync()) {
+    if (!globals.fs.file(artifactFilePath).existsSync()) {
       return null;
     }
     final File hashFile = _lastCopiedHashFile(directory);

@@ -10,12 +10,11 @@ import 'application_package.dart';
 import 'base/common.dart';
 import 'base/io.dart';
 import 'base/os.dart';
-import 'base/process_manager.dart';
 import 'build_info.dart';
 import 'cache.dart';
 import 'convert.dart';
 import 'device.dart';
-import 'globals.dart';
+import 'globals.dart' as globals;
 import 'protocol_discovery.dart';
 
 /// A partial implementation of Device for desktop-class devices to inherit
@@ -95,11 +94,11 @@ abstract class DesktopDevice extends Device {
     final BuildMode buildMode = debuggingOptions?.buildInfo?.mode;
     final String executable = executablePathForDevice(package, buildMode);
     if (executable == null) {
-      printError('Unable to find executable to run');
+      globals.printError('Unable to find executable to run');
       return LaunchResult.failed();
     }
 
-    final Process process = await processManager.start(<String>[
+    final Process process = await globals.processManager.start(<String>[
       executable,
     ]);
     _runningProcesses.add(process);
@@ -119,7 +118,7 @@ abstract class DesktopDevice extends Device {
       onAttached(package, buildMode, process);
       return LaunchResult.succeeded(observatoryUri: observatoryUri);
     } catch (error) {
-      printError('Error waiting for a debug connection: $error');
+      globals.printError('Error waiting for a debug connection: $error');
       return LaunchResult.failed();
     } finally {
       await observatoryDiscovery.cancel();

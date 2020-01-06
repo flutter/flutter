@@ -4,7 +4,7 @@
 
 import 'dart:js' as js;
 
-import 'package:flutter_driver/src/extension/web_extension.dart';
+import 'package:flutter_driver/src/extension/_web_extension.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

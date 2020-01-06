@@ -10,6 +10,7 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/doctor.dart';
 import 'package:flutter_tools/src/intellij/intellij.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -18,7 +19,7 @@ void main() {
   FileSystem fs;
 
   void writeFileCreatingDirectories(String path, List<int> bytes) {
-    final File file = fs.file(path);
+    final File file = globals.fs.file(path);
     file.parent.createSync(recursive: true);
     file.writeAsBytesSync(bytes);
   }
@@ -40,7 +41,7 @@ void main() {
 </idea-plugin>
 ''');
         writeFileCreatingDirectories(
-            fs.path.join(_kPluginsPath, 'Dart', 'lib', 'Dart.jar'),
+            globals.fs.path.join(_kPluginsPath, 'Dart', 'lib', 'Dart.jar'),
             ZipEncoder().encode(dartJarArchive));
 
         final Archive flutterJarArchive =
@@ -51,7 +52,7 @@ void main() {
 </idea-plugin>
 ''');
         writeFileCreatingDirectories(
-            fs.path.join(_kPluginsPath, 'flutter-intellij.jar'),
+            globals.fs.path.join(_kPluginsPath, 'flutter-intellij.jar'),
             ZipEncoder().encode(flutterJarArchive));
 
         final List<ValidationMessage> messages = <ValidationMessage>[];

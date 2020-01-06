@@ -15,10 +15,9 @@ import 'base/context.dart';
 import 'base/file_system.dart';
 import 'build_info.dart';
 import 'bundle.dart' as bundle;
-import 'cache.dart';
 import 'features.dart';
 import 'flutter_manifest.dart';
-import 'globals.dart';
+import 'globals.dart' as globals;
 import 'ios/plist_parser.dart';
 import 'ios/xcodeproj.dart' as xcode;
 import 'plugins.dart';
@@ -73,11 +72,11 @@ class FlutterProject {
 
   /// Returns a [FlutterProject] view of the current directory or a ToolExit error,
   /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
-  static FlutterProject current() => fromDirectory(fs.currentDirectory);
+  static FlutterProject current() => fromDirectory(globals.fs.currentDirectory);
 
   /// Returns a [FlutterProject] view of the given directory or a ToolExit error,
   /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
-  static FlutterProject fromPath(String path) => fromDirectory(fs.directory(path));
+  static FlutterProject fromPath(String path) => fromDirectory(globals.fs.directory(path));
 
   /// The location of this project.
   final Directory directory;
@@ -192,8 +191,8 @@ class FlutterProject {
     try {
       manifest = FlutterManifest.createFromPath(path);
     } on YamlException catch (e) {
-      printStatus('Error detected in pubspec.yaml:', emphasis: true);
-      printError('$e');
+      globals.printStatus('Error detected in pubspec.yaml:', emphasis: true);
+      globals.printError('$e');
     }
     if (manifest == null) {
       throwToolExit('Please correct the pubspec.yaml file at $path');
@@ -309,7 +308,7 @@ class IosProject implements XcodeBasedProject {
 
   static final RegExp _productBundleIdPattern = RegExp(r'''^\s*PRODUCT_BUNDLE_IDENTIFIER\s*=\s*(["']?)(.*?)\1;\s*$''');
   static const String _productBundleIdVariable = r'$(PRODUCT_BUNDLE_IDENTIFIER)';
-  static const String _hostAppProjectName = 'Runner';
+  static const String _hostAppBundleName = 'Runner';
 
   Directory get ephemeralDirectory => parent.directory.childDirectory('.ios');
   Directory get _editableDirectory => parent.directory.childDirectory('ios');
@@ -329,6 +328,9 @@ class IosProject implements XcodeBasedProject {
   /// This is the same as [hostAppRoot] except when the project is
   /// a Flutter module with an editable host app.
   Directory get _flutterLibRoot => isModule ? ephemeralDirectory : _editableDirectory;
+
+  /// The bundle name of the host app, `Runner.app`.
+  String get hostAppBundleName => '$_hostAppBundleName.app';
 
   /// True, if the parent Flutter project is a module project.
   bool get isModule => parent.isModule;
@@ -351,20 +353,20 @@ class IosProject implements XcodeBasedProject {
   @override
   File get podManifestLock => hostAppRoot.childDirectory('Pods').childFile('Manifest.lock');
 
-  /// The 'Info.plist' file of the host app.
-  File get hostInfoPlist => hostAppRoot.childDirectory(_hostAppProjectName).childFile('Info.plist');
+  /// The default 'Info.plist' file of the host app. The developer can change this location in Xcode.
+  File get defaultHostInfoPlist => hostAppRoot.childDirectory(_hostAppBundleName).childFile('Info.plist');
 
   @override
   Directory get symlinks => _flutterLibRoot.childDirectory('.symlinks');
 
   @override
-  Directory get xcodeProject => hostAppRoot.childDirectory('$_hostAppProjectName.xcodeproj');
+  Directory get xcodeProject => hostAppRoot.childDirectory('$_hostAppBundleName.xcodeproj');
 
   @override
   File get xcodeProjectInfoFile => xcodeProject.childFile('project.pbxproj');
 
   @override
-  Directory get xcodeWorkspace => hostAppRoot.childDirectory('$_hostAppProjectName.xcworkspace');
+  Directory get xcodeWorkspace => hostAppRoot.childDirectory('$_hostAppBundleName.xcworkspace');
 
   /// Xcode workspace shared data directory for the host app.
   Directory get xcodeWorkspaceSharedData => xcodeWorkspace.childDirectory('xcshareddata');
@@ -381,48 +383,44 @@ class IosProject implements XcodeBasedProject {
   /// iOS tooling needed to read it is not installed.
   Future<String> get productBundleIdentifier async {
     String fromPlist;
-    try {
-      fromPlist = PlistParser.instance.getValueFromFile(
-        hostInfoPlist.path,
-        PlistParser.kCFBundleIdentifierKey,
-      );
-    } on FileNotFoundException {
-      // iOS tooling not found; likely not running OSX; let [fromPlist] be null
-    }
-    if (fromPlist != null && !fromPlist.contains('\$')) {
-      // Info.plist has no build variables in product bundle ID.
-      return fromPlist;
-    }
-    final String fromPbxproj = _firstMatchInFile(xcodeProjectInfoFile, _productBundleIdPattern)?.group(2);
-    if (fromPbxproj != null && (fromPlist == null || fromPlist == _productBundleIdVariable)) {
-      // Common case. Avoids parsing build settings.
-      return fromPbxproj;
-    }
-    if (fromPlist != null && xcode.xcodeProjectInterpreter.isInstalled) {
-      // General case: perform variable substitution using build settings.
-      return xcode.substituteXcodeVariables(fromPlist, await buildSettings);
-    }
-    return null;
-  }
-
-  /// The bundle name of the host app, `My App.app`.
-  Future<String> get hostAppBundleName async {
-    // The product name and bundle name are derived from the display name, which the user
-    // is instructed to change in Xcode as part of deploying to the App Store.
-    // https://flutter.dev/docs/deployment/ios#review-xcode-project-settings
-    // It may be expensive, but the only source of truth for the name is
-    // Xcode's interpretation of the build settings.
-    String productName;
-    if (xcode.xcodeProjectInterpreter.isInstalled) {
-      final Map<String, String> xcodeBuildSettings = await buildSettings;
-      if (xcodeBuildSettings != null) {
-        productName = xcodeBuildSettings['FULL_PRODUCT_NAME'];
+    final File defaultInfoPlist = defaultHostInfoPlist;
+    // Users can change the location of the Info.plist.
+    // Try parsing the default, first.
+    if (defaultInfoPlist.existsSync()) {
+      try {
+        fromPlist = PlistParser.instance.getValueFromFile(
+          defaultHostInfoPlist.path,
+          PlistParser.kCFBundleIdentifierKey,
+        );
+      } on FileNotFoundException {
+        // iOS tooling not found; likely not running OSX; let [fromPlist] be null
+      }
+      if (fromPlist != null && !fromPlist.contains('\$')) {
+        // Info.plist has no build variables in product bundle ID.
+        return fromPlist;
       }
     }
-    if (productName == null) {
-      printTrace('FULL_PRODUCT_NAME not present, defaulting to $_hostAppProjectName');
+    final Map<String, String> allBuildSettings = await buildSettings;
+    if (allBuildSettings != null) {
+      if (fromPlist != null) {
+        // Perform variable substitution using build settings.
+        return xcode.substituteXcodeVariables(fromPlist, allBuildSettings);
+      }
+      return allBuildSettings['PRODUCT_BUNDLE_IDENTIFIER'];
     }
-    return productName ?? '$_hostAppProjectName.app';
+
+    // On non-macOS platforms, parse the first PRODUCT_BUNDLE_IDENTIFIER from
+    // the project file. This can return the wrong bundle identifier if additional
+    // bundles have been added to the project and are found first, like frameworks
+    // or companion watchOS projects. However, on non-macOS platforms this is
+    // only used for display purposes and to regenerate organization names, so
+    // best-effort is probably fine.
+    final String fromPbxproj = _firstMatchInFile(xcodeProjectInfoFile, _productBundleIdPattern)?.group(2);
+    if (fromPbxproj != null && (fromPlist == null || fromPlist == _productBundleIdVariable)) {
+      return fromPbxproj;
+    }
+
+    return null;
   }
 
   /// The build settings for the host app of this project, as a detached map.
@@ -435,13 +433,14 @@ class IosProject implements XcodeBasedProject {
     Map<String, String> buildSettings = _buildSettings;
     buildSettings ??= await xcode.xcodeProjectInterpreter.getBuildSettings(
       xcodeProject.path,
-      _hostAppProjectName,
+      _hostAppBundleName,
     );
     if (buildSettings != null && buildSettings.isNotEmpty) {
       // No timeouts, flakes, or errors.
       _buildSettings = buildSettings;
+      return buildSettings;
     }
-    return buildSettings;
+    return null;
   }
 
   Map<String, String> _buildSettings;
@@ -455,7 +454,7 @@ class IosProject implements XcodeBasedProject {
   }
 
   Future<void> _updateGeneratedXcodeConfigIfNeeded() async {
-    if (Cache.instance.isOlderThanToolsStamp(generatedXcodePropertiesFile)) {
+    if (globals.cache.isOlderThanToolsStamp(generatedXcodePropertiesFile)) {
       await xcode.updateGeneratedXcodeProperties(
         project: parent,
         buildInfo: BuildInfo.debug,
@@ -469,7 +468,7 @@ class IosProject implements XcodeBasedProject {
       return;
     }
     final bool pubspecChanged = isOlderThanReference(entity: ephemeralDirectory, referenceFile: parent.pubspecFile);
-    final bool toolingChanged = Cache.instance.isOlderThanToolsStamp(ephemeralDirectory);
+    final bool toolingChanged = globals.cache.isOlderThanToolsStamp(ephemeralDirectory);
     if (!pubspecChanged && !toolingChanged) {
       return;
     }
@@ -479,18 +478,18 @@ class IosProject implements XcodeBasedProject {
       .childDirectory('engine');
 
     _deleteIfExistsSync(ephemeralDirectory);
-    _overwriteFromTemplate(fs.path.join('module', 'ios', 'library'), ephemeralDirectory);
+    _overwriteFromTemplate(globals.fs.path.join('module', 'ios', 'library'), ephemeralDirectory);
     // Add ephemeral host app, if a editable host app does not already exist.
     if (!_editableDirectory.existsSync()) {
-      _overwriteFromTemplate(fs.path.join('module', 'ios', 'host_app_ephemeral'), ephemeralDirectory);
+      _overwriteFromTemplate(globals.fs.path.join('module', 'ios', 'host_app_ephemeral'), ephemeralDirectory);
       if (hasPlugins(parent)) {
-        _overwriteFromTemplate(fs.path.join('module', 'ios', 'host_app_ephemeral_cocoapods'), ephemeralDirectory);
+        _overwriteFromTemplate(globals.fs.path.join('module', 'ios', 'host_app_ephemeral_cocoapods'), ephemeralDirectory);
       }
       // Copy podspec and framework from engine cache. The actual build mode
       // doesn't actually matter as it will be overwritten by xcode_backend.sh.
       // However, cocoapods will run before that script and requires something
       // to be in this location.
-      final Directory framework = fs.directory(artifacts.getArtifactPath(Artifact.flutterFramework,
+      final Directory framework = globals.fs.directory(globals.artifacts.getArtifactPath(Artifact.flutterFramework,
         platform: TargetPlatform.ios, mode: BuildMode.debug));
       if (framework.existsSync()) {
         final File podspec = framework.parent.childFile('Flutter.podspec');
@@ -506,10 +505,10 @@ class IosProject implements XcodeBasedProject {
       throwToolExit('iOS host app is already editable. To start fresh, delete the ios/ folder.');
     }
     _deleteIfExistsSync(ephemeralDirectory);
-    _overwriteFromTemplate(fs.path.join('module', 'ios', 'library'), ephemeralDirectory);
-    _overwriteFromTemplate(fs.path.join('module', 'ios', 'host_app_ephemeral'), _editableDirectory);
-    _overwriteFromTemplate(fs.path.join('module', 'ios', 'host_app_ephemeral_cocoapods'), _editableDirectory);
-    _overwriteFromTemplate(fs.path.join('module', 'ios', 'host_app_editable_cocoapods'), _editableDirectory);
+    _overwriteFromTemplate(globals.fs.path.join('module', 'ios', 'library'), ephemeralDirectory);
+    _overwriteFromTemplate(globals.fs.path.join('module', 'ios', 'host_app_ephemeral'), _editableDirectory);
+    _overwriteFromTemplate(globals.fs.path.join('module', 'ios', 'host_app_ephemeral_cocoapods'), _editableDirectory);
+    _overwriteFromTemplate(globals.fs.path.join('module', 'ios', 'host_app_editable_cocoapods'), _editableDirectory);
     await _updateGeneratedXcodeConfigIfNeeded();
     await injectPlugins(parent);
   }
@@ -520,7 +519,7 @@ class IosProject implements XcodeBasedProject {
   Directory get pluginRegistrantHost {
     return isModule
         ? _flutterLibRoot.childDirectory('Flutter').childDirectory('FlutterPluginRegistrant')
-        : hostAppRoot.childDirectory(_hostAppProjectName);
+        : hostAppRoot.childDirectory(_hostAppBundleName);
   }
 
   void _overwriteFromTemplate(String path, Directory target) {
@@ -583,14 +582,14 @@ class AndroidProject {
 
   File get appManifestFile {
     return isUsingGradle
-        ? fs.file(fs.path.join(hostAppGradleRoot.path, 'app', 'src', 'main', 'AndroidManifest.xml'))
+        ? globals.fs.file(globals.fs.path.join(hostAppGradleRoot.path, 'app', 'src', 'main', 'AndroidManifest.xml'))
         : hostAppGradleRoot.childFile('AndroidManifest.xml');
   }
 
   File get gradleAppOutV1File => gradleAppOutV1Directory.childFile('app-debug.apk');
 
   Directory get gradleAppOutV1Directory {
-    return fs.directory(fs.path.join(hostAppGradleRoot.path, 'app', 'build', 'outputs', 'apk'));
+    return globals.fs.directory(globals.fs.path.join(hostAppGradleRoot.path, 'app', 'build', 'outputs', 'apk'));
   }
 
   /// Whether the current flutter project has an Android sub-project.
@@ -622,8 +621,8 @@ class AndroidProject {
       _regenerateLibrary();
       // Add ephemeral host app, if an editable host app does not already exist.
       if (!_editableHostAppDirectory.existsSync()) {
-        _overwriteFromTemplate(fs.path.join('module', 'android', 'host_app_common'), ephemeralDirectory);
-        _overwriteFromTemplate(fs.path.join('module', 'android', 'host_app_ephemeral'), ephemeralDirectory);
+        _overwriteFromTemplate(globals.fs.path.join('module', 'android', 'host_app_common'), ephemeralDirectory);
+        _overwriteFromTemplate(globals.fs.path.join('module', 'android', 'host_app_ephemeral'), ephemeralDirectory);
       }
     }
     if (!hostAppGradleRoot.existsSync()) {
@@ -634,7 +633,7 @@ class AndroidProject {
 
   bool _shouldRegenerateFromTemplate() {
     return isOlderThanReference(entity: ephemeralDirectory, referenceFile: parent.pubspecFile)
-        || Cache.instance.isOlderThanToolsStamp(ephemeralDirectory);
+        || globals.cache.isOlderThanToolsStamp(ephemeralDirectory);
   }
 
   Future<void> makeHostAppEditable() async {
@@ -643,9 +642,9 @@ class AndroidProject {
       throwToolExit('Android host app is already editable. To start fresh, delete the android/ folder.');
     }
     _regenerateLibrary();
-    _overwriteFromTemplate(fs.path.join('module', 'android', 'host_app_common'), _editableHostAppDirectory);
-    _overwriteFromTemplate(fs.path.join('module', 'android', 'host_app_editable'), _editableHostAppDirectory);
-    _overwriteFromTemplate(fs.path.join('module', 'android', 'gradle'), _editableHostAppDirectory);
+    _overwriteFromTemplate(globals.fs.path.join('module', 'android', 'host_app_common'), _editableHostAppDirectory);
+    _overwriteFromTemplate(globals.fs.path.join('module', 'android', 'host_app_editable'), _editableHostAppDirectory);
+    _overwriteFromTemplate(globals.fs.path.join('module', 'android', 'gradle'), _editableHostAppDirectory);
     gradle.gradleUtils.injectGradleWrapperIfNeeded(_editableHostAppDirectory);
     gradle.writeLocalProperties(_editableHostAppDirectory.childFile('local.properties'));
     await injectPlugins(parent);
@@ -657,12 +656,12 @@ class AndroidProject {
 
   void _regenerateLibrary() {
     _deleteIfExistsSync(ephemeralDirectory);
-    _overwriteFromTemplate(fs.path.join(
+    _overwriteFromTemplate(globals.fs.path.join(
       'module',
       'android',
       featureFlags.isAndroidEmbeddingV2Enabled ? 'library_new_embedding' : 'library',
     ), ephemeralDirectory);
-    _overwriteFromTemplate(fs.path.join('module', 'android', 'gradle'), ephemeralDirectory);
+    _overwriteFromTemplate(globals.fs.path.join('module', 'android', 'gradle'), ephemeralDirectory);
     gradle.gradleUtils.injectGradleWrapperIfNeeded(ephemeralDirectory);
   }
 
@@ -781,7 +780,7 @@ class MacOSProject implements XcodeBasedProject {
   @override
   final FlutterProject parent;
 
-  static const String _hostAppProjectName = 'Runner';
+  static const String _hostAppBundleName = 'Runner';
 
   @override
   bool existsSync() => _macOSDirectory.existsSync();
@@ -825,13 +824,13 @@ class MacOSProject implements XcodeBasedProject {
   File get podManifestLock => _macOSDirectory.childDirectory('Pods').childFile('Manifest.lock');
 
   @override
-  Directory get xcodeProject => _macOSDirectory.childDirectory('$_hostAppProjectName.xcodeproj');
+  Directory get xcodeProject => _macOSDirectory.childDirectory('$_hostAppBundleName.xcodeproj');
 
   @override
   File get xcodeProjectInfoFile => xcodeProject.childFile('project.pbxproj');
 
   @override
-  Directory get xcodeWorkspace => _macOSDirectory.childDirectory('$_hostAppProjectName.xcworkspace');
+  Directory get xcodeWorkspace => _macOSDirectory.childDirectory('$_hostAppBundleName.xcworkspace');
 
   @override
   Directory get symlinks => ephemeralDirectory.childDirectory('.symlinks');
@@ -848,7 +847,7 @@ class MacOSProject implements XcodeBasedProject {
   }
 
   Future<void> _updateGeneratedXcodeConfigIfNeeded() async {
-    if (Cache.instance.isOlderThanToolsStamp(generatedXcodePropertiesFile)) {
+    if (globals.cache.isOlderThanToolsStamp(generatedXcodePropertiesFile)) {
       await xcode.updateGeneratedXcodeProperties(
         project: parent,
         buildInfo: BuildInfo.debug,

@@ -17,12 +17,10 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/platform.dart';
-import '../base/process_manager.dart';
 import '../codegen.dart';
 import '../dart/pub.dart';
 import '../dart/sdk.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
 import '../project.dart';
 
 /// The minimum version of build_runner we can support in the flutter tool.
@@ -39,8 +37,8 @@ class BuildRunner extends CodeGenerator {
 
   @override
   Future<void> generateBuildScript(FlutterProject flutterProject) async {
-    final Directory entrypointDirectory = fs.directory(fs.path.join(flutterProject.dartTool.path, 'build', 'entrypoint'));
-    final Directory generatedDirectory = fs.directory(fs.path.join(flutterProject.dartTool.path, 'flutter_tool'));
+    final Directory entrypointDirectory = globals.fs.directory(globals.fs.path.join(flutterProject.dartTool.path, 'build', 'entrypoint'));
+    final Directory generatedDirectory = globals.fs.directory(globals.fs.path.join(flutterProject.dartTool.path, 'flutter_tool'));
     final File buildSnapshot = entrypointDirectory.childFile('build.dart.snapshot');
     final File scriptIdFile = entrypointDirectory.childFile('id');
     final File syntheticPubspec = generatedDirectory.childFile('pubspec.yaml');
@@ -69,7 +67,7 @@ class BuildRunner extends CodeGenerator {
     if (flutterProject.dartTool.existsSync()) {
       flutterProject.dartTool.deleteSync(recursive: true);
     }
-    final Status status = logger.startProgress('generating build script...', timeout: null);
+    final Status status = globals.logger.startProgress('generating build script...', timeout: null);
     try {
       generatedDirectory.createSync(recursive: true);
       entrypointDirectory.createSync(recursive: true);
@@ -86,8 +84,8 @@ class BuildRunner extends CodeGenerator {
           // parent directories.
           if (node is YamlMap && node['path'] != null) {
             final String path = node['path'] as String;
-            if (fs.path.isRelative(path)) {
-              final String convertedPath = fs.path.join('..', '..', path);
+            if (globals.fs.path.isRelative(path)) {
+              final String convertedPath = globals.fs.path.join('..', '..', path);
               stringBuffer.writeln('  $name:');
               stringBuffer.writeln('    path: $convertedPath');
             } else {
@@ -112,18 +110,18 @@ class BuildRunner extends CodeGenerator {
         scriptIdFile.createSync(recursive: true);
       }
       scriptIdFile.writeAsBytesSync(appliedBuilderDigest);
-      final ProcessResult generateResult = await processManager.run(<String>[
+      final ProcessResult generateResult = await globals.processManager.run(<String>[
         sdkBinaryName('pub'), 'run', 'build_runner', 'generate-build-script',
       ], workingDirectory: syntheticPubspec.parent.path);
       if (generateResult.exitCode != 0) {
         throwToolExit('Error generating build_script snapshot: ${generateResult.stderr}');
       }
-      final File buildScript = fs.file(generateResult.stdout.trim());
-      final ProcessResult result = await processManager.run(<String>[
-        artifacts.getArtifactPath(Artifact.engineDartBinary),
+      final File buildScript = globals.fs.file(generateResult.stdout.trim());
+      final ProcessResult result = await globals.processManager.run(<String>[
+        globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
         '--snapshot=${buildSnapshot.path}',
         '--snapshot-kind=app-jit',
-        '--packages=${fs.path.join(generatedDirectory.path, '.packages')}',
+        '--packages=${globals.fs.path.join(generatedDirectory.path, '.packages')}',
         buildScript.path,
       ]);
       if (result.exitCode != 0) {
@@ -143,7 +141,7 @@ class BuildRunner extends CodeGenerator {
     List<String> extraFrontEndOptions = const <String> [],
   }) async {
     await generateBuildScript(flutterProject);
-    final String engineDartBinaryPath = artifacts.getArtifactPath(Artifact.engineDartBinary);
+    final String engineDartBinaryPath = globals.artifacts.getArtifactPath(Artifact.engineDartBinary);
     final File buildSnapshot = flutterProject
         .dartTool
         .childDirectory('build')
@@ -154,7 +152,7 @@ class BuildRunner extends CodeGenerator {
         .childDirectory('flutter_tool')
         .childFile('.packages')
         .path;
-    final Status status = logger.startProgress('starting build daemon...', timeout: null);
+    final Status status = globals.logger.startProgress('starting build daemon...', timeout: null);
     BuildDaemonClient buildDaemonClient;
     try {
       final List<String> command = <String>[
@@ -170,7 +168,7 @@ class BuildRunner extends CodeGenerator {
         command,
         logHandler: (ServerLog log) {
           if (log.message != null) {
-            printTrace(log.message);
+            globals.printTrace(log.message);
           }
         },
       );
@@ -228,7 +226,7 @@ class _BuildRunnerCodegenDaemon implements CodegenDaemon {
 // Sorts the builders by name and produces a hashcode of the resulting iterable.
 List<int> _produceScriptId(YamlMap builders) {
   if (builders == null || builders.isEmpty) {
-    return md5.convert(platform.version.codeUnits).bytes;
+    return md5.convert(globals.platform.version.codeUnits).bytes;
   }
   final List<String> orderedBuilderNames = builders.keys
     .cast<String>()
@@ -239,6 +237,6 @@ List<int> _produceScriptId(YamlMap builders) {
   return md5.convert(<String>[
     ...orderedBuilderNames,
     ...orderedBuilderValues,
-    platform.version,
+    globals.platform.version,
   ].join('').codeUnits).bytes;
 }

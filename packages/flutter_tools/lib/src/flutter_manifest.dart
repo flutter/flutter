@@ -10,7 +10,7 @@ import 'base/file_system.dart';
 import 'base/user_messages.dart';
 import 'base/utils.dart';
 import 'cache.dart';
-import 'globals.dart';
+import 'globals.dart' as globals;
 import 'plugins.dart';
 
 /// A wrapper around the `flutter` section in the `pubspec.yaml` file.
@@ -27,10 +27,10 @@ class FlutterManifest {
 
   /// Returns null on invalid manifest. Returns empty manifest on missing file.
   static FlutterManifest createFromPath(String path) {
-    if (path == null || !fs.isFileSync(path)) {
+    if (path == null || !globals.fs.isFileSync(path)) {
       return _createFromYaml(null);
     }
-    final String manifest = fs.file(path).readAsStringSync();
+    final String manifest = globals.fs.file(path).readAsStringSync();
     return createFromString(manifest);
   }
 
@@ -91,7 +91,7 @@ class FlutterManifest {
       version = Version.parse(verStr);
     } on Exception {
       if (!_hasShowInvalidVersionMsg) {
-        printStatus(userMessages.invalidVersionSettingHintMessage(verStr), emphasis: true);
+        globals.printStatus(userMessages.invalidVersionSettingHintMessage(verStr), emphasis: true);
         _hasShowInvalidVersionMsg = true;
       }
     }
@@ -199,14 +199,14 @@ class FlutterManifest {
     final List<Uri> results = <Uri>[];
     for (Object asset in assets) {
       if (asset is! String || asset == null || asset == '') {
-        printError('Asset manifest contains a null or empty uri.');
+        globals.printError('Asset manifest contains a null or empty uri.');
         continue;
       }
       final String stringAsset = asset as String;
       try {
         results.add(Uri.parse(Uri.encodeFull(stringAsset)));
       } on FormatException {
-        printError('Asset manifest contains invalid uri: $asset.');
+        globals.printError('Asset manifest contains invalid uri: $asset.');
       }
     }
     return results;
@@ -229,11 +229,11 @@ class FlutterManifest {
       final YamlList fontFiles = fontFamily['fonts'] as YamlList;
       final String familyName = fontFamily['family'] as String;
       if (familyName == null) {
-        printError('Warning: Missing family name for font.', emphasis: true);
+        globals.printError('Warning: Missing family name for font.', emphasis: true);
         continue;
       }
       if (fontFiles == null) {
-        printError('Warning: No fonts specified for font $familyName', emphasis: true);
+        globals.printError('Warning: No fonts specified for font $familyName', emphasis: true);
         continue;
       }
 
@@ -241,7 +241,7 @@ class FlutterManifest {
       for (Map<dynamic, dynamic> fontFile in fontFiles.cast<Map<dynamic, dynamic>>()) {
         final String asset = fontFile['asset'] as String;
         if (asset == null) {
-          printError('Warning: Missing asset in fonts for $familyName', emphasis: true);
+          globals.printError('Warning: Missing asset in fonts for $familyName', emphasis: true);
           continue;
         }
 
@@ -307,14 +307,14 @@ class FontAsset {
 
 @visibleForTesting
 String buildSchemaDir(FileSystem fs) {
-  return fs.path.join(
-    fs.path.absolute(Cache.flutterRoot), 'packages', 'flutter_tools', 'schema',
+  return globals.fs.path.join(
+    globals.fs.path.absolute(Cache.flutterRoot), 'packages', 'flutter_tools', 'schema',
   );
 }
 
 @visibleForTesting
 String buildSchemaPath(FileSystem fs) {
-  return fs.path.join(
+  return globals.fs.path.join(
     buildSchemaDir(fs),
     'pubspec_yaml.json',
   );
@@ -352,8 +352,8 @@ bool _validate(YamlMap manifest) {
   }
 
   if (errors.isNotEmpty) {
-    printStatus('Error detected in pubspec.yaml:', emphasis: true);
-    printError(errors.join('\n'));
+    globals.printStatus('Error detected in pubspec.yaml:', emphasis: true);
+    globals.printError(errors.join('\n'));
     return false;
   }
 

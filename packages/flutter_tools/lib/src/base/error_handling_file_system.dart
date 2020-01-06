@@ -8,8 +8,8 @@ import 'dart:io' as io show Directory, File, Link;
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
 
+import '../globals.dart' as globals;
 import 'common.dart' show throwToolExit;
-import 'platform.dart';
 
 // The Flutter tool hits file system errors that only the end-user can address.
 // We would like these errors to not hit crash logging. In these cases, we
@@ -129,7 +129,7 @@ class ErrorHandlingFile
     try {
       return await op();
     } on FileSystemException catch (e) {
-      if (platform.isWindows) {
+      if (globals.platform.isWindows) {
         _handleWindowsException(e, failureMessage);
       }
       rethrow;
@@ -140,7 +140,7 @@ class ErrorHandlingFile
     try {
       return op();
     } on FileSystemException catch (e) {
-      if (platform.isWindows) {
+      if (globals.platform.isWindows) {
         _handleWindowsException(e, failureMessage);
       }
       rethrow;

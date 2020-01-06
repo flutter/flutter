@@ -20,11 +20,16 @@ void main() {
       }));
     }
 
-    Map<String, dynamic> build(int timeStamp, int duration) => <String, dynamic>{
+    Map<String, dynamic> frameBegin(int timeStamp) => <String, dynamic>{
       'name': 'Frame',
-      'ph': 'X',
+      'ph': 'B',
       'ts': timeStamp,
-      'dur': duration,
+    };
+
+    Map<String, dynamic> frameEnd(int timeStamp) => <String, dynamic>{
+      'name': 'Frame',
+      'ph': 'E',
+      'ts': timeStamp,
     };
 
     Map<String, dynamic> begin(int timeStamp) => <String, dynamic>{
@@ -54,8 +59,8 @@ void main() {
       test('counts frames', () {
         expect(
           summarize(<Map<String, dynamic>>[
-            build(1000, 1000),
-            build(3000, 2000),
+            frameBegin(1000), frameEnd(2000),
+            frameBegin(3000), frameEnd(5000),
           ]).countFrames(),
           2,
         );
@@ -73,10 +78,30 @@ void main() {
       test('computes average frame build time in milliseconds', () {
         expect(
           summarize(<Map<String, dynamic>>[
-            build(1000, 1000),
-            build(3000, 2000),
+            frameBegin(1000), frameEnd(2000),
+            frameBegin(3000), frameEnd(5000),
           ]).computeAverageFrameBuildTimeMillis(),
           1.5,
+        );
+      });
+
+      test('skips leading "end" events', () {
+        expect(
+          summarize(<Map<String, dynamic>>[
+            frameEnd(1000),
+            frameBegin(2000), frameEnd(4000),
+          ]).computeAverageFrameBuildTimeMillis(),
+          2.0,
+        );
+      });
+
+      test('skips trailing "begin" events', () {
+        expect(
+          summarize(<Map<String, dynamic>>[
+            frameBegin(2000), frameEnd(4000),
+            frameBegin(5000),
+          ]).computeAverageFrameBuildTimeMillis(),
+          2.0,
         );
       });
     });
@@ -92,15 +117,35 @@ void main() {
       test('computes worst frame build time in milliseconds', () {
         expect(
           summarize(<Map<String, dynamic>>[
-            build(1000, 1000),
-            build(3000, 2000),
+            frameBegin(1000), frameEnd(2000),
+            frameBegin(3000), frameEnd(5000),
           ]).computeWorstFrameBuildTimeMillis(),
           2.0,
         );
         expect(
           summarize(<Map<String, dynamic>>[
-            build(3000, 2000),
-            build(1000, 1000),
+            frameBegin(3000), frameEnd(5000),
+            frameBegin(1000), frameEnd(2000),
+          ]).computeWorstFrameBuildTimeMillis(),
+          2.0,
+        );
+      });
+
+      test('skips leading "end" events', () {
+        expect(
+          summarize(<Map<String, dynamic>>[
+            frameEnd(1000),
+            frameBegin(2000), frameEnd(4000),
+          ]).computeWorstFrameBuildTimeMillis(),
+          2.0,
+        );
+      });
+
+      test('skips trailing "begin" events', () {
+        expect(
+          summarize(<Map<String, dynamic>>[
+            frameBegin(2000), frameEnd(4000),
+            frameBegin(5000),
           ]).computeWorstFrameBuildTimeMillis(),
           2.0,
         );
@@ -110,9 +155,9 @@ void main() {
     group('computeMissedFrameBuildBudgetCount', () {
       test('computes the number of missed build budgets', () {
         final TimelineSummary summary = summarize(<Map<String, dynamic>>[
-          build(1000, 17000),
-          build(19000, 9000),
-          build(29000, 18000),
+          frameBegin(1000), frameEnd(18000),
+          frameBegin(19000), frameEnd(28000),
+          frameBegin(29000), frameEnd(47000),
         ]);
 
         expect(summary.countFrames(), 3);
@@ -267,9 +312,9 @@ void main() {
             begin(1000), end(19000),
             begin(19000), end(29000),
             begin(29000), end(49000),
-            build(1000, 17000),
-            build(19000, 9000),
-            build(29000, 19000),
+            frameBegin(1000), frameEnd(18000),
+            frameBegin(19000), frameEnd(28000),
+            frameBegin(29000), frameEnd(48000),
           ]).summaryJson,
           <String, dynamic>{
             'average_frame_build_time_millis': 15.0,
@@ -317,9 +362,9 @@ void main() {
           begin(1000), end(19000),
           begin(19000), end(29000),
           begin(29000), end(49000),
-          build(1000, 17000),
-          build(19000, 9000),
-          build(29000, 19000),
+          frameBegin(1000), frameEnd(18000),
+          frameBegin(19000), frameEnd(28000),
+          frameBegin(29000), frameEnd(48000),
         ]).writeSummaryToFile('test', destinationDirectory: tempDir.path);
         final String written =
             await fs.file(path.join(tempDir.path, 'test.timeline_summary.json')).readAsString();
