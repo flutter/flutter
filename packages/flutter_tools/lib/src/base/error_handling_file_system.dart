@@ -7,6 +7,7 @@ import 'dart:io' as io show Directory, File, Link;
 
 import 'package:file/file.dart';
 import 'package:meta/meta.dart';
+import 'package:path/path.dart' as p;
 
 import 'common.dart' show throwToolExit;
 import 'platform.dart';
@@ -36,6 +37,16 @@ class ErrorHandlingFileSystem extends ForwardingFileSystem {
 
   @override
   File file(dynamic path) => ErrorHandlingFile(delegate, delegate.file(path));
+
+  @override
+  p.Context get path => _cachedPath ??= delegate.path;
+  p.Context _cachedPath;
+
+  @override
+  set currentDirectory(dynamic path) {
+    _cachedPath = null;
+    delegate.currentDirectory = path;
+  }
 }
 
 class ErrorHandlingFile
