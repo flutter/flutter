@@ -103,8 +103,10 @@ class SkiaGoldClient {
 
     if (_serviceAccount.isEmpty) {
       final StringBuffer buf = StringBuffer()
-        ..writeln('Gold service account is unavailable.');
-      throw NonZeroExitCode(1, buf.toString());
+        ..writeln('The Gold service account is unavailable.')
+        ..writeln('Without a service account, Gold can not be authorized.')
+        ..writeln('Please check your user permissions and current comparator.');
+      throw buf.toString();
     }
 
     final File authorization = workDirectory.childFile('serviceAccount.json');
@@ -125,7 +127,7 @@ class SkiaGoldClient {
 
     if (result.exitCode != 0) {
       final StringBuffer buf = StringBuffer()
-        ..writeln('Skia Gold auth failed.')
+        ..writeln('Skia Gold authorization failed.')
         ..writeln('This could be caused by incorrect user permissions, if the ')
         ..writeln('debug information below contains ENCRYPTED, the wrong ')
         ..writeln('comparator was chosen for the test case.')
@@ -133,7 +135,7 @@ class SkiaGoldClient {
         ..writeln('Debug information for Gold:')
         ..writeln('stdout: ${result.stdout}')
         ..writeln('stderr: ${result.stderr}');
-      throw NonZeroExitCode(1, buf.toString());
+      throw buf.toString();
     }
   }
 
@@ -162,7 +164,7 @@ class SkiaGoldClient {
         ..writeln('Debug information for Gold:')
         ..writeln('stdout: ${result.stdout}')
         ..writeln('stderr: ${result.stderr}');
-      throw NonZeroExitCode(1, buf.toString());
+      throw buf.toString();
     }
   }
 
@@ -193,10 +195,10 @@ class SkiaGoldClient {
     if (imgtestInitArguments.contains(null)) {
       final StringBuffer buf = StringBuffer()
         ..writeln('A null argument was provided for Skia Gold imgtest init.')
-        ..writeln('Confirm the settings of your goldenf file test.')
+        ..writeln('Please confirm the settings of your golden file test.')
         ..writeln('Arguments provided:');
       imgtestInitArguments.forEach(buf.writeln);
-      throw NonZeroExitCode(1, buf.toString());
+      throw buf.toString();
     }
 
     final io.ProcessResult result = await io.Process.run(
@@ -213,7 +215,7 @@ class SkiaGoldClient {
         ..writeln('Debug information for Gold:')
         ..writeln('stdout: ${result.stdout}')
         ..writeln('stderr: ${result.stderr}');
-      throw NonZeroExitCode(1, buf.toString());
+      throw buf.toString();
     }
   }
 
@@ -289,9 +291,11 @@ class SkiaGoldClient {
 
     if (imgtestInitArguments.contains(null)) {
       final StringBuffer buf = StringBuffer()
-        ..writeln('Null argument for Skia Gold tryjobInit:');
+        ..writeln('A null argument was provided for Skia Gold tryjob init.')
+        ..writeln('Please confirm the settings of your golden file test.')
+        ..writeln('Arguments provided:');
       imgtestInitArguments.forEach(buf.writeln);
-      throw NonZeroExitCode(1, buf.toString());
+      throw buf.toString();
     }
 
     final io.ProcessResult result = await io.Process.run(
@@ -308,7 +312,7 @@ class SkiaGoldClient {
         ..writeln('Debug information for Gold:')
         ..writeln('stdout: ${result.stdout}')
         ..writeln('stderr: ${result.stderr}');
-      throw NonZeroExitCode(1, buf.toString());
+      throw buf.toString();
     }
   }
 
@@ -342,13 +346,16 @@ class SkiaGoldClient {
     if (result.exitCode != 0) {
       final String resultStdout = result.stdout.toString();
       if (resultStdout.contains('Untriaged') || resultStdout.contains('negative image')) {
+        final String failureContents = await workDirectory.childFile('failures.json').readAsString();
+        print('$failureContents\n');
+
         final StringBuffer buf = StringBuffer()
-          ..writeln('Golden file test $testName failed.')
-          ..writeln('To view the comparison and approve/reject the image,')
-          ..writeln('visit the Changelists section of')
-          ..writeln('https://flutter-gold.skia.org/')
-          ..writeln('and select your pull request.');
-        throw NonZeroExitCode(1, buf.toString());
+          ..writeln('The golden file "$testName" did not match the expected image.')
+          ..writeln('The closest matching image was: *LINK*')
+          ..writeln('The actual image generated was: *LINK*')
+          ..writeln('To triage this image (e.g. because this is an intentional change), please visit:')
+          ..writeln('*LINK*');
+        throw buf.toString();
       } else {
         final StringBuffer buf = StringBuffer()
           ..writeln('Unexpected Gold tryjobAdd failure.')
@@ -358,7 +365,7 @@ class SkiaGoldClient {
           ..writeln('Debug information for Gold:')
           ..writeln('stdout: ${result.stdout}')
           ..writeln('stderr: ${result.stderr}\n');
-        throw NonZeroExitCode(1, buf.toString());
+        throw buf.toString();
       }
     }
 
@@ -493,7 +500,7 @@ class SkiaGoldClient {
                 ..writeln('change has not been triaged.')
                 ..writeln('The associated pull request is:')
                 ..writeln('https://github.com/flutter/flutter/pull/$ignoredPullRequest');
-              throw NonZeroExitCode(1, buf.toString());
+              throw buf.toString();
             }
           }
         }
@@ -505,7 +512,7 @@ class SkiaGoldClient {
             ..writeln('Check https://flutter-gold.skia.org/ignores, or')
             ..writeln('https://flutter-gold.skia.org/?query=source_type%3Dflutter')
             ..writeln('for untriaged golden files.');
-          throw NonZeroExitCode(1, buf.toString());
+          throw buf.toString();
         } else {
           print('Formatting error detected requesting /ignores from Flutter Gold.'
             '\nrawResponse: $rawResponse');
@@ -542,8 +549,8 @@ class SkiaGoldClient {
       } on FormatException catch(_) {
         if (rawResponse.contains('stream timeout')) {
           final StringBuffer buf = StringBuffer()
-            ..writeln('Stream timeout on /details api.');
-          throw NonZeroExitCode(1, buf.toString());
+            ..writeln('Stream timeout on Gold\'s /details api.');
+          throw buf.toString();
         } else {
           print('Formatting error detected requesting /ignores from Flutter Gold.'
             '\nrawResponse: $rawResponse');
@@ -561,7 +568,7 @@ class SkiaGoldClient {
     if (!_flutterRoot.existsSync()) {
       final StringBuffer buf = StringBuffer()
         ..writeln('Flutter root could not be found: $_flutterRoot');
-      throw NonZeroExitCode(1, buf.toString());
+      throw buf.toString();
     } else {
       final io.ProcessResult revParse = await process.run(
         <String>['git', 'rev-parse', 'HEAD'],
@@ -649,24 +656,5 @@ class SkiaGoldDigest {
          || paramSet['Browser'] == platform.environment[_kTestBrowserKey])
       && testName == name
       && status == 'positive';
-    }
   }
-
-/// Exception that signals a process' exit with a non-zero exit code.
-class NonZeroExitCode implements Exception {
-  /// Create an exception that represents a non-zero exit code.
-  ///
-  /// The first argument must be non-zero.
-  const NonZeroExitCode(this.exitCode, this.stderr) : assert(exitCode != 0);
-
-  /// The code that the process will signal to the operating system.
-  ///
-  /// By definition, this is not zero.
-  final int exitCode;
-
-  /// The message to show on standard error.
-  final String stderr;
-
-  @override
-  String toString() => 'Exit code $exitCode: $stderr';
 }
