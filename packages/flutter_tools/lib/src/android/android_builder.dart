@@ -10,6 +10,7 @@ import '../android/gradle_errors.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../build_info.dart';
+import '../globals.dart' as globals;
 import '../project.dart';
 import 'android_sdk.dart';
 import 'gradle.dart';
@@ -62,7 +63,7 @@ class _AndroidBuilderImpl extends AndroidBuilder {
   }) async {
     try {
       Directory outputDirectory =
-        fs.directory(outputDirectoryPath ?? project.android.buildDirectory);
+        globals.fs.directory(outputDirectoryPath ?? project.android.buildDirectory);
       if (project.isModule) {
         // Module projects artifacts are located in `build/host`.
         outputDirectory = outputDirectory.childDirectory('host');

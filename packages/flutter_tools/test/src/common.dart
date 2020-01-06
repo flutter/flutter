@@ -8,11 +8,12 @@ import 'package:args/command_runner.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/platform.dart';
+
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/commands/create.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:meta/meta.dart';
 import 'package:test_api/test_api.dart' as test_package show TypeMatcher, test; // ignore: deprecated_member_use
 import 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf; // ignore: deprecated_member_use
@@ -40,20 +41,20 @@ void tryToDelete(Directory directory) {
 /// environment variable is set, it will be returned. Otherwise, this will
 /// deduce the path from `platform.script`.
 String getFlutterRoot() {
-  if (platform.environment.containsKey('FLUTTER_ROOT')) {
-    return platform.environment['FLUTTER_ROOT'];
+  if (globals.platform.environment.containsKey('FLUTTER_ROOT')) {
+    return globals.platform.environment['FLUTTER_ROOT'];
   }
 
-  Error invalidScript() => StateError('Could not determine flutter_tools/ path from script URL (${platform.script}); consider setting FLUTTER_ROOT explicitly.');
+  Error invalidScript() => StateError('Could not determine flutter_tools/ path from script URL (${globals.platform.script}); consider setting FLUTTER_ROOT explicitly.');
 
   Uri scriptUri;
-  switch (platform.script.scheme) {
+  switch (globals.platform.script.scheme) {
     case 'file':
-      scriptUri = platform.script;
+      scriptUri = globals.platform.script;
       break;
     case 'data':
       final RegExp flutterTools = RegExp(r'(file://[^"]*[/\\]flutter_tools[/\\][^"]+\.dart)', multiLine: true);
-      final Match match = flutterTools.firstMatch(Uri.decodeFull(platform.script.path));
+      final Match match = flutterTools.firstMatch(Uri.decodeFull(globals.platform.script.path));
       if (match == null) {
         throw invalidScript();
       }
@@ -63,13 +64,13 @@ String getFlutterRoot() {
       throw invalidScript();
   }
 
-  final List<String> parts = fs.path.split(fs.path.fromUri(scriptUri));
+  final List<String> parts = globals.fs.path.split(globals.fs.path.fromUri(scriptUri));
   final int toolsIndex = parts.indexOf('flutter_tools');
   if (toolsIndex == -1) {
     throw invalidScript();
   }
-  final String toolsPath = fs.path.joinAll(parts.sublist(0, toolsIndex + 1));
-  return fs.path.normalize(fs.path.join(toolsPath, '..', '..'));
+  final String toolsPath = globals.fs.path.joinAll(parts.sublist(0, toolsIndex + 1));
+  return globals.fs.path.normalize(globals.fs.path.join(toolsPath, '..', '..'));
 }
 
 CommandRunner<void> createTestCommandRunner([ FlutterCommand command ]) {
@@ -87,7 +88,7 @@ void updateFileModificationTime(
   int seconds,
 ) {
   final DateTime modificationTime = baseTime.add(Duration(seconds: seconds));
-  fs.file(path).setLastModifiedSync(modificationTime);
+  globals.fs.file(path).setLastModifiedSync(modificationTime);
 }
 
 /// Matcher for functions that throw [ToolExit].
@@ -120,12 +121,12 @@ final Matcher isProcessExit = isInstanceOf<ProcessExit>();
 /// Returns the path to the flutter project.
 Future<String> createProject(Directory temp, { List<String> arguments }) async {
   arguments ??= <String>['--no-pub'];
-  final String projectPath = fs.path.join(temp.path, 'flutter_project');
+  final String projectPath = globals.fs.path.join(temp.path, 'flutter_project');
   final CreateCommand command = CreateCommand();
   final CommandRunner<void> runner = createTestCommandRunner(command);
   await runner.run(<String>['create', ...arguments, projectPath]);
   // Created `.packages` since it's not created when the flag `--no-pub` is passed.
-  fs.file(fs.path.join(projectPath, '.packages')).createSync();
+  globals.fs.file(globals.fs.path.join(projectPath, '.packages')).createSync();
   return projectPath;
 }
 

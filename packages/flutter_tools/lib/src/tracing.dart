@@ -8,7 +8,7 @@ import 'base/file_system.dart';
 import 'base/logger.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
-import 'globals.dart';
+import 'globals.dart' as globals;
 import 'vmservice.dart';
 
 // Names of some of the Timeline events we care about.
@@ -39,7 +39,7 @@ class Tracing {
     bool awaitFirstFrame = false,
   }) async {
     if (awaitFirstFrame) {
-      final Status status = logger.startProgress(
+      final Status status = globals.logger.startProgress(
         'Waiting for application to render first frame...',
         timeout: timeoutConfiguration.fastOperation,
       );
@@ -75,8 +75,8 @@ class Tracing {
 /// Download the startup trace information from the given observatory client and
 /// store it to build/start_up_info.json.
 Future<void> downloadStartupTrace(VMService observatory, { bool awaitFirstFrame = true }) async {
-  final String traceInfoFilePath = fs.path.join(getBuildDirectory(), 'start_up_info.json');
-  final File traceInfoFile = fs.file(traceInfoFilePath);
+  final String traceInfoFilePath = globals.fs.path.join(getBuildDirectory(), 'start_up_info.json');
+  final File traceInfoFile = globals.fs.file(traceInfoFilePath);
 
   // Delete old startup data, if any.
   if (traceInfoFile.existsSync()) {
@@ -109,7 +109,7 @@ Future<void> downloadStartupTrace(VMService observatory, { bool awaitFirstFrame 
   final int frameworkInitTimestampMicros = extractInstantEventTimestamp(kFrameworkInitEventName);
 
   if (engineEnterTimestampMicros == null) {
-    printTrace('Engine start event is missing in the timeline: $timeline');
+    globals.printTrace('Engine start event is missing in the timeline: $timeline');
     throw 'Engine start event is missing in the timeline. Cannot compute startup time.';
   }
 
@@ -127,7 +127,7 @@ Future<void> downloadStartupTrace(VMService observatory, { bool awaitFirstFrame 
     final int firstFrameBuiltTimestampMicros = extractInstantEventTimestamp(kFirstFrameBuiltEventName);
     final int firstFrameRasterizedTimestampMicros = extractInstantEventTimestamp(kFirstFrameRasterizedEventName);
     if (firstFrameBuiltTimestampMicros == null || firstFrameRasterizedTimestampMicros == null) {
-      printTrace('First frame events are missing in the timeline: $timeline');
+      globals.printTrace('First frame events are missing in the timeline: $timeline');
       throw 'First frame events are missing in the timeline. Cannot compute startup time.';
     }
 
@@ -146,6 +146,6 @@ Future<void> downloadStartupTrace(VMService observatory, { bool awaitFirstFrame 
 
   traceInfoFile.writeAsStringSync(toPrettyJson(traceInfo));
 
-  printStatus(message);
-  printStatus('Saved startup trace info in ${traceInfoFile.path}.');
+  globals.printStatus(message);
+  globals.printStatus('Saved startup trace info in ${traceInfoFile.path}.');
 }

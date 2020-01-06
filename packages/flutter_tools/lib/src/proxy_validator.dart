@@ -4,8 +4,8 @@
 
 import 'dart:async';
 
-import 'base/platform.dart';
 import 'doctor.dart';
+import 'globals.dart' as globals;
 
 class ProxyValidator extends DoctorValidator {
   ProxyValidator() : super('Proxy Configuration');
@@ -19,8 +19,8 @@ class ProxyValidator extends DoctorValidator {
   /// an empty string will be returned. Checks for the lowercase version of the
   /// environment variable first, then uppercase to match Dart's HTTP implementation.
   static String _getEnv(String key) =>
-      platform.environment[key.toLowerCase()]?.trim() ??
-      platform.environment[key.toUpperCase()]?.trim() ??
+      globals.platform.environment[key.toLowerCase()]?.trim() ??
+      globals.platform.environment[key.toUpperCase()]?.trim() ??
       '';
 
   @override

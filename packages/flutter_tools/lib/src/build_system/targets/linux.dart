@@ -5,7 +5,7 @@
 import '../../artifacts.dart';
 import '../../base/file_system.dart';
 import '../../build_info.dart';
-import '../../globals.dart';
+import '../../globals.dart' as globals;
 import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
@@ -48,10 +48,10 @@ class UnpackLinuxDebug extends Target {
 
   @override
   Future<void> build(Environment environment) async {
-    final String basePath = artifacts.getArtifactPath(Artifact.linuxDesktopPath);
+    final String basePath = globals.artifacts.getArtifactPath(Artifact.linuxDesktopPath);
     final List<File> inputs = <File>[];
     final List<File> outputs = <File>[];
-    final String outputPrefix = fs.path.join(
+    final String outputPrefix = globals.fs.path.join(
       environment.projectDir.path,
       'linux',
       'flutter',
@@ -60,18 +60,18 @@ class UnpackLinuxDebug extends Target {
     // The native linux artifacts are composed of 6 files and a directory (listed above)
     // which need to be copied to the target directory.
     for (String artifact in _kLinuxArtifacts) {
-      final String entityPath = fs.path.join(basePath, artifact);
+      final String entityPath = globals.fs.path.join(basePath, artifact);
       // If this artifact is a file, just copy the source over.
-      if (fs.isFileSync(entityPath)) {
-        final String outputPath = fs.path.join(
+      if (globals.fs.isFileSync(entityPath)) {
+        final String outputPath = globals.fs.path.join(
           outputPrefix,
-          fs.path.relative(entityPath, from: basePath),
+          globals.fs.path.relative(entityPath, from: basePath),
         );
-        final File destinationFile = fs.file(outputPath);
+        final File destinationFile = globals.fs.file(outputPath);
         if (!destinationFile.parent.existsSync()) {
           destinationFile.parent.createSync(recursive: true);
         }
-        final File inputFile = fs.file(entityPath);
+        final File inputFile = globals.fs.file(entityPath);
         inputFile.copySync(destinationFile.path);
         inputs.add(inputFile);
         outputs.add(destinationFile);
@@ -79,18 +79,18 @@ class UnpackLinuxDebug extends Target {
       }
       // If the artifact is the directory cpp_client_wrapper, recursively
       // copy every file from it.
-      for (File input in fs.directory(entityPath)
+      for (File input in globals.fs.directory(entityPath)
           .listSync(recursive: true)
           .whereType<File>()) {
-        final String outputPath = fs.path.join(
+        final String outputPath = globals.fs.path.join(
           outputPrefix,
-          fs.path.relative(input.path, from: basePath),
+          globals.fs.path.relative(input.path, from: basePath),
         );
-        final File destinationFile = fs.file(outputPath);
+        final File destinationFile = globals.fs.file(outputPath);
         if (!destinationFile.parent.existsSync()) {
           destinationFile.parent.createSync(recursive: true);
         }
-        final File inputFile = fs.file(input);
+        final File inputFile = globals.fs.file(input);
         inputFile.copySync(destinationFile.path);
         inputs.add(inputFile);
         outputs.add(destinationFile);

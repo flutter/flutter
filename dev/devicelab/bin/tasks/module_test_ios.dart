@@ -44,7 +44,7 @@ Future<void> main() async {
         'build',
         'ios',
         'iphoneos',
-        'hello.app',
+        'Runner.app',
       ));
 
       if (!exists(ephemeralReleaseHostApp)) {
@@ -84,7 +84,7 @@ Future<void> main() async {
         'build',
         'ios',
         'iphoneos',
-        'hello.app',
+        'Runner.app',
       ));
 
       if (!exists(ephemeralProfileHostApp)) {
@@ -123,7 +123,7 @@ Future<void> main() async {
         'build',
         'ios',
         'iphonesimulator',
-        'hello.app',
+        'Runner.app',
       ));
 
       if (!exists(ephemeralDebugHostApp)) {
@@ -178,7 +178,7 @@ Future<void> main() async {
         'build',
         'ios',
         'iphoneos',
-        'hello.app',
+        'Runner.app',
       )));
 
       if (!ephemeralHostAppWithCocoaPodsBuilt) {
@@ -223,7 +223,7 @@ Future<void> main() async {
         'build',
         'ios',
         'iphoneos',
-        'hello.app',
+        'Runner.app',
       )));
 
       if (!editableHostAppBuilt) {

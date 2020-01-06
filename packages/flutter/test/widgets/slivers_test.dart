@@ -701,7 +701,7 @@ bool sameHorizontal(Offset a, Offset b) => b.dy == a.dy;
 bool sameVertical(Offset a, Offset b) => b.dx == a.dx;
 
 class TestSliverGrid extends StatelessWidget {
-  const TestSliverGrid(this.children);
+  const TestSliverGrid(this.children, { Key key }) : super(key: key);
 
   final List<Widget> children;
 
@@ -726,7 +726,7 @@ class TestSliverGrid extends StatelessWidget {
 }
 
 class TestSliverFixedExtentList extends StatelessWidget {
-  const TestSliverFixedExtentList(this.children);
+  const TestSliverFixedExtentList(this.children, { Key key }) : super(key: key);
 
   final List<Widget> children;
 
@@ -749,7 +749,7 @@ class TestSliverFixedExtentList extends StatelessWidget {
 }
 
 class KeepAlive extends StatefulWidget {
-  const KeepAlive(this.data);
+  const KeepAlive(this.data, { Key key }) : super(key: key);
 
   final String data;
 

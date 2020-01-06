@@ -410,15 +410,7 @@ class CompileTest {
         watch.start();
         await flutter('build', options: options);
         watch.stop();
-        final Directory appBuildDirectory = dir(path.join(cwd, 'build/ios/Release-iphoneos'));
-        final Directory appBundle = appBuildDirectory
-            .listSync()
-            .whereType<Directory>()
-            .singleWhere((Directory directory) => path.extension(directory.path) == '.app', orElse: () => null);
-        if (appBundle == null) {
-          throw 'Failed to find app bundle in ${appBuildDirectory.path}';
-        }
-        final String appPath =  appBundle.path;
+        final String appPath =  '$cwd/build/ios/Release-iphoneos/Runner.app/';
         // IPAs are created manually, https://flutter.dev/ios-release/
         await exec('tar', <String>['-zcf', 'build/app.ipa', appPath]);
         releaseSizeInBytes = await file('$cwd/build/app.ipa').length();

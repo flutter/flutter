@@ -180,7 +180,7 @@ void main() {
       find.byType(RepaintBoundary).first,
       matchesGoldenFile('opacity_test.offset.png'),
     );
-  });
+  }, skip: isBrowser);
 
   testWidgets('empty opacity does not crash', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -191,5 +191,5 @@ void main() {
     // empty opacity layer is sent.
     final OffsetLayer offsetLayer = element.renderObject.debugLayer as OffsetLayer;
     await offsetLayer.toImage(const Rect.fromLTRB(0.0, 0.0, 1.0, 1.0));
-  }, skip: isBrowser); // `Layer.toImage()` doesn't work on web
+  }, skip: isBrowser);
 }

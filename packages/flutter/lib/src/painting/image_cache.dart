@@ -28,6 +28,43 @@ const int _kDefaultSizeBytes = 100 << 20; // 100 MiB
 ///
 /// A shared instance of this cache is retained by [PaintingBinding] and can be
 /// obtained via the [imageCache] top-level property in the [painting] library.
+///
+/// {@tool sample}
+///
+/// This sample shows how to supply your own caching logic and replace the
+/// global [imageCache] varible.
+///
+/// ```dart
+/// /// This is the custom implementation of [ImageCache] where we can override
+/// /// the logic.
+/// class MyImageCache extends ImageCache {
+///   @override
+///   void clear() {
+///     print("Clearing cache!");
+///     super.clear();
+///   }
+/// }
+///
+/// class MyWidgetsBinding extends WidgetsFlutterBinding {
+///   @override
+///   ImageCache createImageCache() => MyImageCache();
+/// }
+///
+/// void main() {
+///   // The constructor sets global variables.
+///   MyWidgetsBinding();
+///   runApp(MyApp());
+/// }
+///
+/// class MyApp extends StatelessWidget {
+///   @override
+///   Widget build(BuildContext context) {
+///     return Container();
+///   }
+/// }
+/// ```
+/// {@end-tool}
+
 class ImageCache {
   final Map<Object, _PendingImage> _pendingImages = <Object, _PendingImage>{};
   final Map<Object, _CachedImage> _cache = <Object, _CachedImage>{};

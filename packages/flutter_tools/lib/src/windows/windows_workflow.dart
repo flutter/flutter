@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import '../base/context.dart';
-import '../base/platform.dart';
 import '../doctor.dart';
 import '../features.dart';
+import '../globals.dart' as globals;
 
 /// The [WindowsWorkflow] instance.
 WindowsWorkflow get windowsWorkflow => context.get<WindowsWorkflow>();
@@ -18,13 +18,13 @@ class WindowsWorkflow implements Workflow {
   const WindowsWorkflow();
 
   @override
-  bool get appliesToHostPlatform => platform.isWindows && featureFlags.isWindowsEnabled;
+  bool get appliesToHostPlatform => globals.platform.isWindows && featureFlags.isWindowsEnabled;
 
   @override
-  bool get canLaunchDevices => platform.isWindows && featureFlags.isWindowsEnabled;
+  bool get canLaunchDevices => globals.platform.isWindows && featureFlags.isWindowsEnabled;
 
   @override
-  bool get canListDevices => platform.isWindows && featureFlags.isWindowsEnabled;
+  bool get canListDevices => globals.platform.isWindows && featureFlags.isWindowsEnabled;
 
   @override
   bool get canListEmulators => false;

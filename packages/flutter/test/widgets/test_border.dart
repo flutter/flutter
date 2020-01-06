@@ -34,4 +34,3 @@ class TestBorder extends ShapeBorder {
     onLog('paint $rect $textDirection');
   }
 }
-

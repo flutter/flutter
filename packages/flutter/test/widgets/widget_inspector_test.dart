@@ -18,6 +18,7 @@ import 'package:flutter_test/flutter_test.dart';
 // columns will impact whether tests pass.
 
 class ClockDemo extends StatefulWidget {
+  const ClockDemo({ Key key }) : super(key: key);
   @override
   _ClockDemoState createState() => _ClockDemoState();
 }
@@ -1634,7 +1635,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
     testWidgets('ext.flutter.inspector.trackRebuildDirtyWidgets', (WidgetTester tester) async {
       service.rebuildCount = 0;
 
-      await tester.pumpWidget(ClockDemo());
+      await tester.pumpWidget(const ClockDemo());
 
       final Element clockDemoElement = find.byType(ClockDemo).evaluate().first;
 
@@ -1724,7 +1725,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       _CreationLocation location = knownLocations[id];
       expect(location.file, equals(file));
       // ClockText widget.
-      expect(location.line, equals(50));
+      expect(location.line, equals(51));
       expect(location.column, equals(9));
       expect(count, equals(1));
 
@@ -1733,7 +1734,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       location = knownLocations[id];
       expect(location.file, equals(file));
       // Text widget in _ClockTextState build method.
-      expect(location.line, equals(88));
+      expect(location.line, equals(89));
       expect(location.column, equals(12));
       expect(count, equals(1));
 
@@ -1758,7 +1759,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       location = knownLocations[id];
       expect(location.file, equals(file));
       // ClockText widget.
-      expect(location.line, equals(50));
+      expect(location.line, equals(51));
       expect(location.column, equals(9));
       expect(count, equals(3)); // 3 clock widget instances rebuilt.
 
@@ -1767,7 +1768,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
       location = knownLocations[id];
       expect(location.file, equals(file));
       // Text widget in _ClockTextState build method.
-      expect(location.line, equals(88));
+      expect(location.line, equals(89));
       expect(location.column, equals(12));
       expect(count, equals(3)); // 3 clock widget instances rebuilt.
 
@@ -1833,7 +1834,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
     testWidgets('ext.flutter.inspector.trackRepaintWidgets', (WidgetTester tester) async {
       service.rebuildCount = 0;
 
-      await tester.pumpWidget(ClockDemo());
+      await tester.pumpWidget(const ClockDemo());
 
       final Element clockDemoElement = find.byType(ClockDemo).evaluate().first;
 
