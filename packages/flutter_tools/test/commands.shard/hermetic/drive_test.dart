@@ -5,16 +5,18 @@
 import 'dart:async';
 
 import 'package:file/memory.dart';
+import 'package:platform/platform.dart';
+
 import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/drive.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:mockito/mockito.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -66,9 +68,9 @@ void main() {
     testUsingContext('returns 1 when test file is not found', () async {
       testDeviceManager.addDevice(MockDevice());
 
-      final String testApp = fs.path.join(tempDir.path, 'test', 'e2e.dart');
-      final String testFile = fs.path.join(tempDir.path, 'test_driver', 'e2e_test.dart');
-      fs.file(testApp).createSync(recursive: true);
+      final String testApp = globals.fs.path.join(tempDir.path, 'test', 'e2e.dart');
+      final String testFile = globals.fs.path.join(tempDir.path, 'test_driver', 'e2e_test.dart');
+      globals.fs.file(testApp).createSync(recursive: true);
 
       final List<String> args = <String>[
         'drive',
@@ -91,8 +93,8 @@ void main() {
       testDeviceManager.addDevice(MockDevice());
       appStarter = expectAsync1((DriveCommand command) async => null);
 
-      final String testApp = fs.path.join(tempDir.path, 'test_driver', 'e2e.dart');
-      final String testFile = fs.path.join(tempDir.path, 'test_driver', 'e2e_test.dart');
+      final String testApp = globals.fs.path.join(tempDir.path, 'test_driver', 'e2e.dart');
+      final String testFile = globals.fs.path.join(tempDir.path, 'test_driver', 'e2e_test.dart');
 
       final MemoryFileSystem memFs = fs;
       await memFs.file(testApp).writeAsString('main() { }');
@@ -116,8 +118,8 @@ void main() {
     });
 
     testUsingContext('returns 1 when app file is outside package', () async {
-      final String appFile = fs.path.join(tempDir.dirname, 'other_app', 'app.dart');
-      fs.file(appFile).createSync(recursive: true);
+      final String appFile = globals.fs.path.join(tempDir.dirname, 'other_app', 'app.dart');
+      globals.fs.file(appFile).createSync(recursive: true);
       final List<String> args = <String>[
         '--no-wrap',
         'drive',
@@ -139,8 +141,8 @@ void main() {
     });
 
     testUsingContext('returns 1 when app file is in the root dir', () async {
-      final String appFile = fs.path.join(tempDir.path, 'main.dart');
-      fs.file(appFile).createSync(recursive: true);
+      final String appFile = globals.fs.path.join(tempDir.path, 'main.dart');
+      globals.fs.file(appFile).createSync(recursive: true);
       final List<String> args = <String>[
         '--no-wrap',
         'drive',
@@ -165,8 +167,8 @@ void main() {
     testUsingContext('returns 0 when test ends successfully', () async {
       testDeviceManager.addDevice(MockDevice());
 
-      final String testApp = fs.path.join(tempDir.path, 'test', 'e2e.dart');
-      final String testFile = fs.path.join(tempDir.path, 'test_driver', 'e2e_test.dart');
+      final String testApp = globals.fs.path.join(tempDir.path, 'test', 'e2e.dart');
+      final String testFile = globals.fs.path.join(tempDir.path, 'test_driver', 'e2e_test.dart');
 
       appStarter = expectAsync1((DriveCommand command) async {
         return LaunchResult.succeeded();
@@ -210,8 +212,8 @@ void main() {
     testUsingContext('returns exitCode set by test runner', () async {
       testDeviceManager.addDevice(MockDevice());
 
-      final String testApp = fs.path.join(tempDir.path, 'test', 'e2e.dart');
-      final String testFile = fs.path.join(tempDir.path, 'test_driver', 'e2e_test.dart');
+      final String testApp = globals.fs.path.join(tempDir.path, 'test', 'e2e.dart');
+      final String testFile = globals.fs.path.join(tempDir.path, 'test_driver', 'e2e_test.dart');
 
       appStarter = expectAsync1((DriveCommand command) async {
         return LaunchResult.succeeded();
@@ -370,8 +372,8 @@ void main() {
         )).thenAnswer((_) => Future<LaunchResult>.value(mockLaunchResult));
         when(mockDevice.isAppInstalled(any)).thenAnswer((_) => Future<bool>.value(false));
 
-        testApp = fs.path.join(tempDir.path, 'test', 'e2e.dart');
-        testFile = fs.path.join(tempDir.path, 'test_driver', 'e2e_test.dart');
+        testApp = globals.fs.path.join(tempDir.path, 'test', 'e2e.dart');
+        testFile = globals.fs.path.join(tempDir.path, 'test_driver', 'e2e_test.dart');
 
         testRunner = (List<String> testArgs, Map<String, String> environment) async {
           throwToolExit(null, exitCode: 123);
@@ -503,8 +505,8 @@ void main() {
         when(mockDevice.isAppInstalled(any))
             .thenAnswer((_) => Future<bool>.value(false));
 
-        testApp = fs.path.join(tempDir.path, 'test', 'e2e.dart');
-        testFile = fs.path.join(tempDir.path, 'test_driver', 'e2e_test.dart');
+        testApp = globals.fs.path.join(tempDir.path, 'test', 'e2e.dart');
+        testFile = globals.fs.path.join(tempDir.path, 'test_driver', 'e2e_test.dart');
 
         testRunner = (List<String> testArgs, Map<String, String> environment) async {
           throwToolExit(null, exitCode: 123);

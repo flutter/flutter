@@ -9,13 +9,13 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_manifest.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 
@@ -34,7 +34,7 @@ void main() {
       });
 
       testInMemory('fails on invalid pubspec.yaml', () async {
-        final Directory directory = fs.directory('myproject');
+        final Directory directory = globals.fs.directory('myproject');
         directory.childFile('pubspec.yaml')
           ..createSync(recursive: true)
           ..writeAsStringSync(invalidPubspec);
@@ -46,7 +46,7 @@ void main() {
       });
 
       testInMemory('fails on pubspec.yaml parse failure', () async {
-        final Directory directory = fs.directory('myproject');
+        final Directory directory = globals.fs.directory('myproject');
         directory.childFile('pubspec.yaml')
           ..createSync(recursive: true)
           ..writeAsStringSync(parseErrorPubspec);
@@ -58,7 +58,7 @@ void main() {
       });
 
       testInMemory('fails on invalid example/pubspec.yaml', () async {
-        final Directory directory = fs.directory('myproject');
+        final Directory directory = globals.fs.directory('myproject');
         directory.childDirectory('example').childFile('pubspec.yaml')
           ..createSync(recursive: true)
           ..writeAsStringSync(invalidPubspec);
@@ -70,7 +70,7 @@ void main() {
       });
 
       testInMemory('treats missing pubspec.yaml as empty', () async {
-        final Directory directory = fs.directory('myproject')
+        final Directory directory = globals.fs.directory('myproject')
           ..createSync(recursive: true);
         expect((FlutterProject.fromDirectory(directory)).manifest.isEmpty,
           true,
@@ -78,7 +78,7 @@ void main() {
       });
 
       testInMemory('reads valid pubspec.yaml', () async {
-        final Directory directory = fs.directory('myproject');
+        final Directory directory = globals.fs.directory('myproject');
         directory.childFile('pubspec.yaml')
           ..createSync(recursive: true)
           ..writeAsStringSync(validPubspec);
@@ -89,7 +89,7 @@ void main() {
       });
 
       testInMemory('sets up location', () async {
-        final Directory directory = fs.directory('myproject');
+        final Directory directory = globals.fs.directory('myproject');
         expect(
           FlutterProject.fromDirectory(directory).directory.absolute.path,
           directory.absolute.path,
@@ -100,7 +100,7 @@ void main() {
         );
         expect(
           FlutterProject.current().directory.absolute.path,
-          fs.currentDirectory.absolute.path,
+          globals.fs.currentDirectory.absolute.path,
         );
       });
     });
@@ -154,7 +154,7 @@ void main() {
     group('ensure ready for platform-specific tooling', () {
       testInMemory('does nothing, if project is not created', () async {
         final FlutterProject project = FlutterProject(
-          fs.directory('not_created'),
+          globals.fs.directory('not_created'),
           FlutterManifest.empty(),
           FlutterManifest.empty(),
         );
@@ -513,7 +513,7 @@ apply plugin: 'kotlin-android'
     });
 
     test('Handles asking for builders from an invalid pubspec', () => testbed.run(() {
-      fs.file('pubspec.yaml')
+      globals.fs.file('pubspec.yaml')
         ..createSync()
         ..writeAsStringSync(r'''
 # Hello, World
@@ -526,7 +526,7 @@ apply plugin: 'kotlin-android'
     }));
 
     test('Handles asking for builders from a trivial pubspec', () => testbed.run(() {
-      fs.file('pubspec.yaml')
+      globals.fs.file('pubspec.yaml')
         ..createSync()
         ..writeAsStringSync(r'''
 # Hello, World
@@ -542,7 +542,7 @@ name: foo_bar
 }
 
 Future<FlutterProject> someProject() async {
-  final Directory directory = fs.directory('some_project');
+  final Directory directory = globals.fs.directory('some_project');
   directory.childFile('.packages').createSync(recursive: true);
   directory.childDirectory('ios').createSync(recursive: true);
   final Directory androidDirectory = directory
@@ -555,7 +555,7 @@ Future<FlutterProject> someProject() async {
 }
 
 Future<FlutterProject> aPluginProject({bool legacy = true}) async {
-  final Directory directory = fs.directory('plugin_project');
+  final Directory directory = globals.fs.directory('plugin_project');
   directory.childDirectory('ios').createSync(recursive: true);
   directory.childDirectory('android').createSync(recursive: true);
   directory.childDirectory('example').createSync(recursive: true);
@@ -593,7 +593,7 @@ flutter:
 }
 
 Future<FlutterProject> aModuleProject() async {
-  final Directory directory = fs.directory('module_project');
+  final Directory directory = globals.fs.directory('module_project');
   directory.childFile('.packages').createSync(recursive: true);
   directory.childFile('pubspec.yaml').writeAsStringSync('''
 name: my_module
@@ -610,16 +610,16 @@ flutter:
 void testInMemory(String description, Future<void> testMethod()) {
   Cache.flutterRoot = getFlutterRoot();
   final FileSystem testFileSystem = MemoryFileSystem(
-    style: platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix,
+    style: globals.platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix,
   );
   // Transfer needed parts of the Flutter installation folder
   // to the in-memory file system used during testing.
   transfer(Cache().getArtifactDirectory('gradle_wrapper'), testFileSystem);
-  transfer(fs.directory(Cache.flutterRoot)
+  transfer(globals.fs.directory(Cache.flutterRoot)
       .childDirectory('packages')
       .childDirectory('flutter_tools')
       .childDirectory('templates'), testFileSystem);
-  transfer(fs.directory(Cache.flutterRoot)
+  transfer(globals.fs.directory(Cache.flutterRoot)
       .childDirectory('packages')
       .childDirectory('flutter_tools')
       .childDirectory('schema'), testFileSystem);

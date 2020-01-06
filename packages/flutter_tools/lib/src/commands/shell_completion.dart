@@ -9,6 +9,7 @@ import 'package:completion/completion.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
+import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 
 class ShellCompletionCommand extends FlutterCommand {
@@ -52,7 +53,7 @@ class ShellCompletionCommand extends FlutterCommand {
       return null;
     }
 
-    final File outputFile = fs.file(argResults.rest.first);
+    final File outputFile = globals.fs.file(argResults.rest.first);
     if (outputFile.existsSync() && !boolArg('overwrite')) {
       throwToolExit(
         'Output file ${outputFile.path} already exists, will not overwrite. '

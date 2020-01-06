@@ -10,11 +10,9 @@ import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
-import '../base/process_manager.dart';
-import '../base/terminal.dart';
 import '../build_info.dart';
 import '../dart/package_map.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../web/compile.dart';
 import 'flutter_platform.dart' as loader;
@@ -49,14 +47,14 @@ Future<int> runTests(
   String randomSeed = '0',
 }) async {
   // Configure package:test to use the Flutter engine for child processes.
-  final String shellPath = artifacts.getArtifactPath(Artifact.flutterTester);
-  if (!processManager.canRun(shellPath)) {
+  final String shellPath = globals.artifacts.getArtifactPath(Artifact.flutterTester);
+  if (!globals.processManager.canRun(shellPath)) {
     throwToolExit('Cannot execute Flutter tester at $shellPath');
   }
 
   // Compute the command-line arguments for package:test.
   final List<String> testArgs = <String>[
-    if (!terminal.supportsColor)
+    if (!globals.terminal.supportsColor)
       '--no-color',
     if (machine)
       ...<String>['-r', 'json']
@@ -70,7 +68,7 @@ Future<int> runTests(
     '--test-randomize-ordering-seed=$randomSeed',
   ];
   if (web) {
-    final String tempBuildDir = fs.systemTempDirectory
+    final String tempBuildDir = globals.fs.systemTempDirectory
       .createTempSync('flutter_test.')
       .absolute
       .uri
@@ -127,7 +125,7 @@ Future<int> runTests(
     trackWidgetCreation: trackWidgetCreation,
     updateGoldens: updateGoldens,
     buildTestAssets: buildTestAssets,
-    projectRootDirectory: fs.currentDirectory.uri,
+    projectRootDirectory: globals.fs.currentDirectory.uri,
     flutterProject: flutterProject,
     icudtlPath: icudtlPath,
   );
@@ -135,25 +133,25 @@ Future<int> runTests(
   // Make the global packages path absolute.
   // (Makes sure it still works after we change the current directory.)
   PackageMap.globalPackagesPath =
-      fs.path.normalize(fs.path.absolute(PackageMap.globalPackagesPath));
+      globals.fs.path.normalize(globals.fs.path.absolute(PackageMap.globalPackagesPath));
 
   // Call package:test's main method in the appropriate directory.
-  final Directory saved = fs.currentDirectory;
+  final Directory saved = globals.fs.currentDirectory;
   try {
     if (workDir != null) {
-      printTrace('switching to directory $workDir to run tests');
-      fs.currentDirectory = workDir;
+      globals.printTrace('switching to directory $workDir to run tests');
+      globals.fs.currentDirectory = workDir;
     }
 
-    printTrace('running test package with arguments: $testArgs');
+    globals.printTrace('running test package with arguments: $testArgs');
     await testWrapper.main(testArgs);
 
     // test.main() sets dart:io's exitCode global.
-    printTrace('test package returned with exit code $exitCode');
+    globals.printTrace('test package returned with exit code $exitCode');
 
     return exitCode;
   } finally {
-    fs.currentDirectory = saved;
+    globals.fs.currentDirectory = saved;
     await platform.close();
   }
 }

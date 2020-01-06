@@ -7,10 +7,9 @@ import 'dart:async';
 import '../android/android_sdk.dart';
 import '../android/android_studio.dart';
 import '../base/common.dart';
-import '../base/file_system.dart';
 import '../convert.dart';
 import '../features.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
 import '../version.dart';
@@ -75,7 +74,7 @@ class ConfigCommand extends FlutterCommand {
         featuresByName[feature.configSetting] = feature;
       }
     }
-    String values = config.keys
+    String values = globals.config.keys
         .map<String>((String key) {
           String configFooter = '';
           if (featuresByName.containsKey(key)) {
@@ -84,7 +83,7 @@ class ConfigCommand extends FlutterCommand {
               configFooter = '(Unavailable)';
             }
           }
-          return '  $key: ${config.getValue(key)} $configFooter';
+          return '  $key: ${globals.config.getValue(key)} $configFooter';
         }).join('\n');
     if (values.isEmpty) {
       values = '  No settings have been configured.';
@@ -108,7 +107,7 @@ class ConfigCommand extends FlutterCommand {
     if (boolArg('clear-features')) {
       for (Feature feature in allFeatures) {
         if (feature.configSetting != null) {
-          config.removeValue(feature.configSetting);
+          globals.config.removeValue(feature.configSetting);
         }
       }
       return null;
@@ -118,7 +117,7 @@ class ConfigCommand extends FlutterCommand {
       final bool value = boolArg('analytics');
       flutterUsage.enabled = value;
       AnalyticsConfigEvent(enabled: value).send();
-      printStatus('Analytics reporting ${value ? 'enabled' : 'disabled'}.');
+      globals.printStatus('Analytics reporting ${value ? 'enabled' : 'disabled'}.');
     }
 
     if (argResults.wasParsed('android-sdk')) {
@@ -135,7 +134,7 @@ class ConfigCommand extends FlutterCommand {
 
     if (argResults.wasParsed('build-dir')) {
       final String buildDir = stringArg('build-dir');
-      if (fs.path.isAbsolute(buildDir)) {
+      if (globals.fs.path.isAbsolute(buildDir)) {
         throwToolExit('build-dir should be a relative path');
       }
       _updateConfig('build-dir', buildDir);
@@ -147,15 +146,15 @@ class ConfigCommand extends FlutterCommand {
       }
       if (argResults.wasParsed(feature.configSetting)) {
         final bool keyValue = boolArg(feature.configSetting);
-        config.setValue(feature.configSetting, keyValue);
-        printStatus('Setting "${feature.configSetting}" value to "$keyValue".');
+        globals.config.setValue(feature.configSetting, keyValue);
+        globals.printStatus('Setting "${feature.configSetting}" value to "$keyValue".');
       }
     }
 
     if (argResults.arguments.isEmpty) {
-      printStatus(usage);
+      globals.printStatus(usage);
     } else {
-      printStatus('\nYou may need to restart any open editors for them to read new settings.');
+      globals.printStatus('\nYou may need to restart any open editors for them to read new settings.');
     }
 
     return null;
@@ -164,8 +163,8 @@ class ConfigCommand extends FlutterCommand {
   Future<void> handleMachine() async {
     // Get all the current values.
     final Map<String, dynamic> results = <String, dynamic>{};
-    for (String key in config.keys) {
-      results[key] = config.getValue(key);
+    for (String key in globals.config.keys) {
+      results[key] = globals.config.getValue(key);
     }
 
     // Ensure we send any calculated ones, if overrides don't exist.
@@ -176,16 +175,16 @@ class ConfigCommand extends FlutterCommand {
       results['android-sdk'] = androidSdk.directory;
     }
 
-    printStatus(const JsonEncoder.withIndent('  ').convert(results));
+    globals.printStatus(const JsonEncoder.withIndent('  ').convert(results));
   }
 
   void _updateConfig(String keyName, String keyValue) {
     if (keyValue.isEmpty) {
-      config.removeValue(keyName);
-      printStatus('Removing "$keyName" value.');
+      globals.config.removeValue(keyName);
+      globals.printStatus('Removing "$keyName" value.');
     } else {
-      config.setValue(keyName, keyValue);
-      printStatus('Setting "$keyName" value to "$keyValue".');
+      globals.config.setValue(keyName, keyValue);
+      globals.printStatus('Setting "$keyName" value to "$keyValue".');
     }
   }
 }

@@ -4,20 +4,18 @@
 
 import 'package:archive/archive.dart';
 
-import '../globals.dart';
+import '../globals.dart' as globals;
 import 'context.dart';
 import 'file_system.dart';
 import 'io.dart';
-import 'platform.dart';
 import 'process.dart';
-import 'process_manager.dart';
 
 /// Returns [OperatingSystemUtils] active in the current app context (i.e. zone).
 OperatingSystemUtils get os => context.get<OperatingSystemUtils>();
 
 abstract class OperatingSystemUtils {
   factory OperatingSystemUtils() {
-    if (platform.isWindows) {
+    if (globals.platform.isWindows) {
       return _WindowsUtils();
     } else {
       return _PosixUtils();
@@ -75,7 +73,7 @@ abstract class OperatingSystemUtils {
       'linux': 'Linux',
       'windows': 'Windows',
     };
-    final String osName = platform.operatingSystem;
+    final String osName = globals.platform.operatingSystem;
     return osNames.containsKey(osName) ? osNames[osName] : osName;
   }
 
@@ -103,10 +101,10 @@ abstract class OperatingSystemUtils {
       if (!ipv6) {
         return findFreePort(ipv6: true);
       }
-      printTrace('findFreePort failed: $e');
+      globals.printTrace('findFreePort failed: $e');
     } catch (e) {
       // Failures are signaled by a return value of 0 from this function.
-      printTrace('findFreePort failed: $e');
+      globals.printTrace('findFreePort failed: $e');
     } finally {
       if (serverSocket != null) {
         await serverSocket.close();
@@ -127,16 +125,16 @@ class _PosixUtils extends OperatingSystemUtils {
   @override
   void chmod(FileSystemEntity entity, String mode) {
     try {
-      final ProcessResult result = processManager.runSync(<String>['chmod', mode, entity.path]);
+      final ProcessResult result = globals.processManager.runSync(<String>['chmod', mode, entity.path]);
       if (result.exitCode != 0) {
-        printTrace(
+        globals.printTrace(
           'Error trying to run chmod on ${entity.absolute.path}'
           '\nstdout: ${result.stdout}'
           '\nstderr: ${result.stderr}',
         );
       }
     } on ProcessException catch (error) {
-      printTrace('Error trying to run chmod on ${entity.absolute.path}: $error');
+      globals.printTrace('Error trying to run chmod on ${entity.absolute.path}: $error');
     }
   }
 
@@ -147,12 +145,12 @@ class _PosixUtils extends OperatingSystemUtils {
       if (all) '-a',
       execName,
     ];
-    final ProcessResult result = processManager.runSync(command);
+    final ProcessResult result = globals.processManager.runSync(command);
     if (result.exitCode != 0) {
       return const <File>[];
     }
     final String stdout = result.stdout as String;
-    return stdout.trim().split('\n').map<File>((String path) => fs.file(path.trim())).toList();
+    return stdout.trim().split('\n').map<File>((String path) => globals.fs.file(path.trim())).toList();
   }
 
   @override
@@ -196,7 +194,7 @@ class _PosixUtils extends OperatingSystemUtils {
       <String>['mkfifo', path],
       throwOnError: true,
     );
-    return fs.file(path);
+    return globals.fs.file(path);
   }
 
   String _name;
@@ -204,7 +202,7 @@ class _PosixUtils extends OperatingSystemUtils {
   @override
   String get name {
     if (_name == null) {
-      if (platform.isMacOS) {
+      if (globals.platform.isMacOS) {
         final List<RunResult> results = <RunResult>[
           processUtils.runSync(<String>['sw_vers', '-productName']),
           processUtils.runSync(<String>['sw_vers', '-productVersion']),
@@ -236,15 +234,15 @@ class _WindowsUtils extends OperatingSystemUtils {
   @override
   List<File> _which(String execName, { bool all = false }) {
     // `where` always returns all matches, not just the first one.
-    final ProcessResult result = processManager.runSync(<String>['where', execName]);
+    final ProcessResult result = globals.processManager.runSync(<String>['where', execName]);
     if (result.exitCode != 0) {
       return const <File>[];
     }
     final List<String> lines = (result.stdout as String).trim().split('\n');
     if (all) {
-      return lines.map<File>((String path) => fs.file(path.trim())).toList();
+      return lines.map<File>((String path) => globals.fs.file(path.trim())).toList();
     }
-    return <File>[fs.file(lines.first.trim())];
+    return <File>[globals.fs.file(lines.first.trim())];
   }
 
   @override
@@ -307,7 +305,7 @@ class _WindowsUtils extends OperatingSystemUtils {
         continue;
       }
 
-      final File destFile = fs.file(fs.path.join(targetDirectory.path, archiveFile.name));
+      final File destFile = globals.fs.file(globals.fs.path.join(targetDirectory.path, archiveFile.name));
       if (!destFile.parent.existsSync()) {
         destFile.parent.createSync(recursive: true);
       }
@@ -325,7 +323,7 @@ class _WindowsUtils extends OperatingSystemUtils {
   @override
   String get name {
     if (_name == null) {
-      final ProcessResult result = processManager.runSync(
+      final ProcessResult result = globals.processManager.runSync(
           <String>['ver'], runInShell: true);
       if (result.exitCode == 0) {
         _name = (result.stdout as String).trim();
@@ -346,12 +344,12 @@ class _WindowsUtils extends OperatingSystemUtils {
 /// or if the project root is the flutter repository root.
 String findProjectRoot([ String directory ]) {
   const String kProjectRootSentinel = 'pubspec.yaml';
-  directory ??= fs.currentDirectory.path;
+  directory ??= globals.fs.currentDirectory.path;
   while (true) {
-    if (fs.isFileSync(fs.path.join(directory, kProjectRootSentinel))) {
+    if (globals.fs.isFileSync(globals.fs.path.join(directory, kProjectRootSentinel))) {
       return directory;
     }
-    final String parent = fs.path.dirname(directory);
+    final String parent = globals.fs.path.dirname(directory);
     if (directory == parent) {
       return null;
     }

@@ -6,12 +6,12 @@ import 'dart:async';
 
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/os.dart';
-import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/process_manager.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
+import 'package:platform/platform.dart';
 
 import '../../src/common.dart';
 import '../../src/mocks.dart';
@@ -36,7 +36,7 @@ void main() {
       when(platform.environment).thenReturn(<String, String>{
         kChromeEnvironment: 'example_chrome',
       });
-      when(processManager.start(any))
+      when(globals.processManager.start(any))
         .thenAnswer((Invocation invocation) async {
         return FakeProcess(
           exitCode: exitCompleter.future,
@@ -69,13 +69,13 @@ void main() {
     ];
 
     await chromeLauncher.launch('example_url', skipCheck: true);
-    final VerificationResult result = verify(processManager.start(captureAny));
+    final VerificationResult result = verify(globals.processManager.start(captureAny));
 
     expect(result.captured.single, containsAll(expected));
   }));
 
   test('can seed chrome temp directory with existing preferences', () => testbed.run(() async {
-    final Directory dataDir = fs.directory('chrome-stuff');
+    final Directory dataDir = globals.fs.directory('chrome-stuff');
     final File preferencesFile = dataDir
       .childDirectory('Default')
       .childFile('preferences');
@@ -84,10 +84,10 @@ void main() {
       ..writeAsStringSync('example');
 
     await chromeLauncher.launch('example_url', skipCheck: true, dataDir: dataDir);
-    final VerificationResult result = verify(processManager.start(captureAny));
+    final VerificationResult result = verify(globals.processManager.start(captureAny));
     final String arg = (result.captured.single as List<String>)
       .firstWhere((String arg) => arg.startsWith('--user-data-dir='));
-    final Directory tempDirectory = fs.directory(arg.split('=')[1]);
+    final Directory tempDirectory = globals.fs.directory(arg.split('=')[1]);
     final File tempFile = tempDirectory
       .childDirectory('Default')
       .childFile('preferences');

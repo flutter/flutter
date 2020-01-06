@@ -13,12 +13,11 @@ import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/platform.dart';
 import '../base/process.dart';
 import '../build_info.dart';
 import '../convert.dart';
 import '../device.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
 import '../mdns_discovery.dart';
 import '../project.dart';
 import '../protocol_discovery.dart';
@@ -40,7 +39,7 @@ class IOSDeploy {
     @required String bundlePath,
     @required List<String> launchArguments,
   }) async {
-    final String iosDeployPath = artifacts.getArtifactPath(Artifact.iosDeploy, platform: TargetPlatform.ios);
+    final String iosDeployPath = globals.artifacts.getArtifactPath(Artifact.iosDeploy, platform: TargetPlatform.ios);
     final List<String> launchCommand = <String>[
       iosDeployPath,
       '--id',
@@ -62,9 +61,9 @@ class IOSDeploy {
     // python at the front of the path, which may not include package 'six'.
     // Ensure that we pick up the system install of python, which does include
     // it.
-    final Map<String, String> iosDeployEnv = Map<String, String>.from(platform.environment);
+    final Map<String, String> iosDeployEnv = Map<String, String>.from(globals.platform.environment);
     iosDeployEnv['PATH'] = '/usr/bin:${iosDeployEnv['PATH']}';
-    iosDeployEnv.addEntries(<MapEntry<String, String>>[cache.dyLdLibEntry]);
+    iosDeployEnv.addEntries(<MapEntry<String, String>>[globals.cache.dyLdLibEntry]);
 
     return await processUtils.stream(
       launchCommand,
@@ -78,17 +77,17 @@ class IOSDeploy {
   String _monitorInstallationFailure(String stdout) {
     // Installation issues.
     if (stdout.contains('Error 0xe8008015') || stdout.contains('Error 0xe8000067')) {
-      printError(noProvisioningProfileInstruction, emphasis: true);
+      globals.printError(noProvisioningProfileInstruction, emphasis: true);
 
     // Launch issues.
     } else if (stdout.contains('e80000e2')) {
-      printError('''
+      globals.printError('''
 ═══════════════════════════════════════════════════════════════════════════════════
 Your device is locked. Unlock your device first before running.
 ═══════════════════════════════════════════════════════════════════════════════════''',
       emphasis: true);
     } else if (stdout.contains('Error 0xe8000022')) {
-      printError('''
+      globals.printError('''
 ═══════════════════════════════════════════════════════════════════════════════════
 Error launching app. Try launching from within Xcode via:
     open ios/Runner.xcworkspace
@@ -106,7 +105,7 @@ class IOSDevices extends PollingDeviceDiscovery {
   IOSDevices() : super('iOS devices');
 
   @override
-  bool get supportsPlatform => platform.isMacOS;
+  bool get supportsPlatform => globals.platform.isMacOS;
 
   @override
   bool get canListAnything => iosWorkflow.canListDevices;
@@ -124,15 +123,15 @@ class IOSDevice extends Device {
           platformType: PlatformType.ios,
           ephemeral: true,
       ) {
-    if (!platform.isMacOS) {
+    if (!globals.platform.isMacOS) {
       assert(false, 'Control of iOS devices or simulators only supported on Mac OS.');
       return;
     }
-    _installerPath = artifacts.getArtifactPath(
+    _installerPath = globals.artifacts.getArtifactPath(
       Artifact.ideviceinstaller,
       platform: TargetPlatform.ios,
     );
-    _iproxyPath = artifacts.getArtifactPath(
+    _iproxyPath = globals.artifacts.getArtifactPath(
       Artifact.iproxy,
       platform: TargetPlatform.ios,
     );
@@ -172,7 +171,7 @@ class IOSDevice extends Device {
   bool get supportsStartPaused => false;
 
   static Future<List<IOSDevice>> getAttachedDevices() async {
-    if (!platform.isMacOS) {
+    if (!globals.platform.isMacOS) {
       throw UnsupportedError('Control of iOS devices or simulators only supported on Mac OS.');
     }
     if (!iMobileDevice.isInstalled) {
@@ -192,9 +191,9 @@ class IOSDevice extends Device {
         devices.add(IOSDevice(id, name: deviceName, sdkVersion: sdkVersion));
       } on IOSDeviceNotFoundError catch (error) {
         // Unable to find device with given udid. Possibly a network device.
-        printTrace('Error getting attached iOS device: $error');
+        globals.printTrace('Error getting attached iOS device: $error');
       } on IOSDeviceNotTrustedError catch (error) {
-        printTrace('Error getting attached iOS device information: $error');
+        globals.printTrace('Error getting attached iOS device information: $error');
         UsageEvent('device', 'ios-trust-failure').send();
       }
     }
@@ -209,7 +208,7 @@ class IOSDevice extends Device {
         <String>[_installerPath, '--list-apps'],
         throwOnError: true,
         environment: Map<String, String>.fromEntries(
-          <MapEntry<String, String>>[cache.dyLdLibEntry],
+          <MapEntry<String, String>>[globals.cache.dyLdLibEntry],
         ),
       );
     } on ProcessException {
@@ -223,9 +222,9 @@ class IOSDevice extends Device {
 
   @override
   Future<bool> installApp(IOSApp app) async {
-    final Directory bundle = fs.directory(app.deviceBundlePath);
+    final Directory bundle = globals.fs.directory(app.deviceBundlePath);
     if (!bundle.existsSync()) {
-      printError('Could not find application bundle at ${bundle.path}; have you run "flutter build ios"?');
+      globals.printError('Could not find application bundle at ${bundle.path}; have you run "flutter build ios"?');
       return false;
     }
 
@@ -234,12 +233,12 @@ class IOSDevice extends Device {
         <String>[_installerPath, '-i', app.deviceBundlePath],
         throwOnError: true,
         environment: Map<String, String>.fromEntries(
-          <MapEntry<String, String>>[cache.dyLdLibEntry],
+          <MapEntry<String, String>>[globals.cache.dyLdLibEntry],
         ),
       );
       return true;
     } on ProcessException catch (error) {
-      printError(error.message);
+      globals.printError(error.message);
       return false;
     }
   }
@@ -251,12 +250,12 @@ class IOSDevice extends Device {
         <String>[_installerPath, '-U', app.id],
         throwOnError: true,
         environment: Map<String, String>.fromEntries(
-          <MapEntry<String, String>>[cache.dyLdLibEntry],
+          <MapEntry<String, String>>[globals.cache.dyLdLibEntry],
         ),
       );
       return true;
     } on ProcessException catch (error) {
-      printError(error.message);
+      globals.printError(error.message);
       return false;
     }
   }
@@ -279,14 +278,14 @@ class IOSDevice extends Device {
 
     if (!prebuiltApplication) {
       // TODO(chinmaygarde): Use mainPath, route.
-      printTrace('Building ${package.name} for $id');
+      globals.printTrace('Building ${package.name} for $id');
 
       String cpuArchitecture;
 
       try {
         cpuArchitecture = await iMobileDevice.getInfoForDevice(id, 'CPUArchitecture');
       } on IOSDeviceNotFoundError catch (e) {
-        printError(e.message);
+        globals.printError(e.message);
         return LaunchResult.failed();
       }
 
@@ -301,9 +300,9 @@ class IOSDevice extends Device {
           activeArch: iosArch,
       );
       if (!buildResult.success) {
-        printError('Could not build the precompiled application for the device.');
+        globals.printError('Could not build the precompiled application for the device.');
         await diagnoseXcodeBuildFailure(buildResult);
-        printError('');
+        globals.printError('');
         return LaunchResult.failed();
       }
       packageId = buildResult.xcodeBuildExecution?.buildSettings['PRODUCT_BUNDLE_IDENTIFIER'];
@@ -316,9 +315,9 @@ class IOSDevice extends Device {
     packageId ??= package.id;
 
     // Step 2: Check that the application exists at the specified path.
-    final Directory bundle = fs.directory(package.deviceBundlePath);
+    final Directory bundle = globals.fs.directory(package.deviceBundlePath);
     if (!bundle.existsSync()) {
-      printError('Could not find the built application bundle at ${bundle.path}.');
+      globals.printError('Could not find the built application bundle at ${bundle.path}.');
       return LaunchResult.failed();
     }
 
@@ -335,7 +334,7 @@ class IOSDevice extends Device {
       // "system_debug_ios" integration test in the CI, which simulates a
       // home-screen launch.
       if (debuggingOptions.debuggingEnabled &&
-          platform.environment['FLUTTER_TOOLS_DEBUG_WITHOUT_CHECKED_MODE'] != 'true') ...<String>[
+          globals.platform.environment['FLUTTER_TOOLS_DEBUG_WITHOUT_CHECKED_MODE'] != 'true') ...<String>[
         '--enable-checked-mode',
         '--verify-entry-points',
       ],
@@ -350,14 +349,14 @@ class IOSDevice extends Device {
       if (platformArgs['trace-startup'] as bool ?? false) '--trace-startup',
     ];
 
-    final Status installStatus = logger.startProgress(
+    final Status installStatus = globals.logger.startProgress(
         'Installing and launching...',
         timeout: timeoutConfiguration.slowOperation);
     try {
       ProtocolDiscovery observatoryDiscovery;
       if (debuggingOptions.debuggingEnabled) {
         // Debugging is enabled, look for the observatory server port post launch.
-        printTrace('Debugging is enabled, connecting to observatory');
+        globals.printTrace('Debugging is enabled, connecting to observatory');
 
         // TODO(danrubel): The Android device class does something similar to this code below.
         // The various Device subclasses should be refactored and common code moved into the superclass.
@@ -375,10 +374,10 @@ class IOSDevice extends Device {
         launchArguments: launchArguments,
       );
       if (installationResult != 0) {
-        printError('Could not install ${bundle.path} on $id.');
-        printError('Try launching Xcode and selecting "Product > Run" to fix the problem:');
-        printError('  open ios/Runner.xcworkspace');
-        printError('');
+        globals.printError('Could not install ${bundle.path} on $id.');
+        globals.printError('Try launching Xcode and selecting "Product > Run" to fix the problem:');
+        globals.printError('  open ios/Runner.xcworkspace');
+        globals.printError('');
         return LaunchResult.failed();
       }
 
@@ -388,7 +387,7 @@ class IOSDevice extends Device {
 
       Uri localUri;
       try {
-        printTrace('Application launched on the device. Waiting for observatory port.');
+        globals.printTrace('Application launched on the device. Waiting for observatory port.');
         localUri = await MDnsObservatoryDiscovery.instance.getObservatoryUri(
           packageId,
           this,
@@ -400,21 +399,21 @@ class IOSDevice extends Device {
           return LaunchResult.succeeded(observatoryUri: localUri);
         }
       } catch (error) {
-        printError('Failed to establish a debug connection with $id using mdns: $error');
+        globals.printError('Failed to establish a debug connection with $id using mdns: $error');
       }
 
       // Fallback to manual protocol discovery.
       UsageEvent('ios-mdns', 'failure').send();
-      printTrace('mDNS lookup failed, attempting fallback to reading device log.');
+      globals.printTrace('mDNS lookup failed, attempting fallback to reading device log.');
       try {
-        printTrace('Waiting for observatory port.');
+        globals.printTrace('Waiting for observatory port.');
         localUri = await observatoryDiscovery.uri;
         if (localUri != null) {
           UsageEvent('ios-mdns', 'fallback-success').send();
           return LaunchResult.succeeded(observatoryUri: localUri);
         }
       } catch (error) {
-        printError('Failed to establish a debug connection with $id using logs: $error');
+        globals.printError('Failed to establish a debug connection with $id using logs: $error');
       } finally {
         await observatoryDiscovery?.cancel();
       }
@@ -697,7 +696,7 @@ class IOSDevicePortForwarder extends DevicePortForwarder {
 
     bool connected = false;
     while (!connected) {
-      printTrace('Attempting to forward device port $devicePort to host port $hostPort');
+      globals.printTrace('Attempting to forward device port $devicePort to host port $hostPort');
       // Usage: iproxy LOCAL_TCP_PORT DEVICE_TCP_PORT UDID
       process = await processUtils.start(
         <String>[
@@ -707,7 +706,7 @@ class IOSDevicePortForwarder extends DevicePortForwarder {
           device.id,
         ],
         environment: Map<String, String>.fromEntries(
-          <MapEntry<String, String>>[cache.dyLdLibEntry],
+          <MapEntry<String, String>>[globals.cache.dyLdLibEntry],
         ),
       );
       // TODO(ianh): This is a flakey race condition, https://github.com/libimobiledevice/libimobiledevice/issues/674
@@ -730,7 +729,7 @@ class IOSDevicePortForwarder extends DevicePortForwarder {
     final ForwardedPort forwardedPort = ForwardedPort.withContext(
       hostPort, devicePort, process,
     );
-    printTrace('Forwarded port $forwardedPort');
+    globals.printTrace('Forwarded port $forwardedPort');
     _forwardedPorts.add(forwardedPort);
     return hostPort;
   }
@@ -742,7 +741,7 @@ class IOSDevicePortForwarder extends DevicePortForwarder {
       return;
     }
 
-    printTrace('Unforwarding port $forwardedPort');
+    globals.printTrace('Unforwarding port $forwardedPort');
     forwardedPort.dispose();
   }
 

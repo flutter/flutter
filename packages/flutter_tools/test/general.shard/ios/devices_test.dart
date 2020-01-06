@@ -24,6 +24,8 @@ import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/mdns_discovery.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
+
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
@@ -193,7 +195,7 @@ void main() {
         mockIosDeploy = MockIOSDeploy();
         mockUsage = MockUsage();
 
-        tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_create_test.');
+        tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_create_test.');
         projectDir = tempDir.childDirectory('flutter_project');
 
         when(
@@ -527,7 +529,7 @@ void main() {
               projectDir.childDirectory('build/ios/iphoneos/Debug-arm64');
 
           // The -showBuildSettings calls have a timeout and so go through
-          // processManager.start().
+          // globals.processManager.start().
           mockProcessManager.processFactory = flakyProcessFactory(
             flakes: showBuildSettingsFlakes ? 1 : 0,
             delay: const Duration(seconds: 62),
@@ -919,7 +921,7 @@ Runner(libsystem_asl.dylib)[297] <Notice>: libMobileGestalt
     });
   });
   testUsingContext('IOSDevice.isSupportedForProject is true on module project', () async {
-    fs.file('pubspec.yaml')
+    globals.fs.file('pubspec.yaml')
       ..createSync()
       ..writeAsStringSync(r'''
 name: example
@@ -927,7 +929,7 @@ name: example
 flutter:
   module: {}
 ''');
-    fs.file('.packages').createSync();
+    globals.fs.file('.packages').createSync();
     final FlutterProject flutterProject = FlutterProject.current();
 
     expect(IOSDevice('test').isSupportedForProject(flutterProject), true);
@@ -937,9 +939,9 @@ flutter:
     Platform: () => macPlatform,
   });
   testUsingContext('IOSDevice.isSupportedForProject is true with editable host app', () async {
-    fs.file('pubspec.yaml').createSync();
-    fs.file('.packages').createSync();
-    fs.directory('ios').createSync();
+    globals.fs.file('pubspec.yaml').createSync();
+    globals.fs.file('.packages').createSync();
+    globals.fs.directory('ios').createSync();
     final FlutterProject flutterProject = FlutterProject.current();
 
     expect(IOSDevice('test').isSupportedForProject(flutterProject), true);
@@ -950,8 +952,8 @@ flutter:
   });
 
   testUsingContext('IOSDevice.isSupportedForProject is false with no host app and no module', () async {
-    fs.file('pubspec.yaml').createSync();
-    fs.file('.packages').createSync();
+    globals.fs.file('pubspec.yaml').createSync();
+    globals.fs.file('.packages').createSync();
     final FlutterProject flutterProject = FlutterProject.current();
 
     expect(IOSDevice('test').isSupportedForProject(flutterProject), false);
@@ -973,7 +975,7 @@ class AbsoluteBuildableIOSApp extends BuildableIOSApp {
 
   @override
   String get deviceBundlePath =>
-      fs.path.join(project.parent.directory.path, 'build', 'ios', 'iphoneos', name);
+      globals.fs.path.join(project.parent.directory.path, 'build', 'ios', 'iphoneos', name);
 
 }
 

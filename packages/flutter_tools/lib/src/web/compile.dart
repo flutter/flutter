@@ -13,7 +13,7 @@ import '../build_system/build_system.dart';
 import '../build_system/targets/dart.dart';
 import '../build_system/targets/web.dart';
 import '../convert.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
 import '../platform_plugins.dart';
 import '../plugins.dart';
 import '../project.dart';
@@ -35,12 +35,12 @@ Future<void> buildWeb(
   final bool hasWebPlugins = findPlugins(flutterProject)
     .any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
   await injectPlugins(flutterProject, checkProjects: true);
-  final Status status = logger.startProgress('Compiling $target for the Web...', timeout: null);
+  final Status status = globals.logger.startProgress('Compiling $target for the Web...', timeout: null);
   final Stopwatch sw = Stopwatch()..start();
   try {
     final BuildResult result = await buildSystem.build(const WebReleaseBundle(), Environment(
-      outputDir: fs.directory(getWebBuildDirectory()),
-      projectDir: fs.currentDirectory,
+      outputDir: globals.fs.directory(getWebBuildDirectory()),
+      projectDir: globals.fs.currentDirectory,
       buildDir: flutterProject.directory
         .childDirectory('.dart_tool')
         .childDirectory('flutter_build'),
@@ -54,7 +54,7 @@ Future<void> buildWeb(
     ));
     if (!result.success) {
       for (ExceptionMeasurement measurement in result.exceptions.values) {
-        printError('Target ${measurement.target} failed: ${measurement.exception}',
+        globals.printError('Target ${measurement.target} failed: ${measurement.exception}',
           stackTrace: measurement.fatal
             ? measurement.stackTrace
             : null,

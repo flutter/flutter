@@ -15,10 +15,9 @@ import 'base/context.dart';
 import 'base/file_system.dart';
 import 'build_info.dart';
 import 'bundle.dart' as bundle;
-import 'cache.dart';
 import 'features.dart';
 import 'flutter_manifest.dart';
-import 'globals.dart';
+import 'globals.dart' as globals;
 import 'ios/plist_parser.dart';
 import 'ios/xcodeproj.dart' as xcode;
 import 'plugins.dart';
@@ -73,11 +72,11 @@ class FlutterProject {
 
   /// Returns a [FlutterProject] view of the current directory or a ToolExit error,
   /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
-  static FlutterProject current() => fromDirectory(fs.currentDirectory);
+  static FlutterProject current() => fromDirectory(globals.fs.currentDirectory);
 
   /// Returns a [FlutterProject] view of the given directory or a ToolExit error,
   /// if `pubspec.yaml` or `example/pubspec.yaml` is invalid.
-  static FlutterProject fromPath(String path) => fromDirectory(fs.directory(path));
+  static FlutterProject fromPath(String path) => fromDirectory(globals.fs.directory(path));
 
   /// The location of this project.
   final Directory directory;
@@ -192,8 +191,8 @@ class FlutterProject {
     try {
       manifest = FlutterManifest.createFromPath(path);
     } on YamlException catch (e) {
-      printStatus('Error detected in pubspec.yaml:', emphasis: true);
-      printError('$e');
+      globals.printStatus('Error detected in pubspec.yaml:', emphasis: true);
+      globals.printError('$e');
     }
     if (manifest == null) {
       throwToolExit('Please correct the pubspec.yaml file at $path');
@@ -455,7 +454,7 @@ class IosProject implements XcodeBasedProject {
   }
 
   Future<void> _updateGeneratedXcodeConfigIfNeeded() async {
-    if (Cache.instance.isOlderThanToolsStamp(generatedXcodePropertiesFile)) {
+    if (globals.cache.isOlderThanToolsStamp(generatedXcodePropertiesFile)) {
       await xcode.updateGeneratedXcodeProperties(
         project: parent,
         buildInfo: BuildInfo.debug,
@@ -469,7 +468,7 @@ class IosProject implements XcodeBasedProject {
       return;
     }
     final bool pubspecChanged = isOlderThanReference(entity: ephemeralDirectory, referenceFile: parent.pubspecFile);
-    final bool toolingChanged = Cache.instance.isOlderThanToolsStamp(ephemeralDirectory);
+    final bool toolingChanged = globals.cache.isOlderThanToolsStamp(ephemeralDirectory);
     if (!pubspecChanged && !toolingChanged) {
       return;
     }
@@ -479,18 +478,18 @@ class IosProject implements XcodeBasedProject {
       .childDirectory('engine');
 
     _deleteIfExistsSync(ephemeralDirectory);
-    _overwriteFromTemplate(fs.path.join('module', 'ios', 'library'), ephemeralDirectory);
+    _overwriteFromTemplate(globals.fs.path.join('module', 'ios', 'library'), ephemeralDirectory);
     // Add ephemeral host app, if a editable host app does not already exist.
     if (!_editableDirectory.existsSync()) {
-      _overwriteFromTemplate(fs.path.join('module', 'ios', 'host_app_ephemeral'), ephemeralDirectory);
+      _overwriteFromTemplate(globals.fs.path.join('module', 'ios', 'host_app_ephemeral'), ephemeralDirectory);
       if (hasPlugins(parent)) {
-        _overwriteFromTemplate(fs.path.join('module', 'ios', 'host_app_ephemeral_cocoapods'), ephemeralDirectory);
+        _overwriteFromTemplate(globals.fs.path.join('module', 'ios', 'host_app_ephemeral_cocoapods'), ephemeralDirectory);
       }
       // Copy podspec and framework from engine cache. The actual build mode
       // doesn't actually matter as it will be overwritten by xcode_backend.sh.
       // However, cocoapods will run before that script and requires something
       // to be in this location.
-      final Directory framework = fs.directory(artifacts.getArtifactPath(Artifact.flutterFramework,
+      final Directory framework = globals.fs.directory(globals.artifacts.getArtifactPath(Artifact.flutterFramework,
         platform: TargetPlatform.ios, mode: BuildMode.debug));
       if (framework.existsSync()) {
         final File podspec = framework.parent.childFile('Flutter.podspec');
@@ -506,10 +505,10 @@ class IosProject implements XcodeBasedProject {
       throwToolExit('iOS host app is already editable. To start fresh, delete the ios/ folder.');
     }
     _deleteIfExistsSync(ephemeralDirectory);
-    _overwriteFromTemplate(fs.path.join('module', 'ios', 'library'), ephemeralDirectory);
-    _overwriteFromTemplate(fs.path.join('module', 'ios', 'host_app_ephemeral'), _editableDirectory);
-    _overwriteFromTemplate(fs.path.join('module', 'ios', 'host_app_ephemeral_cocoapods'), _editableDirectory);
-    _overwriteFromTemplate(fs.path.join('module', 'ios', 'host_app_editable_cocoapods'), _editableDirectory);
+    _overwriteFromTemplate(globals.fs.path.join('module', 'ios', 'library'), ephemeralDirectory);
+    _overwriteFromTemplate(globals.fs.path.join('module', 'ios', 'host_app_ephemeral'), _editableDirectory);
+    _overwriteFromTemplate(globals.fs.path.join('module', 'ios', 'host_app_ephemeral_cocoapods'), _editableDirectory);
+    _overwriteFromTemplate(globals.fs.path.join('module', 'ios', 'host_app_editable_cocoapods'), _editableDirectory);
     await _updateGeneratedXcodeConfigIfNeeded();
     await injectPlugins(parent);
   }
@@ -583,14 +582,14 @@ class AndroidProject {
 
   File get appManifestFile {
     return isUsingGradle
-        ? fs.file(fs.path.join(hostAppGradleRoot.path, 'app', 'src', 'main', 'AndroidManifest.xml'))
+        ? globals.fs.file(globals.fs.path.join(hostAppGradleRoot.path, 'app', 'src', 'main', 'AndroidManifest.xml'))
         : hostAppGradleRoot.childFile('AndroidManifest.xml');
   }
 
   File get gradleAppOutV1File => gradleAppOutV1Directory.childFile('app-debug.apk');
 
   Directory get gradleAppOutV1Directory {
-    return fs.directory(fs.path.join(hostAppGradleRoot.path, 'app', 'build', 'outputs', 'apk'));
+    return globals.fs.directory(globals.fs.path.join(hostAppGradleRoot.path, 'app', 'build', 'outputs', 'apk'));
   }
 
   /// Whether the current flutter project has an Android sub-project.
@@ -622,8 +621,8 @@ class AndroidProject {
       _regenerateLibrary();
       // Add ephemeral host app, if an editable host app does not already exist.
       if (!_editableHostAppDirectory.existsSync()) {
-        _overwriteFromTemplate(fs.path.join('module', 'android', 'host_app_common'), ephemeralDirectory);
-        _overwriteFromTemplate(fs.path.join('module', 'android', 'host_app_ephemeral'), ephemeralDirectory);
+        _overwriteFromTemplate(globals.fs.path.join('module', 'android', 'host_app_common'), ephemeralDirectory);
+        _overwriteFromTemplate(globals.fs.path.join('module', 'android', 'host_app_ephemeral'), ephemeralDirectory);
       }
     }
     if (!hostAppGradleRoot.existsSync()) {
@@ -634,7 +633,7 @@ class AndroidProject {
 
   bool _shouldRegenerateFromTemplate() {
     return isOlderThanReference(entity: ephemeralDirectory, referenceFile: parent.pubspecFile)
-        || Cache.instance.isOlderThanToolsStamp(ephemeralDirectory);
+        || globals.cache.isOlderThanToolsStamp(ephemeralDirectory);
   }
 
   Future<void> makeHostAppEditable() async {
@@ -643,9 +642,9 @@ class AndroidProject {
       throwToolExit('Android host app is already editable. To start fresh, delete the android/ folder.');
     }
     _regenerateLibrary();
-    _overwriteFromTemplate(fs.path.join('module', 'android', 'host_app_common'), _editableHostAppDirectory);
-    _overwriteFromTemplate(fs.path.join('module', 'android', 'host_app_editable'), _editableHostAppDirectory);
-    _overwriteFromTemplate(fs.path.join('module', 'android', 'gradle'), _editableHostAppDirectory);
+    _overwriteFromTemplate(globals.fs.path.join('module', 'android', 'host_app_common'), _editableHostAppDirectory);
+    _overwriteFromTemplate(globals.fs.path.join('module', 'android', 'host_app_editable'), _editableHostAppDirectory);
+    _overwriteFromTemplate(globals.fs.path.join('module', 'android', 'gradle'), _editableHostAppDirectory);
     gradle.gradleUtils.injectGradleWrapperIfNeeded(_editableHostAppDirectory);
     gradle.writeLocalProperties(_editableHostAppDirectory.childFile('local.properties'));
     await injectPlugins(parent);
@@ -657,12 +656,12 @@ class AndroidProject {
 
   void _regenerateLibrary() {
     _deleteIfExistsSync(ephemeralDirectory);
-    _overwriteFromTemplate(fs.path.join(
+    _overwriteFromTemplate(globals.fs.path.join(
       'module',
       'android',
       featureFlags.isAndroidEmbeddingV2Enabled ? 'library_new_embedding' : 'library',
     ), ephemeralDirectory);
-    _overwriteFromTemplate(fs.path.join('module', 'android', 'gradle'), ephemeralDirectory);
+    _overwriteFromTemplate(globals.fs.path.join('module', 'android', 'gradle'), ephemeralDirectory);
     gradle.gradleUtils.injectGradleWrapperIfNeeded(ephemeralDirectory);
   }
 
@@ -848,7 +847,7 @@ class MacOSProject implements XcodeBasedProject {
   }
 
   Future<void> _updateGeneratedXcodeConfigIfNeeded() async {
-    if (Cache.instance.isOlderThanToolsStamp(generatedXcodePropertiesFile)) {
+    if (globals.cache.isOlderThanToolsStamp(generatedXcodePropertiesFile)) {
       await xcode.updateGeneratedXcodeProperties(
         project: parent,
         buildInfo: BuildInfo.debug,
