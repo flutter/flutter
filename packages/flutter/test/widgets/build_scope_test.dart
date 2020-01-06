@@ -136,14 +136,14 @@ void main() {
   testWidgets('Legal times for setState', (WidgetTester tester) async {
     final GlobalKey flipKey = GlobalKey();
     expect(ProbeWidgetState.buildCount, equals(0));
-    await tester.pumpWidget(const ProbeWidget());
+    await tester.pumpWidget(const ProbeWidget(key: Key('a')));
     expect(ProbeWidgetState.buildCount, equals(1));
-    await tester.pumpWidget(const ProbeWidget());
+    await tester.pumpWidget(const ProbeWidget(key: Key('b')));
     expect(ProbeWidgetState.buildCount, equals(2));
     await tester.pumpWidget(FlipWidget(
       key: flipKey,
       left: Container(),
-      right: const ProbeWidget(),
+      right: const ProbeWidget(key: Key('c')),
     ));
     expect(ProbeWidgetState.buildCount, equals(2));
     final FlipWidgetState flipState1 = flipKey.currentState as FlipWidgetState;
