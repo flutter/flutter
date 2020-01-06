@@ -243,6 +243,7 @@ class Shortcuts extends StatefulWidget {
     this.manager,
     this.shortcuts,
     this.child,
+    this.debugLabel,
   }) : super(key: key);
 
   /// The [ShortcutManager] that will manage the mapping between key
@@ -267,6 +268,16 @@ class Shortcuts extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.child}
   final Widget child;
+
+  /// The debug label that is printed for this node when logged.
+  ///
+  /// If this label is set, then the shortcut mapping in [shortcuts] will only
+  /// be displayed if the diagnostic level is set to at least
+  /// [DiagnosticLevel.fine].
+  ///
+  /// This allows simplifying the diagnostic output to avoid cluttering it
+  /// unnecessarily with the default shortcut map.
+  final String debugLabel;
 
   /// Returns the [ActionDispatcher] that most tightly encloses the given
   /// [BuildContext].
@@ -300,7 +311,9 @@ class Shortcuts extends StatefulWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<ShortcutManager>('manager', manager));
-    properties.add(DiagnosticsProperty<Map<LogicalKeySet, Intent>>('shortcuts', shortcuts));
+    final bool showDebugLabel = debugLabel != null && debugLabel.isNotEmpty;
+    properties.add(StringProperty('debugLabel', debugLabel, defaultValue: null, level: showDebugLabel ? DiagnosticLevel.info : DiagnosticLevel.hidden));
+    properties.add(DiagnosticsProperty<Map<LogicalKeySet, Intent>>('shortcuts', shortcuts, level: showDebugLabel ? DiagnosticLevel.fine : DiagnosticLevel.info));
   }
 }
 
