@@ -8,9 +8,8 @@ import 'package:meta/meta.dart';
 
 import '../base/file_system.dart';
 import '../base/logger.dart';
-import '../base/platform.dart';
 import '../build_info.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
 import '../ios/xcodeproj.dart';
 import '../macos/xcode.dart';
 import '../project.dart';
@@ -40,7 +39,7 @@ class CleanCommand extends FlutterCommand {
       await _cleanXcode(flutterProject.macos);
     }
 
-    final Directory buildDir = fs.directory(getBuildDirectory());
+    final Directory buildDir = globals.fs.directory(getBuildDirectory());
     deleteFile(buildDir);
 
     deleteFile(flutterProject.dartTool);
@@ -67,7 +66,10 @@ class CleanCommand extends FlutterCommand {
     if (!xcodeProject.existsSync()) {
       return;
     }
-    final Status xcodeStatus = logger.startProgress('Cleaning Xcode workspace...', timeout: timeoutConfiguration.slowOperation);
+    final Status xcodeStatus = globals.logger.startProgress(
+      'Cleaning Xcode workspace...',
+      timeout: timeoutConfiguration.slowOperation,
+    );
     try {
       final Directory xcodeWorkspace = xcodeProject.xcodeWorkspace;
       final XcodeProjectInfo projectInfo = await xcodeProjectInterpreter.getInfo(xcodeWorkspace.parent.path);
@@ -75,7 +77,7 @@ class CleanCommand extends FlutterCommand {
         xcodeProjectInterpreter.cleanWorkspace(xcodeWorkspace.path, scheme);
       }
     } catch (error) {
-      printTrace('Could not clean Xcode workspace: $error');
+      globals.printTrace('Could not clean Xcode workspace: $error');
     } finally {
       xcodeStatus?.stop();
     }
@@ -89,22 +91,25 @@ class CleanCommand extends FlutterCommand {
         return;
       }
     } on FileSystemException catch (err) {
-      printError('Cannot clean ${file.path}.\n$err');
+      globals.printError('Cannot clean ${file.path}.\n$err');
       return;
     }
-    final Status deletionStatus = logger.startProgress('Deleting ${file.basename}...', timeout: timeoutConfiguration.fastOperation);
+    final Status deletionStatus = globals.logger.startProgress(
+      'Deleting ${file.basename}...',
+      timeout: timeoutConfiguration.fastOperation,
+    );
     try {
       file.deleteSync(recursive: true);
     } on FileSystemException catch (error) {
       final String path = file.path;
-      if (platform.isWindows) {
-        printError(
+      if (globals.platform.isWindows) {
+        globals.printError(
           'Failed to remove $path. '
             'A program may still be using a file in the directory or the directory itself. '
             'To find and stop such a program, see: '
             'https://superuser.com/questions/1333118/cant-delete-empty-folder-because-it-is-used');
       } else {
-        printError('Failed to remove $path: $error');
+        globals.printError('Failed to remove $path: $error');
       }
     } finally {
       deletionStatus.stop();

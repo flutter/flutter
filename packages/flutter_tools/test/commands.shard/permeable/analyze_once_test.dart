@@ -4,15 +4,17 @@
 
 import 'dart:async';
 
+import 'package:platform/platform.dart';
+
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/analyze.dart';
-import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -23,7 +25,7 @@ final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{
 };
 
 void main() {
-  final String analyzerSeparator = platform.isWindows ? '-' : '•';
+  final String analyzerSeparator = globals.platform.isWindows ? '-' : '•';
 
   group('analyze once', () {
     setUpAll(() {
@@ -32,13 +34,13 @@ void main() {
     });
 
     void _createDotPackages(String projectPath) {
-      final String flutterRootUri = 'file://${fs.path.canonicalize(Cache.flutterRoot).replaceAll('\\', '/')}';
+      final String flutterRootUri = 'file://${globals.fs.path.canonicalize(Cache.flutterRoot).replaceAll('\\', '/')}';
       final String dotPackagesSrc = '''# Generated
 flutter:$flutterRootUri/packages/flutter/lib/
 sky_engine:$flutterRootUri/bin/cache/pkg/sky_engine/lib/
 flutter_project:lib/
 ''';
-      fs.file(fs.path.join(projectPath, '.packages'))
+      globals.fs.file(globals.fs.path.join(projectPath, '.packages'))
           ..createSync(recursive: true)
           ..writeAsStringSync(dotPackagesSrc);
     }
@@ -49,16 +51,16 @@ flutter_project:lib/
       File libMain;
 
       setUpAll(() async {
-        tempDir = fs.systemTempDirectory.createTempSync('flutter_analyze_once_test_1.').absolute;
-        projectPath = fs.path.join(tempDir.path, 'flutter_project');
-        fs.file(fs.path.join(projectPath, 'pubspec.yaml'))
+        tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_analyze_once_test_1.').absolute;
+        projectPath = globals.fs.path.join(tempDir.path, 'flutter_project');
+        globals.fs.file(globals.fs.path.join(projectPath, 'pubspec.yaml'))
             ..createSync(recursive: true)
             ..writeAsStringSync(pubspecYamlSrc);
         _createDotPackages(projectPath);
       });
 
       setUp(() {
-        libMain = fs.file(fs.path.join(projectPath, 'lib', 'main.dart'))
+        libMain = globals.fs.file(globals.fs.path.join(projectPath, 'lib', 'main.dart'))
             ..createSync(recursive: true)
             ..writeAsStringSync(mainDartSrc);
       });
@@ -70,7 +72,7 @@ flutter_project:lib/
       // Analyze in the current directory - no arguments
       testUsingContext('working directory', () async {
         await runCommand(
-          command: AnalyzeCommand(workingDirectory: fs.directory(projectPath)),
+          command: AnalyzeCommand(workingDirectory: globals.fs.directory(projectPath)),
           arguments: <String>['analyze', '--no-pub'],
           statusTextContains: <String>['No issues found!'],
         );
@@ -110,7 +112,7 @@ flutter_project:lib/
 
         // Analyze in the current directory - no arguments
         await runCommand(
-          command: AnalyzeCommand(workingDirectory: fs.directory(projectPath)),
+          command: AnalyzeCommand(workingDirectory: globals.fs.directory(projectPath)),
           arguments: <String>['analyze', '--no-pub'],
           statusTextContains: <String>[
             'Analyzing',
@@ -127,7 +129,7 @@ flutter_project:lib/
       testUsingContext('working directory with local options', () async {
         // Insert an analysis_options.yaml file in the project
         // which will trigger a lint for broken code that was inserted earlier
-        final File optionsFile = fs.file(fs.path.join(projectPath, 'analysis_options.yaml'));
+        final File optionsFile = globals.fs.file(globals.fs.path.join(projectPath, 'analysis_options.yaml'));
         try {
           optionsFile.writeAsStringSync('''
       include: package:flutter/analysis_options_user.yaml
@@ -148,7 +150,7 @@ flutter_project:lib/
 
           // Analyze in the current directory - no arguments
           await runCommand(
-            command: AnalyzeCommand(workingDirectory: fs.directory(projectPath)),
+            command: AnalyzeCommand(workingDirectory: globals.fs.directory(projectPath)),
             arguments: <String>['analyze', '--no-pub'],
             statusTextContains: <String>[
               'Analyzing',
@@ -167,18 +169,18 @@ flutter_project:lib/
     });
 
     testUsingContext('no duplicate issues', () async {
-      final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_analyze_once_test_2.').absolute;
+      final Directory tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_analyze_once_test_2.').absolute;
       _createDotPackages(tempDir.path);
 
       try {
-        final File foo = fs.file(fs.path.join(tempDir.path, 'foo.dart'));
+        final File foo = globals.fs.file(globals.fs.path.join(tempDir.path, 'foo.dart'));
         foo.writeAsStringSync('''
 import 'bar.dart';
 
 void foo() => bar();
 ''');
 
-        final File bar = fs.file(fs.path.join(tempDir.path, 'bar.dart'));
+        final File bar = globals.fs.file(globals.fs.path.join(tempDir.path, 'bar.dart'));
         bar.writeAsStringSync('''
 import 'dart:async'; // unused
 
@@ -205,13 +207,13 @@ void bar() {
       const String contents = '''
 StringBuffer bar = StringBuffer('baz');
 ''';
-      final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_analyze_once_test_3.');
+      final Directory tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_analyze_once_test_3.');
       _createDotPackages(tempDir.path);
 
       tempDir.childFile('main.dart').writeAsStringSync(contents);
       try {
         await runCommand(
-          command: AnalyzeCommand(workingDirectory: fs.directory(tempDir)),
+          command: AnalyzeCommand(workingDirectory: globals.fs.directory(tempDir)),
           arguments: <String>['analyze', '--no-pub'],
           statusTextContains: <String>['No issues found!'],
         );
@@ -227,13 +229,13 @@ StringBuffer bar = StringBuffer('baz');
 // TODO(foobar):
 StringBuffer bar = StringBuffer('baz');
 ''';
-      final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_analyze_once_test_4.');
+      final Directory tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_analyze_once_test_4.');
       _createDotPackages(tempDir.path);
 
       tempDir.childFile('main.dart').writeAsStringSync(contents);
       try {
         await runCommand(
-          command: AnalyzeCommand(workingDirectory: fs.directory(tempDir)),
+          command: AnalyzeCommand(workingDirectory: globals.fs.directory(tempDir)),
           arguments: <String>['analyze', '--no-pub'],
           statusTextContains: <String>['No issues found!'],
         );

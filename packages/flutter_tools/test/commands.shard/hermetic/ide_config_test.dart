@@ -9,6 +9,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/template.dart';
 import 'package:flutter_tools/src/commands/ide_config.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -24,33 +25,33 @@ void main() {
       final String tempPath = tempDir.absolute.path;
       final List<String> paths =
         (root ?? tempDir).listSync(recursive: true).map((FileSystemEntity entity) {
-          final String relativePath = fs.path.relative(entity.path, from: tempPath);
+          final String relativePath = globals.fs.path.relative(entity.path, from: tempPath);
           return relativePath;
         }).toList();
       final Map<String, String> contents = <String, String>{};
       for (String path in paths) {
-        final String absPath = fs.path.join(tempPath, path);
-        if (fs.isDirectorySync(absPath)) {
+        final String absPath = globals.fs.path.join(tempPath, path);
+        if (globals.fs.isDirectorySync(absPath)) {
           contents[path] = 'dir';
-        } else if (fs.isFileSync(absPath)) {
-          contents[path] = fs.file(absPath).readAsStringSync();
+        } else if (globals.fs.isFileSync(absPath)) {
+          contents[path] = globals.fs.file(absPath).readAsStringSync();
         }
       }
       return contents;
     }
 
     Map<String, String> _getManifest(Directory base, String marker, { bool isTemplate = false }) {
-      final String basePath = fs.path.relative(base.path, from: tempDir.absolute.path);
+      final String basePath = globals.fs.path.relative(base.path, from: tempDir.absolute.path);
       final String suffix = isTemplate ? Template.copyTemplateExtension : '';
       return <String, String>{
-        fs.path.join(basePath, '.idea'): 'dir',
-        fs.path.join(basePath, '.idea', 'modules.xml$suffix'): 'modules $marker',
-        fs.path.join(basePath, '.idea', 'vcs.xml$suffix'): 'vcs $marker',
-        fs.path.join(basePath, '.idea', '.name$suffix'): 'codeStyleSettings $marker',
-        fs.path.join(basePath, '.idea', 'runConfigurations'): 'dir',
-        fs.path.join(basePath, '.idea', 'runConfigurations', 'hello_world.xml$suffix'): 'hello_world $marker',
-        fs.path.join(basePath, 'flutter.iml$suffix'): 'flutter $marker',
-        fs.path.join(basePath, 'packages', 'new', 'deep.iml$suffix'): 'deep $marker',
+        globals.fs.path.join(basePath, '.idea'): 'dir',
+        globals.fs.path.join(basePath, '.idea', 'modules.xml$suffix'): 'modules $marker',
+        globals.fs.path.join(basePath, '.idea', 'vcs.xml$suffix'): 'vcs $marker',
+        globals.fs.path.join(basePath, '.idea', '.name$suffix'): 'codeStyleSettings $marker',
+        globals.fs.path.join(basePath, '.idea', 'runConfigurations'): 'dir',
+        globals.fs.path.join(basePath, '.idea', 'runConfigurations', 'hello_world.xml$suffix'): 'hello_world $marker',
+        globals.fs.path.join(basePath, 'flutter.iml$suffix'): 'flutter $marker',
+        globals.fs.path.join(basePath, 'packages', 'new', 'deep.iml$suffix'): 'deep $marker',
       };
     }
 
@@ -70,8 +71,8 @@ void main() {
     }
 
     bool _fileOrDirectoryExists(String path) {
-      final String absPath = fs.path.join(tempDir.absolute.path, path);
-      return fs.file(absPath).existsSync() || fs.directory(absPath).existsSync();
+      final String absPath = globals.fs.path.join(tempDir.absolute.path, path);
+      return globals.fs.file(absPath).existsSync() || globals.fs.directory(absPath).existsSync();
     }
 
     Future<void> _updateIdeConfig({
@@ -90,16 +91,16 @@ void main() {
       ]);
 
       for (String path in expectedContents.keys) {
-        final String absPath = fs.path.join(tempDir.absolute.path, path);
-        expect(_fileOrDirectoryExists(fs.path.join(dir.path, path)), true,
+        final String absPath = globals.fs.path.join(tempDir.absolute.path, path);
+        expect(_fileOrDirectoryExists(globals.fs.path.join(dir.path, path)), true,
             reason: "$path doesn't exist");
-        if (fs.file(absPath).existsSync()) {
-          expect(fs.file(absPath).readAsStringSync(), equals(expectedContents[path]),
+        if (globals.fs.file(absPath).existsSync()) {
+          expect(globals.fs.file(absPath).readAsStringSync(), equals(expectedContents[path]),
               reason: "$path contents don't match");
         }
       }
       for (String path in unexpectedPaths) {
-        expect(_fileOrDirectoryExists(fs.path.join(dir.path, path)), false, reason: '$path exists');
+        expect(_fileOrDirectoryExists(globals.fs.path.join(dir.path, path)), false, reason: '$path exists');
       }
     }
 
@@ -108,7 +109,7 @@ void main() {
     });
 
     setUp(() {
-      tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_ide_config_test.');
+      tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_ide_config_test.');
       final Directory packagesDir = tempDir.childDirectory('packages')..createSync(recursive: true);
       toolsDir = packagesDir.childDirectory('flutter_tools')..createSync();
       templateDir = toolsDir.childDirectory('ide_templates')..createSync();
@@ -189,7 +190,7 @@ void main() {
         'template',
         isTemplate: true,
       );
-      final String flutterIml = fs.path.join(
+      final String flutterIml = globals.fs.path.join(
         'packages',
         'flutter_tools',
         'ide_templates',
@@ -259,7 +260,7 @@ void main() {
         'existing',
         isTemplate: true,
       );
-      final String flutterIml = fs.path.join(
+      final String flutterIml = globals.fs.path.join(
         'packages',
         'flutter_tools',
         'ide_templates',
@@ -288,25 +289,25 @@ void main() {
         tempDir,
         'existing',
       );
-      flutterManifest.remove(fs.path.join('packages', 'new', 'deep.iml'));
+      flutterManifest.remove(globals.fs.path.join('packages', 'new', 'deep.iml'));
       _populateDir(flutterManifest);
       final Map<String, String> updatedTemplates = _getManifest(
         intellijDir,
         'existing',
         isTemplate: true,
       );
-      String deepIml = fs.path.join(
+      String deepIml = globals.fs.path.join(
         'packages',
         'flutter_tools',
         'ide_templates',
         'intellij');
       // Remove the all the dir entries too.
       updatedTemplates.remove(deepIml);
-      deepIml = fs.path.join(deepIml, 'packages');
+      deepIml = globals.fs.path.join(deepIml, 'packages');
       updatedTemplates.remove(deepIml);
-      deepIml = fs.path.join(deepIml, 'new');
+      deepIml = globals.fs.path.join(deepIml, 'new');
       updatedTemplates.remove(deepIml);
-      deepIml = fs.path.join(deepIml, 'deep.iml');
+      deepIml = globals.fs.path.join(deepIml, 'deep.iml');
       updatedTemplates.remove(deepIml);
       final Map<String, String> expectedContents = <String, String>{
         ...flutterManifest,

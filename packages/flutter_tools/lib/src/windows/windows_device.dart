@@ -5,11 +5,11 @@
 import 'package:meta/meta.dart';
 
 import '../base/io.dart';
-import '../base/platform.dart';
 import '../base/process.dart';
 import '../build_info.dart';
 import '../desktop_device.dart';
 import '../device.dart';
+import '../globals.dart' as globals;
 import '../project.dart';
 import 'application_package.dart';
 import 'build_windows.dart';
@@ -60,7 +60,7 @@ class WindowsDevices extends PollingDeviceDiscovery {
   WindowsDevices() : super('windows devices');
 
   @override
-  bool get supportsPlatform => platform.isWindows;
+  bool get supportsPlatform => globals.platform.isWindows;
 
   @override
   bool get canListAnything => windowsWorkflow.canListDevices;

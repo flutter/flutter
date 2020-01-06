@@ -16,13 +16,13 @@ import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
@@ -41,11 +41,11 @@ void main() {
       final AndroidProject androidProject = MockAndroidProject();
       when(project.android).thenReturn(androidProject);
       when(project.isModule).thenReturn(false);
-      when(androidProject.buildDirectory).thenReturn(fs.directory('foo'));
+      when(androidProject.buildDirectory).thenReturn(globals.fs.directory('foo'));
 
       expect(
         getApkDirectory(project).path,
-        equals(fs.path.join('foo', 'app', 'outputs', 'apk')),
+        equals(globals.fs.path.join('foo', 'app', 'outputs', 'apk')),
       );
     });
 
@@ -54,11 +54,11 @@ void main() {
       final AndroidProject androidProject = MockAndroidProject();
       when(project.android).thenReturn(androidProject);
       when(project.isModule).thenReturn(true);
-      when(androidProject.buildDirectory).thenReturn(fs.directory('foo'));
+      when(androidProject.buildDirectory).thenReturn(globals.fs.directory('foo'));
 
       expect(
         getApkDirectory(project).path,
-        equals(fs.path.join('foo', 'host', 'outputs', 'apk')),
+        equals(globals.fs.path.join('foo', 'host', 'outputs', 'apk')),
       );
     });
 
@@ -67,11 +67,11 @@ void main() {
       final AndroidProject androidProject = MockAndroidProject();
       when(project.android).thenReturn(androidProject);
       when(project.isModule).thenReturn(false);
-      when(androidProject.buildDirectory).thenReturn(fs.directory('foo'));
+      when(androidProject.buildDirectory).thenReturn(globals.fs.directory('foo'));
 
       expect(
         getBundleDirectory(project).path,
-        equals(fs.path.join('foo', 'app', 'outputs', 'bundle')),
+        equals(globals.fs.path.join('foo', 'app', 'outputs', 'bundle')),
       );
     });
 
@@ -80,18 +80,18 @@ void main() {
       final AndroidProject androidProject = MockAndroidProject();
       when(project.android).thenReturn(androidProject);
       when(project.isModule).thenReturn(true);
-      when(androidProject.buildDirectory).thenReturn(fs.directory('foo'));
+      when(androidProject.buildDirectory).thenReturn(globals.fs.directory('foo'));
 
       expect(
         getBundleDirectory(project).path,
-        equals(fs.path.join('foo', 'host', 'outputs', 'bundle')),
+        equals(globals.fs.path.join('foo', 'host', 'outputs', 'bundle')),
       );
     });
 
     test('getRepoDirectory', () {
       expect(
-        getRepoDirectory(fs.directory('foo')).path,
-        equals(fs.path.join('foo','outputs', 'repo')),
+        getRepoDirectory(globals.fs.directory('foo')).path,
+        equals(globals.fs.path.join('foo','outputs', 'repo')),
       );
     });
   });
@@ -138,7 +138,7 @@ void main() {
       final FlutterProject project = generateFakeAppBundle('foo_barRelease', 'app.aab');
       final File bundle = findBundleFile(project, const BuildInfo(BuildMode.release, 'foo_bar'));
       expect(bundle, isNotNull);
-      expect(bundle.path, fs.path.join('irrelevant', 'app', 'outputs', 'bundle', 'foo_barRelease', 'app.aab'));
+      expect(bundle.path, globals.fs.path.join('irrelevant', 'app', 'outputs', 'bundle', 'foo_barRelease', 'app.aab'));
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
       ProcessManager: () => FakeProcessManager.any(),
@@ -148,7 +148,7 @@ void main() {
       final FlutterProject project = generateFakeAppBundle('fooRelease', 'app.aab');
       final File bundle = findBundleFile(project, const BuildInfo(BuildMode.release, 'foo'));
       expect(bundle, isNotNull);
-      expect(bundle.path, fs.path.join('irrelevant', 'app', 'outputs', 'bundle', 'fooRelease', 'app.aab'));
+      expect(bundle.path, globals.fs.path.join('irrelevant', 'app', 'outputs', 'bundle', 'fooRelease', 'app.aab'));
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
       ProcessManager: () => FakeProcessManager.any(),
@@ -158,7 +158,7 @@ void main() {
       final FlutterProject project = generateFakeAppBundle('release', 'app.aab');
       final File bundle = findBundleFile(project, const BuildInfo(BuildMode.release, null));
       expect(bundle, isNotNull);
-      expect(bundle.path, fs.path.join('irrelevant', 'app', 'outputs', 'bundle', 'release', 'app.aab'));
+      expect(bundle.path, globals.fs.path.join('irrelevant', 'app', 'outputs', 'bundle', 'release', 'app.aab'));
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
       ProcessManager: () => FakeProcessManager.any(),
@@ -168,7 +168,7 @@ void main() {
       final FlutterProject project = generateFakeAppBundle('foo_barDebug', 'app.aab');
       final File bundle = findBundleFile(project, const BuildInfo(BuildMode.debug, 'foo_bar'));
       expect(bundle, isNotNull);
-      expect(bundle.path, fs.path.join('irrelevant', 'app', 'outputs', 'bundle', 'foo_barDebug', 'app.aab'));
+      expect(bundle.path, globals.fs.path.join('irrelevant', 'app', 'outputs', 'bundle', 'foo_barDebug', 'app.aab'));
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
       ProcessManager: () => FakeProcessManager.any(),
@@ -178,7 +178,7 @@ void main() {
       final FlutterProject project = generateFakeAppBundle('fooDebug', 'app.aab');
       final File bundle = findBundleFile(project, const BuildInfo(BuildMode.debug, 'foo'));
       expect(bundle, isNotNull);
-      expect(bundle.path, fs.path.join('irrelevant', 'app', 'outputs', 'bundle', 'fooDebug', 'app.aab'));
+      expect(bundle.path, globals.fs.path.join('irrelevant', 'app', 'outputs', 'bundle', 'fooDebug', 'app.aab'));
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
       ProcessManager: () => FakeProcessManager.any(),
@@ -188,7 +188,7 @@ void main() {
       final FlutterProject project = generateFakeAppBundle('debug', 'app.aab');
       final File bundle = findBundleFile(project, const BuildInfo(BuildMode.debug, null));
       expect(bundle, isNotNull);
-      expect(bundle.path, fs.path.join('irrelevant', 'app', 'outputs', 'bundle', 'debug', 'app.aab'));
+      expect(bundle.path, globals.fs.path.join('irrelevant', 'app', 'outputs', 'bundle', 'debug', 'app.aab'));
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
       ProcessManager: () => FakeProcessManager.any(),
@@ -198,7 +198,7 @@ void main() {
       final FlutterProject project = generateFakeAppBundle('foo_barProfile', 'app.aab');
       final File bundle = findBundleFile(project, const BuildInfo(BuildMode.profile, 'foo_bar'));
       expect(bundle, isNotNull);
-      expect(bundle.path, fs.path.join('irrelevant', 'app', 'outputs', 'bundle', 'foo_barProfile', 'app.aab'));
+      expect(bundle.path, globals.fs.path.join('irrelevant', 'app', 'outputs', 'bundle', 'foo_barProfile', 'app.aab'));
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
       ProcessManager: () => FakeProcessManager.any(),
@@ -208,7 +208,7 @@ void main() {
       final FlutterProject project = generateFakeAppBundle('fooProfile', 'app.aab');
       final File bundle = findBundleFile(project, const BuildInfo(BuildMode.profile, 'foo'));
       expect(bundle, isNotNull);
-      expect(bundle.path, fs.path.join('irrelevant', 'app', 'outputs', 'bundle', 'fooProfile', 'app.aab'));
+      expect(bundle.path, globals.fs.path.join('irrelevant', 'app', 'outputs', 'bundle', 'fooProfile', 'app.aab'));
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
       ProcessManager: () => FakeProcessManager.any(),
@@ -218,7 +218,7 @@ void main() {
       final FlutterProject project = generateFakeAppBundle('profile', 'app.aab');
       final File bundle = findBundleFile(project, const BuildInfo(BuildMode.profile, null));
       expect(bundle, isNotNull);
-      expect(bundle.path, fs.path.join('irrelevant', 'app', 'outputs', 'bundle', 'profile', 'app.aab'));
+      expect(bundle.path, globals.fs.path.join('irrelevant', 'app', 'outputs', 'bundle', 'profile', 'app.aab'));
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
       ProcessManager: () => FakeProcessManager.any(),
@@ -228,7 +228,7 @@ void main() {
       final FlutterProject project = generateFakeAppBundle('release', 'app-release.aab');
       final File bundle = findBundleFile(project, const BuildInfo(BuildMode.release, null));
       expect(bundle, isNotNull);
-      expect(bundle.path, fs.path.join('irrelevant', 'app', 'outputs', 'bundle', 'release', 'app-release.aab'));
+      expect(bundle.path, globals.fs.path.join('irrelevant', 'app', 'outputs', 'bundle', 'release', 'app-release.aab'));
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
       ProcessManager: () => FakeProcessManager.any(),
@@ -238,7 +238,7 @@ void main() {
       final FlutterProject project = generateFakeAppBundle('profile', 'app-profile.aab');
       final File bundle = findBundleFile(project, const BuildInfo(BuildMode.profile, null));
       expect(bundle, isNotNull);
-      expect(bundle.path, fs.path.join('irrelevant', 'app', 'outputs', 'bundle', 'profile', 'app-profile.aab'));
+      expect(bundle.path, globals.fs.path.join('irrelevant', 'app', 'outputs', 'bundle', 'profile', 'app-profile.aab'));
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
       ProcessManager: () => FakeProcessManager.any(),
@@ -248,7 +248,7 @@ void main() {
       final FlutterProject project = generateFakeAppBundle('debug', 'app-debug.aab');
       final File bundle = findBundleFile(project, const BuildInfo(BuildMode.debug, null));
       expect(bundle, isNotNull);
-      expect(bundle.path, fs.path.join('irrelevant', 'app', 'outputs', 'bundle', 'debug', 'app-debug.aab'));
+      expect(bundle.path, globals.fs.path.join('irrelevant', 'app', 'outputs', 'bundle', 'debug', 'app-debug.aab'));
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
       ProcessManager: () => FakeProcessManager.any(),
@@ -258,7 +258,7 @@ void main() {
       final FlutterProject project = generateFakeAppBundle('foo_barRelease', 'app-foo_bar-release.aab');
       final File bundle = findBundleFile(project, const BuildInfo(BuildMode.release, 'foo_bar'));
       expect(bundle, isNotNull);
-      expect(bundle.path, fs.path.join('irrelevant', 'app', 'outputs', 'bundle', 'foo_barRelease', 'app-foo_bar-release.aab'));
+      expect(bundle.path, globals.fs.path.join('irrelevant', 'app', 'outputs', 'bundle', 'foo_barRelease', 'app-foo_bar-release.aab'));
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
       ProcessManager: () => FakeProcessManager.any(),
@@ -268,7 +268,7 @@ void main() {
       final FlutterProject project = generateFakeAppBundle('foo_barProfile', 'app-foo_bar-profile.aab');
       final File bundle = findBundleFile(project, const BuildInfo(BuildMode.profile, 'foo_bar'));
       expect(bundle, isNotNull);
-      expect(bundle.path, fs.path.join('irrelevant', 'app', 'outputs', 'bundle', 'foo_barProfile', 'app-foo_bar-profile.aab'));
+      expect(bundle.path, globals.fs.path.join('irrelevant', 'app', 'outputs', 'bundle', 'foo_barProfile', 'app-foo_bar-profile.aab'));
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
       ProcessManager: () => FakeProcessManager.any(),
@@ -278,7 +278,7 @@ void main() {
       final FlutterProject project = generateFakeAppBundle('foo_barDebug', 'app-foo_bar-debug.aab');
       final File bundle = findBundleFile(project, const BuildInfo(BuildMode.debug, 'foo_bar'));
       expect(bundle, isNotNull);
-      expect(bundle.path, fs.path.join('irrelevant','app', 'outputs', 'bundle', 'foo_barDebug', 'app-foo_bar-debug.aab'));
+      expect(bundle.path, globals.fs.path.join('irrelevant','app', 'outputs', 'bundle', 'foo_barDebug', 'app-foo_bar-debug.aab'));
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
       ProcessManager: () => FakeProcessManager.any(),
@@ -322,9 +322,9 @@ void main() {
 
       when(project.android).thenReturn(androidProject);
       when(project.isModule).thenReturn(false);
-      when(androidProject.buildDirectory).thenReturn(fs.directory('irrelevant'));
+      when(androidProject.buildDirectory).thenReturn(globals.fs.directory('irrelevant'));
 
-      final Directory apkDirectory = fs.directory(fs.path.join('irrelevant', 'app', 'outputs', 'apk', 'release'));
+      final Directory apkDirectory = globals.fs.directory(globals.fs.path.join('irrelevant', 'app', 'outputs', 'apk', 'release'));
       apkDirectory.createSync(recursive: true);
       apkDirectory.childFile('app-release.apk').createSync();
 
@@ -333,7 +333,7 @@ void main() {
         const AndroidBuildInfo(BuildInfo(BuildMode.release, '')),
       );
       expect(apks.isNotEmpty, isTrue);
-      expect(apks.first.path, equals(fs.path.join('irrelevant', 'app', 'outputs', 'apk', 'release', 'app-release.apk')));
+      expect(apks.first.path, equals(globals.fs.path.join('irrelevant', 'app', 'outputs', 'apk', 'release', 'app-release.apk')));
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
       ProcessManager: () => FakeProcessManager.any(),
@@ -345,9 +345,9 @@ void main() {
 
       when(project.android).thenReturn(androidProject);
       when(project.isModule).thenReturn(false);
-      when(androidProject.buildDirectory).thenReturn(fs.directory('irrelevant'));
+      when(androidProject.buildDirectory).thenReturn(globals.fs.directory('irrelevant'));
 
-      final Directory apkDirectory = fs.directory(fs.path.join('irrelevant', 'app', 'outputs', 'apk', 'release'));
+      final Directory apkDirectory = globals.fs.directory(globals.fs.path.join('irrelevant', 'app', 'outputs', 'apk', 'release'));
       apkDirectory.createSync(recursive: true);
       apkDirectory.childFile('app-flavor1-release.apk').createSync();
 
@@ -356,7 +356,7 @@ void main() {
         const AndroidBuildInfo(BuildInfo(BuildMode.release, 'flavor1')),
       );
       expect(apks.isNotEmpty, isTrue);
-      expect(apks.first.path, equals(fs.path.join('irrelevant', 'app', 'outputs', 'apk', 'release', 'app-flavor1-release.apk')));
+      expect(apks.first.path, equals(globals.fs.path.join('irrelevant', 'app', 'outputs', 'apk', 'release', 'app-flavor1-release.apk')));
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
       ProcessManager: () => FakeProcessManager.any(),
@@ -368,9 +368,9 @@ void main() {
 
       when(project.android).thenReturn(androidProject);
       when(project.isModule).thenReturn(false);
-      when(androidProject.buildDirectory).thenReturn(fs.directory('irrelevant'));
+      when(androidProject.buildDirectory).thenReturn(globals.fs.directory('irrelevant'));
 
-      final Directory apkDirectory = fs.directory(fs.path.join('irrelevant', 'app', 'outputs', 'apk', 'flavor1', 'release'));
+      final Directory apkDirectory = globals.fs.directory(globals.fs.path.join('irrelevant', 'app', 'outputs', 'apk', 'flavor1', 'release'));
       apkDirectory.createSync(recursive: true);
       apkDirectory.childFile('app-flavor1-release.apk').createSync();
 
@@ -379,7 +379,7 @@ void main() {
         const AndroidBuildInfo(BuildInfo(BuildMode.release, 'flavor1')),
       );
       expect(apks.isNotEmpty, isTrue);
-      expect(apks.first.path, equals(fs.path.join('irrelevant', 'app', 'outputs', 'apk', 'flavor1', 'release', 'app-flavor1-release.apk')));
+      expect(apks.first.path, equals(globals.fs.path.join('irrelevant', 'app', 'outputs', 'apk', 'flavor1', 'release', 'app-flavor1-release.apk')));
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
       ProcessManager: () => FakeProcessManager.any(),
@@ -456,7 +456,7 @@ void main() {
 
     setUp(() {
       mockLogger = BufferLogger();
-      tempDir = fs.systemTempDirectory.createTempSync('flutter_settings_aar_test.');
+      tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_settings_aar_test.');
     });
 
     testUsingContext('create settings_aar.gradle when current settings.gradle loads plugins', () {
@@ -484,16 +484,16 @@ include ':app'
 
       tempDir.childFile('settings.gradle').writeAsStringSync(currentSettingsGradle);
 
-      final String toolGradlePath = fs.path.join(
-          fs.path.absolute(Cache.flutterRoot),
+      final String toolGradlePath = globals.fs.path.join(
+          globals.fs.path.absolute(Cache.flutterRoot),
           'packages',
           'flutter_tools',
           'gradle');
-      fs.directory(toolGradlePath).createSync(recursive: true);
-      fs.file(fs.path.join(toolGradlePath, 'deprecated_settings.gradle'))
+      globals.fs.directory(toolGradlePath).createSync(recursive: true);
+      globals.fs.file(globals.fs.path.join(toolGradlePath, 'deprecated_settings.gradle'))
           .writeAsStringSync(currentSettingsGradle);
 
-      fs.file(fs.path.join(toolGradlePath, 'settings_aar.gradle.tmpl'))
+      globals.fs.file(globals.fs.path.join(toolGradlePath, 'settings_aar.gradle.tmpl'))
           .writeAsStringSync(settingsAarFile);
 
       createSettingsAarGradle(tempDir);
@@ -518,16 +518,16 @@ include ':app'
 
       tempDir.childFile('settings.gradle').writeAsStringSync(currentSettingsGradle);
 
-      final String toolGradlePath = fs.path.join(
-          fs.path.absolute(Cache.flutterRoot),
+      final String toolGradlePath = globals.fs.path.join(
+          globals.fs.path.absolute(Cache.flutterRoot),
           'packages',
           'flutter_tools',
           'gradle');
-      fs.directory(toolGradlePath).createSync(recursive: true);
-      fs.file(fs.path.join(toolGradlePath, 'deprecated_settings.gradle'))
+      globals.fs.directory(toolGradlePath).createSync(recursive: true);
+      globals.fs.file(globals.fs.path.join(toolGradlePath, 'deprecated_settings.gradle'))
           .writeAsStringSync(currentSettingsGradle);
 
-      fs.file(fs.path.join(toolGradlePath, 'settings_aar.gradle.tmpl'))
+      globals.fs.file(globals.fs.path.join(toolGradlePath, 'settings_aar.gradle.tmpl'))
           .writeAsStringSync(settingsAarFile);
 
       createSettingsAarGradle(tempDir);
@@ -579,9 +579,9 @@ include ':app'
     }) async {
       when(mockArtifacts.getArtifactPath(Artifact.flutterFramework,
           platform: TargetPlatform.android_arm, mode: anyNamed('mode'))).thenReturn('engine');
-      when(mockArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'android_arm'));
+      when(mockArtifacts.engineOutPath).thenReturn(globals.fs.path.join('out', 'android_arm'));
 
-      final File manifestFile = fs.file('path/to/project/pubspec.yaml');
+      final File manifestFile = globals.fs.file('path/to/project/pubspec.yaml');
       manifestFile.createSync(recursive: true);
       manifestFile.writeAsStringSync(manifest);
 
@@ -594,7 +594,7 @@ include ':app'
         requireAndroidSdk: false,
       );
 
-      final File localPropertiesFile = fs.file('path/to/project/android/local.properties');
+      final File localPropertiesFile = globals.fs.file('path/to/project/android/local.properties');
       expect(propertyFor('flutter.versionName', localPropertiesFile), expectedBuildName);
       expect(propertyFor('flutter.versionCode', localPropertiesFile), expectedBuildNumber);
     }
@@ -822,7 +822,7 @@ flutter:
     });
 
     testUsingContext('returns true when the project is using AndroidX', () async {
-      final Directory androidDirectory = fs.systemTempDirectory.createTempSync('flutter_android.');
+      final Directory androidDirectory = globals.fs.systemTempDirectory.createTempSync('flutter_android.');
 
       androidDirectory
         .childFile('gradle.properties')
@@ -836,7 +836,7 @@ flutter:
     });
 
     testUsingContext('returns false when the project is not using AndroidX', () async {
-      final Directory androidDirectory = fs.systemTempDirectory.createTempSync('flutter_android.');
+      final Directory androidDirectory = globals.fs.systemTempDirectory.createTempSync('flutter_android.');
 
       androidDirectory
         .childFile('gradle.properties')
@@ -850,7 +850,7 @@ flutter:
     });
 
     testUsingContext('returns false when gradle.properties does not exist', () async {
-      final Directory androidDirectory = fs.systemTempDirectory.createTempSync('flutter_android.');
+      final Directory androidDirectory = globals.fs.systemTempDirectory.createTempSync('flutter_android.');
 
       expect(isAppUsingAndroidX(androidDirectory), isFalse);
 
@@ -880,13 +880,13 @@ flutter:
     });
 
     testUsingContext('calls gradle', () async {
-      final Directory androidDirectory = fs.directory('android.');
+      final Directory androidDirectory = globals.fs.directory('android.');
       androidDirectory.createSync();
       androidDirectory
         .childFile('pubspec.yaml')
         .writeAsStringSync('name: irrelevant');
 
-      final Directory plugin1 = fs.directory('plugin1.');
+      final Directory plugin1 = globals.fs.directory('plugin1.');
       plugin1
         ..createSync()
         ..childFile('pubspec.yaml')
@@ -902,7 +902,7 @@ flutter:
         .childFile('build.gradle')
         .createSync(recursive: true);
 
-      final Directory plugin2 = fs.directory('plugin2.');
+      final Directory plugin2 = globals.fs.directory('plugin2.');
       plugin2
         ..createSync()
         ..childFile('pubspec.yaml')
@@ -937,8 +937,8 @@ plugin2=${plugin2.path}
         buildDirectory: buildDirectory,
       );
 
-      final String flutterRoot = fs.path.absolute(Cache.flutterRoot);
-      final String initScript = fs.path.join(
+      final String flutterRoot = globals.fs.path.absolute(Cache.flutterRoot);
+      final String initScript = globals.fs.path.join(
         flutterRoot,
         'packages',
         'flutter_tools',
@@ -983,13 +983,13 @@ plugin2=${plugin2.path}
     });
 
     testUsingContext('skips plugin without a android/build.gradle file', () async {
-      final Directory androidDirectory = fs.directory('android.');
+      final Directory androidDirectory = globals.fs.directory('android.');
       androidDirectory.createSync();
       androidDirectory
         .childFile('pubspec.yaml')
         .writeAsStringSync('name: irrelevant');
 
-      final Directory plugin1 = fs.directory('plugin1.');
+      final Directory plugin1 = globals.fs.directory('plugin1.');
       plugin1
         ..createSync()
         ..childFile('pubspec.yaml')
@@ -1022,8 +1022,8 @@ plugin1=${plugin1.path}
         buildDirectory: buildDirectory,
       );
 
-      final String flutterRoot = fs.path.absolute(Cache.flutterRoot);
-      final String initScript = fs.path.join(
+      final String flutterRoot = globals.fs.path.absolute(Cache.flutterRoot);
+      final String initScript = globals.fs.path.join(
         flutterRoot,
         'packages',
         'flutter_tools',
@@ -1103,15 +1103,15 @@ plugin1=${plugin1.path}
         environment: anyNamed('environment')))
       .thenAnswer((_) => Future<Process>.value(process));
 
-      fs.directory('android')
+      globals.fs.directory('android')
         .childFile('build.gradle')
         .createSync(recursive: true);
 
-      fs.directory('android')
+      globals.fs.directory('android')
         .childFile('gradle.properties')
         .createSync(recursive: true);
 
-      fs.directory('android')
+      globals.fs.directory('android')
         .childDirectory('app')
         .childFile('build.gradle')
         ..createSync(recursive: true)
@@ -1182,15 +1182,15 @@ plugin1=${plugin1.path}
         return Future<Process>.value(process);
       });
 
-      fs.directory('android')
+      globals.fs.directory('android')
         .childFile('build.gradle')
         .createSync(recursive: true);
 
-      fs.directory('android')
+      globals.fs.directory('android')
         .childFile('gradle.properties')
         .createSync(recursive: true);
 
-      fs.directory('android')
+      globals.fs.directory('android')
         .childDirectory('app')
         .childFile('build.gradle')
         ..createSync(recursive: true)
@@ -1257,15 +1257,15 @@ plugin1=${plugin1.path}
         environment: anyNamed('environment')))
       .thenThrow(const ProcessException('', <String>[], 'Some gradle message'));
 
-      fs.directory('android')
+      globals.fs.directory('android')
         .childFile('build.gradle')
         .createSync(recursive: true);
 
-      fs.directory('android')
+      globals.fs.directory('android')
         .childFile('gradle.properties')
         .createSync(recursive: true);
 
-      fs.directory('android')
+      globals.fs.directory('android')
         .childDirectory('app')
         .childFile('build.gradle')
         ..createSync(recursive: true)
@@ -1330,15 +1330,15 @@ plugin1=${plugin1.path}
         environment: anyNamed('environment')))
       .thenThrow(const ProcessException('', <String>[], 'Unrecognized'));
 
-      fs.directory('android')
+      globals.fs.directory('android')
         .childFile('build.gradle')
         .createSync(recursive: true);
 
-      fs.directory('android')
+      globals.fs.directory('android')
         .childFile('gradle.properties')
         .createSync(recursive: true);
 
-      fs.directory('android')
+      globals.fs.directory('android')
         .childDirectory('app')
         .childFile('build.gradle')
         ..createSync(recursive: true)
@@ -1390,21 +1390,21 @@ plugin1=${plugin1.path}
         return Future<Process>.value(process);
       });
 
-      fs.directory('android')
+      globals.fs.directory('android')
         .childFile('build.gradle')
         .createSync(recursive: true);
 
-      fs.directory('android')
+      globals.fs.directory('android')
         .childFile('gradle.properties')
         .createSync(recursive: true);
 
-      fs.directory('android')
+      globals.fs.directory('android')
         .childDirectory('app')
         .childFile('build.gradle')
         ..createSync(recursive: true)
         ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
 
-      fs.directory('build')
+      globals.fs.directory('build')
         .childDirectory('app')
         .childDirectory('outputs')
         .childDirectory('apk')
@@ -1468,15 +1468,15 @@ plugin1=${plugin1.path}
         return Future<Process>.value(process);
       });
 
-      fs.directory('android')
+      globals.fs.directory('android')
         .childFile('build.gradle')
         .createSync(recursive: true);
 
-      fs.directory('android')
+      globals.fs.directory('android')
         .childFile('gradle.properties')
         .createSync(recursive: true);
 
-      fs.directory('android')
+      globals.fs.directory('android')
         .childDirectory('app')
         .childFile('build.gradle')
         ..createSync(recursive: true)
@@ -1554,21 +1554,21 @@ plugin1=${plugin1.path}
           ));
       });
 
-      fs.directory('android')
+      globals.fs.directory('android')
         .childFile('build.gradle')
         .createSync(recursive: true);
 
-      fs.directory('android')
+      globals.fs.directory('android')
         .childFile('gradle.properties')
         .createSync(recursive: true);
 
-      fs.directory('android')
+      globals.fs.directory('android')
         .childDirectory('app')
         .childFile('build.gradle')
         ..createSync(recursive: true)
         ..writeAsStringSync('apply from: irrelevant/flutter.gradle');
 
-      fs.directory('build')
+      globals.fs.directory('build')
         .childDirectory('app')
         .childDirectory('outputs')
         .childDirectory('apk')
@@ -1603,7 +1603,7 @@ plugin1=${plugin1.path}
     });
 
     testUsingContext('doesn\'t indicate how to consume an AAR when printHowToConsumeAaar is false', () async {
-      final File manifestFile = fs.file('pubspec.yaml');
+      final File manifestFile = globals.fs.file('pubspec.yaml');
       manifestFile.createSync(recursive: true);
       manifestFile.writeAsStringSync('''
         flutter:
@@ -1612,12 +1612,12 @@ plugin1=${plugin1.path}
         '''
       );
 
-      fs.file('.android/gradlew').createSync(recursive: true);
+      globals.fs.file('.android/gradlew').createSync(recursive: true);
 
-      fs.file('.android/gradle.properties')
+      globals.fs.file('.android/gradle.properties')
         .writeAsStringSync('irrelevant');
 
-      fs.file('.android/build.gradle')
+      globals.fs.file('.android/build.gradle')
         .createSync(recursive: true);
 
       // Let any process start. Assert after.
@@ -1627,12 +1627,12 @@ plugin1=${plugin1.path}
         workingDirectory: anyNamed('workingDirectory'),
       )).thenAnswer((_) async => ProcessResult(1, 0, '', ''));
 
-      fs.directory('build/outputs/repo').createSync(recursive: true);
+      globals.fs.directory('build/outputs/repo').createSync(recursive: true);
 
       await buildGradleAar(
         androidBuildInfo: const AndroidBuildInfo(BuildInfo(BuildMode.release, null)),
         project: FlutterProject.current(),
-        outputDirectory: fs.directory('build/'),
+        outputDirectory: globals.fs.directory('build/'),
         target: '',
         buildNumber: '1.0',
       );
@@ -1658,9 +1658,9 @@ plugin1=${plugin1.path}
     testUsingContext('build apk uses selected local engine', () async {
       when(mockArtifacts.getArtifactPath(Artifact.flutterFramework,
           platform: TargetPlatform.android_arm, mode: anyNamed('mode'))).thenReturn('engine');
-      when(mockArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'android_arm'));
+      when(mockArtifacts.engineOutPath).thenReturn(globals.fs.path.join('out', 'android_arm'));
 
-      fs.file('out/android_arm/flutter_embedding_release.pom')
+      globals.fs.file('out/android_arm/flutter_embedding_release.pom')
         ..createSync(recursive: true)
         ..writeAsStringSync(
 '''<?xml version="1.0" encoding="UTF-8"?>
@@ -1670,21 +1670,21 @@ plugin1=${plugin1.path}
   </dependencies>
 </project>
 ''');
-      fs.file('out/android_arm/armeabi_v7a_release.pom').createSync(recursive: true);
-      fs.file('out/android_arm/armeabi_v7a_release.jar').createSync(recursive: true);
-      fs.file('out/android_arm/flutter_embedding_release.jar').createSync(recursive: true);
-      fs.file('out/android_arm/flutter_embedding_release.pom').createSync(recursive: true);
+      globals.fs.file('out/android_arm/armeabi_v7a_release.pom').createSync(recursive: true);
+      globals.fs.file('out/android_arm/armeabi_v7a_release.jar').createSync(recursive: true);
+      globals.fs.file('out/android_arm/flutter_embedding_release.jar').createSync(recursive: true);
+      globals.fs.file('out/android_arm/flutter_embedding_release.pom').createSync(recursive: true);
 
-      fs.file('android/gradlew').createSync(recursive: true);
+      globals.fs.file('android/gradlew').createSync(recursive: true);
 
-      fs.directory('android')
+      globals.fs.directory('android')
         .childFile('gradle.properties')
         .createSync(recursive: true);
 
-      fs.file('android/build.gradle')
+      globals.fs.file('android/build.gradle')
         .createSync(recursive: true);
 
-      fs.directory('android')
+      globals.fs.directory('android')
         .childDirectory('app')
         .childFile('build.gradle')
         ..createSync(recursive: true)
@@ -1749,9 +1749,9 @@ plugin1=${plugin1.path}
     testUsingContext('build aar uses selected local engine', () async {
       when(mockArtifacts.getArtifactPath(Artifact.flutterFramework,
           platform: TargetPlatform.android_arm, mode: anyNamed('mode'))).thenReturn('engine');
-      when(mockArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'android_arm'));
+      when(mockArtifacts.engineOutPath).thenReturn(globals.fs.path.join('out', 'android_arm'));
 
-      fs.file('out/android_arm/flutter_embedding_release.pom')
+      globals.fs.file('out/android_arm/flutter_embedding_release.pom')
         ..createSync(recursive: true)
         ..writeAsStringSync(
 '''<?xml version="1.0" encoding="UTF-8"?>
@@ -1761,12 +1761,12 @@ plugin1=${plugin1.path}
   </dependencies>
 </project>
 ''');
-      fs.file('out/android_arm/armeabi_v7a_release.pom').createSync(recursive: true);
-      fs.file('out/android_arm/armeabi_v7a_release.jar').createSync(recursive: true);
-      fs.file('out/android_arm/flutter_embedding_release.jar').createSync(recursive: true);
-      fs.file('out/android_arm/flutter_embedding_release.pom').createSync(recursive: true);
+      globals.fs.file('out/android_arm/armeabi_v7a_release.pom').createSync(recursive: true);
+      globals.fs.file('out/android_arm/armeabi_v7a_release.jar').createSync(recursive: true);
+      globals.fs.file('out/android_arm/flutter_embedding_release.jar').createSync(recursive: true);
+      globals.fs.file('out/android_arm/flutter_embedding_release.pom').createSync(recursive: true);
 
-      final File manifestFile = fs.file('pubspec.yaml');
+      final File manifestFile = globals.fs.file('pubspec.yaml');
       manifestFile.createSync(recursive: true);
       manifestFile.writeAsStringSync('''
         flutter:
@@ -1775,12 +1775,12 @@ plugin1=${plugin1.path}
         '''
       );
 
-      fs.file('.android/gradlew').createSync(recursive: true);
+      globals.fs.file('.android/gradlew').createSync(recursive: true);
 
-      fs.file('.android/gradle.properties')
+      globals.fs.file('.android/gradle.properties')
         .writeAsStringSync('irrelevant');
 
-      fs.file('.android/build.gradle')
+      globals.fs.file('.android/build.gradle')
         .createSync(recursive: true);
 
       // Let any process start. Assert after.
@@ -1790,12 +1790,12 @@ plugin1=${plugin1.path}
         workingDirectory: anyNamed('workingDirectory'),
       )).thenAnswer((_) async => ProcessResult(1, 0, '', ''));
 
-      fs.directory('build/outputs/repo').createSync(recursive: true);
+      globals.fs.directory('build/outputs/repo').createSync(recursive: true);
 
       await buildGradleAar(
         androidBuildInfo: const AndroidBuildInfo(BuildInfo(BuildMode.release, null)),
         project: FlutterProject.current(),
-        outputDirectory: fs.directory('build/'),
+        outputDirectory: globals.fs.directory('build/'),
         target: '',
         buildNumber: '2.0',
       );
@@ -1830,7 +1830,7 @@ plugin1=${plugin1.path}
       printHowToConsumeAar(
         buildModes: const <String>{'release', 'debug', 'profile'},
         androidPackage: 'com.mycompany',
-        repoDirectory: fs.directory('build/'),
+        repoDirectory: globals.fs.directory('build/'),
         buildNumber: '2.2',
       );
 
@@ -1883,7 +1883,7 @@ plugin1=${plugin1.path}
       printHowToConsumeAar(
         buildModes: const <String>{'release'},
         androidPackage: 'com.mycompany',
-        repoDirectory: fs.directory('build/'),
+        repoDirectory: globals.fs.directory('build/'),
       );
 
       expect(
@@ -1922,7 +1922,7 @@ plugin1=${plugin1.path}
       printHowToConsumeAar(
         buildModes: const <String>{'debug'},
         androidPackage: 'com.mycompany',
-        repoDirectory: fs.directory('build/'),
+        repoDirectory: globals.fs.directory('build/'),
       );
 
       expect(
@@ -1961,7 +1961,7 @@ plugin1=${plugin1.path}
       printHowToConsumeAar(
         buildModes: const <String>{'profile'},
         androidPackage: 'com.mycompany',
-        repoDirectory: fs.directory('build/'),
+        repoDirectory: globals.fs.directory('build/'),
         buildNumber: '1.0',
       );
 
@@ -2017,7 +2017,7 @@ FlutterProject generateFakeAppBundle(String directoryName, String fileName) {
 
   when(project.isModule).thenReturn(false);
   when(project.android).thenReturn(androidProject);
-  when(androidProject.buildDirectory).thenReturn(fs.directory('irrelevant'));
+  when(androidProject.buildDirectory).thenReturn(globals.fs.directory('irrelevant'));
 
   final Directory bundleDirectory = getBundleDirectory(project);
   bundleDirectory

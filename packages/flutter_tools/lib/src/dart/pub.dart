@@ -11,11 +11,10 @@ import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart' as io;
 import '../base/logger.dart';
-import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
 import '../cache.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart';
 import 'sdk.dart';
@@ -73,7 +72,7 @@ bool _shouldRunPubGet({ File pubSpecYaml, File dotPackages }) {
   if (pubSpecYaml.lastModifiedSync().isAfter(dotPackagesLastModified)) {
     return true;
   }
-  final File flutterToolsStamp = Cache.instance.getStampFileFor('flutter_tools');
+  final File flutterToolsStamp = globals.cache.getStampFileFor('flutter_tools');
   if (flutterToolsStamp.existsSync() &&
       flutterToolsStamp.lastModifiedSync().isAfter(dotPackagesLastModified)) {
     return true;
@@ -146,10 +145,10 @@ class _DefaultPub implements Pub {
     bool checkLastModified = true,
     bool skipPubspecYamlCheck = false,
   }) async {
-    directory ??= fs.currentDirectory.path;
+    directory ??= globals.fs.currentDirectory.path;
 
-    final File pubSpecYaml = fs.file(fs.path.join(directory, 'pubspec.yaml'));
-    final File dotPackages = fs.file(fs.path.join(directory, '.packages'));
+    final File pubSpecYaml = globals.fs.file(globals.fs.path.join(directory, 'pubspec.yaml'));
+    final File dotPackages = globals.fs.file(globals.fs.path.join(directory, '.packages'));
 
     if (!skipPubspecYamlCheck && !pubSpecYaml.existsSync()) {
       if (!skipIfAbsent) {
@@ -162,8 +161,8 @@ class _DefaultPub implements Pub {
 
     if (!checkLastModified || _shouldRunPubGet(pubSpecYaml: pubSpecYaml, dotPackages: dotPackages)) {
       final String command = upgrade ? 'upgrade' : 'get';
-      final Status status = logger.startProgress(
-        'Running "flutter pub $command" in ${fs.path.basename(directory)}...',
+      final Status status = globals.logger.startProgress(
+        'Running "flutter pub $command" in ${globals.fs.path.basename(directory)}...',
         timeout: timeoutConfiguration.slowOperation,
       );
       final bool verbose = FlutterCommand.current != null && FlutterCommand.current.globalResults['verbose'] as bool;
@@ -200,8 +199,8 @@ class _DefaultPub implements Pub {
     // file to be more recently modified.
     final DateTime now = DateTime.now();
     if (now.isBefore(originalPubspecYamlModificationTime)) {
-      printError(
-        'Warning: File "${fs.path.absolute(pubSpecYaml.path)}" was created in the future. '
+      globals.printError(
+        'Warning: File "${globals.fs.path.absolute(pubSpecYaml.path)}" was created in the future. '
         'Optimizations that rely on comparing time stamps will be unreliable. Check your '
         'system clock for accuracy.\n'
         'The timestamp was: $originalPubspecYamlModificationTime\n'
@@ -211,12 +210,12 @@ class _DefaultPub implements Pub {
       dotPackages.setLastModifiedSync(now);
       final DateTime newDotPackagesTimestamp = dotPackages.lastModifiedSync();
       if (newDotPackagesTimestamp.isBefore(originalPubspecYamlModificationTime)) {
-        printError(
-          'Warning: Failed to set timestamp of "${fs.path.absolute(dotPackages.path)}". '
+        globals.printError(
+          'Warning: Failed to set timestamp of "${globals.fs.path.absolute(dotPackages.path)}". '
           'Tried to set timestamp to $now, but new timestamp is $newDotPackagesTimestamp.'
         );
         if (newDotPackagesTimestamp.isAfter(now)) {
-          printError('Maybe the file was concurrently modified?');
+          globals.printError('Maybe the file was concurrently modified?');
         }
       }
     }
@@ -272,7 +271,7 @@ class _DefaultPub implements Pub {
       }
       assert(message != null);
       versionSolvingFailed = false;
-      printStatus('$failureMessage ($message) -- attempting retry $attempts in $duration second${ duration == 1 ? "" : "s"}...');
+      globals.printStatus('$failureMessage ($message) -- attempting retry $attempts in $duration second${ duration == 1 ? "" : "s"}...');
       await Future<void>.delayed(Duration(seconds: duration));
       if (duration < 64) {
         duration *= 2;
@@ -366,7 +365,7 @@ const String _pubCacheEnvironmentKey = 'PUB_CACHE';
 String _getPubEnvironmentValue(PubContext pubContext) {
   // DO NOT update this function without contacting kevmoo.
   // We have server-side tooling that assumes the values are consistent.
-  final String existing = platform.environment[_pubEnvironmentKey];
+  final String existing = globals.platform.environment[_pubEnvironmentKey];
   final List<String> values = <String>[
     if (existing != null && existing.isNotEmpty) existing,
     if (isRunningOnBot) 'flutter_bot',
@@ -377,13 +376,13 @@ String _getPubEnvironmentValue(PubContext pubContext) {
 }
 
 String _getRootPubCacheIfAvailable() {
-  if (platform.environment.containsKey(_pubCacheEnvironmentKey)) {
-    return platform.environment[_pubCacheEnvironmentKey];
+  if (globals.platform.environment.containsKey(_pubCacheEnvironmentKey)) {
+    return globals.platform.environment[_pubCacheEnvironmentKey];
   }
 
-  final String cachePath = fs.path.join(Cache.flutterRoot, '.pub-cache');
-  if (fs.directory(cachePath).existsSync()) {
-    printTrace('Using $cachePath for the pub cache.');
+  final String cachePath = globals.fs.path.join(Cache.flutterRoot, '.pub-cache');
+  if (globals.fs.directory(cachePath).existsSync()) {
+    globals.printTrace('Using $cachePath for the pub cache.');
     return cachePath;
   }
 

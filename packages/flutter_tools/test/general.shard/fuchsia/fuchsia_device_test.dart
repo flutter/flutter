@@ -25,7 +25,7 @@ import 'package:flutter_tools/src/fuchsia/fuchsia_kernel_compiler.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_pm.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_sdk.dart';
 import 'package:flutter_tools/src/fuchsia/tiles_ctl.dart';
-import 'package:flutter_tools/src/globals.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:meta/meta.dart';
@@ -81,8 +81,8 @@ void main() {
 
     testUsingContext('default capabilities', () async {
       final FuchsiaDevice device = FuchsiaDevice('123');
-      fs.directory('fuchsia').createSync(recursive: true);
-      fs.file('pubspec.yaml').createSync();
+      globals.fs.directory('fuchsia').createSync(recursive: true);
+      globals.fs.file('pubspec.yaml').createSync();
 
       expect(device.supportsHotReload, true);
       expect(device.supportsHotRestart, false);
@@ -95,8 +95,8 @@ void main() {
 
     testUsingContext('supported for project', () async {
       final FuchsiaDevice device = FuchsiaDevice('123');
-      fs.directory('fuchsia').createSync(recursive: true);
-      fs.file('pubspec.yaml').createSync();
+      globals.fs.directory('fuchsia').createSync(recursive: true);
+      globals.fs.file('pubspec.yaml').createSync();
       expect(device.isSupportedForProject(FlutterProject.current()), true);
     }, overrides: <Type, Generator>{
       FileSystem: () => memoryFileSystem,
@@ -105,7 +105,7 @@ void main() {
 
     testUsingContext('not supported for project', () async {
       final FuchsiaDevice device = FuchsiaDevice('123');
-      fs.file('pubspec.yaml').createSync();
+      globals.fs.file('pubspec.yaml').createSync();
       expect(device.isSupportedForProject(FlutterProject.current()), false);
     }, overrides: <Type, Generator>{
       FileSystem: () => memoryFileSystem,
@@ -391,28 +391,28 @@ void main() {
   });
 
   testUsingContext('Correct flutter runner', () async {
-    expect(artifacts.getArtifactPath(
+    expect(globals.artifacts.getArtifactPath(
         Artifact.fuchsiaFlutterRunner,
         platform: TargetPlatform.fuchsia_x64,
         mode: BuildMode.debug,
       ),
       contains('flutter_jit_runner'),
     );
-    expect(artifacts.getArtifactPath(
+    expect(globals.artifacts.getArtifactPath(
         Artifact.fuchsiaFlutterRunner,
         platform: TargetPlatform.fuchsia_x64,
         mode: BuildMode.profile,
       ),
       contains('flutter_aot_runner'),
     );
-    expect(artifacts.getArtifactPath(
+    expect(globals.artifacts.getArtifactPath(
         Artifact.fuchsiaFlutterRunner,
         platform: TargetPlatform.fuchsia_x64,
         mode: BuildMode.release,
       ),
       contains('flutter_aot_product_runner'),
     );
-    expect(artifacts.getArtifactPath(
+    expect(globals.artifacts.getArtifactPath(
         Artifact.fuchsiaFlutterRunner,
         platform: TargetPlatform.fuchsia_x64,
         mode: BuildMode.jitRelease,
@@ -475,20 +475,20 @@ void main() {
     }) async {
       const String appName = 'app_name';
       final FuchsiaDevice device = FuchsiaDeviceWithFakeDiscovery('123');
-      fs.directory('fuchsia').createSync(recursive: true);
-      final File pubspecFile = fs.file('pubspec.yaml')..createSync();
+      globals.fs.directory('fuchsia').createSync(recursive: true);
+      final File pubspecFile = globals.fs.file('pubspec.yaml')..createSync();
       pubspecFile.writeAsStringSync('name: $appName');
 
       FuchsiaApp app;
       if (prebuilt) {
-        final File far = fs.file('app_name-0.far')..createSync();
+        final File far = globals.fs.file('app_name-0.far')..createSync();
         app = FuchsiaApp.fromPrebuiltApp(far);
       } else {
-        fs.file(fs.path.join('fuchsia', 'meta', '$appName.cmx'))
+        globals.fs.file(globals.fs.path.join('fuchsia', 'meta', '$appName.cmx'))
           ..createSync(recursive: true)
           ..writeAsStringSync('{}');
-        fs.file('.packages').createSync();
-        fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+        globals.fs.file('.packages').createSync();
+        globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
         app = BuildableFuchsiaApp(project: FlutterProject.current().fuchsia);
       }
 
@@ -518,10 +518,10 @@ void main() {
     testUsingContext('start and stop prebuilt in release mode', () async {
       const String appName = 'app_name';
       final FuchsiaDevice device = FuchsiaDeviceWithFakeDiscovery('123');
-      fs.directory('fuchsia').createSync(recursive: true);
-      final File pubspecFile = fs.file('pubspec.yaml')..createSync();
+      globals.fs.directory('fuchsia').createSync(recursive: true);
+      final File pubspecFile = globals.fs.file('pubspec.yaml')..createSync();
       pubspecFile.writeAsStringSync('name: $appName');
-      final File far = fs.file('app_name-0.far')..createSync();
+      final File far = globals.fs.file('app_name-0.far')..createSync();
 
       final FuchsiaApp app = FuchsiaApp.fromPrebuiltApp(far);
       final DebuggingOptions debuggingOptions =
@@ -983,11 +983,11 @@ class FakeFuchsiaPM implements FuchsiaPM {
 
   @override
   Future<bool> init(String buildPath, String appName) async {
-    if (!fs.directory(buildPath).existsSync()) {
+    if (!globals.fs.directory(buildPath).existsSync()) {
       return false;
     }
-    fs
-        .file(fs.path.join(buildPath, 'meta', 'package'))
+    globals.fs
+        .file(globals.fs.path.join(buildPath, 'meta', 'package'))
         .createSync(recursive: true);
     _appName = appName;
     return true;
@@ -995,43 +995,43 @@ class FakeFuchsiaPM implements FuchsiaPM {
 
   @override
   Future<bool> genkey(String buildPath, String outKeyPath) async {
-    if (!fs.file(fs.path.join(buildPath, 'meta', 'package')).existsSync()) {
+    if (!globals.fs.file(globals.fs.path.join(buildPath, 'meta', 'package')).existsSync()) {
       return false;
     }
-    fs.file(outKeyPath).createSync(recursive: true);
+    globals.fs.file(outKeyPath).createSync(recursive: true);
     return true;
   }
 
   @override
   Future<bool> build(String buildPath, String keyPath, String manifestPath) async {
-    if (!fs.file(fs.path.join(buildPath, 'meta', 'package')).existsSync() ||
-        !fs.file(keyPath).existsSync() ||
-        !fs.file(manifestPath).existsSync()) {
+    if (!globals.fs.file(globals.fs.path.join(buildPath, 'meta', 'package')).existsSync() ||
+        !globals.fs.file(keyPath).existsSync() ||
+        !globals.fs.file(manifestPath).existsSync()) {
       return false;
     }
-    fs.file(fs.path.join(buildPath, 'meta.far')).createSync(recursive: true);
+    globals.fs.file(globals.fs.path.join(buildPath, 'meta.far')).createSync(recursive: true);
     return true;
   }
 
   @override
   Future<bool> archive(String buildPath, String keyPath, String manifestPath) async {
-    if (!fs.file(fs.path.join(buildPath, 'meta', 'package')).existsSync() ||
-        !fs.file(keyPath).existsSync() ||
-        !fs.file(manifestPath).existsSync()) {
+    if (!globals.fs.file(globals.fs.path.join(buildPath, 'meta', 'package')).existsSync() ||
+        !globals.fs.file(keyPath).existsSync() ||
+        !globals.fs.file(manifestPath).existsSync()) {
       return false;
     }
     if (_appName == null) {
       return false;
     }
-    fs
-        .file(fs.path.join(buildPath, '$_appName-0.far'))
+    globals.fs
+        .file(globals.fs.path.join(buildPath, '$_appName-0.far'))
         .createSync(recursive: true);
     return true;
   }
 
   @override
   Future<bool> newrepo(String repoPath) async {
-    if (!fs.directory(repoPath).existsSync()) {
+    if (!globals.fs.directory(repoPath).existsSync()) {
       return false;
     }
     return true;
@@ -1044,10 +1044,10 @@ class FakeFuchsiaPM implements FuchsiaPM {
 
   @override
   Future<bool> publish(String repoPath, String packagePath) async {
-    if (!fs.directory(repoPath).existsSync()) {
+    if (!globals.fs.directory(repoPath).existsSync()) {
       return false;
     }
-    if (!fs.file(packagePath).existsSync()) {
+    if (!globals.fs.file(packagePath).existsSync()) {
       return false;
     }
     return true;
@@ -1100,8 +1100,8 @@ class FakeFuchsiaKernelCompiler implements FuchsiaKernelCompiler {
   }) async {
     final String outDir = getFuchsiaBuildDirectory();
     final String appName = fuchsiaProject.project.manifest.appName;
-    final String manifestPath = fs.path.join(outDir, '$appName.dilpmanifest');
-    fs.file(manifestPath).createSync(recursive: true);
+    final String manifestPath = globals.fs.path.join(outDir, '$appName.dilpmanifest');
+    globals.fs.file(manifestPath).createSync(recursive: true);
   }
 }
 

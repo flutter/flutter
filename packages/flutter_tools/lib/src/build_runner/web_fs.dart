@@ -28,13 +28,12 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/net.dart';
 import '../base/os.dart';
-import '../base/platform.dart';
 import '../build_info.dart';
 import '../bundle.dart';
 import '../cache.dart';
 import '../dart/package_map.dart';
 import '../dart/pub.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
 import '../platform_plugins.dart';
 import '../plugins.dart';
 import '../project.dart';
@@ -186,8 +185,8 @@ class WebFs {
       flutterProject.dartTool.createSync(recursive: true);
     }
     // Workaround for https://github.com/flutter/flutter/issues/41681.
-    final String toolPath = fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools');
-    if (!fs.isFileSync(fs.path.join(toolPath, '.packages'))) {
+    final String toolPath = globals.fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools');
+    if (!globals.fs.isFileSync(globals.fs.path.join(toolPath, '.packages'))) {
       await pub.get(
         context: PubContext.pubGet,
         directory: toolPath,
@@ -202,10 +201,10 @@ class WebFs {
     // Initialize the asset bundle.
     final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
     await assetBundle.build();
-    await writeBundle(fs.directory(getAssetBuildDirectory()), assetBundle.entries);
+    await writeBundle(globals.fs.directory(getAssetBuildDirectory()), assetBundle.entries);
 
-    final String targetBaseName = fs.path
-      .withoutExtension(target).replaceFirst('lib${fs.path.separator}', '');
+    final String targetBaseName = globals.fs.path
+      .withoutExtension(target).replaceFirst('lib${globals.fs.path.separator}', '');
     final Map<String, String> mappedUrls = <String, String>{
       'main.dart.js': 'packages/${flutterProject.manifest.appName}/'
           '${targetBaseName}_web_entrypoint.dart.js',
@@ -251,7 +250,7 @@ class WebFs {
           .any((Plugin p) => p.platforms.containsKey(WebPlugin.kConfigKey));
       // Start the build daemon and run an initial build.
       client = await buildDaemonCreator
-        .startBuildDaemon(fs.currentDirectory.path,
+        .startBuildDaemon(globals.fs.currentDirectory.path,
             release: buildInfo.isRelease,
             profile: buildInfo.isProfile,
             hasPlugins: hasWebPlugins,
@@ -279,12 +278,12 @@ class WebFs {
           firstBuildCompleter.complete(true);
         }
       });
-      final int daemonAssetPort = buildDaemonCreator.assetServerPort(fs.currentDirectory);
+      final int daemonAssetPort = buildDaemonCreator.assetServerPort(globals.fs.currentDirectory);
 
       // Initialize the asset bundle.
       final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
       await assetBundle.build();
-      await writeBundle(fs.directory(getAssetBuildDirectory()), assetBundle.entries);
+      await writeBundle(globals.fs.directory(getAssetBuildDirectory()), assetBundle.entries);
       if (!skipDwds) {
         final BuildRunnerAssetHandler assetHandler = BuildRunnerAssetHandler(
           daemonAssetPort,
@@ -303,7 +302,7 @@ class WebFs {
           verbose: false,
           enableDebugExtension: true,
           urlEncoder: urlTunneller,
-          logWriter: (dynamic level, String message) => printTrace(message),
+          logWriter: (dynamic level, String message) => globals.printTrace(message),
         );
         handler = pipeline.addHandler(dwds.handler);
       } else {
@@ -360,9 +359,9 @@ abstract class AssetServer {
 class ReleaseAssetServer extends AssetServer {
   // Locations where source files, assets, or source maps may be located.
   final List<Uri> _searchPaths = <Uri>[
-    fs.directory(getWebBuildDirectory()).uri,
-    fs.directory(Cache.flutterRoot).parent.uri,
-    fs.currentDirectory.childDirectory('lib').uri,
+    globals.fs.directory(getWebBuildDirectory()).uri,
+    globals.fs.directory(Cache.flutterRoot).parent.uri,
+    globals.fs.currentDirectory.childDirectory('lib').uri,
   ];
 
   @override
@@ -370,7 +369,7 @@ class ReleaseAssetServer extends AssetServer {
     Uri fileUri;
     for (Uri uri in _searchPaths) {
       final Uri potential = uri.resolve(request.url.path);
-      if (potential == null || !fs.isFileSync(potential.toFilePath())) {
+      if (potential == null || !globals.fs.isFileSync(potential.toFilePath())) {
         continue;
       }
       fileUri = potential;
@@ -378,7 +377,7 @@ class ReleaseAssetServer extends AssetServer {
     }
 
     if (fileUri != null) {
-      final File file = fs.file(fileUri);
+      final File file = globals.fs.file(fileUri);
       final Uint8List bytes = file.readAsBytesSync();
       // Fallback to "application/octet-stream" on null which
       // makes no claims as to the structure of the data.
@@ -389,7 +388,7 @@ class ReleaseAssetServer extends AssetServer {
       });
     }
     if (request.url.path == '') {
-      final File file = fs.file(fs.path.join(getWebBuildDirectory(), 'index.html'));
+      final File file = globals.fs.file(globals.fs.path.join(getWebBuildDirectory(), 'index.html'));
       return Response.ok(file.readAsBytesSync(), headers: <String, String>{
         'Content-Type': 'text/html',
       });
@@ -410,7 +409,7 @@ class DebugAssetServer extends AssetServer {
   Future<Response> handle(Request request) async {
     if (request.url.path.endsWith('.html')) {
       final Uri htmlUri = flutterProject.web.directory.uri.resolveUri(request.url);
-      final File htmlFile = fs.file(htmlUri);
+      final File htmlFile = globals.fs.file(htmlUri);
       if (htmlFile.existsSync()) {
         return Response.ok(htmlFile.readAsBytesSync(), headers: <String, String>{
           'Content-Type': 'text/html',
@@ -418,8 +417,8 @@ class DebugAssetServer extends AssetServer {
       }
       return Response.notFound('');
     } else if (request.url.path.contains('stack_trace_mapper')) {
-      final File file = fs.file(fs.path.join(
-        artifacts.getArtifactPath(Artifact.engineDartSdkPath),
+      final File file = globals.fs.file(globals.fs.path.join(
+        globals.artifacts.getArtifactPath(Artifact.engineDartSdkPath),
         'lib',
         'dev_compiler',
         'web',
@@ -434,7 +433,7 @@ class DebugAssetServer extends AssetServer {
       // entrypoint + a "part" suffix (Though the actual names are arbitrary).
       // To make this easier to deal with they are copied into a temp directory.
       if (partFiles == null) {
-        final File dart2jsArchive = fs.file(fs.path.join(
+        final File dart2jsArchive = globals.fs.file(globals.fs.path.join(
           flutterProject.dartTool.path,
           'build',
           'flutter_web',
@@ -444,20 +443,20 @@ class DebugAssetServer extends AssetServer {
         ));
         if (dart2jsArchive.existsSync()) {
           final Archive archive = TarDecoder().decodeBytes(dart2jsArchive.readAsBytesSync());
-          partFiles = fs.systemTempDirectory.createTempSync('flutter_tool.')
+          partFiles = globals.fs.systemTempDirectory.createTempSync('flutter_tool.')
             ..createSync();
           for (ArchiveFile file in archive) {
             partFiles.childFile(file.name).writeAsBytesSync(file.content as List<int>);
           }
         }
       }
-      final String fileName = fs.path.basename(request.url.path);
+      final String fileName = globals.fs.path.basename(request.url.path);
       return Response.ok(partFiles.childFile(fileName).readAsBytesSync(), headers: <String, String>{
         'Content-Type': 'text/javascript',
       });
     } else if (request.url.path.contains('require.js')) {
-      final File file = fs.file(fs.path.join(
-        artifacts.getArtifactPath(Artifact.engineDartSdkPath),
+      final File file = globals.fs.file(globals.fs.path.join(
+        globals.artifacts.getArtifactPath(Artifact.engineDartSdkPath),
         'lib',
         'dev_compiler',
         'kernel',
@@ -468,16 +467,16 @@ class DebugAssetServer extends AssetServer {
         'Content-Type': 'text/javascript',
       });
     } else if (request.url.path.endsWith('dart_sdk.js.map')) {
-      final File file = fs.file(fs.path.join(
-        artifacts.getArtifactPath(Artifact.flutterWebSdk),
+      final File file = globals.fs.file(globals.fs.path.join(
+        globals.artifacts.getArtifactPath(Artifact.flutterWebSdk),
         'kernel',
         'amd',
         'dart_sdk.js.map',
       ));
       return Response.ok(file.readAsBytesSync());
     } else if (request.url.path.endsWith('dart_sdk.js')) {
-      final File file = fs.file(fs.path.join(
-        artifacts.getArtifactPath(Artifact.flutterWebSdk),
+      final File file = globals.fs.file(globals.fs.path.join(
+        globals.artifacts.getArtifactPath(Artifact.flutterWebSdk),
         'kernel',
         'amd',
         'dart_sdk.js',
@@ -498,16 +497,16 @@ class DebugAssetServer extends AssetServer {
       // Handle sdk requests that have mangled urls from engine build.
       if (request.url.path.contains('dart-sdk')) {
         // Note: the request is a uri and not a file path, so they always use `/`.
-        final String sdkPath = fs.path.joinAll(request.url.path.split('dart-sdk/').last.split('/'));
-        final String dartSdkPath = artifacts.getArtifactPath(Artifact.engineDartSdkPath);
-        final File candidateFile = fs.file(fs.path.join(dartSdkPath, sdkPath));
+        final String sdkPath = globals.fs.path.joinAll(request.url.path.split('dart-sdk/').last.split('/'));
+        final String dartSdkPath = globals.artifacts.getArtifactPath(Artifact.engineDartSdkPath);
+        final File candidateFile = globals.fs.file(globals.fs.path.join(dartSdkPath, sdkPath));
         return Response.ok(candidateFile.readAsBytesSync());
       }
 
       // See if it is a flutter sdk path.
-      final String webSdkPath = artifacts.getArtifactPath(Artifact.flutterWebSdk);
-      final File candidateFile = fs.file(fs.path.join(webSdkPath,
-        basePath.split('/').join(platform.pathSeparator)));
+      final String webSdkPath = globals.artifacts.getArtifactPath(Artifact.flutterWebSdk);
+      final File candidateFile = globals.fs.file(globals.fs.path.join(webSdkPath,
+        basePath.split('/').join(globals.platform.pathSeparator)));
       if (candidateFile.existsSync()) {
         return Response.ok(candidateFile.readAsBytesSync());
       }
@@ -515,25 +514,25 @@ class DebugAssetServer extends AssetServer {
       final String packageName = request.url.pathSegments.length == 1
           ? flutterProject.manifest.appName
           : request.url.pathSegments.first;
-      String filePath = fs.path.joinAll(request.url.pathSegments.length == 1
+      String filePath = globals.fs.path.joinAll(request.url.pathSegments.length == 1
           ? request.url.pathSegments
           : request.url.pathSegments.skip(1));
-      String packagePath = packageMap.map[packageName]?.toFilePath(windows: platform.isWindows);
+      String packagePath = packageMap.map[packageName]?.toFilePath(windows: globals.platform.isWindows);
       // If the package isn't found, then we have an issue with relative
       // paths within the main project.
       if (packagePath == null) {
         packagePath = packageMap.map[flutterProject.manifest.appName]
-            .toFilePath(windows: platform.isWindows);
+            .toFilePath(windows: globals.platform.isWindows);
         filePath = request.url.path;
       }
-      final File file = fs.file(fs.path.join(packagePath, filePath));
+      final File file = globals.fs.file(globals.fs.path.join(packagePath, filePath));
       if (file.existsSync()) {
         return Response.ok(file.readAsBytesSync());
       }
       return Response.notFound('');
     } else if (request.url.path.contains('assets')) {
       final String assetPath = request.url.path.replaceFirst('assets/', '');
-      final File file = fs.file(fs.path.join(getAssetBuildDirectory(), assetPath));
+      final File file = globals.fs.file(globals.fs.path.join(getAssetBuildDirectory(), assetPath));
       if (file.existsSync()) {
         final Uint8List bytes = file.readAsBytesSync();
         // Fallback to "application/octet-stream" on null which
@@ -643,15 +642,15 @@ class BuildDaemonCreator {
     bool initializePlatform,
     WebTestTargetManifest testTargets,
   }) {
-    final String flutterToolsPackages = fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools', '.packages');
-    final String buildScript = fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools', 'lib', 'src', 'build_runner', 'build_script.dart');
-    final String flutterWebSdk = artifacts.getArtifactPath(Artifact.flutterWebSdk);
+    final String flutterToolsPackages = globals.fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools', '.packages');
+    final String buildScript = globals.fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools', 'lib', 'src', 'build_runner', 'build_script.dart');
+    final String flutterWebSdk = globals.artifacts.getArtifactPath(Artifact.flutterWebSdk);
 
     // On Windows we need to call the snapshot directly otherwise
     // the process will start in a disjoint cmd without access to
     // STDIO.
     final List<String> args = <String>[
-      artifacts.getArtifactPath(Artifact.engineDartBinary),
+      globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
       '--packages=$flutterToolsPackages',
       buildScript,
       'daemon',
@@ -682,19 +681,19 @@ class BuildDaemonCreator {
                 serverLog.message.contains(_ignoredLine3)) {
               return;
             }
-            printError(serverLog.message);
+            globals.printError(serverLog.message);
             if (serverLog.error != null) {
-              printError(serverLog.error);
+              globals.printError(serverLog.error);
             }
             if (serverLog.stackTrace != null) {
-              printTrace(serverLog.stackTrace);
+              globals.printTrace(serverLog.stackTrace);
             }
             break;
           default:
             if (serverLog.message.contains('Skipping compiling')) {
-              printError(serverLog.message);
+              globals.printError(serverLog.message);
             } else {
-              printTrace(serverLog.message);
+              globals.printTrace(serverLog.message);
             }
         }
       },
@@ -704,7 +703,7 @@ class BuildDaemonCreator {
 
   /// Retrieve the asset server port for the current daemon.
   int assetServerPort(Directory workingDirectory) {
-    final String portFilePath = fs.path.join(daemon.daemonWorkspace(workingDirectory.path), '.asset_server_port');
-    return int.tryParse(fs.file(portFilePath).readAsStringSync());
+    final String portFilePath = globals.fs.path.join(daemon.daemonWorkspace(workingDirectory.path), '.asset_server_port');
+    return int.tryParse(globals.fs.file(portFilePath).readAsStringSync());
   }
 }

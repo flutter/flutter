@@ -8,7 +8,7 @@ import 'package:meta/meta.dart';
 
 import 'base/file_system.dart';
 import 'device.dart';
-import 'globals.dart';
+import 'globals.dart' as globals;
 import 'resident_runner.dart';
 import 'tracing.dart';
 import 'vmservice.dart';
@@ -50,12 +50,12 @@ class ColdRunner extends ResidentRunner {
   }) async {
     final bool prebuiltMode = applicationBinary != null;
     if (!prebuiltMode) {
-      if (!fs.isFileSync(mainPath)) {
+      if (!globals.fs.isFileSync(mainPath)) {
         String message = 'Tried to run $mainPath, but that file does not exist.';
         if (target == null) {
           message += '\nConsider using the -t option to specify the Dart file to start.';
         }
-        printError(message);
+        globals.printError(message);
         return 1;
       }
     }
@@ -75,7 +75,7 @@ class ColdRunner extends ResidentRunner {
       try {
         await connectToServiceProtocol();
       } on String catch (message) {
-        printError(message);
+        globals.printError(message);
         return 2;
       }
     }
@@ -88,7 +88,7 @@ class ColdRunner extends ResidentRunner {
       ));
     }
 
-    printTrace('Application running.');
+    globals.printTrace('Application running.');
 
     for (FlutterDevice device in flutterDevices) {
       if (device.vmService == null) {
@@ -96,14 +96,14 @@ class ColdRunner extends ResidentRunner {
       }
       device.initLogReader();
       await device.refreshViews();
-      printTrace('Connected to ${device.device.name}');
+      globals.printTrace('Connected to ${device.device.name}');
     }
 
     if (traceStartup) {
       // Only trace startup for the first device.
       final FlutterDevice device = flutterDevices.first;
       if (device.vmService != null) {
-        printStatus('Tracing startup on ${device.device.name}.');
+        globals.printStatus('Tracing startup on ${device.device.name}.');
         await downloadStartupTrace(
           device.vmService,
           awaitFirstFrame: awaitFirstFrameWhenTracing,
@@ -132,13 +132,13 @@ class ColdRunner extends ResidentRunner {
     try {
       await connectToServiceProtocol();
     } catch (error) {
-      printError('Error connecting to the service protocol: $error');
+      globals.printError('Error connecting to the service protocol: $error');
       // https://github.com/flutter/flutter/issues/33050
       // TODO(blasten): Remove this check once https://issuetracker.google.com/issues/132325318 has been fixed.
       if (await hasDeviceRunningAndroidQ(flutterDevices) &&
           error.toString().contains(kAndroidQHttpConnectionClosedExp)) {
-        printStatus('🔨 If you are using an emulator running Android Q Beta, consider using an emulator running API level 29 or lower.');
-        printStatus('Learn more about the status of this issue on https://issuetracker.google.com/issues/132325318');
+        globals.printStatus('🔨 If you are using an emulator running Android Q Beta, consider using an emulator running API level 29 or lower.');
+        globals.printStatus('Learn more about the status of this issue on https://issuetracker.google.com/issues/132325318');
       }
       return 2;
     }
@@ -148,7 +148,7 @@ class ColdRunner extends ResidentRunner {
     await refreshViews();
     for (FlutterDevice device in flutterDevices) {
       for (FlutterView view in device.views) {
-        printTrace('Connected to $view.');
+        globals.printTrace('Connected to $view.');
       }
     }
     appStartedCompleter?.complete();
@@ -184,7 +184,7 @@ class ColdRunner extends ResidentRunner {
     for (FlutterDevice device in flutterDevices) {
       final String dname = device.device.name;
       if (device.vmService != null) {
-        printStatus('An Observatory debugger and profiler on $dname is '
+        globals.printStatus('An Observatory debugger and profiler on $dname is '
           'available at: ${device.vmService .httpAddress}');
       }
     }
@@ -199,11 +199,11 @@ class ColdRunner extends ResidentRunner {
       ? 'To detach, press "d"; to quit, press "q".'
       : 'To quit, press "q".';
     if (haveDetails && !details) {
-      printStatus('For a more detailed help message, press "h". $quitMessage');
+      globals.printStatus('For a more detailed help message, press "h". $quitMessage');
     } else if (haveAnything) {
-      printStatus('To repeat this help message, press "h". $quitMessage');
+      globals.printStatus('To repeat this help message, press "h". $quitMessage');
     } else {
-      printStatus(quitMessage);
+      globals.printStatus(quitMessage);
     }
   }
 

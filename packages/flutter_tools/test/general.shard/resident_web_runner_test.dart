@@ -8,7 +8,6 @@ import 'dart:convert';
 import 'package:build_daemon/client.dart';
 import 'package:dwds/dwds.dart';
 import 'package:flutter_tools/src/base/common.dart';
-import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/net.dart';
@@ -19,7 +18,7 @@ import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/globals.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
@@ -102,9 +101,9 @@ void main() {
   });
 
   void _setupMocks() {
-    fs.file('pubspec.yaml').createSync();
-    fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
-    fs.file(fs.path.join('web', 'index.html')).createSync(recursive: true);
+    globals.fs.file('pubspec.yaml').createSync();
+    globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+    globals.fs.file(globals.fs.path.join('web', 'index.html')).createSync(recursive: true);
     when(mockWebFs.connect(any)).thenAnswer((Invocation _) async {
       return ConnectionResult(mockAppConnection, mockDebugConnection);
     });
@@ -224,24 +223,24 @@ void main() {
   }));
 
   test('Exits on run if application does not support the web', () => testbed.run(() async {
-    fs.file('pubspec.yaml').createSync();
+    globals.fs.file('pubspec.yaml').createSync();
 
     expect(await residentWebRunner.run(), 1);
     expect(testLogger.errorText, contains('This application is not configured to build on the web'));
   }));
 
   test('Exits on run if target file does not exist', () => testbed.run(() async {
-    fs.file('pubspec.yaml').createSync();
-    fs.file(fs.path.join('web', 'index.html')).createSync(recursive: true);
+    globals.fs.file('pubspec.yaml').createSync();
+    globals.fs.file(globals.fs.path.join('web', 'index.html')).createSync(recursive: true);
 
     expect(await residentWebRunner.run(), 1);
-    final String absoluteMain = fs.path.absolute(fs.path.join('lib', 'main.dart'));
+    final String absoluteMain = globals.fs.path.absolute(globals.fs.path.join('lib', 'main.dart'));
     expect(testLogger.errorText, contains('Tried to run $absoluteMain, but that file does not exist.'));
   }));
 
   test('Can successfully run and connect to vmservice', () => testbed.run(() async {
     _setupMocks();
-    final DelegateLogger delegateLogger = logger as DelegateLogger;
+    final DelegateLogger delegateLogger = globals.logger as DelegateLogger;
     final BufferLogger bufferLogger = delegateLogger.delegate as BufferLogger;
     final MockStatus status = MockStatus();
     delegateLogger.status = status;
@@ -832,14 +831,14 @@ void main() {
     ));
     await connectionInfoCompleter.future;
 
-    expect(testLogger.statusText, contains('Launching ${fs.path.join('lib', 'main.dart')} on Chromez in debug mode'));
+    expect(testLogger.statusText, contains('Launching ${globals.fs.path.join('lib', 'main.dart')} on Chromez in debug mode'));
   }));
 
   test('Sends launched app.webLaunchUrl event for Chrome device', () => testbed.run(() async {
     _setupMocks();
     when(mockFlutterDevice.device).thenReturn(ChromeDevice());
 
-    final DelegateLogger delegateLogger = logger as DelegateLogger;
+    final DelegateLogger delegateLogger = globals.logger as DelegateLogger;
     final MockStatus mockStatus = MockStatus();
     delegateLogger.status = mockStatus;
     final ResidentWebRunner runner = DwdsWebRunnerFactory().createWebRunner(
@@ -859,7 +858,7 @@ void main() {
     await connectionInfoCompleter.future;
 
     // Ensure we got the URL and that it was already launched.
-    verify(logger.sendEvent(
+    verify(globals.logger.sendEvent(
       'app.webLaunchUrl',
       argThat(allOf(
         containsPair('url', 'http://localhost:8765/app/'),
@@ -875,7 +874,7 @@ void main() {
     _setupMocks();
     when(mockFlutterDevice.device).thenReturn(WebServerDevice());
 
-    final DelegateLogger delegateLogger = logger as DelegateLogger;
+    final DelegateLogger delegateLogger = globals.logger as DelegateLogger;
     final MockStatus mockStatus = MockStatus();
     delegateLogger.status = mockStatus;
     final ResidentWebRunner runner = DwdsWebRunnerFactory().createWebRunner(
@@ -895,7 +894,7 @@ void main() {
     await connectionInfoCompleter.future;
 
     // Ensure we got the URL and that it was not already launched.
-    verify(logger.sendEvent(
+    verify(globals.logger.sendEvent(
       'app.webLaunchUrl',
       argThat(allOf(
         containsPair('url', 'http://localhost:8765/app/'),
@@ -1061,7 +1060,7 @@ void main() {
 
   test('Rethrows unknown exception type from web tooling', () => testbed.run(() async {
     _setupMocks();
-    final DelegateLogger delegateLogger = logger as DelegateLogger;
+    final DelegateLogger delegateLogger = globals.logger as DelegateLogger;
     final MockStatus mockStatus = MockStatus();
     delegateLogger.status = mockStatus;
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();

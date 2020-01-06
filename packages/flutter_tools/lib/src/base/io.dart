@@ -45,8 +45,8 @@ import 'dart:io' as io
 
 import 'package:meta/meta.dart';
 
+import '../globals.dart' as globals;
 import 'context.dart';
-import 'platform.dart';
 import 'process.dart';
 
 export 'dart:io'
@@ -180,7 +180,7 @@ class ProcessSignal {
   ///
   /// This is implemented by sending the signal using [Process.killPid].
   bool send(int pid) {
-    assert(!platform.isWindows || this == ProcessSignal.SIGTERM);
+    assert(!globals.platform.isWindows || this == ProcessSignal.SIGTERM);
     return io.Process.killPid(pid, _delegate);
   }
 
@@ -197,7 +197,7 @@ class _PosixProcessSignal extends ProcessSignal {
 
   @override
   Stream<ProcessSignal> watch() {
-    if (platform.isWindows) {
+    if (globals.platform.isWindows) {
       return const Stream<ProcessSignal>.empty();
     }
     return super.watch();

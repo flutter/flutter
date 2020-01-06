@@ -5,11 +5,10 @@
 import '../../artifacts.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
-import '../../base/process_manager.dart';
 import '../../build_info.dart';
 import '../../compile.dart';
 import '../../dart/package_map.dart';
-import '../../globals.dart';
+import '../../globals.dart' as globals;
 import '../../project.dart';
 import '../build_system.dart';
 import '../depfile.dart';
@@ -52,7 +51,7 @@ class WebEntrypointTarget extends Target {
     final String targetFile = environment.defines[kTargetFile];
     final bool shouldInitializePlatform = environment.defines[kInitializePlatform] == 'true';
     final bool hasPlugins = environment.defines[kHasWebPlugins] == 'true';
-    final String importPath = fs.path.absolute(targetFile);
+    final String importPath = globals.fs.path.absolute(targetFile);
 
     // Use the package uri mapper to find the correct package-scheme import path
     // for the user application. If the application has a mix of package-scheme
@@ -71,7 +70,7 @@ class WebEntrypointTarget extends Target {
     // have an entry for the user's application or if the main file is
     // outside of the lib/ directory.
     final String mainImport = packageUriMapper.map(importPath)?.toString()
-      ?? fs.file(importPath).absolute.uri.toString();
+      ?? globals.fs.file(importPath).absolute.uri.toString();
 
     String contents;
     if (hasPlugins) {
@@ -148,15 +147,15 @@ class Dart2JSTarget extends Target {
   Future<void> build(Environment environment) async {
     final String dart2jsOptimization = environment.defines[kDart2jsOptimization];
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
-    final String specPath = fs.path.join(artifacts.getArtifactPath(Artifact.flutterWebSdk), 'libraries.json');
+    final String specPath = globals.fs.path.join(globals.artifacts.getArtifactPath(Artifact.flutterWebSdk), 'libraries.json');
     final String packageFile = FlutterProject.fromDirectory(environment.projectDir).hasBuilders
       ? PackageMap.globalGeneratedPackagesPath
       : PackageMap.globalPackagesPath;
     final File outputFile = environment.buildDir.childFile('main.dart.js');
 
-    final ProcessResult result = await processManager.run(<String>[
-      artifacts.getArtifactPath(Artifact.engineDartBinary),
-      artifacts.getArtifactPath(Artifact.dart2jsSnapshot),
+    final ProcessResult result = await globals.processManager.run(<String>[
+      globals.artifacts.getArtifactPath(Artifact.engineDartBinary),
+      globals.artifacts.getArtifactPath(Artifact.dart2jsSnapshot),
       '--libraries-spec=$specPath',
       if (dart2jsOptimization != null)
         '-$dart2jsOptimization'
@@ -181,7 +180,7 @@ class Dart2JSTarget extends Target {
     final File dart2jsDeps = environment.buildDir
       .childFile('main.dart.js.deps');
     if (!dart2jsDeps.existsSync()) {
-      printError('Warning: dart2js did not produced expected deps list at '
+      globals.printError('Warning: dart2js did not produced expected deps list at '
         '${dart2jsDeps.path}');
       return;
     }
@@ -226,11 +225,11 @@ class WebReleaseBundle extends Target {
   @override
   Future<void> build(Environment environment) async {
     for (File outputFile in environment.buildDir.listSync(recursive: true).whereType<File>()) {
-      if (!fs.path.basename(outputFile.path).contains('main.dart.js')) {
+      if (!globals.fs.path.basename(outputFile.path).contains('main.dart.js')) {
         continue;
       }
       outputFile.copySync(
-        environment.outputDir.childFile(fs.path.basename(outputFile.path)).path
+        environment.outputDir.childFile(globals.fs.path.basename(outputFile.path)).path
       );
     }
     final Directory outputDirectory = environment.outputDir.childDirectory('assets');
@@ -238,7 +237,7 @@ class WebReleaseBundle extends Target {
     environment.projectDir
       .childDirectory('web')
       .childFile('index.html')
-      .copySync(fs.path.join(environment.outputDir.path, 'index.html'));
+      .copySync(globals.fs.path.join(environment.outputDir.path, 'index.html'));
     final Depfile depfile = await copyAssets(environment, environment.outputDir.childDirectory('assets'));
     depfile.writeToFile(environment.buildDir.childFile('flutter_assets.d'));
   }

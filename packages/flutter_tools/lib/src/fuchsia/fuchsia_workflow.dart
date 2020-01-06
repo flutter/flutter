@@ -3,8 +3,8 @@
 // found in the LICENSE file.
 
 import '../base/context.dart';
-import '../base/platform.dart';
 import '../doctor.dart';
+import '../globals.dart' as globals;
 import 'fuchsia_sdk.dart';
 
 /// The [FuchsiaWorkflow] instance.
@@ -17,7 +17,7 @@ FuchsiaWorkflow get fuchsiaWorkflow => context.get<FuchsiaWorkflow>();
 class FuchsiaWorkflow implements Workflow {
 
   @override
-  bool get appliesToHostPlatform => platform.isLinux || platform.isMacOS;
+  bool get appliesToHostPlatform => globals.platform.isLinux || globals.platform.isMacOS;
 
   @override
   bool get canListDevices {

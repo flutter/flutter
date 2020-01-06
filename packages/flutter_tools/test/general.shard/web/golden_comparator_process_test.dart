@@ -6,6 +6,7 @@ import 'dart:convert';
 
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/test/flutter_web_platform.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
 import '../../src/mocks.dart';
@@ -22,9 +23,9 @@ void main() {
     MockProcess Function(String) createMockProcess;
 
     setUpAll(() {
-      imageFile = fs.file('test_image_file');
+      imageFile = globals.fs.file('test_image_file');
       goldenKey = Uri.parse('file://golden_key');
-      imageFile2 = fs.file('second_test_image_file');
+      imageFile2 = globals.fs.file('second_test_image_file');
       goldenKey2 = Uri.parse('file://second_golden_key');
       createMockProcess = (String stdout) => MockProcess(
         exitCode: Future<int>.value(0),

@@ -3,9 +3,9 @@
 // found in the LICENSE file.
 
 import '../base/context.dart';
-import '../base/platform.dart';
 import '../doctor.dart';
 import '../features.dart';
+import '../globals.dart' as globals;
 
 /// The [WindowsWorkflow] instance.
 LinuxWorkflow get linuxWorkflow => context.get<LinuxWorkflow>();
@@ -18,13 +18,13 @@ class LinuxWorkflow implements Workflow {
   const LinuxWorkflow();
 
   @override
-  bool get appliesToHostPlatform => platform.isLinux && featureFlags.isLinuxEnabled;
+  bool get appliesToHostPlatform => globals.platform.isLinux && featureFlags.isLinuxEnabled;
 
   @override
-  bool get canLaunchDevices => platform.isLinux && featureFlags.isLinuxEnabled;
+  bool get canLaunchDevices => globals.platform.isLinux && featureFlags.isLinuxEnabled;
 
   @override
-  bool get canListDevices => platform.isLinux && featureFlags.isLinuxEnabled;
+  bool get canListDevices => globals.platform.isLinux && featureFlags.isLinuxEnabled;
 
   @override
   bool get canListEmulators => false;
