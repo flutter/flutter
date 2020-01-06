@@ -7,7 +7,7 @@ import 'package:mustache/mustache.dart' as mustache;
 import 'base/common.dart';
 import 'base/file_system.dart';
 import 'cache.dart';
-import 'globals.dart';
+import 'globals.dart' as globals;
 
 /// Expands templates in a directory to a destination. All files that must
 /// undergo template expansion should end with the '.tmpl' extension. All other
@@ -39,14 +39,14 @@ class Template {
         continue;
       }
 
-      final String relativePath = fs.path.relative(entity.path,
+      final String relativePath = globals.fs.path.relative(entity.path,
           from: baseDir.absolute.path);
 
       if (relativePath.contains(templateExtension)) {
         // If '.tmpl' appears anywhere within the path of this entity, it is
         // is a candidate for rendering. This catches cases where the folder
         // itself is a template.
-        _templateFilePaths[relativePath] = fs.path.absolute(entity.path);
+        _templateFilePaths[relativePath] = globals.fs.path.absolute(entity.path);
       }
     }
   }
@@ -75,7 +75,7 @@ class Template {
     try {
       destination.createSync(recursive: true);
     } on FileSystemException catch (err) {
-      printError(err.toString());
+      globals.printError(err.toString());
       throwToolExit('Failed to flutter create at ${destination.path}.');
       return 0;
     }
@@ -110,8 +110,8 @@ class Template {
       final String androidIdentifier = context['androidIdentifier'] as String;
       final String pluginClass = context['pluginClass'] as String;
       final String destinationDirPath = destination.absolute.path;
-      final String pathSeparator = fs.path.separator;
-      String finalDestinationPath = fs.path
+      final String pathSeparator = globals.fs.path.separator;
+      String finalDestinationPath = globals.fs.path
         .join(destinationDirPath, relativeDestinationPath)
         .replaceAll(copyTemplateExtension, '')
         .replaceAll(templateExtension, '');
@@ -139,8 +139,8 @@ class Template {
       if (finalDestinationPath == null) {
         return;
       }
-      final File finalDestinationFile = fs.file(finalDestinationPath);
-      final String relativePathForLogging = fs.path.relative(finalDestinationFile.path);
+      final File finalDestinationFile = globals.fs.file(finalDestinationPath);
+      final String relativePathForLogging = globals.fs.path.relative(finalDestinationFile.path);
 
       // Step 1: Check if the file needs to be overwritten.
 
@@ -148,25 +148,25 @@ class Template {
         if (overwriteExisting) {
           finalDestinationFile.deleteSync(recursive: true);
           if (printStatusWhenWriting) {
-            printStatus('  $relativePathForLogging (overwritten)');
+            globals.printStatus('  $relativePathForLogging (overwritten)');
           }
         } else {
           // The file exists but we cannot overwrite it, move on.
           if (printStatusWhenWriting) {
-            printTrace('  $relativePathForLogging (existing - skipped)');
+            globals.printTrace('  $relativePathForLogging (existing - skipped)');
           }
           return;
         }
       } else {
         if (printStatusWhenWriting) {
-          printStatus('  $relativePathForLogging (created)');
+          globals.printStatus('  $relativePathForLogging (created)');
         }
       }
 
       fileCount++;
 
       finalDestinationFile.createSync(recursive: true);
-      final File sourceFile = fs.file(absoluteSourcePath);
+      final File sourceFile = globals.fs.file(absoluteSourcePath);
 
       // Step 2: If the absolute paths ends with a '.copy.tmpl', this file does
       //         not need mustache rendering but needs to be directly copied.
@@ -200,7 +200,7 @@ class Template {
 }
 
 Directory templateDirectoryInPackage(String name) {
-  final String templatesDir = fs.path.join(Cache.flutterRoot,
+  final String templatesDir = globals.fs.path.join(Cache.flutterRoot,
       'packages', 'flutter_tools', 'templates');
-  return fs.directory(fs.path.join(templatesDir, name));
+  return globals.fs.directory(globals.fs.path.join(templatesDir, name));
 }

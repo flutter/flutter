@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import '../base/process.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
 
 import 'fuchsia_device.dart';
 
@@ -23,7 +23,7 @@ class FuchsiaTilesCtl {
     final FuchsiaTilesCtl tilesCtl = fuchsiaDeviceTools.tilesCtl;
     final Map<int, String> runningApps = await tilesCtl.list(device);
     if (runningApps == null) {
-      printTrace('tiles_ctl is not running');
+      globals.printTrace('tiles_ctl is not running');
       return -1;
     }
     for (MapEntry<int, String> entry in runningApps.entries) {

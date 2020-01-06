@@ -8,8 +8,8 @@ import '../../base/common.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
 import '../../base/process.dart';
-import '../../base/process_manager.dart';
 import '../../build_info.dart';
+import '../../globals.dart' as globals;
 import '../../macos/xcode.dart';
 import '../build_system.dart';
 import '../exceptions.dart';
@@ -65,7 +65,7 @@ abstract class AotAssemblyBase extends Target {
           buildMode: buildMode,
           mainPath: environment.buildDir.childFile('app.dill').path,
           packagesPath: environment.projectDir.childFile('.packages').path,
-          outputPath: fs.path.join(buildOutputPath, getNameForDarwinArch(iosArch)),
+          outputPath: globals.fs.path.join(buildOutputPath, getNameForDarwinArch(iosArch)),
           darwinArch: iosArch,
           bitcode: bitcode,
         ));
@@ -74,13 +74,13 @@ abstract class AotAssemblyBase extends Target {
       if (results.any((int result) => result != 0)) {
         throw Exception('AOT snapshotter exited with code ${results.join()}');
       }
-      final ProcessResult result = await processManager.run(<String>[
+      final ProcessResult result = await globals.processManager.run(<String>[
         'lipo',
         ...iosArchs.map((DarwinArch iosArch) =>
-            fs.path.join(buildOutputPath, getNameForDarwinArch(iosArch), 'App.framework', 'App')),
+            globals.fs.path.join(buildOutputPath, getNameForDarwinArch(iosArch), 'App.framework', 'App')),
         '-create',
         '-output',
-        fs.path.join(environment.outputDir.path, 'App.framework', 'App'),
+        globals.fs.path.join(environment.outputDir.path, 'App.framework', 'App'),
       ]);
       if (result.exitCode != 0) {
         throw Exception('lipo exited with code ${result.exitCode}');
@@ -164,7 +164,7 @@ Future<RunResult> createStubAppFramework(File outputFile, SdkType sdk) async {
     throwToolExit('Failed to create App.framework stub at ${outputFile.path}');
   }
 
-  final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_stub_source.');
+  final Directory tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_stub_source.');
   try {
     final File stubSource = tempDir.childFile('debug_app.cc')
       ..writeAsStringSync(r'''

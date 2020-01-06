@@ -18,7 +18,7 @@ import '../cache.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../emulator.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../resident_runner.dart';
 import '../run_cold.dart';
@@ -50,7 +50,7 @@ class DaemonCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    printStatus('Starting device daemon...');
+    globals.printStatus('Starting device daemon...');
     isRunningFromDaemon = true;
 
     final NotifyingLogger notifyingLogger = NotifyingLogger();
@@ -361,7 +361,7 @@ class DaemonDomain extends Domain {
     if (res is Map<String, dynamic> && res['url'] is String) {
       return res['url'] as String;
     } else {
-      printError('Invalid response to exposeUrl - params should include a String url field');
+      globals.printError('Invalid response to exposeUrl - params should include a String url field');
       return url;
     }
   }
@@ -387,7 +387,7 @@ class DaemonDomain extends Domain {
     try {
       // TODO(jonahwilliams): replace this with a project metadata check once
       // that has been implemented.
-      final FlutterProject flutterProject = FlutterProject.fromDirectory(fs.directory(projectRoot));
+      final FlutterProject flutterProject = FlutterProject.fromDirectory(globals.fs.directory(projectRoot));
       if (flutterProject.linux.existsSync()) {
         result.add('linux');
       }
@@ -472,8 +472,8 @@ class AppDomain extends Domain {
       throw '${toTitleCase(options.buildInfo.friendlyModeName)} mode is not supported for emulators.';
     }
     // We change the current working directory for the duration of the `start` command.
-    final Directory cwd = fs.currentDirectory;
-    fs.currentDirectory = fs.directory(projectDirectory);
+    final Directory cwd = globals.fs.currentDirectory;
+    globals.fs.currentDirectory = globals.fs.directory(projectDirectory);
     final FlutterProject flutterProject = FlutterProject.current();
 
     final FlutterDevice flutterDevice = await FlutterDevice.create(
@@ -600,7 +600,7 @@ class AppDomain extends Domain {
           'trace': '$trace',
         });
       } finally {
-        fs.currentDirectory = cwd;
+        globals.fs.currentDirectory = cwd;
         _apps.remove(app);
       }
     });
@@ -779,7 +779,7 @@ class DeviceDomain extends Domain {
           final Map<String, Object> response = await _deviceToMap(device);
           sendEvent(eventName, response);
         } catch (err) {
-          printError('$err');
+          globals.printError('$err');
         }
       });
     };
@@ -1011,7 +1011,7 @@ class AppInstance {
   }
 
   Future<T> _runInZone<T>(AppDomain domain, FutureOr<T> method()) {
-    _logger ??= _AppRunLogger(domain, this, parent: logToStdout ? logger : null);
+    _logger ??= _AppRunLogger(domain, this, parent: logToStdout ? globals.logger : null);
 
     return context.run<T>(
       body: method,

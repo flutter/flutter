@@ -14,12 +14,11 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 
 import 'base/common.dart';
 import 'base/context.dart';
-import 'base/file_system.dart';
 import 'base/io.dart' as io;
 import 'base/utils.dart';
 import 'convert.dart' show base64, utf8;
 import 'device.dart';
-import 'globals.dart';
+import 'globals.dart' as globals;
 import 'version.dart';
 
 /// Override `WebSocketConnector` in [context] to use a different constructor
@@ -71,11 +70,11 @@ Future<StreamChannel<String>> _defaultOpenChannel(Uri uri, {io.CompressionOption
   io.WebSocket socket;
 
   Future<void> handleError(dynamic e) async {
-    printTrace('Exception attempting to connect to Observatory: $e');
-    printTrace('This was attempt #$attempts. Will retry in $delay.');
+    globals.printTrace('Exception attempting to connect to Observatory: $e');
+    globals.printTrace('This was attempt #$attempts. Will retry in $delay.');
 
     if (attempts == 10) {
-      printStatus('This is taking longer than expected...');
+      globals.printStatus('This is taking longer than expected...');
     }
 
     // Delay next attempt.
@@ -180,7 +179,7 @@ class VMService {
           throw rpc.RpcException.invalidParams('Invalid \'classId\': $classId');
         }
 
-        printTrace('reloadMethod not yet supported, falling back to hot reload');
+        globals.printTrace('reloadMethod not yet supported, falling back to hot reload');
 
         try {
           await reloadMethod(
@@ -291,7 +290,7 @@ class VMService {
   }
 
   static void _unhandledError(dynamic error, dynamic stack) {
-    logger.printTrace('Error in internal implementation of JSON RPC.\n$error\n$stack');
+    globals.logger.printTrace('Error in internal implementation of JSON RPC.\n$error\n$stack');
     assert(false);
   }
 
@@ -332,7 +331,7 @@ class VMService {
     io.CompressionOptions compression = io.CompressionOptions.compressionDefault,
     Device device,
   }) async {
-    final Uri wsUri = httpUri.replace(scheme: 'ws', path: fs.path.join(httpUri.path, 'ws'));
+    final Uri wsUri = httpUri.replace(scheme: 'ws', path: globals.fs.path.join(httpUri.path, 'ws'));
     final StreamChannel<String> channel = await _openChannel(wsUri, compression: compression);
     final rpc.Peer peer = rpc.Peer.withoutJson(jsonDocument.bind(channel), onUnhandledError: _unhandledError);
     final VMService service = VMService(
@@ -420,7 +419,7 @@ class VMService {
     final Map<String, dynamic> eventIsolate = castStringKeyedMap(eventData['isolate']);
 
     // Log event information.
-    printTrace('Notification from VM: $data');
+    globals.printTrace('Notification from VM: $data');
 
     ServiceEvent event;
     if (eventIsolate != null) {
@@ -898,7 +897,7 @@ class VM extends ServiceObjectOwner {
 
           // Eagerly load the isolate.
           isolate.load().catchError((dynamic e, StackTrace stack) {
-            printTrace('Eagerly loading an isolate failed: $e\n$stack');
+            globals.printTrace('Eagerly loading an isolate failed: $e\n$stack');
           });
         } else {
           // Existing isolate, update data.
@@ -948,20 +947,20 @@ class VM extends ServiceObjectOwner {
     Map<String, dynamic> params = const <String, dynamic>{},
     bool truncateLogs = true,
   }) async {
-    printTrace('Sending to VM service: $method($params)');
+    globals.printTrace('Sending to VM service: $method($params)');
     assert(params != null);
     try {
       final Map<String, dynamic> result = await _vmService._sendRequest(method, params);
       final String resultString =
           truncateLogs ? _truncate(result.toString(), 250, '...') : result.toString();
-      printTrace('Result: $resultString');
+      globals.printTrace('Result: $resultString');
       return result;
     } on WebSocketChannelException catch (error) {
       throwToolExit('Error connecting to observatory: $error');
       return null;
     } on rpc.RpcException catch (error) {
-      printError('Error ${error.code} received from application: ${error.message}');
-      printTrace('${error.data}');
+      globals.printError('Error ${error.code} received from application: ${error.message}');
+      globals.printTrace('${error.data}');
       rethrow;
     }
   }
@@ -1087,7 +1086,7 @@ class VM extends ServiceObjectOwner {
       }
       failCount += 1;
       if (failCount == 5) { // waited 200ms
-        printStatus('Flutter is taking longer than expected to report its views. Still trying...');
+        globals.printStatus('Flutter is taking longer than expected to report its views. Still trying...');
       }
       await Future<void>.delayed(const Duration(milliseconds: 50));
       await reload();
@@ -1501,7 +1500,7 @@ class FlutterView extends ServiceObject {
         // TODO(johnmccutchan): Listen to the debug stream and catch initial
         // launch errors.
         if (event.kind == ServiceEvent.kIsolateRunnable) {
-          printTrace('Isolate is runnable.');
+          globals.printTrace('Isolate is runnable.');
           if (!completer.isCompleted) {
             completer.complete();
           }

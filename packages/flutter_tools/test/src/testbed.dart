@@ -12,7 +12,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/os.dart';
-import 'package:flutter_tools/src/base/platform.dart';
+
 import 'package:flutter_tools/src/base/signals.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -21,6 +21,7 @@ import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/version.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:meta/meta.dart';
 import 'package:process/process.dart';
 
@@ -35,7 +36,7 @@ export 'package:flutter_tools/src/base/context.dart' show Generator;
 // this provider. For example, [BufferLogger], [MemoryFileSystem].
 final Map<Type, Generator> _testbedDefaults = <Type, Generator>{
   // Keeps tests fast by avoiding the actual file system.
-  FileSystem: () => MemoryFileSystem(style: platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix),
+  FileSystem: () => MemoryFileSystem(style: globals.platform.isWindows ? FileSystemStyle.windows : FileSystemStyle.posix),
   ProcessManager: () => FakeProcessManager.any(),
   Logger: () => BufferLogger(), // Allows reading logs and prevents stdout.
   OperatingSystemUtils: () => FakeOperatingSystemUtils(),
@@ -61,14 +62,14 @@ final Map<Type, Generator> _testbedDefaults = <Type, Generator>{
 ///
 ///         setUp(() {
 ///           testbed = Testbed(setUp: () {
-///             fs.file('foo').createSync()
+///             globals.fs.file('foo').createSync()
 ///           });
 ///         })
 ///
 ///         test('Can delete a file', () => testbed.run(() {
-///           expect(fs.file('foo').existsSync(), true);
-///           fs.file('foo').deleteSync();
-///           expect(fs.file('foo').existsSync(), false);
+///           expect(globals.fs.file('foo').existsSync(), true);
+///           globals.fs.file('foo').deleteSync();
+///           expect(globals.fs.file('foo').existsSync(), false);
 ///         }));
 ///       });
 ///     }
@@ -843,32 +844,32 @@ class FakeCache implements Cache {
 
   @override
   Directory getArtifactDirectory(String name) {
-    return fs.currentDirectory;
+    return globals.fs.currentDirectory;
   }
 
   @override
   Directory getCacheArtifacts() {
-    return fs.currentDirectory;
+    return globals.fs.currentDirectory;
   }
 
   @override
   Directory getCacheDir(String name) {
-    return fs.currentDirectory;
+    return globals.fs.currentDirectory;
   }
 
   @override
   Directory getDownloadDir() {
-    return fs.currentDirectory;
+    return globals.fs.currentDirectory;
   }
 
   @override
   Directory getRoot() {
-    return fs.currentDirectory;
+    return globals.fs.currentDirectory;
   }
 
   @override
   File getLicenseFile() {
-    return fs.currentDirectory.childFile('LICENSE');
+    return globals.fs.currentDirectory.childFile('LICENSE');
   }
 
   @override
@@ -893,7 +894,7 @@ class FakeCache implements Cache {
 
   @override
   Directory getWebSdkDirectory() {
-    return fs.currentDirectory;
+    return globals.fs.currentDirectory;
   }
 
   @override

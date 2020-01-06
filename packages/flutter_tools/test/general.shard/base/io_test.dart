@@ -74,10 +74,13 @@ void main() {
   });
 
   test('exit does not throw a StateError if overriden', () {
-    setExitFunctionForTests((int value) {});
+    try {
+      setExitFunctionForTests((int value) {});
 
-    expect(() => exit(0), returnsNormally);
-    restoreExitFunction();
+      expect(() => exit(0), returnsNormally);
+    } finally {
+      restoreExitFunction();
+    }
   });
 
   test('test_api defines the Declarer in a known place', () {

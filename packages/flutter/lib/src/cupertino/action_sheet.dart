@@ -265,12 +265,14 @@ class CupertinoActionSheetAction extends StatelessWidget {
   ///
   /// The [child] and [onPressed] arguments must not be null.
   const CupertinoActionSheetAction({
+    Key key,
     @required this.onPressed,
     this.isDefaultAction = false,
     this.isDestructiveAction = false,
     @required this.child,
   }) : assert(child != null),
-       assert(onPressed != null);
+       assert(onPressed != null),
+       super(key: key);
 
   /// The callback that is called when the button is tapped.
   ///

@@ -4,10 +4,10 @@
 
 import 'dart:async';
 
+import 'package:platform/platform.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
-import 'package:flutter_tools/src/globals.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
@@ -16,7 +16,7 @@ import '../../src/context.dart';
 void main() {
   group('output preferences', () {
     testUsingContext('can wrap output', () async {
-      printStatus('0123456789' * 8);
+      globals.printStatus('0123456789' * 8);
       expect(testLogger.statusText, equals(('0123456789' * 4 + '\n') * 2));
     }, overrides: <Type, Generator>{
       OutputPreferences: () => OutputPreferences(wrapText: true, wrapColumn: 40),
@@ -24,7 +24,7 @@ void main() {
 
     testUsingContext('can turn off wrapping', () async {
       final String testString = '0123456789' * 20;
-      printStatus(testString);
+      globals.printStatus(testString);
       expect(testLogger.statusText, equals('$testString\n'));
     }, overrides: <Type, Generator>{
       Platform: () => FakePlatform()..stdoutSupportsAnsi = true,
@@ -174,7 +174,7 @@ void main() {
       when(stdio.stdin).thenThrow(StateError('This should not be called'));
       when(stdio.stdinHasTerminal).thenReturn(false);
 
-      terminal.singleCharMode = true;
+      globals.terminal.singleCharMode = true;
     }, overrides: <Type, Generator>{
       Stdio: () => MockStdio(),
     });

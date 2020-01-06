@@ -7,7 +7,7 @@ import 'dart:async';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../cache.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 import '../template.dart';
 
@@ -64,7 +64,7 @@ class IdeConfigCommand extends FlutterCommand {
 
   static const String _ideName = 'intellij';
   Directory get _templateDirectory {
-    return fs.directory(fs.path.join(
+    return globals.fs.directory(globals.fs.path.join(
       Cache.flutterRoot,
       'packages',
       'flutter_tools',
@@ -74,7 +74,7 @@ class IdeConfigCommand extends FlutterCommand {
   }
 
   Directory get _createTemplatesDirectory {
-    return fs.directory(fs.path.join(
+    return globals.fs.directory(globals.fs.path.join(
       Cache.flutterRoot,
       'packages',
       'flutter_tools',
@@ -82,16 +82,16 @@ class IdeConfigCommand extends FlutterCommand {
     ));
   }
 
-  Directory get _flutterRoot => fs.directory(fs.path.absolute(Cache.flutterRoot));
+  Directory get _flutterRoot => globals.fs.directory(globals.fs.path.absolute(Cache.flutterRoot));
 
   // Returns true if any entire path element is equal to dir.
   bool _hasDirectoryInPath(FileSystemEntity entity, String dir) {
     String path = entity.absolute.path;
-    while (path.isNotEmpty && fs.path.dirname(path) != path) {
-      if (fs.path.basename(path) == dir) {
+    while (path.isNotEmpty && globals.fs.path.dirname(path) != path) {
+      if (globals.fs.path.basename(path) == dir) {
         return true;
       }
-      path = fs.path.dirname(path);
+      path = globals.fs.path.dirname(path);
     }
     return false;
   }
@@ -127,7 +127,7 @@ class IdeConfigCommand extends FlutterCommand {
     final Set<String> manifest = <String>{};
     final Iterable<File> flutterFiles = _flutterRoot.listSync(recursive: true).whereType<File>();
     for (File srcFile in flutterFiles) {
-      final String relativePath = fs.path.relative(srcFile.path, from: _flutterRoot.absolute.path);
+      final String relativePath = globals.fs.path.relative(srcFile.path, from: _flutterRoot.absolute.path);
 
       // Skip template files in both the ide_templates and templates
       // directories to avoid copying onto themselves.
@@ -148,30 +148,30 @@ class IdeConfigCommand extends FlutterCommand {
         continue;
       }
 
-      final File finalDestinationFile = fs.file(fs.path.absolute(
+      final File finalDestinationFile = globals.fs.file(globals.fs.path.absolute(
           _templateDirectory.absolute.path, '$relativePath${Template.copyTemplateExtension}'));
       final String relativeDestination =
-          fs.path.relative(finalDestinationFile.path, from: _flutterRoot.absolute.path);
+          globals.fs.path.relative(finalDestinationFile.path, from: _flutterRoot.absolute.path);
       if (finalDestinationFile.existsSync()) {
         if (_fileIsIdentical(srcFile, finalDestinationFile)) {
-          printTrace('  $relativeDestination (identical)');
+          globals.printTrace('  $relativeDestination (identical)');
           manifest.add('$relativePath${Template.copyTemplateExtension}');
           continue;
         }
         if (boolArg('overwrite')) {
           finalDestinationFile.deleteSync();
-          printStatus('  $relativeDestination (overwritten)');
+          globals.printStatus('  $relativeDestination (overwritten)');
         } else {
-          printTrace('  $relativeDestination (existing - skipped)');
+          globals.printTrace('  $relativeDestination (existing - skipped)');
           manifest.add('$relativePath${Template.copyTemplateExtension}');
           continue;
         }
       } else {
-        printStatus('  $relativeDestination (added)');
+        globals.printStatus('  $relativeDestination (added)');
       }
-      final Directory finalDestinationDir = fs.directory(finalDestinationFile.dirname);
+      final Directory finalDestinationDir = globals.fs.directory(finalDestinationFile.dirname);
       if (!finalDestinationDir.existsSync()) {
-        printTrace("  ${finalDestinationDir.path} doesn't exist, creating.");
+        globals.printTrace("  ${finalDestinationDir.path} doesn't exist, creating.");
         finalDestinationDir.createSync(recursive: true);
       }
       srcFile.copySync(finalDestinationFile.path);
@@ -187,24 +187,24 @@ class IdeConfigCommand extends FlutterCommand {
     // them.
     final Iterable<File> templateFiles = _templateDirectory.listSync(recursive: true).whereType<File>();
     for (File templateFile in templateFiles) {
-      final String relativePath = fs.path.relative(
+      final String relativePath = globals.fs.path.relative(
         templateFile.absolute.path,
         from: _templateDirectory.absolute.path,
       );
       if (!manifest.contains(relativePath)) {
         templateFile.deleteSync();
         final String relativeDestination =
-            fs.path.relative(templateFile.path, from: _flutterRoot.absolute.path);
-        printStatus('  $relativeDestination (removed)');
+            globals.fs.path.relative(templateFile.path, from: _flutterRoot.absolute.path);
+        globals.printStatus('  $relativeDestination (removed)');
       }
       // If the directory is now empty, then remove it, and do the same for its parent,
       // until we escape to the template directory.
-      Directory parentDir = fs.directory(templateFile.dirname);
+      Directory parentDir = globals.fs.directory(templateFile.dirname);
       while (parentDir.listSync().isEmpty) {
         parentDir.deleteSync();
-        printTrace('  ${fs.path.relative(parentDir.absolute.path)} (empty directory - removed)');
-        parentDir = fs.directory(parentDir.dirname);
-        if (fs.path.isWithin(_templateDirectory.absolute.path, parentDir.absolute.path)) {
+        globals.printTrace('  ${globals.fs.path.relative(parentDir.absolute.path)} (empty directory - removed)');
+        parentDir = globals.fs.directory(parentDir.dirname);
+        if (globals.fs.path.isWithin(_templateDirectory.absolute.path, parentDir.absolute.path)) {
           break;
         }
       }
@@ -222,9 +222,9 @@ class IdeConfigCommand extends FlutterCommand {
       return null;
     }
 
-    final String flutterRoot = fs.path.absolute(Cache.flutterRoot);
-    final String dirPath = fs.path.normalize(
-      fs.directory(fs.path.absolute(Cache.flutterRoot)).absolute.path,
+    final String flutterRoot = globals.fs.path.absolute(Cache.flutterRoot);
+    final String dirPath = globals.fs.path.normalize(
+      globals.fs.directory(globals.fs.path.absolute(Cache.flutterRoot)).absolute.path,
     );
 
     final String error = _validateFlutterDir(dirPath, flutterRoot: flutterRoot);
@@ -232,15 +232,15 @@ class IdeConfigCommand extends FlutterCommand {
       throwToolExit(error);
     }
 
-    printStatus('Updating IDE configuration for Flutter tree at $dirPath...');
+    globals.printStatus('Updating IDE configuration for Flutter tree at $dirPath...');
     int generatedCount = 0;
     generatedCount += _renderTemplate(_ideName, dirPath, <String, dynamic>{
       'withRootModule': boolArg('with-root-module'),
     });
 
-    printStatus('Wrote $generatedCount files.');
-    printStatus('');
-    printStatus('Your IntelliJ configuration is now up to date. It is prudent to '
+    globals.printStatus('Wrote $generatedCount files.');
+    globals.printStatus('');
+    globals.printStatus('Your IntelliJ configuration is now up to date. It is prudent to '
         'restart IntelliJ, if running.');
 
     return null;
@@ -249,7 +249,7 @@ class IdeConfigCommand extends FlutterCommand {
   int _renderTemplate(String templateName, String dirPath, Map<String, dynamic> context) {
     final Template template = Template(_templateDirectory, _templateDirectory);
     return template.render(
-      fs.directory(dirPath),
+      globals.fs.directory(dirPath),
       context,
       overwriteExisting: boolArg('overwrite'),
     );
@@ -259,7 +259,7 @@ class IdeConfigCommand extends FlutterCommand {
 /// Return null if the flutter root directory is a valid destination. Return a
 /// validation message if we should disallow the directory.
 String _validateFlutterDir(String dirPath, { String flutterRoot }) {
-  final FileSystemEntityType type = fs.typeSync(dirPath);
+  final FileSystemEntityType type = globals.fs.typeSync(dirPath);
 
   if (type != FileSystemEntityType.notFound) {
     switch (type) {

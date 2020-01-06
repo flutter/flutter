@@ -5,6 +5,7 @@
 import 'dart:async';
 
 import '../base/file_system.dart';
+import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 import 'analyze_continuously.dart';
 import 'analyze_once.dart';
@@ -72,7 +73,7 @@ class AnalyzeCommand extends FlutterCommand {
     }
 
     // Or we're not in a project directory.
-    if (!fs.file('pubspec.yaml').existsSync()) {
+    if (!globals.fs.file('pubspec.yaml').existsSync()) {
       return false;
     }
 

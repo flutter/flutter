@@ -230,6 +230,7 @@ class CupertinoDatePicker extends StatefulWidget {
   ///
   /// [use24hFormat] decides whether 24 hour format is used. Defaults to false.
   CupertinoDatePicker({
+    Key key,
     this.mode = CupertinoDatePickerMode.dateAndTime,
     @required this.onDateTimeChanged,
     DateTime initialDateTime,
@@ -247,7 +248,8 @@ class CupertinoDatePicker extends StatefulWidget {
        assert(
          minuteInterval > 0 && 60 % minuteInterval == 0,
          'minute interval is not a positive integer factor of 60',
-       ) {
+       ),
+       super(key: key) {
     assert(this.initialDateTime != null);
     assert(
       mode != CupertinoDatePickerMode.dateAndTime || minimumDate == null || !this.initialDateTime.isBefore(minimumDate),

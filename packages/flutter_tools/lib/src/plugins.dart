@@ -14,7 +14,7 @@ import 'base/file_system.dart';
 import 'convert.dart';
 import 'dart/package_map.dart';
 import 'features.dart';
-import 'globals.dart';
+import 'globals.dart' as globals;
 import 'macos/cocoapods.dart';
 import 'platform_plugins.dart';
 import 'project.dart';
@@ -22,7 +22,7 @@ import 'project.dart';
 void _renderTemplateToFile(String template, dynamic context, String filePath) {
   final String renderedTemplate =
      mustache.Template(template, htmlEscapeValues: false).renderString(context);
-  final File file = fs.file(filePath);
+  final File file = globals.fs.file(filePath);
   file.createSync(recursive: true);
   file.writeAsStringSync(renderedTemplate);
 }
@@ -264,11 +264,11 @@ class Plugin {
 }
 
 Plugin _pluginFromPubspec(String name, Uri packageRoot) {
-  final String pubspecPath = fs.path.fromUri(packageRoot.resolve('pubspec.yaml'));
-  if (!fs.isFileSync(pubspecPath)) {
+  final String pubspecPath = globals.fs.path.fromUri(packageRoot.resolve('pubspec.yaml'));
+  if (!globals.fs.isFileSync(pubspecPath)) {
     return null;
   }
-  final dynamic pubspec = loadYaml(fs.file(pubspecPath).readAsStringSync());
+  final dynamic pubspec = loadYaml(globals.fs.file(pubspecPath).readAsStringSync());
   if (pubspec == null) {
     return null;
   }
@@ -276,9 +276,9 @@ Plugin _pluginFromPubspec(String name, Uri packageRoot) {
   if (flutterConfig == null || !(flutterConfig.containsKey('plugin') as bool)) {
     return null;
   }
-  final String packageRootPath = fs.path.fromUri(packageRoot);
+  final String packageRootPath = globals.fs.path.fromUri(packageRoot);
   final YamlMap dependencies = pubspec['dependencies'] as YamlMap;
-  printTrace('Found plugin $name at $packageRootPath');
+  globals.printTrace('Found plugin $name at $packageRootPath');
   return Plugin.fromYaml(
     name,
     packageRootPath,
@@ -291,13 +291,13 @@ List<Plugin> findPlugins(FlutterProject project) {
   final List<Plugin> plugins = <Plugin>[];
   Map<String, Uri> packages;
   try {
-    final String packagesFile = fs.path.join(
+    final String packagesFile = globals.fs.path.join(
       project.directory.path,
       PackageMap.globalPackagesPath,
     );
     packages = PackageMap(packagesFile).map;
   } on FormatException catch (e) {
-    printTrace('Invalid .packages file: $e');
+    globals.printTrace('Invalid .packages file: $e');
     return plugins;
   }
   packages.forEach((String name, Uri uri) {
@@ -464,13 +464,13 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
     'plugins': androidPlugins,
     'androidX': isAppUsingAndroidX(project.android.hostAppGradleRoot),
   };
-  final String javaSourcePath = fs.path.join(
+  final String javaSourcePath = globals.fs.path.join(
     project.android.pluginRegistrantHost.path,
     'src',
     'main',
     'java',
   );
-  final String registryPath = fs.path.join(
+  final String registryPath = globals.fs.path.join(
     javaSourcePath,
     'io',
     'flutter',
@@ -488,7 +488,7 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
         if (plugin['supportsEmbeddingV1'] as bool && !(plugin['supportsEmbeddingV2'] as bool)) {
           templateContext['needsShim'] = true;
           if (project.isModule) {
-            printStatus(
+            globals.printStatus(
               'The plugin `${plugin['name']}` is built using an older version '
               "of the Android plugin API which assumes that it's running in a "
               'full-Flutter environment. It may have undefined behaviors when '
@@ -516,7 +516,7 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
       templateContent = _androidPluginRegistryTemplateOldEmbedding;
       break;
   }
-  printTrace('Generating $registryPath');
+  globals.printTrace('Generating $registryPath');
   _renderTemplateToFile(
     templateContent,
     templateContext,
@@ -678,32 +678,32 @@ Future<void> _writeIOSPluginRegistrant(FlutterProject project, List<Plugin> plug
   };
   final String registryDirectory = project.ios.pluginRegistrantHost.path;
   if (project.isModule) {
-    final String registryClassesDirectory = fs.path.join(registryDirectory, 'Classes');
+    final String registryClassesDirectory = globals.fs.path.join(registryDirectory, 'Classes');
     _renderTemplateToFile(
       _pluginRegistrantPodspecTemplate,
       context,
-      fs.path.join(registryDirectory, 'FlutterPluginRegistrant.podspec'),
+      globals.fs.path.join(registryDirectory, 'FlutterPluginRegistrant.podspec'),
     );
     _renderTemplateToFile(
       _objcPluginRegistryHeaderTemplate,
       context,
-      fs.path.join(registryClassesDirectory, 'GeneratedPluginRegistrant.h'),
+      globals.fs.path.join(registryClassesDirectory, 'GeneratedPluginRegistrant.h'),
     );
     _renderTemplateToFile(
       _objcPluginRegistryImplementationTemplate,
       context,
-      fs.path.join(registryClassesDirectory, 'GeneratedPluginRegistrant.m'),
+      globals.fs.path.join(registryClassesDirectory, 'GeneratedPluginRegistrant.m'),
     );
   } else {
     _renderTemplateToFile(
       _objcPluginRegistryHeaderTemplate,
       context,
-      fs.path.join(registryDirectory, 'GeneratedPluginRegistrant.h'),
+      globals.fs.path.join(registryDirectory, 'GeneratedPluginRegistrant.h'),
     );
     _renderTemplateToFile(
       _objcPluginRegistryImplementationTemplate,
       context,
-      fs.path.join(registryDirectory, 'GeneratedPluginRegistrant.m'),
+      globals.fs.path.join(registryDirectory, 'GeneratedPluginRegistrant.m'),
     );
   }
 }
@@ -727,7 +727,7 @@ Future<void> _writeMacOSPluginRegistrant(FlutterProject project, List<Plugin> pl
   _renderTemplateToFile(
     _swiftPluginRegistryTemplate,
     context,
-    fs.path.join(registryDirectory, 'GeneratedPluginRegistrant.swift'),
+    globals.fs.path.join(registryDirectory, 'GeneratedPluginRegistrant.swift'),
   );
 }
 
@@ -744,12 +744,12 @@ Future<void> _writeCppPluginRegistrant(Directory destination, Map<String, dynami
   _renderTemplateToFile(
     _cppPluginRegistryHeaderTemplate,
     templateContext,
-    fs.path.join(registryDirectory, 'generated_plugin_registrant.h'),
+    globals.fs.path.join(registryDirectory, 'generated_plugin_registrant.h'),
   );
   _renderTemplateToFile(
     _cppPluginRegistryImplementationTemplate,
     templateContext,
-    fs.path.join(registryDirectory, 'generated_plugin_registrant.cc'),
+    globals.fs.path.join(registryDirectory, 'generated_plugin_registrant.cc'),
   );
 }
 
@@ -759,9 +759,9 @@ Future<void> _writeWebPluginRegistrant(FlutterProject project, List<Plugin> plug
     'plugins': webPlugins,
   };
   final String registryDirectory = project.web.libDirectory.path;
-  final String filePath = fs.path.join(registryDirectory, 'generated_plugin_registrant.dart');
+  final String filePath = globals.fs.path.join(registryDirectory, 'generated_plugin_registrant.dart');
   if (webPlugins.isEmpty) {
-    final File file = fs.file(filePath);
+    final File file = globals.fs.file(filePath);
     if (file.existsSync()) {
       file.deleteSync();
     }

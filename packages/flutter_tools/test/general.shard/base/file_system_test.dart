@@ -4,6 +4,7 @@
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:platform/platform.dart';
 
 import '../../src/common.dart';
@@ -66,14 +67,14 @@ void main() {
     });
 
     testUsingContext('Skip files if shouldCopyFile returns false', () {
-      final Directory origin = fs.directory('/origin');
+      final Directory origin = globals.fs.directory('/origin');
       origin.createSync();
-      fs.file(fs.path.join('origin', 'a.txt')).writeAsStringSync('irrelevant');
-      fs.directory('/origin/nested').createSync();
-      fs.file(fs.path.join('origin', 'nested', 'a.txt')).writeAsStringSync('irrelevant');
-      fs.file(fs.path.join('origin', 'nested', 'b.txt')).writeAsStringSync('irrelevant');
+      globals.fs.file(globals.fs.path.join('origin', 'a.txt')).writeAsStringSync('irrelevant');
+      globals.fs.directory('/origin/nested').createSync();
+      globals.fs.file(globals.fs.path.join('origin', 'nested', 'a.txt')).writeAsStringSync('irrelevant');
+      globals.fs.file(globals.fs.path.join('origin', 'nested', 'b.txt')).writeAsStringSync('irrelevant');
 
-      final Directory destination = fs.directory('/destination');
+      final Directory destination = globals.fs.directory('/destination');
       copyDirectorySync(origin, destination, shouldCopyFile: (File origin, File dest) {
         return origin.basename == 'b.txt';
       });
@@ -94,24 +95,24 @@ void main() {
     test('does not lowercase on Windows', () {
       String path = 'C:\\Foo\\bAr\\cOOL.dart';
       expect(canonicalizePath(path), path);
-      // fs.path.canonicalize does lowercase on Windows
-      expect(fs.path.canonicalize(path), isNot(path));
+      // globals.fs.path.canonicalize does lowercase on Windows
+      expect(globals.fs.path.canonicalize(path), isNot(path));
 
       path = '..\\bar\\.\\\\Foo';
-      final String expected = fs.path.join(fs.currentDirectory.parent.absolute.path, 'bar', 'Foo');
+      final String expected = globals.fs.path.join(globals.fs.currentDirectory.parent.absolute.path, 'bar', 'Foo');
       expect(canonicalizePath(path), expected);
-      // fs.path.canonicalize should return the same result (modulo casing)
-      expect(fs.path.canonicalize(path), expected.toLowerCase());
+      // globals.fs.path.canonicalize should return the same result (modulo casing)
+      expect(globals.fs.path.canonicalize(path), expected.toLowerCase());
     }, testOn: 'windows');
 
     test('does not lowercase on posix', () {
       String path = '/Foo/bAr/cOOL.dart';
       expect(canonicalizePath(path), path);
-      // fs.path.canonicalize and canonicalizePath should be the same on Posix
-      expect(fs.path.canonicalize(path), path);
+      // globals.fs.path.canonicalize and canonicalizePath should be the same on Posix
+      expect(globals.fs.path.canonicalize(path), path);
 
       path = '../bar/.//Foo';
-      final String expected = fs.path.join(fs.currentDirectory.parent.absolute.path, 'bar', 'Foo');
+      final String expected = globals.fs.path.join(globals.fs.currentDirectory.parent.absolute.path, 'bar', 'Foo');
       expect(canonicalizePath(path), expected);
     }, testOn: 'posix');
   });

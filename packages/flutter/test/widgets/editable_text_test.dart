@@ -4153,11 +4153,13 @@ class MockTextSelectionControls extends Mock implements TextSelectionControls {
 
 class CustomStyleEditableText extends EditableText {
   CustomStyleEditableText({
+    Key key,
     TextEditingController controller,
     Color cursorColor,
     FocusNode focusNode,
     TextStyle style,
   }) : super(
+          key: key,
           controller: controller,
           cursorColor: cursorColor,
           backgroundCursorColor: Colors.grey,
@@ -4180,7 +4182,11 @@ class CustomStyleEditableTextState extends EditableTextState {
 }
 
 class TransformedEditableText extends StatefulWidget {
-  const TransformedEditableText({ this.offset, this.transformButtonKey });
+  const TransformedEditableText({
+    Key key,
+    this.offset,
+    this.transformButtonKey,
+  }) : super(key: key);
 
   final Offset offset;
   final Key transformButtonKey;

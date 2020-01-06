@@ -33,12 +33,11 @@ import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
-import '../base/process_manager.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../convert.dart';
 import '../dart/package_map.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../web/chrome.dart';
 
@@ -52,7 +51,7 @@ class FlutterWebPlatform extends PlatformPlugin {
     this.updateGoldens,
   }) {
     // Look up the location of the testing resources.
-    final Map<String, Uri> packageMap = PackageMap(fs.path.join(
+    final Map<String, Uri> packageMap = PackageMap(globals.fs.path.join(
       Cache.flutterRoot,
       'packages',
       'flutter_tools',
@@ -64,7 +63,7 @@ class FlutterWebPlatform extends PlatformPlugin {
         .add(packagesDirHandler())
         .add(_jsHandler.handler)
         .add(createStaticHandler(
-          fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools'),
+          globals.fs.path.join(Cache.flutterRoot, 'packages', 'flutter_tools'),
           serveFilesOutsidePath: true,
         ))
         .add(createStaticHandler(_config.suiteDefaults.precompiledPath,
@@ -109,7 +108,7 @@ class FlutterWebPlatform extends PlatformPlugin {
   Uri get url => _server.url;
 
   /// The ahem text file.
-  File get ahem => fs.file(fs.path.join(
+  File get ahem => globals.fs.file(globals.fs.path.join(
         Cache.flutterRoot,
         'packages',
         'flutter_tools',
@@ -118,8 +117,8 @@ class FlutterWebPlatform extends PlatformPlugin {
       ));
 
   /// The require js binary.
-  File get requireJs => fs.file(fs.path.join(
-        artifacts.getArtifactPath(Artifact.engineDartSdkPath),
+  File get requireJs => globals.fs.file(globals.fs.path.join(
+        globals.artifacts.getArtifactPath(Artifact.engineDartSdkPath),
         'lib',
         'dev_compiler',
         'kernel',
@@ -128,8 +127,8 @@ class FlutterWebPlatform extends PlatformPlugin {
       ));
 
   /// The ddc to dart stack trace mapper.
-  File get stackTraceMapper => fs.file(fs.path.join(
-        artifacts.getArtifactPath(Artifact.engineDartSdkPath),
+  File get stackTraceMapper => globals.fs.file(globals.fs.path.join(
+        globals.artifacts.getArtifactPath(Artifact.engineDartSdkPath),
         'lib',
         'dev_compiler',
         'web',
@@ -137,20 +136,20 @@ class FlutterWebPlatform extends PlatformPlugin {
       ));
 
   /// The precompiled dart sdk.
-  File get dartSdk => fs.file(fs.path.join(
-        artifacts.getArtifactPath(Artifact.flutterWebSdk),
+  File get dartSdk => globals.fs.file(globals.fs.path.join(
+        globals.artifacts.getArtifactPath(Artifact.flutterWebSdk),
         'kernel',
         'amd',
         'dart_sdk.js',
       ));
 
   /// The precompiled test javascript.
-  File get testDartJs => fs.file(fs.path.join(
+  File get testDartJs => globals.fs.file(globals.fs.path.join(
         testUri.toFilePath(),
         'dart.js',
       ));
 
-  File get testHostDartJs => fs.file(fs.path.join(
+  File get testHostDartJs => globals.fs.file(globals.fs.path.join(
         testUri.toFilePath(),
         'src',
         'runner',
@@ -228,10 +227,10 @@ class FlutterWebPlatform extends PlatformPlugin {
         });
         bytes = base64.decode(response.result['data'] as String);
       } on WipError catch (ex) {
-        printError('Caught WIPError: $ex');
+        globals.printError('Caught WIPError: $ex');
         return shelf.Response.ok('WIP error: $ex');
       } on FormatException catch (ex) {
-        printError('Caught FormatException: $ex');
+        globals.printError('Caught FormatException: $ex');
         return shelf.Response.ok('Caught exception: $ex');
       }
 
@@ -263,10 +262,10 @@ class FlutterWebPlatform extends PlatformPlugin {
 
   // A handler that serves wrapper files used to bootstrap tests.
   shelf.Response _wrapperHandler(shelf.Request request) {
-    final String path = fs.path.fromUri(request.url);
+    final String path = globals.fs.path.fromUri(request.url);
     if (path.endsWith('.html')) {
-      final String test = fs.path.withoutExtension(path) + '.dart';
-      final String scriptBase = htmlEscape.convert(fs.path.basename(test));
+      final String test = globals.fs.path.withoutExtension(path) + '.dart';
+      final String scriptBase = htmlEscape.convert(globals.fs.path.basename(test));
       final String link = '<link rel="x-dart-test" href="$scriptBase">';
       return shelf.Response.ok('''
         <!DOCTYPE html>
@@ -279,7 +278,7 @@ class FlutterWebPlatform extends PlatformPlugin {
         </html>
       ''', headers: <String, String>{'Content-Type': 'text/html'});
     }
-    printTrace('Did not find anything for request: ${request.url}');
+    globals.printTrace('Did not find anything for request: ${request.url}');
     return shelf.Response.notFound('Not found.');
   }
 
@@ -299,8 +298,8 @@ class FlutterWebPlatform extends PlatformPlugin {
       return null;
     }
 
-    final Uri suiteUrl = url.resolveUri(fs.path.toUri(fs.path.withoutExtension(
-            fs.path.relative(path, from: fs.path.join(_root, 'test'))) +
+    final Uri suiteUrl = url.resolveUri(globals.fs.path.toUri(globals.fs.path.withoutExtension(
+            globals.fs.path.relative(path, from: globals.fs.path.join(_root, 'test'))) +
         '.html'));
     final RunnerSuite suite = await browserManager
         .load(path, suiteUrl, suiteConfig, message, mapper: _mappers[path]);
@@ -334,7 +333,7 @@ class FlutterWebPlatform extends PlatformPlugin {
         'debug': _config.pauseAfterLoad.toString(),
       });
 
-    printTrace('Serving tests at $hostUrl');
+    globals.printTrace('Serving tests at $hostUrl');
 
     final Future<BrowserManager> future = BrowserManager.start(
       browser,
@@ -793,7 +792,7 @@ class _BrowserEnvironment implements Environment {
 class TestGoldenComparator {
   /// Creates a [TestGoldenComparator] instance.
   TestGoldenComparator(this.shellPath, this.compilerFactory)
-      : tempDir = fs.systemTempDirectory.createTempSync('flutter_web_platform.');
+      : tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_web_platform.');
 
   final String shellPath;
   final Directory tempDir;
@@ -845,7 +844,7 @@ class TestGoldenComparator {
       // Chrome is the only supported browser currently.
       'FLUTTER_TEST_BROWSER': 'chrome',
     };
-    return processManager.start(command, environment: environment);
+    return globals.processManager.start(command, environment: environment);
   }
 
   Future<String> compareGoldens(Uri testUri, Uint8List bytes, Uri goldenKey, bool updateGoldens) async {
@@ -876,7 +875,7 @@ class TestGoldenComparatorProcess {
         .transform<String>(utf8.decoder)
         .transform<String>(const LineSplitter())
         .where((String line) {
-          printTrace('<<< $line');
+          globals.printTrace('<<< $line');
           return line.isNotEmpty && line[0] == '{';
         })
         .map<dynamic>(jsonDecode)
@@ -886,7 +885,7 @@ class TestGoldenComparatorProcess {
         .transform<String>(utf8.decoder)
         .transform<String>(const LineSplitter())
         .forEach((String line) {
-          printError('<<< $line');
+          globals.printError('<<< $line');
         });
   }
 
@@ -904,7 +903,7 @@ class TestGoldenComparatorProcess {
       'key': goldenKey.toString(),
       'update': updateGoldens,
     });
-    printTrace('Preparing to send command: $command');
+    globals.printTrace('Preparing to send command: $command');
     process.stdin.writeln(command);
   }
 
@@ -915,7 +914,7 @@ class TestGoldenComparatorProcess {
   }
 
   static String generateBootstrap(Uri testUri) {
-    final File testConfigFile = findTestConfigFile(fs.file(testUri));
+    final File testConfigFile = findTestConfigFile(globals.fs.file(testUri));
     // Generate comparator process for the file.
     return '''
 import 'dart:convert'; // ignore: dart_convert_import

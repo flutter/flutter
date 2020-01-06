@@ -57,7 +57,7 @@ void main() {
   });
 
   testWidgets('SingleTickerProviderStateMixin can handle not being used', (WidgetTester tester) async {
-    final Widget widget = BoringTickerTest();
+    const Widget widget = BoringTickerTest();
     expect(widget.toString, isNot(throwsException));
 
     await tester.pumpWidget(widget);
@@ -228,6 +228,7 @@ void main() {
 }
 
 class BoringTickerTest extends StatefulWidget {
+  const BoringTickerTest({ Key key }) : super(key: key);
   @override
   _BoringTickerTestState createState() => _BoringTickerTestState();
 }
