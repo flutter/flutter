@@ -5,12 +5,14 @@
 import 'dart:async';
 
 import 'package:flutter_tools/src/base/common.dart';
+import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/analyze.dart';
 import 'package:flutter_tools/src/dart/pub.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
+import 'package:flutter_tools/src/runner/flutter_command_runner.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -22,26 +24,38 @@ final Map<Type, Generator> noColorTerminalOverride = <Type, Generator>{
 
 void main() {
   final String analyzerSeparator = platform.isWindows ? '-' : '•';
+  const Pub pub = Pub();
 
   group('analyze once', () {
     setUpAll(() {
       Cache.disableLocking();
+      Cache.flutterRoot = FlutterCommandRunner.defaultFlutterRoot;
     });
+
+    void _createDotPackages(String projectPath) {
+      final String flutterRootUri = 'file://${fs.path.canonicalize(Cache.flutterRoot).replaceAll('\\', '/')}';
+      final String dotPackagesSrc = '''# Generated
+flutter:$flutterRootUri/packages/flutter/lib/
+sky_engine:$flutterRootUri/bin/cache/pkg/sky_engine/lib/
+flutter_project:lib/
+''';
+      fs.file(fs.path.join(projectPath, '.packages'))
+          ..createSync(recursive: true)
+          ..writeAsStringSync(dotPackagesSrc);
+    }
 
     group('default libMain', () {
       Directory tempDir;
       String projectPath;
       File libMain;
 
-      setUpAll(() {
+      setUpAll(() async {
         tempDir = fs.systemTempDirectory.createTempSync('flutter_analyze_once_test_1.').absolute;
         projectPath = fs.path.join(tempDir.path, 'flutter_project');
         fs.file(fs.path.join(projectPath, 'pubspec.yaml'))
             ..createSync(recursive: true)
             ..writeAsStringSync(pubspecYamlSrc);
-        fs.file(fs.path.join(projectPath, '.packages',))
-            ..createSync(recursive: true)
-            ..writeAsStringSync(dotPackagesSrc);
+        _createDotPackages(projectPath);
       });
 
       setUp(() {
@@ -62,7 +76,7 @@ void main() {
           statusTextContains: <String>['No issues found!'],
         );
       }, overrides: <Type, Generator>{
-        Pub: () => const Pub(),
+        Pub: () => pub,
       });
 
       // Analyze a specific file outside the current directory
@@ -74,26 +88,30 @@ void main() {
           exitMessageContains: 'is not a directory',
         );
       }, overrides: <Type, Generator>{
-        Pub: () => const Pub(),
+        Pub: () => pub,
       });
 
       // Analyze in the current directory - no arguments
       testUsingContext('working directory with errors', () async {
-        // Break the code to produce the "The parameter 'onPressed' is required" hint
+        // Break the code to produce the "Avoid empty else" hint
         // that is upgraded to a warning in package:flutter/analysis_options_user.yaml
         // to assert that we are using the default Flutter analysis options.
         // Also insert a statement that should not trigger a lint here
         // but will trigger a lint later on when an analysis_options.yaml is added.
         String source = await libMain.readAsString();
         source = source.replaceFirst(
+          'return MaterialApp(',
+          'if (debugPrintRebuildDirtyWidgets) {} else ; return MaterialApp(',
+        );
+        source = source.replaceFirst(
           'onPressed: _incrementCounter,',
           '// onPressed: _incrementCounter,',
         );
         source = source.replaceFirst(
-          '_counter++;',
-          '_counter++; throw "an error message";',
-        );
-        await libMain.writeAsString(source);
+            '_counter++;',
+            '_counter++; throw "an error message";',
+          );
+        libMain.writeAsStringSync(source);
 
         // Analyze in the current directory - no arguments
         await runCommand(
@@ -101,14 +119,15 @@ void main() {
           arguments: <String>['analyze'],
           statusTextContains: <String>[
             'Analyzing',
-            'warning $analyzerSeparator The parameter \'onPressed\' is required',
+            'info $analyzerSeparator Avoid empty else statements',
+            'info $analyzerSeparator Avoid empty statements',
             'info $analyzerSeparator The declaration \'_incrementCounter\' isn\'t',
           ],
-          exitMessageContains: '2 issues found.',
+          exitMessageContains: '3 issues found.',
           toolExit: true,
         );
       }, overrides: <Type, Generator>{
-        Pub: () => const Pub(),
+        Pub: () => pub,
         ...noColorTerminalOverride,
       });
 
@@ -141,11 +160,10 @@ void main() {
             arguments: <String>['analyze'],
             statusTextContains: <String>[
               'Analyzing',
-              'warning $analyzerSeparator The parameter \'onPressed\' is required',
               'info $analyzerSeparator The declaration \'_incrementCounter\' isn\'t',
               'info $analyzerSeparator Only throw instances of classes extending either Exception or Error',
             ],
-            exitMessageContains: '3 issues found.',
+            exitMessageContains: '2 issues found.',
             toolExit: true,
           );
         } finally {
@@ -161,6 +179,7 @@ void main() {
 
     testUsingContext('no duplicate issues', () async {
       final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_analyze_once_test_2.').absolute;
+      _createDotPackages(tempDir.path);
 
       try {
         final File foo = fs.file(fs.path.join(tempDir.path, 'foo.dart'));
@@ -192,7 +211,7 @@ void bar() {
         tryToDelete(tempDir);
       }
     }, overrides: <Type, Generator>{
-      Pub: () => const Pub(),
+      Pub: () => pub,
       ...noColorTerminalOverride
     });
 
@@ -201,6 +220,8 @@ void bar() {
 StringBuffer bar = StringBuffer('baz');
 ''';
       final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_analyze_once_test_3.');
+      _createDotPackages(tempDir.path);
+
       tempDir.childFile('main.dart').writeAsStringSync(contents);
       try {
         await runCommand(
@@ -212,7 +233,7 @@ StringBuffer bar = StringBuffer('baz');
         tryToDelete(tempDir);
       }
     }, overrides: <Type, Generator>{
-      Pub: () => const Pub(),
+      Pub: () => pub,
       ...noColorTerminalOverride
     });
 
@@ -222,6 +243,8 @@ StringBuffer bar = StringBuffer('baz');
 StringBuffer bar = StringBuffer('baz');
 ''';
       final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_analyze_once_test_4.');
+      _createDotPackages(tempDir.path);
+
       tempDir.childFile('main.dart').writeAsStringSync(contents);
       try {
         await runCommand(
@@ -233,7 +256,7 @@ StringBuffer bar = StringBuffer('baz');
         tryToDelete(tempDir);
       }
     }, overrides: <Type, Generator>{
-      Pub: () => const Pub(),
+      Pub: () => pub,
       ...noColorTerminalOverride
     });
   });
@@ -343,21 +366,10 @@ class _MyHomePageState extends State<MyHomePage> {
 ''';
 
 const String pubspecYamlSrc = r'''name: flutter_project
-description: A new Flutter project.
-version: 1.0.0+1
-
 environment:
   sdk: ">=2.1.0 <3.0.0"
 
 dependencies:
   flutter:
-    sdk: flutter''';
-
-const String dotPackagesSrc = r'''# Generated by pub on 2019-12-30 18:54:52.640698.
-collection:file:///Users/dnfield/.pub-cache/hosted/pub.dartlang.org/collection-1.14.11/lib/
-flutter:file:///Users/dnfield/src/flutter/flutter/packages/flutter/lib/
-meta:file:///Users/dnfield/.pub-cache/hosted/pub.dartlang.org/meta-1.1.8/lib/
-sky_engine:file:///Users/dnfield/src/flutter/flutter/bin/cache/pkg/sky_engine/lib/
-typed_data:file:///Users/dnfield/.pub-cache/hosted/pub.dartlang.org/typed_data-1.1.6/lib/
-vector_math:file:///Users/dnfield/.pub-cache/hosted/pub.dartlang.org/vector_math-2.0.8/lib/
-flutter_project:lib/''';
+    sdk: flutter
+''';
