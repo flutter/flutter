@@ -475,6 +475,7 @@ class MouseTracker extends ChangeNotifier {
     final Iterable<MouseTrackerAnnotation> enteringAnnotations =
       nextAnnotations.difference(lastAnnotations).toList().reversed;
     for (final MouseTrackerAnnotation annotation in enteringAnnotations) {
+      assert(trackedAnnotations.contains(annotation));
       if (annotation.onEnter != null) {
         annotation.onEnter(PointerEnterEvent.fromMouseEvent(unhandledEvent).transformed(annotation.getTransform()..invert()));
       } else {
