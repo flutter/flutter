@@ -464,7 +464,8 @@ class MouseTracker extends ChangeNotifier {
       // [MouseRegion.onExit] for details.
       if (annotation.onExit != null && attached) {
         if (annotation.getTransform != null) {
-          annotation.onExit(PointerExitEvent.fromMouseEvent(unhandledEvent).transformed(annotation.getTransform()..invert()));
+          final Matrix4 inverse = Matrix4.identity()..copyInverse(annotation.getTransform());
+          annotation.onExit(PointerExitEvent.fromMouseEvent(unhandledEvent).transformed(inverse));
         } else {
           annotation.onExit(PointerExitEvent.fromMouseEvent(unhandledEvent));
         }
@@ -477,9 +478,12 @@ class MouseTracker extends ChangeNotifier {
     for (final MouseTrackerAnnotation annotation in enteringAnnotations) {
       assert(trackedAnnotations.contains(annotation));
       if (annotation.onEnter != null) {
-        annotation.onEnter(PointerEnterEvent.fromMouseEvent(unhandledEvent).transformed(annotation.getTransform()..invert()));
-      } else {
-        annotation.onEnter(PointerEnterEvent.fromMouseEvent(unhandledEvent));
+        if (annotation.getTransform != null) {
+          final Matrix4 inverse = Matrix4.identity()..copyInverse(annotation.getTransform());
+          annotation.onEnter(PointerEnterEvent.fromMouseEvent(unhandledEvent).transformed(inverse));
+        } else {
+          annotation.onEnter(PointerEnterEvent.fromMouseEvent(unhandledEvent));
+        }
       }
     }
 
@@ -497,7 +501,8 @@ class MouseTracker extends ChangeNotifier {
             || lastHoverPosition != unhandledEvent.position) {
           if (annotation.onHover != null) {
             if (annotation.getTransform != null) {
-              annotation.onHover(unhandledEvent.transformed(annotation.getTransform()..invert()));
+              final Matrix4 inverse = Matrix4.identity()..copyInverse(annotation.getTransform());
+              annotation.onHover(unhandledEvent.transformed(inverse));
             } else {
               annotation.onHover(unhandledEvent);
             }

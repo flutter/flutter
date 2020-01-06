@@ -74,8 +74,9 @@ void main() {
 
   // Set up a trivial test environment that includes one annotation, which adds
   // the enter, hover, and exit events it received to [logEvents].
-  MouseTrackerAnnotation _setUpWithOneAnnotation({List<PointerEvent> logEvents}) {
+  MouseTrackerAnnotation _setUpWithOneAnnotation({List<PointerEvent> logEvents, Matrix4 transform}) {
     final MouseTrackerAnnotation annotation = MouseTrackerAnnotation(
+      getTransform: transform != null ? () => transform : null,
       onEnter: (PointerEnterEvent event) => logEvents.add(event),
       onHover: (PointerHoverEvent event) => logEvents.add(event),
       onExit: (PointerExitEvent event) => logEvents.add(event),
@@ -128,7 +129,7 @@ void main() {
       _pointerData(PointerChange.add, const Offset(0.0, 0.0)),
     ]));
     expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
-      const PointerEnterEvent(position: Offset(0.0, 0.0)),
+      const PointerEnterEvent(position: Offset(0.0, 0.0), localPosition: Offset(0.0, 0.0)),
     ]));
     expect(listenerLogs, <bool>[true]);
     events.clear();
@@ -139,7 +140,7 @@ void main() {
       _pointerData(PointerChange.hover, const Offset(1.0, 101.0)),
     ]));
     expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
-      const PointerHoverEvent(position: Offset(1.0, 101.0)),
+      const PointerHoverEvent(position: Offset(1.0, 101.0), localPosition: Offset(1.0, 101.0)),
     ]));
     expect(_mouseTracker.mouseIsConnected, isTrue);
     expect(listenerLogs, <bool>[]);
@@ -150,7 +151,7 @@ void main() {
       _pointerData(PointerChange.remove, const Offset(1.0, 101.0)),
     ]));
     expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
-      const PointerExitEvent(position: Offset(1.0, 101.0)),
+      const PointerExitEvent(position: Offset(1.0, 101.0), localPosition: Offset(1.0, 101.0)),
     ]));
     expect(listenerLogs, <bool>[false]);
     events.clear();
@@ -161,7 +162,7 @@ void main() {
       _pointerData(PointerChange.add, const Offset(0.0, 301.0)),
     ]));
     expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
-      const PointerEnterEvent(position: Offset(0.0, 301.0)),
+      const PointerEnterEvent(position: Offset(0.0, 301.0), localPosition: Offset(0.0, 301.0)),
     ]));
     expect(listenerLogs, <bool>[true]);
     events.clear();
@@ -684,6 +685,63 @@ void main() {
     expect(finderCalled, 0);
   });
 
+  test('should have the right localPosition when transformed', () {
+    final List<PointerEvent> events = <PointerEvent>[];
+    _setUpWithOneAnnotation(logEvents: events, transform: Matrix4.translationValues(10, 20, 0));
+
+    final List<bool> listenerLogs = <bool>[];
+    _mouseTracker.addListener(() {
+      listenerLogs.add(_mouseTracker.mouseIsConnected);
+    });
+
+    expect(_mouseTracker.mouseIsConnected, isFalse);
+
+    // Pointer enters the annotation.
+    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+      _pointerData(PointerChange.add, const Offset(10.0, 20.0)),
+    ]));
+    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
+      const PointerEnterEvent(position: Offset(10.0, 20.0), localPosition: Offset(0.0, 0.0)),
+    ]));
+    expect(listenerLogs, <bool>[true]);
+    events.clear();
+    listenerLogs.clear();
+
+    // Pointer hovers over the annotation.
+    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+      _pointerData(PointerChange.hover, const Offset(10.0, 20.0)),
+    ]));
+    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
+      const PointerHoverEvent(position: Offset(10.0, 20.0), localPosition: Offset(0.0, 0.0)),
+    ]));
+    expect(listenerLogs, <bool>[]);
+    events.clear();
+    listenerLogs.clear();
+
+    // Pointer is removed while on the annotation.
+    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+      _pointerData(PointerChange.remove, const Offset(1.0, 101.0)),
+    ]));
+    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
+      const PointerExitEvent(position: Offset(1.0, 101.0), localPosition: Offset(-9.0, 81.0)),
+    ]));
+    expect(listenerLogs, <bool>[false]);
+    events.clear();
+    listenerLogs.clear();
+
+    // Pointer is added on the annotation.
+    ui.window.onPointerDataPacket(ui.PointerDataPacket(data: <ui.PointerData>[
+      _pointerData(PointerChange.add, const Offset(0.0, 201.0)),
+    ]));
+    expect(events, _equalToEventsOnCriticalFields(<PointerEvent>[
+      const PointerEnterEvent(position: Offset(0.0, 201.0), localPosition: Offset(-10.0, 181.0)),
+    ]));
+    expect(listenerLogs, <bool>[true]);
+    events.clear();
+    listenerLogs.clear();
+
+  });
+
   test('should trigger callbacks between parents and children in correct order', () {
     // This test simulates the scenario of a layer being the child of another.
     //
@@ -739,7 +797,7 @@ void main() {
     expect(logs, <String>['exitB', 'exitA']);
   });
 
-  test('should trigger callbacks between disjoint siblings in correctly order', () {
+  test('should trigger callbacks between disjoint siblings in correct order', () {
     // This test simulates the scenario of 2 sibling layers that do not overlap
     // with each other.
     //
@@ -843,6 +901,7 @@ class _EventCriticalFieldsMatcher extends Matcher {
     if (!(
       _matchesField(matchState, 'kind', actual.kind, PointerDeviceKind.mouse) &&
       _matchesField(matchState, 'position', actual.position, _expected.position) &&
+      _matchesField(matchState, 'localPosition', actual.localPosition, _expected.localPosition) &&
       _matchesField(matchState, 'device', actual.device, _expected.device)
     )) {
       return false;
