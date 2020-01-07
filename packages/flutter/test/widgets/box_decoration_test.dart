@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:math';
+import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui' as ui show Image;
 
@@ -344,7 +344,6 @@ Future<void> main() async {
   });
 
   testWidgets('Can hit test on BoxDecoration border', (WidgetTester tester) async {
-
     List<int> itemsTapped;
     const Key key = Key('Container with BoxDecoration');
     Widget buildFrame(Border border) {
@@ -380,7 +379,6 @@ Future<void> main() async {
 
     await tester.tap(find.byKey(key));
     expect(itemsTapped, <int>[1,1]);
-
   });
 
   testWidgets('BoxDecoration not tap outside rounded angles - Top Left', (WidgetTester tester) async {
@@ -423,7 +421,7 @@ Future<void> main() async {
     //##@########
     //@##########
     //@##########
-    const double borderDiagonalOffset = radius - radius*sqrt1_2;
+    const double borderDiagonalOffset = radius - radius * math.sqrt1_2;
     const Offset fartherBorderRadiusPoint = Offset(borderDiagonalOffset,borderDiagonalOffset);
 
     await tester.tapAt(topLeft);
@@ -475,7 +473,7 @@ Future<void> main() async {
     // x, y
     const Offset borderTopTangent = Offset(radius, 0.0);
     const Offset borderLeftTangent = Offset(0.0,radius);
-    const double borderDiagonalOffset = radius - radius*sqrt1_2;
+    const double borderDiagonalOffset = radius - radius * math.sqrt1_2;
     const Offset fartherBorderRadiusPoint = Offset(borderDiagonalOffset+1,borderDiagonalOffset+1);
 
     await tester.tapAt(borderTopTangent);
@@ -489,7 +487,6 @@ Future<void> main() async {
 
     await tester.tap(find.byKey(key));
     expect(itemsTapped, <int>[1,1,1,1]);
-
   });
 
   testWidgets('BoxDecoration rounded angles other corner works', (WidgetTester tester) async {
