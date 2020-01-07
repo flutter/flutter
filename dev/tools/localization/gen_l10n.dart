@@ -302,7 +302,7 @@ List<String> genPluralMethodParameters(Iterable<String> placeholderKeys, String 
 }
 
 String generateDateFormattingLogic(Map<String, dynamic> arbBundle, String resourceId) {
-  StringBuffer result = StringBuffer();
+  final StringBuffer result = StringBuffer();
   final Map<String, dynamic> attributesMap = arbBundle['@$resourceId'] as Map<String, dynamic>;
   if (attributesMap != null && attributesMap.containsKey('placeholders')) {
     final Map<String, dynamic> placeholders = attributesMap['placeholders'] as Map<String, dynamic>;
@@ -326,7 +326,7 @@ String generateNumberFormattingLogic(Map<String, dynamic> arbBundle, String reso
   if (attributesMap != null && attributesMap.containsKey('placeholders')) {
     final StringBuffer result = StringBuffer();
     final Map<String, dynamic> placeholders = attributesMap['placeholders'] as Map<String, dynamic>;
-    StringBuffer optionalParametersString = StringBuffer();
+    final StringBuffer optionalParametersString = StringBuffer();
     for (final String placeholder in placeholders.keys) {
       final dynamic value = placeholders[placeholder];
       if (value is Map<String, dynamic> && _isValidNumberFormat(value, placeholder)) {
