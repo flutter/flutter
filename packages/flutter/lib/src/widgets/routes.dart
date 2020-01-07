@@ -1060,6 +1060,31 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///  * [ModalBarrier], the widget that implements this feature.
   String get barrierLabel;
 
+  /// The tween that is used for animating the modal barrier in and out.
+  ///
+  /// The modal barrier is the scrim that is rendered behind each route, which
+  /// generally prevents the user from interacting with the route below the
+  /// current route, and normally partially obscures such routes.
+  ///
+  /// For example, when a dialog is on the screen, the page below the dialog is
+  /// usually darkened by the modal barrier.
+  ///
+  /// While the route is animating into position, the color is animated from
+  /// transparent to the specified color.
+  ///
+  /// If this getter would ever start returning a different color,
+  /// [changedInternalState] should be invoked so that the change can take
+  /// effect.
+  ///
+  /// It defaults to a [CurveTween] with a [Curves.ease] curve.
+  ///
+  /// See also:
+  ///
+  ///  * [barrierColor], which determines the color that the modal transitions
+  ///    to.
+  ///  * [AnimatedModalBarrier], the widget that implements this feature.
+  Animatable<double> barrierTween = CurveTween(curve: Curves.ease);
+
   /// Whether the route should remain in memory when it is inactive.
   ///
   /// If this is true, then the route is maintained, so that any futures it is
@@ -1269,8 +1294,6 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   final GlobalKey _subtreeKey = GlobalKey();
   final PageStorageBucket _storageBucket = PageStorageBucket();
 
-  static final Animatable<double> _easeCurveTween = CurveTween(curve: Curves.ease);
-
   // one of the builders
   OverlayEntry _modalBarrier;
   Widget _buildModalBarrier(BuildContext context) {
@@ -1281,7 +1304,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
         ColorTween(
           begin: _kTransparent,
           end: barrierColor, // changedInternalState is called if this updates
-        ).chain(_easeCurveTween),
+        ).chain(barrierTween),
       );
       barrier = AnimatedModalBarrier(
         color: color,
