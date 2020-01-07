@@ -345,12 +345,13 @@ class SkiaGoldClient {
         final List<String> failureLinks = await workDirectory.childFile('failures.json').readAsLines();
 
         final StringBuffer buf = StringBuffer()
-          ..writeln('The golden file "$testName" did not match the expected image.')
-          ..writeln('To view the closest matching image, the actual image ')
-          ..writeln('generated, and the visual difference, visit: ')
+          ..writeln('The golden file "$testName" ')
+          ..writeln('did not match the expected image.')
+          ..writeln('To view the closest matching image, the actual image generated, ')
+          ..writeln('and the visual difference, visit: ')
           ..writeln(failureLinks.last)
           ..writeln('There you can also triage this image (e.g. because this ')
-          ..writeln('is an intentional change).\n');
+          ..writeln('is an intentional change).\n\n');
         throw buf.toString();
       } else {
         final StringBuffer buf = StringBuffer()
