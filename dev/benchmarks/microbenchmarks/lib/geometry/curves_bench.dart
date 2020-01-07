@@ -9,11 +9,9 @@ import '../common.dart';
 
 const int _kNumIters = 10000;
 
-void main() {
-  assert(false, "Don't run benchmarks in checked mode! Use 'flutter run --release'.");
+void _testCurve(Curve curve, {String name, String description, BenchmarkResultPrinter printer}) {
   final Stopwatch watch = Stopwatch();
-  print('Cubic animation transform benchmark...');
-  const Cubic curve = Cubic(0.0, 0.25, 0.5, 1.0);
+  print('$description benchmark...');
   watch.start();
   for (int i = 0; i < _kNumIters; i += 1) {
     final double t = i / _kNumIters.toDouble();
@@ -21,15 +19,24 @@ void main() {
   }
   watch.stop();
 
-  final BenchmarkResultPrinter printer = BenchmarkResultPrinter();
   printer.addResult(
-    description: 'Cubic animation transform',
+    description: description,
     value: watch.elapsedMicroseconds / _kNumIters,
     unit: 'µs per iteration',
+    name: name,
+  );
+}
+
+void main() {
+  assert(false, "Don't run benchmarks in checked mode! Use 'flutter run --release'.");
+  final BenchmarkResultPrinter printer = BenchmarkResultPrinter();
+  _testCurve(
+    const Cubic(0.0, 0.25, 0.5, 1.0),
     name: 'cubic_animation_transform_iteration',
+    description: 'Cubic animation transform',
+    printer: printer,
   );
 
-  print('CatmullRomCurve animation transform benchmark...');
   final CatmullRomCurve catmullRomCurve = CatmullRomCurve(const <Offset>[
     Offset(0.09, 0.99),
     Offset(0.21, 0.01),
@@ -42,18 +49,12 @@ void main() {
     Offset(0.78, 0.98),
     Offset(0.88, -0.00),
   ], tension: 0.00);
-  watch.start();
-  for (int i = 0; i < _kNumIters; i += 1) {
-    final double t = i / _kNumIters.toDouble();
-    catmullRomCurve.transform(t);
-  }
-  watch.stop();
-
-  printer.addResult(
-    description: 'CatmullRomCurve animation transform',
-    value: watch.elapsedMicroseconds / _kNumIters,
-    unit: 'µs per iteration',
+  _testCurve(
+    catmullRomCurve,
     name: 'catmullrom_transform_iteration',
+    description: 'CatmullRomCurve animation transform',
+    printer: printer,
   );
+
   printer.printToStdout();
 }
