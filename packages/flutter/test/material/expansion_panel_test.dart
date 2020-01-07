@@ -5,7 +5,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-
 class SimpleExpansionPanelListTestWidget extends StatefulWidget {
   const SimpleExpansionPanelListTestWidget({
     Key key,
@@ -19,7 +18,7 @@ class SimpleExpansionPanelListTestWidget extends StatefulWidget {
   final Key secondPanelKey;
   final bool canTapOnHeader;
 
-  /// If null the below default is applied
+  /// If null, the default [ExpansionPanelList]'s expanded header padding value is applied via [defaultExpandedHeaderPadding]
   final EdgeInsets expandedHeaderPadding;
 
   /// Mirrors the default expanded header padding as its source constants are private
@@ -1275,8 +1274,8 @@ void main() {
       const MaterialApp(
         home: SingleChildScrollView(
           child: SimpleExpansionPanelListTestWidget(
-              firstPanelKey: firstPanelKey,
-              canTapOnHeader: true
+            firstPanelKey: firstPanelKey,
+            canTapOnHeader: true
           ),
         ),
       ),
