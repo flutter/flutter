@@ -20,6 +20,7 @@ golden_dir = os.path.join(buildroot_dir, 'flutter', 'testing', 'resources')
 fonts_dir = os.path.join(buildroot_dir, 'flutter', 'third_party', 'txt', 'third_party', 'fonts')
 roboto_font_path = os.path.join(fonts_dir, 'Roboto-Regular.ttf')
 dart_tests_dir = os.path.join(buildroot_dir, 'flutter', 'testing', 'dart',)
+font_subset_dir = os.path.join(buildroot_dir, 'flutter', 'tools', 'font-subset')
 
 fml_unittests_filter = '--gtest_filter=-*TimeSensitiveTest*:*GpuThreadMerger*'
 
@@ -326,7 +327,7 @@ def main():
   args = parser.parse_args()
 
   if args.type == 'all':
-    types = ['engine', 'dart', 'benchmarks', 'java']
+    types = ['engine', 'dart', 'benchmarks', 'java', 'font-subset']
   else:
     types = args.type.split(',')
 
@@ -354,6 +355,9 @@ def main():
   # https://github.com/flutter/flutter/issues/36300
   if 'benchmarks' in types and not IsWindows():
     RunEngineBenchmarks(build_dir, engine_filter)
+
+  if 'engine' in types or 'font-subset' in types:
+    RunCmd(['python', 'test.py'], cwd=font_subset_dir)
 
 
 if __name__ == '__main__':
