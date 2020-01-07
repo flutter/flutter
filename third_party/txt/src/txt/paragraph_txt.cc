@@ -1753,8 +1753,7 @@ std::vector<Paragraph::TextBox> ParagraphTxt::GetRectsForRange(
     } else if (rect_height_style == RectHeightStyle::kMax) {
       for (const Paragraph::TextBox& box : kv.second.boxes) {
         boxes.emplace_back(
-            SkRect::MakeLTRB(box.rect.fLeft,
-                             line.baseline - line.unscaled_ascent,
+            SkRect::MakeLTRB(box.rect.fLeft, line.baseline - line.ascent,
                              box.rect.fRight, line.baseline + line.descent),
             box.direction);
       }

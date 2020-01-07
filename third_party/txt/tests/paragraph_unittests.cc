@@ -4461,7 +4461,7 @@ TEST_F(ParagraphTest, LongWordParagraph) {
   ASSERT_TRUE(Snapshot());
 }
 
-TEST_F(ParagraphTest, KernScaleParagraph) {
+TEST_F(ParagraphTest, LINUX_ONLY(KernScaleParagraph)) {
   float scale = 3.0f;
 
   txt::ParagraphStyle paragraph_style;
@@ -5253,7 +5253,7 @@ TEST_F(ParagraphTest, LINUX_ONLY(StrutParagraph1)) {
   }
   EXPECT_EQ(boxes.size(), 1ull);
   EXPECT_FLOAT_EQ(boxes[0].rect.left(), 0);
-  EXPECT_NEAR(boxes[0].rect.top(), 34.5, 0.0001);
+  EXPECT_NEAR(boxes[0].rect.top(), 0, 0.0001);
   EXPECT_FLOAT_EQ(boxes[0].rect.right(), 50);
   EXPECT_FLOAT_EQ(boxes[0].rect.bottom(), 95);
 
@@ -5276,7 +5276,7 @@ TEST_F(ParagraphTest, LINUX_ONLY(StrutParagraph1)) {
   }
   EXPECT_EQ(boxes.size(), 1ull);
   EXPECT_FLOAT_EQ(boxes[0].rect.left(), 300);
-  EXPECT_NEAR(boxes[0].rect.top(), 34.5, 0.0001);
+  EXPECT_NEAR(boxes[0].rect.top(), 0, 0.0001);
   EXPECT_FLOAT_EQ(boxes[0].rect.right(), 500);
   EXPECT_FLOAT_EQ(boxes[0].rect.bottom(), 95);
 
@@ -5287,7 +5287,7 @@ TEST_F(ParagraphTest, LINUX_ONLY(StrutParagraph1)) {
   }
   EXPECT_EQ(boxes.size(), 1ull);
   EXPECT_FLOAT_EQ(boxes[0].rect.left(), 0);
-  EXPECT_NEAR(boxes[0].rect.top(), 224.5, 0.0001);
+  EXPECT_NEAR(boxes[0].rect.top(), 190, 0.0001);
   EXPECT_FLOAT_EQ(boxes[0].rect.right(), 100);
   EXPECT_FLOAT_EQ(boxes[0].rect.bottom(), 285);
 
@@ -5298,7 +5298,7 @@ TEST_F(ParagraphTest, LINUX_ONLY(StrutParagraph1)) {
   }
   EXPECT_EQ(boxes.size(), 1ull);
   EXPECT_FLOAT_EQ(boxes[0].rect.left(), 50);
-  EXPECT_FLOAT_EQ(boxes[0].rect.top(), 319.5);
+  EXPECT_FLOAT_EQ(boxes[0].rect.top(), 285);
   EXPECT_FLOAT_EQ(boxes[0].rect.right(), 300);
   EXPECT_FLOAT_EQ(boxes[0].rect.bottom(), 380);
 
@@ -5379,7 +5379,7 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(StrutParagraph2)) {
   }
   EXPECT_EQ(boxes.size(), 1ull);
   EXPECT_FLOAT_EQ(boxes[0].rect.left(), 0);
-  EXPECT_NEAR(boxes[0].rect.top(), 24, 0.0001);
+  EXPECT_NEAR(boxes[0].rect.top(), 0, 0.0001);
   EXPECT_FLOAT_EQ(boxes[0].rect.right(), 50);
   EXPECT_FLOAT_EQ(boxes[0].rect.bottom(), 80);
 
@@ -5401,7 +5401,7 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(StrutParagraph2)) {
   }
   EXPECT_EQ(boxes.size(), 1ull);
   EXPECT_FLOAT_EQ(boxes[0].rect.left(), 300);
-  EXPECT_NEAR(boxes[0].rect.top(), 24, 0.0001);
+  EXPECT_NEAR(boxes[0].rect.top(), 0, 0.0001);
   EXPECT_FLOAT_EQ(boxes[0].rect.right(), 500);
   EXPECT_FLOAT_EQ(boxes[0].rect.bottom(), 80);
 
@@ -5412,7 +5412,7 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(StrutParagraph2)) {
   }
   EXPECT_EQ(boxes.size(), 1ull);
   EXPECT_FLOAT_EQ(boxes[0].rect.left(), 0);
-  EXPECT_NEAR(boxes[0].rect.top(), 184, 0.0001);
+  EXPECT_NEAR(boxes[0].rect.top(), 160, 0.0001);
   EXPECT_FLOAT_EQ(boxes[0].rect.right(), 100);
   EXPECT_FLOAT_EQ(boxes[0].rect.bottom(), 240);
 
@@ -5423,7 +5423,7 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(StrutParagraph2)) {
   }
   EXPECT_EQ(boxes.size(), 1ull);
   EXPECT_FLOAT_EQ(boxes[0].rect.left(), 50);
-  EXPECT_FLOAT_EQ(boxes[0].rect.top(), 264);
+  EXPECT_FLOAT_EQ(boxes[0].rect.top(), 240);
   EXPECT_FLOAT_EQ(boxes[0].rect.right(), 300);
   EXPECT_FLOAT_EQ(boxes[0].rect.bottom(), 320);
 
@@ -5505,7 +5505,7 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(StrutParagraph3)) {
   }
   EXPECT_EQ(boxes.size(), 1ull);
   EXPECT_FLOAT_EQ(boxes[0].rect.left(), 0);
-  EXPECT_NEAR(boxes[0].rect.top(), 8, 0.0001);
+  EXPECT_NEAR(boxes[0].rect.top(), 0, 0.0001);
   EXPECT_FLOAT_EQ(boxes[0].rect.right(), 50);
   EXPECT_FLOAT_EQ(boxes[0].rect.bottom(), 60);
 
@@ -5527,7 +5527,7 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(StrutParagraph3)) {
   }
   EXPECT_EQ(boxes.size(), 1ull);
   EXPECT_FLOAT_EQ(boxes[0].rect.left(), 300);
-  EXPECT_NEAR(boxes[0].rect.top(), 8, 0.0001);
+  EXPECT_NEAR(boxes[0].rect.top(), 0, 0.0001);
   EXPECT_FLOAT_EQ(boxes[0].rect.right(), 500);
   EXPECT_FLOAT_EQ(boxes[0].rect.bottom(), 60);
 
@@ -5538,7 +5538,7 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(StrutParagraph3)) {
   }
   EXPECT_EQ(boxes.size(), 1ull);
   EXPECT_FLOAT_EQ(boxes[0].rect.left(), 0);
-  EXPECT_FLOAT_EQ(boxes[0].rect.top(), 128);
+  EXPECT_FLOAT_EQ(boxes[0].rect.top(), 120);
   EXPECT_FLOAT_EQ(boxes[0].rect.right(), 100);
   EXPECT_FLOAT_EQ(boxes[0].rect.bottom(), 180);
 
@@ -5549,7 +5549,7 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(StrutParagraph3)) {
   }
   EXPECT_EQ(boxes.size(), 1ull);
   EXPECT_FLOAT_EQ(boxes[0].rect.left(), 50);
-  EXPECT_FLOAT_EQ(boxes[0].rect.top(), 188);
+  EXPECT_FLOAT_EQ(boxes[0].rect.top(), 180);
   EXPECT_FLOAT_EQ(boxes[0].rect.right(), 300);
   EXPECT_FLOAT_EQ(boxes[0].rect.bottom(), 240);
 
@@ -5632,7 +5632,7 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(StrutForceParagraph)) {
   }
   EXPECT_EQ(boxes.size(), 1ull);
   EXPECT_FLOAT_EQ(boxes[0].rect.left(), 0);
-  EXPECT_NEAR(boxes[0].rect.top(), 22.5, 0.0001);
+  EXPECT_NEAR(boxes[0].rect.top(), 0, 0.0001);
   ;
   EXPECT_FLOAT_EQ(boxes[0].rect.right(), 50);
   EXPECT_FLOAT_EQ(boxes[0].rect.bottom(), 80);
@@ -5655,7 +5655,7 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(StrutForceParagraph)) {
   }
   EXPECT_EQ(boxes.size(), 1ull);
   EXPECT_FLOAT_EQ(boxes[0].rect.left(), 300);
-  EXPECT_NEAR(boxes[0].rect.top(), 22.5, 0.0001);
+  EXPECT_NEAR(boxes[0].rect.top(), 0, 0.0001);
   EXPECT_FLOAT_EQ(boxes[0].rect.right(), 500);
   EXPECT_FLOAT_EQ(boxes[0].rect.bottom(), 80);
 
@@ -5666,7 +5666,7 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(StrutForceParagraph)) {
   }
   EXPECT_EQ(boxes.size(), 1ull);
   EXPECT_FLOAT_EQ(boxes[0].rect.left(), 0);
-  EXPECT_NEAR(boxes[0].rect.top(), 182.5, 0.0001);
+  EXPECT_NEAR(boxes[0].rect.top(), 160, 0.0001);
   EXPECT_FLOAT_EQ(boxes[0].rect.right(), 100);
   EXPECT_FLOAT_EQ(boxes[0].rect.bottom(), 240);
 
@@ -5677,7 +5677,7 @@ TEST_F(ParagraphTest, DISABLE_ON_WINDOWS(StrutForceParagraph)) {
   }
   EXPECT_EQ(boxes.size(), 1ull);
   EXPECT_FLOAT_EQ(boxes[0].rect.left(), 50);
-  EXPECT_FLOAT_EQ(boxes[0].rect.top(), 262.5);
+  EXPECT_FLOAT_EQ(boxes[0].rect.top(), 240);
   EXPECT_FLOAT_EQ(boxes[0].rect.right(), 300);
   EXPECT_FLOAT_EQ(boxes[0].rect.bottom(), 320);
 
