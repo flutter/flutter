@@ -1023,36 +1023,21 @@ class DialogObserver extends NavigatorObserver {
 class _CustomDialogRoute<T> extends PopupRoute<T> {
   _CustomDialogRoute({
     @required Widget child,
-    bool barrierDismissible = true,
-    String barrierLabel,
-    Color barrierColor = Colors.black, // easier value to test against
-    Duration transitionDuration = const Duration(milliseconds: 100), // easier value to test against
-    RouteSettings settings,
-  }) : assert(barrierDismissible != null, barrierTween != null),
-       _child = child,
-       _barrierDismissible = barrierDismissible,
-       _barrierLabel = barrierLabel,
-       _barrierColor = barrierColor,
-       _transitionDuration = transitionDuration,
-       super(settings: settings);
+  }) : _child = child;
 
   final Widget _child;
 
   @override
-  bool get barrierDismissible => _barrierDismissible;
-  final bool _barrierDismissible;
+  bool get barrierDismissible => true;
 
   @override
-  String get barrierLabel => _barrierLabel;
-  final String _barrierLabel;
+  String get barrierLabel => null;
 
   @override
-  Color get barrierColor => _barrierColor;
-  final Color _barrierColor;
+  Color get barrierColor => Colors.black; // easier value to test against
 
   @override
-  Duration get transitionDuration => _transitionDuration;
-  final Duration _transitionDuration;
+  Duration get transitionDuration => const Duration(milliseconds: 100); // easier value to test against
 
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
@@ -1067,42 +1052,28 @@ class _CustomDialogRoute<T> extends PopupRoute<T> {
 class _DialogRouteWithCustomBarrierTween<T> extends PopupRoute<T> {
   _DialogRouteWithCustomBarrierTween({
     @required Widget child,
-    bool barrierDismissible = true,
-    String barrierLabel,
-    Color barrierColor = Colors.black, // easier value to test against
     Animatable<double> barrierTween,
-    Duration transitionDuration = const Duration(milliseconds: 100), // easier value to test against
-    RouteSettings settings,
   }) : assert(barrierDismissible != null, barrierTween != null),
-       _child = child,
-       _barrierDismissible = barrierDismissible,
-       _barrierLabel = barrierLabel,
-       _barrierColor = barrierColor,
        _barrierTween = barrierTween,
-       _transitionDuration = transitionDuration,
-       super(settings: settings);
+       _child = child;
 
   final Widget _child;
 
   @override
-  bool get barrierDismissible => _barrierDismissible;
-  final bool _barrierDismissible;
+  bool get barrierDismissible => true;
 
   @override
-  String get barrierLabel => _barrierLabel;
-  final String _barrierLabel;
+  String get barrierLabel => null;
 
   @override
-  Color get barrierColor => _barrierColor;
-  final Color _barrierColor;
+  Color get barrierColor => Colors.black; // easier value to test against
 
   @override
   Animatable<double> get barrierTween => _barrierTween;
   final Animatable<double> _barrierTween;
 
   @override
-  Duration get transitionDuration => _transitionDuration;
-  final Duration _transitionDuration;
+  Duration get transitionDuration => const Duration(milliseconds: 100); // easier value to test against
 
   @override
   Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
