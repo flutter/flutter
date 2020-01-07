@@ -181,5 +181,5 @@ class StackFrame {
   }
 
   @override
-  String toString() => '$runtimeType{#$number, $packageScheme:$package/$packagePath:$line:$column, className: $className, method: $method}';
+  String toString() => '$runtimeType(#$number, $packageScheme:$package/$packagePath:$line:$column, className: $className, method: $method)';
 }
