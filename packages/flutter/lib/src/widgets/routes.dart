@@ -92,9 +92,17 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   final Completer<T> _transitionCompleter = Completer<T>();
 
   /// The duration the transition going forwards.
+  ///
+  /// See also:
+  ///
+  /// * [reverseTransitionDuration], which controls the duration of the
+  /// transition when it is in reverse.
   Duration get transitionDuration;
 
   /// The duration the transition going in reverse.
+  ///
+  /// By default, the reverse transition duration is set to the value of
+  /// the forwards [transitionDuration].
   Duration get reverseTransitionDuration => transitionDuration;
 
   /// Whether the route obscures previous routes when the transition is complete.

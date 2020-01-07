@@ -974,18 +974,16 @@ class ModifiedReverseTransitionDurationRoute<T> extends MaterialPageRoute<T> {
   ModifiedReverseTransitionDurationRoute({
     @required WidgetBuilder builder,
     RouteSettings settings,
-    Duration reverseTransitionDuration,
+    this.reverseTransitionDuration,
     bool fullscreenDialog = false,
-  }) : _reverseTransitionDuration = reverseTransitionDuration,
-       super(
+  }) : super(
          builder: builder,
          settings: settings,
          fullscreenDialog: fullscreenDialog,
        );
 
   @override
-  Duration get reverseTransitionDuration => _reverseTransitionDuration;
-  final Duration _reverseTransitionDuration;
+  final Duration reverseTransitionDuration;
 }
 
 class MockPageRoute extends Mock implements PageRoute<dynamic> { }
