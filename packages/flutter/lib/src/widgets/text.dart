@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:ui' as ui show BoundaryLineHeightBehavior;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
 
@@ -283,6 +285,7 @@ class Text extends StatelessWidget {
     this.maxLines,
     this.semanticsLabel,
     this.textWidthBasis,
+    this.boundaryLineHeightBehavior,
   }) : assert(
          data != null,
          'A non-null String must be provided to a Text widget.',
@@ -314,6 +317,7 @@ class Text extends StatelessWidget {
     this.maxLines,
     this.semanticsLabel,
     this.textWidthBasis,
+    this.boundaryLineHeightBehavior,
   }) : assert(
          textSpan != null,
          'A non-null TextSpan must be provided to a Text.rich widget.',
@@ -416,6 +420,8 @@ class Text extends StatelessWidget {
   /// {@macro flutter.painting.textPainter.textWidthBasis}
   final TextWidthBasis textWidthBasis;
 
+  final ui.BoundaryLineHeightBehavior boundaryLineHeightBehavior;
+
   @override
   Widget build(BuildContext context) {
     final DefaultTextStyle defaultTextStyle = DefaultTextStyle.of(context);
@@ -434,6 +440,7 @@ class Text extends StatelessWidget {
       maxLines: maxLines ?? defaultTextStyle.maxLines,
       strutStyle: strutStyle,
       textWidthBasis: textWidthBasis ?? defaultTextStyle.textWidthBasis,
+      boundaryLineHeightBehavior: boundaryLineHeightBehavior,
       text: TextSpan(
         style: effectiveTextStyle,
         text: data,
