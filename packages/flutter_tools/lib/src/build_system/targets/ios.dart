@@ -59,7 +59,7 @@ abstract class AotAssemblyBase extends Target {
       // If we're building multiple iOS archs the binaries need to be lipo'd
       // together.
       final List<Future<int>> pending = <Future<int>>[];
-      for (DarwinArch iosArch in iosArchs) {
+      for (final DarwinArch iosArch in iosArchs) {
         pending.add(snapshotter.build(
           platform: targetPlatform,
           buildMode: buildMode,

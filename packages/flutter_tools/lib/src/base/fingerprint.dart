@@ -87,7 +87,7 @@ class Fingerprinter {
   List<String> _getPaths() {
     final Set<String> paths = <String>{
       ..._paths,
-      for (String depfilePath in _depfilePaths)
+      for (final String depfilePath in _depfilePaths)
         ...readDepfile(depfilePath),
     };
     final FingerprintPathFilter filter = _pathFilter ?? (String path) => true;
@@ -108,7 +108,7 @@ class Fingerprint {
     }
 
     _checksums = <String, String>{};
-    for (File file in files) {
+    for (final File file in files) {
       final List<int> bytes = file.readAsBytesSync();
       _checksums[file.path] = md5.convert(bytes).toString();
     }

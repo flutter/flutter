@@ -147,11 +147,11 @@ final RegExp _grandfatheredDeprecation = RegExp(r' // ignore: flutter_deprecatio
 
 Future<void> verifyDeprecations(String workingDirectory, { int minimumMatches = 2000 }) async {
   final List<String> errors = <String>[];
-  for (File file in _allFiles(workingDirectory, 'dart', minimumMatches: minimumMatches)) {
+  for (final File file in _allFiles(workingDirectory, 'dart', minimumMatches: minimumMatches)) {
     int lineNumber = 0;
     final List<String> lines = file.readAsLinesSync();
     final List<int> linesWithDeprecations = <int>[];
-    for (String line in lines) {
+    for (final String line in lines) {
       if (line.contains(_findDeprecationPattern) &&
           !line.endsWith(_ignoreDeprecation) &&
           !line.contains(_grandfatheredDeprecation)) {
@@ -239,7 +239,7 @@ Future<void> _verifyNoMissingLicenseForExtension(String workingDirectory, String
   assert(!license.endsWith('\n'));
   final String licensePattern = license + '\n' + (trailingBlank ? '\n' : '');
   final List<String> errors = <String>[];
-  for (File file in _allFiles(workingDirectory, extension, minimumMatches: minimumMatches)) {
+  for (final File file in _allFiles(workingDirectory, extension, minimumMatches: minimumMatches)) {
     final String contents = file.readAsStringSync().replaceAll('\r\n', '\n');
     if (contents.isEmpty)
       continue; // let's not go down the /bin/true rabbit hole
@@ -270,8 +270,8 @@ Future<void> verifyNoTestImports(String workingDirectory) async {
   final List<String> errors = <String>[];
   assert("// foo\nimport 'binding_test.dart' as binding;\n'".contains(_testImportPattern));
   final List<File> dartFiles = _allFiles(path.join(workingDirectory, 'packages'), 'dart', minimumMatches: 1500).toList();
-  for (File file in dartFiles) {
-    for (String line in file.readAsLinesSync()) {
+  for (final File file in dartFiles) {
+    for (final String line in file.readAsLinesSync()) {
       final Match match = _testImportPattern.firstMatch(line);
       if (match != null && !_exemptTestImports.contains(match.group(2)))
         errors.add(file.path);
@@ -365,7 +365,7 @@ Future<void> verifyGeneratedPluginRegistrants(String flutterRoot) async {
 
   final Map<String, List<File>> packageToRegistrants = <String, List<File>>{};
 
-  for (File file in flutterRootDir.listSync(recursive: true).whereType<File>().where(_isGeneratedPluginRegistrant)) {
+  for (final File file in flutterRootDir.listSync(recursive: true).whereType<File>().where(_isGeneratedPluginRegistrant)) {
     final String package = _getPackageFor(file, flutterRootDir);
     final List<File> registrants = packageToRegistrants.putIfAbsent(package, () => <File>[]);
     registrants.add(file);
@@ -373,16 +373,16 @@ Future<void> verifyGeneratedPluginRegistrants(String flutterRoot) async {
 
   final Set<String> outOfDate = <String>{};
 
-  for (String package in packageToRegistrants.keys) {
+  for (final String package in packageToRegistrants.keys) {
     final Map<File, String> fileToContent = <File, String>{};
-    for (File f in packageToRegistrants[package]) {
+    for (final File f in packageToRegistrants[package]) {
       fileToContent[f] = f.readAsStringSync();
     }
     await runCommand(flutter, <String>['inject-plugins'],
       workingDirectory: package,
       outputMode: OutputMode.discard,
     );
-    for (File registrant in fileToContent.keys) {
+    for (final File registrant in fileToContent.keys) {
       if (registrant.readAsStringSync() != fileToContent[registrant]) {
         outOfDate.add(registrant.path);
       }
@@ -422,20 +422,20 @@ Future<void> verifyNoBadImportsInFlutter(String workingDirectory) async {
   }
   // Verify that the imports are well-ordered.
   final Map<String, Set<String>> dependencyMap = <String, Set<String>>{};
-  for (String directory in directories) {
+  for (final String directory in directories) {
     dependencyMap[directory] = _findFlutterDependencies(path.join(srcPath, directory), errors, checkForMeta: directory != 'foundation');
   }
   assert(dependencyMap['material'].contains('widgets') &&
          dependencyMap['widgets'].contains('rendering') &&
          dependencyMap['rendering'].contains('painting')); // to make sure we're convinced _findFlutterDependencies is finding some
-  for (String package in dependencyMap.keys) {
+  for (final String package in dependencyMap.keys) {
     if (dependencyMap[package].contains(package)) {
       errors.add(
         'One of the files in the $yellow$package$reset package imports that package recursively.'
       );
     }
   }
-  for (String package in dependencyMap.keys) {
+  for (final String package in dependencyMap.keys) {
     final List<String> loop = _deepSearch<String>(dependencyMap, package);
     if (loop != null) {
       errors.add(
@@ -459,7 +459,7 @@ Future<void> verifyNoBadImportsInFlutter(String workingDirectory) async {
 Future<void> verifyNoBadImportsInFlutterTools(String workingDirectory) async {
   final List<String> errors = <String>[];
   final List<File> files = _allFiles(path.join(workingDirectory, 'packages', 'flutter_tools', 'lib'), 'dart', minimumMatches: 200).toList();
-  for (File file in files) {
+  for (final File file in files) {
     if (file.readAsStringSync().contains('package:flutter_tools/')) {
       errors.add('$yellow${file.path}$reset imports flutter_tools.');
     }
@@ -535,7 +535,7 @@ Future<void> verifyNoTrailingSpaces(String workingDirectory, { int minimumMatche
     .where((File file) => path.extension(file.path) != '.jar')
     .toList();
   final List<String> problems = <String>[];
-  for (File file in files) {
+  for (final File file in files) {
     final List<String> lines = file.readAsLinesSync();
     for (int index = 0; index < lines.length; index += 1) {
       if (lines[index].endsWith(' ')) {
@@ -1004,7 +1004,7 @@ Future<void> verifyNoBinaries(String workingDirectory, { Set<Hash256> grandfathe
       .map<File>((String filename) => File(path.join(workingDirectory, filename)))
       .toList();
     final List<String> problems = <String>[];
-    for (File file in files) {
+    for (final File file in files) {
       final Uint8List bytes = file.readAsBytesSync();
       try {
         utf8.decode(bytes);
@@ -1156,7 +1156,7 @@ Set<String> _findFlutterDependencies(String srcPath, List<String> errors, { bool
   return _allFiles(srcPath, 'dart', minimumMatches: 1)
     .map<Set<String>>((File file) {
       final Set<String> result = <String>{};
-      for (String line in file.readAsLinesSync()) {
+      for (final String line in file.readAsLinesSync()) {
         Match match = _importPattern.firstMatch(line);
         if (match != null)
           result.add(match.group(2));
@@ -1180,7 +1180,7 @@ Set<String> _findFlutterDependencies(String srcPath, List<String> errors, { bool
 }
 
 List<T> _deepSearch<T>(Map<T, Set<T>> map, T start, [ Set<T> seen ]) {
-  for (T key in map[start]) {
+  for (final T key in map[start]) {
     if (key == start)
       continue; // we catch these separately
     if (seen != null && seen.contains(key))

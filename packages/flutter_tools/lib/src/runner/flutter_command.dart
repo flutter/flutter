@@ -445,7 +445,7 @@ abstract class FlutterCommand extends Command<void> {
             : null;
     if (argParser.options.containsKey(FlutterOptions.kEnableExperiment) &&
         argResults[FlutterOptions.kEnableExperiment] != null) {
-      for (String expFlag in stringsArg(FlutterOptions.kEnableExperiment)) {
+      for (final String expFlag in stringsArg(FlutterOptions.kEnableExperiment)) {
         final String flag = '--enable-experiment=' + expFlag;
         if (extraFrontEndOptions != null) {
           extraFrontEndOptions += ',' + flag;
@@ -743,7 +743,7 @@ mixin DeviceBasedDevelopmentArtifacts on FlutterCommand {
     final Set<DevelopmentArtifact> artifacts = <DevelopmentArtifact>{
       DevelopmentArtifact.universal,
     };
-    for (Device device in devices) {
+    for (final Device device in devices) {
       final TargetPlatform targetPlatform = await device.targetPlatform;
       final DevelopmentArtifact developmentArtifact = _artifactFromTargetPlatform(targetPlatform);
       if (developmentArtifact != null) {

@@ -274,7 +274,7 @@ class TestAsyncUtils {
         ErrorSummary('Asynchronous call to guarded function leaked.'),
         ErrorHint('You must use "await" with all Future-returning test APIs.')
       ];
-      for (_AsyncScope scope in _scopeStack) {
+      for (final _AsyncScope scope in _scopeStack) {
         final _StackEntry guarder = _findResponsibleMethod(scope.creationStack, 'guard', information);
         if (guarder != null) {
           information.add(ErrorDescription(

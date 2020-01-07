@@ -251,7 +251,7 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   void resolve(GestureDisposition disposition) {
     final List<GestureArenaEntry> localEntries = List<GestureArenaEntry>.from(_entries.values);
     _entries.clear();
-    for (GestureArenaEntry entry in localEntries)
+    for (final GestureArenaEntry entry in localEntries)
       entry.resolve(disposition);
   }
 
@@ -270,7 +270,7 @@ abstract class OneSequenceGestureRecognizer extends GestureRecognizer {
   @override
   void dispose() {
     resolve(GestureDisposition.rejected);
-    for (int pointer in _trackedPointers)
+    for (final int pointer in _trackedPointers)
       GestureBinding.instance.pointerRouter.removeRoute(pointer, handleEvent);
     _trackedPointers.clear();
     assert(_entries.isEmpty);

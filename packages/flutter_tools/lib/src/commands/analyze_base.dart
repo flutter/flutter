@@ -86,8 +86,8 @@ class PackageDependency {
   bool get hasConflict => values.length > 1;
   bool get hasConflictAffectingFlutterRepo {
     assert(globals.fs.path.isAbsolute(Cache.flutterRoot));
-    for (List<String> targetSources in values.values) {
-      for (String source in targetSources) {
+    for (final List<String> targetSources in values.values) {
+      for (final String source in targetSources) {
         assert(globals.fs.path.isAbsolute(source));
         if (globals.fs.path.isWithin(Cache.flutterRoot, source)) {
           return true;
@@ -100,11 +100,11 @@ class PackageDependency {
     assert(hasConflict);
     final List<String> targets = values.keys.toList();
     targets.sort((String a, String b) => values[b].length.compareTo(values[a].length));
-    for (String target in targets) {
+    for (final String target in targets) {
       final int count = values[target].length;
       result.writeln('  $count ${count == 1 ? 'source wants' : 'sources want'} "$target":');
       bool canonical = false;
-      for (String source in values[target]) {
+      for (final String source in values[target]) {
         result.writeln('    $source');
         if (source == canonicalSource) {
           canonical = true;
@@ -140,7 +140,7 @@ class PackageDependencyTracker {
         .readAsStringSync()
         .split('\n')
         .where((String line) => !line.startsWith(RegExp(r'^ *#')));
-      for (String line in lines) {
+      for (final String line in lines) {
         final int colon = line.indexOf(':');
         if (colon > 0) {
           final String packageName = line.substring(0, colon);
@@ -165,7 +165,7 @@ class PackageDependencyTracker {
   }
 
   void checkForConflictingDependencies(Iterable<Directory> pubSpecDirectories, PackageDependencyTracker dependencies) {
-    for (Directory directory in pubSpecDirectories) {
+    for (final Directory directory in pubSpecDirectories) {
       final String pubSpecYamlPath = globals.fs.path.join(directory.path, 'pubspec.yaml');
       final File pubSpecYamlFile = globals.fs.file(pubSpecYamlPath);
       if (pubSpecYamlFile.existsSync()) {
@@ -219,7 +219,7 @@ class PackageDependencyTracker {
   String generateConflictReport() {
     assert(hasConflicts);
     final StringBuffer result = StringBuffer();
-    for (String package in packages.keys.where((String package) => packages[package].hasConflict)) {
+    for (final String package in packages.keys.where((String package) => packages[package].hasConflict)) {
       result.writeln('Package "$package" has conflicts:');
       packages[package].describeConflict(result);
     }
@@ -228,7 +228,7 @@ class PackageDependencyTracker {
 
   Map<String, String> asPackageMap() {
     final Map<String, String> result = <String, String>{};
-    for (String package in packages.keys) {
+    for (final String package in packages.keys) {
       result[package] = packages[package].target;
     }
     return result;

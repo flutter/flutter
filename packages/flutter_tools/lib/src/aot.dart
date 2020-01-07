@@ -89,7 +89,7 @@ class AotBuilder {
       if (platform == TargetPlatform.ios) {
         // Determine which iOS architectures to build for.
         final Map<DarwinArch, String> iosBuilds = <DarwinArch, String>{};
-        for (DarwinArch arch in iosBuildArchs) {
+        for (final DarwinArch arch in iosBuildArchs) {
           iosBuilds[arch] = globals.fs.path.join(outputPath, getNameForDarwinArch(arch));
         }
 
@@ -224,7 +224,7 @@ class AotBuilder {
     ));
     status?.stop();
     if (!result.success) {
-      for (ExceptionMeasurement measurement in result.exceptions.values) {
+      for (final ExceptionMeasurement measurement in result.exceptions.values) {
         globals.printError('Target ${measurement.target} failed: ${measurement.exception}',
           stackTrace: measurement.fatal
             ? measurement.stackTrace

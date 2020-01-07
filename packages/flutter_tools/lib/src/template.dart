@@ -33,7 +33,7 @@ class Template {
 
     final List<FileSystemEntity> templateFiles = templateSource.listSync(recursive: true);
 
-    for (FileSystemEntity entity in templateFiles) {
+    for (final FileSystemEntity entity in templateFiles) {
       if (entity is! File) {
         // We are only interesting in template *file* URIs.
         continue;

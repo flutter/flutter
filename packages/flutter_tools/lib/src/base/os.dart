@@ -248,7 +248,7 @@ class _WindowsUtils extends OperatingSystemUtils {
   @override
   void zip(Directory data, File zipFile) {
     final Archive archive = Archive();
-    for (FileSystemEntity entity in data.listSync(recursive: true)) {
+    for (final FileSystemEntity entity in data.listSync(recursive: true)) {
       if (entity is! File) {
         continue;
       }
@@ -299,7 +299,7 @@ class _WindowsUtils extends OperatingSystemUtils {
   }
 
   void _unpackArchive(Archive archive, Directory targetDirectory) {
-    for (ArchiveFile archiveFile in archive.files) {
+    for (final ArchiveFile archiveFile in archive.files) {
       // The archive package doesn't correctly set isFile.
       if (!archiveFile.isFile || archiveFile.name.endsWith('/')) {
         continue;

@@ -285,7 +285,7 @@ class _TableElement extends RenderObjectElement {
   @override
   void update(Table newWidget) {
     final Map<LocalKey, List<Element>> oldKeyedRows = <LocalKey, List<Element>>{};
-    for (_TableElementRow row in _children) {
+    for (final _TableElementRow row in _children) {
       if (row.key != null) {
         oldKeyedRows[row.key] = row.children;
       }
@@ -293,7 +293,7 @@ class _TableElement extends RenderObjectElement {
     final Iterator<_TableElementRow> oldUnkeyedRows = _children.where((_TableElementRow row) => row.key == null).iterator;
     final List<_TableElementRow> newChildren = <_TableElementRow>[];
     final Set<List<Element>> taken = <List<Element>>{};
-    for (TableRow row in newWidget.children) {
+    for (final TableRow row in newWidget.children) {
       List<Element> oldChildren;
       if (row.key != null && oldKeyedRows.containsKey(row.key)) {
         oldChildren = oldKeyedRows[row.key];
@@ -310,7 +310,7 @@ class _TableElement extends RenderObjectElement {
     }
     while (oldUnkeyedRows.moveNext())
       updateChildren(oldUnkeyedRows.current.children, const <Widget>[], forgottenChildren: _forgottenChildren);
-    for (List<Element> oldChildren in oldKeyedRows.values.where((List<Element> list) => !taken.contains(list)))
+    for (final List<Element> oldChildren in oldKeyedRows.values.where((List<Element> list) => !taken.contains(list)))
       updateChildren(oldChildren, const <Widget>[], forgottenChildren: _forgottenChildren);
 
     _children = newChildren;
@@ -335,7 +335,7 @@ class _TableElement extends RenderObjectElement {
 
   @override
   void visitChildren(ElementVisitor visitor) {
-    for (Element child in _children.expand<Element>((_TableElementRow row) => row.children)) {
+    for (final Element child in _children.expand<Element>((_TableElementRow row) => row.children)) {
       if (!_forgottenChildren.contains(child))
         visitor(child);
     }

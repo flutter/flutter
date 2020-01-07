@@ -1229,7 +1229,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
         }
       }
 
-      for (int index in _childElements.keys.toList()) {
+      for (final int index in _childElements.keys.toList()) {
         final Key key = _childElements[index].widget.key;
         final int newIndex = key == null ? null : widget.delegate.findIndexByKey(key);
         if (newIndex != null && newIndex != index) {

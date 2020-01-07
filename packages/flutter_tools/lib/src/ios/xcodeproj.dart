@@ -106,7 +106,7 @@ void _updateGeneratedEnvironmentVariablesScript({
 
   localsBuffer.writeln('#!/bin/sh');
   localsBuffer.writeln('# This is a generated file; do not edit or check into version control.');
-  for (String line in xcodeBuildSettings) {
+  for (final String line in xcodeBuildSettings) {
     localsBuffer.writeln('export "$line"');
   }
 
@@ -372,7 +372,7 @@ List<String> environmentVariablesAsXcodeBuildSettings() {
 
 Map<String, String> parseXcodeBuildSettings(String showBuildSettingsOutput) {
   final Map<String, String> settings = <String, String>{};
-  for (Match match in showBuildSettingsOutput.split('\n').map<Match>(_settingExpr.firstMatch)) {
+  for (final Match match in showBuildSettingsOutput.split('\n').map<Match>(_settingExpr.firstMatch)) {
     if (match != null) {
       settings[match[1]] = match[2];
     }
@@ -402,7 +402,7 @@ class XcodeProjectInfo {
     final List<String> buildConfigurations = <String>[];
     final List<String> schemes = <String>[];
     List<String> collector;
-    for (String line in output.split('\n')) {
+    for (final String line in output.split('\n')) {
       if (line.isEmpty) {
         collector = null;
         continue;
@@ -454,7 +454,7 @@ class XcodeProjectInfo {
   /// regard to case.
   bool hasBuildConfiguratinForBuildMode(String buildMode) {
     buildMode = buildMode.toLowerCase();
-    for (String name in buildConfigurations) {
+    for (final String name in buildConfigurations) {
       if (name.toLowerCase() == buildMode) {
         return true;
       }

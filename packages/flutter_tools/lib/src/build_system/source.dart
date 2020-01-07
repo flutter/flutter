@@ -146,7 +146,7 @@ class SourceVisitor implements ResolvedFiles {
     if (!globals.fs.directory(filePath).existsSync()) {
       throw Exception('$filePath does not exist!');
     }
-    for (FileSystemEntity entity in globals.fs.directory(filePath).listSync()) {
+    for (final FileSystemEntity entity in globals.fs.directory(filePath).listSync()) {
       final String filename = globals.fs.path.basename(entity.path);
       if (wildcardSegments.isEmpty) {
         sources.add(globals.fs.file(entity.absolute));

@@ -26,7 +26,7 @@ class GenerateCommand extends FlutterCommand {
     final FlutterProject flutterProject = FlutterProject.current();
     final CodegenDaemon codegenDaemon = await codeGenerator.daemon(flutterProject);
     codegenDaemon.startBuild();
-    await for (CodegenStatus codegenStatus in codegenDaemon.buildResults) {
+    await for (final CodegenStatus codegenStatus in codegenDaemon.buildResults) {
       if (codegenStatus == CodegenStatus.Failed) {
         globals.printError('Code generation failed.');
         break;
@@ -44,7 +44,7 @@ class GenerateCommand extends FlutterCommand {
       return null;
     }
     final Directory errorCache = errorCacheParent.childDirectory('error_cache');
-    for (File errorFile in errorCache.listSync(recursive: true).whereType<File>()) {
+    for (final File errorFile in errorCache.listSync(recursive: true).whereType<File>()) {
       try {
         final List<Object> errorData = json.decode(errorFile.readAsStringSync()) as List<Object>;
         final List<Object> stackData = errorData[1] as List<Object>;

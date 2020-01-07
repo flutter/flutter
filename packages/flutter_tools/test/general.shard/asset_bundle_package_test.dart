@@ -38,7 +38,7 @@ flutter:
      assets:
 ''');
 
-      for (String asset in assets) {
+      for (final String asset in assets) {
         buffer.write('''
        - $asset
 ''');
@@ -75,8 +75,8 @@ $assetsSection
     final AssetBundle bundle = AssetBundleFactory.instance.createBundle();
     await bundle.build(manifestPath: 'pubspec.yaml');
 
-    for (String packageName in packages) {
-      for (String asset in assets) {
+    for (final String packageName in packages) {
+      for (final String asset in assets) {
         final String entryKey = Uri.encodeFull('packages/$packageName/$asset');
         expect(bundle.entries.containsKey(entryKey), true, reason: 'Cannot find key on bundle: $entryKey');
         expect(
@@ -93,7 +93,7 @@ $assetsSection
   }
 
   void writeAssets(String path, List<String> assets) {
-    for (String asset in assets) {
+    for (final String asset in assets) {
       final String fullPath = fixPath(globals.fs.path.join(path, asset));
 
       globals.fs.file(fullPath)

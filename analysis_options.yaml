@@ -141,7 +141,7 @@ linter:
     - prefer_equal_for_default_values
     # - prefer_expression_function_bodies # conflicts with https://github.com/flutter/flutter/wiki/Style-guide-for-Flutter-repo#consider-using--for-short-functions-and-methods
     - prefer_final_fields
-    # - prefer_final_in_for_each # not yet tested
+    - prefer_final_in_for_each
     - prefer_final_locals
     # - prefer_for_elements_to_map_fromIterable # not yet tested
     - prefer_foreach

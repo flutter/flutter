@@ -60,7 +60,7 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
     );
     client.startBuild();
     bool success = true;
-    await for (BuildResults results in client.buildResults) {
+    await for (final BuildResults results in client.buildResults) {
       final BuildResult result = results.results.firstWhere((BuildResult result) {
         return result.target == 'web';
       });
@@ -81,7 +81,7 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
       final Iterable<Directory> childDirectories = rootDirectory
         .listSync()
         .whereType<Directory>();
-      for (Directory childDirectory in childDirectories) {
+      for (final Directory childDirectory in childDirectories) {
         final String path = globals.fs.path.join(testOutputDir, 'packages',
             globals.fs.path.basename(childDirectory.path));
         copyDirectorySync(childDirectory.childDirectory('lib'), globals.fs.directory(path));
@@ -135,7 +135,7 @@ class MultirootFileBasedAssetReader extends core.FileBasedAssetReader {
   Stream<AssetId> findAssets(Glob glob, {String package}) async* {
     if (package == null || packageGraph.root.name == package) {
       final String generatedRoot = globals.fs.path.join(generatedDirectory.path, packageGraph.root.name);
-      await for (io.FileSystemEntity entity in glob.list(followLinks: true, root: packageGraph.root.path)) {
+      await for (final io.FileSystemEntity entity in glob.list(followLinks: true, root: packageGraph.root.path)) {
         if (entity is io.File && _isNotHidden(entity) && !globals.fs.path.isWithin(generatedRoot, entity.path)) {
           yield _fileToAssetId(entity, packageGraph.root);
         }
@@ -143,7 +143,7 @@ class MultirootFileBasedAssetReader extends core.FileBasedAssetReader {
       if (!globals.fs.isDirectorySync(generatedRoot)) {
         return;
       }
-      await for (io.FileSystemEntity entity in glob.list(followLinks: true, root: generatedRoot)) {
+      await for (final io.FileSystemEntity entity in glob.list(followLinks: true, root: generatedRoot)) {
         if (entity is io.File && _isNotHidden(entity)) {
           yield _fileToAssetId(entity, packageGraph.root, globals.fs.path.relative(generatedRoot), true);
         }

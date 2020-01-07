@@ -41,7 +41,7 @@ class UnpackWindows extends Target {
   Future<void> build(Environment environment) async {
     // This path needs to match the prefix in the rule below.
     final String basePath = globals.artifacts.getArtifactPath(Artifact.windowsDesktopPath);
-    for (File input in globals.fs.directory(basePath)
+    for (final File input in globals.fs.directory(basePath)
         .listSync(recursive: true)
         .whereType<File>()) {
       final String outputPath = globals.fs.path.join(

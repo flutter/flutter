@@ -1110,7 +1110,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     final Map<String, Locale> languageAndScriptLocales = HashMap<String, Locale>();
     final Map<String, Locale> languageLocales = HashMap<String, Locale>();
     final Map<String, Locale> countryLocales = HashMap<String, Locale>();
-    for (Locale locale in supportedLocales) {
+    for (final Locale locale in supportedLocales) {
       allSupportedLocales['${locale.languageCode}_${locale.scriptCode}_${locale.countryCode}'] ??= locale;
       languageAndScriptLocales['${locale.languageCode}_${locale.scriptCode}'] ??= locale;
       languageAndCountryLocales['${locale.languageCode}_${locale.countryCode}'] ??= locale;
@@ -1209,7 +1209,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     assert(() {
       final Set<Type> unsupportedTypes =
         _localizationsDelegates.map<Type>((LocalizationsDelegate<dynamic> delegate) => delegate.type).toSet();
-      for (LocalizationsDelegate<dynamic> delegate in _localizationsDelegates) {
+      for (final LocalizationsDelegate<dynamic> delegate in _localizationsDelegates) {
         if (!unsupportedTypes.contains(delegate.type))
           continue;
         if (delegate.isSupported(appLocale))
@@ -1230,7 +1230,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
         'Warning: This application\'s locale, $appLocale, is not supported by all of its\n'
         'localization delegates.'
       );
-      for (Type unsupportedType in unsupportedTypes) {
+      for (final Type unsupportedType in unsupportedTypes) {
         // Currently the Cupertino library only provides english localizations.
         // Remove this when https://github.com/flutter/flutter/issues/23847
         // is fixed.
