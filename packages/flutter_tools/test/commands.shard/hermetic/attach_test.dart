@@ -10,7 +10,7 @@ import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/net.dart';
-import 'package:flutter_tools/src/base/platform.dart';
+
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/attach.dart';
@@ -26,6 +26,7 @@ import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 import 'package:quiver/testing/async.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -41,7 +42,7 @@ void main() {
       Cache.disableLocking();
       logger = StreamLogger();
       testFileSystem = MemoryFileSystem(
-      style: platform.isWindows
+      style: globals.platform.isWindows
           ? FileSystemStyle.windows
           : FileSystemStyle.posix,
       );
@@ -164,7 +165,10 @@ void main() {
               if (message == '[stdout] Lost connection to device.') {
                 observatoryLogs.add(message);
               }
-              if (message.contains('To hot reload changes while running, press "r". To hot restart (and rebuild state), press "R".')) {
+              if (message.contains('Hot reload.')) {
+                observatoryLogs.add(message);
+              }
+              if (message.contains('Hot restart.')) {
                 observatoryLogs.add(message);
               }
             });
@@ -202,14 +206,16 @@ void main() {
           }));
         });
 
-        expect(observatoryLogs.length, 7);
+        expect(observatoryLogs.length, 9);
         expect(observatoryLogs[0], '[stdout] Waiting for a connection from Flutter on MockAndroidDevice...');
         expect(observatoryLogs[1], '[verbose] Observatory URL on device: http://127.0.0.1:1234');
         expect(observatoryLogs[2], '[stdout] Lost connection to device.');
-        expect(observatoryLogs[3].contains('To hot reload changes while running, press "r". To hot restart (and rebuild state), press "R"'), isTrue);
-        expect(observatoryLogs[4], '[verbose] Observatory URL on device: http://127.0.0.1:1235');
-        expect(observatoryLogs[5], '[stdout] Lost connection to device.');
-        expect(observatoryLogs[6].contains('To hot reload changes while running, press "r". To hot restart (and rebuild state), press "R"'), isTrue);
+        expect(observatoryLogs[3].contains('Hot reload.'), isTrue);
+        expect(observatoryLogs[4].contains('Hot restart.'), isTrue);
+        expect(observatoryLogs[5], '[verbose] Observatory URL on device: http://127.0.0.1:1235');
+        expect(observatoryLogs[6], '[stdout] Lost connection to device.');
+        expect(observatoryLogs[7].contains('Hot reload.'), isTrue);
+        expect(observatoryLogs[8].contains('Hot restart.'), isTrue);
 
         verify(portForwarder.forward(1234, hostPort: anyNamed('hostPort'))).called(1);
         verify(portForwarder.forward(1235, hostPort: anyNamed('hostPort'))).called(1);
@@ -403,11 +409,11 @@ void main() {
               'Observatory listening on http://127.0.0.1:$devicePort');
           return mockLogReader;
         });
-      final File foo = fs.file('lib/foo.dart')
+      final File foo = globals.fs.file('lib/foo.dart')
         ..createSync();
 
       // Delete the main.dart file to be sure that attach works without it.
-      fs.file(fs.path.join('lib', 'main.dart')).deleteSync();
+      globals.fs.file(globals.fs.path.join('lib', 'main.dart')).deleteSync();
 
       final AttachCommand command = AttachCommand(hotRunnerFactory: mockHotRunnerFactory);
       await createTestCommandRunner(command).run(<String>['attach', '-t', foo.path, '-v']);
@@ -456,10 +462,10 @@ void main() {
 
       testDeviceManager.addDevice(device);
 
-      final File foo = fs.file('lib/foo.dart')..createSync();
+      final File foo = globals.fs.file('lib/foo.dart')..createSync();
 
       // Delete the main.dart file to be sure that attach works without it.
-      fs.file(fs.path.join('lib', 'main.dart')).deleteSync();
+      globals.fs.file(globals.fs.path.join('lib', 'main.dart')).deleteSync();
 
       final AttachCommand command = AttachCommand(hotRunnerFactory: mockHotRunnerFactory);
       await createTestCommandRunner(command).run(<String>['attach', '-t', foo.path, '-v']);

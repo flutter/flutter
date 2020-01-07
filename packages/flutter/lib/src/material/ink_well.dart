@@ -737,12 +737,12 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
     if (_splashes != null) {
       final Set<InteractiveInkFeature> splashes = _splashes;
       _splashes = null;
-      for (InteractiveInkFeature splash in splashes)
+      for (final InteractiveInkFeature splash in splashes)
         splash.dispose();
       _currentSplash = null;
     }
     assert(_currentSplash == null);
-    for (_HighlightType highlight in _highlights.keys) {
+    for (final _HighlightType highlight in _highlights.keys) {
       _highlights[highlight]?.dispose();
       _highlights[highlight] = null;
     }
@@ -768,7 +768,7 @@ class _InkResponseState<T extends InkResponse> extends State<T> with AutomaticKe
   Widget build(BuildContext context) {
     assert(widget.debugCheckContext(context));
     super.build(context); // See AutomaticKeepAliveClientMixin.
-    for (_HighlightType type in _highlights.keys) {
+    for (final _HighlightType type in _highlights.keys) {
       _highlights[type]?.color = getHighlightColorForType(type);
     }
     _currentSplash?.color = widget.splashColor ?? Theme.of(context).splashColor;

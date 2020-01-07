@@ -13,6 +13,8 @@ import 'package:flutter_tools/src/ios/mac.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
+
 import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
@@ -37,10 +39,10 @@ void main() {
     final FakePlatform osx = FakePlatform.fromPlatform(const LocalPlatform())
       ..operatingSystem = 'macos';
     MockProcessManager mockProcessManager;
-    final String libimobiledevicePath = fs.path.join('bin', 'cache', 'artifacts', 'libimobiledevice');
-    final String ideviceIdPath = fs.path.join(libimobiledevicePath, 'idevice_id');
-    final String ideviceInfoPath = fs.path.join(libimobiledevicePath, 'ideviceinfo');
-    final String idevicescreenshotPath = fs.path.join(libimobiledevicePath, 'idevicescreenshot');
+    final String libimobiledevicePath = globals.fs.path.join('bin', 'cache', 'artifacts', 'libimobiledevice');
+    final String ideviceIdPath = globals.fs.path.join(libimobiledevicePath, 'idevice_id');
+    final String ideviceInfoPath = globals.fs.path.join(libimobiledevicePath, 'ideviceinfo');
+    final String idevicescreenshotPath = globals.fs.path.join(libimobiledevicePath, 'idevicescreenshot');
     MockArtifacts mockArtifacts;
     MockCache mockCache;
 
@@ -177,7 +179,7 @@ void main() {
     });
 
     group('screenshot', () {
-      final String outputPath = fs.path.join('some', 'test', 'path', 'image.png');
+      final String outputPath = globals.fs.path.join('some', 'test', 'path', 'image.png');
       MockProcessManager mockProcessManager;
       MockFile mockOutputFile;
 

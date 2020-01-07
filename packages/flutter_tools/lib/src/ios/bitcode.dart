@@ -5,23 +5,23 @@
 import '../artifacts.dart';
 import '../base/common.dart';
 import '../base/context.dart';
-import '../base/file_system.dart';
 import '../base/process.dart';
 import '../base/version.dart';
 import '../build_info.dart';
+import '../globals.dart' as globals;
 import '../ios/plist_parser.dart';
 import '../macos/xcode.dart';
 
 const bool kBitcodeEnabledDefault = false;
 
 Future<void> validateBitcode(BuildMode buildMode, TargetPlatform targetPlatform) async {
-  final Artifacts artifacts = Artifacts.instance;
-  final String flutterFrameworkPath = artifacts.getArtifactPath(
+  final Artifacts localArtifacts = globals.artifacts;
+  final String flutterFrameworkPath = localArtifacts.getArtifactPath(
     Artifact.flutterFramework,
     mode: buildMode,
     platform: targetPlatform,
   );
-  if (!fs.isDirectorySync(flutterFrameworkPath)) {
+  if (!globals.fs.isDirectorySync(flutterFrameworkPath)) {
     throwToolExit('Flutter.framework not found at $flutterFrameworkPath');
   }
   final Xcode xcode = context.get<Xcode>();
@@ -29,7 +29,7 @@ Future<void> validateBitcode(BuildMode buildMode, TargetPlatform targetPlatform)
   final RunResult clangResult = await xcode.clang(<String>['--version']);
   final String clangVersion = clangResult.stdout.split('\n').first;
   final String engineClangVersion = PlistParser.instance.getValueFromFile(
-    fs.path.join(flutterFrameworkPath, 'Info.plist'),
+    globals.fs.path.join(flutterFrameworkPath, 'Info.plist'),
     'ClangVersion',
   );
   final Version engineClangSemVer = _parseVersionFromClang(engineClangVersion);

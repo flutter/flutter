@@ -191,7 +191,7 @@ Future<String> getAndroidManifest(String apk) async {
  /// Checks that the classes are contained in the APK, throws otherwise.
 Future<void> checkApkContainsClasses(File apk, List<String> classes) async {
   final ApkExtractor extractor = ApkExtractor(apk);
-  for (String className in classes) {
+  for (final String className in classes) {
     if (!(await extractor.containsClass(className))) {
       throw Exception('APK doesn\'t contain class `$className`.');
     }

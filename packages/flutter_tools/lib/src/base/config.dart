@@ -3,16 +3,15 @@
 // found in the LICENSE file.
 
 import '../convert.dart';
-import '../globals.dart';
-import 'context.dart';
+import '../globals.dart' as globals;
 import 'file_system.dart';
 import 'logger.dart';
 import 'utils.dart';
 
 class Config {
   Config([File configFile, Logger localLogger]) {
-    final Logger loggerInstance = localLogger ?? logger;
-    _configFile = configFile ?? fs.file(fs.path.join(userHomePath(), '.flutter_settings'));
+    final Logger loggerInstance = localLogger ?? globals.logger;
+    _configFile = configFile ?? globals.fs.file(globals.fs.path.join(userHomePath(), '.flutter_settings'));
     if (_configFile.existsSync()) {
       try {
         _values = castStringKeyedMap(json.decode(_configFile.readAsStringSync()));
@@ -27,8 +26,6 @@ class Config {
       }
     }
   }
-
-  static Config get instance => context.get<Config>();
 
   File _configFile;
   String get configPath => _configFile.path;

@@ -105,7 +105,7 @@ class FakeCommand {
       if (environment == null) {
         return false;
       }
-      for (String key in environment.keys) {
+      for (final String key in environment.keys) {
         if (environment[key] != this.environment[key]) {
           return false;
         }

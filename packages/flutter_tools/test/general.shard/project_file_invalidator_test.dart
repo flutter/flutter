@@ -4,8 +4,9 @@
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/run_hot.dart';
+
+import 'package:platform/platform.dart';
 
 import '../src/common.dart';
 
@@ -13,7 +14,7 @@ import '../src/common.dart';
 final DateTime inFuture = DateTime.now().add(const Duration(days: 100));
 
 void main() {
-  for (bool asyncScanning in <bool>[true, false]) {
+  for (final bool asyncScanning in <bool>[true, false]) {
     testWithoutContext('No last compile, asyncScanning: $asyncScanning', () async {
       final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(
         fileSystem: MemoryFileSystem(),
