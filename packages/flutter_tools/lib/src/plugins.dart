@@ -310,21 +310,35 @@ List<Plugin> findPlugins(FlutterProject project) {
   return plugins;
 }
 
-/// Writes the .flutter-plugins and .flutter-plugins-dependencies files based on the list of plugins.
-/// If there aren't any plugins, then the files aren't written to disk.
+/// Writes the .flutter-plugins and .flutter-plugins-dependencies files based on the list of plugins for
+/// a given [PlatformProject]. If there aren't any plugins, then the files aren't written to disk.
 ///
 /// Finally, returns [true] if .flutter-plugins or .flutter-plugins-dependencies have changed,
 /// otherwise returns [false].
-bool _writeFlutterPluginsList(FlutterProject project, List<Plugin> plugins) {
+bool _writeFlutterPlatformPluginsList(
+  PlatformProject project,
+  List<Plugin> plugins
+) {
+  final Iterable<Plugin> platformPlugins = plugins.where((Plugin p) {
+    return p.platforms.containsKey(project.pluginConfigKey);
+  });
+  return _writeFlutterPluginsListAndDependencyGraph(
+    platformPlugins,
+    project.platformPluginsFile,
+    project.flutterPluginsDependenciesFile
+  );
+}
+
+bool _writeFlutterPluginsListAndDependencyGraph(Iterable<Plugin>platformPlugins, File pluginsFile, File dependenciesFile) {
   final List<dynamic> directAppDependencies = <dynamic>[];
   const String info = 'This is a generated file; do not edit or check into version control.';
   final StringBuffer flutterPluginsBuffer = StringBuffer('# $info\n');
 
   final Set<String> pluginNames = <String>{};
-  for (final Plugin plugin in plugins) {
+  for (Plugin plugin in platformPlugins) {
     pluginNames.add(plugin.name);
   }
-  for (final Plugin plugin in plugins) {
+  for (Plugin plugin in platformPlugins) {
     flutterPluginsBuffer.write('${plugin.name}=${escapePath(plugin.path)}\n');
     directAppDependencies.add(<String, dynamic>{
       'name': plugin.name,
@@ -332,10 +346,12 @@ bool _writeFlutterPluginsList(FlutterProject project, List<Plugin> plugins) {
       'dependencies': <String>[...plugin.dependencies.where(pluginNames.contains)],
     });
   }
-  final File pluginsFile = project.flutterPluginsFile;
   final String oldPluginFileContent = _readFileContent(pluginsFile);
   final String pluginFileContent = flutterPluginsBuffer.toString();
   if (pluginNames.isNotEmpty) {
+    if (!pluginsFile.existsSync()) {
+      pluginsFile.createSync(recursive: true);
+    }
     pluginsFile.writeAsStringSync(pluginFileContent, flush: true);
   } else {
     if (pluginsFile.existsSync()) {
@@ -343,7 +359,6 @@ bool _writeFlutterPluginsList(FlutterProject project, List<Plugin> plugins) {
     }
   }
 
-  final File dependenciesFile = project.flutterPluginsDependenciesFile;
   final String oldDependenciesFileContent = _readFileContent(dependenciesFile);
   final String dependenciesFileContent = json.encode(<String, dynamic>{
       '_info': '// $info',
@@ -783,14 +798,37 @@ Future<void> _writeWebPluginRegistrant(FlutterProject project, List<Plugin> plug
 /// Assumes `pub get` has been executed since last change to `pubspec.yaml`.
 void refreshPluginsList(FlutterProject project, {bool checkProjects = false}) {
   final List<Plugin> plugins = findPlugins(project);
-  final bool changed = _writeFlutterPluginsList(project, plugins);
-  if (changed) {
-    if (!checkProjects || project.ios.existsSync()) {
+
+  // Write legacy plugins list and dependency graph.
+  _writeFlutterPluginsListAndDependencyGraph(
+    plugins,
+    project.flutterPluginsFile,
+    project.flutterPluginsDependenciesFile
+  );
+
+  if (project.web.existsSync()) {
+    _writeFlutterPlatformPluginsList(project.web, plugins);
+  }
+  if (project.windows.existsSync()) {
+    _writeFlutterPlatformPluginsList(project.windows, plugins);
+  }
+  if (project.linux.existsSync()) {
+    _writeFlutterPlatformPluginsList(project.linux, plugins);
+  }
+  if (project.android.existsSync()) {
+    _writeFlutterPlatformPluginsList(project.android, plugins);
+  }
+  if (project.ios.existsSync()) {
+    final bool changed = _writeFlutterPlatformPluginsList(project.ios, plugins);
+    if (changed && !checkProjects) {
       cocoaPods.invalidatePodInstallOutput(project.ios);
     }
-    // TODO(stuartmorgan): Potentially add checkProjects once a decision has
-    // made about how to handle macOS in existing projects.
-    if (project.macos.existsSync()) {
+  }
+  if (project.macos.existsSync()) {
+    final bool changed =_writeFlutterPlatformPluginsList(project.macos, plugins);
+    if (changed) {
+      // TODO(stuartmorgan): Potentially add checkProjects once a decision has
+      // made about how to handle macOS in existing projects.
       cocoaPods.invalidatePodInstallOutput(project.macos);
     }
   }
