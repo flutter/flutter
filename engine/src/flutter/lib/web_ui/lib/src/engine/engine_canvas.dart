@@ -66,8 +66,12 @@ abstract class EngineCanvas {
 
   void drawParagraph(EngineParagraph paragraph, ui.Offset offset);
 
-  void drawVertices(ui.Vertices vertices, ui.BlendMode blendMode,
-      SurfacePaintData paint);
+  void drawVertices(
+      ui.Vertices vertices, ui.BlendMode blendMode, SurfacePaintData paint);
+
+  /// Extension of Canvas API to mark the end of a stream of painting commands
+  /// to enable re-use/dispose optimizations.
+  void endOfPaint();
 }
 
 /// Adds an [offset] transformation to a [transform] matrix and returns the

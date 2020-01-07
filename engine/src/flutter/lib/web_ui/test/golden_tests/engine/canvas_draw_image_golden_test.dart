@@ -19,8 +19,7 @@ void main() async {
 
   // Commit a recording canvas to a bitmap, and compare with the expected
   Future<void> _checkScreenshot(RecordingCanvas rc, String fileName,
-      { Rect region = const Rect.fromLTWH(0, 0, 500, 500) }) async {
-
+      {Rect region = const Rect.fromLTWH(0, 0, 500, 500)}) async {
     final EngineCanvas engineCanvas = BitmapCanvas(screenRect);
 
     rc.apply(engineCanvas);
@@ -47,35 +46,38 @@ void main() async {
 
   test('Paints image', () async {
     final RecordingCanvas rc =
-    RecordingCanvas(const Rect.fromLTRB(0, 0, 400, 300));
+        RecordingCanvas(const Rect.fromLTRB(0, 0, 400, 300));
     rc.save();
     rc.drawImage(createTestImage(), Offset(0, 0), new Paint());
+    rc.restore();
     await _checkScreenshot(rc, 'draw_image');
   });
 
   test('Paints image with transform', () async {
     final RecordingCanvas rc =
-    RecordingCanvas(const Rect.fromLTRB(0, 0, 400, 300));
+        RecordingCanvas(const Rect.fromLTRB(0, 0, 400, 300));
     rc.save();
     rc.translate(50.0, 100.0);
     rc.rotate(math.pi / 4.0);
     rc.drawImage(createTestImage(), Offset(0, 0), new Paint());
+    rc.restore();
     await _checkScreenshot(rc, 'draw_image_with_transform');
   });
 
   test('Paints image with transform and offset', () async {
     final RecordingCanvas rc =
-    RecordingCanvas(const Rect.fromLTRB(0, 0, 400, 300));
+        RecordingCanvas(const Rect.fromLTRB(0, 0, 400, 300));
     rc.save();
     rc.translate(50.0, 100.0);
     rc.rotate(math.pi / 4.0);
     rc.drawImage(createTestImage(), Offset(30, 20), new Paint());
+    rc.restore();
     await _checkScreenshot(rc, 'draw_image_with_transform_and_offset');
   });
 
   test('Paints image with transform using destination', () async {
     final RecordingCanvas rc =
-    RecordingCanvas(const Rect.fromLTRB(0, 0, 400, 300));
+        RecordingCanvas(const Rect.fromLTRB(0, 0, 400, 300));
     rc.save();
     rc.translate(50.0, 100.0);
     rc.rotate(math.pi / 4.0);
@@ -84,53 +86,233 @@ void main() async {
     double testHeight = testImage.height.toDouble();
     rc.drawImageRect(testImage, Rect.fromLTRB(0, 0, testWidth, testHeight),
         Rect.fromLTRB(100, 30, 2 * testWidth, 2 * testHeight), new Paint());
+    rc.restore();
     await _checkScreenshot(rc, 'draw_image_rect_with_transform');
   });
 
   test('Paints image with source and destination', () async {
     final RecordingCanvas rc =
-    RecordingCanvas(const Rect.fromLTRB(0, 0, 400, 300));
+        RecordingCanvas(const Rect.fromLTRB(0, 0, 400, 300));
     rc.save();
     Image testImage = createTestImage();
     double testWidth = testImage.width.toDouble();
     double testHeight = testImage.height.toDouble();
-    rc.drawImageRect(testImage, Rect.fromLTRB(testWidth / 2, 0, testWidth, testHeight),
-        Rect.fromLTRB(100, 30, 2 * testWidth, 2 * testHeight), new Paint());
+    rc.drawImageRect(
+        testImage,
+        Rect.fromLTRB(testWidth / 2, 0, testWidth, testHeight),
+        Rect.fromLTRB(100, 30, 2 * testWidth, 2 * testHeight),
+        new Paint());
+    rc.restore();
     await _checkScreenshot(rc, 'draw_image_rect_with_source');
   });
 
   test('Paints image with source and destination and round clip', () async {
     final RecordingCanvas rc =
-    RecordingCanvas(const Rect.fromLTRB(0, 0, 400, 300));
+        RecordingCanvas(const Rect.fromLTRB(0, 0, 400, 300));
     Image testImage = createTestImage();
     double testWidth = testImage.width.toDouble();
     double testHeight = testImage.height.toDouble();
     rc.save();
-    rc.clipRRect(RRect.fromLTRBR(100, 30, 2 * testWidth, 2 * testHeight, Radius.circular(16)));
-    rc.drawImageRect(testImage, Rect.fromLTRB(testWidth / 2, 0, testWidth, testHeight),
-        Rect.fromLTRB(100, 30, 2 * testWidth, 2 * testHeight), new Paint());
+    rc.clipRRect(RRect.fromLTRBR(
+        100, 30, 2 * testWidth, 2 * testHeight, Radius.circular(16)));
+    rc.drawImageRect(
+        testImage,
+        Rect.fromLTRB(testWidth / 2, 0, testWidth, testHeight),
+        Rect.fromLTRB(100, 30, 2 * testWidth, 2 * testHeight),
+        new Paint());
+    rc.restore();
     await _checkScreenshot(rc, 'draw_image_rect_with_source_and_clip');
   });
 
   test('Paints image with transform using source and destination', () async {
     final RecordingCanvas rc =
-    RecordingCanvas(const Rect.fromLTRB(0, 0, 400, 300));
+        RecordingCanvas(const Rect.fromLTRB(0, 0, 400, 300));
     rc.save();
     rc.translate(50.0, 100.0);
     rc.rotate(math.pi / 6.0);
     Image testImage = createTestImage();
     double testWidth = testImage.width.toDouble();
     double testHeight = testImage.height.toDouble();
-    rc.drawImageRect(testImage, Rect.fromLTRB(testWidth / 2, 0, testWidth, testHeight),
-        Rect.fromLTRB(100, 30, 2 * testWidth, 2 * testHeight), new Paint());
+    rc.drawImageRect(
+        testImage,
+        Rect.fromLTRB(testWidth / 2, 0, testWidth, testHeight),
+        Rect.fromLTRB(100, 30, 2 * testWidth, 2 * testHeight),
+        new Paint());
+    rc.restore();
     await _checkScreenshot(rc, 'draw_image_rect_with_transform_source');
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/44845
+  // Circle should draw on top of image not below.
+  test('Paints on top of image', () async {
+    final RecordingCanvas rc =
+        RecordingCanvas(const Rect.fromLTRB(0, 0, 400, 300));
+    rc.save();
+    Image testImage = createTestImage();
+    double testWidth = testImage.width.toDouble();
+    double testHeight = testImage.height.toDouble();
+    rc.drawImageRect(testImage, Rect.fromLTRB(0, 0, testWidth, testHeight),
+        Rect.fromLTRB(100, 30, 2 * testWidth, 2 * testHeight), new Paint());
+    rc.drawCircle(
+        Offset(100, 100),
+        50.0,
+        Paint()
+          ..strokeWidth = 3
+          ..color = Color.fromARGB(128, 0, 0, 0));
+    rc.restore();
+    await _checkScreenshot(rc, 'draw_circle_on_image');
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/44845
+  // Circle should below image not on top.
+  test('Paints below image', () async {
+    final RecordingCanvas rc =
+        RecordingCanvas(const Rect.fromLTRB(0, 0, 400, 300));
+    rc.save();
+    Image testImage = createTestImage();
+    double testWidth = testImage.width.toDouble();
+    double testHeight = testImage.height.toDouble();
+    rc.drawCircle(
+        Offset(100, 100),
+        50.0,
+        Paint()
+          ..strokeWidth = 3
+          ..color = Color.fromARGB(128, 0, 0, 0));
+    rc.drawImageRect(testImage, Rect.fromLTRB(0, 0, testWidth, testHeight),
+        Rect.fromLTRB(100, 30, 2 * testWidth, 2 * testHeight), new Paint());
+    rc.restore();
+    await _checkScreenshot(rc, 'draw_circle_below_image');
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/44845
+  // Circle should draw on top of image with clip rect.
+  test('Paints on top of image with clip rect', () async {
+    final RecordingCanvas rc =
+        RecordingCanvas(const Rect.fromLTRB(0, 0, 400, 300));
+    rc.save();
+    Image testImage = createTestImage();
+    double testWidth = testImage.width.toDouble();
+    double testHeight = testImage.height.toDouble();
+    rc.clipRect(Rect.fromLTRB(75, 75, 160, 160));
+    rc.drawImageRect(testImage, Rect.fromLTRB(0, 0, testWidth, testHeight),
+        Rect.fromLTRB(100, 30, 2 * testWidth, 2 * testHeight), new Paint());
+    rc.drawCircle(
+        Offset(100, 100),
+        50.0,
+        Paint()
+          ..strokeWidth = 3
+          ..color = Color.fromARGB(128, 0, 0, 0));
+    rc.restore();
+    await _checkScreenshot(rc, 'draw_circle_on_image_clip_rect');
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/44845
+  // Circle should draw on top of image with clip rect and transform.
+  test('Paints on top of image with clip rect with transform', () async {
+    final RecordingCanvas rc =
+        RecordingCanvas(const Rect.fromLTRB(0, 0, 400, 300));
+    rc.save();
+    Image testImage = createTestImage();
+    double testWidth = testImage.width.toDouble();
+    double testHeight = testImage.height.toDouble();
+    // Rotate around center of circle.
+    rc.translate(100, 100);
+    rc.rotate(math.pi / 4.0);
+    rc.translate(-100, -100);
+    rc.clipRect(Rect.fromLTRB(75, 75, 160, 160));
+    rc.drawImageRect(testImage, Rect.fromLTRB(0, 0, testWidth, testHeight),
+        Rect.fromLTRB(100, 30, 2 * testWidth, 2 * testHeight), new Paint());
+    rc.drawCircle(
+        Offset(100, 100),
+        50.0,
+        Paint()
+          ..strokeWidth = 3
+          ..color = Color.fromARGB(128, 0, 0, 0));
+    rc.restore();
+    await _checkScreenshot(rc, 'draw_circle_on_image_clip_rect_with_transform');
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/44845
+  // Circle should draw on top of image with stack of clip rect and transforms.
+  test('Paints on top of image with clip rect with stack', () async {
+    final RecordingCanvas rc =
+        RecordingCanvas(const Rect.fromLTRB(0, 0, 400, 300));
+    rc.save();
+    Image testImage = createTestImage();
+    double testWidth = testImage.width.toDouble();
+    double testHeight = testImage.height.toDouble();
+    // Rotate around center of circle.
+    rc.translate(100, 100);
+    rc.rotate(-math.pi / 4.0);
+    rc.save();
+    rc.translate(-100, -100);
+    rc.clipRect(Rect.fromLTRB(75, 75, 160, 160));
+    rc.drawImageRect(testImage, Rect.fromLTRB(0, 0, testWidth, testHeight),
+        Rect.fromLTRB(100, 30, 2 * testWidth, 2 * testHeight), new Paint());
+    rc.drawCircle(
+        Offset(100, 100),
+        50.0,
+        Paint()
+          ..strokeWidth = 3
+          ..color = Color.fromARGB(128, 0, 0, 0));
+    rc.restore();
+    rc.restore();
+    await _checkScreenshot(rc, 'draw_circle_on_image_clip_rect_with_stack');
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/44845
+  // Circle should draw on top of image with clip rrect.
+  test('Paints on top of image with clip rrect', () async {
+    final RecordingCanvas rc =
+        RecordingCanvas(const Rect.fromLTRB(0, 0, 400, 300));
+    rc.save();
+    Image testImage = createTestImage();
+    double testWidth = testImage.width.toDouble();
+    double testHeight = testImage.height.toDouble();
+    rc.clipRRect(RRect.fromLTRBR(75, 75, 160, 160, Radius.circular(5)));
+    rc.drawImageRect(testImage, Rect.fromLTRB(0, 0, testWidth, testHeight),
+        Rect.fromLTRB(100, 30, 2 * testWidth, 2 * testHeight), Paint());
+    rc.drawCircle(
+        Offset(100, 100),
+        50.0,
+        Paint()
+          ..strokeWidth = 3
+          ..color = Color.fromARGB(128, 0, 0, 0));
+    rc.restore();
+    await _checkScreenshot(rc, 'draw_circle_on_image_clip_rrect');
+  });
+
+  // Regression test for https://github.com/flutter/flutter/issues/44845
+  // Circle should draw on top of image with clip rrect.
+  test('Paints on top of image with clip path', () async {
+    final RecordingCanvas rc =
+        RecordingCanvas(const Rect.fromLTRB(0, 0, 400, 300));
+    rc.save();
+    Image testImage = createTestImage();
+    double testWidth = testImage.width.toDouble();
+    double testHeight = testImage.height.toDouble();
+    final Path path = Path();
+    // Triangle.
+    path.moveTo(118, 57);
+    path.lineTo(75, 160);
+    path.lineTo(160, 160);
+    rc.clipPath(path);
+    rc.drawImageRect(testImage, Rect.fromLTRB(0, 0, testWidth, testHeight),
+        Rect.fromLTRB(100, 30, 2 * testWidth, 2 * testHeight), Paint());
+    rc.drawCircle(
+        Offset(100, 100),
+        50.0,
+        Paint()
+          ..strokeWidth = 3
+          ..color = Color.fromARGB(128, 0, 0, 0));
+    rc.restore();
+    await _checkScreenshot(rc, 'draw_circle_on_image_clip_path');
   });
 }
 
-HtmlImage createTestImage() {
-  const int width = 100;
-  const int height = 50;
-  html.CanvasElement canvas = new html.CanvasElement(width: width, height: height);
+HtmlImage createTestImage({int width = 100, int height = 50}) {
+  html.CanvasElement canvas =
+      new html.CanvasElement(width: width, height: height);
   html.CanvasRenderingContext2D ctx = canvas.context2D;
   ctx.fillStyle = '#E04040';
   ctx.fillRect(0, 0, 33, 50);
@@ -145,4 +327,3 @@ HtmlImage createTestImage() {
   imageElement.src = js_util.callMethod(canvas, 'toDataURL', []);
   return HtmlImage(imageElement, width, height);
 }
-

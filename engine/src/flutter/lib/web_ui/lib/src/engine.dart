@@ -23,6 +23,7 @@ part 'engine/assets.dart';
 part 'engine/bitmap_canvas.dart';
 part 'engine/browser_detection.dart';
 part 'engine/browser_location.dart';
+part 'engine/canvas_pool.dart';
 part 'engine/color_filter.dart';
 part 'engine/compositor/canvas.dart';
 part 'engine/compositor/canvas_kit_canvas.dart';

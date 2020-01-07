@@ -5,7 +5,7 @@
 part of engine;
 
 /// A raw HTML canvas that is directly written to.
-class BitmapCanvas extends EngineCanvas with SaveStackTracking {
+class BitmapCanvas extends EngineCanvas {
   /// The rectangle positioned relative to the parent layer's coordinate
   /// system's origin, within which this canvas paints.
   ///
@@ -14,6 +14,14 @@ class BitmapCanvas extends EngineCanvas with SaveStackTracking {
   set bounds(ui.Rect newValue) {
     assert(newValue != null);
     _bounds = newValue;
+    final int newCanvasPositionX = _bounds.left.floor() - kPaddingPixels;
+    final int newCanvasPositionY = _bounds.top.floor() - kPaddingPixels;
+    if (_canvasPositionX != newCanvasPositionX ||
+        _canvasPositionY != newCanvasPositionY) {
+      _canvasPositionX = newCanvasPositionX;
+      _canvasPositionY = newCanvasPositionY;
+      _updateRootElementTransform();
+    }
   }
 
   ui.Rect _bounds;
@@ -25,8 +33,7 @@ class BitmapCanvas extends EngineCanvas with SaveStackTracking {
   @override
   final html.Element rootElement = html.Element.tag('flt-canvas');
 
-  html.CanvasElement _canvas;
-  html.CanvasRenderingContext2D _ctx;
+  final _CanvasPool _canvasPool;
 
   /// The size of the paint [bounds].
   ui.Size get size => _bounds.size;
@@ -43,22 +50,20 @@ class BitmapCanvas extends EngineCanvas with SaveStackTracking {
   ///
   /// These pixels are different from the logical CSS pixels. Here a pixel
   /// literally means 1 point with a RGBA color.
-  int get widthInBitmapPixels => _widthInBitmapPixels;
-  int _widthInBitmapPixels;
+  final int _widthInBitmapPixels;
 
   /// The number of pixels along the width of the bitmap that the canvas element
   /// renders into.
   ///
   /// These pixels are different from the logical CSS pixels. Here a pixel
   /// literally means 1 point with a RGBA color.
-  int get heightInBitmapPixels => _heightInBitmapPixels;
-  int _heightInBitmapPixels;
+  final int _heightInBitmapPixels;
 
   /// The number of pixels in the bitmap that the canvas element renders into.
   ///
   /// These pixels are different from the logical CSS pixels. Here a pixel
   /// literally means 1 point with a RGBA color.
-  int get bitmapPixelCount => widthInBitmapPixels * heightInBitmapPixels;
+  int get bitmapPixelCount => _widthInBitmapPixels * _heightInBitmapPixels;
 
   int _saveCount = 0;
 
@@ -66,11 +71,8 @@ class BitmapCanvas extends EngineCanvas with SaveStackTracking {
   /// was created.
   final double _devicePixelRatio = html.window.devicePixelRatio;
 
-  // Cached current filter, fill and stroke style to reduce updates to
-  // CanvasRenderingContext2D that are slow even when resetting to null.
-  String _prevFilter = 'none';
-  Object _prevFillStyle;
-  Object _prevStrokeStyle;
+  // Compensation for [_initializeViewport] snapping canvas position to 1 pixel.
+  int _canvasPositionX, _canvasPositionY;
 
   // Indicates the instructions following drawImage or drawParagraph that
   // a child element was created to paint.
@@ -89,51 +91,62 @@ class BitmapCanvas extends EngineCanvas with SaveStackTracking {
   /// This canvas can be reused by pictures with different paint bounds as long
   /// as the [Rect.size] of the bounds fully fit within the size used to
   /// initialize this canvas.
-  BitmapCanvas(this._bounds) : assert(_bounds != null) {
+  BitmapCanvas(this._bounds)
+      : assert(_bounds != null),
+        _widthInBitmapPixels = _widthToPhysical(_bounds.width),
+        _heightInBitmapPixels = _heightToPhysical(_bounds.height),
+        _canvasPool = _CanvasPool(_widthToPhysical(_bounds.width),
+            _heightToPhysical(_bounds.height)) {
     rootElement.style.position = 'absolute';
-
     // Adds one extra pixel to the requested size. This is to compensate for
     // _initializeViewport() snapping canvas position to 1 pixel, causing
     // painting to overflow by at most 1 pixel.
-
-    _widthInBitmapPixels = _widthToPhysical(_bounds.width);
-    _heightInBitmapPixels = _heightToPhysical(_bounds.height);
-
-    // Compute the final CSS canvas size given the actual pixel count we
-    // allocated. This is done for the following reasons:
-    //
-    // * To satisfy the invariant: pixel size = css size * device pixel ratio.
-    // * To make sure that when we scale the canvas by devicePixelRatio (see
-    //   _initializeViewport below) the pixels line up.
-    final double cssWidth = _widthInBitmapPixels / html.window.devicePixelRatio;
-    final double cssHeight =
-        _heightInBitmapPixels / html.window.devicePixelRatio;
-
-    _canvas = html.CanvasElement(
-      width: _widthInBitmapPixels,
-      height: _heightInBitmapPixels,
-    );
-    _canvas.style
-      ..position = 'absolute'
-      ..width = '${cssWidth}px'
-      ..height = '${cssHeight}px';
-    _ctx = _canvas.context2D;
-    rootElement.append(_canvas);
-    _initializeViewport();
+    _canvasPositionX = _bounds.left.floor() - kPaddingPixels;
+    _canvasPositionY = _bounds.top.floor() - kPaddingPixels;
+    _updateRootElementTransform();
+    _canvasPool.allocateCanvas(rootElement);
+    _setupInitialTransform();
   }
 
-  int _widthToPhysical(double width) {
+  void _updateRootElementTransform() {
+    // Flutter emits paint operations positioned relative to the parent layer's
+    // coordinate system. However, canvas' coordinate system's origin is always
+    // in the top-left corner of the canvas. We therefore need to inject an
+    // initial translation so the paint operations are positioned as expected.
+    //
+    // The flooring of the value is to ensure that canvas' top-left corner
+    // lands on the physical pixel. TODO: !This is not accurate if there are
+    // transforms higher up in the stack.
+    rootElement.style.transform =
+        'translate(${_canvasPositionX}px, ${_canvasPositionY}px)';
+  }
+
+  void _setupInitialTransform() {
+    final double canvasPositionCorrectionX = _bounds.left -
+        BitmapCanvas.kPaddingPixels -
+        _canvasPositionX.toDouble();
+    final double canvasPositionCorrectionY =
+        _bounds.top - BitmapCanvas.kPaddingPixels - _canvasPositionY.toDouble();
+    // This compensates for the translate on the `rootElement`.
+    _canvasPool.initialTransform = ui.Offset(
+      -_bounds.left + canvasPositionCorrectionX + BitmapCanvas.kPaddingPixels,
+      -_bounds.top + canvasPositionCorrectionY + BitmapCanvas.kPaddingPixels,
+    );
+  }
+
+  static int _widthToPhysical(double width) {
     final double boundsWidth = width + 1;
     return (boundsWidth * html.window.devicePixelRatio).ceil() +
         2 * kPaddingPixels;
   }
 
-  int _heightToPhysical(double height) {
+  static int _heightToPhysical(double height) {
     final double boundsHeight = height + 1;
     return (boundsHeight * html.window.devicePixelRatio).ceil() +
         2 * kPaddingPixels;
   }
 
+  // Used by picture to assess if canvas is large enough to reuse as is.
   bool doesFitBounds(ui.Rect newBounds) {
     assert(newBounds != null);
     return _widthInBitmapPixels >= _widthToPhysical(newBounds.width) &&
@@ -142,47 +155,20 @@ class BitmapCanvas extends EngineCanvas with SaveStackTracking {
 
   @override
   void dispose() {
-    super.dispose();
-    // Webkit has a threshold for the amount of canvas pixels an app can
-    // allocate. Even though our canvases are being garbage-collected as
-    // expected when we don't need them, Webkit keeps track of their sizes
-    // towards the threshold. Setting width and height to zero tricks Webkit
-    // into thinking that this canvas has a zero size so it doesn't count it
-    // towards the threshold.
-    if (browserEngine == BrowserEngine.webkit) {
-      _canvas.width = _canvas.height = 0;
-    }
+    _canvasPool.dispose();
   }
 
   /// Prepare to reuse this canvas by clearing it's current contents.
   @override
   void clear() {
-    super.clear();
+    _canvasPool.clear();
     final int len = _children.length;
     for (int i = 0; i < len; i++) {
       _children[i].remove();
     }
     _children.clear();
     _cachedLastStyle = null;
-    // Restore to the state where we have only applied the scaling.
-    if (_ctx != null) {
-      _ctx.restore();
-      _ctx.clearRect(0, 0, _widthInBitmapPixels, _heightInBitmapPixels);
-      try {
-        _ctx.font = '';
-      } catch (e) {
-        // Firefox may explode here:
-        // https://bugzilla.mozilla.org/show_bug.cgi?id=941146
-        if (!_isNsErrorFailureException(e)) {
-          rethrow;
-        }
-      }
-      _initializeViewport();
-    }
-    if (_canvas != null) {
-      _canvas.style.transformOrigin = '';
-      _canvas.style.transform = '';
-    }
+    _setupInitialTransform();
   }
 
   /// Checks whether this [BitmapCanvas] can still be recycled and reused.
@@ -197,128 +183,41 @@ class BitmapCanvas extends EngineCanvas with SaveStackTracking {
     return _devicePixelRatio == html.window.devicePixelRatio;
   }
 
-  /// Configures the canvas such that its coordinate system follows the scene's
-  /// coordinate system, and the pixel ratio is applied such that CSS pixels are
-  /// translated to bitmap pixels.
-  void _initializeViewport() {
-    // Save the canvas state with top-level transforms so we can undo
-    // any clips later when we reuse the canvas.
-    _ctx.save();
-
-    // We always start with identity transform because the surrounding transform
-    // is applied on the DOM elements.
-    _ctx.setTransform(1, 0, 0, 1, 0, 0);
-
-    // This scale makes sure that 1 CSS pixel is translated to the correct
-    // number of bitmap pixels.
-    _ctx.scale(html.window.devicePixelRatio, html.window.devicePixelRatio);
-
-    // Flutter emits paint operations positioned relative to the parent layer's
-    // coordinate system. However, canvas' coordinate system's origin is always
-    // in the top-left corner of the canvas. We therefore need to inject an
-    // initial translation so the paint operations are positioned as expected.
-
-    // The flooring of the value is to ensure that canvas' top-left corner
-    // lands on the physical pixel.
-    final int canvasPositionX = _bounds.left.floor() - kPaddingPixels;
-    final int canvasPositionY = _bounds.top.floor() - kPaddingPixels;
-    final double canvasPositionCorrectionX =
-        _bounds.left - kPaddingPixels - canvasPositionX.toDouble();
-    final double canvasPositionCorrectionY =
-        _bounds.top - kPaddingPixels - canvasPositionY.toDouble();
-
-    rootElement.style.transform =
-        'translate(${canvasPositionX}px, ${canvasPositionY}px)';
-
-    // This compensates for the translate on the `rootElement`.
-    translate(
-      -_bounds.left + canvasPositionCorrectionX + kPaddingPixels,
-      -_bounds.top + canvasPositionCorrectionY + kPaddingPixels,
-    );
+  /// Returns a data URI containing a representation of the image in this
+  /// canvas.
+  String toDataUrl() {
+    return _canvasPool.toDataUrl();
   }
-
-  /// The `<canvas>` element used by this bitmap canvas.
-  html.CanvasElement get canvas => _canvas;
-
-  /// The 2D context of the `<canvas>` element used by this bitmap canvas.
-  html.CanvasRenderingContext2D get ctx => _ctx;
 
   /// Sets the global paint styles to correspond to [paint].
   void _applyPaint(SurfacePaintData paint) {
-    ctx.globalCompositeOperation =
-        _stringForBlendMode(paint.blendMode) ?? 'source-over';
-    ctx.lineWidth = paint.strokeWidth ?? 1.0;
-    final ui.StrokeCap cap = paint.strokeCap;
-    if (cap != null) {
-      ctx.lineCap = _stringForStrokeCap(cap);
-    } else {
-      ctx.lineCap = 'butt';
-    }
-    final ui.StrokeJoin join = paint.strokeJoin;
-    if (join != null) {
-      ctx.lineJoin = _stringForStrokeJoin(join);
-    } else {
-      ctx.lineJoin = 'miter';
-    }
+    ContextStateHandle contextHandle = _canvasPool.contextHandle;
+    contextHandle
+      ..lineWidth = paint.strokeWidth ?? 1.0
+      ..blendMode = paint.blendMode
+      ..strokeCap = paint.strokeCap
+      ..strokeJoin = paint.strokeJoin
+      ..filter = _maskFilterToCss(paint.maskFilter);
+
     if (paint.shader != null) {
       final EngineGradient engineShader = paint.shader;
-      final Object paintStyle = engineShader.createPaintStyle(ctx);
-      _setFillAndStrokeStyle(paintStyle, paintStyle);
+      final Object paintStyle =
+          engineShader.createPaintStyle(_canvasPool.context);
+      contextHandle.fillStyle = paintStyle;
+      contextHandle.strokeStyle = paintStyle;
     } else if (paint.color != null) {
       final String colorString = paint.color.toCssString();
-      _setFillAndStrokeStyle(colorString, colorString);
-    }
-    if (paint.maskFilter != null) {
-      _setFilter('blur(${paint.maskFilter.webOnlySigma}px)');
-    }
-  }
-
-  void _strokeOrFill(SurfacePaintData paint, {bool resetPaint = true}) {
-    switch (paint.style) {
-      case ui.PaintingStyle.stroke:
-        ctx.stroke();
-        break;
-      case ui.PaintingStyle.fill:
-      default:
-        ctx.fill();
-        break;
-    }
-    if (resetPaint) {
-      _resetPaint();
-    }
-  }
-
-  /// Resets the paint styles that were set due to a previous paint command.
-  ///
-  /// For example, if a previous paint commands has a blur filter, we need to
-  /// undo that filter here.
-  ///
-  /// This needs to be called after [_applyPaint].
-  void _resetPaint() {
-    _setFilter('none');
-    _setFillAndStrokeStyle(null, null);
-  }
-
-  void _setFilter(String value) {
-    if (_prevFilter != value) {
-      _prevFilter = ctx.filter = value;
-    }
-  }
-
-  void _setFillAndStrokeStyle(Object fillStyle, Object strokeStyle) {
-    final html.CanvasRenderingContext2D _ctx = ctx;
-    if (!identical(_prevFillStyle, fillStyle)) {
-      _prevFillStyle = _ctx.fillStyle = fillStyle;
-    }
-    if (!identical(_prevStrokeStyle, strokeStyle)) {
-      _prevStrokeStyle = _ctx.strokeStyle = strokeStyle;
+      contextHandle.fillStyle = colorString;
+      contextHandle.strokeStyle = colorString;
+    } else {
+      contextHandle.fillStyle = '';
+      contextHandle.strokeStyle = '';
     }
   }
 
   @override
   int save() {
-    super.save();
-    ctx.save();
+    _canvasPool.save();
     return _saveCount++;
   }
 
@@ -328,8 +227,7 @@ class BitmapCanvas extends EngineCanvas with SaveStackTracking {
 
   @override
   void restore() {
-    super.restore();
-    ctx.restore();
+    _canvasPool.restore();
     _saveCount--;
     _cachedLastStyle = null;
   }
@@ -341,262 +239,133 @@ class BitmapCanvas extends EngineCanvas with SaveStackTracking {
     assert(_saveCount >= count);
     final int restores = _saveCount - count;
     for (int i = 0; i < restores; i++) {
-      ctx.restore();
+      _canvasPool.restore();
     }
     _saveCount = count;
   }
 
   @override
   void translate(double dx, double dy) {
-    super.translate(dx, dy);
-    ctx.translate(dx, dy);
+    _canvasPool.translate(dx, dy);
   }
 
   @override
   void scale(double sx, double sy) {
-    super.scale(sx, sy);
-    ctx.scale(sx, sy);
+    _canvasPool.scale(sx, sy);
   }
 
   @override
   void rotate(double radians) {
-    super.rotate(radians);
-    ctx.rotate(radians);
+    _canvasPool.rotate(radians);
   }
 
   @override
   void skew(double sx, double sy) {
-    super.skew(sx, sy);
-    ctx.transform(1, sy, sx, 1, 0, 0);
-    //            |  |   |   |  |  |
-    //            |  |   |   |  |  f - vertical translation
-    //            |  |   |   |  e - horizontal translation
-    //            |  |   |   d - vertical scaling
-    //            |  |   c - horizontal skewing
-    //            |  b - vertical skewing
-    //            a - horizontal scaling
-    //
-    // Source: https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/transform
+    _canvasPool.skew(sx, sy);
   }
 
   @override
   void transform(Float64List matrix4) {
-    super.transform(matrix4);
-
-    // Canvas2D transform API:
-    //
-    // ctx.transform(a, b, c, d, e, f);
-    //
-    // In 3x3 matrix form assuming vector representation of (x, y, 1):
-    //
-    // a c e
-    // b d f
-    // 0 0 1
-    //
-    // This translates to 4x4 matrix with vector representation of (x, y, z, 1)
-    // as:
-    //
-    // a c 0 e
-    // b d 0 f
-    // 0 0 1 0
-    // 0 0 0 1
-    //
-    // This matrix is sufficient to represent 2D rotates, translates, scales,
-    // and skews.
-    _ctx.transform(
-      matrix4[0],
-      matrix4[1],
-      matrix4[4],
-      matrix4[5],
-      matrix4[12],
-      matrix4[13],
-    );
+    _canvasPool.transform(matrix4);
   }
 
   @override
   void clipRect(ui.Rect rect) {
-    super.clipRect(rect);
-    ctx.beginPath();
-    ctx.rect(rect.left, rect.top, rect.width, rect.height);
-    ctx.clip();
+    _canvasPool.clipRect(rect);
   }
 
   @override
   void clipRRect(ui.RRect rrect) {
-    super.clipRRect(rrect);
-    final ui.Path path = ui.Path()..addRRect(rrect);
-    _runPath(path);
-    ctx.clip();
+    _canvasPool.clipRRect(rrect);
   }
 
   @override
   void clipPath(ui.Path path) {
-    super.clipPath(path);
-    _runPath(path);
-    ctx.clip();
+    _canvasPool.clipPath(path);
   }
 
   @override
   void drawColor(ui.Color color, ui.BlendMode blendMode) {
-    ctx.globalCompositeOperation = _stringForBlendMode(blendMode);
-
-    // Fill a virtually infinite rect with the color.
-    //
-    // We can't use (0, 0, width, height) because the current transform can
-    // cause it to not fill the entire clip.
-    ctx.fillRect(-10000, -10000, 20000, 20000);
+    _canvasPool.drawColor(color, blendMode);
   }
 
   @override
   void drawLine(ui.Offset p1, ui.Offset p2, SurfacePaintData paint) {
     _applyPaint(paint);
-    ctx.beginPath();
-    ctx.moveTo(p1.dx, p1.dy);
-    ctx.lineTo(p2.dx, p2.dy);
-    ctx.stroke();
-    _resetPaint();
+    _canvasPool.strokeLine(p1, p2);
   }
 
   @override
   void drawPaint(SurfacePaintData paint) {
     _applyPaint(paint);
-    ctx.beginPath();
-
-    // Fill a virtually infinite rect with the color.
-    //
-    // We can't use (0, 0, width, height) because the current transform can
-    // cause it to not fill the entire clip.
-    ctx.fillRect(-10000, -10000, 20000, 20000);
-    _resetPaint();
+    _canvasPool.fill();
   }
 
   @override
   void drawRect(ui.Rect rect, SurfacePaintData paint) {
     _applyPaint(paint);
-    ctx.beginPath();
-    ctx.rect(rect.left, rect.top, rect.width, rect.height);
-    _strokeOrFill(paint);
+    _canvasPool.drawRect(rect, paint.style);
   }
 
   @override
   void drawRRect(ui.RRect rrect, SurfacePaintData paint) {
     _applyPaint(paint);
-    _RRectToCanvasRenderer(ctx).render(rrect);
-    _strokeOrFill(paint);
+    _canvasPool.drawRRect(rrect, paint.style);
   }
 
   @override
   void drawDRRect(ui.RRect outer, ui.RRect inner, SurfacePaintData paint) {
     _applyPaint(paint);
-    _RRectRenderer renderer = _RRectToCanvasRenderer(ctx);
-    renderer.render(outer);
-    renderer.render(inner, startNewPath: false, reverse: true);
-    _strokeOrFill(paint);
+    _canvasPool.drawDRRect(outer, inner, paint.style);
   }
 
   @override
   void drawOval(ui.Rect rect, SurfacePaintData paint) {
     _applyPaint(paint);
-    ctx.beginPath();
-    ctx.ellipse(rect.center.dx, rect.center.dy, rect.width / 2, rect.height / 2,
-        0, 0, 2.0 * math.pi, false);
-    _strokeOrFill(paint);
+    _canvasPool.drawOval(rect, paint.style);
   }
 
   @override
   void drawCircle(ui.Offset c, double radius, SurfacePaintData paint) {
     _applyPaint(paint);
-    ctx.beginPath();
-    ctx.ellipse(c.dx, c.dy, radius, radius, 0, 0, 2.0 * math.pi, false);
-    _strokeOrFill(paint);
+    _canvasPool.drawCircle(c, radius, paint.style);
   }
 
   @override
   void drawPath(ui.Path path, SurfacePaintData paint) {
     _applyPaint(paint);
-    _runPath(path);
-    _strokeOrFill(paint);
+    _canvasPool.drawPath(path, paint.style);
   }
 
   @override
   void drawShadow(ui.Path path, ui.Color color, double elevation,
       bool transparentOccluder) {
-    final List<CanvasShadow> shadows =
-        ElevationShadow.computeCanvasShadows(elevation, color);
-    if (shadows.isNotEmpty) {
-      for (final CanvasShadow shadow in shadows) {
-        // TODO(het): Shadows with transparent occluders are not supported
-        // on webkit since filter is unsupported.
-        if (transparentOccluder && browserEngine != BrowserEngine.webkit) {
-          // We paint shadows using a path and a mask filter instead of the
-          // built-in shadow* properties. This is because the color alpha of the
-          // paint is added to the shadow. The effect we're looking for is to just
-          // paint the shadow without the path itself, but if we use a non-zero
-          // alpha for the paint the path is painted in addition to the shadow,
-          // which is undesirable.
-          final SurfacePaint paint = SurfacePaint()
-            ..color = shadow.color
-            ..style = ui.PaintingStyle.fill
-            ..strokeWidth = 0.0
-            ..maskFilter = ui.MaskFilter.blur(ui.BlurStyle.normal, shadow.blur);
-          _ctx.save();
-          _ctx.translate(shadow.offsetX, shadow.offsetY);
-          final SurfacePaintData paintData = paint.paintData;
-          _applyPaint(paintData);
-          _runPath(path);
-          _strokeOrFill(paintData, resetPaint: false);
-          _ctx.restore();
-        } else {
-          // TODO(het): We fill the path with this paint, then later we clip
-          // by the same path and fill it with a fully opaque color (we know
-          // the color is fully opaque because `transparentOccluder` is false.
-          // However, due to anti-aliasing of the clip, a few pixels of the
-          // path we are about to paint may still be visible after we fill with
-          // the opaque occluder. For that reason, we fill with the shadow color,
-          // and set the shadow color to fully opaque. This way, the visible
-          // pixels are less opaque and less noticeable.
-          final SurfacePaint paint = SurfacePaint()
-            ..color = shadow.color
-            ..style = ui.PaintingStyle.fill
-            ..strokeWidth = 0.0;
-          _ctx.save();
-          final SurfacePaintData paintData = paint.paintData;
-          _applyPaint(paintData);
-          _ctx.shadowBlur = shadow.blur;
-          _ctx.shadowColor = shadow.color.withAlpha(0xff).toCssString();
-          _ctx.shadowOffsetX = shadow.offsetX;
-          _ctx.shadowOffsetY = shadow.offsetY;
-          _runPath(path);
-          _strokeOrFill(paintData, resetPaint: false);
-          _ctx.restore();
-        }
-      }
-      _resetPaint();
-    }
+    _canvasPool.drawShadow(path, color, elevation, transparentOccluder);
   }
 
   @override
   void drawImage(ui.Image image, ui.Offset p, SurfacePaintData paint) {
-    _applyPaint(paint);
+    //_applyPaint(paint);
     final HtmlImage htmlImage = image;
     final html.ImageElement imgElement = htmlImage.cloneImageElement();
-    String blendMode = ctx.globalCompositeOperation;
+    String blendMode = _stringForBlendMode(paint.blendMode);
     imgElement.style.mixBlendMode = blendMode;
     _drawImage(imgElement, p);
     _childOverdraw = true;
+    _canvasPool.allocateExtraCanvas();
   }
 
   void _drawImage(html.ImageElement imgElement, ui.Offset p) {
-    if (isClipped) {
-      final List<html.Element> clipElements =
-          _clipContent(_clipStack, imgElement, p, currentTransform);
+    if (_canvasPool.isClipped) {
+      final List<html.Element> clipElements = _clipContent(
+          _canvasPool._clipStack, imgElement, p, _canvasPool.currentTransform);
       for (html.Element clipElement in clipElements) {
         rootElement.append(clipElement);
         _children.add(clipElement);
       }
     } else {
-      final String cssTransform =
-          matrix4ToCssTransform3d(transformWithOffset(currentTransform, p));
+      final String cssTransform = matrix4ToCssTransform3d(
+          transformWithOffset(_canvasPool.currentTransform, p));
       imgElement.style
         ..transformOrigin = '0 0 0'
         ..transform = cssTransform;
@@ -656,6 +425,7 @@ class BitmapCanvas extends EngineCanvas with SaveStackTracking {
       if (requiresClipping) {
         restore();
       }
+      _canvasPool.allocateExtraCanvas();
     }
     _childOverdraw = true;
   }
@@ -666,6 +436,7 @@ class BitmapCanvas extends EngineCanvas with SaveStackTracking {
     double x,
     double y,
   ) {
+    html.CanvasRenderingContext2D ctx = _canvasPool.context;
     final double letterSpacing = style.letterSpacing;
     if (letterSpacing == null || letterSpacing == 0.0) {
       ctx.fillText(line.text, x, y);
@@ -692,14 +463,13 @@ class BitmapCanvas extends EngineCanvas with SaveStackTracking {
   @override
   void drawParagraph(EngineParagraph paragraph, ui.Offset offset) {
     assert(paragraph._isLaidOut);
-
+    html.CanvasRenderingContext2D ctx = _canvasPool.context;
     final ParagraphGeometricStyle style = paragraph._geometricStyle;
 
     if (paragraph._drawOnCanvas && _childOverdraw == false) {
       final List<EngineLineMetrics> lines = paragraph._measurementResult.lines;
 
-      final SurfacePaintData backgroundPaint =
-          paragraph._background?.paintData;
+      final SurfacePaintData backgroundPaint = paragraph._background?.paintData;
       if (backgroundPaint != null) {
         final ui.Rect rect = ui.Rect.fromLTWH(
             offset.dx, offset.dy, paragraph.width, paragraph.height);
@@ -719,23 +489,25 @@ class BitmapCanvas extends EngineCanvas with SaveStackTracking {
         _drawTextLine(style, lines[i], x, y);
         y += paragraph._lineHeight;
       }
-      _resetPaint();
       return;
     }
 
     final html.Element paragraphElement =
         _drawParagraphElement(paragraph, offset);
 
-    if (isClipped) {
-      final List<html.Element> clipElements =
-          _clipContent(_clipStack, paragraphElement, offset, currentTransform);
+    if (_canvasPool.isClipped) {
+      final List<html.Element> clipElements = _clipContent(
+          _canvasPool._clipStack,
+          paragraphElement,
+          offset,
+          _canvasPool.currentTransform);
       for (html.Element clipElement in clipElements) {
         rootElement.append(clipElement);
         _children.add(clipElement);
       }
     } else {
-      final String cssTransform =
-          matrix4ToCssTransform3d(transformWithOffset(currentTransform, offset));
+      final String cssTransform = matrix4ToCssTransform3d(
+          transformWithOffset(_canvasPool.currentTransform, offset));
       paragraphElement.style
         ..transformOrigin = '0 0 0'
         ..transform = cssTransform;
@@ -773,6 +545,7 @@ class BitmapCanvas extends EngineCanvas with SaveStackTracking {
         'Linear/Radial/SweepGradient and ImageShader not supported yet');
     final Int32List colors = vertices.colors;
     final ui.VertexMode mode = vertices.mode;
+    html.CanvasRenderingContext2D ctx = _canvasPool.context;
     if (colors == null) {
       final Float32List positions = mode == ui.VertexMode.triangles
           ? vertices.positions
@@ -780,69 +553,21 @@ class BitmapCanvas extends EngineCanvas with SaveStackTracking {
       // Draw hairline for vertices if no vertex colors are specified.
       save();
       final ui.Color color = paint.color ?? ui.Color(0xFF000000);
-      _setFillAndStrokeStyle('', color.toCssString());
-      _glRenderer.drawHairline(_ctx, positions);
+      _canvasPool.contextHandle
+        ..fillStyle = null
+        ..strokeStyle = color.toCssString();
+      _glRenderer.drawHairline(ctx, positions);
       restore();
       return;
     }
-    _glRenderer.drawVertices(_ctx, _widthInBitmapPixels, _heightInBitmapPixels,
-        currentTransform, vertices, blendMode, paint);
+    _glRenderer.drawVertices(ctx, _widthInBitmapPixels, _heightInBitmapPixels,
+        _canvasPool.currentTransform, vertices, blendMode, paint);
   }
 
-  /// 'Runs' the given [path] by applying all of its commands to the canvas.
-  void _runPath(SurfacePath path) {
-    ctx.beginPath();
-    for (Subpath subpath in path.subpaths) {
-      for (PathCommand command in subpath.commands) {
-        switch (command.type) {
-          case PathCommandTypes.bezierCurveTo:
-            final BezierCurveTo curve = command;
-            ctx.bezierCurveTo(
-                curve.x1, curve.y1, curve.x2, curve.y2, curve.x3, curve.y3);
-            break;
-          case PathCommandTypes.close:
-            ctx.closePath();
-            break;
-          case PathCommandTypes.ellipse:
-            final Ellipse ellipse = command;
-            ctx.ellipse(
-                ellipse.x,
-                ellipse.y,
-                ellipse.radiusX,
-                ellipse.radiusY,
-                ellipse.rotation,
-                ellipse.startAngle,
-                ellipse.endAngle,
-                ellipse.anticlockwise);
-            break;
-          case PathCommandTypes.lineTo:
-            final LineTo lineTo = command;
-            ctx.lineTo(lineTo.x, lineTo.y);
-            break;
-          case PathCommandTypes.moveTo:
-            final MoveTo moveTo = command;
-            ctx.moveTo(moveTo.x, moveTo.y);
-            break;
-          case PathCommandTypes.rRect:
-            final RRectCommand rrectCommand = command;
-            _RRectToCanvasRenderer(ctx)
-                .render(rrectCommand.rrect, startNewPath: false);
-            break;
-          case PathCommandTypes.rect:
-            final RectCommand rectCommand = command;
-            ctx.rect(rectCommand.x, rectCommand.y, rectCommand.width,
-                rectCommand.height);
-            break;
-          case PathCommandTypes.quadraticCurveTo:
-            final QuadraticCurveTo quadraticCurveTo = command;
-            ctx.quadraticCurveTo(quadraticCurveTo.x1, quadraticCurveTo.y1,
-                quadraticCurveTo.x2, quadraticCurveTo.y2);
-            break;
-          default:
-            throw UnimplementedError('Unknown path command $command');
-        }
-      }
-    }
+  @override
+  void endOfPaint() {
+    assert(_saveCount == 0);
+    _canvasPool.endOfPaint();
   }
 }
 
@@ -1026,4 +751,9 @@ String _cssTransformAtOffset(
     Matrix4 transform, double offsetX, double offsetY) {
   return matrix4ToCssTransform3d(
       transformWithOffset(transform, ui.Offset(offsetX, offsetY)));
+}
+
+String _maskFilterToCss(ui.MaskFilter maskFilter) {
+  if (maskFilter == null) return 'none';
+  return 'blur(${maskFilter.webOnlySigma}px)';
 }

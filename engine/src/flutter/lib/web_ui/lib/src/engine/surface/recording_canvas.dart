@@ -85,6 +85,7 @@ class RecordingCanvas {
         }
       }
     }
+    engineCanvas.endOfPaint();
   }
 
   /// Prints recorded commands.
