@@ -900,7 +900,7 @@ class SurfacePath implements ui.Path {
         -BitmapCanvas.kPaddingPixels.toDouble());
     _rawRecorder.drawPath(
         this, (SurfacePaint()..color = const ui.Color(0xFF000000)).paintData);
-    final bool result = _rawRecorder.ctx.isPointInPath(pointX, pointY);
+    final bool result = _rawRecorder._canvasPool.context.isPointInPath(pointX, pointY);
     _rawRecorder.dispose();
     return result;
   }

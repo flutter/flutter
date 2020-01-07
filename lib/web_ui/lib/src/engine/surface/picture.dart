@@ -169,10 +169,10 @@ class PersistedStandardPicture extends PersistedPicture {
         // The canvas needs to be resized before painting.
         return 1.0;
       } else {
-        final int newPixelCount = oldCanvas._widthToPhysical(_exactLocalCullRect.width)
-             * oldCanvas._heightToPhysical(_exactLocalCullRect.height);
+        final int newPixelCount = BitmapCanvas._widthToPhysical(_exactLocalCullRect.width)
+             * BitmapCanvas._heightToPhysical(_exactLocalCullRect.height);
         final int oldPixelCount =
-            oldCanvas.widthInBitmapPixels * oldCanvas.heightInBitmapPixels;
+            oldCanvas._widthInBitmapPixels * oldCanvas._heightInBitmapPixels;
 
         if (oldPixelCount == 0) {
           return 1.0;
@@ -320,7 +320,7 @@ class PersistedStandardPicture extends PersistedPicture {
       _surfaceStatsFor(this)
         ..allocateBitmapCanvasCount += 1
         ..allocatedBitmapSizeInPixels =
-            canvas.widthInBitmapPixels * canvas.heightInBitmapPixels;
+            canvas._widthInBitmapPixels * canvas._heightInBitmapPixels;
     }
     return canvas;
   }

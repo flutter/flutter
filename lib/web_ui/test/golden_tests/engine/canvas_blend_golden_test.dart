@@ -74,6 +74,7 @@ void main() async {
         Paint()
           ..style = PaintingStyle.fill
           ..color = const Color.fromARGB(128, 255, 0, 0));
+    rc.restore();
     await _checkScreenshot(rc, 'canvas_blend_circle_diff_color');
   });
 
@@ -109,6 +110,7 @@ void main() async {
           ..color = const Color.fromARGB(128, 255, 0, 0));
     rc.drawImage(createTestImage(), Offset(135.0, 130.0),
         Paint()..blendMode = BlendMode.multiply);
+    rc.restore();
     await _checkScreenshot(rc, 'canvas_blend_image_multiply');
   });
 }
