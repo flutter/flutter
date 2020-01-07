@@ -8,6 +8,7 @@ import 'basic_types.dart';
 import 'constants.dart';
 import 'diagnostics.dart';
 import 'print.dart';
+import 'stack_frame.dart';
 
 /// Signature for [FlutterError.onError] handler.
 typedef FlutterExceptionHandler = void Function(FlutterErrorDetails details);
@@ -415,41 +416,34 @@ class FlutterErrorDetails extends Diagnosticable {
       }
     }
 
-    final Iterable<String> stackLines = (stack != null) ? stack.toString().trimRight().split('\n') : null;
-    if (exception is AssertionError && diagnosticable == null) {
-      bool ourFault = true;
-      if (stackLines != null) {
-        final List<String> stackList = stackLines.take(2).toList();
-        if (stackList.length >= 2) {
-          // TODO(ianh): This has bitrotted and is no longer matching. https://github.com/flutter/flutter/issues/4021
-          final RegExp throwPattern = RegExp(
-              r'^#0 +_AssertionError._throwNew \(dart:.+\)$');
-          final RegExp assertPattern = RegExp(
-              r'^#1 +[^(]+ \((.+?):([0-9]+)(?::[0-9]+)?\)$');
-          if (throwPattern.hasMatch(stackList[0])) {
-            final Match assertMatch = assertPattern.firstMatch(stackList[1]);
-            if (assertMatch != null) {
-              assert(assertMatch.groupCount == 2);
-              final RegExp ourLibraryPattern = RegExp(r'^package:flutter/');
-              ourFault = ourLibraryPattern.hasMatch(assertMatch.group(1));
-            }
-          }
-        }
-      }
-      if (ourFault) {
-        properties.add(ErrorSpacer());
-        properties.add(ErrorHint(
-          'Either the assertion indicates an error in the framework itself, or we should '
-          'provide substantially more information in this error message to help you determine '
-          'and fix the underlying cause.\n'
-          'In either case, please report this assertion by filing a bug on GitHub:\n'
-          '  https://github.com/flutter/flutter/issues/new?template=BUG.md'
-        ));
-      }
-    }
     if (stack != null) {
-      properties.add(ErrorSpacer());
-      properties.add(DiagnosticsStackTrace('When the exception was thrown, this was the stack', stack, stackFilter: stackFilter));
+      if (exception is AssertionError && diagnosticable == null) {
+        // After popping off any dart: stack frames, are there at least two more
+        // stack frames coming from package flutter?
+        //
+        // If not: Error is in user code (user violated assertion in framework).
+        // If so:  Error is in Framework. We either need an assertion higher up
+        //         in the stack, or we've violated our own assertions.
+        final List<StackFrame> stackFrames = StackFrame.fromStackTrace(stack)
+                                                       .skipWhile((StackFrame frame) => frame.packageScheme == 'dart')
+                                                       .toList();
+        final bool ourFault =  stackFrames.length >= 2
+                            && stackFrames[0].package == 'flutter'
+                            && stackFrames[1].package == 'flutter';
+        if (ourFault) {
+          properties.add(ErrorSpacer());
+          properties.add(ErrorHint(
+            'Either the assertion indicates an error in the framework itself, or we should '
+            'provide substantially more information in this error message to help you determine '
+            'and fix the underlying cause.\n'
+            'In either case, please report this assertion by filing a bug on GitHub:\n'
+            '  https://github.com/flutter/flutter/issues/new?template=BUG.md'
+          ));
+        }
+      } else {
+        properties.add(ErrorSpacer());
+        properties.add(DiagnosticsStackTrace('When the exception was thrown, this was the stack', stack, stackFilter: stackFilter));
+      }
     }
     if (informationCollector != null) {
       properties.add(ErrorSpacer());
