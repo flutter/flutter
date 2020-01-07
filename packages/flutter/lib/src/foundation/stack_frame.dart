@@ -24,8 +24,8 @@ class StackFrame {
   ///
   /// All parameters must not be null. The [className] may be the empty string
   /// if there is no class (e.g. for a top level library method).
-  const StackFrame({
-    @required this.number,
+  const StackFrame(
+    this.number, {
     @required this.column,
     @required this.line,
     @required this.packageScheme,
@@ -33,6 +33,7 @@ class StackFrame {
     @required this.packagePath,
     this.className = '',
     @required this.method,
+    this.isConstructor = false,
   })  : assert(number != null),
         assert(column != null),
         assert(line != null),
@@ -40,7 +41,19 @@ class StackFrame {
         assert(packageScheme != null),
         assert(package != null),
         assert(packagePath != null),
-        assert(className != null);
+        assert(className != null),
+        assert(isConstructor != null);
+
+  /// A stack frame representing an asynchronous suspension.
+  static const StackFrame asynchronousSuspension = StackFrame(
+    -1,
+    column: -1,
+    line: -1,
+    method: 'asynchronous suspension',
+    packageScheme: '',
+    package: '',
+    packagePath: '',
+  );
 
   /// Parses a list of [StackFrame]s from a [StackTrace] object.
   ///
@@ -63,15 +76,26 @@ class StackFrame {
   /// Parses a single [StackFrame] from a single line of a [StackTrace].
   static StackFrame fromStackTraceLine(String line) {
     assert(line != null);
+    if (line == '<asynchronous suspension>') {
+      return asynchronousSuspension;
+    }
+
     final RegExp parser = RegExp(r'^#(\d+) +(.+) \((.+):(\d+):(\d+)\)$');
     final Match match = parser.firstMatch(line);
     assert(match != null);
 
+    bool isConstructor = false;
     String className = '';
-    String method = match.group(2);
+    String method = match.group(2).replaceAll('.<anonymous closure>', '');
     if (method.startsWith('new')) {
       className = method.split(' ')[1];
-      method = ctor;
+      method = '';
+      if (className.contains('.')) {
+        final List<String> parts  = className.split('.');
+        className = parts[0];
+        method = parts[1];
+      }
+      isConstructor = true;
     } else if (method.contains('.')) {
       final List<String> parts = method.split('.');
       className = parts[0];
@@ -79,20 +103,25 @@ class StackFrame {
     }
 
     final Uri packageUri = Uri.parse(match.group(3));
+    String package = '<unknown>';
+    String packagePath = packageUri.path;
+    if (packageUri.scheme == 'dart' || packageUri.scheme == 'package') {
+      package = packageUri.pathSegments[0];
+      packagePath = packageUri.path.replaceFirst(packageUri.pathSegments[0] + '/', '');
+    }
+
     return StackFrame(
-      number: int.parse(match.group(1)),
+      int.parse(match.group(1)),
       className: className,
       method: method,
       packageScheme: packageUri.scheme,
-      package: packageUri.pathSegments[0],
-      packagePath: packageUri.path.replaceFirst(packageUri.pathSegments[0] + '/', ''),
+      package: package,
+      packagePath: packagePath,
       line: int.parse(match.group(4)),
       column: int.parse(match.group(5)),
+      isConstructor: isConstructor,
     );
   }
-
-  /// The identifier used for [method] if the method is the class constructor.
-  static const String ctor = 'ctor';
 
   /// The zero-indexed frame number.
   final int number;
@@ -122,16 +151,18 @@ class StackFrame {
 
   /// The class name, if any, for this frame.
   ///
-  /// This may be null for top level methods in a library.
+  /// This may be null for top level methods in a library or anonymous closure
+  /// methods.
   final String className;
 
   /// The method name for this frame.
   ///
-  /// This will be [ctor] if the method is a class constructor.
+  /// This will be an empty string if the stack frame is from the default
+  /// constructor.
   final String method;
 
   /// Whether or not this was thrown from a constructor.
-  bool get isConstructor => className == ctor;
+  final bool isConstructor;
 
   @override
   int get hashCode => hashValues(number, package, line, column, className, method);
