@@ -7,7 +7,6 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import '../flutter_test_alternative.dart';
 
-import 'proxy_box_test.dart';
 import 'rendering_tester.dart';
 
 void main() {
