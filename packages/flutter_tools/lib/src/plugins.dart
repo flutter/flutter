@@ -335,10 +335,10 @@ bool _writeFlutterPluginsListAndDependencyGraph(Iterable<Plugin>platformPlugins,
   final StringBuffer flutterPluginsBuffer = StringBuffer('# $info\n');
 
   final Set<String> pluginNames = <String>{};
-  for (Plugin plugin in platformPlugins) {
+  for (final Plugin plugin in platformPlugins) {
     pluginNames.add(plugin.name);
   }
-  for (Plugin plugin in platformPlugins) {
+  for (final Plugin plugin in platformPlugins) {
     flutterPluginsBuffer.write('${plugin.name}=${escapePath(plugin.path)}\n');
     directAppDependencies.add(<String, dynamic>{
       'name': plugin.name,
