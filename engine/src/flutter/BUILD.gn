@@ -32,6 +32,10 @@ group("flutter") {
   ]
 
   if (current_toolchain == host_toolchain) {
+    public_deps += [ "$flutter_root/tools/font-subset" ]
+  }
+
+  if (current_toolchain == host_toolchain) {
     public_deps += [ "$flutter_root/shell/testing" ]
   }
 
