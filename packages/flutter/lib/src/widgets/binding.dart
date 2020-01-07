@@ -447,28 +447,28 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   @override
   void handleMetricsChanged() {
     super.handleMetricsChanged();
-    for (WidgetsBindingObserver observer in _observers)
+    for (final WidgetsBindingObserver observer in _observers)
       observer.didChangeMetrics();
   }
 
   @override
   void handleTextScaleFactorChanged() {
     super.handleTextScaleFactorChanged();
-    for (WidgetsBindingObserver observer in _observers)
+    for (final WidgetsBindingObserver observer in _observers)
       observer.didChangeTextScaleFactor();
   }
 
   @override
   void handlePlatformBrightnessChanged() {
     super.handlePlatformBrightnessChanged();
-    for (WidgetsBindingObserver observer in _observers)
+    for (final WidgetsBindingObserver observer in _observers)
       observer.didChangePlatformBrightness();
   }
 
   @override
   void handleAccessibilityFeaturesChanged() {
     super.handleAccessibilityFeaturesChanged();
-    for (WidgetsBindingObserver observer in _observers)
+    for (final WidgetsBindingObserver observer in _observers)
       observer.didChangeAccessibilityFeatures();
   }
 
@@ -492,7 +492,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   @protected
   @mustCallSuper
   void dispatchLocalesChanged(List<Locale> locales) {
-    for (WidgetsBindingObserver observer in _observers)
+    for (final WidgetsBindingObserver observer in _observers)
       observer.didChangeLocales(locales);
   }
 
@@ -505,7 +505,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   @protected
   @mustCallSuper
   void dispatchAccessibilityFeaturesChanged() {
-    for (WidgetsBindingObserver observer in _observers)
+    for (final WidgetsBindingObserver observer in _observers)
       observer.didChangeAccessibilityFeatures();
   }
 
@@ -525,7 +525,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   /// [SystemChannels.navigation].
   @protected
   Future<void> handlePopRoute() async {
-    for (WidgetsBindingObserver observer in List<WidgetsBindingObserver>.from(_observers)) {
+    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.from(_observers)) {
       if (await observer.didPopRoute())
         return;
     }
@@ -545,7 +545,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   @protected
   @mustCallSuper
   Future<void> handlePushRoute(String route) async {
-    for (WidgetsBindingObserver observer in List<WidgetsBindingObserver>.from(_observers)) {
+    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.from(_observers)) {
       if (await observer.didPushRoute(route))
         return;
     }
@@ -564,7 +564,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   @override
   void handleAppLifecycleStateChanged(AppLifecycleState state) {
     super.handleAppLifecycleStateChanged(state);
-    for (WidgetsBindingObserver observer in _observers)
+    for (final WidgetsBindingObserver observer in _observers)
       observer.didChangeAppLifecycleState(state);
   }
 
@@ -577,7 +577,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   /// This method exposes the `memoryPressure` notification from
   /// [SystemChannels.system].
   void handleMemoryPressure() {
-    for (WidgetsBindingObserver observer in _observers)
+    for (final WidgetsBindingObserver observer in _observers)
       observer.didHaveMemoryPressure();
   }
 

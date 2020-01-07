@@ -530,9 +530,9 @@ void main() {
       int actions = 0;
       int flags = 0;
       const CustomSemanticsAction action = CustomSemanticsAction(label: 'test');
-      for (int index in SemanticsAction.values.keys)
+      for (final int index in SemanticsAction.values.keys)
         actions |= index;
-      for (int index in SemanticsFlag.values.keys)
+      for (final int index in SemanticsFlag.values.keys)
         // TODO(mdebbar): Remove this if after https://github.com/flutter/engine/pull/9894
         if (SemanticsFlag.values[index] != SemanticsFlag.isMultiline)
           flags |= index;

@@ -75,7 +75,7 @@ class MDnsObservatoryDiscovery {
 
       String domainName;
       if (applicationId != null) {
-        for (String name in uniqueDomainNames) {
+        for (final String name in uniqueDomainNames) {
           if (name.toLowerCase().startsWith(applicationId.toLowerCase())) {
             domainName = name;
             break;
@@ -206,10 +206,10 @@ class MDnsObservatoryDiscovery {
   }
 
   void _logInterfaces(List<NetworkInterface> interfaces) {
-    for (NetworkInterface interface in interfaces) {
+    for (final NetworkInterface interface in interfaces) {
       if (globals.logger.isVerbose) {
         globals.printTrace('Found interface "${interface.name}":');
-        for (InternetAddress address in interface.addresses) {
+        for (final InternetAddress address in interface.addresses) {
           final String linkLocal = address.isLinkLocal ? 'link local' : '';
           globals.printTrace('\tBound address: "${address.address}" $linkLocal');
         }

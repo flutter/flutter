@@ -319,7 +319,7 @@ String wrapText(String text, { int columnWidth, int hangingIndent, int indent, b
   hangingIndent ??= 0;
   final List<String> splitText = text.split('\n');
   final List<String> result = <String>[];
-  for (String line in splitText) {
+  for (final String line in splitText) {
     String trimmedText = line.trimLeft();
     final String leadingWhitespace = line.substring(0, line.length - trimmedText.length);
     List<String> notIndented;
@@ -433,7 +433,7 @@ List<String> _wrapTextAsLines(String text, { int start = 0, int columnWidth, boo
     final RegExp characterOrCode = RegExp('(\u001b\[[0-9;]*m|.)', multiLine: true);
     List<_AnsiRun> result = <_AnsiRun>[];
     final StringBuffer current = StringBuffer();
-    for (Match match in characterOrCode.allMatches(input)) {
+    for (final Match match in characterOrCode.allMatches(input)) {
       current.write(match[0]);
       if (match[0].length < 4) {
         // This is a regular character, write it out.
@@ -461,7 +461,7 @@ List<String> _wrapTextAsLines(String text, { int start = 0, int columnWidth, boo
 
   final List<String> result = <String>[];
   final int effectiveLength = max(columnWidth - start, kMinColumnWidth);
-  for (String line in text.split('\n')) {
+  for (final String line in text.split('\n')) {
     // If the line is short enough, even with ANSI codes, then we can just add
     // add it and move on.
     if (line.length <= effectiveLength || !shouldWrap) {

@@ -283,7 +283,7 @@ final GradleHandledError flavorUndefinedHandler = GradleHandledError(
     );
     // Extract build types and product flavors.
     final Set<String> variants = <String>{};
-    for (String task in tasksRunResult.stdout.split('\n')) {
+    for (final String task in tasksRunResult.stdout.split('\n')) {
       final Match match = _assembleTaskPattern.matchAsPrefix(task);
       if (match != null) {
         final String variant = match.group(1).toLowerCase();

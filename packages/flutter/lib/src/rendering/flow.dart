@@ -352,7 +352,7 @@ class RenderFlow extends RenderBox
     _lastPaintOrder.clear();
     _paintingContext = context;
     _paintingOffset = offset;
-    for (RenderBox child in _randomAccessChildren) {
+    for (final RenderBox child in _randomAccessChildren) {
       final FlowParentData childParentData = child.parentData as FlowParentData;
       childParentData._transform = null;
     }

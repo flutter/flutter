@@ -29,7 +29,7 @@ void main() {
           return relativePath;
         }).toList();
       final Map<String, String> contents = <String, String>{};
-      for (String path in paths) {
+      for (final String path in paths) {
         final String absPath = globals.fs.path.join(tempPath, path);
         if (globals.fs.isDirectorySync(absPath)) {
           contents[path] = 'dir';
@@ -56,12 +56,12 @@ void main() {
     }
 
     void _populateDir(Map<String, String> manifest) {
-      for (String key in manifest.keys) {
+      for (final String key in manifest.keys) {
         if (manifest[key] == 'dir') {
           tempDir.childDirectory(key)..createSync(recursive: true);
         }
       }
-      for (String key in manifest.keys) {
+      for (final String key in manifest.keys) {
         if (manifest[key] != 'dir') {
           tempDir.childFile(key)
             ..createSync(recursive: true)
@@ -90,7 +90,7 @@ void main() {
         ...args,
       ]);
 
-      for (String path in expectedContents.keys) {
+      for (final String path in expectedContents.keys) {
         final String absPath = globals.fs.path.join(tempDir.absolute.path, path);
         expect(_fileOrDirectoryExists(globals.fs.path.join(dir.path, path)), true,
             reason: "$path doesn't exist");
@@ -99,7 +99,7 @@ void main() {
               reason: "$path contents don't match");
         }
       }
-      for (String path in unexpectedPaths) {
+      for (final String path in unexpectedPaths) {
         expect(_fileOrDirectoryExists(globals.fs.path.join(dir.path, path)), false, reason: '$path exists');
       }
     }

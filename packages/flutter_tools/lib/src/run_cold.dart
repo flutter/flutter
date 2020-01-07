@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 
+import 'base/command_help.dart';
 import 'base/file_system.dart';
 import 'device.dart';
 import 'globals.dart' as globals;
@@ -60,7 +61,7 @@ class ColdRunner extends ResidentRunner {
       }
     }
 
-    for (FlutterDevice device in flutterDevices) {
+    for (final FlutterDevice device in flutterDevices) {
       final int result = await device.runCold(
         coldRunner: this,
         route: route,
@@ -90,7 +91,7 @@ class ColdRunner extends ResidentRunner {
 
     globals.printTrace('Application running.');
 
-    for (FlutterDevice device in flutterDevices) {
+    for (final FlutterDevice device in flutterDevices) {
       if (device.vmService == null) {
         continue;
       }
@@ -142,12 +143,12 @@ class ColdRunner extends ResidentRunner {
       }
       return 2;
     }
-    for (FlutterDevice device in flutterDevices) {
+    for (final FlutterDevice device in flutterDevices) {
       device.initLogReader();
     }
     await refreshViews();
-    for (FlutterDevice device in flutterDevices) {
-      for (FlutterView view in device.views) {
+    for (final FlutterDevice device in flutterDevices) {
+      for (final FlutterView view in device.views) {
         globals.printTrace('Connected to $view.');
       }
     }
@@ -170,7 +171,7 @@ class ColdRunner extends ResidentRunner {
 
   @override
   Future<void> cleanupAtFinish() async {
-    for (FlutterDevice flutterDevice in flutterDevices) {
+    for (final FlutterDevice flutterDevice in flutterDevices) {
       await flutterDevice.device.dispose();
     }
 
@@ -179,37 +180,29 @@ class ColdRunner extends ResidentRunner {
 
   @override
   void printHelp({ @required bool details }) {
-    bool haveDetails = false;
-    bool haveAnything = false;
-    for (FlutterDevice device in flutterDevices) {
+    globals.printStatus('Flutter run key commands.');
+    if (supportsServiceProtocol) {
+      if (details) {
+        printHelpDetails();
+      }
+    }
+    CommandHelp.h.print();
+    if (_didAttach) {
+      CommandHelp.d.print();
+    }
+    CommandHelp.q.print();
+    for (final FlutterDevice device in flutterDevices) {
       final String dname = device.device.name;
       if (device.vmService != null) {
         globals.printStatus('An Observatory debugger and profiler on $dname is '
-          'available at: ${device.vmService .httpAddress}');
+          'available at: ${device.vmService.httpAddress}');
       }
-    }
-    if (supportsServiceProtocol) {
-      haveDetails = true;
-      if (details) {
-        printHelpDetails();
-        haveAnything = true;
-      }
-    }
-    final String quitMessage = _didAttach
-      ? 'To detach, press "d"; to quit, press "q".'
-      : 'To quit, press "q".';
-    if (haveDetails && !details) {
-      globals.printStatus('For a more detailed help message, press "h". $quitMessage');
-    } else if (haveAnything) {
-      globals.printStatus('To repeat this help message, press "h". $quitMessage');
-    } else {
-      globals.printStatus(quitMessage);
     }
   }
 
   @override
   Future<void> preExit() async {
-    for (FlutterDevice device in flutterDevices) {
+    for (final FlutterDevice device in flutterDevices) {
       // If we're running in release mode, stop the app using the device logic.
       if (device.vmService == null) {
         await device.device.stopApp(device.package);

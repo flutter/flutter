@@ -2113,7 +2113,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     _snackBarTimer?.cancel();
     _snackBarTimer = null;
     _geometryNotifier.dispose();
-    for (_StandardBottomSheet bottomSheet in _dismissedBottomSheets) {
+    for (final _StandardBottomSheet bottomSheet in _dismissedBottomSheets) {
       bottomSheet.animationController?.dispose();
     }
     if (_currentBottomSheet != null) {

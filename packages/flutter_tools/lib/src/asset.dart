@@ -89,11 +89,11 @@ class _ManifestAssetBundle implements AssetBundle {
       return true;
     }
 
-    for (Directory directory in _wildcardDirectories.values) {
+    for (final Directory directory in _wildcardDirectories.values) {
       if (!directory.existsSync()) {
         return true; // directory was deleted.
       }
-      for (File file in directory.listSync().whereType<File>()) {
+      for (final File file in directory.listSync().whereType<File>()) {
         final DateTime dateTime = file.statSync().modified;
         if (dateTime == null) {
           continue;
@@ -166,7 +166,7 @@ class _ManifestAssetBundle implements AssetBundle {
     );
 
     // Add fonts and assets from packages.
-    for (String packageName in packageMap.map.keys) {
+    for (final String packageName in packageMap.map.keys) {
       final Uri package = packageMap.map[packageName];
       if (package != null && package.scheme == 'file') {
         final String packageManifestPath = globals.fs.path.fromUri(package.resolve('../pubspec.yaml'));
@@ -204,7 +204,7 @@ class _ManifestAssetBundle implements AssetBundle {
 
     // Save the contents of each image, image variant, and font
     // asset in entries.
-    for (_Asset asset in assetVariants.keys) {
+    for (final _Asset asset in assetVariants.keys) {
       if (!asset.assetFileExists && assetVariants[asset].isEmpty) {
         globals.printStatus('Error detected in pubspec.yaml:', emphasis: true);
         globals.printError('No file or variants found for $asset.\n');
@@ -220,7 +220,7 @@ class _ManifestAssetBundle implements AssetBundle {
         assert(!assetVariants[asset].contains(asset));
         assetVariants[asset].insert(0, asset);
       }
-      for (_Asset variant in assetVariants[asset]) {
+      for (final _Asset variant in assetVariants[asset]) {
         assert(variant.assetFileExists);
         entries[variant.entryUri.path] ??= DevFSFileContent(variant.assetFile);
       }
@@ -230,13 +230,13 @@ class _ManifestAssetBundle implements AssetBundle {
       if (flutterManifest.usesMaterialDesign && includeDefaultFonts)
         ..._getMaterialAssets(_fontSetMaterial),
     ];
-    for (_Asset asset in materialAssets) {
+    for (final _Asset asset in materialAssets) {
       assert(asset.assetFileExists);
       entries[asset.entryUri.path] ??= DevFSFileContent(asset.assetFile);
     }
 
     // Update wildcard directories we we can detect changes in them.
-    for (Uri uri in wildcardDirectories) {
+    for (final Uri uri in wildcardDirectories) {
       _wildcardDirectories[uri] ??= globals.fs.directory(uri);
     }
 
@@ -321,8 +321,8 @@ List<Map<String, dynamic>> _getMaterialFonts(String fontSet) {
 List<_Asset> _getMaterialAssets(String fontSet) {
   final List<_Asset> result = <_Asset>[];
 
-  for (Map<String, dynamic> family in _getMaterialFonts(fontSet)) {
-    for (Map<dynamic, dynamic> font in family['fonts']) {
+  for (final Map<String, dynamic> family in _getMaterialFonts(fontSet)) {
+    for (final Map<dynamic, dynamic> font in family['fonts']) {
       final Uri entryUri = globals.fs.path.toUri(font['asset'] as String);
       result.add(_Asset(
         baseDir: globals.fs.path.join(Cache.flutterRoot, 'bin', 'cache', 'artifacts', 'material_fonts'),
@@ -358,7 +358,7 @@ DevFSContent _obtainLicenses(
   // sources, and might need to include a license for each one.)
   final Map<String, Set<String>> packageLicenses = <String, Set<String>>{};
   final Set<String> allPackages = <String>{};
-  for (String packageName in packageMap.map.keys) {
+  for (final String packageName in packageMap.map.keys) {
     final Uri package = packageMap.map[packageName];
     if (package == null || package.scheme != 'file') {
       continue;
@@ -369,7 +369,7 @@ DevFSContent _obtainLicenses(
     }
     final List<String> rawLicenses =
         file.readAsStringSync().split(_licenseSeparator);
-    for (String rawLicense in rawLicenses) {
+    for (final String rawLicense in rawLicenses) {
       List<String> packageNames;
       String licenseText;
       if (rawLicenses.length > 1) {
@@ -421,9 +421,9 @@ DevFSContent _createAssetManifest(Map<_Asset, List<_Asset>> assetVariants) {
       .keys.toList()
     ..sort(_byBasename);
 
-  for (_Asset main in sortedKeys) {
+  for (final _Asset main in sortedKeys) {
     jsonObject[main.entryUri.path] = <String>[
-      for (_Asset variant in assetVariants[main])
+      for (final _Asset variant in assetVariants[main])
         variant.entryUri.path,
     ];
   }
@@ -458,9 +458,9 @@ List<Font> _parsePackageFonts(
   PackageMap packageMap,
 ) {
   final List<Font> packageFonts = <Font>[];
-  for (Font font in manifest.fonts) {
+  for (final Font font in manifest.fonts) {
     final List<FontAsset> packageFontAssets = <FontAsset>[];
-    for (FontAsset fontAsset in font.fontAssets) {
+    for (final FontAsset fontAsset in font.fontAssets) {
       final Uri assetUri = fontAsset.assetUri;
       if (assetUri.pathSegments.first == 'packages' &&
           !globals.fs.isFileSync(globals.fs.path.fromUri(packageMap.map[packageName].resolve('../${assetUri.path}')))) {
@@ -513,7 +513,7 @@ class _AssetDirectoryCache {
 
     if (_cache[directory] == null) {
       final List<String> paths = <String>[];
-      for (FileSystemEntity entity in globals.fs.directory(directory).listSync(recursive: true)) {
+      for (final FileSystemEntity entity in globals.fs.directory(directory).listSync(recursive: true)) {
         final String path = entity.path;
         if (globals.fs.isFileSync(path) && !_excluded.any((String exclude) => path.startsWith(exclude))) {
           paths.add(path);
@@ -521,7 +521,7 @@ class _AssetDirectoryCache {
       }
 
       final Map<String, List<String>> variants = <String, List<String>>{};
-      for (String path in paths) {
+      for (final String path in paths) {
         final String variantName = globals.fs.path.basename(path);
         if (directory == globals.fs.path.dirname(path)) {
           continue;
@@ -572,7 +572,7 @@ Map<_Asset, List<_Asset>> _parseAssets(
   final Map<_Asset, List<_Asset>> result = <_Asset, List<_Asset>>{};
 
   final _AssetDirectoryCache cache = _AssetDirectoryCache(excludeDirs);
-  for (Uri assetUri in flutterManifest.assets) {
+  for (final Uri assetUri in flutterManifest.assets) {
     if (assetUri.toString().endsWith('/')) {
       wildcardDirectories.add(assetUri);
       _parseAssetsFromFolder(packageMap, flutterManifest, assetBase,
@@ -586,8 +586,8 @@ Map<_Asset, List<_Asset>> _parseAssets(
   }
 
   // Add assets referenced in the fonts section of the manifest.
-  for (Font font in flutterManifest.fonts) {
-    for (FontAsset fontAsset in font.fontAssets) {
+  for (final Font font in flutterManifest.fonts) {
+    for (final FontAsset fontAsset in font.fontAssets) {
       final _Asset baseAsset = _resolveAsset(
         packageMap,
         assetBase,
@@ -626,7 +626,7 @@ void _parseAssetsFromFolder(
 
   final List<FileSystemEntity> lister = globals.fs.directory(directoryPath).listSync();
 
-  for (FileSystemEntity entity in lister) {
+  for (final FileSystemEntity entity in lister) {
     if (entity is File) {
       final String relativePath = globals.fs.path.relative(entity.path, from: assetBase);
 
@@ -655,7 +655,7 @@ void _parseAssetFromFile(
     packageName,
   );
   final List<_Asset> variants = <_Asset>[];
-  for (String path in cache.variantsFor(asset.assetFile.path)) {
+  for (final String path in cache.variantsFor(asset.assetFile.path)) {
     final String relativePath = globals.fs.path.relative(path, from: asset.baseDir);
     final Uri relativeUri = globals.fs.path.toUri(relativePath);
     final Uri entryUri = asset.symbolicPrefixUri == null

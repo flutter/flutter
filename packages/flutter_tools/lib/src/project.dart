@@ -699,7 +699,7 @@ class AndroidProject {
       throwToolExit('Error reading $appManifestFile even though it exists. '
                     'Please ensure that you have read permission to this file and try again.');
     }
-    for (xml.XmlElement metaData in document.findAllElements('meta-data')) {
+    for (final xml.XmlElement metaData in document.findAllElements('meta-data')) {
       final String name = metaData.getAttribute('android:name');
       if (name == 'flutterEmbedding') {
         final String embeddingVersionString = metaData.getAttribute('android:value');
@@ -764,7 +764,7 @@ Match _firstMatchInFile(File file, RegExp regExp) {
   if (!file.existsSync()) {
     return null;
   }
-  for (String line in file.readAsLinesSync()) {
+  for (final String line in file.readAsLinesSync()) {
     final Match match = regExp.firstMatch(line);
     if (match != null) {
       return match;

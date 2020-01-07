@@ -245,7 +245,7 @@ class RunCommand extends RunCommandBase {
       deviceType = 'multiple';
       deviceOsVersion = 'multiple';
       isEmulator = false;
-      for (Device device in devices) {
+      for (final Device device in devices) {
         final TargetPlatform platform = await device.targetPlatform;
         anyAndroidDevices = anyAndroidDevices || (platform == TargetPlatform.android);
         anyIOSDevices = anyIOSDevices || (platform == TargetPlatform.ios);
@@ -426,7 +426,7 @@ class RunCommand extends RunCommandBase {
                            'channel.', null);
     }
 
-    for (Device device in devices) {
+    for (final Device device in devices) {
       if (!device.supportsFastStart && boolArg('fast-start')) {
         globals.printStatus(
           'Using --fast-start option with device ${device.name}, but this device '
@@ -456,7 +456,7 @@ class RunCommand extends RunCommandBase {
     }
 
     if (hotMode) {
-      for (Device device in devices) {
+      for (final Device device in devices) {
         if (!device.supportsHotReload) {
           throwToolExit('Hot reload is not supported by ${device.name}. Run with --no-hot.');
         }
@@ -470,7 +470,7 @@ class RunCommand extends RunCommandBase {
     }
     final FlutterProject flutterProject = FlutterProject.current();
     final List<FlutterDevice> flutterDevices = <FlutterDevice>[
-      for (Device device in devices)
+      for (final Device device in devices)
         await FlutterDevice.create(
           device,
           flutterProject: flutterProject,

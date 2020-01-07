@@ -112,10 +112,10 @@ class SimControl {
 
     final Map<String, dynamic> devicesSection = await _list(SimControlListSection.devices);
 
-    for (String deviceCategory in devicesSection.keys) {
+    for (final String deviceCategory in devicesSection.keys) {
       final Object devicesData = devicesSection[deviceCategory];
       if (devicesData != null && devicesData is List<dynamic>) {
-        for (Map<String, dynamic> data in devicesData.map<Map<String, dynamic>>(castStringKeyedMap)) {
+        for (final Map<String, dynamic> data in devicesData.map<Map<String, dynamic>>(castStringKeyedMap)) {
           devices.add(SimDevice(deviceCategory, data));
         }
       }
@@ -809,7 +809,7 @@ class _IOSSimulatorDevicePortForwarder extends DevicePortForwarder {
 
   @override
   Future<void> dispose() async {
-    for (ForwardedPort port in _ports) {
+    for (final ForwardedPort port in _ports) {
       await unforward(port);
     }
   }

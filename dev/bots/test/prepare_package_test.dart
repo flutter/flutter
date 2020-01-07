@@ -35,7 +35,7 @@ void main() {
       );
     }
   });
-  for (String platformName in <String>['macos', 'linux', 'windows']) {
+  for (final String platformName in <String>['macos', 'linux', 'windows']) {
     final FakePlatform platform = FakePlatform(
       operatingSystem: platformName,
       environment: <String, String>{

@@ -68,7 +68,7 @@ class _AndroidBuilderImpl extends AndroidBuilder {
         // Module projects artifacts are located in `build/host`.
         outputDirectory = outputDirectory.childDirectory('host');
       }
-      for (AndroidBuildInfo androidBuildInfo in androidBuildInfo) {
+      for (final AndroidBuildInfo androidBuildInfo in androidBuildInfo) {
         await buildGradleAar(
           project: project,
           androidBuildInfo: androidBuildInfo,

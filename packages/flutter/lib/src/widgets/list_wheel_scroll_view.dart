@@ -265,7 +265,7 @@ class FixedExtentScrollController extends ScrollController {
     }
 
     await Future.wait<void>(<Future<void>>[
-      for (_FixedExtentScrollPosition position in positions.cast<_FixedExtentScrollPosition>())
+      for (final _FixedExtentScrollPosition position in positions.cast<_FixedExtentScrollPosition>())
         position.animateTo(
           itemIndex * position.itemExtent,
           duration: duration,
@@ -279,7 +279,7 @@ class FixedExtentScrollController extends ScrollController {
   /// Jumps the item index position from its current value to the given value,
   /// without animation, and without checking if the new value is in range.
   void jumpToItem(int itemIndex) {
-    for (_FixedExtentScrollPosition position in positions.cast<_FixedExtentScrollPosition>()) {
+    for (final _FixedExtentScrollPosition position in positions.cast<_FixedExtentScrollPosition>()) {
       position.jumpTo(itemIndex * position.itemExtent);
     }
   }

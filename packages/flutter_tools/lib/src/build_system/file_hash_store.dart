@@ -24,7 +24,7 @@ class FileStorage {
     final int version = json['version'] as int;
     final List<Map<String, Object>> rawCachedFiles = (json['files'] as List<dynamic>).cast<Map<String, Object>>();
     final List<FileHash> cachedFiles = <FileHash>[
-      for (Map<String, Object> rawFile in rawCachedFiles) FileHash.fromJson(rawFile),
+      for (final Map<String, Object> rawFile in rawCachedFiles) FileHash.fromJson(rawFile),
     ];
     return FileStorage(version, cachedFiles);
   }
@@ -36,7 +36,7 @@ class FileStorage {
     final Map<String, Object> json = <String, Object>{
       'version': version,
       'files': <Object>[
-        for (FileHash file in files) file.toJson(),
+        for (final FileHash file in files) file.toJson(),
       ],
     };
     return utf8.encode(jsonEncode(json));
@@ -118,7 +118,7 @@ class FileHashStore {
       cacheFile.deleteSync();
       return;
     }
-    for (FileHash fileHash in fileStorage.files) {
+    for (final FileHash fileHash in fileStorage.files) {
       previousHashes[fileHash.path] = fileHash.hash;
     }
     globals.printTrace('Done initializing file store');
@@ -132,7 +132,7 @@ class FileHashStore {
       cacheFile.createSync(recursive: true);
     }
     final List<FileHash> fileHashes = <FileHash>[];
-    for (MapEntry<String, String> entry in currentHashes.entries) {
+    for (final MapEntry<String, String> entry in currentHashes.entries) {
       fileHashes.add(FileHash(entry.key, entry.value));
     }
     final FileStorage fileStorage = FileStorage(
@@ -158,7 +158,7 @@ class FileHashStore {
     final List<File> dirty = <File>[];
     final Pool openFiles = Pool(kMaxOpenFiles);
     await Future.wait(<Future<void>>[
-       for (File file in files) _hashFile(file, dirty, openFiles)
+       for (final File file in files) _hashFile(file, dirty, openFiles)
     ]);
     return dirty;
   }

@@ -213,16 +213,16 @@ class AndroidApk extends ApplicationPackage {
     final String packageId = manifests.first.getAttribute('package');
 
     String launchActivity;
-    for (xml.XmlElement activity in document.findAllElements('activity')) {
+    for (final xml.XmlElement activity in document.findAllElements('activity')) {
       final String enabled = activity.getAttribute('android:enabled');
       if (enabled != null && enabled == 'false') {
         continue;
       }
 
-      for (xml.XmlElement element in activity.findElements('intent-filter')) {
+      for (final xml.XmlElement element in activity.findElements('intent-filter')) {
         String actionName = '';
         String categoryName = '';
-        for (xml.XmlNode node in element.children) {
+        for (final xml.XmlNode node in element.children) {
           if (node is! xml.XmlElement) {
             continue;
           }
@@ -511,7 +511,7 @@ class ApkManifestData {
   static bool isAttributeWithValuePresent(_Element baseElement,
       String childElement, String attributeName, String attributeValue) {
     final Iterable<_Element> allElements = baseElement.allElements(childElement);
-    for (_Element oneElement in allElements) {
+    for (final _Element oneElement in allElements) {
       final String elementAttributeValue = oneElement
           ?.firstAttribute(attributeName)
           ?.value;
@@ -535,7 +535,7 @@ class ApkManifestData {
     final _Element manifest = _Element.fromLine(lines[manifestLine], null);
     _Element currentElement = manifest;
 
-    for (String line in lines.skip(manifestLine)) {
+    for (final String line in lines.skip(manifestLine)) {
       final String trimLine = line.trimLeft();
       final int level = line.length - trimLine.length;
 
@@ -564,7 +564,7 @@ class ApkManifestData {
     final Iterable<_Element> activities = application.allElements('activity');
 
     _Element launchActivity;
-    for (_Element activity in activities) {
+    for (final _Element activity in activities) {
       final _Attribute enabled = activity.firstAttribute('android:enabled');
       final Iterable<_Element> intentFilters = activity.allElements('intent-filter');
       final bool isEnabledByDefault = enabled == null;
@@ -573,7 +573,7 @@ class ApkManifestData {
         continue;
       }
 
-      for (_Element element in intentFilters) {
+      for (final _Element element in intentFilters) {
         final bool isMainAction = isAttributeWithValuePresent(
             element, 'action', 'android:name', '"android.intent.action.MAIN"');
         if (!isMainAction) {

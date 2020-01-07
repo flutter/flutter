@@ -678,7 +678,7 @@ class FlutterPlatform extends PlatformPlugin {
     } finally {
       globals.printTrace('test $ourTestCount: cleaning up...');
       // Finalizers are treated like a stack; run them in reverse order.
-      for (Finalizer finalizer in finalizers.reversed) {
+      for (final Finalizer finalizer in finalizers.reversed) {
         try {
           await finalizer();
         } catch (error, stack) {
@@ -850,7 +850,7 @@ class FlutterPlatform extends PlatformPlugin {
     void reportObservatoryUri(Uri uri),
   }) {
     const String observatoryString = 'Observatory listening on ';
-    for (Stream<List<int>> stream in <Stream<List<int>>>[
+    for (final Stream<List<int>> stream in <Stream<List<int>>>[
       process.stderr,
       process.stdout,
     ]) {

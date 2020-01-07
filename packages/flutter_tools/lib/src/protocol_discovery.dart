@@ -157,7 +157,7 @@ class _BufferedStreamController<T> {
 
   StreamController<T> get _streamController {
     _streamControllerInstance ??= StreamController<T>.broadcast(onListen: () {
-      for (dynamic event in _events) {
+      for (final dynamic event in _events) {
         assert(T is! List);
         if (event is T) {
           _streamControllerInstance.add(event);

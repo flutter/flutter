@@ -104,7 +104,7 @@ class SnippetGenerator {
     final List<String> result = <String>[];
     const HtmlEscape htmlEscape = HtmlEscape();
     String language;
-    for (_ComponentTuple injection in injections) {
+    for (final _ComponentTuple injection in injections) {
       if (!injection.name.startsWith('code')) {
         continue;
       }
@@ -152,7 +152,7 @@ class SnippetGenerator {
     final List<_ComponentTuple> components = <_ComponentTuple>[];
     String language;
     final RegExp codeStartEnd = RegExp(r'^\s*```([-\w]+|[-\w]+ ([-\w]+))?\s*$');
-    for (String line in input.split('\n')) {
+    for (final String line in input.split('\n')) {
       final Match match = codeStartEnd.firstMatch(line);
       if (match != null) { // If we saw the start or end of a code block
         inCodeBlock = !inCodeBlock;
@@ -188,7 +188,7 @@ class SnippetGenerator {
   String _addLineNumbers(String app) {
     final StringBuffer buffer = StringBuffer();
     int count = 0;
-    for (String line in app.split('\n')) {
+    for (final String line in app.split('\n')) {
       count++;
       buffer.writeln('${count.toString().padLeft(5, ' ')}: $line');
     }

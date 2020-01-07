@@ -139,7 +139,7 @@ class Testbed {
             }
             await test();
             Cache.flutterRoot = originalFlutterRoot;
-            for (MapEntry<Timer, StackTrace> entry in timers.entries) {
+            for (final MapEntry<Timer, StackTrace> entry in timers.entries) {
               if (entry.key.isActive) {
                 throw StateError('A Timer was active at the end of a test: ${entry.value}');
               }

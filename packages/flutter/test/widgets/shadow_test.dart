@@ -56,7 +56,7 @@ void main() {
         ),
       );
     }
-    for (int elevation in kElevationToShadow.keys) {
+    for (final int elevation in kElevationToShadow.keys) {
       await tester.pumpWidget(build(elevation));
       await expectLater(
         find.byType(Container),
@@ -120,7 +120,7 @@ void main() {
         ),
       );
     }
-    for (int elevation in kElevationToShadow.keys) {
+    for (final int elevation in kElevationToShadow.keys) {
       await tester.pumpWidget(build(elevation.toDouble()));
       await expectLater(
         find.byType(Container),
