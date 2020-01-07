@@ -29,10 +29,10 @@ void main() {
     setUp(() {
       fakeStopWatch = FakeStopwatch();
     });
-    testUsingContext('error', () async {
+    testWithoutContext('error', () async {
       final BufferLogger mockLogger = BufferLogger(
         terminal: AnsiTerminal(
-          stdio: globals.stdio, // Danger, using real stdio
+          stdio: MockStdio(),
           platform: _kNoAnsiPlatform,
         ),
         outputPreferences: OutputPreferences.test(showColor: false),
@@ -49,10 +49,10 @@ void main() {
       expect(mockLogger.errorText, matches( r'^\[ (?: {0,2}\+[0-9]{1,4} ms|       )\] Helpless!\n$'));
     });
 
-    testUsingContext('ANSI colored errors', () async {
+    testWithoutContext('ANSI colored errors', () async {
       final BufferLogger mockLogger = BufferLogger(
         terminal: AnsiTerminal(
-          stdio: globals.stdio, // Danger, using real stdio
+          stdio:  MockStdio(),
           platform: FakePlatform()..stdoutSupportsAnsi = true,
         ),
         outputPreferences: OutputPreferences.test(showColor: true),
