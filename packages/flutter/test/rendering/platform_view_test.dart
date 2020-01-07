@@ -70,15 +70,19 @@ void main() {
       semanticsHandle.dispose();
     });
 
-    testGesture('hover events are dispatched via PlatformViewController.dispatchPointerEvent', (GestureTester tester) {
-      layout(platformViewRenderBox);
+    testGesture('hover events are dispatched via PlatformViewController.dispatchPointerEvent with correct parameter', (GestureTester tester) {
+      layout(platformViewRenderBox, constraints: BoxConstraints.tight(const Size(100, 100)));
       pumpFrame(phase: EnginePhase.flushSemantics);
 
       final TestPointer pointer = TestPointer(1, PointerDeviceKind.mouse);
       tester.route(pointer.addPointer());
-      tester.route(pointer.hover(const Offset(10, 10)));
+      tester.route(pointer.hover(const Offset(400, 310)));
 
-      expect(fakePlatformViewController.dispatchedPointerEvents, isNotEmpty);
+      expect(fakePlatformViewController.dispatchedPointerEvents, hasLength(1));
+      final PointerEvent event = fakePlatformViewController.dispatchedPointerEvents[0];
+      expect(event is PointerHoverEvent, true);
+      expect(event.position, const Offset(400, 310));
+      expect(event.localPosition, const Offset(50, 60));
     });
 
   }, skip: isBrowser); // TODO(yjbanov): fails on Web with obscured stack trace: https://github.com/flutter/flutter/issues/42770

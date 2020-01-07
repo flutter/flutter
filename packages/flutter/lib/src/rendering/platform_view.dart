@@ -10,6 +10,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 
+import 'package:vector_math/vector_math_64.dart' show Matrix4;
+
 import 'binding.dart';
 import 'box.dart';
 import 'layer.dart';
@@ -811,6 +813,10 @@ mixin _PlatformViewGestureMixin on RenderBox {
 
   _PlatformViewGestureRecognizer _gestureRecognizer;
 
+  Matrix4 _eventTransformer() {
+    return Matrix4.inverted(getTransformTo(null));
+  }
+
   @override
   bool hitTest(BoxHitTestResult result, { Offset position }) {
     if (hitTestBehavior == PlatformViewHitTestBehavior.transparent || !size.contains(position)) {
@@ -836,7 +842,7 @@ mixin _PlatformViewGestureMixin on RenderBox {
     assert(_hoverAnnotation == null);
     _hoverAnnotation = MouseTrackerAnnotation(onHover: (PointerHoverEvent event) {
       if (_handlePointerEvent != null)
-        _handlePointerEvent(event);
+        _handlePointerEvent(event.transformed(_eventTransformer()));
     });
     RendererBinding.instance.mouseTracker.attachAnnotation(_hoverAnnotation);
   }

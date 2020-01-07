@@ -12,7 +12,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter/semantics.dart';
 
-import 'package:vector_math/vector_math_64.dart';
+import 'package:vector_math/vector_math_64.dart' show Matrix4;
 
 import 'binding.dart';
 import 'box.dart';
@@ -2707,7 +2707,7 @@ class RenderMouseRegion extends RenderProxyBox {
   PointerEnterEventListener _onEnter;
   void _handleEnter(PointerEnterEvent event) {
     if (_onEnter != null)
-      _onEnter(event);
+      _onEnter(event.transformed(_eventTransformer()));
   }
 
   /// Called when a pointer changes position without buttons pressed and the end
@@ -2722,7 +2722,7 @@ class RenderMouseRegion extends RenderProxyBox {
   PointerHoverEventListener _onHover;
   void _handleHover(PointerHoverEvent event) {
     if (_onHover != null)
-      _onHover(event);
+      _onHover(event.transformed(_eventTransformer()));
   }
 
   /// Called when a pointer leaves the region (with or without buttons pressed)
@@ -2737,7 +2737,7 @@ class RenderMouseRegion extends RenderProxyBox {
   PointerExitEventListener _onExit;
   void _handleExit(PointerExitEvent event) {
     if (_onExit != null)
-      _onExit(event);
+      _onExit(event.transformed(_eventTransformer()));
   }
 
   // Object used for annotation of the layer used for hover hit detection.
@@ -2749,6 +2749,10 @@ class RenderMouseRegion extends RenderProxyBox {
   /// in other contexts.
   @visibleForTesting
   MouseTrackerAnnotation get hoverAnnotation => _hoverAnnotation;
+
+  Matrix4 _eventTransformer() {
+    return Matrix4.inverted(getTransformTo(null));
+  }
 
   void _updateAnnotations() {
     final bool annotationWasActive = _annotationIsActive;
