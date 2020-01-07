@@ -208,7 +208,7 @@ flutter:
     pluginClass: UseNewEmbedding
 dependencies:
 ''');
-      for (String dependency in dependencies) {
+      for (final String dependency in dependencies) {
         pluginDirectory
           .childFile('pubspec.yaml')
           .writeAsStringSync('  $dependency:\n', mode: FileMode.append);

@@ -1260,7 +1260,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
         final List<Object> propertiesJson = childJson['properties'] as List<Object>;
         final DiagnosticsNode diagnosticsNode = service.toObject(childJson['objectId'] as String) as DiagnosticsNode;
         final List<DiagnosticsNode> expectedProperties = diagnosticsNode.getProperties();
-        for (Map<String, Object> propertyJson in propertiesJson.cast<Map<String, Object>>()) {
+        for (final Map<String, Object> propertyJson in propertiesJson.cast<Map<String, Object>>()) {
           final Object property = service.toObject(propertyJson['objectId'] as String);
           expect(property, isInstanceOf<DiagnosticsNode>());
           expect(expectedProperties, contains(property));
@@ -1296,12 +1296,12 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
         expect(service.toObject(childJson['valueId'] as String), equals(children[i].value));
         expect(service.toObject(childJson['objectId'] as String), isInstanceOf<DiagnosticsNode>());
         final List<Object> propertiesJson = childJson['properties'] as List<Object>;
-        for (Map<String, Object> propertyJson in propertiesJson.cast<Map<String, Object>>()) {
+        for (final Map<String, Object> propertyJson in propertiesJson.cast<Map<String, Object>>()) {
           expect(propertyJson, isNot(contains('children')));
         }
         final DiagnosticsNode diagnosticsNode = service.toObject(childJson['objectId'] as String) as DiagnosticsNode;
         final List<DiagnosticsNode> expectedProperties = diagnosticsNode.getProperties();
-        for (Map<String, Object> propertyJson in propertiesJson.cast<Map<String, Object>>()) {
+        for (final Map<String, Object> propertyJson in propertiesJson.cast<Map<String, Object>>()) {
           final Object property = service.toObject(propertyJson['objectId'] as String);
           expect(property, isInstanceOf<DiagnosticsNode>());
           expect(expectedProperties, contains(property));
@@ -1313,9 +1313,9 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
         <String, String>{'arg': id, 'objectGroup': group, 'subtreeDepth': '3'},
       ) as Map<String, Object>;
       final List<Object> deepChildrenJson = deepSubtreeJson['children'] as List<Object>;
-      for(Map<String, Object> childJson in deepChildrenJson.cast<Map<String, Object>>()) {
+      for (final Map<String, Object> childJson in deepChildrenJson.cast<Map<String, Object>>()) {
         final List<Object> propertiesJson = childJson['properties'] as List<Object>;
-        for (Map<String, Object> propertyJson in propertiesJson.cast<Map<String, Object>>()) {
+        for (final Map<String, Object> propertyJson in propertiesJson.cast<Map<String, Object>>()) {
           expect(propertyJson, contains('children'));
         }
       }
@@ -2584,7 +2584,7 @@ class TestWidgetInspectorService extends Object with WidgetInspectorService {
 
       final List<Map<String, Object>> appBars = <Map<String, Object>>[];
       void visitChildren(List<dynamic> children) {
-        for (Map<String, Object> child in children.cast<Map<String, Object>>()) {
+        for (final Map<String, Object> child in children.cast<Map<String, Object>>()) {
           if (child['description'] == 'AppBar') {
             appBars.add(child);
           }

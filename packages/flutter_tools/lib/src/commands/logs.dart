@@ -8,7 +8,7 @@ import '../base/common.dart';
 import '../base/io.dart';
 import '../cache.dart';
 import '../device.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 
 class LogsCommand extends FlutterCommand {
@@ -50,13 +50,13 @@ class LogsCommand extends FlutterCommand {
 
     Cache.releaseLockEarly();
 
-    printStatus('Showing $logReader logs:');
+    globals.printStatus('Showing $logReader logs:');
 
     final Completer<int> exitCompleter = Completer<int>();
 
     // Start reading.
     final StreamSubscription<String> subscription = logReader.logLines.listen(
-      (String message) => printStatus(message, wrap: false),
+      (String message) => globals.printStatus(message, wrap: false),
       onDone: () {
         exitCompleter.complete(0);
       },
@@ -68,7 +68,7 @@ class LogsCommand extends FlutterCommand {
     // When terminating, close down the log reader.
     ProcessSignal.SIGINT.watch().listen((ProcessSignal signal) {
       subscription.cancel();
-      printStatus('');
+      globals.printStatus('');
       exitCompleter.complete(0);
     });
     ProcessSignal.SIGTERM.watch().listen((ProcessSignal signal) {

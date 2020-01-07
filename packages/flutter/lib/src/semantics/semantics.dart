@@ -386,7 +386,7 @@ class SemanticsData extends Diagnosticable {
     properties.add(DoubleProperty('elevation', elevation, defaultValue: 0.0));
     properties.add(DoubleProperty('thickness', thickness, defaultValue: 0.0));
     final List<String> actionSummary = <String>[
-      for (SemanticsAction action in SemanticsAction.values.values)
+      for (final SemanticsAction action in SemanticsAction.values.values)
         if ((actions & action.index) != 0)
           describeEnum(action),
     ];
@@ -397,7 +397,7 @@ class SemanticsData extends Diagnosticable {
     properties.add(IterableProperty<String>('customActions', customSemanticsActionSummary, ifEmpty: null));
 
     final List<String> flagSummary = <String>[
-      for (SemanticsFlag flag in SemanticsFlag.values.values)
+      for (final SemanticsFlag flag in SemanticsFlag.values.values)
         if ((flags & flag.index) != 0)
           describeEnum(flag),
     ];
@@ -1397,25 +1397,25 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     }());
     assert(() {
       final Set<SemanticsNode> seenChildren = <SemanticsNode>{};
-      for (SemanticsNode child in newChildren)
+      for (final SemanticsNode child in newChildren)
         assert(seenChildren.add(child)); // check for duplicate adds
       return true;
     }());
 
     // The goal of this function is updating sawChange.
     if (_children != null) {
-      for (SemanticsNode child in _children)
+      for (final SemanticsNode child in _children)
         child._dead = true;
     }
     if (newChildren != null) {
-      for (SemanticsNode child in newChildren) {
+      for (final SemanticsNode child in newChildren) {
         assert(!child.isInvisible, 'Child $child is invisible and should not be added as a child of $this.');
         child._dead = false;
       }
     }
     bool sawChange = false;
     if (_children != null) {
-      for (SemanticsNode child in _children) {
+      for (final SemanticsNode child in _children) {
         if (child._dead) {
           if (child.parent == this) {
             // we might have already had our child stolen from us by
@@ -1427,7 +1427,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       }
     }
     if (newChildren != null) {
-      for (SemanticsNode child in newChildren) {
+      for (final SemanticsNode child in newChildren) {
         if (child.parent != this) {
           if (child.parent != null) {
             // we're rebuilding the tree from the bottom up, so it's possible
@@ -1473,7 +1473,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   /// returns false.
   void visitChildren(SemanticsNodeVisitor visitor) {
     if (_children != null) {
-      for (SemanticsNode child in _children) {
+      for (final SemanticsNode child in _children) {
         if (!visitor(child))
           return;
       }
@@ -1487,7 +1487,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   /// returned true, otherwise returns false.
   bool _visitDescendants(SemanticsNodeVisitor visitor) {
     if (_children != null) {
-      for (SemanticsNode child in _children) {
+      for (final SemanticsNode child in _children) {
         if (!visitor(child) || !child._visitDescendants(visitor))
           return false;
       }
@@ -1519,7 +1519,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
       _markDirty();
     }
     if (_children != null) {
-      for (SemanticsNode child in _children)
+      for (final SemanticsNode child in _children)
         child.attach(owner);
     }
   }
@@ -1533,7 +1533,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     super.detach();
     assert(owner == null);
     if (_children != null) {
-      for (SemanticsNode child in _children) {
+      for (final SemanticsNode child in _children) {
         // The list of children may be stale and may contain nodes that have
         // been assigned to a different parent.
         if (child.parent == this)
@@ -1910,7 +1910,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
     final double elevation = _elevation;
     double thickness = _thickness;
     final Set<int> customSemanticsActionIds = <int>{};
-    for (CustomSemanticsAction action in _customSemanticsActions.keys)
+    for (final CustomSemanticsAction action in _customSemanticsActions.keys)
       customSemanticsActionIds.add(CustomSemanticsAction.getIdentifier(action));
     if (hintOverrides != null) {
       if (hintOverrides.onTapHint != null) {
@@ -1955,7 +1955,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
           mergedTags.addAll(node.tags);
         }
         if (node._customSemanticsActions != null) {
-          for (CustomSemanticsAction action in _customSemanticsActions.keys)
+          for (final CustomSemanticsAction action in _customSemanticsActions.keys)
             customSemanticsActionIds.add(CustomSemanticsAction.getIdentifier(action));
         }
         if (node.hintOverrides != null) {
@@ -2356,7 +2356,7 @@ class _SemanticsSortGroup extends Comparable<_SemanticsSortGroup> {
   /// then sorts them using [sortedWithinKnot].
   List<SemanticsNode> sortedWithinVerticalGroup() {
     final List<_BoxEdge> edges = <_BoxEdge>[];
-    for (SemanticsNode child in nodes) {
+    for (final SemanticsNode child in nodes) {
       // Using a small delta to shrink child rects removes overlapping cases.
       final Rect childRect = child.rect.deflate(0.1);
       edges.add(_BoxEdge(
@@ -2375,7 +2375,7 @@ class _SemanticsSortGroup extends Comparable<_SemanticsSortGroup> {
     List<_SemanticsSortGroup> horizontalGroups = <_SemanticsSortGroup>[];
     _SemanticsSortGroup group;
     int depth = 0;
-    for (_BoxEdge edge in edges) {
+    for (final _BoxEdge edge in edges) {
       if (edge.isLeadingEdge) {
         depth += 1;
         group ??= _SemanticsSortGroup(
@@ -2424,10 +2424,10 @@ class _SemanticsSortGroup extends Comparable<_SemanticsSortGroup> {
     }
     final Map<int, SemanticsNode> nodeMap = <int, SemanticsNode>{};
     final Map<int, int> edges = <int, int>{};
-    for (SemanticsNode node in nodes) {
+    for (final SemanticsNode node in nodes) {
       nodeMap[node.id] = node;
       final Offset center = _pointInParentCoordinates(node, node.rect.center);
-      for (SemanticsNode nextNode in nodes) {
+      for (final SemanticsNode nextNode in nodes) {
         if (identical(node, nextNode) || edges[nextNode.id] == node.id) {
           // Skip self or when we've already established that the next node
           // points to current node.
@@ -2499,7 +2499,7 @@ Offset _pointInParentCoordinates(SemanticsNode node, Offset point) {
 /// For an illustration of the algorithm see http://bit.ly/flutter-default-traversal.
 List<SemanticsNode> _childrenInDefaultOrder(List<SemanticsNode> children, TextDirection textDirection) {
   final List<_BoxEdge> edges = <_BoxEdge>[];
-  for (SemanticsNode child in children) {
+  for (final SemanticsNode child in children) {
     assert(child.rect.isFinite);
     // Using a small delta to shrink child rects removes overlapping cases.
     final Rect childRect = child.rect.deflate(0.1);
@@ -2519,7 +2519,7 @@ List<SemanticsNode> _childrenInDefaultOrder(List<SemanticsNode> children, TextDi
   final List<_SemanticsSortGroup> verticalGroups = <_SemanticsSortGroup>[];
   _SemanticsSortGroup group;
   int depth = 0;
-  for (_BoxEdge edge in edges) {
+  for (final _BoxEdge edge in edges) {
     if (edge.isLeadingEdge) {
       depth += 1;
       group ??= _SemanticsSortGroup(
@@ -2616,7 +2616,7 @@ class SemanticsOwner extends ChangeNotifier {
       _detachedNodes.clear();
       localDirtyNodes.sort((SemanticsNode a, SemanticsNode b) => a.depth - b.depth);
       visitedNodes.addAll(localDirtyNodes);
-      for (SemanticsNode node in localDirtyNodes) {
+      for (final SemanticsNode node in localDirtyNodes) {
         assert(node._dirty);
         assert(node.parent == null || !node.parent.isPartOfNodeMerging || node.isMergedIntoParent);
         if (node.isPartOfNodeMerging) {
@@ -2629,7 +2629,7 @@ class SemanticsOwner extends ChangeNotifier {
     }
     visitedNodes.sort((SemanticsNode a, SemanticsNode b) => a.depth - b.depth);
     final ui.SemanticsUpdateBuilder builder = ui.SemanticsUpdateBuilder();
-    for (SemanticsNode node in visitedNodes) {
+    for (final SemanticsNode node in visitedNodes) {
       assert(node.parent?._dirty != true); // could be null (no parent) or false (not dirty)
       // The _serialize() method marks the node as not dirty, and
       // recurses through the tree to do a deep serialization of all
@@ -2645,7 +2645,7 @@ class SemanticsOwner extends ChangeNotifier {
         node._addToUpdate(builder, customSemanticsActionIds);
     }
     _dirtyNodes.clear();
-    for (int actionId in customSemanticsActionIds) {
+    for (final int actionId in customSemanticsActionIds) {
       final CustomSemanticsAction action = CustomSemanticsAction.getAction(actionId);
       builder.updateCustomAction(id: actionId, label: action.label, hint: action.hint, overrideId: action.action?.index ?? -1);
     }
@@ -2710,7 +2710,7 @@ class SemanticsOwner extends ChangeNotifier {
       return result?._actions[action];
     }
     if (node.hasChildren) {
-      for (SemanticsNode child in node._children.reversed) {
+      for (final SemanticsNode child in node._children.reversed) {
         final _SemanticsActionHandler handler = _getSemanticsActionHandlerForPosition(child, position, action);
         if (handler != null)
           return handler;

@@ -5,10 +5,10 @@
 import 'dart:async';
 
 import '../base/common.dart';
-import '../base/platform.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../features.dart';
+import '../globals.dart' as globals;
 import '../macos/build_macos.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
@@ -25,7 +25,7 @@ class BuildMacosCommand extends BuildSubCommand {
   final String name = 'macos';
 
   @override
-  bool get hidden => !featureFlags.isMacOSEnabled || !platform.isMacOS;
+  bool get hidden => !featureFlags.isMacOSEnabled || !globals.platform.isMacOS;
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
@@ -43,7 +43,7 @@ class BuildMacosCommand extends BuildSubCommand {
     if (!featureFlags.isMacOSEnabled) {
       throwToolExit('"build macos" is not currently supported.');
     }
-    if (!platform.isMacOS) {
+    if (!globals.platform.isMacOS) {
       throwToolExit('"build macos" only supported on macOS hosts.');
     }
     if (!flutterProject.macos.existsSync()) {

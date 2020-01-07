@@ -5,10 +5,10 @@
 import 'dart:async';
 
 import '../base/common.dart';
-import '../base/platform.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../features.dart';
+import '../globals.dart' as globals;
 import '../linux/build_linux.dart';
 import '../project.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
@@ -25,7 +25,7 @@ class BuildLinuxCommand extends BuildSubCommand {
   final String name = 'linux';
 
   @override
-  bool get hidden => !featureFlags.isLinuxEnabled || !platform.isLinux;
+  bool get hidden => !featureFlags.isLinuxEnabled || !globals.platform.isLinux;
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
@@ -43,7 +43,7 @@ class BuildLinuxCommand extends BuildSubCommand {
     if (!featureFlags.isLinuxEnabled) {
       throwToolExit('"build linux" is not currently supported.');
     }
-    if (!platform.isLinux) {
+    if (!globals.platform.isLinux) {
       throwToolExit('"build linux" only supported on Linux hosts.');
     }
     if (!flutterProject.linux.existsSync()) {

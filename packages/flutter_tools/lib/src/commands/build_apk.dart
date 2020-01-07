@@ -10,7 +10,7 @@ import '../android/gradle_utils.dart';
 import '../base/terminal.dart';
 import '../build_info.dart';
 import '../cache.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
@@ -93,19 +93,19 @@ class BuildApkCommand extends BuildSubCommand {
     if (buildInfo.isRelease && !androidBuildInfo.splitPerAbi && androidBuildInfo.targetArchs.length > 1) {
       final String targetPlatforms = stringsArg('target-platform').join(', ');
 
-      printStatus('You are building a fat APK that includes binaries for '
+      globals.printStatus('You are building a fat APK that includes binaries for '
                   '$targetPlatforms.', emphasis: true, color: TerminalColor.green);
-      printStatus('If you are deploying the app to the Play Store, '
+      globals.printStatus('If you are deploying the app to the Play Store, '
                   'it\'s recommended to use app bundles or split the APK to reduce the APK size.', emphasis: true);
-      printStatus('To generate an app bundle, run:', emphasis: true, indent: 4);
-      printStatus('flutter build appbundle '
+      globals.printStatus('To generate an app bundle, run:', emphasis: true, indent: 4);
+      globals.printStatus('flutter build appbundle '
                   '--target-platform ${targetPlatforms.replaceAll(' ', '')}',indent: 8);
-      printStatus('Learn more on: https://developer.android.com/guide/app-bundle',indent: 8);
-      printStatus('To split the APKs per ABI, run:', emphasis: true, indent: 4);
-      printStatus('flutter build apk '
+      globals.printStatus('Learn more on: https://developer.android.com/guide/app-bundle',indent: 8);
+      globals.printStatus('To split the APKs per ABI, run:', emphasis: true, indent: 4);
+      globals.printStatus('flutter build apk '
                   '--target-platform ${targetPlatforms.replaceAll(' ', '')} '
                   '--split-per-abi', indent: 8);
-      printStatus('Learn more on:  https://developer.android.com/studio/build/configure-apk-splits#configure-abi-split',indent: 8);
+      globals.printStatus('Learn more on:  https://developer.android.com/studio/build/configure-apk-splits#configure-abi-split',indent: 8);
     }
     await androidBuilder.buildApk(
       project: FlutterProject.current(),

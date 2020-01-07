@@ -5,11 +5,13 @@
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' show ProcessException, ProcessResult;
-import 'package:flutter_tools/src/base/platform.dart';
+
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/windows/visual_studio.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
+import 'package:platform/platform.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -73,8 +75,8 @@ void main() {
     Map<String, dynamic> response,
     String responseOverride,
   ]) {
-    fs.file(vswherePath).createSync(recursive: true);
-    fs.file(vcvarsPath).createSync(recursive: true);
+    globals.fs.file(vswherePath).createSync(recursive: true);
+    globals.fs.file(vcvarsPath).createSync(recursive: true);
 
     final MockProcessResult result = MockProcessResult();
     when(result.exitCode).thenReturn(0);

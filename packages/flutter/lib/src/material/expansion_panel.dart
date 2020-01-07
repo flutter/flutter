@@ -389,7 +389,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
 
   bool _allIdentifiersUnique() {
     final Map<Object, bool> identifierMap = <Object, bool>{};
-    for (ExpansionPanelRadio child in widget.children.cast<ExpansionPanelRadio>()) {
+    for (final ExpansionPanelRadio child in widget.children.cast<ExpansionPanelRadio>()) {
       identifierMap[child.value] = true;
     }
     return identifierMap.length == widget.children.length;
@@ -427,7 +427,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
   }
 
   ExpansionPanelRadio searchPanelByValue(List<ExpansionPanelRadio> panels, Object value)  {
-    for (ExpansionPanelRadio panel in panels) {
+    for (final ExpansionPanelRadio panel in panels) {
       if (panel.value == value)
         return panel;
     }

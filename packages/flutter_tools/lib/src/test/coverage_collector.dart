@@ -10,11 +10,10 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/os.dart';
-import '../base/platform.dart';
 import '../base/process.dart';
 import '../base/utils.dart';
 import '../dart/package_map.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
 import '../vmservice.dart';
 
 import 'watcher.dart';
@@ -28,7 +27,7 @@ class CoverageCollector extends TestWatcher {
 
   @override
   Future<void> handleFinishedTest(ProcessEvent event) async {
-    printTrace('test ${event.childIndex}: collecting coverage');
+    globals.printTrace('test ${event.childIndex}: collecting coverage');
     await collectCoverage(event.process, event.observatoryUri);
   }
 
@@ -70,7 +69,7 @@ class CoverageCollector extends TestWatcher {
     assert(process != null);
     assert(observatoryUri != null);
     final int pid = process.pid;
-    printTrace('pid $pid: collecting coverage data from $observatoryUri...');
+    globals.printTrace('pid $pid: collecting coverage data from $observatoryUri...');
 
     Map<String, dynamic> data;
     final Future<void> processComplete = process.exitCode
@@ -87,9 +86,9 @@ class CoverageCollector extends TestWatcher {
     await Future.any<void>(<Future<void>>[ processComplete, collectionComplete ]);
     assert(data != null);
 
-    printTrace('pid $pid ($observatoryUri): collected coverage data; merging...');
+    globals.printTrace('pid $pid ($observatoryUri): collected coverage data; merging...');
     _addHitmap(coverage.createHitmap(data['coverage'] as List<dynamic>));
-    printTrace('pid $pid ($observatoryUri): done merging coverage data into global coverage map.');
+    globals.printTrace('pid $pid ($observatoryUri): done merging coverage data into global coverage map.');
   }
 
   /// Returns a future that will complete with the formatted coverage data
@@ -106,9 +105,9 @@ class CoverageCollector extends TestWatcher {
     }
     if (formatter == null) {
       final coverage.Resolver resolver = coverage.Resolver(packagesPath: PackageMap.globalPackagesPath);
-      final String packagePath = fs.currentDirectory.path;
+      final String packagePath = globals.fs.currentDirectory.path;
       final List<String> reportOn = coverageDirectory == null
-        ? <String>[fs.path.join(packagePath, 'lib')]
+        ? <String>[globals.fs.path.join(packagePath, 'lib')]
         : <String>[coverageDirectory.path];
       formatter = coverage.LcovFormatter(resolver, reportOn: reportOn, basePath: packagePath);
     }
@@ -118,42 +117,42 @@ class CoverageCollector extends TestWatcher {
   }
 
   Future<bool> collectCoverageData(String coveragePath, { bool mergeCoverageData = false, Directory coverageDirectory }) async {
-    final Status status = logger.startProgress('Collecting coverage information...', timeout: timeoutConfiguration.fastOperation);
+    final Status status = globals.logger.startProgress('Collecting coverage information...', timeout: timeoutConfiguration.fastOperation);
     final String coverageData = await finalizeCoverage(
       coverageDirectory: coverageDirectory,
     );
     status.stop();
-    printTrace('coverage information collection complete');
+    globals.printTrace('coverage information collection complete');
     if (coverageData == null) {
       return false;
     }
 
-    final File coverageFile = fs.file(coveragePath)
+    final File coverageFile = globals.fs.file(coveragePath)
       ..createSync(recursive: true)
       ..writeAsStringSync(coverageData, flush: true);
-    printTrace('wrote coverage data to $coveragePath (size=${coverageData.length})');
+    globals.printTrace('wrote coverage data to $coveragePath (size=${coverageData.length})');
 
     const String baseCoverageData = 'coverage/lcov.base.info';
     if (mergeCoverageData) {
-      if (!fs.isFileSync(baseCoverageData)) {
-        printError('Missing "$baseCoverageData". Unable to merge coverage data.');
+      if (!globals.fs.isFileSync(baseCoverageData)) {
+        globals.printError('Missing "$baseCoverageData". Unable to merge coverage data.');
         return false;
       }
 
       if (os.which('lcov') == null) {
         String installMessage = 'Please install lcov.';
-        if (platform.isLinux) {
+        if (globals.platform.isLinux) {
           installMessage = 'Consider running "sudo apt-get install lcov".';
-        } else if (platform.isMacOS) {
+        } else if (globals.platform.isMacOS) {
           installMessage = 'Consider running "brew install lcov".';
         }
-        printError('Missing "lcov" tool. Unable to merge coverage data.\n$installMessage');
+        globals.printError('Missing "lcov" tool. Unable to merge coverage data.\n$installMessage');
         return false;
       }
 
-      final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_test_coverage.');
+      final Directory tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_test_coverage.');
       try {
-        final File sourceFile = coverageFile.copySync(fs.path.join(tempDir.path, 'lcov.source.info'));
+        final File sourceFile = coverageFile.copySync(globals.fs.path.join(tempDir.path, 'lcov.source.info'));
         final RunResult result = processUtils.runSync(<String>[
           'lcov',
           '--add-tracefile', baseCoverageData,
@@ -189,7 +188,7 @@ Future<Map<String, dynamic>> collect(Uri serviceUri, bool Function(String) libra
 Future<Map<String, dynamic>> _getAllCoverage(VMService service, bool Function(String) libraryPredicate) async {
   await service.getVM();
   final List<Map<String, dynamic>> coverage = <Map<String, dynamic>>[];
-  for (Isolate isolateRef in service.vm.isolates) {
+  for (final Isolate isolateRef in service.vm.isolates) {
     await isolateRef.load();
     final Map<String, dynamic> scriptList = await isolateRef.invokeRpcRaw('getScripts', params: <String, dynamic>{'isolateId': isolateRef.id});
     final List<Future<void>> futures = <Future<void>>[];
@@ -205,7 +204,7 @@ Future<Map<String, dynamic>> _getAllCoverage(VMService service, bool Function(St
     if (scriptList['scripts'] == null) {
       continue;
     }
-    for (Map<String, dynamic> script in scriptList['scripts']) {
+    for (final Map<String, dynamic> script in scriptList['scripts']) {
       if (!libraryPredicate(script['uri'] as String)) {
         continue;
       }
@@ -244,9 +243,9 @@ void _buildCoverageMap(
   List<Map<String, dynamic>> coverage,
 ) {
   final Map<String, Map<int, int>> hitMaps = <String, Map<int, int>>{};
-  for (String scriptId in scripts.keys) {
+  for (final String scriptId in scripts.keys) {
     final Map<String, dynamic> sourceReport = sourceReports[scriptId];
-    for (Map<String, dynamic> range in sourceReport['ranges']) {
+    for (final Map<String, dynamic> range in sourceReport['ranges']) {
       final Map<String, dynamic> coverage = castStringKeyedMap(range['coverage']);
       // Coverage reports may sometimes be null for a Script.
       if (coverage == null) {
@@ -265,14 +264,14 @@ void _buildCoverageMap(
         continue;
       }
       if (hits != null) {
-        for (int hit in hits) {
+        for (final int hit in hits) {
           final int line = _lineAndColumn(hit, tokenPositions)[0];
           final int current = hitMap[line] ?? 0;
           hitMap[line] = current + 1;
         }
       }
       if (misses != null) {
-        for (int miss in misses) {
+        for (final int miss in misses) {
           final int line = _lineAndColumn(miss, tokenPositions)[0];
           hitMap[line] ??= 0;
         }

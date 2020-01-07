@@ -685,7 +685,7 @@ class _TimePickerHeaderLayout extends MultiChildLayoutDelegate {
 
   void _positionPivoted(double width, double y, Map<_TimePickerHeaderId, Size> childSizes, List<_TimePickerHeaderFragment> fragments, int pivotIndex) {
     double tailWidth = childSizes[fragments[pivotIndex].layoutId].width / 2.0;
-    for (_TimePickerHeaderFragment fragment in fragments.skip(pivotIndex + 1)) {
+    for (final _TimePickerHeaderFragment fragment in fragments.skip(pivotIndex + 1)) {
       tailWidth += childSizes[fragment.layoutId].width + fragment.startMargin;
     }
 
@@ -703,7 +703,7 @@ class _TimePickerHeaderLayout extends MultiChildLayoutDelegate {
   void _positionPiece(double width, double centeredAroundY, Map<_TimePickerHeaderId, Size> childSizes, List<_TimePickerHeaderFragment> fragments) {
     double pieceWidth = 0.0;
     double nextMargin = 0.0;
-    for (_TimePickerHeaderFragment fragment in fragments) {
+    for (final _TimePickerHeaderFragment fragment in fragments) {
       final Size childSize = childSizes[fragment.layoutId];
       pieceWidth += childSize.width + nextMargin;
       // Delay application of margin until next element because margin of the
@@ -927,7 +927,7 @@ class _DialPainter extends CustomPainter {
       final double labelThetaIncrement = -_kTwoPi / labels.length;
       double labelTheta = math.pi / 2.0;
 
-      for (_TappableLabel label in labels) {
+      for (final _TappableLabel label in labels) {
         final TextPainter labelPainter = label.painter;
         final Offset labelOffset = Offset(-labelPainter.width / 2.0, -labelPainter.height / 2.0);
         labelPainter.paint(canvas, getOffsetForTheta(labelTheta, ring) + labelOffset);
@@ -1339,7 +1339,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
   }
 
   List<_TappableLabel> _build24HourInnerRing(TextTheme textTheme) => <_TappableLabel>[
-    for (TimeOfDay timeOfDay in _amHours)
+    for (final TimeOfDay timeOfDay in _amHours)
       _buildTappableLabel(
         textTheme,
         timeOfDay.hour,
@@ -1351,7 +1351,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
   ];
 
   List<_TappableLabel> _build24HourOuterRing(TextTheme textTheme) => <_TappableLabel>[
-    for (TimeOfDay timeOfDay in _pmHours)
+    for (final TimeOfDay timeOfDay in _pmHours)
       _buildTappableLabel(
         textTheme,
         timeOfDay.hour,
@@ -1363,7 +1363,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
   ];
 
   List<_TappableLabel> _build12HourOuterRing(TextTheme textTheme) => <_TappableLabel>[
-    for (TimeOfDay timeOfDay in _amHours)
+    for (final TimeOfDay timeOfDay in _amHours)
       _buildTappableLabel(
         textTheme,
         timeOfDay.hour,
@@ -1391,7 +1391,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     ];
 
     return <_TappableLabel>[
-      for (TimeOfDay timeOfDay in _minuteMarkerValues)
+      for (final TimeOfDay timeOfDay in _minuteMarkerValues)
         _buildTappableLabel(
           textTheme,
           timeOfDay.minute,

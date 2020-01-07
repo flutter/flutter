@@ -18,6 +18,8 @@ import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/ios/simulators.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
+
 import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
 import 'package:process/process.dart';
@@ -239,7 +241,7 @@ void main() {
         when(mockXcode.minorVersion).thenReturn(2);
         expect(deviceUnderTest.supportsScreenshot, true);
         final MockFile mockFile = MockFile();
-        when(mockFile.path).thenReturn(fs.path.join('some', 'path', 'to', 'screenshot.png'));
+        when(mockFile.path).thenReturn(globals.fs.path.join('some', 'path', 'to', 'screenshot.png'));
         await deviceUnderTest.takeScreenshot(mockFile);
         verify(mockProcessManager.run(
           <String>[
@@ -248,7 +250,7 @@ void main() {
             'io',
             'x',
             'screenshot',
-            fs.path.join('some', 'path', 'to', 'screenshot.png'),
+            globals.fs.path.join('some', 'path', 'to', 'screenshot.png'),
           ],
           environment: null,
           workingDirectory: null,
@@ -478,7 +480,7 @@ void main() {
       final IOSSimulator device = IOSSimulator('x', name: 'iPhone SE', simulatorCategory: 'iOS 11.2');
       when(PlistParser.instance.getValueFromFile(any, any)).thenReturn('correct');
 
-      final Directory mockDir = fs.currentDirectory;
+      final Directory mockDir = globals.fs.currentDirectory;
       final IOSApp package = PrebuiltIOSApp(projectBundleId: 'incorrect', bundleName: 'name', bundleDir: mockDir);
 
       const BuildInfo mockInfo = BuildInfo(BuildMode.debug, 'flavor');
@@ -493,7 +495,7 @@ void main() {
   });
 
   testUsingContext('IOSDevice.isSupportedForProject is true on module project', () async {
-    fs.file('pubspec.yaml')
+    globals.fs.file('pubspec.yaml')
       ..createSync()
       ..writeAsStringSync(r'''
 name: example
@@ -501,7 +503,7 @@ name: example
 flutter:
   module: {}
 ''');
-    fs.file('.packages').createSync();
+    globals.fs.file('.packages').createSync();
     final FlutterProject flutterProject = FlutterProject.current();
 
     expect(IOSSimulator('test').isSupportedForProject(flutterProject), true);
@@ -511,9 +513,9 @@ flutter:
   });
 
   testUsingContext('IOSDevice.isSupportedForProject is true with editable host app', () async {
-    fs.file('pubspec.yaml').createSync();
-    fs.file('.packages').createSync();
-    fs.directory('ios').createSync();
+    globals.fs.file('pubspec.yaml').createSync();
+    globals.fs.file('.packages').createSync();
+    globals.fs.directory('ios').createSync();
     final FlutterProject flutterProject = FlutterProject.current();
 
     expect(IOSSimulator('test').isSupportedForProject(flutterProject), true);
@@ -523,8 +525,8 @@ flutter:
   });
 
   testUsingContext('IOSDevice.isSupportedForProject is false with no host app and no module', () async {
-    fs.file('pubspec.yaml').createSync();
-    fs.file('.packages').createSync();
+    globals.fs.file('pubspec.yaml').createSync();
+    globals.fs.file('.packages').createSync();
     final FlutterProject flutterProject = FlutterProject.current();
 
     expect(IOSSimulator('test').isSupportedForProject(flutterProject), false);

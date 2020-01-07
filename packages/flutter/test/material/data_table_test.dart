@@ -99,6 +99,72 @@ void main() {
     log.clear();
   });
 
+  testWidgets('DataTable control test - no checkboxes', (WidgetTester tester) async {
+    final List<String> log = <String>[];
+
+    Widget buildTable({ bool checkboxes = false }) {
+      return DataTable(
+        showCheckboxColumn: checkboxes,
+        onSelectAll: (bool value) {
+          log.add('select-all: $value');
+        },
+        columns: const <DataColumn>[
+          DataColumn(
+            label: Text('Name'),
+            tooltip: 'Name',
+          ),
+          DataColumn(
+            label: Text('Calories'),
+            tooltip: 'Calories',
+            numeric: true,
+          ),
+        ],
+        rows: kDesserts.map<DataRow>((Dessert dessert) {
+          return DataRow(
+            key: ValueKey<String>(dessert.name),
+            onSelectChanged: (bool selected) {
+              log.add('row-selected: ${dessert.name}');
+            },
+            cells: <DataCell>[
+              DataCell(
+                Text(dessert.name),
+              ),
+              DataCell(
+                Text('${dessert.calories}'),
+                showEditIcon: true,
+                onTap: () {
+                  log.add('cell-tap: ${dessert.calories}');
+                },
+              ),
+            ],
+          );
+        }).toList(),
+      );
+    }
+
+    await tester.pumpWidget(MaterialApp(
+      home: Material(child: buildTable()),
+    ));
+
+    expect(find.byType(Checkbox), findsNothing);
+    await tester.tap(find.text('Cupcake'));
+
+    expect(log, <String>['row-selected: Cupcake']);
+    log.clear();
+
+    await tester.pumpWidget(MaterialApp(
+      home: Material(child: buildTable(checkboxes: true)),
+    ));
+
+    await tester.pumpAndSettle(const Duration(milliseconds: 200));
+    final Finder checkboxes = find.byType(Checkbox);
+    expect(checkboxes, findsNWidgets(11));
+    await tester.tap(checkboxes.first);
+
+    expect(log, <String>['select-all: true']);
+    log.clear();
+  });
+
   testWidgets('DataTable overflow test - header', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(

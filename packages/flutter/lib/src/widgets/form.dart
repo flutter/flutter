@@ -177,7 +177,7 @@ class FormState extends State<Form> {
 
   /// Saves every [FormField] that is a descendant of this [Form].
   void save() {
-    for (FormFieldState<dynamic> field in _fields)
+    for (final FormFieldState<dynamic> field in _fields)
       field.save();
   }
 
@@ -189,7 +189,7 @@ class FormState extends State<Form> {
   /// If the form's [Form.autovalidate] property is true, the fields will all be
   /// revalidated after being reset.
   void reset() {
-    for (FormFieldState<dynamic> field in _fields)
+    for (final FormFieldState<dynamic> field in _fields)
       field.reset();
     _fieldDidChange();
   }
@@ -205,7 +205,7 @@ class FormState extends State<Form> {
 
   bool _validate() {
     bool hasError = false;
-    for (FormFieldState<dynamic> field in _fields)
+    for (final FormFieldState<dynamic> field in _fields)
       hasError = !field.validate() || hasError;
     return !hasError;
   }

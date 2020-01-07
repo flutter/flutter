@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test('applyGrowthDirectionToAxisDirection produces expected AxisDirection', () {
     expect(AxisDirection.values.length, 4);
-    for (AxisDirection axisDirection in AxisDirection.values) {
+    for (final AxisDirection axisDirection in AxisDirection.values) {
       expect(applyGrowthDirectionToAxisDirection(axisDirection, GrowthDirection.forward), axisDirection);
     }
     expect(applyGrowthDirectionToAxisDirection(AxisDirection.up, GrowthDirection.reverse), AxisDirection.down);

@@ -102,7 +102,7 @@ Future<bool> run(List<String> arguments) async {
     print('');
   }
 
-  for (File file in files) {
+  for (final File file in files) {
     if (verbose)
       print('Processing ${file.path}...');
     TestFile instructions;
@@ -127,7 +127,7 @@ Future<bool> run(List<String> arguments) async {
     try {
       bool success;
       bool showContacts = false;
-      for (String fetchCommand in instructions.fetch) {
+      for (final String fetchCommand in instructions.fetch) {
         success = await shell(fetchCommand, checkout, verbose: verbose, silentFailure: skipOnFetchFailure);
         if (!success) {
           if (skipOnFetchFailure) {
@@ -153,7 +153,7 @@ Future<bool> run(List<String> arguments) async {
         for (int iteration = 0; iteration < repeat; iteration += 1) {
           if (verbose && repeat > 1)
             print('Round ${iteration + 1} of $repeat.');
-          for (String testCommand in instructions.tests) {
+          for (final String testCommand in instructions.tests) {
             success = await shell(testCommand, tests, verbose: verbose);
             if (!success) {
               print('ERROR: One or more tests from ${path.basenameWithoutExtension(file.path)} failed.');
@@ -197,7 +197,7 @@ class TestFile {
     final List<String> fetch = <String>[];
     final List<Directory> update = <Directory>[];
     final List<String> test = <String>[];
-    for (String line in file.readAsLinesSync().map((String line) => line.trim())) {
+    for (final String line in file.readAsLinesSync().map((String line) => line.trim())) {
       if (line.isEmpty) {
         // blank line
       } else if (line.startsWith('#')) {
@@ -228,7 +228,7 @@ class TestFile {
     }
     if (contacts.isEmpty)
       throw FormatException('${errorPrefix}No contacts specified. At least one contact e-mail address must be specified.');
-    for (String email in contacts) {
+    for (final String email in contacts) {
       if (!email.contains(_email) || email.endsWith('@example.com'))
         throw FormatException('${errorPrefix}The following e-mail address appears to be an invalid e-mail address: $email');
     }
