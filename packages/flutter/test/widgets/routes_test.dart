@@ -534,7 +534,7 @@ void main() {
     expect(focusNode.hasPrimaryFocus, isTrue);
   });
 
-  group('TrasitionRoute', () {
+  group('TransitionRoute', () {
     testWidgets('secondary animation is kDismissed when next route finishes pop', (WidgetTester tester) async {
       final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
       await tester.pumpWidget(
@@ -863,7 +863,129 @@ void main() {
       expect(rootObserver.dialogCount, 0);
       expect(nestedObserver.dialogCount, 1);
     });
+
+    testWidgets('reverseTransitionDuration defaults to transitionDuration', (WidgetTester tester) async {
+      final GlobalKey containerKey = GlobalKey();
+
+      // Default MaterialPageRoute transition duration should be 300ms.
+      await tester.pumpWidget(MaterialApp(
+        onGenerateRoute: (RouteSettings settings) {
+          return MaterialPageRoute<dynamic>(
+            builder: (BuildContext context) {
+              return RaisedButton(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute<dynamic>(
+                      builder: (BuildContext innerContext) {
+                        return Container(
+                          key: containerKey,
+                          color: Colors.green,
+                        );
+                      },
+                    ),
+                  );
+                },
+                child: const Text('Open page'),
+              );
+            },
+          );
+        },
+      ));
+
+      // Open the new route.
+      await tester.tap(find.byType(RaisedButton));
+      await tester.pumpAndSettle();
+      expect(find.text('Open page'), findsNothing);
+      expect(find.byKey(containerKey), findsOneWidget);
+
+      // Pop the new route.
+      tester.state<NavigatorState>(find.byType(Navigator)).pop();
+      await tester.pump();
+      expect(find.byKey(containerKey), findsOneWidget);
+
+      // Container should be present halfway through the transition.
+      await tester.pump(const Duration(milliseconds: 150));
+      expect(find.byKey(containerKey), findsOneWidget);
+
+      // Container should be present at the very end of the transition.
+      await tester.pump(const Duration(milliseconds: 150));
+      expect(find.byKey(containerKey), findsOneWidget);
+
+      // Container have transitioned out after 300ms.
+      await tester.pump(const Duration(milliseconds: 1));
+      expect(find.byKey(containerKey), findsNothing);
+    });
+
+    testWidgets('reverseTransitionDuration can be customized', (WidgetTester tester) async {
+      final GlobalKey containerKey = GlobalKey();
+      await tester.pumpWidget(MaterialApp(
+        onGenerateRoute: (RouteSettings settings) {
+          return MaterialPageRoute<dynamic>(
+            builder: (BuildContext context) {
+              return RaisedButton(
+                onPressed: () {
+                  Navigator.of(context).push(
+                    ModifiedReverseTransitionDurationRoute<dynamic>(
+                      builder: (BuildContext innerContext) {
+                        return Container(
+                          key: containerKey,
+                          color: Colors.green,
+                        );
+                      },
+                      // modified value, default MaterialPageRoute transition duration should be 300ms.
+                      reverseTransitionDuration: const Duration(milliseconds: 150),
+                    ),
+                  );
+                },
+                child: const Text('Open page'),
+              );
+            },
+          );
+        },
+      ));
+
+      // Open the new route.
+      await tester.tap(find.byType(RaisedButton));
+      await tester.pumpAndSettle();
+      expect(find.text('Open page'), findsNothing);
+      expect(find.byKey(containerKey), findsOneWidget);
+
+      // Pop the new route.
+      tester.state<NavigatorState>(find.byType(Navigator)).pop();
+      await tester.pump();
+      expect(find.byKey(containerKey), findsOneWidget);
+
+      // Container should be present halfway through the transition.
+      await tester.pump(const Duration(milliseconds: 75));
+      expect(find.byKey(containerKey), findsOneWidget);
+
+      // Container should be present at the very end of the transition.
+      await tester.pump(const Duration(milliseconds: 75));
+      expect(find.byKey(containerKey), findsOneWidget);
+
+      // Container have transitioned out after 150ms.
+      await tester.pump(const Duration(milliseconds: 1));
+      expect(find.byKey(containerKey), findsNothing);
+    });
   });
+}
+
+class ModifiedReverseTransitionDurationRoute<T> extends MaterialPageRoute<T> {
+  ModifiedReverseTransitionDurationRoute({
+    @required WidgetBuilder builder,
+    RouteSettings settings,
+    Duration reverseTransitionDuration,
+    bool fullscreenDialog = false,
+  }) : _reverseTransitionDuration = reverseTransitionDuration,
+       super(
+         builder: builder,
+         settings: settings,
+         fullscreenDialog: fullscreenDialog,
+       );
+
+  @override
+  Duration get reverseTransitionDuration => _reverseTransitionDuration;
+  final Duration _reverseTransitionDuration;
 }
 
 class MockPageRoute extends Mock implements PageRoute<dynamic> { }
