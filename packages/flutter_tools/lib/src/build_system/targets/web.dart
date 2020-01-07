@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:crypto/crypto.dart';
+
 import '../../artifacts.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
@@ -220,12 +222,19 @@ class WebReleaseBundle extends Target {
   @override
   List<String> get depfiles => const <String>[
     'dart2js.d',
+    'flutter_assets.d'
   ];
 
   @override
   Future<void> build(Environment environment) async {
+    final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     for (final File outputFile in environment.buildDir.listSync(recursive: true).whereType<File>()) {
-      if (!globals.fs.path.basename(outputFile.path).contains('main.dart.js')) {
+      final String basename = globals.fs.path.basename(outputFile.path);
+      if (!basename.contains('main.dart.js')) {
+        continue;
+      }
+      // In release mode, do not output deps file or source map.
+      if (buildMode == BuildMode.release && (basename.endsWith('.deps') || basename.endsWith('.map'))) {
         continue;
       }
       outputFile.copySync(
@@ -241,4 +250,103 @@ class WebReleaseBundle extends Target {
     final Depfile depfile = await copyAssets(environment, environment.outputDir.childDirectory('assets'));
     depfile.writeToFile(environment.buildDir.childFile('flutter_assets.d'));
   }
+}
+
+/// Generate a service worker for a web target.
+class WebServiceWorker extends Target {
+  const WebServiceWorker();
+
+  @override
+  String get name => 'web_service_worker';
+
+  @override
+  List<Target> get dependencies => const <Target>[
+    Dart2JSTarget(),
+    WebReleaseBundle(),
+  ];
+
+  @override
+  List<String> get depfiles => const <String>[
+    'service_worker.d',
+  ];
+
+  @override
+  List<Source> get inputs => const <Source>[];
+
+  @override
+  List<Source> get outputs => const <Source>[];
+
+  @override
+  Future<void> build(Environment environment) async {
+    final List<File> contents = environment.outputDir
+      .listSync(recursive: true)
+      .whereType<File>()
+      .where((File file) => !file.path.endsWith('service_worker.js'))
+      .toList();
+    // TODO(jonahwilliams): determine whether this needs to be made more efficient.
+    final Map<String, String> uriToHash = <String, String>{
+      for (File file in contents)
+        '/${globals.fs.path.relative(file.path, from: environment.outputDir.path)}':
+          md5.convert(await file.readAsBytes()).toString(),
+    };
+    final File serviceWorkerFile = environment.outputDir
+      .childFile('service_worker.js');
+    final Depfile depfile = Depfile(contents, <File>[serviceWorkerFile]);
+    final String serviceWorker = generateServiceWorker(uriToHash);
+    serviceWorkerFile
+      .writeAsStringSync(serviceWorker);
+    depfile.writeToFile(environment.buildDir.childFile('service_worker.d'));
+  }
+}
+
+/// Generate a service worker with an app-specific cache name a map of
+/// resource files.
+///
+/// We embed file hashes directly into the worker so that the byte for byte
+/// invalidation will automatically reactivate workers whenever a new
+/// version is deployed.
+// TODO(jonahwilliams): on re-activate, only evict stale assets.
+String generateServiceWorker(Map<String, String> resources) {
+  return '''
+'use strict';
+const CACHE_NAME = 'flutter-app-cache';
+const RESOURCES = {
+  ${resources.entries.map((MapEntry<String, String> entry) => '"${entry.key}": "${entry.value}"').join(",\n")}
+};
+
+self.addEventListener('install', function (event) {
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then(function (cache) {
+        return cache.addAll(Object.keys(RESOURCES));
+      })
+  );
+});
+
+self.addEventListener('activate', function (event) {
+  event.waitUntil(
+    caches.keys().then(function (cacheName) {
+      return caches.delete(cacheName);
+    }).then(function (_) {
+      return caches.open(CACHE_NAME);
+    }).then(function (cache) {
+      return cache.addAll(Object.keys(RESOURCES));
+    })
+  );
+});
+
+self.addEventListener('fetch', function (event) {
+  event.respondWith(
+    caches.match(event.request)
+      .then(function (response) {
+        if (response) {
+          return response;
+        }
+        return fetch(event.request, {
+          credentials: 'include'
+        });
+      })
+  );
+});
+''';
 }
