@@ -2459,7 +2459,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('No tabs'), findsOneWidget);
   });
-  
+
    testWidgets('TabBar expands vertically to accommodate the Icon and child Text() pair the same amount it would expand for Icon and text pair.', (WidgetTester tester) async {
     const double indicatorWeight = 2.0;
 
