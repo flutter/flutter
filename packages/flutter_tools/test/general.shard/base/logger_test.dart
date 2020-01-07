@@ -176,7 +176,7 @@ void main() {
         Stopwatch: () => mockStopwatch,
       });
 
-      testUsingContext('Stdout startProgress on colored terminal for $testOs', () async {
+      testWithoutContext('Stdout startProgress on colored terminal for $testOs', () async {
         bool done = false;
         FakeAsync().run((FakeAsync time) {
           final Logger logger = StdoutLogger(
@@ -210,6 +210,7 @@ void main() {
       testUsingContext('Stdout startProgress on colored terminal pauses on $testOs', () async {
         bool done = false;
         FakeAsync().run((FakeAsync time) {
+          mockStopwatch.elapsed = const Duration(seconds: 5);
           final Logger logger = StdoutLogger(
             terminal: AnsiTerminal(
               stdio: mockStdio,
@@ -741,6 +742,8 @@ void main() {
     });
 
     // Status still uses Stopwatch from context.
+    // TODO(jonahwilliams): switch to testWithoutContext once logger uses a
+    // TimerFactory.
     test('sequential startProgress calls with StdoutLogger', () async {
       final Logger logger = StdoutLogger(
         terminal: AnsiTerminal(
