@@ -1083,7 +1083,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///  * [barrierColor], which determines the color that the modal transitions
   ///    to.
   ///  * [AnimatedModalBarrier], the widget that implements this feature.
-  Animatable<double> barrierTween = CurveTween(curve: Curves.ease);
+  Animatable<double> get barrierTween => CurveTween(curve: Curves.ease);
 
   /// Whether the route should remain in memory when it is inactive.
   ///
