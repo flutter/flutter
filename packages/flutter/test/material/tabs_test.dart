@@ -2474,4 +2474,5 @@ void main() {
     const TabBar tabBarWithTextChild = TabBar(tabs: tabListWithTextChild, indicatorWeight: indicatorWeight,);
 
     expect(tabBarWithText.preferredSize, tabBarWithTextChild.preferredSize);
+   });
 }
