@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 part of engine;
-
 final bool _supportsDecode = js_util.getProperty(
         js_util.getProperty(
             js_util.getProperty(html.window, 'Image'), 'prototype'),
@@ -23,46 +22,54 @@ class HtmlCodec implements ui.Codec {
 
   @override
   Future<ui.FrameInfo> getNextFrame() async {
-    StreamSubscription<html.Event> loadSubscription;
-    StreamSubscription<html.Event> errorSubscription;
     final Completer<ui.FrameInfo> completer = Completer<ui.FrameInfo>();
-    final html.ImageElement imgElement = html.ImageElement();
-    // If the browser doesn't support asynchronous decoding of an image,
-    // then use the `onload` event to decide when it's ready to paint to the
-    // DOM. Unfortunately, this will case the image to be decoded synchronously
-    // on the main thread, and may cause dropped framed.
-    if (!_supportsDecode) {
-      loadSubscription = imgElement.onLoad.listen((html.Event event) {
-        loadSubscription.cancel();
-        errorSubscription.cancel();
+    if (_supportsDecode) {
+      final html.ImageElement imgElement = html.ImageElement();
+      imgElement.src = src;
+      js_util.setProperty(imgElement, 'decoding', 'async');
+      imgElement.decode().then((dynamic _) {
         final HtmlImage image = HtmlImage(
           imgElement,
           imgElement.naturalWidth,
           imgElement.naturalHeight,
         );
         completer.complete(SingleFrameInfo(image));
+      }).catchError((e) {
+        // This code path is hit on Chrome 80.0.3987.16 when too many
+        // images are on the page (~1000).
+        // Fallback here is to load using onLoad instead.
+        _decodeUsingOnLoad(completer);
       });
+    } else {
+      _decodeUsingOnLoad(completer);
     }
+    return completer.future;
+  }
+
+  void _decodeUsingOnLoad(Completer completer) {
+    StreamSubscription<html.Event> loadSubscription;
+    StreamSubscription<html.Event> errorSubscription;
+    final html.ImageElement imgElement = html.ImageElement();
+    // If the browser doesn't support asynchronous decoding of an image,
+    // then use the `onload` event to decide when it's ready to paint to the
+    // DOM. Unfortunately, this will cause the image to be decoded synchronously
+    // on the main thread, and may cause dropped framed.
     errorSubscription = imgElement.onError.listen((html.Event event) {
       loadSubscription?.cancel();
       errorSubscription.cancel();
       completer.completeError(event);
     });
+    loadSubscription = imgElement.onLoad.listen((html.Event event) {
+      loadSubscription.cancel();
+      errorSubscription.cancel();
+      final HtmlImage image = HtmlImage(
+        imgElement,
+        imgElement.naturalWidth,
+        imgElement.naturalHeight,
+      );
+      completer.complete(SingleFrameInfo(image));
+    });
     imgElement.src = src;
-    // If the browser supports asynchronous image decoding, use that instead
-    // of `onload`.
-    if (_supportsDecode) {
-      imgElement.decode().then((dynamic _) {
-        errorSubscription.cancel();
-        final HtmlImage image = HtmlImage(
-          imgElement,
-          imgElement.naturalWidth,
-          imgElement.naturalHeight,
-        );
-        completer.complete(SingleFrameInfo(image));
-      });
-    }
-    return completer.future;
   }
 
   @override
