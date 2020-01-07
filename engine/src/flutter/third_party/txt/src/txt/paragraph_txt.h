@@ -146,7 +146,7 @@ class ParagraphTxt : public Paragraph {
   FRIEND_TEST(ParagraphTest, DISABLED_ArabicParagraph);
   FRIEND_TEST(ParagraphTest, SpacingParagraph);
   FRIEND_TEST(ParagraphTest, LongWordParagraph);
-  FRIEND_TEST(ParagraphTest, KernScaleParagraph);
+  FRIEND_TEST_LINUX_ONLY(ParagraphTest, KernScaleParagraph);
   FRIEND_TEST_WINDOWS_DISABLED(ParagraphTest, NewlineParagraph);
   FRIEND_TEST_LINUX_ONLY(ParagraphTest, EmojiParagraph);
   FRIEND_TEST_LINUX_ONLY(ParagraphTest, EmojiMultiLineRectsParagraph);
