@@ -59,6 +59,7 @@ void main() {
       BuildInfo.debug,
       false,
       const <String>[],
+      false,
     ), throwsA(isInstanceOf<ToolExit>()));
   }));
 
