@@ -169,6 +169,8 @@ class StackFrame {
 
   @override
   bool operator ==(Object other) {
+    if (runtimeType != other.runtimeType)
+      return false;
     return other is StackFrame &&
         number == other.number &&
         package == other.package &&
