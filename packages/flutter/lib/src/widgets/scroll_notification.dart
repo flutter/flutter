@@ -266,6 +266,7 @@ class ScrollEndNotification extends ScrollNotification {
 ///  * [ScrollStartNotification], which indicates that scrolling has started.
 ///  * [ScrollNotification], which describes the notification lifecycle.
 class ScrollCancelledNotification extends ScrollNotification {
+  /// Creates a notification that a [Scrollable] widget has cancelled scrolling.
   ScrollCancelledNotification({
     @required ScrollMetrics metrics,
     @required BuildContext context,
