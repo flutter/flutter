@@ -150,7 +150,14 @@ class WebFs {
   /// Recompile the web application and return whether this was successful.
   Future<bool> recompile() async {
     if (!_useBuildRunner) {
-      await buildWeb(_flutterProject, _target, _buildInfo, _initializePlatform, _dartDefines);
+      await buildWeb(
+        _flutterProject,
+        _target,
+        _buildInfo,
+        _initializePlatform,
+        _dartDefines,
+        false,
+      );
       return true;
     }
     _client.startBuild();
@@ -309,7 +316,14 @@ class WebFs {
         handler = pipeline.addHandler(proxyHandler('http://localhost:$daemonAssetPort/web/'));
       }
     } else {
-      await buildWeb(flutterProject, target, buildInfo, initializePlatform, dartDefines);
+      await buildWeb(
+        flutterProject,
+        target,
+        buildInfo,
+        initializePlatform,
+        dartDefines,
+        false,
+      );
       firstBuildCompleter.complete(true);
     }
 
