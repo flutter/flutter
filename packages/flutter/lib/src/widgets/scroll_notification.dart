@@ -58,6 +58,8 @@ mixin ViewportNotificationMixin on Notification {
 ///    scrolling.
 ///  * A [UserScrollNotification], with a [UserScrollNotification.direction] of
 ///    [ScrollDirection.idle].
+///  * Zero or one [ScrollCancelledNotification] which indicates that the scroll
+///    is cancelled and the widget's state is not changed by the scroll.
 ///
 /// Notifications bubble up through the tree, which means a given
 /// [NotificationListener] will receive notifications for all descendant
@@ -251,6 +253,23 @@ class ScrollEndNotification extends ScrollNotification {
     if (dragDetails != null)
       description.add('$dragDetails');
   }
+}
+
+/// A notification that a [Scrollable] widget has cancelled scrolling.
+///
+/// Cancelling scroll means [Scrollable] widget restores to the state before
+/// user starts scrolling. This could happen in some widgets such as [PageView]
+/// when user doesn't scroll enough and it animates back to previous state where
+/// page is not changed.
+/// See also:
+///
+///  * [ScrollStartNotification], which indicates that scrolling has started.
+///  * [ScrollNotification], which describes the notification lifecycle.
+class ScrollCancelledNotification extends ScrollNotification {
+  ScrollCancelledNotification({
+    @required ScrollMetrics metrics,
+    @required BuildContext context,
+  }) : super(metrics: metrics, context: context);
 }
 
 /// A notification that the user has changed the direction in which they are

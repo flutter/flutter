@@ -120,6 +120,9 @@ class SpringSimulation extends Simulation {
 
   @override
   String toString() => '$runtimeType(end: $_endPosition, $type)';
+
+  /// The end position of the simulation.
+  double get endPosition => _endPosition;
 }
 
 /// A [SpringSimulation] where the value of [x] is guaranteed to have exactly the

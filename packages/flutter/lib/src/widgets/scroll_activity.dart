@@ -106,6 +106,13 @@ abstract class ScrollActivity {
     ScrollEndNotification(metrics: metrics, context: context).dispatch(context);
   }
 
+  /// Dispatch a [ScrollCancelledNotification] with the given metrics.
+  void dispatchScrollCancelledNotification(
+      ScrollMetrics metrics, BuildContext context) {
+    ScrollCancelledNotification(metrics: metrics, context: context)
+        .dispatch(context);
+  }
+
   /// Called when the scroll view that is performing this activity changes its metrics.
   void applyNewDimensions() { }
 

@@ -157,6 +157,11 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   bool get haveDimensions => _haveDimensions;
   bool _haveDimensions = false;
 
+  /// The initial number of pixels to offset the children in the opposite of
+  /// the axis direction when scroll starts.
+  double get initialPixels => _initialPixels;
+  double _initialPixels;
+
   /// Take any current applicable state from the given [ScrollPosition].
   ///
   /// This method is called by the constructor if it is given an `oldPosition`.
@@ -709,7 +714,9 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
 
   /// Called by [beginActivity] to report when an activity has started.
   void didStartScroll() {
-    activity.dispatchScrollStartNotification(copyWith(), context.notificationContext);
+    _initialPixels = pixels;
+    activity.dispatchScrollStartNotification(
+        copyWith(), context.notificationContext);
   }
 
   /// Called by [setPixels] to report a change to the [pixels] position.
@@ -739,6 +746,13 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   /// Subclasses should call this function when they change [userScrollDirection].
   void didUpdateScrollDirection(ScrollDirection direction) {
     UserScrollNotification(metrics: copyWith(), context: context.notificationContext, direction: direction).dispatch(context.notificationContext);
+  }
+
+  /// Dispatches a notification that scroll is cancelled and widget's state is
+  /// not changed by scroll.
+  void didCancelScroll() {
+    activity.dispatchScrollCancelledNotification(
+        copyWith(), context.notificationContext);
   }
 
   @override

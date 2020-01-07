@@ -908,4 +908,68 @@ void main() {
 
     semantics.dispose();
   });
+
+  testWidgets('Fire onScrollStarted when user starts to scroll ',
+      (WidgetTester tester) async {
+    int onScrollStartedCalledCount = 0;
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: PageView(
+        onScrollStarted: () {
+          onScrollStartedCalledCount++;
+        },
+        children: kStates.map<Widget>((String state) => Text(state)).toList(),
+      ),
+    ));
+
+    final TestGesture gesture =
+        await tester.startGesture(const Offset(100.0, 100.0));
+    await gesture.moveBy(const Offset(-380.0, 0.0));
+    await tester.pump();
+
+    expect(onScrollStartedCalledCount, 1);
+  });
+
+  testWidgets('Fire onScrollCancelled when user cancels scroll ',
+      (WidgetTester tester) async {
+    int onScrollCancelledCalledCount = 0;
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: PageView(
+        onScrollCancelled: () {
+          onScrollCancelledCalledCount++;
+        },
+        children: kStates.map<Widget>((String state) => Text(state)).toList(),
+      ),
+    ));
+
+    // Fling at a low speed and with short distance
+    await tester.fling(find.byType(PageView), const Offset(-200.0, 0.0), 10.0);
+    await tester.pumpAndSettle();
+
+    expect(onScrollCancelledCalledCount, 1);
+    expect(find.text('Alabama'), findsOneWidget);
+  });
+
+  testWidgets('Not fire onScrollCancelled when user finishes scrolling ',
+      (WidgetTester tester) async {
+    int onScrollCancelledCalledCount = 0;
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: PageView(
+        onScrollCancelled: () {
+          onScrollCancelledCalledCount++;
+        },
+        children: kStates.map<Widget>((String state) => Text(state)).toList(),
+      ),
+    ));
+
+    // Fling at a high speed and with long distance which triggers page change.
+    await tester.fling(find.byType(PageView), const Offset(-500.0, 0.0), 500.0);
+    await tester.pumpAndSettle();
+
+    expect(onScrollCancelledCalledCount, 0);
+    expect(find.text('Alabama'), findsNothing);
+    expect(find.text('Alaska'), findsOneWidget);
+  });
 }

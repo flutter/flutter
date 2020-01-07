@@ -146,6 +146,12 @@ class ScrollPositionWithSingleContext extends ScrollPosition implements ScrollAc
     final Simulation simulation = physics.createBallisticSimulation(this, velocity);
     if (simulation != null) {
       beginActivity(BallisticScrollActivity(this, simulation, context.vsync));
+      if (simulation is ScrollSpringSimulation &&
+          simulation.endPosition == initialPixels) {
+        // Dispatch a scroll cancelled notification if the end position of the
+        // animation equals to the initial position before scroll starts.
+        didCancelScroll();
+      }
     } else {
       goIdle();
     }

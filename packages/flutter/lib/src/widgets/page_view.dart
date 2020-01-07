@@ -566,6 +566,8 @@ class PageView extends StatefulWidget {
     List<Widget> children = const <Widget>[],
     this.dragStartBehavior = DragStartBehavior.start,
     this.allowImplicitScrolling = false,
+    this.onScrollCancelled,
+    this.onScrollStarted,
   }) : assert(allowImplicitScrolling != null),
        controller = controller ?? _defaultPageController,
        childrenDelegate = SliverChildListDelegate(children),
@@ -601,6 +603,8 @@ class PageView extends StatefulWidget {
     int itemCount,
     this.dragStartBehavior = DragStartBehavior.start,
     this.allowImplicitScrolling = false,
+    this.onScrollCancelled,
+    this.onScrollStarted,
   }) : assert(allowImplicitScrolling != null),
        controller = controller ?? _defaultPageController,
        childrenDelegate = SliverChildBuilderDelegate(itemBuilder, childCount: itemCount),
@@ -699,6 +703,8 @@ class PageView extends StatefulWidget {
     @required this.childrenDelegate,
     this.dragStartBehavior = DragStartBehavior.start,
     this.allowImplicitScrolling = false,
+    this.onScrollCancelled,
+    this.onScrollStarted,
   }) : assert(childrenDelegate != null),
        assert(allowImplicitScrolling != null),
        controller = controller ?? _defaultPageController,
@@ -768,6 +774,13 @@ class PageView extends StatefulWidget {
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
 
+  /// Called when user stops scrolling and the scroll doesn't result in a page
+  /// change.
+  final VoidCallback onScrollCancelled;
+
+  /// Called whenever user starts to scroll.
+  final VoidCallback onScrollStarted;
+
   @override
   _PageViewState createState() => _PageViewState();
 }
@@ -805,12 +818,21 @@ class _PageViewState extends State<PageView> {
 
     return NotificationListener<ScrollNotification>(
       onNotification: (ScrollNotification notification) {
-        if (notification.depth == 0 && widget.onPageChanged != null && notification is ScrollUpdateNotification) {
-          final PageMetrics metrics = notification.metrics as PageMetrics;
-          final int currentPage = metrics.page.round();
-          if (currentPage != _lastReportedPage) {
-            _lastReportedPage = currentPage;
-            widget.onPageChanged(currentPage);
+        if (notification.depth == 0) {
+          if (notification is ScrollUpdateNotification &&
+              widget.onPageChanged != null) {
+            final PageMetrics metrics = notification.metrics as PageMetrics;
+            final int currentPage = metrics.page.round();
+            if (currentPage != _lastReportedPage) {
+              _lastReportedPage = currentPage;
+              widget.onPageChanged(currentPage);
+            }
+          } else if (notification is ScrollCancelledNotification &&
+              widget.onScrollCancelled != null) {
+            widget.onScrollCancelled();
+          } else if (notification is ScrollStartNotification &&
+              widget.onScrollStarted != null) {
+            widget.onScrollStarted();
           }
         }
         return false;
