@@ -96,7 +96,7 @@ flutter_tools:lib/''');
         globals.fs.path.join('packages', 'flutter_tools', 'lib', 'src', 'build_system', 'targets', 'dart.dart'),
         globals.fs.path.join('packages', 'flutter_tools', 'lib', 'src', 'build_system', 'targets', 'ios.dart'),
       ];
-      for (String path in paths) {
+      for (final String path in paths) {
         globals.fs.file(path).createSync(recursive: true);
       }
     }, overrides: <Type, Generator>{

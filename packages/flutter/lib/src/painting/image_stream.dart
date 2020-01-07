@@ -402,7 +402,7 @@ abstract class ImageStreamCompleter extends Diagnosticable {
     // Make a copy to allow for concurrent modification.
     final List<ImageStreamListener> localListeners =
         List<ImageStreamListener>.from(_listeners);
-    for (ImageStreamListener listener in localListeners) {
+    for (final ImageStreamListener listener in localListeners) {
       try {
         listener.onImage(image, false);
       } catch (exception, stack) {
@@ -469,7 +469,7 @@ abstract class ImageStreamCompleter extends Diagnosticable {
     if (localErrorListeners.isEmpty) {
       FlutterError.reportError(_currentError);
     } else {
-      for (ImageErrorListener errorListener in localErrorListeners) {
+      for (final ImageErrorListener errorListener in localErrorListeners) {
         try {
           errorListener(exception, stack);
         } catch (exception, stack) {
@@ -604,7 +604,7 @@ class MultiFrameImageStreamCompleter extends ImageStreamCompleter {
                 .map<ImageChunkListener>((ImageStreamListener listener) => listener.onChunk)
                 .where((ImageChunkListener chunkListener) => chunkListener != null)
                 .toList();
-            for (ImageChunkListener listener in localListeners) {
+            for (final ImageChunkListener listener in localListeners) {
               listener(event);
             }
           }

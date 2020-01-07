@@ -380,7 +380,7 @@ class TestSemantics {
     if (thickness != null)
       buf.writeln('$indent  thickness: $thickness,');
     buf.writeln('$indent  children: <TestSemantics>[');
-    for (TestSemantics child in children) {
+    for (final TestSemantics child in children) {
       buf.writeln('${child.toString(indentAmount + 2)},');
     }
     buf.writeln('$indent  ],');

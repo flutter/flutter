@@ -146,7 +146,7 @@ void main() {
     };
 
     void expectDependenciesResolved(String projectPath) {
-      for (String output in pubOutput) {
+      for (final String output in pubOutput) {
         expectExists(projectPath, output);
       }
     }
@@ -193,7 +193,7 @@ void main() {
         modulePluginRegistrants,
         pluginWitnesses,
       ].expand<String>((List<String> list) => list);
-      for (String path in allFiles) {
+      for (final String path in allFiles) {
         final File file = globals.fs.file(globals.fs.path.join(projectPath, path));
         if (file.existsSync()) {
           file.deleteSync();

@@ -14,7 +14,7 @@ import '../src/common.dart';
 final DateTime inFuture = DateTime.now().add(const Duration(days: 100));
 
 void main() {
-  for (bool asyncScanning in <bool>[true, false]) {
+  for (final bool asyncScanning in <bool>[true, false]) {
     testWithoutContext('No last compile, asyncScanning: $asyncScanning', () async {
       final ProjectFileInvalidator projectFileInvalidator = ProjectFileInvalidator(
         fileSystem: MemoryFileSystem(),

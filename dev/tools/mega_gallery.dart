@@ -134,7 +134,7 @@ void _copy(Directory source, Directory target) {
   if (!target.existsSync())
     target.createSync(recursive: true);
 
-  for (FileSystemEntity entity in source.listSync(followLinks: false)) {
+  for (final FileSystemEntity entity in source.listSync(followLinks: false)) {
     final String name = path.basename(entity.path);
 
     if (entity is Directory) {
@@ -165,7 +165,7 @@ class SourceStats {
 SourceStats getStatsFor(Directory dir, [SourceStats stats]) {
   stats ??= SourceStats();
 
-  for (FileSystemEntity entity in dir.listSync(recursive: false, followLinks: false)) {
+  for (final FileSystemEntity entity in dir.listSync(recursive: false, followLinks: false)) {
     final String name = path.basename(entity.path);
     if (entity is File && name.endsWith('.dart')) {
       stats.files += 1;

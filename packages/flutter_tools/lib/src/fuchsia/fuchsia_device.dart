@@ -164,7 +164,7 @@ class FuchsiaDevices extends PollingDeviceDiscovery {
 @visibleForTesting
 List<FuchsiaDevice> parseListDevices(String text) {
   final List<FuchsiaDevice> devices = <FuchsiaDevice>[];
-  for (String rawLine in text.trim().split('\n')) {
+  for (final String rawLine in text.trim().split('\n')) {
     final String line = rawLine.trim();
     // ['ip', 'device name']
     final List<String> words = line.split(' ');
@@ -501,7 +501,7 @@ class FuchsiaDevice extends Device {
       return null;
     }
     final List<int> ports = <int>[];
-    for (String path in findOutput.split('\n')) {
+    for (final String path in findOutput.split('\n')) {
       if (path == '') {
         continue;
       }
@@ -512,7 +512,7 @@ class FuchsiaDevice extends Device {
         return null;
       }
       final String lsOutput = lsResult.stdout;
-      for (String line in lsOutput.split('\n')) {
+      for (final String line in lsOutput.split('\n')) {
         if (line == '') {
           continue;
         }
@@ -557,7 +557,7 @@ class FuchsiaDevice extends Device {
   // TODO(jonahwilliams): replacing this with the hub will require an update
   // to the flutter_runner.
   Future<int> findIsolatePort(String isolateName, List<int> ports) async {
-    for (int port in ports) {
+    for (final int port in ports) {
       try {
         // Note: The square-bracket enclosure for using the IPv6 loopback
         // didn't appear to work, but when assigning to the IPv4 loopback device,
@@ -567,7 +567,7 @@ class FuchsiaDevice extends Device {
         final VMService vmService = await VMService.connect(uri);
         await vmService.getVM();
         await vmService.refreshViews();
-        for (FlutterView flutterView in vmService.vm.views) {
+        for (final FlutterView flutterView in vmService.vm.views) {
           if (flutterView.uiIsolate == null) {
             continue;
           }
@@ -647,7 +647,7 @@ class FuchsiaIsolateDiscoveryProtocol {
 
   Future<void> _findIsolate() async {
     final List<int> ports = await _device.servicePorts();
-    for (int port in ports) {
+    for (final int port in ports) {
       VMService service;
       if (_ports.containsKey(port)) {
         service = _ports[port];
@@ -664,7 +664,7 @@ class FuchsiaIsolateDiscoveryProtocol {
       }
       await service.getVM();
       await service.refreshViews();
-      for (FlutterView flutterView in service.vm.views) {
+      for (final FlutterView flutterView in service.vm.views) {
         if (flutterView.uiIsolate == null) {
           continue;
         }
@@ -753,7 +753,7 @@ class _FuchsiaPortForwarder extends DevicePortForwarder {
 
   @override
   Future<void> dispose() async {
-    for (ForwardedPort port in forwardedPorts) {
+    for (final ForwardedPort port in forwardedPorts) {
       await unforward(port);
     }
   }

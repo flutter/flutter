@@ -34,7 +34,7 @@ class FakeProcessManager extends Mock implements ProcessManager {
   Map<String, List<ProcessResult>> get fakeResults => _fakeResults;
   set fakeResults(Map<String, List<ProcessResult>> value) {
     _fakeResults = <String, List<ProcessResult>>{};
-    for (String key in value.keys) {
+    for (final String key in value.keys) {
       _fakeResults[key] = (value[key] ?? <ProcessResult>[ProcessResult(0, 0, '', '')]).toList();
     }
   }
@@ -46,7 +46,7 @@ class FakeProcessManager extends Mock implements ProcessManager {
   /// parameters were in the same order.
   void verifyCalls(List<String> calls) {
     int index = 0;
-    for (String call in calls) {
+    for (final String call in calls) {
       expect(call.split(' '), orderedEquals(invocations[index].positionalArguments[0] as Iterable<dynamic>));
       index++;
     }
@@ -178,7 +178,7 @@ class StringStreamConsumer implements StreamConsumer<List<int>> {
 
   @override
   Future<dynamic> close() async {
-    for (Completer<dynamic> completer in completers) {
+    for (final Completer<dynamic> completer in completers) {
       await completer.future;
     }
     completers.clear();

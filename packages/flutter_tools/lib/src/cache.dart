@@ -108,7 +108,7 @@ class Cache {
       _artifacts.add(MacOSFuchsiaSDKArtifacts(this));
       _artifacts.add(FlutterRunnerSDKArtifacts(this));
       _artifacts.add(FlutterRunnerDebugSymbols(this));
-      for (String artifactName in IosUsbArtifacts.artifactNames) {
+      for (final String artifactName in IosUsbArtifacts.artifactNames) {
         _artifacts.add(IosUsbArtifacts(artifactName, this));
       }
     } else {
@@ -300,7 +300,7 @@ class Cache {
       return _dyLdLibEntry;
     }
     final List<String> paths = <String>[];
-    for (ArtifactSet artifact in _artifacts) {
+    for (final ArtifactSet artifact in _artifacts) {
       final Map<String, String> env = artifact.environment;
       if (env == null || !env.containsKey('DYLD_LIBRARY_PATH')) {
         continue;
@@ -378,7 +378,7 @@ class Cache {
     if (!_lockEnabled) {
       return;
     }
-    for (ArtifactSet artifact in _artifacts) {
+    for (final ArtifactSet artifact in _artifacts) {
       if (!requiredArtifacts.contains(artifact.developmentArtifact)) {
         globals.printTrace('Artifact $artifact is not required, skipping update.');
         continue;
@@ -409,7 +409,7 @@ class Cache {
     final bool includeAllPlatformsState = globals.cache.includeAllPlatforms;
     bool allAvailible = true;
     globals.cache.includeAllPlatforms = includeAllPlatforms;
-    for (ArtifactSet cachedArtifact in _artifacts) {
+    for (final ArtifactSet cachedArtifact in _artifacts) {
       if (cachedArtifact is EngineCachedArtifact) {
         allAvailible &= await cachedArtifact.checkForArtifacts(engineVersion);
       }
@@ -496,7 +496,7 @@ abstract class CachedArtifact extends ArtifactSet {
 
   /// Clear any zip/gzip files downloaded.
   void _removeDownloadedFiles() {
-    for (File f in downloadedFiles) {
+    for (final File f in downloadedFiles) {
       try {
         f.deleteSync();
       } on FileSystemException catch (e) {
@@ -606,7 +606,7 @@ class FlutterWebSdk extends CachedArtifact {
     final Uri url = Uri.parse('${cache.storageBaseUrl}/flutter_infra/flutter/$version/$platformName.zip');
     await _downloadZipArchive('Downloading Web SDK...', url, location);
     // This is a temporary work-around for not being able to safely download into a shared directory.
-    for (FileSystemEntity entity in location.listSync(recursive: true)) {
+    for (final FileSystemEntity entity in location.listSync(recursive: true)) {
       if (entity is File) {
         final List<String> segments = globals.fs.path.split(entity.path);
         segments.remove('flutter_web_sdk');
@@ -643,21 +643,21 @@ abstract class EngineCachedArtifact extends CachedArtifact {
   @override
   bool isUpToDateInner() {
     final Directory pkgDir = cache.getCacheDir('pkg');
-    for (String pkgName in getPackageDirs()) {
+    for (final String pkgName in getPackageDirs()) {
       final String pkgPath = globals.fs.path.join(pkgDir.path, pkgName);
       if (!globals.fs.directory(pkgPath).existsSync()) {
         return false;
       }
     }
 
-    for (List<String> toolsDir in getBinaryDirs()) {
+    for (final List<String> toolsDir in getBinaryDirs()) {
       final Directory dir = globals.fs.directory(globals.fs.path.join(location.path, toolsDir[0]));
       if (!dir.existsSync()) {
         return false;
       }
     }
 
-    for (String licenseDir in getLicenseDirs()) {
+    for (final String licenseDir in getLicenseDirs()) {
       final File file = globals.fs.file(globals.fs.path.join(location.path, licenseDir, 'LICENSE'));
       if (!file.existsSync()) {
         return false;
@@ -671,11 +671,11 @@ abstract class EngineCachedArtifact extends CachedArtifact {
     final String url = '${cache.storageBaseUrl}/flutter_infra/flutter/$version/';
 
     final Directory pkgDir = cache.getCacheDir('pkg');
-    for (String pkgName in getPackageDirs()) {
+    for (final String pkgName in getPackageDirs()) {
       await _downloadZipArchive('Downloading package $pkgName...', Uri.parse(url + pkgName + '.zip'), pkgDir);
     }
 
-    for (List<String> toolsDir in getBinaryDirs()) {
+    for (final List<String> toolsDir in getBinaryDirs()) {
       final String cacheDir = toolsDir[0];
       final String urlPath = toolsDir[1];
       final Directory dir = globals.fs.directory(globals.fs.path.join(location.path, cacheDir));
@@ -684,7 +684,7 @@ abstract class EngineCachedArtifact extends CachedArtifact {
       _makeFilesExecutable(dir);
 
       const List<String> frameworkNames = <String>['Flutter', 'FlutterMacOS'];
-      for (String frameworkName in frameworkNames) {
+      for (final String frameworkName in frameworkNames) {
         final File frameworkZip = globals.fs.file(globals.fs.path.join(dir.path, '$frameworkName.framework.zip'));
         if (frameworkZip.existsSync()) {
           final Directory framework = globals.fs.directory(globals.fs.path.join(dir.path, '$frameworkName.framework'));
@@ -695,7 +695,7 @@ abstract class EngineCachedArtifact extends CachedArtifact {
     }
 
     final File licenseSource = cache.getLicenseFile();
-    for (String licenseDir in getLicenseDirs()) {
+    for (final String licenseDir in getLicenseDirs()) {
       final String licenseDestinationPath = globals.fs.path.join(location.path, licenseDir, 'LICENSE');
       await licenseSource.copy(licenseDestinationPath);
     }
@@ -706,7 +706,7 @@ abstract class EngineCachedArtifact extends CachedArtifact {
     final String url = '${cache.storageBaseUrl}/flutter_infra/flutter/$engineVersion/';
 
     bool exists = false;
-    for (String pkgName in getPackageDirs()) {
+    for (final String pkgName in getPackageDirs()) {
       exists = await _doesRemoteExist('Checking package $pkgName is available...',
           Uri.parse(url + pkgName + '.zip'));
       if (!exists) {
@@ -714,7 +714,7 @@ abstract class EngineCachedArtifact extends CachedArtifact {
       }
     }
 
-    for (List<String> toolsDir in getBinaryDirs()) {
+    for (final List<String> toolsDir in getBinaryDirs()) {
       final String cacheDir = toolsDir[0];
       final String urlPath = toolsDir[1];
       exists = await _doesRemoteExist('Checking $cacheDir tools are available...',
@@ -728,7 +728,7 @@ abstract class EngineCachedArtifact extends CachedArtifact {
 
   void _makeFilesExecutable(Directory dir) {
     os.chmod(dir, 'a+r,a+x');
-    for (FileSystemEntity entity in dir.listSync(recursive: true)) {
+    for (final FileSystemEntity entity in dir.listSync(recursive: true)) {
       if (entity is File) {
         final FileStat stat = entity.statSync();
         final bool isUserExecutable = ((stat.mode >> 6) & 0x1) == 1;
@@ -1000,7 +1000,7 @@ class GradleWrapper extends CachedArtifact {
     if (!globals.fs.directory(wrapperDir).existsSync()) {
       return false;
     }
-    for (String scriptName in _gradleScripts) {
+    for (final String scriptName in _gradleScripts) {
       final File scriptFile = globals.fs.file(globals.fs.path.join(wrapperDir.path, scriptName));
       if (!scriptFile.existsSync()) {
         return false;
@@ -1189,7 +1189,7 @@ class IosUsbArtifacts extends CachedArtifact {
     if (executables == null) {
       return true;
     }
-    for (String executable in executables) {
+    for (final String executable in executables) {
       if (!location.childFile(executable).existsSync()) {
         return false;
       }

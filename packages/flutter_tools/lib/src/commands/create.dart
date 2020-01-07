@@ -44,7 +44,7 @@ enum _ProjectType {
 
 _ProjectType _stringToProjectType(String value) {
   _ProjectType result;
-  for (_ProjectType type in _ProjectType.values) {
+  for (final _ProjectType type in _ProjectType.values) {
     if (value == getEnumName(type)) {
       result = type;
       break;
@@ -306,7 +306,7 @@ class CreateCommand extends FlutterCommand {
 
     if (argResults.rest.length > 1) {
       String message = 'Multiple output directories specified.';
-      for (String arg in argResults.rest) {
+      for (final String arg in argResults.rest) {
         if (arg.startsWith('-')) {
           message += '\nTry moving $arg to be immediately following $name';
           break;

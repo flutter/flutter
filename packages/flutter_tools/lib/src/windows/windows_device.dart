@@ -93,7 +93,7 @@ List<String> runningProcess(String processName) {
   if (result.exitCode != 0) {
     return null;
   }
-  for (String rawProcess in result.stdout.split('\n')) {
+  for (final String rawProcess in result.stdout.split('\n')) {
     final String process = rawProcess.trim();
     if (!process.contains(processName)) {
       continue;

@@ -319,7 +319,7 @@ abstract class FlutterTestDriver {
   }
 
   SourcePosition _lookupTokenPos(List<List<int>> table, int tokenPos) {
-    for (List<int> row in table) {
+    for (final List<int> row in table) {
       final int lineNumber = row[0];
       int index = 1;
 

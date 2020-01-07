@@ -185,7 +185,7 @@ class AOTSnapshotter {
     final bool stripSymbols = platform == TargetPlatform.ios && buildMode == BuildMode.release && bitcode;
     if (stripSymbols) {
       final IOSink sink = globals.fs.file('$assembly.stripped.S').openWrite();
-      for (String line in globals.fs.file(assembly).readAsLinesSync()) {
+      for (final String line in globals.fs.file(assembly).readAsLinesSync()) {
         if (line.startsWith('.section __DWARF')) {
           break;
         }

@@ -321,10 +321,10 @@ bool _writeFlutterPluginsList(FlutterProject project, List<Plugin> plugins) {
   final StringBuffer flutterPluginsBuffer = StringBuffer('# $info\n');
 
   final Set<String> pluginNames = <String>{};
-  for (Plugin plugin in plugins) {
+  for (final Plugin plugin in plugins) {
     pluginNames.add(plugin.name);
   }
-  for (Plugin plugin in plugins) {
+  for (final Plugin plugin in plugins) {
     flutterPluginsBuffer.write('${plugin.name}=${escapePath(plugin.path)}\n');
     directAppDependencies.add(<String, dynamic>{
       'name': plugin.name,
@@ -439,7 +439,7 @@ public final class GeneratedPluginRegistrant {
 
 List<Map<String, dynamic>> _extractPlatformMaps(List<Plugin> plugins, String type) {
   final List<Map<String, dynamic>> pluginConfigs = <Map<String, dynamic>>[];
-  for (Plugin p in plugins) {
+  for (final Plugin p in plugins) {
     final PluginPlatform platformPlugin = p.platforms[type];
     if (platformPlugin != null) {
       pluginConfigs.add(platformPlugin.toMap());
@@ -484,7 +484,7 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
       templateContext['needsShim'] = false;
       // If a plugin is using an embedding version older than 2.0 and the app is using 2.0,
       // then add shim for the old plugins.
-      for (Map<String, dynamic> plugin in androidPlugins) {
+      for (final Map<String, dynamic> plugin in androidPlugins) {
         if (plugin['supportsEmbeddingV1'] as bool && !(plugin['supportsEmbeddingV2'] as bool)) {
           templateContext['needsShim'] = true;
           if (project.isModule) {
@@ -504,7 +504,7 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
       break;
     case AndroidEmbeddingVersion.v1:
     default:
-      for (Map<String, dynamic> plugin in androidPlugins) {
+      for (final Map<String, dynamic> plugin in androidPlugins) {
         if (!(plugin['supportsEmbeddingV1'] as bool) && plugin['supportsEmbeddingV2'] as bool) {
           throwToolExit(
             'The plugin `${plugin['name']}` requires your app to be migrated to '

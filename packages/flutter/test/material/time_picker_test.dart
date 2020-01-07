@@ -734,7 +734,7 @@ class _CustomPainterSemanticsTester {
     final PaintPattern expectedLabels = paints;
     int i = 0;
 
-    for (_SemanticsNodeExpectation expectation in expectedNodes) {
+    for (final _SemanticsNodeExpectation expectation in expectedNodes) {
       expect(semantics, includesNodeWith(value: expectation.label));
       final Iterable<SemanticsNode> dialLabelNodes = semantics
           .nodesWith(value: expectation.label)

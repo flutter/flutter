@@ -1572,7 +1572,7 @@ class _CupertinoTimerPickerState extends State<CupertinoTimerPicker> {
     //   that has the biggest width.
     // - If two different 1-digit numbers are of the same width, their corresponding
     //   2 digit numbers are of the same width.
-    for (String input in numbers) {
+    for (final String input in numbers) {
       textPainter.text = TextSpan(
         text: input,
         style: textStyle,
