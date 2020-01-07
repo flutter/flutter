@@ -583,7 +583,7 @@ class FadeTransition extends SingleChildRenderObjectWidget {
 
 /// Animates the opacity of a sliver widget.
 ///
-/// {@tool snippet --template=stateful_widget_scaffold_center_freeform_state}
+/// {@tool sample --template=stateful_widget_scaffold_center_freeform_state}
 /// Creates a [CustomScrollView] with a [SliverFixedExtentList] that uses a
 /// [SliverFadeTransition] to fade the list in and out.
 ///
