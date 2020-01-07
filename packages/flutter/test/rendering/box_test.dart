@@ -1007,6 +1007,13 @@ void main() {
       expect(innerConstrained.localToGlobal(Offset.zero, ancestor: outerConstrained).dy, 25.0);
     });
   });
+
+  test('BoxConstraints parameters should be non-null', () {
+    expect(() => const BoxConstraints(minWidth: null), throwsAssertionError);
+    expect(() => const BoxConstraints(maxWidth: null), throwsAssertionError);
+    expect(() => const BoxConstraints(minHeight: null), throwsAssertionError);
+    expect(() => const BoxConstraints(maxHeight: null), throwsAssertionError);
+  });
 }
 
 class _DummyHitTestTarget implements HitTestTarget {
