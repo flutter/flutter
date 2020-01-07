@@ -51,7 +51,7 @@ class BenchmarkResultPrinter {
 
   String _printJson() {
     final Map<String, double> results = <String, double>{};
-    for (_BenchmarkResult result in _results) {
+    for (final _BenchmarkResult result in _results) {
       results[result.name] = result.value;
     }
     return json.encode(results);
@@ -59,7 +59,7 @@ class BenchmarkResultPrinter {
 
   String _printPlainText() {
     final StringBuffer buf = StringBuffer();
-    for (_BenchmarkResult result in _results) {
+    for (final _BenchmarkResult result in _results) {
       buf.writeln('${result.description}: ${result.value.toStringAsFixed(1)} ${result.unit}');
     }
     return buf.toString();

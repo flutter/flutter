@@ -96,7 +96,7 @@ class IntrinsicColumnWidth extends TableColumnWidth {
   @override
   double minIntrinsicWidth(Iterable<RenderBox> cells, double containerWidth) {
     double result = 0.0;
-    for (RenderBox cell in cells)
+    for (final RenderBox cell in cells)
       result = math.max(result, cell.getMinIntrinsicWidth(double.infinity));
     return result;
   }
@@ -104,7 +104,7 @@ class IntrinsicColumnWidth extends TableColumnWidth {
   @override
   double maxIntrinsicWidth(Iterable<RenderBox> cells, double containerWidth) {
     double result = 0.0;
-    for (RenderBox cell in cells)
+    for (final RenderBox cell in cells)
       result = math.max(result, cell.getMaxIntrinsicWidth(double.infinity));
     return result;
   }
@@ -527,7 +527,7 @@ class RenderTable extends RenderBox {
       return;
     _rowDecorations = value;
     if (_rowDecorationPainters != null) {
-      for (BoxPainter painter in _rowDecorationPainters)
+      for (final BoxPainter painter in _rowDecorationPainters)
         painter?.dispose();
     }
     _rowDecorationPainters = _rowDecorations != null ? List<BoxPainter>(_rowDecorations.length) : null;
@@ -592,7 +592,7 @@ class RenderTable extends RenderBox {
         assert(_rows == 0);
         return;
       }
-      for (RenderBox oldChild in _children) {
+      for (final RenderBox oldChild in _children) {
         if (oldChild != null)
           dropChild(oldChild);
       }
@@ -645,7 +645,7 @@ class RenderTable extends RenderBox {
       setFlatChildren(0, null);
       return;
     }
-    for (RenderBox oldChild in _children) {
+    for (final RenderBox oldChild in _children) {
       if (oldChild != null)
         dropChild(oldChild);
     }
@@ -664,7 +664,7 @@ class RenderTable extends RenderBox {
     assert(_children.length == rows * columns);
     _rows += 1;
     _children.addAll(cells);
-    for (RenderBox cell in cells) {
+    for (final RenderBox cell in cells) {
       if (cell != null)
         adoptChild(cell);
     }
@@ -695,7 +695,7 @@ class RenderTable extends RenderBox {
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
-    for (RenderBox child in _children)
+    for (final RenderBox child in _children)
       child?.attach(owner);
   }
 
@@ -703,18 +703,18 @@ class RenderTable extends RenderBox {
   void detach() {
     super.detach();
     if (_rowDecorationPainters != null) {
-      for (BoxPainter painter in _rowDecorationPainters)
+      for (final BoxPainter painter in _rowDecorationPainters)
         painter?.dispose();
       _rowDecorationPainters = List<BoxPainter>(_rowDecorations.length);
     }
-    for (RenderBox child in _children)
+    for (final RenderBox child in _children)
       child?.detach();
   }
 
   @override
   void visitChildren(RenderObjectVisitor visitor) {
     assert(_children.length == rows * columns);
-    for (RenderBox child in _children) {
+    for (final RenderBox child in _children) {
       if (child != null)
         visitor(child);
     }

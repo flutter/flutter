@@ -506,7 +506,7 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
 
     ComparisonResult result;
     final Map<String, ComparisonResult> failureDiffs = <String, ComparisonResult>{};
-    for (String expectation in testExpectations) {
+    for (final String expectation in testExpectations) {
       final List<int> goldenBytes = await skiaClient.getImageBytes(expectation);
 
       result = GoldenFileComparator.compareLists(
@@ -520,7 +520,7 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
       failureDiffs[expectation] = result;
     }
 
-    for (MapEntry<String, ComparisonResult> entry in failureDiffs.entries) {
+    for (final MapEntry<String, ComparisonResult> entry in failureDiffs.entries) {
       if (await skiaClient.isValidDigestForExpectation(entry.key, golden.path))
         generateFailureOutput(entry.value, golden, basedir, key: entry.key);
     }

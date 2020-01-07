@@ -1270,11 +1270,13 @@ class CupertinoNavigationBarBackButton extends StatelessWidget {
   ///
   /// The [color] parameter must not be null.
   const CupertinoNavigationBarBackButton({
+    Key key,
     this.color,
     this.previousPageTitle,
     this.onPressed,
   }) : _backChevron = null,
-       _backLabel = null;
+       _backLabel = null,
+       super(key: key);
 
   // Allow the back chevron and label to be separately created (and keyed)
   // because they animate separately during page transitions.

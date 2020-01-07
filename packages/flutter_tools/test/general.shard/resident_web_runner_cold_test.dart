@@ -6,12 +6,11 @@ import 'dart:async';
 
 import 'package:dwds/dwds.dart';
 import 'package:flutter_tools/src/base/common.dart';
-import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
-import 'package:flutter_tools/src/globals.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
 import 'package:flutter_tools/src/build_runner/resident_web_runner.dart';
@@ -65,15 +64,15 @@ void main() {
   });
 
   void _setupMocks() {
-    fs.file('pubspec.yaml').createSync();
-    fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
-    fs.file(fs.path.join('web', 'index.html')).createSync(recursive: true);
+    globals.fs.file('pubspec.yaml').createSync();
+    globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+    globals.fs.file(globals.fs.path.join('web', 'index.html')).createSync(recursive: true);
     when(mockWebFs.connect(any)).thenThrow(StateError('debugging not supported'));
   }
 
   test('Can successfully run and connect without vmservice', () => testbed.run(() async {
     _setupMocks();
-    final DelegateLogger delegateLogger = logger as DelegateLogger;
+    final DelegateLogger delegateLogger = globals.logger as DelegateLogger;
     final MockStatus mockStatus = MockStatus();
     delegateLogger.status = mockStatus;
     final Completer<DebugConnectionInfo> connectionInfoCompleter = Completer<DebugConnectionInfo>();

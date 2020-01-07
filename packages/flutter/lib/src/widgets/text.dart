@@ -58,13 +58,14 @@ class DefaultTextStyle extends InheritedTheme {
   ///
   /// This constructor creates a [DefaultTextStyle] that lacks a [child], which
   /// means the constructed value cannot be incorporated into the tree.
-  const DefaultTextStyle.fallback()
+  const DefaultTextStyle.fallback({ Key key })
     : style = const TextStyle(),
       textAlign = null,
       softWrap = true,
       maxLines = null,
       overflow = TextOverflow.clip,
-      textWidthBasis = TextWidthBasis.parent;
+      textWidthBasis = TextWidthBasis.parent,
+      super(key: key, child: null);
 
   /// Creates a default text style that overrides the text styles in scope at
   /// this point in the widget tree.

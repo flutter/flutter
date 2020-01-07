@@ -193,7 +193,7 @@ class SampleChecker {
       "import 'dart:typed_data';",
       "import 'dart:ui' as ui;",
       "import 'package:flutter_test/flutter_test.dart';",
-      for (File file in _listDartFiles(Directory(_defaultFlutterPackage))) ...<String>[
+      for (final File file in _listDartFiles(Directory(_defaultFlutterPackage))) ...<String>[
         '',
         '// ${file.path}',
         "import 'package:flutter/${path.basename(file.path)}';",
@@ -214,7 +214,7 @@ class SampleChecker {
       errors = _analyze(_tempDirectory, sections, snippets);
     } finally {
       if (errors.isNotEmpty) {
-        for (String filePath in errors.keys) {
+        for (final String filePath in errors.keys) {
           errors[filePath].forEach(stderr.writeln);
         }
         stderr.writeln('\nFound ${errors.length} sample code errors.');
@@ -310,7 +310,7 @@ class SampleChecker {
     final List<Section> sections = <Section>[];
     final List<Snippet> snippets = <Snippet>[];
 
-    for (File file in _listDartFiles(_flutterPackage, recursive: true)) {
+    for (final File file in _listDartFiles(_flutterPackage, recursive: true)) {
       final String relativeFilePath = path.relative(file.path, from: _flutterPackage.path);
       final List<String> sampleLines = file.readAsLinesSync();
       final List<Section> preambleSections = <Section>[];
@@ -326,7 +326,7 @@ class SampleChecker {
       final List<String> block = <String>[];
       List<String> snippetArgs = <String>[];
       Line startLine;
-      for (String line in sampleLines) {
+      for (final String line in sampleLines) {
         lineNumber += 1;
         final String trimmedLine = line.trim();
         if (inSnippet) {
@@ -434,10 +434,10 @@ class SampleChecker {
       }
     }
     print('Found ${sections.length} sample code sections.');
-    for (Section section in sections) {
+    for (final Section section in sections) {
       sectionMap[_writeSection(section).path] = section;
     }
-    for (Snippet snippet in snippets) {
+    for (final Snippet snippet in snippets) {
       final File snippetFile = _writeSnippet(snippet);
       snippet.contents = snippetFile.readAsLinesSync();
       snippetMap[snippetFile.absolute.path] = snippet;
@@ -576,7 +576,7 @@ linter:
     );
     bool unknownAnalyzerErrors = false;
     final int headerLength = headers.length + 2;
-    for (String error in errors) {
+    for (final String error in errors) {
       final Match parts = errorPattern.matchAsPrefix(error);
       if (parts != null) {
         final String message = parts[2];
@@ -860,7 +860,7 @@ class Snippet {
   String toString() {
     final StringBuffer buf = StringBuffer('snippet ${args.join(' ')}\n');
     int count = start.line;
-    for (String line in input) {
+    for (final String line in input) {
       buf.writeln(' ${count.toString().padLeft(4, ' ')}: $line');
       count++;
     }

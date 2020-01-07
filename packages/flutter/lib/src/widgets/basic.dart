@@ -6784,7 +6784,7 @@ class KeyedSubtree extends StatelessWidget {
 
     final List<Widget> itemsWithUniqueKeys = <Widget>[];
     int itemIndex = baseIndex;
-    for (Widget item in items) {
+    for (final Widget item in items) {
       itemsWithUniqueKeys.add(KeyedSubtree.wrap(item, itemIndex));
       itemIndex += 1;
     }

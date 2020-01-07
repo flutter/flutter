@@ -165,7 +165,7 @@ abstract class RawKeyEventData {
   /// event, and the keyboard side or sides that the key was on.
   Map<ModifierKey, KeyboardSide> get modifiersPressed {
     final Map<ModifierKey, KeyboardSide> result = <ModifierKey, KeyboardSide>{};
-    for (ModifierKey key in ModifierKey.values) {
+    for (final ModifierKey key in ModifierKey.values) {
       if (isModifierPressed(key)) {
         result[key] = getModifierSide(key);
       }
@@ -523,7 +523,7 @@ class RawKeyboard {
     if (_listeners.isEmpty) {
       return;
     }
-    for (ValueChanged<RawKeyEvent> listener in List<ValueChanged<RawKeyEvent>>.from(_listeners)) {
+    for (final ValueChanged<RawKeyEvent> listener in List<ValueChanged<RawKeyEvent>>.from(_listeners)) {
       if (_listeners.contains(listener)) {
         listener(event);
       }
@@ -575,7 +575,7 @@ class RawKeyboard {
   void _synchronizeModifiers(RawKeyEvent event) {
     final Map<ModifierKey, KeyboardSide> modifiersPressed = event.data.modifiersPressed;
     final Set<LogicalKeyboardKey> modifierKeys = <LogicalKeyboardKey>{};
-    for (ModifierKey key in modifiersPressed.keys) {
+    for (final ModifierKey key in modifiersPressed.keys) {
       final Set<LogicalKeyboardKey> mappedKeys = _modifierKeyMap[_ModifierSidePair(key, modifiersPressed[key])];
       assert(mappedKeys != null,
         'Platform key support for ${Platform.operatingSystem} is '

@@ -270,7 +270,7 @@ String generateDateFormattingLogic(Map<String, dynamic> bundle, String key) {
   final Map<String, dynamic> attributesMap = bundle['@$key'] as Map<String, dynamic>;
   if (attributesMap != null && attributesMap.containsKey('placeholders')) {
     final Map<String, dynamic> placeholders = attributesMap['placeholders'] as Map<String, dynamic>;
-    for (String placeholder in placeholders.keys) {
+    for (final String placeholder in placeholders.keys) {
       final dynamic value = placeholders[placeholder];
       if (
         value is Map<String, dynamic> &&
@@ -302,7 +302,7 @@ List<String> genIntlMethodArgs(Map<String, dynamic> bundle, String key) {
       final Map<String, dynamic> placeholders = attributesMap['placeholders'] as Map<String, dynamic>;
       if (placeholders.isNotEmpty) {
         final List<String> argumentList = <String>[];
-        for (String placeholder in placeholders.keys) {
+        for (final String placeholder in placeholders.keys) {
           final dynamic value = placeholders[placeholder];
           if (
             value is Map<String, dynamic> &&
@@ -328,7 +328,7 @@ String genSimpleMethod(Map<String, dynamic> bundle, String key) {
     String message = bundle[key] as String;
     final Map<String, dynamic> attributesMap = bundle['@$key'] as Map<String, dynamic>;
     final Map<String, dynamic> placeholders = attributesMap['placeholders'] as Map<String, dynamic>;
-    for (String placeholder in placeholders.keys) {
+    for (final String placeholder in placeholders.keys) {
       final dynamic value = placeholders[placeholder];
       if (value is Map<String, dynamic> && _isDateParameter(value)) {
         message = message.replaceAll('{$placeholder}', '\$${placeholder}String');
@@ -388,7 +388,7 @@ String genPluralMethod(Map<String, dynamic> arbBundle, String resourceId) {
   // To make it easier to parse the plurals message, temporarily replace each
   // "{placeholder}" parameter with "#placeholder#".
   String message = arbBundle[resourceId] as String;
-  for (String placeholder in placeholders)
+  for (final String placeholder in placeholders)
     message = message.replaceAll('{$placeholder}', '#$placeholder#');
 
   final Map<String, String> pluralIds = <String, String>{
@@ -406,12 +406,12 @@ String genPluralMethod(Map<String, dynamic> arbBundle, String resourceId) {
     ...genIntlMethodArgs(arbBundle, resourceId),
   ];
 
-  for (String pluralKey in pluralIds.keys) {
+  for (final String pluralKey in pluralIds.keys) {
     final RegExp expRE = RegExp('($pluralKey){([^}]+)}');
     final RegExpMatch match = expRE.firstMatch(message);
     if (match != null && match.groupCount == 2) {
       String argValue = match.group(2);
-      for (String placeholder in placeholders) {
+      for (final String placeholder in placeholders) {
         final dynamic value = placeholdersMap[placeholder];
         if (value is Map<String, dynamic> && _isDateParameter(value)) {
           argValue = argValue.replaceAll('#$placeholder#', '\$${placeholder}String');
@@ -435,7 +435,7 @@ String genSupportedLocaleProperty(Set<LocaleInfo> supportedLocales) {
   const String suffix = '),\n  ];';
 
   String resultingProperty = prefix;
-  for (LocaleInfo locale in supportedLocales) {
+  for (final LocaleInfo locale in supportedLocales) {
     final String languageCode = locale.languageCode;
     final String countryCode = locale.countryCode;
 
@@ -668,7 +668,7 @@ class LocalizationsGenerator {
       .toList();
     final List<LocaleInfo> localeInfoList = <LocaleInfo>[];
 
-    for (File file in fileSystemEntityList) {
+    for (final File file in fileSystemEntityList) {
       final String filePath = file.path;
       if (arbFilenameRE.hasMatch(filePath)) {
         final Map<String, dynamic> arbContents = json.decode(file.readAsStringSync()) as Map<String, dynamic>;
@@ -705,7 +705,7 @@ class LocalizationsGenerator {
     }));
 
     if (preferredSupportedLocales != null) {
-      for (LocaleInfo preferredLocale in preferredSupportedLocales) {
+      for (final LocaleInfo preferredLocale in preferredSupportedLocales) {
         if (!localeInfoList.contains(preferredLocale)) {
           throw L10nException(
             'The preferred supported locale, \'$preferredLocale\', cannot be '
@@ -750,7 +750,7 @@ class LocalizationsGenerator {
     }
 
     final List<String> sortedArbKeys = bundle.keys.toList()..sort();
-    for (String key in sortedArbKeys) {
+    for (final String key in sortedArbKeys) {
       if (key.startsWith('@'))
         continue;
       if (!_isValidGetterAndMethodName(key))

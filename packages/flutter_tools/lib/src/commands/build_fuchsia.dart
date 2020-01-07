@@ -5,11 +5,11 @@
 import 'dart:async';
 
 import '../base/common.dart';
-import '../base/platform.dart';
 import '../build_info.dart';
 import '../cache.dart';
 import '../fuchsia/fuchsia_build.dart';
 import '../fuchsia/fuchsia_pm.dart';
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
 import 'build.dart';
@@ -56,7 +56,7 @@ class BuildFuchsiaCommand extends BuildSubCommand {
     Cache.releaseLockEarly();
     final BuildInfo buildInfo = getBuildInfo();
     final FlutterProject flutterProject = FlutterProject.current();
-    if (!platform.isLinux && !platform.isMacOS) {
+    if (!globals.platform.isLinux && !globals.platform.isMacOS) {
       throwToolExit('"build fuchsia" is only supported on Linux and MacOS hosts.');
     }
     if (!flutterProject.fuchsia.existsSync()) {
