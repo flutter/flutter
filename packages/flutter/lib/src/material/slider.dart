@@ -1125,7 +1125,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
         isEnabled: isInteractive,
         sliderTheme: _sliderTheme,
       ).width;
-      final double adjustedTrackWidth = trackRect.width - tickMarkWidth;
+      final double adjustedTrackWidth = trackRect.width;
       // If the tick marks would be too dense, don't bother painting them.
       if (adjustedTrackWidth / divisions >= 3.0 * tickMarkWidth) {
         final double dy = trackRect.center.dy;
@@ -1133,7 +1133,7 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
           final double value = i / divisions;
           // The ticks are mapped to be within the track, so the tick mark width
           // must be subtracted from the track width.
-          final double dx = trackRect.left + value * adjustedTrackWidth + tickMarkWidth / 2;
+          final double dx = trackRect.left + value * adjustedTrackWidth;
           final Offset tickMarkOffset = Offset(dx, dy);
           _sliderTheme.tickMarkShape.paint(
             context,
