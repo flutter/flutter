@@ -57,7 +57,6 @@ Future<void> main() async {
     debugPrint = debugPrintThrottled;
   });
 
-
   test('Error reporting - assert with message', () async {
     expect(console, isEmpty);
     FlutterError.dumpErrorToConsole(FlutterErrorDetails(
