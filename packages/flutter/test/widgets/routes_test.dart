@@ -863,6 +863,68 @@ void main() {
       expect(rootObserver.dialogCount, 0);
       expect(nestedObserver.dialogCount, 1);
     });
+
+    testWidgets('ModalRoute default barrierTween', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+        home: Material(
+          child: Builder(
+            builder: (BuildContext context) {
+              return Center(
+                child: RaisedButton(
+                  child: const Text('X'),
+                  onPressed: () {
+                    _showCustomDialog(context);
+                  },
+                ),
+              );
+            }
+          ),
+        ),
+      ));
+
+      final CurveTween _defaultBarrierTween = CurveTween(curve: Curves.ease);
+      double _getBarrierTweenAlphaValue(double t) {
+        return _defaultBarrierTween.transform(t) * 255;
+      }
+
+      await tester.tap(find.text('X'));
+      await tester.pump();
+      final Finder animatedModalBarrier = find.byType(AnimatedModalBarrier);
+      expect(animatedModalBarrier, findsOneWidget);
+
+      Animation<Color> modalBarrierAnimation;
+      modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
+      expect(modalBarrierAnimation.value, Colors.transparent);
+
+      await tester.pump(const Duration(milliseconds: 25));
+      modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
+      expect(
+        modalBarrierAnimation.value.alpha,
+        closeTo(_getBarrierTweenAlphaValue(0.25), 1.0),
+      );
+
+      await tester.pump(const Duration(milliseconds: 25));
+      modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
+      expect(
+        modalBarrierAnimation.value.alpha,
+        closeTo(_getBarrierTweenAlphaValue(0.50), 1.0),
+      );
+
+      await tester.pump(const Duration(milliseconds: 25));
+      modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
+      expect(
+        modalBarrierAnimation.value.alpha,
+        closeTo(_getBarrierTweenAlphaValue(0.75), 1.0),
+      );
+
+      await tester.pumpAndSettle();
+      modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
+      expect(modalBarrierAnimation.value, Colors.black);
+    });
+
+    testWidgets('ModalRoute custom barrierTween', (WidgetTester tester) async {
+
+    });
   });
 }
 
@@ -892,3 +954,31 @@ class DialogObserver extends NavigatorObserver {
     super.didPush(route, previousRoute);
   }
 }
+
+void _showCustomDialog(BuildContext context) {
+  showGeneralDialog<void>(
+    context: context,
+    transitionDuration: const Duration(milliseconds: 100),
+    barrierDismissible: true,
+    barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
+    barrierColor: Colors.black, // update this value to make it easy to test
+    pageBuilder: (BuildContext buildContext, Animation<double> animation, Animation<double> secondaryAnimation) {
+      final ThemeData theme = Theme.of(context, shadowThemeOnly: true);
+      return SafeArea(
+        child: Builder(
+          builder: (BuildContext context) {
+            return Theme(
+              data: theme,
+              child: const AlertDialog(title: Text('Hello World')),
+            );
+          }
+        ),
+      );
+    },
+    useRootNavigator: true,
+    transitionBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
+      return const AlertDialog(title: Text('Hello World'));
+    },
+  );
+}
+
