@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 
+import 'base/command_help.dart';
 import 'base/file_system.dart';
 import 'device.dart';
 import 'globals.dart' as globals;
@@ -179,31 +180,23 @@ class ColdRunner extends ResidentRunner {
 
   @override
   void printHelp({ @required bool details }) {
-    bool haveDetails = false;
-    bool haveAnything = false;
+    globals.printStatus('Flutter run key commands.');
+    if (supportsServiceProtocol) {
+      if (details) {
+        printHelpDetails();
+      }
+    }
+    CommandHelp.h.print();
+    if (_didAttach) {
+      CommandHelp.d.print();
+    }
+    CommandHelp.q.print();
     for (final FlutterDevice device in flutterDevices) {
       final String dname = device.device.name;
       if (device.vmService != null) {
         globals.printStatus('An Observatory debugger and profiler on $dname is '
-          'available at: ${device.vmService .httpAddress}');
+          'available at: ${device.vmService.httpAddress}');
       }
-    }
-    if (supportsServiceProtocol) {
-      haveDetails = true;
-      if (details) {
-        printHelpDetails();
-        haveAnything = true;
-      }
-    }
-    final String quitMessage = _didAttach
-      ? 'To detach, press "d"; to quit, press "q".'
-      : 'To quit, press "q".';
-    if (haveDetails && !details) {
-      globals.printStatus('For a more detailed help message, press "h". $quitMessage');
-    } else if (haveAnything) {
-      globals.printStatus('To repeat this help message, press "h". $quitMessage');
-    } else {
-      globals.printStatus(quitMessage);
     }
   }
 
