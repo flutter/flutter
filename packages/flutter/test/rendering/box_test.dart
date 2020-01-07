@@ -1009,10 +1009,10 @@ void main() {
   });
 
   test('BoxConstraints parameters should be non-null', () {
-    expect(() => const BoxConstraints(minWidth: null), throwsAssertionError);
-    expect(() => const BoxConstraints(maxWidth: null), throwsAssertionError);
-    expect(() => const BoxConstraints(minHeight: null), throwsAssertionError);
-    expect(() => const BoxConstraints(maxHeight: null), throwsAssertionError);
+    expect(() => BoxConstraints(minWidth: null), throwsAssertionError);
+    expect(() => BoxConstraints(maxWidth: null), throwsAssertionError);
+    expect(() => BoxConstraints(minHeight: null), throwsAssertionError);
+    expect(() => BoxConstraints(maxHeight: null), throwsAssertionError);
   });
 }
 
