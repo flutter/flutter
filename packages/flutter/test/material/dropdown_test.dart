@@ -447,7 +447,7 @@ void main() {
     await tester.pump(const Duration(seconds: 1)); // finish the menu animation
   });
 
-  for (TextDirection textDirection in TextDirection.values) {
+  for (final TextDirection textDirection in TextDirection.values) {
     testWidgets('Dropdown button aligns selected menu item ($textDirection)', (WidgetTester tester) async {
       final Key buttonKey = UniqueKey();
       const String value = 'two';
@@ -471,7 +471,7 @@ void main() {
       // have the same origin and height as the dropdown button.
       final List<RenderBox> itemBoxes = tester.renderObjectList<RenderBox>(find.byKey(const ValueKey<String>('two'))).toList();
       expect(itemBoxes.length, equals(2));
-      for (RenderBox itemBox in itemBoxes) {
+      for (final RenderBox itemBox in itemBoxes) {
         assert(itemBox.attached);
         assert(textDirection != null);
         switch (textDirection) {
@@ -664,7 +664,7 @@ void main() {
     final double menuItemHeight = itemBoxes.map<double>((RenderBox box) => box.size.height).reduce(math.max);
     expect(menuItemHeight, greaterThan(buttonBox.size.height));
 
-    for (RenderBox itemBox in itemBoxes) {
+    for (final RenderBox itemBox in itemBoxes) {
       assert(itemBox.attached);
       final Offset buttonBoxCenter = buttonBox.size.center(buttonBox.localToGlobal(Offset.zero));
       final Offset itemBoxCenter = itemBox.size.center(itemBox.localToGlobal(Offset.zero));

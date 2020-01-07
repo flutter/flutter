@@ -245,7 +245,7 @@ void main() {
       mockXcode = MockXcode();
       when(mockXcode.sdkLocation(any)).thenAnswer((_) => Future<String>.value(kSDKPath));
 
-      for (BuildMode mode in BuildMode.values) {
+      for (final BuildMode mode in BuildMode.values) {
         when(mockArtifacts.getArtifactPath(Artifact.snapshotDart,
             platform: anyNamed('platform'), mode: mode)).thenReturn(kSnapshotDart);
       }

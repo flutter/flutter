@@ -78,7 +78,7 @@ class BuildRunner extends CodeGenerator {
       stringBuffer.writeln('dependencies:');
       final YamlMap builders = flutterProject.builders;
       if (builders != null) {
-        for (String name in builders.keys.cast<String>()) {
+        for (final String name in builders.keys.cast<String>()) {
           final Object node = builders[name];
           // For relative paths, make sure it is accounted for
           // parent directories.

@@ -116,7 +116,7 @@ bool _isSupportedVersion(AndroidProject project) {
   if (!appGradle.existsSync()) {
     return false;
   }
-  for (String line in appGradle.readAsLinesSync()) {
+  for (final String line in appGradle.readAsLinesSync()) {
     if (line.contains(RegExp(r'apply from: .*/flutter.gradle')) ||
         line.contains("def flutterPluginVersion = 'managed'")) {
       return true;
@@ -184,7 +184,7 @@ void createSettingsAarGradle(Directory androidDirectory) {
   existingVariants.add(settingsAarContent);
 
   bool exactMatch = false;
-  for (String fileContentVariant in existingVariants) {
+  for (final String fileContentVariant in existingVariants) {
     if (currentFileContent.trim() == fileContentVariant.trim()) {
       exactMatch = true;
       break;
@@ -465,7 +465,7 @@ Future<void> buildGradleApp({
   final File apkShaFile = apkDirectory.childFile('app.apk.sha1');
   apkShaFile.writeAsStringSync(_calculateSha(apkFiles.first));
 
-  for (File apkFile in apkFiles) {
+  for (final File apkFile in apkFiles) {
     final String appSize = (buildInfo.mode == BuildMode.debug)
       ? '' // Don't display the size when building a debug variant.
       : ' (${getSizeAsMB(apkFile.lengthSync())})';
@@ -618,7 +618,7 @@ ${globals.terminal.bolden('Consuming the Module')}
 
     dependencies {''');
 
-  for (String buildMode in buildModes) {
+  for (final String buildMode in buildModes) {
     globals.printStatus('''
       ${buildMode}Implementation '$androidPackage:flutter_$buildMode:$buildNumber''');
   }
@@ -647,7 +647,7 @@ ${globals.terminal.bolden('Consuming the Module')}
 
 String _hex(List<int> bytes) {
   final StringBuffer result = StringBuffer();
-  for (int part in bytes) {
+  for (final int part in bytes) {
     result.write('${part < 16 ? '0' : ''}${part.toRadixString(16)}');
   }
   return result.toString();
@@ -707,7 +707,7 @@ Future<void> buildPluginsAsAar(
     return;
   }
   final List<String> plugins = flutterPluginFile.readAsStringSync().split('\n');
-  for (String plugin in plugins) {
+  for (final String plugin in plugins) {
     final List<String> pluginParts = plugin.split('=');
     if (pluginParts.length != 2) {
       continue;
@@ -882,7 +882,7 @@ String _getLocalArtifactVersion(String pomPath) {
   }
   final Iterable<xml.XmlElement> project = document.findElements('project');
   assert(project.isNotEmpty);
-  for (xml.XmlElement versionElement in document.findAllElements('version')) {
+  for (final xml.XmlElement versionElement in document.findAllElements('version')) {
     if (versionElement.parent == project.first) {
       return versionElement.text;
     }
@@ -919,7 +919,7 @@ Directory _getLocalEngineRepo({
       'flutter_embedding_$buildMode.pom',
     )
   );
-  for (String artifact in const <String>['pom', 'jar']) {
+  for (final String artifact in const <String>['pom', 'jar']) {
     // The Android embedding artifacts.
     _createSymlink(
       globals.fs.path.join(

@@ -1521,7 +1521,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    for (NavigatorObserver observer in widget.observers) {
+    for (final NavigatorObserver observer in widget.observers) {
       assert(observer.navigator == null);
       observer._navigator = this;
     }
@@ -1535,7 +1535,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       final List<String> routeParts = initialRouteName.split('/');
       if (initialRouteName.isNotEmpty) {
         String routeName = '';
-        for (String part in routeParts) {
+        for (final String part in routeParts) {
           routeName += '/$part';
           plannedInitialRoutes.add(_routeNamed<dynamic>(routeName, allowNull: true, arguments: null));
         }
@@ -1564,7 +1564,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       route ??= _routeNamed<Object>(Navigator.defaultRouteName, arguments: null);
       push(route);
     }
-    for (Route<dynamic> route in _history)
+    for (final Route<dynamic> route in _history)
       _initialOverlayEntries.addAll(route.overlayEntries);
   }
 
@@ -1572,14 +1572,14 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   void didUpdateWidget(Navigator oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.observers != widget.observers) {
-      for (NavigatorObserver observer in oldWidget.observers)
+      for (final NavigatorObserver observer in oldWidget.observers)
         observer._navigator = null;
-      for (NavigatorObserver observer in widget.observers) {
+      for (final NavigatorObserver observer in widget.observers) {
         assert(observer.navigator == null);
         observer._navigator = this;
       }
     }
-    for (Route<dynamic> route in _history)
+    for (final Route<dynamic> route in _history)
       route.changedExternalState();
   }
 
@@ -1590,10 +1590,10 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       _debugLocked = true;
       return true;
     }());
-    for (NavigatorObserver observer in widget.observers)
+    for (final NavigatorObserver observer in widget.observers)
       observer._navigator = null;
     final List<Route<dynamic>> doomed = _poppedRoutes.toList()..addAll(_history);
-    for (Route<dynamic> route in doomed)
+    for (final Route<dynamic> route in doomed)
       route.dispose();
     _poppedRoutes.clear();
     _history.clear();
@@ -1609,7 +1609,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   OverlayState get overlay => _overlayKey.currentState;
 
   OverlayEntry get _currentOverlayEntry {
-    for (Route<dynamic> route in _history.reversed) {
+    for (final Route<dynamic> route in _history.reversed) {
       if (route.overlayEntries.isNotEmpty)
         return route.overlayEntries.last;
     }
@@ -1796,7 +1796,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       oldRoute.didChangeNext(route);
       route.didChangePrevious(oldRoute);
     }
-    for (NavigatorObserver observer in widget.observers)
+    for (final NavigatorObserver observer in widget.observers)
       observer.didPush(route, oldRoute);
     RouteNotificationMessages.maybeNotifyRouteChange(_routePushedMethod, route, oldRoute);
     assert(() {
@@ -1896,7 +1896,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       _history[index - 1].didChangeNext(newRoute);
       newRoute.didChangePrevious(_history[index - 1]);
     }
-    for (NavigatorObserver observer in widget.observers)
+    for (final NavigatorObserver observer in widget.observers)
       observer.didReplace(newRoute: newRoute, oldRoute: oldRoute);
     RouteNotificationMessages.maybeNotifyRouteChange(_routeReplacedMethod, newRoute, oldRoute);
     assert(() {
@@ -1956,8 +1956,8 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
 
     newRoute.didPush().whenCompleteOrCancel(() {
       if (mounted) {
-        for (Route<dynamic> removedRoute in removedRoutes) {
-          for (NavigatorObserver observer in widget.observers)
+        for (final Route<dynamic> removedRoute in removedRoutes) {
+          for (final NavigatorObserver observer in widget.observers)
             observer.didRemove(removedRoute, newPrecedingRoute);
           removedRoute.dispose();
         }
@@ -1969,7 +1969,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
 
     // Notify for newRoute
     newRoute.didChangeNext(null);
-    for (NavigatorObserver observer in widget.observers)
+    for (final NavigatorObserver observer in widget.observers)
       observer.didPush(newRoute, precedingRoute);
 
     assert(() {
@@ -2020,7 +2020,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       _history[index - 1].didChangeNext(newRoute);
       newRoute.didChangePrevious(_history[index - 1]);
     }
-    for (NavigatorObserver observer in widget.observers)
+    for (final NavigatorObserver observer in widget.observers)
       observer.didReplace(newRoute: newRoute, oldRoute: oldRoute);
     RouteNotificationMessages.maybeNotifyRouteChange(_routeReplacedMethod, newRoute, oldRoute);
     oldRoute.dispose();
@@ -2132,7 +2132,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
         if (route._navigator != null)
           _poppedRoutes.add(route);
         _history.last.didPopNext(route);
-        for (NavigatorObserver observer in widget.observers)
+        for (final NavigatorObserver observer in widget.observers)
           observer.didPop(route, _history.last);
         RouteNotificationMessages.maybeNotifyRouteChange(_routePoppedMethod, route, _history.last);
       } else {
@@ -2190,7 +2190,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     _history.removeAt(index);
     previousRoute?.didChangeNext(nextRoute);
     nextRoute?.didChangePrevious(previousRoute);
-    for (NavigatorObserver observer in widget.observers)
+    for (final NavigatorObserver observer in widget.observers)
       observer.didRemove(route, previousRoute);
     route.dispose();
     assert(() {
@@ -2281,7 +2281,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
       // Don't operate the _history list since the gesture may be canceled.
       // In case of a back swipe, the gesture controller will call .pop() itself.
 
-      for (NavigatorObserver observer in widget.observers)
+      for (final NavigatorObserver observer in widget.observers)
         observer.didStartUserGesture(route, previousRoute);
     }
   }
@@ -2294,7 +2294,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
     assert(_userGesturesInProgress > 0);
     _userGesturesInProgress -= 1;
     if (_userGesturesInProgress == 0) {
-      for (NavigatorObserver observer in widget.observers)
+      for (final NavigatorObserver observer in widget.observers)
         observer.didStopUserGesture();
     }
   }

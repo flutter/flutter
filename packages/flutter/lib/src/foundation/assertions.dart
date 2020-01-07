@@ -556,7 +556,7 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
           ErrorDescription('\nThe malformed error has ${summaries.length} summaries.'),
         ];
         int i = 1;
-        for (DiagnosticsNode summary in summaries) {
+        for (final DiagnosticsNode summary in summaries) {
           message.add(DiagnosticsProperty<DiagnosticsNode>('Summary $i', summary, expandableValue : true));
           i += 1;
         }
@@ -683,7 +683,7 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
     final RegExp packageParser = RegExp(r'^([^:]+):(.+)$');
     final List<String> result = <String>[];
     final List<String> skipped = <String>[];
-    for (String line in frames) {
+    for (final String line in frames) {
       final Match match = stackParser.firstMatch(line);
       if (match != null) {
         assert(match.groupCount == 2);
@@ -834,7 +834,7 @@ class _FlutterErrorDetailsNode extends DiagnosticableNode<FlutterErrorDetails> {
       return null;
     }
     Iterable<DiagnosticsNode> properties = builder.properties;
-    for (DiagnosticPropertiesTransformer transformer in FlutterErrorDetails.propertiesTransformers) {
+    for (final DiagnosticPropertiesTransformer transformer in FlutterErrorDetails.propertiesTransformers) {
       properties = transformer(properties);
     }
     return DiagnosticPropertiesBuilder.fromProperties(properties.toList());

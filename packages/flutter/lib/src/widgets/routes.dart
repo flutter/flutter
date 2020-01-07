@@ -68,7 +68,7 @@ abstract class OverlayRoute<T> extends Route<T> {
 
   @override
   void dispose() {
-    for (OverlayEntry entry in _overlayEntries)
+    for (final OverlayEntry entry in _overlayEntries)
       entry.remove();
     _overlayEntries.clear();
     super.dispose();
@@ -1131,7 +1131,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   Future<RoutePopDisposition> willPop() async {
     final _ModalScopeState<T> scope = _scopeKey.currentState;
     assert(scope != null);
-    for (WillPopCallback callback in List<WillPopCallback>.from(_willPopCallbacks)) {
+    for (final WillPopCallback callback in List<WillPopCallback>.from(_willPopCallbacks)) {
       if (!await callback())
         return RoutePopDisposition.doNotPop;
     }
@@ -1446,7 +1446,7 @@ class RouteObserver<R extends Route<dynamic>> extends NavigatorObserver {
   /// subscribed to multiple types, this will unregister it (once) from each type.
   void unsubscribe(RouteAware routeAware) {
     assert(routeAware != null);
-    for (R route in _listeners.keys) {
+    for (final R route in _listeners.keys) {
       final Set<RouteAware> subscribers = _listeners[route];
       subscribers?.remove(routeAware);
     }
@@ -1458,7 +1458,7 @@ class RouteObserver<R extends Route<dynamic>> extends NavigatorObserver {
       final List<RouteAware> previousSubscribers = _listeners[previousRoute]?.toList();
 
       if (previousSubscribers != null) {
-        for (RouteAware routeAware in previousSubscribers) {
+        for (final RouteAware routeAware in previousSubscribers) {
           routeAware.didPopNext();
         }
       }
@@ -1466,7 +1466,7 @@ class RouteObserver<R extends Route<dynamic>> extends NavigatorObserver {
       final List<RouteAware> subscribers = _listeners[route]?.toList();
 
       if (subscribers != null) {
-        for (RouteAware routeAware in subscribers) {
+        for (final RouteAware routeAware in subscribers) {
           routeAware.didPop();
         }
       }
@@ -1479,7 +1479,7 @@ class RouteObserver<R extends Route<dynamic>> extends NavigatorObserver {
       final Set<RouteAware> previousSubscribers = _listeners[previousRoute];
 
       if (previousSubscribers != null) {
-        for (RouteAware routeAware in previousSubscribers) {
+        for (final RouteAware routeAware in previousSubscribers) {
           routeAware.didPushNext();
         }
       }

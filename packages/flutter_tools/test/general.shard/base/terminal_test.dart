@@ -48,7 +48,7 @@ void main() {
     });
 
     testWithoutContext('adding colors works', () {
-      for (TerminalColor color in TerminalColor.values) {
+      for (final TerminalColor color in TerminalColor.values) {
         expect(
           terminal.color('output', color),
           equals('${AnsiTerminal.colorCode(color)}output${AnsiTerminal.resetColor}'),

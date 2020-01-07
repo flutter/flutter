@@ -177,7 +177,7 @@ class WebAssetServer {
     final Uint8List codeBytes = codeFile.readAsBytesSync();
     final Uint8List sourcemapBytes = sourcemapFile.readAsBytesSync();
     final Map<String, dynamic> manifest = castStringKeyedMap(json.decode(manifestFile.readAsStringSync()));
-    for (String filePath in manifest.keys) {
+    for (final String filePath in manifest.keys) {
       if (filePath == null) {
         globals.printTrace('Invalid manfiest file: $filePath');
         continue;

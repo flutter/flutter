@@ -295,7 +295,7 @@ const List<String> _excludedExampleApplications = <String>[
 /// target app.
 Future<void> _runBuildTests() async {
   final Stream<FileSystemEntity> exampleDirectories = Directory(path.join(flutterRoot, 'examples')).list();
-  await for (FileSystemEntity fileEntity in exampleDirectories) {
+  await for (final FileSystemEntity fileEntity in exampleDirectories) {
     if (fileEntity is! Directory) {
       continue;
     }
@@ -817,7 +817,7 @@ Future<void> _runHostOnlyDeviceLabTests() async {
       last = '_last';
     }
     subshards['$subshard$last'] = () async {
-      for (ShardRunner test in sublist)
+      for (final ShardRunner test in sublist)
         await test();
     };
   }
@@ -1020,7 +1020,7 @@ Future<void> _runFromList(Map<String, ShardRunner> items, String key, String nam
     item = parts[positionInTaskName];
   }
   if (item == null) {
-    for (String currentItem in items.keys) {
+    for (final String currentItem in items.keys) {
       print('$bold$key=$currentItem$reset');
       await items[currentItem]();
       print('');

@@ -25,7 +25,7 @@ void main() {
     focusNode.requestFocus();
     await tester.idle();
 
-    for (String platform in platforms) {
+    for (final String platform in platforms) {
       await tester.sendKeyEvent(LogicalKeyboardKey.shiftLeft, platform: platform);
       await tester.sendKeyEvent(LogicalKeyboardKey.shift, platform: platform);
       await tester.sendKeyDownEvent(LogicalKeyboardKey.keyA, platform: platform);

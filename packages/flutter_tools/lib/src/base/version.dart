@@ -52,7 +52,7 @@ class Version implements Comparable<Version> {
   /// This is the highest-numbered stable version.
   static Version primary(List<Version> versions) {
     Version primary;
-    for (Version version in versions) {
+    for (final Version version in versions) {
       if (primary == null || (version > primary)) {
         primary = version;
       }

@@ -732,7 +732,7 @@ class AndroidDevice extends Device {
 Map<String, String> parseAdbDeviceProperties(String str) {
   final Map<String, String> properties = <String, String>{};
   final RegExp propertyExp = RegExp(r'\[(.*?)\]: \[(.*?)\]');
-  for (Match match in propertyExp.allMatches(str)) {
+  for (final Match match in propertyExp.allMatches(str)) {
     properties[match.group(1)] = match.group(2);
   }
   return properties;
@@ -932,7 +932,7 @@ void parseADBDeviceOutput(
     return;
   }
 
-  for (String line in text.trim().split('\n')) {
+  for (final String line in text.trim().split('\n')) {
     // Skip lines like: * daemon started successfully *
     if (line.startsWith('* daemon ')) {
       continue;
@@ -958,7 +958,7 @@ void parseADBDeviceOutput(
       final Map<String, String> info = <String, String>{};
       if (rest != null && rest.isNotEmpty) {
         rest = rest.trim();
-        for (String data in rest.split(' ')) {
+        for (final String data in rest.split(' ')) {
           if (data.contains(':')) {
             final List<String> fields = data.split(':');
             info[fields[0]] = fields[1];
@@ -1165,7 +1165,7 @@ class _AndroidDevicePortForwarder extends DevicePortForwarder {
     }
 
     final List<String> lines = LineSplitter.split(stdout).toList();
-    for (String line in lines) {
+    for (final String line in lines) {
       if (!line.startsWith(device.id)) {
         continue;
       }
@@ -1260,7 +1260,7 @@ class _AndroidDevicePortForwarder extends DevicePortForwarder {
 
   @override
   Future<void> dispose() async {
-    for (ForwardedPort port in forwardedPorts) {
+    for (final ForwardedPort port in forwardedPorts) {
       await unforward(port);
     }
   }

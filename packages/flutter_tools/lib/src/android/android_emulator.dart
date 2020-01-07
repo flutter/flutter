@@ -85,7 +85,7 @@ List<AndroidEmulator> getEmulatorAvds() {
 /// Parse the given `emulator -list-avds` output in [text], and fill out the given list
 /// of emulators by reading information from the relevant ini files.
 void extractEmulatorAvdInfo(String text, List<AndroidEmulator> emulators) {
-  for (String id in text.trim().split('\n').where((String l) => l != '')) {
+  for (final String id in text.trim().split('\n').where((String l) => l != '')) {
     emulators.add(_loadEmulatorInfo(id));
   }
 }
@@ -125,7 +125,7 @@ Map<String, String> parseIniLines(List<String> contents) {
       // Split into name/value
       .map<List<String>>((String l) => l.split('='));
 
-  for (List<String> property in properties) {
+  for (final List<String> property in properties) {
     results[property[0].trim()] = property[1].trim();
   }
 

@@ -660,7 +660,7 @@ class IOSDeviceLogReader extends DeviceLogReader {
 
   @override
   void dispose() {
-    for (StreamSubscription<ServiceEvent> loggingSubscription in _loggingSubscriptions) {
+    for (final StreamSubscription<ServiceEvent> loggingSubscription in _loggingSubscriptions) {
       loggingSubscription.cancel();
     }
     _idevicesyslogProcess?.kill();
@@ -747,7 +747,7 @@ class IOSDevicePortForwarder extends DevicePortForwarder {
 
   @override
   Future<void> dispose() async {
-    for (ForwardedPort forwardedPort in _forwardedPorts) {
+    for (final ForwardedPort forwardedPort in _forwardedPorts) {
       forwardedPort.dispose();
     }
   }

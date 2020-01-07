@@ -41,7 +41,7 @@ class AnalyzeOnce extends AnalyzeBase {
     final Set<String> directories = Set<String>.from(argResults.rest
         .map<String>((String path) => globals.fs.path.canonicalize(path)));
     if (directories.isNotEmpty) {
-      for (String directory in directories) {
+      for (final String directory in directories) {
         final FileSystemEntityType type = globals.fs.typeSync(directory);
 
         if (type == FileSystemEntityType.notFound) {
@@ -138,7 +138,7 @@ class AnalyzeOnce extends AnalyzeBase {
       globals.printStatus('');
     }
     errors.sort();
-    for (AnalysisError error in errors) {
+    for (final AnalysisError error in errors) {
       globals.printStatus(error.toString(), hangingIndent: 7);
     }
 

@@ -670,9 +670,9 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
   static final Animatable<double> _flexTween = Tween<double>(begin: 1.0, end: 1.5);
 
   void _resetState() {
-    for (AnimationController controller in _controllers)
+    for (final AnimationController controller in _controllers)
       controller.dispose();
-    for (_Circle circle in _circles)
+    for (final _Circle circle in _circles)
       circle.dispose();
     _circles.clear();
 
@@ -708,9 +708,9 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
 
   @override
   void dispose() {
-    for (AnimationController controller in _controllers)
+    for (final AnimationController controller in _controllers)
       controller.dispose();
-    for (_Circle circle in _circles)
+    for (final _Circle circle in _circles)
       circle.dispose();
     super.dispose();
   }
@@ -984,7 +984,7 @@ class _RadialPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    for (_Circle circle in circles) {
+    for (final _Circle circle in circles) {
       final Paint paint = Paint()..color = circle.color;
       final Rect rect = Rect.fromLTWH(0.0, 0.0, size.width, size.height);
       canvas.clipRect(rect);

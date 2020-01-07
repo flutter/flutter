@@ -371,7 +371,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   }
 
   if (autoSigningConfigs != null) {
-    for (MapEntry<String, String> signingConfig in autoSigningConfigs.entries) {
+    for (final MapEntry<String, String> signingConfig in autoSigningConfigs.entries) {
       buildCommands.add('${signingConfig.key}=${signingConfig.value}');
     }
     buildCommands.add('-allowProvisioningUpdates');
@@ -379,7 +379,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   }
 
   final List<FileSystemEntity> contents = app.project.hostAppRoot.listSync();
-  for (FileSystemEntity entity in contents) {
+  for (final FileSystemEntity entity in contents) {
     if (globals.fs.path.extension(entity.path) == '.xcworkspace') {
       buildCommands.addAll(<String>[
         '-workspace', globals.fs.path.basename(entity.path),
@@ -426,7 +426,7 @@ Future<XcodeBuildResult> buildXcodeProject({
 
     Future<void> listenToScriptOutputLine() async {
       final List<String> lines = await scriptOutputPipeFile.readAsLines();
-      for (String line in lines) {
+      for (final String line in lines) {
         if (line == 'done' || line == 'all done') {
           buildSubStatus?.stop();
           buildSubStatus = null;

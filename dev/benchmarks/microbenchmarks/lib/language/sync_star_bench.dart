@@ -84,7 +84,7 @@ Iterable<int> generateIterableList() {
 
 int sumIterable(Iterable<int> values) {
   int result = 0;
-  for (int value in values) {
+  for (final int value in values) {
     result += value;
   }
   return result;

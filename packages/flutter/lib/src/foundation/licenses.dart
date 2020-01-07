@@ -310,7 +310,7 @@ class LicenseRegistry {
   static Stream<LicenseEntry> get licenses async* {
     if (_collectors == null)
       return;
-    for (LicenseEntryCollector collector in _collectors)
+    for (final LicenseEntryCollector collector in _collectors)
       yield* collector();
   }
 

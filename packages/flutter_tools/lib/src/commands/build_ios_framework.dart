@@ -158,7 +158,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
     bundleBuilder ??= BundleBuilder();
     cache ??= globals.cache;
 
-    for (BuildMode mode in buildModes) {
+    for (final BuildMode mode in buildModes) {
       globals.printStatus('Building framework for $iosProject in ${getNameForBuildMode(mode)} mode...');
       final String xcodeBuildConfiguration = toTitleCase(getNameForBuildMode(mode));
       final Directory modeDirectory = outputDirectory.childDirectory(xcodeBuildConfiguration);
@@ -470,8 +470,8 @@ end
       final Directory iPhoneBuildConfiguration = iPhoneBuildOutput.childDirectory('$xcodeBuildConfiguration-iphoneos');
       final Directory simulatorBuildConfiguration = simulatorBuildOutput.childDirectory('$xcodeBuildConfiguration-iphonesimulator');
 
-      for (Directory builtProduct in iPhoneBuildConfiguration.listSync(followLinks: false).whereType<Directory>()) {
-        for (FileSystemEntity podProduct in builtProduct.listSync(followLinks: false)) {
+      for (final Directory builtProduct in iPhoneBuildConfiguration.listSync(followLinks: false).whereType<Directory>()) {
+        for (final FileSystemEntity podProduct in builtProduct.listSync(followLinks: false)) {
           final String podFrameworkName = podProduct.basename;
           if (globals.fs.path.extension(podFrameworkName) == '.framework') {
             final String binaryName = globals.fs.path.basenameWithoutExtension(podFrameworkName);

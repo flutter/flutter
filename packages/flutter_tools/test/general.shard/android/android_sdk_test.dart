@@ -201,7 +201,7 @@ void main() {
         });
       });
 
-      for (String os in <String>['linux', 'macos']) {
+      for (final String os in <String>['linux', 'macos']) {
         testUsingContext('detection on $os (no ndk available)', () {
           sdkDir = MockAndroidSdk.createSdkDirectory(withAndroidN: true);
           globals.config.setValue('android-sdk', sdkDir.path);
