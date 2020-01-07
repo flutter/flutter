@@ -876,7 +876,7 @@ void main() {
                   child: const Text('X'),
                   onPressed: () {
                     Navigator.of(context).push<void>(
-                      _CustomDialogRoute<void>(
+                      _TestDialogRoute<void>(
                         child: const Text('Hello World'),
                       )
                     );
@@ -938,7 +938,7 @@ void main() {
                   child: const Text('X'),
                   onPressed: () {
                     Navigator.of(context).push<void>(
-                      _DialogRouteWithCustomBarrierTween<void>(
+                      _TestDialogRouteWithCustomBarrierTween<void>(
                         child: const Text('Hello World'),
                         barrierTween: CurveTween(curve: Curves.linear),
                       )
@@ -1020,8 +1020,8 @@ class DialogObserver extends NavigatorObserver {
   }
 }
 
-class _CustomDialogRoute<T> extends PopupRoute<T> {
-  _CustomDialogRoute({
+class _TestDialogRoute<T> extends PopupRoute<T> {
+  _TestDialogRoute({
     @required Widget child,
   }) : _child = child;
 
@@ -1049,8 +1049,8 @@ class _CustomDialogRoute<T> extends PopupRoute<T> {
   }
 }
 
-class _DialogRouteWithCustomBarrierTween<T> extends PopupRoute<T> {
-  _DialogRouteWithCustomBarrierTween({
+class _TestDialogRouteWithCustomBarrierTween<T> extends PopupRoute<T> {
+  _TestDialogRouteWithCustomBarrierTween({
     @required Widget child,
     Animatable<double> barrierTween,
   }) : assert(barrierDismissible != null, barrierTween != null),
