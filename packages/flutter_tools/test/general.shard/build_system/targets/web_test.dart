@@ -165,6 +165,33 @@ void main() {
     expect(generated, contains('entrypoint.main();'));
   }));
 
+  test('Dart2JSTarget calls dart2js with expected args with csp', () => testbed.run(() async {
+    environment.defines[kBuildMode] = 'profile';
+    environment.defines[kCspMode] = 'true';
+    when(globals.processManager.run(any)).thenAnswer((Invocation invocation) async {
+      return FakeProcessResult(exitCode: 0);
+    });
+    await const Dart2JSTarget().build(environment);
+
+    final List<String> expected = <String>[
+      globals.fs.path.join('bin', 'cache', 'dart-sdk', 'bin', 'dart'),
+      globals.fs.path.join('bin', 'cache', 'dart-sdk', 'bin', 'snapshots', 'dart2js.dart.snapshot'),
+      '--libraries-spec=' + globals.fs.path.join('bin', 'cache', 'flutter_web_sdk', 'libraries.json'),
+      '-O4', // highest optimizations
+      '--no-minify', // but uses unminified names for debugging
+      '-o',
+      environment.buildDir.childFile('main.dart.js').absolute.path,
+      '--packages=${globals.fs.path.join('foo', '.packages')}',
+      '-Ddart.vm.profile=true',
+      '--csp',
+      environment.buildDir.childFile('main.dart').absolute.path,
+    ];
+    verify(globals.processManager.run(expected)).called(1);
+  }, overrides: <Type, Generator>{
+    ProcessManager: () => MockProcessManager(),
+  }));
+
+
   test('Dart2JSTarget calls dart2js with expected args in profile mode', () => testbed.run(() async {
     environment.defines[kBuildMode] = 'profile';
     when(globals.processManager.run(any)).thenAnswer((Invocation invocation) async {
