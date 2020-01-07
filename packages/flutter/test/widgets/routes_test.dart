@@ -863,8 +863,10 @@ void main() {
       expect(rootObserver.dialogCount, 0);
       expect(nestedObserver.dialogCount, 1);
     });
+  });
 
-    testWidgets('ModalRoute default barrierTween', (WidgetTester tester) async {
+  group('ModalRoute', () {
+    testWidgets('default barrierTween', (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
         home: Material(
           child: Builder(
@@ -926,7 +928,7 @@ void main() {
       expect(modalBarrierAnimation.value, Colors.black);
     });
 
-    testWidgets('ModalRoute custom barrierTween', (WidgetTester tester) async {
+    testWidgets('custom barrierTween', (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
         home: Material(
           child: Builder(
