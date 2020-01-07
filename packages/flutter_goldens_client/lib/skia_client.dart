@@ -106,7 +106,7 @@ class SkiaGoldClient {
         ..writeln('The Gold service account is unavailable.')
         ..writeln('Without a service account, Gold can not be authorized.')
         ..writeln('Please check your user permissions and current comparator.');
-      throw buf.toString();
+      throw Exception(buf.toString());
     }
 
     final File authorization = workDirectory.childFile('serviceAccount.json');
@@ -130,11 +130,12 @@ class SkiaGoldClient {
         ..writeln('Skia Gold authorization failed.')
         ..writeln('This could be caused by incorrect user permissions, if the ')
         ..writeln('debug information below contains ENCRYPTED, the wrong ')
-        ..writeln('comparator was chosen for the test case.\n')
+        ..writeln('comparator was chosen for the test case.')
+        ..writeln()
         ..writeln('Debug information for Gold:')
         ..writeln('stdout: ${result.stdout}')
         ..writeln('stderr: ${result.stderr}');
-      throw buf.toString();
+      throw Exception(buf.toString());
     }
   }
 
@@ -158,11 +159,12 @@ class SkiaGoldClient {
 
     if (result.exitCode != 0) {
       final StringBuffer buf = StringBuffer()
-        ..writeln('Skia Gold emptyAuth failed.\n')
+        ..writeln('Skia Gold emptyAuth failed.')
+        ..writeln()
         ..writeln('Debug information for Gold:')
         ..writeln('stdout: ${result.stdout}')
         ..writeln('stderr: ${result.stderr}');
-      throw buf.toString();
+      throw Exception(buf.toString());
     }
   }
 
@@ -196,7 +198,7 @@ class SkiaGoldClient {
         ..writeln('Please confirm the settings of your golden file test.')
         ..writeln('Arguments provided:');
       imgtestInitArguments.forEach(buf.writeln);
-      throw buf.toString();
+      throw Exception(buf.toString());
     }
 
     final io.ProcessResult result = await io.Process.run(
@@ -208,11 +210,12 @@ class SkiaGoldClient {
       final StringBuffer buf = StringBuffer()
         ..writeln('Skia Gold imgtest init failed.')
         ..writeln('An error occured when initializing golden file test with ')
-        ..writeln('goldctl.\n')
+        ..writeln('goldctl.')
+        ..writeln()
         ..writeln('Debug information for Gold:')
         ..writeln('stdout: ${result.stdout}')
         ..writeln('stderr: ${result.stderr}');
-      throw buf.toString();
+      throw Exception(buf.toString());
     }
   }
 
@@ -292,7 +295,7 @@ class SkiaGoldClient {
         ..writeln('Please confirm the settings of your golden file test.')
         ..writeln('Arguments provided:');
       imgtestInitArguments.forEach(buf.writeln);
-      throw buf.toString();
+      throw Exception(buf.toString());
     }
 
     final io.ProcessResult result = await io.Process.run(
@@ -304,11 +307,12 @@ class SkiaGoldClient {
       final StringBuffer buf = StringBuffer()
         ..writeln('Skia Gold tryjobInit failure.')
         ..writeln('An error occured when initializing golden file tryjob with ')
-        ..writeln('goldctl.\n')
+        ..writeln('goldctl.')
+        ..writeln()
         ..writeln('Debug information for Gold:')
         ..writeln('stdout: ${result.stdout}')
         ..writeln('stderr: ${result.stderr}');
-      throw buf.toString();
+      throw Exception(buf.toString());
     }
   }
 
@@ -351,17 +355,20 @@ class SkiaGoldClient {
           ..writeln('and the visual difference, visit: ')
           ..writeln(failureLinks.last)
           ..writeln('There you can also triage this image (e.g. because this ')
-          ..writeln('is an intentional change).\n\n');
-        throw buf.toString();
+          ..writeln('is an intentional change).')
+          ..writeln();
+        throw Exception(buf.toString());
       } else {
         final StringBuffer buf = StringBuffer()
           ..writeln('Unexpected Gold tryjobAdd failure.')
           ..writeln('Tryjob execution for golden file test $testName failed for')
-          ..writeln('a reason unrelated to pixel comparison.\n')
+          ..writeln('a reason unrelated to pixel comparison.')
+          ..writeln()
           ..writeln('Debug information for Gold:')
           ..writeln('stdout: ${result.stdout}')
-          ..writeln('stderr: ${result.stderr}\n');
-        throw buf.toString();
+          ..writeln('stderr: ${result.stderr}')
+          ..writeln();
+        throw Exception(buf.toString());
       }
     }
 
@@ -480,7 +487,7 @@ class SkiaGoldClient {
         final io.HttpClientResponse response = await request.close();
         rawResponse = await utf8.decodeStream(response);
         final List<dynamic> ignores = json.decode(rawResponse) as List<dynamic>;
-        for(dynamic ignore in ignores) {
+        for(final dynamic ignore in ignores) {
           final List<String> ignoredQueries = (ignore['query'] as String).split('&');
           final String ignoredPullRequest = (ignore['note'] as String).split('/').last;
           final DateTime expiration = DateTime.parse(ignore['expires'] as String);
@@ -496,7 +503,7 @@ class SkiaGoldClient {
                 ..writeln('change has not been triaged.')
                 ..writeln('The associated pull request is:')
                 ..writeln('https://github.com/flutter/flutter/pull/$ignoredPullRequest');
-              throw buf.toString();
+              throw Exception(buf.toString());
             }
           }
         }
@@ -508,7 +515,7 @@ class SkiaGoldClient {
             ..writeln('Check https://flutter-gold.skia.org/ignores, or')
             ..writeln('https://flutter-gold.skia.org/?query=source_type%3Dflutter')
             ..writeln('for untriaged golden files.');
-          throw buf.toString();
+          throw Exception(buf.toString());
         } else {
           print('Formatting error detected requesting /ignores from Flutter Gold.'
             '\nrawResponse: $rawResponse');
@@ -546,7 +553,7 @@ class SkiaGoldClient {
         if (rawResponse.contains('stream timeout')) {
           final StringBuffer buf = StringBuffer()
             ..writeln('Stream timeout on Gold\'s /details api.');
-          throw buf.toString();
+          throw Exception(buf.toString());
         } else {
           print('Formatting error detected requesting /ignores from Flutter Gold.'
             '\nrawResponse: $rawResponse');
@@ -564,7 +571,7 @@ class SkiaGoldClient {
     if (!_flutterRoot.existsSync()) {
       final StringBuffer buf = StringBuffer()
         ..writeln('Flutter root could not be found: $_flutterRoot');
-      throw buf.toString();
+      throw Exception(buf.toString());
     } else {
       final io.ProcessResult revParse = await process.run(
         <String>['git', 'rev-parse', 'HEAD'],
