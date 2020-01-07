@@ -9,12 +9,12 @@ import 'package:json_rpc_2/error_code.dart' as rpc_error_code;
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:meta/meta.dart';
 import 'package:pool/pool.dart';
-
 import 'base/async_guard.dart';
+
+import 'base/command_help.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
-import 'base/terminal.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'compile.dart';
@@ -1045,29 +1045,23 @@ class HotRunner extends ResidentRunner {
 
   @override
   void printHelp({ @required bool details }) {
-    const String fire = '🔥';
-    String rawMessage = '  To hot reload changes while running, press "r". ';
+    globals.printStatus('Flutter run key commands.');
+    CommandHelp.r.print();
     if (canHotRestart) {
-      rawMessage += 'To hot restart (and rebuild state), press "R".';
+      CommandHelp.R.print();
     }
-    final String message = globals.terminal.color(
-      fire + globals.terminal.bolden(rawMessage),
-      TerminalColor.red,
-    );
-    globals.printStatus(message);
+    CommandHelp.h.print();
+    if (_didAttach) {
+      CommandHelp.d.print();
+    }
+    CommandHelp.q.print();
+    if (details) {
+      printHelpDetails();
+    }
     for (final FlutterDevice device in flutterDevices) {
       final String dname = device.device.name;
       globals.printStatus('An Observatory debugger and profiler on $dname is '
-        'available at: ${device.vmService.httpAddress}');
-    }
-    final String quitMessage = _didAttach
-        ? 'To detach, press "d"; to quit, press "q".'
-        : 'To quit, press "q".';
-    if (details) {
-      printHelpDetails();
-      globals.printStatus('To repeat this help message, press "h". $quitMessage');
-    } else {
-      globals.printStatus('For a more detailed help message, press "h". $quitMessage');
+          'available at:\n${device.vmService.httpAddress}');
     }
   }
 

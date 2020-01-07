@@ -27,13 +27,13 @@ import '../src/context.dart';
 import '../src/mocks.dart';
 
 void main() {
+  setUpAll(() {
+    Cache.disableLocking();
+  });
+
   group('analytics', () {
     Directory tempDir;
     MockFlutterConfig mockFlutterConfig;
-
-    setUpAll(() {
-      Cache.disableLocking();
-    });
 
     setUp(() {
       Cache.flutterRoot = '../..';

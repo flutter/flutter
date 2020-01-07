@@ -26,6 +26,9 @@ const String kHasWebPlugins = 'HasWebPlugins';
 /// Valid values are O1 (lowest, profile default) to O4 (highest, release default).
 const String kDart2jsOptimization = 'Dart2jsOptimization';
 
+/// Whether to disable dynamic generation code to satisfy csp policies.
+const String kCspMode = 'cspMode';
+
 /// Generates an entry point for a web target.
 class WebEntrypointTarget extends Target {
   const WebEntrypointTarget();
@@ -146,6 +149,7 @@ class Dart2JSTarget extends Target {
   @override
   Future<void> build(Environment environment) async {
     final String dart2jsOptimization = environment.defines[kDart2jsOptimization];
+    final bool csp = environment.defines[kCspMode] == 'true';
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final String specPath = globals.fs.path.join(globals.artifacts.getArtifactPath(Artifact.flutterWebSdk), 'libraries.json');
     final String packageFile = FlutterProject.fromDirectory(environment.projectDir).hasBuilders
@@ -170,6 +174,8 @@ class Dart2JSTarget extends Target {
         '-Ddart.vm.profile=true'
       else
         '-Ddart.vm.product=true',
+      if (csp)
+        '--csp',
       for (final String dartDefine in parseDartDefines(environment))
         '-D$dartDefine',
       environment.buildDir.childFile('main.dart').path,

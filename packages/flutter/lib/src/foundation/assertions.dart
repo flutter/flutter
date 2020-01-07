@@ -113,6 +113,7 @@ class ErrorDescription extends _ErrorDiagnostic {
 
   /// Calls to the default constructor may be rewritten to use this constructor
   /// in debug mode using a kernel transformer.
+  // ignore: unused_element
   ErrorDescription._fromParts(List<Object> messageParts) : super._fromParts(messageParts, level: DiagnosticLevel.info);
 }
 
@@ -147,6 +148,7 @@ class ErrorSummary extends _ErrorDiagnostic {
 
   /// Calls to the default constructor may be rewritten to use this constructor
   /// in debug mode using a kernel transformer.
+  // ignore: unused_element
   ErrorSummary._fromParts(List<Object> messageParts) : super._fromParts(messageParts, level: DiagnosticLevel.summary);
 }
 
@@ -177,6 +179,7 @@ class ErrorHint extends _ErrorDiagnostic {
 
   /// Calls to the default constructor may be rewritten to use this constructor
   /// in debug mode using a kernel transformer.
+  // ignore: unused_element
   ErrorHint._fromParts(List<Object> messageParts) : super._fromParts(messageParts, level:DiagnosticLevel.hint);
 }
 
