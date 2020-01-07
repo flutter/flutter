@@ -873,7 +873,11 @@ void main() {
                 child: RaisedButton(
                   child: const Text('X'),
                   onPressed: () {
-                    _showCustomDialog(context);
+                    Navigator.of(context).push<void>(
+                      _CustomDialogRoute<void>(
+                        child: const Text('Hello World'),
+                      )
+                    );
                   },
                 ),
               );
@@ -923,7 +927,66 @@ void main() {
     });
 
     testWidgets('ModalRoute custom barrierTween', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+        home: Material(
+          child: Builder(
+            builder: (BuildContext context) {
+              return Center(
+                child: RaisedButton(
+                  child: const Text('X'),
+                  onPressed: () {
+                    Navigator.of(context).push<void>(
+                      _DialogRouteWithCustomBarrierTween<void>(
+                        child: const Text('Hello World'),
+                        barrierTween: CurveTween(curve: Curves.linear),
+                      )
+                    );
+                  },
+                ),
+              );
+            }
+          ),
+        ),
+      ));
 
+      final CurveTween _customBarrierTween = CurveTween(curve: Curves.linear);
+      double _getBarrierTweenAlphaValue(double t) {
+        return _customBarrierTween.transform(t) * 255;
+      }
+
+      await tester.tap(find.text('X'));
+      await tester.pump();
+      final Finder animatedModalBarrier = find.byType(AnimatedModalBarrier);
+      expect(animatedModalBarrier, findsOneWidget);
+
+      Animation<Color> modalBarrierAnimation;
+      modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
+      expect(modalBarrierAnimation.value, Colors.transparent);
+
+      await tester.pump(const Duration(milliseconds: 25));
+      modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
+      expect(
+        modalBarrierAnimation.value.alpha,
+        closeTo(_getBarrierTweenAlphaValue(0.25), 1.0),
+      );
+
+      await tester.pump(const Duration(milliseconds: 25));
+      modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
+      expect(
+        modalBarrierAnimation.value.alpha,
+        closeTo(_getBarrierTweenAlphaValue(0.50), 1.0),
+      );
+
+      await tester.pump(const Duration(milliseconds: 25));
+      modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
+      expect(
+        modalBarrierAnimation.value.alpha,
+        closeTo(_getBarrierTweenAlphaValue(0.75), 1.0),
+      );
+
+      await tester.pumpAndSettle();
+      modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
+      expect(modalBarrierAnimation.value, Colors.black);
     });
   });
 }
@@ -955,30 +1018,96 @@ class DialogObserver extends NavigatorObserver {
   }
 }
 
-void _showCustomDialog(BuildContext context) {
-  showGeneralDialog<void>(
-    context: context,
-    transitionDuration: const Duration(milliseconds: 100),
-    barrierDismissible: true,
-    barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
-    barrierColor: Colors.black, // update this value to make it easy to test
-    pageBuilder: (BuildContext buildContext, Animation<double> animation, Animation<double> secondaryAnimation) {
-      final ThemeData theme = Theme.of(context, shadowThemeOnly: true);
-      return SafeArea(
-        child: Builder(
-          builder: (BuildContext context) {
-            return Theme(
-              data: theme,
-              child: const AlertDialog(title: Text('Hello World')),
-            );
-          }
-        ),
-      );
-    },
-    useRootNavigator: true,
-    transitionBuilder: (BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation, Widget child) {
-      return const AlertDialog(title: Text('Hello World'));
-    },
-  );
+class _CustomDialogRoute<T> extends PopupRoute<T> {
+  _CustomDialogRoute({
+    @required Widget child,
+    bool barrierDismissible = true,
+    String barrierLabel,
+    Color barrierColor = Colors.black, // easier value to test against
+    Duration transitionDuration = const Duration(milliseconds: 100), // easier value to test against
+    RouteSettings settings,
+  }) : assert(barrierDismissible != null, barrierTween != null),
+       _child = child,
+       _barrierDismissible = barrierDismissible,
+       _barrierLabel = barrierLabel,
+       _barrierColor = barrierColor,
+       _transitionDuration = transitionDuration,
+       super(settings: settings);
+
+  final Widget _child;
+
+  @override
+  bool get barrierDismissible => _barrierDismissible;
+  final bool _barrierDismissible;
+
+  @override
+  String get barrierLabel => _barrierLabel;
+  final String _barrierLabel;
+
+  @override
+  Color get barrierColor => _barrierColor;
+  final Color _barrierColor;
+
+  @override
+  Duration get transitionDuration => _transitionDuration;
+  final Duration _transitionDuration;
+
+  @override
+  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+    return Semantics(
+      child: _child,
+      scopesRoute: true,
+      explicitChildNodes: true,
+    );
+  }
 }
 
+class _DialogRouteWithCustomBarrierTween<T> extends PopupRoute<T> {
+  _DialogRouteWithCustomBarrierTween({
+    @required Widget child,
+    bool barrierDismissible = true,
+    String barrierLabel,
+    Color barrierColor = Colors.black, // easier value to test against
+    Animatable<double> barrierTween,
+    Duration transitionDuration = const Duration(milliseconds: 100), // easier value to test against
+    RouteSettings settings,
+  }) : assert(barrierDismissible != null, barrierTween != null),
+       _child = child,
+       _barrierDismissible = barrierDismissible,
+       _barrierLabel = barrierLabel,
+       _barrierColor = barrierColor,
+       _barrierTween = barrierTween,
+       _transitionDuration = transitionDuration,
+       super(settings: settings);
+
+  final Widget _child;
+
+  @override
+  bool get barrierDismissible => _barrierDismissible;
+  final bool _barrierDismissible;
+
+  @override
+  String get barrierLabel => _barrierLabel;
+  final String _barrierLabel;
+
+  @override
+  Color get barrierColor => _barrierColor;
+  final Color _barrierColor;
+
+  @override
+  Animatable<double> get barrierTween => _barrierTween;
+  final Animatable<double> _barrierTween;
+
+  @override
+  Duration get transitionDuration => _transitionDuration;
+  final Duration _transitionDuration;
+
+  @override
+  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+    return Semantics(
+      child: _child,
+      scopesRoute: true,
+      explicitChildNodes: true,
+    );
+  }
+}
