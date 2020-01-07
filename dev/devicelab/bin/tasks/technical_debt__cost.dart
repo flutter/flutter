@@ -137,6 +137,7 @@ Future<void> main() async {
         _kCostBenchmarkKey,
         _kNumberOfDependenciesKey,
         _kNumberOfConsumerDependenciesKey,
+        _kNumberOfFlutterToolGlobals,
       ],
     );
   });
