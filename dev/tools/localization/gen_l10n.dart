@@ -254,7 +254,7 @@ bool _containsFormatKey(Map<String, dynamic> placeholderValue, String placeholde
   );
 }
 
-bool _isDateParameterValid(Map<String, dynamic> placeholderValue, String placeholder) {
+bool _isValidDateParameter(Map<String, dynamic> placeholderValue, String placeholder) {
   if (allowableDateFormats.contains(placeholderValue['format']))
     return true;
   throw L10nException(
@@ -357,7 +357,7 @@ String generateNumberFormattingLogic(Map<String, dynamic> arbBundle, String reso
 bool _isValidDateFormat(Map<String, dynamic> value, String placeholder) {
   return _isDateParameter(value)
       && _containsFormatKey(value, placeholder)
-      && _isDateParameterValid(value, placeholder);
+      && _isValidDateParameter(value, placeholder);
 }
 
 bool _isValidNumberFormat(Map<String, dynamic> value, String placeholder) {
