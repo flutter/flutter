@@ -64,7 +64,7 @@ void main() {
 
   // Creates the mock files necessary to run a build.
   void setUpMockProjectFilesForBuild() {
-    globals.fs.file('linux/build.sh').createSync(recursive: true);
+    globals.fs.file(globals.fs.path.join('linux', 'Makefile')).createSync(recursive: true);
     setUpMockCoreProjectFiles();
   }
 

@@ -76,7 +76,7 @@ void main() {
 
   // Sets up the minimal mock project files necessary for macOS builds to succeed.
   void createMinimalMockProjectFiles() {
-    globals.fs.directory('macos').createSync();
+    globals.fs.directory(globals.fs.path.join('macos', 'Runner.xcworkspace')).createSync(recursive: true);
     createCoreMockProjectFiles();
   }
 
