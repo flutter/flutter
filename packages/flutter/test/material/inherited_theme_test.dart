@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -73,7 +73,7 @@ void main() {
     }
 
     Color containerColor() {
-      final BoxDecoration decoration = tester.widget<Container>(find.byKey(primaryContainerKey)).decoration;
+      final BoxDecoration decoration = tester.widget<Container>(find.byKey(primaryContainerKey)).decoration as BoxDecoration;
       return decoration.color;
     }
 
@@ -227,7 +227,7 @@ void main() {
     Color bannerColor() {
       final BoxDecoration decoration = tester.widget<Container>(
         find.descendant(of: find.byType(MaterialBanner), matching: find.byType(Container)).first,
-      ).decoration;
+      ).decoration as BoxDecoration;
       return decoration.color;
     }
 
@@ -318,7 +318,7 @@ void main() {
     BorderSide dividerBorder() {
       final BoxDecoration decoration = tester.widget<Container>(
         find.descendant(of: find.byType(Divider), matching: find.byType(Container)).first,
-      ).decoration;
+      ).decoration as BoxDecoration;
       return decoration.border.bottom;
     }
 
@@ -698,7 +698,7 @@ void main() {
         find.descendant(
           of: find.widgetWithText(RawMaterialButton, text),
           matching: find.byType(Material),
-        )
+        ),
       ).color;
     }
 

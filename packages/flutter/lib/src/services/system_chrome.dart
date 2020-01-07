@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -196,23 +196,26 @@ class SystemUiOverlayStyle {
   bool operator ==(dynamic other) {
     if (other.runtimeType != runtimeType)
       return false;
-    final SystemUiOverlayStyle typedOther = other;
-    return typedOther.systemNavigationBarColor == systemNavigationBarColor
-      && typedOther.systemNavigationBarDividerColor == systemNavigationBarDividerColor
-      && typedOther.statusBarColor == statusBarColor
-      && typedOther.statusBarIconBrightness == statusBarIconBrightness
-      && typedOther.statusBarBrightness == statusBarBrightness
-      && typedOther.systemNavigationBarIconBrightness == systemNavigationBarIconBrightness;
+    return other is SystemUiOverlayStyle
+        && other.systemNavigationBarColor == systemNavigationBarColor
+        && other.systemNavigationBarDividerColor == systemNavigationBarDividerColor
+        && other.statusBarColor == statusBarColor
+        && other.statusBarIconBrightness == statusBarIconBrightness
+        && other.statusBarBrightness == statusBarBrightness
+        && other.systemNavigationBarIconBrightness == systemNavigationBarIconBrightness;
   }
 }
 
 List<String> _stringify(List<dynamic> list) => <String>[
-  for (dynamic item in list) item.toString(),
+  for (final dynamic item in list) item.toString(),
 ];
 
 /// Controls specific aspects of the operating system's graphical interface and
 /// how it interacts with the application.
 class SystemChrome {
+  // This class is not meant to be instatiated or extended; this constructor
+  // prevents instantiation and extension.
+  // ignore: unused_element
   SystemChrome._();
 
   /// Specifies the set of orientations the application interface can
@@ -221,6 +224,17 @@ class SystemChrome {
   /// The `orientation` argument is a list of [DeviceOrientation] enum values.
   /// The empty list causes the application to defer to the operating system
   /// default.
+  ///
+  /// ## Limitations
+  ///
+  /// This setting will only be respected on iPad if multitasking is disabled.
+  ///
+  /// You can decide to opt out of multitasking on iPad, then
+  /// setPreferredOrientations will work but your app will not
+  /// support Slide Over and Split View multitasking anymore.
+  ///
+  /// Should you decide to opt out of multitasking you can do this by
+  /// setting "Requires full screen" to true in the Xcode Deployment Info.
   static Future<void> setPreferredOrientations(List<DeviceOrientation> orientations) async {
     await SystemChannels.platform.invokeMethod<void>(
       'SystemChrome.setPreferredOrientations',
@@ -369,7 +383,8 @@ class SystemChrome {
   /// {@end-tool}
   ///
   /// See also:
-  ///   * [AnnotatedRegion], the widget used to place data into the layer tree.
+  ///
+  ///  * [AnnotatedRegion], the widget used to place data into the layer tree.
   static void setSystemUIOverlayStyle(SystemUiOverlayStyle style) {
     assert(style != null);
     if (_pendingStyle != null) {

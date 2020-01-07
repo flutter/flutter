@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -13,6 +13,34 @@ void main() {
 
   setUp(() {
     navigatorObserver = MockNavigatorObserver();
+  });
+
+  testWidgets(
+    'Throws FlutterError with correct message when route builder returns null',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const CupertinoApp(
+        home: Placeholder(),
+      ),
+    );
+
+    tester.state<NavigatorState>(find.byType(Navigator)).push(
+          CupertinoPageRoute<void>(
+            title: 'Route 1',
+            builder: (_) => null,
+          ),
+        );
+
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+
+    final dynamic error = tester.takeException();
+    expect(error, isFlutterError);
+    expect(error.toStringDeep(), equalsIgnoringHashCodes(
+      'FlutterError\n'
+      '   The builder for route "null" returned null.\n'
+      '   Route builders must never return null.\n'
+    ));
   });
 
   testWidgets('Middle auto-populates with title', (WidgetTester tester) async {
@@ -31,7 +59,7 @@ void main() {
             child: Placeholder(),
           );
         },
-      )
+      ),
     );
 
     await tester.pump();
@@ -64,7 +92,7 @@ void main() {
             ),
           );
         },
-      )
+      ),
     );
 
     await tester.pump();
@@ -81,8 +109,8 @@ void main() {
     final List<Element> titles = tester.elementList(find.text('An iPod'))
         .toList()
         ..sort((Element a, Element b) {
-          final RenderParagraph aParagraph = a.renderObject;
-          final RenderParagraph bParagraph = b.renderObject;
+          final RenderParagraph aParagraph = a.renderObject as RenderParagraph;
+          final RenderParagraph bParagraph = b.renderObject as RenderParagraph;
           return aParagraph.text.style.fontSize.compareTo(
             bParagraph.text.style.fontSize
           );
@@ -90,13 +118,13 @@ void main() {
 
     final Iterable<double> opacities = titles.map<double>((Element element) {
       final RenderAnimatedOpacity renderOpacity =
-          element.ancestorRenderObjectOfType(const TypeMatcher<RenderAnimatedOpacity>());
+          element.findAncestorRenderObjectOfType<RenderAnimatedOpacity>();
       return renderOpacity.opacity.value;
     });
 
     expect(opacities, <double> [
-        0.0, // Initially the smaller font title is invisible.
-        1.0, // The larger font title is visible.
+      0.0, // Initially the smaller font title is invisible.
+      1.0, // The larger font title is visible.
     ]);
 
     // Check that the large font title is at the right spot.
@@ -126,7 +154,7 @@ void main() {
             child: Placeholder(),
           );
         },
-      )
+      ),
     );
 
     await tester.pump();
@@ -141,7 +169,7 @@ void main() {
             child: Placeholder(),
           );
         },
-      )
+      ),
     );
 
     await tester.pump();
@@ -172,7 +200,7 @@ void main() {
             child: Placeholder(),
           );
         },
-      )
+      ),
     );
 
     await tester.pump();
@@ -187,7 +215,7 @@ void main() {
             child: Placeholder(),
           );
         },
-      )
+      ),
     );
 
     // Trigger the route push
@@ -890,6 +918,164 @@ void main() {
     expect(homeTapCount, 1);
     expect(pageTapCount, 1);
   });
+
+  testWidgets('showCupertinoModalPopup uses root navigator by default', (WidgetTester tester) async {
+    final PopupObserver rootObserver = PopupObserver();
+    final PopupObserver nestedObserver = PopupObserver();
+
+    await tester.pumpWidget(CupertinoApp(
+      navigatorObservers: <NavigatorObserver>[rootObserver],
+      home: Navigator(
+        observers: <NavigatorObserver>[nestedObserver],
+        onGenerateRoute: (RouteSettings settings) {
+          return PageRouteBuilder<dynamic>(
+            pageBuilder: (BuildContext context, Animation<double> _, Animation<double> __) {
+              return GestureDetector(
+                onTap: () async {
+                  await showCupertinoModalPopup<void>(
+                    context: context,
+                    builder: (BuildContext context) => const SizedBox(),
+                  );
+                },
+                child: const Text('tap'),
+              );
+            },
+          );
+        },
+      ),
+    ));
+
+    // Open the dialog.
+    await tester.tap(find.text('tap'));
+
+    expect(rootObserver.popupCount, 1);
+    expect(nestedObserver.popupCount, 0);
+  });
+
+  testWidgets('showCupertinoModalPopup uses nested navigator if useRootNavigator is false', (WidgetTester tester) async {
+    final PopupObserver rootObserver = PopupObserver();
+    final PopupObserver nestedObserver = PopupObserver();
+
+    await tester.pumpWidget(CupertinoApp(
+      navigatorObservers: <NavigatorObserver>[rootObserver],
+      home: Navigator(
+        observers: <NavigatorObserver>[nestedObserver],
+        onGenerateRoute: (RouteSettings settings) {
+          return PageRouteBuilder<dynamic>(
+            pageBuilder: (BuildContext context, Animation<double> _, Animation<double> __) {
+              return GestureDetector(
+                onTap: () async {
+                  await showCupertinoModalPopup<void>(
+                    context: context,
+                    useRootNavigator: false,
+                    builder: (BuildContext context) => const SizedBox(),
+                  );
+                },
+                child: const Text('tap'),
+              );
+            },
+          );
+        },
+      ),
+    ));
+
+    // Open the dialog.
+    await tester.tap(find.text('tap'));
+
+    expect(rootObserver.popupCount, 0);
+    expect(nestedObserver.popupCount, 1);
+  });
+
+  testWidgets('showCupertinoDialog uses root navigator by default', (WidgetTester tester) async {
+    final DialogObserver rootObserver = DialogObserver();
+    final DialogObserver nestedObserver = DialogObserver();
+
+    await tester.pumpWidget(CupertinoApp(
+      navigatorObservers: <NavigatorObserver>[rootObserver],
+      home: Navigator(
+        observers: <NavigatorObserver>[nestedObserver],
+        onGenerateRoute: (RouteSettings settings) {
+          return PageRouteBuilder<dynamic>(
+            pageBuilder: (BuildContext context, Animation<double> _, Animation<double> __) {
+              return GestureDetector(
+                onTap: () async {
+                  await showCupertinoDialog<void>(
+                    context: context,
+                    builder: (BuildContext context) => const SizedBox(),
+                  );
+                },
+                child: const Text('tap'),
+              );
+            },
+          );
+        },
+      ),
+    ));
+
+    // Open the dialog.
+    await tester.tap(find.text('tap'));
+
+    expect(rootObserver.dialogCount, 1);
+    expect(nestedObserver.dialogCount, 0);
+  });
+
+  testWidgets('showCupertinoDialog uses nested navigator if useRootNavigator is false', (WidgetTester tester) async {
+    final DialogObserver rootObserver = DialogObserver();
+    final DialogObserver nestedObserver = DialogObserver();
+
+    await tester.pumpWidget(CupertinoApp(
+      navigatorObservers: <NavigatorObserver>[rootObserver],
+      home: Navigator(
+        observers: <NavigatorObserver>[nestedObserver],
+        onGenerateRoute: (RouteSettings settings) {
+          return PageRouteBuilder<dynamic>(
+            pageBuilder: (BuildContext context, Animation<double> _, Animation<double> __) {
+              return GestureDetector(
+                onTap: () async {
+                  await showCupertinoDialog<void>(
+                    context: context,
+                    useRootNavigator: false,
+                    builder: (BuildContext context) => const SizedBox(),
+                  );
+                },
+                child: const Text('tap'),
+              );
+            },
+          );
+        },
+      ),
+    ));
+
+    // Open the dialog.
+    await tester.tap(find.text('tap'));
+
+    expect(rootObserver.dialogCount, 0);
+    expect(nestedObserver.dialogCount, 1);
+  });
 }
 
 class MockNavigatorObserver extends Mock implements NavigatorObserver {}
+
+class PopupObserver extends NavigatorObserver {
+  int popupCount = 0;
+
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic> previousRoute) {
+    if (route.toString().contains('_CupertinoModalPopupRoute')) {
+      popupCount++;
+    }
+    super.didPush(route, previousRoute);
+  }
+}
+
+class DialogObserver extends NavigatorObserver {
+  int dialogCount = 0;
+
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic> previousRoute) {
+    if (route.toString().contains('_DialogRoute')) {
+      dialogCount++;
+    }
+    super.didPush(route, previousRoute);
+  }
+}

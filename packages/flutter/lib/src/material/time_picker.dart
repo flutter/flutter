@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -209,6 +209,7 @@ class _DayPeriodControl extends StatelessWidget {
         _announceToAccessibility(context, MaterialLocalizations.of(context).anteMeridiemAbbreviation);
         break;
       case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
         break;
     }
     _togglePeriod();
@@ -224,6 +225,7 @@ class _DayPeriodControl extends StatelessWidget {
         _announceToAccessibility(context, MaterialLocalizations.of(context).postMeridiemAbbreviation);
         break;
       case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
         break;
     }
     _togglePeriod();
@@ -683,7 +685,7 @@ class _TimePickerHeaderLayout extends MultiChildLayoutDelegate {
 
   void _positionPivoted(double width, double y, Map<_TimePickerHeaderId, Size> childSizes, List<_TimePickerHeaderFragment> fragments, int pivotIndex) {
     double tailWidth = childSizes[fragments[pivotIndex].layoutId].width / 2.0;
-    for (_TimePickerHeaderFragment fragment in fragments.skip(pivotIndex + 1)) {
+    for (final _TimePickerHeaderFragment fragment in fragments.skip(pivotIndex + 1)) {
       tailWidth += childSizes[fragment.layoutId].width + fragment.startMargin;
     }
 
@@ -701,7 +703,7 @@ class _TimePickerHeaderLayout extends MultiChildLayoutDelegate {
   void _positionPiece(double width, double centeredAroundY, Map<_TimePickerHeaderId, Size> childSizes, List<_TimePickerHeaderFragment> fragments) {
     double pieceWidth = 0.0;
     double nextMargin = 0.0;
-    for (_TimePickerHeaderFragment fragment in fragments) {
+    for (final _TimePickerHeaderFragment fragment in fragments) {
       final Size childSize = childSizes[fragment.layoutId];
       pieceWidth += childSize.width + nextMargin;
       // Delay application of margin until next element because margin of the
@@ -925,7 +927,7 @@ class _DialPainter extends CustomPainter {
       final double labelThetaIncrement = -_kTwoPi / labels.length;
       double labelTheta = math.pi / 2.0;
 
-      for (_TappableLabel label in labels) {
+      for (final _TappableLabel label in labels) {
         final TextPainter labelPainter = label.painter;
         final Offset labelOffset = Offset(-labelPainter.width / 2.0, -labelPainter.height / 2.0);
         labelPainter.paint(canvas, getOffsetForTheta(labelTheta, ring) + labelOffset);
@@ -1002,7 +1004,7 @@ class _DialPainter extends CustomPainter {
         final double width = labelPainter.width * _semanticNodeSizeScale;
         final double height = labelPainter.height * _semanticNodeSizeScale;
         final Offset nodeOffset = getOffsetForTheta(labelTheta, ring) + Offset(-width / 2.0, -height / 2.0);
-        final TextSpan textSpan = labelPainter.text;
+        final TextSpan textSpan = labelPainter.text as TextSpan;
         final CustomPainterSemantics node = CustomPainterSemantics(
           rect: Rect.fromLTRB(
             nodeOffset.dx - 24.0 + width / 2,
@@ -1188,7 +1190,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
       _thetaTween
         ..begin = angle
         ..end = angle; // The controller doesn't animate during the pan gesture.
-      final RenderBox box = context.findRenderObject();
+      final RenderBox box = context.findRenderObject() as RenderBox;
       final double radius = box.size.shortestSide / 2.0;
       if (widget.mode == _TimePickerMode.hour && widget.use24HourDials) {
         if (offset.distance * 1.5 < radius)
@@ -1206,7 +1208,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
   void _handlePanStart(DragStartDetails details) {
     assert(!_dragging);
     _dragging = true;
-    final RenderBox box = context.findRenderObject();
+    final RenderBox box = context.findRenderObject() as RenderBox;
     _position = box.globalToLocal(details.globalPosition);
     _center = box.size.center(Offset.zero);
     _updateThetaForPan();
@@ -1233,7 +1235,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
   }
 
   void _handleTapUp(TapUpDetails details) {
-    final RenderBox box = context.findRenderObject();
+    final RenderBox box = context.findRenderObject() as RenderBox;
     _position = box.globalToLocal(details.globalPosition);
     _center = box.size.center(Offset.zero);
     _updateThetaForPan();
@@ -1337,7 +1339,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
   }
 
   List<_TappableLabel> _build24HourInnerRing(TextTheme textTheme) => <_TappableLabel>[
-    for (TimeOfDay timeOfDay in _amHours)
+    for (final TimeOfDay timeOfDay in _amHours)
       _buildTappableLabel(
         textTheme,
         timeOfDay.hour,
@@ -1349,7 +1351,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
   ];
 
   List<_TappableLabel> _build24HourOuterRing(TextTheme textTheme) => <_TappableLabel>[
-    for (TimeOfDay timeOfDay in _pmHours)
+    for (final TimeOfDay timeOfDay in _pmHours)
       _buildTappableLabel(
         textTheme,
         timeOfDay.hour,
@@ -1361,7 +1363,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
   ];
 
   List<_TappableLabel> _build12HourOuterRing(TextTheme textTheme) => <_TappableLabel>[
-    for (TimeOfDay timeOfDay in _amHours)
+    for (final TimeOfDay timeOfDay in _amHours)
       _buildTappableLabel(
         textTheme,
         timeOfDay.hour,
@@ -1389,7 +1391,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     ];
 
     return <_TappableLabel>[
-      for (TimeOfDay timeOfDay in _minuteMarkerValues)
+      for (final TimeOfDay timeOfDay in _minuteMarkerValues)
         _buildTappableLabel(
           textTheme,
           timeOfDay.minute,
@@ -1525,6 +1527,7 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
         });
         break;
       case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
         break;
     }
   }
@@ -1731,8 +1734,8 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
 /// ```
 /// {@end-tool}
 ///
-/// The [context] argument is passed to [showDialog], the documentation for
-/// which discusses how it is used.
+/// The [context] and [useRootNavigator] arguments are passed to [showDialog],
+/// the documentation for which discusses how it is used.
 ///
 /// The [builder] parameter can be used to wrap the dialog widget
 /// to add inherited widgets like [Localizations.override],
@@ -1780,14 +1783,17 @@ Future<TimeOfDay> showTimePicker({
   @required BuildContext context,
   @required TimeOfDay initialTime,
   TransitionBuilder builder,
+  bool useRootNavigator = true,
 }) async {
   assert(context != null);
   assert(initialTime != null);
+  assert(useRootNavigator != null);
   assert(debugCheckHasMaterialLocalizations(context));
 
   final Widget dialog = _TimePickerDialog(initialTime: initialTime);
   return await showDialog<TimeOfDay>(
     context: context,
+    useRootNavigator: useRootNavigator,
     builder: (BuildContext context) {
       return builder == null ? dialog : builder(context, dialog);
     },

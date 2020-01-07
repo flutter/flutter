@@ -1,13 +1,25 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
+// Sets a platform override for desktop to avoid exceptions. See
+// https://flutter.dev/desktop#target-platform-override for more info.
+// TODO(gspencergoog): Remove once TargetPlatform includes all desktop platforms.
+void _enablePlatformOverrideForDesktop() {
+  if (!kIsWeb && (Platform.isWindows || Platform.isLinux)) {
+    debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
+  }
+}
+
 void main() {
+  _enablePlatformOverrideForDesktop();
   runApp(const MaterialApp(
     title: 'Actions Demo',
     home: FocusDemo(),
@@ -65,7 +77,7 @@ class UndoableActionDispatcher extends ActionDispatcher implements Listenable {
   /// May only be called by subclasses.
   @protected
   void notifyListeners() {
-    for (VoidCallback callback in _listeners) {
+    for (final VoidCallback callback in _listeners) {
       callback();
     }
   }
@@ -94,7 +106,7 @@ class UndoableActionDispatcher extends ActionDispatcher implements Listenable {
   bool get canUndo {
     if (_completedActions.isNotEmpty) {
       final Intent lastIntent = _completedActions.last.invocationIntent;
-      return lastIntent.isEnabled(WidgetsBinding.instance.focusManager.primaryFocus.context);
+      return lastIntent.isEnabled(primaryFocus.context);
     }
     return false;
   }
@@ -103,7 +115,7 @@ class UndoableActionDispatcher extends ActionDispatcher implements Listenable {
   bool get canRedo {
     if (_undoneActions.isNotEmpty) {
       final Intent lastIntent = _undoneActions.last.invocationIntent;
-      return lastIntent.isEnabled(WidgetsBinding.instance.focusManager.primaryFocus?.context);
+      return lastIntent.isEnabled(primaryFocus?.context);
     }
     return false;
   }
@@ -154,7 +166,7 @@ class UndoIntent extends Intent {
 
   @override
   bool isEnabled(BuildContext context) {
-    final UndoableActionDispatcher manager = Actions.of(context, nullOk: true);
+    final UndoableActionDispatcher manager = Actions.of(context, nullOk: true) as UndoableActionDispatcher;
     return manager.canUndo;
   }
 }
@@ -164,7 +176,7 @@ class RedoIntent extends Intent {
 
   @override
   bool isEnabled(BuildContext context) {
-    final UndoableActionDispatcher manager = Actions.of(context, nullOk: true);
+    final UndoableActionDispatcher manager = Actions.of(context, nullOk: true) as UndoableActionDispatcher;
     return manager.canRedo;
   }
 }
@@ -177,7 +189,7 @@ final Action kUndoAction = CallbackAction(
     if (node?.context == null) {
       return;
     }
-    final UndoableActionDispatcher manager = Actions.of(node.context, nullOk: true);
+    final UndoableActionDispatcher manager = Actions.of(node.context, nullOk: true) as UndoableActionDispatcher;
     manager?.undo();
   },
 );
@@ -190,7 +202,7 @@ final Action kRedoAction = CallbackAction(
     if (node?.context == null) {
       return;
     }
-    final UndoableActionDispatcher manager = Actions.of(node.context, nullOk: true);
+    final UndoableActionDispatcher manager = Actions.of(node.context, nullOk: true) as UndoableActionDispatcher;
     manager?.redo();
   },
 );
@@ -228,9 +240,9 @@ abstract class UndoableAction extends Action {
 
   @override
   @mustCallSuper
-  void invoke(FocusNode node, Intent tag) {
+  void invoke(FocusNode node, Intent intent) {
     invocationNode = node;
-    invocationIntent = tag;
+    invocationIntent = intent;
   }
 
   @override
@@ -240,22 +252,22 @@ abstract class UndoableAction extends Action {
   }
 }
 
-class SetFocusActionBase extends UndoableAction {
-  SetFocusActionBase(LocalKey name) : super(name);
+class UndoableFocusActionBase extends UndoableAction {
+  UndoableFocusActionBase(LocalKey name) : super(name);
 
   FocusNode _previousFocus;
 
   @override
-  void invoke(FocusNode node, Intent tag) {
-    super.invoke(node, tag);
-    _previousFocus = WidgetsBinding.instance.focusManager.primaryFocus;
+  void invoke(FocusNode node, Intent intent) {
+    super.invoke(node, intent);
+    _previousFocus = primaryFocus;
     node.requestFocus();
   }
 
   @override
   void undo() {
     if (_previousFocus == null) {
-      WidgetsBinding.instance.focusManager.primaryFocus?.unfocus();
+      primaryFocus?.unfocus();
       return;
     }
     if (_previousFocus is FocusScopeNode) {
@@ -265,7 +277,7 @@ class SetFocusActionBase extends UndoableAction {
 
       // Unfocus the current node to remove it from the focused child list of
       // the scope.
-      WidgetsBinding.instance.focusManager.primaryFocus?.unfocus();
+      primaryFocus?.unfocus();
       // and then let the scope node be focused...
     }
     _previousFocus.requestFocus();
@@ -279,60 +291,46 @@ class SetFocusActionBase extends UndoableAction {
   }
 }
 
-class SetFocusAction extends SetFocusActionBase {
-  SetFocusAction() : super(key);
-
-  static const LocalKey key = ValueKey<Type>(SetFocusAction);
+class UndoableRequestFocusAction extends UndoableFocusActionBase {
+  UndoableRequestFocusAction() : super(RequestFocusAction.key);
 
   @override
-  void invoke(FocusNode node, Intent tag) {
-    super.invoke(node, tag);
+  void invoke(FocusNode node, Intent intent) {
+    super.invoke(node, intent);
     node.requestFocus();
   }
 }
 
 /// Actions for manipulating focus.
-class NextFocusAction extends SetFocusActionBase {
-  NextFocusAction() : super(key);
-
-  static const LocalKey key = ValueKey<Type>(NextFocusAction);
+class UndoableNextFocusAction extends UndoableFocusActionBase {
+  UndoableNextFocusAction() : super(NextFocusAction.key);
 
   @override
-  void invoke(FocusNode node, Intent tag) {
-    super.invoke(node, tag);
+  void invoke(FocusNode node, Intent intent) {
+    super.invoke(node, intent);
     node.nextFocus();
   }
 }
 
-class PreviousFocusAction extends SetFocusActionBase {
-  PreviousFocusAction() : super(key);
-
-  static const LocalKey key = ValueKey<Type>(PreviousFocusAction);
+class UndoablePreviousFocusAction extends UndoableFocusActionBase {
+  UndoablePreviousFocusAction() : super(PreviousFocusAction.key);
 
   @override
-  void invoke(FocusNode node, Intent tag) {
-    super.invoke(node, tag);
+  void invoke(FocusNode node, Intent intent) {
+    super.invoke(node, intent);
     node.previousFocus();
   }
 }
 
-class DirectionalFocusIntent extends Intent {
-  const DirectionalFocusIntent(this.direction) : super(DirectionalFocusAction.key);
-
-  final TraversalDirection direction;
-}
-
-class DirectionalFocusAction extends SetFocusActionBase {
-  DirectionalFocusAction() : super(key);
-
-  static const LocalKey key = ValueKey<Type>(DirectionalFocusAction);
+class UndoableDirectionalFocusAction extends UndoableFocusActionBase {
+  UndoableDirectionalFocusAction() : super(DirectionalFocusAction.key);
 
   TraversalDirection direction;
 
   @override
-  void invoke(FocusNode node, DirectionalFocusIntent tag) {
-    super.invoke(node, tag);
-    final DirectionalFocusIntent args = tag;
+  void invoke(FocusNode node, DirectionalFocusIntent intent) {
+    super.invoke(node, intent);
+    final DirectionalFocusIntent args = intent;
     node.focusInDirection(args.direction);
   }
 }
@@ -359,7 +357,7 @@ class _DemoButtonState extends State<DemoButton> {
   void _handleOnPressed() {
     print('Button ${widget.name} pressed.');
     setState(() {
-      Actions.invoke(context, const Intent(SetFocusAction.key), focusNode: _focusNode);
+      Actions.invoke(context, const Intent(RequestFocusAction.key), focusNode: _focusNode);
     });
   }
 
@@ -427,101 +425,91 @@ class _FocusDemoState extends State<FocusDemo> {
   @override
   Widget build(BuildContext context) {
     final TextTheme textTheme = Theme.of(context).textTheme;
-    return Shortcuts(
-      shortcuts: <LogicalKeySet, Intent>{
-        LogicalKeySet(LogicalKeyboardKey.tab): const Intent(NextFocusAction.key),
-        LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.tab): const Intent(PreviousFocusAction.key),
-        LogicalKeySet(LogicalKeyboardKey.arrowUp): const DirectionalFocusIntent(TraversalDirection.up),
-        LogicalKeySet(LogicalKeyboardKey.arrowDown): const DirectionalFocusIntent(TraversalDirection.down),
-        LogicalKeySet(LogicalKeyboardKey.arrowLeft): const DirectionalFocusIntent(TraversalDirection.left),
-        LogicalKeySet(LogicalKeyboardKey.arrowRight): const DirectionalFocusIntent(TraversalDirection.right),
+    return Actions(
+      dispatcher: dispatcher,
+      actions: <LocalKey, ActionFactory>{
+        RequestFocusAction.key: () => UndoableRequestFocusAction(),
+        NextFocusAction.key: () => UndoableNextFocusAction(),
+        PreviousFocusAction.key: () => UndoablePreviousFocusAction(),
+        DirectionalFocusAction.key: () => UndoableDirectionalFocusAction(),
+        kUndoActionKey: () => kUndoAction,
+        kRedoActionKey: () => kRedoAction,
       },
-      child: Actions(
-        dispatcher: dispatcher,
-        actions: <LocalKey, ActionFactory>{
-          SetFocusAction.key: () => SetFocusAction(),
-          NextFocusAction.key: () => NextFocusAction(),
-          PreviousFocusAction.key: () => PreviousFocusAction(),
-          DirectionalFocusAction.key: () => DirectionalFocusAction(),
-          kUndoActionKey: () => kUndoAction,
-          kRedoActionKey: () => kRedoAction,
-        },
-        child: DefaultFocusTraversal(
-          policy: ReadingOrderTraversalPolicy(),
-          child: Shortcuts(
-            shortcuts: <LogicalKeySet, Intent>{
-              LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.shift, LogicalKeyboardKey.keyZ): kRedoIntent,
-              LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyZ): kUndoIntent,
-            },
-            child: FocusScope(
-              debugLabel: 'Scope',
-              autofocus: true,
-              child: DefaultTextStyle(
-                style: textTheme.display1,
-                child: Scaffold(
-                  appBar: AppBar(
-                    title: const Text('Actions Demo'),
-                  ),
-                  body: Center(
-                    child: Builder(builder: (BuildContext context) {
-                      return Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: <Widget>[
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: const <Widget>[
-                              DemoButton(name: 'One'),
-                              DemoButton(name: 'Two'),
-                              DemoButton(name: 'Three'),
-                            ],
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: const <Widget>[
-                              DemoButton(name: 'Four'),
-                              DemoButton(name: 'Five'),
-                              DemoButton(name: 'Six'),
-                            ],
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: const <Widget>[
-                              DemoButton(name: 'Seven'),
-                              DemoButton(name: 'Eight'),
-                              DemoButton(name: 'Nine'),
-                            ],
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: <Widget>[
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: RaisedButton(
-                                  child: const Text('UNDO'),
-                                  onPressed: canUndo
-                                      ? () {
-                                          Actions.invoke(context, kUndoIntent);
-                                        }
-                                      : null,
-                                ),
+      child: DefaultFocusTraversal(
+        policy: ReadingOrderTraversalPolicy(),
+        child: Shortcuts(
+          shortcuts: <LogicalKeySet, Intent>{
+            LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.shift, LogicalKeyboardKey.keyZ): kRedoIntent,
+            LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.keyZ): kUndoIntent,
+          },
+          child: FocusScope(
+            debugLabel: 'Scope',
+            autofocus: true,
+            child: DefaultTextStyle(
+              style: textTheme.display1,
+              child: Scaffold(
+                appBar: AppBar(
+                  title: const Text('Actions Demo'),
+                ),
+                body: Center(
+                  child: Builder(builder: (BuildContext context) {
+                    return Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: const <Widget>[
+                            DemoButton(name: 'One'),
+                            DemoButton(name: 'Two'),
+                            DemoButton(name: 'Three'),
+                          ],
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: const <Widget>[
+                            DemoButton(name: 'Four'),
+                            DemoButton(name: 'Five'),
+                            DemoButton(name: 'Six'),
+                          ],
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: const <Widget>[
+                            DemoButton(name: 'Seven'),
+                            DemoButton(name: 'Eight'),
+                            DemoButton(name: 'Nine'),
+                          ],
+                        ),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: <Widget>[
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: RaisedButton(
+                                child: const Text('UNDO'),
+                                onPressed: canUndo
+                                    ? () {
+                                        Actions.invoke(context, kUndoIntent);
+                                      }
+                                    : null,
                               ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: RaisedButton(
-                                  child: const Text('REDO'),
-                                  onPressed: canRedo
-                                      ? () {
-                                          Actions.invoke(context, kRedoIntent);
-                                        }
-                                      : null,
-                                ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: RaisedButton(
+                                child: const Text('REDO'),
+                                onPressed: canRedo
+                                    ? () {
+                                        Actions.invoke(context, kRedoIntent);
+                                      }
+                                    : null,
                               ),
-                            ],
-                          ),
-                        ],
-                      );
-                    }),
-                  ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    );
+                  }),
                 ),
               ),
             ),

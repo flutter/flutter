@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -558,9 +558,10 @@ void main() {
                       TestSemantics(
                         id: 10,
                         flags: <SemanticsFlag>[
-                          SemanticsFlag.isButton,
                           SemanticsFlag.hasEnabledState,
+                          SemanticsFlag.isButton,
                           SemanticsFlag.isEnabled,
+                          SemanticsFlag.isFocusable,
                         ],
                         actions: <SemanticsAction>[SemanticsAction.tap],
                         label: 'Back',
@@ -588,9 +589,10 @@ void main() {
                   TestSemantics(
                     id: 8,
                     flags: <SemanticsFlag>[
-                      SemanticsFlag.isButton,
                       SemanticsFlag.hasEnabledState,
+                      SemanticsFlag.isButton,
                       SemanticsFlag.isEnabled,
+                      SemanticsFlag.isFocusable,
                     ],
                     actions: <SemanticsAction>[SemanticsAction.tap],
                     label: 'Suggestions',
@@ -642,11 +644,12 @@ void main() {
 
 class TestHomePage extends StatelessWidget {
   const TestHomePage({
+    Key key,
     this.results,
     this.delegate,
     this.passInInitialQuery = false,
     this.initialQuery,
-  });
+  }) : super(key: key);
 
   final List<String> results;
   final SearchDelegate<String> delegate;

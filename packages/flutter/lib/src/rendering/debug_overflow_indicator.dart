@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -282,9 +282,9 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
     }
 
     final List<_OverflowRegionData> overflowRegions = _calculateOverflowRegions(overflow, containerRect);
-    for (_OverflowRegionData region in overflowRegions) {
+    for (final _OverflowRegionData region in overflowRegions) {
       context.canvas.drawRect(region.rect.shift(offset), _indicatorPaint);
-      final TextSpan textSpan = _indicatorLabel[region.side.index].text;
+      final TextSpan textSpan = _indicatorLabel[region.side.index].text as TextSpan;
       if (textSpan?.text != region.label) {
         _indicatorLabel[region.side.index].text = TextSpan(
           text: region.label,

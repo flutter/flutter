@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -280,26 +280,29 @@ class _TooltipState extends State<Tooltip> with SingleTickerProviderStateMixin {
   }
 
   void _createNewEntry() {
-    final RenderBox box = context.findRenderObject();
+    final RenderBox box = context.findRenderObject() as RenderBox;
     final Offset target = box.localToGlobal(box.size.center(Offset.zero));
 
     // We create this widget outside of the overlay entry's builder to prevent
     // updated values from happening to leak into the overlay when the overlay
     // rebuilds.
-    final Widget overlay = _TooltipOverlay(
-      message: widget.message,
-      height: height,
-      padding: padding,
-      margin: margin,
-      decoration: decoration,
-      textStyle: textStyle,
-      animation: CurvedAnimation(
-        parent: _controller,
-        curve: Curves.fastOutSlowIn,
+    final Widget overlay = Directionality(
+      textDirection: Directionality.of(context),
+      child: _TooltipOverlay(
+        message: widget.message,
+        height: height,
+        padding: padding,
+        margin: margin,
+        decoration: decoration,
+        textStyle: textStyle,
+        animation: CurvedAnimation(
+          parent: _controller,
+          curve: Curves.fastOutSlowIn,
+        ),
+        target: target,
+        verticalOffset: verticalOffset,
+        preferBelow: preferBelow,
       ),
-      target: target,
-      verticalOffset: verticalOffset,
-      preferBelow: preferBelow,
     );
     _entry = OverlayEntry(builder: (BuildContext context) => overlay);
     Overlay.of(context, debugRequiredFor: widget).insert(_entry);

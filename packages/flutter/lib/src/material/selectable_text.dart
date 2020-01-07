@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -46,9 +46,9 @@ class _TextSpanEditingController extends TextEditingController {
 
 class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestureDetectorBuilder {
   _SelectableTextSelectionGestureDetectorBuilder({
-    @required _SelectableTextState state
+    @required _SelectableTextState state,
   }) : _state = state,
-      super(delegate: state);
+       super(delegate: state);
 
   final _SelectableTextState _state;
 
@@ -70,6 +70,7 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
     if (delegate.selectionEnabled) {
       switch (Theme.of(_state.context).platform) {
         case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
           renderEditable.selectPositionAt(
             from: details.globalPosition,
             cause: SelectionChangedCause.longPress,
@@ -93,6 +94,7 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
     if (delegate.selectionEnabled) {
       switch (Theme.of(_state.context).platform) {
         case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
           renderEditable.selectWordEdge(cause: SelectionChangedCause.tap);
           break;
         case TargetPlatform.android:
@@ -110,6 +112,7 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
     if (delegate.selectionEnabled) {
       switch (Theme.of(_state.context).platform) {
         case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
           renderEditable.selectPositionAt(
             from: details.globalPosition,
             cause: SelectionChangedCause.longPress,
@@ -130,6 +133,8 @@ class _SelectableTextSelectionGestureDetectorBuilder extends TextSelectionGestur
 /// The [SelectableText] widget displays a string of text with a single style.
 /// The string might break across multiple lines or might all be displayed on
 /// the same line depending on the layout constraints.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=ZSU3ZXOs6hc}
 ///
 /// The [style] argument is optional. When omitted, the text will use the style
 /// from the closest enclosing [DefaultTextStyle]. If the given style's
@@ -196,6 +201,7 @@ class SelectableText extends StatefulWidget {
     this.strutStyle,
     this.textAlign,
     this.textDirection,
+    this.textScaleFactor,
     this.showCursor = false,
     this.autofocus = false,
     ToolbarOptions toolbarOptions,
@@ -238,6 +244,7 @@ class SelectableText extends StatefulWidget {
     this.strutStyle,
     this.textAlign,
     this.textDirection,
+    this.textScaleFactor,
     this.showCursor = false,
     this.autofocus = false,
     ToolbarOptions toolbarOptions,
@@ -316,6 +323,9 @@ class SelectableText extends StatefulWidget {
   /// {@macro flutter.widgets.editableText.textDirection}
   final TextDirection textDirection;
 
+  /// {@macro flutter.widgets.editableText.textScaleFactor}
+  final double textScaleFactor;
+
   /// {@macro flutter.widgets.editableText.autofocus}
   final bool autofocus;
 
@@ -371,7 +381,7 @@ class SelectableText extends StatefulWidget {
   /// selectable text's internal gesture detector, use a [Listener].
   final GestureTapCallback onTap;
 
-  /// {@macro flutter.widgets.edtiableText.scrollPhysics}
+  /// {@macro flutter.widgets.editableText.scrollPhysics}
   final ScrollPhysics scrollPhysics;
 
   /// {@macro flutter.painting.textPainter.textWidthBasis}
@@ -391,6 +401,7 @@ class SelectableText extends StatefulWidget {
     properties.add(IntProperty('maxLines', maxLines, defaultValue: null));
     properties.add(EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
     properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
+    properties.add(DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: null));
     properties.add(DoubleProperty('cursorWidth', cursorWidth, defaultValue: 2.0));
     properties.add(DiagnosticsProperty<Radius>('cursorRadius', cursorRadius, defaultValue: null));
     properties.add(DiagnosticsProperty<Color>('cursorColor', cursorColor, defaultValue: null));
@@ -460,6 +471,7 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
 
     switch (Theme.of(context).platform) {
       case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
         if (cause == SelectionChangedCause.longPress) {
           _editableText?.bringIntoView(selection.base);
         }
@@ -527,6 +539,7 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
 
     switch (themeData.platform) {
       case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
         forcePressEnabled = true;
         textSelectionControls = cupertinoTextSelectionControls;
         paintCursorAboveText = true;
@@ -565,6 +578,7 @@ class _SelectableTextState extends State<SelectableText> with AutomaticKeepAlive
         strutStyle: widget.strutStyle ?? StrutStyle.disabled,
         textAlign: widget.textAlign ?? defaultTextStyle.textAlign ?? TextAlign.start,
         textDirection: widget.textDirection,
+        textScaleFactor: widget.textScaleFactor,
         autofocus: widget.autofocus,
         forceLine: false,
         toolbarOptions: widget.toolbarOptions,

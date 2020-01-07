@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -65,7 +65,7 @@ import 'theme_data.dart';
 /// {@endtemplate}
 ///
 /// {@template flutter.material.slider.seeAlso.roundSliderTickMarkShape}
-///  * [RoundSliderTickMarkShape], which is the the default [Slider]'s tick mark
+///  * [RoundSliderTickMarkShape], which is the default [Slider]'s tick mark
 ///    shape that paints a solid circle.
 /// {@endtemplate}
 ///
@@ -185,13 +185,13 @@ class SliderTheme extends InheritedTheme {
   ///  * [SliderThemeData], which describes the actual configuration of a slider
   ///    theme.
   static SliderThemeData of(BuildContext context) {
-    final SliderTheme inheritedTheme = context.inheritFromWidgetOfExactType(SliderTheme);
+    final SliderTheme inheritedTheme = context.dependOnInheritedWidgetOfExactType<SliderTheme>();
     return inheritedTheme != null ? inheritedTheme.data : Theme.of(context).sliderTheme;
   }
 
   @override
   Widget wrap(BuildContext context, Widget child) {
-    final SliderTheme ancestorTheme = context.ancestorWidgetOfExactType(SliderTheme);
+    final SliderTheme ancestorTheme = context.findAncestorWidgetOfExactType<SliderTheme>();
     return identical(this, ancestorTheme) ? child : SliderTheme(data: data, child: child);
   }
 
@@ -508,7 +508,7 @@ class SliderThemeData extends Diagnosticable {
   ///
   /// See also:
   ///
-  ///  * [RoundRangeSliderTickMarkShape], which is the the default tick mark
+  ///  * [RoundRangeSliderTickMarkShape], which is the default tick mark
   ///    shape for the range slider.
   final SliderTickMarkShape tickMarkShape;
 
@@ -518,7 +518,7 @@ class SliderThemeData extends Diagnosticable {
   ///
   /// See also:
   ///
-  ///  * [RoundRangeSliderThumbShape], which is the the default thumb shape for
+  ///  * [RoundRangeSliderThumbShape], which is the default thumb shape for
   ///    the [RangeSlider].
   final SliderComponentShape thumbShape;
 
@@ -533,7 +533,7 @@ class SliderThemeData extends Diagnosticable {
   ///
   /// See also:
   ///
-  ///  * [RoundedRectRangeSliderTrackShape], which is the the default track
+  ///  * [RoundedRectRangeSliderTrackShape], which is the default track
   ///    shape for the [RangeSlider].
   final SliderTrackShape trackShape;
 
@@ -544,7 +544,7 @@ class SliderThemeData extends Diagnosticable {
   ///
   /// See also:
   ///
-  ///  * [PaddleRangeSliderValueIndicatorShape], which is the the default value
+  ///  * [PaddleRangeSliderValueIndicatorShape], which is the default value
   ///    indicator shape for the [RangeSlider].
   final SliderComponentShape valueIndicatorShape;
 
@@ -558,7 +558,7 @@ class SliderThemeData extends Diagnosticable {
   ///
   /// See also:
   ///
-  ///  * [RoundSliderTickMarkShape], which is the the default tick mark shape
+  ///  * [RoundSliderTickMarkShape], which is the default tick mark shape
   ///    for the [Slider].
   final RangeSliderTickMarkShape rangeTickMarkShape;
 
@@ -572,7 +572,7 @@ class SliderThemeData extends Diagnosticable {
   ///
   /// See also:
   ///
-  ///  * [RoundSliderThumbShape], which is the the default thumb shape for the
+  ///  * [RoundSliderThumbShape], which is the default thumb shape for the
   ///    [Slider].
   final RangeSliderThumbShape rangeThumbShape;
 
@@ -587,7 +587,7 @@ class SliderThemeData extends Diagnosticable {
   ///
   /// See also:
   ///
-  ///  * [RoundedRectSliderTrackShape], which is the the default track
+  ///  * [RoundedRectSliderTrackShape], which is the default track
   ///    shape for the [Slider].
   final RangeSliderTrackShape rangeTrackShape;
 
@@ -602,7 +602,7 @@ class SliderThemeData extends Diagnosticable {
   ///
   /// See also:
   ///
-  ///  * [PaddleSliderValueIndicatorShape], which is the the default value
+  ///  * [PaddleSliderValueIndicatorShape], which is the default value
   ///    indicator shape for the [Slider].
   final RangeSliderValueIndicatorShape rangeValueIndicatorShape;
 
@@ -615,8 +615,6 @@ class SliderThemeData extends Diagnosticable {
   final ShowValueIndicator showValueIndicator;
 
   /// The text style for the text on the value indicator.
-  ///
-  /// By default this is the [ThemeData.accentTextTheme.body2] text theme.
   final TextStyle valueIndicatorTextStyle;
 
   /// Limits the thumb's separation distance.
@@ -782,34 +780,34 @@ class SliderThemeData extends Diagnosticable {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    final SliderThemeData otherData = other;
-    return otherData.trackHeight == trackHeight
-      && otherData.activeTrackColor == activeTrackColor
-      && otherData.inactiveTrackColor == inactiveTrackColor
-      && otherData.disabledActiveTrackColor == disabledActiveTrackColor
-      && otherData.disabledInactiveTrackColor == disabledInactiveTrackColor
-      && otherData.activeTickMarkColor == activeTickMarkColor
-      && otherData.inactiveTickMarkColor == inactiveTickMarkColor
-      && otherData.disabledActiveTickMarkColor == disabledActiveTickMarkColor
-      && otherData.disabledInactiveTickMarkColor == disabledInactiveTickMarkColor
-      && otherData.thumbColor == thumbColor
-      && otherData.overlappingShapeStrokeColor == overlappingShapeStrokeColor
-      && otherData.disabledThumbColor == disabledThumbColor
-      && otherData.overlayColor == overlayColor
-      && otherData.valueIndicatorColor == valueIndicatorColor
-      && otherData.overlayShape == overlayShape
-      && otherData.tickMarkShape == tickMarkShape
-      && otherData.thumbShape == thumbShape
-      && otherData.trackShape == trackShape
-      && otherData.valueIndicatorShape == valueIndicatorShape
-      && otherData.rangeTickMarkShape == rangeTickMarkShape
-      && otherData.rangeThumbShape == rangeThumbShape
-      && otherData.rangeTrackShape == rangeTrackShape
-      && otherData.rangeValueIndicatorShape == rangeValueIndicatorShape
-      && otherData.showValueIndicator == showValueIndicator
-      && otherData.valueIndicatorTextStyle == valueIndicatorTextStyle
-      && otherData.minThumbSeparation == minThumbSeparation
-      && otherData.thumbSelector == thumbSelector;
+    return other is SliderThemeData
+        && other.trackHeight == trackHeight
+        && other.activeTrackColor == activeTrackColor
+        && other.inactiveTrackColor == inactiveTrackColor
+        && other.disabledActiveTrackColor == disabledActiveTrackColor
+        && other.disabledInactiveTrackColor == disabledInactiveTrackColor
+        && other.activeTickMarkColor == activeTickMarkColor
+        && other.inactiveTickMarkColor == inactiveTickMarkColor
+        && other.disabledActiveTickMarkColor == disabledActiveTickMarkColor
+        && other.disabledInactiveTickMarkColor == disabledInactiveTickMarkColor
+        && other.thumbColor == thumbColor
+        && other.overlappingShapeStrokeColor == overlappingShapeStrokeColor
+        && other.disabledThumbColor == disabledThumbColor
+        && other.overlayColor == overlayColor
+        && other.valueIndicatorColor == valueIndicatorColor
+        && other.overlayShape == overlayShape
+        && other.tickMarkShape == tickMarkShape
+        && other.thumbShape == thumbShape
+        && other.trackShape == trackShape
+        && other.valueIndicatorShape == valueIndicatorShape
+        && other.rangeTickMarkShape == rangeTickMarkShape
+        && other.rangeThumbShape == rangeThumbShape
+        && other.rangeTrackShape == rangeTrackShape
+        && other.rangeValueIndicatorShape == rangeValueIndicatorShape
+        && other.showValueIndicator == showValueIndicator
+        && other.valueIndicatorTextStyle == valueIndicatorTextStyle
+        && other.minThumbSeparation == minThumbSeparation
+        && other.thumbSelector == thumbSelector;
   }
 
   @override
@@ -1448,16 +1446,16 @@ abstract class RangeSliderTrackShape {
 /// Base track shape that provides an implementation of [getPreferredRect] for
 /// default sizing.
 ///
+/// The height is set from [SliderThemeData.trackHeight] and the width of the
+/// parent box less the larger of the widths of [SliderThemeData.thumbShape] and
+/// [SliderThemeData.overlayShape].
+///
 /// See also:
 ///
 ///  * [RectangularSliderTrackShape], which is a track shape with sharp
 ///    rectangular edges
 ///  * [RoundedRectSliderTrackShape], which is a track shape with round
 ///    stadium-like edges.
-///
-/// The height is set from [SliderThemeData.trackHeight] and the width of the
-/// parent box less the larger of the widths of [SliderThemeData.thumbShape] and
-/// [SliderThemeData.overlayShape].
 abstract class BaseSliderTrackShape {
   /// Returns a rect that represents the track bounds that fits within the
   /// [Slider].
@@ -1500,7 +1498,7 @@ abstract class BaseSliderTrackShape {
 /// [parentBox]. The track rectangle extends to the bounds of the [parentBox],
 /// but is padded by the [RoundSliderOverlayShape] radius. The height is defined
 /// by the [SliderThemeData.trackHeight]. The color is determined by the
-/// [Slider]'s enabled state and the track segments's active state which are
+/// [Slider]'s enabled state and the track segment's active state which are
 /// defined by:
 ///   [SliderThemeData.activeTrackColor],
 ///   [SliderThemeData.inactiveTrackColor],
@@ -1626,16 +1624,16 @@ class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
 
   @override
   void paint(
-      PaintingContext context,
-      Offset offset, {
-      @required RenderBox parentBox,
-      @required SliderThemeData sliderTheme,
-      @required Animation<double> enableAnimation,
-      @required TextDirection textDirection,
-      @required Offset thumbCenter,
-      bool isDiscrete = false,
-      bool isEnabled = false,
-    }) {
+    PaintingContext context,
+    Offset offset, {
+    @required RenderBox parentBox,
+    @required SliderThemeData sliderTheme,
+    @required Animation<double> enableAnimation,
+    @required TextDirection textDirection,
+    @required Offset thumbCenter,
+    bool isDiscrete = false,
+    bool isEnabled = false,
+  }) {
     assert(context != null);
     assert(offset != null);
     assert(parentBox != null);
@@ -1706,7 +1704,7 @@ class RoundedRectSliderTrackShape extends SliderTrackShape with BaseSliderTrackS
 /// [parentBox]. The track rectangle extends to the bounds of the [parentBox],
 /// but is padded by the [RoundSliderOverlayShape] radius. The height is
 /// defined by the [SliderThemeData.trackHeight]. The color is determined by the
-/// [Slider]'s enabled state and the track segments's active state which are
+/// [Slider]'s enabled state and the track segment's active state which are
 /// defined by:
 ///   [SliderThemeData.activeTrackColor],
 ///   [SliderThemeData.inactiveTrackColor],
@@ -2620,6 +2618,7 @@ class _PaddleSliderTrackShapePathPainter {
   // Adds an arc to the path that has the attributes passed in. This is
   // a convenience to make adding arcs have less boilerplate.
   static void _addArc(Path path, Offset center, double radius, double startAngle, double endAngle) {
+    assert(center.isFinite);
     final Rect arcRect = Rect.fromCircle(center: center, radius: radius);
     path.arcTo(arcRect, startAngle, endAngle - startAngle, false);
   }
@@ -2692,6 +2691,12 @@ class _PaddleSliderTrackShapePathPainter {
     TextPainter labelPainter,
     Color strokePaintColor,
   ) {
+    if (scale == 0.0) {
+      // Zero scale essentially means "do not draw anything", so it's safe to just return. Otherwise,
+      // our math below will attempt to divide by zero and send needless NaNs to the engine.
+      return;
+    }
+
     // The entire value indicator should scale with the size of the label,
     // to keep it large enough to encompass the label text.
     final double textScaleFactor = labelPainter.height / _labelTextDesignSize;
@@ -2763,8 +2768,8 @@ class _PaddleSliderTrackShapePathPainter {
     // the top neck arc. We use this to shrink/expand it based on the scale
     // factor of the value indicator.
     final double neckStretchBaseline = math.max(0.0, rightBottomNeckCenterY - math.max(leftTopNeckCenter.dy, neckRightCenter.dy));
-    final double t = math.pow(inverseTextScale, 3.0);
-    final double stretch = (neckStretchBaseline * t).clamp(0.0, 10.0 * neckStretchBaseline);
+    final double t = math.pow(inverseTextScale, 3.0) as double;
+    final double stretch = (neckStretchBaseline * t).clamp(0.0, 10.0 * neckStretchBaseline) as double;
     final Offset neckStretch = Offset(0.0, neckStretchBaseline - stretch);
 
     assert(!_debuggingLabelLocation || () {
@@ -2881,9 +2886,9 @@ class RangeValues {
   bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
-    final RangeValues typedOther = other;
-    return typedOther.start == start
-        && typedOther.end == end;
+    return other is RangeValues
+        && other.start == start
+        && other.end == end;
   }
 
   @override
@@ -2920,9 +2925,9 @@ class RangeLabels {
   bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
-    final RangeLabels typedOther = other;
-    return typedOther.start == start
-        && typedOther.end == end;
+    return other is RangeLabels
+        && other.start == start
+        && other.end == end;
   }
 
   @override

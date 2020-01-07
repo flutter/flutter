@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -177,6 +177,7 @@ class Drawer extends StatelessWidget {
     String label = semanticLabel;
     switch (Theme.of(context).platform) {
       case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
         label = semanticLabel;
         break;
       case TargetPlatform.android:
@@ -380,7 +381,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   final GlobalKey _drawerKey = GlobalKey();
 
   double get _width {
-    final RenderBox box = _drawerKey.currentContext?.findRenderObject();
+    final RenderBox box = _drawerKey.currentContext?.findRenderObject() as RenderBox;
     if (box != null)
       return box.size.width;
     return _kWidth; // drawer not being shown currently
@@ -523,6 +524,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
           platformHasBackButton = true;
           break;
         case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
         case TargetPlatform.fuchsia:
           platformHasBackButton = false;
           break;
@@ -546,9 +548,12 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
                   onTap: close,
                   child: Semantics(
                     label: MaterialLocalizations.of(context)?.modalBarrierDismissLabel,
-                    child: Container( // The drawer's "scrim"
-                      color: _scrimColorTween.evaluate(_controller),
-                    ),
+                    child: MouseRegion(
+                      opaque: true,
+                      child: Container( // The drawer's "scrim"
+                        color: _scrimColorTween.evaluate(_controller),
+                      ),
+                    )
                   ),
                 ),
               ),

@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -337,6 +337,36 @@ void main() {
       HotRunnerConfig: () => TestHotRunnerConfig(successfulSetup: true),
     });
   });
+
+  group('hot cleanupAtFinish()', () {
+    MockFlutterDevice mockFlutterDeviceFactory(Device device) {
+      final MockFlutterDevice mockFlutterDevice = MockFlutterDevice();
+      when(mockFlutterDevice.stopEchoingDeviceLog()).thenAnswer((Invocation invocation) => Future<void>.value(null));
+      when(mockFlutterDevice.device).thenReturn(device);
+      return mockFlutterDevice;
+    }
+
+    testUsingContext('disposes each device', () async {
+      final MockDevice mockDevice1 = MockDevice();
+      final MockDevice mockDevice2 = MockDevice();
+      final MockFlutterDevice mockFlutterDevice1 = mockFlutterDeviceFactory(mockDevice1);
+      final MockFlutterDevice mockFlutterDevice2 = mockFlutterDeviceFactory(mockDevice2);
+
+      final List<FlutterDevice> devices = <FlutterDevice>[
+        mockFlutterDevice1,
+        mockFlutterDevice2,
+      ];
+
+      await HotRunner(devices,
+        debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
+      ).cleanupAtFinish();
+
+      verify(mockDevice1.dispose());
+      verify(mockFlutterDevice1.stopEchoingDeviceLog());
+      verify(mockDevice2.dispose());
+      verify(mockFlutterDevice2.stopEchoingDeviceLog());
+    });
+  });
 }
 
 class MockDevFs extends Mock implements DevFS {}
@@ -348,6 +378,8 @@ class MockDevice extends Mock implements Device {
     when(isSupported()).thenReturn(true);
   }
 }
+
+class MockFlutterDevice extends Mock implements FlutterDevice {}
 
 class TestFlutterDevice extends FlutterDevice {
   TestFlutterDevice({
@@ -365,6 +397,7 @@ class TestFlutterDevice extends FlutterDevice {
     ReloadSources reloadSources,
     Restart restart,
     CompileExpression compileExpression,
+    ReloadMethod reloadMethod,
   }) async {
     throw exception;
   }

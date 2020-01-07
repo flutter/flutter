@@ -1,24 +1,41 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/mdns_discovery.dart';
 import 'package:mockito/mockito.dart';
 import 'package:multicast_dns/multicast_dns.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
+import '../src/mocks.dart';
 
 void main() {
   group('mDNS Discovery', () {
     final int year3000 = DateTime(3000).millisecondsSinceEpoch;
 
+    setUp(() {
+      setNetworkInterfaceLister(
+        ({
+          bool includeLoopback,
+          bool includeLinkLocal,
+          InternetAddressType type,
+        }) async => <NetworkInterface>[],
+      );
+    });
+
+    tearDown(() {
+      resetNetworkInterfaceLister();
+    });
+
     MDnsClient getMockClient(
       List<PtrResourceRecord> ptrRecords,
-      Map<String, List<SrvResourceRecord>> srvResponse,
-    ) {
+      Map<String, List<SrvResourceRecord>> srvResponse, {
+      Map<String, List<TxtResourceRecord>> txtResponse = const <String, List<TxtResourceRecord>>{},
+    }) {
       final MDnsClient client = MockMDnsClient();
 
       when(client.lookup<PtrResourceRecord>(
@@ -30,6 +47,12 @@ void main() {
           ResourceRecordQuery.service(entry.key),
         )).thenAnswer((_) => Stream<SrvResourceRecord>.fromIterable(entry.value));
       }
+
+      for (final MapEntry<String, List<TxtResourceRecord>> entry in txtResponse.entries) {
+        when(client.lookup<TxtResourceRecord>(
+          ResourceRecordQuery.text(entry.key),
+        )).thenAnswer((_) => Stream<TxtResourceRecord>.fromIterable(entry.value));
+      }
       return client;
     }
 
@@ -39,6 +62,18 @@ void main() {
       final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(mdnsClient: client);
       final int port = (await portDiscovery.query())?.port;
       expect(port, isNull);
+    });
+
+    testUsingContext('Prints helpful message when there is no ipv4 link local address.', () async {
+      final MDnsClient client = getMockClient(<PtrResourceRecord>[], <String, List<SrvResourceRecord>>{});
+      final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(mdnsClient: client);
+
+      final Uri uri = await portDiscovery.getObservatoryUri(
+        '',
+        MockIOSDevice(),
+      );
+      expect(uri, isNull);
+      expect(testLogger.errorText, contains('Personal Hotspot'));
     });
 
     testUsingContext('One port available, no appId', () async {
@@ -56,6 +91,31 @@ void main() {
       final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(mdnsClient: client);
       final int port = (await portDiscovery.query())?.port;
       expect(port, 123);
+    });
+
+    testUsingContext('One port available, no appId, with authCode', () async {
+      final MDnsClient client = getMockClient(
+        <PtrResourceRecord>[
+          PtrResourceRecord('foo', year3000, domainName: 'bar'),
+        ],
+        <String, List<SrvResourceRecord>>{
+          'bar': <SrvResourceRecord>[
+            SrvResourceRecord('bar', year3000, port: 123, weight: 1, priority: 1, target: 'appId'),
+          ],
+        },
+        txtResponse: <String, List<TxtResourceRecord>>{
+          'bar': <TxtResourceRecord>[
+            TxtResourceRecord('bar', year3000, text: 'authCode=xyz\n'),
+          ],
+        },
+      );
+
+      final MDnsObservatoryDiscovery portDiscovery = MDnsObservatoryDiscovery(
+        mdnsClient: client,
+      );
+      final MDnsObservatoryDiscoveryResult result = await portDiscovery.query();
+      expect(result?.port, 123);
+      expect(result?.authCode, 'xyz/');
     });
 
     testUsingContext('Multiple ports available, without appId', () async {

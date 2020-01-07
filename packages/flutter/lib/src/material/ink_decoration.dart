@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -252,7 +252,7 @@ class _InkState extends State<Ink> {
         decoration: widget.decoration,
         configuration: createLocalImageConfiguration(context),
         controller: Material.of(context),
-        referenceBox: context.findRenderObject(),
+        referenceBox: context.findRenderObject() as RenderBox,
         onRemoved: _handleRemoved,
       );
     } else {

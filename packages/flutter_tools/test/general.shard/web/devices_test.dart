@@ -1,14 +1,14 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/web/chrome.dart';
 import 'package:flutter_tools/src/web/web_device.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
+import 'package:platform/platform.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -42,14 +42,15 @@ void main() {
     expect(chromeDevice.supportsScreenshot, false);
     expect(await chromeDevice.isLocalEmulator, false);
     expect(chromeDevice.getLogReader(app: mockWebApplicationPackage), isInstanceOf<NoOpDeviceLogReader>());
+    expect(chromeDevice.getLogReader(), isInstanceOf<NoOpDeviceLogReader>());
     expect(await chromeDevice.portForwarder.forward(1), 1);
   });
 
   test('Server defaults', () async {
     final WebServerDevice device = WebServerDevice();
 
-    expect(device.name, 'Server');
-    expect(device.id, 'web');
+    expect(device.name, 'Web Server');
+    expect(device.id, 'web-server');
     expect(device.supportsHotReload, true);
     expect(device.supportsHotRestart, true);
     expect(device.supportsStartPaused, true);
@@ -57,7 +58,38 @@ void main() {
     expect(device.supportsScreenshot, false);
     expect(await device.isLocalEmulator, false);
     expect(device.getLogReader(app: mockWebApplicationPackage), isInstanceOf<NoOpDeviceLogReader>());
+    expect(device.getLogReader(), isInstanceOf<NoOpDeviceLogReader>());
     expect(await device.portForwarder.forward(1), 1);
+  });
+
+  testUsingContext('Chrome device is listed when Chrome is available', () async {
+    when(mockChromeLauncher.canFindChrome()).thenReturn(true);
+
+    final WebDevices deviceDiscoverer = WebDevices();
+    final List<Device> devices = await deviceDiscoverer.pollingGetDevices();
+    expect(devices, contains(isInstanceOf<ChromeDevice>()));
+  }, overrides: <Type, Generator>{
+    ChromeLauncher: () => mockChromeLauncher,
+  });
+
+  testUsingContext('Chrome device is not listed when Chrome is not available', () async {
+    when(mockChromeLauncher.canFindChrome()).thenReturn(false);
+
+    final WebDevices deviceDiscoverer = WebDevices();
+    final List<Device> devices = await deviceDiscoverer.pollingGetDevices();
+    expect(devices, isNot(contains(isInstanceOf<ChromeDevice>())));
+  }, overrides: <Type, Generator>{
+    ChromeLauncher: () => mockChromeLauncher,
+  });
+
+  testUsingContext('Web Server device is listed even when Chrome is not available', () async {
+    when(mockChromeLauncher.canFindChrome()).thenReturn(false);
+
+    final WebDevices deviceDiscoverer = WebDevices();
+    final List<Device> devices = await deviceDiscoverer.pollingGetDevices();
+    expect(devices, contains(isInstanceOf<WebServerDevice>()));
+  }, overrides: <Type, Generator>{
+    ChromeLauncher: () => mockChromeLauncher,
   });
 
   testUsingContext('Chrome invokes version command on non-Windows platforms', () async{
@@ -70,6 +102,10 @@ void main() {
 
     expect(chromeDevice.isSupported(), true);
     expect(await chromeDevice.sdkNameAndVersion, 'ABC');
+
+    // Verify caching works correctly.
+    expect(await chromeDevice.sdkNameAndVersion, 'ABC');
+    verify(mockProcessManager.run(<String>['chrome.foo', '--version'])).called(1);
   }, overrides: <Type, Generator>{
     Platform: () => mockPlatform,
     ProcessManager: () => mockProcessManager,

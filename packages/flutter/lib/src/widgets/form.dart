@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -91,7 +91,7 @@ class Form extends StatefulWidget {
   /// form.save();
   /// ```
   static FormState of(BuildContext context) {
-    final _FormScope scope = context.inheritFromWidgetOfExactType(_FormScope);
+    final _FormScope scope = context.dependOnInheritedWidgetOfExactType<_FormScope>();
     return scope?._formState;
   }
 
@@ -177,7 +177,7 @@ class FormState extends State<Form> {
 
   /// Saves every [FormField] that is a descendant of this [Form].
   void save() {
-    for (FormFieldState<dynamic> field in _fields)
+    for (final FormFieldState<dynamic> field in _fields)
       field.save();
   }
 
@@ -189,7 +189,7 @@ class FormState extends State<Form> {
   /// If the form's [Form.autovalidate] property is true, the fields will all be
   /// revalidated after being reset.
   void reset() {
-    for (FormFieldState<dynamic> field in _fields)
+    for (final FormFieldState<dynamic> field in _fields)
       field.reset();
     _fieldDidChange();
   }
@@ -205,7 +205,7 @@ class FormState extends State<Form> {
 
   bool _validate() {
     bool hasError = false;
-    for (FormFieldState<dynamic> field in _fields)
+    for (final FormFieldState<dynamic> field in _fields)
       hasError = !field.validate() || hasError;
     return !hasError;
   }

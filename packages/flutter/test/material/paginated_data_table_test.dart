@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -13,7 +13,7 @@ class TestDataSource extends DataTableSource {
     this.onSelectChanged,
   });
 
-  final Function onSelectChanged;
+  final void Function(bool) onSelectChanged;
 
   int get generation => _generation;
   int _generation = 0;
@@ -259,7 +259,7 @@ void main() {
     expect(find.text('501'), findsOneWidget);
     // Test that it fits:
     expect(tester.getTopRight(find.text('501')).dx, greaterThanOrEqualTo(tester.getTopRight(find.text('Rows per page:')).dx + 40.0));
-  });
+  }, skip: isBrowser);  // TODO(yjbanov): https://github.com/flutter/flutter/issues/43433
 
   testWidgets('PaginatedDataTable footer scrolls', (WidgetTester tester) async {
     final TestDataSource source = TestDataSource();

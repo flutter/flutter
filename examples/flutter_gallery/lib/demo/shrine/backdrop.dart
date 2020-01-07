@@ -1,16 +1,6 @@
-// Copyright 2018-present the Flutter authors. All Rights Reserved.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-// http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
 
 import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
@@ -21,6 +11,65 @@ const Cubic _kAccelerateCurve = Cubic(0.548, 0.0, 0.757, 0.464);
 const Cubic _kDecelerateCurve = Cubic(0.23, 0.94, 0.41, 1.0);
 const double _kPeakVelocityTime = 0.248210;
 const double _kPeakVelocityProgress = 0.379146;
+
+class _TappableWhileStatusIs extends StatefulWidget {
+  const _TappableWhileStatusIs(
+      this.status, {
+        Key key,
+        this.controller,
+        this.child,
+      }) : super(key: key);
+
+  final AnimationController controller;
+  final AnimationStatus status;
+  final Widget child;
+
+  @override
+  _TappableWhileStatusIsState createState() => _TappableWhileStatusIsState();
+}
+
+class _TappableWhileStatusIsState extends State<_TappableWhileStatusIs> {
+  bool _active;
+
+  @override
+  void initState() {
+    super.initState();
+    widget.controller.addStatusListener(_handleStatusChange);
+    _active = widget.controller.status == widget.status;
+  }
+
+  @override
+  void dispose() {
+    widget.controller.removeStatusListener(_handleStatusChange);
+    super.dispose();
+  }
+
+  void _handleStatusChange(AnimationStatus status) {
+    final bool value = widget.controller.status == widget.status;
+    if (_active != value) {
+      setState(() {
+        _active = value;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    Widget child = AbsorbPointer(
+      absorbing: !_active,
+      child: widget.child,
+    );
+
+    if (!_active) {
+      child = FocusScope(
+        canRequestFocus: false,
+        debugLabel: '$_TappableWhileStatusIs',
+        child: child,
+      );
+    }
+    return child;
+  }
+}
 
 class _FrontLayer extends StatelessWidget {
   const _FrontLayer({
@@ -62,7 +111,7 @@ class _FrontLayer extends StatelessWidget {
 class _BackdropTitle extends AnimatedWidget {
   const _BackdropTitle({
     Key key,
-    Listenable listenable,
+    Animation<double> listenable,
     this.onPress,
     @required this.frontTitle,
     @required this.backTitle,
@@ -70,14 +119,14 @@ class _BackdropTitle extends AnimatedWidget {
        assert(backTitle != null),
        super(key: key, listenable: listenable);
 
-  final Function onPress;
+  final void Function() onPress;
   final Widget frontTitle;
   final Widget backTitle;
 
   @override
   Widget build(BuildContext context) {
     final Animation<double> animation = CurvedAnimation(
-      parent: listenable,
+      parent: listenable as Animation<double>,
       curve: const Interval(0.0, 0.78),
     );
 
@@ -275,12 +324,20 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
     return Stack(
       key: _backdropKey,
       children: <Widget>[
-        widget.backLayer,
+        _TappableWhileStatusIs(
+          AnimationStatus.dismissed,
+          controller: _controller,
+          child: widget.backLayer,
+        ),
         PositionedTransition(
           rect: _layerAnimation,
           child: _FrontLayer(
             onTap: _toggleBackdropLayerVisibility,
-            child: widget.frontLayer,
+            child: _TappableWhileStatusIs(
+              AnimationStatus.completed,
+              controller: _controller,
+              child: widget.frontLayer,
+            ),
           ),
         ),
       ],

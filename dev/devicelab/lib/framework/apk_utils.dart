@@ -1,14 +1,31 @@
-// Copyright (c) 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:path/path.dart' as path;
 import 'package:flutter_devicelab/framework/framework.dart';
 import 'package:flutter_devicelab/framework/utils.dart';
+
+final List<String> flutterAssets = <String>[
+  'assets/flutter_assets/AssetManifest.json',
+  'assets/flutter_assets/LICENSE',
+  'assets/flutter_assets/fonts/MaterialIcons-Regular.ttf',
+  'assets/flutter_assets/packages/cupertino_icons/assets/CupertinoIcons.ttf',
+];
+
+final List<String> debugAssets = <String>[
+  'assets/flutter_assets/isolate_snapshot_data',
+  'assets/flutter_assets/kernel_blob.bin',
+  'assets/flutter_assets/vm_snapshot_data',
+];
+
+final List<String> baseApkFiles = <String> [
+  'classes.dex',
+  'AndroidManifest.xml',
+];
 
 /// Runs the given [testFunction] on a freshly generated Flutter project.
 Future<void> runProjectTest(Future<void> testFunction(FlutterProject project)) async {
@@ -36,20 +53,18 @@ Future<void> runPluginProjectTest(Future<void> testFunction(FlutterPluginProject
 
 /// Returns the list of files inside an Android Package Kit.
 Future<Iterable<String>> getFilesInApk(String apk) async {
-  if (!File(apk).existsSync())
+  if (!File(apk).existsSync()) {
     throw TaskResult.failure(
         'Gradle did not produce an output artifact file at: $apk');
-
-  final Process unzip = await startProcess(
-    'unzip',
-    <String>['-v', apk],
-    isBot: false, // we just want to test the output, not have any debugging info
+  }
+  final String files = await _evalApkAnalyzer(
+    <String>[
+      'files',
+      'list',
+      apk,
+    ]
   );
-  return unzip.stdout
-      .transform(utf8.decoder)
-      .transform(const LineSplitter())
-      .map((String line) => line.split(' ').last)
-      .toList();
+  return files.split('\n').map((String file) => file.substring(1).trim());
 }
 /// Returns the list of files inside an Android App Bundle.
 Future<Iterable<String>> getFilesInAppBundle(String bundle) {
@@ -59,22 +74,6 @@ Future<Iterable<String>> getFilesInAppBundle(String bundle) {
 /// Returns the list of files inside an Android Archive.
 Future<Iterable<String>> getFilesInAar(String aar) {
   return getFilesInApk(aar);
-}
-
-void checkItContains<T>(Iterable<T> values, Iterable<T> collection) {
-  for (T value in values) {
-    if (!collection.contains(value)) {
-      throw TaskResult.failure('Expected to find `$value` in `$collection`.');
-    }
-  }
-}
-
-void checkItDoesNotContain<T>(Iterable<T> values, Iterable<T> collection) {
-  for (T value in values) {
-    if (collection.contains(value)) {
-      throw TaskResult.failure('Did not expect to find `$value` in `$collection`.');
-    }
-  }
 }
 
 TaskResult failure(String message, ProcessResult result) {
@@ -99,9 +98,36 @@ String get _androidHome {
   return androidHome;
 }
 
-/// Utility class to analyze the content inside an APK using dexdump,
-/// which is provided by the Android SDK.
-/// https://android.googlesource.com/platform/art/+/master/dexdump/dexdump.cc
+/// Executes an APK analyzer subcommand.
+Future<String> _evalApkAnalyzer(
+  List<String> args, {
+  bool printStdout = true,
+  String workingDirectory,
+}) async {
+  final String javaHome = await findJavaHome();
+  final String javaBinary = path.join(javaHome, 'bin', 'java');
+  assert(canRun(javaBinary));
+
+  final String androidTools = path.join(_androidHome, 'tools');
+  final String libs = path.join(androidTools, 'lib');
+  assert(Directory(libs).existsSync());
+
+  final String classSeparator =  Platform.isWindows ? ';' : ':';
+  return eval(
+    javaBinary,
+    <String>[
+      '-Dcom.android.sdklib.toolsdir=$androidTools',
+      '-classpath',
+      '.$classSeparator$libs${Platform.pathSeparator}*',
+      'com.android.tools.apk.analyzer.ApkAnalyzerCli',
+      ...args,
+    ],
+    printStdout: printStdout,
+    workingDirectory: workingDirectory,
+  );
+}
+
+/// Utility class to analyze the content inside an APK using the APK analyzer.
 class ApkExtractor {
   ApkExtractor(this.apkFile);
 
@@ -110,34 +136,28 @@ class ApkExtractor {
 
   bool _extracted = false;
 
-  Directory _outputDir;
+  Set<String> _classes = const <String>{};
 
-  Future<void> _extractApk() async {
+  Future<void> _extractDex() async {
     if (_extracted) {
       return;
     }
-    _outputDir = apkFile.parent.createTempSync('apk');
-    if (Platform.isWindows) {
-      await eval('7za', <String>['x', apkFile.path], workingDirectory: _outputDir.path);
-    } else {
-      await eval('unzip', <String>[apkFile.path], workingDirectory: _outputDir.path);
-    }
+    final String packages = await _evalApkAnalyzer(
+      <String>[
+        'dex',
+        'packages',
+        apkFile.path,
+      ],
+      printStdout: false,
+    );
+    _classes = Set<String>.from(
+      packages
+        .split('\n')
+        .where((String line) => line.startsWith('C'))
+        .map<String>((String line) => line.split('\t').last),
+    );
+    assert(_classes.isNotEmpty);
     _extracted = true;
-  }
-
-  /// Returns the full path to the [dexdump] tool.
-  Future<String> _findDexDump() async {
-    String dexdumps;
-    if (Platform.isWindows) {
-      dexdumps = await eval('dir', <String>['/s/b', 'dexdump.exe'],
-          workingDirectory: _androidHome);
-    } else {
-      dexdumps = await eval('find', <String>[_androidHome, '-name', 'dexdump']);
-    }
-    if (dexdumps.isEmpty) {
-      throw Exception('Couldn\'t find a dexdump executable.');
-    }
-    return dexdumps.split('\n').first;
   }
 
   // Removes any temporary directory.
@@ -145,41 +165,33 @@ class ApkExtractor {
     if (!_extracted) {
       return;
     }
-    rmTree(_outputDir);
+    _classes = const <String>{};
     _extracted = true;
   }
 
   /// Returns true if the APK contains a given class.
   Future<bool> containsClass(String className) async {
-    await _extractApk();
-
-    final String dexDump = await _findDexDump();
-    final String classesDex = path.join(_outputDir.path, 'classes.dex');
-
-    if (!File(classesDex).existsSync()) {
-      throw Exception('Couldn\'t find classes.dex in the APK.');
-    }
-    final String classDescriptors = await eval(dexDump,
-        <String>[classesDex], printStdout: false);
-
-    if (classDescriptors.isEmpty) {
-      throw Exception('No descriptors found in classes.dex.');
-    }
-    return classDescriptors.contains(className.replaceAll('.', '/'));
+    await _extractDex();
+    return _classes.contains(className);
   }
 }
 
 /// Gets the content of the `AndroidManifest.xml`.
-Future<String> getAndroidManifest(String apk) {
-  final String apkAnalyzer = path.join(_androidHome, 'tools', 'bin', 'apkanalyzer');
-  return eval(apkAnalyzer, <String>['manifest', 'print', apk],
-      workingDirectory: _androidHome);
+Future<String> getAndroidManifest(String apk) async {
+  return await _evalApkAnalyzer(
+    <String>[
+      'manifest',
+      'print',
+      apk,
+    ],
+    workingDirectory: _androidHome,
+  );
 }
 
  /// Checks that the classes are contained in the APK, throws otherwise.
 Future<void> checkApkContainsClasses(File apk, List<String> classes) async {
   final ApkExtractor extractor = ApkExtractor(apk);
-  for (String className in classes) {
+  for (final String className in classes) {
     if (!(await extractor.containsClass(className))) {
       throw Exception('APK doesn\'t contain class `$className`.');
     }
@@ -297,7 +309,7 @@ android {
 
   Future<ProcessResult> resultOfFlutterCommand(String command, List<String> options) {
     return Process.run(
-      path.join(flutterDirectory.path, 'bin', 'flutter'),
+      path.join(flutterDirectory.path, 'bin', Platform.isWindows ? 'flutter.bat' : 'flutter'),
       <String>[command, ...options],
       workingDirectory: rootPath,
     );
@@ -380,35 +392,14 @@ Future<ProcessResult> _resultOfGradleTask({String workingDirectory, String task,
   );
 }
 
-class _Dependencies {
-  _Dependencies(String depfilePath) {
-    final RegExp _separatorExpr = RegExp(r'([^\\]) ');
-    final RegExp _escapeExpr = RegExp(r'\\(.)');
-
-    // Depfile format:
-    // outfile1 outfile2 : file1.dart file2.dart file3.dart file\ 4.dart
-    final String contents = File(depfilePath).readAsStringSync();
-    final List<String> colonSeparated = contents.split(': ');
-    target = colonSeparated[0].trim();
-    dependencies = colonSeparated[1]
-        // Put every file on right-hand side on the separate line
-        .replaceAllMapped(_separatorExpr, (Match match) => '${match.group(1)}\n')
-        .split('\n')
-        // Expand escape sequences, so that '\ ', for example,ß becomes ' '
-        .map<String>((String path) => path.replaceAllMapped(_escapeExpr, (Match match) => match.group(1)).trim())
-        .where((String path) => path.isNotEmpty)
-        .toSet();
-  }
-
-  String target;
-  Set<String> dependencies;
-}
-
 /// Returns [null] if target matches [expectedTarget], otherwise returns an error message.
 String validateSnapshotDependency(FlutterProject project, String expectedTarget) {
-  final _Dependencies deps = _Dependencies(
+  final File snapshotBlob = File(
       path.join(project.rootPath, 'build', 'app', 'intermediates',
-          'flutter', 'debug', 'android-arm', 'snapshot_blob.bin.d'));
-  return deps.target == expectedTarget ? null :
-    'Dependency file should have $expectedTarget as target. Instead has ${deps.target}';
+          'flutter', 'debug', 'flutter_build.d'));
+
+  assert(snapshotBlob.existsSync());
+  final String contentSnapshot = snapshotBlob.readAsStringSync();
+  return contentSnapshot.contains('$expectedTarget ')
+    ? null : 'Dependency file should have $expectedTarget as target. Instead found $contentSnapshot';
 }

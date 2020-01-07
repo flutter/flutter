@@ -1,9 +1,11 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
 @TestOn('!chrome')
 import 'dart:async';
 import 'dart:typed_data';
+import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -127,7 +129,7 @@ void main() {
 
       final Layer textureParentLayer = tester.layers[tester.layers.length - 2];
       expect(textureParentLayer, isInstanceOf<ClipRectLayer>());
-      final ClipRectLayer clipRect = textureParentLayer;
+      final ClipRectLayer clipRect = textureParentLayer as ClipRectLayer;
       expect(clipRect.clipRect, const Rect.fromLTWH(0.0, 0.0, 100.0, 50.0));
       expect(
         viewsController.views,
@@ -836,7 +838,15 @@ void main() {
         ),
       );
 
-      final SemanticsNode semantics =  tester.getSemantics(find.byType(AndroidView));
+      // Find the first _AndroidPlatformView widget inside of the AndroidView so
+      // that it finds the right RenderObject when looking for semantics.
+      final Finder semanticsFinder = find.byWidgetPredicate(
+            (Widget widget) {
+          return widget.runtimeType.toString() == '_AndroidPlatformView';
+        },
+        description: '_AndroidPlatformView widget inside AndroidView',
+      );
+      final SemanticsNode semantics = tester.getSemantics(semanticsFinder.first);
 
       // Platform view has not been created yet, no platformViewId.
       expect(semantics.platformViewId, null);
@@ -888,7 +898,7 @@ void main() {
           find.descendant(
               of: find.byType(AndroidView),
               matching: find.byType(Focus),
-          )
+          ),
       );
       final Element containerElement = tester.element(find.byKey(containerKey));
       final FocusNode androidViewFocusNode = androidViewFocusWidget.focusNode;
@@ -947,7 +957,7 @@ void main() {
       int lastPlatformViewTextClient;
       SystemChannels.textInput.setMockMethodCallHandler((MethodCall call) {
         if (call.method == 'TextInput.setPlatformViewClient') {
-          lastPlatformViewTextClient = call.arguments;
+          lastPlatformViewTextClient = call.arguments as int;
         }
         return null;
       });
@@ -1579,7 +1589,7 @@ void main() {
               height: 100,
             ),
           ],
-        )
+        ),
       );
 
       // First frame is before the platform view was created so the render object
@@ -1679,10 +1689,7 @@ void main() {
         hitTestBehavior: PlatformViewHitTestBehavior.opaque,
         gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},);
       await tester.pumpWidget(surface);
-      final PlatformViewLayer layer = tester.layers.firstWhere((Layer layer){
-        return layer is PlatformViewLayer;
-      });
-      expect(layer, isNotNull);
+      expect(() => tester.layers.whereType<PlatformViewLayer>().first, returnsNormally);
     });
 
     testWidgets('PlatformViewSurface can lose gesture arenas', (WidgetTester tester) async {
@@ -1914,7 +1921,8 @@ void main() {
             Factory<OneSequenceGestureRecognizer>(
                   constructRecognizer,
             ),
-          })
+          },
+        ),
       );
 
       await tester.pumpWidget(
@@ -1925,7 +1933,8 @@ void main() {
             Factory<OneSequenceGestureRecognizer>(
                   constructRecognizer,
             ),
-          })
+          },
+        ),
       );
       expect(factoryInvocationCount, 1);
     });
@@ -1952,15 +1961,13 @@ void main() {
       });
 
       await tester.pumpWidget(platformViewLink);
-      final SizedBox sizedBox = tester.allWidgets.firstWhere((Widget widget) => widget is SizedBox);
-      expect(sizedBox, isNotNull);
+      expect(() => tester.allWidgets.whereType<SizedBox>().first, returnsNormally);
 
       onPlatformViewCreatedCallBack(createdPlatformViewId);
 
       await tester.pump();
 
-      final PlatformViewSurface surface = tester.allWidgets.firstWhere((Widget widget) => widget is PlatformViewSurface);
-      expect(surface, isNotNull);
+      expect(() => tester.allWidgets.whereType<PlatformViewSurface>().first, returnsNormally);
 
       expect(createdPlatformViewId, currentViewId+1);
     });
@@ -2048,6 +2055,7 @@ void main() {
     testWidgets('PlatformViewLink re-initializes when view type changes', (WidgetTester tester) async {
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final List<int> ids = <int>[];
+      final List<int> surfaceViewIds = <int>[];
       final List<String> viewTypes = <String>[];
 
       PlatformViewLink createPlatformViewLink(String viewType) {
@@ -2061,6 +2069,7 @@ void main() {
             return controller;
           },
           surfaceFactory: (BuildContext context, PlatformViewController controller) {
+            surfaceViewIds.add(controller.viewId);
             return PlatformViewSurface(
               gestureRecognizers: const <Factory<OneSequenceGestureRecognizer>>{},
               controller: controller,
@@ -2097,6 +2106,13 @@ void main() {
       );
 
       expect(
+        surfaceViewIds,
+        unorderedEquals(<int>[
+          currentViewId+1, currentViewId+2,
+        ]),
+      );
+
+      expect(
         viewTypes,
         unorderedEquals(<String>[
           'webview', 'maps',
@@ -2117,10 +2133,7 @@ void main() {
 
       await tester.pumpWidget(platformViewLink);
 
-      final Container container = tester.allWidgets.firstWhere((Widget widget){
-        return widget is Container;
-      });
-      expect(container, isNotNull);
+      expect(() => tester.allWidgets.whereType<Container>().first, returnsNormally);
     });
 
     testWidgets('PlatformViewLink manages the focus properly', (WidgetTester tester) async {
@@ -2160,7 +2173,7 @@ void main() {
           find.descendant(
               of: find.byType(PlatformViewLink),
               matching: find.byType(Focus),
-          )
+          ),
       );
       final FocusNode platformViewFocusNode = platformViewFocusWidget.focusNode;
       final Element containerElement = tester.element(find.byKey(containerKey));

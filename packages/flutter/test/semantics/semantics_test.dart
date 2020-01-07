@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -74,7 +74,7 @@ void main() {
       final List<SemanticsNode> children = <SemanticsNode>[
         SemanticsNode()
           ..isMergedIntoParent = true
-          ..rect = const Rect.fromLTRB(5.0, 5.0, 10.0, 10.0)
+          ..rect = const Rect.fromLTRB(5.0, 5.0, 10.0, 10.0),
       ];
 
       node.updateWith(
@@ -82,7 +82,7 @@ void main() {
         childrenInInversePaintOrder: children,
       );
 
-      children.add( SemanticsNode()
+      children.add(SemanticsNode()
         ..isMergedIntoParent = true
         ..rect = const Rect.fromLTRB(42.0, 42.0, 10.0, 10.0)
       );
@@ -264,7 +264,7 @@ void main() {
     final List<int> expectedResults = <int>[0, -1, 1, 0];
     assert(tests.length == expectedResults.length);
     final List<int> results = <int>[
-      for (List<SemanticsSortKey> tuple in tests) tuple[0].compareTo(tuple[1]),
+      for (final List<SemanticsSortKey> tuple in tests) tuple[0].compareTo(tuple[1]),
     ];
     expect(results, orderedEquals(expectedResults));
   });
@@ -279,7 +279,7 @@ void main() {
     final List<int> expectedResults = <int>[0, -1, 1, 0];
     assert(tests.length == expectedResults.length);
     final List<int> results = <int>[
-      for (List<SemanticsSortKey> tuple in tests) tuple[0].compareTo(tuple[1]),
+      for (final List<SemanticsSortKey> tuple in tests) tuple[0].compareTo(tuple[1]),
     ];
     expect(results, orderedEquals(expectedResults));
   });
@@ -573,6 +573,7 @@ void main() {
 
     expect(config.isSemanticBoundary, isFalse);
     expect(config.isButton, isFalse);
+    expect(config.isLink, isFalse);
     expect(config.isMergingSemanticsOfDescendants, isFalse);
     expect(config.isEnabled, null);
     expect(config.isChecked, null);
@@ -596,6 +597,7 @@ void main() {
 
     config.isSemanticBoundary = true;
     config.isButton = true;
+    config.isLink = true;
     config.isMergingSemanticsOfDescendants = true;
     config.isEnabled = true;
     config.isChecked = true;
@@ -632,6 +634,7 @@ void main() {
 
     expect(config.isSemanticBoundary, isTrue);
     expect(config.isButton, isTrue);
+    expect(config.isLink, isTrue);
     expect(config.isMergingSemanticsOfDescendants, isTrue);
     expect(config.isEnabled, isTrue);
     expect(config.isChecked, isTrue);
@@ -665,7 +668,7 @@ class TestRender extends RenderProxyBox {
     this.hasScrollUpAction = false,
     this.hasScrollDownAction = false,
     this.isSemanticBoundary,
-    RenderObject child,
+    RenderBox child,
   }) : super(child);
 
   bool hasTapAction;

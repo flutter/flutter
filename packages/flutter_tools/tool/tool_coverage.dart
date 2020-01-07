@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -9,17 +9,14 @@ import 'dart:isolate';
 
 import 'package:async/async.dart';
 import 'package:coverage/coverage.dart';
+import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/context_runner.dart';
+import 'package:flutter_tools/src/test/test_wrapper.dart';
 import 'package:path/path.dart' as path;
-import 'package:pedantic/pedantic.dart';
 import 'package:stream_channel/isolate_channel.dart';
 import 'package:stream_channel/stream_channel.dart';
-import 'package:test_core/src/runner/hack_register_platform.dart' as hack; // ignore: implementation_imports
-import 'package:test_core/src/executable.dart' as test; // ignore: implementation_imports
 import 'package:vm_service_client/vm_service_client.dart'; // ignore: deprecated_member_use
-import 'package:test_api/src/backend/runtime.dart'; // ignore: implementation_imports
 import 'package:test_api/src/backend/suite_platform.dart'; // ignore: implementation_imports
-import 'package:test_core/src/runner/platform.dart'; // ignore: implementation_imports
 import 'package:test_core/src/runner/runner_suite.dart'; // ignore: implementation_imports
 import 'package:test_core/src/runner/suite.dart'; // ignore: implementation_imports
 import 'package:test_core/src/runner/plugin/platform_helpers.dart'; // ignore: implementation_imports
@@ -35,11 +32,23 @@ import 'package:flutter_tools/src/test/coverage_collector.dart';
 Future<void> main(List<String> arguments) async {
   return runInContext(() async {
     final VMPlatform vmPlatform = VMPlatform();
-    hack.registerPlatformPlugin(
+    const TestWrapper test = TestWrapper();
+    test.registerPlatformPlugin(
       <Runtime>[Runtime.vm],
       () => vmPlatform,
     );
-    await test.main(<String>['-x', 'no_coverage', '--no-color', '-r', 'compact', '-j', '1', ...arguments]);
+    if (arguments.isEmpty) {
+      arguments = <String>[
+        path.join('test', 'general.shard'),
+        path.join('test', 'commands.shard', 'hermetic'),
+      ];
+    }
+    await test.main(<String>[
+      '--no-color',
+      '-r', 'compact',
+      '-j', '1',
+      ...arguments
+    ]);
     exit(exitCode);
   });
 }
@@ -57,8 +66,12 @@ class VMPlatform extends PlatformPlugin {
       throw UnimplementedError();
 
   @override
-  Future<RunnerSuite> load(String codePath, SuitePlatform platform,
-      SuiteConfiguration suiteConfig, Object message) async {
+  Future<RunnerSuite> load(
+    String codePath,
+    SuitePlatform platform,
+    SuiteConfiguration suiteConfig,
+    Object message,
+  ) async {
     final ReceivePort receivePort = ReceivePort();
     Isolate isolate;
     try {
@@ -74,7 +87,7 @@ class VMPlatform extends PlatformPlugin {
       _pending.remove(codePath);
     }));
     final ServiceProtocolInfo info = await Service.controlWebServer(enable: true);
-    final dynamic channel = IsolateChannel<Object>.connectReceive(receivePort)
+    final StreamChannel<Object> channel = IsolateChannel<Object>.connectReceive(receivePort)
       .transformStream(StreamTransformer<Object, Object>.fromHandlers(
         handleDone: (EventSink<Object> sink) async {
           try {
@@ -141,8 +154,7 @@ class VMPlatform extends PlatformPlugin {
     final String result = await coverageCollector.finalizeCoverage(
       formatter: formatter,
     );
-    final String prefix = Platform.environment['SUBSHARD'] ?? '';
-    final String outputLcovPath = path.join('coverage', '$prefix.lcov.info');
+    final String outputLcovPath = path.join('coverage', 'lcov.info');
     File(outputLcovPath)
       ..createSync(recursive: true)
       ..writeAsStringSync(result);

@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -81,11 +81,11 @@ enum DartVmEventType {
 /// An event regarding the Dart VM.
 ///
 /// Specifies the type of the event (whether the VM has started or has stopped),
-/// and contains the service port of the VM as well as a URI to connect to it.
+/// and contains the service port of the VM as well as a URL to connect to it.
 class DartVmEvent {
   DartVmEvent._({this.eventType, this.servicePort, this.uri});
 
-  /// The URI used to connect to the Dart VM.
+  /// The URL used to connect to the Dart VM.
   final Uri uri;
 
   /// The type of event regarding this instance of the Dart VM.
@@ -221,7 +221,7 @@ class FuchsiaRemoteConnection {
   /// those objects) will subsequently have its connection closed as well, so
   /// behavior for them will be undefined.
   Future<void> stop() async {
-    for (PortForwarder pf in _forwardedVmServicePorts) {
+    for (final PortForwarder pf in _forwardedVmServicePorts) {
       // Closes VM service first to ensure that the connection is closed cleanly
       // on the target before shutting down the forwarding itself.
       final DartVm vmService = _dartVmCache[pf.port];
@@ -229,7 +229,7 @@ class FuchsiaRemoteConnection {
       await vmService?.stop();
       await pf.stop();
     }
-    for (PortForwarder pf in _dartVmPortMap.values) {
+    for (final PortForwarder pf in _dartVmPortMap.values) {
       final DartVm vmService = _dartVmCache[pf.port];
       _dartVmCache[pf.port] = null;
       await vmService?.stop();
@@ -305,7 +305,7 @@ class FuchsiaRemoteConnection {
     // simultaneously via Future.wait.
     final List<Future<List<IsolateRef>>> isolates =
         <Future<List<IsolateRef>>>[];
-    for (PortForwarder fp in _dartVmPortMap.values) {
+    for (final PortForwarder fp in _dartVmPortMap.values) {
       final DartVm vmService =
           await _getDartVm(fp.port, timeout: vmConnectionTimeout);
       if (vmService == null) {
@@ -390,7 +390,7 @@ class FuchsiaRemoteConnection {
       }
     }
 
-    for (PortForwarder pf in _dartVmPortMap.values) {
+    for (final PortForwarder pf in _dartVmPortMap.values) {
       final DartVm service = await _getDartVm(pf.port);
       if (service == null) {
         await shutDownPortForwarder(pf);
@@ -448,7 +448,7 @@ class FuchsiaRemoteConnection {
   Future<void> _pollVms() async {
     await _checkPorts();
     final List<int> servicePorts = await getDeviceServicePorts();
-    for (int servicePort in servicePorts) {
+    for (final int servicePort in servicePorts) {
       if (!_stalePorts.contains(servicePort) &&
           !_dartVmPortMap.containsKey(servicePort)) {
         _dartVmPortMap[servicePort] = await fuchsiaPortForwardingFunction(
@@ -499,7 +499,7 @@ class FuchsiaRemoteConnection {
               _sshCommandRunner.sshConfigPath);
         }));
 
-    for (PortForwarder pf in forwardedVmServicePorts) {
+    for (final PortForwarder pf in forwardedVmServicePorts) {
       // TODO(awdavies): Handle duplicates.
       _dartVmPortMap[pf.remotePort] = pf;
     }
@@ -521,13 +521,13 @@ class FuchsiaRemoteConnection {
     final List<String> portPaths = await _sshCommandRunner
         .run('/bin/find /hub -name vmservice-port');
     final List<int> ports = <int>[];
-    for (String path in portPaths) {
+    for (final String path in portPaths) {
       if (path == '') {
         continue;
       }
       final List<String> lsOutput =
           await _sshCommandRunner.run('/bin/ls $path');
-      for (String line in lsOutput) {
+      for (final String line in lsOutput) {
         if (line == '') {
           continue;
         }

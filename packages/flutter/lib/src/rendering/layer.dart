@@ -1,11 +1,10 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:async';
 import 'dart:collection';
-import 'dart:ui' as ui show EngineLayer, Image, ImageFilter, PathMetric,
-                            Picture, PictureRecorder, Scene, SceneBuilder;
+import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -13,6 +12,68 @@ import 'package:flutter/painting.dart';
 import 'package:vector_math/vector_math_64.dart';
 
 import 'debug.dart';
+
+/// Information collected for an annotation that is found in the layer tree.
+///
+/// See also:
+///
+///  * [Layer.findAnnotations], which create and use objects of this class.
+@immutable
+class AnnotationEntry<T> {
+  /// Create an entry of found annotation by providing the object and related
+  /// information.
+  const AnnotationEntry({
+    @required this.annotation,
+    @required this.localPosition,
+  }) : assert(localPosition != null);
+
+  /// The annotation object that is found.
+  final T annotation;
+
+  /// The target location described by the local coordinate space of the layer
+  /// that contains the annotation.
+  final Offset localPosition;
+
+  @override
+  String toString() {
+    return '$runtimeType(annotation: $annotation, localPostion: $localPosition)';
+  }
+}
+
+/// Information collected about a list of annotations that are found in the
+/// layer tree.
+///
+/// See also:
+///
+///  * [AnnotationEntry], which are members of this class.
+///  * [Layer.findAllAnnotations], and [Layer.findAnnotations], which create and
+///    use an object of this class.
+class AnnotationResult<T> {
+  final List<AnnotationEntry<T>> _entries = <AnnotationEntry<T>>[];
+
+  /// Add a new entry to the end of the result.
+  ///
+  /// Usually, entries should be added in order from most specific to least
+  /// specific, typically during an upward walk of the tree.
+  void add(AnnotationEntry<T> entry) => _entries.add(entry);
+
+  /// An unmodifiable list of [AnnotationEntry] objects recorded.
+  ///
+  /// The first entry is the most specific, typically the one at the leaf of
+  /// tree.
+  Iterable<AnnotationEntry<T>> get entries => _entries;
+
+  /// An unmodifiable list of annotations recorded.
+  ///
+  /// The first entry is the most specific, typically the one at the leaf of
+  /// tree.
+  ///
+  /// It is similar to [entries] but does not contain other information.
+  Iterable<T> get annotations sync* {
+    for (final AnnotationEntry<T> entry in _entries)
+      yield entry.annotation;
+  }
+}
 
 /// A composited layer.
 ///
@@ -41,7 +102,7 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
   /// Only subclasses of [ContainerLayer] can have children in the layer tree.
   /// All other layer classes are used for leaves in the layer tree.
   @override
-  ContainerLayer get parent => super.parent;
+  ContainerLayer get parent => super.parent as ContainerLayer;
 
   // Whether this layer has any changes since its last call to [addToScene].
   //
@@ -213,31 +274,149 @@ abstract class Layer extends AbstractNode with DiagnosticableTreeMixin {
     parent?._removeChild(this);
   }
 
-  /// Returns the value of [S] that corresponds to the point described by
-  /// [regionOffset].
+  /// Search this layer and its subtree for annotations of type `S` at the
+  /// location described by `localPosition`.
   ///
-  /// Returns null if no matching region is found.
+  /// This method is called by the default implementation of [find] and
+  /// [findAllAnnotations]. Override this method to customize how the layer
+  /// should search for annotations, or if the layer has its own annotations to
+  /// add.
   ///
-  /// The main way for a value to be found here is by pushing an
-  /// [AnnotatedRegionLayer] into the layer tree.
+  /// The default implementation simply returns `false`, which means neither
+  /// the layer nor its children has annotations, and the annotation search
+  /// is not absorbed either (see below for explanation).
   ///
-  /// See also:
+  /// ## About layer annotations
   ///
-  ///  * [AnnotatedRegionLayer], for placing values in the layer tree.
-  S find<S>(Offset regionOffset);
+  /// {@template flutter.rendering.layer.findAnnotations.aboutAnnotations}
+  /// An annotation is an optional object of any type that can be carried with a
+  /// layer. An annotation can be found at a location as long as the owner layer
+  /// contains the location and is walked to.
+  ///
+  /// The annotations are searched by first visiting each child recursively,
+  /// then this layer, resulting in an order from visually front to back.
+  /// Annotations must meet the given restrictions, such as type and position.
+  ///
+  /// The common way for a value to be found here is by pushing an
+  /// [AnnotatedRegionLayer] into the layer tree, or by adding the desired
+  /// annotation by overriding [findAnnotations].
+  /// {@endtemplate}
+  ///
+  /// ## Parameters and return value
+  ///
+  /// The [result] parameter is where the method outputs the resulting
+  /// annotations. New annotations found during the walk are added to the tail.
+  ///
+  /// The [onlyFirst] parameter indicates that, if true, the search will stop
+  /// when it finds the first qualified annotation; otherwise, it will walk the
+  /// entire subtree.
+  ///
+  /// The return value indicates the opacity of this layer and its subtree at
+  /// this position. If it returns true, then this layer's parent should skip
+  /// the children behind this layer. In other words, it is opaque to this type
+  /// of annotation and has absorbed the search so that its siblings behind it
+  /// are not aware of the search. If the return value is false, then the parent
+  /// might continue with other siblings.
+  ///
+  /// The return value does not affect whether the parent adds its own
+  /// annotations; in other words, if a layer is supposed to add an annotation,
+  /// it will always add it even if its children are opaque to this type of
+  /// annotation. However, the opacity that the parents return might be affected
+  /// by their children, hence making all of its ancestors opaque to this type
+  /// of annotation.
+  @protected
+  bool findAnnotations<S>(
+    AnnotationResult<S> result,
+    Offset localPosition, {
+    @required bool onlyFirst,
+  }) {
+    return false;
+  }
 
-  /// Returns an iterable of [S] values that corresponds to the point described
-  /// by [regionOffset] on all layers under the point.
+  /// Search this layer and its subtree for the first annotation of type `S`
+  /// under the point described by `localPosition`.
   ///
-  /// Returns an empty list if no matching region is found.
+  /// Returns null if no matching annotations are found.
   ///
-  /// The main way for a value to be found here is by pushing an
-  /// [AnnotatedRegionLayer] into the layer tree.
+  /// By default this method simply calls [findAnnotations] with `onlyFirst:
+  /// true` and returns the annotation of the first result. Prefer overriding
+  /// [findAnnotations] instead of this method, because during an annotation
+  /// search, only [findAnnotations] is recursively called, while custom
+  /// behavior in this method is ignored.
+  ///
+  /// ## About layer annotations
+  ///
+  /// {@macro flutter.rendering.layer.findAnnotations.aboutAnnotations}
   ///
   /// See also:
   ///
+  ///  * [findAllAnnotations], which is similar but returns all annotations found
+  ///    at the given position.
   ///  * [AnnotatedRegionLayer], for placing values in the layer tree.
-  Iterable<S> findAll<S>(Offset regionOffset);
+  S find<S>(Offset localPosition) {
+    final AnnotationResult<S> result = AnnotationResult<S>();
+    findAnnotations<S>(result, localPosition, onlyFirst: true);
+    return result.entries.isEmpty ? null : result.entries.first.annotation;
+  }
+
+  /// Search this layer and its subtree for all annotations of type `S` under
+  /// the point described by `localPosition`.
+  ///
+  /// Returns a result with empty entries if no matching annotations are found.
+  ///
+  /// By default this method simply calls [findAnnotations] with `onlyFirst:
+  /// false` and returns the annotations of its result. Prefer overriding
+  /// [findAnnotations] instead of this method, because during an annotation
+  /// search, only [findAnnotations] is recursively called, while custom
+  /// behavior in this method is ignored.
+  ///
+  /// ## About layer annotations
+  ///
+  /// {@macro flutter.rendering.layer.findAnnotations.aboutAnnotations}
+  ///
+  /// See also:
+  ///
+  ///  * [find], which is similar but returns the first annotation found at the
+  ///    given position.
+  ///  * [findAllAnnotations], which is similar but returns an
+  ///    [AnnotationResult], which contains more information, such as the local
+  ///    position of the event related to each annotation, and is equally fast,
+  ///    hence is preferred over [findAll].
+  ///  * [AnnotatedRegionLayer], for placing values in the layer tree.
+  @Deprecated(
+    'Use findAllAnnotations(...).annotations instead. '
+    'This feature was deprecated after v1.10.14.'
+  )
+  Iterable<S> findAll<S>(Offset localPosition) {
+    final AnnotationResult<S> result = findAllAnnotations(localPosition);
+    return result.entries.map((AnnotationEntry<S> entry) => entry.annotation);
+  }
+
+  /// Search this layer and its subtree for all annotations of type `S` under
+  /// the point described by `localPosition`.
+  ///
+  /// Returns a result with empty entries if no matching annotations are found.
+  ///
+  /// By default this method simply calls [findAnnotations] with `onlyFirst:
+  /// false` and returns the annotations of its result. Prefer overriding
+  /// [findAnnotations] instead of this method, because during an annotation
+  /// search, only [findAnnotations] is recursively called, while custom
+  /// behavior in this method is ignored.
+  ///
+  /// ## About layer annotations
+  ///
+  /// {@macro flutter.rendering.layer.findAnnotations.aboutAnnotations}
+  ///
+  /// See also:
+  ///
+  ///  * [find], which is similar but returns the first annotation found at the
+  ///    given position.
+  ///  * [AnnotatedRegionLayer], for placing values in the layer tree.
+  AnnotationResult<S> findAllAnnotations<S>(Offset localPosition) {
+    final AnnotationResult<S> result = AnnotationResult<S>();
+    findAnnotations<S>(result, localPosition, onlyFirst: false);
+    return result;
+  }
 
   /// Override this method to upload this layer to the engine.
   ///
@@ -359,10 +538,10 @@ class PictureLayer extends Layer {
   }
 
   @override
-  S find<S>(Offset regionOffset) => null;
-
-  @override
-  Iterable<S> findAll<S>(Offset regionOffset) => <S>[];
+  @protected
+  bool findAnnotations<S>(AnnotationResult<S> result, Offset localPosition, { @required bool onlyFirst }) {
+    return false;
+  }
 }
 
 /// A composited layer that maps a backend texture to a rectangle.
@@ -410,11 +589,11 @@ class TextureLayer extends Layer {
 
   /// When true the texture that will not be updated with new frames.
   ///
-  /// This is used when resizing an embedded  Android views: When resizing
-  /// there is a short period during which the framework cannot tell
-  /// if the newest texture frame has the previous or new size, to workaround this
-  /// the framework "freezes" the texture just before resizing the Android view and unfreezes
-  /// it when it is certain that a frame with the new size is ready.
+  /// This is used when resizing an embedded  Android views: When resizing there
+  /// is a short period during which the framework cannot tell if the newest
+  /// texture frame has the previous or new size, to workaround this the
+  /// framework "freezes" the texture just before resizing the Android view and
+  /// un-freezes it when it is certain that a frame with the new size is ready.
   final bool freeze;
 
   @override
@@ -430,10 +609,10 @@ class TextureLayer extends Layer {
   }
 
   @override
-  S find<S>(Offset regionOffset) => null;
-
-  @override
-  Iterable<S> findAll<S>(Offset regionOffset) => <S>[];
+  @protected
+  bool findAnnotations<S>(AnnotationResult<S> result, Offset localPosition, { @required bool onlyFirst }) {
+    return false;
+  }
 }
 
 /// A layer that shows an embedded [UIView](https://developer.apple.com/documentation/uikit/uiview)
@@ -445,6 +624,7 @@ class PlatformViewLayer extends Layer {
   PlatformViewLayer({
     @required this.rect,
     @required this.viewId,
+    this.hoverAnnotation,
   }) : assert(rect != null),
        assert(viewId != null);
 
@@ -455,6 +635,25 @@ class PlatformViewLayer extends Layer {
   ///
   /// A UIView with this identifier must have been created by [PlatformViewsServices.initUiKitView].
   final int viewId;
+
+  /// [MouseTrackerAnnotation] that handles mouse events for this layer.
+  ///
+  /// If [hoverAnnotation] is non-null, [PlatformViewLayer] will annotate the
+  /// region of this platform view such that annotation callbacks will receive
+  /// mouse events, including mouse enter, exit, and hover, but not including
+  /// mouse down, move, and up. The layer will be treated as opaque during an
+  /// annotation search, which will prevent layers behind it from receiving
+  /// these events.
+  ///
+  /// By default, [hoverAnnotation] is null, and [PlatformViewLayer] will not
+  /// receive mouse events, and will therefore appear translucent during the
+  /// annotation search.
+  ///
+  /// See also:
+  ///
+  ///  * [MouseRegion], which explains more about the mouse events and opacity
+  ///    during annotation search.
+  final MouseTrackerAnnotation hoverAnnotation;
 
   @override
   void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
@@ -468,10 +667,22 @@ class PlatformViewLayer extends Layer {
   }
 
   @override
-  S find<S>(Offset regionOffset) => null;
-
-  @override
-  Iterable<S> findAll<S>(Offset regionOffset) => <S>[];
+  @protected
+  bool findAnnotations<S>(AnnotationResult<S> result, Offset localPosition, { @required bool onlyFirst }) {
+    if (hoverAnnotation == null || !rect.contains(localPosition)) {
+      return false;
+    }
+    if (S == MouseTrackerAnnotation) {
+      final Object untypedValue = hoverAnnotation;
+      final S typedValue = untypedValue as S;
+      result.add(AnnotationEntry<S>(
+        annotation: typedValue,
+        localPosition: localPosition,
+      ));
+      return true;
+    }
+    return false;
+  }
 }
 
 /// A layer that indicates to the compositor that it should display
@@ -544,10 +755,10 @@ class PerformanceOverlayLayer extends Layer {
   }
 
   @override
-  S find<S>(Offset regionOffset) => null;
-
-  @override
-  Iterable<S> findAll<S>(Offset regionOffset) => <S>[];
+  @protected
+  bool findAnnotations<S>(AnnotationResult<S> result, Offset localPosition, { @required bool onlyFirst }) {
+    return false;
+  }
 }
 
 /// A composited layer that has a list of children.
@@ -593,7 +804,7 @@ class ContainerLayer extends Layer {
       // PhysicalModelLayers. If we don't, we'll end up adding duplicate layers
       // or continuing to render stale outlines.
       if (temporaryLayers != null) {
-        for (PictureLayer temporaryLayer in temporaryLayers) {
+        for (final PictureLayer temporaryLayer in temporaryLayers) {
           temporaryLayer.remove();
         }
       }
@@ -728,31 +939,16 @@ class ContainerLayer extends Layer {
   }
 
   @override
-  S find<S>(Offset regionOffset) {
-    Layer current = lastChild;
-    while (current != null) {
-      final Object value = current.find<S>(regionOffset);
-      if (value != null) {
-        return value;
-      }
-      current = current.previousSibling;
+  @protected
+  bool findAnnotations<S>(AnnotationResult<S> result, Offset localPosition, { @required bool onlyFirst }) {
+    for (Layer child = lastChild; child != null; child = child.previousSibling) {
+      final bool isAbsorbed = child.findAnnotations<S>(result, localPosition, onlyFirst: onlyFirst);
+      if (isAbsorbed)
+        return true;
+      if (onlyFirst && result.entries.isNotEmpty)
+        return isAbsorbed;
     }
-    return null;
-  }
-
-  @override
-  Iterable<S> findAll<S>(Offset regionOffset) {
-    Iterable<S> result = Iterable<S>.empty();
-    if (firstChild == null)
-      return result;
-    Layer child = lastChild;
-    while (true) {
-      result = result.followedBy(child.findAll<S>(regionOffset));
-      if (child == firstChild)
-        break;
-      child = child.previousSibling;
-    }
-    return result;
+    return false;
   }
 
   @override
@@ -974,13 +1170,9 @@ class OffsetLayer extends ContainerLayer {
   }
 
   @override
-  S find<S>(Offset regionOffset) {
-    return super.find<S>(regionOffset - offset);
-  }
-
-  @override
-  Iterable<S> findAll<S>(Offset regionOffset) {
-    return super.findAll<S>(regionOffset - offset);
+  @protected
+  bool findAnnotations<S>(AnnotationResult<S> result, Offset localPosition, { @required bool onlyFirst }) {
+    return super.findAnnotations<S>(result, localPosition - offset, onlyFirst: onlyFirst);
   }
 
   @override
@@ -997,7 +1189,11 @@ class OffsetLayer extends ContainerLayer {
     // retained rendering, we don't want to push the offset down to each leaf
     // node. Otherwise, changing an offset layer on the very high level could
     // cascade the change to too many leaves.
-    engineLayer = builder.pushOffset(layerOffset.dx + offset.dx, layerOffset.dy + offset.dy, oldLayer: _engineLayer);
+    engineLayer = builder.pushOffset(
+      layerOffset.dx + offset.dx,
+      layerOffset.dy + offset.dy,
+      oldLayer: _engineLayer as ui.OffsetEngineLayer,
+    );
     addChildrenToScene(builder);
     builder.pop();
   }
@@ -1102,17 +1298,11 @@ class ClipRectLayer extends ContainerLayer {
   }
 
   @override
-  S find<S>(Offset regionOffset) {
-    if (!clipRect.contains(regionOffset))
-      return null;
-    return super.find<S>(regionOffset);
-  }
-
-  @override
-  Iterable<S> findAll<S>(Offset regionOffset) {
-    if (!clipRect.contains(regionOffset))
-      return Iterable<S>.empty();
-    return super.findAll<S>(regionOffset);
+  @protected
+  bool findAnnotations<S>(AnnotationResult<S> result, Offset localPosition, { @required bool onlyFirst }) {
+    if (!clipRect.contains(localPosition))
+      return false;
+    return super.findAnnotations<S>(result, localPosition, onlyFirst: onlyFirst);
   }
 
   @override
@@ -1126,7 +1316,11 @@ class ClipRectLayer extends ContainerLayer {
     }());
     if (enabled) {
       final Rect shiftedClipRect = layerOffset == Offset.zero ? clipRect : clipRect.shift(layerOffset);
-      engineLayer = builder.pushClipRect(shiftedClipRect, clipBehavior: clipBehavior, oldLayer: _engineLayer);
+      engineLayer = builder.pushClipRect(
+        shiftedClipRect,
+        clipBehavior: clipBehavior,
+        oldLayer: _engineLayer as ui.ClipRectEngineLayer,
+      );
     } else {
       engineLayer = null;
     }
@@ -1139,6 +1333,7 @@ class ClipRectLayer extends ContainerLayer {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<Rect>('clipRect', clipRect));
+    properties.add(DiagnosticsProperty<Clip>('clipBehavior', clipBehavior));
   }
 }
 
@@ -1188,17 +1383,11 @@ class ClipRRectLayer extends ContainerLayer {
   }
 
   @override
-  S find<S>(Offset regionOffset) {
-    if (!clipRRect.contains(regionOffset))
-      return null;
-    return super.find<S>(regionOffset);
-  }
-
-  @override
-  Iterable<S> findAll<S>(Offset regionOffset) {
-    if (!clipRRect.contains(regionOffset))
-      return Iterable<S>.empty();
-    return super.findAll<S>(regionOffset);
+  @protected
+  bool findAnnotations<S>(AnnotationResult<S> result, Offset localPosition, { @required bool onlyFirst }) {
+    if (!clipRRect.contains(localPosition))
+      return false;
+    return super.findAnnotations<S>(result, localPosition, onlyFirst: onlyFirst);
   }
 
   @override
@@ -1212,7 +1401,11 @@ class ClipRRectLayer extends ContainerLayer {
     }());
     if (enabled) {
       final RRect shiftedClipRRect = layerOffset == Offset.zero ? clipRRect : clipRRect.shift(layerOffset);
-      engineLayer = builder.pushClipRRect(shiftedClipRRect, clipBehavior: clipBehavior, oldLayer: _engineLayer);
+      engineLayer = builder.pushClipRRect(
+        shiftedClipRRect,
+        clipBehavior: clipBehavior,
+        oldLayer: _engineLayer as ui.ClipRRectEngineLayer,
+      );
     } else {
       engineLayer = null;
     }
@@ -1225,6 +1418,7 @@ class ClipRRectLayer extends ContainerLayer {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<RRect>('clipRRect', clipRRect));
+    properties.add(DiagnosticsProperty<Clip>('clipBehavior', clipBehavior));
   }
 }
 
@@ -1274,17 +1468,11 @@ class ClipPathLayer extends ContainerLayer {
   }
 
   @override
-  S find<S>(Offset regionOffset) {
-    if (!clipPath.contains(regionOffset))
-      return null;
-    return super.find<S>(regionOffset);
-  }
-
-  @override
-  Iterable<S> findAll<S>(Offset regionOffset) {
-    if (!clipPath.contains(regionOffset))
-      return Iterable<S>.empty();
-    return super.findAll<S>(regionOffset);
+  @protected
+  bool findAnnotations<S>(AnnotationResult<S> result, Offset localPosition, { @required bool onlyFirst }) {
+    if (!clipPath.contains(localPosition))
+      return false;
+    return super.findAnnotations<S>(result, localPosition, onlyFirst: onlyFirst);
   }
 
   @override
@@ -1298,13 +1486,23 @@ class ClipPathLayer extends ContainerLayer {
     }());
     if (enabled) {
       final Path shiftedPath = layerOffset == Offset.zero ? clipPath : clipPath.shift(layerOffset);
-      engineLayer = builder.pushClipPath(shiftedPath, clipBehavior: clipBehavior, oldLayer: _engineLayer);
+      engineLayer = builder.pushClipPath(
+        shiftedPath,
+        clipBehavior: clipBehavior,
+        oldLayer: _engineLayer as ui.ClipPathEngineLayer,
+      );
     } else {
       engineLayer = null;
     }
     addChildrenToScene(builder, layerOffset);
     if (enabled)
       builder.pop();
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<Clip>('clipBehavior', clipBehavior));
   }
 }
 
@@ -1335,7 +1533,10 @@ class ColorFilterLayer extends ContainerLayer {
   @override
   void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     assert(colorFilter != null);
-    engineLayer = builder.pushColorFilter(colorFilter, oldLayer: _engineLayer);
+    engineLayer = builder.pushColorFilter(
+      colorFilter,
+      oldLayer: _engineLayer as ui.ColorFilterEngineLayer,
+    );
     addChildrenToScene(builder, layerOffset);
     builder.pop();
   }
@@ -1344,6 +1545,48 @@ class ColorFilterLayer extends ContainerLayer {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<ColorFilter>('colorFilter', colorFilter));
+  }
+}
+
+/// A composite layer that applies an [ImageFilter] to its children.
+class ImageFilterLayer extends ContainerLayer {
+  /// Creates a layer that applies an [ImageFilter] to its children.
+  ///
+  /// The [imageFilter] property must be non-null before the compositing phase
+  /// of the pipeline.
+  ImageFilterLayer({
+    ui.ImageFilter imageFilter,
+  }) : _imageFilter = imageFilter;
+
+  /// The image filter to apply to children.
+  ///
+  /// The scene must be explicitly recomposited after this property is changed
+  /// (as described at [Layer]).
+  ui.ImageFilter get imageFilter => _imageFilter;
+  ui.ImageFilter _imageFilter;
+  set imageFilter(ui.ImageFilter value) {
+    assert(value != null);
+    if (value != _imageFilter) {
+      _imageFilter = value;
+      markNeedsAddToScene();
+    }
+  }
+
+  @override
+  void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+    assert(imageFilter != null);
+    engineLayer = builder.pushImageFilter(
+      imageFilter,
+      oldLayer: _engineLayer as ui.ImageFilterEngineLayer,
+    );
+    addChildrenToScene(builder, layerOffset);
+    builder.pop();
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<ui.ImageFilter>('imageFilter', imageFilter));
   }
 }
 
@@ -1395,12 +1638,15 @@ class TransformLayer extends OffsetLayer {
       _lastEffectiveTransform = Matrix4.translationValues(totalOffset.dx, totalOffset.dy, 0.0)
         ..multiply(_lastEffectiveTransform);
     }
-    engineLayer = builder.pushTransform(_lastEffectiveTransform.storage, oldLayer: _engineLayer);
+    engineLayer = builder.pushTransform(
+      _lastEffectiveTransform.storage,
+      oldLayer: _engineLayer as ui.TransformEngineLayer,
+    );
     addChildrenToScene(builder);
     builder.pop();
   }
 
-  Offset _transformOffset(Offset regionOffset) {
+  Offset _transformOffset(Offset localPosition) {
     if (_inverseDirty) {
       _invertedTransform = Matrix4.tryInvert(
         PointerEvent.removePerspectiveTransform(transform)
@@ -1409,24 +1655,18 @@ class TransformLayer extends OffsetLayer {
     }
     if (_invertedTransform == null)
       return null;
-    final Vector4 vector = Vector4(regionOffset.dx, regionOffset.dy, 0.0, 1.0);
+    final Vector4 vector = Vector4(localPosition.dx, localPosition.dy, 0.0, 1.0);
     final Vector4 result = _invertedTransform.transform(vector);
     return Offset(result[0], result[1]);
   }
 
   @override
-  S find<S>(Offset regionOffset) {
-    final Offset transformedOffset = _transformOffset(regionOffset);
-    return transformedOffset == null ? null : super.find<S>(transformedOffset);
-  }
-
-  @override
-  Iterable<S> findAll<S>(Offset regionOffset) {
-    final Offset transformedOffset = _transformOffset(regionOffset);
-    if (transformedOffset == null) {
-      return Iterable<S>.empty();
-    }
-    return super.findAll<S>(transformedOffset);
+  @protected
+  bool findAnnotations<S>(AnnotationResult<S> result, Offset localPosition, { @required bool onlyFirst }) {
+    final Offset transformedOffset = _transformOffset(localPosition);
+    if (transformedOffset == null)
+      return false;
+    return super.findAnnotations<S>(result, transformedOffset, onlyFirst: onlyFirst);
   }
 
   @override
@@ -1511,7 +1751,11 @@ class OpacityLayer extends ContainerLayer {
     }());
 
     if (enabled)
-      engineLayer = builder.pushOpacity(alpha, offset: offset + layerOffset, oldLayer: _engineLayer);
+      engineLayer = builder.pushOpacity(
+        alpha,
+        offset: offset + layerOffset,
+        oldLayer: _engineLayer as ui.OpacityEngineLayer,
+      );
     else
       engineLayer = null;
     addChildrenToScene(builder);
@@ -1528,6 +1772,11 @@ class OpacityLayer extends ContainerLayer {
 }
 
 /// A composited layer that applies a shader to its children.
+///
+/// The shader is only applied inside the given [maskRect]. The shader itself
+/// uses the top left of the [maskRect] as its origin.
+///
+/// The [maskRect] does not affect the positions of any child layers.
 class ShaderMaskLayer extends ContainerLayer {
   /// Creates a shader mask layer.
   ///
@@ -1543,8 +1792,16 @@ class ShaderMaskLayer extends ContainerLayer {
 
   /// The shader to apply to the children.
   ///
+  /// The origin of the shader (e.g. of the coordinate system used by the `from`
+  /// and `to` arguments to [ui.Gradient.linear]) is at the top left of the
+  /// [maskRect].
+  ///
   /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
+  ///
+  /// See also:
+  ///
+  ///  * [ui.Gradient] and [ui.ImageShader], two shader types that can be used.
   Shader get shader => _shader;
   Shader _shader;
   set shader(Shader value) {
@@ -1554,7 +1811,10 @@ class ShaderMaskLayer extends ContainerLayer {
     }
   }
 
-  /// The size of the shader.
+  /// The position and size of the shader.
+  ///
+  /// The [shader] is only rendered inside this rectangle, using the top left of
+  /// the rectangle as its origin.
   ///
   /// The scene must be explicitly recomposited after this property is changed
   /// (as described at [Layer]).
@@ -1585,8 +1845,14 @@ class ShaderMaskLayer extends ContainerLayer {
     assert(shader != null);
     assert(maskRect != null);
     assert(blendMode != null);
+    assert(layerOffset != null);
     final Rect shiftedMaskRect = layerOffset == Offset.zero ? maskRect : maskRect.shift(layerOffset);
-    engineLayer = builder.pushShaderMask(shader, shiftedMaskRect, blendMode, oldLayer: _engineLayer);
+    engineLayer = builder.pushShaderMask(
+      shader,
+      shiftedMaskRect,
+      blendMode,
+      oldLayer: _engineLayer as ui.ShaderMaskEngineLayer,
+    );
     addChildrenToScene(builder, layerOffset);
     builder.pop();
   }
@@ -1624,7 +1890,10 @@ class BackdropFilterLayer extends ContainerLayer {
   @override
   void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     assert(filter != null);
-    engineLayer = builder.pushBackdropFilter(filter, oldLayer: _engineLayer);
+    engineLayer = builder.pushBackdropFilter(
+      filter,
+      oldLayer: _engineLayer as ui.BackdropFilterEngineLayer,
+    );
     addChildrenToScene(builder, layerOffset);
     builder.pop();
   }
@@ -1734,17 +2003,11 @@ class PhysicalModelLayer extends ContainerLayer {
   }
 
   @override
-  S find<S>(Offset regionOffset) {
-    if (!clipPath.contains(regionOffset))
-      return null;
-    return super.find<S>(regionOffset);
-  }
-
-  @override
-  Iterable<S> findAll<S>(Offset regionOffset) {
-    if (!clipPath.contains(regionOffset))
-      return Iterable<S>.empty();
-    return super.findAll<S>(regionOffset);
+  @protected
+  bool findAnnotations<S>(AnnotationResult<S> result, Offset localPosition, { @required bool onlyFirst }) {
+    if (!clipPath.contains(localPosition))
+      return false;
+    return super.findAnnotations<S>(result, localPosition, onlyFirst: onlyFirst);
   }
 
   @override
@@ -1767,7 +2030,7 @@ class PhysicalModelLayer extends ContainerLayer {
         color: color,
         shadowColor: shadowColor,
         clipBehavior: clipBehavior,
-        oldLayer: _engineLayer,
+        oldLayer: _engineLayer as ui.PhysicalShapeEngineLayer,
       );
     } else {
       engineLayer = null;
@@ -1870,17 +2133,20 @@ class LeaderLayer extends ContainerLayer {
   Offset _lastOffset;
 
   @override
-  S find<S>(Offset regionOffset) => super.find<S>(regionOffset - offset);
-
-  @override
-  Iterable<S> findAll<S>(Offset regionOffset) => super.findAll<S>(regionOffset - offset);
+  @protected
+  bool findAnnotations<S>(AnnotationResult<S> result, Offset localPosition, { @required bool onlyFirst }) {
+    return super.findAnnotations<S>(result, localPosition - offset, onlyFirst: onlyFirst);
+  }
 
   @override
   void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
     assert(offset != null);
     _lastOffset = offset + layerOffset;
     if (_lastOffset != Offset.zero)
-      engineLayer = builder.pushTransform(Matrix4.translationValues(_lastOffset.dx, _lastOffset.dy, 0.0).storage, oldLayer: _engineLayer);
+      engineLayer = builder.pushTransform(
+        Matrix4.translationValues(_lastOffset.dx, _lastOffset.dy, 0.0).storage,
+        oldLayer: _engineLayer as ui.TransformEngineLayer,
+      );
     addChildrenToScene(builder);
     if (_lastOffset != Offset.zero)
       builder.pop();
@@ -1991,37 +2257,32 @@ class FollowerLayer extends ContainerLayer {
   Matrix4 _invertedTransform;
   bool _inverseDirty = true;
 
-  Offset _transformOffset<S>(Offset regionOffset) {
+  Offset _transformOffset<S>(Offset localPosition) {
     if (_inverseDirty) {
       _invertedTransform = Matrix4.tryInvert(getLastTransform());
       _inverseDirty = false;
     }
     if (_invertedTransform == null)
       return null;
-    final Vector4 vector = Vector4(regionOffset.dx, regionOffset.dy, 0.0, 1.0);
+    final Vector4 vector = Vector4(localPosition.dx, localPosition.dy, 0.0, 1.0);
     final Vector4 result = _invertedTransform.transform(vector);
     return Offset(result[0] - linkedOffset.dx, result[1] - linkedOffset.dy);
   }
 
   @override
-  S find<S>(Offset regionOffset) {
+  @protected
+  bool findAnnotations<S>(AnnotationResult<S> result, Offset localPosition, { @required bool onlyFirst }) {
     if (link.leader == null) {
-      return showWhenUnlinked ? super.find<S>(regionOffset - unlinkedOffset) : null;
+      if (showWhenUnlinked) {
+        return super.findAnnotations(result, localPosition - unlinkedOffset, onlyFirst: onlyFirst);
+      }
+      return false;
     }
-    final Offset transformedOffset = _transformOffset<S>(regionOffset);
-    return transformedOffset == null ? null : super.find<S>(transformedOffset);
-  }
-
-  @override
-  Iterable<S> findAll<S>(Offset regionOffset) {
-    if (link.leader == null) {
-      return showWhenUnlinked ? super.findAll<S>(regionOffset - unlinkedOffset) : <S>[];
-    }
-    final Offset transformedOffset = _transformOffset<S>(regionOffset);
+    final Offset transformedOffset = _transformOffset<S>(localPosition);
     if (transformedOffset == null) {
-      return <S>[];
+      return false;
     }
-    return super.findAll<S>(transformedOffset);
+    return super.findAnnotations<S>(result, transformedOffset, onlyFirst: onlyFirst);
   }
 
   /// The transform that was used during the last composition phase.
@@ -2127,14 +2388,20 @@ class FollowerLayer extends ContainerLayer {
     }
     _establishTransform();
     if (_lastTransform != null) {
-      engineLayer = builder.pushTransform(_lastTransform.storage, oldLayer: _engineLayer);
+      engineLayer = builder.pushTransform(
+        _lastTransform.storage,
+        oldLayer: _engineLayer as ui.TransformEngineLayer,
+      );
       addChildrenToScene(builder);
       builder.pop();
       _lastOffset = unlinkedOffset + layerOffset;
     } else {
       _lastOffset = null;
       final Matrix4 matrix = Matrix4.translationValues(unlinkedOffset.dx, unlinkedOffset.dy, .0);
-      engineLayer = builder.pushTransform(matrix.storage, oldLayer: _engineLayer);
+      engineLayer = builder.pushTransform(
+        matrix.storage,
+        oldLayer: _engineLayer as ui.TransformEngineLayer,
+      );
       addChildrenToScene(builder);
       builder.pop();
     }
@@ -2160,67 +2427,127 @@ class FollowerLayer extends ContainerLayer {
   }
 }
 
-/// A composited layer which annotates its children with a value.
+/// A composited layer which annotates its children with a value. Pushing this
+/// layer to the tree is the common way of adding an annotation.
 ///
-/// These values can be retrieved using [Layer.find] with a given [Offset]. If
-/// a [Size] is provided to this layer, then find will check if the provided
-/// offset is within the bounds of the layer.
+/// An annotation is an optional object of any type that, when attached with a
+/// layer, can be retrieved using [Layer.find] or [Layer.findAllAnnotations]
+/// with a position. The search process is done recursively, controlled by a
+/// concept of being opaque to a type of annotation, explained in the document
+/// of [Layer.findAnnotations].
+///
+/// When an annotation search arrives, this layer defers the same search to each
+/// of this layer's children, respecting their opacity. Then it adds this
+/// layer's [annotation] if all of the following restrictions are met:
+///
+/// {@template flutter.rendering.annotatedRegionLayer.restrictions}
+/// * The target type must be identical to the annotated type `T`.
+/// * If [size] is provided, the target position must be contained within the
+///   rectangle formed by [size] and [offset].
+/// {@endtemplate}
+///
+/// This layer is opaque to a type of annotation if any child is also opaque, or
+/// if [opaque] is true and the layer's annotation is added.
 class AnnotatedRegionLayer<T> extends ContainerLayer {
-  /// Creates a new layer annotated with [value] that clips to rectangle defined
-  /// by the [size] and [offset] if provided.
+  /// Creates a new layer that annotates its children with [value].
   ///
   /// The [value] provided cannot be null.
-  AnnotatedRegionLayer(this.value, {this.size, Offset offset})
-      : offset = offset ?? Offset.zero,
-        assert(value != null);
+  AnnotatedRegionLayer(
+    this.value, {
+    this.size,
+    Offset offset,
+    this.opaque = false,
+  }) : assert(value != null),
+       assert(opaque != null),
+       offset = offset ?? Offset.zero;
 
-  /// The value returned by [find] if the offset is contained within this layer.
+  /// The annotated object, which is added to the result if all restrictions are
+  /// met.
   final T value;
 
-  /// The [size] is optionally used to clip the hit-testing of [find].
+  /// The size of an optional clipping rectangle, used to control whether a
+  /// position is contained by the annotation.
   ///
-  /// If not provided, all offsets are considered to be contained within this
-  /// layer, unless an ancestor layer applies a clip.
-  ///
-  /// If [offset] is set, then the offset is applied to the size region before
-  /// hit testing in [find].
+  /// If [size] is provided, then the annotation is only added if the target
+  /// position is contained by the rectangle formed by [size] and [offset].
+  /// Otherwise no such restriction is applied, and clipping can only be done by
+  /// the ancestor layers.
   final Size size;
 
-  /// The [offset] is optionally used to translate the clip region for the
-  /// hit-testing of [find] by [offset].
+  /// The offset of the optional clipping rectangle that is indicated by [size].
   ///
-  /// If not provided, offset defaults to [Offset.zero].
+  /// The [offset] defaults to [Offset.zero] if not provided, and is ignored if
+  /// [size] is not set.
   ///
-  /// Ignored if [size] is not set.
+  /// The [offset] only offsets the clipping rectangle, and does not affect
+  /// how the painting or annotation search is propagated to its children.
   final Offset offset;
 
-  @override
-  S find<S>(Offset regionOffset) {
-    final S result = super.find<S>(regionOffset);
-    if (result != null)
-      return result;
-    if (size != null && !(offset & size).contains(regionOffset))
-      return null;
-    if (T == S) {
-      final Object untypedResult = value;
-      final S typedResult = untypedResult;
-      return typedResult;
-    }
-    return null;
-  }
+  /// Whether the annotation of this layer should be opaque during an annotation
+  /// search of type `T`, preventing siblings visually behind it from being
+  /// searched.
+  ///
+  /// If [opaque] is true, and this layer does add its annotation [value],
+  /// then the layer will always be opaque during the search.
+  ///
+  /// If [opaque] is false, or if this layer does not add its annotation,
+  /// then the opacity of this layer will be the one returned by the children,
+  /// meaning that it will be opaque if any child is opaque.
+  ///
+  /// The [opaque] defaults to false.
+  ///
+  /// The [opaque] is effectively useless during [Layer.find] (more
+  /// specifically, [Layer.findAnnotations] with `onlyFirst: true`), since the
+  /// search process then skips the remaining tree after finding the first
+  /// annotation.
+  ///
+  /// See also:
+  ///
+  ///  * [Layer.findAnnotations], which explains the concept of being opaque
+  ///    to a type of annotation as the return value.
+  ///  * [HitTestBehavior], which controls similar logic when hit-testing in the
+  ///    render tree.
+  final bool opaque;
 
+  /// Searches the subtree for annotations of type `S` at the location
+  /// `localPosition`, then adds the annotation [value] if applicable.
+  ///
+  /// This method always searches its children, and if any child returns `true`,
+  /// the remaining children are skipped. Regardless of what the children
+  /// return, this method then adds this layer's annotation if all of the
+  /// following restrictions are met:
+  ///
+  /// {@macro flutter.rendering.annotatedRegionLayer.restrictions}
+  ///
+  /// This search process respects `onlyFirst`, meaning that when `onlyFirst` is
+  /// true, the search will stop when it finds the first annotation from the
+  /// children, and the layer's own annotation is checked only when none is
+  /// given by the children.
+  ///
+  /// The return value is true if any child returns `true`, or if [opaque] is
+  /// true and the layer's annotation is added.
+  ///
+  /// For explanation of layer annotations, parameters and return value, refer
+  /// to [Layer.findAnnotations].
   @override
-  Iterable<S> findAll<S>(Offset regionOffset) {
-    final Iterable<S> childResults = super.findAll<S>(regionOffset);
-    if (size != null && !(offset & size).contains(regionOffset)) {
-      return childResults;
+  @protected
+  bool findAnnotations<S>(AnnotationResult<S> result, Offset localPosition, { @required bool onlyFirst }) {
+    bool isAbsorbed = super.findAnnotations(result, localPosition, onlyFirst: onlyFirst);
+    if (result.entries.isNotEmpty && onlyFirst)
+      return isAbsorbed;
+    if (size != null && !(offset & size).contains(localPosition)) {
+      return isAbsorbed;
     }
     if (T == S) {
-      final Object untypedResult = value;
-      final S typedResult = untypedResult;
-      return childResults.followedBy(<S>[typedResult]);
+      isAbsorbed = isAbsorbed || opaque;
+      final Object untypedValue = value;
+      final S typedValue = untypedValue as S;
+      result.add(AnnotationEntry<S>(
+        annotation: typedValue,
+        localPosition: localPosition,
+      ));
     }
-    return childResults;
+    return isAbsorbed;
   }
 
   @override
@@ -2229,5 +2556,6 @@ class AnnotatedRegionLayer<T> extends ContainerLayer {
     properties.add(DiagnosticsProperty<T>('value', value));
     properties.add(DiagnosticsProperty<Size>('size', size, defaultValue: null));
     properties.add(DiagnosticsProperty<Offset>('offset', offset, defaultValue: null));
+    properties.add(DiagnosticsProperty<bool>('opaque', opaque, defaultValue: false));
   }
 }

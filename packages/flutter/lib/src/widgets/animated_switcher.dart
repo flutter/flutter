@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -65,6 +65,8 @@ typedef AnimatedSwitcherLayoutBuilder = Widget Function(Widget currentChild, Lis
 
 /// A widget that by default does a cross-fade between a new widget and the
 /// widget previously set on the [AnimatedSwitcher] as a child.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=2W7POjFb88g}
 ///
 /// If they are swapped fast enough (i.e. before [duration] elapses), more than
 /// one previous child can exist and be transitioning out while the newest one
@@ -423,7 +425,7 @@ class _AnimatedSwitcherState extends State<AnimatedSwitcher> with TickerProvider
   void dispose() {
     if (_currentEntry != null)
       _currentEntry.controller.dispose();
-    for (_ChildEntry entry in _outgoingEntries)
+    for (final _ChildEntry entry in _outgoingEntries)
       entry.controller.dispose();
     super.dispose();
   }

@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -10,23 +10,23 @@ MaterialApp _appWithAlertDialog(WidgetTester tester, AlertDialog dialog, { Theme
   return MaterialApp(
     theme: theme,
     home: Material(
-        child: Builder(
-            builder: (BuildContext context) {
-              return Center(
-                  child: RaisedButton(
-                      child: const Text('X'),
-                      onPressed: () {
-                        showDialog<void>(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return RepaintBoundary(key: _painterKey, child: dialog);
-                          },
-                        );
-                      },
-                  ),
-              );
-            }
-        ),
+      child: Builder(
+        builder: (BuildContext context) {
+          return Center(
+            child: RaisedButton(
+              child: const Text('X'),
+              onPressed: () {
+                showDialog<void>(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return RepaintBoundary(key: _painterKey, child: dialog);
+                  },
+                );
+              },
+            ),
+          );
+        },
+      ),
     ),
   );
 }
@@ -38,7 +38,7 @@ Material _getMaterialFromDialog(WidgetTester tester) {
 }
 
 RenderParagraph _getTextRenderObjectFromDialog(WidgetTester tester, String text) {
-  return tester.element<StatelessElement>(find.descendant(of: find.byType(AlertDialog), matching: find.text(text))).renderObject;
+  return tester.element<StatelessElement>(find.descendant(of: find.byType(AlertDialog), matching: find.text(text))).renderObject as RenderParagraph;
 }
 
 void main() {
@@ -130,10 +130,7 @@ void main() {
 
     await expectLater(
       find.byKey(_painterKey),
-      matchesGoldenFile(
-        'dialog_theme.dialog_with_custom_border.png',
-        version: null,
-      ),
+      matchesGoldenFile('dialog_theme.dialog_with_custom_border.png'),
     );
   }, skip: isBrowser);
 

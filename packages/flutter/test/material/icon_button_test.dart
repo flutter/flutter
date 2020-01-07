@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -10,6 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../rendering/mock_canvas.dart';
 import '../widgets/semantics_tester.dart';
+import 'feedback_tester.dart';
 
 class MockOnPressedFunction implements Function {
   int called = 0;
@@ -294,12 +295,13 @@ void main() {
           ],
           flags: <SemanticsFlag>[
             SemanticsFlag.hasEnabledState,
-            SemanticsFlag.isEnabled,
             SemanticsFlag.isButton,
+            SemanticsFlag.isEnabled,
+            SemanticsFlag.isFocusable,
           ],
           label: 'link',
         ),
-      ]
+      ],
     ), ignoreId: true, ignoreTransform: true));
 
     semantics.dispose();
@@ -327,7 +329,7 @@ void main() {
             ],
             label: 'link',
           ),
-        ]
+        ],
     ), ignoreId: true, ignoreTransform: true));
 
     semantics.dispose();
@@ -396,6 +398,111 @@ void main() {
 
     expect(focusNode1.hasPrimaryFocus, isTrue);
     expect(focusNode2.hasPrimaryFocus, isFalse);
+  });
+
+  group('feedback', () {
+    FeedbackTester feedback;
+
+    setUp(() {
+      feedback = FeedbackTester();
+    });
+
+    tearDown(() {
+      feedback?.dispose();
+    });
+
+    testWidgets('IconButton with disabled feedback', (WidgetTester tester) async {
+      await tester.pumpWidget(Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: IconButton(
+              onPressed: () {},
+              enableFeedback: false,
+              icon: const Icon(Icons.link),
+            ),
+          ),
+        ),
+      ));
+      await tester.tap(find.byType(IconButton), pointer: 1);
+      await tester.pump(const Duration(seconds: 1));
+      expect(feedback.clickSoundCount, 0);
+      expect(feedback.hapticCount, 0);
+    });
+
+    testWidgets('IconButton with enabled feedback', (WidgetTester tester) async {
+      await tester.pumpWidget(Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: IconButton(
+              onPressed: () {},
+              enableFeedback: true,
+              icon: const Icon(Icons.link),
+            ),
+          ),
+        ),
+      ));
+      await tester.tap(find.byType(IconButton), pointer: 1);
+      await tester.pump(const Duration(seconds: 1));
+      expect(feedback.clickSoundCount, 1);
+      expect(feedback.hapticCount, 0);
+    });
+
+    testWidgets('IconButton with enabled feedback by default', (WidgetTester tester) async {
+      await tester.pumpWidget(Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: IconButton(
+              onPressed: () {},
+              icon: const Icon(Icons.link),
+            ),
+          ),
+        ),
+      ));
+      await tester.tap(find.byType(IconButton), pointer: 1);
+      await tester.pump(const Duration(seconds: 1));
+      expect(feedback.clickSoundCount, 1);
+      expect(feedback.hapticCount, 0);
+    });
+  });
+
+  testWidgets('IconButton responds to density changes.', (WidgetTester tester) async {
+    const Key key = Key('test');
+    Future<void> buildTest(VisualDensity visualDensity) async {
+      return await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: IconButton(
+                visualDensity: visualDensity,
+                key: key,
+                onPressed: () {},
+                icon: const Icon(Icons.play_arrow),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    await buildTest(const VisualDensity());
+    final RenderBox box = tester.renderObject(find.byKey(key));
+    await tester.pumpAndSettle();
+    expect(box.size, equals(const Size(48, 48)));
+
+    await buildTest(const VisualDensity(horizontal: 3.0, vertical: 3.0));
+    await tester.pumpAndSettle();
+    expect(box.size, equals(const Size(60, 60)));
+
+    await buildTest(const VisualDensity(horizontal: -3.0, vertical: -3.0));
+    await tester.pumpAndSettle();
+    expect(box.size, equals(const Size(40, 40)));
+
+    await buildTest(const VisualDensity(horizontal: 3.0, vertical: -3.0));
+    await tester.pumpAndSettle();
+    expect(box.size, equals(const Size(60, 40)));
   });
 }
 

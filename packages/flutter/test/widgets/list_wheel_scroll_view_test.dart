@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -62,6 +62,63 @@ void main() {
           );
         },
         throwsAssertionError,
+      );
+    });
+
+    testWidgets('ListWheelScrollView needs valid overAndUnderCenterOpacity', (WidgetTester tester) async {
+      expect(
+        () {
+          ListWheelScrollView(
+            overAndUnderCenterOpacity: null,
+            itemExtent: 20.0,
+            children: <Widget>[Container()],
+          );
+        },
+        throwsAssertionError,
+      );
+
+      expect(
+        () {
+          ListWheelScrollView(
+            overAndUnderCenterOpacity: -1,
+            itemExtent: 20.0,
+            children: <Widget>[Container()],
+          );
+        },
+        throwsAssertionError,
+      );
+
+      expect(
+        () {
+          ListWheelScrollView(
+            overAndUnderCenterOpacity: 2,
+            itemExtent: 20.0,
+            children: <Widget>[Container()],
+          );
+        },
+        throwsAssertionError,
+      );
+
+      expect(
+        () {
+          ListWheelScrollView(
+            overAndUnderCenterOpacity: 1,
+            itemExtent: 20.0,
+            children: <Widget>[Container()],
+          );
+        },
+        isNot(throwsAssertionError),
+      );
+
+      expect(
+        () {
+          ListWheelScrollView(
+            overAndUnderCenterOpacity: 0,
+            itemExtent: 20.0,
+            children: <Widget>[Container()],
+          );
+        },
+        isNot(throwsAssertionError),
       );
     });
   });
@@ -134,7 +191,7 @@ void main() {
               },
             ),
           ),
-        )
+        ),
       );
 
       // Can be scrolled infinitely for negative indexes.
@@ -183,7 +240,7 @@ void main() {
               },
             ),
           ),
-        )
+        ),
       );
 
       expect(paintedChildren, <int>[-13, -12, -11, -10, -9, -8, -7]);
@@ -299,7 +356,7 @@ void main() {
               },
             ),
           ),
-        )
+        ),
       );
 
       // Scrolls up and down to check if builder is called twice.
@@ -326,10 +383,10 @@ void main() {
               return Text(index.toString());
             }),
           ),
-        )
+        ),
       );
 
-      final RenderListWheelViewport viewport = tester.firstRenderObject(find.byType(Text)).parent.parent;
+      final RenderListWheelViewport viewport = tester.firstRenderObject(find.byType(Text)).parent.parent as RenderListWheelViewport;
 
       // Item 0 is in the middle. There are 3 children visible after it, so the
       // value of childCount should be 4.
@@ -363,10 +420,10 @@ void main() {
               return Text(index.toString());
             }),
           ),
-        )
+        ),
       );
 
-      final RenderListWheelViewport viewport = tester.firstRenderObject(find.byType(Text)).parent.parent;
+      final RenderListWheelViewport viewport = tester.firstRenderObject(find.byType(Text)).parent.parent as RenderListWheelViewport;
 
       // The screen is vertically 600px. Since the middle item is centered,
       // half of the first and last items are visible, making 7 children visible.
@@ -385,7 +442,7 @@ void main() {
               return Text(index.toString());
             }),
           ),
-        )
+        ),
       );
 
       // 12 instead of 6 children are laid out + 1 because the middle item is
@@ -535,10 +592,7 @@ void main() {
 
       await expectLater(
         find.byKey(const Key('list_wheel_scroll_view')),
-        matchesGoldenFile(
-          'list_wheel_scroll_view.center_child.magnified.png',
-          version: null,
-        ),
+        matchesGoldenFile('list_wheel_scroll_view.center_child.magnified.png'),
       );
     }, skip: isBrowser);
 
@@ -560,7 +614,7 @@ void main() {
         ),
       );
 
-      final RenderListWheelViewport viewport = tester.firstRenderObject(find.byType(Container)).parent.parent;
+      final RenderListWheelViewport viewport = tester.firstRenderObject(find.byType(Container)).parent.parent as RenderListWheelViewport;
       expect(viewport, paints..transform(
         matrix4: equals(<dynamic>[
           1.0, 0.0, 0.0, 0.0,
@@ -592,10 +646,7 @@ void main() {
 
       await expectLater(
         find.byKey(const Key('list_wheel_scroll_view')),
-        matchesGoldenFile(
-          'list_wheel_scroll_view.curved_wheel.left.png',
-          version: null,
-        ),
+        matchesGoldenFile('list_wheel_scroll_view.curved_wheel.left.png'),
       );
     }, skip: isBrowser);
 
@@ -620,7 +671,7 @@ void main() {
         ),
       );
 
-      final RenderListWheelViewport viewport = tester.firstRenderObject(find.byType(Container)).parent.parent;
+      final RenderListWheelViewport viewport = tester.firstRenderObject(find.byType(Container)).parent.parent as RenderListWheelViewport;
       expect(viewport, paints..transform(
         matrix4: equals(<dynamic>[
           1.0, 0.0, 0.0, 0.0,
@@ -741,7 +792,7 @@ void main() {
         ),
       );
 
-      final RenderListWheelViewport viewport = tester.firstRenderObject(find.byType(Container)).parent.parent;
+      final RenderListWheelViewport viewport = tester.firstRenderObject(find.byType(Container)).parent.parent as RenderListWheelViewport;
       expect(viewport, paints
         ..transform(
           matrix4: equals(<dynamic>[
@@ -1237,7 +1288,7 @@ void main() {
       ),
     );
 
-    final RenderListWheelViewport viewport = tester.allRenderObjects.firstWhere((RenderObject r) => r is RenderListWheelViewport);
+    final RenderListWheelViewport viewport = tester.allRenderObjects.whereType<RenderListWheelViewport>().first;
 
     // direct child of viewport
     RenderObject target = tester.renderObject(find.byWidget(outerChildren[5]));

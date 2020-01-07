@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -64,10 +64,10 @@ dynamic getRenderChip(WidgetTester tester) {
   return element.renderObject;
 }
 
-double getSelectProgress(WidgetTester tester) => getRenderChip(tester)?.checkmarkAnimation?.value;
-double getAvatarDrawerProgress(WidgetTester tester) => getRenderChip(tester)?.avatarDrawerAnimation?.value;
-double getDeleteDrawerProgress(WidgetTester tester) => getRenderChip(tester)?.deleteDrawerAnimation?.value;
-double getEnableProgress(WidgetTester tester) => getRenderChip(tester)?.enableAnimation?.value;
+double getSelectProgress(WidgetTester tester) => getRenderChip(tester)?.checkmarkAnimation?.value as double;
+double getAvatarDrawerProgress(WidgetTester tester) => getRenderChip(tester)?.avatarDrawerAnimation?.value as double;
+double getDeleteDrawerProgress(WidgetTester tester) => getRenderChip(tester)?.deleteDrawerAnimation?.value as double;
+double getEnableProgress(WidgetTester tester) => getRenderChip(tester)?.enableAnimation?.value as double;
 
 /// Adds the basic requirements for a Chip.
 Widget _wrapForChip({
@@ -171,7 +171,7 @@ Future<void> _pumpCheckmarkChip(
           );
         },
       ),
-    )
+    ),
   );
 }
 
@@ -185,6 +185,77 @@ void _expectCheckmarkColor(Finder finder, Color color) {
       ..path()
       // The second path that is painted is the check mark.
       ..path(color: color),
+  );
+}
+
+Widget _chipWithOptionalDeleteButton({
+  UniqueKey deleteButtonKey,
+  UniqueKey labelKey,
+  bool deletable,
+  TextDirection textDirection = TextDirection.ltr,
+}){
+  return _wrapForChip(
+    textDirection: textDirection,
+    child: Wrap(
+      children: <Widget>[
+        RawChip(
+          onPressed: () {},
+          onDeleted: deletable ? () {} : null,
+          deleteIcon: Icon(Icons.close, key: deleteButtonKey),
+          label: Text(
+            deletable
+              ? 'Chip with Delete Button'
+              : 'Chip without Delete Button',
+            key: labelKey,
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+bool offsetsAreClose(Offset a, Offset b) => (a - b).distance < 1.0;
+bool radiiAreClose(double a, double b) => (a - b).abs() < 1.0;
+
+// Ripple pattern matches if there exists at least one ripple
+// with the [expectedCenter] and [expectedRadius].
+// This ensures the existence of a ripple.
+PaintPattern ripplePattern(Offset expectedCenter, double expectedRadius) {
+  return paints
+    ..something((Symbol method, List<dynamic> arguments) {
+        if (method != #drawCircle)
+          return false;
+        final Offset center = arguments[0] as Offset;
+        final double radius = arguments[1] as double;
+        return offsetsAreClose(center, expectedCenter) && radiiAreClose(radius, expectedRadius);
+      }
+    );
+}
+
+// Unique ripple pattern matches if there does not exist ripples
+// other than ones with the [expectedCenter] and [expectedRadius].
+// This ensures the nonexistence of two different ripples.
+PaintPattern uniqueRipplePattern(Offset expectedCenter, double expectedRadius) {
+  return paints
+    ..everything((Symbol method, List<dynamic> arguments) {
+        if (method != #drawCircle)
+          return true;
+        final Offset center = arguments[0] as Offset;
+        final double radius = arguments[1] as double;
+        if (offsetsAreClose(center, expectedCenter) && radiiAreClose(radius, expectedRadius))
+          return true;
+        throw '''
+              Expected: center == $expectedCenter, radius == $expectedRadius
+              Found: center == $center radius == $radius''';
+      }
+    );
+}
+
+// Finds any container of a tooltip.
+Finder findTooltipContainer(String tooltipText) {
+  return find.ancestor(
+    of: find.text(tooltipText),
+    matching: find.byType(Container),
   );
 }
 
@@ -333,7 +404,7 @@ void main() {
                     label: Text(text),
                     onDeleted: onDeleted,
                   ),
-                ]
+                ],
               ),
             ),
           ),
@@ -403,7 +474,7 @@ void main() {
       ),
     );
     expect(tester.getSize(find.byType(Text)), const Size(40.0, 10.0));
-    expect(tester.getSize(find.byType(Chip)), const Size(64.0,48.0));
+    expect(tester.getSize(find.byType(Chip)), const Size(64.0, 48.0));
     await tester.pumpWidget(
       _wrapForChip(
         child: Row(
@@ -923,6 +994,202 @@ void main() {
     expect(find.byKey(deleteButtonKey), findsNothing);
   }, skip: isBrowser);
 
+  testWidgets('Chip creates centered, unique ripple when label is tapped', (WidgetTester tester) async {
+    // Creates a chip with a delete button.
+    final UniqueKey labelKey = UniqueKey();
+    final UniqueKey deleteButtonKey = UniqueKey();
+
+    await tester.pumpWidget(
+      _chipWithOptionalDeleteButton(
+        labelKey: labelKey,
+        deleteButtonKey: deleteButtonKey,
+        deletable: true,
+      ),
+    );
+
+    final RenderBox box = getMaterialBox(tester);
+
+    // Taps at a location close to the center of the label.
+    final Offset centerOfLabel = tester.getCenter(find.byKey(labelKey));
+    final Offset tapLocationOfLabel = centerOfLabel + const Offset(-10, -10);
+    final TestGesture gesture = await tester.startGesture(tapLocationOfLabel);
+    await tester.pump();
+
+    // Waits for 100 ms.
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // There should be exactly one ink-creating widget.
+    expect(find.byType(InkWell), findsOneWidget);
+    expect(find.byType(InkResponse), findsNothing);
+
+    // There should be one unique, centered ink ripple.
+    expect(box, ripplePattern(const Offset(163.0, 6.0), 20.9));
+    expect(box, uniqueRipplePattern(const Offset(163.0, 6.0), 20.9));
+
+    // There should be no tooltip.
+    expect(findTooltipContainer('Delete'), findsNothing);
+
+    // Waits for 100 ms again.
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // The ripple should grow, with the same center.
+    expect(box, ripplePattern(const Offset(163.0, 6.0), 41.8));
+    expect(box, uniqueRipplePattern(const Offset(163.0, 6.0), 41.8));
+
+    // There should be no tooltip.
+    expect(findTooltipContainer('Delete'), findsNothing);
+
+    // Waits for a very long time.
+    await tester.pumpAndSettle();
+
+    // There should still be no tooltip.
+    expect(findTooltipContainer('Delete'), findsNothing);
+
+    await gesture.up();
+  }, skip: isBrowser);
+
+  testWidgets('Delete button creates non-centered, unique ripple when tapped', (WidgetTester tester) async {
+    // Creates a chip with a delete button.
+    final UniqueKey labelKey = UniqueKey();
+    final UniqueKey deleteButtonKey = UniqueKey();
+
+    await tester.pumpWidget(
+      _chipWithOptionalDeleteButton(
+        labelKey: labelKey,
+        deleteButtonKey: deleteButtonKey,
+        deletable: true,
+      ),
+    );
+
+    final RenderBox box = getMaterialBox(tester);
+
+    // Taps at a location close to the center of the delete icon.
+    final Offset centerOfDeleteButton = tester.getCenter(find.byKey(deleteButtonKey));
+    final Offset tapLocationOfDeleteButton = centerOfDeleteButton + const Offset(-10, -10);
+    final TestGesture gesture = await tester.startGesture(tapLocationOfDeleteButton);
+    await tester.pump();
+
+    // Waits for 200 ms.
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // There should be exactly one ink-creating widget.
+    expect(find.byType(InkWell), findsOneWidget);
+    expect(find.byType(InkResponse), findsNothing);
+
+    // There should be one unique ink ripple.
+    expect(box, ripplePattern(const Offset(3.0, 3.0), 3.5));
+    expect(box, uniqueRipplePattern(const Offset(3.0, 3.0), 3.5));
+
+    // There should be no tooltip.
+    expect(findTooltipContainer('Delete'), findsNothing);
+
+    // Waits for 200 ms again.
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // The ripple should grow, but the center should move,
+    // Towards the center of the delete icon.
+    expect(box, ripplePattern(const Offset(5.0, 5.0), 10.5));
+    expect(box, uniqueRipplePattern(const Offset(5.0, 5.0), 10.5));
+
+    // There should be no tooltip.
+    expect(findTooltipContainer('Delete'), findsNothing);
+
+    // Waits for a very long time.
+    // This is pressing and holding the delete button.
+    await tester.pumpAndSettle();
+
+    // There should be a tooltip.
+    expect(findTooltipContainer('Delete'), findsOneWidget);
+
+    await gesture.up();
+  }, skip: isBrowser);
+
+  testWidgets('RTL delete button responds to tap on the left of the chip', (WidgetTester tester) async {
+    // Creates an RTL chip with a delete button.
+    final UniqueKey labelKey = UniqueKey();
+    final UniqueKey deleteButtonKey = UniqueKey();
+
+    await tester.pumpWidget(
+      _chipWithOptionalDeleteButton(
+        labelKey: labelKey,
+        deleteButtonKey: deleteButtonKey,
+        deletable: true,
+        textDirection: TextDirection.rtl,
+      ),
+    );
+
+    // Taps at a location close to the center of the delete icon,
+    // Which is on the left side of the chip.
+    final Offset topLeftOfInkWell = tester.getTopLeft(find.byType(InkWell));
+    final Offset tapLocation = topLeftOfInkWell + const Offset(8, 8);
+    final TestGesture gesture = await tester.startGesture(tapLocation);
+    await tester.pump();
+
+    await tester.pumpAndSettle();
+
+    // The existence of a 'Delete' tooltip indicates the delete icon is tapped,
+    // Instead of the label.
+    expect(findTooltipContainer('Delete'), findsOneWidget);
+
+    await gesture.up();
+  }, skip: isBrowser);
+
+  testWidgets('Chip without delete button creates correct ripple', (WidgetTester tester) async {
+    // Creates a chip with a delete button.
+    final UniqueKey labelKey = UniqueKey();
+
+    await tester.pumpWidget(
+      _chipWithOptionalDeleteButton(
+        labelKey: labelKey,
+        deletable: false,
+      ),
+    );
+
+    final RenderBox box = getMaterialBox(tester);
+
+    // Taps at a location close to the bottom-right corner of the chip.
+    final Offset bottomRightOfInkWell = tester.getBottomRight(find.byType(InkWell));
+    final Offset tapLocation = bottomRightOfInkWell + const Offset(-10, -10);
+    final TestGesture gesture = await tester.startGesture(tapLocation);
+    await tester.pump();
+
+    // Waits for 100 ms.
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // There should be exactly one ink-creating widget.
+    expect(find.byType(InkWell), findsOneWidget);
+    expect(find.byType(InkResponse), findsNothing);
+
+    // There should be one unique, centered ink ripple.
+    expect(box, ripplePattern(const Offset(378.0, 22.0), 37.9));
+    expect(box, uniqueRipplePattern(const Offset(378.0, 22.0), 37.9));
+
+    // There should be no tooltip.
+    expect(findTooltipContainer('Delete'), findsNothing);
+
+    // Waits for 100 ms again.
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // The ripple should grow, with the same center.
+    // This indicates that the tap is not on a delete icon.
+    expect(box, ripplePattern(const Offset(378.0, 22.0), 75.8));
+    expect(box, uniqueRipplePattern(const Offset(378.0, 22.0), 75.8));
+
+    // There should be no tooltip.
+    expect(findTooltipContainer('Delete'), findsNothing);
+
+    // Waits for a very long time.
+    await tester.pumpAndSettle();
+
+    // There should still be no tooltip.
+    // This indicates that the tap is not on a delete icon.
+    expect(findTooltipContainer('Delete'), findsNothing);
+
+    await gesture.up();
+  }, skip: isBrowser);
+
   testWidgets('Selection with avatar works as expected on RawChip', (WidgetTester tester) async {
     bool selected = false;
     final UniqueKey labelKey = UniqueKey();
@@ -1390,6 +1657,7 @@ void main() {
                         flags: <SemanticsFlag>[
                           SemanticsFlag.hasEnabledState,
                           SemanticsFlag.isEnabled,
+                          SemanticsFlag.isFocusable,
                         ],
                         actions: <SemanticsAction>[SemanticsAction.tap],
                       ),
@@ -1436,6 +1704,7 @@ void main() {
                         flags: <SemanticsFlag>[
                           SemanticsFlag.hasEnabledState,
                           SemanticsFlag.isEnabled,
+                          SemanticsFlag.isFocusable,
                         ],
                         actions: <SemanticsAction>[SemanticsAction.tap],
                       ),
@@ -1474,9 +1743,10 @@ void main() {
                         label: 'test',
                         textDirection: TextDirection.ltr,
                         flags: <SemanticsFlag>[
-                          SemanticsFlag.isSelected,
                           SemanticsFlag.hasEnabledState,
                           SemanticsFlag.isEnabled,
+                          SemanticsFlag.isFocusable,
+                          SemanticsFlag.isSelected,
                         ],
                         actions: <SemanticsAction>[SemanticsAction.tap],
                       ),
@@ -1783,7 +2053,7 @@ void main() {
         matching: find.byWidgetPredicate((Widget widget) {
           return widget.runtimeType.toString() == '_ChipRenderWidget';
         }),
-      )
+      ),
     );
     const Color selectScrimColor = Color(0x60191919);
     expect(rawChip, paints..path(color: selectScrimColor, includes: <Offset>[
@@ -1973,6 +2243,111 @@ void main() {
     await tester.pump();
     expect(focusNode1.hasPrimaryFocus, isTrue);
     expect(focusNode2.hasPrimaryFocus, isFalse);
+  });
+
+  testWidgets('Chip responds to density changes.', (WidgetTester tester) async {
+    const Key key = Key('test');
+    const Key textKey = Key('test text');
+    const Key iconKey = Key('test icon');
+    const Key avatarKey = Key('test avatar');
+    Future<void> buildTest(VisualDensity visualDensity) async {
+      return await tester.pumpWidget(
+        MaterialApp(
+          home: Material(
+            child: Center(
+              child: Column(
+                children: <Widget>[
+                  InputChip(
+                    visualDensity: visualDensity,
+                    key: key,
+                    onPressed: () {},
+                    onDeleted: () {},
+                    label: const Text('Test', key: textKey),
+                    deleteIcon: const Icon(Icons.delete, key: iconKey),
+                    avatar: const Icon(Icons.play_arrow, key: avatarKey),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    // The Chips only change in size vertically in response to density, so
+    // horizontal changes aren't expected.
+    await buildTest(VisualDensity.standard);
+    Rect box = tester.getRect(find.byKey(key));
+    Rect textBox = tester.getRect(find.byKey(textKey));
+    Rect iconBox = tester.getRect(find.byKey(iconKey));
+    Rect avatarBox = tester.getRect(find.byKey(avatarKey));
+    expect(box.size, equals(const Size(128, 32.0 + 16.0)));
+    expect(textBox.size, equals(const Size(56, 14)));
+    expect(iconBox.size, equals(const Size(24, 24)));
+    expect(avatarBox.size, equals(const Size(24, 24)));
+    expect(textBox.top, equals(17));
+    expect(box.bottom - textBox.bottom, equals(17));
+    expect(textBox.left, equals(372));
+    expect(box.right - textBox.right, equals(36));
+
+    // Try decreasing density (with higher density numbers).
+    await buildTest(const VisualDensity(horizontal: 3.0, vertical: 3.0));
+    box = tester.getRect(find.byKey(key));
+    textBox = tester.getRect(find.byKey(textKey));
+    iconBox = tester.getRect(find.byKey(iconKey));
+    avatarBox = tester.getRect(find.byKey(avatarKey));
+    expect(box.size, equals(const Size(128, 60)));
+    expect(textBox.size, equals(const Size(56, 14)));
+    expect(iconBox.size, equals(const Size(24, 24)));
+    expect(avatarBox.size, equals(const Size(24, 24)));
+    expect(textBox.top, equals(23));
+    expect(box.bottom - textBox.bottom, equals(23));
+    expect(textBox.left, equals(372));
+    expect(box.right - textBox.right, equals(36));
+
+    // Try increasing density (with lower density numbers).
+    await buildTest(const VisualDensity(horizontal: -3.0, vertical: -3.0));
+    box = tester.getRect(find.byKey(key));
+    textBox = tester.getRect(find.byKey(textKey));
+    iconBox = tester.getRect(find.byKey(iconKey));
+    avatarBox = tester.getRect(find.byKey(avatarKey));
+    expect(box.size, equals(const Size(128, 36)));
+    expect(textBox.size, equals(const Size(56, 14)));
+    expect(iconBox.size, equals(const Size(24, 24)));
+    expect(avatarBox.size, equals(const Size(24, 24)));
+    expect(textBox.top, equals(11));
+    expect(box.bottom - textBox.bottom, equals(11));
+    expect(textBox.left, equals(372));
+    expect(box.right - textBox.right, equals(36));
+
+    // Now test that horizontal and vertical are wired correctly. Negating the
+    // horizontal should have no change over what's above.
+    await buildTest(const VisualDensity(horizontal: 3.0, vertical: -3.0));
+    await tester.pumpAndSettle();
+    box = tester.getRect(find.byKey(key));
+    textBox = tester.getRect(find.byKey(textKey));
+    iconBox = tester.getRect(find.byKey(iconKey));
+    avatarBox = tester.getRect(find.byKey(avatarKey));
+    expect(box.size, equals(const Size(128, 36)));
+    expect(textBox.size, equals(const Size(56, 14)));
+    expect(iconBox.size, equals(const Size(24, 24)));
+    expect(avatarBox.size, equals(const Size(24, 24)));
+    expect(textBox.top, equals(11));
+    expect(box.bottom - textBox.bottom, equals(11));
+    expect(textBox.left, equals(372));
+    expect(box.right - textBox.right, equals(36));
+
+    // Make sure the "Comfortable" setting is the spec'd size
+    await buildTest(VisualDensity.comfortable);
+    await tester.pumpAndSettle();
+    box = tester.getRect(find.byKey(key));
+    expect(box.size, equals(const Size(128, 28.0 + 16.0)));
+
+    // Make sure the "Compact" setting is the spec'd size
+    await buildTest(VisualDensity.compact);
+    await tester.pumpAndSettle();
+    box = tester.getRect(find.byKey(key));
+    expect(box.size, equals(const Size(128, 24.0 + 16.0)));
   });
 
   testWidgets('Input chip check mark color is determined by platform brightness when light', (WidgetTester tester) async {

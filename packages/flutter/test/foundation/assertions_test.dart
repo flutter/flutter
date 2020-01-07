@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -14,7 +14,7 @@ void main() {
     });
     expect(log[0], contains('Example label'));
     expect(log[1], contains('debugPrintStack'));
-  });
+  }, skip: isBrowser);
 
   test('debugPrintStack', () {
     final List<String> log = captureOutput(() {
@@ -39,7 +39,7 @@ void main() {
 
     expect(joined, contains('captureOutput'));
     expect(joined, contains('\nExample information\n'));
-  });
+  }, skip: isBrowser);
 
   test('FlutterErrorDetails.toString', () {
     expect(

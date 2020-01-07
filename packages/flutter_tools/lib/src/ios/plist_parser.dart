@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -6,8 +6,9 @@ import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/process.dart';
+import '../base/utils.dart';
 import '../convert.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
 
 class PlistParser {
   const PlistParser();
@@ -28,14 +29,14 @@ class PlistParser {
   Map<String, dynamic> parseFile(String plistFilePath) {
     assert(plistFilePath != null);
     const String executable = '/usr/bin/plutil';
-    if (!fs.isFileSync(executable)) {
+    if (!globals.fs.isFileSync(executable)) {
       throw const FileNotFoundException(executable);
     }
-    if (!fs.isFileSync(plistFilePath)) {
+    if (!globals.fs.isFileSync(plistFilePath)) {
       return const <String, dynamic>{};
     }
 
-    final String normalizedPlistPath = fs.path.absolute(plistFilePath);
+    final String normalizedPlistPath = globals.fs.path.absolute(plistFilePath);
 
     try {
       final List<String> args = <String>[
@@ -45,9 +46,9 @@ class PlistParser {
         args,
         throwOnError: true,
       ).stdout.trim();
-      return json.decode(jsonContent);
+      return castStringKeyedMap(json.decode(jsonContent));
     } on ProcessException catch (error) {
-      printTrace('$error');
+      globals.printTrace('$error');
       return const <String, dynamic>{};
     }
   }
@@ -64,6 +65,6 @@ class PlistParser {
   String getValueFromFile(String plistFilePath, String key) {
     assert(key != null);
     final Map<String, dynamic> parsed = parseFile(plistFilePath);
-    return parsed[key];
+    return parsed[key] as String;
   }
 }

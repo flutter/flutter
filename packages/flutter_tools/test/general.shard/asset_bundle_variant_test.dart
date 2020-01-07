@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -9,8 +9,9 @@ import 'package:file/memory.dart';
 
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/platform.dart';
+
 import 'package:flutter_tools/src/cache.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -23,14 +24,14 @@ void main() {
     // fixed we fix them here.
     // TODO(dantup): Remove this function once the above issue is fixed and
     // rolls into Flutter.
-    return path?.replaceAll('/', fs.path.separator);
+    return path?.replaceAll('/', globals.fs.path.separator);
   }
 
   group('AssetBundle asset variants', () {
     FileSystem testFileSystem;
     setUp(() async {
       testFileSystem = MemoryFileSystem(
-        style: platform.isWindows
+        style: globals.platform.isWindows
           ? FileSystemStyle.windows
           : FileSystemStyle.posix,
       );
@@ -41,9 +42,9 @@ void main() {
       // Setting flutterRoot here so that it picks up the MemoryFileSystem's
       // path separator.
       Cache.flutterRoot = getFlutterRoot();
-      writeEmptySchemaFile(fs);
+      writeEmptySchemaFile(globals.fs);
 
-      fs.file('pubspec.yaml')
+      globals.fs.file('pubspec.yaml')
         ..createSync()
         ..writeAsStringSync(
 '''
@@ -56,7 +57,7 @@ flutter:
     - a/b/c/foo
 '''
       );
-      fs.file('.packages')..createSync();
+      globals.fs.file('.packages')..createSync();
 
       final List<String> assets = <String>[
         'a/b/c/foo',
@@ -64,8 +65,8 @@ flutter:
         'a/b/c/var2/foo',
         'a/b/c/var3/foo',
       ];
-      for (String asset in assets) {
-        fs.file(fixPath(asset))
+      for (final String asset in assets) {
+        globals.fs.file(fixPath(asset))
           ..createSync(recursive: true)
           ..writeAsStringSync(asset);
       }
@@ -74,24 +75,25 @@ flutter:
       await bundle.build(manifestPath: 'pubspec.yaml');
 
       // The main asset file, /a/b/c/foo, and its variants exist.
-      for (String asset in assets) {
+      for (final String asset in assets) {
         expect(bundle.entries.containsKey(asset), true);
         expect(utf8.decode(await bundle.entries[asset].contentsAsBytes()), asset);
       }
 
-      fs.file(fixPath('a/b/c/foo')).deleteSync();
+      globals.fs.file(fixPath('a/b/c/foo')).deleteSync();
       bundle = AssetBundleFactory.instance.createBundle();
       await bundle.build(manifestPath: 'pubspec.yaml');
 
       // Now the main asset file, /a/b/c/foo, does not exist. This is OK because
       // the /a/b/c/*/foo variants do exist.
       expect(bundle.entries.containsKey('a/b/c/foo'), false);
-      for (String asset in assets.skip(1)) {
+      for (final String asset in assets.skip(1)) {
         expect(bundle.entries.containsKey(asset), true);
         expect(utf8.decode(await bundle.entries[asset].contentsAsBytes()), asset);
       }
     }, overrides: <Type, Generator>{
       FileSystem: () => testFileSystem,
+      ProcessManager: () => FakeProcessManager.any(),
     });
   });
 }

@@ -1,8 +1,10 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 @TestOn('chrome') // Uses web-only Flutter SDK
+
+import 'dart:ui' as ui;
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -27,6 +29,9 @@ class TestPlugin {
 }
 
 void main() {
+  // Disabling tester emulation because this test relies on real message channel communication.
+  ui.debugEmulateFlutterTesterEnvironment = false; // ignore: undefined_prefixed_name
+
   group('Plugin Registry', () {
     setUp(() {
       TestWidgetsFlutterBinding.ensureInitialized();
@@ -51,7 +56,7 @@ void main() {
       final List<String> loggedMessages = <String>[];
       ServicesBinding.instance.defaultBinaryMessenger
           .setMessageHandler('test_send', (ByteData data) {
-        loggedMessages.add(codec.decodeMessage(data));
+        loggedMessages.add(codec.decodeMessage(data) as String);
         return null;
       });
 

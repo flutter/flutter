@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -44,6 +44,69 @@ void main() {
     await tester.pumpWidget(widget);
 
     // The shader bounds rectangle should reflect the position of the centered SizedBox.
-    expect(shaderBounds, equals(const Rect.fromLTWH(200.0, 100.0, 400.0, 400.0)));
+    expect(shaderBounds, equals(const Rect.fromLTWH(0.0, 0.0, 400.0, 400.0)));
+  }, skip: isBrowser);
+
+
+  testWidgets('Bounds rect includes offset visual inspection', (WidgetTester tester) async {
+    final Widget widgetBottomRight = Container(
+      width: 400,
+      height: 400,
+      color: const Color(0xFFFFFFFF),
+      child: RepaintBoundary(
+        child: Align(
+          alignment: Alignment.bottomRight,
+          child: ShaderMask(
+            shaderCallback: (Rect bounds) => const RadialGradient(
+              center: Alignment.center,
+              radius: 0.05,
+              colors:  <Color>[Color(0xFFFF0000),  Color(0xFF00FF00)],
+              tileMode: TileMode.mirror,
+            ).createShader(bounds),
+            child: Container(
+              width: 100,
+              height: 100,
+              color: const Color(0xFFFFFFFF),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpWidget(widgetBottomRight);
+
+    await expectLater(
+      find.byType(RepaintBoundary),
+      matchesGoldenFile('shader_mask.bounds.matches_bottom_right.png'),
+    );
+
+    final Widget widgetTopLeft = Container(
+      width: 400,
+      height: 400,
+      color: const Color(0xFFFFFFFF),
+      child: RepaintBoundary(
+        child: Align(
+          alignment: Alignment.topLeft,
+          child: ShaderMask(
+            shaderCallback: (Rect bounds) => const RadialGradient(
+              center: Alignment.center,
+              radius: 0.05,
+              colors:  <Color>[Color(0xFFFF0000),  Color(0xFF00FF00)],
+              tileMode: TileMode.mirror,
+            ).createShader(bounds),
+            child: Container(
+              width: 100,
+              height: 100,
+              color: const Color(0xFFFFFFFF),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpWidget(widgetTopLeft);
+
+    await expectLater(
+      find.byType(RepaintBoundary),
+      matchesGoldenFile('shader_mask.bounds.matches_top_left.png'),
+    );
   }, skip: isBrowser);
 }

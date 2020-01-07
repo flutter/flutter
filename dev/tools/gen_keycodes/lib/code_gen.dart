@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -20,7 +20,7 @@ class CodeGenerator {
     final StringBuffer result = StringBuffer();
     final List<String> words = input.split(RegExp(r'\s+'));
     String currentLine = words.removeAt(0);
-    for (String word in words) {
+    for (final String word in words) {
       if ((currentLine.length + word.length) < wrapWidth) {
         currentLine += ' $word';
       } else {
@@ -37,7 +37,7 @@ class CodeGenerator {
   /// Gets the generated definitions of PhysicalKeyboardKeys.
   String get physicalDefinitions {
     final StringBuffer definitions = StringBuffer();
-    for (Key entry in keyData.data) {
+    for (final Key entry in keyData.data) {
       final String firstComment = wrapString('Represents the location of the '
         '"${entry.commentName}" key on a generalized keyboard.');
       final String otherComments = wrapString('See the function '
@@ -73,7 +73,7 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
       }
     }
 
-    for (Key entry in keyData.data) {
+    for (final Key entry in keyData.data) {
       printKey(
         entry.flutterId,
         entry.keyLabel,
@@ -81,13 +81,13 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
         entry.commentName,
       );
     }
-    for (String name in Key.synonyms.keys) {
+    for (final String name in Key.synonyms.keys) {
       // Use the first item in the synonyms as a template for the ID to use.
       // It won't end up being the same value because it'll be in the pseudo-key
       // plane.
       final Key entry = keyData.data.firstWhere((Key item) => item.name == Key.synonyms[name][0]);
       final Set<String> unionNames = Key.synonyms[name].map<String>((dynamic name) {
-        return upperCamelToLowerCamel(name);
+        return upperCamelToLowerCamel(name as String);
       }).toSet();
       printKey(Key.synonymPlane | entry.flutterId, entry.keyLabel, name, Key.getCommentName(name),
           otherComments: wrapString('This key represents the union of the keys '
@@ -99,8 +99,8 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
 
   String get logicalSynonyms {
     final StringBuffer synonyms = StringBuffer();
-    for (String name in Key.synonyms.keys) {
-      for (String synonym in Key.synonyms[name]) {
+    for (final String name in Key.synonyms.keys) {
+      for (final String synonym in Key.synonyms[name].cast<String>()) {
         final String keyName = upperCamelToLowerCamel(synonym);
         synonyms.writeln('    $keyName: $name,');
       }
@@ -108,10 +108,23 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
     return synonyms.toString();
   }
 
+  List<Key> get numpadKeyData {
+    return keyData.data.where((Key entry) {
+      return entry.constantName.startsWith('numpad') && entry.keyLabel != null;
+    }).toList();
+  }
+
+  List<Key> get functionKeyData {
+    final RegExp functionKeyRe = RegExp(r'^f[0-9]+$');
+    return keyData.data.where((Key entry) {
+      return functionKeyRe.hasMatch(entry.constantName);
+    }).toList();
+  }
+
   /// This generates the map of USB HID codes to physical keys.
   String get predefinedHidCodeMap {
     final StringBuffer scanCodeMap = StringBuffer();
-    for (Key entry in keyData.data) {
+    for (final Key entry in keyData.data) {
       scanCodeMap.writeln('    ${toHex(entry.usbHidCode)}: ${entry.constantName},');
     }
     return scanCodeMap.toString().trimRight();
@@ -120,10 +133,10 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
   /// THis generates the map of Flutter key codes to logical keys.
   String get predefinedKeyCodeMap {
     final StringBuffer keyCodeMap = StringBuffer();
-    for (Key entry in keyData.data) {
+    for (final Key entry in keyData.data) {
       keyCodeMap.writeln('    ${toHex(entry.flutterId, digits: 10)}: ${entry.constantName},');
     }
-    for (String entry in Key.synonyms.keys) {
+    for (final String entry in Key.synonyms.keys) {
       // Use the first item in the synonyms as a template for the ID to use.
       // It won't end up being the same value because it'll be in the pseudo-key
       // plane.
@@ -139,12 +152,9 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
   /// This generates the map of GLFW number pad key codes to logical keys.
   String get glfwNumpadMap {
     final StringBuffer glfwNumpadMap = StringBuffer();
-    final List<Key> onlyNumpads = keyData.data.where((Key entry) {
-      return entry.constantName.startsWith('numpad') && entry.keyLabel != null;
-    }).toList();
-    for (Key entry in onlyNumpads) {
+    for (final Key entry in numpadKeyData) {
       if (entry.glfwKeyCodes != null) {
-        for (int code in entry.glfwKeyCodes.cast<int>()) {
+        for (final int code in entry.glfwKeyCodes.cast<int>()) {
           glfwNumpadMap.writeln('  $code: LogicalKeyboardKey.${entry.constantName},');
         }
       }
@@ -155,9 +165,9 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
   /// This generates the map of GLFW key codes to logical keys.
   String get glfwKeyCodeMap {
     final StringBuffer glfwKeyCodeMap = StringBuffer();
-    for (Key entry in keyData.data) {
+    for (final Key entry in keyData.data) {
       if (entry.glfwKeyCodes != null) {
-        for (int code in entry.glfwKeyCodes.cast<int>()) {
+        for (final int code in entry.glfwKeyCodes.cast<int>()) {
           glfwKeyCodeMap.writeln('  $code: LogicalKeyboardKey.${entry.constantName},');
         }
       }
@@ -168,7 +178,7 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
   /// This generates the map of XKB USB HID codes to physical keys.
   String get xkbScanCodeMap {
     final StringBuffer xkbScanCodeMap = StringBuffer();
-    for (Key entry in keyData.data) {
+    for (final Key entry in keyData.data) {
       if (entry.xKbScanCode != null) {
         xkbScanCodeMap.writeln('  ${toHex(entry.xKbScanCode)}: PhysicalKeyboardKey.${entry.constantName},');
       }
@@ -179,9 +189,9 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
   /// This generates the map of Android key codes to logical keys.
   String get androidKeyCodeMap {
     final StringBuffer androidKeyCodeMap = StringBuffer();
-    for (Key entry in keyData.data) {
+    for (final Key entry in keyData.data) {
       if (entry.androidKeyCodes != null) {
-        for (int code in entry.androidKeyCodes.cast<int>()) {
+        for (final int code in entry.androidKeyCodes.cast<int>()) {
           androidKeyCodeMap.writeln('  $code: LogicalKeyboardKey.${entry.constantName},');
         }
       }
@@ -192,12 +202,9 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
   /// This generates the map of Android number pad key codes to logical keys.
   String get androidNumpadMap {
     final StringBuffer androidKeyCodeMap = StringBuffer();
-    final List<Key> onlyNumpads = keyData.data.where((Key entry) {
-      return entry.constantName.startsWith('numpad') && entry.keyLabel != null;
-    }).toList();
-    for (Key entry in onlyNumpads) {
+    for (final Key entry in numpadKeyData) {
       if (entry.androidKeyCodes != null) {
-        for (int code in entry.androidKeyCodes.cast<int>()) {
+        for (final int code in entry.androidKeyCodes.cast<int>()) {
           androidKeyCodeMap.writeln('  $code: LogicalKeyboardKey.${entry.constantName},');
         }
       }
@@ -208,9 +215,9 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
   /// This generates the map of Android scan codes to physical keys.
   String get androidScanCodeMap {
     final StringBuffer androidScanCodeMap = StringBuffer();
-    for (Key entry in keyData.data) {
+    for (final Key entry in keyData.data) {
       if (entry.androidScanCodes != null) {
-        for (int code in entry.androidScanCodes.cast<int>()) {
+        for (final int code in entry.androidScanCodes.cast<int>()) {
           androidScanCodeMap.writeln('  $code: PhysicalKeyboardKey.${entry.constantName},');
         }
       }
@@ -221,7 +228,7 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
   /// This generates the map of macOS key codes to physical keys.
   String get macOsScanCodeMap {
     final StringBuffer macOsScanCodeMap = StringBuffer();
-    for (Key entry in keyData.data) {
+    for (final Key entry in keyData.data) {
       if (entry.macOsScanCode != null) {
         macOsScanCodeMap.writeln('  ${toHex(entry.macOsScanCode)}: PhysicalKeyboardKey.${entry.constantName},');
       }
@@ -232,10 +239,7 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
   /// This generates the map of macOS number pad key codes to logical keys.
   String get macOsNumpadMap {
     final StringBuffer macOsNumPadMap = StringBuffer();
-    final List<Key> onlyNumpads = keyData.data.where((Key entry) {
-      return entry.constantName.startsWith('numpad') && entry.keyLabel != null;
-    }).toList();
-    for (Key entry in onlyNumpads) {
+    for (final Key entry in numpadKeyData) {
       if (entry.macOsScanCode != null) {
         macOsNumPadMap.writeln('  ${toHex(entry.macOsScanCode)}: LogicalKeyboardKey.${entry.constantName},');
       }
@@ -243,10 +247,20 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
     return macOsNumPadMap.toString().trimRight();
   }
 
+  String get macOsFunctionKeyMap {
+    final StringBuffer macOsFunctionKeyMap = StringBuffer();
+    for (final Key entry in functionKeyData) {
+      if (entry.macOsScanCode != null) {
+        macOsFunctionKeyMap.writeln('  ${toHex(entry.macOsScanCode)}: LogicalKeyboardKey.${entry.constantName},');
+      }
+    }
+    return macOsFunctionKeyMap.toString().trimRight();
+  }
+
   /// This generates the map of Fuchsia key codes to logical keys.
   String get fuchsiaKeyCodeMap {
     final StringBuffer fuchsiaKeyCodeMap = StringBuffer();
-    for (Key entry in keyData.data) {
+    for (final Key entry in keyData.data) {
       if (entry.usbHidCode != null) {
         fuchsiaKeyCodeMap.writeln('  ${toHex(entry.flutterId)}: LogicalKeyboardKey.${entry.constantName},');
       }
@@ -257,12 +271,45 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
   /// This generates the map of Fuchsia USB HID codes to physical keys.
   String get fuchsiaHidCodeMap {
     final StringBuffer fuchsiaScanCodeMap = StringBuffer();
-    for (Key entry in keyData.data) {
+    for (final Key entry in keyData.data) {
       if (entry.usbHidCode != null) {
         fuchsiaScanCodeMap.writeln('  ${toHex(entry.usbHidCode)}: PhysicalKeyboardKey.${entry.constantName},');
       }
     }
     return fuchsiaScanCodeMap.toString().trimRight();
+  }
+
+  /// This generates the map of Web KeyboardEvent codes to logical keys.
+  String get webLogicalKeyMap {
+    final StringBuffer result = StringBuffer();
+    for (final Key entry in keyData.data) {
+      if (entry.name != null) {
+        result.writeln("  '${entry.name}': LogicalKeyboardKey.${entry.constantName},");
+      }
+    }
+    return result.toString().trimRight();
+  }
+
+  /// This generates the map of Web KeyboardEvent codes to physical keys.
+  String get webPhysicalKeyMap {
+    final StringBuffer result = StringBuffer();
+    for (final Key entry in keyData.data) {
+      if (entry.name != null) {
+        result.writeln("  '${entry.name}': PhysicalKeyboardKey.${entry.constantName},");
+      }
+    }
+    return result.toString().trimRight();
+  }
+
+  /// This generates the map of Web number pad codes to logical keys.
+  String get webNumpadMap {
+    final StringBuffer result = StringBuffer();
+    for (final Key entry in numpadKeyData) {
+      if (entry.name != null) {
+        result.writeln("  '${entry.name}': LogicalKeyboardKey.${entry.constantName},");
+      }
+    }
+    return result.toString().trimRight();
   }
 
   /// Substitutes the various maps and definitions into the template file for
@@ -294,9 +341,13 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
       'FUCHSIA_KEY_CODE_MAP': fuchsiaKeyCodeMap,
       'MACOS_SCAN_CODE_MAP': macOsScanCodeMap,
       'MACOS_NUMPAD_MAP': macOsNumpadMap,
+      'MACOS_FUNCTION_KEY_MAP': macOsFunctionKeyMap,
       'GLFW_KEY_CODE_MAP': glfwKeyCodeMap,
       'GLFW_NUMPAD_MAP': glfwNumpadMap,
       'XKB_SCAN_CODE_MAP': xkbScanCodeMap,
+      'WEB_LOGICAL_KEY_MAP': webLogicalKeyMap,
+      'WEB_PHYSICAL_KEY_MAP': webPhysicalKeyMap,
+      'WEB_NUMPAD_MAP': webNumpadMap,
     };
 
     final String template = File(path.join(flutterRoot.path, 'dev', 'tools', 'gen_keycodes', 'data', 'keyboard_maps.tmpl')).readAsStringSync();
@@ -308,7 +359,7 @@ $otherComments  static const LogicalKeyboardKey $constantName = LogicalKeyboardK
 
   static String _injectDictionary(String template, Map<String, String> dictionary) {
     String result = template;
-    for (String key in dictionary.keys) {
+    for (final String key in dictionary.keys) {
       result = result.replaceAll('@@@$key@@@', dictionary[key]);
     }
     return result;

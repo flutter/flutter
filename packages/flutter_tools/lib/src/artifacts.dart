@@ -1,17 +1,14 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'package:meta/meta.dart';
 
-import 'base/context.dart';
 import 'base/file_system.dart';
-import 'base/platform.dart';
-import 'base/process_manager.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'dart/sdk.dart';
-import 'globals.dart';
+import 'globals.dart' as globals;
 
 enum Artifact {
   /// The tool which compiles a dart kernel file into native code.
@@ -28,7 +25,7 @@ enum Artifact {
   platformLibrariesJson,
   flutterPatchedSdkPath,
   frontendServerSnapshotForEngineDartSdk,
-  /// The root directory of the dartk SDK.
+  /// The root directory of the dart SDK.
   engineDartSdkPath,
   /// The dart binary used to execute any of the required snapshots.
   engineDartBinary,
@@ -40,6 +37,8 @@ enum Artifact {
   kernelWorkerSnapshot,
   /// The root of the web implementation of the dart SDK.
   flutterWebSdk,
+  /// The summary dill for the dartdevc target.
+  webPlatformKernelDill,
   iosDeploy,
   ideviceinfo,
   ideviceId,
@@ -56,6 +55,10 @@ enum Artifact {
   skyEnginePath,
   /// The location of the macOS engine podspec file.
   flutterMacOSPodspec,
+
+  // Fuchsia artifacts from the engine prebuilts.
+  fuchsiaKernelCompiler,
+  fuchsiaFlutterRunner,
 }
 
 String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMode mode ]) {
@@ -92,6 +95,9 @@ String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMo
     case Artifact.frontendServerSnapshotForEngineDartSdk:
       return 'frontend_server.dart.snapshot';
     case Artifact.engineDartBinary:
+      if (platform == TargetPlatform.windows_x64) {
+        return 'dart.exe';
+      }
       return 'dart';
     case Artifact.dart2jsSnapshot:
       return 'dart2js.dart.snapshot';
@@ -123,6 +129,14 @@ String _artifactToFileName(Artifact artifact, [ TargetPlatform platform, BuildMo
       return 'sky_engine';
     case Artifact.flutterMacOSPodspec:
       return 'FlutterMacOS.podspec';
+    case Artifact.webPlatformKernelDill:
+      return 'flutter_ddc_sdk.dill';
+    case Artifact.fuchsiaKernelCompiler:
+      return 'kernel_compiler.snapshot';
+    case Artifact.fuchsiaFlutterRunner:
+      final String jitOrAot = mode.isJit ? '_jit' : '_aot';
+      final String productOrNo = mode.isRelease ? '_product' : '';
+      return 'flutter$jitOrAot${productOrNo}_runner-0.far';
   }
   assert(false, 'Invalid artifact $artifact.');
   return null;
@@ -141,8 +155,6 @@ class EngineBuildPaths {
 
 // Manages the engine artifacts of Flutter.
 abstract class Artifacts {
-  static Artifacts get instance => context.get<Artifacts>();
-
   static LocalEngineArtifacts getLocalEngine(String engineSrcPath, EngineBuildPaths engineBuildPaths) {
     return LocalEngineArtifacts(engineSrcPath, engineBuildPaths.targetEngine, engineBuildPaths.hostEngine);
   }
@@ -153,6 +165,19 @@ abstract class Artifacts {
   // Returns which set of engine artifacts is currently used for the [platform]
   // and [mode] combination.
   String getEngineType(TargetPlatform platform, [ BuildMode mode ]);
+}
+
+TargetPlatform get _currentHostPlatform {
+  if (globals.platform.isMacOS) {
+    return TargetPlatform.darwin_x64;
+  }
+  if (globals.platform.isLinux) {
+    return TargetPlatform.linux_x64;
+  }
+  if (globals.platform.isWindows) {
+    return TargetPlatform.windows_x64;
+  }
+  throw UnimplementedError('Host OS not supported.');
 }
 
 /// Manages the engine artifacts downloaded to the local cache.
@@ -170,8 +195,10 @@ class CachedArtifacts extends Artifacts {
         return _getIosArtifactPath(artifact, platform, mode);
       case TargetPlatform.darwin_x64:
         return _getDarwinArtifactPath(artifact, platform, mode);
+      case TargetPlatform.fuchsia_arm64:
+      case TargetPlatform.fuchsia_x64:
+        return _getFuchsiaArtifactPath(artifact, platform, mode);
       case TargetPlatform.linux_x64:
-      case TargetPlatform.fuchsia:
       case TargetPlatform.windows_x64:
       case TargetPlatform.tester:
       case TargetPlatform.web_javascript:
@@ -182,7 +209,7 @@ class CachedArtifacts extends Artifacts {
 
   @override
   String getEngineType(TargetPlatform platform, [ BuildMode mode ]) {
-    return fs.path.basename(_getEngineArtifactsPath(platform, mode));
+    return globals.fs.path.basename(_getEngineArtifactsPath(platform, mode));
   }
 
   String _getDarwinArtifactPath(Artifact artifact, TargetPlatform platform, BuildMode mode) {
@@ -190,7 +217,7 @@ class CachedArtifacts extends Artifacts {
     // and not the gen_snapshot for darwin as a target platform.
     if (platform != null && artifact == Artifact.genSnapshot) {
       final String engineDir = _getEngineArtifactsPath(platform, mode);
-      return fs.path.join(engineDir, _artifactToFileName(artifact));
+      return globals.fs.path.join(engineDir, _artifactToFileName(artifact));
     }
     return _getHostArtifactPath(artifact, platform ?? _currentHostPlatform, mode);
   }
@@ -200,52 +227,83 @@ class CachedArtifacts extends Artifacts {
     switch (artifact) {
       case Artifact.frontendServerSnapshotForEngineDartSdk:
         assert(mode != BuildMode.debug, 'Artifact $artifact only available in non-debug mode.');
-        return fs.path.join(engineDir, _artifactToFileName(artifact));
+        return globals.fs.path.join(engineDir, _artifactToFileName(artifact));
       case Artifact.genSnapshot:
         assert(mode != BuildMode.debug, 'Artifact $artifact only available in non-debug mode.');
         final String hostPlatform = getNameForHostPlatform(getCurrentHostPlatform());
-        return fs.path.join(engineDir, hostPlatform, _artifactToFileName(artifact));
+        return globals.fs.path.join(engineDir, hostPlatform, _artifactToFileName(artifact));
       default:
-        assert(false, 'Artifact $artifact not available for platform $platform.');
-        return null;
+        return _getHostArtifactPath(artifact, platform, mode);
     }
   }
 
   String _getIosArtifactPath(Artifact artifact, TargetPlatform platform, BuildMode mode) {
-    final String artifactFileName = _artifactToFileName(artifact);
     switch (artifact) {
       case Artifact.genSnapshot:
       case Artifact.snapshotDart:
       case Artifact.flutterFramework:
       case Artifact.frontendServerSnapshotForEngineDartSdk:
+        final String artifactFileName = _artifactToFileName(artifact);
         final String engineDir = _getEngineArtifactsPath(platform, mode);
-        return fs.path.join(engineDir, artifactFileName);
+        return globals.fs.path.join(engineDir, artifactFileName);
       case Artifact.ideviceId:
       case Artifact.ideviceinfo:
       case Artifact.idevicescreenshot:
       case Artifact.idevicesyslog:
       case Artifact.idevicename:
-        return cache.getArtifactDirectory('libimobiledevice').childFile(artifactFileName).path;
+        final String artifactFileName = _artifactToFileName(artifact);
+        return globals.cache.getArtifactDirectory('libimobiledevice').childFile(artifactFileName).path;
       case Artifact.iosDeploy:
-        return cache.getArtifactDirectory('ios-deploy').childFile(artifactFileName).path;
+        final String artifactFileName = _artifactToFileName(artifact);
+        return globals.cache.getArtifactDirectory('ios-deploy').childFile(artifactFileName).path;
       case Artifact.ideviceinstaller:
-        return cache.getArtifactDirectory('ideviceinstaller').childFile(artifactFileName).path;
+        final String artifactFileName = _artifactToFileName(artifact);
+        return globals.cache.getArtifactDirectory('ideviceinstaller').childFile(artifactFileName).path;
       case Artifact.iproxy:
-        return cache.getArtifactDirectory('usbmuxd').childFile(artifactFileName).path;
+        final String artifactFileName = _artifactToFileName(artifact);
+        return globals.cache.getArtifactDirectory('usbmuxd').childFile(artifactFileName).path;
       default:
-        assert(false, 'Artifact $artifact not available for platform $platform.');
-        return null;
+        return _getHostArtifactPath(artifact, platform, mode);
+    }
+  }
+
+  String _getFuchsiaArtifactPath(Artifact artifact, TargetPlatform platform, BuildMode mode) {
+    final String root = globals.fs.path.join(
+      globals.cache.getArtifactDirectory('flutter_runner').path,
+      'flutter',
+      fuchsiaArchForTargetPlatform(platform),
+      mode.isRelease ? 'release' : mode.toString(),
+    );
+    final String runtime = mode.isJit ? 'jit' : 'aot';
+    switch (artifact) {
+      case Artifact.genSnapshot:
+        final String genSnapshot = mode.isRelease ? 'gen_snapshot_product' : 'gen_snapshot';
+        return globals.fs.path.join(root, runtime, 'dart_binaries', genSnapshot);
+      case Artifact.flutterPatchedSdkPath:
+        const String artifactFileName = 'flutter_runner_patched_sdk';
+        return globals.fs.path.join(root, runtime, artifactFileName);
+      case Artifact.platformKernelDill:
+        final String artifactFileName = _artifactToFileName(artifact, platform, mode);
+        return globals.fs.path.join(root, runtime, 'flutter_runner_patched_sdk', artifactFileName);
+      case Artifact.fuchsiaKernelCompiler:
+        final String artifactFileName = _artifactToFileName(artifact, platform, mode);
+        return globals.fs.path.join(root, runtime, 'dart_binaries', artifactFileName);
+      case Artifact.fuchsiaFlutterRunner:
+        final String artifactFileName = _artifactToFileName(artifact, platform, mode);
+        return globals.fs.path.join(root, runtime, artifactFileName);
+      default:
+        return _getHostArtifactPath(artifact, platform, mode);
     }
   }
 
   String _getFlutterPatchedSdkPath(BuildMode mode) {
-    final String engineArtifactsPath = cache.getArtifactDirectory('engine').path;
-    return fs.path.join(engineArtifactsPath, 'common',
+    final String engineArtifactsPath = globals.cache.getArtifactDirectory('engine').path;
+    return globals.fs.path.join(engineArtifactsPath, 'common',
         mode == BuildMode.release ? 'flutter_patched_sdk_product' : 'flutter_patched_sdk');
   }
 
   String _getFlutterWebSdkPath() {
-    return cache.getWebSdkDirectory().path;
+    return globals.cache.getWebSdkDirectory().path;
   }
 
   String _getHostArtifactPath(Artifact artifact, TargetPlatform platform, BuildMode mode) {
@@ -259,27 +317,29 @@ class CachedArtifacts extends Artifacts {
       case Artifact.vmSnapshotData:
       case Artifact.isolateSnapshotData:
       case Artifact.frontendServerSnapshotForEngineDartSdk:
-        final String engineArtifactsPath = cache.getArtifactDirectory('engine').path;
+        final String engineArtifactsPath = globals.cache.getArtifactDirectory('engine').path;
         final String platformDirName = getNameForTargetPlatform(platform);
-        return fs.path.join(engineArtifactsPath, platformDirName, _artifactToFileName(artifact, platform, mode));
+        return globals.fs.path.join(engineArtifactsPath, platformDirName, _artifactToFileName(artifact, platform, mode));
       case Artifact.engineDartSdkPath:
         return dartSdkPath;
       case Artifact.engineDartBinary:
-        return fs.path.join(dartSdkPath, 'bin', _artifactToFileName(artifact));
+        return globals.fs.path.join(dartSdkPath, 'bin', _artifactToFileName(artifact, platform));
       case Artifact.platformKernelDill:
-        return fs.path.join(_getFlutterPatchedSdkPath(mode), _artifactToFileName(artifact));
+        return globals.fs.path.join(_getFlutterPatchedSdkPath(mode), _artifactToFileName(artifact));
       case Artifact.platformLibrariesJson:
-        return fs.path.join(_getFlutterPatchedSdkPath(mode), 'lib', _artifactToFileName(artifact));
+        return globals.fs.path.join(_getFlutterPatchedSdkPath(mode), 'lib', _artifactToFileName(artifact));
       case Artifact.flutterPatchedSdkPath:
         return _getFlutterPatchedSdkPath(mode);
       case Artifact.flutterWebSdk:
         return _getFlutterWebSdkPath();
+      case Artifact.webPlatformKernelDill:
+        return globals.fs.path.join(_getFlutterWebSdkPath(), 'kernel', _artifactToFileName(artifact));
       case Artifact.dart2jsSnapshot:
-        return fs.path.join(dartSdkPath, 'bin', 'snapshots', _artifactToFileName(artifact));
+        return globals.fs.path.join(dartSdkPath, 'bin', 'snapshots', _artifactToFileName(artifact));
       case Artifact.dartdevcSnapshot:
-        return fs.path.join(dartSdkPath, 'bin', 'snapshots', _artifactToFileName(artifact));
+        return globals.fs.path.join(dartSdkPath, 'bin', 'snapshots', _artifactToFileName(artifact));
       case Artifact.kernelWorkerSnapshot:
-        return fs.path.join(dartSdkPath, 'bin', 'snapshots', _artifactToFileName(artifact));
+        return globals.fs.path.join(dartSdkPath, 'bin', 'snapshots', _artifactToFileName(artifact));
       case Artifact.flutterMacOSFramework:
       case Artifact.linuxDesktopPath:
       case Artifact.windowsDesktopPath:
@@ -291,11 +351,11 @@ class CachedArtifacts extends Artifacts {
         if (mode == BuildMode.profile || mode == BuildMode.release) {
           platformDirName = '$platformDirName-${getNameForBuildMode(mode)}';
         }
-        final String engineArtifactsPath = cache.getArtifactDirectory('engine').path;
-        return fs.path.join(engineArtifactsPath, platformDirName, _artifactToFileName(artifact, platform, mode));
+        final String engineArtifactsPath = globals.cache.getArtifactDirectory('engine').path;
+        return globals.fs.path.join(engineArtifactsPath, platformDirName, _artifactToFileName(artifact, platform, mode));
       case Artifact.skyEnginePath:
-        final Directory dartPackageDirectory = cache.getCacheDir('pkg');
-        return fs.path.join(dartPackageDirectory.path,  _artifactToFileName(artifact));
+        final Directory dartPackageDirectory = globals.cache.getCacheDir('pkg');
+        return globals.fs.path.join(dartPackageDirectory.path,  _artifactToFileName(artifact));
       default:
         assert(false, 'Artifact $artifact not available for platform $platform.');
         return null;
@@ -303,7 +363,7 @@ class CachedArtifacts extends Artifacts {
   }
 
   String _getEngineArtifactsPath(TargetPlatform platform, [ BuildMode mode ]) {
-    final String engineDir = cache.getArtifactDirectory('engine').path;
+    final String engineDir = globals.cache.getArtifactDirectory('engine').path;
     final String platformName = getNameForTargetPlatform(platform);
     switch (platform) {
       case TargetPlatform.linux_x64:
@@ -313,15 +373,16 @@ class CachedArtifacts extends Artifacts {
         // under a separate directory from the host artifacts.
         // https://github.com/flutter/flutter/issues/38935
         if (mode == BuildMode.debug || mode == null) {
-          return fs.path.join(engineDir, platformName);
+          return globals.fs.path.join(engineDir, platformName);
         }
         final String suffix = mode != BuildMode.debug ? '-${snakeCase(getModeName(mode), '-')}' : '';
-        return fs.path.join(engineDir, platformName + suffix);
-      case TargetPlatform.fuchsia:
+        return globals.fs.path.join(engineDir, platformName + suffix);
+      case TargetPlatform.fuchsia_arm64:
+      case TargetPlatform.fuchsia_x64:
       case TargetPlatform.tester:
       case TargetPlatform.web_javascript:
         assert(mode == null, 'Platform $platform does not support different build modes.');
-        return fs.path.join(engineDir, platformName);
+        return globals.fs.path.join(engineDir, platformName);
       case TargetPlatform.ios:
       case TargetPlatform.android_arm:
       case TargetPlatform.android_arm64:
@@ -329,23 +390,13 @@ class CachedArtifacts extends Artifacts {
       case TargetPlatform.android_x86:
         assert(mode != null, 'Need to specify a build mode for platform $platform.');
         final String suffix = mode != BuildMode.debug ? '-${snakeCase(getModeName(mode), '-')}' : '';
-        return fs.path.join(engineDir, platformName + suffix);
+        return globals.fs.path.join(engineDir, platformName + suffix);
+      case TargetPlatform.android:
+        assert(false, 'cannot use TargetPlatform.android to look up artifacts');
+        return null;
     }
     assert(false, 'Invalid platform $platform.');
     return null;
-  }
-
-  TargetPlatform get _currentHostPlatform {
-    if (platform.isMacOS) {
-      return TargetPlatform.darwin_x64;
-    }
-    if (platform.isLinux) {
-      return TargetPlatform.linux_x64;
-    }
-    if (platform.isWindows) {
-      return TargetPlatform.windows_x64;
-    }
-    throw UnimplementedError('Host OS not supported.');
   }
 }
 
@@ -359,65 +410,83 @@ class LocalEngineArtifacts extends Artifacts {
 
   @override
   String getArtifactPath(Artifact artifact, { TargetPlatform platform, BuildMode mode }) {
-    final String artifactFileName = _artifactToFileName(artifact);
+    platform ??= _currentHostPlatform;
+    final String artifactFileName = _artifactToFileName(artifact, platform, mode);
     switch (artifact) {
       case Artifact.snapshotDart:
-        return fs.path.join(_engineSrcPath, 'flutter', 'lib', 'snapshot', artifactFileName);
+        return globals.fs.path.join(_engineSrcPath, 'flutter', 'lib', 'snapshot', artifactFileName);
       case Artifact.genSnapshot:
         return _genSnapshotPath();
       case Artifact.flutterTester:
         return _flutterTesterPath(platform);
       case Artifact.isolateSnapshotData:
       case Artifact.vmSnapshotData:
-        return fs.path.join(engineOutPath, 'gen', 'flutter', 'lib', 'snapshot', artifactFileName);
+        return globals.fs.path.join(engineOutPath, 'gen', 'flutter', 'lib', 'snapshot', artifactFileName);
       case Artifact.platformKernelDill:
-        return fs.path.join(_getFlutterPatchedSdkPath(mode), artifactFileName);
+        if (platform == TargetPlatform.fuchsia_x64 || platform == TargetPlatform.fuchsia_arm64) {
+          return globals.fs.path.join(engineOutPath, 'flutter_runner_patched_sdk', artifactFileName);
+        }
+        return globals.fs.path.join(_getFlutterPatchedSdkPath(mode), artifactFileName);
       case Artifact.platformLibrariesJson:
-        return fs.path.join(_getFlutterPatchedSdkPath(mode), 'lib', artifactFileName);
+        return globals.fs.path.join(_getFlutterPatchedSdkPath(mode), 'lib', artifactFileName);
       case Artifact.flutterFramework:
-        return fs.path.join(engineOutPath, artifactFileName);
+        return globals.fs.path.join(engineOutPath, artifactFileName);
       case Artifact.flutterMacOSFramework:
-        return fs.path.join(engineOutPath, artifactFileName);
+        return globals.fs.path.join(engineOutPath, artifactFileName);
       case Artifact.flutterPatchedSdkPath:
         // When using local engine always use [BuildMode.debug] regardless of
         // what was specified in [mode] argument because local engine will
         // have only one flutter_patched_sdk in standard location, that
         // is happen to be what debug(non-release) mode is using.
+        if (platform == TargetPlatform.fuchsia_x64 || platform == TargetPlatform.fuchsia_arm64) {
+          return globals.fs.path.join(engineOutPath, 'flutter_runner_patched_sdk');
+        }
         return _getFlutterPatchedSdkPath(BuildMode.debug);
       case Artifact.flutterWebSdk:
         return _getFlutterWebSdkPath();
       case Artifact.frontendServerSnapshotForEngineDartSdk:
-        return fs.path.join(_hostEngineOutPath, 'gen', artifactFileName);
+        return globals.fs.path.join(_hostEngineOutPath, 'gen', artifactFileName);
       case Artifact.engineDartSdkPath:
-        return fs.path.join(_hostEngineOutPath, 'dart-sdk');
+        return globals.fs.path.join(_hostEngineOutPath, 'dart-sdk');
       case Artifact.engineDartBinary:
-        return fs.path.join(_hostEngineOutPath, 'dart-sdk', 'bin', artifactFileName);
+        return globals.fs.path.join(_hostEngineOutPath, 'dart-sdk', 'bin', artifactFileName);
       case Artifact.dart2jsSnapshot:
-        return fs.path.join(_hostEngineOutPath, 'dart-sdk', 'bin', 'snapshots', artifactFileName);
+        return globals.fs.path.join(_hostEngineOutPath, 'dart-sdk', 'bin', 'snapshots', artifactFileName);
       case Artifact.dartdevcSnapshot:
-        return fs.path.join(dartSdkPath, 'bin', 'snapshots', artifactFileName);
+        return globals.fs.path.join(dartSdkPath, 'bin', 'snapshots', artifactFileName);
       case Artifact.kernelWorkerSnapshot:
-        return fs.path.join(_hostEngineOutPath, 'dart-sdk', 'bin', 'snapshots', artifactFileName);
+        return globals.fs.path.join(_hostEngineOutPath, 'dart-sdk', 'bin', 'snapshots', artifactFileName);
       case Artifact.ideviceId:
       case Artifact.ideviceinfo:
       case Artifact.idevicename:
       case Artifact.idevicescreenshot:
       case Artifact.idevicesyslog:
-        return cache.getArtifactDirectory('libimobiledevice').childFile(artifactFileName).path;
+        return globals.cache.getArtifactDirectory('libimobiledevice').childFile(artifactFileName).path;
       case Artifact.ideviceinstaller:
-        return cache.getArtifactDirectory('ideviceinstaller').childFile(artifactFileName).path;
+        return globals.cache.getArtifactDirectory('ideviceinstaller').childFile(artifactFileName).path;
       case Artifact.iosDeploy:
-        return cache.getArtifactDirectory('ios-deploy').childFile(artifactFileName).path;
+        return globals.cache.getArtifactDirectory('ios-deploy').childFile(artifactFileName).path;
       case Artifact.iproxy:
-        return cache.getArtifactDirectory('usbmuxd').childFile(artifactFileName).path;
+        return globals.cache.getArtifactDirectory('usbmuxd').childFile(artifactFileName).path;
       case Artifact.linuxDesktopPath:
-        return fs.path.join(_hostEngineOutPath, artifactFileName);
+        return globals.fs.path.join(_hostEngineOutPath, artifactFileName);
       case Artifact.windowsDesktopPath:
-        return fs.path.join(_hostEngineOutPath, artifactFileName);
+        return globals.fs.path.join(_hostEngineOutPath, artifactFileName);
       case Artifact.skyEnginePath:
-        return fs.path.join(_hostEngineOutPath, 'gen', 'dart-pkg', artifactFileName);
+        return globals.fs.path.join(_hostEngineOutPath, 'gen', 'dart-pkg', artifactFileName);
       case Artifact.flutterMacOSPodspec:
-        return fs.path.join(_hostEngineOutPath, _artifactToFileName(artifact));
+        return globals.fs.path.join(_hostEngineOutPath, _artifactToFileName(artifact));
+      case Artifact.webPlatformKernelDill:
+        return globals.fs.path.join(_getFlutterWebSdkPath(), 'kernel', _artifactToFileName(artifact));
+      case Artifact.fuchsiaKernelCompiler:
+        final String hostPlatform = getNameForHostPlatform(getCurrentHostPlatform());
+        final String modeName = mode.isRelease ? 'release' : mode.toString();
+        final String dartBinaries = 'dart_binaries-$modeName-$hostPlatform';
+        return globals.fs.path.join(engineOutPath, 'host_bundle', dartBinaries, 'kernel_compiler.dart.snapshot');
+      case Artifact.fuchsiaFlutterRunner:
+        final String jitOrAot = mode.isJit ? '_jit' : '_aot';
+        final String productOrNo = mode.isRelease ? '_product' : '';
+        return globals.fs.path.join(engineOutPath, 'flutter$jitOrAot${productOrNo}_runner-0.far');
     }
     assert(false, 'Invalid artifact $artifact.');
     return null;
@@ -425,24 +494,24 @@ class LocalEngineArtifacts extends Artifacts {
 
   @override
   String getEngineType(TargetPlatform platform, [ BuildMode mode ]) {
-    return fs.path.basename(engineOutPath);
+    return globals.fs.path.basename(engineOutPath);
   }
 
   String _getFlutterPatchedSdkPath(BuildMode buildMode) {
-    return fs.path.join(engineOutPath,
+    return globals.fs.path.join(engineOutPath,
         buildMode == BuildMode.release ? 'flutter_patched_sdk_product' : 'flutter_patched_sdk');
   }
 
   String _getFlutterWebSdkPath() {
-    return fs.path.join(engineOutPath, 'flutter_web_sdk');
+    return globals.fs.path.join(engineOutPath, 'flutter_web_sdk');
   }
 
   String _genSnapshotPath() {
     const List<String> clangDirs = <String>['.', 'clang_x64', 'clang_x86', 'clang_i386'];
     final String genSnapshotName = _artifactToFileName(Artifact.genSnapshot);
-    for (String clangDir in clangDirs) {
-      final String genSnapshotPath = fs.path.join(engineOutPath, clangDir, genSnapshotName);
-      if (processManager.canRun(genSnapshotPath)) {
+    for (final String clangDir in clangDirs) {
+      final String genSnapshotPath = globals.fs.path.join(engineOutPath, clangDir, genSnapshotName);
+      if (globals.processManager.canRun(genSnapshotPath)) {
         return genSnapshotPath;
       }
     }
@@ -451,11 +520,11 @@ class LocalEngineArtifacts extends Artifacts {
 
   String _flutterTesterPath(TargetPlatform platform) {
     if (getCurrentHostPlatform() == HostPlatform.linux_x64) {
-      return fs.path.join(engineOutPath, _artifactToFileName(Artifact.flutterTester));
+      return globals.fs.path.join(engineOutPath, _artifactToFileName(Artifact.flutterTester));
     } else if (getCurrentHostPlatform() == HostPlatform.darwin_x64) {
-      return fs.path.join(engineOutPath, 'flutter_tester');
+      return globals.fs.path.join(engineOutPath, 'flutter_tester');
     } else if (getCurrentHostPlatform() == HostPlatform.windows_x64) {
-      return fs.path.join(engineOutPath, 'flutter_tester.exe');
+      return globals.fs.path.join(engineOutPath, 'flutter_tester.exe');
     }
     throw Exception('Unsupported platform $platform.');
   }

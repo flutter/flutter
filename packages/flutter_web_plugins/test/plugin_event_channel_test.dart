@@ -1,16 +1,20 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 @TestOn('chrome') // Uses web-only Flutter SDK
 
 import 'dart:async';
+import 'dart:ui' as ui;
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 
 void main() {
+  // Disabling tester emulation because this test relies on real message channel communication.
+  ui.debugEmulateFlutterTesterEnvironment = false; // ignore: undefined_prefixed_name
+
   group('Plugin Event Channel', () {
     setUp(() {
       TestWidgetsFlutterBinding.ensureInitialized();

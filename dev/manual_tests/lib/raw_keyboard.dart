@@ -1,11 +1,24 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+// Sets a platform override for desktop to avoid exceptions. See
+// https://flutter.dev/desktop#target-platform-override for more info.
+// TODO(gspencergoog): Remove once TargetPlatform includes all desktop platforms.
+void _enablePlatformOverrideForDesktop() {
+  if (!kIsWeb && (Platform.isWindows || Platform.isLinux)) {
+    debugDefaultTargetPlatformOverride = TargetPlatform.fuchsia;
+  }
+}
+
 void main() {
+  _enablePlatformOverrideForDesktop();
   runApp(MaterialApp(
     title: 'Hardware Key Demo',
     home: Scaffold(
@@ -93,6 +106,7 @@ class _HardwareKeyDemoState extends State<RawKeyboardDemo> {
             dataText.add(Text('vendorId: ${data.vendorId} (${_asHex(data.vendorId)})'));
             dataText.add(Text('productId: ${data.productId} (${_asHex(data.productId)})'));
             dataText.add(Text('flags: ${data.flags} (${_asHex(data.flags)})'));
+            dataText.add(Text('repeatCount: ${data.repeatCount} (${_asHex(data.repeatCount)})'));
           } else if (data is RawKeyEventDataFuchsia) {
             dataText.add(Text('codePoint: ${data.codePoint} (${_asHex(data.codePoint)})'));
             dataText.add(Text('hidUsage: ${data.hidUsage} (${_asHex(data.hidUsage)})'));
@@ -113,8 +127,8 @@ class _HardwareKeyDemoState extends State<RawKeyboardDemo> {
           if (_event.character != null) {
             dataText.add(Text('character: ${_event.character}'));
           }
-          for (ModifierKey modifier in data.modifiersPressed.keys) {
-            for (KeyboardSide side in KeyboardSide.values) {
+          for (final ModifierKey modifier in data.modifiersPressed.keys) {
+            for (final KeyboardSide side in KeyboardSide.values) {
               if (data.isModifierPressed(modifier, side: side)) {
                 dataText.add(
                   Text('${_getEnumName(side)} ${_getEnumName(modifier).replaceAll('Modifier', '')} pressed'),

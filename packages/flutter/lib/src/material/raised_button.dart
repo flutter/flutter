@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -20,10 +20,10 @@ import 'theme_data.dart';
 /// in long busy lists of content, or in wide spaces. Avoid using raised buttons
 /// on already-raised content such as dialogs or cards.
 ///
-/// If the [onPressed] callback is null, then the button will be disabled and by
+/// If [onPressed] and [onLongPress] callbacks are null, then the button will be disabled and by
 /// default will resemble a flat button in the [disabledColor]. If you are
 /// trying to change the button's [color] and it is not having any effect, check
-/// that you are passing a non-null [onPressed] handler.
+/// that you are passing a non-null [onPressed] or [onLongPress] callbacks.
 ///
 /// If you want an ink-splash effect for taps, but don't want to use a button,
 /// consider using [InkWell] directly.
@@ -108,6 +108,7 @@ class RaisedButton extends MaterialButton {
   const RaisedButton({
     Key key,
     @required VoidCallback onPressed,
+    VoidCallback onLongPress,
     ValueChanged<bool> onHighlightChanged,
     ButtonTextTheme textTheme,
     Color textColor,
@@ -125,6 +126,7 @@ class RaisedButton extends MaterialButton {
     double highlightElevation,
     double disabledElevation,
     EdgeInsetsGeometry padding,
+    VisualDensity visualDensity,
     ShapeBorder shape,
     Clip clipBehavior = Clip.none,
     FocusNode focusNode,
@@ -142,6 +144,7 @@ class RaisedButton extends MaterialButton {
        super(
          key: key,
          onPressed: onPressed,
+         onLongPress: onLongPress,
          onHighlightChanged: onHighlightChanged,
          textTheme: textTheme,
          textColor: textColor,
@@ -159,6 +162,7 @@ class RaisedButton extends MaterialButton {
          highlightElevation: highlightElevation,
          disabledElevation: disabledElevation,
          padding: padding,
+         visualDensity: visualDensity,
          shape: shape,
          clipBehavior: clipBehavior,
          focusNode: focusNode,
@@ -179,6 +183,7 @@ class RaisedButton extends MaterialButton {
   factory RaisedButton.icon({
     Key key,
     @required VoidCallback onPressed,
+    VoidCallback onLongPress,
     ValueChanged<bool> onHighlightChanged,
     ButtonTextTheme textTheme,
     Color textColor,
@@ -209,6 +214,7 @@ class RaisedButton extends MaterialButton {
     final ButtonThemeData buttonTheme = ButtonTheme.of(context);
     return RawMaterialButton(
       onPressed: onPressed,
+      onLongPress: onLongPress,
       onHighlightChanged: onHighlightChanged,
       clipBehavior: clipBehavior,
       fillColor: buttonTheme.getFillColor(this),
@@ -223,6 +229,7 @@ class RaisedButton extends MaterialButton {
       highlightElevation: buttonTheme.getHighlightElevation(this),
       disabledElevation: buttonTheme.getDisabledElevation(this),
       padding: buttonTheme.getPadding(this),
+      visualDensity: visualDensity ?? theme.visualDensity,
       constraints: buttonTheme.getConstraints(this),
       shape: buttonTheme.getShape(this),
       focusNode: focusNode,
@@ -244,7 +251,7 @@ class RaisedButton extends MaterialButton {
   }
 }
 
-/// The type of of RaisedButtons created with [RaisedButton.icon].
+/// The type of RaisedButtons created with [RaisedButton.icon].
 ///
 /// This class only exists to give RaisedButtons created with [RaisedButton.icon]
 /// a distinct class for the sake of [ButtonTheme]. It can not be instantiated.
@@ -252,6 +259,7 @@ class _RaisedButtonWithIcon extends RaisedButton with MaterialButtonWithIconMixi
   _RaisedButtonWithIcon({
     Key key,
     @required VoidCallback onPressed,
+    VoidCallback onLongPress,
     ValueChanged<bool> onHighlightChanged,
     ButtonTextTheme textTheme,
     Color textColor,
@@ -284,6 +292,7 @@ class _RaisedButtonWithIcon extends RaisedButton with MaterialButtonWithIconMixi
        super(
          key: key,
          onPressed: onPressed,
+         onLongPress: onLongPress,
          onHighlightChanged: onHighlightChanged,
          textTheme: textTheme,
          textColor: textColor,

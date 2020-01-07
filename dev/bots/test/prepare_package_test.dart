@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -35,7 +35,7 @@ void main() {
       );
     }
   });
-  for (String platformName in <String>['macos', 'linux', 'windows']) {
+  for (final String platformName in <String>['macos', 'linux', 'windows']) {
     final FakePlatform platform = FakePlatform(
       operatingSystem: platformName,
       environment: <String, String>{
@@ -328,13 +328,13 @@ void main() {
         expect(contents, contains('"channel": "dev"'));
         // Make sure old matching entries are removed.
         expect(contents, isNot(contains('v0.0.0')));
-        final Map<String, dynamic> jsonData = json.decode(contents);
-        final List<dynamic> releases = jsonData['releases'];
+        final Map<String, dynamic> jsonData = json.decode(contents) as Map<String, dynamic>;
+        final List<dynamic> releases = jsonData['releases'] as List<dynamic>;
         expect(releases.length, equals(3));
         // Make sure the new entry is first (and hopefully it takes less than a
         // minute to go from publishArchive above to this line!).
         expect(
-          DateTime.now().difference(DateTime.parse(releases[0]['release_date'])),
+          DateTime.now().difference(DateTime.parse(releases[0]['release_date'] as String)),
           lessThan(const Duration(minutes: 1)),
         );
         const JsonEncoder encoder = JsonEncoder.withIndent('  ');

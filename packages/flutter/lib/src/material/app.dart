@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -189,6 +189,8 @@ class MaterialApp extends StatefulWidget {
     this.checkerboardOffscreenLayers = false,
     this.showSemanticsDebugger = false,
     this.debugShowCheckedModeBanner = true,
+    this.shortcuts,
+    this.actions,
   }) : assert(routes != null),
        assert(navigatorObservers != null),
        assert(title != null),
@@ -306,10 +308,10 @@ class MaterialApp extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///   * [theme], which is used when a light mode is selected.
-  ///   * [darkTheme], which is used when a dark mode is selected.
-  ///   * [ThemeData.brightness], which indicates to various parts of the
-  ///     system what kind of theme is being used.
+  ///  * [theme], which is used when a light mode is selected.
+  ///  * [darkTheme], which is used when a dark mode is selected.
+  ///  * [ThemeData.brightness], which indicates to various parts of the
+  ///    system what kind of theme is being used.
   final ThemeMode themeMode;
 
   /// {@macro flutter.widgets.widgetsApp.color}
@@ -455,6 +457,67 @@ class MaterialApp extends StatefulWidget {
   /// {@macro flutter.widgets.widgetsApp.debugShowCheckedModeBanner}
   final bool debugShowCheckedModeBanner;
 
+  /// {@macro flutter.widgets.widgetsApp.shortcuts}
+  /// {@tool sample}
+  /// This example shows how to add a single shortcut for
+  /// [LogicalKeyboardKey.select] to the default shortcuts without needing to
+  /// add your own [Shortcuts] widget.
+  ///
+  /// Alternatively, you could insert a [Shortcuts] widget with just the mapping
+  /// you want to add between the [WidgetsApp] and its child and get the same
+  /// effect.
+  ///
+  /// ```dart
+  /// Widget build(BuildContext context) {
+  ///   return WidgetsApp(
+  ///     shortcuts: <LogicalKeySet, Intent>{
+  ///       ... WidgetsApp.defaultShortcuts,
+  ///       LogicalKeySet(LogicalKeyboardKey.select): const Intent(ActivateAction.key),
+  ///     },
+  ///     color: const Color(0xFFFF0000),
+  ///     builder: (BuildContext context, Widget child) {
+  ///       return const Placeholder();
+  ///     },
+  ///   );
+  /// }
+  /// ```
+  /// {@end-tool}
+  /// {@macro flutter.widgets.widgetsApp.shortcuts.seeAlso}
+  final Map<LogicalKeySet, Intent> shortcuts;
+
+  /// {@macro flutter.widgets.widgetsApp.actions}
+  /// {@tool sample}
+  /// This example shows how to add a single action handling an
+  /// [ActivateAction] to the default actions without needing to
+  /// add your own [Actions] widget.
+  ///
+  /// Alternatively, you could insert a [Actions] widget with just the mapping
+  /// you want to add between the [WidgetsApp] and its child and get the same
+  /// effect.
+  ///
+  /// ```dart
+  /// Widget build(BuildContext context) {
+  ///   return WidgetsApp(
+  ///     actions: <LocalKey, ActionFactory>{
+  ///       ... WidgetsApp.defaultActions,
+  ///       ActivateAction.key: () => CallbackAction(
+  ///         ActivateAction.key,
+  ///         onInvoke: (FocusNode focusNode, Intent intent) {
+  ///           // Do something here...
+  ///         },
+  ///       ),
+  ///     },
+  ///     color: const Color(0xFFFF0000),
+  ///     builder: (BuildContext context, Widget child) {
+  ///       return const Placeholder();
+  ///     },
+  ///   );
+  /// }
+  /// ```
+  /// {@end-tool}
+  /// {@macro flutter.widgets.widgetsApp.actions.seeAlso}
+  final Map<LocalKey, ActionFactory> actions;
+
   /// Turns on a [GridPaper] overlay that paints a baseline grid
   /// Material apps.
   ///
@@ -481,6 +544,7 @@ class _MaterialScrollBehavior extends ScrollBehavior {
     // the base class as well.
     switch (getPlatform(context)) {
       case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
         return child;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
@@ -553,8 +617,9 @@ class _MaterialAppState extends State<MaterialApp> {
       key: GlobalObjectKey(this),
       navigatorKey: widget.navigatorKey,
       navigatorObservers: _navigatorObservers,
-        pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) =>
-            MaterialPageRoute<T>(settings: settings, builder: builder),
+      pageRouteBuilder: <T>(RouteSettings settings, WidgetBuilder builder) {
+        return MaterialPageRoute<T>(settings: settings, builder: builder);
+      },
       home: widget.home,
       routes: widget.routes,
       initialRoute: widget.initialRoute,
@@ -624,6 +689,8 @@ class _MaterialAppState extends State<MaterialApp> {
           mini: true,
         );
       },
+      shortcuts: widget.shortcuts,
+      actions: widget.actions,
     );
 
     assert(() {

@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -16,7 +16,7 @@ void main() {
         OffsetLayer(offset: const Offset(0.0, 200.0)),
       ];
       int i = 0;
-      for (OffsetLayer layer in layers) {
+      for (final OffsetLayer layer in layers) {
         layer.append(AnnotatedRegionLayer<int>(i, size: const Size(200.0, 100.0)));
         containerLayer.append(layer);
         i += 1;
@@ -35,7 +35,7 @@ void main() {
         ClipRectLayer(clipRect: const Rect.fromLTRB(0.0, 200.0, 100.0, 300.0)),
       ];
       int i = 0;
-      for (ClipRectLayer layer in layers) {
+      for (final ClipRectLayer layer in layers) {
         layer.append(AnnotatedRegionLayer<int>(i));
         containerLayer.append(layer);
         i += 1;
@@ -55,7 +55,7 @@ void main() {
         ClipRRectLayer(clipRRect: RRect.fromLTRBR(0.0, 200.0, 100.0, 300.0, const Radius.circular(4.0))),
       ];
       int i = 0;
-      for (ClipRRectLayer layer in layers) {
+      for (final ClipRRectLayer layer in layers) {
         layer.append(AnnotatedRegionLayer<int>(i));
         containerLayer.append(layer);
         i += 1;
@@ -80,7 +80,7 @@ void main() {
         OffsetLayer(offset: const Offset(0.0, 200.0)),
       ];
       int i = 0;
-      for (OffsetLayer layer in layers) {
+      for (final OffsetLayer layer in layers) {
         final AnnotatedRegionLayer<int> annotatedRegionLayer = AnnotatedRegionLayer<int>(i, size: const Size(100.0, 100.0));
         layer.append(annotatedRegionLayer);
         transformLayer.append(layer);
@@ -136,7 +136,7 @@ void main() {
       expect(parent.find<int>(const Offset(0.0, 0.0)), 1);
     });
   });
-  group('$AnnotatedRegion findAll', () {
+  group('$AnnotatedRegion findAllAnnotations', () {
     test('finds the first value in a OffsetLayer when sized', () {
       final ContainerLayer containerLayer = ContainerLayer();
       final List<OffsetLayer> layers = <OffsetLayer>[
@@ -145,15 +145,15 @@ void main() {
         OffsetLayer(offset: const Offset(0.0, 200.0)),
       ];
       int i = 0;
-      for (OffsetLayer layer in layers) {
+      for (final OffsetLayer layer in layers) {
         layer.append(AnnotatedRegionLayer<int>(i, size: const Size(200.0, 100.0)));
         containerLayer.append(layer);
         i += 1;
       }
 
-      expect(containerLayer.findAll<int>(const Offset(0.0, 1.0)), equals(<int>[0]));
-      expect(containerLayer.findAll<int>(const Offset(0.0, 101.0)),equals(<int>[1]));
-      expect(containerLayer.findAll<int>(const Offset(0.0, 201.0)), equals(<int>[2]));
+      expect(containerLayer.findAllAnnotations<int>(const Offset(0.0, 1.0)).annotations.toList(), equals(<int>[0]));
+      expect(containerLayer.findAllAnnotations<int>(const Offset(0.0, 101.0)).annotations.toList(), equals(<int>[1]));
+      expect(containerLayer.findAllAnnotations<int>(const Offset(0.0, 201.0)).annotations.toList(), equals(<int>[2]));
     });
 
     test('finds a value within the clip in a ClipRectLayer', () {
@@ -164,15 +164,15 @@ void main() {
         ClipRectLayer(clipRect: const Rect.fromLTRB(0.0, 200.0, 100.0, 300.0)),
       ];
       int i = 0;
-      for (ClipRectLayer layer in layers) {
+      for (final ClipRectLayer layer in layers) {
         layer.append(AnnotatedRegionLayer<int>(i));
         containerLayer.append(layer);
         i += 1;
       }
 
-      expect(containerLayer.findAll<int>(const Offset(0.0, 1.0)), equals(<int>[0]));
-      expect(containerLayer.findAll<int>(const Offset(0.0, 101.0)), equals(<int>[1]));
-      expect(containerLayer.findAll<int>(const Offset(0.0, 201.0)), equals(<int>[2]));
+      expect(containerLayer.findAllAnnotations<int>(const Offset(0.0, 1.0)).annotations.toList(), equals(<int>[0]));
+      expect(containerLayer.findAllAnnotations<int>(const Offset(0.0, 101.0)).annotations.toList(), equals(<int>[1]));
+      expect(containerLayer.findAllAnnotations<int>(const Offset(0.0, 201.0)).annotations.toList(), equals(<int>[2]));
     });
 
 
@@ -184,15 +184,15 @@ void main() {
         ClipRRectLayer(clipRRect: RRect.fromLTRBR(0.0, 200.0, 100.0, 300.0, const Radius.circular(4.0))),
       ];
       int i = 0;
-      for (ClipRRectLayer layer in layers) {
+      for (final ClipRRectLayer layer in layers) {
         layer.append(AnnotatedRegionLayer<int>(i));
         containerLayer.append(layer);
         i += 1;
       }
 
-      expect(containerLayer.findAll<int>(const Offset(5.0, 5.0)), equals(<int>[0]));
-      expect(containerLayer.findAll<int>(const Offset(5.0, 105.0)), equals(<int>[1]));
-      expect(containerLayer.findAll<int>(const Offset(5.0, 205.0)), equals(<int>[2]));
+      expect(containerLayer.findAllAnnotations<int>(const Offset(5.0, 5.0)).annotations.toList(), equals(<int>[0]));
+      expect(containerLayer.findAllAnnotations<int>(const Offset(5.0, 105.0)).annotations.toList(), equals(<int>[1]));
+      expect(containerLayer.findAllAnnotations<int>(const Offset(5.0, 205.0)).annotations.toList(), equals(<int>[2]));
     });
 
     test('finds a value under a TransformLayer', () {
@@ -209,18 +209,18 @@ void main() {
         OffsetLayer(offset: const Offset(0.0, 200.0)),
       ];
       int i = 0;
-      for (OffsetLayer layer in layers) {
+      for (final OffsetLayer layer in layers) {
         final AnnotatedRegionLayer<int> annotatedRegionLayer = AnnotatedRegionLayer<int>(i, size: const Size(100.0, 100.0));
         layer.append(annotatedRegionLayer);
         transformLayer.append(layer);
         i += 1;
       }
 
-      expect(transformLayer.findAll<int>(const Offset(0.0, 100.0)), equals(<int>[0]));
-      expect(transformLayer.findAll<int>(const Offset(0.0, 200.0)), equals(<int>[0]));
-      expect(transformLayer.findAll<int>(const Offset(0.0, 270.0)), equals(<int>[1]));
-      expect(transformLayer.findAll<int>(const Offset(0.0, 400.0)), equals(<int>[1]));
-      expect(transformLayer.findAll<int>(const Offset(0.0, 530.0)), equals(<int>[2]));
+      expect(transformLayer.findAllAnnotations<int>(const Offset(0.0, 100.0)).annotations.toList(), equals(<int>[0]));
+      expect(transformLayer.findAllAnnotations<int>(const Offset(0.0, 200.0)).annotations.toList(), equals(<int>[0]));
+      expect(transformLayer.findAllAnnotations<int>(const Offset(0.0, 270.0)).annotations.toList(), equals(<int>[1]));
+      expect(transformLayer.findAllAnnotations<int>(const Offset(0.0, 400.0)).annotations.toList(), equals(<int>[1]));
+      expect(transformLayer.findAllAnnotations<int>(const Offset(0.0, 530.0)).annotations.toList(), equals(<int>[2]));
     });
 
     test('finds multiple nested, overlapping regions', () {
@@ -231,13 +231,13 @@ void main() {
         AnnotatedRegionLayer<int>(index++, size: const Size(100.0, 100.0)),
         AnnotatedRegionLayer<int>(index++, size: const Size(100.0, 100.0)),
       ];
-      for (ContainerLayer layer in layers) {
+      for (final ContainerLayer layer in layers) {
         final AnnotatedRegionLayer<int> annotatedRegionLayer = AnnotatedRegionLayer<int>(index++, size: const Size(100.0, 100.0));
         layer.append(annotatedRegionLayer);
         parent.append(layer);
       }
 
-      expect(parent.findAll<int>(const Offset(0.0, 0.0)), equals(<int>[3, 1, 2, 0,]));
+      expect(parent.findAllAnnotations<int>(const Offset(0.0, 0.0)).annotations.toList(), equals(<int>[3, 1, 2, 0,]));
     });
 
     test('looks for child AnnotatedRegions before parents', () {
@@ -251,7 +251,7 @@ void main() {
       parent.append(child3);
       layer.append(parent);
 
-      expect(parent.findAll<int>(Offset.zero), equals(<int>[4, 3, 2, 1]));
+      expect(parent.findAllAnnotations<int>(Offset.zero).annotations.toList(), equals(<int>[4, 3, 2, 1]));
     });
 
     test('looks for correct type', () {
@@ -261,7 +261,7 @@ void main() {
       layer.append(child2);
       layer.append(child1);
 
-      expect(layer.findAll<String>(Offset.zero), equals(<String>['hello']));
+      expect(layer.findAllAnnotations<String>(Offset.zero).annotations.toList(), equals(<String>['hello']));
     });
 
     test('does not clip Layer.find on an AnnotatedRegion with an unrelated type', () {
@@ -271,7 +271,7 @@ void main() {
       parent.append(child);
       layer.append(parent);
 
-      expect(layer.findAll<int>(const Offset(100.0, 100.0)), equals(<int>[1]));
+      expect(layer.findAllAnnotations<int>(const Offset(100.0, 100.0)).annotations.toList(), equals(<int>[1]));
     });
 
     test('handles non-invertable transforms', () {
@@ -279,11 +279,11 @@ void main() {
       final TransformLayer parent = TransformLayer(transform: Matrix4.diagonal3Values(0.0, 1.0, 1.0));
       parent.append(child);
 
-      expect(parent.findAll<int>(const Offset(0.0, 0.0)), equals(<int>[]));
+      expect(parent.findAllAnnotations<int>(const Offset(0.0, 0.0)).annotations.toList(), equals(<int>[]));
 
       parent.transform = Matrix4.diagonal3Values(1.0, 1.0, 1.0);
 
-      expect(parent.findAll<int>(const Offset(0.0, 0.0)), equals(<int>[1]));
+      expect(parent.findAllAnnotations<int>(const Offset(0.0, 0.0)).annotations.toList(), equals(<int>[1]));
     });
   });
 }

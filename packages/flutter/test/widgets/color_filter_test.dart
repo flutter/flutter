@@ -1,4 +1,4 @@
-// Copyright 2019 The Flutter Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -18,10 +18,7 @@ void main() {
     );
     await expectLater(
       find.byType(ColorFiltered),
-      matchesGoldenFile(
-        'color_filter_red.png',
-        version: 1,
-      ),
+      matchesGoldenFile('color_filter_red.png'),
     );
   });
 
@@ -54,14 +51,11 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
     await expectLater(
       find.byType(ColorFiltered),
-      matchesGoldenFile(
-        'color_filter_sepia.png',
-        version: 1,
-      ),
+      matchesGoldenFile('color_filter_sepia.png'),
     );
   });
 
@@ -79,7 +73,7 @@ void main() {
 
     await pumpWithColor(Colors.red);
     final RenderObject renderObject = tester.firstRenderObject(find.byType(ColorFiltered));
-    final ColorFilterLayer originalLayer = renderObject.debugLayer;
+    final ColorFilterLayer originalLayer = renderObject.debugLayer as ColorFilterLayer;
     expect(originalLayer, isNotNull);
 
     // Change color to force a repaint.

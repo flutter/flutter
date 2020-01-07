@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -113,14 +113,16 @@ class Icon extends StatelessWidget {
   /// See [Theme] to set the current theme and [ThemeData.brightness]
   /// for setting the current theme's brightness.
   ///
+  /// {@tool sample}
   /// Typically, a material design color will be used, as follows:
   ///
   /// ```dart
   /// Icon(
-  ///   icon: Icons.widgets,
+  ///   Icons.widgets,
   ///   color: Colors.blue.shade400,
   /// )
   /// ```
+  /// {@end-tool}
   final Color color;
 
   /// Semantic label for the icon.

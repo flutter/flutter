@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -31,12 +31,13 @@ class CupertinoButton extends StatefulWidget {
     @required this.child,
     this.padding,
     this.color,
-    this.disabledColor,
+    this.disabledColor = CupertinoColors.quaternarySystemFill,
     this.minSize = kMinInteractiveDimensionCupertino,
-    this.pressedOpacity = 0.1,
+    this.pressedOpacity = 0.4,
     this.borderRadius = const BorderRadius.all(Radius.circular(8.0)),
     @required this.onPressed,
   }) : assert(pressedOpacity == null || (pressedOpacity >= 0.0 && pressedOpacity <= 1.0)),
+       assert(disabledColor != null),
        _filled = false,
        super(key: key);
 
@@ -50,12 +51,13 @@ class CupertinoButton extends StatefulWidget {
     Key key,
     @required this.child,
     this.padding,
-    this.disabledColor,
+    this.disabledColor = CupertinoColors.quaternarySystemFill,
     this.minSize = kMinInteractiveDimensionCupertino,
-    this.pressedOpacity = 0.1,
+    this.pressedOpacity = 0.4,
     this.borderRadius = const BorderRadius.all(Radius.circular(8.0)),
     @required this.onPressed,
   }) : assert(pressedOpacity == null || (pressedOpacity >= 0.0 && pressedOpacity <= 1.0)),
+       assert(disabledColor != null),
        color = null,
        _filled = true,
        super(key: key);
@@ -82,8 +84,8 @@ class CupertinoButton extends StatefulWidget {
   ///
   /// Ignored if the [CupertinoButton] doesn't also have a [color].
   ///
-  /// Defaults to [CupertinoSystemColors.quaternarySystemFill] when [color] is
-  /// specified and [disabledColor] is null.
+  /// Defaults to [CupertinoColors.quaternarySystemFill] when [color] is
+  /// specified. Must not be null.
   final Color disabledColor;
 
   /// The callback that is called when the button is tapped or otherwise activated.
@@ -100,7 +102,7 @@ class CupertinoButton extends StatefulWidget {
   /// The opacity that the button will fade to when it is pressed.
   /// The button will have an opacity of 1.0 when it is not pressed.
   ///
-  /// This defaults to 0.1. If null, opacity will not change on pressed if using
+  /// This defaults to 0.4. If null, opacity will not change on pressed if using
   /// your own custom effects is desired.
   final double pressedOpacity;
 
@@ -214,7 +216,7 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
       ? themeData.primaryContrastingColor
       : enabled
         ? primaryColor
-        : CupertinoDynamicColor.resolve(CupertinoSystemColors.of(context).placeholderText, context);
+        : CupertinoDynamicColor.resolve(CupertinoColors.placeholderText, context);
 
     final TextStyle textStyle = themeData.textTheme.textStyle.copyWith(color: foregroundColor);
 
@@ -239,7 +241,7 @@ class _CupertinoButtonState extends State<CupertinoButton> with SingleTickerProv
               decoration: BoxDecoration(
                 borderRadius: widget.borderRadius,
                 color: backgroundColor != null && !enabled
-                  ? CupertinoDynamicColor.resolve(widget.disabledColor ?? CupertinoSystemColors.of(context).quaternarySystemFill, context)
+                  ? CupertinoDynamicColor.resolve(widget.disabledColor, context)
                   : backgroundColor,
               ),
               child: Padding(

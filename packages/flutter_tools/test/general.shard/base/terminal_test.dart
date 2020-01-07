@@ -1,12 +1,14 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:async';
 
-import 'package:flutter_tools/src/base/platform.dart';
+import 'package:platform/platform.dart';
+import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
-import 'package:flutter_tools/src/globals.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
+import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -14,7 +16,7 @@ import '../../src/context.dart';
 void main() {
   group('output preferences', () {
     testUsingContext('can wrap output', () async {
-      printStatus('0123456789' * 8);
+      globals.printStatus('0123456789' * 8);
       expect(testLogger.statusText, equals(('0123456789' * 4 + '\n') * 2));
     }, overrides: <Type, Generator>{
       OutputPreferences: () => OutputPreferences(wrapText: true, wrapColumn: 40),
@@ -22,7 +24,7 @@ void main() {
 
     testUsingContext('can turn off wrapping', () async {
       final String testString = '0123456789' * 20;
-      printStatus(testString);
+      globals.printStatus(testString);
       expect(testLogger.statusText, equals('$testString\n'));
     }, overrides: <Type, Generator>{
       Platform: () => FakePlatform()..stdoutSupportsAnsi = true,
@@ -38,7 +40,7 @@ void main() {
     });
 
     testUsingContext('adding colors works', () {
-      for (TerminalColor color in TerminalColor.values) {
+      for (final TerminalColor color in TerminalColor.values) {
         expect(
           terminal.color('output', color),
           equals('${AnsiTerminal.colorCode(color)}output${AnsiTerminal.resetColor}'),
@@ -167,6 +169,15 @@ void main() {
           'Please choose something: \n'
           '\n');
     });
+
+    testUsingContext('Does not set single char mode when a terminal is not attached', () {
+      when(stdio.stdin).thenThrow(StateError('This should not be called'));
+      when(stdio.stdinHasTerminal).thenReturn(false);
+
+      globals.terminal.singleCharMode = true;
+    }, overrides: <Type, Generator>{
+      Stdio: () => MockStdio(),
+    });
   });
 }
 
@@ -178,3 +189,5 @@ class TestTerminal extends AnsiTerminal {
     return mockStdInStream;
   }
 }
+
+class MockStdio extends Mock implements Stdio {}

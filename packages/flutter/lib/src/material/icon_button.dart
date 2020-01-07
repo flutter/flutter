@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -13,6 +13,7 @@ import 'icons.dart';
 import 'ink_well.dart';
 import 'material.dart';
 import 'theme.dart';
+import 'theme_data.dart';
 import 'tooltip.dart';
 
 // Minimum logical pixel size of the IconButton.
@@ -138,6 +139,7 @@ class IconButton extends StatelessWidget {
   const IconButton({
     Key key,
     this.iconSize = 24.0,
+    this.visualDensity,
     this.padding = const EdgeInsets.all(8.0),
     this.alignment = Alignment.center,
     @required this.icon,
@@ -151,6 +153,7 @@ class IconButton extends StatelessWidget {
     this.focusNode,
     this.autofocus = false,
     this.tooltip,
+    this.enableFeedback = true,
   }) : assert(iconSize != null),
        assert(padding != null),
        assert(alignment != null),
@@ -169,6 +172,16 @@ class IconButton extends StatelessWidget {
   /// [Icon.size] instead, then the [IconButton] would default to 24.0 and then
   /// the [Icon] itself would likely get clipped.
   final double iconSize;
+
+  /// Defines how compact the icon button's layout will be.
+  ///
+  /// {@macro flutter.material.themedata.visualDensity}
+  ///
+  /// See also:
+  ///
+  ///  * [ThemeData.visualDensity], which specifies the [density] for all widgets
+  ///    within a [Theme].
+  final VisualDensity visualDensity;
 
   /// The padding around the button's icon. The entire padded icon will react
   /// to input gestures.
@@ -215,8 +228,6 @@ class IconButton extends StatelessWidget {
   ///
   /// The icon is enabled if [onPressed] is not null.
   ///
-  /// See also [disabledColor].
-  ///
   /// ```dart
   /// IconButton(
   ///   color: Colors.blue,
@@ -248,8 +259,6 @@ class IconButton extends StatelessWidget {
   /// Defaults to the [ThemeData.disabledColor] of the current [Theme].
   ///
   /// The icon is disabled if [onPressed] is null.
-  ///
-  /// See also [color].
   final Color disabledColor;
 
   /// The callback that is called when the button is tapped or otherwise activated.
@@ -269,17 +278,29 @@ class IconButton extends StatelessWidget {
   /// used for accessibility.
   final String tooltip;
 
+  /// Whether detected gestures should provide acoustic and/or haptic feedback.
+  ///
+  /// For example, on Android a tap will produce a clicking sound and a
+  /// long-press will produce a short vibration, when feedback is enabled.
+  ///
+  /// See also:
+  ///
+  ///  * [Feedback] for providing platform-specific feedback to certain actions.
+  final bool enableFeedback;
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterial(context));
+    final ThemeData theme = Theme.of(context);
     Color currentColor;
     if (onPressed != null)
       currentColor = color;
     else
-      currentColor = disabledColor ?? Theme.of(context).disabledColor;
+      currentColor = disabledColor ?? theme.disabledColor;
 
+    final Offset densityAdjustment = (visualDensity ?? theme.visualDensity).baseSizeAdjustment;
     Widget result = ConstrainedBox(
-      constraints: const BoxConstraints(minWidth: _kMinButtonSize, minHeight: _kMinButtonSize),
+      constraints: BoxConstraints(minWidth: _kMinButtonSize + densityAdjustment.dx, minHeight: _kMinButtonSize + densityAdjustment.dy),
       child: Padding(
         padding: padding,
         child: SizedBox(
@@ -309,22 +330,21 @@ class IconButton extends StatelessWidget {
     return Semantics(
       button: true,
       enabled: onPressed != null,
-      child: Focus(
+      child: InkResponse(
         focusNode: focusNode,
         autofocus: autofocus,
         canRequestFocus: onPressed != null,
-        child: InkResponse(
-          onTap: onPressed,
-          child: result,
-          focusColor: focusColor ?? Theme.of(context).focusColor,
-          hoverColor: hoverColor ?? Theme.of(context).hoverColor,
-          highlightColor: highlightColor ?? Theme.of(context).highlightColor,
-          splashColor: splashColor ?? Theme.of(context).splashColor,
-          radius: math.max(
-            Material.defaultSplashRadius,
-            (iconSize + math.min(padding.horizontal, padding.vertical)) * 0.7,
-            // x 0.5 for diameter -> radius and + 40% overflow derived from other Material apps.
-          ),
+        onTap: onPressed,
+        enableFeedback: enableFeedback,
+        child: result,
+        focusColor: focusColor ?? Theme.of(context).focusColor,
+        hoverColor: hoverColor ?? Theme.of(context).hoverColor,
+        highlightColor: highlightColor ?? Theme.of(context).highlightColor,
+        splashColor: splashColor ?? Theme.of(context).splashColor,
+        radius: math.max(
+          Material.defaultSplashRadius,
+          (iconSize + math.min(padding.horizontal, padding.vertical)) * 0.7,
+          // x 0.5 for diameter -> radius and + 40% overflow derived from other Material apps.
         ),
       ),
     );

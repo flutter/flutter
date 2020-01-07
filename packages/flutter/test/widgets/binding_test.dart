@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -68,9 +68,13 @@ void main() {
     await defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
     expect(observer.lifecycleState, AppLifecycleState.inactive);
 
-    message = const StringCodec().encodeMessage('AppLifecycleState.suspending');
+
+    message = const StringCodec().encodeMessage('AppLifecycleState.detached');
     await defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
-    expect(observer.lifecycleState, AppLifecycleState.suspending);
+    // TODO(chunhtai): this should be detached once the issue is fixed
+    // https://github.com/flutter/flutter/issues/39832
+    // The binding drops detached message for now.
+    expect(observer.lifecycleState, AppLifecycleState.inactive);
   });
 
   testWidgets('didPushRoute callback', (WidgetTester tester) async {
@@ -105,16 +109,6 @@ void main() {
     await defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
     expect(tester.binding.hasScheduledFrame, isFalse);
 
-    message = const StringCodec().encodeMessage('AppLifecycleState.suspending');
-    await defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
-    expect(tester.binding.hasScheduledFrame, isFalse);
-
-    message = const StringCodec().encodeMessage('AppLifecycleState.inactive');
-    await defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
-    expect(tester.binding.hasScheduledFrame, isTrue);
-    await tester.pump();
-    expect(tester.binding.hasScheduledFrame, isFalse);
-
     message = const StringCodec().encodeMessage('AppLifecycleState.paused');
     await defaultBinaryMessenger.handlePlatformMessage('flutter/lifecycle', message, (_) { });
     expect(tester.binding.hasScheduledFrame, isFalse);
@@ -137,5 +131,37 @@ void main() {
     tester.binding.scheduleWarmUpFrame(); // this actually tests flutter_test's implementation
     expect(tester.binding.hasScheduledFrame, isFalse);
     expect(frameCount, 1);
+  });
+
+  testWidgets('scheduleFrameCallback error control test', (WidgetTester tester) async {
+    FlutterError error;
+    try {
+      tester.binding.scheduleFrameCallback(null, rescheduling: true);
+    } on FlutterError catch (e) {
+      error = e;
+    }
+    expect(error, isNotNull);
+    expect(error.diagnostics.length, 3);
+    expect(error.diagnostics.last.level, DiagnosticLevel.hint);
+    expect(
+      error.diagnostics.last.toStringDeep(),
+      equalsIgnoringHashCodes(
+        'If this is the initial registration of the callback, or if the\n'
+        'callback is asynchronous, then do not use the "rescheduling"\n'
+        'argument.\n'
+      ),
+    );
+    expect(
+      error.toStringDeep(),
+      'FlutterError\n'
+      '   scheduleFrameCallback called with rescheduling true, but no\n'
+      '   callback is in scope.\n'
+      '   The "rescheduling" argument should only be set to true if the\n'
+      '   callback is being reregistered from within the callback itself,\n'
+      '   and only then if the callback itself is entirely synchronous.\n'
+      '   If this is the initial registration of the callback, or if the\n'
+      '   callback is asynchronous, then do not use the "rescheduling"\n'
+      '   argument.\n'
+    );
   });
 }

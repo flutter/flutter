@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -25,7 +25,7 @@ bool _isTaskRegistered = false;
 /// The task does not run immediately but waits for the request via the
 /// VM service protocol to run it.
 ///
-/// It is ok for a [task] to perform many things. However, only one task can be
+/// It is OK for a [task] to perform many things. However, only one task can be
 /// registered per Dart VM.
 Future<TaskResult> task(TaskFunction task) {
   if (_isTaskRegistered)
@@ -143,7 +143,7 @@ class _TaskRunner {
     });
   }
 
-  /// Disables the keep-alive port, allowing the VM to exit.
+  /// Disables the keepalive port, allowing the VM to exit.
   void _closeKeepAlivePort() {
     _startTaskTimeout?.cancel();
     _keepAlivePort?.close();
@@ -179,7 +179,7 @@ class TaskResult {
         message = 'success' {
     const JsonEncoder prettyJson = JsonEncoder.withIndent('  ');
     if (benchmarkScoreKeys != null) {
-      for (String key in benchmarkScoreKeys) {
+      for (final String key in benchmarkScoreKeys) {
         if (!data.containsKey(key)) {
           throw 'Invalid Golem score key "$key". It does not exist in task '
               'result data ${prettyJson.convert(data)}';
@@ -194,8 +194,10 @@ class TaskResult {
   /// Constructs a successful result using JSON data stored in a file.
   factory TaskResult.successFromFile(File file,
       {List<String> benchmarkScoreKeys}) {
-    return TaskResult.success(json.decode(file.readAsStringSync()),
-        benchmarkScoreKeys: benchmarkScoreKeys);
+    return TaskResult.success(
+      json.decode(file.readAsStringSync()) as Map<String, dynamic>,
+      benchmarkScoreKeys: benchmarkScoreKeys,
+    );
   }
 
   /// Constructs an unsuccessful result.

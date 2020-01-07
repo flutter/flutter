@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -9,7 +9,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
 import 'actions.dart';
-import 'binding.dart';
 import 'focus_manager.dart';
 import 'focus_scope.dart';
 import 'framework.dart';
@@ -26,7 +25,7 @@ import 'inherited_notifier.dart';
 ///
 /// See also:
 ///
-///  - [ShortcutManager], which uses [LogicalKeySet] (a [KeySet] subclass) to
+///  * [ShortcutManager], which uses [LogicalKeySet] (a [KeySet] subclass) to
 ///    define its key map.
 class KeySet<T extends KeyboardKey> extends Diagnosticable {
   /// A constructor for making a [KeySet] of up to four keys.
@@ -90,8 +89,8 @@ class KeySet<T extends KeyboardKey> extends Diagnosticable {
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    final KeySet<T> typedOther = other;
-    return _keys.length == typedOther._keys.length && _keys.containsAll(typedOther._keys);
+    return other is KeySet<T>
+        && setEquals<T>(other._keys, _keys);
   }
 
   @override
@@ -169,10 +168,7 @@ class ShortcutManager extends ChangeNotifier with DiagnosticableMixin {
   Map<LogicalKeySet, Intent> get shortcuts => _shortcuts;
   Map<LogicalKeySet, Intent> _shortcuts;
   set shortcuts(Map<LogicalKeySet, Intent> value) {
-    if (_shortcuts == value) {
-      return;
-    }
-    if (_shortcuts != value) {
+    if (!mapEquals<LogicalKeySet, Intent>(_shortcuts, value)) {
       _shortcuts = value;
       notifyListeners();
     }
@@ -200,7 +196,7 @@ class ShortcutManager extends ChangeNotifier with DiagnosticableMixin {
       // have synonyms in the map.  This is for things like left and right shift
       // keys mapping to just the "shift" pseudo-key.
       final Set<LogicalKeyboardKey> pseudoKeys = <LogicalKeyboardKey>{};
-      for (LogicalKeyboardKey setKey in keySet.keys) {
+      for (final LogicalKeyboardKey setKey in keySet.keys) {
         final Set<LogicalKeyboardKey> synonyms = setKey.synonyms;
         if (synonyms.isNotEmpty) {
           // There currently aren't any synonyms that match more than one key.
@@ -212,7 +208,7 @@ class ShortcutManager extends ChangeNotifier with DiagnosticableMixin {
       matchedIntent = _shortcuts[LogicalKeySet.fromSet(pseudoKeys)];
     }
     if (matchedIntent != null) {
-      final BuildContext primaryContext = WidgetsBinding.instance.focusManager.primaryFocus?.context;
+      final BuildContext primaryContext = primaryFocus?.context;
       if (primaryContext == null) {
         return false;
       }
@@ -235,9 +231,9 @@ class ShortcutManager extends ChangeNotifier with DiagnosticableMixin {
 ///
 /// See also:
 ///
-///   * [Intent], a class for containing a description of a user
-///     action to be invoked.
-///   * [Action], a class for defining an invocation of a user action.
+///  * [Intent], a class for containing a description of a user action to be
+///    invoked.
+///  * [Action], a class for defining an invocation of a user action.
 class Shortcuts extends StatefulWidget {
   /// Creates a ActionManager object.
   ///
@@ -258,7 +254,13 @@ class Shortcuts extends StatefulWidget {
   /// [shortcuts] change materially.
   final ShortcutManager manager;
 
-  /// The map of shortcuts that the [manager] will be given to manage.
+  /// {@template flutter.widgets.shortcuts.shortcuts}
+  /// The map of shortcuts that the [ShortcutManager] will be given to manage.
+  ///
+  /// For performance reasons, it is recommended that a pre-built map is passed
+  /// in here (e.g. a final variable from your widget class) instead of defining
+  /// it inline in the build function.
+  /// {@endtemplate}
   final Map<LogicalKeySet, Intent> shortcuts;
 
   /// The child widget for this [Shortcuts] widget.
@@ -272,7 +274,7 @@ class Shortcuts extends StatefulWidget {
   /// The [context] argument must not be null.
   static ShortcutManager of(BuildContext context, {bool nullOk = false}) {
     assert(context != null);
-    final _ShortcutsMarker inherited = context.inheritFromWidgetOfExactType(_ShortcutsMarker);
+    final _ShortcutsMarker inherited = context.dependOnInheritedWidgetOfExactType<_ShortcutsMarker>();
     assert(() {
       if (nullOk) {
         return true;
@@ -324,15 +326,15 @@ class _ShortcutsState extends State<Shortcuts> {
   @override
   void didUpdateWidget(Shortcuts oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.manager != oldWidget.manager || widget.shortcuts != oldWidget.shortcuts) {
+    if (widget.manager != oldWidget.manager) {
       if (widget.manager != null) {
         _internalManager?.dispose();
         _internalManager = null;
       } else {
         _internalManager ??= ShortcutManager();
       }
-      manager.shortcuts = widget.shortcuts;
     }
+    manager.shortcuts = widget.shortcuts;
   }
 
   bool _handleOnKey(FocusNode node, RawKeyEvent event) {
@@ -345,6 +347,7 @@ class _ShortcutsState extends State<Shortcuts> {
   @override
   Widget build(BuildContext context) {
     return Focus(
+      debugLabel: '$Shortcuts',
       canRequestFocus: false,
       onKey: _handleOnKey,
       child: _ShortcutsMarker(

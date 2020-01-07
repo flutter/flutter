@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -66,7 +66,7 @@ void main() {
   // │ B │
   // └───┘
   testTraversal('Semantics traverses vertically top-to-bottom', (TraversalTester tester) async {
-    for (TextDirection textDirection in TextDirection.values) {
+    for (final TextDirection textDirection in TextDirection.values) {
       await tester.test(
         textDirection: textDirection,
         children: <String, Rect>{
@@ -321,7 +321,7 @@ class TraversalTester {
                 ),
               ),
             ),
-        )
+        ),
     );
 
     expect(semantics, hasSemantics(

@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -83,7 +83,7 @@ void main() {
         find.descendant(
           of: find.widgetWithText(CupertinoActionSheetAction, text),
           matching: find.byType(DefaultTextStyle),
-        )
+        ),
       ).style;
     }
 
@@ -313,7 +313,7 @@ void main() {
             ),
           );
         }),
-      )
+      ),
     );
 
     await tester.tap(find.text('Go'));
@@ -997,7 +997,7 @@ RenderBox findScrollableActionsSectionRenderBox(WidgetTester tester) {
     }),
   );
   assert(actionsSection is RenderBox);
-  return actionsSection;
+  return actionsSection as RenderBox;
 }
 
 Widget createAppWithButtonThatLaunchesActionSheet(Widget actionSheet) {

@@ -1,6 +1,7 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
 @TestOn('chrome')
 
 import 'dart:async';
@@ -196,7 +197,8 @@ void main() {
       // is not yet in the tree.
       await tester.pump();
 
-      final SemanticsNode semantics = tester.getSemantics(find.byType(HtmlElementView));
+      // The platform view ID is set on the child of the HtmlElementView render object.
+      final SemanticsNode semantics = tester.getSemantics(find.byType(PlatformViewSurface));
 
       expect(semantics.platformViewId, currentViewId + 1);
       expect(semantics.rect, const Rect.fromLTWH(0, 0, 200, 100));

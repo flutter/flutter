@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -9,7 +9,6 @@ import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/src/scheduler/ticker.dart';
 import '../flutter_test_alternative.dart';
 
 import 'rendering_tester.dart';
@@ -218,7 +217,7 @@ void main() {
     expect(getPixel(0, 0), equals(0x00000080));
     expect(getPixel(image.width - 1, 0 ), equals(0xffffffff));
 
-    final OffsetLayer layer = boundary.debugLayer;
+    final OffsetLayer layer = boundary.debugLayer as OffsetLayer;
 
     image = await layer.toImage(Offset.zero & const Size(20.0, 20.0));
     expect(image.width, equals(20));
@@ -277,7 +276,7 @@ void main() {
 
   test('RenderAnimatedOpacity does not composite if it is transparent', () async {
     final Animation<double> opacityAnimation = AnimationController(
-      vsync: _FakeTickerProvider(),
+      vsync: FakeTickerProvider(),
     )..value = 0.0;
 
     final RenderAnimatedOpacity renderAnimatedOpacity = RenderAnimatedOpacity(
@@ -292,7 +291,7 @@ void main() {
 
   test('RenderAnimatedOpacity does not composite if it is opaque', () {
     final Animation<double> opacityAnimation = AnimationController(
-      vsync: _FakeTickerProvider(),
+      vsync: FakeTickerProvider(),
     )..value = 1.0;
 
     final RenderAnimatedOpacity renderAnimatedOpacity = RenderAnimatedOpacity(
@@ -307,7 +306,7 @@ void main() {
 
   test('RenderAnimatedOpacity reuses its layer', () {
     final Animation<double> opacityAnimation = AnimationController(
-      vsync: _FakeTickerProvider(),
+      vsync: FakeTickerProvider(),
     )..value = 0.5;  // must not be 0 or 1.0. Otherwise, it won't create a layer
 
     _testLayerReuse<OpacityLayer>(RenderAnimatedOpacity(
@@ -483,60 +482,10 @@ class _TestRRectClipper extends CustomClipper<RRect> {
   bool shouldReclip(_TestRRectClipper oldClipper) => true;
 }
 
-class _FakeTickerProvider implements TickerProvider {
-  @override
-  Ticker createTicker(TickerCallback onTick, [ bool disableAnimations = false ]) {
-    return _FakeTicker();
-  }
-}
-
-class _FakeTicker implements Ticker {
-  @override
-  bool muted;
-
-  @override
-  void absorbTicker(Ticker originalTicker) { }
-
-  @override
-  String get debugLabel => null;
-
-  @override
-  bool get isActive => null;
-
-  @override
-  bool get isTicking => null;
-
-  @override
-  bool get scheduled => null;
-
-  @override
-  bool get shouldScheduleTick => null;
-
-  @override
-  void dispose() { }
-
-  @override
-  void scheduleTick({ bool rescheduling = false }) { }
-
-  @override
-  TickerFuture start() {
-    return null;
-  }
-
-  @override
-  void stop({ bool canceled = false }) { }
-
-  @override
-  void unscheduleTick() { }
-
-  @override
-  String toString({ bool debugIncludeStack = false }) => super.toString();
-}
-
 // Forces two frames and checks that:
 // - a layer is created on the first frame
 // - the layer is reused on the second frame
-void _testLayerReuse<L extends Layer>(RenderObject renderObject) {
+void _testLayerReuse<L extends Layer>(RenderBox renderObject) {
   expect(L, isNot(Layer));
   expect(renderObject.debugLayer, null);
   layout(renderObject, phase: EnginePhase.paint, constraints: BoxConstraints.tight(const Size(10, 10)));

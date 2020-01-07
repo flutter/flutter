@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -6,10 +6,10 @@ import 'package:file/memory.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' show ProcessResult;
-import 'package:flutter_tools/src/base/platform.dart';
-import 'package:flutter_tools/src/base/config.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
+import 'package:platform/platform.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -38,43 +38,46 @@ void main() {
 
     testUsingContext('parse sdk', () {
       sdkDir = MockAndroidSdk.createSdkDirectory();
-      Config.instance.setValue('android-sdk', sdkDir.path);
+      globals.config.setValue('android-sdk', sdkDir.path);
 
       final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
       expect(sdk.latestVersion, isNotNull);
       expect(sdk.latestVersion.sdkLevel, 23);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('parse sdk N', () {
       sdkDir = MockAndroidSdk.createSdkDirectory(withAndroidN: true);
-      Config.instance.setValue('android-sdk', sdkDir.path);
+      globals.config.setValue('android-sdk', sdkDir.path);
 
       final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
       expect(sdk.latestVersion, isNotNull);
       expect(sdk.latestVersion.sdkLevel, 24);
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('returns sdkmanager path', () {
       sdkDir = MockAndroidSdk.createSdkDirectory();
-      Config.instance.setValue('android-sdk', sdkDir.path);
+      globals.config.setValue('android-sdk', sdkDir.path);
 
       final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
-      expect(sdk.sdkManagerPath, fs.path.join(sdk.directory, 'tools', 'bin', 'sdkmanager'));
+      expect(sdk.sdkManagerPath, globals.fs.path.join(sdk.directory, 'tools', 'bin', 'sdkmanager'));
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
     testUsingContext('returns sdkmanager version', () {
       sdkDir = MockAndroidSdk.createSdkDirectory();
-      Config.instance.setValue('android-sdk', sdkDir.path);
+      globals.config.setValue('android-sdk', sdkDir.path);
 
       final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
-      when(processManager.canRun(sdk.sdkManagerPath)).thenReturn(true);
-      when(processManager.runSync(<String>[sdk.sdkManagerPath, '--version'],
+      when(globals.processManager.canRun(sdk.sdkManagerPath)).thenReturn(true);
+      when(globals.processManager.runSync(<String>[sdk.sdkManagerPath, '--version'],
           environment: argThat(isNotNull,  named: 'environment')))
           .thenReturn(ProcessResult(1, 0, '26.1.1\n', ''));
       expect(sdk.sdkManagerVersion, '26.1.1');
@@ -85,10 +88,10 @@ void main() {
 
     testUsingContext('returns validate sdk is well formed', () {
       sdkDir = MockBrokenAndroidSdk.createSdkDirectory();
-      Config.instance.setValue('android-sdk', sdkDir.path);
+      globals.config.setValue('android-sdk', sdkDir.path);
 
       final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
-      when(processManager.canRun(sdk.adbPath)).thenReturn(true);
+      when(globals.processManager.canRun(sdk.adbPath)).thenReturn(true);
 
       final List<String> validationIssues = sdk.validateSdkWellFormed();
       expect(validationIssues.first, 'No valid Android SDK platforms found in'
@@ -102,11 +105,11 @@ void main() {
 
     testUsingContext('does not throw on sdkmanager version check failure', () {
       sdkDir = MockAndroidSdk.createSdkDirectory();
-      Config.instance.setValue('android-sdk', sdkDir.path);
+      globals.config.setValue('android-sdk', sdkDir.path);
 
       final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
-      when(processManager.canRun(sdk.sdkManagerPath)).thenReturn(true);
-      when(processManager.runSync(<String>[sdk.sdkManagerPath, '--version'],
+      when(globals.processManager.canRun(sdk.sdkManagerPath)).thenReturn(true);
+      when(globals.processManager.runSync(<String>[sdk.sdkManagerPath, '--version'],
           environment: argThat(isNotNull,  named: 'environment')))
           .thenReturn(ProcessResult(1, 1, '26.1.1\n', 'Mystery error'));
       expect(sdk.sdkManagerVersion, isNull);
@@ -117,10 +120,10 @@ void main() {
 
     testUsingContext('throws on sdkmanager version check if sdkmanager not found', () {
       sdkDir = MockAndroidSdk.createSdkDirectory(withSdkManager: false);
-      Config.instance.setValue('android-sdk', sdkDir.path);
+      globals.config.setValue('android-sdk', sdkDir.path);
 
       final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
-      when(processManager.canRun(sdk.sdkManagerPath)).thenReturn(false);
+      when(globals.processManager.canRun(sdk.sdkManagerPath)).thenReturn(false);
       expect(() => sdk.sdkManagerVersion, throwsToolExit());
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
@@ -135,11 +138,11 @@ void main() {
         testUsingContext('detection on $os', () {
           sdkDir = MockAndroidSdk.createSdkDirectory(
               withAndroidN: true, withNdkDir: osDir, withNdkSysroot: true);
-          Config.instance.setValue('android-sdk', sdkDir.path);
+          globals.config.setValue('android-sdk', sdkDir.path);
 
           final String realSdkDir = sdkDir.path;
-          final String realNdkDir = fs.path.join(realSdkDir, 'ndk-bundle');
-          final String realNdkCompiler = fs.path.join(
+          final String realNdkDir = globals.fs.path.join(realSdkDir, 'ndk-bundle');
+          final String realNdkCompiler = globals.fs.path.join(
               realNdkDir,
               'toolchains',
               'arm-linux-androideabi-4.9',
@@ -148,7 +151,7 @@ void main() {
               'bin',
               'arm-linux-androideabi-gcc');
           final String realNdkSysroot =
-              fs.path.join(realNdkDir, 'platforms', 'android-9', 'arch-arm');
+              globals.fs.path.join(realNdkDir, 'platforms', 'android-9', 'arch-arm');
 
           final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
           expect(sdk.directory, realSdkDir);
@@ -158,31 +161,32 @@ void main() {
           expect(sdk.ndk.compilerArgs, <String>['--sysroot', realNdkSysroot]);
         }, overrides: <Type, Generator>{
           FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
           Platform: () => FakePlatform(operatingSystem: os),
         });
 
         testUsingContext('newer NDK require explicit -fuse-ld on $os', () {
           sdkDir = MockAndroidSdk.createSdkDirectory(
               withAndroidN: true, withNdkDir: osDir, withNdkSysroot: true, ndkVersion: 18);
-          Config.instance.setValue('android-sdk', sdkDir.path);
+          globals.config.setValue('android-sdk', sdkDir.path);
 
           final String realSdkDir = sdkDir.path;
-          final String realNdkDir = fs.path.join(realSdkDir, 'ndk-bundle');
-          final String realNdkToolchainBin = fs.path.join(
+          final String realNdkDir = globals.fs.path.join(realSdkDir, 'ndk-bundle');
+          final String realNdkToolchainBin = globals.fs.path.join(
               realNdkDir,
               'toolchains',
               'arm-linux-androideabi-4.9',
               'prebuilt',
               osDir,
               'bin');
-          final String realNdkCompiler = fs.path.join(
+          final String realNdkCompiler = globals.fs.path.join(
               realNdkToolchainBin,
               'arm-linux-androideabi-gcc');
-          final String realNdkLinker = fs.path.join(
+          final String realNdkLinker = globals.fs.path.join(
               realNdkToolchainBin,
               'arm-linux-androideabi-ld');
           final String realNdkSysroot =
-              fs.path.join(realNdkDir, 'platforms', 'android-9', 'arch-arm');
+              globals.fs.path.join(realNdkDir, 'platforms', 'android-9', 'arch-arm');
 
           final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
           expect(sdk.directory, realSdkDir);
@@ -192,14 +196,15 @@ void main() {
           expect(sdk.ndk.compilerArgs, <String>['--sysroot', realNdkSysroot, '-fuse-ld=$realNdkLinker']);
         }, overrides: <Type, Generator>{
           FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
           Platform: () => FakePlatform(operatingSystem: os),
         });
       });
 
-      for (String os in <String>['linux', 'macos']) {
+      for (final String os in <String>['linux', 'macos']) {
         testUsingContext('detection on $os (no ndk available)', () {
           sdkDir = MockAndroidSdk.createSdkDirectory(withAndroidN: true);
-          Config.instance.setValue('android-sdk', sdkDir.path);
+          globals.config.setValue('android-sdk', sdkDir.path);
 
           final String realSdkDir = sdkDir.path;
           final AndroidSdk sdk = AndroidSdk.locateAndroidSdk();
@@ -209,6 +214,7 @@ void main() {
           expect(explanation, contains('Can not locate ndk-bundle'));
         }, overrides: <Type, Generator>{
           FileSystem: () => fs,
+          ProcessManager: () => FakeProcessManager.any(),
           Platform: () => FakePlatform(operatingSystem: os),
         });
       }
@@ -224,8 +230,8 @@ class MockBrokenAndroidSdk extends Mock implements AndroidSdk {
     bool withNdkSysroot = false,
     bool withSdkManager = true,
   }) {
-    final Directory dir = fs.systemTempDirectory.createTempSync('flutter_mock_android_sdk.');
-    final String exe = platform.isWindows ? '.exe' : '';
+    final Directory dir = globals.fs.systemTempDirectory.createTempSync('flutter_mock_android_sdk.');
+    final String exe = globals.platform.isWindows ? '.exe' : '';
     _createSdkFile(dir, 'licenses/dummy');
     _createSdkFile(dir, 'platform-tools/adb$exe');
 

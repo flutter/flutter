@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -38,7 +38,7 @@ class TestServiceExtensionsBinding extends BindingBase
   }
 
   @override
-  void postEvent(String eventKind, Map<dynamic, dynamic> eventData) {
+  void postEvent(String eventKind, Map<String, dynamic> eventData) {
     getEventsDispatched(eventKind).add(eventData);
   }
 
@@ -78,11 +78,7 @@ class TestServiceExtensionsBinding extends BindingBase
     await flushMicrotasks();
     if (ui.window.onDrawFrame != null)
       ui.window.onDrawFrame();
-    // use frameTimings. https://github.com/flutter/flutter/issues/38838
-    // ignore: deprecated_member_use
     if (ui.window.onReportTimings != null)
-      // use frameTimings. https://github.com/flutter/flutter/issues/38838
-      // ignore: deprecated_member_use
       ui.window.onReportTimings(<ui.FrameTiming>[]);
   }
 
@@ -174,7 +170,7 @@ void main() {
     const int disabledExtensions = kIsWeb ? 3 : 0;
     // If you add a service extension... TEST IT! :-)
     // ...then increment this number.
-    expect(binding.extensions.length, 27 + widgetInspectorExtensionCount - disabledExtensions);
+    expect(binding.extensions.length, 28 + widgetInspectorExtensionCount - disabledExtensions);
 
     expect(console, isEmpty);
     debugPrint = debugPrintThrottled;
@@ -691,9 +687,16 @@ void main() {
   test('Service extensions - saveCompilationTrace', () async {
     Map<String, dynamic> result;
     result = await binding.testExtension('saveCompilationTrace', <String, String>{});
-    final String trace = String.fromCharCodes(result['value']);
+    final String trace = String.fromCharCodes((result['value'] as List<dynamic>).cast<int>());
     expect(trace, contains('dart:core,Object,Object.\n'));
     expect(trace, contains('package:test_api/test_api.dart,::,test\n'));
     expect(trace, contains('service_extensions_test.dart,::,main\n'));
+  }, skip: isBrowser);
+
+  test('Service extensions - fastReassemble', () async {
+    Map<String, dynamic> result;
+    result = await binding.testExtension('fastReassemble', <String, String>{'class': 'Foo'});
+
+    expect(result, containsPair('Success', 'true'));
   }, skip: isBrowser);
 }

@@ -1,11 +1,10 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import '../base/platform.dart';
 import '../doctor.dart';
+import '../globals.dart' as globals;
 import 'chrome.dart';
-import 'workflow.dart';
 
 /// A validator that checks whether chrome is installed and can run.
 class WebValidator extends DoctorValidator {
@@ -14,16 +13,17 @@ class WebValidator extends DoctorValidator {
   @override
   Future<ValidationResult> validate() async {
     final String chrome = findChromeExecutable();
-    final bool canRunChrome = canFindChrome();
+    final bool canRunChrome = chromeLauncher.canFindChrome();
     final List<ValidationMessage> messages = <ValidationMessage>[
-      if (platform.environment.containsKey(kChromeEnvironment))
+      if (globals.platform.environment.containsKey(kChromeEnvironment))
         if (!canRunChrome)
           ValidationMessage.hint('$chrome is not executable.')
         else
           ValidationMessage('$kChromeEnvironment = $chrome')
       else
         if (!canRunChrome)
-          ValidationMessage.hint('$kChromeEnvironment not set')
+          ValidationMessage.hint('Cannot find Chrome. Try setting '
+            '$kChromeEnvironment to a Chrome executable.')
         else
           ValidationMessage('Chrome at $chrome'),
     ];

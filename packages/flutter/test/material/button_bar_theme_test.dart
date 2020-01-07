@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -116,7 +116,7 @@ void main() {
             return Container();
           }
         ),
-      )
+      ),
     );
     expect(ButtonBarTheme.of(capturedContext), equals(buttonBarTheme));
     expect(ButtonBarTheme.of(capturedContext).buttonMinWidth, equals(42.0));
@@ -142,7 +142,7 @@ void main() {
             );
           }
         ),
-      )
+      ),
     );
     expect(ButtonBarTheme.of(capturedContext), equals(buttonBarTheme));
     expect(ButtonBarTheme.of(capturedContext).buttonMinWidth, equals(84.0));

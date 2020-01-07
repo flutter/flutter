@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -61,7 +61,7 @@ class SnippetGenerator {
   /// Injects the [injections] into the [template], and turning the
   /// "description" injection into a comment. Only used for
   /// [SnippetType.application] snippets.
-  String interpolateTemplate(List<_ComponentTuple> injections, String template) {
+  String interpolateTemplate(List<_ComponentTuple> injections, String template, Map<String, Object> metadata) {
     final RegExp moustacheRegExp = RegExp('{{([^}]+)}}');
     return template.replaceAllMapped(moustacheRegExp, (Match match) {
       if (match[1] == 'description') {
@@ -86,9 +86,9 @@ class SnippetGenerator {
         // mustache reference, since we want to allow the sections to be
         // "optional" in the input: users shouldn't be forced to add an empty
         // "```dart preamble" section if that section would be empty.
-        return injections
-            .firstWhere((_ComponentTuple tuple) => tuple.name == match[1], orElse: () => null)
-            ?.mergedContent ?? '';
+        final _ComponentTuple result = injections
+            .firstWhere((_ComponentTuple tuple) => tuple.name == match[1], orElse: () => null);
+        return result?.mergedContent ?? (metadata[match[1]] ?? '').toString();
       }
     }).trim();
   }
@@ -104,7 +104,7 @@ class SnippetGenerator {
     final List<String> result = <String>[];
     const HtmlEscape htmlEscape = HtmlEscape();
     String language;
-    for (_ComponentTuple injection in injections) {
+    for (final _ComponentTuple injection in injections) {
       if (!injection.name.startsWith('code')) {
         continue;
       }
@@ -129,7 +129,8 @@ class SnippetGenerator {
       'code': htmlEscape.convert(result.join('\n')),
       'language': language ?? 'dart',
       'serial': '',
-      'id': metadata['id'],
+      'id': metadata['id'] as String,
+      'element': metadata['element'] as String ?? '',
       'app': '',
     };
     if (type == SnippetType.application) {
@@ -151,7 +152,7 @@ class SnippetGenerator {
     final List<_ComponentTuple> components = <_ComponentTuple>[];
     String language;
     final RegExp codeStartEnd = RegExp(r'^\s*```([-\w]+|[-\w]+ ([-\w]+))?\s*$');
-    for (String line in input.split('\n')) {
+    for (final String line in input.split('\n')) {
       final Match match = codeStartEnd.firstMatch(line);
       if (match != null) { // If we saw the start or end of a code block
         inCodeBlock = !inCodeBlock;
@@ -187,7 +188,7 @@ class SnippetGenerator {
   String _addLineNumbers(String app) {
     final StringBuffer buffer = StringBuffer();
     int count = 0;
-    for (String line in app.split('\n')) {
+    for (final String line in app.split('\n')) {
       count++;
       buffer.writeln('${count.toString().padLeft(5, ' ')}: $line');
     }
@@ -242,7 +243,7 @@ class SnippetGenerator {
           exit(1);
         }
         final String templateContents = _loadFileAsUtf8(templateFile);
-        String app = interpolateTemplate(snippetData, templateContents);
+        String app = interpolateTemplate(snippetData, templateContents, metadata);
 
         try {
           app = formatter.format(app);
@@ -252,7 +253,7 @@ class SnippetGenerator {
         }
 
         snippetData.add(_ComponentTuple('app', app.split('\n')));
-        final File outputFile = output ?? getOutputFile(metadata['id']);
+        final File outputFile = output ?? getOutputFile(metadata['id'] as String);
         stderr.writeln('Writing to ${outputFile.absolute.path}');
         outputFile.writeAsStringSync(app);
 

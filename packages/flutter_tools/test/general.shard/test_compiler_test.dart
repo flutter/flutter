@@ -1,11 +1,12 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/test/test_compiler.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:mockito/mockito.dart';
 
 import '../src/common.dart';
@@ -20,11 +21,12 @@ void main() {
     setUp(() {
       testbed = Testbed(
         setup: () async {
-          fs.file('pubspec.yaml').createSync();
-          fs.file('.packages').createSync();
-          fs.file('test/foo.dart').createSync(recursive: true);
+          globals.fs.file('pubspec.yaml').createSync();
+          globals.fs.file('.packages').createSync();
+          globals.fs.file('test/foo.dart').createSync(recursive: true);
           residentCompiler = MockResidentCompiler();
           testCompiler = FakeTestCompiler(
+            BuildMode.debug,
             false,
             FlutterProject.current(),
             residentCompiler,
@@ -39,12 +41,12 @@ void main() {
         <Uri>[Uri.parse('test/foo.dart')],
         outputPath: testCompiler.outputDill.path,
       )).thenAnswer((Invocation invocation) async {
-        fs.file('abc.dill').createSync();
+        globals.fs.file('abc.dill').createSync();
         return const CompilerOutput('abc.dill', 0, <Uri>[]);
       });
 
       expect(await testCompiler.compile('test/foo.dart'), 'test/foo.dart.dill');
-      expect(fs.file('test/foo.dart.dill').existsSync(), true);
+      expect(globals.fs.file('test/foo.dart.dill').existsSync(), true);
     }));
 
     test('Reports null when a compile fails', () => testbed.run(() async {
@@ -53,12 +55,12 @@ void main() {
         <Uri>[Uri.parse('test/foo.dart')],
         outputPath: testCompiler.outputDill.path,
       )).thenAnswer((Invocation invocation) async {
-        fs.file('abc.dill').createSync();
+        globals.fs.file('abc.dill').createSync();
         return const CompilerOutput('abc.dill', 1, <Uri>[]);
       });
 
       expect(await testCompiler.compile('test/foo.dart'), null);
-      expect(fs.file('test/foo.dart.dill').existsSync(), false);
+      expect(globals.fs.file('test/foo.dart.dill').existsSync(), false);
       verify(residentCompiler.shutdown()).called(1);
     }));
 
@@ -75,10 +77,11 @@ void main() {
 /// Override the creation of the Resident Compiler to simplify testing.
 class FakeTestCompiler extends TestCompiler {
   FakeTestCompiler(
+    BuildMode buildMode,
     bool trackWidgetCreation,
     FlutterProject flutterProject,
     this.residentCompiler,
-  ) : super(trackWidgetCreation, flutterProject);
+  ) : super(buildMode, trackWidgetCreation, flutterProject);
 
   final MockResidentCompiler residentCompiler;
 

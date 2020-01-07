@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -68,10 +68,10 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
 
   /// Configure the behavior of offsets sent to [onStart].
   ///
-  /// If set to [DragStartBehavior.start], the [onStart] callback will be called at the time and
-  /// position when the gesture detector wins the arena. If [DragStartBehavior.down],
-  /// [onStart] will be called at the time and position when a down event was
-  /// first detected.
+  /// If set to [DragStartBehavior.start], the [onStart] callback will be called
+  /// at the time and position when this gesture recognizer wins the arena. If
+  /// [DragStartBehavior.down], [onStart] will be called at the time and
+  /// position when a down event was first detected.
   ///
   /// For more information about the gesture arena:
   /// https://flutter.dev/docs/development/ui/advanced/gestures#gesture-disambiguation
@@ -80,9 +80,9 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
   ///
   /// ## Example:
   ///
-  /// A finger presses down on the screen with offset (500.0, 500.0),
-  /// and then moves to position (510.0, 500.0) before winning the arena.
-  /// With [dragStartBehavior] set to [DragStartBehavior.down], the [onStart]
+  /// A finger presses down on the screen with offset (500.0, 500.0), and then
+  /// moves to position (510.0, 500.0) before winning the arena. With
+  /// [dragStartBehavior] set to [DragStartBehavior.down], the [onStart]
   /// callback will be called at the time corresponding to the touch's position
   /// at (500.0, 500.0). If it is instead set to [DragStartBehavior.start],
   /// [onStart] will be called at the time corresponding to the touch's position
@@ -218,7 +218,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
         return false;
       }
     }
-    return super.isPointerAllowed(event);
+    return super.isPointerAllowed(event as PointerDownEvent);
   }
 
   @override
@@ -412,7 +412,7 @@ abstract class DragGestureRecognizer extends OneSequenceGestureRecognizer {
     assert(tracker != null);
 
     DragEndDetails details;
-    void Function() debugReport;
+    String Function() debugReport;
 
     final VelocityEstimate estimate = tracker.getVelocityEstimate();
     if (estimate != null && isFlingGesture(estimate)) {

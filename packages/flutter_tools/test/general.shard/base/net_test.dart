@@ -1,19 +1,54 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:typed_data';
+import 'dart:convert';
 
+import 'package:file/file.dart';
+import 'package:file/memory.dart';
+import 'package:platform/platform.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' as io;
 import 'package:flutter_tools/src/base/net.dart';
-import 'package:flutter_tools/src/base/platform.dart';
+
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:quiver/testing/async.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
 
 void main() {
+  group('successful fetch', () {
+    const String responseString = 'response string';
+    List<int> responseData;
+
+    setUp(() {
+      responseData = utf8.encode(responseString);
+    });
+
+    testUsingContext('fetchUrl() gets the data', () async {
+      final List<int> data = await fetchUrl(Uri.parse('http://example.invalid/'));
+      expect(data, equals(responseData));
+    }, overrides: <Type, Generator>{
+      HttpClientFactory: () => () => FakeHttpClient(200, data: responseString),
+    });
+
+    testUsingContext('fetchUrl(destFile) writes the data to a file', () async {
+      final File destFile = globals.fs.file('dest_file')..createSync();
+      final List<int> data = await fetchUrl(
+        Uri.parse('http://example.invalid/'),
+        destFile: destFile,
+      );
+      expect(data, equals(<int>[]));
+      expect(destFile.readAsStringSync(), equals(responseString));
+    }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem(),
+      HttpClientFactory: () => () => FakeHttpClient(200, data: responseString),
+      ProcessManager: () => FakeProcessManager.any(),
+    });
+  });
+
   testUsingContext('retry from 500', () async {
     String error;
     FakeAsync().run((FakeAsync time) {
@@ -127,7 +162,7 @@ void main() {
     ),
     Platform: () => FakePlatform.fromPlatform(const LocalPlatform())
       ..environment = <String, String>{
-        'FLUTTER_STORAGE_BASE_URL': 'example.invalid'
+        'FLUTTER_STORAGE_BASE_URL': 'example.invalid',
       },
   });
 
@@ -249,13 +284,14 @@ class FakeHttpClientThrowing implements io.HttpClient {
 }
 
 class FakeHttpClient implements io.HttpClient {
-  FakeHttpClient(this.statusCode);
+  FakeHttpClient(this.statusCode, { this.data });
 
   final int statusCode;
+  final String data;
 
   @override
   Future<io.HttpClientRequest> getUrl(Uri url) async {
-    return FakeHttpClientRequest(statusCode);
+    return FakeHttpClientRequest(statusCode, data: data);
   }
 
   @override
@@ -286,13 +322,14 @@ class FakeHttpClientThrowingRequest implements io.HttpClient {
 }
 
 class FakeHttpClientRequest implements io.HttpClientRequest {
-  FakeHttpClientRequest(this.statusCode);
+  FakeHttpClientRequest(this.statusCode, { this.data });
 
   final int statusCode;
+  final String data;
 
   @override
   Future<io.HttpClientResponse> close() async {
-    return FakeHttpClientResponse(statusCode);
+    return FakeHttpClientResponse(statusCode, data: data);
   }
 
   @override
@@ -318,28 +355,41 @@ class FakeHttpClientRequestThrowing implements io.HttpClientRequest {
 }
 
 class FakeHttpClientResponse implements io.HttpClientResponse {
-  FakeHttpClientResponse(this.statusCode);
+  FakeHttpClientResponse(this.statusCode, { this.data });
 
   @override
   final int statusCode;
+
+  final String data;
 
   @override
   String get reasonPhrase => '<reason phrase>';
 
   @override
-  StreamSubscription<Uint8List> listen(
-    void onData(Uint8List event), {
+  StreamSubscription<List<int>> listen(
+    void onData(List<int> event), {
     Function onError,
     void onDone(),
     bool cancelOnError,
   }) {
-    return Stream<Uint8List>.fromFuture(Future<Uint8List>.error(const io.SocketException('test')))
-      .listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);
+    if (data == null) {
+      return Stream<List<int>>.fromFuture(Future<List<int>>.error(
+        const io.SocketException('test'),
+      )).listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);
+    } else {
+      return Stream<List<int>>.fromFuture(Future<List<int>>.value(
+        utf8.encode(data),
+      )).listen(onData, onError: onError, onDone: onDone, cancelOnError: cancelOnError);
+    }
   }
 
   @override
-  Future<dynamic> forEach(void Function(Uint8List element) action) {
-    return Future<void>.error(const io.SocketException('test'));
+  Future<dynamic> forEach(void Function(List<int> element) action) async {
+    if (data == null) {
+      return Future<void>.error(const io.SocketException('test'));
+    } else {
+      return Future<void>.microtask(() => action(utf8.encode(data)));
+    }
   }
 
   @override

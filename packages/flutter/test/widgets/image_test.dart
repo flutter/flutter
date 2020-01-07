@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -37,14 +37,14 @@ void main() {
       null,
       EnginePhase.layout,
     );
-    RenderImage renderImage = key.currentContext.findRenderObject();
+    RenderImage renderImage = key.currentContext.findRenderObject() as RenderImage;
     expect(renderImage.image, isNull);
 
     imageProvider1.complete();
     await tester.idle(); // resolve the future from the image provider
     await tester.pump(null, EnginePhase.layout);
 
-    renderImage = key.currentContext.findRenderObject();
+    renderImage = key.currentContext.findRenderObject() as RenderImage;
     expect(renderImage.image, isNotNull);
 
     final TestImageProvider imageProvider2 = TestImageProvider();
@@ -60,7 +60,7 @@ void main() {
       EnginePhase.layout,
     );
 
-    renderImage = key.currentContext.findRenderObject();
+    renderImage = key.currentContext.findRenderObject() as RenderImage;
     expect(renderImage.image, isNull);
   });
 
@@ -79,14 +79,14 @@ void main() {
       null,
       EnginePhase.layout,
     );
-    RenderImage renderImage = key.currentContext.findRenderObject();
+    RenderImage renderImage = key.currentContext.findRenderObject() as RenderImage;
     expect(renderImage.image, isNull);
 
     imageProvider1.complete();
     await tester.idle(); // resolve the future from the image provider
     await tester.pump(null, EnginePhase.layout);
 
-    renderImage = key.currentContext.findRenderObject();
+    renderImage = key.currentContext.findRenderObject() as RenderImage;
     expect(renderImage.image, isNotNull);
 
     final TestImageProvider imageProvider2 = TestImageProvider();
@@ -103,7 +103,7 @@ void main() {
       EnginePhase.layout,
     );
 
-    renderImage = key.currentContext.findRenderObject();
+    renderImage = key.currentContext.findRenderObject() as RenderImage;
     expect(renderImage.image, isNotNull);
   });
 
@@ -119,14 +119,14 @@ void main() {
       null,
       EnginePhase.layout,
     );
-    RenderImage renderImage = key.currentContext.findRenderObject();
+    RenderImage renderImage = key.currentContext.findRenderObject() as RenderImage;
     expect(renderImage.image, isNull);
 
     imageProvider1.complete();
     await tester.idle(); // resolve the future from the image provider
     await tester.pump(null, EnginePhase.layout);
 
-    renderImage = key.currentContext.findRenderObject();
+    renderImage = key.currentContext.findRenderObject() as RenderImage;
     expect(renderImage.image, isNotNull);
 
     final TestImageProvider imageProvider2 = TestImageProvider();
@@ -140,7 +140,7 @@ void main() {
       EnginePhase.layout,
     );
 
-    renderImage = key.currentContext.findRenderObject();
+    renderImage = key.currentContext.findRenderObject() as RenderImage;
     expect(renderImage.image, isNull);
   });
 
@@ -157,14 +157,14 @@ void main() {
       null,
       EnginePhase.layout,
     );
-    RenderImage renderImage = key.currentContext.findRenderObject();
+    RenderImage renderImage = key.currentContext.findRenderObject() as RenderImage;
     expect(renderImage.image, isNull);
 
     imageProvider1.complete();
     await tester.idle(); // resolve the future from the image provider
     await tester.pump(null, EnginePhase.layout);
 
-    renderImage = key.currentContext.findRenderObject();
+    renderImage = key.currentContext.findRenderObject() as RenderImage;
     expect(renderImage.image, isNotNull);
 
     final TestImageProvider imageProvider2 = TestImageProvider();
@@ -179,7 +179,7 @@ void main() {
       EnginePhase.layout,
     );
 
-    renderImage = key.currentContext.findRenderObject();
+    renderImage = key.currentContext.findRenderObject() as RenderImage;
     expect(renderImage.image, isNotNull);
   });
 
@@ -210,7 +210,7 @@ void main() {
             image: imageProvider,
           ),
         ),
-      )
+      ),
     );
 
     expect(imageProvider._lastResolvedConfiguration.devicePixelRatio, 5.0);
@@ -237,7 +237,7 @@ void main() {
             image: imageProvider,
           ),
         ),
-      )
+      ),
     );
 
     expect(imageProvider._lastResolvedConfiguration.devicePixelRatio, 10.0);
@@ -276,7 +276,7 @@ void main() {
             child: Container(width: 100.0),
           ),
         ],
-      )
+      ),
     );
 
     expect(imageProvider._lastResolvedConfiguration.devicePixelRatio, 5.0);
@@ -306,7 +306,7 @@ void main() {
             ),
           ),
         ],
-      )
+      ),
     );
 
     expect(imageProvider._lastResolvedConfiguration.devicePixelRatio, 10.0);
@@ -597,7 +597,7 @@ void main() {
         image: TestImageProvider(),
         color: const Color(0xFF00FF00),
         colorBlendMode: BlendMode.clear,
-      )
+      ),
     );
     final RenderImage renderer = tester.renderObject<RenderImage>(find.byType(Image));
     expect(renderer.color, const Color(0xFF00FF00));
@@ -717,7 +717,7 @@ void main() {
         null,
         EnginePhase.layout,
     );
-    RenderImage renderImage = key.currentContext.findRenderObject();
+    RenderImage renderImage = key.currentContext.findRenderObject() as RenderImage;
     expect(renderImage.image, isNull);
 
     imageProvider1.complete();
@@ -725,7 +725,7 @@ void main() {
     await tester.idle(); // resolve the future from the image provider
     await tester.pump(null, EnginePhase.layout);
 
-    renderImage = key.currentContext.findRenderObject();
+    renderImage = key.currentContext.findRenderObject() as RenderImage;
     expect(renderImage.image, isNotNull);
 
     final ui.Image oldImage = renderImage.image;
@@ -742,7 +742,7 @@ void main() {
         EnginePhase.layout,
     );
 
-    renderImage = key.currentContext.findRenderObject();
+    renderImage = key.currentContext.findRenderObject() as RenderImage;
     expect(renderImage.image, isNotNull);
     expect(renderImage.image, isNot(equals(oldImage)));
   });
@@ -792,7 +792,7 @@ void main() {
           textDirection: TextDirection.ltr,
           flags: <SemanticsFlag>[SemanticsFlag.isImage],
         ),
-      ]
+      ],
     ), ignoreTransform: true));
     semantics.dispose();
   });
@@ -1199,7 +1199,7 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
   }
 
   @override
-  ImageStreamCompleter load(TestImageProvider key) => _streamCompleter;
+  ImageStreamCompleter load(TestImageProvider key, DecoderCallback decode) => _streamCompleter;
 
   void complete() {
     _completer.complete(ImageInfo(image: TestImage()));
@@ -1240,7 +1240,7 @@ class TestImageStreamCompleter extends ImageStreamCompleter {
       _currentImage = imageInfo;
     }
     final List<ImageStreamListener> localListeners = listeners.toList();
-    for (ImageStreamListener listener in localListeners) {
+    for (final ImageStreamListener listener in localListeners) {
       if (imageInfo != null) {
         listener.onImage(imageInfo, false);
       }

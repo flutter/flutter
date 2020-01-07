@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -112,7 +112,10 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   ///
   /// Deprecated. Call [prepareInitialFrame] followed by a call to
   /// [PipelineOwner.requestVisualUpdate] on [owner] instead.
-  @Deprecated('Call prepareInitialFrame followed by owner.requestVisualUpdate() instead.')
+  @Deprecated(
+    'Call prepareInitialFrame followed by owner.requestVisualUpdate() instead. '
+    'This feature was deprecated after v1.10.0.'
+  )
   void scheduleInitialFrame() {
     prepareInitialFrame();
     owner.requestVisualUpdate();
@@ -136,9 +139,9 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
 
   Matrix4 _rootTransform;
 
-  Layer _updateMatricesAndCreateNewRootLayer() {
+  TransformLayer _updateMatricesAndCreateNewRootLayer() {
     _rootTransform = configuration.toMatrix();
-    final ContainerLayer rootLayer = TransformLayer(transform: _rootTransform);
+    final TransformLayer rootLayer = TransformLayer(transform: _rootTransform);
     rootLayer.attach(this);
     assert(_rootTransform != null);
     return rootLayer;
@@ -190,13 +193,15 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
   ///
   /// See also:
   ///
-  /// * [Layer.findAll], which is used by this method to find all
-  ///   [AnnotatedRegionLayer]s annotated for mouse tracking.
+  ///  * [Layer.findAllAnnotations], which is used by this method to find all
+  ///    [AnnotatedRegionLayer]s annotated for mouse tracking.
   Iterable<MouseTrackerAnnotation> hitTestMouseTrackers(Offset position) {
     // Layer hit testing is done using device pixels, so we have to convert
     // the logical coordinates of the event location back to device pixels
     // here.
-    return layer.findAll<MouseTrackerAnnotation>(position * configuration.devicePixelRatio);
+    return layer.findAllAnnotations<MouseTrackerAnnotation>(
+      position * configuration.devicePixelRatio
+    ).annotations;
   }
 
   @override
@@ -248,8 +253,9 @@ class RenderView extends RenderObject with RenderObjectWithChildMixin<RenderBox>
       case TargetPlatform.android:
         lowerOverlayStyle = layer.find<SystemUiOverlayStyle>(bottom);
         break;
-      case TargetPlatform.iOS:
       case TargetPlatform.fuchsia:
+      case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
         break;
     }
     // If there are no overlay styles in the UI don't bother updating.

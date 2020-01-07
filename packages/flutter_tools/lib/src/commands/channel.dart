@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -7,7 +7,7 @@ import 'dart:async';
 import '../base/common.dart';
 import '../base/process.dart';
 import '../cache.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 import '../version.dart';
 
@@ -39,8 +39,8 @@ class ChannelCommand extends FlutterCommand {
     switch (argResults.rest.length) {
       case 0:
         await _listChannels(
-          showAll: argResults['all'],
-          verbose: globalResults['verbose'],
+          showAll: boolArg('all'),
+          verbose: globalResults['verbose'] as bool,
         );
         return null;
       case 1:
@@ -60,7 +60,7 @@ class ChannelCommand extends FlutterCommand {
 
     showAll = showAll || currentChannel != currentBranch;
 
-    printStatus('Flutter channels:');
+    globals.printStatus('Flutter channels:');
     final int result = await processUtils.stream(
       <String>['git', 'branch', '-r'],
       workingDirectory: Cache.flutterRoot,
@@ -94,12 +94,12 @@ class ChannelCommand extends FlutterCommand {
   }
 
   Future<void> _switchChannel(String branchName) {
-    printStatus("Switching to flutter channel '$branchName'...");
+    globals.printStatus("Switching to flutter channel '$branchName'...");
     if (FlutterVersion.obsoleteBranches.containsKey(branchName)) {
       final String alternative = FlutterVersion.obsoleteBranches[branchName];
-      printStatus("This channel is obsolete. Consider switching to the '$alternative' channel instead.");
+      globals.printStatus("This channel is obsolete. Consider switching to the '$alternative' channel instead.");
     } else if (!FlutterVersion.officialChannels.contains(branchName)) {
-      printStatus('This is not an official channel. For a list of available channels, try "flutter channel".');
+      globals.printStatus('This is not an official channel. For a list of available channels, try "flutter channel".');
     }
     return _checkout(branchName);
   }
@@ -108,7 +108,7 @@ class ChannelCommand extends FlutterCommand {
     final String channel = FlutterVersion.instance.channel;
     if (FlutterVersion.obsoleteBranches.containsKey(channel)) {
       final String alternative = FlutterVersion.obsoleteBranches[channel];
-      printStatus("Transitioning from '$channel' to '$alternative'...");
+      globals.printStatus("Transitioning from '$channel' to '$alternative'...");
       return _checkout(alternative);
     }
   }

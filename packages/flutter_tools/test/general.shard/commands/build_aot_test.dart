@@ -1,4 +1,4 @@
-// Copyright 2019 The Flutter Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -7,8 +7,8 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
-import 'package:flutter_tools/src/commands/build_aot.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
+import 'package:flutter_tools/src/ios/bitcode.dart';
 import 'package:flutter_tools/src/ios/plist_parser.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:mockito/mockito.dart';
@@ -41,6 +41,7 @@ void main() {
   }, overrides: <Type, Generator>{
     Artifacts: () => LocalEngineArtifacts('/engine', 'ios_profile', 'host_profile'),
     FileSystem: () => memoryFileSystem,
+    ProcessManager: () => FakeProcessManager.any(),
   });
 
   testUsingContext('build aot prints error if Clang version invalid', () async {

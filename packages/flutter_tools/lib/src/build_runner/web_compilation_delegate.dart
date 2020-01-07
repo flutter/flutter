@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -16,6 +16,7 @@ import 'package:path/path.dart' as path;
 import '../base/file_system.dart';
 import '../build_info.dart';
 import '../convert.dart';
+import '../globals.dart' as globals;
 import '../platform_plugins.dart';
 import '../plugins.dart';
 import '../project.dart';
@@ -30,6 +31,7 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
   Future<bool> initialize({
     Directory projectDirectory,
     String testOutputDir,
+    List<String> testFiles,
     BuildMode mode,
     String projectName,
     bool initializePlatform,
@@ -46,12 +48,19 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
       release: mode == BuildMode.release,
       profile: mode == BuildMode.profile,
       hasPlugins: hasWebPlugins,
-      includeTests: true,
       initializePlatform: initializePlatform,
+      testTargets: WebTestTargetManifest(
+        testFiles
+          .map<String>((String absolutePath) {
+            final String relativePath = path.relative(absolutePath, from: projectDirectory.path);
+            return '${path.withoutExtension(relativePath)}.*';
+          })
+          .toList(),
+      ),
     );
     client.startBuild();
     bool success = true;
-    await for (BuildResults results in client.buildResults) {
+    await for (final BuildResults results in client.buildResults) {
       final BuildResult result = results.results.firstWhere((BuildResult result) {
         return result.target == 'web';
       });
@@ -72,21 +81,21 @@ class BuildRunnerWebCompilationProxy extends WebCompilationProxy {
       final Iterable<Directory> childDirectories = rootDirectory
         .listSync()
         .whereType<Directory>();
-      for (Directory childDirectory in childDirectories) {
-        final String path = fs.path.join(testOutputDir, 'packages',
-            fs.path.basename(childDirectory.path));
-        copyDirectorySync(childDirectory.childDirectory('lib'), fs.directory(path));
+      for (final Directory childDirectory in childDirectories) {
+        final String path = globals.fs.path.join(testOutputDir, 'packages',
+            globals.fs.path.basename(childDirectory.path));
+        copyDirectorySync(childDirectory.childDirectory('lib'), globals.fs.directory(path));
       }
       final Directory outputDirectory = rootDirectory
           .childDirectory(projectName)
           .childDirectory('test');
-      copyDirectorySync(outputDirectory, fs.directory(fs.path.join(testOutputDir)));
+      copyDirectorySync(outputDirectory, globals.fs.directory(globals.fs.path.join(testOutputDir)));
     }
     return success;
   }
 }
 
-/// Handles mapping a single root file scheme to a multiroot scheme.
+/// Handles mapping a single root file scheme to a multi-root scheme.
 ///
 /// This allows one build_runner build to read the output from a previous
 /// isolated build.
@@ -125,20 +134,18 @@ class MultirootFileBasedAssetReader extends core.FileBasedAssetReader {
   @override
   Stream<AssetId> findAssets(Glob glob, {String package}) async* {
     if (package == null || packageGraph.root.name == package) {
-      await for (io.FileSystemEntity entity in glob.list(followLinks: true, root: packageGraph.root.path)) {
-        if (entity is io.File && _isNotHidden(entity)) {
+      final String generatedRoot = globals.fs.path.join(generatedDirectory.path, packageGraph.root.name);
+      await for (final io.FileSystemEntity entity in glob.list(followLinks: true, root: packageGraph.root.path)) {
+        if (entity is io.File && _isNotHidden(entity) && !globals.fs.path.isWithin(generatedRoot, entity.path)) {
           yield _fileToAssetId(entity, packageGraph.root);
         }
       }
-      final String generatedRoot = fs.path.join(
-        generatedDirectory.path, packageGraph.root.name,
-      );
-      if (!fs.isDirectorySync(generatedRoot)) {
+      if (!globals.fs.isDirectorySync(generatedRoot)) {
         return;
       }
-      await for (io.FileSystemEntity entity in glob.list(followLinks: true, root: generatedRoot)) {
+      await for (final io.FileSystemEntity entity in glob.list(followLinks: true, root: generatedRoot)) {
         if (entity is io.File && _isNotHidden(entity)) {
-          yield _fileToAssetId(entity, packageGraph.root, generatedRoot);
+          yield _fileToAssetId(entity, packageGraph.root, globals.fs.path.relative(generatedRoot), true);
         }
       }
       return;
@@ -151,19 +158,24 @@ class MultirootFileBasedAssetReader extends core.FileBasedAssetReader {
   }
 
   bool _missingSource(AssetId id) {
-    return !fs.file(path.joinAll(<String>[packageGraph.root.path, ...id.pathSegments])).existsSync();
+    return !globals.fs.file(path.joinAll(<String>[packageGraph.root.path, ...id.pathSegments])).existsSync();
   }
 
   File _generatedFile(AssetId id) {
-    return fs.file(
+    return globals.fs.file(
       path.joinAll(<String>[generatedDirectory.path, packageGraph.root.name, ...id.pathSegments])
     );
   }
 
   /// Creates an [AssetId] for [file], which is a part of [packageNode].
-  AssetId _fileToAssetId(io.File file, core.PackageNode packageNode, [String root]) {
+  AssetId _fileToAssetId(io.File file, core.PackageNode packageNode, [String root, bool generated = false]) {
     final String filePath = path.normalize(file.absolute.path);
-    final String relativePath = path.relative(filePath, from: root ?? packageNode.path);
+    String relativePath;
+    if (generated) {
+      relativePath = filePath.substring(root.length + 2);
+    } else {
+      relativePath = path.relative(filePath, from: packageNode.path);
+    }
     return AssetId(packageNode.name, relativePath);
   }
 }

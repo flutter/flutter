@@ -1,13 +1,13 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'package:flutter_tools/src/base/io.dart' show ProcessException, ProcessResult;
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
+import 'package:platform/platform.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -52,8 +52,8 @@ void main() {
 
     testUsingContext('xcodeVersionSatisfactory is false when version is less than minimum', () {
       when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
-      when(mockXcodeProjectInterpreter.majorVersion).thenReturn(8);
-      when(mockXcodeProjectInterpreter.minorVersion).thenReturn(17);
+      when(mockXcodeProjectInterpreter.majorVersion).thenReturn(9);
+      when(mockXcodeProjectInterpreter.minorVersion).thenReturn(0);
       expect(xcode.isVersionSatisfactory, isFalse);
     }, overrides: <Type, Generator>{
       XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
@@ -68,8 +68,8 @@ void main() {
 
     testUsingContext('xcodeVersionSatisfactory is true when version meets minimum', () {
       when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
-      when(mockXcodeProjectInterpreter.majorVersion).thenReturn(9);
-      when(mockXcodeProjectInterpreter.minorVersion).thenReturn(0);
+      when(mockXcodeProjectInterpreter.majorVersion).thenReturn(10);
+      when(mockXcodeProjectInterpreter.minorVersion).thenReturn(2);
       expect(xcode.isVersionSatisfactory, isTrue);
     }, overrides: <Type, Generator>{
       XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
@@ -77,8 +77,8 @@ void main() {
 
     testUsingContext('xcodeVersionSatisfactory is true when major version exceeds minimum', () {
       when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
-      when(mockXcodeProjectInterpreter.majorVersion).thenReturn(10);
-      when(mockXcodeProjectInterpreter.minorVersion).thenReturn(0);
+      when(mockXcodeProjectInterpreter.majorVersion).thenReturn(11);
+      when(mockXcodeProjectInterpreter.minorVersion).thenReturn(2);
       expect(xcode.isVersionSatisfactory, isTrue);
     }, overrides: <Type, Generator>{
       XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
@@ -86,8 +86,8 @@ void main() {
 
     testUsingContext('xcodeVersionSatisfactory is true when minor version exceeds minimum', () {
       when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
-      when(mockXcodeProjectInterpreter.majorVersion).thenReturn(9);
-      when(mockXcodeProjectInterpreter.minorVersion).thenReturn(1);
+      when(mockXcodeProjectInterpreter.majorVersion).thenReturn(10);
+      when(mockXcodeProjectInterpreter.minorVersion).thenReturn(3);
       expect(xcode.isVersionSatisfactory, isTrue);
     }, overrides: <Type, Generator>{
       XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
@@ -123,8 +123,8 @@ void main() {
         .thenReturn(ProcessResult(1, 127, '', 'ERROR'));
 
       when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
-      when(mockXcodeProjectInterpreter.majorVersion).thenReturn(9);
-      when(mockXcodeProjectInterpreter.minorVersion).thenReturn(1);
+      when(mockXcodeProjectInterpreter.majorVersion).thenReturn(10);
+      when(mockXcodeProjectInterpreter.minorVersion).thenReturn(2);
 
       expect(xcode.isInstalledAndMeetsVersionCheck, isFalse);
     }, overrides: <Type, Generator>{
@@ -141,7 +141,7 @@ void main() {
         .thenReturn(ProcessResult(1, 0, xcodePath, ''));
 
       when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
-      when(mockXcodeProjectInterpreter.majorVersion).thenReturn(8);
+      when(mockXcodeProjectInterpreter.majorVersion).thenReturn(9);
       when(mockXcodeProjectInterpreter.minorVersion).thenReturn(0);
       expect(xcode.isInstalledAndMeetsVersionCheck, isFalse);
     }, overrides: <Type, Generator>{
@@ -158,8 +158,8 @@ void main() {
         .thenReturn(ProcessResult(1, 0, xcodePath, ''));
 
       when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
-      when(mockXcodeProjectInterpreter.majorVersion).thenReturn(9);
-      when(mockXcodeProjectInterpreter.minorVersion).thenReturn(1);
+      when(mockXcodeProjectInterpreter.majorVersion).thenReturn(10);
+      when(mockXcodeProjectInterpreter.minorVersion).thenReturn(2);
       expect(xcode.isInstalledAndMeetsVersionCheck, isTrue);
     }, overrides: <Type, Generator>{
       XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
@@ -189,6 +189,12 @@ void main() {
       expect(xcode.eulaSigned, isTrue);
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('SDK name', () {
+      expect(getNameForSdk(SdkType.iPhone), 'iphoneos');
+      expect(getNameForSdk(SdkType.iPhoneSimulator), 'iphonesimulator');
+      expect(getNameForSdk(SdkType.macOS), 'macosx');
     });
   });
 }

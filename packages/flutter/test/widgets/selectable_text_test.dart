@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -78,7 +78,7 @@ Widget overlayWithEntry(OverlayEntry entry) {
         data: const MediaQueryData(size: Size(800.0, 600.0)),
         child: Overlay(
           initialEntries: <OverlayEntry>[
-            entry
+            entry,
           ],
         ),
       ),
@@ -117,7 +117,7 @@ double getOpacity(WidgetTester tester, Finder finder) {
       find.ancestor(
         of: finder,
         matching: find.byType(FadeTransition),
-      )
+      ),
   ).opacity.value;
 }
 
@@ -177,10 +177,7 @@ void main() {
     debugResetSemanticsIdCounter();
   });
 
-  Widget selectableTextBuilder({
-    String text = '',
-    int maxLines = 1,
-  }) {
+  Widget selectableTextBuilder({String text = '', int maxLines = 1}) {
     return boilerplate(
       child: SelectableText(
         text,
@@ -192,17 +189,12 @@ void main() {
 
   testWidgets('has expected defaults', (WidgetTester tester) async {
     await tester.pumpWidget(
-      const MediaQuery(
-        data: MediaQueryData(devicePixelRatio: 1.0),
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: SelectableText('selectable text'),
-        ),
+      boilerplate(
+          child: const SelectableText('selectable text'),
       ),
     );
 
-    final SelectableText selectableText =
-    tester.firstWidget(find.byType(SelectableText));
+    final SelectableText selectableText = tester.firstWidget(find.byType(SelectableText));
     expect(selectableText.showCursor, false);
     expect(selectableText.autofocus, false);
     expect(selectableText.dragStartBehavior, DragStartBehavior.start);
@@ -239,7 +231,7 @@ void main() {
                     ),
                   ),
                 ],
-              )
+              ),
           ),
         ),
       ),
@@ -277,7 +269,7 @@ void main() {
                                 child: Text('Hello World!')
                             )
                         ),
-                      )
+                      ),
                   ),
                   TextSpan(
                     text: 'Third line!\n',
@@ -287,7 +279,7 @@ void main() {
                     ),
                   ),
                 ],
-              )
+              ),
           ),
         ),
       ),
@@ -299,7 +291,7 @@ void main() {
     await tester.pumpWidget(
         overlay(
           child: const SelectableText('selectable text'),
-        )
+        ),
     );
     await tester.tap(find.byType(SelectableText));
     await tester.idle();
@@ -310,7 +302,7 @@ void main() {
     await tester.pumpWidget(
         boilerplate(
           child: const SelectableText('s'),
-        )
+        ),
     );
 
     RenderBox findSelectableTextBox() => tester.renderObject(find.byType(SelectableText));
@@ -321,11 +313,34 @@ void main() {
     await tester.pumpWidget(
         boilerplate(
           child: const SelectableText('very very long'),
-        )
+        ),
     );
 
     final RenderBox longtextBox = findSelectableTextBox();
     expect(longtextBox.size, const Size(199.0, 14.0));
+  });
+
+  testWidgets('can scale with textScaleFactor', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      boilerplate(
+        child: const SelectableText('selectable text'),
+      ),
+    );
+
+    final RenderBox renderBox = tester.renderObject(find.byType(SelectableText));
+    expect(renderBox.size.height, 14.0);
+
+    await tester.pumpWidget(
+      boilerplate(
+        child: const SelectableText(
+          'selectable text',
+          textScaleFactor: 1.9,
+        ),
+      ),
+    );
+
+    final RenderBox scaledBox = tester.renderObject(find.byType(SelectableText));
+    expect(scaledBox.size.height, 27.0);
   });
 
   testWidgets('can switch between textWidthBasis', (WidgetTester tester) async {
@@ -337,7 +352,7 @@ void main() {
           text,
           textWidthBasis: TextWidthBasis.parent,
         ),
-      )
+      ),
     );
     RenderBox textBox = findTextBox();
     expect(textBox.size, const Size(800.0, 28.0));
@@ -348,7 +363,7 @@ void main() {
           text,
           textWidthBasis: TextWidthBasis.longestLine,
         ),
-      )
+      ),
     );
     textBox = findTextBox();
     expect(textBox.size, const Size(633.0, 28.0));
@@ -417,7 +432,7 @@ void main() {
     await tester.pumpWidget(
         overlay(
           child: const SelectableText('abc def ghi'),
-        )
+        ),
     );
     final EditableText editableText = tester.widget(find.byType(EditableText));
     expect(editableText.controller.selection.baseOffset, -1);
@@ -440,7 +455,7 @@ void main() {
             'abc def ghi',
             enableInteractiveSelection: false,
           ),
-        )
+        ),
     );
     final EditableText editableText = tester.widget(find.byType(EditableText));
     expect(editableText.controller.selection.baseOffset, -1);
@@ -463,7 +478,7 @@ void main() {
             'abc def ghi',
             enableInteractiveSelection: false,
           ),
-        )
+        ),
     );
     final EditableText editableText = tester.widget(find.byType(EditableText));
     expect(editableText.controller.selection.baseOffset, -1);
@@ -485,7 +500,7 @@ void main() {
     await tester.pumpWidget(
         overlay(
           child: const SelectableText('abc def ghi'),
-        )
+        ),
     );
 
     final EditableText editableText = tester.widget(find.byType(EditableText));
@@ -514,7 +529,7 @@ void main() {
     await tester.pumpWidget(
         overlay(
           child: const SelectableText('abc def ghi'),
-        )
+        ),
     );
     // Long press the 'e' to select 'def', but don't release the gesture.
     final Offset ePos = textOffsetToPosition(tester, 5);
@@ -541,7 +556,7 @@ void main() {
     await tester.pumpWidget(
         overlay(
           child: const SelectableText('abc def ghi'),
-        )
+        ),
     );
 
     final EditableText editableText = tester.widget(find.byType(EditableText));
@@ -564,7 +579,7 @@ void main() {
     await tester.pumpWidget(
         overlay(
           child: const SelectableText('selectable'),
-        )
+        ),
     );
     final EditableText editableTextWidget = tester.widget(find.byType(EditableText));
     // selectable text cannot open keyboard.
@@ -602,7 +617,7 @@ void main() {
             selectAll: true,
           ),
         ),
-      )
+      ),
     );
     const int dIndex = 5;
     final Offset dPos = textOffsetToPosition(tester, dIndex);
@@ -1240,7 +1255,7 @@ void main() {
           SemanticsFlag.isTextField,
           SemanticsFlag.isReadOnly,
           SemanticsFlag.isMultiline,
-        ]
+        ],
       ),
     );
 
@@ -1278,7 +1293,7 @@ void main() {
 
       await tester.sendKeyDownEvent(LogicalKeyboardKey.shift);
       await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowLeft);
-      expect(controller.selection.extentOffset - controller.selection.baseOffset, 1);
+      expect(controller.selection.extentOffset - controller.selection.baseOffset, -1);
     });
 
     testWidgets('Shift test 2', (WidgetTester tester) async {
@@ -1302,7 +1317,7 @@ void main() {
 
       await tester.pumpAndSettle();
 
-      expect(controller.selection.extentOffset - controller.selection.baseOffset, 5);
+      expect(controller.selection.extentOffset - controller.selection.baseOffset, -5);
     });
 
     testWidgets('Down and up test', (WidgetTester tester) async {
@@ -1312,7 +1327,7 @@ void main() {
       await tester.sendKeyDownEvent(LogicalKeyboardKey.arrowUp);
       await tester.pumpAndSettle();
 
-      expect(controller.selection.extentOffset - controller.selection.baseOffset, 11);
+      expect(controller.selection.extentOffset - controller.selection.baseOffset, -11);
 
       await tester.sendKeyUpEvent(LogicalKeyboardKey.arrowUp);
       await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
@@ -1371,7 +1386,7 @@ void main() {
       await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
       await tester.pumpAndSettle();
 
-      expect(controller.selection.extentOffset - controller.selection.baseOffset, 5);
+      expect(controller.selection.extentOffset - controller.selection.baseOffset, -5);
     });
   });
 
@@ -1381,7 +1396,7 @@ void main() {
     String clipboardContent = '';
     SystemChannels.platform.setMockMethodCallHandler((MethodCall methodCall) async {
       if (methodCall.method == 'Clipboard.setData')
-        clipboardContent = methodCall.arguments['text'];
+        clipboardContent = methodCall.arguments['text'] as String;
       else if (methodCall.method == 'Clipboard.getData')
         return <String, dynamic>{'text': clipboardContent};
       return null;
@@ -1516,7 +1531,7 @@ void main() {
     await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
     await tester.pumpAndSettle();
 
-    expect(c1.selection.extentOffset - c1.selection.baseOffset, 5);
+    expect(c1.selection.extentOffset - c1.selection.baseOffset, -5);
 
     await tester.pumpWidget(
       MaterialApp(
@@ -1555,7 +1570,7 @@ void main() {
     editableTextWidget = tester.widget(find.byType(EditableText).last);
     c1 = editableTextWidget.controller;
 
-    expect(c1.selection.extentOffset - c1.selection.baseOffset, 10);
+    expect(c1.selection.extentOffset - c1.selection.baseOffset, -6);
   });
 
 
@@ -1610,7 +1625,7 @@ void main() {
     await tester.sendKeyUpEvent(LogicalKeyboardKey.shift);
     await tester.pumpAndSettle();
 
-    expect(c1.selection.extentOffset - c1.selection.baseOffset, 5);
+    expect(c1.selection.extentOffset - c1.selection.baseOffset, -5);
     expect(c2.selection.extentOffset - c2.selection.baseOffset, 0);
 
     await tester.tap(find.byType(SelectableText).last);
@@ -1625,7 +1640,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(c1.selection.extentOffset - c1.selection.baseOffset, 0);
-    expect(c2.selection.extentOffset - c2.selection.baseOffset, 5);
+    expect(c2.selection.extentOffset - c2.selection.baseOffset, -5);
   });
 
   testWidgets('Caret works when maxLines is null', (WidgetTester tester) async {
@@ -1635,7 +1650,7 @@ void main() {
             'x',
             maxLines: null,
           ),
-        )
+        ),
     );
 
     final EditableText editableTextWidget = tester.widget(find.byType(EditableText).first);
@@ -2242,7 +2257,7 @@ void main() {
                 style: style,
               ),
             ),
-          )
+          ),
         ),
       );
     }
@@ -3186,25 +3201,13 @@ void main() {
   testWidgets('SelectableText implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
-//    properties.add(DiagnosticsProperty<String>('data', data, defaultValue: null));
-//    properties.add(DiagnosticsProperty<FocusNode>('focusNode', focusNode, defaultValue: null));
-//    properties.add(DiagnosticsProperty<TextStyle>('style', style, defaultValue: null));
-//    properties.add(DiagnosticsProperty<bool>('autofocus', autofocus, defaultValue: false));
-//    properties.add(DiagnosticsProperty<bool>('showCursor', showCursor, defaultValue: false));
-//    properties.add(IntProperty('maxLines', maxLines, defaultValue: null));
-//    properties.add(EnumProperty<TextAlign>('textAlign', textAlign, defaultValue: null));
-//    properties.add(EnumProperty<TextDirection>('textDirection', textDirection, defaultValue: null));
-//    properties.add(DoubleProperty('cursorWidth', cursorWidth, defaultValue: 2.0));
-//    properties.add(DiagnosticsProperty<Radius>('cursorRadius', cursorRadius, defaultValue: null));
-//    properties.add(DiagnosticsProperty<Color>('cursorColor', cursorColor, defaultValue: null));
-//    properties.add(FlagProperty('selectionEnabled', value: selectionEnabled, defaultValue: true, ifFalse: 'selection disabled'));
-//    properties.add(DiagnosticsProperty<ScrollPhysics>('scrollPhysics', scrollPhysics, defaultValue: null));
     // Not checking controller, inputFormatters, focusNode
     const SelectableText(
       'something',
       style: TextStyle(color: Color(0xff00ff00)),
       textAlign: TextAlign.end,
       textDirection: TextDirection.ltr,
+      textScaleFactor: 1.0,
       autofocus: true,
       showCursor: true,
       maxLines: 10,
@@ -3227,6 +3230,7 @@ void main() {
       'maxLines: 10',
       'textAlign: end',
       'textDirection: ltr',
+      'textScaleFactor: 1.0',
       'cursorWidth: 1.0',
       'cursorRadius: Radius.circular(0.0)',
       'cursorColor: Color(0xff00ff00)',
@@ -3555,8 +3559,8 @@ void main() {
     // On Android, an empty app contains a single FadeTransition. The following
     // two are the left and right text selection handles, respectively.
     expect(transitions.length, 3);
-    final FadeTransition left = transitions[1];
-    final FadeTransition right = transitions[2];
+    final FadeTransition left = transitions[1] as FadeTransition;
+    final FadeTransition right = transitions[2] as FadeTransition;
 
     expect(left.opacity.value, equals(1.0));
     expect(right.opacity.value, equals(1.0));
@@ -3584,8 +3588,8 @@ void main() {
     final List<Widget> transitions =
     find.byType(FadeTransition).evaluate().map((Element e) => e.widget).toList();
     expect(transitions.length, 2);
-    final FadeTransition left = transitions[0];
-    final FadeTransition right = transitions[1];
+    final FadeTransition left = transitions[0] as FadeTransition;
+    final FadeTransition right = transitions[1] as FadeTransition;
 
     expect(left.opacity.value, equals(1.0));
     expect(right.opacity.value, equals(1.0));

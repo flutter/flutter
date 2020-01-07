@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -77,9 +77,9 @@ enum Orientation {
 ///
 /// See also:
 ///
-/// * [Scaffold], [SafeArea], [CupertinoTabScaffold], and
-/// [CupertinoPageScaffold], all of which are informed by [padding],
-/// [viewPadding], and [viewInsets].
+///  * [Scaffold], [SafeArea], [CupertinoTabScaffold], and
+///    [CupertinoPageScaffold], all of which are informed by [padding],
+///    [viewPadding], and [viewInsets].
 @immutable
 class MediaQueryData {
   /// Creates data for a media query with explicit values.
@@ -174,8 +174,8 @@ class MediaQueryData {
   ///
   /// See also:
   ///
-  /// * [ui.window], which provides some additional detail about this property
-  ///   and how it relates to [padding] and [viewPadding].
+  ///  * [ui.window], which provides some additional detail about this property
+  ///    and how it relates to [padding] and [viewPadding].
   final EdgeInsets viewInsets;
 
   /// The parts of the display that are partially obscured by system UI,
@@ -213,8 +213,8 @@ class MediaQueryData {
   ///
   /// See also:
   ///
-  /// * [ui.window], which provides some additional detail about this
-  ///   property and how it relates to [padding] and [viewInsets].
+  ///  * [ui.window], which provides some additional detail about this
+  ///    property and how it relates to [padding] and [viewInsets].
   final EdgeInsets viewPadding;
 
   /// The areas along the edges of the display where the system consumes
@@ -420,10 +420,10 @@ class MediaQueryData {
         bottom: removeBottom ? 0.0 : null,
       ),
       viewPadding: viewPadding.copyWith(
-        left: math.max(0.0, viewPadding.left - padding.left),
-        top: math.max(0.0, viewPadding.top - padding.top),
-        right: math.max(0.0, viewPadding.right - padding.right),
-        bottom: math.max(0.0, viewPadding.bottom - padding.bottom),
+        left: removeLeft ? math.max(0.0, viewPadding.left - padding.left) : null,
+        top: removeTop ? math.max(0.0, viewPadding.top - padding.top) : null,
+        right: removeRight ? math.max(0.0, viewPadding.right - padding.right) : null,
+        bottom: removeBottom ? math.max(0.0, viewPadding.bottom - padding.bottom) : null,
       ),
       viewInsets: viewInsets,
       alwaysUse24HourFormat: alwaysUse24HourFormat,
@@ -463,10 +463,10 @@ class MediaQueryData {
       platformBrightness: platformBrightness,
       padding: padding,
       viewPadding: viewPadding.copyWith(
-        left: math.max(0.0, viewPadding.left - viewInsets.left),
-        top: math.max(0.0, viewPadding.top - viewInsets.top),
-        right: math.max(0.0, viewPadding.right - viewInsets.right),
-        bottom: math.max(0.0, viewPadding.bottom - viewInsets.bottom),
+        left: removeLeft ? math.max(0.0, viewPadding.left - viewInsets.left) : null,
+        top: removeTop ? math.max(0.0, viewPadding.top - viewInsets.top) : null,
+        right: removeRight ? math.max(0.0, viewPadding.right - viewInsets.right) : null,
+        bottom: removeBottom ? math.max(0.0, viewPadding.bottom - viewInsets.bottom) : null,
       ),
       viewInsets: viewInsets.copyWith(
         left: removeLeft ? 0.0 : null,
@@ -535,21 +535,21 @@ class MediaQueryData {
   bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
-    final MediaQueryData typedOther = other;
-    return typedOther.size == size
-        && typedOther.devicePixelRatio == devicePixelRatio
-        && typedOther.textScaleFactor == textScaleFactor
-        && typedOther.platformBrightness == platformBrightness
-        && typedOther.padding == padding
-        && typedOther.viewPadding == viewPadding
-        && typedOther.viewInsets == viewInsets
-        && typedOther.physicalDepth == physicalDepth
-        && typedOther.alwaysUse24HourFormat == alwaysUse24HourFormat
-        && typedOther.highContrast == highContrast
-        && typedOther.disableAnimations == disableAnimations
-        && typedOther.invertColors == invertColors
-        && typedOther.accessibleNavigation == accessibleNavigation
-        && typedOther.boldText == boldText;
+    return other is MediaQueryData
+        && other.size == size
+        && other.devicePixelRatio == devicePixelRatio
+        && other.textScaleFactor == textScaleFactor
+        && other.platformBrightness == platformBrightness
+        && other.padding == padding
+        && other.viewPadding == viewPadding
+        && other.viewInsets == viewInsets
+        && other.physicalDepth == physicalDepth
+        && other.alwaysUse24HourFormat == alwaysUse24HourFormat
+        && other.highContrast == highContrast
+        && other.disableAnimations == disableAnimations
+        && other.invertColors == invertColors
+        && other.accessibleNavigation == accessibleNavigation
+        && other.boldText == boldText;
   }
 
   @override
@@ -739,7 +739,7 @@ class MediaQuery extends InheritedWidget {
   /// See also:
   ///
   ///  * [MediaQueryData.viewPadding], the affected property of the
-  ///  [MediaQueryData].
+  ///    [MediaQueryData].
   ///  * [removePadding], the same thing but for [MediaQueryData.padding].
   ///  * [removeViewInsets], the same thing but for [MediaQueryData.viewInsets].
   factory MediaQuery.removeViewPadding({
@@ -790,20 +790,21 @@ class MediaQuery extends InheritedWidget {
   static MediaQueryData of(BuildContext context, { bool nullOk = false }) {
     assert(context != null);
     assert(nullOk != null);
-    final MediaQuery query = context.inheritFromWidgetOfExactType(MediaQuery);
+    final MediaQuery query = context.dependOnInheritedWidgetOfExactType<MediaQuery>();
     if (query != null)
       return query.data;
     if (nullOk)
       return null;
-    throw FlutterError(
-      'MediaQuery.of() called with a context that does not contain a MediaQuery.\n'
-      'No MediaQuery ancestor could be found starting from the context that was passed '
-      'to MediaQuery.of(). This can happen because you do not have a WidgetsApp or '
-      'MaterialApp widget (those widgets introduce a MediaQuery), or it can happen '
-      'if the context you use comes from a widget above those widgets.\n'
-      'The context used was:\n'
-      '  $context'
-    );
+    throw FlutterError.fromParts(<DiagnosticsNode>[
+      ErrorSummary('MediaQuery.of() called with a context that does not contain a MediaQuery.'),
+      ErrorDescription(
+        'No MediaQuery ancestor could be found starting from the context that was passed '
+        'to MediaQuery.of(). This can happen because you do not have a WidgetsApp or '
+        'MaterialApp widget (those widgets introduce a MediaQuery), or it can happen '
+        'if the context you use comes from a widget above those widgets.'
+      ),
+      context.describeElement('The context used was')
+    ]);
   }
 
   /// Returns textScaleFactor for the nearest MediaQuery ancestor or 1.0, if

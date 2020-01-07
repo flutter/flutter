@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -192,6 +192,9 @@ class MaterialAccentColor extends ColorSwatch<int> {
 /// The [Colors.transparent] color isn't shown here because it is entirely
 /// invisible!
 class Colors {
+  // This class is not meant to be instatiated or extended; this constructor
+  // prevents instantiation and extension.
+  // ignore: unused_element
   Colors._();
 
   /// Completely invisible.

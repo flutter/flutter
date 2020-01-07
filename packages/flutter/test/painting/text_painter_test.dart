@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -744,6 +744,15 @@ void main() {
     final List<ui.LineMetrics> lines = painter.computeLineMetrics();
 
     expect(lines.length, 4);
+
+    // TODO(garyq): This data dump is for debugging a test flake. This should
+    // be removed when it is no longer useful.
+    if (lines[1].hardBreak == true) {
+      print('LineMetrics called: ${lines.length}');
+      for (final ui.LineMetrics line in lines) {
+        print('${line.lineNumber}: ${line.hardBreak}');
+      }
+    }
 
     expect(lines[0].hardBreak, true);
     expect(lines[1].hardBreak, false);

@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -66,10 +66,19 @@ class _TappableWhileStatusIsState extends State<_TappableWhileStatusIs> {
 
   @override
   Widget build(BuildContext context) {
-    return AbsorbPointer(
+    Widget child = AbsorbPointer(
       absorbing: !_active,
       child: widget.child,
     );
+
+    if (!_active) {
+      child = FocusScope(
+        canRequestFocus: false,
+        debugLabel: '$_TappableWhileStatusIs',
+        child: child,
+      );
+    }
+    return child;
   }
 }
 
@@ -88,7 +97,7 @@ class _CrossFadeTransition extends AnimatedWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Animation<double> progress = listenable;
+    final Animation<double> progress = listenable as Animation<double>;
 
     final double opacity1 = CurvedAnimation(
       parent: ReverseAnimation(progress),
@@ -218,7 +227,7 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
   double get _backdropHeight {
     // Warning: this can be safely called from the event handlers but it may
     // not be called at build time.
-    final RenderBox renderBox = _backdropKey.currentContext.findRenderObject();
+    final RenderBox renderBox = _backdropKey.currentContext.findRenderObject() as RenderBox;
     return math.max(0.0, renderBox.size.height - _kBackAppBarHeight - _kFrontClosedHeight);
   }
 
@@ -275,10 +284,14 @@ class _BackdropState extends State<Backdrop> with SingleTickerProviderStateMixin
               ),
             ),
             Expanded(
-              child: Visibility(
-                child: widget.backLayer,
-                visible: _controller.status != AnimationStatus.completed,
-                maintainState: true,
+              child: _TappableWhileStatusIs(
+                AnimationStatus.dismissed,
+                controller: _controller,
+                child: Visibility(
+                  child: widget.backLayer,
+                  visible: _controller.status != AnimationStatus.completed,
+                  maintainState: true,
+                ),
               ),
             ),
           ],

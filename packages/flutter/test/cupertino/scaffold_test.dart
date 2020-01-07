@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -176,7 +176,7 @@ void main() {
           data:  MediaQueryData(viewInsets: EdgeInsets.only(bottom: 20.0)),
           child: child,
         ),
-      )
+      ),
     );
 
     final Offset initialPoint = tester.getCenter(find.byType(Placeholder));
@@ -192,7 +192,7 @@ void main() {
           ),
           child: child,
         ),
-      )
+      ),
     );
     final Offset finalPoint = tester.getCenter(find.byType(Placeholder));
     expect(initialPoint, finalPoint);
@@ -407,11 +407,11 @@ void main() {
       ),
     );
 
-    final DecoratedBox decoratedBox = tester.widgetList(find.byType(DecoratedBox)).elementAt(1);
+    final DecoratedBox decoratedBox = tester.widgetList(find.byType(DecoratedBox)).elementAt(1) as DecoratedBox;
     expect(decoratedBox.decoration.runtimeType, BoxDecoration);
 
-    final BoxDecoration decoration = decoratedBox.decoration;
-    expect(decoration.color, CupertinoColors.white);
+    final BoxDecoration decoration = decoratedBox.decoration as BoxDecoration;
+    expect(decoration.color, isSameColorAs(CupertinoColors.white));
   });
 
   testWidgets('Overrides background color', (WidgetTester tester) async {
@@ -424,10 +424,10 @@ void main() {
       ),
     );
 
-    final DecoratedBox decoratedBox = tester.widgetList(find.byType(DecoratedBox)).elementAt(1);
+    final DecoratedBox decoratedBox = tester.widgetList(find.byType(DecoratedBox)).elementAt(1) as DecoratedBox;
     expect(decoratedBox.decoration.runtimeType, BoxDecoration);
 
-    final BoxDecoration decoration = decoratedBox.decoration;
+    final BoxDecoration decoration = decoratedBox.decoration as BoxDecoration;
     expect(decoration.color, const Color(0xFF010203));
   });
 

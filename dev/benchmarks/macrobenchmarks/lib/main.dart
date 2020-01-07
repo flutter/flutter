@@ -1,32 +1,46 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:macrobenchmarks/src/large_images.dart';
+import 'package:macrobenchmarks/src/picture_cache.dart';
 
 import 'common.dart';
 import 'src/backdrop_filter.dart';
 import 'src/cubic_bezier.dart';
 import 'src/cull_opacity.dart';
+import 'src/post_backdrop_filter.dart';
+import 'src/simple_animation.dart';
+import 'src/text.dart';
 
 const String kMacrobenchmarks ='Macrobenchmarks';
 
-void main() => runApp(MacrobenchmarksApp());
+void main() => runApp(const MacrobenchmarksApp());
 
 class MacrobenchmarksApp extends StatelessWidget {
+  const MacrobenchmarksApp({this.initialRoute = '/'});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: kMacrobenchmarks,
-      initialRoute: '/',
+      initialRoute: initialRoute,
       routes: <String, WidgetBuilder>{
         '/': (BuildContext context) => HomePage(),
         kCullOpacityRouteName: (BuildContext context) => CullOpacityPage(),
         kCubicBezierRouteName: (BuildContext context) => CubicBezierPage(),
         kBackdropFilterRouteName: (BuildContext context) => BackdropFilterPage(),
+        kPostBackdropFilterRouteName: (BuildContext context) => PostBackdropFilterPage(),
+        kSimpleAnimationRouteName: (BuildContext conttext) => SimpleAnimationPage(),
+        kPictureCacheRouteName: (BuildContext context) => PictureCachePage(),
+        kLargeImagesRouteName: (BuildContext context) => LargeImagesPage(),
+        kTextRouteName: (BuildContext context) => TextPage(),
       },
     );
   }
+
+  final String initialRoute;
 }
 
 class HomePage extends StatelessWidget {
@@ -39,22 +53,57 @@ class HomePage extends StatelessWidget {
           RaisedButton(
             key: const Key(kCullOpacityRouteName),
             child: const Text('Cull opacity'),
-            onPressed: (){
+            onPressed: () {
               Navigator.pushNamed(context, kCullOpacityRouteName);
             },
           ),
           RaisedButton(
             key: const Key(kCubicBezierRouteName),
             child: const Text('Cubic Bezier'),
-            onPressed: (){
+            onPressed: () {
               Navigator.pushNamed(context, kCubicBezierRouteName);
             },
           ),
           RaisedButton(
             key: const Key(kBackdropFilterRouteName),
             child: const Text('Backdrop Filter'),
-            onPressed: (){
+            onPressed: () {
               Navigator.pushNamed(context, kBackdropFilterRouteName);
+            },
+          ),
+          RaisedButton(
+            key: const Key(kPostBackdropFilterRouteName),
+            child: const Text('Post Backdrop Filter'),
+            onPressed: () {
+              Navigator.pushNamed(context, kPostBackdropFilterRouteName);
+            },
+          ),
+          RaisedButton(
+            key: const Key(kSimpleAnimationRouteName),
+            child: const Text('Simple Animation'),
+            onPressed: () {
+              Navigator.pushNamed(context, kSimpleAnimationRouteName);
+            },
+          ),
+          RaisedButton(
+            key: const Key(kPictureCacheRouteName),
+            child: const Text('Picture Cache'),
+            onPressed: () {
+              Navigator.pushNamed(context, kPictureCacheRouteName);
+            },
+          ),
+          RaisedButton(
+            key: const Key(kLargeImagesRouteName),
+            child: const Text('Large Images'),
+            onPressed: () {
+              Navigator.pushNamed(context, kLargeImagesRouteName);
+            },
+          ),
+          RaisedButton(
+            key: const Key(kTextRouteName),
+            child: const Text('Text'),
+            onPressed: () {
+              Navigator.pushNamed(context, kTextRouteName);
             },
           ),
         ],

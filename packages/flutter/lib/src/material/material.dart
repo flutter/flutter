@@ -1,14 +1,13 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
-import 'colors.dart';
 import 'constants.dart';
+import 'elevation_overlay.dart';
 import 'theme.dart';
 
 /// Signature for the callback used by ink effects to obtain the rectangle for the effect.
@@ -215,9 +214,9 @@ class Material extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///   * [ThemeData.applyElevationOverlayColor] which controls the whether
-  ///     an overlay color will be applied to indicate elevation.
-  ///   * [color] which may have an elevation overlay applied.
+  ///  * [ThemeData.applyElevationOverlayColor] which controls the whether
+  ///    an overlay color will be applied to indicate elevation.
+  ///  * [color] which may have an elevation overlay applied.
   ///
   /// {@endtemplate}
   final double elevation;
@@ -228,9 +227,9 @@ class Material extends StatefulWidget {
   /// [MaterialType.transparency].
   ///
   /// To support dark themes, if the surrounding
-  /// [ThemeData.applyElevationOverlayColor] is [true] and
-  /// this color is [ThemeData.colorScheme.surface] then a semi-transparent
-  /// white will be composited on top this color to indicate the elevation.
+  /// [ThemeData.applyElevationOverlayColor] is true then a semi-transparent
+  /// overlay color will be composited on top this color to indicate
+  /// the elevation.
   ///
   /// By default, the color is derived from the [type] of material.
   final Color color;
@@ -294,7 +293,7 @@ class Material extends StatefulWidget {
   /// MaterialInkController inkController = Material.of(context);
   /// ```
   static MaterialInkController of(BuildContext context) {
-    final _RenderInkFeatures result = context.ancestorRenderObjectOfType(const TypeMatcher<_RenderInkFeatures>());
+    final _RenderInkFeatures result = context.findAncestorRenderObjectOfType<_RenderInkFeatures>();
     return result;
   }
 
@@ -316,24 +315,6 @@ class Material extends StatefulWidget {
 
   /// The default radius of an ink splash in logical pixels.
   static const double defaultSplashRadius = 35.0;
-}
-
-// Apply a semi-transparent white on surface colors to
-// indicate the level of elevation.
-Color _elevationOverlayColor(BuildContext context, Color background, double elevation) {
-  final ThemeData theme = Theme.of(context);
-  if (elevation > 0.0 &&
-      theme.applyElevationOverlayColor &&
-      background == theme.colorScheme.surface) {
-
-    // Compute the opacity for the given elevation
-    // This formula matches the values in the spec:
-    // https://material.io/design/color/dark-theme.html#properties
-    final double opacity = (4.5 * math.log(elevation + 1) + 2) / 100.0;
-    final Color overlay = Colors.white.withOpacity(opacity);
-    return Color.alphaBlend(overlay, background);
-  }
-  return background;
 }
 
 class _MaterialState extends State<Material> with TickerProviderStateMixin {
@@ -377,7 +358,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
     }
     contents = NotificationListener<LayoutChangedNotification>(
       onNotification: (LayoutChangedNotification notification) {
-        final _RenderInkFeatures renderer = _inkFeatureRenderer.currentContext.findRenderObject();
+        final _RenderInkFeatures renderer = _inkFeatureRenderer.currentContext.findRenderObject() as _RenderInkFeatures;
         renderer._didChangeLayout();
         return false;
       },
@@ -406,7 +387,7 @@ class _MaterialState extends State<Material> with TickerProviderStateMixin {
         clipBehavior: widget.clipBehavior,
         borderRadius: BorderRadius.zero,
         elevation: widget.elevation,
-        color: _elevationOverlayColor(context, backgroundColor, widget.elevation),
+        color: ElevationOverlay.applyOverlay(context, backgroundColor, widget.elevation),
         shadowColor: widget.shadowColor,
         animateColor: false,
         child: contents,
@@ -543,7 +524,7 @@ class _RenderInkFeatures extends RenderProxyBox implements MaterialInkController
       canvas.save();
       canvas.translate(offset.dx, offset.dy);
       canvas.clipRect(Offset.zero & size);
-      for (InkFeature inkFeature in _inkFeatures)
+      for (final InkFeature inkFeature in _inkFeatures)
         inkFeature._paint(canvas);
       canvas.restore();
     }
@@ -594,7 +575,7 @@ abstract class InkFeature {
     this.onRemoved,
   }) : assert(controller != null),
        assert(referenceBox != null),
-       _controller = controller;
+       _controller = controller as _RenderInkFeatures;
 
   /// The [MaterialInkController] associated with this [InkFeature].
   ///
@@ -631,7 +612,7 @@ abstract class InkFeature {
     final List<RenderObject> descendants = <RenderObject>[referenceBox];
     RenderObject node = referenceBox;
     while (node != _controller) {
-      node = node.parent;
+      node = node.parent as RenderObject;
       assert(node != null);
       descendants.add(node);
     }
@@ -753,9 +734,21 @@ class _MaterialInteriorState extends AnimatedWidgetBaseState<_MaterialInterior> 
 
   @override
   void forEachTween(TweenVisitor<dynamic> visitor) {
-    _elevation = visitor(_elevation, widget.elevation, (dynamic value) => Tween<double>(begin: value));
-    _shadowColor = visitor(_shadowColor, widget.shadowColor, (dynamic value) => ColorTween(begin: value));
-    _border = visitor(_border, widget.shape, (dynamic value) => ShapeBorderTween(begin: value));
+    _elevation = visitor(
+      _elevation,
+      widget.elevation,
+      (dynamic value) => Tween<double>(begin: value as double),
+    ) as Tween<double>;
+    _shadowColor = visitor(
+      _shadowColor,
+      widget.shadowColor,
+      (dynamic value) => ColorTween(begin: value as Color),
+    ) as ColorTween;
+    _border = visitor(
+      _border,
+      widget.shape,
+      (dynamic value) => ShapeBorderTween(begin: value as ShapeBorder),
+    ) as ShapeBorderTween;
   }
 
   @override
@@ -774,7 +767,7 @@ class _MaterialInteriorState extends AnimatedWidgetBaseState<_MaterialInterior> 
       ),
       clipBehavior: widget.clipBehavior,
       elevation: elevation,
-      color: _elevationOverlayColor(context, widget.color, elevation),
+      color: ElevationOverlay.applyOverlay(context, widget.color, elevation),
       shadowColor: _shadowColor.evaluate(animation),
     );
   }

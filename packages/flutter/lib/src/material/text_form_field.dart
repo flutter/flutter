@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -8,6 +8,8 @@ import 'package:flutter/widgets.dart';
 import 'input_decorator.dart';
 import 'text_field.dart';
 import 'theme.dart';
+
+export 'package:flutter/services.dart' show SmartQuotesType, SmartDashesType;
 
 /// A [FormField] that contains a [TextField].
 ///
@@ -74,7 +76,7 @@ class TextFormField extends FormField<String> {
   /// When a [controller] is specified, [initialValue] must be null (the
   /// default). If [controller] is null, then a [TextEditingController]
   /// will be constructed automatically and its `text` will be initialized
-  /// to [initalValue] or the empty string.
+  /// to [initialValue] or the empty string.
   ///
   /// For documentation about the various parameters, see the [TextField] class
   /// and [new TextField], the constructor.
@@ -98,6 +100,9 @@ class TextFormField extends FormField<String> {
     bool showCursor,
     bool obscureText = false,
     bool autocorrect = true,
+    SmartDashesType smartDashesType,
+    SmartQuotesType smartQuotesType,
+    bool enableSuggestions = true,
     bool autovalidate = false,
     bool maxLengthEnforced = true,
     int maxLines = 1,
@@ -125,6 +130,7 @@ class TextFormField extends FormField<String> {
        assert(readOnly != null),
        assert(obscureText != null),
        assert(autocorrect != null),
+       assert(enableSuggestions != null),
        assert(autovalidate != null),
        assert(maxLengthEnforced != null),
        assert(scrollPadding != null),
@@ -139,6 +145,7 @@ class TextFormField extends FormField<String> {
          !expands || (maxLines == null && minLines == null),
          'minLines and maxLines must be null when expands is true.',
        ),
+       assert(!obscureText || maxLines == 1, 'Obscured fields cannot be multiline.'),
        assert(maxLength == null || maxLength > 0),
        assert(enableInteractiveSelection != null),
        super(
@@ -149,7 +156,7 @@ class TextFormField extends FormField<String> {
     autovalidate: autovalidate,
     enabled: enabled,
     builder: (FormFieldState<String> field) {
-      final _TextFormFieldState state = field;
+      final _TextFormFieldState state = field as _TextFormFieldState;
       final InputDecoration effectiveDecoration = (decoration ?? const InputDecoration())
         .applyDefaults(Theme.of(field.context).inputDecorationTheme);
       void onChangedHandler(String value) {
@@ -176,6 +183,9 @@ class TextFormField extends FormField<String> {
         showCursor: showCursor,
         obscureText: obscureText,
         autocorrect: autocorrect,
+        smartDashesType: smartDashesType ?? (obscureText ? SmartDashesType.disabled : SmartDashesType.enabled),
+        smartQuotesType: smartQuotesType ?? (obscureText ? SmartQuotesType.disabled : SmartQuotesType.enabled),
+        enableSuggestions: enableSuggestions,
         maxLengthEnforced: maxLengthEnforced,
         maxLines: maxLines,
         minLines: minLines,
@@ -214,7 +224,7 @@ class _TextFormFieldState extends FormFieldState<String> {
   TextEditingController get _effectiveController => widget.controller ?? _controller;
 
   @override
-  TextFormField get widget => super.widget;
+  TextFormField get widget => super.widget as TextFormField;
 
   @override
   void initState() {

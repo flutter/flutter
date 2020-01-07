@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -24,7 +24,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     final RenderBox outsideBox = tester.firstRenderObject(find.byKey(outside));
@@ -60,7 +60,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     final RenderBox outsideBox = tester.firstRenderObject(find.byKey(outside));
@@ -96,7 +96,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
 
     final RenderBox outsideBox = tester.firstRenderObject(find.byKey(outside));
@@ -407,10 +407,10 @@ void main() {
 
   testWidgets('FittedBox layers - none - clip', (WidgetTester tester) async {
     final List<double> values = <double>[10.0, 50.0, 100.0];
-    for (double a in values) {
-      for (double b in values) {
-        for (double c in values) {
-          for (double d in values) {
+    for (final double a in values) {
+      for (final double b in values) {
+        for (final double c in values) {
+          for (final double d in values) {
             await tester.pumpWidget(
               Center(
                 child: SizedBox(
@@ -466,7 +466,7 @@ void main() {
             ),
           ),
         ),
-      )
+      ),
     );
     expect(_pointerDown, isFalse);
     await tester.tap(find.byKey(key1));
@@ -478,7 +478,7 @@ List<Type> getLayers() {
   final List<Type> layers = <Type>[];
   Layer layer = RendererBinding.instance.renderView.debugLayer;
   while (layer is ContainerLayer) {
-    final ContainerLayer container = layer;
+    final ContainerLayer container = layer as ContainerLayer;
     layers.add(container.runtimeType);
     expect(container.firstChild, same(container.lastChild));
     layer = container.firstChild;

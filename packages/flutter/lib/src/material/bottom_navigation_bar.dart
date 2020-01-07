@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -322,8 +322,8 @@ class BottomNavigationBar extends StatefulWidget {
   // [BottomNavigationBarType.fixed] is used for 3 or fewer items, and
   // [BottomNavigationBarType.shifting] is used for 4+ items.
   static BottomNavigationBarType _type(
-      BottomNavigationBarType type,
-      List<BottomNavigationBarItem> items,
+    BottomNavigationBarType type,
+    List<BottomNavigationBarItem> items,
   ) {
     if (type != null) {
       return type;
@@ -474,45 +474,43 @@ class _BottomNavigationTile extends StatelessWidget {
       child: Semantics(
         container: true,
         selected: selected,
-        child: Focus(
-          child: Stack(
-            children: <Widget>[
-              InkResponse(
-                onTap: onTap,
-                child: Padding(
-                  padding: EdgeInsets.only(top: topPadding, bottom: bottomPadding),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    mainAxisSize: MainAxisSize.min,
-                    children: <Widget>[
-                      _TileIcon(
-                        colorTween: colorTween,
-                        animation: animation,
-                        iconSize: iconSize,
-                        selected: selected,
-                        item: item,
-                        selectedIconTheme: selectedIconTheme,
-                        unselectedIconTheme: unselectedIconTheme,
-                      ),
-                      _Label(
-                        colorTween: colorTween,
-                        animation: animation,
-                        item: item,
-                        selectedLabelStyle: selectedLabelStyle,
-                        unselectedLabelStyle: unselectedLabelStyle,
-                        showSelectedLabels: showSelectedLabels,
-                        showUnselectedLabels: showUnselectedLabels,
-                      ),
-                    ],
-                  ),
+        child: Stack(
+          children: <Widget>[
+            InkResponse(
+              onTap: onTap,
+              child: Padding(
+                padding: EdgeInsets.only(top: topPadding, bottom: bottomPadding),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    _TileIcon(
+                      colorTween: colorTween,
+                      animation: animation,
+                      iconSize: iconSize,
+                      selected: selected,
+                      item: item,
+                      selectedIconTheme: selectedIconTheme,
+                      unselectedIconTheme: unselectedIconTheme,
+                    ),
+                    _Label(
+                      colorTween: colorTween,
+                      animation: animation,
+                      item: item,
+                      selectedLabelStyle: selectedLabelStyle,
+                      unselectedLabelStyle: unselectedLabelStyle,
+                      showSelectedLabels: showSelectedLabels,
+                      showUnselectedLabels: showUnselectedLabels,
+                    ),
+                  ],
                 ),
               ),
-              Semantics(
-                label: indexLabel,
-              ),
-            ],
-          ),
+            ),
+            Semantics(
+              label: indexLabel,
+            ),
+          ],
         ),
       ),
     );
@@ -672,9 +670,9 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
   static final Animatable<double> _flexTween = Tween<double>(begin: 1.0, end: 1.5);
 
   void _resetState() {
-    for (AnimationController controller in _controllers)
+    for (final AnimationController controller in _controllers)
       controller.dispose();
-    for (_Circle circle in _circles)
+    for (final _Circle circle in _circles)
       circle.dispose();
     _circles.clear();
 
@@ -710,9 +708,9 @@ class _BottomNavigationBarState extends State<BottomNavigationBar> with TickerPr
 
   @override
   void dispose() {
-    for (AnimationController controller in _controllers)
+    for (final AnimationController controller in _controllers)
       controller.dispose();
-    for (_Circle circle in _circles)
+    for (final _Circle circle in _circles)
       circle.dispose();
     super.dispose();
   }
@@ -986,7 +984,7 @@ class _RadialPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    for (_Circle circle in circles) {
+    for (final _Circle circle in circles) {
       final Paint paint = Paint()..color = circle.color;
       final Rect rect = Rect.fromLTWH(0.0, 0.0, size.width, size.height);
       canvas.clipRect(rect);

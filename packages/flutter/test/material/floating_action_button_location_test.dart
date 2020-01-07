@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -137,9 +137,9 @@ void main() {
               && currentRotations != null && currentRotations.isNotEmpty
               && previousRect != null && currentRect != null) {
             final List<double> deltas = <double>[];
-            for (double currentRotation in currentRotations) {
+            for (final double currentRotation in currentRotations) {
               double minDelta;
-              for (double previousRotation in previousRotations) {
+              for (final double previousRotation in previousRotations) {
                 final double delta = (previousRotation - currentRotation).abs();
                 minDelta ??= delta;
                 minDelta = min(delta, minDelta);

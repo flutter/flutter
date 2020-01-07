@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -140,7 +140,7 @@ void main() {
     tap.dispose();
   });
 
-  testGesture('Should not recognize two overlapping taps', (GestureTester tester) {
+  testGesture('Should not recognize two overlapping taps (FIFO)', (GestureTester tester) {
     final TapGestureRecognizer tap = TapGestureRecognizer();
 
     int tapsRecognized = 0;
@@ -169,6 +169,40 @@ void main() {
     tester.route(up2);
     expect(tapsRecognized, 1);
     GestureBinding.instance.gestureArena.sweep(2);
+    expect(tapsRecognized, 1);
+
+    tap.dispose();
+  });
+
+  testGesture('Should not recognize two overlapping taps (FILO)', (GestureTester tester) {
+    final TapGestureRecognizer tap = TapGestureRecognizer();
+
+    int tapsRecognized = 0;
+    tap.onTap = () {
+      tapsRecognized++;
+    };
+
+    tap.addPointer(down1);
+    tester.closeArena(1);
+    expect(tapsRecognized, 0);
+    tester.route(down1);
+    expect(tapsRecognized, 0);
+
+    tap.addPointer(down2);
+    tester.closeArena(2);
+    expect(tapsRecognized, 0);
+    tester.route(down1);
+    expect(tapsRecognized, 0);
+
+
+    tester.route(up2);
+    expect(tapsRecognized, 0);
+    GestureBinding.instance.gestureArena.sweep(2);
+    expect(tapsRecognized, 0);
+
+    tester.route(up1);
+    expect(tapsRecognized, 1);
+    GestureBinding.instance.gestureArena.sweep(1);
     expect(tapsRecognized, 1);
 
     tap.dispose();
@@ -340,6 +374,32 @@ void main() {
     expect(gotError, isFalse);
 
     tester.route(up1);
+    expect(gotError, isTrue);
+
+    FlutterError.onError = previousErrorHandler;
+    tap.dispose();
+  });
+
+  testGesture('onTapCancel should show reason in the proper format', (GestureTester tester) {
+    final TapGestureRecognizer tap = TapGestureRecognizer();
+
+    tap.onTapCancel = () {
+      throw Exception(test);
+    };
+
+    final FlutterExceptionHandler previousErrorHandler = FlutterError.onError;
+    bool gotError = false;
+    FlutterError.onError = (FlutterErrorDetails details) {
+      expect(details.toString().contains('"spontaneous onTapCancel"') , isTrue);
+      gotError = true;
+    };
+
+    const int pointer = 1;
+    tap.addPointer(const PointerDownEvent(pointer: pointer));
+    tester.closeArena(pointer);
+    tester.async.elapse(const Duration(milliseconds: 500));
+    tester.route(const PointerCancelEvent(pointer: pointer));
+
     expect(gotError, isTrue);
 
     FlutterError.onError = previousErrorHandler;
@@ -520,6 +580,51 @@ void main() {
 
     tap.dispose();
     drag.dispose();
+  });
+
+  testGesture('non-primary pointers does not trigger timeout', (GestureTester tester) {
+    // Regression test for https://github.com/flutter/flutter/issues/43310
+    // Pointer1 down, pointer2 down, then pointer 1 up, all within the timeout.
+    // In this way, `BaseTapGestureRecognizer.didExceedDeadline` can be triggered
+    // after its `_reset`.
+    final TapGestureRecognizer tap = TapGestureRecognizer();
+
+    final List<String> recognized = <String>[];
+    tap.onTapDown = (_) {
+      recognized.add('down');
+    };
+    tap.onTapUp = (_) {
+      recognized.add('up');
+    };
+    tap.onTap = () {
+      recognized.add('tap');
+    };
+    tap.onTapCancel = () {
+      recognized.add('cancel');
+    };
+
+    tap.addPointer(down1);
+    tester.closeArena(down1.pointer);
+
+    tap.addPointer(down2);
+    tester.closeArena(down2.pointer);
+
+    expect(recognized, isEmpty);
+
+    tester.route(up1);
+    GestureBinding.instance.gestureArena.sweep(down1.pointer);
+    expect(recognized, <String>['down', 'up', 'tap']);
+    recognized.clear();
+
+    // If regression happens, the following step will throw error
+    tester.async.elapse(const Duration(milliseconds: 200));
+    expect(recognized, isEmpty);
+
+    tester.route(up2);
+    GestureBinding.instance.gestureArena.sweep(down2.pointer);
+    expect(recognized, isEmpty);
+
+    tap.dispose();
   });
 
   group('Enforce consistent-button restriction:', () {

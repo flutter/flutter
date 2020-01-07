@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -7,14 +7,13 @@ import 'dart:async';
 import 'package:flutter_tools/src/base/async_guard.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/logger.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
+import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/convert.dart';
-import 'package:flutter_tools/src/globals.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
+import 'package:platform/platform.dart';
 
 import '../src/common.dart';
 import '../src/context.dart';
@@ -29,7 +28,7 @@ void main() {
   StreamController<String> stdErrStreamController;
 
   setUp(() {
-    generator = ResidentCompiler('sdkroot');
+    generator = ResidentCompiler('sdkroot', buildMode: BuildMode.debug);
     mockProcessManager = MockProcessManager();
     mockFrontendServer = MockProcess();
     mockFrontendServerStdIn = MockStdIn();
@@ -52,8 +51,6 @@ void main() {
   });
 
   testUsingContext('incremental compile single dart compile', () async {
-    final BufferLogger bufferLogger = logger;
-
     when(mockFrontendServer.stdout)
         .thenAnswer((Invocation invocation) => Stream<List<int>>.fromFuture(
           Future<List<int>>.value(utf8.encode(
@@ -68,7 +65,7 @@ void main() {
     );
     expect(mockFrontendServerStdIn.getAndClear(), 'compile /path/to/main.dart\n');
     verifyNoMoreInteractions(mockFrontendServerStdIn);
-    expect(bufferLogger.errorText, equals('\nCompiler message:\nline1\nline2\n'));
+    expect(testLogger.errorText, equals('\nCompiler message:\nline1\nline2\n'));
     expect(output.outputFilename, equals('/path/to/main.dart.dill'));
   }, overrides: <Type, Generator>{
     ProcessManager: () => mockProcessManager,
@@ -111,7 +108,6 @@ void main() {
   });
 
   testUsingContext('incremental compile and recompile', () async {
-    final BufferLogger bufferLogger = logger;
     final StreamController<List<int>> streamController = StreamController<List<int>>();
     when(mockFrontendServer.stdout)
         .thenAnswer((Invocation invocation) => streamController.stream);
@@ -140,7 +136,7 @@ void main() {
       '^reject\\n\$');
     verifyNoMoreInteractions(mockFrontendServerStdIn);
     expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
-    expect(bufferLogger.errorText, equals(
+    expect(testLogger.errorText, equals(
       '\nCompiler message:\nline0\nline1\n'
       '\nCompiler message:\nline1\nline2\n'
       '\nCompiler message:\nline1\nline2\n'
@@ -152,8 +148,6 @@ void main() {
   });
 
   testUsingContext('incremental compile and recompile twice', () async {
-    final BufferLogger bufferLogger = logger;
-
     final StreamController<List<int>> streamController = StreamController<List<int>>();
     when(mockFrontendServer.stdout)
         .thenAnswer((Invocation invocation) => streamController.stream);
@@ -170,7 +164,7 @@ void main() {
 
     verifyNoMoreInteractions(mockFrontendServerStdIn);
     expect(mockFrontendServerStdIn.getAndClear(), isEmpty);
-    expect(bufferLogger.errorText, equals(
+    expect(testLogger.errorText, equals(
       '\nCompiler message:\nline0\nline1\n'
       '\nCompiler message:\nline1\nline2\n'
       '\nCompiler message:\nline2\nline3\n'

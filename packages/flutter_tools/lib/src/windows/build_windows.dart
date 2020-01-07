@@ -1,20 +1,16 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file
+// found in the LICENSE file.
 
 import '../artifacts.dart';
 import '../base/common.dart';
-import '../base/file_system.dart';
-import '../base/io.dart';
 import '../base/logger.dart';
-import '../base/process_manager.dart';
+import '../base/process.dart';
 import '../build_info.dart';
 import '../cache.dart';
-import '../convert.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
-
 import 'msbuild_utils.dart';
 import 'visual_studio.dart';
 
@@ -29,11 +25,11 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {S
   if (target != null) {
     environment['FLUTTER_TARGET'] = target;
   }
-  if (artifacts is LocalEngineArtifacts) {
-    final LocalEngineArtifacts localEngineArtifacts = artifacts;
+  if (globals.artifacts is LocalEngineArtifacts) {
+    final LocalEngineArtifacts localEngineArtifacts = globals.artifacts as LocalEngineArtifacts;
     final String engineOutPath = localEngineArtifacts.engineOutPath;
-    environment['FLUTTER_ENGINE'] = fs.path.dirname(fs.path.dirname(engineOutPath));
-    environment['LOCAL_ENGINE'] = fs.path.basename(engineOutPath);
+    environment['FLUTTER_ENGINE'] = globals.fs.path.dirname(globals.fs.path.dirname(engineOutPath));
+    environment['LOCAL_ENGINE'] = globals.fs.path.basename(engineOutPath);
   }
   writePropertySheet(windowsProject.generatedPropertySheetFile, environment);
 
@@ -45,14 +41,14 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {S
 
   if (!buildInfo.isDebug) {
     const String warning = '🚧 ';
-    printStatus(warning * 20);
-    printStatus('Warning: Only debug is currently implemented for Windows. This is effectively a debug build.');
-    printStatus('See https://github.com/flutter/flutter/issues/38477 for details and updates.');
-    printStatus(warning * 20);
-    printStatus('');
+    globals.printStatus(warning * 20);
+    globals.printStatus('Warning: Only debug is currently implemented for Windows. This is effectively a debug build.');
+    globals.printStatus('See https://github.com/flutter/flutter/issues/38477 for details and updates.');
+    globals.printStatus(warning * 20);
+    globals.printStatus('');
   }
 
-  final String buildScript = fs.path.join(
+  final String buildScript = globals.fs.path.join(
     Cache.flutterRoot,
     'packages',
     'flutter_tools',
@@ -63,30 +59,21 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {S
   final String configuration = buildInfo.isDebug ? 'Debug' : 'Release';
   final String solutionPath = windowsProject.solutionFile.path;
   final Stopwatch sw = Stopwatch()..start();
-  // Run the script with a relative path to the project using the enclosing
-  // directory as the workingDirectory, to avoid hitting the limit on command
-  // lengths in batch scripts if the absolute path to the project is long.
-  final Process process = await processManager.start(<String>[
-    buildScript,
-    vcvarsScript,
-    fs.path.basename(solutionPath),
-    configuration,
-  ], workingDirectory: fs.path.dirname(solutionPath));
-  final Status status = logger.startProgress(
+  final Status status = globals.logger.startProgress(
     'Building Windows application...',
     timeout: null,
   );
   int result;
   try {
-    process.stderr
-      .transform(utf8.decoder)
-      .transform(const LineSplitter())
-      .listen(printError);
-    process.stdout
-      .transform(utf8.decoder)
-      .transform(const LineSplitter())
-      .listen(printTrace);
-    result = await process.exitCode;
+    // Run the script with a relative path to the project using the enclosing
+    // directory as the workingDirectory, to avoid hitting the limit on command
+    // lengths in batch scripts if the absolute path to the project is long.
+    result = await processUtils.stream(<String>[
+      buildScript,
+      vcvarsScript,
+      globals.fs.path.basename(solutionPath),
+      configuration,
+    ], workingDirectory: globals.fs.path.dirname(solutionPath), trace: true);
   } finally {
     status.cancel();
   }

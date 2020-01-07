@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -10,16 +10,27 @@ import 'package:crypto/crypto.dart';
 import 'package:meta/meta.dart';
 import 'package:pool/pool.dart';
 
+import '../base/context.dart';
 import '../base/file_system.dart';
-import '../base/platform.dart';
+import '../base/utils.dart';
 import '../cache.dart';
 import '../convert.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
 import 'exceptions.dart';
 import 'file_hash_store.dart';
 import 'source.dart';
 
 export 'source.dart';
+
+/// The [BuildSystem] instance.
+BuildSystem get buildSystem => context.get<BuildSystem>();
+
+/// A reasonable amount of files to open at the same time.
+///
+/// This number is somewhat arbitrary - it is difficult to detect whether
+/// or not we'll run out of file descriptors when using async dart:io
+/// APIs.
+const int kMaxOpenFiles = 64;
 
 /// Configuration for the build system itself.
 class BuildSystemConfig {
@@ -71,7 +82,7 @@ class BuildSystemConfig {
 ///
 /// ## Code review
 ///
-/// ### Targes should only depend on files that are provided as inputs
+/// ### Targets should only depend on files that are provided as inputs
 ///
 /// Example: gen_snapshot must be provided as an input to the aot_elf
 /// build steps, even though it isn't a source file. This ensures that changes
@@ -112,21 +123,25 @@ abstract class Target {
   /// The output [Source]s which we attempt to verify are correctly produced.
   List<Source> get outputs;
 
+  /// A list of zero or more depfiles, located directly under {BUILD_DIR}.
+  List<String> get depfiles => const <String>[];
+
   /// The action which performs this build step.
   Future<void> build(Environment environment);
 
   /// Create a [Node] with resolved inputs and outputs.
   Node _toNode(Environment environment) {
-    final List<File> inputs = resolveInputs(environment);
-    final List<File> outputs = resolveOutputs(environment);
+    final ResolvedFiles inputsFiles = resolveInputs(environment);
+    final ResolvedFiles outputFiles = resolveOutputs(environment);
     return Node(
       this,
-      inputs,
-      outputs,
+      inputsFiles.sources,
+      outputFiles.sources,
       <Node>[
-        for (Target target in dependencies) target._toNode(environment)
+        for (final Target target in dependencies) target._toNode(environment),
       ],
       environment,
+      inputsFiles.containsNewDepfile,
     );
   }
 
@@ -145,11 +160,11 @@ abstract class Target {
   ) {
     final File stamp = _findStampFile(environment);
     final List<String> inputPaths = <String>[];
-    for (File input in inputs) {
+    for (final File input in inputs) {
       inputPaths.add(input.path);
     }
     final List<String> outputPaths = <String>[];
-    for (File output in outputs) {
+    for (final File output in outputs) {
       outputPaths.add(output.path);
     }
     final Map<String, Object> result = <String, Object>{
@@ -164,21 +179,16 @@ abstract class Target {
 
   /// Resolve the set of input patterns and functions into a concrete list of
   /// files.
-  List<File> resolveInputs(
-    Environment environment,
-  ) {
-    return _resolveConfiguration(inputs, environment, implicit: true, inputs: true);
+  ResolvedFiles resolveInputs(Environment environment) {
+    return _resolveConfiguration(inputs, depfiles, environment, implicit: true, inputs: true);
   }
 
   /// Find the current set of declared outputs, including wildcard directories.
   ///
   /// The [implicit] flag controls whether it is safe to evaluate [Source]s
   /// which uses functions, behaviors, or patterns.
-  List<File> resolveOutputs(
-    Environment environment,
-  ) {
-    final List<File> outputEntities = _resolveConfiguration(outputs, environment, inputs: false);
-    return outputEntities;
+  ResolvedFiles resolveOutputs(Environment environment) {
+    return _resolveConfiguration(outputs, depfiles, environment, inputs: false);
   }
 
   /// Performs a fold across this target and its dependencies.
@@ -196,13 +206,15 @@ abstract class Target {
   Map<String, Object> toJson(Environment environment) {
     return <String, Object>{
       'name': name,
-      'dependencies': dependencies.map((Target target) => target.name).toList(),
-      'inputs': resolveInputs(environment)
-          .map((File file) => file.path)
-          .toList(),
-      'outputs': resolveOutputs(environment)
-          .map((File file) => file.path)
-          .toList(),
+      'dependencies': <String>[
+        for (final Target target in dependencies) target.name,
+      ],
+      'inputs': <String>[
+        for (final File file in resolveInputs(environment).sources) file.path,
+      ],
+      'outputs': <String>[
+        for (final File file in resolveOutputs(environment).sources) file.path,
+      ],
       'stamp': _findStampFile(environment).absolute.path,
     };
   }
@@ -213,13 +225,15 @@ abstract class Target {
     return environment.buildDir.childFile(fileName);
   }
 
-  static List<File> _resolveConfiguration(
-      List<Source> config, Environment environment, { bool implicit = true, bool inputs = true }) {
+  static ResolvedFiles _resolveConfiguration(List<Source> config,
+    List<String> depfiles, Environment environment, { bool implicit = true, bool inputs = true,
+  }) {
     final SourceVisitor collector = SourceVisitor(environment, inputs);
-    for (Source source in config) {
+    for (final Source source in config) {
       source.accept(collector);
     }
-    return collector.sources;
+    depfiles.forEach(collector.visitDepfile);
+    return collector;
   }
 }
 
@@ -241,7 +255,7 @@ abstract class Target {
 /// Use a hard-coded path or directory relative to the current working
 /// directory to write an output file.
 ///
-///   fs.file('build/linux/out')
+///   globals.fs.file('build/linux/out')
 ///     ..createSync()
 ///     ..writeAsStringSync('output data');
 ///
@@ -278,12 +292,11 @@ class Environment {
     String buildPrefix;
     final List<String> keys = defines.keys.toList()..sort();
     final StringBuffer buffer = StringBuffer();
-    for (String key in keys) {
+    for (final String key in keys) {
       buffer.write(key);
       buffer.write(defines[key]);
     }
-    // in case there was no configuration, provide some value.
-    buffer.write('Flutter is awesome');
+    buffer.write(outputDir.path);
     final String output = buffer.toString();
     final Digest digest = md5.convert(utf8.encode(output));
     buildPrefix = hex.encode(digest.bytes);
@@ -295,9 +308,9 @@ class Environment {
       projectDir: projectDir,
       buildDir: buildDirectory,
       rootBuildDir: rootBuildDir,
-      cacheDir: Cache.instance.getRoot(),
+      cacheDir: globals.cache.getRoot(),
       defines: defines,
-      flutterRootDir: fs.directory(Cache.flutterRoot),
+      flutterRootDir: globals.fs.directory(Cache.flutterRoot),
     );
   }
 
@@ -397,7 +410,7 @@ class BuildSystem {
     environment.outputDir.createSync(recursive: true);
 
     // Load file hash store from previous builds.
-    final FileHashStore fileCache = FileHashStore(environment)
+    final FileHashStore fileCache = FileHashStore(environment, globals.fs)
       ..initialize();
 
     // Perform sanity checks on build.
@@ -447,11 +460,11 @@ class BuildSystem {
 /// An active instance of a build.
 class _BuildInstance {
   _BuildInstance(this.environment, this.fileCache, this.buildSystemConfig)
-    : resourcePool = Pool(buildSystemConfig.resourcePoolSize ?? platform?.numberOfProcessors ?? 1);
+    : resourcePool = Pool(buildSystemConfig.resourcePoolSize ?? globals.platform?.numberOfProcessors ?? 1);
 
   final BuildSystemConfig buildSystemConfig;
   final Pool resourcePool;
-  final Map<String, AsyncMemoizer<void>> pending = <String, AsyncMemoizer<void>>{};
+  final Map<String, AsyncMemoizer<bool>> pending = <String, AsyncMemoizer<bool>>{};
   final Environment environment;
   final FileHashStore fileCache;
   final Map<String, File> inputFiles = <String, File>{};
@@ -477,49 +490,78 @@ class _BuildInstance {
     final Stopwatch stopwatch = Stopwatch()..start();
     bool passed = true;
     bool skipped = false;
-    try {
-      final bool canSkip = await node.computeChanges(environment, fileCache);
-      for (File input in node.inputs) {
-        // The build system should produce a list of aggregate input and output
-        // files for the overall build. The goal is to provide this to a hosting
-        // build system, such as Xcode, to configure logic for when to skip the
-        // rule/phase which contains the flutter build. When looking at the
-        // inputs and outputs for the individual rules, we need to be careful to
-        // remove inputs that were actually output from previous build steps.
-        // This indicates that the file is actual an output or intermediary. If
-        // these files are included as both inputs and outputs then it isn't
-        // possible to construct a DAG describing the build.
-        final String resolvedPath = input.resolveSymbolicLinksSync();
+
+    // The build system produces a list of aggregate input and output
+    // files for the overall build. This list is provided to a hosting build
+    // system, such as Xcode, to configure logic for when to skip the
+    // rule/phase which contains the flutter build.
+    //
+    // When looking at the inputs and outputs for the individual rules, we need
+    // to be careful to remove inputs that were actually output from previous
+    // build steps. This indicates that the file is an intermediary. If
+    // these files are included as both inputs and outputs then it isn't
+    // possible to construct a DAG describing the build.
+    void updateGraph() {
+      for (final File output in node.outputs) {
+        outputFiles[output.path] = output;
+      }
+      for (final File input in node.inputs) {
+        final String resolvedPath = input.absolute.path;
         if (outputFiles.containsKey(resolvedPath)) {
           continue;
         }
         inputFiles[resolvedPath] = input;
       }
+    }
+
+    try {
+      // If we're missing a depfile, wait until after evaluating the target to
+      // compute changes.
+      final bool canSkip = !node.missingDepfile &&
+        await node.computeChanges(environment, fileCache);
+
       if (canSkip) {
         skipped = true;
-        printStatus('Skipping target: ${node.target.name}');
-        for (File output in node.outputs) {
-          outputFiles[output.path] = output;
-        }
-      } else {
-        printStatus('${node.target.name}: Starting due to ${node.invalidatedReasons}');
-        await node.target.build(environment);
-        printStatus('${node.target.name}: Complete');
+        globals.printTrace('Skipping target: ${node.target.name}');
+        updateGraph();
+        return passed;
+      }
+      globals.printTrace('${node.target.name}: Starting due to ${node.invalidatedReasons}');
+      await node.target.build(environment);
+      globals.printTrace('${node.target.name}: Complete');
 
-        // Update hashes for output files.
-        await fileCache.hashFiles(node.outputs);
-        node.target._writeStamp(node.inputs, node.outputs, environment);
-        for (File output in node.outputs) {
-          outputFiles[output.path] = output;
+      node.inputs
+        ..clear()
+        ..addAll(node.target.resolveInputs(environment).sources);
+      node.outputs
+        ..clear()
+        ..addAll(node.target.resolveOutputs(environment).sources);
+
+      // If we were missing the depfile, resolve  input files after executing the
+      // target so that all file hashes are up to date on the next run.
+      if (node.missingDepfile) {
+        await fileCache.hashFiles(node.inputs);
+      }
+
+      // Always update hashes for output files.
+      await fileCache.hashFiles(node.outputs);
+      node.target._writeStamp(node.inputs, node.outputs, environment);
+      updateGraph();
+
+      // Delete outputs from previous stages that are no longer a part of the
+      // build.
+      for (final String previousOutput in node.previousOutputs) {
+        if (outputFiles.containsKey(previousOutput)) {
+          continue;
         }
-        // Delete outputs from previous stages that are no longer a part of the build.
-        for (String previousOutput in node.previousOutputs) {
-          if (!outputFiles.containsKey(previousOutput)) {
-            fs.file(previousOutput).deleteSync();
-          }
+        final File previousFile = globals.fs.file(previousOutput);
+        if (previousFile.existsSync()) {
+          previousFile.deleteSync();
         }
       }
     } catch (exception, stackTrace) {
+      // TODO(jonahwilliams): throw specific exception for expected errors to mark
+      // as non-fatal. All others should be fatal.
       node.target.clearStamp(environment);
       passed = false;
       skipped = false;
@@ -537,11 +579,17 @@ class _BuildInstance {
 
 /// Helper class to collect exceptions.
 class ExceptionMeasurement {
-  ExceptionMeasurement(this.target, this.exception, this.stackTrace);
+  ExceptionMeasurement(this.target, this.exception, this.stackTrace, {this.fatal = false});
 
   final String target;
   final dynamic exception;
   final StackTrace stackTrace;
+
+  /// Whether this exception was a fatal build system error.
+  final bool fatal;
+
+  @override
+  String toString() => 'target: $target\nexception:$exception\n$stackTrace';
 }
 
 /// Helper class to collect measurement data.
@@ -566,7 +614,7 @@ void checkCycles(Target initial) {
     }
     visited.add(target);
     stack.add(target);
-    for (Target dependency in target.dependencies) {
+    for (final Target dependency in target.dependencies) {
       checkInternal(dependency, visited, stack);
     }
     stack.remove(target);
@@ -579,7 +627,7 @@ void verifyOutputDirectories(List<File> outputs, Environment environment, Target
   final String buildDirectory = environment.buildDir.resolveSymbolicLinksSync();
   final String projectDirectory = environment.projectDir.resolveSymbolicLinksSync();
   final List<File> missingOutputs = <File>[];
-  for (File sourceFile in outputs) {
+  for (final File sourceFile in outputs) {
     if (!sourceFile.existsSync()) {
       missingOutputs.add(sourceFile);
       continue;
@@ -596,8 +644,14 @@ void verifyOutputDirectories(List<File> outputs, Environment environment, Target
 
 /// A node in the build graph.
 class Node {
-  Node(this.target, this.inputs, this.outputs, this.dependencies,
-      Environment environment) {
+  Node(
+    this.target,
+    this.inputs,
+    this.outputs,
+    this.dependencies,
+    Environment environment,
+    this.missingDepfile,
+  ) {
     final File stamp = target._findStampFile(environment);
 
     // If the stamp file doesn't exist, we haven't run this step before and
@@ -617,7 +671,7 @@ class Node {
     }
     Map<String, Object> values;
     try {
-      values = json.decode(content);
+      values = castStringKeyedMap(json.decode(content));
     } on FormatException {
       // The json is malformed in some way.
       _dirty = true;
@@ -644,6 +698,12 @@ class Node {
   /// These files may not yet exist if the target hasn't run yet.
   final List<File> outputs;
 
+  /// Whether this node is missing a depfile.
+  ///
+  /// This requires an additional pass of source resolution after the target
+  /// has been executed.
+  final bool missingDepfile;
+
   /// The target definition which contains the build action to invoke.
   final Target target;
 
@@ -659,7 +719,7 @@ class Node {
   /// One or more reasons why a task was invalidated.
   ///
   /// May be empty if the task was skipped.
-  final Set<InvalidedReason> invalidatedReasons = <InvalidedReason>{};
+  final Set<InvalidatedReason> invalidatedReasons = <InvalidatedReason>{};
 
   /// Whether this node needs an action performed.
   bool get dirty => _dirty;
@@ -673,13 +733,13 @@ class Node {
     FileHashStore fileHashStore,
   ) async {
     final Set<String> currentOutputPaths = <String>{
-      for (File file in outputs) file.path
+      for (final File file in outputs) file.path,
     };
     // For each input, first determine if we've already computed the hash
     // for it. Then collect it to be sent off for hashing as a group.
     final List<File> sourcesToHash = <File>[];
     final List<File> missingInputs = <File>[];
-    for (File file in inputs) {
+    for (final File file in inputs) {
       if (!file.existsSync()) {
         missingInputs.add(file);
         continue;
@@ -690,7 +750,7 @@ class Node {
       if (fileHashStore.currentHashes.containsKey(absolutePath)) {
         final String currentHash = fileHashStore.currentHashes[absolutePath];
         if (currentHash != previousHash) {
-          invalidatedReasons.add(InvalidedReason.inputChanged);
+          invalidatedReasons.add(InvalidatedReason.inputChanged);
           _dirty = true;
         }
       } else {
@@ -700,17 +760,17 @@ class Node {
 
     // For each output, first determine if we've already computed the hash
     // for it. Then collect it to be sent off for hashing as a group.
-    for (String previousOutput in previousOutputs) {
+    for (final String previousOutput in previousOutputs) {
       // output paths changed.
       if (!currentOutputPaths.contains(previousOutput)) {
         _dirty = true;
-        invalidatedReasons.add(InvalidedReason.outputSetChanged);
+        invalidatedReasons.add(InvalidatedReason.outputSetChanged);
         // if this isn't a current output file there is no reason to compute the hash.
         continue;
       }
-      final File file = fs.file(previousOutput);
+      final File file = globals.fs.file(previousOutput);
       if (!file.existsSync()) {
-        invalidatedReasons.add(InvalidedReason.outputMissing);
+        invalidatedReasons.add(InvalidatedReason.outputMissing);
         _dirty = true;
         continue;
       }
@@ -719,7 +779,7 @@ class Node {
       if (fileHashStore.currentHashes.containsKey(absolutePath)) {
         final String currentHash = fileHashStore.currentHashes[absolutePath];
         if (currentHash != previousHash) {
-          invalidatedReasons.add(InvalidedReason.outputChanged);
+          invalidatedReasons.add(InvalidatedReason.outputChanged);
           _dirty = true;
         }
       } else {
@@ -727,9 +787,14 @@ class Node {
       }
     }
 
-    // If we depend on a file that doesnt exist on disk, kill the build.
+    // If we depend on a file that doesnt exist on disk, mark the build as
+    // dirty. if the rule is not correctly specified, this will result in it
+    // always being rerun.
     if (missingInputs.isNotEmpty) {
-      throw MissingInputException(missingInputs, target.name);
+      _dirty = true;
+      final String missingMessage = missingInputs.map((File file) => file.path).join(', ');
+      globals.printTrace('invalidated build due to missing files: $missingMessage');
+      invalidatedReasons.add(InvalidatedReason.inputMissing);
     }
 
     // If we have files to hash, compute them asynchronously and then
@@ -737,7 +802,7 @@ class Node {
     if (sourcesToHash.isNotEmpty) {
       final List<File> dirty = await fileHashStore.hashFiles(sourcesToHash);
       if (dirty.isNotEmpty) {
-        invalidatedReasons.add(InvalidedReason.inputChanged);
+        invalidatedReasons.add(InvalidatedReason.inputChanged);
         _dirty = true;
       }
     }
@@ -745,8 +810,12 @@ class Node {
   }
 }
 
-/// A description of why a task was rerun.
-enum InvalidedReason {
+/// A description of why a target was rerun.
+enum InvalidatedReason {
+  /// An input file that was expected is missing. This can occur when using
+  /// depfile dependencies, or if a target is incorrectly specified.
+  inputMissing,
+
   /// An input file has an updated hash.
   inputChanged,
 

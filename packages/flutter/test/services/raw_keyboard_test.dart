@@ -1,9 +1,8 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-@TestOn('!chrome') // web does not have keyboard support yet.
-
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -14,6 +13,199 @@ class _ModifierCheck {
 }
 
 void main() {
+  group('RawKeyboard', () {
+    testWidgets('keysPressed is maintained', (WidgetTester tester) async {
+      for (final String platform in <String>['linux', 'android', 'macos', 'fuchsia']) {
+        RawKeyboard.instance.clearKeysPressed();
+        expect(RawKeyboard.instance.keysPressed, isEmpty, reason: 'on $platform');
+        await simulateKeyDownEvent(LogicalKeyboardKey.shiftLeft, platform: platform);
+        expect(
+          RawKeyboard.instance.keysPressed,
+          equals(
+            <LogicalKeyboardKey>{ LogicalKeyboardKey.shiftLeft },
+          ),
+          reason: 'on $platform',
+        );
+        await simulateKeyDownEvent(LogicalKeyboardKey.controlLeft, platform: platform);
+        expect(
+          RawKeyboard.instance.keysPressed,
+          equals(
+            <LogicalKeyboardKey>{
+              LogicalKeyboardKey.shiftLeft,
+              LogicalKeyboardKey.controlLeft,
+            },
+          ),
+          reason: 'on $platform',
+        );
+        await simulateKeyDownEvent(LogicalKeyboardKey.keyA, platform: platform);
+        expect(
+          RawKeyboard.instance.keysPressed,
+          equals(
+            <LogicalKeyboardKey>{
+              LogicalKeyboardKey.shiftLeft,
+              LogicalKeyboardKey.controlLeft,
+              LogicalKeyboardKey.keyA,
+            },
+          ),
+          reason: 'on $platform',
+        );
+        await simulateKeyUpEvent(LogicalKeyboardKey.keyA, platform: platform);
+        expect(
+          RawKeyboard.instance.keysPressed,
+          equals(
+            <LogicalKeyboardKey>{
+              LogicalKeyboardKey.shiftLeft,
+              LogicalKeyboardKey.controlLeft,
+            },
+          ),
+          reason: 'on $platform',
+        );
+        await simulateKeyUpEvent(LogicalKeyboardKey.controlLeft, platform: platform);
+        expect(
+          RawKeyboard.instance.keysPressed,
+          equals(
+            <LogicalKeyboardKey>{ LogicalKeyboardKey.shiftLeft },
+          ),
+          reason: 'on $platform',
+        );
+        await simulateKeyUpEvent(LogicalKeyboardKey.shiftLeft, platform: platform);
+        expect(RawKeyboard.instance.keysPressed, isEmpty, reason: 'on $platform');
+        // The Fn key isn't mapped on linux.
+        if (platform != 'linux') {
+          await simulateKeyDownEvent(LogicalKeyboardKey.fn, platform: platform);
+          expect(RawKeyboard.instance.keysPressed,
+            equals(
+              <LogicalKeyboardKey>{
+                if (platform != 'macos') LogicalKeyboardKey.fn,
+              },
+            ),
+            reason: 'on $platform');
+          await simulateKeyDownEvent(LogicalKeyboardKey.f12, platform: platform);
+          expect(
+            RawKeyboard.instance.keysPressed,
+            equals(
+              <LogicalKeyboardKey>{
+                if (platform != 'macos') LogicalKeyboardKey.fn,
+                LogicalKeyboardKey.f12,
+              },
+            ),
+            reason: 'on $platform',
+          );
+          await simulateKeyUpEvent(LogicalKeyboardKey.fn, platform: platform);
+          expect(
+            RawKeyboard.instance.keysPressed,
+            equals(
+              <LogicalKeyboardKey>{ LogicalKeyboardKey.f12 },
+            ),
+            reason: 'on $platform',
+          );
+          await simulateKeyUpEvent(LogicalKeyboardKey.f12, platform: platform);
+          expect(RawKeyboard.instance.keysPressed, isEmpty, reason: 'on $platform');
+        }
+      }
+    }, skip: kIsWeb);
+
+    testWidgets('keysPressed modifiers are synchronized with key events on macOS', (WidgetTester tester) async {
+      expect(RawKeyboard.instance.keysPressed, isEmpty);
+      // Generate the data for a regular key down event.
+      final Map<String, dynamic> data = KeyEventSimulator.getKeyData(
+        LogicalKeyboardKey.keyA,
+        platform: 'macos',
+        isDown: true,
+      );
+      // Change the modifiers so that they show the shift key as already down
+      // when this event is received, but it's not in keysPressed yet.
+      data['modifiers'] |= RawKeyEventDataMacOs.modifierLeftShift | RawKeyEventDataMacOs.modifierShift;
+      // dispatch the modified data.
+      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+        SystemChannels.keyEvent.name,
+        SystemChannels.keyEvent.codec.encodeMessage(data),
+        (ByteData data) {},
+      );
+      expect(
+        RawKeyboard.instance.keysPressed,
+        equals(
+          <LogicalKeyboardKey>{LogicalKeyboardKey.shiftLeft, LogicalKeyboardKey.keyA},
+        ),
+      );
+    });
+
+    testWidgets('keysPressed modifiers are synchronized with key events on android', (WidgetTester tester) async {
+      expect(RawKeyboard.instance.keysPressed, isEmpty);
+      // Generate the data for a regular key down event.
+      final Map<String, dynamic> data = KeyEventSimulator.getKeyData(
+        LogicalKeyboardKey.keyA,
+        platform: 'android',
+        isDown: true,
+      );
+      // Change the modifiers so that they show the shift key as already down
+      // when this event is received, but it's not in keysPressed yet.
+      data['metaState'] |= RawKeyEventDataAndroid.modifierLeftShift | RawKeyEventDataAndroid.modifierShift;
+      // dispatch the modified data.
+      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+        SystemChannels.keyEvent.name,
+        SystemChannels.keyEvent.codec.encodeMessage(data),
+        (ByteData data) {},
+      );
+      expect(
+        RawKeyboard.instance.keysPressed,
+        equals(
+          <LogicalKeyboardKey>{LogicalKeyboardKey.shiftLeft, LogicalKeyboardKey.keyA},
+        ),
+      );
+    });
+
+    testWidgets('keysPressed modifiers are synchronized with key events on fuchsia', (WidgetTester tester) async {
+      expect(RawKeyboard.instance.keysPressed, isEmpty);
+      // Generate the data for a regular key down event.
+      final Map<String, dynamic> data = KeyEventSimulator.getKeyData(
+        LogicalKeyboardKey.keyA,
+        platform: 'fuchsia',
+        isDown: true,
+      );
+      // Change the modifiers so that they show the shift key as already down
+      // when this event is received, but it's not in keysPressed yet.
+      data['modifiers'] |= RawKeyEventDataFuchsia.modifierLeftShift;
+      // dispatch the modified data.
+      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+        SystemChannels.keyEvent.name,
+        SystemChannels.keyEvent.codec.encodeMessage(data),
+        (ByteData data) {},
+      );
+      expect(
+        RawKeyboard.instance.keysPressed,
+        equals(
+          <LogicalKeyboardKey>{LogicalKeyboardKey.shiftLeft, LogicalKeyboardKey.keyA},
+        ),
+      );
+    });
+
+    testWidgets('keysPressed modifiers are synchronized with key events on linux', (WidgetTester tester) async {
+      expect(RawKeyboard.instance.keysPressed, isEmpty);
+      // Generate the data for a regular key down event.
+      final Map<String, dynamic> data = KeyEventSimulator.getKeyData(
+        LogicalKeyboardKey.keyA,
+        platform: 'linux',
+        isDown: true,
+      );
+      // Change the modifiers so that they show the shift key as already down
+      // when this event is received, but it's not in keysPressed yet.
+      data['modifiers'] |= GLFWKeyHelper.modifierShift;
+      // dispatch the modified data.
+      await ServicesBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+        SystemChannels.keyEvent.name,
+        SystemChannels.keyEvent.codec.encodeMessage(data),
+        (ByteData data) {},
+      );
+      expect(
+        RawKeyboard.instance.keysPressed,
+        equals(
+          <LogicalKeyboardKey>{LogicalKeyboardKey.shiftLeft, LogicalKeyboardKey.keyA},
+        ),
+      );
+    });
+  });
+
   group('RawKeyEventDataAndroid', () {
     const Map<int, _ModifierCheck> modifierTests = <int, _ModifierCheck>{
       RawKeyEventDataAndroid.modifierAlt | RawKeyEventDataAndroid.modifierLeftAlt: _ModifierCheck(ModifierKey.altModifier, KeyboardSide.left),
@@ -32,7 +224,7 @@ void main() {
     };
 
     test('modifier keys are recognized individually', () {
-      for (int modifier in modifierTests.keys) {
+      for (final int modifier in modifierTests.keys) {
         final RawKeyEvent event = RawKeyEvent.fromMessage(<String, dynamic>{
           'type': 'keydown',
           'keymap': 'android',
@@ -42,9 +234,10 @@ void main() {
           'scanCode': 0x20,
           'metaState': modifier,
           'source': 0x101, // Keyboard source.
+          'deviceId': 1,
         });
-        final RawKeyEventDataAndroid data = event.data;
-        for (ModifierKey key in ModifierKey.values) {
+        final RawKeyEventDataAndroid data = event.data as RawKeyEventDataAndroid;
+        for (final ModifierKey key in ModifierKey.values) {
           if (modifierTests[modifier].key == key) {
             expect(
               data.isModifierPressed(key, side: modifierTests[modifier].side),
@@ -63,7 +256,7 @@ void main() {
       }
     });
     test('modifier keys are recognized when combined', () {
-      for (int modifier in modifierTests.keys) {
+      for (final int modifier in modifierTests.keys) {
         if (modifier == RawKeyEventDataAndroid.modifierFunction) {
           // No need to combine function key with itself.
           continue;
@@ -77,9 +270,10 @@ void main() {
           'scanCode': 0x20,
           'metaState': modifier | RawKeyEventDataAndroid.modifierFunction,
           'source': 0x101, // Keyboard source.
+          'deviceId': 1,
         });
-        final RawKeyEventDataAndroid data = event.data;
-        for (ModifierKey key in ModifierKey.values) {
+        final RawKeyEventDataAndroid data = event.data as RawKeyEventDataAndroid;
+        for (final ModifierKey key in ModifierKey.values) {
           if (modifierTests[modifier].key == key || key == ModifierKey.functionModifier) {
             expect(
               data.isModifierPressed(key, side: modifierTests[modifier].side),
@@ -114,8 +308,9 @@ void main() {
         'scanCode': 30,
         'metaState': 0x0,
         'source': 0x101, // Keyboard source.
+        'deviceId': 1,
       });
-      final RawKeyEventDataAndroid data = keyAEvent.data;
+      final RawKeyEventDataAndroid data = keyAEvent.data as RawKeyEventDataAndroid;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.keyA));
       expect(data.logicalKey, equals(LogicalKeyboardKey.keyA));
       expect(data.keyLabel, equals('a'));
@@ -130,8 +325,9 @@ void main() {
         'scanCode': 1,
         'metaState': 0x0,
         'source': 0x101, // Keyboard source.
+        'deviceId': 1,
       });
-      final RawKeyEventDataAndroid data = escapeKeyEvent.data;
+      final RawKeyEventDataAndroid data = escapeKeyEvent.data as RawKeyEventDataAndroid;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.escape));
       expect(data.logicalKey, equals(LogicalKeyboardKey.escape));
       expect(data.keyLabel, isNull);
@@ -147,8 +343,9 @@ void main() {
         'scanCode': 42,
         'metaState': RawKeyEventDataAndroid.modifierLeftShift,
         'source': 0x101, // Keyboard source.
+        'deviceId': 1,
       });
-      final RawKeyEventDataAndroid data = shiftLeftKeyEvent.data;
+      final RawKeyEventDataAndroid data = shiftLeftKeyEvent.data as RawKeyEventDataAndroid;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.shiftLeft));
       expect(data.logicalKey, equals(LogicalKeyboardKey.shiftLeft));
       expect(data.keyLabel, isNull);
@@ -164,8 +361,9 @@ void main() {
         'scanCode': 0,
         'metaState': 0,
         'source': 0x1000010, // Joystick source.
+        'deviceId': 1,
       });
-      final RawKeyEventDataAndroid data = joystickDpadDown.data;
+      final RawKeyEventDataAndroid data = joystickDpadDown.data as RawKeyEventDataAndroid;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.arrowDown));
       expect(data.logicalKey, equals(LogicalKeyboardKey.arrowDown));
       expect(data.keyLabel, isNull);
@@ -182,7 +380,7 @@ void main() {
         'metaState': 0,
         'source': 0x101, // Keyboard source.
       });
-      final RawKeyEventDataAndroid data = joystickDpadDown.data;
+      final RawKeyEventDataAndroid data = joystickDpadDown.data as RawKeyEventDataAndroid;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.arrowDown));
       expect(data.logicalKey, equals(LogicalKeyboardKey.arrowDown));
       expect(data.keyLabel, isNull);
@@ -191,18 +389,51 @@ void main() {
       final RawKeyEvent joystickDpadCenter = RawKeyEvent.fromMessage(const <String, dynamic>{
         'type': 'keydown',
         'keymap': 'android',
-        'keyCode': 23,  // DPAD_CENTER code.
+        'keyCode': 23, // DPAD_CENTER code.
         'plainCodePoint': 0,
         'codePoint': 0,
         'character': null,
-        'scanCode': 317,  // Left side thumb joystick center click button.
+        'scanCode': 317, // Left side thumb joystick center click button.
         'metaState': 0,
         'source': 0x501, // Gamepad and keyboard source.
+        'deviceId': 1,
       });
-      final RawKeyEventDataAndroid data = joystickDpadCenter.data;
+      final RawKeyEventDataAndroid data = joystickDpadCenter.data as RawKeyEventDataAndroid;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.gameButtonThumbLeft));
       expect(data.logicalKey, equals(LogicalKeyboardKey.select));
       expect(data.keyLabel, isNull);
+    });
+    test('Device id is read from message', () {
+      final RawKeyEvent joystickDpadCenter = RawKeyEvent.fromMessage(const <String, dynamic>{
+        'type': 'keydown',
+        'keymap': 'android',
+        'keyCode': 23, // DPAD_CENTER code.
+        'plainCodePoint': 0,
+        'codePoint': 0,
+        'character': null,
+        'scanCode': 317, // Left side thumb joystick center click button.
+        'metaState': 0,
+        'source': 0x501, // Gamepad and keyboard source.
+        'deviceId': 10,
+      });
+      final RawKeyEventDataAndroid data = joystickDpadCenter.data as RawKeyEventDataAndroid;
+      expect(data.deviceId, equals(10));
+    });
+    test('Repeat count is passed correctly', () {
+      final RawKeyEvent repeatCountEvent = RawKeyEvent.fromMessage(<String, dynamic>{
+        'type': 'keydown',
+        'keymap': 'android',
+        'keyCode': 29,
+        'plainCodePoint': 'a'.codeUnitAt(0),
+        'codePoint': 'A'.codeUnitAt(0),
+        'character': 'A',
+        'scanCode': 30,
+        'metaState': 0x0,
+        'source': 0x101, // Keyboard source.
+        'repeatCount': 42,
+      });
+      final RawKeyEventDataAndroid data = repeatCountEvent.data as RawKeyEventDataAndroid;
+      expect(data.repeatCount, equals(42));
     });
   });
   group('RawKeyEventDataFuchsia', () {
@@ -223,7 +454,7 @@ void main() {
     };
 
     test('modifier keys are recognized individually', () {
-      for (int modifier in modifierTests.keys) {
+      for (final int modifier in modifierTests.keys) {
         final RawKeyEvent event = RawKeyEvent.fromMessage(<String, dynamic>{
           'type': 'keydown',
           'keymap': 'fuchsia',
@@ -231,8 +462,8 @@ void main() {
           'codePoint': 0x64,
           'modifiers': modifier,
         });
-        final RawKeyEventDataFuchsia data = event.data;
-        for (ModifierKey key in ModifierKey.values) {
+        final RawKeyEventDataFuchsia data = event.data as RawKeyEventDataFuchsia;
+        for (final ModifierKey key in ModifierKey.values) {
           if (modifierTests[modifier].key == key) {
             expect(
               data.isModifierPressed(key, side: modifierTests[modifier].side),
@@ -250,7 +481,7 @@ void main() {
       }
     });
     test('modifier keys are recognized when combined', () {
-      for (int modifier in modifierTests.keys) {
+      for (final int modifier in modifierTests.keys) {
         if (modifier == RawKeyEventDataFuchsia.modifierCapsLock) {
           // No need to combine caps lock key with itself.
           continue;
@@ -262,8 +493,8 @@ void main() {
           'codePoint': 0x64,
           'modifiers': modifier | RawKeyEventDataFuchsia.modifierCapsLock,
         });
-        final RawKeyEventDataFuchsia data = event.data;
-        for (ModifierKey key in ModifierKey.values) {
+        final RawKeyEventDataFuchsia data = event.data as RawKeyEventDataFuchsia;
+        for (final ModifierKey key in ModifierKey.values) {
           if (modifierTests[modifier].key == key || key == ModifierKey.capsLockModifier) {
             expect(
               data.isModifierPressed(key, side: modifierTests[modifier].side),
@@ -290,7 +521,7 @@ void main() {
         'codePoint': 'a'.codeUnitAt(0),
         'character': 'a',
       });
-      final RawKeyEventDataFuchsia data = keyAEvent.data;
+      final RawKeyEventDataFuchsia data = keyAEvent.data as RawKeyEventDataFuchsia;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.keyA));
       expect(data.logicalKey, equals(LogicalKeyboardKey.keyA));
       expect(data.keyLabel, equals('a'));
@@ -303,7 +534,7 @@ void main() {
         'codePoint': null,
         'character': null,
       });
-      final RawKeyEventDataFuchsia data = escapeKeyEvent.data;
+      final RawKeyEventDataFuchsia data = escapeKeyEvent.data as RawKeyEventDataFuchsia;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.escape));
       expect(data.logicalKey, equals(LogicalKeyboardKey.escape));
       expect(data.keyLabel, isNull);
@@ -316,28 +547,31 @@ void main() {
         'codePoint': null,
         'character': null,
       });
-      final RawKeyEventDataFuchsia data = shiftLeftKeyEvent.data;
+      final RawKeyEventDataFuchsia data = shiftLeftKeyEvent.data as RawKeyEventDataFuchsia;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.shiftLeft));
       expect(data.logicalKey, equals(LogicalKeyboardKey.shiftLeft));
       expect(data.keyLabel, isNull);
     });
-  });
+  }, skip: isBrowser);
   group('RawKeyEventDataMacOs', () {
     const Map<int, _ModifierCheck> modifierTests = <int, _ModifierCheck>{
       RawKeyEventDataMacOs.modifierOption | RawKeyEventDataMacOs.modifierLeftOption: _ModifierCheck(ModifierKey.altModifier, KeyboardSide.left),
       RawKeyEventDataMacOs.modifierOption | RawKeyEventDataMacOs.modifierRightOption: _ModifierCheck(ModifierKey.altModifier, KeyboardSide.right),
       RawKeyEventDataMacOs.modifierShift | RawKeyEventDataMacOs.modifierLeftShift: _ModifierCheck(ModifierKey.shiftModifier, KeyboardSide.left),
       RawKeyEventDataMacOs.modifierShift | RawKeyEventDataMacOs.modifierRightShift: _ModifierCheck(ModifierKey.shiftModifier, KeyboardSide.right),
-      RawKeyEventDataMacOs.modifierFunction: _ModifierCheck(ModifierKey.functionModifier, KeyboardSide.all),
       RawKeyEventDataMacOs.modifierControl | RawKeyEventDataMacOs.modifierLeftControl: _ModifierCheck(ModifierKey.controlModifier, KeyboardSide.left),
       RawKeyEventDataMacOs.modifierControl | RawKeyEventDataMacOs.modifierRightControl: _ModifierCheck(ModifierKey.controlModifier, KeyboardSide.right),
       RawKeyEventDataMacOs.modifierCommand | RawKeyEventDataMacOs.modifierLeftCommand: _ModifierCheck(ModifierKey.metaModifier, KeyboardSide.left),
       RawKeyEventDataMacOs.modifierCommand | RawKeyEventDataMacOs.modifierRightCommand: _ModifierCheck(ModifierKey.metaModifier, KeyboardSide.right),
+      RawKeyEventDataMacOs.modifierOption: _ModifierCheck(ModifierKey.altModifier, KeyboardSide.all),
+      RawKeyEventDataMacOs.modifierShift: _ModifierCheck(ModifierKey.shiftModifier, KeyboardSide.all),
+      RawKeyEventDataMacOs.modifierControl: _ModifierCheck(ModifierKey.controlModifier, KeyboardSide.all),
+      RawKeyEventDataMacOs.modifierCommand: _ModifierCheck(ModifierKey.metaModifier, KeyboardSide.all),
       RawKeyEventDataMacOs.modifierCapsLock: _ModifierCheck(ModifierKey.capsLockModifier, KeyboardSide.all),
     };
 
     test('modifier keys are recognized individually', () {
-      for (int modifier in modifierTests.keys) {
+      for (final int modifier in modifierTests.keys) {
         final RawKeyEvent event = RawKeyEvent.fromMessage(<String, dynamic>{
           'type': 'keydown',
           'keymap': 'macos',
@@ -346,8 +580,8 @@ void main() {
           'charactersIgnoringModifiers': 'a',
           'modifiers': modifier,
         });
-        final RawKeyEventDataMacOs data = event.data;
-        for (ModifierKey key in ModifierKey.values) {
+        final RawKeyEventDataMacOs data = event.data as RawKeyEventDataMacOs;
+        for (final ModifierKey key in ModifierKey.values) {
           if (modifierTests[modifier].key == key) {
             expect(
               data.isModifierPressed(key, side: modifierTests[modifier].side),
@@ -366,9 +600,9 @@ void main() {
       }
     });
     test('modifier keys are recognized when combined', () {
-      for (int modifier in modifierTests.keys) {
-        if (modifier == RawKeyEventDataMacOs.modifierFunction) {
-          // No need to combine function key with itself.
+      for (final int modifier in modifierTests.keys) {
+        if (modifier == RawKeyEventDataMacOs.modifierCapsLock) {
+          // No need to combine caps lock key with itself.
           continue;
         }
         final RawKeyEvent event = RawKeyEvent.fromMessage(<String, dynamic>{
@@ -378,18 +612,18 @@ void main() {
           'plainCodePoint': 0x64,
           'characters': 'a',
           'charactersIgnoringModifiers': 'a',
-          'modifiers': modifier | RawKeyEventDataMacOs.modifierFunction,
+          'modifiers': modifier | RawKeyEventDataMacOs.modifierCapsLock,
         });
-        final RawKeyEventDataMacOs data = event.data;
-        for (ModifierKey key in ModifierKey.values) {
-          if (modifierTests[modifier].key == key || key == ModifierKey.functionModifier) {
+        final RawKeyEventDataMacOs data = event.data as RawKeyEventDataMacOs;
+        for (final ModifierKey key in ModifierKey.values) {
+          if (modifierTests[modifier].key == key || key == ModifierKey.capsLockModifier) {
             expect(
               data.isModifierPressed(key, side: modifierTests[modifier].side),
               isTrue,
               reason: '$key should be pressed with metaState $modifier '
-                  "and additional key ${RawKeyEventDataMacOs.modifierFunction}, but isn't.",
+                  "and additional key ${RawKeyEventDataMacOs.modifierCapsLock}, but isn't.",
             );
-            if (key != ModifierKey.functionModifier) {
+            if (key != ModifierKey.capsLockModifier) {
               expect(data.getModifierSide(key), equals(modifierTests[modifier].side));
             } else {
               expect(data.getModifierSide(key), equals(KeyboardSide.all));
@@ -399,7 +633,7 @@ void main() {
               data.isModifierPressed(key, side: modifierTests[modifier].side),
               isFalse,
               reason: '$key should not be pressed with metaState $modifier '
-                  'and additional key ${RawKeyEventDataMacOs.modifierFunction}.',
+                  'and additional key ${RawKeyEventDataMacOs.modifierCapsLock}.',
             );
           }
         }
@@ -415,7 +649,7 @@ void main() {
         'charactersIgnoringModifiers': unmodifiedCharacter,
         'modifiers': 0x0,
       });
-      final RawKeyEventDataMacOs data = keyAEvent.data;
+      final RawKeyEventDataMacOs data = keyAEvent.data as RawKeyEventDataMacOs;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.keyA));
       expect(data.logicalKey, equals(LogicalKeyboardKey.keyA));
       expect(data.keyLabel, equals('a'));
@@ -430,7 +664,7 @@ void main() {
         'character': null,
         'modifiers': 0x0,
       });
-      final RawKeyEventDataMacOs data = escapeKeyEvent.data;
+      final RawKeyEventDataMacOs data = escapeKeyEvent.data as RawKeyEventDataMacOs;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.escape));
       expect(data.logicalKey, equals(LogicalKeyboardKey.escape));
       expect(data.keyLabel, isNull);
@@ -445,7 +679,7 @@ void main() {
         'character': null,
         'modifiers': RawKeyEventDataMacOs.modifierLeftShift,
       });
-      final RawKeyEventDataMacOs data = shiftLeftKeyEvent.data;
+      final RawKeyEventDataMacOs data = shiftLeftKeyEvent.data as RawKeyEventDataMacOs;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.shiftLeft));
       expect(data.logicalKey, equals(LogicalKeyboardKey.shiftLeft));
       expect(data.keyLabel, isNull);
@@ -460,13 +694,12 @@ void main() {
         'character': null,
         'modifiers': RawKeyEventDataMacOs.modifierFunction,
       });
-      final RawKeyEventDataMacOs data = leftArrowKey.data;
+      final RawKeyEventDataMacOs data = leftArrowKey.data as RawKeyEventDataMacOs;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.arrowLeft));
       expect(data.logicalKey, equals(LogicalKeyboardKey.arrowLeft));
       expect(data.logicalKey.keyLabel, isNull);
     });
-
-  });
+  }, skip: isBrowser);
   group('RawKeyEventDataLinux-GFLW', () {
     const Map<int, _ModifierCheck> modifierTests = <int, _ModifierCheck>{
       GLFWKeyHelper.modifierAlt: _ModifierCheck(ModifierKey.altModifier, KeyboardSide.any),
@@ -477,38 +710,63 @@ void main() {
       GLFWKeyHelper.modifierCapsLock: _ModifierCheck(ModifierKey.capsLockModifier, KeyboardSide.all),
     };
 
+    // How modifiers are interpreted depends upon the keyCode for GLFW.
+    int keyCodeForModifier(int modifier, {bool isLeft}) {
+      switch (modifier) {
+        case GLFWKeyHelper.modifierAlt:
+          return isLeft ? 342 : 346;
+        case GLFWKeyHelper.modifierShift:
+          return isLeft ? 340 : 344;
+        case GLFWKeyHelper.modifierControl:
+          return isLeft ? 341 : 345;
+        case GLFWKeyHelper.modifierMeta:
+          return isLeft ? 343 : 347;
+        case GLFWKeyHelper.modifierNumericPad:
+          return 282;
+        case GLFWKeyHelper.modifierCapsLock:
+          return 280;
+        default:
+          return 65; // keyA
+      }
+    }
+
     test('modifier keys are recognized individually', () {
-      for (int modifier in modifierTests.keys) {
-        final RawKeyEvent event = RawKeyEvent.fromMessage(<String, dynamic>{
-          'type': 'keydown',
-          'keymap': 'linux',
-          'toolkit': 'glfw',
-          'keyCode': 65,
-          'scanCode': 0x00000026,
-          'unicodeScalarValues': 97,
-          'modifiers': modifier,
-        });
-        final RawKeyEventDataLinux data = event.data;
-        for (ModifierKey key in ModifierKey.values) {
-          if (modifierTests[modifier].key == key) {
-            expect(
-              data.isModifierPressed(key, side: modifierTests[modifier].side),
-              isTrue,
-              reason: "$key should be pressed with metaState $modifier, but isn't.",
-            );
-            expect(data.getModifierSide(key), equals(modifierTests[modifier].side));
-          } else {
-            expect(
-              data.isModifierPressed(key, side: modifierTests[modifier].side),
-              isFalse,
-              reason: '$key should not be pressed with metaState $modifier.',
-            );
+      for (final int modifier in modifierTests.keys) {
+        for (final bool isDown in <bool>[true, false]) {
+          for (final bool isLeft in <bool>[true, false]) {
+            final RawKeyEvent event = RawKeyEvent.fromMessage(<String, dynamic>{
+              'type': isDown ? 'keydown' : 'keyup',
+              'keymap': 'linux',
+              'toolkit': 'glfw',
+              'keyCode': keyCodeForModifier(modifier, isLeft: isLeft),
+              'scanCode': 0x00000026,
+              'unicodeScalarValues': 97,
+              // GLFW modifiers don't include the current key event.
+              'modifiers': isDown ? 0 : modifier,
+            });
+            final RawKeyEventDataLinux data = event.data as RawKeyEventDataLinux;
+            for (final ModifierKey key in ModifierKey.values) {
+              if (modifierTests[modifier].key == key) {
+                expect(
+                  data.isModifierPressed(key, side: modifierTests[modifier].side),
+                  isDown ? isTrue : isFalse,
+                  reason: "${isLeft ? 'left' : 'right'} $key ${isDown ? 'should' : 'should not'} be pressed with metaState $modifier, when key is ${isDown ? 'down' : 'up'}, but isn't.",
+                );
+                expect(data.getModifierSide(key), equals(modifierTests[modifier].side));
+              } else {
+                expect(
+                  data.isModifierPressed(key, side: modifierTests[modifier].side),
+                  isFalse,
+                  reason: "${isLeft ? 'left' : 'right'} $key should not be pressed with metaState $modifier, wwhen key is ${isDown ? 'down' : 'up'}, but is.",
+                );
+              }
+            }
           }
         }
       }
     });
     test('modifier keys are recognized when combined', () {
-      for (int modifier in modifierTests.keys) {
+      for (final int modifier in modifierTests.keys) {
         if (modifier == GLFWKeyHelper.modifierControl) {
           // No need to combine CTRL key with itself.
           continue;
@@ -522,8 +780,8 @@ void main() {
           'unicodeScalarValues': 97,
           'modifiers': modifier | GLFWKeyHelper.modifierControl,
         });
-        final RawKeyEventDataLinux data = event.data;
-        for (ModifierKey key in ModifierKey.values) {
+        final RawKeyEventDataLinux data = event.data as RawKeyEventDataLinux;
+        for (final ModifierKey key in ModifierKey.values) {
           if (modifierTests[modifier].key == key || key == ModifierKey.controlModifier) {
             expect(
               data.isModifierPressed(key, side: modifierTests[modifier].side),
@@ -557,7 +815,7 @@ void main() {
         'unicodeScalarValues': 113,
         'modifiers': 0x0,
       });
-      final RawKeyEventDataLinux data = keyAEvent.data;
+      final RawKeyEventDataLinux data = keyAEvent.data as RawKeyEventDataLinux;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.keyA));
       expect(data.logicalKey, equals(LogicalKeyboardKey.keyQ));
       expect(data.keyLabel, equals('q'));
@@ -572,7 +830,7 @@ void main() {
         'unicodeScalarValues': 0x10FFFF,
         'modifiers': 0x0,
       });
-      final RawKeyEventDataLinux data = keyAEvent.data;
+      final RawKeyEventDataLinux data = keyAEvent.data as RawKeyEventDataLinux;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.keyA));
       expect(data.logicalKey.keyId, equals(0x10FFFF));
       expect(data.keyLabel, equals('􏿿'));
@@ -603,7 +861,7 @@ void main() {
         'unicodeScalarValues': 0,
         'modifiers': 0x0,
       });
-      final RawKeyEventDataLinux data = escapeKeyEvent.data;
+      final RawKeyEventDataLinux data = escapeKeyEvent.data as RawKeyEventDataLinux;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.escape));
       expect(data.logicalKey, equals(LogicalKeyboardKey.escape));
       expect(data.keyLabel, isNull);
@@ -617,9 +875,134 @@ void main() {
         'scanCode': 0x00000032,
         'unicodeScalarValues': 0,
       });
-      final RawKeyEventDataLinux data = shiftLeftKeyEvent.data;
+      final RawKeyEventDataLinux data = shiftLeftKeyEvent.data as RawKeyEventDataLinux;
       expect(data.physicalKey, equals(PhysicalKeyboardKey.shiftLeft));
       expect(data.logicalKey, equals(LogicalKeyboardKey.shiftLeft));
+      expect(data.keyLabel, isNull);
+    });
+  }, skip: isBrowser);
+
+  group('RawKeyEventDataWeb', () {
+    const Map<int, ModifierKey> modifierTests = <int, ModifierKey>{
+      RawKeyEventDataWeb.modifierAlt: ModifierKey.altModifier,
+      RawKeyEventDataWeb.modifierShift: ModifierKey.shiftModifier,
+      RawKeyEventDataWeb.modifierControl: ModifierKey.controlModifier,
+      RawKeyEventDataWeb.modifierMeta: ModifierKey.metaModifier,
+      RawKeyEventDataWeb.modifierCapsLock: ModifierKey.capsLockModifier,
+      RawKeyEventDataWeb.modifierNumLock: ModifierKey.numLockModifier,
+      RawKeyEventDataWeb.modifierScrollLock: ModifierKey.scrollLockModifier,
+    };
+
+    test('modifier keys are recognized individually', () {
+      for (final int modifier in modifierTests.keys) {
+        final RawKeyEvent event = RawKeyEvent.fromMessage(<String, dynamic>{
+          'type': 'keydown',
+          'keymap': 'web',
+          'code': 'RandomCode',
+          'key': null,
+          'metaState': modifier,
+        });
+        final RawKeyEventDataWeb data = event.data as RawKeyEventDataWeb;
+        for (final ModifierKey key in ModifierKey.values) {
+          if (modifierTests[modifier] == key) {
+            expect(
+              data.isModifierPressed(key),
+              isTrue,
+              reason: "$key should be pressed with metaState $modifier, but isn't.",
+            );
+          } else {
+            expect(
+              data.isModifierPressed(key),
+              isFalse,
+              reason: '$key should not be pressed with metaState $modifier.',
+            );
+          }
+        }
+      }
+    });
+    test('modifier keys are recognized when combined', () {
+      for (final int modifier in modifierTests.keys) {
+        if (modifier == RawKeyEventDataWeb.modifierMeta) {
+          // No need to combine meta key with itself.
+          continue;
+        }
+        final RawKeyEvent event = RawKeyEvent.fromMessage(<String, dynamic>{
+          'type': 'keydown',
+          'keymap': 'web',
+          'code': 'RandomCode',
+          'key': null,
+          'metaState': modifier | RawKeyEventDataWeb.modifierMeta,
+        });
+        final RawKeyEventDataWeb data = event.data as RawKeyEventDataWeb;
+        for (final ModifierKey key in ModifierKey.values) {
+          if (modifierTests[modifier] == key || key == ModifierKey.metaModifier) {
+            expect(
+              data.isModifierPressed(key),
+              isTrue,
+              reason: '$key should be pressed with metaState $modifier '
+                  "and additional key ${RawKeyEventDataWeb.modifierMeta}, but isn't.",
+            );
+          } else {
+            expect(
+              data.isModifierPressed(key),
+              isFalse,
+              reason: '$key should not be pressed with metaState $modifier '
+                  'and additional key ${RawKeyEventDataWeb.modifierMeta}.',
+            );
+          }
+        }
+      }
+    });
+    test('Printable keyboard keys are correctly translated', () {
+      final RawKeyEvent keyAEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
+        'type': 'keydown',
+        'keymap': 'web',
+        'code': 'KeyA',
+        'key': 'a',
+        'metaState': 0x0,
+      });
+      final RawKeyEventDataWeb data = keyAEvent.data as RawKeyEventDataWeb;
+      expect(data.physicalKey, equals(PhysicalKeyboardKey.keyA));
+      expect(data.logicalKey, equals(LogicalKeyboardKey.keyA));
+      expect(data.keyLabel, equals('a'));
+    });
+    test('Control keyboard keys are correctly translated', () {
+      final RawKeyEvent escapeKeyEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
+        'type': 'keydown',
+        'keymap': 'web',
+        'code': 'Escape',
+        'key': null,
+        'metaState': 0x0,
+      });
+      final RawKeyEventDataWeb data = escapeKeyEvent.data as RawKeyEventDataWeb;
+      expect(data.physicalKey, equals(PhysicalKeyboardKey.escape));
+      expect(data.logicalKey, equals(LogicalKeyboardKey.escape));
+      expect(data.keyLabel, isNull);
+    });
+    test('Modifier keyboard keys are correctly translated', () {
+      final RawKeyEvent shiftKeyEvent = RawKeyEvent.fromMessage(const <String, dynamic>{
+        'type': 'keydown',
+        'keymap': 'web',
+        'code': 'ShiftLeft',
+        'keyLabel': null,
+        'metaState': RawKeyEventDataWeb.modifierShift,
+      });
+      final RawKeyEventDataWeb data = shiftKeyEvent.data as RawKeyEventDataWeb;
+      expect(data.physicalKey, equals(PhysicalKeyboardKey.shiftLeft));
+      expect(data.logicalKey, equals(LogicalKeyboardKey.shiftLeft));
+      expect(data.keyLabel, isNull);
+    });
+    test('Arrow keys from a keyboard give correct physical key mappings', () {
+      final RawKeyEvent arrowKeyDown = RawKeyEvent.fromMessage(const <String, dynamic>{
+        'type': 'keydown',
+        'keymap': 'web',
+        'code': 'ArrowDown',
+        'key': null,
+        'metaState': 0x0,
+      });
+      final RawKeyEventDataWeb data = arrowKeyDown.data as RawKeyEventDataWeb;
+      expect(data.physicalKey, equals(PhysicalKeyboardKey.arrowDown));
+      expect(data.logicalKey, equals(LogicalKeyboardKey.arrowDown));
       expect(data.keyLabel, isNull);
     });
   });
