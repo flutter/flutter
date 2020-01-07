@@ -130,8 +130,7 @@ class SkiaGoldClient {
         ..writeln('Skia Gold authorization failed.')
         ..writeln('This could be caused by incorrect user permissions, if the ')
         ..writeln('debug information below contains ENCRYPTED, the wrong ')
-        ..writeln('comparator was chosen for the test case.')
-        ..writeln()
+        ..writeln('comparator was chosen for the test case.\n')
         ..writeln('Debug information for Gold:')
         ..writeln('stdout: ${result.stdout}')
         ..writeln('stderr: ${result.stderr}');
@@ -159,8 +158,7 @@ class SkiaGoldClient {
 
     if (result.exitCode != 0) {
       final StringBuffer buf = StringBuffer()
-        ..writeln('Skia Gold emptyAuth failed.')
-        ..writeln()
+        ..writeln('Skia Gold emptyAuth failed.\n')
         ..writeln('Debug information for Gold:')
         ..writeln('stdout: ${result.stdout}')
         ..writeln('stderr: ${result.stderr}');
@@ -210,8 +208,7 @@ class SkiaGoldClient {
       final StringBuffer buf = StringBuffer()
         ..writeln('Skia Gold imgtest init failed.')
         ..writeln('An error occured when initializing golden file test with ')
-        ..writeln('goldctl.')
-        ..writeln()
+        ..writeln('goldctl.\n')
         ..writeln('Debug information for Gold:')
         ..writeln('stdout: ${result.stdout}')
         ..writeln('stderr: ${result.stderr}');
@@ -307,8 +304,7 @@ class SkiaGoldClient {
       final StringBuffer buf = StringBuffer()
         ..writeln('Skia Gold tryjobInit failure.')
         ..writeln('An error occured when initializing golden file tryjob with ')
-        ..writeln('goldctl.')
-        ..writeln()
+        ..writeln('goldctl.\n')
         ..writeln('Debug information for Gold:')
         ..writeln('stdout: ${result.stdout}')
         ..writeln('stderr: ${result.stderr}');
@@ -346,22 +342,21 @@ class SkiaGoldClient {
     if (result.exitCode != 0) {
       final String resultStdout = result.stdout.toString();
       if (resultStdout.contains('Untriaged') || resultStdout.contains('negative image')) {
-        final String failureContents = await workDirectory.childFile('failures.json').readAsString();
-        print('$failureContents\n');
+        final List<String> failureLinks = await workDirectory.childFile('failures.json').readAsLines();
 
         final StringBuffer buf = StringBuffer()
           ..writeln('The golden file "$testName" did not match the expected image.')
-          ..writeln('The closest matching image was: *LINK*')
-          ..writeln('The actual image generated was: *LINK*')
-          ..writeln('To triage this image (e.g. because this is an intentional change), please visit:')
-          ..writeln('*LINK*');
+          ..writeln('To view the closest matching image, the actual image ')
+          ..writeln('generated, and the visual difference, visit: ')
+          ..writeln(failureLinks.last)
+          ..writeln('There you can also triage this image (e.g. because this ')
+          ..writeln('is an intentional change).\n');
         throw buf.toString();
       } else {
         final StringBuffer buf = StringBuffer()
           ..writeln('Unexpected Gold tryjobAdd failure.')
           ..writeln('Tryjob execution for golden file test $testName failed for')
-          ..writeln('a reason unrelated to pixel comparison.')
-          ..writeln()
+          ..writeln('a reason unrelated to pixel comparison.\n')
           ..writeln('Debug information for Gold:')
           ..writeln('stdout: ${result.stdout}')
           ..writeln('stderr: ${result.stderr}\n');
