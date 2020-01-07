@@ -198,7 +198,7 @@ class PackageUriMapper {
   PackageUriMapper(String scriptPath, String packagesPath, String fileSystemScheme, List<String> fileSystemRoots) {
     final Map<String, Uri> packageMap = PackageMap(globals.fs.path.absolute(packagesPath)).map;
     final String scriptUri = Uri.file(scriptPath, windows: globals.platform.isWindows).toString();
-    for (String packageName in packageMap.keys) {
+    for (final String packageName in packageMap.keys) {
       final String prefix = packageMap[packageName].toString();
       // Only perform a multi-root mapping if there are multiple roots.
       if (fileSystemScheme != null
@@ -227,7 +227,7 @@ class PackageUriMapper {
       return null;
     }
     final String scriptUri = Uri.file(scriptPath, windows: globals.platform.isWindows).toString();
-    for (String uriPrefix in _uriPrefixes) {
+    for (final String uriPrefix in _uriPrefixes) {
       if (scriptUri.startsWith(uriPrefix)) {
         return Uri.parse('package:$_packageName/${scriptUri.substring(uriPrefix.length)}');
       }
@@ -314,7 +314,7 @@ class KernelCompiler {
       sdkRoot,
       '--target=$targetModel',
       '-Ddart.developer.causal_async_stacks=$causalAsyncStacks',
-      for (Object dartDefine in dartDefines)
+      for (final Object dartDefine in dartDefines)
         '-D$dartDefine',
       ..._buildModeOptions(buildMode),
       if (trackWidgetCreation) '--track-widget-creation',
@@ -336,7 +336,7 @@ class KernelCompiler {
         depFilePath,
       ],
       if (fileSystemRoots != null)
-        for (String root in fileSystemRoots) ...<String>[
+        for (final String root in fileSystemRoots) ...<String>[
           '--filesystem-root',
           root,
         ],
@@ -608,7 +608,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
         : '';
     _server.stdin.writeln('recompile $mainUri$inputKey');
     globals.printTrace('<- recompile $mainUri$inputKey');
-    for (Uri fileUri in request.invalidatedFiles) {
+    for (final Uri fileUri in request.invalidatedFiles) {
       _server.stdin.writeln(_mapFileUri(fileUri.toString(), packageUriMapper));
       globals.printTrace('${_mapFileUri(fileUri.toString(), packageUriMapper)}');
     }
@@ -651,7 +651,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
       '--incremental',
       '--target=$targetModel',
       '-Ddart.developer.causal_async_stacks=$causalAsyncStacks',
-      for (Object dartDefine in dartDefines)
+      for (final Object dartDefine in dartDefines)
         '-D$dartDefine',
       if (outputPath != null) ...<String>[
         '--output-dill',
@@ -667,7 +667,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
       ..._buildModeOptions(buildMode),
       if (trackWidgetCreation) '--track-widget-creation',
       if (fileSystemRoots != null)
-        for (String root in fileSystemRoots) ...<String>[
+        for (final String root in fileSystemRoots) ...<String>[
           '--filesystem-root',
           root,
         ],
@@ -824,7 +824,7 @@ class DefaultResidentCompiler implements ResidentCompiler {
     }
 
     if (fileSystemRoots != null) {
-      for (String root in fileSystemRoots) {
+      for (final String root in fileSystemRoots) {
         if (filename.startsWith(root)) {
           return Uri(
               scheme: fileSystemScheme, path: filename.substring(root.length))

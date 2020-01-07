@@ -22,7 +22,7 @@ class IntelliJPlugins {
     String title, {
     Version minVersion,
   }) {
-    for (String packageName in packageNames) {
+    for (final String packageName in packageNames) {
       if (!_hasPackage(packageName)) {
         continue;
       }

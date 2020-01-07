@@ -257,13 +257,13 @@ class _SegmentedControlState<T> extends State<CupertinoSegmentedControl<T>>
 
   void _updateAnimationControllers() {
     assert(mounted, 'This should only be called after didUpdateDependencies');
-    for (AnimationController controller in _selectionControllers) {
+    for (final AnimationController controller in _selectionControllers) {
       controller.dispose();
     }
     _selectionControllers.clear();
     _childTweens.clear();
 
-    for (T key in widget.children.keys) {
+    for (final T key in widget.children.keys) {
       final AnimationController animationController = createAnimationController();
       if (widget.groupValue == key) {
         _childTweens.add(_reverseBackgroundColorTween);
@@ -294,7 +294,7 @@ class _SegmentedControlState<T> extends State<CupertinoSegmentedControl<T>>
 
     if (oldWidget.groupValue != widget.groupValue) {
       int index = 0;
-      for (T key in widget.children.keys) {
+      for (final T key in widget.children.keys) {
         if (widget.groupValue == key) {
           _childTweens[index] = _forwardBackgroundColorTween;
           _selectionControllers[index].forward();
@@ -309,7 +309,7 @@ class _SegmentedControlState<T> extends State<CupertinoSegmentedControl<T>>
 
   @override
   void dispose() {
-    for (AnimationController animationController in _selectionControllers) {
+    for (final AnimationController animationController in _selectionControllers) {
       animationController.dispose();
     }
     super.dispose();
@@ -364,7 +364,7 @@ class _SegmentedControlState<T> extends State<CupertinoSegmentedControl<T>>
     int index = 0;
     int selectedIndex;
     int pressedIndex;
-    for (T currentKey in widget.children.keys) {
+    for (final T currentKey in widget.children.keys) {
       selectedIndex = (widget.groupValue == currentKey) ? index : selectedIndex;
       pressedIndex = (_pressedKey == currentKey) ? index : pressedIndex;
 
@@ -629,7 +629,7 @@ class _RenderSegmentedControl<T> extends RenderBox
     double maxHeight = _kMinSegmentedControlHeight;
 
     double childWidth = constraints.minWidth / childCount;
-    for (RenderBox child in getChildrenAsList()) {
+    for (final RenderBox child in getChildrenAsList()) {
       childWidth = math.max(childWidth, child.getMaxIntrinsicWidth(double.infinity));
     }
     childWidth = math.min(childWidth, constraints.maxWidth / childCount);

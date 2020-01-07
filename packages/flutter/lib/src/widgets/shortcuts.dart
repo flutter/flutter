@@ -196,7 +196,7 @@ class ShortcutManager extends ChangeNotifier with DiagnosticableMixin {
       // have synonyms in the map.  This is for things like left and right shift
       // keys mapping to just the "shift" pseudo-key.
       final Set<LogicalKeyboardKey> pseudoKeys = <LogicalKeyboardKey>{};
-      for (LogicalKeyboardKey setKey in keySet.keys) {
+      for (final LogicalKeyboardKey setKey in keySet.keys) {
         final Set<LogicalKeyboardKey> synonyms = setKey.synonyms;
         if (synonyms.isNotEmpty) {
           // There currently aren't any synonyms that match more than one key.

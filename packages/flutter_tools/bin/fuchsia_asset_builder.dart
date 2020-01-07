@@ -86,7 +86,7 @@ Future<void> writeFuchsiaManifest(AssetBundle assets, String outputBase, String 
   await destFile.create(recursive: true);
   final libfs.IOSink outFile = destFile.openWrite();
 
-  for (String path in assets.entries.keys) {
+  for (final String path in assets.entries.keys) {
     outFile.write('data/$componentName/$path=$outputBase/$path\n');
   }
   await outFile.flush();

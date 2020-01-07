@@ -38,7 +38,7 @@ class DevicesCommand extends FlutterCommand {
       final List<String> diagnostics = await deviceManager.getDeviceDiagnostics();
       if (diagnostics.isNotEmpty) {
         globals.printStatus('');
-        for (String diagnostic in diagnostics) {
+        for (final String diagnostic in diagnostics) {
           globals.printStatus('• $diagnostic', hangingIndent: 2);
         }
       }

@@ -69,7 +69,7 @@ Future<void> saveDurationsHistogram(List<Map<String, dynamic>> events, String ou
   int frameStart;
 
   // Save the duration of the first frame after each 'Start Transition' event.
-  for (Map<String, dynamic> event in events) {
+  for (final Map<String, dynamic> event in events) {
     final String eventName = event['name'] as String;
     if (eventName == 'Start Transition') {
       assert(startEvent == null);
@@ -143,7 +143,7 @@ Future<void> runDemos(List<String> demos, FlutterDriver driver) async {
   final SerializableFinder demoList = find.byValueKey('GalleryDemoList');
   String currentDemoCategory;
 
-  for (String demo in demos) {
+  for (final String demo in demos) {
     if (kSkippedDemos.contains(demo))
       continue;
 

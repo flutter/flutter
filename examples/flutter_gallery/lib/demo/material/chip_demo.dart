@@ -260,7 +260,7 @@ class _ChipDemoState extends State<ChipDemo> {
 
     Set<String> allowedActions = <String>{};
     if (_selectedMaterial != null && _selectedMaterial.isNotEmpty) {
-      for (String tool in _selectedTools) {
+      for (final String tool in _selectedTools) {
         allowedActions.addAll(_toolActions[tool]);
       }
       allowedActions = allowedActions.intersection(_materialActions[_selectedMaterial]);

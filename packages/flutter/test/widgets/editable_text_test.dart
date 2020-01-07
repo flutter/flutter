@@ -3180,7 +3180,7 @@ void main() {
           platform == 'macos' ? LogicalKeyboardKey.metaLeft : LogicalKeyboardKey.altLeft,
           platform: platform);
     }
-    for (LogicalKeyboardKey key in keys) {
+    for (final LogicalKeyboardKey key in keys) {
       await tester.sendKeyEvent(key, platform: platform);
       await tester.pump();
     }
@@ -4039,7 +4039,7 @@ void main() {
     final List<String> logOrder = <String>['TextInput.setClient', 'TextInput.show', 'TextInput.setEditableSizeAndTransform', 'TextInput.setStyle', 'TextInput.setEditingState', 'TextInput.setEditingState', 'TextInput.show'];
     expect(tester.testTextInput.log.length, 7);
     int index = 0;
-    for (MethodCall m in tester.testTextInput.log) {
+    for (final MethodCall m in tester.testTextInput.log) {
       expect(m.method, logOrder[index]);
       index++;
     }
@@ -4083,7 +4083,7 @@ void main() {
     ];
     expect(tester.testTextInput.log.length, logOrder.length);
     int index = 0;
-    for (MethodCall m in tester.testTextInput.log) {
+    for (final MethodCall m in tester.testTextInput.log) {
       expect(m.method, logOrder[index]);
       index++;
     }
@@ -4131,7 +4131,7 @@ void main() {
     ];
     expect(tester.testTextInput.log.length, logOrder.length);
     int index = 0;
-    for (MethodCall m in tester.testTextInput.log) {
+    for (final MethodCall m in tester.testTextInput.log) {
       expect(m.method, logOrder[index]);
       index++;
     }

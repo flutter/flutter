@@ -59,7 +59,7 @@ class Animation {
     sb.write('const $className $varName = const $className(\n');
     sb.write('${kIndent}const Size(${size.x}, ${size.y}),\n');
     sb.write('${kIndent}const <_PathFrames>[\n');
-    for (PathAnimation path in paths)
+    for (final PathAnimation path in paths)
       sb.write(path.toDart());
     sb.write('$kIndent],\n');
     sb.write(');');
@@ -117,11 +117,11 @@ class PathAnimation {
     final StringBuffer sb = StringBuffer();
     sb.write('${kIndent * 2}const _PathFrames(\n');
     sb.write('${kIndent * 3}opacities: const <double>[\n');
-    for (double opacity in opacities)
+    for (final double opacity in opacities)
       sb.write('${kIndent * 4}$opacity,\n');
     sb.write('${kIndent * 3}],\n');
     sb.write('${kIndent * 3}commands: const <_PathCommand>[\n');
-    for (PathCommandAnimation command in commands)
+    for (final PathCommandAnimation command in commands)
       sb.write(command.toDart());
     sb.write('${kIndent * 3}],\n');
     sb.write('${kIndent * 2}),\n');
@@ -166,9 +166,9 @@ class PathCommandAnimation {
     }
     final StringBuffer sb = StringBuffer();
     sb.write('${kIndent * 4}const $dartCommandClass(\n');
-    for (List<Point<double>> pointFrames in points) {
+    for (final List<Point<double>> pointFrames in points) {
       sb.write('${kIndent * 5}const <Offset>[\n');
-      for (Point<double> point in pointFrames)
+      for (final Point<double> point in pointFrames)
         sb.write('${kIndent * 6}const Offset(${point.x}, ${point.y}),\n');
       sb.write('${kIndent * 5}],\n');
     }
@@ -201,7 +201,7 @@ FrameData interpretSvg(String svgFilePath) {
 
 List<SvgPath> _interpretSvgGroup(List<XmlNode> children, _Transform transform) {
   final List<SvgPath> paths = <SvgPath>[];
-  for (XmlNode node in children) {
+  for (final XmlNode node in children) {
     if (node.nodeType != XmlNodeType.ELEMENT)
       continue;
     final XmlElement element = node as XmlElement;
@@ -304,7 +304,7 @@ class SvgPath {
     final SvgPathCommandBuilder commandsBuilder = SvgPathCommandBuilder();
     if (!_pathCommandValidator.hasMatch(dAttr))
       throw Exception('illegal or unsupported path d expression: $dAttr');
-    for (Match match in _pathCommandMatcher.allMatches(dAttr)) {
+    for (final Match match in _pathCommandMatcher.allMatches(dAttr)) {
       final String commandType = match.group(1);
       final String pointStr = match.group(2);
       commands.add(commandsBuilder.build(commandType, parsePoints(pointStr)));
@@ -469,7 +469,7 @@ Matrix3 _parseSvgTransform(String transform) {
     throw Exception('illegal or unsupported transform: $transform');
   final Iterable<Match> matches =_transformCommand.allMatches(transform).toList().reversed;
   Matrix3 result = Matrix3.identity();
-  for (Match m in matches) {
+  for (final Match m in matches) {
     final String command = m.group(1);
     final String params = m.group(2);
     if (command == 'translate') {

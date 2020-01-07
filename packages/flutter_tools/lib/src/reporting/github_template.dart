@@ -99,7 +99,7 @@ ${_projectMetadataInformation()}
         description.writeln('### Plugins');
         // Format is:
         // camera=/path/to/.pub-cache/hosted/pub.dartlang.org/camera-0.5.7+2/
-        for (String plugin in project.flutterPluginsFile.readAsLinesSync()) {
+        for (final String plugin in project.flutterPluginsFile.readAsLinesSync()) {
           final List<String> pluginParts = plugin.split('=');
           if (pluginParts.length != 2) {
             continue;

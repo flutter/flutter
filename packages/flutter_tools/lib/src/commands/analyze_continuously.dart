@@ -43,7 +43,7 @@ class AnalyzeContinuously extends AnalyzeBase {
       analysisTarget = 'Flutter repository';
 
       globals.printTrace('Analyzing Flutter repository:');
-      for (String projectPath in repoRoots) {
+      for (final String projectPath in repoRoots) {
         globals.printTrace('  ${globals.fs.path.relative(projectPath)}');
       }
     } else {
@@ -91,7 +91,7 @@ class AnalyzeContinuously extends AnalyzeBase {
 
       // Remove errors for deleted files, sort, and print errors.
       final List<AnalysisError> errors = <AnalysisError>[];
-      for (String path in analysisErrors.keys.toList()) {
+      for (final String path in analysisErrors.keys.toList()) {
         if (globals.fs.isFileSync(path)) {
           errors.addAll(analysisErrors[path]);
         } else {
@@ -112,7 +112,7 @@ class AnalyzeContinuously extends AnalyzeBase {
 
       errors.sort();
 
-      for (AnalysisError error in errors) {
+      for (final AnalysisError error in errors) {
         globals.printStatus(error.toString());
         if (error.code != null) {
           globals.printTrace('error code: ${error.code}');

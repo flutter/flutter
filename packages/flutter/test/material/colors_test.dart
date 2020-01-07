@@ -53,31 +53,31 @@ void main() {
   });
 
   test('Colors swatches do not contain duplicates', () {
-    for (MaterialColor color in Colors.primaries)
+    for (final MaterialColor color in Colors.primaries)
       expect(primaryKeys.map<Color>((int key) => color[key]).toSet().length, primaryKeys.length);
 
     expect(primaryKeys.map<Color>((int key) => Colors.grey[key]).toSet().length, primaryKeys.length);
 
-    for (MaterialAccentColor color in Colors.accents)
+    for (final MaterialAccentColor color in Colors.accents)
       expect(accentKeys.map<Color>((int key) => color[key]).toSet().length, accentKeys.length);
   });
 
   test('All color swatch colors are opaque and equal their primary color', () {
-    for (MaterialColor color in Colors.primaries) {
+    for (final MaterialColor color in Colors.primaries) {
       expect(color.value, color.shade500.value);
-      for (int key in primaryKeys) {
+      for (final int key in primaryKeys) {
         expect(color[key].alpha, 0xFF);
       }
     }
 
     expect(Colors.grey.value, Colors.grey.shade500.value);
-    for (int key in primaryKeys) {
+    for (final int key in primaryKeys) {
       expect(Colors.grey[key].alpha, 0xFF);
     }
 
-    for (MaterialAccentColor color in Colors.accents) {
+    for (final MaterialAccentColor color in Colors.accents) {
       expect(color.value, color.shade200.value);
-      for (int key in accentKeys) {
+      for (final int key in accentKeys) {
         expect(color[key].alpha, 0xFF);
       }
     }

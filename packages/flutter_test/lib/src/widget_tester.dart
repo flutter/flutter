@@ -117,7 +117,7 @@ void testWidgets(
   assert(variant.values.isNotEmpty, 'There must be at least on value to test in the testing variant');
   final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized() as TestWidgetsFlutterBinding;
   final WidgetTester tester = WidgetTester._(binding);
-  for (dynamic value in variant.values) {
+  for (final dynamic value in variant.values) {
     final String variationDescription = variant.describeValue(value);
     final String combinedDescription = variationDescription.isNotEmpty ? '$description ($variationDescription)' : description;
     test(
@@ -629,7 +629,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
       int numberOfTypes = 0;
       int totalNumber = 0;
       debugPrint('Some possible finders for the widgets at ${binding.globalToLocal(event.position)}:');
-      for (Element element in candidates) {
+      for (final Element element in candidates) {
         if (totalNumber > 13) // an arbitrary number of finders that feels useful without being overwhelming
           break;
         totalNumber += 1; // optimistically assume we'll be able to describe it
@@ -755,7 +755,7 @@ class WidgetTester extends WidgetController implements HitTestDispatcher, Ticker
   void verifyTickersWereDisposed([ String when = 'when none should have been' ]) {
     assert(when != null);
     if (_tickers != null) {
-      for (Ticker ticker in _tickers) {
+      for (final Ticker ticker in _tickers) {
         if (ticker.isActive) {
           throw FlutterError.fromParts(<DiagnosticsNode>[
             ErrorSummary('A Ticker was active $when.'),

@@ -183,7 +183,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
             .directory(path)
             .listSync(followLinks: false)
             .whereType<Directory>();
-        for (Directory directory in directories) {
+        for (final Directory directory in directories) {
           final String name = directory.basename;
           // An exact match, or something like 'Android Studio 3.0 Preview.app'.
           if (name.startsWith('Android Studio') && name.endsWith('.app')) {
@@ -236,7 +236,7 @@ class AndroidStudio implements Comparable<AndroidStudio> {
     // Read all $HOME/.AndroidStudio*/system/.home files. There may be several
     // pointing to the same installation, so we grab only the latest one.
     if (homeDirPath != null && globals.fs.directory(homeDirPath).existsSync()) {
-      for (FileSystemEntity entity in globals.fs.directory(homeDirPath).listSync(followLinks: false)) {
+      for (final FileSystemEntity entity in globals.fs.directory(homeDirPath).listSync(followLinks: false)) {
         if (entity is Directory && entity.basename.startsWith('.AndroidStudio')) {
           final AndroidStudio studio = AndroidStudio.fromHomeDot(entity);
           if (studio != null && !_hasStudioAt(studio.directory, newerThan: studio.version)) {

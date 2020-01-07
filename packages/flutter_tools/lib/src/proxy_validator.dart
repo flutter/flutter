@@ -34,7 +34,7 @@ class ProxyValidator extends DoctorValidator {
         messages.add(ValidationMessage.hint('NO_PROXY is not set'));
       } else {
         messages.add(ValidationMessage('NO_PROXY is $_noProxy'));
-        for (String host in const <String>['127.0.0.1', 'localhost']) {
+        for (final String host in const <String>['127.0.0.1', 'localhost']) {
           final ValidationMessage msg = _noProxy.contains(host)
               ? ValidationMessage('NO_PROXY contains $host')
               : ValidationMessage.hint('NO_PROXY does not contain $host');

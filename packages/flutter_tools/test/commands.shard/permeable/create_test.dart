@@ -645,7 +645,7 @@ void main() {
 
     expect(actualContents.contains('flutter_test.dart'), true);
 
-    for (FileSystemEntity file in projectDir.listSync(recursive: true)) {
+    for (final FileSystemEntity file in projectDir.listSync(recursive: true)) {
       if (file is File && file.path.endsWith('.dart')) {
         final String original = file.readAsStringSync();
 
@@ -737,7 +737,7 @@ void main() {
     expectExists('lib/main.dart');
     expectExists('test/widget_test.dart');
 
-    for (FileSystemEntity file in projectDir.listSync(recursive: true)) {
+    for (final FileSystemEntity file in projectDir.listSync(recursive: true)) {
       if (file is File && file.path.endsWith('.dart')) {
         final String original = file.readAsStringSync();
 
@@ -1227,10 +1227,10 @@ Future<void> _createProject(
   }
 
   final List<String> failures = <String>[
-    for (String path in expectedPaths)
+    for (final String path in expectedPaths)
       if (!pathExists(path))
         'Path "$path" does not exist.',
-    for (String path in unexpectedPaths)
+    for (final String path in unexpectedPaths)
       if (pathExists(path))
         'Path "$path" exists when it shouldn\'t.',
   ];

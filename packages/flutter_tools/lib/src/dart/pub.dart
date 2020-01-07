@@ -29,7 +29,7 @@ Pub get pub => context.get<Pub>();
 // We have server-side tooling that assumes the values are consistent.
 class PubContext {
   PubContext._(this._values) {
-    for (String item in _values) {
+    for (final String item in _values) {
       if (!_validContext.hasMatch(item)) {
         throw ArgumentError.value(
             _values, 'value', 'Must match RegExp ${_validContext.pattern}');

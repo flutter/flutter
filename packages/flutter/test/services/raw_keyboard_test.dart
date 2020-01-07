@@ -15,7 +15,7 @@ class _ModifierCheck {
 void main() {
   group('RawKeyboard', () {
     testWidgets('keysPressed is maintained', (WidgetTester tester) async {
-      for (String platform in <String>['linux', 'android', 'macos', 'fuchsia']) {
+      for (final String platform in <String>['linux', 'android', 'macos', 'fuchsia']) {
         RawKeyboard.instance.clearKeysPressed();
         expect(RawKeyboard.instance.keysPressed, isEmpty, reason: 'on $platform');
         await simulateKeyDownEvent(LogicalKeyboardKey.shiftLeft, platform: platform);
@@ -224,7 +224,7 @@ void main() {
     };
 
     test('modifier keys are recognized individually', () {
-      for (int modifier in modifierTests.keys) {
+      for (final int modifier in modifierTests.keys) {
         final RawKeyEvent event = RawKeyEvent.fromMessage(<String, dynamic>{
           'type': 'keydown',
           'keymap': 'android',
@@ -237,7 +237,7 @@ void main() {
           'deviceId': 1,
         });
         final RawKeyEventDataAndroid data = event.data as RawKeyEventDataAndroid;
-        for (ModifierKey key in ModifierKey.values) {
+        for (final ModifierKey key in ModifierKey.values) {
           if (modifierTests[modifier].key == key) {
             expect(
               data.isModifierPressed(key, side: modifierTests[modifier].side),
@@ -256,7 +256,7 @@ void main() {
       }
     });
     test('modifier keys are recognized when combined', () {
-      for (int modifier in modifierTests.keys) {
+      for (final int modifier in modifierTests.keys) {
         if (modifier == RawKeyEventDataAndroid.modifierFunction) {
           // No need to combine function key with itself.
           continue;
@@ -273,7 +273,7 @@ void main() {
           'deviceId': 1,
         });
         final RawKeyEventDataAndroid data = event.data as RawKeyEventDataAndroid;
-        for (ModifierKey key in ModifierKey.values) {
+        for (final ModifierKey key in ModifierKey.values) {
           if (modifierTests[modifier].key == key || key == ModifierKey.functionModifier) {
             expect(
               data.isModifierPressed(key, side: modifierTests[modifier].side),
@@ -454,7 +454,7 @@ void main() {
     };
 
     test('modifier keys are recognized individually', () {
-      for (int modifier in modifierTests.keys) {
+      for (final int modifier in modifierTests.keys) {
         final RawKeyEvent event = RawKeyEvent.fromMessage(<String, dynamic>{
           'type': 'keydown',
           'keymap': 'fuchsia',
@@ -463,7 +463,7 @@ void main() {
           'modifiers': modifier,
         });
         final RawKeyEventDataFuchsia data = event.data as RawKeyEventDataFuchsia;
-        for (ModifierKey key in ModifierKey.values) {
+        for (final ModifierKey key in ModifierKey.values) {
           if (modifierTests[modifier].key == key) {
             expect(
               data.isModifierPressed(key, side: modifierTests[modifier].side),
@@ -481,7 +481,7 @@ void main() {
       }
     });
     test('modifier keys are recognized when combined', () {
-      for (int modifier in modifierTests.keys) {
+      for (final int modifier in modifierTests.keys) {
         if (modifier == RawKeyEventDataFuchsia.modifierCapsLock) {
           // No need to combine caps lock key with itself.
           continue;
@@ -494,7 +494,7 @@ void main() {
           'modifiers': modifier | RawKeyEventDataFuchsia.modifierCapsLock,
         });
         final RawKeyEventDataFuchsia data = event.data as RawKeyEventDataFuchsia;
-        for (ModifierKey key in ModifierKey.values) {
+        for (final ModifierKey key in ModifierKey.values) {
           if (modifierTests[modifier].key == key || key == ModifierKey.capsLockModifier) {
             expect(
               data.isModifierPressed(key, side: modifierTests[modifier].side),
@@ -571,7 +571,7 @@ void main() {
     };
 
     test('modifier keys are recognized individually', () {
-      for (int modifier in modifierTests.keys) {
+      for (final int modifier in modifierTests.keys) {
         final RawKeyEvent event = RawKeyEvent.fromMessage(<String, dynamic>{
           'type': 'keydown',
           'keymap': 'macos',
@@ -581,7 +581,7 @@ void main() {
           'modifiers': modifier,
         });
         final RawKeyEventDataMacOs data = event.data as RawKeyEventDataMacOs;
-        for (ModifierKey key in ModifierKey.values) {
+        for (final ModifierKey key in ModifierKey.values) {
           if (modifierTests[modifier].key == key) {
             expect(
               data.isModifierPressed(key, side: modifierTests[modifier].side),
@@ -600,7 +600,7 @@ void main() {
       }
     });
     test('modifier keys are recognized when combined', () {
-      for (int modifier in modifierTests.keys) {
+      for (final int modifier in modifierTests.keys) {
         if (modifier == RawKeyEventDataMacOs.modifierCapsLock) {
           // No need to combine caps lock key with itself.
           continue;
@@ -615,7 +615,7 @@ void main() {
           'modifiers': modifier | RawKeyEventDataMacOs.modifierCapsLock,
         });
         final RawKeyEventDataMacOs data = event.data as RawKeyEventDataMacOs;
-        for (ModifierKey key in ModifierKey.values) {
+        for (final ModifierKey key in ModifierKey.values) {
           if (modifierTests[modifier].key == key || key == ModifierKey.capsLockModifier) {
             expect(
               data.isModifierPressed(key, side: modifierTests[modifier].side),
@@ -731,9 +731,9 @@ void main() {
     }
 
     test('modifier keys are recognized individually', () {
-      for (int modifier in modifierTests.keys) {
-        for (bool isDown in <bool>[true, false]) {
-          for (bool isLeft in <bool>[true, false]) {
+      for (final int modifier in modifierTests.keys) {
+        for (final bool isDown in <bool>[true, false]) {
+          for (final bool isLeft in <bool>[true, false]) {
             final RawKeyEvent event = RawKeyEvent.fromMessage(<String, dynamic>{
               'type': isDown ? 'keydown' : 'keyup',
               'keymap': 'linux',
@@ -745,7 +745,7 @@ void main() {
               'modifiers': isDown ? 0 : modifier,
             });
             final RawKeyEventDataLinux data = event.data as RawKeyEventDataLinux;
-            for (ModifierKey key in ModifierKey.values) {
+            for (final ModifierKey key in ModifierKey.values) {
               if (modifierTests[modifier].key == key) {
                 expect(
                   data.isModifierPressed(key, side: modifierTests[modifier].side),
@@ -766,7 +766,7 @@ void main() {
       }
     });
     test('modifier keys are recognized when combined', () {
-      for (int modifier in modifierTests.keys) {
+      for (final int modifier in modifierTests.keys) {
         if (modifier == GLFWKeyHelper.modifierControl) {
           // No need to combine CTRL key with itself.
           continue;
@@ -781,7 +781,7 @@ void main() {
           'modifiers': modifier | GLFWKeyHelper.modifierControl,
         });
         final RawKeyEventDataLinux data = event.data as RawKeyEventDataLinux;
-        for (ModifierKey key in ModifierKey.values) {
+        for (final ModifierKey key in ModifierKey.values) {
           if (modifierTests[modifier].key == key || key == ModifierKey.controlModifier) {
             expect(
               data.isModifierPressed(key, side: modifierTests[modifier].side),
@@ -894,7 +894,7 @@ void main() {
     };
 
     test('modifier keys are recognized individually', () {
-      for (int modifier in modifierTests.keys) {
+      for (final int modifier in modifierTests.keys) {
         final RawKeyEvent event = RawKeyEvent.fromMessage(<String, dynamic>{
           'type': 'keydown',
           'keymap': 'web',
@@ -903,7 +903,7 @@ void main() {
           'metaState': modifier,
         });
         final RawKeyEventDataWeb data = event.data as RawKeyEventDataWeb;
-        for (ModifierKey key in ModifierKey.values) {
+        for (final ModifierKey key in ModifierKey.values) {
           if (modifierTests[modifier] == key) {
             expect(
               data.isModifierPressed(key),
@@ -921,7 +921,7 @@ void main() {
       }
     });
     test('modifier keys are recognized when combined', () {
-      for (int modifier in modifierTests.keys) {
+      for (final int modifier in modifierTests.keys) {
         if (modifier == RawKeyEventDataWeb.modifierMeta) {
           // No need to combine meta key with itself.
           continue;
@@ -934,7 +934,7 @@ void main() {
           'metaState': modifier | RawKeyEventDataWeb.modifierMeta,
         });
         final RawKeyEventDataWeb data = event.data as RawKeyEventDataWeb;
-        for (ModifierKey key in ModifierKey.values) {
+        for (final ModifierKey key in ModifierKey.values) {
           if (modifierTests[modifier] == key || key == ModifierKey.metaModifier) {
             expect(
               data.isModifierPressed(key),

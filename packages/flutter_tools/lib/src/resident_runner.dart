@@ -249,7 +249,7 @@ class FlutterDevice {
       return;
     }
     final List<Future<void>> futures = <Future<void>>[];
-    for (FlutterView view in flutterViews) {
+    for (final FlutterView view in flutterViews) {
       if (view != null && view.uiIsolate != null) {
         assert(!view.uiIsolate.pauseEvent.isPauseEvent);
         futures.add(view.uiIsolate.flutterExit());
@@ -283,7 +283,7 @@ class FlutterDevice {
     final Uri deviceEntryUri = devFS.baseUri.resolveUri(globals.fs.path.toUri(entryPath));
     final Uri devicePackagesUri = devFS.baseUri.resolve('.packages');
     return <Future<Map<String, dynamic>>>[
-      for (FlutterView view in views)
+      for (final FlutterView view in views)
         view.uiIsolate.reloadSources(
           pause: pause,
           rootLibUri: deviceEntryUri,
@@ -302,68 +302,68 @@ class FlutterDevice {
   }
 
   Future<void> debugDumpApp() async {
-    for (FlutterView view in views) {
+    for (final FlutterView view in views) {
       await view.uiIsolate.flutterDebugDumpApp();
     }
   }
 
   Future<void> debugDumpRenderTree() async {
-    for (FlutterView view in views) {
+    for (final FlutterView view in views) {
       await view.uiIsolate.flutterDebugDumpRenderTree();
     }
   }
 
   Future<void> debugDumpLayerTree() async {
-    for (FlutterView view in views) {
+    for (final FlutterView view in views) {
       await view.uiIsolate.flutterDebugDumpLayerTree();
     }
   }
 
   Future<void> debugDumpSemanticsTreeInTraversalOrder() async {
-    for (FlutterView view in views) {
+    for (final FlutterView view in views) {
       await view.uiIsolate.flutterDebugDumpSemanticsTreeInTraversalOrder();
     }
   }
 
   Future<void> debugDumpSemanticsTreeInInverseHitTestOrder() async {
-    for (FlutterView view in views) {
+    for (final FlutterView view in views) {
       await view.uiIsolate.flutterDebugDumpSemanticsTreeInInverseHitTestOrder();
     }
   }
 
   Future<void> toggleDebugPaintSizeEnabled() async {
-    for (FlutterView view in views) {
+    for (final FlutterView view in views) {
       await view.uiIsolate.flutterToggleDebugPaintSizeEnabled();
     }
   }
 
   Future<void> toggleDebugCheckElevationsEnabled() async {
-    for (FlutterView view in views) {
+    for (final FlutterView view in views) {
       await view.uiIsolate.flutterToggleDebugCheckElevationsEnabled();
     }
   }
 
   Future<void> debugTogglePerformanceOverlayOverride() async {
-    for (FlutterView view in views) {
+    for (final FlutterView view in views) {
       await view.uiIsolate.flutterTogglePerformanceOverlayOverride();
     }
   }
 
   Future<void> toggleWidgetInspector() async {
-    for (FlutterView view in views) {
+    for (final FlutterView view in views) {
       await view.uiIsolate.flutterToggleWidgetInspector();
     }
   }
 
   Future<void> toggleProfileWidgetBuilds() async {
-    for (FlutterView view in views) {
+    for (final FlutterView view in views) {
       await view.uiIsolate.flutterToggleProfileWidgetBuilds();
     }
   }
 
   Future<String> togglePlatform({ String from }) async {
     final String to = nextPlatform(from, featureFlags);
-    for (FlutterView view in views) {
+    for (final FlutterView view in views) {
       await view.uiIsolate.flutterPlatformOverride(to);
     }
     return to;
@@ -578,7 +578,7 @@ final RegExp kAndroidQHttpConnectionClosedExp = RegExp(r'^HttpException\:.+\, ur
 
 /// Returns `true` if any of the devices is running Android Q.
 Future<bool> hasDeviceRunningAndroidQ(List<FlutterDevice> flutterDevices) async {
-  for (FlutterDevice flutterDevice in flutterDevices) {
+  for (final FlutterDevice flutterDevice in flutterDevices) {
     final String sdkNameAndVersion = await flutterDevice.device.sdkNameAndVersion;
     if (sdkNameAndVersion != null && sdkNameAndVersion.startsWith('Android 10')) {
       return true;
@@ -755,77 +755,77 @@ abstract class ResidentRunner {
 
   Future<void> refreshViews() async {
     final List<Future<void>> futures = <Future<void>>[
-      for (FlutterDevice device in flutterDevices) device.refreshViews(),
+      for (final FlutterDevice device in flutterDevices) device.refreshViews(),
     ];
     await Future.wait(futures);
   }
 
   Future<void> debugDumpApp() async {
     await refreshViews();
-    for (FlutterDevice device in flutterDevices) {
+    for (final FlutterDevice device in flutterDevices) {
       await device.debugDumpApp();
     }
   }
 
   Future<void> debugDumpRenderTree() async {
     await refreshViews();
-    for (FlutterDevice device in flutterDevices) {
+    for (final FlutterDevice device in flutterDevices) {
       await device.debugDumpRenderTree();
     }
   }
 
   Future<void> debugDumpLayerTree() async {
     await refreshViews();
-    for (FlutterDevice device in flutterDevices) {
+    for (final FlutterDevice device in flutterDevices) {
       await device.debugDumpLayerTree();
     }
   }
 
   Future<void> debugDumpSemanticsTreeInTraversalOrder() async {
     await refreshViews();
-    for (FlutterDevice device in flutterDevices) {
+    for (final FlutterDevice device in flutterDevices) {
       await device.debugDumpSemanticsTreeInTraversalOrder();
     }
   }
 
   Future<void> debugDumpSemanticsTreeInInverseHitTestOrder() async {
     await refreshViews();
-    for (FlutterDevice device in flutterDevices) {
+    for (final FlutterDevice device in flutterDevices) {
       await device.debugDumpSemanticsTreeInInverseHitTestOrder();
     }
   }
 
   Future<void> debugToggleDebugPaintSizeEnabled() async {
     await refreshViews();
-    for (FlutterDevice device in flutterDevices) {
+    for (final FlutterDevice device in flutterDevices) {
       await device.toggleDebugPaintSizeEnabled();
     }
   }
 
   Future<void> debugToggleDebugCheckElevationsEnabled() async {
     await refreshViews();
-    for (FlutterDevice device in flutterDevices) {
+    for (final FlutterDevice device in flutterDevices) {
       await device.toggleDebugCheckElevationsEnabled();
     }
   }
 
   Future<void> debugTogglePerformanceOverlayOverride() async {
     await refreshViews();
-    for (FlutterDevice device in flutterDevices) {
+    for (final FlutterDevice device in flutterDevices) {
       await device.debugTogglePerformanceOverlayOverride();
     }
   }
 
   Future<void> debugToggleWidgetInspector() async {
     await refreshViews();
-    for (FlutterDevice device in flutterDevices) {
+    for (final FlutterDevice device in flutterDevices) {
       await device.toggleWidgetInspector();
     }
   }
 
   Future<void> debugToggleProfileWidgetBuilds() async {
     await refreshViews();
-    for (FlutterDevice device in flutterDevices) {
+    for (final FlutterDevice device in flutterDevices) {
       await device.toggleProfileWidgetBuilds();
     }
   }
@@ -845,7 +845,7 @@ abstract class ResidentRunner {
       if (supportsServiceProtocol && isRunningDebug) {
         await device.refreshViews();
         try {
-          for (FlutterView view in device.views) {
+          for (final FlutterView view in device.views) {
             await view.uiIsolate.flutterDebugAllowBanner(false);
           }
         } catch (error) {
@@ -859,7 +859,7 @@ abstract class ResidentRunner {
       } finally {
         if (supportsServiceProtocol && isRunningDebug) {
           try {
-            for (FlutterView view in device.views) {
+            for (final FlutterView view in device.views) {
               await view.uiIsolate.flutterDebugAllowBanner(true);
             }
           } catch (error) {
@@ -882,7 +882,7 @@ abstract class ResidentRunner {
     await refreshViews();
     final String from = await flutterDevices[0].views[0].uiIsolate.flutterPlatformOverride();
     String to;
-    for (FlutterDevice device in flutterDevices) {
+    for (final FlutterDevice device in flutterDevices) {
       to = await device.togglePlatform(from: from);
     }
     globals.printStatus('Switched operating system to $to');
@@ -913,7 +913,7 @@ abstract class ResidentRunner {
     _finished = Completer<int>();
 
     bool viewFound = false;
-    for (FlutterDevice device in flutterDevices) {
+    for (final FlutterDevice device in flutterDevices) {
       await device.connect(
         reloadSources: reloadSources,
         restart: restart,
@@ -935,7 +935,7 @@ abstract class ResidentRunner {
     }
 
     // Listen for service protocol connection to close.
-    for (FlutterDevice device in flutterDevices) {
+    for (final FlutterDevice device in flutterDevices) {
       // This hooks up callbacks for when the connection stops in the future.
       // We don't want to wait for them. We don't handle errors in those callbacks'
       // futures either because they just print to logger and is not critical.
@@ -993,7 +993,7 @@ abstract class ResidentRunner {
 
   Future<void> exitApp() async {
     final List<Future<void>> futures = <Future<void>>[
-      for (FlutterDevice device in flutterDevices)  device.exitApps(),
+      for (final FlutterDevice device in flutterDevices)  device.exitApps(),
     ];
     await Future.wait(futures);
     appFinished();
@@ -1116,7 +1116,7 @@ class TerminalHandler {
   /// Unregisters terminal signal and keystroke handlers.
   void stop() {
     assert(residentRunner.stayResident);
-    for (MapEntry<io.ProcessSignal, Object> entry in _signalTokens.entries) {
+    for (final MapEntry<io.ProcessSignal, Object> entry in _signalTokens.entries) {
       signals.removeHandler(entry.key, entry.value);
     }
     _signalTokens.clear();
@@ -1154,7 +1154,7 @@ class TerminalHandler {
         final List<FlutterView> views = residentRunner.flutterDevices
             .expand((FlutterDevice d) => d.views).toList();
         globals.printStatus('Connected ${pluralize('view', views.length)}:');
-        for (FlutterView v in views) {
+        for (final FlutterView v in views) {
           globals.printStatus('${v.uiIsolate.name} (${v.uiIsolate.id})', indent: 2);
         }
         return true;
@@ -1189,7 +1189,7 @@ class TerminalHandler {
         await residentRunner.exit();
         return true;
       case 's':
-        for (FlutterDevice device in residentRunner.flutterDevices) {
+        for (final FlutterDevice device in residentRunner.flutterDevices) {
           if (device.device.supportsScreenshot) {
             await residentRunner.screenshot(device);
           }

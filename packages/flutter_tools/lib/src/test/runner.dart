@@ -61,9 +61,9 @@ Future<int> runTests(
     else
       ...<String>['-r', 'compact'],
     '--concurrency=$concurrency',
-    for (String name in names)
+    for (final String name in names)
       ...<String>['--name', name],
-    for (String plainName in plainNames)
+    for (final String plainName in plainNames)
       ...<String>['--plain-name', plainName],
     '--test-randomize-ordering-seed=$randomSeed',
   ];

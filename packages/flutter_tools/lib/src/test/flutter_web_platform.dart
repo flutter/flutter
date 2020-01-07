@@ -440,7 +440,7 @@ class PathHandler {
   /// the longest matching prefix wins.
   void add(String path, shelf.Handler handler) {
     _Node node = _paths;
-    for (String component in p.url.split(path)) {
+    for (final String component in p.url.split(path)) {
       node = node.children.putIfAbsent(component, () => _Node());
     }
     node.handler = handler;
@@ -489,7 +489,7 @@ class BrowserManager {
     // Start this canceled because we don't want it to start ticking until we
     // get some response from the iframe.
     _timer = RestartableTimer(const Duration(seconds: 3), () {
-      for (RunnerSuiteController controller in _controllers) {
+      for (final RunnerSuiteController controller in _controllers) {
         controller.setDebugging(true);
       }
     })
@@ -503,7 +503,7 @@ class BrowserManager {
           if (!_closed) {
             _timer.reset();
           }
-          for (RunnerSuiteController controller in _controllers) {
+          for (final RunnerSuiteController controller in _controllers) {
             controller.setDebugging(false);
           }
 
@@ -933,7 +933,7 @@ void main() async {
     .transform<String>(utf8.decoder)
     .transform<String>(const LineSplitter())
     .map<Object>(jsonDecode);
-  await for (Object command in commands) {
+  await for (final Object command in commands) {
     if (command is Map<String, dynamic>) {
       File imageFile = File(command['imageFile']);
       Uri goldenKey = Uri.parse(command['key']);

@@ -66,7 +66,7 @@ class PrecacheCommand extends FlutterCommand {
       globals.cache.useUnsignedMacBinaries = true;
     }
     final Set<DevelopmentArtifact> requiredArtifacts = <DevelopmentArtifact>{};
-    for (DevelopmentArtifact artifact in DevelopmentArtifact.values) {
+    for (final DevelopmentArtifact artifact in DevelopmentArtifact.values) {
       // Don't include unstable artifacts on stable branches.
       if (!FlutterVersion.instance.isMaster && artifact.unstable) {
         continue;
