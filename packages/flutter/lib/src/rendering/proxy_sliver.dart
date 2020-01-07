@@ -12,7 +12,6 @@ import 'layer.dart';
 import 'object.dart';
 import 'proxy_box.dart';
 import 'sliver.dart';
-import 'sliver_multi_box_adaptor.dart';
 
 /// A base class for sliver render objects that resemble their children.
 ///
@@ -132,7 +131,6 @@ class RenderSliverOpacity extends RenderProxySliver {
   set opacity(double value) {
     assert(value != null);
     assert(value >= 0.0 && value <= 1.0);
-
     if (_opacity == value)
       return;
     final bool didNeedCompositing = alwaysNeedsCompositing;
