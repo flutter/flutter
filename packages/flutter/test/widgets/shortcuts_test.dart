@@ -146,7 +146,7 @@ void main() {
           })),
       );
     });
-    test('KeySet diagnostics work.', () {
+    test('LogicalKeySet diagnostics work.', () {
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
       LogicalKeySet(
@@ -162,10 +162,7 @@ void main() {
           .toList();
 
       expect(description.length, equals(1));
-      expect(
-          description[0],
-          equalsIgnoringHashCodes(
-              'keys: {LogicalKeyboardKey#00000(keyId: "0x00000061", keyLabel: "a", debugName: "Key A"), LogicalKeyboardKey#00000(keyId: "0x00000062", keyLabel: "b", debugName: "Key B")}'));
+      expect(description[0], equals('keys: Key A + Key B'));
     });
   });
   group(Shortcuts, () {
@@ -284,9 +281,13 @@ void main() {
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
       Shortcuts(shortcuts: <LogicalKeySet, Intent>{LogicalKeySet(
+        LogicalKeyboardKey.shift,
         LogicalKeyboardKey.keyA,
-        LogicalKeyboardKey.keyB,
-      ) : const Intent(ActivateAction.key)}).debugFillProperties(builder);
+      ) : const Intent(ActivateAction.key),
+        LogicalKeySet(
+        LogicalKeyboardKey.shift,
+        LogicalKeyboardKey.arrowRight,
+      ) : const DirectionalFocusIntent(TraversalDirection.right)}).debugFillProperties(builder);
 
       final List<String> description = builder.properties
           .where((DiagnosticsNode node) {
@@ -295,18 +296,17 @@ void main() {
           .map((DiagnosticsNode node) => node.toString())
           .toList();
 
-      expect(description.length, equals(2));
-      expect(description[0], equals('manager: null'));
+      expect(description.length, equals(1));
       expect(
-          description[1],
+          description[0],
           equalsIgnoringHashCodes(
-              'shortcuts: {LogicalKeySet#00000(keys: {LogicalKeyboardKey#00000(keyId: "0x00000061", keyLabel: "a", debugName: "Key A"), LogicalKeyboardKey#00000(keyId: "0x00000062", keyLabel: "b", debugName: "Key B")}): Intent#00000(key: [<ActivateAction>])}'));
+              'shortcuts: {{Shift + Key A}: Intent#00000(key: [<ActivateAction>]), {Shift + Arrow Right}: DirectionalFocusIntent#00000(key: [<DirectionalFocusAction>])}'));
     });
     test('Shortcuts diagnostics work when debugLabel specified.', () {
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
       Shortcuts(
-        debugLabel: 'Debug Label',
+        debugLabel: '<Debug Label>',
         shortcuts: <LogicalKeySet, Intent>{
           LogicalKeySet(
             LogicalKeyboardKey.keyA,
@@ -315,31 +315,15 @@ void main() {
         },
       ).debugFillProperties(builder);
 
-      List<String> description = builder.properties
+      final List<String> description = builder.properties
           .where((DiagnosticsNode node) {
         return !node.isFiltered(DiagnosticLevel.info);
       })
           .map((DiagnosticsNode node) => node.toString())
           .toList();
 
-      expect(description.length, equals(2));
-      expect(description[0], equals('manager: null'));
-      expect(description[1], equals('debugLabel: "Debug Label"'));
-
-      description = builder.properties
-          .where((DiagnosticsNode node) {
-        return !node.isFiltered(DiagnosticLevel.fine);
-      })
-          .map((DiagnosticsNode node) => node.toString())
-          .toList();
-
-      expect(description.length, equals(3));
-      expect(description[0], equals('manager: null'));
-      expect(description[1], equals('debugLabel: "Debug Label"'));
-      expect(
-          description[2],
-          equalsIgnoringHashCodes(
-              'shortcuts: {LogicalKeySet#00000(keys: {LogicalKeyboardKey#00000(keyId: "0x00000061", keyLabel: "a", debugName: "Key A"), LogicalKeyboardKey#00000(keyId: "0x00000062", keyLabel: "b", debugName: "Key B")}): Intent#00000(key: [<ActivateAction>])}'));
+      expect(description.length, equals(1));
+      expect(description[0], equals('shortcuts: <Debug Label>'));
     });
   });
 }
