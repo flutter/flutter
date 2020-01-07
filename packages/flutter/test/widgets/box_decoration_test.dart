@@ -556,5 +556,4 @@ Future<void> main() async {
     await tester.tapAt(topLeftOutside);
     expect(itemsTapped, <int>[1,1,1,1,1],reason: 'top left tapped');
   });
-
 }
