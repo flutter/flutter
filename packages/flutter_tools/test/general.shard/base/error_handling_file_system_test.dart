@@ -6,6 +6,7 @@ import 'package:file/file.dart';
 import 'package:flutter_tools/src/base/error_handling_file_system.dart';
 import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
+import 'package:path/path.dart' as path; // ignore: package_path_import
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -14,6 +15,7 @@ import '../../src/testbed.dart';
 class MockFile extends Mock implements File {}
 class MockFileSystem extends Mock implements FileSystem {}
 class MockPlatform extends Mock implements Platform {}
+class MockPathContext extends Mock implements path.Context {}
 
 void main() {
   group('throws ToolExit on Windows', () {
@@ -32,6 +34,7 @@ void main() {
       when(windowsPlatform.isWindows).thenReturn(true);
       when(windowsPlatform.isLinux).thenReturn(false);
       when(windowsPlatform.isMacOS).thenReturn(false);
+      when(mockFileSystem.path).thenReturn(MockPathContext());
       testbed = Testbed(overrides: <Type, Generator>{
         Platform: () => windowsPlatform,
       });
@@ -95,5 +98,24 @@ void main() {
       errorCode: kUserMappedSectionOpened,
       expectedMessage: 'The file is being used by another program',
     );
+  });
+
+  test('Caches path context correctly', () {
+    final MockFileSystem mockFileSystem = MockFileSystem();
+    final FileSystem fs = ErrorHandlingFileSystem(mockFileSystem);
+
+    expect(identical(fs.path, fs.path), true);
+  });
+
+  test('Clears cache when CWD changes', () {
+    final MockFileSystem mockFileSystem = MockFileSystem();
+    final FileSystem fs = ErrorHandlingFileSystem(mockFileSystem);
+
+    final Object firstPath = fs.path;
+
+    fs.currentDirectory = null;
+    when(mockFileSystem.path).thenReturn(MockPathContext());
+
+    expect(identical(firstPath, fs.path), false);
   });
 }
