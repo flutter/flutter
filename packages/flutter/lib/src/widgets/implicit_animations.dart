@@ -1396,7 +1396,7 @@ class SliverAnimatedOpacity extends ImplicitlyAnimatedWidget {
     VoidCallback onEnd,
     this.alwaysIncludeSemantics = false,
   }) : assert(opacity != null && opacity >= 0.0 && opacity <= 1.0),
-      super(key: key, curve: curve, duration: duration, onEnd: onEnd);
+       super(key: key, curve: curve, duration: duration, onEnd: onEnd);
 
   /// The sliver below this widget in the tree.
   ///
