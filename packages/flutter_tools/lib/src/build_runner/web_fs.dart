@@ -150,11 +150,18 @@ class WebFs {
   /// Recompile the web application and return whether this was successful.
   Future<bool> recompile() async {
     if (!_useBuildRunner) {
-      await buildWeb(_flutterProject, _target, _buildInfo, _initializePlatform, _dartDefines);
+      await buildWeb(
+        _flutterProject,
+        _target,
+        _buildInfo,
+        _initializePlatform,
+        _dartDefines,
+        false,
+      );
       return true;
     }
     _client.startBuild();
-    await for (BuildResults results in _client.buildResults) {
+    await for (final BuildResults results in _client.buildResults) {
       final BuildResult result = results.results.firstWhere((BuildResult result) {
         return result.target == kBuildTargetName;
       });
@@ -309,7 +316,14 @@ class WebFs {
         handler = pipeline.addHandler(proxyHandler('http://localhost:$daemonAssetPort/web/'));
       }
     } else {
-      await buildWeb(flutterProject, target, buildInfo, initializePlatform, dartDefines);
+      await buildWeb(
+        flutterProject,
+        target,
+        buildInfo,
+        initializePlatform,
+        dartDefines,
+        false,
+      );
       firstBuildCompleter.complete(true);
     }
 
@@ -367,7 +381,7 @@ class ReleaseAssetServer extends AssetServer {
   @override
   Future<Response> handle(Request request) async {
     Uri fileUri;
-    for (Uri uri in _searchPaths) {
+    for (final Uri uri in _searchPaths) {
       final Uri potential = uri.resolve(request.url.path);
       if (potential == null || !globals.fs.isFileSync(potential.toFilePath())) {
         continue;
@@ -445,7 +459,7 @@ class DebugAssetServer extends AssetServer {
           final Archive archive = TarDecoder().decodeBytes(dart2jsArchive.readAsBytesSync());
           partFiles = globals.fs.systemTempDirectory.createTempSync('flutter_tool.')
             ..createSync();
-          for (ArchiveFile file in archive) {
+          for (final ArchiveFile file in archive) {
             partFiles.childFile(file.name).writeAsBytesSync(file.content as List<int>);
           }
         }
@@ -664,7 +678,7 @@ class BuildDaemonCreator {
       '--define', 'flutter_tools:shell=initializePlatform=$initializePlatform',
       // The following will cause build runner to only build tests that were requested.
       if (testTargets != null && testTargets.hasBuildFilters)
-        for (String buildFilter in testTargets.buildFilters)
+        for (final String buildFilter in testTargets.buildFilters)
           '--build-filter=$buildFilter',
     ];
 

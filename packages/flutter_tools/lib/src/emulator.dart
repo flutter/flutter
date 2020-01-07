@@ -250,7 +250,7 @@ abstract class Emulator {
 
     // Extract emulators information
     final List<List<String>> table = <List<String>>[
-      for (Emulator emulator in emulators)
+      for (final Emulator emulator in emulators)
         <String>[
           emulator.id ?? '',
           emulator.name ?? '',
@@ -262,7 +262,7 @@ abstract class Emulator {
     // Calculate column widths
     final List<int> indices = List<int>.generate(table[0].length - 1, (int i) => i);
     List<int> widths = indices.map<int>((int i) => 0).toList();
-    for (List<String> row in table) {
+    for (final List<String> row in table) {
       widths = indices.map<int>((int i) => math.max(widths[i], row[i].length)).toList();
     }
 

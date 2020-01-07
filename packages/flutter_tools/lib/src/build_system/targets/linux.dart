@@ -59,7 +59,7 @@ class UnpackLinuxDebug extends Target {
     );
     // The native linux artifacts are composed of 6 files and a directory (listed above)
     // which need to be copied to the target directory.
-    for (String artifact in _kLinuxArtifacts) {
+    for (final String artifact in _kLinuxArtifacts) {
       final String entityPath = globals.fs.path.join(basePath, artifact);
       // If this artifact is a file, just copy the source over.
       if (globals.fs.isFileSync(entityPath)) {
@@ -79,7 +79,7 @@ class UnpackLinuxDebug extends Target {
       }
       // If the artifact is the directory cpp_client_wrapper, recursively
       // copy every file from it.
-      for (File input in globals.fs.directory(entityPath)
+      for (final File input in globals.fs.directory(entityPath)
           .listSync(recursive: true)
           .whereType<File>()) {
         final String outputPath = globals.fs.path.join(

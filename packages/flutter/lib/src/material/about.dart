@@ -488,7 +488,7 @@ class _LicensePageState extends State<LicensePage> {
       debugFlowId = flow.id;
       return true;
     }());
-    await for (LicenseEntry license in LicenseRegistry.licenses) {
+    await for (final LicenseEntry license in LicenseRegistry.licenses) {
       if (!mounted) {
         return;
       }
@@ -523,7 +523,7 @@ class _LicensePageState extends State<LicensePage> {
             textAlign: TextAlign.center,
           ),
         ));
-        for (LicenseParagraph paragraph in paragraphs) {
+        for (final LicenseParagraph paragraph in paragraphs) {
           if (paragraph.indent == LicenseParagraph.centeredIndent) {
             _licenses.add(Padding(
               padding: const EdgeInsets.only(top: 16.0),

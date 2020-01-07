@@ -207,12 +207,15 @@ class SystemUiOverlayStyle {
 }
 
 List<String> _stringify(List<dynamic> list) => <String>[
-  for (dynamic item in list) item.toString(),
+  for (final dynamic item in list) item.toString(),
 ];
 
 /// Controls specific aspects of the operating system's graphical interface and
 /// how it interacts with the application.
 class SystemChrome {
+  // This class is not meant to be instatiated or extended; this constructor
+  // prevents instantiation and extension.
+  // ignore: unused_element
   SystemChrome._();
 
   /// Specifies the set of orientations the application interface can

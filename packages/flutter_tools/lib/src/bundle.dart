@@ -126,7 +126,7 @@ Future<void> buildWithAssemble({
   final BuildResult result = await buildSystem.build(target, environment);
 
   if (!result.success) {
-    for (ExceptionMeasurement measurement in result.exceptions.values) {
+    for (final ExceptionMeasurement measurement in result.exceptions.values) {
         globals.printError('Target ${measurement.target} failed: ${measurement.exception}',
           stackTrace: measurement.fatal
             ? measurement.stackTrace

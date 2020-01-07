@@ -222,7 +222,7 @@ class TestCommand extends FastFlutterCommand {
     if (flutterProject.hasBuilders) {
       final CodegenDaemon codegenDaemon = await codeGenerator.daemon(flutterProject);
       codegenDaemon.startBuild();
-      await for (CodegenStatus status in codegenDaemon.buildResults) {
+      await for (final CodegenStatus status in codegenDaemon.buildResults) {
         if (status == CodegenStatus.Succeeded) {
           break;
         }
@@ -296,7 +296,7 @@ class TestCommand extends FastFlutterCommand {
       return true;
     }
 
-    for (DevFSFileContent entry in entries.values.whereType<DevFSFileContent>()) {
+    for (final DevFSFileContent entry in entries.values.whereType<DevFSFileContent>()) {
       // Calling isModified to access file stats first in order for isModifiedAfter
       // to work.
       if (entry.isModified && entry.isModifiedAfter(lastModified)) {

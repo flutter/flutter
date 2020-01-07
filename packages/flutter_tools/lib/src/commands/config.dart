@@ -30,7 +30,7 @@ class ConfigCommand extends FlutterCommand {
       negatable: false,
       hide: !verboseHelp,
       help: 'Print config values as json.');
-    for (Feature feature in allFeatures) {
+    for (final Feature feature in allFeatures) {
       if (feature.configSetting == null) {
         continue;
       }
@@ -69,7 +69,7 @@ class ConfigCommand extends FlutterCommand {
     // are available.
     final Map<String, Feature> featuresByName = <String, Feature>{};
     final String channel = FlutterVersion.instance.channel;
-    for (Feature feature in allFeatures) {
+    for (final Feature feature in allFeatures) {
       if (feature.configSetting != null) {
         featuresByName[feature.configSetting] = feature;
       }
@@ -105,7 +105,7 @@ class ConfigCommand extends FlutterCommand {
     }
 
     if (boolArg('clear-features')) {
-      for (Feature feature in allFeatures) {
+      for (final Feature feature in allFeatures) {
         if (feature.configSetting != null) {
           globals.config.removeValue(feature.configSetting);
         }
@@ -140,7 +140,7 @@ class ConfigCommand extends FlutterCommand {
       _updateConfig('build-dir', buildDir);
     }
 
-    for (Feature feature in allFeatures) {
+    for (final Feature feature in allFeatures) {
       if (feature.configSetting == null) {
         continue;
       }
@@ -163,7 +163,7 @@ class ConfigCommand extends FlutterCommand {
   Future<void> handleMachine() async {
     // Get all the current values.
     final Map<String, dynamic> results = <String, dynamic>{};
-    for (String key in globals.config.keys) {
+    for (final String key in globals.config.keys) {
       results[key] = globals.config.getValue(key);
     }
 

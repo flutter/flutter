@@ -168,7 +168,7 @@ class ScrollController extends ChangeNotifier {
   /// value was out of range.
   void jumpTo(double value) {
     assert(_positions.isNotEmpty, 'ScrollController not attached to any scroll views.');
-    for (ScrollPosition position in List<ScrollPosition>.from(_positions))
+    for (final ScrollPosition position in List<ScrollPosition>.from(_positions))
       position.jumpTo(value);
   }
 
@@ -194,7 +194,7 @@ class ScrollController extends ChangeNotifier {
 
   @override
   void dispose() {
-    for (ScrollPosition position in _positions)
+    for (final ScrollPosition position in _positions)
       position.removeListener(notifyListeners);
     super.dispose();
   }
@@ -367,7 +367,7 @@ class TrackingScrollController extends ScrollController {
 
   @override
   void dispose() {
-    for (ScrollPosition position in positions) {
+    for (final ScrollPosition position in positions) {
       assert(_positionToListener.containsKey(position));
       position.removeListener(_positionToListener[position]);
     }

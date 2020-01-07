@@ -399,7 +399,7 @@ class MemoryIOSink implements IOSink {
   @override
   void writeAll(Iterable<dynamic> objects, [ String separator = '' ]) {
     bool addSeparator = false;
-    for (dynamic object in objects) {
+    for (final dynamic object in objects) {
       if (addSeparator) {
         write(separator);
       }

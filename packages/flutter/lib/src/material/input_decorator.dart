@@ -805,14 +805,14 @@ class _RenderDecoration extends RenderBox {
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
-    for (RenderBox child in _children)
+    for (final RenderBox child in _children)
       child.attach(owner);
   }
 
   @override
   void detach() {
     super.detach();
-    for (RenderBox child in _children)
+    for (final RenderBox child in _children)
       child.detach();
   }
 
@@ -1199,7 +1199,7 @@ class _RenderDecoration extends RenderBox {
 
   double _lineHeight(double width, List<RenderBox> boxes) {
     double height = 0.0;
-    for (RenderBox box in boxes) {
+    for (final RenderBox box in boxes) {
       if (box == null)
         continue;
       height = math.max(_minHeight(box, width), height);
@@ -1448,7 +1448,7 @@ class _RenderDecoration extends RenderBox {
   @override
   bool hitTestChildren(BoxHitTestResult result, { @required Offset position }) {
     assert(position != null);
-    for (RenderBox child in _children) {
+    for (final RenderBox child in _children) {
       // TODO(hansmuller): label must be handled specially since we've transformed it
       final Offset offset = _boxParentData(child).offset;
       final bool isHit = result.addWithPaintOffset(

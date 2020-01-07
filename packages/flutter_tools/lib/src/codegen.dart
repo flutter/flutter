@@ -118,7 +118,7 @@ class CodeGeneratingKernelCompiler implements KernelCompiler {
     codeGenerator.updatePackages(flutterProject);
     final CodegenDaemon codegenDaemon = await codeGenerator.daemon(flutterProject);
     codegenDaemon.startBuild();
-    await for (CodegenStatus codegenStatus in codegenDaemon.buildResults) {
+    await for (final CodegenStatus codegenStatus in codegenDaemon.buildResults) {
       if (codegenStatus == CodegenStatus.Failed) {
         globals.printError('Code generation failed, build may have compile errors.');
         break;

@@ -115,11 +115,11 @@ class AssembleCommand extends FlutterCommand {
     }
     final String name = argResults.rest.first;
     final Map<String, Target> targetMap = <String, Target>{
-      for (Target target in _kDefaultTargets)
+      for (final Target target in _kDefaultTargets)
         target.name: target
     };
     final List<Target> results = <Target>[
-      for (String targetName in argResults.rest)
+      for (final String targetName in argResults.rest)
         if (targetMap.containsKey(targetName))
           targetMap[targetName]
     ];
@@ -153,7 +153,7 @@ class AssembleCommand extends FlutterCommand {
 
   Map<String, String> _parseDefines(List<String> values) {
     final Map<String, String> results = <String, String>{};
-    for (String chunk in values) {
+    for (final String chunk in values) {
       final int indexEquals = chunk.indexOf('=');
       if (indexEquals == -1) {
         throwToolExit('Improperly formatted define flag: $chunk');
@@ -179,7 +179,7 @@ class AssembleCommand extends FlutterCommand {
         : null,
     ));
     if (!result.success) {
-      for (ExceptionMeasurement measurement in result.exceptions.values) {
+      for (final ExceptionMeasurement measurement in result.exceptions.values) {
         globals.printError('Target ${measurement.target} failed: ${measurement.exception}',
           stackTrace: measurement.fatal
             ? measurement.stackTrace
@@ -209,7 +209,7 @@ void writeListIfChanged(List<File> files, String path) {
   final File file = globals.fs.file(path);
   final StringBuffer buffer = StringBuffer();
   // These files are already sorted.
-  for (File file in files) {
+  for (final File file in files) {
     buffer.writeln(file.path);
   }
   final String newContents = buffer.toString();

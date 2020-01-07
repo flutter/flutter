@@ -215,7 +215,7 @@ class AndroidNdk {
           .map<String>((String line) => line.trim())
           .where((String line) => line.isNotEmpty);
       final Map<String, String> properties = <String, String>{};
-      for (String line in propertiesFileLines) {
+      for (final String line in propertiesFileLines) {
         final List<String> parts = line.split(' = ');
         if (parts.length == 2) {
           properties[parts[0]] = parts[1];

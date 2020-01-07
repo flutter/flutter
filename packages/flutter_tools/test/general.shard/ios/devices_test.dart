@@ -80,7 +80,7 @@ void main() {
       Platform: () => macPlatform,
     });
 
-    for (Platform platform in unsupportedPlatforms) {
+    for (final Platform platform in unsupportedPlatforms) {
       testUsingContext('throws UnsupportedError exception if instantiated on ${platform.operatingSystem}', () {
         expect(
           () { IOSDevice('device-123'); },
@@ -781,7 +781,7 @@ void main() {
     });
 
     final List<Platform> unsupportedPlatforms = <Platform>[linuxPlatform, windowsPlatform];
-    for (Platform platform in unsupportedPlatforms) {
+    for (final Platform platform in unsupportedPlatforms) {
       testUsingContext('throws Unsupported Operation exception on ${platform.operatingSystem}', () async {
         when(iMobileDevice.isInstalled).thenReturn(false);
         when(iMobileDevice.getAvailableDeviceIDs())

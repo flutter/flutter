@@ -70,7 +70,7 @@ class AnnotationResult<T> {
   ///
   /// It is similar to [entries] but does not contain other information.
   Iterable<T> get annotations sync* {
-    for (AnnotationEntry<T> entry in _entries)
+    for (final AnnotationEntry<T> entry in _entries)
       yield entry.annotation;
   }
 }
@@ -804,7 +804,7 @@ class ContainerLayer extends Layer {
       // PhysicalModelLayers. If we don't, we'll end up adding duplicate layers
       // or continuing to render stale outlines.
       if (temporaryLayers != null) {
-        for (PictureLayer temporaryLayer in temporaryLayers) {
+        for (final PictureLayer temporaryLayer in temporaryLayers) {
           temporaryLayer.remove();
         }
       }

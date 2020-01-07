@@ -137,9 +137,9 @@ void main() {
               && currentRotations != null && currentRotations.isNotEmpty
               && previousRect != null && currentRect != null) {
             final List<double> deltas = <double>[];
-            for (double currentRotation in currentRotations) {
+            for (final double currentRotation in currentRotations) {
               double minDelta;
-              for (double previousRotation in previousRotations) {
+              for (final double previousRotation in previousRotations) {
                 final double delta = (previousRotation - currentRotation).abs();
                 minDelta ??= delta;
                 minDelta = min(delta, minDelta);

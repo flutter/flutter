@@ -22,8 +22,8 @@ void main() {
       .where(_isDartFile)
       .where(_isNotSkipped)
       .map(_asFile);
-    for (File file in files) {
-      for (String line in file.readAsLinesSync()) {
+    for (final File file in files) {
+      for (final String line in file.readAsLinesSync()) {
         if (line.startsWith(RegExp(r'import.*package:'))) {
           continue;
         }
@@ -47,8 +47,8 @@ void main() {
       .where(_isDartFile)
       .where(_isNotSkipped)
       .map(_asFile);
-    for (File file in files) {
-      for (String line in file.readAsLinesSync()) {
+    for (final File file in files) {
+      for (final String line in file.readAsLinesSync()) {
         if (line.startsWith(RegExp(r'import.*globals.dart'))
          && !line.contains(r'as globals')) {
           final String relativePath = globals.fs.path.relative(file.path, from:flutterTools);
@@ -65,14 +65,14 @@ void main() {
     ];
     bool _isNotWhitelisted(FileSystemEntity entity) => whitelistedPaths.every((String path) => path != entity.path);
 
-    for (String dirName in <String>['lib', 'bin']) {
+    for (final String dirName in <String>['lib', 'bin']) {
       final Iterable<File> files = globals.fs.directory(globals.fs.path.join(flutterTools, dirName))
         .listSync(recursive: true)
         .where(_isDartFile)
         .where(_isNotWhitelisted)
         .map(_asFile);
-      for (File file in files) {
-        for (String line in file.readAsLinesSync()) {
+      for (final File file in files) {
+        for (final String line in file.readAsLinesSync()) {
           if (line.startsWith(RegExp(r'import.*dart:io')) &&
               !line.contains('ignore: dart_io_import')) {
             final String relativePath = globals.fs.path.relative(file.path, from:flutterTools);
@@ -92,14 +92,14 @@ void main() {
     ];
     bool _isNotWhitelisted(FileSystemEntity entity) => whitelistedPaths.every((String path) => path != entity.path);
 
-    for (String dirName in <String>['lib']) {
+    for (final String dirName in <String>['lib']) {
       final Iterable<File> files = globals.fs.directory(globals.fs.path.join(flutterTools, dirName))
         .listSync(recursive: true)
         .where(_isDartFile)
         .where(_isNotWhitelisted)
         .map(_asFile);
-      for (File file in files) {
-        for (String line in file.readAsLinesSync()) {
+      for (final File file in files) {
+        for (final String line in file.readAsLinesSync()) {
           if (line.startsWith(RegExp(r'import.*package:test_api')) &&
               !line.contains('ignore: test_api_import')) {
             final String relativePath = globals.fs.path.relative(file.path, from:flutterTools);
@@ -112,14 +112,14 @@ void main() {
 
   test('no unauthorized imports of package:path', () {
     final String whitelistedPath = globals.fs.path.join(flutterTools, 'lib', 'src', 'build_runner', 'web_compilation_delegate.dart');
-    for (String dirName in <String>['lib', 'bin', 'test']) {
+    for (final String dirName in <String>['lib', 'bin', 'test']) {
       final Iterable<File> files = globals.fs.directory(globals.fs.path.join(flutterTools, dirName))
         .listSync(recursive: true)
         .where(_isDartFile)
         .where((FileSystemEntity entity) => entity.path != whitelistedPath)
         .map(_asFile);
-      for (File file in files) {
-        for (String line in file.readAsLinesSync()) {
+      for (final File file in files) {
+        for (final String line in file.readAsLinesSync()) {
           if (line.startsWith(RegExp(r'import.*package:path/path.dart')) &&
               !line.contains('ignore: package_path_import')) {
             final String relativePath = globals.fs.path.relative(file.path, from:flutterTools);
@@ -137,14 +137,14 @@ void main() {
     ];
     bool _isNotWhitelisted(FileSystemEntity entity) => whitelistedPaths.every((String path) => path != entity.path);
 
-    for (String dirName in <String>['lib']) {
+    for (final String dirName in <String>['lib']) {
       final Iterable<File> files = globals.fs.directory(globals.fs.path.join(flutterTools, dirName))
         .listSync(recursive: true)
         .where(_isDartFile)
         .where(_isNotWhitelisted)
         .map(_asFile);
-      for (File file in files) {
-        for (String line in file.readAsLinesSync()) {
+      for (final File file in files) {
+        for (final String line in file.readAsLinesSync()) {
           if (line.startsWith(RegExp(r'import.*dart:convert')) &&
               !line.contains('ignore: dart_convert_import')) {
             final String relativePath = globals.fs.path.relative(file.path, from:flutterTools);
@@ -163,14 +163,14 @@ void main() {
     ];
     bool _isNotWhitelisted(FileSystemEntity entity) => whitelistedPaths.every((String path) => !entity.path.contains(path));
 
-    for (String dirName in <String>['lib']) {
+    for (final String dirName in <String>['lib']) {
       final Iterable<File> files = globals.fs.directory(globals.fs.path.join(flutterTools, dirName))
         .listSync(recursive: true)
         .where(_isDartFile)
         .where(_isNotWhitelisted)
         .map(_asFile);
-      for (File file in files) {
-        for (String line in file.readAsLinesSync()) {
+      for (final File file in files) {
+        for (final String line in file.readAsLinesSync()) {
           if (line.startsWith(RegExp(r'import.*package:build_runner_core/build_runner_core.dart')) ||
               line.startsWith(RegExp(r'import.*package:build_runner/build_runner.dart')) ||
               line.startsWith(RegExp(r'import.*package:build_config/build_config.dart')) ||

@@ -28,6 +28,7 @@ Future<void> buildWeb(
   BuildInfo buildInfo,
   bool initializePlatform,
   List<String> dartDefines,
+  bool csp,
 ) async {
   if (!flutterProject.web.existsSync()) {
     throwToolExit('Missing index.html.');
@@ -50,10 +51,11 @@ Future<void> buildWeb(
         kInitializePlatform: initializePlatform.toString(),
         kHasWebPlugins: hasWebPlugins.toString(),
         kDartDefines: jsonEncode(dartDefines),
+        kCspMode: csp.toString(),
       },
     ));
     if (!result.success) {
-      for (ExceptionMeasurement measurement in result.exceptions.values) {
+      for (final ExceptionMeasurement measurement in result.exceptions.values) {
         globals.printError('Target ${measurement.target} failed: ${measurement.exception}',
           stackTrace: measurement.fatal
             ? measurement.stackTrace

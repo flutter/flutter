@@ -1209,14 +1209,14 @@ class _RenderListTile extends RenderBox {
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
-    for (RenderBox child in _children)
+    for (final RenderBox child in _children)
       child.attach(owner);
   }
 
   @override
   void detach() {
     super.detach();
-    for (RenderBox child in _children)
+    for (final RenderBox child in _children)
       child.detach();
   }
 
@@ -1479,7 +1479,7 @@ class _RenderListTile extends RenderBox {
   @override
   bool hitTestChildren(BoxHitTestResult result, { @required Offset position }) {
     assert(position != null);
-    for (RenderBox child in _children) {
+    for (final RenderBox child in _children) {
       final BoxParentData parentData = child.parentData as BoxParentData;
       final bool isHit = result.addWithPaintOffset(
         offset: parentData.offset,

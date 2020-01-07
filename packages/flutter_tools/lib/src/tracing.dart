@@ -51,7 +51,7 @@ class Tracing {
           }
         });
         bool done = false;
-        for (FlutterView view in vmService.vm.views) {
+        for (final FlutterView view in vmService.vm.views) {
           if (await view.uiIsolate.flutterAlreadyPaintedFirstUsefulFrame()) {
             done = true;
             break;

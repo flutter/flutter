@@ -337,7 +337,7 @@ void main() {
 
     Future<Uri> findUri(List<MockFlutterView> views, String expectedIsolateName) async {
       when(vm.views).thenReturn(views);
-      for (MockFlutterView view in views) {
+      for (final MockFlutterView view in views) {
         when(view.owner).thenReturn(vm);
       }
       final MockFuchsiaDevice fuchsiaDevice =

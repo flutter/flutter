@@ -138,7 +138,7 @@ abstract class Target {
       inputsFiles.sources,
       outputFiles.sources,
       <Node>[
-        for (Target target in dependencies) target._toNode(environment),
+        for (final Target target in dependencies) target._toNode(environment),
       ],
       environment,
       inputsFiles.containsNewDepfile,
@@ -160,11 +160,11 @@ abstract class Target {
   ) {
     final File stamp = _findStampFile(environment);
     final List<String> inputPaths = <String>[];
-    for (File input in inputs) {
+    for (final File input in inputs) {
       inputPaths.add(input.path);
     }
     final List<String> outputPaths = <String>[];
-    for (File output in outputs) {
+    for (final File output in outputs) {
       outputPaths.add(output.path);
     }
     final Map<String, Object> result = <String, Object>{
@@ -207,13 +207,13 @@ abstract class Target {
     return <String, Object>{
       'name': name,
       'dependencies': <String>[
-        for (Target target in dependencies) target.name,
+        for (final Target target in dependencies) target.name,
       ],
       'inputs': <String>[
-        for (File file in resolveInputs(environment).sources) file.path,
+        for (final File file in resolveInputs(environment).sources) file.path,
       ],
       'outputs': <String>[
-        for (File file in resolveOutputs(environment).sources) file.path,
+        for (final File file in resolveOutputs(environment).sources) file.path,
       ],
       'stamp': _findStampFile(environment).absolute.path,
     };
@@ -229,7 +229,7 @@ abstract class Target {
     List<String> depfiles, Environment environment, { bool implicit = true, bool inputs = true,
   }) {
     final SourceVisitor collector = SourceVisitor(environment, inputs);
-    for (Source source in config) {
+    for (final Source source in config) {
       source.accept(collector);
     }
     depfiles.forEach(collector.visitDepfile);
@@ -292,7 +292,7 @@ class Environment {
     String buildPrefix;
     final List<String> keys = defines.keys.toList()..sort();
     final StringBuffer buffer = StringBuffer();
-    for (String key in keys) {
+    for (final String key in keys) {
       buffer.write(key);
       buffer.write(defines[key]);
     }
@@ -502,10 +502,10 @@ class _BuildInstance {
     // these files are included as both inputs and outputs then it isn't
     // possible to construct a DAG describing the build.
     void updateGraph() {
-      for (File output in node.outputs) {
+      for (final File output in node.outputs) {
         outputFiles[output.path] = output;
       }
-      for (File input in node.inputs) {
+      for (final File input in node.inputs) {
         final String resolvedPath = input.absolute.path;
         if (outputFiles.containsKey(resolvedPath)) {
           continue;
@@ -550,7 +550,7 @@ class _BuildInstance {
 
       // Delete outputs from previous stages that are no longer a part of the
       // build.
-      for (String previousOutput in node.previousOutputs) {
+      for (final String previousOutput in node.previousOutputs) {
         if (outputFiles.containsKey(previousOutput)) {
           continue;
         }
@@ -614,7 +614,7 @@ void checkCycles(Target initial) {
     }
     visited.add(target);
     stack.add(target);
-    for (Target dependency in target.dependencies) {
+    for (final Target dependency in target.dependencies) {
       checkInternal(dependency, visited, stack);
     }
     stack.remove(target);
@@ -627,7 +627,7 @@ void verifyOutputDirectories(List<File> outputs, Environment environment, Target
   final String buildDirectory = environment.buildDir.resolveSymbolicLinksSync();
   final String projectDirectory = environment.projectDir.resolveSymbolicLinksSync();
   final List<File> missingOutputs = <File>[];
-  for (File sourceFile in outputs) {
+  for (final File sourceFile in outputs) {
     if (!sourceFile.existsSync()) {
       missingOutputs.add(sourceFile);
       continue;
@@ -733,13 +733,13 @@ class Node {
     FileHashStore fileHashStore,
   ) async {
     final Set<String> currentOutputPaths = <String>{
-      for (File file in outputs) file.path,
+      for (final File file in outputs) file.path,
     };
     // For each input, first determine if we've already computed the hash
     // for it. Then collect it to be sent off for hashing as a group.
     final List<File> sourcesToHash = <File>[];
     final List<File> missingInputs = <File>[];
-    for (File file in inputs) {
+    for (final File file in inputs) {
       if (!file.existsSync()) {
         missingInputs.add(file);
         continue;
@@ -760,7 +760,7 @@ class Node {
 
     // For each output, first determine if we've already computed the hash
     // for it. Then collect it to be sent off for hashing as a group.
-    for (String previousOutput in previousOutputs) {
+    for (final String previousOutput in previousOutputs) {
       // output paths changed.
       if (!currentOutputPaths.contains(previousOutput)) {
         _dirty = true;

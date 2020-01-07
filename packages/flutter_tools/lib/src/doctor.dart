@@ -147,7 +147,7 @@ class Doctor {
   /// Return a list of [ValidatorTask] objects and starts validation on all
   /// objects in [validators].
   List<ValidatorTask> startValidatorTasks() => <ValidatorTask>[
-    for (DoctorValidator validator in validators)
+    for (final DoctorValidator validator in validators)
       ValidatorTask(
         validator,
         // We use an asyncGuard() here to be absolutely certain that
@@ -178,7 +178,7 @@ class Doctor {
     bool missingComponent = false;
     bool sawACrash = false;
 
-    for (DoctorValidator validator in validators) {
+    for (final DoctorValidator validator in validators) {
       final StringBuffer lineBuffer = StringBuffer();
       ValidationResult result;
       try {
@@ -248,7 +248,7 @@ class Doctor {
     bool doctorResult = true;
     int issues = 0;
 
-    for (ValidatorTask validatorTask in startValidatorTasks()) {
+    for (final ValidatorTask validatorTask in startValidatorTasks()) {
       final DoctorValidator validator = validatorTask.validator;
       final Status status = Status.withSpinner(
         timeout: timeoutConfiguration.fastOperation,
@@ -291,12 +291,12 @@ class Doctor {
             hangingIndent: result.leadingBox.length + 1);
       }
 
-      for (ValidationMessage message in result.messages) {
+      for (final ValidationMessage message in result.messages) {
         if (message.type != ValidationMessageType.information || verbose == true) {
           int hangingIndent = 2;
           int indent = 4;
           final String indicator = showColor ? message.coloredIndicator : message.indicator;
-          for (String line in '$indicator ${message.message}'.split('\n')) {
+          for (final String line in '$indicator ${message.message}'.split('\n')) {
             globals.printStatus(line, hangingIndent: hangingIndent, indent: indent, emphasis: true);
             // Only do hanging indent for the first line.
             hangingIndent = 0;
@@ -402,7 +402,7 @@ class GroupedValidator extends DoctorValidator {
   @override
   Future<ValidationResult> validate() async {
     final List<ValidatorTask> tasks = <ValidatorTask>[
-      for (DoctorValidator validator in subValidators)
+      for (final DoctorValidator validator in subValidators)
         ValidatorTask(
           validator,
           asyncGuard<ValidationResult>(() => validator.validate()),
@@ -410,7 +410,7 @@ class GroupedValidator extends DoctorValidator {
     ];
 
     final List<ValidationResult> results = <ValidationResult>[];
-    for (ValidatorTask subValidator in tasks) {
+    for (final ValidatorTask subValidator in tasks) {
       _currentSlowWarning = subValidator.validator.slowWarning;
       try {
         results.add(await subValidator.result);
@@ -429,7 +429,7 @@ class GroupedValidator extends DoctorValidator {
     final List<ValidationMessage> mergedMessages = <ValidationMessage>[];
     String statusInfo;
 
-    for (ValidationResult result in results) {
+    for (final ValidationResult result in results) {
       statusInfo ??= result.statusInfo;
       switch (result.type) {
         case ValidationType.installed:
@@ -753,7 +753,7 @@ class IntelliJValidatorOnLinuxAndWindows extends IntelliJValidator {
       validators.add(validator);
     }
 
-    for (FileSystemEntity dir in globals.fs.directory(homeDirPath).listSync()) {
+    for (final FileSystemEntity dir in globals.fs.directory(homeDirPath).listSync()) {
       if (dir is Directory) {
         final String name = globals.fs.path.basename(dir.path);
         IntelliJValidator._idToTitle.forEach((String id, String title) {
@@ -808,10 +808,10 @@ class IntelliJValidatorOnMac extends IntelliJValidator {
               .map<List<FileSystemEntity>>((Directory dir) => dir.existsSync() ? dir.listSync() : <FileSystemEntity>[])
               .expand<FileSystemEntity>((List<FileSystemEntity> mappedDirs) => mappedDirs)
               .whereType<Directory>();
-      for (Directory dir in installDirs) {
+      for (final Directory dir in installDirs) {
         checkForIntelliJ(dir);
         if (!dir.path.endsWith('.app')) {
-          for (FileSystemEntity subdir in dir.listSync()) {
+          for (final FileSystemEntity subdir in dir.listSync()) {
             if (subdir is Directory) {
               checkForIntelliJ(subdir);
             }
