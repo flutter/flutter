@@ -176,7 +176,8 @@ void main() {
         Stopwatch: () => mockStopwatch,
       });
 
-      testWithoutContext('Stdout startProgress on colored terminal for $testOs', () async {
+      // Uses Stopwatch from context.
+      testUsingContext('Stdout startProgress on colored terminal for $testOs', () async {
         bool done = false;
         FakeAsync().run((FakeAsync time) {
           final Logger logger = StdoutLogger(
