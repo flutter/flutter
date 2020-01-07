@@ -59,69 +59,90 @@ class RenderSliverFillViewport extends RenderSliverFixedExtentBoxAdaptor {
   }
 }
 
-/// A sliver that contains a single box child that fills the remaining space in
-/// the viewport.
+/// A sliver that contains a single box child that contains a scrollable and
+/// fills the viewport.
 ///
-/// [RenderSliverFillRemaining] sizes its child to fill the viewport in the
-/// cross axis and to fill the remaining space in the viewport in the main axis.
+/// [RenderSliverFillRemainingWithScrollable] sizes its child to fill the
+/// viewport in the cross axis and to fill the remaining space in the viewport
+/// in the main axis.
 ///
 /// Typically this will be the last sliver in a viewport, since (by definition)
 /// there is never any room for anything beyond this sliver.
 ///
 /// See also:
 ///
+///  * [NestedScrollView], which uses this sliver for the inner scrollable.
+///  * [RenderSliverFillRemaining], which lays out its
+///    non-scrollable child slightly different than this widget.
+///  * [RenderSliverFillRemainingAndOverscroll], which incorporates the
+///    overscroll into the remaining space to fill.
+///  * [RenderSliverFillViewport], which sizes its children based on the
+///    size of the viewport, regardless of what else is in the scroll view.
+///  * [RenderSliverList], which shows a list of variable-sized children in a
+///    viewport.
+class RenderSliverFillRemainingWithScrollable extends RenderSliverSingleBoxAdapter {
+  /// Creates a [RenderSliver] that wraps a scrollable [RenderBox] which is
+  /// sized to fit the remaining space in the viewport.
+  RenderSliverFillRemainingWithScrollable({ RenderBox child }) : super(child: child);
+
+  @override
+  void performLayout() {
+    // TODO(Piinks): This may fill too much space for NestedScrollView, https://github.com/flutter/flutter/issues/46028
+    final double extent = constraints.remainingPaintExtent - math.min(constraints.overlap, 0.0);
+
+    if (child != null)
+      child.layout(constraints.asBoxConstraints(
+        minExtent: extent,
+        maxExtent: extent,
+      ));
+
+    final double paintedChildSize = calculatePaintOffset(constraints, from: 0.0, to: extent);
+    assert(paintedChildSize.isFinite);
+    assert(paintedChildSize >= 0.0);
+    geometry = SliverGeometry(
+      scrollExtent: constraints.viewportMainAxisExtent,
+      paintExtent: paintedChildSize,
+      maxPaintExtent: paintedChildSize,
+      hasVisualOverflow: extent > constraints.remainingPaintExtent || constraints.scrollOffset > 0.0,
+    );
+    if (child != null)
+      setChildParentData(child, constraints, geometry);
+  }
+}
+
+/// A sliver that contains a single box child that is non-scrollable and fills
+/// the remaining space in the viewport.
+///
+/// [RenderSliverFillRemaining] sizes its child to fill the
+/// viewport in the cross axis and to fill the remaining space in the viewport
+/// in the main axis.
+///
+/// Typically this will be the last sliver in a viewport, since (by definition)
+/// there is never any room for anything beyond this sliver.
+///
+/// See also:
+///
+///  * [RenderSliverFillRemainingWithScrollable], which lays out its scrollable
+///    child slightly different than this widget.
+///  * [RenderSliverFillRemainingAndOverscroll], which incorporates the
+///    overscroll into the remaining space to fill.
 ///  * [RenderSliverFillViewport], which sizes its children based on the
 ///    size of the viewport, regardless of what else is in the scroll view.
 ///  * [RenderSliverList], which shows a list of variable-sized children in a
 ///    viewport.
 class RenderSliverFillRemaining extends RenderSliverSingleBoxAdapter {
-  /// Creates a [RenderSliver] that wraps a [RenderBox] which is sized to fit
-  /// the remaining space in the viewport.
-  RenderSliverFillRemaining({
-    RenderBox child,
-    this.hasScrollBody = true,
-    this.fillOverscroll = false,
-  }) : assert(hasScrollBody != null),
-       super(child: child);
-
-  /// Indicates whether the child has a scrollable body, this value cannot be
-  /// null.
-  ///
-  /// Defaults to true such that the child will extend beyond the viewport and
-  /// scroll, as seen in [NestedScrollView].
-  ///
-  /// Setting this value to false will allow the child to fill the remainder of
-  /// the viewport and not extend further. However, if the
-  /// [precedingScrollExtent] exceeds the size of the viewport, the sliver will
-  /// defer to the child's size rather than overriding it.
-  bool hasScrollBody;
-
-  /// Indicates whether the child should stretch to fill the overscroll area
-  /// created by certain scroll physics, such as iOS' default scroll physics.
-  /// This value cannot be null. This flag is only relevant when the
-  /// [hasScrollBody] value is false.
-  ///
-  /// Defaults to false, meaning the default behavior is for the child to
-  /// maintain its size and not extend into the overscroll area.
-  bool fillOverscroll;
+  /// Creates a [RenderSliver] that wraps a non-scrollable [RenderBox] which is
+  /// sized to fit the remaining space in the viewport.
+  RenderSliverFillRemaining({ RenderBox child }) : super(child: child);
 
   @override
   void performLayout() {
-    double childExtent;
+    // The remaining space in the viewportMainAxisExtent. Can be <= 0 if we have
+    // scrolled beyond the extent of the screen.
     double extent = constraints.viewportMainAxisExtent - constraints.precedingScrollExtent;
-    double maxExtent = constraints.remainingPaintExtent - math.min(constraints.overlap, 0.0);
 
-    if (hasScrollBody) {
-      extent = maxExtent;
-      if (child != null)
-        child.layout(
-          constraints.asBoxConstraints(
-            minExtent: extent,
-            maxExtent: extent,
-          ),
-          parentUsesSize: true,
-        );
-    } else if (child != null) {
+    if (child != null) {
+      double childExtent;
       switch (constraints.axis) {
         case Axis.horizontal:
           childExtent = child.getMaxIntrinsicWidth(constraints.crossAxisExtent);
@@ -131,36 +152,105 @@ class RenderSliverFillRemaining extends RenderSliverSingleBoxAdapter {
           break;
       }
 
-      if (constraints.precedingScrollExtent > constraints.viewportMainAxisExtent || childExtent > extent)
-        extent = childExtent;
-      if (maxExtent < extent)
-        maxExtent = extent;
-      if ((fillOverscroll ? maxExtent : extent) > childExtent) {
-        child.layout(
-          constraints.asBoxConstraints(
-            minExtent: extent,
-            maxExtent: fillOverscroll ? maxExtent : extent,
-          ),
-          parentUsesSize: true,
-        );
-      } else {
-        child.layout(constraints.asBoxConstraints(), parentUsesSize: true);
-      }
+      // If the childExtent is greater than the computed extent, we want to use
+      // that instead of potentially cutting off the child. This allows us to
+      // safely specify a maxExtent.
+      extent = math.max(extent, childExtent);
+      child.layout(constraints.asBoxConstraints(
+        minExtent: extent,
+        maxExtent: extent,
+      ));
     }
 
     assert(extent.isFinite,
       'The calculated extent for the child of SliverFillRemaining is not finite.'
-        'This can happen if the child is a scrollable, in which case, the'
-        'hasScrollBody property of SliverFillRemaining should not be set to'
-        'false.',
+      'This can happen if the child is a scrollable, in which case, the'
+      'hasScrollBody property of SliverFillRemaining should not be set to'
+      'false.',
     );
     final double paintedChildSize = calculatePaintOffset(constraints, from: 0.0, to: extent);
     assert(paintedChildSize.isFinite);
     assert(paintedChildSize >= 0.0);
     geometry = SliverGeometry(
-      scrollExtent: hasScrollBody ? constraints.viewportMainAxisExtent : extent,
+      scrollExtent: extent,
       paintExtent: paintedChildSize,
       maxPaintExtent: paintedChildSize,
+      hasVisualOverflow: extent > constraints.remainingPaintExtent || constraints.scrollOffset > 0.0,
+    );
+    if (child != null)
+      setChildParentData(child, constraints, geometry);
+  }
+}
+
+/// A sliver that contains a single box child that is non-scrollable and fills
+/// the remaining space in the viewport including any overscrolled area.
+///
+/// [RenderSliverFillRemainingAndOverscroll] sizes its child to fill the
+/// viewport in the cross axis and to fill the remaining space in the viewport
+/// in the main axis with the overscroll area included.
+///
+/// Typically this will be the last sliver in a viewport, since (by definition)
+/// there is never any room for anything beyond this sliver.
+///
+/// See also:
+///
+///  * [RenderSliverFillRemainingWithScrollable], which lays out its scrollable
+///    child without overscroll.
+///  * [RenderSliverFillRemaining], which lays out its
+///    non-scrollable child without overscroll.
+///  * [RenderSliverFillViewport], which sizes its children based on the
+///    size of the viewport, regardless of what else is in the scroll view.
+///  * [RenderSliverList], which shows a list of variable-sized children in a
+///    viewport.
+class RenderSliverFillRemainingAndOverscroll extends RenderSliverSingleBoxAdapter {
+  /// Creates a [RenderSliver] that wraps a non-scrollable [RenderBox] which is
+  /// sized to fit the remaining space plus any overscroll in the viewport.
+  RenderSliverFillRemainingAndOverscroll({ RenderBox child }) : super(child: child);
+
+  @override
+  void performLayout() {
+    // The remaining space in the viewportMainAxisExtent. Can be <= 0 if we have
+    // scrolled beyond the extent of the screen.
+    double extent = constraints.viewportMainAxisExtent - constraints.precedingScrollExtent;
+    // The maxExtent includes any overscrolled area. Can be < 0 if we have
+    // overscroll in the opposite direction, away from the end of the list.
+    double maxExtent = constraints.remainingPaintExtent - math.min(constraints.overlap, 0.0);
+
+    if (child != null) {
+      double childExtent;
+      switch (constraints.axis) {
+        case Axis.horizontal:
+          childExtent = child.getMaxIntrinsicWidth(constraints.crossAxisExtent);
+          break;
+        case Axis.vertical:
+          childExtent = child.getMaxIntrinsicHeight(constraints.crossAxisExtent);
+          break;
+      }
+
+      // If the childExtent is greater than the computed extent, we want to use
+      // that instead of potentially cutting off the child. This allows us to
+      // safely specify a maxExtent.
+      extent = math.max(extent, childExtent);
+      // The extent could be larger than the maxExtent due to a larger child
+      // size or overscrolling at the top of the scrollable (rather than at the
+      // end where this sliver is).
+      maxExtent = math.max(extent, maxExtent);
+      child.layout(constraints.asBoxConstraints(minExtent: extent, maxExtent: maxExtent));
+    }
+
+    assert(extent.isFinite,
+      'The calculated extent for the child of SliverFillRemaining is not finite.'
+      'This can happen if the child is a scrollable, in which case, the'
+      'hasScrollBody property of SliverFillRemaining should not be set to'
+      'false.',
+    );
+    final double paintedChildSize = calculatePaintOffset(constraints, from: 0.0, to: extent);
+    assert(paintedChildSize.isFinite);
+    assert(paintedChildSize >= 0.0);
+    geometry = SliverGeometry(
+      scrollExtent: extent,
+      paintExtent: math.min(maxExtent, constraints.remainingPaintExtent),
+      maxPaintExtent: maxExtent,
       hasVisualOverflow: extent > constraints.remainingPaintExtent || constraints.scrollOffset > 0.0,
     );
     if (child != null)
