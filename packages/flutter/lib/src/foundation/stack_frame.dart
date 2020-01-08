@@ -73,6 +73,25 @@ class StackFrame {
         .toList();
   }
 
+  static StackFrame _parseWebFrame(String line) {
+    final RegExp parser = RegExp(r'^(package:.+) (\d+):(\d+)\s+(.+)$');
+    final Match match = parser.firstMatch(line);
+    assert(match != null);
+
+    final Uri packageUri = Uri.parse(match.group(1));
+
+    return StackFrame(
+      -1,
+      packageScheme: 'package',
+      package: packageUri.pathSegments[0],
+      packagePath: packageUri.path.replaceFirst(packageUri.pathSegments[0] + '/', ''),
+      line: int.parse(match.group(2)),
+      column: int.parse(match.group(3)),
+      className: '<unknown>',
+      method: match.group(4),
+    );
+  }
+
   /// Parses a single [StackFrame] from a single line of a [StackTrace].
   static StackFrame fromStackTraceLine(String line) {
     assert(line != null);
@@ -80,7 +99,12 @@ class StackFrame {
       return asynchronousSuspension;
     }
 
-    final RegExp parser = RegExp(r'^#(\d+) +(.+) \((.+):(\d+):(\d+)\)$');
+    // Web frames.
+    if (line.startsWith('package')) {
+      return _parseWebFrame(line);
+    }
+
+    final RegExp parser = RegExp(r'^#(\d) +(.+) \((.+?):(\d+):?(\d+){0,1}\)$');
     final Match match = parser.firstMatch(line);
     assert(match != null);
 
@@ -118,7 +142,7 @@ class StackFrame {
       package: package,
       packagePath: packagePath,
       line: int.parse(match.group(4)),
-      column: int.parse(match.group(5)),
+      column: match.group(5) == null ? -1 : int.parse(match.group(5)),
       isConstructor: isConstructor,
     );
   }

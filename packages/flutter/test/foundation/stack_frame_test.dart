@@ -33,6 +33,20 @@ void main() {
       asyncStackFrames,
     );
   });
+
+  test('Parses stack without cols', () {
+    expect(
+      StackFrame.fromStackString(stackFrameNoCols),
+      stackFrameNoColsFrames,
+    );
+  });
+
+  test('Parses web stack', () {
+    expect(
+      StackFrame.fromStackString(webStackTrace),
+      webStackTraceFrames,
+    );
+  });
 }
 
 const String stackString = '''#0      _AssertionError._doThrowNew (dart:core-patch/errors_patch.dart:42:39)
@@ -111,45 +125,99 @@ const String asyncStackString = '''#0      getSampleStack.<anonymous closure> (f
 #38     _RawReceivePortImpl._handleMessage (dart:isolate-patch/isolate_patch.dart:174:12)''';
 
 const List<StackFrame> asyncStackFrames = <StackFrame>[
-StackFrame(0,  className: '',                    method: 'getSampleStack', packageScheme: 'file',    package: '<unknown>',       packagePath: '/path/to/flutter/packages/flutter/test/foundation/error_reporting_test.dart', line: 40,   column: 57),
-StackFrame(1,  className: 'Future',              method: 'sync',           packageScheme: 'dart',    package: 'async',           packagePath: 'future.dart',                                                                 line: 224,  column: 31, isConstructor: true),
-StackFrame(2,  className: '',                    method: 'getSampleStack', packageScheme: 'file',    package: '<unknown>',       packagePath: '/path/to/flutter/packages/flutter/test/foundation/error_reporting_test.dart', line: 40,   column: 10),
-StackFrame(3,  className: '',                    method: 'main',           packageScheme: 'file',    package: '<unknown>',       packagePath: '/path/to/flutter/packages/flutter/foundation/error_reporting_test.dart',      line: 46,   column: 40),
-StackFrame(4,  className: '',                    method: 'main',           packageScheme: 'package', package: 'flutter_goldens', packagePath: 'flutter_goldens.dart',                                                        line: 43,   column: 17),
-StackFrame.asynchronousSuspension,
-StackFrame(5,  className: '',                    method: 'main',           packageScheme: 'file',    package: '<unknown>',      packagePath: '/temp/path.whatever/listener.dart',                                           line: 47,   column: 18),
-StackFrame(6,  className: '',                    method: '_rootRun',       packageScheme: 'dart',    package: 'async',          packagePath: 'zone.dart',                                                                   line: 1126, column: 13),
-StackFrame(7,  className: '_CustomZone',         method: 'run',            packageScheme: 'dart',    package: 'async',          packagePath: 'zone.dart',                                                                   line: 1023, column: 19),
-StackFrame(8,  className: '',                    method: '_runZoned',      packageScheme: 'dart',    package: 'async',          packagePath: 'zone.dart',                                                                   line: 1518, column: 10),
-StackFrame(9,  className: '',                    method: 'runZoned',       packageScheme: 'dart',    package: 'async',          packagePath: 'zone.dart',                                                                   line: 1465, column: 12),
-StackFrame(10, className: 'Declarer',            method: 'declare',        packageScheme: 'package', package: 'test_api',       packagePath: 'src/backend/declarer.dart',                                                   line: 130,  column: 22),
-StackFrame(11, className: 'RemoteListener',      method: 'start',          packageScheme: 'package', package: 'test_api',       packagePath: 'src/remote_listener.dart',                                                    line: 124,  column: 26),
-StackFrame.asynchronousSuspension,
-StackFrame(12, className: '',                    method: '_rootRun',       packageScheme: 'dart',    package: 'async',          packagePath: 'zone.dart',                                                                   line: 1126, column: 13),
-StackFrame(13, className: '_CustomZone',         method: 'run' ,           packageScheme: 'dart',    package: 'async',          packagePath: 'zone.dart',                                                                   line: 1023, column: 19),
-StackFrame(14, className: '',                    method: '_runZoned',      packageScheme: 'dart',    package: 'async',          packagePath: 'zone.dart',                                                                   line: 1518, column: 10),
-StackFrame(15, className: '',                    method: 'runZoned',       packageScheme: 'dart',    package: 'async',          packagePath: 'zone.dart',                                                                   line: 1502, column: 12),
-StackFrame(16, className: 'RemoteListener',      method: 'start',          packageScheme: 'package', package: 'test_api',       packagePath: 'src/remote_listener.dart',                                                    line: 70,   column: 9),
-StackFrame(17, className: '',                    method: '_rootRun',       packageScheme: 'dart',    package: 'async',          packagePath: 'zone.dart',                                                                   line: 1126, column: 13),
-StackFrame(18, className: '_CustomZone',         method: 'run',            packageScheme: 'dart',    package: 'async',          packagePath: 'zone.dart',                                                                   line: 1023, column: 19),
-StackFrame(19, className: '',                    method: '_runZoned',      packageScheme: 'dart',    package: 'async',          packagePath: 'zone.dart',                                                                   line: 1518, column: 10),
-StackFrame(20, className: '',                    method: 'runZoned',       packageScheme: 'dart',    package: 'async',          packagePath: 'zone.dart',                                                                   line: 1465, column: 12),
-StackFrame(21, className: 'StackTraceFormatter', method: 'asCurrent',      packageScheme: 'pacakge', package: 'test_api',       packagePath: 'src/backend/stack_trace_formatter.dart',                                      line: 41,   column: 31),
-StackFrame(22, className: 'RemoteListener',      method: 'start',          packageScheme: 'package', package: 'test_api',       packagePath: 'src/remote_listener.dart',                                                    line: 69,   column: 29),
-StackFrame(23, className: '',                    method: '_rootRun',       packageScheme: 'dart',    package: 'async',          packagePath: 'zone.dart',                                                                   line: 1126, column: 13),
-StackFrame(24, className: '_CustomZone',         method: 'run',            packageScheme: 'dart',    package: 'async',          packagePath: 'zone.dart',                                                                   line: 1023, column: 19),
-StackFrame(25, className: '',                    method: '_runZoned',      packageScheme: 'dart',    package: 'async',          packagePath: 'zone.dart',                                                                   line: 1518, column: 10),
-StackFrame(26, className: '',                    method: 'runZoned',       packageScheme: 'dart',    package: 'async',          packagePath: 'zone.dart',                                                                   line: 1465, column: 12),
-StackFrame(27, className: 'SuiteChannelManager', method: 'asCurrent',      packageScheme: 'package', package: 'test_api',       packagePath: 'src/suite_channel_manager.dart',                                              line: 34,   column: 31),
-StackFrame(28, className: 'RemoteListener',      method: 'start',          packageScheme: 'package', package: 'test_api',       packagePath: 'src/remote_listener.dart',                                                    line: 68,   column: 27),
-StackFrame(29, className: '',                    method: 'serializeSuite', packageScheme: 'file',    package: '<unknown>',      packagePath: '/temp/path.whatever/listener.dart',                                           line: 17,   column: 25),
-StackFrame(30, className: '',                    method: 'main',           packageScheme: 'file',    package: '<unknown>',      packagePath: '/temp/path.whatever/listener.dart',                                           line: 43,   column: 36),
-StackFrame(31, className: '',                    method: '_runMainZoned',  packageScheme: 'dart',    package: 'ui',             packagePath: 'hooks.dart',                                                                  line:239,   column: 25),
-StackFrame(32, className: '',                    method: '_rootRun',       packageScheme: 'dart',    package: 'async',          packagePath: 'zone.dart',                                                                   line: 1126, column: 13),
-StackFrame(33, className: '_CustomZone',         method: 'run' ,           packageScheme: 'dart',    package: 'async',          packagePath: 'zone.dart',                                                                   line: 1023, column: 19),
-StackFrame(34, className: '',                    method: '_runZoned',      packageScheme: 'dart',    package: 'async',          packagePath: 'zone.dart',                                                                   line: 1518, column: 10),
-StackFrame(35, className: '',                    method: 'runZoned',       packageScheme: 'dart',    package: 'async',          packagePath: 'zone.dart',                                                                   line: 1502, column: 12),
-StackFrame(36, className: '',                    method: '_runMainZoned',  packageScheme: 'dart',    package: 'ui',             packagePath: 'hooks.dart',                                                                  line: 231,  column: 5),
-StackFrame(37, className: '',                    method: '_startIsolate',  packageScheme: 'dart',    package: 'isolate-patch',  packagePath: 'isolate_patch.dart',                                                          line: 307,  column: 19),
-StackFrame(38, className: '_RawReceivePortImpl', method: '_handleMessage', packageScheme: 'dart',    package: 'isolate-patch',  packagePath: 'isolate_patch.dart',                                                          line: 174,  column: 12),
+  StackFrame(0,  className: '',                    method: 'getSampleStack', packageScheme: 'file',    package: '<unknown>',       packagePath: '/path/to/flutter/packages/flutter/test/foundation/error_reporting_test.dart', line: 40,   column: 57),
+  StackFrame(1,  className: 'Future',              method: 'sync',           packageScheme: 'dart',    package: 'async',           packagePath: 'future.dart',                                                                 line: 224,  column: 31, isConstructor: true),
+  StackFrame(2,  className: '',                    method: 'getSampleStack', packageScheme: 'file',    package: '<unknown>',       packagePath: '/path/to/flutter/packages/flutter/test/foundation/error_reporting_test.dart', line: 40,   column: 10),
+  StackFrame(3,  className: '',                    method: 'main',           packageScheme: 'file',    package: '<unknown>',       packagePath: '/path/to/flutter/packages/flutter/foundation/error_reporting_test.dart',      line: 46,   column: 40),
+  StackFrame(4,  className: '',                    method: 'main',           packageScheme: 'package', package: 'flutter_goldens', packagePath: 'flutter_goldens.dart',                                                        line: 43,   column: 17),
+  StackFrame.asynchronousSuspension,
+  StackFrame(5,  className: '',                    method: 'main',           packageScheme: 'file',    package: '<unknown>',      packagePath: '/temp/path.whatever/listener.dart',                                           line: 47,   column: 18),
+  StackFrame(6,  className: '',                    method: '_rootRun',       packageScheme: 'dart',    package: 'async',          packagePath: 'zone.dart',                                                                   line: 1126, column: 13),
+  StackFrame(7,  className: '_CustomZone',         method: 'run',            packageScheme: 'dart',    package: 'async',          packagePath: 'zone.dart',                                                                   line: 1023, column: 19),
+  StackFrame(8,  className: '',                    method: '_runZoned',      packageScheme: 'dart',    package: 'async',          packagePath: 'zone.dart',                                                                   line: 1518, column: 10),
+  StackFrame(9,  className: '',                    method: 'runZoned',       packageScheme: 'dart',    package: 'async',          packagePath: 'zone.dart',                                                                   line: 1465, column: 12),
+  StackFrame(10, className: 'Declarer',            method: 'declare',        packageScheme: 'package', package: 'test_api',       packagePath: 'src/backend/declarer.dart',                                                   line: 130,  column: 22),
+  StackFrame(11, className: 'RemoteListener',      method: 'start',          packageScheme: 'package', package: 'test_api',       packagePath: 'src/remote_listener.dart',                                                    line: 124,  column: 26),
+  StackFrame.asynchronousSuspension,
+  StackFrame(12, className: '',                    method: '_rootRun',       packageScheme: 'dart',    package: 'async',          packagePath: 'zone.dart',                                                                   line: 1126, column: 13),
+  StackFrame(13, className: '_CustomZone',         method: 'run' ,           packageScheme: 'dart',    package: 'async',          packagePath: 'zone.dart',                                                                   line: 1023, column: 19),
+  StackFrame(14, className: '',                    method: '_runZoned',      packageScheme: 'dart',    package: 'async',          packagePath: 'zone.dart',                                                                   line: 1518, column: 10),
+  StackFrame(15, className: '',                    method: 'runZoned',       packageScheme: 'dart',    package: 'async',          packagePath: 'zone.dart',                                                                   line: 1502, column: 12),
+  StackFrame(16, className: 'RemoteListener',      method: 'start',          packageScheme: 'package', package: 'test_api',       packagePath: 'src/remote_listener.dart',                                                    line: 70,   column: 9),
+  StackFrame(17, className: '',                    method: '_rootRun',       packageScheme: 'dart',    package: 'async',          packagePath: 'zone.dart',                                                                   line: 1126, column: 13),
+  StackFrame(18, className: '_CustomZone',         method: 'run',            packageScheme: 'dart',    package: 'async',          packagePath: 'zone.dart',                                                                   line: 1023, column: 19),
+  StackFrame(19, className: '',                    method: '_runZoned',      packageScheme: 'dart',    package: 'async',          packagePath: 'zone.dart',                                                                   line: 1518, column: 10),
+  StackFrame(20, className: '',                    method: 'runZoned',       packageScheme: 'dart',    package: 'async',          packagePath: 'zone.dart',                                                                   line: 1465, column: 12),
+  StackFrame(21, className: 'StackTraceFormatter', method: 'asCurrent',      packageScheme: 'pacakge', package: 'test_api',       packagePath: 'src/backend/stack_trace_formatter.dart',                                      line: 41,   column: 31),
+  StackFrame(22, className: 'RemoteListener',      method: 'start',          packageScheme: 'package', package: 'test_api',       packagePath: 'src/remote_listener.dart',                                                    line: 69,   column: 29),
+  StackFrame(23, className: '',                    method: '_rootRun',       packageScheme: 'dart',    package: 'async',          packagePath: 'zone.dart',                                                                   line: 1126, column: 13),
+  StackFrame(24, className: '_CustomZone',         method: 'run',            packageScheme: 'dart',    package: 'async',          packagePath: 'zone.dart',                                                                   line: 1023, column: 19),
+  StackFrame(25, className: '',                    method: '_runZoned',      packageScheme: 'dart',    package: 'async',          packagePath: 'zone.dart',                                                                   line: 1518, column: 10),
+  StackFrame(26, className: '',                    method: 'runZoned',       packageScheme: 'dart',    package: 'async',          packagePath: 'zone.dart',                                                                   line: 1465, column: 12),
+  StackFrame(27, className: 'SuiteChannelManager', method: 'asCurrent',      packageScheme: 'package', package: 'test_api',       packagePath: 'src/suite_channel_manager.dart',                                              line: 34,   column: 31),
+  StackFrame(28, className: 'RemoteListener',      method: 'start',          packageScheme: 'package', package: 'test_api',       packagePath: 'src/remote_listener.dart',                                                    line: 68,   column: 27),
+  StackFrame(29, className: '',                    method: 'serializeSuite', packageScheme: 'file',    package: '<unknown>',      packagePath: '/temp/path.whatever/listener.dart',                                           line: 17,   column: 25),
+  StackFrame(30, className: '',                    method: 'main',           packageScheme: 'file',    package: '<unknown>',      packagePath: '/temp/path.whatever/listener.dart',                                           line: 43,   column: 36),
+  StackFrame(31, className: '',                    method: '_runMainZoned',  packageScheme: 'dart',    package: 'ui',             packagePath: 'hooks.dart',                                                                  line:239,   column: 25),
+  StackFrame(32, className: '',                    method: '_rootRun',       packageScheme: 'dart',    package: 'async',          packagePath: 'zone.dart',                                                                   line: 1126, column: 13),
+  StackFrame(33, className: '_CustomZone',         method: 'run' ,           packageScheme: 'dart',    package: 'async',          packagePath: 'zone.dart',                                                                   line: 1023, column: 19),
+  StackFrame(34, className: '',                    method: '_runZoned',      packageScheme: 'dart',    package: 'async',          packagePath: 'zone.dart',                                                                   line: 1518, column: 10),
+  StackFrame(35, className: '',                    method: 'runZoned',       packageScheme: 'dart',    package: 'async',          packagePath: 'zone.dart',                                                                   line: 1502, column: 12),
+  StackFrame(36, className: '',                    method: '_runMainZoned',  packageScheme: 'dart',    package: 'ui',             packagePath: 'hooks.dart',                                                                  line: 231,  column: 5),
+  StackFrame(37, className: '',                    method: '_startIsolate',  packageScheme: 'dart',    package: 'isolate-patch',  packagePath: 'isolate_patch.dart',                                                          line: 307,  column: 19),
+  StackFrame(38, className: '_RawReceivePortImpl', method: '_handleMessage', packageScheme: 'dart',    package: 'isolate-patch',  packagePath: 'isolate_patch.dart',                                                          line: 174,  column: 12),
+];
+
+const String stackFrameNoCols = '''#0      blah (package:assertions/main.dart:4)
+#1      main (package:assertions/main.dart:8)
+#2      _runMainZoned.<anonymous closure>.<anonymous closure> (dart:ui/hooks.dart:239)
+#3      _rootRun (dart:async/zone.dart:1126)
+#4      _CustomZone.run (dart:async/zone.dart:1023)
+#5      _runZoned (dart:async/zone.dart:1518)
+#6      runZoned (dart:async/zone.dart:1502)
+#7      _runMainZoned.<anonymous closure> (dart:ui/hooks.dart:231)
+#8      _startIsolate.<anonymous closure> (dart:isolate-patch/isolate_patch.dart:307)
+#9      _RawReceivePortImpl._handleMessage (dart:isolate-patch/isolate_patch.dart:174)''';
+
+const List<StackFrame> stackFrameNoColsFrames = <StackFrame>[
+  StackFrame(0,  className: '',                    method: 'blah',           packageScheme: 'package', package: 'assertions',    packagePath: 'main.dart',          line: 4,    column: -1),
+  StackFrame(1,  className: '',                    method: 'main',           packageScheme: 'package', package: 'assertions',    packagePath: 'main.dart',          line: 8,    column: -1),
+  StackFrame(2,  className: '',                    method: '_runMainZoned',  packageScheme: 'dart',    package: 'ui',            packagePath: 'hooks.dart',         line: 239,  column: -1),
+  StackFrame(3,  className: '',                    method: '_rootRun',       packageScheme: 'dart',    package: 'async',         packagePath: 'zone.dart',          line: 1126, column: -1),
+  StackFrame(4,  className: '_CustomZone',         method: 'run',            packageScheme: 'dart',    package: 'async',         packagePath: 'zone.dart',          line: 1023, column: -1),
+  StackFrame(5,  className: '',                    method: '_runZoned',      packageScheme: 'dart',    package: 'async',         packagePath: 'zone.dart',          line: 1518, column: -1),
+  StackFrame(6,  className: '',                    method: 'runZoned',       packageScheme: 'dart',    package: 'async',         packagePath: 'zone.dart',          line: 1502, column: -1),
+  StackFrame(7,  className: '',                    method: '_runMainZoned',  packageScheme: 'dart',    package: 'ui',            packagePath: 'hooks.dart',         line: 231,  column: -1),
+  StackFrame(8,  className: '',                    method: '_startIsolate',  packageScheme: 'dart',    package: 'isolate-patch', packagePath: 'isolate-patch.dart', line: 307,  column: -1),
+  StackFrame(9,  className: '_RawReceivePortImpl', method: '_handleMessage', packageScheme: 'dart',    package: 'isolate-patch', packagePath: 'isolate-patch.dart', line: 174,  column: -1),
+];
+
+const String webStackTrace = r'''package:dart-sdk/lib/_internal/js_dev_runtime/private/ddc_runtime/errors.dart 196:49  throw_
+package:assertions/main.dart 4:3                                                      blah
+package:assertions/main.dart 8:5                                                      main$
+package:assertions/main_web_entrypoint.dart 9:3                                       main$
+package:dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 47:50            onValue
+package:dart-sdk/lib/async/zone.dart 1381:54                                          runUnary
+package:dart-sdk/lib/async/future_impl.dart 140:18                                    handleValue
+package:dart-sdk/lib/async/future_impl.dart 682:44                                    handleValueCallback
+package:dart-sdk/lib/async/future_impl.dart 711:32                                    _propagateToListeners
+package:dart-sdk/lib/async/future_impl.dart 391:9                                     callback
+package:dart-sdk/lib/async/schedule_microtask.dart 43:11                              _microtaskLoop
+package:dart-sdk/lib/async/schedule_microtask.dart 52:5                               _startMicrotaskLoop
+package:dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 168:15           <fn>''';
+
+const List<StackFrame> webStackTraceFrames = <StackFrame>[
+  StackFrame(-1, className: '<unknown>', method: 'throw_',                packageScheme: 'package', package: 'dart-sdk',   packagePath: 'lib/_intenral/js_dev_runtime/private/ddc_runtime/errors.dart', line: 196,  column: 49),
+  StackFrame(-1, className: '<unknown>', method: 'blah',                  packageScheme: 'package', package: 'assertions', packagePath: 'main.dart',                                                    line: 4,    column: 3),
+  StackFrame(-1, className: '<unknown>', method: r'main$',                packageScheme: 'package', package: 'assertions', packagePath: 'main.dart',                                                    line: 8,    column: 5),
+  StackFrame(-1, className: '<unknown>', method: r'main$',                packageScheme: 'package', package: 'assertions', packagePath: 'main_web_entrypoint.dart',                                     line: 9,    column: 3),
+  StackFrame(-1, className: '<unknown>', method: 'onValue',               packageScheme: 'package', package: 'dart-sdk',   packagePath: 'lib/_internal/js_dev_runtime/patch/async_patch.dart',          line: 47,   column: 50),
+  StackFrame(-1, className: '<unknown>', method: 'runUnary',              packageScheme: 'package', package: 'dart-sdk',   packagePath: 'lib/async/zone.dart',                                          line: 1381, column: 54),
+  StackFrame(-1, className: '<unknown>', method: 'handleValue',           packageScheme: 'package', package: 'dart-sdk',   packagePath: 'lib/async/future_impl.dart',                                   line: 140,  column: 18),
+  StackFrame(-1, className: '<unknown>', method: 'handleValueCallback',   packageScheme: 'package', package: 'dart-sdk',   packagePath: 'lib/async/future_impl.dart',                                   line: 682,  column: 44),
+  StackFrame(-1, className: '<unknown>', method: '_propagateToListeners', packageScheme: 'package', package: 'dart-sdk',   packagePath: 'lib/async/future_impl.dart',                                   line: 711,  column: 32),
+  StackFrame(-1, className: '<unknown>', method: 'callback',              packageScheme: 'package', package: 'dart-sdk',   packagePath: 'lib/async/future_impl.dart',                                   line: 391,  column: 9),
+  StackFrame(-1, className: '<unknown>', method: '_microtaskLoop',        packageScheme: 'package', package: 'dart-sdk',   packagePath: 'lib/async/schedule_microtask.dart',                            line: 43,   column: 11),
+  StackFrame(-1, className: '<unknown>', method: '_startMicrotaskLoop',   packageScheme: 'package', package: 'dart-sdk',   packagePath: 'lib/async/schedule_microtask.dart',                            line: 52,   column: 5),
+  StackFrame(-1, className: '<unknown>', method: '<fn>',                 packageScheme: 'package', package: 'dart-sdk',   packagePath: 'lib/_internal/js_dev_runtime/patch/async_patch.dart',          line: 168,  column: 15),
 ];
