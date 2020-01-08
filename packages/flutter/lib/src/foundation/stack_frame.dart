@@ -8,7 +8,7 @@ import 'package:meta/meta.dart';
 
 /// A object representation of a frame from a stack trace.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This example creates a traversable list of parsed [StackFrame] objects from
 /// the current [StackTrace].

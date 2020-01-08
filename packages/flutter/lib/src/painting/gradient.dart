@@ -82,7 +82,7 @@ abstract class GradientTransform {
 /// A [GradientTransform] that rotates the gradient around the center-point of
 /// its bounding box.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This sample would rotate a sweep gradient by a quarter turn clockwise:
 ///
@@ -327,7 +327,7 @@ abstract class Gradient {
 /// Typically this class is used with [BoxDecoration], which does the painting.
 /// To use a [LinearGradient] to paint on a canvas directly, see [createShader].
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This sample draws a picture that looks like vertical window shades by having
 /// a [Container] display a [BoxDecoration] with a [LinearGradient].
@@ -551,7 +551,7 @@ class LinearGradient extends Gradient {
 /// Typically this class is used with [BoxDecoration], which does the painting.
 /// To use a [RadialGradient] to paint on a canvas directly, see [createShader].
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This function draws a gradient that looks like a sun in a blue sky.
 ///
@@ -799,7 +799,7 @@ class RadialGradient extends Gradient {
 /// Typically this class is used with [BoxDecoration], which does the painting.
 /// To use a [SweepGradient] to paint on a canvas directly, see [createShader].
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This sample draws a different color in each quadrant.
 ///
@@ -824,7 +824,7 @@ class RadialGradient extends Gradient {
 /// ```
 /// {@end-tool}
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This sample takes the above gradient and rotates it by `math.pi/4` radians,
 /// i.e. 45 degrees.

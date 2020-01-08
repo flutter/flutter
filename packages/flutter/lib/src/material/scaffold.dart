@@ -803,7 +803,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 /// [ScaffoldState] for the current [BuildContext] via [Scaffold.of] and use the
 /// [ScaffoldState.showSnackBar] and [ScaffoldState.showBottomSheet] functions.
 ///
-/// {@tool snippet --template=stateful_widget_material}
+/// {@tool sample --template=stateful_widget_material}
 /// This example shows a [Scaffold] with a [body] and [FloatingActionButton].
 /// The [body] is a [Text] placed in a [Center] in order to center the text
 /// within the [Scaffold]. The [FloatingActionButton] is connected to a
@@ -832,7 +832,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 /// ```
 /// {@end-tool}
 ///
-/// {@tool snippet --template=stateful_widget_material}
+/// {@tool sample --template=stateful_widget_material}
 /// This example shows a [Scaffold] with a blueGrey [backgroundColor], [body]
 /// and [FloatingActionButton]. The [body] is a [Text] placed in a [Center] in
 /// order to center the text within the [Scaffold]. The [FloatingActionButton]
@@ -862,7 +862,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 /// ```
 /// {@end-tool}
 ///
-/// {@tool snippet --template=stateful_widget_material}
+/// {@tool sample --template=stateful_widget_material}
 /// This example shows a [Scaffold] with an [AppBar], a [BottomAppBar] and a
 /// [FloatingActionButton]. The [body] is a [Text] placed in a [Center] in order
 /// to center the text within the [Scaffold]. The [FloatingActionButton] is
@@ -932,7 +932,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 /// scaffold with a differently titled AppBar. It would be better to add a
 /// listener to the [TabController] that updates the AppBar.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 /// Add a listener to the app's tab controller so that the [AppBar] title of the
 /// app's one and only scaffold is reset each time a new tab is selected.
 ///
@@ -1097,7 +1097,7 @@ class Scaffold extends StatefulWidget {
   /// To open the drawer programmatically, use the [ScaffoldState.openDrawer]
   /// function.
   ///
-  /// {@tool snippet --template=stateful_widget_material}
+  /// {@tool sample --template=stateful_widget_material}
   /// To disable the drawer edge swipe, set the [Scaffold.drawerEdgeWidth]
   /// to 0. Then, use [ScaffoldState.openDrawer] to open the drawer.
   ///
@@ -1138,7 +1138,7 @@ class Scaffold extends StatefulWidget {
   /// To open the drawer programmatically, use the [ScaffoldState.openEndDrawer]
   /// function.
   ///
-  /// {@tool snippet --template=stateful_widget_material}
+  /// {@tool sample --template=stateful_widget_material}
   /// To disable the drawer edge swipe, set the [Scaffold.drawerEdgeWidth]
   /// to 0. Then, use [ScaffoldState.openEndDrawer] to open the drawer.
   ///
@@ -1267,7 +1267,7 @@ class Scaffold extends StatefulWidget {
 
   /// The state from the closest instance of this class that encloses the given context.
   ///
-  /// {@tool snippet --template=freeform}
+  /// {@tool sample --template=freeform}
   /// Typical usage of the [Scaffold.of] function is to call it from within the
   /// `build` method of a child of a [Scaffold].
   ///
@@ -1320,7 +1320,7 @@ class Scaffold extends StatefulWidget {
   /// ```
   /// {@end-tool}
   ///
-  /// {@tool snippet --template=stateless_widget_material}
+  /// {@tool sample --template=stateless_widget_material}
   /// When the [Scaffold] is actually created in the same `build` function, the
   /// `context` argument to the `build` function can't be used to find the
   /// [Scaffold] (since it's "above" the widget being returned in the widget
@@ -1877,7 +1877,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   ///
   /// {@animation 350 622 https://flutter.github.io/assets-for-api-docs/assets/material/show_bottom_sheet.mp4}
   ///
-  /// {@tool snippet --template=stateless_widget_scaffold}
+  /// {@tool sample --template=stateless_widget_scaffold}
   ///
   /// This example demonstrates how to use `showBottomSheet` to display a
   /// bottom sheet when a user taps a button. It also demonstrates how to
