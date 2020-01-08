@@ -2699,8 +2699,8 @@ class RenderMouseRegion extends RenderProxyBox {
     }
   }
 
-  /// Called when a mouse pointer enters the region (with or without buttons
-  /// pressed).
+  /// Called when a mouse pointer starts being contained by the region (with or
+  /// without buttons pressed) for any reason.
   PointerEnterEventListener get onEnter => _onEnter;
   set onEnter(PointerEnterEventListener value) {
     if (_onEnter != value) {
@@ -2729,8 +2729,8 @@ class RenderMouseRegion extends RenderProxyBox {
       _onHover(event);
   }
 
-  /// Called when a pointer leaves the region (with or without buttons pressed)
-  /// and the annotation is still attached.
+  /// Called when a pointer is no longer contained by the region (with or
+  /// without buttons pressed) for any reason.
   PointerExitEventListener get onExit => _onExit;
   set onExit(PointerExitEventListener value) {
     if (_onExit != value) {
@@ -2773,11 +2773,6 @@ class RenderMouseRegion extends RenderProxyBox {
     if (annotationWasActive != value) {
       markNeedsPaint();
       markNeedsCompositingBitsUpdate();
-      if (_annotationIsActive) {
-        RendererBinding.instance.mouseTracker.attachAnnotation(_annotationKey);
-      } else {
-        RendererBinding.instance.mouseTracker.detachAnnotation(_annotationKey);
-      }
     }
   }
 
@@ -2795,10 +2790,7 @@ class RenderMouseRegion extends RenderProxyBox {
 
   @override
   void detach() {
-    if (_annotationIsActive) {
-      RendererBinding.instance.mouseTracker.detachAnnotation(_annotationKey);
-      _annotationIsActive = false;
-    }
+    _annotationIsActive = false;
     RendererBinding.instance.mouseTracker.removeListener(_handleUpdatedMouseIsConnected);
     super.detach();
   }

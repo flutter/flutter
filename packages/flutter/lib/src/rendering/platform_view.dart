@@ -10,7 +10,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 
-import 'binding.dart';
 import 'box.dart';
 import 'layer.dart';
 import 'object.dart';
@@ -838,18 +837,5 @@ mixin _PlatformViewGestureMixin on RenderBox {
     if (event is PointerDownEvent) {
       _gestureRecognizer.addPointer(event);
     }
-  }
-
-  @override
-  void attach(PipelineOwner owner) {
-    super.attach(owner);
-    RendererBinding.instance.mouseTracker.attachAnnotation(_hoverAnnotationKey);
-  }
-
-  @override
-  void detach() {
-    _gestureRecognizer.reset();
-    RendererBinding.instance.mouseTracker.detachAnnotation(_hoverAnnotationKey);
-    super.detach();
   }
 }

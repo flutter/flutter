@@ -5845,7 +5845,7 @@ class _PointerListener extends SingleChildRenderObjectWidget {
 ///
 ///  * [Listener], a similar widget that tracks pointer events when the pointer
 ///    have buttons pressed.
-class MouseRegion extends SingleChildRenderObjectWidget {
+class MouseRegion extends StatefulWidget {
   /// Creates a widget that forwards mouse events to callbacks.
   const MouseRegion({
     Key key,
@@ -5853,16 +5853,15 @@ class MouseRegion extends SingleChildRenderObjectWidget {
     this.onExit,
     this.onHover,
     this.opaque = true,
-    Widget child,
+    this.child,
   }) : assert(opaque != null),
-       super(key: key, child: child);
+       super(key: key);
 
-  /// Called when a mouse pointer, with or without buttons pressed, has
-  /// entered this widget.
+  /// Called when a mouse pointer has entered this widget.
   ///
-  /// This callback is triggered when the pointer has started to be contained
-  /// by the region of this widget. More specifically, the callback is triggered
-  /// by the following cases:
+  /// This callback is triggered when the pointer, with or without buttons
+  /// pressed, has started to be contained by the region of this widget. More
+  /// specifically, the callback is triggered by the following cases:
   ///
   ///  * This widget has appeared under a pointer.
   ///  * This widget has moved to under a pointer.
@@ -5871,8 +5870,7 @@ class MouseRegion extends SingleChildRenderObjectWidget {
   ///
   /// This callback is not always matched by an [onExit]. If the [MouseRegion]
   /// is unmounted while being hovered by a pointer, the [onExit] of the widget
-  /// callback will never called, despite the earlier call of [onEnter]. For
-  /// more details, see [onExit].
+  /// callback will never called. For more details, see [onExit].
   ///
   /// See also:
   ///
@@ -5881,29 +5879,21 @@ class MouseRegion extends SingleChildRenderObjectWidget {
   ///    internally implemented.
   final PointerEnterEventListener onEnter;
 
-  /// Called when a mouse pointer changes position without buttons pressed, and
-  /// the new position is within the region defined by this widget.
+  /// Called when a mouse pointer moves within this widget without buttons
+  /// pressed.
   ///
-  /// This callback is triggered when:
-  ///
-  ///  * An annotation that did not contain the pointer has moved to under a
-  ///    pointer that has no buttons pressed.
-  ///  * A pointer has moved onto, or moved within an annotation without buttons
-  ///    pressed.
-  ///
-  /// This callback is not triggered when
-  ///
-  ///  * An annotation that is containing the pointer has moved, and still
-  ///    contains the pointer.
+  /// This callback is not triggered when the [MouseRegion] has moved
+  /// while being hovered by the mouse pointer.
   final PointerHoverEventListener onHover;
 
-  /// Called when a mouse pointer, with or without buttons pressed, has exited
-  /// this widget when the widget is still mounted.
+  /// Called when a mouse pointer has exited this widget when the widget is
+  /// still mounted.
   ///
-  /// This callback is triggered when the pointer has stopped to be contained
-  /// by the region of this widget, except when it's caused by the removal of
-  /// this widget. More specifically, the callback is triggered by
-  /// the following cases:
+  /// This callback is triggered when the pointer, with or without buttons
+  /// pressed, has stopped to be contained by the region of this widget, except
+  /// when it's caused by the removal of this widget, which is different from
+  /// [MouseTrackerAnnotation.onExit]. More specifically, this callback is
+  /// triggered by the following cases:
   ///
   ///  * This widget, which used to contain a pointer, has moved away.
   ///  * A pointer that used to be within this widget has been removed.
@@ -5914,14 +5904,25 @@ class MouseRegion extends SingleChildRenderObjectWidget {
   ///  * This widget, which used to contain a pointer, has disappeared.
   ///
   /// The last case is the only case when [onExit] does not match an earlier
-  /// [onEnter].
-  /// {@macro flutter.mouseTracker.onExit}
+  /// [onEnter]. This design is because the last case is very likely due to
+  /// the widget being unmounted, at which time calling `setState` will throw
+  /// exceptions. There are a few ways to mitigate this limit:
+  ///
+  ///  * If the state of hovering is completely managed within a widget that
+  ///    unconditionally creates this [MouseRegion], then this will not be a
+  ///    concern, since after the [MouseRegion] is unmounted the state is no
+  ///    longer used.
+  ///  * Otherwise, the outer widget is very likely accessible to the
+  ///    condition that controls whether this [MouseRegion] is present. If so,
+  ///    call [onExit] at the event that turns the condition from true to false.
+  ///  * In the cases where the solutions above won't work, you can always
+  ///    override [State.dispose] and call [onExit].
   ///
   /// See also:
   ///
   ///  * [onEnter], which is triggered when a mouse pointer enters the region.
   ///  * [MouseTrackerAnnotation.onExit], which is how this callback is
-  ///    internally implemented.
+  ///    internally implemented, but without the limit.
   final PointerExitEventListener onExit;
 
   /// Whether this widget should prevent other [MouseRegion]s visually behind it
@@ -5940,24 +5941,13 @@ class MouseRegion extends SingleChildRenderObjectWidget {
   /// This defaults to true.
   final bool opaque;
 
-  @override
-  RenderMouseRegion createRenderObject(BuildContext context) {
-    return RenderMouseRegion(
-      onEnter: onEnter,
-      onHover: onHover,
-      onExit: onExit,
-      opaque: opaque,
-    );
-  }
+  /// The widget below this widget in the tree.
+  ///
+  /// {@macro flutter.widgets.child}
+  final Widget child;
 
   @override
-  void updateRenderObject(BuildContext context, RenderMouseRegion renderObject) {
-    renderObject
-      ..onEnter = onEnter
-      ..onHover = onHover
-      ..onExit = onExit
-      ..opaque = opaque;
-  }
+  _MouseRegionState createState() => _MouseRegionState();
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -5971,6 +5961,49 @@ class MouseRegion extends SingleChildRenderObjectWidget {
       listeners.add('hover');
     properties.add(IterableProperty<String>('listeners', listeners, ifEmpty: '<none>'));
     properties.add(DiagnosticsProperty<bool>('opaque', opaque, defaultValue: true));
+  }
+}
+
+class _MouseRegionState extends State<MouseRegion> {
+  void handleExit(PointerExitEvent event) {
+    if (widget.onExit != null && mounted)
+      widget.onExit(event);
+  }
+
+  PointerExitEventListener getHandleExit() {
+    return widget.onExit == null ? null : handleExit;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _RawMouseRegion(this);
+  }
+}
+
+class _RawMouseRegion extends SingleChildRenderObjectWidget {
+  _RawMouseRegion(this.owner) : super(child: owner.widget.child);
+
+  final _MouseRegionState owner;
+
+  @override
+  RenderMouseRegion createRenderObject(BuildContext context) {
+    final MouseRegion widget = owner.widget;
+    return RenderMouseRegion(
+      onEnter: widget.onEnter,
+      onHover: widget.onHover,
+      onExit: owner.getHandleExit(),
+      opaque: widget.opaque,
+    );
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, RenderMouseRegion renderObject) {
+    final MouseRegion widget = owner.widget;
+    renderObject
+      ..onEnter = widget.onEnter
+      ..onHover = widget.onHover
+      ..onExit = owner.getHandleExit()
+      ..opaque = widget.opaque;
   }
 }
 

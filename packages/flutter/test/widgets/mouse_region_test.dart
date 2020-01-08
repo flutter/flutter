@@ -140,7 +140,7 @@ void main() {
     expect(exit.position, equals(const Offset(1.0, 1.0)));
   });
 
-  testWidgets('detects pointer exit when widget disappears', (WidgetTester tester) async {
+  testWidgets("doesn't detect pointer exit when widget disappears", (WidgetTester tester) async {
     PointerEnterEvent enter;
     PointerHoverEvent move;
     PointerExitEvent exit;
@@ -155,7 +155,6 @@ void main() {
         onExit: (PointerExitEvent details) => exit = details,
       ),
     ));
-    final RenderMouseRegion renderListener = tester.renderObject(find.byType(MouseRegion));
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer(location: Offset.zero);
     addTearDown(gesture.removePointer);
@@ -173,7 +172,6 @@ void main() {
       ),
     ));
     expect(exit, isNull);
-    expect(tester.binding.mouseTracker.isAnnotationAttached(renderListener.annotationKey), isFalse);
   });
 
   testWidgets('Hover works with nested listeners', (WidgetTester tester) async {
@@ -225,8 +223,6 @@ void main() {
         ],
       ),
     );
-    final RenderMouseRegion renderListener1 = tester.renderObject(find.byKey(key1));
-    final RenderMouseRegion renderListener2 = tester.renderObject(find.byKey(key2));
     Offset center = tester.getCenter(find.byKey(key2));
     await gesture.moveTo(center);
     await tester.pump();
@@ -238,8 +234,6 @@ void main() {
     expect(enter1, isNotEmpty);
     expect(enter1.last.position, equals(center));
     expect(exit1, isEmpty);
-    expect(tester.binding.mouseTracker.isAnnotationAttached(renderListener1.annotationKey), isTrue);
-    expect(tester.binding.mouseTracker.isAnnotationAttached(renderListener2.annotationKey), isTrue);
     clearLists();
 
     // Now make sure that exiting the child only triggers the child exit, not
@@ -254,8 +248,6 @@ void main() {
     expect(move1.last.position, equals(center));
     expect(enter1, isEmpty);
     expect(exit1, isEmpty);
-    expect(tester.binding.mouseTracker.isAnnotationAttached(renderListener1.annotationKey), isTrue);
-    expect(tester.binding.mouseTracker.isAnnotationAttached(renderListener2.annotationKey), isTrue);
     clearLists();
   });
 
@@ -310,8 +302,6 @@ void main() {
         ],
       ),
     );
-    final RenderMouseRegion renderListener1 = tester.renderObject(find.byKey(key1));
-    final RenderMouseRegion renderListener2 = tester.renderObject(find.byKey(key2));
     final Offset center1 = tester.getCenter(find.byKey(key1));
     final Offset center2 = tester.getCenter(find.byKey(key2));
     await gesture.moveTo(center1);
@@ -324,8 +314,6 @@ void main() {
     expect(move2, isEmpty);
     expect(enter2, isEmpty);
     expect(exit2, isEmpty);
-    expect(tester.binding.mouseTracker.isAnnotationAttached(renderListener1.annotationKey), isTrue);
-    expect(tester.binding.mouseTracker.isAnnotationAttached(renderListener2.annotationKey), isTrue);
     clearLists();
     await gesture.moveTo(center2);
     await tester.pump();
@@ -338,8 +326,6 @@ void main() {
     expect(enter2, isNotEmpty);
     expect(enter2.last.position, equals(center2));
     expect(exit2, isEmpty);
-    expect(tester.binding.mouseTracker.isAnnotationAttached(renderListener1.annotationKey), isTrue);
-    expect(tester.binding.mouseTracker.isAnnotationAttached(renderListener2.annotationKey), isTrue);
     clearLists();
     await gesture.moveTo(const Offset(400.0, 450.0));
     await tester.pump();
@@ -350,8 +336,6 @@ void main() {
     expect(enter2, isEmpty);
     expect(exit2, isNotEmpty);
     expect(exit2.last.position, equals(const Offset(400.0, 450.0)));
-    expect(tester.binding.mouseTracker.isAnnotationAttached(renderListener1.annotationKey), isTrue);
-    expect(tester.binding.mouseTracker.isAnnotationAttached(renderListener2.annotationKey), isTrue);
     clearLists();
     await tester.pumpWidget(Container());
     expect(move1, isEmpty);
@@ -360,8 +344,6 @@ void main() {
     expect(move2, isEmpty);
     expect(enter2, isEmpty);
     expect(exit2, isEmpty);
-    expect(tester.binding.mouseTracker.isAnnotationAttached(renderListener1.annotationKey), isFalse);
-    expect(tester.binding.mouseTracker.isAnnotationAttached(renderListener2.annotationKey), isFalse);
   });
 
   testWidgets('MouseRegion uses updated callbacks', (WidgetTester tester) async {
@@ -1279,20 +1261,6 @@ void main() {
     await tester.pumpAndSettle();
     await gesture.moveBy(const Offset(10.0, 10.0));
     expect(tester.binding.hasScheduledFrame, isFalse);
-  });
-
-  testWidgets("MouseTracker's attachAnnotation doesn't schedule any frames", (WidgetTester tester) async {
-    // This test is here because MouseTracker can't use testWidgets.
-    final MouseTrackerAnnotation annotation = MouseTrackerAnnotation(
-      key: UniqueKey(),
-      onEnter: (PointerEnterEvent event) {},
-      onHover: (PointerHoverEvent event) {},
-      onExit: (PointerExitEvent event) {},
-    );
-    RendererBinding.instance.mouseTracker.attachAnnotation(annotation.key);
-    expect(tester.binding.hasScheduledFrame, isFalse);
-    expect(RendererBinding.instance.mouseTracker.isAnnotationAttached(annotation.key), isTrue);
-    RendererBinding.instance.mouseTracker.detachAnnotation(annotation.key);
   });
 }
 
