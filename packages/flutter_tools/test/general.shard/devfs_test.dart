@@ -14,7 +14,6 @@ import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/vmservice.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:mockito/mockito.dart';
 
