@@ -682,7 +682,7 @@ void main() {
                 'FLUTTER_ROOT': _kFlutterRoot,
                 'CIRRUS_CI' : 'true',
                 'CIRRUS_PR' : '1234',
-                'GOLD_SERVICE_ACCOUNT' : 'service account...',
+                'GOLD_SERVICE_ACCOUNT' : 'ENCRYPTED[...]',
                 'CIRRUS_USER_PERMISSION' : 'none',
               },
               operatingSystem: 'macos'
