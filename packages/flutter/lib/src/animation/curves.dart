@@ -317,6 +317,112 @@ class Cubic extends Curve {
 /// incrementing `t` by, say, 0.1 might move along the curve by quite a lot at one
 /// part of the curve, or hardly at all in another part of the curve, depending
 /// on the definition of the curve.
+///
+/// {@tool snippet --template=stateless_widget_material}
+/// This example shows how to use a [Curve2D] to modify the position of a widget
+/// so that it can follow an arbitrary path.
+///
+/// ```dart preamble
+/// // This is the path that the child will follow. It's a CatmullRomSpline so
+/// // that the coordinates can be specified that it must pass through. If the
+/// // tension is set to 1.0, it will linearly interpolate between those points,
+/// // instead of interpolating smoothly.
+/// final CatmullRomSpline path = CatmullRomSpline(
+///   const <Offset>[
+///     Offset(0.05, 0.75),
+///     Offset(0.18, 0.23),
+///     Offset(0.32, 0.04),
+///     Offset(0.73, 0.5),
+///     Offset(0.42, 0.74),
+///     Offset(0.73, 0.01),
+///     Offset(0.93, 0.93),
+///     Offset(0.05, 0.75),
+///   ],
+///   startHandle: Offset(0.93, 0.93),
+///   endHandle: Offset(0.18, 0.23),
+///   tension: 0.0,
+/// );
+///
+/// class FollowCurve2D extends StatefulWidget {
+///   const FollowCurve2D({
+///     Key key,
+///     @required this.path,
+///     this.curve = Curves.easeInOut,
+///     @required this.child,
+///     this.duration = const Duration(seconds: 1),
+///   })  : assert(path != null),
+///         assert(curve != null),
+///         assert(child != null),
+///         assert(duration != null),
+///         super(key: key);
+///
+///   final Curve2D path;
+///   final Curve curve;
+///   final Duration duration;
+///   final Widget child;
+///
+///   @override
+///   _FollowCurve2DState createState() => _FollowCurve2DState();
+/// }
+///
+/// class _FollowCurve2DState extends State<FollowCurve2D> with TickerProviderStateMixin {
+///   // The animation controller for this animation.
+///   AnimationController controller;
+///   // The animation that will be used to apply the widget's animation curve.
+///   Animation<double> animation;
+///
+///   @override
+///   void initState() {
+///     super.initState();
+///     controller = AnimationController(duration: widget.duration, vsync: this);
+///     animation = CurvedAnimation(parent: controller, curve: widget.curve);
+///     // Have the controller repeat indefinitely.  If you want it to "bounce" back
+///     // and forth, set the reverse parameter to true.
+///     controller.repeat(reverse: false);
+///     controller.addListener(() => setState(() {}));
+///   }
+///
+///   @override
+///   void dispose() {
+///     super.dispose();
+///     // Always have to dispose of animation controllers when done.
+///     controller.dispose();
+///   }
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     // Scale the path values to match the -1.0 to 1.0 domain of the Alignment widget.
+///     final Offset position = widget.path.transform(animation.value) * 2.0 - Offset(1.0, 1.0);
+///     return Align(
+///       alignment: Alignment(position.dx, position.dy),
+///       child: widget.child,
+///     );
+///   }
+/// }
+/// ```
+///
+/// ```dart
+///   Widget build(BuildContext context) {
+///     return Container(
+///       color: Colors.white,
+///       alignment: Alignment.center,
+///       child: FollowCurve2D(
+///         path: path,
+///         curve: Curves.easeInOut,
+///         duration: const Duration(seconds: 3),
+///         child: CircleAvatar(
+///           backgroundColor: Colors.yellow,
+///           child: DefaultTextStyle(
+///             style: Theme.of(context).textTheme.title,
+///             child: Text("B"), // Buzz, buzz!
+///           ),
+///         ),
+///       ),
+///     );
+///   }
+/// ```
+/// {@end-tool}
+///
 abstract class Curve2D extends ParametricCurve<Offset> {
   /// Abstract const constructor to enable subclasses to provide const
   /// constructors so that they can be used in const expressions.
@@ -356,8 +462,6 @@ abstract class Curve2D extends ParametricCurve<Offset> {
     assert(start != null);
     assert(end != null);
     assert(end > start);
-    final Curve2DSample first = Curve2DSample(start, transform(start));
-    final List<Curve2DSample> samples = <Curve2DSample>[first];
     // We want to pick a random seed that will keep the result stable if
     // evaluated again, so we use the first non-generated control point.
     final math.Random rand = math.Random(samplingSeed);
@@ -369,21 +473,29 @@ abstract class Curve2D extends ParametricCurve<Offset> {
       return (z * z) < tolerance;
     }
 
-    void sample(Curve2DSample p, Curve2DSample q) {
+    final Curve2DSample first = Curve2DSample(start, transform(start));
+    final Curve2DSample last = Curve2DSample(end, transform(end));
+    final List<Curve2DSample> samples = <Curve2DSample>[first];
+    void sample(Curve2DSample p, Curve2DSample q, {bool forceSubdivide = false}) {
       // Pick a random point somewhat near the center, which avoids aliasing
       // problems with periodic curves.
       final double t = p.t + (0.45 + 0.1 * rand.nextDouble()) * (q.t - p.t);
       final Curve2DSample r = Curve2DSample(t, transform(t));
 
-      if (isFlat(p.value, q.value, r.value)) {
+      if (!forceSubdivide && isFlat(p.value, q.value, r.value)) {
         samples.add(q);
       } else {
         sample(p, r);
         sample(r, q);
       }
     }
-    final Curve2DSample last = Curve2DSample(end, transform(end));
-    sample(first, last);
+    // If the curve starts and ends on the same point, then we force it to
+    // subdivide at least once, because otherwise it will terminate immediately.
+    sample(
+      first,
+      last,
+      forceSubdivide: (first.value.dx - last.value.dx).abs() < tolerance && (first.value.dy - last.value.dy).abs() < tolerance,
+    );
     return samples;
   }
 
