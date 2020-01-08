@@ -240,7 +240,7 @@ class FloatingActionButton extends StatelessWidget {
   ///
   /// Although the color of theme's `accentIconTheme` currently provides a
   /// default that supercedes the `onSecondary` color, this dependency
-  /// has been deprecated:  flutter.dev/go/remove-fab-accent-theme-dependency.
+  /// has been deprecated:  https://flutter.dev/go/remove-fab-accent-theme-dependency.
   /// It will be removed in the future.
   final Color foregroundColor;
 
@@ -425,7 +425,7 @@ class FloatingActionButton extends StatelessWidget {
 
     // Applications should no longer use accentIconTheme's color to configure
     // the foreground color of floating action buttons. For more information, see
-    // flutter.dev/go/remove-fab-accent-theme-dependency.
+    // https://flutter.dev/go/remove-fab-accent-theme-dependency.
     if (this.foregroundColor == null && floatingActionButtonTheme.foregroundColor == null) {
       final bool accentIsDark = theme.accentColorBrightness == Brightness.dark;
       final Color defaultAccentIconThemeColor = accentIsDark ? Colors.white : Colors.black;
