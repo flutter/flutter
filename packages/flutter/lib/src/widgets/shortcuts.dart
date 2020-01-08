@@ -166,6 +166,37 @@ class LogicalKeySet extends KeySet<LogicalKeyboardKey> with DiagnosticableMixin 
   }
 }
 
+/// Diagnostics property which handles formatting a `Map<LogicalKeySet, Intent>`
+/// (the same type as the [Shortcuts.shortcuts] property) so that it is human-readable.
+class ShortcutMapProperty extends DiagnosticsProperty<Map<LogicalKeySet, Intent>> {
+  /// Create a diagnostics property for `Map<LogicalKeySet, Intent>` objects,
+  /// which are the same type as the [Shortcuts.shortcuts] property.
+  ///
+  /// The [showName] and [level] arguments must not be null.
+  ShortcutMapProperty(
+    String name,
+    Map<LogicalKeySet, Intent> value, {
+    bool showName = true,
+    Object defaultValue = kNoDefaultValue,
+    DiagnosticLevel level = DiagnosticLevel.info,
+    String description,
+  }) : assert(showName != null),
+       assert(level != null),
+       super(
+         name,
+         value,
+         showName: showName,
+         defaultValue: defaultValue,
+         level: level,
+         description: description,
+       );
+
+  @override
+  String valueToString({ TextTreeConfiguration parentConfiguration }) {
+    return '{${value.keys.map<String>((LogicalKeySet keySet) => '{${keySet.debugDescribeKeys()}}: ${value[keySet]}').join(', ')}}';
+  }
+}
+
 /// A manager of keyboard shortcut bindings.
 ///
 /// A [ShortcutManager] is obtained by calling [Shortcuts.of] on the context of
@@ -337,13 +368,8 @@ class Shortcuts extends StatefulWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-
-    final String description = debugLabel?.isNotEmpty ?? false
-        ? debugLabel
-        : '{${shortcuts.keys.map<String>((LogicalKeySet keySet) => '{${keySet.debugDescribeKeys()}}: ${shortcuts[keySet]}').join(', ')}}';
-
     properties.add(DiagnosticsProperty<ShortcutManager>('manager', manager, defaultValue: null));
-    properties.add(DiagnosticsProperty<Map<LogicalKeySet, Intent>>('shortcuts', shortcuts, description: description));
+    properties.add(ShortcutMapProperty('shortcuts', shortcuts, description: debugLabel?.isNotEmpty ?? false ? debugLabel : null));
   }
 }
 
