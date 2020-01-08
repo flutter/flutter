@@ -676,31 +676,32 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
       '_FrameCallbackEntry',
     };
 
-    final Set<String> visited = <String>{};
-    int skippedFromFlutterCount = 0;
+    bool seenMount = false;
+    bool seenUserCode = false;
 
     final List<String> result = <String>[];
     final List<String> skipped = <String>[];
     for (final String line in frames) {
       final StackFrame frameLine = StackFrame.fromStackTraceLine(line);
+      seenUserCode |= frameLine.packageScheme == 'package' && frameLine.package != 'flutter';
+
       if (filteredClasses.contains(frameLine.className)) {
-        skipped.add('class ${frameLine.className}');
+        skipped.add('${frameLine.className}');
       } else if (filteredPackages.contains(frameLine.packageScheme + ':' + frameLine.package)) {
-        skipped.add('package ${frameLine.packageScheme == 'dart' ? 'dart:' : ''}${frameLine.package}');
-      } else if (frameLine.packageScheme == 'package' && frameLine.package == 'flutter') {
-        if (visited.add('flutter/${frameLine.packagePath}:${frameLine.line}:${frameLine.column}')) {
-          if (skippedFromFlutterCount > 0) {
-            result.add('(elided $skippedFromFlutterCount frame${skippedFromFlutterCount == 1 ? '' : 's'} from package:flutter)');
-            skippedFromFlutterCount = 0;
-          }
+        skipped.add('${frameLine.packageScheme == 'dart' ? 'dart:' : ''}${frameLine.package}');
+      } else if (seenUserCode && frameLine.packageScheme == 'package' && frameLine.package == 'flutter') {
+        if (!seenMount) {
           result.add(line);
         } else {
-          skippedFromFlutterCount++;
+          skipped.add('flutter');
         }
+        // Web stacks don't have class names, so we can't avoid the source path.
+        seenMount |= frameLine.packagePath == 'src/widgets/framework.dart' && frameLine.method == 'mount';
       } else {
         result.add(line);
       }
     }
+
     if (skipped.length == 1) {
       result.add('(elided one frame from ${skipped.single})');
     } else if (skipped.length > 1) {
