@@ -815,7 +815,9 @@ class ParagraphRuler {
     final int len = constraintCache.length;
     for (int i = 0; i < len; i++) {
       final MeasurementResult item = constraintCache[i];
-      if (item.constraintWidth == constraints.width) {
+      if (item.constraintWidth == constraints.width &&
+          item.textAlign == paragraph._textAlign &&
+          item.textDirection == paragraph._textDirection) {
         return item;
       }
     }
@@ -867,7 +869,13 @@ class MeasurementResult {
   /// of each laid out line.
   final List<EngineLineMetrics> lines;
 
-  const MeasurementResult(
+  /// The text align value of the paragraph.
+  final ui.TextAlign textAlign;
+
+  /// The text direction of the paragraph.
+  final ui.TextDirection textDirection;
+
+  MeasurementResult(
     this.constraintWidth, {
     @required this.isSingleLine,
     @required this.width,
@@ -879,6 +887,8 @@ class MeasurementResult {
     @required this.alphabeticBaseline,
     @required this.ideographicBaseline,
     @required this.lines,
+    @required textAlign,
+    @required textDirection,
   })  : assert(constraintWidth != null),
         assert(isSingleLine != null),
         assert(width != null),
@@ -887,5 +897,7 @@ class MeasurementResult {
         assert(minIntrinsicWidth != null),
         assert(maxIntrinsicWidth != null),
         assert(alphabeticBaseline != null),
-        assert(ideographicBaseline != null);
+        assert(ideographicBaseline != null),
+        this.textAlign = textAlign ?? ui.TextAlign.start,
+        this.textDirection = textDirection ?? ui.TextDirection.ltr;
 }

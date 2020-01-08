@@ -437,6 +437,7 @@ class BitmapCanvas extends EngineCanvas {
     double y,
   ) {
     html.CanvasRenderingContext2D ctx = _canvasPool.context;
+    x += line.left;
     final double letterSpacing = style.letterSpacing;
     if (letterSpacing == null || letterSpacing == 0.0) {
       ctx.fillText(line.text, x, y);
@@ -482,11 +483,10 @@ class BitmapCanvas extends EngineCanvas {
       }
       _applyPaint(paragraph._paint.paintData);
 
-      final double x = offset.dx + paragraph._alignOffset;
       double y = offset.dy + paragraph.alphabeticBaseline;
       final int len = lines.length;
       for (int i = 0; i < len; i++) {
-        _drawTextLine(style, lines[i], x, y);
+        _drawTextLine(style, lines[i], offset.dx, y);
         y += paragraph._lineHeight;
       }
       return;
