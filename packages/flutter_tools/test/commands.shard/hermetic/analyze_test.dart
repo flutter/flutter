@@ -6,6 +6,7 @@ import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/analyze_base.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -31,15 +32,15 @@ void main() {
     testUsingContext('inRepo', () {
       // Absolute paths
       expect(inRepo(<String>[tempDir.path]), isFalse);
-      expect(inRepo(<String>[fs.path.join(tempDir.path, 'foo')]), isFalse);
+      expect(inRepo(<String>[globals.fs.path.join(tempDir.path, 'foo')]), isFalse);
       expect(inRepo(<String>[Cache.flutterRoot]), isTrue);
-      expect(inRepo(<String>[fs.path.join(Cache.flutterRoot, 'foo')]), isTrue);
+      expect(inRepo(<String>[globals.fs.path.join(Cache.flutterRoot, 'foo')]), isTrue);
 
       // Relative paths
-      fs.currentDirectory = Cache.flutterRoot;
+      globals.fs.currentDirectory = Cache.flutterRoot;
       expect(inRepo(<String>['.']), isTrue);
       expect(inRepo(<String>['foo']), isTrue);
-      fs.currentDirectory = tempDir.path;
+      globals.fs.currentDirectory = tempDir.path;
       expect(inRepo(<String>['.']), isFalse);
       expect(inRepo(<String>['foo']), isFalse);
 

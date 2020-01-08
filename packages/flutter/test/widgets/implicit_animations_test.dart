@@ -248,7 +248,12 @@ Widget wrap({Widget child}) {
 }
 
 class TestAnimatedWidget extends StatefulWidget {
-  const TestAnimatedWidget({this.callback, this.switchKey, this.state});
+  const TestAnimatedWidget({
+    Key key,
+    this.callback,
+    this.switchKey,
+    this.state,
+  }) : super(key: key);
   @required
   final VoidCallback callback;
   @required

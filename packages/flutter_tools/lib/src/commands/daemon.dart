@@ -18,7 +18,7 @@ import '../cache.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../emulator.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../resident_runner.dart';
 import '../run_cold.dart';
@@ -50,7 +50,7 @@ class DaemonCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    printStatus('Starting device daemon...');
+    globals.printStatus('Starting device daemon...');
     isRunningFromDaemon = true;
 
     final NotifyingLogger notifyingLogger = NotifyingLogger();
@@ -204,7 +204,7 @@ class Daemon {
 
   void shutdown({ dynamic error }) {
     _commandSubscription?.cancel();
-    for (Domain domain in _domainMap.values) {
+    for (final Domain domain in _domainMap.values) {
       domain.dispose();
     }
     if (!_onExitCompleter.isCompleted) {
@@ -361,7 +361,7 @@ class DaemonDomain extends Domain {
     if (res is Map<String, dynamic> && res['url'] is String) {
       return res['url'] as String;
     } else {
-      printError('Invalid response to exposeUrl - params should include a String url field');
+      globals.printError('Invalid response to exposeUrl - params should include a String url field');
       return url;
     }
   }
@@ -387,7 +387,7 @@ class DaemonDomain extends Domain {
     try {
       // TODO(jonahwilliams): replace this with a project metadata check once
       // that has been implemented.
-      final FlutterProject flutterProject = FlutterProject.fromDirectory(fs.directory(projectRoot));
+      final FlutterProject flutterProject = FlutterProject.fromDirectory(globals.fs.directory(projectRoot));
       if (flutterProject.linux.existsSync()) {
         result.add('linux');
       }
@@ -472,8 +472,8 @@ class AppDomain extends Domain {
       throw '${toTitleCase(options.buildInfo.friendlyModeName)} mode is not supported for emulators.';
     }
     // We change the current working directory for the duration of the `start` command.
-    final Directory cwd = fs.currentDirectory;
-    fs.currentDirectory = fs.directory(projectDirectory);
+    final Directory cwd = globals.fs.currentDirectory;
+    globals.fs.currentDirectory = globals.fs.directory(projectDirectory);
     final FlutterProject flutterProject = FlutterProject.current();
 
     final FlutterDevice flutterDevice = await FlutterDevice.create(
@@ -600,7 +600,7 @@ class AppDomain extends Domain {
           'trace': '$trace',
         });
       } finally {
-        fs.currentDirectory = cwd;
+        globals.fs.currentDirectory = cwd;
         _apps.remove(app);
       }
     });
@@ -779,7 +779,7 @@ class DeviceDomain extends Domain {
           final Map<String, Object> response = await _deviceToMap(device);
           sendEvent(eventName, response);
         } catch (err) {
-          printError('$err');
+          globals.printError('$err');
         }
       });
     };
@@ -791,15 +791,15 @@ class DeviceDomain extends Domain {
   /// of properties (id, name, platform, ...).
   Future<List<Map<String, dynamic>>> getDevices([ Map<String, dynamic> args ]) async {
     return <Map<String, dynamic>>[
-      for (PollingDeviceDiscovery discoverer in _discoverers)
-        for (Device device in await discoverer.devices)
+      for (final PollingDeviceDiscovery discoverer in _discoverers)
+        for (final Device device in await discoverer.devices)
           await _deviceToMap(device),
     ];
   }
 
   /// Enable device events.
   Future<void> enable(Map<String, dynamic> args) {
-    for (PollingDeviceDiscovery discoverer in _discoverers) {
+    for (final PollingDeviceDiscovery discoverer in _discoverers) {
       discoverer.startPolling();
     }
     return Future<void>.value();
@@ -807,7 +807,7 @@ class DeviceDomain extends Domain {
 
   /// Disable device events.
   Future<void> disable(Map<String, dynamic> args) {
-    for (PollingDeviceDiscovery discoverer in _discoverers) {
+    for (final PollingDeviceDiscovery discoverer in _discoverers) {
       discoverer.stopPolling();
     }
     return Future<void>.value();
@@ -845,14 +845,14 @@ class DeviceDomain extends Domain {
 
   @override
   void dispose() {
-    for (PollingDeviceDiscovery discoverer in _discoverers) {
+    for (final PollingDeviceDiscovery discoverer in _discoverers) {
       discoverer.dispose();
     }
   }
 
   /// Return the device matching the deviceId field in the args.
   Future<Device> _getDevice(String deviceId) async {
-    for (PollingDeviceDiscovery discoverer in _discoverers) {
+    for (final PollingDeviceDiscovery discoverer in _discoverers) {
       final Device device = (await discoverer.devices).firstWhere((Device device) => device.id == deviceId, orElse: () => null);
       if (device != null) {
         return device;
@@ -1011,7 +1011,7 @@ class AppInstance {
   }
 
   Future<T> _runInZone<T>(AppDomain domain, FutureOr<T> method()) {
-    _logger ??= _AppRunLogger(domain, this, parent: logToStdout ? logger : null);
+    _logger ??= _AppRunLogger(domain, this, parent: logToStdout ? globals.logger : null);
 
     return context.run<T>(
       body: method,

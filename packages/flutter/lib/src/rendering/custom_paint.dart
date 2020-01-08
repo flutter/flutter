@@ -790,7 +790,7 @@ class RenderCustomPaint extends RenderProxyBox {
     }
 
     assert(() {
-      for (SemanticsNode node in newChildren) {
+      for (final SemanticsNode node in newChildren) {
         assert(node != null);
       }
       return true;

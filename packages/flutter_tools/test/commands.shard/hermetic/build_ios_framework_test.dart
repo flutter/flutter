@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_ios_framework.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/version.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
@@ -34,7 +35,7 @@ void main() {
         mockCache = MockCache();
 
         when(mockFlutterVersion.gitTagVersion).thenReturn(mockGitTagVersion);
-        outputDirectory = fs.systemTempDirectory
+        outputDirectory = globals.fs.systemTempDirectory
             .createTempSync('flutter_build_ios_framework_test_output.')
             .childDirectory('Debug')
           ..createSync();

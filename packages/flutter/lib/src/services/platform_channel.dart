@@ -289,7 +289,7 @@ class MethodChannel {
   ///   } else if ([@"getSongs" isEqualToString:call.method]) {
   ///     NSArray* items = [BWPlayApi items];
   ///     NSMutableArray* json = [NSMutableArray arrayWithCapacity:items.count];
-  ///     for (BWPlayItem* item in items) {
+  ///     for (final BWPlayItem* item in items) {
   ///       [json addObject:@{@"id":item.itemId, @"title":item.name, @"artist":item.artist}];
   ///     }
   ///     result(json);

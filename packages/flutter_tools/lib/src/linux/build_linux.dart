@@ -4,12 +4,11 @@
 
 import '../artifacts.dart';
 import '../base/common.dart';
-import '../base/file_system.dart';
 import '../base/logger.dart';
 import '../base/process.dart';
 import '../build_info.dart';
 import '../cache.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
 
@@ -22,11 +21,11 @@ export TRACK_WIDGET_CREATION=${buildInfo?.trackWidgetCreation == true}
 export FLUTTER_TARGET=$target
 export PROJECT_DIR=${linuxProject.project.directory.path}
 ''');
-  if (artifacts is LocalEngineArtifacts) {
-    final LocalEngineArtifacts localEngineArtifacts = artifacts as LocalEngineArtifacts;
+  if (globals.artifacts is LocalEngineArtifacts) {
+    final LocalEngineArtifacts localEngineArtifacts = globals.artifacts as LocalEngineArtifacts;
     final String engineOutPath = localEngineArtifacts.engineOutPath;
-    buffer.writeln('export FLUTTER_ENGINE=${fs.path.dirname(fs.path.dirname(engineOutPath))}');
-    buffer.writeln('export LOCAL_ENGINE=${fs.path.basename(engineOutPath)}');
+    buffer.writeln('export FLUTTER_ENGINE=${globals.fs.path.dirname(globals.fs.path.dirname(engineOutPath))}');
+    buffer.writeln('export LOCAL_ENGINE=${globals.fs.path.basename(engineOutPath)}');
   }
 
   /// Cache flutter configuration files in the linux directory.
@@ -36,17 +35,17 @@ export PROJECT_DIR=${linuxProject.project.directory.path}
 
   if (!buildInfo.isDebug) {
     const String warning = '🚧 ';
-    printStatus(warning * 20);
-    printStatus('Warning: Only debug is currently implemented for Linux. This is effectively a debug build.');
-    printStatus('See https://github.com/flutter/flutter/issues/38478 for details and updates.');
-    printStatus(warning * 20);
-    printStatus('');
+    globals.printStatus(warning * 20);
+    globals.printStatus('Warning: Only debug is currently implemented for Linux. This is effectively a debug build.');
+    globals.printStatus('See https://github.com/flutter/flutter/issues/38478 for details and updates.');
+    globals.printStatus(warning * 20);
+    globals.printStatus('');
   }
 
   // Invoke make.
   final String buildFlag = getNameForBuildMode(buildInfo.mode ?? BuildMode.release);
   final Stopwatch sw = Stopwatch()..start();
-  final Status status = logger.startProgress(
+  final Status status = globals.logger.startProgress(
     'Building Linux application...',
     timeout: null,
   );

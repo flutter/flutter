@@ -82,7 +82,7 @@ class TestRoute extends Route<String> with LocalHistoryRoute<String> {
   @override
   void dispose() {
     log('dispose');
-    for (OverlayEntry entry in _entries)
+    for (final OverlayEntry entry in _entries)
       entry.remove();
     _entries.clear();
     routes.remove(this);

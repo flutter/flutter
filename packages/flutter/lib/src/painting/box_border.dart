@@ -326,6 +326,19 @@ class Border extends BoxBorder {
         bottom = side,
         left = side;
 
+  /// Creates a border with symmetrical vertical and horizontal sides.
+  ///
+  /// All arguments default to [BorderSide.none] and must not be null.
+  const Border.symmetric({
+    BorderSide vertical = BorderSide.none,
+    BorderSide horizontal = BorderSide.none,
+  }) : assert(vertical != null),
+       assert(horizontal != null),
+       left = horizontal,
+       top = vertical,
+       right = horizontal,
+       bottom = vertical;
+
   /// A uniform border with all sides the same color and width.
   ///
   /// The sides default to black solid borders, one logical pixel wide.

@@ -58,6 +58,7 @@ class ReorderableListView extends StatefulWidget {
 
   /// Creates a reorderable list.
   ReorderableListView({
+    Key key,
     this.header,
     @required this.children,
     @required this.onReorder,
@@ -70,7 +71,8 @@ class ReorderableListView extends StatefulWidget {
        assert(
          children.every((Widget w) => w.key != null),
          'All children of this widget must have a key.',
-       );
+       ),
+       super(key: key);
 
   /// A non-reorderable header widget to show before the list.
   ///

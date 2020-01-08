@@ -4,7 +4,7 @@
 
 import 'package:flutter_driver/src/common/wait.dart';
 
-import '../common.dart';
+import '../../common.dart';
 
 void main() {
   group('WaitForCondition', () {

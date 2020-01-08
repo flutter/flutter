@@ -66,7 +66,7 @@ void main() {
   // │ B │
   // └───┘
   testTraversal('Semantics traverses vertically top-to-bottom', (TraversalTester tester) async {
-    for (TextDirection textDirection in TextDirection.values) {
+    for (final TextDirection textDirection in TextDirection.values) {
       await tester.test(
         textDirection: textDirection,
         children: <String, Rect>{

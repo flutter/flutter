@@ -49,4 +49,3 @@
   // give it a Mac keycode. This overrides their definition.
   //        USB HID    evdev    XKB     Win    Mac  DOMKey         Code
    USB_KEYMAP(0x000012, 0x0000, 0x0000, 0x0000, 0x003f, "Fn", FN),
-

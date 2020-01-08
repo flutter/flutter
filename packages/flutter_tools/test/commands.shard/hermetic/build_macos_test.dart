@@ -4,10 +4,11 @@
 
 import 'package:args/command_runner.dart';
 import 'package:file/memory.dart';
+import 'package:platform/platform.dart';
+
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build.dart';
@@ -18,6 +19,7 @@ import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -67,17 +69,17 @@ void main() {
 
   // Sets up the minimal mock project files necessary for macOS builds to succeed.
   void createMinimalMockProjectFiles() {
-    fs.directory('macos').createSync();
-    fs.file('pubspec.yaml').createSync();
-    fs.file('.packages').createSync();
-    fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+    globals.fs.directory('macos').createSync();
+    globals.fs.file('pubspec.yaml').createSync();
+    globals.fs.file('.packages').createSync();
+    globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
   }
 
   // Mocks the process manager to handle an xcodebuild call to build the app
   // in the given configuration.
   void setUpMockXcodeBuildHandler(String configuration) {
-    final FlutterProject flutterProject = FlutterProject.fromDirectory(fs.currentDirectory);
-    final Directory flutterBuildDir = fs.directory(getMacOSBuildDirectory());
+    final FlutterProject flutterProject = FlutterProject.fromDirectory(globals.fs.currentDirectory);
+    final Directory flutterBuildDir = globals.fs.directory(getMacOSBuildDirectory());
     when(mockProcessManager.start(<String>[
       '/usr/bin/env',
       'xcrun',
@@ -86,11 +88,11 @@ void main() {
       '-configuration', configuration,
       '-scheme', 'Runner',
       '-derivedDataPath', flutterBuildDir.absolute.path,
-      'OBJROOT=${fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Intermediates.noindex')}',
-      'SYMROOT=${fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Products')}',
+      'OBJROOT=${globals.fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Intermediates.noindex')}',
+      'SYMROOT=${globals.fs.path.join(flutterBuildDir.absolute.path, 'Build', 'Products')}',
       'COMPILER_INDEX_STORE_ENABLE=NO',
     ])).thenAnswer((Invocation invocation) async {
-      fs.file(fs.path.join('macos', 'Flutter', 'ephemeral', '.app_filename'))
+      globals.fs.file(globals.fs.path.join('macos', 'Flutter', 'ephemeral', '.app_filename'))
         ..createSync(recursive: true)
         ..writeAsStringSync('example.app');
       return mockProcess;
@@ -111,9 +113,9 @@ void main() {
   testUsingContext('macOS build fails on non-macOS platform', () async {
     final BuildCommand command = BuildCommand();
     applyMocksToCommand(command);
-    fs.file('pubspec.yaml').createSync();
-    fs.file('.packages').createSync();
-    fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+    globals.fs.file('pubspec.yaml').createSync();
+    globals.fs.file('.packages').createSync();
+    globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
 
     expect(createTestCommandRunner(command).run(
       const <String>['build', 'macos']
@@ -202,7 +204,7 @@ void main() {
   });
 
   testUsingContext('hidden when not enabled on macOS host', () {
-    when(platform.isMacOS).thenReturn(true);
+    when(globals.platform.isMacOS).thenReturn(true);
 
     expect(BuildMacosCommand().hidden, true);
   }, overrides: <Type, Generator>{
@@ -211,7 +213,7 @@ void main() {
   });
 
   testUsingContext('Not hidden when enabled and on macOS host', () {
-    when(platform.isMacOS).thenReturn(true);
+    when(globals.platform.isMacOS).thenReturn(true);
 
     expect(BuildMacosCommand().hidden, false);
   }, overrides: <Type, Generator>{

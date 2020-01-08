@@ -180,7 +180,7 @@ mixin TickerProviderStateMixin<T extends StatefulWidget> on State<T> implements 
   void dispose() {
     assert(() {
       if (_tickers != null) {
-        for (Ticker ticker in _tickers) {
+        for (final Ticker ticker in _tickers) {
           if (ticker.isActive) {
             throw FlutterError.fromParts(<DiagnosticsNode>[
               ErrorSummary('$this was disposed with an active Ticker.'),
@@ -208,7 +208,7 @@ mixin TickerProviderStateMixin<T extends StatefulWidget> on State<T> implements 
   void didChangeDependencies() {
     final bool muted = !TickerMode.of(context);
     if (_tickers != null) {
-      for (Ticker ticker in _tickers) {
+      for (final Ticker ticker in _tickers) {
         ticker.muted = muted;
       }
     }

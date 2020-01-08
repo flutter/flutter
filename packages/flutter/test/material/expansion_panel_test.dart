@@ -55,7 +55,7 @@ class _SimpleExpansionPanelListTestWidgetState extends State<SimpleExpansionPane
 }
 
 class ExpansionPanelListSemanticsTest extends StatefulWidget {
-  const ExpansionPanelListSemanticsTest({this.headerKey});
+  const ExpansionPanelListSemanticsTest({ Key key, this.headerKey }) : super(key: key);
 
   final Key headerKey;
 

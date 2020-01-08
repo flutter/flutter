@@ -7,6 +7,7 @@ import 'package:pool/pool.dart';
 import '../../asset.dart';
 import '../../base/file_system.dart';
 import '../../devfs.dart';
+import '../../globals.dart' as globals;
 import '../../plugins.dart';
 import '../../project.dart';
 import '../build_system.dart';
@@ -39,12 +40,12 @@ Future<Depfile> copyAssets(Environment environment, Directory outputDirectory) a
         // to `%23.ext`.  However, we have to keep it this way since the
         // platform channels in the framework will URI encode these values,
         // and the native APIs will look for files this way.
-        final File file = fs.file(fs.path.join(outputDirectory.path, entry.key));
+        final File file = globals.fs.file(globals.fs.path.join(outputDirectory.path, entry.key));
         outputs.add(file);
         file.parent.createSync(recursive: true);
         final DevFSContent content = entry.value;
         if (content is DevFSFileContent && content.file is File) {
-          inputs.add(fs.file(content.file.path));
+          inputs.add(globals.fs.file(content.file.path));
           await (content.file as File).copy(file.path);
         } else {
           await file.writeAsBytes(await entry.value.contentsAsBytes());

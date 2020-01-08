@@ -5,6 +5,7 @@
 import 'base/config.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
+import 'globals.dart' as globals;
 
 PersistentToolState get persistentToolState => PersistentToolState.instance;
 
@@ -24,7 +25,7 @@ abstract class PersistentToolState {
 
 class _DefaultPersistentToolState implements PersistentToolState {
   _DefaultPersistentToolState([File configFile]) :
-    _config = Config(configFile ?? fs.file(fs.path.join(userHomePath(), _kFileName)));
+    _config = Config(configFile ?? globals.fs.file(globals.fs.path.join(userHomePath(), _kFileName)));
 
   static const String _kFileName = '.flutter_tool_state';
   static const String _kRedisplayWelcomeMessage = 'redisplay-welcome-message';
