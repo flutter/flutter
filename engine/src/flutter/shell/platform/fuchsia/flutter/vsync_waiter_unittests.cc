@@ -14,8 +14,6 @@
 #include "flutter/fml/time/time_point.h"
 #include "flutter/shell/common/thread_host.h"
 #include "flutter/shell/common/vsync_waiter.h"
-#include "flutter/shell/platform/fuchsia/flutter/task_runner_adapter.h"
-#include "flutter/shell/platform/fuchsia/flutter/thread.h"
 #include "flutter/shell/platform/fuchsia/flutter/vsync_waiter.h"
 
 namespace flutter_runner_test {
@@ -50,21 +48,17 @@ class VsyncWaiterTest : public testing::Test {
 };
 
 TEST_F(VsyncWaiterTest, AwaitVsync) {
-  std::array<std::unique_ptr<flutter_runner::Thread>, 3> threads;
-
-  for (auto& thread : threads) {
-    thread.reset(new flutter_runner::Thread());
-  }
-
-  async::Loop loop(&kAsyncLoopConfigAttachToCurrentThread);
+  flutter::ThreadHost thread_host(
+      "VsyncWaiterTests.",
+      flutter::ThreadHost::Type::Platform | flutter::ThreadHost::Type::IO |
+          flutter::ThreadHost::Type::UI | flutter::ThreadHost::Type::GPU);
 
   const flutter::TaskRunners task_runners(
-      "VsyncWaiterTests",  // Dart thread labels
-      flutter_runner::CreateFMLTaskRunner(
-          async_get_default_dispatcher()),  // platform
-      flutter_runner::CreateFMLTaskRunner(threads[0]->dispatcher()),  // gpu
-      flutter_runner::CreateFMLTaskRunner(threads[1]->dispatcher()),  // ui
-      flutter_runner::CreateFMLTaskRunner(threads[2]->dispatcher())   // io
+      "VsyncWaiterTests",                            // Dart thread labels
+      thread_host.platform_thread->GetTaskRunner(),  // platform
+      thread_host.gpu_thread->GetTaskRunner(),       // gpu
+      thread_host.ui_thread->GetTaskRunner(),        // ui
+      thread_host.io_thread->GetTaskRunner()         // io
   );
 
   auto vsync_waiter = CreateVsyncWaiter(std::move(task_runners));
@@ -82,9 +76,6 @@ TEST_F(VsyncWaiterTest, AwaitVsync) {
   EXPECT_FALSE(did_timeout);
 
   vsync_waiter.reset();
-  for (const auto& thread : threads) {
-    thread->Quit();
-  }
 }
 
 TEST_F(VsyncWaiterTest, SnapToNextPhaseOverlapsWithNow) {
