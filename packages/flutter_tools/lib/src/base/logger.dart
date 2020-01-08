@@ -565,7 +565,8 @@ class VerboseLogger extends Logger {
     return SilentStatus(
       timeout: timeout,
       timeoutConfiguration: _timeoutConfiguration,
-      stopwatch: timer,
+      // This is intentionally a different stopwatch than above.
+      stopwatch: _stopwatchFactory.createStopwatch(),
       onFinish: () {
         String time;
         if (timeout == null || timeout > _timeoutConfiguration.fastOperation) {
