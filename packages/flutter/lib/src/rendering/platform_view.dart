@@ -756,7 +756,6 @@ class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
   void paint(PaintingContext context, Offset offset) {
     assert(_controller.viewId != null);
 
-
     final MouseTrackerAnnotation annotation = MouseTrackerAnnotation(
       key: _hoverAnnotationKey,
       onHover: (PointerHoverEvent event) {
@@ -837,5 +836,11 @@ mixin _PlatformViewGestureMixin on RenderBox {
     if (event is PointerDownEvent) {
       _gestureRecognizer.addPointer(event);
     }
+  }
+
+  @override
+  void detach() {
+    _gestureRecognizer.reset();
+    super.detach();
   }
 }
