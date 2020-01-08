@@ -907,7 +907,7 @@ Directory _getLocalEngineRepo({
     .createTempSync('flutter_tool_local_engine_repo.');
 
   // Remove the local engine repo before the tool exits.
-  addShutdownHook(
+  shutdownHooks.addShutdownHook(
     () => localEngineRepo.deleteSync(recursive: true),
     ShutdownStage.CLEANUP,
   );
