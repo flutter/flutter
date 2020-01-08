@@ -50,7 +50,7 @@ void main() {
         await untilCalled(mockProcessManager.start(any, environment: anyNamed('environment')));
         final VerificationResult toVerify = verify(mockProcessManager.start(any, environment: captureAnyNamed('environment')));
         expect(toVerify.captured, hasLength(1));
-        expect(toVerify.captured.first, isInstanceOf<Map<String, String>>());
+        expect(toVerify.captured.first, isA<Map<String, String>>());
         return toVerify.captured.first as Map<String, String>;
       }
 

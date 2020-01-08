@@ -153,9 +153,9 @@ void main() {
       minHeight: 20.0,
       maxHeight: 30.0,
     );
-    expect(() => BoxConstraints.lerp(constraints1, constraints2, 0.5), throwsA(isInstanceOf<AssertionError>()));
-    expect(() => BoxConstraints.lerp(constraints1, constraints3, 0.5), throwsA(isInstanceOf<AssertionError>()));
-    expect(() => BoxConstraints.lerp(constraints2, constraints3, 0.5), throwsA(isInstanceOf<AssertionError>()));
+    expect(() => BoxConstraints.lerp(constraints1, constraints2, 0.5), throwsA(isA<AssertionError>()));
+    expect(() => BoxConstraints.lerp(constraints1, constraints3, 0.5), throwsA(isA<AssertionError>()));
+    expect(() => BoxConstraints.lerp(constraints2, constraints3, 0.5), throwsA(isA<AssertionError>()));
   });
 
   test('BoxConstraints normalize', () {

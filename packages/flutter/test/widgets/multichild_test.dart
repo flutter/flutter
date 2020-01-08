@@ -13,12 +13,12 @@ void checkTree(WidgetTester tester, List<BoxDecoration> expectedDecorations) {
     (Element element) => element is MultiChildRenderObjectElement
   ));
   expect(element, isNotNull);
-  expect(element.renderObject is RenderStack, isTrue);
+  expect(element.renderObject, isA<RenderStack>());
   final RenderStack renderObject = element.renderObject as RenderStack;
   try {
     RenderObject child = renderObject.firstChild;
     for (final BoxDecoration decoration in expectedDecorations) {
-      expect(child is RenderDecoratedBox, isTrue);
+      expect(child, isA<RenderDecoratedBox>());
       final RenderDecoratedBox decoratedBox = child as RenderDecoratedBox;
       expect(decoratedBox.decoration, equals(decoration));
       final StackParentData decoratedBoxParentData = decoratedBox.parentData as StackParentData;

@@ -72,7 +72,7 @@ void main() {
   });
 
   test('Throws a tool exit if bind fails with a SocketException', () => testbed.run(() async {
-    expect(WebAssetServer.start('hello', 1234), throwsA(isInstanceOf<ToolExit>()));
+    expect(WebAssetServer.start('hello', 1234), throwsA(isA<ToolExit>()));
   }));
 
   test('Can catch exceptions through the onError callback', () => testbed.run(() async {
@@ -84,7 +84,7 @@ void main() {
     when(request.uri).thenReturn(Uri.parse('http://foobar/foo.js'));
     requestController.add(request);
 
-    expect(closeCompleter.future, throwsA(isInstanceOf<StateError>()));
+    expect(closeCompleter.future, throwsA(isA<StateError>()));
   }));
 
   test('Handles against malformed manifest', () => testbed.run(() async {

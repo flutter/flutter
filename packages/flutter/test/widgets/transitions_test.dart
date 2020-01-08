@@ -80,7 +80,7 @@ void main() {
       actualDecoration = actualBox.decoration as BoxDecoration;
 
       expect(actualDecoration.color, const Color(0xFF7F7F7F));
-      expect(actualDecoration.border, isInstanceOf<Border>());
+      expect(actualDecoration.border, isA<Border>());
       final Border border = actualDecoration.border as Border;
       expect(border.left.width, 2.5);
       expect(border.left.style, BorderStyle.solid);
@@ -137,7 +137,7 @@ void main() {
       // Same as the test above but the values should be much closer to the
       // tween's end values given the easeOut curve.
       expect(actualDecoration.color, const Color(0xFF505050));
-      expect(actualDecoration.border, isInstanceOf<Border>());
+      expect(actualDecoration.border, isA<Border>());
       final Border border = actualDecoration.border as Border;
       expect(border.left.width, closeTo(1.9, 0.1));
       expect(border.left.style, BorderStyle.solid);

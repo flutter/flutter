@@ -25,7 +25,7 @@ void main() {
     final Future<CompilerOutput> output = stdoutHandler.compilerOutput.future;
     stdoutHandler.handler('message with no result');
 
-    expect(output, throwsA(isInstanceOf<ToolExit>()));
+    expect(output, throwsA(isA<ToolExit>()));
   });
 
   test('TargetModel values', () {
@@ -41,6 +41,6 @@ void main() {
     expect(TargetModel('dartdevc'), TargetModel.dartdevc);
     expect(TargetModel.dartdevc.toString(), 'dartdevc');
 
-    expect(() => TargetModel('foobar'), throwsA(isInstanceOf<AssertionError>()));
+    expect(() => TargetModel('foobar'), throwsA(isA<AssertionError>()));
   });
 }

@@ -62,7 +62,7 @@ void main() {
       targetPlatform: TargetPlatform.linux_x64,
       depfilePath: 'example.d',
       precompiled: false,
-    ), throwsA(isInstanceOf<ToolExit>()));
+    ), throwsA(isA<ToolExit>()));
   }));
 }
 

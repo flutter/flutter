@@ -60,7 +60,7 @@ void main() {
       false,
       const <String>[],
       false,
-    ), throwsA(isInstanceOf<ToolExit>()));
+    ), throwsA(isA<ToolExit>()));
   }));
 
   test('Refuses to build using runner when missing index.html', () => testbed.run(() async {
@@ -82,7 +82,7 @@ void main() {
     final CommandRunner<void> runner = createTestCommandRunner(BuildCommand());
 
     expect(() => runner.run(<String>['build', 'web', '--debug']),
-        throwsA(isInstanceOf<UsageException>()));
+        throwsA(isA<UsageException>()));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: true),
   }));
@@ -91,7 +91,7 @@ void main() {
     final CommandRunner<void> runner = createTestCommandRunner(BuildCommand());
 
     expect(() => runner.run(<String>['build', 'web']),
-        throwsA(isInstanceOf<ToolExit>()));
+        throwsA(isA<ToolExit>()));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: false),
   }));

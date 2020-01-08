@@ -77,7 +77,7 @@ void main() {
     setUpMockProjectFilesForBuild();
     expect(createTestCommandRunner(command).run(
       const <String>['build', 'windows']
-    ), throwsA(isInstanceOf<ToolExit>()));
+    ), throwsA(isA<ToolExit>()));
   }, overrides: <Type, Generator>{
     Platform: () => windowsPlatform,
     FileSystem: () => MemoryFileSystem(style: FileSystemStyle.windows),
@@ -110,7 +110,7 @@ void main() {
 
     expect(createTestCommandRunner(command).run(
       const <String>['build', 'windows']
-    ), throwsA(isInstanceOf<ToolExit>()));
+    ), throwsA(isA<ToolExit>()));
   }, overrides: <Type, Generator>{
     Platform: () => notWindowsPlatform,
     FileSystem: () => MemoryFileSystem(style: FileSystemStyle.windows),

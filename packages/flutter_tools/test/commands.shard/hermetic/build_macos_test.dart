@@ -127,7 +127,7 @@ void main() {
 
     expect(createTestCommandRunner(command).run(
       const <String>['build', 'macos']
-    ), throwsA(isInstanceOf<ToolExit>()));
+    ), throwsA(isA<ToolExit>()));
   }, overrides: <Type, Generator>{
     Platform: () => notMacosPlatform,
     FileSystem: () => MemoryFileSystem(),
@@ -206,7 +206,7 @@ void main() {
     final CommandRunner<void> runner = createTestCommandRunner(BuildCommand());
 
     expect(() => runner.run(<String>['build', 'macos']),
-        throwsA(isInstanceOf<ToolExit>()));
+        throwsA(isA<ToolExit>()));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: false),
   });

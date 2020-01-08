@@ -543,7 +543,7 @@ Future<void> main() async {
     final FlutterError error = exception as FlutterError;
     expect(error.diagnostics.length, 3);
     final DiagnosticsNode last = error.diagnostics.last;
-    expect(last, isInstanceOf<DiagnosticsProperty<StatefulElement>>());
+    expect(last, isA<DiagnosticsProperty<StatefulElement>>());
     expect(
       last.toStringDeep(),
       equalsIgnoringHashCodes(

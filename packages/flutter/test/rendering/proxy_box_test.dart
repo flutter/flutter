@@ -490,7 +490,7 @@ void _testLayerReuse<L extends Layer>(RenderBox renderObject) {
   expect(renderObject.debugLayer, null);
   layout(renderObject, phase: EnginePhase.paint, constraints: BoxConstraints.tight(const Size(10, 10)));
   final Layer layer = renderObject.debugLayer;
-  expect(layer, isInstanceOf<L>());
+  expect(layer, isA<L>());
   expect(layer, isNotNull);
 
   // Mark for repaint otherwise pumpFrame is a noop.

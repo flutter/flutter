@@ -430,7 +430,7 @@ void main() {
     when(mockDevice.supportsScreenshot).thenReturn(false);
 
     expect(() => residentRunner.screenshot(mockFlutterDevice),
-        throwsA(isInstanceOf<AssertionError>()));
+        throwsA(isA<AssertionError>()));
   }));
 
   test('ResidentRunner does not toggle banner in non-debug mode', () => testbed.run(() async {
@@ -710,7 +710,7 @@ void main() {
     expect(nextPlatform('iOS', TestFeatureFlags()), 'fuchsia');
     expect(nextPlatform('fuchsia', TestFeatureFlags()), 'android');
     expect(nextPlatform('fuchsia', TestFeatureFlags(isMacOSEnabled: true)), 'macOS');
-    expect(() => nextPlatform('unknown', TestFeatureFlags()), throwsA(isInstanceOf<AssertionError>()));
+    expect(() => nextPlatform('unknown', TestFeatureFlags()), throwsA(isA<AssertionError>()));
   });
 }
 

@@ -109,7 +109,7 @@ void main() {
       'bundle',
       '--no-pub',
       '--target-platform=windows-x64',
-    ]), throwsA(isInstanceOf<ToolExit>()));
+    ]), throwsA(isA<ToolExit>()));
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
     ProcessManager: () => FakeProcessManager.any(),
@@ -127,7 +127,7 @@ void main() {
       'bundle',
       '--no-pub',
       '--target-platform=linux-x64',
-    ]), throwsA(isInstanceOf<ToolExit>()));
+    ]), throwsA(isA<ToolExit>()));
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
     ProcessManager: () => FakeProcessManager.any(),
@@ -145,7 +145,7 @@ void main() {
       'bundle',
       '--no-pub',
       '--target-platform=darwin-x64',
-    ]), throwsA(isInstanceOf<ToolExit>()));
+    ]), throwsA(isA<ToolExit>()));
   }, overrides: <Type, Generator>{
     FileSystem: () => MemoryFileSystem(),
     ProcessManager: () => FakeProcessManager.any(),

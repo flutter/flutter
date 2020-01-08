@@ -63,7 +63,7 @@ void main() {
         const GitTagVersion.unknown(),
         flutterVersion,
       );
-      expect(result, throwsA(isInstanceOf<ToolExit>()));
+      expect(result, throwsA(isA<ToolExit>()));
     }, overrides: <Type, Generator>{
       Platform: () => fakePlatform,
     });

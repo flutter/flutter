@@ -50,7 +50,7 @@ void main() {
       expect(
           createTestCommandRunner(command)
               .run(const <String>['build', 'fuchsia']),
-          throwsA(isInstanceOf<ToolExit>()));
+          throwsA(isA<ToolExit>()));
     }, overrides: <Type, Generator>{
       Platform: () => linuxPlatform,
       FileSystem: () => MemoryFileSystem(),
@@ -67,7 +67,7 @@ void main() {
       expect(
           createTestCommandRunner(command)
               .run(const <String>['build', 'fuchsia']),
-          throwsA(isInstanceOf<ToolExit>()));
+          throwsA(isA<ToolExit>()));
     }, overrides: <Type, Generator>{
       Platform: () => linuxPlatform,
       FileSystem: () => MemoryFileSystem(),
@@ -89,7 +89,7 @@ void main() {
       expect(
           createTestCommandRunner(command)
               .run(const <String>['build', 'fuchsia']),
-          throwsA(isInstanceOf<ToolExit>()));
+          throwsA(isA<ToolExit>()));
     }, overrides: <Type, Generator>{
       Platform: () => windowsPlatform,
       FileSystem: () => MemoryFileSystem(),
@@ -111,7 +111,7 @@ void main() {
       expect(
           createTestCommandRunner(command)
               .run(const <String>['build', 'fuchsia']),
-          throwsA(isInstanceOf<ToolExit>()));
+          throwsA(isA<ToolExit>()));
     }, overrides: <Type, Generator>{
       Platform: () => linuxPlatform,
       FileSystem: () => MemoryFileSystem(),

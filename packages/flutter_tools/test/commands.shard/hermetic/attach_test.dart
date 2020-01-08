@@ -614,7 +614,7 @@ void main() {
       final AttachCommand command = AttachCommand();
       await expectLater(
         createTestCommandRunner(command).run(<String>['attach']),
-        throwsA(isInstanceOf<ToolExit>()),
+        throwsA(isA<ToolExit>()),
       );
       expect(testLogger.statusText, contains('No supported devices connected'));
     }, overrides: <Type, Generator>{
@@ -637,7 +637,7 @@ void main() {
       testDeviceManager.addDevice(aDeviceWithId('yy2'));
       await expectLater(
         createTestCommandRunner(command).run(<String>['attach']),
-        throwsA(isInstanceOf<ToolExit>()),
+        throwsA(isA<ToolExit>()),
       );
       expect(testLogger.statusText, contains('More than one device'));
       expect(testLogger.statusText, contains('xx1'));

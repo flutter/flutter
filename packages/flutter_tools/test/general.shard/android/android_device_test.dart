@@ -652,7 +652,7 @@ flutter:
       when(mockProcessManager.run(argThat(contains('forward'))))
           .thenAnswer((_) async => ProcessResult(0, 0, '123456', ''));
 
-      expect(forwarder.forward(123, hostPort: 456), throwsA(isInstanceOf<ProcessException>()));
+      expect(forwarder.forward(123, hostPort: 456), throwsA(isA<ProcessException>()));
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
     });

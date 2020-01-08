@@ -101,7 +101,7 @@ void main() {
 
     expect(createTestCommandRunner(command).run(
       const <String>['build', 'linux']
-    ), throwsA(isInstanceOf<ToolExit>()));
+    ), throwsA(isA<ToolExit>()));
   }, overrides: <Type, Generator>{
     Platform: () => notLinuxPlatform,
     FileSystem: () => MemoryFileSystem(),
@@ -220,7 +220,7 @@ BINARY_NAME=fizz_bar
     final CommandRunner<void> runner = createTestCommandRunner(BuildCommand());
 
     expect(() => runner.run(<String>['build', 'linux']),
-        throwsA(isInstanceOf<ToolExit>()));
+        throwsA(isA<ToolExit>()));
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
   });

@@ -24,7 +24,7 @@ void main() {
     when(mockDirectory.createSync(recursive: true)).thenThrow(const FileSystemException());
 
     expect(() => template.render(mockDirectory, <String, Object>{}),
-        throwsA(isInstanceOf<ToolExit>()));
+        throwsA(isA<ToolExit>()));
   }));
 }
 

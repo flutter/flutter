@@ -82,7 +82,7 @@ void main() {
       '/path/to/main.dart',
       null, /* invalidatedFiles */
       outputPath: '/build/',
-    )), throwsA(isInstanceOf<ToolExit>()));
+    )), throwsA(isA<ToolExit>()));
   }, overrides: <Type, Generator>{
     ProcessManager: () => mockProcessManager,
     OutputPreferences: () => OutputPreferences(showColor: false),
@@ -100,7 +100,7 @@ void main() {
       '/path/to/main.dart',
       null, /* invalidatedFiles */
       outputPath: '/build/',
-    )), throwsA(isInstanceOf<ToolExit>()));
+    )), throwsA(isA<ToolExit>()));
   }, overrides: <Type, Generator>{
     ProcessManager: () => mockProcessManager,
     OutputPreferences: () => OutputPreferences(showColor: false),

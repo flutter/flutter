@@ -249,7 +249,7 @@ void main() {
         .thenAnswer((Invocation invocation) async {
           return OperationResult(1, 'fail', fatal: true);
         });
-      expect(terminalHandler.processTerminalInput('r'), throwsA(isInstanceOf<ToolExit>()));
+      expect(terminalHandler.processTerminalInput('r'), throwsA(isA<ToolExit>()));
     });
 
     testUsingContext('r - hotReload unsupported', () async {
@@ -292,7 +292,7 @@ void main() {
         .thenAnswer((Invocation invocation) async {
           return OperationResult(1, 'fail', fatal: true);
         });
-      expect(() => terminalHandler.processTerminalInput('R'), throwsA(isInstanceOf<ToolExit>()));
+      expect(() => terminalHandler.processTerminalInput('R'), throwsA(isA<ToolExit>()));
     });
 
     testUsingContext('R - hot restart unsupported', () async {

@@ -102,7 +102,7 @@ void main() {
       expect(() => commandRunner.run(<String>[
         'config',
         '--build-dir=/foo',
-      ]), throwsA(isInstanceOf<ToolExit>()));
+      ]), throwsA(isA<ToolExit>()));
       verifyNoAnalytics();
     }, overrides: <Type, Generator>{
       Usage: () => mockUsage,

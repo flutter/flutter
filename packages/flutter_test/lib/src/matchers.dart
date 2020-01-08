@@ -162,7 +162,7 @@ const Matcher hasAGoodToStringDeep = _HasGoodToStringDeep();
 
 /// A matcher for functions that throw [FlutterError].
 ///
-/// This is equivalent to `throwsA(isInstanceOf<FlutterError>())`.
+/// This is equivalent to `throwsA(isA<FlutterError>())`.
 ///
 /// If you are trying to test whether a call to [WidgetTester.pumpWidget]
 /// results in a [FlutterError], see [TestWidgetsFlutterBinding.takeException].
@@ -176,7 +176,7 @@ final Matcher throwsFlutterError = throwsA(isFlutterError);
 
 /// A matcher for functions that throw [AssertionError].
 ///
-/// This is equivalent to `throwsA(isInstanceOf<AssertionError>())`.
+/// This is equivalent to `throwsA(isA<AssertionError>())`.
 ///
 /// If you are trying to test whether a call to [WidgetTester.pumpWidget]
 /// results in an [AssertionError], see
@@ -197,7 +197,7 @@ final Matcher throwsAssertionError = throwsA(isAssertionError);
 ///
 ///  * [throwsFlutterError], to test if a function throws a [FlutterError].
 ///  * [isAssertionError], to test if any object is any kind of [AssertionError].
-final Matcher isFlutterError = isInstanceOf<FlutterError>();
+final test_package.TypeMatcher<FlutterError> isFlutterError = isA<FlutterError>();
 
 /// A matcher for [AssertionError].
 ///
@@ -207,11 +207,11 @@ final Matcher isFlutterError = isInstanceOf<FlutterError>();
 ///
 ///  * [throwsAssertionError], to test if a function throws any [AssertionError].
 ///  * [isFlutterError], to test if any object is a [FlutterError].
-final Matcher isAssertionError = isInstanceOf<AssertionError>();
+final test_package.TypeMatcher<AssertionError> isAssertionError = isA<AssertionError>();
 
 /// A matcher that compares the type of the actual value to the type argument T.
 // TODO(ianh): Remove this once https://github.com/dart-lang/matcher/issues/98 is fixed
-Matcher isInstanceOf<T>() => test_package.TypeMatcher<T>();
+test_package.TypeMatcher<T> isInstanceOf<T>() => isA<T>();
 
 /// Asserts that two [double]s are equal, within some tolerated error.
 ///

@@ -29,7 +29,7 @@ void main() {
       testInMemory('fails on null directory', () async {
         expect(
           () => FlutterProject.fromDirectory(null),
-          throwsA(isInstanceOf<AssertionError>()),
+          throwsA(isA<AssertionError>()),
         );
       });
 
@@ -41,7 +41,7 @@ void main() {
 
         expect(
           () => FlutterProject.fromDirectory(directory),
-          throwsA(isInstanceOf<ToolExit>()),
+          throwsA(isA<ToolExit>()),
         );
       });
 
@@ -53,7 +53,7 @@ void main() {
 
         expect(
           () => FlutterProject.fromDirectory(directory),
-          throwsA(isInstanceOf<ToolExit>()),
+          throwsA(isA<ToolExit>()),
         );
       });
 
@@ -65,7 +65,7 @@ void main() {
 
         expect(
           () => FlutterProject.fromDirectory(directory),
-          throwsA(isInstanceOf<ToolExit>()),
+          throwsA(isA<ToolExit>()),
         );
       });
 
@@ -110,7 +110,7 @@ void main() {
         final FlutterProject project = await someProject();
         await expectLater(
           project.android.makeHostAppEditable(),
-          throwsA(isInstanceOf<AssertionError>()),
+          throwsA(isA<AssertionError>()),
         );
       });
       testInMemory('exits on already editable module', () async {
