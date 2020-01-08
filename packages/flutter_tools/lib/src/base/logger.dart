@@ -561,11 +561,11 @@ class VerboseLogger extends Logger {
   }) {
     assert(progressIndicatorPadding != null);
     printStatus(message);
-    final Stopwatch timer = Stopwatch()..start();
+    final Stopwatch timer = _stopwatchFactory.createStopwatch()..start();
     return SilentStatus(
       timeout: timeout,
       timeoutConfiguration: _timeoutConfiguration,
-      stopwatch: _stopwatchFactory.createStopwatch(),
+      stopwatch: timer,
       onFinish: () {
         String time;
         if (timeout == null || timeout > _timeoutConfiguration.fastOperation) {
