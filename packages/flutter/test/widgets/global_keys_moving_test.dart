@@ -29,10 +29,10 @@ class StatefulLeafState extends State<StatefulLeaf> {
 }
 
 class KeyedWrapper extends StatelessWidget {
-  const KeyedWrapper(this.key1, this.key2);
+  const KeyedWrapper(this.key1, this.key2, { Key key }) : super(key: key);
 
   final Key key1;
-  final Key key2;
+  final GlobalKey key2;
 
   @override
   Widget build(BuildContext context) {

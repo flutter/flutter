@@ -333,7 +333,7 @@ class RenderParagraph extends RenderBox
   // alignments that require the baseline (baseline, aboveBaseline,
   // belowBaseline).
   bool _canComputeIntrinsics() {
-    for (PlaceholderSpan span in _placeholderSpans) {
+    for (final PlaceholderSpan span in _placeholderSpans) {
       switch (span.alignment) {
         case ui.PlaceholderAlignment.baseline:
         case ui.PlaceholderAlignment.aboveBaseline:
@@ -781,7 +781,7 @@ class RenderParagraph extends RenderBox
     final List<InlineSpanSemanticsInformation> combined = <InlineSpanSemanticsInformation>[];
     String workingText = '';
     String workingLabel;
-    for (InlineSpanSemanticsInformation info in _semanticsInfo) {
+    for (final InlineSpanSemanticsInformation info in _semanticsInfo) {
       if (info.requiresOwnNode) {
         if (workingText != null) {
           combined.add(InlineSpanSemanticsInformation(
@@ -823,7 +823,7 @@ class RenderParagraph extends RenderBox
       config.isSemanticBoundary = true;
     } else {
       final StringBuffer buffer = StringBuffer();
-      for (InlineSpanSemanticsInformation info in _semanticsInfo) {
+      for (final InlineSpanSemanticsInformation info in _semanticsInfo) {
         buffer.write(info.semanticsLabel ?? info.text);
       }
       config.label = buffer.toString();
@@ -841,7 +841,7 @@ class RenderParagraph extends RenderBox
     int start = 0;
     int placeholderIndex = 0;
     RenderBox child = firstChild;
-    for (InlineSpanSemanticsInformation info in _combineSemanticsInfo()) {
+    for (final InlineSpanSemanticsInformation info in _combineSemanticsInfo()) {
       final TextDirection initialDirection = currentDirection;
       final TextSelection selection = TextSelection(
         baseOffset: start,
@@ -853,7 +853,7 @@ class RenderParagraph extends RenderBox
       }
       Rect rect = rects.first.toRect();
       currentDirection = rects.first.direction;
-      for (ui.TextBox textBox in rects.skip(1)) {
+      for (final ui.TextBox textBox in rects.skip(1)) {
         rect = rect.expandToInclude(textBox.toRect());
         currentDirection = textBox.direction;
       }

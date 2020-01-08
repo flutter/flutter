@@ -68,7 +68,7 @@ void main() {
       const Locale('zh', 'ZH'): const <String>['period', 'hour', 'string :', 'minute'], //'ah:mm'
     };
 
-    for (Locale locale in locales.keys) {
+    for (final Locale locale in locales.keys) {
       final Offset center = await startPicker(tester, (TimeOfDay time) { }, locale: locale);
       final List<String> actual = <String>[];
       tester.element(find.byType(CustomMultiChildLayout)).visitChildren((Element child) {
@@ -114,7 +114,7 @@ void main() {
       Locale('en', 'GB'), // HH
       Locale('es', 'ES'), // H
     ];
-    for (Locale locale in locales) {
+    for (final Locale locale in locales) {
       // Tap along the segment stretching from the center to the edge at
       // 12:00 AM position. There are two rings. At ~70% mark, the ring
       // switches between inner ring and outer ring.

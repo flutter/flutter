@@ -52,7 +52,7 @@ void main() {
             final ButtonThemeData theme = ButtonTheme.of(context);
             textTheme = theme.textTheme;
             constraints = theme.constraints;
-            padding = theme.padding;
+            padding = theme.padding as EdgeInsets;
             shape = theme.shape;
             layoutBehavior = theme.layoutBehavior;
             colorScheme = theme.colorScheme;
@@ -143,7 +143,7 @@ void main() {
             final ButtonThemeData theme = ButtonTheme.of(context);
             textTheme = theme.textTheme;
             constraints = theme.constraints;
-            padding = theme.padding;
+            padding = theme.padding as EdgeInsets;
             shape = theme.shape;
             return Container(
               alignment: Alignment.topLeft,
@@ -195,7 +195,7 @@ void main() {
               final ButtonThemeData theme = ButtonTheme.of(context);
               textTheme = theme.textTheme;
               constraints = theme.constraints;
-              padding = theme.padding;
+              padding = theme.padding as EdgeInsets;
               shape = theme.shape;
               return Container(
                 alignment: Alignment.topLeft,

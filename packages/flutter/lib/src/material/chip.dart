@@ -63,7 +63,8 @@ const Icon _kDefaultDeleteIcon = Icon(Icons.cancel, size: _kDeleteIconSize);
 ///  * <https://material.io/design/components/chips.html>
 abstract class ChipAttributes {
   // This class is intended to be used as an interface, and should not be
-  // extended directly.
+  // extended directly; this constructor prevents instantiation and extension.
+  // ignore: unused_element
   factory ChipAttributes._() => null;
 
   /// The primary content of the chip.
@@ -174,7 +175,8 @@ abstract class ChipAttributes {
 ///  * <https://material.io/design/components/chips.html>
 abstract class DeletableChipAttributes {
   // This class is intended to be used as an interface, and should not be
-  // extended directly.
+  // extended directly; this constructor prevents instantiation and extension.
+  // ignore: unused_element
   factory DeletableChipAttributes._() => null;
 
   /// The icon displayed when [onDeleted] is set.
@@ -216,7 +218,7 @@ abstract class DeletableChipAttributes {
   ///   ];
   ///
   ///   Iterable<Widget> get actorWidgets sync* {
-  ///     for (Actor actor in _cast) {
+  ///     for (final Actor actor in _cast) {
   ///       yield Padding(
   ///         padding: const EdgeInsets.all(4.0),
   ///         child: Chip(
@@ -275,7 +277,8 @@ abstract class DeletableChipAttributes {
 ///  * <https://material.io/design/components/chips.html>
 abstract class CheckmarkableChipAttributes {
   // This class is intended to be used as an interface, and should not be
-  // extended directly.
+  // extended directly; this constructor prevents instantiation and extension.
+  // ignore: unused_element
   factory CheckmarkableChipAttributes._() => null;
 
   /// Whether or not to show a check mark when [selected] is true.
@@ -309,7 +312,8 @@ abstract class CheckmarkableChipAttributes {
 ///  * <https://material.io/design/components/chips.html>
 abstract class SelectableChipAttributes {
   // This class is intended to be used as an interface, and should not be
-  // extended directly.
+  // extended directly; this constructor prevents instantiation and extension.
+  // ignore: unused_element
   factory SelectableChipAttributes._() => null;
 
   /// Whether or not this chip is selected.
@@ -417,7 +421,8 @@ abstract class SelectableChipAttributes {
 ///  * <https://material.io/design/components/chips.html>
 abstract class DisabledChipAttributes {
   // This class is intended to be used as an interface, and should not be
-  // extended directly.
+  // extended directly; this constructor prevents instantiation and extension.
+  // ignore: unused_element
   factory DisabledChipAttributes._() => null;
 
   /// Whether or not this chip is enabled for input.
@@ -464,7 +469,8 @@ abstract class DisabledChipAttributes {
 ///  * <https://material.io/design/components/chips.html>
 abstract class TappableChipAttributes {
   // This class is intended to be used as an interface, and should not be
-  // extended directly.
+  // extended directly; this constructor prevents instantiation and extension.
+  // ignore: unused_element
   factory TappableChipAttributes._() => null;
 
   /// Called when the user taps the chip.
@@ -1056,7 +1062,7 @@ class ChoiceChip extends StatelessWidget
 ///   List<String> _filters = <String>[];
 ///
 ///   Iterable<Widget> get actorWidgets sync* {
-///     for (ActorFilterEntry actor in _cast) {
+///     for (final ActorFilterEntry actor in _cast) {
 ///       yield Padding(
 ///         padding: const EdgeInsets.all(4.0),
 ///         child: FilterChip(
@@ -2316,7 +2322,7 @@ class _RenderChip extends RenderBox {
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
-    for (RenderBox child in _children) {
+    for (final RenderBox child in _children) {
       child.attach(owner);
     }
   }
@@ -2324,7 +2330,7 @@ class _RenderChip extends RenderBox {
   @override
   void detach() {
     super.detach();
-    for (RenderBox child in _children) {
+    for (final RenderBox child in _children) {
       child.detach();
     }
   }

@@ -26,13 +26,27 @@
 /// increase the API surface that we have to test in Flutter tools, and the APIs
 /// in `dart:io` can sometimes be hard to use in tests.
 import 'dart:async';
-import 'dart:io' as io show exit, IOSink, Process, ProcessInfo, ProcessSignal,
-    stderr, stdin, Stdin, StdinException, Stdout, stdout;
+import 'dart:io' as io
+  show
+    exit,
+    InternetAddress,
+    InternetAddressType,
+    IOSink,
+    NetworkInterface,
+    Process,
+    ProcessInfo,
+    ProcessSignal,
+    stderr,
+    stdin,
+    Stdin,
+    StdinException,
+    Stdout,
+    stdout;
 
 import 'package:meta/meta.dart';
 
+import '../globals.dart' as globals;
 import 'context.dart';
-import 'platform.dart';
 import 'process.dart';
 
 export 'dart:io'
@@ -60,6 +74,7 @@ export 'dart:io'
         IOException,
         IOSink,
         // Link              NO! Use `file_system.dart`
+        // NetworkInterface  NO! Use `io.dart`
         pid,
         // Platform          NO! use `platform.dart`
         Process,
@@ -165,7 +180,7 @@ class ProcessSignal {
   ///
   /// This is implemented by sending the signal using [Process.killPid].
   bool send(int pid) {
-    assert(!platform.isWindows || this == ProcessSignal.SIGTERM);
+    assert(!globals.platform.isWindows || this == ProcessSignal.SIGTERM);
     return io.Process.killPid(pid, _delegate);
   }
 
@@ -182,7 +197,7 @@ class _PosixProcessSignal extends ProcessSignal {
 
   @override
   Stream<ProcessSignal> watch() {
-    if (platform.isWindows) {
+    if (globals.platform.isWindows) {
       return const Stream<ProcessSignal>.empty();
     }
     return super.watch();
@@ -258,4 +273,67 @@ class _DefaultProcessInfo implements ProcessInfo {
 
   @override
   int get maxRss => io.ProcessInfo.maxRss;
+}
+
+/// The return type for [listNetworkInterfaces].
+class NetworkInterface implements io.NetworkInterface {
+  NetworkInterface(this._delegate);
+
+  final io.NetworkInterface _delegate;
+
+  @override
+  List<io.InternetAddress> get addresses => _delegate.addresses;
+
+  @override
+  int get index => _delegate.index;
+
+  @override
+  String get name => _delegate.name;
+
+  @override
+  String toString() => "NetworkInterface('$name', $addresses)";
+}
+
+typedef NetworkInterfaceLister = Future<List<NetworkInterface>> Function({
+  bool includeLoopback,
+  bool includeLinkLocal,
+  io.InternetAddressType type,
+});
+
+NetworkInterfaceLister _networkInterfaceListerOverride;
+
+// Tests can set up a non-default network interface lister.
+@visibleForTesting
+void setNetworkInterfaceLister(NetworkInterfaceLister lister) {
+  _networkInterfaceListerOverride = lister;
+}
+
+@visibleForTesting
+void resetNetworkInterfaceLister() {
+  _networkInterfaceListerOverride = null;
+}
+
+/// This calls [NetworkInterface.list] from `dart:io` unless it is overridden by
+/// [setNetworkInterfaceLister] for a test. If it is overridden for a test,
+/// it should be reset with [resetNetworkInterfaceLister].
+Future<List<NetworkInterface>> listNetworkInterfaces({
+  bool includeLoopback = false,
+  bool includeLinkLocal = false,
+  io.InternetAddressType type = io.InternetAddressType.any,
+}) async {
+  if (_networkInterfaceListerOverride != null) {
+    return _networkInterfaceListerOverride(
+      includeLoopback: includeLoopback,
+      includeLinkLocal: includeLinkLocal,
+      type: type,
+    );
+  }
+  final List<io.NetworkInterface> interfaces = await io.NetworkInterface.list(
+    includeLoopback: includeLoopback,
+    includeLinkLocal: includeLinkLocal,
+    type: type,
+  );
+  return interfaces.map(
+    (io.NetworkInterface interface) => NetworkInterface(interface),
+  ).toList();
 }

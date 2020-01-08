@@ -62,7 +62,7 @@ void _tests() {
       .trim() + ',';
 
     File findThisTestFile(Directory directory) {
-      for (FileSystemEntity entity in directory.listSync()) {
+      for (final FileSystemEntity entity in directory.listSync()) {
         if (entity is Directory) {
           final File childSearch = findThisTestFile(entity);
           if (childSearch != null) {

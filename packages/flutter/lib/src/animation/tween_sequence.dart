@@ -57,7 +57,7 @@ class TweenSequence<T> extends Animatable<T> {
     _items.addAll(items);
 
     double totalWeight = 0.0;
-    for (TweenSequenceItem<T> item in _items)
+    for (final TweenSequenceItem<T> item in _items)
       totalWeight += item.weight;
     assert(totalWeight > 0.0);
 

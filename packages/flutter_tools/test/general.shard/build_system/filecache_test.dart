@@ -7,6 +7,7 @@ import 'dart:typed_data';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/file_hash_store.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
@@ -19,23 +20,23 @@ void main() {
 
   setUp(() {
     testbed = Testbed(setup: () {
-      fs.directory('build').createSync();
+      globals.fs.directory('build').createSync();
       environment = Environment(
-        outputDir: fs.currentDirectory,
-        projectDir: fs.currentDirectory,
+        outputDir: globals.fs.currentDirectory,
+        projectDir: globals.fs.currentDirectory,
       );
       environment.buildDir.createSync(recursive: true);
     });
   });
 
   test('Initializes file cache', () => testbed.run(() {
-    final FileHashStore fileCache = FileHashStore(environment, fs);
+    final FileHashStore fileCache = FileHashStore(environment, globals.fs);
     fileCache.initialize();
     fileCache.persist();
 
-    expect(fs.file(fs.path.join(environment.buildDir.path, '.filecache')).existsSync(), true);
+    expect(globals.fs.file(globals.fs.path.join(environment.buildDir.path, '.filecache')).existsSync(), true);
 
-    final Uint8List buffer = fs.file(fs.path.join(environment.buildDir.path, '.filecache'))
+    final Uint8List buffer = globals.fs.file(globals.fs.path.join(environment.buildDir.path, '.filecache'))
         .readAsBytesSync();
     final FileStorage fileStorage = FileStorage.fromBuffer(buffer);
 
@@ -44,15 +45,15 @@ void main() {
   }));
 
   test('saves and restores to file cache', () => testbed.run(() async {
-    final File file = fs.file('foo.dart')
+    final File file = globals.fs.file('foo.dart')
       ..createSync()
       ..writeAsStringSync('hello');
-    final FileHashStore fileCache = FileHashStore(environment, fs);
+    final FileHashStore fileCache = FileHashStore(environment, globals.fs);
     fileCache.initialize();
     await fileCache.hashFiles(<File>[file]);
     fileCache.persist();
     final String currentHash =  fileCache.currentHashes[file.path];
-    final Uint8List buffer = fs.file(fs.path.join(environment.buildDir.path, '.filecache'))
+    final Uint8List buffer = globals.fs.file(globals.fs.path.join(environment.buildDir.path, '.filecache'))
         .readAsBytesSync();
     FileStorage fileStorage = FileStorage.fromBuffer(buffer);
 
@@ -60,7 +61,7 @@ void main() {
     expect(fileStorage.files.single.path, file.path);
 
 
-    final FileHashStore newFileCache = FileHashStore(environment, fs);
+    final FileHashStore newFileCache = FileHashStore(environment, globals.fs);
     newFileCache.initialize();
     expect(newFileCache.currentHashes, isEmpty);
     expect(newFileCache.previousHashes['foo.dart'],  currentHash);
@@ -74,10 +75,10 @@ void main() {
   }));
 
   test('handles persisting with a missing build directory', () => testbed.run(() async {
-    final File file = fs.file('foo.dart')
+    final File file = globals.fs.file('foo.dart')
       ..createSync()
       ..writeAsStringSync('hello');
-    final FileHashStore fileCache = FileHashStore(environment, fs);
+    final FileHashStore fileCache = FileHashStore(environment, globals.fs);
     fileCache.initialize();
     environment.buildDir.deleteSync(recursive: true);
 
@@ -87,18 +88,18 @@ void main() {
   }));
 
   test('handles hashing missing files', () => testbed.run(() async {
-    final FileHashStore fileCache = FileHashStore(environment, fs);
+    final FileHashStore fileCache = FileHashStore(environment, globals.fs);
     fileCache.initialize();
 
-    final List<File> results = await fileCache.hashFiles(<File>[fs.file('hello.dart')]);
+    final List<File> results = await fileCache.hashFiles(<File>[globals.fs.file('hello.dart')]);
 
     expect(results, hasLength(1));
     expect(results.single.path, 'hello.dart');
-    expect(fileCache.currentHashes, isNot(contains(fs.path.absolute('hello.dart'))));
+    expect(fileCache.currentHashes, isNot(contains(globals.fs.path.absolute('hello.dart'))));
   }));
 
   test('handles failure to persist file cache', () => testbed.run(() async {
-    final FakeForwardingFileSystem fakeForwardingFileSystem = FakeForwardingFileSystem(fs);
+    final FakeForwardingFileSystem fakeForwardingFileSystem = FakeForwardingFileSystem(globals.fs);
     final FileHashStore fileCache = FileHashStore(environment, fakeForwardingFileSystem);
     final String cacheFile = environment.buildDir.childFile('.filecache').path;
     final MockFile mockFile = MockFile();
@@ -113,7 +114,7 @@ void main() {
   }));
 
   test('handles failure to restore file cache', () => testbed.run(() async {
-    final FakeForwardingFileSystem fakeForwardingFileSystem = FakeForwardingFileSystem(fs);
+    final FakeForwardingFileSystem fakeForwardingFileSystem = FakeForwardingFileSystem(globals.fs);
     final FileHashStore fileCache = FileHashStore(environment, fakeForwardingFileSystem);
     final String cacheFile = environment.buildDir.childFile('.filecache').path;
     final MockFile mockFile = MockFile();

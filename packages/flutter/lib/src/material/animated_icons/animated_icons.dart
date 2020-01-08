@@ -162,7 +162,7 @@ class _AnimatedIconPainter extends CustomPainter {
     }
 
     final double clampedProgress = progress.value.clamp(0.0, 1.0) as double;
-    for (_PathFrames path in paths)
+    for (final _PathFrames path in paths)
       path.paint(canvas, color, uiPathFactory, clampedProgress);
   }
 
@@ -203,7 +203,7 @@ class _PathFrames {
       ..style = PaintingStyle.fill
       ..color = color.withOpacity(color.opacity * opacity);
     final ui.Path path = uiPathFactory();
-    for (_PathCommand command in commands)
+    for (final _PathCommand command in commands)
       command.apply(path, progress);
     canvas.drawPath(path, paint);
   }

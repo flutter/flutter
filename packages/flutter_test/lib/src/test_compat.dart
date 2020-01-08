@@ -54,7 +54,7 @@ Future<void> _runGroup(Suite suiteConfig, Group group, List<Group> parents, _Rep
       setUpAllSucceeded = liveTest.state.result.isPassing;
     }
     if (setUpAllSucceeded) {
-      for (GroupEntry entry in group.entries) {
+      for (final GroupEntry entry in group.entries) {
         if (entry is Group) {
           await _runGroup(suiteConfig, entry, parents, reporter);
         } else if (entry.metadata.skip) {
@@ -502,7 +502,7 @@ String _prefixLines(String text, String prefix, { String first, String last, Str
   }
   final StringBuffer buffer = StringBuffer('$first${lines.first}\n');
   // Write out all but the first and last lines with [prefix].
-  for (String line in lines.skip(1).take(lines.length - 2)) {
+  for (final String line in lines.skip(1).take(lines.length - 2)) {
     buffer.writeln('$prefix$line');
   }
   buffer.write('$last${lines.last}');

@@ -5,10 +5,9 @@
 import 'dart:async';
 
 import '../convert.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
 import 'context.dart';
 import 'io.dart' as io;
-import 'platform.dart';
 
 enum TerminalColor {
   red,
@@ -20,21 +19,15 @@ enum TerminalColor {
   grey,
 }
 
-AnsiTerminal get terminal {
-  return context?.get<AnsiTerminal>() ?? _defaultAnsiTerminal;
-}
-
 /// Warning mark to use in stdout or stderr.
 String get warningMark {
-  return terminal.bolden(terminal.color('[!]', TerminalColor.red));
+  return globals.terminal.bolden(globals.terminal.color('[!]', TerminalColor.red));
 }
 
 /// Success mark to use in stdout.
 String get successMark {
-  return terminal.bolden(terminal.color('✓', TerminalColor.green));
+  return globals.terminal.bolden(globals.terminal.color('✓', TerminalColor.green));
 }
-
-final AnsiTerminal _defaultAnsiTerminal = AnsiTerminal();
 
 OutputPreferences get outputPreferences {
   return context?.get<OutputPreferences>() ?? _defaultOutputPreferences;
@@ -50,7 +43,7 @@ class OutputPreferences {
     bool showColor,
   }) : wrapText = wrapText ?? io.stdio.hasTerminal,
        _overrideWrapColumn = wrapColumn,
-       showColor = showColor ?? platform.stdoutSupportsAnsi ?? false;
+       showColor = showColor ?? globals.platform.stdoutSupportsAnsi ?? false;
 
   /// A version of this class for use in tests.
   OutputPreferences.test() : wrapText = false, _overrideWrapColumn = null, showColor = false;
@@ -114,7 +107,7 @@ class AnsiTerminal {
 
   static String colorCode(TerminalColor color) => _colorMap[color];
 
-  bool get supportsColor => platform.stdoutSupportsAnsi ?? false;
+  bool get supportsColor => globals.platform.stdoutSupportsAnsi ?? false;
   final RegExp _boldControls = RegExp('(${RegExp.escape(resetBold)}|${RegExp.escape(bold)})');
 
   /// Whether we are interacting with the flutter tool via the terminal.
@@ -227,14 +220,14 @@ class AnsiTerminal {
     singleCharMode = true;
     while (choice == null || choice.length > 1 || !acceptedCharacters.contains(choice)) {
       if (prompt != null) {
-        printStatus(prompt, emphasis: true, newline: false);
+        globals.printStatus(prompt, emphasis: true, newline: false);
         if (displayAcceptedCharacters) {
-          printStatus(' [${charactersToDisplay.join("|")}]', newline: false);
+          globals.printStatus(' [${charactersToDisplay.join("|")}]', newline: false);
         }
-        printStatus(': ', emphasis: true, newline: false);
+        globals.printStatus(': ', emphasis: true, newline: false);
       }
       choice = await keystrokes.first;
-      printStatus(choice);
+      globals.printStatus(choice);
     }
     singleCharMode = false;
     if (defaultChoiceIndex != null && choice == '\n') {

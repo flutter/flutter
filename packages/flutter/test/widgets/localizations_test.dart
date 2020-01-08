@@ -26,7 +26,7 @@ void main() {
 
     Locale locale;
     binding.onAllowFrame = () {
-      locale = state.locale;
+      locale = state.locale as Locale;
     };
     delegate.completer.complete('foo');
     await tester.idle();

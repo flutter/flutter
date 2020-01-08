@@ -215,7 +215,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
         children.add(child);
         return true;
       });
-      for (SemanticsNode child in children) {
+      for (final SemanticsNode child in children) {
         result += await evaluateNode(child);
       }
       if (_shouldSkipNode(data)) {
@@ -348,7 +348,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
 class _ContrastReport {
   factory _ContrastReport(List<int> colors) {
     final Map<int, int> colorHistogram = <int, int>{};
-    for (int color in colors) {
+    for (final int color in colors) {
       colorHistogram[color] = (colorHistogram[color] ?? 0) + 1;
     }
     if (colorHistogram.length == 1) {
@@ -358,7 +358,7 @@ class _ContrastReport {
     // to determine the lighter and darker color, partition the colors
     // by lightness and then choose the mode from each group.
     double averageLightness = 0.0;
-    for (int color in colorHistogram.keys) {
+    for (final int color in colorHistogram.keys) {
       final HSLColor hslColor = HSLColor.fromColor(Color(color));
       averageLightness += hslColor.lightness * colorHistogram[color];
     }
@@ -369,7 +369,7 @@ class _ContrastReport {
     int lightCount = 0;
     int darkCount = 0;
     // Find the most frequently occurring light and dark color.
-    for (MapEntry<int, int> entry in colorHistogram.entries) {
+    for (final MapEntry<int, int> entry in colorHistogram.entries) {
       final HSLColor color = HSLColor.fromColor(Color(entry.key));
       final int count = entry.value;
       if (color.lightness <= averageLightness && count > darkCount) {

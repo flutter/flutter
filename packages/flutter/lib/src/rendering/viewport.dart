@@ -30,8 +30,9 @@ enum CacheExtentStyle {
 /// the framework recognize such render objects and interact with them without
 /// having specific knowledge of all the various types of viewports.
 abstract class RenderAbstractViewport extends RenderObject {
-  // This class is intended to be used as an interface with the implements
-  // keyword, and should not be extended directly.
+  // This class is intended to be used as an interface, and should not be
+  // extended directly; this constructor prevents instantiation and extension.
+  // ignore: unused_element
   factory RenderAbstractViewport._() => null;
 
   /// Returns the [RenderAbstractViewport] that most tightly encloses the given
@@ -581,7 +582,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
   }
 
   void _paintContents(PaintingContext context, Offset offset) {
-    for (RenderSliver child in childrenInPaintOrder) {
+    for (final RenderSliver child in childrenInPaintOrder) {
       if (child.geometry.visible)
         context.paintChild(child, offset + paintOffsetOf(child));
     }
@@ -631,7 +632,7 @@ abstract class RenderViewportBase<ParentDataClass extends ContainerParentDataMix
     assert(mainAxisPosition != null);
     assert(crossAxisPosition != null);
     final SliverHitTestResult sliverResult = SliverHitTestResult.wrap(result);
-    for (RenderSliver child in childrenInHitTestOrder) {
+    for (final RenderSliver child in childrenInHitTestOrder) {
       if (!child.geometry.visible) {
         continue;
       }

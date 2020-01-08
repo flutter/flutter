@@ -301,12 +301,12 @@ void _tests() {
 
     final CustomPaint dialPaint = tester.widget(findDialPaint);
     final dynamic dialPainter = dialPaint.painter;
-    final List<dynamic> primaryOuterLabels = dialPainter.primaryOuterLabels;
-    expect(primaryOuterLabels.map<String>((dynamic tp) => tp.painter.text.text), labels12To11);
+    final List<dynamic> primaryOuterLabels = dialPainter.primaryOuterLabels as List<dynamic>;
+    expect(primaryOuterLabels.map<String>((dynamic tp) => tp.painter.text.text as String), labels12To11);
     expect(dialPainter.primaryInnerLabels, null);
 
-    final List<dynamic> secondaryOuterLabels = dialPainter.secondaryOuterLabels;
-    expect(secondaryOuterLabels.map<String>((dynamic tp) => tp.painter.text.text), labels12To11);
+    final List<dynamic> secondaryOuterLabels = dialPainter.secondaryOuterLabels as List<dynamic>;
+    expect(secondaryOuterLabels.map<String>((dynamic tp) => tp.painter.text.text as String), labels12To11);
     expect(dialPainter.secondaryInnerLabels, null);
   });
 
@@ -315,15 +315,15 @@ void _tests() {
 
     final CustomPaint dialPaint = tester.widget(findDialPaint);
     final dynamic dialPainter = dialPaint.painter;
-    final List<dynamic> primaryOuterLabels = dialPainter.primaryOuterLabels;
-    expect(primaryOuterLabels.map<String>((dynamic tp) => tp.painter.text.text), labels00To23);
-    final List<dynamic> primaryInnerLabels = dialPainter.primaryInnerLabels;
-    expect(primaryInnerLabels.map<String>((dynamic tp) => tp.painter.text.text), labels12To11TwoDigit);
+    final List<dynamic> primaryOuterLabels = dialPainter.primaryOuterLabels as List<dynamic>;
+    expect(primaryOuterLabels.map<String>((dynamic tp) => tp.painter.text.text as String), labels00To23);
+    final List<dynamic> primaryInnerLabels = dialPainter.primaryInnerLabels as List<dynamic>;
+    expect(primaryInnerLabels.map<String>((dynamic tp) => tp.painter.text.text as String), labels12To11TwoDigit);
 
-    final List<dynamic> secondaryOuterLabels = dialPainter.secondaryOuterLabels;
-    expect(secondaryOuterLabels.map<String>((dynamic tp) => tp.painter.text.text), labels00To23);
-    final List<dynamic> secondaryInnerLabels = dialPainter.secondaryInnerLabels;
-    expect(secondaryInnerLabels.map<String>((dynamic tp) => tp.painter.text.text), labels12To11TwoDigit);
+    final List<dynamic> secondaryOuterLabels = dialPainter.secondaryOuterLabels as List<dynamic>;
+    expect(secondaryOuterLabels.map<String>((dynamic tp) => tp.painter.text.text as String), labels00To23);
+    final List<dynamic> secondaryInnerLabels = dialPainter.secondaryInnerLabels as List<dynamic>;
+    expect(secondaryInnerLabels.map<String>((dynamic tp) => tp.painter.text.text as String), labels12To11TwoDigit);
   });
 
   testWidgets('provides semantics information for AM/PM indicator', (WidgetTester tester) async {
@@ -727,14 +727,14 @@ class _CustomPainterSemanticsTester {
         return recordedInvocation.invocation.memberName == #drawParagraph;
       })
       .map<ui.Paragraph>((RecordedInvocation recordedInvocation) {
-        return recordedInvocation.invocation.positionalArguments.first;
+        return recordedInvocation.invocation.positionalArguments.first as ui.Paragraph;
       })
       .toList();
 
     final PaintPattern expectedLabels = paints;
     int i = 0;
 
-    for (_SemanticsNodeExpectation expectation in expectedNodes) {
+    for (final _SemanticsNodeExpectation expectation in expectedNodes) {
       expect(semantics, includesNodeWith(value: expectation.label));
       final Iterable<SemanticsNode> dialLabelNodes = semantics
           .nodesWith(value: expectation.label)

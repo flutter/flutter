@@ -990,7 +990,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
 
   @override
   void dispose() {
-    for (GestureRecognizer recognizer in _recognizers.values)
+    for (final GestureRecognizer recognizer in _recognizers.values)
       recognizer.dispose();
     _recognizers = null;
     super.dispose();
@@ -1000,7 +1000,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
     assert(_recognizers != null);
     final Map<Type, GestureRecognizer> oldRecognizers = _recognizers;
     _recognizers = <Type, GestureRecognizer>{};
-    for (Type type in gestures.keys) {
+    for (final Type type in gestures.keys) {
       assert(gestures[type] != null);
       assert(gestures[type]._debugAssertTypeMatches(type));
       assert(!_recognizers.containsKey(type));
@@ -1008,7 +1008,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
       assert(_recognizers[type].runtimeType == type, 'GestureRecognizerFactory of type $type created a GestureRecognizer of type ${_recognizers[type].runtimeType}. The GestureRecognizerFactory must be specialized with the type of the class that it returns from its constructor method.');
       gestures[type].initializer(_recognizers[type]);
     }
-    for (Type type in oldRecognizers.keys) {
+    for (final Type type in oldRecognizers.keys) {
       if (!_recognizers.containsKey(type))
         oldRecognizers[type].dispose();
     }
@@ -1016,7 +1016,7 @@ class RawGestureDetectorState extends State<RawGestureDetector> {
 
   void _handlePointerDown(PointerDownEvent event) {
     assert(_recognizers != null);
-    for (GestureRecognizer recognizer in _recognizers.values)
+    for (final GestureRecognizer recognizer in _recognizers.values)
       recognizer.addPointer(event);
   }
 

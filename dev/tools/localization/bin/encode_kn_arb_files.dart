@@ -18,7 +18,7 @@
 // Run this program from the root of the git repository.
 //
 // ```
-// dart dev/tools/localization/encode_kn_arb_files.dart
+// dart dev/tools/localization/bin/encode_kn_arb_files.dart
 // ```
 
 import 'dart:async';
@@ -27,7 +27,7 @@ import 'dart:io';
 
 import 'package:path/path.dart' as path;
 
-import 'localizations_utils.dart';
+import '../localizations_utils.dart';
 
 Map<String, dynamic> loadBundle(File file) {
   if (!FileSystemEntity.isFileSync(file.path))
@@ -36,7 +36,7 @@ Map<String, dynamic> loadBundle(File file) {
 }
 
 void encodeBundleTranslations(Map<String, dynamic> bundle) {
-  for (String key in bundle.keys) {
+  for (final String key in bundle.keys) {
     // The ARB file resource "attributes" for foo are called @foo. Don't need
     // to encode them.
     if (key.startsWith('@'))
@@ -54,7 +54,7 @@ void encodeBundleTranslations(Map<String, dynamic> bundle) {
 void checkEncodedTranslations(Map<String, dynamic> encodedBundle, Map<String, dynamic> bundle) {
   bool errorFound = false;
   const JsonDecoder decoder = JsonDecoder();
-  for (String key in bundle.keys) {
+  for (final String key in bundle.keys) {
     if (decoder.convert('"${encodedBundle[key]}"') != bundle[key]) {
       stderr.writeln('  encodedTranslation for $key does not match original value "${bundle[key]}"');
       errorFound = true;
@@ -67,7 +67,7 @@ void checkEncodedTranslations(Map<String, dynamic> encodedBundle, Map<String, dy
 void rewriteBundle(File file, Map<String, dynamic> bundle) {
   final StringBuffer contents = StringBuffer();
   contents.writeln('{');
-  for (String key in bundle.keys) {
+  for (final String key in bundle.keys) {
     contents.writeln('  "$key": "${bundle[key]}"${key == bundle.keys.last ? '' : ','}');
   }
   contents.writeln('}');
