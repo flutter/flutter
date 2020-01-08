@@ -247,11 +247,10 @@ class Stdio {
   bool get supportsAnsiEscapes => hasTerminal && io.stdout.supportsAnsiEscapes;
 }
 
-Stdio get stdio => context.get<Stdio>() ?? const Stdio();
-io.Stdout get stdout => stdio.stdout;
-Stream<List<int>> get stdin => stdio.stdin;
-io.IOSink get stderr => stdio.stderr;
-bool get stdinHasTerminal => stdio.stdinHasTerminal;
+io.Stdout get stdout => globals.stdio.stdout;
+Stream<List<int>> get stdin => globals.stdio.stdin;
+io.IOSink get stderr => globals.stdio.stderr;
+bool get stdinHasTerminal => globals.stdio.stdinHasTerminal;
 
 /// An overridable version of io.ProcessInfo.
 abstract class ProcessInfo {

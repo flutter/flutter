@@ -699,7 +699,7 @@ class StreamLogger extends Logger {
     int progressIndicatorPadding = kDefaultStatusPadding,
   }) {
     _log('[progress] $message');
-    return SilentStatus(timeout: timeout)..start();
+    return SilentStatus(timeout: timeout, timeoutConfiguration: timeoutConfiguration)..start();
   }
 
   bool _interrupt = false;
@@ -722,6 +722,12 @@ class StreamLogger extends Logger {
 
   @override
   void sendEvent(String name, [Map<String, dynamic> args]) { }
+
+  @override
+  bool get supportsColor => throw UnimplementedError();
+
+  @override
+  bool get hasTerminal => false;
 }
 
 class LoggerInterrupted implements Exception {
