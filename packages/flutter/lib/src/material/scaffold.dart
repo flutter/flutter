@@ -314,7 +314,7 @@ class _BodyBoxConstraints extends BoxConstraints {
   // If the height of the bottom widgets has changed, even though the constraints'
   // min and max values have not, we still want performLayout to happen.
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (super != other)
       return false;
     return other is _BodyBoxConstraints

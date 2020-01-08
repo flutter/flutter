@@ -167,7 +167,7 @@ class LogicalKeyboardKey extends KeyboardKey {
   int get hashCode => keyId.hashCode;
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }
@@ -2069,7 +2069,7 @@ class PhysicalKeyboardKey extends KeyboardKey {
   int get hashCode => usbHidUsage.hashCode;
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other.runtimeType != runtimeType) {
       return false;
     }

@@ -73,7 +73,7 @@ class ObjectKey extends LocalKey {
   final Object value;
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
     return other is ObjectKey
@@ -325,7 +325,7 @@ class GlobalObjectKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
   final Object value;
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
     return other is GlobalObjectKey<T>
@@ -453,7 +453,7 @@ abstract class Widget extends DiagnosticableTree {
 
   @override
   @nonVirtual
-  bool operator ==(dynamic other) => super==other;
+  bool operator ==(Object other) => super == other;
 
   @override
   @nonVirtual

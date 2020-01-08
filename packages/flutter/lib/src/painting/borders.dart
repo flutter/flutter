@@ -252,10 +252,10 @@ class BorderSide {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
-    if (runtimeType != other.runtimeType)
+    if (other.runtimeType != runtimeType)
       return false;
     return other is BorderSide
         && other.color == color
@@ -610,10 +610,10 @@ class _CompoundBorder extends ShapeBorder {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
-    if (runtimeType != other.runtimeType)
+    if (other.runtimeType != runtimeType)
       return false;
     return other is _CompoundBorder
         && listEquals<ShapeBorder>(other.borders, borders);

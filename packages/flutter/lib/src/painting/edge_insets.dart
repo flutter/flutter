@@ -279,7 +279,7 @@ abstract class EdgeInsetsGeometry {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     return other is EdgeInsetsGeometry
         && other._left == _left
         && other._right == _right

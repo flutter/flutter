@@ -126,7 +126,7 @@ class CustomSemanticsAction {
   int get hashCode => ui.hashValues(label, hint, action);
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
     return other is CustomSemanticsAction
@@ -421,7 +421,7 @@ class SemanticsData extends Diagnosticable {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     return other is SemanticsData
         && other.flags == flags
         && other.actions == actions
@@ -559,7 +559,7 @@ class SemanticsHintOverrides extends DiagnosticableTree {
   int get hashCode => ui.hashValues(onTapHint, onLongPressHint);
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
     return other is SemanticsHintOverrides

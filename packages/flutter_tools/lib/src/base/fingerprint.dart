@@ -140,7 +140,7 @@ class Fingerprint {
   });
 
   @override
-  bool operator==(dynamic other) {
+  bool operator==(Object other) {
     if (identical(other, this)) {
       return true;
     }

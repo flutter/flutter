@@ -366,7 +366,7 @@ class _DropdownRouteResult<T> {
   final T result;
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     return other is _DropdownRouteResult<T>
         && other.result == result;
   }

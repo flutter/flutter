@@ -110,8 +110,8 @@ class StadiumBorder extends ShapeBorder {
   }
 
   @override
-  bool operator ==(dynamic other) {
-    if (runtimeType != other.runtimeType)
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType)
       return false;
     return other is StadiumBorder
         && other.side == side;
@@ -257,8 +257,8 @@ class _StadiumToCircleBorder extends ShapeBorder {
   }
 
   @override
-  bool operator ==(dynamic other) {
-    if (runtimeType != other.runtimeType)
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType)
       return false;
     return other is _StadiumToCircleBorder
         && other.side == side
@@ -399,8 +399,8 @@ class _StadiumToRoundedRectangleBorder extends ShapeBorder {
   }
 
   @override
-  bool operator ==(dynamic other) {
-    if (runtimeType != other.runtimeType)
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType)
       return false;
     return other is _StadiumToRoundedRectangleBorder
         && other.side == side
