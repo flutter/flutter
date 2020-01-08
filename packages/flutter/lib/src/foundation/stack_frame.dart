@@ -10,13 +10,12 @@ import 'package:meta/meta.dart';
 ///
 /// {@tool sample}
 ///
-/// For example, a caller that wishes to traverse the stack could use
+/// This example creates a traversable list of parsed [StackFrame] objects from
+/// the current [StackTrace].
 ///
 /// ```dart
 /// final List<StackFrame> currentFrames = StackFrame.fromStackTrace(StackTrace.current);
 /// ```
-///
-/// To create a traversable parsed stack.
 /// {@end-tool}
 @immutable
 class StackFrame {
@@ -24,8 +23,8 @@ class StackFrame {
   ///
   /// All parameters must not be null. The [className] may be the empty string
   /// if there is no class (e.g. for a top level library method).
-  const StackFrame(
-    this.number, {
+  const StackFrame({
+    @required this.number,
     @required this.column,
     @required this.line,
     @required this.packageScheme,
@@ -46,7 +45,7 @@ class StackFrame {
 
   /// A stack frame representing an asynchronous suspension.
   static const StackFrame asynchronousSuspension = StackFrame(
-    -1,
+    number: -1,
     column: -1,
     line: -1,
     method: 'asynchronous suspension',
@@ -81,7 +80,7 @@ class StackFrame {
     final Uri packageUri = Uri.parse(match.group(1));
 
     return StackFrame(
-      -1,
+      number: -1,
       packageScheme: 'package',
       package: packageUri.pathSegments[0],
       packagePath: packageUri.path.replaceFirst(packageUri.pathSegments[0] + '/', ''),
@@ -135,7 +134,7 @@ class StackFrame {
     }
 
     return StackFrame(
-      int.parse(match.group(1)),
+      number: int.parse(match.group(1)),
       className: className,
       method: method,
       packageScheme: packageUri.scheme,
@@ -148,6 +147,8 @@ class StackFrame {
   }
 
   /// The zero-indexed frame number.
+  ///
+  /// This value may be -1 to indicate an unknown frame number.
   final int number;
 
   /// The scheme of the package for this frame, e.g. "dart" for
