@@ -309,7 +309,7 @@ class RecordingCanvas {
     }
     _paintBounds.grow(pathBounds);
     // Clone path so it can be reused for subsequent draw calls.
-    final ui.Path clone = ui.Path.from(path);
+    final ui.Path clone = SurfacePath._shallowCopy(path);
     clone.fillType = path.fillType;
     _commands.add(PaintDrawPath(clone, paint.paintData));
   }

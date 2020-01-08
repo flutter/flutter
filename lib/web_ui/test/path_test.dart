@@ -238,4 +238,18 @@ void main() {
             distance: 0.1,
             from: const Rect.fromLTRB(220.0, 124.1, 382.9, 300.0)));
   });
+
+  // Regression test for https://github.com/flutter/flutter/issues/46813.
+  test('Should deep copy path', () {
+    final SurfacePath path = SurfacePath();
+    path.moveTo(25, 30);
+    path.lineTo(100, 200);
+    expect(path.getBounds(), const Rect.fromLTRB(25, 30, 100, 200));
+
+    final SurfacePath path2 = SurfacePath.from(path);
+    path2.lineTo(250, 300);
+    expect(path2.getBounds(), const Rect.fromLTRB(25, 30, 250, 300));
+    // Expect original path to stay the same.
+    expect(path.getBounds(), const Rect.fromLTRB(25, 30, 100, 200));
+  });
 }
