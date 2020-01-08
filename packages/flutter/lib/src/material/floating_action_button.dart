@@ -424,7 +424,7 @@ class FloatingActionButton extends StatelessWidget {
     final FloatingActionButtonThemeData floatingActionButtonTheme = theme.floatingActionButtonTheme;
 
     // Applications should no longer use accentIconTheme's color to configure
-    // the configure of floating action buttons. For more information, see
+    // the foreground color of floating action buttons. For more information, see
     // flutter.dev/go/remove-fab-accent-theme-dependency.
     if (this.foregroundColor == null && floatingActionButtonTheme.foregroundColor == null) {
       final bool accentIsDark = theme.accentColorBrightness == Brightness.dark;
