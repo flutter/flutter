@@ -171,7 +171,7 @@ void main() {
       ),
     );
 
-    final RenderSliver boxWithPadding = tester.renderObject<RenderSliver>(find.byType(SliverFillViewport).first);
+    final RenderSliver boxWithPadding = tester.renderObject<RenderSliver>(find.byType(SliverFillViewport));
     expect(boxWithPadding.geometry.paintExtent, equals(600.0));
 
     await tester.pumpWidget(
@@ -189,7 +189,7 @@ void main() {
       ),
     );
 
-    final RenderSliver boxWithoutPadding = tester.renderObject<RenderSliver>(find.byType(SliverFillViewport).first);
+    final RenderSliver boxWithoutPadding = tester.renderObject<RenderSliver>(find.byType(SliverFillViewport));
     expect(boxWithoutPadding.geometry.paintExtent, equals(300.0));
   });
 }
