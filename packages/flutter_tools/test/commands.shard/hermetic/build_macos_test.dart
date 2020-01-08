@@ -67,12 +67,17 @@ void main() {
     when(notMacosPlatform.isWindows).thenReturn(false);
   });
 
-  // Sets up the minimal mock project files necessary for macOS builds to succeed.
-  void createMinimalMockProjectFiles() {
-    globals.fs.directory('macos').createSync();
+  // Sets up the minimal mock project files necessary to look like a Flutter project.
+  void createCoreMockProjectFiles() {
     globals.fs.file('pubspec.yaml').createSync();
     globals.fs.file('.packages').createSync();
     globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+  }
+
+  // Sets up the minimal mock project files necessary for macOS builds to succeed.
+  void createMinimalMockProjectFiles() {
+    globals.fs.directory(globals.fs.path.join('macos', 'Runner.xcworkspace')).createSync(recursive: true);
+    createCoreMockProjectFiles();
   }
 
   // Mocks the process manager to handle an xcodebuild call to build the app
@@ -102,11 +107,14 @@ void main() {
   testUsingContext('macOS build fails when there is no macos project', () async {
     final BuildCommand command = BuildCommand();
     applyMocksToCommand(command);
+    createCoreMockProjectFiles();
     expect(createTestCommandRunner(command).run(
       const <String>['build', 'macos']
-    ), throwsA(isInstanceOf<ToolExit>()));
+    ), throwsToolExit(message: 'No macOS desktop project configured'));
   }, overrides: <Type, Generator>{
     Platform: () => macosPlatform,
+    FileSystem: () => MemoryFileSystem(),
+    ProcessManager: () => FakeProcessManager.any(),
     FeatureFlags: () => TestFeatureFlags(isMacOSEnabled: true),
   });
 

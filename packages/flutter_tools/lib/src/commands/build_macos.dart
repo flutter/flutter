@@ -46,9 +46,6 @@ class BuildMacosCommand extends BuildSubCommand {
     if (!globals.platform.isMacOS) {
       throwToolExit('"build macos" only supported on macOS hosts.');
     }
-    if (!flutterProject.macos.existsSync()) {
-      throwToolExit('No macOS desktop project configured.');
-    }
     await buildMacOS(
       flutterProject: flutterProject,
       buildInfo: buildInfo,
