@@ -107,6 +107,11 @@ class FontCollection : public std::enable_shared_from_this<FontCollection> {
       fallback_fonts_for_locale_;
   bool enable_font_fallback_;
 
+#if FLUTTER_ENABLE_SKSHAPER
+  // An equivalent font collection usable by the Skia text shaper library.
+  sk_sp<skia::textlayout::FontCollection> skt_collection_;
+#endif
+
   // Performs the actual work of MatchFallbackFont. The result is cached in
   // fallback_match_cache_.
   const std::shared_ptr<minikin::FontFamily>& DoMatchFallbackFont(
