@@ -58,6 +58,9 @@ class MaterialPageRoute<T> extends PageRoute<T> {
   final bool maintainState;
 
   @override
+  Duration get transitionDuration => const Duration(milliseconds: 300);
+
+  @override
   Color get barrierColor => null;
 
   @override
