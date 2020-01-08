@@ -191,6 +191,13 @@ struct Settings {
   // the buffer must be as small as possible.
   std::shared_ptr<const fml::Mapping> persistent_isolate_data;
 
+  /// Max size of old gen heap size in MB, or 0 for unlimited, -1 for default
+  /// value.
+  ///
+  /// See also:
+  /// https://github.com/dart-lang/sdk/blob/ca64509108b3e7219c50d6c52877c85ab6a35ff2/runtime/vm/flag_list.h#L150
+  int64_t old_gen_heap_size = -1;
+
   std::string ToString() const;
 };
 
