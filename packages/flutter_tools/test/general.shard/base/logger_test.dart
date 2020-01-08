@@ -6,7 +6,6 @@ import 'dart:convert' show jsonEncode;
 
 import 'package:platform/platform.dart';
 import 'package:flutter_tools/src/base/context.dart';
-import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
@@ -16,7 +15,7 @@ import '../../src/common.dart';
 import '../../src/context.dart';
 import '../../src/mocks.dart';
 
-final Generator _kNoAnsiPlatform = () => FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false;
+final Platform _kNoAnsiPlatform = FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false;
 
 void main() {
   final String red = RegExp.escape(AnsiTerminal.red);
@@ -30,9 +29,15 @@ void main() {
     setUp(() {
       fakeStopWatch = FakeStopwatch();
     });
-    testUsingContext('error', () async {
-      final BufferLogger mockLogger = BufferLogger();
-      final VerboseLogger verboseLogger = VerboseLogger(mockLogger);
+    testWithoutContext('error', () async {
+      final BufferLogger mockLogger = BufferLogger(
+        terminal: AnsiTerminal(
+          stdio: MockStdio(),
+          platform: _kNoAnsiPlatform,
+        ),
+        outputPreferences: OutputPreferences.test(showColor: false),
+      );
+      final VerboseLogger verboseLogger = VerboseLogger(mockLogger, stopwatch: fakeStopWatch);
 
       verboseLogger.printStatus('Hey Hey Hey Hey');
       verboseLogger.printTrace('Oooh, I do I do I do');
@@ -42,15 +47,17 @@ void main() {
                                              r'\[ (?: {0,2}\+[0-9]{1,4} ms|       )\] Oooh, I do I do I do\n$'));
       expect(mockLogger.traceText, '');
       expect(mockLogger.errorText, matches( r'^\[ (?: {0,2}\+[0-9]{1,4} ms|       )\] Helpless!\n$'));
-    }, overrides: <Type, Generator>{
-      OutputPreferences: () => OutputPreferences(showColor: false),
-      Platform: _kNoAnsiPlatform,
-      Stopwatch: () => fakeStopWatch,
     });
 
-    testUsingContext('ANSI colored errors', () async {
-      final BufferLogger mockLogger = BufferLogger();
-      final VerboseLogger verboseLogger = VerboseLogger(mockLogger);
+    testWithoutContext('ANSI colored errors', () async {
+      final BufferLogger mockLogger = BufferLogger(
+        terminal: AnsiTerminal(
+          stdio:  MockStdio(),
+          platform: FakePlatform()..stdoutSupportsAnsi = true,
+        ),
+        outputPreferences: OutputPreferences.test(showColor: true),
+      );
+      final VerboseLogger verboseLogger = VerboseLogger(mockLogger, stopwatch: fakeStopWatch);
 
       verboseLogger.printStatus('Hey Hey Hey Hey');
       verboseLogger.printTrace('Oooh, I do I do I do');
@@ -64,10 +71,6 @@ void main() {
       expect(
           mockLogger.errorText,
           matches('^$red' r'\[ (?: {0,2}\+[0-9]{1,4} ms|       )\] ' '${bold}Helpless!$resetBold$resetColor' r'\n$'));
-    }, overrides: <Type, Generator>{
-      OutputPreferences: () => OutputPreferences(showColor: true),
-      Platform: () => FakePlatform()..stdoutSupportsAnsi = true,
-      Stopwatch: () => fakeStopWatch,
     });
   });
 
@@ -84,6 +87,8 @@ void main() {
         timeout: const Duration(seconds: 2),
         padding: 20,
         onFinish: () => called += 1,
+        stdio: mockStdio,
+        timeoutConfiguration: const TimeoutConfiguration(),
       );
     }
 
@@ -110,6 +115,8 @@ void main() {
         FakeAsync().run((FakeAsync time) {
           final AnsiSpinner ansiSpinner = AnsiSpinner(
             timeout: const Duration(hours: 10),
+            stdio: mockStdio,
+            timeoutConfiguration: const TimeoutConfiguration(),
           )..start();
           doWhileAsync(time, () => ansiSpinner.ticks < 10);
           List<String> lines = outputStdout();
@@ -138,7 +145,6 @@ void main() {
         expect(done, isTrue);
       }, overrides: <Type, Generator>{
         Platform: () => FakePlatform(operatingSystem: testOs),
-        Stdio: () => mockStdio,
         Stopwatch: () => mockStopwatch,
       });
 
@@ -148,6 +154,8 @@ void main() {
         FakeAsync().run((FakeAsync time) {
           final AnsiSpinner ansiSpinner = AnsiSpinner(
             timeout: const Duration(seconds: 2),
+            stdio: mockStdio,
+            timeoutConfiguration: const TimeoutConfiguration(),
           )..start();
           mockStopwatch.elapsed = const Duration(seconds: 1);
           doWhileAsync(time, () => ansiSpinner.ticks < 10); // one second
@@ -165,14 +173,22 @@ void main() {
         expect(done, isTrue);
       }, overrides: <Type, Generator>{
         Platform: () => FakePlatform(operatingSystem: testOs),
-        Stdio: () => mockStdio,
         Stopwatch: () => mockStopwatch,
       });
 
+      // Uses Stopwatch from context.
       testUsingContext('Stdout startProgress on colored terminal for $testOs', () async {
         bool done = false;
         FakeAsync().run((FakeAsync time) {
-          final Logger logger = context.get<Logger>();
+          final Logger logger = StdoutLogger(
+            terminal: AnsiTerminal(
+              stdio: mockStdio,
+              platform: FakePlatform(operatingSystem: testOs)..stdoutSupportsAnsi = true,
+            ),
+            stdio: mockStdio,
+            outputPreferences: OutputPreferences.test(showColor: true),
+            timeoutConfiguration: const TimeoutConfiguration(),
+          );
           final Status status = logger.startProgress(
             'Hello',
             progressId: null,
@@ -190,18 +206,21 @@ void main() {
           done = true;
         });
         expect(done, isTrue);
-      }, overrides: <Type, Generator>{
-        Logger: () => StdoutLogger(),
-        OutputPreferences: () => OutputPreferences(showColor: true),
-        Platform: () => FakePlatform(operatingSystem: testOs)..stdoutSupportsAnsi = true,
-        Stdio: () => mockStdio,
       });
 
       testUsingContext('Stdout startProgress on colored terminal pauses on $testOs', () async {
         bool done = false;
         FakeAsync().run((FakeAsync time) {
           mockStopwatch.elapsed = const Duration(seconds: 5);
-          final Logger logger = context.get<Logger>();
+          final Logger logger = StdoutLogger(
+            terminal: AnsiTerminal(
+              stdio: mockStdio,
+              platform: FakePlatform(operatingSystem: testOs)..stdoutSupportsAnsi = true,
+            ),
+            stdio: mockStdio,
+            outputPreferences: OutputPreferences.test(showColor: true),
+            timeoutConfiguration: const TimeoutConfiguration(),
+          );
           final Status status = logger.startProgress(
             'Knock Knock, Who\'s There',
             timeout: const Duration(days: 10),
@@ -232,10 +251,6 @@ void main() {
         });
         expect(done, isTrue);
       }, overrides: <Type, Generator>{
-        Logger: () => StdoutLogger(),
-        OutputPreferences: () => OutputPreferences(showColor: true),
-        Platform: () => FakePlatform(operatingSystem: testOs)..stdoutSupportsAnsi = true,
-        Stdio: () => mockStdio,
         Stopwatch: () => mockStopwatch,
       });
 
@@ -270,7 +285,6 @@ void main() {
         expect(done, isTrue);
       }, overrides: <Type, Generator>{
         Platform: () => FakePlatform(operatingSystem: testOs),
-        Stdio: () => mockStdio,
         Stopwatch: () => mockStopwatch,
       });
 
@@ -307,7 +321,6 @@ void main() {
         expect(done, isTrue);
       }, overrides: <Type, Generator>{
         Platform: () => FakePlatform(operatingSystem: testOs),
-        Stdio: () => mockStdio,
         Stopwatch: () => mockStopwatch,
       });
 
@@ -353,7 +366,6 @@ void main() {
         expect(done, isTrue);
       }, overrides: <Type, Generator>{
         Platform: () => FakePlatform(operatingSystem: testOs),
-        Stdio: () => mockStdio,
         Stopwatch: () => mockStopwatch,
       });
     }
@@ -372,33 +384,48 @@ void main() {
         timeout: timeoutConfiguration.slowOperation,
         padding: 20,
         onFinish: () => called++,
+        stdio: mockStdio,
+        timeoutConfiguration: const TimeoutConfiguration(),
       );
     });
 
     List<String> outputStdout() => mockStdio.writtenToStdout.join('').split('\n');
     List<String> outputStderr() => mockStdio.writtenToStderr.join('').split('\n');
 
-    testUsingContext('Error logs are wrapped', () async {
-      final Logger logger = context.get<Logger>();
+    testWithoutContext('Error logs are wrapped', () async {
+      final Logger logger = StdoutLogger(
+        terminal: AnsiTerminal(
+          stdio: mockStdio,
+          platform: _kNoAnsiPlatform,
+        ),
+        stdio: mockStdio,
+        outputPreferences: OutputPreferences.test(wrapText: true, wrapColumn: 40, showColor: false),
+        timeoutConfiguration: const TimeoutConfiguration(),
+      );
       logger.printError('0123456789' * 15);
       final List<String> lines = outputStderr();
+
       expect(outputStdout().length, equals(1));
       expect(outputStdout().first, isEmpty);
       expect(lines[0], equals('0123456789' * 4));
       expect(lines[1], equals('0123456789' * 4));
       expect(lines[2], equals('0123456789' * 4));
       expect(lines[3], equals('0123456789' * 3));
-    }, overrides: <Type, Generator>{
-      Logger: () => StdoutLogger(),
-      OutputPreferences: () => OutputPreferences(wrapText: true, wrapColumn: 40, showColor: false),
-      Stdio: () => mockStdio,
-      Platform: _kNoAnsiPlatform,
     });
 
-    testUsingContext('Error logs are wrapped and can be indented.', () async {
-      final Logger logger = context.get<Logger>();
+    testWithoutContext('Error logs are wrapped and can be indented.', () async {
+      final Logger logger = StdoutLogger(
+        terminal: AnsiTerminal(
+          stdio: mockStdio,
+          platform: _kNoAnsiPlatform,
+        ),
+        stdio: mockStdio,
+        outputPreferences: OutputPreferences.test(wrapText: true, wrapColumn: 40, showColor: false),
+        timeoutConfiguration: const TimeoutConfiguration(),
+      );
       logger.printError('0123456789' * 15, indent: 5);
       final List<String> lines = outputStderr();
+
       expect(outputStdout().length, equals(1));
       expect(outputStdout().first, isEmpty);
       expect(lines.length, equals(6));
@@ -408,17 +435,21 @@ void main() {
       expect(lines[3], equals('     56789012345678901234567890123456789'));
       expect(lines[4], equals('     0123456789'));
       expect(lines[5], isEmpty);
-    }, overrides: <Type, Generator>{
-      Logger: () => StdoutLogger(),
-      OutputPreferences: () => OutputPreferences(wrapText: true, wrapColumn: 40, showColor: false),
-      Stdio: () => mockStdio,
-      Platform: _kNoAnsiPlatform,
     });
 
-    testUsingContext('Error logs are wrapped and can have hanging indent.', () async {
-      final Logger logger = context.get<Logger>();
+    testWithoutContext('Error logs are wrapped and can have hanging indent.', () async {
+      final Logger logger = StdoutLogger(
+        terminal: AnsiTerminal(
+          stdio: mockStdio,
+          platform: _kNoAnsiPlatform,
+        ),
+        stdio: mockStdio,
+        outputPreferences: OutputPreferences.test(wrapText: true, wrapColumn: 40, showColor: false),
+        timeoutConfiguration: const TimeoutConfiguration(),
+      );
       logger.printError('0123456789' * 15, hangingIndent: 5);
       final List<String> lines = outputStderr();
+
       expect(outputStdout().length, equals(1));
       expect(outputStdout().first, isEmpty);
       expect(lines.length, equals(6));
@@ -428,17 +459,21 @@ void main() {
       expect(lines[3], equals('     01234567890123456789012345678901234'));
       expect(lines[4], equals('     56789'));
       expect(lines[5], isEmpty);
-    }, overrides: <Type, Generator>{
-      Logger: () => StdoutLogger(),
-      OutputPreferences: () => OutputPreferences(wrapText: true, wrapColumn: 40, showColor: false),
-      Stdio: () => mockStdio,
-      Platform: _kNoAnsiPlatform,
     });
 
-    testUsingContext('Error logs are wrapped, indented, and can have hanging indent.', () async {
-      final Logger logger = context.get<Logger>();
+    testWithoutContext('Error logs are wrapped, indented, and can have hanging indent.', () async {
+      final Logger logger = StdoutLogger(
+        terminal: AnsiTerminal(
+          stdio: mockStdio,
+          platform: _kNoAnsiPlatform,
+        ),
+        stdio: mockStdio,
+        outputPreferences: OutputPreferences.test(wrapText: true, wrapColumn: 40, showColor: false),
+        timeoutConfiguration: const TimeoutConfiguration(),
+      );
       logger.printError('0123456789' * 15, indent: 4, hangingIndent: 5);
       final List<String> lines = outputStderr();
+
       expect(outputStdout().length, equals(1));
       expect(outputStdout().first, isEmpty);
       expect(lines.length, equals(6));
@@ -448,34 +483,42 @@ void main() {
       expect(lines[3], equals('         8901234567890123456789012345678'));
       expect(lines[4], equals('         901234567890123456789'));
       expect(lines[5], isEmpty);
-    }, overrides: <Type, Generator>{
-      Logger: () => StdoutLogger(),
-      OutputPreferences: () => OutputPreferences(wrapText: true, wrapColumn: 40, showColor: false),
-      Stdio: () => mockStdio,
-      Platform: _kNoAnsiPlatform,
     });
 
-    testUsingContext('Stdout logs are wrapped', () async {
-      final Logger logger = context.get<Logger>();
+    testWithoutContext('Stdout logs are wrapped', () async {
+      final Logger logger = StdoutLogger(
+        terminal: AnsiTerminal(
+          stdio: mockStdio,
+          platform: _kNoAnsiPlatform,
+        ),
+        stdio: mockStdio,
+        outputPreferences: OutputPreferences.test(wrapText: true, wrapColumn: 40, showColor: false),
+        timeoutConfiguration: const TimeoutConfiguration(),
+      );
       logger.printStatus('0123456789' * 15);
       final List<String> lines = outputStdout();
+
       expect(outputStderr().length, equals(1));
       expect(outputStderr().first, isEmpty);
       expect(lines[0], equals('0123456789' * 4));
       expect(lines[1], equals('0123456789' * 4));
       expect(lines[2], equals('0123456789' * 4));
       expect(lines[3], equals('0123456789' * 3));
-    }, overrides: <Type, Generator>{
-      Logger: () => StdoutLogger(),
-      OutputPreferences: () => OutputPreferences(wrapText: true, wrapColumn: 40, showColor: false),
-      Stdio: () => mockStdio,
-      Platform: _kNoAnsiPlatform,
     });
 
-    testUsingContext('Stdout logs are wrapped and can be indented.', () async {
-      final Logger logger = context.get<Logger>();
+    testWithoutContext('Stdout logs are wrapped and can be indented.', () async {
+      final Logger logger = StdoutLogger(
+        terminal: AnsiTerminal(
+          stdio: mockStdio,
+          platform: _kNoAnsiPlatform,
+        ),
+        stdio: mockStdio,
+        outputPreferences: OutputPreferences.test(wrapText: true, wrapColumn: 40, showColor: false),
+        timeoutConfiguration: const TimeoutConfiguration(),
+      );
       logger.printStatus('0123456789' * 15, indent: 5);
       final List<String> lines = outputStdout();
+
       expect(outputStderr().length, equals(1));
       expect(outputStderr().first, isEmpty);
       expect(lines.length, equals(6));
@@ -485,17 +528,21 @@ void main() {
       expect(lines[3], equals('     56789012345678901234567890123456789'));
       expect(lines[4], equals('     0123456789'));
       expect(lines[5], isEmpty);
-    }, overrides: <Type, Generator>{
-      Logger: () => StdoutLogger(),
-      OutputPreferences: () => OutputPreferences(wrapText: true, wrapColumn: 40, showColor: false),
-      Stdio: () => mockStdio,
-      Platform: _kNoAnsiPlatform,
     });
 
-    testUsingContext('Stdout logs are wrapped and can have hanging indent.', () async {
-      final Logger logger = context.get<Logger>();
+    testWithoutContext('Stdout logs are wrapped and can have hanging indent.', () async {
+      final Logger logger = StdoutLogger(
+        terminal: AnsiTerminal(
+          stdio: mockStdio,
+          platform: _kNoAnsiPlatform,
+        ),
+        stdio: mockStdio,
+        outputPreferences: OutputPreferences.test(wrapText: true, wrapColumn: 40, showColor: false),
+        timeoutConfiguration: const TimeoutConfiguration(),
+      );
       logger.printStatus('0123456789' * 15, hangingIndent: 5);
       final List<String> lines = outputStdout();
+
       expect(outputStderr().length, equals(1));
       expect(outputStderr().first, isEmpty);
       expect(lines.length, equals(6));
@@ -505,17 +552,21 @@ void main() {
       expect(lines[3], equals('     01234567890123456789012345678901234'));
       expect(lines[4], equals('     56789'));
       expect(lines[5], isEmpty);
-    }, overrides: <Type, Generator>{
-      Logger: () => StdoutLogger(),
-      OutputPreferences: () => OutputPreferences(wrapText: true, wrapColumn: 40, showColor: false),
-      Stdio: () => mockStdio,
-      Platform: _kNoAnsiPlatform,
     });
 
     testUsingContext('Stdout logs are wrapped, indented, and can have hanging indent.', () async {
-      final Logger logger = context.get<Logger>();
+      final Logger logger = StdoutLogger(
+        terminal: AnsiTerminal(
+          stdio: mockStdio,
+          platform: _kNoAnsiPlatform,
+        ),
+        stdio: mockStdio,
+        outputPreferences: OutputPreferences.test(wrapText: true, wrapColumn: 40, showColor: false),
+        timeoutConfiguration: const TimeoutConfiguration(),
+      );
       logger.printStatus('0123456789' * 15, indent: 4, hangingIndent: 5);
       final List<String> lines = outputStdout();
+
       expect(outputStderr().length, equals(1));
       expect(outputStderr().first, isEmpty);
       expect(lines.length, equals(6));
@@ -525,42 +576,78 @@ void main() {
       expect(lines[3], equals('         8901234567890123456789012345678'));
       expect(lines[4], equals('         901234567890123456789'));
       expect(lines[5], isEmpty);
-    }, overrides: <Type, Generator>{
-      Logger: () => StdoutLogger(),
-      OutputPreferences: () => OutputPreferences(wrapText: true, wrapColumn: 40, showColor: false),
-      Stdio: () => mockStdio,
-      Platform: _kNoAnsiPlatform,
     });
 
-    testUsingContext('Error logs are red', () async {
-      final Logger logger = context.get<Logger>();
+    testWithoutContext('Error logs are red', () async {
+      final Logger logger = StdoutLogger(
+        terminal: AnsiTerminal(
+          stdio: mockStdio,
+          platform: FakePlatform()..stdoutSupportsAnsi = true,
+        ),
+        stdio: mockStdio,
+        outputPreferences: OutputPreferences.test(showColor: true),
+        timeoutConfiguration: const TimeoutConfiguration(),
+      );
       logger.printError('Pants on fire!');
       final List<String> lines = outputStderr();
+
       expect(outputStdout().length, equals(1));
       expect(outputStdout().first, isEmpty);
       expect(lines[0], equals('${AnsiTerminal.red}Pants on fire!${AnsiTerminal.resetColor}'));
-    }, overrides: <Type, Generator>{
-      Logger: () => StdoutLogger(),
-      OutputPreferences: () => OutputPreferences(showColor: true),
-      Platform: () => FakePlatform()..stdoutSupportsAnsi = true,
-      Stdio: () => mockStdio,
     });
 
-    testUsingContext('Stdout logs are not colored', () async {
-      final Logger logger = context.get<Logger>();
+    testWithoutContext('Stdout logs are not colored', () async {
+      final Logger logger = StdoutLogger(
+        terminal: AnsiTerminal(
+          stdio: mockStdio,
+          platform: FakePlatform(),
+        ),
+        stdio: mockStdio,
+        outputPreferences:  OutputPreferences.test(showColor: true),
+        timeoutConfiguration: const TimeoutConfiguration(),
+      );
       logger.printStatus('All good.');
+
       final List<String> lines = outputStdout();
       expect(outputStderr().length, equals(1));
       expect(outputStderr().first, isEmpty);
       expect(lines[0], equals('All good.'));
-    }, overrides: <Type, Generator>{
-      Logger: () => StdoutLogger(),
-      OutputPreferences: () => OutputPreferences(showColor: true),
-      Stdio: () => mockStdio,
     });
 
-    testUsingContext('Stdout printStatus handle null inputs on colored terminal', () async {
-      final Logger logger = context.get<Logger>();
+    testWithoutContext('Stdout printStatus handle null inputs on colored terminal', () async {
+      final Logger logger = StdoutLogger(
+        terminal: AnsiTerminal(
+          stdio: mockStdio,
+          platform: FakePlatform(),
+        ),
+        stdio: mockStdio,
+        outputPreferences: OutputPreferences.test(showColor: true),
+        timeoutConfiguration: const TimeoutConfiguration(),
+      );
+      logger.printStatus(
+        null,
+        emphasis: null,
+        color: null,
+        newline: null,
+        indent: null,
+      );
+      final List<String> lines = outputStdout();
+
+      expect(outputStderr().length, equals(1));
+      expect(outputStderr().first, isEmpty);
+      expect(lines[0], equals(''));
+    });
+
+    testWithoutContext('Stdout printStatus handle null inputs on non-color terminal', () async {
+      final Logger logger = StdoutLogger(
+        terminal: AnsiTerminal(
+          stdio: mockStdio,
+          platform: _kNoAnsiPlatform,
+        ),
+        stdio: mockStdio,
+        outputPreferences: OutputPreferences.test(showColor: false),
+        timeoutConfiguration: const TimeoutConfiguration(),
+      );
       logger.printStatus(
         null,
         emphasis: null,
@@ -572,40 +659,25 @@ void main() {
       expect(outputStderr().length, equals(1));
       expect(outputStderr().first, isEmpty);
       expect(lines[0], equals(''));
-    }, overrides: <Type, Generator>{
-      Logger: () => StdoutLogger(),
-      OutputPreferences: () => OutputPreferences(showColor: true),
-      Stdio: () => mockStdio,
     });
 
-    testUsingContext('Stdout printStatus handle null inputs on non-color terminal', () async {
-      final Logger logger = context.get<Logger>();
-      logger.printStatus(
-        null,
-        emphasis: null,
-        color: null,
-        newline: null,
-        indent: null,
-      );
-      final List<String> lines = outputStdout();
-      expect(outputStderr().length, equals(1));
-      expect(outputStderr().first, isEmpty);
-      expect(lines[0], equals(''));
-    }, overrides: <Type, Generator>{
-      Logger: () => StdoutLogger(),
-      OutputPreferences: () => OutputPreferences(showColor: false),
-      Stdio: () => mockStdio,
-      Platform: _kNoAnsiPlatform,
-    });
-
-    testUsingContext('Stdout startProgress on non-color terminal', () async {
+    // Status uses Stopwatch from context.
+    test('Stdout startProgress on non-color terminal', () async {
       bool done = false;
       FakeAsync().run((FakeAsync time) {
-        final Logger logger = context.get<Logger>();
+        final Logger logger = StdoutLogger(
+          terminal: AnsiTerminal(
+            stdio: mockStdio,
+            platform: _kNoAnsiPlatform,
+          ),
+          stdio: mockStdio,
+          outputPreferences: OutputPreferences.test(showColor: false),
+          timeoutConfiguration: const TimeoutConfiguration(),
+        );
         final Status status = logger.startProgress(
           'Hello',
           progressId: null,
-          timeout: timeoutConfiguration.slowOperation,
+          timeout: const TimeoutConfiguration().slowOperation,
           progressIndicatorPadding: 20, // this minus the "Hello" equals the 15 below.
         );
         expect(outputStderr().length, equals(1));
@@ -619,11 +691,6 @@ void main() {
         done = true;
       });
       expect(done, isTrue);
-    }, overrides: <Type, Generator>{
-      Logger: () => StdoutLogger(),
-      OutputPreferences: () => OutputPreferences(showColor: false),
-      Stdio: () => mockStdio,
-      Platform: _kNoAnsiPlatform,
     });
 
     testUsingContext('SummaryStatus works when canceled', () async {
@@ -646,7 +713,9 @@ void main() {
       // Verify that stopping or canceling multiple times throws.
       expect(() { summaryStatus.cancel(); }, throwsA(isInstanceOf<AssertionError>()));
       expect(() { summaryStatus.stop(); }, throwsA(isInstanceOf<AssertionError>()));
-    }, overrides: <Type, Generator>{Stdio: () => mockStdio, Platform: _kNoAnsiPlatform});
+    }, overrides: <Type, Generator>{
+      Platform: () => _kNoAnsiPlatform,
+    });
 
     testUsingContext('SummaryStatus works when stopped', () async {
       summaryStatus.start();
@@ -669,30 +738,53 @@ void main() {
       // Verify that stopping or canceling multiple times throws.
       expect(() { summaryStatus.stop(); }, throwsA(isInstanceOf<AssertionError>()));
       expect(() { summaryStatus.cancel(); }, throwsA(isInstanceOf<AssertionError>()));
-    }, overrides: <Type, Generator>{Stdio: () => mockStdio, Platform: _kNoAnsiPlatform});
+    }, overrides: <Type, Generator>{
+      Platform: () => _kNoAnsiPlatform,
+    });
 
-    testUsingContext('sequential startProgress calls with StdoutLogger', () async {
-      final Logger logger = context.get<Logger>();
-      logger.startProgress('AAA', timeout: timeoutConfiguration.fastOperation)..stop();
-      logger.startProgress('BBB', timeout: timeoutConfiguration.fastOperation)..stop();
+    // Status still uses Stopwatch from context.
+    // TODO(jonahwilliams): switch to testWithoutContext once logger uses a
+    // TimerFactory.
+    test('sequential startProgress calls with StdoutLogger', () async {
+      final Logger logger = StdoutLogger(
+        terminal: AnsiTerminal(
+          stdio: mockStdio,
+          platform: _kNoAnsiPlatform,
+        ),
+        stdio: mockStdio,
+        outputPreferences: OutputPreferences.test(showColor: false),
+        timeoutConfiguration: const TimeoutConfiguration(),
+      );
+      logger.startProgress('AAA', timeout: const TimeoutConfiguration().fastOperation)..stop();
+      logger.startProgress('BBB', timeout: const TimeoutConfiguration().fastOperation)..stop();
       final List<String> output = outputStdout();
+
       expect(output.length, equals(3));
+
       // There's 61 spaces at the start: 59 (padding default) - 3 (length of AAA) + 5 (margin).
       // Then there's a left-padded "0ms" 8 characters wide, so 5 spaces then "0ms"
       // (except sometimes it's randomly slow so we handle up to "99,999ms").
       expect(output[0], matches(RegExp(r'AAA[ ]{61}[\d, ]{5}[\d]ms')));
       expect(output[1], matches(RegExp(r'BBB[ ]{61}[\d, ]{5}[\d]ms')));
-    }, overrides: <Type, Generator>{
-      Logger: () => StdoutLogger(),
-      OutputPreferences: () => OutputPreferences(showColor: false),
-      Stdio: () => mockStdio,
-      Platform: _kNoAnsiPlatform,
     });
 
-    testUsingContext('sequential startProgress calls with VerboseLogger and StdoutLogger', () async {
-      final Logger logger = context.get<Logger>();
-      logger.startProgress('AAA', timeout: timeoutConfiguration.fastOperation)..stop();
-      logger.startProgress('BBB', timeout: timeoutConfiguration.fastOperation)..stop();
+    // Status still uses Stopwatch from context.
+    test('sequential startProgress calls with VerboseLogger and StdoutLogger', () async {
+      final Logger logger = VerboseLogger(
+        StdoutLogger(
+          terminal: AnsiTerminal(
+            stdio: mockStdio,
+            platform: _kNoAnsiPlatform,
+          ),
+          stdio: mockStdio,
+          outputPreferences: OutputPreferences.test(),
+          timeoutConfiguration: const TimeoutConfiguration(),
+        ),
+        stopwatch: FakeStopwatch(),
+      );
+      logger.startProgress('AAA', timeout: const TimeoutConfiguration().fastOperation)..stop();
+      logger.startProgress('BBB', timeout: const TimeoutConfiguration().fastOperation)..stop();
+
       expect(outputStdout(), <Matcher>[
         matches(r'^\[ (?: {0,2}\+[0-9]{1,4} ms|       )\] AAA$'),
         matches(r'^\[ (?: {0,2}\+[0-9]{1,4} ms|       )\] AAA \(completed.*\)$'),
@@ -700,19 +792,21 @@ void main() {
         matches(r'^\[ (?: {0,2}\+[0-9]{1,4} ms|       )\] BBB \(completed.*\)$'),
         matches(r'^$'),
       ]);
-    }, overrides: <Type, Generator>{
-      Logger: () => VerboseLogger(StdoutLogger()),
-      Stdio: () => mockStdio,
-      Platform: _kNoAnsiPlatform,
     });
 
-    testUsingContext('sequential startProgress calls with BufferLogger', () async {
-      testLogger.startProgress('AAA', timeout: timeoutConfiguration.fastOperation)..stop();
-      testLogger.startProgress('BBB', timeout: timeoutConfiguration.fastOperation)..stop();
-      expect(testLogger.statusText, 'AAA\nBBB\n');
-    }, overrides: <Type, Generator>{
-      Logger: () => BufferLogger(),
-      Platform: _kNoAnsiPlatform,
+    // Status still uses Stopwatch from context.
+    test('sequential startProgress calls with BufferLogger', () async {
+      final BufferLogger logger = BufferLogger(
+        terminal: AnsiTerminal(
+          stdio: mockStdio,
+          platform: _kNoAnsiPlatform,
+        ),
+        outputPreferences: OutputPreferences.test(),
+      );
+      logger.startProgress('AAA', timeout: const TimeoutConfiguration().fastOperation)..stop();
+      logger.startProgress('BBB', timeout: const TimeoutConfiguration().fastOperation)..stop();
+
+      expect(logger.statusText, 'AAA\nBBB\n');
     });
   });
 }
