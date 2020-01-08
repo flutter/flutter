@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -53,11 +53,11 @@ class IconData {
   bool operator ==(dynamic other) {
     if (runtimeType != other.runtimeType)
       return false;
-    final IconData typedOther = other;
-    return codePoint == typedOther.codePoint
-        && fontFamily == typedOther.fontFamily
-        && fontPackage == typedOther.fontPackage
-        && matchTextDirection == typedOther.matchTextDirection;
+    return other is IconData
+        && other.codePoint == codePoint
+        && other.fontFamily == fontFamily
+        && other.fontPackage == fontPackage
+        && other.matchTextDirection == matchTextDirection;
   }
 
   @override
@@ -65,4 +65,38 @@ class IconData {
 
   @override
   String toString() => 'IconData(U+${codePoint.toRadixString(16).toUpperCase().padLeft(5, '0')})';
+}
+
+/// [DiagnosticsProperty] that has an [IconData] as value.
+class IconDataProperty extends DiagnosticsProperty<IconData> {
+  /// Create a diagnostics property for [IconData].
+  ///
+  /// The [showName], [style], and [level] arguments must not be null.
+  IconDataProperty(
+    String name,
+    IconData value, {
+    String ifNull,
+    bool showName = true,
+    DiagnosticsTreeStyle style = DiagnosticsTreeStyle.singleLine,
+    DiagnosticLevel level = DiagnosticLevel.info,
+  }) : assert(showName != null),
+       assert(style != null),
+       assert(level != null),
+       super(name, value,
+         showName: showName,
+         ifNull: ifNull,
+         style: style,
+         level: level,
+       );
+
+  @override
+  Map<String, Object> toJsonMap(DiagnosticsSerializationDelegate delegate) {
+    final Map<String, Object> json = super.toJsonMap(delegate);
+    if (value != null) {
+      json['valueProperties'] = <String, Object>{
+        'codePoint': value.codePoint,
+      };
+    }
+    return json;
+  }
 }

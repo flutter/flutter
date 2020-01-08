@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -19,21 +19,6 @@ Widget wrap({ Widget child }) {
 }
 
 void main() {
-  testWidgets('CheckboxListTile control test', (WidgetTester tester) async {
-    final List<dynamic> log = <dynamic>[];
-    await tester.pumpWidget(wrap(
-      child: CheckboxListTile(
-        value: true,
-        onChanged: (bool value) { log.add(value); },
-        title: const Text('Hello'),
-      ),
-    ));
-    await tester.tap(find.text('Hello'));
-    log.add('-');
-    await tester.tap(find.byType(Checkbox));
-    expect(log, equals(<dynamic>[false, '-', false]));
-  });
-
   testWidgets('RadioListTile should initialize according to groupValue', (WidgetTester tester) async {
     final List<int> values = <int>[0, 1, 2];
     int selectedValue;
@@ -49,7 +34,8 @@ void main() {
     List<RadioListTile<int>> findTiles() => find
       .byType(radioListTileType)
       .evaluate()
-      .map<RadioListTile<int>>((Element element) => element.widget)
+      .map<Widget>((Element element) => element.widget)
+      .cast<RadioListTile<int>>()
       .toList();
 
     Widget buildFrame() {
@@ -256,10 +242,11 @@ void main() {
           rect: const Rect.fromLTWH(0.0, 0.0, 800.0, 56.0),
           transform: null,
           flags: <SemanticsFlag>[
-            SemanticsFlag.hasToggledState,
-            SemanticsFlag.isToggled,
             SemanticsFlag.hasEnabledState,
+            SemanticsFlag.hasToggledState,
             SemanticsFlag.isEnabled,
+            SemanticsFlag.isFocusable,
+            SemanticsFlag.isToggled,
           ],
           actions: SemanticsAction.tap.index,
           label: 'aaa\nAAA',
@@ -270,9 +257,10 @@ void main() {
           transform: Matrix4.translationValues(0.0, 56.0, 0.0),
           flags: <SemanticsFlag>[
             SemanticsFlag.hasCheckedState,
-            SemanticsFlag.isChecked,
             SemanticsFlag.hasEnabledState,
+            SemanticsFlag.isChecked,
             SemanticsFlag.isEnabled,
+            SemanticsFlag.isFocusable,
           ],
           actions: SemanticsAction.tap.index,
           label: 'bbb\nBBB',
@@ -285,6 +273,7 @@ void main() {
             SemanticsFlag.hasCheckedState,
             SemanticsFlag.hasEnabledState,
             SemanticsFlag.isEnabled,
+            SemanticsFlag.isFocusable,
             SemanticsFlag.isInMutuallyExclusiveGroup,
           ],
           actions: SemanticsAction.tap.index,

@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -202,27 +202,29 @@ void main() {
     final PageController pageController = PageController(initialPage: 1);
 
     await tester.pumpWidget(
-      MediaQuery(
-        data: const MediaQueryData(devicePixelRatio: 1.0),
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: Material(
-            child: PageView(
-              controller: pageController,
-              children: <Widget>[
-                Container(
-                  color: Colors.red,
-                ),
-                Container(
-                  child: TextField(
-                    controller: textController,
+      MaterialApp(
+        home: MediaQuery(
+          data: const MediaQueryData(devicePixelRatio: 1.0),
+          child: Directionality(
+            textDirection: TextDirection.ltr,
+            child: Material(
+              child: PageView(
+                controller: pageController,
+                children: <Widget>[
+                  Container(
+                    color: Colors.red,
                   ),
-                  color: Colors.green,
-                ),
-                Container(
-                  color: Colors.red,
-                ),
-              ],
+                  Container(
+                    child: TextField(
+                      controller: textController,
+                    ),
+                    color: Colors.green,
+                  ),
+                  Container(
+                    color: Colors.red,
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -257,7 +259,7 @@ void main() {
             children: <Widget>[
               EditableText(
                 backgroundCursorColor: Colors.grey,
-                maxLines: null, // multi-line
+                maxLines: null, // multiline
                 controller: controller,
                 focusNode: focusNode,
                 style: textStyle,

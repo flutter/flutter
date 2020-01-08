@@ -1,8 +1,6 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -30,7 +28,7 @@ void main () {
     setUp(() {
       semanticEvents = <Map<String, Object>>[];
       SystemChannels.accessibility.setMockMessageHandler((dynamic message) async {
-        final Map<dynamic, dynamic> typedMessage = message;
+        final Map<dynamic, dynamic> typedMessage = message as Map<dynamic, dynamic>;
         semanticEvents.add(typedMessage.cast<String, Object>());
       });
     });
@@ -203,11 +201,11 @@ void main () {
 }
 
 class TestWidget extends StatelessWidget {
-
   const TestWidget({
+    Key key,
     this.tapHandler = nullHandler,
     this.longPressHandler = nullHandler,
-  });
+  }) : super(key: key);
 
   final HandlerCreator tapHandler;
   final HandlerCreator longPressHandler;

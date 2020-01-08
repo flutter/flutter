@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -25,13 +25,13 @@ enum MyFlutterErrorCode {
 
   override func application(
     _ application: UIApplication,
-    didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
+    didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
     GeneratedPluginRegistrant.register(with: self)
     guard let controller = window?.rootViewController as? FlutterViewController else {
       fatalError("rootViewController is not type FlutterViewController")
     }
     let batteryChannel = FlutterMethodChannel(name: ChannelName.battery,
-                                              binaryMessenger: controller)
+                                              binaryMessenger: controller.binaryMessenger)
     batteryChannel.setMethodCallHandler({
       [weak self] (call: FlutterMethodCall, result: FlutterResult) -> Void in
       guard call.method == "getBatteryLevel" else {
@@ -42,7 +42,7 @@ enum MyFlutterErrorCode {
     })
 
     let chargingChannel = FlutterEventChannel(name: ChannelName.charging,
-                                              binaryMessenger: controller)
+                                              binaryMessenger: controller.binaryMessenger)
     chargingChannel.setStreamHandler(self)
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
@@ -67,7 +67,7 @@ enum MyFlutterErrorCode {
     NotificationCenter.default.addObserver(
       self,
       selector: #selector(AppDelegate.onBatteryStateDidChange),
-      name: NSNotification.Name.UIDeviceBatteryStateDidChange,
+      name: UIDevice.batteryStateDidChangeNotification,
       object: nil)
     return nil
   }

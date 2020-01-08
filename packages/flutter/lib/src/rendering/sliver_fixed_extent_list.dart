@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -142,6 +142,26 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
     return childManager.childCount * itemExtent;
   }
 
+  int _calculateLeadingGarbage(int firstIndex) {
+    RenderBox walker = firstChild;
+    int leadingGarbage = 0;
+    while(walker != null && indexOf(walker) < firstIndex){
+      leadingGarbage += 1;
+      walker = childAfter(walker);
+    }
+    return leadingGarbage;
+  }
+
+  int _calculateTrailingGarbage(int targetLastIndex) {
+    RenderBox walker = lastChild;
+    int trailingGarbage = 0;
+    while(walker != null && indexOf(walker) > targetLastIndex){
+      trailingGarbage += 1;
+      walker = childBefore(walker);
+    }
+    return trailingGarbage;
+  }
+
   @override
   void performLayout() {
     childManager.didStartLayout();
@@ -165,10 +185,8 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
         getMaxChildIndexForScrollOffset(targetEndScrollOffset, itemExtent) : null;
 
     if (firstChild != null) {
-      final int oldFirstIndex = indexOf(firstChild);
-      final int oldLastIndex = indexOf(lastChild);
-      final int leadingGarbage = (firstIndex - oldFirstIndex).clamp(0, childCount);
-      final int trailingGarbage = targetLastIndex == null ? 0 : (oldLastIndex - targetLastIndex).clamp(0, childCount);
+      final int leadingGarbage = _calculateLeadingGarbage(firstIndex);
+      final int trailingGarbage = _calculateTrailingGarbage(targetLastIndex);
       collectGarbage(leadingGarbage, trailingGarbage);
     } else {
       collectGarbage(0, 0);
@@ -177,7 +195,26 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
     if (firstChild == null) {
       if (!addInitialChild(index: firstIndex, layoutOffset: indexToLayoutOffset(itemExtent, firstIndex))) {
         // There are either no children, or we are past the end of all our children.
-        final double max = computeMaxScrollOffset(constraints, itemExtent);
+        // If it is the latter, we will need to find the first available child.
+        double max;
+        if (childManager.childCount != null) {
+          max = computeMaxScrollOffset(constraints, itemExtent);
+        } else if (firstIndex <= 0) {
+          max = 0.0;
+        } else {
+          // We will have to find it manually.
+          int possibleFirstIndex = firstIndex - 1;
+          while (
+            possibleFirstIndex > 0 &&
+            !addInitialChild(
+              index: possibleFirstIndex,
+              layoutOffset: indexToLayoutOffset(itemExtent, possibleFirstIndex),
+            )
+          ) {
+            possibleFirstIndex -= 1;
+          }
+          max = possibleFirstIndex * itemExtent;
+        }
         geometry = SliverGeometry(
           scrollExtent: max,
           maxPaintExtent: max,
@@ -198,7 +235,7 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
         geometry = SliverGeometry(scrollOffsetCorrection: index * itemExtent);
         return;
       }
-      final SliverMultiBoxAdaptorParentData childParentData = child.parentData;
+      final SliverMultiBoxAdaptorParentData childParentData = child.parentData as SliverMultiBoxAdaptorParentData;
       childParentData.layoutOffset = indexToLayoutOffset(itemExtent, index);
       assert(childParentData.index == index);
       trailingChildWithLayout ??= child;
@@ -206,17 +243,19 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
 
     if (trailingChildWithLayout == null) {
       firstChild.layout(childConstraints);
-      final SliverMultiBoxAdaptorParentData childParentData = firstChild.parentData;
+      final SliverMultiBoxAdaptorParentData childParentData = firstChild.parentData as SliverMultiBoxAdaptorParentData;
       childParentData.layoutOffset = indexToLayoutOffset(itemExtent, firstIndex);
       trailingChildWithLayout = firstChild;
     }
 
-    while (targetLastIndex == null || indexOf(trailingChildWithLayout) < targetLastIndex) {
+    double estimatedMaxScrollOffset = double.infinity;
+    for (int index = indexOf(trailingChildWithLayout) + 1; targetLastIndex == null || index <= targetLastIndex; ++index) {
       RenderBox child = childAfter(trailingChildWithLayout);
-      if (child == null) {
+      if (child == null || indexOf(child) != index) {
         child = insertAndLayoutChild(childConstraints, after: trailingChildWithLayout);
         if (child == null) {
           // We have run out of children.
+          estimatedMaxScrollOffset = index * itemExtent;
           break;
         }
       } else {
@@ -224,7 +263,8 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
       }
       trailingChildWithLayout = child;
       assert(child != null);
-      final SliverMultiBoxAdaptorParentData childParentData = child.parentData;
+      final SliverMultiBoxAdaptorParentData childParentData = child.parentData as SliverMultiBoxAdaptorParentData;
+      assert(childParentData.index == index);
       childParentData.layoutOffset = indexToLayoutOffset(itemExtent, childParentData.index);
     }
 
@@ -237,12 +277,15 @@ abstract class RenderSliverFixedExtentBoxAdaptor extends RenderSliverMultiBoxAda
     assert(indexOf(firstChild) == firstIndex);
     assert(targetLastIndex == null || lastIndex <= targetLastIndex);
 
-    final double estimatedMaxScrollOffset = estimateMaxScrollOffset(
-      constraints,
-      firstIndex: firstIndex,
-      lastIndex: lastIndex,
-      leadingScrollOffset: leadingScrollOffset,
-      trailingScrollOffset: trailingScrollOffset,
+    estimatedMaxScrollOffset = math.min(
+      estimatedMaxScrollOffset,
+      estimateMaxScrollOffset(
+        constraints,
+        firstIndex: firstIndex,
+        lastIndex: lastIndex,
+        leadingScrollOffset: leadingScrollOffset,
+        trailingScrollOffset: trailingScrollOffset,
+      ),
     );
 
     final double paintExtent = calculatePaintOffset(

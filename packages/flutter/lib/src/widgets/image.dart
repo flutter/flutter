@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -12,6 +12,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/semantics.dart';
 
 import 'basic.dart';
+import 'binding.dart';
 import 'framework.dart';
 import 'localizations.dart';
 import 'media_query.dart';
@@ -108,6 +109,83 @@ Future<void> precacheImage(
   return completer.future;
 }
 
+/// Signature used by [Image.frameBuilder] to control the widget that will be
+/// used when an [Image] is built.
+///
+/// The `child` argument contains the default image widget and is guaranteed to
+/// be non-null. Typically, this builder will wrap the `child` widget in some
+/// way and return the wrapped widget. If this builder returns `child` directly,
+/// it will yield the same result as if [Image.frameBuilder] was null.
+///
+/// The `frame` argument specifies the index of the current image frame being
+/// rendered. It will be null before the first image frame is ready, and zero
+/// for the first image frame. For single-frame images, it will never be greater
+/// than zero. For multi-frame images (such as animated GIFs), it will increase
+/// by one every time a new image frame is shown (including when the image
+/// animates in a loop).
+///
+/// The `wasSynchronouslyLoaded` argument specifies whether the image was
+/// available synchronously (on the same
+/// [rendering pipeline frame](rendering/RendererBinding/drawFrame.html) as the
+/// `Image` widget itself was created) and thus able to be painted immediately.
+/// If this is false, then there was one or more rendering pipeline frames where
+/// the image wasn't yet available to be painted. For multi-frame images (such
+/// as animated GIFs), the value of this argument will be the same for all image
+/// frames. In other words, if the first image frame was available immediately,
+/// then this argument will be true for all image frames.
+///
+/// This builder must not return null.
+///
+/// See also:
+///
+///  * [Image.frameBuilder], which makes use of this signature in the [Image]
+///    widget.
+typedef ImageFrameBuilder = Widget Function(
+  BuildContext context,
+  Widget child,
+  int frame,
+  bool wasSynchronouslyLoaded,
+);
+
+/// Signature used by [Image.loadingBuilder] to build a representation of the
+/// image's loading progress.
+///
+/// This is useful for images that are incrementally loaded (e.g. over a local
+/// file system or a network), and the application wishes to give the user an
+/// indication of when the image will be displayed.
+///
+/// The `child` argument contains the default image widget and is guaranteed to
+/// be non-null. Typically, this builder will wrap the `child` widget in some
+/// way and return the wrapped widget. If this builder returns `child` directly,
+/// it will yield the same result as if [Image.loadingBuilder] was null.
+///
+/// The `loadingProgress` argument contains the current progress towards loading
+/// the image. This argument will be non-null while the image is loading, but it
+/// will be null in the following cases:
+///
+///   * When the widget is first rendered before any bytes have been loaded.
+///   * When an image has been fully loaded and is available to be painted.
+///
+/// If callers are implementing custom [ImageProvider] and [ImageStream]
+/// instances (which is very rare), it's possible to produce image streams that
+/// continue to fire image chunk events after an image frame has been loaded.
+/// In such cases, the `child` parameter will represent the current
+/// fully-loaded image frame.
+///
+/// This builder must not return null.
+///
+/// See also:
+///
+///  * [Image.loadingBuilder], which makes use of this signature in the [Image]
+///    widget.
+///  * [ImageChunkListener], a lower-level signature for listening to raw
+///    [ImageChunkEvent]s.
+typedef ImageLoadingBuilder = Widget Function(
+  BuildContext context,
+  Widget child,
+  ImageChunkEvent loadingProgress,
+);
+
 /// A widget that displays an image.
 ///
 /// Several constructors are provided for the various ways that an image can be
@@ -129,13 +207,49 @@ Future<void> precacheImage(
 /// The image is painted using [paintImage], which describes the meanings of the
 /// various fields on this class in more detail.
 ///
+/// {@tool sample}
+/// The default constructor can be used with any [ImageProvider], such as a
+/// [NetworkImage], to display an image from the internet.
+///
+/// ![An image of an owl displayed by the image widget](https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg)
+///
+/// ```dart
+/// const Image(
+///   image: NetworkImage('https://flutter.github.io/assets-for-api-docs/assets/widgets/owl.jpg'),
+/// )
+/// ```
+/// {@end-tool}
+///
+/// {@tool sample}
+/// The [Image] Widget also provides several constructors to display different
+/// types of images for convenience. In this example, use the [Image.network]
+/// constructor to display an image from the internet.
+///
+/// ![An image of an owl displayed by the image widget using the shortcut constructor](https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg)
+///
+/// ```dart
+/// Image.network('https://flutter.github.io/assets-for-api-docs/assets/widgets/owl-2.jpg')
+/// ```
+/// {@end-tool}
+///
+/// The [Image.asset], [Image.network], [Image.file], and [Image.memory]
+/// constructors allow a custom decode size to be specified through
+/// [cacheWidth] and [cacheHeight] parameters. The engine will decode the
+/// image to the specified size, which is primarily intended to reduce the
+/// memory usage of [ImageCache].
+///
+/// In the case where a network image is used on the Web platform, the
+/// [cacheWidth] and [cacheHeight] parameters are ignored as the Web engine
+/// delegates image decoding of network images to the Web, which does not support
+/// custom decode sizes.
+///
 /// See also:
 ///
 ///  * [Icon], which shows an image from a font.
 ///  * [new Ink.image], which is the preferred way to show an image in a
 ///    material application (especially if the image is in a [Material] and will
 ///    have an [InkWell] on top of it).
-///  * [Image](https://api.flutter.dev/flutter/dart-ui/Image-class.html), the class in the [dart:ui] library.
+///  * [Image](dart-ui/Image-class.html), the class in the [dart:ui] library.
 ///
 class Image extends StatefulWidget {
   /// Creates a widget that displays an image.
@@ -160,6 +274,8 @@ class Image extends StatefulWidget {
   const Image({
     Key key,
     @required this.image,
+    this.frameBuilder,
+    this.loadingBuilder,
     this.semanticLabel,
     this.excludeFromSemantics = false,
     this.width,
@@ -200,10 +316,25 @@ class Image extends StatefulWidget {
   /// [FilterQuality.none] which corresponds to nearest-neighbor.
   ///
   /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
+  ///
+  /// If [cacheWidth] or [cacheHeight] are provided, it indicates to the
+  /// engine that the image should be decoded at the specified size. The image
+  /// will be rendered to the constraints of the layout or [width] and [height]
+  /// regardless of these parameters. These parameters are primarily intended
+  /// to reduce the memory usage of [ImageCache].
+  ///
+  /// In the case where the network image is on the Web platform, the [cacheWidth]
+  /// and [cacheHeight] parameters are ignored as the web engine delegates
+  /// image decoding to the web which does not support custom decode sizes.
+  //
+  // TODO(garyq): We should eventually support custom decoding of network images
+  // on Web as well, see https://github.com/flutter/flutter/issues/42789.
   Image.network(
     String src, {
     Key key,
     double scale = 1.0,
+    this.frameBuilder,
+    this.loadingBuilder,
     this.semanticLabel,
     this.excludeFromSemantics = false,
     this.width,
@@ -218,10 +349,14 @@ class Image extends StatefulWidget {
     this.gaplessPlayback = false,
     this.filterQuality = FilterQuality.low,
     Map<String, String> headers,
-  }) : image = NetworkImage(src, scale: scale, headers: headers),
+    int cacheWidth,
+    int cacheHeight,
+  }) : image = ResizeImage.resizeIfNeeded(cacheWidth, cacheHeight, NetworkImage(src, scale: scale, headers: headers)),
        assert(alignment != null),
        assert(repeat != null),
        assert(matchTextDirection != null),
+       assert(cacheWidth == null || cacheWidth > 0),
+       assert(cacheHeight == null || cacheHeight > 0),
        super(key: key);
 
   /// Creates a widget that displays an [ImageStream] obtained from a [File].
@@ -242,10 +377,17 @@ class Image extends StatefulWidget {
   /// [FilterQuality.none] which corresponds to nearest-neighbor.
   ///
   /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
+  ///
+  /// If [cacheWidth] or [cacheHeight] are provided, it indicates to the
+  /// engine that the image must be decoded at the specified size. The image
+  /// will be rendered to the constraints of the layout or [width] and [height]
+  /// regardless of these parameters. These parameters are primarily intended
+  /// to reduce the memory usage of [ImageCache].
   Image.file(
     File file, {
     Key key,
     double scale = 1.0,
+    this.frameBuilder,
     this.semanticLabel,
     this.excludeFromSemantics = false,
     this.width,
@@ -259,11 +401,16 @@ class Image extends StatefulWidget {
     this.matchTextDirection = false,
     this.gaplessPlayback = false,
     this.filterQuality = FilterQuality.low,
-  }) : image = FileImage(file, scale: scale),
+    int cacheWidth,
+    int cacheHeight,
+  }) : image = ResizeImage.resizeIfNeeded(cacheWidth, cacheHeight, FileImage(file, scale: scale)),
+       loadingBuilder = null,
        assert(alignment != null),
        assert(repeat != null),
        assert(filterQuality != null),
        assert(matchTextDirection != null),
+       assert(cacheWidth == null || cacheWidth > 0),
+       assert(cacheHeight == null || cacheHeight > 0),
        super(key: key);
 
 
@@ -294,6 +441,12 @@ class Image extends StatefulWidget {
   /// density, the exact path must be provided (e.g. `images/2x/cat.png`).
   ///
   /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
+  ///
+  /// If [cacheWidth] or [cacheHeight] are provided, it indicates to the
+  /// engine that the image must be decoded at the specified size. The image
+  /// will be rendered to the constraints of the layout or [width] and [height]
+  /// regardless of these parameters. These parameters are primarily intended
+  /// to reduce the memory usage of [ImageCache].
   ///
   /// The [name] and [repeat] arguments must not be null.
   ///
@@ -395,6 +548,7 @@ class Image extends StatefulWidget {
     String name, {
     Key key,
     AssetBundle bundle,
+    this.frameBuilder,
     this.semanticLabel,
     this.excludeFromSemantics = false,
     double scale,
@@ -410,17 +564,27 @@ class Image extends StatefulWidget {
     this.gaplessPlayback = false,
     String package,
     this.filterQuality = FilterQuality.low,
-  }) : image = scale != null
+    int cacheWidth,
+    int cacheHeight,
+  }) : image = ResizeImage.resizeIfNeeded(cacheWidth, cacheHeight, scale != null
          ? ExactAssetImage(name, bundle: bundle, scale: scale, package: package)
-         : AssetImage(name, bundle: bundle, package: package),
+         : AssetImage(name, bundle: bundle, package: package)
+       ),
+       loadingBuilder = null,
        assert(alignment != null),
        assert(repeat != null),
        assert(matchTextDirection != null),
+       assert(cacheWidth == null || cacheWidth > 0),
+       assert(cacheHeight == null || cacheHeight > 0),
        super(key: key);
 
   /// Creates a widget that displays an [ImageStream] obtained from a [Uint8List].
   ///
   /// The [bytes], [scale], and [repeat] arguments must not be null.
+  ///
+  /// This only accepts compressed image formats (e.g. PNG). Uncompressed
+  /// formats like rawRgba (the default format of [ui.Image.toByteData]) will
+  /// lead to exceptions.
   ///
   /// Either the [width] and [height] arguments should be specified, or the
   /// widget should be placed in a context that sets tight layout constraints.
@@ -433,10 +597,17 @@ class Image extends StatefulWidget {
   /// [FilterQuality.none] which corresponds to nearest-neighbor.
   ///
   /// If [excludeFromSemantics] is true, then [semanticLabel] will be ignored.
+  ///
+  /// If [cacheWidth] or [cacheHeight] are provided, it indicates to the
+  /// engine that the image must be decoded at the specified size. The image
+  /// will be rendered to the constraints of the layout or [width] and [height]
+  /// regardless of these parameters. These parameters are primarily intended
+  /// to reduce the memory usage of [ImageCache].
   Image.memory(
     Uint8List bytes, {
     Key key,
     double scale = 1.0,
+    this.frameBuilder,
     this.semanticLabel,
     this.excludeFromSemantics = false,
     this.width,
@@ -450,14 +621,176 @@ class Image extends StatefulWidget {
     this.matchTextDirection = false,
     this.gaplessPlayback = false,
     this.filterQuality = FilterQuality.low,
-  }) : image = MemoryImage(bytes, scale: scale),
+    int cacheWidth,
+    int cacheHeight,
+  }) : image = ResizeImage.resizeIfNeeded(cacheWidth, cacheHeight, MemoryImage(bytes, scale: scale)),
+       loadingBuilder = null,
        assert(alignment != null),
        assert(repeat != null),
        assert(matchTextDirection != null),
+       assert(cacheWidth == null || cacheWidth > 0),
+       assert(cacheHeight == null || cacheHeight > 0),
        super(key: key);
 
   /// The image to display.
   final ImageProvider image;
+
+  /// A builder function responsible for creating the widget that represents
+  /// this image.
+  ///
+  /// If this is null, this widget will display an image that is painted as
+  /// soon as the first image frame is available (and will appear to "pop" in
+  /// if it becomes available asynchronously). Callers might use this builder to
+  /// add effects to the image (such as fading the image in when it becomes
+  /// available) or to display a placeholder widget while the image is loading.
+  ///
+  /// To have finer-grained control over the way that an image's loading
+  /// progress is communicated to the user, see [loadingBuilder].
+  ///
+  /// ## Chaining with [loadingBuilder]
+  ///
+  /// If a [loadingBuilder] has _also_ been specified for an image, the two
+  /// builders will be chained together: the _result_ of this builder will
+  /// be passed as the `child` argument to the [loadingBuilder]. For example,
+  /// consider the following builders used in conjunction:
+  ///
+  /// {@template flutter.widgets.image.chainedBuildersExample}
+  /// ```dart
+  /// Image(
+  ///   ...
+  ///   frameBuilder: (BuildContext context, Widget child, int frame, bool wasSynchronouslyLoaded) {
+  ///     return Padding(
+  ///       padding: EdgeInsets.all(8.0),
+  ///       child: child,
+  ///     );
+  ///   },
+  ///   loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent loadingProgress) {
+  ///     return Center(child: child);
+  ///   },
+  /// )
+  /// ```
+  ///
+  /// In this example, the widget hierarchy will contain the following:
+  ///
+  /// ```dart
+  /// Center(
+  ///   Padding(
+  ///     padding: EdgeInsets.all(8.0),
+  ///     child: <image>,
+  ///   ),
+  /// )
+  /// ```
+  /// {@endtemplate}
+  ///
+  /// {@tool snippet --template=stateless_widget_material}
+  ///
+  /// The following sample demonstrates how to use this builder to implement an
+  /// image that fades in once it's been loaded.
+  ///
+  /// This sample contains a limited subset of the functionality that the
+  /// [FadeInImage] widget provides out of the box.
+  ///
+  /// ```dart
+  /// @override
+  /// Widget build(BuildContext context) {
+  ///   return DecoratedBox(
+  ///     decoration: BoxDecoration(
+  ///       color: Colors.white,
+  ///       border: Border.all(),
+  ///       borderRadius: BorderRadius.circular(20),
+  ///     ),
+  ///     child: Image.network(
+  ///       'https://example.com/image.jpg',
+  ///       frameBuilder: (BuildContext context, Widget child, int frame, bool wasSynchronouslyLoaded) {
+  ///         if (wasSynchronouslyLoaded) {
+  ///           return child;
+  ///         }
+  ///         return AnimatedOpacity(
+  ///           child: child,
+  ///           opacity: frame == null ? 0 : 1,
+  ///           duration: const Duration(seconds: 1),
+  ///           curve: Curves.easeOut,
+  ///         );
+  ///       },
+  ///     ),
+  ///   );
+  /// }
+  /// ```
+  /// {@end-tool}
+  ///
+  /// Run against a real-world image, the previous example renders the following
+  /// image.
+  ///
+  /// {@animation 400 400 https://flutter.github.io/assets-for-api-docs/assets/widgets/frame_builder_image.mp4}
+  final ImageFrameBuilder frameBuilder;
+
+  /// A builder that specifies the widget to display to the user while an image
+  /// is still loading.
+  ///
+  /// If this is null, and the image is loaded incrementally (e.g. over a
+  /// network), the user will receive no indication of the progress as the
+  /// bytes of the image are loaded.
+  ///
+  /// For more information on how to interpret the arguments that are passed to
+  /// this builder, see the documentation on [ImageLoadingBuilder].
+  ///
+  /// ## Performance implications
+  ///
+  /// If a [loadingBuilder] is specified for an image, the [Image] widget is
+  /// likely to be rebuilt on every
+  /// [rendering pipeline frame](rendering/RendererBinding/drawFrame.html) until
+  /// the image has loaded. This is useful for cases such as displaying a loading
+  /// progress indicator, but for simpler cases such as displaying a placeholder
+  /// widget that doesn't depend on the loading progress (e.g. static "loading"
+  /// text), [frameBuilder] will likely work and not incur as much cost.
+  ///
+  /// ## Chaining with [frameBuilder]
+  ///
+  /// If a [frameBuilder] has _also_ been specified for an image, the two
+  /// builders will be chained together: the `child` argument to this
+  /// builder will contain the _result_ of the [frameBuilder]. For example,
+  /// consider the following builders used in conjunction:
+  ///
+  /// {@macro flutter.widgets.image.chainedBuildersExample}
+  ///
+  /// {@tool snippet --template=stateless_widget_material}
+  ///
+  /// The following sample uses [loadingBuilder] to show a
+  /// [CircularProgressIndicator] while an image loads over the network.
+  ///
+  /// ```dart
+  /// Widget build(BuildContext context) {
+  ///   return DecoratedBox(
+  ///     decoration: BoxDecoration(
+  ///       color: Colors.white,
+  ///       border: Border.all(),
+  ///       borderRadius: BorderRadius.circular(20),
+  ///     ),
+  ///     child: Image.network(
+  ///       'https://example.com/image.jpg',
+  ///       loadingBuilder: (BuildContext context, Widget child, ImageChunkEvent loadingProgress) {
+  ///         if (loadingProgress == null)
+  ///           return child;
+  ///         return Center(
+  ///           child: CircularProgressIndicator(
+  ///             value: loadingProgress.expectedTotalBytes != null
+  ///                 ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes
+  ///                 : null,
+  ///           ),
+  ///         );
+  ///       },
+  ///     ),
+  ///   );
+  /// }
+  /// ```
+  /// {@end-tool}
+  ///
+  /// Run against a real-world image, the previous example renders the following
+  /// loading progress indicator while the image loads before rendering the
+  /// completed image.
+  ///
+  /// {@animation 400 400 https://flutter.github.io/assets-for-api-docs/assets/widgets/loading_progress_image.mp4}
+  final ImageLoadingBuilder loadingBuilder;
 
   /// If non-null, require the image to have this width.
   ///
@@ -588,9 +921,11 @@ class Image extends StatefulWidget {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<ImageProvider>('image', image));
+    properties.add(DiagnosticsProperty<Function>('frameBuilder', frameBuilder));
+    properties.add(DiagnosticsProperty<Function>('loadingBuilder', loadingBuilder));
     properties.add(DoubleProperty('width', width, defaultValue: null));
     properties.add(DoubleProperty('height', height, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('color', color, defaultValue: null));
+    properties.add(ColorProperty('color', color, defaultValue: null));
     properties.add(EnumProperty<BlendMode>('colorBlendMode', colorBlendMode, defaultValue: null));
     properties.add(EnumProperty<BoxFit>('fit', fit, defaultValue: null));
     properties.add(DiagnosticsProperty<AlignmentGeometry>('alignment', alignment, defaultValue: null));
@@ -603,16 +938,32 @@ class Image extends StatefulWidget {
   }
 }
 
-class _ImageState extends State<Image> {
+class _ImageState extends State<Image> with WidgetsBindingObserver {
   ImageStream _imageStream;
   ImageInfo _imageInfo;
+  ImageChunkEvent _loadingProgress;
   bool _isListeningToStream = false;
   bool _invertColors;
+  int _frameNumber;
+  bool _wasSynchronouslyLoaded;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    assert(_imageStream != null);
+    WidgetsBinding.instance.removeObserver(this);
+    _stopListeningToStream();
+    super.dispose();
+  }
 
   @override
   void didChangeDependencies() {
-    _invertColors = MediaQuery.of(context, nullOk: true)?.invertColors
-      ?? SemanticsBinding.instance.accessibilityFeatures.invertColors;
+    _updateInvertColors();
     _resolveImage();
 
     if (TickerMode.of(context))
@@ -626,8 +977,21 @@ class _ImageState extends State<Image> {
   @override
   void didUpdateWidget(Image oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (_isListeningToStream &&
+        (widget.loadingBuilder == null) != (oldWidget.loadingBuilder == null)) {
+      _imageStream.removeListener(_getListener(oldWidget.loadingBuilder));
+      _imageStream.addListener(_getListener());
+    }
     if (widget.image != oldWidget.image)
       _resolveImage();
+  }
+
+  @override
+  void didChangeAccessibilityFeatures() {
+    super.didChangeAccessibilityFeatures();
+    setState(() {
+      _updateInvertColors();
+    });
   }
 
   @override
@@ -636,66 +1000,86 @@ class _ImageState extends State<Image> {
     super.reassemble();
   }
 
+  void _updateInvertColors() {
+    _invertColors = MediaQuery.of(context, nullOk: true)?.invertColors
+        ?? SemanticsBinding.instance.accessibilityFeatures.invertColors;
+  }
+
   void _resolveImage() {
     final ImageStream newStream =
       widget.image.resolve(createLocalImageConfiguration(
-          context,
-          size: widget.width != null && widget.height != null ? Size(widget.width, widget.height) : null,
+        context,
+        size: widget.width != null && widget.height != null ? Size(widget.width, widget.height) : null,
       ));
     assert(newStream != null);
     _updateSourceStream(newStream);
   }
 
-  void _handleImageChanged(ImageInfo imageInfo, bool synchronousCall) {
+  ImageStreamListener _getListener([ImageLoadingBuilder loadingBuilder]) {
+    loadingBuilder ??= widget.loadingBuilder;
+    return ImageStreamListener(
+      _handleImageFrame,
+      onChunk: loadingBuilder == null ? null : _handleImageChunk,
+    );
+  }
+
+  void _handleImageFrame(ImageInfo imageInfo, bool synchronousCall) {
     setState(() {
       _imageInfo = imageInfo;
+      _loadingProgress = null;
+      _frameNumber = _frameNumber == null ? 0 : _frameNumber + 1;
+      _wasSynchronouslyLoaded |= synchronousCall;
     });
   }
 
-  // Update _imageStream to newStream, and moves the stream listener
+  void _handleImageChunk(ImageChunkEvent event) {
+    assert(widget.loadingBuilder != null);
+    setState(() {
+      _loadingProgress = event;
+    });
+  }
+
+  // Updates _imageStream to newStream, and moves the stream listener
   // registration from the old stream to the new stream (if a listener was
   // registered).
   void _updateSourceStream(ImageStream newStream) {
     if (_imageStream?.key == newStream?.key)
       return;
 
-    final ImageStreamListener listener = ImageStreamListener(_handleImageChanged);
-
     if (_isListeningToStream)
-      _imageStream.removeListener(listener);
+      _imageStream.removeListener(_getListener());
 
     if (!widget.gaplessPlayback)
       setState(() { _imageInfo = null; });
 
+    setState(() {
+      _loadingProgress = null;
+      _frameNumber = null;
+      _wasSynchronouslyLoaded = false;
+    });
+
     _imageStream = newStream;
     if (_isListeningToStream)
-      _imageStream.addListener(listener);
+      _imageStream.addListener(_getListener());
   }
 
   void _listenToStream() {
     if (_isListeningToStream)
       return;
-    _imageStream.addListener(ImageStreamListener(_handleImageChanged));
+    _imageStream.addListener(_getListener());
     _isListeningToStream = true;
   }
 
   void _stopListeningToStream() {
     if (!_isListeningToStream)
       return;
-    _imageStream.removeListener(ImageStreamListener(_handleImageChanged));
+    _imageStream.removeListener(_getListener());
     _isListeningToStream = false;
   }
 
   @override
-  void dispose() {
-    assert(_imageStream != null);
-    _stopListeningToStream();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final RawImage image = RawImage(
+    Widget result = RawImage(
       image: _imageInfo?.image,
       width: widget.width,
       height: widget.height,
@@ -710,14 +1094,23 @@ class _ImageState extends State<Image> {
       invertColors: _invertColors,
       filterQuality: widget.filterQuality,
     );
-    if (widget.excludeFromSemantics)
-      return image;
-    return Semantics(
-      container: widget.semanticLabel != null,
-      image: true,
-      label: widget.semanticLabel ?? '',
-      child: image,
-    );
+
+    if (!widget.excludeFromSemantics) {
+      result = Semantics(
+        container: widget.semanticLabel != null,
+        image: true,
+        label: widget.semanticLabel ?? '',
+        child: result,
+      );
+    }
+
+    if (widget.frameBuilder != null)
+      result = widget.frameBuilder(context, result, _frameNumber, _wasSynchronouslyLoaded);
+
+    if (widget.loadingBuilder != null)
+      result = widget.loadingBuilder(context, result, _loadingProgress);
+
+    return result;
   }
 
   @override
@@ -725,5 +1118,8 @@ class _ImageState extends State<Image> {
     super.debugFillProperties(description);
     description.add(DiagnosticsProperty<ImageStream>('stream', _imageStream));
     description.add(DiagnosticsProperty<ImageInfo>('pixels', _imageInfo));
+    description.add(DiagnosticsProperty<ImageChunkEvent>('loadingProgress', _loadingProgress));
+    description.add(DiagnosticsProperty<int>('frameNumber', _frameNumber));
+    description.add(DiagnosticsProperty<bool>('wasSynchronouslyLoaded', _wasSynchronouslyLoaded));
   }
 }

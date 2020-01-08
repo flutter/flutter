@@ -1,4 +1,4 @@
-// Copyright 2019 The Flutter Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -19,12 +19,11 @@ TaskFunction createRunWithoutLeakTest(dynamic dir) {
     final List<String> options = <String>[
       '-d', device.deviceId, '--verbose',
     ];
-    setLocalEngineOptionIfNecessary(options);
     int exitCode;
     await inDirectory<void>(dir, () async {
       final Process process = await startProcess(
           path.join(flutterDirectory.path, 'bin', 'flutter'),
-          <String>['run']..addAll(options),
+          flutterCommandArgs('run', options),
           environment: null,
       );
       final Completer<void> stdoutDone = Completer<void>();

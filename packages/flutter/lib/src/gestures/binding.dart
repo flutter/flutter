@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -88,7 +88,7 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
 
   /// Dispatch a [PointerCancelEvent] for the given pointer soon.
   ///
-  /// The pointer event will be dispatch before the next pointer event and
+  /// The pointer event will be dispatched before the next pointer event and
   /// before the end of the microtask but not within this function call.
   void cancelPointer(int pointer) {
     if (_pendingPointerEvents.isEmpty && !locked)
@@ -193,9 +193,9 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
       }
       return;
     }
-    for (HitTestEntry entry in hitTestResult.path) {
+    for (final HitTestEntry entry in hitTestResult.path) {
       try {
-        entry.target.handleEvent(event, entry);
+        entry.target.handleEvent(event.transformed(entry.transform), entry);
       } catch (exception, stack) {
         FlutterError.reportError(FlutterErrorDetailsForPointerEventDispatcher(
           exception: exception,
@@ -229,8 +229,10 @@ mixin GestureBinding on BindingBase implements HitTestable, HitTestDispatcher, H
 /// Variant of [FlutterErrorDetails] with extra fields for the gesture
 /// library's binding's pointer event dispatcher ([GestureBinding.dispatchEvent]).
 ///
-/// See also [FlutterErrorDetailsForPointerRouter], which is also used by the
-/// gesture library.
+/// See also:
+///
+///  * [FlutterErrorDetailsForPointerRouter], which is also used by the
+///    gesture library.
 class FlutterErrorDetailsForPointerEventDispatcher extends FlutterErrorDetails {
   /// Creates a [FlutterErrorDetailsForPointerEventDispatcher] object with the given
   /// arguments setting the object's properties.
@@ -252,7 +254,7 @@ class FlutterErrorDetailsForPointerEventDispatcher extends FlutterErrorDetails {
     library: library,
     context: context,
     informationCollector: informationCollector,
-    silent: silent
+    silent: silent,
   );
 
   /// The pointer event that was being routed when the exception was raised.

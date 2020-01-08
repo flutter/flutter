@@ -1,24 +1,9 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:io' show Platform;
-
-import 'assertions.dart';
-
-/// The platform that user interaction should adapt to target.
-///
-/// The [defaultTargetPlatform] getter returns the current platform.
-enum TargetPlatform {
-  /// Android: <https://www.android.com/>
-  android,
-
-  /// Fuchsia: <https://fuchsia.googlesource.com/>
-  fuchsia,
-
-  /// iOS: <http://www.apple.com/ios/>
-  iOS,
-}
+import '_platform_io.dart'
+  if (dart.library.html) '_platform_web.dart' as _platform;
 
 /// The [TargetPlatform] that matches the platform on which the framework is
 /// currently executing.
@@ -26,11 +11,11 @@ enum TargetPlatform {
 /// This is the default value of [ThemeData.platform] (hence the name). Widgets
 /// from the material library should use [Theme.of] to determine the current
 /// platform for styling purposes, rather than using [defaultTargetPlatform].
-/// However, if there is widget behavior that depends on the actual underlying
-/// platform, then depending on [defaultTargetPlatform] makes sense.
-/// [dart.io.Platform.environment] should be used directly only when it's
-/// critical to actually know the current platform, without any overrides
-/// possible (for example, when a system API is about to be called).
+/// Widgets and render objects at lower layers that try to emulate the
+/// underlying platform can depend on [defaultTargetPlatform] directly. The
+/// [dart:io.Platform] object should only be used directly when it's critical to
+/// actually know the current platform, without any overrides possible (for
+/// example, when a system API is about to be called).
 ///
 /// In a test environment, the platform returned is [TargetPlatform.android]
 /// regardless of the host platform. (Android was chosen because the tests were
@@ -48,36 +33,23 @@ enum TargetPlatform {
 // that would mean we'd be stuck with that platform forever emulating the other,
 // and we'd never be able to introduce dedicated behavior for that platform
 // (since doing so would be a big breaking change).
-TargetPlatform get defaultTargetPlatform {
-  // TODO(jonahwilliams): consider where this constant should live.
-  const bool kIsWeb = identical(1, 1.0);
-  TargetPlatform result;
-  if (kIsWeb) {
-    result = TargetPlatform.android;
-  } else {
-    if (Platform.isIOS) {
-      result = TargetPlatform.iOS;
-    } else if (Platform.isAndroid) {
-      result = TargetPlatform.android;
-    } else if (Platform.isFuchsia) {
-      result = TargetPlatform.fuchsia;
-    }
-  }
-  assert(() {
-    if (!kIsWeb && Platform.environment.containsKey('FLUTTER_TEST'))
-      result = TargetPlatform.android;
-    return true;
-  }());
-  if (debugDefaultTargetPlatformOverride != null)
-    result = debugDefaultTargetPlatformOverride;
-  if (result == null) {
-    throw FlutterError(
-      'Unknown platform.\n'
-      '${Platform.operatingSystem} was not recognized as a target platform. '
-      'Consider updating the list of TargetPlatforms to include this platform.'
-    );
-  }
-  return result;
+TargetPlatform get defaultTargetPlatform => _platform.defaultTargetPlatform;
+
+/// The platform that user interaction should adapt to target.
+///
+/// The [defaultTargetPlatform] getter returns the current platform.
+enum TargetPlatform {
+  /// Android: <https://www.android.com/>
+  android,
+
+  /// Fuchsia: <https://fuchsia.googlesource.com/>
+  fuchsia,
+
+  /// iOS: <http://www.apple.com/ios/>
+  iOS,
+
+  /// macOS: <http://www.apple.com/macos>
+  macOS,
 }
 
 /// Override the [defaultTargetPlatform].

@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -287,7 +287,7 @@ class CalcExpression {
     // multiplication or division symbols.
     num currentTermValue = removeNextTerm(list);
     while (list.isNotEmpty) {
-      final OperationToken opToken = list.removeAt(0);
+      final OperationToken opToken = list.removeAt(0) as OperationToken;
       final num nextTermValue = removeNextTerm(list);
       switch (opToken.operation) {
         case Operation.Addition:
@@ -302,8 +302,9 @@ class CalcExpression {
           assert(false);
       }
     }
-    final List<ExpressionToken> outList = <ExpressionToken>[];
-    outList.add(ResultToken(currentTermValue));
+    final List<ExpressionToken> outList = <ExpressionToken>[
+      ResultToken(currentTermValue),
+    ];
     return CalcExpression(outList, ExpressionState.Result);
   }
 
@@ -312,11 +313,11 @@ class CalcExpression {
   /// and division symbols.
   static num removeNextTerm(List<ExpressionToken> list) {
     assert(list != null && list.isNotEmpty);
-    final NumberToken firstNumToken = list.removeAt(0);
+    final NumberToken firstNumToken = list.removeAt(0) as NumberToken;
     num currentValue = firstNumToken.number;
     while (list.isNotEmpty) {
       bool isDivision = false;
-      final OperationToken nextOpToken = list.first;
+      final OperationToken nextOpToken = list.first as OperationToken;
       switch (nextOpToken.operation) {
         case Operation.Addition:
         case Operation.Subtraction:
@@ -330,7 +331,7 @@ class CalcExpression {
       // Remove the operation token.
       list.removeAt(0);
       // Remove the next number token.
-      final NumberToken nextNumToken = list.removeAt(0);
+      final NumberToken nextNumToken = list.removeAt(0) as NumberToken;
       final num nextNumber = nextNumToken.number;
       if (isDivision)
         currentValue /= nextNumber;

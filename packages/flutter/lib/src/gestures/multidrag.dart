@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -163,7 +163,10 @@ abstract class MultiDragPointerState {
   void dispose() {
     _arenaEntry?.resolve(GestureDisposition.rejected);
     _arenaEntry = null;
-    assert(() { _pendingDelta = null; return true; }());
+    assert(() {
+      _pendingDelta = null;
+      return true;
+    }());
   }
 }
 

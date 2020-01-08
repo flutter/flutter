@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -86,8 +86,7 @@ class OverlayEntry {
     if (_opaque == value)
       return;
     _opaque = value;
-    assert(_overlay != null);
-    _overlay._didChangeEntryOpacity();
+    _overlay?._didChangeEntryOpacity();
   }
 
   /// Whether this entry must be included in the tree even if there is a fully
@@ -235,20 +234,19 @@ class Overlay extends StatefulWidget {
   /// OverlayState overlay = Overlay.of(context);
   /// ```
   static OverlayState of(BuildContext context, { Widget debugRequiredFor }) {
-    final OverlayState result = context.ancestorStateOfType(const TypeMatcher<OverlayState>());
+    final OverlayState result = context.findAncestorStateOfType<OverlayState>();
     assert(() {
       if (debugRequiredFor != null && result == null) {
-        final String additional = context.widget != debugRequiredFor
-          ? '\nThe context from which that widget was searching for an overlay was:\n  $context'
-          : '';
-        throw FlutterError(
-          'No Overlay widget found.\n'
-          '${debugRequiredFor.runtimeType} widgets require an Overlay widget ancestor for correct operation.\n'
-          'The most common way to add an Overlay to an application is to include a MaterialApp or Navigator widget in the runApp() call.\n'
-          'The specific widget that failed to find an overlay was:\n'
-          '  $debugRequiredFor'
-          '$additional'
-        );
+        final List<DiagnosticsNode> information = <DiagnosticsNode>[
+          ErrorSummary('No Overlay widget found.'),
+          ErrorDescription('${debugRequiredFor.runtimeType} widgets require an Overlay widget ancestor for correct operation.'),
+          ErrorHint('The most common way to add an Overlay to an application is to include a MaterialApp or Navigator widget in the runApp() call.'),
+          DiagnosticsProperty<Widget>('The specific widget that failed to find an overlay was', debugRequiredFor, style: DiagnosticsTreeStyle.errorProperty),
+          if (context.widget != debugRequiredFor)
+            context.describeElement('The context from which that widget was searching for an overlay was')
+        ];
+
+        throw FlutterError.fromParts(information);
       }
       return true;
     }());
@@ -339,7 +337,7 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
     );
     if (entries.isEmpty)
       return;
-    for (OverlayEntry entry in entries) {
+    for (final OverlayEntry entry in entries) {
       assert(entry._overlay == null);
       entry._overlay = this;
     }
@@ -392,7 +390,7 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
     if (listEquals(_entries, newEntriesList))
       return;
     final LinkedHashSet<OverlayEntry> old = LinkedHashSet<OverlayEntry>.from(_entries);
-    for (OverlayEntry entry in newEntriesList) {
+    for (final OverlayEntry entry in newEntriesList) {
       entry._overlay ??= this;
     }
     setState(() {
@@ -510,10 +508,10 @@ class _TheatreElement extends RenderObjectElement {
       super(widget);
 
   @override
-  _Theatre get widget => super.widget;
+  _Theatre get widget => super.widget as _Theatre;
 
   @override
-  _RenderTheatre get renderObject => super.renderObject;
+  _RenderTheatre get renderObject => super.renderObject as _RenderTheatre;
 
   Element _onstage;
   static final Object _onstageSlot = Object();
@@ -526,10 +524,10 @@ class _TheatreElement extends RenderObjectElement {
     assert(renderObject.debugValidateChild(child));
     if (slot == _onstageSlot) {
       assert(child is RenderStack);
-      renderObject.child = child;
+      renderObject.child = child as RenderStack;
     } else {
       assert(slot == null || slot is Element);
-      renderObject.insert(child, after: slot?.renderObject);
+      renderObject.insert(child, after: slot?.renderObject as RenderBox);
     }
   }
 
@@ -538,14 +536,14 @@ class _TheatreElement extends RenderObjectElement {
     if (slot == _onstageSlot) {
       renderObject.remove(child);
       assert(child is RenderStack);
-      renderObject.child = child;
+      renderObject.child = child as RenderStack;
     } else {
       assert(slot == null || slot is Element);
       if (renderObject.child == child) {
         renderObject.child = null;
-        renderObject.insert(child, after: slot?.renderObject);
+        renderObject.insert(child, after: slot?.renderObject as RenderBox);
       } else {
-        renderObject.move(child, after: slot?.renderObject);
+        renderObject.move(child, after: slot?.renderObject as RenderBox);
       }
     }
   }
@@ -563,7 +561,7 @@ class _TheatreElement extends RenderObjectElement {
   void visitChildren(ElementVisitor visitor) {
     if (_onstage != null)
       visitor(_onstage);
-    for (Element child in _offstage) {
+    for (final Element child in _offstage) {
       if (!_forgottenOffstageChildren.contains(child))
         visitor(child);
     }
@@ -660,10 +658,9 @@ class _RenderTheatre extends RenderBox
 
   @override
   List<DiagnosticsNode> debugDescribeChildren() {
-    final List<DiagnosticsNode> children = <DiagnosticsNode>[];
-
-    if (child != null)
-      children.add(child.toDiagnosticsNode(name: 'onstage'));
+    final List<DiagnosticsNode> children = <DiagnosticsNode>[
+      if (child != null) child.toDiagnosticsNode(name: 'onstage'),
+    ];
 
     if (firstChild != null) {
       RenderBox child = firstChild;
@@ -678,7 +675,7 @@ class _RenderTheatre extends RenderBox
         );
         if (child == lastChild)
           break;
-        final StackParentData childParentData = child.parentData;
+        final StackParentData childParentData = child.parentData as StackParentData;
         child = childParentData.nextSibling;
         count += 1;
       }

@@ -1,18 +1,17 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'package:package_config/packages_file.dart' as packages_file;
 
-import '../base/file_system.dart';
-import '../base/platform.dart';
+import '../globals.dart' as globals;
 
 const String kPackagesFileName = '.packages';
 
 Map<String, Uri> _parse(String packagesPath) {
-  final List<int> source = fs.file(packagesPath).readAsBytesSync();
+  final List<int> source = globals.fs.file(packagesPath).readAsBytesSync();
   return packages_file.parse(source,
-      Uri.file(packagesPath, windows: platform.isWindows));
+      Uri.file(packagesPath, windows: globals.platform.isWindows));
 }
 
 class PackageMap {
@@ -20,7 +19,7 @@ class PackageMap {
 
   static String get globalPackagesPath => _globalPackagesPath ?? kPackagesFileName;
 
-  static String get globalGeneratedPackagesPath => fs.path.setExtension(globalPackagesPath, '.generated');
+  static String get globalGeneratedPackagesPath => globals.fs.path.setExtension(globalPackagesPath, '.generated');
 
   static set globalPackagesPath(String value) {
     _globalPackagesPath = value;
@@ -46,27 +45,30 @@ class PackageMap {
   /// Returns the path to [packageUri].
   String pathForPackage(Uri packageUri) => uriForPackage(packageUri).path;
 
-  /// Returns the path to [packageUri] as Uri.
+  /// Returns the path to [packageUri] as URL.
   Uri uriForPackage(Uri packageUri) {
     assert(packageUri.scheme == 'package');
     final List<String> pathSegments = packageUri.pathSegments.toList();
     final String packageName = pathSegments.removeAt(0);
     final Uri packageBase = map[packageName];
-    if (packageBase == null)
+    if (packageBase == null) {
       return null;
-    final String packageRelativePath = fs.path.joinAll(pathSegments);
-    return packageBase.resolveUri(fs.path.toUri(packageRelativePath));
+    }
+    final String packageRelativePath = globals.fs.path.joinAll(pathSegments);
+    return packageBase.resolveUri(globals.fs.path.toUri(packageRelativePath));
   }
 
   String checkValid() {
-    if (fs.isFileSync(packagesPath))
+    if (globals.fs.isFileSync(packagesPath)) {
       return null;
+    }
     String message = '$packagesPath does not exist.';
-    final String pubspecPath = fs.path.absolute(fs.path.dirname(packagesPath), 'pubspec.yaml');
-    if (fs.isFileSync(pubspecPath))
+    final String pubspecPath = globals.fs.path.absolute(globals.fs.path.dirname(packagesPath), 'pubspec.yaml');
+    if (globals.fs.isFileSync(pubspecPath)) {
       message += '\nDid you run "flutter pub get" in this directory?';
-    else
+    } else {
       message += '\nDid you run this command from the same directory as your pubspec.yaml file?';
+    }
     return message;
   }
 }

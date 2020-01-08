@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -23,19 +23,19 @@ void checkTree(WidgetTester tester, List<TestParentData> expectedParentData) {
   );
   expect(element, isNotNull);
   expect(element.renderObject is RenderStack, isTrue);
-  final RenderStack renderObject = element.renderObject;
+  final RenderStack renderObject = element.renderObject as RenderStack;
   try {
     RenderObject child = renderObject.firstChild;
-    for (TestParentData expected in expectedParentData) {
+    for (final TestParentData expected in expectedParentData) {
       expect(child is RenderDecoratedBox, isTrue);
-      final RenderDecoratedBox decoratedBox = child;
+      final RenderDecoratedBox decoratedBox = child as RenderDecoratedBox;
       expect(decoratedBox.parentData is StackParentData, isTrue);
-      final StackParentData parentData = decoratedBox.parentData;
+      final StackParentData parentData = decoratedBox.parentData as StackParentData;
       expect(parentData.top, equals(expected.top));
       expect(parentData.right, equals(expected.right));
       expect(parentData.bottom, equals(expected.bottom));
       expect(parentData.left, equals(expected.left));
-      final StackParentData decoratedBoxParentData = decoratedBox.parentData;
+      final StackParentData decoratedBoxParentData = decoratedBox.parentData as StackParentData;
       child = decoratedBoxParentData.nextSibling;
     }
     expect(child, isNull);
@@ -266,7 +266,20 @@ void main() {
         ],
       ),
     );
-    expect(tester.takeException(), isFlutterError);
+    dynamic exception = tester.takeException();
+    expect(exception, isFlutterError);
+    expect(
+      exception.toString(),
+      equalsIgnoringHashCodes(
+        'Incorrect use of ParentDataWidget.\n'
+        'Positioned widgets must be placed directly inside Stack widgets.\n'
+        'Positioned(no depth, left: 7.0, top: 6.0, dirty) has a Stack ancestor, but there are other widgets between them:\n'
+        '- Positioned(top: 5.0, bottom: 8.0) (this is a different Positioned than the one with the problem)\n'
+        'These widgets cannot come between a Positioned and its Stack.\n'
+        'The ownership chain for the parent of the offending Positioned was:\n'
+        '  Positioned ← Stack ← [root]'
+      ),
+    );
 
     await tester.pumpWidget(Stack(textDirection: TextDirection.ltr));
 
@@ -285,7 +298,18 @@ void main() {
         ),
       ),
     );
-    expect(tester.takeException(), isFlutterError);
+    exception = tester.takeException();
+    expect(exception, isFlutterError);
+    expect(
+      exception.toString(),
+      equalsIgnoringHashCodes(
+        'Incorrect use of ParentDataWidget.\n'
+        'Positioned widgets must be placed inside Stack widgets.\n'
+        'Positioned(no depth, left: 7.0, top: 6.0, dirty) has no Stack ancestor at all.\n'
+        'The ownership chain for the parent of the offending Positioned was:\n'
+        '  Row ← Container ← [root]'
+      ),
+    );
 
     await tester.pumpWidget(
       Stack(textDirection: TextDirection.ltr)
@@ -356,7 +380,7 @@ void main() {
     await tester.pumpWidget(Row(
       children: <Widget>[
         Stack(
-        textDirection: TextDirection.ltr,
+          textDirection: TextDirection.ltr,
           children: <Widget>[
             Expanded(
               child: Container(),
@@ -366,6 +390,19 @@ void main() {
       ],
     ));
 
-    expect(tester.takeException(), isFlutterError);
+    final dynamic exception = tester.takeException();
+    expect(exception, isFlutterError);
+    expect(
+      exception.toString(),
+      equalsIgnoringHashCodes(
+        'Incorrect use of ParentDataWidget.\n'
+        'Expanded widgets must be placed directly inside Flex widgets.\n'
+        'Expanded(no depth, flex: 1, dirty) has a Flex ancestor, but there are other widgets between them:\n'
+        '- Stack(alignment: AlignmentDirectional.topStart, textDirection: ltr, fit: loose, overflow: clip)\n'
+        'These widgets cannot come between a Expanded and its Flex.\n'
+        'The ownership chain for the parent of the offending Expanded was:\n'
+        '  Stack ← Row ← [root]'
+      ),
+    );
   });
 }

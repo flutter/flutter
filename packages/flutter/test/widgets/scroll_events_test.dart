@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -139,7 +139,7 @@ void main() {
     final List<String> log = <String>[];
     await tester.pumpWidget(_buildScroller(log: log));
 
-    // The ideal behaviour here would be a single start/end pair, but for
+    // The ideal behavior here would be a single start/end pair, but for
     // simplicity of implementation we compromise here and accept two. Should
     // you find a way to make this work with just one without complicating the
     // API, feel free to change the expectation here.

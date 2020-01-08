@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -128,8 +128,8 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
   /// [workingDevice].
   @override
   Future<void> chooseWorkingDevice() async {
-    final List<Device> allDevices = (await discoverDevices())
-      .map<Device>((String id) => AndroidDevice(deviceId: id))
+    final List<AndroidDevice> allDevices = (await discoverDevices())
+      .map<AndroidDevice>((String id) => AndroidDevice(deviceId: id))
       .toList();
 
     if (allDevices.isEmpty)
@@ -144,7 +144,7 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
     final List<String> output = (await eval(adbPath, <String>['devices', '-l'], canFail: false))
         .trim().split('\n');
     final List<String> results = <String>[];
-    for (String line in output) {
+    for (final String line in output) {
       // Skip lines like: * daemon started successfully *
       if (line.startsWith('* daemon '))
         continue;
@@ -172,7 +172,7 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
   @override
   Future<Map<String, HealthCheckResult>> checkDevices() async {
     final Map<String, HealthCheckResult> results = <String, HealthCheckResult>{};
-    for (String deviceId in await discoverDevices()) {
+    for (final String deviceId in await discoverDevices()) {
       try {
         final AndroidDevice device = AndroidDevice(deviceId: deviceId);
         // Just a smoke test that we can read wakefulness state
@@ -262,17 +262,17 @@ class AndroidDevice implements Device {
 
   /// Executes [command] on `adb shell` and returns its exit code.
   Future<void> shellExec(String command, List<String> arguments, { Map<String, String> environment }) async {
-    await adb(<String>['shell', command]..addAll(arguments), environment: environment);
+    await adb(<String>['shell', command, ...arguments], environment: environment);
   }
 
   /// Executes [command] on `adb shell` and returns its standard output as a [String].
   Future<String> shellEval(String command, List<String> arguments, { Map<String, String> environment }) {
-    return adb(<String>['shell', command]..addAll(arguments), environment: environment);
+    return adb(<String>['shell', command, ...arguments], environment: environment);
   }
 
   /// Runs `adb` with the given [arguments], selecting this device.
   Future<String> adb(List<String> arguments, { Map<String, String> environment }) {
-    return eval(adbPath, <String>['-s', deviceId]..addAll(arguments), environment: environment, canFail: false);
+    return eval(adbPath, <String>['-s', deviceId, ...arguments], environment: environment, canFail: false);
   }
 
   @override
@@ -322,7 +322,7 @@ class AndroidDevice implements Device {
         process.exitCode.then<void>((int exitCode) {
           print('adb logcat process terminated with exit code $exitCode');
           if (!aborted) {
-            stream.addError(BuildFailedError('adb logcat failed with exit code $exitCode.'));
+            stream.addError(BuildFailedError('adb logcat failed with exit code $exitCode.\n'));
             processDone.complete();
           }
         });
@@ -392,9 +392,35 @@ class IosDeviceDiscovery implements DeviceDiscovery {
     _workingDevice = allDevices[math.Random().nextInt(allDevices.length)];
   }
 
+  // Returns the path to cached binaries relative to devicelab directory
+  String get _artifactDirPath {
+    return path.normalize(
+      path.join(
+        path.current,
+        '../../bin/cache/artifacts',
+      )
+    );
+  }
+
+  // Returns a colon-separated environment variable that contains the paths
+  // of linked libraries for idevice_id
+  Map<String, String> get _ideviceIdEnvironment {
+    final String libPath = const <String>[
+      'libimobiledevice',
+      'usbmuxd',
+      'libplist',
+      'openssl',
+      'ideviceinstaller',
+      'ios-deploy',
+      'libzip',
+    ].map((String packageName) => path.join(_artifactDirPath, packageName)).join(':');
+    return <String, String>{'DYLD_LIBRARY_PATH': libPath};
+  }
+
   @override
   Future<List<String>> discoverDevices() async {
-    final List<String> iosDeviceIDs = LineSplitter.split(await eval('idevice_id', <String>['-l']))
+    final String ideviceIdPath = path.join(_artifactDirPath, 'libimobiledevice', 'idevice_id');
+    final List<String> iosDeviceIDs = LineSplitter.split(await eval(ideviceIdPath, <String>['-l'], environment: _ideviceIdEnvironment))
       .map<String>((String line) => line.trim())
       .where((String line) => line.isNotEmpty)
       .toList();
@@ -406,7 +432,7 @@ class IosDeviceDiscovery implements DeviceDiscovery {
   @override
   Future<Map<String, HealthCheckResult>> checkDevices() async {
     final Map<String, HealthCheckResult> results = <String, HealthCheckResult>{};
-    for (String deviceId in await discoverDevices()) {
+    for (final String deviceId in await discoverDevices()) {
       // TODO(ianh): do a more meaningful connectivity check than just recording the ID
       results['ios-device-$deviceId'] = HealthCheckResult.success();
     }

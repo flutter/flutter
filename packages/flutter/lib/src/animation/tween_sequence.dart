@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -7,6 +7,9 @@ import 'package:flutter/foundation.dart';
 import 'animation.dart';
 import 'tween.dart';
 
+// Examples can assume:
+// AnimationController myAnimationController;
+
 /// Enables creating an [Animation] whose value is defined by a sequence of
 /// [Tween]s.
 ///
@@ -14,9 +17,10 @@ import 'tween.dart';
 /// animation's duration. Each tween defines the animation's value during the
 /// interval indicated by its weight.
 ///
-/// For example, to define an animation that uses an easing curve to interpolate
-/// between 5.0 and 10.0 during the first 40% of the animation, remain at 10.0
-/// for the next 20%, and then return to 10.0 for the final 40%:
+/// {@tool sample}
+/// This example defines an animation that uses an easing curve to interpolate
+/// between 5.0 and 10.0 during the first 40% of the animation, remains at 10.0
+/// for the next 20%, and then returns to 5.0 for the final 40%.
 ///
 /// ```dart
 /// final Animation<double> animation = TweenSequence(
@@ -38,6 +42,7 @@ import 'tween.dart';
 ///   ],
 /// ).animate(myAnimationController);
 /// ```
+/// {@end-tool}
 class TweenSequence<T> extends Animatable<T> {
   /// Construct a TweenSequence.
   ///
@@ -52,7 +57,7 @@ class TweenSequence<T> extends Animatable<T> {
     _items.addAll(items);
 
     double totalWeight = 0.0;
-    for (TweenSequenceItem<T> item in _items)
+    for (final TweenSequenceItem<T> item in _items)
       totalWeight += item.weight;
     assert(totalWeight > 0.0);
 
@@ -83,12 +88,36 @@ class TweenSequence<T> extends Animatable<T> {
         return _evaluateAt(t, index);
     }
     // Should be unreachable.
-    assert(false, 'TweenSequence.evaluate() could not find a interval for $t');
+    assert(false, 'TweenSequence.evaluate() could not find an interval for $t');
     return null;
   }
 
   @override
   String toString() => 'TweenSequence(${_items.length} items)';
+}
+
+/// Enables creating a flipped [Animation] whose value is defined by a sequence
+/// of [Tween]s.
+///
+/// This creates a [TweenSequence] that evaluates to a result that flips the
+/// tween both horizontally and vertically.
+///
+/// This tween sequence assumes that the evaluated result has to be a double
+/// between 0.0 and 1.0.
+class FlippedTweenSequence extends TweenSequence<double> {
+  /// Creates a flipped [TweenSequence].
+  ///
+  /// The [items] parameter must be a list of one or more [TweenSequenceItem]s.
+  ///
+  /// There's a small cost associated with building a `TweenSequence` so it's
+  /// best to reuse one, rather than rebuilding it on every frame, when that's
+  /// possible.
+  FlippedTweenSequence(List<TweenSequenceItem<double>> items)
+    : assert(items != null),
+      super(items);
+
+  @override
+  double transform(double t) => 1 - super.transform(1 - t);
 }
 
 /// A simple holder for one element of a [TweenSequence].

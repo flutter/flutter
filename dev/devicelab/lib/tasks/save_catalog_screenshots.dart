@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -43,7 +43,7 @@ class Upload {
     if (retryCount == 0)
       return const Duration(milliseconds: 1000);
     random ??= math.Random();
-    return Duration(milliseconds: random.nextInt(1000) + math.pow(2, retryCount) * 1000);
+    return Duration(milliseconds: random.nextInt(1000) + (math.pow(2, retryCount) as int) * 1000);
   }
 
   Future<bool> save(HttpClient client, String name, List<int> content) async {
@@ -65,7 +65,7 @@ class Upload {
       } else {
         // TODO(hansmuller): only retry on 5xx and 429 responses
         logMessage('Request to save "$name" (length ${content.length}) failed with status ${response.statusCode}, will retry');
-        logMessage(await response.transform<String>(utf8.decoder).join());
+        logMessage(await response.cast<List<int>>().transform<String>(utf8.decoder).join());
       }
       return response.statusCode == HttpStatus.ok;
     } on TimeoutException catch (_) {
@@ -80,7 +80,7 @@ class Upload {
       throw UploadError('upload of "$fromPath" to "$largeName" and "$smallName" failed after 2 retries');
 
     largeImage ??= await File(fromPath).readAsBytes();
-    smallImage ??= encodePng(copyResize(decodePng(largeImage), 300));
+    smallImage ??= encodePng(copyResize(decodePng(largeImage), width: 300));
 
     if (!largeImageSaved)
       largeImageSaved = await save(client, largeName, largeImage);
@@ -119,17 +119,15 @@ Future<void> saveCatalogScreenshots({
     String token, // Cloud storage authorization token.
     String prefix, // Prefix for all file names.
   }) async {
-  final List<String> screenshots = <String>[];
-  for (FileSystemEntity entity in directory.listSync()) {
-    if (entity is File && entity.path.endsWith('.png')) {
-      final File file = entity;
-      screenshots.add(file.path);
-    }
-  }
+  final List<String> screenshots = <String>[
+    for (final FileSystemEntity entity in directory.listSync())
+      if (entity is File && entity.path.endsWith('.png'))
+        entity.path,
+  ];
 
   final List<String> largeNames = <String>[]; // Cloud storage names for the full res screenshots.
   final List<String> smallNames = <String>[]; // Likewise for the scaled down screenshots.
-  for (String path in screenshots) {
+  for (final String path in screenshots) {
     final String name = screenshotName(path);
     largeNames.add('$commit/$prefix$name.png');
     smallNames.add('$commit/$prefix${name}_small.png');

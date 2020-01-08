@@ -1,9 +1,11 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'bottom_tab_bar.dart';
+import 'colors.dart';
 import 'theme.dart';
 
 /// Coordinates tab selection between a [CupertinoTabBar] and a [CupertinoTabScaffold].
@@ -57,8 +59,8 @@ import 'theme.dart';
 ///
 /// See also:
 ///
-/// * [CupertinoTabScaffold], a tabbed application root layout that can be
-///   controlled by a [CupertinoTabController].
+///  * [CupertinoTabScaffold], a tabbed application root layout that can be
+///    controlled by a [CupertinoTabController].
 class CupertinoTabController extends ChangeNotifier {
   /// Creates a [CupertinoTabController] to control the tab index of [CupertinoTabScaffold]
   /// and [CupertinoTabBar].
@@ -117,8 +119,12 @@ class CupertinoTabController extends ChangeNotifier {
 ///
 /// Tabs' contents are built with the provided [tabBuilder] at the active
 /// tab index. The [tabBuilder] must be able to build the same number of
-/// pages as there are [tabBar.items]. Inactive tabs will be moved [Offstage]
+/// pages as there are [tabBar] items. Inactive tabs will be moved [Offstage]
 /// and their animations disabled.
+///
+/// Adding/removing tabs, or changing the order of tabs is supported but not
+/// recommended. Doing so is against the iOS human interface guidelines, and
+/// [CupertinoTabScaffold] may lose some tabs' state in the process.
 ///
 /// Use [CupertinoTabView] as the root widget of each tab to support tabs with
 /// parallel navigation state and history. Since each [CupertinoTabView] contains
@@ -193,6 +199,7 @@ class CupertinoTabController extends ChangeNotifier {
 ///  * [CupertinoPageRoute], a route hosting modal pages with iOS style transitions.
 ///  * [CupertinoPageScaffold], typical contents of an iOS modal page implementing
 ///    layout with a navigation bar on top.
+///  * [iOS human interface guidelines](https://developer.apple.com/design/human-interface-guidelines/ios/bars/tab-bars/).
 class CupertinoTabScaffold extends StatefulWidget {
   /// Creates a layout for applications with a tab bar at the bottom.
   ///
@@ -232,6 +239,14 @@ class CupertinoTabScaffold extends StatefulWidget {
   /// If translucent, the main content may slide behind it.
   /// Otherwise, the main content's bottom margin will be offset by its height.
   ///
+  /// By default `tabBar` has its text scale factor set to 1.0 and does not
+  /// respond to text scale factor changes from the operating system, to match
+  /// the native iOS behavior. To override this behavior, wrap each of the `tabBar`'s
+  /// items inside a [MediaQuery] with the desired [MediaQueryData.textScaleFactor]
+  /// value. The text scale factor value from the operating system can be retrieved
+  /// int many ways, such as querying [MediaQuery.textScaleFactorOf] against
+  /// [CupertinoApp]'s [BuildContext].
+  ///
   /// Must not be null.
   final CupertinoTabBar tabBar;
 
@@ -245,12 +260,12 @@ class CupertinoTabScaffold extends StatefulWidget {
 
   /// An [IndexedWidgetBuilder] that's called when tabs become active.
   ///
-  /// The widgets built by [IndexedWidgetBuilder] is typically a [CupertinoTabView]
-  /// in order to achieve the parallel hierarchies information architecture seen
-  /// on iOS apps with tab bars.
+  /// The widgets built by [IndexedWidgetBuilder] are typically a
+  /// [CupertinoTabView] in order to achieve the parallel hierarchical
+  /// information architecture seen on iOS apps with tab bars.
   ///
-  /// When the tab becomes inactive, its content is still cached in the widget
-  /// tree [Offstage] and its animations disabled.
+  /// When the tab becomes inactive, its content is cached in the widget tree
+  /// [Offstage] and its animations disabled.
   ///
   /// Content can slide under the [tabBar] when they're translucent.
   /// In that case, the child's [BuildContext]'s [MediaQuery] will have a
@@ -265,7 +280,7 @@ class CupertinoTabScaffold extends StatefulWidget {
   /// By default uses [CupertinoTheme]'s `scaffoldBackgroundColor` when null.
   final Color backgroundColor;
 
-  /// Whether the [child] should size itself to avoid the window's bottom inset.
+  /// Whether the body should size itself to avoid the window's bottom inset.
   ///
   /// For example, if there is an onscreen keyboard displayed above the
   /// scaffold, the body can be resized to avoid overlapping the keyboard, which
@@ -333,14 +348,12 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> stacked = <Widget>[];
-
     final MediaQueryData existingMediaQuery = MediaQuery.of(context);
     MediaQueryData newMediaQuery = MediaQuery.of(context);
 
     Widget content = _TabSwitchingView(
       currentTabIndex: _controller.index,
-      tabNumber: widget.tabBar.items.length,
+      tabCount: widget.tabBar.items.length,
       tabBuilder: widget.tabBuilder,
     );
     EdgeInsets contentPadding = EdgeInsets.zero;
@@ -367,6 +380,7 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
       // obstructed area.
       if (widget.tabBar.opaque(context)) {
         contentPadding = EdgeInsets.only(bottom: bottomPadding);
+        newMediaQuery = newMediaQuery.removePadding(removeBottom: true);
       } else {
         newMediaQuery = newMediaQuery.copyWith(
           padding: newMediaQuery.padding.copyWith(
@@ -384,33 +398,34 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
       ),
     );
 
-    // The main content being at the bottom is added to the stack first.
-    stacked.add(content);
-
-    if (widget.tabBar != null) {
-      stacked.add(Align(
-        alignment: Alignment.bottomCenter,
-        // Override the tab bar's currentIndex to the current tab and hook in
-        // our own listener to update the [_controller.currentIndex] on top of a possibly user
-        // provided callback.
-        child: widget.tabBar.copyWith(
-          currentIndex: _controller.index,
-          onTap: (int newIndex) {
-            _controller.index = newIndex;
-            // Chain the user's original callback.
-            if (widget.tabBar.onTap != null)
-              widget.tabBar.onTap(newIndex);
-          },
-        ),
-      ));
-    }
-
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: widget.backgroundColor ?? CupertinoTheme.of(context).scaffoldBackgroundColor,
+        color: CupertinoDynamicColor.resolve(widget.backgroundColor, context)
+            ?? CupertinoTheme.of(context).scaffoldBackgroundColor,
       ),
       child: Stack(
-        children: stacked,
+        children: <Widget>[
+          // The main content being at the bottom is added to the stack first.
+          content,
+          MediaQuery(
+            data: existingMediaQuery.copyWith(textScaleFactor: 1),
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              // Override the tab bar's currentIndex to the current tab and hook in
+              // our own listener to update the [_controller.currentIndex] on top of a possibly user
+              // provided callback.
+              child: widget.tabBar.copyWith(
+                currentIndex: _controller.index,
+                onTap: (int newIndex) {
+                  _controller.index = newIndex;
+                  // Chain the user's original callback.
+                  if (widget.tabBar.onTap != null)
+                    widget.tabBar.onTap(newIndex);
+                },
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -433,14 +448,14 @@ class _CupertinoTabScaffoldState extends State<CupertinoTabScaffold> {
 class _TabSwitchingView extends StatefulWidget {
   const _TabSwitchingView({
     @required this.currentTabIndex,
-    @required this.tabNumber,
+    @required this.tabCount,
     @required this.tabBuilder,
   }) : assert(currentTabIndex != null),
-       assert(tabNumber != null && tabNumber > 0),
+       assert(tabCount != null && tabCount > 0),
        assert(tabBuilder != null);
 
   final int currentTabIndex;
-  final int tabNumber;
+  final int tabCount;
   final IndexedWidgetBuilder tabBuilder;
 
   @override
@@ -448,17 +463,19 @@ class _TabSwitchingView extends StatefulWidget {
 }
 
 class _TabSwitchingViewState extends State<_TabSwitchingView> {
-  List<Widget> tabs;
-  List<FocusScopeNode> tabFocusNodes;
+  final List<bool> shouldBuildTab = <bool>[];
+  final List<FocusScopeNode> tabFocusNodes = <FocusScopeNode>[];
+
+  // When focus nodes are no longer needed, we need to dispose of them, but we
+  // can't be sure that nothing else is listening to them until this widget is
+  // disposed of, so when they are no longer needed, we move them to this list,
+  // and dispose of them when we dispose of this widget.
+  final List<FocusScopeNode> discardedNodes = <FocusScopeNode>[];
 
   @override
   void initState() {
     super.initState();
-    tabs = List<Widget>(widget.tabNumber);
-    tabFocusNodes = List<FocusScopeNode>.generate(
-      widget.tabNumber,
-      (int index) => FocusScopeNode(debugLabel: 'Tab Focus Scope $index'),
-    );
+    shouldBuildTab.addAll(List<bool>.filled(widget.tabCount, false));
   }
 
   @override
@@ -470,16 +487,46 @@ class _TabSwitchingViewState extends State<_TabSwitchingView> {
   @override
   void didUpdateWidget(_TabSwitchingView oldWidget) {
     super.didUpdateWidget(oldWidget);
+
+    // Only partially invalidate the tabs cache to avoid breaking the current
+    // behavior. We assume that the only possible change is either:
+    // - new tabs are appended to the tab list, or
+    // - some trailing tabs are removed.
+    // If the above assumption is not true, some tabs may lose their state.
+    final int lengthDiff = widget.tabCount - shouldBuildTab.length;
+    if (lengthDiff > 0) {
+      shouldBuildTab.addAll(List<bool>.filled(lengthDiff, false));
+    } else if (lengthDiff < 0) {
+      shouldBuildTab.removeRange(widget.tabCount, shouldBuildTab.length);
+    }
     _focusActiveTab();
   }
 
+  // Will focus the active tab if the FocusScope above it has focus already.  If
+  // not, then it will just mark it as the preferred focus for that scope.
   void _focusActiveTab() {
+    if (tabFocusNodes.length != widget.tabCount) {
+      if (tabFocusNodes.length > widget.tabCount) {
+        discardedNodes.addAll(tabFocusNodes.sublist(widget.tabCount));
+        tabFocusNodes.removeRange(widget.tabCount, tabFocusNodes.length);
+      } else {
+        tabFocusNodes.addAll(
+          List<FocusScopeNode>.generate(
+            widget.tabCount - tabFocusNodes.length,
+              (int index) => FocusScopeNode(debugLabel: '$CupertinoTabScaffold Tab ${index + tabFocusNodes.length}'),
+          ),
+        );
+      }
+    }
     FocusScope.of(context).setFirstFocus(tabFocusNodes[widget.currentTabIndex]);
   }
 
   @override
   void dispose() {
-    for (FocusScopeNode focusScopeNode in tabFocusNodes) {
+    for (final FocusScopeNode focusScopeNode in tabFocusNodes) {
+      focusScopeNode.dispose();
+    }
+    for (final FocusScopeNode focusScopeNode in discardedNodes) {
       focusScopeNode.dispose();
     }
     super.dispose();
@@ -489,12 +536,9 @@ class _TabSwitchingViewState extends State<_TabSwitchingView> {
   Widget build(BuildContext context) {
     return Stack(
       fit: StackFit.expand,
-      children: List<Widget>.generate(widget.tabNumber, (int index) {
+      children: List<Widget>.generate(widget.tabCount, (int index) {
         final bool active = index == widget.currentTabIndex;
-
-        if (active || tabs[index] != null) {
-          tabs[index] = widget.tabBuilder(context, index);
-        }
+        shouldBuildTab[index] = active || shouldBuildTab[index];
 
         return Offstage(
           offstage: !active,
@@ -502,7 +546,9 @@ class _TabSwitchingViewState extends State<_TabSwitchingView> {
             enabled: active,
             child: FocusScope(
               node: tabFocusNodes[index],
-              child: tabs[index] ?? Container(),
+              child: Builder(builder: (BuildContext context) {
+                return shouldBuildTab[index] ? widget.tabBuilder(context, index) : Container();
+              }),
             ),
           ),
         );

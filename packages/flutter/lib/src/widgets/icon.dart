@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -26,14 +26,33 @@ import 'icon_theme_data.dart';
 ///
 /// {@tool sample}
 ///
-/// This example shows how to use [Icon] to create an addition icon, in the
-/// color pink, and 30 x 30 pixels in size.
+/// This example shows how to create a [Row] of [Icon]s in different colors and
+/// sizes. The first [Icon] uses a [semanticLabel] to announce in accessibility
+/// modes like TalkBack and VoiceOver.
+///
+/// ![A row of icons representing a pink heart, a green musical note, and a blue umbrella](https://flutter.github.io/assets-for-api-docs/assets/widgets/icon.png)
 ///
 /// ```dart
-/// Icon(
-///   Icons.add,
-///   color: Colors.pink,
-///   size: 30.0,
+/// Row(
+///   mainAxisAlignment: MainAxisAlignment.spaceAround,
+///   children: const <Widget>[
+///     Icon(
+///       Icons.favorite,
+///       color: Colors.pink,
+///       size: 24.0,
+///       semanticLabel: 'Text to announce in accessibility modes',
+///     ),
+///     Icon(
+///       Icons.audiotrack,
+///       color: Colors.green,
+///       size: 30.0,
+///     ),
+///     Icon(
+///       Icons.beach_access,
+///       color: Colors.blue,
+///       size: 36.0,
+///     ),
+///   ],
 /// )
 /// ```
 /// {@end-tool}
@@ -94,14 +113,16 @@ class Icon extends StatelessWidget {
   /// See [Theme] to set the current theme and [ThemeData.brightness]
   /// for setting the current theme's brightness.
   ///
+  /// {@tool sample}
   /// Typically, a material design color will be used, as follows:
   ///
   /// ```dart
   /// Icon(
-  ///   icon: Icons.widgets,
+  ///   Icons.widgets,
   ///   color: Colors.blue.shade400,
   /// )
   /// ```
+  /// {@end-tool}
   final Color color;
 
   /// Semantic label for the icon.
@@ -198,8 +219,8 @@ class Icon extends StatelessWidget {
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<IconData>('icon', icon, ifNull: '<empty>', showName: false));
+    properties.add(IconDataProperty('icon', icon, ifNull: '<empty>', showName: false));
     properties.add(DoubleProperty('size', size, defaultValue: null));
-    properties.add(DiagnosticsProperty<Color>('color', color, defaultValue: null));
+    properties.add(ColorProperty('color', color, defaultValue: null));
   }
 }

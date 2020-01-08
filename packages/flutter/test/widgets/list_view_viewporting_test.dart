@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -120,8 +120,7 @@ void main() {
       1, 2,
       3, 4, 5, // visible
       6, 7,
-    ]
-    ));
+    ]));
     callbackTracker.clear();
   });
 
@@ -261,7 +260,7 @@ void main() {
     );
 
     DecoratedBox widget = tester.firstWidget(find.byType(DecoratedBox));
-    BoxDecoration decoration = widget.decoration;
+    BoxDecoration decoration = widget.decoration as BoxDecoration;
     expect(decoration.color, equals(Colors.blue));
 
     setState(() {
@@ -271,7 +270,7 @@ void main() {
     await tester.pump();
 
     widget = tester.firstWidget(find.byType(DecoratedBox));
-    decoration = widget.decoration;
+    decoration = widget.decoration as BoxDecoration;
     expect(decoration.color, equals(Colors.green));
   });
 
@@ -459,7 +458,7 @@ void main() {
                   ),
               ),
             ),
-        )
+        ),
     );
 
     final RenderSliverList list = tester.renderObject(find.byType(SliverList));
@@ -490,7 +489,7 @@ void main() {
                     ),
                 ),
             ),
-        )
+        ),
     );
 
     final RenderObject renderObject = tester.renderObject(find.byType(Scrollable));
@@ -516,7 +515,7 @@ void main() {
               ),
             ),
           ),
-        )
+        ),
     );
 
     final RenderObject renderObject = tester.renderObject(find.byType(Scrollable));

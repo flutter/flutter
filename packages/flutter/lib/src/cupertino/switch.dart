@@ -1,8 +1,7 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:math' as math;
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/foundation.dart';
@@ -61,6 +60,7 @@ class CupertinoSwitch extends StatefulWidget {
     @required this.value,
     @required this.onChanged,
     this.activeColor,
+    this.trackColor,
     this.dragStartBehavior = DragStartBehavior.start,
   }) : assert(value != null),
        assert(dragStartBehavior != null),
@@ -97,9 +97,14 @@ class CupertinoSwitch extends StatefulWidget {
 
   /// The color to use when this switch is on.
   ///
-  /// Defaults to [CupertinoColors.activeGreen] when null and ignores the
-  /// [CupertinoTheme] in accordance to native iOS behavior.
+  /// Defaults to [CupertinoColors.systemGreen] when null and ignores
+  /// the [CupertinoTheme] in accordance to native iOS behavior.
   final Color activeColor;
+
+  /// The color to use for the background when the switch is off.
+  ///
+  /// Defaults to [CupertinoColors.secondarySystemFill] when null.
+  final Color trackColor;
 
   /// {@template flutter.cupertino.switch.dragStartBehavior}
   /// Determines the way that drag start behavior is handled.
@@ -117,7 +122,9 @@ class CupertinoSwitch extends StatefulWidget {
   ///
   /// See also:
   ///
-  ///  * [DragGestureRecognizer.dragStartBehavior], which gives an example for the different behaviors.
+  ///  * [DragGestureRecognizer.dragStartBehavior], which gives an example for
+  ///    the different behaviors.
+  ///
   /// {@endtemplate}
   final DragStartBehavior dragStartBehavior;
 
@@ -139,7 +146,11 @@ class _CupertinoSwitchState extends State<CupertinoSwitch> with TickerProviderSt
       opacity: widget.onChanged == null ? _kCupertinoSwitchDisabledOpacity : 1.0,
       child: _CupertinoSwitchRenderObjectWidget(
         value: widget.value,
-        activeColor: widget.activeColor ?? CupertinoColors.activeGreen,
+        activeColor: CupertinoDynamicColor.resolve(
+          widget.activeColor ?? CupertinoColors.systemGreen,
+          context,
+        ),
+        trackColor: CupertinoDynamicColor.resolve(widget.trackColor ?? CupertinoColors.secondarySystemFill, context),
         onChanged: widget.onChanged,
         vsync: this,
         dragStartBehavior: widget.dragStartBehavior,
@@ -153,6 +164,7 @@ class _CupertinoSwitchRenderObjectWidget extends LeafRenderObjectWidget {
     Key key,
     this.value,
     this.activeColor,
+    this.trackColor,
     this.onChanged,
     this.vsync,
     this.dragStartBehavior = DragStartBehavior.start,
@@ -160,6 +172,7 @@ class _CupertinoSwitchRenderObjectWidget extends LeafRenderObjectWidget {
 
   final bool value;
   final Color activeColor;
+  final Color trackColor;
   final ValueChanged<bool> onChanged;
   final TickerProvider vsync;
   final DragStartBehavior dragStartBehavior;
@@ -169,6 +182,7 @@ class _CupertinoSwitchRenderObjectWidget extends LeafRenderObjectWidget {
     return _RenderCupertinoSwitch(
       value: value,
       activeColor: activeColor,
+      trackColor: trackColor,
       onChanged: onChanged,
       textDirection: Directionality.of(context),
       vsync: vsync,
@@ -181,6 +195,7 @@ class _CupertinoSwitchRenderObjectWidget extends LeafRenderObjectWidget {
     renderObject
       ..value = value
       ..activeColor = activeColor
+      ..trackColor = trackColor
       ..onChanged = onChanged
       ..textDirection = Directionality.of(context)
       ..vsync = vsync
@@ -199,7 +214,6 @@ const double _kSwitchHeight = 39.0;
 // Opacity of a disabled switch, as eye-balled from iOS Simulator on Mac.
 const double _kCupertinoSwitchDisabledOpacity = 0.5;
 
-const Color _kTrackColor = CupertinoColors.lightBackgroundGray;
 const Duration _kReactionDuration = Duration(milliseconds: 300);
 const Duration _kToggleDuration = Duration(milliseconds: 200);
 
@@ -207,6 +221,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
   _RenderCupertinoSwitch({
     @required bool value,
     @required Color activeColor,
+    @required Color trackColor,
     ValueChanged<bool> onChanged,
     @required TextDirection textDirection,
     @required TickerProvider vsync,
@@ -216,6 +231,7 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
        assert(vsync != null),
        _value = value,
        _activeColor = activeColor,
+       _trackColor = trackColor,
        _onChanged = onChanged,
        _textDirection = textDirection,
        _vsync = vsync,
@@ -291,6 +307,16 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
     if (value == _activeColor)
       return;
     _activeColor = value;
+    markNeedsPaint();
+  }
+
+  Color get trackColor => _trackColor;
+  Color _trackColor;
+  set trackColor(Color value) {
+    assert(value != null);
+    if (value == _trackColor)
+      return;
+    _trackColor = value;
     markNeedsPaint();
   }
 
@@ -424,12 +450,13 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
   }
 
   void _emitVibration() {
-    switch(defaultTargetPlatform) {
+    switch (defaultTargetPlatform) {
       case TargetPlatform.iOS:
         HapticFeedback.lightImpact();
         break;
-      case TargetPlatform.fuchsia:
       case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+      case TargetPlatform.macOS:
         break;
     }
   }
@@ -457,8 +484,6 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
     config.isToggled = _value;
   }
 
-  final CupertinoThumbPainter _thumbPainter = CupertinoThumbPainter();
-
   @override
   void paint(PaintingContext context, Offset offset) {
     final Canvas canvas = context.canvas;
@@ -476,11 +501,8 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
         break;
     }
 
-    final Color trackColor = _value ? activeColor : _kTrackColor;
-    final double borderThickness = 1.5 + (_kTrackRadius - 1.5) * math.max(currentReactionValue, currentValue);
-
     final Paint paint = Paint()
-      ..color = trackColor;
+      ..color = Color.lerp(trackColor, activeColor, currentValue);
 
     final Rect trackRect = Rect.fromLTWH(
         offset.dx + (size.width - _kTrackWidth) / 2.0,
@@ -488,9 +510,8 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
         _kTrackWidth,
         _kTrackHeight,
     );
-    final RRect outerRRect = RRect.fromRectAndRadius(trackRect, const Radius.circular(_kTrackRadius));
-    final RRect innerRRect = RRect.fromRectAndRadius(trackRect.deflate(borderThickness), const Radius.circular(_kTrackRadius));
-    canvas.drawDRRect(outerRRect, innerRRect, paint);
+    final RRect trackRRect = RRect.fromRectAndRadius(trackRect, const Radius.circular(_kTrackRadius));
+    canvas.drawRRect(trackRRect, paint);
 
     final double currentThumbExtension = CupertinoThumbPainter.extension * currentReactionValue;
     final double thumbLeft = lerpDouble(
@@ -504,13 +525,16 @@ class _RenderCupertinoSwitch extends RenderConstrainedBox {
       visualPosition,
     );
     final double thumbCenterY = offset.dy + size.height / 2.0;
-
-    _thumbPainter.paint(canvas, Rect.fromLTRB(
+    final Rect thumbBounds = Rect.fromLTRB(
       thumbLeft,
       thumbCenterY - CupertinoThumbPainter.radius,
       thumbRight,
       thumbCenterY + CupertinoThumbPainter.radius,
-    ));
+    );
+
+    context.pushClipRRect(needsCompositing, Offset.zero, thumbBounds, trackRRect, (PaintingContext innerContext, Offset offset) {
+      const CupertinoThumbPainter.switchThumb().paint(innerContext.canvas, thumbBounds);
+    });
   }
 
   @override

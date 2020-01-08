@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -7,13 +7,22 @@ import 'package:flutter/painting.dart';
 
 import 'basic.dart';
 import 'framework.dart';
+import 'inherited_theme.dart';
 import 'media_query.dart';
 
 // Examples can assume:
 // String _name;
 
-/// The text style to apply to descendant [Text] widgets without explicit style.
-class DefaultTextStyle extends InheritedWidget {
+/// The text style to apply to descendant [Text] widgets which don't have an
+/// explicit style.
+///
+/// See also:
+///
+///  * [AnimatedDefaultTextStyle], which animates changes in the text style
+///    smoothly over a given duration.
+///  * [DefaultTextStyleTransition], which takes a provided [Animation] to
+///    animate changes in text style smoothly over time.
+class DefaultTextStyle extends InheritedTheme {
   /// Creates a default text style for the given subtree.
   ///
   /// Consider using [DefaultTextStyle.merge] to inherit styling information
@@ -49,13 +58,14 @@ class DefaultTextStyle extends InheritedWidget {
   ///
   /// This constructor creates a [DefaultTextStyle] that lacks a [child], which
   /// means the constructed value cannot be incorporated into the tree.
-  const DefaultTextStyle.fallback()
+  const DefaultTextStyle.fallback({ Key key })
     : style = const TextStyle(),
       textAlign = null,
       softWrap = true,
       maxLines = null,
       overflow = TextOverflow.clip,
-      textWidthBasis = TextWidthBasis.parent;
+      textWidthBasis = TextWidthBasis.parent,
+      super(key: key, child: null);
 
   /// Creates a default text style that overrides the text styles in scope at
   /// this point in the widget tree.
@@ -127,6 +137,7 @@ class DefaultTextStyle extends InheritedWidget {
   final int maxLines;
 
   /// The strategy to use when calculating the width of the Text.
+  ///
   /// See [TextWidthBasis] for possible values and their implications.
   final TextWidthBasis textWidthBasis;
 
@@ -141,7 +152,7 @@ class DefaultTextStyle extends InheritedWidget {
   /// DefaultTextStyle style = DefaultTextStyle.of(context);
   /// ```
   static DefaultTextStyle of(BuildContext context) {
-    return context.inheritFromWidgetOfExactType(DefaultTextStyle) ?? const DefaultTextStyle.fallback();
+    return context.dependOnInheritedWidgetOfExactType<DefaultTextStyle>() ?? const DefaultTextStyle.fallback();
   }
 
   @override
@@ -152,6 +163,20 @@ class DefaultTextStyle extends InheritedWidget {
         overflow != oldWidget.overflow ||
         maxLines != oldWidget.maxLines ||
         textWidthBasis != oldWidget.textWidthBasis;
+  }
+
+  @override
+  Widget wrap(BuildContext context, Widget child) {
+    final DefaultTextStyle defaultTextStyle = context.findAncestorWidgetOfExactType<DefaultTextStyle>();
+    return identical(this, defaultTextStyle) ? child : DefaultTextStyle(
+      style: style,
+      textAlign: textAlign,
+      softWrap: softWrap,
+      overflow: overflow,
+      maxLines: maxLines,
+      textWidthBasis: textWidthBasis,
+      child: child,
+    );
   }
 
   @override
@@ -181,6 +206,13 @@ class DefaultTextStyle extends InheritedWidget {
 ///
 /// {@tool sample}
 ///
+/// This example shows how to display text using the [Text] widget with the
+/// [overflow] set to [TextOverflow.ellipsis].
+///
+/// ![If the text is shorter than the available space, it is displayed in full without an ellipsis.](https://flutter.github.io/assets-for-api-docs/assets/widgets/text.png)
+///
+/// ![If the text overflows, the Text widget displays an ellipsis to trim the overflowing text](https://flutter.github.io/assets-for-api-docs/assets/widgets/text_ellipsis.png)
+///
 /// ```dart
 /// Text(
 ///   'Hello, $_name! How are you?',
@@ -197,6 +229,8 @@ class DefaultTextStyle extends InheritedWidget {
 /// for each word.
 ///
 /// {@tool sample}
+///
+/// ![The word "Hello" is shown with the default text styles. The word "beautiful" is italicized. The word "world" is bold.](https://flutter.github.io/assets-for-api-docs/assets/widgets/text_rich.png)
 ///
 /// ```dart
 /// const Text.rich(
@@ -256,9 +290,16 @@ class Text extends StatelessWidget {
        textSpan = null,
        super(key: key);
 
-  /// Creates a text widget with a [TextSpan].
+  /// Creates a text widget with a [InlineSpan].
+  ///
+  /// The following subclasses of [InlineSpan] may be used to build rich text:
+  ///
+  /// * [TextSpan]s define text and children [InlineSpan]s.
+  /// * [WidgetSpan]s define embedded inline widgets.
   ///
   /// The [textSpan] parameter must not be null.
+  ///
+  /// See [RichText] which provides a lower-level way to draw text.
   const Text.rich(
     this.textSpan, {
     Key key,
@@ -285,10 +326,10 @@ class Text extends StatelessWidget {
   /// This will be null if a [textSpan] is provided instead.
   final String data;
 
-  /// The text to display as a [TextSpan].
+  /// The text to display as a [InlineSpan].
   ///
   /// This will be null if [data] is provided instead.
-  final TextSpan textSpan;
+  final InlineSpan textSpan;
 
   /// If non-null, the style to use for this text.
   ///
@@ -372,7 +413,7 @@ class Text extends StatelessWidget {
   /// ```
   final String semanticsLabel;
 
-  /// {@macro flutter.dart:ui.text.TextWidthBasis}
+  /// {@macro flutter.painting.textPainter.textWidthBasis}
   final TextWidthBasis textWidthBasis;
 
   @override
@@ -396,7 +437,7 @@ class Text extends StatelessWidget {
       text: TextSpan(
         style: effectiveTextStyle,
         text: data,
-        children: textSpan != null ? <TextSpan>[textSpan] : null,
+        children: textSpan != null ? <InlineSpan>[textSpan] : null,
       ),
     );
     if (semanticsLabel != null) {

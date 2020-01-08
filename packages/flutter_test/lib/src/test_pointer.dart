@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -209,35 +209,36 @@ class TestPointer {
   ///
   /// By default, the time stamp on the event is [Duration.zero]. You can give a
   /// specific time stamp by passing the `timeStamp` argument.
-  ///
-  /// [isDown] must be false, since hover events can't be sent when the pointer
-  /// is up.
   PointerAddedEvent addPointer({
     Duration timeStamp = Duration.zero,
+    Offset location,
   }) {
     assert(timeStamp != null);
+    _location = location ?? _location;
     return PointerAddedEvent(
       timeStamp: timeStamp,
       kind: kind,
       device: _device,
+      position: _location ?? Offset.zero,
     );
   }
 
-  /// Create a [PointerRemovedEvent] with the kind the pointer was created with.
+  /// Create a [PointerRemovedEvent] with the [PointerDeviceKind] the pointer
+  /// was created with.
   ///
   /// By default, the time stamp on the event is [Duration.zero]. You can give a
   /// specific time stamp by passing the `timeStamp` argument.
-  ///
-  /// [isDown] must be false, since hover events can't be sent when the pointer
-  /// is up.
   PointerRemovedEvent removePointer({
     Duration timeStamp = Duration.zero,
+    Offset location,
   }) {
     assert(timeStamp != null);
+    _location = location ?? _location;
     return PointerRemovedEvent(
       timeStamp: timeStamp,
       kind: kind,
       device: _device,
+      position: _location ?? Offset.zero,
     );
   }
 
@@ -372,16 +373,16 @@ class TestGesture {
   }
 
   /// In a test, send a pointer add event for this pointer.
-  Future<void> addPointer({ Duration timeStamp = Duration.zero }) {
+  Future<void> addPointer({ Duration timeStamp = Duration.zero, Offset location }) {
     return TestAsyncUtils.guard<void>(() {
-      return _dispatcher(_pointer.addPointer(timeStamp: timeStamp), null);
+      return _dispatcher(_pointer.addPointer(timeStamp: timeStamp, location: location ?? _pointer.location), null);
     });
   }
 
   /// In a test, send a pointer remove event for this pointer.
-  Future<void> removePointer({ Duration timeStamp = Duration.zero }) {
+  Future<void> removePointer({ Duration timeStamp = Duration.zero, Offset location }) {
     return TestAsyncUtils.guard<void>(() {
-      return _dispatcher(_pointer.removePointer(timeStamp: timeStamp), null);
+      return _dispatcher(_pointer.removePointer(timeStamp: timeStamp, location: location ?? _pointer.location), null);
     });
   }
 
@@ -403,7 +404,7 @@ class TestGesture {
     return TestAsyncUtils.guard<void>(() {
       if (_pointer._isDown) {
         assert(_result != null,
-            'Move events with the pointer down must be preceeded by a down '
+            'Move events with the pointer down must be preceded by a down '
             'event that captures a hit test result.');
         return _dispatcher(_pointer.move(location, timeStamp: timeStamp), _result);
       } else {

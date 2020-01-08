@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -53,8 +53,8 @@ bool debugPrintScheduleFrameStacks = false;
 /// This function is used by the test framework to ensure that debug variables
 /// haven't been inadvertently changed.
 ///
-/// See [https://docs.flutter.io/flutter/scheduler/scheduler-library.html] for
-/// a complete list.
+/// See [the scheduler library](scheduler/scheduler-library.html) for a complete
+/// list.
 bool debugAssertAllSchedulerVarsUnset(String reason) {
   assert(() {
     if (debugPrintBeginFrameBanner ||

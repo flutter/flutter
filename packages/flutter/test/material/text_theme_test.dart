@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -74,10 +74,10 @@ void main() {
     // The `displayColor` is applied to [display4], [display3], [display2],
     // [display1], and [caption]. The `bodyColor` is applied to the remaining
     // text styles.
-    const Color displayColor = Color(1);
-    const Color bodyColor = Color(2);
+    const Color displayColor = Color(0x00000001);
+    const Color bodyColor = Color(0x00000002);
     const String fontFamily = 'fontFamily';
-    const Color decorationColor = Color(3);
+    const Color decorationColor = Color(0x00000003);
     const TextDecorationStyle decorationStyle = TextDecorationStyle.dashed;
     final TextDecoration decoration = TextDecoration.combine(<TextDecoration>[
       TextDecoration.underline,

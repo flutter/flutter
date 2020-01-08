@@ -1,4 +1,4 @@
-// Copyright 2019 The Flutter Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -32,6 +32,8 @@ typedef ScrollableWidgetBuilder = Widget Function(
 /// A container for a [Scrollable] that responds to drag gestures by resizing
 /// the scrollable until a limit is reached, and then scrolling.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=Hgw819mL_78}
+///
 /// This widget can be dragged along the vertical axis between its
 /// [minChildSize], which defaults to `0.25` and [maxChildSize], which defaults
 /// to `1.0`. These sizes are percentages of the height of the parent container.
@@ -44,10 +46,10 @@ typedef ScrollableWidgetBuilder = Widget Function(
 /// between the range of minChildSize and maxChildSize (as percentages of the
 /// parent container's height) as long as the builder creates a widget which
 /// uses the provided [ScrollController]. If the widget created by the
-/// [ScrollableWidgetBuilder] does not use provided [ScrollController], the
+/// [ScrollableWidgetBuilder] does not use the provided [ScrollController], the
 /// sheet will remain at the initialChildSize.
 ///
-/// By default, the widget will expand its non-occupied area to fill availble
+/// By default, the widget will expand its non-occupied area to fill available
 /// space in the parent. If this is not desired, e.g. because the parent wants
 /// to position sheet based on the space it is taking, the [expand] property
 /// may be set to false.
@@ -157,7 +159,7 @@ class DraggableScrollableSheet extends StatefulWidget {
 /// [DraggableScrollableSheet] widgets notify their ancestors when the size of
 /// the sheet changes. When the extent of the sheet changes via a drag,
 /// this notification bubbles up through the tree, which means a given
-/// [NotificationListener] will recieve notifications for all descendant
+/// [NotificationListener] will receive notifications for all descendant
 /// [DraggableScrollableSheet] widgets. To focus on notifications from the
 /// nearest [DraggableScorllableSheet] descendant, check that the [depth]
 /// property of the notification is zero.
@@ -258,7 +260,7 @@ class _DraggableSheetExtent {
 
   set currentExtent(double value) {
     assert(value != null);
-    _currentExtent.value = value.clamp(minExtent, maxExtent);
+    _currentExtent.value = value.clamp(minExtent, maxExtent) as double;
   }
   double get currentExtent => _currentExtent.value;
 
@@ -488,6 +490,8 @@ class _DraggableScrollableSheetScrollPosition
         velocity = ballisticController.velocity + (physics.tolerance.velocity * ballisticController.velocity.sign);
         super.goBallistic(velocity);
         ballisticController.stop();
+      } else if (ballisticController.isCompleted) {
+        super.goBallistic(0);
       }
     }
 
@@ -509,7 +513,7 @@ class _DraggableScrollableSheetScrollPosition
 /// A widget that can notify a descendent [DraggableScrollableSheet] that it
 /// should reset its position to the initial state.
 ///
-/// The [Scaffold] uses this widget to notify a persistentent bottom sheet that
+/// The [Scaffold] uses this widget to notify a persistent bottom sheet that
 /// the user has tapped back if the sheet has started to cover more of the body
 /// than when at its initial position. This is important for users of assistive
 /// technology, where dragging may be difficult to communicate.
@@ -520,7 +524,7 @@ class DraggableScrollableActuator extends StatelessWidget {
   /// The [child] parameter is required.
   DraggableScrollableActuator({
     Key key,
-    @required this.child
+    @required this.child,
   }) : super(key: key);
 
   /// This child's [DraggableScrollableSheet] descendant will be reset when the
@@ -538,7 +542,7 @@ class DraggableScrollableActuator extends StatelessWidget {
   /// some [DraggableScrollableSheet] is listening for updates, `false`
   /// otherwise.
   static bool reset(BuildContext context) {
-    final _InheritedResetNotifier notifier = context.inheritFromWidgetOfExactType(_InheritedResetNotifier);
+    final _InheritedResetNotifier notifier = context.dependOnInheritedWidgetOfExactType<_InheritedResetNotifier>();
     if (notifier == null) {
       return false;
     }
@@ -590,12 +594,12 @@ class _InheritedResetNotifier extends InheritedNotifier<_ResetNotifier> {
   ///
   /// Returns true if the notifier requested a reset, false otherwise.
   static bool shouldReset(BuildContext context) {
-    final InheritedWidget widget = context.inheritFromWidgetOfExactType(_InheritedResetNotifier);
+    final InheritedWidget widget = context.dependOnInheritedWidgetOfExactType<_InheritedResetNotifier>();
     if (widget == null) {
       return false;
     }
     assert(widget is _InheritedResetNotifier);
-    final _InheritedResetNotifier inheritedNotifier = widget;
+    final _InheritedResetNotifier inheritedNotifier = widget as _InheritedResetNotifier;
     final bool wasCalled = inheritedNotifier.notifier._wasCalled;
     inheritedNotifier.notifier._wasCalled = false;
     return wasCalled;

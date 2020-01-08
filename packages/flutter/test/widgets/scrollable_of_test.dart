@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -24,7 +24,7 @@ class _ScrollPositionListenerState extends State<ScrollPositionListener> {
     _position?.removeListener(listener);
     _position = Scrollable.of(context)?.position;
     _position?.addListener(listener);
-    widget.log('didChangeDependencies ${_position?.pixels}');
+    widget.log('didChangeDependencies ${_position?.pixels?.toStringAsFixed(1)}');
   }
 
   @override
@@ -37,7 +37,7 @@ class _ScrollPositionListenerState extends State<ScrollPositionListener> {
   Widget build(BuildContext context) => widget.child;
 
   void listener() {
-    widget.log('listener ${_position?.pixels}');
+    widget.log('listener ${_position?.pixels?.toStringAsFixed(1)}');
   }
 
 }
@@ -99,7 +99,7 @@ void main() {
     await tester.startGesture(const Offset(100.0, 100.0));
     await tester.pump(const Duration(seconds: 1));
 
-    final StatefulElement scrollableElement = find.byType(Scrollable).evaluate().first;
+    final StatefulElement scrollableElement = find.byType(Scrollable).evaluate().first as StatefulElement;
     expect(Scrollable.of(notification.context), equals(scrollableElement.state));
   });
 }

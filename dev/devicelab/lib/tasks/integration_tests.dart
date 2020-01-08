@@ -1,4 +1,4 @@
-// Copyright (c) 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -8,7 +8,6 @@ import 'dart:io';
 import 'package:path/path.dart' as path;
 import '../framework/adb.dart';
 import '../framework/framework.dart';
-import '../framework/ios.dart';
 import '../framework/utils.dart';
 
 TaskFunction createChannelsIntegrationTest() {
@@ -43,6 +42,13 @@ TaskFunction createExternalUiIntegrationTest() {
 TaskFunction createPlatformChannelSampleTest() {
   return DriverTest(
     '${flutterDirectory.path}/examples/platform_channel',
+    'test_driver/button_tap.dart',
+  );
+}
+
+TaskFunction createPlatformChannelSwiftSampleTest() {
+  return DriverTest(
+    '${flutterDirectory.path}/examples/platform_channel_swift',
     'test_driver/button_tap.dart',
   );
 }
@@ -94,6 +100,20 @@ TaskFunction createFlutterCreateOfflineTest() {
   };
 }
 
+TaskFunction createAndroidSplashScreenKitchenSinkTest() {
+  return DriverTest(
+    '${flutterDirectory.path}/dev/integration_tests/android_splash_screens/splash_screen_kitchen_sink',
+    'test_driver/main.dart',
+  );
+}
+
+TaskFunction createFlutterDriverScreenshotTest() {
+  return DriverTest(
+    '${flutterDirectory.path}/dev/integration_tests/flutter_driver_screenshot_test',
+    'lib/main.dart',
+  );
+}
+
 class DriverTest {
 
   DriverTest(
@@ -116,16 +136,14 @@ class DriverTest {
       final String deviceId = device.deviceId;
       await flutter('packages', options: <String>['get']);
 
-      if (deviceOperatingSystem == DeviceOperatingSystem.ios)
-        await prepareProvisioningCertificates(testDirectory);
       final List<String> options = <String>[
         '-v',
         '-t',
         testTarget,
         '-d',
         deviceId,
+        ...extraOptions,
       ];
-      options.addAll(extraOptions);
       await flutter('drive', options: options, environment: Map<String, String>.from(environment));
 
       return TaskResult.success(null);

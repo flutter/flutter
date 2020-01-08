@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -166,25 +166,27 @@ class _CupertinoTextFieldDemoState extends State<CupertinoTextFieldDemo> {
           previousPageTitle: 'Cupertino',
           middle: Text('Text Fields'),
         ),
-        child: ListView(
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 32.0, horizontal: 16.0),
-              child: Column(
-                children: <Widget>[
-                  _buildNameField(),
-                  _buildEmailField(),
-                  _buildLocationField(),
-                  _buildPinField(),
-                  _buildTagsField(),
-                ],
+        child: CupertinoScrollbar(
+          child: ListView(
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 32.0, horizontal: 16.0),
+                child: Column(
+                  children: <Widget>[
+                    _buildNameField(),
+                    _buildEmailField(),
+                    _buildLocationField(),
+                    _buildPinField(),
+                    _buildTagsField(),
+                  ],
+                ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 32.0, horizontal: 16.0),
-              child: _buildChatTextField(),
-            ),
-          ],
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 32.0, horizontal: 16.0),
+                child: _buildChatTextField(),
+              ),
+            ],
+          ),
         ),
       ),
     );

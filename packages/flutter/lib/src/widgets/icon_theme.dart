@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -7,11 +7,12 @@ import 'package:flutter/foundation.dart';
 import 'basic.dart';
 import 'framework.dart';
 import 'icon_theme_data.dart';
+import 'inherited_theme.dart';
 
 /// Controls the default color, opacity, and size of icons in a widget subtree.
 ///
 /// The icon theme is honored by [Icon] and [ImageIcon] widgets.
-class IconTheme extends InheritedWidget {
+class IconTheme extends InheritedTheme {
   /// Creates an icon theme that controls the color, opacity, and size of
   /// descendant widgets.
   ///
@@ -58,12 +59,18 @@ class IconTheme extends InheritedWidget {
   /// IconThemeData theme = IconTheme.of(context);
   /// ```
   static IconThemeData of(BuildContext context) {
-    final IconThemeData iconThemeData = _getInheritedIconThemeData(context);
-    return iconThemeData.isConcrete ? iconThemeData : const IconThemeData.fallback().merge(iconThemeData);
+    final IconThemeData iconThemeData = _getInheritedIconThemeData(context).resolve(context);
+    return iconThemeData.isConcrete
+      ? iconThemeData
+      : iconThemeData.copyWith(
+        size: iconThemeData.size ?? const IconThemeData.fallback().size,
+        color: iconThemeData.color ?? const IconThemeData.fallback().color,
+        opacity: iconThemeData.opacity ?? const IconThemeData.fallback().opacity,
+      );
   }
 
   static IconThemeData _getInheritedIconThemeData(BuildContext context) {
-    final IconTheme iconTheme = context.inheritFromWidgetOfExactType(IconTheme);
+    final IconTheme iconTheme = context.dependOnInheritedWidgetOfExactType<IconTheme>();
     return iconTheme?.data ?? const IconThemeData.fallback();
   }
 
@@ -71,8 +78,14 @@ class IconTheme extends InheritedWidget {
   bool updateShouldNotify(IconTheme oldWidget) => data != oldWidget.data;
 
   @override
+  Widget wrap(BuildContext context, Widget child) {
+    final IconTheme iconTheme = context.findAncestorWidgetOfExactType<IconTheme>();
+    return identical(this, iconTheme) ? child : IconTheme(data: data, child: child);
+  }
+
+  @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<IconThemeData>('data', data, showName: false));
+    data.debugFillProperties(properties);
   }
 }

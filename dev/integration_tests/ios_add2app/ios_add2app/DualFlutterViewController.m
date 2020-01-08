@@ -1,4 +1,4 @@
-// Copyright 2018 The Flutter Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -15,6 +15,11 @@
 - (void)viewDidLoad {
   [super viewDidLoad];
   self.title = @"Dual Flutter Views";
+  self.navigationItem.backBarButtonItem = [[UIBarButtonItem alloc]
+                                              initWithTitle:@"Back"
+                                                      style:UIBarButtonItemStylePlain
+                                                     target:nil
+                                                     action:nil];
 
   UIStackView* stackView = [[UIStackView alloc] initWithFrame:self.view.frame];
   stackView.axis = UILayoutConstraintAxisVertical;

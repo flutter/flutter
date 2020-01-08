@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -7,7 +7,9 @@ import 'dart:collection' show HashMap;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 
+import 'actions.dart';
 import 'banner.dart';
 import 'basic.dart';
 import 'binding.dart';
@@ -18,7 +20,9 @@ import 'media_query.dart';
 import 'navigator.dart';
 import 'pages.dart';
 import 'performance_overlay.dart';
+import 'scrollable.dart';
 import 'semantics_debugger.dart';
+import 'shortcuts.dart';
 import 'text.dart';
 import 'title.dart';
 import 'widget_inspector.dart';
@@ -44,6 +48,7 @@ export 'dart:ui' show Locale;
 ///    is recommended over [LocaleResolutionCallback].
 typedef LocaleListResolutionCallback = Locale Function(List<Locale> locales, Iterable<Locale> supportedLocales);
 
+/// {@template flutter.widgets.widgetsApp.localeResolutionCallback}
 /// The signature of [WidgetsApp.localeResolutionCallback].
 ///
 /// It is recommended to provide a [LocaleListResolutionCallback] instead of a
@@ -68,6 +73,7 @@ typedef LocaleListResolutionCallback = Locale Function(List<Locale> locales, Ite
 ///
 ///  * [LocaleListResolutionCallback], which takes a list of preferred locales (instead of one locale).
 ///    Resolutions by [LocaleListResolutionCallback] take precedence over [LocaleResolutionCallback].
+/// {@endtemplate}
 typedef LocaleResolutionCallback = Locale Function(Locale locale, Iterable<Locale> supportedLocales);
 
 /// The signature of [WidgetsApp.onGenerateTitle].
@@ -85,15 +91,33 @@ typedef GenerateAppTitle = String Function(BuildContext context);
 /// Creates a [PageRoute] using the given [RouteSettings] and [WidgetBuilder].
 typedef PageRouteFactory = PageRoute<T> Function<T>(RouteSettings settings, WidgetBuilder builder);
 
-/// A convenience class that wraps a number of widgets that are commonly
+/// A convenience widget that wraps a number of widgets that are commonly
 /// required for an application.
 ///
 /// One of the primary roles that [WidgetsApp] provides is binding the system
 /// back button to popping the [Navigator] or quitting the application.
 ///
-/// See also: [CheckedModeBanner], [DefaultTextStyle], [MediaQuery],
-/// [Localizations], [Title], [Navigator], [Overlay], [SemanticsDebugger] (the
-/// widgets wrapped by this one).
+/// It is used by both [MaterialApp] and [CupertinoApp] to implement base
+/// functionality for an app.
+///
+/// Find references to many of the widgets that [WidgetsApp] wraps in the "See
+/// also" section.
+///
+/// See also:
+///
+///  * [CheckedModeBanner], which displays a [Banner] saying "DEBUG" when
+///    running in checked mode.
+///  * [DefaultTextStyle], the text style to apply to descendant [Text] widgets
+///    without an explicit style.
+///  * [MediaQuery], which establishes a subtree in which media queries resolve
+///    to a [MediaQueryData].
+///  * [Localizations], which defines the [Locale] for its `child`.
+///  * [Title], a widget that describes this app in the operating system.
+///  * [Navigator], a widget that manages a set of child widgets with a stack
+///    discipline.
+///  * [Overlay], a widget that manages a [Stack] of entries that can be managed
+///    independently.
+///  * [SemanticsDebugger], a widget that visualizes the semantics for the child.
 class WidgetsApp extends StatefulWidget {
   /// Creates a widget that wraps a number of widgets that are commonly
   /// required for an application.
@@ -163,6 +187,8 @@ class WidgetsApp extends StatefulWidget {
     this.debugShowWidgetInspector = false,
     this.debugShowCheckedModeBanner = true,
     this.inspectorSelectButtonBuilder,
+    this.shortcuts,
+    this.actions,
   }) : assert(navigatorObservers != null),
        assert(routes != null),
        assert(
@@ -361,10 +387,12 @@ class WidgetsApp extends StatefulWidget {
   /// also. For example, if the route was `/a/b/c`, then the app would start
   /// with the three routes `/a`, `/a/b`, and `/a/b/c` loaded, in that order.
   ///
-  /// If any part of this process fails to generate routes, then the
-  /// [initialRoute] is ignored and [Navigator.defaultRouteName] is used instead
-  /// (`/`). This can happen if the app is started with an intent that specifies
-  /// a non-existent route.
+  /// Intermediate routes aren't required to exist. In the example above, `/a`
+  /// and `/a/b` could be skipped if they have no matching route. But `/a/b/c` is
+  /// required to have a route, else [initialRoute] is ignored and
+  /// [Navigator.defaultRouteName] is used instead (`/`). This can happen if the
+  /// app is started with an intent that specifies a non-existent route.
+  ///
   /// The [Navigator] is only built if routes are provided (either via [home],
   /// [routes], [onGenerateRoute], or [onUnknownRoute]); if they are not,
   /// [initialRoute] must be null and [builder] must not be null.
@@ -374,6 +402,7 @@ class WidgetsApp extends StatefulWidget {
   ///  * [Navigator.initialRoute], which is used to implement this property.
   ///  * [Navigator.push], for pushing additional routes.
   ///  * [Navigator.pop], for removing a route from the stack.
+  ///
   /// {@endtemplate}
   final String initialRoute;
 
@@ -479,7 +508,7 @@ class WidgetsApp extends StatefulWidget {
   ///
   /// The value of [Localizations.locale] will equal this locale if
   /// it matches one of the [supportedLocales]. Otherwise it will be
-  /// the first [supportedLocale].
+  /// the first element of [supportedLocales].
   /// {@endtemplate}
   ///
   /// See also:
@@ -503,22 +532,25 @@ class WidgetsApp extends StatefulWidget {
   /// when the app is started, and when the user changes the
   /// device's locale.
   ///
-  /// When a [localeListResolutionCallback] is provided, Flutter will first attempt to
-  /// resolve the locale with the provided [localeListResolutionCallback]. If the
-  /// callback or result is null, it will fallback to trying the [localeResolutionCallback].
-  /// If both [localeResolutionCallback] and [localeListResolutionCallback] are left null
-  /// or fail to resolve (return null), the [WidgetsApp.basicLocaleListResolution]
-  /// fallback algorithm will be used.
+  /// When a [localeListResolutionCallback] is provided, Flutter will first
+  /// attempt to resolve the locale with the provided
+  /// [localeListResolutionCallback]. If the callback or result is null, it will
+  /// fallback to trying the [localeResolutionCallback]. If both
+  /// [localeResolutionCallback] and [localeListResolutionCallback] are left
+  /// null or fail to resolve (return null), the a basic fallback algorithm will
+  /// be used.
   ///
   /// The priority of each available fallback is:
   ///
   ///  1. [localeListResolutionCallback] is attempted first.
-  ///  2. [localeResolutionCallback] is attempted second.
-  ///  3. Flutter's [WidgetsApp.basicLocaleListResolution] algorithm is attempted last.
+  ///  1. [localeResolutionCallback] is attempted second.
+  ///  1. Flutter's basic resolution algorithm, as described in
+  ///     [supportedLocales], is attempted last.
   ///
   /// Properly localized projects should provide a more advanced algorithm than
-  /// [basicLocaleListResolution] as it does not implement a complete algorithm
-  /// (such as the one defined in [Unicode TR35](https://unicode.org/reports/tr35/#LanguageMatching))
+  /// the basic method from [supportedLocales], as it does not implement a
+  /// complete algorithm (such as the one defined in
+  /// [Unicode TR35](https://unicode.org/reports/tr35/#LanguageMatching))
   /// and is optimized for speed at the detriment of some uncommon edge-cases.
   /// {@endtemplate}
   ///
@@ -531,8 +563,6 @@ class WidgetsApp extends StatefulWidget {
   ///
   ///  * [MaterialApp.localeListResolutionCallback], which sets the callback of the
   ///    [WidgetsApp] it creates.
-  ///  * [basicLocaleListResolution], a static method that implements the locale resolution
-  ///    algorithm that is used when no custom locale resolution algorithm is provided.
   final LocaleListResolutionCallback localeListResolutionCallback;
 
   /// {@macro flutter.widgets.widgetsApp.localeListResolutionCallback}
@@ -548,8 +578,6 @@ class WidgetsApp extends StatefulWidget {
   ///
   ///  * [MaterialApp.localeResolutionCallback], which sets the callback of the
   ///    [WidgetsApp] it creates.
-  ///  * [basicLocaleListResolution], a static method that implements the locale resolution
-  ///    algorithm that is used when no custom locale resolution algorithm is provided.
   final LocaleResolutionCallback localeResolutionCallback;
 
   /// {@template flutter.widgets.widgetsApp.supportedLocales}
@@ -562,24 +590,24 @@ class WidgetsApp extends StatefulWidget {
   /// `[const Locale('en', 'US')]`.
   ///
   /// The order of the list matters. The default locale resolution algorithm,
-  /// [basicLocaleListResolution], attempts to match by the following priority:
+  /// `basicLocaleListResolution`, attempts to match by the following priority:
   ///
   ///  1. [Locale.languageCode], [Locale.scriptCode], and [Locale.countryCode]
-  ///  2. [Locale.languageCode] and [Locale.countryCode] only
-  ///  3. [Locale.languageCode] and [Locale.countryCode] only
-  ///  4. [Locale.languageCode] only
-  ///  6. [Locale.countryCode] only when all [preferredLocales] fail to match
-  ///  5. returns [supportedLocales.first] as a fallback
+  ///  1. [Locale.languageCode] and [Locale.countryCode] only
+  ///  1. [Locale.languageCode] and [Locale.countryCode] only
+  ///  1. [Locale.languageCode] only
+  ///  1. [Locale.countryCode] only when all preferred locales fail to match
+  ///  1. Returns the first element of [supportedLocales] as a fallback
   ///
-  /// When more than one supported locale matches one of these criteria, only the first
-  /// matching locale is returned. See [basicLocaleListResolution] for a complete
-  /// description of the algorithm.
+  /// When more than one supported locale matches one of these criteria, only
+  /// the first matching locale is returned.
   ///
-  /// The default locale resolution algorithm can be overridden by providing a value for
-  /// [localeListResolutionCallback]. The provided [basicLocaleListResolution] is optimized
-  /// for speed and does not implement a full algorithm (such as the one defined in
-  /// [Unicode TR35](https://unicode.org/reports/tr35/#LanguageMatching)) that takes
-  /// distances between languages into account.
+  /// The default locale resolution algorithm can be overridden by providing a
+  /// value for [localeListResolutionCallback]. The provided
+  /// `basicLocaleListResolution` is optimized for speed and does not implement
+  /// a full algorithm (such as the one defined in
+  /// [Unicode TR35](https://unicode.org/reports/tr35/#LanguageMatching)) that
+  /// takes distances between languages into account.
   ///
   /// When supporting languages with more than one script, it is recommended
   /// to specify the [Locale.scriptCode] explicitly. Locales may also be defined without
@@ -618,8 +646,6 @@ class WidgetsApp extends StatefulWidget {
   ///    when the device's locale changes.
   ///  * [localizationsDelegates], which collectively define all of the localized
   ///    resources used by this app.
-  ///  * [basicLocaleListResolution], a static method that implements the locale resolution
-  ///    algorithm that is used when no custom locale resolution algorithm is provided.
   final Iterable<Locale> supportedLocales;
 
   /// Turns on a performance overlay.
@@ -675,6 +701,103 @@ class WidgetsApp extends StatefulWidget {
   /// {@endtemplate}
   final bool debugShowCheckedModeBanner;
 
+  /// {@template flutter.widgets.widgetsApp.shortcuts}
+  /// The default map of keyboard shortcuts to intents for the application.
+  ///
+  /// By default, this is set to [WidgetsApp.defaultShortcuts].
+  /// {@endtemplate}
+  ///
+  /// {@tool sample}
+  /// This example shows how to add a single shortcut for
+  /// [LogicalKeyboardKey.select] to the default shortcuts without needing to
+  /// add your own [Shortcuts] widget.
+  ///
+  /// Alternatively, you could insert a [Shortcuts] widget with just the mapping
+  /// you want to add between the [WidgetsApp] and its child and get the same
+  /// effect.
+  ///
+  /// ```dart
+  /// Widget build(BuildContext context) {
+  ///   return WidgetsApp(
+  ///     shortcuts: <LogicalKeySet, Intent>{
+  ///       ... WidgetsApp.defaultShortcuts,
+  ///       LogicalKeySet(LogicalKeyboardKey.select): const Intent(ActivateAction.key),
+  ///     },
+  ///     color: const Color(0xFFFF0000),
+  ///     builder: (BuildContext context, Widget child) {
+  ///       return const Placeholder();
+  ///     },
+  ///   );
+  /// }
+  /// ```
+  /// {@end-tool}
+  ///
+  /// {@template flutter.widgets.widgetsApp.shortcuts.seeAlso}
+  /// See also:
+  ///
+  ///  * [LogicalKeySet], a set of [LogicalKeyboardKey]s that make up the keys
+  ///    for this map.
+  ///  * The [Shortcuts] widget, which defines a keyboard mapping.
+  ///  * The [Actions] widget, which defines the mapping from intent to action.
+  ///  * The [Intent] and [Action] classes, which allow definition of new
+  ///    actions.
+  /// {@endtemplate}
+  final Map<LogicalKeySet, Intent> shortcuts;
+
+  /// {@template flutter.widgets.widgetsApp.actions}
+  /// The default map of intent keys to actions for the application.
+  ///
+  /// By default, this is the output of [WidgetsApp.defaultActions], called with
+  /// [defaultTargetPlatform]. Specifying [actions] for an app overrides the
+  /// default, so if you wish to modify the default [actions], you can call
+  /// [WidgetsApp.defaultActions] and modify the resulting map, passing it as
+  /// the [actions] for this app. You may also add to the bindings, or override
+  /// specific bindings for a widget subtree, by adding your own [Actions]
+  /// widget.
+  /// {@endtemplate}
+  ///
+  /// {@tool sample}
+  /// This example shows how to add a single action handling an
+  /// [ActivateAction] to the default actions without needing to
+  /// add your own [Actions] widget.
+  ///
+  /// Alternatively, you could insert a [Actions] widget with just the mapping
+  /// you want to add between the [WidgetsApp] and its child and get the same
+  /// effect.
+  ///
+  /// ```dart
+  /// Widget build(BuildContext context) {
+  ///   return WidgetsApp(
+  ///     actions: <LocalKey, ActionFactory>{
+  ///       ... WidgetsApp.defaultActions,
+  ///       ActivateAction.key: () => CallbackAction(
+  ///         ActivateAction.key,
+  ///         onInvoke: (FocusNode focusNode, Intent intent) {
+  ///           // Do something here...
+  ///         },
+  ///       ),
+  ///     },
+  ///     color: const Color(0xFFFF0000),
+  ///     builder: (BuildContext context, Widget child) {
+  ///       return const Placeholder();
+  ///     },
+  ///   );
+  /// }
+  /// ```
+  /// {@end-tool}
+  ///
+  /// {@template flutter.widgets.widgetsApp.actions.seeAlso}
+  /// See also:
+  ///
+  ///  * The [shortcuts] parameter, which defines the default set of shortcuts
+  ///    for the application.
+  ///  * The [Shortcuts] widget, which defines a keyboard mapping.
+  ///  * The [Actions] widget, which defines the mapping from intent to action.
+  ///  * The [Intent] and [Action] classes, which allow definition of new
+  ///    actions.
+  /// {@endtemplate}
+  final Map<LocalKey, ActionFactory> actions;
+
   /// If true, forces the performance overlay to be visible in all instances.
   ///
   /// Used by the `showPerformanceOverlay` observatory extension.
@@ -698,12 +821,106 @@ class WidgetsApp extends StatefulWidget {
   /// with "s".
   static bool debugAllowBannerOverride = true;
 
+  static final Map<LogicalKeySet, Intent> _defaultShortcuts = <LogicalKeySet, Intent>{
+    // Activation
+    LogicalKeySet(LogicalKeyboardKey.enter): const Intent(ActivateAction.key),
+    LogicalKeySet(LogicalKeyboardKey.space): const Intent(ActivateAction.key),
+
+    // Keyboard traversal.
+    LogicalKeySet(LogicalKeyboardKey.tab): const Intent(NextFocusAction.key),
+    LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.tab): const Intent(PreviousFocusAction.key),
+    LogicalKeySet(LogicalKeyboardKey.arrowLeft): const DirectionalFocusIntent(TraversalDirection.left),
+    LogicalKeySet(LogicalKeyboardKey.arrowRight): const DirectionalFocusIntent(TraversalDirection.right),
+    LogicalKeySet(LogicalKeyboardKey.arrowDown): const DirectionalFocusIntent(TraversalDirection.down),
+    LogicalKeySet(LogicalKeyboardKey.arrowUp): const DirectionalFocusIntent(TraversalDirection.up),
+
+    // Scrolling
+    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.arrowUp): const ScrollIntent(direction: AxisDirection.up),
+    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.arrowDown): const ScrollIntent(direction: AxisDirection.down),
+    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.arrowLeft): const ScrollIntent(direction: AxisDirection.left),
+    LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.arrowRight): const ScrollIntent(direction: AxisDirection.right),
+    LogicalKeySet(LogicalKeyboardKey.pageUp): const ScrollIntent(direction: AxisDirection.up, type: ScrollIncrementType.page),
+    LogicalKeySet(LogicalKeyboardKey.pageDown): const ScrollIntent(direction: AxisDirection.down, type: ScrollIncrementType.page),
+  };
+
+  // Default shortcuts for the web platform.
+  static final Map<LogicalKeySet, Intent> _defaultWebShortcuts = <LogicalKeySet, Intent>{
+    // Activation
+    LogicalKeySet(LogicalKeyboardKey.space): const Intent(ActivateAction.key),
+
+    // Keyboard traversal.
+    LogicalKeySet(LogicalKeyboardKey.tab): const Intent(NextFocusAction.key),
+    LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.tab): const Intent(PreviousFocusAction.key),
+
+    // Scrolling
+    LogicalKeySet(LogicalKeyboardKey.arrowUp): const ScrollIntent(direction: AxisDirection.up),
+    LogicalKeySet(LogicalKeyboardKey.arrowDown): const ScrollIntent(direction: AxisDirection.down),
+    LogicalKeySet(LogicalKeyboardKey.arrowLeft): const ScrollIntent(direction: AxisDirection.left),
+    LogicalKeySet(LogicalKeyboardKey.arrowRight): const ScrollIntent(direction: AxisDirection.right),
+    LogicalKeySet(LogicalKeyboardKey.pageUp): const ScrollIntent(direction: AxisDirection.up, type: ScrollIncrementType.page),
+    LogicalKeySet(LogicalKeyboardKey.pageDown): const ScrollIntent(direction: AxisDirection.down, type: ScrollIncrementType.page),
+  };
+
+  // Default shortcuts for the macOS platform.
+  static final Map<LogicalKeySet, Intent> _defaultMacOsShortcuts = <LogicalKeySet, Intent>{
+    // Activation
+    LogicalKeySet(LogicalKeyboardKey.enter): const Intent(ActivateAction.key),
+    LogicalKeySet(LogicalKeyboardKey.space): const Intent(ActivateAction.key),
+
+    // Keyboard traversal
+    LogicalKeySet(LogicalKeyboardKey.tab): const Intent(NextFocusAction.key),
+    LogicalKeySet(LogicalKeyboardKey.shift, LogicalKeyboardKey.tab): const Intent(PreviousFocusAction.key),
+    LogicalKeySet(LogicalKeyboardKey.arrowLeft): const DirectionalFocusIntent(TraversalDirection.left),
+    LogicalKeySet(LogicalKeyboardKey.arrowRight): const DirectionalFocusIntent(TraversalDirection.right),
+    LogicalKeySet(LogicalKeyboardKey.arrowDown): const DirectionalFocusIntent(TraversalDirection.down),
+    LogicalKeySet(LogicalKeyboardKey.arrowUp): const DirectionalFocusIntent(TraversalDirection.up),
+
+    // Scrolling
+    LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.arrowUp): const ScrollIntent(direction: AxisDirection.up),
+    LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.arrowDown): const ScrollIntent(direction: AxisDirection.down),
+    LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.arrowLeft): const ScrollIntent(direction: AxisDirection.left),
+    LogicalKeySet(LogicalKeyboardKey.meta, LogicalKeyboardKey.arrowRight): const ScrollIntent(direction: AxisDirection.right),
+    LogicalKeySet(LogicalKeyboardKey.pageUp): const ScrollIntent(direction: AxisDirection.up, type: ScrollIncrementType.page),
+    LogicalKeySet(LogicalKeyboardKey.pageDown): const ScrollIntent(direction: AxisDirection.down, type: ScrollIncrementType.page),
+  };
+
+  /// Generates the default shortcut key bindings based on the
+  /// [defaultTargetPlatform].
+  ///
+  /// Used by [WidgetsApp] to assign a default value to [WidgetsApp.shortcuts].
+  static Map<LogicalKeySet, Intent> get defaultShortcuts {
+    if (kIsWeb) {
+      return _defaultWebShortcuts;
+    }
+
+    switch (defaultTargetPlatform) {
+      case TargetPlatform.android:
+      case TargetPlatform.fuchsia:
+        return _defaultShortcuts;
+      case TargetPlatform.macOS:
+        return _defaultMacOsShortcuts;
+      case TargetPlatform.iOS:
+        // No keyboard support on iOS yet.
+        break;
+    }
+    return <LogicalKeySet, Intent>{};
+  }
+
+  /// The default value of [WidgetsApp.actions].
+  static final Map<LocalKey, ActionFactory> defaultActions = <LocalKey, ActionFactory>{
+    DoNothingAction.key: () => const DoNothingAction(),
+    RequestFocusAction.key: () => RequestFocusAction(),
+    NextFocusAction.key: () => NextFocusAction(),
+    PreviousFocusAction.key: () => PreviousFocusAction(),
+    DirectionalFocusAction.key: () => DirectionalFocusAction(),
+    ScrollAction.key: () => ScrollAction(),
+  };
+
   @override
   _WidgetsAppState createState() => _WidgetsAppState();
 }
 
-class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserver {
-
+class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
   // STATE LIFECYCLE
 
   @override
@@ -726,13 +943,6 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) { }
-
-  @override
-  void didHaveMemoryPressure() { }
-
 
   // NAVIGATOR
 
@@ -785,12 +995,14 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
     final Route<dynamic> result = widget.onUnknownRoute(settings);
     assert(() {
       if (result == null) {
-        throw FlutterError(
-          'The onUnknownRoute callback returned null.\n'
-          'When the $runtimeType requested the route $settings from its '
-          'onUnknownRoute callback, the callback returned null. Such callbacks '
-          'must never return null.'
-        );
+        throw FlutterError.fromParts(<DiagnosticsNode>[
+          ErrorSummary('The onUnknownRoute callback returned null.'),
+          ErrorDescription(
+            'When the $runtimeType requested the route $settings from its '
+            'onUnknownRoute callback, the callback returned null. Such callbacks '
+            'must never return null.'
+          )
+        ]);
       }
       return true;
     }());
@@ -816,7 +1028,6 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
     navigator.pushNamed(route);
     return true;
   }
-
 
   // LOCALIZATION
 
@@ -845,40 +1056,41 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
 
   /// The default locale resolution algorithm.
   ///
-  /// Custom resolution algorithms can be provided through [WidgetsApp.localeListResolutionCallback]
-  /// or [WidgetsApp.localeResolutionCallback].
+  /// Custom resolution algorithms can be provided through
+  /// [WidgetsApp.localeListResolutionCallback] or
+  /// [WidgetsApp.localeResolutionCallback].
   ///
-  /// When no custom locale resolution algorithms are provided or if both fail to resolve,
-  /// Flutter will default to calling this algorithm.
+  /// When no custom locale resolution algorithms are provided or if both fail
+  /// to resolve, Flutter will default to calling this algorithm.
   ///
   /// This algorithm prioritizes speed at the cost of slightly less appropriate
   /// resolutions for edge cases.
   ///
-  /// This algorithm will resolve to the earliest locale in [preferredLocales] that
+  /// This algorithm will resolve to the earliest preferred locale that
   /// matches the most fields, prioritizing in the order of perfect match,
   /// languageCode+countryCode, languageCode+scriptCode, languageCode-only.
   ///
   /// In the case where a locale is matched by languageCode-only and is not the
-  /// default (first) locale, the next locale in preferredLocales with a
+  /// default (first) locale, the next preferred locale with a
   /// perfect match can supersede the languageCode-only match if it exists.
   ///
-  /// When a preferredLocale matches more than one supported locale, it will resolve
-  /// to the first matching locale listed in the supportedLocales.
+  /// When a preferredLocale matches more than one supported locale, it will
+  /// resolve to the first matching locale listed in the supportedLocales.
   ///
-  /// When all [preferredLocales] have been exhausted without a match, the first countryCode only
-  /// match will be returned.
+  /// When all preferred locales have been exhausted without a match, the first
+  /// countryCode only match will be returned.
   ///
-  /// When no match at all is found, the first (default) locale in [supportedLocales] will be
-  /// returned.
+  /// When no match at all is found, the first (default) locale in
+  /// [supportedLocales] will be returned.
   ///
   /// To summarize, the main matching priority is:
   ///
   ///  1. [Locale.languageCode], [Locale.scriptCode], and [Locale.countryCode]
-  ///  2. [Locale.languageCode] and [Locale.scriptCode] only
-  ///  3. [Locale.languageCode] and [Locale.countryCode] only
-  ///  4. [Locale.languageCode] only (with caveats, see above)
-  ///  5. [Locale.countryCode] only when all [preferredLocales] fail to match
-  ///  6. returns [supportedLocales.first] as a fallback
+  ///  1. [Locale.languageCode] and [Locale.scriptCode] only
+  ///  1. [Locale.languageCode] and [Locale.countryCode] only
+  ///  1. [Locale.languageCode] only (with caveats, see above)
+  ///  1. [Locale.countryCode] only when all [preferredLocales] fail to match
+  ///  1. Returns the first element of [supportedLocales] as a fallback
   ///
   /// This algorithm does not take language distance (how similar languages are to each other)
   /// into account, and will not handle edge cases such as resolving `de` to `fr` rather than `zh`
@@ -898,7 +1110,7 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
     final Map<String, Locale> languageAndScriptLocales = HashMap<String, Locale>();
     final Map<String, Locale> languageLocales = HashMap<String, Locale>();
     final Map<String, Locale> countryLocales = HashMap<String, Locale>();
-    for (Locale locale in supportedLocales) {
+    for (final Locale locale in supportedLocales) {
       allSupportedLocales['${locale.languageCode}_${locale.scriptCode}_${locale.countryCode}'] ??= locale;
       languageAndScriptLocales['${locale.languageCode}_${locale.scriptCode}'] ??= locale;
       languageAndCountryLocales['${locale.languageCode}_${locale.countryCode}'] ??= locale;
@@ -991,53 +1203,13 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
     yield DefaultWidgetsLocalizations.delegate;
   }
 
-  // ACCESSIBILITY
-
-  @override
-  void didChangeAccessibilityFeatures() {
-    setState(() {
-      // The properties of window have changed. We use them in our build
-      // function, so we need setState(), but we don't cache anything locally.
-    });
-  }
-
-
-  // METRICS
-
-  @override
-  void didChangeMetrics() {
-    setState(() {
-      // The properties of window have changed. We use them in our build
-      // function, so we need setState(), but we don't cache anything locally.
-    });
-  }
-
-  @override
-  void didChangeTextScaleFactor() {
-    setState(() {
-      // The textScaleFactor property of window has changed. We reference
-      // window in our build function, so we need to call setState(), but
-      // we don't need to cache anything locally.
-    });
-  }
-
-  // RENDERING
-  @override
-  void didChangePlatformBrightness() {
-    setState(() {
-      // The platformBrightness property of window has changed. We reference
-      // window in our build function, so we need to call setState(), but
-      // we don't need to cache anything locally.
-    });
-  }
-
   // BUILDER
 
   bool _debugCheckLocalizations(Locale appLocale) {
     assert(() {
       final Set<Type> unsupportedTypes =
         _localizationsDelegates.map<Type>((LocalizationsDelegate<dynamic> delegate) => delegate.type).toSet();
-      for (LocalizationsDelegate<dynamic> delegate in _localizationsDelegates) {
+      for (final LocalizationsDelegate<dynamic> delegate in _localizationsDelegates) {
         if (!unsupportedTypes.contains(delegate.type))
           continue;
         if (delegate.isSupported(appLocale))
@@ -1058,7 +1230,7 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
         'Warning: This application\'s locale, $appLocale, is not supported by all of its\n'
         'localization delegates.'
       );
-      for (Type unsupportedType in unsupportedTypes) {
+      for (final Type unsupportedType in unsupportedTypes) {
         // Currently the Cupertino library only provides english localizations.
         // Remove this when https://github.com/flutter/flutter/issues/23847
         // is fixed.
@@ -1190,17 +1362,95 @@ class _WidgetsAppState extends State<WidgetsApp> implements WidgetsBindingObserv
       : _locale;
 
     assert(_debugCheckLocalizations(appLocale));
-
-    return DefaultFocusTraversal(
-      policy: ReadingOrderTraversalPolicy(),
-      child: MediaQuery(
-        data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
-        child: Localizations(
-          locale: appLocale,
-          delegates: _localizationsDelegates.toList(),
-          child: title,
+    return Shortcuts(
+      shortcuts: widget.shortcuts ?? WidgetsApp.defaultShortcuts,
+      child: Actions(
+        actions: widget.actions ?? WidgetsApp.defaultActions,
+        child: DefaultFocusTraversal(
+          policy: ReadingOrderTraversalPolicy(),
+          child: _MediaQueryFromWindow(
+            child: Localizations(
+              locale: appLocale,
+              delegates: _localizationsDelegates.toList(),
+              child: title,
+            ),
+          ),
         ),
       ),
     );
+  }
+}
+
+/// Builds [MediaQuery] from `window` by listening to [WidgetsBinding].
+///
+/// It is performed in a standalone widget to rebuild **only** [MediaQuery] and
+/// its dependents when `window` changes, instead of rebuilding the entire widget tree.
+class _MediaQueryFromWindow extends StatefulWidget {
+  const _MediaQueryFromWindow({Key key, this.child}) : super(key: key);
+
+  final Widget child;
+
+  @override
+  _MediaQueryFromWindowsState createState() => _MediaQueryFromWindowsState();
+}
+
+class _MediaQueryFromWindowsState extends State<_MediaQueryFromWindow> with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  // ACCESSIBILITY
+
+  @override
+  void didChangeAccessibilityFeatures() {
+    setState(() {
+      // The properties of window have changed. We use them in our build
+      // function, so we need setState(), but we don't cache anything locally.
+    });
+  }
+
+  // METRICS
+
+  @override
+  void didChangeMetrics() {
+    setState(() {
+      // The properties of window have changed. We use them in our build
+      // function, so we need setState(), but we don't cache anything locally.
+    });
+  }
+
+  @override
+  void didChangeTextScaleFactor() {
+    setState(() {
+      // The textScaleFactor property of window has changed. We reference
+      // window in our build function, so we need to call setState(), but
+      // we don't need to cache anything locally.
+    });
+  }
+
+  // RENDERING
+  @override
+  void didChangePlatformBrightness() {
+    setState(() {
+      // The platformBrightness property of window has changed. We reference
+      // window in our build function, so we need to call setState(), but
+      // we don't need to cache anything locally.
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MediaQuery(
+      data: MediaQueryData.fromWindow(WidgetsBinding.instance.window),
+      child: widget.child,
+    );
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
   }
 }

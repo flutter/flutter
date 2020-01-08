@@ -1,16 +1,18 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
+import 'constants.dart';
 import 'expand_icon.dart';
 import 'ink_well.dart';
+import 'material_localizations.dart';
 import 'mergeable_material.dart';
 import 'theme.dart';
 
-const double _kPanelHeaderCollapsedHeight = 48.0;
+const double _kPanelHeaderCollapsedHeight = kMinInteractiveDimension;
 const double _kPanelHeaderExpandedHeight = 64.0;
 
 class _SaltedKey<S, V> extends LocalKey {
@@ -23,9 +25,9 @@ class _SaltedKey<S, V> extends LocalKey {
   bool operator ==(dynamic other) {
     if (other.runtimeType != runtimeType)
       return false;
-    final _SaltedKey<S, V> typedOther = other;
-    return salt == typedOther.salt
-        && value == typedOther.value;
+    return other is _SaltedKey<S, V>
+        && other.salt == salt
+        && other.value == value;
   }
 
   @override
@@ -362,7 +364,8 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
     if (widget._allowOnlyOnePanelOpen) {
       assert(_allIdentifiersUnique(), 'All ExpansionPanelRadio identifier values must be unique.');
       if (widget.initialOpenPanelValue != null) {
-        _currentOpenPanel = searchPanelByValue(widget.children, widget.initialOpenPanelValue);
+        _currentOpenPanel =
+          searchPanelByValue(widget.children.cast<ExpansionPanelRadio>(), widget.initialOpenPanelValue);
       }
     }
   }
@@ -376,7 +379,8 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
       // If the previous widget was non-radio ExpansionPanelList, initialize the
       // open panel to widget.initialOpenPanelValue
       if (!oldWidget._allowOnlyOnePanelOpen) {
-        _currentOpenPanel = searchPanelByValue(widget.children, widget.initialOpenPanelValue);
+        _currentOpenPanel =
+          searchPanelByValue(widget.children.cast<ExpansionPanelRadio>(), widget.initialOpenPanelValue);
       }
     } else {
       _currentOpenPanel = null;
@@ -385,7 +389,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
 
   bool _allIdentifiersUnique() {
     final Map<Object, bool> identifierMap = <Object, bool>{};
-    for (ExpansionPanelRadio child in widget.children) {
+    for (final ExpansionPanelRadio child in widget.children.cast<ExpansionPanelRadio>()) {
       identifierMap[child.value] = true;
     }
     return identifierMap.length == widget.children.length;
@@ -393,7 +397,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
 
   bool _isChildExpanded(int index) {
     if (widget._allowOnlyOnePanelOpen) {
-      final ExpansionPanelRadio radioWidget = widget.children[index];
+      final ExpansionPanelRadio radioWidget = widget.children[index] as ExpansionPanelRadio;
       return _currentOpenPanel?.value == radioWidget.value;
     }
     return widget.children[index].isExpanded;
@@ -404,12 +408,12 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
       widget.expansionCallback(index, isExpanded);
 
     if (widget._allowOnlyOnePanelOpen) {
-      final ExpansionPanelRadio pressedChild = widget.children[index];
+      final ExpansionPanelRadio pressedChild = widget.children[index] as ExpansionPanelRadio;
 
       // If another ExpansionPanelRadio was already open, apply its
       // expansionCallback (if any) to false, because it's closing.
       for (int childIndex = 0; childIndex < widget.children.length; childIndex += 1) {
-        final ExpansionPanelRadio child = widget.children[childIndex];
+        final ExpansionPanelRadio child = widget.children[childIndex] as ExpansionPanelRadio;
         if (widget.expansionCallback != null &&
             childIndex != index &&
             child.value == _currentOpenPanel?.value)
@@ -423,7 +427,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
   }
 
   ExpansionPanelRadio searchPanelByValue(List<ExpansionPanelRadio> panels, Object value)  {
-    for (ExpansionPanelRadio panel in panels) {
+    for (final ExpansionPanelRadio panel in panels) {
       if (panel.value == value)
         return panel;
     }
@@ -446,7 +450,26 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
         context,
         _isChildExpanded(index),
       );
-      final Row header = Row(
+
+      Widget expandIconContainer = Container(
+        margin: const EdgeInsetsDirectional.only(end: 8.0),
+        child: ExpandIcon(
+          isExpanded: _isChildExpanded(index),
+          padding: const EdgeInsets.all(16.0),
+          onPressed: !child.canTapOnHeader
+              ? (bool isExpanded) => _handlePressed(isExpanded, index)
+              : null,
+        ),
+      );
+      if (!child.canTapOnHeader) {
+        final MaterialLocalizations localizations = MaterialLocalizations.of(context);
+        expandIconContainer = Semantics(
+          label: _isChildExpanded(index)? localizations.expandedIconTapHint : localizations.collapsedIconTapHint,
+          container: true,
+          child: expandIconContainer,
+        );
+      }
+      Widget header = Row(
         children: <Widget>[
           Expanded(
             child: AnimatedContainer(
@@ -459,32 +482,23 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
               ),
             ),
           ),
-          Container(
-            margin: const EdgeInsetsDirectional.only(end: 8.0),
-            child: ExpandIcon(
-              isExpanded: _isChildExpanded(index),
-              padding: const EdgeInsets.all(16.0),
-              onPressed: !child.canTapOnHeader
-                ? (bool isExpanded) => _handlePressed(isExpanded, index)
-                : null,
-            ),
-          ),
+          expandIconContainer,
         ],
       );
-
+      if (child.canTapOnHeader) {
+        header = MergeSemantics(
+          child: InkWell(
+            onTap: () => _handlePressed(_isChildExpanded(index), index),
+            child: header,
+          ),
+        );
+      }
       items.add(
         MaterialSlice(
           key: _SaltedKey<BuildContext, int>(context, index * 2),
           child: Column(
             children: <Widget>[
-              MergeSemantics(
-                child: child.canTapOnHeader
-                  ? InkWell(
-                  onTap: () => _handlePressed(_isChildExpanded(index), index),
-                  child: header,
-                )
-                  : header,
-              ),
+              header,
               AnimatedCrossFade(
                 firstChild: Container(height: 0.0),
                 secondChild: child.body,

@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -186,10 +186,10 @@ void main() {
 
       testWidgets('Preserves children states when the list parent changes the order', (WidgetTester tester) async {
         _StatefulState findState(Key key) {
-          return find.byElementPredicate((Element element) => element.ancestorWidgetOfExactType(_Stateful)?.key == key)
+          return find.byElementPredicate((Element element) => element.findAncestorWidgetOfExactType<_Stateful>()?.key == key)
               .evaluate()
               .first
-              .ancestorStateOfType(const TypeMatcher<_StatefulState>());
+              .findAncestorStateOfType<_StatefulState>();
         }
         await tester.pumpWidget(MaterialApp(
           home: ReorderableListView(
@@ -304,7 +304,7 @@ void main() {
           final Semantics semantics = find.ancestor(
             of: find.byKey(Key(listItems[index])),
             matching: find.byType(Semantics),
-          ).evaluate().first.widget;
+          ).evaluate().first.widget as Semantics;
           return semantics.properties.customSemanticsActions;
         }
 
@@ -316,7 +316,7 @@ void main() {
         testWidgets('Provides the correct accessibility actions in LTR and RTL modes', (WidgetTester tester) async {
           // The a11y actions for a vertical list are the same in LTR and RTL modes.
           final SemanticsHandle handle = tester.ensureSemantics();
-          for (TextDirection direction in TextDirection.values) {
+          for (final TextDirection direction in TextDirection.values) {
             await tester.pumpWidget(build());
 
             // The first item can be moved down or to the end.
@@ -469,6 +469,7 @@ void main() {
             hasToggledState: true,
             isToggled: true,
             isEnabled: true,
+            isFocusable: true,
             hasEnabledState: true,
             label: 'Switch tile',
             hasTapAction: true,
@@ -615,10 +616,10 @@ void main() {
 
       testWidgets('Preserves children states when the list parent changes the order', (WidgetTester tester) async {
         _StatefulState findState(Key key) {
-          return find.byElementPredicate((Element element) => element.ancestorWidgetOfExactType(_Stateful)?.key == key)
+          return find.byElementPredicate((Element element) => element.findAncestorWidgetOfExactType<_Stateful>()?.key == key)
               .evaluate()
               .first
-              .ancestorStateOfType(const TypeMatcher<_StatefulState>());
+              .findAncestorStateOfType<_StatefulState>();
         }
         await tester.pumpWidget(MaterialApp(
           home: ReorderableListView(
@@ -660,7 +661,7 @@ void main() {
           final Semantics semantics = find.ancestor(
             of: find.byKey(Key(listItems[index])),
             matching: find.byType(Semantics),
-          ).evaluate().first.widget;
+          ).evaluate().first.widget as Semantics;
           return semantics.properties.customSemanticsActions;
         }
 

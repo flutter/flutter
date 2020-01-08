@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -204,22 +204,23 @@ class _SearchDemoSearchDelegate extends SearchDelegate<int> {
   @override
   List<Widget> buildActions(BuildContext context) {
     return <Widget>[
-      query.isEmpty
-          ? IconButton(
-              tooltip: 'Voice Search',
-              icon: const Icon(Icons.mic),
-              onPressed: () {
-                query = 'TODO: implement voice input';
-              },
-            )
-          : IconButton(
-              tooltip: 'Clear',
-              icon: const Icon(Icons.clear),
-              onPressed: () {
-                query = '';
-                showSuggestions(context);
-              },
-            ),
+      if (query.isEmpty)
+        IconButton(
+          tooltip: 'Voice Search',
+          icon: const Icon(Icons.mic),
+          onPressed: () {
+            query = 'TODO: implement voice input';
+          },
+        )
+      else
+        IconButton(
+          tooltip: 'Clear',
+          icon: const Icon(Icons.clear),
+          onPressed: () {
+            query = '';
+            showSuggestions(context);
+          },
+        ),
     ];
   }
 }

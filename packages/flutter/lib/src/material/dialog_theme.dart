@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -18,8 +18,8 @@ import 'theme.dart';
 /// When Shape is `null`, the dialog defaults to a [RoundedRectangleBorder] with
 /// a border radius of 2.0 on all corners.
 ///
-/// [titleTextStyle] and [contentTextStyle] are used in [AlertDialogs].
-/// If null, they default to [ThemeData.textTheme.title] and [ThemeData.textTheme.subhead],
+/// [titleTextStyle] and [contentTextStyle] are used in [AlertDialog]s.
+/// If null, they default to [TextTheme.title] and [TextTheme.subhead],
 /// respectively.
 ///
 /// See also:
@@ -109,20 +109,20 @@ class DialogTheme extends Diagnosticable {
       return true;
     if (other.runtimeType != runtimeType)
       return false;
-    final DialogTheme typedOther = other;
-    return typedOther.backgroundColor == backgroundColor
-        && typedOther.elevation == elevation
-        && typedOther.shape == shape
-        && typedOther.titleTextStyle == titleTextStyle
-        && typedOther.contentTextStyle == contentTextStyle;
+    return other is DialogTheme
+        && other.backgroundColor == backgroundColor
+        && other.elevation == elevation
+        && other.shape == shape
+        && other.titleTextStyle == titleTextStyle
+        && other.contentTextStyle == contentTextStyle;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<Color>('backgroundColor', backgroundColor));
+    properties.add(ColorProperty('backgroundColor', backgroundColor));
     properties.add(DiagnosticsProperty<ShapeBorder>('shape', shape, defaultValue: null));
-    properties.add(DiagnosticsProperty<double>('elevation', elevation));
+    properties.add(DoubleProperty('elevation', elevation));
     properties.add(DiagnosticsProperty<TextStyle>('titleTextStyle', titleTextStyle, defaultValue: null));
     properties.add(DiagnosticsProperty<TextStyle>('contentTextStyle', contentTextStyle, defaultValue: null));
   }

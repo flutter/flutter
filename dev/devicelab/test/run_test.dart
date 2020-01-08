@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -15,14 +15,12 @@ void main() {
 
   group('run.dart script', () {
     Future<ProcessResult> runScript(List<String> testNames) async {
-      final List<String> options = <String>['bin/run.dart'];
-      for (String testName in testNames) {
-        options..addAll(<String>['-t', testName]);
-      }
       final String dart = path.absolute(path.join('..', '..', 'bin', 'cache', 'dart-sdk', 'bin', 'dart'));
-      final ProcessResult scriptProcess = processManager.runSync(
-        <String>[dart]..addAll(options)
-      );
+      final ProcessResult scriptProcess = processManager.runSync(<String>[
+        dart,
+        'bin/run.dart',
+        for (final String testName in testNames) ...<String>['-t', testName],
+      ]);
       return scriptProcess;
     }
 

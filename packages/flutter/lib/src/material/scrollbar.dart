@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -36,6 +36,7 @@ class Scrollbar extends StatefulWidget {
   const Scrollbar({
     Key key,
     @required this.child,
+    this.controller,
   }) : super(key: key);
 
   /// The widget below this widget in the tree.
@@ -46,17 +47,18 @@ class Scrollbar extends StatefulWidget {
   /// Typically a [ListView] or [CustomScrollView].
   final Widget child;
 
+  /// {@macro flutter.cupertino.cupertinoScrollbar.controller}
+  final ScrollController controller;
+
   @override
   _ScrollbarState createState() => _ScrollbarState();
 }
 
-
 class _ScrollbarState extends State<Scrollbar> with TickerProviderStateMixin {
   ScrollbarPainter _materialPainter;
-  TargetPlatform _currentPlatform;
   TextDirection _textDirection;
   Color _themeColor;
-
+  bool _useCupertinoScrollbar;
   AnimationController _fadeoutAnimationController;
   Animation<double> _fadeoutOpacityAnimation;
   Timer _fadeoutTimer;
@@ -77,42 +79,52 @@ class _ScrollbarState extends State<Scrollbar> with TickerProviderStateMixin {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-
+    assert((() {
+      _useCupertinoScrollbar = null;
+      return true;
+    })());
     final ThemeData theme = Theme.of(context);
-    _currentPlatform = theme.platform;
-
-    switch (_currentPlatform) {
+    switch (theme.platform) {
       case TargetPlatform.iOS:
+      case TargetPlatform.macOS:
         // On iOS, stop all local animations. CupertinoScrollbar has its own
         // animations.
         _fadeoutTimer?.cancel();
         _fadeoutTimer = null;
         _fadeoutAnimationController.reset();
+        _useCupertinoScrollbar = true;
         break;
       case TargetPlatform.android:
       case TargetPlatform.fuchsia:
         _themeColor = theme.highlightColor.withOpacity(1.0);
         _textDirection = Directionality.of(context);
         _materialPainter = _buildMaterialScrollbarPainter();
+        _useCupertinoScrollbar = false;
         break;
     }
+    assert(_useCupertinoScrollbar != null);
   }
 
   ScrollbarPainter _buildMaterialScrollbarPainter() {
     return ScrollbarPainter(
-        color: _themeColor,
-        textDirection: _textDirection,
-        thickness: _kScrollbarThickness,
-        fadeoutOpacityAnimation: _fadeoutOpacityAnimation,
-      );
+      color: _themeColor,
+      textDirection: _textDirection,
+      thickness: _kScrollbarThickness,
+      fadeoutOpacityAnimation: _fadeoutOpacityAnimation,
+      padding: MediaQuery.of(context).padding,
+    );
   }
 
   bool _handleScrollNotification(ScrollNotification notification) {
+    final ScrollMetrics metrics = notification.metrics;
+    if (metrics.maxScrollExtent <= metrics.minScrollExtent) {
+      return false;
+    }
+
     // iOS sub-delegates to the CupertinoScrollbar instead and doesn't handle
     // scroll notifications here.
-    if (_currentPlatform != TargetPlatform.iOS
-        && (notification is ScrollUpdateNotification
-            || notification is OverscrollNotification)) {
+    if (!_useCupertinoScrollbar &&
+        (notification is ScrollUpdateNotification || notification is OverscrollNotification)) {
       if (_fadeoutAnimationController.status != AnimationStatus.forward) {
         _fadeoutAnimationController.forward();
       }
@@ -137,25 +149,22 @@ class _ScrollbarState extends State<Scrollbar> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    switch (_currentPlatform) {
-      case TargetPlatform.iOS:
-        return CupertinoScrollbar(
-          child: widget.child,
-        );
-      case TargetPlatform.android:
-      case TargetPlatform.fuchsia:
-        return NotificationListener<ScrollNotification>(
-          onNotification: _handleScrollNotification,
-          child: RepaintBoundary(
-            child: CustomPaint(
-              foregroundPainter: _materialPainter,
-              child: RepaintBoundary(
-                child: widget.child,
-              ),
-            ),
-          ),
-        );
+    if (_useCupertinoScrollbar) {
+      return CupertinoScrollbar(
+        child: widget.child,
+        controller: widget.controller,
+      );
     }
-    throw FlutterError('Unknown platform for scrollbar insertion');
+    return NotificationListener<ScrollNotification>(
+      onNotification: _handleScrollNotification,
+      child: RepaintBoundary(
+        child: CustomPaint(
+          foregroundPainter: _materialPainter,
+          child: RepaintBoundary(
+            child: widget.child,
+          ),
+        ),
+      ),
+    );
   }
 }

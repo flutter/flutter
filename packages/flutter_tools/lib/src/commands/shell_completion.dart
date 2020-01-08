@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -9,6 +9,7 @@ import 'package:completion/completion.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
+import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 
 class ShellCompletionCommand extends FlutterCommand {
@@ -52,8 +53,8 @@ class ShellCompletionCommand extends FlutterCommand {
       return null;
     }
 
-    final File outputFile = fs.file(argResults.rest.first);
-    if (outputFile.existsSync() && !argResults['overwrite']) {
+    final File outputFile = globals.fs.file(argResults.rest.first);
+    if (outputFile.existsSync() && !boolArg('overwrite')) {
       throwToolExit(
         'Output file ${outputFile.path} already exists, will not overwrite. '
             'Use --overwrite to force overwriting existing output file.',

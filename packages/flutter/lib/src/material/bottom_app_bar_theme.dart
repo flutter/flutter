@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -92,16 +92,16 @@ class BottomAppBarTheme extends Diagnosticable {
       return true;
     if (other.runtimeType != runtimeType)
       return false;
-    final BottomAppBarTheme typedOther = other;
-    return typedOther.color == color
-        && typedOther.elevation == elevation
-        && typedOther.shape == shape;
+    return other is BottomAppBarTheme
+        && other.color == color
+        && other.elevation == elevation
+        && other.shape == shape;
   }
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
-    properties.add(DiagnosticsProperty<Color>('color', color, defaultValue: null));
+    properties.add(ColorProperty('color', color, defaultValue: null));
     properties.add(DiagnosticsProperty<double>('elevation', elevation, defaultValue: null));
     properties.add(DiagnosticsProperty<NotchedShape>('shape', shape, defaultValue: null));
   }

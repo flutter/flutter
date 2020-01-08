@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -26,6 +26,12 @@ import 'fuchsia_pm.dart';
 //         -h: SHA256 hash of source config file (optional, with URL)
 //         -x: do not disable other active sources (if the provided source is
 //             enabled)
+//
+//     add_repo_cfg  - add a repository config to the set of known repositories,
+//                     using a source config
+//         -n: name of the update source (optional, with URL)
+//         -f: file path or url to a source config file
+//         -h: SHA256 hash of source config file (optional, with URL)
 //
 //     rm_src        - remove a source, if it exists
 //         -n: name of the update source
@@ -71,6 +77,32 @@ class FuchsiaAmberCtl {
   Future<bool> getUp(FuchsiaDevice device, String packageName) async {
     final RunResult result =
         await device.shell('amber_ctl get_up -n $packageName');
+    return result.exitCode == 0;
+  }
+
+  /// Converts the amber source config created when [server] was set up to a
+  /// pkg_resolver repo config, and teaches the pkg_resolver instance running
+  /// on [device] about the [FuchsiaPackageServer].
+  Future<bool> addRepoCfg(FuchsiaDevice device, FuchsiaPackageServer server) async {
+    final String configUrl = '${server.url}/config.json';
+    final RunResult result =
+        await device.shell('amber_ctl add_repo_cfg -n ${server.name} -f $configUrl');
+    return result.exitCode == 0;
+  }
+
+  /// Instructs the pkg_resolver instance running on [device] to prefetch the
+  /// package [packageName].
+  Future<bool> pkgCtlResolve(FuchsiaDevice device, FuchsiaPackageServer server, String packageName) async {
+    final String packageUrl = 'fuchsia-pkg://${server.name}/$packageName';
+    final RunResult result = await device.shell('pkgctl resolve $packageUrl');
+    return result.exitCode == 0;
+  }
+
+  /// Instructs the pkg_resolver instance running on [device] to forget about
+  /// the Fuchsia package server that it was accessing via [serverUrl].
+  Future<bool> pkgCtlRepoRemove(FuchsiaDevice device, FuchsiaPackageServer server) async {
+    final String repoUrl = 'fuchsia-pkg://${server.name}';
+    final RunResult result = await device.shell('pkgctl repo rm $repoUrl');
     return result.exitCode == 0;
   }
 }

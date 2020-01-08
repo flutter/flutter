@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -21,7 +21,7 @@ void main() {
 
     expect(friction.dx(1.0), 120.0);
     expect(friction.dx(2.0), 36.0);
-    expect(friction.dx(3.0), 10.8);
+    expect(friction.dx(3.0), closeTo(10.8, 0.00001));
     expect(friction.dx(4.0) < 3.5, true);
 
     expect(friction.isDone(5.0), true);

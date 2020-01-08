@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -193,14 +193,14 @@ const List<_Diagonal> _allDiagonals = <_Diagonal>[
   _Diagonal(_CornerId.bottomLeft, _CornerId.topRight),
 ];
 
-typedef _KeyFunc<T> = dynamic Function(T input);
+typedef _KeyFunc<T> = double Function(T input);
 
 // Select the element for which the key function returns the maximum value.
 T _maxBy<T>(Iterable<T> input, _KeyFunc<T> keyFunc) {
   T maxValue;
-  dynamic maxKey;
-  for (T value in input) {
-    final dynamic key = keyFunc(value);
+  double maxKey;
+  for (final T value in input) {
+    final double key = keyFunc(value);
     if (maxKey == null || key > maxKey) {
       maxValue = value;
       maxKey = key;
@@ -224,7 +224,7 @@ T _maxBy<T>(Iterable<T> input, _KeyFunc<T> keyFunc) {
 ///  * [MaterialRectCenterArcTween], which interpolates a rect along a circular
 ///    arc between the begin and end [Rect]'s centers.
 ///  * [Tween], for a discussion on how to use interpolation objects.
-///  * [MaterialPointArcTween], the analogue for [Offset] interpolation.
+///  * [MaterialPointArcTween], the analog for [Offset] interpolation.
 ///  * [RectTween], which does a linear rectangle interpolation.
 ///  * [Hero.createRectTween], which can be used to specify the tween that defines
 ///    a hero's path.
@@ -340,7 +340,7 @@ class MaterialRectArcTween extends RectTween {
 ///  * [MaterialRectArcTween], A [Tween] that interpolates a [Rect] by having
 ///    its opposite corners follow circular arcs.
 ///  * [Tween], for a discussion on how to use interpolation objects.
-///  * [MaterialPointArcTween], the analogue for [Offset] interpolation.
+///  * [MaterialPointArcTween], the analog for [Offset] interpolation.
 ///  * [RectTween], which does a linear rectangle interpolation.
 ///  * [Hero.createRectTween], which can be used to specify the tween that defines
 ///    a hero's path.

@@ -1,8 +1,6 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-
-import 'dart:io' show Platform;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -46,7 +44,7 @@ void main() {
               );
             },
           ),
-        )
+        ),
       );
 
       await expectLater(
@@ -54,7 +52,7 @@ void main() {
         matchesGoldenFile('localized_fonts.rich_text.styled_text_span.png'),
       );
     },
-    skip: !Platform.isLinux,
+    skip: isBrowser, // TODO(yjbanov): implement goldens on the Web: https://github.com/flutter/flutter/issues/40297
   );
 
   testWidgets(
@@ -98,7 +96,7 @@ void main() {
               );
             },
           ),
-        )
+        ),
       );
 
       await expectLater(
@@ -106,7 +104,7 @@ void main() {
         matchesGoldenFile('localized_fonts.text_ambient_locale.chars.png'),
       );
     },
-    skip: !Platform.isLinux,
+    skip: isBrowser, // TODO(yjbanov): implement goldens on the Web: https://github.com/flutter/flutter/issues/40297
   );
 
   testWidgets(
@@ -142,7 +140,7 @@ void main() {
               );
             },
           ),
-        )
+        ),
       );
 
       await expectLater(
@@ -150,7 +148,7 @@ void main() {
         matchesGoldenFile('localized_fonts.text_explicit_locale.chars.png'),
       );
     },
-    skip: !Platform.isLinux,
+    skip: isBrowser, // TODO(yjbanov): implement goldens on the Web: https://github.com/flutter/flutter/issues/40297
   );
 
 }

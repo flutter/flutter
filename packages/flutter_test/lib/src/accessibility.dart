@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -65,7 +65,7 @@ abstract class AccessibilityGuideline {
   String get description;
 }
 
-/// A guideline which enforces that all tapable semantics nodes have a minimum
+/// A guideline which enforces that all tappable semantics nodes have a minimum
 /// size.
 ///
 /// Each platform defines its own guidelines for minimum tap areas.
@@ -73,7 +73,7 @@ abstract class AccessibilityGuideline {
 class MinimumTapTargetGuideline extends AccessibilityGuideline {
   const MinimumTapTargetGuideline._(this.size, this.link);
 
-  /// The minimum allowed size of a tapable node.
+  /// The minimum allowed size of a tappable node.
   final Size size;
 
   /// A link describing the tap target guidelines for a platform.
@@ -196,12 +196,12 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
   Future<Evaluation> evaluate(WidgetTester tester) async {
     final SemanticsNode root = tester.binding.pipelineOwner.semanticsOwner.rootSemanticsNode;
     final RenderView renderView = tester.binding.renderView;
-    final OffsetLayer layer = renderView.layer;
+    final OffsetLayer layer = renderView.debugLayer as OffsetLayer;
     ui.Image image;
     final ByteData byteData = await tester.binding.runAsync<ByteData>(() async {
       // Needs to be the same pixel ratio otherwise our dimensions won't match the
       // last transform layer.
-      image = await layer.toImage(renderView.paintBounds, pixelRatio: 1 / 3);
+      image = await layer.toImage(renderView.paintBounds, pixelRatio: 1 / tester.binding.window.devicePixelRatio);
       return image.toByteData();
     });
 
@@ -215,7 +215,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
         children.add(child);
         return true;
       });
-      for (SemanticsNode child in children) {
+      for (final SemanticsNode child in children) {
         result += await evaluateNode(child);
       }
       if (_shouldSkipNode(data)) {
@@ -231,7 +231,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
       Rect paintBounds;
       if (elements.length == 1) {
         final Element element = elements.single;
-        final RenderBox renderObject = element.renderObject;
+        final RenderBox renderObject = element.renderObject as RenderBox;
         element.renderObject.paintBounds;
         paintBounds = Rect.fromPoints(
           renderObject.localToGlobal(element.renderObject.paintBounds.topLeft - const Offset(4.0, 4.0)),
@@ -260,7 +260,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
         return result;
       }
 
-      if (_isNodeOffScreen(paintBounds)) {
+      if (_isNodeOffScreen(paintBounds, tester.binding.window)) {
         return result;
       }
       final List<int> subset = _subsetToRect(byteData, paintBounds, image.width, image.height);
@@ -302,13 +302,14 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
 
   // Returns a rect that is entirely on screen, or null if it is too far off.
   //
-  // Given an 1800 * 2400 pixel buffer, can we actually get all the data from
-  // this node? allow a small delta overlap before culling the node.
-  bool _isNodeOffScreen(Rect paintBounds) {
+  // Given a pixel buffer based on the physical window size, can we actually
+  // get all the data from this node? allow a small delta overlap before
+  // culling the node.
+  bool _isNodeOffScreen(Rect paintBounds, ui.Window window) {
     return paintBounds.top < -50.0
       || paintBounds.left <  -50.0
-      || paintBounds.bottom > 2400.0 + 50.0
-      || paintBounds.right > 1800.0 + 50.0;
+      || paintBounds.bottom > (window.physicalSize.height * window.devicePixelRatio) + 50.0
+      || paintBounds.right > (window.physicalSize.width * window.devicePixelRatio)  + 50.0;
   }
 
   List<int> _subsetToRect(ByteData data, Rect paintBounds, int width, int height) {
@@ -347,7 +348,7 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
 class _ContrastReport {
   factory _ContrastReport(List<int> colors) {
     final Map<int, int> colorHistogram = <int, int>{};
-    for (int color in colors) {
+    for (final int color in colors) {
       colorHistogram[color] = (colorHistogram[color] ?? 0) + 1;
     }
     if (colorHistogram.length == 1) {
@@ -357,7 +358,7 @@ class _ContrastReport {
     // to determine the lighter and darker color, partition the colors
     // by lightness and then choose the mode from each group.
     double averageLightness = 0.0;
-    for (int color in colorHistogram.keys) {
+    for (final int color in colorHistogram.keys) {
       final HSLColor hslColor = HSLColor.fromColor(Color(color));
       averageLightness += hslColor.lightness * colorHistogram[color];
     }
@@ -368,7 +369,7 @@ class _ContrastReport {
     int lightCount = 0;
     int darkCount = 0;
     // Find the most frequently occurring light and dark color.
-    for (MapEntry<int, int> entry in colorHistogram.entries) {
+    for (final MapEntry<int, int> entry in colorHistogram.entries) {
       final HSLColor color = HSLColor.fromColor(Color(entry.key));
       final int count = entry.value;
       if (color.lightness <= averageLightness && count > darkCount) {
@@ -405,20 +406,20 @@ class _ContrastReport {
     if (r <= 0.03928)
       r /= 12.92;
     else
-      r = math.pow((r + 0.055)/ 1.055, 2.4);
+      r = math.pow((r + 0.055)/ 1.055, 2.4).toDouble();
     if (g <= 0.03928)
       g /= 12.92;
     else
-      g = math.pow((g + 0.055)/ 1.055, 2.4);
+      g = math.pow((g + 0.055)/ 1.055, 2.4).toDouble();
     if (b <= 0.03928)
       b /= 12.92;
     else
-      b = math.pow((b + 0.055)/ 1.055, 2.4);
+      b = math.pow((b + 0.055)/ 1.055, 2.4).toDouble();
     return 0.2126 * r + 0.7152 * g + 0.0722 * b;
   }
 }
 
-/// A guideline which requires tapable semantic nodes a minimum size of 48 by 48.
+/// A guideline which requires tappable semantic nodes a minimum size of 48 by 48.
 ///
 /// See also:
 ///
@@ -428,7 +429,7 @@ const AccessibilityGuideline androidTapTargetGuideline = MinimumTapTargetGuideli
   'https://support.google.com/accessibility/android/answer/7101858?hl=en',
 );
 
-/// A guideline which requires tapable semantic nodes a minimum size of 44 by 44.
+/// A guideline which requires tappable semantic nodes a minimum size of 44 by 44.
 ///
 /// See also:
 ///

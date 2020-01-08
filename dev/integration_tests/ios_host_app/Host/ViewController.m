@@ -1,9 +1,14 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 #import "ViewController.h"
-#import "Flutter/Flutter.h"
-#import "FlutterPluginRegistrant/GeneratedPluginRegistrant.h"
+#import <Flutter/Flutter.h>
+#import <FlutterPluginRegistrant/GeneratedPluginRegistrant.h>
 
 @implementation ViewController
 
+// Boiler-plate add-to-app demo. Not integration tested anywhere.
 - (void)viewDidLoad {
     [super viewDidLoad];
     UIButton *button = [UIButton buttonWithType:UIButtonTypeCustom];

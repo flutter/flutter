@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -53,8 +53,8 @@ class _GalleryAppState extends State<GalleryApp> {
     // https://docs.flutter.io/flutter/widgets/Navigator-class.html
     return Map<String, WidgetBuilder>.fromIterable(
       kAllGalleryDemos,
-      key: (dynamic demo) => '${demo.routeName}',
-      value: (dynamic demo) => demo.buildRoute,
+      key: (dynamic demo) => '${(demo as GalleryDemo).routeName}',
+      value: (dynamic demo) => (demo as GalleryDemo).buildRoute,
     );
   }
 
@@ -62,12 +62,19 @@ class _GalleryAppState extends State<GalleryApp> {
   void initState() {
     super.initState();
     _options = GalleryOptions(
-      theme: kLightGalleryTheme,
+      themeMode: ThemeMode.system,
       textScaleFactor: kAllGalleryTextScaleValues[0],
+      visualDensity: kAllGalleryVisualDensityValues[0],
       timeDilation: timeDilation,
       platform: defaultTargetPlatform,
     );
     model = AppStateModel()..loadProducts();
+  }
+
+  @override
+  void reassemble() {
+    _options = _options.copyWith(platform: defaultTargetPlatform);
+    super.reassemble();
   }
 
   @override
@@ -134,7 +141,9 @@ class _GalleryAppState extends State<GalleryApp> {
     return ScopedModel<AppStateModel>(
       model: model,
       child: MaterialApp(
-        theme: _options.theme.data.copyWith(platform: _options.platform),
+        theme: kLightGalleryTheme.copyWith(platform: _options.platform, visualDensity: _options.visualDensity.visualDensity),
+        darkTheme: kDarkGalleryTheme.copyWith(platform: _options.platform, visualDensity: _options.visualDensity.visualDensity),
+        themeMode: _options.themeMode,
         title: 'Flutter Gallery',
         color: Colors.grey,
         showPerformanceOverlay: _options.showPerformanceOverlay,
@@ -148,12 +157,14 @@ class _GalleryAppState extends State<GalleryApp> {
               // Specifically use a blank Cupertino theme here and do not transfer
               // over the Material primary color etc except the brightness to
               // showcase standard iOS looks.
-              CupertinoTheme(
-                data: CupertinoThemeData(
-                  brightness: _options.theme.data.brightness,
-                ),
-                child: child,
-              ),
+              Builder(builder: (BuildContext context) {
+                return CupertinoTheme(
+                  data: CupertinoThemeData(
+                    brightness: Theme.of(context).brightness,
+                  ),
+                  child: child,
+                );
+              }),
             ),
           );
         },

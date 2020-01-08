@@ -1,9 +1,10 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import '../base/common.dart';
 import '../base/process.dart';
+import '../globals.dart' as globals;
 import 'fuchsia_sdk.dart';
 
 // Usage: dev_finder <flags> <subcommand> <subcommand args>
@@ -22,35 +23,47 @@ class FuchsiaDevFinder {
   /// formatted as follows:
   /// 192.168.42.172 scare-cable-skip-joy
   Future<List<String>> list() async {
-    if (fuchsiaArtifacts.devFinder == null) {
+    if (fuchsiaArtifacts.devFinder == null ||
+        !fuchsiaArtifacts.devFinder.existsSync()) {
       throwToolExit('Fuchsia dev_finder tool not found.');
     }
     final List<String> command = <String>[
       fuchsiaArtifacts.devFinder.path,
       'list',
-      '-full'
+      '-full',
     ];
-    final RunResult result = await runAsync(command);
-    return (result.exitCode == 0) ? result.stdout.split('\n') : null;
+    final RunResult result = await processUtils.run(command);
+    if (result.exitCode != 0) {
+      globals.printError('dev_finder failed: ${result.stderr}');
+      return null;
+    }
+    return result.stdout.split('\n');
   }
 
-  /// Returns the host address by which the device [deviceName] should use for
-  /// the host.
+  /// Returns the address of the named device.
+  ///
+  /// If local is true, then gives the address by which the device reaches the
+  /// host.
   ///
   /// The string [deviceName] should be the name of the device from the
   /// 'list' command, e.g. 'scare-cable-skip-joy'.
-  Future<String> resolve(String deviceName) async {
-    if (fuchsiaArtifacts.devFinder == null) {
+  Future<String> resolve(String deviceName, {bool local = false}) async {
+    if (fuchsiaArtifacts.devFinder == null ||
+        !fuchsiaArtifacts.devFinder.existsSync()) {
       throwToolExit('Fuchsia dev_finder tool not found.');
     }
     final List<String> command = <String>[
       fuchsiaArtifacts.devFinder.path,
       'resolve',
-      '-local',
+      if (local) '-local',
       '-device-limit', '1',
-      deviceName
+      deviceName,
     ];
-    final RunResult result = await runAsync(command);
-    return (result.exitCode == 0) ? result.stdout.trim() : null;
+    final RunResult result = await processUtils.run(command);
+    if (result.exitCode != 0) {
+      globals.printError('dev_finder failed: ${result.stderr}');
+      return null;
+    }
+    return result.stdout.trim();
   }
 }

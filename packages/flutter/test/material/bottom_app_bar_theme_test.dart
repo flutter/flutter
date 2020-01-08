@@ -1,8 +1,6 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-
-import 'dart:io' show Platform;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -83,9 +81,8 @@ void main() {
     await expectLater(
       find.byKey(_painterKey),
       matchesGoldenFile('bottom_app_bar_theme.custom_shape.png'),
-      skip: !Platform.isLinux,
     );
-  });
+  }, skip: isBrowser);
 
   testWidgets('BAB theme does not affect defaults', (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(
