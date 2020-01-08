@@ -136,7 +136,7 @@ class Directionality extends InheritedWidget {
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=9hltevOHQBw}
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This example shows some [Text] when the `_visible` member field is true, and
 /// hides it when it is false:
@@ -167,7 +167,7 @@ class Directionality extends InheritedWidget {
 /// For example, `Container(color: Color.fromRGBO(255, 0, 0, 0.5))` is much
 /// faster than `Opacity(opacity: 0.5, child: Container(color: Colors.red))`.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// The following example draws an [Image] with 0.5 opacity without using
 /// [Opacity]:
@@ -266,7 +266,7 @@ class Opacity extends SingleChildRenderObjectWidget {
 /// For example, [ShaderMask] can be used to gradually fade out the edge
 /// of a child by using a [new ui.Gradient.linear] mask.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This example makes the text look like it is on fire:
 ///
@@ -345,7 +345,7 @@ class ShaderMask extends SingleChildRenderObjectWidget {
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=dYRs7Q1vfYI}
 ///
-/// {@tool sample}
+/// {@tool snippet}
 /// If the [BackdropFilter] needs to be applied to an area that exactly matches
 /// its child, wraps the [BackdropFilter] with a clip widget that clips exactly
 /// to that child.
@@ -439,7 +439,7 @@ class BackdropFilter extends SingleChildRenderObjectWidget {
 /// [isComplex] and [willChange] are hints to the compositor's raster cache
 /// and must not be null.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This example shows how the sample custom painter shown at [CustomPainter]
 /// could be used in a [CustomPaint] widget to display a background to some
@@ -555,7 +555,7 @@ class CustomPaint extends SingleChildRenderObjectWidget {
 ///  * [OverflowBox]
 ///  * [SizedOverflowBox]
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// For example, by combining a [ClipRect] with an [Align], one can show just
 /// the top half of an [Image]:
@@ -1056,7 +1056,7 @@ class PhysicalShape extends SingleChildRenderObjectWidget {
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=9z_YNlRlWfA}
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This example rotates and skews an orange box containing text, keeping the
 /// top right corner pinned to its original position.
@@ -1105,7 +1105,7 @@ class Transform extends SingleChildRenderObjectWidget {
   /// The `angle` argument must not be null. It gives the rotation in clockwise
   /// radians.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// This example rotates an orange box containing text around its center by
   /// fifteen degrees.
@@ -1140,7 +1140,7 @@ class Transform extends SingleChildRenderObjectWidget {
   ///
   /// The `offset` argument must not be null. It specifies the translation.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// This example shifts the silver-colored child down by fifteen pixels.
   ///
@@ -1173,7 +1173,7 @@ class Transform extends SingleChildRenderObjectWidget {
   /// The [alignment] controls the origin of the scale; by default, this is
   /// the center of the box.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// This example shrinks an orange box containing text such that each dimension
   /// is half the size it would otherwise be.
@@ -1512,7 +1512,7 @@ class FractionalTranslation extends SingleChildRenderObjectWidget {
 /// this object applies its rotation prior to layout, which means the entire
 /// rotated box consumes only as much space as required by the rotated child.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This snippet rotates the child (some [Text]) so that it renders from bottom
 /// to top, like an axis label on a graph:
@@ -1561,7 +1561,7 @@ class RotatedBox extends SingleChildRenderObjectWidget {
 /// size. Padding then sizes itself to its child's size, inflated by the
 /// padding, effectively creating empty space around the child.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This snippet creates "Hello World!" [Text] inside a [Card] that is indented
 /// by sixteen pixels in each direction.
@@ -1664,7 +1664,7 @@ class Padding extends SingleChildRenderObjectWidget {
 /// widget positions the `child` such that both points are lined up on top of
 /// each other.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 /// The [Align] widget in this example uses one of the defined constants from
 /// [Alignment], [topRight]. This places the [FlutterLogo] in the top right corner
 /// of the parent blue [Container].
@@ -1688,7 +1688,7 @@ class Padding extends SingleChildRenderObjectWidget {
 /// ```
 /// {@end-tool}
 ///
-/// {@tool sample}
+/// {@tool snippet}
 /// The [Alignment] used in the following example defines a single point:
 ///
 ///   * (0.2 * width of [FlutterLogo]/2 + width of [FlutterLogo]/2, 0.6 * height
@@ -1719,7 +1719,7 @@ class Padding extends SingleChildRenderObjectWidget {
 /// ```
 /// {@end-tool}
 ///
-/// {@tool sample}
+/// {@tool snippet}
 /// The [FractionalOffset] used in the following example defines two points:
 ///
 ///   * (0.2 * width of [FlutterLogo], 0.6 * height of [FlutterLogo]) = (12.0, 36.0)
@@ -2014,7 +2014,7 @@ class CustomMultiChildLayout extends MultiChildRenderObjectWidget {
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=EHPu_DzRfqA}
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This snippet makes the child widget (a [Card] with some [Text]) have the
 /// exact size 200x300, parental constraints permitting:
@@ -2124,7 +2124,7 @@ class SizedBox extends SingleChildRenderObjectWidget {
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=o2KveVr7adg}
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This snippet makes the child widget (a [Card] with some [Text]) fill the
 /// parent, by applying [BoxConstraints.expand] constraints:
@@ -3105,7 +3105,7 @@ class ListBody extends MultiChildRenderObjectWidget {
 /// [CustomMultiChildLayout] instead. In particular, when using a [Stack] you
 /// can't position children relative to their size or the stack's own size.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// Using a [Stack] you can position widgets over one another.
 ///
@@ -3134,7 +3134,7 @@ class ListBody extends MultiChildRenderObjectWidget {
 /// ```
 /// {@end-tool}
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This example shows how [Stack] can be used to enhance text visibility
 /// by adding gradient backdrops.
@@ -3968,7 +3968,7 @@ class Flex extends MultiChildRenderObjectWidget {
 /// If you only have one child, then consider using [Align] or [Center] to
 /// position the child.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This example divides the available space into three (horizontally), and
 /// places text centered in the first two cells and the Flutter logo centered in
@@ -4158,7 +4158,7 @@ class Row extends Flex {
 /// If you only have one child, then consider using [Align] or [Center] to
 /// position the child.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This example uses a [Column] to arrange three widgets vertically, the last
 /// being made to fill all the remaining space.
@@ -4180,7 +4180,7 @@ class Row extends Flex {
 /// )
 /// ```
 /// {@end-tool}
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// In the sample above, the text and the logo are centered on each line. In the
 /// following example, the [crossAxisAlignment] is set to
@@ -4435,7 +4435,7 @@ class Flexible extends ParentDataWidget<Flex> {
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=_rnZaagadyo}
 ///
-/// {@tool snippet --template=stateless_widget_material}
+/// {@tool sample --template=stateless_widget_material}
 /// This example shows how to use an [Expanded] widget in a [Column] so that
 /// it's middle child, a [Container] here, expands to fill the space.
 ///
@@ -4474,7 +4474,7 @@ class Flexible extends ParentDataWidget<Flex> {
 /// ```
 /// {@end-tool}
 ///
-/// {@tool snippet --template=stateless_widget_material}
+/// {@tool sample --template=stateless_widget_material}
 /// This example shows how to use an [Expanded] widget in a [Row] with multiple
 /// children expanded, utilizing the [flex] factor to prioritize available space.
 ///
@@ -4548,7 +4548,7 @@ class Expanded extends Flexible {
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=z5iw2SeFx2M}
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This example renders some [Chip]s representing four contacts in a [Wrap] so
 /// that they flow across lines as necessary.
@@ -4819,7 +4819,7 @@ class Wrap extends MultiChildRenderObjectWidget {
 ///
 /// {@animation 450 100 https://flutter.github.io/assets-for-api-docs/assets/widgets/flow_menu.mp4}
 ///
-/// {@tool snippet --template=freeform}
+/// {@tool sample --template=freeform}
 ///
 /// This example uses the [Flow] widget to create a menu that opens and closes
 /// as it is interacted with, shown above. The color of the button in the menu
@@ -5001,7 +5001,7 @@ class Flow extends MultiChildRenderObjectWidget {
 /// spans with the default text style while still allowing specified styles per
 /// span.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This sample demonstrates how to mix and match text with different text
 /// styles using the [RichText] Widget. It displays the text "Hello bold world,"
@@ -5389,7 +5389,7 @@ class RawImage extends LeafRenderObjectWidget {
 /// For example, used by [Image] to determine which bundle to use for
 /// [AssetImage]s if no bundle is specified explicitly.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This can be used in tests to override what the current asset bundle is, thus
 /// allowing specific resources to be injected into the widget under test.
@@ -5407,7 +5407,7 @@ class RawImage extends LeafRenderObjectWidget {
 /// }
 /// ```
 /// {@end-tool}
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// ...then wrap the widget under test with a [DefaultAssetBundle] using this
 /// bundle implementation:
@@ -5527,7 +5527,7 @@ class WidgetToRenderBoxAdapter extends LeafRenderObjectWidget {
 /// If it has a child, this widget defers to the child for sizing behavior. If
 /// it does not have a child, it grows to fit the parent instead.
 ///
-/// {@tool snippet --template=stateful_widget_scaffold_center}
+/// {@tool sample --template=stateful_widget_scaffold_center}
 /// This example makes a [Container] react to being touched, showing a count of
 /// the number of pointer downs and ups.
 ///
@@ -5780,7 +5780,7 @@ class _PointerListener extends SingleChildRenderObjectWidget {
 /// If it has a child, this widget defers to the child for sizing behavior. If
 /// it does not have a child, it grows to fit the parent instead.
 ///
-/// {@tool snippet --template=stateful_widget_scaffold_center}
+/// {@tool sample --template=stateful_widget_scaffold_center}
 /// This example makes a [Container] react to being entered by a mouse
 /// pointer, showing a count of the number of entries and exits.
 ///
@@ -6702,7 +6702,7 @@ class ExcludeSemantics extends SingleChildRenderObjectWidget {
 /// to manually provide semantic indexes if not all child of the scrollable
 /// contribute semantics.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// The example below handles spacers in a scrollable that don't contribute
 /// semantics. The automatic indexes would give the spaces a semantic index,
@@ -6838,7 +6838,7 @@ typedef StatefulWidgetBuilder = Widget Function(BuildContext context, StateSette
 /// Since the [builder] is re-invoked when the [StateSetter] is called, any
 /// variables that represents state should be kept outside the [builder] function.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This example shows using an inline StatefulBuilder that rebuilds and that
 /// also has state.

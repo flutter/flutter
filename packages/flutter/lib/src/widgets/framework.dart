@@ -532,7 +532,7 @@ abstract class Widget extends DiagnosticableTree {
 ///    widget, so that only the inner-most widget needs to be rebuilt when the
 ///    theme changes.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// The following is a skeleton of a stateless widget subclass called `GreenFrog`.
 ///
@@ -551,7 +551,7 @@ abstract class Widget extends DiagnosticableTree {
 /// ```
 /// {@end-tool}
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This next example shows the more generic widget `Frog` which can be given
 /// a color and a child:
@@ -746,7 +746,7 @@ abstract class StatelessWidget extends Widget {
 ///    [KeyedSubtree] widget may be useful for this purpose if no other widget
 ///    can conveniently be assigned the key.)
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This is a skeleton of a stateful widget subclass called `YellowBird`.
 ///
@@ -770,7 +770,7 @@ abstract class StatelessWidget extends Widget {
 /// }
 /// ```
 /// {@end-tool}
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This example shows the more generic widget `Bird` which can be given a
 /// color and a child, and which has some internal state with a method that
@@ -1423,7 +1423,7 @@ abstract class ProxyWidget extends Widget {
 /// thus also to a particular [RenderObjectWidget] class. That class is `T`, the
 /// [ParentDataWidget] type argument.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This example shows how you would build a [ParentDataWidget] to configure a
 /// `FrogJar` widget's children by specifying a [Size] for each one.
@@ -1558,7 +1558,7 @@ abstract class ParentDataWidget<T extends RenderObjectWidget> extends ProxyWidge
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=Zbm3hjPjQMk}
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// The following is a skeleton of an inherited widget called `FrogColor`:
 ///
@@ -2182,7 +2182,7 @@ abstract class BuildContext {
   /// an ancestor from one of those methods, save a reference to the ancestor
   /// by calling [findAncestorStateOfType] in [State.didChangeDependencies].
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// ```dart
   /// ScrollableState scrollable = context.findAncestorStateOfType<ScrollableState>();
@@ -4085,7 +4085,7 @@ typedef ErrorWidgetBuilder = Widget Function(FlutterErrorDetails details);
 ///
 /// It is possible to override this widget.
 ///
-/// {@tool snippet --template=freeform}
+/// {@tool sample --template=freeform}
 /// ```dart
 /// import 'package:flutter/material.dart';
 ///

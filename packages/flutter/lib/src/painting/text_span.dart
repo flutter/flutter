@@ -30,7 +30,7 @@ import 'text_style.dart';
 /// span in a widget, use a [RichText]. For text with a single style, consider
 /// using the [Text] widget.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// The text "Hello world!", in black:
 ///
@@ -110,7 +110,7 @@ class TextSpan extends InlineSpan {
   /// [GestureRecognizer.dispose] when the [InlineSpan] object is no longer
   /// used.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// This example shows how to manage the lifetime of a gesture recognizer
   /// provided to an [InlineSpan] object. It defines a `BuzzingText` widget

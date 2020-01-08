@@ -23,7 +23,7 @@ export 'package:flutter/rendering.dart' show RelativeRect;
 /// [AnimatedWidget] is most useful for widgets that are otherwise stateless. To
 /// use [AnimatedWidget], simply subclass it and implement the build function.
 ///
-///{@tool sample}
+///{@tool snippet}
 ///
 /// This code defines a widget called `Spinner` that spins a green square
 /// continually. It is built with an [AnimatedWidget].
@@ -194,7 +194,7 @@ class _AnimatedState extends State<AnimatedWidget> {
 /// animated by a [CurvedAnimation] set to [Curves.elasticIn]:
 /// {@animation 300 378 https://flutter.github.io/assets-for-api-docs/assets/widgets/slide_transition.mp4}
 ///
-/// {@tool snippet --template=stateful_widget_scaffold_center_freeform_state}
+/// {@tool sample --template=stateful_widget_scaffold_center_freeform_state}
 /// The following code implements the [SlideTransition] as seen in the video
 /// above:
 ///
@@ -583,7 +583,7 @@ class FadeTransition extends SingleChildRenderObjectWidget {
 
 /// Animates the opacity of a sliver widget.
 ///
-/// {@tool snippet --template=stateful_widget_scaffold_center_freeform_state}
+/// {@tool sample --template=stateful_widget_scaffold_center_freeform_state}
 /// Creates a [CustomScrollView] with a [SliverFixedExtentList] that uses a
 /// [SliverFadeTransition] to fade the list in and out.
 ///
@@ -1035,7 +1035,7 @@ class DefaultTextStyleTransition extends AnimatedWidget {
 /// Using this pre-built child is entirely optional, but can improve
 /// performance significantly in some cases and is therefore a good practice.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This code defines a widget called `Spinner` that spins a green square
 /// continually. It is built with an [AnimatedBuilder] and makes use of the

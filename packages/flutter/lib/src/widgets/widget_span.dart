@@ -22,7 +22,7 @@ import 'framework.dart';
 /// To properly layout and paint the [child] widget, [WidgetSpan] should be
 /// passed into a [Text.rich] widget.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// A card with `Hello World!` embedded inline within a TextSpan tree.
 ///

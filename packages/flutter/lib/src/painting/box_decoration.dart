@@ -33,7 +33,7 @@ import 'image_provider.dart';
 ///
 /// The [border] paints over the body; the [boxShadow], naturally, paints below it.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// The following applies a [BoxDecoration] to a [Container] widget to draw an
 /// [image] of an owl with a thick black [border] and rounded corners.

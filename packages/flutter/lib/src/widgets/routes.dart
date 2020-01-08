@@ -388,7 +388,7 @@ mixin LocalHistoryRoute<T> on Route<T> {
   /// The given local history entry must not already be part of another local
   /// history route.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// The following example is an app with 2 pages: `HomePage` and `SecondPage`.
   /// The `HomePage` can navigate to the `SecondPage`.
@@ -1373,7 +1373,7 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
 /// than only specific subtypes. For example, to watch for all [PageRoute]
 /// variants, the `RouteObserver<PageRoute<dynamic>>` type may be used.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// To make a [StatefulWidget] aware of its current [Route] state, implement
 /// [RouteAware] in its [State] and subscribe it to a [RouteObserver]:

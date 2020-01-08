@@ -305,7 +305,7 @@ abstract class EdgeInsetsGeometry {
 /// _start_, top, _end_, and bottom, where start and end are resolved in terms
 /// of a [TextDirection] (typically obtained from the ambient [Directionality]).
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// Here are some examples of how to create [EdgeInsets] instances:
 ///
@@ -315,7 +315,7 @@ abstract class EdgeInsetsGeometry {
 /// const EdgeInsets.all(8.0)
 /// ```
 /// {@end-tool}
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// Eight pixel margin above and below, no horizontal margins:
 ///
@@ -323,7 +323,7 @@ abstract class EdgeInsetsGeometry {
 /// const EdgeInsets.symmetric(vertical: 8.0)
 /// ```
 /// {@end-tool}
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// Left margin indent of 40 pixels:
 ///
@@ -344,7 +344,7 @@ class EdgeInsets extends EdgeInsetsGeometry {
 
   /// Creates insets where all the offsets are `value`.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// Typical eight-pixel margin on all sides:
   ///
@@ -360,7 +360,7 @@ class EdgeInsets extends EdgeInsetsGeometry {
 
   /// Creates insets with only the given values non-zero.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// Left margin indent of 40 pixels:
   ///
@@ -377,7 +377,7 @@ class EdgeInsets extends EdgeInsetsGeometry {
 
   /// Creates insets with symmetrical vertical and horizontal offsets.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// Eight pixel margin above and below, no horizontal margins:
   ///
@@ -638,7 +638,7 @@ class EdgeInsetsDirectional extends EdgeInsetsGeometry {
 
   /// Creates insets with only the given values non-zero.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// A margin indent of 40 pixels on the leading side:
   ///

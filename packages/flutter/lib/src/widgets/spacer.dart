@@ -17,7 +17,7 @@ import 'framework.dart';
 /// [Spacer] has taken up all of the additional space, therefore there is none
 /// left to redistribute.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// ```dart
 /// Row(
