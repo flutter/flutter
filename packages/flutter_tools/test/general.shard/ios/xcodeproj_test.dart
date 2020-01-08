@@ -11,7 +11,6 @@ import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 
 import 'package:mockito/mockito.dart';
 import 'package:platform/platform.dart';
@@ -420,7 +419,7 @@ Information about project "Runner":
       mockArtifacts = MockLocalEngineArtifacts();
       mockProcessManager = MockProcessManager();
       macOS = fakePlatform('macos');
-      globals.fs.file(xcodebuild).createSync(recursive: true);
+      fs.file(xcodebuild).createSync(recursive: true);
     });
 
     void testUsingOsxContext(String description, dynamic testMethod()) {
@@ -435,7 +434,7 @@ Information about project "Runner":
     testUsingOsxContext('sets ARCHS=armv7 when armv7 local engine is set', () async {
       when(mockArtifacts.getArtifactPath(Artifact.flutterFramework,
           platform: TargetPlatform.ios, mode: anyNamed('mode'))).thenReturn('engine');
-      when(mockArtifacts.engineOutPath).thenReturn(globals.fs.path.join('out', 'ios_profile_arm'));
+      when(mockArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'ios_profile_arm'));
 
       const BuildInfo buildInfo = BuildInfo(BuildMode.debug, null);
       final FlutterProject project = FlutterProject.fromPath('path/to/project');
@@ -444,13 +443,13 @@ Information about project "Runner":
         buildInfo: buildInfo,
       );
 
-      final File config = globals.fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
+      final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
       expect(config.existsSync(), isTrue);
 
       final String contents = config.readAsStringSync();
       expect(contents.contains('ARCHS=armv7'), isTrue);
 
-      final File buildPhaseScript = globals.fs.file('path/to/project/ios/Flutter/flutter_export_environment.sh');
+      final File buildPhaseScript = fs.file('path/to/project/ios/Flutter/flutter_export_environment.sh');
       expect(buildPhaseScript.existsSync(), isTrue);
 
       final String buildPhaseScriptContents = buildPhaseScript.readAsStringSync();
@@ -460,7 +459,7 @@ Information about project "Runner":
     testUsingOsxContext('sets TRACK_WIDGET_CREATION=true when trackWidgetCreation is true', () async {
       when(mockArtifacts.getArtifactPath(Artifact.flutterFramework,
           platform: TargetPlatform.ios, mode: anyNamed('mode'))).thenReturn('engine');
-      when(mockArtifacts.engineOutPath).thenReturn(globals.fs.path.join('out', 'ios_profile_arm'));
+      when(mockArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'ios_profile_arm'));
       const BuildInfo buildInfo = BuildInfo(BuildMode.debug, null, trackWidgetCreation: true);
       final FlutterProject project = FlutterProject.fromPath('path/to/project');
       await updateGeneratedXcodeProperties(
@@ -468,13 +467,13 @@ Information about project "Runner":
         buildInfo: buildInfo,
       );
 
-      final File config = globals.fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
+      final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
       expect(config.existsSync(), isTrue);
 
       final String contents = config.readAsStringSync();
       expect(contents.contains('TRACK_WIDGET_CREATION=true'), isTrue);
 
-      final File buildPhaseScript = globals.fs.file('path/to/project/ios/Flutter/flutter_export_environment.sh');
+      final File buildPhaseScript = fs.file('path/to/project/ios/Flutter/flutter_export_environment.sh');
       expect(buildPhaseScript.existsSync(), isTrue);
 
       final String buildPhaseScriptContents = buildPhaseScript.readAsStringSync();
@@ -484,7 +483,7 @@ Information about project "Runner":
     testUsingOsxContext('does not set TRACK_WIDGET_CREATION when trackWidgetCreation is false', () async {
       when(mockArtifacts.getArtifactPath(Artifact.flutterFramework,
           platform: TargetPlatform.ios, mode: anyNamed('mode'))).thenReturn('engine');
-      when(mockArtifacts.engineOutPath).thenReturn(globals.fs.path.join('out', 'ios_profile_arm'));
+      when(mockArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'ios_profile_arm'));
       const BuildInfo buildInfo = BuildInfo(BuildMode.debug, null);
       final FlutterProject project = FlutterProject.fromPath('path/to/project');
       await updateGeneratedXcodeProperties(
@@ -492,13 +491,13 @@ Information about project "Runner":
         buildInfo: buildInfo,
       );
 
-      final File config = globals.fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
+      final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
       expect(config.existsSync(), isTrue);
 
       final String contents = config.readAsStringSync();
       expect(contents.contains('TRACK_WIDGET_CREATION=true'), isFalse);
 
-      final File buildPhaseScript = globals.fs.file('path/to/project/ios/Flutter/flutter_export_environment.sh');
+      final File buildPhaseScript = fs.file('path/to/project/ios/Flutter/flutter_export_environment.sh');
       expect(buildPhaseScript.existsSync(), isTrue);
 
       final String buildPhaseScriptContents = buildPhaseScript.readAsStringSync();
@@ -508,7 +507,7 @@ Information about project "Runner":
     testUsingOsxContext('sets ARCHS=armv7 when armv7 local engine is set', () async {
       when(mockArtifacts.getArtifactPath(Artifact.flutterFramework,
           platform: TargetPlatform.ios, mode: anyNamed('mode'))).thenReturn('engine');
-      when(mockArtifacts.engineOutPath).thenReturn(globals.fs.path.join('out', 'ios_profile'));
+      when(mockArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'ios_profile'));
       const BuildInfo buildInfo = BuildInfo(BuildMode.debug, null);
 
       final FlutterProject project = FlutterProject.fromPath('path/to/project');
@@ -517,7 +516,7 @@ Information about project "Runner":
         buildInfo: buildInfo,
       );
 
-      final File config = globals.fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
+      final File config = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
       expect(config.existsSync(), isTrue);
 
       final String contents = config.readAsStringSync();
@@ -541,9 +540,9 @@ Information about project "Runner":
     }) async {
       when(mockArtifacts.getArtifactPath(Artifact.flutterFramework,
           platform: TargetPlatform.ios, mode: anyNamed('mode'))).thenReturn('engine');
-      when(mockArtifacts.engineOutPath).thenReturn(globals.fs.path.join('out', 'ios'));
+      when(mockArtifacts.engineOutPath).thenReturn(fs.path.join('out', 'ios'));
 
-      final File manifestFile = globals.fs.file('path/to/project/pubspec.yaml');
+      final File manifestFile = fs.file('path/to/project/pubspec.yaml');
       manifestFile.createSync(recursive: true);
       manifestFile.writeAsStringSync(manifestString);
 
@@ -555,7 +554,7 @@ Information about project "Runner":
         buildInfo: buildInfo,
       );
 
-      final File localPropertiesFile = globals.fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
+      final File localPropertiesFile = fs.file('path/to/project/ios/Flutter/Generated.xcconfig');
       expect(propertyFor('FLUTTER_BUILD_NAME', localPropertiesFile), expectedBuildName);
       expect(propertyFor('FLUTTER_BUILD_NUMBER', localPropertiesFile), expectedBuildNumber);
       expect(propertyFor('FLUTTER_BUILD_NUMBER', localPropertiesFile), isNotNull);
