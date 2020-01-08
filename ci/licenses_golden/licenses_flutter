@@ -1020,8 +1020,6 @@ FILE: ../../../flutter/shell/platform/fuchsia/flutter/kernel/extract_far.dart
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/kernel/framework_shim.dart
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/kernel/libraries.json
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/logging.h
-FILE: ../../../flutter/shell/platform/fuchsia/flutter/loop.cc
-FILE: ../../../flutter/shell/platform/fuchsia/flutter/loop.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/main.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/meta/aot_product_runtime
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/meta/aot_runtime
@@ -1044,12 +1042,6 @@ FILE: ../../../flutter/shell/platform/fuchsia/flutter/session_connection.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/session_connection.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/surface.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/surface.h
-FILE: ../../../flutter/shell/platform/fuchsia/flutter/task_observers.cc
-FILE: ../../../flutter/shell/platform/fuchsia/flutter/task_observers.h
-FILE: ../../../flutter/shell/platform/fuchsia/flutter/task_runner_adapter.cc
-FILE: ../../../flutter/shell/platform/fuchsia/flutter/task_runner_adapter.h
-FILE: ../../../flutter/shell/platform/fuchsia/flutter/thread.cc
-FILE: ../../../flutter/shell/platform/fuchsia/flutter/thread.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/unique_fdio_ns.h
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/vsync_recorder.cc
 FILE: ../../../flutter/shell/platform/fuchsia/flutter/vsync_recorder.h
