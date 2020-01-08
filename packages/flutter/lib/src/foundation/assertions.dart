@@ -775,9 +775,11 @@ class DiagnosticsStackTrace extends DiagnosticsBlock {
   }) : super(
     name: name,
     value: stack,
-    properties: (stackFilter ?? FlutterError.defaultStackFilter)(stack.toString().trimRight().split('\n'))
-      .map<DiagnosticsNode>(_createStackFrame)
-      .toList(),
+    properties: stack == null
+        ? <DiagnosticsNode>[]
+        : (stackFilter ?? FlutterError.defaultStackFilter)(stack.toString().trimRight().split('\n'))
+              .map<DiagnosticsNode>(_createStackFrame)
+              .toList(),
     style: DiagnosticsTreeStyle.flat,
     showSeparator: showSeparator,
     allowTruncate: true,

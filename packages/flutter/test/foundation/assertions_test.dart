@@ -376,9 +376,14 @@ void main() {
 
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     details.debugFillProperties(builder);
-    expect(builder.properties.length, 2);
+
+    expect(builder.properties.length, 4);
     expect(builder.properties[0].toString(), 'The following assertion was thrown:');
     expect(builder.properties[1].toString(), 'Assertion failed');
+    expect(builder.properties[2] is ErrorSpacer, true);
+    final DiagnosticsStackTrace trace = builder.properties[3] as DiagnosticsStackTrace;
+    expect(trace, isNotNull);
+    expect(trace.value, stack);
   });
 
   test('Identifies our fault', () {
@@ -406,7 +411,7 @@ void main() {
 
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
     details.debugFillProperties(builder);
-    expect(builder.properties.length, 4);
+    expect(builder.properties.length, 6);
     expect(builder.properties[0].toString(), 'The following assertion was thrown:');
     expect(builder.properties[1].toString(), 'Assertion failed');
     expect(builder.properties[2] is ErrorSpacer, true);
@@ -418,5 +423,9 @@ void main() {
       'In either case, please report this assertion by filing a bug on GitHub:\n'
       '  https://github.com/flutter/flutter/issues/new?template=BUG.md',
     );
+    expect(builder.properties[3] is ErrorSpacer, true);
+    final DiagnosticsStackTrace trace = builder.properties[4] as DiagnosticsStackTrace;
+    expect(trace, isNotNull);
+    expect(trace.value, stack);
   });
 }
