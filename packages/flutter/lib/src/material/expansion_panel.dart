@@ -13,7 +13,9 @@ import 'mergeable_material.dart';
 import 'theme.dart';
 
 const double _kPanelHeaderCollapsedHeight = kMinInteractiveDimension;
-const double _kPanelHeaderExpandedHeight = 64.0;
+const EdgeInsets _kPanelHeaderExpandedDefaultPadding = EdgeInsets.symmetric(
+    vertical: 64.0 - _kPanelHeaderCollapsedHeight
+);
 
 class _SaltedKey<S, V> extends LocalKey {
   const _SaltedKey(this.salt, this.value);
@@ -225,6 +227,7 @@ class ExpansionPanelList extends StatefulWidget {
     this.children = const <ExpansionPanel>[],
     this.expansionCallback,
     this.animationDuration = kThemeAnimationDuration,
+    this.expandedHeaderPadding = _kPanelHeaderExpandedDefaultPadding,
   }) : assert(children != null),
        assert(animationDuration != null),
        _allowOnlyOnePanelOpen = false,
@@ -313,6 +316,7 @@ class ExpansionPanelList extends StatefulWidget {
     this.expansionCallback,
     this.animationDuration = kThemeAnimationDuration,
     this.initialOpenPanelValue,
+    this.expandedHeaderPadding = _kPanelHeaderExpandedDefaultPadding,
   }) : assert(children != null),
        assert(animationDuration != null),
        _allowOnlyOnePanelOpen = true,
@@ -350,6 +354,12 @@ class ExpansionPanelList extends StatefulWidget {
   /// only used when initializing with the [ExpansionPanelList.radio]
   /// constructor.)
   final Object initialOpenPanelValue;
+
+  /// The padding that surrounds the panel header when expanded.
+  ///
+  /// By default, 16px of space is added to the header vertically (above and below)
+  /// during expansion.
+  final EdgeInsets expandedHeaderPadding;
 
   @override
   State<StatefulWidget> createState() => _ExpansionPanelListState();
@@ -437,9 +447,6 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
   @override
   Widget build(BuildContext context) {
     final List<MergeableMaterialItem> items = <MergeableMaterialItem>[];
-    const EdgeInsets kExpandedEdgeInsets = EdgeInsets.symmetric(
-      vertical: _kPanelHeaderExpandedHeight - _kPanelHeaderCollapsedHeight
-    );
 
     for (int index = 0; index < widget.children.length; index += 1) {
       if (_isChildExpanded(index) && index != 0 && !_isChildExpanded(index - 1))
@@ -475,7 +482,7 @@ class _ExpansionPanelListState extends State<ExpansionPanelList> {
             child: AnimatedContainer(
               duration: widget.animationDuration,
               curve: Curves.fastOutSlowIn,
-              margin: _isChildExpanded(index) ? kExpandedEdgeInsets : EdgeInsets.zero,
+              margin: _isChildExpanded(index) ? widget.expandedHeaderPadding : EdgeInsets.zero,
               child: ConstrainedBox(
                 constraints: const BoxConstraints(minHeight: _kPanelHeaderCollapsedHeight),
                 child: headerWidget,

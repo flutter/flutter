@@ -9,7 +9,6 @@ import 'package:file/memory.dart';
 
 import 'package:flutter_tools/src/asset.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/bundle.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/devfs.dart';
@@ -183,16 +182,15 @@ flutter:
     });
   });
 
-  test('Failed directory delete shows message', () async {
+  testUsingContext('Failed directory delete shows message', () async {
     final MockDirectory mockDirectory = MockDirectory();
-    final BufferLogger bufferLogger = BufferLogger();
     when(mockDirectory.existsSync()).thenReturn(true);
     when(mockDirectory.deleteSync(recursive: true)).thenThrow(const FileSystemException('ABCD'));
 
-    await writeBundle(mockDirectory, <String, DevFSContent>{}, loggerOverride: bufferLogger);
+    await writeBundle(mockDirectory, <String, DevFSContent>{}, loggerOverride: testLogger);
 
     verify(mockDirectory.createSync(recursive: true)).called(1);
-    expect(bufferLogger.errorText, contains('ABCD'));
+    expect(testLogger.errorText, contains('ABCD'));
   });
 }
 

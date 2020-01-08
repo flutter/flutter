@@ -165,10 +165,7 @@ void main() {
               if (message == '[stdout] Lost connection to device.') {
                 observatoryLogs.add(message);
               }
-              if (message.contains('Hot reload.')) {
-                observatoryLogs.add(message);
-              }
-              if (message.contains('Hot restart.')) {
+              if (message.contains('To hot reload changes while running, press "r". To hot restart (and rebuild state), press "R".')) {
                 observatoryLogs.add(message);
               }
             });
@@ -206,16 +203,14 @@ void main() {
           }));
         });
 
-        expect(observatoryLogs.length, 9);
+        expect(observatoryLogs.length, 7);
         expect(observatoryLogs[0], '[stdout] Waiting for a connection from Flutter on MockAndroidDevice...');
         expect(observatoryLogs[1], '[verbose] Observatory URL on device: http://127.0.0.1:1234');
         expect(observatoryLogs[2], '[stdout] Lost connection to device.');
-        expect(observatoryLogs[3].contains('Hot reload.'), isTrue);
-        expect(observatoryLogs[4].contains('Hot restart.'), isTrue);
-        expect(observatoryLogs[5], '[verbose] Observatory URL on device: http://127.0.0.1:1235');
-        expect(observatoryLogs[6], '[stdout] Lost connection to device.');
-        expect(observatoryLogs[7].contains('Hot reload.'), isTrue);
-        expect(observatoryLogs[8].contains('Hot restart.'), isTrue);
+        expect(observatoryLogs[3].contains('To hot reload changes while running, press "r". To hot restart (and rebuild state), press "R"'), isTrue);
+        expect(observatoryLogs[4], '[verbose] Observatory URL on device: http://127.0.0.1:1235');
+        expect(observatoryLogs[5], '[stdout] Lost connection to device.');
+        expect(observatoryLogs[6].contains('To hot reload changes while running, press "r". To hot restart (and rebuild state), press "R"'), isTrue);
 
         verify(portForwarder.forward(1234, hostPort: anyNamed('hostPort'))).called(1);
         verify(portForwarder.forward(1235, hostPort: anyNamed('hostPort'))).called(1);
@@ -704,7 +699,7 @@ class StreamLogger extends Logger {
     int progressIndicatorPadding = kDefaultStatusPadding,
   }) {
     _log('[progress] $message');
-    return SilentStatus(timeout: timeout)..start();
+    return SilentStatus(timeout: timeout, timeoutConfiguration: timeoutConfiguration)..start();
   }
 
   bool _interrupt = false;
@@ -727,6 +722,12 @@ class StreamLogger extends Logger {
 
   @override
   void sendEvent(String name, [Map<String, dynamic> args]) { }
+
+  @override
+  bool get supportsColor => throw UnimplementedError();
+
+  @override
+  bool get hasTerminal => false;
 }
 
 class LoggerInterrupted implements Exception {
