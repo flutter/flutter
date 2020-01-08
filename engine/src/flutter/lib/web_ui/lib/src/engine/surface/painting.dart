@@ -287,9 +287,27 @@ class SurfacePath implements ui.Path {
   /// This copy is fast and does not require additional memory unless either
   /// the `source` path or the path returned by this constructor are modified.
   SurfacePath.from(SurfacePath source)
+      : subpaths = _deepCopy(source.subpaths);
+
+  SurfacePath._shallowCopy(SurfacePath source)
       : subpaths = List<Subpath>.from(source.subpaths);
 
   SurfacePath._clone(this.subpaths, this._fillType);
+
+  static List<Subpath> _deepCopy(List<Subpath> source) {
+    // The last sub path can potentially still be mutated by calling ops.
+    // Copy all sub paths except the last active one which needs a deep copy.
+    final List<Subpath> paths = [];
+    int len = source.length;
+    if (len != 0) {
+      --len;
+      for (int i = 0; i < len; i++) {
+        paths.add(source[i]);
+      }
+      paths.add(source[len].shift(const ui.Offset(0, 0)));
+    }
+    return paths;
+  }
 
   /// Determines how the interior of this path is calculated.
   ///
