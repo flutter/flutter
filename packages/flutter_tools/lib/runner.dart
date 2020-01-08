@@ -255,7 +255,7 @@ Future<int> _exit(int code) async {
   }
 
   // Run shutdown hooks before flushing logs
-  await runShutdownHooks();
+  await shutdownHooks.runShutdownHooks();
 
   final Completer<void> completer = Completer<void>();
 
