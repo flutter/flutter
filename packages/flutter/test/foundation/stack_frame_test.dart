@@ -60,7 +60,7 @@ const String stackString = '''#0      _AssertionError._doThrowNew (dart:core-pat
 #8      StatefulElement._firstBuild (package:flutter/src/widgets/framework.dart:4461:11)
 #9      ComponentElement.mount (package:flutter/src/widgets/framework.dart:4281:5)
 #10     Element.inflateWidget (package:flutter/src/widgets/framework.dart:3276:14)
-#11     Element.updateChild (package:flutter/src/widgets/framework.dart:3070:12)
+#11     Element.updateChild (package:flutter/src/widgets/framework.dart)
 #12     SingleChildRenderObjectElement.mount (package:flutter/blah.dart:999:9)
 #13     main (package:hello_flutter/main.dart:10:4)''';
 
@@ -76,7 +76,7 @@ const List<StackFrame> stackFrames = <StackFrame>[
   StackFrame(number: 8,  className: 'StatefulElement',                method: '_firstBuild',    packageScheme: 'package', package: 'flutter',       packagePath: 'src/widgets/framework.dart', line: 4461, column: 11),
   StackFrame(number: 9,  className: 'ComponentElement',               method: 'mount',          packageScheme: 'package', package: 'flutter',       packagePath: 'src/widgets/framework.dart', line: 4281, column: 5),
   StackFrame(number: 10, className: 'Element',                        method: 'inflateWidget',  packageScheme: 'package', package: 'flutter',       packagePath: 'src/widgets/framework.dart', line: 3276, column: 14),
-  StackFrame(number: 11, className: 'Element',                        method: 'updateChild',    packageScheme: 'package', package: 'flutter',       packagePath: 'src/widgets/framework.dart', line: 3070, column: 12),
+  StackFrame(number: 11, className: 'Element',                        method: 'updateChild',    packageScheme: 'package', package: 'flutter',       packagePath: 'src/widgets/framework.dart', line: -1,   column: -1),
   StackFrame(number: 12, className: 'SingleChildRenderObjectElement', method: 'mount',          packageScheme: 'package', package: 'flutter',       packagePath: 'blah.dart',                  line: 999,  column: 9),
   StackFrame(number: 13, className: '',                               method: 'main',           packageScheme: 'package', package: 'hello_flutter', packagePath: 'main.dart',                  line: 10,   column: 4),
 ];

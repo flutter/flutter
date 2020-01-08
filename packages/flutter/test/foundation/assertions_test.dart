@@ -423,8 +423,8 @@ void main() {
       'In either case, please report this assertion by filing a bug on GitHub:\n'
       '  https://github.com/flutter/flutter/issues/new?template=BUG.md',
     );
-    expect(builder.properties[3] is ErrorSpacer, true);
-    final DiagnosticsStackTrace trace = builder.properties[4] as DiagnosticsStackTrace;
+    expect(builder.properties[4] is ErrorSpacer, true);
+    final DiagnosticsStackTrace trace = builder.properties[5] as DiagnosticsStackTrace;
     expect(trace, isNotNull);
     expect(trace.value, stack);
   });

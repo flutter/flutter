@@ -1849,18 +1849,18 @@ void main() {
 
   test('Stack trace test', () {
     final StackTrace stack = StackTrace.fromString(
-      '#0      someMethod()  file:///diagnostics_test.dart:42:19\n'
-      '#1      someMethod2()  file:///diagnostics_test.dart:12:3\n'
-      '#2      someMethod3()  file:///foo.dart:4:1\n'
+      '#0      someMethod  (file:///diagnostics_test.dart:42:19)\n'
+      '#1      someMethod2  (file:///diagnostics_test.dart:12:3)\n'
+      '#2      someMethod3  (file:///foo.dart:4:1)\n'
     );
 
     expect(
       DiagnosticsStackTrace('Stack trace', stack).toStringDeep(),
       equalsIgnoringHashCodes(
         'Stack trace:\n'
-        '#0      someMethod()  file:///diagnostics_test.dart:42:19\n'
-        '#1      someMethod2()  file:///diagnostics_test.dart:12:3\n'
-        '#2      someMethod3()  file:///foo.dart:4:1\n'
+        '#0      someMethod  (file:///diagnostics_test.dart:42:19)\n'
+        '#1      someMethod2  (file:///diagnostics_test.dart:12:3)\n'
+        '#2      someMethod3  (file:///foo.dart:4:1)\n'
       ),
     );
 
@@ -1868,9 +1868,9 @@ void main() {
       DiagnosticsStackTrace('-- callback 2 --', stack, showSeparator: false).toStringDeep(),
       equalsIgnoringHashCodes(
         '-- callback 2 --\n'
-        '#0      someMethod()  file:///diagnostics_test.dart:42:19\n'
-        '#1      someMethod2()  file:///diagnostics_test.dart:12:3\n'
-        '#2      someMethod3()  file:///foo.dart:4:1\n'
+        '#0      someMethod  (file:///diagnostics_test.dart:42:19)\n'
+        '#1      someMethod2  (file:///diagnostics_test.dart:12:3)\n'
+        '#2      someMethod3  (file:///foo.dart:4:1)\n'
       ),
     );
   });

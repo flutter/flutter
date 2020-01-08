@@ -103,7 +103,7 @@ class StackFrame {
       return _parseWebFrame(line);
     }
 
-    final RegExp parser = RegExp(r'^#(\d+) +(.+) \((.+?):(\d+):?(\d+){0,1}\)$');
+    final RegExp parser = RegExp(r'^#(\d+) +(.+) \((.+?):?(\d+){0,1}:?(\d+){0,1}\)$');
     final Match match = parser.firstMatch(line);
     assert(match != null, 'Expected $line to match $parser.');
 
@@ -140,7 +140,7 @@ class StackFrame {
       packageScheme: packageUri.scheme,
       package: package,
       packagePath: packagePath,
-      line: int.parse(match.group(4)),
+      line: match.group(4) == null ? -1 : int.parse(match.group(4)),
       column: match.group(5) == null ? -1 : int.parse(match.group(5)),
       isConstructor: isConstructor,
     );
