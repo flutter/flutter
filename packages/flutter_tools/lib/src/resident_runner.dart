@@ -9,7 +9,6 @@ import 'package:meta/meta.dart';
 import 'application_package.dart';
 import 'artifacts.dart';
 import 'asset.dart';
-import 'base/command_help.dart';
 import 'base/common.dart';
 import 'base/file_system.dart';
 import 'base/io.dart' as io;
@@ -1004,30 +1003,23 @@ abstract class ResidentRunner {
   void printHelp({ @required bool details });
 
   void printHelpDetails() {
-    if (flutterDevices.any((FlutterDevice d) => d.device.supportsScreenshot)) {
-      CommandHelp.s.print();
-    }
     if (supportsServiceProtocol) {
-      CommandHelp.w.print();
-      CommandHelp.t.print();
+      globals.printStatus('You can dump the widget hierarchy of the app (debugDumpApp) by pressing "w".');
+      globals.printStatus('To dump the rendering tree of the app (debugDumpRenderTree), press "t".');
       if (isRunningDebug) {
-        CommandHelp.L.print();
-        CommandHelp.S.print();
-        CommandHelp.U.print();
-        CommandHelp.i.print();
-        CommandHelp.p.print();
-        CommandHelp.o.print();
-        CommandHelp.z.print();
+        globals.printStatus('For layers (debugDumpLayerTree), use "L"; for accessibility (debugDumpSemantics), use "S" (for traversal order) or "U" (for inverse hit test order).');
+        globals.printStatus('To toggle the widget inspector (WidgetsApp.showWidgetInspectorOverride), press "i".');
+        globals.printStatus('To toggle the display of construction lines (debugPaintSizeEnabled), press "p".');
+        globals.printStatus('To simulate different operating systems, (defaultTargetPlatform), press "o".');
+        globals.printStatus('To toggle the elevation checker, press "z".');
       } else {
-        CommandHelp.S.print();
-        CommandHelp.U.print();
+        globals.printStatus('To dump the accessibility tree (debugDumpSemantics), press "S" (for traversal order) or "U" (for inverse hit test order).');
       }
-      // `P` should precede `a`
-      CommandHelp.P.print();
-      CommandHelp.a.print();
+      globals.printStatus('To display the performance overlay (WidgetsApp.showPerformanceOverlay), press "P".');
+      globals.printStatus('To enable timeline events for all widget build methods, (debugProfileWidgetBuilds), press "a"');
     }
     if (flutterDevices.any((FlutterDevice d) => d.device.supportsScreenshot)) {
-      CommandHelp.s.print();
+      globals.printStatus('To save a screenshot to flutter.png, press "s".');
     }
   }
 

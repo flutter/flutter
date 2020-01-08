@@ -352,4 +352,80 @@ void main() {
       expect(summary.value, equals(<String>['Invalid argument(s) (myArgument): Must not be null']));
     }
   });
+
+  test('Identifies user fault', () {
+    // User fault because they called `new Text(null)` from their own code.
+    final StackTrace stack = StackTrace.fromString('''#0      _AssertionError._doThrowNew (dart:core-patch/errors_patch.dart:42:39)
+#1      _AssertionError._throwNew (dart:core-patch/errors_patch.dart:38:5)
+#2      new Text (package:flutter/src/widgets/text.dart:287:10)
+#3      _MyHomePageState.build (package:hello_flutter/main.dart:72:16)
+#4      StatefulElement.build (package:flutter/src/widgets/framework.dart:4414:27)
+#5      ComponentElement.performRebuild (package:flutter/src/widgets/framework.dart:4303:15)
+#6      Element.rebuild (package:flutter/src/widgets/framework.dart:4027:5)
+#7      ComponentElement._firstBuild (package:flutter/src/widgets/framework.dart:4286:5)
+#8      StatefulElement._firstBuild (package:flutter/src/widgets/framework.dart:4461:11)
+#9      ComponentElement.mount (package:flutter/src/widgets/framework.dart:4281:5)
+#10      Element.inflateWidget (package:flutter/src/widgets/framework.dart:3276:14)
+#11     Element.updateChild (package:flutter/src/widgets/framework.dart:3070:12)
+#12     SingleChildRenderObjectElement.mount (package:flutter/blah.dart:999:9)''');
+
+    final FlutterErrorDetails details = FlutterErrorDetails(
+      exception: AssertionError('Test assertion'),
+      stack: stack,
+    );
+
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    details.debugFillProperties(builder);
+
+    expect(builder.properties.length, 4);
+    expect(builder.properties[0].toString(), 'The following assertion was thrown:');
+    expect(builder.properties[1].toString(), 'Assertion failed');
+    expect(builder.properties[2] is ErrorSpacer, true);
+    final DiagnosticsStackTrace trace = builder.properties[3] as DiagnosticsStackTrace;
+    expect(trace, isNotNull);
+    expect(trace.value, stack);
+  });
+
+  test('Identifies our fault', () {
+    // Our fault because we should either have an assertion in `text_helper.dart`
+    // or we should make sure not to pass bad values into new Text.
+    final StackTrace stack = StackTrace.fromString('''#0      _AssertionError._doThrowNew (dart:core-patch/errors_patch.dart:42:39)
+#1      _AssertionError._throwNew (dart:core-patch/errors_patch.dart:38:5)
+#2      new Text (package:flutter/src/widgets/text.dart:287:10)
+#3      new SomeWidgetUsingText (package:flutter/src/widgets/text_helper.dart:287:10)
+#4      _MyHomePageState.build (package:hello_flutter/main.dart:72:16)
+#5      StatefulElement.build (package:flutter/src/widgets/framework.dart:4414:27)
+#6      ComponentElement.performRebuild (package:flutter/src/widgets/framework.dart:4303:15)
+#7      Element.rebuild (package:flutter/src/widgets/framework.dart:4027:5)
+#8      ComponentElement._firstBuild (package:flutter/src/widgets/framework.dart:4286:5)
+#9      StatefulElement._firstBuild (package:flutter/src/widgets/framework.dart:4461:11)
+#10     ComponentElement.mount (package:flutter/src/widgets/framework.dart:4281:5)
+#11     Element.inflateWidget (package:flutter/src/widgets/framework.dart:3276:14)
+#12     Element.updateChild (package:flutter/src/widgets/framework.dart:3070:12)
+#13     SingleChildRenderObjectElement.mount (package:flutter/blah.dart:999:9)''');
+
+    final FlutterErrorDetails details = FlutterErrorDetails(
+      exception: AssertionError('Test assertion'),
+      stack: stack,
+    );
+
+    final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+    details.debugFillProperties(builder);
+    expect(builder.properties.length, 6);
+    expect(builder.properties[0].toString(), 'The following assertion was thrown:');
+    expect(builder.properties[1].toString(), 'Assertion failed');
+    expect(builder.properties[2] is ErrorSpacer, true);
+    expect(
+      builder.properties[3].toString(),
+      'Either the assertion indicates an error in the framework itself, or we should '
+      'provide substantially more information in this error message to help you determine '
+      'and fix the underlying cause.\n'
+      'In either case, please report this assertion by filing a bug on GitHub:\n'
+      '  https://github.com/flutter/flutter/issues/new?template=BUG.md',
+    );
+    expect(builder.properties[4] is ErrorSpacer, true);
+    final DiagnosticsStackTrace trace = builder.properties[5] as DiagnosticsStackTrace;
+    expect(trace, isNotNull);
+    expect(trace.value, stack);
+  });
 }
