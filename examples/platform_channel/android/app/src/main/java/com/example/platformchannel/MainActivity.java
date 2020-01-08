@@ -29,11 +29,19 @@ public class MainActivity extends FlutterActivity {
   private static final String BATTERY_CHANNEL = "samples.flutter.io/battery";
   private static final String CHARGING_CHANNEL = "samples.flutter.io/charging";
 
+  private BroadcastReceiver chargingStateChangeReceiver;
+  
+  private void unregisterChargingStateChangeReceiver() {
+    if(chargingStateChangeReceiver != null) {
+      unregisterReceiver(chargingStateChangeReceiver);
+      chargingStateChangeReceiver = null;
+    }
+  }
+  
   @Override
   public void configureFlutterEngine(@NonNull FlutterEngine flutterEngine) {
     new EventChannel(flutterEngine.getDartExecutor(), CHARGING_CHANNEL).setStreamHandler(
       new StreamHandler() {
-        private BroadcastReceiver chargingStateChangeReceiver;
         @Override
         public void onListen(Object arguments, EventSink events) {
           chargingStateChangeReceiver = createChargingStateChangeReceiver(events);
@@ -43,8 +51,7 @@ public class MainActivity extends FlutterActivity {
 
         @Override
         public void onCancel(Object arguments) {
-          unregisterReceiver(chargingStateChangeReceiver);
-          chargingStateChangeReceiver = null;
+          unregisterChargingStateChangeReceiver();
         }
       }
     );
@@ -67,6 +74,11 @@ public class MainActivity extends FlutterActivity {
         }
       }
     );
+  }
+  
+  @Override
+  public void cleanUpFlutterEngine(@NonNull FlutterEngine flutterEngine) {
+    unregisterChargingStateChangeReceiver();
   }
 
   private BroadcastReceiver createChargingStateChangeReceiver(final EventSink events) {
