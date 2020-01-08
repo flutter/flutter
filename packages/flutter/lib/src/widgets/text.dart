@@ -45,6 +45,7 @@ class DefaultTextStyle extends InheritedTheme {
     this.overflow = TextOverflow.clip,
     this.maxLines,
     this.textWidthBasis = TextWidthBasis.parent,
+    this.boundaryLineHeightBehavior,
     @required Widget child,
   }) : assert(style != null),
        assert(softWrap != null),
@@ -143,6 +144,8 @@ class DefaultTextStyle extends InheritedTheme {
   /// See [TextWidthBasis] for possible values and their implications.
   final TextWidthBasis textWidthBasis;
 
+  final ui.BoundaryLineHeightBehavior boundaryLineHeightBehavior;
+
   /// The closest instance of this class that encloses the given context.
   ///
   /// If no such instance exists, returns an instance created by
@@ -164,7 +167,8 @@ class DefaultTextStyle extends InheritedTheme {
         softWrap != oldWidget.softWrap ||
         overflow != oldWidget.overflow ||
         maxLines != oldWidget.maxLines ||
-        textWidthBasis != oldWidget.textWidthBasis;
+        textWidthBasis != oldWidget.textWidthBasis ||
+        boundaryLineHeightBehavior != oldWidget.boundaryLineHeightBehavior;
   }
 
   @override
@@ -177,6 +181,7 @@ class DefaultTextStyle extends InheritedTheme {
       overflow: overflow,
       maxLines: maxLines,
       textWidthBasis: textWidthBasis,
+      boundaryLineHeightBehavior: boundaryLineHeightBehavior,
       child: child,
     );
   }
@@ -190,6 +195,7 @@ class DefaultTextStyle extends InheritedTheme {
     properties.add(EnumProperty<TextOverflow>('overflow', overflow, defaultValue: null));
     properties.add(IntProperty('maxLines', maxLines, defaultValue: null));
     properties.add(EnumProperty<TextWidthBasis>('textWidthBasis', textWidthBasis, defaultValue: TextWidthBasis.parent));
+    properties.add(DiagnosticsProperty<ui.BoundaryLineHeightBehavior>('boundaryLineHeightBehavior', boundaryLineHeightBehavior, defaultValue: null));
   }
 }
 
@@ -440,7 +446,7 @@ class Text extends StatelessWidget {
       maxLines: maxLines ?? defaultTextStyle.maxLines,
       strutStyle: strutStyle,
       textWidthBasis: textWidthBasis ?? defaultTextStyle.textWidthBasis,
-      boundaryLineHeightBehavior: boundaryLineHeightBehavior,
+      boundaryLineHeightBehavior: boundaryLineHeightBehavior ?? defaultTextStyle.boundaryLineHeightBehavior,
       text: TextSpan(
         style: effectiveTextStyle,
         text: data,
@@ -474,6 +480,8 @@ class Text extends StatelessWidget {
     properties.add(EnumProperty<TextOverflow>('overflow', overflow, defaultValue: null));
     properties.add(DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: null));
     properties.add(IntProperty('maxLines', maxLines, defaultValue: null));
+    properties.add(EnumProperty<TextWidthBasis>('textWidthBasis', textWidthBasis, defaultValue: null));
+    properties.add(DiagnosticsProperty<ui.BoundaryLineHeightBehavior>('boundaryLineHeightBehavior', boundaryLineHeightBehavior, defaultValue: null));
     if (semanticsLabel != null) {
       properties.add(StringProperty('semanticsLabel', semanticsLabel));
     }
