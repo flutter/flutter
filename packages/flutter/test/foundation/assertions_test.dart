@@ -430,7 +430,6 @@ void main() {
   });
 
   test('defaultStackFilter compresses huge ugly stacks', () {
-    print(FlutterError.defaultStackFilter(hugeUglyStack.split('\n')).join('\n'));
     expect(
       FlutterError.defaultStackFilter(hugeUglyStack.split('\n')),
       const <String>[
