@@ -349,10 +349,10 @@ class _DefaultUsage implements Usage {
   ║ crash reports to Google.                                                   ║
   ║                                                                            ║
   ║ Read about data we send with crash reports:                                ║
-  ║ https://github.com/flutter/flutter/wiki/Flutter-CLI-crash-reporting        ║
+  ║ https://flutter.dev/docs/reference/crash-reporting                         ║
   ║                                                                            ║
   ║ See Google's privacy policy:                                               ║
-  ║ https://www.google.com/intl/en/policies/privacy/                           ║
+  ║ https://policies.google.com/privacy                                        ║
   ╚════════════════════════════════════════════════════════════════════════════╝
   ''', emphasis: true);
   }
