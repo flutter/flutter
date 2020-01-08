@@ -231,14 +231,25 @@ class FloatingActionButton extends StatelessWidget {
   /// used for accessibility.
   final String tooltip;
 
-  /// The default icon and text color.
+  /// The default foreground color for icons and text within the button.
   ///
-  /// Defaults to [ThemeData.accentIconTheme.color] for the current theme.
+  /// If this property is null, then the [Theme]'s
+  /// [ThemeData.floatingActionButtonTheme.foregroundColor] is used. If that
+  /// property is also null, then the [Theme]'s
+  /// [ThemeData.colorScheme.onSecondary] color is used.
+  ///
+  /// Although the color of theme's `accentIconTheme` currently provides a
+  /// default that supercedes the `onSecondary` color, this dependency
+  /// has been deprecated:  flutter.dev/go/remove-fab-accent-theme-dependency.
+  /// It will be removed in the future.
   final Color foregroundColor;
 
-  /// The color to use when filling the button.
+  /// The button's background color.
   ///
-  /// Defaults to [ThemeData.accentColor] for the current theme.
+  /// If this property is null, then the [Theme]'s
+  /// [ThemeData.floatingActionButtonTheme.backgroundColor] is used. If that
+  /// property is also null, then the [Theme]'s
+  /// [ThemeData.colorScheme.secondary] color is used.
   final Color backgroundColor;
 
   /// The color to use for filling the button when the button has input focus.
