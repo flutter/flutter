@@ -985,7 +985,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///
   /// If [barrierDismissible] is false, then tapping the barrier has no effect.
   ///
-  /// If this getter would ever start return a different value,
+  /// If this getter would ever start returning a different value,
   /// [changedInternalState] should be invoked so that the change can take
   /// effect.
   ///
