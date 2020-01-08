@@ -940,13 +940,13 @@ void main() {
                     Navigator.of(context).push<void>(
                       _TestDialogRouteWithCustomBarrierTween<void>(
                         child: const Text('Hello World'),
-                        barrierTween: CurveTween(curve: Curves.linear),
-                      )
+                        barrierCurve: Curves.linear,
+                      ),
                     );
                   },
                 ),
               );
-            }
+            },
           ),
         ),
       ));
@@ -1052,9 +1052,9 @@ class _TestDialogRoute<T> extends PopupRoute<T> {
 class _TestDialogRouteWithCustomBarrierTween<T> extends PopupRoute<T> {
   _TestDialogRouteWithCustomBarrierTween({
     @required Widget child,
-    @required Animatable<double> barrierTween,
-  }) : assert(barrierTween != null),
-       _barrierTween = barrierTween,
+    @required Curve barrierCurve,
+  }) : assert(barrierCurve != null),
+       _barrierCurve = barrierCurve,
        _child = child;
 
   final Widget _child;
@@ -1069,8 +1069,8 @@ class _TestDialogRouteWithCustomBarrierTween<T> extends PopupRoute<T> {
   Color get barrierColor => Colors.black; // easier value to test against
 
   @override
-  Animatable<double> get barrierTween => _barrierTween;
-  final Animatable<double> _barrierTween;
+  Curve get barrierCurve => _barrierCurve;
+  final Curve _barrierCurve;
 
   @override
   Duration get transitionDuration => const Duration(milliseconds: 100); // easier value to test against

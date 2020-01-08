@@ -1072,18 +1072,19 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// While the route is animating into position, the color is animated from
   /// transparent to the specified color.
   ///
-  /// If this getter would ever start returning a different tween,
+  /// If this getter would ever start returning a different curve,
   /// [changedInternalState] should be invoked so that the change can take
   /// effect.
   ///
-  /// It defaults to a [CurveTween] with a [Curves.ease] curve.
+  /// It defaults to [Curves.ease].
   ///
   /// See also:
   ///
   ///  * [barrierColor], which determines the color that the modal transitions
   ///    to.
+  ///  * [Curves] for collection of common curves.
   ///  * [AnimatedModalBarrier], the widget that implements this feature.
-  Animatable<double> get barrierTween => CurveTween(curve: Curves.ease);
+  Curve get barrierCurve => Curves.ease;
 
   /// Whether the route should remain in memory when it is inactive.
   ///
@@ -1303,8 +1304,8 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
       final Animation<Color> color = animation.drive(
         ColorTween(
           begin: _kTransparent,
-          end: barrierColor, // changedInternalState is called if this updates
-        ).chain(barrierTween),
+          end: barrierColor, // changedInternalState is called if barrierColor updates
+        ).chain(CurveTween(curve: barrierCurve)), // changedInternalState is called if barrierCurve
       );
       barrier = AnimatedModalBarrier(
         color: color,
