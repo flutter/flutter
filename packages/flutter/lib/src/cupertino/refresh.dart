@@ -1,6 +1,7 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
 import 'dart:async';
 import 'dart:math';
 
@@ -353,8 +354,7 @@ class CupertinoSliverRefreshControl extends StatefulWidget {
   /// state that gets passed into the [builder] function. Used for testing.
   @visibleForTesting
   static RefreshIndicatorMode state(BuildContext context) {
-    final _CupertinoSliverRefreshControlState state
-        = context.ancestorStateOfType(const TypeMatcher<_CupertinoSliverRefreshControlState>());
+    final _CupertinoSliverRefreshControlState state = context.findAncestorStateOfType<_CupertinoSliverRefreshControlState>();
     return state.refreshState;
   }
 
@@ -379,9 +379,9 @@ class CupertinoSliverRefreshControl extends StatefulWidget {
                 opacity: opacityCurve.transform(
                   min(pulledExtent / refreshTriggerPullDistance, 1.0)
                 ),
-                child: const Icon(
+                child: Icon(
                   CupertinoIcons.down_arrow,
-                  color: CupertinoColors.inactiveGray,
+                  color: CupertinoDynamicColor.resolve(CupertinoColors.inactiveGray, context),
                   size: 36.0,
                 ),
               )

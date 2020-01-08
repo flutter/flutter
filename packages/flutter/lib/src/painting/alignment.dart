@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -127,12 +127,10 @@ abstract class AlignmentGeometry {
 
   @override
   bool operator ==(dynamic other) {
-    if (other is! AlignmentGeometry)
-      return false;
-    final AlignmentGeometry typedOther = other;
-    return _x == typedOther._x &&
-           _start == typedOther._start &&
-           _y == typedOther._y;
+    return other is AlignmentGeometry
+        && other._x == _x
+        && other._start == _start
+        && other._y == _y;
   }
 
   @override
@@ -631,5 +629,46 @@ class _MixedAlignment extends AlignmentGeometry {
         return Alignment(_x + _start, _y);
     }
     return null;
+  }
+}
+
+/// The vertical alignment of text within an input box.
+///
+/// A single [y] value that can range from -1.0 to 1.0. -1.0 aligns to the top
+/// of an input box so that the top of the first line of text fits within the
+/// box and its padding. 0.0 aligns to the center of the box. 1.0 aligns so that
+/// the bottom of the last line of text aligns with the bottom interior edge of
+/// the input box.
+///
+/// See also:
+///
+///  * [TextField.textAlignVertical], which is passed on to the [InputDecorator].
+///  * [CupertinoTextField.textAlignVertical], which behaves in the same way as
+///    the parameter in TextField.
+///  * [InputDecorator.textAlignVertical], which defines the alignment of
+///    prefix, input, and suffix within an [InputDecorator].
+class TextAlignVertical {
+  /// Creates a TextAlignVertical from any y value between -1.0 and 1.0.
+  const TextAlignVertical({
+    @required this.y,
+  }) : assert(y != null),
+       assert(y >= -1.0 && y <= 1.0);
+
+  /// A value ranging from -1.0 to 1.0 that defines the topmost and bottommost
+  /// locations of the top and bottom of the input box.
+  final double y;
+
+  /// Aligns a TextField's input Text with the topmost location within a
+  /// TextField's input box.
+  static const TextAlignVertical top = TextAlignVertical(y: -1.0);
+  /// Aligns a TextField's input Text to the center of the TextField.
+  static const TextAlignVertical center = TextAlignVertical(y: 0.0);
+  /// Aligns a TextField's input Text with the bottommost location within a
+  /// TextField.
+  static const TextAlignVertical bottom = TextAlignVertical(y: 1.0);
+
+  @override
+  String toString() {
+    return '$runtimeType(y: $y)';
   }
 }

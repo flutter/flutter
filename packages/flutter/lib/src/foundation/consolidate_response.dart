@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -43,10 +43,8 @@ typedef BytesReceivedCallback = void Function(int cumulative, int total);
 /// bytes from this method (assuming the response is sending compressed bytes),
 /// set both [HttpClient.autoUncompress] to false and the `autoUncompress`
 /// parameter to false.
-// TODO(tvolkert): Remove the [client] param once https://github.com/dart-lang/sdk/issues/36971 is fixed.
 Future<Uint8List> consolidateHttpClientResponseBytes(
   HttpClientResponse response, {
-  HttpClient client,
   bool autoUncompress = true,
   BytesReceivedCallback onBytesReceived,
 }) {
@@ -58,15 +56,21 @@ Future<Uint8List> consolidateHttpClientResponseBytes(
   int expectedContentLength = response.contentLength;
   if (expectedContentLength == -1)
     expectedContentLength = null;
-  if (response.headers?.value(HttpHeaders.contentEncodingHeader) == 'gzip') {
-    if (client?.autoUncompress ?? true) {
+  switch (response.compressionState) {
+    case HttpClientResponseCompressionState.compressed:
+      if (autoUncompress) {
+        // We need to un-compress the bytes as they come in.
+        sink = gzip.decoder.startChunkedConversion(output);
+      }
+      break;
+    case HttpClientResponseCompressionState.decompressed:
       // response.contentLength will not match our bytes stream, so we declare
       // that we don't know the expected content length.
       expectedContentLength = null;
-    } else if (autoUncompress) {
-      // We need to un-compress the bytes as they come in.
-      sink = gzip.decoder.startChunkedConversion(output);
-    }
+      break;
+    case HttpClientResponseCompressionState.notCompressed:
+      // Fall-through.
+      break;
   }
 
   int bytesReceived = 0;
@@ -111,7 +115,7 @@ class _OutputBuffer extends ByteConversionSinkBase {
     }
     _bytes = Uint8List(_contentLength);
     int offset = 0;
-    for (List<int> chunk in _chunks) {
+    for (final List<int> chunk in _chunks) {
       _bytes.setRange(offset, offset + chunk.length, chunk);
       offset += chunk.length;
     }

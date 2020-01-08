@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -62,18 +62,20 @@ class OverscrollDemoState extends State<OverscrollDemo> {
       body: RefreshIndicator(
         key: _refreshIndicatorKey,
         onRefresh: _handleRefresh,
-        child: ListView.builder(
-          padding: kMaterialListPadding,
-          itemCount: _items.length,
-          itemBuilder: (BuildContext context, int index) {
-            final String item = _items[index];
-            return ListTile(
-              isThreeLine: true,
-              leading: CircleAvatar(child: Text(item)),
-              title: Text('This item represents $item.'),
-              subtitle: const Text('Even more additional list item information appears on line three.'),
-            );
-          },
+        child: Scrollbar(
+          child: ListView.builder(
+            padding: kMaterialListPadding,
+            itemCount: _items.length,
+            itemBuilder: (BuildContext context, int index) {
+              final String item = _items[index];
+              return ListTile(
+                isThreeLine: true,
+                leading: CircleAvatar(child: Text(item)),
+                title: Text('This item represents $item.'),
+                subtitle: const Text('Even more additional list item information appears on line three.'),
+              );
+            },
+          ),
         ),
       ),
     );

@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -103,9 +103,9 @@ void main() {
               splashColor: const Color(0xffff0000),
               focusColor: const Color(0xff0000ff),
               highlightColor: const Color(0xf00fffff),
-              onTap: () {},
-              onLongPress: () {},
-              onHover: (bool hover) {}
+              onTap: () { },
+              onLongPress: () { },
+              onHover: (bool hover) { },
             ),
           ),
         ),
@@ -113,15 +113,50 @@ void main() {
     ));
     final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await gesture.addPointer();
+    addTearDown(gesture.removePointer);
     await gesture.moveTo(tester.getCenter(find.byType(Container)));
     await tester.pumpAndSettle();
     final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
     expect(inkFeatures, paints..rect(rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0), color: const Color(0xff00ff00)));
-
-    await gesture.removePointer();
   });
 
   testWidgets('ink response changes color on focus', (WidgetTester tester) async {
+    FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    final FocusNode focusNode = FocusNode(debugLabel: 'Ink Focus');
+    await tester.pumpWidget(
+      Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Center(
+            child: Container(
+              width: 100,
+              height: 100,
+              child: InkWell(
+                focusNode: focusNode,
+                hoverColor: const Color(0xff00ff00),
+                splashColor: const Color(0xffff0000),
+                focusColor: const Color(0xff0000ff),
+                highlightColor: const Color(0xf00fffff),
+                onTap: () { },
+                onLongPress: () { },
+                onHover: (bool hover) { },
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    expect(inkFeatures, paintsExactlyCountTimes(#rect, 0));
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(inkFeatures, paints
+      ..rect(rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0), color: const Color(0xff0000ff)));
+  });
+
+  testWidgets("ink response doesn't change color on focus when on touch device", (WidgetTester tester) async {
+    FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTouch;
     final FocusNode focusNode = FocusNode(debugLabel: 'Ink Focus');
     await tester.pumpWidget(Material(
       child: Directionality(
@@ -133,13 +168,13 @@ void main() {
               width: 100,
               height: 100,
               child: InkWell(
-                hoverColor: const Color(0xff00ff00),
-                splashColor: const Color(0xffff0000),
-                focusColor: const Color(0xff0000ff),
-                highlightColor: const Color(0xf00fffff),
-                onTap: () {},
-                onLongPress: () {},
-                onHover: (bool hover) {}
+                  hoverColor: const Color(0xff00ff00),
+                  splashColor: const Color(0xffff0000),
+                  focusColor: const Color(0xff0000ff),
+                  highlightColor: const Color(0xf00fffff),
+                  onTap: () { },
+                  onLongPress: () { },
+                  onHover: (bool hover) { },
               ),
             ),
           ),
@@ -151,8 +186,7 @@ void main() {
     expect(inkFeatures, paintsExactlyCountTimes(#rect, 0));
     focusNode.requestFocus();
     await tester.pumpAndSettle();
-    expect(inkFeatures, paints
-      ..rect(rect: const Rect.fromLTRB(350.0, 250.0, 450.0, 350.0), color: const Color(0xff0000ff)));
+    expect(inkFeatures, paintsExactlyCountTimes(#rect, 0));
   });
 
   group('feedback', () {
@@ -172,8 +206,8 @@ void main() {
           textDirection: TextDirection.ltr,
           child: Center(
             child: InkWell(
-              onTap: () {},
-              onLongPress: () {},
+              onTap: () { },
+              onLongPress: () { },
             ),
           ),
         ),
@@ -200,8 +234,8 @@ void main() {
           textDirection: TextDirection.ltr,
           child: Center(
             child: InkWell(
-              onTap: () {},
-              onLongPress: () {},
+              onTap: () { },
+              onLongPress: () { },
               enableFeedback: false,
             ),
           ),
@@ -267,7 +301,7 @@ void main() {
       textDirection: TextDirection.ltr,
       child: Material(
         child: InkWell(
-          onTap: () {},
+          onTap: () { },
           child: const Text('Button'),
         ),
       ),
@@ -278,7 +312,7 @@ void main() {
       textDirection: TextDirection.ltr,
       child: Material(
         child: InkWell(
-          onTap: () {},
+          onTap: () { },
           child: const Text('Button'),
           excludeFromSemantics: true,
         ),
@@ -287,5 +321,94 @@ void main() {
     expect(semantics, isNot(includesNodeWith(label: 'Button', actions: <SemanticsAction>[SemanticsAction.tap])));
 
     semantics.dispose();
+  });
+  testWidgets("ink response doesn't focus when disabled", (WidgetTester tester) async {
+    WidgetsBinding.instance.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTouch;
+    final FocusNode focusNode = FocusNode(debugLabel: 'Ink Focus');
+    final GlobalKey childKey = GlobalKey();
+    await tester.pumpWidget(
+      Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: InkWell(
+            autofocus: true,
+            onTap: () {},
+            onLongPress: () {},
+            onHover: (bool hover) {},
+            focusNode: focusNode,
+            child: Container(key: childKey),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(focusNode.hasPrimaryFocus, isTrue);
+    await tester.pumpWidget(
+      Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: InkWell(
+            focusNode: focusNode,
+            child: Container(key: childKey),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(focusNode.hasPrimaryFocus, isFalse);
+  });
+
+  testWidgets("ink response doesn't hover when disabled", (WidgetTester tester) async {
+    WidgetsBinding.instance.focusManager.highlightStrategy = FocusHighlightStrategy.alwaysTouch;
+    final FocusNode focusNode = FocusNode(debugLabel: 'Ink Focus');
+    final GlobalKey childKey = GlobalKey();
+    bool hovering = false;
+    await tester.pumpWidget(
+      Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Container(
+            width: 100,
+            height: 100,
+            child: InkWell(
+              autofocus: true,
+              onTap: () {},
+              onLongPress: () {},
+              onHover: (bool value) { hovering = value; },
+              focusNode: focusNode,
+              child: Container(key: childKey),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(focusNode.hasPrimaryFocus, isTrue);
+    final TestGesture gesture = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await gesture.addPointer();
+    addTearDown(gesture.removePointer);
+    await gesture.moveTo(tester.getCenter(find.byKey(childKey)));
+    await tester.pumpAndSettle();
+    expect(hovering, isTrue);
+
+    await tester.pumpWidget(
+      Material(
+        child: Directionality(
+          textDirection: TextDirection.ltr,
+          child: Container(
+            width: 100,
+            height: 100,
+            child: InkWell(
+              focusNode: focusNode,
+              onHover: (bool value) { hovering = value; },
+              child: Container(key: childKey),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+    expect(focusNode.hasPrimaryFocus, isFalse);
   });
 }

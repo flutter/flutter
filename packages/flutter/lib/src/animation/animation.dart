@@ -1,8 +1,7 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show VoidCallback;
 
 import 'package:flutter/foundation.dart';
 
@@ -63,6 +62,9 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
 
   /// Stop calling the listener every time the value of the animation changes.
   ///
+  /// If `listener` is not currently registered as a listener, this method does
+  /// nothing.
+  ///
   /// Listeners can be added with [addListener].
   @override
   void removeListener(VoidCallback listener);
@@ -73,6 +75,9 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
   void addStatusListener(AnimationStatusListener listener);
 
   /// Stops calling the listener every time the status of the animation changes.
+  ///
+  /// If `listener` is not currently registered as a status listener, this
+  /// method does nothing.
   ///
   /// Listeners can be added with [addStatusListener].
   void removeStatusListener(AnimationStatusListener listener);
@@ -162,7 +167,7 @@ abstract class Animation<T> extends Listenable implements ValueListenable<T> {
   @optionalTypeArgs
   Animation<U> drive<U>(Animatable<U> child) {
     assert(this is Animation<double>);
-    return child.animate(this as dynamic); // TODO(ianh): Clean this once https://github.com/dart-lang/sdk/issues/32120 is fixed.
+    return child.animate(this as Animation<double>);
   }
 
   @override

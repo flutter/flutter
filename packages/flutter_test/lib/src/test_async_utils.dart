@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -45,6 +45,9 @@ class _AsyncScope {
 /// });
 /// ```
 class TestAsyncUtils {
+  // This class is not meant to be instatiated or extended; this constructor
+  // prevents instantiation and extension.
+  // ignore: unused_element
   TestAsyncUtils._();
   static const String _className = 'TestAsyncUtils';
 
@@ -185,9 +188,10 @@ class TestAsyncUtils {
       assert(candidateScope.zone != null);
     } while (candidateScope.zone != zone);
     assert(scope != null);
-    final List<DiagnosticsNode> information = <DiagnosticsNode>[];
-    information.add(ErrorSummary('Guarded function conflict.'));
-    information.add(ErrorHint('You must use "await" with all Future-returning test APIs.'));
+    final List<DiagnosticsNode> information = <DiagnosticsNode>[
+      ErrorSummary('Guarded function conflict.'),
+      ErrorHint('You must use "await" with all Future-returning test APIs.'),
+    ];
     final _StackEntry originalGuarder = _findResponsibleMethod(scope.creationStack, 'guard', information);
     final _StackEntry collidingGuarder = _findResponsibleMethod(StackTrace.current, 'guardSync', information);
     if (originalGuarder != null && collidingGuarder != null) {
@@ -273,7 +277,7 @@ class TestAsyncUtils {
         ErrorSummary('Asynchronous call to guarded function leaked.'),
         ErrorHint('You must use "await" with all Future-returning test APIs.')
       ];
-      for (_AsyncScope scope in _scopeStack) {
+      for (final _AsyncScope scope in _scopeStack) {
         final _StackEntry guarder = _findResponsibleMethod(scope.creationStack, 'guard', information);
         if (guarder != null) {
           information.add(ErrorDescription(

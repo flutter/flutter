@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -7,7 +7,9 @@ import 'package:meta/meta.dart';
 import '../application_package.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
+import '../base/utils.dart';
 import '../build_info.dart';
+import '../globals.dart' as globals;
 import '../project.dart';
 
 abstract class WindowsApp extends ApplicationPackage {
@@ -63,10 +65,10 @@ class BuildableWindowsApp extends WindowsApp {
     if (!exeNameFile.existsSync()) {
       throwToolExit('Failed to find Windows executable name');
     }
-    return fs.path.join(
+    return globals.fs.path.join(
         getWindowsBuildDirectory(),
         'x64',
-        buildMode == BuildMode.debug ? 'Debug' : 'Release',
+        toTitleCase(getNameForBuildMode(buildMode)),
         'Runner',
         exeNameFile.readAsStringSync().trim());
   }

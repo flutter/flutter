@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -9,8 +9,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/gestures.dart' show DragStartBehavior;
 
 import 'button_bar.dart';
-import 'button_theme.dart';
 import 'card.dart';
+import 'constants.dart';
 import 'data_table.dart';
 import 'data_table_source.dart';
 import 'debug.dart';
@@ -70,6 +70,11 @@ class PaginatedDataTable extends StatefulWidget {
     this.sortColumnIndex,
     this.sortAscending = true,
     this.onSelectAll,
+    this.dataRowHeight = kMinInteractiveDimension,
+    this.headingRowHeight = 56.0,
+    this.horizontalMargin = 24.0,
+    this.columnSpacing = 56.0,
+    this.showCheckboxColumn = true,
     this.initialFirstRowIndex = 0,
     this.onPageChanged,
     this.rowsPerPage = defaultRowsPerPage,
@@ -83,6 +88,11 @@ class PaginatedDataTable extends StatefulWidget {
        assert(columns.isNotEmpty),
        assert(sortColumnIndex == null || (sortColumnIndex >= 0 && sortColumnIndex < columns.length)),
        assert(sortAscending != null),
+       assert(dataRowHeight != null),
+       assert(headingRowHeight != null),
+       assert(horizontalMargin != null),
+       assert(columnSpacing != null),
+       assert(showCheckboxColumn != null),
        assert(rowsPerPage != null),
        assert(rowsPerPage > 0),
        assert(() {
@@ -130,6 +140,34 @@ class PaginatedDataTable extends StatefulWidget {
   ///
   /// See [DataTable.onSelectAll].
   final ValueSetter<bool> onSelectAll;
+
+  /// The height of each row (excluding the row that contains column headings).
+  ///
+  /// This value is optional and defaults to kMinInteractiveDimension if not
+  /// specified.
+  final double dataRowHeight;
+
+  /// The height of the heading row.
+  ///
+  /// This value is optional and defaults to 56.0 if not specified.
+  final double headingRowHeight;
+
+  /// The horizontal margin between the edges of the table and the content
+  /// in the first and last cells of each row.
+  ///
+  /// When a checkbox is displayed, it is also the margin between the checkbox
+  /// the content in the first data column.
+  ///
+  /// This value defaults to 24.0 to adhere to the Material Design specifications.
+  final double horizontalMargin;
+
+  /// The horizontal margin between the contents of each data column.
+  ///
+  /// This value defaults to 56.0 to adhere to the Material Design specifications.
+  final double columnSpacing;
+
+  /// {@macro flutter.material.dataTable.showCheckboxColumn}
+  final bool showCheckboxColumn;
 
   /// The index of the first row to display when the widget is first created.
   final int initialFirstRowIndex;
@@ -193,7 +231,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
   @override
   void initState() {
     super.initState();
-    _firstRowIndex = PageStorage.of(context)?.readState(context) ?? widget.initialFirstRowIndex ?? 0;
+    _firstRowIndex = PageStorage.of(context)?.readState(context) as int ?? widget.initialFirstRowIndex ?? 0;
     widget.source.addListener(_handleDataSourceChanged);
     _handleDataSourceChanged();
   }
@@ -349,7 +387,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
             alignment: AlignmentDirectional.centerEnd,
             child: DropdownButtonHideUnderline(
               child: DropdownButton<int>(
-                items: availableRowsPerPage,
+                items: availableRowsPerPage.cast<DropdownMenuItem<int>>(),
                 value: widget.rowsPerPage,
                 onChanged: widget.onRowsPerPageChanged,
                 style: footerTextStyle,
@@ -368,7 +406,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
           _firstRowIndex + widget.rowsPerPage,
           _rowCount,
           _rowCountApproximate,
-        )
+        ),
       ),
       Container(width: 32.0),
       IconButton(
@@ -405,16 +443,14 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
                 data: const IconThemeData(
                   opacity: 0.54
                 ),
-                child: ButtonTheme.bar(
-                  child: Ink(
-                    height: 64.0,
-                    color: _selectedRowCount > 0 ? themeData.secondaryHeaderColor : null,
-                    child: Padding(
-                      padding: EdgeInsetsDirectional.only(start: startPadding, end: 14.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: headerWidgets,
-                      ),
+                child: Ink(
+                  height: 64.0,
+                  color: _selectedRowCount > 0 ? themeData.secondaryHeaderColor : null,
+                  child: Padding(
+                    padding: EdgeInsetsDirectional.only(start: startPadding, end: 14.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: headerWidgets,
                     ),
                   ),
                 ),
@@ -430,6 +466,11 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
               sortColumnIndex: widget.sortColumnIndex,
               sortAscending: widget.sortAscending,
               onSelectAll: widget.onSelectAll,
+              dataRowHeight: widget.dataRowHeight,
+              headingRowHeight: widget.headingRowHeight,
+              horizontalMargin: widget.horizontalMargin,
+              columnSpacing: widget.columnSpacing,
+              showCheckboxColumn: widget.showCheckboxColumn,
               rows: _getRows(_firstRowIndex, widget.rowsPerPage),
             ),
           ),

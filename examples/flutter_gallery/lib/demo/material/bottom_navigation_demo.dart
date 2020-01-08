@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -158,16 +158,15 @@ class _BottomNavigationDemoState extends State<BottomNavigationDemo>
 
   @override
   void dispose() {
-    for (NavigationIconView view in _navigationViews)
+    for (final NavigationIconView view in _navigationViews)
       view.controller.dispose();
     super.dispose();
   }
 
   Widget _buildTransitionsStack() {
-    final List<FadeTransition> transitions = <FadeTransition>[];
-
-    for (NavigationIconView view in _navigationViews)
-      transitions.add(view.transition(_type, context));
+    final List<FadeTransition> transitions = <FadeTransition>[
+      for (final NavigationIconView view in _navigationViews) view.transition(_type, context),
+    ];
 
     // We want to have the newly animating (fading in) views on top.
     transitions.sort((FadeTransition a, FadeTransition b) {

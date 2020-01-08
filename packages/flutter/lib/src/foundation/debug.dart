@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -19,12 +19,13 @@ import 'print.dart';
 /// override [debugPrint] themselves and want to check that their own custom
 /// value wasn't overridden by a test.
 ///
-/// See [https://docs.flutter.io/flutter/foundation/foundation-library.html] for
-/// a complete list.
+/// See [the foundation library](foundation/foundation-library.html)
+/// for a complete list.
 bool debugAssertAllFoundationVarsUnset(String reason, { DebugPrintCallback debugPrintOverride = debugPrintThrottled }) {
   assert(() {
     if (debugPrint != debugPrintOverride ||
-        debugDefaultTargetPlatformOverride != null)
+        debugDefaultTargetPlatformOverride != null ||
+        debugDoublePrecision != null)
       throw FlutterError(reason);
     return true;
   }());
@@ -51,7 +52,10 @@ bool debugInstrumentationEnabled = false;
 ///    implicitly add any timeline events.
 Future<T> debugInstrumentAction<T>(String description, Future<T> action()) {
   bool instrument = false;
-  assert(() { instrument = debugInstrumentationEnabled; return true; }());
+  assert(() {
+    instrument = debugInstrumentationEnabled;
+    return true;
+  }());
   if (instrument) {
     final Stopwatch stopwatch = Stopwatch()..start();
     return action().whenComplete(() {
@@ -73,3 +77,21 @@ Future<T> debugInstrumentAction<T>(String description, Future<T> action()) {
 const Map<String, String> timelineWhitelistArguments = <String, String>{
   'mode': 'basic',
 };
+
+/// Configure [debugFormatDouble] using [num.toStringAsPrecision].
+///
+/// Defaults to null, which uses the default logic of [debugFormatDouble].
+int debugDoublePrecision;
+
+/// Formats a double to have standard formatting.
+///
+/// This behavior can be overridden by [debugDoublePrecision].
+String debugFormatDouble(double value) {
+  if (value == null) {
+    return 'null';
+  }
+  if (debugDoublePrecision != null) {
+    return value.toStringAsPrecision(debugDoublePrecision);
+  }
+  return value.toStringAsFixed(1);
+}

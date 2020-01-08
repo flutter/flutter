@@ -1,3 +1,7 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -15,7 +19,7 @@ const String _kSecondIsolateName = 'second isolate name';
 
 void main() {
   task(() async {
-    final AndroidDevice device = await devices.workingDevice;
+    final AndroidDevice device = await devices.workingDevice as AndroidDevice;
     await device.unlock();
 
     section('Compile and run the tester app');
@@ -71,7 +75,7 @@ Future<Process> _run({@required Device device, @required List<String> command, @
   await inDirectory(appDir, () async {
   runner = await startProcess(
       path.join(flutterDirectory.path, 'bin', 'flutter'),
-      <String>['--suppress-analytics', '-d', device.deviceId] + command,
+      <String>['--suppress-analytics', '-d', device.deviceId, ...command],
       isBot: false, // we just want to test the output, not have any debugging info
     );
     final StreamController<String> stdout = StreamController<String>.broadcast();

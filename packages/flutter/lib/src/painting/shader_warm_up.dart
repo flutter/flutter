@@ -1,4 +1,4 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -32,8 +32,9 @@ import 'package:flutter/foundation.dart';
 /// `CircularRRectOp`) would suggest Xyz draw operations are causing the
 /// shaders to be compiled. A useful shader warm-up draw operation would
 /// eliminate such long compilation calls in the animation. To double-check
-/// the warm-up, trace with `flutter run --profile --trace-skia --start-
-/// paused`. The `GrGLProgramBuilder` with the associated `XyzOp` should
+/// the warm-up, trace with
+/// `flutter run --profile --trace-skia --start-paused`.
+/// The `GrGLProgramBuilder` with the associated `XyzOp` should
 /// appear during startup rather than in the middle of a later animation.
 
 ///
@@ -56,23 +57,24 @@ abstract class ShaderWarmUp {
 
   /// The size of the warm up image.
   ///
-  /// The exact size shouldn't matter much as long as it's not too far away from
-  /// the target device's screen. 1024x1024 is a good choice as it is within an
-  /// order of magnitude of most devices.
+  /// The exact size shouldn't matter much as long as all draws are onscreen.
+  /// 100x100 is an arbitrary small size that's easy to fit significant draw
+  /// calls onto.
   ///
   /// A custom shader warm up can override this based on targeted devices.
-  ui.Size get size => const ui.Size(1024.0, 1024.0);
+  ui.Size get size => const ui.Size(100.0, 100.0);
 
   /// Trigger draw operations on a given canvas to warm up GPU shader
   /// compilation cache.
   ///
   /// To decide which draw operations to be added to your custom warm up
-  /// process, try capture an skp using `flutter screenshot --observatory-
-  /// port=<port> --type=skia` and analyze it with https://debugger.skia.org.
+  /// process, try capture an skp using
+  /// `flutter screenshot --observatory-uri=<uri> --type=skia`
+  /// and analyze it with https://debugger.skia.org.
   /// Alternatively, one may run the app with `flutter run --trace-skia` and
   /// then examine the GPU thread in the observatory timeline to see which
   /// Skia draw operations are commonly used, and which shader compilations
-  /// are causing janks.
+  /// are causing jank.
   @protected
   Future<void> warmUpOnCanvas(ui.Canvas canvas);
 
@@ -99,7 +101,21 @@ abstract class ShaderWarmUp {
 /// issues seen so far.
 class DefaultShaderWarmUp extends ShaderWarmUp {
   /// Allow [DefaultShaderWarmUp] to be used as the default value of parameters.
-  const DefaultShaderWarmUp();
+  const DefaultShaderWarmUp({
+    this.drawCallSpacing = 0.0,
+    this.canvasSize = const ui.Size(100.0, 100.0),
+  });
+
+  /// Constant that can be used to space out draw calls for visualizing the draws
+  /// for debugging purposes (example: 80.0).  Be sure to also change your canvas
+  /// size.
+  final double drawCallSpacing;
+
+  /// Value that returned by this.size to control canvas size where draws happen.
+  final ui.Size canvasSize;
+
+  @override
+  ui.Size get size => canvasSize;
 
   /// Trigger common draw operations on a canvas to warm up GPU shader
   /// compilation cache.
@@ -155,29 +171,46 @@ class DefaultShaderWarmUp extends ShaderWarmUp {
     // Warm up path stroke and fill shaders.
     for (int i = 0; i < paths.length; i += 1) {
       canvas.save();
-      for (ui.Paint paint in paints) {
+      for (final ui.Paint paint in paints) {
         canvas.drawPath(paths[i], paint);
-        canvas.translate(80.0, 0.0);
+        canvas.translate(drawCallSpacing, 0.0);
       }
       canvas.restore();
-      canvas.translate(0.0, 80.0);
+      canvas.translate(0.0, drawCallSpacing);
     }
 
     // Warm up shadow shaders.
     const ui.Color black = ui.Color(0xFF000000);
     canvas.save();
     canvas.drawShadow(rrectPath, black, 10.0, true);
-    canvas.translate(80.0, 0.0);
+    canvas.translate(drawCallSpacing, 0.0);
     canvas.drawShadow(rrectPath, black, 10.0, false);
     canvas.restore();
 
     // Warm up text shaders.
-    canvas.translate(0.0, 80.0);
+    canvas.translate(0.0, drawCallSpacing);
     final ui.ParagraphBuilder paragraphBuilder = ui.ParagraphBuilder(
       ui.ParagraphStyle(textDirection: ui.TextDirection.ltr),
     )..pushStyle(ui.TextStyle(color: black))..addText('_');
     final ui.Paragraph paragraph = paragraphBuilder.build()
       ..layout(const ui.ParagraphConstraints(width: 60.0));
     canvas.drawParagraph(paragraph, const ui.Offset(20.0, 20.0));
+
+    // Draw a rect inside a rrect with a non-trivial intersection. If the
+    // intersection is trivial (e.g., equals the rrect clip), Skia will optimize
+    // the clip out.
+    //
+    // Add an integral or fractional translation to trigger Skia's non-AA or AA
+    // optimizations (as did before in normal FillRectOp in rrect clip cases).
+    for (final double fraction in <double>[0.0, 0.5]) {
+      canvas
+        ..save()
+        ..translate(fraction, fraction)
+        ..clipRRect(ui.RRect.fromLTRBR(8, 8, 328, 248, const ui.Radius.circular(16)))
+        ..drawRect(const ui.Rect.fromLTRB(10, 10, 320, 240), ui.Paint())
+        ..restore();
+      canvas.translate(drawCallSpacing, 0.0);
+    }
+    canvas.translate(0.0, drawCallSpacing);
   }
 }

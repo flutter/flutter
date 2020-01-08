@@ -1,8 +1,8 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-package io.flutter.integration.androidviews;
+package io.flutter.integration.platformviews;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
@@ -32,7 +32,7 @@ public class MainActivity extends FlutterActivity implements MethodChannel.Metho
         super.onCreate(savedInstanceState);
         GeneratedPluginRegistrant.registerWith(this);
         getFlutterView().getPluginRegistry()
-                .registrarFor("io.flutter.integration.android_views").platformViewRegistry()
+                .registrarFor("io.flutter.integration.platform_views").platformViewRegistry()
                 .registerViewFactory("simple_view", new SimpleViewFactory(getFlutterView()));
         mMethodChannel = new MethodChannel(this.getFlutterView(), "android_views_integration");
         mMethodChannel.setMethodCallHandler(this);
@@ -101,4 +101,3 @@ public class MainActivity extends FlutterActivity implements MethodChannel.Metho
         permissionResult = null;
     }
 }
-

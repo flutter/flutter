@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -7,15 +7,15 @@ import 'package:flutter/rendering.dart';
 
 import '../rendering/src/solid_color_box.dart';
 
-// Solid colour, RenderObject version
+// Solid color, RenderObject version
 void addFlexChildSolidColor(RenderFlex parent, Color backgroundColor, { int flex = 0 }) {
   final RenderSolidColorBox child = RenderSolidColorBox(backgroundColor);
   parent.add(child);
-  final FlexParentData childParentData = child.parentData;
+  final FlexParentData childParentData = child.parentData as FlexParentData;
   childParentData.flex = flex;
 }
 
-// Solid colour, Widget version
+// Solid color, Widget version
 class Rectangle extends StatelessWidget {
   const Rectangle(this.color, { Key key }) : super(key: key);
 

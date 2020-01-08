@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -10,6 +10,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:meta/meta.dart';
 
 void main() {
+  test('TestWindow can handle new methods without breaking', () {
+    final dynamic testWindow = TestWindow(window: ui.window);
+    expect(testWindow.someNewProperty, null);
+  });
+
   testWidgets('TestWindow can fake device pixel ratio', (WidgetTester tester) async {
     verifyThatTestWindowCanFakeProperty<double>(
       tester: tester,
@@ -34,6 +39,20 @@ void main() {
       },
       propertyFaker: (TestWidgetsFlutterBinding binding, Size fakeValue) {
         binding.window.physicalSizeTestValue = fakeValue;
+      },
+    );
+  });
+
+  testWidgets('TestWindow can fake physical depth', (WidgetTester tester) async {
+    verifyThatTestWindowCanFakeProperty<double>(
+      tester: tester,
+      realValue: ui.window.physicalDepth,
+      fakeValue: 120.0,
+      propertyRetriever: () {
+        return WidgetsBinding.instance.window.physicalDepth;
+      },
+      propertyFaker: (TestWidgetsFlutterBinding binding, double fakeValue) {
+        binding.window.physicalDepthTestValue = fakeValue;
       },
     );
   });
@@ -205,7 +224,7 @@ void verifyThatTestWindowCanFakeProperty<WindowPropertyType>({
 TestWidgetsFlutterBinding retrieveTestBinding(WidgetTester tester) {
   final WidgetsBinding binding = tester.binding;
   assert(binding is TestWidgetsFlutterBinding);
-  final TestWidgetsFlutterBinding testBinding = binding;
+  final TestWidgetsFlutterBinding testBinding = binding as TestWidgetsFlutterBinding;
   return testBinding;
 }
 

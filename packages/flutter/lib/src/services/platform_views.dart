@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -7,6 +7,7 @@ import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/gestures.dart';
 
 import 'message_codec.dart';
 import 'system_channels.dart';
@@ -18,10 +19,6 @@ final PlatformViewsRegistry platformViewsRegistry = PlatformViewsRegistry._insta
 ///
 /// A Flutter application has a single [PlatformViewsRegistry] which can be accesses
 /// through the [platformViewsRegistry] getter.
-///
-/// See also:
-///
-///  * [PlatformView], a widget that shows a platform view.
 class PlatformViewsRegistry {
   PlatformViewsRegistry._instance();
 
@@ -47,8 +44,6 @@ typedef PlatformViewCreatedCallback = void Function(int id);
 /// Provides access to the platform views service.
 ///
 /// This service allows creating and controlling platform-specific views.
-///
-/// See also: [PlatformView].
 class PlatformViewsService {
   PlatformViewsService._() {
     SystemChannels.platform_views.setMethodCallHandler(_onMethodCall);
@@ -64,7 +59,7 @@ class PlatformViewsService {
   Future<void> _onMethodCall(MethodCall call) {
     switch(call.method) {
       case 'viewFocused':
-        final int id = call.arguments;
+        final int id = call.arguments as int;
         if (_focusCallbacks.containsKey(id)) {
           _focusCallbacks[id]();
         }
@@ -427,7 +422,6 @@ enum _AndroidViewState {
   waitingForSize,
   creating,
   created,
-  createFailed,
   disposed,
 }
 
@@ -466,7 +460,7 @@ class AndroidViewController {
   /// Android's [MotionEvent.ACTION_MOVE](https://developer.android.com/reference/android/view/MotionEvent#ACTION_MOVE)
   static const int kActionMove = 2;
 
-  /// Action code for when a motion event has been cancelled.
+  /// Action code for when a motion event has been canceled.
   ///
   /// Android's [MotionEvent.ACTION_CANCEL](https://developer.android.com/reference/android/view/MotionEvent#ACTION_CANCEL)
   static const int kActionCancel = 3;
@@ -505,9 +499,9 @@ class AndroidViewController {
 
   _AndroidViewState _state;
 
-  dynamic _creationParams;
+  final dynamic _creationParams;
 
-  MessageCodec<dynamic> _creationParamsCodec;
+  final MessageCodec<dynamic> _creationParamsCodec;
 
   final List<PlatformViewCreatedCallback> _platformViewCreatedCallbacks = <PlatformViewCreatedCallback>[];
 
@@ -583,6 +577,14 @@ class AndroidViewController {
     });
   }
 
+  /// Clears the focus from the Android View if it is focused.
+  Future<void> clearFocus() {
+    if (_state != _AndroidViewState.created) {
+      return null;
+    }
+    return SystemChannels.platform_views.invokeMethod<void>('clearFocus', id);
+  }
+
   static int _getAndroidDirection(TextDirection direction) {
     assert(direction != null);
     switch (direction) {
@@ -630,7 +632,7 @@ class AndroidViewController {
     }
     _textureId = await SystemChannels.platform_views.invokeMethod('create', args);
     _state = _AndroidViewState.created;
-    for (PlatformViewCreatedCallback callback in _platformViewCreatedCallbacks) {
+    for (final PlatformViewCreatedCallback callback in _platformViewCreatedCallbacks) {
       callback(id);
     }
   }
@@ -704,4 +706,30 @@ class UiKitViewController {
     _debugDisposed = true;
     await SystemChannels.platform_views.invokeMethod<void>('dispose', id);
   }
+}
+
+/// An interface for a controlling a single platform view.
+///
+/// Used by [PlatformViewSurface] to interface with the platform view it embeds.
+abstract class PlatformViewController {
+
+  /// The viewId associated with this controller.
+  ///
+  /// The viewId should always be unique and non-negative. And it must not be null.
+  ///
+  /// See also:
+  ///
+  ///  * [PlatformViewRegistry], which is a helper for managing platform view ids.
+  int get viewId;
+
+  /// Dispatches the `event` to the platform view.
+  void dispatchPointerEvent(PointerEvent event);
+
+  /// Disposes the platform view.
+  ///
+  /// The [PlatformViewController] is unusable after calling dispose.
+  void dispose();
+
+  /// Clears the view's focus on the platform side.
+  void clearFocus();
 }

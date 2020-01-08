@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -26,5 +26,5 @@ void main() {
       paints
         ..circle(x: 25.0, y: 40.0, radius: 10.0, strokeWidth: 10.0),
     );
-  });
+  }, skip: isBrowser);
 }

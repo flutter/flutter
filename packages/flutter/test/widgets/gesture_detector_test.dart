@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -224,7 +224,7 @@ void main() {
     expect(didTap, isFalse);
   });
 
-  testWidgets('cache unchanged callbacks', (WidgetTester tester) async {
+  testWidgets('cache render object', (WidgetTester tester) async {
     final GestureTapCallback inputCallback = () { };
 
     await tester.pumpWidget(
@@ -237,7 +237,6 @@ void main() {
     );
 
     final RenderSemanticsGestureHandler renderObj1 = tester.renderObject(find.byType(GestureDetector));
-    final GestureTapCallback actualCallback1 = renderObj1.onTap;
 
     await tester.pumpWidget(
       Center(
@@ -249,10 +248,8 @@ void main() {
     );
 
     final RenderSemanticsGestureHandler renderObj2 = tester.renderObject(find.byType(GestureDetector));
-    final GestureTapCallback actualCallback2 = renderObj2.onTap;
 
     expect(renderObj1, same(renderObj2));
-    expect(actualCallback1, same(actualCallback2)); // Should be cached.
   });
 
   testWidgets('Tap down occurs after kPressTimeout', (WidgetTester tester) async {
@@ -525,4 +522,188 @@ void main() {
     expect(horizontalDragStart, 1);
     expect(forcePressStart, 0);
   });
+
+  group('RawGestureDetectorState\'s debugFillProperties', () {
+    testWidgets('when default', (WidgetTester tester) async {
+      final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+      final GlobalKey key = GlobalKey();
+      await tester.pumpWidget(RawGestureDetector(
+        key: key,
+      ));
+      key.currentState.debugFillProperties(builder);
+
+      final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
+
+      expect(description, <String>[
+        'gestures: <none>',
+      ]);
+    });
+
+    testWidgets('should show gestures, custom semantics and behavior', (WidgetTester tester) async {
+      final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+      final GlobalKey key = GlobalKey();
+      await tester.pumpWidget(RawGestureDetector(
+        key: key,
+        behavior: HitTestBehavior.deferToChild,
+        gestures: <Type, GestureRecognizerFactory>{
+          TapGestureRecognizer: GestureRecognizerFactoryWithHandlers<TapGestureRecognizer>(
+            () => TapGestureRecognizer(),
+            (TapGestureRecognizer recognizer) {
+              recognizer.onTap = () {};
+            },
+          ),
+          LongPressGestureRecognizer: GestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
+            () => LongPressGestureRecognizer(),
+            (LongPressGestureRecognizer recognizer) {
+              recognizer.onLongPress = () {};
+            },
+          ),
+        },
+        child: Container(),
+        semantics: _EmptySemanticsGestureDelegate(),
+      ));
+      key.currentState.debugFillProperties(builder);
+
+      final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
+
+      expect(description, <String>[
+        'gestures: tap, long press',
+        'semantics: _EmptySemanticsGestureDelegate()',
+        'behavior: deferToChild',
+      ]);
+    });
+
+    testWidgets('should not show semantics when excludeFromSemantics is true', (WidgetTester tester) async {
+      final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+      final GlobalKey key = GlobalKey();
+      await tester.pumpWidget(RawGestureDetector(
+        key: key,
+        gestures: const <Type, GestureRecognizerFactory>{},
+        child: Container(),
+        semantics: _EmptySemanticsGestureDelegate(),
+        excludeFromSemantics: true,
+      ));
+      key.currentState.debugFillProperties(builder);
+
+      final List<String> description = builder.properties
+        .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
+        .map((DiagnosticsNode node) => node.toString())
+        .toList();
+
+      expect(description, <String>[
+        'gestures: <none>',
+        'excludeFromSemantics: true',
+      ]);
+    });
+
+    group('error control test', () {
+      test('constructor redundant pan and scale', () {
+        FlutterError error;
+        try {
+          GestureDetector(onScaleStart: (_) {}, onPanStart: (_) {},);
+        } on FlutterError catch (e) {
+          error = e;
+        } finally {
+          expect(error, isNotNull);
+          expect(
+            error.toStringDeep(),
+            'FlutterError\n'
+            '   Incorrect GestureDetector arguments.\n'
+            '   Having both a pan gesture recognizer and a scale gesture\n'
+            '   recognizer is redundant; scale is a superset of pan.\n'
+            '   Just use the scale gesture recognizer.\n',
+          );
+          expect(error.diagnostics.last.level, DiagnosticLevel.hint);
+          expect(
+            error.diagnostics.last.toStringDeep(),
+            equalsIgnoringHashCodes(
+              'Just use the scale gesture recognizer.\n',
+            )
+          );
+        }
+      });
+
+      test('constructur duplicate drag recognizer', () {
+        FlutterError error;
+        try {
+          GestureDetector(
+            onVerticalDragStart: (_) {},
+            onHorizontalDragStart: (_) {},
+            onPanStart: (_) {},
+          );
+        } on FlutterError catch (e) {
+          error = e;
+        } finally {
+          expect(error, isNotNull);
+          expect(
+            error.toStringDeep(),
+            'FlutterError\n'
+            '   Incorrect GestureDetector arguments.\n'
+            '   Simultaneously having a vertical drag gesture recognizer, a\n'
+            '   horizontal drag gesture recognizer, and a pan gesture recognizer\n'
+            '   will result in the pan gesture recognizer being ignored, since\n'
+            '   the other two will catch all drags.\n',
+          );
+        }
+      });
+
+      testWidgets('replaceGestureRecognizers not during layout', (WidgetTester tester) async {
+        final GlobalKey<RawGestureDetectorState> key = GlobalKey<RawGestureDetectorState>();
+        await tester.pumpWidget(
+          Directionality(
+            textDirection: TextDirection.ltr,
+            child: RawGestureDetector(
+              key: key,
+              child: Container(
+                child: const Text('Text'),
+              ),
+            ),
+          ),
+        );
+        FlutterError error;
+        try {
+          key.currentState.replaceGestureRecognizers(
+            <Type, GestureRecognizerFactory>{});
+        } on FlutterError catch (e) {
+          error = e;
+        } finally {
+          expect(error, isNotNull);
+          expect(error.diagnostics.last.level, DiagnosticLevel.hint);
+          expect(
+            error.diagnostics.last.toStringDeep(),
+            equalsIgnoringHashCodes(
+              'To set the gesture recognizers at other times, trigger a new\n'
+              'build using setState() and provide the new gesture recognizers as\n'
+              'constructor arguments to the corresponding RawGestureDetector or\n'
+              'GestureDetector object.\n'
+            ),
+          );
+          expect(
+            error.toStringDeep(),
+            'FlutterError\n'
+            '   Unexpected call to replaceGestureRecognizers() method of\n'
+            '   RawGestureDetectorState.\n'
+            '   The replaceGestureRecognizers() method can only be called during\n'
+            '   the layout phase.\n'
+            '   To set the gesture recognizers at other times, trigger a new\n'
+            '   build using setState() and provide the new gesture recognizers as\n'
+            '   constructor arguments to the corresponding RawGestureDetector or\n'
+            '   GestureDetector object.\n',
+          );
+        }
+      });
+    });
+  });
+}
+
+class _EmptySemanticsGestureDelegate extends SemanticsGestureDelegate {
+  @override
+  void assignSemantics(RenderSemanticsGestureHandler renderObject) {
+  }
 }

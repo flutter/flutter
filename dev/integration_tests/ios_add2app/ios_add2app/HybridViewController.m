@@ -1,4 +1,4 @@
-// Copyright 2018 The Flutter Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -36,6 +36,11 @@ static NSString *_kPing = @"ping";
   stackView.layoutMargins = UIEdgeInsetsMake(0, 0, 50, 0);
   stackView.layoutMarginsRelativeArrangement = YES;
   [self.view addSubview:stackView];
+  self.navigationItem.backBarButtonItem = [[UIBarButtonItem alloc]
+                                              initWithTitle:@"Back"
+                                                      style:UIBarButtonItemStylePlain
+                                                     target:nil
+                                                     action:nil];
 
   NativeViewController *nativeViewController =
       [[NativeViewController alloc] initWithDelegate:self];
@@ -51,7 +56,7 @@ static NSString *_kPing = @"ping";
 
   _messageChannel = [[FlutterBasicMessageChannel alloc]
          initWithName:_kChannel
-      binaryMessenger:_flutterViewController
+      binaryMessenger:_flutterViewController.binaryMessenger
                 codec:[FlutterStringCodec sharedInstance]];
   [self addChildViewController:_flutterViewController];
   [stackView addArrangedSubview:_flutterViewController.view];

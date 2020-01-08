@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -22,8 +22,8 @@ class GalleryDemoCategory {
       return true;
     if (runtimeType != other.runtimeType)
       return false;
-    final GalleryDemoCategory typedOther = other;
-    return typedOther.name == name && typedOther.icon == icon;
+    return other is GalleryDemoCategory
+        && other.name == name && other.icon == icon;
   }
 
   @override
@@ -131,6 +131,14 @@ List<GalleryDemo> _buildGalleryDemos() {
       routeName: TransformationsDemo.routeName,
       buildRoute: (BuildContext context) => const TransformationsDemo(),
     ),
+    GalleryDemo(
+      title: 'Pesto',
+      subtitle: 'Simple recipe browser',
+      icon: Icons.adjust,
+      category: _kDemos,
+      routeName: PestoDemo.routeName,
+      buildRoute: (BuildContext context) => const PestoDemo(),
+    ),
 
     // Style
     GalleryDemo(
@@ -158,6 +166,15 @@ List<GalleryDemo> _buildGalleryDemos() {
       category: _kMaterialComponents,
       routeName: BackdropDemo.routeName,
       buildRoute: (BuildContext context) => BackdropDemo(),
+    ),
+    GalleryDemo(
+      title: 'Banner',
+      subtitle: 'Displaying a banner within a list',
+      icon: GalleryIcons.lists_leave_behind,
+      category: _kMaterialComponents,
+      routeName: BannerDemo.routeName,
+      documentationUrl: 'https://api.flutter.dev/flutter/material/MaterialBanner-class.html',
+      buildRoute: (BuildContext context) => const BannerDemo(),
     ),
     GalleryDemo(
       title: 'Bottom app bar',
@@ -546,23 +563,6 @@ List<GalleryDemo> _buildGalleryDemos() {
       buildRoute: (BuildContext context) => const VideoDemo(),
     ),
   ];
-
-  // Keep Pesto around for its regression test value. It is not included
-  // in (release builds) the performance tests.
-  assert(() {
-    galleryDemos.insert(0,
-      GalleryDemo(
-        title: 'Pesto',
-        subtitle: 'Simple recipe browser',
-        icon: Icons.adjust,
-        category: _kDemos,
-        routeName: PestoDemo.routeName,
-        buildRoute: (BuildContext context) => const PestoDemo(),
-      ),
-    );
-    return true;
-  }());
-
   return galleryDemos;
 }
 
@@ -582,6 +582,6 @@ final Map<GalleryDemoCategory, List<GalleryDemo>> kGalleryCategoryToDemos =
 final Map<String, String> kDemoDocumentationUrl =
     Map<String, String>.fromIterable(
       kAllGalleryDemos.where((GalleryDemo demo) => demo.documentationUrl != null),
-      key: (dynamic demo) => demo.routeName,
-      value: (dynamic demo) => demo.documentationUrl,
+      key: (dynamic demo) => (demo as GalleryDemo).routeName,
+      value: (dynamic demo) => (demo as GalleryDemo).documentationUrl,
     );

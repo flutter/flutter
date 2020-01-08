@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -55,7 +55,7 @@ void main() {
     layout(table, constraints: const BoxConstraints.tightFor(width: 100.0));
 
     const double expectedWidth = 100.0 / 6;
-    for (RenderBox child in children) {
+    for (final RenderBox child in children) {
       expect(child.size.width, moreOrLessEquals(expectedWidth));
     }
   });
@@ -176,15 +176,21 @@ void main() {
     final RenderBox child2 = RenderPositionedBox();
     final RenderBox child3 = RenderPositionedBox();
     table = RenderTable(textDirection: TextDirection.ltr);
-    table.setFlatChildren(3, <RenderBox>[child1, RenderPositionedBox(), child2,
-                                         RenderPositionedBox(), child3, RenderPositionedBox()]);
+    table.setFlatChildren(3, <RenderBox>[
+      child1, RenderPositionedBox(), child2,
+      RenderPositionedBox(), child3, RenderPositionedBox(),
+    ]);
     expect(table.rows, equals(2));
     layout(table);
-    table.setFlatChildren(3, <RenderBox>[RenderPositionedBox(), child1, RenderPositionedBox(),
-                                         child2, RenderPositionedBox(), child3]);
+    table.setFlatChildren(3, <RenderBox>[
+      RenderPositionedBox(), child1, RenderPositionedBox(),
+      child2, RenderPositionedBox(), child3,
+    ]);
     pumpFrame();
-    table.setFlatChildren(3, <RenderBox>[RenderPositionedBox(), child1, RenderPositionedBox(),
-                                         child2, RenderPositionedBox(), child3]);
+    table.setFlatChildren(3, <RenderBox>[
+      RenderPositionedBox(), child1, RenderPositionedBox(),
+      child2, RenderPositionedBox(), child3,
+    ]);
     pumpFrame();
     expect(table.columns, equals(3));
     expect(table.rows, equals(2));
@@ -208,13 +214,43 @@ void main() {
     table.setFlatChildren(2, <RenderBox>[ RenderPositionedBox(), RenderPositionedBox() ]);
     pumpFrame();
     expect(table, paints..path()..path()..path()..path()..path());
-    table.setFlatChildren(2, <RenderBox>[ RenderPositionedBox(), RenderPositionedBox(),
-                                          RenderPositionedBox(), RenderPositionedBox() ]);
+    table.setFlatChildren(2, <RenderBox>[
+      RenderPositionedBox(), RenderPositionedBox(),
+      RenderPositionedBox(), RenderPositionedBox(),
+    ]);
     pumpFrame();
     expect(table, paints..path()..path()..path()..path()..path()..path());
-    table.setFlatChildren(3, <RenderBox>[ RenderPositionedBox(), RenderPositionedBox(), RenderPositionedBox(),
-                                          RenderPositionedBox(), RenderPositionedBox(), RenderPositionedBox() ]);
+    table.setFlatChildren(3, <RenderBox>[
+      RenderPositionedBox(), RenderPositionedBox(), RenderPositionedBox(),
+      RenderPositionedBox(), RenderPositionedBox(), RenderPositionedBox(),
+    ]);
     pumpFrame();
     expect(table, paints..path()..path()..path()..path()..path()..path());
+  });
+
+  test('Table flex sizing', () {
+    const BoxConstraints cellConstraints =
+        BoxConstraints.tightFor(width: 100, height: 100);
+    final RenderTable table = RenderTable(
+      textDirection: TextDirection.rtl,
+      children: <List<RenderBox>>[
+        List<RenderBox>.generate(
+          7,
+          (int _) => RenderConstrainedBox(additionalConstraints: cellConstraints),
+        ),
+      ],
+      columnWidths: const <int, TableColumnWidth>{
+        0: FlexColumnWidth(1.0),
+        1: FlexColumnWidth(0.123),
+        2: FlexColumnWidth(0.123),
+        3: FlexColumnWidth(0.123),
+        4: FlexColumnWidth(0.123),
+        5: FlexColumnWidth(0.123),
+        6: FlexColumnWidth(0.123),
+      },
+    );
+
+    layout(table, constraints: BoxConstraints.tight(const Size(800.0, 600.0)));
+    expect(table.hasSize, true);
   });
 }

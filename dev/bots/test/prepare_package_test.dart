@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -35,7 +35,7 @@ void main() {
       );
     }
   });
-  for (String platformName in <String>['macos', 'linux', 'windows']) {
+  for (final String platformName in <String>['macos', 'linux', 'windows']) {
     final FakePlatform platform = FakePlatform(
       operatingSystem: platformName,
       environment: <String, String>{
@@ -106,16 +106,14 @@ void main() {
 
       test('sets PUB_CACHE properly', () async {
         final String createBase = path.join(tempDir.absolute.path, 'create_');
-        final Map<String, List<ProcessResult>> calls = <String, List<ProcessResult>>{
+        final String archiveName = path.join(tempDir.absolute.path,
+            'flutter_${platformName}_v1.2.3-dev${platform.isLinux ? '.tar.xz' : '.zip'}');
+        processManager.fakeResults = <String, List<ProcessResult>>{
           'git clone -b dev https://chromium.googlesource.com/external/github.com/flutter/flutter': null,
           'git reset --hard $testRef': null,
           'git remote set-url origin https://github.com/flutter/flutter.git': null,
           'git describe --tags --exact-match $testRef': <ProcessResult>[ProcessResult(0, 0, 'v1.2.3', '')],
-        };
-        if (platform.isWindows) {
-          calls['7za x ${path.join(tempDir.path, 'mingit.zip')}'] = null;
-        }
-        calls.addAll(<String, List<ProcessResult>>{
+          if (platform.isWindows) '7za x ${path.join(tempDir.path, 'mingit.zip')}': null,
           '$flutter doctor': null,
           '$flutter update-packages': null,
           '$flutter precache': null,
@@ -124,17 +122,11 @@ void main() {
           '$flutter create --template=package ${createBase}package': null,
           '$flutter create --template=plugin ${createBase}plugin': null,
           'git clean -f -X **/.packages': null,
-        });
-        final String archiveName = path.join(tempDir.absolute.path,
-            'flutter_${platformName}_v1.2.3-dev${platform.isLinux ? '.tar.xz' : '.zip'}');
-        if (platform.isWindows) {
-          calls['7za a -tzip -mx=9 $archiveName flutter'] = null;
-        } else if (platform.isMacOS) {
-          calls['zip -r -9 $archiveName flutter'] = null;
-        } else if (platform.isLinux) {
-          calls['tar cJf $archiveName flutter'] = null;
-        }
-        processManager.fakeResults = calls;
+          if (platform.isWindows) 'attrib -h .git': null,
+          if (platform.isWindows) '7za a -tzip -mx=9 $archiveName flutter': null
+          else if (platform.isMacOS) 'zip -r -9 $archiveName flutter': null
+          else if (platform.isLinux) 'tar cJf $archiveName flutter': null,
+        };
         await creator.initializeRepo();
         await creator.createArchive();
         expect(
@@ -149,16 +141,14 @@ void main() {
 
       test('calls the right commands for archive output', () async {
         final String createBase = path.join(tempDir.absolute.path, 'create_');
+        final String archiveName = path.join(tempDir.absolute.path,
+            'flutter_${platformName}_v1.2.3-dev${platform.isLinux ? '.tar.xz' : '.zip'}');
         final Map<String, List<ProcessResult>> calls = <String, List<ProcessResult>>{
           'git clone -b dev https://chromium.googlesource.com/external/github.com/flutter/flutter': null,
           'git reset --hard $testRef': null,
           'git remote set-url origin https://github.com/flutter/flutter.git': null,
           'git describe --tags --exact-match $testRef': <ProcessResult>[ProcessResult(0, 0, 'v1.2.3', '')],
-        };
-        if (platform.isWindows) {
-          calls['7za x ${path.join(tempDir.path, 'mingit.zip')}'] = null;
-        }
-        calls.addAll(<String, List<ProcessResult>>{
+          if (platform.isWindows) '7za x ${path.join(tempDir.path, 'mingit.zip')}': null,
           '$flutter doctor': null,
           '$flutter update-packages': null,
           '$flutter precache': null,
@@ -167,16 +157,11 @@ void main() {
           '$flutter create --template=package ${createBase}package': null,
           '$flutter create --template=plugin ${createBase}plugin': null,
           'git clean -f -X **/.packages': null,
-        });
-        final String archiveName = path.join(tempDir.absolute.path,
-            'flutter_${platformName}_v1.2.3-dev${platform.isLinux ? '.tar.xz' : '.zip'}');
-        if (platform.isWindows) {
-          calls['7za a -tzip -mx=9 $archiveName flutter'] = null;
-        } else if (platform.isMacOS) {
-          calls['zip -r -9 $archiveName flutter'] = null;
-        } else if (platform.isLinux) {
-          calls['tar cJf $archiveName flutter'] = null;
-        }
+          if (platform.isWindows) 'attrib -h .git': null,
+          if (platform.isWindows) '7za a -tzip -mx=9 $archiveName flutter': null
+          else if (platform.isMacOS) 'zip -r -9 $archiveName flutter': null
+          else if (platform.isLinux) 'tar cJf $archiveName flutter': null,
+        };
         processManager.fakeResults = calls;
         creator = ArchiveCreator(
           tempDir,
@@ -206,16 +191,14 @@ void main() {
 
       test('non-strict mode calls the right commands', () async {
         final String createBase = path.join(tempDir.absolute.path, 'create_');
+        final String archiveName = path.join(tempDir.absolute.path,
+            'flutter_${platformName}_v1.2.3-dev${platform.isLinux ? '.tar.xz' : '.zip'}');
         final Map<String, List<ProcessResult>> calls = <String, List<ProcessResult>>{
           'git clone -b dev https://chromium.googlesource.com/external/github.com/flutter/flutter': null,
           'git reset --hard $testRef': null,
           'git remote set-url origin https://github.com/flutter/flutter.git': null,
           'git describe --tags --abbrev=0 $testRef': <ProcessResult>[ProcessResult(0, 0, 'v1.2.3', '')],
-        };
-        if (platform.isWindows) {
-          calls['7za x ${path.join(tempDir.path, 'mingit.zip')}'] = null;
-        }
-        calls.addAll(<String, List<ProcessResult>>{
+          if (platform.isWindows) '7za x ${path.join(tempDir.path, 'mingit.zip')}': null,
           '$flutter doctor': null,
           '$flutter update-packages': null,
           '$flutter precache': null,
@@ -224,16 +207,11 @@ void main() {
           '$flutter create --template=package ${createBase}package': null,
           '$flutter create --template=plugin ${createBase}plugin': null,
           'git clean -f -X **/.packages': null,
-        });
-        final String archiveName = path.join(tempDir.absolute.path,
-            'flutter_${platformName}_v1.2.3-dev${platform.isLinux ? '.tar.xz' : '.zip'}');
-        if (platform.isWindows) {
-          calls['7za a -tzip -mx=9 $archiveName flutter'] = null;
-        } else if (platform.isMacOS) {
-          calls['zip -r -9 $archiveName flutter'] = null;
-        } else if (platform.isLinux) {
-          calls['tar cJf $archiveName flutter'] = null;
-        }
+          if (platform.isWindows) 'attrib -h .git': null,
+          if (platform.isWindows) '7za a -tzip -mx=9 $archiveName flutter': null
+          else if (platform.isMacOS) 'zip -r -9 $archiveName flutter': null
+          else if (platform.isLinux) 'tar cJf $archiveName flutter': null,
+        };
         processManager.fakeResults = calls;
         creator = ArchiveCreator(
           tempDir,
@@ -350,13 +328,13 @@ void main() {
         expect(contents, contains('"channel": "dev"'));
         // Make sure old matching entries are removed.
         expect(contents, isNot(contains('v0.0.0')));
-        final Map<String, dynamic> jsonData = json.decode(contents);
-        final List<dynamic> releases = jsonData['releases'];
+        final Map<String, dynamic> jsonData = json.decode(contents) as Map<String, dynamic>;
+        final List<dynamic> releases = jsonData['releases'] as List<dynamic>;
         expect(releases.length, equals(3));
         // Make sure the new entry is first (and hopefully it takes less than a
         // minute to go from publishArchive above to this line!).
         expect(
-          DateTime.now().difference(DateTime.parse(releases[0]['release_date'])),
+          DateTime.now().difference(DateTime.parse(releases[0]['release_date'] as String)),
           lessThan(const Duration(minutes: 1)),
         );
         const JsonEncoder encoder = JsonEncoder.withIndent('  ');

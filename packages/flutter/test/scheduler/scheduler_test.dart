@@ -1,15 +1,29 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
 import 'dart:async';
+import 'dart:ui' show window, FrameTiming;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
 import '../flutter_test_alternative.dart';
+import 'scheduler_tester.dart';
 
-class TestSchedulerBinding extends BindingBase with ServicesBinding, SchedulerBinding { }
+class TestSchedulerBinding extends BindingBase with ServicesBinding, SchedulerBinding {
+  final Map<String, List<Map<String, dynamic>>> eventsDispatched = <String, List<Map<String, dynamic>>>{};
+
+  @override
+  void postEvent(String eventKind, Map<String, dynamic> eventData) {
+    getEventsDispatched(eventKind).add(eventData);
+  }
+
+  List<Map<String, dynamic>> getEventsDispatched(String eventKind) {
+    return eventsDispatched.putIfAbsent(eventKind, () => <Map<String, dynamic>>[]);
+  }
+}
 
 class TestStrategy {
   int allowedPriority = 10000;
@@ -20,7 +34,8 @@ class TestStrategy {
 }
 
 void main() {
-  SchedulerBinding scheduler;
+  TestSchedulerBinding scheduler;
+
   setUpAll(() {
     scheduler = TestSchedulerBinding();
   });
@@ -114,5 +129,68 @@ void main() {
     // events are locked.
     expect(timerQueueTasks.length, 2);
     expect(taskExecuted, false);
+  });
+
+  test('Flutter.Frame event fired', () async {
+    window.onReportTimings(<FrameTiming>[FrameTiming(<int>[
+      // build start, build finish
+      10000, 15000,
+      // raster start, raster finish
+      16000, 20000,
+    ])]);
+
+    final List<Map<String, dynamic>> events = scheduler.getEventsDispatched('Flutter.Frame');
+    expect(events, hasLength(1));
+
+    final Map<String, dynamic> event = events.first;
+    expect(event['number'], isNonNegative);
+    expect(event['startTime'], 10000);
+    expect(event['elapsed'], 10000);
+    expect(event['build'], 5000);
+    expect(event['raster'], 4000);
+  });
+
+  test('TimingsCallback exceptions are caught', () {
+    FlutterErrorDetails errorCaught;
+    FlutterError.onError = (FlutterErrorDetails details) {
+      errorCaught = details;
+    };
+    SchedulerBinding.instance.addTimingsCallback((List<FrameTiming> timings) {
+      throw Exception('Test');
+    });
+    window.onReportTimings(<FrameTiming>[]);
+    expect(errorCaught.exceptionAsString(), equals('Exception: Test'));
+  });
+
+  test('currentSystemFrameTimeStamp is the raw timestamp', () {
+    Duration lastTimeStamp;
+    Duration lastSystemTimeStamp;
+
+    void frameCallback(Duration timeStamp) {
+      expect(timeStamp, scheduler.currentFrameTimeStamp);
+      lastTimeStamp = scheduler.currentFrameTimeStamp;
+      lastSystemTimeStamp = scheduler.currentSystemFrameTimeStamp;
+    }
+
+    scheduler.scheduleFrameCallback(frameCallback);
+    tick(const Duration(seconds: 2));
+    expect(lastTimeStamp, Duration.zero);
+    expect(lastSystemTimeStamp, const Duration(seconds: 2));
+
+    scheduler.scheduleFrameCallback(frameCallback);
+    tick(const Duration(seconds: 4));
+    expect(lastTimeStamp, const Duration(seconds: 2));
+    expect(lastSystemTimeStamp, const Duration(seconds: 4));
+
+    timeDilation = 2;
+    scheduler.scheduleFrameCallback(frameCallback);
+    tick(const Duration(seconds: 6));
+    expect(lastTimeStamp, const Duration(seconds: 2)); // timeDilation calls SchedulerBinding.resetEpoch
+    expect(lastSystemTimeStamp, const Duration(seconds: 6));
+
+    scheduler.scheduleFrameCallback(frameCallback);
+    tick(const Duration(seconds: 8));
+    expect(lastTimeStamp, const Duration(seconds: 3)); // 2s + (8 - 6)s / 2
+    expect(lastSystemTimeStamp, const Duration(seconds: 8));
   });
 }

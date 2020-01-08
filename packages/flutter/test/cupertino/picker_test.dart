@@ -1,11 +1,14 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+
+import '../rendering/mock_canvas.dart';
 
 void main() {
   testWidgets('Picker respects theme styling', (WidgetTester tester) async {
@@ -34,10 +37,11 @@ void main() {
 
     final RenderParagraph paragraph = tester.renderObject(find.text('1'));
 
-    expect(paragraph.text.style, const TextStyle(
+    expect(paragraph.text.style.color, isSameColorAs(CupertinoColors.black));
+    expect(paragraph.text.style.copyWith(color: CupertinoColors.black), const TextStyle(
       inherit: false,
       fontFamily: '.SF Pro Display',
-      fontSize: 25.0,
+      fontSize: 21.0,
       fontWeight: FontWeight.w400,
       letterSpacing: -0.41,
       color: CupertinoColors.black,
@@ -93,125 +97,56 @@ void main() {
     });
   });
 
-  group('gradient', () {
-    testWidgets('gradient displays correctly with background color', (WidgetTester tester) async {
-      const Color backgroundColor = Color.fromRGBO(255, 0, 0, 1.0);
-      await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: Align(
-            alignment: Alignment.topLeft,
-            child: SizedBox(
-              height: 300.0,
-              width: 300.0,
-              child: CupertinoPicker(
-                backgroundColor: backgroundColor,
-                itemExtent: 15.0,
-                children: const <Widget>[
-                  Text('1'),
-                  Text('1'),
-                  Text('1'),
-                  Text('1'),
-                  Text('1'),
-                  Text('1'),
-                  Text('1'),
-                ],
-                onSelectedItemChanged: (int i) { },
+  testWidgets('picker dark mode', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      CupertinoApp(
+        theme: const CupertinoThemeData(brightness: Brightness.light),
+        home: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            height: 300.0,
+            width: 300.0,
+            child: CupertinoPicker(
+              backgroundColor: const CupertinoDynamicColor.withBrightness(
+                color: Color(0xFF123456), // Set alpha channel to FF to disable under magnifier painting.
+                darkColor: Color(0xFF654321),
               ),
+              itemExtent: 15.0,
+              children: const <Widget>[Text('1'), Text('1')],
+              onSelectedItemChanged: (int i) { },
             ),
           ),
         ),
-      );
-      final Container container = tester.firstWidget(find.byType(Container));
-      final BoxDecoration boxDecoration = container.decoration;
-      expect(boxDecoration.gradient.colors, <Color>[
-        backgroundColor,
-        backgroundColor.withAlpha(0xF2),
-        backgroundColor.withAlpha(0xDD),
-        backgroundColor.withAlpha(0x00),
-        backgroundColor.withAlpha(0x00),
-        backgroundColor.withAlpha(0xDD),
-        backgroundColor.withAlpha(0xF2),
-        backgroundColor,
-      ]);
-    });
+      ),
+    );
 
-    testWidgets('No gradient displays with transparent background color', (WidgetTester tester) async {
-      const Color backgroundColor = Color.fromRGBO(255, 0, 0, 0.5);
-      await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: Align(
-            alignment: Alignment.topLeft,
-            child: SizedBox(
-              height: 300.0,
-              width: 300.0,
-              child: CupertinoPicker(
-                backgroundColor: backgroundColor,
-                itemExtent: 15.0,
-                children: const <Widget>[
-                  Text('1'),
-                  Text('1'),
-                  Text('1'),
-                  Text('1'),
-                  Text('1'),
-                  Text('1'),
-                  Text('1'),
-                ],
-                onSelectedItemChanged: (int i) { },
-              ),
-            ),
-          ),
-        ),
-      );
-      final DecoratedBox decoratedBox = tester.firstWidget(find.byType(DecoratedBox));
-      final BoxDecoration boxDecoration = decoratedBox.decoration;
-      expect(boxDecoration.gradient, isNull);
-      expect(boxDecoration.color, isNotNull);
-    });
+    expect(find.byType(CupertinoPicker), paints..path(color: const Color(0x33000000), style: PaintingStyle.stroke));
+    expect(find.byType(CupertinoPicker), paints..rect(color: const Color(0xFF123456)));
 
-    testWidgets('gradient displays correctly with null background color', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        Directionality(
-          textDirection: TextDirection.ltr,
-          child: Align(
-            alignment: Alignment.topLeft,
-            child: SizedBox(
-              height: 300.0,
-              width: 300.0,
-              child: CupertinoPicker(
-                backgroundColor: null,
-                itemExtent: 15.0,
-                children: const <Widget>[
-                  Text('1'),
-                  Text('1'),
-                  Text('1'),
-                  Text('1'),
-                  Text('1'),
-                  Text('1'),
-                  Text('1'),
-                ],
-                onSelectedItemChanged: (int i) { },
+    await tester.pumpWidget(
+      CupertinoApp(
+        theme: const CupertinoThemeData(brightness: Brightness.dark),
+        home: Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(
+            height: 300.0,
+            width: 300.0,
+            child: CupertinoPicker(
+              backgroundColor: const CupertinoDynamicColor.withBrightness(
+                color: Color(0xFF123456),
+                darkColor: Color(0xFF654321),
               ),
+              itemExtent: 15.0,
+              children: const <Widget>[Text('1'), Text('1')],
+              onSelectedItemChanged: (int i) { },
             ),
           ),
         ),
-      );
-      // If the background color is null, the gradient color should be white.
-      const Color backgroundColor = Color(0xFFFFFFFF);
-      final Container container = tester.firstWidget(find.byType(Container));
-      final BoxDecoration boxDecoration = container.decoration;
-      expect(boxDecoration.gradient.colors, <Color>[
-        backgroundColor,
-        backgroundColor.withAlpha(0xF2),
-        backgroundColor.withAlpha(0xDD),
-        backgroundColor.withAlpha(0x00),
-        backgroundColor.withAlpha(0x00),
-        backgroundColor.withAlpha(0xDD),
-        backgroundColor.withAlpha(0xF2),
-        backgroundColor,
-      ]);
-    });
+      ),
+    );
+
+    expect(find.byType(CupertinoPicker), paints..path(color: const Color(0x33FFFFFF), style: PaintingStyle.stroke));
+    expect(find.byType(CupertinoPicker), paints..rect(color: const Color(0xFF654321)));
   });
 
   group('scroll', () {

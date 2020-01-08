@@ -1,8 +1,6 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
-
-import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
@@ -81,7 +79,7 @@ void main() {
       find.byKey(key),
       matchesGoldenFile('bottom_app_bar.custom_shape.2.png'),
     );
-  }, skip: !Platform.isLinux);
+  }, skip: isBrowser);
 
   testWidgets('color defaults to Theme.bottomAppBarColor', (WidgetTester tester) async {
     await tester.pumpWidget(
@@ -133,6 +131,24 @@ void main() {
       tester.widget(find.byType(PhysicalShape).at(0));
 
     expect(physicalShape.color, const Color(0xff0000ff));
+  });
+
+  testWidgets('dark theme applies an elevation overlay color', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: ThemeData.from(colorScheme: const ColorScheme.dark()),
+        home: Scaffold(
+          bottomNavigationBar: BottomAppBar(
+            color: const ColorScheme.dark().surface,
+          ),
+        ),
+      )
+    );
+
+    final PhysicalShape physicalShape = tester.widget(find.byType(PhysicalShape).at(0));
+
+    // For the default dark theme the overlay color for elevation 8 is 0xFF2D2D2D
+    expect(physicalShape.color, const Color(0xFF2D2D2D));
   });
 
   // This is a regression test for a bug we had where toggling the notch on/off
@@ -388,7 +404,7 @@ class ClipCachePainter extends CustomPainter {
       final RenderObject renderObject = e.findRenderObject();
       if (renderObject.runtimeType == RenderPhysicalShape) {
         assert(result == null);
-        result = renderObject;
+        result = renderObject as RenderPhysicalShape;
       } else {
         result = findPhysicalShapeChild(e);
       }
@@ -403,7 +419,7 @@ class ClipCachePainter extends CustomPainter {
 }
 
 class ShapeListener extends StatefulWidget {
-  const ShapeListener(this.child);
+  const ShapeListener(this.child, { Key key }) : super(key: key);
 
   final Widget child;
 
@@ -450,4 +466,3 @@ class RectangularNotch extends NotchedShape {
       ..close();
   }
 }
-

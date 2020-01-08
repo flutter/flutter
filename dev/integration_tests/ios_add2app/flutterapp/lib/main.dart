@@ -1,3 +1,7 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'dart:async';
 import 'dart:ui' as ui;
 
@@ -25,6 +29,8 @@ const BasicMessageChannel<String> _kReloadChannel =
     BasicMessageChannel<String>(_kReloadChannelName, StringCodec());
 
 void main() {
+  // Ensures bindings are initialized before doing anything.
+  WidgetsFlutterBinding.ensureInitialized();
   // Start listening immediately for messages from the iOS side. ObjC calls
   // will be made to let us know when we should be changing the app state.
   _kReloadChannel.setMessageHandler(run);

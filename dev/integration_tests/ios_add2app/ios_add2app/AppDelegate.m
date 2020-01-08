@@ -1,4 +1,4 @@
-// Copyright 2018 The Flutter Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -41,7 +41,7 @@ static NSString *_kReloadChannelName = @"reload";
 
   _reloadMessageChannel = [[FlutterBasicMessageChannel alloc]
          initWithName:_kReloadChannelName
-      binaryMessenger:_engine
+      binaryMessenger:_engine.binaryMessenger
                 codec:[FlutterStringCodec sharedInstance]];
 
   self.window.rootViewController = _navigationController;

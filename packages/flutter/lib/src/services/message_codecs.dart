@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -147,8 +147,8 @@ class JSONMethodCodec implements MethodCodec {
         && decoded[0] is String
         && (decoded[1] == null || decoded[1] is String))
       throw PlatformException(
-        code: decoded[0],
-        message: decoded[1],
+        code: decoded[0] as String,
+        message: decoded[1] as String,
         details: decoded[2],
       );
     throw FormatException('Invalid envelope: $decoded');
@@ -338,6 +338,14 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
       buffer.putUint8(_valueNull);
     } else if (value is bool) {
       buffer.putUint8(value ? _valueTrue : _valueFalse);
+    } else if (value is double) {  // Double precedes int because in JS everything is a double.
+                                   // Therefore in JS, both `is int` and `is double` always
+                                   // return `true`. If we check int first, we'll end up treating
+                                   // all numbers as ints and attempt the int32/int64 conversion,
+                                   // which is wrong. This precedence rule is irrelevant when
+                                   // decoding because we use tags to detect the type of value.
+      buffer.putUint8(_valueFloat64);
+      buffer.putFloat64(value);
     } else if (value is int) {
       if (-0x7fffffff - 1 <= value && value <= 0x7fffffff) {
         buffer.putUint8(_valueInt32);
@@ -346,12 +354,9 @@ class StandardMessageCodec implements MessageCodec<dynamic> {
         buffer.putUint8(_valueInt64);
         buffer.putInt64(value);
       }
-    } else if (value is double) {
-      buffer.putUint8(_valueFloat64);
-      buffer.putFloat64(value);
     } else if (value is String) {
       buffer.putUint8(_valueString);
-      final List<int> bytes = utf8.encoder.convert(value);
+      final Uint8List bytes = utf8.encoder.convert(value);
       writeSize(buffer, bytes.length);
       buffer.putUint8List(bytes);
     } else if (value is Uint8List) {
@@ -561,7 +566,7 @@ class StandardMethodCodec implements MethodCodec {
     final dynamic errorMessage = messageCodec.readValue(buffer);
     final dynamic errorDetails = messageCodec.readValue(buffer);
     if (errorCode is String && (errorMessage == null || errorMessage is String) && !buffer.hasRemaining)
-      throw PlatformException(code: errorCode, message: errorMessage, details: errorDetails);
+      throw PlatformException(code: errorCode, message: errorMessage as String, details: errorDetails);
     else
       throw const FormatException('Invalid envelope');
   }

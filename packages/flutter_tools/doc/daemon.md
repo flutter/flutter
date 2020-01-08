@@ -45,7 +45,7 @@ Any params for that command should be passed in through a `params` field. Here's
 Events that come from the server will have an `event` field containing the type of event, along with a `params` field.
 
 ```
-[{"event":"device.added","params":{"id":"1DD6786B-37D4-4355-AA15-B818A87A18B4","name":"iPhone XS Max","platform":"ios","emulator":true}}]
+[{"event":"device.added","params":{"id":"1DD6786B-37D4-4355-AA15-B818A87A18B4","name":"iPhone XS Max","platform":"ios","emulator":true,"ephemeral":false,"platformType":"ios","category":"mobile"}}]
 ```
 
 ## Domains and Commands
@@ -59,6 +59,17 @@ The `version()` command responds with a String with the protocol version.
 #### daemon.shutdown
 
 The `shutdown()` command will terminate the flutter daemon. It is not necessary to call this before shutting down the daemon; it is perfectly acceptable to just kill the daemon process.
+
+#### daemon.getSupportedPlatforms
+
+The `getSupportedPlatforms()` command will enumerate all platforms supported by the project located at the provided `projectRoot`. It returns a Map with the key 'platforms' containing a List of strings which describe the set of all possibly supported platforms. Possible values include:
+   - android
+   - ios
+   - linux #experimental
+   - macos #experimental
+   - windows #experimental
+   - fuchsia #experimental
+   - web #experimental
 
 #### Events
 
@@ -95,6 +106,15 @@ The `restart()` restarts the given application. It returns a Map of `{ int code,
 - `fullRestart`: optional; whether to do a full (rather than an incremental) restart of the application
 - `reason`: optional; the reason for the full restart (eg. `save`, `manual`) for reporting purposes
 - `pause`: optional; when doing a hot restart the isolate should enter a paused mode
+
+#### app.reloadMethod
+
+Performs a limited hot restart which does not sync assets and only marks elements as dirty, instead of reassembling the full application. A `code` of `0` indicates success, and non-zero indicates a failure.
+
+- `appId`: the id of a previously started app; this is required.
+- `library`: the absolute file URI of the library to be updated; this is required.
+- `class`: the name of the StatelessWidget that was updated, or the StatefulWidget
+corresponding to the updated State class; this is required.
 
 #### app.callServiceExtension
 
@@ -142,11 +162,41 @@ This is sent when an operation starts and again when it stops. When an operation
 
 This is sent when an app is stopped or detached from. The `params` field will be a map with the field `appId`.
 
+#### app.webLaunchUrl
+
+This is sent once a web application is being served and available for the user to access. The `params` field will be a map with a string `url` field and a boolean `launched` indicating whether the application has already been launched in a browser (this will generally be true for a browser device unless `--no-web-browser-launch` was used, and false for the headless `web-server` device).
+
+### Daemon-to-Editor Requests
+
+These requests come _from_ the Flutter daemon and should be responded to by the client/editor.
+
+#### app.exposeUrl
+
+This request is enabled only if `flutter run` is run with the `--web-allow-expose-url` flag.
+
+This request is sent by the server when it has a local URL that needs to be exposed to the end user. This is to support running on a remote machine where a URL (for example `http://localhost:1234`) may not be directly accessible to the end user. With this URL clients can perform tunnelling and then provide the tunneled URL back to Flutter so that it can be used in code that will be executed on the end users machine (for example wehen a web application needs to be able to connect back to a service like the DWDS debugging service).
+
+This request will only be sent if a web application was run in a mode that requires mapped URLs (such as using `--no-web-browser-launch` for browser devices or the headless `web-server` device when debugging).
+
+The request will contain an `id` field and a `params` field that is a map containing a string `url` field.
+
+The response should be sent using the same `id` as the request with a `result` map containing the mapped `url` (or the same URL in the case where the client does not need to perform any mapping).
+
 ### device domain
 
 #### device.getDevices
 
-Return a list of all connected devices. The `params` field will be a List; each item is a map with the fields `id`, `name`, `platform`, and `emulator` (a boolean).
+Return a list of all connected devices. The `params` field will be a List; each item is a map with the fields `id`, `name`, `platform`, `category`, `platformType`, `ephemeral`, `emulator` (a boolean) and `emulatorId`.
+
+`category` is string description of the kind of workflow the device supports. The current categories are "mobile", "web" and "desktop", or null if none.
+
+`platformType` is a string description of the platform sub-folder the device
+supports. The current catgetories are "android", "ios", "linux", "macos",
+"fuchsia", "windows", and "web". These are kept in sync with the response from `daemon.getSupportedPlatforms`.
+
+`ephemeral` is a boolean which indicates where the device needs to be manually connected to a development machine. For example, a physical Android device is ephemeral, but the "web" device (that is always present) is not.
+
+`emulatorId` is an string ID that matches the ID from `getEmulators` to allow clients to match running devices to the emulators that started them (for example to hide emulators that are already running). This field is not guaranteed to be populated even if a device was spawned from an emulator as it may require a successful connection to the device to retrieve it. In the case of a failed connection or the device is not an emulator, this field will be null.
 
 #### device.enable
 
@@ -170,17 +220,17 @@ Removed a forwarded port. It takes `deviceId`, `devicePort`, and `hostPort` as r
 
 #### device.added
 
-This is sent when a device is connected (and polling has been enabled via `enable()`). The `params` field will be a map with the fields `id`, `name`, `platform`, and `emulator`.
+This is sent when a device is connected (and polling has been enabled via `enable()`). The `params` field will be a map with the fields `id`, `name`, `platform`, `category`, `platformType`, `ephemeral`, and  `emulator`. For more information on `platform`, `category`, `platformType`, and `ephemeral` see `device.getDevices`.
 
 #### device.removed
 
-This is sent when a device is disconnected (and polling has been enabled via `enable()`). The `params` field will be a map with the fields `id`, `name`, `platform`, and `emulator`.
+This is sent when a device is disconnected (and polling has been enabled via `enable()`). The `params` field will be a map with the fields `id`, `name`, `platform`, `category`, `platformType`, `ephemeral`, and  `emulator`. For more information on `platform`, `category`, `platformType`, and `ephemeral` see `device.getDevices`.
 
 ### emulator domain
 
 #### emulator.getEmulators
 
-Return a list of all available emulators. The `params` field will be a List; each item is a map with the fields `id` and `name`.
+Return a list of all available emulators. The `params` field will be a List; each item is a map with the fields `id`, `name`, `category` and `platformType`. `category` and `platformType` values match the values described in `device.getDevices`.
 
 #### emulator.launch
 
@@ -239,6 +289,10 @@ See the [source](https://github.com/flutter/flutter/blob/master/packages/flutter
 
 ## Changelog
 
+- 0.5.3: Added `emulatorId` field to device.
+- 0.5.2: Added `platformType` and `category` fields to emulator.
+- 0.5.1: Added `platformType`, `ephemeral`, and `category` fields to device.
+- 0.5.0: Added `daemon.getSupportedPlatforms` command
 - 0.4.2: Added `app.detach` command
 - 0.4.1: Added `flutter attach --machine`
 - 0.4.0: Added `emulator.create` command

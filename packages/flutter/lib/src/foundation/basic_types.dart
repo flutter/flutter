@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -8,11 +8,12 @@ import 'dart:collection';
 // COMMON SIGNATURES
 
 export 'dart:ui' show VoidCallback;
-export 'bitfield.dart' if (dart.library.html) 'bitfield_unsupported.dart';
 
 /// Signature for callbacks that report that an underlying value has changed.
 ///
-/// See also [ValueSetter].
+/// See also:
+///
+///  * [ValueSetter], for callbacks that report that a value has been set.
 typedef ValueChanged<T> = void Function(T value);
 
 /// Signature for callbacks that report that a value has been set.
@@ -237,4 +238,3 @@ class Factory<T> {
     return 'Factory(type: $type)';
   }
 }
-

@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -280,7 +280,7 @@ class _ConnectivityOverlayState extends State<ConnectivityOverlay> {
   StreamSubscription<ConnectivityResult> connectivitySubscription;
   bool connected = true;
 
-  static const Widget errorSnackBar = SnackBar(
+  static const SnackBar errorSnackBar = SnackBar(
     backgroundColor: Colors.red,
     content: ListTile(
       title: Text('No network'),
@@ -294,8 +294,7 @@ class _ConnectivityOverlayState extends State<ConnectivityOverlay> {
     final Connectivity connectivity = Connectivity();
     ConnectivityResult previousResult = await connectivity.checkConnectivity();
     yield previousResult;
-    await for (ConnectivityResult result
-        in connectivity.onConnectivityChanged) {
+    await for (final ConnectivityResult result in connectivity.onConnectivityChanged) {
       if (result != previousResult) {
         yield result;
         previousResult = result;
@@ -405,19 +404,21 @@ class _VideoDemoState extends State<VideoDemo> with SingleTickerProviderStateMix
       ),
       body: isSupported
         ? ConnectivityOverlay(
-            child: ListView(
-              children: <Widget>[
-                VideoCard(
-                  title: 'Butterfly',
-                  subtitle: '… flutters by',
-                  controller: butterflyController,
-                ),
-                VideoCard(
-                  title: 'Bee',
-                  subtitle: '… gently buzzing',
-                  controller: beeController,
-                ),
-              ],
+            child: Scrollbar(
+              child: ListView(
+                children: <Widget>[
+                  VideoCard(
+                    title: 'Butterfly',
+                    subtitle: '… flutters by',
+                    controller: butterflyController,
+                  ),
+                  VideoCard(
+                    title: 'Bee',
+                    subtitle: '… gently buzzing',
+                    controller: beeController,
+                  ),
+                ],
+              ),
             ),
             connectedCompleter: connectedCompleter,
             scaffoldKey: scaffoldKey,

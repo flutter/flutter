@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -82,18 +82,16 @@ class SshCommandRunner {
   /// If the subprocess creating the SSH tunnel returns a nonzero exit status,
   /// then an [SshCommandError] is raised.
   Future<List<String>> run(String command) async {
-    final List<String> args = <String>['ssh'];
-    if (sshConfigPath != null) {
-      args.addAll(<String>['-F', sshConfigPath]);
-    }
-    if (isIpV6Address(address)) {
-      final String fullAddress =
-          interface.isEmpty ? address : '$address%$interface';
-      args.addAll(<String>['-6', fullAddress]);
-    } else {
-      args.add(address);
-    }
-    args.add(command);
+    final List<String> args = <String>[
+      'ssh',
+      if (sshConfigPath != null)
+        ...<String>['-F', sshConfigPath],
+      if (isIpV6Address(address))
+        ...<String>['-6', if (interface.isEmpty) address else '$address%$interface']
+      else
+        address,
+      command,
+    ];
     _log.fine('Running command through SSH: ${args.join(' ')}');
     final ProcessResult result = await _processManager.run(args);
     if (result.exitCode != 0) {
@@ -101,6 +99,6 @@ class SshCommandRunner {
           'Command failed: $command\nstdout: ${result.stdout}\nstderr: ${result.stderr}');
     }
     _log.fine('SSH command stdout in brackets:[${result.stdout}]');
-    return result.stdout.split('\n');
+    return (result.stdout as String).split('\n');
   }
 }

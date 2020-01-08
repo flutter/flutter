@@ -1,4 +1,4 @@
-# Copyright 2016 The Chromium Authors. All rights reserved.
+# Copyright 2014 The Flutter Authors. All rights reserved.
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
@@ -14,7 +14,12 @@ dart_library("flutter_test") {
 
   deps = [
     "../flutter",
+    "//third_party/dart-pkg/pub/image",
+    "//third_party/dart-pkg/pub/path",
     "//third_party/dart-pkg/pub/quiver",
+    "//third_party/dart-pkg/pub/stack_trace",
     "//third_party/dart-pkg/pub/test",
+    "//third_party/dart-pkg/pub/test_api",
+    "//third_party/dart-pkg/pub/vector_math",
   ]
 }

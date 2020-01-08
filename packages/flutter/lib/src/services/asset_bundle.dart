@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -9,7 +9,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 
-import 'platform_messages.dart';
+import 'binary_messenger.dart';
 
 /// A collection of resources used by the application.
 ///
@@ -116,10 +116,10 @@ class NetworkAssetBundle extends AssetBundle {
     final HttpClientRequest request = await _httpClient.getUrl(_urlFromKey(key));
     final HttpClientResponse response = await request.close();
     if (response.statusCode != HttpStatus.ok)
-      throw FlutterError(
-        'Unable to load asset: $key\n'
-        'HTTP status code: ${response.statusCode}'
-      );
+      throw FlutterError.fromParts(<DiagnosticsNode>[
+        ErrorSummary('Unable to load asset: $key'),
+        IntProperty('HTTP status code', response.statusCode),
+      ]);
     final Uint8List bytes = await consolidateHttpClientResponseBytes(response);
     return bytes.buffer.asByteData();
   }
@@ -178,7 +178,7 @@ abstract class CachingAssetBundle extends AssetBundle {
     assert(key != null);
     assert(parser != null);
     if (_structuredDataCache.containsKey(key))
-      return _structuredDataCache[key];
+      return _structuredDataCache[key] as Future<T>;
     Completer<T> completer;
     Future<T> result;
     loadString(key, cache: false).then<T>(parser).then<void>((T value) {
@@ -216,7 +216,7 @@ class PlatformAssetBundle extends CachingAssetBundle {
   Future<ByteData> load(String key) async {
     final Uint8List encoded = utf8.encoder.convert(Uri(path: Uri.encodeFull(key)).path);
     final ByteData asset =
-        await BinaryMessages.send('flutter/assets', encoded.buffer.asByteData());
+        await defaultBinaryMessenger.send('flutter/assets', encoded.buffer.asByteData()); // ignore: deprecated_member_use_from_same_package
     if (asset == null)
       throw FlutterError('Unable to load asset: $key');
     return asset;

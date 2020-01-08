@@ -1,11 +1,16 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:async';
 
-import '../android/app_bundle.dart';
+import '../android/android_builder.dart';
+import '../android/android_sdk.dart';
+import '../android/gradle_utils.dart';
+import '../build_info.dart';
+import '../cache.dart';
 import '../project.dart';
+import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
 import 'build.dart';
 
@@ -17,26 +22,25 @@ class BuildAppBundleCommand extends BuildSubCommand {
     usesPubOption();
     usesBuildNumberOption();
     usesBuildNameOption();
+    addShrinkingFlag();
 
     argParser
       ..addFlag('track-widget-creation', negatable: false, hide: !verboseHelp)
-      ..addFlag(
-        'build-shared-library',
-        negatable: false,
-        help: 'Whether to prefer compiling to a *.so file (android only).',
-      )
-      ..addOption(
-        'target-platform',
-        allowed: <String>['android-arm', 'android-arm64'],
-        help: 'The target platform for which the app is compiled.\n'
-            'By default, the bundle will include \'arm\' and \'arm64\', '
-            'which is the recommended configuration for app bundles.\n'
-            'For more, see https://developer.android.com/distribute/best-practices/develop/64-bit',
+      ..addMultiOption('target-platform',
+        splitCommas: true,
+        defaultsTo: <String>['android-arm', 'android-arm64', 'android-x64'],
+        allowed: <String>['android-arm', 'android-arm64', 'android-x64'],
+        help: 'The target platform for which the app is compiled.',
       );
   }
 
   @override
   final String name = 'appbundle';
+
+  @override
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => <DevelopmentArtifact>{
+    DevelopmentArtifact.androidGenSnapshot,
+  };
 
   @override
   final String description =
@@ -46,11 +50,38 @@ class BuildAppBundleCommand extends BuildSubCommand {
       'suitable for deploying to app stores. \n app bundle improves your app size';
 
   @override
+  Future<Map<CustomDimensions, String>> get usageValues async {
+    final Map<CustomDimensions, String> usage = <CustomDimensions, String>{};
+
+    usage[CustomDimensions.commandBuildAppBundleTargetPlatform] =
+        stringsArg('target-platform').join(',');
+
+    if (boolArg('release')) {
+      usage[CustomDimensions.commandBuildAppBundleBuildMode] = 'release';
+    } else if (boolArg('debug')) {
+      usage[CustomDimensions.commandBuildAppBundleBuildMode] = 'debug';
+    } else if (boolArg('profile')) {
+      usage[CustomDimensions.commandBuildAppBundleBuildMode] = 'profile';
+    } else {
+      // The build defaults to release.
+      usage[CustomDimensions.commandBuildAppBundleBuildMode] = 'release';
+    }
+    return usage;
+  }
+
+  @override
   Future<FlutterCommandResult> runCommand() async {
-    await buildAppBundle(
+    if (androidSdk == null) {
+      exitWithNoSdkMessage();
+    }
+    final AndroidBuildInfo androidBuildInfo = AndroidBuildInfo(getBuildInfo(),
+      targetArchs: stringsArg('target-platform').map<AndroidArch>(getAndroidArchForName),
+      shrink: boolArg('shrink'),
+    );
+    await androidBuilder.buildAab(
       project: FlutterProject.current(),
       target: targetFile,
-      buildInfo: getBuildInfo(),
+      androidBuildInfo: androidBuildInfo,
     );
     return null;
   }

@@ -1,9 +1,10 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:ui' show window;
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -70,7 +71,6 @@ void main() {
       backgroundColor: Colors.blue,
     );
     final ChipThemeData chipTheme = theme.chipTheme;
-    bool value;
 
     Widget buildChip(ChipThemeData data) {
       return MaterialApp(
@@ -90,8 +90,8 @@ void main() {
                   avatar: const Placeholder(),
                   deleteIcon: const Placeholder(),
                   isEnabled: true,
-                  selected: value,
-                  label: Text('$value'),
+                  selected: false,
+                  label: const Text('Chip'),
                   onSelected: (bool newValue) { },
                   onPressed: null,
                 ),
@@ -164,12 +164,12 @@ void main() {
     expect(materialBox, paints..path(color: Color(customTheme.backgroundColor.value)));
     expect(material.elevation, customTheme.elevation);
     expect(material.shadowColor, customTheme.shadowColor);
-  });
+  }, skip: isBrowser);
 
   testWidgets('ChipThemeData generates correct opacities for defaults', (WidgetTester tester) async {
     const Color customColor1 = Color(0xcafefeed);
     const Color customColor2 = Color(0xdeadbeef);
-    final TextStyle customStyle = ThemeData.fallback().accentTextTheme.body2.copyWith(color: customColor2);
+    final TextStyle customStyle = ThemeData.fallback().textTheme.body2.copyWith(color: customColor2);
 
     final ChipThemeData lightTheme = ChipThemeData.fromDefaults(
       secondaryColor: customColor1,
@@ -230,17 +230,18 @@ void main() {
     final ChipThemeData chipThemeBlack = ChipThemeData.fromDefaults(
       secondaryColor: Colors.black,
       brightness: Brightness.dark,
-      labelStyle: ThemeData.fallback().accentTextTheme.body2.copyWith(color: Colors.black),
+      labelStyle: ThemeData.fallback().textTheme.body2.copyWith(color: Colors.black),
     ).copyWith(
       elevation: 1.0,
       pressElevation: 4.0,
       shadowColor: Colors.black,
       selectedShadowColor: Colors.black,
+      checkmarkColor: Colors.black,
     );
     final ChipThemeData chipThemeWhite = ChipThemeData.fromDefaults(
       secondaryColor: Colors.white,
       brightness: Brightness.light,
-      labelStyle: ThemeData.fallback().accentTextTheme.body2.copyWith(color: Colors.white),
+      labelStyle: ThemeData.fallback().textTheme.body2.copyWith(color: Colors.white),
     ).copyWith(
       padding: const EdgeInsets.all(2.0),
       labelPadding: const EdgeInsets.only(top: 8.0, bottom: 8.0),
@@ -248,6 +249,7 @@ void main() {
       pressElevation: 10.0,
       shadowColor: Colors.white,
       selectedShadowColor: Colors.white,
+      checkmarkColor: Colors.white,
     );
 
     final ChipThemeData lerp = ChipThemeData.lerp(chipThemeBlack, chipThemeWhite, 0.5);
@@ -267,6 +269,7 @@ void main() {
     expect(lerp.brightness, equals(Brightness.light));
     expect(lerp.elevation, 3.0);
     expect(lerp.pressElevation, 7.0);
+    expect(lerp.checkmarkColor, equals(middleGrey));
 
     expect(ChipThemeData.lerp(null, null, 0.25), isNull);
 
@@ -286,6 +289,7 @@ void main() {
     expect(lerpANull25.brightness, equals(Brightness.light));
     expect(lerpANull25.elevation, 1.25);
     expect(lerpANull25.pressElevation, 2.5);
+    expect(lerpANull25.checkmarkColor, equals(Colors.white.withAlpha(0x40)));
 
     final ChipThemeData lerpANull75 = ChipThemeData.lerp(null, chipThemeWhite, 0.75);
     expect(lerpANull75.backgroundColor, equals(Colors.black.withAlpha(0x17)));
@@ -303,6 +307,7 @@ void main() {
     expect(lerpANull75.brightness, equals(Brightness.light));
     expect(lerpANull75.elevation, 3.75);
     expect(lerpANull75.pressElevation, 7.5);
+    expect(lerpANull75.checkmarkColor, equals(Colors.white.withAlpha(0xbf)));
 
     final ChipThemeData lerpBNull25 = ChipThemeData.lerp(chipThemeBlack, null, 0.25);
     expect(lerpBNull25.backgroundColor, equals(Colors.white.withAlpha(0x17)));
@@ -320,6 +325,7 @@ void main() {
     expect(lerpBNull25.brightness, equals(Brightness.dark));
     expect(lerpBNull25.elevation, 0.75);
     expect(lerpBNull25.pressElevation, 3.0);
+    expect(lerpBNull25.checkmarkColor, equals(Colors.black.withAlpha(0xbf)));
 
     final ChipThemeData lerpBNull75 = ChipThemeData.lerp(chipThemeBlack, null, 0.75);
     expect(lerpBNull75.backgroundColor, equals(Colors.white.withAlpha(0x08)));
@@ -337,5 +343,100 @@ void main() {
     expect(lerpBNull75.brightness, equals(Brightness.light));
     expect(lerpBNull75.elevation, 0.25);
     expect(lerpBNull75.pressElevation, 1.0);
+    expect(lerpBNull75.checkmarkColor, equals(Colors.black.withAlpha(0x40)));
+  });
+
+  testWidgets('Chip uses stateful color from chip theme', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode();
+
+    const Color pressedColor = Color(0x00000001);
+    const Color hoverColor = Color(0x00000002);
+    const Color focusedColor = Color(0x00000003);
+    const Color defaultColor = Color(0x00000004);
+    const Color selectedColor = Color(0x00000005);
+    const Color disabledColor = Color(0x00000006);
+
+    Color getTextColor(Set<MaterialState> states) {
+      if (states.contains(MaterialState.disabled))
+        return disabledColor;
+
+      if (states.contains(MaterialState.pressed))
+        return pressedColor;
+
+      if (states.contains(MaterialState.hovered))
+        return hoverColor;
+
+      if (states.contains(MaterialState.focused))
+        return focusedColor;
+
+      if (states.contains(MaterialState.selected))
+        return selectedColor;
+
+      return defaultColor;
+    }
+
+    final TextStyle labelStyle =  TextStyle(
+      color: MaterialStateColor.resolveWith(getTextColor),
+    );
+    Widget chipWidget({ bool enabled = true, bool selected = false }) {
+      return MaterialApp(
+        theme: ThemeData(
+          chipTheme: ThemeData.light().chipTheme.copyWith(
+            labelStyle: labelStyle,
+            secondaryLabelStyle: labelStyle,
+          ),
+        ),
+        home: Scaffold(
+          body: Focus(
+            focusNode: focusNode,
+            child: ChoiceChip(
+              label: const Text('Chip'),
+              selected: selected,
+              onSelected: enabled ? (_) {} : null,
+            ),
+          ),
+        ),
+      );
+    }
+    Color textColor() {
+      return tester.renderObject<RenderParagraph>(find.text('Chip')).text.style.color;
+    }
+
+    // Default, not disabled.
+    await tester.pumpWidget(chipWidget());
+    expect(textColor(), equals(defaultColor));
+
+    // Selected.
+    await tester.pumpWidget(chipWidget(selected: true));
+    expect(textColor(), selectedColor);
+
+    // Focused.
+    final FocusNode chipFocusNode = focusNode.children.first;
+    chipFocusNode.requestFocus();
+    await tester.pumpAndSettle();
+    expect(textColor(), focusedColor);
+
+    // Hovered.
+    final Offset center = tester.getCenter(find.byType(ChoiceChip));
+    final TestGesture gesture = await tester.createGesture(
+      kind: PointerDeviceKind.mouse,
+    );
+    await gesture.addPointer();
+    await gesture.moveTo(center);
+    await tester.pumpAndSettle();
+    expect(textColor(), hoverColor);
+
+    // Pressed.
+    await gesture.down(center);
+    await tester.pumpAndSettle();
+    expect(textColor(), pressedColor);
+
+    // Disabled.
+    await tester.pumpWidget(chipWidget(enabled: false));
+    await tester.pumpAndSettle();
+    expect(textColor(), disabledColor);
+
+    // Teardown.
+    await gesture.removePointer();
   });
 }

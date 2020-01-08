@@ -1,8 +1,8 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-package io.flutter.integration.androidviews;
+package io.flutter.integration.platformviews;
 
 import android.annotation.TargetApi;
 import android.os.Build;

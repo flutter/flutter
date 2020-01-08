@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -10,6 +10,7 @@ import 'box_border.dart';
 import 'box_decoration.dart';
 import 'box_shadow.dart';
 import 'circle_border.dart';
+import 'colors.dart';
 import 'decoration.dart';
 import 'decoration_image.dart';
 import 'edge_insets.dart';
@@ -121,6 +122,11 @@ class ShapeDecoration extends Decoration {
     );
   }
 
+  @override
+  Path getClipPath(Rect rect, TextDirection textDirection) {
+    return shape.getOuterPath(rect, textDirection: textDirection);
+  }
+
   /// The color to fill in the background of the shape.
   ///
   /// The color is under the [image].
@@ -140,7 +146,13 @@ class ShapeDecoration extends Decoration {
   /// The image is drawn over the [color] or [gradient].
   final DecorationImage image;
 
-  /// A list of shadows cast by this shape behind the shape.
+  /// A list of shadows cast by the [shape].
+  ///
+  /// See also:
+  ///
+  ///  * [kElevationToShadow], for some predefined shadows used in Material
+  ///    Design.
+  ///  * [PhysicalModel], a widget for showing shadows.
   final List<BoxShadow> shadows;
 
   /// The shape to fill the [color], [gradient], and [image] into and to cast as
@@ -171,7 +183,7 @@ class ShapeDecoration extends Decoration {
   ///
   /// This value may be misleading. See the discussion at [ShapeBorder.dimensions].
   @override
-  EdgeInsets get padding => shape.dimensions;
+  EdgeInsetsGeometry get padding => shape.dimensions;
 
   @override
   bool get isComplex => shadows != null;
@@ -181,9 +193,9 @@ class ShapeDecoration extends Decoration {
     if (a is BoxDecoration) {
       return ShapeDecoration.lerp(ShapeDecoration.fromBoxDecoration(a), this, t);
     } else if (a == null || a is ShapeDecoration) {
-      return ShapeDecoration.lerp(a, this, t);
+      return ShapeDecoration.lerp(a as ShapeDecoration, this, t);
     }
-    return super.lerpFrom(a, t);
+    return super.lerpFrom(a, t) as ShapeDecoration;
   }
 
   @override
@@ -191,9 +203,9 @@ class ShapeDecoration extends Decoration {
     if (b is BoxDecoration) {
       return ShapeDecoration.lerp(this, ShapeDecoration.fromBoxDecoration(b), t);
     } else if (b == null || b is ShapeDecoration) {
-      return ShapeDecoration.lerp(this, b, t);
+      return ShapeDecoration.lerp(this, b as ShapeDecoration, t);
     }
-    return super.lerpTo(b, t);
+    return super.lerpTo(b, t) as ShapeDecoration;
   }
 
   /// Linearly interpolate between two shapes.
@@ -239,12 +251,12 @@ class ShapeDecoration extends Decoration {
       return true;
     if (runtimeType != other.runtimeType)
       return false;
-    final ShapeDecoration typedOther = other;
-    return color == typedOther.color
-        && gradient == typedOther.gradient
-        && image == typedOther.image
-        && shadows == typedOther.shadows
-        && shape == typedOther.shape;
+    return other is ShapeDecoration
+        && other.color == color
+        && other.gradient == gradient
+        && other.image == image
+        && other.shadows == shadows
+        && other.shape == shape;
   }
 
   @override
@@ -262,7 +274,7 @@ class ShapeDecoration extends Decoration {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.defaultDiagnosticsTreeStyle = DiagnosticsTreeStyle.whitespace;
-    properties.add(DiagnosticsProperty<Color>('color', color, defaultValue: null));
+    properties.add(ColorProperty('color', color, defaultValue: null));
     properties.add(DiagnosticsProperty<Gradient>('gradient', gradient, defaultValue: null));
     properties.add(DiagnosticsProperty<DecorationImage>('image', image, defaultValue: null));
     properties.add(IterableProperty<BoxShadow>('shadows', shadows, defaultValue: null, style: DiagnosticsTreeStyle.whitespace));

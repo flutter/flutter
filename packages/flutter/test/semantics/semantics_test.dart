@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -61,6 +61,107 @@ void main() {
       );
 
       expect(node.getSemanticsData().tags, tags);
+    });
+
+    test('mutate existing semantic node list errors', () {
+      final SemanticsNode node = SemanticsNode()
+        ..rect = const Rect.fromLTRB(0.0, 0.0, 10.0, 10.0);
+
+      final SemanticsConfiguration config = SemanticsConfiguration()
+        ..isSemanticBoundary = true
+        ..isMergingSemanticsOfDescendants = true;
+
+      final List<SemanticsNode> children = <SemanticsNode>[
+        SemanticsNode()
+          ..isMergedIntoParent = true
+          ..rect = const Rect.fromLTRB(5.0, 5.0, 10.0, 10.0),
+      ];
+
+      node.updateWith(
+        config: config,
+        childrenInInversePaintOrder: children,
+      );
+
+      children.add(SemanticsNode()
+        ..isMergedIntoParent = true
+        ..rect = const Rect.fromLTRB(42.0, 42.0, 10.0, 10.0)
+      );
+
+      {
+        FlutterError error;
+        try {
+          node.updateWith(
+            config: config,
+            childrenInInversePaintOrder: children,
+          );
+        } on FlutterError catch (e) {
+          error = e;
+        }
+        expect(error, isNotNull);
+        expect(error.toString(), equalsIgnoringHashCodes(
+          'Failed to replace child semantics nodes because the list of `SemanticsNode`s was mutated.\n'
+          'Instead of mutating the existing list, create a new list containing the desired `SemanticsNode`s.\n'
+          'Error details:\n'
+          'The list\'s length has changed from 1 to 2.'
+        ));
+        expect(
+          error.diagnostics.singleWhere((DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
+          'Instead of mutating the existing list, create a new list containing the desired `SemanticsNode`s.',
+        );
+      }
+
+      {
+        FlutterError error;
+        final List<SemanticsNode> modifiedChildren = <SemanticsNode>[
+          SemanticsNode()
+            ..isMergedIntoParent = true
+            ..rect = const Rect.fromLTRB(5.0, 5.0, 10.0, 10.0),
+          SemanticsNode()
+            ..isMergedIntoParent = true
+            ..rect = const Rect.fromLTRB(10.0, 10.0, 20.0, 20.0),
+        ];
+        node.updateWith(
+          config: config,
+          childrenInInversePaintOrder: modifiedChildren,
+        );
+        try {
+          modifiedChildren[0] = SemanticsNode()
+            ..isMergedIntoParent = true
+            ..rect = const Rect.fromLTRB(0.0, 0.0, 20.0, 20.0);
+          modifiedChildren[1] = SemanticsNode()
+            ..isMergedIntoParent = true
+            ..rect = const Rect.fromLTRB(40.0, 14.0, 20.0, 20.0);
+          node.updateWith(
+            config: config,
+            childrenInInversePaintOrder: modifiedChildren,
+          );
+        } on FlutterError catch (e) {
+          error = e;
+        }
+        expect(error, isNotNull);
+        expect(error.toStringDeep(), equalsIgnoringHashCodes(
+          'FlutterError\n'
+          '   Failed to replace child semantics nodes because the list of\n'
+          '   `SemanticsNode`s was mutated.\n'
+          '   Instead of mutating the existing list, create a new list\n'
+          '   containing the desired `SemanticsNode`s.\n'
+          '   Error details:\n'
+          '   Child node at position 0 was replaced:\n'
+          '   Previous child: SemanticsNode#6(STALE, owner: null, merged up ⬆️, Rect.fromLTRB(0.0, 0.0, 20.0, 20.0))\n'
+          '   New child: SemanticsNode#4(STALE, owner: null, merged up ⬆️, Rect.fromLTRB(5.0, 5.0, 10.0, 10.0))\n'
+          '\n'
+          '   Child node at position 1 was replaced:\n'
+          '   Previous child: SemanticsNode#7(STALE, owner: null, merged up ⬆️, Rect.fromLTRB(40.0, 14.0, 20.0, 20.0))\n'
+          '   New child: SemanticsNode#5(STALE, owner: null, merged up ⬆️, Rect.fromLTRB(10.0, 10.0, 20.0, 20.0))\n'
+        ));
+
+        expect(
+          error.diagnostics.singleWhere((DiagnosticsNode node) => node.level == DiagnosticLevel.hint).toString(),
+          'Instead of mutating the existing list, create a new list containing the desired `SemanticsNode`s.',
+        );
+        // Two previous children and two new children.
+        expect(error.diagnostics.where((DiagnosticsNode node) => node.value is SemanticsNode).length, 4);
+      }
     });
 
     test('after markNeedsSemanticsUpdate() all render objects between two semantic boundaries are asked for annotations', () {
@@ -162,10 +263,9 @@ void main() {
     ];
     final List<int> expectedResults = <int>[0, -1, 1, 0];
     assert(tests.length == expectedResults.length);
-    final List<int> results = <int>[];
-    for (List<SemanticsSortKey> tuple in tests) {
-      results.add(tuple[0].compareTo(tuple[1]));
-    }
+    final List<int> results = <int>[
+      for (final List<SemanticsSortKey> tuple in tests) tuple[0].compareTo(tuple[1]),
+    ];
     expect(results, orderedEquals(expectedResults));
   });
 
@@ -178,10 +278,9 @@ void main() {
     ];
     final List<int> expectedResults = <int>[0, -1, 1, 0];
     assert(tests.length == expectedResults.length);
-    final List<int> results = <int>[];
-    for (List<SemanticsSortKey> tuple in tests) {
-      results.add(tuple[0].compareTo(tuple[1]));
-    }
+    final List<int> results = <int>[
+      for (final List<SemanticsSortKey> tuple in tests) tuple[0].compareTo(tuple[1]),
+    ];
     expect(results, orderedEquals(expectedResults));
   });
 
@@ -334,6 +433,7 @@ void main() {
       '   isMergedIntoParent: false\n'
       '   mergeAllDescendantsIntoThisNode: false\n'
       '   Rect.fromLTRB(0.0, 0.0, 0.0, 0.0)\n'
+      '   tags: null\n'
       '   actions: []\n'
       '   customActions: []\n'
       '   flags: []\n'
@@ -347,13 +447,15 @@ void main() {
       '   textDirection: null\n'
       '   sortKey: null\n'
       '   platformViewId: null\n'
+      '   maxValueLength: null\n'
+      '   currentValueLength: null\n'
       '   scrollChildren: null\n'
       '   scrollIndex: null\n'
       '   scrollExtentMin: null\n'
       '   scrollPosition: null\n'
       '   scrollExtentMax: null\n'
       '   elevation: 0.0\n'
-      '   thicknes: 0.0\n',
+      '   thickness: 0.0\n',
     );
 
     final SemanticsConfiguration config = SemanticsConfiguration()
@@ -429,6 +531,7 @@ void main() {
       '   isMergedIntoParent: false\n'
       '   mergeAllDescendantsIntoThisNode: false\n'
       '   Rect.fromLTRB(0.0, 0.0, 0.0, 0.0)\n'
+      '   tags: null\n'
       '   actions: customAction\n'
       '   customActions: action1, action2, action3\n'
       '   flags: []\n'
@@ -442,15 +545,26 @@ void main() {
       '   textDirection: null\n'
       '   sortKey: null\n'
       '   platformViewId: null\n'
+      '   maxValueLength: null\n'
+      '   currentValueLength: null\n'
       '   scrollChildren: null\n'
       '   scrollIndex: null\n'
       '   scrollExtentMin: null\n'
       '   scrollPosition: null\n'
       '   scrollExtentMax: null\n'
       '   elevation: 0.0\n'
-      '   thicknes: 0.0\n',
+      '   thickness: 0.0\n',
     );
+  });
 
+  test('Tags show up in debug properties', () {
+    final SemanticsNode actionNode = SemanticsNode()
+      ..tags = <SemanticsTag>{RenderViewport.useTwoPaneSemantics};
+
+    expect(
+      actionNode.toStringDeep(),
+      contains('\n   tags: RenderViewport.twoPane\n'),
+    );
   });
 
   test('SemanticsConfiguration getter/setter', () {
@@ -459,6 +573,7 @@ void main() {
 
     expect(config.isSemanticBoundary, isFalse);
     expect(config.isButton, isFalse);
+    expect(config.isLink, isFalse);
     expect(config.isMergingSemanticsOfDescendants, isFalse);
     expect(config.isEnabled, null);
     expect(config.isChecked, null);
@@ -482,6 +597,7 @@ void main() {
 
     config.isSemanticBoundary = true;
     config.isButton = true;
+    config.isLink = true;
     config.isMergingSemanticsOfDescendants = true;
     config.isEnabled = true;
     config.isChecked = true;
@@ -518,6 +634,7 @@ void main() {
 
     expect(config.isSemanticBoundary, isTrue);
     expect(config.isButton, isTrue);
+    expect(config.isLink, isTrue);
     expect(config.isMergingSemanticsOfDescendants, isTrue);
     expect(config.isEnabled, isTrue);
     expect(config.isChecked, isTrue);
@@ -551,7 +668,7 @@ class TestRender extends RenderProxyBox {
     this.hasScrollUpAction = false,
     this.hasScrollDownAction = false,
     this.isSemanticBoundary,
-    RenderObject child,
+    RenderBox child,
   }) : super(child);
 
   bool hasTapAction;

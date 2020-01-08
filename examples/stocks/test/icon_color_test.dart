@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -41,7 +41,7 @@ void checkIconColor(WidgetTester tester, String label, Color color) {
   final Element listTile = findElementOfExactWidgetTypeGoingUp(tester.element(find.text(label)), ListTile);
   expect(listTile, isNotNull);
   final Element asset = findElementOfExactWidgetTypeGoingDown(listTile, RichText);
-  final RichText richText = asset.widget;
+  final RichText richText = asset.widget as RichText;
   expect(richText.text.style.color, equals(color));
 }
 
@@ -72,7 +72,7 @@ void main() {
     expect(find.text('MARKET'), findsOneWidget);
     expect(find.text('Account Balance'), findsOneWidget);
 
-    // check the colour of the icon - light mode
+    // check the color of the icon - light mode
     checkIconColor(tester, 'Stock List', Colors.purple); // theme primary color
     checkIconColor(tester, 'Account Balance', Colors.black38); // disabled
     checkIconColor(tester, 'About', Colors.black45); // enabled
@@ -83,9 +83,9 @@ void main() {
     await tester.pump(); // start the theme transition
     await tester.pump(const Duration(seconds: 5)); // end the transition
 
-    // check the colour of the icon - dark mode
+    // check the color of the icon - dark mode
     checkIconColor(tester, 'Stock List', Colors.redAccent); // theme accent color
-    checkIconColor(tester, 'Account Balance', Colors.white30); // disabled
+    checkIconColor(tester, 'Account Balance', Colors.white38); // disabled
     checkIconColor(tester, 'About', Colors.white); // enabled
   });
 }

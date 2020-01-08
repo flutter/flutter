@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -12,7 +12,8 @@ import '../cache.dart';
 import '../dart/package_map.dart';
 import '../dart/sdk.dart';
 import '../device.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
+import '../project.dart';
 import '../resident_runner.dart';
 import '../runner/flutter_command.dart' show FlutterCommandResult;
 import 'run.dart';
@@ -68,6 +69,34 @@ class DriveCommand extends RunCommandBase {
       ..addFlag('build',
         defaultsTo: true,
         help: 'Build the app before running.',
+      )
+      ..addOption('driver-port',
+        defaultsTo: '4444',
+        help: 'The port where Webdriver server is launched at. Defaults to 4444.',
+        valueHelp: '4444'
+      )
+      ..addFlag('headless',
+        defaultsTo: true,
+        help: 'Whether the driver browser is going to be launched in headless mode. Defaults to true.',
+      )
+      ..addOption('browser-name',
+        defaultsTo: 'chrome',
+        help: 'Name of browser where tests will be executed. \n'
+              'Following browsers are supported: \n'
+              'Chrome, Firefox, Safari (macOS and iOS) and Edge. Defaults to Chrome.',
+        allowed: <String>[
+          'chrome',
+          'edge',
+          'firefox',
+          'ios-safari',
+          'safari',
+        ]
+      )
+      ..addOption('browser-dimension',
+        defaultsTo: '1600,1024',
+        help: 'The dimension of browser when running Flutter Web test. \n'
+              'This will affect screenshot and all offset-related actions. \n'
+              'By default. it is set to 1600,1024 (1600 by 1024).',
       );
   }
 
@@ -82,7 +111,9 @@ class DriveCommand extends RunCommandBase {
 
   Device _device;
   Device get device => _device;
-  bool get shouldBuild => argResults['build'];
+  bool get shouldBuild => boolArg('build');
+
+  bool get verboseSystemLogs => boolArg('verbose-system-logs');
 
   /// Subscription to log messages printed on the device or simulator.
   // ignore: cancel_subscriptions
@@ -91,19 +122,22 @@ class DriveCommand extends RunCommandBase {
   @override
   Future<FlutterCommandResult> runCommand() async {
     final String testFile = _getTestFile();
-    if (testFile == null)
+    if (testFile == null) {
       throwToolExit(null);
+    }
 
-    _device = await targetDeviceFinder();
-    if (device == null)
+    _device = await findTargetDevice();
+    if (device == null) {
       throwToolExit(null);
+    }
 
-    if (await fs.type(testFile) != FileSystemEntityType.file)
+    if (await globals.fs.type(testFile) != FileSystemEntityType.file) {
       throwToolExit('Test file not found: $testFile');
+    }
 
     String observatoryUri;
     if (argResults['use-existing-app'] == null) {
-      printStatus('Starting application: $targetFile');
+      globals.printStatus('Starting application: $targetFile');
 
       if (getBuildInfo().isRelease) {
         // This is because we need VM service to be able to drive the app.
@@ -116,27 +150,37 @@ class DriveCommand extends RunCommandBase {
       }
 
       final LaunchResult result = await appStarter(this);
-      if (result == null)
+      if (result == null) {
         throwToolExit('Application failed to start. Will not run test. Quitting.', exitCode: 1);
+      }
       observatoryUri = result.observatoryUri.toString();
     } else {
-      printStatus('Will connect to already running application instance.');
-      observatoryUri = argResults['use-existing-app'];
+      globals.printStatus('Will connect to already running application instance.');
+      observatoryUri = stringArg('use-existing-app');
     }
 
     Cache.releaseLockEarly();
 
+    final Map<String, String> environment = <String, String>{
+      'VM_SERVICE_URL': observatoryUri,
+      'SELENIUM_PORT': argResults['driver-port'].toString(),
+      'BROWSER_NAME': argResults['browser-name'].toString(),
+      'BROWSER_DIMENSION': argResults['browser-dimension'].toString(),
+      'HEADLESS': argResults['headless'].toString(),
+    };
+
     try {
-      await testRunner(<String>[testFile], observatoryUri);
+      await testRunner(<String>[testFile], environment);
     } catch (error, stackTrace) {
-      if (error is ToolExit)
+      if (error is ToolExit) {
         rethrow;
+      }
       throwToolExit('CAUGHT EXCEPTION: $error\n$stackTrace');
     } finally {
-      if (argResults['keep-app-running'] ?? (argResults['use-existing-app'] != null)) {
-        printStatus('Leaving the application running.');
+      if (boolArg('keep-app-running') ?? (argResults['use-existing-app'] != null)) {
+        globals.printStatus('Leaving the application running.');
       } else {
-        printStatus('Stopping application instance.');
+        globals.printStatus('Stopping application instance.');
         await appStopper(this);
       }
     }
@@ -145,33 +189,34 @@ class DriveCommand extends RunCommandBase {
   }
 
   String _getTestFile() {
-    if (argResults['driver'] != null)
-      return argResults['driver'];
+    if (argResults['driver'] != null) {
+      return stringArg('driver');
+    }
 
     // If the --driver argument wasn't provided, then derive the value from
     // the target file.
-    String appFile = fs.path.normalize(targetFile);
+    String appFile = globals.fs.path.normalize(targetFile);
 
     // This command extends `flutter run` and therefore CWD == package dir
-    final String packageDir = fs.currentDirectory.path;
+    final String packageDir = globals.fs.currentDirectory.path;
 
     // Make appFile path relative to package directory because we are looking
     // for the corresponding test file relative to it.
-    if (!fs.path.isRelative(appFile)) {
-      if (!fs.path.isWithin(packageDir, appFile)) {
-        printError(
+    if (!globals.fs.path.isRelative(appFile)) {
+      if (!globals.fs.path.isWithin(packageDir, appFile)) {
+        globals.printError(
           'Application file $appFile is outside the package directory $packageDir'
         );
         return null;
       }
 
-      appFile = fs.path.relative(appFile, from: packageDir);
+      appFile = globals.fs.path.relative(appFile, from: packageDir);
     }
 
-    final List<String> parts = fs.path.split(appFile);
+    final List<String> parts = globals.fs.path.split(appFile);
 
     if (parts.length < 2) {
-      printError(
+      globals.printError(
         'Application file $appFile must reside in one of the sub-directories '
         'of the package structure, not in the root directory.'
       );
@@ -181,29 +226,22 @@ class DriveCommand extends RunCommandBase {
     // Look for the test file inside `test_driver/` matching the sub-path, e.g.
     // if the application is `lib/foo/bar.dart`, the test file is expected to
     // be `test_driver/foo/bar_test.dart`.
-    final String pathWithNoExtension = fs.path.withoutExtension(fs.path.joinAll(
-      <String>[packageDir, 'test_driver']..addAll(parts.skip(1))));
-    return '${pathWithNoExtension}_test${fs.path.extension(appFile)}';
+    final String pathWithNoExtension = globals.fs.path.withoutExtension(globals.fs.path.joinAll(
+      <String>[packageDir, 'test_driver', ...parts.skip(1)]));
+    return '${pathWithNoExtension}_test${globals.fs.path.extension(appFile)}';
   }
 }
 
-/// Finds a device to test on. May launch a simulator, if necessary.
-typedef TargetDeviceFinder = Future<Device> Function();
-TargetDeviceFinder targetDeviceFinder = findTargetDevice;
-void restoreTargetDeviceFinder() {
-  targetDeviceFinder = findTargetDevice;
-}
-
 Future<Device> findTargetDevice() async {
-  final List<Device> devices = await deviceManager.getDevices().toList();
+  final List<Device> devices = await deviceManager.findTargetDevices(FlutterProject.current());
 
   if (deviceManager.hasSpecifiedDeviceId) {
     if (devices.isEmpty) {
-      printStatus("No devices found with name or id matching '${deviceManager.specifiedDeviceId}'");
+      globals.printStatus("No devices found with name or id matching '${deviceManager.specifiedDeviceId}'");
       return null;
     }
     if (devices.length > 1) {
-      printStatus("Found ${devices.length} devices with name or id matching '${deviceManager.specifiedDeviceId}':");
+      globals.printStatus("Found ${devices.length} devices with name or id matching '${deviceManager.specifiedDeviceId}':");
       await Device.printDevices(devices);
       return null;
     }
@@ -211,13 +249,13 @@ Future<Device> findTargetDevice() async {
   }
 
   if (devices.isEmpty) {
-    printError('No devices found.');
+    globals.printError('No devices found.');
     return null;
   } else if (devices.length > 1) {
-    printStatus('Found multiple connected devices:');
-    printStatus(devices.map<String>((Device d) => '  - ${d.name}\n').join(''));
+    globals.printStatus('Found multiple connected devices:');
+    await Device.printDevices(devices);
   }
-  printStatus('Using device ${devices.first.name}.');
+  globals.printStatus('Using device ${devices.first.name}.');
   return devices.first;
 }
 
@@ -231,36 +269,38 @@ void restoreAppStarter() {
 
 Future<LaunchResult> _startApp(DriveCommand command) async {
   final String mainPath = findMainDartFile(command.targetFile);
-  if (await fs.type(mainPath) != FileSystemEntityType.file) {
-    printError('Tried to run $mainPath, but that file does not exist.');
+  if (await globals.fs.type(mainPath) != FileSystemEntityType.file) {
+    globals.printError('Tried to run $mainPath, but that file does not exist.');
     return null;
   }
 
-  printTrace('Stopping previously running application, if any.');
+  globals.printTrace('Stopping previously running application, if any.');
   await appStopper(command);
 
   final ApplicationPackage package = await command.applicationPackages
       .getPackageForPlatform(await command.device.targetPlatform);
 
   if (command.shouldBuild) {
-    printTrace('Installing application package.');
-    if (await command.device.isAppInstalled(package))
+    globals.printTrace('Installing application package.');
+    if (await command.device.isAppInstalled(package)) {
       await command.device.uninstallApp(package);
+    }
     await command.device.installApp(package);
   }
 
   final Map<String, dynamic> platformArgs = <String, dynamic>{};
-  if (command.traceStartup)
+  if (command.traceStartup) {
     platformArgs['trace-startup'] = command.traceStartup;
+  }
 
-  printTrace('Starting application.');
+  globals.printTrace('Starting application.');
 
   // Forward device log messages to the terminal window running the "drive" command.
   command._deviceLogSubscription = command
       .device
       .getLogReader(app: package)
       .logLines
-      .listen(printStatus);
+      .listen(globals.printStatus);
 
   final LaunchResult result = await command.device.startApp(
     package,
@@ -269,11 +309,13 @@ Future<LaunchResult> _startApp(DriveCommand command) async {
     debuggingOptions: DebuggingOptions.enabled(
       command.getBuildInfo(),
       startPaused: true,
-      observatoryPort: command.observatoryPort,
+      hostVmServicePort: command.hostVmservicePort,
+      verboseSystemLogs: command.verboseSystemLogs,
+      cacheSkSL: command.cacheSkSL,
+      dumpSkpOnShaderCompilation: command.dumpSkpOnShaderCompilation,
     ),
     platformArgs: platformArgs,
     prebuiltApplication: !command.shouldBuild,
-    usesTerminalUi: false,
   );
 
   if (!result.started) {
@@ -285,29 +327,30 @@ Future<LaunchResult> _startApp(DriveCommand command) async {
 }
 
 /// Runs driver tests.
-typedef TestRunner = Future<void> Function(List<String> testArgs, String observatoryUri);
+typedef TestRunner = Future<void> Function(List<String> testArgs, Map<String, String> environment);
 TestRunner testRunner = _runTests;
 void restoreTestRunner() {
   testRunner = _runTests;
 }
 
-Future<void> _runTests(List<String> testArgs, String observatoryUri) async {
-  printTrace('Running driver tests.');
+Future<void> _runTests(List<String> testArgs, Map<String, String> environment) async {
+  globals.printTrace('Running driver tests.');
 
-  PackageMap.globalPackagesPath = fs.path.normalize(fs.path.absolute(PackageMap.globalPackagesPath));
-  final String dartVmPath = fs.path.join(dartSdkPath, 'bin', 'dart');
-  final int result = await runCommandAndStreamOutput(
-    <String>[dartVmPath]
-      ..addAll(dartVmFlags)
-      ..addAll(testArgs)
-      ..addAll(<String>[
-        '--packages=${PackageMap.globalPackagesPath}',
-        '-rexpanded',
-      ]),
-    environment: <String, String>{'VM_SERVICE_URL': observatoryUri},
+  PackageMap.globalPackagesPath = globals.fs.path.normalize(globals.fs.path.absolute(PackageMap.globalPackagesPath));
+  final String dartVmPath = globals.fs.path.join(dartSdkPath, 'bin', 'dart');
+  final int result = await processUtils.stream(
+    <String>[
+      dartVmPath,
+      ...dartVmFlags,
+      ...testArgs,
+      '--packages=${PackageMap.globalPackagesPath}',
+      '-rexpanded',
+    ],
+    environment: environment,
   );
-  if (result != 0)
+  if (result != 0) {
     throwToolExit('Driver tests failed: $result', exitCode: result);
+  }
 }
 
 
@@ -319,7 +362,7 @@ void restoreAppStopper() {
 }
 
 Future<bool> _stopApp(DriveCommand command) async {
-  printTrace('Stopping application.');
+  globals.printTrace('Stopping application.');
   final ApplicationPackage package = await command.applicationPackages.getPackageForPlatform(await command.device.targetPlatform);
   final bool stopped = await command.device.stopApp(package);
   await command._deviceLogSubscription?.cancel();

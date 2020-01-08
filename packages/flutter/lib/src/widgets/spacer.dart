@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -32,6 +32,8 @@ import 'framework.dart';
 /// )
 /// ```
 /// {@end-tool}
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=7FJgd7QN1zI}
 ///
 /// See also:
 ///

@@ -1,0 +1,42 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+import '../doctor.dart';
+import '../globals.dart' as globals;
+import 'chrome.dart';
+
+/// A validator that checks whether chrome is installed and can run.
+class WebValidator extends DoctorValidator {
+  const WebValidator() : super('Chrome - develop for the web');
+
+  @override
+  Future<ValidationResult> validate() async {
+    final String chrome = findChromeExecutable();
+    final bool canRunChrome = chromeLauncher.canFindChrome();
+    final List<ValidationMessage> messages = <ValidationMessage>[
+      if (globals.platform.environment.containsKey(kChromeEnvironment))
+        if (!canRunChrome)
+          ValidationMessage.hint('$chrome is not executable.')
+        else
+          ValidationMessage('$kChromeEnvironment = $chrome')
+      else
+        if (!canRunChrome)
+          ValidationMessage.hint('Cannot find Chrome. Try setting '
+            '$kChromeEnvironment to a Chrome executable.')
+        else
+          ValidationMessage('Chrome at $chrome'),
+    ];
+    if (!canRunChrome) {
+      return ValidationResult(
+        ValidationType.missing,
+        messages,
+        statusInfo: 'Cannot find chrome executable at $chrome',
+      );
+    }
+    return ValidationResult(
+      ValidationType.installed,
+      messages,
+    );
+  }
+}

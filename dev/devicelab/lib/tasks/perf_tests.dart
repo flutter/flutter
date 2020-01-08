@@ -1,4 +1,4 @@
-// Copyright (c) 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -54,6 +54,41 @@ TaskFunction createCubicBezierPerfTest() {
   ).run;
 }
 
+TaskFunction createBackdropFilterPerfTest({bool needsMeasureCpuGpu = false}) {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/backdrop_filter_perf.dart',
+    'backdrop_filter_perf',
+    needsMeasureCpuGPu: needsMeasureCpuGpu,
+  ).run;
+}
+
+TaskFunction createPostBackdropFilterPerfTest({bool needsMeasureCpuGpu = false}) {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/post_backdrop_filter_perf.dart',
+    'post_backdrop_filter_perf',
+    needsMeasureCpuGPu: needsMeasureCpuGpu,
+  ).run;
+}
+
+TaskFunction createSimpleAnimationPerfTest({bool needsMeasureCpuGpu = false}) {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/simple_animation_perf.dart',
+    'simple_animation_perf',
+    needsMeasureCpuGPu: needsMeasureCpuGpu,
+  ).run;
+}
+
+TaskFunction createPictureCachePerfTest() {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/picture_cache_perf.dart',
+    'picture_cache_perf',
+  ).run;
+}
+
 TaskFunction createFlutterGalleryStartupTest() {
   return StartupTest(
     '${flutterDirectory.path}/examples/flutter_gallery',
@@ -66,12 +101,23 @@ TaskFunction createComplexLayoutStartupTest() {
   ).run;
 }
 
+TaskFunction createHelloWorldStartupTest() {
+  return StartupTest(
+    '${flutterDirectory.path}/examples/hello_world',
+    reportMetrics: false,
+  ).run;
+}
+
 TaskFunction createFlutterGalleryCompileTest() {
   return CompileTest('${flutterDirectory.path}/examples/flutter_gallery').run;
 }
 
 TaskFunction createHelloWorldCompileTest() {
   return CompileTest('${flutterDirectory.path}/examples/hello_world', reportPackageContentSizes: true).run;
+}
+
+TaskFunction createWebCompileTest() {
+  return const WebCompileTest().run;
 }
 
 TaskFunction createComplexLayoutCompileTest() {
@@ -103,11 +149,19 @@ TaskFunction createBasicMaterialCompileTest() {
       await flutter('create', options: <String>['--template=app', sampleAppName]);
     });
 
-    if (!(await sampleDir.exists()))
+    if (!sampleDir.existsSync())
       throw 'Failed to create default Flutter app in ${sampleDir.path}';
 
     return CompileTest(sampleDir.path).run();
   };
+}
+
+TaskFunction createTextfieldPerfTest() {
+  return PerfTest(
+    '${flutterDirectory.path}/dev/benchmarks/macrobenchmarks',
+    'test_driver/textfield_perf.dart',
+    'textfield_perf',
+  ).run;
 }
 
 
@@ -123,9 +177,6 @@ class StartupTest {
       final String deviceId = (await devices.workingDevice).deviceId;
       await flutter('packages', options: <String>['get']);
 
-      if (deviceOperatingSystem == DeviceOperatingSystem.ios)
-        await prepareProvisioningCertificates(testDirectory);
-
       await flutter('run', options: <String>[
         '--verbose',
         '--profile',
@@ -133,13 +184,16 @@ class StartupTest {
         '-d',
         deviceId,
       ]);
-      final Map<String, dynamic> data = json.decode(file('$testDirectory/build/start_up_info.json').readAsStringSync());
+      final Map<String, dynamic> data = json.decode(
+        file('$testDirectory/build/start_up_info.json').readAsStringSync(),
+      ) as Map<String, dynamic>;
 
       if (!reportMetrics)
         return TaskResult.success(data);
 
       return TaskResult.success(data, benchmarkScoreKeys: <String>[
         'timeToFirstFrameMicros',
+        'timeToFirstFrameRasterizedMicros',
       ]);
     });
   }
@@ -148,11 +202,17 @@ class StartupTest {
 /// Measures application runtime performance, specifically per-frame
 /// performance.
 class PerfTest {
-  const PerfTest(this.testDirectory, this.testTarget, this.timelineFileName);
+  const PerfTest(
+      this.testDirectory,
+      this.testTarget,
+      this.timelineFileName,
+      {this.needsMeasureCpuGPu = false});
 
   final String testDirectory;
   final String testTarget;
   final String timelineFileName;
+
+  final bool needsMeasureCpuGPu;
 
   Future<TaskResult> run() {
     return inDirectory<TaskResult>(testDirectory, () async {
@@ -160,9 +220,6 @@ class PerfTest {
       await device.unlock();
       final String deviceId = device.deviceId;
       await flutter('packages', options: <String>['get']);
-
-      if (deviceOperatingSystem == DeviceOperatingSystem.ios)
-        await prepareProvisioningCertificates(testDirectory);
 
       await flutter('drive', options: <String>[
         '-v',
@@ -173,13 +230,21 @@ class PerfTest {
         '-d',
         deviceId,
       ]);
-      final Map<String, dynamic> data = json.decode(file('$testDirectory/build/$timelineFileName.timeline_summary.json').readAsStringSync());
+      final Map<String, dynamic> data = json.decode(
+        file('$testDirectory/build/$timelineFileName.timeline_summary.json').readAsStringSync(),
+      ) as Map<String, dynamic>;
 
-      if (data['frame_count'] < 5) {
+      if (data['frame_count'] as int < 5) {
         return TaskResult.failure(
           'Timeline contains too few frames: ${data['frame_count']}. Possibly '
           'trace events are not being captured.',
         );
+      }
+
+      if (needsMeasureCpuGPu) {
+        await inDirectory<void>('$testDirectory/build', () async {
+          data.addAll(await measureIosCpuGpu(deviceId: deviceId));
+        });
       }
 
       return TaskResult.success(data, benchmarkScoreKeys: <String>[
@@ -193,8 +258,83 @@ class PerfTest {
         'missed_frame_rasterizer_budget_count',
         '90th_percentile_frame_rasterizer_time_millis',
         '99th_percentile_frame_rasterizer_time_millis',
+        if (needsMeasureCpuGPu) 'cpu_percentage',
+        if (needsMeasureCpuGPu) 'gpu_percentage',
       ]);
     });
+  }
+}
+
+/// Measures how long it takes to compile a Flutter app to JavaScript and how
+/// big the compiled code is.
+class WebCompileTest {
+  const WebCompileTest();
+
+  Future<TaskResult> run() async {
+    final Map<String, Object> metrics = <String, Object>{};
+    await inDirectory<TaskResult>('${flutterDirectory.path}/examples/hello_world', () async {
+      await flutter('packages', options: <String>['get']);
+      await evalFlutter('build', options: <String>[
+        'web',
+        '-v',
+        '--release',
+        '--no-pub',
+      ], environment: <String, String>{
+        'FLUTTER_WEB': 'true',
+      });
+      final String output = '${flutterDirectory.path}/examples/hello_world/build/web/main.dart.js';
+      await _measureSize('hello_world', output, metrics);
+      return null;
+    });
+    await inDirectory<TaskResult>('${flutterDirectory.path}/examples/flutter_gallery', () async {
+      await flutter('packages', options: <String>['get']);
+      await evalFlutter('build', options: <String>[
+        'web',
+        '-v',
+        '--release',
+        '--no-pub',
+      ], environment: <String, String>{
+        'FLUTTER_WEB': 'true',
+      });
+      final String output = '${flutterDirectory.path}/examples/flutter_gallery/build/web/main.dart.js';
+      await _measureSize('flutter_gallery', output, metrics);
+      return null;
+    });
+    const String sampleAppName = 'sample_flutter_app';
+    final Directory sampleDir = dir('${Directory.systemTemp.path}/$sampleAppName');
+
+    rmTree(sampleDir);
+
+    await inDirectory<void>(Directory.systemTemp, () async {
+      await flutter('create', options: <String>['--template=app', sampleAppName], environment: <String, String>{
+          'FLUTTER_WEB': 'true',
+        });
+      await inDirectory(sampleDir, () async {
+        await flutter('packages', options: <String>['get']);
+        await evalFlutter('build', options: <String>[
+          'web',
+          '-v',
+          '--release',
+          '--no-pub',
+        ], environment: <String, String>{
+          'FLUTTER_WEB': 'true',
+        });
+        await _measureSize('basic_material_app', path.join(sampleDir.path, 'build/web/main.dart.js'), metrics);
+      });
+    });
+    return TaskResult.success(metrics, benchmarkScoreKeys: metrics.keys.toList());
+  }
+
+  static Future<void> _measureSize(String metric, String output, Map<String, Object> metrics) async {
+    final ProcessResult result = await Process.run('du', <String>['-k', output]);
+    await Process.run('gzip',<String>['-k', '9', output]);
+    final ProcessResult resultGzip = await Process.run('du', <String>['-k', output + '.gz']);
+    metrics['${metric}_dart2js_size'] = _parseDu(result.stdout as String);
+    metrics['${metric}_dart2js_size_gzip'] = _parseDu(resultGzip.stdout as String);
+  }
+
+  static int _parseDu(String source) {
+    return int.parse(source.split(RegExp(r'\s+')).first.trim());
   }
 }
 
@@ -212,17 +352,17 @@ class CompileTest {
       await device.unlock();
       await flutter('packages', options: <String>['get']);
 
-      final Map<String, dynamic> metrics = <String, dynamic>{}
-        ..addAll(await _compileAot())
-        ..addAll(await _compileApp(reportPackageContentSizes: reportPackageContentSizes))
-        ..addAll(await _compileDebug());
+      final Map<String, dynamic> metrics = <String, dynamic>{
+        ...await _compileAot(),
+        ...await _compileApp(reportPackageContentSizes: reportPackageContentSizes),
+        ...await _compileDebug(),
+      };
 
       return TaskResult.success(metrics, benchmarkScoreKeys: metrics.keys.toList());
     });
   }
 
   static Future<Map<String, dynamic>> _compileAot() async {
-    // Generate blobs instead of assembly.
     await flutter('clean');
     final Stopwatch watch = Stopwatch()..start();
     final List<String> options = <String>[
@@ -241,13 +381,12 @@ class CompileTest {
         options.add('android-arm');
         break;
     }
-    setLocalEngineOptionIfNecessary(options);
     final String compileLog = await evalFlutter('build', options: options);
     watch.stop();
 
     final RegExp metricExpression = RegExp(r'([a-zA-Z]+)\(CodeSize\)\: (\d+)');
     final Map<String, dynamic> metrics = <String, dynamic>{};
-    for (Match m in metricExpression.allMatches(compileLog)) {
+    for (final Match m in metricExpression.allMatches(compileLog)) {
       metrics[_sdkNameToMetricName(m.group(1))] = int.parse(m.group(2));
     }
     if (metrics.length != _kSdkNameToMetricNameMapping.length) {
@@ -263,13 +402,11 @@ class CompileTest {
     final Stopwatch watch = Stopwatch();
     int releaseSizeInBytes;
     final List<String> options = <String>['--release'];
-    setLocalEngineOptionIfNecessary(options);
     final Map<String, dynamic> metrics = <String, dynamic>{};
 
     switch (deviceOperatingSystem) {
       case DeviceOperatingSystem.ios:
         options.insert(0, 'ios');
-        await prepareProvisioningCertificates(cwd);
         watch.start();
         await flutter('build', options: options);
         watch.stop();
@@ -282,6 +419,7 @@ class CompileTest {
         break;
       case DeviceOperatingSystem.android:
         options.insert(0, 'apk');
+        options.add('--target-platform=android-arm');
         watch.start();
         await flutter('build', options: options);
         watch.stop();
@@ -310,14 +448,13 @@ class CompileTest {
     await flutter('clean');
     final Stopwatch watch = Stopwatch();
     final List<String> options = <String>['--debug'];
-    setLocalEngineOptionIfNecessary(options);
     switch (deviceOperatingSystem) {
       case DeviceOperatingSystem.ios:
         options.insert(0, 'ios');
-        await prepareProvisioningCertificates(cwd);
         break;
       case DeviceOperatingSystem.android:
         options.insert(0, 'apk');
+        options.add('--target-platform=android-arm');
         break;
     }
     watch.start();
@@ -376,23 +513,14 @@ class CompileTest {
     }
 
     final _UnzipListEntry libflutter = fileToMetadata['lib/armeabi-v7a/libflutter.so'];
-    final _UnzipListEntry isolateSnapshotData = fileToMetadata['assets/isolate_snapshot_data'];
-    final _UnzipListEntry isolateSnapshotInstr = fileToMetadata['assets/isolate_snapshot_instr'];
-    final _UnzipListEntry vmSnapshotData = fileToMetadata['assets/vm_snapshot_data'];
-    final _UnzipListEntry vmSnapshotInstr = fileToMetadata['assets/vm_snapshot_instr'];
+    final _UnzipListEntry libapp = fileToMetadata['lib/armeabi-v7a/libapp.so'];
     final _UnzipListEntry license = fileToMetadata['assets/flutter_assets/LICENSE'];
 
     return <String, dynamic>{
       'libflutter_uncompressed_bytes': libflutter.uncompressedSize,
       'libflutter_compressed_bytes': libflutter.compressedSize,
-      'snapshot_uncompressed_bytes': isolateSnapshotData.uncompressedSize +
-          isolateSnapshotInstr.uncompressedSize +
-          vmSnapshotData.uncompressedSize +
-          vmSnapshotInstr.uncompressedSize,
-      'snapshot_compressed_bytes': isolateSnapshotData.compressedSize +
-          isolateSnapshotInstr.compressedSize +
-          vmSnapshotData.compressedSize +
-          vmSnapshotInstr.compressedSize,
+      'libapp_uncompressed_bytes': libapp.uncompressedSize,
+      'libapp_compressed_bytes': libapp.compressedSize,
       'license_uncompressed_bytes': license.uncompressedSize,
       'license_compressed_bytes': license.compressedSize,
     };
@@ -434,9 +562,6 @@ class MemoryTest {
       await device.unlock();
       await flutter('packages', options: <String>['get']);
 
-      if (deviceOperatingSystem == DeviceOperatingSystem.ios)
-        await prepareProvisioningCertificates(project);
-
       final StreamSubscription<String> adb = device.logcat.listen(
         (String data) {
           if (data.contains('==== MEMORY BENCHMARK ==== $_nextMessage ===='))
@@ -463,10 +588,11 @@ class MemoryTest {
       final ListStatistics endMemoryStatistics = ListStatistics(_endMemory);
       final ListStatistics diffMemoryStatistics = ListStatistics(_diffMemory);
 
-      final Map<String, dynamic> memoryUsage = <String, dynamic>{};
-      memoryUsage.addAll(startMemoryStatistics.asMap('start'));
-      memoryUsage.addAll(endMemoryStatistics.asMap('end'));
-      memoryUsage.addAll(diffMemoryStatistics.asMap('diff'));
+      final Map<String, dynamic> memoryUsage = <String, dynamic>{
+        ...startMemoryStatistics.asMap('start'),
+        ...endMemoryStatistics.asMap('end'),
+        ...diffMemoryStatistics.asMap('diff'),
+      };
 
       _device = null;
       _startMemory.clear();
@@ -494,7 +620,7 @@ class MemoryTest {
     await receivedNextMessage;
   }
 
-  /// To change the behaviour of the test, override this.
+  /// To change the behavior of the test, override this.
   ///
   /// Make sure to call recordStart() and recordEnd() once each in that order.
   ///
@@ -531,9 +657,82 @@ class MemoryTest {
     assert(_startMemoryUsage != null);
     print('snapshotting memory usage...');
     final Map<String, dynamic> endMemoryUsage = await device.getMemoryStats(package);
-    _startMemory.add(_startMemoryUsage['total_kb']);
-    _endMemory.add(endMemoryUsage['total_kb']);
-    _diffMemory.add(endMemoryUsage['total_kb'] - _startMemoryUsage['total_kb']);
+    _startMemory.add(_startMemoryUsage['total_kb'] as int);
+    _endMemory.add(endMemoryUsage['total_kb'] as int);
+    _diffMemory.add((endMemoryUsage['total_kb'] as int) - (_startMemoryUsage['total_kb'] as int));
+  }
+}
+
+enum ReportedDurationTestFlavor {
+  debug, profile, release
+}
+
+String _reportedDurationTestToString(ReportedDurationTestFlavor flavor) {
+  switch (flavor) {
+    case ReportedDurationTestFlavor.debug:
+      return 'debug';
+    case ReportedDurationTestFlavor.profile:
+      return 'profile';
+    case ReportedDurationTestFlavor.release:
+      return 'release';
+  }
+  throw ArgumentError('Unexpected value for enum $flavor');
+}
+
+class ReportedDurationTest {
+  ReportedDurationTest(this.flavor, this.project, this.test, this.package, this.durationPattern);
+
+  final ReportedDurationTestFlavor flavor;
+  final String project;
+  final String test;
+  final String package;
+  final RegExp durationPattern;
+
+  final Completer<int> durationCompleter = Completer<int>();
+
+  int get iterationCount => 10;
+
+  Device get device => _device;
+  Device _device;
+
+  Future<TaskResult> run() {
+    return inDirectory<TaskResult>(project, () async {
+      // This test currently only works on Android, because device.logcat,
+      // device.getMemoryStats, etc, aren't implemented for iOS.
+
+      _device = await devices.workingDevice;
+      await device.unlock();
+      await flutter('packages', options: <String>['get']);
+
+      final StreamSubscription<String> adb = device.logcat.listen(
+        (String data) {
+          if (durationPattern.hasMatch(data))
+            durationCompleter.complete(int.parse(durationPattern.firstMatch(data).group(1)));
+        },
+      );
+      print('launching $project$test on device...');
+      await flutter('run', options: <String>[
+        '--verbose',
+        '--${_reportedDurationTestToString(flavor)}',
+        '--no-resident',
+        '-d', device.deviceId,
+        test,
+      ]);
+
+      final int duration = await durationCompleter.future;
+      print('terminating...');
+      await device.stop(package);
+      await adb.cancel();
+
+      _device = null;
+
+      final Map<String, dynamic> reportedDuration = <String, dynamic>{
+        'duration': duration,
+      };
+      _device = null;
+
+      return TaskResult.success(reportedDuration, benchmarkScoreKeys: reportedDuration.keys.toList());
+    });
   }
 }
 

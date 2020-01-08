@@ -1,4 +1,4 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -137,7 +137,7 @@ class DartVm {
 
   final json_rpc.Peer _peer;
 
-  /// The URI through which this DartVM instance is connected.
+  /// The URL through which this DartVM instance is connected.
   final Uri uri;
 
   /// Attempts to connect to the given [Uri].
@@ -170,8 +170,8 @@ class DartVm {
     final Map<String, dynamic> jsonVmRef =
         await invokeRpc('getVM', timeout: timeout);
     final List<IsolateRef> result = <IsolateRef>[];
-    for (Map<String, dynamic> jsonIsolate in jsonVmRef['isolates']) {
-      final String name = jsonIsolate['name'];
+    for (final Map<String, dynamic> jsonIsolate in jsonVmRef['isolates']) {
+      final String name = jsonIsolate['name'] as String;
       if (pattern.matchAsPrefix(name) != null) {
         _log.fine('Found Isolate matching "$pattern": "$name"');
         result.add(IsolateRef._fromJson(jsonIsolate, this));
@@ -197,7 +197,7 @@ class DartVm {
           'Peer connection timed out during RPC call',
           timeout,
         );
-      });
+      }) as Map<String, dynamic>;
     return result;
   }
 
@@ -213,7 +213,7 @@ class DartVm {
     final List<FlutterView> views = <FlutterView>[];
     final Map<String, dynamic> rpcResponse =
         await invokeRpc('_flutter.listViews', timeout: timeout);
-    for (Map<String, dynamic> jsonView in rpcResponse['views']) {
+    for (final Map<String, dynamic> jsonView in rpcResponse['views']) {
       final FlutterView flutterView = FlutterView._fromJson(jsonView);
       if (flutterView != null) {
         views.add(flutterView);
@@ -243,11 +243,11 @@ class FlutterView {
   /// All other cases return a [FlutterView] instance. The name of the
   /// view may be null, but the id will always be set.
   factory FlutterView._fromJson(Map<String, dynamic> json) {
-    final Map<String, dynamic> isolate = json['isolate'];
-    final String id = json['id'];
+    final Map<String, dynamic> isolate = json['isolate'] as Map<String, dynamic>;
+    final String id = json['id'] as String;
     String name;
     if (isolate != null) {
-      name = isolate['name'];
+      name = isolate['name'] as String;
       if (name == null) {
         throw RpcFormatError('Unable to find name for isolate "$isolate"');
       }
@@ -286,9 +286,9 @@ class IsolateRef {
   IsolateRef._(this.name, this.number, this.dartVm);
 
   factory IsolateRef._fromJson(Map<String, dynamic> json, DartVm dartVm) {
-    final String number = json['number'];
-    final String name = json['name'];
-    final String type = json['type'];
+    final String number = json['number'] as String;
+    final String name = json['name'] as String;
+    final String type = json['type'] as String;
     if (type == null) {
       throw RpcFormatError('Unable to find type within JSON "$json"');
     }

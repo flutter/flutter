@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -6,6 +6,7 @@ import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:flutter/painting.dart';
+import 'package:flutter/foundation.dart';
 
 import 'object.dart';
 import 'stack.dart';
@@ -216,15 +217,12 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
       ));
     }
 
-    final List<String> overflows = <String>[];
-    if (overflow.left > 0.0)
-      overflows.add('${_formatPixels(overflow.left)} pixels on the left');
-    if (overflow.top > 0.0)
-      overflows.add('${_formatPixels(overflow.top)} pixels on the top');
-    if (overflow.bottom > 0.0)
-      overflows.add('${_formatPixels(overflow.bottom)} pixels on the bottom');
-    if (overflow.right > 0.0)
-      overflows.add('${_formatPixels(overflow.right)} pixels on the right');
+    final List<String> overflows = <String>[
+      if (overflow.left > 0.0) '${_formatPixels(overflow.left)} pixels on the left',
+      if (overflow.top > 0.0) '${_formatPixels(overflow.top)} pixels on the top',
+      if (overflow.bottom > 0.0) '${_formatPixels(overflow.bottom)} pixels on the bottom',
+      if (overflow.right > 0.0) '${_formatPixels(overflow.right)} pixels on the right',
+    ];
     String overflowText = '';
     assert(overflows.isNotEmpty,
         "Somehow $runtimeType didn't actually overflow like it thought it did.");
@@ -248,13 +246,15 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
         context: ErrorDescription('during layout'),
         renderObject: this,
         informationCollector: () sync* {
+          if (debugCreator != null)
+            yield DiagnosticsDebugCreator(debugCreator);
           yield* overflowHints;
           yield describeForError('The specific $runtimeType in question is');
           // TODO(jacobr): this line is ascii art that it would be nice to
           // handle a little more generically in GUI debugging clients in the
           // future.
           yield DiagnosticsNode.message('◢◤' * (FlutterError.wrapWidth ~/ 2), allowWrap: false);
-        }
+        },
       ),
     );
   }
@@ -282,10 +282,10 @@ mixin DebugOverflowIndicatorMixin on RenderObject {
     }
 
     final List<_OverflowRegionData> overflowRegions = _calculateOverflowRegions(overflow, containerRect);
-    for (_OverflowRegionData region in overflowRegions) {
+    for (final _OverflowRegionData region in overflowRegions) {
       context.canvas.drawRect(region.rect.shift(offset), _indicatorPaint);
-
-      if (_indicatorLabel[region.side.index].text?.text != region.label) {
+      final TextSpan textSpan = _indicatorLabel[region.side.index].text as TextSpan;
+      if (textSpan?.text != region.label) {
         _indicatorLabel[region.side.index].text = TextSpan(
           text: region.label,
           style: _indicatorTextStyle,

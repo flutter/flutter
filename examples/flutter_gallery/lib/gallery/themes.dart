@@ -1,18 +1,11 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
 
-class GalleryTheme {
-  const GalleryTheme._(this.name, this.data);
-
-  final String name;
-  final ThemeData data;
-}
-
-final GalleryTheme kDarkGalleryTheme = GalleryTheme._('Dark', _buildDarkTheme());
-final GalleryTheme kLightGalleryTheme = GalleryTheme._('Light', _buildLightTheme());
+final ThemeData kLightGalleryTheme = _buildLightTheme();
+final ThemeData kDarkGalleryTheme = _buildDarkTheme();
 
 TextTheme _buildTextTheme(TextTheme base) {
   return base.copyWith(

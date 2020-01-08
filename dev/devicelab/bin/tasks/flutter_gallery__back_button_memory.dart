@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -19,14 +19,17 @@ class BackButtonMemoryTest extends MemoryTest {
   BackButtonMemoryTest() : super('${flutterDirectory.path}/examples/flutter_gallery', 'test_memory/back_button.dart', packageName);
 
   @override
-  AndroidDevice get device => super.device;
+  AndroidDevice get device => super.device as AndroidDevice;
+
+  @override
+  int get iterationCount => 5;
 
   /// Perform a series of back button suspend and resume cycles.
   @override
   Future<void> useMemory() async {
     await launchApp();
     await recordStart();
-    for (int iteration = 0; iteration < 10; iteration += 1) {
+    for (int iteration = 0; iteration < 8; iteration += 1) {
       print('back/forward iteration $iteration');
 
       // Push back button, wait for it to be seen by the Flutter app.

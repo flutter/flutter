@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -12,6 +12,7 @@ library foundation;
 export 'package:meta/meta.dart' show
   immutable,
   mustCallSuper,
+  nonVirtual,
   optionalTypeArgs,
   protected,
   required,
@@ -35,6 +36,7 @@ export 'src/foundation/annotations.dart';
 export 'src/foundation/assertions.dart';
 export 'src/foundation/basic_types.dart';
 export 'src/foundation/binding.dart';
+export 'src/foundation/bitfield.dart';
 export 'src/foundation/change_notifier.dart';
 export 'src/foundation/collections.dart';
 export 'src/foundation/consolidate_response.dart';
@@ -50,5 +52,6 @@ export 'src/foundation/platform.dart';
 export 'src/foundation/print.dart';
 export 'src/foundation/profile.dart';
 export 'src/foundation/serialization.dart';
+export 'src/foundation/stack_frame.dart';
 export 'src/foundation/synchronous_future.dart';
 export 'src/foundation/unicode.dart';

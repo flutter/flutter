@@ -1,4 +1,4 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -36,7 +36,7 @@ enum ListTileStyle {
 ///
 /// The [Drawer] widget specifies a tile theme for its children which sets
 /// [style] to [ListTileStyle.drawer].
-class ListTileTheme extends InheritedWidget {
+class ListTileTheme extends InheritedTheme {
   /// Creates a list tile theme that controls the color and style parameters for
   /// [ListTile]s.
   const ListTileTheme({
@@ -111,8 +111,22 @@ class ListTileTheme extends InheritedWidget {
   /// ListTileTheme theme = ListTileTheme.of(context);
   /// ```
   static ListTileTheme of(BuildContext context) {
-    final ListTileTheme result = context.inheritFromWidgetOfExactType(ListTileTheme);
+    final ListTileTheme result = context.dependOnInheritedWidgetOfExactType<ListTileTheme>();
     return result ?? const ListTileTheme();
+  }
+
+  @override
+  Widget wrap(BuildContext context, Widget child) {
+    final ListTileTheme ancestorTheme = context.findAncestorWidgetOfExactType<ListTileTheme>();
+    return identical(this, ancestorTheme) ? child : ListTileTheme(
+      dense: dense,
+      style: style,
+      selectedColor: selectedColor,
+      iconColor: iconColor,
+      textColor: textColor,
+      contentPadding: contentPadding,
+      child: child,
+    );
   }
 
   @override
@@ -150,6 +164,8 @@ enum ListTileControlAffinity {
 
 /// A single fixed-height row that typically contains some text as well as
 /// a leading or trailing icon.
+///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=l8dj0yPBvgQ}
 ///
 /// A list tile contains one to three lines of text optionally flanked by icons or
 /// other widgets, such as check boxes. The icons (or other widgets) for the
@@ -424,7 +440,7 @@ enum ListTileControlAffinity {
 ///
 /// {@tool snippet --template=stateless_widget_scaffold}
 ///
-/// Here is an example of an article list item with multi-line titles and
+/// Here is an example of an article list item with multiline titles and
 /// subtitles. It utilizes [Row]s and [Column]s, as well as [Expanded] and
 /// [AspectRatio] widgets to organize its layout.
 ///
@@ -866,6 +882,7 @@ class ListTile extends StatelessWidget {
     return InkWell(
       onTap: enabled ? onTap : null,
       onLongPress: enabled ? onLongPress : null,
+      canRequestFocus: enabled,
       child: Semantics(
         selected: selected,
         enabled: enabled,
@@ -958,10 +975,10 @@ class _ListTileElement extends RenderObjectElement {
   final Map<Element, _ListTileSlot> childToSlot = <Element, _ListTileSlot>{};
 
   @override
-  _ListTile get widget => super.widget;
+  _ListTile get widget => super.widget as _ListTile;
 
   @override
-  _RenderListTile get renderObject => super.renderObject;
+  _RenderListTile get renderObject => super.renderObject as _RenderListTile;
 
   @override
   void visitChildren(ElementVisitor visitor) {
@@ -1022,7 +1039,7 @@ class _ListTileElement extends RenderObjectElement {
     _updateChild(widget.trailing, _ListTileSlot.trailing);
   }
 
-  void _updateRenderObject(RenderObject child, _ListTileSlot slot) {
+  void _updateRenderObject(RenderBox child, _ListTileSlot slot) {
     switch (slot) {
       case _ListTileSlot.leading:
         renderObject.leading = child;
@@ -1043,8 +1060,8 @@ class _ListTileElement extends RenderObjectElement {
   void insertChildRenderObject(RenderObject child, dynamic slotValue) {
     assert(child is RenderBox);
     assert(slotValue is _ListTileSlot);
-    final _ListTileSlot slot = slotValue;
-    _updateRenderObject(child, slot);
+    final _ListTileSlot slot = slotValue as _ListTileSlot;
+    _updateRenderObject(child as RenderBox, slot);
     assert(renderObject.childToSlot.keys.contains(child));
     assert(renderObject.slotToChild.keys.contains(slot));
   }
@@ -1192,14 +1209,14 @@ class _RenderListTile extends RenderBox {
   @override
   void attach(PipelineOwner owner) {
     super.attach(owner);
-    for (RenderBox child in _children)
+    for (final RenderBox child in _children)
       child.attach(owner);
   }
 
   @override
   void detach() {
     super.detach();
-    for (RenderBox child in _children)
+    for (final RenderBox child in _children)
       child.detach();
   }
 
@@ -1286,7 +1303,7 @@ class _RenderListTile extends RenderBox {
   @override
   double computeDistanceToActualBaseline(TextBaseline baseline) {
     assert(title != null);
-    final BoxParentData parentData = title.parentData;
+    final BoxParentData parentData = title.parentData as BoxParentData;
     return parentData.offset.dy + title.getDistanceToActualBaseline(baseline);
   }
 
@@ -1302,7 +1319,7 @@ class _RenderListTile extends RenderBox {
   }
 
   static void _positionBox(RenderBox box, Offset offset) {
-    final BoxParentData parentData = box.parentData;
+    final BoxParentData parentData = box.parentData as BoxParentData;
     parentData.offset = offset;
   }
 
@@ -1446,7 +1463,7 @@ class _RenderListTile extends RenderBox {
   void paint(PaintingContext context, Offset offset) {
     void doPaint(RenderBox child) {
       if (child != null) {
-        final BoxParentData parentData = child.parentData;
+        final BoxParentData parentData = child.parentData as BoxParentData;
         context.paintChild(child, parentData.offset + offset);
       }
     }
@@ -1462,8 +1479,8 @@ class _RenderListTile extends RenderBox {
   @override
   bool hitTestChildren(BoxHitTestResult result, { @required Offset position }) {
     assert(position != null);
-    for (RenderBox child in _children) {
-      final BoxParentData parentData = child.parentData;
+    for (final RenderBox child in _children) {
+      final BoxParentData parentData = child.parentData as BoxParentData;
       final bool isHit = result.addWithPaintOffset(
         offset: parentData.offset,
         position: position,

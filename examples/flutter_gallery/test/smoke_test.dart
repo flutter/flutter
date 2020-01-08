@@ -1,4 +1,4 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -42,7 +42,7 @@ void verifyToStringOutput(String name, String route, String testString) {
   final List<String> lines = testString.split('\n');
   if (!testString.endsWith('\n'))
     reportToStringError(name, route, lines.length, lines, 'does not end with a line feed');
-  for (String line in lines) {
+  for (final String line in lines) {
     lineNumber += 1;
     if (line == '' && lineNumber != lines.length) {
       reportToStringError(name, route, lineNumber, lines, 'found empty line');
@@ -109,28 +109,28 @@ Future<void> smokeOptionsPage(WidgetTester tester) async {
   await tester.tap(showOptionsPageButton);
   await tester.pumpAndSettle();
 
-  // Switch to the dark theme: first switch control
+  // Switch to the dark theme: first menu button, choose 'Dark'
+  await tester.tap(find.byIcon(Icons.arrow_drop_down).first);
+  await tester.pumpAndSettle();
+  await tester.tap(find.text('Dark'));
+  await tester.pumpAndSettle();
+
+  // Switch back to system theme setting: first menu button, choose 'System Default'
+  await tester.tap(find.byIcon(Icons.arrow_drop_down).first);
+  await tester.pumpAndSettle();
+  await tester.tap(find.text('System Default').at(1));
+  await tester.pumpAndSettle();
+
+  // Switch text direction: first switch
   await tester.tap(find.byType(Switch).first);
   await tester.pumpAndSettle();
 
-  // Switch back to the light theme: first switch control again
+  // Switch back to system text direction: first switch control again
   await tester.tap(find.byType(Switch).first);
-  await tester.pumpAndSettle();
-
-  // Popup the text size menu: first menu button, choose 'Small'
-  await tester.tap(find.byIcon(Icons.arrow_drop_down).first);
-  await tester.pumpAndSettle();
-  await tester.tap(find.text('Small'));
-  await tester.pumpAndSettle();
-
-  // Popup the text size menu: first menu button, choose 'Normal'
-  await tester.tap(find.byIcon(Icons.arrow_drop_down).first);
-  await tester.pumpAndSettle();
-  await tester.tap(find.text('Normal'));
   await tester.pumpAndSettle();
 
   // Scroll the 'Send feedback' item into view
-  await tester.drag(find.text('Normal'), const Offset(0.0, -1000.0));
+  await tester.drag(find.text('Theme'), const Offset(0.0, -1000.0));
   await tester.pumpAndSettle();
   await tester.tap(find.text('Send feedback'));
   await tester.pumpAndSettle();
@@ -157,11 +157,11 @@ Future<void> smokeGallery(WidgetTester tester) async {
 
   expect(find.text(kGalleryTitle), findsOneWidget);
 
-  for (GalleryDemoCategory category in kAllGalleryDemoCategories) {
+  for (final GalleryDemoCategory category in kAllGalleryDemoCategories) {
     await Scrollable.ensureVisible(tester.element(find.text(category.name)), alignment: 0.5);
     await tester.tap(find.text(category.name));
     await tester.pumpAndSettle();
-    for (GalleryDemo demo in kGalleryCategoryToDemos[category]) {
+    for (final GalleryDemo demo in kGalleryCategoryToDemos[category]) {
       await Scrollable.ensureVisible(tester.element(find.text(demo.title)), alignment: 0.0);
       await smokeDemo(tester, demo);
       tester.binding.debugAssertNoTransientCallbacks('A transient callback was still active after running $demo');

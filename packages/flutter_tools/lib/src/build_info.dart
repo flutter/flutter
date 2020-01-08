@@ -1,12 +1,10 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'base/context.dart';
-import 'base/file_system.dart';
-import 'base/platform.dart';
 import 'base/utils.dart';
-import 'globals.dart';
+import 'globals.dart' as globals;
 
 /// Information about a build to be performed or used.
 class BuildInfo {
@@ -14,11 +12,8 @@ class BuildInfo {
     this.mode,
     this.flavor, {
     this.trackWidgetCreation = false,
-    this.compilationTraceFilePath,
     this.extraFrontEndOptions,
     this.extraGenSnapshotOptions,
-    this.buildSharedLibrary,
-    this.targetPlatform,
     this.fileSystemRoots,
     this.fileSystemScheme,
     this.buildNumber,
@@ -41,20 +36,11 @@ class BuildInfo {
   /// Whether the build should track widget creation locations.
   final bool trackWidgetCreation;
 
-  /// Dart compilation trace file to use for JIT VM snapshot.
-  final String compilationTraceFilePath;
-
   /// Extra command-line options for front-end.
   final String extraFrontEndOptions;
 
   /// Extra command-line options for gen_snapshot.
   final String extraGenSnapshotOptions;
-
-  /// Whether to prefer AOT compiling to a *so file.
-  final bool buildSharedLibrary;
-
-  /// Target platform for the build (e.g. android_arm versus android_arm64).
-  final TargetPlatform targetPlatform;
 
   /// Internal version number (not displayed to users).
   /// Each build must have a unique number to differentiate it from previous builds.
@@ -71,9 +57,8 @@ class BuildInfo {
 
   static const BuildInfo debug = BuildInfo(BuildMode.debug, null);
   static const BuildInfo profile = BuildInfo(BuildMode.profile, null);
+  static const BuildInfo jitRelease = BuildInfo(BuildMode.jitRelease, null);
   static const BuildInfo release = BuildInfo(BuildMode.release, null);
-  static const BuildInfo dynamicProfile = BuildInfo(BuildMode.dynamicProfile, null);
-  static const BuildInfo dynamicRelease = BuildInfo(BuildMode.dynamicRelease, null);
 
   /// Returns whether a debug build is requested.
   ///
@@ -82,40 +67,135 @@ class BuildInfo {
 
   /// Returns whether a profile build is requested.
   ///
-  /// Exactly one of [isDebug], [isProfile], or [isRelease] is true.
-  bool get isProfile => mode == BuildMode.profile || mode == BuildMode.dynamicProfile;
+  /// Exactly one of [isDebug], [isProfile], [isJitRelease],
+  /// or [isRelease] is true.
+  bool get isProfile => mode == BuildMode.profile;
 
   /// Returns whether a release build is requested.
   ///
-  /// Exactly one of [isDebug], [isProfile], or [isRelease] is true.
-  bool get isRelease => mode == BuildMode.release || mode == BuildMode.dynamicRelease;
+  /// Exactly one of [isDebug], [isProfile], [isJitRelease],
+  /// or [isRelease] is true.
+  bool get isRelease => mode == BuildMode.release;
 
-  /// Returns whether a dynamic build is requested.
-  bool get isDynamic => mode == BuildMode.dynamicProfile || mode == BuildMode.dynamicRelease;
+  /// Returns whether a JIT release build is requested.
+  ///
+  /// Exactly one of [isDebug], [isProfile], [isJitRelease],
+  /// or [isRelease] is true.
+  bool get isJitRelease => mode == BuildMode.jitRelease;
 
   bool get usesAot => isAotBuildMode(mode);
   bool get supportsEmulator => isEmulatorBuildMode(mode);
   bool get supportsSimulator => isEmulatorBuildMode(mode);
   String get modeName => getModeName(mode);
   String get friendlyModeName => getFriendlyModeName(mode);
-
-  BuildInfo withTargetPlatform(TargetPlatform targetPlatform) =>
-      BuildInfo(mode, flavor,
-          trackWidgetCreation: trackWidgetCreation,
-          compilationTraceFilePath: compilationTraceFilePath,
-          extraFrontEndOptions: extraFrontEndOptions,
-          extraGenSnapshotOptions: extraGenSnapshotOptions,
-          buildSharedLibrary: buildSharedLibrary,
-          targetPlatform: targetPlatform);
 }
 
-/// The type of build.
-enum BuildMode {
-  debug,
-  profile,
-  release,
-  dynamicProfile,
-  dynamicRelease
+/// Information about an Android build to be performed or used.
+class AndroidBuildInfo {
+  const AndroidBuildInfo(
+    this.buildInfo, {
+    this.targetArchs = const <AndroidArch>[
+      AndroidArch.armeabi_v7a,
+      AndroidArch.arm64_v8a,
+      AndroidArch.x86_64,
+    ],
+    this.splitPerAbi = false,
+    this.shrink = false,
+    this.fastStart = false,
+  });
+
+  // The build info containing the mode and flavor.
+  final BuildInfo buildInfo;
+
+  /// Whether to split the shared library per ABI.
+  ///
+  /// When this is false, multiple ABIs will be contained within one primary
+  /// build artifact. When this is true, multiple build artifacts (one per ABI)
+  /// will be produced.
+  final bool splitPerAbi;
+
+  /// Whether to enable code shrinking on release mode.
+  final bool shrink;
+
+  /// The target platforms for the build.
+  final Iterable<AndroidArch> targetArchs;
+
+  /// Whether to bootstrap an empty application.
+  final bool fastStart;
+}
+
+/// A summary of the compilation strategy used for Dart.
+class BuildMode {
+  const BuildMode._(this.name);
+
+  factory BuildMode.fromName(String value) {
+    switch (value) {
+      case 'debug':
+        return BuildMode.debug;
+      case 'profile':
+        return BuildMode.profile;
+      case 'release':
+        return BuildMode.release;
+      case 'jit_release':
+        return BuildMode.jitRelease;
+    }
+    throw ArgumentError('$value is not a supported build mode');
+  }
+
+  /// Built in JIT mode with no optimizations, enabled asserts, and an observatory.
+  static const BuildMode debug = BuildMode._('debug');
+
+  /// Built in AOT mode with some optimizations and an observatory.
+  static const BuildMode profile = BuildMode._('profile');
+
+  /// Built in AOT mode with all optimizations and no observatory.
+  static const BuildMode release = BuildMode._('release');
+
+  /// Built in JIT mode with all optimizations and no observatory.
+  static const BuildMode jitRelease = BuildMode._('jit_release');
+
+  static const List<BuildMode> values = <BuildMode>[
+    debug,
+    profile,
+    release,
+    jitRelease,
+  ];
+  static const Set<BuildMode> releaseModes = <BuildMode>{
+    release,
+    jitRelease,
+  };
+  static const Set<BuildMode> jitModes = <BuildMode>{
+    debug,
+    jitRelease,
+  };
+
+  /// Whether this mode is considered release.
+  ///
+  /// Useful for determining whether we should enable/disable asserts or
+  /// other development features.
+  bool get isRelease => releaseModes.contains(this);
+
+  /// Whether this mode is using the JIT runtime.
+  bool get isJit => jitModes.contains(this);
+
+  /// Whether this mode is using the precompiled runtime.
+  bool get isPrecompiled => !isJit;
+
+  /// The name for this build mode.
+  final String name;
+
+  @override
+  String toString() => name;
+}
+
+/// Return the name for the build mode, or "any" if null.
+String getNameForBuildMode(BuildMode buildMode) {
+  return buildMode.name;
+}
+
+/// Returns the [BuildMode] for a particular `name`.
+BuildMode getBuildModeForName(String name) {
+  return BuildMode.fromName(name);
 }
 
 String validatedBuildNumberForPlatform(TargetPlatform targetPlatform, String buildNumber) {
@@ -127,6 +207,9 @@ String validatedBuildNumberForPlatform(TargetPlatform targetPlatform, String bui
     // See CFBundleVersion at https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
     final RegExp disallowed = RegExp(r'[^\d\.]');
     String tmpBuildNumber = buildNumber.replaceAll(disallowed, '');
+    if (tmpBuildNumber.isEmpty) {
+      return null;
+    }
     final List<String> segments = tmpBuildNumber
         .split('.')
         .where((String segment) => segment.isNotEmpty)
@@ -136,7 +219,7 @@ String validatedBuildNumberForPlatform(TargetPlatform targetPlatform, String bui
     }
     tmpBuildNumber = segments.join('.');
     if (tmpBuildNumber != buildNumber) {
-      printTrace('Invalid build-number: $buildNumber for iOS/macOS, overridden by $tmpBuildNumber.\n'
+      globals.printTrace('Invalid build-number: $buildNumber for iOS/macOS, overridden by $tmpBuildNumber.\n'
           'See CFBundleVersion at https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html');
     }
     return tmpBuildNumber;
@@ -154,7 +237,7 @@ String validatedBuildNumberForPlatform(TargetPlatform targetPlatform, String bui
     }
     tmpBuildNumberStr = tmpBuildNumberInt.toString();
     if (tmpBuildNumberStr != buildNumber) {
-      printTrace('Invalid build-number: $buildNumber for Android, overridden by $tmpBuildNumberStr.\n'
+      globals.printTrace('Invalid build-number: $buildNumber for Android, overridden by $tmpBuildNumberStr.\n'
           'See versionCode at https://developer.android.com/studio/publish/versioning');
     }
     return tmpBuildNumberStr;
@@ -171,6 +254,9 @@ String validatedBuildNameForPlatform(TargetPlatform targetPlatform, String build
     // See CFBundleShortVersionString at https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
     final RegExp disallowed = RegExp(r'[^\d\.]');
     String tmpBuildName = buildName.replaceAll(disallowed, '');
+    if (tmpBuildName.isEmpty) {
+      return null;
+    }
     final List<String> segments = tmpBuildName
         .split('.')
         .where((String segment) => segment.isNotEmpty)
@@ -180,12 +266,13 @@ String validatedBuildNameForPlatform(TargetPlatform targetPlatform, String build
     }
     tmpBuildName = segments.join('.');
     if (tmpBuildName != buildName) {
-      printTrace('Invalid build-name: $buildName for iOS/macOS, overridden by $tmpBuildName.\n'
+      globals.printTrace('Invalid build-name: $buildName for iOS/macOS, overridden by $tmpBuildName.\n'
           'See CFBundleShortVersionString at https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html');
     }
     return tmpBuildName;
   }
-  if (targetPlatform == TargetPlatform.android_arm ||
+  if (targetPlatform == TargetPlatform.android ||
+      targetPlatform == TargetPlatform.android_arm ||
       targetPlatform == TargetPlatform.android_arm64 ||
       targetPlatform == TargetPlatform.android_x64 ||
       targetPlatform == TargetPlatform.android_x86) {
@@ -208,9 +295,7 @@ bool isAotBuildMode(BuildMode mode) {
 
 // Returns true if the given build mode can be used on emulators / simulators.
 bool isEmulatorBuildMode(BuildMode mode) {
-  return mode == BuildMode.debug ||
-    mode == BuildMode.dynamicRelease ||
-    mode == BuildMode.dynamicProfile;
+  return mode == BuildMode.debug;
 }
 
 enum HostPlatform {
@@ -233,49 +318,66 @@ String getNameForHostPlatform(HostPlatform platform) {
 }
 
 enum TargetPlatform {
-  android_arm,
-  android_arm64,
-  android_x64,
-  android_x86,
+  android,
   ios,
   darwin_x64,
   linux_x64,
   windows_x64,
-  fuchsia,
+  fuchsia_arm64,
+  fuchsia_x64,
   tester,
-  web,
+  web_javascript,
+  // The arch specific android target platforms are soft-depreacted.
+  // Instead of using TargetPlatform as a combination arch + platform
+  // the code will be updated to carry arch information in [DarwinArch]
+  // and [AndroidArch].
+  android_arm,
+  android_arm64,
+  android_x64,
+  android_x86,
 }
 
-/// iOS target device architecture.
+/// iOS and macOS target device architecture.
 //
 // TODO(cbracken): split TargetPlatform.ios into ios_armv7, ios_arm64.
-enum IOSArch {
+enum DarwinArch {
   armv7,
   arm64,
+  x86_64,
+}
+
+// TODO(jonahwilliams): replace all android TargetPlatform usage with AndroidArch.
+enum AndroidArch {
+  armeabi_v7a,
+  arm64_v8a,
+  x86,
+  x86_64,
 }
 
 /// The default set of iOS device architectures to build for.
-const List<IOSArch> defaultIOSArchs = <IOSArch>[
-  IOSArch.arm64,
+const List<DarwinArch> defaultIOSArchs = <DarwinArch>[
+  DarwinArch.arm64,
 ];
 
-String getNameForIOSArch(IOSArch arch) {
+String getNameForDarwinArch(DarwinArch arch) {
   switch (arch) {
-    case IOSArch.armv7:
+    case DarwinArch.armv7:
       return 'armv7';
-    case IOSArch.arm64:
+    case DarwinArch.arm64:
       return 'arm64';
+    case DarwinArch.x86_64:
+      return 'x86_64';
   }
   assert(false);
   return null;
 }
 
-IOSArch getIOSArchForName(String arch) {
+DarwinArch getIOSArchForName(String arch) {
   switch (arch) {
     case 'armv7':
-      return IOSArch.armv7;
+      return DarwinArch.armv7;
     case 'arm64':
-      return IOSArch.arm64;
+      return DarwinArch.arm64;
   }
   assert(false);
   return null;
@@ -299,12 +401,16 @@ String getNameForTargetPlatform(TargetPlatform platform) {
       return 'linux-x64';
     case TargetPlatform.windows_x64:
       return 'windows-x64';
-    case TargetPlatform.fuchsia:
-      return 'fuchsia';
+    case TargetPlatform.fuchsia_arm64:
+      return 'fuchsia-arm64';
+    case TargetPlatform.fuchsia_x64:
+      return 'fuchsia-x64';
     case TargetPlatform.tester:
       return 'flutter-tester';
-    case TargetPlatform.web:
-      return 'web';
+    case TargetPlatform.web_javascript:
+      return 'web-javascript';
+    case TargetPlatform.android:
+      return 'android';
   }
   assert(false);
   return null;
@@ -312,6 +418,8 @@ String getNameForTargetPlatform(TargetPlatform platform) {
 
 TargetPlatform getTargetPlatformForName(String platform) {
   switch (platform) {
+    case 'android':
+      return TargetPlatform.android;
     case 'android-arm':
       return TargetPlatform.android_arm;
     case 'android-arm64':
@@ -320,6 +428,10 @@ TargetPlatform getTargetPlatformForName(String platform) {
       return TargetPlatform.android_x64;
     case 'android-x86':
       return TargetPlatform.android_x86;
+    case 'fuchsia-arm64':
+      return TargetPlatform.fuchsia_arm64;
+    case 'fuchsia-x64':
+      return TargetPlatform.fuchsia_x64;
     case 'ios':
       return TargetPlatform.ios;
     case 'darwin-x64':
@@ -328,22 +440,82 @@ TargetPlatform getTargetPlatformForName(String platform) {
       return TargetPlatform.linux_x64;
     case 'windows-x64':
       return TargetPlatform.windows_x64;
-    case 'web':
-      return TargetPlatform.web;
+    case 'web-javascript':
+      return TargetPlatform.web_javascript;
   }
   assert(platform != null);
   return null;
 }
 
-HostPlatform getCurrentHostPlatform() {
-  if (platform.isMacOS)
-    return HostPlatform.darwin_x64;
-  if (platform.isLinux)
-    return HostPlatform.linux_x64;
-  if (platform.isWindows)
-    return HostPlatform.windows_x64;
+AndroidArch getAndroidArchForName(String platform) {
+  switch (platform) {
+    case 'android-arm':
+      return AndroidArch.armeabi_v7a;
+    case 'android-arm64':
+      return AndroidArch.arm64_v8a;
+    case 'android-x64':
+      return AndroidArch.x86_64;
+    case 'android-x86':
+      return AndroidArch.x86;
+  }
+  assert(false);
+  return null;
+}
 
-  printError('Unsupported host platform, defaulting to Linux');
+String getNameForAndroidArch(AndroidArch arch) {
+  switch (arch) {
+    case AndroidArch.armeabi_v7a:
+      return 'armeabi-v7a';
+    case AndroidArch.arm64_v8a:
+      return 'arm64-v8a';
+    case AndroidArch.x86_64:
+      return 'x86_64';
+    case AndroidArch.x86:
+      return 'x86';
+  }
+  assert(false);
+  return null;
+}
+
+String getPlatformNameForAndroidArch(AndroidArch arch) {
+  switch (arch) {
+    case AndroidArch.armeabi_v7a:
+      return 'android-arm';
+    case AndroidArch.arm64_v8a:
+      return 'android-arm64';
+    case AndroidArch.x86_64:
+      return 'android-x64';
+    case AndroidArch.x86:
+      return 'android-x86';
+  }
+  assert(false);
+  return null;
+}
+
+String fuchsiaArchForTargetPlatform(TargetPlatform targetPlatform) {
+  switch (targetPlatform) {
+    case TargetPlatform.fuchsia_arm64:
+      return 'arm64';
+    case TargetPlatform.fuchsia_x64:
+      return 'x64';
+    default:
+      assert(false);
+      return null;
+  }
+}
+
+HostPlatform getCurrentHostPlatform() {
+  if (globals.platform.isMacOS) {
+    return HostPlatform.darwin_x64;
+  }
+  if (globals.platform.isLinux) {
+    return HostPlatform.linux_x64;
+  }
+  if (globals.platform.isWindows) {
+    return HostPlatform.windows_x64;
+  }
+
+  globals.printError('Unsupported host platform, defaulting to Linux');
 
   return HostPlatform.linux_x64;
 }
@@ -352,13 +524,14 @@ HostPlatform getCurrentHostPlatform() {
 String getBuildDirectory() {
   // TODO(johnmccutchan): Stop calling this function as part of setting
   // up command line argument processing.
-  if (context == null || config == null)
+  if (context == null || globals.config == null) {
     return 'build';
+  }
 
-  final String buildDir = config.getValue('build-dir') ?? 'build';
-  if (fs.path.isAbsolute(buildDir)) {
+  final String buildDir = globals.config.getValue('build-dir') as String ?? 'build';
+  if (globals.fs.path.isAbsolute(buildDir)) {
     throw Exception(
-        'build-dir config setting in ${config.configPath} must be relative');
+        'build-dir config setting in ${globals.config.configPath} must be relative');
   }
   return buildDir;
 }
@@ -371,46 +544,40 @@ String getAndroidBuildDirectory() {
 
 /// Returns the AOT build output directory.
 String getAotBuildDirectory() {
-  return fs.path.join(getBuildDirectory(), 'aot');
+  return globals.fs.path.join(getBuildDirectory(), 'aot');
 }
 
 /// Returns the asset build output directory.
 String getAssetBuildDirectory() {
-  return fs.path.join(getBuildDirectory(), 'flutter_assets');
+  return globals.fs.path.join(getBuildDirectory(), 'flutter_assets');
 }
 
 /// Returns the iOS build output directory.
 String getIosBuildDirectory() {
-  return fs.path.join(getBuildDirectory(), 'ios');
+  return globals.fs.path.join(getBuildDirectory(), 'ios');
 }
 
 /// Returns the macOS build output directory.
 String getMacOSBuildDirectory() {
-  return fs.path.join(getBuildDirectory(), 'macos');
+  return globals.fs.path.join(getBuildDirectory(), 'macos');
 }
 
 /// Returns the web build output directory.
 String getWebBuildDirectory() {
-  return fs.path.join(getBuildDirectory(), 'web');
+  return globals.fs.path.join(getBuildDirectory(), 'web');
 }
 
 /// Returns the Linux build output directory.
 String getLinuxBuildDirectory() {
-  return fs.path.join(getBuildDirectory(), 'linux');
+  return globals.fs.path.join(getBuildDirectory(), 'linux');
 }
 
 /// Returns the Windows build output directory.
 String getWindowsBuildDirectory() {
-  return fs.path.join(getBuildDirectory(), 'windows');
+  return globals.fs.path.join(getBuildDirectory(), 'windows');
 }
 
 /// Returns the Fuchsia build output directory.
 String getFuchsiaBuildDirectory() {
-  return fs.path.join(getBuildDirectory(), 'fuchsia');
-}
-
-/// Returns directory used by incremental compiler (IKG - incremental kernel
-/// generator) to store cached intermediate state.
-String getIncrementalCompilerByteStoreDirectory() {
-  return fs.path.join(getBuildDirectory(), 'ikg_byte_store');
+  return globals.fs.path.join(getBuildDirectory(), 'fuchsia');
 }

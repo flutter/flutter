@@ -1,3 +1,7 @@
+// Copyright 2014 The Flutter Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_gallery/demo/all.dart';
@@ -45,7 +49,7 @@ void main() {
       await tester.pumpWidget(MaterialApp(home: ChipDemo()));
       await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
       handle.dispose();
-    });
+    }, skip: true); // TODO(gspencergoog): Stop skipping when issue is fixed. https://github.com/flutter/flutter/issues/42455
 
     testWidgets('data_table_demo', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
@@ -472,15 +476,15 @@ void main() {
 
   group('All material demos meet text contrast guidelines', () {
     final List<ThemeData> themes = <ThemeData>[
-      kLightGalleryTheme.data,
+      kLightGalleryTheme,
       ThemeData.light(),
-      // TODO(hansmuller): add kDarkGalleryTheme.data, ThemeData.dark(), see #22044
+      // TODO(hansmuller): add kDarkGalleryTheme, ThemeData.dark(), see #22044
     ];
 
     const List<String> themeNames = <String>[
       'kLightGalleryTheme',
       'ThemeData.light()',
-      // TODO(hansmuller): add 'kDarkGalleryTheme', 'ThemeData.dark()', see 22044
+      // TODO(hansmuller): add 'kDarkGalleryTheme', 'ThemeData.dark()', see #22044
     ];
 
     for (int themeIndex = 0; themeIndex < themes.length; themeIndex += 1) {

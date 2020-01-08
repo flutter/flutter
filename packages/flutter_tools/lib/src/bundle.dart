@@ -1,31 +1,33 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:pool/pool.dart';
 
-import 'artifacts.dart';
 import 'asset.dart';
-import 'base/build.dart';
 import 'base/common.dart';
 import 'base/file_system.dart';
+import 'base/logger.dart';
 import 'build_info.dart';
-import 'compile.dart';
+import 'build_system/build_system.dart';
+import 'build_system/depfile.dart';
+import 'build_system/targets/dart.dart';
 import 'dart/package_map.dart';
 import 'devfs.dart';
-import 'globals.dart';
+import 'globals.dart' as globals;
 import 'project.dart';
 
-const String defaultMainPath = 'lib/main.dart';
+String get defaultMainPath => globals.fs.path.join('lib', 'main.dart');
 const String defaultAssetBasePath = '.';
 const String defaultManifestPath = 'pubspec.yaml';
-String get defaultDepfilePath => fs.path.join(getBuildDirectory(), 'snapshot_blob.bin.d');
+String get defaultDepfilePath => globals.fs.path.join(getBuildDirectory(), 'snapshot_blob.bin.d');
 
 String getDefaultApplicationKernelPath({ @required bool trackWidgetCreation }) {
   return getKernelPathForTransformerOptions(
-    fs.path.join(getBuildDirectory(), 'app.dill'),
+    globals.fs.path.join(getBuildDirectory(), 'app.dill'),
     trackWidgetCreation: trackWidgetCreation,
   );
 }
@@ -42,119 +44,105 @@ String getKernelPathForTransformerOptions(
 
 const String defaultPrivateKeyPath = 'privatekey.der';
 
-const String _kKernelKey = 'kernel_blob.bin';
-const String _kVMSnapshotData = 'vm_snapshot_data';
-const String _kIsolateSnapshotData = 'isolate_snapshot_data';
-const String _kIsolateSnapshotInstr = 'isolate_snapshot_instr';
-
-Future<void> build({
-  TargetPlatform platform,
-  BuildMode buildMode,
-  String mainPath = defaultMainPath,
-  String manifestPath = defaultManifestPath,
-  String applicationKernelFilePath,
-  String depfilePath,
-  String privateKeyPath = defaultPrivateKeyPath,
-  String assetDirPath,
-  String packagesPath,
-  bool precompiledSnapshot = false,
-  bool reportLicensedPackages = false,
-  bool trackWidgetCreation = false,
-  String compilationTraceFilePath,
-  List<String> extraFrontEndOptions = const <String>[],
-  List<String> extraGenSnapshotOptions = const <String>[],
-  List<String> fileSystemRoots,
-  String fileSystemScheme,
-}) async {
-  depfilePath ??= defaultDepfilePath;
-  assetDirPath ??= getAssetBuildDirectory();
-  packagesPath ??= fs.path.absolute(PackageMap.globalPackagesPath);
-  applicationKernelFilePath ??= getDefaultApplicationKernelPath(trackWidgetCreation: trackWidgetCreation);
-  final FlutterProject flutterProject = FlutterProject.current();
-
-  if (compilationTraceFilePath != null) {
-    if (buildMode != BuildMode.dynamicProfile && buildMode != BuildMode.dynamicRelease) {
-      // Silently ignore JIT snapshotting for those builds that don't support it.
-      compilationTraceFilePath = null;
-
-    } else if (compilationTraceFilePath.isEmpty) {
-      // Disable JIT snapshotting if flag is empty.
-      printStatus('Code snapshot will be disabled for this build.');
-      compilationTraceFilePath = null;
-
-    } else if (!fs.file(compilationTraceFilePath).existsSync()) {
-      // Be forgiving if compilation trace file is missing.
-      printStatus('No compilation trace available. To optimize performance, consider using --train.');
-      final File tmp = fs.systemTempDirectory.childFile('flutterEmptyCompilationTrace.txt');
-      compilationTraceFilePath = (tmp..createSync(recursive: true)).path;
-
-    } else {
-      printStatus('Code snapshot will use compilation training file $compilationTraceFilePath.');
-    }
-  }
-
-  DevFSContent kernelContent;
-  if (!precompiledSnapshot) {
-    if ((extraFrontEndOptions != null) && extraFrontEndOptions.isNotEmpty)
-      printTrace('Extra front-end options: $extraFrontEndOptions');
-    ensureDirectoryExists(applicationKernelFilePath);
-    final KernelCompiler kernelCompiler = await kernelCompilerFactory.create(flutterProject);
-    final CompilerOutput compilerOutput = await kernelCompiler.compile(
-      sdkRoot: artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath, mode: buildMode),
-      incrementalCompilerByteStorePath: compilationTraceFilePath != null ? null :
-          fs.path.absolute(getIncrementalCompilerByteStoreDirectory()),
-      mainPath: fs.file(mainPath).absolute.path,
-      outputFilePath: applicationKernelFilePath,
-      depFilePath: depfilePath,
+/// Provides a `build` method that builds the bundle.
+class BundleBuilder {
+  /// Builds the bundle for the given target platform.
+  ///
+  /// The default `mainPath` is `lib/main.dart`.
+  /// The default  `manifestPath` is `pubspec.yaml`
+  Future<void> build({
+    @required TargetPlatform platform,
+    BuildMode buildMode,
+    String mainPath,
+    String manifestPath = defaultManifestPath,
+    String applicationKernelFilePath,
+    String depfilePath,
+    String privateKeyPath = defaultPrivateKeyPath,
+    String assetDirPath,
+    String packagesPath,
+    bool precompiledSnapshot = false,
+    bool reportLicensedPackages = false,
+    bool trackWidgetCreation = false,
+    List<String> extraFrontEndOptions = const <String>[],
+    List<String> extraGenSnapshotOptions = const <String>[],
+    List<String> fileSystemRoots,
+    String fileSystemScheme,
+  }) async {
+    mainPath ??= defaultMainPath;
+    depfilePath ??= defaultDepfilePath;
+    assetDirPath ??= getAssetBuildDirectory();
+    packagesPath ??= globals.fs.path.absolute(PackageMap.globalPackagesPath);
+    final FlutterProject flutterProject = FlutterProject.current();
+    await buildWithAssemble(
+      buildMode: buildMode ?? BuildMode.debug,
+      targetPlatform: platform,
+      mainPath: mainPath,
+      flutterProject: flutterProject,
+      outputDir: assetDirPath,
+      depfilePath: depfilePath,
+      precompiled: precompiledSnapshot,
       trackWidgetCreation: trackWidgetCreation,
-      extraFrontEndOptions: extraFrontEndOptions,
-      fileSystemRoots: fileSystemRoots,
-      fileSystemScheme: fileSystemScheme,
-      packagesPath: packagesPath,
-      linkPlatformKernelIn: compilationTraceFilePath != null,
     );
-    if (compilerOutput?.outputFilename == null) {
-      throwToolExit('Compiler failed on $mainPath');
-    }
-    kernelContent = DevFSFileContent(fs.file(compilerOutput.outputFilename));
-
-    await fs.directory(getBuildDirectory()).childFile('frontend_server.d')
-        .writeAsString('frontend_server.d: ${artifacts.getArtifactPath(Artifact.frontendServerSnapshotForEngineDartSdk)}\n');
-
-    if (compilationTraceFilePath != null) {
-      final JITSnapshotter snapshotter = JITSnapshotter();
-      final int snapshotExitCode = await snapshotter.build(
-        platform: platform,
-        buildMode: buildMode,
-        mainPath: applicationKernelFilePath,
-        outputPath: getBuildDirectory(),
-        packagesPath: packagesPath,
-        compilationTraceFilePath: compilationTraceFilePath,
-        extraGenSnapshotOptions: extraGenSnapshotOptions,
-      );
-      if (snapshotExitCode != 0) {
-        throwToolExit('Snapshotting exited with non-zero exit code: $snapshotExitCode');
+    // Work around for flutter_tester placing kernel artifacts in odd places.
+    if (applicationKernelFilePath != null) {
+      final File outputDill = globals.fs.directory(assetDirPath).childFile('kernel_blob.bin');
+      if (outputDill.existsSync()) {
+        outputDill.copySync(applicationKernelFilePath);
       }
     }
+    return;
   }
+}
 
-  final AssetBundle assets = await buildAssets(
-    manifestPath: manifestPath,
-    assetDirPath: assetDirPath,
-    packagesPath: packagesPath,
-    reportLicensedPackages: reportLicensedPackages,
+/// Build an application bundle using flutter assemble.
+///
+/// This is a temporary shim to migrate the build implementations.
+Future<void> buildWithAssemble({
+  @required FlutterProject flutterProject,
+  @required BuildMode buildMode,
+  @required TargetPlatform targetPlatform,
+  @required String mainPath,
+  @required String outputDir,
+  @required String depfilePath,
+  @required bool precompiled,
+  bool trackWidgetCreation,
+}) async {
+  // If the precompiled flag was not passed, force us into debug mode.
+  buildMode = precompiled ? buildMode : BuildMode.debug;
+  final Environment environment = Environment(
+    projectDir: flutterProject.directory,
+    outputDir: globals.fs.directory(outputDir),
+    buildDir: flutterProject.dartTool.childDirectory('flutter_build'),
+    defines: <String, String>{
+      kTargetFile: mainPath,
+      kBuildMode: getNameForBuildMode(buildMode),
+      kTargetPlatform: getNameForTargetPlatform(targetPlatform),
+      kTrackWidgetCreation: trackWidgetCreation?.toString(),
+    },
   );
-  if (assets == null)
-    throwToolExit('Error building assets', exitCode: 1);
+  final Target target = buildMode == BuildMode.debug
+    ? const CopyFlutterBundle()
+    : const ReleaseCopyFlutterBundle();
+  final BuildResult result = await buildSystem.build(target, environment);
 
-  await assemble(
-    buildMode: buildMode,
-    assetBundle: assets,
-    kernelContent: kernelContent,
-    privateKeyPath: privateKeyPath,
-    assetDirPath: assetDirPath,
-    compilationTraceFilePath: compilationTraceFilePath,
-  );
+  if (!result.success) {
+    for (final ExceptionMeasurement measurement in result.exceptions.values) {
+        globals.printError('Target ${measurement.target} failed: ${measurement.exception}',
+          stackTrace: measurement.fatal
+            ? measurement.stackTrace
+            : null,
+        );
+    }
+    throwToolExit('Failed to build bundle.');
+  }
+  if (depfilePath != null) {
+    final Depfile depfile = Depfile(result.inputFiles, result.outputFiles);
+    final File outputDepfile = globals.fs.file(depfilePath);
+    if (!outputDepfile.parent.existsSync()) {
+      outputDepfile.parent.createSync(recursive: true);
+    }
+    depfile.writeToFile(outputDepfile);
+  }
 }
 
 Future<AssetBundle> buildAssets({
@@ -165,7 +153,7 @@ Future<AssetBundle> buildAssets({
   bool reportLicensedPackages = false,
 }) async {
   assetDirPath ??= getAssetBuildDirectory();
-  packagesPath ??= fs.path.absolute(PackageMap.globalPackagesPath);
+  packagesPath ??= globals.fs.path.absolute(PackageMap.globalPackagesPath);
 
   // Build the asset bundle.
   final AssetBundle assetBundle = AssetBundleFactory.instance.createBundle();
@@ -176,60 +164,47 @@ Future<AssetBundle> buildAssets({
     includeDefaultFonts: includeDefaultFonts,
     reportLicensedPackages: reportLicensedPackages,
   );
-  if (result != 0)
+  if (result != 0) {
     return null;
-
-  return assetBundle;
-}
-
-Future<void> assemble({
-  BuildMode buildMode,
-  AssetBundle assetBundle,
-  DevFSContent kernelContent,
-  String privateKeyPath = defaultPrivateKeyPath,
-  String assetDirPath,
-  String compilationTraceFilePath,
-}) async {
-  assetDirPath ??= getAssetBuildDirectory();
-  printTrace('Building bundle');
-
-  final Map<String, DevFSContent> assetEntries = Map<String, DevFSContent>.from(assetBundle.entries);
-  if (kernelContent != null) {
-    if (compilationTraceFilePath != null) {
-      final String vmSnapshotData = artifacts.getArtifactPath(Artifact.vmSnapshotData, mode: buildMode);
-      final String isolateSnapshotData = fs.path.join(getBuildDirectory(), _kIsolateSnapshotData);
-      final String isolateSnapshotInstr = fs.path.join(getBuildDirectory(), _kIsolateSnapshotInstr);
-      assetEntries[_kVMSnapshotData] = DevFSFileContent(fs.file(vmSnapshotData));
-      assetEntries[_kIsolateSnapshotData] = DevFSFileContent(fs.file(isolateSnapshotData));
-      assetEntries[_kIsolateSnapshotInstr] = DevFSFileContent(fs.file(isolateSnapshotInstr));
-    } else {
-      final String vmSnapshotData = artifacts.getArtifactPath(Artifact.vmSnapshotData, mode: buildMode);
-      final String isolateSnapshotData = artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: buildMode);
-      assetEntries[_kKernelKey] = kernelContent;
-      assetEntries[_kVMSnapshotData] = DevFSFileContent(fs.file(vmSnapshotData));
-      assetEntries[_kIsolateSnapshotData] = DevFSFileContent(fs.file(isolateSnapshotData));
-    }
   }
 
-  printTrace('Writing asset files to $assetDirPath');
-  ensureDirectoryExists(assetDirPath);
-
-  await writeBundle(fs.directory(assetDirPath), assetEntries);
-  printTrace('Wrote $assetDirPath');
+  return assetBundle;
 }
 
 Future<void> writeBundle(
   Directory bundleDir,
   Map<String, DevFSContent> assetEntries,
+  { Logger loggerOverride }
 ) async {
-  if (bundleDir.existsSync())
-    bundleDir.deleteSync(recursive: true);
+  loggerOverride ??= globals.logger;
+  if (bundleDir.existsSync()) {
+    try {
+      bundleDir.deleteSync(recursive: true);
+    } on FileSystemException catch (err) {
+      loggerOverride.printError(
+        'Failed to clean up asset directory ${bundleDir.path}: $err\n'
+        'To clean build artifacts, use the command "flutter clean".'
+      );
+    }
+  }
   bundleDir.createSync(recursive: true);
 
+  // Limit number of open files to avoid running out of file descriptors.
+  final Pool pool = Pool(64);
   await Future.wait<void>(
     assetEntries.entries.map<Future<void>>((MapEntry<String, DevFSContent> entry) async {
-      final File file = fs.file(fs.path.join(bundleDir.path, entry.key));
-      file.parent.createSync(recursive: true);
-      await file.writeAsBytes(await entry.value.contentsAsBytes());
+      final PoolResource resource = await pool.request();
+      try {
+        // This will result in strange looking files, for example files with `/`
+        // on Windows or files that end up getting URI encoded such as `#.ext`
+        // to `%23.ext`.  However, we have to keep it this way since the
+        // platform channels in the framework will URI encode these values,
+        // and the native APIs will look for files this way.
+        final File file = globals.fs.file(globals.fs.path.join(bundleDir.path, entry.key));
+        file.parent.createSync(recursive: true);
+        await file.writeAsBytes(await entry.value.contentsAsBytes());
+      } finally {
+        resource.release();
+      }
     }));
 }

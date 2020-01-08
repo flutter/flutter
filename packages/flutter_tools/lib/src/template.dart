@@ -1,12 +1,13 @@
-// Copyright 2016 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'package:mustache/mustache.dart' as mustache;
 
+import 'base/common.dart';
 import 'base/file_system.dart';
 import 'cache.dart';
-import 'globals.dart';
+import 'globals.dart' as globals;
 
 /// Expands templates in a directory to a destination. All files that must
 /// undergo template expansion should end with the '.tmpl' extension. All other
@@ -32,20 +33,20 @@ class Template {
 
     final List<FileSystemEntity> templateFiles = templateSource.listSync(recursive: true);
 
-    for (FileSystemEntity entity in templateFiles) {
+    for (final FileSystemEntity entity in templateFiles) {
       if (entity is! File) {
         // We are only interesting in template *file* URIs.
         continue;
       }
 
-      final String relativePath = fs.path.relative(entity.path,
+      final String relativePath = globals.fs.path.relative(entity.path,
           from: baseDir.absolute.path);
 
       if (relativePath.contains(templateExtension)) {
         // If '.tmpl' appears anywhere within the path of this entity, it is
         // is a candidate for rendering. This catches cases where the folder
         // itself is a template.
-        _templateFilePaths[relativePath] = fs.path.absolute(entity.path);
+        _templateFilePaths[relativePath] = globals.fs.path.absolute(entity.path);
       }
     }
   }
@@ -62,13 +63,22 @@ class Template {
 
   Map<String /* relative */, String /* absolute source */> _templateFilePaths;
 
+  /// Render the template into [directory].
+  ///
+  /// May throw a [ToolExit] if the directory is not writable.
   int render(
     Directory destination,
     Map<String, dynamic> context, {
     bool overwriteExisting = true,
     bool printStatusWhenWriting = true,
   }) {
-    destination.createSync(recursive: true);
+    try {
+      destination.createSync(recursive: true);
+    } on FileSystemException catch (err) {
+      globals.printError(err.toString());
+      throwToolExit('Failed to flutter create at ${destination.path}.');
+      return 0;
+    }
     int fileCount = 0;
 
     /// Returns the resolved destination path corresponding to the specified
@@ -80,17 +90,28 @@ class Template {
       final Match match = _kTemplateLanguageVariant.matchAsPrefix(relativeDestinationPath);
       if (match != null) {
         final String platform = match.group(1);
-        final String language = context['${platform}Language'];
-        if (language != match.group(2))
+        final String language = context['${platform}Language'] as String;
+        if (language != match.group(2)) {
           return null;
+        }
         relativeDestinationPath = relativeDestinationPath.replaceAll('$platform-$language.tmpl', platform);
       }
-      final String projectName = context['projectName'];
-      final String androidIdentifier = context['androidIdentifier'];
-      final String pluginClass = context['pluginClass'];
+      // Only build a web project if explicitly asked.
+      final bool web = context['web'] as bool;
+      if (relativeDestinationPath.contains('web') && !web) {
+        return null;
+      }
+      // Only build a macOS project if explicitly asked.
+      final bool macOS = context['macos'] as bool;
+      if (relativeDestinationPath.startsWith('macos.tmpl') && !macOS) {
+        return null;
+      }
+      final String projectName = context['projectName'] as String;
+      final String androidIdentifier = context['androidIdentifier'] as String;
+      final String pluginClass = context['pluginClass'] as String;
       final String destinationDirPath = destination.absolute.path;
-      final String pathSeparator = fs.path.separator;
-      String finalDestinationPath = fs.path
+      final String pathSeparator = globals.fs.path.separator;
+      String finalDestinationPath = globals.fs.path
         .join(destinationDirPath, relativeDestinationPath)
         .replaceAll(copyTemplateExtension, '')
         .replaceAll(templateExtension, '');
@@ -99,46 +120,53 @@ class Template {
         finalDestinationPath = finalDestinationPath
             .replaceAll('androidIdentifier', androidIdentifier.replaceAll('.', pathSeparator));
       }
-      if (projectName != null)
+      if (projectName != null) {
         finalDestinationPath = finalDestinationPath.replaceAll('projectName', projectName);
-      if (pluginClass != null)
+      }
+      if (pluginClass != null) {
         finalDestinationPath = finalDestinationPath.replaceAll('pluginClass', pluginClass);
+      }
       return finalDestinationPath;
     }
 
     _templateFilePaths.forEach((String relativeDestinationPath, String absoluteSourcePath) {
-      final bool withRootModule = context['withRootModule'] ?? false;
-      if (!withRootModule && absoluteSourcePath.contains('flutter_root'))
+      final bool withRootModule = context['withRootModule'] as bool ?? false;
+      if (!withRootModule && absoluteSourcePath.contains('flutter_root')) {
         return;
+      }
 
       final String finalDestinationPath = renderPath(relativeDestinationPath);
-      if (finalDestinationPath == null)
+      if (finalDestinationPath == null) {
         return;
-      final File finalDestinationFile = fs.file(finalDestinationPath);
-      final String relativePathForLogging = fs.path.relative(finalDestinationFile.path);
+      }
+      final File finalDestinationFile = globals.fs.file(finalDestinationPath);
+      final String relativePathForLogging = globals.fs.path.relative(finalDestinationFile.path);
 
       // Step 1: Check if the file needs to be overwritten.
 
       if (finalDestinationFile.existsSync()) {
         if (overwriteExisting) {
           finalDestinationFile.deleteSync(recursive: true);
-          if (printStatusWhenWriting)
-            printStatus('  $relativePathForLogging (overwritten)');
+          if (printStatusWhenWriting) {
+            globals.printStatus('  $relativePathForLogging (overwritten)');
+          }
         } else {
           // The file exists but we cannot overwrite it, move on.
-          if (printStatusWhenWriting)
-            printTrace('  $relativePathForLogging (existing - skipped)');
+          if (printStatusWhenWriting) {
+            globals.printTrace('  $relativePathForLogging (existing - skipped)');
+          }
           return;
         }
       } else {
-        if (printStatusWhenWriting)
-          printStatus('  $relativePathForLogging (created)');
+        if (printStatusWhenWriting) {
+          globals.printStatus('  $relativePathForLogging (created)');
+        }
       }
 
       fileCount++;
 
       finalDestinationFile.createSync(recursive: true);
-      final File sourceFile = fs.file(absoluteSourcePath);
+      final File sourceFile = globals.fs.file(absoluteSourcePath);
 
       // Step 2: If the absolute paths ends with a '.copy.tmpl', this file does
       //         not need mustache rendering but needs to be directly copied.
@@ -172,7 +200,7 @@ class Template {
 }
 
 Directory templateDirectoryInPackage(String name) {
-  final String templatesDir = fs.path.join(Cache.flutterRoot,
+  final String templatesDir = globals.fs.path.join(Cache.flutterRoot,
       'packages', 'flutter_tools', 'templates');
-  return fs.directory(fs.path.join(templatesDir, name));
+  return globals.fs.directory(globals.fs.path.join(templatesDir, name));
 }

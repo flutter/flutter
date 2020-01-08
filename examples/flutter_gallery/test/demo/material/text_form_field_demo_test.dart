@@ -1,4 +1,4 @@
-// Copyright 2017 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
@@ -16,8 +16,16 @@ void main() {
     final Finder nameField = find.widgetWithText(TextFormField, 'Name *');
     expect(nameField, findsOneWidget);
 
+    final Finder phoneNumberField = find.widgetWithText(TextFormField, 'Phone Number *');
+    expect(phoneNumberField, findsOneWidget);
+
     final Finder passwordField = find.widgetWithText(TextFormField, 'Password *');
     expect(passwordField, findsOneWidget);
+
+    // Verify the that the phone number's TextInputFormatter does what's expected.
+    await tester.enterText(phoneNumberField, '1234567890');
+    await tester.pumpAndSettle();
+    expect(find.text('(123) 456-7890'), findsOneWidget);
 
     await tester.enterText(nameField, '');
     await tester.pumpAndSettle();

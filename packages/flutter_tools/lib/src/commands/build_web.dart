@@ -1,14 +1,15 @@
-// Copyright 2019 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
 import 'dart:async';
 
 import '../base/common.dart';
-import '../base/logger.dart';
 import '../build_info.dart';
-import '../globals.dart';
-import '../runner/flutter_command.dart' show DevelopmentArtifact, FlutterCommandResult;
+import '../features.dart';
+import '../project.dart';
+import '../runner/flutter_command.dart'
+    show DevelopmentArtifact, FlutterCommandResult;
 import '../web/compile.dart';
 import 'build.dart';
 
@@ -16,36 +17,56 @@ class BuildWebCommand extends BuildSubCommand {
   BuildWebCommand() {
     usesTargetOption();
     usesPubOption();
-    defaultBuildMode = BuildMode.release;
+    addBuildModeFlags(excludeDebug: true);
+    usesDartDefines();
+    argParser.addFlag('web-initialize-platform',
+        defaultsTo: true,
+        negatable: true,
+        hide: true,
+        help: 'Whether to automatically invoke webOnlyInitializePlatform.',
+    );
+    argParser.addFlag('csp',
+      defaultsTo: false,
+      negatable: false,
+      help: 'Disable dynamic generation of code in the generated output.'
+        'This is necessary to satisfy CSP restrictions (see http://www.w3.org/TR/CSP/).'
+    );
   }
 
   @override
-  Future<Set<DevelopmentArtifact>> get requiredArtifacts async => const <DevelopmentArtifact>{
-    DevelopmentArtifact.universal,
-    DevelopmentArtifact.web,
-  };
+  Future<Set<DevelopmentArtifact>> get requiredArtifacts async =>
+      const <DevelopmentArtifact>{
+        DevelopmentArtifact.web,
+      };
 
   @override
   final String name = 'web';
 
   @override
-  bool get hidden => true;
+  bool get hidden => !featureFlags.isWebEnabled;
 
   @override
-  bool get isExperimental => true;
-
-  @override
-  final String description = '(EXPERIMENTAL) build a web application bundle.';
+  final String description = 'build a web application bundle.';
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    final String target = argResults['target'];
-    final Status status = logger.startProgress('Compiling $target to JavaScript...', timeout: null);
-    final int result = await webCompiler.compile(target: target);
-    status.stop();
-    if (result == 1) {
-      throwToolExit('Failed to compile $target to JavaScript.');
+    if (!featureFlags.isWebEnabled) {
+      throwToolExit('"build web" is not currently supported.');
     }
+    final FlutterProject flutterProject = FlutterProject.current();
+    final String target = stringArg('target');
+    final BuildInfo buildInfo = getBuildInfo();
+    if (buildInfo.isDebug) {
+      throwToolExit('debug builds cannot be built directly for the web. Try using "flutter run"');
+    }
+    await buildWeb(
+      flutterProject,
+      target,
+      buildInfo,
+      boolArg('web-initialize-platform'),
+      dartDefines,
+      boolArg('csp')
+    );
     return null;
   }
 }

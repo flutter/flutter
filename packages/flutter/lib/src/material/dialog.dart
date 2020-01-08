@@ -1,6 +1,11 @@
-// Copyright 2015 The Chromium Authors. All rights reserved.
+// Copyright 2014 The Flutter Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
+
+// TODO(shihaohong): remove ignoring deprecated member use analysis
+// when AlertDialog.scrollable parameter is removed. See
+// https://flutter.dev/go/scrollable-alert-dialog for more details.
+// ignore_for_file: deprecated_member_use_from_same_package
 
 import 'dart:async';
 
@@ -8,7 +13,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button_bar.dart';
-import 'button_theme.dart';
 import 'colors.dart';
 import 'debug.dart';
 import 'dialog_theme.dart';
@@ -66,16 +70,20 @@ class Dialog extends StatelessWidget {
   /// {@macro flutter.material.material.elevation}
   final double elevation;
 
+  /// {@template flutter.material.dialog.insetAnimationDuration}
   /// The duration of the animation to show when the system keyboard intrudes
   /// into the space that the dialog is placed in.
   ///
   /// Defaults to 100 milliseconds.
+  /// {@endtemplate}
   final Duration insetAnimationDuration;
 
+  /// {@template flutter.material.dialog.insetAnimationCurve}
   /// The curve to use for the animation shown when the system keyboard intrudes
   /// into the space that the dialog is placed in.
   ///
-  /// Defaults to [Curves.fastOutSlowIn].
+  /// Defaults to [Curves.decelerate].
+  /// {@endtemplate}
   final Curve insetAnimationCurve;
 
   /// {@template flutter.material.dialog.shape}
@@ -134,6 +142,8 @@ class Dialog extends StatelessWidget {
 /// of actions. The title is displayed above the content and the actions are
 /// displayed below the content.
 ///
+/// {@youtube 560 315 https://www.youtube.com/watch?v=75CsnyRXf5I}
+///
 /// If the content is too large to fit on the screen vertically, the dialog will
 /// display the title and the actions and let the content overflow, which is
 /// rarely desired. Consider using a scrolling widget for [content], such as
@@ -149,30 +159,32 @@ class Dialog extends StatelessWidget {
 /// Typically passed as the child widget to [showDialog], which displays the
 /// dialog.
 ///
+/// {@animation 350 622 https://flutter.github.io/assets-for-api-docs/assets/material/alert_dialog.mp4}
+///
 /// {@tool sample}
 ///
 /// This snippet shows a method in a [State] which, when called, displays a dialog box
 /// and returns a [Future] that completes when the dialog is dismissed.
 ///
 /// ```dart
-/// Future<void> _neverSatisfied() async {
+/// Future<void> _showMyDialog() async {
 ///   return showDialog<void>(
 ///     context: context,
 ///     barrierDismissible: false, // user must tap button!
 ///     builder: (BuildContext context) {
 ///       return AlertDialog(
-///         title: Text('Rewind and remember'),
+///         title: Text('AlertDialog Title'),
 ///         content: SingleChildScrollView(
 ///           child: ListBody(
 ///             children: <Widget>[
-///               Text('You will never be satisfied.'),
-///               Text('You\’re like me. I’m never satisfied.'),
+///               Text('This is a demo alert dialog.'),
+///               Text('Would you like to approve of this message?'),
 ///             ],
 ///           ),
 ///         ),
 ///         actions: <Widget>[
 ///           FlatButton(
-///             child: Text('Regret'),
+///             child: Text('Approve'),
 ///             onPressed: () {
 ///               Navigator.of(context).pop();
 ///             },
@@ -209,10 +221,13 @@ class AlertDialog extends StatelessWidget {
     this.contentPadding = const EdgeInsets.fromLTRB(24.0, 20.0, 24.0, 24.0),
     this.contentTextStyle,
     this.actions,
+    this.actionsPadding = EdgeInsets.zero,
+    this.buttonPadding,
     this.backgroundColor,
     this.elevation,
     this.semanticLabel,
     this.shape,
+    this.scrollable = false,
   }) : assert(contentPadding != null),
        super(key: key);
 
@@ -276,6 +291,42 @@ class AlertDialog extends StatelessWidget {
   /// from the [actions].
   final List<Widget> actions;
 
+  /// Padding around the the set of [actions] at the bottom of the dialog.
+  ///
+  /// Typically used to provide padding to the button bar between the button bar
+  /// and the edges of the dialog.
+  ///
+  /// If are no [actions], then no padding will be included. The padding around
+  /// the button bar defaults to zero. It is also important to note that
+  /// [buttonPadding] may contribute to the padding on the edges of [actions] as
+  /// well.
+  ///
+  /// {@tool sample}
+  /// This is an example of a set of actions aligned with the content widget.
+  /// ```dart
+  /// AlertDialog(
+  ///   title: Text('Title'),
+  ///   content: Container(width: 200, height: 200, color: Colors.green),
+  ///   actions: <Widget>[
+  ///     RaisedButton(onPressed: () {}, child: Text('Button 1')),
+  ///     RaisedButton(onPressed: () {}, child: Text('Button 2')),
+  ///   ],
+  ///   actionsPadding: EdgeInsets.symmetric(horizontal: 8.0),
+  /// )
+  /// ```
+  /// {@end-tool}
+  final EdgeInsetsGeometry actionsPadding;
+
+  /// The padding that surrounds each button in [actions].
+  ///
+  /// This is different from [actionsPadding], which defines the padding
+  /// between the entire button bar and the edges of the dialog.
+  ///
+  /// If this property is null, then it will use the surrounding
+  /// [ButtonBarTheme.buttonPadding]. If that is null, it will default to
+  /// 8.0 logical pixels on the left and right.
+  final EdgeInsetsGeometry buttonPadding;
+
   /// {@macro flutter.material.dialog.backgroundColor}
   final Color backgroundColor;
 
@@ -299,16 +350,46 @@ class AlertDialog extends StatelessWidget {
   /// {@macro flutter.material.dialog.shape}
   final ShapeBorder shape;
 
+  /// Determines whether the [title] and [content] widgets are wrapped in a
+  /// scrollable.
+  ///
+  /// This configuration is used when the [title] and [content] are expected
+  /// to overflow. Both [title] and [content] are wrapped in a scroll view,
+  /// allowing all overflowed content to be visible while still showing the
+  /// button bar.
+  @Deprecated(
+    'Set scrollable to `true`. This parameter will be removed and '
+    'was introduced to migrate AlertDialog to be scrollable by '
+    'default. For more information, see '
+    'https://flutter.dev/docs/release/breaking-changes/scrollable_alert_dialog. '
+    'This feature was deprecated after v1.13.2.'
+  )
+  final bool scrollable;
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
     final ThemeData theme = Theme.of(context);
     final DialogTheme dialogTheme = DialogTheme.of(context);
-    final List<Widget> children = <Widget>[];
-    String label = semanticLabel;
 
-    if (title != null) {
-      children.add(Padding(
+    String label = semanticLabel;
+    if (title == null) {
+      switch (theme.platform) {
+        case TargetPlatform.iOS:
+        case TargetPlatform.macOS:
+          label = semanticLabel;
+          break;
+        case TargetPlatform.android:
+        case TargetPlatform.fuchsia:
+          label = semanticLabel ?? MaterialLocalizations.of(context)?.alertDialogLabel;
+      }
+    }
+
+    Widget titleWidget;
+    Widget contentWidget;
+    Widget actionsWidget;
+    if (title != null)
+     titleWidget = Padding(
         padding: titlePadding ?? EdgeInsets.fromLTRB(24.0, 24.0, 24.0, content == null ? 20.0 : 0.0),
         child: DefaultTextStyle(
           style: titleTextStyle ?? dialogTheme.titleTextStyle ?? theme.textTheme.title,
@@ -318,43 +399,63 @@ class AlertDialog extends StatelessWidget {
             container: true,
           ),
         ),
-      ));
-    } else {
-      switch (defaultTargetPlatform) {
-        case TargetPlatform.iOS:
-          label = semanticLabel;
-          break;
-        case TargetPlatform.android:
-        case TargetPlatform.fuchsia:
-          label = semanticLabel ?? MaterialLocalizations.of(context)?.alertDialogLabel;
-      }
-    }
+      );
 
-    if (content != null) {
-      children.add(Flexible(
-        child: Padding(
-          padding: contentPadding,
-          child: DefaultTextStyle(
-            style: contentTextStyle ?? dialogTheme.contentTextStyle ?? theme.textTheme.subhead,
-            child: content,
-          ),
+    if (content != null)
+      contentWidget = Padding(
+        padding: contentPadding,
+        child: DefaultTextStyle(
+          style: contentTextStyle ?? dialogTheme.contentTextStyle ?? theme.textTheme.subhead,
+          child: content,
         ),
-      ));
-    }
+      );
 
-    if (actions != null) {
-      children.add(ButtonTheme.bar(
+    if (actions != null)
+      actionsWidget = Padding(
+        padding: actionsPadding,
         child: ButtonBar(
+          buttonPadding: buttonPadding,
           children: actions,
         ),
-      ));
+      );
+
+    List<Widget> columnChildren;
+    if (scrollable) {
+      columnChildren = <Widget>[
+        if (title != null || content != null)
+          Flexible(
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: <Widget>[
+                  if (title != null)
+                    titleWidget,
+                  if (content != null)
+                    contentWidget,
+                ],
+              ),
+            ),
+          ),
+        if (actions != null)
+          actionsWidget,
+      ];
+    } else {
+      columnChildren = <Widget>[
+        if (title != null)
+          titleWidget,
+        if (content != null)
+          Flexible(child: contentWidget),
+        if (actions != null)
+          actionsWidget,
+      ];
     }
 
     Widget dialogChild = IntrinsicWidth(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: children,
+        children: columnChildren,
       ),
     );
 
@@ -451,6 +552,8 @@ class SimpleDialogOption extends StatelessWidget {
 ///
 /// Typically passed as the child widget to [showDialog], which displays the
 /// dialog.
+///
+/// {@animation 350 622 https://flutter.github.io/assets-for-api-docs/assets/material/simple_dialog.mp4}
 ///
 /// {@tool sample}
 ///
@@ -587,19 +690,12 @@ class SimpleDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasMaterialLocalizations(context));
-    final List<Widget> body = <Widget>[];
-    String label = semanticLabel;
+    final ThemeData theme = Theme.of(context);
 
-    if (title != null) {
-      body.add(Padding(
-        padding: titlePadding,
-        child: DefaultTextStyle(
-          style: Theme.of(context).textTheme.title,
-          child: Semantics(namesRoute: true, child: title),
-        ),
-      ));
-    } else {
-      switch (defaultTargetPlatform) {
+    String label = semanticLabel;
+    if (title == null) {
+      switch (theme.platform) {
+        case TargetPlatform.macOS:
         case TargetPlatform.iOS:
           label = semanticLabel;
           break;
@@ -609,15 +705,6 @@ class SimpleDialog extends StatelessWidget {
       }
     }
 
-    if (children != null) {
-      body.add(Flexible(
-        child: SingleChildScrollView(
-          padding: contentPadding,
-          child: ListBody(children: children),
-        ),
-      ));
-    }
-
     Widget dialogChild = IntrinsicWidth(
       stepWidth: 56.0,
       child: ConstrainedBox(
@@ -625,7 +712,23 @@ class SimpleDialog extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: body,
+          children: <Widget>[
+            if (title != null)
+              Padding(
+                padding: titlePadding,
+                child: DefaultTextStyle(
+                  style: theme.textTheme.title,
+                  child: Semantics(namesRoute: true, child: title),
+                ),
+              ),
+            if (children != null)
+              Flexible(
+                child: SingleChildScrollView(
+                  padding: contentPadding,
+                  child: ListBody(children: children),
+                ),
+              ),
+          ],
         ),
       ),
     );
@@ -665,19 +768,23 @@ Widget _buildMaterialDialogTransitions(BuildContext context, Animation<double> a
 /// `showDialog` is originally called from. Use a [StatefulBuilder] or a
 /// custom [StatefulWidget] if the dialog needs to update dynamically.
 ///
+/// The `child` argument is deprecated, and should be replaced with `builder`.
+///
 /// The `context` argument is used to look up the [Navigator] and [Theme] for
 /// the dialog. It is only used when the method is called. Its corresponding
 /// widget can be safely removed from the tree before the dialog is closed.
 ///
-/// The `child` argument is deprecated, and should be replaced with `builder`.
+/// The `useRootNavigator` argument is used to determine whether to push the
+/// dialog to the [Navigator] furthest from or nearest to the given `context`.
+/// By default, `useRootNavigator` is `true` and the dialog route created by
+/// this method is pushed to the root navigator.
 ///
-/// Returns a [Future] that resolves to the value (if any) that was passed to
-/// [Navigator.pop] when the dialog was closed.
-///
-/// The dialog route created by this method is pushed to the root navigator.
 /// If the application has multiple [Navigator] objects, it may be necessary to
 /// call `Navigator.of(context, rootNavigator: true).pop(result)` to close the
 /// dialog rather than just `Navigator.pop(context, result)`.
+///
+/// Returns a [Future] that resolves to the value (if any) that was passed to
+/// [Navigator.pop] when the dialog was closed.
 ///
 /// See also:
 ///
@@ -694,11 +801,15 @@ Future<T> showDialog<T>({
   @Deprecated(
     'Instead of using the "child" argument, return the child from a closure '
     'provided to the "builder" argument. This will ensure that the BuildContext '
-    'is appropriate for widgets built in the dialog.'
-  ) Widget child,
+    'is appropriate for widgets built in the dialog. '
+    'This feature was deprecated after v0.2.3.'
+  )
+  Widget child,
   WidgetBuilder builder,
+  bool useRootNavigator = true,
 }) {
   assert(child == null || builder == null);
+  assert(useRootNavigator != null);
   assert(debugCheckHasMaterialLocalizations(context));
 
   final ThemeData theme = Theme.of(context, shadowThemeOnly: true);
@@ -721,5 +832,6 @@ Future<T> showDialog<T>({
     barrierColor: Colors.black54,
     transitionDuration: const Duration(milliseconds: 150),
     transitionBuilder: _buildMaterialDialogTransitions,
+    useRootNavigator: useRootNavigator,
   );
 }
