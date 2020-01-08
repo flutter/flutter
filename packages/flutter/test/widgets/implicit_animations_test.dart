@@ -184,7 +184,6 @@ void main() {
     final Finder widgetFinder = find.byKey(switchKey);
 
     await tester.tap(widgetFinder);
-
     await tester.pump();
     expect(mockOnEndFunction.called, 0);
     await tester.pump(animationDuration);
@@ -192,6 +191,35 @@ void main() {
     await tester.pump(additionalDelay);
     expect(mockOnEndFunction.called, 1);
   });
+
+  testWidgets('AnimatedOpacity transition test', (WidgetTester tester) async {
+    await tester.pumpWidget(wrap(
+      child: TestAnimatedWidget(
+        switchKey: switchKey,
+        state: _TestAnimatedOpacityWidgetState(),
+      )
+    ));
+
+    final Finder switchFinder = find.byKey(switchKey);
+    final FadeTransition opacityWidget = tester.widget<FadeTransition>(
+      find.ancestor(
+        of: find.byType(Placeholder),
+        matching: find.byType(FadeTransition),
+      ).first,
+    );
+
+    await tester.tap(switchFinder);
+    await tester.pump();
+    expect(opacityWidget.opacity.value, equals(0.0));
+
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(opacityWidget.opacity.value, equals(0.5));
+    await tester.pump(const Duration(milliseconds: 250));
+    expect(opacityWidget.opacity.value, equals(0.75));
+    await tester.pump(const Duration(milliseconds: 250));
+    expect(opacityWidget.opacity.value, equals(1.0));
+  });
+
 
   testWidgets('SliverAnimatedOpacity onEnd callback test', (WidgetTester tester) async {
     await tester.pumpWidget(TestAnimatedWidget(
@@ -210,6 +238,34 @@ void main() {
     expect(mockOnEndFunction.called, 0);
     await tester.pump(additionalDelay);
     expect(mockOnEndFunction.called, 1);
+  });
+
+  testWidgets('SliverAnimatedOpacity transition test', (WidgetTester tester) async {
+    await tester.pumpWidget(wrap(
+      child: TestAnimatedWidget(
+        switchKey: switchKey,
+        state: _TestSliverAnimatedOpacityWidgetState(),
+      )
+    ));
+
+    final Finder switchFinder = find.byKey(switchKey);
+    final SliverFadeTransition opacityWidget = tester.widget<SliverFadeTransition>(
+      find.ancestor(
+        of: find.byType(Placeholder),
+        matching: find.byType(SliverFadeTransition),
+      ).first,
+    );
+
+    await tester.tap(switchFinder);
+    await tester.pump();
+    expect(opacityWidget.opacity.value, equals(0.0));
+
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(opacityWidget.opacity.value, equals(0.5));
+    await tester.pump(const Duration(milliseconds: 250));
+    expect(opacityWidget.opacity.value, equals(0.75));
+    await tester.pump(const Duration(milliseconds: 250));
+    expect(opacityWidget.opacity.value, equals(1.0));
   });
 
   testWidgets('AnimatedDefaultTextStyle onEnd callback test', (WidgetTester tester) async {
@@ -419,7 +475,7 @@ class _TestAnimatedOpacityWidgetState extends _TestAnimatedWidgetState {
       child: child,
       duration: duration,
       onEnd: widget.callback,
-      opacity: toggle ? 0.1 : 0.9,
+      opacity: toggle ? 1.0 : 0.0,
     );
   }
 }
@@ -431,7 +487,7 @@ class _TestSliverAnimatedOpacityWidgetState extends _TestAnimatedWidgetState {
       sliver: SliverToBoxAdapter(child: child),
       duration: duration,
       onEnd: widget.callback,
-      opacity: toggle ? 0.1 : 0.9,
+      opacity: toggle ? 1.0 : 0.0,
     );
   }
 
@@ -440,30 +496,20 @@ class _TestSliverAnimatedOpacityWidgetState extends _TestAnimatedWidgetState {
     final Widget animatedWidget = getAnimatedWidget();
 
     return Material(
-      child: Localizations(
-        locale: const Locale('en', 'us'),
-        delegates: const <LocalizationsDelegate<dynamic>>[
-          DefaultWidgetsLocalizations.delegate,
-          DefaultMaterialLocalizations.delegate,
-        ],
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: MediaQuery(
-            data: const MediaQueryData(),
-            child: CustomScrollView(
-              slivers: <Widget>[
-                animatedWidget,
-                SliverToBoxAdapter(
-                  child: Switch(
-                    key: widget.switchKey,
-                    value: toggle,
-                    onChanged: onChanged,
-                  ),
-                ),
-              ],
-            )
-          )
-        )
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: CustomScrollView(
+          slivers: <Widget>[
+            animatedWidget,
+            SliverToBoxAdapter(
+              child: Switch(
+                key: widget.switchKey,
+                value: toggle,
+                onChanged: onChanged,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
