@@ -134,6 +134,7 @@ COPY ci/docker_linux/Gemfile.lock /Gemfile.lock
 RUN bundle install --system
 
 # Install goldctl, for Golden testing
+# Last updated 1/8/19 (update to rebuild Dockerfile with latest goldctl)
 COPY bots/download_goldctl.sh /download_goldctl.sh
 ENV GOLDCTL '/depot_tools/goldctl'
 RUN /download_goldctl.sh
