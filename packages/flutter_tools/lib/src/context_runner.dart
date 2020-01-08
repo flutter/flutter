@@ -120,8 +120,12 @@ Future<T> runInContext<T>(
       OperatingSystemUtils: () => OperatingSystemUtils(),
       PersistentToolState: () => PersistentToolState(),
       ProcessInfo: () => ProcessInfo(),
-      ProcessUtils: () => ProcessUtils(),
+      ProcessUtils: () => ProcessUtils(
+        processManager: globals.processManager,
+        logger: globals.logger,
+      ),
       Pub: () => const Pub(),
+      ShutdownHooks: () => ShutdownHooks(logger: globals.logger),
       Signals: () => Signals(),
       SimControl: () => SimControl(),
       Stdio: () => const Stdio(),
