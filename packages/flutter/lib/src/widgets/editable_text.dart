@@ -779,7 +779,7 @@ class EditableText extends StatefulWidget {
   /// and selection, one can add a listener to its [controller] with
   /// [TextEditingController.addListener].
   ///
-  /// {@tool sample --template=stateful_widget_material}
+  /// {@tool dartpad --template=stateful_widget_material}
   ///
   /// This example shows how onChanged could be used to check the TextField's
   /// current value each time the user inserts or deletes a character.
