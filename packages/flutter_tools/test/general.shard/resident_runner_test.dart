@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
-import 'package:flutter_tools/src/base/command_help.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -366,33 +365,21 @@ void main() {
 
     // supports service protocol
     expect(residentRunner.supportsServiceProtocol, true);
+    expect(testLogger.statusText, contains('"w"'));
+    expect(testLogger.statusText, contains('"t"'));
+    expect(testLogger.statusText, contains('"P"'));
+    expect(testLogger.statusText, contains('"a"'));
     // isRunningDebug
     expect(residentRunner.isRunningDebug, true);
-    // commands
-    expect(testLogger.statusText, equals(
-        <dynamic>[
-          'Flutter run key commands.',
-          CommandHelp.r,
-          CommandHelp.R,
-          CommandHelp.h,
-          CommandHelp.q,
-          CommandHelp.s,
-          CommandHelp.w,
-          CommandHelp.t,
-          CommandHelp.L,
-          CommandHelp.S,
-          CommandHelp.U,
-          CommandHelp.i,
-          CommandHelp.p,
-          CommandHelp.o,
-          CommandHelp.z,
-          CommandHelp.P,
-          CommandHelp.a,
-          CommandHelp.s,
-          'An Observatory debugger and profiler on null is available at:\nnull',
-          ''
-        ].join('\n')
-    ));
+    expect(testLogger.statusText, contains('"L"'));
+    expect(testLogger.statusText, contains('"S"'));
+    expect(testLogger.statusText, contains('"U"'));
+    expect(testLogger.statusText, contains('"i"'));
+    expect(testLogger.statusText, contains('"p"'));
+    expect(testLogger.statusText, contains('"o"'));
+    expect(testLogger.statusText, contains('"z"'));
+    // screenshot
+    expect(testLogger.statusText, contains('"s"'));
   }));
 
   test('ResidentRunner can take screenshot on debug device', () => testbed.run(() async {

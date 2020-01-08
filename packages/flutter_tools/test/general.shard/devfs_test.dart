@@ -14,7 +14,6 @@ import 'package:flutter_tools/src/base/net.dart';
 import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/vmservice.dart';
-import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:mockito/mockito.dart';
 
@@ -30,7 +29,7 @@ void main() {
 
   setUpAll(() {
     fs = MemoryFileSystem();
-    filePath = globals.fs.path.join('lib', 'foo.txt');
+    filePath = fs.path.join('lib', 'foo.txt');
   });
 
   group('DevFSContent', () {
@@ -62,7 +61,7 @@ void main() {
       expect(content.isModified, isFalse);
     });
     testUsingContext('file', () async {
-      final File file = globals.fs.file(filePath);
+      final File file = fs.file(filePath);
       final DevFSFileContent content = DevFSFileContent(file);
       expect(content.isModified, isFalse);
       expect(content.isModified, isFalse);
@@ -111,7 +110,7 @@ void main() {
     });
 
     testUsingContext('retry uploads when failure', () async {
-      final File file = globals.fs.file(globals.fs.path.join(basePath, filePath));
+      final File file = fs.file(fs.path.join(basePath, filePath));
       await file.parent.create(recursive: true);
       file.writeAsBytesSync(<int>[1, 2, 3]);
       // simulate package
@@ -189,7 +188,7 @@ void main() {
 
     testUsingContext('create dev file system', () async {
       // simulate workspace
-      final File file = globals.fs.file(globals.fs.path.join(basePath, filePath));
+      final File file = fs.file(fs.path.join(basePath, filePath));
       await file.parent.create(recursive: true);
       file.writeAsBytesSync(<int>[1, 2, 3]);
 
@@ -231,7 +230,7 @@ void main() {
 
     testUsingContext('cleanup preexisting file system', () async {
       // simulate workspace
-      final File file = globals.fs.file(globals.fs.path.join(basePath, filePath));
+      final File file = fs.file(fs.path.join(basePath, filePath));
       await file.parent.create(recursive: true);
       file.writeAsBytesSync(<int>[1, 2, 3]);
 
@@ -298,7 +297,7 @@ void main() {
         outputPath: anyNamed('outputPath'),
         packagesFilePath: anyNamed('packagesFilePath'),
       )).thenAnswer((Invocation invocation) {
-        globals.fs.file('example').createSync();
+        fs.file('example').createSync();
         return Future<CompilerOutput>.value(CompilerOutput('example', 0, <Uri>[sourceFile.uri]));
       });
 
@@ -418,7 +417,7 @@ final List<Directory> _tempDirs = <Directory>[];
 final Map <String, Uri> _packages = <String, Uri>{};
 
 Directory _newTempDir(FileSystem fs) {
-  final Directory tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_devfs${_tempDirs.length}_test.');
+  final Directory tempDir = fs.systemTempDirectory.createTempSync('flutter_devfs${_tempDirs.length}_test.');
   _tempDirs.add(tempDir);
   return tempDir;
 }
@@ -431,21 +430,21 @@ void _cleanupTempDirs() {
 
 Future<File> _createPackage(FileSystem fs, String pkgName, String pkgFileName, { bool doubleSlash = false }) async {
   final Directory pkgTempDir = _newTempDir(fs);
-  String pkgFilePath = globals.fs.path.join(pkgTempDir.path, pkgName, 'lib', pkgFileName);
+  String pkgFilePath = fs.path.join(pkgTempDir.path, pkgName, 'lib', pkgFileName);
   if (doubleSlash) {
     // Force two separators into the path.
-    final String doubleSlash = globals.fs.path.separator + globals.fs.path.separator;
-    pkgFilePath = pkgTempDir.path + doubleSlash + globals.fs.path.join(pkgName, 'lib', pkgFileName);
+    final String doubleSlash = fs.path.separator + fs.path.separator;
+    pkgFilePath = pkgTempDir.path + doubleSlash + fs.path.join(pkgName, 'lib', pkgFileName);
   }
-  final File pkgFile = globals.fs.file(pkgFilePath);
+  final File pkgFile = fs.file(pkgFilePath);
   await pkgFile.parent.create(recursive: true);
   pkgFile.writeAsBytesSync(<int>[11, 12, 13]);
-  _packages[pkgName] = globals.fs.path.toUri(pkgFile.parent.path);
+  _packages[pkgName] = fs.path.toUri(pkgFile.parent.path);
   final StringBuffer sb = StringBuffer();
   _packages.forEach((String pkgName, Uri pkgUri) {
     sb.writeln('$pkgName:$pkgUri');
   });
-  return globals.fs.file(globals.fs.path.join(_tempDirs[0].path, '.packages'))
+  return fs.file(fs.path.join(_tempDirs[0].path, '.packages'))
     ..writeAsStringSync(sb.toString());
 }
 

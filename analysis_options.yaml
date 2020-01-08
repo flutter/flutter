@@ -143,7 +143,7 @@ linter:
     - prefer_final_fields
     - prefer_final_in_for_each
     - prefer_final_locals
-    # - prefer_for_elements_to_map_fromIterable # not yet tested
+    - prefer_for_elements_to_map_fromIterable
     - prefer_foreach
     # - prefer_function_declarations_over_variables # not yet tested
     - prefer_generic_function_type_aliases
