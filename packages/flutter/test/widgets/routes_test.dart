@@ -1052,7 +1052,7 @@ class _TestDialogRoute<T> extends PopupRoute<T> {
 class _TestDialogRouteWithCustomBarrierTween<T> extends PopupRoute<T> {
   _TestDialogRouteWithCustomBarrierTween({
     @required Widget child,
-    Animatable<double> barrierTween,
+    @required Animatable<double> barrierTween,
   }) : assert(barrierTween != null),
        _barrierTween = barrierTween,
        _child = child;
