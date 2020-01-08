@@ -32,5 +32,15 @@ TEST_F(DartVMTest, SimpleIsolateNameServer) {
   ASSERT_TRUE(ns->RemoveIsolateNameMapping("foobar"));
 }
 
+TEST_F(DartVMTest, OldGenHeapSize) {
+  ASSERT_FALSE(DartVMRef::IsInstanceRunning());
+  auto settings = CreateSettingsForFixture();
+  settings.old_gen_heap_size = 1024;
+  auto vm = DartVMRef::Create(settings);
+  // There is no way to introspect on the heap size so we just assert the vm was
+  // created.
+  ASSERT_TRUE(vm);
+}
+
 }  // namespace testing
 }  // namespace flutter

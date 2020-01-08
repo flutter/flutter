@@ -1114,6 +1114,13 @@ typedef struct {
   /// absence, platforms views in the scene are ignored and Flutter renders to
   /// the root surface as normal.
   const FlutterCompositor* compositor;
+
+  /// Max size of the old gen heap for the Dart VM in MB, or 0 for unlimited, -1
+  /// for default value.
+  ///
+  /// See also:
+  /// https://github.com/dart-lang/sdk/blob/ca64509108b3e7219c50d6c52877c85ab6a35ff2/runtime/vm/flag_list.h#L150
+  int64_t dart_old_gen_heap_size;
 } FlutterProjectArgs;
 
 //------------------------------------------------------------------------------
