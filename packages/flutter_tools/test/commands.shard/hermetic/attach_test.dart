@@ -699,7 +699,11 @@ class StreamLogger extends Logger {
     int progressIndicatorPadding = kDefaultStatusPadding,
   }) {
     _log('[progress] $message');
-    return SilentStatus(timeout: timeout, timeoutConfiguration: timeoutConfiguration)..start();
+    return SilentStatus(
+      timeout: timeout,
+      timeoutConfiguration: timeoutConfiguration,
+      stopwatch: Stopwatch(),
+    )..start();
   }
 
   bool _interrupt = false;
