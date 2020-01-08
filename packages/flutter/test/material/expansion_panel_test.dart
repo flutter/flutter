@@ -1275,7 +1275,7 @@ void main() {
         home: SingleChildScrollView(
           child: SimpleExpansionPanelListTestWidget(
             firstPanelKey: firstPanelKey,
-            canTapOnHeader: true
+            canTapOnHeader: true,
           ),
         ),
       ),
