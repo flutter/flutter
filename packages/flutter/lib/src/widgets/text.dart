@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show BoundaryLineHeightBehavior;
+import 'dart:ui' as ui show HeightBehavior;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
@@ -45,7 +45,7 @@ class DefaultTextStyle extends InheritedTheme {
     this.overflow = TextOverflow.clip,
     this.maxLines,
     this.textWidthBasis = TextWidthBasis.parent,
-    this.boundaryLineHeightBehavior,
+    this.heightBehavior,
     @required Widget child,
   }) : assert(style != null),
        assert(softWrap != null),
@@ -144,7 +144,7 @@ class DefaultTextStyle extends InheritedTheme {
   /// See [TextWidthBasis] for possible values and their implications.
   final TextWidthBasis textWidthBasis;
 
-  final ui.BoundaryLineHeightBehavior boundaryLineHeightBehavior;
+  final ui.HeightBehavior heightBehavior;
 
   /// The closest instance of this class that encloses the given context.
   ///
@@ -168,7 +168,7 @@ class DefaultTextStyle extends InheritedTheme {
         overflow != oldWidget.overflow ||
         maxLines != oldWidget.maxLines ||
         textWidthBasis != oldWidget.textWidthBasis ||
-        boundaryLineHeightBehavior != oldWidget.boundaryLineHeightBehavior;
+        heightBehavior != oldWidget.heightBehavior;
   }
 
   @override
@@ -181,7 +181,7 @@ class DefaultTextStyle extends InheritedTheme {
       overflow: overflow,
       maxLines: maxLines,
       textWidthBasis: textWidthBasis,
-      boundaryLineHeightBehavior: boundaryLineHeightBehavior,
+      heightBehavior: heightBehavior,
       child: child,
     );
   }
@@ -195,7 +195,7 @@ class DefaultTextStyle extends InheritedTheme {
     properties.add(EnumProperty<TextOverflow>('overflow', overflow, defaultValue: null));
     properties.add(IntProperty('maxLines', maxLines, defaultValue: null));
     properties.add(EnumProperty<TextWidthBasis>('textWidthBasis', textWidthBasis, defaultValue: TextWidthBasis.parent));
-    properties.add(DiagnosticsProperty<ui.BoundaryLineHeightBehavior>('boundaryLineHeightBehavior', boundaryLineHeightBehavior, defaultValue: null));
+    properties.add(DiagnosticsProperty<ui.HeightBehavior>('heightBehavior', heightBehavior, defaultValue: null));
   }
 }
 
@@ -291,7 +291,7 @@ class Text extends StatelessWidget {
     this.maxLines,
     this.semanticsLabel,
     this.textWidthBasis,
-    this.boundaryLineHeightBehavior,
+    this.heightBehavior,
   }) : assert(
          data != null,
          'A non-null String must be provided to a Text widget.',
@@ -323,7 +323,7 @@ class Text extends StatelessWidget {
     this.maxLines,
     this.semanticsLabel,
     this.textWidthBasis,
-    this.boundaryLineHeightBehavior,
+    this.heightBehavior,
   }) : assert(
          textSpan != null,
          'A non-null TextSpan must be provided to a Text.rich widget.',
@@ -426,7 +426,8 @@ class Text extends StatelessWidget {
   /// {@macro flutter.painting.textPainter.textWidthBasis}
   final TextWidthBasis textWidthBasis;
 
-  final ui.BoundaryLineHeightBehavior boundaryLineHeightBehavior;
+  /// {@template flutter.dart:ui.heightBehavior}
+  final ui.HeightBehavior heightBehavior;
 
   @override
   Widget build(BuildContext context) {
@@ -446,7 +447,7 @@ class Text extends StatelessWidget {
       maxLines: maxLines ?? defaultTextStyle.maxLines,
       strutStyle: strutStyle,
       textWidthBasis: textWidthBasis ?? defaultTextStyle.textWidthBasis,
-      boundaryLineHeightBehavior: boundaryLineHeightBehavior ?? defaultTextStyle.boundaryLineHeightBehavior,
+      heightBehavior: heightBehavior ?? defaultTextStyle.heightBehavior,
       text: TextSpan(
         style: effectiveTextStyle,
         text: data,
@@ -481,7 +482,7 @@ class Text extends StatelessWidget {
     properties.add(DoubleProperty('textScaleFactor', textScaleFactor, defaultValue: null));
     properties.add(IntProperty('maxLines', maxLines, defaultValue: null));
     properties.add(EnumProperty<TextWidthBasis>('textWidthBasis', textWidthBasis, defaultValue: null));
-    properties.add(DiagnosticsProperty<ui.BoundaryLineHeightBehavior>('boundaryLineHeightBehavior', boundaryLineHeightBehavior, defaultValue: null));
+    properties.add(DiagnosticsProperty<ui.HeightBehavior>('heightBehavior', heightBehavior, defaultValue: null));
     if (semanticsLabel != null) {
       properties.add(StringProperty('semanticsLabel', semanticsLabel));
     }

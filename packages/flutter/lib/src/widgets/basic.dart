@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' as ui show Image, ImageFilter, BoundaryLineHeightBehavior;
+import 'dart:ui' as ui show Image, ImageFilter, HeightBehavior;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -5063,7 +5063,7 @@ class RichText extends MultiChildRenderObjectWidget {
     this.locale,
     this.strutStyle,
     this.textWidthBasis = TextWidthBasis.parent,
-    this.boundaryLineHeightBehavior,
+    this.heightBehavior,
   }) : assert(text != null),
        assert(textAlign != null),
        assert(softWrap != null),
@@ -5145,7 +5145,7 @@ class RichText extends MultiChildRenderObjectWidget {
   /// {@macro flutter.widgets.text.DefaultTextStyle.textWidthBasis}
   final TextWidthBasis textWidthBasis;
 
-  final ui.BoundaryLineHeightBehavior boundaryLineHeightBehavior;
+  final ui.HeightBehavior heightBehavior;
 
   @override
   RenderParagraph createRenderObject(BuildContext context) {
@@ -5159,7 +5159,7 @@ class RichText extends MultiChildRenderObjectWidget {
       maxLines: maxLines,
       strutStyle: strutStyle,
       textWidthBasis: textWidthBasis,
-      boundaryLineHeightBehavior: boundaryLineHeightBehavior,
+      heightBehavior: heightBehavior,
       locale: locale ?? Localizations.localeOf(context, nullOk: true),
     );
   }
@@ -5177,7 +5177,7 @@ class RichText extends MultiChildRenderObjectWidget {
       ..maxLines = maxLines
       ..strutStyle = strutStyle
       ..textWidthBasis = textWidthBasis
-      ..boundaryLineHeightBehavior = boundaryLineHeightBehavior
+      ..heightBehavior = heightBehavior
       ..locale = locale ?? Localizations.localeOf(context, nullOk: true);
   }
 

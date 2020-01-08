@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
-import 'dart:ui' as ui show Gradient, Shader, TextBox, PlaceholderAlignment, BoundaryLineHeightBehavior;
+import 'dart:ui' as ui show Gradient, Shader, TextBox, PlaceholderAlignment, HeightBehavior;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
@@ -75,7 +75,7 @@ class RenderParagraph extends RenderBox
     Locale locale,
     StrutStyle strutStyle,
     TextWidthBasis textWidthBasis = TextWidthBasis.parent,
-    ui.BoundaryLineHeightBehavior boundaryLineHeightBehavior,
+    ui.HeightBehavior heightBehavior,
     List<RenderBox> children,
   }) : assert(text != null),
        assert(text.debugAssertIsValid()),
@@ -98,7 +98,7 @@ class RenderParagraph extends RenderBox
          locale: locale,
          strutStyle: strutStyle,
          textWidthBasis: textWidthBasis,
-         boundaryLineHeightBehavior: boundaryLineHeightBehavior
+         heightBehavior: heightBehavior
        ) {
     addAll(children);
     _extractPlaceholderSpans(text);
@@ -277,11 +277,11 @@ class RenderParagraph extends RenderBox
     markNeedsLayout();
   }
 
-  ui.BoundaryLineHeightBehavior get boundaryLineHeightBehavior => _textPainter.boundaryLineHeightBehavior;
-  set boundaryLineHeightBehavior(ui.BoundaryLineHeightBehavior value) {
-    if (_textPainter.boundaryLineHeightBehavior == value)
+  ui.HeightBehavior get heightBehavior => _textPainter.heightBehavior;
+  set heightBehavior(ui.HeightBehavior value) {
+    if (_textPainter.heightBehavior == value)
       return;
-    _textPainter.boundaryLineHeightBehavior = value;
+    _textPainter.heightBehavior = value;
     _overflowShader = null;
     markNeedsLayout();
   }

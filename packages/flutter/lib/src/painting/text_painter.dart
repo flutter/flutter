@@ -3,7 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:math' show min, max;
-import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle, PlaceholderAlignment, LineMetrics, BoundaryLineHeightBehavior;
+import 'dart:ui' as ui show Paragraph, ParagraphBuilder, ParagraphConstraints, ParagraphStyle, PlaceholderAlignment, LineMetrics, HeightBehavior;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -142,7 +142,7 @@ class TextPainter {
     Locale locale,
     StrutStyle strutStyle,
     TextWidthBasis textWidthBasis = TextWidthBasis.parent,
-    ui.BoundaryLineHeightBehavior boundaryLineHeightBehavior,
+    ui.HeightBehavior heightBehavior,
   }) : assert(text == null || text.debugAssertIsValid()),
        assert(textAlign != null),
        assert(textScaleFactor != null),
@@ -341,13 +341,13 @@ class TextPainter {
     markNeedsLayout();
   }
 
-  ui.BoundaryLineHeightBehavior get boundaryLineHeightBehavior => _boundaryLineHeightBehavior;
-  ui.BoundaryLineHeightBehavior _boundaryLineHeightBehavior;
-  set boundaryLineHeightBehavior(ui.BoundaryLineHeightBehavior value) {
+  ui.HeightBehavior get heightBehavior => _heightBehavior;
+  ui.HeightBehavior _heightBehavior;
+  set heightBehavior(ui.HeightBehavior value) {
     assert(value != null);
-    if (_boundaryLineHeightBehavior == value)
+    if (_heightBehavior == value)
       return;
-    _boundaryLineHeightBehavior = value;
+    _heightBehavior = value;
     markNeedsLayout();
   }
 
