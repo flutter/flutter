@@ -32,7 +32,7 @@ class MultiChildLayoutParentData extends ContainerBoxParentData<RenderBox> {
 /// the layout cannot depend on layout properties of the children. This was
 /// a design decision to simplify the delegate implementations: This way,
 /// the delegate implementations do not have to also handle various intrinsic
-/// sizing functions if the parent's size depended on the children.  
+/// sizing functions if the parent's size depended on the children.
 /// If you want to build a custom layout where you define the size of that widget
 /// based on its children, then you will have to create a custom render object.
 /// See [MultiChildRenderObjectWidget] with [ContainerRenderObjectMixin] and
