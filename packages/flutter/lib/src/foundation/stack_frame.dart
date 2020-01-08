@@ -33,6 +33,7 @@ class StackFrame {
     this.className = '',
     @required this.method,
     this.isConstructor = false,
+    @required this.source,
   })  : assert(number != null),
         assert(column != null),
         assert(line != null),
@@ -41,7 +42,8 @@ class StackFrame {
         assert(package != null),
         assert(packagePath != null),
         assert(className != null),
-        assert(isConstructor != null);
+        assert(isConstructor != null),
+        assert(source != null);
 
   /// A stack frame representing an asynchronous suspension.
   static const StackFrame asynchronousSuspension = StackFrame(
@@ -52,6 +54,7 @@ class StackFrame {
     packageScheme: '',
     package: '',
     packagePath: '',
+    source: '<asynchronous suspension>',
   );
 
   /// Parses a list of [StackFrame]s from a [StackTrace] object.
@@ -99,6 +102,7 @@ class StackFrame {
       column: int.parse(match.group(3)),
       className: '<unknown>',
       method: match.group(4),
+      source: line,
     );
   }
 
@@ -154,8 +158,12 @@ class StackFrame {
       line: match.group(4) == null ? -1 : int.parse(match.group(4)),
       column: match.group(5) == null ? -1 : int.parse(match.group(5)),
       isConstructor: isConstructor,
+      source: line,
     );
   }
+
+  /// The original source of this stack frame.
+  final String source;
 
   /// The zero-indexed frame number.
   ///
@@ -201,7 +209,7 @@ class StackFrame {
   final bool isConstructor;
 
   @override
-  int get hashCode => hashValues(number, package, line, column, className, method);
+  int get hashCode => hashValues(number, package, line, column, className, method, source);
 
   @override
   bool operator ==(Object other) {
@@ -213,7 +221,8 @@ class StackFrame {
         line == other.line &&
         column == other.column &&
         className == other.className &&
-        method == other.method;
+        method == other.method &&
+        source == other.source;
   }
 
   @override
