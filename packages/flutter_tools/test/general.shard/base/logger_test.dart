@@ -799,7 +799,7 @@ void main() {
           timeoutConfiguration: const TimeoutConfiguration(),
           platform: FakePlatform(),
         ),
-        stopwatchFactory: FakeStopwatchFactory(FakeStopwatch()),
+        stopwatchFactory: FakeStopwatchFactory(),
       );
       logger.startProgress('AAA', timeout: const TimeoutConfiguration().fastOperation)..stop();
       logger.startProgress('BBB', timeout: const TimeoutConfiguration().fastOperation)..stop();
@@ -866,12 +866,12 @@ class FakeStopwatch implements Stopwatch {
 }
 
 class FakeStopwatchFactory implements StopwatchFactory {
-  FakeStopwatchFactory(this.stopwatch);
+  FakeStopwatchFactory([this.stopwatch]);
 
   Stopwatch stopwatch;
 
   @override
   Stopwatch createStopwatch() {
-    return stopwatch;
+    return stopwatch ?? FakeStopwatch();
   }
 }
