@@ -23,7 +23,7 @@ import 'image.dart';
 /// The [child] is not clipped. To clip a child to the shape of a particular
 /// [ShapeDecoration], consider using a [ClipPath] widget.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This sample shows a radial gradient that draws a moon on a night sky:
 ///
@@ -230,7 +230,7 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
 ///
 /// ## Example
 ///
-/// {@tool sample}
+/// {@tool snippet}
 /// This example shows a 48x48 amber square (placed inside a [Center] widget in
 /// case the parent widget has its own opinions regarding the size that the
 /// [Container] should take), with a margin so that it stays away from
@@ -250,7 +250,7 @@ class DecoratedBox extends SingleChildRenderObjectWidget {
 /// ```
 /// {@end-tool}
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This example shows how to use many of the features of [Container] at once.
 /// The [constraints] are set to fit the font size plus ample headroom

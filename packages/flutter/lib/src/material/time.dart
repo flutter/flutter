@@ -29,7 +29,7 @@ enum DayPeriod {
 /// minute or using [DateTime] object.
 /// Hours are specified between 0 and 23, as in a 24-hour clock.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// ```dart
 /// TimeOfDay now = TimeOfDay.now();

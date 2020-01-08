@@ -12,7 +12,7 @@ import 'edge_insets.dart';
 /// A rectangular border with smooth continuous transitions between the straight
 /// sides and the rounded corners.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 /// ```dart
 /// Widget build(BuildContext context) {
 ///   return Material(

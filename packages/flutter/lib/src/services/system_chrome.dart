@@ -322,7 +322,7 @@ class SystemChrome {
   /// If a particular style is not supported on the platform, selecting it will
   /// have no effect.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   /// ```dart
   /// @override
   /// Widget build(BuildContext context) {
@@ -340,7 +340,7 @@ class SystemChrome {
   /// navigation bar and synthesize them into a single style. This can be used
   /// to configure the system styles when an app bar is not used.
   ///
-  /// {@tool snippet --template=stateful_widget_material}
+  /// {@tool sample --template=stateful_widget_material}
   /// The following example creates a widget that changes the status bar color
   /// to a random value on Android.
   ///

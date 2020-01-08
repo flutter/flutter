@@ -683,7 +683,7 @@ class BoxHitTestResult extends HitTestResult {
   /// the child speaks a different hit test protocol then the parent and the
   /// position is not required to do the actual hit testing in that protocol.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   /// This method is used in [RenderBox.hitTestChildren] when the child and
   /// parent don't share the same origin.
   ///

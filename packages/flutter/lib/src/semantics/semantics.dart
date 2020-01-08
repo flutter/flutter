@@ -1665,7 +1665,7 @@ class SemanticsNode extends AbstractNode with DiagnosticableTreeMixin {
   /// describes how high the box is that this [SemanticsNode] occupies in three
   /// dimensional space. The two other dimensions are defined by [rect].
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   /// The following code stacks three [PhysicalModel]s on top of each other
   /// separated by non-zero elevations.
   ///
