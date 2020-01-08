@@ -288,6 +288,9 @@ class LicenseEntryWithLineBreaks extends LicenseEntry {
 ///  * [AboutListTile], which is a widget that can be added to a [Drawer]. When
 ///    tapped it calls [showAboutDialog].
 class LicenseRegistry {
+  // This class is not meant to be instatiated or extended; this constructor
+  // prevents instantiation and extension.
+  // ignore: unused_element
   LicenseRegistry._();
 
   static List<LicenseEntryCollector> _collectors;
@@ -310,7 +313,7 @@ class LicenseRegistry {
   static Stream<LicenseEntry> get licenses async* {
     if (_collectors == null)
       return;
-    for (LicenseEntryCollector collector in _collectors)
+    for (final LicenseEntryCollector collector in _collectors)
       yield* collector();
   }
 

@@ -46,7 +46,7 @@ abstract class SemanticsEvent {
     final List<String> pairs = <String>[];
     final Map<String, dynamic> dataMap = getDataMap();
     final List<String> sortedKeys = dataMap.keys.toList()..sort();
-    for (String key in sortedKeys)
+    for (final String key in sortedKeys)
       pairs.add('$key: ${dataMap[key]}');
     return '$runtimeType(${pairs.join(', ')})';
   }

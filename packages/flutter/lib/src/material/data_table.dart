@@ -454,7 +454,7 @@ class DataTable extends StatelessWidget {
     if (onSelectAll != null) {
       onSelectAll(checked);
     } else {
-      for (DataRow row in rows) {
+      for (final DataRow row in rows) {
         if ((row.onSelectChanged != null) && (row.selected != checked))
           row.onSelectChanged(checked);
       }
@@ -648,7 +648,7 @@ class DataTable extends StatelessWidget {
         onCheckboxChanged: _handleSelectAll,
       );
       rowIndex = 1;
-      for (DataRow row in rows) {
+      for (final DataRow row in rows) {
         tableRows[rowIndex].children[0] = _buildCheckbox(
           color: theme.accentColor,
           checked: row.selected,
@@ -699,7 +699,7 @@ class DataTable extends StatelessWidget {
         ascending: sortAscending,
       );
       rowIndex = 1;
-      for (DataRow row in rows) {
+      for (final DataRow row in rows) {
         final DataCell cell = row.cells[dataColumnIndex];
         tableRows[rowIndex].children[displayColumnIndex] = _buildDataCell(
           context: context,

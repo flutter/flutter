@@ -386,7 +386,7 @@ class CompileTest {
 
     final RegExp metricExpression = RegExp(r'([a-zA-Z]+)\(CodeSize\)\: (\d+)');
     final Map<String, dynamic> metrics = <String, dynamic>{};
-    for (Match m in metricExpression.allMatches(compileLog)) {
+    for (final Match m in metricExpression.allMatches(compileLog)) {
       metrics[_sdkNameToMetricName(m.group(1))] = int.parse(m.group(2));
     }
     if (metrics.length != _kSdkNameToMetricNameMapping.length) {

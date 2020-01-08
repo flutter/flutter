@@ -258,7 +258,7 @@ void assertContains(String text, List<String> patterns) {
   if (patterns == null) {
     expect(text, isEmpty);
   } else {
-    for (String pattern in patterns) {
+    for (final String pattern in patterns) {
       expect(text, contains(pattern));
     }
   }

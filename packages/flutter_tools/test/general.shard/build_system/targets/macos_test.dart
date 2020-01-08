@@ -82,7 +82,7 @@ void main() {
   });
 
   test('Copies files to correct cache directory', () => testbed.run(() async {
-    for (File input in inputs) {
+    for (final File input in inputs) {
       input.createSync(recursive: true);
     }
     // Create output directory so we can test that it is deleted.
@@ -100,7 +100,7 @@ void main() {
       expect(target.existsSync(), false);
       target.createSync(recursive: true);
 
-      for (FileSystemEntity entity in source.listSync(recursive: true)) {
+      for (final FileSystemEntity entity in source.listSync(recursive: true)) {
         if (entity is File) {
           final String relative = globals.fs.path.relative(entity.path, from: source.path);
           final String destination = globals.fs.path.join(target.path, relative);
@@ -115,7 +115,7 @@ void main() {
     await const DebugUnpackMacOS().build(environment);
 
     expect(globals.fs.directory('$_kOutputPrefix').existsSync(), true);
-    for (File file in inputs) {
+    for (final File file in inputs) {
       expect(globals.fs.file(file.path.replaceFirst(_kInputPrefix, _kOutputPrefix)).existsSync(), true);
     }
   }));

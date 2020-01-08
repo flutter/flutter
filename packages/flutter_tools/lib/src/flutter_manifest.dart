@@ -197,7 +197,7 @@ class FlutterManifest {
       return const <Uri>[];
     }
     final List<Uri> results = <Uri>[];
-    for (Object asset in assets) {
+    for (final Object asset in assets) {
       if (asset is! String || asset == null || asset == '') {
         globals.printError('Asset manifest contains a null or empty uri.');
         continue;
@@ -225,7 +225,7 @@ class FlutterManifest {
     }
 
     final List<Font> fonts = <Font>[];
-    for (Map<String, dynamic> fontFamily in _rawFontsDescriptor) {
+    for (final Map<String, dynamic> fontFamily in _rawFontsDescriptor) {
       final YamlList fontFiles = fontFamily['fonts'] as YamlList;
       final String familyName = fontFamily['family'] as String;
       if (familyName == null) {
@@ -238,7 +238,7 @@ class FlutterManifest {
       }
 
       final List<FontAsset> fontAssets = <FontAsset>[];
-      for (Map<dynamic, dynamic> fontFile in fontFiles.cast<Map<dynamic, dynamic>>()) {
+      for (final Map<dynamic, dynamic> fontFile in fontFiles.cast<Map<dynamic, dynamic>>()) {
         final String asset = fontFile['asset'] as String;
         if (asset == null) {
           globals.printError('Warning: Missing asset in fonts for $familyName', emphasis: true);
@@ -431,7 +431,7 @@ void _validateFonts(YamlList fonts, List<String> errors) {
       continue;
     }
     final YamlMap fontMap = fontListEntry as YamlMap;
-    for (dynamic key in fontMap.keys.where((dynamic key) => key != 'family' && key != 'fonts')) {
+    for (final dynamic key in fontMap.keys.where((dynamic key) => key != 'family' && key != 'fonts')) {
       errors.add('Unexpected child "$key" found under "fonts".');
     }
     if (fontMap['family'] != null && fontMap['family'] is! String) {

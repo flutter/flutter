@@ -206,7 +206,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
       }
 
       Command<void> command = commands[error.commands.first];
-      for (String commandName in error.commands.skip(1)) {
+      for (final String commandName in error.commands.skip(1)) {
         command = command.subcommands[commandName];
       }
 
@@ -386,7 +386,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
     tmpBasename = tmpBasename.substring(tmpBasename.indexOf('_') + 1);
     // Strip suffix for various archs.
     final List<String> suffixes = <String>['_arm', '_arm64', '_x86', '_x64'];
-    for (String suffix in suffixes) {
+    for (final String suffix in suffixes) {
       tmpBasename = tmpBasename.replaceFirst(RegExp('$suffix\$'), '');
     }
     return 'host_' + tmpBasename;

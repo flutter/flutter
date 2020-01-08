@@ -170,7 +170,7 @@ class Dart2JSTarget extends Target {
         '-Ddart.vm.profile=true'
       else
         '-Ddart.vm.product=true',
-      for (String dartDefine in parseDartDefines(environment))
+      for (final String dartDefine in parseDartDefines(environment))
         '-D$dartDefine',
       environment.buildDir.childFile('main.dart').path,
     ]);
@@ -224,7 +224,7 @@ class WebReleaseBundle extends Target {
 
   @override
   Future<void> build(Environment environment) async {
-    for (File outputFile in environment.buildDir.listSync(recursive: true).whereType<File>()) {
+    for (final File outputFile in environment.buildDir.listSync(recursive: true).whereType<File>()) {
       if (!globals.fs.path.basename(outputFile.path).contains('main.dart.js')) {
         continue;
       }

@@ -171,7 +171,7 @@ class DefaultShaderWarmUp extends ShaderWarmUp {
     // Warm up path stroke and fill shaders.
     for (int i = 0; i < paths.length; i += 1) {
       canvas.save();
-      for (ui.Paint paint in paints) {
+      for (final ui.Paint paint in paints) {
         canvas.drawPath(paths[i], paint);
         canvas.translate(drawCallSpacing, 0.0);
       }
@@ -202,7 +202,7 @@ class DefaultShaderWarmUp extends ShaderWarmUp {
     //
     // Add an integral or fractional translation to trigger Skia's non-AA or AA
     // optimizations (as did before in normal FillRectOp in rrect clip cases).
-    for (double fraction in <double>[0.0, 0.5]) {
+    for (final double fraction in <double>[0.0, 0.5]) {
       canvas
         ..save()
         ..translate(fraction, fraction)

@@ -416,7 +416,7 @@ class _UiKitViewGestureRecognizer extends OneSequenceGestureRecognizer {
   @override
   void addAllowedPointer(PointerDownEvent event) {
     startTrackingPointer(event.pointer, event.transform);
-    for (OneSequenceGestureRecognizer recognizer in _gestureRecognizers) {
+    for (final OneSequenceGestureRecognizer recognizer in _gestureRecognizers) {
       recognizer.addPointer(event);
     }
   }
@@ -492,7 +492,7 @@ class _PlatformViewGestureRecognizer extends OneSequenceGestureRecognizer {
   @override
   void addAllowedPointer(PointerDownEvent event) {
     startTrackingPointer(event.pointer, event.transform);
-    for (OneSequenceGestureRecognizer recognizer in _gestureRecognizers) {
+    for (final OneSequenceGestureRecognizer recognizer in _gestureRecognizers) {
       recognizer.addPointer(event);
     }
   }

@@ -23,7 +23,7 @@ class TestTree extends Object with DiagnosticableTreeMixin {
 
   @override
   List<DiagnosticsNode> debugDescribeChildren() => <DiagnosticsNode>[
-    for (TestTree child in children)
+    for (final TestTree child in children)
       child.toDiagnosticsNode(
         name: 'child ${child.name}',
         style: child.style,

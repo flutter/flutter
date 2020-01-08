@@ -59,7 +59,7 @@ Future<void> main(List<String> rawArgs) async {
   final String localEngine = args['local-engine'] as String;
   final String localEngineSrcPath = args['local-engine-src-path'] as String;
 
-  for (String taskName in _taskNames) {
+  for (final String taskName in _taskNames) {
     section('Running task "$taskName"');
     final Map<String, dynamic> result = await runTask(
       taskName,
@@ -95,7 +95,7 @@ void addTasks({
   }
   // Only start skipping if user specified a task to continue from
   final String stage = args['stage'] as String;
-  for (ManifestTask task in tasks) {
+  for (final ManifestTask task in tasks) {
     final bool isQualifyingStage = stage == null || task.stage == stage;
     final bool isQualifyingHost = !(args['match-host-platform'] as bool) || task.isSupportedByHost();
     if (isQualifyingHost && isQualifyingStage) {
@@ -116,7 +116,7 @@ final ArgParser _argParser = ArgParser()
         '\n'
         'This option may be repeated to specify multiple tasks.',
     callback: (List<String> value) {
-      for (String nameOrPath in value) {
+      for (final String nameOrPath in value) {
         final List<String> fragments = path.split(nameOrPath);
         final bool isDartFile = fragments.last.endsWith('.dart');
 

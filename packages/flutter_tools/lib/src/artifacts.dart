@@ -509,7 +509,7 @@ class LocalEngineArtifacts extends Artifacts {
   String _genSnapshotPath() {
     const List<String> clangDirs = <String>['.', 'clang_x64', 'clang_x86', 'clang_i386'];
     final String genSnapshotName = _artifactToFileName(Artifact.genSnapshot);
-    for (String clangDir in clangDirs) {
+    for (final String clangDir in clangDirs) {
       final String genSnapshotPath = globals.fs.path.join(engineOutPath, clangDir, genSnapshotName);
       if (globals.processManager.canRun(genSnapshotPath)) {
         return genSnapshotPath;

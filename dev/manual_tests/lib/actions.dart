@@ -77,7 +77,7 @@ class UndoableActionDispatcher extends ActionDispatcher implements Listenable {
   /// May only be called by subclasses.
   @protected
   void notifyListeners() {
-    for (VoidCallback callback in _listeners) {
+    for (final VoidCallback callback in _listeners) {
       callback();
     }
   }

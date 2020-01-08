@@ -843,7 +843,7 @@ class _PrefixedStringBuilder {
     );
     int i = 0;
     final int length = lines.length;
-    for (String line in lines) {
+    for (final String line in lines) {
       i++;
       _writeLine(
         line,
@@ -1132,7 +1132,7 @@ class TextTreeRenderer {
       const int maxLines = 25;
       int lines = 0;
       void visitor(DiagnosticsNode node) {
-        for (DiagnosticsNode child in node.getChildren()) {
+        for (final DiagnosticsNode child in node.getChildren()) {
           if (lines < maxLines) {
             depth += 1;
             descendants.add('$prefixOtherLines${"  " * depth}$child');
@@ -2508,7 +2508,7 @@ class FlagsSummary<T> extends DiagnosticsProperty<Map<String, T>> {
   // For a null value, it is omitted unless `includeEmtpy` is true and
   // [ifEntryNull] contains a corresponding description.
   Iterable<String> _formattedValues() sync* {
-    for (MapEntry<String, T> entry in value.entries) {
+    for (final MapEntry<String, T> entry in value.entries) {
       if (entry.value != null) {
         yield entry.key;
       }

@@ -106,7 +106,7 @@ void main() {
       globals.fs.path.join('bin', 'cache', 'dart-sdk', 'bin', 'dart'),
       globals.fs.path.join('bin', 'cache', 'dart-sdk '),
     ];
-    for (String dependency in dependencies) {
+    for (final String dependency in dependencies) {
       globals.fs.file(dependency).createSync(recursive: true);
     }
 

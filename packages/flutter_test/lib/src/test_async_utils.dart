@@ -45,6 +45,9 @@ class _AsyncScope {
 /// });
 /// ```
 class TestAsyncUtils {
+  // This class is not meant to be instatiated or extended; this constructor
+  // prevents instantiation and extension.
+  // ignore: unused_element
   TestAsyncUtils._();
   static const String _className = 'TestAsyncUtils';
 
@@ -274,7 +277,7 @@ class TestAsyncUtils {
         ErrorSummary('Asynchronous call to guarded function leaked.'),
         ErrorHint('You must use "await" with all Future-returning test APIs.')
       ];
-      for (_AsyncScope scope in _scopeStack) {
+      for (final _AsyncScope scope in _scopeStack) {
         final _StackEntry guarder = _findResponsibleMethod(scope.creationStack, 'guard', information);
         if (guarder != null) {
           information.add(ErrorDescription(

@@ -105,7 +105,7 @@ Future<void> run(List<String> args) async {
     final Directory sdkRootDest =
         globals.fs.directory(globals.artifacts.getArtifactPath(Artifact.flutterPatchedSdkPath));
     sdkRootDest.createSync(recursive: true);
-    for (FileSystemEntity artifact in sdkRootSrc.listSync()) {
+    for (final FileSystemEntity artifact in sdkRootSrc.listSync()) {
       globals.fs.link(sdkRootDest.childFile(artifact.basename).path).createSync(artifact.path);
     }
     // TODO(tvolkert): Remove once flutter_tester no longer looks for this.
@@ -136,7 +136,7 @@ Future<void> run(List<String> args) async {
     final Map<String, String> tests = <String, String>{};
     final List<Map<String, dynamic>> jsonList = List<Map<String, dynamic>>.from(
       (json.decode(globals.fs.file(argResults[_kOptionTests]).readAsStringSync()) as List<dynamic>).cast<Map<String, dynamic>>());
-    for (Map<String, dynamic> map in jsonList) {
+    for (final Map<String, dynamic> map in jsonList) {
       final String source = globals.fs.file(map['source']).resolveSymbolicLinksSync();
       final String dill = globals.fs.file(map['dill']).resolveSymbolicLinksSync();
       tests[source] = dill;

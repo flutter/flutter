@@ -65,7 +65,7 @@ flutter:
         'a/b/c/var2/foo',
         'a/b/c/var3/foo',
       ];
-      for (String asset in assets) {
+      for (final String asset in assets) {
         globals.fs.file(fixPath(asset))
           ..createSync(recursive: true)
           ..writeAsStringSync(asset);
@@ -75,7 +75,7 @@ flutter:
       await bundle.build(manifestPath: 'pubspec.yaml');
 
       // The main asset file, /a/b/c/foo, and its variants exist.
-      for (String asset in assets) {
+      for (final String asset in assets) {
         expect(bundle.entries.containsKey(asset), true);
         expect(utf8.decode(await bundle.entries[asset].contentsAsBytes()), asset);
       }
@@ -87,7 +87,7 @@ flutter:
       // Now the main asset file, /a/b/c/foo, does not exist. This is OK because
       // the /a/b/c/*/foo variants do exist.
       expect(bundle.entries.containsKey('a/b/c/foo'), false);
-      for (String asset in assets.skip(1)) {
+      for (final String asset in assets.skip(1)) {
         expect(bundle.entries.containsKey(asset), true);
         expect(utf8.decode(await bundle.entries[asset].contentsAsBytes()), asset);
       }

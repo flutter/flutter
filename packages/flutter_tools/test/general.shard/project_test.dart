@@ -643,7 +643,7 @@ void testInMemory(String description, Future<void> testMethod()) {
 void transfer(FileSystemEntity entity, FileSystem target) {
   if (entity is Directory) {
     target.directory(entity.absolute.path).createSync(recursive: true);
-    for (FileSystemEntity child in entity.listSync()) {
+    for (final FileSystemEntity child in entity.listSync()) {
       transfer(child, target);
     }
   } else if (entity is File) {

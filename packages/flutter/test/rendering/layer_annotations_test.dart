@@ -674,7 +674,7 @@ class _Layers {
     assert(!_assigned);
     _assigned = true;
     if (children != null) {
-      for (Object child in children) {
+      for (final Object child in children) {
         Layer layer;
         if (child is Layer) {
           layer = child;

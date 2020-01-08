@@ -114,7 +114,7 @@ class _DefaultSignals implements Signals {
   }
 
   Future<void> _handleSignal(ProcessSignal s) async {
-    for (SignalHandler handler in _handlersList[s]) {
+    for (final SignalHandler handler in _handlersList[s]) {
       try {
         await asyncGuard<void>(() async => handler(s));
       } catch (e) {

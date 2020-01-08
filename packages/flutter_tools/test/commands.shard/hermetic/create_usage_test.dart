@@ -31,7 +31,7 @@ void main() {
           globals.fs.path.join('usr', 'local', 'bin', 'adb'),
           globals.fs.path.join('Android', 'platform-tools', 'adb.exe'),
         ];
-        for (String path in paths) {
+        for (final String path in paths) {
           globals.fs.file(path).createSync(recursive: true);
         }
       }, overrides: <Type, Generator>{
