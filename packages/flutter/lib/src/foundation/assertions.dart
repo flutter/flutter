@@ -675,6 +675,10 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
       '_FakeAsync',
       '_FrameCallbackEntry',
     };
+
+    final Set<String> visited = <String>{};
+    int skippedFromFlutterCount = 0;
+
     final List<String> result = <String>[];
     final List<String> skipped = <String>[];
     for (final String line in frames) {
@@ -683,6 +687,16 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
         skipped.add('class ${frameLine.className}');
       } else if (filteredPackages.contains(frameLine.packageScheme + ':' + frameLine.package)) {
         skipped.add('package ${frameLine.packageScheme == 'dart' ? 'dart:' : ''}${frameLine.package}');
+      } else if (frameLine.packageScheme == 'package' && frameLine.package == 'flutter') {
+        if (visited.add('flutter/${frameLine.packagePath}:${frameLine.line}:${frameLine.column}')) {
+          if (skippedFromFlutterCount > 0) {
+            result.add('(elided $skippedFromFlutterCount frame${skippedFromFlutterCount == 1 ? '' : 's'} from package:flutter)');
+            skippedFromFlutterCount = 0;
+          }
+          result.add(line);
+        } else {
+          skippedFromFlutterCount++;
+        }
       } else {
         result.add(line);
       }
