@@ -6,8 +6,8 @@
 # Capture the directory this script resides in
 SCRIPT_DIRECTORY="$(dirname $(readlink -f "$0"))"
 
-# Change directory to /dev directory
-cd "$(dirname "$0")/../.."
+# Set context to flutter/dev
+CONTEXT="${SCRIPT_DIRECTORY}/../.."
 
 TAG="${CIRRUS_TAG:-latest}"
 
@@ -21,4 +21,4 @@ sudo docker pull "gcr.io/flutter-cirrus/build-flutter-image:$TAG"
 sudo docker build "$@" \
   --tag "gcr.io/flutter-cirrus/build-flutter-image:$TAG" \
   --file "$SCRIPT_DIRECTORY/Dockerfile" \
-  "$PWD"
+  "$CONTEXT"
