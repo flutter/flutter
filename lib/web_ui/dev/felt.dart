@@ -51,8 +51,12 @@ void _listenToShutdownSignals() {
     print('Received SIGINT. Shutting down.');
     io.exit(1);
   });
-  io.ProcessSignal.sigterm.watch().listen((_) {
-    print('Received SIGTERM. Shutting down.');
-    io.exit(1);
-  });
+  // SIGTERM signals are not generated under Windows.
+  // See https://docs.microsoft.com/en-us/previous-versions/xdkz3x12(v%3Dvs.140)
+  if (!io.Platform.isWindows) {
+    io.ProcessSignal.sigterm.watch().listen((_) {
+      print('Received SIGTERM. Shutting down.');
+      io.exit(1);
+    });
+  }
 }

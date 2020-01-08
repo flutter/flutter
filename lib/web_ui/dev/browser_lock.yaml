@@ -3,5 +3,6 @@ chrome:
   # systems, so we specify per-OS build number.
   Linux: 695653
   Mac: 695656
+  Win: 695655
 firefox:
   version: '71.0'
