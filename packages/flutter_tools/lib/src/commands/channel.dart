@@ -65,31 +65,54 @@ class ChannelCommand extends FlutterCommand {
       <String>['git', 'branch', '-r'],
       workingDirectory: Cache.flutterRoot,
       mapFunction: (String line) {
-        if (verbose) {
-          rawOutput.add(line);
-        }
-        final List<String> split = line.split('/');
-        if (split.length < 2) {
-          return null;
-        }
-        final String branchName = split[1];
-        if (seenChannels.contains(branchName)) {
-          return null;
-        }
-        seenChannels.add(branchName);
-        if (branchName == currentBranch) {
-          return '* $branchName';
-        }
-        if (!branchName.startsWith('HEAD ') &&
-            (showAll || FlutterVersion.officialChannels.contains(branchName))) {
-          return '  $branchName';
-        }
+        rawOutput.add(line);
         return null;
       },
     );
     if (result != 0) {
       final String details = verbose ? '\n${rawOutput.join('\n')}' : '';
       throwToolExit('List channels failed: $result$details', exitCode: result);
+    } else {
+      // show channels sorted by stability
+      final List<String> officialChannels = FlutterVersion.officialChannels.toList(growable: false);
+      final List<bool> availableChannels = List<bool>.generate(officialChannels.length, (_)=>false, growable: false);
+
+      for (final String line in rawOutput) {
+          final List<String> split = line.split('/');
+          if (split.length > 1) {
+            final int index = officialChannels.indexOf(split[1]);
+
+            if (index != -1) { // Mark all available channels official channels from output
+              availableChannels[index] = true;
+            }
+            else if (showAll && !seenChannels.contains(split[1])) {
+            // add other branches to seenChannels if --all flag is given (to print later)
+              seenChannels.add(split[1]);
+            }
+          }
+      }
+
+      // print all available official channels in sorted manner
+      for (int i = 0; i < officialChannels.length; i++) {
+        // only print non-missing channels
+        if (availableChannels[i]) {
+          String currentIndicator = ' ';
+          if(officialChannels[i] == currentChannel){
+            currentIndicator = '*';
+          }
+          globals.printStatus('$currentIndicator ${officialChannels[i]}');
+        }
+      }
+
+      if (showAll) {
+        for (final String branch in seenChannels){
+          if(currentBranch == branch){
+          globals.printStatus('* $branch');
+          } else if (!branch.startsWith('HEAD ')) {
+          globals.printStatus('  $branch');
+          }
+        }
+      }
     }
   }
 
