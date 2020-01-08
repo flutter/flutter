@@ -866,7 +866,7 @@ void main() {
   });
 
   group('ModalRoute', () {
-    testWidgets('default barrierTween', (WidgetTester tester) async {
+    testWidgets('default barrierCurve', (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
         home: Material(
           child: Builder(
@@ -888,9 +888,9 @@ void main() {
         ),
       ));
 
-      final CurveTween _defaultBarrierTween = CurveTween(curve: Curves.ease);
-      double _getBarrierTweenAlphaValue(double t) {
-        return _defaultBarrierTween.transform(t) * 255;
+      final CurveTween _defaultBarrierCurve = CurveTween(curve: Curves.ease);
+      double _getBarrierCurveAlphaValue(double t) {
+        return _defaultBarrierCurve.transform(t) * 255;
       }
 
       await tester.tap(find.text('X'));
@@ -906,21 +906,21 @@ void main() {
       modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
       expect(
         modalBarrierAnimation.value.alpha,
-        closeTo(_getBarrierTweenAlphaValue(0.25), 1.0),
+        closeTo(_getBarrierCurveAlphaValue(0.25), 1.0),
       );
 
       await tester.pump(const Duration(milliseconds: 25));
       modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
       expect(
         modalBarrierAnimation.value.alpha,
-        closeTo(_getBarrierTweenAlphaValue(0.50), 1.0),
+        closeTo(_getBarrierCurveAlphaValue(0.50), 1.0),
       );
 
       await tester.pump(const Duration(milliseconds: 25));
       modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
       expect(
         modalBarrierAnimation.value.alpha,
-        closeTo(_getBarrierTweenAlphaValue(0.75), 1.0),
+        closeTo(_getBarrierCurveAlphaValue(0.75), 1.0),
       );
 
       await tester.pumpAndSettle();
@@ -928,7 +928,7 @@ void main() {
       expect(modalBarrierAnimation.value, Colors.black);
     });
 
-    testWidgets('custom barrierTween', (WidgetTester tester) async {
+    testWidgets('custom barrierCurve', (WidgetTester tester) async {
       await tester.pumpWidget(MaterialApp(
         home: Material(
           child: Builder(
@@ -938,7 +938,7 @@ void main() {
                   child: const Text('X'),
                   onPressed: () {
                     Navigator.of(context).push<void>(
-                      _TestDialogRouteWithCustomBarrierTween<void>(
+                      _TestDialogRouteWithCustomBarrierCurve<void>(
                         child: const Text('Hello World'),
                         barrierCurve: Curves.linear,
                       ),
@@ -951,9 +951,9 @@ void main() {
         ),
       ));
 
-      final CurveTween _customBarrierTween = CurveTween(curve: Curves.linear);
-      double _getBarrierTweenAlphaValue(double t) {
-        return _customBarrierTween.transform(t) * 255;
+      final CurveTween _customBarrierCurve = CurveTween(curve: Curves.linear);
+      double _getBarrierCurveAlphaValue(double t) {
+        return _customBarrierCurve.transform(t) * 255;
       }
 
       await tester.tap(find.text('X'));
@@ -969,21 +969,21 @@ void main() {
       modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
       expect(
         modalBarrierAnimation.value.alpha,
-        closeTo(_getBarrierTweenAlphaValue(0.25), 1.0),
+        closeTo(_getBarrierCurveAlphaValue(0.25), 1.0),
       );
 
       await tester.pump(const Duration(milliseconds: 25));
       modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
       expect(
         modalBarrierAnimation.value.alpha,
-        closeTo(_getBarrierTweenAlphaValue(0.50), 1.0),
+        closeTo(_getBarrierCurveAlphaValue(0.50), 1.0),
       );
 
       await tester.pump(const Duration(milliseconds: 25));
       modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
       expect(
         modalBarrierAnimation.value.alpha,
-        closeTo(_getBarrierTweenAlphaValue(0.75), 1.0),
+        closeTo(_getBarrierCurveAlphaValue(0.75), 1.0),
       );
 
       await tester.pumpAndSettle();
@@ -1049,8 +1049,8 @@ class _TestDialogRoute<T> extends PopupRoute<T> {
   }
 }
 
-class _TestDialogRouteWithCustomBarrierTween<T> extends PopupRoute<T> {
-  _TestDialogRouteWithCustomBarrierTween({
+class _TestDialogRouteWithCustomBarrierCurve<T> extends PopupRoute<T> {
+  _TestDialogRouteWithCustomBarrierCurve({
     @required Widget child,
     @required Curve barrierCurve,
   }) : assert(barrierCurve != null),
