@@ -73,17 +73,28 @@ class StackFrame {
   }
 
   static StackFrame _parseWebFrame(String line) {
-    final RegExp parser = RegExp(r'^(package:.+) (\d+):(\d+)\s+(.+)$');
+    final bool hasPackage = line.startsWith('package');
+    final RegExp parser = hasPackage
+        ? RegExp(r'^(package:.+) (\d+):(\d+)\s+(.+)$')
+        : RegExp(r'^(.+) (\d+):(\d+)\s+(.+)$');
     final Match match = parser.firstMatch(line);
     assert(match != null, 'Expecgted $line to match $parser.');
 
-    final Uri packageUri = Uri.parse(match.group(1));
+    String package = '<unknown>';
+    String packageScheme = '<unknown>';
+    String packagePath = '<unknown>';
+    if (hasPackage) {
+      packageScheme = 'package';
+      final Uri packageUri = Uri.parse(match.group(1));
+      package = packageUri.pathSegments[0];
+      packagePath = packageUri.path.replaceFirst(packageUri.pathSegments[0] + '/', '');
+    }
 
     return StackFrame(
       number: -1,
-      packageScheme: 'package',
-      package: packageUri.pathSegments[0],
-      packagePath: packageUri.path.replaceFirst(packageUri.pathSegments[0] + '/', ''),
+      packageScheme: packageScheme,
+      package: package,
+      packagePath: packagePath,
       line: int.parse(match.group(2)),
       column: int.parse(match.group(3)),
       className: '<unknown>',
@@ -99,7 +110,7 @@ class StackFrame {
     }
 
     // Web frames.
-    if (line.startsWith('package')) {
+    if (!line.startsWith('#')) {
       return _parseWebFrame(line);
     }
 

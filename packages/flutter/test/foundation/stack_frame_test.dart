@@ -148,7 +148,7 @@ const List<StackFrame> asyncStackFrames = <StackFrame>[
   StackFrame(number: 18, className: '_CustomZone',         method: 'run',            packageScheme: 'dart',    package: 'async',          packagePath: 'zone.dart',                                                                   line: 1023, column: 19),
   StackFrame(number: 19, className: '',                    method: '_runZoned',      packageScheme: 'dart',    package: 'async',          packagePath: 'zone.dart',                                                                   line: 1518, column: 10),
   StackFrame(number: 20, className: '',                    method: 'runZoned',       packageScheme: 'dart',    package: 'async',          packagePath: 'zone.dart',                                                                   line: 1465, column: 12),
-  StackFrame(number: 21, className: 'StackTraceFormatter', method: 'asCurrent',      packageScheme: 'pacakge', package: 'test_api',       packagePath: 'src/backend/stack_trace_formatter.dart',                                      line: 41,   column: 31),
+  StackFrame(number: 21, className: 'StackTraceFormatter', method: 'asCurrent',      packageScheme: 'package', package: 'test_api',       packagePath: 'src/backend/stack_trace_formatter.dart',                                      line: 41,   column: 31),
   StackFrame(number: 22, className: 'RemoteListener',      method: 'start',          packageScheme: 'package', package: 'test_api',       packagePath: 'src/remote_listener.dart',                                                    line: 69,   column: 29),
   StackFrame(number: 23, className: '',                    method: '_rootRun',       packageScheme: 'dart',    package: 'async',          packagePath: 'zone.dart',                                                                   line: 1126, column: 13),
   StackFrame(number: 24, className: '_CustomZone',         method: 'run',            packageScheme: 'dart',    package: 'async',          packagePath: 'zone.dart',                                                                   line: 1023, column: 19),
@@ -198,6 +198,7 @@ package:assertions/main.dart 8:5                                                
 package:assertions/main_web_entrypoint.dart 9:3                                       main$
 package:dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 47:50            onValue
 package:dart-sdk/lib/async/zone.dart 1381:54                                          runUnary
+object_test.dart 210:5                                                                performLayout
 package:dart-sdk/lib/async/future_impl.dart 140:18                                    handleValue
 package:dart-sdk/lib/async/future_impl.dart 682:44                                    handleValueCallback
 package:dart-sdk/lib/async/future_impl.dart 711:32                                    _propagateToListeners
@@ -207,17 +208,18 @@ package:dart-sdk/lib/async/schedule_microtask.dart 52:5                         
 package:dart-sdk/lib/_internal/js_dev_runtime/patch/async_patch.dart 168:15           <fn>''';
 
 const List<StackFrame> webStackTraceFrames = <StackFrame>[
-  StackFrame(number: -1, className: '<unknown>', method: 'throw_',                packageScheme: 'package', package: 'dart-sdk',   packagePath: 'lib/_intenral/js_dev_runtime/private/ddc_runtime/errors.dart', line: 196,  column: 49),
-  StackFrame(number: -1, className: '<unknown>', method: 'blah',                  packageScheme: 'package', package: 'assertions', packagePath: 'main.dart',                                                    line: 4,    column: 3),
-  StackFrame(number: -1, className: '<unknown>', method: r'main$',                packageScheme: 'package', package: 'assertions', packagePath: 'main.dart',                                                    line: 8,    column: 5),
-  StackFrame(number: -1, className: '<unknown>', method: r'main$',                packageScheme: 'package', package: 'assertions', packagePath: 'main_web_entrypoint.dart',                                     line: 9,    column: 3),
-  StackFrame(number: -1, className: '<unknown>', method: 'onValue',               packageScheme: 'package', package: 'dart-sdk',   packagePath: 'lib/_internal/js_dev_runtime/patch/async_patch.dart',          line: 47,   column: 50),
-  StackFrame(number: -1, className: '<unknown>', method: 'runUnary',              packageScheme: 'package', package: 'dart-sdk',   packagePath: 'lib/async/zone.dart',                                          line: 1381, column: 54),
-  StackFrame(number: -1, className: '<unknown>', method: 'handleValue',           packageScheme: 'package', package: 'dart-sdk',   packagePath: 'lib/async/future_impl.dart',                                   line: 140,  column: 18),
-  StackFrame(number: -1, className: '<unknown>', method: 'handleValueCallback',   packageScheme: 'package', package: 'dart-sdk',   packagePath: 'lib/async/future_impl.dart',                                   line: 682,  column: 44),
-  StackFrame(number: -1, className: '<unknown>', method: '_propagateToListeners', packageScheme: 'package', package: 'dart-sdk',   packagePath: 'lib/async/future_impl.dart',                                   line: 711,  column: 32),
-  StackFrame(number: -1, className: '<unknown>', method: 'callback',              packageScheme: 'package', package: 'dart-sdk',   packagePath: 'lib/async/future_impl.dart',                                   line: 391,  column: 9),
-  StackFrame(number: -1, className: '<unknown>', method: '_microtaskLoop',        packageScheme: 'package', package: 'dart-sdk',   packagePath: 'lib/async/schedule_microtask.dart',                            line: 43,   column: 11),
-  StackFrame(number: -1, className: '<unknown>', method: '_startMicrotaskLoop',   packageScheme: 'package', package: 'dart-sdk',   packagePath: 'lib/async/schedule_microtask.dart',                            line: 52,   column: 5),
-  StackFrame(number: -1, className: '<unknown>', method: '<fn>',                 packageScheme: 'package', package: 'dart-sdk',   packagePath: 'lib/_internal/js_dev_runtime/patch/async_patch.dart',          line: 168,  column: 15),
+  StackFrame(number: -1, className: '<unknown>', method: 'throw_',                packageScheme: 'package',   package: 'dart-sdk',   packagePath: 'lib/_intenral/js_dev_runtime/private/ddc_runtime/errors.dart', line: 196,  column: 49),
+  StackFrame(number: -1, className: '<unknown>', method: 'blah',                  packageScheme: 'package',   package: 'assertions', packagePath: 'main.dart',                                                    line: 4,    column: 3),
+  StackFrame(number: -1, className: '<unknown>', method: r'main$',                packageScheme: 'package',   package: 'assertions', packagePath: 'main.dart',                                                    line: 8,    column: 5),
+  StackFrame(number: -1, className: '<unknown>', method: r'main$',                packageScheme: 'package',   package: 'assertions', packagePath: 'main_web_entrypoint.dart',                                     line: 9,    column: 3),
+  StackFrame(number: -1, className: '<unknown>', method: 'onValue',               packageScheme: 'package',   package: 'dart-sdk',   packagePath: 'lib/_internal/js_dev_runtime/patch/async_patch.dart',          line: 47,   column: 50),
+  StackFrame(number: -1, className: '<unknown>', method: 'runUnary',              packageScheme: 'package',   package: 'dart-sdk',   packagePath: 'lib/async/zone.dart',                                          line: 1381, column: 54),
+  StackFrame(number: -1, className: '<unknown>', method: 'performLayout',         packageScheme: '<unknown>', package: '<unknown>',  packagePath: '<unknown>',                                                    line: 210,  column: 5),
+  StackFrame(number: -1, className: '<unknown>', method: 'handleValue',           packageScheme: 'package',   package: 'dart-sdk',   packagePath: 'lib/async/future_impl.dart',                                   line: 140,  column: 18),
+  StackFrame(number: -1, className: '<unknown>', method: 'handleValueCallback',   packageScheme: 'package',   package: 'dart-sdk',   packagePath: 'lib/async/future_impl.dart',                                   line: 682,  column: 44),
+  StackFrame(number: -1, className: '<unknown>', method: '_propagateToListeners', packageScheme: 'package',   package: 'dart-sdk',   packagePath: 'lib/async/future_impl.dart',                                   line: 711,  column: 32),
+  StackFrame(number: -1, className: '<unknown>', method: 'callback',              packageScheme: 'package',   package: 'dart-sdk',   packagePath: 'lib/async/future_impl.dart',                                   line: 391,  column: 9),
+  StackFrame(number: -1, className: '<unknown>', method: '_microtaskLoop',        packageScheme: 'package',   package: 'dart-sdk',   packagePath: 'lib/async/schedule_microtask.dart',                            line: 43,   column: 11),
+  StackFrame(number: -1, className: '<unknown>', method: '_startMicrotaskLoop',   packageScheme: 'package',   package: 'dart-sdk',   packagePath: 'lib/async/schedule_microtask.dart',                            line: 52,   column: 5),
+  StackFrame(number: -1, className: '<unknown>', method: '<fn>',                  packageScheme: 'package',   package: 'dart-sdk',   packagePath: 'lib/_internal/js_dev_runtime/patch/async_patch.dart',          line: 168,  column: 15),
 ];
