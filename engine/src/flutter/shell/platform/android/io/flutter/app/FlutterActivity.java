@@ -16,12 +16,17 @@ import io.flutter.plugin.common.PluginRegistry;
 import io.flutter.view.FlutterNativeView;
 import io.flutter.view.FlutterView;
 
+// This uses a javadoc deprecation instead of a deprecation annotation because we don't want to show
+// a build-time warning yet. Revise once v2 embedding usage volume increases.
 /**
  * Base class for activities that use Flutter.
+ *
+ * @deprecated As of Flutter v1.12, this class is deprecated in favor of {@link io.flutter.embedding.android.FlutterActivity}.
+ *             See https://flutter.dev/go/android-project-migration for migration details.
  */
 public class FlutterActivity extends Activity implements FlutterView.Provider, PluginRegistry, ViewFactory {
     private static final String TAG = "FlutterActivity";
-    
+
     private final FlutterActivityDelegate delegate = new FlutterActivityDelegate(this, this);
 
     // These aliases ensure that the methods we forward to the delegate adhere
