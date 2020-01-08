@@ -20,6 +20,12 @@ Future<void> buildMacOS({
   BuildInfo buildInfo,
   String targetOverride,
 }) async {
+  if (!flutterProject.macos.xcodeWorkspace.existsSync()) {
+    throwToolExit('No macOS desktop project configured. '
+      'See https://flutter.dev/desktop#add-desktop-support-to-an-existing-flutter-project '
+      'to learn about adding macOS support to a project.');
+  }
+
   final Directory flutterBuildDir = globals.fs.directory(getMacOSBuildDirectory());
   if (!flutterBuildDir.existsSync()) {
     flutterBuildDir.createSync(recursive: true);
