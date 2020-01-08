@@ -45,11 +45,16 @@ Future<void> main() async {
 
   final StackTrace sampleStack = await getSampleStack();
 
-  test('Error reporting - pretest', () async {
+  setUp(() async {
     expect(debugPrint, equals(debugPrintThrottled));
     debugPrint = (String message, { int wrapWidth }) {
       console.add(message);
     };
+  });
+
+  tearDown(() async {
+    expect(console, isEmpty);
+    debugPrint = debugPrintThrottled;
   });
 
   test('Error reporting - assert with message', () async {
@@ -70,11 +75,6 @@ Future<void> main() async {
       'Message goes here\\.\n'
       '\'[^\']+flutter/test/foundation/error_reporting_test\\.dart\':\n'
       'Failed assertion: line [0-9]+ pos [0-9]+: \'false\'\n'
-      '\n'
-      'Either the assertion indicates an error in the framework itself, or we should provide substantially\n'
-      'more information in this error message to help you determine and fix the underlying cause\\.\n'
-      'In either case, please report this assertion by filing a bug on GitHub:\n'
-      '  https://github\\.com/flutter/flutter/issues/new\\?template=BUG\\.md\n'
       '\n'
       'When the exception was thrown, this was the stack:\n'
       '#0      getSampleStack\\.<anonymous closure> \\([^)]+flutter/test/foundation/error_reporting_test\\.dart:[0-9]+:[0-9]+\\)\n'
@@ -111,11 +111,6 @@ Future<void> main() async {
       'word word word word word word word word word word word word word word word word word word word word\n'
       '\'[^\']+flutter/test/foundation/error_reporting_test\\.dart\':\n'
       'Failed assertion: line [0-9]+ pos [0-9]+: \'false\'\n'
-      '\n'
-      'Either the assertion indicates an error in the framework itself, or we should provide substantially\n'
-      'more information in this error message to help you determine and fix the underlying cause\\.\n'
-      'In either case, please report this assertion by filing a bug on GitHub:\n'
-      '  https://github\\.com/flutter/flutter/issues/new\\?template=BUG\\.md\n'
       '════════════════════════════════════════════════════════════════════════════════════════════════════\$',
     ));
     console.clear();
@@ -152,11 +147,6 @@ Future<void> main() async {
       'The following assertion was thrown testing the error handling logic:\n'
       '\'[^\']+flutter/test/foundation/error_reporting_test\\.dart\':[\n ]'
       'Failed[\n ]assertion:[\n ]line[\n ][0-9]+[\n ]pos[\n ][0-9]+:[\n ]\'false\':[\n ]is[\n ]not[\n ]true\\.\n'
-      '\n'
-      'Either the assertion indicates an error in the framework itself, or we should provide substantially\n'
-      'more information in this error message to help you determine and fix the underlying cause\\.\n'
-      'In either case, please report this assertion by filing a bug on GitHub:\n'
-      '  https://github\\.com/flutter/flutter/issues/new\\?template=BUG\\.md\n'
       '\n'
       'When the exception was thrown, this was the stack:\n'
       '#0      getSampleStack\\.<anonymous closure> \\([^)]+flutter/test/foundation/error_reporting_test\\.dart:[0-9]+:[0-9]+\\)\n'
@@ -218,10 +208,5 @@ Future<void> main() async {
     expect(console.join('\n'), 'Another exception was thrown: hello again');
     console.clear();
     FlutterError.resetErrorCount();
-  });
-
-  test('Error reporting - posttest', () async {
-    expect(console, isEmpty);
-    debugPrint = debugPrintThrottled;
   });
 }
