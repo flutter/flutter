@@ -127,7 +127,7 @@ Widget _wrapWithBackground({
       }
       return backgroundColor.computeLuminance() < luminanceThreshold;
     };
-     final bool isDark = computeLuminance() < 0.179;
+    final bool isDark = computeLuminance();
     final Brightness newBrightness = brightness ?? (isDark ? Brightness.dark : Brightness.light);
     SystemUiOverlayStyle overlayStyle;
     switch (newBrightness) {
@@ -544,7 +544,6 @@ class _CupertinoNavigationBarState extends State<CupertinoNavigationBar> {
             child: _TransitionableNavigationBar(
               componentsKeys: keys,
               backgroundColor: widget.backgroundColor,
-       background: widget.background,
               background: widget.background,
               backButtonTextStyle: CupertinoTheme
                   .of(context)
@@ -804,7 +803,7 @@ class _CupertinoSliverNavigationBarState
             components: components,
             userMiddle: widget.middle,
             backgroundColor: CupertinoDynamicColor.resolve(widget.backgroundColor, context) ?? CupertinoTheme.of(context).barBackgroundColor,
-      background: widget.background,
+            background: widget.background,
             brightness: widget.brightness,
             border: widget.border,
             padding: widget.padding,
@@ -880,7 +879,7 @@ class _LargeTitleNavigationBarSliverDelegate
     final Widget navBar = _wrapWithBackground(
       border: border,
       backgroundColor: CupertinoDynamicColor.resolve(backgroundColor, context),
-   background: background,
+      background: background,
       brightness: brightness,
       child: DefaultTextStyle(
         style: CupertinoTheme
@@ -961,7 +960,7 @@ class _LargeTitleNavigationBarSliverDelegate
       child: _TransitionableNavigationBar(
         componentsKeys: keys,
         backgroundColor: CupertinoDynamicColor.resolve(backgroundColor, context),
-    background: background,
+        background: background,
         backButtonTextStyle: CupertinoTheme.of(context).textTheme.navActionTextStyle,
         titleTextStyle: CupertinoTheme.of(context).textTheme.navTitleTextStyle,
         largeTitleTextStyle: CupertinoTheme.of(context).textTheme.navLargeTitleTextStyle,
