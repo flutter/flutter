@@ -243,7 +243,18 @@ const Set<String> allowableNumberFormats = <String>{
   'simpleCurrency',
 };
 
-// TODO(shihaohong): add doc on what these are
+// A subset of [allowableNumberFormats] that takes named parameters instead
+// of positional parameters.
+//
+// This helps the tool correctly generate number formmatting code correctly.
+//
+// Example of code that uses named parameters:
+// final NumberFormat format = NumberFormat.compact(
+//   locale: _localeName,
+// );
+//
+// Example of code that uses positional parameters:
+// final NumberFormat format = NumberFormat.scientificPattern(_localeName);
 const Set<String> numberFormatsWithNamedParameters = <String>{
   'compact',
   'compactCurrency',
@@ -345,8 +356,6 @@ String generateNumberFormattingLogic(Map<String, dynamic> arbBundle, String reso
     for (final String placeholder in placeholders.keys) {
       final dynamic value = placeholders[placeholder];
       if (value is Map<String, dynamic> && _isValidNumberFormat(value, placeholder)) {
-        print(value['format']);
-        print(numberFormatsWithNamedParameters.contains(value['format']));
         if (numberFormatsWithNamedParameters.contains(value['format'])) {
           if (value.containsKey('optionalParameters')) {
             final Map<String, dynamic> optionalParameters = value['optionalParameters'] as Map<String, dynamic>;
