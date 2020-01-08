@@ -974,7 +974,7 @@ class NotifyingLogger extends Logger {
   }) {
     assert(timeout != null);
     printStatus(message);
-    return SilentStatus(timeout: timeout);
+    return SilentStatus(timeout: timeout, timeoutConfiguration: timeoutConfiguration);
   }
 
   void dispose() {
@@ -983,6 +983,12 @@ class NotifyingLogger extends Logger {
 
   @override
   void sendEvent(String name, [Map<String, dynamic> args]) { }
+
+  @override
+  bool get supportsColor => throw UnimplementedError();
+
+  @override
+  bool get hasTerminal => false;
 }
 
 /// A running application, started by this daemon.
@@ -1167,6 +1173,7 @@ class _AppRunLogger extends Logger {
 
     _status = SilentStatus(
       timeout: timeout,
+      timeoutConfiguration: timeoutConfiguration,
       onFinish: () {
         _status = null;
         _sendProgressEvent(<String, dynamic>{
@@ -1206,6 +1213,12 @@ class _AppRunLogger extends Logger {
       domain.sendEvent(name, args);
     }
   }
+
+  @override
+  bool get supportsColor => throw UnimplementedError();
+
+  @override
+  bool get hasTerminal => false;
 }
 
 class LogMessage {

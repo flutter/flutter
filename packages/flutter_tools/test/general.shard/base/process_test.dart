@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:platform/platform.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:mockito/mockito.dart';
@@ -69,11 +68,9 @@ void main() {
 
   group('output formatting', () {
     MockProcessManager mockProcessManager;
-    BufferLogger mockLogger;
 
     setUp(() {
       mockProcessManager = MockProcessManager();
-      mockLogger = BufferLogger();
     });
 
     MockProcess Function(List<String>) processMetaFactory(List<String> stdout, { List<String> stderr = const <String>[] }) {
@@ -88,10 +85,10 @@ void main() {
       final List<String> testString = <String>['0123456789' * 10];
       mockProcessManager.processFactory = processMetaFactory(testString, stderr: testString);
       await processUtils.stream(<String>['command']);
-      expect(mockLogger.statusText, equals('${testString[0]}\n'));
-      expect(mockLogger.errorText, equals('${testString[0]}\n'));
+
+      expect(testLogger.statusText, equals('${testString[0]}\n'));
+      expect(testLogger.errorText, equals('${testString[0]}\n'));
     }, overrides: <Type, Generator>{
-      Logger: () => mockLogger,
       ProcessManager: () => mockProcessManager,
       OutputPreferences: () => OutputPreferences(wrapText: true, wrapColumn: 40),
       Platform: () => FakePlatform.fromPlatform(const LocalPlatform())..stdoutSupportsAnsi = false,
