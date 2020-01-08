@@ -76,7 +76,7 @@ class StackFrame {
   static StackFrame _parseWebFrame(String line) {
     final RegExp parser = RegExp(r'^(package:.+) (\d+):(\d+)\s+(.+)$');
     final Match match = parser.firstMatch(line);
-    assert(match != null);
+    assert(match != null, 'Expecgted $line to match $parser.');
 
     final Uri packageUri = Uri.parse(match.group(1));
 
@@ -104,9 +104,9 @@ class StackFrame {
       return _parseWebFrame(line);
     }
 
-    final RegExp parser = RegExp(r'^#(\d) +(.+) \((.+?):(\d+):?(\d+){0,1}\)$');
+    final RegExp parser = RegExp(r'^#(\d+) +(.+) \((.+?):(\d+):?(\d+){0,1}\)$');
     final Match match = parser.firstMatch(line);
-    assert(match != null);
+    assert(match != null, 'Expected $line to match $parser.');
 
     bool isConstructor = false;
     String className = '';

@@ -665,39 +665,27 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
   /// format but the frame numbers will not be consecutive (frames are elided)
   /// and the final line may be prose rather than a stack frame.
   static Iterable<String> defaultStackFilter(Iterable<String> frames) {
-    const List<String> filteredPackages = <String>[
+    const Set<String> filteredPackages = <String>{
       'dart:async-patch',
       'dart:async',
       'package:stack_trace',
-    ];
-    const List<String> filteredClasses = <String>[
+    };
+    const Set<String> filteredClasses = <String>{
       '_AssertionError',
       '_FakeAsync',
       '_FrameCallbackEntry',
-    ];
-    final RegExp stackParser = RegExp(r'^#[0-9]+ +([^.]+).* \(([^/\\]*)[/\\].+:[0-9]+(?::[0-9]+)?\)$');
-    final RegExp packageParser = RegExp(r'^([^:]+):(.+)$');
+    };
     final List<String> result = <String>[];
     final List<String> skipped = <String>[];
     for (final String line in frames) {
-      final Match match = stackParser.firstMatch(line);
-      if (match != null) {
-        assert(match.groupCount == 2);
-        if (filteredPackages.contains(match.group(2))) {
-          final Match packageMatch = packageParser.firstMatch(match.group(2));
-          if (packageMatch != null && packageMatch.group(1) == 'package') {
-            skipped.add('package ${packageMatch.group(2)}'); // avoid "package package:foo"
-          } else {
-            skipped.add('package ${match.group(2)}');
-          }
-          continue;
-        }
-        if (filteredClasses.contains(match.group(1))) {
-          skipped.add('class ${match.group(1)}');
-          continue;
-        }
+      final StackFrame frameLine = StackFrame.fromStackTraceLine(line);
+      if (filteredClasses.contains(frameLine.className)) {
+        skipped.add('class ${frameLine.className}');
+      } else if (filteredPackages.contains(frameLine.packageScheme + ':' + frameLine.package)) {
+        skipped.add('package ${frameLine.packageScheme == 'dart' ? 'dart:' : ''}${frameLine.package}');
+      } else {
+        result.add(line);
       }
-      result.add(line);
     }
     if (skipped.length == 1) {
       result.add('(elided one frame from ${skipped.single})');
