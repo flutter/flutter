@@ -37,8 +37,7 @@ Stream<String> runAndGetStdout(String executable, List<String> arguments, {
 
   stderr.addStream(process.stderr);
   final Stream<String> lines = process.stdout.transform(utf8.decoder).transform(const LineSplitter());
-  await for (final String line in lines)
-    yield line;
+  yield* lines;
 
   final int exitCode = await process.exitCode;
   if ((exitCode == 0) == expectNonZeroExit || (expectedExitCode != null && exitCode != expectedExitCode)) {
