@@ -24,15 +24,16 @@ abstract class ParametricCurve<T> {
 
   /// Returns the value of the curve at point `t`.
   ///
-  /// This function must ensure the following:
-  /// - The value of `t` must be between 0.0 and 1.0, inclusive.
+  /// This method asserts that t is between 0 and 1 before delegating to
+  /// [transformInternal].
   ///
   /// It is recommended that subclasses override [transformInternal] instead of
   /// this function, as the above case is already handled in the default
   /// implementation of [transform], which delegates the remaining logic to
   /// [transformInternal].
   T transform(double t) {
-    assert(t >= 0.0 && t <= 1.0);
+    assert(t != null);
+    assert(t >= 0.0 && t <= 1.0, 'parametric value $t is outside of [0, 1] range.');
     return transformInternal(t);
   }
 
@@ -84,11 +85,10 @@ abstract class Curve extends ParametricCurve<double> {
   /// [transformInternal].
   @override
   double transform(double t) {
-    assert(t >= 0.0 && t <= 1.0);
     if (t == 0.0 || t == 1.0) {
       return t;
     }
-    return transformInternal(t);
+    return super.transform(t);
   }
 
   /// Returns a new curve that is the reversed inversion of this one.
@@ -447,7 +447,11 @@ abstract class Curve2D extends ParametricCurve<Offset> {
   /// See also:
   ///
   ///  * Luiz Henrique de Figueire's Graphics Gem on [the algorithm](http://ariel.chronotext.org/dd/defigueiredo93adaptive.pdf).
-  Iterable<Curve2DSample> generateSamples({double start = 0.0, double end = 1.0, double tolerance = 1e-10}) {
+  Iterable<Curve2DSample> generateSamples({
+    double start = 0.0,
+    double end = 1.0,
+    double tolerance = 1e-10,
+  }) {
     // The sampling  algorithm is:
     // 1. Evaluate the area of the triangle (a proxy for the "flatness" of the
     //    curve) formed by two points and a test point.
@@ -633,7 +637,6 @@ class CatmullRomSpline extends Curve2D {
            _tension = tension,
            _cubicSegments = <List<Offset>>[];
 
-
   /// Constructs a centripetal Catmull-Rom spline curve.
   ///
   /// The same as [new CatmullRomSpline], except that the internal data
@@ -655,7 +658,12 @@ class CatmullRomSpline extends Curve2D {
            _cubicSegments = _computeSegments(controlPoints, tension, startHandle: startHandle, endHandle: endHandle);
 
 
-  static List<List<Offset>> _computeSegments(List<Offset> controlPoints, double tension, {Offset startHandle, Offset endHandle}) {
+  static List<List<Offset>> _computeSegments(
+      List<Offset> controlPoints,
+      double tension, {
+      Offset startHandle,
+      Offset endHandle,
+    }) {
     // If not specified, select the first and last control points (which are
     // handles: they are not intersected by the resulting curve) so that they
     // extend the first and last segments, respectively.
@@ -712,7 +720,9 @@ class CatmullRomSpline extends Curve2D {
     if (_cubicSegments.isNotEmpty) {
       return;
     }
-    _cubicSegments.addAll(_computeSegments(_controlPoints, _tension, startHandle: _startHandle, endHandle: _endHandle));
+    _cubicSegments.addAll(
+      _computeSegments(_controlPoints, _tension, startHandle: _startHandle, endHandle: _endHandle),
+    );
   }
 
   @override
@@ -725,7 +735,6 @@ class CatmullRomSpline extends Curve2D {
 
   @override
   Offset transformInternal(double t) {
-    assert(t >= 0.0 && t <= 1.0, 'parametric value $t is outside of [0, 1] range.');
     _initializeIfNeeded();
     final double length = _cubicSegments.length.toDouble();
     double position;
@@ -806,7 +815,6 @@ class CatmullRomCurve extends Curve {
         // Pre-compute samples so that we don't have to evaluate the spline's inverse
         // all the time in transformInternal.
         _precomputedSamples = <Curve2DSample>[];
-
 
   /// Constructs a centripetal [CatmullRomCurve].
   ///
@@ -922,7 +930,9 @@ class CatmullRomCurve extends Curve {
     controlPoints = <Offset>[startHandle, ...controlPoints, endHandle];
     double lastX = -double.infinity;
     for (int i = 0; i < controlPoints.length; ++i) {
-      if (i > 1 && i < controlPoints.length - 2 && (controlPoints[i].dx <= 0.0 || controlPoints[i].dx >= 1.0)) {
+      if (i > 1 &&
+          i < controlPoints.length - 2 &&
+          (controlPoints[i].dx <= 0.0 || controlPoints[i].dx >= 1.0)) {
         assert(() {
           reasons?.add('Control points must have X values between 0.0 and 1.0, exclusive. '
               'Point $i has an x value (${controlPoints[i].dx}) which is outside the range.');
@@ -970,7 +980,7 @@ class CatmullRomCurve extends Curve {
         return false;
       }
     }
-    for (Curve2DSample sample in samplePoints) {
+    for (final Curve2DSample sample in samplePoints) {
       final Offset point = sample.value;
       final double t = sample.t;
       final double x = point.dx;
@@ -1015,8 +1025,6 @@ class CatmullRomCurve extends Curve {
   double transformInternal(double t) {
     // Linearly interpolate between the two closest samples generated when the
     // curve was created.
-
-    assert(t != null);
     if (_precomputedSamples.isEmpty) {
       // Compute the samples now if we were constructed lazily.
       _precomputedSamples.addAll(_computeSamples(controlPoints, tension));
