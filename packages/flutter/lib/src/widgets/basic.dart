@@ -1955,7 +1955,7 @@ class LayoutId extends ParentDataWidget<CustomMultiChildLayout> {
 /// the children.
 ///
 /// [CustomMultiChildLayout] is appropriate when there are complex relationships
-/// between the size and positioning of multiple widgets. To control the
+/// between the size and positioning of a multiple widgets. To control the
 /// layout of a single child, [CustomSingleChildLayout] is more appropriate. For
 /// simple cases, such as aligning a widget to one or another edge, the [Stack]
 /// widget is more appropriate.
