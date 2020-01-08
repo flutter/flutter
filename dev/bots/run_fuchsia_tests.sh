@@ -3,16 +3,18 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+# This script has been adapted from:
+# https://github.com/flutter/engine/blob/master/testing/fuchsia/run_tests.sh
+# Any modifications made to this file might be applicable there as well.
+
 # This expects the device to be in zedboot mode, with a zedboot that is
 # is compatible with the Fuchsia system image provided.
 #
 # The first and only parameter should be the path to the Fuchsia system image
-# tarball, e.g. `./fuchsia-test.sh generic-x64.tgz`.
+# tarball, e.g. `./run_fuchsia_tests.sh generic-x64.tgz`.
 #
 # This script expects `pm`, `dev_finder`, and `fuchsia_ctl` to all be in the
-# same directory as the script, as well as the `flutter_aot_runner-0.far` and
-# the `flutter_runner_tests-0.far`. It is written to be run from its own
-# directory, and will fail if run from other directories or via sym-links.
+# same directory as the script.
 
 set -Ee
 
