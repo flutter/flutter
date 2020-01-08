@@ -10,6 +10,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 
 import 'button.dart';
+import 'colors.dart';
 import 'floating_action_button_theme.dart';
 import 'scaffold.dart';
 import 'theme.dart';
@@ -410,6 +411,25 @@ class FloatingActionButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final FloatingActionButtonThemeData floatingActionButtonTheme = theme.floatingActionButtonTheme;
+
+    // Applications should no longer use accentIconTheme's color to configure
+    // the configure of floating action buttons. For more information, see
+    // flutter.dev/go/remove-fab-accent-theme-dependency.
+    if (this.foregroundColor == null && floatingActionButtonTheme.foregroundColor == null) {
+      final bool accentIsDark = theme.accentColorBrightness == Brightness.dark;
+      final Color defaultAccentIconThemeColor = accentIsDark ? Colors.white : Colors.black;
+      if (theme.accentIconTheme.color != defaultAccentIconThemeColor) {
+        debugPrint(
+          'Warning: '
+          'The support for configuring the foreground color of '
+          'FloatingActionButtons using ThemeData.accentIconTheme '
+          'has been deprecated. Please use ThemeData.floatingActionButtonTheme '
+          'instead. See '
+          'https://flutter.dev/docs/release/breaking-changes/fab_accent_dependency. '
+          'This feature was deprecated after v1.13.2.'
+        );
+      }
+    }
 
     final Color foregroundColor = this.foregroundColor
       ?? floatingActionButtonTheme.foregroundColor
