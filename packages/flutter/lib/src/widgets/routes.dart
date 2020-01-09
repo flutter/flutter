@@ -1060,7 +1060,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///  * [ModalBarrier], the widget that implements this feature.
   String get barrierLabel;
 
-  /// The tween that is used for animating the modal barrier in and out.
+  /// The curve that is used for animating the modal barrier in and out.
   ///
   /// The modal barrier is the scrim that is rendered behind each route, which
   /// generally prevents the user from interacting with the route below the
