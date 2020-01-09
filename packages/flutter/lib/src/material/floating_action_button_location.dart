@@ -202,21 +202,6 @@ double _dockedOffsetY(ScaffoldPrelayoutGeometry scaffoldGeometry) {
   return math.min(maxFabY, fabY);
 }
 
-class _CenterFloatFloatingActionButtonLocation extends FloatingActionButtonLocation {
-  const _CenterFloatFloatingActionButtonLocation();
-
-  @override
-  Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
-    return Offset(
-      _centerOffsetX(scaffoldGeometry),
-      _floatingOffsetY(scaffoldGeometry),
-    );
-  }
-
-  @override
-  String toString() => 'FloatingActionButtonLocation.centerFloat';
-}
-
 class _EndFloatFloatingActionButtonLocation extends FloatingActionButtonLocation {
   const _EndFloatFloatingActionButtonLocation();
 
@@ -230,6 +215,21 @@ class _EndFloatFloatingActionButtonLocation extends FloatingActionButtonLocation
 
   @override
   String toString() => 'FloatingActionButtonLocation.endFloat';
+}
+
+class _CenterFloatFloatingActionButtonLocation extends FloatingActionButtonLocation {
+  const _CenterFloatFloatingActionButtonLocation();
+
+  @override
+  Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
+    return Offset(
+      _centerOffsetX(scaffoldGeometry),
+      _floatingOffsetY(scaffoldGeometry),
+    );
+  }
+
+  @override
+  String toString() => 'FloatingActionButtonLocation.centerFloat';
 }
 
 class _EndDockedFloatingActionButtonLocation extends FloatingActionButtonLocation {
