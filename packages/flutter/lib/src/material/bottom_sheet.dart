@@ -152,7 +152,7 @@ class _BottomSheetState extends State<BottomSheet> {
   final GlobalKey _childKey = GlobalKey(debugLabel: 'BottomSheet child');
 
   double get _childHeight {
-    final RenderBox renderBox = _childKey.currentContext.findRenderObject();
+    final RenderBox renderBox = _childKey.currentContext.findRenderObject() as RenderBox;
     return renderBox.size.height;
   }
 
@@ -265,7 +265,9 @@ class _ModalBottomSheet<T> extends StatefulWidget {
     this.shape,
     this.clipBehavior,
     this.isScrollControlled = false,
+    this.enableDrag = true,
   }) : assert(isScrollControlled != null),
+       assert(enableDrag != null),
        super(key: key);
 
   final _ModalBottomSheetRoute<T> route;
@@ -274,6 +276,7 @@ class _ModalBottomSheet<T> extends StatefulWidget {
   final double elevation;
   final ShapeBorder shape;
   final Clip clipBehavior;
+  final bool enableDrag;
 
   @override
   _ModalBottomSheetState<T> createState() => _ModalBottomSheetState<T>();
@@ -326,6 +329,7 @@ class _ModalBottomSheetState<T> extends State<_ModalBottomSheet<T>> {
                 elevation: widget.elevation,
                 shape: widget.shape,
                 clipBehavior: widget.clipBehavior,
+                enableDrag: widget.enableDrag,
               ),
             ),
           ),
@@ -344,11 +348,14 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
     this.elevation,
     this.shape,
     this.clipBehavior,
+    this.modalBarrierColor,
     this.isDismissible = true,
+    this.enableDrag = true,
     @required this.isScrollControlled,
     RouteSettings settings,
   }) : assert(isScrollControlled != null),
        assert(isDismissible != null),
+       assert(enableDrag != null),
        super(settings: settings);
 
   final WidgetBuilder builder;
@@ -358,7 +365,9 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
   final double elevation;
   final ShapeBorder shape;
   final Clip clipBehavior;
+  final Color modalBarrierColor;
   final bool isDismissible;
+  final bool enableDrag;
 
   @override
   Duration get transitionDuration => _bottomSheetDuration;
@@ -370,7 +379,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
   final String barrierLabel;
 
   @override
-  Color get barrierColor => Colors.black54;
+  Color get barrierColor => modalBarrierColor ?? Colors.black54;
 
   AnimationController _animationController;
 
@@ -397,6 +406,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
         shape: shape,
         clipBehavior: clipBehavior,
         isScrollControlled: isScrollControlled,
+        enableDrag: enableDrag,
       ),
     );
     if (theme != null)
@@ -435,6 +445,9 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
 /// The [isDismissible] parameter specifies whether the bottom sheet will be
 /// dismissed when user taps on the scrim.
 ///
+/// The [enableDrag] parameter specifies whether the bottom sheet can be
+/// dragged up and down and dismissed by swiping downards.
+///
 /// The optional [backgroundColor], [elevation], [shape], and [clipBehavior]
 /// parameters can be passed in to customize the appearance and behavior of
 /// modal bottom sheets.
@@ -444,7 +457,7 @@ class _ModalBottomSheetRoute<T> extends PopupRoute<T> {
 ///
 /// {@animation 350 622 https://flutter.github.io/assets-for-api-docs/assets/material/show_modal_bottom_sheet.mp4}
 ///
-/// {@tool snippet --template=stateless_widget_scaffold}
+/// {@tool sample --template=stateless_widget_scaffold}
 ///
 /// This example demonstrates how to use `showModalBottomSheet` to display a
 /// bottom sheet that obscures the content behind it when a user taps a button.
@@ -501,15 +514,18 @@ Future<T> showModalBottomSheet<T>({
   double elevation,
   ShapeBorder shape,
   Clip clipBehavior,
+  Color barrierColor,
   bool isScrollControlled = false,
   bool useRootNavigator = false,
   bool isDismissible = true,
+  bool enableDrag = true,
 }) {
   assert(context != null);
   assert(builder != null);
   assert(isScrollControlled != null);
   assert(useRootNavigator != null);
   assert(isDismissible != null);
+  assert(enableDrag != null);
   assert(debugCheckHasMediaQuery(context));
   assert(debugCheckHasMaterialLocalizations(context));
 
@@ -523,6 +539,8 @@ Future<T> showModalBottomSheet<T>({
     shape: shape,
     clipBehavior: clipBehavior,
     isDismissible: isDismissible,
+    modalBarrierColor: barrierColor,
+    enableDrag: enableDrag,
   ));
 }
 

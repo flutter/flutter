@@ -12,7 +12,7 @@ import 'package:flutter_devicelab/framework/utils.dart';
 /// Combines several TaskFunctions with trivial success value into one.
 TaskFunction combine(List<TaskFunction> tasks) {
   return () async {
-    for (TaskFunction task in tasks) {
+    for (final TaskFunction task in tasks) {
       final TaskResult result = await task();
       if (result.failed) {
         return result;

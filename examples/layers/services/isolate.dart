@@ -44,7 +44,7 @@ class Calculator {
       }
     );
     try {
-      final List<dynamic> result = decoder.convert(_data);
+      final List<dynamic> result = decoder.convert(_data) as List<dynamic>;
       final int n = result.length;
       onResultListener('Decoded $n results');
     } catch (e, stack) {

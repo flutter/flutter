@@ -16,7 +16,7 @@ import 'base/io.dart';
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'fuchsia/fuchsia_device.dart';
-import 'globals.dart';
+import 'globals.dart' as globals;
 import 'ios/devices.dart';
 import 'ios/simulators.dart';
 import 'linux/linux_device.dart';
@@ -118,7 +118,7 @@ class DeviceManager {
     }
 
     // Match on a id or name starting with [deviceId].
-    for (Device device in devices.where(startsWithDeviceId)) {
+    for (final Device device in devices.where(startsWithDeviceId)) {
       yield device;
     }
   }
@@ -136,8 +136,8 @@ class DeviceManager {
 
   /// Return the list of all connected devices.
   Stream<Device> getAllConnectedDevices() async* {
-    for (DeviceDiscovery discoverer in _platformDiscoverers) {
-      for (Device device in await discoverer.devices) {
+    for (final DeviceDiscovery discoverer in _platformDiscoverers) {
+      for (final Device device in await discoverer.devices) {
         yield device;
       }
     }
@@ -151,7 +151,7 @@ class DeviceManager {
   /// Get diagnostics about issues with any connected devices.
   Future<List<String>> getDeviceDiagnostics() async {
     return <String>[
-      for (DeviceDiscovery discoverer in _platformDiscoverers)
+      for (final DeviceDiscovery discoverer in _platformDiscoverers)
         ...await discoverer.getDiagnostics(),
     ];
   }
@@ -178,7 +178,7 @@ class DeviceManager {
     // compilers, and web requires an entirely different resident runner.
     if (hasSpecifiedAllDevices) {
       devices = <Device>[
-        for (Device device in devices)
+        for (final Device device in devices)
           if (await device.targetPlatform != TargetPlatform.fuchsia_arm64 &&
               await device.targetPlatform != TargetPlatform.fuchsia_x64 &&
               await device.targetPlatform != TargetPlatform.web_javascript)
@@ -191,7 +191,7 @@ class DeviceManager {
     // 'android' folder then don't attempt to launch with an Android device.
     if (devices.length > 1 && !hasSpecifiedDeviceId) {
       devices = <Device>[
-        for (Device device in devices)
+        for (final Device device in devices)
           if (isDeviceSupportedForProject(device, flutterProject))
             device,
       ];
@@ -269,7 +269,7 @@ abstract class PollingDeviceDiscovery extends DeviceDiscovery {
         final List<Device> devices = await pollingGetDevices().timeout(_pollingTimeout);
         _items.updateWithNewList(devices);
       } on TimeoutException {
-        printTrace('Device poll timed out. Will retry.');
+        globals.printTrace('Device poll timed out. Will retry.');
       }
       _timer = _initTimer();
     });
@@ -420,6 +420,9 @@ abstract class Device {
   /// application.
   bool get supportsScreenshot => false;
 
+  /// Whether the device supports the '--fast-start' development mode.
+  bool get supportsFastStart => false;
+
   /// Stop an app package on the current device.
   Future<bool> stopApp(covariant ApplicationPackage app);
 
@@ -457,7 +460,7 @@ abstract class Device {
 
     // Extract device information
     final List<List<String>> table = <List<String>>[];
-    for (Device device in devices) {
+    for (final Device device in devices) {
       String supportIndicator = device.isSupported() ? '' : ' (unsupported)';
       final TargetPlatform targetPlatform = await device.targetPlatform;
       if (await device.isLocalEmulator) {
@@ -475,18 +478,18 @@ abstract class Device {
     // Calculate column widths
     final List<int> indices = List<int>.generate(table[0].length - 1, (int i) => i);
     List<int> widths = indices.map<int>((int i) => 0).toList();
-    for (List<String> row in table) {
+    for (final List<String> row in table) {
       widths = indices.map<int>((int i) => math.max(widths[i], row[i].length)).toList();
     }
 
     // Join columns into lines of text
-    for (List<String> row in table) {
+    for (final List<String> row in table) {
       yield indices.map<String>((int i) => row[i].padRight(widths[i])).join(' • ') + ' • ${row.last}';
     }
   }
 
   static Future<void> printDevices(List<Device> devices) async {
-    await descriptions(devices).forEach(printStatus);
+    await descriptions(devices).forEach(globals.printStatus);
   }
 
   /// Clean up resources allocated by device
@@ -533,11 +536,18 @@ class DebuggingOptions {
     this.initializePlatform = true,
     this.hostname,
     this.port,
+    this.webEnableExposeUrl,
     this.vmserviceOutFile,
+    this.fastStart = false,
    }) : debuggingEnabled = true;
 
-  DebuggingOptions.disabled(this.buildInfo, { this.initializePlatform = true, this.port, this.hostname, this.cacheSkSL = false, })
-    : debuggingEnabled = false,
+  DebuggingOptions.disabled(this.buildInfo, {
+      this.initializePlatform = true,
+      this.port,
+      this.hostname,
+      this.webEnableExposeUrl,
+      this.cacheSkSL = false,
+    }) : debuggingEnabled = false,
       useTestFonts = false,
       startPaused = false,
       dartFlags = '',
@@ -550,7 +560,8 @@ class DebuggingOptions {
       verboseSystemLogs = false,
       hostVmServicePort = null,
       deviceVmServicePort = null,
-      vmserviceOutFile = null;
+      vmserviceOutFile = null,
+      fastStart = false;
 
   final bool debuggingEnabled;
 
@@ -572,8 +583,10 @@ class DebuggingOptions {
   final int deviceVmServicePort;
   final String port;
   final String hostname;
+  final bool webEnableExposeUrl;
   /// A file where the vmservice URL should be written after the application is started.
   final String vmserviceOutFile;
+  final bool fastStart;
 
   bool get hasObservatoryPort => hostVmServicePort != null;
 }

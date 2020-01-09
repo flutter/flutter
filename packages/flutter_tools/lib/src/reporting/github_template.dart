@@ -7,11 +7,12 @@ import 'dart:async';
 import 'package:file/file.dart';
 
 import '../base/context.dart';
+import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/net.dart';
 import '../convert.dart';
 import '../flutter_manifest.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
 import '../project.dart';
 
 /// Provide suggested GitHub issue templates to user when Flutter encounters an error.
@@ -40,27 +41,27 @@ class GitHubTemplateCreator {
     ) async {
     final String title = '[tool_crash] $errorString';
     final String body = '''## Command
-  ```
-  $command
-  ```
+```
+$command
+```
 
-  ## Steps to Reproduce
-  1. ...
-  2. ...
-  3. ...
+## Steps to Reproduce
+1. ...
+2. ...
+3. ...
 
-  ## Logs
-  $exception
-  ```
-  ${LineSplitter.split(stackTrace.toString()).take(20).join('\n')}
-  ```
-  ```
-  $doctorText
-  ```
+## Logs
+$exception
+```
+${LineSplitter.split(stackTrace.toString()).take(20).join('\n')}
+```
+```
+$doctorText
+```
 
-  ## Flutter Application Metadata
-  ${_projectMetadataInformation()}
-  ''';
+## Flutter Application Metadata
+${_projectMetadataInformation()}
+''';
 
     final String fullURL = 'https://github.com/flutter/flutter/issues/new?'
       'title=${Uri.encodeQueryComponent(title)}'
@@ -84,29 +85,33 @@ class GitHubTemplateCreator {
       if (project == null || manifest == null || manifest.isEmpty) {
         return 'No pubspec in working directory.';
       }
-      String description = '';
-      description += '''
-**Version**: ${manifest.appVersion}
-**Material**: ${manifest.usesMaterialDesign}
-**Android X**: ${manifest.usesAndroidX}
-**Module**: ${manifest.isModule}
-**Plugin**: ${manifest.isPlugin}
-**Android package**: ${manifest.androidPackage}
-**iOS bundle identifier**: ${manifest.iosBundleIdentifier}
-''';
+      final StringBuffer description = StringBuffer()
+        ..writeln('**Version**: ${manifest.appVersion}')
+        ..writeln('**Material**: ${manifest.usesMaterialDesign}')
+        ..writeln('**Android X**: ${manifest.usesAndroidX}')
+        ..writeln('**Module**: ${manifest.isModule}')
+        ..writeln('**Plugin**: ${manifest.isPlugin}')
+        ..writeln('**Android package**: ${manifest.androidPackage}')
+        ..writeln('**iOS bundle identifier**: ${manifest.iosBundleIdentifier}');
+
       final File file = project.flutterPluginsFile;
       if (file.existsSync()) {
-        description += '### Plugins\n';
-        for (String plugin in project.flutterPluginsFile.readAsLinesSync()) {
+        description.writeln('### Plugins');
+        // Format is:
+        // camera=/path/to/.pub-cache/hosted/pub.dartlang.org/camera-0.5.7+2/
+        for (final String plugin in project.flutterPluginsFile.readAsLinesSync()) {
           final List<String> pluginParts = plugin.split('=');
           if (pluginParts.length != 2) {
             continue;
           }
-          description += pluginParts.first;
+          // Write the last part of the path, which includes the plugin name and version.
+          // Example: camera-0.5.7+2
+          final List<String> pathParts = globals.fs.path.split(pluginParts[1]);
+          description.writeln(pathParts.isEmpty ? pluginParts.first : pathParts.last);
         }
       }
 
-      return description;
+      return description.toString();
     } on Exception catch (exception) {
       return exception.toString();
     }
@@ -118,7 +123,7 @@ class GitHubTemplateCreator {
   Future<String> _shortURL(String fullURL) async {
     String url;
     try {
-      printTrace('Attempting git.io shortener: $fullURL');
+      globals.printTrace('Attempting git.io shortener: $fullURL');
       final List<int> bodyBytes = utf8.encode('url=${Uri.encodeQueryComponent(fullURL)}');
       final HttpClientRequest request = await _client.postUrl(Uri.parse('https://git.io'));
       request.headers.set(HttpHeaders.contentLengthHeader, bodyBytes.length.toString());
@@ -128,10 +133,10 @@ class GitHubTemplateCreator {
       if (response.statusCode == 201) {
         url = response.headers[HttpHeaders.locationHeader]?.first;
       } else {
-        printTrace('Failed to shorten GitHub template URL. Server responded with HTTP status code ${response.statusCode}');
+        globals.printTrace('Failed to shorten GitHub template URL. Server responded with HTTP status code ${response.statusCode}');
       }
     } catch (sendError) {
-      printTrace('Failed to shorten GitHub template URL: $sendError');
+      globals.printTrace('Failed to shorten GitHub template URL: $sendError');
     }
 
     return url ?? fullURL;

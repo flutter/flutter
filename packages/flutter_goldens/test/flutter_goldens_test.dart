@@ -53,9 +53,10 @@ void main() {
 
   group('SkiaGoldClient', () {
     SkiaGoldClient skiaClient;
+    Directory workDirectory;
 
     setUp(() {
-      final Directory workDirectory = fs.directory('/workDirectory')
+      workDirectory = fs.directory('/workDirectory')
         ..createSync(recursive: true);
       skiaClient = SkiaGoldClient(
         workDirectory,
@@ -66,20 +67,91 @@ void main() {
       );
     });
 
-    group('auth', () {
-      test('performs minimal work if already authorized', () async {
-        fs.file('/workDirectory/temp/auth_opt.json')
-          ..createSync(recursive: true);
-        when(process.run(any))
-          .thenAnswer((_) => Future<ProcessResult>
-            .value(ProcessResult(123, 0, '', '')));
-        await skiaClient.auth();
+    test('auth performs minimal work if already authorized', () async {
+      fs.file('/workDirectory/temp/auth_opt.json')
+        ..createSync(recursive: true);
+      when(process.run(any))
+        .thenAnswer((_) => Future<ProcessResult>
+        .value(ProcessResult(123, 0, '', '')));
+      await skiaClient.auth();
 
-        verifyNever(process.run(
-            captureAny,
-            workingDirectory: captureAnyNamed('workingDirectory'),
-        ));
-      });
+      verifyNever(process.run(
+        captureAny,
+        workingDirectory: captureAnyNamed('workingDirectory'),
+      ));
+    });
+
+    test('throws for error state from auth', () async {
+      platform = FakePlatform(
+        environment: <String, String>{
+          'FLUTTER_ROOT': _kFlutterRoot,
+          'GOLD_SERVICE_ACCOUNT' : 'Service Account',
+          'GOLDCTL' : 'goldctl',
+        },
+        operatingSystem: 'macos'
+      );
+
+      skiaClient = SkiaGoldClient(
+        workDirectory,
+        fs: fs,
+        process: process,
+        platform: platform,
+        httpClient: mockHttpClient,
+      );
+
+      when(process.run(any))
+        .thenAnswer((_) => Future<ProcessResult>
+        .value(ProcessResult(123, 1, 'fail', 'fail')));
+      final Future<void> test = skiaClient.auth();
+
+      expect(
+        test,
+        throwsException,
+      );
+    });
+
+    test(' throws for error state from init', () {
+      platform = FakePlatform(
+        environment: <String, String>{
+          'FLUTTER_ROOT': _kFlutterRoot,
+          'GOLDCTL' : 'goldctl',
+        },
+        operatingSystem: 'macos'
+      );
+
+      skiaClient = SkiaGoldClient(
+        workDirectory,
+        fs: fs,
+        process: process,
+        platform: platform,
+        httpClient: mockHttpClient,
+      );
+
+      when(process.run(
+        <String>['git', 'rev-parse', 'HEAD'],
+        workingDirectory: '/flutter',
+      )).thenAnswer((_) => Future<ProcessResult>
+        .value(ProcessResult(12345678, 0, '12345678', '')));
+
+      when(process.run(
+        <String>[
+          'goldctl',
+          'imgtest', 'init',
+          '--instance', 'flutter',
+          '--work-dir', '/workDirectory/temp',
+          '--commit', '12345678',
+          '--keys-file', '/workDirectory/keys.json',
+          '--failure-file', '/workDirectory/failures.json',
+          '--passfail',
+        ],
+      )).thenAnswer((_) => Future<ProcessResult>
+        .value(ProcessResult(123, 1, 'fail', 'fail')));
+      final Future<void> test =  skiaClient.imgtestInit();
+
+      expect(
+        test,
+        throwsException,
+      );
     });
 
     group('Request Handling', () {
@@ -399,6 +471,7 @@ void main() {
               'CIRRUS_CI': 'true',
               'CIRRUS_PR': '1234',
               'GOLD_SERVICE_ACCOUNT' : 'service account...',
+              'CIRRUS_USER_PERMISSION' : 'write',
             },
             operatingSystem: 'macos'
           );
@@ -451,6 +524,74 @@ void main() {
             isFalse,
           );
         });
+
+        test('returns true - admin privileges', () {
+          platform = FakePlatform(
+            environment: <String, String>{
+              'FLUTTER_ROOT': _kFlutterRoot,
+              'CIRRUS_CI': 'true',
+              'CIRRUS_PR': '1234',
+              'GOLD_SERVICE_ACCOUNT' : 'service account...',
+              'CIRRUS_USER_PERMISSION' : 'admin',
+            },
+            operatingSystem: 'macos'
+          );
+          expect(
+            FlutterPreSubmitFileComparator.isAvailableForEnvironment(platform),
+            isTrue,
+          );
+        });
+
+        test('returns true - write privileges', () {
+          platform = FakePlatform(
+            environment: <String, String>{
+              'FLUTTER_ROOT': _kFlutterRoot,
+              'CIRRUS_CI': 'true',
+              'CIRRUS_PR': '1234',
+              'GOLD_SERVICE_ACCOUNT' : 'service account...',
+              'CIRRUS_USER_PERMISSION' : 'write',
+            },
+            operatingSystem: 'macos'
+          );
+          expect(
+            FlutterPreSubmitFileComparator.isAvailableForEnvironment(platform),
+            isTrue,
+          );
+        });
+
+        test('returns false - read privileges', () {
+          platform = FakePlatform(
+            environment: <String, String>{
+              'FLUTTER_ROOT': _kFlutterRoot,
+              'CIRRUS_CI': 'true',
+              'CIRRUS_PR': '1234',
+              'GOLD_SERVICE_ACCOUNT' : 'service account...',
+              'CIRRUS_USER_PERMISSION' : 'read',
+            },
+            operatingSystem: 'macos'
+          );
+          expect(
+            FlutterPreSubmitFileComparator.isAvailableForEnvironment(platform),
+            isFalse,
+          );
+        });
+
+        test('returns false - no privileges', () {
+          platform = FakePlatform(
+            environment: <String, String>{
+              'FLUTTER_ROOT': _kFlutterRoot,
+              'CIRRUS_CI': 'true',
+              'CIRRUS_PR': '1234',
+              'GOLD_SERVICE_ACCOUNT' : 'service account...',
+              'CIRRUS_USER_PERMISSION' : 'none',
+            },
+            operatingSystem: 'macos'
+          );
+          expect(
+            FlutterPreSubmitFileComparator.isAvailableForEnvironment(platform),
+            isFalse,
+          );
+        });
       });
     });
 
@@ -483,10 +624,26 @@ void main() {
             isTrue,
           );
         });
-        test('returns false', () {
+        test('returns false - no CI', () {
           platform = FakePlatform(
             environment: <String, String>{
               'FLUTTER_ROOT': _kFlutterRoot,
+            },
+            operatingSystem: 'macos'
+          );
+          expect(
+            FlutterSkippingGoldenFileComparator.isAvailableForEnvironment(
+              platform),
+            isFalse,
+          );
+        });
+
+        test('returns false - permission pass through', () {
+          platform = FakePlatform(
+            environment: <String, String>{
+              'FLUTTER_ROOT': _kFlutterRoot,
+              'CIRRUS_CI' : 'yep',
+              'GOLD_SERVICE_ACCOUNT' : 'This is a Gold shard!',
             },
             operatingSystem: 'macos'
           );

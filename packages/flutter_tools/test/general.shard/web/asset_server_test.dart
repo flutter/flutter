@@ -6,7 +6,7 @@ import 'package:flutter_tools/src/artifacts.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/build_runner/web_fs.dart';
-import 'package:flutter_tools/src/globals.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:shelf/shelf.dart';
 
@@ -28,18 +28,18 @@ void main() {
   setUp(() {
     testbed = Testbed(
       setup: () {
-        fs.file(fs.path.join('lib', 'main.dart'))
+        globals.fs.file(globals.fs.path.join('lib', 'main.dart'))
           .createSync(recursive: true);
-        fs.file(fs.path.join('web', 'index.html'))
+        globals.fs.file(globals.fs.path.join('web', 'index.html'))
           ..createSync(recursive: true)
           ..writeAsStringSync('hello');
-        fs.file(fs.path.join('build', 'flutter_assets', 'foo.png'))
+        globals.fs.file(globals.fs.path.join('build', 'flutter_assets', 'foo.png'))
           ..createSync(recursive: true)
           ..writeAsBytesSync(kTransparentImage);
-        fs.file(fs.path.join('build', 'flutter_assets', 'bar'))
+        globals.fs.file(globals.fs.path.join('build', 'flutter_assets', 'bar'))
           ..createSync(recursive: true)
           ..writeAsBytesSync(<int>[1, 2, 3]);
-        assetServer = DebugAssetServer(FlutterProject.current(), fs.path.join('main'));
+        assetServer = DebugAssetServer(FlutterProject.current(), globals.fs.path.join('main'));
       }
     );
   });
@@ -56,8 +56,8 @@ void main() {
   }));
 
   test('can serve a sourcemap from dart:ui', () => testbed.run(() async {
-    final String flutterWebSdkPath = artifacts.getArtifactPath(Artifact.flutterWebSdk);
-    final File windowSourceFile = fs.file(fs.path.join(flutterWebSdkPath, 'lib', 'ui', 'src', 'ui', 'window.dart'))
+    final String flutterWebSdkPath = globals.artifacts.getArtifactPath(Artifact.flutterWebSdk);
+    final File windowSourceFile = globals.fs.file(globals.fs.path.join(flutterWebSdkPath, 'lib', 'ui', 'src', 'ui', 'window.dart'))
       ..createSync(recursive: true)
       ..writeAsStringSync('test');
     final Response response = await assetServer
@@ -70,8 +70,8 @@ void main() {
   }));
 
   test('can serve a sourcemap from the dart:sdk', () => testbed.run(() async {
-    final String dartSdkPath = artifacts.getArtifactPath(Artifact.engineDartSdkPath);
-    final File listSourceFile = fs.file(fs.path.join(dartSdkPath, 'lib', 'core', 'list.dart'))
+    final String dartSdkPath = globals.artifacts.getArtifactPath(Artifact.engineDartSdkPath);
+    final File listSourceFile = globals.fs.file(globals.fs.path.join(dartSdkPath, 'lib', 'core', 'list.dart'))
       ..createSync(recursive: true)
       ..writeAsStringSync('test');
 
@@ -113,7 +113,7 @@ void main() {
 
   test('release asset server serves correct mime type and content length for png', () => testbed.run(() async {
     assetServer = ReleaseAssetServer();
-    fs.file(fs.path.join('build', 'web', 'assets', 'foo.png'))
+    globals.fs.file(globals.fs.path.join('build', 'web', 'assets', 'foo.png'))
       ..createSync(recursive: true)
       ..writeAsBytesSync(kTransparentImage);
     final Response response = await assetServer
@@ -127,7 +127,7 @@ void main() {
 
   test('release asset server serves correct mime type and content length for JavaScript', () => testbed.run(() async {
     assetServer = ReleaseAssetServer();
-    fs.file(fs.path.join('build', 'web', 'assets', 'foo.js'))
+    globals.fs.file(globals.fs.path.join('build', 'web', 'assets', 'foo.js'))
       ..createSync(recursive: true)
       ..writeAsStringSync('function main() {}');
     final Response response = await assetServer
@@ -141,7 +141,7 @@ void main() {
 
   test('release asset server serves correct mime type and content length for html', () => testbed.run(() async {
     assetServer = ReleaseAssetServer();
-    fs.file(fs.path.join('build', 'web', 'assets', 'foo.html'))
+    globals.fs.file(globals.fs.path.join('build', 'web', 'assets', 'foo.html'))
       ..createSync(recursive: true)
       ..writeAsStringSync('<!doctype html><html></html>');
     final Response response = await assetServer
@@ -155,7 +155,7 @@ void main() {
 
   test('release asset server serves content from flutter root', () => testbed.run(() async {
     assetServer = ReleaseAssetServer();
-    fs.file(fs.path.join('flutter', 'bar.dart'))
+    globals.fs.file(globals.fs.path.join('flutter', 'bar.dart'))
       ..createSync(recursive: true)
       ..writeAsStringSync('void main() { }');
     final Response response = await assetServer
@@ -166,7 +166,7 @@ void main() {
 
   test('release asset server serves content from project directory', () => testbed.run(() async {
     assetServer = ReleaseAssetServer();
-    fs.file(fs.path.join('lib', 'bar.dart'))
+    globals.fs.file(globals.fs.path.join('lib', 'bar.dart'))
       ..createSync(recursive: true)
       ..writeAsStringSync('void main() { }');
     final Response response = await assetServer

@@ -31,7 +31,7 @@ export 'dart:ui' show AppLifecycleState, Locale;
 /// handlers must be implemented (and the analyzer will list those that have
 /// been omitted).
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This [StatefulWidget] implements the parts of the [State] and
 /// [WidgetsBindingObserver] protocols necessary to react to application
@@ -109,7 +109,7 @@ abstract class WidgetsBindingObserver {
   ///
   /// This method exposes notifications from [Window.onMetricsChanged].
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// This [StatefulWidget] implements the parts of the [State] and
   /// [WidgetsBindingObserver] protocols necessary to react when the device is
@@ -170,7 +170,7 @@ abstract class WidgetsBindingObserver {
   ///
   /// This method exposes notifications from [Window.onTextScaleFactorChanged].
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// ```dart
   /// class TextScaleFactorReactor extends StatefulWidget {
@@ -326,6 +326,27 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
         },
       );
 
+      // Register the ability to quickly mark elements as dirty.
+      // The performance of this method may be improved with additional
+      // information from https://github.com/flutter/flutter/issues/46195.
+      registerServiceExtension(
+        name: 'fastReassemble',
+        callback: (Map<String, Object> params) async {
+          final String className = params['class'] as String;
+          void markElementsDirty(Element element) {
+            if (element == null) {
+              return;
+            }
+            if (element.widget?.runtimeType?.toString()?.startsWith(className) ?? false) {
+              element.markNeedsBuild();
+            }
+            element.visitChildElements(markElementsDirty);
+          }
+          markElementsDirty(renderViewElement);
+          return <String, String>{'Success': 'true'};
+        },
+      );
+
       // Expose the ability to send Widget rebuilds as [Timeline] events.
       registerBoolServiceExtension(
         name: 'profileWidgetBuilds',
@@ -426,28 +447,28 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   @override
   void handleMetricsChanged() {
     super.handleMetricsChanged();
-    for (WidgetsBindingObserver observer in _observers)
+    for (final WidgetsBindingObserver observer in _observers)
       observer.didChangeMetrics();
   }
 
   @override
   void handleTextScaleFactorChanged() {
     super.handleTextScaleFactorChanged();
-    for (WidgetsBindingObserver observer in _observers)
+    for (final WidgetsBindingObserver observer in _observers)
       observer.didChangeTextScaleFactor();
   }
 
   @override
   void handlePlatformBrightnessChanged() {
     super.handlePlatformBrightnessChanged();
-    for (WidgetsBindingObserver observer in _observers)
+    for (final WidgetsBindingObserver observer in _observers)
       observer.didChangePlatformBrightness();
   }
 
   @override
   void handleAccessibilityFeaturesChanged() {
     super.handleAccessibilityFeaturesChanged();
-    for (WidgetsBindingObserver observer in _observers)
+    for (final WidgetsBindingObserver observer in _observers)
       observer.didChangeAccessibilityFeatures();
   }
 
@@ -471,7 +492,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   @protected
   @mustCallSuper
   void dispatchLocalesChanged(List<Locale> locales) {
-    for (WidgetsBindingObserver observer in _observers)
+    for (final WidgetsBindingObserver observer in _observers)
       observer.didChangeLocales(locales);
   }
 
@@ -484,7 +505,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   @protected
   @mustCallSuper
   void dispatchAccessibilityFeaturesChanged() {
-    for (WidgetsBindingObserver observer in _observers)
+    for (final WidgetsBindingObserver observer in _observers)
       observer.didChangeAccessibilityFeatures();
   }
 
@@ -504,7 +525,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   /// [SystemChannels.navigation].
   @protected
   Future<void> handlePopRoute() async {
-    for (WidgetsBindingObserver observer in List<WidgetsBindingObserver>.from(_observers)) {
+    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.from(_observers)) {
       if (await observer.didPopRoute())
         return;
     }
@@ -524,7 +545,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   @protected
   @mustCallSuper
   Future<void> handlePushRoute(String route) async {
-    for (WidgetsBindingObserver observer in List<WidgetsBindingObserver>.from(_observers)) {
+    for (final WidgetsBindingObserver observer in List<WidgetsBindingObserver>.from(_observers)) {
       if (await observer.didPushRoute(route))
         return;
     }
@@ -543,7 +564,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   @override
   void handleAppLifecycleStateChanged(AppLifecycleState state) {
     super.handleAppLifecycleStateChanged(state);
-    for (WidgetsBindingObserver observer in _observers)
+    for (final WidgetsBindingObserver observer in _observers)
       observer.didChangeAppLifecycleState(state);
   }
 
@@ -556,7 +577,7 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   /// This method exposes the `memoryPressure` notification from
   /// [SystemChannels.system].
   void handleMemoryPressure() {
-    for (WidgetsBindingObserver observer in _observers)
+    for (final WidgetsBindingObserver observer in _observers)
       observer.didHaveMemoryPressure();
   }
 
@@ -815,7 +836,10 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
   ///
   /// This is called by [runApp] to configure the widget tree.
   ///
-  /// See also [RenderObjectToWidgetAdapter.attachToRenderTree].
+  /// See also:
+  ///
+  ///  * [RenderObjectToWidgetAdapter.attachToRenderTree], which inflates a
+  ///    widget and attaches it to the render tree.
   void attachRootWidget(Widget rootWidget) {
     _renderViewElement = RenderObjectToWidgetAdapter<RenderBox>(
       container: renderView,

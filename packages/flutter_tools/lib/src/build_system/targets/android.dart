@@ -6,7 +6,7 @@ import '../../artifacts.dart';
 import '../../base/build.dart';
 import '../../base/file_system.dart';
 import '../../build_info.dart';
-import '../../globals.dart';
+import '../../globals.dart' as globals;
 import '../build_system.dart';
 import '../depfile.dart';
 import '../exceptions.dart';
@@ -31,9 +31,12 @@ abstract class AndroidAssetBundle extends Target {
   List<Source> get outputs => const <Source>[];
 
   @override
-  List<String> get depfiles => const <String>[
-    'flutter_assets.d',
+  List<String> get depfiles => <String>[
+    if (_copyAssets)
+      'flutter_assets.d',
   ];
+
+  bool get _copyAssets => true;
 
   @override
   Future<void> build(Environment environment) async {
@@ -47,17 +50,19 @@ abstract class AndroidAssetBundle extends Target {
 
     // Only copy the prebuilt runtimes and kernel blob in debug mode.
     if (buildMode == BuildMode.debug) {
-      final String vmSnapshotData = artifacts.getArtifactPath(Artifact.vmSnapshotData, mode: BuildMode.debug);
-      final String isolateSnapshotData = artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: BuildMode.debug);
+      final String vmSnapshotData = globals.artifacts.getArtifactPath(Artifact.vmSnapshotData, mode: BuildMode.debug);
+      final String isolateSnapshotData = globals.artifacts.getArtifactPath(Artifact.isolateSnapshotData, mode: BuildMode.debug);
       environment.buildDir.childFile('app.dill')
           .copySync(outputDirectory.childFile('kernel_blob.bin').path);
-      fs.file(vmSnapshotData)
+      globals.fs.file(vmSnapshotData)
           .copySync(outputDirectory.childFile('vm_snapshot_data').path);
-      fs.file(isolateSnapshotData)
+      globals.fs.file(isolateSnapshotData)
           .copySync(outputDirectory.childFile('isolate_snapshot_data').path);
     }
-    final Depfile assetDepfile = await copyAssets(environment, outputDirectory);
-    assetDepfile.writeToFile(environment.buildDir.childFile('flutter_assets.d'));
+    if (_copyAssets) {
+      final Depfile assetDepfile = await copyAssets(environment, outputDirectory);
+      assetDepfile.writeToFile(environment.buildDir.childFile('flutter_assets.d'));
+    }
   }
 
   @override
@@ -88,6 +93,17 @@ class DebugAndroidApplication extends AndroidAssetBundle {
     const Source.pattern('{OUTPUT_DIR}/isolate_snapshot_data'),
     const Source.pattern('{OUTPUT_DIR}/kernel_blob.bin'),
   ];
+}
+
+/// A minimal android application that does not include assets.
+class FastStartAndroidApplication extends DebugAndroidApplication {
+  const FastStartAndroidApplication();
+
+  @override
+  String get name => 'faststart_android_application';
+
+  @override
+  bool get _copyAssets => false;
 }
 
 /// An implementation of [AndroidAssetBundle] that only includes assets.
@@ -192,6 +208,8 @@ class AndroidAot extends AotElfBase {
     if (!output.existsSync()) {
       output.createSync(recursive: true);
     }
+    final List<String> extraGenSnapshotOptions = environment.defines[kExtraGenSnapshotOptions]?.split(',')
+      ?? const <String>[];
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final int snapshotExitCode = await snapshotter.build(
       platform: targetPlatform,
@@ -200,6 +218,7 @@ class AndroidAot extends AotElfBase {
       packagesPath: environment.projectDir.childFile('.packages').path,
       outputPath: output.path,
       bitcode: false,
+      extraGenSnapshotOptions: extraGenSnapshotOptions,
     );
     if (snapshotExitCode != 0) {
       throw Exception('AOT snapshotter exited with code $snapshotExitCode');
@@ -271,4 +290,3 @@ const Target androidx64ProfileBundle = AndroidAotBundle(androidx64Profile);
 const Target androidArmReleaseBundle = AndroidAotBundle(androidArmRelease);
 const Target androidArm64ReleaseBundle = AndroidAotBundle(androidArm64Release);
 const Target androidx64ReleaseBundle = AndroidAotBundle(androidx64Release);
-

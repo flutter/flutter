@@ -91,15 +91,33 @@ typedef GenerateAppTitle = String Function(BuildContext context);
 /// Creates a [PageRoute] using the given [RouteSettings] and [WidgetBuilder].
 typedef PageRouteFactory = PageRoute<T> Function<T>(RouteSettings settings, WidgetBuilder builder);
 
-/// A convenience class that wraps a number of widgets that are commonly
+/// A convenience widget that wraps a number of widgets that are commonly
 /// required for an application.
 ///
 /// One of the primary roles that [WidgetsApp] provides is binding the system
 /// back button to popping the [Navigator] or quitting the application.
 ///
-/// See also: [CheckedModeBanner], [DefaultTextStyle], [MediaQuery],
-/// [Localizations], [Title], [Navigator], [Overlay], [SemanticsDebugger] (the
-/// widgets wrapped by this one).
+/// It is used by both [MaterialApp] and [CupertinoApp] to implement base
+/// functionality for an app.
+///
+/// Find references to many of the widgets that [WidgetsApp] wraps in the "See
+/// also" section.
+///
+/// See also:
+///
+///  * [CheckedModeBanner], which displays a [Banner] saying "DEBUG" when
+///    running in checked mode.
+///  * [DefaultTextStyle], the text style to apply to descendant [Text] widgets
+///    without an explicit style.
+///  * [MediaQuery], which establishes a subtree in which media queries resolve
+///    to a [MediaQueryData].
+///  * [Localizations], which defines the [Locale] for its `child`.
+///  * [Title], a widget that describes this app in the operating system.
+///  * [Navigator], a widget that manages a set of child widgets with a stack
+///    discipline.
+///  * [Overlay], a widget that manages a [Stack] of entries that can be managed
+///    independently.
+///  * [SemanticsDebugger], a widget that visualizes the semantics for the child.
 class WidgetsApp extends StatefulWidget {
   /// Creates a widget that wraps a number of widgets that are commonly
   /// required for an application.
@@ -689,7 +707,7 @@ class WidgetsApp extends StatefulWidget {
   /// By default, this is set to [WidgetsApp.defaultShortcuts].
   /// {@endtemplate}
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   /// This example shows how to add a single shortcut for
   /// [LogicalKeyboardKey.select] to the default shortcuts without needing to
   /// add your own [Shortcuts] widget.
@@ -738,7 +756,7 @@ class WidgetsApp extends StatefulWidget {
   /// widget.
   /// {@endtemplate}
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   /// This example shows how to add a single action handling an
   /// [ActivateAction] to the default actions without needing to
   /// add your own [Actions] widget.
@@ -1092,7 +1110,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     final Map<String, Locale> languageAndScriptLocales = HashMap<String, Locale>();
     final Map<String, Locale> languageLocales = HashMap<String, Locale>();
     final Map<String, Locale> countryLocales = HashMap<String, Locale>();
-    for (Locale locale in supportedLocales) {
+    for (final Locale locale in supportedLocales) {
       allSupportedLocales['${locale.languageCode}_${locale.scriptCode}_${locale.countryCode}'] ??= locale;
       languageAndScriptLocales['${locale.languageCode}_${locale.scriptCode}'] ??= locale;
       languageAndCountryLocales['${locale.languageCode}_${locale.countryCode}'] ??= locale;
@@ -1191,7 +1209,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     assert(() {
       final Set<Type> unsupportedTypes =
         _localizationsDelegates.map<Type>((LocalizationsDelegate<dynamic> delegate) => delegate.type).toSet();
-      for (LocalizationsDelegate<dynamic> delegate in _localizationsDelegates) {
+      for (final LocalizationsDelegate<dynamic> delegate in _localizationsDelegates) {
         if (!unsupportedTypes.contains(delegate.type))
           continue;
         if (delegate.isSupported(appLocale))
@@ -1212,7 +1230,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
         'Warning: This application\'s locale, $appLocale, is not supported by all of its\n'
         'localization delegates.'
       );
-      for (Type unsupportedType in unsupportedTypes) {
+      for (final Type unsupportedType in unsupportedTypes) {
         // Currently the Cupertino library only provides english localizations.
         // Remove this when https://github.com/flutter/flutter/issues/23847
         // is fixed.

@@ -374,7 +374,7 @@ void _defineTests() {
     // Do the actions work?
     final SemanticsOwner semanticsOwner = tester.binding.pipelineOwner.semanticsOwner;
     int expectedLength = 1;
-    for (SemanticsAction action in allActions) {
+    for (final SemanticsAction action in allActions) {
       switch (action) {
         case SemanticsAction.moveCursorBackwardByCharacter:
         case SemanticsAction.moveCursorForwardByCharacter:
@@ -716,7 +716,7 @@ class _DiffTester {
           TestSemantics.rootChild(
             rect: TestSemantics.fullScreen,
             children: <TestSemantics>[
-              for (String label in labels)
+              for (final String label in labels)
                 TestSemantics(
                   rect: const Rect.fromLTRB(1.0, 1.0, 2.0, 2.0),
                   label: label,
@@ -783,7 +783,7 @@ class _SemanticsDiffTest extends CustomPainter {
 
   List<CustomPainterSemantics> buildSemantics(Size size) {
     final List<CustomPainterSemantics> semantics = <CustomPainterSemantics>[];
-    for (String label in data) {
+    for (final String label in data) {
       Key key;
       if (label.endsWith('-k')) {
         key = ValueKey<String>(label);

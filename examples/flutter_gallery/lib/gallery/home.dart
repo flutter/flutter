@@ -134,7 +134,7 @@ class _CategoriesPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: List<Widget>.generate(rowCount, (int rowIndex) {
                   final int columnCountForRow = rowIndex == rowCount - 1
-                    ? categories.length - columnCount * math.max(0, rowCount - 1)
+                    ? categories.length - columnCount * math.max<int>(0, rowCount - 1)
                     : columnCount;
 
                   return Row(

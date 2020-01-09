@@ -4,15 +4,14 @@
 
 import 'dart:async';
 
-import 'package:flutter/semantics.dart';
 import 'package:meta/meta.dart';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show RendererBinding, SemanticsHandle;
 import 'package:flutter/scheduler.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -24,12 +23,14 @@ import '../common/frame_sync.dart';
 import '../common/geometry.dart';
 import '../common/gesture.dart';
 import '../common/health.dart';
+import '../common/layer_tree.dart';
 import '../common/message.dart';
 import '../common/render_tree.dart';
 import '../common/request_data.dart';
 import '../common/semantics.dart';
 import '../common/text.dart';
 import '../common/wait.dart';
+import '_extension_io.dart' if (dart.library.html) '_extension_web.dart';
 import 'wait_conditions.dart';
 
 const String _extensionMethodName = 'driver';
@@ -55,6 +56,9 @@ class _DriverBinding extends BindingBase with ServicesBinding, SchedulerBinding,
       name: _extensionMethodName,
       callback: extension.call,
     );
+    if (kIsWeb) {
+      registerWebServiceExtension(extension.call);
+    }
   }
 
   @override
@@ -107,6 +111,7 @@ class FlutterDriverExtension {
 
     _commandHandlers.addAll(<String, CommandHandlerCallback>{
       'get_health': _getHealth,
+      'get_layer_tree': _getLayerTree,
       'get_render_tree': _getRenderTree,
       'enter_text': _enterText,
       'get_text': _getText,
@@ -130,6 +135,7 @@ class FlutterDriverExtension {
 
     _commandDeserializers.addAll(<String, CommandDeserializerCallback>{
       'get_health': (Map<String, String> params) => GetHealth.deserialize(params),
+      'get_layer_tree': (Map<String, String> params) => GetLayerTree.deserialize(params),
       'get_render_tree': (Map<String, String> params) => GetRenderTree.deserialize(params),
       'enter_text': (Map<String, String> params) => EnterText.deserialize(params),
       'get_text': (Map<String, String> params) => GetText.deserialize(params),
@@ -228,6 +234,10 @@ class FlutterDriverExtension {
   }
 
   Future<Health> _getHealth(Command command) async => const Health(HealthStatus.ok);
+
+  Future<LayerTree> _getLayerTree(Command command) async {
+    return LayerTree(RendererBinding.instance?.renderView?.debugLayer?.toStringDeep());
+  }
 
   Future<RenderTree> _getRenderTree(Command command) async {
     return RenderTree(RendererBinding.instance?.renderView?.toStringDeep());

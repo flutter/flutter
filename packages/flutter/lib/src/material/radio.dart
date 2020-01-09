@@ -29,7 +29,7 @@ const double _kInnerRadius = 4.5;
 /// will respond to [onChanged] by calling [State.setState] to update the
 /// radio button's [groupValue].
 ///
-/// {@tool snippet --template=stateful_widget_scaffold_center}
+/// {@tool sample --template=stateful_widget_scaffold_center}
 ///
 /// Here is an example of Radio widgets wrapped in ListTiles, which is similar
 /// to what you could get with the RadioListTile widget.
@@ -112,6 +112,7 @@ class Radio<T> extends StatefulWidget {
     this.focusColor,
     this.hoverColor,
     this.materialTapTargetSize,
+    this.visualDensity,
     this.focusNode,
     this.autofocus = false,
   }) : assert(autofocus != null),
@@ -167,6 +168,16 @@ class Radio<T> extends StatefulWidget {
   ///
   ///  * [MaterialTapTargetSize], for a description of how this affects tap targets.
   final MaterialTapTargetSize materialTapTargetSize;
+
+  /// Defines how compact the radio's layout will be.
+  ///
+  /// {@macro flutter.material.themedata.visualDensity}
+  ///
+  /// See also:
+  ///
+  ///  * [ThemeData.visualDensity], which specifies the [density] for all widgets
+  ///    within a [Theme].
+  final VisualDensity visualDensity;
 
   /// The color for the radio's [Material] when it has the input focus.
   final Color focusColor;
@@ -247,6 +258,7 @@ class _RadioState<T> extends State<Radio<T>> with TickerProviderStateMixin {
         size = const Size(2 * kRadialReactionRadius, 2 * kRadialReactionRadius);
         break;
     }
+    size += (widget.visualDensity ?? themeData.visualDensity).baseSizeAdjustment;
     final BoxConstraints additionalConstraints = BoxConstraints.tight(size);
     return FocusableActionDetector(
       actions: _actionMap,

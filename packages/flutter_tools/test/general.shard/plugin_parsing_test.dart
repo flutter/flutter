@@ -122,6 +122,19 @@ void main() {
       expect(windowsPlugin.pluginClass, 'WinSamplePlugin');
     });
 
+    test('Legacy Format and Multi-Platform Format together is not allowed and error message contains plugin name', () {
+      const String pluginYamlRaw = 'androidPackage: com.flutter.dev\n'
+          'platforms:\n'
+          ' android:\n'
+          '  package: com.flutter.dev\n';
+
+      final YamlMap pluginYaml = loadYaml(pluginYamlRaw) as YamlMap;
+      expect(
+        () => Plugin.fromYaml(_kTestPluginName, _kTestPluginPath, pluginYaml, const <String>[]),
+        throwsToolExit(message: _kTestPluginName),
+      );
+    });
+
     test('A default_package field is allowed', () {
       const String pluginYamlRaw =
           'platforms:\n'

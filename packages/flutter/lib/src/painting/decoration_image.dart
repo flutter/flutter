@@ -222,7 +222,7 @@ class DecorationImagePainter {
         // when the image is ready.
         if (configuration.textDirection == null) {
           throw FlutterError.fromParts(<DiagnosticsNode>[
-            ErrorSummary('ImageDecoration.matchTextDirection can only be used when a TextDirection is available.'),
+            ErrorSummary('DecorationImage.matchTextDirection can only be used when a TextDirection is available.'),
             ErrorDescription(
               'When DecorationImagePainter.paint() was called, there was no text direction provided '
               'in the ImageConfiguration object to match.'
@@ -443,14 +443,14 @@ void paintImage({
     if (repeat == ImageRepeat.noRepeat) {
       canvas.drawImageRect(image, sourceRect, destinationRect, paint);
     } else {
-      for (Rect tileRect in _generateImageTileRects(rect, destinationRect, repeat))
+      for (final Rect tileRect in _generateImageTileRects(rect, destinationRect, repeat))
         canvas.drawImageRect(image, sourceRect, tileRect, paint);
     }
   } else {
     if (repeat == ImageRepeat.noRepeat) {
       canvas.drawImageNine(image, centerSlice, destinationRect, paint);
     } else {
-      for (Rect tileRect in _generateImageTileRects(rect, destinationRect, repeat))
+      for (final Rect tileRect in _generateImageTileRects(rect, destinationRect, repeat))
         canvas.drawImageNine(image, centerSlice, tileRect, paint);
     }
   }

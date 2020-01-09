@@ -16,7 +16,7 @@ class TestScrollPhysics extends ScrollPhysics {
     return TestScrollPhysics(name: name, parent: parent?.applyTo(ancestor) ?? ancestor);
   }
 
-  TestScrollPhysics get namedParent => parent;
+  TestScrollPhysics get namedParent => parent as TestScrollPhysics;
   String get names => parent == null ? name : '$name ${namedParent.names}';
 
   @override
@@ -30,11 +30,11 @@ class TestScrollPhysics extends ScrollPhysics {
 
 void main() {
   test('ScrollPhysics applyTo()', () {
-    const ScrollPhysics a = TestScrollPhysics(name: 'a');
-    const ScrollPhysics b = TestScrollPhysics(name: 'b');
-    const ScrollPhysics c = TestScrollPhysics(name: 'c');
-    const ScrollPhysics d = TestScrollPhysics(name: 'd');
-    const ScrollPhysics e = TestScrollPhysics(name: 'e');
+    const TestScrollPhysics a = TestScrollPhysics(name: 'a');
+    const TestScrollPhysics b = TestScrollPhysics(name: 'b');
+    const TestScrollPhysics c = TestScrollPhysics(name: 'c');
+    const TestScrollPhysics d = TestScrollPhysics(name: 'd');
+    const TestScrollPhysics e = TestScrollPhysics(name: 'e');
 
     expect(a.parent, null);
     expect(b.parent, null);

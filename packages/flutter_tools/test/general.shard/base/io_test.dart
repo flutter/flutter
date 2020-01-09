@@ -68,6 +68,38 @@ void main() {
   testUsingContext('ProcessSignal toString() works', () async {
     expect(io.ProcessSignal.sigint.toString(), ProcessSignal.SIGINT.toString());
   });
+
+  test('exit throws a StateError if called without being overriden', () {
+    expect(() => exit(0), throwsA(isInstanceOf<AssertionError>()));
+  });
+
+  test('exit does not throw a StateError if overriden', () {
+    try {
+      setExitFunctionForTests((int value) {});
+
+      expect(() => exit(0), returnsNormally);
+    } finally {
+      restoreExitFunction();
+    }
+  });
+
+  test('test_api defines the Declarer in a known place', () {
+    expect(Zone.current[#test.declarer], isNotNull);
+  });
+
+  test('listNetworkInterfaces() uses overrides', () async {
+    setNetworkInterfaceLister(
+      ({
+        bool includeLoopback,
+        bool includeLinkLocal,
+        InternetAddressType type,
+      }) async => <NetworkInterface>[],
+    );
+
+    expect(await listNetworkInterfaces(), isEmpty);
+
+    resetNetworkInterfaceLister();
+  });
 }
 
 class MockIoProcessSignal extends Mock implements io.ProcessSignal {}

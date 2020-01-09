@@ -10,6 +10,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 
+import 'binding.dart';
 import 'box.dart';
 import 'layer.dart';
 import 'object.dart';
@@ -416,7 +417,7 @@ class _UiKitViewGestureRecognizer extends OneSequenceGestureRecognizer {
   @override
   void addAllowedPointer(PointerDownEvent event) {
     startTrackingPointer(event.pointer, event.transform);
-    for (OneSequenceGestureRecognizer recognizer in _gestureRecognizers) {
+    for (final OneSequenceGestureRecognizer recognizer in _gestureRecognizers) {
       recognizer.addPointer(event);
     }
   }
@@ -492,7 +493,7 @@ class _PlatformViewGestureRecognizer extends OneSequenceGestureRecognizer {
   @override
   void addAllowedPointer(PointerDownEvent event) {
     startTrackingPointer(event.pointer, event.transform);
-    for (OneSequenceGestureRecognizer recognizer in _gestureRecognizers) {
+    for (final OneSequenceGestureRecognizer recognizer in _gestureRecognizers) {
       recognizer.addPointer(event);
     }
   }
@@ -686,8 +687,7 @@ class _MotionEventsDispatcher {
     return AndroidPointerProperties(id: pointerId, toolType: toolType);
   }
 
-  bool isSinglePointerAction(PointerEvent event) =>
-      !(event is PointerDownEvent) && !(event is PointerUpEvent);
+  bool isSinglePointerAction(PointerEvent event) => event is! PointerDownEvent && event is! PointerUpEvent;
 }
 
 /// A render object for embedding a platform view.
@@ -758,7 +758,8 @@ class PlatformViewRenderBox extends RenderBox with _PlatformViewGestureMixin {
     assert(_controller.viewId != null);
     context.addLayer(PlatformViewLayer(
             rect: offset & size,
-            viewId: _controller.viewId));
+            viewId: _controller.viewId,
+            hoverAnnotation: _hoverAnnotation));
   }
 
   @override
@@ -778,6 +779,18 @@ mixin _PlatformViewGestureMixin on RenderBox {
   // any newly arriving events there's nothing we need to invalidate.
   PlatformViewHitTestBehavior hitTestBehavior;
 
+  /// [MouseTrackerAnnotation] associated with the platform view layer.
+  ///
+  /// Gesture recognizers don't receive hover events due to the performance
+  /// cost associated with hit testing a sequence of potentially thousands of
+  /// events -- move events only hit-test the down event, then cache the result
+  /// and apply it to all subsequent move events, but there is no down event
+  /// for a hover. To support native hover gesture handling by platform views,
+  /// we attach/detach this layer annotation as necessary.
+  MouseTrackerAnnotation _hoverAnnotation;
+
+  _HandlePointerEvent _handlePointerEvent;
+
   /// {@macro  flutter.rendering.platformView.updateGestureRecognizers}
   ///
   /// Any active gesture arena the `PlatformView` participates in is rejected when the
@@ -793,6 +806,7 @@ mixin _PlatformViewGestureMixin on RenderBox {
     }
     _gestureRecognizer?.dispose();
     _gestureRecognizer = _PlatformViewGestureRecognizer(handlePointerEvent, gestureRecognizers);
+    _handlePointerEvent = handlePointerEvent;
   }
 
   _PlatformViewGestureRecognizer _gestureRecognizer;
@@ -817,8 +831,21 @@ mixin _PlatformViewGestureMixin on RenderBox {
   }
 
   @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    assert(_hoverAnnotation == null);
+    _hoverAnnotation = MouseTrackerAnnotation(onHover: (PointerHoverEvent event) {
+      if (_handlePointerEvent != null)
+        _handlePointerEvent(event);
+    });
+    RendererBinding.instance.mouseTracker.attachAnnotation(_hoverAnnotation);
+  }
+
+  @override
   void detach() {
     _gestureRecognizer.reset();
+    RendererBinding.instance.mouseTracker.detachAnnotation(_hoverAnnotation);
+    _hoverAnnotation = null;
     super.detach();
   }
 }

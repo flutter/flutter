@@ -182,7 +182,7 @@ typedef DecoderCallback = Future<ui.Codec> Function(Uint8List bytes, {int cacheW
 ///
 /// The following image formats are supported: {@macro flutter.dart:ui.imageFormats}
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// The following shows the code required to write a widget that fully conforms
 /// to the [ImageProvider] and [Widget] protocols. (It is essentially a
@@ -349,7 +349,7 @@ abstract class ImageProvider<T> {
   /// The [configuration] is optional and defaults to
   /// [ImageConfiguration.empty].
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// The following sample code shows how an image loaded using the [Image]
   /// widget can be evicted using a [NetworkImage] with a matching URL.
@@ -398,7 +398,7 @@ abstract class ImageProvider<T> {
   ///
   /// See also:
   ///
-  ///   * [ResizeImage], for modifying the key to account for cache dimensions.
+  ///  * [ResizeImage], for modifying the key to account for cache dimensions.
   @protected
   ImageStreamCompleter load(T key, DecoderCallback decode);
 

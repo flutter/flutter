@@ -12,7 +12,7 @@ import 'edge_insets.dart';
 /// A rectangular border with smooth continuous transitions between the straight
 /// sides and the rounded corners.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 /// ```dart
 /// Widget build(BuildContext context) {
 ///   return Material(
@@ -26,10 +26,10 @@ import 'edge_insets.dart';
 ///
 /// See also:
 ///
-/// * [RoundedRectangleBorder] Which creates rectangles with rounded corners,
-///   however its straight sides change into a rounded corner with a circular
-///   radius in a step function instead of gradually like the
-///   [ContinuousRectangleBorder].
+///  * [RoundedRectangleBorder] Which creates rectangles with rounded corners,
+///    however its straight sides change into a rounded corner with a circular
+///    radius in a step function instead of gradually like the
+///    [ContinuousRectangleBorder].
 class ContinuousRectangleBorder extends ShapeBorder {
   /// The arguments must not be null.
   const ContinuousRectangleBorder({

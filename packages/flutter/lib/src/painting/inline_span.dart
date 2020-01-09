@@ -40,7 +40,8 @@ typedef InlineSpanVisitor = bool Function(InlineSpan span);
 /// For [PlaceholderSpan]s, [InlineSpanSemanticsInformation.placeholder] is used by default.
 ///
 /// See also:
-///   * [InlineSpan.getSemanticsInformation]
+///
+///  * [InlineSpan.getSemanticsInformation]
 @immutable
 class InlineSpanSemanticsInformation {
   /// Constructs an object that holds the text and semantics label values of an
@@ -107,7 +108,7 @@ class InlineSpanSemanticsInformation {
 ///    this is the [WidgetSpan] class in the widgets library.
 ///  * The subclass [WidgetSpan] specifies embedded inline widgets.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This example shows a tree of [InlineSpan]s that make a query asking for a
 /// name with a [TextField] embedded inline.

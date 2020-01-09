@@ -82,7 +82,7 @@ void main() {
     expect(tester.getRect(find.byKey(key)), const Rect.fromLTRB(0.0, 325.0, 800.0, 600.0));
   });
 
-  for (TargetPlatform platform in TargetPlatform.values) {
+  for (final TargetPlatform platform in TargetPlatform.values) {
     group('$platform Scroll Physics', () {
       debugDefaultTargetPlatformOverride = platform;
 

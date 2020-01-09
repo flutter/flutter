@@ -273,8 +273,10 @@ class BoxConstraints extends Constraints {
   /// Returns the size that both satisfies the constraints and is as close as
   /// possible to the given size.
   ///
-  /// See also [constrainDimensions], which applies the same algorithm to
-  /// separately provided widths and heights.
+  /// See also:
+  ///
+  ///  * [constrainDimensions], which applies the same algorithm to
+  ///    separately provided widths and heights.
   Size constrain(Size size) {
     Size result = Size(constrainWidth(size.width), constrainHeight(size.height));
     assert(() {
@@ -681,7 +683,7 @@ class BoxHitTestResult extends HitTestResult {
   /// the child speaks a different hit test protocol then the parent and the
   /// position is not required to do the actual hit testing in that protocol.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   /// This method is used in [RenderBox.hitTestChildren] when the child and
   /// parent don't share the same origin.
   ///
@@ -1311,8 +1313,7 @@ abstract class RenderBox extends RenderObject {
   /// function couples the child with the parent so that when the child's layout
   /// changes, the parent is notified (via [markNeedsLayout]).
   ///
-  /// Calling this function is expensive and as it can result in O(N^2)
-  /// behavior.
+  /// Calling this function is expensive as it can result in O(N^2) behavior.
   ///
   /// Do not override this method. Instead, implement [computeMinIntrinsicWidth].
   @mustCallSuper
@@ -1451,8 +1452,7 @@ abstract class RenderBox extends RenderObject {
   /// function couples the child with the parent so that when the child's layout
   /// changes, the parent is notified (via [markNeedsLayout]).
   ///
-  /// Calling this function is expensive and as it can result in O(N^2)
-  /// behavior.
+  /// Calling this function is expensive as it can result in O(N^2) behavior.
   ///
   /// Do not override this method. Instead, implement
   /// [computeMaxIntrinsicWidth].
@@ -1511,7 +1511,9 @@ abstract class RenderBox extends RenderObject {
   ///
   /// This function should never return a negative or infinite value.
   ///
-  /// See also examples in the definition of [computeMinIntrinsicWidth].
+  /// See also:
+  ///
+  ///  * [computeMinIntrinsicWidth], which has usage examples.
   @protected
   double computeMaxIntrinsicWidth(double height) {
     return 0.0;
@@ -1529,8 +1531,7 @@ abstract class RenderBox extends RenderObject {
   /// function couples the child with the parent so that when the child's layout
   /// changes, the parent is notified (via [markNeedsLayout]).
   ///
-  /// Calling this function is expensive and as it can result in O(N^2)
-  /// behavior.
+  /// Calling this function is expensive as it can result in O(N^2) behavior.
   ///
   /// Do not override this method. Instead, implement
   /// [computeMinIntrinsicHeight].
@@ -1585,7 +1586,9 @@ abstract class RenderBox extends RenderObject {
   ///
   /// This function should never return a negative or infinite value.
   ///
-  /// See also examples in the definition of [computeMinIntrinsicWidth].
+  /// See also:
+  ///
+  ///  * [computeMinIntrinsicWidth], which has usage examples.
   @protected
   double computeMinIntrinsicHeight(double width) {
     return 0.0;
@@ -1604,8 +1607,7 @@ abstract class RenderBox extends RenderObject {
   /// function couples the child with the parent so that when the child's layout
   /// changes, the parent is notified (via [markNeedsLayout]).
   ///
-  /// Calling this function is expensive and as it can result in O(N^2)
-  /// behavior.
+  /// Calling this function is expensive as it can result in O(N^2) behavior.
   ///
   /// Do not override this method. Instead, implement
   /// [computeMaxIntrinsicHeight].
@@ -1664,7 +1666,9 @@ abstract class RenderBox extends RenderObject {
   ///
   /// This function should never return a negative or infinite value.
   ///
-  /// See also examples in the definition of [computeMinIntrinsicWidth].
+  /// See also:
+  ///
+  ///  * [computeMinIntrinsicWidth], which has usage examples.
   @protected
   double computeMaxIntrinsicHeight(double width) {
     return 0.0;

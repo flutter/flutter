@@ -27,8 +27,7 @@ void main() {
     ]);
     expect(stdoutLines, <String>[
       'Found 7 sample code sections.',
-      'Generating snippet for known_broken_documentation.dart:38',
-      'Starting analysis of samples.',
+       'Starting analysis of code samples.',
       '',
     ]);
   }, skip: Platform.isWindows);

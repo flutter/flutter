@@ -226,7 +226,7 @@ class TableBorder {
               ..strokeWidth = verticalInside.width
               ..style = PaintingStyle.stroke;
             path.reset();
-            for (double x in columns) {
+            for (final double x in columns) {
               path.moveTo(rect.left + x, rect.top);
               path.lineTo(rect.left + x, rect.bottom);
             }
@@ -245,7 +245,7 @@ class TableBorder {
               ..strokeWidth = horizontalInside.width
               ..style = PaintingStyle.stroke;
             path.reset();
-            for (double y in rows) {
+            for (final double y in rows) {
               path.moveTo(rect.left, rect.top + y);
               path.lineTo(rect.right, rect.top + y);
             }

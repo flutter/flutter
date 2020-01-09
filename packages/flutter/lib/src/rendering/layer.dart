@@ -70,7 +70,7 @@ class AnnotationResult<T> {
   ///
   /// It is similar to [entries] but does not contain other information.
   Iterable<T> get annotations sync* {
-    for (AnnotationEntry<T> entry in _entries)
+    for (final AnnotationEntry<T> entry in _entries)
       yield entry.annotation;
   }
 }
@@ -624,6 +624,7 @@ class PlatformViewLayer extends Layer {
   PlatformViewLayer({
     @required this.rect,
     @required this.viewId,
+    this.hoverAnnotation,
   }) : assert(rect != null),
        assert(viewId != null);
 
@@ -634,6 +635,25 @@ class PlatformViewLayer extends Layer {
   ///
   /// A UIView with this identifier must have been created by [PlatformViewsServices.initUiKitView].
   final int viewId;
+
+  /// [MouseTrackerAnnotation] that handles mouse events for this layer.
+  ///
+  /// If [hoverAnnotation] is non-null, [PlatformViewLayer] will annotate the
+  /// region of this platform view such that annotation callbacks will receive
+  /// mouse events, including mouse enter, exit, and hover, but not including
+  /// mouse down, move, and up. The layer will be treated as opaque during an
+  /// annotation search, which will prevent layers behind it from receiving
+  /// these events.
+  ///
+  /// By default, [hoverAnnotation] is null, and [PlatformViewLayer] will not
+  /// receive mouse events, and will therefore appear translucent during the
+  /// annotation search.
+  ///
+  /// See also:
+  ///
+  ///  * [MouseRegion], which explains more about the mouse events and opacity
+  ///    during annotation search.
+  final MouseTrackerAnnotation hoverAnnotation;
 
   @override
   void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
@@ -649,6 +669,18 @@ class PlatformViewLayer extends Layer {
   @override
   @protected
   bool findAnnotations<S>(AnnotationResult<S> result, Offset localPosition, { @required bool onlyFirst }) {
+    if (hoverAnnotation == null || !rect.contains(localPosition)) {
+      return false;
+    }
+    if (S == MouseTrackerAnnotation) {
+      final Object untypedValue = hoverAnnotation;
+      final S typedValue = untypedValue as S;
+      result.add(AnnotationEntry<S>(
+        annotation: typedValue,
+        localPosition: localPosition,
+      ));
+      return true;
+    }
     return false;
   }
 }
@@ -772,7 +804,7 @@ class ContainerLayer extends Layer {
       // PhysicalModelLayers. If we don't, we'll end up adding duplicate layers
       // or continuing to render stale outlines.
       if (temporaryLayers != null) {
-        for (PictureLayer temporaryLayer in temporaryLayers) {
+        for (final PictureLayer temporaryLayer in temporaryLayers) {
           temporaryLayer.remove();
         }
       }
@@ -1513,6 +1545,48 @@ class ColorFilterLayer extends ContainerLayer {
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
     super.debugFillProperties(properties);
     properties.add(DiagnosticsProperty<ColorFilter>('colorFilter', colorFilter));
+  }
+}
+
+/// A composite layer that applies an [ImageFilter] to its children.
+class ImageFilterLayer extends ContainerLayer {
+  /// Creates a layer that applies an [ImageFilter] to its children.
+  ///
+  /// The [imageFilter] property must be non-null before the compositing phase
+  /// of the pipeline.
+  ImageFilterLayer({
+    ui.ImageFilter imageFilter,
+  }) : _imageFilter = imageFilter;
+
+  /// The image filter to apply to children.
+  ///
+  /// The scene must be explicitly recomposited after this property is changed
+  /// (as described at [Layer]).
+  ui.ImageFilter get imageFilter => _imageFilter;
+  ui.ImageFilter _imageFilter;
+  set imageFilter(ui.ImageFilter value) {
+    assert(value != null);
+    if (value != _imageFilter) {
+      _imageFilter = value;
+      markNeedsAddToScene();
+    }
+  }
+
+  @override
+  void addToScene(ui.SceneBuilder builder, [ Offset layerOffset = Offset.zero ]) {
+    assert(imageFilter != null);
+    engineLayer = builder.pushImageFilter(
+      imageFilter,
+      oldLayer: _engineLayer as ui.ImageFilterEngineLayer,
+    );
+    addChildrenToScene(builder, layerOffset);
+    builder.pop();
+  }
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DiagnosticsProperty<ui.ImageFilter>('imageFilter', imageFilter));
   }
 }
 

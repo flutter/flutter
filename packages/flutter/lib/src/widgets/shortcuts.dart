@@ -25,7 +25,7 @@ import 'inherited_notifier.dart';
 ///
 /// See also:
 ///
-///  - [ShortcutManager], which uses [LogicalKeySet] (a [KeySet] subclass) to
+///  * [ShortcutManager], which uses [LogicalKeySet] (a [KeySet] subclass) to
 ///    define its key map.
 class KeySet<T extends KeyboardKey> extends Diagnosticable {
   /// A constructor for making a [KeySet] of up to four keys.
@@ -196,7 +196,7 @@ class ShortcutManager extends ChangeNotifier with DiagnosticableMixin {
       // have synonyms in the map.  This is for things like left and right shift
       // keys mapping to just the "shift" pseudo-key.
       final Set<LogicalKeyboardKey> pseudoKeys = <LogicalKeyboardKey>{};
-      for (LogicalKeyboardKey setKey in keySet.keys) {
+      for (final LogicalKeyboardKey setKey in keySet.keys) {
         final Set<LogicalKeyboardKey> synonyms = setKey.synonyms;
         if (synonyms.isNotEmpty) {
           // There currently aren't any synonyms that match more than one key.
@@ -231,9 +231,9 @@ class ShortcutManager extends ChangeNotifier with DiagnosticableMixin {
 ///
 /// See also:
 ///
-///   * [Intent], a class for containing a description of a user
-///     action to be invoked.
-///   * [Action], a class for defining an invocation of a user action.
+///  * [Intent], a class for containing a description of a user action to be
+///    invoked.
+///  * [Action], a class for defining an invocation of a user action.
 class Shortcuts extends StatefulWidget {
   /// Creates a ActionManager object.
   ///

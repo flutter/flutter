@@ -3,10 +3,8 @@
 // found in the LICENSE file.
 
 import 'base/context.dart';
-import 'base/file_system.dart';
-import 'base/platform.dart';
 import 'base/utils.dart';
-import 'globals.dart';
+import 'globals.dart' as globals;
 
 /// Information about a build to be performed or used.
 class BuildInfo {
@@ -103,6 +101,7 @@ class AndroidBuildInfo {
     ],
     this.splitPerAbi = false,
     this.shrink = false,
+    this.fastStart = false,
   });
 
   // The build info containing the mode and flavor.
@@ -120,6 +119,9 @@ class AndroidBuildInfo {
 
   /// The target platforms for the build.
   final Iterable<AndroidArch> targetArchs;
+
+  /// Whether to bootstrap an empty application.
+  final bool fastStart;
 }
 
 /// A summary of the compilation strategy used for Dart.
@@ -217,7 +219,7 @@ String validatedBuildNumberForPlatform(TargetPlatform targetPlatform, String bui
     }
     tmpBuildNumber = segments.join('.');
     if (tmpBuildNumber != buildNumber) {
-      printTrace('Invalid build-number: $buildNumber for iOS/macOS, overridden by $tmpBuildNumber.\n'
+      globals.printTrace('Invalid build-number: $buildNumber for iOS/macOS, overridden by $tmpBuildNumber.\n'
           'See CFBundleVersion at https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html');
     }
     return tmpBuildNumber;
@@ -235,7 +237,7 @@ String validatedBuildNumberForPlatform(TargetPlatform targetPlatform, String bui
     }
     tmpBuildNumberStr = tmpBuildNumberInt.toString();
     if (tmpBuildNumberStr != buildNumber) {
-      printTrace('Invalid build-number: $buildNumber for Android, overridden by $tmpBuildNumberStr.\n'
+      globals.printTrace('Invalid build-number: $buildNumber for Android, overridden by $tmpBuildNumberStr.\n'
           'See versionCode at https://developer.android.com/studio/publish/versioning');
     }
     return tmpBuildNumberStr;
@@ -264,7 +266,7 @@ String validatedBuildNameForPlatform(TargetPlatform targetPlatform, String build
     }
     tmpBuildName = segments.join('.');
     if (tmpBuildName != buildName) {
-      printTrace('Invalid build-name: $buildName for iOS/macOS, overridden by $tmpBuildName.\n'
+      globals.printTrace('Invalid build-name: $buildName for iOS/macOS, overridden by $tmpBuildName.\n'
           'See CFBundleShortVersionString at https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html');
     }
     return tmpBuildName;
@@ -503,17 +505,17 @@ String fuchsiaArchForTargetPlatform(TargetPlatform targetPlatform) {
 }
 
 HostPlatform getCurrentHostPlatform() {
-  if (platform.isMacOS) {
+  if (globals.platform.isMacOS) {
     return HostPlatform.darwin_x64;
   }
-  if (platform.isLinux) {
+  if (globals.platform.isLinux) {
     return HostPlatform.linux_x64;
   }
-  if (platform.isWindows) {
+  if (globals.platform.isWindows) {
     return HostPlatform.windows_x64;
   }
 
-  printError('Unsupported host platform, defaulting to Linux');
+  globals.printError('Unsupported host platform, defaulting to Linux');
 
   return HostPlatform.linux_x64;
 }
@@ -522,14 +524,14 @@ HostPlatform getCurrentHostPlatform() {
 String getBuildDirectory() {
   // TODO(johnmccutchan): Stop calling this function as part of setting
   // up command line argument processing.
-  if (context == null || config == null) {
+  if (context == null || globals.config == null) {
     return 'build';
   }
 
-  final String buildDir = config.getValue('build-dir') as String ?? 'build';
-  if (fs.path.isAbsolute(buildDir)) {
+  final String buildDir = globals.config.getValue('build-dir') as String ?? 'build';
+  if (globals.fs.path.isAbsolute(buildDir)) {
     throw Exception(
-        'build-dir config setting in ${config.configPath} must be relative');
+        'build-dir config setting in ${globals.config.configPath} must be relative');
   }
   return buildDir;
 }
@@ -542,40 +544,40 @@ String getAndroidBuildDirectory() {
 
 /// Returns the AOT build output directory.
 String getAotBuildDirectory() {
-  return fs.path.join(getBuildDirectory(), 'aot');
+  return globals.fs.path.join(getBuildDirectory(), 'aot');
 }
 
 /// Returns the asset build output directory.
 String getAssetBuildDirectory() {
-  return fs.path.join(getBuildDirectory(), 'flutter_assets');
+  return globals.fs.path.join(getBuildDirectory(), 'flutter_assets');
 }
 
 /// Returns the iOS build output directory.
 String getIosBuildDirectory() {
-  return fs.path.join(getBuildDirectory(), 'ios');
+  return globals.fs.path.join(getBuildDirectory(), 'ios');
 }
 
 /// Returns the macOS build output directory.
 String getMacOSBuildDirectory() {
-  return fs.path.join(getBuildDirectory(), 'macos');
+  return globals.fs.path.join(getBuildDirectory(), 'macos');
 }
 
 /// Returns the web build output directory.
 String getWebBuildDirectory() {
-  return fs.path.join(getBuildDirectory(), 'web');
+  return globals.fs.path.join(getBuildDirectory(), 'web');
 }
 
 /// Returns the Linux build output directory.
 String getLinuxBuildDirectory() {
-  return fs.path.join(getBuildDirectory(), 'linux');
+  return globals.fs.path.join(getBuildDirectory(), 'linux');
 }
 
 /// Returns the Windows build output directory.
 String getWindowsBuildDirectory() {
-  return fs.path.join(getBuildDirectory(), 'windows');
+  return globals.fs.path.join(getBuildDirectory(), 'windows');
 }
 
 /// Returns the Fuchsia build output directory.
 String getFuchsiaBuildDirectory() {
-  return fs.path.join(getBuildDirectory(), 'fuchsia');
+  return globals.fs.path.join(getBuildDirectory(), 'fuchsia');
 }

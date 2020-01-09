@@ -207,12 +207,15 @@ class SystemUiOverlayStyle {
 }
 
 List<String> _stringify(List<dynamic> list) => <String>[
-  for (dynamic item in list) item.toString(),
+  for (final dynamic item in list) item.toString(),
 ];
 
 /// Controls specific aspects of the operating system's graphical interface and
 /// how it interacts with the application.
 class SystemChrome {
+  // This class is not meant to be instatiated or extended; this constructor
+  // prevents instantiation and extension.
+  // ignore: unused_element
   SystemChrome._();
 
   /// Specifies the set of orientations the application interface can
@@ -319,7 +322,7 @@ class SystemChrome {
   /// If a particular style is not supported on the platform, selecting it will
   /// have no effect.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   /// ```dart
   /// @override
   /// Widget build(BuildContext context) {
@@ -337,7 +340,7 @@ class SystemChrome {
   /// navigation bar and synthesize them into a single style. This can be used
   /// to configure the system styles when an app bar is not used.
   ///
-  /// {@tool snippet --template=stateful_widget_material}
+  /// {@tool sample --template=stateful_widget_material}
   /// The following example creates a widget that changes the status bar color
   /// to a random value on Android.
   ///
@@ -380,7 +383,8 @@ class SystemChrome {
   /// {@end-tool}
   ///
   /// See also:
-  ///   * [AnnotatedRegion], the widget used to place data into the layer tree.
+  ///
+  ///  * [AnnotatedRegion], the widget used to place data into the layer tree.
   static void setSystemUIOverlayStyle(SystemUiOverlayStyle style) {
     assert(style != null);
     if (_pendingStyle != null) {

@@ -8,6 +8,9 @@ import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
 
+// Examples can assume:
+// BuildContext context;
+
 /// Coordinates tab selection between a [TabBar] and a [TabBarView].
 ///
 /// The [index] property is the index of the selected tab and the [animation]
@@ -23,7 +26,7 @@ import 'constants.dart';
 ///
 /// {@animation 700 540 https://flutter.github.io/assets-for-api-docs/assets/material/tabs.mp4}
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This widget introduces a [Scaffold] with an [AppBar] and a [TabBar].
 ///
@@ -336,11 +339,13 @@ class DefaultTabController extends StatefulWidget {
 
   /// The closest instance of this class that encloses the given context.
   ///
-  /// Typical usage:
+  /// {@tool snippet}
+  /// Typical usage is as follows:
   ///
   /// ```dart
-  /// TabController controller = DefaultTabBarController.of(context);
+  /// TabController controller = DefaultTabController.of(context);
   /// ```
+  /// {@end-tool}
   static TabController of(BuildContext context) {
     final _TabControllerScope scope = context.dependOnInheritedWidgetOfExactType<_TabControllerScope>();
     return scope?.controller;

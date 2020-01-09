@@ -37,3 +37,15 @@ flutter drive --profile test_driver/backdrop_filter_perf.dart
 Results should be in the file `build/backdrop_filter_perf.timeline_summary.json`.
 
 More detailed logs should be in `build/backdrop_filter_perf.timeline.json`.
+
+## Post Backdrop filter benchmark
+
+To run the post-backdrop filter benchmark on a device:
+
+```
+flutter drive --profile test_driver/post_backdrop_filter_perf.dart
+```
+
+Results should be in the file `build/post_backdrop_filter_perf.timeline_summary.json`.
+
+More detailed logs should be in `build/post_backdrop_filter_perf.timeline.json`.

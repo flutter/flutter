@@ -61,7 +61,7 @@ const Duration _kBaseSettleDuration = Duration(milliseconds: 246);
 ///
 /// {@animation 350 622 https://flutter.github.io/assets-for-api-docs/assets/material/drawer.mp4}
 ///
-/// {@tool sample}
+/// {@tool snippet}
 /// This example shows how to create a [Scaffold] that contains an [AppBar] and
 /// a [Drawer]. A user taps the "menu" icon in the [AppBar] to open the
 /// [Drawer]. The [Drawer] displays four items: A header and three menu items.
@@ -381,7 +381,7 @@ class DrawerControllerState extends State<DrawerController> with SingleTickerPro
   final GlobalKey _drawerKey = GlobalKey();
 
   double get _width {
-    final RenderBox box = _drawerKey.currentContext?.findRenderObject();
+    final RenderBox box = _drawerKey.currentContext?.findRenderObject() as RenderBox;
     if (box != null)
       return box.size.width;
     return _kWidth; // drawer not being shown currently
