@@ -206,49 +206,19 @@ double _dockedOffsetY(ScaffoldPrelayoutGeometry scaffoldGeometry) {
   return math.min(maxFabY, fabY);
 }
 
-class _EndFloatFloatingActionButtonLocation extends FloatingActionButtonLocation {
-  const _EndFloatFloatingActionButtonLocation();
+class _StartDockedFloatingActionButtonLocation extends FloatingActionButtonLocation {
+  const _StartDockedFloatingActionButtonLocation();
 
   @override
   Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
     return Offset(
-      _endOffsetX(scaffoldGeometry),
-      _floatingOffsetY(scaffoldGeometry),
-    );
-  }
-
-  @override
-  String toString() => 'FloatingActionButtonLocation.endFloat';
-}
-
-class _CenterFloatFloatingActionButtonLocation extends FloatingActionButtonLocation {
-  const _CenterFloatFloatingActionButtonLocation();
-
-  @override
-  Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
-    return Offset(
-      _centerOffsetX(scaffoldGeometry),
-      _floatingOffsetY(scaffoldGeometry),
-    );
-  }
-
-  @override
-  String toString() => 'FloatingActionButtonLocation.centerFloat';
-}
-
-class _EndDockedFloatingActionButtonLocation extends FloatingActionButtonLocation {
-  const _EndDockedFloatingActionButtonLocation();
-
-  @override
-  Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
-    return Offset(
-      _endOffsetX(scaffoldGeometry),
+      _startOffsetX(scaffoldGeometry),
       _dockedOffsetY(scaffoldGeometry),
     );
   }
 
   @override
-  String toString() => 'FloatingActionButtonLocation.endDocked';
+  String toString() => 'FloatingActionButtonLocation.centerDocked';
 }
 
 class _CenterDockedFloatingActionButtonLocation extends FloatingActionButtonLocation {
@@ -266,19 +236,49 @@ class _CenterDockedFloatingActionButtonLocation extends FloatingActionButtonLoca
   String toString() => 'FloatingActionButtonLocation.centerDocked';
 }
 
-class _StartDockedFloatingActionButtonLocation extends FloatingActionButtonLocation {
-  const _StartDockedFloatingActionButtonLocation();
+class _EndDockedFloatingActionButtonLocation extends FloatingActionButtonLocation {
+  const _EndDockedFloatingActionButtonLocation();
 
   @override
   Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
     return Offset(
-      _startOffsetX(scaffoldGeometry),
+      _endOffsetX(scaffoldGeometry),
       _dockedOffsetY(scaffoldGeometry),
     );
   }
 
   @override
-  String toString() => 'FloatingActionButtonLocation.centerDocked';
+  String toString() => 'FloatingActionButtonLocation.endDocked';
+}
+
+class _CenterFloatFloatingActionButtonLocation extends FloatingActionButtonLocation {
+  const _CenterFloatFloatingActionButtonLocation();
+
+  @override
+  Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
+    return Offset(
+      _centerOffsetX(scaffoldGeometry),
+      _floatingOffsetY(scaffoldGeometry),
+    );
+  }
+
+  @override
+  String toString() => 'FloatingActionButtonLocation.centerFloat';
+}
+
+class _EndFloatFloatingActionButtonLocation extends FloatingActionButtonLocation {
+  const _EndFloatFloatingActionButtonLocation();
+
+  @override
+  Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
+    return Offset(
+      _endOffsetX(scaffoldGeometry),
+      _floatingOffsetY(scaffoldGeometry),
+    );
+  }
+
+  @override
+  String toString() => 'FloatingActionButtonLocation.endFloat';
 }
 
 class _StartTopFloatingActionButtonLocation extends FloatingActionButtonLocation {
@@ -294,6 +294,21 @@ class _StartTopFloatingActionButtonLocation extends FloatingActionButtonLocation
 
   @override
   String toString() => 'FloatingActionButtonLocation.startTop';
+}
+
+class _EndTopFloatingActionButtonLocation extends FloatingActionButtonLocation {
+  const _EndTopFloatingActionButtonLocation();
+
+  @override
+  Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
+    return Offset(
+      _endOffsetX(scaffoldGeometry),
+      _topOffsetY(scaffoldGeometry),
+    );
+  }
+
+  @override
+  String toString() => 'FloatingActionButtonLocation.endTop';
 }
 
 class _MiniStartTopFloatingActionButtonLocation extends FloatingActionButtonLocation {
@@ -312,21 +327,6 @@ class _MiniStartTopFloatingActionButtonLocation extends FloatingActionButtonLoca
 
   @override
   String toString() => 'FloatingActionButtonLocation.miniStartTop';
-}
-
-class _EndTopFloatingActionButtonLocation extends FloatingActionButtonLocation {
-  const _EndTopFloatingActionButtonLocation();
-
-  @override
-  Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
-    return Offset(
-      _endOffsetX(scaffoldGeometry),
-      _topOffsetY(scaffoldGeometry),
-    );
-  }
-
-  @override
-  String toString() => 'FloatingActionButtonLocation.endTop';
 }
 
 /// Provider of animations to move the [FloatingActionButton] between [FloatingActionButtonLocation]s.
