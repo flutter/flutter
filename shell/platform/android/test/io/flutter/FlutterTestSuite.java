@@ -18,6 +18,7 @@ import io.flutter.embedding.engine.RenderingComponentTest;
 import io.flutter.embedding.engine.plugins.shim.ShimPluginRegistryTest;
 import io.flutter.embedding.engine.renderer.FlutterRendererTest;
 import io.flutter.embedding.engine.systemchannels.PlatformChannelTest;
+import io.flutter.external.FlutterLaunchTests;
 import io.flutter.plugin.common.StandardMessageCodecTest;
 import io.flutter.plugin.editing.TextInputPluginTest;
 import io.flutter.plugin.platform.SingleViewPresentationTest;
@@ -37,6 +38,7 @@ import test.io.flutter.embedding.engine.dart.DartExecutorTest;
     FlutterEngineTest.class,
     FlutterFragmentTest.class,
     FlutterJNITest.class,
+    FlutterLaunchTests.class,
     FlutterShellArgsTest.class,
     FlutterRendererTest.class,
     FlutterViewTest.class,
