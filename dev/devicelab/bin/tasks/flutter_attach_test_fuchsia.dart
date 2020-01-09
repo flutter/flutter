@@ -167,12 +167,13 @@ void main() {
 
         final Completer<void> hotReloadCompleter = Completer<void>();
         final Completer<void> reloadedCompleter = Completer<void>();
+        final RegExp observatoryRegexp = RegExp('An Observatory debugger and profiler on .+ is available at');
         runProcess.stdout
           .transform<String>(utf8.decoder)
           .transform<String>(const LineSplitter())
           .listen((String line) {
             print('run:stdout: $line');
-            if (line.contains('To detach, press "d"; to quit, press "q"')) {
+            if (observatoryRegexp.hasMatch(line)) {
               hotReloadCompleter.complete();
             } else if (line.contains('Reloaded')) {
               reloadedCompleter.complete();
