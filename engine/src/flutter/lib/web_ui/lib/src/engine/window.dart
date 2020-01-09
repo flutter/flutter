@@ -158,6 +158,12 @@ class EngineWindow extends ui.Window {
           case 'SystemSound.play':
             // There are no default system sounds on web.
             return;
+          case 'Clipboard.setData':
+          case 'Clipboard.getData':
+            // TODO(nurhan): https://github.com/flutter/flutter/issues/46020
+            print('WARNING: Clipboard API unimplemented for Flutter for Web. '
+                'Use context menu for text editing.');
+            return;
         }
         break;
 
