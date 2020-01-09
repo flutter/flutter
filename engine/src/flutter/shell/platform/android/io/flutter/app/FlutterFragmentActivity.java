@@ -101,7 +101,7 @@ public class FlutterFragmentActivity
             super.onBackPressed();
         }
     }
-        
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -141,6 +141,7 @@ public class FlutterFragmentActivity
 
     @Override
     protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
         eventDelegate.onNewIntent(intent);
     }
 
