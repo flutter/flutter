@@ -111,6 +111,8 @@ abstract class FloatingActionButtonLocation {
   /// or that use a [SliverAppBar] in the scaffold body itself.
   static const FloatingActionButtonLocation endTop = _EndTopFloatingActionButtonLocation();
 
+  static const FloatingActionButtonLocation startDocked = _StartDockedFloatingActionButtonLocation();
+
   /// Places the [FloatingActionButton] based on the [Scaffold]'s layout.
   ///
   /// This uses a [ScaffoldPrelayoutGeometry], which the [Scaffold] constructs
@@ -256,6 +258,21 @@ class _CenterDockedFloatingActionButtonLocation extends FloatingActionButtonLoca
   Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
     return Offset(
       _centerOffsetX(scaffoldGeometry),
+      _dockedOffsetY(scaffoldGeometry),
+    );
+  }
+
+  @override
+  String toString() => 'FloatingActionButtonLocation.centerDocked';
+}
+
+class _StartDockedFloatingActionButtonLocation extends FloatingActionButtonLocation {
+  const _StartDockedFloatingActionButtonLocation();
+
+  @override
+  Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
+    return Offset(
+      _startOffsetX(scaffoldGeometry),
       _dockedOffsetY(scaffoldGeometry),
     );
   }
