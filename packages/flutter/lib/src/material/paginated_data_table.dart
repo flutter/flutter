@@ -485,7 +485,7 @@ class PaginatedDataTableState extends State<PaginatedDataTable> {
                     opacity: 0.54
                   ),
                   child: Container(
-                    // TODO(https://github.com/flutter/flutter/issues/48522): this won't handle text zoom correctly.
+                    // TODO(bkonyi): this won't handle text zoom correctly, https://github.com/flutter/flutter/issues/48522
                     height: 56.0,
                     child: SingleChildScrollView(
                       dragStartBehavior: widget.dragStartBehavior,

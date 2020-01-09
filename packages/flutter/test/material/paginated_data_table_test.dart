@@ -50,7 +50,7 @@ class TestDataSource extends DataTableSource {
 }
 
 void main() {
-  final TestWidgetsFlutterBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
+  final WidgetsBinding binding = TestWidgetsFlutterBinding.ensureInitialized();
 
   testWidgets('PaginatedDataTable paging', (WidgetTester tester) async {
     final TestDataSource source = TestDataSource();
@@ -392,7 +392,7 @@ void main() {
 
     // Ensure the containing Card is small enough that we don't expand too
     // much, resulting in our custom margin being ignored.
-    await binding.setSurfaceSize(Size(_width, _height));
+    await binding.setSurfaceSize(const Size(_width, _height));
 
     final TestDataSource source = TestDataSource(
       onSelectChanged: (bool value) {},
@@ -698,7 +698,7 @@ void main() {
       ),
     );
 
-    await binding.setSurfaceSize(Size(_originalWidth, _height));
+    await binding.setSurfaceSize(const Size(_originalWidth, _height));
     await tester.pumpWidget(buildWidget());
 
     // Widths should be equal before we resize...
@@ -708,7 +708,7 @@ void main() {
         tester.renderObject<RenderBox>(find.byType(Card).first).size.width)
     );
 
-    await binding.setSurfaceSize(Size(_expandedWidth, _height));
+    await binding.setSurfaceSize(const Size(_expandedWidth, _height));
     await tester.pumpWidget(buildWidget());
 
     final double cardWidth = tester.renderObject<RenderBox>(find.byType(Card).first).size.width;
