@@ -243,8 +243,8 @@ const Set<String> allowableNumberFormats = <String>{
   'simpleCurrency',
 };
 
-// A subset of [allowableNumberFormats] that takes named parameters instead
-// of positional parameters.
+// The names of the NumberFormat factory constructors which have named
+// parameters rather than positional parameters.
 //
 // This helps the tool correctly generate number formmatting code correctly.
 //
