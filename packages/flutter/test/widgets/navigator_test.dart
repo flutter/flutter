@@ -155,7 +155,7 @@ void main() {
     );
     await tester.pumpWidget(widget);
     await tester.tap(find.byKey(targetKey));
-    expect(exception, isA<FlutterError>());
+    expect(exception, isFlutterError);
     expect('$exception', startsWith('Navigator operation requested with a context'));
   });
 

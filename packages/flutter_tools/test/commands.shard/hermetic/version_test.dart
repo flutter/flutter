@@ -107,7 +107,7 @@ void main() {
           '--no-pub',
           version,
         ]),
-        throwsA(isA<ToolExit>()),
+        throwsToolExit(),
       );
     }, overrides: <Type, Generator>{
       ProcessManager: () => MockProcessManager(),

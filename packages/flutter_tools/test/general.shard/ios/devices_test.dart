@@ -84,7 +84,7 @@ void main() {
       testUsingContext('throws UnsupportedError exception if instantiated on ${platform.operatingSystem}', () {
         expect(
           () { IOSDevice('device-123'); },
-          throwsA(isA<AssertionError>()),
+          throwsAssertionError,
         );
       }, overrides: <Type, Generator>{
         Platform: () => platform,

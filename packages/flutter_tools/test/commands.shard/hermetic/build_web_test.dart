@@ -5,7 +5,6 @@
 import 'package:args/command_runner.dart';
 import 'package:platform/platform.dart';
 
-import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/cache.dart';
@@ -60,7 +59,7 @@ void main() {
       false,
       const <String>[],
       false,
-    ), throwsA(isA<ToolExit>()));
+    ), throwsToolExit());
   }));
 
   test('Refuses to build using runner when missing index.html', () => testbed.run(() async {
@@ -91,7 +90,7 @@ void main() {
     final CommandRunner<void> runner = createTestCommandRunner(BuildCommand());
 
     expect(() => runner.run(<String>['build', 'web']),
-        throwsA(isA<ToolExit>()));
+        throwsToolExit());
   }, overrides: <Type, Generator>{
     FeatureFlags: () => TestFeatureFlags(isWebEnabled: false),
   }));

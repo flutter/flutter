@@ -4,6 +4,7 @@
 
 import 'dart:io';
 
+import 'package:flutter_driver/src/common/error.dart';
 import 'package:test_api/test_api.dart' hide TypeMatcher, isInstanceOf; // ignore: deprecated_member_use
 import 'package:test_api/test_api.dart' as test_package show TypeMatcher; // ignore: deprecated_member_use
 
@@ -25,3 +26,6 @@ void tryToDelete(Directory directory) {
     print('Failed to delete ${directory.path}: $error');
   }
 }
+
+/// Matcher for functions that throw [DriverError].
+final Matcher throwsDriverError = throwsA(isA<DriverError>());

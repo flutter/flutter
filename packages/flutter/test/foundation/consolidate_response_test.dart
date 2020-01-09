@@ -110,8 +110,7 @@ void main() {
       });
       when(response.contentLength).thenReturn(-1);
 
-      expect(consolidateHttpClientResponseBytes(response),
-          throwsA(isA<Exception>()));
+      expect(consolidateHttpClientResponseBytes(response), throwsException);
     });
 
     test('Propagates error to Future return value if onBytesReceived throws', () async {

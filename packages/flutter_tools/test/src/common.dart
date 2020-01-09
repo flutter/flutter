@@ -91,6 +91,9 @@ void updateFileModificationTime(
   globals.fs.file(path).setLastModifiedSync(modificationTime);
 }
 
+/// Matcher for functions that throw [AssertionError].
+final Matcher throwsAssertionError = throwsA(isA<AssertionError>());
+
 /// Matcher for functions that throw [ToolExit].
 Matcher throwsToolExit({ int exitCode, Pattern message }) {
   Matcher matcher = isToolExit;

@@ -145,7 +145,7 @@ void main() {
 
     group('ByValueKey', () {
       test('restricts value types', () async {
-        expect(() => find.byValueKey(null), throwsA(isA<DriverError>()));
+        expect(() => find.byValueKey(null), throwsDriverError);
       });
 
       test('finds by ValueKey', () async {
@@ -194,7 +194,7 @@ void main() {
 
     group('tap', () {
       test('requires a target reference', () async {
-        expect(driver.tap(null), throwsA(isA<DriverError>()));
+        expect(driver.tap(null), throwsDriverError);
       });
 
       test('sends the tap command', () async {
@@ -213,7 +213,7 @@ void main() {
 
     group('getText', () {
       test('requires a target reference', () async {
-        expect(driver.getText(null), throwsA(isA<DriverError>()));
+        expect(driver.getText(null), throwsDriverError);
       });
 
       test('sends the getText command', () async {
@@ -255,7 +255,7 @@ void main() {
 
     group('waitFor', () {
       test('requires a target reference', () async {
-        expect(driver.waitFor(null), throwsA(isA<DriverError>()));
+        expect(driver.waitFor(null), throwsDriverError);
       });
 
       test('sends the waitFor command', () async {
@@ -378,11 +378,11 @@ void main() {
 
     group('getOffset', () {
       test('requires a target reference', () async {
-        expect(driver.getCenter(null), throwsA(isA<DriverError>()));
-        expect(driver.getTopLeft(null), throwsA(isA<DriverError>()));
-        expect(driver.getTopRight(null), throwsA(isA<DriverError>()));
-        expect(driver.getBottomLeft(null), throwsA(isA<DriverError>()));
-        expect(driver.getBottomRight(null), throwsA(isA<DriverError>()));
+        expect(driver.getCenter(null), throwsDriverError);
+        expect(driver.getTopLeft(null), throwsDriverError);
+        expect(driver.getTopRight(null), throwsDriverError);
+        expect(driver.getBottomLeft(null), throwsDriverError);
+        expect(driver.getBottomRight(null), throwsDriverError);
       });
 
       test('sends the getCenter command', () async {
@@ -704,7 +704,7 @@ void main() {
     group('ByValueKey', () {
       test('restricts value types', () async {
         expect(() => find.byValueKey(null),
-            throwsA(isA<DriverError>()));
+            throwsDriverError);
       });
 
       test('finds by ValueKey', () async {
@@ -756,7 +756,7 @@ void main() {
 
     group('tap', () {
       test('requires a target reference', () async {
-        expect(driver.tap(null), throwsA(isA<DriverError>()));
+        expect(driver.tap(null), throwsDriverError);
       });
 
       test('sends the tap command', () async {
@@ -776,7 +776,7 @@ void main() {
 
     group('getText', () {
       test('requires a target reference', () async {
-        expect(driver.getText(null), throwsA(isA<DriverError>()));
+        expect(driver.getText(null), throwsDriverError);
       });
 
       test('sends the getText command', () async {
@@ -800,7 +800,7 @@ void main() {
 
     group('waitFor', () {
       test('requires a target reference', () async {
-        expect(driver.waitFor(null), throwsA(isA<DriverError>()));
+        expect(driver.waitFor(null), throwsDriverError);
       });
 
       test('sends the waitFor command', () async {
@@ -879,11 +879,11 @@ void main() {
 
     group('getOffset', () {
       test('requires a target reference', () async {
-        expect(driver.getCenter(null), throwsA(isA<DriverError>()));
-        expect(driver.getTopLeft(null), throwsA(isA<DriverError>()));
-        expect(driver.getTopRight(null), throwsA(isA<DriverError>()));
-        expect(driver.getBottomLeft(null), throwsA(isA<DriverError>()));
-        expect(driver.getBottomRight(null), throwsA(isA<DriverError>()));
+        expect(driver.getCenter(null), throwsDriverError);
+        expect(driver.getTopLeft(null), throwsDriverError);
+        expect(driver.getTopRight(null), throwsDriverError);
+        expect(driver.getBottomLeft(null), throwsDriverError);
+        expect(driver.getBottomRight(null), throwsDriverError);
       });
 
       test('sends the getCenter command', () async {

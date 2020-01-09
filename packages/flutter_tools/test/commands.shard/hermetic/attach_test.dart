@@ -235,7 +235,7 @@ void main() {
         });
         testDeviceManager.addDevice(device);
         expect(createTestCommandRunner(AttachCommand()).run(<String>['attach']),
-               throwsA(isA<ToolExit>()));
+               throwsToolExit());
       }, overrides: <Type, Generator>{
         FileSystem: () => testFileSystem,
         ProcessManager: () => FakeProcessManager.any(),
@@ -614,7 +614,7 @@ void main() {
       final AttachCommand command = AttachCommand();
       await expectLater(
         createTestCommandRunner(command).run(<String>['attach']),
-        throwsA(isA<ToolExit>()),
+        throwsToolExit(),
       );
       expect(testLogger.statusText, contains('No supported devices connected'));
     }, overrides: <Type, Generator>{
@@ -637,7 +637,7 @@ void main() {
       testDeviceManager.addDevice(aDeviceWithId('yy2'));
       await expectLater(
         createTestCommandRunner(command).run(<String>['attach']),
-        throwsA(isA<ToolExit>()),
+        throwsToolExit(),
       );
       expect(testLogger.statusText, contains('More than one device'));
       expect(testLogger.statusText, contains('xx1'));

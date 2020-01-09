@@ -136,10 +136,10 @@ void main() {
           // Verify that stopping or canceling multiple times throws.
           expect(() {
             ansiSpinner.stop();
-          }, throwsA(isA<AssertionError>()));
+          }, throwsAssertionError);
           expect(() {
             ansiSpinner.cancel();
-          }, throwsA(isA<AssertionError>()));
+          }, throwsAssertionError);
           done = true;
         });
         expect(done, isTrue);
@@ -314,8 +314,8 @@ void main() {
           expect(lines[1], equals(''));
 
           // Verify that stopping or canceling multiple times throws.
-          expect(() { ansiStatus.cancel(); }, throwsA(isA<AssertionError>()));
-          expect(() { ansiStatus.stop(); }, throwsA(isA<AssertionError>()));
+          expect(() { ansiStatus.cancel(); }, throwsAssertionError);
+          expect(() { ansiStatus.stop(); }, throwsAssertionError);
           done = true;
         });
         expect(done, isTrue);
@@ -359,8 +359,8 @@ void main() {
           expect(lines[1], equals(''));
 
           // Verify that stopping or canceling multiple times throws.
-          expect(() { ansiStatus.stop(); }, throwsA(isA<AssertionError>()));
-          expect(() { ansiStatus.cancel(); }, throwsA(isA<AssertionError>()));
+          expect(() { ansiStatus.stop(); }, throwsAssertionError);
+          expect(() { ansiStatus.cancel(); }, throwsAssertionError);
           done = true;
         });
         expect(done, isTrue);
@@ -711,8 +711,8 @@ void main() {
       expect(lines[1], equals(''));
 
       // Verify that stopping or canceling multiple times throws.
-      expect(() { summaryStatus.cancel(); }, throwsA(isA<AssertionError>()));
-      expect(() { summaryStatus.stop(); }, throwsA(isA<AssertionError>()));
+      expect(() { summaryStatus.cancel(); }, throwsAssertionError);
+      expect(() { summaryStatus.stop(); }, throwsAssertionError);
     }, overrides: <Type, Generator>{
       Platform: () => _kNoAnsiPlatform,
     });
@@ -736,8 +736,8 @@ void main() {
       expect(lines[1], equals(''));
 
       // Verify that stopping or canceling multiple times throws.
-      expect(() { summaryStatus.stop(); }, throwsA(isA<AssertionError>()));
-      expect(() { summaryStatus.cancel(); }, throwsA(isA<AssertionError>()));
+      expect(() { summaryStatus.stop(); }, throwsAssertionError);
+      expect(() { summaryStatus.cancel(); }, throwsAssertionError);
     }, overrides: <Type, Generator>{
       Platform: () => _kNoAnsiPlatform,
     });

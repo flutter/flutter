@@ -33,8 +33,7 @@ void main() {
         ),
       );
 
-      expect(() => tester.getSemantics(find.text('hello')),
-        throwsA(isA<StateError>()));
+      expect(() => tester.getSemantics(find.text('hello')), throwsStateError);
     }, semanticsEnabled: false);
 
     testWidgets('throws when there are multiple results from the finder', (WidgetTester tester) async {
@@ -53,8 +52,7 @@ void main() {
         ),
       );
 
-      expect(() => tester.getSemantics(find.text('hello')),
-          throwsA(isA<StateError>()));
+      expect(() => tester.getSemantics(find.text('hello')), throwsStateError);
       semanticsHandle.dispose();
     });
 

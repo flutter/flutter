@@ -459,7 +459,7 @@ void main() {
 
     // A separatorBuilder that returns null throws a FlutterError
     await tester.pumpWidget(buildFrame(null));
-    expect(tester.takeException(), isA<FlutterError>());
+    expect(tester.takeException(), isFlutterError);
     expect(find.byType(ErrorWidget), findsOneWidget);
   });
 
@@ -566,7 +566,7 @@ void main() {
         return const SizedBox();
       },
       itemCount: -1,
-    ), throwsA(isA<AssertionError>()));
+    ), throwsAssertionError);
   });
 
   testWidgets('ListView.builder asserts on negative semanticChildCount', (WidgetTester tester) async {
@@ -576,7 +576,7 @@ void main() {
       },
       itemCount: 1,
       semanticChildCount: -1,
-    ), throwsA(isA<AssertionError>()));
+    ), throwsAssertionError);
   });
 
   testWidgets('ListView.builder asserts on nonsensical childCount/semanticChildCount', (WidgetTester tester) async {
@@ -586,6 +586,6 @@ void main() {
       },
       itemCount: 1,
       semanticChildCount: 4,
-    ), throwsA(isA<AssertionError>()));
+    ), throwsAssertionError);
   });
 }
