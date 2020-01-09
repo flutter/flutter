@@ -40,7 +40,7 @@ typedef ValueWidgetBuilder<T> = Widget Function(BuildContext context, T value, W
 /// Using this pre-built child is entirely optional, but can improve
 /// performance significantly in some cases and is therefore a good practice.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This sample shows how you could use a [ValueListenableBuilder] instead of
 /// setting state on the whole [Scaffold] in the default `flutter create` app.

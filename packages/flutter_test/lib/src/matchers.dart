@@ -327,7 +327,7 @@ Matcher coversSameAreaAs(Path expectedPath, { @required Rect areaToCompare, int 
 /// The master golden image files that are tested against can be created or
 /// updated by running `flutter test --update-goldens` on the test.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 /// Sample invocations of [matchesGoldenFile].
 ///
 /// ```dart

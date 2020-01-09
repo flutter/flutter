@@ -180,7 +180,7 @@ class MethodChannel {
   /// in Dart using a MethodChannel and how to implement those methods in Java
   /// (for Android) and Objective-C (for iOS).
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// The code might be packaged up as a musical plugin, see
   /// <https://flutter.dev/developing-packages/>:
@@ -233,7 +233,7 @@ class MethodChannel {
   /// ```
   /// {@end-tool}
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// Java (for Android):
   ///
@@ -273,7 +273,7 @@ class MethodChannel {
   /// ```
   /// {@end-tool}
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// Objective-C (for iOS):
   ///

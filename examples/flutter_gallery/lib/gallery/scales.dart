@@ -11,8 +11,8 @@ class GalleryTextScaleValue {
   final String label;
 
   @override
-  bool operator ==(dynamic other) {
-    if (runtimeType != other.runtimeType)
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType)
       return false;
     return other is GalleryTextScaleValue
         && other.scale == scale
@@ -44,12 +44,12 @@ class GalleryVisualDensityValue {
   final String label;
 
   @override
-  bool operator ==(dynamic other) {
-    if (runtimeType != other.runtimeType)
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType)
       return false;
     return other is GalleryVisualDensityValue
-        && visualDensity == other.visualDensity
-        && label == other.label;
+        && other.visualDensity == visualDensity
+        && other.label == label;
   }
 
   @override

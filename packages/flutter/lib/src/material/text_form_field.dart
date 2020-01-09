@@ -36,7 +36,7 @@ export 'package:flutter/services.dart' show SmartQuotesType, SmartDashesType;
 ///
 /// For a documentation about the various parameters, see [TextField].
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// Creates a [TextFormField] with an [InputDecoration] and validator function.
 ///

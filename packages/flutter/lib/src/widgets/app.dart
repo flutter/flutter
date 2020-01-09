@@ -707,7 +707,7 @@ class WidgetsApp extends StatefulWidget {
   /// By default, this is set to [WidgetsApp.defaultShortcuts].
   /// {@endtemplate}
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   /// This example shows how to add a single shortcut for
   /// [LogicalKeyboardKey.select] to the default shortcuts without needing to
   /// add your own [Shortcuts] widget.
@@ -756,7 +756,7 @@ class WidgetsApp extends StatefulWidget {
   /// widget.
   /// {@endtemplate}
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   /// This example shows how to add a single action handling an
   /// [ActivateAction] to the default actions without needing to
   /// add your own [Actions] widget.
@@ -1364,6 +1364,7 @@ class _WidgetsAppState extends State<WidgetsApp> with WidgetsBindingObserver {
     assert(_debugCheckLocalizations(appLocale));
     return Shortcuts(
       shortcuts: widget.shortcuts ?? WidgetsApp.defaultShortcuts,
+      debugLabel: '<Default WidgetsApp Shortcuts>',
       child: Actions(
         actions: widget.actions ?? WidgetsApp.defaultActions,
         child: DefaultFocusTraversal(

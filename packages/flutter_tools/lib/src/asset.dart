@@ -283,7 +283,7 @@ class _Asset {
   String toString() => 'asset: $entryUri';
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(other, this)) {
       return true;
     }

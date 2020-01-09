@@ -55,8 +55,8 @@ class GalleryOptions {
   }
 
   @override
-  bool operator ==(dynamic other) {
-    if (runtimeType != other.runtimeType)
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType)
       return false;
     return other is GalleryOptions
         && other.themeMode == themeMode

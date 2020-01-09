@@ -39,10 +39,10 @@ class _InputBorderGap extends ChangeNotifier {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
-    if (runtimeType != other.runtimeType)
+    if (other.runtimeType != runtimeType)
       return false;
     return other is _InputBorderGap
         && other.start == start
@@ -525,7 +525,7 @@ class _Decoration {
   final Widget container;
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
     if (other.runtimeType != runtimeType)
@@ -2305,7 +2305,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 /// to describe their decoration. (In fact, this class is merely the
 /// configuration of an [InputDecorator], which does all the heavy lifting.)
 ///
-/// {@tool snippet --template=stateless_widget_scaffold}
+/// {@tool sample --template=stateless_widget_scaffold}
 ///
 /// This sample shows how to style a `TextField` using an `InputDecorator`. The
 /// TextField displays a "send message" icon to the left of the input area,
@@ -2330,7 +2330,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 /// ```
 /// {@end-tool}
 ///
-/// {@tool snippet --template=stateless_widget_scaffold}
+/// {@tool sample --template=stateless_widget_scaffold}
 ///
 /// This sample shows how to style a "collapsed" `TextField` using an
 /// `InputDecorator`. The collapsed `TextField` surrounds the hint text and
@@ -2350,7 +2350,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 /// ```
 /// {@end-tool}
 ///
-/// {@tool snippet --template=stateless_widget_scaffold}
+/// {@tool sample --template=stateless_widget_scaffold}
 ///
 /// This sample shows how to create a `TextField` with hint text, a red border
 /// on all sides, and an error message. To display a red border and error
@@ -2371,7 +2371,7 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
 /// ```
 /// {@end-tool}
 ///
-/// {@tool snippet --template=stateless_widget_scaffold}
+/// {@tool sample --template=stateless_widget_scaffold}
 ///
 /// This sample shows how to style a `TextField` with a round border and
 /// additional text before and after the input area. It displays "Prefix" before
@@ -3189,7 +3189,7 @@ class InputDecoration {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
     if (other.runtimeType != runtimeType)

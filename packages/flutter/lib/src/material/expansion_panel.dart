@@ -24,7 +24,7 @@ class _SaltedKey<S, V> extends LocalKey {
   final V value;
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
     return other is _SaltedKey<S, V>
@@ -140,7 +140,7 @@ class ExpansionPanelRadio extends ExpansionPanel {
 /// Note that [expansionCallback] behaves differently for [ExpansionPanelList]
 /// and [ExpansionPanelList.radio].
 ///
-/// {@tool snippet --template=stateful_widget_scaffold}
+/// {@tool sample --template=stateful_widget_scaffold}
 ///
 /// Here is a simple example of how to implement ExpansionPanelList.
 ///
@@ -242,7 +242,7 @@ class ExpansionPanelList extends StatefulWidget {
   /// arguments must not be null. The [children] objects must be instances
   /// of [ExpansionPanelRadio].
   ///
-  /// {@tool snippet --template=stateful_widget_scaffold}
+  /// {@tool sample --template=stateful_widget_scaffold}
   ///
   /// Here is a simple example of how to implement ExpansionPanelList.radio.
   ///
