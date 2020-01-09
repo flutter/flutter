@@ -777,7 +777,7 @@ class MockFuchsiaDevice extends Mock implements FuchsiaDevice {
   final bool _ipv6;
 
   @override
-  Future<bool> get ipv6 async => _ipv6;
+  bool get ipv6 => _ipv6;
 
   @override
   final String id;
