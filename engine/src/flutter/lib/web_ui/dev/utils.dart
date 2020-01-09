@@ -43,6 +43,9 @@ Future<int> runProcess(
     executable,
     arguments,
     workingDirectory: workingDirectory,
+    // Running the process in a system shell for Windows. Otherwise
+    // the process is not able to get Dart from path.
+    runInShell: io.Platform.isWindows,
     mode: io.ProcessStartMode.inheritStdio,
   );
   final int exitCode = await process.exitCode;
