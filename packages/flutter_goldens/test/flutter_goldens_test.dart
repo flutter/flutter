@@ -873,7 +873,7 @@ void main() {
         when(mockDirectory.uri).thenReturn(Uri.parse('/flutter'));
 
         when(mockSkiaClient.getExpectations())
-          .thenAnswer((_) => throw const OSError('Offline!'));
+          .thenAnswer((_) => throw const OSError('Can\'t reach Gold'));
         FlutterGoldenFileComparator comparator = await FlutterLocalFileComparator.fromDefaultComparator(
           platform,
           goldens: mockSkiaClient,
@@ -882,7 +882,7 @@ void main() {
         expect(comparator.runtimeType, FlutterSkippingGoldenFileComparator);
 
         when(mockSkiaClient.getExpectations())
-          .thenAnswer((_) => throw const SocketException('Offline!'));
+          .thenAnswer((_) => throw const SocketException('Can\'t reach Gold'));
         comparator = await FlutterLocalFileComparator.fromDefaultComparator(
           platform,
           goldens: mockSkiaClient,
