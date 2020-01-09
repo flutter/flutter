@@ -1020,7 +1020,6 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
         // It's safe to use these calls as point-in-time - do not subscribe to
         // updates of MediaQuery or Scrollable.
         final double maxPhysicalDimension = WidgetsBinding.instance.window.physicalSize.longestSide;
-        // print('${(Scrollable.scrollingVelocityOfContext(context) ?? 0).abs()} $maxPhysicalDimension');
         if ((Scrollable.scrollingVelocityOfContext(context) ?? 0).abs() > maxPhysicalDimension) {
           return DeferringImageProviderAction.defer;
         }

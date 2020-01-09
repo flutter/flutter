@@ -210,7 +210,6 @@ class ImageCache {
       }
     }
     void listener(ImageInfo info, bool syncCall) {
-      print('about to do it!');
       // Images that fail to load don't contribute to cache size.
       final int imageSize = info?.image == null ? 0 : info.image.height * info.image.width * 4;
       final _CachedImage image = _CachedImage(result, imageSize);
@@ -227,7 +226,6 @@ class ImageCache {
       }
 
       _cache[key] = image;
-      print('cached');
       _checkCacheSize();
     }
     if (maximumSize > 0 && maximumSizeBytes > 0) {

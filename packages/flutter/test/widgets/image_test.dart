@@ -1177,46 +1177,71 @@ void main() {
   }, skip: isBrowser);
 
   testWidgets('Image defers loading while fast scrolling', (WidgetTester tester) async {
-    // final ImageCache imageCache = PaintingBinding.instance.imageCache;
-    // final int oldMaxSize = imageCache.maximumSize;
-    // imageCache.maximumSize = 1001;
-    try {
-      // final MemoryImage memoryImage = ;
-      await tester.pumpWidget(Directionality(
-        textDirection: TextDirection.ltr,
-        child: GridView.builder(
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
-          itemCount: 1000,
-          itemBuilder: (_, int index) {
-            return Image(
-              image: MemoryImage(Uint8List.fromList(kTransparentImage)),
+    const int gridCells = 1000;
+    final List<TestImageProvider> imageProviders = <TestImageProvider>[];
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: GridView.builder(
+        physics: const BouncingScrollPhysics(),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
+        itemCount: gridCells,
+        itemBuilder: (_, int index) {
+          final TestImageProvider provider = TestImageProvider();
+          imageProviders.add(provider);
+          return SizedBox(
+            height: 250,
+            width: 250,
+            child: Image(
+              image: provider,
               semanticLabel: index.toString(),
-            );
-          },
-        ),
-      ));
+            ),
+          );
+        },
+      ),
+    ));
 
-      // print(tester.allWidgets.toList());
-      expect(find.bySemanticsLabel('5'), findsOneWidget);
-      for (int i = 0; i < 30; i++) {
-        await tester.fling(find.byType(GridView), const Offset(0, -200), 5000);
-        await tester.pump();
-        print('iteration $i');
-          final RenderViewport viewport = tester.renderObject(find.byType(Viewport));
-  final ScrollPosition position = viewport.offset as ScrollPosition;
-  print(position.activity.velocity);
-  // print(Scrollable.of(find.byType(Image).evaluate().first)?.position?.activity?.velocity);
-  print(Scrollable.scrollingVelocityOfContext(find.byType(Image).evaluate().first));
+    final bool Function(TestImageProvider) loadCalled = (TestImageProvider provider) => provider.loadCalled;
+    final bool Function(TestImageProvider) loadNotCalled = (TestImageProvider provider) => !provider.loadCalled;
+    final double largePixelAmount = WidgetsBinding.instance.window.physicalSize.longestSide;
+
+    expect(find.bySemanticsLabel('5'), findsOneWidget);
+    expect(imageProviders.every(loadCalled), true);
+
+    // Simulate a very fast fling.
+    // This is hard to get quite right as a gesture, but all we care about is
+    // going ballistic.
+    // We can also listen this way to stop and validate we have
+    // not tried to actually decode any images while it doing a high velocity
+    // ballistic simulation, before slowing down again.
+    final ScrollableState scrollable = Scrollable.of(find.bySemanticsLabel('5').evaluate().first);
+    bool firstSeen = false;
+    scrollable.position.addListener(() {
+      if (!firstSeen) {
+        // We get 12 loads from before we're going fast enough.
+        // We should not get any more until we go idle.
+        expect(imageProviders.length, 12);
+        expect(imageProviders.every(loadCalled), true);
+        imageProviders.clear();
+        firstSeen = true;
       }
 
-      await tester.pumpAndSettle();
-      // await tester.pumpAndSettle();
-      // expect(find.bySemanticsLabel('5'), findsNothing);
-      // print(tester.allWidgets.toList());
-      print(imageCache.currentSize);
-    } finally {
-      // imageCache.maximumSize = oldMaxSize;
-    }
+      if (scrollable.position.activity.velocity <= largePixelAmount + 100) {
+        // We got 120 image providers created, and none of them have called
+        // resolve yet - still scrolling too fast.
+        expect(imageProviders.length, 120);
+        expect(imageProviders.every(loadNotCalled), true);
+        scrollable.position.activity.delegate.goIdle();
+      }
+    });
+    scrollable.position.activity.delegate.goBallistic(largePixelAmount * 100);
+    await tester.pumpAndSettle();
+
+    /// 7 more image providers were created by frames after we called goIdle.
+    /// 22 have had load called (they're on screen or close enough where they
+    /// are still in tree).
+    expect(imageProviders.length, 127);
+    expect(imageProviders.where(loadCalled).length, 22);
+    expect(imageProviders.where(loadNotCalled).length, 105);
   });
 }
 
@@ -1230,6 +1255,9 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
   ImageStreamCompleter _streamCompleter;
   ImageConfiguration _lastResolvedConfiguration;
 
+  bool get loadCalled => _loadCalled;
+  bool _loadCalled = false;
+
   @override
   Future<TestImageProvider> obtainKey(ImageConfiguration configuration) {
     return SynchronousFuture<TestImageProvider>(this);
@@ -1242,7 +1270,10 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
   }
 
   @override
-  ImageStreamCompleter load(TestImageProvider key, DecoderCallback decode) => _streamCompleter;
+  ImageStreamCompleter load(TestImageProvider key, DecoderCallback decode) {
+    _loadCalled = true;
+    return _streamCompleter;
+  }
 
   void complete() {
     _completer.complete(ImageInfo(image: TestImage()));

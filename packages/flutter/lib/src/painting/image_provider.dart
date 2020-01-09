@@ -9,6 +9,7 @@ import 'dart:ui' as ui show Codec;
 import 'dart:ui' show Size, Locale, TextDirection, hashValues;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
 import '_network_image_io.dart'
@@ -924,10 +925,8 @@ class DeferringImageProvider<T> extends ImageProvider<T> {
   const DeferringImageProvider({
     @required this.imageProvider,
     @required this.getNextAction,
-    this.deferDuration = Duration.zero,
   }) : assert(imageProvider != null),
-       assert(getNextAction != null),
-       assert(deferDuration != null);
+       assert(getNextAction != null);
 
   /// The wrapped [ImageProvider] to delegate loading the image and creating
   /// a key for it.
@@ -935,13 +934,6 @@ class DeferringImageProvider<T> extends ImageProvider<T> {
   /// The image provider's load method may never be called if resolution gets
   /// cancelled.
   final ImageProvider<T> imageProvider;
-
-  /// The duration to wait between checking for the next action after a
-  /// [DeferringImageProviderAction.defer].
-  ///
-  /// The default is [Duration.zero], which indicates the end of the current
-  /// task queue.
-  final Duration deferDuration;
 
   /// A callback used by [resolve] to determine whether resolution should be
   /// cancelled, deferred, or executed.
@@ -960,9 +952,12 @@ class DeferringImageProvider<T> extends ImageProvider<T> {
       }
       switch (getNextAction()) {
         case DeferringImageProviderAction.defer:
-          Timer.run(() => deferredResolve(key));
-
-          // Timer.periodic (deferDuration, () => deferredResolve(key));
+          // Get ourselves to the end of any frame callbacks at the beginning of
+          // the next frame, which should be after the scroll animation has
+          // updated our velocity value.
+          SchedulerBinding.instance.scheduleFrameCallback((_) {
+            scheduleMicrotask(() => deferredResolve(key));
+          });
           return;
         case DeferringImageProviderAction.cancel:
           return;
@@ -988,15 +983,14 @@ class DeferringImageProvider<T> extends ImageProvider<T> {
       return false;
     return other is DeferringImageProvider
         && other.imageProvider == imageProvider
-        && other.getNextAction == getNextAction
-        && other.deferDuration == deferDuration;
+        && other.getNextAction == getNextAction;
   }
 
   @override
-  int get hashCode => hashValues(imageProvider, getNextAction, deferDuration);
+  int get hashCode => hashValues(imageProvider, getNextAction);
 
   @override
-  String toString() => '$runtimeType(imageProvider: $imageProvider, deferDuration: $deferDuration)';
+  String toString() => '$runtimeType(imageProvider: $imageProvider)';
 }
 
 // A completer used when resolving an image fails sync.
