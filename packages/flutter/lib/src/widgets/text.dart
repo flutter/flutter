@@ -68,6 +68,7 @@ class DefaultTextStyle extends InheritedTheme {
       maxLines = null,
       overflow = TextOverflow.clip,
       textWidthBasis = TextWidthBasis.parent,
+      heightBehavior = null,
       super(key: key, child: null);
 
   /// Creates a default text style that overrides the text styles in scope at
@@ -144,6 +145,7 @@ class DefaultTextStyle extends InheritedTheme {
   /// See [TextWidthBasis] for possible values and their implications.
   final TextWidthBasis textWidthBasis;
 
+  /// {@macro flutter.dart:ui.heightBehavior}
   final ui.HeightBehavior heightBehavior;
 
   /// The closest instance of this class that encloses the given context.

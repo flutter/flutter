@@ -277,6 +277,7 @@ class RenderParagraph extends RenderBox
     markNeedsLayout();
   }
 
+  /// {@macro flutter.dart:ui.heightBehavior}
   ui.HeightBehavior get heightBehavior => _textPainter.heightBehavior;
   set heightBehavior(ui.HeightBehavior value) {
     if (_textPainter.heightBehavior == value)

@@ -5145,6 +5145,7 @@ class RichText extends MultiChildRenderObjectWidget {
   /// {@macro flutter.widgets.text.DefaultTextStyle.textWidthBasis}
   final TextWidthBasis textWidthBasis;
 
+  /// {@macro flutter.dart:ui.heightBehavior}
   final ui.HeightBehavior heightBehavior;
 
   @override

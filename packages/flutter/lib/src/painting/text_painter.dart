@@ -341,6 +341,7 @@ class TextPainter {
     markNeedsLayout();
   }
 
+  /// {@macro flutter.dart:ui.heightBehavior}
   ui.HeightBehavior get heightBehavior => _heightBehavior;
   ui.HeightBehavior _heightBehavior;
   set heightBehavior(ui.HeightBehavior value) {
