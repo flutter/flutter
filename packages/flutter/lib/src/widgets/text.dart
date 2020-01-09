@@ -428,7 +428,7 @@ class Text extends StatelessWidget {
   /// {@macro flutter.painting.textPainter.textWidthBasis}
   final TextWidthBasis textWidthBasis;
 
-  /// {@template flutter.dart:ui.heightBehavior}
+  /// {@macro flutter.dart:ui.heightBehavior}
   final ui.HeightBehavior heightBehavior;
 
   @override

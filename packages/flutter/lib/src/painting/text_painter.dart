@@ -156,7 +156,8 @@ class TextPainter {
        _ellipsis = ellipsis,
        _locale = locale,
        _strutStyle = strutStyle,
-       _textWidthBasis = textWidthBasis;
+       _textWidthBasis = textWidthBasis,
+       _heightBehavior = heightBehavior;
 
   ui.Paragraph _paragraph;
   bool _needsLayout = true;
@@ -410,6 +411,7 @@ class TextPainter {
       textDirection: textDirection ?? defaultTextDirection,
       textScaleFactor: textScaleFactor,
       maxLines: _maxLines,
+      heightBehavior: _heightBehavior,
       ellipsis: _ellipsis,
       locale: _locale,
       strutStyle: _strutStyle,
@@ -417,6 +419,7 @@ class TextPainter {
       textAlign: textAlign,
       textDirection: textDirection ?? defaultTextDirection,
       maxLines: maxLines,
+      heightBehavior: _heightBehavior,
       ellipsis: ellipsis,
       locale: locale,
     );
