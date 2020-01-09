@@ -184,6 +184,8 @@ double _floatingOffsetY(ScaffoldPrelayoutGeometry scaffoldGeometry) {
   return fabY;
 }
 
+// Provider of common logic for [FloatingActionButtonLocation]s that
+// dock to the [BottomAppBar].
 double _dockedOffsetY(ScaffoldPrelayoutGeometry scaffoldGeometry) {
   final double contentBottom = scaffoldGeometry.contentBottom;
   final double bottomSheetHeight = scaffoldGeometry.bottomSheetSize.height;
