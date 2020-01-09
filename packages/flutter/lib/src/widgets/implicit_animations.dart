@@ -473,7 +473,7 @@ abstract class ImplicitlyAnimatedWidgetState<T extends ImplicitlyAnimatedWidget>
   /// properties. Dependent properties should not be updated within
   /// [forEachTween].
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// This sample implements an implicitly animated widget's `State`.
   /// The widget animates between colors whenever `widget.targetColor`
@@ -578,7 +578,7 @@ abstract class AnimatedWidgetBaseState<T extends ImplicitlyAnimatedWidget> exten
 /// like, using a [curve] of [Curves.fastOutSlowIn].
 /// {@animation 250 266 https://flutter.github.io/assets-for-api-docs/assets/widgets/animated_container.mp4}
 ///
-/// {@tool snippet --template=stateful_widget_scaffold}
+/// {@tool sample --template=stateful_widget_scaffold}
 ///
 /// The following example (depicted above) transitions an AnimatedContainer
 /// between two states. It adjusts the [height], [width], [color], and
@@ -1251,7 +1251,7 @@ class _AnimatedPositionedDirectionalState extends AnimatedWidgetBaseState<Animat
 /// of [Curves.fastOutSlowIn].
 /// {@animation 250 266 https://flutter.github.io/assets-for-api-docs/assets/widgets/animated_opacity.mp4}
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// ```dart
 /// class LogoFade extends StatefulWidget {

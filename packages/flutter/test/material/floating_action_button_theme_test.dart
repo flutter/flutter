@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -117,7 +118,16 @@ void main() {
     expect(_getRawMaterialButton(tester).splashColor, splashColor);
   });
 
+  // The feature checked by this test has been deprecated, see
+  // https://flutter.dev/go/remove-fab-accent-theme-dependency. This test will be
+  // removed in the future.
   testWidgets('FloatingActionButton foreground color uses iconAccentTheme if no widget or widget theme color is specified', (WidgetTester tester) async {
+    final DebugPrintCallback oldPrint = debugPrint;
+    final List<String> log = <String>[];
+    debugPrint = (String message, { int wrapWidth }) {
+      log.add(message);
+    };
+
     await tester.pumpWidget(MaterialApp(
       home: Scaffold(
         floatingActionButton: Theme(
@@ -131,6 +141,11 @@ void main() {
         ),
       ),
     ));
+
+    debugPrint = oldPrint;
+
+    // Verify that a warning message is generated.
+    expect(log.first, contains('https://flutter.dev/docs/release/breaking-changes/fab_accent_dependency'));
 
     expect(_getRichText(tester).text.style.color, const Color(0xFACEFACE));
   });

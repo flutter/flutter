@@ -84,11 +84,12 @@ class InlineSpanSemanticsInformation {
   final bool requiresOwnNode;
 
   @override
-  bool operator ==(dynamic other) {
-    if (other is! InlineSpanSemanticsInformation) {
-      return false;
-    }
-    return other.text == text && other.semanticsLabel == semanticsLabel && other.recognizer == recognizer && other.isPlaceholder == isPlaceholder;
+  bool operator ==(Object other) {
+    return other is InlineSpanSemanticsInformation
+        && other.text == text
+        && other.semanticsLabel == semanticsLabel
+        && other.recognizer == recognizer
+        && other.isPlaceholder == isPlaceholder;
   }
 
   @override
@@ -108,7 +109,7 @@ class InlineSpanSemanticsInformation {
 ///    this is the [WidgetSpan] class in the widgets library.
 ///  * The subclass [WidgetSpan] specifies embedded inline widgets.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This example shows a tree of [InlineSpan]s that make a query asking for a
 /// name with a [TextField] embedded inline.
@@ -354,7 +355,7 @@ abstract class InlineSpan extends DiagnosticableTree {
   RenderComparison compareTo(InlineSpan other);
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
     if (other.runtimeType != runtimeType)

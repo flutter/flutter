@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:math' show Random, max;
 
 import 'package:intl/intl.dart';
+import 'package:meta/meta.dart';
 
 import '../convert.dart';
 import '../globals.dart' as globals;
@@ -395,7 +396,7 @@ class _AnsiRun {
 /// If [outputPreferences.wrapText] is false, then the text will be returned
 /// simply split at the newlines, but not wrapped. If [shouldWrap] is specified,
 /// then it overrides the [outputPreferences.wrapText] setting.
-List<String> _wrapTextAsLines(String text, { int start = 0, int columnWidth, bool shouldWrap }) {
+List<String> _wrapTextAsLines(String text, { int start = 0, int columnWidth, @required bool shouldWrap }) {
   if (text == null || text.isEmpty) {
     return <String>[''];
   }

@@ -4,7 +4,6 @@
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
-import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -22,14 +21,12 @@ void main() {
   MockXcode mockXcode;
   MemoryFileSystem memoryFileSystem;
   MockProcessManager mockProcessManager;
-  BufferLogger bufferLogger;
   MockPlistUtils mockPlistUtils;
 
   setUp(() {
     mockXcode = MockXcode();
     memoryFileSystem = MemoryFileSystem(style: FileSystemStyle.posix);
     mockProcessManager = MockProcessManager();
-    bufferLogger = BufferLogger();
     mockPlistUtils = MockPlistUtils();
   });
 
@@ -67,7 +64,6 @@ void main() {
     FileSystem: () => memoryFileSystem,
     ProcessManager: () => mockProcessManager,
     Xcode: () => mockXcode,
-    Logger: () => bufferLogger,
     PlistParser: () => mockPlistUtils,
   });
 
@@ -91,7 +87,6 @@ void main() {
     FileSystem: () => memoryFileSystem,
     ProcessManager: () => mockProcessManager,
     Xcode: () => mockXcode,
-    Logger: () => bufferLogger,
     PlistParser: () => mockPlistUtils,
   });
 
@@ -114,7 +109,6 @@ void main() {
     FileSystem: () => memoryFileSystem,
     ProcessManager: () => mockProcessManager,
     Xcode: () => mockXcode,
-    Logger: () => bufferLogger,
     PlistParser: () => mockPlistUtils,
   });
 
@@ -143,7 +137,6 @@ void main() {
     FileSystem: () => memoryFileSystem,
     ProcessManager: () => mockProcessManager,
     Xcode: () => mockXcode,
-    Logger: () => bufferLogger,
     PlistParser: () => mockPlistUtils,
   });
 
@@ -162,13 +155,12 @@ void main() {
 
     await validateBitcode(BuildMode.release, TargetPlatform.ios);
 
-    expect(bufferLogger.statusText, '');
+    expect(testLogger.statusText, '');
   }, overrides: <Type, Generator>{
     Artifacts: () => LocalEngineArtifacts('/engine', 'ios_profile', 'host_profile'),
     FileSystem: () => memoryFileSystem,
     ProcessManager: () => mockProcessManager,
     Xcode: () => mockXcode,
-    Logger: () => bufferLogger,
     PlistParser: () => mockPlistUtils,
   });
 
@@ -187,13 +179,12 @@ void main() {
 
     await validateBitcode(BuildMode.release, TargetPlatform.ios);
 
-    expect(bufferLogger.statusText, '');
+    expect(testLogger.statusText, '');
   }, overrides: <Type, Generator>{
     Artifacts: () => LocalEngineArtifacts('/engine', 'ios_profile', 'host_profile'),
     FileSystem: () => memoryFileSystem,
     ProcessManager: () => mockProcessManager,
     Xcode: () => mockXcode,
-    Logger: () => bufferLogger,
     PlistParser: () => mockPlistUtils,
   });
 }

@@ -46,9 +46,6 @@ class BuildLinuxCommand extends BuildSubCommand {
     if (!globals.platform.isLinux) {
       throwToolExit('"build linux" only supported on Linux hosts.');
     }
-    if (!flutterProject.linux.existsSync()) {
-      throwToolExit('No Linux desktop project configured.');
-    }
     await buildLinux(flutterProject.linux, buildInfo, target: targetFile);
     return null;
   }
