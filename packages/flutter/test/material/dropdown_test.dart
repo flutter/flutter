@@ -385,6 +385,7 @@ void main() {
                         );
                       }).toList(),
                       validator: (String v) => v == null ? 'Must select value' : null,
+                      onChanged: (String newValue) {},
                       onSaved: (String v) {
                         setState(() {
                           value = v;
