@@ -124,13 +124,13 @@ abstract class FloatingActionButtonLocation {
   String toString() => '$runtimeType';
 }
 
-double _leftOffset(ScaffoldPrelayoutGeometry scaffoldGeometry, { double offset = 0.0 }) {
+double _leftOffsetX(ScaffoldPrelayoutGeometry scaffoldGeometry, { double offset = 0.0 }) {
   return kFloatingActionButtonMargin
        + scaffoldGeometry.minInsets.left
        - offset;
 }
 
-double _rightOffset(ScaffoldPrelayoutGeometry scaffoldGeometry, { double offset = 0.0 }) {
+double _rightOffsetX(ScaffoldPrelayoutGeometry scaffoldGeometry, { double offset = 0.0 }) {
   return scaffoldGeometry.scaffoldSize.width
        - kFloatingActionButtonMargin
        - scaffoldGeometry.minInsets.right
@@ -138,38 +138,38 @@ double _rightOffset(ScaffoldPrelayoutGeometry scaffoldGeometry, { double offset 
        + offset;
 }
 
-double _startOffset(ScaffoldPrelayoutGeometry scaffoldGeometry, { double offset = 0.0 }) {
+double _startOffsetX(ScaffoldPrelayoutGeometry scaffoldGeometry, { double offset = 0.0 }) {
   assert(scaffoldGeometry.textDirection != null);
   switch (scaffoldGeometry.textDirection) {
     case TextDirection.rtl:
-      return _rightOffset(scaffoldGeometry, offset: offset);
+      return _rightOffsetX(scaffoldGeometry, offset: offset);
     case TextDirection.ltr:
-      return _leftOffset(scaffoldGeometry, offset: offset);
+      return _leftOffsetX(scaffoldGeometry, offset: offset);
   }
   return null;
 }
 
-double _endOffset(ScaffoldPrelayoutGeometry scaffoldGeometry, { double offset = 0.0 }) {
+double _endOffsetX(ScaffoldPrelayoutGeometry scaffoldGeometry, { double offset = 0.0 }) {
   assert(scaffoldGeometry.textDirection != null);
   switch (scaffoldGeometry.textDirection) {
     case TextDirection.rtl:
-      return _leftOffset(scaffoldGeometry, offset: offset);
+      return _leftOffsetX(scaffoldGeometry, offset: offset);
     case TextDirection.ltr:
-      return _rightOffset(scaffoldGeometry, offset: offset);
+      return _rightOffsetX(scaffoldGeometry, offset: offset);
   }
   return null;
 }
 
-double _centerOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
+double _centerOffsetX(ScaffoldPrelayoutGeometry scaffoldGeometry) {
   return (scaffoldGeometry.scaffoldSize.width - scaffoldGeometry.floatingActionButtonSize.width) / 2.0;
 }
 
-double _getTopY(ScaffoldPrelayoutGeometry scaffoldGeometry) {
+double _topOffsetY(ScaffoldPrelayoutGeometry scaffoldGeometry) {
   final double fabHalfHeight = scaffoldGeometry.floatingActionButtonSize.height / 2.0;
   return scaffoldGeometry.contentTop - fabHalfHeight;
 }
 
-double _getFloatingY(ScaffoldPrelayoutGeometry scaffoldGeometry) {
+double _floatingOffsetY(ScaffoldPrelayoutGeometry scaffoldGeometry) {
   final double contentBottom = scaffoldGeometry.contentBottom;
   final double bottomSheetHeight = scaffoldGeometry.bottomSheetSize.height;
   final double fabHeight = scaffoldGeometry.floatingActionButtonSize.height;
@@ -184,7 +184,7 @@ double _getFloatingY(ScaffoldPrelayoutGeometry scaffoldGeometry) {
   return fabY;
 }
 
-double _getDockedY(ScaffoldPrelayoutGeometry scaffoldGeometry) {
+double _dockedOffsetY(ScaffoldPrelayoutGeometry scaffoldGeometry) {
   final double contentBottom = scaffoldGeometry.contentBottom;
   final double bottomSheetHeight = scaffoldGeometry.bottomSheetSize.height;
   final double fabHeight = scaffoldGeometry.floatingActionButtonSize.height;
@@ -208,8 +208,8 @@ class _CenterFloatFloatingActionButtonLocation extends FloatingActionButtonLocat
   @override
   Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
     return Offset(
-      _centerOffset(scaffoldGeometry),
-      _getFloatingY(scaffoldGeometry),
+      _centerOffsetX(scaffoldGeometry),
+      _floatingOffsetY(scaffoldGeometry),
     );
   }
 
@@ -223,8 +223,8 @@ class _EndFloatFloatingActionButtonLocation extends FloatingActionButtonLocation
   @override
   Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
     return Offset(
-      _endOffset(scaffoldGeometry),
-      _getFloatingY(scaffoldGeometry),
+      _endOffsetX(scaffoldGeometry),
+      _floatingOffsetY(scaffoldGeometry),
     );
   }
 
@@ -238,8 +238,8 @@ class _EndDockedFloatingActionButtonLocation extends FloatingActionButtonLocatio
   @override
   Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
     return Offset(
-      _endOffset(scaffoldGeometry),
-      _getDockedY(scaffoldGeometry),
+      _endOffsetX(scaffoldGeometry),
+      _dockedOffsetY(scaffoldGeometry),
     );
   }
 
@@ -253,8 +253,8 @@ class _CenterDockedFloatingActionButtonLocation extends FloatingActionButtonLoca
   @override
   Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
     return Offset(
-      _centerOffset(scaffoldGeometry),
-      _getDockedY(scaffoldGeometry),
+      _centerOffsetX(scaffoldGeometry),
+      _dockedOffsetY(scaffoldGeometry),
     );
   }
 
@@ -268,8 +268,8 @@ class _StartTopFloatingActionButtonLocation extends FloatingActionButtonLocation
   @override
   Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
     return Offset(
-      _startOffset(scaffoldGeometry),
-      _getTopY(scaffoldGeometry),
+      _startOffsetX(scaffoldGeometry),
+      _topOffsetY(scaffoldGeometry),
     );
   }
 
@@ -286,8 +286,8 @@ class _MiniStartTopFloatingActionButtonLocation extends FloatingActionButtonLoca
     // four pixels in every direction in order to have a hit target area of 48
     // pixels in each dimension, despite being a circle of radius 40.
     return Offset(
-      _startOffset(scaffoldGeometry, offset: 4.0),
-      _getTopY(scaffoldGeometry),
+      _startOffsetX(scaffoldGeometry, offset: 4.0),
+      _topOffsetY(scaffoldGeometry),
     );
   }
 
@@ -301,8 +301,8 @@ class _EndTopFloatingActionButtonLocation extends FloatingActionButtonLocation {
   @override
   Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
     return Offset(
-      _endOffset(scaffoldGeometry),
-      _getTopY(scaffoldGeometry),
+      _endOffsetX(scaffoldGeometry),
+      _topOffsetY(scaffoldGeometry),
     );
   }
 
