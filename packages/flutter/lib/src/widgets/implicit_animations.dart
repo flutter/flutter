@@ -1380,7 +1380,7 @@ class _AnimatedOpacityState extends ImplicitlyAnimatedWidgetState<AnimatedOpacit
 ///
 /// {@animation 250 266 https://flutter.github.io/assets-for-api-docs/assets/widgets/animated_opacity.mp4}
 ///
-/// {@tool snippet --template=stateful_widget_scaffold_center_freeform_state}
+/// {@tool sample --template=stateful_widget_scaffold_center_freeform_state}
 /// Creates a [CustomScrollView] with a [SliverFixedExtentList] and a
 /// [FloatignActionButton]. Pressing the button animates the lists' opacity.
 ///
