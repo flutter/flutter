@@ -388,6 +388,7 @@ NSString* const FlutterDefaultDartEntrypoint = nil;
   static size_t shellCount = 1;
 
   auto settings = [_dartProject.get() settings];
+  auto windowData = [_dartProject.get() defaultWindowData];
 
   if (libraryURI) {
     FML_DCHECK(entrypoint) << "Must specify entrypoint if specifying library";
@@ -441,6 +442,7 @@ NSString* const FlutterDefaultDartEntrypoint = nil;
     );
     // Create the shell. This is a blocking operation.
     _shell = flutter::Shell::Create(std::move(task_runners),  // task runners
+                                    std::move(windowData),    // window data
                                     std::move(settings),      // settings
                                     on_create_platform_view,  // platform view creation
                                     on_create_rasterizer      // rasterzier creation
@@ -454,6 +456,7 @@ NSString* const FlutterDefaultDartEntrypoint = nil;
     );
     // Create the shell. This is a blocking operation.
     _shell = flutter::Shell::Create(std::move(task_runners),  // task runners
+                                    std::move(windowData),    // window data
                                     std::move(settings),      // settings
                                     on_create_platform_view,  // platform view creation
                                     on_create_rasterizer      // rasterzier creation

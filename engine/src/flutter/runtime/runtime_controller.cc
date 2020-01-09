@@ -25,39 +25,8 @@ RuntimeController::RuntimeController(
     fml::WeakPtr<ImageDecoder> p_image_decoder,
     std::string p_advisory_script_uri,
     std::string p_advisory_script_entrypoint,
-    const std::function<void(int64_t)>& p_idle_notification_callback,
-    const fml::closure& p_isolate_create_callback,
-    const fml::closure& p_isolate_shutdown_callback,
-    std::shared_ptr<const fml::Mapping> p_persistent_isolate_data)
-    : RuntimeController(p_client,
-                        p_vm,
-                        std::move(p_isolate_snapshot),
-                        std::move(p_task_runners),
-                        std::move(p_snapshot_delegate),
-                        std::move(p_io_manager),
-                        std::move(p_unref_queue),
-                        std::move(p_image_decoder),
-                        std::move(p_advisory_script_uri),
-                        std::move(p_advisory_script_entrypoint),
-                        p_idle_notification_callback,
-                        WindowData{/* default window data */},
-                        p_isolate_create_callback,
-                        p_isolate_shutdown_callback,
-                        std::move(p_persistent_isolate_data)) {}
-
-RuntimeController::RuntimeController(
-    RuntimeDelegate& p_client,
-    DartVM* p_vm,
-    fml::RefPtr<const DartSnapshot> p_isolate_snapshot,
-    TaskRunners p_task_runners,
-    fml::WeakPtr<SnapshotDelegate> p_snapshot_delegate,
-    fml::WeakPtr<IOManager> p_io_manager,
-    fml::RefPtr<SkiaUnrefQueue> p_unref_queue,
-    fml::WeakPtr<ImageDecoder> p_image_decoder,
-    std::string p_advisory_script_uri,
-    std::string p_advisory_script_entrypoint,
     const std::function<void(int64_t)>& idle_notification_callback,
-    WindowData p_window_data,
+    const WindowData& p_window_data,
     const fml::closure& p_isolate_create_callback,
     const fml::closure& p_isolate_shutdown_callback,
     std::shared_ptr<const fml::Mapping> p_persistent_isolate_data)
@@ -399,11 +368,5 @@ RuntimeController::Locale::Locale(std::string language_code_,
       variant_code(variant_code_) {}
 
 RuntimeController::Locale::~Locale() = default;
-
-RuntimeController::WindowData::WindowData() = default;
-
-RuntimeController::WindowData::WindowData(const WindowData& other) = default;
-
-RuntimeController::WindowData::~WindowData() = default;
 
 }  // namespace flutter

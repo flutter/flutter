@@ -17,6 +17,7 @@
 #include "flutter/lib/ui/window/pointer_data_packet.h"
 #include "flutter/lib/ui/window/window.h"
 #include "flutter/runtime/dart_vm.h"
+#include "flutter/runtime/window_data.h"
 #include "rapidjson/document.h"
 #include "rapidjson/stringbuffer.h"
 
@@ -40,6 +41,7 @@ class RuntimeController final : public WindowClient {
       std::string advisory_script_uri,
       std::string advisory_script_entrypoint,
       const std::function<void(int64_t)>& idle_notification_callback,
+      const WindowData& data,
       const fml::closure& isolate_create_callback,
       const fml::closure& isolate_shutdown_callback,
       std::shared_ptr<const fml::Mapping> persistent_isolate_data);
@@ -103,29 +105,6 @@ class RuntimeController final : public WindowClient {
     std::string variant_code;
   };
 
-  // Stores data about the window to be used at startup
-  // as well as on hot restarts. Data kept here will persist
-  // after hot restart.
-  struct WindowData {
-    WindowData();
-
-    WindowData(const WindowData& other);
-
-    ~WindowData();
-
-    ViewportMetrics viewport_metrics;
-    std::string language_code;
-    std::string country_code;
-    std::string script_code;
-    std::string variant_code;
-    std::vector<std::string> locale_data;
-    std::string user_settings_data = "{}";
-    std::string lifecycle_state = "AppLifecycleState.detached";
-    bool semantics_enabled = false;
-    bool assistive_technology_enabled = false;
-    int32_t accessibility_feature_flags_ = 0;
-  };
-
   RuntimeDelegate& client_;
   DartVM* const vm_;
   fml::RefPtr<const DartSnapshot> isolate_snapshot_;
@@ -143,23 +122,6 @@ class RuntimeController final : public WindowClient {
   const fml::closure isolate_create_callback_;
   const fml::closure isolate_shutdown_callback_;
   std::shared_ptr<const fml::Mapping> persistent_isolate_data_;
-
-  RuntimeController(
-      RuntimeDelegate& client,
-      DartVM* vm,
-      fml::RefPtr<const DartSnapshot> isolate_snapshot,
-      TaskRunners task_runners,
-      fml::WeakPtr<SnapshotDelegate> snapshot_delegate,
-      fml::WeakPtr<IOManager> io_manager,
-      fml::RefPtr<SkiaUnrefQueue> unref_queue,
-      fml::WeakPtr<ImageDecoder> image_decoder,
-      std::string advisory_script_uri,
-      std::string advisory_script_entrypoint,
-      const std::function<void(int64_t)>& idle_notification_callback,
-      WindowData data,
-      const fml::closure& isolate_create_callback,
-      const fml::closure& isolate_shutdown_callback,
-      std::shared_ptr<const fml::Mapping> persistent_isolate_data);
 
   Window* GetWindowIfAvailable();
 

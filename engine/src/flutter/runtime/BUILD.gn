@@ -68,6 +68,8 @@ source_set("runtime") {
     "skia_concurrent_executor.h",
     "start_up.cc",
     "start_up.h",
+    "window_data.cc",
+    "window_data.h",
   ]
 
   deps = [
