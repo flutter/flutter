@@ -128,6 +128,7 @@ ENV LANG en_US.UTF-8
 # Skip all the documentation (-N) since it's just on CI.
 RUN gem install bundler -N
 
+# Gemfile last edited 1/6/2019 (update to trigger a rebuild of Docker image)
 COPY ci/docker_linux/Gemfile /Gemfile
 COPY ci/docker_linux/Gemfile.lock /Gemfile.lock
 

@@ -195,7 +195,7 @@ enum ListTileControlAffinity {
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This example uses a [ListView] to demonstrate different configurations of
 /// [ListTile]s in [Card]s.
@@ -254,7 +254,7 @@ enum ListTileControlAffinity {
 /// )
 /// ```
 /// {@end-tool}
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// Tiles can be much more elaborate. Here is a tile which can be tapped, but
 /// which is disabled when the `_act` variable is not 2. When the tile is
@@ -285,7 +285,7 @@ enum ListTileControlAffinity {
 /// that are large enough, but it is up to the developer to ensure that
 /// their widgets follow the Material spec.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// Here is an example of a one-line, non-[dense] ListTile with a
 /// tappable leading widget that adheres to accessibility requirements and
@@ -317,7 +317,7 @@ enum ListTileControlAffinity {
 /// you're looking for, it's easy to create custom list items with a
 /// combination of other widgets, such as [Row]s and [Column]s.
 ///
-/// {@tool snippet --template=stateless_widget_scaffold}
+/// {@tool sample --template=stateless_widget_scaffold}
 ///
 /// Here is an example of a custom list item that resembles a Youtube related
 /// video list item created with [Expanded] and [Container] widgets.
@@ -438,7 +438,7 @@ enum ListTileControlAffinity {
 /// ```
 /// {@end-tool}
 ///
-/// {@tool snippet --template=stateless_widget_scaffold}
+/// {@tool sample --template=stateless_widget_scaffold}
 ///
 /// Here is an example of an article list item with multiline titles and
 /// subtitles. It utilizes [Row]s and [Column]s, as well as [Expanded] and

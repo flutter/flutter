@@ -80,7 +80,7 @@ class ScrollPhysics {
   /// The returned object will combine some of the behaviors from this
   /// [ScrollPhysics] instance and some of the behaviors from [ancestor].
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// In the following example, the [applyTo] method is used to combine the
   /// scroll physics of two [ScrollPhysics] objects, the resulting [ScrollPhysics]

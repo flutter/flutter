@@ -211,7 +211,12 @@ class Doctor {
         lineBuffer.write(' (${result.statusInfo})');
       }
 
-      buffer.write(wrapText(lineBuffer.toString(), hangingIndent: result.leadingBox.length + 1));
+      buffer.write(wrapText(
+        lineBuffer.toString(),
+        hangingIndent: result.leadingBox.length + 1,
+        columnWidth: outputPreferences.wrapColumn,
+        shouldWrap: outputPreferences.wrapText,
+      ));
       buffer.writeln();
 
       if (result.type != ValidationType.installed) {
@@ -253,6 +258,7 @@ class Doctor {
       final Status status = Status.withSpinner(
         timeout: timeoutConfiguration.fastOperation,
         slowWarningCallback: () => validator.slowWarning,
+        timeoutConfiguration: timeoutConfiguration,
       );
       ValidationResult result;
       try {

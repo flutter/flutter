@@ -24,7 +24,7 @@ import 'icon_theme_data.dart';
 /// This widget assumes that the rendered icon is squared. Non-squared icons may
 /// render incorrectly.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This example shows how to create a [Row] of [Icon]s in different colors and
 /// sizes. The first [Icon] uses a [semanticLabel] to announce in accessibility
@@ -113,7 +113,7 @@ class Icon extends StatelessWidget {
   /// See [Theme] to set the current theme and [ThemeData.brightness]
   /// for setting the current theme's brightness.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   /// Typically, a material design color will be used, as follows:
   ///
   /// ```dart

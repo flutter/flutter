@@ -625,7 +625,7 @@ class NavigatorObserver {
 /// in this situation, but it's a real world example where nested [Navigator]s
 /// are used.
 ///
-/// {@tool snippet --template=freeform}
+/// {@tool sample --template=freeform}
 /// The following example demonstrates how a nested [Navigator] can be used to
 /// present a standalone user registration journey.
 ///
@@ -854,7 +854,7 @@ class Navigator extends StatefulWidget {
   /// [Navigator.onUnknownRoute] to construct the route.
   /// {@endtemplate}
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// Typical usage is as follows:
   ///
@@ -865,7 +865,7 @@ class Navigator extends StatefulWidget {
   /// ```
   /// {@end-tool}
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// The following example shows how to pass additional `arguments` to the
   /// route:
@@ -884,7 +884,7 @@ class Navigator extends StatefulWidget {
   /// ```
   /// {@end-tool}
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// The following example shows how to pass a custom Object to the route:
   ///
@@ -952,7 +952,7 @@ class Navigator extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.navigator.pushNamed.arguments}
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// Typical usage is as follows:
   ///
@@ -1007,7 +1007,7 @@ class Navigator extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.navigator.pushNamed.arguments}
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// Typical usage is as follows:
   ///
@@ -1068,7 +1068,7 @@ class Navigator extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.navigator.pushNamed.arguments}
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// Typical usage is as follows:
   ///
@@ -1106,7 +1106,7 @@ class Navigator extends StatefulWidget {
   /// The `T` type argument is the type of the return value of the route.
   /// {@endtemplate}
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// Typical usage is as follows:
   ///
@@ -1149,7 +1149,7 @@ class Navigator extends StatefulWidget {
   /// and `TO` is the type of the return value of the old route.
   /// {@endtemplate}
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// Typical usage is as follows:
   ///
@@ -1200,7 +1200,7 @@ class Navigator extends StatefulWidget {
   /// The `T` type argument is the type of the return value of the new route.
   /// {@endtemplate}
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// Typical usage is as follows:
   ///
@@ -1364,7 +1364,7 @@ class Navigator extends StatefulWidget {
   /// false); returns false if there are no further previous routes.
   /// {@endtemplate}
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// Typical usage for closing a route is as follows:
   ///
@@ -1402,7 +1402,7 @@ class Navigator extends StatefulWidget {
   /// See [pop] for more details of the semantics of popping a route.
   /// {@endtemplate}
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// Typical usage is as follows:
   ///
@@ -1665,7 +1665,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///
   /// {@macro flutter.widgets.navigator.pushNamed.arguments}
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// Typical usage is as follows:
   ///
@@ -1691,7 +1691,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///
   /// {@macro flutter.widgets.navigator.pushNamed.arguments}
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// Typical usage is as follows:
   ///
@@ -1717,7 +1717,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///
   /// {@macro flutter.widgets.navigator.pushNamed.arguments}
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// Typical usage is as follows:
   ///
@@ -1744,7 +1744,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///
   /// {@macro flutter.widgets.navigator.pushNamed.arguments}
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// Typical usage is as follows:
   ///
@@ -1767,7 +1767,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///
   /// {@macro flutter.widgets.navigator.push}
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// Typical usage is as follows:
   ///
@@ -1853,7 +1853,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///
   /// {@macro flutter.widgets.navigator.pushReplacement}
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// Typical usage is as follows:
   ///
@@ -1912,7 +1912,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///
   /// {@macro flutter.widgets.navigator.pushAndRemoveUntil}
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// Typical usage is as follows:
   ///
@@ -2088,7 +2088,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///
   /// {@macro flutter.widgets.navigator.pop}
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// Typical usage for closing a route is as follows:
   ///
@@ -2098,7 +2098,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   /// }
   /// ```
   /// {@end-tool}
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// A dialog box might be closed with a result:
   ///
@@ -2157,7 +2157,7 @@ class NavigatorState extends State<Navigator> with TickerProviderStateMixin {
   ///
   /// {@macro flutter.widgets.navigator.popUntil}
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// Typical usage is as follows:
   ///

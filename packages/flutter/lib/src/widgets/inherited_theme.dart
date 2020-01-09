@@ -19,7 +19,7 @@ import 'framework.dart';
 /// be able to depend on inherited widget ancestors of the context
 /// it's built in.
 ///
-/// {@tool snippet --template=freeform}
+/// {@tool sample --template=freeform}
 /// This example demonstrates how `InheritedTheme.captureAll()` can be used
 /// to wrap the contents of a new route with the inherited themes that
 /// are present when the route is built - but are not present when route

@@ -268,10 +268,6 @@ class FlutterSkiaGoldFileComparator extends FlutterGoldenFileComparator {
 ///  * [FlutterLocalFileComparator], another
 ///    [FlutterGoldenFileComparator] that tests golden images locally on your
 ///    current machine.
-// TODO(Piinks): Better handling for first-time contributors that cannot decrypt
-// the service account is needed. Gold has a new feature `goldctl imgtest check`
-// that could work. There is also the previous implementation that did not use
-// goldctl for this edge case. https://github.com/flutter/flutter/issues/46687
 class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
   /// Creates a [FlutterPreSubmitFileComparator] that will test golden file
   /// images against baselines requested from Flutter Gold.
@@ -299,21 +295,75 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
     final Platform platform, {
     SkiaGoldClient goldens,
     LocalFileComparator defaultComparator,
+    final Directory testBasedir,
   }) async {
 
     defaultComparator ??= goldenFileComparator as LocalFileComparator;
-    final Directory baseDirectory = FlutterGoldenFileComparator.getBaseDirectory(
+    final Directory baseDirectory = testBasedir ?? FlutterGoldenFileComparator.getBaseDirectory(
       defaultComparator,
       platform,
       suffix: '${math.Random().nextInt(10000)}',
     );
-    baseDirectory.createSync(recursive: true);
+
+    if (!baseDirectory.existsSync())
+      baseDirectory.createSync(recursive: true);
 
     goldens ??= SkiaGoldClient(baseDirectory);
-    await goldens.auth();
-    await goldens.tryjobInit();
-    return FlutterPreSubmitFileComparator(baseDirectory.uri, goldens);
+
+    final bool hasWritePermission = !platform.environment['GOLD_SERVICE_ACCOUNT'].startsWith('ENCRYPTED');
+    if (hasWritePermission) {
+      await goldens.auth();
+      await goldens.tryjobInit();
+      return _AuthorizedFlutterPreSubmitComparator(
+        baseDirectory.uri,
+        goldens,
+        platform: platform,
+      );
+    }
+
+    goldens.emptyAuth();
+    return _UnauthorizedFlutterPreSubmitComparator(
+      baseDirectory.uri,
+      goldens,
+      platform: platform,
+    );
   }
+
+  @override
+  Future<bool> compare(Uint8List imageBytes, Uri golden) async {
+    assert(
+      false,
+      'The FlutterPreSubmitFileComparator has been used to execute a golden '
+      'file test; this should never happen. Presubmit golden file testing '
+      'should be executed by either the _AuthorizedFlutterPreSubmitComparator '
+      'or the _UnauthorizedFlutterPreSubmitComparator based on contributor '
+      'permissions.'
+    );
+    return false;
+  }
+
+  /// Decides based on the current environment whether goldens tests should be
+  /// performed as pre-submit tests with Skia Gold.
+  static bool isAvailableForEnvironment(Platform platform) {
+    final String cirrusPR = platform.environment['CIRRUS_PR'] ?? '';
+    return platform.environment.containsKey('CIRRUS_CI')
+      && cirrusPR.isNotEmpty
+      && platform.environment.containsKey('GOLD_SERVICE_ACCOUNT');
+  }
+}
+
+class _AuthorizedFlutterPreSubmitComparator extends FlutterPreSubmitFileComparator {
+  _AuthorizedFlutterPreSubmitComparator(
+    final Uri basedir,
+    final SkiaGoldClient skiaClient, {
+    final FileSystem fs = const LocalFileSystem(),
+    final Platform platform = const LocalPlatform(),
+  }) : super(
+    basedir,
+    skiaClient,
+    fs: fs,
+    platform: platform,
+  );
 
   @override
   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
@@ -323,17 +373,54 @@ class FlutterPreSubmitFileComparator extends FlutterGoldenFileComparator {
 
     return skiaClient.tryjobAdd(golden.path, goldenFile);
   }
+}
 
-  /// Decides based on the current environment whether goldens tests should be
-  /// performed as pre-submit tests with Skia Gold.
-  static bool isAvailableForEnvironment(Platform platform) {
-    final String cirrusPR = platform.environment['CIRRUS_PR'] ?? '';
-    final bool hasWritePermission = platform.environment['CIRRUS_USER_PERMISSION'] == 'admin'
-      || platform.environment['CIRRUS_USER_PERMISSION'] == 'write';
-    return platform.environment.containsKey('CIRRUS_CI')
-      && cirrusPR.isNotEmpty
-      && platform.environment.containsKey('GOLD_SERVICE_ACCOUNT')
-      && hasWritePermission;
+class _UnauthorizedFlutterPreSubmitComparator extends FlutterPreSubmitFileComparator {
+  _UnauthorizedFlutterPreSubmitComparator(
+    final Uri basedir,
+    final SkiaGoldClient skiaClient, {
+    final FileSystem fs = const LocalFileSystem(),
+    final Platform platform = const LocalPlatform(),
+  }) : super(
+    basedir,
+    skiaClient,
+    fs: fs,
+    platform: platform,
+  );
+
+  @override
+  Future<bool> compare(Uint8List imageBytes, Uri golden) async {
+    golden = _addPrefix(golden);
+    await update(golden, imageBytes);
+    final File goldenFile = getGoldenFile(golden);
+
+    // Check for match to existing baseline.
+    if (await skiaClient.imgtestCheck(golden.path, goldenFile))
+      return true;
+
+    // We do not have a matching image, so we need to check a few things
+    // manually. We wait until this point to do this work so request traffic
+    // low.
+    skiaClient.getExpectations();
+    final String testName = skiaClient.cleanTestName(golden.path);
+    final List<String> testExpectations = skiaClient.expectations[testName];
+    if (testExpectations == null) {
+      // This is a new test.
+      print('No expectations provided by Skia Gold for test: $golden. '
+        'This may be a new test. If this is an unexpected result, check '
+        'https://flutter-gold.skia.org.\n'
+      );
+      return true;
+    }
+
+    // Contributors without the proper permissions to execute a tryjob can make
+    // a golden file change through Gold's ignore feature instead.
+    final bool ignoreResult = await skiaClient.testIsIgnoredForPullRequest(
+      platform.environment['CIRRUS_PR'] ?? '',
+      golden.path,
+    );
+    // If true, this is an intended change.
+    return ignoreResult;
   }
 }
 
@@ -399,12 +486,8 @@ class FlutterSkippingGoldenFileComparator extends FlutterGoldenFileComparator {
   /// Decides based on the current environment whether this comparator should be
   /// used.
   static bool isAvailableForEnvironment(Platform platform) {
-    return (platform.environment.containsKey('SWARMING_TASK_ID')
-      || platform.environment.containsKey('CIRRUS_CI'))
-      // A service account means that this is a Gold shard. At this point, it
-      // means we don't have permission to use the account, so we will pass
-      // through to the [FlutterLocalFileComparator].
-      && !platform.environment.containsKey('GOLD_SERVICE_ACCOUNT');
+    return platform.environment.containsKey('SWARMING_TASK_ID')
+      || platform.environment.containsKey('CIRRUS_CI');
   }
 }
 

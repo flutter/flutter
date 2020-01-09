@@ -387,8 +387,8 @@ class FakeAndroidPlatformView {
   int layoutDirection;
 
   @override
-  bool operator ==(dynamic other) {
-    if (other.runtimeType != FakeAndroidPlatformView)
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType)
       return false;
     return other is FakeAndroidPlatformView
         && other.id == id
@@ -415,9 +415,7 @@ class FakeAndroidMotionEvent {
 
 
   @override
-  bool operator ==(dynamic other) {
-    if (other is! FakeAndroidMotionEvent)
-      return false;
+  bool operator ==(Object other) {
     return other is FakeAndroidMotionEvent
         && listEquals<int>(other.pointerIds, pointerIds)
         && other.action == action
@@ -441,8 +439,8 @@ class FakeUiKitView {
   final Uint8List creationParams;
 
   @override
-  bool operator ==(dynamic other) {
-    if (other.runtimeType != FakeUiKitView)
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType)
       return false;
     return other is FakeUiKitView
         && other.id == id
@@ -466,8 +464,8 @@ class FakeHtmlPlatformView {
   final String type;
 
   @override
-  bool operator ==(dynamic other) {
-    if (other.runtimeType != FakeHtmlPlatformView)
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType)
       return false;
     return other is FakeHtmlPlatformView
         && other.id == id
