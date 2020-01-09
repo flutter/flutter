@@ -10,7 +10,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/semantics.dart';
 import 'package:flutter/services.dart';
 
-import 'binding.dart';
 import 'box.dart';
 import 'layer.dart';
 import 'object.dart';
