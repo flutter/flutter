@@ -91,7 +91,7 @@ class ImageConfiguration {
   static const ImageConfiguration empty = ImageConfiguration();
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
     return other is ImageConfiguration
@@ -436,7 +436,7 @@ class AssetBundleImageKey {
   final double scale;
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
     return other is AssetBundleImageKey
@@ -654,7 +654,7 @@ class FileImage extends ImageProvider<FileImage> {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
     return other is FileImage
@@ -715,7 +715,7 @@ class MemoryImage extends ImageProvider<MemoryImage> {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
     return other is MemoryImage
@@ -852,7 +852,7 @@ class ExactAssetImage extends AssetBundleImageProvider {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
     return other is ExactAssetImage
