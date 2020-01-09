@@ -173,7 +173,7 @@ class _CenterFloatFloatingActionButtonLocation extends FloatingActionButtonLocat
     final double fabX = _centerOffset(scaffoldGeometry);
 
     // Compute the y-axis offset.
-    final double fabY = _getDockedY(scaffoldGeometry);
+    final double fabY = _getFloatingY(scaffoldGeometry);
 
     return Offset(fabX, fabY);
   }
@@ -191,7 +191,7 @@ class _EndFloatFloatingActionButtonLocation extends FloatingActionButtonLocation
     final double fabX = _endOffset(scaffoldGeometry);
 
     // Compute the y-axis offset.
-    final double fabY = _getDockedY(scaffoldGeometry);
+    final double fabY = _getFloatingY(scaffoldGeometry);
 
     return Offset(fabX, fabY);
   }
@@ -233,6 +233,11 @@ double _getDockedY(ScaffoldPrelayoutGeometry scaffoldGeometry) {
   return math.min(maxFabY, fabY);
 }
 
+double _getTopY(ScaffoldPrelayoutGeometry scaffoldGeometry) {
+  final double fabHalfHeight = scaffoldGeometry.floatingActionButtonSize.height / 2.0;
+  return scaffoldGeometry.contentTop - fabHalfHeight;
+}
+
 class _EndDockedFloatingActionButtonLocation extends FloatingActionButtonLocation {
   const _EndDockedFloatingActionButtonLocation();
 
@@ -259,17 +264,12 @@ class _CenterDockedFloatingActionButtonLocation extends FloatingActionButtonLoca
   String toString() => 'FloatingActionButtonLocation.centerDocked';
 }
 
-double _straddleAppBar(ScaffoldPrelayoutGeometry scaffoldGeometry) {
-  final double fabHalfHeight = scaffoldGeometry.floatingActionButtonSize.height / 2.0;
-  return scaffoldGeometry.contentTop - fabHalfHeight;
-}
-
 class _StartTopFloatingActionButtonLocation extends FloatingActionButtonLocation {
   const _StartTopFloatingActionButtonLocation();
 
   @override
   Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
-    return Offset(_startOffset(scaffoldGeometry), _straddleAppBar(scaffoldGeometry));
+    return Offset(_startOffset(scaffoldGeometry), _getTopY(scaffoldGeometry));
   }
 
   @override
@@ -284,7 +284,7 @@ class _MiniStartTopFloatingActionButtonLocation extends FloatingActionButtonLoca
     // We have to offset the FAB by four pixels because the FAB itself _adds_
     // four pixels in every direction in order to have a hit target area of 48
     // pixels in each dimension, despite being a circle of radius 40.
-    return Offset(_startOffset(scaffoldGeometry, offset: 4.0), _straddleAppBar(scaffoldGeometry));
+    return Offset(_startOffset(scaffoldGeometry, offset: 4.0), _getTopY(scaffoldGeometry));
   }
 
   @override
@@ -296,7 +296,7 @@ class _EndTopFloatingActionButtonLocation extends FloatingActionButtonLocation {
 
   @override
   Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
-    return Offset(_endOffset(scaffoldGeometry), _straddleAppBar(scaffoldGeometry));
+    return Offset(_endOffset(scaffoldGeometry), _getTopY(scaffoldGeometry));
   }
 
   @override
