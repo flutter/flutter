@@ -16,6 +16,7 @@ import 'binding.dart';
 import 'framework.dart';
 import 'localizations.dart';
 import 'media_query.dart';
+import 'scrollable.dart';
 import 'ticker_provider.dart';
 
 export 'package:flutter/painting.dart' show
@@ -955,7 +956,6 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
 
   @override
   void dispose() {
-    assert(_imageStream != null);
     WidgetsBinding.instance.removeObserver(this);
     _stopListeningToStream();
     super.dispose();
@@ -1006,11 +1006,34 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   }
 
   void _resolveImage() {
-    final ImageStream newStream =
-      widget.image.resolve(createLocalImageConfiguration(
+    final DeferringImageProvider<dynamic> provider = DeferringImageProvider<dynamic>(
+      imageProvider: widget.image,
+      getNextAction: () {
+        // Did this element get disposed of (scrolled too far out of view before
+        // scrolling slowed down enough to catch up)?
+        if (!mounted) {
+          return DeferringImageProviderAction.cancel;
+        }
+        // Is it scrolling so fast that the image is unlikely stay around long
+        // enough to be worth decoding? If so, wait until the next task loop
+        // to see if we've slowed down or disappeared.
+        // It's safe to use these calls as point-in-time - do not subscribe to
+        // updates of MediaQuery or Scrollable.
+        final double maxPhysicalDimension = WidgetsBinding.instance.window.physicalSize.longestSide;
+        // print('${(Scrollable.scrollingVelocityOfContext(context) ?? 0).abs()} $maxPhysicalDimension');
+        if ((Scrollable.scrollingVelocityOfContext(context) ?? 0).abs() > maxPhysicalDimension) {
+          return DeferringImageProviderAction.defer;
+        }
+        // Ok, either not scrolling or scrolling slowly enough.
+        return DeferringImageProviderAction.resolve;
+      },
+    );
+    final ImageStream newStream = provider.resolve(
+      createLocalImageConfiguration(
         context,
         size: widget.width != null && widget.height != null ? Size(widget.width, widget.height) : null,
-      ));
+      ),
+    );
     assert(newStream != null);
     _updateSourceStream(newStream);
   }
@@ -1064,14 +1087,14 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
   }
 
   void _listenToStream() {
-    if (_isListeningToStream)
+    if (_isListeningToStream || _imageStream == null)
       return;
     _imageStream.addListener(_getListener());
     _isListeningToStream = true;
   }
 
   void _stopListeningToStream() {
-    if (!_isListeningToStream)
+    if (!_isListeningToStream || _imageStream == null)
       return;
     _imageStream.removeListener(_getListener());
     _isListeningToStream = false;

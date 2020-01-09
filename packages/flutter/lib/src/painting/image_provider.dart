@@ -270,10 +270,23 @@ abstract class ImageProvider<T> {
   /// This is the public entry-point of the [ImageProvider] class hierarchy.
   ///
   /// Subclasses should implement [obtainKey] and [load], which are used by this
-  /// method.
+  /// method. If they need to manage the actual resolution of the image, they
+  /// should override [resolveForStream] instead.
+  @nonVirtual
   ImageStream resolve(ImageConfiguration configuration) {
     assert(configuration != null);
     final ImageStream stream = ImageStream();
+    resolveForStream(configuration, stream);
+    return stream;
+  }
+
+  /// Subclasses that need to manage resolution more finely should override
+  /// this method, which is called by [resolve] with the [ImageStream] that gets
+  /// returned to callers of [resolve].
+  @protected
+  void resolveForStream(ImageConfiguration configuration, ImageStream stream) {
+    assert(configuration != null);
+    assert(stream != null);
     T obtainedKey;
     bool didError = false;
     Future<void> handleError(dynamic exception, StackTrace stack) async {
@@ -332,7 +345,6 @@ abstract class ImageProvider<T> {
         }
       }).catchError(handleError);
     });
-    return stream;
   }
 
   /// Evicts an entry from the image cache.
@@ -866,6 +878,125 @@ class ExactAssetImage extends AssetBundleImageProvider {
 
   @override
   String toString() => '$runtimeType(name: "$keyName", scale: $scale, bundle: $bundle)';
+}
+
+/// The action a [DeferringImageProvider] should take currently.
+enum DeferringImageProviderAction {
+  /// Indicates that the image is no longer needed, and the
+  /// [DeferringImageProvider] should stop seeking to resolve the image.
+  ///
+  /// After returning this action, the [DeferringImageProvider] will not call
+  /// its [DeferringImageProvider.getNextAction] callback anymore.
+  cancel,
+
+  /// Indicates that the caller would like to defer the image and be called
+  /// again after the next [DeferringImageProvider.deferDuration] elapses (or
+  /// at the end of current task queue if the duration is [Duration.zero]).
+  defer,
+
+  /// Indicates that the [DeferringImageProvider] should attempt to resolve the
+  /// image.
+  ///
+  /// After returning this action, the [DeferringImageProvider] will not call
+  /// its [DeferringImageProvider.getNextAction] callback anymore.
+  resolve,
+}
+
+/// An [ImageProvider] that can delay resolving an image using its wrapped
+/// [imageProvider] until an arbitrary condition is met.
+///
+/// For example, the [Image] widget uses this provider to defer loading images
+/// if it is the child of a scrollable that is rapidly scrolling. It cancels
+/// resolving the image if its element is evicted from the tree before scrolling
+/// ends, and otherwise waits for scrolling to slow down before actually
+/// resolving the image. This prevents the framework from over-utilizing
+/// hardware resources for images that will never be shown on screen.
+///
+/// If the image is already in the cache, e.g. from [precacheImage] or because
+/// another provider has already resolved it, the [getNextAction] callback will
+/// never fire and the cached image is reused.
+@immutable
+class DeferringImageProvider<T> extends ImageProvider<T> {
+
+  /// Creates a new [DeferringImageProvider].
+  ///
+  /// All parameters must not be null.
+  const DeferringImageProvider({
+    @required this.imageProvider,
+    @required this.getNextAction,
+    this.deferDuration = Duration.zero,
+  }) : assert(imageProvider != null),
+       assert(getNextAction != null),
+       assert(deferDuration != null);
+
+  /// The wrapped [ImageProvider] to delegate loading the image and creating
+  /// a key for it.
+  ///
+  /// The image provider's load method may never be called if resolution gets
+  /// cancelled.
+  final ImageProvider<T> imageProvider;
+
+  /// The duration to wait between checking for the next action after a
+  /// [DeferringImageProviderAction.defer].
+  ///
+  /// The default is [Duration.zero], which indicates the end of the current
+  /// task queue.
+  final Duration deferDuration;
+
+  /// A callback used by [resolve] to determine whether resolution should be
+  /// cancelled, deferred, or executed.
+  ///
+  /// This callback is never called if the [ImageCache] already has the image
+  /// present, such as from [precacheImage] or another provider successfully
+  /// loading it.
+  final DeferringImageProviderAction Function() getNextAction;
+
+  @override
+  void resolveForStream(ImageConfiguration configuration, ImageStream stream) {
+    void deferredResolve(Object key) {
+      if (PaintingBinding.instance.imageCache.containsKey(key)) {
+        imageProvider.resolveForStream(configuration, stream);
+        return;
+      }
+      switch (getNextAction()) {
+        case DeferringImageProviderAction.defer:
+          Timer.run(() => deferredResolve(key));
+
+          // Timer.periodic (deferDuration, () => deferredResolve(key));
+          return;
+        case DeferringImageProviderAction.cancel:
+          return;
+        case DeferringImageProviderAction.resolve:
+          imageProvider.resolveForStream(configuration, stream);
+          return;
+      }
+    }
+    obtainKey(configuration).then((Object key) {
+      deferredResolve(key);
+    });
+  }
+
+  @override
+  ImageStreamCompleter load(T key, DecoderCallback decode) => imageProvider.load(key, decode);
+
+  @override
+  Future<T> obtainKey(ImageConfiguration configuration) => imageProvider.obtainKey(configuration);
+
+  @override
+  bool operator ==(dynamic other) {
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is DeferringImageProvider
+        && other.imageProvider == imageProvider
+        && other.getNextAction == getNextAction
+        && other.deferDuration == deferDuration;
+  }
+
+  @override
+  int get hashCode => hashValues(imageProvider, getNextAction, deferDuration);
+
+  @override
+  String toString() => '$runtimeType(imageProvider: $imageProvider, deferDuration: $deferDuration)';
 }
 
 // A completer used when resolving an image fails sync.

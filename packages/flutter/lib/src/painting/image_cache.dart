@@ -193,8 +193,14 @@ class ImageCache {
       _cache[key] = image;
       return image.completer;
     }
+    if (result != null) {
+      return result;
+    }
     try {
       result = loader();
+      if (result == null) {
+        return null;
+      }
     } catch (error, stackTrace) {
       if (onError != null) {
         onError(error, stackTrace);
@@ -204,6 +210,7 @@ class ImageCache {
       }
     }
     void listener(ImageInfo info, bool syncCall) {
+      print('about to do it!');
       // Images that fail to load don't contribute to cache size.
       final int imageSize = info?.image == null ? 0 : info.image.height * info.image.width * 4;
       final _CachedImage image = _CachedImage(result, imageSize);
@@ -220,6 +227,7 @@ class ImageCache {
       }
 
       _cache[key] = image;
+      print('cached');
       _checkCacheSize();
     }
     if (maximumSize > 0 && maximumSizeBytes > 0) {
@@ -229,6 +237,11 @@ class ImageCache {
       result.addListener(streamListener);
     }
     return result;
+  }
+
+  /// Returns whether this [key] has been previously added by [putIfAbsent].
+  bool containsKey(Object key) {
+    return _pendingImages[key] != null || _cache[key] != null;
   }
 
   // Remove images from the cache until both the length and bytes are below

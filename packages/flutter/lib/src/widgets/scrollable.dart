@@ -251,6 +251,16 @@ class Scrollable extends StatefulWidget {
     return widget?.scrollable;
   }
 
+  /// Gets the current scroll velocity of the state of the closest instance of
+  /// this class that encloses a given context.
+  ///
+  /// This does _not_ cause callers to subscribe to updates of this widget, and
+  /// is only safe to use as a single point in time reference.
+  static double scrollingVelocityOfContext(BuildContext context) {
+    final _ScrollableScope widget = context.getElementForInheritedWidgetOfExactType<_ScrollableScope>()?.widget as _ScrollableScope;
+    return widget?.scrollable?.position?.currentScrollVelocity;
+  }
+
   /// Scrolls the scrollables that enclose the given context so as to make the
   /// given context visible.
   static Future<void> ensureVisible(

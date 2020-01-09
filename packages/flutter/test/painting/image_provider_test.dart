@@ -23,7 +23,7 @@ void main() {
     return PaintingBinding.instance.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight);
   };
 
-  group(ImageProvider, () {
+  group('ImageProvider', () {
     setUpAll(() {
       TestRenderingFlutterBinding(); // initializes the imageCache
     });
@@ -31,6 +31,78 @@ void main() {
     group('Image cache', () {
       tearDown(() {
         imageCache.clear();
+      });
+
+      test('DeferringImageProvider does not cache on cancel', () async {
+        final Uint8List bytes = Uint8List.fromList(kTransparentImage);
+        final DeferringImageProvider<MemoryImage> imageProvider = DeferringImageProvider<MemoryImage>(
+          imageProvider: MemoryImage(bytes),
+          getNextAction: () => DeferringImageProviderAction.cancel,
+        );
+        final ImageStream stream = imageProvider.resolve(ImageConfiguration.empty);
+
+        expect(stream.completer, isNull);
+        expect(imageCache.currentSize, 0);
+      });
+
+      test('DeferringImageProvider does not cache while deferring until resolve', () async {
+        bool defer = true;
+        final Uint8List bytes = Uint8List.fromList(kTransparentImage);
+        final DeferringImageProvider<MemoryImage> imageProvider = DeferringImageProvider<MemoryImage>(
+          imageProvider: MemoryImage(bytes),
+          getNextAction: () => defer ? DeferringImageProviderAction.defer : DeferringImageProviderAction.resolve,
+        );
+        final ImageStream stream = imageProvider.resolve(ImageConfiguration.empty);
+        expect(stream.completer, isNull);
+        expect(imageCache.currentSize, 0);
+        defer = false;
+        await Future<void>.delayed(Duration.zero, () async {
+          expect(stream.completer, isNotNull);
+          final Completer<void> completer = Completer<void>();
+          stream.addListener(ImageStreamListener((ImageInfo info, bool syncCall) => completer.complete()));
+          await completer.future;
+          expect(imageCache.currentSize, 1);
+        });
+      });
+
+      test('DeferringImageProvider can cancel after deferring', () async {
+        bool defer = true;
+        final Uint8List bytes = Uint8List.fromList(kTransparentImage);
+        final DeferringImageProvider<MemoryImage> imageProvider = DeferringImageProvider<MemoryImage>(
+          imageProvider: MemoryImage(bytes),
+          getNextAction: () => defer ? DeferringImageProviderAction.defer : DeferringImageProviderAction.cancel,
+        );
+        final ImageStream stream = imageProvider.resolve(ImageConfiguration.empty);
+        expect(stream.completer, isNull);
+        expect(imageCache.currentSize, 0);
+        defer = false;
+        await Future<void>.delayed(Duration.zero, () async {
+          expect(stream.completer, isNull);
+          expect(imageCache.currentSize, 0);
+        });
+      });
+
+      test('DeferringImageProvider uses precached image and does not call getNextAction', () async {
+        final Uint8List bytes = Uint8List.fromList(kTransparentImage);
+        final MemoryImage imageProvider = MemoryImage(bytes);
+        final ImageStream stream = imageProvider.resolve(ImageConfiguration.empty);
+        final Completer<void> completer = Completer<void>();
+        stream.addListener(ImageStreamListener((ImageInfo info, bool syncCall) => completer.complete()));
+        await completer.future;
+
+        expect(imageCache.currentSize, 1);
+        final Object key = await imageProvider.obtainKey(ImageConfiguration.empty);
+        expect(imageCache.containsKey(key), true);
+
+        final DeferringImageProvider<MemoryImage> deferringImageProvider = DeferringImageProvider<MemoryImage>(
+          imageProvider: MemoryImage(bytes),
+          getNextAction: () => fail('Expected not to be called'),
+        );
+        final ImageStream deferredStream = deferringImageProvider.resolve(ImageConfiguration.empty);
+        final Completer<void> deferredCompleter = Completer<void>();
+        deferredStream.addListener(ImageStreamListener((ImageInfo info, bool syncCall) => deferredCompleter.complete()));
+        await completer.future;
+        expect(imageCache.currentSize, 1);
       });
 
       test('ImageProvider can evict images', () async {
@@ -148,7 +220,7 @@ void main() {
       expect(uncaught, false);
     });
 
-    group(NetworkImage, () {
+    group('NetworkImage', () {
       MockHttpClient httpClient;
 
       setUp(() {

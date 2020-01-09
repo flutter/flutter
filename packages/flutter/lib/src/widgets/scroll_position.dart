@@ -675,6 +675,9 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   ScrollActivity get activity => _activity;
   ScrollActivity _activity;
 
+  /// The current [ScrollActivity.velocity] of the current activity, if any.
+  double get currentScrollVelocity => activity?.velocity;
+
   /// Change the current [activity], disposing of the old one and
   /// sending scroll notifications as necessary.
   ///

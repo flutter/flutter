@@ -1175,6 +1175,49 @@ void main() {
     streamCompleter.setData(chunkEvent: const ImageChunkEvent(cumulativeBytesLoaded: 10, expectedTotalBytes: 100));
     expect(tester.binding.hasScheduledFrame, isFalse);
   }, skip: isBrowser);
+
+  testWidgets('Image defers loading while fast scrolling', (WidgetTester tester) async {
+    // final ImageCache imageCache = PaintingBinding.instance.imageCache;
+    // final int oldMaxSize = imageCache.maximumSize;
+    // imageCache.maximumSize = 1001;
+    try {
+      // final MemoryImage memoryImage = ;
+      await tester.pumpWidget(Directionality(
+        textDirection: TextDirection.ltr,
+        child: GridView.builder(
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 3),
+          itemCount: 1000,
+          itemBuilder: (_, int index) {
+            return Image(
+              image: MemoryImage(Uint8List.fromList(kTransparentImage)),
+              semanticLabel: index.toString(),
+            );
+          },
+        ),
+      ));
+
+      // print(tester.allWidgets.toList());
+      expect(find.bySemanticsLabel('5'), findsOneWidget);
+      for (int i = 0; i < 30; i++) {
+        await tester.fling(find.byType(GridView), const Offset(0, -200), 5000);
+        await tester.pump();
+        print('iteration $i');
+          final RenderViewport viewport = tester.renderObject(find.byType(Viewport));
+  final ScrollPosition position = viewport.offset as ScrollPosition;
+  print(position.activity.velocity);
+  // print(Scrollable.of(find.byType(Image).evaluate().first)?.position?.activity?.velocity);
+  print(Scrollable.scrollingVelocityOfContext(find.byType(Image).evaluate().first));
+      }
+
+      await tester.pumpAndSettle();
+      // await tester.pumpAndSettle();
+      // expect(find.bySemanticsLabel('5'), findsNothing);
+      // print(tester.allWidgets.toList());
+      print(imageCache.currentSize);
+    } finally {
+      // imageCache.maximumSize = oldMaxSize;
+    }
+  });
 }
 
 class TestImageProvider extends ImageProvider<TestImageProvider> {
@@ -1193,9 +1236,9 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
   }
 
   @override
-  ImageStream resolve(ImageConfiguration configuration) {
+  void resolveForStream(ImageConfiguration configuration, ImageStream stream) {
     _lastResolvedConfiguration = configuration;
-    return super.resolve(configuration);
+    super.resolveForStream(configuration, stream);
   }
 
   @override
