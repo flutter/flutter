@@ -207,13 +207,10 @@ class _CenterFloatFloatingActionButtonLocation extends FloatingActionButtonLocat
 
   @override
   Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
-    // Compute the x-axis offset.
-    final double fabX = _centerOffset(scaffoldGeometry);
-
-    // Compute the y-axis offset.
-    final double fabY = _getFloatingY(scaffoldGeometry);
-
-    return Offset(fabX, fabY);
+    return Offset(
+      _centerOffset(scaffoldGeometry),
+      _getFloatingY(scaffoldGeometry),
+    );
   }
 
   @override
@@ -225,13 +222,10 @@ class _EndFloatFloatingActionButtonLocation extends FloatingActionButtonLocation
 
   @override
   Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
-    // Compute the x-axis offset.
-    final double fabX = _endOffset(scaffoldGeometry);
-
-    // Compute the y-axis offset.
-    final double fabY = _getFloatingY(scaffoldGeometry);
-
-    return Offset(fabX, fabY);
+    return Offset(
+      _endOffset(scaffoldGeometry),
+      _getFloatingY(scaffoldGeometry),
+    );
   }
 
   @override
@@ -243,8 +237,10 @@ class _EndDockedFloatingActionButtonLocation extends FloatingActionButtonLocatio
 
   @override
   Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
-    final double fabX = _endOffset(scaffoldGeometry);
-    return Offset(fabX, _getDockedY(scaffoldGeometry));
+    return Offset(
+      _endOffset(scaffoldGeometry),
+      _getDockedY(scaffoldGeometry),
+    );
   }
 
   @override
@@ -256,8 +252,10 @@ class _CenterDockedFloatingActionButtonLocation extends FloatingActionButtonLoca
 
   @override
   Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
-    final double fabX = _centerOffset(scaffoldGeometry);
-    return Offset(fabX, _getDockedY(scaffoldGeometry));
+    return Offset(
+      _centerOffset(scaffoldGeometry),
+      _getDockedY(scaffoldGeometry),
+    );
   }
 
   @override
@@ -269,7 +267,10 @@ class _StartTopFloatingActionButtonLocation extends FloatingActionButtonLocation
 
   @override
   Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
-    return Offset(_startOffset(scaffoldGeometry), _getTopY(scaffoldGeometry));
+    return Offset(
+      _startOffset(scaffoldGeometry),
+      _getTopY(scaffoldGeometry),
+    );
   }
 
   @override
@@ -284,7 +285,10 @@ class _MiniStartTopFloatingActionButtonLocation extends FloatingActionButtonLoca
     // We have to offset the FAB by four pixels because the FAB itself _adds_
     // four pixels in every direction in order to have a hit target area of 48
     // pixels in each dimension, despite being a circle of radius 40.
-    return Offset(_startOffset(scaffoldGeometry, offset: 4.0), _getTopY(scaffoldGeometry));
+    return Offset(
+      _startOffset(scaffoldGeometry, offset: 4.0),
+      _getTopY(scaffoldGeometry),
+    );
   }
 
   @override
@@ -296,7 +300,10 @@ class _EndTopFloatingActionButtonLocation extends FloatingActionButtonLocation {
 
   @override
   Offset getOffset(ScaffoldPrelayoutGeometry scaffoldGeometry) {
-    return Offset(_endOffset(scaffoldGeometry), _getTopY(scaffoldGeometry));
+    return Offset(
+      _endOffset(scaffoldGeometry),
+      _getTopY(scaffoldGeometry),
+    );
   }
 
   @override
