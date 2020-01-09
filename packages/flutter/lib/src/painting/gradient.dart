@@ -493,10 +493,10 @@ class LinearGradient extends Gradient {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
-    if (runtimeType != other.runtimeType)
+    if (other.runtimeType != runtimeType)
       return false;
     return other is LinearGradient
         && other.begin == begin
@@ -753,10 +753,10 @@ class RadialGradient extends Gradient {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
-    if (runtimeType != other.runtimeType)
+    if (other.runtimeType != runtimeType)
       return false;
     return other is RadialGradient
         && other.center == center
@@ -999,10 +999,10 @@ class SweepGradient extends Gradient {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
-    if (runtimeType != other.runtimeType)
+    if (other.runtimeType != runtimeType)
       return false;
     return other is SweepGradient
         && other.center == center

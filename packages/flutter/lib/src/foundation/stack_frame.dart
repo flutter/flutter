@@ -213,16 +213,16 @@ class StackFrame {
 
   @override
   bool operator ==(Object other) {
-    if (runtimeType != other.runtimeType)
+    if (other.runtimeType != runtimeType)
       return false;
-    return other is StackFrame &&
-        number == other.number &&
-        package == other.package &&
-        line == other.line &&
-        column == other.column &&
-        className == other.className &&
-        method == other.method &&
-        source == other.source;
+    return other is StackFrame
+        && other.number == number
+        && other.package == package
+        && other.line == line
+        && other.column == column
+        && other.className == className
+        && other.method == method
+        && other.source == source;
   }
 
   @override

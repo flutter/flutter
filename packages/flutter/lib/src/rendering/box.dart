@@ -581,11 +581,11 @@ class BoxConstraints extends Constraints {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     assert(debugAssertIsValid());
     if (identical(this, other))
       return true;
-    if (runtimeType != other.runtimeType)
+    if (other.runtimeType != runtimeType)
       return false;
     assert(other is BoxConstraints && other.debugAssertIsValid());
     return other is BoxConstraints
@@ -855,7 +855,7 @@ class _IntrinsicDimensionsCacheEntry {
   final double argument;
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     return other is _IntrinsicDimensionsCacheEntry
         && other.dimension == dimension
         && other.argument == argument;

@@ -116,7 +116,7 @@ class ImageStreamListener {
   int get hashCode => hashValues(onImage, onChunk, onError);
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
     return other is ImageStreamListener

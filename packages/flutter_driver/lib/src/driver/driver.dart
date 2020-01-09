@@ -751,7 +751,7 @@ class DriverOffset {
   String toString() => '$runtimeType($dx, $dy)';
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     return other is DriverOffset
         && other.dx == dx
         && other.dy == dy;
