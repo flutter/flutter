@@ -140,7 +140,9 @@ class _CanvasPool extends _SaveStackTracking {
       int clipDepth, Matrix4 transform, List<_SaveClipEntry> clipStack) {
     final html.CanvasRenderingContext2D ctx = _context;
     if (!transform.isIdentity()) {
-      ctx.setTransform(transform[0], transform[1], transform[4], transform[5],
+      final double ratio = EngineWindow.browserDevicePixelRatio;
+      ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+      ctx.transform(transform[0], transform[1], transform[4], transform[5],
           transform[12], transform[13]);
     }
     if (clipStack != null) {
