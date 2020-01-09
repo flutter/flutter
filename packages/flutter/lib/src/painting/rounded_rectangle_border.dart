@@ -123,8 +123,8 @@ class RoundedRectangleBorder extends ShapeBorder {
   }
 
   @override
-  bool operator ==(dynamic other) {
-    if (runtimeType != other.runtimeType)
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType)
       return false;
     return other is RoundedRectangleBorder
         && other.side == side
@@ -283,8 +283,8 @@ class _RoundedRectangleToCircleBorder extends ShapeBorder {
   }
 
   @override
-  bool operator ==(dynamic other) {
-    if (runtimeType != other.runtimeType)
+  bool operator ==(Object other) {
+    if (other.runtimeType != runtimeType)
       return false;
     return other is _RoundedRectangleToCircleBorder
         && other.side == side

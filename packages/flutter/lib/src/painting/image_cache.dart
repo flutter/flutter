@@ -29,7 +29,7 @@ const int _kDefaultSizeBytes = 100 << 20; // 100 MiB
 /// A shared instance of this cache is retained by [PaintingBinding] and can be
 /// obtained via the [imageCache] top-level property in the [painting] library.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This sample shows how to supply your own caching logic and replace the
 /// global [imageCache] varible.

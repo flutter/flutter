@@ -208,7 +208,7 @@ typedef ImageLoadingBuilder = Widget Function(
 /// The image is painted using [paintImage], which describes the meanings of the
 /// various fields on this class in more detail.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 /// The default constructor can be used with any [ImageProvider], such as a
 /// [NetworkImage], to display an image from the internet.
 ///
@@ -221,7 +221,7 @@ typedef ImageLoadingBuilder = Widget Function(
 /// ```
 /// {@end-tool}
 ///
-/// {@tool sample}
+/// {@tool snippet}
 /// The [Image] Widget also provides several constructors to display different
 /// types of images for convenience. In this example, use the [Image.network]
 /// constructor to display an image from the internet.
@@ -461,7 +461,7 @@ class Image extends StatefulWidget {
   /// which corresponds to bilinear interpolation, rather than the default
   /// [FilterQuality.none] which corresponds to nearest-neighbor.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// Suppose that the project's `pubspec.yaml` file contains the following:
   ///
@@ -500,7 +500,7 @@ class Image extends StatefulWidget {
   /// must be provided. For instance, suppose a package called `my_icons` has
   /// `icons/heart.png` .
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   /// Then to display the image, use:
   ///
   /// ```dart
@@ -683,7 +683,7 @@ class Image extends StatefulWidget {
   /// ```
   /// {@endtemplate}
   ///
-  /// {@tool snippet --template=stateless_widget_material}
+  /// {@tool sample --template=stateless_widget_material}
   ///
   /// The following sample demonstrates how to use this builder to implement an
   /// image that fades in once it's been loaded.
@@ -754,7 +754,7 @@ class Image extends StatefulWidget {
   ///
   /// {@macro flutter.widgets.image.chainedBuildersExample}
   ///
-  /// {@tool snippet --template=stateless_widget_material}
+  /// {@tool sample --template=stateless_widget_material}
   ///
   /// The following sample uses [loadingBuilder] to show a
   /// [CircularProgressIndicator] while an image loads over the network.

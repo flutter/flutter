@@ -228,14 +228,12 @@ abstract class Emulator {
   int get hashCode => id.hashCode;
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other)) {
       return true;
     }
-    if (other is! Emulator) {
-      return false;
-    }
-    return id == other.id;
+    return other is Emulator
+        && other.id == id;
   }
 
   Future<void> launch();

@@ -183,7 +183,7 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
 ///
 /// {@animation 250 500 https://flutter.github.io/assets-for-api-docs/assets/widgets/sliver_fill_remaining_sizes_child.mp4}
 ///
-/// {@tool snippet --template=stateless_widget_scaffold}
+/// {@tool sample --template=stateless_widget_scaffold}
 ///
 /// In this sample the [SliverFillRemaining] sizes its [child] to fill the
 /// remaining extent of the viewport in both axes. The icon is centered in the
@@ -221,7 +221,7 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
 ///
 /// {@animation 250 500 https://flutter.github.io/assets-for-api-docs/assets/widgets/sliver_fill_remaining_defers_to_child.mp4}
 ///
-/// {@tool snippet --template=stateless_widget_scaffold}
+/// {@tool sample --template=stateless_widget_scaffold}
 ///
 /// In this sample the [SliverFillRemaining] defers to the size of its [child]
 /// because the child's extent exceeds that of the remaining extent of the
@@ -265,7 +265,7 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
 ///
 /// {@animation 250 500 https://flutter.github.io/assets-for-api-docs/assets/widgets/sliver_fill_remaining_scrolled_beyond.mp4}
 ///
-/// {@tool snippet --template=stateless_widget_scaffold}
+/// {@tool sample --template=stateless_widget_scaffold}
 ///
 /// In this sample the [SliverFillRemaining] defers to the size of its [child]
 /// because the [precedingScrollExtent] of the [SliverConstraints] has gone
@@ -314,7 +314,7 @@ class _RenderSliverFractionalPadding extends RenderSliverEdgeInsetsPadding {
 ///
 /// {@animation 250 500 https://flutter.github.io/assets-for-api-docs/assets/widgets/sliver_fill_remaining_fill_overscroll.mp4}
 ///
-/// {@tool snippet --template=stateless_widget_scaffold}
+/// {@tool sample --template=stateless_widget_scaffold}
 ///
 /// In this sample the [SliverFillRemaining]'s child stretches to fill the
 /// overscroll area when [fillOverscroll] is true. This sample also features a

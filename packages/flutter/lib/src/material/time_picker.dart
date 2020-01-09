@@ -1723,7 +1723,7 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
 /// The returned Future resolves to the time selected by the user when the user
 /// closes the dialog. If the user cancels the dialog, null is returned.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 /// Show a dialog with [initialTime] equal to the current time.
 ///
 /// ```dart
@@ -1741,7 +1741,7 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
 /// to add inherited widgets like [Localizations.override],
 /// [Directionality], or [MediaQuery].
 ///
-/// {@tool sample}
+/// {@tool snippet}
 /// Show a dialog with the text direction overridden to be [TextDirection.rtl].
 ///
 /// ```dart
@@ -1758,7 +1758,7 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
 /// ```
 /// {@end-tool}
 ///
-/// {@tool sample}
+/// {@tool snippet}
 /// Show a dialog with time unconditionally displayed in 24 hour format.
 ///
 /// ```dart
