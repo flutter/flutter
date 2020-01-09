@@ -536,6 +536,8 @@ FILE: ../../../flutter/runtime/start_up.cc
 FILE: ../../../flutter/runtime/start_up.h
 FILE: ../../../flutter/runtime/test_font_data.cc
 FILE: ../../../flutter/runtime/test_font_data.h
+FILE: ../../../flutter/runtime/window_data.cc
+FILE: ../../../flutter/runtime/window_data.h
 FILE: ../../../flutter/shell/common/animator.cc
 FILE: ../../../flutter/shell/common/animator.h
 FILE: ../../../flutter/shell/common/animator_unittests.cc

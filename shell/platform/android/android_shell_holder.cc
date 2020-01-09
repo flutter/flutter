@@ -21,6 +21,12 @@
 
 namespace flutter {
 
+static WindowData GetDefaultWindowData() {
+  WindowData window_data;
+  window_data.lifecycle_state = "AppLifecycleState.detached";
+  return window_data;
+}
+
 AndroidShellHolder::AndroidShellHolder(
     flutter::Settings settings,
     fml::jni::JavaObjectWeakGlobalRef java_object,
@@ -103,6 +109,7 @@ AndroidShellHolder::AndroidShellHolder(
 
   shell_ =
       Shell::Create(task_runners,             // task runners
+                    GetDefaultWindowData(),   // window data
                     settings_,                // settings
                     on_create_platform_view,  // platform view create callback
                     on_create_rasterizer      // rasterizer create callback
