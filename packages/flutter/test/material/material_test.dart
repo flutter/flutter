@@ -11,6 +11,7 @@ import '../rendering/mock_canvas.dart';
 import '../widgets/test_border.dart' show TestBorder;
 
 class NotifyMaterial extends StatelessWidget {
+  const NotifyMaterial({ Key key }) : super(key: key);
   @override
   Widget build(BuildContext context) {
     LayoutChangedNotification().dispatch(context);
@@ -101,7 +102,7 @@ void main() {
 
   testWidgets('LayoutChangedNotification test', (WidgetTester tester) async {
     await tester.pumpWidget(
-      Material(
+      const Material(
         child: NotifyMaterial(),
       ),
     );
@@ -250,7 +251,7 @@ void main() {
         ElevationColor(24.0, Color(0xFF20362B)),
       ];
 
-      for (ElevationColor test in elevationColors) {
+      for (final ElevationColor test in elevationColors) {
         await tester.pumpWidget(
             Theme(
               data: ThemeData(
@@ -717,7 +718,7 @@ void main() {
         find.byKey(painterKey),
         matchesGoldenFile('material.border_paint_above.png'),
       );
-    }, skip: isBrowser);
+    });
 
     testWidgets('border is painted below child when specified', (WidgetTester tester) async {
       final Key painterKey = UniqueKey();
@@ -757,6 +758,6 @@ void main() {
         find.byKey(painterKey),
         matchesGoldenFile('material.border_paint_below.png'),
       );
-    }, skip: isBrowser);
+    });
   });
 }

@@ -30,6 +30,7 @@ class _StockSymbolView extends StatelessWidget {
             children: <Widget>[
               Text(
                 '${stock.symbol}',
+                key: ValueKey<String>('${stock.symbol}_symbol_name'),
                 style: Theme.of(context).textTheme.display2,
               ),
               arrow,

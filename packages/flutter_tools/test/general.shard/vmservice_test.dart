@@ -7,10 +7,12 @@ import 'dart:io';
 
 import 'package:flutter_tools/src/base/io.dart';
 import 'package:flutter_tools/src/base/logger.dart';
+import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/vmservice.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as rpc;
 import 'package:mockito/mockito.dart';
+import 'package:platform/platform.dart';
 import 'package:quiver/testing/async.dart';
 
 import '../src/common.dart';
@@ -167,6 +169,7 @@ class MockPeer implements rpc.Peer {
 void main() {
   MockStdio mockStdio;
   group('VMService', () {
+
     setUp(() {
       mockStdio = MockStdio();
     });
@@ -188,8 +191,12 @@ void main() {
         expect(mockStdio.writtenToStderr.join(''), '');
       });
     }, overrides: <Type, Generator>{
-      Logger: () => StdoutLogger(),
-      Stdio: () => mockStdio,
+      Logger: () => StdoutLogger(
+        outputPreferences: OutputPreferences.test(),
+        stdio: mockStdio,
+        terminal: AnsiTerminal(stdio: mockStdio, platform: const LocalPlatform()),
+        timeoutConfiguration: const TimeoutConfiguration(),
+      ),
       WebSocketConnector: () => (String url, {CompressionOptions compression}) async => throw const SocketException('test'),
     });
 
@@ -198,7 +205,7 @@ void main() {
         bool done = false;
         final MockPeer mockPeer = MockPeer();
         expect(mockPeer.returnedFromSendRequest, 0);
-        final VMService vmService = VMService(mockPeer, null, null, null, null, null, null);
+        final VMService vmService = VMService(mockPeer, null, null, null, null, null, null, null);
         expect(mockPeer.sentNotifications, contains('registerService'));
         final List<String> registeredServices =
           mockPeer.sentNotifications['registerService']
@@ -263,21 +270,29 @@ void main() {
         expect(mockStdio.writtenToStderr.join(''), '');
       });
     }, overrides: <Type, Generator>{
-      Logger: () => StdoutLogger(),
-      Stdio: () => mockStdio,
+      Logger: () => StdoutLogger(
+        outputPreferences: outputPreferences,
+        terminal: AnsiTerminal(stdio: mockStdio, platform: const LocalPlatform()),
+        stdio: mockStdio,
+        timeoutConfiguration: const TimeoutConfiguration(),
+      ),
     });
 
     testUsingContext('registers hot UI method', () {
       FakeAsync().run((FakeAsync time) {
         final MockPeer mockPeer = MockPeer();
-        Future<void> reloadSources(String isolateId, { bool pause, bool force}) async {}
-        VMService(mockPeer, null, null, reloadSources, null, null, null);
+        Future<void> reloadMethod({ String classId, String libraryId }) async {}
+        VMService(mockPeer, null, null, null, null, null, null, reloadMethod);
 
         expect(mockPeer.registeredMethods, contains('reloadMethod'));
       });
     }, overrides: <Type, Generator>{
-      Logger: () => StdoutLogger(),
-      Stdio: () => mockStdio,
+      Logger: () => StdoutLogger(
+        outputPreferences: outputPreferences,
+        terminal: AnsiTerminal(stdio: mockStdio, platform: const LocalPlatform()),
+        stdio: mockStdio,
+        timeoutConfiguration: const TimeoutConfiguration(),
+      ),
     });
 
     testUsingContext('registers flutterMemoryInfo service', () {
@@ -285,13 +300,17 @@ void main() {
         final MockDevice mockDevice = MockDevice();
         final MockPeer mockPeer = MockPeer();
         Future<void> reloadSources(String isolateId, { bool pause, bool force}) async {}
-        VMService(mockPeer, null, null, reloadSources, null, null, mockDevice);
+        VMService(mockPeer, null, null, reloadSources, null, null, mockDevice, null);
 
         expect(mockPeer.registeredMethods, contains('flutterMemoryInfo'));
       });
     }, overrides: <Type, Generator>{
-      Logger: () => StdoutLogger(),
-      Stdio: () => mockStdio,
+      Logger: () => StdoutLogger(
+        outputPreferences: outputPreferences,
+        terminal: AnsiTerminal(stdio: mockStdio, platform: const LocalPlatform()),
+        stdio: mockStdio,
+        timeoutConfiguration: const TimeoutConfiguration(),
+      ),
     });
   });
 }

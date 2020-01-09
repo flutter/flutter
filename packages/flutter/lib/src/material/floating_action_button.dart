@@ -57,7 +57,7 @@ class _DefaultHeroTag {
 /// disabled. Consider changing the [backgroundColor] if disabling the floating
 /// action button.
 ///
-/// {@tool snippet --template=stateless_widget_material}
+/// {@tool sample --template=stateless_widget_material}
 /// This example shows how to display a [FloatingActionButton] in a
 /// [Scaffold], with a pink [backgroundColor] and a thumbs up [Icon].
 ///
@@ -84,7 +84,7 @@ class _DefaultHeroTag {
 /// ```
 /// {@end-tool}
 ///
-/// {@tool snippet --template=stateless_widget_material}
+/// {@tool sample --template=stateless_widget_material}
 /// This example shows how to make an extended [FloatingActionButton] in a
 /// [Scaffold], with a  pink [backgroundColor], a thumbs up [Icon] and a
 /// [Text] label that reads "Approve".

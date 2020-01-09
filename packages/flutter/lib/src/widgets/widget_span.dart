@@ -22,7 +22,7 @@ import 'framework.dart';
 /// To properly layout and paint the [child] widget, [WidgetSpan] should be
 /// passed into a [Text.rich] widget.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// A card with `Hello World!` embedded inline within a TextSpan tree.
 ///
@@ -148,7 +148,7 @@ class WidgetSpan extends PlaceholderSpan {
       return RenderComparison.layout;
     if ((style == null) != (other.style == null))
       return RenderComparison.layout;
-    final WidgetSpan typedOther = other;
+    final WidgetSpan typedOther = other as WidgetSpan;
     if (child != typedOther.child || alignment != typedOther.alignment) {
       return RenderComparison.layout;
     }
@@ -171,10 +171,10 @@ class WidgetSpan extends PlaceholderSpan {
       return false;
     if (super != other)
       return false;
-    final WidgetSpan typedOther = other;
-    return typedOther.child == child
-        && typedOther.alignment == alignment
-        && typedOther.baseline == baseline;
+    return other is WidgetSpan
+        && other.child == child
+        && other.alignment == alignment
+        && other.baseline == baseline;
   }
 
   @override

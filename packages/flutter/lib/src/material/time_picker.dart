@@ -685,7 +685,7 @@ class _TimePickerHeaderLayout extends MultiChildLayoutDelegate {
 
   void _positionPivoted(double width, double y, Map<_TimePickerHeaderId, Size> childSizes, List<_TimePickerHeaderFragment> fragments, int pivotIndex) {
     double tailWidth = childSizes[fragments[pivotIndex].layoutId].width / 2.0;
-    for (_TimePickerHeaderFragment fragment in fragments.skip(pivotIndex + 1)) {
+    for (final _TimePickerHeaderFragment fragment in fragments.skip(pivotIndex + 1)) {
       tailWidth += childSizes[fragment.layoutId].width + fragment.startMargin;
     }
 
@@ -703,7 +703,7 @@ class _TimePickerHeaderLayout extends MultiChildLayoutDelegate {
   void _positionPiece(double width, double centeredAroundY, Map<_TimePickerHeaderId, Size> childSizes, List<_TimePickerHeaderFragment> fragments) {
     double pieceWidth = 0.0;
     double nextMargin = 0.0;
-    for (_TimePickerHeaderFragment fragment in fragments) {
+    for (final _TimePickerHeaderFragment fragment in fragments) {
       final Size childSize = childSizes[fragment.layoutId];
       pieceWidth += childSize.width + nextMargin;
       // Delay application of margin until next element because margin of the
@@ -927,7 +927,7 @@ class _DialPainter extends CustomPainter {
       final double labelThetaIncrement = -_kTwoPi / labels.length;
       double labelTheta = math.pi / 2.0;
 
-      for (_TappableLabel label in labels) {
+      for (final _TappableLabel label in labels) {
         final TextPainter labelPainter = label.painter;
         final Offset labelOffset = Offset(-labelPainter.width / 2.0, -labelPainter.height / 2.0);
         labelPainter.paint(canvas, getOffsetForTheta(labelTheta, ring) + labelOffset);
@@ -1004,7 +1004,7 @@ class _DialPainter extends CustomPainter {
         final double width = labelPainter.width * _semanticNodeSizeScale;
         final double height = labelPainter.height * _semanticNodeSizeScale;
         final Offset nodeOffset = getOffsetForTheta(labelTheta, ring) + Offset(-width / 2.0, -height / 2.0);
-        final TextSpan textSpan = labelPainter.text;
+        final TextSpan textSpan = labelPainter.text as TextSpan;
         final CustomPainterSemantics node = CustomPainterSemantics(
           rect: Rect.fromLTRB(
             nodeOffset.dx - 24.0 + width / 2,
@@ -1190,7 +1190,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
       _thetaTween
         ..begin = angle
         ..end = angle; // The controller doesn't animate during the pan gesture.
-      final RenderBox box = context.findRenderObject();
+      final RenderBox box = context.findRenderObject() as RenderBox;
       final double radius = box.size.shortestSide / 2.0;
       if (widget.mode == _TimePickerMode.hour && widget.use24HourDials) {
         if (offset.distance * 1.5 < radius)
@@ -1208,7 +1208,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
   void _handlePanStart(DragStartDetails details) {
     assert(!_dragging);
     _dragging = true;
-    final RenderBox box = context.findRenderObject();
+    final RenderBox box = context.findRenderObject() as RenderBox;
     _position = box.globalToLocal(details.globalPosition);
     _center = box.size.center(Offset.zero);
     _updateThetaForPan();
@@ -1235,7 +1235,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
   }
 
   void _handleTapUp(TapUpDetails details) {
-    final RenderBox box = context.findRenderObject();
+    final RenderBox box = context.findRenderObject() as RenderBox;
     _position = box.globalToLocal(details.globalPosition);
     _center = box.size.center(Offset.zero);
     _updateThetaForPan();
@@ -1339,7 +1339,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
   }
 
   List<_TappableLabel> _build24HourInnerRing(TextTheme textTheme) => <_TappableLabel>[
-    for (TimeOfDay timeOfDay in _amHours)
+    for (final TimeOfDay timeOfDay in _amHours)
       _buildTappableLabel(
         textTheme,
         timeOfDay.hour,
@@ -1351,7 +1351,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
   ];
 
   List<_TappableLabel> _build24HourOuterRing(TextTheme textTheme) => <_TappableLabel>[
-    for (TimeOfDay timeOfDay in _pmHours)
+    for (final TimeOfDay timeOfDay in _pmHours)
       _buildTappableLabel(
         textTheme,
         timeOfDay.hour,
@@ -1363,7 +1363,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
   ];
 
   List<_TappableLabel> _build12HourOuterRing(TextTheme textTheme) => <_TappableLabel>[
-    for (TimeOfDay timeOfDay in _amHours)
+    for (final TimeOfDay timeOfDay in _amHours)
       _buildTappableLabel(
         textTheme,
         timeOfDay.hour,
@@ -1391,7 +1391,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
     ];
 
     return <_TappableLabel>[
-      for (TimeOfDay timeOfDay in _minuteMarkerValues)
+      for (final TimeOfDay timeOfDay in _minuteMarkerValues)
         _buildTappableLabel(
           textTheme,
           timeOfDay.minute,
@@ -1723,7 +1723,7 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
 /// The returned Future resolves to the time selected by the user when the user
 /// closes the dialog. If the user cancels the dialog, null is returned.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 /// Show a dialog with [initialTime] equal to the current time.
 ///
 /// ```dart
@@ -1741,7 +1741,7 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
 /// to add inherited widgets like [Localizations.override],
 /// [Directionality], or [MediaQuery].
 ///
-/// {@tool sample}
+/// {@tool snippet}
 /// Show a dialog with the text direction overridden to be [TextDirection.rtl].
 ///
 /// ```dart
@@ -1758,7 +1758,7 @@ class _TimePickerDialogState extends State<_TimePickerDialog> {
 /// ```
 /// {@end-tool}
 ///
-/// {@tool sample}
+/// {@tool snippet}
 /// Show a dialog with time unconditionally displayed in 24 hour format.
 ///
 /// ```dart

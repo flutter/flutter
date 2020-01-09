@@ -22,8 +22,8 @@ class GalleryDemoCategory {
       return true;
     if (runtimeType != other.runtimeType)
       return false;
-    final GalleryDemoCategory typedOther = other;
-    return typedOther.name == name && typedOther.icon == icon;
+    return other is GalleryDemoCategory
+        && other.name == name && other.icon == icon;
   }
 
   @override
@@ -579,9 +579,7 @@ final Map<GalleryDemoCategory, List<GalleryDemo>> kGalleryCategoryToDemos =
     },
   );
 
-final Map<String, String> kDemoDocumentationUrl =
-    Map<String, String>.fromIterable(
-      kAllGalleryDemos.where((GalleryDemo demo) => demo.documentationUrl != null),
-      key: (dynamic demo) => demo.routeName,
-      value: (dynamic demo) => demo.documentationUrl,
-    );
+final Map<String, String> kDemoDocumentationUrl = <String, String>{
+  for (final GalleryDemo demo in kAllGalleryDemos)
+    if (demo.documentationUrl != null) demo.routeName: demo.documentationUrl,
+};

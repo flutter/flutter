@@ -6,16 +6,17 @@ import 'dart:async';
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:platform/platform.dart';
+import 'package:mockito/mockito.dart';
+import 'package:process/process.dart';
+
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/cocoapods.dart';
 import 'package:flutter_tools/src/plugins.dart';
 import 'package:flutter_tools/src/project.dart';
-import 'package:mockito/mockito.dart';
-import 'package:process/process.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -80,12 +81,12 @@ void main() {
     when(mockProcessManager.run(
       <String>['pod', 'install', '--verbose'],
       workingDirectory: 'project/ios',
-      environment: <String, String>{'FLUTTER_FRAMEWORK_DIR': 'engine/path', 'COCOAPODS_DISABLE_STATS': 'true'},
+      environment: <String, String>{'FLUTTER_FRAMEWORK_DIR': 'engine/path', 'COCOAPODS_DISABLE_STATS': 'true', 'LANG': 'en_US.UTF-8'},
     )).thenAnswer((_) async => exitsHappy());
     when(mockProcessManager.run(
       <String>['pod', 'install', '--verbose'],
       workingDirectory: 'project/macos',
-      environment: <String, String>{'FLUTTER_FRAMEWORK_DIR': 'engine/path', 'COCOAPODS_DISABLE_STATS': 'true'},
+      environment: <String, String>{'FLUTTER_FRAMEWORK_DIR': 'engine/path', 'COCOAPODS_DISABLE_STATS': 'true', 'LANG': 'en_US.UTF-8'},
     )).thenAnswer((_) async => exitsHappy());
   });
 
@@ -368,6 +369,7 @@ void main() {
         environment: <String, String>{
           'FLUTTER_FRAMEWORK_DIR': 'engine/path',
           'COCOAPODS_DISABLE_STATS': 'true',
+          'LANG': 'en_US.UTF-8',
         },
       )).thenAnswer((_) async => exitsWithError(
         '''
@@ -420,7 +422,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
       verify(mockProcessManager.run(
         <String>['pod', 'install', '--verbose'],
         workingDirectory: 'project/ios',
-        environment: <String, String>{'FLUTTER_FRAMEWORK_DIR': 'engine/path', 'COCOAPODS_DISABLE_STATS': 'true'},
+        environment: <String, String>{'FLUTTER_FRAMEWORK_DIR': 'engine/path', 'COCOAPODS_DISABLE_STATS': 'true', 'LANG': 'en_US.UTF-8'},
       ));
     }, overrides: <Type, Generator>{
       FileSystem: () => fs,
@@ -447,6 +449,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
         environment: <String, String>{
           'FLUTTER_FRAMEWORK_DIR': 'engine/path',
           'COCOAPODS_DISABLE_STATS': 'true',
+          'LANG': 'en_US.UTF-8',
         },
       ));
     }, overrides: <Type, Generator>{
@@ -477,6 +480,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
         environment: <String, String>{
           'FLUTTER_FRAMEWORK_DIR': 'engine/path',
           'COCOAPODS_DISABLE_STATS': 'true',
+          'LANG': 'en_US.UTF-8',
         },
       ));
     }, overrides: <Type, Generator>{
@@ -507,6 +511,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
         environment: <String, String>{
           'FLUTTER_FRAMEWORK_DIR': 'engine/path',
           'COCOAPODS_DISABLE_STATS': 'true',
+          'LANG': 'en_US.UTF-8',
         },
       ));
     }, overrides: <Type, Generator>{
@@ -539,6 +544,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
         environment: <String, String>{
           'FLUTTER_FRAMEWORK_DIR': 'engine/path',
           'COCOAPODS_DISABLE_STATS': 'true',
+          'LANG': 'en_US.UTF-8',
         },
       ));
     }, overrides: <Type, Generator>{
@@ -591,6 +597,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
         environment: <String, String>{
           'FLUTTER_FRAMEWORK_DIR': 'engine/path',
           'COCOAPODS_DISABLE_STATS': 'true',
+          'LANG': 'en_US.UTF-8',
         },
       )).thenAnswer(
         (_) async => exitsWithError()
@@ -621,6 +628,7 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
         'FLUTTER_FRAMEWORK_DIR': 'engine/path',
         'COCOAPODS_DISABLE_STATS': 'true',
         'CP_REPOS_DIR': cocoapodsRepoDir,
+        'LANG': 'en_US.UTF8',
       };
     });
 
@@ -629,7 +637,6 @@ Note: as of CocoaPods 1.0, `pod repo update` does not happen on `pod install` by
       fs.file(fs.path.join('project', 'ios', 'Podfile'))
         ..createSync()
         ..writeAsStringSync('Existing Podfile');
-
       when(mockProcessManager.run(
         <String>['pod', 'install', '--verbose'],
         workingDirectory: 'project/ios',

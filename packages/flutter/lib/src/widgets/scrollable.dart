@@ -481,7 +481,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
       return;
     _shouldIgnorePointer = value;
     if (_ignorePointerKey.currentContext != null) {
-      final RenderIgnorePointer renderBox = _ignorePointerKey.currentContext.findRenderObject();
+      final RenderIgnorePointer renderBox = _ignorePointerKey.currentContext.findRenderObject() as RenderIgnorePointer;
       renderBox.ignoring = _shouldIgnorePointer;
     }
   }
@@ -576,7 +576,7 @@ class ScrollableState extends State<Scrollable> with TickerProviderStateMixin
     if (_physics != null && !_physics.shouldAcceptUserOffset(position)) {
       return;
     }
-    final double targetScrollOffset = _targetScrollOffsetForPointerScroll(event);
+    final double targetScrollOffset = _targetScrollOffsetForPointerScroll(event as PointerScrollEvent);
     if (targetScrollOffset != position.pixels) {
       position.jumpTo(targetScrollOffset);
     }
@@ -763,7 +763,7 @@ class _RenderScrollSemantics extends RenderProxyBox {
     int firstVisibleIndex;
     final List<SemanticsNode> excluded = <SemanticsNode>[_innerNode];
     final List<SemanticsNode> included = <SemanticsNode>[];
-    for (SemanticsNode child in children) {
+    for (final SemanticsNode child in children) {
       assert(child.isTagged(RenderViewport.useTwoPaneSemantics));
       if (child.isTagged(RenderViewport.excludeFromScrolling)) {
         excluded.add(child);

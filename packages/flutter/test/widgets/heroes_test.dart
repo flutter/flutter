@@ -540,7 +540,7 @@ Future<void> main() async {
     await tester.pump();
     final dynamic exception = tester.takeException();
     expect(exception, isFlutterError);
-    final FlutterError error = exception;
+    final FlutterError error = exception as FlutterError;
     expect(error.diagnostics.length, 3);
     final DiagnosticsNode last = error.diagnostics.last;
     expect(last, isInstanceOf<DiagnosticsProperty<StatefulElement>>());

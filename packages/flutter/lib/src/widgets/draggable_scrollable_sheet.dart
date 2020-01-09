@@ -54,7 +54,7 @@ typedef ScrollableWidgetBuilder = Widget Function(
 /// to position sheet based on the space it is taking, the [expand] property
 /// may be set to false.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This is a sample widget which shows a [ListView] that has 25 [ListTile]s.
 /// It starts out as taking up half the body of the [Scaffold], and can be
@@ -260,7 +260,7 @@ class _DraggableSheetExtent {
 
   set currentExtent(double value) {
     assert(value != null);
-    _currentExtent.value = value.clamp(minExtent, maxExtent);
+    _currentExtent.value = value.clamp(minExtent, maxExtent) as double;
   }
   double get currentExtent => _currentExtent.value;
 
@@ -599,7 +599,7 @@ class _InheritedResetNotifier extends InheritedNotifier<_ResetNotifier> {
       return false;
     }
     assert(widget is _InheritedResetNotifier);
-    final _InheritedResetNotifier inheritedNotifier = widget;
+    final _InheritedResetNotifier inheritedNotifier = widget as _InheritedResetNotifier;
     final bool wasCalled = inheritedNotifier.notifier._wasCalled;
     inheritedNotifier.notifier._wasCalled = false;
     return wasCalled;

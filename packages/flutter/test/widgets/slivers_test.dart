@@ -48,7 +48,7 @@ Future<void> testSliverFixedExtentList(WidgetTester tester, List<String> items) 
               },
               childCount : items.length,
               findChildIndexCallback: (Key key) {
-                final ValueKey<String> valueKey = key;
+                final ValueKey<String> valueKey = key as ValueKey<String>;
                 final String data = valueKey.value;
                 return items.indexOf(data);
               },
@@ -353,7 +353,7 @@ void main() {
       addRepaintBoundaries: false,
       addSemanticIndexes: false,
     );
-    final KeyedSubtree wrapped = builderThrowsDelegate.build(null, 0);
+    final KeyedSubtree wrapped = builderThrowsDelegate.build(null, 0) as KeyedSubtree;
     expect(wrapped.child, errorText);
     expect(tester.takeException(), 'builder');
     ErrorWidget.builder = oldBuilder;
@@ -701,7 +701,7 @@ bool sameHorizontal(Offset a, Offset b) => b.dy == a.dy;
 bool sameVertical(Offset a, Offset b) => b.dx == a.dx;
 
 class TestSliverGrid extends StatelessWidget {
-  const TestSliverGrid(this.children);
+  const TestSliverGrid(this.children, { Key key }) : super(key: key);
 
   final List<Widget> children;
 
@@ -726,7 +726,7 @@ class TestSliverGrid extends StatelessWidget {
 }
 
 class TestSliverFixedExtentList extends StatelessWidget {
-  const TestSliverFixedExtentList(this.children);
+  const TestSliverFixedExtentList(this.children, { Key key }) : super(key: key);
 
   final List<Widget> children;
 
@@ -749,7 +749,7 @@ class TestSliverFixedExtentList extends StatelessWidget {
 }
 
 class KeepAlive extends StatefulWidget {
-  const KeepAlive(this.data);
+  const KeepAlive(this.data, { Key key }) : super(key: key);
 
   final String data;
 

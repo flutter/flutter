@@ -144,8 +144,8 @@ class DoubleTapGestureRecognizer extends GestureRecognizer {
   /// Called when the user has tapped the screen with a primary button at the
   /// same location twice in quick succession.
   ///
-  /// This triggers when the pointer stops contacting the device after the 2nd tap,
-  /// immediately after [onDoubleTapUp].
+  /// This triggers when the pointer stops contacting the device after the
+  /// second tap.
   ///
   /// See also:
   ///
@@ -505,7 +505,7 @@ class MultiTapGestureRecognizer extends GestureRecognizer {
   @override
   void dispose() {
     final List<_TapGesture> localGestures = List<_TapGesture>.from(_gestureMap.values);
-    for (_TapGesture gesture in localGestures)
+    for (final _TapGesture gesture in localGestures)
       gesture.cancel();
     // Rejection of each gesture should cause it to be removed from our map
     assert(_gestureMap.isEmpty);

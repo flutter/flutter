@@ -46,7 +46,7 @@ abstract class SemanticsEvent {
     final List<String> pairs = <String>[];
     final Map<String, dynamic> dataMap = getDataMap();
     final List<String> sortedKeys = dataMap.keys.toList()..sort();
-    for (String key in sortedKeys)
+    for (final String key in sortedKeys)
       pairs.add('$key: ${dataMap[key]}');
     return '$runtimeType(${pairs.join(', ')})';
   }
@@ -141,9 +141,17 @@ class TapSemanticEvent extends SemanticsEvent {
 /// the label of the semantics node has changed since the last live region
 /// update. iOS does not currently support this event.
 ///
+/// Deprecated. This message was never implemented, and references to it should
+/// be removed.
+///
 /// See also:
 ///
 ///  * [SemanticsFlag.liveRegion], for a description of live regions.
+///
+@Deprecated(
+  'This event has never been implemented and will be removed in a future version of Flutter. References to it should be removed. '
+  'This feature was deprecated after v1.12.16.'
+)
 class UpdateLiveRegionEvent extends SemanticsEvent {
   /// Creates a new [UpdateLiveRegionEvent].
   const UpdateLiveRegionEvent() : super('updateLiveRegion');

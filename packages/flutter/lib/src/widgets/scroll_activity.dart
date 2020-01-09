@@ -433,21 +433,21 @@ class DragScrollActivity extends ScrollActivity {
   void dispatchScrollStartNotification(ScrollMetrics metrics, BuildContext context) {
     final dynamic lastDetails = _controller.lastDetails;
     assert(lastDetails is DragStartDetails);
-    ScrollStartNotification(metrics: metrics, context: context, dragDetails: lastDetails).dispatch(context);
+    ScrollStartNotification(metrics: metrics, context: context, dragDetails: lastDetails as DragStartDetails).dispatch(context);
   }
 
   @override
   void dispatchScrollUpdateNotification(ScrollMetrics metrics, BuildContext context, double scrollDelta) {
     final dynamic lastDetails = _controller.lastDetails;
     assert(lastDetails is DragUpdateDetails);
-    ScrollUpdateNotification(metrics: metrics, context: context, scrollDelta: scrollDelta, dragDetails: lastDetails).dispatch(context);
+    ScrollUpdateNotification(metrics: metrics, context: context, scrollDelta: scrollDelta, dragDetails: lastDetails as DragUpdateDetails).dispatch(context);
   }
 
   @override
   void dispatchOverscrollNotification(ScrollMetrics metrics, BuildContext context, double overscroll) {
     final dynamic lastDetails = _controller.lastDetails;
     assert(lastDetails is DragUpdateDetails);
-    OverscrollNotification(metrics: metrics, context: context, overscroll: overscroll, dragDetails: lastDetails).dispatch(context);
+    OverscrollNotification(metrics: metrics, context: context, overscroll: overscroll, dragDetails: lastDetails as DragUpdateDetails).dispatch(context);
   }
 
   @override

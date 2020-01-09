@@ -158,6 +158,7 @@ enum DiagnosticsTreeStyle {
   /// the following line.
   ///
   /// See also:
+  ///
   ///  * [singleLine], which displays the same information but keeps the
   ///    property and value on the same line.
   errorProperty,
@@ -166,8 +167,8 @@ enum DiagnosticsTreeStyle {
   ///
   /// See also:
   ///
-  ///  * [DebugOverflowIndicator], which uses this style to display just the
-  ///    immediate children of a node.
+  ///  * [DebugOverflowIndicatorMixin], which uses this style to display just
+  ///    the immediate children of a node.
   shallow,
 
   /// Render only the children of a node truncating before the tree becomes too
@@ -326,9 +327,6 @@ class TextTreeConfiguration {
 
   /// Mandatory string to add after the properties of a node regardless of
   /// whether the node has any properties.
-  ///
-  /// See [headerLineTextConfiguration] for an example of using this field to
-  /// add a colon at the end of the header line.
   final String mandatoryAfterProperties;
 
   /// Property separator to add between properties.
@@ -515,7 +513,7 @@ final TextTreeConfiguration denseTextConfiguration = TextTreeConfiguration(
 ///    ╚═══════════
 /// ```
 ///
-/// /// See also:
+/// See also:
 ///
 ///  * [DiagnosticsTreeStyle.transition], uses this style for ASCII art display.
 final TextTreeConfiguration transitionTextConfiguration = TextTreeConfiguration(
@@ -845,7 +843,7 @@ class _PrefixedStringBuilder {
     );
     int i = 0;
     final int length = lines.length;
-    for (String line in lines) {
+    for (final String line in lines) {
       i++;
       _writeLine(
         line,
@@ -1061,7 +1059,7 @@ bool _isSingleLine(DiagnosticsTreeStyle style) {
 ///
 /// See also:
 ///
-/// * [DiagnosticsNode.toStringDeep], which uses a [TextRender] to return a
+///  * [DiagnosticsNode.toStringDeep], which uses a [TextTreeRenderer] to return a
 ///    string representation of this node and its descendants.
 class TextTreeRenderer {
   /// Creates a [TextTreeRenderer] object with the given arguments specifying
@@ -1134,7 +1132,7 @@ class TextTreeRenderer {
       const int maxLines = 25;
       int lines = 0;
       void visitor(DiagnosticsNode node) {
-        for (DiagnosticsNode child in node.getChildren()) {
+        for (final DiagnosticsNode child in node.getChildren()) {
           if (lines < maxLines) {
             depth += 1;
             descendants.add('$prefixOtherLines${"  " * depth}$child');
@@ -1632,6 +1630,7 @@ abstract class DiagnosticsNode {
       return toStringDeep(parentConfiguration: parentConfiguration, minLevel: minLevel);
 
     final String description = toDescription(parentConfiguration: parentConfiguration);
+    assert(description != null);
 
     if (name == null || name.isEmpty || !showName)
       return description;
@@ -1717,7 +1716,7 @@ abstract class DiagnosticsNode {
 
 /// Debugging message displayed like a property.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// The following two properties are better expressed using this
 /// [MessageProperty] class, rather than [StringProperty], as the intent is to
@@ -1729,7 +1728,7 @@ abstract class DiagnosticsNode {
 /// var usefulness = MessageProperty('usefulness ratio', 'no metrics collected yet (never painted)');
 /// ```
 /// {@end-tool}
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// On the other hand, [StringProperty] is better suited when the property has a
 /// concrete value that is a string:
@@ -2056,7 +2055,7 @@ class PercentProperty extends DoubleProperty {
 /// when `visible` is false and nothing when visible is true, in contrast to
 /// `visible: true` or `visible: false`.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// ```dart
 /// FlagProperty(
@@ -2066,7 +2065,7 @@ class PercentProperty extends DoubleProperty {
 /// )
 /// ```
 /// {@end-tool}
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// [FlagProperty] should also be used instead of [DiagnosticsProperty<bool>]
 /// if showing the bool value would not clearly indicate the meaning of the
@@ -2510,7 +2509,7 @@ class FlagsSummary<T> extends DiagnosticsProperty<Map<String, T>> {
   // For a null value, it is omitted unless `includeEmtpy` is true and
   // [ifEntryNull] contains a corresponding description.
   Iterable<String> _formattedValues() sync* {
-    for (MapEntry<String, T> entry in value.entries) {
+    for (final MapEntry<String, T> entry in value.entries) {
       if (entry.value != null) {
         yield entry.key;
       }
@@ -2970,7 +2969,7 @@ String describeIdentity(Object object) => '${object.runtimeType}#${shortHash(obj
 ///
 /// Strips off the enum class name from the `enumEntry.toString()`.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// ```dart
 /// enum Day {
@@ -3190,7 +3189,7 @@ mixin DiagnosticableMixin {
   /// `toString` method implementation works fine using [DiagnosticsProperty]
   /// directly.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// This example shows best practices for implementing [debugFillProperties]
   /// illustrating use of all common [DiagnosticsProperty] subclasses and all

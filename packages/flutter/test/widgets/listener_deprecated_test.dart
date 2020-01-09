@@ -145,7 +145,7 @@ void main() {
       expect(exit, isNotNull);
       expect(exit.position, equals(const Offset(1.0, 1.0)));
     });
-    testWidgets('detects pointer exit when widget disappears', (WidgetTester tester) async {
+    testWidgets('does not detect pointer exit when widget disappears', (WidgetTester tester) async {
       PointerEnterEvent enter;
       PointerHoverEvent move;
       PointerExitEvent exit;
@@ -177,8 +177,7 @@ void main() {
           height: 100.0,
         ),
       ));
-      expect(exit, isNotNull);
-      expect(exit.position, equals(const Offset(400.0, 300.0)));
+      expect(exit, isNull);
       expect(tester.binding.mouseTracker.isAnnotationAttached(renderListener.hoverAnnotation), isFalse);
     });
     testWidgets('Hover works with nested listeners', (WidgetTester tester) async {
@@ -231,8 +230,8 @@ void main() {
         ),
       );
       final List<RenderObject> listeners = tester.renderObjectList(find.byType(MouseRegion)).toList();
-      final RenderMouseRegion renderListener1 = listeners[0];
-      final RenderMouseRegion renderListener2 = listeners[1];
+      final RenderMouseRegion renderListener1 = listeners[0] as RenderMouseRegion;
+      final RenderMouseRegion renderListener2 = listeners[1] as RenderMouseRegion;
       Offset center = tester.getCenter(find.byKey(key2));
       await gesture.moveTo(center);
       await tester.pump();
@@ -316,8 +315,8 @@ void main() {
         ),
       );
       final List<RenderObject> listeners = tester.renderObjectList(find.byType(MouseRegion)).toList();
-      final RenderMouseRegion renderListener1 = listeners[0];
-      final RenderMouseRegion renderListener2 = listeners[1];
+      final RenderMouseRegion renderListener1 = listeners[0] as RenderMouseRegion;
+      final RenderMouseRegion renderListener2 = listeners[1] as RenderMouseRegion;
       final Offset center1 = tester.getCenter(find.byKey(key1));
       final Offset center2 = tester.getCenter(find.byKey(key2));
       await gesture.moveTo(center1);
@@ -529,14 +528,15 @@ void main() {
       );
       await tester.pump();
       expect(HoverClientState.numEntries, equals(1));
-      expect(HoverClientState.numExits, equals(1));
+      // Unmounting a MouseRegion doesn't trigger onExit
+      expect(HoverClientState.numExits, equals(0));
 
       await tester.pumpWidget(
         const Center(child: HoverFeedback()),
       );
       await tester.pump();
       expect(HoverClientState.numEntries, equals(2));
-      expect(HoverClientState.numExits, equals(1));
+      expect(HoverClientState.numExits, equals(0));
     });
 
     testWidgets("Listener activate/deactivate don't duplicate annotations", (WidgetTester tester) async {
@@ -559,14 +559,15 @@ void main() {
         Center(child: Container(child: HoverFeedback(key: feedbackKey))),
       );
       await tester.pump();
-      expect(HoverClientState.numEntries, equals(2));
-      expect(HoverClientState.numExits, equals(1));
+      expect(HoverClientState.numEntries, equals(1));
+      expect(HoverClientState.numExits, equals(0));
       await tester.pumpWidget(
         Container(),
       );
       await tester.pump();
-      expect(HoverClientState.numEntries, equals(2));
-      expect(HoverClientState.numExits, equals(2));
+      expect(HoverClientState.numEntries, equals(1));
+      // Unmounting a MouseRegion doesn't trigger onExit
+      expect(HoverClientState.numExits, equals(0));
     });
 
     testWidgets('Exit event when unplugging mouse should have a position', (WidgetTester tester) async {

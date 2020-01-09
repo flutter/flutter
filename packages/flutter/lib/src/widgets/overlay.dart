@@ -337,7 +337,7 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
     );
     if (entries.isEmpty)
       return;
-    for (OverlayEntry entry in entries) {
+    for (final OverlayEntry entry in entries) {
       assert(entry._overlay == null);
       entry._overlay = this;
     }
@@ -390,7 +390,7 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
     if (listEquals(_entries, newEntriesList))
       return;
     final LinkedHashSet<OverlayEntry> old = LinkedHashSet<OverlayEntry>.from(_entries);
-    for (OverlayEntry entry in newEntriesList) {
+    for (final OverlayEntry entry in newEntriesList) {
       entry._overlay ??= this;
     }
     setState(() {
@@ -508,10 +508,10 @@ class _TheatreElement extends RenderObjectElement {
       super(widget);
 
   @override
-  _Theatre get widget => super.widget;
+  _Theatre get widget => super.widget as _Theatre;
 
   @override
-  _RenderTheatre get renderObject => super.renderObject;
+  _RenderTheatre get renderObject => super.renderObject as _RenderTheatre;
 
   Element _onstage;
   static final Object _onstageSlot = Object();
@@ -524,10 +524,10 @@ class _TheatreElement extends RenderObjectElement {
     assert(renderObject.debugValidateChild(child));
     if (slot == _onstageSlot) {
       assert(child is RenderStack);
-      renderObject.child = child;
+      renderObject.child = child as RenderStack;
     } else {
       assert(slot == null || slot is Element);
-      renderObject.insert(child, after: slot?.renderObject);
+      renderObject.insert(child, after: slot?.renderObject as RenderBox);
     }
   }
 
@@ -536,14 +536,14 @@ class _TheatreElement extends RenderObjectElement {
     if (slot == _onstageSlot) {
       renderObject.remove(child);
       assert(child is RenderStack);
-      renderObject.child = child;
+      renderObject.child = child as RenderStack;
     } else {
       assert(slot == null || slot is Element);
       if (renderObject.child == child) {
         renderObject.child = null;
-        renderObject.insert(child, after: slot?.renderObject);
+        renderObject.insert(child, after: slot?.renderObject as RenderBox);
       } else {
-        renderObject.move(child, after: slot?.renderObject);
+        renderObject.move(child, after: slot?.renderObject as RenderBox);
       }
     }
   }
@@ -561,7 +561,7 @@ class _TheatreElement extends RenderObjectElement {
   void visitChildren(ElementVisitor visitor) {
     if (_onstage != null)
       visitor(_onstage);
-    for (Element child in _offstage) {
+    for (final Element child in _offstage) {
       if (!_forgottenOffstageChildren.contains(child))
         visitor(child);
     }
@@ -675,7 +675,7 @@ class _RenderTheatre extends RenderBox
         );
         if (child == lastChild)
           break;
-        final StackParentData childParentData = child.parentData;
+        final StackParentData childParentData = child.parentData as StackParentData;
         child = childParentData.nextSibling;
         count += 1;
       }

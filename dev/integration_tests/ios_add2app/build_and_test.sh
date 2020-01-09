@@ -24,4 +24,3 @@ set -o pipefail && xcodebuild \
   -scheme ios_add2appTests \
   -sdk "iphonesimulator$os_version" \
   -destination "OS=$os_version,name=iPhone X" test | $PRETTY
-

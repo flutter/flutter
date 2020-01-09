@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/foundation.dart';
+
 import 'framework.dart';
 
 /// A [ValueKey] that defines where [PageStorage] values will be saved.
@@ -48,12 +50,8 @@ class _StorageEntryIdentifier {
   bool operator ==(dynamic other) {
     if (other.runtimeType != runtimeType)
       return false;
-    final _StorageEntryIdentifier typedOther = other;
-    for (int index = 0; index < keys.length; index += 1) {
-      if (keys[index] != typedOther.keys[index])
-        return false;
-    }
-    return true;
+    return other is _StorageEntryIdentifier
+        && listEquals<PageStorageKey<dynamic>>(other.keys, keys);
   }
 
   @override

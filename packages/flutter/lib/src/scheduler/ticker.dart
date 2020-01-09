@@ -433,8 +433,8 @@ class TickerFuture implements Future<void> {
   }
 
   @override
-  Future<E> then<E>(dynamic f(void value), { Function onError }) {
-    return _primaryCompleter.future.then<E>(f, onError: onError);
+  Future<R> then<R>(FutureOr<R> onValue(void value), { Function onError }) {
+    return _primaryCompleter.future.then<R>(onValue, onError: onError);
   }
 
   @override

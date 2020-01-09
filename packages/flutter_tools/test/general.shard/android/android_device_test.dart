@@ -11,16 +11,16 @@ import 'package:flutter_tools/src/android/android_console.dart';
 import 'package:flutter_tools/src/android/android_device.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/application_package.dart';
-import 'package:flutter_tools/src/base/config.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/process.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
+import 'package:platform/platform.dart';
 
 import '../../src/common.dart';
 import '../../src/context.dart';
@@ -111,8 +111,8 @@ void main() {
         final AndroidDevice device = AndroidDevice(deviceId, modelID: 'TestModel');
 
         final Directory sdkDir = MockAndroidSdk.createSdkDirectory();
-        Config.instance.setValue('android-sdk', sdkDir.path);
-        final File adbExe = fs.file(getAdbPath(androidSdk));
+        globals.config.setValue('android-sdk', sdkDir.path);
+        final File adbExe = globals.fs.file(getAdbPath(androidSdk));
 
         when(mockAndroidSdk.licensesAvailable).thenReturn(true);
         when(mockAndroidSdk.latestVersion).thenReturn(MockAndroidSdkVersion());
@@ -153,8 +153,8 @@ void main() {
         final AndroidDevice device = AndroidDevice(deviceId, modelID: 'TestModel');
 
         final Directory sdkDir = MockAndroidSdk.createSdkDirectory();
-        Config.instance.setValue('android-sdk', sdkDir.path);
-        final File adbExe = fs.file(getAdbPath(androidSdk));
+        globals.config.setValue('android-sdk', sdkDir.path);
+        final File adbExe = globals.fs.file(getAdbPath(androidSdk));
 
         when(mockAndroidSdk.licensesAvailable).thenReturn(true);
         when(mockAndroidSdk.latestVersion).thenReturn(MockAndroidSdkVersion());
@@ -194,9 +194,9 @@ void main() {
 
     testUsingContext('throws on missing adb path', () {
       final Directory sdkDir = MockAndroidSdk.createSdkDirectory();
-      Config.instance.setValue('android-sdk', sdkDir.path);
+      globals.config.setValue('android-sdk', sdkDir.path);
 
-      final File adbExe = fs.file(getAdbPath(androidSdk));
+      final File adbExe = globals.fs.file(getAdbPath(androidSdk));
       when(mockProcessManager.runSync(
         <String>[adbExe.path, 'devices', '-l'],
       )).thenThrow(ArgumentError(adbExe.path));
@@ -209,9 +209,9 @@ void main() {
 
     testUsingContext('throws on failing adb', () {
       final Directory sdkDir = MockAndroidSdk.createSdkDirectory();
-      Config.instance.setValue('android-sdk', sdkDir.path);
+      globals.config.setValue('android-sdk', sdkDir.path);
 
-      final File adbExe = fs.file(getAdbPath(androidSdk));
+      final File adbExe = globals.fs.file(getAdbPath(androidSdk));
       when(mockProcessManager.runSync(
         <String>[adbExe.path, 'devices', '-l'],
       )).thenThrow(ProcessException(adbExe.path, <String>['devices', '-l']));
@@ -497,7 +497,7 @@ Use the 'android' tool to install them:
   });
 
   testUsingContext('isSupportedForProject is true on module project', () async {
-    fs.file('pubspec.yaml')
+    globals.fs.file('pubspec.yaml')
       ..createSync()
       ..writeAsStringSync(r'''
 name: example
@@ -505,7 +505,7 @@ name: example
 flutter:
   module: {}
 ''');
-    fs.file('.packages').createSync();
+    globals.fs.file('.packages').createSync();
     final FlutterProject flutterProject = FlutterProject.current();
 
     expect(AndroidDevice('test').isSupportedForProject(flutterProject), true);
@@ -515,9 +515,9 @@ flutter:
   });
 
   testUsingContext('isSupportedForProject is true with editable host app', () async {
-    fs.file('pubspec.yaml').createSync();
-    fs.file('.packages').createSync();
-    fs.directory('android').createSync();
+    globals.fs.file('pubspec.yaml').createSync();
+    globals.fs.file('.packages').createSync();
+    globals.fs.directory('android').createSync();
     final FlutterProject flutterProject = FlutterProject.current();
 
     expect(AndroidDevice('test').isSupportedForProject(flutterProject), true);
@@ -527,8 +527,8 @@ flutter:
   });
 
   testUsingContext('isSupportedForProject is false with no host app and no module', () async {
-    fs.file('pubspec.yaml').createSync();
-    fs.file('.packages').createSync();
+    globals.fs.file('pubspec.yaml').createSync();
+    globals.fs.file('.packages').createSync();
     final FlutterProject flutterProject = FlutterProject.current();
 
     expect(AndroidDevice('test').isSupportedForProject(flutterProject), false);
@@ -665,6 +665,36 @@ flutter:
     }, overrides: <Type, Generator>{
       ProcessManager: () => mockProcessManager,
     });
+
+    testUsingContext('disposing device disposes the portForwarder', () async {
+      bool unforwardCalled = false;
+      when(mockProcessManager.run(argThat(containsAll(<String>[
+        'forward',
+        'tcp:0',
+        'tcp:123',
+      ])))).thenAnswer((_) async {
+        return ProcessResult(0, 0, '456', '');
+      });
+      when(mockProcessManager.runSync(argThat(containsAll(<String>[
+        'forward',
+        '--list',
+      ])))).thenReturn(ProcessResult(0, 0, '1234 tcp:456 tcp:123', ''));
+      when(mockProcessManager.run(argThat(containsAll(<String>[
+        'forward',
+        '--remove',
+        'tcp:456',
+      ])))).thenAnswer((_) async {
+        unforwardCalled = true;
+        return ProcessResult(0, 0, '', '');
+      });
+      expect(await forwarder.forward(123), equals(456));
+
+      await device.dispose();
+
+      expect(unforwardCalled, isTrue);
+    }, overrides: <Type, Generator>{
+      ProcessManager: () => mockProcessManager,
+    });
   });
 
   group('lastLogcatTimestamp', () {
@@ -702,6 +732,24 @@ flutter:
       logReader.logLines.listen((_) {});
 
       verify(mockProcessManager.start(const <String>['adb', '-s', '1234', 'logcat', '-v', 'time', '-T', klastLocatcatTimestamp]))
+        .called(1);
+    }, overrides: <Type, Generator>{
+      AndroidSdk: () => mockAndroidSdk,
+      ProcessManager: () => mockProcessManager,
+    });
+
+    testUsingContext('calls adb logcat with expected flags when the device logs are empty', () async {
+      when(mockAndroidSdk.adbPath).thenReturn('adb');
+      when(mockProcessManager.runSync(<String>['adb', '-s', '1234', 'shell', '-x', 'logcat', '-v', 'time', '-t', '1']))
+        .thenReturn(ProcessResult(0, 0, '', ''));
+      when(mockProcessManager.start(argThat(contains('logcat'))))
+        .thenAnswer((_) => Future<Process>.value(createMockProcess()));
+
+      final AndroidDevice device = AndroidDevice('1234');
+      final DeviceLogReader logReader = device.getLogReader();
+      logReader.logLines.listen((_) {});
+
+      verify(mockProcessManager.start(const <String>['adb', '-s', '1234', 'logcat', '-v', 'time', '-T', '']))
         .called(1);
     }, overrides: <Type, Generator>{
       AndroidSdk: () => mockAndroidSdk,

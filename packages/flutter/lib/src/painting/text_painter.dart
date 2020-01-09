@@ -170,6 +170,8 @@ class TextPainter {
   void markNeedsLayout() {
     _paragraph = null;
     _needsLayout = true;
+    _previousCaretPosition = null;
+    _previousCaretPrototype = null;
   }
 
   /// The (potentially styled) text to paint.
@@ -549,7 +551,7 @@ class TextPainter {
     _lastMaxWidth = maxWidth;
     _paragraph.layout(ui.ParagraphConstraints(width: maxWidth));
     if (minWidth != maxWidth) {
-      final double newWidth = maxIntrinsicWidth.clamp(minWidth, maxWidth);
+      final double newWidth = maxIntrinsicWidth.clamp(minWidth, maxWidth) as double;
       if (newWidth != width) {
         _paragraph.layout(ui.ParagraphConstraints(width: newWidth));
       }

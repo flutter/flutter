@@ -365,7 +365,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
     final Offset startOffset = _textPainter.getOffsetForCaret(
       TextPosition(offset: _selection.start, affinity: _selection.affinity),
-      Rect.zero,
+      _caretPrototype,
     );
     // TODO(justinmc): https://github.com/flutter/flutter/issues/31495
     // Check if the selection is visible with an approximation because a
@@ -381,7 +381,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 
     final Offset endOffset =  _textPainter.getOffsetForCaret(
       TextPosition(offset: _selection.end, affinity: _selection.affinity),
-      Rect.zero,
+      _caretPrototype,
     );
     _selectionEndInViewport.value = visibleRegion
       .inflate(visibleRegionSlop)
@@ -733,7 +733,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   }
 
   /// The text to display.
-  TextSpan get text => _textPainter.text;
+  TextSpan get text => _textPainter.text as TextSpan;
   final TextPainter _textPainter;
   set text(TextSpan value) {
     if (_textPainter.text == value)
@@ -1908,7 +1908,7 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       'Last width ($_textLayoutLastMinWidth, $_textLayoutLastMaxWidth) not the same as max width constraint (${constraints.minWidth}, ${constraints.maxWidth}).');
     assert(_selectionRects != null);
     final Paint paint = Paint()..color = _selectionColor;
-    for (ui.TextBox box in _selectionRects)
+    for (final ui.TextBox box in _selectionRects)
       canvas.drawRect(box.toRect().shift(effectiveOffset), paint);
   }
 
@@ -1955,8 +1955,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
   void _paintHandleLayers(PaintingContext context, List<TextSelectionPoint> endpoints) {
     Offset startPoint = endpoints[0].point;
     startPoint = Offset(
-      startPoint.dx.clamp(0.0, size.width),
-      startPoint.dy.clamp(0.0, size.height),
+      startPoint.dx.clamp(0.0, size.width) as double,
+      startPoint.dy.clamp(0.0, size.height) as double,
     );
     context.pushLayer(
       LeaderLayer(link: startHandleLayerLink, offset: startPoint),
@@ -1966,8 +1966,8 @@ class RenderEditable extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
     if (endpoints.length == 2) {
       Offset endPoint = endpoints[1].point;
       endPoint = Offset(
-        endPoint.dx.clamp(0.0, size.width),
-        endPoint.dy.clamp(0.0, size.height),
+        endPoint.dx.clamp(0.0, size.width) as double,
+        endPoint.dy.clamp(0.0, size.height) as double,
       );
       context.pushLayer(
         LeaderLayer(link: endHandleLayerLink, offset: endPoint),

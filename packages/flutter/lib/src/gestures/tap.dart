@@ -390,7 +390,7 @@ class TapGestureRecognizer extends BaseTapGestureRecognizer {
   /// See also:
   ///
   ///  * [kSecondaryButton], the button this callback responds to.
-  ///  * [onPrimaryTapDown], a similar callback but for a primary button.
+  ///  * [onTapDown], a similar callback but for a primary button.
   ///  * [TapDownDetails], which is passed as an argument to this callback.
   ///  * [GestureDetector.onSecondaryTapDown], which exposes this callback.
   GestureTapDownCallback onSecondaryTapDown;
@@ -407,7 +407,7 @@ class TapGestureRecognizer extends BaseTapGestureRecognizer {
   /// See also:
   ///
   ///  * [kSecondaryButton], the button this callback responds to.
-  ///  * [onPrimaryTapUp], a similar callback but for a primary button.
+  ///  * [onTapUp], a similar callback but for a primary button.
   ///  * [TapUpDetails], which is passed as an argument to this callback.
   ///  * [GestureDetector.onSecondaryTapUp], which exposes this callback.
   GestureTapUpCallback onSecondaryTapUp;
@@ -423,7 +423,7 @@ class TapGestureRecognizer extends BaseTapGestureRecognizer {
   /// See also:
   ///
   ///  * [kSecondaryButton], the button this callback responds to.
-  ///  * [onPrimaryTapCancel], a similar callback but for a primary button.
+  ///  * [onTapCancel], a similar callback but for a primary button.
   ///  * [GestureDetector.onTapCancel], which exposes this callback.
   GestureTapCancelCallback onSecondaryTapCancel;
 

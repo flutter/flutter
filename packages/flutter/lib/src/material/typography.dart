@@ -12,7 +12,7 @@ import 'text_theme.dart';
 /// its localized [TextStyle] geometry for [ThemeData.textTheme].
 ///
 /// The script category defines the overall geometry of a [TextTheme] for
-/// the static [MaterialTextGeometry.localizedFor] method in terms of the
+/// the [Typography.geometryThemeFor] method in terms of the
 /// three language categories defined in <https://material.io/go/design-typography>.
 ///
 /// Generally speaking, font sizes for [ScriptCategory.tall] and
@@ -234,12 +234,12 @@ class Typography extends Diagnosticable {
       return true;
     if (other.runtimeType != runtimeType)
       return false;
-    final Typography otherTypography = other;
-    return otherTypography.black == black
-        && otherTypography.white == white
-        && otherTypography.englishLike == englishLike
-        && otherTypography.dense == dense
-        && otherTypography.tall == tall;
+    return other is Typography
+        && other.black == black
+        && other.white == white
+        && other.englishLike == englishLike
+        && other.dense == dense
+        && other.tall == tall;
   }
 
   @override

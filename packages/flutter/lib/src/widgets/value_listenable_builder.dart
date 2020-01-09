@@ -40,7 +40,7 @@ typedef ValueWidgetBuilder<T> = Widget Function(BuildContext context, T value, W
 /// Using this pre-built child is entirely optional, but can improve
 /// performance significantly in some cases and is therefore a good practice.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This sample shows how you could use a [ValueListenableBuilder] instead of
 /// setting state on the whole [Scaffold] in the default `flutter create` app.
@@ -115,11 +115,13 @@ class ValueListenableBuilder<T> extends StatefulWidget {
   /// The [child] is optional but is good practice to use if part of the widget
   /// subtree does not depend on the value of the [valueListenable].
   const ValueListenableBuilder({
+    Key key,
     @required this.valueListenable,
     @required this.builder,
     this.child,
   }) : assert(valueListenable != null),
-       assert(builder != null);
+       assert(builder != null),
+       super(key: key);
 
   /// The [ValueListenable] whose value you depend on in order to build.
   ///

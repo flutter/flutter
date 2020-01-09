@@ -29,7 +29,7 @@ enum DayPeriod {
 /// minute or using [DateTime] object.
 /// Hours are specified between 0 and 23, as in a 24-hour clock.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// ```dart
 /// TimeOfDay now = TimeOfDay.now();
@@ -113,11 +113,9 @@ class TimeOfDay {
 
   @override
   bool operator ==(dynamic other) {
-    if (other is! TimeOfDay)
-      return false;
-    final TimeOfDay typedOther = other;
-    return typedOther.hour == hour
-        && typedOther.minute == minute;
+    return other is TimeOfDay
+        && other.hour == hour
+        && other.minute == minute;
   }
 
   @override
