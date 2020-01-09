@@ -6,12 +6,12 @@ part of engine;
 
 const bool _debugLogHistoryActions = false;
 
-class _HistoryEntry {
+class TestHistoryEntry {
   final dynamic state;
   final String title;
   final String url;
 
-  const _HistoryEntry(this.state, this.title, this.url);
+  const TestHistoryEntry(this.state, this.title, this.url);
 
   @override
   String toString() {
@@ -25,24 +25,30 @@ class _HistoryEntry {
 /// It keeps a list of history entries and event listeners in memory and
 /// manipulates them in order to achieve the desired functionality.
 class TestLocationStrategy extends LocationStrategy {
-  /// Passing a [defaultRouteName] will make the app start at that route. The
-  /// way it does it is by using it as a path on the first history entry.
-  TestLocationStrategy([String defaultRouteName = ''])
+  /// Creates a instance of [TestLocationStrategy] with an empty string as the
+  /// path.
+  factory TestLocationStrategy() => TestLocationStrategy.fromEntry(TestHistoryEntry(null, null, ''));
+
+  /// Creates an instance of [TestLocationStrategy] and populates it with a list
+  /// that has [initialEntry] as the only item.
+  TestLocationStrategy.fromEntry(TestHistoryEntry initialEntry)
       : _currentEntryIndex = 0,
-        history = <_HistoryEntry>[_HistoryEntry(null, null, defaultRouteName)];
+        history = <TestHistoryEntry>[initialEntry];
 
   @override
   String get path => ensureLeading(currentEntry.url, '/');
 
   int _currentEntryIndex;
-  final List<_HistoryEntry> history;
+  int get currentEntryIndex => _currentEntryIndex;
 
-  _HistoryEntry get currentEntry {
+  final List<TestHistoryEntry> history;
+
+  TestHistoryEntry get currentEntry {
     assert(withinAppHistory);
     return history[_currentEntryIndex];
   }
 
-  set currentEntry(_HistoryEntry entry) {
+  set currentEntry(TestHistoryEntry entry) {
     assert(withinAppHistory);
     history[_currentEntryIndex] = entry;
   }
@@ -62,7 +68,7 @@ class TestLocationStrategy extends LocationStrategy {
     // If the user goes A -> B -> C -> D, then goes back to B and pushes a new
     // entry called E, we should end up with: A -> B -> E in the history list.
     history.removeRange(_currentEntryIndex, history.length);
-    history.add(_HistoryEntry(state, title, url));
+    history.add(TestHistoryEntry(state, title, url));
 
     if (_debugLogHistoryActions) {
       print('$runtimeType.pushState(...) -> $this');
@@ -72,7 +78,10 @@ class TestLocationStrategy extends LocationStrategy {
   @override
   void replaceState(dynamic state, String title, String url) {
     assert(withinAppHistory);
-    currentEntry = _HistoryEntry(state, title, url);
+    if (url == null || url == '') {
+      url = currentEntry.url;
+    }
+    currentEntry = TestHistoryEntry(state, title, url);
 
     if (_debugLogHistoryActions) {
       print('$runtimeType.replaceState(...) -> $this');
@@ -149,7 +158,7 @@ class TestLocationStrategy extends LocationStrategy {
   String toString() {
     final List<String> lines = List<String>(history.length);
     for (int i = 0; i < history.length; i++) {
-      final _HistoryEntry entry = history[i];
+      final TestHistoryEntry entry = history[i];
       lines[i] = _currentEntryIndex == i ? '* $entry' : '  $entry';
     }
     return '$runtimeType: [\n${lines.join('\n')}\n]';
