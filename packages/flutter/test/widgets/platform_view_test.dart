@@ -1604,9 +1604,9 @@ void main() {
     });
 
     testWidgets('UiKitView rejects gestures absorbed by siblings if the touch is outside of the platform view bounds but inside platform view frame', (WidgetTester tester) async {
-      // UIKitView has bounds of (0, 0, 300, 500)
-      // UIKitView has frame of (0, 100, 300, 500)
-      // Touch happened on (550. 150)
+      // UiKitView is positioned at (left=0, top=100, right=300, bottom=600).
+      // Opaque container is on top of the UiKitView positioned at (left=0, top=500, right=300, bottom=600).
+      // Touch on (550, 150) is expected to be absorbed by the container.
       final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
       final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
       viewsController.registerViewType('webview');
