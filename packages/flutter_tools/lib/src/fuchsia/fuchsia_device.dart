@@ -172,11 +172,10 @@ Future<List<FuchsiaDevice>> parseListDevices(String text) async {
       continue;
     }
     final String name = words[1];
-    final String resolvedHost =
-      await fuchsiaSdk.fuchsiaDevFinder.resolve(
-        name,
-        local: false,
-      );
+    final String resolvedHost = await fuchsiaSdk.fuchsiaDevFinder.resolve(
+      name,
+      local: false,
+    );
     if (resolvedHost == null) {
       globals.printError('Failed to resolve host for Fuchsia device `$name`');
       continue;
@@ -248,8 +247,7 @@ class FuchsiaDevice extends Device {
     }
     // Stop the app if it's currently running.
     await stopApp(package);
-    final String host =
-    await fuchsiaSdk.fuchsiaDevFinder.resolve(
+    final String host = await fuchsiaSdk.fuchsiaDevFinder.resolve(
       name,
       local: true,
     );

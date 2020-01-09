@@ -54,8 +54,9 @@ class FuchsiaSdk {
     return devices.isNotEmpty ? devices[0] : null;
   }
 
-  /// Returns the fuchsia system logs for an attached device.
-  Stream<String> syslogs(String deviceIp) {
+  /// Returns the fuchsia system logs for an attached device where
+  /// [id] is the IP address of the device.
+  Stream<String> syslogs(String id) {
     Process process;
     try {
       final StreamController<String> controller = StreamController<String>(onCancel: () {
@@ -72,7 +73,7 @@ class FuchsiaSdk {
         'ssh',
         '-F',
         fuchsiaArtifacts.sshConfig.absolute.path,
-        deviceIp,
+        id, // The device's IP.
         remoteCommand,
       ];
       globals.processManager.start(cmd).then((Process newProcess) {
