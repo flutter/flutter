@@ -316,6 +316,45 @@ List<Plugin> findPlugins(FlutterProject project) {
 /// Finally, returns [true] if .flutter-plugins or .flutter-plugins-dependencies have changed,
 /// otherwise returns [false].
 bool _writeFlutterPluginsList(FlutterProject project, List<Plugin> plugins) {
+  const String info = 'This is a generated file; do not edit or check into version control.';
+
+  final Map<String, dynamic> result = <String, dynamic> {}; 
+  result['_info'] = '// $info';
+
+  final List<dynamic> pluginsList = <dynamic>[];
+  if (project.ios.existsSync()) {
+    pluginsList.add(<String, dynamic>{
+      project.ios.pluginConfigKey: project.ios.pluginsList(plugins)
+    });
+  }
+  if (project.android.existsSync()) {
+    pluginsList.add(<String, dynamic>{
+      project.android.pluginConfigKey: project.android.pluginsList(plugins)
+    });
+  }
+  if (project.macos.existsSync()) {
+    pluginsList.add(<String, dynamic>{
+      project.macos.pluginConfigKey: project.macos.pluginsList(plugins)
+    });
+  }
+
+  result['plugins'] = pluginsList;
+
+  final File pluginsFile = project.flutterPluginsJsonFile;
+  final String oldPluginFileContent = _readFileContent(pluginsFile);
+  final String pluginFileContent = json.encode(result);
+  if (pluginFileContent.isNotEmpty) {
+    pluginsFile.writeAsStringSync(pluginFileContent, flush: true);
+  } else {
+    if (pluginsFile.existsSync()) {
+      pluginsFile.deleteSync();
+    }
+  }
+
+  return oldPluginFileContent != _readFileContent(pluginsFile);
+}
+
+bool _writeFlutterPluginsListLegacy(FlutterProject project, List<Plugin> plugins) {
   final List<dynamic> directAppDependencies = <dynamic>[];
   const String info = 'This is a generated file; do not edit or check into version control.';
   final StringBuffer flutterPluginsBuffer = StringBuffer('# $info\n');
@@ -782,7 +821,9 @@ Future<void> _writeWebPluginRegistrant(FlutterProject project, List<Plugin> plug
 /// Assumes `pub get` has been executed since last change to `pubspec.yaml`.
 void refreshPluginsList(FlutterProject project, {bool checkProjects = false}) {
   final List<Plugin> plugins = findPlugins(project);
-  final bool changed = _writeFlutterPluginsList(project, plugins);
+  _writeFlutterPluginsList(project, plugins);
+
+  final bool changed = _writeFlutterPluginsListLegacy(project, plugins);
   if (changed) {
     if (!checkProjects || project.ios.existsSync()) {
       cocoaPods.invalidatePodInstallOutput(project.ios);
