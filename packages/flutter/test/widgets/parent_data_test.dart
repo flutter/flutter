@@ -473,7 +473,7 @@ class TestParentDataWidget extends ParentDataWidget<DummyParentData> {
   }
 
   @override
-  Type get debugTypicalAncestorWidget => throw UnimplementedError();
+  Type get debugTypicalAncestorWidget => OneAncestorWidget;
 }
 
 class DummyParentData extends ParentData {
