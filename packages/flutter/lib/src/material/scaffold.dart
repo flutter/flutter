@@ -803,7 +803,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 /// [ScaffoldState] for the current [BuildContext] via [Scaffold.of] and use the
 /// [ScaffoldState.showSnackBar] and [ScaffoldState.showBottomSheet] functions.
 ///
-/// {@tool snippet --template=stateful_widget_material}
+/// {@tool sample --template=stateful_widget_material}
 /// This example shows a [Scaffold] with a [body] and [FloatingActionButton].
 /// The [body] is a [Text] placed in a [Center] in order to center the text
 /// within the [Scaffold]. The [FloatingActionButton] is connected to a
@@ -832,7 +832,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 /// ```
 /// {@end-tool}
 ///
-/// {@tool snippet --template=stateful_widget_material}
+/// {@tool sample --template=stateful_widget_material}
 /// This example shows a [Scaffold] with a blueGrey [backgroundColor], [body]
 /// and [FloatingActionButton]. The [body] is a [Text] placed in a [Center] in
 /// order to center the text within the [Scaffold]. The [FloatingActionButton]
@@ -862,7 +862,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 /// ```
 /// {@end-tool}
 ///
-/// {@tool snippet --template=stateful_widget_material}
+/// {@tool sample --template=stateful_widget_material}
 /// This example shows a [Scaffold] with an [AppBar], a [BottomAppBar] and a
 /// [FloatingActionButton]. The [body] is a [Text] placed in a [Center] in order
 /// to center the text within the [Scaffold]. The [FloatingActionButton] is
@@ -932,7 +932,7 @@ class _FloatingActionButtonTransitionState extends State<_FloatingActionButtonTr
 /// scaffold with a differently titled AppBar. It would be better to add a
 /// listener to the [TabController] that updates the AppBar.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 /// Add a listener to the app's tab controller so that the [AppBar] title of the
 /// app's one and only scaffold is reset each time a new tab is selected.
 ///
@@ -1092,20 +1092,82 @@ class Scaffold extends StatefulWidget {
   /// devices. Swipes in from either left-to-right ([TextDirection.ltr]) or
   /// right-to-left ([TextDirection.rtl])
   ///
-  /// In the uncommon case that you wish to open the drawer manually, use the
-  /// [ScaffoldState.openDrawer] function.
-  ///
   /// Typically a [Drawer].
+  ///
+  /// To open the drawer programmatically, use the [ScaffoldState.openDrawer]
+  /// function.
+  ///
+  /// {@tool sample --template=stateful_widget_material}
+  /// To disable the drawer edge swipe, set the [Scaffold.drawerEdgeWidth]
+  /// to 0. Then, use [ScaffoldState.openDrawer] to open the drawer.
+  ///
+  /// ```dart
+  /// final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  ///
+  /// void _openDrawer() {
+  ///   _scaffoldKey.currentState.openDrawer();
+  /// }
+  ///
+  /// @override
+  /// Widget build(BuildContext context) {
+  ///   return Scaffold(
+  ///     key: _scaffoldKey,
+  ///     appBar: AppBar(title: Text('Drawer Demo')),
+  ///     body: Center(
+  ///       child: RaisedButton(
+  ///         onPressed: _openDrawer,
+  ///         child: Text('Open Drawer'),
+  ///       ),
+  ///     ),
+  ///     drawer: Drawer(
+  ///       child: Center(child: Text('This is the Drawer')),
+  ///     ),
+  ///     drawerEdgeDragWidth: 0.0, // Disable opening the drawer with a swipe gesture.
+  ///   );
+  /// }
+  /// ```
+  /// {@end-tool}
   final Widget drawer;
 
   /// A panel displayed to the side of the [body], often hidden on mobile
   /// devices. Swipes in from right-to-left ([TextDirection.ltr]) or
   /// left-to-right ([TextDirection.rtl])
   ///
-  /// In the uncommon case that you wish to open the drawer manually, use the
-  /// [ScaffoldState.openEndDrawer] function.
-  ///
   /// Typically a [Drawer].
+  ///
+  /// To open the drawer programmatically, use the [ScaffoldState.openEndDrawer]
+  /// function.
+  ///
+  /// {@tool sample --template=stateful_widget_material}
+  /// To disable the drawer edge swipe, set the [Scaffold.drawerEdgeWidth]
+  /// to 0. Then, use [ScaffoldState.openEndDrawer] to open the drawer.
+  ///
+  /// ```dart
+  /// final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  ///
+  /// void _openEndDrawer() {
+  ///   _scaffoldKey.currentState.openEndDrawer();
+  /// }
+  ///
+  /// @override
+  /// Widget build(BuildContext context) {
+  ///   return Scaffold(
+  ///     key: _scaffoldKey,
+  ///     appBar: AppBar(title: Text('Drawer Demo')),
+  ///     body: Center(
+  ///       child: RaisedButton(
+  ///         onPressed: _openEndDrawer,
+  ///         child: Text('Open End Drawer'),
+  ///       ),
+  ///     ),
+  ///     endDrawer: Drawer(
+  ///       child: Center(child: Text('This is the Drawer')),
+  ///     ),
+  ///     drawerEdgeDragWidth: 0.0, // Disable opening the drawer with a swipe gesture.
+  ///   );
+  /// }
+  /// ```
+  /// {@end-tool}
   final Widget endDrawer;
 
   /// The color to use for the scrim that obscures primary content while a drawer is open.
@@ -1205,7 +1267,7 @@ class Scaffold extends StatefulWidget {
 
   /// The state from the closest instance of this class that encloses the given context.
   ///
-  /// {@tool snippet --template=freeform}
+  /// {@tool sample --template=freeform}
   /// Typical usage of the [Scaffold.of] function is to call it from within the
   /// `build` method of a child of a [Scaffold].
   ///
@@ -1258,7 +1320,7 @@ class Scaffold extends StatefulWidget {
   /// ```
   /// {@end-tool}
   ///
-  /// {@tool snippet --template=stateless_widget_material}
+  /// {@tool sample --template=stateless_widget_material}
   /// When the [Scaffold] is actually created in the same `build` function, the
   /// `context` argument to the `build` function can't be used to find the
   /// [Scaffold] (since it's "above" the widget being returned in the widget
@@ -1815,7 +1877,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
   ///
   /// {@animation 350 622 https://flutter.github.io/assets-for-api-docs/assets/material/show_bottom_sheet.mp4}
   ///
-  /// {@tool snippet --template=stateless_widget_scaffold}
+  /// {@tool sample --template=stateless_widget_scaffold}
   ///
   /// This example demonstrates how to use `showBottomSheet` to display a
   /// bottom sheet when a user taps a button. It also demonstrates how to
@@ -2051,7 +2113,7 @@ class ScaffoldState extends State<Scaffold> with TickerProviderStateMixin {
     _snackBarTimer?.cancel();
     _snackBarTimer = null;
     _geometryNotifier.dispose();
-    for (_StandardBottomSheet bottomSheet in _dismissedBottomSheets) {
+    for (final _StandardBottomSheet bottomSheet in _dismissedBottomSheets) {
       bottomSheet.animationController?.dispose();
     }
     if (_currentBottomSheet != null) {
@@ -2574,11 +2636,12 @@ class PersistentBottomSheetController<T> extends ScaffoldFeatureController<_Stan
 
 class _ScaffoldScope extends InheritedWidget {
   const _ScaffoldScope({
+    Key key,
     @required this.hasDrawer,
     @required this.geometryNotifier,
     @required Widget child,
   }) : assert(hasDrawer != null),
-       super(child: child);
+       super(key: key, child: child);
 
   final bool hasDrawer;
   final _ScaffoldGeometryNotifier geometryNotifier;

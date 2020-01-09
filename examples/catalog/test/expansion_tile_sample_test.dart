@@ -13,11 +13,11 @@ void main() {
     await tester.pump();
 
     // Initially only the top level EntryItems (the "chapters") are present.
-    for (Entry chapter in expansion_tile_sample.data) {
+    for (final Entry chapter in expansion_tile_sample.data) {
       expect(find.text(chapter.title), findsOneWidget);
-      for (Entry section in chapter.children) {
+      for (final Entry section in chapter.children) {
         expect(find.text(section.title), findsNothing);
-        for (Entry item in section.children)
+        for (final Entry item in section.children)
           expect(find.text(item.title), findsNothing);
       }
     }
@@ -34,15 +34,15 @@ void main() {
 
     // Expand the chapters. Now the chapter and sections, but not the
     // items, should be present.
-    for (Entry chapter in expansion_tile_sample.data.reversed)
+    for (final Entry chapter in expansion_tile_sample.data.reversed)
       await tapEntry(chapter.title);
 
-    for (Entry chapter in expansion_tile_sample.data) {
+    for (final Entry chapter in expansion_tile_sample.data) {
       expect(find.text(chapter.title), findsOneWidget);
-      for (Entry section in chapter.children) {
+      for (final Entry section in chapter.children) {
         expect(find.text(section.title), findsOneWidget);
         await scrollUpOneEntry();
-        for (Entry item in section.children)
+        for (final Entry item in section.children)
           expect(find.text(item.title), findsNothing);
       }
       await scrollUpOneEntry();
@@ -53,8 +53,8 @@ void main() {
     await tester.pumpAndSettle();
 
     // Expand the sections. Now Widgets for all three levels should be present.
-    for (Entry chapter in expansion_tile_sample.data) {
-      for (Entry section in chapter.children) {
+    for (final Entry chapter in expansion_tile_sample.data) {
+      for (final Entry section in chapter.children) {
         await tapEntry(section.title);
         await scrollUpOneEntry();
       }
@@ -65,11 +65,11 @@ void main() {
     // Working in reverse order, so we don't need to do anymore scrolling,
     // check that everything is visible and close the sections and
     // chapters as we go up.
-    for (Entry chapter in expansion_tile_sample.data.reversed) {
+    for (final Entry chapter in expansion_tile_sample.data.reversed) {
       expect(find.text(chapter.title), findsOneWidget);
-      for (Entry section in chapter.children.reversed) {
+      for (final Entry section in chapter.children.reversed) {
         expect(find.text(section.title), findsOneWidget);
-        for (Entry item in section.children.reversed)
+        for (final Entry item in section.children.reversed)
           expect(find.text(item.title), findsOneWidget);
         await tapEntry(section.title); // close the section
       }
@@ -77,11 +77,11 @@ void main() {
     }
 
     // Finally only the top level EntryItems (the "chapters") are present.
-    for (Entry chapter in expansion_tile_sample.data) {
+    for (final Entry chapter in expansion_tile_sample.data) {
       expect(find.text(chapter.title), findsOneWidget);
-      for (Entry section in chapter.children) {
+      for (final Entry section in chapter.children) {
         expect(find.text(section.title), findsNothing);
-        for (Entry item in section.children)
+        for (final Entry item in section.children)
           expect(find.text(item.title), findsNothing);
       }
     }

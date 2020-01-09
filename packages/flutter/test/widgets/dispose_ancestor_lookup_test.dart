@@ -8,7 +8,7 @@ import 'package:flutter/widgets.dart';
 typedef TestCallback = void Function(BuildContext context);
 
 class TestWidget extends StatefulWidget {
-  const TestWidget(this.callback);
+  const TestWidget(this.callback, { Key key }) : super(key: key);
 
   final TestCallback callback;
 

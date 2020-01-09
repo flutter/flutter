@@ -122,7 +122,7 @@ import 'text_style.dart';
 ///
 /// ### Examples
 ///
-/// {@tool sample}
+/// {@tool snippet}
 /// In this simple case, the text will be rendered at font size 10, however,
 /// the vertical height of each line will be the strut height (Roboto in
 /// font size 30 * 1.5) as the text itself is shorter than the strut.
@@ -143,7 +143,7 @@ import 'text_style.dart';
 /// ```
 /// {@end-tool}
 ///
-/// {@tool sample}
+/// {@tool snippet}
 /// Here, strut is used to absorb the additional line height in the second line.
 /// The strut [height] was defined as 1.5 (the default font size is 14), which
 /// caused all lines to be laid out taller than without strut. This extra space
@@ -184,7 +184,7 @@ import 'text_style.dart';
 /// ```
 /// {@end-tool}
 ///
-/// {@tool sample}
+/// {@tool snippet}
 /// Here, strut is used to enable strange and overlapping text to achieve unique
 /// effects. The `M`s in lines 2 and 3 are able to extend above their lines and
 /// fill empty space in lines above. The [forceStrutHeight] is enabled and functions
@@ -227,7 +227,7 @@ import 'text_style.dart';
 /// ```
 /// {@end-tool}
 ///
-/// {@tool sample}
+/// {@tool snippet}
 /// This example uses forceStrutHeight to create a 'drop cap' for the 'T' in 'The'.
 /// By locking the line heights to the metrics of the 14pt serif font, we are able
 /// to lay out a large 37pt 'T' on the second line to take up space on both the first

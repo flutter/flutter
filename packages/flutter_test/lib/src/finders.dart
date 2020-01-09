@@ -719,7 +719,7 @@ class _AncestorFinder extends Finder {
   @override
   Iterable<Element> get allCandidates {
     final List<Element> candidates = <Element>[];
-    for (Element root in descendant.evaluate()) {
+    for (final Element root in descendant.evaluate()) {
       final List<Element> ancestors = <Element>[];
       if (matchRoot)
         ancestors.add(root);

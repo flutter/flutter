@@ -30,7 +30,7 @@ import 'text_style.dart';
 /// span in a widget, use a [RichText]. For text with a single style, consider
 /// using the [Text] widget.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// The text "Hello world!", in black:
 ///
@@ -110,7 +110,7 @@ class TextSpan extends InlineSpan {
   /// [GestureRecognizer.dispose] when the [InlineSpan] object is no longer
   /// used.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// This example shows how to manage the lifetime of a gesture recognizer
   /// provided to an [InlineSpan] object. It defines a `BuzzingText` widget
@@ -206,7 +206,7 @@ class TextSpan extends InlineSpan {
     if (text != null)
       builder.addText(text);
     if (children != null) {
-      for (InlineSpan child in children) {
+      for (final InlineSpan child in children) {
         assert(child != null);
         child.build(
           builder,
@@ -231,7 +231,7 @@ class TextSpan extends InlineSpan {
         return false;
     }
     if (children != null) {
-      for (InlineSpan child in children) {
+      for (final InlineSpan child in children) {
         if (!child.visitChildren(visitor))
           return false;
       }
@@ -256,7 +256,7 @@ class TextSpan extends InlineSpan {
         return false;
     }
     if (children != null) {
-      for (InlineSpan child in children) {
+      for (final InlineSpan child in children) {
         assert(
           child is TextSpan,
           'visitTextSpan is deprecated. Use visitChildren to support InlineSpans',
@@ -300,7 +300,7 @@ class TextSpan extends InlineSpan {
       buffer.write(text);
     }
     if (children != null) {
-      for (InlineSpan child in children) {
+      for (final InlineSpan child in children) {
         child.computeToPlainText(buffer,
           includeSemanticsLabels: includeSemanticsLabels,
           includePlaceholders: includePlaceholders,
@@ -320,7 +320,7 @@ class TextSpan extends InlineSpan {
       ));
     }
     if (children != null) {
-      for (InlineSpan child in children) {
+      for (final InlineSpan child in children) {
         child.computeSemanticsInformation(collector);
       }
     }
@@ -364,7 +364,7 @@ class TextSpan extends InlineSpan {
   bool debugAssertIsValid() {
     assert(() {
       if (children != null) {
-        for (InlineSpan child in children) {
+        for (final InlineSpan child in children) {
           if (child == null) {
             throw FlutterError.fromParts(<DiagnosticsNode>[
               ErrorSummary('TextSpan contains a null child.'),

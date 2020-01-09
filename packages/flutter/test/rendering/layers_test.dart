@@ -113,15 +113,15 @@ void main() {
     b.append(f);
     c.append(g);
 
-    for (ContainerLayer layer in allLayers) {
+    for (final ContainerLayer layer in allLayers) {
       expect(layer.debugSubtreeNeedsAddToScene, true);
     }
 
-    for (ContainerLayer layer in allLayers) {
+    for (final ContainerLayer layer in allLayers) {
       layer.debugMarkClean();
     }
 
-    for (ContainerLayer layer in allLayers) {
+    for (final ContainerLayer layer in allLayers) {
       expect(layer.debugSubtreeNeedsAddToScene, false);
     }
 
@@ -148,7 +148,7 @@ void main() {
     expect(g.debugSubtreeNeedsAddToScene, true);
 
     a.buildScene(SceneBuilder());
-    for (ContainerLayer layer in allLayers) {
+    for (final ContainerLayer layer in allLayers) {
       expect(layer.debugSubtreeNeedsAddToScene, false);
     }
   });

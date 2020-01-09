@@ -144,7 +144,7 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
     final List<String> output = (await eval(adbPath, <String>['devices', '-l'], canFail: false))
         .trim().split('\n');
     final List<String> results = <String>[];
-    for (String line in output) {
+    for (final String line in output) {
       // Skip lines like: * daemon started successfully *
       if (line.startsWith('* daemon '))
         continue;
@@ -172,7 +172,7 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
   @override
   Future<Map<String, HealthCheckResult>> checkDevices() async {
     final Map<String, HealthCheckResult> results = <String, HealthCheckResult>{};
-    for (String deviceId in await discoverDevices()) {
+    for (final String deviceId in await discoverDevices()) {
       try {
         final AndroidDevice device = AndroidDevice(deviceId: deviceId);
         // Just a smoke test that we can read wakefulness state
@@ -432,7 +432,7 @@ class IosDeviceDiscovery implements DeviceDiscovery {
   @override
   Future<Map<String, HealthCheckResult>> checkDevices() async {
     final Map<String, HealthCheckResult> results = <String, HealthCheckResult>{};
-    for (String deviceId in await discoverDevices()) {
+    for (final String deviceId in await discoverDevices()) {
       // TODO(ianh): do a more meaningful connectivity check than just recording the ID
       results['ios-device-$deviceId'] = HealthCheckResult.success();
     }

@@ -54,7 +54,7 @@ typedef ScrollableWidgetBuilder = Widget Function(
 /// to position sheet based on the space it is taking, the [expand] property
 /// may be set to false.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This is a sample widget which shows a [ListView] that has 25 [ListTile]s.
 /// It starts out as taking up half the body of the [Scaffold], and can be

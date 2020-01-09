@@ -1440,7 +1440,7 @@ mixin WidgetInspectorService {
       // https://github.com/flutter/flutter/issues/32660 is fixed.
       return !file.contains('packages/flutter/');
     }
-    for (String directory in _pubRootDirectories) {
+    for (final String directory in _pubRootDirectories) {
       if (file.startsWith(directory)) {
         return true;
       }
@@ -1573,7 +1573,7 @@ mixin WidgetInspectorService {
     InspectorSerializationDelegate delegate,
   ) {
     final List<DiagnosticsNode> children = <DiagnosticsNode>[
-      for (DiagnosticsNode child in nodes)
+      for (final DiagnosticsNode child in nodes)
         if (!delegate.summaryTree || _shouldShowInSummaryTree(child))
           child
         else
@@ -1781,7 +1781,7 @@ mixin WidgetInspectorService {
     Element current = selection?.currentElement;
     if (current != null && !_isValueCreatedByLocalProject(current)) {
       Element firstLocal;
-      for (Element candidate in current.debugGetDiagnosticChain()) {
+      for (final Element candidate in current.debugGetDiagnosticChain()) {
         if (_isValueCreatedByLocalProject(candidate)) {
           firstLocal = candidate;
           break;
@@ -2003,7 +2003,7 @@ class _ElementLocationStatsTracker {
     // trigger significant additional memory allocations. Avoiding memory
     // allocations is important to minimize the impact this class has on cpu
     // and memory performance of the running app.
-    for (_LocationCount entry in active) {
+    for (final _LocationCount entry in active) {
       entry.reset();
     }
     active.clear();
@@ -2014,7 +2014,7 @@ class _ElementLocationStatsTracker {
   Map<String, dynamic> exportToJson(Duration startTime) {
     final List<int> events = List<int>.filled(active.length * 2, 0);
     int j = 0;
-    for (_LocationCount stat in active) {
+    for (final _LocationCount stat in active) {
       events[j++] = stat.id;
       events[j++] = stat.count;
     }
@@ -2027,7 +2027,7 @@ class _ElementLocationStatsTracker {
     if (newLocations.isNotEmpty) {
       // Add all newly used location ids to the JSON.
       final Map<String, List<int>> locationsJson = <String, List<int>>{};
-      for (_LocationCount entry in newLocations) {
+      for (final _LocationCount entry in newLocations) {
         final _Location location = entry.location;
         final List<int> jsonForFile = locationsJson.putIfAbsent(
           location.file,
@@ -2537,7 +2537,7 @@ class _InspectorOverlayLayer extends Layer {
 
     final RenderObject selected = selection.current;
     final List<_TransformedRect> candidates = <_TransformedRect>[];
-    for (RenderObject candidate in selection.candidates) {
+    for (final RenderObject candidate in selection.candidates) {
       if (candidate == selected || !candidate.attached)
         continue;
       candidates.add(_TransformedRect(candidate));
@@ -2584,7 +2584,7 @@ class _InspectorOverlayLayer extends Layer {
     // Show all other candidate possibly selected elements. This helps selecting
     // render objects by selecting the edge of the bounding box shows all
     // elements the user could toggle the selection between.
-    for (_TransformedRect transformedRect in state.candidates) {
+    for (final _TransformedRect transformedRect in state.candidates) {
       canvas
         ..save()
         ..transform(transformedRect.transform.storage)
@@ -2767,7 +2767,7 @@ bool _isDebugCreator(DiagnosticsNode node) => node is DiagnosticsDebugCreator;
 Iterable<DiagnosticsNode> transformDebugCreator(Iterable<DiagnosticsNode> properties) sync* {
   final List<DiagnosticsNode> pending = <DiagnosticsNode>[];
   bool foundStackTrace = false;
-  for (DiagnosticsNode node in properties) {
+  for (final DiagnosticsNode node in properties) {
     if (!foundStackTrace && node is DiagnosticsStackTrace)
       foundStackTrace = true;
     if (_isDebugCreator(node)) {

@@ -23,6 +23,18 @@ void main() {
     expect(border.bottom, same(side));
   });
 
+  test('Border.symmetric constructor', () {
+    expect(() => Border.symmetric(vertical: nonconst(null)), throwsAssertionError);
+    expect(() => Border.symmetric(horizontal: nonconst(null)), throwsAssertionError);
+    const BorderSide side1 = BorderSide(color: Color(0xFFFFFFFF));
+    const BorderSide side2 = BorderSide(color: Color(0xFF000000));
+    const Border border = Border.symmetric(vertical: side1, horizontal: side2);
+    expect(border.left, same(side2));
+    expect(border.top, same(side1));
+    expect(border.right, same(side2));
+    expect(border.bottom, same(side1));
+  });
+
   test('Border.merge', () {
     const BorderSide magenta3 = BorderSide(color: Color(0xFFFF00FF), width: 3.0);
     const BorderSide magenta6 = BorderSide(color: Color(0xFFFF00FF), width: 6.0);

@@ -9,6 +9,7 @@ import '../base/common.dart';
 import '../base/file_system.dart';
 import '../base/utils.dart';
 import '../build_info.dart';
+import '../globals.dart' as globals;
 import '../project.dart';
 
 abstract class WindowsApp extends ApplicationPackage {
@@ -64,7 +65,7 @@ class BuildableWindowsApp extends WindowsApp {
     if (!exeNameFile.existsSync()) {
       throwToolExit('Failed to find Windows executable name');
     }
-    return fs.path.join(
+    return globals.fs.path.join(
         getWindowsBuildDirectory(),
         'x64',
         toTitleCase(getNameForBuildMode(buildMode)),

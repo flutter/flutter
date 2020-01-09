@@ -15,4 +15,3 @@
 
 @interface MainViewController : UIViewController <NativeViewControllerDelegate>
 @end
-

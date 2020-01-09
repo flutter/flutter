@@ -12,7 +12,7 @@ class TestRoute extends PageRouteBuilder<void> {
 }
 
 class IconTextBox extends StatelessWidget {
-  const IconTextBox(this.text);
+  const IconTextBox(this.text, { Key key }) : super(key: key);
   final String text;
   @override
   Widget build(BuildContext context) {
