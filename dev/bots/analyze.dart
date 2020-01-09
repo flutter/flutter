@@ -746,9 +746,11 @@ final Set<Hash256> _grandfatheredBinaries = <Hash256>{
   Hash256(0xD29D4E0AF9256DC9, 0x2D0A8F8810608A5E, 0x64A132AD8B397CA2, 0xC4DDC0B1C26A68C3),
 
   // packages/flutter_tools/templates/app/web/icons/Icon-192.png.copy.tmpl
+  // examples/flutter_gallery/web/icons/Icon-192.png
   Hash256(0x3DCE99077602F704, 0x21C1C6B2A240BC9B, 0x83D64D86681D45F2, 0x154143310C980BE3),
 
   // packages/flutter_tools/templates/app/web/icons/Icon-512.png.copy.tmpl
+  // examples/flutter_gallery/web/icons/Icon-512.png
   Hash256(0xBACCB205AE45f0B4, 0x21BE1657259B4943, 0xAC40C95094AB877F, 0x3BCBE12CD544DCBE),
 
   // GALLERY ICONS
