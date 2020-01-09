@@ -4,6 +4,7 @@
 
 import 'dart:async';
 
+import 'package:flutter_tools/src/platform_plugins.dart';
 import 'package:meta/meta.dart';
 import 'package:xml/xml.dart' as xml;
 import 'package:yaml/yaml.dart';
@@ -145,6 +146,9 @@ class FlutterProject {
   File get packagesFile => directory.childFile('.packages');
 
   /// The `.flutter-plugins` file of this project.
+  File get flutterPluginsJsonFile => directory.childFile('.flutter-plugins.json');
+
+  /// The `.flutter-plugins` file of this project.
   File get flutterPluginsFile => directory.childFile('.flutter-plugins');
 
   /// The `.flutter-plugins-dependencies` file of this project,
@@ -251,6 +255,32 @@ class FlutterProject {
   }
 }
 
+abstract class FlutterProjectPlatform {
+  List<Map<String,dynamic>> pluginsList(List<Plugin>plugins) {
+    final Iterable<Plugin> platformPlugins = plugins.where((Plugin p) {
+      return p.platforms.containsKey(pluginConfigKey);
+    });
+      final Set<String> pluginNames = <String>{};
+    for (final Plugin plugin in plugins) {
+      pluginNames.add(plugin.name);
+    }
+
+    final List<Map<String, dynamic>> list = <Map<String, dynamic>>[];
+    for (final Plugin plugin in platformPlugins) {
+      list.add(<String, dynamic>{
+        'name': plugin.name,
+        'dependencies': <String>[
+          ...plugin.dependencies.where(pluginNames.contains)
+        ]
+      });
+    }
+    return list;
+  }
+
+  String get pluginConfigKey;
+  bool existsSync();
+}
+
 /// Represents an Xcode-based sub-project.
 ///
 /// This defines interfaces common to iOS and macOS projects.
@@ -300,11 +330,14 @@ abstract class XcodeBasedProject {
 ///
 /// Instances will reflect the contents of the `ios/` sub-folder of
 /// Flutter applications and the `.ios/` sub-folder of Flutter module projects.
-class IosProject implements XcodeBasedProject {
+class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
   IosProject.fromFlutter(this.parent);
 
   @override
   final FlutterProject parent;
+
+  @override
+  String get pluginConfigKey => IOSPlugin.kConfigKey;
 
   static final RegExp _productBundleIdPattern = RegExp(r'''^\s*PRODUCT_BUNDLE_IDENTIFIER\s*=\s*(["']?)(.*?)\1;\s*$''');
   static const String _productBundleIdVariable = r'$(PRODUCT_BUNDLE_IDENTIFIER)';
@@ -574,11 +607,14 @@ class IosProject implements XcodeBasedProject {
 ///
 /// Instances will reflect the contents of the `android/` sub-folder of
 /// Flutter applications and the `.android/` sub-folder of Flutter module projects.
-class AndroidProject {
+class AndroidProject extends FlutterProjectPlatform{
   AndroidProject._(this.parent);
 
   /// The parent of this project.
   final FlutterProject parent;
+
+  @override
+  String get pluginConfigKey => AndroidPlugin.kConfigKey;
 
   static final RegExp _applicationIdPattern = RegExp('^\\s*applicationId\\s+[\'\"](.*)[\'\"]\\s*\$');
   static final RegExp _kotlinPluginPattern = RegExp('^\\s*apply plugin\:\\s+[\'\"]kotlin-android[\'\"]\\s*\$');
@@ -627,6 +663,7 @@ class AndroidProject {
   }
 
   /// Whether the current flutter project has an Android sub-project.
+  @override
   bool existsSync() {
     return parent.isModule || _editableHostAppDirectory.existsSync();
   }
@@ -810,12 +847,15 @@ Match _firstMatchInFile(File file, RegExp regExp) {
 }
 
 /// The macOS sub project.
-class MacOSProject implements XcodeBasedProject {
+class MacOSProject extends FlutterProjectPlatform implements XcodeBasedProject {
   MacOSProject._(this.parent);
 
   @override
   final FlutterProject parent;
 
+  @override
+  String get pluginConfigKey => MacOSPlugin.kConfigKey;
+  
   static const String _hostAppBundleName = 'Runner';
 
   @override
