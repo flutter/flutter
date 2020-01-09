@@ -337,6 +337,16 @@ bool _writeFlutterPluginsList(FlutterProject project, List<Plugin> plugins) {
       project.macos.pluginConfigKey: project.macos.pluginsList(plugins)
     });
   }
+  if (project.linux.existsSync()) {
+    pluginsList.add(<String, dynamic>{
+      project.linux.pluginConfigKey: project.linux.pluginsList(plugins)
+    });
+  }
+  if (project.windows.existsSync()) {
+    pluginsList.add(<String, dynamic>{
+      project.windows.pluginConfigKey: project.windows.pluginsList(plugins)
+    });
+  }
 
   result['plugins'] = pluginsList;
 
