@@ -967,8 +967,6 @@ class DeferringImageProvider<T> extends ImageProvider<T> {
       }
     }
     obtainKey(configuration).then(deferredResolve);
-      deferredResolve(key);
-    });
   }
 
   @override
