@@ -57,14 +57,14 @@ void main() {
     expect(topEnd * 1.0, topEnd);
     expect(topLeft * 1.0, topLeft);
     expect(topRight * 1.0, topRight);
-    for (double n in numbers) {
+    for (final double n in numbers) {
       expect((topStart * n).add(topStart), topStart * (n + 1.0));
       expect((topEnd * n).add(topEnd), topEnd * (n + 1.0));
-      for (double m in numbers)
+      for (final double m in numbers)
         expect((topStart * n).add(topStart * m), topStart * (n + m));
     }
     expect(topStart + topStart + topStart, topStart * 3.0); // without using "add"
-    for (TextDirection x in TextDirection.values) {
+    for (final TextDirection x in TextDirection.values) {
       expect((topEnd * 0.0).add(topRight * 0.0).resolve(x), center.add(center).resolve(x));
       expect((topEnd * 0.0).add(topLeft).resolve(x), center.add(topLeft).resolve(x));
       expect(((topEnd * 0.0).resolve(x)).add(topLeft.resolve(x)), (center.resolve(x)).add(topLeft.resolve(x)));
@@ -107,7 +107,7 @@ void main() {
     final AlignmentGeometry mixed2 = const Alignment(70.0, 110.0).add(const AlignmentDirectional(130.0, 170.0));
     final AlignmentGeometry mixed3 = const Alignment(25.0, 42.5).add(const AlignmentDirectional(55.0, 80.0));
 
-    for (TextDirection direction in TextDirection.values) {
+    for (final TextDirection direction in TextDirection.values) {
       expect(AlignmentGeometry.lerp(mixed1, mixed2, 0.0).resolve(direction), mixed1.resolve(direction));
       expect(AlignmentGeometry.lerp(mixed1, mixed2, 1.0).resolve(direction), mixed2.resolve(direction));
       expect(AlignmentGeometry.lerp(mixed1, mixed2, 0.25).resolve(direction), mixed3.resolve(direction));
@@ -150,17 +150,17 @@ void main() {
 
     final List<double> times = <double>[ 0.25, 0.5, 0.75 ];
 
-    for (TextDirection direction in TextDirection.values) {
+    for (final TextDirection direction in TextDirection.values) {
       final Alignment defaultValue = AlignmentDirectional.center.resolve(direction);
-      for (AlignmentGeometry a in offsets) {
+      for (final AlignmentGeometry a in offsets) {
         final Alignment resolvedA = a?.resolve(direction) ?? defaultValue;
-        for (AlignmentGeometry b in offsets) {
+        for (final AlignmentGeometry b in offsets) {
           final Alignment resolvedB = b?.resolve(direction) ?? defaultValue;
           approxExpect(Alignment.lerp(resolvedA, resolvedB, 0.0), resolvedA);
           approxExpect(Alignment.lerp(resolvedA, resolvedB, 1.0), resolvedB);
           approxExpect((AlignmentGeometry.lerp(a, b, 0.0) ?? defaultValue).resolve(direction), resolvedA);
           approxExpect((AlignmentGeometry.lerp(a, b, 1.0) ?? defaultValue).resolve(direction), resolvedB);
-          for (double t in times) {
+          for (final double t in times) {
             assert(t > 0.0);
             assert(t < 1.0);
             final Alignment value = (AlignmentGeometry.lerp(a, b, t) ?? defaultValue).resolve(direction);
@@ -191,7 +191,7 @@ void main() {
     expect(const AlignmentDirectional(1.0, 2.0) / 2.0, const AlignmentDirectional(0.5, 1.0));
     expect(const AlignmentDirectional(1.0, 2.0) % 2.0, const AlignmentDirectional(1.0, 0.0));
     expect(const AlignmentDirectional(1.0, 2.0) ~/ 2.0, const AlignmentDirectional(0.0, 1.0));
-    for (TextDirection direction in TextDirection.values) {
+    for (final TextDirection direction in TextDirection.values) {
       expect(Alignment.center.add(const AlignmentDirectional(1.0, 2.0) * 2.0).resolve(direction), const AlignmentDirectional(2.0, 4.0).resolve(direction));
       expect(Alignment.center.add(const AlignmentDirectional(1.0, 2.0) / 2.0).resolve(direction), const AlignmentDirectional(0.5, 1.0).resolve(direction));
       expect(Alignment.center.add(const AlignmentDirectional(1.0, 2.0) % 2.0).resolve(direction), const AlignmentDirectional(1.0, 0.0).resolve(direction));

@@ -18,6 +18,9 @@ import 'theme.dart';
 /// A palette of [Color] constants that describe colors commonly used when
 /// matching the iOS platform aesthetics.
 class CupertinoColors {
+  // This class is not meant to be instatiated or extended; this constructor
+  // prevents instantiation and extension.
+  // ignore: unused_element
   CupertinoColors._();
 
   /// iOS 13's default blue color. Used to indicate active elements such as
@@ -589,7 +592,7 @@ class CupertinoColors {
 /// [CupertinoDynamicColor.resolve] against its own [BuildContext], on a best-effort
 /// basis.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 /// By default a [CupertinoButton] has no background color. The following sample
 /// code shows how to build a [CupertinoButton] that appears white in light mode,
 /// and changes automatically to black in dark mode.
@@ -614,7 +617,7 @@ class CupertinoColors {
 /// implicitly resolves all the colors used in the retrieved [CupertinoThemeData],
 /// before returning it.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 /// The following code sample creates a [Container] with the `primaryColor` of the
 /// current theme. If `primaryColor` is a [CupertinoDynamicColor], the container
 /// will be adaptive, thanks to [CupertinoTheme.of]: it will switch to `primaryColor`'s
@@ -640,7 +643,7 @@ class CupertinoColors {
 /// the colors used in the [Border] have to be resolved manually before being passed
 /// to [CupertinoNavigationBar]'s constructor.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// The following code samples demonstrate two cases where you have to manually
 /// resolve a [CupertinoDynamicColor].
@@ -997,20 +1000,21 @@ class CupertinoDynamicColor extends Color with DiagnosticableMixin implements Di
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
-
-    return other.runtimeType == runtimeType
-        && value == other.value
-        && color == other.color
-        && darkColor == other.darkColor
-        && highContrastColor == other.highContrastColor
-        && darkHighContrastColor == other.darkHighContrastColor
-        && elevatedColor == other.elevatedColor
-        && darkElevatedColor == other.darkElevatedColor
-        && highContrastElevatedColor == other.highContrastElevatedColor
-        && darkHighContrastElevatedColor == other.darkHighContrastElevatedColor;
+    if (other.runtimeType != runtimeType)
+      return false;
+    return other is CupertinoDynamicColor
+        && other.value == value
+        && other.color == color
+        && other.darkColor == darkColor
+        && other.highContrastColor == highContrastColor
+        && other.darkHighContrastColor == darkHighContrastColor
+        && other.elevatedColor == elevatedColor
+        && other.darkElevatedColor == darkElevatedColor
+        && other.highContrastElevatedColor == highContrastElevatedColor
+        && other.darkHighContrastElevatedColor == darkHighContrastElevatedColor;
   }
 
   @override

@@ -2,13 +2,14 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:platform/platform.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/base/utils.dart';
 import 'package:flutter_tools/src/build_system/build_system.dart';
 import 'package:flutter_tools/src/build_system/exceptions.dart';
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/convert.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:mockito/mockito.dart';
 
 import '../../src/common.dart';
@@ -93,13 +94,13 @@ void main() {
     testbed = Testbed(
       setup: () {
         environment = Environment(
-          outputDir: fs.currentDirectory,
-          projectDir: fs.currentDirectory,
+          outputDir: globals.fs.currentDirectory,
+          projectDir: globals.fs.currentDirectory,
         );
-        fs.file('foo.dart')
+        globals.fs.file('foo.dart')
           ..createSync(recursive: true)
           ..writeAsStringSync('');
-        fs.file('pubspec.yaml').createSync();
+        globals.fs.file('pubspec.yaml').createSync();
       },
       overrides: <Type, Generator>{
         Platform: () => mockPlatform,
@@ -109,7 +110,7 @@ void main() {
 
   test('Does not throw exception if asked to build with missing inputs', () => testbed.run(() async {
     // Delete required input file.
-    fs.file('foo.dart').deleteSync();
+    globals.fs.file('foo.dart').deleteSync();
     final BuildResult buildResult = await buildSystem.build(fooTarget, environment);
 
     expect(buildResult.hasException, false);
@@ -131,7 +132,7 @@ void main() {
   test('Saves a stamp file with inputs and outputs', () => testbed.run(() async {
     await buildSystem.build(fooTarget, environment);
 
-    final File stampFile = fs.file(fs.path.join(environment.buildDir.path, 'foo.stamp'));
+    final File stampFile = globals.fs.file(globals.fs.path.join(environment.buildDir.path, 'foo.stamp'));
     expect(stampFile.existsSync(), true);
 
     final Map<String, dynamic> stampContents = castStringKeyedMap(json.decode(stampFile.readAsStringSync()));
@@ -141,9 +142,9 @@ void main() {
   test('Creates a BuildResult with inputs and outputs', () => testbed.run(() async {
     final BuildResult result = await buildSystem.build(fooTarget, environment);
 
-    expect(result.inputFiles.single.path, fs.path.absolute('foo.dart'));
+    expect(result.inputFiles.single.path, globals.fs.path.absolute('foo.dart'));
     expect(result.outputFiles.single.path,
-        fs.path.absolute(fs.path.join(environment.buildDir.path, 'out')));
+        globals.fs.path.absolute(globals.fs.path.join(environment.buildDir.path, 'out')));
   }));
 
   test('Does not re-invoke build if stamp is valid', () => testbed.run(() async {
@@ -156,7 +157,7 @@ void main() {
   test('Re-invoke build if input is modified', () => testbed.run(() async {
     await buildSystem.build(fooTarget, environment);
 
-    fs.file('foo.dart').writeAsStringSync('new contents');
+    globals.fs.file('foo.dart').writeAsStringSync('new contents');
 
     await buildSystem.build(fooTarget, environment);
     expect(fooInvocations, 2);
@@ -165,7 +166,7 @@ void main() {
   test('does not re-invoke build if input timestamp changes', () => testbed.run(() async {
     await buildSystem.build(fooTarget, environment);
 
-    fs.file('foo.dart').writeAsStringSync('');
+    globals.fs.file('foo.dart').writeAsStringSync('');
 
     await buildSystem.build(fooTarget, environment);
     expect(fooInvocations, 1);
@@ -195,7 +196,7 @@ void main() {
 
     await buildSystem.build(barTarget, environment);
 
-    expect(fs.file(fs.path.join(environment.buildDir.path, 'bar')).existsSync(), true);
+    expect(globals.fs.file(globals.fs.path.join(environment.buildDir.path, 'bar')).existsSync(), true);
     expect(fooInvocations, 1);
     expect(barInvocations, 1);
   }));
@@ -216,7 +217,7 @@ void main() {
     })
       ..inputs = const <Source>[Source.pattern('{PROJECT_DIR}/foo.dart')]
       ..outputs = const <Source>[Source.pattern('{BUILD_DIR}/foo.out')];
-    fs.file('foo.dart').createSync();
+    globals.fs.file('foo.dart').createSync();
 
     await buildSystem.build(testTarget, environment);
 
@@ -240,7 +241,7 @@ void main() {
     })
       ..inputs = const <Source>[Source.pattern('{PROJECT_DIR}/foo.dart')]
       ..outputs = const <Source>[Source.pattern('{BUILD_DIR}/foo.out')];
-    fs.file('foo.dart').createSync();
+    globals.fs.file('foo.dart').createSync();
 
     await buildSystem.build(testTarget, environment);
 
@@ -265,7 +266,7 @@ void main() {
     })
       ..inputs = const <Source>[Source.pattern('{PROJECT_DIR}/foo.dart')]
       ..outputs = const <Source>[Source.pattern('{BUILD_DIR}/foo.out')];
-    fs.file('foo.dart').createSync();
+    globals.fs.file('foo.dart').createSync();
     await buildSystem.build(testTarget, environment);
 
     // invalid JSON
@@ -295,11 +296,11 @@ void main() {
         '/foo.dart',
       ],
       'outputs': <Object>[
-        fs.path.join(environment.buildDir.path, 'out'),
+        globals.fs.path.join(environment.buildDir.path, 'out'),
       ],
       'dependencies': <Object>[],
       'name':  'foo',
-      'stamp': fs.path.join(environment.buildDir.path, 'foo.stamp'),
+      'stamp': globals.fs.path.join(environment.buildDir.path, 'foo.stamp'),
     });
   }));
 
@@ -317,15 +318,15 @@ void main() {
     final TestTarget target = TestTarget((Environment environment) async {
       environment.buildDir.childFile('example.d')
         .writeAsStringSync('a.txt: b.txt');
-      fs.file('a.txt').writeAsStringSync('a');
+      globals.fs.file('a.txt').writeAsStringSync('a');
       called += 1;
     })
       ..depfiles = <String>['example.d'];
-    fs.file('b.txt').writeAsStringSync('b');
+    globals.fs.file('b.txt').writeAsStringSync('b');
 
     await buildSystem.build(target, environment);
 
-    expect(fs.file('a.txt').existsSync(), true);
+    expect(globals.fs.file('a.txt').existsSync(), true);
     expect(called, 1);
 
     // Second build is up to date due to depfil parse.
@@ -334,8 +335,8 @@ void main() {
   }));
 
   test('output directory is an input to the build',  () => testbed.run(() async {
-    final Environment environmentA = Environment(projectDir: fs.currentDirectory, outputDir: fs.directory('a'));
-    final Environment environmentB = Environment(projectDir: fs.currentDirectory, outputDir: fs.directory('b'));
+    final Environment environmentA = Environment(projectDir: globals.fs.currentDirectory, outputDir: globals.fs.directory('a'));
+    final Environment environmentB = Environment(projectDir: globals.fs.currentDirectory, outputDir: globals.fs.directory('b'));
 
     expect(environmentA.buildDir.path, isNot(environmentB.buildDir.path));
   }));
@@ -346,31 +347,31 @@ void main() {
       if (called == 0) {
         environment.buildDir.childFile('example.d')
           .writeAsStringSync('a.txt c.txt: b.txt');
-        fs.file('a.txt').writeAsStringSync('a');
-        fs.file('c.txt').writeAsStringSync('a');
+        globals.fs.file('a.txt').writeAsStringSync('a');
+        globals.fs.file('c.txt').writeAsStringSync('a');
       } else {
         // On second run, we no longer claim c.txt as an output.
         environment.buildDir.childFile('example.d')
           .writeAsStringSync('a.txt: b.txt');
-        fs.file('a.txt').writeAsStringSync('a');
+        globals.fs.file('a.txt').writeAsStringSync('a');
       }
       called += 1;
     })
       ..depfiles = const <String>['example.d'];
-    fs.file('b.txt').writeAsStringSync('b');
+    globals.fs.file('b.txt').writeAsStringSync('b');
 
     await buildSystem.build(target, environment);
 
-    expect(fs.file('a.txt').existsSync(), true);
-    expect(fs.file('c.txt').existsSync(), true);
+    expect(globals.fs.file('a.txt').existsSync(), true);
+    expect(globals.fs.file('c.txt').existsSync(), true);
     expect(called, 1);
 
     // rewrite an input to force a rerun, espect that the old c.txt is deleted.
-    fs.file('b.txt').writeAsStringSync('ba');
+    globals.fs.file('b.txt').writeAsStringSync('ba');
     await buildSystem.build(target, environment);
 
-    expect(fs.file('a.txt').existsSync(), true);
-    expect(fs.file('c.txt').existsSync(), false);
+    expect(globals.fs.file('a.txt').existsSync(), true);
+    expect(globals.fs.file('c.txt').existsSync(), false);
     expect(called, 2);
   }));
 }

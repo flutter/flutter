@@ -85,7 +85,7 @@ typedef MaterialPropertyResolver<T> = T Function(Set<MaterialState> states);
 /// This should only be used as parameters when they are documented to take
 /// [MaterialStateColor], otherwise only the default state will be used.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This example shows how you could pass a `MaterialStateColor` to `FlatButton.textColor`.
 /// Here, the text color will be `Colors.blue[900]` when the button is being
@@ -119,7 +119,7 @@ abstract class MaterialStateColor extends Color implements MaterialStateProperty
   /// to provide a `defaultValue` to the super constructor, so that we can know
   /// at compile-time what the value of the default [Color] is.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// In this next example, we see how you can create a `MaterialStateColor` by
   /// extending the abstract class and overriding the `resolve` method.

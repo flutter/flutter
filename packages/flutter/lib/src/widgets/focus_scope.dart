@@ -38,7 +38,7 @@ import 'inherited_notifier.dart';
 ///
 /// To collect a sub-tree of nodes into a group, use a [FocusScope].
 ///
-/// {@tool snippet --template=stateful_widget_scaffold}
+/// {@tool sample --template=stateful_widget_scaffold}
 /// This example shows how to manage focus using the [Focus] and [FocusScope]
 /// widgets. See [FocusNode] for a similar example that doesn't use [Focus] or
 /// [FocusScope].

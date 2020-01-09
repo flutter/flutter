@@ -4,10 +4,13 @@
 
 import 'dart:ui' as ui show Color;
 
+import 'package:flutter/animation.dart';
 import 'package:flutter/foundation.dart';
 import 'package:vector_math/vector_math_64.dart';
 
+import 'layer.dart';
 import 'object.dart';
+import 'proxy_box.dart';
 import 'sliver.dart';
 
 /// A base class for sliver render objects that resemble their children.
@@ -51,6 +54,12 @@ abstract class RenderProxySliver extends RenderSliver with RenderObjectWithChild
   }
 
   @override
+  void paint(PaintingContext context, Offset offset) {
+    if (child != null)
+      context.paintChild(child, offset);
+  }
+
+  @override
   bool hitTestChildren(SliverHitTestResult result, {double mainAxisPosition, double crossAxisPosition}) {
     return child != null
       && child.geometry.hitTestExtent > 0
@@ -71,7 +80,7 @@ abstract class RenderProxySliver extends RenderSliver with RenderObjectWithChild
   @override
   void applyPaintTransform(RenderObject child, Matrix4 transform) {
     assert(child != null);
-    final SliverPhysicalParentData childParentData = child.parentData;
+    final SliverPhysicalParentData childParentData = child.parentData as SliverPhysicalParentData;
     childParentData.applyPaintTransform(transform);
   }
 }
@@ -151,7 +160,6 @@ class RenderSliverOpacity extends RenderProxySliver {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    void _paintWithOpacity(PaintingContext context, Offset offset) => context.paintChild(child, offset);
     if (child != null && child.geometry.visible) {
       if (_alpha == 0) {
         // No need to keep the layer. We'll create a new one if necessary.
@@ -168,8 +176,8 @@ class RenderSliverOpacity extends RenderProxySliver {
       layer = context.pushOpacity(
         offset,
         _alpha,
-        _paintWithOpacity,
-        oldLayer: layer,
+        super.paint,
+        oldLayer: layer as OpacityLayer,
       );
     }
   }
@@ -367,5 +375,25 @@ class RenderSliverOffstage extends RenderProxySliver {
         style: offstage ? DiagnosticsTreeStyle.offstage : DiagnosticsTreeStyle.sparse,
       ),
     ];
+  }
+}
+
+/// Makes its sliver child partially transparent, driven from an [Animation].
+///
+/// This is a variant of [RenderSliverOpacity] that uses an [Animation<double>]
+/// rather than a [double] to control the opacity.
+class RenderSliverAnimatedOpacity extends RenderProxySliver with RenderAnimatedOpacityMixin<RenderSliver>{
+  /// Creates a partially transparent render object.
+  ///
+  /// The [opacity] argument must not be null.
+  RenderSliverAnimatedOpacity({
+    @required Animation<double> opacity,
+    bool alwaysIncludeSemantics = false,
+    RenderSliver sliver,
+  }) : assert(opacity != null),
+       assert(alwaysIncludeSemantics != null) {
+    this.opacity = opacity;
+    this.alwaysIncludeSemantics = alwaysIncludeSemantics;
+    child = sliver;
   }
 }

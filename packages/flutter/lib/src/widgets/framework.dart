@@ -73,7 +73,7 @@ class ObjectKey extends LocalKey {
   final Object value;
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
     return other is ObjectKey
@@ -206,7 +206,7 @@ abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
   static void _debugVerifyIllFatedPopulation() {
     assert(() {
       Map<GlobalKey, Set<Element>> duplicates;
-      for (Element element in _debugIllFatedElements) {
+      for (final Element element in _debugIllFatedElements) {
         if (element._debugLifecycleState != _ElementLifecycle.defunct) {
           assert(element != null);
           assert(element.widget != null);
@@ -224,7 +224,7 @@ abstract class GlobalKey<T extends State<StatefulWidget>> extends Key {
       if (duplicates != null) {
         final List<DiagnosticsNode> information = <DiagnosticsNode>[];
         information.add(ErrorSummary('Multiple widgets used the same GlobalKey.'));
-        for (GlobalKey key in duplicates.keys) {
+        for (final GlobalKey key in duplicates.keys) {
           final Set<Element> elements = duplicates[key];
           // TODO(jacobr): this will omit the '- ' before each widget name and
           // use the more standard whitespace style instead. Please let me know
@@ -325,7 +325,7 @@ class GlobalObjectKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
   final Object value;
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
     return other is GlobalObjectKey<T>
@@ -451,6 +451,13 @@ abstract class Widget extends DiagnosticableTree {
     properties.defaultDiagnosticsTreeStyle = DiagnosticsTreeStyle.dense;
   }
 
+  @override
+  @nonVirtual
+  bool operator ==(Object other) => super == other;
+
+  @override
+  @nonVirtual
+  int get hashCode => super.hashCode;
 
   /// Whether the `newWidget` can be used to update an [Element] that currently
   /// has the `oldWidget` as its configuration.
@@ -525,7 +532,7 @@ abstract class Widget extends DiagnosticableTree {
 ///    widget, so that only the inner-most widget needs to be rebuilt when the
 ///    theme changes.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// The following is a skeleton of a stateless widget subclass called `GreenFrog`.
 ///
@@ -544,7 +551,7 @@ abstract class Widget extends DiagnosticableTree {
 /// ```
 /// {@end-tool}
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This next example shows the more generic widget `Frog` which can be given
 /// a color and a child:
@@ -739,7 +746,7 @@ abstract class StatelessWidget extends Widget {
 ///    [KeyedSubtree] widget may be useful for this purpose if no other widget
 ///    can conveniently be assigned the key.)
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This is a skeleton of a stateful widget subclass called `YellowBird`.
 ///
@@ -763,7 +770,7 @@ abstract class StatelessWidget extends Widget {
 /// }
 /// ```
 /// {@end-tool}
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This example shows the more generic widget `Bird` which can be given a
 /// color and a child, and which has some internal state with a method that
@@ -1416,7 +1423,7 @@ abstract class ProxyWidget extends Widget {
 /// thus also to a particular [RenderObjectWidget] class. That class is `T`, the
 /// [ParentDataWidget] type argument.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This example shows how you would build a [ParentDataWidget] to configure a
 /// `FrogJar` widget's children by specifying a [Size] for each one.
@@ -1494,7 +1501,7 @@ abstract class ParentDataWidget<T extends RenderObjectWidget> extends ProxyWidge
         '$runtimeType widgets must be placed directly inside $T widgets.\n'
         '$description has a $T ancestor, but there are other widgets between them:'
       );
-      for (Widget ancestor in badAncestors) {
+      for (final Widget ancestor in badAncestors) {
         if (ancestor.runtimeType == runtimeType) {
           yield ErrorDescription('- $ancestor (this is a different $runtimeType than the one with the problem)');
         } else {
@@ -1551,7 +1558,7 @@ abstract class ParentDataWidget<T extends RenderObjectWidget> extends ProxyWidge
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=Zbm3hjPjQMk}
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// The following is a skeleton of an inherited widget called `FrogColor`:
 ///
@@ -2175,7 +2182,7 @@ abstract class BuildContext {
   /// an ancestor from one of those methods, save a reference to the ancestor
   /// by calling [findAncestorStateOfType] in [State.didChangeDependencies].
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// ```dart
   /// ScrollableState scrollable = context.findAncestorStateOfType<ScrollableState>();
@@ -2544,7 +2551,7 @@ class BuildOwner {
         return true;
       }());
     } finally {
-      for (Element element in _dirtyElements) {
+      for (final Element element in _dirtyElements) {
         assert(element._inDirtyList);
         element._inDirtyList = false;
       }
@@ -2599,13 +2606,13 @@ class BuildOwner {
           if (_debugElementsThatWillNeedToBeRebuiltDueToGlobalKeyShenanigans != null &&
               _debugElementsThatWillNeedToBeRebuiltDueToGlobalKeyShenanigans.isNotEmpty) {
             final Set<GlobalKey> keys = HashSet<GlobalKey>();
-            for (Element element in _debugElementsThatWillNeedToBeRebuiltDueToGlobalKeyShenanigans.keys) {
+            for (final Element element in _debugElementsThatWillNeedToBeRebuiltDueToGlobalKeyShenanigans.keys) {
               if (element._debugLifecycleState != _ElementLifecycle.defunct)
                 keys.addAll(_debugElementsThatWillNeedToBeRebuiltDueToGlobalKeyShenanigans[element]);
             }
             if (keys.isNotEmpty) {
               final Map<String, int> keyStringCount = HashMap<String, int>();
-              for (String key in keys.map<String>((GlobalKey key) => key.toString())) {
+              for (final String key in keys.map<String>((GlobalKey key) => key.toString())) {
                 if (keyStringCount.containsKey(key)) {
                   keyStringCount[key] += 1;
                 } else {
@@ -2622,7 +2629,7 @@ class BuildOwner {
               });
               final Iterable<Element> elements = _debugElementsThatWillNeedToBeRebuiltDueToGlobalKeyShenanigans.keys;
               final Map<String, int> elementStringCount = HashMap<String, int>();
-              for (String element in elements.map<String>((Element element) => element.toString())) {
+              for (final String element in elements.map<String>((Element element) => element.toString())) {
                 if (elementStringCount.containsKey(element)) {
                   elementStringCount[element] += 1;
                 } else {
@@ -3395,7 +3402,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
     assert(depth != null);
     assert(_active);
     if (_dependencies != null && _dependencies.isNotEmpty) {
-      for (InheritedElement dependency in _dependencies)
+      for (final InheritedElement dependency in _dependencies)
         dependency._dependents.remove(this);
       // For expediency, we don't actually clear the list here, even though it's
       // no longer representative of what we are registered with. If we never
@@ -4078,7 +4085,7 @@ typedef ErrorWidgetBuilder = Widget Function(FlutterErrorDetails details);
 ///
 /// It is possible to override this widget.
 ///
-/// {@tool snippet --template=freeform}
+/// {@tool sample --template=freeform}
 /// ```dart
 /// import 'package:flutter/material.dart';
 ///
@@ -4907,7 +4914,7 @@ class InheritedElement extends ProxyElement {
   @override
   void notifyClients(InheritedWidget oldWidget) {
     assert(_debugCheckOwnerBuildTargetExists('notifyClients'));
-    for (Element dependent in _dependents.keys) {
+    for (final Element dependent in _dependents.keys) {
       assert(() {
         // check that it really is our descendant
         Element ancestor = dependent._parent;
@@ -5322,7 +5329,7 @@ abstract class RenderObjectElement extends Element {
 
     // Clean up any of the remaining middle nodes from the old list.
     if (haveOldChildren && oldKeyedChildren.isNotEmpty) {
-      for (Element oldChild in oldKeyedChildren.values) {
+      for (final Element oldChild in oldKeyedChildren.values) {
         if (forgottenChildren == null || !forgottenChildren.contains(oldChild))
           deactivateChild(oldChild);
       }
@@ -5605,7 +5612,7 @@ class MultiChildRenderObjectElement extends RenderObjectElement {
 
   @override
   void visitChildren(ElementVisitor visitor) {
-    for (Element child in _children) {
+    for (final Element child in _children) {
       if (!_forgottenChildren.contains(child))
         visitor(child);
     }

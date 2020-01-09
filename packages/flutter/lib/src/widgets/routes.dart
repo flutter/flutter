@@ -68,7 +68,7 @@ abstract class OverlayRoute<T> extends Route<T> {
 
   @override
   void dispose() {
-    for (OverlayEntry entry in _overlayEntries)
+    for (final OverlayEntry entry in _overlayEntries)
       entry.remove();
     _overlayEntries.clear();
     super.dispose();
@@ -91,8 +91,19 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   Future<T> get completed => _transitionCompleter.future;
   final Completer<T> _transitionCompleter = Completer<T>();
 
-  /// The duration the transition lasts.
+  /// The duration the transition going forwards.
+  ///
+  /// See also:
+  ///
+  /// * [reverseTransitionDuration], which controls the duration of the
+  /// transition when it is in reverse.
   Duration get transitionDuration;
+
+  /// The duration the transition going in reverse.
+  ///
+  /// By default, the reverse transition duration is set to the value of
+  /// the forwards [transitionDuration].
+  Duration get reverseTransitionDuration => transitionDuration;
 
   /// Whether the route obscures previous routes when the transition is complete.
   ///
@@ -127,9 +138,11 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   AnimationController createAnimationController() {
     assert(!_transitionCompleter.isCompleted, 'Cannot reuse a $runtimeType after disposing it.');
     final Duration duration = transitionDuration;
+    final Duration reverseDuration = reverseTransitionDuration;
     assert(duration != null && duration >= Duration.zero);
     return AnimationController(
       duration: duration,
+      reverseDuration: reverseDuration,
       debugLabel: debugLabel,
       vsync: navigator,
     );
@@ -388,7 +401,7 @@ mixin LocalHistoryRoute<T> on Route<T> {
   /// The given local history entry must not already be part of another local
   /// history route.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// The following example is an app with 2 pages: `HomePage` and `SecondPage`.
   /// The `HomePage` can navigate to the `SecondPage`.
@@ -1131,7 +1144,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   Future<RoutePopDisposition> willPop() async {
     final _ModalScopeState<T> scope = _scopeKey.currentState;
     assert(scope != null);
-    for (WillPopCallback callback in List<WillPopCallback>.from(_willPopCallbacks)) {
+    for (final WillPopCallback callback in List<WillPopCallback>.from(_willPopCallbacks)) {
       if (!await callback())
         return RoutePopDisposition.doNotPop;
     }
@@ -1373,7 +1386,7 @@ abstract class PopupRoute<T> extends ModalRoute<T> {
 /// than only specific subtypes. For example, to watch for all [PageRoute]
 /// variants, the `RouteObserver<PageRoute<dynamic>>` type may be used.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// To make a [StatefulWidget] aware of its current [Route] state, implement
 /// [RouteAware] in its [State] and subscribe it to a [RouteObserver]:
@@ -1446,7 +1459,7 @@ class RouteObserver<R extends Route<dynamic>> extends NavigatorObserver {
   /// subscribed to multiple types, this will unregister it (once) from each type.
   void unsubscribe(RouteAware routeAware) {
     assert(routeAware != null);
-    for (R route in _listeners.keys) {
+    for (final R route in _listeners.keys) {
       final Set<RouteAware> subscribers = _listeners[route];
       subscribers?.remove(routeAware);
     }
@@ -1458,7 +1471,7 @@ class RouteObserver<R extends Route<dynamic>> extends NavigatorObserver {
       final List<RouteAware> previousSubscribers = _listeners[previousRoute]?.toList();
 
       if (previousSubscribers != null) {
-        for (RouteAware routeAware in previousSubscribers) {
+        for (final RouteAware routeAware in previousSubscribers) {
           routeAware.didPopNext();
         }
       }
@@ -1466,7 +1479,7 @@ class RouteObserver<R extends Route<dynamic>> extends NavigatorObserver {
       final List<RouteAware> subscribers = _listeners[route]?.toList();
 
       if (subscribers != null) {
-        for (RouteAware routeAware in subscribers) {
+        for (final RouteAware routeAware in subscribers) {
           routeAware.didPop();
         }
       }
@@ -1479,7 +1492,7 @@ class RouteObserver<R extends Route<dynamic>> extends NavigatorObserver {
       final Set<RouteAware> previousSubscribers = _listeners[previousRoute];
 
       if (previousSubscribers != null) {
-        for (RouteAware routeAware in previousSubscribers) {
+        for (final RouteAware routeAware in previousSubscribers) {
           routeAware.didPushNext();
         }
       }

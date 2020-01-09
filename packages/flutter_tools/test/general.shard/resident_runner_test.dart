@@ -6,6 +6,7 @@ import 'dart:async';
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/artifacts.dart';
+import 'package:flutter_tools/src/base/command_help.dart';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
@@ -15,7 +16,7 @@ import 'package:flutter_tools/src/compile.dart';
 import 'package:flutter_tools/src/devfs.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/features.dart';
-import 'package:flutter_tools/src/globals.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
 import 'package:flutter_tools/src/resident_runner.dart';
@@ -42,7 +43,7 @@ void main() {
 
   setUp(() {
     testbed = Testbed(setup: () {
-      fs.file(fs.path.join('build', 'app.dill'))
+      globals.fs.file(globals.fs.path.join('build', 'app.dill'))
         ..createSync(recursive: true)
         ..writeAsStringSync('ABC');
       residentRunner = HotRunner(
@@ -352,7 +353,7 @@ void main() {
       ],
       stayResident: false,
       debuggingOptions: DebuggingOptions.enabled(BuildInfo.debug),
-      dillOutputPath: fs.path.join('foobar', 'app.dill'),
+      dillOutputPath: globals.fs.path.join('foobar', 'app.dill'),
     );
     expect(otherRunner.artifactDirectory.path, contains('foobar'));
   }));
@@ -365,21 +366,33 @@ void main() {
 
     // supports service protocol
     expect(residentRunner.supportsServiceProtocol, true);
-    expect(testLogger.statusText, contains('"w"'));
-    expect(testLogger.statusText, contains('"t"'));
-    expect(testLogger.statusText, contains('"P"'));
-    expect(testLogger.statusText, contains('"a"'));
     // isRunningDebug
     expect(residentRunner.isRunningDebug, true);
-    expect(testLogger.statusText, contains('"L"'));
-    expect(testLogger.statusText, contains('"S"'));
-    expect(testLogger.statusText, contains('"U"'));
-    expect(testLogger.statusText, contains('"i"'));
-    expect(testLogger.statusText, contains('"p"'));
-    expect(testLogger.statusText, contains('"o"'));
-    expect(testLogger.statusText, contains('"z"'));
-    // screenshot
-    expect(testLogger.statusText, contains('"s"'));
+    // commands
+    expect(testLogger.statusText, equals(
+        <dynamic>[
+          'Flutter run key commands.',
+          CommandHelp.r,
+          CommandHelp.R,
+          CommandHelp.h,
+          CommandHelp.q,
+          CommandHelp.s,
+          CommandHelp.w,
+          CommandHelp.t,
+          CommandHelp.L,
+          CommandHelp.S,
+          CommandHelp.U,
+          CommandHelp.i,
+          CommandHelp.p,
+          CommandHelp.o,
+          CommandHelp.z,
+          CommandHelp.P,
+          CommandHelp.a,
+          CommandHelp.s,
+          'An Observatory debugger and profiler on null is available at: null',
+          ''
+        ].join('\n')
+    ));
   }));
 
   test('ResidentRunner can take screenshot on debug device', () => testbed.run(() async {
@@ -566,7 +579,7 @@ void main() {
   }));
 
   test('HotRunner writes vm service file when providing debugging option', () => testbed.run(() async {
-    fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+    globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     residentRunner = HotRunner(
       <FlutterDevice>[
         mockFlutterDevice,
@@ -582,13 +595,13 @@ void main() {
     });
     await residentRunner.run();
 
-    expect(await fs.file('foo').readAsString(), testUri.toString());
+    expect(await globals.fs.file('foo').readAsString(), testUri.toString());
   }));
 
   test('HotRunner unforwards device ports', () => testbed.run(() async {
     final MockDevicePortForwarder mockPortForwarder = MockDevicePortForwarder();
     when(mockDevice.portForwarder).thenReturn(mockPortForwarder);
-    fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+    globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     residentRunner = HotRunner(
       <FlutterDevice>[
         mockFlutterDevice,
@@ -613,7 +626,7 @@ void main() {
   }));
 
   test('HotRunner handles failure to write vmservice file', () => testbed.run(() async {
-    fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+    globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     residentRunner = HotRunner(
       <FlutterDevice>[
         mockFlutterDevice,
@@ -636,7 +649,7 @@ void main() {
 
 
   test('ColdRunner writes vm service file when providing debugging option', () => testbed.run(() async {
-    fs.file(fs.path.join('lib', 'main.dart')).createSync(recursive: true);
+    globals.fs.file(globals.fs.path.join('lib', 'main.dart')).createSync(recursive: true);
     residentRunner = ColdRunner(
       <FlutterDevice>[
         mockFlutterDevice,
@@ -652,7 +665,7 @@ void main() {
     });
     await residentRunner.run();
 
-    expect(await fs.file('foo').readAsString(), testUri.toString());
+    expect(await globals.fs.file('foo').readAsString(), testUri.toString());
   }));
 
   test('FlutterDevice uses dartdevc configuration when targeting web', () => testbed.run(() async {
@@ -671,10 +684,10 @@ void main() {
 
     expect(residentCompiler.targetModel, TargetModel.dartdevc);
     expect(residentCompiler.sdkRoot,
-      artifacts.getArtifactPath(Artifact.flutterWebSdk, mode: BuildMode.debug) + '/');
+      globals.artifacts.getArtifactPath(Artifact.flutterWebSdk, mode: BuildMode.debug) + '/');
     expect(
       residentCompiler.platformDill,
-      fs.file(artifacts.getArtifactPath(Artifact.webPlatformKernelDill, mode: BuildMode.debug))
+      globals.fs.file(globals.artifacts.getArtifactPath(Artifact.webPlatformKernelDill, mode: BuildMode.debug))
         .absolute.uri.toString(),
     );
   }, overrides: <Type, Generator>{

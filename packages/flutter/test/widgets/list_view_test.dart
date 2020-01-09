@@ -19,7 +19,7 @@ class TestSliverChildListDelegate extends SliverChildListDelegate {
 }
 
 class Alive extends StatefulWidget {
-  const Alive(this.alive, this.index);
+  const Alive(this.alive, this.index, { Key key }) : super(key: key);
   final bool alive;
   final int index;
 

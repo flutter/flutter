@@ -269,7 +269,7 @@ void main() {
       find.byKey(_painterKey),
       matchesGoldenFile('tab_bar_theme.tab_indicator_size_tab.png'),
     );
-  });
+  }, skip: isBrowser);
 
   testWidgets('Tab bar theme overrides tab indicator size (label)', (WidgetTester tester) async {
     const TabBarTheme tabBarTheme = TabBarTheme(indicatorSize: TabBarIndicatorSize.label);
@@ -280,7 +280,7 @@ void main() {
       find.byKey(_painterKey),
       matchesGoldenFile('tab_bar_theme.tab_indicator_size_label.png'),
     );
-  });
+  }, skip: isBrowser);
 
   testWidgets('Tab bar theme - custom tab indicator', (WidgetTester tester) async {
     final TabBarTheme tabBarTheme = TabBarTheme(
@@ -296,7 +296,7 @@ void main() {
       find.byKey(_painterKey),
       matchesGoldenFile('tab_bar_theme.custom_tab_indicator.png'),
     );
-  });
+  }, skip: isBrowser);
 
   testWidgets('Tab bar theme - beveled rect indicator', (WidgetTester tester) async {
     final TabBarTheme tabBarTheme = TabBarTheme(
@@ -312,5 +312,5 @@ void main() {
       find.byKey(_painterKey),
       matchesGoldenFile('tab_bar_theme.beveled_rect_indicator.png'),
     );
-  });
+  }, skip: isBrowser);
 }

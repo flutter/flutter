@@ -5,10 +5,10 @@
 import 'dart:async';
 
 import '../base/common.dart';
-import '../base/file_system.dart';
 import '../build_info.dart';
 import '../bundle.dart';
 import '../features.dart';
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
 import '../runner/flutter_command.dart' show FlutterOptions, FlutterCommandResult;
@@ -82,7 +82,7 @@ class BuildBundleCommand extends BuildSubCommand {
 
   @override
   Future<Map<CustomDimensions, String>> get usageValues async {
-    final String projectDir = fs.file(targetFile).parent.parent.path;
+    final String projectDir = globals.fs.file(targetFile).parent.parent.path;
     final FlutterProject futterProject = FlutterProject.fromPath(projectDir);
     if (futterProject == null) {
       return const <CustomDimensions, String>{};

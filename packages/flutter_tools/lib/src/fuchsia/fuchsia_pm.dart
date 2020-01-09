@@ -7,7 +7,7 @@ import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/process.dart';
 import '../convert.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
 
 import 'fuchsia_sdk.dart';
 
@@ -121,11 +121,11 @@ class FuchsiaPM {
     process.stdout
         .transform(utf8.decoder)
         .transform(const LineSplitter())
-        .listen(printTrace);
+        .listen(globals.printTrace);
     process.stderr
         .transform(utf8.decoder)
         .transform(const LineSplitter())
-        .listen(printError);
+        .listen(globals.printError);
     return process;
   }
 
@@ -200,12 +200,12 @@ class FuchsiaPackageServer {
   /// be spawned, and true otherwise.
   Future<bool> start() async {
     if (_process != null) {
-      printError('$this already started!');
+      globals.printError('$this already started!');
       return false;
     }
     // initialize a new repo.
     if (!await fuchsiaSdk.fuchsiaPM.newrepo(_repo)) {
-      printError('Failed to create a new package server repo');
+      globals.printError('Failed to create a new package server repo');
       return false;
     }
     _process = await fuchsiaSdk.fuchsiaPM.serve(_repo, _host, _port);
@@ -213,7 +213,7 @@ class FuchsiaPackageServer {
     unawaited(_process.exitCode.whenComplete(() {
       // If _process is null, then the server was stopped deliberately.
       if (_process != null) {
-        printError('Error running Fuchsia pm tool "serve" command');
+        globals.printError('Error running Fuchsia pm tool "serve" command');
       }
     }));
     return true;

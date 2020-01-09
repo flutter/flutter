@@ -8,23 +8,26 @@ import 'dart:math' as math;
 import '../asset.dart';
 import '../base/common.dart';
 import '../base/file_system.dart';
-import '../base/platform.dart';
 import '../build_info.dart';
 import '../bundle.dart';
 import '../cache.dart';
 import '../codegen.dart';
 import '../dart/pub.dart';
 import '../devfs.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
 import '../project.dart';
 import '../runner/flutter_command.dart';
 import '../test/coverage_collector.dart';
 import '../test/event_printer.dart';
 import '../test/runner.dart';
+import '../test/test_wrapper.dart';
 import '../test/watcher.dart';
 
 class TestCommand extends FastFlutterCommand {
-  TestCommand({ bool verboseHelp = false }) {
+  TestCommand({
+    bool verboseHelp = false,
+    this.testWrapper = const TestWrapper(),
+  }) : assert(testWrapper != null) {
     requiresPubspecYaml();
     usesPubOption();
     argParser
@@ -86,7 +89,7 @@ class TestCommand extends FastFlutterCommand {
       )
       ..addOption('concurrency',
         abbr: 'j',
-        defaultsTo: math.max<int>(1, platform.numberOfProcessors - 2).toString(),
+        defaultsTo: math.max<int>(1, globals.platform.numberOfProcessors - 2).toString(),
         help: 'The number of concurrent test processes to run.',
         valueHelp: 'jobs',
       )
@@ -100,9 +103,19 @@ class TestCommand extends FastFlutterCommand {
         allowed: const <String>['tester', 'chrome'],
         defaultsTo: 'tester',
         help: 'The platform to run the unit tests on. Defaults to "tester".',
+      )
+      ..addOption('test-randomize-ordering-seed',
+        defaultsTo: '0',
+        help: 'If positive, use this as a seed to randomize the execution of '
+              'test cases (must be a 32bit unsigned integer).\n'
+              'If "random", pick a random seed to use.\n'
+              'If 0 or not set, do not randomize test case execution order.',
       );
     usesTrackWidgetCreation(verboseHelp: verboseHelp);
   }
+
+  /// The interface for starting and configuring the tester.
+  final TestWrapper testWrapper;
 
   @override
   Future<Set<DevelopmentArtifact>> get requiredArtifacts async {
@@ -121,8 +134,8 @@ class TestCommand extends FastFlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    await cache.updateAll(await requiredArtifacts);
-    if (!fs.isFileSync('pubspec.yaml')) {
+    await globals.cache.updateAll(await requiredArtifacts);
+    if (!globals.fs.isFileSync('pubspec.yaml')) {
       throwToolExit(
         'Error: No pubspec.yaml file found in the current working directory.\n'
         'Run this command from the root of your project. Test files must be '
@@ -141,7 +154,7 @@ class TestCommand extends FastFlutterCommand {
       await _buildTestAsset();
     }
 
-    List<String> files = argResults.rest.map<String>((String testPath) => fs.path.absolute(testPath)).toList();
+    List<String> files = argResults.rest.map<String>((String testPath) => globals.fs.path.absolute(testPath)).toList();
 
     final bool startPaused = boolArg('start-paused');
     if (startPaused && files.length != 1) {
@@ -162,7 +175,7 @@ class TestCommand extends FastFlutterCommand {
     if (files.isEmpty) {
       // We don't scan the entire package, only the test/ subdirectory, so that
       // files with names like like "hit_test.dart" don't get run.
-      workDir = fs.directory('test');
+      workDir = globals.fs.directory('test');
       if (!workDir.existsSync()) {
         throwToolExit('Test directory "${workDir.path}" not found.');
       }
@@ -176,8 +189,8 @@ class TestCommand extends FastFlutterCommand {
     } else {
       files = <String>[
         for (String path in files)
-          if (fs.isDirectorySync(path))
-            ..._findTests(fs.directory(path))
+          if (globals.fs.isDirectorySync(path))
+            ..._findTests(globals.fs.directory(path))
           else
             path,
       ];
@@ -209,7 +222,7 @@ class TestCommand extends FastFlutterCommand {
     if (flutterProject.hasBuilders) {
       final CodegenDaemon codegenDaemon = await codeGenerator.daemon(flutterProject);
       codegenDaemon.startBuild();
-      await for (CodegenStatus status in codegenDaemon.buildResults) {
+      await for (final CodegenStatus status in codegenDaemon.buildResults) {
         if (status == CodegenStatus.Succeeded) {
           break;
         }
@@ -223,6 +236,7 @@ class TestCommand extends FastFlutterCommand {
       boolArg('disable-service-auth-codes');
 
     final int result = await runTests(
+      testWrapper,
       files,
       workDir: workDir,
       names: names,
@@ -240,6 +254,7 @@ class TestCommand extends FastFlutterCommand {
       buildTestAssets: buildTestAssets,
       flutterProject: flutterProject,
       web: stringArg('platform') == 'chrome',
+      randomSeed: stringArg('test-randomize-ordering-seed'),
     );
 
     if (collector != null) {
@@ -265,23 +280,23 @@ class TestCommand extends FastFlutterCommand {
       throwToolExit('Error: Failed to build asset bundle');
     }
     if (_needRebuild(assetBundle.entries)) {
-      await writeBundle(fs.directory(fs.path.join('build', 'unit_test_assets')),
+      await writeBundle(globals.fs.directory(globals.fs.path.join('build', 'unit_test_assets')),
           assetBundle.entries);
     }
   }
 
   bool _needRebuild(Map<String, DevFSContent> entries) {
-    final File manifest = fs.file(fs.path.join('build', 'unit_test_assets', 'AssetManifest.json'));
+    final File manifest = globals.fs.file(globals.fs.path.join('build', 'unit_test_assets', 'AssetManifest.json'));
     if (!manifest.existsSync()) {
       return true;
     }
     final DateTime lastModified = manifest.lastModifiedSync();
-    final File pub = fs.file('pubspec.yaml');
+    final File pub = globals.fs.file('pubspec.yaml');
     if (pub.lastModifiedSync().isAfter(lastModified)) {
       return true;
     }
 
-    for (DevFSFileContent entry in entries.values.whereType<DevFSFileContent>()) {
+    for (final DevFSFileContent entry in entries.values.whereType<DevFSFileContent>()) {
       // Calling isModified to access file stats first in order for isModifiedAfter
       // to work.
       if (entry.isModified && entry.isModifiedAfter(lastModified)) {
@@ -295,6 +310,6 @@ class TestCommand extends FastFlutterCommand {
 Iterable<String> _findTests(Directory directory) {
   return directory.listSync(recursive: true, followLinks: false)
       .where((FileSystemEntity entity) => entity.path.endsWith('_test.dart') &&
-      fs.isFileSync(entity.path))
-      .map((FileSystemEntity entity) => fs.path.absolute(entity.path));
+      globals.fs.isFileSync(entity.path))
+      .map((FileSystemEntity entity) => globals.fs.path.absolute(entity.path));
 }

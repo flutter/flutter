@@ -17,6 +17,7 @@ import 'package:flutter_tools/src/commands/doctor.dart';
 import 'package:flutter_tools/src/device.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_device.dart';
 import 'package:flutter_tools/src/fuchsia/fuchsia_sdk.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/runner/flutter_command.dart';
 
@@ -40,20 +41,20 @@ Future<void> main(List<String> args) async {
   final List<String> targetParts = _extractPathAndName(target);
   final String path = targetParts[0];
   final String name = targetParts[1];
-  final File dartSdk = fs.file(argResults['dart-sdk']);
+  final File dartSdk = globals.fs.file(argResults['dart-sdk']);
   final String buildDirectory = argResults['build-dir'] as String;
-  final File frontendServer = fs.file('$buildDirectory/host_x64/gen/third_party/flutter/frontend_server/frontend_server_tool.snapshot');
-  final File sshConfig = fs.file('$buildDirectory/ssh-keys/ssh_config');
-  final File devFinder = fs.file(argResults['dev-finder']);
-  final File platformKernelDill = fs.file('$buildDirectory/flutter_runner_patched_sdk/platform_strong.dill');
-  final File flutterPatchedSdk = fs.file('$buildDirectory/flutter_runner_patched_sdk');
+  final File frontendServer = globals.fs.file('$buildDirectory/host_x64/gen/third_party/flutter/frontend_server/frontend_server_tool.snapshot');
+  final File sshConfig = globals.fs.file('$buildDirectory/ssh-keys/ssh_config');
+  final File devFinder = globals.fs.file(argResults['dev-finder']);
+  final File platformKernelDill = globals.fs.file('$buildDirectory/flutter_runner_patched_sdk/platform_strong.dill');
+  final File flutterPatchedSdk = globals.fs.file('$buildDirectory/flutter_runner_patched_sdk');
   final String packages = '$buildDirectory/dartlang/gen/$path/${name}_dart_library.packages';
   final String outputDill = '$buildDirectory/${name}_tmp.dill';
 
   // TODO(jonahwilliams): running from fuchsia root hangs hot reload for some reason.
   // switch to the project root directory and run from there.
-  originalWorkingDirectory = fs.currentDirectory.path;
-  fs.currentDirectory = path;
+  originalWorkingDirectory = globals.fs.currentDirectory.path;
+  globals.fs.currentDirectory = path;
 
   if (!devFinder.existsSync()) {
     print('Error: dev_finder not found at ${devFinder.path}.');
@@ -71,7 +72,7 @@ Future<void> main(List<String> args) async {
   // Check for a package with a lib directory.
   final String entrypoint = argResults['entrypoint'] as String;
   String targetFile = 'lib/$entrypoint';
-  if (!fs.file(targetFile).existsSync()) {
+  if (!globals.fs.file(targetFile).existsSync()) {
     // Otherwise assume the package is flat.
     targetFile = entrypoint;
   }

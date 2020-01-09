@@ -234,7 +234,7 @@ class MediaQueryData {
   /// This property is currently only expected to be set to a non-default value
   /// on Android starting with version Q.
   ///
-  /// {@tool snippet --template=stateful_widget_material}
+  /// {@tool sample --template=stateful_widget_material}
   ///
   /// For apps that might be deployed on Android Q devices with full gesture
   /// navigation enabled, use [MediaQuery.systemGestureInsets] with [Padding]

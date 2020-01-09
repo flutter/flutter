@@ -30,7 +30,7 @@ class ValueInherited extends InheritedWidget {
 }
 
 class ExpectFail extends StatefulWidget {
-  const ExpectFail(this.onError);
+  const ExpectFail(this.onError, { Key key }) : super(key: key);
   final VoidCallback onError;
 
   @override

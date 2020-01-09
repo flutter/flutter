@@ -7,7 +7,7 @@ import 'package:meta/meta.dart';
 import '../application_package.dart';
 import '../base/file_system.dart';
 import '../build_info.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
 import '../project.dart';
 
 abstract class FuchsiaApp extends ApplicationPackage {
@@ -29,9 +29,9 @@ abstract class FuchsiaApp extends ApplicationPackage {
   ///
   /// [applicationBinary] is the path to the .far archive.
   factory FuchsiaApp.fromPrebuiltApp(FileSystemEntity applicationBinary) {
-    final FileSystemEntityType entityType = fs.typeSync(applicationBinary.path);
+    final FileSystemEntityType entityType = globals.fs.typeSync(applicationBinary.path);
     if (entityType != FileSystemEntityType.file) {
-      printError('File "${applicationBinary.path}" does not exist or is not a .far file. Use far archive.');
+      globals.printError('File "${applicationBinary.path}" does not exist or is not a .far file. Use far archive.');
       return null;
     }
     return PrebuiltFuchsiaApp(
@@ -56,7 +56,7 @@ class PrebuiltFuchsiaApp extends FuchsiaApp {
   final String _farArchive;
 
   @override
-  File farArchive(BuildMode buildMode) => fs.file(_farArchive);
+  File farArchive(BuildMode buildMode) => globals.fs.file(_farArchive);
 
   @override
   String get name => _farArchive;
@@ -72,9 +72,9 @@ class BuildableFuchsiaApp extends FuchsiaApp {
   File farArchive(BuildMode buildMode) {
     // TODO(zra): Distinguish among build modes.
     final String outDir = getFuchsiaBuildDirectory();
-    final String pkgDir = fs.path.join(outDir, 'pkg');
+    final String pkgDir = globals.fs.path.join(outDir, 'pkg');
     final String appName = project.project.manifest.appName;
-    return fs.file(fs.path.join(pkgDir, '$appName-0.far'));
+    return globals.fs.file(globals.fs.path.join(pkgDir, '$appName-0.far'));
   }
 
   @override
