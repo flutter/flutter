@@ -974,7 +974,11 @@ class NotifyingLogger extends Logger {
   }) {
     assert(timeout != null);
     printStatus(message);
-    return SilentStatus(timeout: timeout, timeoutConfiguration: timeoutConfiguration);
+    return SilentStatus(
+      timeout: timeout,
+      timeoutConfiguration: timeoutConfiguration,
+      stopwatch: Stopwatch(),
+    );
   }
 
   void dispose() {
@@ -1181,7 +1185,7 @@ class _AppRunLogger extends Logger {
           'progressId': progressId,
           'finished': true,
         });
-      })..start();
+      }, stopwatch: Stopwatch())..start();
     return _status;
   }
 
