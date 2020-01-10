@@ -29,9 +29,9 @@ assignees: ''
 2. Update the files as follows: ... <!-- include every file that is different from the template app! -->
 3. ... <!-- describe how to reproduce the problem -->
 
-**Expected results:** <!-- what did you see? -->
+**Expected results:** <!-- what did you want to see? -->
 
-**Actual results:** <!-- what did you want to see? -->
+**Actual results:** <!-- what did you see? -->
 
 <details>
   <summary>Logs</summary>
