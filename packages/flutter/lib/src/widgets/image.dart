@@ -1017,10 +1017,16 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
         // Is it scrolling so fast that the image is unlikely stay around long
         // enough to be worth decoding? If so, wait until the next task loop
         // to see if we've slowed down or disappeared.
+        // We're using the large of height or width of the window in physical
+        // pixels. This operation compares physical pixels (the window
+        // dimension) with logical pixels (the scrolling velocity). Using
+        // logical window pixels results in being too aggressive about loading
+        // images, and physical pixels will give us a better approximation of
+        // how much RAM is available.
         // It's safe to use these calls as point-in-time - do not subscribe to
         // updates of MediaQuery or Scrollable.
-        final double maxPhysicalDimension = WidgetsBinding.instance.window.physicalSize.longestSide;
-        if ((Scrollable.scrollingVelocityOfContext(context) ?? 0).abs() > maxPhysicalDimension) {
+        final double maxPhysicalPixels = WidgetsBinding.instance.window.physicalSize.longestSide;
+        if ((Scrollable.scrollingVelocityOfContext(context) ?? 0).abs() > maxPhysicalPixels) {
           return DeferringImageProviderAction.defer;
         }
         // Ok, either not scrolling or scrolling slowly enough.

@@ -193,14 +193,8 @@ class ImageCache {
       _cache[key] = image;
       return image.completer;
     }
-    if (result != null) {
-      return result;
-    }
     try {
       result = loader();
-      if (result == null) {
-        return null;
-      }
     } catch (error, stackTrace) {
       if (onError != null) {
         onError(error, stackTrace);

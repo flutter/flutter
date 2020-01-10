@@ -256,6 +256,9 @@ class Scrollable extends StatefulWidget {
   ///
   /// This does _not_ cause callers to subscribe to updates of this widget, and
   /// is only safe to use as a single point in time reference.
+  ///
+  /// This value is in logical pixels per second. It may be positive, negative,
+  /// 0, or null.
   static double scrollingVelocityOfContext(BuildContext context) {
     final _ScrollableScope widget = context.getElementForInheritedWidgetOfExactType<_ScrollableScope>()?.widget as _ScrollableScope;
     return widget?.scrollable?.position?.currentScrollVelocity;

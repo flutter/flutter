@@ -676,6 +676,9 @@ abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   ScrollActivity _activity;
 
   /// The current [ScrollActivity.velocity] of the current activity, if any.
+  ///
+  /// This value is in logical pixels per second. It may be positive, negative,
+  /// 0, or null.
   double get currentScrollVelocity => activity?.velocity;
 
   /// Change the current [activity], disposing of the old one and

@@ -281,9 +281,15 @@ abstract class ImageProvider<T> {
     return stream;
   }
 
+  /// This method does the acutal work of [resolve], both decoding the image
+  /// and making sure it ends up in the [ImageCache].
+  ///
   /// Subclasses that need to manage resolution more finely should override
   /// this method, which is called by [resolve] with the [ImageStream] that gets
-  /// returned to callers of [resolve].
+  /// returned to callers of [resolve]. For example, the
+  /// [DeferringImageProvider] overrides this method to give callers time to
+  /// either cancel or continue based on a condition before actually decoding
+  /// and caching the image.
   @protected
   void resolveForStream(ImageConfiguration configuration, ImageStream stream) {
     assert(configuration != null);
