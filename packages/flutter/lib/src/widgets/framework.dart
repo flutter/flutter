@@ -1482,7 +1482,7 @@ abstract class ParentDataWidget<T extends ParentData> extends ProxyWidget {
   /// The [RenderObjectWidget] that is typically used to setup the [ParentData]
   /// that [applyParentData] will write to.
   Type get debugTypicalAncestorWidget;
-  
+
   Iterable<DiagnosticsNode> _debugDescribeIncorrectParentDataType({
     @required ParentData parentData,
     RenderObjectWidget parentDataCreator,
