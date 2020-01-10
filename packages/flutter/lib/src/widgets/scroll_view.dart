@@ -735,7 +735,7 @@ abstract class BoxScrollView extends ScrollView {
 ///  * Using [AutomaticKeepAlive] widgets (inserted by default when
 ///    [addAutomaticKeepAlives] is true). Instead of unconditionally caching the
 ///    child element subtree when scrolling off-screen like [KeepAlive],
-///    [AutomaticKeepAlive] can let whether to cache the subtree be determined
+///    [AutomaticKeepAlive] can let know whether to cache the subtree be determined
 ///    by descendant logic in the subtree.
 ///
 ///    As an example, the [EditableText] widget signals its list child element
