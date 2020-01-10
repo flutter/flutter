@@ -362,7 +362,7 @@ class TextTheme extends Diagnosticable {
   ///     return Theme(
   ///       data: theme.copyWith(
   ///         textTheme: theme.textTheme.copyWith(
-  ///           title: theme.textTheme.title.copyWith(
+  ///           headline6: theme.textTheme.headline6.copyWith(
   ///             color: titleColor,
   ///           ),
   ///         ),
@@ -505,7 +505,7 @@ class TextTheme extends Diagnosticable {
   ///     // set the title, but everything else would be null. This isn't very
   ///     // useful, so merge it with the existing theme to keep all of the
   ///     // preexisting definitions for the other styles.
-  ///     TextTheme partialTheme = TextTheme(title: TextStyle(color: titleColor));
+  ///     TextTheme partialTheme = TextTheme(headline6: TextStyle(color: titleColor));
   ///     theme = theme.copyWith(textTheme: theme.textTheme.merge(partialTheme));
   ///     return Theme(data: theme, child: child);
   ///   }
