@@ -663,7 +663,7 @@ class NavigatorObserver {
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return DefaultTextStyle(
-///       style: Theme.of(context).textTheme.display1,
+///       style: Theme.of(context).textTheme.headline4,
 ///       child: Container(
 ///         color: Colors.white,
 ///         alignment: Alignment.center,
@@ -677,7 +677,7 @@ class NavigatorObserver {
 ///   @override
 ///   Widget build(BuildContext context) {
 ///     return DefaultTextStyle(
-///       style: Theme.of(context).textTheme.display1,
+///       style: Theme.of(context).textTheme.headline4,
 ///       child: GestureDetector(
 ///         onTap: () {
 ///           // This moves from the personal info page to the credentials page,
@@ -707,7 +707,7 @@ class NavigatorObserver {
 ///     return GestureDetector(
 ///       onTap: onSignupComplete,
 ///       child: DefaultTextStyle(
-///         style: Theme.of(context).textTheme.display1,
+///         style: Theme.of(context).textTheme.headline4,
 ///         child: Container(
 ///           color: Colors.pinkAccent,
 ///           alignment: Alignment.center,
