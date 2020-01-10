@@ -184,9 +184,9 @@ class FlutterWebConnection {
     final sync_io.WebDriver driver = createDriver(settings);
     driver.get(url);
 
-    DriverUtils.setDriverLocationAndDimension(driver, settings);
+    setDriverLocationAndDimension(driver, settings);
 
-    await DriverUtils.waitUntilExtensionInstalled(driver, timeout);
+    await waitUntilExtensionInstalled(driver, timeout);
     return FlutterWebConnection(driver);
   }
 
@@ -228,29 +228,25 @@ class FlutterWebConnection {
   }
 }
 
-/// Utility functions for working with WebDriver.
-class DriverUtils {
-  /// Configures the location and dimension of WebDriver.
-  static void setDriverLocationAndDimension(sync_io.WebDriver driver, Map<String, dynamic> settings) {
-    final List<String> dimensions = settings['browser-dimension'].split(',') as List<String>;
-    if (dimensions.length != 2) {
-      throw DriverError('Invalid browser window size.');
-    }
-    final int x = int.parse(dimensions[0]);
-    final int y = int.parse(dimensions[1]);
-    final sync_io.Window window = driver.window;
-    try {
-      window.setLocation(const math.Point<int>(0, 0));
-      window.setSize(math.Rectangle<int>(0, 0, x, y));
-    } catch (_) {
-      // Error might be thrown in some browsers.
-    }
+/// Configures the location and dimension of WebDriver.
+void setDriverLocationAndDimension(sync_io.WebDriver driver, Map<String, dynamic> settings) {
+  final List<String> dimensions = settings['browser-dimension'].split(',') as List<String>;
+  if (dimensions.length != 2) {
+    throw DriverError('Invalid browser window size.');
   }
-
-  /// Waits until Extension is installed.
-  static Future<void> waitUntilExtensionInstalled(sync_io.WebDriver driver, Duration timeout) async {
-    await waitFor<void>(() => driver.execute('return typeof(window.\$flutterDriver)', <String>[]),
-        matcher: 'function',
-        timeout: timeout ?? const Duration(days: 365));
+  final int x = int.parse(dimensions[0]);
+  final int y = int.parse(dimensions[1]);
+  final sync_io.Window window = driver.window;
+  try {
+    window.setLocation(const math.Point<int>(0, 0));
+    window.setSize(math.Rectangle<int>(0, 0, x, y));
+  } catch (_) {
+    // Error might be thrown in some browsers.
   }
 }
+
+/// Waits until extension is installed.
+Future<void> waitUntilExtensionInstalled(sync_io.WebDriver driver, Duration timeout) async =>
+  await waitFor<void>(() => driver.execute('return typeof(window.\$flutterDriver)', <String>[]),
+      matcher: 'function',
+      timeout: timeout ?? const Duration(days: 365));
