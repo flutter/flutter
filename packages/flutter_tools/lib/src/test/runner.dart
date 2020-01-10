@@ -31,6 +31,8 @@ abstract class FlutterTestRunner {
     Directory workDir,
     List<String> names = const <String>[],
     List<String> plainNames = const <String>[],
+    String tags = '',
+    String excludeTags = '',
     bool enableObservatory = false,
     bool startPaused = false,
     bool disableServiceAuthCodes = false,
@@ -102,6 +104,10 @@ class _FlutterTestRunnerImpl implements FlutterTestRunner {
         ...<String>['--name', name],
       for (final String plainName in plainNames)
         ...<String>['--plain-name', plainName],
+      if (tags.isNotEmpty)
+        ...<String>['--tags', tags],
+      if (excludeTags.isNotEmpty)
+        ...<String>['--exclude-tags', excludeTags],
       '--test-randomize-ordering-seed=$randomSeed',
     ];
     if (web) {
