@@ -91,7 +91,7 @@
 - (void)publishServiceProtocolPort:(NSString*)uri {
   // uri comes in as something like 'http://127.0.0.1:XXXXX/' where XXXXX is the port
   // number.
-  url.reset([[[NSURL alloc] initWithString:uri] retain]);
+  url.reset([[NSURL alloc] initWithString:uri]);
 
   DNSServiceFlags flags = kDNSServiceFlagsDefault;
 #if TARGET_IPHONE_SIMULATOR
@@ -157,7 +157,7 @@ static void DNSSD_API registrationCallback(DNSServiceRef sdRef,
 - (void)publishServiceProtocolPort:(NSString*)uri {
   // uri comes in as something like 'http://127.0.0.1:XXXXX/' where XXXXX is the port
   // number.
-  url.reset([[[NSURL alloc] initWithString:uri] retain]);
+  url.reset([[NSURL alloc] initWithString:uri]);
 
   NSNetService* netServiceTmp = [[NSNetService alloc] initWithDomain:@"local."
                                                                 type:@"_dartobservatory._tcp."
