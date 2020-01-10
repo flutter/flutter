@@ -2695,6 +2695,9 @@ class BuildOwner {
         return true;
       }());
     } catch (e, stack) {
+      // Catching the exception directly to avoid activating the ErrorWidget.
+      // Since the tree is in a broken state, adding the ErrorWidget would
+      // cause more exceptions.
       _debugReportException(ErrorSummary('while finalizing the widget tree'), e, stack);
     } finally {
       Timeline.finishSync();
@@ -5383,6 +5386,9 @@ abstract class RenderObjectElement extends Element {
           ]);
         }
       } on FlutterError catch (e) {
+        // Catching the exception directly to avoid activating the ErrorWidget.
+        // Since the tree is in a broken state, adding the ErrorWidget would
+        // cause more exceptions.
         _debugReportException(ErrorSummary('while applying parent data.'), e, e.stackTrace);
       }
       return true;
