@@ -246,8 +246,9 @@ void setDriverLocationAndDimension(sync_io.WebDriver driver, Map<String, dynamic
 }
 
 /// Waits until extension is installed.
-Future<void> waitUntilExtensionInstalled(sync_io.WebDriver driver, Duration timeout) async =>
-  await waitFor<void>(() => driver.execute('return typeof(window.\$flutterDriver)', <String>[]),
+Future<void> waitUntilExtensionInstalled(sync_io.WebDriver driver, Duration timeout) async {
+  await waitFor<void>(() =>
+      driver.execute('return typeof(window.\$flutterDriver)', <String>[]),
       matcher: 'function',
       timeout: timeout ?? const Duration(days: 365));
-
+}
