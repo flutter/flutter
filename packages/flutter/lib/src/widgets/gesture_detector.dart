@@ -128,7 +128,7 @@ class GestureRecognizerFactoryWithHandlers<T extends GestureRecognizer> extends 
 ///
 /// {@animation 200 150 https://flutter.github.io/assets-for-api-docs/assets/widgets/gesture_detector.mp4}
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This example turns the light bulb yellow when the "turn lights on" button is
 /// tapped by setting the `_lights` field:
@@ -759,7 +759,7 @@ class GestureDetector extends StatelessWidget {
 /// Configuring the gesture recognizers requires a carefully constructed map, as
 /// described in [gestures] and as shown in the example below.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This example shows how to hook up a [TapGestureRecognizer]. It assumes that
 /// the code is being used inside a [State] object with a `_last` field that is
@@ -853,7 +853,7 @@ class RawGestureDetector extends StatefulWidget {
   ///    `onDown`, `onStart`, `onUpdate` and `onEnd`, then
   ///    [PanGestureRecognizer]'s `onDown`, `onStart`, `onUpdate` and `onEnd`.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   /// This custom gesture detector listens to force presses, while also allows
   /// the same callback to be triggered by semantic long presses.
   ///

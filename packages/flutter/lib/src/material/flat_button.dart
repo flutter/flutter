@@ -40,7 +40,7 @@ import 'theme_data.dart';
 ///
 /// The [clipBehavior] argument must not be null.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This example shows a simple [FlatButton].
 ///
@@ -58,7 +58,7 @@ import 'theme_data.dart';
 /// ```
 /// {@end-tool}
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This example shows a [FlatButton] that is normally white-on-blue,
 /// with splashes rendered in a different shade of blue.

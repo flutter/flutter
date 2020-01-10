@@ -10,6 +10,7 @@ import 'base/config.dart';
 import 'base/context.dart';
 import 'base/error_handling_file_system.dart';
 import 'base/file_system.dart';
+import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/terminal.dart';
 import 'cache.dart';
@@ -103,4 +104,10 @@ AnsiTerminal get terminal {
   return context?.get<AnsiTerminal>() ?? _defaultAnsiTerminal;
 }
 
-final AnsiTerminal _defaultAnsiTerminal = AnsiTerminal();
+final AnsiTerminal _defaultAnsiTerminal = AnsiTerminal(
+  stdio: stdio,
+  platform: platform,
+);
+
+/// The global Stdio wrapper.
+Stdio get stdio => context.get<Stdio>() ?? const Stdio();
