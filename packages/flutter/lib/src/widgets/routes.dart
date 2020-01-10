@@ -998,7 +998,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///
   /// If [barrierDismissible] is false, then tapping the barrier has no effect.
   ///
-  /// If this getter would ever start returning a different color,
+  /// If this getter would ever start returning a different value,
   /// [changedInternalState] should be invoked so that the change can take
   /// effect.
   ///
@@ -1062,7 +1062,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// For example, when a dialog is on the screen, the page below the dialog is
   /// usually darkened by the modal barrier.
   ///
-  /// If this getter would ever start returning a different color,
+  /// If this getter would ever start returning a different label,
   /// [changedInternalState] should be invoked so that the change can take
   /// effect.
   ///
@@ -1072,6 +1072,32 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///    tapped.
   ///  * [ModalBarrier], the widget that implements this feature.
   String get barrierLabel;
+
+  /// The curve that is used for animating the modal barrier in and out.
+  ///
+  /// The modal barrier is the scrim that is rendered behind each route, which
+  /// generally prevents the user from interacting with the route below the
+  /// current route, and normally partially obscures such routes.
+  ///
+  /// For example, when a dialog is on the screen, the page below the dialog is
+  /// usually darkened by the modal barrier.
+  ///
+  /// While the route is animating into position, the color is animated from
+  /// transparent to the specified [barrierColor].
+  ///
+  /// If this getter would ever start returning a different curve,
+  /// [changedInternalState] should be invoked so that the change can take
+  /// effect.
+  ///
+  /// It defaults to [Curves.ease].
+  ///
+  /// See also:
+  ///
+  ///  * [barrierColor], which determines the color that the modal transitions
+  ///    to.
+  ///  * [Curves] for a collection of common curves.
+  ///  * [AnimatedModalBarrier], the widget that implements this feature.
+  Curve get barrierCurve => Curves.ease;
 
   /// Whether the route should remain in memory when it is inactive.
   ///
@@ -1282,30 +1308,28 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   final GlobalKey _subtreeKey = GlobalKey();
   final PageStorageBucket _storageBucket = PageStorageBucket();
 
-  static final Animatable<double> _easeCurveTween = CurveTween(curve: Curves.ease);
-
   // one of the builders
   OverlayEntry _modalBarrier;
   Widget _buildModalBarrier(BuildContext context) {
     Widget barrier;
-    if (barrierColor != null && !offstage) { // changedInternalState is called if these update
+    if (barrierColor != null && !offstage) { // changedInternalState is called if barrierColor or offstage updates
       assert(barrierColor != _kTransparent);
       final Animation<Color> color = animation.drive(
         ColorTween(
           begin: _kTransparent,
-          end: barrierColor, // changedInternalState is called if this updates
-        ).chain(_easeCurveTween),
+          end: barrierColor, // changedInternalState is called if barrierColor updates
+        ).chain(CurveTween(curve: barrierCurve)), // changedInternalState is called if barrierCurve updates
       );
       barrier = AnimatedModalBarrier(
         color: color,
-        dismissible: barrierDismissible, // changedInternalState is called if this updates
-        semanticsLabel: barrierLabel, // changedInternalState is called if this updates
+        dismissible: barrierDismissible, // changedInternalState is called if barrierDismissible updates
+        semanticsLabel: barrierLabel, // changedInternalState is called if barrierLabel updates
         barrierSemanticsDismissible: semanticsDismissible,
       );
     } else {
       barrier = ModalBarrier(
-        dismissible: barrierDismissible, // changedInternalState is called if this updates
-        semanticsLabel: barrierLabel, // changedInternalState is called if this updates
+        dismissible: barrierDismissible, // changedInternalState is called if barrierDismissible updates
+        semanticsLabel: barrierLabel, // changedInternalState is called if barrierLabel updates
         barrierSemanticsDismissible: semanticsDismissible,
       );
     }
@@ -1316,7 +1340,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
       );
     }
     return IgnorePointer(
-      ignoring: animation.status == AnimationStatus.reverse || // changedInternalState is called when this updates
+      ignoring: animation.status == AnimationStatus.reverse || // changedInternalState is called when animation.status updates
                 animation.status == AnimationStatus.dismissed, // dismissed is possible when doing a manual pop gesture
       child: barrier,
     );

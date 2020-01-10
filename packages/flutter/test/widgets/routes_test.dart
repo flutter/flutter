@@ -1034,6 +1034,133 @@ void main() {
       expect(find.byKey(containerKey), findsNothing);
     });
   });
+
+  group('ModalRoute', () {
+    testWidgets('default barrierCurve', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+        home: Material(
+          child: Builder(
+            builder: (BuildContext context) {
+              return Center(
+                child: RaisedButton(
+                  child: const Text('X'),
+                  onPressed: () {
+                    Navigator.of(context).push<void>(
+                      _TestDialogRouteWithCustomBarrierCurve<void>(
+                        child: const Text('Hello World'),
+                      )
+                    );
+                  },
+                ),
+              );
+            }
+          ),
+        ),
+      ));
+
+      final CurveTween _defaultBarrierTween = CurveTween(curve: Curves.ease);
+      int _getExpectedBarrierTweenAlphaValue(double t) {
+        return Color.getAlphaFromOpacity(_defaultBarrierTween.transform(t));
+      }
+
+      await tester.tap(find.text('X'));
+      await tester.pump();
+      final Finder animatedModalBarrier = find.byType(AnimatedModalBarrier);
+      expect(animatedModalBarrier, findsOneWidget);
+
+      Animation<Color> modalBarrierAnimation;
+      modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
+      expect(modalBarrierAnimation.value, Colors.transparent);
+
+      await tester.pump(const Duration(milliseconds: 25));
+      modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
+      expect(
+        modalBarrierAnimation.value.alpha,
+        closeTo(_getExpectedBarrierTweenAlphaValue(0.25), 1.0),
+      );
+
+      await tester.pump(const Duration(milliseconds: 25));
+      modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
+      expect(
+        modalBarrierAnimation.value.alpha,
+        closeTo(_getExpectedBarrierTweenAlphaValue(0.50), 1.0),
+      );
+
+      await tester.pump(const Duration(milliseconds: 25));
+      modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
+      expect(
+        modalBarrierAnimation.value.alpha,
+        closeTo(_getExpectedBarrierTweenAlphaValue(0.75), 1.0),
+      );
+
+      await tester.pumpAndSettle();
+      modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
+      expect(modalBarrierAnimation.value, Colors.black);
+    });
+
+    testWidgets('custom barrierCurve', (WidgetTester tester) async {
+      await tester.pumpWidget(MaterialApp(
+        home: Material(
+          child: Builder(
+            builder: (BuildContext context) {
+              return Center(
+                child: RaisedButton(
+                  child: const Text('X'),
+                  onPressed: () {
+                    Navigator.of(context).push<void>(
+                      _TestDialogRouteWithCustomBarrierCurve<void>(
+                        child: const Text('Hello World'),
+                        barrierCurve: Curves.linear,
+                      ),
+                    );
+                  },
+                ),
+              );
+            },
+          ),
+        ),
+      ));
+
+      final CurveTween _customBarrierTween = CurveTween(curve: Curves.linear);
+      int _getExpectedBarrierTweenAlphaValue(double t) {
+        return Color.getAlphaFromOpacity(_customBarrierTween.transform(t));
+      }
+
+      await tester.tap(find.text('X'));
+      await tester.pump();
+      final Finder animatedModalBarrier = find.byType(AnimatedModalBarrier);
+      expect(animatedModalBarrier, findsOneWidget);
+
+      Animation<Color> modalBarrierAnimation;
+      modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
+      expect(modalBarrierAnimation.value, Colors.transparent);
+
+      await tester.pump(const Duration(milliseconds: 25));
+      modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
+      expect(
+        modalBarrierAnimation.value.alpha,
+        closeTo(_getExpectedBarrierTweenAlphaValue(0.25), 1.0),
+      );
+
+      await tester.pump(const Duration(milliseconds: 25));
+      modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
+      expect(
+        modalBarrierAnimation.value.alpha,
+        closeTo(_getExpectedBarrierTweenAlphaValue(0.50), 1.0),
+      );
+
+      await tester.pump(const Duration(milliseconds: 25));
+      modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
+      expect(
+        modalBarrierAnimation.value.alpha,
+        closeTo(_getExpectedBarrierTweenAlphaValue(0.75), 1.0),
+      );
+
+      await tester.pumpAndSettle();
+      modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
+      expect(modalBarrierAnimation.value, Colors.black);
+    });
+  });
 }
 
 double _getOpacity(GlobalKey key, WidgetTester tester) {
@@ -1087,5 +1214,45 @@ class DialogObserver extends NavigatorObserver {
       dialogCount++;
     }
     super.didPush(route, previousRoute);
+  }
+}
+
+class _TestDialogRouteWithCustomBarrierCurve<T> extends PopupRoute<T> {
+  _TestDialogRouteWithCustomBarrierCurve({
+    @required Widget child,
+    Curve barrierCurve,
+  }) : _barrierCurve = barrierCurve,
+       _child = child;
+
+  final Widget _child;
+
+  @override
+  bool get barrierDismissible => true;
+
+  @override
+  String get barrierLabel => null;
+
+  @override
+  Color get barrierColor => Colors.black; // easier value to test against
+
+  @override
+  Curve get barrierCurve {
+    if (_barrierCurve == null) {
+      return super.barrierCurve;
+    }
+    return _barrierCurve;
+  }
+  final Curve _barrierCurve;
+
+  @override
+  Duration get transitionDuration => const Duration(milliseconds: 100); // easier value to test against
+
+  @override
+  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
+    return Semantics(
+      child: _child,
+      scopesRoute: true,
+      explicitChildNodes: true,
+    );
   }
 }
