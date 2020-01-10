@@ -9,6 +9,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:test_api/test_api.dart' show TypeMatcher; // ignore: deprecated_member_use
@@ -18,7 +19,6 @@ import 'image_data.dart';
 import 'mocks_for_image_cache.dart';
 
 void main() {
-
   final DecoderCallback basicDecoder = (Uint8List bytes, {int cacheWidth, int cacheHeight}) {
     return PaintingBinding.instance.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight);
   };
@@ -47,39 +47,65 @@ void main() {
 
       test('DeferringImageProvider does not cache while deferring until resolve', () async {
         bool defer = true;
+        int getNextActionCount = 0;
         final Uint8List bytes = Uint8List.fromList(kTransparentImage);
+        SchedulerBinding.instance.debugAssertNoTransientCallbacks('Nothing registered yet');
         final DeferringImageProvider<MemoryImage> imageProvider = DeferringImageProvider<MemoryImage>(
           imageProvider: MemoryImage(bytes),
-          getNextAction: () => defer ? DeferringImageProviderAction.defer : DeferringImageProviderAction.resolve,
+          getNextAction: () {
+            getNextActionCount++;
+            expect(getNextActionCount, lessThan(3));
+            return  defer ? DeferringImageProviderAction.defer : DeferringImageProviderAction.resolve;
+          },
         );
+        expect(getNextActionCount, 0);
         final ImageStream stream = imageProvider.resolve(ImageConfiguration.empty);
+        expect(getNextActionCount, 1);
         expect(stream.completer, isNull);
         expect(imageCache.currentSize, 0);
         defer = false;
-        await Future<void>.delayed(Duration.zero, () async {
-          expect(stream.completer, isNotNull);
-          final Completer<void> completer = Completer<void>();
-          stream.addListener(ImageStreamListener((ImageInfo info, bool syncCall) => completer.complete()));
-          await completer.future;
-          expect(imageCache.currentSize, 1);
-        });
+
+        // Fire the transient callback added by the provider and wait for the
+        // binding to finish.
+        await SchedulerBinding.instance.endOfFrame;
+        SchedulerBinding.instance.debugAssertNoTransientCallbacks('Should not have registered again.');
+        expect(getNextActionCount, 2);
+        expect(imageCache.currentSize, 0);
+
+        expect(stream.completer, isNotNull);
+        final Completer<void> completer = Completer<void>();
+        stream.addListener(ImageStreamListener((ImageInfo info, bool syncCall) => completer.complete()));
+        await completer.future;
+        expect(imageCache.currentSize, 1);
       });
 
       test('DeferringImageProvider can cancel after deferring', () async {
         bool defer = true;
+        int getNextActionCount = 0;
         final Uint8List bytes = Uint8List.fromList(kTransparentImage);
+        SchedulerBinding.instance.debugAssertNoTransientCallbacks('Nothing registered yet');
         final DeferringImageProvider<MemoryImage> imageProvider = DeferringImageProvider<MemoryImage>(
           imageProvider: MemoryImage(bytes),
-          getNextAction: () => defer ? DeferringImageProviderAction.defer : DeferringImageProviderAction.cancel,
+          getNextAction: () {
+            getNextActionCount++;
+            expect(getNextActionCount, lessThan(3));
+            return defer ? DeferringImageProviderAction.defer : DeferringImageProviderAction.cancel;
+          }
         );
+        expect(getNextActionCount, 0);
         final ImageStream stream = imageProvider.resolve(ImageConfiguration.empty);
+        expect(getNextActionCount, 1);
         expect(stream.completer, isNull);
         expect(imageCache.currentSize, 0);
         defer = false;
-        await Future<void>.delayed(Duration.zero, () async {
-          expect(stream.completer, isNull);
-          expect(imageCache.currentSize, 0);
-        });
+
+        // Fire the transient callback added by the provider and wait for the
+        // binding to finish.
+        await SchedulerBinding.instance.endOfFrame;
+        SchedulerBinding.instance.debugAssertNoTransientCallbacks('Should not have reigstered again.');
+        expect(getNextActionCount, 2);
+        expect(stream.completer, isNull);
+        expect(imageCache.currentSize, 0);
       });
 
       test('DeferringImageProvider uses precached image and does not call getNextAction', () async {
@@ -103,6 +129,7 @@ void main() {
         deferredStream.addListener(ImageStreamListener((ImageInfo info, bool syncCall) => deferredCompleter.complete()));
         await completer.future;
         expect(imageCache.currentSize, 1);
+        SchedulerBinding.instance.debugAssertNoTransientCallbacks('Should not have reigstered at all.');
       });
 
       test('ImageProvider can evict images', () async {
