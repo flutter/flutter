@@ -88,6 +88,6 @@ class PrecacheCommand extends FlutterCommand {
     } else {
       globals.printStatus('Already up-to-date.');
     }
-    return null;
+    return FlutterCommandResult.success();
   }
 }

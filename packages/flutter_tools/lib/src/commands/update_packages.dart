@@ -180,7 +180,7 @@ class UpdatePackagesCommand extends FlutterCommand {
         );
       }
       globals.printStatus('All pubspecs were up to date.');
-      return null;
+      return FlutterCommandResult.success();
     }
 
     if (upgrade || isPrintPaths || isPrintTransitiveClosure) {
@@ -289,12 +289,12 @@ class UpdatePackagesCommand extends FlutterCommand {
         tree._dependencyTree.forEach((String from, Set<String> to) {
           globals.printStatus('$from -> $to');
         });
-        return null;
+        return FlutterCommandResult.success();
       }
 
       if (isPrintPaths) {
         showDependencyPaths(from: stringArg('from'), to: stringArg('to'), tree: tree);
-        return null;
+        return FlutterCommandResult.success();
       }
 
       // Now that we have collected all the data, we can apply our dependency
@@ -328,7 +328,7 @@ class UpdatePackagesCommand extends FlutterCommand {
     final double seconds = timer.elapsedMilliseconds / 1000.0;
     globals.printStatus('\nRan \'pub\' $count time${count == 1 ? "" : "s"} and fetched coverage data in ${seconds.toStringAsFixed(1)}s.');
 
-    return null;
+    return FlutterCommandResult.success();
   }
 
   void showDependencyPaths({

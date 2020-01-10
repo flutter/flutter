@@ -97,16 +97,16 @@ class ScreenshotCommand extends FlutterCommand {
     switch (stringArg(_kType)) {
       case _kDeviceType:
         await runScreenshot(outputFile);
-        return null;
+        return FlutterCommandResult.success();
       case _kSkiaType:
         await runSkia(outputFile);
-        return null;
+        return FlutterCommandResult.success();
       case _kRasterizerType:
         await runRasterizer(outputFile);
-        return null;
+        return FlutterCommandResult.success();
     }
 
-    return null;
+    return FlutterCommandResult.success();
   }
 
   Future<void> runScreenshot(File outputFile) async {
