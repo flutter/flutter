@@ -41,8 +41,8 @@ def parse_json_file(file)
   json = JSON.parse(plugins_file)
   
   generated_key_values = {}
-  macos_plugins = json['plugins']['macos']
-  macos_plugins.each { |plugin|
+  ios_plugins = json['plugins']['ios']
+  ios_plugins.each { |plugin|
     podname = plugin['name']
     podpath = File.expand_path("#{plugin['path']}", file_abs_path)
       generated_key_values[podname] = podpath
