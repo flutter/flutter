@@ -368,17 +368,14 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   ///
   /// The [debugLabel] is ignored on release builds.
   ///
-  /// The [skipTraversal], [canRequestFocus], and [requestFocusWhenReparented] arguments must not
-  /// be null.
+  /// The [skipTraversal] and [canRequestFocus] arguments must not be null.
   FocusNode({
     String debugLabel,
     FocusOnKeyCallback onKey,
     bool skipTraversal = false,
     bool canRequestFocus = true,
-    this.requestFocusWhenReparented = false,
   })  : assert(skipTraversal != null),
         assert(canRequestFocus != null),
-        assert(requestFocusWhenReparented != null),
         _skipTraversal = skipTraversal,
         _canRequestFocus = canRequestFocus,
         _onKey = onKey {
@@ -781,9 +778,9 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     if (oldScope != null && child.context != null && child.enclosingScope != oldScope) {
       DefaultFocusTraversal.of(child.context, nullOk: true)?.changedScope(node: child, oldScope: oldScope);
     }
-    if (child.requestFocusWhenReparented) {
+    if (child._requestFocusWhenReparented) {
       child._doRequestFocus();
-      child.requestFocusWhenReparented = false;
+      child._requestFocusWhenReparented = false;
     }
   }
 
@@ -858,6 +855,10 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
       assert(_focusDebug('Node NOT requesting focus because canRequestFocus is false: $this'));
       return;
     }
+    if (_parent == null) {
+      _requestFocusWhenReparented = true;
+      return;
+    }
     _setAsFocusedChild();
     if (hasPrimaryFocus) {
       return;
@@ -867,26 +868,19 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     _markAsDirty(newFocus: this);
   }
 
-  /// If set to true, the node will request focus on this node the next time
-  /// this node is reparented in the focus tree.
-  ///
-  /// Once [requestFocus] has been called at the next reparenting, this value
-  /// will be reset to false.
-  ///
-  /// This will only call [requestFocus] for the node once the next time the
-  /// node is reparented. After that, [requestFocusWhenReparented] will need to
-  /// be set to true again to have it be focused again on the next reparenting.
-  ///
-  /// This is useful if you want to have a node be focused as soon as it is
-  /// added to the widget tree, specifically in the case where you are creating
-  /// new widgets that should be focused immediately after creation.
-  ///
-  /// This is similar to the [FocusScope.autofocus] method, except that it will
-  /// request focus regardless of whether another node in the scope already has
-  /// focus.
-  ///
-  /// Defaults to false and must not be null.
-  bool requestFocusWhenReparented;
+  // If set to true, the node will request focus on this node the next time
+  // this node is reparented in the focus tree.
+  //
+  // Once requestFocus has been called at the next reparenting, this value
+  // will be reset to false.
+  //
+  // This will only force a call to requestFocus for the node once the next time
+  // the node is reparented. After that, _requestFocusWhenReparented would need
+  // to be set to true again to have it be focused again on the next
+  // reparenting.
+  //
+  // This is used when requestFocus is called and there is no parent yet.
+  bool _requestFocusWhenReparented = false;
 
   /// Sets this node as the [FocusScopeNode.focusedChild] of the enclosing
   /// scope.
@@ -1057,13 +1051,6 @@ class FocusScopeNode extends FocusNode {
   ///
   /// The node is notified that it has received the primary focus in a
   /// microtask, so notification may lag the request by up to one frame.
-  ///
-  /// See also:
-  ///
-  ///  - [requestFocusWhenReparented], which requests that the node be focused
-  ///    the next time it is reparented, if a less immediate focus request is
-  ///    desired (as when you are adding a new widget that needs to be focused,
-  ///    but hasn't yet been attached the widget tree).
   void autofocus(FocusNode node) {
     assert(_focusDebug('Node autofocusing: $node'));
     if (focusedChild == null) {
