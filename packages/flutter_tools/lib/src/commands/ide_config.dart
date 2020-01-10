@@ -219,7 +219,7 @@ class IdeConfigCommand extends FlutterCommand {
 
     if (boolArg('update-templates')) {
       _handleTemplateUpdate();
-      return null;
+      return FlutterCommandResult.success();
     }
 
     final String flutterRoot = globals.fs.path.absolute(Cache.flutterRoot);

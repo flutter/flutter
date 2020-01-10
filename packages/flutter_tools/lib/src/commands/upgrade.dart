@@ -73,7 +73,7 @@ class UpgradeCommandRunner {
     } else {
       await runCommandSecondHalf(flutterVersion);
     }
-    return null;
+    return FlutterCommandResult.success();
   }
 
   Future<void> runCommandFirstHalf(

@@ -305,7 +305,7 @@ void main() {
           'flutter',
           'dummy',
           const Duration(milliseconds: 1000),
-          null,
+          'fail',
         ],
       );
     });
@@ -396,7 +396,7 @@ class FakeCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    return null;
+    return FlutterCommandResult.success();
   }
 }
 
