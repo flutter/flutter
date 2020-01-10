@@ -405,7 +405,10 @@ class FlutterDevice {
   }) async {
     final bool prebuiltMode = hotRunner.applicationBinary != null;
     final String modeName = hotRunner.debuggingOptions.buildInfo.friendlyModeName;
-    globals.printStatus('Launching ${getDisplayPath(hotRunner.mainPath)} on ${device.name} in $modeName mode...');
+    globals.printStatus(
+      'Launching ${fsUtils.getDisplayPath(hotRunner.mainPath)} '
+      'on ${device.name} in $modeName mode...',
+    );
 
     final TargetPlatform targetPlatform = await device.targetPlatform;
     package = await ApplicationPackageFactory.instance.getPackageForPlatform(
@@ -472,9 +475,15 @@ class FlutterDevice {
     final bool prebuiltMode = coldRunner.applicationBinary != null;
     if (coldRunner.mainPath == null) {
       assert(prebuiltMode);
-      globals.printStatus('Launching ${package.displayName} on ${device.name} in $modeName mode...');
+      globals.printStatus(
+        'Launching ${package.displayName} '
+        'on ${device.name} in $modeName mode...',
+      );
     } else {
-      globals.printStatus('Launching ${getDisplayPath(coldRunner.mainPath)} on ${device.name} in $modeName mode...');
+      globals.printStatus(
+        'Launching ${fsUtils.getDisplayPath(coldRunner.mainPath)} '
+        'on ${device.name} in $modeName mode...',
+      );
     }
 
     if (package == null) {
@@ -849,8 +858,15 @@ abstract class ResidentRunner {
   Future<void> screenshot(FlutterDevice device) async {
     assert(device.device.supportsScreenshot);
 
-    final Status status = globals.logger.startProgress('Taking screenshot for ${device.device.name}...', timeout: timeoutConfiguration.fastOperation);
-    final File outputFile = getUniqueFile(globals.fs.currentDirectory, 'flutter', 'png');
+    final Status status = globals.logger.startProgress(
+      'Taking screenshot for ${device.device.name}...',
+      timeout: timeoutConfiguration.fastOperation,
+    );
+    final File outputFile = fsUtils.getUniqueFile(
+      globals.fs.currentDirectory,
+      'flutter',
+      'png',
+    );
     try {
       if (supportsServiceProtocol && isRunningDebug) {
         await device.refreshViews();
@@ -881,7 +897,9 @@ abstract class ResidentRunner {
       }
       final int sizeKB = outputFile.lengthSync() ~/ 1024;
       status.stop();
-      globals.printStatus('Screenshot written to ${globals.fs.path.relative(outputFile.path)} (${sizeKB}kB).');
+      globals.printStatus(
+        'Screenshot written to ${globals.fs.path.relative(outputFile.path)} (${sizeKB}kB).',
+      );
     } catch (error) {
       status.cancel();
       globals.printError('Error taking screenshot: $error');
