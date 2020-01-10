@@ -47,6 +47,6 @@ class BuildWindowsCommand extends BuildSubCommand {
       throwToolExit('"build windows" only supported on Windows hosts.');
     }
     await buildWindows(flutterProject.windows, buildInfo, target: targetFile);
-    return null;
+    return FlutterCommandResult.success();
   }
 }
