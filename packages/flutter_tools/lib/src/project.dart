@@ -798,12 +798,16 @@ enum AndroidEmbeddingVersion {
 }
 
 /// Represents the web sub-project of a Flutter project.
-class WebProject {
+class WebProject extends FlutterProjectPlatform {
   WebProject._(this.parent);
 
   final FlutterProject parent;
 
+  @override
+  String get pluginConfigKey => WebPlugin.kConfigKey;
+
   /// Whether this flutter project has a web sub-project.
+  @override
   bool existsSync() {
     return parent.directory.childDirectory('web').existsSync()
       && indexFile.existsSync();
