@@ -4,6 +4,7 @@
 
 import 'dart:math' as math;
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
@@ -49,7 +50,7 @@ class _ToolbarContainerLayout extends SingleChildLayoutDelegate {
 
   @override
   bool shouldRelayout(_ToolbarContainerLayout oldDelegate) =>
-      this.titleHeight != oldDelegate.titleHeight;
+      titleHeight != oldDelegate.titleHeight;
 }
 
 // TODO(eseidel): Toolbar needs to change size based on orientation:
@@ -199,12 +200,14 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
     this.centerTitle,
     this.titleSpacing = NavigationToolbar.kMiddleSpacing,
     this.titleHeight,
+    this.centerIcons = true,
     this.toolbarOpacity = 1.0,
     this.bottomOpacity = 1.0,
   })  : assert(automaticallyImplyLeading != null),
         assert(elevation == null || elevation >= 0.0),
         assert(primary != null),
         assert(titleSpacing != null),
+        assert(centerIcons != null),
         assert(toolbarOpacity != null),
         assert(bottomOpacity != null),
         preferredSize = Size.fromHeight((titleHeight ?? kToolbarHeight) +
@@ -370,6 +373,16 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   /// If not provided, then defaults to [kToolbarHeight].
   final double titleHeight;
 
+  /// Specifies whether the [AppBar.leading] and [AppBar.actions] should always be placed vertically center of the AppBar.
+  /// If you don't use [AppBar.titleHeight] exclusively, this option has NO effect.
+  ///
+  /// If you plan to set AppBar height manually (by specifying [AppBar.titleHeight]), the icons ([AppBar.leading] and [AppBar.actions]) are always placed vertically center of the AppBar.
+  ///
+  /// If this is set to false, the icons will be placed on top (as you had not specified titleHeight).
+  ///
+  /// Defaults to true.
+  final bool centerIcons;
+
   /// How opaque the toolbar part of the app bar is.
   ///
   /// A value of 1.0 is fully opaque, and a value of 0.0 is fully transparent.
@@ -396,7 +409,9 @@ class AppBar extends StatefulWidget implements PreferredSizeWidget {
   final Size preferredSize;
 
   bool _getEffectiveCenterTitle(ThemeData theme) {
-    if (centerTitle != null) return centerTitle;
+    if (centerTitle != null) {
+      return centerTitle;
+    }
     assert(theme.platform != null);
     switch (theme.platform) {
       case TargetPlatform.android:
@@ -540,6 +555,7 @@ class _AppBarState extends State<AppBar> {
       trailing: actions,
       centerMiddle: widget._getEffectiveCenterTitle(theme),
       middleSpacing: widget.titleSpacing,
+      centerIcons: widget.centerIcons,
     );
 
     // If the toolbar is allocated less than kToolbarHeight (or titleHeight, if given)  make it
@@ -563,7 +579,7 @@ class _AppBarState extends State<AppBar> {
           Flexible(
             child: ConstrainedBox(
               constraints: BoxConstraints(
-                  maxHeight: (widget.titleHeight ?? kToolbarHeight)),
+                  maxHeight: widget.titleHeight ?? kToolbarHeight),
               child: appBar,
             ),
           ),
@@ -665,7 +681,9 @@ class _FloatingAppBarState extends State<_FloatingAppBar> {
   }
 
   void _isScrollingListener() {
-    if (_position == null) return;
+    if (_position == null) {
+      return;
+    }
 
     // When a scroll stops, then maybe snap the appbar into view.
     // Similarly, when a scroll starts, then maybe stop the snap animation.
@@ -698,7 +716,8 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
     @required this.primary,
     @required this.centerTitle,
     @required this.titleSpacing,
-    this.titleHeight,
+    @required this.titleHeight,
+    @required this.centerIcons,
     @required this.expandedHeight,
     @required this.collapsedHeight,
     @required this.topPadding,
@@ -727,6 +746,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   final bool centerTitle;
   final double titleSpacing;
   final double titleHeight;
+  final bool centerIcons;
   final double expandedHeight;
   final double collapsedHeight;
   final double topPadding;
@@ -803,6 +823,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         centerTitle: centerTitle,
         titleSpacing: titleSpacing,
         titleHeight: titleHeight,
+        centerIcons: centerIcons,
         shape: shape,
         toolbarOpacity: toolbarOpacity,
         bottomOpacity: pinned
@@ -832,6 +853,7 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
         centerTitle != oldDelegate.centerTitle ||
         titleSpacing != oldDelegate.titleSpacing ||
         titleHeight != oldDelegate.titleHeight ||
+        centerIcons != oldDelegate.centerIcons ||
         expandedHeight != oldDelegate.expandedHeight ||
         topPadding != oldDelegate.topPadding ||
         pinned != oldDelegate.pinned ||
@@ -948,6 +970,7 @@ class SliverAppBar extends StatefulWidget {
     this.centerTitle,
     this.titleSpacing = NavigationToolbar.kMiddleSpacing,
     this.titleHeight,
+    this.centerIcons = true,
     this.expandedHeight,
     this.floating = false,
     this.pinned = false,
@@ -960,6 +983,7 @@ class SliverAppBar extends StatefulWidget {
         assert(forceElevated != null),
         assert(primary != null),
         assert(titleSpacing != null),
+        assert(centerIcons != null),
         assert(floating != null),
         assert(pinned != null),
         assert(snap != null),
@@ -1124,6 +1148,16 @@ class SliverAppBar extends StatefulWidget {
   /// If not provided, then defaults to [kToolbarHeight].
   final double titleHeight;
 
+  /// Specifies whether the [AppBar.leading] and [AppBar.actions] should always be placed vertically center of the AppBar.
+  /// If you don't use [AppBar.titleHeight] exclusively, this option has NO effect.
+  ///
+  /// If you plan to set AppBar height manually (by specifying [AppBar.titleHeight]), the icons ([AppBar.leading] and [AppBar.actions]) are always placed vertically center of the AppBar.
+  ///
+  /// If this is set to false, the icons will be placed on top (as you had not specified titleHeight).
+  ///
+  /// Defaults to true.
+  final bool centerIcons;
+
   /// The size of the app bar when it is fully expanded.
   ///
   /// By default, the total height of the toolbar and the bottom widget (if
@@ -1274,7 +1308,9 @@ class _SliverAppBarState extends State<SliverAppBar>
     super.didUpdateWidget(oldWidget);
     if (widget.snap != oldWidget.snap || widget.floating != oldWidget.floating)
       _updateSnapConfiguration();
-    if (widget.stretch != oldWidget.stretch) _updateStretchConfiguration();
+    if (widget.stretch != oldWidget.stretch) {
+      _updateStretchConfiguration();
+    }
   }
 
   @override
@@ -1311,6 +1347,7 @@ class _SliverAppBarState extends State<SliverAppBar>
           centerTitle: widget.centerTitle,
           titleSpacing: widget.titleSpacing,
           titleHeight: widget.titleHeight,
+          centerIcons: widget.centerIcons,
           expandedHeight: widget.expandedHeight,
           collapsedHeight: collapsedHeight,
           topPadding: topPadding,

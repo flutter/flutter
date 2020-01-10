@@ -3,7 +3,9 @@
 // found in the LICENSE file.
 
 import 'dart:math' as math;
+import 'dart:math';
 
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
 import 'basic.dart';
@@ -22,7 +24,6 @@ import 'framework.dart';
 /// the iOS [CupertinoNavigationBar] or wrap this widget with more theming
 /// specifications for your own custom app bar.
 class NavigationToolbar extends StatelessWidget {
-
   /// Creates a widget that lays out its children in a manner suitable for a
   /// toolbar.
   const NavigationToolbar({
@@ -32,9 +33,11 @@ class NavigationToolbar extends StatelessWidget {
     this.trailing,
     this.centerMiddle = true,
     this.middleSpacing = kMiddleSpacing,
-  }) : assert(centerMiddle != null),
-       assert(middleSpacing != null),
-       super(key: key);
+    this.centerIcons = true,
+  })  : assert(centerMiddle != null),
+        assert(middleSpacing != null),
+        assert(centerIcons != null),
+        super(key: key);
 
   /// The default spacing around the [middle] widget in dp.
   static const double kMiddleSpacing = 16.0;
@@ -58,6 +61,16 @@ class NavigationToolbar extends StatelessWidget {
   /// Defaults to [kMiddleSpacing].
   final double middleSpacing;
 
+  /// Specifies whether the [AppBar.leading] and [AppBar.actions] should always be placed vertically center of the AppBar.
+  /// If you don't use [AppBar.titleHeight] exclusively, this option has NO effect.
+  ///
+  /// If you plan to set AppBar height manually (by specifying [AppBar.titleHeight]), the icons ([AppBar.leading] and [AppBar.actions]) are always placed vertically center of the AppBar.
+  ///
+  /// If this is set to false, the icons will be placed on top (as you had not specified titleHeight).
+  ///
+  /// Defaults to true.
+  final bool centerIcons;
+
   @override
   Widget build(BuildContext context) {
     assert(debugCheckHasDirectionality(context));
@@ -67,11 +80,13 @@ class NavigationToolbar extends StatelessWidget {
         centerMiddle: centerMiddle,
         middleSpacing: middleSpacing,
         textDirection: textDirection,
+        centerIcons: centerIcons,
       ),
       children: <Widget>[
         if (leading != null) LayoutId(id: _ToolbarSlot.leading, child: leading),
         if (middle != null) LayoutId(id: _ToolbarSlot.middle, child: middle),
-        if (trailing != null) LayoutId(id: _ToolbarSlot.trailing, child: trailing),
+        if (trailing != null)
+          LayoutId(id: _ToolbarSlot.trailing, child: trailing),
       ],
     );
   }
@@ -88,8 +103,10 @@ class _ToolbarLayout extends MultiChildLayoutDelegate {
     this.centerMiddle,
     @required this.middleSpacing,
     @required this.textDirection,
-  }) : assert(middleSpacing != null),
-       assert(textDirection != null);
+    @required this.centerIcons,
+  })  : assert(middleSpacing != null),
+        assert(textDirection != null),
+        assert(centerIcons != null);
 
   // If false the middle widget should be start-justified within the space
   // between the leading and trailing widgets.
@@ -102,6 +119,8 @@ class _ToolbarLayout extends MultiChildLayoutDelegate {
 
   final TextDirection textDirection;
 
+  final bool centerIcons;
+
   @override
   void performLayout(Size size) {
     double leadingWidth = 0.0;
@@ -110,9 +129,12 @@ class _ToolbarLayout extends MultiChildLayoutDelegate {
     if (hasChild(_ToolbarSlot.leading)) {
       final BoxConstraints constraints = BoxConstraints(
         minWidth: 0.0,
-        maxWidth: size.width / 3.0, // The leading widget shouldn't take up more than 1/3 of the space.
-        minHeight: size.height, // The height should be exactly the height of the bar.
-        maxHeight: size.height,
+        maxWidth: size.width / 3.0,
+        // The leading widget shouldn't take up more than 1/3 of the space.
+        minHeight: centerIcons ? size.height : min(size.height, kToolbarHeight),
+        // The height should be exactly the height of the bar.
+        // If icons need to be centered, use received height, otherwise use minimum of received height and standard height.
+        maxHeight: centerIcons ? size.height : min(size.height, kToolbarHeight),
       );
       leadingWidth = layoutChild(_ToolbarSlot.leading, constraints).width;
       double leadingX;
@@ -128,7 +150,12 @@ class _ToolbarLayout extends MultiChildLayoutDelegate {
     }
 
     if (hasChild(_ToolbarSlot.trailing)) {
-      final BoxConstraints constraints = BoxConstraints.loose(size);
+      final BoxConstraints constraints = BoxConstraints(
+          minWidth: 0.0,
+          maxWidth: size.width,
+          minHeight: 0.0,
+          maxHeight:
+              centerIcons ? size.height : min(size.height, kToolbarHeight));
       final Size trailingSize = layoutChild(_ToolbarSlot.trailing, constraints);
       double trailingX;
       switch (textDirection) {
@@ -139,14 +166,19 @@ class _ToolbarLayout extends MultiChildLayoutDelegate {
           trailingX = size.width - trailingSize.width;
           break;
       }
-      final double trailingY = (size.height - trailingSize.height) / 2.0;
+      final double trailingY =
+          ((centerIcons ? size.height : min(size.height, kToolbarHeight)) -
+                  trailingSize.height) /
+              2.0;
       trailingWidth = trailingSize.width;
       positionChild(_ToolbarSlot.trailing, Offset(trailingX, trailingY));
     }
 
     if (hasChild(_ToolbarSlot.middle)) {
-      final double maxWidth = math.max(size.width - leadingWidth - trailingWidth - middleSpacing * 2.0, 0.0);
-      final BoxConstraints constraints = BoxConstraints.loose(size).copyWith(maxWidth: maxWidth);
+      final double maxWidth = math.max(
+          size.width - leadingWidth - trailingWidth - middleSpacing * 2.0, 0.0);
+      final BoxConstraints constraints =
+          BoxConstraints.loose(size).copyWith(maxWidth: maxWidth);
       final Size middleSize = layoutChild(_ToolbarSlot.middle, constraints);
 
       final double middleStartMargin = leadingWidth + middleSpacing;
@@ -178,8 +210,8 @@ class _ToolbarLayout extends MultiChildLayoutDelegate {
 
   @override
   bool shouldRelayout(_ToolbarLayout oldDelegate) {
-    return oldDelegate.centerMiddle != centerMiddle
-        || oldDelegate.middleSpacing != middleSpacing
-        || oldDelegate.textDirection != textDirection;
+    return oldDelegate.centerMiddle != centerMiddle ||
+        oldDelegate.middleSpacing != middleSpacing ||
+        oldDelegate.textDirection != textDirection;
   }
 }

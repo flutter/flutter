@@ -490,7 +490,9 @@ class _GeometryListenerState extends State<_GeometryListener> {
     super.didChangeDependencies();
     final ValueListenable<ScaffoldGeometry> newListenable =
         Scaffold.geometryOf(context);
-    if (geometryListenable == newListenable) return;
+    if (geometryListenable == newListenable) {
+      return;
+    }
 
     if (geometryListenable != null)
       geometryListenable.removeListener(onGeometryChanged);
@@ -515,6 +517,7 @@ class _GeometryCachePainter extends CustomPainter {
   final ValueListenable<ScaffoldGeometry> geometryListenable;
 
   ScaffoldGeometry value;
+
   @override
   void paint(Canvas canvas, Size size) {
     value = geometryListenable.value;
