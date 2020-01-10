@@ -153,7 +153,7 @@ class FuchsiaDevices extends PollingDeviceDiscovery {
     if (text == null || text.isEmpty) {
       return <Device>[];
     }
-    final List<FuchsiaDevice> devices = parseListDevices(text);
+    final List<FuchsiaDevice> devices = await parseListDevices(text);
     return devices;
   }
 
@@ -162,7 +162,7 @@ class FuchsiaDevices extends PollingDeviceDiscovery {
 }
 
 @visibleForTesting
-List<FuchsiaDevice> parseListDevices(String text) {
+Future<List<FuchsiaDevice>> parseListDevices(String text) async {
   final List<FuchsiaDevice> devices = <FuchsiaDevice>[];
   for (final String rawLine in text.trim().split('\n')) {
     final String line = rawLine.trim();
@@ -172,8 +172,15 @@ List<FuchsiaDevice> parseListDevices(String text) {
       continue;
     }
     final String name = words[1];
-    final String id = words[0];
-    devices.add(FuchsiaDevice(id, name: name));
+    final String resolvedHost = await fuchsiaSdk.fuchsiaDevFinder.resolve(
+      name,
+      local: false,
+    );
+    if (resolvedHost == null) {
+      globals.printError('Failed to resolve host for Fuchsia device `$name`');
+      continue;
+    }
+    devices.add(FuchsiaDevice(resolvedHost, name: name));
   }
   return devices;
 }
@@ -240,7 +247,6 @@ class FuchsiaDevice extends Device {
     }
     // Stop the app if it's currently running.
     await stopApp(package);
-    // Find out who the device thinks we are.
     final String host = await fuchsiaSdk.fuchsiaDevFinder.resolve(
       name,
       local: true,
@@ -249,6 +255,7 @@ class FuchsiaDevice extends Device {
       globals.printError('Failed to resolve host for Fuchsia device');
       return LaunchResult.failed();
     }
+    // Find out who the device thinks we are.
     final int port = await os.findFreePort();
     if (port == 0) {
       globals.printError('Failed to find a free port');
@@ -475,11 +482,9 @@ class FuchsiaDevice extends Device {
   @override
   bool get supportsScreenshot => false;
 
-  Future<bool> get ipv6 async {
-    // Workaround for https://github.com/dart-lang/sdk/issues/29456
-    final String fragment = (await _resolvedIp).split('%').first;
+  bool get ipv6 {
     try {
-      Uri.parseIPv6Address(fragment);
+      Uri.parseIPv6Address(id);
       return true;
     } on FormatException {
       return false;
@@ -525,15 +530,6 @@ class FuchsiaDevice extends Device {
     return ports;
   }
 
-  String _cachedResolvedIp;
-
-  Future<String> get _resolvedIp async {
-    return _cachedResolvedIp ??= await fuchsiaSdk.fuchsiaDevFinder.resolve(
-      name,
-      local: false,
-    );
-  }
-
   /// Run `command` on the Fuchsia device shell.
   Future<RunResult> shell(String command) async {
     if (fuchsiaArtifacts.sshConfig == null) {
@@ -544,7 +540,7 @@ class FuchsiaDevice extends Device {
       'ssh',
       '-F',
       fuchsiaArtifacts.sshConfig.absolute.path,
-      await _resolvedIp,
+      id, // Device's IP address.
       command,
     ]);
   }
@@ -670,7 +666,7 @@ class FuchsiaIsolateDiscoveryProtocol {
         }
         final Uri address = flutterView.owner.vmService.httpAddress;
         if (flutterView.uiIsolate.name.contains(_isolateName)) {
-          _foundUri.complete(await _device.ipv6
+          _foundUri.complete(_device.ipv6
               ? Uri.parse('http://[$_ipv6Loopback]:${address.port}/')
               : Uri.parse('http://$_ipv4Loopback:${address.port}/'));
           _status.stop();
@@ -711,7 +707,7 @@ class _FuchsiaPortForwarder extends DevicePortForwarder {
       '-f',
       '-L',
       '$hostPort:$_ipv4Loopback:$devicePort',
-      await device._resolvedIp,
+      device.id, // Device's IP address.
       'true',
     ];
     final Process process = await globals.processManager.start(command);
@@ -743,7 +739,7 @@ class _FuchsiaPortForwarder extends DevicePortForwarder {
       '-vvv',
       '-L',
       '${forwardedPort.hostPort}:$_ipv4Loopback:${forwardedPort.devicePort}',
-      await device._resolvedIp,
+      device.id, // Device's IP address.
     ];
     final ProcessResult result = await globals.processManager.run(command);
     if (result.exitCode != 0) {
@@ -753,7 +749,9 @@ class _FuchsiaPortForwarder extends DevicePortForwarder {
 
   @override
   Future<void> dispose() async {
-    for (final ForwardedPort port in forwardedPorts) {
+    final List<ForwardedPort> forwardedPortsCopy =
+      List<ForwardedPort>.from(forwardedPorts);
+    for (final ForwardedPort port in forwardedPortsCopy) {
       await unforward(port);
     }
   }

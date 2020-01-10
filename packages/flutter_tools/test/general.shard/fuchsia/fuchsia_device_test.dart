@@ -55,20 +55,24 @@ void main() {
       expect(device.name, name);
     });
 
-    test('parse dev_finder output', () {
-      const String example = '192.168.42.56 paper-pulp-bush-angel';
-      final List<FuchsiaDevice> names = parseListDevices(example);
+    testUsingContext('parse dev_finder output', () async {
+      const String example = '2001:0db8:85a3:0000:0000:8a2e:0370:7334 paper-pulp-bush-angel';
+      final List<FuchsiaDevice> names = await parseListDevices(example);
 
       expect(names.length, 1);
       expect(names.first.name, 'paper-pulp-bush-angel');
-      expect(names.first.id, '192.168.42.56');
+      expect(names.first.id, '192.168.42.10');
+    }, overrides: <Type, Generator>{
+      FuchsiaSdk: () => MockFuchsiaSdk(),
     });
 
-    test('parse junk dev_finder output', () {
+    testUsingContext('parse junk dev_finder output', () async {
       const String example = 'junk';
-      final List<FuchsiaDevice> names = parseListDevices(example);
+      final List<FuchsiaDevice> names = await parseListDevices(example);
 
       expect(names.length, 0);
+    }, overrides: <Type, Generator>{
+      FuchsiaSdk: () => MockFuchsiaSdk(),
     });
 
     testUsingContext('disposing device disposes the portForwarder', () async {
@@ -773,7 +777,7 @@ class MockFuchsiaDevice extends Mock implements FuchsiaDevice {
   final bool _ipv6;
 
   @override
-  Future<bool> get ipv6 async => _ipv6;
+  bool get ipv6 => _ipv6;
 
   @override
   final String id;
