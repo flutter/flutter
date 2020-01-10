@@ -564,7 +564,15 @@ class FlutterLocalFileComparator extends FlutterGoldenFileComparator with LocalC
       return FlutterSkippingGoldenFileComparator(
         baseDirectory.uri,
         goldens,
-        'No network connection available for contacting Gold.',
+        'OSError occurred, could not reach Gold. '
+          'Switching to FlutterSkippingGoldenFileComparator.',
+      );
+    } on io.SocketException catch (_) {
+      return FlutterSkippingGoldenFileComparator(
+        baseDirectory.uri,
+        goldens,
+        'SocketException occurred, could not reach Gold. '
+          'Switching to FlutterSkippingGoldenFileComparator.',
       );
     }
 
