@@ -157,10 +157,10 @@ abstract class FlutterDriver {
   }
 
   /// Getter of appIsolate
-  VMIsolate get appIsolate;
+  VMIsolate get appIsolate => throw UnimplementedError();
 
   /// Getter of serviceClient
-  VMServiceClient get serviceClient;
+  VMServiceClient get serviceClient => throw UnimplementedError();
 
   /// Sends [command] to the Flutter Driver extensions.
   /// This must be implemented by subclass.
@@ -169,7 +169,7 @@ abstract class FlutterDriver {
   ///
   ///  * [VMServiceFlutterDriver], which uses vmservice to implement.
   ///  * [WebFlutterDriver], which uses webdriver to implement.
-  Future<Map<String, dynamic>> sendCommand(Command command);
+  Future<Map<String, dynamic>> sendCommand(Command command) => throw UnimplementedError();
 
   /// Checks the status of the Flutter Driver extension.
   Future<Health> checkHealth({ Duration timeout }) async {
@@ -561,7 +561,7 @@ abstract class FlutterDriver {
   ///        In practice, sometimes the device gets really busy for a while and
   ///        even two seconds isn't enough, which means that this is still racy
   ///        and a source of flakes.
-  Future<List<int>> screenshot();
+  Future<List<int>> screenshot() => throw UnimplementedError();
 
   /// Returns the Flags set in the Dart VM as JSON.
   ///
@@ -584,7 +584,7 @@ abstract class FlutterDriver {
   /// [getFlagList]: https://github.com/dart-lang/sdk/blob/master/runtime/vm/service/service.md#getflaglist
   ///
   /// Throws [UnimplementedError] on [WebFlutterDriver] instances.
-  Future<List<Map<String, dynamic>>> getVmFlags();
+  Future<List<Map<String, dynamic>>> getVmFlags() => throw UnimplementedError();
 
   /// Starts recording performance traces.
   ///
@@ -596,7 +596,7 @@ abstract class FlutterDriver {
   Future<void> startTracing({
     List<TimelineStream> streams = const <TimelineStream>[TimelineStream.all],
     Duration timeout = kUnusuallyLongTimeout,
-  });
+  }) => throw UnimplementedError();
 
   /// Stops recording performance traces and downloads the timeline.
   ///
@@ -607,7 +607,7 @@ abstract class FlutterDriver {
   /// For [WebFlutterDriver], this is only supported for Chrome.
   Future<Timeline> stopTracingAndDownloadTimeline({
     Duration timeout = kUnusuallyLongTimeout,
-  });
+  }) => throw UnimplementedError();
 
   /// Runs [action] and outputs a performance trace for it.
   ///
@@ -632,7 +632,7 @@ abstract class FlutterDriver {
     Future<dynamic> action(), {
     List<TimelineStream> streams = const <TimelineStream>[TimelineStream.all],
     bool retainPriorEvents = false,
-  });
+  }) => throw UnimplementedError();
 
   /// Clears all timeline events recorded up until now.
   ///
@@ -643,7 +643,7 @@ abstract class FlutterDriver {
   /// For [WebFlutterDriver], this is only supported for Chrome.
   Future<void> clearTimeline({
     Duration timeout = kUnusuallyLongTimeout,
-  });
+  }) => throw UnimplementedError();
 
   /// [action] will be executed with the frame sync mechanism disabled.
   ///
@@ -675,12 +675,12 @@ abstract class FlutterDriver {
   /// Force a garbage collection run in the VM.
   ///
   /// Throws [UnimplementedError] on [WebFlutterDriver] instances.
-  Future<void> forceGC();
+  Future<void> forceGC() => throw UnimplementedError();
 
   /// Closes the underlying connection to the VM service.
   ///
   /// Returns a [Future] that fires once the connection has been closed.
-  Future<void> close();
+  Future<void> close() => throw UnimplementedError();
 }
 
 /// Provides convenient accessors to frequently used finders.
