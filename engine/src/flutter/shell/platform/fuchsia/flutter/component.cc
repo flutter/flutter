@@ -231,15 +231,21 @@ Application::Application(
                          << "): " << zx_status_get_string(status);
           return;
         }
-        const char* other_dirs[] = {"debug", "ctrl"};
+        const char* other_dirs[] = {"debug", "ctrl", "diagnostics"};
         // add other directories as RemoteDirs.
         for (auto& dir_str : other_dirs) {
           fidl::InterfaceHandle<fuchsia::io::Directory> dir;
           auto request = dir.NewRequest().TakeChannel();
-          fdio_service_connect_at(directory_ptr_.channel().get(), dir_str,
-                                  request.release());
-          outgoing_dir_->AddEntry(
-              dir_str, std::make_unique<vfs::RemoteDir>(dir.TakeChannel()));
+          auto status = fdio_service_connect_at(directory_ptr_.channel().get(),
+                                                dir_str, request.release());
+          if (status == ZX_OK) {
+            outgoing_dir_->AddEntry(
+                dir_str, std::make_unique<vfs::RemoteDir>(dir.TakeChannel()));
+          } else {
+            FML_LOG(ERROR) << "could not add out directory entry(" << dir_str
+                           << ") for flutter app(" << debug_label_
+                           << "): " << zx_status_get_string(status);
+          }
         }
       };
 
