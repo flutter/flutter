@@ -51,7 +51,7 @@ class TestShortcutManager extends ShortcutManager {
 
 void main() {
   group(LogicalKeySet, () {
-    test('$LogicalKeySet passes parameters correctly.', () {
+    test('LogicalKeySet passes parameters correctly.', () {
       final LogicalKeySet set1 = LogicalKeySet(LogicalKeyboardKey.keyA);
       final LogicalKeySet set2 = LogicalKeySet(
         LogicalKeyboardKey.keyA,
@@ -109,7 +109,7 @@ void main() {
             LogicalKeyboardKey.keyD,
           }));
     });
-    test('$LogicalKeySet works as a map key.', () {
+    test('LogicalKeySet works as a map key.', () {
       final LogicalKeySet set1 = LogicalKeySet(LogicalKeyboardKey.keyA);
       final LogicalKeySet set2 = LogicalKeySet(
         LogicalKeyboardKey.keyA,
@@ -146,7 +146,7 @@ void main() {
           })),
       );
     });
-    test('$KeySet diagnostics work.', () {
+    test('LogicalKeySet diagnostics work.', () {
       final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
 
       LogicalKeySet(
@@ -162,14 +162,11 @@ void main() {
           .toList();
 
       expect(description.length, equals(1));
-      expect(
-          description[0],
-          equalsIgnoringHashCodes(
-              'keys: {LogicalKeyboardKey#00000(keyId: "0x00000061", keyLabel: "a", debugName: "Key A"), LogicalKeyboardKey#00000(keyId: "0x00000062", keyLabel: "b", debugName: "Key B")}'));
+      expect(description[0], equals('keys: Key A + Key B'));
     });
   });
   group(Shortcuts, () {
-    testWidgets('$ShortcutManager handles shortcuts', (WidgetTester tester) async {
+    testWidgets('ShortcutManager handles shortcuts', (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       final List<LogicalKeyboardKey> pressedKeys = <LogicalKeyboardKey>[];
       final TestShortcutManager testManager = TestShortcutManager(pressedKeys);
@@ -202,7 +199,7 @@ void main() {
       expect(invoked, isTrue);
       expect(pressedKeys, equals(<LogicalKeyboardKey>[LogicalKeyboardKey.shiftLeft]));
     });
-    testWidgets("$Shortcuts passes to the next $Shortcuts widget if it doesn't map the key", (WidgetTester tester) async {
+    testWidgets("Shortcuts passes to the next Shortcuts widget if it doesn't map the key", (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       final List<LogicalKeyboardKey> pressedKeys = <LogicalKeyboardKey>[];
       final TestShortcutManager testManager = TestShortcutManager(pressedKeys);
@@ -240,7 +237,7 @@ void main() {
       expect(invoked, isTrue);
       expect(pressedKeys, equals(<LogicalKeyboardKey>[LogicalKeyboardKey.shiftLeft]));
     });
-    testWidgets('$Shortcuts can disable a shortcut with Intent.doNothing', (WidgetTester tester) async {
+    testWidgets('Shortcuts can disable a shortcut with Intent.doNothing', (WidgetTester tester) async {
       final GlobalKey containerKey = GlobalKey();
       final List<LogicalKeyboardKey> pressedKeys = <LogicalKeyboardKey>[];
       final TestShortcutManager testManager = TestShortcutManager(pressedKeys);
@@ -279,6 +276,54 @@ void main() {
       await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
       expect(invoked, isFalse);
       expect(pressedKeys, isEmpty);
+    });
+    test('Shortcuts diagnostics work.', () {
+      final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+
+      Shortcuts(shortcuts: <LogicalKeySet, Intent>{LogicalKeySet(
+        LogicalKeyboardKey.shift,
+        LogicalKeyboardKey.keyA,
+      ) : const Intent(ActivateAction.key),
+        LogicalKeySet(
+        LogicalKeyboardKey.shift,
+        LogicalKeyboardKey.arrowRight,
+      ) : const DirectionalFocusIntent(TraversalDirection.right)}).debugFillProperties(builder);
+
+      final List<String> description = builder.properties
+          .where((DiagnosticsNode node) {
+        return !node.isFiltered(DiagnosticLevel.info);
+      })
+          .map((DiagnosticsNode node) => node.toString())
+          .toList();
+
+      expect(description.length, equals(1));
+      expect(
+          description[0],
+          equalsIgnoringHashCodes(
+              'shortcuts: {{Shift + Key A}: Intent#00000(key: [<ActivateAction>]), {Shift + Arrow Right}: DirectionalFocusIntent#00000(key: [<DirectionalFocusAction>])}'));
+    });
+    test('Shortcuts diagnostics work when debugLabel specified.', () {
+      final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
+
+      Shortcuts(
+        debugLabel: '<Debug Label>',
+        shortcuts: <LogicalKeySet, Intent>{
+          LogicalKeySet(
+            LogicalKeyboardKey.keyA,
+            LogicalKeyboardKey.keyB,
+          ): const Intent(ActivateAction.key)
+        },
+      ).debugFillProperties(builder);
+
+      final List<String> description = builder.properties
+          .where((DiagnosticsNode node) {
+        return !node.isFiltered(DiagnosticLevel.info);
+      })
+          .map((DiagnosticsNode node) => node.toString())
+          .toList();
+
+      expect(description.length, equals(1));
+      expect(description[0], equals('shortcuts: <Debug Label>'));
     });
   });
 }

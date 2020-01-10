@@ -16,6 +16,13 @@ import 'visual_studio.dart';
 
 /// Builds the Windows project using msbuild.
 Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {String target}) async {
+  if (!windowsProject.solutionFile.existsSync()) {
+    throwToolExit(
+      'No Windows desktop project configured. '
+      'See https://github.com/flutter/flutter/wiki/Desktop-shells#create '
+      'to learn about adding Windows support to a project.');
+  }
+
   final Map<String, String> environment = <String, String>{
     'FLUTTER_ROOT': Cache.flutterRoot,
     'FLUTTER_EPHEMERAL_DIR': windowsProject.ephemeralDirectory.path,

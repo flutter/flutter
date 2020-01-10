@@ -466,7 +466,7 @@ class SliverConstraints extends Constraints {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
     if (other is! SliverConstraints)

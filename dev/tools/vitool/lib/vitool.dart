@@ -268,7 +268,7 @@ class FrameData {
 
   @override
   bool operator ==(Object other) {
-    if (runtimeType != other.runtimeType)
+    if (other.runtimeType != runtimeType)
       return false;
     return other is FrameData
         && other.size == size
@@ -320,7 +320,7 @@ class SvgPath {
 
   @override
   bool operator ==(Object other) {
-    if (runtimeType != other.runtimeType)
+    if (other.runtimeType != runtimeType)
       return false;
     return other is SvgPath
         && other.id == id
@@ -369,7 +369,7 @@ class SvgPathCommand {
 
   @override
   bool operator ==(Object other) {
-    if (runtimeType != other.runtimeType)
+    if (other.runtimeType != runtimeType)
       return false;
     return other is SvgPathCommand
         && other.type == type
