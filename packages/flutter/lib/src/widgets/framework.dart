@@ -1428,7 +1428,7 @@ abstract class ProxyWidget extends Widget {
 /// `FrogJar` widget's children by specifying a [Size] for each one.
 ///
 /// ```dart
-/// class FrogSize extends ParentDataWidget<FrogJar> {
+/// class FrogSize extends ParentDataWidget<FrogJarParentData> {
 ///   FrogSize({
 ///     Key key,
 ///     @required this.size,
@@ -1448,6 +1448,9 @@ abstract class ProxyWidget extends Widget {
 ///       targetParent.markNeedsLayout();
 ///     }
 ///   }
+///
+///   @override
+///   Type get debugTypicalAncestorWidget => FrogJar;
 /// }
 /// ```
 /// {@end-tool}
