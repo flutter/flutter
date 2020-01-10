@@ -313,7 +313,7 @@ void main() {
       equalsIgnoringHashCodes(
         'Incorrect use of ParentDataWidget.\n'
         'The ParentDataWidget Positioned(left: 7.0, top: 6.0) wants to apply ParentData of type '
-        'StackParentData to a RenderObject, which has been setup to only accept ParentData of '
+        'StackParentData to a RenderObject, which has been set up to accept ParentData of '
         'incompatible type FlexParentData.\n'
         'Usually, this means that the Positioned widget has the wrong ancestor RenderObjectWidget. '
         'Typically, Positioned widgets are placed directly inside Stack widgets.\n'
@@ -412,7 +412,7 @@ void main() {
       equalsIgnoringHashCodes(
         'Incorrect use of ParentDataWidget.\n'
         'The ParentDataWidget Expanded(flex: 1) wants to apply ParentData of type '
-        'FlexParentData to a RenderObject, which has been setup to only accept ParentData of '
+        'FlexParentData to a RenderObject, which has been set up to accept ParentData of '
         'incompatible type StackParentData.\n'
         'Usually, this means that the Expanded widget has the wrong ancestor RenderObjectWidget. '
         'Typically, Expanded widgets are placed directly inside Flex widgets.\n'
@@ -473,7 +473,7 @@ class TestParentDataWidget extends ParentDataWidget<DummyParentData> {
   }
 
   @override
-  Type get debugTypicalAncestorWidget => OneAncestorWidget;
+  Type get debugTypicalAncestorWidgetClass => OneAncestorWidget;
 }
 
 class DummyParentData extends ParentData {

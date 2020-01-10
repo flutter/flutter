@@ -1941,7 +1941,7 @@ class LayoutId extends ParentDataWidget<MultiChildLayoutParentData> {
   }
 
   @override
-  Type get debugTypicalAncestorWidget => CustomMultiChildLayout;
+  Type get debugTypicalAncestorWidgetClass => CustomMultiChildLayout;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -3581,7 +3581,7 @@ class Positioned extends ParentDataWidget<StackParentData> {
   }
 
   @override
-  Type get debugTypicalAncestorWidget => Stack;
+  Type get debugTypicalAncestorWidgetClass => Stack;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {
@@ -4420,7 +4420,7 @@ class Flexible extends ParentDataWidget<FlexParentData> {
   }
 
   @override
-  Type get debugTypicalAncestorWidget => Flex;
+  Type get debugTypicalAncestorWidgetClass => Flex;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

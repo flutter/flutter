@@ -1591,7 +1591,7 @@ class KeepAlive extends ParentDataWidget<KeepAliveParentDataMixin> {
   bool debugCanApplyOutOfTurn() => keepAlive;
 
   @override
-  Type get debugTypicalAncestorWidget => SliverWithKeepAliveWidget;
+  Type get debugTypicalAncestorWidgetClass => SliverWithKeepAliveWidget;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

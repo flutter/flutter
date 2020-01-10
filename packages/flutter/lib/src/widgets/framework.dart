@@ -1450,7 +1450,7 @@ abstract class ProxyWidget extends Widget {
 ///   }
 ///
 ///   @override
-///   Type get debugTypicalAncestorWidget => FrogJar;
+///   Type get debugTypicalAncestorWidgetClass => FrogJar;
 /// }
 /// ```
 /// {@end-tool}
@@ -1476,18 +1476,25 @@ abstract class ParentDataWidget<T extends ParentData> extends ProxyWidget {
 
   /// Checks if this widget can apply its parent data to the provided
   /// `renderObject`.
+  ///
+  /// The [RenderObject.parentData] of the provided `renderObject` is
+  /// typically set up by an ancestor [RenderObjectWidget] of the type returned
+  /// by [debugTypicalAncestorWidgetClass].
+  ///
+  /// This is called just before [applyParentData] is invoked with the same
+  /// [RenderObject] provided to that method.
   bool debugIsValidRenderObject(RenderObject renderObject) {
     assert(T != dynamic);
     assert(T != ParentData);
     return renderObject.parentData is T;
   }
 
-  /// The [RenderObjectWidget] that is typically used to setup the [ParentData]
+  /// The [RenderObjectWidget] that is typically used to set up the [ParentData]
   /// that [applyParentData] will write to.
   ///
   /// This is only used in error messages to tell users what widget typically
   /// wraps this ParentDataWidget.
-  Type get debugTypicalAncestorWidget;
+  Type get debugTypicalAncestorWidgetClass;
 
   Iterable<DiagnosticsNode> _debugDescribeIncorrectParentDataType({
     @required ParentData parentData,
@@ -1496,21 +1503,21 @@ abstract class ParentDataWidget<T extends ParentData> extends ProxyWidget {
   }) sync* {
     assert(T != dynamic);
     assert(T != ParentData);
-    assert(debugTypicalAncestorWidget != null);
+    assert(debugTypicalAncestorWidgetClass != null);
 
     final String description = 'The ParentDataWidget $this wants to apply ParentData of type $T to a RenderObject';
     if (parentData == null) {
       yield ErrorDescription(
-        '$description, which has not been setup to receive any ParentData.'
+        '$description, which has not been set up to receive any ParentData.'
       );
     } else {
       yield ErrorDescription(
-        '$description, which has been setup to only accept ParentData of incompatible type ${parentData.runtimeType}.'
+        '$description, which has been set up to accept ParentData of incompatible type ${parentData.runtimeType}.'
       );
     }
     yield ErrorHint(
       'Usually, this means that the $runtimeType widget has the wrong ancestor RenderObjectWidget. '
-      'Typically, $runtimeType widgets are placed directly inside $debugTypicalAncestorWidget widgets.'
+      'Typically, $runtimeType widgets are placed directly inside $debugTypicalAncestorWidgetClass widgets.'
     );
     if (parentDataCreator != null) {
       yield ErrorHint(
@@ -5127,7 +5134,7 @@ abstract class RenderObjectElement extends Element {
             ErrorSummary('Incorrect use of ParentDataWidget.'),
             ErrorDescription('The following ParentDataWidgets are providing parent data to the same RenderObject:'),
             for (final ParentDataElement<ParentData> ancestor in badAncestors)
-              ErrorDescription('- ${ancestor.widget} (typically placed directly inside a ${ancestor.widget.debugTypicalAncestorWidget} widget)'),
+              ErrorDescription('- ${ancestor.widget} (typically placed directly inside a ${ancestor.widget.debugTypicalAncestorWidgetClass} widget)'),
             ErrorDescription('However, a RenderObject can only receive parent data from at most one ParentDataWidget.'),
             ErrorHint('Usually, this indicates that at least one of the offending ParentDataWidgets listed above is not placed directly inside a compatible ancestor widget.'),
             ErrorDescription('The ownership chain for the RenderObject that received the parent data was:\n  ${debugGetCreatorChain(10)}'),

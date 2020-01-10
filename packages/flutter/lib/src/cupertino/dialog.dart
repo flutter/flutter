@@ -1044,7 +1044,7 @@ class _ActionButtonParentDataWidget extends ParentDataWidget<_ActionButtonParent
   }
 
   @override
-  Type get debugTypicalAncestorWidget => _CupertinoDialogActionsRenderWidget;
+  Type get debugTypicalAncestorWidgetClass => _CupertinoDialogActionsRenderWidget;
 }
 
 // ParentData applied to individual action buttons that report whether or not
