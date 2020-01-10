@@ -46,22 +46,14 @@ template("aot_snapshot") {
       shim_target,
     ]
 
-    vm_snapshot_data_path = "$target_gen_dir/${kernel_name}_vm_data.aotsnapshot"
-    vm_snapshot_instructions_path =
-        "$target_gen_dir/${kernel_name}_vm_instructions.aotsnapshot"
-    snapshot_data_path = "$target_gen_dir/${kernel_name}_data.aotsnapshot"
-    snapshot_instructions_path =
-        "$target_gen_dir/${kernel_name}_instructions.aotsnapshot"
+    snapshot_path = "$target_gen_dir/${kernel_name}_snapshot.so"
 
     inputs = [
       shim_kernel,
     ]
 
     outputs = [
-      vm_snapshot_data_path,
-      vm_snapshot_instructions_path,
-      snapshot_data_path,
-      snapshot_instructions_path,
+      snapshot_path,
     ]
 
     if (product) {
@@ -73,13 +65,8 @@ template("aot_snapshot") {
     args = [
       "--no_causal_async_stacks",
       "--deterministic",
-      "--snapshot_kind=app-aot-blobs",
-      "--vm_snapshot_data=" + rebase_path(vm_snapshot_data_path),
-      "--vm_snapshot_instructions=" +
-          rebase_path(vm_snapshot_instructions_path),
-      "--isolate_snapshot_data=" + rebase_path(snapshot_data_path),
-      "--isolate_snapshot_instructions=" +
-          rebase_path(snapshot_instructions_path),
+      "--snapshot_kind=app-aot-elf",
+      "--elf=" + rebase_path(snapshot_path),
     ]
 
     # No asserts in debug or release product.
