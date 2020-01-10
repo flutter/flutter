@@ -344,7 +344,7 @@ bool _writeFlutterPluginsList(FlutterProject project, List<Plugin> plugins) {
   final File pluginsFile = project.flutterPluginsJsonFile;
   final String oldPluginFileContent = _readFileContent(pluginsFile);
   final String pluginFileContent = json.encode(result);
-  if (plugins.isNotEmpty) {
+  if (pluginsMap.isNotEmpty) {
     pluginsFile.writeAsStringSync(pluginFileContent, flush: true);
   } else {
     if (pluginsFile.existsSync()) {

@@ -45,32 +45,38 @@ void main() {
       when(iosProject.podManifestLock).thenReturn(flutterProject.directory.childDirectory('ios').childFile('Podfile.lock'));
       when(iosProject.pluginsList(any)).thenReturn(<Map<String,dynamic>>[]);
       when(iosProject.pluginConfigKey).thenReturn('ios');
+      when(iosProject.existsSync()).thenReturn(false);
       macosProject = MockMacOSProject();
       when(flutterProject.macos).thenReturn(macosProject);
       when(macosProject.podfile).thenReturn(flutterProject.directory.childDirectory('macos').childFile('Podfile'));
       when(macosProject.podManifestLock).thenReturn(flutterProject.directory.childDirectory('macos').childFile('Podfile.lock'));
       when(macosProject.pluginsList(any)).thenReturn(<Map<String,dynamic>>[]);
       when(macosProject.pluginConfigKey).thenReturn('macos');
+      when(macosProject.existsSync()).thenReturn(false);
       androidProject = MockAndroidProject();
       when(flutterProject.android).thenReturn(androidProject);
       when(androidProject.pluginRegistrantHost).thenReturn(flutterProject.directory.childDirectory('android').childDirectory('app'));
       when(androidProject.hostAppGradleRoot).thenReturn(flutterProject.directory.childDirectory('android'));
       when(androidProject.pluginsList(any)).thenReturn(<Map<String,dynamic>>[]);
       when(androidProject.pluginConfigKey).thenReturn('android');
+      when(androidProject.existsSync()).thenReturn(false);
       webProject = MockWebProject();
       when(flutterProject.web).thenReturn(webProject);
       when(webProject.libDirectory).thenReturn(flutterProject.directory.childDirectory('lib'));
       when(webProject.existsSync()).thenReturn(true);
       when(webProject.pluginsList(any)).thenReturn(<Map<String,dynamic>>[]);
       when(webProject.pluginConfigKey).thenReturn('web');
+      when(webProject.existsSync()).thenReturn(false);
       windowsProject = MockWindowsProject();
       when(flutterProject.windows).thenReturn(windowsProject);
       when(windowsProject.pluginsList(any)).thenReturn(<Map<String,dynamic>>[]);
       when(windowsProject.pluginConfigKey).thenReturn('windows');
+      when(windowsProject.existsSync()).thenReturn(false);
       linuxProject = MockLinuxProject();
       when(flutterProject.linux).thenReturn(linuxProject);;
       when(linuxProject.pluginsList(any)).thenReturn(<Map<String,dynamic>>[]);
       when(linuxProject.pluginConfigKey).thenReturn('linux');
+      when(linuxProject.existsSync()).thenReturn(false);
 
       // Set up a simple .packages file for all the tests to use, pointing to one package.
       dummyPackageDirectory = fs.directory('/pubcache/apackage/lib/');
@@ -282,13 +288,6 @@ dependencies:
         flutterProject.flutterPluginsDependenciesFile.createSync();
         flutterProject.flutterPluginsJsonFile.createSync();
 
-        when(iosProject.existsSync()).thenReturn(false);
-        when(androidProject.existsSync()).thenReturn(false);
-        when(macosProject.existsSync()).thenReturn(false);
-        when(windowsProject.existsSync()).thenReturn(false);
-        when(linuxProject.existsSync()).thenReturn(false);
-        when(webProject.existsSync()).thenReturn(false);
-
         refreshPluginsList(flutterProject);
         expect(flutterProject.flutterPluginsFile.existsSync(), false);
         expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), false);
@@ -309,11 +308,6 @@ dependencies:
 
         when(iosProject.existsSync()).thenReturn(true);
         when(iosProject.pluginsList(any)).thenReturn(dummyPluginsList);
-        when(androidProject.existsSync()).thenReturn(false);
-        when(macosProject.existsSync()).thenReturn(false);
-        when(windowsProject.existsSync()).thenReturn(false);
-        when(linuxProject.existsSync()).thenReturn(false);
-        when(webProject.existsSync()).thenReturn(false);
 
         refreshPluginsList(flutterProject);
         expect(flutterProject.flutterPluginsFile.existsSync(), true);
@@ -337,11 +331,6 @@ dependencies:
 
         when(iosProject.existsSync()).thenReturn(true);
         when(iosProject.pluginsList(any)).thenReturn(dummyPluginsList);
-        when(androidProject.existsSync()).thenReturn(false);
-        when(macosProject.existsSync()).thenReturn(false);
-        when(windowsProject.existsSync()).thenReturn(false);
-        when(linuxProject.existsSync()).thenReturn(false);
-        when(webProject.existsSync()).thenReturn(false);
 
         refreshPluginsList(flutterProject);
 
@@ -393,20 +382,44 @@ dependencies:
         ProcessManager: () => FakeProcessManager.any(),
       });
 
-      // testUsingContext('Changes to the plugin list invalidates the Cocoapod lockfiles', () {
-      //   simulatePodInstallRun(iosProject);
-      //   simulatePodInstallRun(macosProject);
-      //   configureDummyPackageAsPlugin();
-      //   when(iosProject.existsSync()).thenReturn(true);
-      //   when(macosProject.existsSync()).thenReturn(true);
-      //   refreshPluginsList(flutterProject);
-      //   expect(iosProject.podManifestLock.existsSync(), false);
-      //   expect(macosProject.podManifestLock.existsSync(), false);
-      // }, overrides: <Type, Generator>{
-      //   FileSystem: () => fs,
-      //   ProcessManager: () => FakeProcessManager.any(),
-      // });
+      testUsingContext('Changes to the plugin list invalidates the Cocoapod lockfiles', () {
+        simulatePodInstallRun(iosProject);
+        simulatePodInstallRun(macosProject);
+        configureDummyPackageAsPlugin();
+        when(iosProject.existsSync()).thenReturn(true);
+        when(macosProject.existsSync()).thenReturn(true);
+        refreshPluginsList(flutterProject);
+        expect(iosProject.podManifestLock.existsSync(), false);
+        expect(macosProject.podManifestLock.existsSync(), false);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+      });
+
+      testUsingContext('Changes to the plugin json list invalidates the Cocoapod lockfiles', () {
+        simulatePodInstallRun(iosProject);
+        simulatePodInstallRun(macosProject);
+        final List<Map<String, dynamic>> dummyPluginsList = <Map<String,dynamic>>[ 
+          <String,dynamic>{
+            'name': 'test',
+            'path': 'test_path',
+            'dependencies': <String>[],
+        }];
+
+        when(iosProject.existsSync()).thenReturn(true);
+        when(iosProject.pluginsList(any)).thenReturn(dummyPluginsList);
+        when(macosProject.existsSync()).thenReturn(true);
+        when(macosProject.pluginsList(any)).thenReturn(dummyPluginsList);
+
+        refreshPluginsList(flutterProject);
+        expect(iosProject.podManifestLock.existsSync(), false);
+        expect(macosProject.podManifestLock.existsSync(), false);
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+      });
     });
+
 
     group('injectPlugins', () {
       MockFeatureFlags featureFlags;
