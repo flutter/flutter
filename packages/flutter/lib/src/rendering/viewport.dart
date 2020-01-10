@@ -138,7 +138,7 @@ class RevealedOffset {
 
   @override
   String toString() {
-    return '$runtimeType(offset: $offset, rect: $rect)';
+    return '${objectRuntimeType(this, 'RenderAbstractViewport')}(offset: $offset, rect: $rect)';
   }
 }
 

@@ -48,7 +48,7 @@ class MethodCall {
   final dynamic arguments;
 
   @override
-  String toString() => '$runtimeType($method, $arguments)';
+  String toString() => '${objectRuntimeType(this, 'MessageCodec')}($method, $arguments)';
 }
 
 /// A codec for method calls and enveloped results.

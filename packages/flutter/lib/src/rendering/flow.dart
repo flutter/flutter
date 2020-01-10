@@ -132,7 +132,7 @@ abstract class FlowDelegate {
   ///
   /// By default, returns the [runtimeType] of the class.
   @override
-  String toString() => '$runtimeType';
+  String toString() => '${objectRuntimeType(this, 'FlowPaintingContext')}';
 }
 
 /// Parent data for use with [RenderFlow].

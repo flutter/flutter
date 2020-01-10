@@ -1104,7 +1104,7 @@ abstract class SemanticsGestureDelegate {
   void assignSemantics(RenderSemanticsGestureHandler renderObject);
 
   @override
-  String toString() => '$runtimeType()';
+  String toString() => '${objectRuntimeType(this, 'GestureRecognizerFactory')}()';
 }
 
 // The default semantics delegate of [RawGestureDetector]. Its behavior is

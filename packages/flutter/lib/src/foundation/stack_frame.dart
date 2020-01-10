@@ -6,6 +6,8 @@ import 'dart:ui' show hashValues;
 
 import 'package:meta/meta.dart';
 
+import 'object.dart';
+
 /// A object representation of a frame from a stack trace.
 ///
 /// {@tool snippet}
@@ -226,5 +228,5 @@ class StackFrame {
   }
 
   @override
-  String toString() => '$runtimeType(#$number, $packageScheme:$package/$packagePath:$line:$column, className: $className, method: $method)';
+  String toString() => '${objectRuntimeType(this, 'StackFrame')}(#$number, $packageScheme:$package/$packagePath:$line:$column, className: $className, method: $method)';
 }
