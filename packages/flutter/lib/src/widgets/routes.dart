@@ -1070,7 +1070,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   /// usually darkened by the modal barrier.
   ///
   /// While the route is animating into position, the color is animated from
-  /// transparent to the specified color.
+  /// transparent to the specified [barrierColor].
   ///
   /// If this getter would ever start returning a different curve,
   /// [changedInternalState] should be invoked so that the change can take
@@ -1082,7 +1082,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   ///
   ///  * [barrierColor], which determines the color that the modal transitions
   ///    to.
-  ///  * [Curves] for collection of common curves.
+  ///  * [Curves] for a collection of common curves.
   ///  * [AnimatedModalBarrier], the widget that implements this feature.
   Curve get barrierCurve => Curves.ease;
 

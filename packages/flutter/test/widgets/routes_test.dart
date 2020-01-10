@@ -876,7 +876,7 @@ void main() {
                   child: const Text('X'),
                   onPressed: () {
                     Navigator.of(context).push<void>(
-                      _TestDialogRoute<void>(
+                      _TestDialogRouteWithCustomBarrierCurve<void>(
                         child: const Text('Hello World'),
                       )
                     );
@@ -889,8 +889,8 @@ void main() {
       ));
 
       final CurveTween _defaultBarrierTween = CurveTween(curve: Curves.ease);
-      double _getBarrierTweenAlphaValue(double t) {
-        return _defaultBarrierTween.transform(t) * 255;
+      int _getExpectedBarrierTweenAlphaValue(double t) {
+        return Color.getAlphaFromOpacity(_defaultBarrierTween.transform(t));
       }
 
       await tester.tap(find.text('X'));
@@ -906,21 +906,21 @@ void main() {
       modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
       expect(
         modalBarrierAnimation.value.alpha,
-        closeTo(_getBarrierTweenAlphaValue(0.25), 1.0),
+        closeTo(_getExpectedBarrierTweenAlphaValue(0.25), 1.0),
       );
 
       await tester.pump(const Duration(milliseconds: 25));
       modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
       expect(
         modalBarrierAnimation.value.alpha,
-        closeTo(_getBarrierTweenAlphaValue(0.50), 1.0),
+        closeTo(_getExpectedBarrierTweenAlphaValue(0.50), 1.0),
       );
 
       await tester.pump(const Duration(milliseconds: 25));
       modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
       expect(
         modalBarrierAnimation.value.alpha,
-        closeTo(_getBarrierTweenAlphaValue(0.75), 1.0),
+        closeTo(_getExpectedBarrierTweenAlphaValue(0.75), 1.0),
       );
 
       await tester.pumpAndSettle();
@@ -952,8 +952,8 @@ void main() {
       ));
 
       final CurveTween _customBarrierTween = CurveTween(curve: Curves.linear);
-      double _getBarrierTweenAlphaValue(double t) {
-        return _customBarrierTween.transform(t) * 255;
+      int _getExpectedBarrierTweenAlphaValue(double t) {
+        return Color.getAlphaFromOpacity(_customBarrierTween.transform(t));
       }
 
       await tester.tap(find.text('X'));
@@ -969,21 +969,21 @@ void main() {
       modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
       expect(
         modalBarrierAnimation.value.alpha,
-        closeTo(_getBarrierTweenAlphaValue(0.25), 1.0),
+        closeTo(_getExpectedBarrierTweenAlphaValue(0.25), 1.0),
       );
 
       await tester.pump(const Duration(milliseconds: 25));
       modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
       expect(
         modalBarrierAnimation.value.alpha,
-        closeTo(_getBarrierTweenAlphaValue(0.50), 1.0),
+        closeTo(_getExpectedBarrierTweenAlphaValue(0.50), 1.0),
       );
 
       await tester.pump(const Duration(milliseconds: 25));
       modalBarrierAnimation = tester.widget<AnimatedModalBarrier>(animatedModalBarrier).color;
       expect(
         modalBarrierAnimation.value.alpha,
-        closeTo(_getBarrierTweenAlphaValue(0.75), 1.0),
+        closeTo(_getExpectedBarrierTweenAlphaValue(0.75), 1.0),
       );
 
       await tester.pumpAndSettle();
@@ -1020,41 +1020,11 @@ class DialogObserver extends NavigatorObserver {
   }
 }
 
-class _TestDialogRoute<T> extends PopupRoute<T> {
-  _TestDialogRoute({
-    @required Widget child,
-  }) : _child = child;
-
-  final Widget _child;
-
-  @override
-  bool get barrierDismissible => true;
-
-  @override
-  String get barrierLabel => null;
-
-  @override
-  Color get barrierColor => Colors.black; // easier value to test against
-
-  @override
-  Duration get transitionDuration => const Duration(milliseconds: 100); // easier value to test against
-
-  @override
-  Widget buildPage(BuildContext context, Animation<double> animation, Animation<double> secondaryAnimation) {
-    return Semantics(
-      child: _child,
-      scopesRoute: true,
-      explicitChildNodes: true,
-    );
-  }
-}
-
 class _TestDialogRouteWithCustomBarrierCurve<T> extends PopupRoute<T> {
   _TestDialogRouteWithCustomBarrierCurve({
     @required Widget child,
-    @required Curve barrierCurve,
-  }) : assert(barrierCurve != null),
-       _barrierCurve = barrierCurve,
+    Curve barrierCurve,
+  }) : _barrierCurve = barrierCurve,
        _child = child;
 
   final Widget _child;
@@ -1069,7 +1039,12 @@ class _TestDialogRouteWithCustomBarrierCurve<T> extends PopupRoute<T> {
   Color get barrierColor => Colors.black; // easier value to test against
 
   @override
-  Curve get barrierCurve => _barrierCurve;
+  Curve get barrierCurve {
+    if (_barrierCurve == null) {
+      return super.barrierCurve;
+    }
+    return _barrierCurve;
+  }
   final Curve _barrierCurve;
 
   @override
