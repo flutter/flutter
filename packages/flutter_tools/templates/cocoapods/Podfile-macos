@@ -34,16 +34,18 @@ def parse_KV_file(file, separator='=')
 end
 
 def parse_json_file(file)
-  plugins_file = File.read(file)
-  if !File.exists? plugins_file
-    return [];
+  file_abs_path = File.expand_path(file)
+  if !File.exists? file_abs_path
+    puts ".flutter-plugins.json must exist. If you're running pod install manually, make sure flutter packages get is executed first."
   end
+  plugins_file = File.read(file_abs_path)
   json = JSON.parse(plugins_file)
+  
   pods_ary = []
-  macos_plugins = json['macos']
-  macos_plugins.foreach { |plugin|
+  macos_plugins = json['plugins']['macos']
+  macos_plugins.each { |plugin|
     podname = plugin['name']
-    podpath = plugin['path']
+    podpath = File.expand_path("#{plugin['path']}", file_abs_path)
     pods_ary.push({:name => podname, :path => podpath});
   }
   return pods_ary
