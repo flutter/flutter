@@ -198,7 +198,7 @@ class Dart2JSTarget extends Target {
   }
 }
 
-/// Unpacks the dart2js compilation to a given output directory
+/// Unpacks the dart2js compilation and resources to a given output directory
 class WebReleaseBundle extends Target {
   const WebReleaseBundle();
 
@@ -214,18 +214,18 @@ class WebReleaseBundle extends Target {
   List<Source> get inputs => const <Source>[
     Source.pattern('{BUILD_DIR}/main.dart.js'),
     Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
-    Source.pattern('{PROJECT_DIR}/web/index.html'),
   ];
 
   @override
   List<Source> get outputs => const <Source>[
     Source.pattern('{OUTPUT_DIR}/main.dart.js'),
-    Source.pattern('{OUTPUT_DIR}/index.html'),
   ];
 
   @override
   List<String> get depfiles => const <String>[
     'dart2js.d',
+    'flutter_assets.d',
+    'web_resources.d',
   ];
 
   @override
@@ -240,11 +240,30 @@ class WebReleaseBundle extends Target {
     }
     final Directory outputDirectory = environment.outputDir.childDirectory('assets');
     outputDirectory.createSync(recursive: true);
-    environment.projectDir
-      .childDirectory('web')
-      .childFile('index.html')
-      .copySync(globals.fs.path.join(environment.outputDir.path, 'index.html'));
     final Depfile depfile = await copyAssets(environment, environment.outputDir.childDirectory('assets'));
     depfile.writeToFile(environment.buildDir.childFile('flutter_assets.d'));
+
+    final Directory webResources = environment.projectDir
+      .childDirectory('web');
+    final List<File> inputResourceFiles = webResources
+      .listSync(recursive: true)
+      .whereType<File>()
+      .toList();
+
+    // Copy other resource files out of web/ directory.
+    final List<File> outputResourcesFiles = <File>[];
+    for (final File inputFile in inputResourceFiles) {
+      final File outputFile = globals.fs.file(globals.fs.path.join(
+        environment.outputDir.path,
+        globals.fs.path.relative(inputFile.path, from: webResources.path)));
+      if (!outputFile.parent.existsSync()) {
+        outputFile.parent.createSync(recursive: true);
+      }
+      inputFile.copySync(outputFile.path);
+      outputResourcesFiles.add(outputFile);
+    }
+    final Depfile resourceFile = Depfile(inputResourceFiles, outputResourcesFiles);
+    resourceFile.writeToFile(environment.buildDir.childFile('web_resources.d'));
+
   }
 }
