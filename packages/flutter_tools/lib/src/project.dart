@@ -269,6 +269,7 @@ abstract class FlutterProjectPlatform {
     for (final Plugin plugin in platformPlugins) {
       list.add(<String, dynamic>{
         'name': plugin.name,
+        'path': escapePath(plugin.path),
         'dependencies': <String>[
           ...plugin.dependencies.where(pluginNames.contains)
         ]
@@ -607,7 +608,7 @@ class IosProject extends FlutterProjectPlatform implements XcodeBasedProject {
 ///
 /// Instances will reflect the contents of the `android/` sub-folder of
 /// Flutter applications and the `.android/` sub-folder of Flutter module projects.
-class AndroidProject extends FlutterProjectPlatform{
+class AndroidProject extends FlutterProjectPlatform {
   AndroidProject._(this.parent);
 
   /// The parent of this project.
