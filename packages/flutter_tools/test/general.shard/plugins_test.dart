@@ -87,6 +87,18 @@ void main() {
       platforms:
         ios:
           pluginClass: FLESomePlugin
+        macos:
+          pluginClass: FLESomePlugin
+        windows:
+          pluginClass: FLESomePlugin
+        linux:
+          pluginClass: FLESomePlugin
+        web:
+          pluginClass: SomePlugin
+          fileName: lib/SomeFile.dart
+        android:
+          pluginClass: SomePlugin
+          package: AndroidPackage
   ''');
     }
 
@@ -249,12 +261,6 @@ dependencies:
 
     group('refreshPlugins', () {
       testUsingContext('Refreshing the plugin list is a no-op when the plugins list stays empty', () { 
-        // final List<Map<String, dynamic>> dummyPluginsList = <Map<String,dynamic>>[ 
-        //   <String,dynamic>{
-        //     'name': 'test',
-        //     'path': 'test_path',
-        //     'dependencies': <String>[],
-        // }];
         when(iosProject.existsSync()).thenReturn(true);
         when(androidProject.existsSync()).thenReturn(true);
         when(macosProject.existsSync()).thenReturn(true);
@@ -294,57 +300,98 @@ dependencies:
 
       testUsingContext('Refreshing the plugin list creates a plugin directory when there are plugins', () {
         configureDummyPackageAsPlugin();
-        when(iosProject.existsSync()).thenReturn(false);
+        final List<Map<String, dynamic>> dummyPluginsList = <Map<String,dynamic>>[ 
+          <String,dynamic>{
+            'name': 'test',
+            'path': 'test_path',
+            'dependencies': <String>[],
+        }];
+
+        when(iosProject.existsSync()).thenReturn(true);
+        when(iosProject.pluginsList(any)).thenReturn(dummyPluginsList);
+        when(androidProject.existsSync()).thenReturn(false);
         when(macosProject.existsSync()).thenReturn(false);
+        when(windowsProject.existsSync()).thenReturn(false);
+        when(linuxProject.existsSync()).thenReturn(false);
+        when(webProject.existsSync()).thenReturn(false);
+
         refreshPluginsList(flutterProject);
         expect(flutterProject.flutterPluginsFile.existsSync(), true);
+        expect(flutterProject.flutterPluginsJsonFile.existsSync(), true);
         expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), true);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
       });
 
-      // testUsingContext('Refreshing the plugin list modifies .flutter-plugins and .flutter-plugins-dependencies when there are plugins', () {
-      //   createPluginWithDependencies(name: 'plugin-a', dependencies: const <String>['plugin-b', 'plugin-c', 'random-package']);
-      //   createPluginWithDependencies(name: 'plugin-b', dependencies: const <String>['plugin-c']);
-      //   createPluginWithDependencies(name: 'plugin-c', dependencies: const <String>[]);
-      //   when(iosProject.existsSync()).thenReturn(false);
-      //   when(macosProject.existsSync()).thenReturn(false);
+      testUsingContext('Refreshing the plugin list modifies .flutter-plugins.json .flutter-plugins and .flutter-plugins-dependencies when there are plugins', () {
+        createPluginWithDependencies(name: 'plugin-a', dependencies: const <String>['plugin-b', 'plugin-c', 'random-package']);
+        createPluginWithDependencies(name: 'plugin-b', dependencies: const <String>['plugin-c']);
+        createPluginWithDependencies(name: 'plugin-c', dependencies: const <String>[]);
+        final List<Map<String, dynamic>> dummyPluginsList = <Map<String,dynamic>>[ 
+          <String,dynamic>{
+            'name': 'test',
+            'path': 'test_path',
+            'dependencies': <String>[],
+        }];
 
-      //   refreshPluginsList(flutterProject);
+        when(iosProject.existsSync()).thenReturn(true);
+        when(iosProject.pluginsList(any)).thenReturn(dummyPluginsList);
+        when(androidProject.existsSync()).thenReturn(false);
+        when(macosProject.existsSync()).thenReturn(false);
+        when(windowsProject.existsSync()).thenReturn(false);
+        when(linuxProject.existsSync()).thenReturn(false);
+        when(webProject.existsSync()).thenReturn(false);
 
-      //   expect(flutterProject.flutterPluginsFile.existsSync(), true);
-      //   expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), true);
-      //   expect(flutterProject.flutterPluginsFile.readAsStringSync(),
-      //     '# This is a generated file; do not edit or check into version control.\n'
-      //     'plugin-a=/.tmp_rand0/plugin.rand0/\n'
-      //     'plugin-b=/.tmp_rand0/plugin.rand1/\n'
-      //     'plugin-c=/.tmp_rand0/plugin.rand2/\n'
-      //     ''
-      //   );
-      //   expect(flutterProject.flutterPluginsDependenciesFile.readAsStringSync(),
-      //     '{'
-      //       '"_info":"// This is a generated file; do not edit or check into version control.",'
-      //       '"dependencyGraph":['
-      //         '{'
-      //           '"name":"plugin-a",'
-      //           '"dependencies":["plugin-b","plugin-c"]'
-      //         '},'
-      //         '{'
-      //           '"name":"plugin-b",'
-      //           '"dependencies":["plugin-c"]'
-      //         '},'
-      //         '{'
-      //           '"name":"plugin-c",'
-      //           '"dependencies":[]'
-      //         '}'
-      //       ']'
-      //     '}'
-      //   );
-      // }, overrides: <Type, Generator>{
-      //   FileSystem: () => fs,
-      //   ProcessManager: () => FakeProcessManager.any(),
-      // });
+        refreshPluginsList(flutterProject);
+
+        expect(flutterProject.flutterPluginsFile.existsSync(), true);
+        expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), true);
+        expect(flutterProject.flutterPluginsFile.readAsStringSync(),
+          '# This is a generated file; do not edit or check into version control.\n'
+          'plugin-a=/.tmp_rand0/plugin.rand0/\n'
+          'plugin-b=/.tmp_rand0/plugin.rand1/\n'
+          'plugin-c=/.tmp_rand0/plugin.rand2/\n'
+          ''
+        );
+        expect(flutterProject.flutterPluginsDependenciesFile.readAsStringSync(),
+          '{'
+            '"_info":"// This is a generated file; do not edit or check into version control.",'
+            '"dependencyGraph":['
+              '{'
+                '"name":"plugin-a",'
+                '"dependencies":["plugin-b","plugin-c"]'
+              '},'
+              '{'
+                '"name":"plugin-b",'
+                '"dependencies":["plugin-c"]'
+              '},'
+              '{'
+                '"name":"plugin-c",'
+                '"dependencies":[]'
+              '}'
+            ']'
+          '}'
+        );
+        expect(flutterProject.flutterPluginsJsonFile.existsSync(), true);
+        expect(flutterProject.flutterPluginsJsonFile.readAsStringSync(),
+          '{'
+            '"_info":"// This is a generated file; do not edit or check into version control.",'
+            '"plugins":{'
+              '"ios":['
+                '{'
+                  '"name":"test",'
+                  '"path":"test_path",'
+                  '"dependencies":[]'
+                '}'
+              ']'
+            '}'
+          '}'
+        );
+      }, overrides: <Type, Generator>{
+        FileSystem: () => fs,
+        ProcessManager: () => FakeProcessManager.any(),
+      });
 
       // testUsingContext('Changes to the plugin list invalidates the Cocoapod lockfiles', () {
       //   simulatePodInstallRun(iosProject);

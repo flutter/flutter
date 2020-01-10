@@ -338,7 +338,6 @@ bool _writeFlutterPluginsList(FlutterProject project, List<Plugin> plugins) {
   _addPluginsToPlatform(plugins, project.linux, pluginsMap);
   _addPluginsToPlatform(plugins, project.windows, pluginsMap);
   _addPluginsToPlatform(plugins, project.web, pluginsMap);
-  print(pluginsMap);
 
   result['plugins'] = pluginsMap;
 
