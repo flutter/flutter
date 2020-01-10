@@ -9,7 +9,8 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../widgets/semantics_tester.dart';
 
-Widget buildSliverAppBarApp({ bool floating, bool pinned, double expandedHeight, bool snap = false }) {
+Widget buildSliverAppBarApp(
+    {bool floating, bool pinned, double expandedHeight, bool snap = false}) {
   return Localizations(
     locale: const Locale('en', 'US'),
     delegates: const <LocalizationsDelegate<dynamic>>[
@@ -33,7 +34,9 @@ Widget buildSliverAppBarApp({ bool floating, bool pinned, double expandedHeight,
                   expandedHeight: expandedHeight,
                   snap: snap,
                   bottom: TabBar(
-                    tabs: <String>['A','B','C'].map<Widget>((String t) => Tab(text: 'TAB $t')).toList(),
+                    tabs: <String>['A', 'B', 'C']
+                        .map<Widget>((String t) => Tab(text: 'TAB $t'))
+                        .toList(),
                   ),
                 ),
                 SliverToBoxAdapter(
@@ -52,14 +55,21 @@ Widget buildSliverAppBarApp({ bool floating, bool pinned, double expandedHeight,
 }
 
 ScrollController primaryScrollController(WidgetTester tester) {
-  return PrimaryScrollController.of(tester.element(find.byType(CustomScrollView)));
+  return PrimaryScrollController.of(
+      tester.element(find.byType(CustomScrollView)));
 }
 
-double appBarHeight(WidgetTester tester) => tester.getSize(find.byType(AppBar, skipOffstage: false)).height;
-double appBarTop(WidgetTester tester) => tester.getTopLeft(find.byType(AppBar, skipOffstage: false)).dy;
-double appBarBottom(WidgetTester tester) => tester.getBottomLeft(find.byType(AppBar, skipOffstage: false)).dy;
+double appBarHeight(WidgetTester tester) =>
+    tester.getSize(find.byType(AppBar, skipOffstage: false)).height;
 
-double tabBarHeight(WidgetTester tester) => tester.getSize(find.byType(TabBar, skipOffstage: false)).height;
+double appBarTop(WidgetTester tester) =>
+    tester.getTopLeft(find.byType(AppBar, skipOffstage: false)).dy;
+
+double appBarBottom(WidgetTester tester) =>
+    tester.getBottomLeft(find.byType(AppBar, skipOffstage: false)).dy;
+
+double tabBarHeight(WidgetTester tester) =>
+    tester.getSize(find.byType(TabBar, skipOffstage: false)).height;
 
 void main() {
   setUp(() {
@@ -145,7 +155,8 @@ void main() {
     expect(center.dx, lessThan(400 - size.width / 2.0));
   });
 
-  testWidgets('AppBar centerTitle:true centers on Android', (WidgetTester tester) async {
+  testWidgets('AppBar centerTitle:true centers on Android',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(platform: TargetPlatform.android),
@@ -165,7 +176,8 @@ void main() {
     expect(center.dx, lessThan(400 + size.width / 2.0));
   });
 
-  testWidgets('AppBar centerTitle:false title start edge is 16.0 (LTR)', (WidgetTester tester) async {
+  testWidgets('AppBar centerTitle:false title start edge is 16.0 (LTR)',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -182,7 +194,8 @@ void main() {
     expect(tester.getTopRight(titleWidget).dx, 800 - 16.0);
   });
 
-  testWidgets('AppBar centerTitle:false title start edge is 16.0 (RTL)', (WidgetTester tester) async {
+  testWidgets('AppBar centerTitle:false title start edge is 16.0 (RTL)',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Directionality(
@@ -202,7 +215,8 @@ void main() {
     expect(tester.getTopLeft(titleWidget).dx, 16.0);
   });
 
-  testWidgets('AppBar titleSpacing:32 title start edge is 32.0 (LTR)', (WidgetTester tester) async {
+  testWidgets('AppBar titleSpacing:32 title start edge is 32.0 (LTR)',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -220,7 +234,8 @@ void main() {
     expect(tester.getTopRight(titleWidget).dx, 800 - 32.0);
   });
 
-  testWidgets('AppBar titleSpacing:32 title start edge is 32.0 (RTL)', (WidgetTester tester) async {
+  testWidgets('AppBar titleSpacing:32 title start edge is 32.0 (RTL)',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Directionality(
@@ -242,11 +257,32 @@ void main() {
   });
 
   testWidgets(
-    'AppBar centerTitle:false leading button title left edge is 72.0 (LTR)',
-    (WidgetTester tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
+      'AppBar centerTitle:false leading button title left edge is 72.0 (LTR)',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(
+            centerTitle: false,
+            title: const Text('X'),
+          ),
+          // A drawer causes a leading hamburger.
+          drawer: const Drawer(),
+        ),
+      ),
+    );
+
+    expect(tester.getTopLeft(find.text('X')).dx, 72.0);
+  });
+
+  testWidgets(
+      'AppBar centerTitle:false leading button title left edge is 72.0 (RTL)',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.rtl,
+          child: Scaffold(
             appBar: AppBar(
               centerTitle: false,
               title: const Text('X'),
@@ -255,34 +291,14 @@ void main() {
             drawer: const Drawer(),
           ),
         ),
-      );
+      ),
+    );
 
-      expect(tester.getTopLeft(find.text('X')).dx, 72.0);
-    });
+    expect(tester.getTopRight(find.text('X')).dx, 800.0 - 72.0);
+  });
 
-  testWidgets(
-    'AppBar centerTitle:false leading button title left edge is 72.0 (RTL)',
-    (WidgetTester tester) async {
-      await tester.pumpWidget(
-        MaterialApp(
-          home: Directionality(
-            textDirection: TextDirection.rtl,
-            child: Scaffold(
-              appBar: AppBar(
-                centerTitle: false,
-                title: const Text('X'),
-              ),
-              // A drawer causes a leading hamburger.
-              drawer: const Drawer(),
-            ),
-          ),
-        ),
-      );
-
-      expect(tester.getTopRight(find.text('X')).dx, 800.0 - 72.0);
-    });
-
-  testWidgets('AppBar centerTitle:false title overflow OK', (WidgetTester tester) async {
+  testWidgets('AppBar centerTitle:false title overflow OK',
+      (WidgetTester tester) async {
     // The app bar's title should be constrained to fit within the available space
     // between the leading and actions widgets.
 
@@ -310,11 +326,15 @@ void main() {
 
     final Finder title = find.byKey(titleKey);
     expect(tester.getTopLeft(title).dx, 72.0);
-    expect(tester.getSize(title).width, equals(
-        800.0 // Screen width.
-        - 56.0 // Leading button width.
-        - 16.0 // Leading button to title padding.
-        - 16.0)); // Title right side padding.
+    expect(
+        tester.getSize(title).width,
+        equals(800.0 // Screen width.
+            -
+            56.0 // Leading button width.
+            -
+            16.0 // Leading button to title padding.
+            -
+            16.0)); // Title right side padding.
 
     actions = <Widget>[
       const SizedBox(width: 100.0),
@@ -324,21 +344,28 @@ void main() {
 
     expect(tester.getTopLeft(title).dx, 72.0);
     // The title shrinks by 200.0 to allow for the actions widgets.
-    expect(tester.getSize(title).width, equals(
-        800.0 // Screen width.
-        - 56.0 // Leading button width.
-        - 16.0 // Leading button to title padding.
-        - 16.0 // Title to actions padding
-        - 200.0)); // Actions' width.
+    expect(
+        tester.getSize(title).width,
+        equals(800.0 // Screen width.
+            -
+            56.0 // Leading button width.
+            -
+            16.0 // Leading button to title padding.
+            -
+            16.0 // Title to actions padding
+            -
+            200.0)); // Actions' width.
 
     leading = Container(); // AppBar will constrain the width to 24.0
     await tester.pumpWidget(buildApp());
     expect(tester.getTopLeft(title).dx, 72.0);
     // Adding a leading widget shouldn't effect the title's size
-    expect(tester.getSize(title).width, equals(800.0 - 56.0 - 16.0 - 16.0 - 200.0));
+    expect(tester.getSize(title).width,
+        equals(800.0 - 56.0 - 16.0 - 16.0 - 200.0));
   });
 
-  testWidgets('AppBar centerTitle:true title overflow OK (LTR)', (WidgetTester tester) async {
+  testWidgets('AppBar centerTitle:true title overflow OK (LTR)',
+      (WidgetTester tester) async {
     // The app bar's title should be constrained to fit within the available space
     // between the leading and actions widgets. When it's also centered it may
     // also be start or end justified if it doesn't fit in the overall center.
@@ -390,7 +417,8 @@ void main() {
     expect(tester.getSize(title).width, equals(620.0));
   });
 
-  testWidgets('AppBar centerTitle:true title overflow OK (RTL)', (WidgetTester tester) async {
+  testWidgets('AppBar centerTitle:true title overflow OK (RTL)',
+      (WidgetTester tester) async {
     // The app bar's title should be constrained to fit within the available space
     // between the leading and actions widgets. When it's also centered it may
     // also be start or end justified if it doesn't fit in the overall center.
@@ -486,7 +514,8 @@ void main() {
     expect(tester.getSize(title).isEmpty, isTrue);
   });
 
-  testWidgets('AppBar actions are vertically centered', (WidgetTester tester) async {
+  testWidgets('AppBar actions are vertically centered',
+      (WidgetTester tester) async {
     final UniqueKey appBarKey = UniqueKey();
     final UniqueKey leadingKey = UniqueKey();
     final UniqueKey titleKey = UniqueKey();
@@ -518,7 +547,8 @@ void main() {
     expect(yCenter(appBarKey), equals(yCenter(action1Key)));
   });
 
-  testWidgets('leading button extends to edge and is square', (WidgetTester tester) async {
+  testWidgets('leading button extends to edge and is square',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(platform: TargetPlatform.android),
@@ -526,7 +556,8 @@ void main() {
           appBar: AppBar(
             title: const Text('X'),
           ),
-          drawer: Column(), // Doesn't really matter. Triggers a hamburger regardless.
+          drawer:
+              Column(), // Doesn't really matter. Triggers a hamburger regardless.
         ),
       ),
     );
@@ -536,14 +567,15 @@ void main() {
     expect(tester.getSize(hamburger), const Size(56.0, 56.0));
   });
 
-  testWidgets('test action is 4dp from edge and 48dp min', (WidgetTester tester) async {
+  testWidgets('test action is 4dp from edge and 48dp min',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         theme: ThemeData(platform: TargetPlatform.android),
         home: Scaffold(
           appBar: AppBar(
             title: const Text('X'),
-            actions: const <Widget> [
+            actions: const <Widget>[
               IconButton(
                 icon: Icon(Icons.share),
                 onPressed: null,
@@ -572,7 +604,8 @@ void main() {
     expect(tester.getSize(shareButton), const Size(48.0, 56.0));
   });
 
-  testWidgets('SliverAppBar default configuration', (WidgetTester tester) async {
+  testWidgets('SliverAppBar default configuration',
+      (WidgetTester tester) async {
     await tester.pumpWidget(buildSliverAppBarApp(
       floating: false,
       pinned: false,
@@ -608,8 +641,8 @@ void main() {
     expect(tabBarHeight(tester), initialTabBarHeight);
   });
 
-  testWidgets('SliverAppBar expandedHeight, pinned', (WidgetTester tester) async {
-
+  testWidgets('SliverAppBar expandedHeight, pinned',
+      (WidgetTester tester) async {
     await tester.pumpWidget(buildSliverAppBarApp(
       floating: false,
       pinned: true,
@@ -641,8 +674,8 @@ void main() {
     expect(tabBarHeight(tester), initialTabBarHeight);
   });
 
-  testWidgets('SliverAppBar expandedHeight, pinned and floating', (WidgetTester tester) async {
-
+  testWidgets('SliverAppBar expandedHeight, pinned and floating',
+      (WidgetTester tester) async {
     await tester.pumpWidget(buildSliverAppBarApp(
       floating: true,
       pinned: true,
@@ -674,7 +707,8 @@ void main() {
     expect(tabBarHeight(tester), initialTabBarHeight);
   });
 
-  testWidgets('SliverAppBar expandedHeight, floating with snap:true', (WidgetTester tester) async {
+  testWidgets('SliverAppBar expandedHeight, floating with snap:true',
+      (WidgetTester tester) async {
     await tester.pumpWidget(buildSliverAppBarApp(
       floating: true,
       pinned: false,
@@ -687,7 +721,8 @@ void main() {
     expect(appBarBottom(tester), 128.0);
 
     // Scroll to the middle of the list. The (floating) appbar is no longer visible.
-    final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
+    final ScrollPosition position =
+        tester.state<ScrollableState>(find.byType(Scrollable)).position;
     position.jumpTo(256.00);
     await tester.pumpAndSettle();
     expect(find.byType(SliverAppBar), findsNothing);
@@ -696,7 +731,8 @@ void main() {
     // Drag the scrollable up and down. The app bar should not snap open, its
     // height should just track the drag offset.
     TestGesture gesture = await tester.startGesture(const Offset(50.0, 256.0));
-    await gesture.moveBy(const Offset(0.0, 128.0)); // drag the appbar all the way open
+    await gesture
+        .moveBy(const Offset(0.0, 128.0)); // drag the appbar all the way open
     await tester.pump();
     expect(appBarTop(tester), 0.0);
     expect(appBarHeight(tester), 128.0);
@@ -755,7 +791,8 @@ void main() {
     expect(appBarBottom(tester), lessThanOrEqualTo(0.0));
   });
 
-  testWidgets('SliverAppBar expandedHeight, floating and pinned with snap:true', (WidgetTester tester) async {
+  testWidgets('SliverAppBar expandedHeight, floating and pinned with snap:true',
+      (WidgetTester tester) async {
     await tester.pumpWidget(buildSliverAppBarApp(
       floating: true,
       pinned: true,
@@ -769,7 +806,8 @@ void main() {
 
     // Scroll to the middle of the list. The only the tab bar is visible
     // because this is a pinned appbar.
-    final ScrollPosition position = tester.state<ScrollableState>(find.byType(Scrollable)).position;
+    final ScrollPosition position =
+        tester.state<ScrollableState>(find.byType(Scrollable)).position;
     position.jumpTo(256.0);
     await tester.pumpAndSettle();
     expect(find.byType(SliverAppBar), findsOneWidget);
@@ -841,17 +879,18 @@ void main() {
     expect(appBarBottom(tester), kTextTabBarHeight);
   });
 
-  testWidgets('AppBar dimensions, with and without bottom, primary', (WidgetTester tester) async {
-    const MediaQueryData topPadding100 = MediaQueryData(padding: EdgeInsets.only(top: 100.0));
+  testWidgets('AppBar dimensions, with and without bottom, primary',
+      (WidgetTester tester) async {
+    const MediaQueryData topPadding100 =
+        MediaQueryData(padding: EdgeInsets.only(top: 100.0));
 
-    await tester.pumpWidget(
-      Localizations(
-        locale: const Locale('en', 'US'),
-        delegates: const <LocalizationsDelegate<dynamic>>[
-          DefaultMaterialLocalizations.delegate,
-          DefaultWidgetsLocalizations.delegate,
-        ],
-        child: Directionality(
+    await tester.pumpWidget(Localizations(
+      locale: const Locale('en', 'US'),
+      delegates: const <LocalizationsDelegate<dynamic>>[
+        DefaultMaterialLocalizations.delegate,
+        DefaultWidgetsLocalizations.delegate,
+      ],
+      child: Directionality(
         textDirection: TextDirection.ltr,
         child: MediaQuery(
           data: topPadding100,
@@ -865,20 +904,19 @@ void main() {
     expect(appBarTop(tester), 0.0);
     expect(appBarHeight(tester), kToolbarHeight);
 
-    await tester.pumpWidget(
-      Localizations(
-        locale: const Locale('en', 'US'),
-        delegates: const <LocalizationsDelegate<dynamic>>[
-          DefaultMaterialLocalizations.delegate,
-          DefaultWidgetsLocalizations.delegate,
-        ],
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: MediaQuery(
-            data: topPadding100,
-            child: Scaffold(
-              primary: true,
-              appBar: AppBar(title: const Text('title')),
+    await tester.pumpWidget(Localizations(
+      locale: const Locale('en', 'US'),
+      delegates: const <LocalizationsDelegate<dynamic>>[
+        DefaultMaterialLocalizations.delegate,
+        DefaultWidgetsLocalizations.delegate,
+      ],
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: topPadding100,
+          child: Scaffold(
+            primary: true,
+            appBar: AppBar(title: const Text('title')),
           ),
         ),
       ),
@@ -887,23 +925,22 @@ void main() {
     expect(tester.getTopLeft(find.text('title')).dy, greaterThan(100.0));
     expect(appBarHeight(tester), kToolbarHeight + 100.0);
 
-    await tester.pumpWidget(
-      Localizations(
-        locale: const Locale('en', 'US'),
-        delegates: const <LocalizationsDelegate<dynamic>>[
-          DefaultMaterialLocalizations.delegate,
-          DefaultWidgetsLocalizations.delegate,
-        ],
-        child: Directionality(
-          textDirection: TextDirection.ltr,
-          child: MediaQuery(
-            data: topPadding100,
-            child: Scaffold(
-              primary: false,
-              appBar: AppBar(
-                bottom: PreferredSize(
-                  preferredSize: const Size.fromHeight(200.0),
-                  child: Container(),
+    await tester.pumpWidget(Localizations(
+      locale: const Locale('en', 'US'),
+      delegates: const <LocalizationsDelegate<dynamic>>[
+        DefaultMaterialLocalizations.delegate,
+        DefaultWidgetsLocalizations.delegate,
+      ],
+      child: Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: topPadding100,
+          child: Scaffold(
+            primary: false,
+            appBar: AppBar(
+              bottom: PreferredSize(
+                preferredSize: const Size.fromHeight(200.0),
+                child: Container(),
               ),
             ),
           ),
@@ -913,14 +950,13 @@ void main() {
     expect(appBarTop(tester), 0.0);
     expect(appBarHeight(tester), kToolbarHeight + 200.0);
 
-    await tester.pumpWidget(
-      Localizations(
-        locale: const Locale('en', 'US'),
-        delegates: const <LocalizationsDelegate<dynamic>>[
-          DefaultMaterialLocalizations.delegate,
-          DefaultWidgetsLocalizations.delegate,
-        ],
-        child: Directionality(
+    await tester.pumpWidget(Localizations(
+      locale: const Locale('en', 'US'),
+      delegates: const <LocalizationsDelegate<dynamic>>[
+        DefaultMaterialLocalizations.delegate,
+        DefaultWidgetsLocalizations.delegate,
+      ],
+      child: Directionality(
         textDirection: TextDirection.ltr,
         child: MediaQuery(
           data: topPadding100,
@@ -962,7 +998,8 @@ void main() {
     expect(tester.getTopLeft(find.text('title')).dy, lessThan(100.0));
   });
 
-  testWidgets('AppBar updates when you add a drawer', (WidgetTester tester) async {
+  testWidgets('AppBar updates when you add a drawer',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -982,7 +1019,9 @@ void main() {
     expect(find.byIcon(Icons.menu), findsOneWidget);
   });
 
-  testWidgets('AppBar does not draw menu for drawer if automaticallyImplyLeading is false', (WidgetTester tester) async {
+  testWidgets(
+      'AppBar does not draw menu for drawer if automaticallyImplyLeading is false',
+      (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
         home: Scaffold(
@@ -992,6 +1031,34 @@ void main() {
       ),
     );
     expect(find.byIcon(Icons.menu), findsNothing);
+  });
+
+  testWidgets('AppBar sizes according to titleHeight',
+      (WidgetTester tester) async {
+    final GlobalKey key = GlobalKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: AppBar(
+            leading: Placeholder(key: key),
+            title: const Text('Abc'),
+            titleHeight: 100,
+            actions: const <Widget>[
+              Placeholder(fallbackWidth: 10.0),
+              Placeholder(fallbackWidth: 10.0),
+              Placeholder(fallbackWidth: 10.0),
+            ],
+          ),
+        ),
+      ),
+    );
+    expect(
+        tester
+            .renderObject<RenderBox>(find.byKey(key))
+            .localToGlobal(Offset.zero),
+        const Offset(0.0, 0.0));
+    expect(tester.renderObject<RenderBox>(find.byKey(key)).size,
+        const Size(56.0, 100.0));
   });
 
   testWidgets('AppBar handles loose children 0', (WidgetTester tester) async {
@@ -1011,8 +1078,13 @@ void main() {
         ),
       ),
     );
-    expect(tester.renderObject<RenderBox>(find.byKey(key)).localToGlobal(Offset.zero), const Offset(0.0, 0.0));
-    expect(tester.renderObject<RenderBox>(find.byKey(key)).size, const Size(56.0, 56.0));
+    expect(
+        tester
+            .renderObject<RenderBox>(find.byKey(key))
+            .localToGlobal(Offset.zero),
+        const Offset(0.0, 0.0));
+    expect(tester.renderObject<RenderBox>(find.byKey(key)).size,
+        const Size(56.0, 56.0));
   });
 
   testWidgets('AppBar handles loose children 1', (WidgetTester tester) async {
@@ -1041,8 +1113,13 @@ void main() {
         ),
       ),
     );
-    expect(tester.renderObject<RenderBox>(find.byKey(key)).localToGlobal(Offset.zero), const Offset(0.0, 0.0));
-    expect(tester.renderObject<RenderBox>(find.byKey(key)).size, const Size(56.0, 56.0));
+    expect(
+        tester
+            .renderObject<RenderBox>(find.byKey(key))
+            .localToGlobal(Offset.zero),
+        const Offset(0.0, 0.0));
+    expect(tester.renderObject<RenderBox>(find.byKey(key)).size,
+        const Size(56.0, 56.0));
   });
 
   testWidgets('AppBar handles loose children 2', (WidgetTester tester) async {
@@ -1082,8 +1159,13 @@ void main() {
         ),
       ),
     );
-    expect(tester.renderObject<RenderBox>(find.byKey(key)).localToGlobal(Offset.zero), const Offset(0.0, 0.0));
-    expect(tester.renderObject<RenderBox>(find.byKey(key)).size, const Size(56.0, 56.0));
+    expect(
+        tester
+            .renderObject<RenderBox>(find.byKey(key))
+            .localToGlobal(Offset.zero),
+        const Offset(0.0, 0.0));
+    expect(tester.renderObject<RenderBox>(find.byKey(key)).size,
+        const Size(56.0, 56.0));
   });
 
   testWidgets('AppBar handles loose children 3', (WidgetTester tester) async {
@@ -1114,41 +1196,52 @@ void main() {
         ),
       ),
     );
-    expect(tester.renderObject<RenderBox>(find.byKey(key)).localToGlobal(Offset.zero), const Offset(0.0, 0.0));
-    expect(tester.renderObject<RenderBox>(find.byKey(key)).size, const Size(56.0, 56.0));
+    expect(
+        tester
+            .renderObject<RenderBox>(find.byKey(key))
+            .localToGlobal(Offset.zero),
+        const Offset(0.0, 0.0));
+    expect(tester.renderObject<RenderBox>(find.byKey(key)).size,
+        const Size(56.0, 56.0));
   });
 
-  testWidgets('AppBar positioning of leading and trailing widgets with top padding', (WidgetTester tester) async {
-    const MediaQueryData topPadding100 = MediaQueryData(padding: EdgeInsets.only(top: 100));
+  testWidgets(
+      'AppBar positioning of leading and trailing widgets with top padding',
+      (WidgetTester tester) async {
+    const MediaQueryData topPadding100 =
+        MediaQueryData(padding: EdgeInsets.only(top: 100));
 
     final Key leadingKey = UniqueKey();
     final Key titleKey = UniqueKey();
     final Key trailingKey = UniqueKey();
 
-    await tester.pumpWidget(
-      Localizations(
-        locale: const Locale('en', 'US'),
-        delegates: const <LocalizationsDelegate<dynamic>>[
-          DefaultMaterialLocalizations.delegate,
-          DefaultWidgetsLocalizations.delegate,
-        ],
-        child: Directionality(
+    await tester.pumpWidget(Localizations(
+      locale: const Locale('en', 'US'),
+      delegates: const <LocalizationsDelegate<dynamic>>[
+        DefaultMaterialLocalizations.delegate,
+        DefaultWidgetsLocalizations.delegate,
+      ],
+      child: Directionality(
         textDirection: TextDirection.rtl,
         child: MediaQuery(
           data: topPadding100,
           child: Scaffold(
             primary: false,
             appBar: AppBar(
-              leading: Placeholder(key: leadingKey), // Forced to 56x56, see _kLeadingWidth in app_bar.dart.
+              leading: Placeholder(key: leadingKey),
+              // Forced to 56x56, see _kLeadingWidth in app_bar.dart.
               title: Placeholder(key: titleKey, fallbackHeight: kToolbarHeight),
-              actions: <Widget>[ Placeholder(key: trailingKey, fallbackWidth: 10) ],
+              actions: <Widget>[
+                Placeholder(key: trailingKey, fallbackWidth: 10)
+              ],
             ),
           ),
         ),
       ),
     ));
     expect(tester.getTopLeft(find.byType(AppBar)), const Offset(0, 0));
-    expect(tester.getTopLeft(find.byKey(leadingKey)), const Offset(800.0 - 56.0, 100));
+    expect(tester.getTopLeft(find.byKey(leadingKey)),
+        const Offset(800.0 - 56.0, 100));
     expect(tester.getTopLeft(find.byKey(trailingKey)), const Offset(0.0, 100));
 
     // Because the topPadding eliminates the vertical space for the
@@ -1158,24 +1251,27 @@ void main() {
     // (-28). The top of the toolbar is at (screen coordinates) y=100, so the
     // top of the title is 100 + -28 = 72. The toolbar clips its contents
     // so the title isn't actually visible.
-    expect(tester.getTopLeft(find.byKey(titleKey)), const Offset(10 + NavigationToolbar.kMiddleSpacing, 72));
+    expect(tester.getTopLeft(find.byKey(titleKey)),
+        const Offset(10 + NavigationToolbar.kMiddleSpacing, 72));
   });
 
-  testWidgets('SliverAppBar positioning of leading and trailing widgets with top padding', (WidgetTester tester) async {
-    const MediaQueryData topPadding100 = MediaQueryData(padding: EdgeInsets.only(top: 100.0));
+  testWidgets(
+      'SliverAppBar positioning of leading and trailing widgets with top padding',
+      (WidgetTester tester) async {
+    const MediaQueryData topPadding100 =
+        MediaQueryData(padding: EdgeInsets.only(top: 100.0));
 
     final Key leadingKey = UniqueKey();
     final Key titleKey = UniqueKey();
     final Key trailingKey = UniqueKey();
 
-    await tester.pumpWidget(
-      Localizations(
-        locale: const Locale('en', 'US'),
-        delegates: const <LocalizationsDelegate<dynamic>>[
-          DefaultMaterialLocalizations.delegate,
-          DefaultWidgetsLocalizations.delegate,
-        ],
-        child: Directionality(
+    await tester.pumpWidget(Localizations(
+      locale: const Locale('en', 'US'),
+      delegates: const <LocalizationsDelegate<dynamic>>[
+        DefaultMaterialLocalizations.delegate,
+        DefaultWidgetsLocalizations.delegate,
+      ],
+      child: Directionality(
         textDirection: TextDirection.rtl,
         child: MediaQuery(
           data: topPadding100,
@@ -1184,8 +1280,9 @@ void main() {
             slivers: <Widget>[
               SliverAppBar(
                 leading: Placeholder(key: leadingKey),
-                title: Placeholder(key: titleKey, fallbackHeight: kToolbarHeight),
-                actions: <Widget>[ Placeholder(key: trailingKey) ],
+                title:
+                    Placeholder(key: titleKey, fallbackHeight: kToolbarHeight),
+                actions: <Widget>[Placeholder(key: trailingKey)],
               ),
             ],
           ),
@@ -1193,26 +1290,30 @@ void main() {
       ),
     ));
     expect(tester.getTopLeft(find.byType(AppBar)), const Offset(0.0, 0.0));
-    expect(tester.getTopLeft(find.byKey(leadingKey)), const Offset(800.0 - 56.0, 100.0));
+    expect(tester.getTopLeft(find.byKey(leadingKey)),
+        const Offset(800.0 - 56.0, 100.0));
     expect(tester.getTopLeft(find.byKey(titleKey)), const Offset(416.0, 100.0));
-    expect(tester.getTopLeft(find.byKey(trailingKey)), const Offset(0.0, 100.0));
+    expect(
+        tester.getTopLeft(find.byKey(trailingKey)), const Offset(0.0, 100.0));
   });
 
-  testWidgets('SliverAppBar positioning of leading and trailing widgets with bottom padding', (WidgetTester tester) async {
-    const MediaQueryData topPadding100 = MediaQueryData(padding: EdgeInsets.only(top: 100.0, bottom: 50.0));
+  testWidgets(
+      'SliverAppBar positioning of leading and trailing widgets with bottom padding',
+      (WidgetTester tester) async {
+    const MediaQueryData topPadding100 =
+        MediaQueryData(padding: EdgeInsets.only(top: 100.0, bottom: 50.0));
 
     final Key leadingKey = UniqueKey();
     final Key titleKey = UniqueKey();
     final Key trailingKey = UniqueKey();
 
-    await tester.pumpWidget(
-      Localizations(
-        locale: const Locale('en', 'US'),
-        delegates: const <LocalizationsDelegate<dynamic>>[
-          DefaultMaterialLocalizations.delegate,
-          DefaultWidgetsLocalizations.delegate,
-        ],
-        child: Directionality(
+    await tester.pumpWidget(Localizations(
+      locale: const Locale('en', 'US'),
+      delegates: const <LocalizationsDelegate<dynamic>>[
+        DefaultMaterialLocalizations.delegate,
+        DefaultWidgetsLocalizations.delegate,
+      ],
+      child: Directionality(
         textDirection: TextDirection.rtl,
         child: MediaQuery(
           data: topPadding100,
@@ -1222,19 +1323,23 @@ void main() {
               SliverAppBar(
                 leading: Placeholder(key: leadingKey),
                 title: Placeholder(key: titleKey),
-                actions: <Widget>[ Placeholder(key: trailingKey) ],
+                actions: <Widget>[Placeholder(key: trailingKey)],
               ),
             ],
           ),
         ),
       ),
     ));
-    expect(tester.getRect(find.byType(AppBar)), const Rect.fromLTRB(0.0, 0.0, 800.00, 100.0 + 56.0));
-    expect(tester.getRect(find.byKey(leadingKey)), const Rect.fromLTRB(800.0 - 56.0, 100.0, 800.0, 100.0 + 56.0));
-    expect(tester.getRect(find.byKey(trailingKey)), const Rect.fromLTRB(0.0, 100.0, 400.0, 100.0 + 56.0));
+    expect(tester.getRect(find.byType(AppBar)),
+        const Rect.fromLTRB(0.0, 0.0, 800.00, 100.0 + 56.0));
+    expect(tester.getRect(find.byKey(leadingKey)),
+        const Rect.fromLTRB(800.0 - 56.0, 100.0, 800.0, 100.0 + 56.0));
+    expect(tester.getRect(find.byKey(trailingKey)),
+        const Rect.fromLTRB(0.0, 100.0, 400.0, 100.0 + 56.0));
   });
 
-  testWidgets('SliverAppBar provides correct semantics in LTR', (WidgetTester tester) async {
+  testWidgets('SliverAppBar provides correct semantics in LTR',
+      (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -1257,43 +1362,47 @@ void main() {
       ),
     );
 
-    expect(semantics, hasSemantics(
-      TestSemantics.root(
-        children: <TestSemantics>[
-          TestSemantics(
+    expect(
+        semantics,
+        hasSemantics(
+          TestSemantics.root(
             children: <TestSemantics>[
               TestSemantics(
-                flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                 children: <TestSemantics>[
                   TestSemantics(
+                    flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                     children: <TestSemantics>[
                       TestSemantics(
-                        label: 'Leading',
-                        textDirection: TextDirection.ltr,
-                      ),
-                      TestSemantics(
-                        flags: <SemanticsFlag>[
-                          SemanticsFlag.namesRoute,
-                          SemanticsFlag.isHeader,
+                        children: <TestSemantics>[
+                          TestSemantics(
+                            label: 'Leading',
+                            textDirection: TextDirection.ltr,
+                          ),
+                          TestSemantics(
+                            flags: <SemanticsFlag>[
+                              SemanticsFlag.namesRoute,
+                              SemanticsFlag.isHeader,
+                            ],
+                            label: 'Title',
+                            textDirection: TextDirection.ltr,
+                          ),
+                          TestSemantics(
+                            label: 'Action 1',
+                            textDirection: TextDirection.ltr,
+                          ),
+                          TestSemantics(
+                            label: 'Action 2',
+                            textDirection: TextDirection.ltr,
+                          ),
+                          TestSemantics(
+                            label: 'Action 3',
+                            textDirection: TextDirection.ltr,
+                          ),
+                          TestSemantics(
+                            label: 'Bottom',
+                            textDirection: TextDirection.ltr,
+                          ),
                         ],
-                        label: 'Title',
-                        textDirection: TextDirection.ltr,
-                      ),
-                      TestSemantics(
-                        label: 'Action 1',
-                        textDirection: TextDirection.ltr,
-                      ),
-                      TestSemantics(
-                        label: 'Action 2',
-                        textDirection: TextDirection.ltr,
-                      ),
-                      TestSemantics(
-                        label: 'Action 3',
-                        textDirection: TextDirection.ltr,
-                      ),
-                      TestSemantics(
-                        label: 'Bottom',
-                        textDirection: TextDirection.ltr,
                       ),
                     ],
                   ),
@@ -1301,17 +1410,16 @@ void main() {
               ),
             ],
           ),
-        ],
-      ),
-      ignoreRect: true,
-      ignoreTransform: true,
-      ignoreId: true,
-    ));
+          ignoreRect: true,
+          ignoreTransform: true,
+          ignoreId: true,
+        ));
 
     semantics.dispose();
   });
 
-  testWidgets('SliverAppBar provides correct semantics in RTL', (WidgetTester tester) async {
+  testWidgets('SliverAppBar provides correct semantics in RTL',
+      (WidgetTester tester) async {
     final SemanticsTester semantics = SemanticsTester(tester);
 
     await tester.pumpWidget(
@@ -1340,46 +1448,50 @@ void main() {
       ),
     );
 
-    expect(semantics, hasSemantics(
-      TestSemantics.root(
-        children: <TestSemantics>[
-          TestSemantics(
+    expect(
+        semantics,
+        hasSemantics(
+          TestSemantics.root(
             children: <TestSemantics>[
               TestSemantics(
-                flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                 children: <TestSemantics>[
                   TestSemantics(
-                    textDirection: TextDirection.rtl,
+                    flags: <SemanticsFlag>[SemanticsFlag.scopesRoute],
                     children: <TestSemantics>[
                       TestSemantics(
+                        textDirection: TextDirection.rtl,
                         children: <TestSemantics>[
                           TestSemantics(
-                            label: 'Leading',
-                            textDirection: TextDirection.rtl,
-                          ),
-                          TestSemantics(
-                            flags: <SemanticsFlag>[
-                              SemanticsFlag.namesRoute,
-                              SemanticsFlag.isHeader,
+                            children: <TestSemantics>[
+                              TestSemantics(
+                                label: 'Leading',
+                                textDirection: TextDirection.rtl,
+                              ),
+                              TestSemantics(
+                                flags: <SemanticsFlag>[
+                                  SemanticsFlag.namesRoute,
+                                  SemanticsFlag.isHeader,
+                                ],
+                                label: 'Title',
+                                textDirection: TextDirection.rtl,
+                              ),
+                              TestSemantics(
+                                label: 'Action 1',
+                                textDirection: TextDirection.rtl,
+                              ),
+                              TestSemantics(
+                                label: 'Action 2',
+                                textDirection: TextDirection.rtl,
+                              ),
+                              TestSemantics(
+                                label: 'Action 3',
+                                textDirection: TextDirection.rtl,
+                              ),
+                              TestSemantics(
+                                label: 'Bottom',
+                                textDirection: TextDirection.rtl,
+                              ),
                             ],
-                            label: 'Title',
-                            textDirection: TextDirection.rtl,
-                          ),
-                          TestSemantics(
-                            label: 'Action 1',
-                            textDirection: TextDirection.rtl,
-                          ),
-                          TestSemantics(
-                            label: 'Action 2',
-                            textDirection: TextDirection.rtl,
-                          ),
-                          TestSemantics(
-                            label: 'Action 3',
-                            textDirection: TextDirection.rtl,
-                          ),
-                          TestSemantics(
-                            label: 'Bottom',
-                            textDirection: TextDirection.rtl,
                           ),
                         ],
                       ),
@@ -1389,17 +1501,16 @@ void main() {
               ),
             ],
           ),
-        ],
-      ),
-      ignoreRect: true,
-      ignoreTransform: true,
-      ignoreId: true,
-    ));
+          ignoreRect: true,
+          ignoreTransform: true,
+          ignoreId: true,
+        ));
 
     semantics.dispose();
   });
 
-  testWidgets('AppBar draws a light system bar for a dark background', (WidgetTester tester) async {
+  testWidgets('AppBar draws a light system bar for a dark background',
+      (WidgetTester tester) async {
     final ThemeData darkTheme = ThemeData.dark();
     await tester.pumpWidget(MaterialApp(
       theme: darkTheme,
@@ -1409,13 +1520,16 @@ void main() {
     ));
 
     expect(darkTheme.primaryColorBrightness, Brightness.dark);
-    expect(SystemChrome.latestStyle, const SystemUiOverlayStyle(
-      statusBarBrightness: Brightness.dark,
-      statusBarIconBrightness: Brightness.light,
-    ));
+    expect(
+        SystemChrome.latestStyle,
+        const SystemUiOverlayStyle(
+          statusBarBrightness: Brightness.dark,
+          statusBarIconBrightness: Brightness.light,
+        ));
   });
 
-  testWidgets('AppBar draws a dark system bar for a light background', (WidgetTester tester) async {
+  testWidgets('AppBar draws a dark system bar for a light background',
+      (WidgetTester tester) async {
     final ThemeData lightTheme = ThemeData(primaryColor: Colors.white);
     await tester.pumpWidget(MaterialApp(
       theme: lightTheme,
@@ -1425,13 +1539,16 @@ void main() {
     ));
 
     expect(lightTheme.primaryColorBrightness, Brightness.light);
-    expect(SystemChrome.latestStyle, const SystemUiOverlayStyle(
-      statusBarBrightness: Brightness.light,
-      statusBarIconBrightness: Brightness.dark,
-    ));
+    expect(
+        SystemChrome.latestStyle,
+        const SystemUiOverlayStyle(
+          statusBarBrightness: Brightness.light,
+          statusBarIconBrightness: Brightness.dark,
+        ));
   });
 
-  testWidgets('Changing SliverAppBar snap from true to false', (WidgetTester tester) async {
+  testWidgets('Changing SliverAppBar snap from true to false',
+      (WidgetTester tester) async {
     // Regression test for https://github.com/flutter/flutter/issues/17598
     const double appBarHeight = 256.0;
     bool snap = true;
@@ -1509,14 +1626,15 @@ void main() {
     expect(getAppBarWidget(appBarFinder).shape, null);
 
     final Finder materialFinder = find.byType(Material);
-    Material getMaterialWidget(Finder finder) => tester.widget<Material>(finder);
+    Material getMaterialWidget(Finder finder) =>
+        tester.widget<Material>(finder);
     expect(getMaterialWidget(materialFinder).shape, null);
   });
 
   testWidgets('AppBar with shape', (WidgetTester tester) async {
-    const RoundedRectangleBorder roundedRectangleBorder = RoundedRectangleBorder(
-      borderRadius: BorderRadius.all(Radius.circular(15.0))
-    );
+    const RoundedRectangleBorder roundedRectangleBorder =
+        RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(15.0)));
     await tester.pumpWidget(
       MaterialApp(
         home: AppBar(
@@ -1533,7 +1651,8 @@ void main() {
     expect(getAppBarWidget(appBarFinder).shape, roundedRectangleBorder);
 
     final Finder materialFinder = find.byType(Material);
-    Material getMaterialWidget(Finder finder) => tester.widget<Material>(finder);
+    Material getMaterialWidget(Finder finder) =>
+        tester.widget<Material>(finder);
     expect(getMaterialWidget(materialFinder).shape, roundedRectangleBorder);
   });
 
@@ -1553,16 +1672,19 @@ void main() {
     );
 
     final Finder sliverAppBarFinder = find.byType(SliverAppBar);
-    SliverAppBar getSliverAppBarWidget(Finder finder) => tester.widget<SliverAppBar>(finder);
+    SliverAppBar getSliverAppBarWidget(Finder finder) =>
+        tester.widget<SliverAppBar>(finder);
     expect(getSliverAppBarWidget(sliverAppBarFinder).shape, null);
 
     final Finder materialFinder = find.byType(Material);
-    Material getMaterialWidget(Finder finder) => tester.widget<Material>(finder);
+    Material getMaterialWidget(Finder finder) =>
+        tester.widget<Material>(finder);
     expect(getMaterialWidget(materialFinder).shape, null);
   });
 
   testWidgets('SliverAppBar with shape', (WidgetTester tester) async {
-    const RoundedRectangleBorder roundedRectangleBorder = RoundedRectangleBorder(
+    const RoundedRectangleBorder roundedRectangleBorder =
+        RoundedRectangleBorder(
       borderRadius: BorderRadius.all(Radius.circular(15.0)),
     );
     await tester.pumpWidget(
@@ -1581,15 +1703,19 @@ void main() {
     );
 
     final Finder sliverAppBarFinder = find.byType(SliverAppBar);
-    SliverAppBar getSliverAppBarWidget(Finder finder) => tester.widget<SliverAppBar>(finder);
-    expect(getSliverAppBarWidget(sliverAppBarFinder).shape, roundedRectangleBorder);
+    SliverAppBar getSliverAppBarWidget(Finder finder) =>
+        tester.widget<SliverAppBar>(finder);
+    expect(getSliverAppBarWidget(sliverAppBarFinder).shape,
+        roundedRectangleBorder);
 
     final Finder materialFinder = find.byType(Material);
-    Material getMaterialWidget(Finder finder) => tester.widget<Material>(finder);
+    Material getMaterialWidget(Finder finder) =>
+        tester.widget<Material>(finder);
     expect(getMaterialWidget(materialFinder).shape, roundedRectangleBorder);
   });
 
-  testWidgets('AppBars with jumbo titles, textScaleFactor = 3, 3.5, 4', (WidgetTester tester) async {
+  testWidgets('AppBars with jumbo titles, textScaleFactor = 3, 3.5, 4',
+      (WidgetTester tester) async {
     double textScaleFactor;
     TextDirection textDirection;
     bool centerTitle;
@@ -1601,7 +1727,8 @@ void main() {
             return Directionality(
               textDirection: textDirection,
               child: MediaQuery(
-                data: MediaQuery.of(context).copyWith(textScaleFactor: textScaleFactor),
+                data: MediaQuery.of(context)
+                    .copyWith(textScaleFactor: textScaleFactor),
                 child: Builder(
                   builder: (BuildContext context) {
                     return Scaffold(
@@ -1648,14 +1775,17 @@ void main() {
     expect(tester.getRect(appBarTitle), const Rect.fromLTRB(16, -12, 416, 68));
     expect(tester.getCenter(appBarTitle).dy, tester.getCenter(toolbar).dy);
 
-    textDirection = TextDirection.rtl; // Changed to rtl. "Jumbo" title is still 400x80.
+    textDirection =
+        TextDirection.rtl; // Changed to rtl. "Jumbo" title is still 400x80.
     await tester.pumpWidget(buildFrame());
-    expect(tester.getRect(appBarTitle), const Rect.fromLTRB(800.0 - 400.0 - 16.0, -12, 800.0 - 16.0, 68));
+    expect(tester.getRect(appBarTitle),
+        const Rect.fromLTRB(800.0 - 400.0 - 16.0, -12, 800.0 - 16.0, 68));
     expect(tester.getCenter(appBarTitle).dy, tester.getCenter(toolbar).dy);
 
     centerTitle = true; // Changed to true. "Jumbo" title is still 400x80.
     await tester.pumpWidget(buildFrame());
-    expect(tester.getRect(appBarTitle), const Rect.fromLTRB(200, -12, 800.0 - 200.0, 68));
+    expect(tester.getRect(appBarTitle),
+        const Rect.fromLTRB(200, -12, 800.0 - 200.0, 68));
     expect(tester.getCenter(appBarTitle).dy, tester.getCenter(toolbar).dy);
   });
 }
