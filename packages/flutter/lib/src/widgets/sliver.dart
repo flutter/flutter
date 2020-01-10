@@ -93,7 +93,7 @@ int _kDefaultSemanticIndexCallback(Widget _, int localIndex) => localIndex;
 ///  * Using [AutomaticKeepAlive] widgets (inserted by default in
 ///    [SliverChildListDelegate] or [SliverChildListDelegate]). Instead of
 ///    unconditionally caching the child element subtree when scrolling
-///    off-screen like [KeepAlive], [AutomaticKeepAlive] can let whether to
+///    off-screen like [KeepAlive], [AutomaticKeepAlive] can let know whether to
 ///    cache the subtree be determined by descendant logic in the subtree.
 ///
 ///    As an example, the [EditableText] widget signals its sliver child element
