@@ -982,18 +982,6 @@ class DeferringImageProvider<T> extends ImageProvider<T> {
   Future<T> obtainKey(ImageConfiguration configuration) => imageProvider.obtainKey(configuration);
 
   @override
-  bool operator ==(dynamic other) {
-    if (other.runtimeType != runtimeType)
-      return false;
-    return other is DeferringImageProvider
-        && other.imageProvider == imageProvider
-        && other.getNextAction == getNextAction;
-  }
-
-  @override
-  int get hashCode => hashValues(imageProvider, getNextAction);
-
-  @override
   String toString() => '$runtimeType(imageProvider: $imageProvider)';
 }
 
