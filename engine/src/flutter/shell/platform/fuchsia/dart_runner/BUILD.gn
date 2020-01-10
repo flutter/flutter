@@ -31,8 +31,6 @@ template("runner") {
       "dart_runner.h",
       "logging.h",
       "main.cc",
-      "mapped_resource.cc",
-      "mapped_resource.h",
       "service_isolate.cc",
       "service_isolate.h",
     ]
@@ -41,9 +39,15 @@ template("runner") {
 
     dart_deps = []
     if (!invoker.product) {
-      dart_deps += [ "//third_party/dart/runtime/bin:dart_io_api" ]
+      dart_deps += [
+        "//third_party/dart/runtime/bin:dart_io_api",
+        "$flutter_root/shell/platform/fuchsia/runtime/dart/utils:utils",
+      ]
     } else {
-      dart_deps += [ "//third_party/dart/runtime/bin:dart_io_api_product" ]
+      dart_deps += [
+        "//third_party/dart/runtime/bin:dart_io_api_product",
+        "$flutter_root/shell/platform/fuchsia/runtime/dart/utils:utils_product",
+      ]
     }
 
     deps = [
@@ -51,7 +55,6 @@ template("runner") {
              "$flutter_root/fml",
              "$flutter_root/shell/platform/fuchsia/dart-pkg/fuchsia",
              "$flutter_root/shell/platform/fuchsia/dart-pkg/zircon",
-             "$flutter_root/shell/platform/fuchsia/runtime/dart/utils",
              "$fuchsia_sdk_root/pkg:async",
              "$fuchsia_sdk_root/pkg:async-cpp",
              "$fuchsia_sdk_root/pkg:async-default",
@@ -156,32 +159,24 @@ template("aot_runner_package") {
 
     resources = []
     if (!invoker.product) {
-      vmservice_data = rebase_path(
+      vmservice_snapshot = rebase_path(
               get_label_info("vmservice:vmservice_snapshot", "target_gen_dir") +
-              "/vmservice_data.aotsnapshot")
-      vmservice_instr = rebase_path(
-              get_label_info("vmservice:vmservice_snapshot", "target_gen_dir") +
-              "/vmservice_instructions.aotsnapshot")
+              "/vmservice_snapshot.so")
       dart_profiler_symbols = rebase_path(
               get_label_info(
                   "$flutter_root/shell/platform/fuchsia/runtime/dart/profiler_symbols:dart_aot_runner",
                   "target_gen_dir") + "/dart_aot_runner.dartprofilersymbols")
 
       inputs = [
-        vmservice_data,
-        vmservice_instr,
+        vmservice_snapshot,
         observatory_archive_file,
         dart_profiler_symbols,
       ]
 
       resources += [
         {
-          path = vmservice_data
-          dest = "vmservice_isolate_snapshot_data.bin"
-        },
-        {
-          path = vmservice_instr
-          dest = "vmservice_isolate_snapshot_instructions.bin"
+          path = vmservice_snapshot
+          dest = "vmservice_snapshot.so"
         },
         {
           path = rebase_path(observatory_archive_file)
