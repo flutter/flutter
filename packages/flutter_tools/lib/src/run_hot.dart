@@ -11,7 +11,6 @@ import 'package:meta/meta.dart';
 import 'package:pool/pool.dart';
 import 'base/async_guard.dart';
 
-import 'base/command_help.dart';
 import 'base/context.dart';
 import 'base/file_system.dart';
 import 'base/logger.dart';
@@ -1046,15 +1045,15 @@ class HotRunner extends ResidentRunner {
   @override
   void printHelp({ @required bool details }) {
     globals.printStatus('Flutter run key commands.');
-    CommandHelp.r.print();
+    commandHelp.r.print();
     if (canHotRestart) {
-      CommandHelp.R.print();
+      commandHelp.R.print();
     }
-    CommandHelp.h.print();
+    commandHelp.h.print();
     if (_didAttach) {
-      CommandHelp.d.print();
+      commandHelp.d.print();
     }
-    CommandHelp.q.print();
+    commandHelp.q.print();
     if (details) {
       printHelpDetails();
     }
