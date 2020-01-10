@@ -196,6 +196,7 @@ void main() {
         stdio: mockStdio,
         terminal: AnsiTerminal(stdio: mockStdio, platform: const LocalPlatform()),
         timeoutConfiguration: const TimeoutConfiguration(),
+        platform: FakePlatform(),
       ),
       WebSocketConnector: () => (String url, {CompressionOptions compression}) async => throw const SocketException('test'),
     });
@@ -275,6 +276,7 @@ void main() {
         terminal: AnsiTerminal(stdio: mockStdio, platform: const LocalPlatform()),
         stdio: mockStdio,
         timeoutConfiguration: const TimeoutConfiguration(),
+        platform: FakePlatform(),
       ),
     });
 
@@ -292,6 +294,7 @@ void main() {
         terminal: AnsiTerminal(stdio: mockStdio, platform: const LocalPlatform()),
         stdio: mockStdio,
         timeoutConfiguration: const TimeoutConfiguration(),
+        platform: FakePlatform(),
       ),
     });
 
@@ -310,6 +313,7 @@ void main() {
         terminal: AnsiTerminal(stdio: mockStdio, platform: const LocalPlatform()),
         stdio: mockStdio,
         timeoutConfiguration: const TimeoutConfiguration(),
+        platform: FakePlatform(),
       ),
     });
   });
