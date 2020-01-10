@@ -20,6 +20,17 @@ typedef DiagnosticPropertiesTransformer = Iterable<DiagnosticsNode> Function(Ite
 /// and other callbacks that collect information describing an error.
 typedef InformationCollector = Iterable<DiagnosticsNode> Function();
 
+/// Signature for an additional filter added to
+/// [FlutterError.defaultStackFilter]'s list of delegates.
+///
+/// This method serves as a mapping function over the original list of stack
+/// lines.
+///
+/// See also:
+///
+///   * [StackFrame], a class that can help with parsing stack frames.
+typedef StackFilter = void Function(List<StackFrame>);
+
 abstract class _ErrorDiagnostic extends DiagnosticsProperty<List<Object>> {
   /// This constructor provides a reliable hook for a kernel transformer to find
   /// error messages that need to be rewritten to include object references for
@@ -653,6 +664,19 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
     _errorCount += 1;
   }
 
+  static final List<StackFilter> _stackFilters = <StackFilter>[];
+
+  /// Adds a stack filtering function to [defaultStackFilter].
+  ///
+  /// For example, the framework adds filtering functions to elide common tree-
+  /// walking patterns in the stacktrace.
+  ///
+  /// Added filters are called in order or addition. The stack trace they
+  /// receive may have already been filtered by a previous filter.
+  static void addDefaultStackFilter(StackFilter filter) {
+    _stackFilters.add(filter);
+  }
+
   /// Converts a stack to a string that is more readable by omitting stack
   /// frames that correspond to Dart internals.
   ///
@@ -674,31 +698,24 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
       '_AssertionError',
       '_FakeAsync',
       '_FrameCallbackEntry',
+      '_Timer',
+      '_RawReceivePortImpl',
     };
-
-    bool seenMount = false;
-    bool seenUserCode = false;
 
     final List<String> result = <String>[];
     final List<String> skipped = <String>[];
-    for (final String line in frames) {
-      final StackFrame frameLine = StackFrame.fromStackTraceLine(line);
-      seenUserCode |= frameLine.packageScheme == 'package' && frameLine.package != 'flutter';
 
+    final List<StackFrame> parsedFrames = StackFrame.fromStackString(frames.join('\n'));
+    for (final StackFilter filter in _stackFilters) {
+      filter(parsedFrames);
+    }
+    for (final StackFrame frameLine in parsedFrames) {
       if (filteredClasses.contains(frameLine.className)) {
-        skipped.add('${frameLine.className}');
+        skipped.add('class ${frameLine.className}');
       } else if (filteredPackages.contains(frameLine.packageScheme + ':' + frameLine.package)) {
         skipped.add('${frameLine.packageScheme == 'dart' ? 'dart:' : ''}${frameLine.package}');
-      } else if (seenUserCode && frameLine.packageScheme == 'package' && frameLine.package == 'flutter') {
-        if (!seenMount) {
-          result.add(line);
-        } else {
-          skipped.add('flutter');
-        }
-        // Web stacks don't have class names, so we can't avoid the source path.
-        seenMount |= frameLine.packagePath == 'src/widgets/framework.dart' && frameLine.method == 'mount';
       } else {
-        result.add(line);
+        result.add(frameLine.source);
       }
     }
 

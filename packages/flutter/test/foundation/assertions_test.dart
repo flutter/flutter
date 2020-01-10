@@ -430,6 +430,86 @@ void main() {
   });
 
   test('defaultStackFilter compresses huge ugly stacks', () {
+
+    String stackLineStripped(StackFrame frame) => '${frame.className}.${frame.method} ${frame.packagePath}';
+    const String componentElementStack = '''
+Element.inflateWidget src/widgets/framework.dart
+Element.updateChild src/widgets/framework.dart
+ComponentElement.performRebuild src/widgets/framework.dart
+Element.rebuild src/widgets/framework.dart
+ComponentElement._firstBuild src/widgets/framework.dart
+ComponentElement.mount src/widgets/framework.dart''';
+
+    const String statefulElementStack = '''
+Element.inflateWidget src/widgets/framework.dart
+Element.updateChild src/widgets/framework.dart
+ComponentElement.performRebuild src/widgets/framework.dart
+Element.rebuild src/widgets/framework.dart
+ComponentElement._firstBuild src/widgets/framework.dart
+StatefulElement._firstBuild src/widgets/framework.dart
+ComponentElement.mount src/widgets/framework.dart''';
+    const String singleChildRenderObjectElementStack = '''
+Element.inflateWidget src/widgets/framework.dart
+Element.updateChild src/widgets/framework.dart
+SingleChildRenderObjectElement.mount src/widgets/framework.dart''';
+
+    FlutterError.addDefaultStackFilter((List<StackFrame> frames) {
+      bool mutateList(int start, int length, String golden, String message, {String classNameOverride}) {
+        final RegExp repeatedPattern = RegExp(message + r'( \(x(\d+\))){0,1}');
+        final StackFrame original = frames[start];
+        if (golden.startsWith(stackLineStripped(original))) {
+          final String candidate = frames.skip(start).take(length).map(stackLineStripped).join('\n');
+          if (candidate != golden) {
+            return false;
+          }
+          final StackFrame previousFrame = frames[start - 1];
+          final Match match = repeatedPattern.firstMatch(previousFrame.source);
+          if (match != null) {
+            final String previousTimes = match.group(2);
+            final int times = previousTimes == null ? 1 : int.parse(previousTimes);
+            frames[start - 1] = StackFrame(
+              number: -1,
+              className: classNameOverride ?? original.className,
+              method: original.method,
+              package: original.package,
+              packagePath: original.packagePath,
+              packageScheme: original.packageScheme,
+              column: original.column,
+              line: original.line,
+              source: '$message (x$times)',
+            );
+            frames.removeRange(start, start + length + 1);
+          } else {
+            frames[start] = StackFrame(
+              number: -1,
+              className: classNameOverride ?? original.className,
+              method: original.method,
+              package: original.package,
+              packagePath: original.packagePath,
+              packageScheme: original.packageScheme,
+              column: original.column,
+              line: original.line,
+              source: message,
+            );
+            frames.removeRange(start + 1, start + length);
+          }
+          return true;
+        }
+        return false;
+      }
+
+      for (int i = 0; i < frames.length; i++) {
+        if (mutateList(i, 6, componentElementStack,               '        Normal ComponentElement mounting')
+         || mutateList(i, 7, statefulElementStack,                '        Normal StatefulElement mounting', classNameOverride: 'StatefulElement')
+         || mutateList(i, 3, singleChildRenderObjectElementStack, '        Normal SingleChildRenderObjectElement mounting')
+        ) {
+          i--;
+          continue;
+        }
+      }
+    });
+    print(FlutterError.defaultStackFilter(hugeUglyStack.split('\n')).join('\n'));
+    return;
     expect(
       FlutterError.defaultStackFilter(hugeUglyStack.split('\n')),
       const <String>[
