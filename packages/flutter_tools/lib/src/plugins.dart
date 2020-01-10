@@ -321,31 +321,21 @@ bool _writeFlutterPluginsList(FlutterProject project, List<Plugin> plugins) {
   final Map<String, dynamic> result = <String, dynamic> {}; 
   result['_info'] = '// $info';
 
-  final List<dynamic> pluginsList = <dynamic>[];
+  final Map<String, dynamic> pluginsList = <String, dynamic>{};
   if (project.ios.existsSync()) {
-    pluginsList.add(<String, dynamic>{
-      project.ios.pluginConfigKey: project.ios.pluginsList(plugins)
-    });
+    pluginsList[project.ios.pluginConfigKey] = project.ios.pluginsList(plugins);
   }
   if (project.android.existsSync()) {
-    pluginsList.add(<String, dynamic>{
-      project.android.pluginConfigKey: project.android.pluginsList(plugins)
-    });
+    pluginsList[project.android.pluginConfigKey] = project.android.pluginsList(plugins);
   }
   if (project.macos.existsSync()) {
-    pluginsList.add(<String, dynamic>{
-      project.macos.pluginConfigKey: project.macos.pluginsList(plugins)
-    });
+    pluginsList[project.macos.pluginConfigKey] = project.macos.pluginsList(plugins);
   }
   if (project.linux.existsSync()) {
-    pluginsList.add(<String, dynamic>{
-      project.linux.pluginConfigKey: project.linux.pluginsList(plugins)
-    });
+    pluginsList[project.linux.pluginConfigKey] = project.linux.pluginsList(plugins);
   }
   if (project.windows.existsSync()) {
-    pluginsList.add(<String, dynamic>{
-      project.windows.pluginConfigKey: project.windows.pluginsList(plugins)
-    });
+    pluginsList[project.windows.pluginConfigKey] = project.windows.pluginsList(plugins);
   }
 
   result['plugins'] = pluginsList;
