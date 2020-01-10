@@ -10,60 +10,9 @@ import 'package:meta/meta.dart';
 
 import '../convert.dart';
 import '../globals.dart' as globals;
-import 'context.dart';
 import 'file_system.dart';
 import 'io.dart' as io;
 import 'terminal.dart';
-
-const BotDetector _kBotDetector = BotDetector();
-
-class BotDetector {
-  const BotDetector();
-
-  bool get isRunningOnBot {
-    if (
-        // Explicitly stated to not be a bot.
-        globals.platform.environment['BOT'] == 'false'
-
-        // Set by the IDEs to the IDE name, so a strong signal that this is not a bot.
-        || globals.platform.environment.containsKey('FLUTTER_HOST')
-        // When set, GA logs to a local file (normally for tests) so we don't need to filter.
-        || globals.platform.environment.containsKey('FLUTTER_ANALYTICS_LOG_FILE')
-    ) {
-      return false;
-    }
-
-    return globals.platform.environment['BOT'] == 'true'
-
-        // https://docs.travis-ci.com/user/environment-variables/#Default-Environment-Variables
-        || globals.platform.environment['TRAVIS'] == 'true'
-        || globals.platform.environment['CONTINUOUS_INTEGRATION'] == 'true'
-        || globals.platform.environment.containsKey('CI') // Travis and AppVeyor
-
-        // https://www.appveyor.com/docs/environment-variables/
-        || globals.platform.environment.containsKey('APPVEYOR')
-
-        // https://cirrus-ci.org/guide/writing-tasks/#environment-variables
-        || globals.platform.environment.containsKey('CIRRUS_CI')
-
-        // https://docs.aws.amazon.com/codebuild/latest/userguide/build-env-ref-env-vars.html
-        || (globals.platform.environment.containsKey('AWS_REGION') &&
-            globals.platform.environment.containsKey('CODEBUILD_INITIATOR'))
-
-        // https://wiki.jenkins.io/display/JENKINS/Building+a+software+project#Buildingasoftwareproject-belowJenkinsSetEnvironmentVariables
-        || globals.platform.environment.containsKey('JENKINS_URL')
-
-        // Properties on Flutter's Chrome Infra bots.
-        || globals.platform.environment['CHROME_HEADLESS'] == '1'
-        || globals.platform.environment.containsKey('BUILDBOT_BUILDERNAME')
-        || globals.platform.environment.containsKey('SWARMING_TASK_ID');
-  }
-}
-
-bool get isRunningOnBot {
-  final BotDetector botDetector = context.get<BotDetector>() ?? _kBotDetector;
-  return botDetector.isRunningOnBot;
-}
 
 /// Convert `foo_bar` to `fooBar`.
 String camelCase(String str) {
