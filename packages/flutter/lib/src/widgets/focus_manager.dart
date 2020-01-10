@@ -18,7 +18,7 @@ import 'framework.dart';
 
 // Used for debugging focus code. Set to true to see highly verbose debug output
 // when focus changes occur.
-const bool _kDebugFocus = false;
+const bool _kDebugFocus = true;
 
 bool _focusDebug(String message, [Iterable<String> details]) {
   if (_kDebugFocus) {
@@ -857,6 +857,9 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     assert(_focusDebug('Node requesting focus: $this'));
     _markAsDirty(newFocus: this);
   }
+
+  /// Requests the focus the next time this node is attached to the focus tree.
+  bool requestFocusOnAttach = false;
 
   /// Sets this node as the [FocusScopeNode.focusedChild] of the enclosing
   /// scope.

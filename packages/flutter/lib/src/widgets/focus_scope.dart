@@ -344,7 +344,6 @@ class _FocusState extends State<Focus> {
       // _createNode is overridden in _FocusScopeState.
       _internalNode ??= _createNode();
     }
-    _focusAttachment = focusNode.attach(context, onKey: widget.onKey);
     if (widget.skipTraversal != null) {
       focusNode.skipTraversal = widget.skipTraversal;
     }
@@ -353,11 +352,13 @@ class _FocusState extends State<Focus> {
     }
     _canRequestFocus = focusNode.canRequestFocus;
     _hasPrimaryFocus = focusNode.hasPrimaryFocus;
+    _focusAttachment = focusNode.attach(context, onKey: widget.onKey);
 
     // Add listener even if the _internalNode existed before, since it should
     // not be listening now if we're re-using a previous one because it should
     // have already removed its listener.
     focusNode.addListener(_handleFocusChanged);
+    _handleAttachFocus();
   }
 
   FocusNode _createNode() {
@@ -428,6 +429,18 @@ class _FocusState extends State<Focus> {
 
     if (oldWidget.autofocus != widget.autofocus) {
       _handleAutofocus();
+    }
+    _handleAttachFocus();
+  }
+  void _handleAttachFocus() {
+    if (focusNode.requestFocusOnAttach) {
+        print('Requesting focus on attach for $focusNode.');
+        focusNode.requestFocus();
+        debugDumpFocusTree();
+        focusNode.requestFocusOnAttach = false;
+    } else {
+      print('Not requesting focus for ${focusNode} because requestFocusOnAttach is false');
+      debugDumpFocusTree();
     }
   }
 
