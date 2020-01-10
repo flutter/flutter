@@ -9,6 +9,7 @@ import 'dart:math';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
 import 'package:flutter/widgets.dart';
@@ -1214,4 +1215,18 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
       onChanged((value - _semanticActionUnit).clamp(0.0, 1.0) as double);
     }
   }
+}
+
+class SliderTextField extends StatelessWidget{
+  SliderTextField({this.textStyle});
+  /// TODO
+  final TextStyle textStyle;
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      decoration: ,
+    );
+  }
+
 }

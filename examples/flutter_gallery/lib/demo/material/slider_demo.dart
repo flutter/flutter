@@ -246,6 +246,8 @@ class _SlidersState extends State<_Sliders> {
           Column(
             mainAxisSize: MainAxisSize.min,
             children: <Widget>[
+              SliderTextField(
+              ),
               Semantics(
                 label: 'Editable numerical value',
                 child: SizedBox(
