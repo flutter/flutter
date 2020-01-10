@@ -133,7 +133,7 @@ enum MaterialTapTargetSize {
 /// This sample creates a [MaterialApp] widget that stores `ThemeData` and
 /// passes the `ThemeData` to descendant widgets. The [AppBar] widget uses the
 /// [primaryColor] to create a blue background. The [Text] widget uses the
-/// [TextTheme.body1] to create purple text. The [FloatingActionButton] widget
+/// [TextTheme.bodyText2] to create purple text. The [FloatingActionButton] widget
 /// uses the [accentColor] to create a green background.
 ///
 /// ![](https://flutter.github.io/assets-for-api-docs/assets/material/material_app_theme_data.png)
@@ -143,7 +143,7 @@ enum MaterialTapTargetSize {
 ///   theme: ThemeData(
 ///     primaryColor: Colors.blue,
 ///     accentColor: Colors.green,
-///     textTheme: TextTheme(body1: TextStyle(color: Colors.purple)),
+///     textTheme: TextTheme(bodyText2: TextStyle(color: Colors.purple)),
 ///   ),
 ///   home: Scaffold(
 ///     appBar: AppBar(
@@ -316,7 +316,7 @@ class ThemeData extends Diagnosticable {
     accentIconTheme ??= accentIsDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black);
     iconTheme ??= isDark ? const IconThemeData(color: Colors.white) : const IconThemeData(color: Colors.black87);
     platform ??= defaultTargetPlatform;
-    typography ??= Typography(platform: platform);
+    typography ??= Typography.material2014(platform: platform);
     TextTheme defaultTextTheme = isDark ? typography.white : typography.black;
     TextTheme defaultPrimaryTextTheme = primaryIsDark ? typography.white : typography.black;
     TextTheme defaultAccentTextTheme = accentIsDark ? typography.white : typography.black;
@@ -360,7 +360,7 @@ class ThemeData extends Diagnosticable {
     chipTheme ??= ChipThemeData.fromDefaults(
       secondaryColor: primaryColor,
       brightness: brightness,
-      labelStyle: textTheme.body2,
+      labelStyle: textTheme.bodyText1,
     );
     dialogTheme ??= const DialogTheme();
     floatingActionButtonTheme ??= const FloatingActionButtonThemeData();

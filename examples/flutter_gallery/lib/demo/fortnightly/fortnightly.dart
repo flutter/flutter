@@ -115,8 +115,8 @@ class FruitPage extends StatelessWidget {
                         ),
                         Text(
                           ' ¬ ',
-                          // TODO(larche): Replace textTheme.display3.color with a ColorScheme value when known.
-                          style: textTheme.overline.apply(color: textTheme.display3.color),
+                          // TODO(larche): Replace textTheme.headline2.color with a ColorScheme value when known.
+                          style: textTheme.overline.apply(color: textTheme.headline2.color),
                         ),
                         Text(
                           'CULTURE',
@@ -127,13 +127,13 @@ class FruitPage extends StatelessWidget {
                     const SizedBox(height: 10),
                     Text(
                       'Quince for Wisdom, Persimmon for Luck, Pomegranate for Love',
-                      style: textTheme.display1,
+                      style: textTheme.headline4,
                     ),
                     const SizedBox(height: 10),
                     Text(
                       'How these crazy fruits sweetened our hearts, relationships, '
                           'and puffed pastries',
-                      style: textTheme.body1,
+                      style: textTheme.bodyText2,
                     ),
                     Padding(
                       padding: const EdgeInsets.symmetric(vertical: 16),
@@ -149,7 +149,7 @@ class FruitPage extends StatelessWidget {
                           const SizedBox(width: 12),
                           Text(
                             'by',
-                            style: textTheme.display3,
+                            style: textTheme.headline2,
                           ),
                           const SizedBox(width: 4),
                           const Text(
@@ -166,7 +166,7 @@ class FruitPage extends StatelessWidget {
                     ),
                     Text(
                       '$paragraph1\n\n$paragraph2',
-                      style: textTheme.body2,
+                      style: textTheme.bodyText1,
                     ),
                   ],
                 ),
@@ -194,7 +194,7 @@ TextTheme _buildTextTheme(TextTheme base) {
   theme = theme.apply(displayColor: Colors.black);
 
   theme = theme.copyWith(
-    display1: base.display1.copyWith(
+    headline4: base.headline4.copyWith(
       fontFamily: 'Merriweather',
       fontStyle: FontStyle.italic,
       fontSize: 28,
@@ -202,21 +202,21 @@ TextTheme _buildTextTheme(TextTheme base) {
       color: Colors.black,
       height: .88,
     ),
-    display3: base.display3.copyWith(
+    headline2: base.headline2.copyWith(
       fontFamily: 'LibreFranklin',
       fontSize: 18,
       fontWeight: FontWeight.w500,
       color: Colors.black.withAlpha(153),
     ),
-    headline: base.headline.copyWith(fontWeight: FontWeight.w500),
-    body1: base.body1.copyWith(
+    headline5: base.headline5.copyWith(fontWeight: FontWeight.w500),
+    bodyText2: base.bodyText2.copyWith(
       fontFamily: 'Merriweather',
       fontSize: 14,
       fontWeight: FontWeight.w300,
       color: const Color(0xFF666666),
       height: 1.11,
     ),
-    body2: base.body2.copyWith(
+    bodyText1: base.bodyText1.copyWith(
       fontFamily: 'Merriweather',
       fontSize: 16,
       fontWeight: FontWeight.w300,

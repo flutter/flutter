@@ -9,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test('Typography is defined for all target platforms', () {
     for (final TargetPlatform platform in TargetPlatform.values) {
-      final Typography typography = Typography(platform: platform);
+      final Typography typography = Typography.material2018(platform: platform);
       expect(typography, isNotNull, reason: 'null typography for $platform');
       expect(typography.black, isNotNull, reason: 'null black typography for $platform');
       expect(typography.white, isNotNull, reason: 'null white typography for $platform');
@@ -17,8 +17,8 @@ void main() {
   });
 
   test('Typography on Android, Fuchsia defaults to Roboto', () {
-    expect(Typography(platform: TargetPlatform.android).black.title.fontFamily, 'Roboto');
-    expect(Typography(platform: TargetPlatform.fuchsia).black.title.fontFamily, 'Roboto');
+    expect(Typography.material2018(platform: TargetPlatform.android).black.headline6.fontFamily, 'Roboto');
+    expect(Typography.material2018(platform: TargetPlatform.fuchsia).black.headline6.fontFamily, 'Roboto');
   });
 
   test('Typography on iOS defaults to the correct SF font family based on size', () {
@@ -31,27 +31,27 @@ void main() {
       return s.fontFamily == '.SF UI Text';
     }, 'Uses SF Text font');
 
-    final Typography typography = Typography(platform: TargetPlatform.iOS);
+    final Typography typography = Typography.material2018(platform: TargetPlatform.iOS);
     for (final TextTheme textTheme in <TextTheme>[typography.black, typography.white]) {
-      expect(textTheme.display4, isDisplayFont);
-      expect(textTheme.display3, isDisplayFont);
-      expect(textTheme.display2, isDisplayFont);
-      expect(textTheme.display1, isDisplayFont);
-      expect(textTheme.headline, isDisplayFont);
-      expect(textTheme.title, isDisplayFont);
-      expect(textTheme.subhead, isTextFont);
-      expect(textTheme.body2, isTextFont);
-      expect(textTheme.body1, isTextFont);
+      expect(textTheme.headline1, isDisplayFont);
+      expect(textTheme.headline2, isDisplayFont);
+      expect(textTheme.headline3, isDisplayFont);
+      expect(textTheme.headline4, isDisplayFont);
+      expect(textTheme.headline5, isDisplayFont);
+      expect(textTheme.headline6, isDisplayFont);
+      expect(textTheme.subtitle1, isTextFont);
+      expect(textTheme.bodyText1, isTextFont);
+      expect(textTheme.bodyText2, isTextFont);
       expect(textTheme.caption, isTextFont);
       expect(textTheme.button, isTextFont);
-      expect(textTheme.subtitle, isTextFont);
+      expect(textTheme.subtitle2, isTextFont);
       expect(textTheme.overline, isTextFont);
     }
   });
 
   testWidgets('Typography implements debugFillProperties', (WidgetTester tester) async {
     final DiagnosticPropertiesBuilder builder = DiagnosticPropertiesBuilder();
-    Typography(
+    Typography.material2018(
       platform: TargetPlatform.android,
       black: Typography.blackCupertino,
       white: Typography.whiteCupertino,
@@ -64,6 +64,6 @@ void main() {
       .where((DiagnosticsNode node) => !node.isFiltered(DiagnosticLevel.info))
       .map((DiagnosticsNode node) => node.name).toList();
 
-    expect(nonDefaultPropertyNames, <String>['black', 'white', 'englishLike', 'dense', 'tall']);
+    expect(nonDefaultPropertyNames, <String>['black', 'white']);
   });
 }
