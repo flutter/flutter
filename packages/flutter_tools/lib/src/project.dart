@@ -3,7 +3,6 @@
 // found in the LICENSE file.
 
 import 'dart:async';
-import 'dart:html';
 
 import 'package:flutter_tools/src/platform_plugins.dart';
 import 'package:meta/meta.dart';
