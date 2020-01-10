@@ -5,8 +5,8 @@
 import 'dart:math' as math;
 import 'dart:math';
 
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/src/material/constants.dart';
 
 import 'basic.dart';
 import 'debug.dart';
