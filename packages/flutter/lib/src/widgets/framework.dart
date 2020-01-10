@@ -1457,9 +1457,9 @@ abstract class ProxyWidget extends Widget {
 ///  * [RenderObject], the superclass for layout algorithms.
 ///  * [RenderObject.parentData], the slot that this class configures.
 ///  * [ParentData], the superclass of the data that will be placed in
-///    [RenderObject.parentData] slots.
+///    [RenderObject.parentData] slots. The `T` type parameter for
+///    [ParentDataWidget] is a [ParentData].
 ///  * [RenderObjectWidget], the class for widgets that wrap [RenderObject]s.
-///    The `T` type parameter for [ParentDataWidget] is a [RenderObjectWidget].
 ///  * [StatefulWidget] and [State], for widgets that can build differently
 ///    several times over their lifetime.
 abstract class ParentDataWidget<T extends ParentData> extends ProxyWidget {
