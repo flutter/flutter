@@ -310,6 +310,16 @@ List<Plugin> findPlugins(FlutterProject project) {
   return plugins;
 }
 
+void _addPluginsToPlatform(List<Plugin> plugins, FlutterProjectPlatform platform, Map<String, dynamic> pluginsMap) {
+  if (!platform.existsSync()) {
+    return;
+  }
+  final List<Map<String,dynamic>> list = platform.pluginsList(plugins);
+  if (list.isNotEmpty) {
+    pluginsMap[platform.pluginConfigKey] = list;
+  }
+}
+
 /// Writes the .flutter-plugins and .flutter-plugins-dependencies files based on the list of plugins.
 /// If there aren't any plugins, then the files aren't written to disk.
 ///
@@ -321,29 +331,21 @@ bool _writeFlutterPluginsList(FlutterProject project, List<Plugin> plugins) {
   final Map<String, dynamic> result = <String, dynamic> {}; 
   result['_info'] = '// $info';
 
-  final Map<String, dynamic> pluginsList = <String, dynamic>{};
-  if (project.ios.existsSync()) {
-    pluginsList[project.ios.pluginConfigKey] = project.ios.pluginsList(plugins);
-  }
-  if (project.android.existsSync()) {
-    pluginsList[project.android.pluginConfigKey] = project.android.pluginsList(plugins);
-  }
-  if (project.macos.existsSync()) {
-    pluginsList[project.macos.pluginConfigKey] = project.macos.pluginsList(plugins);
-  }
-  if (project.linux.existsSync()) {
-    pluginsList[project.linux.pluginConfigKey] = project.linux.pluginsList(plugins);
-  }
-  if (project.windows.existsSync()) {
-    pluginsList[project.windows.pluginConfigKey] = project.windows.pluginsList(plugins);
-  }
+  final Map<String, dynamic> pluginsMap = <String, dynamic>{};
+  _addPluginsToPlatform(plugins, project.ios, pluginsMap);
+  _addPluginsToPlatform(plugins, project.android, pluginsMap);
+  _addPluginsToPlatform(plugins, project.macos, pluginsMap);
+  _addPluginsToPlatform(plugins, project.linux, pluginsMap);
+  _addPluginsToPlatform(plugins, project.windows, pluginsMap);
+  _addPluginsToPlatform(plugins, project.web, pluginsMap);
+  print(pluginsMap);
 
-  result['plugins'] = pluginsList;
+  result['plugins'] = pluginsMap;
 
   final File pluginsFile = project.flutterPluginsJsonFile;
   final String oldPluginFileContent = _readFileContent(pluginsFile);
   final String pluginFileContent = json.encode(result);
-  if (pluginFileContent.isNotEmpty) {
+  if (plugins.isNotEmpty) {
     pluginsFile.writeAsStringSync(pluginFileContent, flush: true);
   } else {
     if (pluginsFile.existsSync()) {
@@ -821,9 +823,9 @@ Future<void> _writeWebPluginRegistrant(FlutterProject project, List<Plugin> plug
 /// Assumes `pub get` has been executed since last change to `pubspec.yaml`.
 void refreshPluginsList(FlutterProject project, {bool checkProjects = false}) {
   final List<Plugin> plugins = findPlugins(project);
-  _writeFlutterPluginsList(project, plugins);
+  _writeFlutterPluginsListLegacy(project, plugins);
 
-  final bool changed = _writeFlutterPluginsListLegacy(project, plugins);
+  final bool changed = _writeFlutterPluginsList(project, plugins);
   if (changed) {
     if (!checkProjects || project.ios.existsSync()) {
       cocoaPods.invalidatePodInstallOutput(project.ios);
