@@ -358,7 +358,6 @@ class _FocusState extends State<Focus> {
     // not be listening now if we're re-using a previous one because it should
     // have already removed its listener.
     focusNode.addListener(_handleFocusChanged);
-    _handleAttachFocus();
   }
 
   FocusNode _createNode() {
@@ -429,18 +428,6 @@ class _FocusState extends State<Focus> {
 
     if (oldWidget.autofocus != widget.autofocus) {
       _handleAutofocus();
-    }
-    _handleAttachFocus();
-  }
-  void _handleAttachFocus() {
-    if (focusNode.requestFocusOnAttach) {
-        print('Requesting focus on attach for $focusNode.');
-        focusNode.requestFocus();
-        debugDumpFocusTree();
-        focusNode.requestFocusOnAttach = false;
-    } else {
-      print('Not requesting focus for ${focusNode} because requestFocusOnAttach is false');
-      debugDumpFocusTree();
     }
   }
 
