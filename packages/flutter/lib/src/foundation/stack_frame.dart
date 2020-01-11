@@ -81,7 +81,7 @@ class StackFrame {
         ? RegExp(r'^(package:.+) (\d+):(\d+)\s+(.+)$')
         : RegExp(r'^(.+) (\d+):(\d+)\s+(.+)$');
     final Match match = parser.firstMatch(line);
-    assert(match != null, 'Expecgted $line to match $parser.');
+    assert(match != null, 'Expected $line to match $parser.');
 
     String package = '<unknown>';
     String packageScheme = '<unknown>';
