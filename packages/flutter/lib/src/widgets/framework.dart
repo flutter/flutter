@@ -338,7 +338,7 @@ class GlobalObjectKey<T extends State<StatefulWidget>> extends GlobalKey<T> {
   @override
   String toString() {
     String selfType = objectRuntimeType(this, 'GlobalObjectKey');
-    // const GlobalObjectKey().runtimeType.toString() returns 'GlobalObjectKey<State<StatefulWidget>>'
+    // The runtimeType string of a GlobalObjectKey() returns 'GlobalObjectKey<State<StatefulWidget>>'
     // because GlobalObjectKey is instantiated to its bounds. To avoid cluttering the output
     // we remove the suffix.
     const String suffix = '<State<StatefulWidget>>';
