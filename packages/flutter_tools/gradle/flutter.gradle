@@ -250,6 +250,7 @@ class FlutterPlugin implements Plugin<Project> {
     private void configurePlugins() {
         if (!buildPluginAsAar()) {
             getPluginList().each this.&configurePluginProject
+            getPluginList().each this.&configurePluginDependencies
             return
         }
         project.repositories {
@@ -296,7 +297,6 @@ class FlutterPlugin implements Plugin<Project> {
 
     // Adds the plugin project dependency to the app project .
     private void configurePluginProject(Map plugin) {
-        println plugin
         Project pluginProject = project.rootProject.findProject(":${plugin['name']}")
         if (pluginProject == null) {
             project.logger.error("Plugin project :${plugin['name']} not found. Please update settings.gradle.")
@@ -329,8 +329,6 @@ class FlutterPlugin implements Plugin<Project> {
             pluginProject.android.buildTypes.each addEmbeddingCompileOnlyDependency
             pluginProject.android.buildTypes.whenObjectAdded addEmbeddingCompileOnlyDependency
         }
-
-        configurePluginDependenciesNew(plugin['name'], plugin['dependencies'])
     }
 
     // Returns `true` if the given path contains an `android/build.gradle` file.
@@ -346,44 +344,15 @@ class FlutterPlugin implements Plugin<Project> {
     // Add the dependencies on other plugin projects to the plugin project.
     // A plugin A can depend on plugin B. As a result, this dependency must be surfaced by
     // making the Gradle plugin project A depend on the Gradle plugin project B.
-    private void configurePluginDependencies(Object dependencyObject) {
-        assert dependencyObject.name instanceof String
-        Project pluginProject = project.rootProject.findProject(":${dependencyObject.name}")
-        if (pluginProject == null ||
-            !doesSupportAndroidPlatform(pluginProject.projectDir.parentFile.path)) {
-            return
-        }
-        assert dependencyObject.dependencies instanceof List
-        dependencyObject.dependencies.each { pluginDependencyName ->
-            assert pluginDependencyName instanceof String
-            if (pluginDependencyName.empty) {
-                return
-            }
-            Project dependencyProject = project.rootProject.findProject(":$pluginDependencyName")
-            if (dependencyProject == null ||
-                !doesSupportAndroidPlatform(dependencyProject.projectDir.parentFile.path)) {
-                return
-            }
-            // Wait for the Android plugin to load and add the dependency to the plugin project.
-            pluginProject.afterEvaluate {
-                pluginProject.dependencies {
-                    implementation dependencyProject
-                }
-            }
-        }
-    }
-
-    private void configurePluginDependenciesNew(String pluginName, List dependencies) {
+    private void configurePluginDependencies(Map plugin) {
+        def pluginName = plugin['name']
+        def dependencies = plugin['dependencies']
         Project pluginProject = project.rootProject.findProject(":$pluginName")
         if (pluginProject == null ||
             !doesSupportAndroidPlatform(pluginProject.projectDir.parentFile.path)) {
-            println "Doesn't support"
             return
         }
-        println pluginProject
-        println "++"
         dependencies.each { pluginDependencyName ->
-            println pluginDependencyName
             assert pluginDependencyName instanceof String
             if (pluginDependencyName.empty) {
                 return
@@ -397,7 +366,6 @@ class FlutterPlugin implements Plugin<Project> {
             // Wait for the Android plugin to load and add the dependency to the plugin project.
             pluginProject.afterEvaluate {
                 pluginProject.dependencies {
-                    println "Implementing"
                     implementation dependencyProject
                 }
             }
@@ -410,43 +378,9 @@ class FlutterPlugin implements Plugin<Project> {
         assert object instanceof Map
         assert object.plugins instanceof Map
         assert object.plugins.android instanceof List
-        println object.plugins.android
         return object.plugins.android
     }
-
-    // Gets the plugins dependencies from `.flutter-plugins-dependencies`.
-    private List getPluginDependencies() {
-        // Consider a `.flutter-plugins-dependencies` file with the following content:
-        // {
-        //     "dependencyGraph": [
-        //       {
-        //         "name": "plugin-a",
-        //         "dependencies": ["plugin-b","plugin-c"]
-        //       },
-        //       {
-        //         "name": "plugin-b",
-        //         "dependencies": ["plugin-c"]
-        //       },
-        //       {
-        //         "name": "plugin-c",
-        //         "dependencies": []'
-        //       }
-        //     ]
-        //  }
-        //
-        // This means, `plugin-a` depends on `plugin-b` and `plugin-c`.
-        // `plugin-b` depends on `plugin-c`.
-        // `plugin-c` doesn't depend on anything.
-        File pluginsDependencyFile = new File(project.projectDir.parentFile.parentFile, '.flutter-plugins-dependencies')
-        if (pluginsDependencyFile.exists()) {
-            def object = new JsonSlurper().parseText(pluginsDependencyFile.text)
-            assert object instanceof Map
-            assert object.dependencyGraph instanceof List
-            return object.dependencyGraph
-        }
-        return []
-    }
-
+    
     private static String toCammelCase(List<String> parts) {
         if (parts.empty) {
             return ""
