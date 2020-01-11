@@ -101,7 +101,7 @@ class ConfigCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     if (boolArg('machine')) {
       await handleMachine();
-      return null;
+      return FlutterCommandResult.success();
     }
 
     if (boolArg('clear-features')) {
@@ -110,7 +110,7 @@ class ConfigCommand extends FlutterCommand {
           globals.config.removeValue(feature.configSetting);
         }
       }
-      return null;
+      return FlutterCommandResult.success();
     }
 
     if (argResults.wasParsed('analytics')) {
@@ -157,7 +157,7 @@ class ConfigCommand extends FlutterCommand {
       globals.printStatus('\nYou may need to restart any open editors for them to read new settings.');
     }
 
-    return null;
+    return FlutterCommandResult.success();
   }
 
   Future<void> handleMachine() async {

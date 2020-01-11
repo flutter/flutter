@@ -297,7 +297,7 @@ class CreateCommand extends FlutterCommand {
       Cache.releaseLockEarly();
 
       await _writeSamplesJson(stringArg('list-samples'));
-      return null;
+      return FlutterCommandResult.success();
     }
 
     if (argResults.rest.isEmpty) {
@@ -482,8 +482,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
         globals.printStatus('Your $application code is in $relativeAppMain');
       }
     }
-
-    return null;
+    return FlutterCommandResult.success();
   }
 
   Future<int> _generateModule(Directory directory, Map<String, dynamic> templateContext, { bool overwrite = false }) async {
