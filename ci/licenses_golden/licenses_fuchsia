@@ -1,4 +1,4 @@
-Signature: 8e1bcdbf6688267e31b1f99e6dcfc828
+Signature: 64e5d87e44f391665a5f6622334b6345
 
 UNUSED LICENSES:
 
@@ -485,6 +485,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.sessions2/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.mediacodec/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.mem/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.migration/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular.auth/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular.session/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular.testing/meta.json
@@ -1404,6 +1405,8 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media/usage_reporter.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.mediacodec/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.mem/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.mem/range.fidl
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.migration/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.migration/migration.fidl
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular.auth/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular.session/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular.session/modular_config.fidl
@@ -2163,6 +2166,7 @@ FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media.sessions2/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.media/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.mediacodec/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.mem/meta.json
+FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.migration/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular.auth/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular.session/meta.json
 FILE: ../../../fuchsia/sdk/linux/fidl/fuchsia.modular.testing/meta.json
