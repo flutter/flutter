@@ -22,13 +22,19 @@ const Color _kDefaultTabBarBorderColor = CupertinoDynamicColor.withBrightness(
 );
 const Color _kDefaultTabBarInactiveColor = CupertinoColors.inactiveGray;
 
+/// The enumerator for [CupertinoBottomTabBar]'s layout mode
 enum CupertinoTabBarLayoutMode {
+  /// Regular tab bar height (compatible with vertical and horizontal icon layouts)
   regular,
+  /// Compact tab bar height (compatible only with horizontal icon layout)
   compact
 }
 
+/// The enumerator for [CupertinoBottomTabBar]'s item inner layout mode
 enum CupertinoTabBarItemLayoutMode {
+  /// Stacked item layout, text under icon
   vertical,
+  /// Horizontal item layout, text to the right of icon
   horizontal
 }
 
@@ -180,14 +186,14 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
 
   /// Controls whether the tab bar should be displayed in its compact mode (landscape mode on iPhone) or the regular one.
   ///
-  /// The default value is [CupertinoTabBarMode.auto].
+  /// When this value is [null], the layout mode is automatically calculated on build
   final CupertinoTabBarLayoutMode barLayoutMode;
 
   /// Controls whether the buttons should have a wide appearance, which, as of iOS 11,
   /// is common apps in landscape mode (iPhone) or always on iPad.
   /// (source: https://developer.apple.com/videos/play/wwdc2017/204/)
   ///
-  /// The default value is [CupertinoTabButtonMode.auto].
+  /// When this value is [null], the layout mode is automatically calculated on build
   final CupertinoTabBarItemLayoutMode itemLayoutMode;
 
   /// The callback that is called when a item is tapped.
