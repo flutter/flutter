@@ -18,11 +18,11 @@ enum CupertinoSizeClass {
 class CupertinoSizeClassHelper {
   /// Checks whether the current window indicates a tablet layout
   /// (source: https://github.com/ominibyte/flutter_device_type/blob/a7d880f108caa6bc62f933aa81b613f960ae2ec3/lib/flutter_device_type.dart#L29)
-  static bool isTablet(BuildContext context) {
-    if(MediaQuery.of(context).devicePixelRatio < 2 && (MediaQuery.of(context).size.width >= 1000 || MediaQuery.of(context).size.height >= 1000)) {
+  static bool isTablet() {
+    if(WidgetsBinding.instance.window.devicePixelRatio < 2 && (WidgetsBinding.instance.window.physicalSize.width >= 1000 || WidgetsBinding.instance.window.physicalSize.height >= 1000)) {
       return true;
     }
-    else if(MediaQuery.of(context).devicePixelRatio == 2 && (MediaQuery.of(context).size.width >= 1920 || MediaQuery.of(context).size.height >= 1920)) {
+    else if(WidgetsBinding.instance.window.devicePixelRatio == 2 && (WidgetsBinding.instance.window.physicalSize.width >= 1920 || WidgetsBinding.instance.window.physicalSize.height >= 1920)) {
       return true;
     }
     else
@@ -34,43 +34,48 @@ class CupertinoSizeClassHelper {
   // TODO(kerberjg): investigate results of using this on Android devices (potential resolution mismatch)
 
   /// Returns true if phone is Xs Max, 11 Pro Max
-  static bool isMaxStyle(BuildContext context) {
-    return MediaQuery.of(context).devicePixelRatio == 3 && (MediaQuery.of(context).size.width == 2688 || MediaQuery.of(context).size.height == 2688);
+  static bool isMaxStyle() {
+    return WidgetsBinding.instance.window.devicePixelRatio == 3 && (WidgetsBinding.instance.window.physicalSize.width == 2688 || WidgetsBinding.instance.window.physicalSize.height == 2688);
   }
 
   /// Returns true if phone is X, Xr, Xs, 11, 11 Pro
-  static bool is10Style(BuildContext context) {
-    return (MediaQuery.of(context).size.width == 828 || MediaQuery.of(context).size.height == 828) || (MediaQuery.of(context).size.width == 1125 || MediaQuery.of(context).size.height == 1125);
+  static bool is10Style() {
+    return (WidgetsBinding.instance.window.physicalSize.width == 828 || WidgetsBinding.instance.window.physicalSize.height == 828) || (WidgetsBinding.instance.window.physicalSize.width == 1125 || WidgetsBinding.instance.window.physicalSize.height == 1125);
   }
 
   /// Returns true if phone is 6+, 6s+, 7+, 8+
-  static bool isPlusStyle(BuildContext context) {
-    return MediaQuery.of(context).devicePixelRatio == 3 && (MediaQuery.of(context).size.width == 2208 || MediaQuery.of(context).size.height == 2208);
+  static bool isPlusStyle() {
+    return WidgetsBinding.instance.window.devicePixelRatio == 3 && (WidgetsBinding.instance.window.physicalSize.width == 2208 || WidgetsBinding.instance.window.physicalSize.height == 2208);
   }
 
   /// Returns true if phone is 6, 6s, 7, 8 (non-plus)
-  static bool is6Style(BuildContext context) {
-    return MediaQuery.of(context).devicePixelRatio == 2 && (MediaQuery.of(context).size.width == 750 || MediaQuery.of(context).size.height == 750);
+  static bool is6Style() {
+    return WidgetsBinding.instance.window.devicePixelRatio == 2 && (WidgetsBinding.instance.window.physicalSize.width == 750 || WidgetsBinding.instance.window.physicalSize.height == 750);
   }
 
   /// Returns true if phone is 5, 5c, 5s, SE, iPod 5g
-  static bool is5Style(BuildContext context) {
-    return MediaQuery.of(context).devicePixelRatio == 2 && (MediaQuery.of(context).size.width == 640 || MediaQuery.of(context).size.height == 640) && (MediaQuery.of(context).size.width == 1136 || MediaQuery.of(context).size.height == 1136);
+  static bool is5Style() {
+    return WidgetsBinding.instance.window.devicePixelRatio == 2 && (WidgetsBinding.instance.window.physicalSize.width == 640 || WidgetsBinding.instance.window.physicalSize.height == 640) && (WidgetsBinding.instance.window.physicalSize.width == 1136 || WidgetsBinding.instance.window.physicalSize.height == 1136);
   }
 
   /// Returns true if phone is 4, 4s, iPod 4g
-  static bool is4Style(BuildContext context) {
-    return MediaQuery.of(context).devicePixelRatio == 2 && (MediaQuery.of(context).size.width == 640 || MediaQuery.of(context).size.height == 640) && (MediaQuery.of(context).size.width == 960 || MediaQuery.of(context).size.height == 960);
+  static bool is4Style() {
+    return WidgetsBinding.instance.window.devicePixelRatio == 2 && (WidgetsBinding.instance.window.physicalSize.width == 640 || WidgetsBinding.instance.window.physicalSize.height == 640) && (WidgetsBinding.instance.window.physicalSize.width == 960 || WidgetsBinding.instance.window.physicalSize.height == 960);
+  }
+
+  /// Returns the window's orientation
+  static Orientation getOrientation() {
+    return WidgetsBinding.instance.window.physicalSize.width > WidgetsBinding.instance.window.physicalSize.height ? Orientation.landscape : Orientation.portrait;
   }
 
   // NOTE: devices from series 3 and below are not included because they don't support iOS 8
 
   /// Returns the width [CupertinoSizeClass] for the view in the current [BuildContext]
   static CupertinoSizeClass getWidthSizeClass(BuildContext context) {
-    if(isTablet(context)) {
+    if(isTablet()) {
       return CupertinoSizeClass.regular;
-    } else if(MediaQuery.of(context).orientation == Orientation.portrait) {
-      return isPlusStyle(context) || isMaxStyle(context) ? CupertinoSizeClass.regular : CupertinoSizeClass.compact;
+    } else if(getOrientation() == Orientation.portrait) {
+      return isPlusStyle() || isMaxStyle() ? CupertinoSizeClass.regular : CupertinoSizeClass.compact;
     } else {
       return CupertinoSizeClass.compact;
     } 
@@ -78,10 +83,10 @@ class CupertinoSizeClassHelper {
 
   /// Returns the height [CupertinoSizeClass] for the view in the current [BuildContext]
   static CupertinoSizeClass getHeightSizeClass(BuildContext context) {
-    if(isTablet(context)) {
+    if(isTablet()) {
       return CupertinoSizeClass.regular;
     } else {
-      return MediaQuery.of(context).orientation == Orientation.portrait ? CupertinoSizeClass.regular : CupertinoSizeClass.compact;
+      return getOrientation() == Orientation.portrait ? CupertinoSizeClass.regular : CupertinoSizeClass.compact;
     }
   }
 }

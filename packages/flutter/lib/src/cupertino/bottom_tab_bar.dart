@@ -2,11 +2,12 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'dart:ui' show ImageFilter, window;
+import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/widgets.dart';
 
 import 'colors.dart';
+import 'size_class.dart';
 import 'theme.dart';
 
 // Standard iOS 11 tab bar height.
@@ -37,81 +38,6 @@ enum CupertinoTabBarItemLayoutMode {
   /// Horizontal item layout, text to the right of icon
   horizontal
 }
-
-/*
- *
- */
-enum CupertinoSizeClass {
-  compact,
-  regular,
-}
-
-class CupertinoSizeClassHelper {
-
-  static bool isTablet() {
-    if(window.devicePixelRatio < 2 && (window.physicalSize.width >= 1000 || window.physicalSize.height >= 1000)) {
-      return true;
-    }
-    else if(window.devicePixelRatio == 2 && (window.physicalSize.width >= 1920 || window.physicalSize.height >= 1920)) {
-      return true;
-    }
-    else
-      return false;
-  }
-
-  // TODO: take Split View into consideration, be less resolution dependent
-
-  /// Returns true if phone is Xs Max, 11 Pro Max
-  static bool isMaxStyle() {
-    return window.devicePixelRatio == 3 && (window.physicalSize.width == 2688 || window.physicalSize.height == 2688);
-  }
-
-  /// Returns true if phone is X, Xr, Xs, 11, 11 Pro
-  static bool is10Style() {
-    return (window.physicalSize.width == 828 || window.physicalSize.height == 828) || (window.physicalSize.width == 1125 || window.physicalSize.height == 1125);
-  }
-
-  /// Returns true if phone is 6+, 6s+, 7+, 8+
-  static bool isPlusStyle() {
-    return window.devicePixelRatio == 3 && (window.physicalSize.width == 2208 || window.physicalSize.height == 2208);
-  }
-
-  /// Returns true if phone is 6, 6s, 7, 8 (non-plus)
-  static bool is6Style() {
-    return window.devicePixelRatio == 2 && (window.physicalSize.width == 750 || window.physicalSize.height == 750);
-  }
-
-  /// Returns true if phone is 5, 5c, 5s, SE, iPod 5g
-  /// NOTE: also includes 4, 4s, iPod 4g
-  static bool is5Style() {
-    return window.devicePixelRatio == 2 && (window.physicalSize.width == 640 || window.physicalSize.height == 640);
-  }
-
-  // TODO: create separate qualifier for iPhone/iPod series 4
-
-  // NOTE: devices from series 3 and below are not included because they don't support iOS 8
-
-  static CupertinoSizeClass getWidthSizeClass(BuildContext context) {
-    if(isTablet()) {
-      return CupertinoSizeClass.regular;
-    } else if(MediaQuery.of(context).orientation == Orientation.portrait) {
-      return isPlusStyle() || isMaxStyle() ? CupertinoSizeClass.regular : CupertinoSizeClass.compact;
-    } else {
-      return CupertinoSizeClass.compact;
-    } 
-  }
-
-  static CupertinoSizeClass getHeightSizeClass(BuildContext context) {
-    if(isTablet()) {
-      return CupertinoSizeClass.regular;
-    } else {
-      return MediaQuery.of(context).orientation == Orientation.portrait ? CupertinoSizeClass.regular : CupertinoSizeClass.compact;
-    }
-  }
-}
-/*
- *
- */
 
 /// An iOS-styled bottom navigation tab bar.
 ///
@@ -250,7 +176,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
   Size get preferredSize => _isBarCompact ? const Size.fromHeight(_kTabBarCompactHeight) : const Size.fromHeight(_kTabBarHeight);
 
   // TODO(kerberjg): reconsider the usage of [window.physicalSize] since it leads to incorrect size detection when mocking size in tests
-  bool get _isBarCompact => barLayoutMode != CupertinoTabBarLayoutMode.regular && window.physicalSize.height < 800;
+  bool get _isBarCompact => barLayoutMode == CupertinoTabBarLayoutMode.compact || (barLayoutMode == null && WidgetsBinding.instance.window.physicalSize.height < 800);
 
   /// Indicates whether the tab bar is fully opaque or can have contents behind
   /// it show through it.
