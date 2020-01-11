@@ -15,6 +15,7 @@ import 'base/file_system.dart';
 import 'base/io.dart' as io;
 import 'base/logger.dart';
 import 'base/signals.dart';
+import 'base/terminal.dart' show outputPreferences;
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'codegen.dart';
@@ -607,7 +608,13 @@ abstract class ResidentRunner {
        artifactDirectory = dillOutputPath == null
           ? globals.fs.systemTempDirectory.createTempSync('flutter_tool.')
           : globals.fs.file(dillOutputPath).parent,
-       assetBundle = AssetBundleFactory.instance.createBundle() {
+       assetBundle = AssetBundleFactory.instance.createBundle(),
+       commandHelp = CommandHelp(
+         logger: globals.logger,
+         terminal: globals.terminal,
+         platform: globals.platform,
+         outputPreferences: outputPreferences,
+       ) {
     if (!artifactDirectory.existsSync()) {
       artifactDirectory.createSync(recursive: true);
     }
@@ -639,6 +646,8 @@ abstract class ResidentRunner {
   final String projectRootPath;
   final String mainPath;
   final AssetBundle assetBundle;
+
+  final CommandHelp commandHelp;
 
   bool _exited = false;
   Completer<int> _finished = Completer<int>();
@@ -1005,29 +1014,29 @@ abstract class ResidentRunner {
 
   void printHelpDetails() {
     if (flutterDevices.any((FlutterDevice d) => d.device.supportsScreenshot)) {
-      CommandHelp.s.print();
+      commandHelp.s.print();
     }
     if (supportsServiceProtocol) {
-      CommandHelp.w.print();
-      CommandHelp.t.print();
+      commandHelp.w.print();
+      commandHelp.t.print();
       if (isRunningDebug) {
-        CommandHelp.L.print();
-        CommandHelp.S.print();
-        CommandHelp.U.print();
-        CommandHelp.i.print();
-        CommandHelp.p.print();
-        CommandHelp.o.print();
-        CommandHelp.z.print();
+        commandHelp.L.print();
+        commandHelp.S.print();
+        commandHelp.U.print();
+        commandHelp.i.print();
+        commandHelp.p.print();
+        commandHelp.o.print();
+        commandHelp.z.print();
       } else {
-        CommandHelp.S.print();
-        CommandHelp.U.print();
+        commandHelp.S.print();
+        commandHelp.U.print();
       }
       // `P` should precede `a`
-      CommandHelp.P.print();
-      CommandHelp.a.print();
+      commandHelp.P.print();
+      commandHelp.a.print();
     }
     if (flutterDevices.any((FlutterDevice d) => d.device.supportsScreenshot)) {
-      CommandHelp.s.print();
+      commandHelp.s.print();
     }
   }
 
