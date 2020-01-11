@@ -28,6 +28,8 @@ typedef InformationCollector = Iterable<DiagnosticsNode> Function();
 ///
 /// See also:
 ///
+///   * [FlutterError.addDefaultStackFilter], a method to register additional
+///     stack filters for [FlutterError.defaultStackFilter].
 ///   * [StackFrame], a class that can help with parsing stack frames.
 typedef StackFilter = void Function(List<StackFrame>);
 
