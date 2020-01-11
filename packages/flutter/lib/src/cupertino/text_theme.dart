@@ -189,7 +189,7 @@ class CupertinoTextThemeData extends Diagnosticable {
 
   final TextStyle _tabWideLabelTextStyle;
   /// Typography of unselected tabs.
-  TextStyle get tabWideLabelTextStyle => _tabWideLabelTextStyle ?? _kDefaultTabWideLabelTextStyle;
+  TextStyle get tabWideLabelTextStyle => _tabWideLabelTextStyle ?? _defaults.tabWideLabelTextStyle;
 
   final TextStyle _navTitleTextStyle;
   /// The [TextStyle] of titles in standard navigation bars.
