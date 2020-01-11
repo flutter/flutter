@@ -250,7 +250,6 @@ class FlutterPlugin implements Plugin<Project> {
     private void configurePlugins() {
         if (!buildPluginAsAar()) {
             getPluginList().each this.&configurePluginProject
-            getPluginDependencies().each this.&configurePluginDependencies
             return
         }
         project.repositories {
@@ -258,8 +257,8 @@ class FlutterPlugin implements Plugin<Project> {
                 url "${getPluginBuildDir()}/outputs/repo"
             }
         }
-        getPluginList().each { pluginName, pluginPath ->
-            configurePluginAar(pluginName, pluginPath, project)
+        getPluginList().each { plugin ->
+            configurePluginAar(plugin['name'], plugin['path'], project)
         }
     }
 
@@ -296,10 +295,11 @@ class FlutterPlugin implements Plugin<Project> {
     }
 
     // Adds the plugin project dependency to the app project .
-    private void configurePluginProject(String pluginName, String _) {
-        Project pluginProject = project.rootProject.findProject(":$pluginName")
+    private void configurePluginProject(Map plugin) {
+        println plugin
+        Project pluginProject = project.rootProject.findProject(":${plugin['name']}")
         if (pluginProject == null) {
-            project.logger.error("Plugin project :$pluginName not found. Please update settings.gradle.")
+            project.logger.error("Plugin project :${plugin['name']} not found. Please update settings.gradle.")
             return
         }
         // Add plugin dependency to the app project.
@@ -329,6 +329,8 @@ class FlutterPlugin implements Plugin<Project> {
             pluginProject.android.buildTypes.each addEmbeddingCompileOnlyDependency
             pluginProject.android.buildTypes.whenObjectAdded addEmbeddingCompileOnlyDependency
         }
+
+        configurePluginDependenciesNew(plugin['name'], plugin['dependencies'])
     }
 
     // Returns `true` if the given path contains an `android/build.gradle` file.
@@ -371,19 +373,45 @@ class FlutterPlugin implements Plugin<Project> {
         }
     }
 
-    private Properties getPluginList() {
-        File pluginsFile = new File(project.projectDir.parentFile.parentFile, '.flutter-plugins')
-        Properties allPlugins = readPropertiesIfExist(pluginsFile)
-        Properties androidPlugins = new Properties()
-        allPlugins.each { name, path ->
-            if (doesSupportAndroidPlatform(path)) {
-                androidPlugins.setProperty(name, path)
-            }
-            // TODO(amirh): log an error if this plugin was specified to be an Android
-            // plugin according to the new schema, and was missing a build.gradle file.
-            // https://github.com/flutter/flutter/issues/40784
+    private void configurePluginDependenciesNew(String pluginName, List dependencies) {
+        Project pluginProject = project.rootProject.findProject(":$pluginName")
+        if (pluginProject == null ||
+            !doesSupportAndroidPlatform(pluginProject.projectDir.parentFile.path)) {
+            println "Doesn't support"
+            return
         }
-        return androidPlugins
+        println pluginProject
+        println "++"
+        dependencies.each { pluginDependencyName ->
+            println pluginDependencyName
+            assert pluginDependencyName instanceof String
+            if (pluginDependencyName.empty) {
+                return
+            }
+            Project dependencyProject = project.rootProject.findProject(":$pluginDependencyName")
+            if (dependencyProject == null ||
+                !doesSupportAndroidPlatform(dependencyProject.projectDir.parentFile.path)) {
+                return
+            }
+
+            // Wait for the Android plugin to load and add the dependency to the plugin project.
+            pluginProject.afterEvaluate {
+                pluginProject.dependencies {
+                    println "Implementing"
+                    implementation dependencyProject
+                }
+            }
+        }
+    }
+
+    private List getPluginList() {
+        File pluginsFile = new File(project.projectDir.parentFile.parentFile, '.flutter-plugins.json')
+        def object = new JsonSlurper().parseText(pluginsFile.text)
+        assert object instanceof Map
+        assert object.plugins instanceof Map
+        assert object.plugins.android instanceof List
+        println object.plugins.android
+        return object.plugins.android
     }
 
     // Gets the plugins dependencies from `.flutter-plugins-dependencies`.

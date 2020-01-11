@@ -822,10 +822,10 @@ Future<void> _writeWebPluginRegistrant(FlutterProject project, List<Plugin> plug
 /// Assumes `pub get` has been executed since last change to `pubspec.yaml`.
 void refreshPluginsList(FlutterProject project, {bool checkProjects = false}) {
   final List<Plugin> plugins = findPlugins(project);
-  _writeFlutterPluginsListLegacy(project, plugins);
+  final bool legacyChanged = _writeFlutterPluginsListLegacy(project, plugins);
 
   final bool changed = _writeFlutterPluginsList(project, plugins);
-  if (changed) {
+  if (changed || legacyChanged) {
     if (!checkProjects || project.ios.existsSync()) {
       cocoaPods.invalidatePodInstallOutput(project.ios);
     }
