@@ -254,6 +254,39 @@ void main() {
     expect(image.image, activeIcon);
   });
 
+  const MediaQueryData mockIPhone8LandscapeMediaQueryData = MediaQueryData(
+    size: Size(1334, 750),
+    devicePixelRatio: 2
+  );
+
+  testWidgets('Sets correct layout modes in landscape on iPhone pre-10 non-Plus models', (WidgetTester tester) async {
+    final CupertinoTabBar tabBar = CupertinoTabBar(
+      items: const <BottomNavigationBarItem>[
+        BottomNavigationBarItem(
+          icon: ImageIcon(TestImageProvider(24, 24)),
+          title: Text('Aka'),
+        ),
+        BottomNavigationBarItem(
+          icon: ImageIcon(TestImageProvider(24, 24)),
+          title: Text('Shiro'),
+        ),
+      ],
+    );
+
+    await pumpWidgetWithBoilerplate(tester, MediaQuery(
+      data: mockIPhone8LandscapeMediaQueryData,
+      child: CupertinoTabScaffold(
+        tabBar: tabBar,
+        tabBuilder: (BuildContext context, int index) {
+          return const Placeholder();
+        },
+      ),
+    ));
+
+    // Expect the tab bar to be compact
+    expect(tester.getSize(find.byType(CupertinoTabBar)).height, 32.0);
+  });
+
   testWidgets('Adjusts height to account for bottom padding', (WidgetTester tester) async {
     final CupertinoTabBar tabBar = CupertinoTabBar(
       items: const <BottomNavigationBarItem>[
@@ -279,8 +312,8 @@ void main() {
           title: Text('Shiro 2'),
         ),
       ],
-      isWide: true,
-      isCompact: true,
+      itemLayoutMode: CupertinoTabBarItemLayoutMode.horizontal,
+      barLayoutMode: CupertinoTabBarLayoutMode.compact,
     );
 
     // Verify height with no bottom padding.
@@ -293,7 +326,7 @@ void main() {
         },
       ),
     ));
-    expect(tester.getSize(find.byType(CupertinoTabBar)).height, 50.0);
+    expect(tester.getSize(find.byType(CupertinoTabBar)).height, 49.0);
 
     await pumpWidgetWithBoilerplate(tester, MediaQuery(
       data: const MediaQueryData(),
@@ -318,7 +351,7 @@ void main() {
         },
       ),
     ));
-    expect(tester.getSize(find.byType(CupertinoTabBar)).height, 50.0 + bottomPadding);
+    expect(tester.getSize(find.byType(CupertinoTabBar)).height, 49.0 + bottomPadding);
 
     await pumpWidgetWithBoilerplate(tester, MediaQuery(
       data: const MediaQueryData(padding: EdgeInsets.only(bottom: bottomPadding)),
@@ -332,32 +365,26 @@ void main() {
     expect(tester.getSize(find.byType(CupertinoTabBar)).height, 32.0 + bottomPadding);
   });
 
-  testWidgets('Compact flag takes effect only when the wide flag is active as well', (WidgetTester tester) async {
-    final CupertinoTabBar falseCompactTabBar = CupertinoTabBar(
-      items: const <BottomNavigationBarItem>[
-        BottomNavigationBarItem(
-          icon: ImageIcon(TestImageProvider(24, 24)),
-          title: Text('Aka 2'),
-        ),
-        BottomNavigationBarItem(
-          icon: ImageIcon(TestImageProvider(24, 24)),
-          title: Text('Shiro 2'),
-        ),
-      ],
-      isWide: false,
-      isCompact: true,
-    );
-
-    await pumpWidgetWithBoilerplate(tester, MediaQuery(
-      data: const MediaQueryData(),
-      child: CupertinoTabScaffold(
-        tabBar: falseCompactTabBar,
-        tabBuilder: (BuildContext context, int index) {
-          return const Placeholder();
-        },
-      ),
-    ));
-    expect(tester.getSize(find.byType(CupertinoTabBar)).height, 50.0);
+  testWidgets('Doesn\'t build with compact bar and vertical items', (WidgetTester tester) async {
+    try {
+      final CupertinoTabBar falseCompactTabBar = CupertinoTabBar(
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: ImageIcon(TestImageProvider(24, 24)),
+            title: Text('Aka 2'),
+          ),
+          BottomNavigationBarItem(
+            icon: ImageIcon(TestImageProvider(24, 24)),
+            title: Text('Shiro 2'),
+          ),
+        ],
+        itemLayoutMode: CupertinoTabBarItemLayoutMode.vertical,
+        barLayoutMode: CupertinoTabBarLayoutMode.compact,
+      );
+    } on AssertionError catch (e) {
+      expect(e.toString(), contains('layout'));
+      // Exception expected.
+    }
   });
 
   testWidgets('Opaque background does not add blur effects', (WidgetTester tester) async {
