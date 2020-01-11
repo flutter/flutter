@@ -42,10 +42,10 @@ class BouncingScrollSimulation extends Simulation {
        assert(leadingExtent <= trailingExtent),
        assert(spring != null),
        super(tolerance: tolerance) {
-    if (position < leadingExtent) {
+    if (velocity <= 0.0 && position < leadingExtent) {
       _springSimulation = _underscrollSimulation(position, velocity);
       _springTime = double.negativeInfinity;
-    } else if (position > trailingExtent) {
+    } else if (velocity >= 0.0 && position > trailingExtent) {
       _springSimulation = _overscrollSimulation(position, velocity);
       _springTime = double.negativeInfinity;
     } else {
@@ -76,12 +76,14 @@ class BouncingScrollSimulation extends Simulation {
   /// scroll into overscroll.
   static const double maxSpringTransferVelocity = 5000.0;
 
-  /// When [x] falls below this value the simulation switches from an internal friction
-  /// model to a spring model which causes [x] to "spring" back to [leadingExtent].
+  /// When [x] falls below this value and the [velocity] is smaller than 0.0 the 
+  /// simulation switches from an internal friction model to a spring model which 
+  /// causes [x] to "spring" back to [leadingExtent].
   final double leadingExtent;
 
-  /// When [x] exceeds this value the simulation switches from an internal friction
-  /// model to a spring model which causes [x] to "spring" back to [trailingExtent].
+  /// When [x] exceeds this value and the [velocity] is bigger than 0.0 the
+  /// simulation switches from an internal friction model to a spring model which
+  /// causes [x] to "spring" back to [trailingExtent].
   final double trailingExtent;
 
   /// The spring used used to return [x] to either [leadingExtent] or [trailingExtent].
