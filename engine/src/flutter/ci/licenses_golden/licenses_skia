@@ -1,4 +1,4 @@
-Signature: 5e802e5dc4bb228172f9e382590a9cc4
+Signature: 2a42c11ed4709993536100032505c6eb
 
 UNUSED LICENSES:
 
@@ -5366,8 +5366,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ====================================================================================================
 LIBRARY: skia
-ORIGIN: ../../../third_party/skia/gm/bicubic.cpp + ../../../third_party/skia/LICENSE
+ORIGIN: ../../../third_party/skia/gm/3d.cpp + ../../../third_party/skia/LICENSE
 TYPE: LicenseType.bsd
+FILE: ../../../third_party/skia/gm/3d.cpp
 FILE: ../../../third_party/skia/gm/bicubic.cpp
 FILE: ../../../third_party/skia/gm/strokerect_anisotropic.cpp
 FILE: ../../../third_party/skia/include/private/SkM44.h
