@@ -212,6 +212,77 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('showOnScreen works with pinned app bar and individual slivers, when custom titleHeight given', (WidgetTester tester) async {
+    semantics = SemanticsTester(tester); // enables semantics tree generation
+
+    const double kItemHeight = 100.0;
+    const double kExpandedAppBarHeight = 256.0;
+
+
+    final List<Widget> children = <Widget>[];
+    final List<Widget> slivers = List<Widget>.generate(30, (int i) {
+      final Widget child = MergeSemantics(
+        child: Container(
+          child: Text('Item $i'),
+          height: 72.0,
+        ),
+      );
+      children.add(child);
+      return SliverToBoxAdapter(
+        child: child,
+      );
+    });
+
+    final ScrollController scrollController = ScrollController(
+      initialScrollOffset: 2.5 * kItemHeight,
+    );
+
+    const double customTitleHeight = 128.0;
+
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: MediaQuery(
+        data: const MediaQueryData(),
+        child: Localizations(
+          locale: const Locale('en', 'us'),
+          delegates: const <LocalizationsDelegate<dynamic>>[
+            DefaultWidgetsLocalizations.delegate,
+            DefaultMaterialLocalizations.delegate,
+          ],
+          child: Scrollable(
+            controller: scrollController,
+            viewportBuilder: (BuildContext context, ViewportOffset offset) {
+              return Viewport(
+                offset: offset,
+                slivers: <Widget>[
+                  const SliverAppBar(
+                    titleHeight: customTitleHeight,
+                    pinned: true,
+                    expandedHeight: kExpandedAppBarHeight,
+                    flexibleSpace: FlexibleSpaceBar(
+                      title: Text('App Bar'),
+                    ),
+                  ),
+                  ...slivers,
+                ],
+              );
+            },
+          ),
+        ),
+      ),
+    ));
+
+    expect(scrollController.offset, 2.5 * kItemHeight);
+
+    final int id0 = tester.renderObject(find.byWidget(children[0])).debugSemantics.id;
+    tester.binding.pipelineOwner.semanticsOwner.performAction(id0, SemanticsAction.showOnScreen);
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 5));
+    expect(tester.getTopLeft(find.byWidget(children[0])).dy, customTitleHeight);
+
+    semantics.dispose();
+  });
+
   testWidgets('correct scrollProgress', (WidgetTester tester) async {
     semantics = SemanticsTester(tester);
 
