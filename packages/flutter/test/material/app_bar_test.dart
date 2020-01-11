@@ -994,6 +994,29 @@ void main() {
     expect(find.byIcon(Icons.menu), findsNothing);
   });
 
+  testWidgets('AppBar sizes according to titleHeight', (WidgetTester tester) async {
+    final GlobalKey key = GlobalKey();
+    const double customTitleHeight = 128.0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Center(
+          child: AppBar(
+            leading: Placeholder(key: key),
+            title: const Text('Abc'),
+            titleHeight: customTitleHeight,
+            actions: const <Widget>[
+              Placeholder(fallbackWidth: 10.0),
+              Placeholder(fallbackWidth: 10.0),
+              Placeholder(fallbackWidth: 10.0),
+            ],
+          ),
+        ),
+      ),
+    );
+    expect(tester.renderObject<RenderBox>(find.byKey(key)).localToGlobal(Offset.zero), const Offset(0.0, 0.0));
+    expect(tester.renderObject<RenderBox>(find.byKey(key)).size, const Size(56.0, customTitleHeight));
+  });
+
   testWidgets('AppBar handles loose children 0', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
     await tester.pumpWidget(

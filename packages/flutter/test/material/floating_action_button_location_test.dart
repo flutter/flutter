@@ -316,6 +316,28 @@ void main() {
     expect(tester.getCenter(find.byType(FloatingActionButton)).dy, kToolbarHeight);
   }, skip: isBrowser);
 
+  testWidgets('Mini-start-top floating action button location, with custom titleHeight', (WidgetTester tester) async {
+    const double customTitleHeight = 128.0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          appBar: AppBar(titleHeight: customTitleHeight),
+          floatingActionButton: FloatingActionButton(onPressed: () { }, mini: true),
+          floatingActionButtonLocation: FloatingActionButtonLocation.miniStartTop,
+          body: Column(
+            children: const <Widget>[
+              ListTile(
+                leading: CircleAvatar(),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+    expect(tester.getCenter(find.byType(FloatingActionButton)).dx, tester.getCenter(find.byType(CircleAvatar)).dx);
+    expect(tester.getCenter(find.byType(FloatingActionButton)).dy, customTitleHeight);
+  }, skip: isBrowser);
+
   testWidgets('Start-top floating action button location LTR', (WidgetTester tester) async {
     await tester.pumpWidget(
       MaterialApp(
