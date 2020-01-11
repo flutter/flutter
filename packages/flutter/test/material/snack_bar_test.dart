@@ -561,17 +561,25 @@ void main() {
       ),
     ));
 
-    final Offset floatingActionButtonOriginBottomCenter = tester.getCenter(find.byType(FloatingActionButton));
+    // Get the Rect of the FAB to compare after the SnackBar appears.
+    final Rect originalFabRect = tester.getRect(find.byType(FloatingActionButton));
 
     await tester.tap(find.text('X'));
     await tester.pump(); // start animation
     await tester.pump(const Duration(milliseconds: 750)); // Animation last frame.
 
-    final Offset snackBarTopCenter = tester.getCenter(find.byType(SnackBar));
-    final Offset floatingActionButtonBottomCenter = tester.getCenter(find.byType(FloatingActionButton));
+    final Rect fabRect = tester.getRect(find.byType(FloatingActionButton));
 
-    expect(floatingActionButtonOriginBottomCenter.dy > floatingActionButtonBottomCenter.dy, true);
-    expect(snackBarTopCenter.dy > floatingActionButtonBottomCenter.dy, true);
+    // FAB should shift upwards after SnackBar appears.
+    expect(fabRect.center.dy, lessThan(originalFabRect.center.dy));
+
+    final Offset snackBarTopRight = tester.getTopRight(find.byType(SnackBar));
+
+    // FAB's surrounding padding is set to [kFloatingActionButtonMargin] in floating_action_button_location.dart by default.
+    const int defaultFabPadding = 16;
+
+    // FAB should be positioned above the SnackBar by the default padding.
+    expect(fabRect.bottomRight.dy, snackBarTopRight.dy - defaultFabPadding);
   });
 
   testWidgets('Floating SnackBar button text alignment', (WidgetTester tester) async {
