@@ -249,7 +249,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Size get preferredSize => _isBarCompact ? const Size.fromHeight(_kTabBarCompactHeight) : const Size.fromHeight(_kTabBarHeight);
 
-  bool get _isBarCompact => window.physicalSize.height < 800;
+  bool get _isBarCompact => barLayoutMode != CupertinoTabBarLayoutMode.regular && window.physicalSize.height < 800;
 
   /// Indicates whether the tab bar is fully opaque or can have contents behind
   /// it show through it.
@@ -286,9 +286,40 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
 
     final Color inactive = CupertinoDynamicColor.resolve(inactiveColor, context);
 
-    // TODO: allow dynamic resizing
-    final bool isIconCompact = (CupertinoSizeClassHelper.getWidthSizeClass(context) == CupertinoSizeClass.compact) && (CupertinoSizeClassHelper.getHeightSizeClass(context) == CupertinoSizeClass.compact);
-    final bool isItemVertical = (CupertinoSizeClassHelper.getWidthSizeClass(context) == CupertinoSizeClass.compact) && (CupertinoSizeClassHelper.getHeightSizeClass(context) == CupertinoSizeClass.regular);
+    bool isIconCompact, isItemVertical;
+
+    // Applies the manual layout types, if specified
+    switch(barLayoutMode) {
+      case CupertinoTabBarLayoutMode.compact:
+        isIconCompact = true; break;
+      case CupertinoTabBarLayoutMode.regular:
+        isIconCompact = false; break;
+    }
+
+    switch(itemLayoutMode) {
+      case CupertinoTabBarItemLayoutMode.vertical:
+        isItemVertical = true; break;
+      case CupertinoTabBarItemLayoutMode.horizontal:
+        isItemVertical = false; break;
+    }
+
+    // Automatically determines the layouts of the tab bar and its items based on the context view's size classes
+    if(CupertinoSizeClassHelper.getWidthSizeClass(context) == CupertinoSizeClass.compact) {
+      switch(CupertinoSizeClassHelper.getHeightSizeClass(context)) {
+        case CupertinoSizeClass.compact:
+          isIconCompact ??= true;
+          isItemVertical ??= false;
+          break;
+
+        case CupertinoSizeClass.regular:
+          isIconCompact ??= false;
+          isItemVertical ??= true;
+          break;
+      }
+    } else {
+      isIconCompact ??= false;
+      isItemVertical ??= false;
+    }
 
     Widget result = DecoratedBox(
       decoration: BoxDecoration(
@@ -383,7 +414,7 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
 
   Widget _buildSingleWideTabItem(BottomNavigationBarItem item, bool active) {
     final List<Widget> components = <Widget>[
-      active ? item.activeIcon : item.icon,
+      if (active) item.activeIcon else item.icon,
     ];
 
     if (item.title != null) {
