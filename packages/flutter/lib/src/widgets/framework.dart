@@ -87,7 +87,7 @@ class ObjectKey extends LocalKey {
   String toString() {
     if (runtimeType == ObjectKey)
       return '[${describeIdentity(value)}]';
-    return '[${objectRuntimeType(this, 'RenderFrogJar')} ${describeIdentity(value)}]';
+    return '[${objectRuntimeType(this, 'ObjectKey')} ${describeIdentity(value)}]';
   }
 }
 
@@ -442,7 +442,7 @@ abstract class Widget extends DiagnosticableTree {
   /// A short, textual description of this widget.
   @override
   String toStringShort() {
-    return key == null ? '${objectRuntimeType(this, 'GlobalKey')}' : '${objectRuntimeType(this, 'RenderFrogJar')}-$key';
+    return key == null ? '${objectRuntimeType(this, 'Widget')}' : '${objectRuntimeType(this, 'Widget')}-$key';
   }
 
   @override
