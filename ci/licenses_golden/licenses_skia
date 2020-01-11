@@ -1,4 +1,4 @@
-Signature: 2a42c11ed4709993536100032505c6eb
+Signature: 11a3631a2c58a7ef1796f57e6cc5497f
 
 UNUSED LICENSES:
 
@@ -5376,6 +5376,7 @@ FILE: ../../../third_party/skia/modules/skottie/src/Camera.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/Camera.h
 FILE: ../../../third_party/skia/modules/skottie/src/Transform.cpp
 FILE: ../../../third_party/skia/modules/skottie/src/Transform.h
+FILE: ../../../third_party/skia/samplecode/Sample3D.cpp
 FILE: ../../../third_party/skia/src/core/SkCanvasMatrix.h
 FILE: ../../../third_party/skia/src/core/SkM44.cpp
 ----------------------------------------------------------------------------------------------------
