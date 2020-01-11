@@ -424,21 +424,22 @@ class CupertinoTabBar extends StatelessWidget implements PreferredSizeWidget {
   /// parameters overridden.
   CupertinoTabBar copyWith({
     Key key,
+    CupertinoTabBarLayoutMode barLayoutMode,
+    CupertinoTabBarItemLayoutMode itemLayoutMode,
     List<BottomNavigationBarItem> items,
     Color backgroundColor,
     Color activeColor,
     Color inactiveColor,
     Size iconSize,
-    Size wideIconSize,
     Size compactIconSize,
-    bool isWide,
-    bool isCompact,
     Border border,
     int currentIndex,
     ValueChanged<int> onTap,
   }) {
     return CupertinoTabBar(
       key: key ?? this.key,
+      barLayoutMode: barLayoutMode ?? this.barLayoutMode,
+      itemLayoutMode: itemLayoutMode ?? this.itemLayoutMode,
       items: items ?? this.items,
       backgroundColor: backgroundColor ?? this.backgroundColor,
       activeColor: activeColor ?? this.activeColor,
