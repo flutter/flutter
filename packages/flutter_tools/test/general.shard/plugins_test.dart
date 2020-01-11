@@ -12,7 +12,6 @@ import 'package:flutter_tools/src/project.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 
-import '../commands.shard/hermetic/drive_test.dart';
 import '../src/common.dart';
 import '../src/context.dart';
 
@@ -703,6 +702,7 @@ dependencies:
       testUsingContext('Registrant for web doesn\'t escape slashes in imports', () async {
         when(flutterProject.isModule).thenReturn(true);
         when(featureFlags.isWebEnabled).thenReturn(true);
+        when(webProject.existsSync()).thenReturn(true);
 
         final Directory webPluginWithNestedFile =
             fs.systemTempDirectory.createTempSync('web_plugin_with_nested');
