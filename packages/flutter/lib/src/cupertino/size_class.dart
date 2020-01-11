@@ -4,6 +4,8 @@
 
 import 'package:flutter/widgets.dart';
 
+// TODO(keberjg): reconsider the usage of Size Classes
+
 /// An enumerator denoting iOS' size classes describing the height and width of a view 
 /// (source: https://developer.apple.com/design/human-interface-guidelines/ios/visual-design/adaptivity-and-layout/)
 enum CupertinoSizeClass {
