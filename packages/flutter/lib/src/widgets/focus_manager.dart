@@ -518,7 +518,8 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
     return _descendants;
   }
 
-  /// Returns all descendants which do not have the [skipTraversal] flag set.
+  /// Returns all descendants which do not have the [skipTraversal] and do have
+  /// the [canRequestFocus] flag set.
   Iterable<FocusNode> get traversalDescendants => descendants.where((FocusNode node) => !node.skipTraversal && node.canRequestFocus);
 
   /// An [Iterable] over the ancestors of this node.

@@ -428,6 +428,33 @@ void main() {
     expect(focusNode.hasPrimaryFocus, isFalse);
   });
 
+  testWidgets('IconButton shows focus highlight.', (WidgetTester tester) async {
+    final FocusNode focusNode = FocusNode(debugLabel: 'IconButton');
+    const Color focusColor = Color(0xfff44336);
+    await tester.pumpWidget(
+      wrap(
+        child: IconButton(
+          focusColor: focusColor,
+          focusNode: focusNode,
+          autofocus: true,
+          onPressed: () {},
+          icon: const Icon(Icons.link),
+        ),
+      ),
+    );
+
+    FocusManager.instance.highlightStrategy = FocusHighlightStrategy.alwaysTraditional;
+    await tester.pump();
+    expect(focusNode.hasPrimaryFocus, isTrue);
+
+    focusNode.requestFocus();
+    await tester.pumpAndSettle();
+
+    final RenderObject inkFeatures = tester.allRenderObjects.firstWhere((RenderObject object) => object.runtimeType.toString() == '_RenderInkFeatures');
+    expect(inkFeatures, paints..circle(color: focusColor));
+  });
+
+
   testWidgets("Disabled IconButton can't be traversed to when disabled.", (WidgetTester tester) async {
     final FocusNode focusNode1 = FocusNode(debugLabel: 'IconButton 1');
     final FocusNode focusNode2 = FocusNode(debugLabel: 'IconButton 2');
