@@ -364,6 +364,8 @@ void main() {
 
     residentRunner.printHelp(details: true);
 
+    final CommandHelp commandHelp = residentRunner.commandHelp;
+
     // supports service protocol
     expect(residentRunner.supportsServiceProtocol, true);
     // isRunningDebug
@@ -372,23 +374,23 @@ void main() {
     expect(testLogger.statusText, equals(
         <dynamic>[
           'Flutter run key commands.',
-          CommandHelp.r,
-          CommandHelp.R,
-          CommandHelp.h,
-          CommandHelp.q,
-          CommandHelp.s,
-          CommandHelp.w,
-          CommandHelp.t,
-          CommandHelp.L,
-          CommandHelp.S,
-          CommandHelp.U,
-          CommandHelp.i,
-          CommandHelp.p,
-          CommandHelp.o,
-          CommandHelp.z,
-          CommandHelp.P,
-          CommandHelp.a,
-          CommandHelp.s,
+          commandHelp.r,
+          commandHelp.R,
+          commandHelp.h,
+          commandHelp.q,
+          commandHelp.s,
+          commandHelp.w,
+          commandHelp.t,
+          commandHelp.L,
+          commandHelp.S,
+          commandHelp.U,
+          commandHelp.i,
+          commandHelp.p,
+          commandHelp.o,
+          commandHelp.z,
+          commandHelp.P,
+          commandHelp.a,
+          commandHelp.s,
           'An Observatory debugger and profiler on null is available at: null',
           ''
         ].join('\n')
