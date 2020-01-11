@@ -254,12 +254,11 @@ void main() {
     expect(image.image, activeIcon);
   });
 
-  const MediaQueryData mockIPhone8LandscapeMediaQueryData = MediaQueryData(
-    size: Size(1334, 750),
-    devicePixelRatio: 2
-  );
-
   testWidgets('Sets correct layout modes in landscape on iPhone pre-10 non-Plus models', (WidgetTester tester) async {
+    // Mock a landscape iPhone 8
+    tester.binding.window.physicalSizeTestValue = const Size(1334, 750);
+    tester.binding.window.devicePixelRatioTestValue = 2;
+
     final CupertinoTabBar tabBar = CupertinoTabBar(
       items: const <BottomNavigationBarItem>[
         BottomNavigationBarItem(
@@ -274,7 +273,7 @@ void main() {
     );
 
     await pumpWidgetWithBoilerplate(tester, MediaQuery(
-      data: mockIPhone8LandscapeMediaQueryData,
+      data: const MediaQueryData(),
       child: CupertinoTabScaffold(
         tabBar: tabBar,
         tabBuilder: (BuildContext context, int index) {
@@ -285,6 +284,9 @@ void main() {
 
     // Expect the tab bar to be compact
     expect(tester.getSize(find.byType(CupertinoTabBar)).height, 32.0);
+
+    tester.binding.window.physicalSizeTestValue = null;
+    tester.binding.window.devicePixelRatioTestValue = null;
   });
 
   testWidgets('Adjusts height to account for bottom padding', (WidgetTester tester) async {
