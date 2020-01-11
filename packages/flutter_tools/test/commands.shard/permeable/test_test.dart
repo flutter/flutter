@@ -96,6 +96,27 @@ void main() {
     expect(result.exitCode, 0);
   });
 
+
+  testUsingContext('flutter test should run a test with given tag', () async {
+    Cache.flutterRoot = '../..';
+    final ProcessResult result = await _runFlutterTest('filtering_tag', automatedTestsDirectory, flutterTestDirectory,
+        extraArguments: const <String>['--tags', 'good-tag']);
+    if (!(result.stdout as String).contains('+1: All tests passed')) {
+      fail('unexpected output from test:\n\n${result.stdout}\n-- end stdout --\n\n');
+    }
+    expect(result.exitCode, 0);
+  });
+
+  testUsingContext('flutter test should run a test when its name contains a string', () async {
+    Cache.flutterRoot = '../..';
+    final ProcessResult result = await _runFlutterTest('filtering_tag', automatedTestsDirectory, flutterTestDirectory,
+        extraArguments: const <String>['--exclude-tags', 'bad-tag']);
+    if (!(result.stdout as String).contains('+1: All tests passed')) {
+      fail('unexpected output from test:\n\n${result.stdout}\n-- end stdout --\n\n');
+    }
+    expect(result.exitCode, 0);
+  });
+
   testUsingContext('flutter test should test runs to completion', () async {
     Cache.flutterRoot = '../..';
     final ProcessResult result = await _runFlutterTest('trivial', automatedTestsDirectory, flutterTestDirectory,

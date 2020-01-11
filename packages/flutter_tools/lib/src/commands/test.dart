@@ -44,10 +44,12 @@ class TestCommand extends FastFlutterCommand {
       )
       ..addOption('tags',
         abbr: 't',
+        defaultsTo: '',
         help: 'Run only tests associated with tags',
       )
       ..addOption('exclude-tags',
         abbr: 'x',
+        defaultsTo: '',
         help: 'Run only tests WITHOUT given tags',
       )
       ..addFlag('start-paused',
