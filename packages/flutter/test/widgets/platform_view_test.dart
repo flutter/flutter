@@ -1603,6 +1603,48 @@ void main() {
       expect(viewsController.gesturesAccepted[currentViewId + 1], 0);
     });
 
+    testWidgets('UiKitView rejects gestures absorbed by siblings if the touch is outside of the platform view bounds but inside platform view frame', (WidgetTester tester) async {
+      // UiKitView is positioned at (left=0, top=100, right=300, bottom=600).
+      // Opaque container is on top of the UiKitView positioned at (left=0, top=500, right=300, bottom=600).
+      // Touch on (550, 150) is expected to be absorbed by the container.
+      final int currentViewId = platformViewsRegistry.getNextPlatformViewId();
+      final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
+      viewsController.registerViewType('webview');
+
+      await tester.pumpWidget(
+        Container(width: 300, height: 600,
+          child: Stack(
+            alignment: Alignment.topLeft,
+            children: <Widget>[
+              Transform.translate(
+                offset: const Offset(0, 100),
+                child: Container(
+                  width: 300,
+                  height: 500,
+                  child: const UiKitView(viewType: 'webview', layoutDirection: TextDirection.ltr)),),
+              Transform.translate(
+                offset: const Offset(0, 500),
+                child: Container(
+                  color: const Color.fromARGB(255, 255, 255, 255),
+                  width: 300,
+                  height: 100,
+              ),),
+            ],
+          ),
+        ),
+      );
+
+      // First frame is before the platform view was created so the render object
+      // is not yet in the tree.
+      await tester.pump();
+
+      final TestGesture gesture = await tester.startGesture(const Offset(150, 550));
+      await gesture.up();
+
+      expect(viewsController.gesturesRejected[currentViewId + 1], 1);
+      expect(viewsController.gesturesAccepted[currentViewId + 1], 0);
+    });
+
     testWidgets('AndroidView rebuilt with same gestureRecognizers', (WidgetTester tester) async {
       final FakeIosPlatformViewsController viewsController = FakeIosPlatformViewsController();
       viewsController.registerViewType('webview');
