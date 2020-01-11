@@ -2,8 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:async';
 import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
@@ -163,5 +165,34 @@ void main() {
       '   callback is asynchronous, then do not use the "rescheduling"\n'
       '   argument.\n'
     );
+  });
+
+  testWidgets('defaultStackFilter elides framework Element mounting stacks', (WidgetTester tester) async {
+    final FlutterExceptionHandler oldHandler = FlutterError.onError;
+    String filteredStack;
+    FlutterError.onError = (FlutterErrorDetails details) {
+      expect(details.exception, isAssertionError);
+      expect(filteredStack, null);
+      filteredStack = details.toString();
+    };
+    await tester.pumpWidget(Directionality(
+      textDirection: TextDirection.ltr,
+      child: FocusableActionDetector(
+        child: Builder(
+          builder: (BuildContext context) {
+            return Opacity(
+              opacity: .5,
+              child: Builder(
+                builder: (BuildContext context) => Text(null),
+              ),
+            );
+          },
+        ),
+      ),
+    ));
+    // We don't elide the root or the last element.
+    expect(tester.allElements.length, 10);
+    expect(filteredStack, contains('...     Normal mounting of 8 elements (43 frames).'));
+    FlutterError.onError = oldHandler;
   });
 }
