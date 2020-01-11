@@ -95,14 +95,6 @@ int _kDefaultSemanticIndexCallback(Widget _, int localIndex) => localIndex;
 ///    [AutomaticKeepAlive] allows descendant widgets to control whether the 
 ///    subtree is actually kept alive or not. This behavior is in contrast with
 ///    [KeepAlive], which will unconditionally keep the subtree alive.
-
-///  * Using [AutomaticKeepAlive] widgets (inserted by default when
-///    [addAutomaticKeepAlives] is true). [AutomaticKeepAlive] allows descendant
-///    widgets to control whether the subtree is actually kept alive or not.
-///    This behavior is in contrast with [KeepAlive], which will unconditionally keep
-///    the subtree alive.
-
-
 ///
 ///    As an example, the [EditableText] widget signals its sliver child element
 ///    subtree to stay alive while its text field has input focus. If it doesn't
