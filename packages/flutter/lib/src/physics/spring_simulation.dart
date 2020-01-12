@@ -228,12 +228,18 @@ class _OverdampedSolution implements _SpringSolution {
 
   @override
   double x(double time) {
+    if (time > 0.3) {
+      time = 0.1 * (math.pow(1e9, (time - 0.3)) - 1) + 0.3;
+    }
     return _c1 * math.pow(math.e, _r1 * time) +
            _c2 * math.pow(math.e, _r2 * time);
   }
 
   @override
   double dx(double time) {
+    if (time > 0.3) {
+      time = 0.1 * (math.pow(1e9, (time - 0.3)) - 1) + 0.3;
+    }
     return _c1 * _r1 * math.pow(math.e, _r1 * time) +
            _c2 * _r2 * math.pow(math.e, _r2 * time);
   }
