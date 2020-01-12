@@ -692,54 +692,6 @@ void main() {
     skip: isBrowser,
   );
 
-  testWidgets('Floating SnackBar is positioned above FloatingActionButton', (WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
-      theme: ThemeData(
-        snackBarTheme: const SnackBarThemeData(behavior: SnackBarBehavior.floating,)
-      ),
-      home: MediaQuery(
-        data: const MediaQueryData(
-          padding: EdgeInsets.only(
-            left: 10.0,
-            top: 20.0,
-            right: 30.0,
-            bottom: 40.0,
-          ),
-        ),
-        child: Scaffold(
-          floatingActionButton: FloatingActionButton(
-            child: const Icon(Icons.send),
-            onPressed: () {},
-          ),
-          body: Builder(
-            builder: (BuildContext context) {
-              return GestureDetector(
-                onTap: () {
-                  Scaffold.of(context).showSnackBar(SnackBar(
-                    content: const Text('I am a snack bar.'),
-                    duration: const Duration(seconds: 2),
-                    action: SnackBarAction(label: 'ACTION', onPressed: () {}),
-                  ));
-                },
-                child: const Text('X'),
-              );
-            }
-          ),
-        ),
-      ),
-    ));
-    await tester.tap(find.text('X'));
-    await tester.pump(); // start animation
-    await tester.pump(const Duration(milliseconds: 750)); // Animation last frame.
-
-    final Offset snackBarBottomCenter = tester.getBottomLeft(find.byType(SnackBar));
-    final Offset floatingActionButtonTopCenter = tester.getTopLeft(find.byType(FloatingActionButton));
-
-    // Since padding and margin is handled inside snackBarBox,
-    // the bottom offset of snackbar should equal with top offset of FAB
-    expect(snackBarBottomCenter.dy == floatingActionButtonTopCenter.dy, true);
-  });
-
   testWidgets('SnackBar bottom padding is not consumed by viewInsets', (WidgetTester tester) async {
     final Widget child = Directionality(
       textDirection: TextDirection.ltr,
@@ -1263,6 +1215,47 @@ void main() {
         final Offset scaffoldBottomLeft = tester.getBottomLeft(find.byType(Scaffold));
 
         expect(snackBarBottomLeft, equals(scaffoldBottomLeft));
+      },
+    );
+
+    testWidgets(
+      '${SnackBarBehavior.floating} should align SnackBar with the top of FloatingActionButton'
+      'when Scaffold has a FloatingActionButton',
+      (WidgetTester tester) async {
+        await tester.pumpWidget(MaterialApp(
+          home: Scaffold(
+            floatingActionButton: FloatingActionButton(
+              child: const Icon(Icons.send),
+              onPressed: () {},
+            ),
+            body: Builder(
+              builder: (BuildContext context) {
+                return GestureDetector(
+                  onTap: () {
+                    Scaffold.of(context).showSnackBar(SnackBar(
+                      content: const Text('I am a snack bar.'),
+                      duration: const Duration(seconds: 2),
+                      action: SnackBarAction(label: 'ACTION', onPressed: () {}),
+                      behavior: SnackBarBehavior.floating,
+                    ));
+                  },
+                  child: const Text('X'),
+                );
+              },
+            ),
+          ),
+        ));
+        await tester.tap(find.text('X'));
+        await tester.pumpAndSettle(); // Have the SnackBar fully animate out.
+
+        final Offset snackBarBottomLeft = tester.getBottomLeft(find.byType(SnackBar));
+        final Offset floatingActionButtonTopLeft = tester.getTopLeft(
+          find.byType(FloatingActionButton),
+        );
+
+        // Since padding between the SnackBar and the FAB is created by the SnackBar,
+        // the bottom offset of the SnackBar should be equal to the top offset of the FAB
+        expect(snackBarBottomLeft.dy, floatingActionButtonTopLeft.dy);
       },
     );
 
