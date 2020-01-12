@@ -692,61 +692,6 @@ void main() {
     skip: isBrowser,
   );
 
-  testWidgets('SnackBar bottom padding is not consumed by viewInsets', (WidgetTester tester) async {
-    final Widget child = Directionality(
-      textDirection: TextDirection.ltr,
-      child: Scaffold(
-      resizeToAvoidBottomInset: false,
-      floatingActionButton: FloatingActionButton(
-        child: const Icon(Icons.send),
-        onPressed: () {},
-      ),
-      body: Builder(
-        builder: (BuildContext context) {
-          return GestureDetector(
-            onTap: () {
-              Scaffold.of(context).showSnackBar(
-                SnackBar(
-                  content: const Text('I am a snack bar.'),
-                  duration: const Duration(seconds: 2),
-                  action: SnackBarAction(label: 'ACTION', onPressed: () {}),
-                ),
-              );
-            },
-            child: const Text('X'),
-          );
-        }
-      ),
-    ));
-
-    await tester.pumpWidget(
-      MediaQuery(
-        data: const MediaQueryData(
-          padding: EdgeInsets.only(bottom: 20.0),
-        ),
-        child: child,
-      ),
-    );
-    await tester.tap(find.text('X'));
-    await tester.pumpAndSettle(); // Show snackbar
-    final Offset initialPoint = tester.getCenter(find.byType(SnackBar));
-    // Consume bottom padding - as if by the keyboard opening
-    await tester.pumpWidget(
-      MediaQuery(
-        data: const MediaQueryData(
-          padding: EdgeInsets.zero,
-          viewPadding: EdgeInsets.only(bottom: 20),
-          viewInsets: EdgeInsets.only(bottom: 300),
-        ),
-        child: child,
-      ),
-    );
-    await tester.tap(find.text('X'));
-    await tester.pumpAndSettle();
-    final Offset finalPoint = tester.getCenter(find.byType(SnackBar));
-    expect(initialPoint, finalPoint);
-  });
-
   testWidgets('SnackBarClosedReason', (WidgetTester tester) async {
     final GlobalKey<ScaffoldState> scaffoldKey = GlobalKey<ScaffoldState>();
     bool actionPressed = false;
@@ -1179,6 +1124,71 @@ void main() {
           final Offset bottomNavigationBarTopLeft = tester.getTopLeft(find.byKey(boxKey));
 
           expect(snackBarBottomLeft, equals(bottomNavigationBarTopLeft));
+        },
+      );
+
+      testWidgets(
+        'Padding of $behavior is not consumed by viewInsets',
+        (WidgetTester tester) async {
+          final Widget child = Directionality(
+            textDirection: TextDirection.ltr,
+            child: Scaffold(
+              resizeToAvoidBottomInset: false,
+              floatingActionButton: FloatingActionButton(
+                child: const Icon(Icons.send),
+                onPressed: () {},
+              ),
+              body: Builder(
+                builder: (BuildContext context) {
+                  return GestureDetector(
+                    onTap: () {
+                      Scaffold.of(context).showSnackBar(
+                        SnackBar(
+                          content: const Text('I am a snack bar.'),
+                          duration: const Duration(seconds: 2),
+                          action: SnackBarAction(label: 'ACTION', onPressed: () {}),
+                          behavior: behavior,
+                        ),
+                      );
+                    },
+                    child: const Text('X'),
+                  );
+                },
+              ),
+            ),
+          );
+
+          await tester.pumpWidget(
+            MediaQuery(
+              data: const MediaQueryData(
+                padding: EdgeInsets.only(bottom: 20.0),
+              ),
+              child: child,
+            ),
+          );
+          await tester.tap(find.text('X'));
+          await tester.pumpAndSettle(); // Show snackbar
+          final Offset initialBottomLeft = tester.getBottomLeft(find.byType(SnackBar));
+          final Offset initialBottomRight = tester.getBottomRight(find.byType(SnackBar));
+          // Consume bottom padding - as if by the keyboard opening
+          await tester.pumpWidget(
+            MediaQuery(
+              data: const MediaQueryData(
+                padding: EdgeInsets.zero,
+                viewPadding: EdgeInsets.all(20),
+                viewInsets: EdgeInsets.all(100),
+              ),
+              child: child,
+            ),
+          );
+          await tester.tap(find.text('X'));
+          await tester.pumpAndSettle(); // Have the SnackBar fully animate out.
+
+          final Offset finalBottomLeft = tester.getBottomLeft(find.byType(SnackBar));
+          final Offset finalBottomRight = tester.getBottomRight(find.byType(SnackBar));
+
+          expect(initialBottomLeft, finalBottomLeft);
+          expect(initialBottomRight, finalBottomRight);
         },
       );
     }
