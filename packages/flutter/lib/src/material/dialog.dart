@@ -161,7 +161,7 @@ class Dialog extends StatelessWidget {
 ///
 /// {@animation 350 622 https://flutter.github.io/assets-for-api-docs/assets/material/alert_dialog.mp4}
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This snippet shows a method in a [State] which, when called, displays a dialog box
 /// and returns a [Future] that completes when the dialog is dismissed.
@@ -301,7 +301,7 @@ class AlertDialog extends StatelessWidget {
   /// [buttonPadding] may contribute to the padding on the edges of [actions] as
   /// well.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   /// This is an example of a set of actions aligned with the content widget.
   /// ```dart
   /// AlertDialog(
@@ -488,7 +488,7 @@ class AlertDialog extends StatelessWidget {
 /// title and the first option, and 24 pixels of spacing between the last option
 /// and the bottom of the dialog.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// ```dart
 /// SimpleDialogOption(
@@ -555,7 +555,7 @@ class SimpleDialogOption extends StatelessWidget {
 ///
 /// {@animation 350 622 https://flutter.github.io/assets-for-api-docs/assets/material/simple_dialog.mp4}
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// In this example, the user is asked to select between two options. These
 /// options are represented as an enum. The [showDialog] method here returns

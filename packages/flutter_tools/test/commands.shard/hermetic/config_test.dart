@@ -200,6 +200,18 @@ void main() {
       final ConfigCommand configCommand = ConfigCommand();
       final CommandRunner<void> commandRunner = createTestCommandRunner(configCommand);
 
+      when(mockUsage.sendEvent(
+        captureAny,
+        captureAny,
+        label: captureAnyNamed('label'),
+        value: anyNamed('value'),
+        parameters: anyNamed('parameters'),
+      )).thenAnswer((Invocation invocation) async {
+        expect(mockUsage.enabled, true);
+        expect(invocation.positionalArguments, <String>['analytics', 'enabled']);
+        expect(invocation.namedArguments[#label], 'false');
+      });
+
       await commandRunner.run(<String>[
         'config',
         '--no-analytics',
@@ -219,16 +231,6 @@ void main() {
         any,
         label: anyNamed('label'),
       ));
-
-      expect(verify(mockUsage.sendEvent(
-        captureAny,
-        captureAny,
-        label: captureAnyNamed('label'),
-        value: anyNamed('value'),
-        parameters: anyNamed('parameters'),
-      )).captured,
-        <dynamic>['analytics', 'enabled', 'false'],
-      );
     }, overrides: <Type, Generator>{
       Usage: () => mockUsage,
     });

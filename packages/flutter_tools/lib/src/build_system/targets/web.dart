@@ -28,6 +28,9 @@ const String kHasWebPlugins = 'HasWebPlugins';
 /// Valid values are O1 (lowest, profile default) to O4 (highest, release default).
 const String kDart2jsOptimization = 'Dart2jsOptimization';
 
+/// Whether to disable dynamic generation code to satisfy csp policies.
+const String kCspMode = 'cspMode';
+
 /// Generates an entry point for a web target.
 class WebEntrypointTarget extends Target {
   const WebEntrypointTarget();
@@ -148,6 +151,7 @@ class Dart2JSTarget extends Target {
   @override
   Future<void> build(Environment environment) async {
     final String dart2jsOptimization = environment.defines[kDart2jsOptimization];
+    final bool csp = environment.defines[kCspMode] == 'true';
     final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     final String specPath = globals.fs.path.join(globals.artifacts.getArtifactPath(Artifact.flutterWebSdk), 'libraries.json');
     final String packageFile = FlutterProject.fromDirectory(environment.projectDir).hasBuilders
@@ -172,6 +176,8 @@ class Dart2JSTarget extends Target {
         '-Ddart.vm.profile=true'
       else
         '-Ddart.vm.product=true',
+      if (csp)
+        '--csp',
       for (final String dartDefine in parseDartDefines(environment))
         '-D$dartDefine',
       environment.buildDir.childFile('main.dart').path,
@@ -194,7 +200,7 @@ class Dart2JSTarget extends Target {
   }
 }
 
-/// Unpacks the dart2js compilation to a given output directory
+/// Unpacks the dart2js compilation and resources to a given output directory
 class WebReleaseBundle extends Target {
   const WebReleaseBundle();
 
@@ -210,19 +216,18 @@ class WebReleaseBundle extends Target {
   List<Source> get inputs => const <Source>[
     Source.pattern('{BUILD_DIR}/main.dart.js'),
     Source.pattern('{PROJECT_DIR}/pubspec.yaml'),
-    Source.pattern('{PROJECT_DIR}/web/index.html'),
   ];
 
   @override
   List<Source> get outputs => const <Source>[
     Source.pattern('{OUTPUT_DIR}/main.dart.js'),
-    Source.pattern('{OUTPUT_DIR}/index.html'),
   ];
 
   @override
   List<String> get depfiles => const <String>[
     'dart2js.d',
-    'flutter_assets.d'
+    'flutter_assets.d',
+    'web_resources.d',
   ];
 
   @override
@@ -243,12 +248,31 @@ class WebReleaseBundle extends Target {
     }
     final Directory outputDirectory = environment.outputDir.childDirectory('assets');
     outputDirectory.createSync(recursive: true);
-    environment.projectDir
-      .childDirectory('web')
-      .childFile('index.html')
-      .copySync(globals.fs.path.join(environment.outputDir.path, 'index.html'));
     final Depfile depfile = await copyAssets(environment, environment.outputDir.childDirectory('assets'));
     depfile.writeToFile(environment.buildDir.childFile('flutter_assets.d'));
+
+    final Directory webResources = environment.projectDir
+      .childDirectory('web');
+    final List<File> inputResourceFiles = webResources
+      .listSync(recursive: true)
+      .whereType<File>()
+      .toList();
+
+    // Copy other resource files out of web/ directory.
+    final List<File> outputResourcesFiles = <File>[];
+    for (final File inputFile in inputResourceFiles) {
+      final File outputFile = globals.fs.file(globals.fs.path.join(
+        environment.outputDir.path,
+        globals.fs.path.relative(inputFile.path, from: webResources.path)));
+      if (!outputFile.parent.existsSync()) {
+        outputFile.parent.createSync(recursive: true);
+      }
+      inputFile.copySync(outputFile.path);
+      outputResourcesFiles.add(outputFile);
+    }
+    final Depfile resourceFile = Depfile(inputResourceFiles, outputResourcesFiles);
+    resourceFile.writeToFile(environment.buildDir.childFile('web_resources.d'));
+
   }
 }
 

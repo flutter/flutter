@@ -25,6 +25,7 @@ import 'scroll_position_with_single_context.dart';
 import 'scroll_view.dart';
 import 'scrollable.dart';
 import 'sliver.dart';
+import 'sliver_fill.dart';
 import 'viewport.dart';
 
 /// A controller for [PageView].
@@ -38,7 +39,7 @@ import 'viewport.dart';
 ///
 ///  * [PageView], which is the widget this object controls.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This widget introduces a [MaterialApp], [Scaffold] and [PageView] with two pages
 /// using the default constructor. Both pages contain a [RaisedButton] allowing you
@@ -609,7 +610,7 @@ class PageView extends StatefulWidget {
   /// Creates a scrollable list that works page by page with a custom child
   /// model.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// This [PageView] uses a custom [SliverChildBuilderDelegate] to support child
   /// reordering.

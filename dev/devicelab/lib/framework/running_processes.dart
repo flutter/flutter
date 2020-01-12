@@ -19,10 +19,10 @@ class RunningProcessInfo {
 
   @override
   bool operator ==(Object other) {
-    return other is RunningProcessInfo &&
-        other.pid == pid &&
-        other.commandLine == commandLine &&
-        other.creationDate == creationDate;
+    return other is RunningProcessInfo
+        && other.pid == pid
+        && other.commandLine == commandLine
+        && other.creationDate == creationDate;
   }
 
   @override

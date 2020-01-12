@@ -200,7 +200,7 @@ class AssembleCommand extends FlutterCommand {
       final Depfile depfile = Depfile(result.inputFiles, result.outputFiles);
       depfile.writeToFile(globals.fs.file(depfileFile));
     }
-    return null;
+    return FlutterCommandResult.success();
   }
 }
 

@@ -63,7 +63,8 @@ const Icon _kDefaultDeleteIcon = Icon(Icons.cancel, size: _kDeleteIconSize);
 ///  * <https://material.io/design/components/chips.html>
 abstract class ChipAttributes {
   // This class is intended to be used as an interface, and should not be
-  // extended directly.
+  // extended directly; this constructor prevents instantiation and extension.
+  // ignore: unused_element
   factory ChipAttributes._() => null;
 
   /// The primary content of the chip.
@@ -174,7 +175,8 @@ abstract class ChipAttributes {
 ///  * <https://material.io/design/components/chips.html>
 abstract class DeletableChipAttributes {
   // This class is intended to be used as an interface, and should not be
-  // extended directly.
+  // extended directly; this constructor prevents instantiation and extension.
+  // ignore: unused_element
   factory DeletableChipAttributes._() => null;
 
   /// The icon displayed when [onDeleted] is set.
@@ -190,7 +192,7 @@ abstract class DeletableChipAttributes {
   /// that the user tapped the delete button. In order to delete the chip, you
   /// have to do something similar to the following sample:
   ///
-  /// {@tool snippet --template=stateful_widget_scaffold_center}
+  /// {@tool sample --template=stateful_widget_scaffold_center}
   ///
   /// This sample shows how to use [onDeleted] to remove an entry when the
   /// delete button is tapped.
@@ -275,7 +277,8 @@ abstract class DeletableChipAttributes {
 ///  * <https://material.io/design/components/chips.html>
 abstract class CheckmarkableChipAttributes {
   // This class is intended to be used as an interface, and should not be
-  // extended directly.
+  // extended directly; this constructor prevents instantiation and extension.
+  // ignore: unused_element
   factory CheckmarkableChipAttributes._() => null;
 
   /// Whether or not to show a check mark when [selected] is true.
@@ -309,7 +312,8 @@ abstract class CheckmarkableChipAttributes {
 ///  * <https://material.io/design/components/chips.html>
 abstract class SelectableChipAttributes {
   // This class is intended to be used as an interface, and should not be
-  // extended directly.
+  // extended directly; this constructor prevents instantiation and extension.
+  // ignore: unused_element
   factory SelectableChipAttributes._() => null;
 
   /// Whether or not this chip is selected.
@@ -337,7 +341,7 @@ abstract class SelectableChipAttributes {
   /// The [onSelected] and [TappableChipAttributes.onPressed] callbacks must not
   /// both be specified at the same time.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// A [StatefulWidget] that illustrates use of onSelected in an [InputChip].
   ///
@@ -417,7 +421,8 @@ abstract class SelectableChipAttributes {
 ///  * <https://material.io/design/components/chips.html>
 abstract class DisabledChipAttributes {
   // This class is intended to be used as an interface, and should not be
-  // extended directly.
+  // extended directly; this constructor prevents instantiation and extension.
+  // ignore: unused_element
   factory DisabledChipAttributes._() => null;
 
   /// Whether or not this chip is enabled for input.
@@ -464,7 +469,8 @@ abstract class DisabledChipAttributes {
 ///  * <https://material.io/design/components/chips.html>
 abstract class TappableChipAttributes {
   // This class is intended to be used as an interface, and should not be
-  // extended directly.
+  // extended directly; this constructor prevents instantiation and extension.
+  // ignore: unused_element
   factory TappableChipAttributes._() => null;
 
   /// Called when the user taps the chip.
@@ -473,7 +479,7 @@ abstract class TappableChipAttributes {
   /// taps on the label or avatar parts of the chip. If [onPressed] is null,
   /// then the chip will be disabled.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// ```dart
   /// class Blacksmith extends StatelessWidget {
@@ -519,7 +525,7 @@ abstract class TappableChipAttributes {
 /// [MaterialApp] and [Scaffold]. The [label] and [clipBehavior] arguments must
 /// not be null.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// ```dart
 /// Chip(
@@ -659,7 +665,7 @@ class Chip extends StatelessWidget implements ChipAttributes, DeletableChipAttri
 ///  * In a horizontally scrollable list, like a [ListView] whose
 ///    scrollDirection is [Axis.horizontal].
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// ```dart
 /// InputChip(
@@ -852,7 +858,7 @@ class InputChip extends StatelessWidget
 /// Requires one of its ancestors to be a [Material] widget. The [selected] and
 /// [label] arguments must not be null.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// ```dart
 /// class MyThreeOptions extends StatefulWidget {
@@ -1032,7 +1038,7 @@ class ChoiceChip extends StatelessWidget
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// ```dart
 /// class ActorFilterEntry {
@@ -1257,7 +1263,7 @@ class FilterChip extends StatelessWidget
 ///
 /// Requires one of its ancestors to be a [Material] widget.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// ```dart
 /// ActionChip(
@@ -2174,7 +2180,7 @@ class _ChipRenderTheme {
   final bool canTapBody;
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other)) {
       return true;
     }

@@ -342,7 +342,7 @@ abstract class ScrollView extends StatelessWidget {
 ///
 /// {@animation 400 376 https://flutter.github.io/assets-for-api-docs/assets/widgets/custom_scroll_view.mp4}
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This sample code shows a scroll view that contains a flexible pinned app
 /// bar, a grid, and an infinite list.
@@ -608,7 +608,7 @@ abstract class BoxScrollView extends ScrollView {
 /// extremities to avoid partial obstructions indicated by [MediaQuery]'s
 /// padding. To avoid this behavior, override with a zero [padding] property.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 /// This example uses the default constructor for [ListView] which takes an
 /// explicit [List<Widget>] of children. This [ListView]'s children are made up
 /// of [Container]s with [Text].
@@ -639,7 +639,7 @@ abstract class BoxScrollView extends ScrollView {
 /// ```
 /// {@end-tool}
 ///
-/// {@tool sample}
+/// {@tool snippet}
 /// This example mirrors the previous one, creating the same list using the
 /// [ListView.builder] constructor. Using the [IndexedWidgetBuilder], children
 /// are built lazily and can be infinite in number.
@@ -664,7 +664,7 @@ abstract class BoxScrollView extends ScrollView {
 /// ```
 /// {@end-tool}
 ///
-/// {@tool sample}
+/// {@tool snippet}
 /// This example continues to build from our the previous ones, creating a
 /// similar list using [ListView.separated]. Here, a [Divider] is used as a
 /// separator.
@@ -786,7 +786,7 @@ abstract class BoxScrollView extends ScrollView {
 /// [SliverGrid] or [SliverAppBar], can be put in the [CustomScrollView.slivers]
 /// list.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// Here are two brief snippets showing a [ListView] and its equivalent using
 /// [CustomScrollView]:
@@ -804,7 +804,7 @@ abstract class BoxScrollView extends ScrollView {
 /// )
 /// ```
 /// {@end-tool}
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// ```dart
 /// CustomScrollView(
@@ -989,7 +989,7 @@ class ListView extends BoxScrollView {
   /// advance, or all at once when the [ListView] itself is created, it is more
   /// efficient to use [new ListView].
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// This example shows how to create [ListView] whose [ListTile] list items
   /// are separated by [Divider]s.
@@ -1077,7 +1077,7 @@ class ListView extends BoxScrollView {
   /// For example, a custom child model can control the algorithm used to
   /// estimate the size of children that are not actually visible.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// This [ListView] uses a custom [SliverChildBuilderDelegate] to support child
   /// reordering.
@@ -1290,7 +1290,7 @@ class ListView extends BoxScrollView {
 /// [SliverList] or [SliverAppBar], can be put in the [CustomScrollView.slivers]
 /// list.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 /// This example demonstrates how to create a [GridView] with two columns. The
 /// children are spaced apart using the [crossAxisSpacing] and [mainAxisSpacing]
 /// properties.
@@ -1340,7 +1340,7 @@ class ListView extends BoxScrollView {
 /// ```
 /// {@end-tool}
 ///
-/// {@tool sample}
+/// {@tool snippet}
 /// This example shows how to create the same grid as the previous example
 /// using a [CustomScrollView] and a [SliverGrid].
 ///

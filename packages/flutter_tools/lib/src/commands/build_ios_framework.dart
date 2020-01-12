@@ -204,8 +204,7 @@ class BuildIOSFrameworkCommand extends BuildSubCommand {
     }
 
     globals.printStatus('Frameworks written to ${outputDirectory.path}.');
-
-    return null;
+    return FlutterCommandResult.success();
   }
 
   /// Create podspec that will download and unzip remote engine assets so host apps can leverage CocoaPods

@@ -9,11 +9,13 @@ import 'package:meta/meta.dart';
 import 'application_package.dart';
 import 'artifacts.dart';
 import 'asset.dart';
+import 'base/command_help.dart';
 import 'base/common.dart';
 import 'base/file_system.dart';
 import 'base/io.dart' as io;
 import 'base/logger.dart';
 import 'base/signals.dart';
+import 'base/terminal.dart' show outputPreferences;
 import 'base/utils.dart';
 import 'build_info.dart';
 import 'codegen.dart';
@@ -606,7 +608,13 @@ abstract class ResidentRunner {
        artifactDirectory = dillOutputPath == null
           ? globals.fs.systemTempDirectory.createTempSync('flutter_tool.')
           : globals.fs.file(dillOutputPath).parent,
-       assetBundle = AssetBundleFactory.instance.createBundle() {
+       assetBundle = AssetBundleFactory.instance.createBundle(),
+       commandHelp = CommandHelp(
+         logger: globals.logger,
+         terminal: globals.terminal,
+         platform: globals.platform,
+         outputPreferences: outputPreferences,
+       ) {
     if (!artifactDirectory.existsSync()) {
       artifactDirectory.createSync(recursive: true);
     }
@@ -638,6 +646,8 @@ abstract class ResidentRunner {
   final String projectRootPath;
   final String mainPath;
   final AssetBundle assetBundle;
+
+  final CommandHelp commandHelp;
 
   bool _exited = false;
   Completer<int> _finished = Completer<int>();
@@ -1003,23 +1013,30 @@ abstract class ResidentRunner {
   void printHelp({ @required bool details });
 
   void printHelpDetails() {
+    if (flutterDevices.any((FlutterDevice d) => d.device.supportsScreenshot)) {
+      commandHelp.s.print();
+    }
     if (supportsServiceProtocol) {
-      globals.printStatus('You can dump the widget hierarchy of the app (debugDumpApp) by pressing "w".');
-      globals.printStatus('To dump the rendering tree of the app (debugDumpRenderTree), press "t".');
+      commandHelp.w.print();
+      commandHelp.t.print();
       if (isRunningDebug) {
-        globals.printStatus('For layers (debugDumpLayerTree), use "L"; for accessibility (debugDumpSemantics), use "S" (for traversal order) or "U" (for inverse hit test order).');
-        globals.printStatus('To toggle the widget inspector (WidgetsApp.showWidgetInspectorOverride), press "i".');
-        globals.printStatus('To toggle the display of construction lines (debugPaintSizeEnabled), press "p".');
-        globals.printStatus('To simulate different operating systems, (defaultTargetPlatform), press "o".');
-        globals.printStatus('To toggle the elevation checker, press "z".');
+        commandHelp.L.print();
+        commandHelp.S.print();
+        commandHelp.U.print();
+        commandHelp.i.print();
+        commandHelp.p.print();
+        commandHelp.o.print();
+        commandHelp.z.print();
       } else {
-        globals.printStatus('To dump the accessibility tree (debugDumpSemantics), press "S" (for traversal order) or "U" (for inverse hit test order).');
+        commandHelp.S.print();
+        commandHelp.U.print();
       }
-      globals.printStatus('To display the performance overlay (WidgetsApp.showPerformanceOverlay), press "P".');
-      globals.printStatus('To enable timeline events for all widget build methods, (debugProfileWidgetBuilds), press "a"');
+      // `P` should precede `a`
+      commandHelp.P.print();
+      commandHelp.a.print();
     }
     if (flutterDevices.any((FlutterDevice d) => d.device.supportsScreenshot)) {
-      globals.printStatus('To save a screenshot to flutter.png, press "s".');
+      commandHelp.s.print();
     }
   }
 
