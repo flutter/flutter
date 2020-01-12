@@ -2,7 +2,10 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart' show ProcessException, ProcessResult;
+import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/macos/xcode.dart';
 import 'package:mockito/mockito.dart';
@@ -17,184 +20,161 @@ class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterprete
 class MockPlatform extends Mock implements Platform {}
 
 void main() {
-  group('Xcode', () {
-    MockProcessManager mockProcessManager;
-    Xcode xcode;
-    MockXcodeProjectInterpreter mockXcodeProjectInterpreter;
-    MockPlatform mockPlatform;
+  ProcessManager processManager;
+  Xcode xcode;
+  MockXcodeProjectInterpreter mockXcodeProjectInterpreter;
+  MockPlatform platform;
+  Logger logger;
+  FileSystem fileSystem;
 
-    setUp(() {
-      mockProcessManager = MockProcessManager();
-      mockXcodeProjectInterpreter = MockXcodeProjectInterpreter();
-      xcode = Xcode();
-      mockPlatform = MockPlatform();
-    });
+  setUp(() {
+    logger = MockLogger();
+    fileSystem = MemoryFileSystem();
+    processManager = MockProcessManager();
+    mockXcodeProjectInterpreter = MockXcodeProjectInterpreter();
+    platform = MockPlatform();
+    xcode = Xcode(
+      logger: logger,
+      platform: platform,
+      fileSystem: fileSystem,
+      processManager: processManager,
+      xcodeProjectInterpreter: mockXcodeProjectInterpreter,
+    );
+  });
 
-    testUsingContext('xcodeSelectPath returns null when xcode-select is not installed', () {
-      when(mockProcessManager.runSync(<String>['/usr/bin/xcode-select', '--print-path']))
-          .thenThrow(const ProcessException('/usr/bin/xcode-select', <String>['--print-path']));
-      expect(xcode.xcodeSelectPath, isNull);
-      when(mockProcessManager.runSync(<String>['/usr/bin/xcode-select', '--print-path']))
-          .thenThrow(ArgumentError('Invalid argument(s): Cannot find executable for /usr/bin/xcode-select'));
-      expect(xcode.xcodeSelectPath, isNull);
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
-    });
+  testWithoutContext('xcodeSelectPath returns null when xcode-select is not installed', () {
+    when(processManager.runSync(<String>['/usr/bin/xcode-select', '--print-path']))
+        .thenThrow(const ProcessException('/usr/bin/xcode-select', <String>['--print-path']));
+    expect(xcode.xcodeSelectPath, isNull);
+    when(processManager.runSync(<String>['/usr/bin/xcode-select', '--print-path']))
+        .thenThrow(ArgumentError('Invalid argument(s): Cannot find executable for /usr/bin/xcode-select'));
 
-    testUsingContext('xcodeSelectPath returns path when xcode-select is installed', () {
-      const String xcodePath = '/Applications/Xcode8.0.app/Contents/Developer';
-      when(mockProcessManager.runSync(<String>['/usr/bin/xcode-select', '--print-path']))
-          .thenReturn(ProcessResult(1, 0, xcodePath, ''));
-      expect(xcode.xcodeSelectPath, xcodePath);
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
-    });
+    expect(xcode.xcodeSelectPath, isNull);
+  });
 
-    testUsingContext('xcodeVersionSatisfactory is false when version is less than minimum', () {
-      when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
-      when(mockXcodeProjectInterpreter.majorVersion).thenReturn(9);
-      when(mockXcodeProjectInterpreter.minorVersion).thenReturn(0);
-      expect(xcode.isVersionSatisfactory, isFalse);
-    }, overrides: <Type, Generator>{
-      XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
-    });
-
-    testUsingContext('xcodeVersionSatisfactory is false when xcodebuild tools are not installed', () {
-      when(mockXcodeProjectInterpreter.isInstalled).thenReturn(false);
-      expect(xcode.isVersionSatisfactory, isFalse);
-    }, overrides: <Type, Generator>{
-      XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
-    });
-
-    testUsingContext('xcodeVersionSatisfactory is true when version meets minimum', () {
-      when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
-      when(mockXcodeProjectInterpreter.majorVersion).thenReturn(10);
-      when(mockXcodeProjectInterpreter.minorVersion).thenReturn(2);
-      expect(xcode.isVersionSatisfactory, isTrue);
-    }, overrides: <Type, Generator>{
-      XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
-    });
-
-    testUsingContext('xcodeVersionSatisfactory is true when major version exceeds minimum', () {
-      when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
-      when(mockXcodeProjectInterpreter.majorVersion).thenReturn(11);
-      when(mockXcodeProjectInterpreter.minorVersion).thenReturn(2);
-      expect(xcode.isVersionSatisfactory, isTrue);
-    }, overrides: <Type, Generator>{
-      XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
-    });
-
-    testUsingContext('xcodeVersionSatisfactory is true when minor version exceeds minimum', () {
-      when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
-      when(mockXcodeProjectInterpreter.majorVersion).thenReturn(10);
-      when(mockXcodeProjectInterpreter.minorVersion).thenReturn(3);
-      expect(xcode.isVersionSatisfactory, isTrue);
-    }, overrides: <Type, Generator>{
-      XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
-    });
-
-    testUsingContext('isInstalledAndMeetsVersionCheck is false when not macOS', () {
-      when(mockPlatform.isMacOS).thenReturn(false);
-      expect(xcode.isInstalledAndMeetsVersionCheck, isFalse);
-    }, overrides: <Type, Generator>{
-      XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
-      Platform: () => mockPlatform,
-    });
-
-    testUsingContext('isInstalledAndMeetsVersionCheck is false when not installed', () {
-      when(mockPlatform.isMacOS).thenReturn(true);
-
-      const String xcodePath = '/Applications/Xcode8.0.app/Contents/Developer';
-      when(mockProcessManager.runSync(<String>['/usr/bin/xcode-select', '--print-path']))
+  testWithoutContext('xcodeSelectPath returns path when xcode-select is installed', () {
+    const String xcodePath = '/Applications/Xcode8.0.app/Contents/Developer';
+    when(processManager.runSync(<String>['/usr/bin/xcode-select', '--print-path']))
         .thenReturn(ProcessResult(1, 0, xcodePath, ''));
 
-      when(mockXcodeProjectInterpreter.isInstalled).thenReturn(false);
-      expect(xcode.isInstalledAndMeetsVersionCheck, isFalse);
-    }, overrides: <Type, Generator>{
-      XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
-      Platform: () => mockPlatform,
-      ProcessManager: () => mockProcessManager,
-    });
+    expect(xcode.xcodeSelectPath, xcodePath);
+  });
 
-    testUsingContext('isInstalledAndMeetsVersionCheck is false when no xcode-select', () {
-      when(mockPlatform.isMacOS).thenReturn(true);
+  testWithoutContext('xcodeVersionSatisfactory is false when version is less than minimum', () {
+    when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
+    when(mockXcodeProjectInterpreter.majorVersion).thenReturn(9);
+    when(mockXcodeProjectInterpreter.minorVersion).thenReturn(0);
 
-      when(mockProcessManager.runSync(<String>['/usr/bin/xcode-select', '--print-path']))
-        .thenReturn(ProcessResult(1, 127, '', 'ERROR'));
+    expect(xcode.isVersionSatisfactory, isFalse);
+  });
 
-      when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
-      when(mockXcodeProjectInterpreter.majorVersion).thenReturn(10);
-      when(mockXcodeProjectInterpreter.minorVersion).thenReturn(2);
+  testWithoutContext('xcodeVersionSatisfactory is false when xcodebuild tools are not installed', () {
+    when(mockXcodeProjectInterpreter.isInstalled).thenReturn(false);
 
-      expect(xcode.isInstalledAndMeetsVersionCheck, isFalse);
-    }, overrides: <Type, Generator>{
-      XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
-      Platform: () => mockPlatform,
-      ProcessManager: () => mockProcessManager,
-    });
+    expect(xcode.isVersionSatisfactory, isFalse);
+  });
 
-    testUsingContext('isInstalledAndMeetsVersionCheck is false when version not satisfied', () {
-      when(mockPlatform.isMacOS).thenReturn(true);
+  testWithoutContext('xcodeVersionSatisfactory is true when version meets minimum', () {
+    when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
+    when(mockXcodeProjectInterpreter.majorVersion).thenReturn(10);
+    when(mockXcodeProjectInterpreter.minorVersion).thenReturn(2);
 
-      const String xcodePath = '/Applications/Xcode8.0.app/Contents/Developer';
-      when(mockProcessManager.runSync(<String>['/usr/bin/xcode-select', '--print-path']))
-        .thenReturn(ProcessResult(1, 0, xcodePath, ''));
+    expect(xcode.isVersionSatisfactory, isTrue);
+  });
 
-      when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
-      when(mockXcodeProjectInterpreter.majorVersion).thenReturn(9);
-      when(mockXcodeProjectInterpreter.minorVersion).thenReturn(0);
-      expect(xcode.isInstalledAndMeetsVersionCheck, isFalse);
-    }, overrides: <Type, Generator>{
-      XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
-      Platform: () => mockPlatform,
-      ProcessManager: () => mockProcessManager,
-    });
+  testWithoutContext('xcodeVersionSatisfactory is true when major version exceeds minimum', () {
+    when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
+    when(mockXcodeProjectInterpreter.majorVersion).thenReturn(11);
+    when(mockXcodeProjectInterpreter.minorVersion).thenReturn(2);
 
-    testUsingContext('isInstalledAndMeetsVersionCheck is true when macOS and installed and version is satisfied', () {
-      when(mockPlatform.isMacOS).thenReturn(true);
+    expect(xcode.isVersionSatisfactory, isTrue);
+  });
 
-      const String xcodePath = '/Applications/Xcode8.0.app/Contents/Developer';
-      when(mockProcessManager.runSync(<String>['/usr/bin/xcode-select', '--print-path']))
-        .thenReturn(ProcessResult(1, 0, xcodePath, ''));
+  testWithoutContext('xcodeVersionSatisfactory is true when minor version exceeds minimum', () {
+    when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
+    when(mockXcodeProjectInterpreter.majorVersion).thenReturn(10);
+    when(mockXcodeProjectInterpreter.minorVersion).thenReturn(3);
 
-      when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
-      when(mockXcodeProjectInterpreter.majorVersion).thenReturn(10);
-      when(mockXcodeProjectInterpreter.minorVersion).thenReturn(2);
-      expect(xcode.isInstalledAndMeetsVersionCheck, isTrue);
-    }, overrides: <Type, Generator>{
-      XcodeProjectInterpreter: () => mockXcodeProjectInterpreter,
-      Platform: () => mockPlatform,
-      ProcessManager: () => mockProcessManager,
-    });
+    expect(xcode.isVersionSatisfactory, isTrue);
+  });
 
-    testUsingContext('eulaSigned is false when clang is not installed', () {
-      when(mockProcessManager.runSync(<String>['/usr/bin/xcrun', 'clang']))
-          .thenThrow(const ProcessException('/usr/bin/xcrun', <String>['clang']));
-      expect(xcode.eulaSigned, isFalse);
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
-    });
+  testWithoutContext('isInstalledAndMeetsVersionCheck is false when not macOS', () {
+    when(platform.isMacOS).thenReturn(false);
 
-    testUsingContext('eulaSigned is false when clang output indicates EULA not yet accepted', () {
-      when(mockProcessManager.runSync(<String>['/usr/bin/xcrun', 'clang']))
-          .thenReturn(ProcessResult(1, 1, '', 'Xcode EULA has not been accepted.\nLaunch Xcode and accept the license.'));
-      expect(xcode.eulaSigned, isFalse);
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
-    });
+    expect(xcode.isInstalledAndMeetsVersionCheck, isFalse);
+  });
 
-    testUsingContext('eulaSigned is true when clang output indicates EULA has been accepted', () {
-      when(mockProcessManager.runSync(<String>['/usr/bin/xcrun', 'clang']))
-          .thenReturn(ProcessResult(1, 1, '', 'clang: error: no input files'));
-      expect(xcode.eulaSigned, isTrue);
-    }, overrides: <Type, Generator>{
-      ProcessManager: () => mockProcessManager,
-    });
+  testWithoutContext('isInstalledAndMeetsVersionCheck is false when not installed', () {
+    when(platform.isMacOS).thenReturn(true);
+    const String xcodePath = '/Applications/Xcode8.0.app/Contents/Developer';
+    when(processManager.runSync(<String>['/usr/bin/xcode-select', '--print-path']))
+      .thenReturn(ProcessResult(1, 0, xcodePath, ''));
+    when(mockXcodeProjectInterpreter.isInstalled).thenReturn(false);
 
-    testUsingContext('SDK name', () {
-      expect(getNameForSdk(SdkType.iPhone), 'iphoneos');
-      expect(getNameForSdk(SdkType.iPhoneSimulator), 'iphonesimulator');
-      expect(getNameForSdk(SdkType.macOS), 'macosx');
-    });
+    expect(xcode.isInstalledAndMeetsVersionCheck, isFalse);
+  });
+
+  testWithoutContext('isInstalledAndMeetsVersionCheck is false when no xcode-select', () {
+    when(platform.isMacOS).thenReturn(true);
+    when(processManager.runSync(<String>['/usr/bin/xcode-select', '--print-path']))
+      .thenReturn(ProcessResult(1, 127, '', 'ERROR'));
+    when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
+    when(mockXcodeProjectInterpreter.majorVersion).thenReturn(10);
+    when(mockXcodeProjectInterpreter.minorVersion).thenReturn(2);
+
+    expect(xcode.isInstalledAndMeetsVersionCheck, isFalse);
+  });
+
+  testWithoutContext('isInstalledAndMeetsVersionCheck is false when version not satisfied', () {
+    when(platform.isMacOS).thenReturn(true);
+    const String xcodePath = '/Applications/Xcode8.0.app/Contents/Developer';
+    when(processManager.runSync(<String>['/usr/bin/xcode-select', '--print-path']))
+      .thenReturn(ProcessResult(1, 0, xcodePath, ''));
+    when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
+    when(mockXcodeProjectInterpreter.majorVersion).thenReturn(9);
+    when(mockXcodeProjectInterpreter.minorVersion).thenReturn(0);
+
+    expect(xcode.isInstalledAndMeetsVersionCheck, isFalse);
+  });
+
+  testWithoutContext('isInstalledAndMeetsVersionCheck is true when macOS and installed and version is satisfied', () {
+    when(platform.isMacOS).thenReturn(true);
+    const String xcodePath = '/Applications/Xcode8.0.app/Contents/Developer';
+    when(processManager.runSync(<String>['/usr/bin/xcode-select', '--print-path']))
+      .thenReturn(ProcessResult(1, 0, xcodePath, ''));
+    when(mockXcodeProjectInterpreter.isInstalled).thenReturn(true);
+    when(mockXcodeProjectInterpreter.majorVersion).thenReturn(10);
+    when(mockXcodeProjectInterpreter.minorVersion).thenReturn(2);
+
+    expect(xcode.isInstalledAndMeetsVersionCheck, isTrue);
+  });
+
+  testWithoutContext('eulaSigned is false when clang is not installed', () {
+    when(processManager.runSync(<String>['/usr/bin/xcrun', 'clang']))
+        .thenThrow(const ProcessException('/usr/bin/xcrun', <String>['clang']));
+
+    expect(xcode.eulaSigned, isFalse);
+  });
+
+  testWithoutContext('eulaSigned is false when clang output indicates EULA not yet accepted', () {
+    when(processManager.runSync(<String>['/usr/bin/xcrun', 'clang']))
+        .thenReturn(ProcessResult(1, 1, '', 'Xcode EULA has not been accepted.\nLaunch Xcode and accept the license.'));
+
+    expect(xcode.eulaSigned, isFalse);
+  });
+
+  testWithoutContext('eulaSigned is true when clang output indicates EULA has been accepted', () {
+    when(processManager.runSync(<String>['/usr/bin/xcrun', 'clang']))
+        .thenReturn(ProcessResult(1, 1, '', 'clang: error: no input files'));
+
+    expect(xcode.eulaSigned, isTrue);
+  });
+
+  testWithoutContext('SDK name', () {
+    expect(getNameForSdk(SdkType.iPhone), 'iphoneos');
+    expect(getNameForSdk(SdkType.iPhoneSimulator), 'iphonesimulator');
+    expect(getNameForSdk(SdkType.macOS), 'macosx');
   });
 }
+
+class MockLogger extends Mock implements Logger {}
