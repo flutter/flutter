@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:file_testing/file_testing.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 
 import 'package:flutter_tools/src/build_system/build_system.dart';
@@ -382,6 +383,26 @@ void main() {
     verifyNever(globals.processManager.run(any));
   }, overrides: <Type, Generator>{
     ProcessManager: () => MockProcessManager(),
+  }));
+
+  test('Generated service worker correctly inlines file hashes', () {
+    final String result = generateServiceWorker(<String, String>{'/foo': 'abcd'});
+
+    expect(result, contains('{\n  "/foo": "abcd"\n};'));
+  });
+
+  test('WebServiceWorker generates a service_worker for a web resource folder', () => testbed.run(() async {
+    environment.outputDir.childFile('a.txt')
+      ..createSync(recursive: true)
+      ..writeAsStringSync('A');
+    await const WebServiceWorker().build(environment);
+
+    expect(environment.outputDir.childFile('service_worker.js'), exists);
+    // Contains file hash.
+    expect(environment.outputDir.childFile('service_worker.js').readAsStringSync(), contains('"/a.txt": "7fc56270e7a70fa81a5935b72eacbe29"'));
+    expect(environment.buildDir.childFile('service_worker.d'), exists);
+    // Depends on resource file.
+    expect(environment.buildDir.childFile('service_worker.d').readAsStringSync(), contains('a.txt'));
   }));
 }
 

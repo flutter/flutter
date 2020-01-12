@@ -305,7 +305,8 @@ class WebServiceWorker extends Target {
     final List<File> contents = environment.outputDir
       .listSync(recursive: true)
       .whereType<File>()
-      .where((File file) => !file.path.endsWith('service_worker.js'))
+      .where((File file) => !file.path.endsWith('service_worker.js')
+        && !globals.fs.path.basename(file.path).startsWith('.'))
       .toList();
     // TODO(jonahwilliams): determine whether this needs to be made more efficient.
     final Map<String, String> uriToHash = <String, String>{
