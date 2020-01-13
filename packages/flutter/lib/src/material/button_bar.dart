@@ -64,6 +64,7 @@ class ButtonBar extends StatelessWidget {
     this.buttonPadding,
     this.buttonAlignedDropdown,
     this.layoutBehavior,
+    this.verticalDirection,
     this.children = const <Widget>[],
   }) : assert(buttonMinWidth == null || buttonMinWidth >= 0.0),
        assert(buttonHeight == null || buttonHeight >= 0.0),
@@ -126,6 +127,14 @@ class ButtonBar extends StatelessWidget {
   /// If that is null, it will default [ButtonBarLayoutBehavior.padded].
   final ButtonBarLayoutBehavior layoutBehavior;
 
+  /// Defines the vertical direction of a [ButtonBar]'s children if it
+  /// overflows.
+  ///
+  /// If null then it will use the surrounding
+  /// [ButtonBarTheme.verticalDirection]. If that is null, it will
+  /// default to [VerticalDirection.down].
+  final VerticalDirection verticalDirection;
+
   /// The buttons to arrange horizontally.
   ///
   /// Typically [RaisedButton] or [FlatButton] widgets.
@@ -152,6 +161,7 @@ class ButtonBar extends StatelessWidget {
       child: _ButtonBarRow(
         mainAxisAlignment: alignment ?? barTheme.alignment ?? MainAxisAlignment.end,
         mainAxisSize: mainAxisSize ?? barTheme.mainAxisSize ?? MainAxisSize.max,
+        verticalDirection: verticalDirection ?? barTheme.verticalDirection ?? VerticalDirection.down,
         children: children.map<Widget>((Widget child) {
           return Padding(
             padding: EdgeInsets.symmetric(horizontal: paddingUnit),
