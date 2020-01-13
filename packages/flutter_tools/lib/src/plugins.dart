@@ -868,8 +868,8 @@ Future<void> _writeWebPluginRegistrant(FlutterProject project, List<Plugin> plug
 void refreshPluginsList(FlutterProject project, {bool checkProjects = false}) {
   final List<Plugin> plugins = findPlugins(project);
 
-  // TODO(franciscojma): Write the legacy plugin files to avoid breaking existing apps. Remove once
-  // migration is completed.
+  // TODO(franciscojma): Remove once migration is complete.
+  // Write the legacy plugin files to avoid breaking existing apps.
   final bool legacyChanged = _writeFlutterPluginsListLegacy(project, plugins);
 
   final bool changed = _writeFlutterPluginsList(project, plugins);
