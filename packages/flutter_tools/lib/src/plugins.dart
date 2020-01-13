@@ -320,10 +320,47 @@ void _addPluginsToPlatform(List<Plugin> plugins, FlutterProjectPlatform platform
   }
 }
 
-/// Writes the .flutter-plugins and .flutter-plugins-dependencies files based on the list of plugins.
-/// If there aren't any plugins, then the files aren't written to disk.
+/// Writes the .flutter-plugins.json file based on the list of plugins.
+/// If there aren't any plugins, then the files aren't written to disk. The resulting
+/// file looks something like this:
+// {
+//     "_info": "// This is a generated file; do not edit or check into version control.",
+//     "plugins": {
+//         "ios": [
+//             {
+//                 "name": "plugin-a",
+//                 "path": "/path/to/plugin/pubspec",
+//                 "dependencies": []
+//             },
+//             {
+//                 "name": "plugin-b",
+//                 "path": "/path/to/plugin/pubspec",
+//                 "dependencies": [
+//                     "plugin-c",
+//                     "plugin-d"
+//                 ]
+//             }
+//         ],
+//         "macos": [
+//             {
+//                 "name": "plugin-a",
+//                 "path": "/path/to/plugin/pubspec",
+//                 "dependencies": [
+//                    plugin-b,
+//                 ]
+//             },
+//             {
+//                 "name": "plugin-b",
+//                 "path": "/path/to/plugin/pubspec",
+//                 "dependencies": [
+//                     "plugin-c"
+//                 ]
+//             }
+//         ],
+//     }
+// }
 ///
-/// Finally, returns [true] if .flutter-plugins or .flutter-plugins-dependencies have changed,
+/// Finally, returns [true] if .flutter-plugins.json has changed,
 /// otherwise returns [false].
 bool _writeFlutterPluginsList(FlutterProject project, List<Plugin> plugins) {
   const String info = 'This is a generated file; do not edit or check into version control.';
@@ -355,6 +392,14 @@ bool _writeFlutterPluginsList(FlutterProject project, List<Plugin> plugins) {
   return oldPluginFileContent != _readFileContent(pluginsFile);
 }
 
+// This method will be DEPRECATED in favor of _writeFlutterPluginsList.
+// TODO(franciscojma): Remove once deprecated.
+//
+/// Writes the .flutter-plugins and .flutter-plugins-dependencies files based on the list of plugins.
+/// If there aren't any plugins, then the files aren't written to disk.
+///
+/// Finally, returns [true] if .flutter-plugins or .flutter-plugins-dependencies have changed,
+/// otherwise returns [false].
 bool _writeFlutterPluginsListLegacy(FlutterProject project, List<Plugin> plugins) {
   final List<dynamic> directAppDependencies = <dynamic>[];
   const String info = 'This is a generated file; do not edit or check into version control.';
@@ -822,6 +867,9 @@ Future<void> _writeWebPluginRegistrant(FlutterProject project, List<Plugin> plug
 /// Assumes `pub get` has been executed since last change to `pubspec.yaml`.
 void refreshPluginsList(FlutterProject project, {bool checkProjects = false}) {
   final List<Plugin> plugins = findPlugins(project);
+
+  // TODO(franciscojma): Write the legacy plugin files to avoid breaking existing apps. Remove once
+  // migration is completed.
   final bool legacyChanged = _writeFlutterPluginsListLegacy(project, plugins);
 
   final bool changed = _writeFlutterPluginsList(project, plugins);
