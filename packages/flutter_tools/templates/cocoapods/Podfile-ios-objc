@@ -39,7 +39,7 @@ def parse_json_file(file)
   end
   plugins_file = File.read(file_abs_path)
   json = JSON.parse(plugins_file)
-  
+
   generated_key_values = {}
   ios_plugins = json['plugins']['ios']
   ios_plugins.each { |plugin|

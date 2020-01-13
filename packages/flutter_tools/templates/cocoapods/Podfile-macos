@@ -40,7 +40,7 @@ def parse_json_file(file)
   end
   plugins_file = File.read(file_abs_path)
   json = JSON.parse(plugins_file)
-  
+
   pods_ary = []
   macos_plugins = json['plugins']['macos']
   macos_plugins.each { |plugin|
