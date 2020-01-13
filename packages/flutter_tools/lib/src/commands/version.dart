@@ -143,6 +143,6 @@ class VersionCommand extends FlutterCommand {
       throwToolExit(null, exitCode: code);
     }
 
-    return const FlutterCommandResult(ExitStatus.success);
+    return FlutterCommandResult.success();
   }
 }

@@ -74,7 +74,7 @@ void main() {
         const GitTagVersion.unknown(),
         flutterVersion,
       );
-      expect(await result, null);
+      expect(await result, FlutterCommandResult.success());
     }, overrides: <Type, Generator>{
       ProcessManager: () => processManager,
       Platform: () => fakePlatform,
@@ -102,7 +102,7 @@ void main() {
         gitTagVersion,
         flutterVersion,
       );
-      expect(await result, null);
+      expect(await result, FlutterCommandResult.success());
     }, overrides: <Type, Generator>{
       ProcessManager: () => processManager,
       Platform: () => fakePlatform,
@@ -115,7 +115,7 @@ void main() {
         gitTagVersion,
         flutterVersion,
       );
-      expect(await result, null);
+      expect(await result, FlutterCommandResult.success());
     }, overrides: <Type, Generator>{
       ProcessManager: () => processManager,
       Platform: () => fakePlatform,
@@ -129,7 +129,7 @@ void main() {
         gitTagVersion,
         flutterVersion,
       );
-      expect(await result, null);
+      expect(await result, FlutterCommandResult.success());
       verifyNever(globals.processManager.start(
         <String>[
           globals.fs.path.join('bin', 'flutter'),

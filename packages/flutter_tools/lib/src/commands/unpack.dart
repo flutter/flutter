@@ -93,7 +93,7 @@ class UnpackCommand extends FlutterCommand {
     if (!success) {
       throwToolExit('Failed to unpack desktop artifacts.');
     }
-    return null;
+    return FlutterCommandResult.success();
   }
 }
 

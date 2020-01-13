@@ -239,7 +239,7 @@ class FlutterCommandRunner extends CommandRunner<void> {
     // Check for verbose.
     if (topLevelResults['verbose'] as bool) {
       // Override the logger.
-      contextOverrides[Logger] = VerboseLogger(globals.logger, stopwatch: Stopwatch());
+      contextOverrides[Logger] = VerboseLogger(globals.logger);
     }
 
     // Don't set wrapColumns unless the user said to: if it's set, then all

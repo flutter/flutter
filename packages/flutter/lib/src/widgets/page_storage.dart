@@ -47,7 +47,7 @@ class _StorageEntryIdentifier {
   bool get isNotEmpty => keys.isNotEmpty;
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (other.runtimeType != runtimeType)
       return false;
     return other is _StorageEntryIdentifier

@@ -108,12 +108,14 @@ Future<T> runInContext<T>(
             stdio: globals.stdio,
             outputPreferences: outputPreferences,
             timeoutConfiguration: timeoutConfiguration,
+            platform: globals.platform,
           )
         : StdoutLogger(
             terminal: globals.terminal,
             stdio: globals.stdio,
             outputPreferences: outputPreferences,
             timeoutConfiguration: timeoutConfiguration,
+            platform: globals.platform,
           ),
       MacOSWorkflow: () => const MacOSWorkflow(),
       MDnsObservatoryDiscovery: () => MDnsObservatoryDiscovery(),

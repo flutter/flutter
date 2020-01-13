@@ -50,6 +50,21 @@ class FlutterCommandResult {
     this.endTimeOverride,
   });
 
+  /// A command that succeeded. It is used to log the result of a command invocation.
+  factory FlutterCommandResult.success() {
+    return const FlutterCommandResult(ExitStatus.success);
+  }
+
+  /// A command that exited with a warning. It is used to log the result of a command invocation.
+  factory FlutterCommandResult.warning() {
+    return const FlutterCommandResult(ExitStatus.warning);
+  }
+
+  /// A command that failed. It is used to log the result of a command invocation.
+  factory FlutterCommandResult.fail() {
+    return const FlutterCommandResult(ExitStatus.fail);
+  }
+
   final ExitStatus exitStatus;
 
   /// Optional data that can be appended to the timing event.
@@ -516,12 +531,9 @@ abstract class FlutterCommand extends Command<void> {
         flutterUsage.printWelcome();
         final String commandPath = await usagePath;
         _registerSignalHandlers(commandPath, startTime);
-        FlutterCommandResult commandResult;
+        FlutterCommandResult commandResult = FlutterCommandResult.fail();
         try {
           commandResult = await verifyThenRunCommand(commandPath);
-        } on ToolExit {
-          commandResult = const FlutterCommandResult(ExitStatus.fail);
-          rethrow;
         } finally {
           final DateTime endTime = systemClock.now();
           globals.printTrace(userMessages.flutterElapsedTime(name, getElapsedAsMilliseconds(endTime.difference(startTime))));
@@ -557,15 +569,15 @@ abstract class FlutterCommand extends Command<void> {
     if (commandPath == null) {
       return;
     }
-
+    assert(commandResult != null);
     // Send command result.
     CommandResultEvent(commandPath, commandResult).send();
 
     // Send timing.
     final List<String> labels = <String>[
-      if (commandResult?.exitStatus != null)
+      if (commandResult.exitStatus != null)
         getEnumName(commandResult.exitStatus),
-      if (commandResult?.timingLabelParts?.isNotEmpty ?? false)
+      if (commandResult.timingLabelParts?.isNotEmpty ?? false)
         ...commandResult.timingLabelParts,
     ];
 
@@ -577,7 +589,7 @@ abstract class FlutterCommand extends Command<void> {
       name,
       // If the command provides its own end time, use it. Otherwise report
       // the duration of the entire execution.
-      (commandResult?.endTimeOverride ?? endTime).difference(startTime),
+      (commandResult.endTimeOverride ?? endTime).difference(startTime),
       // Report in the form of `success-[parameter1-parameter2]`, all of which
       // can be null if the command doesn't provide a FlutterCommandResult.
       label: label == '' ? null : label,
