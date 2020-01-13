@@ -232,14 +232,13 @@ class WebReleaseBundle extends Target {
 
   @override
   Future<void> build(Environment environment) async {
-    final BuildMode buildMode = getBuildModeForName(environment.defines[kBuildMode]);
     for (final File outputFile in environment.buildDir.listSync(recursive: true).whereType<File>()) {
       final String basename = globals.fs.path.basename(outputFile.path);
       if (!basename.contains('main.dart.js')) {
         continue;
       }
-      // In release mode, do not output deps file or source map.
-      if (buildMode == BuildMode.release && (basename.endsWith('.deps') || basename.endsWith('.map'))) {
+      // Do not copy the deps file.
+      if (basename.endsWith('.deps')) {
         continue;
       }
       outputFile.copySync(
@@ -305,17 +304,19 @@ class WebServiceWorker extends Target {
     final List<File> contents = environment.outputDir
       .listSync(recursive: true)
       .whereType<File>()
-      .where((File file) => !file.path.endsWith('service_worker.js')
+      .where((File file) => !file.path.endsWith('flutter_service_worker.js')
         && !globals.fs.path.basename(file.path).startsWith('.'))
       .toList();
     // TODO(jonahwilliams): determine whether this needs to be made more efficient.
     final Map<String, String> uriToHash = <String, String>{
       for (File file in contents)
+        // Do not force caching of source maps.
+        if (!file.path.endsWith('main.dart.js.map'))
         '/${globals.fs.path.relative(file.path, from: environment.outputDir.path)}':
           md5.convert(await file.readAsBytes()).toString(),
     };
     final File serviceWorkerFile = environment.outputDir
-      .childFile('service_worker.js');
+      .childFile('flutter_service_worker.js');
     final Depfile depfile = Depfile(contents, <File>[serviceWorkerFile]);
     final String serviceWorker = generateServiceWorker(uriToHash);
     serviceWorkerFile
@@ -338,15 +339,6 @@ const CACHE_NAME = 'flutter-app-cache';
 const RESOURCES = {
   ${resources.entries.map((MapEntry<String, String> entry) => '"${entry.key}": "${entry.value}"').join(",\n")}
 };
-
-self.addEventListener('install', function (event) {
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(function (cache) {
-        return cache.addAll(Object.keys(RESOURCES));
-      })
-  );
-});
 
 self.addEventListener('activate', function (event) {
   event.waitUntil(

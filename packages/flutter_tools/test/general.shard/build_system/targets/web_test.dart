@@ -397,9 +397,10 @@ void main() {
       ..writeAsStringSync('A');
     await const WebServiceWorker().build(environment);
 
-    expect(environment.outputDir.childFile('service_worker.js'), exists);
+    expect(environment.outputDir.childFile('flutter_service_worker.js'), exists);
     // Contains file hash.
-    expect(environment.outputDir.childFile('service_worker.js').readAsStringSync(), contains('"/a.txt": "7fc56270e7a70fa81a5935b72eacbe29"'));
+    expect(environment.outputDir.childFile('flutter_service_worker.js').readAsStringSync(),
+      contains('"/a.txt": "7fc56270e7a70fa81a5935b72eacbe29"'));
     expect(environment.buildDir.childFile('service_worker.d'), exists);
     // Depends on resource file.
     expect(environment.buildDir.childFile('service_worker.d').readAsStringSync(), contains('a.txt'));

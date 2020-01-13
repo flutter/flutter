@@ -19,12 +19,12 @@ found in the LICENSE file. -->
 </head>
 <body>
   <!-- This script installs service_worker.js to provide PWA functionality to
-       application. For more information, see:
-       https://developers.google.com/web/fundamentals/primers/service-workers -->
-    <script>
+  application. For more information, see:
+  https://developers.google.com/web/fundamentals/primers/service-workers -->
+  <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function () {
-        navigator.serviceWorker.register('/service_worker.js');
+        navigator.serviceWorker.register('/flutter_service_worker.js');
       });
     }
   </script>
