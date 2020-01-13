@@ -956,9 +956,8 @@ abstract class ResidentRunner {
     }
   }
 
-  Future<void> _serviceProtocolDone(dynamic object) {
+  Future<void> _serviceProtocolDone(dynamic object) async {
     globals.printTrace('Service protocol connection closed.');
-    return Future<void>.value(object);
   }
 
   Future<void> _serviceProtocolError(dynamic error, StackTrace stack) {

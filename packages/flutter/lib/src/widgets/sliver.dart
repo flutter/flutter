@@ -1554,7 +1554,7 @@ class _SliverOffstageElement extends SingleChildRenderObjectElement {
 /// In practice, the simplest way to deal with these notifications is to mix
 /// [AutomaticKeepAliveClientMixin] into one's [State]. See the documentation
 /// for that mixin class for details.
-class KeepAlive extends ParentDataWidget<SliverWithKeepAliveWidget> {
+class KeepAlive extends ParentDataWidget<KeepAliveParentDataMixin> {
   /// Marks a child as needing to remain alive.
   ///
   /// The [child] and [keepAlive] arguments must not be null.
@@ -1589,6 +1589,9 @@ class KeepAlive extends ParentDataWidget<SliverWithKeepAliveWidget> {
   // go away _unless_ we do a layout).
   @override
   bool debugCanApplyOutOfTurn() => keepAlive;
+
+  @override
+  Type get debugTypicalAncestorWidgetClass => SliverWithKeepAliveWidget;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

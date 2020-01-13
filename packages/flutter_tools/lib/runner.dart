@@ -9,6 +9,7 @@ import 'package:intl/intl.dart' as intl;
 import 'package:intl/intl_standalone.dart' as intl_standalone;
 import 'package:meta/meta.dart';
 
+import 'src/base/bot_detector.dart';
 import 'src/base/common.dart';
 import 'src/base/context.dart';
 import 'src/base/file_system.dart';
@@ -19,7 +20,7 @@ import 'src/base/terminal.dart';
 import 'src/base/utils.dart';
 import 'src/context_runner.dart';
 import 'src/doctor.dart';
-import 'src/globals.dart';
+import 'src/globals.dart' as globals;
 import 'src/reporting/github_template.dart';
 import 'src/reporting/reporting.dart';
 import 'src/runner/flutter_command.dart';
@@ -37,7 +38,7 @@ Future<int> run(
   String flutterVersion,
   Map<Type, Generator> overrides,
 }) {
-  reportCrashes ??= !isRunningOnBot;
+  reportCrashes ??= !isRunningOnBot(globals.platform);
 
   if (muteCommandLogging) {
     // Remove the verbose option; for help and doctor, users don't need to see
@@ -90,16 +91,16 @@ Future<int> _handleToolError(
   String getFlutterVersion(),
 ) async {
   if (error is UsageException) {
-    printError('${error.message}\n');
-    printError("Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and options.");
+    globals.printError('${error.message}\n');
+    globals.printError("Run 'flutter -h' (or 'flutter <command> -h') for available flutter commands and options.");
     // Argument error exit code.
     return _exit(64);
   } else if (error is ToolExit) {
     if (error.message != null) {
-      printError(error.message);
+      globals.printError(error.message);
     }
     if (verbose) {
-      printError('\n$stackTrace\n');
+      globals.printError('\n$stackTrace\n');
     }
     return _exit(error.exitCode ?? 1);
   } else if (error is ProcessExit) {
@@ -131,7 +132,7 @@ Future<int> _handleToolError(
     );
 
     final String errorString = error.toString();
-    printError('Oops; flutter has exited unexpectedly: "$errorString".');
+    globals.printError('Oops; flutter has exited unexpectedly: "$errorString".');
 
     try {
       await _informUserOfCrash(args, error, stackTrace, errorString);
@@ -155,15 +156,15 @@ Future<void> _informUserOfCrash(List<String> args, dynamic error, StackTrace sta
   final String doctorText = await _doctorText();
   final File file = await _createLocalCrashReport(args, error, stackTrace, doctorText);
 
-  printError('A crash report has been written to ${file.path}.');
-  printStatus('This crash may already be reported. Check GitHub for similar crashes.', emphasis: true);
+  globals.printError('A crash report has been written to ${file.path}.');
+  globals.printStatus('This crash may already be reported. Check GitHub for similar crashes.', emphasis: true);
 
   final GitHubTemplateCreator gitHubTemplateCreator = context.get<GitHubTemplateCreator>() ?? GitHubTemplateCreator();
   final String similarIssuesURL = await gitHubTemplateCreator.toolCrashSimilarIssuesGitHubURL(errorString);
-  printStatus('$similarIssuesURL\n', wrap: false);
-  printStatus('To report your crash to the Flutter team, first read the guide to filing a bug.', emphasis: true);
-  printStatus('https://flutter.dev/docs/resources/bug-reports\n', wrap: false);
-  printStatus('Create a new GitHub issue by pasting this link into your browser and completing the issue template. Thank you!', emphasis: true);
+  globals.printStatus('$similarIssuesURL\n', wrap: false);
+  globals.printStatus('To report your crash to the Flutter team, first read the guide to filing a bug.', emphasis: true);
+  globals.printStatus('https://flutter.dev/docs/resources/bug-reports\n', wrap: false);
+  globals.printStatus('Create a new GitHub issue by pasting this link into your browser and completing the issue template. Thank you!', emphasis: true);
 
   final String command = _crashCommand(args);
   final String gitHubTemplateURL = await gitHubTemplateCreator.toolCrashIssueTemplateGitHubURL(
@@ -173,7 +174,7 @@ Future<void> _informUserOfCrash(List<String> args, dynamic error, StackTrace sta
     stackTrace,
     doctorText
   );
-  printStatus('$gitHubTemplateURL\n', wrap: false);
+  globals.printStatus('$gitHubTemplateURL\n', wrap: false);
 }
 
 String _crashCommand(List<String> args) => 'flutter ${args.join(' ')}';
@@ -214,8 +215,8 @@ Future<File> _createLocalCrashReport(List<String> args, dynamic error, StackTrac
     try {
       crashFile.writeAsStringSync(buffer.toString());
     } on FileSystemException catch (e) {
-      printError('Could not write crash report to disk: $e');
-      printError(buffer.toString());
+      globals.printError('Could not write crash report to disk: $e');
+      globals.printError(buffer.toString());
     }
   }
 
@@ -225,7 +226,7 @@ Future<File> _createLocalCrashReport(List<String> args, dynamic error, StackTrac
 Future<String> _doctorText() async {
   try {
     final BufferLogger logger = BufferLogger(
-      terminal: terminal,
+      terminal: globals.terminal,
       outputPreferences: outputPreferences,
     );
 
@@ -251,7 +252,7 @@ Future<int> _exit(int code) async {
   if (flutterUsage.enabled) {
     final Stopwatch stopwatch = Stopwatch()..start();
     await flutterUsage.ensureAnalyticsSent();
-    printTrace('ensureAnalyticsSent: ${stopwatch.elapsedMilliseconds}ms');
+    globals.printTrace('ensureAnalyticsSent: ${stopwatch.elapsedMilliseconds}ms');
   }
 
   // Run shutdown hooks before flushing logs
@@ -262,7 +263,7 @@ Future<int> _exit(int code) async {
   // Give the task / timer queue one cycle through before we hard exit.
   Timer.run(() {
     try {
-      printTrace('exiting with code $code');
+      globals.printTrace('exiting with code $code');
       exit(code);
       completer.complete();
     } catch (error, stackTrace) {
