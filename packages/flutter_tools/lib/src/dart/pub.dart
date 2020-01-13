@@ -6,13 +6,13 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 
+import '../base/bot_detector.dart';
 import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart' as io;
 import '../base/logger.dart';
 import '../base/process.dart';
-import '../base/utils.dart';
 import '../cache.dart';
 import '../globals.dart' as globals;
 import '../reporting/reporting.dart';
@@ -232,7 +232,7 @@ class _DefaultPub implements Pub {
     @required bool retry,
     bool showTraceForErrors,
   }) async {
-    showTraceForErrors ??= isRunningOnBot;
+    showTraceForErrors ??= isRunningOnBot(globals.platform);
 
     String lastPubMessage = 'no message';
     bool versionSolvingFailed = false;
@@ -368,7 +368,7 @@ String _getPubEnvironmentValue(PubContext pubContext) {
   final String existing = globals.platform.environment[_pubEnvironmentKey];
   final List<String> values = <String>[
     if (existing != null && existing.isNotEmpty) existing,
-    if (isRunningOnBot) 'flutter_bot',
+    if (isRunningOnBot(globals.platform)) 'flutter_bot',
     'flutter_cli',
     ...pubContext._values,
   ];
