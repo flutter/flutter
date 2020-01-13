@@ -1,4 +1,4 @@
-Signature: bccdd00bb498e644c0288742e9cad30c
+Signature: 7eb3b81d765385261c0892f9047c6c87
 
 UNUSED LICENSES:
 
@@ -8442,7 +8442,6 @@ FILE: ../../../third_party/dart/sdk/lib/io/io_resource_info.dart
 FILE: ../../../third_party/dart/sdk/lib/io/security_context.dart
 FILE: ../../../third_party/dart/sdk/lib/vmservice/asset.dart
 FILE: ../../../third_party/dart/sdk/lib/vmservice/vmservice.dart
-FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/lib/js/dart2js/js_dart2js.dart
 FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/patch/developer_patch.dart
 FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/private/ddc_runtime/classes.dart
 FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/private/ddc_runtime/errors.dart
@@ -9511,6 +9510,7 @@ FILE: ../../../third_party/dart/sdk/lib/io/socket.dart
 FILE: ../../../third_party/dart/sdk/lib/io/stdio.dart
 FILE: ../../../third_party/dart/sdk/lib/io/string_transformer.dart
 FILE: ../../../third_party/dart/sdk/lib/js/dart2js/js_dart2js.dart
+FILE: ../../../third_party/dart/sdk/lib/js/js.dart
 FILE: ../../../third_party/dart/sdk/lib/math/jenkins_smi_hash.dart
 FILE: ../../../third_party/dart/sdk/lib/math/point.dart
 FILE: ../../../third_party/dart/sdk/lib/math/rectangle.dart
@@ -9616,7 +9616,7 @@ FILE: ../../../third_party/dart/sdk_nnbd/lib/io/secure_socket.dart
 FILE: ../../../third_party/dart/sdk_nnbd/lib/io/socket.dart
 FILE: ../../../third_party/dart/sdk_nnbd/lib/io/stdio.dart
 FILE: ../../../third_party/dart/sdk_nnbd/lib/io/string_transformer.dart
-FILE: ../../../third_party/dart/sdk_nnbd/lib/js/dart2js/js_dart2js.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/js/js.dart
 FILE: ../../../third_party/dart/sdk_nnbd/lib/math/jenkins_smi_hash.dart
 FILE: ../../../third_party/dart/sdk_nnbd/lib/math/point.dart
 FILE: ../../../third_party/dart/sdk_nnbd/lib/math/rectangle.dart
@@ -9890,6 +9890,10 @@ ORIGIN: ../../../third_party/dart/runtime/vm/field_table.cc + ../../../third_par
 TYPE: LicenseType.bsd
 FILE: ../../../third_party/dart/runtime/vm/field_table.cc
 FILE: ../../../third_party/dart/runtime/vm/field_table.h
+FILE: ../../../third_party/dart/sdk/lib/_internal/js_dev_runtime/patch/js_patch.dart
+FILE: ../../../third_party/dart/sdk/lib/_internal/js_runtime/lib/js_patch.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_dev_runtime/patch/js_patch.dart
+FILE: ../../../third_party/dart/sdk_nnbd/lib/_internal/js_runtime/lib/js_patch.dart
 ----------------------------------------------------------------------------------------------------
 Copyright (c) 2020, the Dart project authors.  Please see the AUTHORS file
 for details. All rights reserved.
