@@ -1,17 +1,15 @@
 include ':app'
-import groovy.json.JsonSlurper
 
 def flutterProjectRoot = rootProject.projectDir.parentFile.toPath()
 
-File pluginsFile = new File(flutterProjectRoot.toFile(), '.flutter-plugins.json')
-def object = new JsonSlurper().parseText(pluginsFile.text)
-assert object instanceof Map
-assert object.plugins instanceof Map
-assert object.plugins.android instanceof List
-def plugins = object.plugins.android
+def plugins = new Properties()
+def pluginsFile = new File(flutterProjectRoot.toFile(), '.flutter-plugins')
+if (pluginsFile.exists()) {
+    pluginsFile.withReader('UTF-8') { reader -> plugins.load(reader) }
+}
 
-plugins.each { plugin ->
-    def pluginDirectory = flutterProjectRoot.resolve(plugin['path']).resolve('android').toFile()
-    include ":${plugin['name']}"
-    project(":${plugin['name']}").projectDir = pluginDirectory
+plugins.each { name, path ->
+    def pluginDirectory = flutterProjectRoot.resolve(path).resolve('android').toFile()
+    include ":$name"
+    project(":$name").projectDir = pluginDirectory
 }
