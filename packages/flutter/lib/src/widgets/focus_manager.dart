@@ -824,7 +824,10 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
   /// Requests the primary focus for this node, or for a supplied [node], which
   /// will also give focus to its [ancestors].
   ///
-  /// If called without a node, request focus for this node.
+  /// If called without a node, request focus for this node. If the node hasn't
+  /// been added to the focus tree yet, then defer the focus request until it
+  /// is, allowing newly created widgets to request focus as soon as they are
+  /// added.
   ///
   /// If the given [node] is not yet a part of the focus tree, then this method
   /// will add the [node] as a child of this node before requesting focus.
@@ -855,6 +858,9 @@ class FocusNode with DiagnosticableTreeMixin, ChangeNotifier {
       assert(_focusDebug('Node NOT requesting focus because canRequestFocus is false: $this'));
       return;
     }
+    // If the node isn't part of the tree, then we just defer the focus request
+    // until the next time it is reparented, so that it's possible to focus
+    // newly added widgets.
     if (_parent == null) {
       _requestFocusWhenReparented = true;
       return;
