@@ -13,12 +13,18 @@ import 'typography.dart';
 
 /// Material design text theme.
 ///
-/// Definitions for the various typographical styles found in material design
+/// Definitions for the various typographical styles found in Material Design
 /// (e.g., button, caption). Rather than creating a [TextTheme] directly,
 /// you can obtain an instance as [Typography.black] or [Typography.white].
 ///
 /// To obtain the current text theme, call [Theme.of] with the current
 /// [BuildContext] and read the [ThemeData.textTheme] property.
+///
+/// The names of the TextTheme properties match this table from the
+/// [Material Design spec](https://material.io/design/typography/the-type-system.html#type-scale)
+/// with two exceptions: the styles called H1-H6 in the spec are
+/// headline1-headline6 in the API, and body1,body2 are called
+/// bodyText1 and bodyText2.
 ///
 /// ![](https://storage.googleapis.com/spec-host-backup/mio-design%2Fassets%2F1W8kyGVruuG_O8psvyiOaCf1lLFIMzB-N%2Ftypesystem-typescale.png)
 ///
@@ -33,20 +39,20 @@ import 'typography.dart';
 /// NAME         SIZE  WEIGHT  SPACING
 /// headline1    96.0  light   -1.5
 /// headline2    60.0  light   -0.5
-/// headline3    48.0  normal   0.0
-/// headline4    34.0  normal   0.25
-/// headline5    24.0  normal   0.0
+/// headline3    48.0  regular  0.0
+/// headline4    34.0  regular  0.25
+/// headline5    24.0  regular  0.0
 /// headline6    20.0  medium   0.15
-/// subtitle1    16.0  normal   0.15
+/// subtitle1    16.0  regular  0.15
 /// subtitle2    14.0  medium   0.1
-/// body1        16.0  normal   0.5   (bodyText1)
-/// body2        14.0  normal   0.25  (bodyText2)
-/// button       14.0  medium   0.75
-/// caption      12.0  normal   0.4
-/// overline     10.0  normal   1.5
+/// body1        16.0  regular  0.5   (bodyText1)
+/// body2        14.0  regular  0.25  (bodyText2)
+/// button       14.0  medium   1.25
+/// caption      12.0  regular  0.4
+/// overline     10.0  regular  1.5
 /// ```
 ///
-/// ...where "light" is `FontWeight.w300`, "normal" is `FontWeight.w400` and
+/// ...where "light" is `FontWeight.w300`, "regular" is `FontWeight.w400` and
 /// "medium" is `FontWeight.w500`.
 ///
 /// The [TextTheme] API was originally based on the original material (2014)

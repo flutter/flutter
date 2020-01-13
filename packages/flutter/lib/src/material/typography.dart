@@ -435,11 +435,11 @@ class Typography extends Diagnosticable {
     headline5 : TextStyle(debugLabel: 'englishLike headline5 2018', fontSize: 24.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic, letterSpacing: 0.0),
     headline6 : TextStyle(debugLabel: 'englishLike headline6 2018', fontSize: 20.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.alphabetic, letterSpacing: 0.15),
     subtitle1 : TextStyle(debugLabel: 'englishLike subtitle1 2018', fontSize: 16.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic, letterSpacing: 0.15),
+    subtitle2 : TextStyle(debugLabel: 'englishLike subtitle2 2018', fontSize: 14.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.alphabetic, letterSpacing: 0.1),
     bodyText1 : TextStyle(debugLabel: 'englishLike bodyText1 2018', fontSize: 14.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic, letterSpacing: 0.25),
     bodyText2 : TextStyle(debugLabel: 'englishLike bodyText2 2018', fontSize: 16.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic, letterSpacing: 0.5),
-    caption   : TextStyle(debugLabel: 'englishLike caption 2018',   fontSize: 12.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic, letterSpacing: 0.4),
     button    : TextStyle(debugLabel: 'englishLike button 2018',    fontSize: 14.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.alphabetic, letterSpacing: 0.75),
-    subtitle2 : TextStyle(debugLabel: 'englishLike subtitle2 2018', fontSize: 14.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.alphabetic, letterSpacing: 0.1),
+    caption   : TextStyle(debugLabel: 'englishLike caption 2018',   fontSize: 12.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic, letterSpacing: 0.4),
     overline  : TextStyle(debugLabel: 'englishLike overline 2018',  fontSize: 10.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic, letterSpacing: 1.5),
   );
 
@@ -474,11 +474,11 @@ class Typography extends Diagnosticable {
     headline5 : TextStyle(debugLabel: 'dense headline5 2018', fontSize: 24.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
     headline6 : TextStyle(debugLabel: 'dense headline6 2018', fontSize: 21.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.ideographic),
     subtitle1 : TextStyle(debugLabel: 'dense subtitle1 2018', fontSize: 17.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
+    subtitle2 : TextStyle(debugLabel: 'dense subtitle2 2018', fontSize: 15.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.ideographic),
     bodyText1 : TextStyle(debugLabel: 'dense bodyText1 2018', fontSize: 17.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
     bodyText2 : TextStyle(debugLabel: 'dense bodyText2 2018', fontSize: 15.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
-    caption   : TextStyle(debugLabel: 'dense caption 2018',   fontSize: 13.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
     button    : TextStyle(debugLabel: 'dense button 2018',    fontSize: 15.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.ideographic),
-    subtitle2 : TextStyle(debugLabel: 'dense subtitle2 2018', fontSize: 15.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.ideographic),
+    caption   : TextStyle(debugLabel: 'dense caption 2018',   fontSize: 13.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
     overline  : TextStyle(debugLabel: 'dense overline 2018',  fontSize: 11.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.ideographic),
   );
 
@@ -511,11 +511,11 @@ class Typography extends Diagnosticable {
     headline5 : TextStyle(debugLabel: 'tall headline5 2018', fontSize: 24.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
     headline6 : TextStyle(debugLabel: 'tall headline6 2018', fontSize: 21.0, fontWeight: FontWeight.w700, textBaseline: TextBaseline.alphabetic),
     subtitle1 : TextStyle(debugLabel: 'tall subtitle1 2018', fontSize: 17.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
+    subtitle2 : TextStyle(debugLabel: 'tall subtitle2 2018', fontSize: 15.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.alphabetic),
     bodyText1 : TextStyle(debugLabel: 'tall bodyText1 2018', fontSize: 17.0, fontWeight: FontWeight.w700, textBaseline: TextBaseline.alphabetic),
     bodyText2 : TextStyle(debugLabel: 'tall bodyText2 2018', fontSize: 15.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
     button    : TextStyle(debugLabel: 'tall button 2018',    fontSize: 15.0, fontWeight: FontWeight.w700, textBaseline: TextBaseline.alphabetic),
     caption   : TextStyle(debugLabel: 'tall caption 2018',   fontSize: 13.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
-    subtitle2 : TextStyle(debugLabel: 'tall subtitle2 2018', fontSize: 15.0, fontWeight: FontWeight.w500, textBaseline: TextBaseline.alphabetic),
     overline  : TextStyle(debugLabel: 'tall overline 2018',  fontSize: 11.0, fontWeight: FontWeight.w400, textBaseline: TextBaseline.alphabetic),
   );
 }

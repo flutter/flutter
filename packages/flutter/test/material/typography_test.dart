@@ -127,14 +127,14 @@ void main() {
     // Body1 Roboto regular 16 0.5
     expect(theme.bodyText1.fontFamily, 'Roboto');
     expect(theme.bodyText1.fontWeight, regular);
-    // TODO(hansmuller): restore after englishLike2018 has been updated
+    // TODO(hansmuller): restore after englishLike2018 has been updated per #38904.
     //expect(theme.bodyText1.fontSize, 16);
     //expect(theme.bodyText1.letterSpacing, 0.5);
 
     // Body2 Roboto regular 14 0.25
     expect(theme.bodyText2.fontFamily, 'Roboto');
     expect(theme.bodyText2.fontWeight, regular);
-    // TODO(hansmuller): restore after englishLike2018 has been updated
+    // TODO(hansmuller): restore after englishLike2018 has been updated per #38904.
     //expect(theme.bodyText2.fontSize, 14);
     //expect(theme.bodyText2.letterSpacing, 0.25);
 
@@ -142,7 +142,7 @@ void main() {
     expect(theme.button.fontFamily, 'Roboto');
     expect(theme.button.fontWeight, medium);
     expect(theme.button.fontSize, 14);
-    // TODO(hansmuller): restore after englishLike2018 has been updated
+    // TODO(hansmuller): restore after englishLike2018 has been updated, per #38904.
     //expect(theme.button.letterSpacing, 1.25);
 
     // Caption Roboto regular 12 0.4
