@@ -160,7 +160,7 @@ class TestCompiler {
           // The idea is to keep the cache file up-to-date and include as
           // much as possible in an effort to re-use as many packages as
           // possible.
-          ensureDirectoryExists(testFilePath);
+          fsUtils.ensureDirectoryExists(testFilePath);
           await outputFile.copy(testFilePath);
         }
         request.result.complete(kernelReadyToRun.path);
