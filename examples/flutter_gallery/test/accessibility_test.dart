@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter_gallery/gallery/app.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_gallery/demo/all.dart';
 import 'package:flutter_gallery/gallery/themes.dart';
@@ -755,5 +756,14 @@ void main() {
         handle.dispose();
       });
     }
+  });
+
+  group('Gallery home page meets text contrast guidelines', () {
+    testWidgets('options menu', (WidgetTester tester) async {
+      await tester.pumpWidget(const GalleryApp(testMode: true));
+      await tester.tap(find.byTooltip('Toggle options page'));
+      await tester.pumpAndSettle();
+      await expectLater(tester, meetsGuideline(textContrastGuideline));
+    });
   });
 }
