@@ -20,18 +20,95 @@ typedef DiagnosticPropertiesTransformer = Iterable<DiagnosticsNode> Function(Ite
 /// and other callbacks that collect information describing an error.
 typedef InformationCollector = Iterable<DiagnosticsNode> Function();
 
-/// Signature for an additional filter added to
-/// [FlutterError.defaultStackFilter]'s list of delegates.
+/// Partial information from a stack frame for stack filtering purposes.
 ///
-/// This method serves as a mapping function over the original list of stack
-/// lines.
+/// See also:
+///
+///  * [SubStackFilter], which uses this class to compare against [StackFrame]s.
+@immutable
+class PartialStackFrame {
+  /// Creates a new [PartialStackFrame] instance. All arguments are required and
+  /// must not be null.
+  const PartialStackFrame({
+    @required this.className,
+    @required this.method,
+    @required this.packagePath,
+  }) : assert(className != null),
+       assert(method != null),
+       assert(packagePath != null);
+
+  /// The class name for the method.
+  ///
+  /// On web, this is ignored, since class names are not available. Top level
+  /// methods should use the empty string.
+  final String className;
+
+  /// The method name for this frame line.
+  ///
+  /// On web, private methods are wrapped with `[]`.
+  final String method;
+
+  /// The relative path to the file for this method and class.
+  ///
+  /// This is required for disambiguation.
+  final String packagePath;
+
+  @override
+  String toString() {
+    if (kIsWeb) {
+      final String webMethod = method.startsWith('_') ? '[$method]' : method;
+      return '$packagePath: $webMethod';
+    }
+    return '$packagePath: $className.$method';
+  }
+}
+
+/// A class that matches sublists of stack frames for additional filtering
+/// of [FlutterError.defaultStackFilter].
+///
+/// This class provides a list of partial stack [frames] to match against and a
+/// replacement string for matches.
 ///
 /// See also:
 ///
 ///   * [FlutterError.addDefaultStackFilter], a method to register additional
 ///     stack filters for [FlutterError.defaultStackFilter].
 ///   * [StackFrame], a class that can help with parsing stack frames.
-typedef StackFilter = void Function(List<StackFrame>);
+///   * [PartialStackFrame], a class that helps match partial method information
+///     to a stack frame.
+class SubStackFilter {
+  /// Creates a new SubStackFilter. All parameters are required and must not be
+  /// null.
+  const SubStackFilter({
+    @required this.frames,
+    @required this.replacement,
+  }) : assert(frames != null),
+       assert(replacement != null);
+
+  /// The shape of this repetative stack pattern.
+  final List<PartialStackFrame> frames;
+
+  /// The number of frames in this pattern.
+  int get numFrames => frames.length;
+
+  /// The string to replace the frames with.
+  ///
+  /// If the same replacement string is used multiple times in a row, the
+  /// [FlutterError.defaultStackFilter] will simply update a counter after this
+  /// line rather than repeating it.
+  final String replacement;
+
+  /// Checks whether the sublist of [StackFrame]s provided matches the [frames].
+  bool matchesFrames(List<StackFrame> stackFrames) {
+    if (stackFrames.length != numFrames) {
+      return false;
+    }
+    final String Function(StackFrame) mappingFunction = kIsWeb
+      ? (StackFrame frame) => '${frame.packagePath}: ${frame.method.startsWith('_') ? '[' + frame.method + ']' : frame.method}'
+      : (StackFrame frame) => '${frame.packagePath}: ${frame.className}.${frame.method}';
+    return stackFrames.map<String>(mappingFunction).join('\n') == frames.join('\n');
+  }
+}
 
 abstract class _ErrorDiagnostic extends DiagnosticsProperty<List<Object>> {
   /// This constructor provides a reliable hook for a kernel transformer to find
@@ -666,17 +743,17 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
     _errorCount += 1;
   }
 
-  static final List<StackFilter> _stackFilters = <StackFilter>[];
+  static final List<SubStackFilter> _stackFilters = <SubStackFilter>[];
 
   /// Adds a stack filtering function to [defaultStackFilter].
   ///
-  /// For example, the framework adds filtering functions to elide common tree-
-  /// walking patterns in the stacktrace.
+  /// For example, the framework adds common patterns of element building to
+  /// elide tree-walking patterns in the stacktrace.
   ///
-  /// Added filters are called in order or addition. The stack trace they
-  /// receive may have already been filtered by a previous filter.
-  static void addDefaultStackFilter(StackFilter filter) {
-    _stackFilters.add(filter);
+  /// Added filters are checked in order of addition. The first matching filter
+  /// wins, and subsequent filters will not be checked.
+  static void addDefaultStackFilter(SubStackFilter frames) {
+    _stackFilters.add(frames);
   }
 
   /// Converts a stack to a string that is more readable by omitting stack
@@ -708,10 +785,23 @@ class FlutterError extends Error with DiagnosticableTreeMixin implements Asserti
     final List<String> skipped = <String>[];
 
     final List<StackFrame> parsedFrames = StackFrame.fromStackString(frames.join('\n'));
-    for (final StackFilter filter in _stackFilters) {
-      filter(parsedFrames);
-    }
-    for (final StackFrame frameLine in parsedFrames) {
+
+    final RegExp repetitionPattern = RegExp(r'\(x(\d+) - (\d+) frames\)');
+    mainLoop:
+    for (int index = 0; index < parsedFrames.length; index++) {
+      for (final SubStackFilter filter in _stackFilters) {
+        if (filter.matchesFrames(parsedFrames.skip(index).take(filter.numFrames).toList())) {
+          index = index + filter.numFrames;
+          if (result.last.startsWith(filter.replacement)) {
+            final Match match = repetitionPattern.firstMatch(result.last);
+            result.last = filter.replacement + ' (x${int.parse(match.group(1)) + 1} - ${int.parse(match.group(2)) + filter.numFrames + 1} frames)';
+          } else {
+            result.add(filter.replacement + ' (x1 - ${filter.numFrames + 1} frames)');
+          }
+          continue mainLoop;
+        }
+      }
+      final StackFrame frameLine = parsedFrames[index];
       if (filteredClasses.contains(frameLine.className)) {
         skipped.add('class ${frameLine.className}');
       } else if (filteredPackages.contains(frameLine.packageScheme + ':' + frameLine.package)) {

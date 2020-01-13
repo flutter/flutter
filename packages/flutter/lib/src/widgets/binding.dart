@@ -256,9 +256,10 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
     _instance = this;
 
     assert(() {
-      _debugAddStackFilter();
+      _debugAddStackFilters();
       return true;
     }());
+
     // Initialization of [_buildOwner] has to be done after
     // [super.initInstances] is called, as it requires [ServicesBinding] to
     // properly setup the [defaultBinaryMessenger] instance.
@@ -270,107 +271,82 @@ mixin WidgetsBinding on BindingBase, ServicesBinding, SchedulerBinding, GestureB
     FlutterErrorDetails.propertiesTransformers.add(transformDebugCreator);
   }
 
-  void _debugAddStackFilter() {
-    String stackLineStripped(StackFrame frame) => '${frame.className}.${frame.method} ${frame.packagePath}';
-    const String componentElementStack = '''
-Element.inflateWidget src/widgets/framework.dart
-Element.updateChild src/widgets/framework.dart
-ComponentElement.performRebuild src/widgets/framework.dart
-Element.rebuild src/widgets/framework.dart
-ComponentElement._firstBuild src/widgets/framework.dart
-ComponentElement.mount src/widgets/framework.dart''';
+  void _debugAddStackFilters() {
+    const PartialStackFrame elementInflateWidget = PartialStackFrame(className: 'Element', method: 'inflateWidget', packagePath: 'src/widgets/framework.dart');
+    const PartialStackFrame elementUpdateChild = PartialStackFrame(className: 'Element', method: 'updateChild', packagePath: 'src/widgets/framework.dart');
+    const PartialStackFrame elementRebuild = PartialStackFrame(className: 'Element', method: 'rebuild', packagePath: 'src/widgets/framework.dart');
+    const PartialStackFrame componentElementPerformRebuild = PartialStackFrame(className: 'ComponentElement', method: 'performRebuild', packagePath: 'src/widgets/framework.dart');
+    const PartialStackFrame componentElementFristBuild = PartialStackFrame(className: 'ComponentElement', method: '_firstBuild', packagePath: 'src/widgets/framework.dart');
+    const PartialStackFrame componentElementMount = PartialStackFrame(className: 'ComponentElement', method: 'mount', packagePath: 'src/widgets/framework.dart');
+    const PartialStackFrame statefulElementFristBuild = PartialStackFrame(className: 'StatefulElement', method: '_firstBuild', packagePath: 'src/widgets/framework.dart');
+    const PartialStackFrame singleChildMount = PartialStackFrame(className: 'SingleChildRenderObjectElement', method: 'mount', packagePath: 'src/widgets/framework.dart');
 
-    const String componentElementStack2 = '''
-Element.updateChild src/widgets/framework.dart
-ComponentElement.performRebuild src/widgets/framework.dart
-Element.rebuild src/widgets/framework.dart
-ComponentElement._firstBuild src/widgets/framework.dart
-ComponentElement.mount src/widgets/framework.dart''';
+    const String replacementString = '...     Normal element mounting';
 
-    const String statefulElementStack = '''
-Element.inflateWidget src/widgets/framework.dart
-Element.updateChild src/widgets/framework.dart
-ComponentElement.performRebuild src/widgets/framework.dart
-Element.rebuild src/widgets/framework.dart
-ComponentElement._firstBuild src/widgets/framework.dart
-StatefulElement._firstBuild src/widgets/framework.dart
-ComponentElement.mount src/widgets/framework.dart''';
+    // ComponentElement variations
+    FlutterError.addDefaultStackFilter(const SubStackFilter(
+      frames: <PartialStackFrame>[
+        elementInflateWidget,
+        elementUpdateChild,
+        componentElementPerformRebuild,
+        elementRebuild,
+        componentElementFristBuild,
+        componentElementMount,
+      ],
+      replacement: replacementString,
+    ));
+    FlutterError.addDefaultStackFilter(const SubStackFilter(
+      frames: <PartialStackFrame>[
+        elementUpdateChild,
+        componentElementPerformRebuild,
+        elementRebuild,
+        componentElementFristBuild,
+        componentElementMount,
+      ],
+      replacement: replacementString,
+    ));
 
-    const String statefulElementStack2 = '''
-Element.updateChild src/widgets/framework.dart
-ComponentElement.performRebuild src/widgets/framework.dart
-Element.rebuild src/widgets/framework.dart
-ComponentElement._firstBuild src/widgets/framework.dart
-StatefulElement._firstBuild src/widgets/framework.dart
-ComponentElement.mount src/widgets/framework.dart''';
+    // StatefulElement variations
+    FlutterError.addDefaultStackFilter(const SubStackFilter(
+      frames: <PartialStackFrame>[
+        elementInflateWidget,
+        elementUpdateChild,
+        componentElementPerformRebuild,
+        elementRebuild,
+        componentElementFristBuild,
+        statefulElementFristBuild,
+        componentElementMount,
+      ],
+      replacement: replacementString,
+    ));
+    FlutterError.addDefaultStackFilter(const SubStackFilter(
+      frames: <PartialStackFrame>[
+        elementUpdateChild,
+        componentElementPerformRebuild,
+        elementRebuild,
+        componentElementFristBuild,
+        statefulElementFristBuild,
+        componentElementMount,
+      ],
+      replacement: replacementString,
+    ));
 
-    const String singleChildRenderObjectElementStack = '''
-Element.inflateWidget src/widgets/framework.dart
-Element.updateChild src/widgets/framework.dart
-SingleChildRenderObjectElement.mount src/widgets/framework.dart''';
-
-    const String singleChildRenderObjectElementStack2 = '''
-Element.updateChild src/widgets/framework.dart
-SingleChildRenderObjectElement.mount src/widgets/framework.dart''';
-
-    FlutterError.addDefaultStackFilter((List<StackFrame> frames) {
-      bool mutateList(int start, int length, String golden) {
-        final StackFrame original = frames[start];
-        if (!golden.startsWith(stackLineStripped(original))) {
-          return false;
-        }
-        final String candidate = frames.skip(start).take(length).map(stackLineStripped).join('\n');
-        if (candidate != golden) {
-          return false;
-        }
-        final RegExp repeatedPattern = RegExp(r'...     Normal mounting of (\d+) elements? \((\d+) frames\).');
-        final StackFrame previousFrame = frames[start - 1];
-        final Match match = repeatedPattern.firstMatch(previousFrame.source);
-        if (match != null) {
-          final int times = int.parse(match.group(1)) + 1;
-          final int additionalFrames = int.parse(match.group(2)) + length + 1;
-          frames[start - 1] = StackFrame(
-            number: -1,
-            className: original.className,
-            method: original.method,
-            package: original.package,
-            packagePath: original.packagePath,
-            packageScheme: original.packageScheme,
-            column: original.column,
-            line: original.line,
-            source: '...     Normal mounting of $times elements ($additionalFrames frames).',
-          );
-          frames.removeRange(start, start + length + 1);
-        } else {
-          frames[start] = StackFrame(
-            number: -1,
-            className: original.className,
-            method: original.method,
-            package: original.package,
-            packagePath: original.packagePath,
-            packageScheme: original.packageScheme,
-            column: original.column,
-            line: original.line,
-            source: '...     Normal mounting of 1 element (${length + 1} frames).',
-          );
-          frames.removeRange(start + 1, start + length);
-        }
-        return true;
-      }
-
-      for (int i = 0; i < frames.length; i++) {
-        if (frames[i].package == 'flutter' &&
-            (mutateList(i, 6, componentElementStack)
-          || mutateList(i, 5, componentElementStack2)
-          || mutateList(i, 7, statefulElementStack)
-          || mutateList(i, 6, statefulElementStack2)
-          || mutateList(i, 3, singleChildRenderObjectElementStack)
-          || mutateList(i, 2, singleChildRenderObjectElementStack2))
-        ) {
-          i--;
-        }
-      }
-    });
+    // SingleChildRenderObjectElement variations
+    FlutterError.addDefaultStackFilter(const SubStackFilter(
+      frames: <PartialStackFrame>[
+        elementInflateWidget,
+        elementUpdateChild,
+        singleChildMount,
+      ],
+      replacement: replacementString,
+    ));
+    FlutterError.addDefaultStackFilter(const SubStackFilter(
+      frames: <PartialStackFrame>[
+        elementUpdateChild,
+        singleChildMount,
+      ],
+      replacement: replacementString,
+    ));
   }
 
   /// The current [WidgetsBinding], if one has been created.
