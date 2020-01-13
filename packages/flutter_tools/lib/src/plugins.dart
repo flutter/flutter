@@ -325,7 +325,7 @@ bool _writeFlutterPluginsList(FlutterProject project, List<Plugin> plugins) {
     pluginNames.add(plugin.name);
   }
   for (final Plugin plugin in plugins) {
-    flutterPluginsBuffer.write('${plugin.name}=${escapePath(plugin.path)}\n');
+    flutterPluginsBuffer.write('${plugin.name}=${fsUtils.escapePath(plugin.path)}\n');
     directAppDependencies.add(<String, dynamic>{
       'name': plugin.name,
       // Extract the plugin dependencies which happen to be plugins.
