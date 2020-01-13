@@ -40,4 +40,8 @@ std::string FontFeatures::GetFeatureSettings() const {
   return stream.str();
 }
 
+const std::map<std::string, int>& FontFeatures::GetFontFeatures() const {
+  return feature_map_;
+}
+
 }  // namespace txt
