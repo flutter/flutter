@@ -246,7 +246,7 @@ import io.flutter.embedding.engine.renderer.FlutterUiDisplayListener;
   }
 
   public static class SavedState extends BaseSavedState {
-    public static Creator CREATOR = new Creator() {
+    public static Creator<SavedState> CREATOR = new Creator<SavedState>() {
       @Override
       public SavedState createFromParcel(Parcel source) {
         return new SavedState(source);
