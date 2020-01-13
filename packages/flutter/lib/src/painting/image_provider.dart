@@ -666,7 +666,7 @@ class FileImage extends ImageProvider<FileImage> {
   int get hashCode => hashValues(file?.path, scale);
 
   @override
-  String toString() => '${objectRuntimeType(this, 'AssetBundleImageProvider')}("${file?.path}", scale: $scale)';
+  String toString() => '${objectRuntimeType(this, 'FileImage')}("${file?.path}", scale: $scale)';
 }
 
 /// Decodes the given [Uint8List] buffer as an image, associating it with the

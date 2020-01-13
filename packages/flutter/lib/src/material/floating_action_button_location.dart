@@ -407,7 +407,7 @@ abstract class FloatingActionButtonAnimator {
   double getAnimationRestart(double previousValue) => 0.0;
 
   @override
-  String toString() => '${objectRuntimeType(this, '_CenterFloatFloatingActionButtonLocation')}';
+  String toString() => '${objectRuntimeType(this, 'FloatingActionButtonAnimator')}';
 }
 
 class _ScalingFabMotionAnimator extends FloatingActionButtonAnimator {

@@ -669,6 +669,6 @@ class TextAlignVertical {
 
   @override
   String toString() {
-    return '${objectRuntimeType(this, 'AlignmentGeometry')}(y: $y)';
+    return '${objectRuntimeType(this, 'TextAlignVertical')}(y: $y)';
   }
 }

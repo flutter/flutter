@@ -685,7 +685,7 @@ class TextEditingValue {
   }
 
   @override
-  String toString() => '${objectRuntimeType(this, 'TextInputConfiguration')}(text: \u2524$text\u251C, selection: $selection, composing: $composing)';
+  String toString() => '${objectRuntimeType(this, 'TextEditingValue')}(text: \u2524$text\u251C, selection: $selection, composing: $composing)';
 
   @override
   bool operator ==(Object other) {

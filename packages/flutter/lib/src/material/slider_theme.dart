@@ -2896,7 +2896,7 @@ class RangeValues {
 
   @override
   String toString() {
-    return '${objectRuntimeType(this, 'SliderTheme')}($start, $end)';
+    return '${objectRuntimeType(this, 'RangeValues')}($start, $end)';
   }
 }
 

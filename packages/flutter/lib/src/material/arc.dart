@@ -325,7 +325,7 @@ class MaterialRectArcTween extends RectTween {
 
   @override
   String toString() {
-    return '${objectRuntimeType(this, '_Diagonal')}($begin \u2192 $end; beginArc=$beginArc, endArc=$endArc)';
+    return '${objectRuntimeType(this, 'MaterialRectArcTween')}($begin \u2192 $end; beginArc=$beginArc, endArc=$endArc)';
   }
 }
 

@@ -843,7 +843,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
   }
 
   @override
-  String toString() => '${objectRuntimeType(this, 'NestedScrollView')}(outer=$_outerController; inner=$_innerController)';
+  String toString() => '${objectRuntimeType(this, '_NestedScrollCoordinator')}(outer=$_outerController; inner=$_innerController)';
 }
 
 class _NestedScrollController extends ScrollController {
@@ -1226,7 +1226,7 @@ class _NestedOuterBallisticScrollActivity extends BallisticScrollActivity {
 
   @override
   String toString() {
-    return '${objectRuntimeType(this, '_NestedScrollController')}(${metrics.minRange} .. ${metrics.maxRange}; correcting by ${metrics.correctionOffset})';
+    return '${objectRuntimeType(this, '_NestedOuterBallisticScrollActivity')}(${metrics.minRange} .. ${metrics.maxRange}; correcting by ${metrics.correctionOffset})';
   }
 }
 

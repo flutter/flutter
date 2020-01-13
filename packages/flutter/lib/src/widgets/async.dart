@@ -264,7 +264,7 @@ class AsyncSnapshot<T> {
   bool get hasError => error != null;
 
   @override
-  String toString() => '${objectRuntimeType(this, 'StreamBuilderBase')}($connectionState, $data, $error)';
+  String toString() => '${objectRuntimeType(this, 'AsyncSnapshot')}($connectionState, $data, $error)';
 
   @override
   bool operator ==(Object other) {

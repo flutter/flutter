@@ -3870,7 +3870,7 @@ abstract class Element extends DiagnosticableTree implements BuildContext {
   /// A short, textual description of this element.
   @override
   String toStringShort() {
-    return widget != null ? '${widget.toStringShort()}' : '[${objectRuntimeType(this, '_InactiveElements')}]';
+    return widget != null ? '${widget.toStringShort()}' : '[${objectRuntimeType(this, 'Element')}]';
   }
 
   @override

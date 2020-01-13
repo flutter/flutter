@@ -595,5 +595,5 @@ class OffsetPair {
   }
 
   @override
-  String toString() => '${objectRuntimeType(this, 'GestureRecognizer')}(local: $local, global: $global)';
+  String toString() => '${objectRuntimeType(this, 'OffsetPair')}(local: $local, global: $global)';
 }

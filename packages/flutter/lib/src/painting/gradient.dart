@@ -511,7 +511,7 @@ class LinearGradient extends Gradient {
 
   @override
   String toString() {
-    return '${objectRuntimeType(this, '_ColorsAndStops')}($begin, $end, $colors, $stops, $tileMode)';
+    return '${objectRuntimeType(this, 'LinearGradient')}($begin, $end, $colors, $stops, $tileMode)';
   }
 }
 

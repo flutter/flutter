@@ -615,7 +615,7 @@ class PaintingContext extends ClipContext {
   }
 
   @override
-  String toString() => '${objectRuntimeType(this, 'ParentData')}#$hashCode(layer: $_containerLayer, canvas bounds: $estimatedBounds)';
+  String toString() => '${objectRuntimeType(this, 'PaintingContext')}#$hashCode(layer: $_containerLayer, canvas bounds: $estimatedBounds)';
 }
 
 /// An abstract set of layout constraints.

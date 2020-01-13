@@ -545,8 +545,12 @@ Future<void> verifyInternationalizations() async {
 }
 
 Future<void> verifyNoRuntimeTypeInToString(String workingDirectory) async {
-  final List<File> files = _allFiles(path.join(workingDirectory, 'packages', 'flutter', 'lib'), 'dart', minimumMatches: 400)
-      .where((File file) => !file.path.endsWith(path.join('lib', 'src', 'foundation', 'object.dart')))
+  final String flutterLib = path.join(workingDirectory, 'packages', 'flutter', 'lib');
+  final Set<String> excludedFiles = <String>{
+    path.join(flutterLib, 'src', 'foundation', 'object.dart'), // Calls this from within an assert.
+  };
+  final List<File> files = _allFiles(flutterLib, 'dart', minimumMatches: 400)
+      .where((File file) => !excludedFiles.contains(file.path))
       .toList();
   final RegExp toStringRegExp = RegExp(r'^\s+String\s+to(.+?)?String(.+?)?\(\)\s+(\{|=>)');
   final List<String> problems = <String>[];

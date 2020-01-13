@@ -135,7 +135,7 @@ abstract class LocalizationsDelegate<T> {
   Type get type => T;
 
   @override
-  String toString() => '${objectRuntimeType(this, 'Intl')}[$type]';
+  String toString() => '${objectRuntimeType(this, 'LocalizationsDelegate')}[$type]';
 }
 
 /// Interface for localized resource values for the lowest levels of the Flutter
