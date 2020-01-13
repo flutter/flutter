@@ -119,7 +119,7 @@ class BuildAarCommand extends BuildSubCommand {
       outputDirectoryPath: stringArg('output-dir'),
       buildNumber: buildNumber,
     );
-    return null;
+    return FlutterCommandResult.success();
   }
 
   /// Returns the [FlutterProject] which is determined from the remaining command-line

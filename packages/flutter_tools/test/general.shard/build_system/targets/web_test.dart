@@ -31,6 +31,7 @@ void main() {
     when(mockPlatform.isWindows).thenReturn(false);
     when(mockPlatform.isMacOS).thenReturn(true);
     when(mockPlatform.isLinux).thenReturn(false);
+    when(mockPlatform.environment).thenReturn(const <String, String>{});
 
     when(mockWindowsPlatform.isWindows).thenReturn(true);
     when(mockWindowsPlatform.isMacOS).thenReturn(false);
@@ -41,10 +42,11 @@ void main() {
         ..createSync(recursive: true)
         ..writeAsStringSync('foo:lib/\n');
       PackageMap.globalPackagesPath = packagesFile.path;
+      globals.fs.currentDirectory.childDirectory('bar').createSync();
 
       environment = Environment(
         projectDir: globals.fs.currentDirectory.childDirectory('foo'),
-        outputDir: globals.fs.currentDirectory,
+        outputDir: globals.fs.currentDirectory.childDirectory('bar'),
         buildDir: globals.fs.currentDirectory,
         defines: <String, String>{
           kTargetFile: globals.fs.path.join('foo', 'lib', 'main.dart'),
@@ -75,6 +77,32 @@ void main() {
 
     // Import.
     expect(generated, contains("import 'package:foo/main.dart' as entrypoint;"));
+  }));
+
+  test('WebReleaseBundle copies dart2js output and resource files to output directory', () => testbed.run(() async {
+    final Directory webResources = environment.projectDir.childDirectory('web');
+    webResources.childFile('index.html')
+      ..createSync(recursive: true);
+    webResources.childFile('foo.txt')
+      ..writeAsStringSync('A');
+    environment.buildDir.childFile('main.dart.js').createSync();
+
+    await const WebReleaseBundle().build(environment);
+
+    expect(environment.outputDir.childFile('foo.txt')
+      .readAsStringSync(), 'A');
+    expect(environment.outputDir.childFile('main.dart.js')
+      .existsSync(), true);
+    expect(environment.outputDir.childDirectory('assets')
+      .childFile('AssetManifest.json').existsSync(), true);
+
+    // Update to arbitary resource file triggers rebuild.
+    webResources.childFile('foo.txt').writeAsStringSync('B');
+
+    await const WebReleaseBundle().build(environment);
+
+    expect(environment.outputDir.childFile('foo.txt')
+      .readAsStringSync(), 'B');
   }));
 
   test('WebEntrypointTarget generates an entrypoint for a file outside of main', () => testbed.run(() async {

@@ -2,6 +2,7 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
@@ -144,5 +145,51 @@ void main() {
         ''
       ),
     );
+  });
+
+  testWidgets('SliverFillViewport padding test', (WidgetTester tester) async {
+    final SliverChildListDelegate delegate = SliverChildListDelegate(
+      <Widget>[
+        Container(child: const Text('0')),
+      ],
+      addAutomaticKeepAlives: false,
+      addSemanticIndexes: false,
+    );
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: CustomScrollView(
+          slivers: <Widget>[
+            SliverFillViewport(
+              padEnds: true,
+              viewportFraction: 0.5,
+              delegate: delegate,
+            ),
+          ],
+        ),
+      ),
+    );
+
+    final RenderSliver boxWithPadding = tester.renderObject<RenderSliver>(find.byType(SliverFillViewport));
+    expect(boxWithPadding.geometry.paintExtent, equals(600.0));
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: CustomScrollView(
+          slivers: <Widget>[
+            SliverFillViewport(
+              padEnds: false,
+              viewportFraction: 0.5,
+              delegate: delegate,
+            ),
+          ],
+        ),
+      ),
+    );
+
+    final RenderSliver boxWithoutPadding = tester.renderObject<RenderSliver>(find.byType(SliverFillViewport));
+    expect(boxWithoutPadding.geometry.paintExtent, equals(300.0));
   });
 }

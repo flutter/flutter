@@ -6,6 +6,8 @@ import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 import 'package:mime/mime.dart' as mime;
+import 'package:package_config/discovery.dart';
+import 'package:package_config/packages.dart';
 
 import '../artifacts.dart';
 import '../asset.dart';
@@ -26,7 +28,8 @@ import 'bootstrap.dart';
 /// This is only used in development mode.
 class WebAssetServer {
   @visibleForTesting
-  WebAssetServer(this._httpServer, { @required void Function(dynamic, StackTrace) onError }) {
+  WebAssetServer(this._httpServer, this._packages,
+      {@required void Function(dynamic, StackTrace) onError}) {
     _httpServer.listen((HttpRequest request) {
       _handleRequest(request).catchError(onError);
       // TODO(jonahwilliams): test the onError callback when https://github.com/dart-lang/sdk/issues/39094 is fixed.
@@ -44,9 +47,13 @@ class WebAssetServer {
   static Future<WebAssetServer> start(String hostname, int port) async {
     try {
       final HttpServer httpServer = await HttpServer.bind(hostname, port);
-      return WebAssetServer(httpServer, onError: (dynamic error, StackTrace stackTrace) {
+      final Packages packages =
+          await loadPackagesFile(Uri.base.resolve('.packages'));
+      return WebAssetServer(httpServer, packages,
+          onError: (dynamic error, StackTrace stackTrace) {
         httpServer.close(force: true);
-        throwToolExit('Unhandled exception in web development server:\n$error\n$stackTrace');
+        throwToolExit(
+            'Unhandled exception in web development server:\n$error\n$stackTrace');
       });
     } on SocketException catch (err) {
       throwToolExit('Failed to bind web development server:\n$err');
@@ -63,14 +70,16 @@ class WebAssetServer {
 
   final RegExp _drivePath = RegExp(r'\/[A-Z]:\/');
 
+  final Packages _packages;
+
   // handle requests for JavaScript source, dart sources maps, or asset files.
   Future<void> _handleRequest(HttpRequest request) async {
     final HttpResponse response = request.response;
     // If the response is `/`, then we are requesting the index file.
     if (request.uri.path == '/') {
       final File indexFile = globals.fs.currentDirectory
-        .childDirectory('web')
-        .childFile('index.html');
+          .childDirectory('web')
+          .childFile('index.html');
       if (indexFile.existsSync()) {
         response.headers.add('Content-Type', 'text/html');
         response.headers.add('Content-Length', indexFile.lengthSync());
@@ -117,23 +126,37 @@ class WebAssetServer {
     // doesn't currently consider the case of Dart files as assets.
     File file = globals.fs.file(Uri.base.resolve(request.uri.path));
 
-    // If both of the lookups above failed, the file might have been an asset.
+    // If both of the lookups above failed, the file might have been a package
+    // file which is signaled by a `/packages/<package>/<path>` request.
+    if (!file.existsSync() && request.uri.pathSegments.first == 'packages') {
+      file = globals.fs.file(_packages.resolve(Uri(
+          scheme: 'package', pathSegments: request.uri.pathSegments.skip(1))));
+    }
+
+    // If all of the lookups above failed, the file might have been an asset.
     // Try and resolve the path relative to the built asset directory.
     if (!file.existsSync()) {
       final String assetPath = request.uri.path.replaceFirst('/assets/', '');
-      file = globals.fs.file(globals.fs.path.join(getAssetBuildDirectory(), globals.fs.path.relative(assetPath)));
+      file = globals.fs.file(globals.fs.path
+          .join(getAssetBuildDirectory(), globals.fs.path.relative(assetPath)));
     }
 
     // If it isn't a project source or an asset, it must be a dart SDK source.
     // or a flutter web SDK source.
     if (!file.existsSync()) {
-      final Directory dartSdkParent = globals.fs.directory(globals.artifacts.getArtifactPath(Artifact.engineDartSdkPath)).parent;
-      file = globals.fs.file(globals.fs.path.joinAll(<String>[dartSdkParent.path, ...request.uri.pathSegments]));
+      final Directory dartSdkParent = globals.fs
+          .directory(
+              globals.artifacts.getArtifactPath(Artifact.engineDartSdkPath))
+          .parent;
+      file = globals.fs.file(globals.fs.path
+          .joinAll(<String>[dartSdkParent.path, ...request.uri.pathSegments]));
     }
 
     if (!file.existsSync()) {
-      final String flutterWebSdk = globals.artifacts.getArtifactPath(Artifact.flutterWebSdk);
-      file = globals.fs.file(globals.fs.path.joinAll(<String>[flutterWebSdk, ...request.uri.pathSegments]));
+      final String flutterWebSdk =
+          globals.artifacts.getArtifactPath(Artifact.flutterWebSdk);
+      file = globals.fs.file(globals.fs.path
+          .joinAll(<String>[flutterWebSdk, ...request.uri.pathSegments]));
     }
 
     if (!file.existsSync()) {
@@ -147,7 +170,7 @@ class WebAssetServer {
     // cannot determine a mime type, fall back to application/octet-stream.
     String mimeType;
     if (length >= 12) {
-      mimeType= mime.lookupMimeType(
+      mimeType = mime.lookupMimeType(
         file.path,
         headerBytes: await file.openRead(0, 12).first,
       );
@@ -176,15 +199,19 @@ class WebAssetServer {
     final List<String> modules = <String>[];
     final Uint8List codeBytes = codeFile.readAsBytesSync();
     final Uint8List sourcemapBytes = sourcemapFile.readAsBytesSync();
-    final Map<String, dynamic> manifest = castStringKeyedMap(json.decode(manifestFile.readAsStringSync()));
+    final Map<String, dynamic> manifest =
+        castStringKeyedMap(json.decode(manifestFile.readAsStringSync()));
     for (final String filePath in manifest.keys) {
       if (filePath == null) {
         globals.printTrace('Invalid manfiest file: $filePath');
         continue;
       }
-      final Map<String, dynamic> offsets = castStringKeyedMap(manifest[filePath]);
-      final List<int> codeOffsets = (offsets['code'] as List<dynamic>).cast<int>();
-      final List<int> sourcemapOffsets = (offsets['sourcemap'] as List<dynamic>).cast<int>();
+      final Map<String, dynamic> offsets =
+          castStringKeyedMap(manifest[filePath]);
+      final List<int> codeOffsets =
+          (offsets['code'] as List<dynamic>).cast<int>();
+      final List<int> sourcemapOffsets =
+          (offsets['sourcemap'] as List<dynamic>).cast<int>();
       if (codeOffsets.length != 2 || sourcemapOffsets.length != 2) {
         globals.printTrace('Invalid manifest byte offsets: $offsets');
         continue;
@@ -206,13 +233,14 @@ class WebAssetServer {
       final int sourcemapStart = sourcemapOffsets[0];
       final int sourcemapEnd = sourcemapOffsets[1];
       if (sourcemapStart < 0 || sourcemapEnd > sourcemapBytes.lengthInBytes) {
-        globals.printTrace('Invalid byte index: [$sourcemapStart, $sourcemapEnd]');
+        globals
+            .printTrace('Invalid byte index: [$sourcemapStart, $sourcemapEnd]');
         continue;
       }
       final Uint8List sourcemapView = Uint8List.view(
         sourcemapBytes.buffer,
         sourcemapStart,
-        sourcemapEnd - sourcemapStart ,
+        sourcemapEnd - sourcemapStart,
       );
       _sourcemaps['${_filePathToUriFragment(filePath)}.map'] = sourcemapView;
 
@@ -246,7 +274,7 @@ class WebDevFS implements DevFS {
   @override
   Future<Uri> create() async {
     _webAssetServer = await WebAssetServer.start(hostname, port);
-   return Uri.base;
+    return Uri.base;
   }
 
   @override
@@ -311,29 +339,37 @@ class WebDevFS implements DevFS {
         'web',
         'dart_stack_trace_mapper.js',
       ));
-      _webAssetServer.writeFile('/main.dart.js', generateBootstrapScript(
-        requireUrl: _filePathToUriFragment(requireJS.path),
-        mapperUrl: _filePathToUriFragment(stackTraceMapper.path),
-        entrypoint: '${_filePathToUriFragment(mainPath)}.js',
-      ));
-      _webAssetServer.writeFile('/main_module.js', generateMainModule(
-        entrypoint: '${_filePathToUriFragment(mainPath)}.js',
-      ));
+      _webAssetServer.writeFile(
+          '/main.dart.js',
+          generateBootstrapScript(
+            requireUrl: _filePathToUriFragment(requireJS.path),
+            mapperUrl: _filePathToUriFragment(stackTraceMapper.path),
+            entrypoint: '${_filePathToUriFragment(mainPath)}.js',
+          ));
+      _webAssetServer.writeFile(
+          '/main_module.js',
+          generateMainModule(
+            entrypoint: '${_filePathToUriFragment(mainPath)}.js',
+          ));
       _webAssetServer.writeFile('/dart_sdk.js', dartSdk.readAsStringSync());
-      _webAssetServer.writeFile('/dart_sdk.js.map', dartSdkSourcemap.readAsStringSync());
+      _webAssetServer.writeFile(
+          '/dart_sdk.js.map', dartSdkSourcemap.readAsStringSync());
       // TODO(jonahwilliams): refactor the asset code in this and the regular devfs to
       // be shared.
-      await writeBundle(globals.fs.directory(getAssetBuildDirectory()), bundle.entries);
+      await writeBundle(
+          globals.fs.directory(getAssetBuildDirectory()), bundle.entries);
     }
     final DateTime candidateCompileTime = DateTime.now();
     if (fullRestart) {
       generator.reset();
     }
-     final CompilerOutput compilerOutput = await generator.recompile(
+    final CompilerOutput compilerOutput = await generator.recompile(
       mainPath,
       invalidatedFiles,
-      outputPath:  dillOutputPath ?? getDefaultApplicationKernelPath(trackWidgetCreation: trackWidgetCreation),
-      packagesFilePath : _packagesFilePath,
+      outputPath: dillOutputPath ??
+          getDefaultApplicationKernelPath(
+              trackWidgetCreation: trackWidgetCreation),
+      packagesFilePath: _packagesFilePath,
     );
     if (compilerOutput == null || compilerOutput.errorCount > 0) {
       return UpdateFSReport(success: false);
@@ -354,18 +390,19 @@ class WebDevFS implements DevFS {
     } on FileSystemException catch (err) {
       throwToolExit('Failed to load recompiled sources:\n$err');
     }
-    return UpdateFSReport(success: true, syncedBytes: codeFile.lengthSync(),
-      invalidatedSourcesCount: invalidatedFiles.length)
-        ..invalidatedModules = modules.map(_filePathToUriFragment).toList();
+    return UpdateFSReport(
+        success: true,
+        syncedBytes: codeFile.lengthSync(),
+        invalidatedSourcesCount: invalidatedFiles.length)
+      ..invalidatedModules = modules.map(_filePathToUriFragment).toList();
   }
 }
 
 String _filePathToUriFragment(String path) {
   if (globals.platform.isWindows) {
     final bool startWithSlash = path.startsWith('/');
-    final String partial = globals.fs.path
-      .split(path)
-      .skip(startWithSlash ? 2 : 1).join('/');
+    final String partial =
+        globals.fs.path.split(path).skip(startWithSlash ? 2 : 1).join('/');
     if (partial.startsWith('/')) {
       return partial;
     }

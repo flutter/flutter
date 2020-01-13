@@ -962,7 +962,7 @@ void main() {
     "placeholders": {
       "progress": {
         "type": "Number",
-        "format": "percentPattern"
+        "format": "compact"
       }
     }
   }
@@ -990,7 +990,7 @@ void main() {
         expect(
           generator.classMethods.first,
           '''  String courseCompletion(Object progress) {
-    final NumberFormat progressNumberFormat = NumberFormat.percentPattern(
+    final NumberFormat progressNumberFormat = NumberFormat.compact(
       locale: _localeName,
     );
     final String progressString = progressNumberFormat.format(progress);
@@ -1006,15 +1006,26 @@ void main() {
 ''');
       });
 
-      test('correctly adds optional parameters to numbers', () {
-        const String singleNumberMessage = '''{
+      test('correctly adds optional named parameters to numbers', () {
+        const Set<String> numberFormatsWithNamedParameters = <String>{
+          'compact',
+          'compactCurrency',
+          'compactSimpleCurrency',
+          'compactLong',
+          'currency',
+          'decimalPercentPattern',
+          'simpleCurrency',
+        };
+
+        for (final String numberFormat in numberFormatsWithNamedParameters) {
+          final String singleNumberMessage = '''{
   "courseCompletion": "You have completed {progress} of the course.",
   "@courseCompletion": {
     "description": "The amount of progress the student has made in their class.",
     "placeholders": {
       "progress": {
         "type": "Number",
-        "format": "decimalPercentPattern",
+        "format": "$numberFormat",
         "optionalParameters": {
           "decimalDigits": 2
         }
@@ -1022,30 +1033,30 @@ void main() {
     }
   }
 }''';
-        final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
-          ..createSync(recursive: true);
-        l10nDirectory.childFile(defaultTemplateArbFileName)
-          .writeAsStringSync(singleNumberMessage);
+          final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+            ..createSync(recursive: true);
+          l10nDirectory.childFile(defaultTemplateArbFileName)
+            .writeAsStringSync(singleNumberMessage);
 
-        final LocalizationsGenerator generator = LocalizationsGenerator(fs);
-        try {
-          generator.initialize(
-            l10nDirectoryPath: defaultArbPathString,
-            templateArbFileName: defaultTemplateArbFileName,
-            outputFileString: defaultOutputFileString,
-            classNameString: defaultClassNameString,
-          );
-          generator.parseArbFiles();
-          generator.generateClassMethods();
-        } on Exception catch (e) {
-          fail('Parsing template arb file should succeed: \n$e');
-        }
+          final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+          try {
+            generator.initialize(
+              l10nDirectoryPath: defaultArbPathString,
+              templateArbFileName: defaultTemplateArbFileName,
+              outputFileString: defaultOutputFileString,
+              classNameString: defaultClassNameString,
+            );
+            generator.parseArbFiles();
+            generator.generateClassMethods();
+          } on Exception catch (e) {
+            fail('Parsing template arb file should succeed: \n$e');
+          }
 
-        expect(generator.classMethods, isNotEmpty);
-        expect(
-          generator.classMethods.first,
-          '''  String courseCompletion(Object progress) {
-    final NumberFormat progressNumberFormat = NumberFormat.decimalPercentPattern(
+          expect(generator.classMethods, isNotEmpty);
+          expect(
+            generator.classMethods.first,
+            '''  String courseCompletion(Object progress) {
+    final NumberFormat progressNumberFormat = NumberFormat.$numberFormat(
       locale: _localeName,
       decimalDigits: 2,
     );
@@ -1060,6 +1071,65 @@ void main() {
     );
   }
 ''');
+        }
+      });
+
+      test('correctly adds optional positional parameters to numbers', () {
+        const Set<String> numberFormatsWithPositionalParameters = <String>{
+          'decimalPattern',
+          'percentPattern',
+          'scientificPattern',
+        };
+
+        for (final String numberFormat in numberFormatsWithPositionalParameters) {
+          final String singleNumberMessage = '''{
+  "courseCompletion": "You have completed {progress} of the course.",
+  "@courseCompletion": {
+    "description": "The amount of progress the student has made in their class.",
+    "placeholders": {
+      "progress": {
+        "type": "Number",
+        "format": "$numberFormat"
+      }
+    }
+  }
+}''';
+          final Directory l10nDirectory = fs.currentDirectory.childDirectory('lib').childDirectory('l10n')
+            ..createSync(recursive: true);
+          l10nDirectory.childFile(defaultTemplateArbFileName)
+            .writeAsStringSync(singleNumberMessage);
+
+          final LocalizationsGenerator generator = LocalizationsGenerator(fs);
+          try {
+            generator.initialize(
+              l10nDirectoryPath: defaultArbPathString,
+              templateArbFileName: defaultTemplateArbFileName,
+              outputFileString: defaultOutputFileString,
+              classNameString: defaultClassNameString,
+            );
+            generator.parseArbFiles();
+            generator.generateClassMethods();
+          } on Exception catch (e) {
+            fail('Parsing template arb file should succeed: \n$e');
+          }
+
+          expect(generator.classMethods, isNotEmpty);
+          expect(
+            generator.classMethods.first,
+            '''  String courseCompletion(Object progress) {
+    final NumberFormat progressNumberFormat = NumberFormat.$numberFormat(_localeName);
+    final String progressString = progressNumberFormat.format(progress);
+
+    return Intl.message(
+      r'You have completed \$progressString of the course.',
+      locale: _localeName,
+      name: 'courseCompletion',
+      desc: r'The amount of progress the student has made in their class.',
+      args: <Object>[progressString]
+    );
+  }
+''');
+        }
       });
 
       test('throws an exception when improperly formatted number is passed in', () {

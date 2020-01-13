@@ -297,7 +297,7 @@ class CreateCommand extends FlutterCommand {
       Cache.releaseLockEarly();
 
       await _writeSamplesJson(stringArg('list-samples'));
-      return null;
+      return FlutterCommandResult.success();
     }
 
     if (argResults.rest.isEmpty) {
@@ -482,8 +482,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
         globals.printStatus('Your $application code is in $relativeAppMain');
       }
     }
-
-    return null;
+    return FlutterCommandResult.success();
   }
 
   Future<int> _generateModule(Directory directory, Map<String, dynamic> templateContext, { bool overwrite = false }) async {
@@ -651,7 +650,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
 
   int _injectGradleWrapper(FlutterProject project) {
     int filesCreated = 0;
-    copyDirectorySync(
+    fsUtils.copyDirectorySync(
       globals.cache.getArtifactDirectory('gradle_wrapper'),
       project.android.hostAppGradleRoot,
       onFileCopied: (File sourceFile, File destinationFile) {
