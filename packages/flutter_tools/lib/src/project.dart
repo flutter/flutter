@@ -467,7 +467,10 @@ class IosProject implements XcodeBasedProject {
     if (!isModule) {
       return;
     }
-    final bool pubspecChanged = isOlderThanReference(entity: ephemeralDirectory, referenceFile: parent.pubspecFile);
+    final bool pubspecChanged = fsUtils.isOlderThanReference(
+      entity: ephemeralDirectory,
+      referenceFile: parent.pubspecFile,
+    );
     final bool toolingChanged = globals.cache.isOlderThanToolsStamp(ephemeralDirectory);
     if (!pubspecChanged && !toolingChanged) {
       return;
@@ -478,22 +481,37 @@ class IosProject implements XcodeBasedProject {
       .childDirectory('engine');
 
     _deleteIfExistsSync(ephemeralDirectory);
-    _overwriteFromTemplate(globals.fs.path.join('module', 'ios', 'library'), ephemeralDirectory);
+    _overwriteFromTemplate(
+      globals.fs.path.join('module', 'ios', 'library'),
+      ephemeralDirectory,
+    );
     // Add ephemeral host app, if a editable host app does not already exist.
     if (!_editableDirectory.existsSync()) {
-      _overwriteFromTemplate(globals.fs.path.join('module', 'ios', 'host_app_ephemeral'), ephemeralDirectory);
+      _overwriteFromTemplate(
+        globals.fs.path.join('module', 'ios', 'host_app_ephemeral'),
+        ephemeralDirectory,
+      );
       if (hasPlugins(parent)) {
-        _overwriteFromTemplate(globals.fs.path.join('module', 'ios', 'host_app_ephemeral_cocoapods'), ephemeralDirectory);
+        _overwriteFromTemplate(
+          globals.fs.path.join('module', 'ios', 'host_app_ephemeral_cocoapods'),
+          ephemeralDirectory,
+        );
       }
       // Copy podspec and framework from engine cache. The actual build mode
       // doesn't actually matter as it will be overwritten by xcode_backend.sh.
       // However, cocoapods will run before that script and requires something
       // to be in this location.
-      final Directory framework = globals.fs.directory(globals.artifacts.getArtifactPath(Artifact.flutterFramework,
-        platform: TargetPlatform.ios, mode: BuildMode.debug));
+      final Directory framework = globals.fs.directory(
+        globals.artifacts.getArtifactPath(Artifact.flutterFramework,
+        platform: TargetPlatform.ios,
+        mode: BuildMode.debug,
+      ));
       if (framework.existsSync()) {
         final File podspec = framework.parent.childFile('Flutter.podspec');
-        copyDirectorySync(framework, engineDest.childDirectory('Flutter.framework'));
+        fsUtils.copyDirectorySync(
+          framework,
+          engineDest.childDirectory('Flutter.framework'),
+        );
         podspec.copySync(engineDest.childFile('Flutter.podspec').path);
       }
     }
@@ -505,20 +523,36 @@ class IosProject implements XcodeBasedProject {
       throwToolExit('iOS host app is already editable. To start fresh, delete the ios/ folder.');
     }
     _deleteIfExistsSync(ephemeralDirectory);
-    _overwriteFromTemplate(globals.fs.path.join('module', 'ios', 'library'), ephemeralDirectory);
-    _overwriteFromTemplate(globals.fs.path.join('module', 'ios', 'host_app_ephemeral'), _editableDirectory);
-    _overwriteFromTemplate(globals.fs.path.join('module', 'ios', 'host_app_ephemeral_cocoapods'), _editableDirectory);
-    _overwriteFromTemplate(globals.fs.path.join('module', 'ios', 'host_app_editable_cocoapods'), _editableDirectory);
+    _overwriteFromTemplate(
+      globals.fs.path.join('module', 'ios', 'library'),
+      ephemeralDirectory,
+    );
+    _overwriteFromTemplate(
+      globals.fs.path.join('module', 'ios', 'host_app_ephemeral'),
+      _editableDirectory,
+    );
+    _overwriteFromTemplate(
+      globals.fs.path.join('module', 'ios', 'host_app_ephemeral_cocoapods'),
+      _editableDirectory,
+    );
+    _overwriteFromTemplate(
+      globals.fs.path.join('module', 'ios', 'host_app_editable_cocoapods'),
+      _editableDirectory,
+    );
     await _updateGeneratedXcodeConfigIfNeeded();
     await injectPlugins(parent);
   }
 
   @override
-  File get generatedXcodePropertiesFile => _flutterLibRoot.childDirectory('Flutter').childFile('Generated.xcconfig');
+  File get generatedXcodePropertiesFile => _flutterLibRoot
+    .childDirectory('Flutter')
+    .childFile('Generated.xcconfig');
 
   Directory get pluginRegistrantHost {
     return isModule
-        ? _flutterLibRoot.childDirectory('Flutter').childDirectory('FlutterPluginRegistrant')
+        ? _flutterLibRoot
+            .childDirectory('Flutter')
+            .childDirectory('FlutterPluginRegistrant')
         : hostAppRoot.childDirectory(_hostAppBundleName);
   }
 
@@ -632,8 +666,10 @@ class AndroidProject {
   }
 
   bool _shouldRegenerateFromTemplate() {
-    return isOlderThanReference(entity: ephemeralDirectory, referenceFile: parent.pubspecFile)
-        || globals.cache.isOlderThanToolsStamp(ephemeralDirectory);
+    return fsUtils.isOlderThanReference(
+      entity: ephemeralDirectory,
+      referenceFile: parent.pubspecFile,
+    ) || globals.cache.isOlderThanToolsStamp(ephemeralDirectory);
   }
 
   Future<void> makeHostAppEditable() async {
