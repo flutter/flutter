@@ -105,7 +105,7 @@ class RunCommand extends RunCommandBase {
       )
       ..addFlag('endless-trace-buffer',
         negatable: false,
-        help: 'Enable tracing to the endless tracer. This is usefull when '
+        help: 'Enable tracing to the endless tracer. This is useful when '
               'recording huge amounts of traces. If we need to use endless buffer to '
               'record startup traces, we can combine the ("--trace-startup"). '
               'For exemple, flutter run --trace-startup --endless-trace-buffer. ',
