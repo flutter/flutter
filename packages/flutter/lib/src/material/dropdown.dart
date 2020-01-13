@@ -1432,10 +1432,10 @@ class DropdownButtonFormField<T> extends FormField<T> {
            );
            return InputDecorator(
              decoration: effectiveDecoration.copyWith(errorText: field.errorText),
-             isEmpty: value == null,
+             isEmpty: field.value == null,
              child: DropdownButtonHideUnderline(
                child: DropdownButton<T>(
-                 value: value,
+                 value: field.value,
                  items: items,
                  selectedItemBuilder: selectedItemBuilder,
                  hint: hint,
