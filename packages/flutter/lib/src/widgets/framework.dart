@@ -1419,9 +1419,8 @@ abstract class ProxyWidget extends Widget {
 /// [RenderObjectWidget]s with more than one child. For example, [Stack] uses
 /// the [Positioned] parent data widget to position each child.
 ///
-/// A [ParentDataWidget] is specific to a particular kind of [RenderObject], and
-/// thus also to a particular [RenderObjectWidget] class. That class is `T`, the
-/// [ParentDataWidget] type argument.
+/// A [ParentDataWidget] is specific to a particular kind of [ParentData]. That
+/// class is `T`, the [ParentData] type argument.
 ///
 /// {@tool snippet}
 ///
@@ -1429,7 +1428,7 @@ abstract class ProxyWidget extends Widget {
 /// `FrogJar` widget's children by specifying a [Size] for each one.
 ///
 /// ```dart
-/// class FrogSize extends ParentDataWidget<FrogJar> {
+/// class FrogSize extends ParentDataWidget<FrogJarParentData> {
 ///   FrogSize({
 ///     Key key,
 ///     @required this.size,
@@ -1449,6 +1448,9 @@ abstract class ProxyWidget extends Widget {
 ///       targetParent.markNeedsLayout();
 ///     }
 ///   }
+///
+///   @override
+///   Type get debugTypicalAncestorWidgetClass => FrogJar;
 /// }
 /// ```
 /// {@end-tool}
@@ -1458,12 +1460,12 @@ abstract class ProxyWidget extends Widget {
 ///  * [RenderObject], the superclass for layout algorithms.
 ///  * [RenderObject.parentData], the slot that this class configures.
 ///  * [ParentData], the superclass of the data that will be placed in
-///    [RenderObject.parentData] slots.
+///    [RenderObject.parentData] slots. The `T` type parameter for
+///    [ParentDataWidget] is a [ParentData].
 ///  * [RenderObjectWidget], the class for widgets that wrap [RenderObject]s.
-///    The `T` type parameter for [ParentDataWidget] is a [RenderObjectWidget].
 ///  * [StatefulWidget] and [State], for widgets that can build differently
 ///    several times over their lifetime.
-abstract class ParentDataWidget<T extends RenderObjectWidget> extends ProxyWidget {
+abstract class ParentDataWidget<T extends ParentData> extends ProxyWidget {
   /// Abstract const constructor. This constructor enables subclasses to provide
   /// const constructors so that they can be used in const expressions.
   const ParentDataWidget({ Key key, Widget child })
@@ -1472,45 +1474,61 @@ abstract class ParentDataWidget<T extends RenderObjectWidget> extends ProxyWidge
   @override
   ParentDataElement<T> createElement() => ParentDataElement<T>(this);
 
-  /// Subclasses should override this method to return true if the given
-  /// ancestor is a RenderObjectWidget that wraps a RenderObject that can handle
-  /// the kind of ParentData widget that the ParentDataWidget subclass handles.
+  /// Checks if this widget can apply its parent data to the provided
+  /// `renderObject`.
   ///
-  /// The default implementation uses the type argument.
-  bool debugIsValidAncestor(RenderObjectWidget ancestor) {
+  /// The [RenderObject.parentData] of the provided `renderObject` is
+  /// typically set up by an ancestor [RenderObjectWidget] of the type returned
+  /// by [debugTypicalAncestorWidgetClass].
+  ///
+  /// This is called just before [applyParentData] is invoked with the same
+  /// [RenderObject] provided to that method.
+  bool debugIsValidRenderObject(RenderObject renderObject) {
     assert(T != dynamic);
-    assert(T != RenderObjectWidget);
-    return ancestor is T;
+    assert(T != ParentData);
+    return renderObject.parentData is T;
   }
 
-  /// Subclasses should override this to describe the requirements for using the
-  /// ParentDataWidget subclass. It is called when debugIsValidAncestor()
-  /// returned false for an ancestor, or when there are extraneous
-  /// [ParentDataWidget]s in the ancestor chain.
-  Iterable<DiagnosticsNode> debugDescribeInvalidAncestorChain({ String description, DiagnosticsNode ownershipChain, bool foundValidAncestor, Iterable<Widget> badAncestors }) sync* {
+  /// The [RenderObjectWidget] that is typically used to set up the [ParentData]
+  /// that [applyParentData] will write to.
+  ///
+  /// This is only used in error messages to tell users what widget typically
+  /// wraps this ParentDataWidget.
+  Type get debugTypicalAncestorWidgetClass;
+
+  Iterable<DiagnosticsNode> _debugDescribeIncorrectParentDataType({
+    @required ParentData parentData,
+    RenderObjectWidget parentDataCreator,
+    DiagnosticsNode ownershipChain,
+  }) sync* {
     assert(T != dynamic);
-    assert(T != RenderObjectWidget);
-    if (!foundValidAncestor) {
+    assert(T != ParentData);
+    assert(debugTypicalAncestorWidgetClass != null);
+
+    final String description = 'The ParentDataWidget $this wants to apply ParentData of type $T to a RenderObject';
+    if (parentData == null) {
       yield ErrorDescription(
-        '$runtimeType widgets must be placed inside $T widgets.\n'
-        '$description has no $T ancestor at all.'
+        '$description, which has not been set up to receive any ParentData.'
       );
     } else {
-      assert(badAncestors.isNotEmpty);
       yield ErrorDescription(
-        '$runtimeType widgets must be placed directly inside $T widgets.\n'
-        '$description has a $T ancestor, but there are other widgets between them:'
+        '$description, which has been set up to accept ParentData of incompatible type ${parentData.runtimeType}.'
       );
-      for (final Widget ancestor in badAncestors) {
-        if (ancestor.runtimeType == runtimeType) {
-          yield ErrorDescription('- $ancestor (this is a different $runtimeType than the one with the problem)');
-        } else {
-          yield ErrorDescription('- $ancestor');
-        }
-      }
-      yield ErrorDescription('These widgets cannot come between a $runtimeType and its $T.');
     }
-    yield ErrorDescription('The ownership chain for the parent of the offending $runtimeType was:\n  $ownershipChain');
+    yield ErrorHint(
+      'Usually, this means that the $runtimeType widget has the wrong ancestor RenderObjectWidget. '
+      'Typically, $runtimeType widgets are placed directly inside $debugTypicalAncestorWidgetClass widgets.'
+    );
+    if (parentDataCreator != null) {
+      yield ErrorHint(
+        'The offending $runtimeType is currently placed inside a ${parentDataCreator.runtimeType} widget.'
+      );
+    }
+    if (ownershipChain != null) {
+      yield ErrorDescription(
+        'The ownership chain for the RenderObject that received the incompatible parent data was:\n  $ownershipChain'
+      );
+    }
   }
 
   /// Write the data from this widget into the given render object's parent data.
@@ -2684,6 +2702,9 @@ class BuildOwner {
         return true;
       }());
     } catch (e, stack) {
+      // Catching the exception directly to avoid activating the ErrorWidget.
+      // Since the tree is in a broken state, adding the ErrorWidget would
+      // cause more exceptions.
       _debugReportException(ErrorSummary('while finalizing the widget tree'), e, stack);
     } finally {
       Timeline.finishSync();
@@ -4657,52 +4678,19 @@ abstract class ProxyElement extends ComponentElement {
 }
 
 /// An [Element] that uses a [ParentDataWidget] as its configuration.
-class ParentDataElement<T extends RenderObjectWidget> extends ProxyElement {
+class ParentDataElement<T extends ParentData> extends ProxyElement {
   /// Creates an element that uses the given widget as its configuration.
   ParentDataElement(ParentDataWidget<T> widget) : super(widget);
 
   @override
   ParentDataWidget<T> get widget => super.widget as ParentDataWidget<T>;
 
-  @override
-  void mount(Element parent, dynamic newSlot) {
-    assert(() {
-      final List<Widget> badAncestors = <Widget>[];
-      Element ancestor = parent;
-      while (ancestor != null) {
-        if (ancestor is ParentDataElement<RenderObjectWidget>) {
-          badAncestors.add(ancestor.widget);
-        } else if (ancestor is RenderObjectElement) {
-          if (widget.debugIsValidAncestor(ancestor.widget))
-            break;
-          badAncestors.add(ancestor.widget);
-        }
-        ancestor = ancestor._parent;
-      }
-      if (ancestor != null && badAncestors.isEmpty)
-        return true;
-      // TODO(jacobr): switch to describing the invalid parent chain in terms
-      // of DiagnosticsNode objects when possible.
-      throw FlutterError.fromParts(<DiagnosticsNode>[
-        ErrorSummary('Incorrect use of ParentDataWidget.'),
-        // TODO(jacobr): fix this constructor call to use FlutterErrorBuilder.
-        ...widget.debugDescribeInvalidAncestorChain(
-          description: '$this',
-          ownershipChain: ErrorDescription(parent.debugGetCreatorChain(10)),
-          foundValidAncestor: ancestor != null,
-          badAncestors: badAncestors,
-        ),
-      ]);
-    }());
-    super.mount(parent, newSlot);
-  }
-
   void _applyParentData(ParentDataWidget<T> widget) {
     void applyParentDataToChild(Element child) {
       if (child is RenderObjectElement) {
         child._updateParentData(widget);
       } else {
-        assert(child is! ParentDataElement<RenderObjectWidget>);
+        assert(child is! ParentDataElement<ParentData>);
         child.visitChildren(applyParentDataToChild);
       }
     }
@@ -5116,14 +5104,48 @@ abstract class RenderObjectElement extends Element {
     return ancestor as RenderObjectElement;
   }
 
-  ParentDataElement<RenderObjectWidget> _findAncestorParentDataElement() {
+  ParentDataElement<ParentData> _findAncestorParentDataElement() {
     Element ancestor = _parent;
+    ParentDataElement<ParentData> result;
     while (ancestor != null && ancestor is! RenderObjectElement) {
-      if (ancestor is ParentDataElement<RenderObjectWidget>)
-        return ancestor;
+      if (ancestor is ParentDataElement<ParentData>) {
+        result = ancestor as ParentDataElement<ParentData>;
+        break;
+      }
       ancestor = ancestor._parent;
     }
-    return null;
+    assert(() {
+      if (result == null || ancestor == null) {
+        return true;
+      }
+      // Check that no other ParentDataWidgets want to provide parent data.
+      final List<ParentDataElement<ParentData>> badAncestors = <ParentDataElement<ParentData>>[];
+      ancestor = ancestor._parent;
+      while (ancestor != null && ancestor is! RenderObjectElement) {
+        if (ancestor is ParentDataElement<ParentData>) {
+          badAncestors.add(ancestor as ParentDataElement<ParentData>);
+        }
+        ancestor = ancestor._parent;
+      }
+      if (badAncestors.isNotEmpty) {
+        badAncestors.insert(0, result);
+        try {
+          throw FlutterError.fromParts(<DiagnosticsNode>[
+            ErrorSummary('Incorrect use of ParentDataWidget.'),
+            ErrorDescription('The following ParentDataWidgets are providing parent data to the same RenderObject:'),
+            for (final ParentDataElement<ParentData> ancestor in badAncestors)
+              ErrorDescription('- ${ancestor.widget} (typically placed directly inside a ${ancestor.widget.debugTypicalAncestorWidgetClass} widget)'),
+            ErrorDescription('However, a RenderObject can only receive parent data from at most one ParentDataWidget.'),
+            ErrorHint('Usually, this indicates that at least one of the offending ParentDataWidgets listed above is not placed directly inside a compatible ancestor widget.'),
+            ErrorDescription('The ownership chain for the RenderObject that received the parent data was:\n  ${debugGetCreatorChain(10)}'),
+          ]);
+        } on FlutterError catch (e) {
+          _debugReportException(ErrorSummary('while looking for parent data.'), e, e.stackTrace);
+        }
+      }
+      return true;
+    }());
+    return result;
   }
 
   @override
@@ -5355,8 +5377,31 @@ abstract class RenderObjectElement extends Element {
     widget.didUnmountRenderObject(renderObject);
   }
 
-  void _updateParentData(ParentDataWidget<RenderObjectWidget> parentData) {
-    parentData.applyParentData(renderObject);
+  void _updateParentData(ParentDataWidget<ParentData> parentDataWidget) {
+    bool applyParentData = true;
+    assert(() {
+      try {
+        if (!parentDataWidget.debugIsValidRenderObject(renderObject)) {
+          applyParentData = false;
+          throw FlutterError.fromParts(<DiagnosticsNode>[
+            ErrorSummary('Incorrect use of ParentDataWidget.'),
+            ...parentDataWidget._debugDescribeIncorrectParentDataType(
+              parentData: renderObject.parentData,
+              parentDataCreator: _ancestorRenderObjectElement.widget,
+              ownershipChain: ErrorDescription(debugGetCreatorChain(10)),
+            ),
+          ]);
+        }
+      } on FlutterError catch (e) {
+        // Catching the exception directly to avoid activating the ErrorWidget.
+        // Since the tree is in a broken state, adding the ErrorWidget would
+        // cause more exceptions.
+        _debugReportException(ErrorSummary('while applying parent data.'), e, e.stackTrace);
+      }
+      return true;
+    }());
+    if (applyParentData)
+      parentDataWidget.applyParentData(renderObject);
   }
 
   @override
@@ -5373,7 +5418,7 @@ abstract class RenderObjectElement extends Element {
     _slot = newSlot;
     _ancestorRenderObjectElement = _findAncestorRenderObjectElement();
     _ancestorRenderObjectElement?.insertChildRenderObject(renderObject, newSlot);
-    final ParentDataElement<RenderObjectWidget> parentDataElement = _findAncestorParentDataElement();
+    final ParentDataElement<ParentData> parentDataElement = _findAncestorParentDataElement();
     if (parentDataElement != null)
       _updateParentData(parentDataElement.widget);
   }
