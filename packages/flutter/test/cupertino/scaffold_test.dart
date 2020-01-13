@@ -232,7 +232,7 @@ void main() {
       ),
     );
 
-    expect(tester.getSize(find.byWidget(page1Center)).height, 600.0 - 44.0 - 50.0);
+    expect(tester.getSize(find.byWidget(page1Center)).height, 600.0 - 44.0 - 49.0);
   });
 
   testWidgets('Contents have automatic sliver padding between translucent bars', (WidgetTester tester) async {
@@ -286,7 +286,7 @@ void main() {
     await tester.pump(const Duration(seconds: 1));
 
     // List content automatically padded by tab bar and bottom media query padding.
-    expect(tester.getBottomLeft(find.byWidget(content)).dy, 600 - 20.0 - 50.0);
+    expect(tester.getBottomLeft(find.byWidget(content)).dy, 600 - 20.0 - 49.0);
   });
 
   testWidgets('iOS independent tab navigation', (WidgetTester tester) async {
