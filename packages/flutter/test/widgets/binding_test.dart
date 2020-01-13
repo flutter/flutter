@@ -171,8 +171,8 @@ void main() {
     final FlutterExceptionHandler oldHandler = FlutterError.onError;
     String filteredStack;
     FlutterError.onError = (FlutterErrorDetails details) {
-      expect(details.exception, isAssertionError);
       expect(filteredStack, null);
+      expect(details.exception, isAssertionError);
       filteredStack = details.toString();
     };
     await tester.pumpWidget(Directionality(
@@ -192,7 +192,7 @@ void main() {
     ));
     // We don't elide the root or the last element.
     expect(tester.allElements.length, 10);
-    expect(filteredStack, contains('...     Normal mounting of 8 elements (43 frames).'));
+    expect(filteredStack, contains('...     Normal element mounting (x8 - 42 frames)'));
     FlutterError.onError = oldHandler;
   });
 }
