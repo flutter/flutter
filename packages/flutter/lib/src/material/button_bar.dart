@@ -312,8 +312,16 @@ class _RenderButtonBarRow extends RenderFlex {
       super.performLayout();
     } else {
       final BoxConstraints childConstraints = constraints.copyWith(minWidth: 0.0);
-      RenderBox child = firstChild;
+      RenderBox child;
       double currentHeight = 0.0;
+      switch (verticalDirection) {
+        case VerticalDirection.down:
+          child = firstChild;
+          break;
+        case VerticalDirection.up:
+          child = lastChild;
+          break;
+      }
 
       while (child != null) {
         final FlexParentData childParentData = child.parentData as FlexParentData;
@@ -357,7 +365,14 @@ class _RenderButtonBarRow extends RenderFlex {
             break;
         }
         currentHeight += child.size.height;
-        child = childParentData.nextSibling;
+        switch (verticalDirection) {
+          case VerticalDirection.down:
+            child = childParentData.nextSibling;
+            break;
+          case VerticalDirection.up:
+            child = childParentData.previousSibling;
+            break;
+        }
       }
       size = constraints.constrain(Size(constraints.maxWidth, currentHeight));
     }
