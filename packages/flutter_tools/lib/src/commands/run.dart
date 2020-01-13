@@ -8,7 +8,6 @@ import 'package:args/command_runner.dart';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
-import '../base/io.dart';
 import '../base/time.dart';
 import '../base/utils.dart';
 import '../build_info.dart';

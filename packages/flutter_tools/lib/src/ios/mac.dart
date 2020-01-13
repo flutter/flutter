@@ -551,10 +551,7 @@ Future<XcodeBuildResult> buildXcodeProject({
         // (for example, kernel binary files produced from previous run).
         globals.fs.directory(outputDir).deleteSync(recursive: true);
       }
-      fsUtils.copyDirectorySync(
-        globals.fs.directory(expectedOutputDirectory),
-        globals.fs.directory(outputDir),
-      );
+      copyDirectorySync(globals.fs.directory(expectedOutputDirectory), globals.fs.directory(outputDir));
     } else {
       globals.printError('Build succeeded but the expected app at $expectedOutputDirectory not found');
     }

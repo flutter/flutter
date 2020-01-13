@@ -17,6 +17,7 @@ import 'src/base/io.dart';
 import 'src/base/logger.dart';
 import 'src/base/process.dart';
 import 'src/base/terminal.dart';
+import 'src/base/utils.dart';
 import 'src/context_runner.dart';
 import 'src/doctor.dart';
 import 'src/globals.dart' as globals;
@@ -190,7 +191,7 @@ FileSystem crashFileSystem = const LocalFileSystem();
 
 /// Saves the crash report to a local file.
 Future<File> _createLocalCrashReport(List<String> args, dynamic error, StackTrace stackTrace, String doctorText) async {
-  File crashFile = fsUtils.getUniqueFile(crashFileSystem.currentDirectory, 'flutter', 'log');
+  File crashFile = getUniqueFile(crashFileSystem.currentDirectory, 'flutter', 'log');
 
   final StringBuffer buffer = StringBuffer();
 
@@ -210,7 +211,7 @@ Future<File> _createLocalCrashReport(List<String> args, dynamic error, StackTrac
     crashFile.writeAsStringSync(buffer.toString());
   } on FileSystemException catch (_) {
     // Fallback to the system temporary directory.
-    crashFile = fsUtils.getUniqueFile(crashFileSystem.systemTempDirectory, 'flutter', 'log');
+    crashFile = getUniqueFile(crashFileSystem.systemTempDirectory, 'flutter', 'log');
     try {
       crashFile.writeAsStringSync(buffer.toString());
     } on FileSystemException catch (e) {

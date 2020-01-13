@@ -11,6 +11,7 @@ import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
+import '../base/utils.dart';
 import '../cache.dart';
 import '../commands/daemon.dart';
 import '../compile.dart';
