@@ -185,7 +185,7 @@ class DriveCommand extends RunCommandBase {
       }
     }
 
-    return null;
+    return FlutterCommandResult.success();
   }
 
   String _getTestFile() {

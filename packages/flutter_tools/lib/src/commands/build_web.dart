@@ -67,6 +67,6 @@ class BuildWebCommand extends BuildSubCommand {
       dartDefines,
       boolArg('csp')
     );
-    return null;
+    return FlutterCommandResult.success();
   }
 }

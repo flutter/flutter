@@ -118,4 +118,24 @@ void main() {
 
     expect(identical(firstPath, fs.path), false);
   });
+
+  group('toString() gives toString() of delegate', () {
+    test('ErrorHandlingFileSystem', () {
+      final MockFileSystem mockFileSystem = MockFileSystem();
+      final FileSystem fs = ErrorHandlingFileSystem(mockFileSystem);
+
+      expect(mockFileSystem.toString(), isNotNull);
+      expect(fs.toString(), equals(mockFileSystem.toString()));
+    });
+
+    test('ErrorHandlingFile', () {
+      final MockFileSystem mockFileSystem = MockFileSystem();
+      final FileSystem fs = ErrorHandlingFileSystem(mockFileSystem);
+      final MockFile mockFile = MockFile();
+      when(mockFileSystem.file(any)).thenReturn(mockFile);
+
+      expect(mockFile.toString(), isNotNull);
+      expect(fs.file('file').toString(), equals(mockFile.toString()));
+    });
+  });
 }

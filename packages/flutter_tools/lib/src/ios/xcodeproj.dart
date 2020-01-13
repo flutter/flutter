@@ -285,6 +285,9 @@ class XcodeProjectInterpreter {
     final Status status = Status.withSpinner(
       timeout: timeoutConfiguration.fastOperation,
       timeoutConfiguration: timeoutConfiguration,
+      platform: globals.platform,
+      stopwatch: Stopwatch(),
+      supportsColor: globals.terminal.supportsColor,
     );
     final List<String> showBuildSettingsCommand = <String>[
       _executable,
