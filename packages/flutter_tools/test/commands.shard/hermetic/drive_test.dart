@@ -54,6 +54,7 @@ void main() {
       appStopper = (DriveCommand command) {
         throw 'Unexpected call to appStopper';
       };
+      mockDevice = MockAndroidDevice();
     });
 
     tearDown(() {
@@ -287,7 +288,6 @@ void main() {
       });
 
       testUsingContext('skips unsupported device', () async {
-        mockDevice = MockAndroidDevice();
         mockUnsupportedDevice = MockDevice();
         when(mockUnsupportedDevice.isSupportedForProject(any))
             .thenReturn(false);
