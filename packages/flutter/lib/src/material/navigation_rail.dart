@@ -1,21 +1,29 @@
 import 'package:flutter/material.dart';
 
-enum NavigationRailLabelKind {
-  Regular,
-  Impersistent,
-  Persistent,
-//  Extended,
+/// Defines the behavior of the labels of a [NavigationRail].
+///
+/// See also:
+///   [NavigationRail]
+enum NavigationRailLabelType {
+  /// Only the icons of a navigation rail item are shown.
+  NoLabels,
+
+  /// Only the selected navigation rail item will show its label.
+  ///
+  /// The label will animate in and out as new items are selected.
+  SelectedLabels,
+
+  /// All navigation rail items will show their label.
+  AllLabels,
 }
 
 class NavigationRail extends StatefulWidget {
   NavigationRail({
     this.leading,
-    this.extendedLeading, // TODO: leading could also be a function that takes in whether its extended or not
     this.items,
-    this.actions,
     this.currentIndex,
-    this.onNavigationIndexChange,
-    this.labelKind = NavigationRailLabelKind.Regular,
+    this.onItemSelected,
+    this.labelType = NavigationRailLabelType.NoLabels,
     this.labelTextStyle,
     this.labelIconTheme,
     this.selectedLabelTextStyle,
@@ -23,13 +31,10 @@ class NavigationRail extends StatefulWidget {
   });
 
   final Widget leading;
-  final Widget extendedLeading;
   final List<BottomNavigationBarItem> items;
-  final List<Widget> actions;
   final int currentIndex;
-  final ValueChanged<int> onNavigationIndexChange;
-
-  final NavigationRailLabelKind labelKind;
+  final ValueChanged<int> onItemSelected;
+  final NavigationRailLabelType labelType;
   final TextStyle labelTextStyle;
   final IconTheme labelIconTheme;
   final TextStyle selectedLabelTextStyle;
@@ -56,17 +61,9 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
     _controllers = List<AnimationController>.generate(widget.items.length, (int index) {
       return AnimationController(
         duration: kThemeAnimationDuration,
-//        duration: Duration(milliseconds: 2000),
         vsync: this,
       )..addListener(_rebuild);
     });
-//    _animations = List<CurvedAnimation>.generate(widget.items.length, (int index) {
-//      return CurvedAnimation(
-//        parent: _controllers[index],
-//        curve: Curves.fastOutSlowIn,
-//        reverseCurve: Curves.fastOutSlowIn.flipped,
-//      );
-//    });
     _animations = _controllers.map((AnimationController controller) => controller.view).toList();
     _controllers[widget.currentIndex].value = 1.0;
   }
@@ -103,27 +100,32 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
 
   @override
   Widget build(BuildContext context) {
-    final leading = widget.leading;
+    final Widget leading = widget.leading;
     return DefaultTextStyle(
       style: TextStyle(color: Theme.of(context).colorScheme.primary),
       child: Container(
+        width: _railWidth,
         color: Theme.of(context).colorScheme.surface,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
+            _verticalSpacing,
             if (leading != null)
-              SizedBox(
-                height: 96,
-                width: 72,
-                child: Align(
-                  alignment: Alignment.center,
-                  child: leading,
+              ...<Widget>[
+                SizedBox(
+                  height: _railItemHeight,
+                  width: _railItemWidth,
+                  child: Align(
+                    alignment: Alignment.center,
+                    child: leading,
+                  ),
                 ),
-              ),
+                _verticalSpacing,
+              ],
             for (int i = 0; i < widget.items.length; i++)
               _RailItem(
                 animation: _animations[i],
-                labelKind: widget.labelKind,
+                labelKind: widget.labelType,
                 selected: widget.currentIndex == i,
                 icon: widget.currentIndex == i
                     ? widget.items[i].activeIcon
@@ -136,11 +138,9 @@ class _NavigationRailState extends State<NavigationRail> with TickerProviderStat
                   child: widget.items[i].title,
                 ),
                 onTap: () {
-                  widget.onNavigationIndexChange(i);
+                  widget.onItemSelected(i);
                 },
               ),
-            Spacer(),
-            ...widget.actions,
           ],
         ),
       ),
@@ -156,7 +156,7 @@ class _RailItem extends StatelessWidget {
     this.icon,
     this.title,
     this.onTap,
-  }) {
+  }) : assert(labelKind != null) {
     _positionAnimation = CurvedAnimation(
       parent: ReverseAnimation(animation),
       curve: Curves.easeInOut,
@@ -164,12 +164,12 @@ class _RailItem extends StatelessWidget {
     );
   }
 
-  Animation _positionAnimation;
+  Animation<double> _positionAnimation;
 
   final Animation<double> animation;
-  final NavigationRailLabelKind labelKind;
+  final NavigationRailLabelType labelKind;
   final bool selected;
-  final Icon icon;
+  final Widget icon;
   final Widget title;
   final VoidCallback onTap;
 
@@ -193,12 +193,15 @@ class _RailItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print('_RailItem build');
     Widget content;
     switch (labelKind) {
-      case NavigationRailLabelKind.Regular:
-        content = SizedBox(width: 72, child: icon);
+      case NavigationRailLabelType.NoLabels:
+        print('NoLabels');
+        content = SizedBox(width: _railItemWidth, child: icon);
         break;
-      case NavigationRailLabelKind.Impersistent:
+      case NavigationRailLabelType.SelectedLabels:
+        print('SelectedLabels');
         content = SizedBox(
           width: 72,
           child: Column(
@@ -215,7 +218,8 @@ class _RailItem extends StatelessWidget {
           ),
         );
         break;
-      case NavigationRailLabelKind.Persistent:
+      case NavigationRailLabelType.AllLabels:
+        print('AllLabels');
         content = SizedBox(
           width: 72,
           child: Column(
@@ -262,3 +266,9 @@ class _RailItem extends StatelessWidget {
     );
   }
 }
+
+const double _railWidth = 72;
+const double _railItemWidth = _railWidth;
+const double _railItemHeight = _railItemWidth;
+const double _spacing = 8;
+const Widget _verticalSpacing = SizedBox(height: _spacing);
