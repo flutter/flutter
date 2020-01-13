@@ -114,6 +114,11 @@ skt::TextStyle TxtToSkia(const TextStyle& txt) {
     skia.setForegroundColor(txt.foreground);
   }
 
+  skia.resetFontFeatures();
+  for (const auto& ff : txt.font_features.GetFontFeatures()) {
+    skia.addFontFeature(SkString(ff.first.c_str()), ff.second);
+  }
+
   skia.resetShadows();
   for (const txt::TextShadow& txt_shadow : txt.text_shadows) {
     skt::TextShadow shadow;

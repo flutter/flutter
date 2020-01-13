@@ -31,6 +31,8 @@ class FontFeatures {
 
   std::string GetFeatureSettings() const;
 
+  const std::map<std::string, int>& GetFontFeatures() const;
+
  private:
   std::map<std::string, int> feature_map_;
 };
