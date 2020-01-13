@@ -265,14 +265,14 @@ dependencies:
     }
 
     group('refreshPlugins', () {
-      testUsingContext('Refreshing the plugin list is a no-op when the plugins list stays empty', () { 
+      testUsingContext('Refreshing the plugin list is a no-op when the plugins list stays empty', () {
         when(iosProject.existsSync()).thenReturn(true);
         when(androidProject.existsSync()).thenReturn(true);
         when(macosProject.existsSync()).thenReturn(true);
         when(windowsProject.existsSync()).thenReturn(true);
         when(linuxProject.existsSync()).thenReturn(true);
         when(webProject.existsSync()).thenReturn(true);
-        
+
         refreshPluginsList(flutterProject);
         expect(flutterProject.flutterPluginsFile.existsSync(), false);
         expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), false);
@@ -298,7 +298,7 @@ dependencies:
 
       testUsingContext('Refreshing the plugin list creates a plugin directory when there are plugins', () {
         configureDummyPackageAsPlugin();
-        final List<Map<String, dynamic>> dummyPluginsList = <Map<String,dynamic>>[ 
+        final List<Map<String, dynamic>> dummyPluginsList = <Map<String,dynamic>>[
           <String,dynamic>{
             'name': 'test',
             'path': 'test_path',
@@ -321,7 +321,7 @@ dependencies:
         createPluginWithDependencies(name: 'plugin-a', dependencies: const <String>['plugin-b', 'plugin-c', 'random-package']);
         createPluginWithDependencies(name: 'plugin-b', dependencies: const <String>['plugin-c']);
         createPluginWithDependencies(name: 'plugin-c', dependencies: const <String>[]);
-        final List<Map<String, dynamic>> dummyPluginsList = <Map<String,dynamic>>[ 
+        final List<Map<String, dynamic>> dummyPluginsList = <Map<String,dynamic>>[
           <String,dynamic>{
             'name': 'test',
             'path': 'test_path',
@@ -398,7 +398,7 @@ dependencies:
       testUsingContext('Changes to the plugin json list invalidates the Cocoapod lockfiles', () {
         simulatePodInstallRun(iosProject);
         simulatePodInstallRun(macosProject);
-        final List<Map<String, dynamic>> dummyPluginsList = <Map<String,dynamic>>[ 
+        final List<Map<String, dynamic>> dummyPluginsList = <Map<String,dynamic>>[
           <String,dynamic>{
             'name': 'test',
             'path': 'test_path',

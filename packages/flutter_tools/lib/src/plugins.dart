@@ -328,7 +328,7 @@ void _addPluginsToPlatform(List<Plugin> plugins, FlutterProjectPlatform platform
 bool _writeFlutterPluginsList(FlutterProject project, List<Plugin> plugins) {
   const String info = 'This is a generated file; do not edit or check into version control.';
 
-  final Map<String, dynamic> result = <String, dynamic> {}; 
+  final Map<String, dynamic> result = <String, dynamic> {};
   result['_info'] = '// $info';
 
   final Map<String, dynamic> pluginsMap = <String, dynamic>{};
