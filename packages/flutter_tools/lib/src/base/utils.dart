@@ -9,7 +9,6 @@ import 'package:intl/intl.dart';
 import 'package:meta/meta.dart';
 
 import '../convert.dart';
-import '../globals.dart' as globals;
 import 'file_system.dart';
 import 'terminal.dart';
 
