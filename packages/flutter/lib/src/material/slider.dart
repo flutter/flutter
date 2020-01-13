@@ -10,8 +10,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart' show timeDilation;
+import 'package:flutter/services.dart';
+import 'package:flutter/src/widgets/basic.dart';
 import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
@@ -1218,14 +1221,40 @@ class _RenderSlider extends RenderBox with RelayoutWhenSystemFontsChangeMixin {
 }
 
 class SliderTextField extends StatelessWidget{
-  SliderTextField({this.textStyle});
+  SliderTextField({
+    this.textStyle,
+    this.inputDecoration,
+  });
+
   /// TODO
   final TextStyle textStyle;
+  final InputDecoration inputDecoration;
 
   @override
   Widget build(BuildContext context) {
-    return TextField(
-      decoration: ,
+    return SizedBox(
+      width: 60,
+      height: 75,
+      child: TextField(
+        textAlign: TextAlign.center,
+        textAlignVertical: TextAlignVertical.center,
+        keyboardType: TextInputType.numberWithOptions(),
+        maxLines: 1,
+        maxLength: 3,
+        maxLengthEnforced: true,
+        decoration: const InputDecoration(
+          border: OutlineInputBorder(
+            gapPadding: 1.0,
+          ),
+          filled: true,
+          fillColor: const Color(0xFFBDBDBD),
+        ),
+        style: const TextStyle(
+          fontSize: 20.0,
+          //height: 1.0,
+          color: const Color(0xFF212121)
+        ),
+      )
     );
   }
 
