@@ -54,7 +54,6 @@ void main() {
       appStopper = (DriveCommand command) {
         throw 'Unexpected call to appStopper';
       };
-      mockDevice = MockAndroidDevice();
     });
 
     tearDown(() {
@@ -333,6 +332,7 @@ void main() {
       Platform macOsPlatform() => FakePlatform(operatingSystem: 'macos');
 
       testUsingContext('uses existing simulator', () async {
+        mockDevice = MockDevice();
         testDeviceManager.addDevice(mockDevice);
         when(mockDevice.name).thenReturn('mock-simulator');
         when(mockDevice.isLocalEmulator)
