@@ -48,7 +48,7 @@ class IOSEmulator extends Emulator {
         xcode.getSimulatorPath(),
       ];
 
-      final RunResult launchResult = await processUtils.run(args);
+      final RunResult launchResult = await ProcessUtils(logger: globals.logger, processManager: globals.processManager).run(args);
       if (launchResult.exitCode != 0) {
         globals.printError('$launchResult');
         return false;

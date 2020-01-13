@@ -550,7 +550,7 @@ class AndroidSdk {
     // See: http://stackoverflow.com/questions/14292698/how-do-i-check-if-the-java-jdk-is-installed-on-mac.
     if (globals.platform.isMacOS) {
       try {
-        final String javaHomeOutput = processUtils.runSync(
+        final String javaHomeOutput = ProcessUtils(logger: globals.logger, processManager: globals.processManager).runSync(
           <String>['/usr/libexec/java_home'],
           throwOnError: true,
           hideStdout: true,
@@ -590,7 +590,7 @@ class AndroidSdk {
     if (!globals.processManager.canRun(sdkManagerPath)) {
       throwToolExit('Android sdkmanager not found. Update to the latest Android SDK to resolve this.');
     }
-    final RunResult result = processUtils.runSync(
+    final RunResult result = ProcessUtils(logger: globals.logger, processManager: globals.processManager).runSync(
       <String>[sdkManagerPath, '--version'],
       environment: sdkManagerEnv,
     );

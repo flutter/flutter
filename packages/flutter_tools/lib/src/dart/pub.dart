@@ -255,7 +255,7 @@ class _DefaultPub implements Pub {
     int code;
     loop: while (true) {
       attempts += 1;
-      code = await processUtils.stream(
+      code = await ProcessUtils(logger: globals.logger, processManager: globals.processManager).stream(
         _pubCommand(arguments),
         workingDirectory: directory,
         mapFunction: filterWrapper, // may set versionSolvingFailed, lastPubMessage
@@ -301,7 +301,7 @@ class _DefaultPub implements Pub {
     String directory,
   }) async {
     Cache.releaseLockEarly();
-    final io.Process process = await processUtils.start(
+    final io.Process process = await ProcessUtils(logger: globals.logger, processManager: globals.processManager).start(
       _pubCommand(arguments),
       workingDirectory: directory,
       environment: _createPubEnvironment(PubContext.interactive),

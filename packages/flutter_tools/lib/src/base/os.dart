@@ -155,7 +155,7 @@ class _PosixUtils extends OperatingSystemUtils {
 
   @override
   void zip(Directory data, File zipFile) {
-    processUtils.runSync(
+    ProcessUtils(logger: globals.logger, processManager: globals.processManager).runSync(
       <String>['zip', '-r', '-q', zipFile.path, '.'],
       workingDirectory: data.path,
       throwOnError: true,
@@ -165,7 +165,7 @@ class _PosixUtils extends OperatingSystemUtils {
   // unzip -o -q zipfile -d dest
   @override
   void unzip(File file, Directory targetDirectory) {
-    processUtils.runSync(
+    ProcessUtils(logger: globals.logger, processManager: globals.processManager).runSync(
       <String>['unzip', '-o', '-q', file.path, '-d', targetDirectory.path],
       throwOnError: true,
     );
@@ -173,12 +173,12 @@ class _PosixUtils extends OperatingSystemUtils {
 
   @override
   bool verifyZip(File zipFile) =>
-      processUtils.exitsHappySync(<String>['zip', '-T', zipFile.path]);
+      ProcessUtils(logger: globals.logger, processManager: globals.processManager).exitsHappySync(<String>['zip', '-T', zipFile.path]);
 
   // tar -xzf tarball -C dest
   @override
   void unpack(File gzippedTarFile, Directory targetDirectory) {
-    processUtils.runSync(
+    ProcessUtils(logger: globals.logger, processManager: globals.processManager).runSync(
       <String>['tar', '-xzf', gzippedTarFile.path, '-C', targetDirectory.path],
       throwOnError: true,
     );
@@ -186,11 +186,11 @@ class _PosixUtils extends OperatingSystemUtils {
 
   @override
   bool verifyGzip(File gzippedFile) =>
-      processUtils.exitsHappySync(<String>['gzip', '-t', gzippedFile.path]);
+      ProcessUtils(logger: globals.logger, processManager: globals.processManager).exitsHappySync(<String>['gzip', '-t', gzippedFile.path]);
 
   @override
   File makePipe(String path) {
-    processUtils.runSync(
+    ProcessUtils(logger: globals.logger, processManager: globals.processManager).runSync(
       <String>['mkfifo', path],
       throwOnError: true,
     );
@@ -203,6 +203,7 @@ class _PosixUtils extends OperatingSystemUtils {
   String get name {
     if (_name == null) {
       if (globals.platform.isMacOS) {
+        final ProcessUtils processUtils = ProcessUtils(logger: globals.logger, processManager: globals.processManager);
         final List<RunResult> results = <RunResult>[
           processUtils.runSync(<String>['sw_vers', '-productName']),
           processUtils.runSync(<String>['sw_vers', '-productVersion']),

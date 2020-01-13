@@ -131,7 +131,7 @@ class SimControl {
   }
 
   Future<bool> isInstalled(String deviceId, String appId) {
-    return processUtils.exitsHappy(<String>[
+    return ProcessUtils(logger: globals.logger, processManager: globals.processManager).exitsHappy(<String>[
       _xcrunPath,
       'simctl',
       'get_app_container',
@@ -143,7 +143,7 @@ class SimControl {
   Future<RunResult> install(String deviceId, String appPath) {
     Future<RunResult> result;
     try {
-      result = processUtils.run(
+      result = ProcessUtils(logger: globals.logger, processManager: globals.processManager).run(
         <String>[_xcrunPath, 'simctl', 'install', deviceId, appPath],
         throwOnError: true,
       );
@@ -156,7 +156,7 @@ class SimControl {
   Future<RunResult> uninstall(String deviceId, String appId) {
     Future<RunResult> result;
     try {
-      result = processUtils.run(
+      result = ProcessUtils(logger: globals.logger, processManager: globals.processManager).run(
         <String>[_xcrunPath, 'simctl', 'uninstall', deviceId, appId],
         throwOnError: true,
       );
@@ -169,7 +169,7 @@ class SimControl {
   Future<RunResult> launch(String deviceId, String appIdentifier, [ List<String> launchArgs ]) {
     Future<RunResult> result;
     try {
-      result = processUtils.run(
+      result = ProcessUtils(logger: globals.logger, processManager: globals.processManager).run(
         <String>[
           _xcrunPath,
           'simctl',
@@ -188,7 +188,7 @@ class SimControl {
 
   Future<void> takeScreenshot(String deviceId, String outputPath) async {
     try {
-      await processUtils.run(
+      await ProcessUtils(logger: globals.logger, processManager: globals.processManager).run(
         <String>[_xcrunPath, 'simctl', 'io', deviceId, 'screenshot', outputPath],
         throwOnError: true,
       );
@@ -550,12 +550,12 @@ class IOSSimulator extends Device {
 Future<Process> launchDeviceLogTool(IOSSimulator device) async {
   // Versions of iOS prior to iOS 11 log to the simulator syslog file.
   if (await device.sdkMajorVersion < 11) {
-    return processUtils.start(<String>['tail', '-n', '0', '-F', device.logFilePath]);
+    return ProcessUtils(logger: globals.logger, processManager: globals.processManager).start(<String>['tail', '-n', '0', '-F', device.logFilePath]);
   }
 
   // For iOS 11 and above, use /usr/bin/log to tail process logs.
   // Run in interactive mode (via script), otherwise /usr/bin/log buffers in 4k chunks. (radar: 34420207)
-  return processUtils.start(<String>[
+  return ProcessUtils(logger: globals.logger, processManager: globals.processManager).start(<String>[
     'script', '/dev/null', '/usr/bin/log', 'stream', '--style', 'syslog', '--predicate', 'processImagePath CONTAINS "${device.id}"',
   ]);
 }
@@ -563,7 +563,7 @@ Future<Process> launchDeviceLogTool(IOSSimulator device) async {
 Future<Process> launchSystemLogTool(IOSSimulator device) async {
   // Versions of iOS prior to 11 tail the simulator syslog file.
   if (await device.sdkMajorVersion < 11) {
-    return processUtils.start(<String>['tail', '-n', '0', '-F', '/private/var/log/system.log']);
+    return ProcessUtils(logger: globals.logger, processManager: globals.processManager).start(<String>['tail', '-n', '0', '-F', '/private/var/log/system.log']);
   }
 
   // For iOS 11 and later, all relevant detail is in the device log.

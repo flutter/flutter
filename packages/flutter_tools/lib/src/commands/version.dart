@@ -37,7 +37,7 @@ class VersionCommand extends FlutterCommand {
   Future<List<String>> getTags() async {
     RunResult runResult;
     try {
-      runResult = await processUtils.run(
+      runResult = await ProcessUtils(logger: globals.logger, processManager: globals.processManager).run(
         <String>['git', 'tag', '-l', 'v*', '--sort=-creatordate'],
         throwOnError: true,
         workingDirectory: Cache.flutterRoot,
@@ -84,7 +84,7 @@ class VersionCommand extends FlutterCommand {
     }
 
     try {
-      await processUtils.run(
+      await ProcessUtils(logger: globals.logger, processManager: globals.processManager).run(
         <String>['git', 'checkout', 'v$version'],
         throwOnError: true,
         workingDirectory: Cache.flutterRoot,
@@ -103,7 +103,7 @@ class VersionCommand extends FlutterCommand {
     // if necessary.
     globals.printStatus('');
     globals.printStatus('Downloading engine...');
-    int code = await processUtils.stream(<String>[
+    int code = await ProcessUtils(logger: globals.logger, processManager: globals.processManager).stream(<String>[
       globals.fs.path.join('bin', 'flutter'),
       '--no-color',
       'precache',
@@ -130,7 +130,7 @@ class VersionCommand extends FlutterCommand {
     // Run a doctor check in case system requirements have changed.
     globals.printStatus('');
     globals.printStatus('Running flutter doctor...');
-    code = await processUtils.stream(
+    code = await ProcessUtils(logger: globals.logger, processManager: globals.processManager).stream(
       <String>[
         globals.fs.path.join('bin', 'flutter'),
         'doctor',

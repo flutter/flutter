@@ -118,6 +118,7 @@ Future<Map<String, String>> getCodeSigningIdentityDevelopmentTeam({
 
   // If the user's environment is missing the tools needed to find and read
   // certificates, abandon. Tools should be pre-equipped on macOS.
+  final ProcessUtils processUtils = ProcessUtils(logger: globals.logger, processManager: globals.processManager);
   if (!await processUtils.exitsHappy(const <String>['which', 'security']) ||
       !await processUtils.exitsHappy(const <String>['which', 'openssl'])) {
     return null;

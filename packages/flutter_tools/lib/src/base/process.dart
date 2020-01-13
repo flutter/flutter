@@ -158,10 +158,10 @@ class RunResult {
   @override
   String toString() {
     final StringBuffer out = StringBuffer();
-    if (stdout.isNotEmpty) {
+    if (stdout?.isNotEmpty ?? false) {
       out.writeln(stdout);
     }
-    if (stderr.isNotEmpty) {
+    if (stderr?.isNotEmpty ?? false) {
       out.writeln(stderr);
     }
     return out.toString().trimRight();
@@ -180,8 +180,7 @@ class RunResult {
 
 typedef RunResultChecker = bool Function(int);
 
-ProcessUtils get processUtils => ProcessUtils.instance;
-
+/// Utilities for interactions with the process manager.
 abstract class ProcessUtils {
   factory ProcessUtils({
     @required ProcessManager processManager,
@@ -190,8 +189,6 @@ abstract class ProcessUtils {
     processManager: processManager,
     logger: logger,
   );
-
-  static ProcessUtils get instance => context.get<ProcessUtils>();
 
   /// Spawns a child process to run the command [cmd].
   ///

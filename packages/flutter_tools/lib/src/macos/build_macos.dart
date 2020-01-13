@@ -74,7 +74,7 @@ Future<void> buildMacOS({
   );
   int result;
   try {
-    result = await processUtils.stream(<String>[
+    result = await ProcessUtils(logger: globals.logger, processManager: globals.processManager).stream(<String>[
       '/usr/bin/env',
       'xcrun',
       'xcodebuild',

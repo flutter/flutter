@@ -42,7 +42,7 @@ class PlistParser {
       final List<String> args = <String>[
         executable, '-convert', 'json', '-o', '-', normalizedPlistPath,
       ];
-      final String jsonContent = processUtils.runSync(
+      final String jsonContent = ProcessUtils(logger: globals.logger, processManager: globals.processManager).runSync(
         args,
         throwOnError: true,
       ).stdout.trim();

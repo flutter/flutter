@@ -141,7 +141,7 @@ Future<void> checkGradleDependencies() async {
     timeout: timeoutConfiguration.slowOperation,
   );
   final FlutterProject flutterProject = FlutterProject.current();
-  await processUtils.run(<String>[
+  await ProcessUtils(logger: globals.logger, processManager: globals.processManager).run(<String>[
       gradleUtils.getExecutable(flutterProject),
       'dependencies',
     ],
@@ -368,7 +368,7 @@ Future<void> buildGradleApp({
   final Stopwatch sw = Stopwatch()..start();
   int exitCode = 1;
   try {
-    exitCode = await processUtils.stream(
+    exitCode = await ProcessUtils(logger: globals.logger, processManager: globals.processManager).stream(
       command,
       workingDirectory: project.android.hostAppGradleRoot.path,
       allowReentrantFlutter: true,
@@ -553,7 +553,7 @@ Future<void> buildGradleAar({
   final Stopwatch sw = Stopwatch()..start();
   RunResult result;
   try {
-    result = await processUtils.run(
+    result = await ProcessUtils(logger: globals.logger, processManager: globals.processManager).run(
       command,
       workingDirectory: project.android.hostAppGradleRoot.path,
       allowReentrantFlutter: true,

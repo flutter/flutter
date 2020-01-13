@@ -116,7 +116,7 @@ class AotBuilder {
           final Iterable<String> dylibs = iosBuilds.values.map<String>(
               (String outputDir) => globals.fs.path.join(outputDir, 'App.framework', 'App'));
           globals.fs.directory(globals.fs.path.join(outputPath, 'App.framework'))..createSync();
-          await processUtils.run(
+          await ProcessUtils(logger: globals.logger, processManager: globals.processManager).run(
             <String>[
               'lipo',
               ...dylibs,

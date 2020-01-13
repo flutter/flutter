@@ -104,7 +104,7 @@ class IMobileDevice {
   final String _idevicescreenshotPath;
 
   bool get isInstalled {
-    _isInstalled ??= processUtils.exitsHappySync(
+    _isInstalled ??= ProcessUtils(logger: globals.logger, processManager: globals.processManager).exitsHappySync(
       <String>[
         _ideviceIdPath,
         '-h',
@@ -133,7 +133,7 @@ class IMobileDevice {
     final Map<String, String> executionEnv = Map<String, String>.fromEntries(
       <MapEntry<String, String>>[globals.cache.dyLdLibEntry]
     );
-    final ProcessResult ideviceResult = (await processUtils.run(
+    final ProcessResult ideviceResult = (await ProcessUtils(logger: globals.logger, processManager: globals.processManager).run(
       <String>[
         _ideviceinfoPath,
         '-u',
@@ -147,7 +147,7 @@ class IMobileDevice {
     }
 
     // If no device is attached, we're unable to detect any problems. Assume all is well.
-    final ProcessResult result = (await processUtils.run(
+    final ProcessResult result = (await ProcessUtils(logger: globals.logger, processManager: globals.processManager).run(
       <String>[
         _ideviceIdPath,
         '-l',
@@ -158,7 +158,7 @@ class IMobileDevice {
       _isWorking = true;
     } else {
       // Check that we can look up the names of any attached devices.
-      _isWorking = await processUtils.exitsHappy(
+      _isWorking = await ProcessUtils(logger: globals.logger, processManager: globals.processManager).exitsHappy(
         <String>[_idevicenamePath],
         environment: executionEnv,
       );
@@ -231,7 +231,7 @@ class IMobileDevice {
 
   /// Starts `idevicesyslog` and returns the running process.
   Future<Process> startLogger(String deviceID) {
-    return processUtils.start(
+    return ProcessUtils(logger: globals.logger, processManager: globals.processManager).start(
       <String>[
         _idevicesyslogPath,
         '-u',
@@ -245,7 +245,7 @@ class IMobileDevice {
 
   /// Captures a screenshot to the specified outputFile.
   Future<void> takeScreenshot(File outputFile) {
-    return processUtils.run(
+    return ProcessUtils(logger: globals.logger, processManager: globals.processManager).run(
       <String>[
         _idevicescreenshotPath,
         outputFile.path,
@@ -496,7 +496,7 @@ Future<XcodeBuildResult> buildXcodeProject({
   const Duration showBuildSettingsTimeout = Duration(minutes: 1);
   Map<String, String> buildSettings;
   try {
-    final RunResult showBuildSettingsResult = await processUtils.run(
+    final RunResult showBuildSettingsResult = await ProcessUtils(logger: globals.logger, processManager: globals.processManager).run(
       showBuildSettingsCommand,
       throwOnError: true,
       workingDirectory: app.project.hostAppRoot.path,
@@ -577,7 +577,7 @@ Future<RunResult> _runBuildWithRetries(List<String> buildCommands, BuildableIOSA
     remainingTries--;
     buildRetryDelaySeconds *= 2;
 
-    buildResult = await processUtils.run(
+    buildResult = await ProcessUtils(logger: globals.logger, processManager: globals.processManager).run(
       buildCommands,
       workingDirectory: app.project.hostAppRoot.path,
       allowReentrantFlutter: true,

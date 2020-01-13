@@ -50,7 +50,7 @@ class AndroidEmulator extends Emulator {
 
   @override
   Future<void> launch() async {
-    final Future<void> launchResult = processUtils.run(
+    final Future<void> launchResult = ProcessUtils(logger: globals.logger, processManager: globals.processManager).run(
       <String>[getEmulatorPath(), '-avd', id],
       throwOnError: true,
     );
@@ -72,7 +72,7 @@ List<AndroidEmulator> getEmulatorAvds() {
     return <AndroidEmulator>[];
   }
 
-  final String listAvdsOutput = processUtils.runSync(
+  final String listAvdsOutput = ProcessUtils(logger: globals.logger, processManager: globals.processManager).runSync(
     <String>[emulatorPath, '-list-avds']).stdout.trim();
 
   final List<AndroidEmulator> emulators = <AndroidEmulator>[];

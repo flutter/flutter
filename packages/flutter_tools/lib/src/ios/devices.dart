@@ -65,7 +65,7 @@ class IOSDeploy {
     iosDeployEnv['PATH'] = '/usr/bin:${iosDeployEnv['PATH']}';
     iosDeployEnv.addEntries(<MapEntry<String, String>>[globals.cache.dyLdLibEntry]);
 
-    return await processUtils.stream(
+    return await ProcessUtils(logger: globals.logger, processManager: globals.processManager).stream(
       launchCommand,
       mapFunction: _monitorInstallationFailure,
       trace: true,
@@ -204,7 +204,7 @@ class IOSDevice extends Device {
   Future<bool> isAppInstalled(IOSApp app) async {
     RunResult apps;
     try {
-      apps = await processUtils.run(
+      apps = await ProcessUtils(logger: globals.logger, processManager: globals.processManager).run(
         <String>[_installerPath, '--list-apps'],
         throwOnError: true,
         environment: Map<String, String>.fromEntries(
@@ -229,7 +229,7 @@ class IOSDevice extends Device {
     }
 
     try {
-      await processUtils.run(
+      await ProcessUtils(logger: globals.logger, processManager: globals.processManager).run(
         <String>[_installerPath, '-i', app.deviceBundlePath],
         throwOnError: true,
         environment: Map<String, String>.fromEntries(
@@ -246,7 +246,7 @@ class IOSDevice extends Device {
   @override
   Future<bool> uninstallApp(IOSApp app) async {
     try {
-      await processUtils.run(
+      await ProcessUtils(logger: globals.logger, processManager: globals.processManager).run(
         <String>[_installerPath, '-U', app.id],
         throwOnError: true,
         environment: Map<String, String>.fromEntries(
@@ -698,7 +698,7 @@ class IOSDevicePortForwarder extends DevicePortForwarder {
     while (!connected) {
       globals.printTrace('Attempting to forward device port $devicePort to host port $hostPort');
       // Usage: iproxy LOCAL_TCP_PORT DEVICE_TCP_PORT UDID
-      process = await processUtils.start(
+      process = await ProcessUtils(logger: globals.logger, processManager: globals.processManager).start(
         <String>[
           device._iproxyPath,
           hostPort.toString(),

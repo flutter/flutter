@@ -48,7 +48,7 @@ class Xcode {
   String get xcodeSelectPath {
     if (_xcodeSelectPath == null) {
       try {
-        _xcodeSelectPath = processUtils.runSync(
+        _xcodeSelectPath = ProcessUtils(logger: globals.logger, processManager: globals.processManager).runSync(
           <String>['/usr/bin/xcode-select', '--print-path'],
         ).stdout.trim();
       } on ProcessException {
@@ -78,7 +78,7 @@ class Xcode {
   bool get eulaSigned {
     if (_eulaSigned == null) {
       try {
-        final RunResult result = processUtils.runSync(
+        final RunResult result = ProcessUtils(logger: globals.logger, processManager: globals.processManager).runSync(
           <String>['/usr/bin/xcrun', 'clang'],
         );
         if (result.stdout != null && result.stdout.contains('license')) {
@@ -103,7 +103,7 @@ class Xcode {
       try {
         // This command will error if additional components need to be installed in
         // xcode 9.2 and above.
-        final RunResult result = processUtils.runSync(
+        final RunResult result = ProcessUtils(logger: globals.logger, processManager: globals.processManager).runSync(
           <String>['/usr/bin/xcrun', 'simctl', 'list'],
         );
         _isSimctlInstalled = result.stderr == null || result.stderr == '';
@@ -128,14 +128,14 @@ class Xcode {
   }
 
   Future<RunResult> cc(List<String> args) {
-    return processUtils.run(
+    return ProcessUtils(logger: globals.logger, processManager: globals.processManager).run(
       <String>['xcrun', 'cc', ...args],
       throwOnError: true,
     );
   }
 
   Future<RunResult> clang(List<String> args) {
-    return processUtils.run(
+    return ProcessUtils(logger: globals.logger, processManager: globals.processManager).run(
       <String>['xcrun', 'clang', ...args],
       throwOnError: true,
     );
@@ -143,7 +143,7 @@ class Xcode {
 
   Future<String> sdkLocation(SdkType sdk) async {
     assert(sdk != null);
-    final RunResult runResult = await processUtils.run(
+    final RunResult runResult = await ProcessUtils(logger: globals.logger, processManager: globals.processManager).run(
       <String>['xcrun', '--sdk', getNameForSdk(sdk), '--show-sdk-path'],
       throwOnError: true,
     );

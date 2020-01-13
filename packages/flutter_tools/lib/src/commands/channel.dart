@@ -61,7 +61,7 @@ class ChannelCommand extends FlutterCommand {
     showAll = showAll || currentChannel != currentBranch;
 
     globals.printStatus('Flutter channels:');
-    final int result = await processUtils.stream(
+    final int result = await ProcessUtils(logger: globals.logger, processManager: globals.processManager).stream(
       <String>['git', 'branch', '-r'],
       workingDirectory: Cache.flutterRoot,
       mapFunction: (String line) {
@@ -115,6 +115,7 @@ class ChannelCommand extends FlutterCommand {
 
   static Future<void> _checkout(String branchName) async {
     // Get latest refs from upstream.
+    final ProcessUtils processUtils = ProcessUtils(logger: globals.logger, processManager: globals.processManager);
     int result = await processUtils.stream(
       <String>['git', 'fetch'],
       workingDirectory: Cache.flutterRoot,

@@ -646,7 +646,7 @@ class FlutterValidator extends DoctorValidator {
 bool _genSnapshotRuns(String genSnapshotPath) {
   const int kExpectedExitCode = 255;
   try {
-    return processUtils.runSync(<String>[genSnapshotPath]).exitCode == kExpectedExitCode;
+    return ProcessUtils(logger: globals.logger, processManager: globals.processManager).runSync(<String>[genSnapshotPath]).exitCode == kExpectedExitCode;
   } catch (error) {
     return false;
   }

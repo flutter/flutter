@@ -229,7 +229,7 @@ class XcodeProjectInterpreter {
       return;
     }
     try {
-      final RunResult result = processUtils.runSync(
+      final RunResult result = ProcessUtils(logger: globals.logger, processManager: globals.processManager).runSync(
         <String>[_executable, '-version'],
       );
       if (result.exitCode != 0) {
@@ -302,7 +302,7 @@ class XcodeProjectInterpreter {
       // showBuildSettings is reported to occasionally timeout. Here, we give it
       // a lot of wiggle room (locally on Flutter Gallery, this takes ~1s).
       // When there is a timeout, we retry once.
-      final RunResult result = await processUtils.run(
+      final RunResult result = await ProcessUtils(logger: globals.logger, processManager: globals.processManager).run(
         showBuildSettingsCommand,
         throwOnError: true,
         workingDirectory: projectPath,
@@ -325,7 +325,7 @@ class XcodeProjectInterpreter {
   }
 
   void cleanWorkspace(String workspacePath, String scheme) {
-    processUtils.runSync(<String>[
+    ProcessUtils(logger: globals.logger, processManager: globals.processManager).runSync(<String>[
       _executable,
       '-workspace',
       workspacePath,
@@ -342,7 +342,7 @@ class XcodeProjectInterpreter {
     // * -project is passed and the given project isn't there, or
     // * no -project is passed and there isn't a project.
     const int missingProjectExitCode = 66;
-    final RunResult result = await processUtils.run(
+    final RunResult result = await ProcessUtils(logger: globals.logger, processManager: globals.processManager).run(
       <String>[
         _executable,
         '-list',

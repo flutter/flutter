@@ -190,7 +190,7 @@ class VisualStudio {
         '-utf8',
         '-latest',
       ];
-      final RunResult whereResult = processUtils.runSync(<String>[
+      final RunResult whereResult = ProcessUtils(logger: globals.logger, processManager: globals.processManager).runSync(<String>[
         _vswherePath,
         ...defaultArguments,
         ...?additionalArguments,

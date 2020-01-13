@@ -288,7 +288,7 @@ end
           '-output',
           fatFlutterFrameworkBinary.path
         ];
-        final RunResult lipoResult = processUtils.runSync(
+        final RunResult lipoResult = ProcessUtils(logger: globals.logger, processManager: globals.processManager).runSync(
           lipoCommand,
           allowReentrantFlutter: false,
         );
@@ -368,7 +368,7 @@ end
       destinationAppFrameworkDirectory.childFile(binaryName).path
     ];
 
-    final RunResult lipoResult = processUtils.runSync(
+    final RunResult lipoResult = ProcessUtils(logger: globals.logger, processManager: globals.processManager).runSync(
       lipoCommand,
       allowReentrantFlutter: false,
     );
@@ -428,7 +428,7 @@ end
         'ONLY_ACTIVE_ARCH=NO' // No device targeted, so build all valid architectures.
       ];
 
-      RunResult buildPluginsResult = processUtils.runSync(
+      RunResult buildPluginsResult = ProcessUtils(logger: globals.logger, processManager: globals.processManager).runSync(
         pluginsBuildCommand,
         workingDirectory: _project.ios.hostAppRoot.childDirectory('Pods').path,
         allowReentrantFlutter: false,
@@ -453,7 +453,7 @@ end
           // No device targeted, so build all valid architectures.
         ];
 
-        buildPluginsResult = processUtils.runSync(
+        buildPluginsResult = ProcessUtils(logger: globals.logger, processManager: globals.processManager).runSync(
           pluginsBuildCommand,
           workingDirectory: _project.ios.hostAppRoot
               .childDirectory('Pods')
@@ -487,7 +487,7 @@ end
                 modeDirectory.childDirectory(podFrameworkName).childFile(binaryName).path
               ];
 
-              final RunResult pluginsLipoResult = processUtils.runSync(
+              final RunResult pluginsLipoResult = ProcessUtils(logger: globals.logger, processManager: globals.processManager).runSync(
                 lipoCommand,
                 workingDirectory: outputDirectory.path,
                 allowReentrantFlutter: false,
@@ -513,7 +513,7 @@ end
                 modeDirectory.childFile('$binaryName.xcframework').path
               ];
 
-              final RunResult xcframeworkResult = processUtils.runSync(
+              final RunResult xcframeworkResult = ProcessUtils(logger: globals.logger, processManager: globals.processManager).runSync(
                 xcframeworkCommand,
                 workingDirectory: outputDirectory.path,
                 allowReentrantFlutter: false,
@@ -584,7 +584,7 @@ end
         armFlutterFrameworkBinary.path
       ];
 
-      RunResult lipoResult = processUtils.runSync(
+      RunResult lipoResult = ProcessUtils(logger: globals.logger, processManager: globals.processManager).runSync(
         lipoCommand,
         allowReentrantFlutter: false,
       );
@@ -610,7 +610,7 @@ end
         simulatorFlutterFrameworkBinary.path
       ];
 
-      lipoResult = processUtils.runSync(
+      lipoResult = ProcessUtils(logger: globals.logger, processManager: globals.processManager).runSync(
         lipoCommand,
         allowReentrantFlutter: false,
       );
@@ -632,7 +632,7 @@ end
             .path
       ];
 
-      final RunResult xcframeworkResult = processUtils.runSync(
+      final RunResult xcframeworkResult = ProcessUtils(logger: globals.logger, processManager: globals.processManager).runSync(
         xcframeworkCommand,
         allowReentrantFlutter: false,
       );
@@ -659,7 +659,7 @@ end
           .path
     ];
 
-    final RunResult xcframeworkResult = processUtils.runSync(
+    final RunResult xcframeworkResult = ProcessUtils(logger: globals.logger, processManager: globals.processManager).runSync(
       xcframeworkCommand,
       allowReentrantFlutter: false,
     );

@@ -913,7 +913,7 @@ class AndroidMavenArtifacts extends ArtifactSet {
     try {
       final String gradleExecutable = gradle.absolute.path;
       final String flutterSdk = escapePath(Cache.flutterRoot);
-      final RunResult processResult = await processUtils.run(
+      final RunResult processResult = await ProcessUtils(logger: globals.logger, processManager: globals.processManager).run(
         <String>[
           gradleExecutable,
           '-b', globals.fs.path.join(flutterSdk, 'packages', 'flutter_tools', 'gradle', 'resolve_dependencies.gradle'),

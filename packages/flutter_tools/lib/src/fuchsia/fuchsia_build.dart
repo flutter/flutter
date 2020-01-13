@@ -114,7 +114,7 @@ Future<void> _genSnapshot(
     timeout: null,
   );
   try {
-    result = await processUtils.stream(command, trace: true);
+    result = await ProcessUtils(logger: globals.logger, processManager: globals.processManager).stream(command, trace: true);
   } finally {
     status.cancel();
   }

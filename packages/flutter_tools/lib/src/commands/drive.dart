@@ -338,7 +338,7 @@ Future<void> _runTests(List<String> testArgs, Map<String, String> environment) a
 
   PackageMap.globalPackagesPath = globals.fs.path.normalize(globals.fs.path.absolute(PackageMap.globalPackagesPath));
   final String dartVmPath = globals.fs.path.join(dartSdkPath, 'bin', 'dart');
-  final int result = await processUtils.stream(
+  final int result = await ProcessUtils(logger: globals.logger, processManager: globals.processManager).stream(
     <String>[
       dartVmPath,
       ...dartVmFlags,

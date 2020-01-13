@@ -273,7 +273,7 @@ class AndroidLicenseValidator extends DoctorValidator {
     }
 
     try {
-      final Process process = await processUtils.start(
+      final Process process = await ProcessUtils(logger: globals.logger, processManager: globals.processManager).start(
         <String>[androidSdk.sdkManagerPath, '--licenses'],
         environment: androidSdk.sdkManagerEnv,
       );
@@ -316,7 +316,7 @@ class AndroidLicenseValidator extends DoctorValidator {
     }
 
     try {
-      final Process process = await processUtils.start(
+      final Process process = await ProcessUtils(logger: globals.logger, processManager: globals.processManager).start(
         <String>[androidSdk.sdkManagerPath, '--licenses'],
         environment: androidSdk.sdkManagerEnv,
       );

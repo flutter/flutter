@@ -7,6 +7,7 @@ import 'dart:async';
 import '../base/common.dart';
 import '../base/process.dart';
 import '../dart/sdk.dart';
+import '../globals.dart' as globals;
 import '../runner/flutter_command.dart';
 
 class FormatCommand extends FlutterCommand {
@@ -71,7 +72,7 @@ class FormatCommand extends FlutterCommand {
       ...argResults.rest,
     ];
 
-    final int result = await processUtils.stream(command);
+    final int result = await ProcessUtils(logger: globals.logger, processManager: globals.processManager).stream(command);
     if (result != 0) {
       throwToolExit('Formatting failed: $result', exitCode: result);
     }

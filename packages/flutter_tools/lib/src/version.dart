@@ -602,7 +602,7 @@ String _runSync(List<String> command, { bool lenient = true }) {
 }
 
 String _runGit(String command) {
-  return processUtils.runSync(
+  return ProcessUtils(logger: globals.logger, processManager: globals.processManager).runSync(
     command.split(' '),
     workingDirectory: Cache.flutterRoot,
   ).stdout.trim();

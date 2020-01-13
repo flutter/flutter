@@ -75,7 +75,7 @@ Future<void> buildWindows(WindowsProject windowsProject, BuildInfo buildInfo, {S
     // Run the script with a relative path to the project using the enclosing
     // directory as the workingDirectory, to avoid hitting the limit on command
     // lengths in batch scripts if the absolute path to the project is long.
-    result = await processUtils.stream(<String>[
+    result = await ProcessUtils(logger: globals.logger, processManager: globals.processManager).stream(<String>[
       buildScript,
       vcvarsScript,
       globals.fs.path.basename(solutionPath),

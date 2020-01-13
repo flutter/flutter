@@ -57,7 +57,7 @@ export PROJECT_DIR=${linuxProject.project.directory.path}
   );
   int result;
   try {
-    result = await processUtils.stream(<String>[
+    result = await ProcessUtils(logger: globals.logger, processManager: globals.processManager).stream(<String>[
       'make',
       '-C',
       linuxProject.makeFile.parent.path,

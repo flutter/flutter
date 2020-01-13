@@ -69,7 +69,7 @@ class GenSnapshot {
       outputFilter = (String line) => line != kStripWarning ? line : null;
     }
 
-    return processUtils.stream(
+    return ProcessUtils(logger: globals.logger, processManager: globals.processManager).stream(
       <String>[snapshotterPath, ...args],
       mapFunction: outputFilter,
     );
