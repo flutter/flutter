@@ -194,6 +194,41 @@ void main() {
     await tester.pumpAndSettle();
     expect(value, equals('three'));
   });
+ 
+  testWidgets('DropdownButtonFormFieldState value changes when option selected',
+      (WidgetTester tester) async {
+    String value = 'one';
+    final GlobalKey<FormFieldState<String>> stateKey =
+        GlobalKey<FormFieldState<String>>();
+
+    await tester.pumpWidget(
+      Builder(
+        builder: (BuildContext context) {
+          return MaterialApp(
+            home: Material(
+              child: DropdownButtonFormField<String>(
+                key: stateKey,
+                value: value,
+                items: menuItems.map((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+                onChanged: (_) {},
+              ),
+            ),
+          );
+        },
+      ),
+    );
+    expect(stateKey.currentState.value, equals('one'));
+    await tester.tap(find.text('one'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('three').last);
+    await tester.pumpAndSettle();
+    expect(stateKey.currentState.value, equals('three'));
+  });
 
   testWidgets('DropdownButtonFormField arrow icon aligns with the edge of button when expanded', (WidgetTester tester) async {
     final Key buttonKey = UniqueKey();
