@@ -567,7 +567,7 @@ std::unique_ptr<flutter::VsyncWaiter> PlatformView::CreateVSyncWaiter() {
 // |flutter::PlatformView|
 std::unique_ptr<flutter::Surface> PlatformView::CreateRenderingSurface() {
   // This platform does not repeatly lose and gain a surface connection. So the
-  // surface is setup once during platform view setup and and returned to the
+  // surface is setup once during platform view setup and returned to the
   // shell on the initial (and only) |NotifyCreated| call.
   return std::move(surface_);
 }
