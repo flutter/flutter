@@ -12,11 +12,22 @@ import 'package:path/path.dart' as path;
 
 import 'utils.dart';
 
+
+/// Gets the artifact path relative to the current directory.
+String getArtifactPath() {
+  return path.normalize(
+      path.join(
+        path.current,
+        '../../bin/cache/artifacts',
+      )
+    );
+}
+
 /// The root of the API for controlling devices.
 DeviceDiscovery get devices => DeviceDiscovery();
 
 /// Device operating system the test is configured to test.
-enum DeviceOperatingSystem { android, ios }
+enum DeviceOperatingSystem { android, ios, fuchsia }
 
 /// Device OS to test on.
 DeviceOperatingSystem deviceOperatingSystem = DeviceOperatingSystem.android;
@@ -29,6 +40,8 @@ abstract class DeviceDiscovery {
         return AndroidDeviceDiscovery();
       case DeviceOperatingSystem.ios:
         return IosDeviceDiscovery();
+      case DeviceOperatingSystem.fuchsia:
+        return FuchsiaDeviceDiscovery();
       default:
         throw StateError('Unsupported device operating system: {config.deviceOperatingSystem}');
     }
@@ -196,6 +209,91 @@ class AndroidDeviceDiscovery implements DeviceDiscovery {
     // a better method, but so far that's the best one I've found.
     await exec(adbPath, <String>['kill-server'], canFail: false);
   }
+}
+
+class FuchsiaDeviceDiscovery implements DeviceDiscovery {
+  factory FuchsiaDeviceDiscovery() {
+    return _instance ??= FuchsiaDeviceDiscovery._();
+  }
+
+  FuchsiaDeviceDiscovery._();
+
+  static FuchsiaDeviceDiscovery _instance;
+
+ FuchsiaDevice _workingDevice;
+
+ String get _devFinder {
+    final String devFinder = path.join(getArtifactPath(), 'fuchsia', 'tools', 'dev_finder');
+    if (!File(devFinder).existsSync()) {
+      throw FileSystemException('Couldn\'t find dev_finder at location $devFinder');
+    }
+    return devFinder;
+ }
+
+  @override
+  Future<FuchsiaDevice> get workingDevice async {
+    if (_workingDevice == null) {
+      await chooseWorkingDevice();
+    }
+    return _workingDevice;
+  }
+
+  /// Picks the first connected Fuchsia device.
+  @override
+  Future<void> chooseWorkingDevice() async {
+    final List<FuchsiaDevice> allDevices = (await discoverDevices())
+      .map<FuchsiaDevice>((String id) => FuchsiaDevice(deviceId: id))
+      .toList();
+
+    if (allDevices.isEmpty) {
+      throw Exception('No Fuchsia devices detected');
+    }
+    _workingDevice = allDevices.first;
+  }
+
+  @override
+  Future<List<String>> discoverDevices() async {
+    final List<String> output = (await eval(_devFinder, <String>['list', '-full']))
+      .trim()
+      .split('\n');
+
+    final List<String> devices = <String>[];
+    for (final String line in output) {
+      final List<String> parts = line.split(' ');
+      assert(parts.length == 2);
+      devices.add(parts.last); // The device id.
+    }
+    return devices;
+  }
+
+  @override
+  Future<Map<String, HealthCheckResult>> checkDevices() async {
+    final Map<String, HealthCheckResult> results = <String, HealthCheckResult>{};
+    for (final String deviceId in await discoverDevices()) {
+      try {
+        final int resolveResult = await exec(
+          _devFinder,
+          <String>[
+            'resolve',
+            '-device-limit',
+            '1',
+            deviceId,
+          ]
+        );
+        if (resolveResult == 0) {
+          results['fuchsia-device-$deviceId'] = HealthCheckResult.success();
+        } else {
+          results['fuchsia-device-$deviceId'] = HealthCheckResult.failure('Cannot resolve device $deviceId');
+        }
+      } catch (error, stacktrace) {
+        results['fuchsia-device-$deviceId'] = HealthCheckResult.error(error, stacktrace);
+      }
+    }
+    return results;
+  }
+
+  @override
+  Future<void> performPreflightTasks() async {}
 }
 
 class AndroidDevice implements Device {
@@ -392,16 +490,6 @@ class IosDeviceDiscovery implements DeviceDiscovery {
     _workingDevice = allDevices[math.Random().nextInt(allDevices.length)];
   }
 
-  // Returns the path to cached binaries relative to devicelab directory
-  String get _artifactDirPath {
-    return path.normalize(
-      path.join(
-        path.current,
-        '../../bin/cache/artifacts',
-      )
-    );
-  }
-
   // Returns a colon-separated environment variable that contains the paths
   // of linked libraries for idevice_id
   Map<String, String> get _ideviceIdEnvironment {
@@ -413,13 +501,13 @@ class IosDeviceDiscovery implements DeviceDiscovery {
       'ideviceinstaller',
       'ios-deploy',
       'libzip',
-    ].map((String packageName) => path.join(_artifactDirPath, packageName)).join(':');
+    ].map((String packageName) => path.join(getArtifactPath(), packageName)).join(':');
     return <String, String>{'DYLD_LIBRARY_PATH': libPath};
   }
 
   @override
   Future<List<String>> discoverDevices() async {
-    final String ideviceIdPath = path.join(_artifactDirPath, 'libimobiledevice', 'idevice_id');
+    final String ideviceIdPath = path.join(getArtifactPath(), 'libimobiledevice', 'idevice_id');
     final List<String> iosDeviceIDs = LineSplitter.split(await eval(ideviceIdPath, <String>['-l'], environment: _ideviceIdEnvironment))
       .map<String>((String line) => line.trim())
       .where((String line) => line.isNotEmpty)
@@ -492,6 +580,49 @@ class IosDevice implements Device {
 
   @override
   Future<void> stop(String packageName) async {}
+}
+
+/// Fuchsia device.
+class FuchsiaDevice implements Device {
+  const FuchsiaDevice({ @required this.deviceId });
+
+  @override
+  final String deviceId;
+
+  // TODO(egarciad): Implement these for Fuchsia.
+  @override
+  Future<bool> isAwake() async => true;
+
+  @override
+  Future<bool> isAsleep() async => false;
+
+  @override
+  Future<void> wakeUp() async {}
+
+  @override
+  Future<void> sendToSleep() async {}
+
+  @override
+  Future<void> togglePower() async {}
+
+  @override
+  Future<void> unlock() async {}
+
+  @override
+  Future<void> tap(int x, int y) async {}
+
+  @override
+  Future<void> stop(String packageName) async {}
+
+  @override
+  Future<Map<String, dynamic>> getMemoryStats(String packageName) async {
+    throw 'Not implemented';
+  }
+
+  @override
+  Stream<String> get logcat {
+    throw 'Not implemented';
+  }
 }
 
 /// Path to the `adb` executable.

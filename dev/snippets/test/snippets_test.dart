@@ -37,20 +37,20 @@ main() {
   {{code}}
 }
 ''');
-      configuration.getHtmlSkeletonFile(SnippetType.application).writeAsStringSync('''
+      configuration.getHtmlSkeletonFile(SnippetType.sample).writeAsStringSync('''
 <div>HTML Bits</div>
 {{description}}
 <pre>{{code}}</pre>
 <pre>{{app}}</pre>
 <div>More HTML Bits</div>
 ''');
-      configuration.getHtmlSkeletonFile(SnippetType.sample).writeAsStringSync('''
+      configuration.getHtmlSkeletonFile(SnippetType.snippet).writeAsStringSync('''
 <div>HTML Bits</div>
 {{description}}
 <pre>{{code}}</pre>
 <div>More HTML Bits</div>
 ''');
-      configuration.getHtmlSkeletonFile(SnippetType.application, showDartPad: true).writeAsStringSync('''
+      configuration.getHtmlSkeletonFile(SnippetType.sample, showDartPad: true).writeAsStringSync('''
 <div>HTML Bits (DartPad-style)</div>
 <iframe class="snippet-dartpad" src="https://dartpad.dev/embed-flutter.html?split=60&run=true&sample_id={{id}}"></iframe>
 <div>More HTML Bits</div>
@@ -83,7 +83,7 @@ void main() {
 
       final String html = generator.generate(
         inputFile,
-        SnippetType.application,
+        SnippetType.sample,
         template: 'template',
         metadata: <String, Object>{
           'id': 'id',
@@ -126,7 +126,7 @@ void main() {
 
       final String html = generator.generate(
         inputFile,
-        SnippetType.sample,
+        SnippetType.snippet,
         metadata: <String, Object>{'id': 'id'},
       );
       expect(html, contains('<div>HTML Bits</div>'));
@@ -155,7 +155,7 @@ void main() {
 
       final String html = generator.generate(
         inputFile,
-        SnippetType.application,
+        SnippetType.sample,
         showDartPad: true,
         template: 'template',
         metadata: <String, Object>{'id': 'id'},
@@ -185,7 +185,7 @@ void main() {
 
       generator.generate(
         inputFile,
-        SnippetType.application,
+        SnippetType.sample,
         template: 'template',
         output: outputFile,
         metadata: <String, Object>{'sourcePath': 'some/path.dart', 'id': 'id'},

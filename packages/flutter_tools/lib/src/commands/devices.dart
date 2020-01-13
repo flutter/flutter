@@ -47,6 +47,6 @@ class DevicesCommand extends FlutterCommand {
       await Device.printDevices(devices);
     }
 
-    return null;
+    return FlutterCommandResult.success();
   }
 }

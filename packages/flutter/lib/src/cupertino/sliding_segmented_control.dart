@@ -178,7 +178,7 @@ class CupertinoSlidingSegmentedControl<T> extends StatefulWidget {
   /// the parent [StatefulWidget] using the [State.setState] method, so that
   /// the parent gets rebuilt; for example:
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   ///
   /// ```dart
   /// class SegmentedControlExample extends StatefulWidget {

@@ -46,10 +46,7 @@ class BuildWindowsCommand extends BuildSubCommand {
     if (!globals.platform.isWindows) {
       throwToolExit('"build windows" only supported on Windows hosts.');
     }
-    if (!flutterProject.windows.existsSync()) {
-      throwToolExit('No Windows desktop project configured.');
-    }
     await buildWindows(flutterProject.windows, buildInfo, target: targetFile);
-    return null;
+    return FlutterCommandResult.success();
   }
 }

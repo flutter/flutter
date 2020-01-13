@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/logger.dart';
 import 'package:flutter_tools/src/base/terminal.dart';
 import 'package:flutter_tools/src/build_info.dart';
 import 'package:flutter_tools/src/compile.dart';
@@ -103,7 +102,6 @@ void main() {
   }, overrides: <Type, Generator>{
     ProcessManager: () => mockProcessManager,
     OutputPreferences: () => OutputPreferences(showColor: false),
-    Logger: () => BufferLogger(),
     Platform: kNoColorTerminalPlatform,
   });
 

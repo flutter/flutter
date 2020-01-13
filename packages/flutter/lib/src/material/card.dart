@@ -19,7 +19,7 @@ import 'theme.dart';
 /// some text describing a musical, and the other with buttons for buying
 /// tickets or listening to the show.](https://flutter.github.io/assets-for-api-docs/assets/material/card.png)
 ///
-/// {@tool snippet --template=stateless_widget_scaffold}
+/// {@tool sample --template=stateless_widget_scaffold}
 ///
 /// This sample shows creation of a [Card] widget that shows album information
 /// and two actions.
@@ -59,7 +59,7 @@ import 'theme.dart';
 /// Sometimes the primary action area of a card is the card itself. Cards can be
 /// one large touch target that shows a detail screen when tapped.
 ///
-/// {@tool snippet --template=stateless_widget_scaffold}
+/// {@tool sample --template=stateless_widget_scaffold}
 ///
 /// This sample shows creation of a [Card] widget that can be tapped. When
 /// tapped this [Card]'s [InkWell] displays an "ink splash" that fills the

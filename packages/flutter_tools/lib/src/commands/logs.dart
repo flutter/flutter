@@ -83,6 +83,6 @@ class LogsCommand extends FlutterCommand {
       throwToolExit('Error listening to $logReader logs.');
     }
 
-    return null;
+    return FlutterCommandResult.success();
   }
 }

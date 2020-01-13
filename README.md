@@ -46,7 +46,7 @@ Flutter code is powered by the world-class [Dart platform], which enables
 compilation to 32-bit and 64-bit ARM machine code for iOS and Android, as well
 as JavaScript for the web and Intel x64 for desktop devices.
 
-![Dart platforms][Dart platforms]
+![Dart platform diagram][]
 
 ### Productive development
 
@@ -78,9 +78,9 @@ Information on how to get started can be found at our
 [layered architecture]: https://flutter.dev/docs/resources/inside-flutter
 [widget catalog]: https://flutter.dev/widgets/
 [Reflectly hero image]: https://github.com/flutter/website/blob/master/src/images/homepage/reflectly-hero-600px.png
-[Dart platforms]: https://dart.dev/assets/platforms-7f4d540acf9fe801b456ad74f9f855230a385014d05d9f5997c878b889a67a0f.svg
 [Skia]: https://skia.org/
 [Dart platform]: https://dart.dev/
+[Dart platform diagram]: https://github.com/flutter/website/blob/master/src/images/homepage/dart-diagram-small.png
 [Hot reload animation]: https://raw.githubusercontent.com/flutter/website/master/src/_assets/image/tools/android-studio/hot-reload.gif
 [Hot reload]: https://flutter.dev/docs/development/tools/hot-reload
 [Visual Studio Code]: https://marketplace.visualstudio.com/items?itemName=Dart-Code.flutter

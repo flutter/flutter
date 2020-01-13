@@ -237,7 +237,7 @@ typedef ChildIndexGetter = int Function(Key key);
 /// delegates where the first has 10 children contributing semantics, then the
 /// second delegate should offset its children by 10.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This sample code shows how to use `semanticIndexOffset` to handle multiple
 /// delegates in a single scroll view.
@@ -276,7 +276,7 @@ typedef ChildIndexGetter = int Function(Key key);
 /// providing a `semanticIndexCallback` which returns null for separators
 /// indexes and rounds the non-separator indexes down by half.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This sample code shows how to use `semanticIndexCallback` to handle
 /// annotating a subset of child nodes with a semantic index. There is
@@ -832,7 +832,7 @@ class SliverList extends SliverMultiBoxAdaptorWidget {
 /// [SliverFixedExtentList] does not need to perform layout on its children to
 /// obtain their extent in the main axis.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This example, which would be inserted into a [CustomScrollView.slivers]
 /// list, shows an infinite number of items in varying shades of blue:
@@ -899,7 +899,7 @@ class SliverFixedExtentList extends SliverMultiBoxAdaptorWidget {
 ///
 /// {@youtube 560 315 https://www.youtube.com/watch?v=ORiTTaVY6mM}
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This example, which would be inserted into a [CustomScrollView.slivers]
 /// list, shows twenty boxes in a pretty teal grid:
@@ -1325,7 +1325,7 @@ class SliverMultiBoxAdaptorElement extends RenderObjectElement implements Render
 /// For the value 1.0, the sliver child is painted immediately without an
 /// intermediate buffer.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This example shows a [SliverList] when the `_visible` member field is true,
 /// and hides it when it is false:
@@ -1554,7 +1554,7 @@ class _SliverOffstageElement extends SingleChildRenderObjectElement {
 /// In practice, the simplest way to deal with these notifications is to mix
 /// [AutomaticKeepAliveClientMixin] into one's [State]. See the documentation
 /// for that mixin class for details.
-class KeepAlive extends ParentDataWidget<SliverWithKeepAliveWidget> {
+class KeepAlive extends ParentDataWidget<KeepAliveParentDataMixin> {
   /// Marks a child as needing to remain alive.
   ///
   /// The [child] and [keepAlive] arguments must not be null.
@@ -1589,6 +1589,9 @@ class KeepAlive extends ParentDataWidget<SliverWithKeepAliveWidget> {
   // go away _unless_ we do a layout).
   @override
   bool debugCanApplyOutOfTurn() => keepAlive;
+
+  @override
+  Type get debugTypicalAncestorWidgetClass => SliverWithKeepAliveWidget;
 
   @override
   void debugFillProperties(DiagnosticPropertiesBuilder properties) {

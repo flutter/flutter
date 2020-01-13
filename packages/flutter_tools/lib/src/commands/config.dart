@@ -101,7 +101,7 @@ class ConfigCommand extends FlutterCommand {
   Future<FlutterCommandResult> runCommand() async {
     if (boolArg('machine')) {
       await handleMachine();
-      return null;
+      return FlutterCommandResult.success();
     }
 
     if (boolArg('clear-features')) {
@@ -110,13 +110,15 @@ class ConfigCommand extends FlutterCommand {
           globals.config.removeValue(feature.configSetting);
         }
       }
-      return null;
+      return FlutterCommandResult.success();
     }
 
     if (argResults.wasParsed('analytics')) {
       final bool value = boolArg('analytics');
-      flutterUsage.enabled = value;
+      // We send the analytics event *before* toggling the flag intentionally
+      // to be sure that opt-out events are sent correctly.
       AnalyticsConfigEvent(enabled: value).send();
+      flutterUsage.enabled = value;
       globals.printStatus('Analytics reporting ${value ? 'enabled' : 'disabled'}.');
     }
 
@@ -157,7 +159,7 @@ class ConfigCommand extends FlutterCommand {
       globals.printStatus('\nYou may need to restart any open editors for them to read new settings.');
     }
 
-    return null;
+    return FlutterCommandResult.success();
   }
 
   Future<void> handleMachine() async {

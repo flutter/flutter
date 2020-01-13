@@ -92,6 +92,7 @@ void testUsingContext(
       return context.run<dynamic>(
         name: 'mocks',
         overrides: <Type, Generator>{
+          AnsiTerminal: () => AnsiTerminal(platform: globals.platform, stdio: globals.stdio),
           Config: () => buildConfig(globals.fs),
           DeviceManager: () => FakeDeviceManager(),
           Doctor: () => FakeDoctor(),
@@ -103,7 +104,10 @@ void testUsingContext(
             return mock;
           },
           OutputPreferences: () => OutputPreferences.test(),
-          Logger: () => BufferLogger(),
+          Logger: () => BufferLogger(
+            terminal: globals.terminal,
+            outputPreferences: outputPreferences,
+          ),
           OperatingSystemUtils: () => FakeOperatingSystemUtils(),
           PersistentToolState: () => buildPersistentToolState(globals.fs),
           SimControl: () => MockSimControl(),

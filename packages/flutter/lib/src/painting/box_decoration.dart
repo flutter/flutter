@@ -33,7 +33,7 @@ import 'image_provider.dart';
 ///
 /// The [border] paints over the body; the [boxShadow], naturally, paints below it.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// The following applies a [BoxDecoration] to a [Container] widget to draw an
 /// [image] of an owl with a thick black [border] and rounded corners.
@@ -309,10 +309,10 @@ class BoxDecoration extends Decoration {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     if (identical(this, other))
       return true;
-    if (runtimeType != other.runtimeType)
+    if (other.runtimeType != runtimeType)
       return false;
     return other is BoxDecoration
         && other.color == color
