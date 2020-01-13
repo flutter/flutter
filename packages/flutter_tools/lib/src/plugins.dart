@@ -263,7 +263,7 @@ class Plugin {
   final Map<String, PluginPlatform> platforms;
 }
 
-Plugin _pluginFromPubspec(String name, Uri packageRoot) {
+Plugin _pluginFromPackage(String name, Uri packageRoot) {
   final String pubspecPath = globals.fs.path.fromUri(packageRoot.resolve('pubspec.yaml'));
   if (!globals.fs.isFileSync(pubspecPath)) {
     return null;
@@ -302,7 +302,7 @@ List<Plugin> findPlugins(FlutterProject project) {
   }
   packages.forEach((String name, Uri uri) {
     final Uri packageRoot = uri.resolve('..');
-    final Plugin plugin = _pluginFromPubspec(name, packageRoot);
+    final Plugin plugin = _pluginFromPackage(name, packageRoot);
     if (plugin != null) {
       plugins.add(plugin);
     }
