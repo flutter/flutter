@@ -6,7 +6,6 @@ import 'dart:async';
 
 import '../base/common.dart';
 import '../base/file_system.dart';
-import '../base/utils.dart';
 import '../convert.dart';
 import '../device.dart';
 import '../globals.dart' as globals;
@@ -110,7 +109,11 @@ class ScreenshotCommand extends FlutterCommand {
   }
 
   Future<void> runScreenshot(File outputFile) async {
-    outputFile ??= getUniqueFile(globals.fs.currentDirectory, 'flutter', 'png');
+    outputFile ??= fsUtils.getUniqueFile(
+      globals.fs.currentDirectory,
+      'flutter',
+      'png',
+    );
     try {
       await device.takeScreenshot(outputFile);
     } catch (error) {
@@ -121,7 +124,11 @@ class ScreenshotCommand extends FlutterCommand {
 
   Future<void> runSkia(File outputFile) async {
     final Map<String, dynamic> skp = await _invokeVmServiceRpc('_flutter.screenshotSkp');
-    outputFile ??= getUniqueFile(globals.fs.currentDirectory, 'flutter', 'skp');
+    outputFile ??= fsUtils.getUniqueFile(
+      globals.fs.currentDirectory,
+      'flutter',
+      'skp',
+    );
     final IOSink sink = outputFile.openWrite();
     sink.add(base64.decode(skp['skp'] as String));
     await sink.close();
@@ -131,7 +138,11 @@ class ScreenshotCommand extends FlutterCommand {
 
   Future<void> runRasterizer(File outputFile) async {
     final Map<String, dynamic> response = await _invokeVmServiceRpc('_flutter.screenshot');
-    outputFile ??= getUniqueFile(globals.fs.currentDirectory, 'flutter', 'png');
+    outputFile ??= fsUtils.getUniqueFile(
+      globals.fs.currentDirectory,
+      'flutter',
+      'png',
+    );
     final IOSink sink = outputFile.openWrite();
     sink.add(base64.decode(response['screenshot'] as String));
     await sink.close();
