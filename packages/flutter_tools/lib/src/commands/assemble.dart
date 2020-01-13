@@ -16,6 +16,7 @@ import '../build_system/targets/linux.dart';
 import '../build_system/targets/macos.dart';
 import '../build_system/targets/web.dart';
 import '../build_system/targets/windows.dart';
+import '../cache.dart';
 import '../globals.dart' as globals;
 import '../project.dart';
 import '../reporting/reporting.dart';
@@ -147,6 +148,8 @@ class AssembleCommand extends FlutterCommand {
           .childDirectory('flutter_build'),
       projectDir: flutterProject.directory,
       defines: _parseDefines(stringsArg('define')),
+      cacheDir: globals.cache.getRoot(),
+      flutterRootDir: globals.fs.directory(Cache.flutterRoot),
     );
     return result;
   }

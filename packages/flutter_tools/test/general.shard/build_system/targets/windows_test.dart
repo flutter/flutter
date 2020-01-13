@@ -37,6 +37,8 @@ void main() {
       environment = Environment(
         outputDir: globals.fs.currentDirectory,
         projectDir: globals.fs.currentDirectory,
+        cacheDir: globals.fs.currentDirectory,
+        flutterRootDir: globals.fs.currentDirectory,
       );
       globals.fs.file(r'C:\bin\cache\artifacts\engine\windows-x64\flutter_export.h').createSync(recursive: true);
       globals.fs.file(r'C:\bin\cache\artifacts\engine\windows-x64\flutter_messenger.h').createSync();
