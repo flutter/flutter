@@ -72,7 +72,7 @@ void main() {
       when(windowsProject.pluginConfigKey).thenReturn('windows');
       when(windowsProject.existsSync()).thenReturn(false);
       linuxProject = MockLinuxProject();
-      when(flutterProject.linux).thenReturn(linuxProject);;
+      when(flutterProject.linux).thenReturn(linuxProject);
       when(linuxProject.pluginsList(any)).thenReturn(<Map<String,dynamic>>[]);
       when(linuxProject.pluginConfigKey).thenReturn('linux');
       when(linuxProject.existsSync()).thenReturn(false);
