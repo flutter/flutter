@@ -647,7 +647,11 @@ void main() {
                 const PopupMenuItem<int>(value: 2, child: Text('2')),
                 const PopupMenuItem<int>(value: 3, child: Text('3')),
                 const PopupMenuItem<int>(value: 4, child: Text('4')),
-                const PopupMenuItem<int>(value: 5, child: Text('5')),
+                const PopupMenuItem<int>(
+                  value: 5,
+                  child: Text('5'),
+                  enabled: false,
+                ),
               ];
             },
             child: const SizedBox(
@@ -682,32 +686,54 @@ void main() {
                     ],
                     children: <TestSemantics>[
                       TestSemantics(
-                        flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
+                        flags: <SemanticsFlag>[
+                          SemanticsFlag.isButton,
+                          SemanticsFlag.hasEnabledState,
+                          SemanticsFlag.isEnabled,
+                          SemanticsFlag.isFocusable,
+                        ],
                         actions: <SemanticsAction>[SemanticsAction.tap],
                         label: '1',
                         textDirection: TextDirection.ltr,
                       ),
                       TestSemantics(
-                        flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
+                        flags: <SemanticsFlag>[
+                          SemanticsFlag.isButton,
+                          SemanticsFlag.hasEnabledState,
+                          SemanticsFlag.isEnabled,
+                          SemanticsFlag.isFocusable,
+                        ],
                         actions: <SemanticsAction>[SemanticsAction.tap],
                         label: '2',
                         textDirection: TextDirection.ltr,
                       ),
                       TestSemantics(
-                        flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
+                        flags: <SemanticsFlag>[
+                          SemanticsFlag.isButton,
+                          SemanticsFlag.hasEnabledState,
+                          SemanticsFlag.isEnabled,
+                          SemanticsFlag.isFocusable,
+                        ],
                         actions: <SemanticsAction>[SemanticsAction.tap],
                         label: '3',
                         textDirection: TextDirection.ltr,
                       ),
                       TestSemantics(
-                        flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
+                        flags: <SemanticsFlag>[
+                          SemanticsFlag.isButton,
+                          SemanticsFlag.hasEnabledState,
+                          SemanticsFlag.isEnabled,
+                          SemanticsFlag.isFocusable,
+                        ],
                         actions: <SemanticsAction>[SemanticsAction.tap],
                         label: '4',
                         textDirection: TextDirection.ltr,
                       ),
                       TestSemantics(
-                        flags: <SemanticsFlag>[SemanticsFlag.isFocusable],
-                        actions: <SemanticsAction>[SemanticsAction.tap],
+                        flags: <SemanticsFlag>[
+                          SemanticsFlag.isButton,
+                          SemanticsFlag.hasEnabledState,
+                        ],
                         label: '5',
                         textDirection: TextDirection.ltr,
                       ),

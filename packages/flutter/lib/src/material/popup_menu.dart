@@ -321,10 +321,16 @@ class PopupMenuItemState<T, W extends PopupMenuItem<T>> extends State<W> {
       );
     }
 
-    return InkWell(
-      onTap: widget.enabled ? handleTap : null,
-      canRequestFocus: widget.enabled,
-      child: item,
+    return MergeSemantics(
+      child: InkWell(
+        onTap: widget.enabled ? handleTap : null,
+        canRequestFocus: widget.enabled,
+        child: Semantics(
+          button: true,
+          enabled: widget.enabled,
+          child: item,
+        ),
+      ),
     );
   }
 }
