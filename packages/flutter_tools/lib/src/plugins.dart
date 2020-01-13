@@ -323,42 +323,42 @@ void _addPluginsToPlatform(List<Plugin> plugins, FlutterProjectPlatform platform
 /// Writes the .flutter-plugins.json file based on the list of plugins.
 /// If there aren't any plugins, then the files aren't written to disk. The resulting
 /// file looks something like this:
-// {
-//     "_info": "// This is a generated file; do not edit or check into version control.",
-//     "plugins": {
-//         "ios": [
-//             {
-//                 "name": "plugin-a",
-//                 "path": "/path/to/plugin/pubspec",
-//                 "dependencies": []
-//             },
-//             {
-//                 "name": "plugin-b",
-//                 "path": "/path/to/plugin/pubspec",
-//                 "dependencies": [
-//                     "plugin-c",
-//                     "plugin-d"
-//                 ]
-//             }
-//         ],
-//         "macos": [
-//             {
-//                 "name": "plugin-a",
-//                 "path": "/path/to/plugin/pubspec",
-//                 "dependencies": [
-//                    plugin-b,
-//                 ]
-//             },
-//             {
-//                 "name": "plugin-b",
-//                 "path": "/path/to/plugin/pubspec",
-//                 "dependencies": [
-//                     "plugin-c"
-//                 ]
-//             }
-//         ],
-//     }
-// }
+/// {
+///     "_info": "// This is a generated file; do not edit or check into version control.",
+///     "plugins": {
+///         "ios": [
+///             {
+///                 "name": "plugin-a",
+///                 "path": "/path/to/plugin/pubspec",
+///                 "dependencies": []
+///             },
+///             {
+///                 "name": "plugin-b",
+///                 "path": "/path/to/plugin/pubspec",
+///                 "dependencies": [
+///                     "plugin-c",
+///                     "plugin-d"
+///                 ]
+///             }
+///         ],
+///         "macos": [
+///             {
+///                 "name": "plugin-a",
+///                 "path": "/path/to/plugin/pubspec",
+///                 "dependencies": [
+///                    plugin-b,
+///                 ]
+///             },
+///             {
+///                 "name": "plugin-b",
+///                 "path": "/path/to/plugin/pubspec",
+///                "dependencies": [
+///                     "plugin-c"
+///                 ]
+///             }
+///         ],
+///     }
+/// }
 ///
 /// Finally, returns [true] if .flutter-plugins.json has changed,
 /// otherwise returns [false].
