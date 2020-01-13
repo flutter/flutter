@@ -81,6 +81,7 @@ void main() {
   }));
 
   test('WebReleaseBundle copies dart2js output and resource files to output directory', () => testbed.run(() async {
+    environment.defines[kBuildMode] = 'release';
     final Directory webResources = environment.projectDir.childDirectory('web');
     webResources.childFile('index.html')
       ..createSync(recursive: true);
