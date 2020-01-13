@@ -25,10 +25,7 @@ abstract class PersistentToolState {
 
 class _DefaultPersistentToolState implements PersistentToolState {
   _DefaultPersistentToolState([File configFile]) :
-    _config = Config(configFile ?? globals.fs.file(globals.fs.path.join(
-      fsUtils.userHomePath,
-      _kFileName,
-    )));
+    _config = Config(configFile ?? globals.fs.file(globals.fs.path.join(userHomePath(), _kFileName)));
 
   static const String _kFileName = '.flutter_tool_state';
   static const String _kRedisplayWelcomeMessage = 'redisplay-welcome-message';

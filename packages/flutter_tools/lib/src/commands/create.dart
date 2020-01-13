@@ -650,7 +650,7 @@ To edit platform code in an IDE see https://flutter.dev/developing-packages/#edi
 
   int _injectGradleWrapper(FlutterProject project) {
     int filesCreated = 0;
-    fsUtils.copyDirectorySync(
+    copyDirectorySync(
       globals.cache.getArtifactDirectory('gradle_wrapper'),
       project.android.hostAppGradleRoot,
       onFileCopied: (File sourceFile, File destinationFile) {
