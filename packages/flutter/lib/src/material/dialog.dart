@@ -222,6 +222,7 @@ class AlertDialog extends StatelessWidget {
     this.contentTextStyle,
     this.actions,
     this.actionsPadding = EdgeInsets.zero,
+    this.actionsVerticalDirection,
     this.buttonPadding,
     this.backgroundColor,
     this.elevation,
@@ -315,7 +316,23 @@ class AlertDialog extends StatelessWidget {
   /// )
   /// ```
   /// {@end-tool}
+  ///
+  /// See also:
+  ///
+  /// * [ButtonBar], which [actions] configures to lay itself out.
   final EdgeInsetsGeometry actionsPadding;
+
+  /// The vertical direction of [actions] if the children overflow
+  /// horizontally.
+  ///
+  /// If null then it will use the surrounding
+  /// [ButtonBarTheme.verticalDirection]. If that is null, it will
+  /// default to [VerticalDirection.down].
+  ///
+  /// See also:
+  ///
+  /// * [ButtonBar], which [actions] configures to lay itself out.
+  final VerticalDirection actionsVerticalDirection;
 
   /// The padding that surrounds each button in [actions].
   ///
@@ -325,6 +342,10 @@ class AlertDialog extends StatelessWidget {
   /// If this property is null, then it will use the surrounding
   /// [ButtonBarTheme.buttonPadding]. If that is null, it will default to
   /// 8.0 logical pixels on the left and right.
+  ///
+  /// See also:
+  ///
+  /// * [ButtonBar], which [actions] configures to lay itself out.
   final EdgeInsetsGeometry buttonPadding;
 
   /// {@macro flutter.material.dialog.backgroundColor}
@@ -415,6 +436,7 @@ class AlertDialog extends StatelessWidget {
         padding: actionsPadding,
         child: ButtonBar(
           buttonPadding: buttonPadding,
+          verticalDirection: actionsVerticalDirection,
           children: actions,
         ),
       );
