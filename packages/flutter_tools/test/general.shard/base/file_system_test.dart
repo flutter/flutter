@@ -4,41 +4,41 @@
 
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:mockito/mockito.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:platform/platform.dart';
 
 import '../../src/common.dart';
-
-class MockPlatform extends Mock implements Platform {}
+import '../../src/context.dart';
 
 void main() {
   group('ensureDirectoryExists', () {
     MemoryFileSystem fs;
-    FileSystemUtils fsUtils;
 
     setUp(() {
       fs = MemoryFileSystem();
-      fsUtils = FileSystemUtils(
-        fileSystem: fs,
-        platform: MockPlatform(),
-      );
     });
 
-    testWithoutContext('recursively creates a directory if it does not exist', () async {
-      fsUtils.ensureDirectoryExists('foo/bar/baz.flx');
+    testUsingContext('recursively creates a directory if it does not exist', () async {
+      ensureDirectoryExists('foo/bar/baz.flx');
       expect(fs.isDirectorySync('foo/bar'), true);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
     });
 
-    testWithoutContext('throws tool exit on failure to create', () async {
+    testUsingContext('throws tool exit on failure to create', () async {
       fs.file('foo').createSync();
-      expect(() => fsUtils.ensureDirectoryExists('foo/bar.flx'), throwsToolExit());
+      expect(() => ensureDirectoryExists('foo/bar.flx'), throwsToolExit());
+    }, overrides: <Type, Generator>{
+      FileSystem: () => fs,
+      ProcessManager: () => FakeProcessManager.any(),
     });
   });
 
   group('copyDirectorySync', () {
     /// Test file_systems.copyDirectorySync() using MemoryFileSystem.
     /// Copies between 2 instances of file systems which is also supported by copyDirectorySync().
-    testWithoutContext('test directory copy', () async {
+    test('test directory copy', () async {
       final MemoryFileSystem sourceMemoryFs = MemoryFileSystem();
       const String sourcePath = '/some/origin';
       final Directory sourceDirectory = await sourceMemoryFs.directory(sourcePath).create(recursive: true);
@@ -52,12 +52,7 @@ void main() {
       final MemoryFileSystem targetMemoryFs = MemoryFileSystem();
       const String targetPath = '/some/non-existent/target';
       final Directory targetDirectory = targetMemoryFs.directory(targetPath);
-
-      final FileSystemUtils fsUtils = FileSystemUtils(
-        fileSystem: sourceMemoryFs,
-        platform: MockPlatform(),
-      );
-      fsUtils.copyDirectorySync(sourceDirectory, targetDirectory);
+      copyDirectorySync(sourceDirectory, targetDirectory);
 
       expect(targetDirectory.existsSync(), true);
       targetMemoryFs.currentDirectory = targetPath;
@@ -71,21 +66,16 @@ void main() {
       expect(sourceMemoryFs.directory(sourcePath).listSync().length, 3);
     });
 
-    testWithoutContext('Skip files if shouldCopyFile returns false', () {
-      final MemoryFileSystem fileSystem = MemoryFileSystem();
-      final FileSystemUtils fsUtils = FileSystemUtils(
-        fileSystem: fileSystem,
-        platform: MockPlatform(),
-      );
-      final Directory origin = fileSystem.directory('/origin');
+    testUsingContext('Skip files if shouldCopyFile returns false', () {
+      final Directory origin = globals.fs.directory('/origin');
       origin.createSync();
-      fileSystem.file(fileSystem.path.join('origin', 'a.txt')).writeAsStringSync('irrelevant');
-      fileSystem.directory('/origin/nested').createSync();
-      fileSystem.file(fileSystem.path.join('origin', 'nested', 'a.txt')).writeAsStringSync('irrelevant');
-      fileSystem.file(fileSystem.path.join('origin', 'nested', 'b.txt')).writeAsStringSync('irrelevant');
+      globals.fs.file(globals.fs.path.join('origin', 'a.txt')).writeAsStringSync('irrelevant');
+      globals.fs.directory('/origin/nested').createSync();
+      globals.fs.file(globals.fs.path.join('origin', 'nested', 'a.txt')).writeAsStringSync('irrelevant');
+      globals.fs.file(globals.fs.path.join('origin', 'nested', 'b.txt')).writeAsStringSync('irrelevant');
 
-      final Directory destination = fileSystem.directory('/destination');
-      fsUtils.copyDirectorySync(origin, destination, shouldCopyFile: (File origin, File dest) {
+      final Directory destination = globals.fs.directory('/destination');
+      copyDirectorySync(origin, destination, shouldCopyFile: (File origin, File dest) {
         return origin.basename == 'b.txt';
       });
 
@@ -95,30 +85,53 @@ void main() {
 
       expect(destination.childFile('a.txt').existsSync(), isFalse);
       expect(destination.childDirectory('nested').childFile('a.txt').existsSync(), isFalse);
+    }, overrides: <Type, Generator>{
+      FileSystem: () => MemoryFileSystem(),
+      ProcessManager: () => FakeProcessManager.any(),
     });
   });
 
+  group('canonicalizePath', () {
+    test('does not lowercase on Windows', () {
+      String path = 'C:\\Foo\\bAr\\cOOL.dart';
+      expect(canonicalizePath(path), path);
+      // globals.fs.path.canonicalize does lowercase on Windows
+      expect(globals.fs.path.canonicalize(path), isNot(path));
+
+      path = '..\\bar\\.\\\\Foo';
+      final String expected = globals.fs.path.join(globals.fs.currentDirectory.parent.absolute.path, 'bar', 'Foo');
+      expect(canonicalizePath(path), expected);
+      // globals.fs.path.canonicalize should return the same result (modulo casing)
+      expect(globals.fs.path.canonicalize(path), expected.toLowerCase());
+    }, testOn: 'windows');
+
+    test('does not lowercase on posix', () {
+      String path = '/Foo/bAr/cOOL.dart';
+      expect(canonicalizePath(path), path);
+      // globals.fs.path.canonicalize and canonicalizePath should be the same on Posix
+      expect(globals.fs.path.canonicalize(path), path);
+
+      path = '../bar/.//Foo';
+      final String expected = globals.fs.path.join(globals.fs.currentDirectory.parent.absolute.path, 'bar', 'Foo');
+      expect(canonicalizePath(path), expected);
+    }, testOn: 'posix');
+  });
+
   group('escapePath', () {
-    testWithoutContext('on Windows', () {
-      final MemoryFileSystem fileSystem = MemoryFileSystem();
-      final FileSystemUtils fsUtils = FileSystemUtils(
-        fileSystem: fileSystem,
-        platform: FakePlatform(operatingSystem: 'windows'),
-      );
-      expect(fsUtils.escapePath('C:\\foo\\bar\\cool.dart'), 'C:\\\\foo\\\\bar\\\\cool.dart');
-      expect(fsUtils.escapePath('foo\\bar\\cool.dart'), 'foo\\\\bar\\\\cool.dart');
-      expect(fsUtils.escapePath('C:/foo/bar/cool.dart'), 'C:/foo/bar/cool.dart');
+    testUsingContext('on Windows', () {
+      expect(escapePath('C:\\foo\\bar\\cool.dart'), 'C:\\\\foo\\\\bar\\\\cool.dart');
+      expect(escapePath('foo\\bar\\cool.dart'), 'foo\\\\bar\\\\cool.dart');
+      expect(escapePath('C:/foo/bar/cool.dart'), 'C:/foo/bar/cool.dart');
+    }, overrides: <Type, Generator>{
+      Platform: () => FakePlatform(operatingSystem: 'windows'),
     });
 
-    testWithoutContext('on Linux', () {
-      final MemoryFileSystem fileSystem = MemoryFileSystem();
-      final FileSystemUtils fsUtils = FileSystemUtils(
-        fileSystem: fileSystem,
-        platform: FakePlatform(operatingSystem: 'linux'),
-      );
-      expect(fsUtils.escapePath('/foo/bar/cool.dart'), '/foo/bar/cool.dart');
-      expect(fsUtils.escapePath('foo/bar/cool.dart'), 'foo/bar/cool.dart');
-      expect(fsUtils.escapePath('foo\\cool.dart'), 'foo\\cool.dart');
+    testUsingContext('on Linux', () {
+      expect(escapePath('/foo/bar/cool.dart'), '/foo/bar/cool.dart');
+      expect(escapePath('foo/bar/cool.dart'), 'foo/bar/cool.dart');
+      expect(escapePath('foo\\cool.dart'), 'foo\\cool.dart');
+    }, overrides: <Type, Generator>{
+      Platform: () => FakePlatform(operatingSystem: 'linux'),
     });
   });
 }
