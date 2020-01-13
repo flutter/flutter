@@ -284,11 +284,80 @@ class NestedScrollView extends StatefulWidget {
   }
 
   @override
-  _NestedScrollViewState createState() => _NestedScrollViewState();
+  NestedScrollViewState createState() => NestedScrollViewState();
 }
 
-class _NestedScrollViewState extends State<NestedScrollView> {
+/// The [State] for a [NestedScrollView].
+///
+/// It allows you to obtain the [ScrollController]s of the children of your [NestedScrollView].
+///
+/// You can access the inner scroll controller via [innerController] and the outer
+/// controller with [outerController], however, notice that the outer scroll position
+/// can also be obtained using [NestedScrollView.controller].
+///
+/// If you want to access the inner scroll controller of your nested scroll view,
+/// you can get its [NestedScrollViewState] by supplying a `GlobalKey<NestedScrollViewState>`
+/// to your [NestedScrollView] widget (the `key` parameter).
+///
+/// {@tool sample}
+///
+/// You would access the [NestedScrollViewState] using a [GlobalKey].
+/// Using the following setup, you can access the inner scroll controller
+/// using `globalKey.currentState.innerController`.
+///
+/// ```dart
+/// class ExampleWidget extends StatelessWidget {
+///   final GlobalKey<NestedScrollViewState> globalKey = GlobalKey();
+///
+///   @override
+///   Widget build(BuildContext context) {
+///     return NestedScrollView(
+///       key: globalKey,
+///       headerSliverBuilder: (context, _) => const [SliverAppBar()],
+///       body: const CustomScrollView(
+///         // ...
+///       ),
+///     );
+///   }
+///
+///   ScrollController get innerController {
+///     return globalKey.currentState.innerController;
+///   }
+/// }
+/// ```
+///
+/// {@end-tool}
+class NestedScrollViewState extends State<NestedScrollView> {
   final SliverOverlapAbsorberHandle _absorberHandle = SliverOverlapAbsorberHandle();
+
+  /// The [ScrollController] provided to the [ScrollView] in [NestedScrollView.body].
+  ///
+  /// Manipulating the [ScrollPosition] of this controller fully pushes the header sliver up,
+  /// i.e. the position of the [outerController] will be set to [ScrollPosition.maxScrollExtent],
+  /// unless you use [ScrollPosition.setPixels].
+  /// Visually, the header sliver will not be visible, i.e. it is "pushed" up out of view.
+  ///
+  /// See also:
+  ///
+  ///  * [outerController], which exposes the [ScrollController] used by the [CustomScrollView]
+  ///    containing the [Sliver]s from [NestedScrollView.headerSliverBuilder].
+  ScrollController get innerController => _coordinator._innerController;
+
+  /// The [ScrollController] used by the [CustomScrollView] containing
+  /// the [Sliver]s from [NestedScrollView.headerSliverBuilder].
+  ///
+  /// This is equivalent to [NestedScrollView.controller] if provided.
+  ///
+  /// Manipulating the [ScrollPosition] of this controller fully pulls back the inner body,
+  /// i.e. the position of the [innerController] will be set to [ScrollPosition.minScrollExtent],
+  /// unless you use [ScrollPosition.setPixels].
+  /// Visually, the inner body will be scrolled to its beginning, i.e. it is "pulled" back.
+  ///
+  /// See also:
+  ///
+  ///  * [innerController], which exposes the [ScrollController] provided to the
+  ///    [ScrollView] in [NestedScrollView.body].
+  ScrollController get outerController => _coordinator._outerController;
 
   _NestedScrollCoordinator _coordinator;
 
@@ -409,7 +478,7 @@ class _InheritedNestedScrollView extends InheritedWidget {
        assert(child != null),
        super(key: key, child: child);
 
-  final _NestedScrollViewState state;
+  final NestedScrollViewState state;
 
   @override
   bool updateShouldNotify(_InheritedNestedScrollView old) => state != old.state;
@@ -472,7 +541,7 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
     _innerController = _NestedScrollController(this, initialScrollOffset: 0.0, debugLabel: 'inner');
   }
 
-  final _NestedScrollViewState _state;
+  final NestedScrollViewState _state;
   ScrollController _parent;
   final VoidCallback _onHasScrolledBodyChanged;
 
