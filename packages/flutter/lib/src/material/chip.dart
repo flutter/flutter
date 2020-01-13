@@ -1784,23 +1784,26 @@ class _RawChipState extends State<RawChip> with TickerProviderStateMixin<RawChip
     if (!hasDeleteButton) {
       return null;
     }
-    return _wrapWithTooltip(
-      widget.deleteButtonTooltipMessage ?? MaterialLocalizations.of(context)?.deleteButtonTooltip,
-      widget.onDeleted,
-      GestureDetector(
-        key: deleteIconKey,
-        behavior: HitTestBehavior.opaque,
-        onTap: widget.isEnabled
-            ? () {
-                Feedback.forTap(context);
-                widget.onDeleted();
-            }
-            : null,
-        child: IconTheme(
-          data: theme.iconTheme.copyWith(
-            color: widget.deleteIconColor ?? chipTheme.deleteIconColor,
+    return Semantics(
+      container: true,
+      child: _wrapWithTooltip(
+        widget.deleteButtonTooltipMessage ?? MaterialLocalizations.of(context)?.deleteButtonTooltip,
+        widget.onDeleted,
+        GestureDetector(
+          key: deleteIconKey,
+          behavior: HitTestBehavior.opaque,
+          onTap: widget.isEnabled
+              ? () {
+                  Feedback.forTap(context);
+                  widget.onDeleted();
+              }
+              : null,
+          child: IconTheme(
+            data: theme.iconTheme.copyWith(
+              color: widget.deleteIconColor ?? chipTheme.deleteIconColor,
+            ),
+            child: widget.deleteIcon,
           ),
-          child: widget.deleteIcon,
         ),
       ),
     );
