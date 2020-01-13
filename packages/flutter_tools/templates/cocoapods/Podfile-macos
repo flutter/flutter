@@ -1,7 +1,5 @@
 platform :osx, '10.11'
 
-require 'json'
-
 # CocoaPods analytics sends network stats synchronously affecting flutter build latency.
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
 
@@ -29,24 +27,6 @@ def parse_KV_file(file, separator='=')
       else
         puts "Invalid plugin specification: #{line}"
       end
-  }
-  return pods_ary
-end
-
-def parse_json_file(file)
-  file_abs_path = File.expand_path(file)
-  if !File.exists? file_abs_path
-    puts ".flutter-plugins.json must exist. If you're running pod install manually, make sure flutter packages get is executed first."
-  end
-  plugins_file = File.read(file_abs_path)
-  json = JSON.parse(plugins_file)
-
-  pods_ary = []
-  macos_plugins = json['plugins']['macos']
-  macos_plugins.each { |plugin|
-    podname = plugin['name']
-    podpath = File.expand_path("#{plugin['path']}", file_abs_path)
-    pods_ary.push({:name => podname, :path => podpath});
   }
   return pods_ary
 end
@@ -88,7 +68,7 @@ target 'Runner' do
   }
 
   # Plugin Pods
-  plugin_pods = parse_json_file('../.flutter-plugins.json')
+  plugin_pods = parse_KV_file('../.flutter-plugins')
   plugin_pods.map { |p|
     symlink = File.join(symlink_plugins_dir, p[:name])
     File.symlink(p[:path], symlink)
