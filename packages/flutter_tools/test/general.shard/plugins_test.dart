@@ -317,7 +317,8 @@ dependencies:
         ProcessManager: () => FakeProcessManager.any(),
       });
 
-      testUsingContext('Refreshing the plugin list modifies .flutter-plugins.json .flutter-plugins and .flutter-plugins-dependencies when there are plugins', () {
+      // TODO(franciscojma): Remove logic for .flutter-plugins and .flutter-plugin-dependencies once they are deprecated.
+      testUsingContext('Refreshing the plugin list modifies .flutter-plugins.json, .flutter-plugins and .flutter-plugins-dependencies when there are plugins', () {
         createPluginWithDependencies(name: 'plugin-a', dependencies: const <String>['plugin-b', 'plugin-c', 'random-package']);
         createPluginWithDependencies(name: 'plugin-b', dependencies: const <String>['plugin-c']);
         createPluginWithDependencies(name: 'plugin-c', dependencies: const <String>[]);
