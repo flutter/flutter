@@ -259,6 +259,10 @@ class _SemanticsDebuggerPainter extends CustomPainter {
       annotations.add('textfield');
       wantsTap = true;
     }
+    if (data.hasFlag(SemanticsFlag.isLink)) {
+      annotations.add('link');
+      wantsTap = true;
+    }
 
     if (data.hasAction(SemanticsAction.tap)) {
       if (!wantsTap)

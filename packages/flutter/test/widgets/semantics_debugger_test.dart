@@ -461,6 +461,34 @@ void main() {
     );
   });
 
+  testWidgets('SemanticsDebugger link', (WidgetTester tester) async {
+    final UniqueKey widgetKey = UniqueKey();
+    final UniqueKey debugger = UniqueKey();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: SemanticsDebugger(
+          key: debugger,
+          child: Material(
+            child: Semantics(
+              key: widgetKey,
+              label: 'summarized text',
+              link: true,
+              excludeSemantics: true,
+              child: const Text('detailed text'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(
+      _getMessageShownInSemanticsDebugger(
+          widgetKey: widgetKey, debuggerKey: debugger, tester: tester),
+      'summarized text (link; disabled)',
+    );
+  });
+
   testWidgets('SemanticsDebugger label style is used in the painter.', (WidgetTester tester) async {
     final UniqueKey debugger = UniqueKey();
     const TextStyle labelStyle = TextStyle(color: Colors.amber);
