@@ -45,10 +45,10 @@ void main() {
       PackageMap.globalPackagesPath = packagesFile.path;
       globals.fs.currentDirectory.childDirectory('bar').createSync();
 
-      environment = Environment(
+      environment = Environment.test(
+        globals.fs.currentDirectory,
         projectDir: globals.fs.currentDirectory.childDirectory('foo'),
         outputDir: globals.fs.currentDirectory.childDirectory('bar'),
-        buildDir: globals.fs.currentDirectory,
         defines: <String, String>{
           kTargetFile: globals.fs.path.join('foo', 'lib', 'main.dart'),
         }
