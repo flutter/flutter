@@ -12,12 +12,17 @@ VisualStudio get visualStudio => context.get<VisualStudio>();
 
 /// Encapsulates information about the installed copy of Visual Studio, if any.
 class VisualStudio {
-  /// True if a sufficiently recent version of Visual Studio is installed.
+  /// True if Visual Studio installation was found.
   ///
   /// Versions older than 2017 Update 2 won't be detected, so error messages to
   /// users should take into account that [false] may mean that the user may
   /// have an old version rather than no installation at all.
   bool get isInstalled => _bestVisualStudioDetails.isNotEmpty;
+
+  bool get isAtLeastMinimumVersion {
+    final int installedMajorVersion = _majorVersion;
+    return installedMajorVersion != null && installedMajorVersion >= _minimumSupportedVersion;
+  }
 
   /// True if there is a version of Visual Studio with all the components
   /// necessary to build the project.
@@ -25,7 +30,7 @@ class VisualStudio {
 
   /// The name of the Visual Studio install.
   ///
-  /// For instance: "Visual Studio Community 2017".
+  /// For instance: "Visual Studio Community 2019".
   String get displayName => _bestVisualStudioDetails[_displayNameKey] as String;
 
   /// The user-friendly version number of the Visual Studio install.
@@ -81,11 +86,18 @@ class VisualStudio {
 
   /// The names of the components within the workload that must be installed.
   ///
-  /// If there is an existing Visual Studio installation, the major version
-  /// should be provided here, as the descriptions of some components differ
-  /// from version to version.
-  List<String> necessaryComponentDescriptions([int visualStudioMajorVersion]) {
-    return _requiredComponents(visualStudioMajorVersion).values.toList();
+  /// The descriptions of some components differ from version to version. When
+  /// a supported version is present, the descriptions used will be for that
+  /// version.
+  List<String> necessaryComponentDescriptions() {
+    return _requiredComponents().values.toList();
+  }
+
+  /// The consumer-facing version name of the minumum supported version.
+  ///
+  /// E.g., for Visual Studio 2019 this returns "2019" rather than "16".
+  String get minimumVersionDescription {
+    return '2019';
   }
 
   /// The path to vcvars64.bat, or null if no Visual Studio installation has
@@ -104,6 +116,9 @@ class VisualStudio {
     );
   }
 
+  /// The major version of the Visual Studio install, as an integer.
+  int get _majorVersion => fullVersion != null ? int.tryParse(fullVersion.split('.')[0]) : null;
+
   /// The path to vswhere.exe.
   ///
   /// vswhere should be installed for VS 2017 Update 2 and later; if it's not
@@ -121,14 +136,18 @@ class VisualStudio {
   ///
   /// Maps from component IDs to description in the installer UI.
   /// See https://docs.microsoft.com/en-us/visualstudio/install/workload-and-component-ids
-  Map<String, String> _requiredComponents([int visualStudioMajorVersion]) {
+  Map<String, String> _requiredComponents([int majorVersion]) {
     // The description of the C++ toolchain required by the template. The
     // component name is significantly different in different versions.
-    // Default to the latest known description, but use a specific string
-    // if a known older version is requested.
-    String cppToolchainDescription = 'MSVC v142 - VS 2019 C++ x64/x86 build tools';
-    if (visualStudioMajorVersion == 15) {
-      cppToolchainDescription = 'VC++ 2017 version 15.9 v14.## latest v141 tools';
+    // When a new major version of VS is supported, its toochain description
+    // should be added below. It should also be made the default, so that when
+    // there is no installation, the message shows the string that will be
+    // relevant for the most likely fresh install case).
+    String cppToolchainDescription;
+    switch (majorVersion ?? _majorVersion) {
+      case 16:
+      default:
+        cppToolchainDescription = 'MSVC v142 - VS 2019 C++ x64/x86 build tools';
     }
     // The 'Microsoft.VisualStudio.Component.VC.Tools.x86.x64' ID is assigned to the latest
     // release of the toolchain, and there can be minor updates within a given version of
@@ -146,6 +165,15 @@ class VisualStudio {
           'Windows 10 SDK (10.0.17763.0)',
     };
   }
+
+  /// The minimum supported major version.
+  static const int _minimumSupportedVersion = 16;  // '16' is VS 2019.
+
+  /// vswhere argument to specificy the minimum version.
+  static const String _vswhereMinVersionArgument = '-version';
+
+  /// vswhere argument to allow prerelease versions.
+  static const String _vswherePrereleaseArgument = '-prerelease';
 
   // Keys in a VS details dictionary returned from vswhere.
 
@@ -173,9 +201,6 @@ class VisualStudio {
   ///
   /// This key is under the 'catalog' entry.
   static const String _catalogDisplayVersionKey = 'productDisplayVersion';
-
-  /// vswhere argument keys
-  static const String _prereleaseKey = '-prerelease';
 
   /// Returns the details dictionary for the newest version of Visual Studio
   /// that includes all of [requiredComponents], if there is one.
@@ -235,7 +260,8 @@ class VisualStudio {
   }
 
   /// Returns the details dictionary for the latest version of Visual Studio
-  /// that has all required components, or {} if there is no such installation.
+  /// that has all required components and is a supported version, or {} if
+  /// there is no such installation.
   ///
   /// If no installation is found, the cached VS details are set to an empty map
   /// to avoid repeating vswhere queries that have already not found an installation.
@@ -244,12 +270,17 @@ class VisualStudio {
     if (_cachedUsableVisualStudioDetails != null) {
       return _cachedUsableVisualStudioDetails;
     }
-    Map<String, dynamic> visualStudioDetails =
-        _visualStudioDetails(requiredComponents: _requiredComponents().keys);
+    final List<String> minimumVersionArguments = <String>[
+      _vswhereMinVersionArgument,
+      _minimumSupportedVersion.toString(),
+    ];
+    Map<String, dynamic> visualStudioDetails = _visualStudioDetails(
+        requiredComponents: _requiredComponents(_minimumSupportedVersion).keys,
+        additionalArguments: minimumVersionArguments);
     // If a stable version is not found, try searching for a pre-release version.
     visualStudioDetails ??= _visualStudioDetails(
-        requiredComponents: _requiredComponents().keys,
-        additionalArguments: <String>[_prereleaseKey]);
+        requiredComponents: _requiredComponents(_minimumSupportedVersion).keys,
+        additionalArguments: <String>[...minimumVersionArguments, _vswherePrereleaseArgument]);
 
     if (visualStudioDetails != null) {
       if (installationHasIssues(visualStudioDetails)) {
@@ -263,16 +294,17 @@ class VisualStudio {
   }
 
   /// Returns the details dictionary of the latest version of Visual Studio,
-  /// regardless of components, or {} if no such installation is found.
+  /// regardless of components and version, or {} if no such installation is
+  /// found.
   ///
-  /// If no installation is found, the cached
-  /// VS details are set to an empty map to avoid repeating vswhere queries that
-  /// have already not found an installation.
+  /// If no installation is found, the cached VS details are set to an empty map
+  /// to avoid repeating vswhere queries that have already not found an
+  /// installation.
   Map<String, dynamic> _cachedAnyVisualStudioDetails;
   Map<String, dynamic> get _anyVisualStudioDetails {
     // Search for all types of installations.
     _cachedAnyVisualStudioDetails ??= _visualStudioDetails(
-        additionalArguments: <String>[_prereleaseKey, '-all']);
+        additionalArguments: <String>[_vswherePrereleaseArgument, '-all']);
     // Add a sentinel empty value to avoid querying vswhere again.
     _cachedAnyVisualStudioDetails ??= <String, dynamic>{};
     return _cachedAnyVisualStudioDetails;
