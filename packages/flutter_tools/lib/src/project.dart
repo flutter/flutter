@@ -4,7 +4,6 @@
 
 import 'dart:async';
 
-import 'package:flutter_tools/src/platform_plugins.dart';
 import 'package:meta/meta.dart';
 import 'package:xml/xml.dart' as xml;
 import 'package:yaml/yaml.dart';
@@ -21,6 +20,7 @@ import 'flutter_manifest.dart';
 import 'globals.dart' as globals;
 import 'ios/plist_parser.dart';
 import 'ios/xcodeproj.dart' as xcode;
+import 'platform_plugins.dart';
 import 'plugins.dart';
 import 'template.dart';
 
@@ -255,20 +255,22 @@ class FlutterProject {
   }
 }
 
+/// Base class for projects per platform.
 abstract class FlutterProjectPlatform {
 
-  // Plugin's platform config key, i.e., "macos", "ios".
+  /// Plugin's platform config key, i.e., "macos", "ios".
   String get pluginConfigKey;
 
-  // Whether a the platform exists in the project.
+  /// Whether a the platform exists in the project.
   bool existsSync();
 
-  // Creates a list with the project plugins supported for the current platform.
-  List<Map<String,dynamic>> pluginsList(List<Plugin>plugins) {
+  /// Creates a list with the project plugins supported for the current platform.
+  List<Map<String, dynamic>> pluginsList(List<Plugin>plugins) {
     final Iterable<Plugin> platformPlugins = plugins.where((Plugin p) {
       return p.platforms.containsKey(pluginConfigKey);
     });
-      final Set<String> pluginNames = <String>{};
+
+    final Set<String> pluginNames = <String>{};
     for (final Plugin plugin in plugins) {
       pluginNames.add(plugin.name);
     }
