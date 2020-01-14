@@ -442,15 +442,14 @@ class LocalEngineArtifacts extends Artifacts {
     this._engineSrcPath,
     this.engineOutPath,
     this._hostEngineOutPath, {
-      @required FileSystem fileSystem,
-      @required Cache cache,
-      @required ProcessManager processManager,
-      @required Platform platform,
-    }
-  ) : _fileSystem = fileSystem,
-      _cache = cache,
-      _processManager = processManager,
-      _platform = platform;
+    @required FileSystem fileSystem,
+    @required Cache cache,
+    @required ProcessManager processManager,
+    @required Platform platform,
+  }) : _fileSystem = fileSystem,
+       _cache = cache,
+       _processManager = processManager,
+       _platform = platform;
 
   final String _engineSrcPath;
   final String engineOutPath; // TODO(goderbauer): This should be private.
