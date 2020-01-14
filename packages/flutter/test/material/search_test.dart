@@ -117,7 +117,7 @@ void main() {
     final AppBar appBar = tester.widget<AppBar>(find.byType(AppBar));
     final Color primaryColor = appBar.backgroundColor;
 
-    expect(primaryColor, delegate.primaryColor);
+    expect(primaryColor, Colors.pink);
   });
 
   testWidgets('Requests suggestions', (WidgetTester tester) async {
@@ -772,8 +772,6 @@ class _TestSearchDelegate extends SearchDelegate<String> {
 
 class _TestSearchDelegatePrimaryColor extends SearchDelegate<String> {
   _TestSearchDelegatePrimaryColor();
-
-  final Color primaryColor = Colors.pink;
 
   @override
   Widget buildLeading(BuildContext context) {
