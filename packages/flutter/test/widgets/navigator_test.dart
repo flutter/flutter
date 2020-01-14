@@ -8,6 +8,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
+import 'animated_switcher_test.dart';
 import 'observer_tester.dart';
 import 'semantics_tester.dart';
 
@@ -1186,6 +1187,33 @@ void main() {
     expect(find.byKey(const ValueKey<String>('/A/B')), findsNothing); // popped
     expect(find.byKey(const ValueKey<String>('/C')), findsOneWidget);
   });
+
+  testWidgets('Pushing opaque Route does not rebuild routes below', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/45797.
+
+    final GlobalKey<NavigatorState> navigator = GlobalKey<NavigatorState>();
+    final Key bottomRoute = UniqueKey();
+    final Key topRoute = UniqueKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        navigatorKey: navigator,
+        routes: <String, WidgetBuilder>{
+          '/' : (BuildContext context) => StatefulTestWidget(key: bottomRoute),
+          '/a': (BuildContext context) => StatefulTestWidget(key: topRoute),
+        },
+      ),
+    );
+    expect(tester.state<StatefulTestState>(find.byKey(bottomRoute)).rebuildCount, 1);
+
+    navigator.currentState.pushNamed('/a');
+    await tester.pumpAndSettle();
+
+    // Bottom route is offstage and did not rebuild.
+    expect(find.byKey(bottomRoute), findsNothing);
+    expect(tester.state<StatefulTestState>(find.byKey(bottomRoute, skipOffstage: false)).rebuildCount, 1);
+
+    expect(tester.state<StatefulTestState>(find.byKey(topRoute)).rebuildCount, 1);
+  });
 }
 
 class NoAnimationPageRoute extends PageRouteBuilder<void> {
@@ -1197,5 +1225,22 @@ class NoAnimationPageRoute extends PageRouteBuilder<void> {
   @override
   AnimationController createAnimationController() {
     return super.createAnimationController()..value = 1.0;
+  }
+}
+
+class StatefulTestWidget extends StatefulWidget {
+  const StatefulTestWidget({Key key}) : super(key: key);
+
+  @override
+  State<StatefulTestWidget> createState() => StatefulTestState();
+}
+
+class StatefulTestState extends State<StatefulTestWidget> {
+  int rebuildCount = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    rebuildCount += 1;
+    return Container();
   }
 }

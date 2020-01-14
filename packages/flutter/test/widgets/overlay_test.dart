@@ -6,6 +6,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/widgets.dart';
 
+import 'stateful_components_test.dart';
+
 void main() {
   testWidgets('OverflowEntries context contains Overlay', (WidgetTester tester) async {
     final GlobalKey overlayKey = GlobalKey();
@@ -699,4 +701,140 @@ void main() {
     expect(find.byKey(root), findsNothing);
     expect(find.byKey(top), findsOneWidget);
   });
+
+  testWidgets('OverlayEntries do not rebuild when opaqueness changes', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/45797.
+
+    final GlobalKey<OverlayState> overlayKey = GlobalKey<OverlayState>();
+    final Key bottom = UniqueKey();
+    final Key middle = UniqueKey();
+    final Key top = UniqueKey();
+    final Widget bottomWidget = StatefulTestWidget(key: bottom);
+    final Widget middleWidget = StatefulTestWidget(key: middle);
+    final Widget topWidget = StatefulTestWidget(key: top);
+
+    final OverlayEntry bottomEntry = OverlayEntry(
+      maintainState: true,
+      builder: (BuildContext context) {
+        return bottomWidget;
+      },
+    );
+    final OverlayEntry middleEntry = OverlayEntry(
+      maintainState: true,
+      builder: (BuildContext context) {
+        return middleWidget;
+      },
+    );
+    final OverlayEntry topEntry = OverlayEntry(
+      maintainState: true,
+      builder: (BuildContext context) {
+        return topWidget;
+      },
+    );
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(
+          key: overlayKey,
+          initialEntries: <OverlayEntry>[
+            bottomEntry,
+            middleEntry,
+            topEntry,
+          ],
+        ),
+      ),
+    );
+
+    // All widgets are onstage.
+    expect(tester.state<StatefulTestState>(find.byKey(bottom)).rebuildCount, 1);
+    expect(tester.state<StatefulTestState>(find.byKey(middle)).rebuildCount, 1);
+    expect(tester.state<StatefulTestState>(find.byKey(top)).rebuildCount, 1);
+
+    middleEntry.opaque = true;
+    await tester.pump();
+
+    // Bottom widget is offstage and did not rebuild.
+    expect(find.byKey(bottom), findsNothing);
+    expect(tester.state<StatefulTestState>(find.byKey(bottom, skipOffstage: false)).rebuildCount, 1);
+    expect(tester.state<StatefulTestState>(find.byKey(middle)).rebuildCount, 1);
+    expect(tester.state<StatefulTestState>(find.byKey(top)).rebuildCount, 1);
+  });
+
+  testWidgets('OverlayEntries do not rebuild when opaque entry is added', (WidgetTester tester) async {
+    // Regression test for https://github.com/flutter/flutter/issues/45797.
+
+    final GlobalKey<OverlayState> overlayKey = GlobalKey<OverlayState>();
+    final Key bottom = UniqueKey();
+    final Key middle = UniqueKey();
+    final Key top = UniqueKey();
+    final Widget bottomWidget = StatefulTestWidget(key: bottom);
+    final Widget middleWidget = StatefulTestWidget(key: middle);
+    final Widget topWidget = StatefulTestWidget(key: top);
+
+    final OverlayEntry bottomEntry = OverlayEntry(
+      maintainState: true,
+      builder: (BuildContext context) {
+        return bottomWidget;
+      },
+    );
+    final OverlayEntry middleEntry = OverlayEntry(
+      opaque: true,
+      maintainState: true,
+      builder: (BuildContext context) {
+        return middleWidget;
+      },
+    );
+    final OverlayEntry topEntry = OverlayEntry(
+      maintainState: true,
+      builder: (BuildContext context) {
+        return topWidget;
+      },
+    );
+
+    await tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: Overlay(
+          key: overlayKey,
+          initialEntries: <OverlayEntry>[
+            bottomEntry,
+            topEntry,
+          ],
+        ),
+      ),
+    );
+
+    // Both widgets are onstage.
+    expect(tester.state<StatefulTestState>(find.byKey(bottom)).rebuildCount, 1);
+    expect(tester.state<StatefulTestState>(find.byKey(top)).rebuildCount, 1);
+
+    overlayKey.currentState.rearrange(<OverlayEntry>[
+      bottomEntry, middleEntry, topEntry,
+    ]);
+    await tester.pump();
+
+    // Bottom widget is offstage and did not rebuild.
+    expect(find.byKey(bottom), findsNothing);
+    expect(tester.state<StatefulTestState>(find.byKey(bottom, skipOffstage: false)).rebuildCount, 1);
+    expect(tester.state<StatefulTestState>(find.byKey(middle)).rebuildCount, 1);
+    expect(tester.state<StatefulTestState>(find.byKey(top)).rebuildCount, 1);
+  });
+}
+
+class StatefulTestWidget extends StatefulWidget {
+  const StatefulTestWidget({Key key}) : super(key: key);
+
+  @override
+  State<StatefulTestWidget> createState() => StatefulTestState();
+}
+
+class StatefulTestState extends State<StatefulTestWidget> {
+  int rebuildCount = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    rebuildCount += 1;
+    return Container();
+  }
 }
