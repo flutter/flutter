@@ -55,7 +55,7 @@ void main() {
       expect(device.name, name);
     });
 
-    testUsingContext('parse dev_finder output', () async {
+    testUsingContext('parse device-finder output', () async {
       const String example = '2001:0db8:85a3:0000:0000:8a2e:0370:7334 paper-pulp-bush-angel';
       final List<FuchsiaDevice> names = await parseListDevices(example);
 
@@ -66,7 +66,7 @@ void main() {
       FuchsiaSdk: () => MockFuchsiaSdk(),
     });
 
-    testUsingContext('parse junk dev_finder output', () async {
+    testUsingContext('parse junk device-finder output', () async {
       const String example = 'junk';
       final List<FuchsiaDevice> names = await parseListDevices(example);
 
@@ -591,7 +591,7 @@ void main() {
       OperatingSystemUtils: () => osUtils,
     });
 
-    testUsingContext('fail with correct LaunchResult when dev_finder fails', () async {
+    testUsingContext('fail with correct LaunchResult when device-finder fails', () async {
       final LaunchResult launchResult =
           await setupAndStartApp(prebuilt: true, mode: BuildMode.release);
       expect(launchResult.started, isFalse);

@@ -7,7 +7,7 @@ import '../base/process.dart';
 import '../globals.dart' as globals;
 import 'fuchsia_sdk.dart';
 
-// Usage: dev_finder <flags> <subcommand> <subcommand args>
+// Usage: device-finder <flags> <subcommand> <subcommand args>
 //
 // Subcommands:
 //   commands         list all command names
@@ -17,7 +17,7 @@ import 'fuchsia_sdk.dart';
 //   resolve          attempts to resolve all passed Fuchsia domain names on the
 //                    network
 
-/// A simple wrapper for the Fuchsia SDK's 'dev_finder' tool.
+/// A simple wrapper for the Fuchsia SDK's 'device-finder' tool.
 class FuchsiaDevFinder {
   /// Returns a list of attached devices as a list of strings with entries
   /// formatted as follows:
@@ -25,7 +25,7 @@ class FuchsiaDevFinder {
   Future<List<String>> list() async {
     if (fuchsiaArtifacts.devFinder == null ||
         !fuchsiaArtifacts.devFinder.existsSync()) {
-      throwToolExit('Fuchsia dev_finder tool not found.');
+      throwToolExit('Fuchsia device-finder tool not found.');
     }
     final List<String> command = <String>[
       fuchsiaArtifacts.devFinder.path,
@@ -34,7 +34,7 @@ class FuchsiaDevFinder {
     ];
     final RunResult result = await processUtils.run(command);
     if (result.exitCode != 0) {
-      globals.printError('dev_finder failed: ${result.stderr}');
+      globals.printError('device-finder failed: ${result.stderr}');
       return null;
     }
     return result.stdout.split('\n');
@@ -50,7 +50,7 @@ class FuchsiaDevFinder {
   Future<String> resolve(String deviceName, {bool local = false}) async {
     if (fuchsiaArtifacts.devFinder == null ||
         !fuchsiaArtifacts.devFinder.existsSync()) {
-      throwToolExit('Fuchsia dev_finder tool not found.');
+      throwToolExit('Fuchsia device-finder tool not found.');
     }
     final List<String> command = <String>[
       fuchsiaArtifacts.devFinder.path,
@@ -61,7 +61,7 @@ class FuchsiaDevFinder {
     ];
     final RunResult result = await processUtils.run(command);
     if (result.exitCode != 0) {
-      globals.printError('dev_finder failed: ${result.stderr}');
+      globals.printError('device-finder failed: ${result.stderr}');
       return null;
     }
     return result.stdout.trim();

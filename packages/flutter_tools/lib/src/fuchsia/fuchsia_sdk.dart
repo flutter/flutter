@@ -29,7 +29,7 @@ class FuchsiaSdk {
   FuchsiaPM get fuchsiaPM => _fuchsiaPM ??= FuchsiaPM();
   FuchsiaPM _fuchsiaPM;
 
-  /// Interface to the 'dev_finder' tool.
+  /// Interface to the 'device-finder' tool.
   FuchsiaDevFinder _fuchsiaDevFinder;
   FuchsiaDevFinder get fuchsiaDevFinder =>
       _fuchsiaDevFinder ??= FuchsiaDevFinder();
@@ -40,7 +40,7 @@ class FuchsiaSdk {
       _fuchsiaKernelCompiler ??= FuchsiaKernelCompiler();
 
   /// Example output:
-  ///    $ dev_finder list -full
+  ///    $ device-finder list -full
   ///    > 192.168.42.56 paper-pulp-bush-angel
   Future<String> listDevices() async {
     if (fuchsiaArtifacts.devFinder == null ||
@@ -127,7 +127,7 @@ class FuchsiaArtifacts {
 
     final String fuchsia = globals.cache.getArtifactDirectory('fuchsia').path;
     final String tools = globals.fs.path.join(fuchsia, 'tools');
-    final File devFinder = globals.fs.file(globals.fs.path.join(tools, 'dev_finder'));
+    final File devFinder = globals.fs.file(globals.fs.path.join(tools, 'device-finder'));
     final File pm = globals.fs.file(globals.fs.path.join(tools, 'pm'));
 
     return FuchsiaArtifacts(
