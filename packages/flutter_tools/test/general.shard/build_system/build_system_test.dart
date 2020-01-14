@@ -93,9 +93,8 @@ void main() {
       ];
     testbed = Testbed(
       setup: () {
-        environment = Environment(
-          outputDir: globals.fs.currentDirectory,
-          projectDir: globals.fs.currentDirectory,
+        environment = Environment.test(
+          globals.fs.currentDirectory,
         );
         globals.fs.file('foo.dart')
           ..createSync(recursive: true)
@@ -335,8 +334,8 @@ void main() {
   }));
 
   test('output directory is an input to the build',  () => testbed.run(() async {
-    final Environment environmentA = Environment(projectDir: globals.fs.currentDirectory, outputDir: globals.fs.directory('a'));
-    final Environment environmentB = Environment(projectDir: globals.fs.currentDirectory, outputDir: globals.fs.directory('b'));
+    final Environment environmentA = Environment.test(globals.fs.currentDirectory, outputDir: globals.fs.directory('a'));
+    final Environment environmentB = Environment.test(globals.fs.currentDirectory, outputDir: globals.fs.directory('b'));
 
     expect(environmentA.buildDir.path, isNot(environmentB.buildDir.path));
   }));

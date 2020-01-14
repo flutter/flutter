@@ -6,7 +6,6 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 
-import 'base/command_help.dart';
 import 'base/file_system.dart';
 import 'device.dart';
 import 'globals.dart' as globals;
@@ -186,11 +185,11 @@ class ColdRunner extends ResidentRunner {
         printHelpDetails();
       }
     }
-    CommandHelp.h.print();
+    commandHelp.h.print();
     if (_didAttach) {
-      CommandHelp.d.print();
+      commandHelp.d.print();
     }
-    CommandHelp.q.print();
+    commandHelp.q.print();
     for (final FlutterDevice device in flutterDevices) {
       final String dname = device.device.name;
       if (device.vmService != null) {

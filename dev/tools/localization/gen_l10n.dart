@@ -232,11 +232,37 @@ const Set<String> allowableDateFormats = <String>{
 // * <https://pub.dev/documentation/intl/latest/intl/NumberFormat-class.html>
 const Set<String> allowableNumberFormats = <String>{
   'compact',
+  'compactCurrency',
+  'compactSimpleCurrency',
   'compactLong',
+  'currency',
   'decimalPattern',
   'decimalPercentPattern',
   'percentPattern',
   'scientificPattern',
+  'simpleCurrency',
+};
+
+// The names of the NumberFormat factory constructors which have named
+// parameters rather than positional parameters.
+//
+// This helps the tool correctly generate number formmatting code correctly.
+//
+// Example of code that uses named parameters:
+// final NumberFormat format = NumberFormat.compact(
+//   locale: _localeName,
+// );
+//
+// Example of code that uses positional parameters:
+// final NumberFormat format = NumberFormat.scientificPattern(_localeName);
+const Set<String> numberFormatsWithNamedParameters = <String>{
+  'compact',
+  'compactCurrency',
+  'compactSimpleCurrency',
+  'compactLong',
+  'currency',
+  'decimalPercentPattern',
+  'simpleCurrency',
 };
 
 bool _isDateParameter(Map<String, dynamic> placeholderValue) => placeholderValue['type'] == 'DateTime';
@@ -330,19 +356,27 @@ String generateNumberFormattingLogic(Map<String, dynamic> arbBundle, String reso
     for (final String placeholder in placeholders.keys) {
       final dynamic value = placeholders[placeholder];
       if (value is Map<String, dynamic> && _isValidNumberFormat(value, placeholder)) {
-        if (value.containsKey('optionalParameters')) {
-          final Map<String, dynamic> optionalParameters = value['optionalParameters'] as Map<String, dynamic>;
-          for (final String parameter in optionalParameters.keys)
-            optionalParametersString.write('\n      $parameter: ${optionalParameters[parameter]},');
-        }
+        if (numberFormatsWithNamedParameters.contains(value['format'])) {
+          if (value.containsKey('optionalParameters')) {
+            final Map<String, dynamic> optionalParameters = value['optionalParameters'] as Map<String, dynamic>;
+            for (final String parameter in optionalParameters.keys)
+              optionalParametersString.write('\n      $parameter: ${optionalParameters[parameter]},');
+          }
 
-        result.write('''
+          result.write('''
 
     final NumberFormat ${placeholder}NumberFormat = NumberFormat.${value['format']}(
       locale: _localeName,@optionalParameters
     );
     final String ${placeholder}String = ${placeholder}NumberFormat.format($placeholder);
 ''');
+        } else {
+          result.write('''
+
+    final NumberFormat ${placeholder}NumberFormat = NumberFormat.${value['format']}(_localeName);
+    final String ${placeholder}String = ${placeholder}NumberFormat.format($placeholder);
+''');
+        }
       }
     }
 

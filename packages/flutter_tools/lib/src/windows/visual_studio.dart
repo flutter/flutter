@@ -135,7 +135,7 @@ class VisualStudio {
     // Visual Studio. Since it changes over time, listing a precise version would become
     // wrong after each VC++ toolchain update, so just instruct people to install the
     // latest version.
-    cppToolchainDescription += '\n - If there are multiple versions, install the latest one';
+    cppToolchainDescription += '\n   - If there are multiple build tool versions available, install the latest';
     return <String, String>{
       // The MSBuild tool and related command-line toolchain.
       'Microsoft.Component.MSBuild': 'MSBuild',

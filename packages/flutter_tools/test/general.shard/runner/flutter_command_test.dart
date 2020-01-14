@@ -217,6 +217,14 @@ void main() {
       }
     });
 
+    test('FlutterCommandResult.success()', () async {
+      expect(FlutterCommandResult.success().exitStatus, ExitStatus.success);
+    });
+
+    test('FlutterCommandResult.warning()', () async {
+      expect(FlutterCommandResult.warning().exitStatus, ExitStatus.warning);
+    });
+
     group('signals tests', () {
       MockIoProcessSignal mockSignal;
       ProcessSignal signalUnderTest;
@@ -297,7 +305,7 @@ void main() {
           'flutter',
           'dummy',
           const Duration(milliseconds: 1000),
-          null,
+          'fail',
         ],
       );
     });
@@ -388,7 +396,7 @@ class FakeCommand extends FlutterCommand {
 
   @override
   Future<FlutterCommandResult> runCommand() async {
-    return null;
+    return FlutterCommandResult.success();
   }
 }
 

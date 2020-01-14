@@ -380,6 +380,8 @@ class CompileTest {
       case DeviceOperatingSystem.android:
         options.add('android-arm');
         break;
+      case DeviceOperatingSystem.fuchsia:
+        throw Exception('Unsupported option for Fuchsia devices');
     }
     final String compileLog = await evalFlutter('build', options: options);
     watch.stop();
@@ -434,6 +436,8 @@ class CompileTest {
         if (reportPackageContentSizes)
           metrics.addAll(await getSizesFromApk(apkPath));
         break;
+      case DeviceOperatingSystem.fuchsia:
+        throw Exception('Unsupported option for Fuchsia devices');
     }
 
     metrics.addAll(<String, dynamic>{
@@ -456,6 +460,8 @@ class CompileTest {
         options.insert(0, 'apk');
         options.add('--target-platform=android-arm');
         break;
+      case DeviceOperatingSystem.fuchsia:
+        throw Exception('Unsupported option for Fuchsia devices');
     }
     watch.start();
     await flutter('build', options: options);

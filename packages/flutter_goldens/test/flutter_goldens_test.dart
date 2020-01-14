@@ -871,9 +871,19 @@ void main() {
         final MockDirectory mockDirectory = MockDirectory();
         when(mockDirectory.existsSync()).thenReturn(true);
         when(mockDirectory.uri).thenReturn(Uri.parse('/flutter'));
+
         when(mockSkiaClient.getExpectations())
-          .thenAnswer((_) => throw const OSError());
-        final FlutterGoldenFileComparator comparator = await FlutterLocalFileComparator.fromDefaultComparator(
+          .thenAnswer((_) => throw const OSError('Can\'t reach Gold'));
+        FlutterGoldenFileComparator comparator = await FlutterLocalFileComparator.fromDefaultComparator(
+          platform,
+          goldens: mockSkiaClient,
+          baseDirectory: mockDirectory,
+        );
+        expect(comparator.runtimeType, FlutterSkippingGoldenFileComparator);
+
+        when(mockSkiaClient.getExpectations())
+          .thenAnswer((_) => throw const SocketException('Can\'t reach Gold'));
+        comparator = await FlutterLocalFileComparator.fromDefaultComparator(
           platform,
           goldens: mockSkiaClient,
           baseDirectory: mockDirectory,
