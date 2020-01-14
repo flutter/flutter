@@ -61,9 +61,9 @@ FLUTTER_EXPORT FlutterDesktopPluginRegistrarRef
 FlutterDesktopGetPluginRegistrar(FlutterDesktopViewControllerRef controller,
                                  const char* plugin_name);
 
-// Return backing HWND for manipulation in host application.
-FLUTTER_EXPORT HWND
-FlutterDesktopGetHWND(FlutterDesktopViewControllerRef controller);
+// Returns the view managed by the given controller.
+FLUTTER_EXPORT FlutterDesktopViewRef
+FlutterDesktopGetView(FlutterDesktopViewControllerRef controller);
 
 // Processes any pending events in the Flutter engine, and returns the
 // number of nanoseconds until the next scheduled event (or  max, if none).
@@ -73,6 +73,9 @@ FlutterDesktopGetHWND(FlutterDesktopViewControllerRef controller);
 // last return value from this function.
 FLUTTER_EXPORT uint64_t
 FlutterDesktopProcessMessages(FlutterDesktopViewControllerRef controller);
+
+// Return backing HWND for manipulation in host application.
+FLUTTER_EXPORT HWND FlutterDesktopViewGetHWND(FlutterDesktopViewRef view);
 
 // Runs an instance of a headless Flutter engine.
 //
@@ -95,6 +98,11 @@ FlutterDesktopRunEngine(const char* assets_path,
 // successful. |engine_ref| is no longer valid after this call.
 FLUTTER_EXPORT bool FlutterDesktopShutDownEngine(
     FlutterDesktopEngineRef engine_ref);
+
+// Returns the view associated with this registrar's engine instance
+// This is a Windows-specific extension to flutter_plugin_registrar.h.
+FLUTTER_EXPORT FlutterDesktopViewRef
+FlutterDesktopRegistrarGetView(FlutterDesktopPluginRegistrarRef registrar);
 
 #if defined(__cplusplus)
 }  // extern "C"

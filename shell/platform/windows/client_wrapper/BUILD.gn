@@ -7,6 +7,7 @@ import("$flutter_root/testing/testing.gni")
 
 _wrapper_includes = [
   "include/flutter/flutter_view_controller.h",
+  "include/flutter/flutter_view.h",
   "include/flutter/plugin_registrar_windows.h",
 ]
 
@@ -69,9 +70,10 @@ test_fixtures("client_wrapper_windows_fixtures") {
 executable("client_wrapper_windows_unittests") {
   testonly = true
 
-  # TODO: Add more unit tests.
   sources = [
     "flutter_view_controller_unittests.cc",
+    "flutter_view_unittests.cc",
+    "plugin_registrar_windows_unittests.cc",
   ]
 
   deps = [

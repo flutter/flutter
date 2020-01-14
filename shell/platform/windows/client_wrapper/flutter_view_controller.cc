@@ -30,18 +30,16 @@ FlutterViewController::FlutterViewController(
       width, height, assets_path.c_str(), icu_data_path_.c_str(),
       arg_count > 0 ? &engine_arguments[0] : nullptr, arg_count);
   if (!controller_) {
-    std::cerr << "Failed to create view." << std::endl;
+    std::cerr << "Failed to create view controller." << std::endl;
+    return;
   }
+  view_ = std::make_unique<FlutterView>(FlutterDesktopGetView(controller_));
 }
 
 FlutterViewController::~FlutterViewController() {
   if (controller_) {
     FlutterDesktopDestroyViewController(controller_);
   }
-}
-
-HWND FlutterViewController::GetNativeWindow() {
-  return FlutterDesktopGetHWND(controller_);
 }
 
 std::chrono::nanoseconds FlutterViewController::ProcessMessages() {
