@@ -83,6 +83,8 @@ class _MyHomePageState extends State<_MyHomePage> {
             return (await deviceInfo.androidInfo).model;
           case TargetPlatform.fuchsia:
             return 'fuchsia';
+          default:
+            return 'unsupported';
         }
         break;
     }

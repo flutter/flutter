@@ -139,7 +139,7 @@ class FuchsiaDevices extends PollingDeviceDiscovery {
   FuchsiaDevices() : super('Fuchsia devices');
 
   @override
-  bool get supportsPlatform => globals.platform.isLinux || globals.platform.isMacOS;
+  bool get supportsPlatform => isFuchsiaSupportedPlatform();
 
   @override
   bool get canListAnything => fuchsiaWorkflow.canListDevices;
@@ -443,7 +443,7 @@ class FuchsiaDevice extends Device {
   }
 
   @override
-  bool get supportsScreenshot => true;
+  bool get supportsScreenshot => isFuchsiaSupportedPlatform();
 
   @override
   Future<void> takeScreenshot(File outputFile) async {

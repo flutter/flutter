@@ -20,6 +20,11 @@ FuchsiaSdk get fuchsiaSdk => context.get<FuchsiaSdk>();
 /// The [FuchsiaArtifacts] instance.
 FuchsiaArtifacts get fuchsiaArtifacts => context.get<FuchsiaArtifacts>();
 
+/// Returns [true] if the current platform supports Fuchsia targets.
+bool isFuchsiaSupportedPlatform() {
+  return globals.platform.isLinux || globals.platform.isMacOS;
+}
+
 /// The Fuchsia SDK shell commands.
 ///
 /// This workflow assumes development within the fuchsia source tree,
@@ -110,7 +115,7 @@ class FuchsiaArtifacts {
   /// FUCHSIA_SSH_CONFIG) to find the ssh configuration needed to talk to
   /// a device.
   factory FuchsiaArtifacts.find() {
-    if (!globals.platform.isLinux && !globals.platform.isMacOS) {
+    if (!isFuchsiaSupportedPlatform()) {
       // Don't try to find the artifacts on platforms that are not supported.
       return FuchsiaArtifacts();
     }

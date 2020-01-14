@@ -333,9 +333,18 @@ void main() {
       mockProcessManager = MockProcessManager();
     });
 
-    test('is supported', () {
+    test('is supported on posix platforms', () {
       final FuchsiaDevice device = FuchsiaDevice('id', name: 'tester');
       expect(device.supportsScreenshot, true);
+    }, testOn: 'posix');
+
+    testUsingContext('is not supported on Windows', () {
+      final FuchsiaDevice device = FuchsiaDevice('id', name: 'tester');
+      expect(device.supportsScreenshot, false);
+    }, overrides: <Type, Generator>{
+      Platform: () => FakePlatform(
+        operatingSystem: 'windows',
+      ),
     });
 
     test('takeScreenshot throws if file isn\'t .ppm', () async {
@@ -344,7 +353,7 @@ void main() {
         () => device.takeScreenshot(globals.fs.file('file.invalid')),
         throwsA(equals('file.invalid must be a .ppm file')),
       );
-    });
+    }, testOn: 'posix');
 
     testUsingContext('takeScreenshot throws if screencap failed', () async {
       final FuchsiaDevice device = FuchsiaDevice('0.0.0.0', name: 'tester');
@@ -373,7 +382,7 @@ void main() {
         },
         operatingSystem: 'linux',
       ),
-    });
+    }, testOn: 'posix');
 
     testUsingContext('takeScreenshot throws if scp failed', () async {
       final FuchsiaDevice device = FuchsiaDevice('0.0.0.0', name: 'tester');
@@ -426,7 +435,7 @@ void main() {
         },
         operatingSystem: 'linux',
       ),
-    });
+    }, testOn: 'posix');
 
     testUsingContext('takeScreenshot prints error if can\'t delete file from device', () async {
       final FuchsiaDevice device = FuchsiaDevice('0.0.0.0', name: 'tester');
@@ -484,7 +493,7 @@ void main() {
         },
         operatingSystem: 'linux',
       ),
-    });
+    }, testOn: 'posix');
 
     testUsingContext('takeScreenshot returns', () async {
       final FuchsiaDevice device = FuchsiaDevice('0.0.0.0', name: 'tester');
@@ -538,7 +547,7 @@ void main() {
         },
         operatingSystem: 'linux',
       ),
-    });
+    }, testOn: 'posix');
   });
 
   group(FuchsiaIsolateDiscoveryProtocol, () {
