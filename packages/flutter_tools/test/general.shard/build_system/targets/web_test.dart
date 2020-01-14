@@ -45,7 +45,7 @@ void main() {
       globals.fs.currentDirectory.childDirectory('bar').createSync();
 
       environment = Environment.test(
-         globals.fs.currentDirectory,
+        globals.fs.currentDirectory,
         projectDir: globals.fs.currentDirectory.childDirectory('foo'),
         outputDir: globals.fs.currentDirectory.childDirectory('bar'),
         defines: <String, String>{
