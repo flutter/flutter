@@ -247,6 +247,8 @@ class _DayPeriodControl extends StatelessWidget {
     );
     final bool layoutPortrait = orientation == Orientation.portrait;
 
+    final double buttonTextScaleFactor = math.min(MediaQuery.of(context).textScaleFactor, 2.0);
+
     final Widget amButton = ConstrainedBox(
       constraints: _kMinTappableRegion,
       child: Material(
@@ -261,7 +263,7 @@ class _DayPeriodControl extends StatelessWidget {
               heightFactor: 1,
               child: Semantics(
                 selected: amSelected,
-                child: Text(materialLocalizations.anteMeridiemAbbreviation, style: amStyle),
+                child: Text(materialLocalizations.anteMeridiemAbbreviation, style: amStyle, textScaleFactor: buttonTextScaleFactor),
               ),
             ),
           ),
@@ -284,7 +286,7 @@ class _DayPeriodControl extends StatelessWidget {
               heightFactor: 1,
               child: Semantics(
                 selected: !amSelected,
-                child: Text(materialLocalizations.postMeridiemAbbreviation, style: pmStyle),
+                child: Text(materialLocalizations.postMeridiemAbbreviation, style: pmStyle, textScaleFactor: buttonTextScaleFactor),
               ),
             ),
           ),
@@ -383,7 +385,7 @@ class _HourControl extends StatelessWidget {
           type: MaterialType.transparency,
           child: InkWell(
             onTap: Feedback.wrapForTap(() => fragmentContext.onModeChange(_TimePickerMode.hour), context),
-            child: Text(formattedHour, style: hourStyle, textAlign: TextAlign.end),
+            child: Text(formattedHour, style: hourStyle, textAlign: TextAlign.end, textScaleFactor: 1.0,),
           ),
         ),
       ),
@@ -404,7 +406,7 @@ class _StringFragment extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ExcludeSemantics(
-      child: Text(value, style: fragmentContext.inactiveStyle),
+      child: Text(value, style: fragmentContext.inactiveStyle, textScaleFactor: 1.0),
     );
   }
 }
@@ -453,7 +455,7 @@ class _MinuteControl extends StatelessWidget {
           type: MaterialType.transparency,
           child: InkWell(
             onTap: Feedback.wrapForTap(() => fragmentContext.onModeChange(_TimePickerMode.minute), context),
-            child: Text(formattedMinute, style: minuteStyle, textAlign: TextAlign.start),
+            child: Text(formattedMinute, style: minuteStyle, textAlign: TextAlign.start, textScaleFactor: 1.0),
           ),
         ),
       ),
