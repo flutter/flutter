@@ -127,7 +127,7 @@ void main() {
       );
     });
 
-    testUsingContext('Looks up dart.exe on windows platforms', () async {
+    testWithoutContext('Looks up dart.exe on windows platforms', () async {
       artifacts = LocalEngineArtifacts(fileSystem.currentDirectory.path,
         fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'android_debug_unopt'),
         fileSystem.path.join(fileSystem.currentDirectory.path, 'out', 'host_debug_unopt'),
