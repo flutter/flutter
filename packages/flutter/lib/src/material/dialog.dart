@@ -334,7 +334,7 @@ class AlertDialog extends StatelessWidget {
   /// bottom and "ends" at the top.
   ///
   /// If null then it will use the surrounding
-  /// [ButtonBarTheme.buttonBarOverflowDirection]. If that is null, it will
+  /// [ButtonBarTheme.overflowDirection]. If that is null, it will
   /// default to [VerticalDirection.down].
   ///
   /// See also:
