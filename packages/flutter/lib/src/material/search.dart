@@ -193,12 +193,7 @@ abstract class SearchDelegate<T> {
     assert(context != null);
     final ThemeData theme = Theme.of(context);
     assert(theme != null);
-    return theme.copyWith(
-      primaryColor: Colors.white,
-      primaryIconTheme: theme.primaryIconTheme.copyWith(color: Colors.grey),
-      primaryColorBrightness: Brightness.light,
-      primaryTextTheme: theme.textTheme,
-    );
+    return theme;
   }
 
   /// The current query string shown in the [AppBar].
