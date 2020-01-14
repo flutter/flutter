@@ -197,7 +197,7 @@ void main() {
 
   testWidgets('DropdownButtonFormFieldState value changes when option selected',
       (WidgetTester tester) async {
-    String value = 'one';
+    final String value = 'one';
     final GlobalKey<FormFieldState<String>> stateKey =
         GlobalKey<FormFieldState<String>>();
 
