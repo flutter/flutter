@@ -175,7 +175,6 @@ class AotBuilder {
       case TargetPlatform.android_arm64:
       case TargetPlatform.android_x86:
       case TargetPlatform.darwin_x64:
-        return true;
       case TargetPlatform.android_x64:
       case TargetPlatform.ios:
       case TargetPlatform.linux_x64:
@@ -196,6 +195,7 @@ class AotBuilder {
     String outputDir,
     bool quiet
   }) async {
+    // This code is currently dead, but will be updated as we move iOS to assemble.
     Status status;
     if (!quiet) {
       final String typeName = globals.artifacts.getEngineType(targetPlatform, buildMode);
@@ -205,10 +205,7 @@ class AotBuilder {
       );
     }
     final FlutterProject flutterProject = FlutterProject.current();
-    // Currently this only supports android, per the check above.
-    final Target target = buildMode == BuildMode.profile
-      ? const ProfileCopyFlutterAotBundle()
-      : const ReleaseCopyFlutterAotBundle();
+    const Target target = null;
 
     final BuildResult result = await buildSystem.build(target, Environment(
       projectDir: flutterProject.directory,
