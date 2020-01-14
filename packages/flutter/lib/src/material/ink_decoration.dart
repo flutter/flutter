@@ -44,7 +44,7 @@ import 'material.dart';
 /// generally speaking will match the order they are given in the widget tree,
 /// but this order may appear to be somewhat random in more dynamic situations.
 ///
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// This example shows how a [Material] widget can have a yellow rectangle drawn
 /// on it using [Ink], while still having ink effects over the yellow rectangle:
@@ -68,7 +68,7 @@ import 'material.dart';
 /// )
 /// ```
 /// {@end-tool}
-/// {@tool sample}
+/// {@tool snippet}
 ///
 /// The following example shows how an image can be printed on a [Material]
 /// widget with an [InkWell] above it:

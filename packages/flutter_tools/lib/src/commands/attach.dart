@@ -11,14 +11,13 @@ import '../base/common.dart';
 import '../base/context.dart';
 import '../base/file_system.dart';
 import '../base/io.dart';
-import '../base/terminal.dart';
 import '../base/utils.dart';
 import '../cache.dart';
 import '../commands/daemon.dart';
 import '../compile.dart';
 import '../device.dart';
 import '../fuchsia/fuchsia_device.dart';
-import '../globals.dart';
+import '../globals.dart' as globals;
 import '../ios/devices.dart';
 import '../ios/simulators.dart';
 import '../mdns_discovery.dart';
@@ -172,14 +171,14 @@ class AttachCommand extends FlutterCommand {
 
     final Device device = await findTargetDevice();
 
-    final Artifacts artifacts = device.artifactOverrides ?? Artifacts.instance;
+    final Artifacts overrideArtifacts = device.artifactOverrides ?? globals.artifacts;
     await context.run<void>(
       body: () => _attachToDevice(device),
       overrides: <Type, Generator>{
-        Artifacts: () => artifacts,
+        Artifacts: () => overrideArtifacts,
     });
 
-    return null;
+    return FlutterCommandResult.success();
   }
 
   Future<void> _attachToDevice(Device device) async {
@@ -219,7 +218,7 @@ class AttachCommand extends FlutterCommand {
         if (module == null) {
           throwToolExit('\'--module\' is required for attaching to a Fuchsia device');
         }
-        usesIpv6 = await device.ipv6;
+        usesIpv6 = device.ipv6;
         FuchsiaIsolateDiscoveryProtocol isolateDiscoveryProtocol;
         try {
           isolateDiscoveryProtocol = device.getIsolateDiscoveryProtocol(module);
@@ -227,7 +226,7 @@ class AttachCommand extends FlutterCommand {
         } catch (_) {
           isolateDiscoveryProtocol?.dispose();
           final List<ForwardedPort> ports = device.portForwarder.forwardedPorts.toList();
-          for (ForwardedPort port in ports) {
+          for (final ForwardedPort port in ports) {
             await device.portForwarder.unforward(port);
           }
           rethrow;
@@ -254,7 +253,7 @@ class AttachCommand extends FlutterCommand {
             devicePort: deviceVmservicePort,
             hostPort: hostVmservicePort,
           );
-        printStatus('Waiting for a connection from Flutter on ${device.name}...');
+        globals.printStatus('Waiting for a connection from Flutter on ${device.name}...');
         observatoryUri = observatoryDiscovery.uris;
         // Determine ipv6 status from the scanned logs.
         usesIpv6 = observatoryDiscovery.ipv6;
@@ -272,7 +271,7 @@ class AttachCommand extends FlutterCommand {
         ).asBroadcastStream();
     }
 
-    terminal.usesTerminalUi = daemon == null;
+    globals.terminal.usesTerminalUi = daemon == null;
 
     try {
       int result;
@@ -291,7 +290,7 @@ class AttachCommand extends FlutterCommand {
             device,
             null,
             true,
-            fs.currentDirectory,
+            globals.fs.currentDirectory,
             LaunchMode.attach,
           );
         } catch (error) {
@@ -326,11 +325,11 @@ class AttachCommand extends FlutterCommand {
         if (runner.exited || !runner.isWaitingForObservatory) {
           break;
         }
-        printStatus('Waiting for a new connection from Flutter on ${device.name}...');
+        globals.printStatus('Waiting for a new connection from Flutter on ${device.name}...');
       }
     } finally {
       final List<ForwardedPort> ports = device.portForwarder.forwardedPorts.toList();
-      for (ForwardedPort port in ports) {
+      for (final ForwardedPort port in ports) {
         await device.portForwarder.unforward(port);
       }
     }

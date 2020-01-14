@@ -148,7 +148,7 @@ void main() {
     await tester.tap(find.byKey(dropdownMenuButtonKey));
     await tester.pump(const Duration(seconds: 1));
 
-    for (Element item in tester.elementList(find.text('menuItem')))
+    for (final Element item in tester.elementList(find.text('menuItem')))
       expect(Theme.of(item).brightness, equals(Brightness.light));
   });
 
@@ -390,8 +390,8 @@ void main() {
       ];
     }
 
-    for (TextTheme textTheme in <TextTheme>[theme.textTheme, theme.primaryTextTheme, theme.accentTextTheme]) {
-      for (TextStyle style in extractStyles(textTheme).map<TextStyle>((TextStyle style) => _TextStyleProxy(style))) {
+    for (final TextTheme textTheme in <TextTheme>[theme.textTheme, theme.primaryTextTheme, theme.accentTextTheme]) {
+      for (final TextStyle style in extractStyles(textTheme).map<TextStyle>((TextStyle style) => _TextStyleProxy(style))) {
         expect(style.inherit, false);
         expect(style.color, isNotNull);
         expect(style.fontFamily, isNotNull);
@@ -650,7 +650,7 @@ void main() {
 
 int testBuildCalled;
 class Test extends StatefulWidget {
-  const Test();
+  const Test({ Key key }) : super(key: key);
 
   @override
   _TestState createState() => _TestState();

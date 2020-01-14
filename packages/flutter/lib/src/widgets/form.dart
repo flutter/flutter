@@ -16,7 +16,7 @@ import 'will_pop_scope.dart';
 /// with a context whose ancestor is the [Form], or pass a [GlobalKey] to the
 /// [Form] constructor and call [GlobalKey.currentState].
 ///
-/// {@tool snippet --template=stateful_widget_scaffold}
+/// {@tool sample --template=stateful_widget_scaffold}
 /// This example shows a [Form] with one [TextFormField] to enter an email
 /// address and a [RaisedButton] to submit the form. A [GlobalKey] is used here
 /// to identify the [Form] and validate input.
@@ -177,7 +177,7 @@ class FormState extends State<Form> {
 
   /// Saves every [FormField] that is a descendant of this [Form].
   void save() {
-    for (FormFieldState<dynamic> field in _fields)
+    for (final FormFieldState<dynamic> field in _fields)
       field.save();
   }
 
@@ -189,7 +189,7 @@ class FormState extends State<Form> {
   /// If the form's [Form.autovalidate] property is true, the fields will all be
   /// revalidated after being reset.
   void reset() {
-    for (FormFieldState<dynamic> field in _fields)
+    for (final FormFieldState<dynamic> field in _fields)
       field.reset();
     _fieldDidChange();
   }
@@ -205,7 +205,7 @@ class FormState extends State<Form> {
 
   bool _validate() {
     bool hasError = false;
-    for (FormFieldState<dynamic> field in _fields)
+    for (final FormFieldState<dynamic> field in _fields)
       hasError = !field.validate() || hasError;
     return !hasError;
   }

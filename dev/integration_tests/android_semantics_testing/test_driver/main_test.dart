@@ -399,7 +399,7 @@ void main() {
           // catch up.
           await Future<void>.delayed(const Duration(milliseconds: 1500));
 
-          for (String item in popupItems) {
+          for (final String item in popupItems) {
             expect(
                 await getSemantics(find.byValueKey('$popupKeyValue.$item')),
                 hasAndroidSemantics(
@@ -423,7 +423,7 @@ void main() {
           await driver.tap(find.byValueKey(popupButtonKeyValue));
           await Future<void>.delayed(const Duration(milliseconds: 1500));
 
-          for (String item in popupItems) {
+          for (final String item in popupItems) {
             expect(
                 await getSemantics(find.byValueKey('$popupKeyValue.$item')),
                 hasAndroidSemantics(
@@ -467,7 +467,7 @@ void main() {
         try {
           await Future<void>.delayed(const Duration(milliseconds: 1500));
 
-          for (String item in popupItems) {
+          for (final String item in popupItems) {
             // There are two copies of each item, so we want to find the version
             // that is in the overlay, not the one in the dropdown.
             expect(
@@ -503,7 +503,7 @@ void main() {
           await driver.tap(find.byValueKey(dropdownButtonKeyValue));
           await Future<void>.delayed(const Duration(milliseconds: 1500));
 
-          for (String item in popupItems) {
+          for (final String item in popupItems) {
             // There are two copies of each item, so we want to find the version
             // that is in the overlay, not the one in the dropdown.
             expect(
@@ -572,7 +572,7 @@ void main() {
               ),
               reason: "Alert OK button doesn't have the right semantics");
 
-          for (String item in <String>['Title', 'Body1', 'Body2']) {
+          for (final String item in <String>['Title', 'Body1', 'Body2']) {
             expect(
                 await getSemantics(find.byValueKey('$alertKeyValue.$item')),
                 hasAndroidSemantics(
@@ -611,7 +611,7 @@ void main() {
               ),
               reason: "Alert OK button doesn't have the right semantics");
 
-          for (String item in <String>['Title', 'Body1', 'Body2']) {
+          for (final String item in <String>['Title', 'Body1', 'Body2']) {
             expect(
                 await getSemantics(find.byValueKey('$alertKeyValue.$item')),
                 hasAndroidSemantics(

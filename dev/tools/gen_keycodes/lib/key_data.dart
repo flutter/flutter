@@ -53,18 +53,18 @@ class KeyData {
   /// Parses the given JSON data and populates the data structure from it.
   KeyData.fromJson(Map<String, dynamic> contentMap) {
     data = <Key>[
-      for (String key in contentMap.keys) Key.fromJsonMapEntry(key, contentMap[key] as Map<String, List<dynamic>>),
+      for (final String key in contentMap.keys) Key.fromJsonMapEntry(key, contentMap[key] as Map<String, List<dynamic>>),
     ];
   }
 
   /// Converts the data structure into a JSON structure that can be parsed by
   /// [KeyData.fromJson].
   Map<String, dynamic> toJson() {
-    for (Key entry in data) {
+    for (final Key entry in data) {
       // Android Key names
       entry.androidKeyNames = _nameToAndroidName[entry.constantName]?.cast<String>();
       if (entry.androidKeyNames != null && entry.androidKeyNames.isNotEmpty) {
-        for (String androidKeyName in entry.androidKeyNames) {
+        for (final String androidKeyName in entry.androidKeyNames) {
           if (_nameToAndroidKeyCode[androidKeyName] != null) {
             entry.androidKeyCodes ??= <int>[];
             entry.androidKeyCodes.add(_nameToAndroidKeyCode[androidKeyName]);
@@ -79,7 +79,7 @@ class KeyData {
       // GLFW key names
       entry.glfwKeyNames = _nameToGlfwName[entry.constantName]?.cast<String>();
       if (entry.glfwKeyNames != null && entry.glfwKeyNames.isNotEmpty) {
-        for (String glfwKeyName in entry.glfwKeyNames) {
+        for (final String glfwKeyName in entry.glfwKeyNames) {
           if (_nameToGlfwKeyCode[glfwKeyName] != null) {
             entry.glfwKeyCodes ??= <int>[];
             entry.glfwKeyCodes.add(_nameToGlfwKeyCode[glfwKeyName]);
@@ -89,7 +89,7 @@ class KeyData {
     }
 
     final Map<String, dynamic> outputMap = <String, dynamic>{};
-    for (Key entry in data) {
+    for (final Key entry in data) {
       outputMap[entry.constantName] = entry.toJson();
     }
     return outputMap;
@@ -178,7 +178,7 @@ class KeyData {
     headerFile = headerFile.replaceAllMapped(enumBlock, (Match match) => match.group(1));
     final RegExp enumEntry = RegExp(r'''AKEYCODE_([A-Z0-9_]+)\s*=\s*([0-9]+),?''');
     final Map<String, int> result = <String, int>{};
-    for (Match match in enumEntry.allMatches(headerFile)) {
+    for (final Match match in enumEntry.allMatches(headerFile)) {
       result[match.group(1)] = int.parse(match.group(2));
     }
     return result;
@@ -193,7 +193,7 @@ class KeyData {
     // Only get the KEY definitions, ignore the rest (mouse, joystick, etc).
     final RegExp enumEntry = RegExp(r'''define GLFW_KEY_([A-Z0-9_]+)\s*([A-Z0-9_]+),?''');
     final Map<String, dynamic> replaced = <String, dynamic>{};
-    for (Match match in enumEntry.allMatches(headerFile)) {
+    for (final Match match in enumEntry.allMatches(headerFile)) {
       replaced[match.group(1)] = int.tryParse(match.group(2)) ?? match.group(2).replaceAll('GLFW_KEY_', '');
     }
     final Map<String, int> result = <String, int>{};

@@ -12,6 +12,7 @@ import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_aar.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
@@ -23,11 +24,13 @@ import '../../src/mocks.dart';
 void main() {
   Cache.disableLocking();
 
-  group('getUsage', () {
+  group('Usage', () {
     Directory tempDir;
+    Usage mockUsage;
 
     setUp(() {
-      tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
+      mockUsage = MockUsage();
+      tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
     });
 
     tearDown(() {
@@ -82,6 +85,26 @@ void main() {
     }, overrides: <Type, Generator>{
       AndroidBuilder: () => FakeAndroidBuilder(),
     });
+
+    testUsingContext('logs success', () async {
+      final String projectPath = await createProject(tempDir,
+          arguments: <String>['--no-pub', '--template=module']);
+
+      await runCommandIn(projectPath,
+          arguments: <String>['--target-platform=android-arm']);
+
+      verify(mockUsage.sendEvent(
+        'tool-command-result',
+        'aar',
+        label: 'success',
+        value: anyNamed('value'),
+        parameters: anyNamed('parameters'),
+      )).called(1);
+    },
+    overrides: <Type, Generator>{
+      AndroidBuilder: () => FakeAndroidBuilder(),
+      Usage: () => mockUsage,
+    });
   });
 
   group('Gradle', () {
@@ -94,7 +117,7 @@ void main() {
       mockUsage = MockUsage();
       when(mockUsage.isFirstRun).thenReturn(true);
 
-      tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
+      tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
 
       mockProcessManager = MockProcessManager();
       when(mockProcessManager.run(any,
@@ -149,7 +172,7 @@ void main() {
             arguments: <String>['--no-pub'],
           );
         }, throwsToolExit(
-          message: '[!] No Android SDK found. Try setting the ANDROID_HOME environment variable',
+          message: 'No Android SDK found. Try setting the ANDROID_HOME environment variable',
         ));
       },
       overrides: <Type, Generator>{
@@ -171,7 +194,7 @@ Future<BuildAarCommand> runBuildAarCommand(
     'aar',
     '--no-pub',
     ...?arguments,
-    fs.path.join(target, 'lib', 'main.dart'),
+    globals.fs.path.join(target, 'lib', 'main.dart'),
   ]);
   return command;
 }

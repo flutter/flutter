@@ -922,12 +922,14 @@ class PlatformViewSurface extends LeafRenderObjectWidget {
   ///
   /// The [controller] must not be null.
   const PlatformViewSurface({
+    Key key,
     @required this.controller,
     @required this.hitTestBehavior,
     @required this.gestureRecognizers,
   }) : assert(controller != null),
        assert(hitTestBehavior != null),
-       assert(gestureRecognizers != null);
+       assert(gestureRecognizers != null),
+       super(key: key);
 
   /// The controller for the platform view integrated by this [PlatformViewSurface].
   ///

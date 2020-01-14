@@ -9,11 +9,12 @@ import 'package:flutter_tools/src/android/android_builder.dart';
 import 'package:flutter_tools/src/android/android_sdk.dart';
 import 'package:flutter_tools/src/base/context.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
-import 'package:flutter_tools/src/base/platform.dart';
+
 import 'package:flutter_tools/src/cache.dart';
 import 'package:flutter_tools/src/commands/build_apk.dart';
 import 'package:flutter_tools/src/project.dart';
 import 'package:flutter_tools/src/reporting/reporting.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:mockito/mockito.dart';
 import 'package:process/process.dart';
 
@@ -25,11 +26,13 @@ import '../../src/mocks.dart';
 void main() {
   Cache.disableLocking();
 
-  group('getUsage', () {
+  group('Usage', () {
     Directory tempDir;
+    Usage mockUsage;
 
     setUp(() {
-      tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
+      mockUsage = MockUsage();
+      tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
     });
 
     tearDown(() {
@@ -91,6 +94,25 @@ void main() {
     }, overrides: <Type, Generator>{
       AndroidBuilder: () => FakeAndroidBuilder(),
     });
+
+    testUsingContext('logs success', () async {
+      final String projectPath = await createProject(tempDir,
+          arguments: <String>['--no-pub', '--template=app']);
+
+      await runBuildApkCommand(projectPath);
+
+      verify(mockUsage.sendEvent(
+        'tool-command-result',
+        'apk',
+        label: 'success',
+        value: anyNamed('value'),
+        parameters: anyNamed('parameters'),
+      )).called(1);
+    },
+    overrides: <Type, Generator>{
+      AndroidBuilder: () => FakeAndroidBuilder(),
+      Usage: () => mockUsage,
+    });
   });
 
   group('Gradle', () {
@@ -104,9 +126,9 @@ void main() {
       mockUsage = MockUsage();
       when(mockUsage.isFirstRun).thenReturn(true);
 
-      tempDir = fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
-      gradlew = fs.path.join(tempDir.path, 'flutter_project', 'android',
-          platform.isWindows ? 'gradlew.bat' : 'gradlew');
+      tempDir = globals.fs.systemTempDirectory.createTempSync('flutter_tools_packages_test.');
+      gradlew = globals.fs.path.join(tempDir.path, 'flutter_project', 'android',
+          globals.platform.isWindows ? 'gradlew.bat' : 'gradlew');
 
       mockProcessManager = MockProcessManager();
       when(mockProcessManager.run(<String>[gradlew, '-v'],
@@ -170,7 +192,7 @@ void main() {
             arguments: <String>['--no-pub'],
           );
         }, throwsToolExit(
-          message: '[!] No Android SDK found. Try setting the ANDROID_HOME environment variable',
+          message: 'No Android SDK found. Try setting the ANDROID_HOME environment variable',
         ));
       },
       overrides: <Type, Generator>{
@@ -192,7 +214,7 @@ void main() {
         <String>[
           gradlew,
           '-q',
-          '-Ptarget=${fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
+          '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
           '-Ptrack-widget-creation=true',
           '-Pshrink=true',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
@@ -223,7 +245,7 @@ void main() {
         <String>[
           gradlew,
           '-q',
-          '-Ptarget=${fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
+          '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
           '-Ptrack-widget-creation=true',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
           'assembleRelease',
@@ -246,7 +268,7 @@ void main() {
         <String>[
           gradlew,
           '-q',
-          '-Ptarget=${fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
+          '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
           '-Ptrack-widget-creation=true',
           '-Pshrink=true',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
@@ -301,7 +323,7 @@ void main() {
         <String>[
           gradlew,
           '-q',
-          '-Ptarget=${fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
+          '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
           '-Ptrack-widget-creation=true',
           '-Pshrink=true',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
@@ -352,7 +374,7 @@ void main() {
         <String>[
           gradlew,
           '-q',
-          '-Ptarget=${fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
+          '-Ptarget=${globals.fs.path.join(tempDir.path, 'flutter_project', 'lib', 'main.dart')}',
           '-Ptrack-widget-creation=true',
           '-Pshrink=true',
           '-Ptarget-platform=android-arm,android-arm64,android-x64',
@@ -409,7 +431,7 @@ Future<BuildApkCommand> runBuildApkCommand(
     'apk',
     ...?arguments,
     '--no-pub',
-    fs.path.join(target, 'lib', 'main.dart'),
+    globals.fs.path.join(target, 'lib', 'main.dart'),
   ]);
   return command;
 }

@@ -90,10 +90,10 @@ class BoxConstraints extends Constraints {
     this.maxWidth = double.infinity,
     this.minHeight = 0.0,
     this.maxHeight = double.infinity,
-  }) : assert(minWidth != null),
-       assert(maxWidth != null),
-       assert(minHeight != null),
-       assert(maxHeight != null);
+  }) : assert (minWidth != null),
+       assert (maxWidth != null),
+       assert (minHeight != null),
+       assert (maxHeight != null);
 
   /// Creates box constraints that is respected only by the given size.
   BoxConstraints.tight(Size size)
@@ -584,11 +584,11 @@ class BoxConstraints extends Constraints {
   }
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     assert(debugAssertIsValid());
     if (identical(this, other))
       return true;
-    if (runtimeType != other.runtimeType)
+    if (other.runtimeType != runtimeType)
       return false;
     assert(other is BoxConstraints && other.debugAssertIsValid());
     return other is BoxConstraints
@@ -686,7 +686,7 @@ class BoxHitTestResult extends HitTestResult {
   /// the child speaks a different hit test protocol then the parent and the
   /// position is not required to do the actual hit testing in that protocol.
   ///
-  /// {@tool sample}
+  /// {@tool snippet}
   /// This method is used in [RenderBox.hitTestChildren] when the child and
   /// parent don't share the same origin.
   ///
@@ -858,7 +858,7 @@ class _IntrinsicDimensionsCacheEntry {
   final double argument;
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     return other is _IntrinsicDimensionsCacheEntry
         && other.dimension == dimension
         && other.argument == argument;
@@ -1316,8 +1316,7 @@ abstract class RenderBox extends RenderObject {
   /// function couples the child with the parent so that when the child's layout
   /// changes, the parent is notified (via [markNeedsLayout]).
   ///
-  /// Calling this function is expensive and as it can result in O(N^2)
-  /// behavior.
+  /// Calling this function is expensive as it can result in O(N^2) behavior.
   ///
   /// Do not override this method. Instead, implement [computeMinIntrinsicWidth].
   @mustCallSuper
@@ -1456,8 +1455,7 @@ abstract class RenderBox extends RenderObject {
   /// function couples the child with the parent so that when the child's layout
   /// changes, the parent is notified (via [markNeedsLayout]).
   ///
-  /// Calling this function is expensive and as it can result in O(N^2)
-  /// behavior.
+  /// Calling this function is expensive as it can result in O(N^2) behavior.
   ///
   /// Do not override this method. Instead, implement
   /// [computeMaxIntrinsicWidth].
@@ -1536,8 +1534,7 @@ abstract class RenderBox extends RenderObject {
   /// function couples the child with the parent so that when the child's layout
   /// changes, the parent is notified (via [markNeedsLayout]).
   ///
-  /// Calling this function is expensive and as it can result in O(N^2)
-  /// behavior.
+  /// Calling this function is expensive as it can result in O(N^2) behavior.
   ///
   /// Do not override this method. Instead, implement
   /// [computeMinIntrinsicHeight].
@@ -1613,8 +1610,7 @@ abstract class RenderBox extends RenderObject {
   /// function couples the child with the parent so that when the child's layout
   /// changes, the parent is notified (via [markNeedsLayout]).
   ///
-  /// Calling this function is expensive and as it can result in O(N^2)
-  /// behavior.
+  /// Calling this function is expensive as it can result in O(N^2) behavior.
   ///
   /// Do not override this method. Instead, implement
   /// [computeMaxIntrinsicHeight].
