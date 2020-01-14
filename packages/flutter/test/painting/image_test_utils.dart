@@ -25,9 +25,9 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
   }
 
   @override
-  ImageStream resolve(ImageConfiguration config) {
+  ImageStream resolve(ImageConfiguration config, { ImageCache imageCache }) {
     configuration = config;
-    return super.resolve(configuration);
+    return super.resolve(configuration, imageCache: imageCache);
   }
 
   @override

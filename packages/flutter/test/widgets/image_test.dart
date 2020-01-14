@@ -1175,6 +1175,21 @@ void main() {
     streamCompleter.setData(chunkEvent: const ImageChunkEvent(cumulativeBytesLoaded: 10, expectedTotalBytes: 100));
     expect(tester.binding.hasScheduledFrame, isFalse);
   }, skip: isBrowser);
+
+  testWidgets('Uses the scoped image cache if available', (WidgetTester tester) async {
+    final ImageCache imageCache = TestImageCache();
+    final TestImageProvider imageProvider = TestImageProvider();
+    await tester.pumpWidget(
+      ScopedImageCache(
+        child: Image(
+          excludeFromSemantics: true,
+          image: imageProvider,
+        ),
+        imageCache: imageCache,
+      ),
+    );
+    expect(imageProvider._lastResolvedImageCache, imageCache);
+  });
 }
 
 class TestImageProvider extends ImageProvider<TestImageProvider> {
@@ -1186,6 +1201,7 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
   final Completer<ImageInfo> _completer = Completer<ImageInfo>();
   ImageStreamCompleter _streamCompleter;
   ImageConfiguration _lastResolvedConfiguration;
+  ImageCache _lastResolvedImageCache;
 
   @override
   Future<TestImageProvider> obtainKey(ImageConfiguration configuration) {
@@ -1193,9 +1209,10 @@ class TestImageProvider extends ImageProvider<TestImageProvider> {
   }
 
   @override
-  ImageStream resolve(ImageConfiguration configuration) {
+  ImageStream resolve(ImageConfiguration configuration, { ImageCache imageCache }) {
     _lastResolvedConfiguration = configuration;
-    return super.resolve(configuration);
+    _lastResolvedImageCache = imageCache;
+    return super.resolve(configuration, imageCache: imageCache);
   }
 
   @override
@@ -1269,3 +1286,5 @@ class TestImage implements ui.Image {
   @override
   String toString() => '[$width\u00D7$height]';
 }
+
+class TestImageCache extends ImageCache {}

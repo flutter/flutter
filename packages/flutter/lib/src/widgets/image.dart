@@ -16,6 +16,7 @@ import 'binding.dart';
 import 'framework.dart';
 import 'localizations.dart';
 import 'media_query.dart';
+import 'scoped_image_cache.dart';
 import 'ticker_provider.dart';
 
 export 'package:flutter/painting.dart' show
@@ -82,7 +83,7 @@ Future<void> precacheImage(
 }) {
   final ImageConfiguration config = createLocalImageConfiguration(context, size: size);
   final Completer<void> completer = Completer<void>();
-  final ImageStream stream = provider.resolve(config);
+  final ImageStream stream = provider.resolve(config, imageCache: ScopedImageCache.of(context));
   ImageStreamListener listener;
   listener = ImageStreamListener(
     (ImageInfo image, bool sync) {
@@ -1007,10 +1008,13 @@ class _ImageState extends State<Image> with WidgetsBindingObserver {
 
   void _resolveImage() {
     final ImageStream newStream =
-      widget.image.resolve(createLocalImageConfiguration(
-        context,
-        size: widget.width != null && widget.height != null ? Size(widget.width, widget.height) : null,
-      ));
+      widget.image.resolve(
+        createLocalImageConfiguration(
+          context,
+          size: widget.width != null && widget.height != null ? Size(widget.width, widget.height) : null,
+        ),
+        imageCache: ScopedImageCache.of(context),
+      );
     assert(newStream != null);
     _updateSourceStream(newStream);
   }

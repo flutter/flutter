@@ -224,7 +224,7 @@ typedef DecoderCallback = Future<ui.Codec> Function(Uint8List bytes, {int cacheW
 ///
 ///   void _getImage() {
 ///     final ImageStream oldImageStream = _imageStream;
-///     _imageStream = widget.imageProvider.resolve(createLocalImageConfiguration(context));
+///     _imageStream = widget.imageProvider.resolve(createLocalImageConfiguration(context), ScopedImageCache.of(context));
 ///     if (_imageStream.key != oldImageStream?.key) {
 ///       // If the keys are the same, then we got the same image back, and so we don't
 ///       // need to update the listeners. If the key changed, though, we must make sure
@@ -265,14 +265,20 @@ abstract class ImageProvider<T> {
   const ImageProvider();
 
   /// Resolves this image provider using the given `configuration`, returning
-  /// an [ImageStream].
+  /// an [ImageStream], using the provided [imageCache].
   ///
   /// This is the public entry-point of the [ImageProvider] class hierarchy.
   ///
+  /// Callers with a [BuildContext] available should use [ScopedImageCache.of]
+  /// to retrieve the correct [ImageCache]. If no [ImageCache] argument is
+  /// provided, the [PaintingBinding.imageCache] will be used.
+  ///
   /// Subclasses should implement [obtainKey] and [load], which are used by this
   /// method.
-  ImageStream resolve(ImageConfiguration configuration) {
+  ImageStream resolve(ImageConfiguration configuration, { ImageCache imageCache }) {
     assert(configuration != null);
+    imageCache ??= PaintingBinding.instance.imageCache;
+
     final ImageStream stream = ImageStream();
     T obtainedKey;
     bool didError = false;
@@ -322,7 +328,7 @@ abstract class ImageProvider<T> {
       }
       key.then<void>((T key) {
         obtainedKey = key;
-        final ImageStreamCompleter completer = PaintingBinding.instance.imageCache.putIfAbsent(
+        final ImageStreamCompleter completer = imageCache.putIfAbsent(
           key,
           () => load(key, PaintingBinding.instance.instantiateImageCodec),
           onError: handleError,

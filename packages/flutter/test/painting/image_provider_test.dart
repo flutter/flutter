@@ -23,7 +23,7 @@ void main() {
     return PaintingBinding.instance.instantiateImageCodec(bytes, cacheWidth: cacheWidth, cacheHeight: cacheHeight);
   };
 
-  group(ImageProvider, () {
+  group('ImageProvider', () {
     setUpAll(() {
       TestRenderingFlutterBinding(); // initializes the imageCache
     });
@@ -31,6 +31,27 @@ void main() {
     group('Image cache', () {
       tearDown(() {
         imageCache.clear();
+      });
+
+      test('ImageProvider can use the provided cache', () async {
+        final MockImageCache localCache = MockImageCache();
+
+        final Uint8List bytes = Uint8List.fromList(kTransparentImage);
+        final MemoryImage imageProvider = MemoryImage(bytes);
+        int localCacheCallCount = 0;
+        when(localCache.putIfAbsent(any, any, onError: anyNamed('onError'))).thenAnswer((_) {
+          localCacheCallCount += 1;
+          return imageProvider.load(imageProvider, basicDecoder);
+        });
+
+        expect(localCacheCallCount, 0);
+        final ImageStream stream = imageProvider.resolve(ImageConfiguration.empty, imageCache: localCache);
+        final Completer<void> completer = Completer<void>();
+        stream.addListener(ImageStreamListener((ImageInfo info, bool syncCall) => completer.complete()));
+        await completer.future;
+
+        expect(imageCache.currentSize, 0);
+        expect(localCacheCallCount, 1);
       });
 
       test('ImageProvider can evict images', () async {
@@ -148,7 +169,7 @@ void main() {
       expect(uncaught, false);
     });
 
-    group(NetworkImage, () {
+    group('NetworkImage', () {
       MockHttpClient httpClient;
 
       setUp(() {
@@ -380,3 +401,4 @@ Future<Size> _resolveAndGetSize(ImageProvider imageProvider,
 class MockHttpClient extends Mock implements HttpClient {}
 class MockHttpClientRequest extends Mock implements HttpClientRequest {}
 class MockHttpClientResponse extends Mock implements HttpClientResponse {}
+class MockImageCache extends Mock implements ImageCache {}
