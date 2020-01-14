@@ -35,7 +35,6 @@ const List<Target> _kDefaultTargets = <Target>[
   DebugMacOSBundleFlutterAssets(),
   ProfileMacOSBundleFlutterAssets(),
   ReleaseMacOSBundleFlutterAssets(),
-  DebugBundleLinuxAssets(),
   WebServiceWorker(),
   DebugAndroidApplication(),
   FastStartAndroidApplication(),
@@ -52,6 +51,10 @@ const List<Target> _kDefaultTargets = <Target>[
   androidArmReleaseBundle,
   androidArm64ReleaseBundle,
   androidx64ReleaseBundle,
+  // Linux specific targets
+  DebugBundleLinuxAssets(),
+  ProfileBundleLinuxAssets(),
+  ReleaseBundleLinuxAssets(),
 ];
 
 /// Assemble provides a low level API to interact with the flutter tool build

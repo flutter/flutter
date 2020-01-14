@@ -225,24 +225,6 @@ BINARY_NAME=fizz_bar
     FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: false),
   });
 
-  testUsingContext('Release build prints an under-construction warning', () async {
-    final BuildCommand command = BuildCommand();
-    applyMocksToCommand(command);
-    setUpMockProjectFilesForBuild();
-    expectMakeInvocationWithMode('release');
-
-    await createTestCommandRunner(command).run(
-      const <String>['build', 'linux']
-    );
-
-    expect(testLogger.statusText, contains('🚧'));
-  }, overrides: <Type, Generator>{
-    FileSystem: () => MemoryFileSystem(),
-    ProcessManager: () => mockProcessManager,
-    Platform: () => linuxPlatform,
-    FeatureFlags: () => TestFeatureFlags(isLinuxEnabled: true),
-  });
-
   testUsingContext('hidden when not enabled on Linux host', () {
     when(globals.platform.isLinux).thenReturn(true);
 

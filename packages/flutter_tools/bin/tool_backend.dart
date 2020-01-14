@@ -47,10 +47,15 @@ or
           if (localEngine != null) '--local-engine=$localEngine',
           'assemble',
           '-dTargetPlatform=$targetPlatform',
-          '-dBuildMode=debug',
+          '-dBuildMode=$buildMode',
           '-dTargetFile=$flutterTarget',
           '--output=build',
-          'debug_bundle_linux_assets',
+          if (buildMode == 'debug')
+            'debug_bundle_linux_assets'
+          else if (buildMode == 'release')
+            'release_bundle_linux_assets'
+          else if (buildMode == 'profile')
+            'profile_bundle_linux_assets'
         ]);
     if (unpackResult.exitCode != 0) {
       stderr.write(unpackResult.stderr);

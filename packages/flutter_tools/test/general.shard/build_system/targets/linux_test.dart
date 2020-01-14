@@ -55,7 +55,7 @@ void main() {
   });
 
   test('Copies files to correct cache directory, excluding unrelated code', () => testbed.run(() async {
-    final BuildResult result = await buildSystem.build(const UnpackLinuxDebug(), environment);
+    final BuildResult result = await buildSystem.build(const UnpackLinux(), environment);
 
     expect(result.hasException, false);
     expect(globals.fs.file('linux/flutter/ephemeral/libflutter_linux_glfw.so').existsSync(), true);
@@ -69,26 +69,26 @@ void main() {
   }));
 
   test('Does not re-copy files unecessarily', () => testbed.run(() async {
-    await buildSystem.build(const UnpackLinuxDebug(), environment);
+    await buildSystem.build(const UnpackLinux(), environment);
     // Set a date in the far distant past to deal with the limited resolution
     // of the windows filesystem.
     final DateTime theDistantPast = DateTime(1991, 8, 23);
     globals.fs.file('linux/flutter/ephemeral/libflutter_linux_glfw.so').setLastModifiedSync(theDistantPast);
-    await buildSystem.build(const UnpackLinuxDebug(), environment);
+    await buildSystem.build(const UnpackLinux(), environment);
 
     expect(globals.fs.file('linux/flutter/ephemeral/libflutter_linux_glfw.so').statSync().modified, equals(theDistantPast));
   }));
 
   test('Detects changes in input cache files', () => testbed.run(() async {
-    await buildSystem.build(const UnpackLinuxDebug(), environment);
+    await buildSystem.build(const UnpackLinux(), environment);
     globals.fs.file('bin/cache/artifacts/engine/linux-x64/libflutter_linux_glfw.so').writeAsStringSync('asd'); // modify cache.
 
-    await buildSystem.build(const UnpackLinuxDebug(), environment);
+    await buildSystem.build(const UnpackLinux(), environment);
 
     expect(globals.fs.file('linux/flutter/ephemeral/libflutter_linux_glfw.so').readAsStringSync(), 'asd');
   }));
 
-  test('Copies artifacts to out directory', () => testbed.run(() async {
+  test('Debug copies artifacts to out directory', () => testbed.run(() async {
     environment.buildDir.createSync(recursive: true);
 
     // Create input files.
@@ -99,6 +99,36 @@ void main() {
       .childDirectory('flutter_assets');
 
     expect(output.childFile('kernel_blob.bin').existsSync(), true);
+    expect(output.childFile('FontManifest.json').existsSync(), false);
+    expect(output.childFile('AssetManifest.json').existsSync(), true);
+  }));
+
+  test('Profile/Release copies artifacts to out directory', () => testbed.run(() async {
+    environment.buildDir.createSync(recursive: true);
+
+    // Create input files.
+    environment.buildDir.childFile('app.so').createSync();
+
+    await const ProfileBundleLinuxAssets().build(environment);
+    final Directory output = environment.outputDir
+      .childDirectory('flutter_assets');
+
+    expect(output.childFile('libapp.so').existsSync(), true);
+    expect(output.childFile('FontManifest.json').existsSync(), false);
+    expect(output.childFile('AssetManifest.json').existsSync(), true);
+  }));
+
+  test('Release copies artifacts to out directory', () => testbed.run(() async {
+    environment.buildDir.createSync(recursive: true);
+
+    // Create input files.
+    environment.buildDir.childFile('app.so').createSync();
+
+    await const ReleaseBundleLinuxAssets().build(environment);
+    final Directory output = environment.outputDir
+      .childDirectory('flutter_assets');
+
+    expect(output.childFile('libapp.so').existsSync(), true);
     expect(output.childFile('FontManifest.json').existsSync(), false);
     expect(output.childFile('AssetManifest.json').existsSync(), true);
   }));
