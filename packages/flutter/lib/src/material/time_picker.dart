@@ -1328,7 +1328,7 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
 
   _TappableLabel _buildTappableLabel(TextTheme textTheme, int value, String label, VoidCallback onTap) {
     final TextStyle style = textTheme.subhead;
-    final labelScaleFactor = math.min(MediaQuery.of(context).textScaleFactor, 2.0);
+    final double labelScaleFactor = math.min(MediaQuery.of(context).textScaleFactor, 2.0);
     return _TappableLabel(
       value: value,
       painter: TextPainter(
