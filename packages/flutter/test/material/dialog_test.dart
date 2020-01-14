@@ -560,10 +560,10 @@ void main() {
     await tester.tap(find.text('X'));
     await tester.pumpAndSettle();
 
-    final Rect containerOneRect = tester.getRect(find.byKey(key1));
-    final Rect containerTwoRect = tester.getRect(find.byKey(key2));
-    // Second [Container] should appear above first container.
-    expect(containerTwoRect.bottom, containerOneRect.top);
+    final Rect buttonOneRect = tester.getRect(find.byKey(key1));
+    final Rect buttonTwoRect = tester.getRect(find.byKey(key2));
+    // Second [RaisedButton] should appear above the first.
+    expect(buttonTwoRect.bottom, buttonOneRect.top);
   });
 
   testWidgets('Dialogs removes MediaQuery padding and view insets', (WidgetTester tester) async {
