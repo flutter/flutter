@@ -312,16 +312,6 @@ List<Plugin> findPlugins(FlutterProject project) {
   return plugins;
 }
 
-void _addPluginsToPlatform(List<Plugin> plugins, FlutterProjectPlatform platform, Map<String, dynamic> pluginsMap) {
-  if (!platform.existsSync()) {
-    return;
-  }
-  final List<Map<String,dynamic>> list = platform.pluginsList(plugins);
-  if (list.isNotEmpty) {
-    pluginsMap[platform.pluginConfigKey] = list;
-  }
-}
-
 /// Writes the .flutter-plugins-dependencies file based on the list of plugins.
 /// If there aren't any plugins, then the files aren't written to disk. The resulting
 /// file looks something like this:
@@ -393,34 +383,34 @@ void _addPluginsToPlatform(List<Plugin> plugins, FlutterProjectPlatform platform
 /// Finally, returns [true] if .flutter-plugins.json has changed,
 /// otherwise returns [false].
 bool _writeFlutterPluginsList(FlutterProject project, List<Plugin> plugins) {
-  const String info = 'This is a generated file; do not edit or check into version control.';
-
-  final Map<String, dynamic> result = <String, dynamic> {};
-  result['_info'] = '// $info';
+  final File pluginsFile = project.flutterPluginsDependenciesFile;
+  if (plugins.isEmpty) {
+    if (pluginsFile.existsSync()) {
+      pluginsFile.deleteSync();
+      return true;
+    }
+    return false;
+  }
 
   final Map<String, dynamic> pluginsMap = <String, dynamic>{};
-  _addPluginsToPlatform(plugins, project.ios, pluginsMap);
-  _addPluginsToPlatform(plugins, project.android, pluginsMap);
-  _addPluginsToPlatform(plugins, project.macos, pluginsMap);
-  _addPluginsToPlatform(plugins, project.linux, pluginsMap);
-  _addPluginsToPlatform(plugins, project.windows, pluginsMap);
-  _addPluginsToPlatform(plugins, project.web, pluginsMap);
+  pluginsMap[project.ios.pluginConfigKey] = project.ios.pluginsList(plugins);
+  pluginsMap[project.android.pluginConfigKey] = project.android.pluginsList(plugins);
+  pluginsMap[project.macos.pluginConfigKey] = project.macos.pluginsList(plugins);
+  pluginsMap[project.linux.pluginConfigKey] = project.linux.pluginsList(plugins);
+  pluginsMap[project.windows.pluginConfigKey] = project.windows.pluginsList(plugins);
+  pluginsMap[project.web.pluginConfigKey] = project.web.pluginsList(plugins);
 
+  final Map<String, dynamic> result = <String, dynamic> {};
+
+  result['info'] =  'This is a generated file; do not edit or check into version control.';
   result['plugins'] = pluginsMap;
   result['dependencyGraph'] = _createLegacyPluginDependencyGraph(plugins);
   result['date_created'] = systemClock.now().toString();
   result['version'] = FlutterVersion().frameworkVersion;
 
-  final File pluginsFile = project.flutterPluginsDependenciesFile;
   final String oldPluginFileContent = _readFileContent(pluginsFile);
   final String pluginFileContent = json.encode(result);
-  if (pluginsMap.isNotEmpty) {
-    pluginsFile.writeAsStringSync(pluginFileContent, flush: true);
-  } else {
-    if (pluginsFile.existsSync()) {
-      pluginsFile.deleteSync();
-    }
-  }
+   pluginsFile.writeAsStringSync(pluginFileContent, flush: true);
 
   return oldPluginFileContent != _readFileContent(pluginsFile);
 }
@@ -450,22 +440,26 @@ List<dynamic> _createLegacyPluginDependencyGraph(List<Plugin> plugins) {
 ///
 /// Finally, returns [true] if .flutter-plugins has changed, otherwise returns [false].
 bool _writeFlutterPluginsListLegacy(FlutterProject project, List<Plugin> plugins) {
+
+  final File pluginsFile = project.flutterPluginsFile;
+  if (plugins.isEmpty) {
+    if (pluginsFile.existsSync()) {
+      pluginsFile.deleteSync();
+      return true;
+    }
+    return false;
+  }
+
   const String info = 'This is a generated file; do not edit or check into version control.';
   final StringBuffer flutterPluginsBuffer = StringBuffer('# $info\n');
 
   for (final Plugin plugin in plugins) {
     flutterPluginsBuffer.write('${plugin.name}=${escapePath(plugin.path)}\n');
   }
-  final File pluginsFile = project.flutterPluginsFile;
   final String oldPluginFileContent = _readFileContent(pluginsFile);
   final String pluginFileContent = flutterPluginsBuffer.toString();
-  if (plugins.isNotEmpty) {
-    pluginsFile.writeAsStringSync(pluginFileContent, flush: true);
-  } else {
-    if (pluginsFile.existsSync()) {
-      pluginsFile.deleteSync();
-    }
-  }
+  pluginsFile.writeAsStringSync(pluginFileContent, flush: true);
+
   return oldPluginFileContent != _readFileContent(pluginsFile);
 }
 

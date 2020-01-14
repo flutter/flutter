@@ -37,6 +37,7 @@ void main() {
       // Add basic properties to the Flutter project and subprojects
       flutterProject = MockFlutterProject();
       when(flutterProject.directory).thenReturn(fs.directory('/'));
+      // TODO(franciscojma): Remove logic for .flutter-plugins it's deprecated.
       when(flutterProject.flutterPluginsFile).thenReturn(flutterProject.directory.childFile('.flutter-plugins'));
       when(flutterProject.flutterPluginsDependenciesFile).thenReturn(flutterProject.directory.childFile('.flutter-plugins-dependencies'));
       iosProject = MockIosProject();
@@ -315,7 +316,6 @@ dependencies:
         ProcessManager: () => FakeProcessManager.any(),
       });
 
-      // TODO(franciscojma): Remove logic for .flutter-plugins and .flutter-plugin-dependencies once they are deprecated.
       testUsingContext('Refreshing the plugin list modifies .flutter-plugins and .flutter-plugins-dependencies when there are plugins', () {
         createPluginWithDependencies(name: 'plugin-a', dependencies: const <String>['plugin-b', 'plugin-c', 'random-package']);
         createPluginWithDependencies(name: 'plugin-b', dependencies: const <String>['plugin-c']);
@@ -344,10 +344,9 @@ dependencies:
           'plugin-c=/.tmp_rand0/plugin.rand2/\n'
           ''
         );
-        print(flutterProject.flutterPluginsDependenciesFile.readAsStringSync());
         expect(flutterProject.flutterPluginsDependenciesFile.readAsStringSync(),
           '{'
-            '"_info":"// This is a generated file; do not edit or check into version control.",'
+            '"info":"This is a generated file; do not edit or check into version control.",'
             '"plugins":{'
               '"ios":['
                 '{'
@@ -356,7 +355,12 @@ dependencies:
                   '"dependencies":['
                   ']'
                 '}'
-              ']'
+              '],'
+              '"android":[],'
+              '"macos":[],'
+              '"linux":[],'
+              '"windows":[],'
+              '"web":[]'
             '},'
             '"dependencyGraph":['
               '{'
@@ -405,6 +409,7 @@ dependencies:
       testUsingContext('Changes to the plugin json list invalidates the Cocoapod lockfiles', () {
         simulatePodInstallRun(iosProject);
         simulatePodInstallRun(macosProject);
+        configureDummyPackageAsPlugin();
         final List<Map<String, dynamic>> dummyPluginsList = <Map<String,dynamic>>[
           <String,dynamic>{
             'name': 'test',
