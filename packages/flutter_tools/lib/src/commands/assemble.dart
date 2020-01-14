@@ -36,7 +36,7 @@ const List<Target> _kDefaultTargets = <Target>[
   ProfileMacOSBundleFlutterAssets(),
   ReleaseMacOSBundleFlutterAssets(),
   DebugBundleLinuxAssets(),
-  WebReleaseBundle(),
+  WebServiceWorker(),
   DebugAndroidApplication(),
   FastStartAndroidApplication(),
   ProfileAndroidApplication(),
