@@ -101,13 +101,12 @@ void main() {
     await tester.pumpAndSettle();
 
     final TextField textField = tester.widget<TextField>(find.byType(TextField));
-
     final Color hintColor = textField.decoration.hintStyle.color;
     expect(hintColor, delegate.hintTextColor);
   });
 
   testWidgets('SearchBar color overridden', (WidgetTester tester) async {
-    final _TestSearchDelegate2 delegate = _TestSearchDelegate2();
+    final _TestSearchDelegatePrimaryColor delegate = _TestSearchDelegatePrimaryColor();
 
     await tester.pumpWidget(TestHomePage(
       delegate: delegate,
@@ -634,6 +633,7 @@ void main() {
 
       expect(semantics, hasSemantics(buildExpected(routeName: 'Search'),
           ignoreId: true, ignoreRect: true, ignoreTransform: true));
+
       semantics.dispose();
     });
 
@@ -650,6 +650,7 @@ void main() {
 
       expect(semantics, hasSemantics(buildExpected(routeName: ''),
           ignoreId: true, ignoreRect: true, ignoreTransform: true));
+
       debugDefaultTargetPlatformOverride = null;
       semantics.dispose();
     });
@@ -769,55 +770,29 @@ class _TestSearchDelegate extends SearchDelegate<String> {
   }
 }
 
-class _TestSearchDelegate2 extends SearchDelegate<String> {
-  _TestSearchDelegate2({
-    this.suggestions = 'Suggestions',
-    this.result = 'Result',
-    this.actions = const <Widget>[],
-    String searchHint,
-    TextInputAction textInputAction = TextInputAction.search,
-  }) : super(searchFieldLabel: searchHint, textInputAction: textInputAction);
+class _TestSearchDelegatePrimaryColor extends SearchDelegate<String> {
+  _TestSearchDelegatePrimaryColor();
 
-  final String suggestions;
-  final String result;
-  final List<Widget> actions;
   final Color primaryColor = Colors.pink;
-
 
   @override
   Widget buildLeading(BuildContext context) {
-    return IconButton(
-      tooltip: 'Back',
-      icon: const Icon(Icons.arrow_back),
-      onPressed: () {
-        close(context, result);
-      },
-    );
+    return const Text('Leading');
   }
-
-  final List<String> queriesForSuggestions = <String>[];
-  final List<String> queriesForResults = <String>[];
 
   @override
   Widget buildSuggestions(BuildContext context) {
-    queriesForSuggestions.add(query);
-    return MaterialButton(
-      onPressed: () {
-        showResults(context);
-      },
-      child: Text(suggestions),
-    );
+    return const Text('Suggestions');
   }
 
   @override
   Widget buildResults(BuildContext context) {
-    queriesForResults.add(query);
     return const Text('Results');
   }
 
   @override
   List<Widget> buildActions(BuildContext context) {
-    return actions;
+    return <Widget>[];
   }
 }
 
