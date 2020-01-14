@@ -558,7 +558,7 @@ Future<void> verifyNoRuntimeTypeInToString(String workingDirectory) async {
     final List<String> lines = file.readAsLinesSync();
     for (int index = 0; index < lines.length; index++) {
       if (toStringRegExp.hasMatch(lines[index])) {
-        final int sourceLine = index;
+        final int sourceLine = index + 1;
         bool _checkForRuntimeType(String line) {
           if (line.contains(r'$runtimeType') || line.contains('runtimeType.toString()')) {
             problems.add('${file.path}:$sourceLine}: toString calls runtimeType.toString');
