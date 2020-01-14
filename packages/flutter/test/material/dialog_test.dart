@@ -550,7 +550,7 @@ void main() {
           child: const Text('Looooooooooooooong button 2'),
         ),
       ],
-      actionsVerticalDirection: VerticalDirection.up,
+      actionsOverflowDirection: VerticalDirection.up,
     );
 
     await tester.pumpWidget(

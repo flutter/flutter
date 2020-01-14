@@ -64,7 +64,7 @@ class ButtonBar extends StatelessWidget {
     this.buttonPadding,
     this.buttonAlignedDropdown,
     this.layoutBehavior,
-    this.verticalDirection,
+    this.overflowDirection,
     this.children = const <Widget>[],
   }) : assert(buttonMinWidth == null || buttonMinWidth >= 0.0),
        assert(buttonHeight == null || buttonHeight >= 0.0),
@@ -130,10 +130,18 @@ class ButtonBar extends StatelessWidget {
   /// Defines the vertical direction of a [ButtonBar]'s children if it
   /// overflows.
   ///
+  /// If [children] do not fit into a single row, then they
+  /// are arranged in a column. The first action is at the top of the
+  /// column if this property is set to [VerticalDirection.down], since it
+  /// "starts" at the top and "ends" at the bottom. On the other hand,
+  /// the first action will be at the bottom of the column if this
+  /// property is set to [VerticalDirection.up], since it "starts" at the
+  /// bottom and "ends" at the top.
+  ///
   /// If null then it will use the surrounding
   /// [ButtonBarTheme.verticalDirection]. If that is null, it will
   /// default to [VerticalDirection.down].
-  final VerticalDirection verticalDirection;
+  final VerticalDirection overflowDirection;
 
   /// The buttons to arrange horizontally.
   ///
@@ -161,7 +169,7 @@ class ButtonBar extends StatelessWidget {
       child: _ButtonBarRow(
         mainAxisAlignment: alignment ?? barTheme.alignment ?? MainAxisAlignment.end,
         mainAxisSize: mainAxisSize ?? barTheme.mainAxisSize ?? MainAxisSize.max,
-        verticalDirection: verticalDirection ?? barTheme.verticalDirection ?? VerticalDirection.down,
+        overflowDirection: overflowDirection ?? barTheme.overflowDirection ?? VerticalDirection.down,
         children: children.map<Widget>((Widget child) {
           return Padding(
             padding: EdgeInsets.symmetric(horizontal: paddingUnit),
@@ -216,7 +224,7 @@ class _ButtonBarRow extends Flex {
     MainAxisAlignment mainAxisAlignment = MainAxisAlignment.start,
     CrossAxisAlignment crossAxisAlignment = CrossAxisAlignment.center,
     TextDirection textDirection,
-    VerticalDirection verticalDirection = VerticalDirection.down,
+    VerticalDirection overflowDirection = VerticalDirection.down,
     TextBaseline textBaseline,
   }) : super(
     children: children,
@@ -225,7 +233,7 @@ class _ButtonBarRow extends Flex {
     mainAxisAlignment: mainAxisAlignment,
     crossAxisAlignment: crossAxisAlignment,
     textDirection: textDirection,
-    verticalDirection: verticalDirection,
+    verticalDirection: overflowDirection,
     textBaseline: textBaseline,
   );
 

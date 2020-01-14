@@ -558,7 +558,7 @@ void main() {
               buttonPadding: EdgeInsets.zero,
               // Set the vertical direction to start from the bottom and lay
               // out upwards.
-              verticalDirection: VerticalDirection.up,
+              overflowDirection: VerticalDirection.up,
               children: <Widget>[
                 Container(key: keyOne, height: 50.0, width: 500.0),
                 Container(key: keyTwo, height: 50.0, width: 500.0),

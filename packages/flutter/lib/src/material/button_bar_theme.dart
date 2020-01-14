@@ -38,7 +38,7 @@ class ButtonBarThemeData extends Diagnosticable {
     this.buttonPadding,
     this.buttonAlignedDropdown,
     this.layoutBehavior,
-    this.verticalDirection,
+    this.overflowDirection,
   }) : assert(buttonMinWidth == null || buttonMinWidth >= 0.0),
        assert(buttonHeight == null || buttonHeight >= 0.0);
 
@@ -100,7 +100,15 @@ class ButtonBarThemeData extends Diagnosticable {
 
   /// Defines the vertical direction of a [ButtonBar]'s children if it
   /// overflows.
-  final VerticalDirection verticalDirection;
+  ///
+  /// If the [ButtonBar]'s children do not fit into a single row, then they
+  /// are arranged in a column. The first action is at the top of the
+  /// column if this property is set to [VerticalDirection.down], since it
+  /// "starts" at the top and "ends" at the bottom. On the other hand,
+  /// the first action will be at the bottom of the column if this
+  /// property is set to [VerticalDirection.up], since it "starts" at the
+  /// bottom and "ends" at the top.
+  final VerticalDirection overflowDirection;
 
   /// Creates a copy of this object but with the given fields replaced with the
   /// new values.
@@ -113,7 +121,7 @@ class ButtonBarThemeData extends Diagnosticable {
     EdgeInsetsGeometry buttonPadding,
     bool buttonAlignedDropdown,
     ButtonBarLayoutBehavior layoutBehavior,
-    VerticalDirection verticalDirection,
+    VerticalDirection overflowDirection,
   }) {
     return ButtonBarThemeData(
       alignment: alignment ?? this.alignment,
@@ -124,7 +132,7 @@ class ButtonBarThemeData extends Diagnosticable {
       buttonPadding: buttonPadding ?? this.buttonPadding,
       buttonAlignedDropdown: buttonAlignedDropdown ?? this.buttonAlignedDropdown,
       layoutBehavior: layoutBehavior ?? this.layoutBehavior,
-      verticalDirection: verticalDirection ?? this.verticalDirection,
+      overflowDirection: overflowDirection ?? this.overflowDirection,
     );
   }
 
@@ -146,7 +154,7 @@ class ButtonBarThemeData extends Diagnosticable {
       buttonPadding: EdgeInsetsGeometry.lerp(a?.buttonPadding, b?.buttonPadding, t),
       buttonAlignedDropdown: t < 0.5 ? a.buttonAlignedDropdown : b.buttonAlignedDropdown,
       layoutBehavior: t < 0.5 ? a.layoutBehavior : b.layoutBehavior,
-      verticalDirection: t < 0.5 ? a.verticalDirection : b.verticalDirection,
+      overflowDirection: t < 0.5 ? a.overflowDirection : b.overflowDirection,
     );
   }
 
@@ -161,7 +169,7 @@ class ButtonBarThemeData extends Diagnosticable {
       buttonPadding,
       buttonAlignedDropdown,
       layoutBehavior,
-      verticalDirection,
+      overflowDirection,
     );
   }
 
@@ -180,7 +188,7 @@ class ButtonBarThemeData extends Diagnosticable {
         && other.buttonPadding == buttonPadding
         && other.buttonAlignedDropdown == buttonAlignedDropdown
         && other.layoutBehavior == layoutBehavior
-        && other.verticalDirection == verticalDirection;
+        && other.overflowDirection == overflowDirection;
   }
 
   @override
@@ -198,7 +206,7 @@ class ButtonBarThemeData extends Diagnosticable {
         ifTrue: 'dropdown width matches button',
         defaultValue: null));
     properties.add(DiagnosticsProperty<ButtonBarLayoutBehavior>('layoutBehavior', layoutBehavior, defaultValue: null));
-    properties.add(DiagnosticsProperty<VerticalDirection>('verticalDirection', verticalDirection, defaultValue: null));
+    properties.add(DiagnosticsProperty<VerticalDirection>('overflowDirection', overflowDirection, defaultValue: null));
   }
 }
 

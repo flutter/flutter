@@ -18,7 +18,7 @@ void main() {
     expect(buttonBarTheme.buttonPadding, null);
     expect(buttonBarTheme.buttonAlignedDropdown, null);
     expect(buttonBarTheme.layoutBehavior, null);
-    expect(buttonBarTheme.verticalDirection, null);
+    expect(buttonBarTheme.overflowDirection, null);
   });
 
   test('ThemeData uses default ButtonBarThemeData', () {
@@ -40,7 +40,7 @@ void main() {
       buttonPadding: EdgeInsets.symmetric(vertical: 5.0),
       buttonAlignedDropdown: false,
       layoutBehavior: ButtonBarLayoutBehavior.padded,
-      verticalDirection: VerticalDirection.down,
+      overflowDirection: VerticalDirection.down,
     );
     const ButtonBarThemeData barThemeAccent = ButtonBarThemeData(
       alignment: MainAxisAlignment.center,
@@ -51,7 +51,7 @@ void main() {
       buttonPadding: EdgeInsets.symmetric(horizontal: 10.0),
       buttonAlignedDropdown: true,
       layoutBehavior: ButtonBarLayoutBehavior.constrained,
-      verticalDirection: VerticalDirection.up,
+      overflowDirection: VerticalDirection.up,
     );
 
     final ButtonBarThemeData lerp = ButtonBarThemeData.lerp(barThemePrimary, barThemeAccent, 0.5);
@@ -63,7 +63,7 @@ void main() {
     expect(lerp.buttonPadding, equals(const EdgeInsets.fromLTRB(5.0, 2.5, 5.0, 2.5)));
     expect(lerp.buttonAlignedDropdown, isTrue);
     expect(lerp.layoutBehavior, equals(ButtonBarLayoutBehavior.constrained));
-    expect(lerp.verticalDirection, equals(VerticalDirection.up));
+    expect(lerp.overflowDirection, equals(VerticalDirection.up));
   });
 
   testWidgets('Default ButtonBarThemeData debugFillProperties', (WidgetTester tester) async {
@@ -89,7 +89,7 @@ void main() {
       buttonPadding: EdgeInsets.symmetric(horizontal: 7.3),
       buttonAlignedDropdown: true,
       layoutBehavior: ButtonBarLayoutBehavior.constrained,
-      verticalDirection: VerticalDirection.up,
+      overflowDirection: VerticalDirection.up,
     ).debugFillProperties(builder);
 
     final List<String> description = builder.properties
@@ -106,7 +106,7 @@ void main() {
       'padding: EdgeInsets(7.3, 0.0, 7.3, 0.0)',
       'dropdown width matches button',
       'layoutBehavior: ButtonBarLayoutBehavior.constrained',
-      'verticalDirection: VerticalDirection.up',
+      'overflowDirection: VerticalDirection.up',
     ]);
   });
 
