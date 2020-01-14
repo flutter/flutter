@@ -12,6 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   testWidgets('SemanticsDebugger smoke test', (WidgetTester tester) async {
+
     // This is a smoketest to verify that adding a debugger doesn't crash.
     await tester.pumpWidget(
       Directionality(
@@ -54,8 +55,7 @@ void main() {
     expect(true, isTrue); // expect that we reach here without crashing
   });
 
-  testWidgets('SemanticsDebugger reparents subtree',
-          (WidgetTester tester) async {
+  testWidgets('SemanticsDebugger reparents subtree', (WidgetTester tester) async {
     final GlobalKey key = GlobalKey();
 
     await tester.pumpWidget(
@@ -71,8 +71,7 @@ void main() {
                 top: 0.0,
                 width: 100.0,
                 height: 100.0,
-                child: Semantics(
-                    label: 'label2', textDirection: TextDirection.ltr),
+                child: Semantics(label: 'label2', textDirection: TextDirection.ltr),
               ),
             ],
           ),
@@ -97,11 +96,9 @@ void main() {
                       top: 0.0,
                       width: 100.0,
                       height: 100.0,
-                      child: Semantics(
-                          label: 'label2', textDirection: TextDirection.ltr),
+                      child: Semantics(label: 'label2', textDirection: TextDirection.ltr),
                     ),
-                    Semantics(
-                        label: 'label3', textDirection: TextDirection.ltr),
+                    Semantics(label: 'label3', textDirection: TextDirection.ltr),
                   ],
                 ),
               ),
@@ -128,12 +125,9 @@ void main() {
                         top: 0.0,
                         width: 100.0,
                         height: 100.0,
-                        child: Semantics(
-                            label: 'label2', textDirection: TextDirection.ltr)),
-                    Semantics(
-                        label: 'label3', textDirection: TextDirection.ltr),
-                    Semantics(
-                        label: 'label4', textDirection: TextDirection.ltr),
+                        child: Semantics(label: 'label2', textDirection: TextDirection.ltr)),
+                    Semantics(label: 'label3', textDirection: TextDirection.ltr),
+                    Semantics(label: 'label4', textDirection: TextDirection.ltr),
                   ],
                 ),
               ),
@@ -146,8 +140,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('SemanticsDebugger interaction test',
-          (WidgetTester tester) async {
+  testWidgets('SemanticsDebugger interaction test', (WidgetTester tester) async {
     final List<String> log = <String>[];
 
     await tester.pumpWidget(
@@ -185,8 +178,7 @@ void main() {
     log.clear();
   });
 
-  testWidgets('SemanticsDebugger interaction test - negative',
-          (WidgetTester tester) async {
+  testWidgets('SemanticsDebugger interaction test - negative', (WidgetTester tester) async {
     final List<String> log = <String>[];
 
     await tester.pumpWidget(
@@ -207,8 +199,7 @@ void main() {
                     onPressed: () {
                       log.add('bottom');
                     },
-                    child:
-                    const Text('BOTTOM', textDirection: TextDirection.ltr),
+                    child: const Text('BOTTOM', textDirection: TextDirection.ltr),
                   ),
                 ),
               ],
@@ -373,8 +364,7 @@ void main() {
     expect(valueTop, isFalse);
   });
 
-  testWidgets('SemanticsDebugger checkbox message',
-          (WidgetTester tester) async {
+  testWidgets('SemanticsDebugger checkbox message', (WidgetTester tester) async {
     final Key checkbox = UniqueKey();
     final Key checkboxUnchecked = UniqueKey();
     final Key checkboxDisabled = UniqueKey();
@@ -394,7 +384,7 @@ void main() {
                   key: checkbox,
                   child: Checkbox(
                     value: true,
-                    onChanged: (bool _) {},
+                    onChanged: (bool _) { },
                   ),
                 ),
                 Semantics(
@@ -402,7 +392,7 @@ void main() {
                   key: checkboxUnchecked,
                   child: Checkbox(
                     value: false,
-                    onChanged: (bool _) {},
+                    onChanged: (bool _) { },
                   ),
                 ),
                 Semantics(
@@ -429,25 +419,19 @@ void main() {
     );
 
     expect(
-      _getMessageShownInSemanticsDebugger(
-          widgetKey: checkbox, debuggerKey: debugger, tester: tester),
+      _getMessageShownInSemanticsDebugger(widgetKey: checkbox, debuggerKey: debugger, tester: tester),
       'checked',
     );
     expect(
-      _getMessageShownInSemanticsDebugger(
-          widgetKey: checkboxUnchecked, debuggerKey: debugger, tester: tester),
+      _getMessageShownInSemanticsDebugger(widgetKey: checkboxUnchecked, debuggerKey: debugger, tester: tester),
       'unchecked',
     );
     expect(
-      _getMessageShownInSemanticsDebugger(
-          widgetKey: checkboxDisabled, debuggerKey: debugger, tester: tester),
+      _getMessageShownInSemanticsDebugger(widgetKey: checkboxDisabled, debuggerKey: debugger, tester: tester),
       'checked; disabled',
     );
     expect(
-      _getMessageShownInSemanticsDebugger(
-          widgetKey: checkboxDisabledUnchecked,
-          debuggerKey: debugger,
-          tester: tester),
+      _getMessageShownInSemanticsDebugger(widgetKey: checkboxDisabledUnchecked, debuggerKey: debugger, tester: tester),
       'unchecked; disabled',
     );
   });
@@ -469,11 +453,9 @@ void main() {
       ),
     );
 
-    final dynamic semanticsDebuggerPainter =
-    _getSemanticsDebuggerPainter(debuggerKey: debugger, tester: tester);
-    final RenderObject renderTextfield = tester.renderObject(find
-        .descendant(of: find.byKey(textField), matching: find.byType(Semantics))
-        .first);
+    final dynamic semanticsDebuggerPainter = _getSemanticsDebuggerPainter(debuggerKey: debugger, tester: tester);
+    final RenderObject renderTextfield = tester.renderObject(find.descendant(of: find.byKey(textField), matching: find.byType(Semantics)).first);
+
     expect(
       semanticsDebuggerPainter.getMessage(renderTextfield.debugSemantics),
       'textfield',
@@ -508,8 +490,7 @@ void main() {
     );
   });
 
-  testWidgets('SemanticsDebugger label style is used in the painter.',
-          (WidgetTester tester) async {
+  testWidgets('SemanticsDebugger label style is used in the painter.', (WidgetTester tester) async {
     final UniqueKey debugger = UniqueKey();
     const TextStyle labelStyle = TextStyle(color: Colors.amber);
     await tester.pumpWidget(
@@ -526,10 +507,7 @@ void main() {
       ),
     );
 
-    expect(
-        _getSemanticsDebuggerPainter(debuggerKey: debugger, tester: tester)
-            .labelStyle,
-        labelStyle);
+    expect(_getSemanticsDebuggerPainter(debuggerKey: debugger, tester: tester).labelStyle, labelStyle);
   });
 }
 
@@ -538,26 +516,19 @@ String _getMessageShownInSemanticsDebugger({
   @required Key debuggerKey,
   @required WidgetTester tester,
 }) {
-  final dynamic semanticsDebuggerPainter =
-  _getSemanticsDebuggerPainter(debuggerKey: debuggerKey, tester: tester);
-  return semanticsDebuggerPainter.getMessage(
-      tester
-          .renderObject(find.byKey(widgetKey))
-          .debugSemantics) as String;
+  final dynamic semanticsDebuggerPainter = _getSemanticsDebuggerPainter(debuggerKey: debuggerKey, tester: tester);
+  return semanticsDebuggerPainter.getMessage(tester.renderObject(find.byKey(widgetKey)).debugSemantics) as String;
 }
 
 dynamic _getSemanticsDebuggerPainter({
   @required Key debuggerKey,
   @required WidgetTester tester,
 }) {
-  final CustomPaint customPaint = tester
-      .widgetList(find.descendant(
+  final CustomPaint customPaint = tester.widgetList(find.descendant(
     of: find.byKey(debuggerKey),
     matching: find.byType(CustomPaint),
-  ))
-      .first as CustomPaint;
+  )).first as CustomPaint;
   final dynamic semanticsDebuggerPainter = customPaint.foregroundPainter;
-  expect(semanticsDebuggerPainter.runtimeType.toString(),
-      '_SemanticsDebuggerPainter');
+  expect(semanticsDebuggerPainter.runtimeType.toString(), '_SemanticsDebuggerPainter');
   return semanticsDebuggerPainter;
 }
