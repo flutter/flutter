@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'package:crypto/crypto.dart';
+
 import '../../artifacts.dart';
 import '../../base/file_system.dart';
 import '../../base/io.dart';
@@ -231,7 +233,12 @@ class WebReleaseBundle extends Target {
   @override
   Future<void> build(Environment environment) async {
     for (final File outputFile in environment.buildDir.listSync(recursive: true).whereType<File>()) {
-      if (!globals.fs.path.basename(outputFile.path).contains('main.dart.js')) {
+      final String basename = globals.fs.path.basename(outputFile.path);
+      if (!basename.contains('main.dart.js')) {
+        continue;
+      }
+      // Do not copy the deps file.
+      if (basename.endsWith('.deps')) {
         continue;
       }
       outputFile.copySync(
@@ -266,4 +273,97 @@ class WebReleaseBundle extends Target {
     resourceFile.writeToFile(environment.buildDir.childFile('web_resources.d'));
 
   }
+}
+
+/// Generate a service worker for a web target.
+class WebServiceWorker extends Target {
+  const WebServiceWorker();
+
+  @override
+  String get name => 'web_service_worker';
+
+  @override
+  List<Target> get dependencies => const <Target>[
+    Dart2JSTarget(),
+    WebReleaseBundle(),
+  ];
+
+  @override
+  List<String> get depfiles => const <String>[
+    'service_worker.d',
+  ];
+
+  @override
+  List<Source> get inputs => const <Source>[];
+
+  @override
+  List<Source> get outputs => const <Source>[];
+
+  @override
+  Future<void> build(Environment environment) async {
+    final List<File> contents = environment.outputDir
+      .listSync(recursive: true)
+      .whereType<File>()
+      .where((File file) => !file.path.endsWith('flutter_service_worker.js')
+        && !globals.fs.path.basename(file.path).startsWith('.'))
+      .toList();
+    // TODO(jonahwilliams): determine whether this needs to be made more efficient.
+    final Map<String, String> uriToHash = <String, String>{
+      for (File file in contents)
+        // Do not force caching of source maps.
+        if (!file.path.endsWith('main.dart.js.map'))
+        '/${globals.fs.path.relative(file.path, from: environment.outputDir.path)}':
+          md5.convert(await file.readAsBytes()).toString(),
+    };
+    final File serviceWorkerFile = environment.outputDir
+      .childFile('flutter_service_worker.js');
+    final Depfile depfile = Depfile(contents, <File>[serviceWorkerFile]);
+    final String serviceWorker = generateServiceWorker(uriToHash);
+    serviceWorkerFile
+      .writeAsStringSync(serviceWorker);
+    depfile.writeToFile(environment.buildDir.childFile('service_worker.d'));
+  }
+}
+
+/// Generate a service worker with an app-specific cache name a map of
+/// resource files.
+///
+/// We embed file hashes directly into the worker so that the byte for byte
+/// invalidation will automatically reactivate workers whenever a new
+/// version is deployed.
+// TODO(jonahwilliams): on re-activate, only evict stale assets.
+String generateServiceWorker(Map<String, String> resources) {
+  return '''
+'use strict';
+const CACHE_NAME = 'flutter-app-cache';
+const RESOURCES = {
+  ${resources.entries.map((MapEntry<String, String> entry) => '"${entry.key}": "${entry.value}"').join(",\n")}
+};
+
+self.addEventListener('activate', function (event) {
+  event.waitUntil(
+    caches.keys().then(function (cacheName) {
+      return caches.delete(cacheName);
+    }).then(function (_) {
+      return caches.open(CACHE_NAME);
+    }).then(function (cache) {
+      return cache.addAll(Object.keys(RESOURCES));
+    })
+  );
+});
+
+self.addEventListener('fetch', function (event) {
+  event.respondWith(
+    caches.match(event.request)
+      .then(function (response) {
+        if (response) {
+          return response;
+        }
+        return fetch(event.request, {
+          credentials: 'include'
+        });
+      })
+  );
+});
+''';
 }

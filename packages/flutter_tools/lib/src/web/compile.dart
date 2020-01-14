@@ -39,7 +39,7 @@ Future<void> buildWeb(
   final Status status = globals.logger.startProgress('Compiling $target for the Web...', timeout: null);
   final Stopwatch sw = Stopwatch()..start();
   try {
-    final BuildResult result = await buildSystem.build(const WebReleaseBundle(), Environment(
+    final BuildResult result = await buildSystem.build(const WebServiceWorker(), Environment(
       outputDir: globals.fs.directory(getWebBuildDirectory()),
       projectDir: globals.fs.currentDirectory,
       buildDir: flutterProject.directory
