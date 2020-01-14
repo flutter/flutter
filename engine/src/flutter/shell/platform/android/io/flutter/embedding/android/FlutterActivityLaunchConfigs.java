@@ -18,7 +18,7 @@ public class FlutterActivityLaunchConfigs {
   /* package */ static final String NORMAL_THEME_META_DATA_KEY = "io.flutter.embedding.android.NormalTheme";
 
   // Intent extra arguments.
-  /* package */ static final String EXTRA_INITIAL_ROUTE = "initial_route";
+  /* package */ static final String EXTRA_INITIAL_ROUTE = "route";
   /* package */ static final String EXTRA_BACKGROUND_MODE = "background_mode";
   /* package */ static final String EXTRA_CACHED_ENGINE_ID = "cached_engine_id";
   /* package */ static final String EXTRA_DESTROY_ENGINE_WITH_ACTIVITY = "destroy_engine_with_activity";
