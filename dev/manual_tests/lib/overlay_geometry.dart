@@ -159,7 +159,7 @@ class OverlayGeometryAppState extends State<OverlayGeometryApp> {
       setState(() {
         final double dy = markersScrollOffset - notification.metrics.extentBefore;
         markersScrollOffset = notification.metrics.extentBefore;
-        for (MarkerType type in markers.keys) {
+        for (final MarkerType type in markers.keys) {
           final Offset oldPosition = markers[type];
           markers[type] = oldPosition.translate(0.0, dy);
         }
@@ -199,7 +199,7 @@ class OverlayGeometryAppState extends State<OverlayGeometryApp> {
             ),
           ),
         ),
-        for (MarkerType type in markers.keys)
+        for (final MarkerType type in markers.keys)
           Marker(type: type, position: markers[type]),
       ],
     );

@@ -38,7 +38,7 @@ import 'inherited_notifier.dart';
 ///
 /// To collect a sub-tree of nodes into a group, use a [FocusScope].
 ///
-/// {@tool snippet --template=stateful_widget_scaffold}
+/// {@tool sample --template=stateful_widget_scaffold}
 /// This example shows how to manage focus using the [Focus] and [FocusScope]
 /// widgets. See [FocusNode] for a similar example that doesn't use [Focus] or
 /// [FocusScope].
@@ -344,7 +344,6 @@ class _FocusState extends State<Focus> {
       // _createNode is overridden in _FocusScopeState.
       _internalNode ??= _createNode();
     }
-    _focusAttachment = focusNode.attach(context, onKey: widget.onKey);
     if (widget.skipTraversal != null) {
       focusNode.skipTraversal = widget.skipTraversal;
     }
@@ -353,6 +352,7 @@ class _FocusState extends State<Focus> {
     }
     _canRequestFocus = focusNode.canRequestFocus;
     _hasPrimaryFocus = focusNode.hasPrimaryFocus;
+    _focusAttachment = focusNode.attach(context, onKey: widget.onKey);
 
     // Add listener even if the _internalNode existed before, since it should
     // not be listening now if we're re-using a previous one because it should

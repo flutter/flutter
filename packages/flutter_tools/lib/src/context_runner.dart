@@ -17,12 +17,11 @@ import 'base/context.dart';
 import 'base/io.dart';
 import 'base/logger.dart';
 import 'base/os.dart';
-import 'base/platform.dart';
 import 'base/process.dart';
 import 'base/signals.dart';
+import 'base/terminal.dart';
 import 'base/time.dart';
 import 'base/user_messages.dart';
-import 'base/utils.dart';
 import 'build_system/build_system.dart';
 import 'cache.dart';
 import 'compile.dart';
@@ -35,6 +34,7 @@ import 'features.dart';
 import 'fuchsia/fuchsia_device.dart' show FuchsiaDeviceTools;
 import 'fuchsia/fuchsia_sdk.dart' show FuchsiaSdk, FuchsiaArtifacts;
 import 'fuchsia/fuchsia_workflow.dart' show FuchsiaWorkflow;
+import 'globals.dart' as globals;
 import 'ios/devices.dart' show IOSDeploy;
 import 'ios/ios_workflow.dart';
 import 'ios/mac.dart';
@@ -74,7 +74,6 @@ Future<T> runInContext<T>(
       ApplicationPackageFactory: () => ApplicationPackageFactory(),
       Artifacts: () => CachedArtifacts(),
       AssetBundleFactory: () => AssetBundleFactory.defaultInstance,
-      BotDetector: () => const BotDetector(),
       BuildSystem: () => const BuildSystem(),
       Cache: () => Cache(),
       ChromeLauncher: () => const ChromeLauncher(),
@@ -101,14 +100,32 @@ Future<T> runInContext<T>(
       IOSWorkflow: () => const IOSWorkflow(),
       KernelCompilerFactory: () => const KernelCompilerFactory(),
       LinuxWorkflow: () => const LinuxWorkflow(),
-      Logger: () => platform.isWindows ? WindowsStdoutLogger() : StdoutLogger(),
+      Logger: () => globals.platform.isWindows
+        ? WindowsStdoutLogger(
+            terminal: globals.terminal,
+            stdio: globals.stdio,
+            outputPreferences: outputPreferences,
+            timeoutConfiguration: timeoutConfiguration,
+            platform: globals.platform,
+          )
+        : StdoutLogger(
+            terminal: globals.terminal,
+            stdio: globals.stdio,
+            outputPreferences: outputPreferences,
+            timeoutConfiguration: timeoutConfiguration,
+            platform: globals.platform,
+          ),
       MacOSWorkflow: () => const MacOSWorkflow(),
       MDnsObservatoryDiscovery: () => MDnsObservatoryDiscovery(),
       OperatingSystemUtils: () => OperatingSystemUtils(),
       PersistentToolState: () => PersistentToolState(),
       ProcessInfo: () => ProcessInfo(),
-      ProcessUtils: () => ProcessUtils(),
+      ProcessUtils: () => ProcessUtils(
+        processManager: globals.processManager,
+        logger: globals.logger,
+      ),
       Pub: () => const Pub(),
+      ShutdownHooks: () => ShutdownHooks(logger: globals.logger),
       Signals: () => Signals(),
       SimControl: () => SimControl(),
       Stdio: () => const Stdio(),

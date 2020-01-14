@@ -114,7 +114,7 @@ Future<void> main() async {
 
       section('Check profile, release builds has Dart AOT dylib');
 
-      for (String mode in <String>['Profile', 'Release']) {
+      for (final String mode in <String>['Profile', 'Release']) {
         final String appFrameworkPath = path.join(
           outputPath,
           mode,
@@ -159,7 +159,7 @@ Future<void> main() async {
 
       section("Check all modes' engine dylib");
 
-      for (String mode in <String>['Debug', 'Profile', 'Release']) {
+      for (final String mode in <String>['Debug', 'Profile', 'Release']) {
         final String engineFrameworkPath = path.join(
           outputPath,
           mode,
@@ -194,7 +194,7 @@ Future<void> main() async {
 
       section("Check all modes' engine header");
 
-      for (String mode in <String>['Debug', 'Profile', 'Release']) {
+      for (final String mode in <String>['Debug', 'Profile', 'Release']) {
         checkFileContains(
           <String>['#include "FlutterEngine.h"'],
           path.join(outputPath, mode, 'Flutter.framework', 'Headers', 'Flutter.h'),
@@ -203,7 +203,7 @@ Future<void> main() async {
 
       section("Check all modes' have plugin dylib");
 
-      for (String mode in <String>['Debug', 'Profile', 'Release']) {
+      for (final String mode in <String>['Debug', 'Profile', 'Release']) {
         final String pluginFrameworkPath = path.join(
           outputPath,
           mode,
@@ -237,7 +237,7 @@ Future<void> main() async {
 
       section("Check all modes' have generated plugin registrant");
 
-      for (String mode in <String>['Debug', 'Profile', 'Release']) {
+      for (final String mode in <String>['Debug', 'Profile', 'Release']) {
         final String registrantFrameworkPath = path.join(
           outputPath,
           mode,

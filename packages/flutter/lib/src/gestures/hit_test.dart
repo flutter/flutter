@@ -11,8 +11,9 @@ import 'events.dart';
 
 /// An object that can hit-test pointers.
 abstract class HitTestable {
-  // This class is intended to be used as an interface with the implements
-  // keyword, and should not be extended directly.
+  // This class is intended to be used as an interface, and should not be
+  // extended directly; this constructor prevents instantiation and extension.
+  // ignore: unused_element
   factory HitTestable._() => null;
 
   /// Check whether the given position hits this object.
@@ -24,8 +25,9 @@ abstract class HitTestable {
 
 /// An object that can dispatch events.
 abstract class HitTestDispatcher {
-  // This class is intended to be used as an interface with the implements
-  // keyword, and should not be extended directly.
+  // This class is intended to be used as an interface, and should not be
+  // extended directly; this constructor prevents instantiation and extension.
+  // ignore: unused_element
   factory HitTestDispatcher._() => null;
 
   /// Override this method to dispatch events.
@@ -34,8 +36,9 @@ abstract class HitTestDispatcher {
 
 /// An object that can handle events.
 abstract class HitTestTarget {
-  // This class is intended to be used as an interface with the implements
-  // keyword, and should not be extended directly.
+  // This class is intended to be used as an interface, and should not be
+  // extended directly; this constructor prevents instantiation and extension.
+  // ignore: unused_element
   factory HitTestTarget._() => null;
 
   /// Override this method to receive events.

@@ -8,10 +8,13 @@ import 'dart:io';
 import 'package:flutter_tools/src/base/common.dart';
 import 'package:flutter_tools/src/base/file_system.dart';
 import 'package:flutter_tools/src/base/io.dart';
-import 'package:flutter_tools/src/base/platform.dart';
 import 'package:flutter_tools/src/convert.dart';
 import 'package:flutter_tools/src/web/devfs_web.dart';
 import 'package:mockito/mockito.dart';
+import 'package:package_config/discovery.dart';
+import 'package:package_config/packages.dart';
+import 'package:platform/platform.dart';
+import 'package:flutter_tools/src/globals.dart' as globals;
 
 import '../../src/common.dart';
 import '../../src/testbed.dart';
@@ -35,6 +38,11 @@ void main() {
   WebAssetServer webAssetServer;
   MockPlatform windows;
   MockPlatform linux;
+  Packages packages;
+
+  setUpAll(() async {
+    packages = await loadPackagesFile(Uri.base.resolve('.packages'));
+  });
 
   setUp(() {
     windows = MockPlatform();
@@ -59,7 +67,8 @@ void main() {
       when(response.close()).thenAnswer((Invocation invocation) async {
         closeCompleter.complete();
       });
-      webAssetServer = WebAssetServer(mockHttpServer, onError: (dynamic error, StackTrace stackTrace) {
+      webAssetServer = WebAssetServer(
+          mockHttpServer, packages, onError: (dynamic error, StackTrace stackTrace) {
         closeCompleter.completeError(error, stackTrace);
       });
     });
@@ -87,18 +96,18 @@ void main() {
   }));
 
   test('Handles against malformed manifest', () => testbed.run(() async {
-    final File source = fs.file('source')
+    final File source = globals.fs.file('source')
       ..writeAsStringSync('main() {}');
-    final File sourcemap = fs.file('sourcemap')
+    final File sourcemap = globals.fs.file('sourcemap')
       ..writeAsStringSync('{}');
 
     // Missing ending offset.
-    final File manifestMissingOffset = fs.file('manifestA')
+    final File manifestMissingOffset = globals.fs.file('manifestA')
       ..writeAsStringSync(json.encode(<String, Object>{'/foo.js': <String, Object>{
         'code': <int>[0],
         'sourcemap': <int>[0],
       }}));
-    final File manifestOutOfBounds = fs.file('manifest')
+    final File manifestOutOfBounds = globals.fs.file('manifest')
       ..writeAsStringSync(json.encode(<String, Object>{'/foo.js': <String, Object>{
         'code': <int>[0, 100],
         'sourcemap': <int>[0],
@@ -109,11 +118,11 @@ void main() {
   }));
 
   test('serves JavaScript files from in memory cache', () => testbed.run(() async {
-    final File source = fs.file('source')
+    final File source = globals.fs.file('source')
       ..writeAsStringSync('main() {}');
-    final File sourcemap = fs.file('sourcemap')
+    final File sourcemap = globals.fs.file('sourcemap')
       ..writeAsStringSync('{}');
-    final File manifest = fs.file('manifest')
+    final File manifest = globals.fs.file('manifest')
       ..writeAsStringSync(json.encode(<String, Object>{'/foo.js': <String, Object>{
         'code': <int>[0, source.lengthSync()],
         'sourcemap': <int>[0, 2],
@@ -132,11 +141,11 @@ void main() {
   }));
 
   test('serves JavaScript files from in memory cache on Windows', () => testbed.run(() async {
-    final File source = fs.file('source')
+    final File source = globals.fs.file('source')
       ..writeAsStringSync('main() {}');
-    final File sourcemap = fs.file('sourcemap')
+    final File sourcemap = globals.fs.file('sourcemap')
       ..writeAsStringSync('{}');
-    final File manifest = fs.file('manifest')
+    final File manifest = globals.fs.file('manifest')
       ..writeAsStringSync(json.encode(<String, Object>{'/C:/foo.js': <String, Object>{
         'code': <int>[0, source.lengthSync()],
         'sourcemap': <int>[0, 2],
@@ -167,11 +176,11 @@ void main() {
   }));
 
   test('handles missing JavaScript files from in memory cache', () => testbed.run(() async {
-    final File source = fs.file('source')
+    final File source = globals.fs.file('source')
       ..writeAsStringSync('main() {}');
-    final File sourcemap = fs.file('sourcemap')
+    final File sourcemap = globals.fs.file('sourcemap')
       ..writeAsStringSync('{}');
-    final File manifest = fs.file('manifest')
+    final File manifest = globals.fs.file('manifest')
       ..writeAsStringSync(json.encode(<String, Object>{'/foo.js': <String, Object>{
         'code': <int>[0, source.lengthSync()],
         'sourcemap': <int>[0, 2],
@@ -186,7 +195,7 @@ void main() {
   }));
 
   test('serves Dart files from in filesystem on Windows', () => testbed.run(() async {
-    final File source = fs.file('foo.dart').absolute
+    final File source = globals.fs.file('foo.dart').absolute
       ..createSync(recursive: true)
       ..writeAsStringSync('void main() {}');
 
@@ -201,7 +210,7 @@ void main() {
   }));
 
   test('serves Dart files from in filesystem on Linux/macOS', () => testbed.run(() async {
-    final File source = fs.file('foo.dart').absolute
+    final File source = globals.fs.file('foo.dart').absolute
       ..createSync(recursive: true)
       ..writeAsStringSync('void main() {}');
 
@@ -224,7 +233,7 @@ void main() {
   }));
 
   test('serves asset files from in filesystem with known mime type', () => testbed.run(() async {
-    final File source = fs.file(fs.path.join('build', 'flutter_assets', 'foo.png'))
+    final File source = globals.fs.file(globals.fs.path.join('build', 'flutter_assets', 'foo.png'))
       ..createSync(recursive: true)
       ..writeAsBytesSync(kTransparentImage);
 
@@ -238,7 +247,7 @@ void main() {
   }));
 
   test('serves asset files from in filesystem with known mime type on Windows', () => testbed.run(() async {
-    final File source = fs.file(fs.path.join('build', 'flutter_assets', 'foo.png'))
+    final File source = globals.fs.file(globals.fs.path.join('build', 'flutter_assets', 'foo.png'))
       ..createSync(recursive: true)
       ..writeAsBytesSync(kTransparentImage);
 
@@ -255,7 +264,7 @@ void main() {
 
 
   test('serves asset files files from in filesystem with unknown mime type and length > 12', () => testbed.run(() async {
-    final File source = fs.file(fs.path.join('build', 'flutter_assets', 'foo'))
+    final File source = globals.fs.file(globals.fs.path.join('build', 'flutter_assets', 'foo'))
       ..createSync(recursive: true)
       ..writeAsBytesSync(List<int>.filled(100, 0));
 
@@ -269,7 +278,7 @@ void main() {
   }));
 
   test('serves asset files files from in filesystem with unknown mime type and length < 12', () => testbed.run(() async {
-    final File source = fs.file(fs.path.join('build', 'flutter_assets', 'foo'))
+    final File source = globals.fs.file(globals.fs.path.join('build', 'flutter_assets', 'foo'))
       ..createSync(recursive: true)
       ..writeAsBytesSync(<int>[1, 2, 3]);
 
@@ -288,6 +297,23 @@ void main() {
     await closeCompleter.future;
 
     verify(response.statusCode = HttpStatus.notFound).called(1);
+  }));
+
+  test('serves /packages/<package>/<path> files as if they were '
+       'package:<package>/<path> uris', () => testbed.run(() async {
+    final Uri expectedUri = packages.resolve(
+        Uri.parse('package:flutter_tools/foo.dart'));
+    final File source = globals.fs.file(globals.fs.path.fromUri(expectedUri))
+      ..createSync(recursive: true)
+      ..writeAsBytesSync(<int>[1, 2, 3]);
+    when(request.uri).thenReturn(
+        Uri.parse('http:///packages/flutter_tools/foo.dart'));
+    requestController.add(request);
+    await closeCompleter.future;
+
+    verify(headers.add('Content-Length', source.lengthSync())).called(1);
+    verify(headers.add('Content-Type', 'application/octet-stream')).called(1);
+    verify(response.addStream(any)).called(1);
   }));
 
   test('calling dispose closes the http server', () => testbed.run(() async {

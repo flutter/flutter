@@ -204,7 +204,7 @@ class _MergeableMaterialState extends State<MergeableMaterial> with TickerProvid
 
   @override
   void dispose() {
-    for (MergeableMaterialItem child in _children) {
+    for (final MergeableMaterialItem child in _children) {
       if (child is MaterialGap)
         _animationTuples[child.key].controller.dispose();
     }
@@ -631,7 +631,7 @@ class _MergeableMaterialSliceKey extends GlobalKey {
   final LocalKey value;
 
   @override
-  bool operator ==(dynamic other) {
+  bool operator ==(Object other) {
     return other is _MergeableMaterialSliceKey
         && other.value == value;
   }
@@ -687,7 +687,7 @@ class _RenderMergeableMaterialListBody extends RenderListBody {
   List<BoxShadow> boxShadows;
 
   void _paintShadows(Canvas canvas, Rect rect) {
-    for (BoxShadow boxShadow in boxShadows) {
+    for (final BoxShadow boxShadow in boxShadows) {
       final Paint paint = boxShadow.toPaint();
       // TODO(dragostis): Right now, we are only interpolating the border radii
       // of the visible Material slices, not the shadows; they are not getting

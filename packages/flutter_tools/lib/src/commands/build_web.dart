@@ -25,6 +25,12 @@ class BuildWebCommand extends BuildSubCommand {
         hide: true,
         help: 'Whether to automatically invoke webOnlyInitializePlatform.',
     );
+    argParser.addFlag('csp',
+      defaultsTo: false,
+      negatable: false,
+      help: 'Disable dynamic generation of code in the generated output.'
+        'This is necessary to satisfy CSP restrictions (see http://www.w3.org/TR/CSP/).'
+    );
   }
 
   @override
@@ -59,7 +65,8 @@ class BuildWebCommand extends BuildSubCommand {
       buildInfo,
       boolArg('web-initialize-platform'),
       dartDefines,
+      boolArg('csp')
     );
-    return null;
+    return FlutterCommandResult.success();
   }
 }
