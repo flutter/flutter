@@ -17,6 +17,9 @@ enum NavigationRailLabelType {
   AllLabels,
 }
 
+/// Marker class for [NavigationRail] items.
+class NavigationRailItem extends BottomNavigationBarItem { }
+
 class NavigationRail extends StatefulWidget {
   NavigationRail({
     this.leading,
@@ -30,12 +33,40 @@ class NavigationRail extends StatefulWidget {
     this.selectedLabelIconTheme,
   });
 
+  /// The leading widget in the rail that is placed above the items.
+  ///
+  /// This is commonly a [FloatingActionButton].
   final Widget leading;
-  final List<BottomNavigationBarItem> items;
+
+  /// Defines the appearence of the button items that are arrayed within the
+  /// navigation rail.
+  final List<NavigationRailItem> items;
+
+  /// The index into [items] for the current active [NavigationRailItem].
   final int currentIndex;
+
+
   final ValueChanged<int> onItemSelected;
+
+  /// Defines the layout and behavior of the labels in the [NavigationRail].
+  ///
+  /// See also:
+  ///   * [NavigationRailLabelType] for information on the meaning of different
+  ///   types.
   final NavigationRailLabelType labelType;
+
+
   final TextStyle labelTextStyle;
+
+  /// The size, opacity, and color of the icon in the currently unselected
+  /// [BottomNavigationBarItem.icon]s
+  ///
+  /// If this is not provided, the size will default to [iconSize], the color
+  /// will default to [unselectedItemColor].
+  ///
+  /// It this field is provided, it must contain non-null [IconThemeData.size]
+  /// and [IconThemeData.color] properties. Also, if this field is supplied,
+  /// [unselectedIconTheme] must be provided.
   final IconTheme labelIconTheme;
   final TextStyle selectedLabelTextStyle;
   final IconTheme selectedLabelIconTheme;
