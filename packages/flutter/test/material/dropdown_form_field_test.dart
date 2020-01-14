@@ -196,7 +196,7 @@ void main() {
   });
 
   testWidgets('DropdownButtonFormFieldState value updates when a different option is selected', (WidgetTester tester) async {
-    final String value = 'one';
+    const String value = 'one';
     final GlobalKey<FormFieldState<String>> stateKey = GlobalKey<FormFieldState<String>>();
 
     await tester.pumpWidget(
@@ -240,7 +240,7 @@ void main() {
         home: Material(
           child: DropdownButtonFormField<String>(
             key: stateKey,
-            hint: Text("Hint"),
+            hint: const Text('Hint'),
             onChanged: (String newValue) {},
             items: menuItems.map((String value) {
               return DropdownMenuItem<String>(
@@ -259,7 +259,7 @@ void main() {
     expect((tester.widget(find.byType(InputDecorator)) as InputDecorator).isEmpty, equals(true));
 
     // Tap [DropdownButton] to open dropdown menu.
-    await tester.tap(find.text("Hint"));
+    await tester.tap(find.text('Hint'));
     await tester.pumpAndSettle();
 
     // Tap outside the [DropdownButton] to close dropdown menu without selecting an option.
