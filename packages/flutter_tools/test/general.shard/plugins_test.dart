@@ -4,6 +4,7 @@
 
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
+import 'package:flutter_tools/src/base/time.dart';
 import 'package:flutter_tools/src/dart/package_map.dart';
 import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
@@ -27,9 +28,11 @@ void main() {
     MockLinuxProject linuxProject;
     File packagesFile;
     Directory dummyPackageDirectory;
+    SystemClock mockClock;
 
     setUp(() async {
       fs = MemoryFileSystem();
+      mockClock = MockClock();
 
       // Add basic properties to the Flutter project and subprojects
       flutterProject = MockFlutterProject();
@@ -317,6 +320,9 @@ dependencies:
         createPluginWithDependencies(name: 'plugin-a', dependencies: const <String>['plugin-b', 'plugin-c', 'random-package']);
         createPluginWithDependencies(name: 'plugin-b', dependencies: const <String>['plugin-c']);
         createPluginWithDependencies(name: 'plugin-c', dependencies: const <String>[]);
+        when(mockClock.now()).thenAnswer(
+          (Invocation _) => DateTime(1970, 1, 1)
+        );
         final List<Map<String, dynamic>> dummyPluginsList = <Map<String,dynamic>>[
           <String,dynamic>{
             'name': 'test',
@@ -372,28 +378,14 @@ dependencies:
                 ']'
               '}'
             '],'
-            '"date_created":"2020-01-13 17:25:41.914283",'
+            '"date_created":"1970-01-01 00:00:00.000",'
             '"version":"0.0.0-unknown"'
           '}'
         );
-        // expect(flutterProject.flutterPluginsJsonFile.existsSync(), true);
-        // expect(flutterProject.flutterPluginsJsonFile.readAsStringSync(),
-        //   '{'
-        //     '"_info":"// This is a generated file; do not edit or check into version control.",'
-        //     '"plugins":{'
-        //       '"ios":['
-        //         '{'
-        //           '"name":"test",'
-        //           '"path":"test_path",'
-        //           '"dependencies":[]'
-        //         '}'
-        //       ']'
-        //     '}'
-        //   '}'
-        // );
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
+        SystemClock: () => mockClock,
       });
 
       testUsingContext('Changes to the plugin list invalidates the Cocoapod lockfiles', () {
@@ -768,3 +760,4 @@ class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterprete
 class MockWebProject extends Mock implements WebProject {}
 class MockWindowsProject extends Mock implements WindowsProject {}
 class MockLinuxProject extends Mock implements LinuxProject {}
+class MockClock extends Mock implements SystemClock {}
