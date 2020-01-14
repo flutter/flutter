@@ -19,7 +19,7 @@ public class {{pluginClass}} implements FlutterPlugin, MethodCallHandler {
   @Override
   public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
     final MethodChannel channel = new MethodChannel(flutterPluginBinding.getFlutterEngine().getDartExecutor(), "{{projectName}}");
-    channel.setMethodCallHandler(new {{pluginClass}}());
+    channel.setMethodCallHandler(this);
   }
 
   // This static function is optional and equivalent to onAttachedToEngine. It supports the old

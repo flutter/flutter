@@ -18,7 +18,7 @@ import io.flutter.plugin.common.PluginRegistry.Registrar
 public class {{pluginClass}}: FlutterPlugin, MethodCallHandler {
   override fun onAttachedToEngine(@NonNull flutterPluginBinding: FlutterPlugin.FlutterPluginBinding) {
     val channel = MethodChannel(flutterPluginBinding.getFlutterEngine().getDartExecutor(), "{{projectName}}")
-    channel.setMethodCallHandler({{pluginClass}}());
+    channel.setMethodCallHandler(this);
   }
 
   // This static function is optional and equivalent to onAttachedToEngine. It supports the old
