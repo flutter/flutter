@@ -39,7 +39,7 @@ class TypefaceFontStyleSet : public SkFontStyleSet {
   int count() override;
 
   // |SkFontStyleSet|
-  void getStyle(int index, SkFontStyle*, SkString* style) override;
+  void getStyle(int index, SkFontStyle* style, SkString* name) override;
 
   // |SkFontStyleSet|
   SkTypeface* createTypeface(int index) override;

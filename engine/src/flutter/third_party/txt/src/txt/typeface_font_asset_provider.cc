@@ -92,8 +92,16 @@ int TypefaceFontStyleSet::count() {
   return typefaces_.size();
 }
 
-void TypefaceFontStyleSet::getStyle(int index, SkFontStyle*, SkString* style) {
-  FML_DCHECK(false);
+void TypefaceFontStyleSet::getStyle(int index,
+                                    SkFontStyle* style,
+                                    SkString* name) {
+  FML_DCHECK(static_cast<size_t>(index) < typefaces_.size());
+  if (style) {
+    *style = typefaces_[index]->fontStyle();
+  }
+  if (name) {
+    name->reset();
+  }
 }
 
 SkTypeface* TypefaceFontStyleSet::createTypeface(int i) {
@@ -105,14 +113,7 @@ SkTypeface* TypefaceFontStyleSet::createTypeface(int i) {
 }
 
 SkTypeface* TypefaceFontStyleSet::matchStyle(const SkFontStyle& pattern) {
-  if (typefaces_.empty())
-    return nullptr;
-
-  for (const sk_sp<SkTypeface>& typeface : typefaces_)
-    if (typeface->fontStyle() == pattern)
-      return SkRef(typeface.get());
-
-  return SkRef(typefaces_[0].get());
+  return matchStyleCSS3(pattern);
 }
 
 }  // namespace txt
