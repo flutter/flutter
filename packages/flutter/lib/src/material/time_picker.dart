@@ -1328,13 +1328,13 @@ class _DialState extends State<_Dial> with SingleTickerProviderStateMixin {
 
   _TappableLabel _buildTappableLabel(TextTheme textTheme, int value, String label, VoidCallback onTap) {
     final TextStyle style = textTheme.subhead;
-    // TODO(abarth): Handle textScaleFactor.
-    // https://github.com/flutter/flutter/issues/5939
+    final labelScaleFactor = math.min(MediaQuery.of(context).textScaleFactor, 2.0);
     return _TappableLabel(
       value: value,
       painter: TextPainter(
         text: TextSpan(style: style, text: label),
         textDirection: TextDirection.ltr,
+        textScaleFactor: labelScaleFactor,
       )..layout(),
       onTap: onTap,
     );
