@@ -25,7 +25,6 @@ import '../../src/mocks.dart';
 void main() {
   group('drive', () {
     DriveCommand command;
-    Device mockDevice;
     Device mockUnsupportedDevice;
     MemoryFileSystem fs;
     Directory tempDir;
@@ -249,7 +248,7 @@ void main() {
     group('findTargetDevice', () {
       testUsingContext('uses specified device', () async {
         testDeviceManager.specifiedDeviceId = '123';
-        mockDevice = MockDevice();
+        final Device mockDevice = MockDevice();
         testDeviceManager.addDevice(mockDevice);
         when(mockDevice.name).thenReturn('specified-device');
         when(mockDevice.id).thenReturn('123');
@@ -274,7 +273,7 @@ void main() {
       });
 
       testUsingContext('uses existing Android device', () async {
-        mockDevice = MockAndroidDevice();
+        final Device mockDevice = MockAndroidDevice();
         when(mockDevice.name).thenReturn('mock-android-device');
         testDeviceManager.addDevice(mockDevice);
 
@@ -287,7 +286,7 @@ void main() {
       });
 
       testUsingContext('skips unsupported device', () async {
-        mockDevice = MockAndroidDevice();
+        final Device mockDevice = MockAndroidDevice();
         mockUnsupportedDevice = MockDevice();
         when(mockUnsupportedDevice.isSupportedForProject(any))
             .thenReturn(false);
@@ -333,6 +332,7 @@ void main() {
       Platform macOsPlatform() => FakePlatform(operatingSystem: 'macos');
 
       testUsingContext('uses existing simulator', () async {
+        final Device mockDevice = MockDevice();
         testDeviceManager.addDevice(mockDevice);
         when(mockDevice.name).thenReturn('mock-simulator');
         when(mockDevice.isLocalEmulator)
@@ -354,8 +354,8 @@ void main() {
         restoreAppStarter();
       });
 
-      Future<void> appStarterSetup() async {
-        mockDevice = MockDevice();
+      Future<Device> appStarterSetup() async {
+        final Device mockDevice = MockDevice();
         testDeviceManager.addDevice(mockDevice);
 
         final MockDeviceLogReader mockDeviceLogReader = MockDeviceLogReader();
@@ -388,10 +388,11 @@ void main() {
         final MemoryFileSystem memFs = fs;
         await memFs.file(testApp).writeAsString('main() {}');
         await memFs.file(testFile).writeAsString('main() {}');
+        return mockDevice;
       }
 
       testUsingContext('does not use pre-built app if no build arg provided', () async {
-        await appStarterSetup();
+        final Device mockDevice = await appStarterSetup();
 
         final List<String> args = <String>[
           'drive',
@@ -418,7 +419,7 @@ void main() {
       });
 
       testUsingContext('does not use pre-built app if --build arg provided', () async {
-        await appStarterSetup();
+        final Device mockDevice = await appStarterSetup();
 
         final List<String> args = <String>[
           'drive',
@@ -446,7 +447,7 @@ void main() {
       });
 
       testUsingContext('uses prebuilt app if --no-build arg provided', () async {
-        await appStarterSetup();
+        final Device mockDevice = await appStarterSetup();
 
         final List<String> args = <String>[
           'drive',
@@ -483,8 +484,8 @@ void main() {
         restoreAppStarter();
       });
 
-      Future<void> appStarterSetup() async {
-        mockDevice = MockDevice();
+      Future<Device> appStarterSetup() async {
+        final Device mockDevice = MockDevice();
         testDeviceManager.addDevice(mockDevice);
 
         final MockDeviceLogReader mockDeviceLogReader = MockDeviceLogReader();
@@ -521,6 +522,7 @@ void main() {
         final MemoryFileSystem memFs = fs;
         await memFs.file(testApp).writeAsString('main() {}');
         await memFs.file(testFile).writeAsString('main() {}');
+        return mockDevice;
       }
 
       void _testOptionThatDefaultsToFalse(
@@ -529,7 +531,7 @@ void main() {
         bool optionValue(),
       ) {
         testUsingContext('$optionName ${setToTrue ? 'works' : 'defaults to false'}', () async {
-          await appStarterSetup();
+          final Device mockDevice = await appStarterSetup();
 
           final List<String> args = <String>[
             'drive',
