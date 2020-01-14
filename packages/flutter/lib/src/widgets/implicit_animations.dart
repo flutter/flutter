@@ -1293,6 +1293,8 @@ class _AnimatedPositionedDirectionalState extends AnimatedWidgetBaseState<Animat
 ///  * [AnimatedSwitcher], for fading between many children in sequence.
 ///  * [FadeTransition], an explicitly animated version of this widget, where
 ///    an [Animation] is provided by the caller instead of being built in.
+///  * [SliverAnimatedOpacity], for automatically transitioning a sliver's
+///    opacity over a given duration whenever the given opacity changes.
 class AnimatedOpacity extends ImplicitlyAnimatedWidget {
   /// Creates a widget that animates its opacity implicitly.
   ///
@@ -1361,6 +1363,141 @@ class _AnimatedOpacityState extends ImplicitlyAnimatedWidgetState<AnimatedOpacit
     return FadeTransition(
       opacity: _opacityAnimation,
       child: widget.child,
+      alwaysIncludeSemantics: widget.alwaysIncludeSemantics,
+    );
+  }
+}
+
+/// Animated version of [SliverOpacity] which automatically transitions the
+/// sliver child's opacity over a given duration whenever the given opacity
+/// changes.
+///
+/// Animating an opacity is relatively expensive because it requires painting
+/// the sliver child into an intermediate buffer.
+///
+/// Here's an illustration of what using this widget looks like, using a [curve]
+/// of [Curves.fastOutSlowIn].
+///
+/// {@animation 250 266 https://flutter.github.io/assets-for-api-docs/assets/widgets/animated_opacity.mp4}
+///
+/// {@tool sample --template=stateful_widget_scaffold_center_freeform_state}
+/// Creates a [CustomScrollView] with a [SliverFixedExtentList] and a
+/// [FloatingActionButton]. Pressing the button animates the lists' opacity.
+///
+/// ```dart
+/// class _MyStatefulWidgetState extends State<MyStatefulWidget> with SingleTickerProviderStateMixin {
+///   bool _visible = true;
+///
+///   Widget build(BuildContext context) {
+///     return CustomScrollView(
+///       slivers: <Widget>[
+///         SliverAnimatedOpacity(
+///           opacity: _visible ? 1.0 : 0.0,
+///           duration: Duration(milliseconds: 500),
+///           sliver: SliverFixedExtentList(
+///             itemExtent: 100.0,
+///             delegate: SliverChildBuilderDelegate(
+///               (BuildContext context, int index) {
+///                 return Container(
+///                   color: index % 2 == 0
+///                     ? Colors.indigo[200]
+///                     : Colors.orange[200],
+///                 );
+///               },
+///               childCount: 5,
+///             ),
+///           ),
+///         ),
+///         SliverToBoxAdapter(
+///           child: FloatingActionButton(
+///             onPressed: () {
+///               setState(() {
+///                 _visible = !_visible;
+///               });
+///             },
+///             tooltip: 'Toggle opacity',
+///             child: Icon(Icons.flip),
+///           )
+///         ),
+///       ]
+///     );
+///   }
+/// }
+/// ```
+/// {@end-tool}
+///
+/// See also:
+///
+///  * [SliverFadeTransition], an explicitly animated version of this widget, where
+///    an [Animation] is provided by the caller instead of being built in.
+///  * [AnimatedOpacity], for automatically transitioning a box child's
+///    opacity over a given duration whenever the given opacity changes.
+class SliverAnimatedOpacity extends ImplicitlyAnimatedWidget {
+  /// Creates a widget that animates its opacity implicitly.
+  ///
+  /// The [opacity] argument must not be null and must be between 0.0 and 1.0,
+  /// inclusive. The [curve] and [duration] arguments must not be null.
+  const SliverAnimatedOpacity({
+    Key key,
+    this.sliver,
+    @required this.opacity,
+    Curve curve = Curves.linear,
+    @required Duration duration,
+    VoidCallback onEnd,
+    this.alwaysIncludeSemantics = false,
+  }) : assert(opacity != null && opacity >= 0.0 && opacity <= 1.0),
+      super(key: key, curve: curve, duration: duration, onEnd: onEnd);
+
+  /// The sliver below this widget in the tree.
+  final Widget sliver;
+
+  /// The target opacity.
+  ///
+  /// An opacity of 1.0 is fully opaque. An opacity of 0.0 is fully transparent
+  /// (i.e., invisible).
+  ///
+  /// The opacity must not be null.
+  final double opacity;
+
+  /// Whether the semantic information of the children is always included.
+  ///
+  /// Defaults to false.
+  ///
+  /// When true, regardless of the opacity settings the sliver child's semantic
+  /// information is exposed as if the widget were fully visible. This is
+  /// useful in cases where labels may be hidden during animations that
+  /// would otherwise contribute relevant semantics.
+  final bool alwaysIncludeSemantics;
+
+  @override
+  _SliverAnimatedOpacityState createState() => _SliverAnimatedOpacityState();
+
+  @override
+  void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+    super.debugFillProperties(properties);
+    properties.add(DoubleProperty('opacity', opacity));
+  }
+}
+
+class _SliverAnimatedOpacityState extends ImplicitlyAnimatedWidgetState<SliverAnimatedOpacity> {
+  Tween<double> _opacity;
+  Animation<double> _opacityAnimation;
+
+  @override
+  void forEachTween(TweenVisitor<dynamic> visitor) {
+    _opacity = visitor(_opacity, widget.opacity, (dynamic value) => Tween<double>(begin: value as double)) as Tween<double>;
+  }
+
+  @override
+  void didUpdateTweens() {
+    _opacityAnimation = animation.drive(_opacity);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SliverFadeTransition(
+      opacity: _opacityAnimation,
+      sliver: widget.sliver,
       alwaysIncludeSemantics: widget.alwaysIncludeSemantics,
     );
   }
