@@ -15,6 +15,7 @@ import 'material_localizations.dart';
 import 'scaffold.dart';
 import 'text_field.dart';
 import 'theme.dart';
+import 'colors.dart';
 
 /// Shows a full screen search page and returns the search result selected by
 /// the user when the page is closed.

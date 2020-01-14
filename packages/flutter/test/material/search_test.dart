@@ -107,7 +107,7 @@ void main() {
   });
 
   testWidgets('SearchBar color overridden', (WidgetTester tester) async {
-    final _TestSearchDelegate delegate = _TestSearchDelegate();
+    final _TestSearchDelegate2 delegate = _TestSearchDelegate2();
 
     await tester.pumpWidget(TestHomePage(
       delegate: delegate,
@@ -673,6 +673,9 @@ class TestHomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      theme: ThemeData(
+        primaryColor: Colors.pink,
+      ),
       home: Builder(builder: (BuildContext context) {
         return Scaffold(
           appBar: AppBar(
@@ -720,13 +723,11 @@ class _TestSearchDelegate extends SearchDelegate<String> {
   final String result;
   final List<Widget> actions;
   final Color hintTextColor = Colors.green;
-  final Color primaryColor = Colors.pink;
 
   @override
   ThemeData appBarTheme(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     return theme.copyWith(
-      primaryColor: primaryColor,
       inputDecorationTheme: InputDecorationTheme(hintStyle: TextStyle(color: hintTextColor)),
     );
   }
@@ -767,3 +768,56 @@ class _TestSearchDelegate extends SearchDelegate<String> {
     return actions;
   }
 }
+
+class _TestSearchDelegate2 extends SearchDelegate<String> {
+  _TestSearchDelegate2({
+    this.suggestions = 'Suggestions',
+    this.result = 'Result',
+    this.actions = const <Widget>[],
+    String searchHint,
+    TextInputAction textInputAction = TextInputAction.search,
+  }) : super(searchFieldLabel: searchHint, textInputAction: textInputAction);
+
+  final String suggestions;
+  final String result;
+  final List<Widget> actions;
+  final Color primaryColor = Colors.pink;
+
+
+  @override
+  Widget buildLeading(BuildContext context) {
+    return IconButton(
+      tooltip: 'Back',
+      icon: const Icon(Icons.arrow_back),
+      onPressed: () {
+        close(context, result);
+      },
+    );
+  }
+
+  final List<String> queriesForSuggestions = <String>[];
+  final List<String> queriesForResults = <String>[];
+
+  @override
+  Widget buildSuggestions(BuildContext context) {
+    queriesForSuggestions.add(query);
+    return MaterialButton(
+      onPressed: () {
+        showResults(context);
+      },
+      child: Text(suggestions),
+    );
+  }
+
+  @override
+  Widget buildResults(BuildContext context) {
+    queriesForResults.add(query);
+    return const Text('Results');
+  }
+
+  @override
+  List<Widget> buildActions(BuildContext context) {
+    return actions;
+  }
+}
+
