@@ -236,7 +236,7 @@ ParagraphTxt::ParagraphTxt() {
 ParagraphTxt::~ParagraphTxt() = default;
 
 void ParagraphTxt::SetText(std::vector<uint16_t> text, StyledRuns runs) {
-  needs_layout_ = true;
+  SetDirty(true);
   if (text.size() == 0)
     return;
   text_ = std::move(text);
@@ -1277,37 +1277,45 @@ const ParagraphStyle& ParagraphTxt::GetParagraphStyle() const {
 }
 
 double ParagraphTxt::GetAlphabeticBaseline() {
+  FML_DCHECK(!needs_layout_) << "only valid after layout";
   // Currently -fAscent
   return alphabetic_baseline_;
 }
 
 double ParagraphTxt::GetIdeographicBaseline() {
+  FML_DCHECK(!needs_layout_) << "only valid after layout";
   // TODO(garyq): Currently -fAscent + fUnderlinePosition. Verify this.
   return ideographic_baseline_;
 }
 
 double ParagraphTxt::GetMaxIntrinsicWidth() {
+  FML_DCHECK(!needs_layout_) << "only valid after layout";
   return max_intrinsic_width_;
 }
 
 double ParagraphTxt::GetMinIntrinsicWidth() {
+  FML_DCHECK(!needs_layout_) << "only valid after layout";
   return min_intrinsic_width_;
 }
 
 size_t ParagraphTxt::TextSize() const {
+  FML_DCHECK(!needs_layout_) << "only valid after layout";
   return text_.size();
 }
 
 double ParagraphTxt::GetHeight() {
+  FML_DCHECK(!needs_layout_) << "only valid after layout";
   return final_line_count_ == 0 ? 0
                                 : line_metrics_[final_line_count_ - 1].height;
 }
 
 double ParagraphTxt::GetMaxWidth() {
+  FML_DCHECK(!needs_layout_) << "only valid after layout";
   return width_;
 }
 
 double ParagraphTxt::GetLongestLine() {
+  FML_DCHECK(!needs_layout_) << "only valid after layout";
   return longest_line_;
 }
 
@@ -1608,6 +1616,7 @@ std::vector<Paragraph::TextBox> ParagraphTxt::GetRectsForRange(
     size_t end,
     RectHeightStyle rect_height_style,
     RectWidthStyle rect_width_style) {
+  FML_DCHECK(!needs_layout_) << "only valid after layout";
   // Struct that holds calculated metrics for each line.
   struct LineBoxMetrics {
     std::vector<Paragraph::TextBox> boxes;
@@ -1818,6 +1827,7 @@ std::vector<Paragraph::TextBox> ParagraphTxt::GetRectsForRange(
 Paragraph::PositionWithAffinity ParagraphTxt::GetGlyphPositionAtCoordinate(
     double dx,
     double dy) {
+  FML_DCHECK(!needs_layout_) << "only valid after layout";
   if (final_line_count_ <= 0)
     return PositionWithAffinity(0, DOWNSTREAM);
 
@@ -1898,6 +1908,7 @@ Paragraph::PositionWithAffinity ParagraphTxt::GetGlyphPositionAtCoordinate(
 // We don't cache this because since this returns all boxes, it is usually
 // unnecessary to call this multiple times in succession.
 std::vector<Paragraph::TextBox> ParagraphTxt::GetRectsForPlaceholders() {
+  FML_DCHECK(!needs_layout_) << "only valid after layout";
   // Struct that holds calculated metrics for each line.
   struct LineBoxMetrics {
     std::vector<Paragraph::TextBox> boxes;
@@ -1936,6 +1947,7 @@ std::vector<Paragraph::TextBox> ParagraphTxt::GetRectsForPlaceholders() {
 }
 
 Paragraph::Range<size_t> ParagraphTxt::GetWordBoundary(size_t offset) {
+  FML_DCHECK(!needs_layout_) << "only valid after layout";
   if (text_.size() == 0)
     return Range<size_t>(0, 0);
 
@@ -1959,10 +1971,12 @@ Paragraph::Range<size_t> ParagraphTxt::GetWordBoundary(size_t offset) {
 }
 
 size_t ParagraphTxt::GetLineCount() {
+  FML_DCHECK(!needs_layout_) << "only valid after layout";
   return final_line_count_;
 }
 
 bool ParagraphTxt::DidExceedMaxLines() {
+  FML_DCHECK(!needs_layout_) << "only valid after layout";
   return did_exceed_max_lines_;
 }
 
@@ -1971,6 +1985,7 @@ void ParagraphTxt::SetDirty(bool dirty) {
 }
 
 std::vector<LineMetrics>& ParagraphTxt::GetLineMetrics() {
+  FML_DCHECK(!needs_layout_) << "only valid after layout";
   return line_metrics_;
 }
 
