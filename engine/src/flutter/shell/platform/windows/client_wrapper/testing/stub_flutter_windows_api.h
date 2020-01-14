@@ -43,11 +43,11 @@ class StubFlutterWindowsApi {
   // Called for FlutterDesktopDestroyView.
   virtual void DestroyViewController() {}
 
-  // Called for FlutterDesktopProcessMessages
-  virtual uint64_t FlutterDesktopProcessMessages() { return 0; }
+  // Called for FlutterDesktopProcessMessages.
+  virtual uint64_t ProcessMessages() { return 0; }
 
-  // Called for FlutterDesktopProcessMessages
-  virtual HWND FlutterDesktopGetHWND() { return reinterpret_cast<HWND>(1); }
+  // Called for FlutterDesktopViewGetHWND.
+  virtual HWND ViewGetHWND() { return reinterpret_cast<HWND>(1); }
 
   // Called for FlutterDesktopRunEngine.
   virtual FlutterDesktopEngineRef RunEngine(const char* assets_path,

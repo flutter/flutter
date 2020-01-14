@@ -11,6 +11,7 @@
 #include <string>
 #include <vector>
 
+#include "flutter_view.h"
 #include "plugin_registrar.h"
 #include "plugin_registry.h"
 
@@ -49,8 +50,7 @@ class FlutterViewController : public PluginRegistry {
   FlutterViewController(FlutterViewController const&) = delete;
   FlutterViewController& operator=(FlutterViewController const&) = delete;
 
-  // Return backing HWND for manipulation in host application.
-  HWND GetNativeWindow();
+  FlutterView* view() { return view_.get(); }
 
   // Processes any pending events in the Flutter engine, and returns the
   // nanosecond delay until the next scheduled event (or  max, if none).
@@ -71,6 +71,9 @@ class FlutterViewController : public PluginRegistry {
 
   // Handle for interacting with the C API's view controller, if any.
   FlutterDesktopViewControllerRef controller_ = nullptr;
+
+  // The owned FlutterView.
+  std::unique_ptr<FlutterView> view_;
 };
 
 }  // namespace flutter
