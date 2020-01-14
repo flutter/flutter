@@ -18,6 +18,7 @@ import 'globals.dart' as globals;
 import 'macos/cocoapods.dart';
 import 'platform_plugins.dart';
 import 'project.dart';
+import 'version.dart';
 
 void _renderTemplateToFile(String template, dynamic context, String filePath) {
   final String renderedTemplate =
@@ -320,7 +321,7 @@ void _addPluginsToPlatform(List<Plugin> plugins, FlutterProjectPlatform platform
   }
 }
 
-/// Writes the .flutter-plugins.json file based on the list of plugins.
+/// Writes the .flutter-plugins-dependencies file based on the list of plugins.
 /// If there aren't any plugins, then the files aren't written to disk. The resulting
 /// file looks something like this:
 /// {
@@ -358,7 +359,35 @@ void _addPluginsToPlatform(List<Plugin> plugins, FlutterProjectPlatform platform
 ///             }
 ///         ],
 ///     }
+///     "dependencyGraph": [
+///       {
+///           "name": "e2e",
+///           "dependencies": [
+///           ]
+///        },
+///       {
+///           "name": "shared_preferences",
+///           "dependencies": [
+///              "shared_preferences_macos",
+///              "shared_preferences_web"
+///           ]
+///        },
+///       {
+///           "name": "shared_preferences_macos",
+///           "dependencies": [
+///           ]
+///        },
+///        {
+///           "name": "shared_preferences_web",
+///           "dependencies": [
+///           ]
+///         }
+///     ]
+///     "date_created": "2020-01-13T22:42:48.743606Z",
+///     "version": "1.13.1-pre.341"
 /// }
+/// Note that the dependencyGraph object is kept for backwards compatibility and will be removed once migration
+/// is complete.
 ///
 /// Finally, returns [true] if .flutter-plugins.json has changed,
 /// otherwise returns [false].
@@ -377,8 +406,11 @@ bool _writeFlutterPluginsList(FlutterProject project, List<Plugin> plugins) {
   _addPluginsToPlatform(plugins, project.web, pluginsMap);
 
   result['plugins'] = pluginsMap;
+  result['dependencyGraph'] = _createLegacyPluginDependencyGraph(plugins);
+  result['date_created'] = DateTime.now().toString();
+  result['version'] = FlutterVersion().frameworkVersion;
 
-  final File pluginsFile = project.flutterPluginsJsonFile;
+  final File pluginsFile = project.flutterPluginsDependenciesFile;
   final String oldPluginFileContent = _readFileContent(pluginsFile);
   final String pluginFileContent = json.encode(result);
   if (pluginsMap.isNotEmpty) {
@@ -392,58 +424,48 @@ bool _writeFlutterPluginsList(FlutterProject project, List<Plugin> plugins) {
   return oldPluginFileContent != _readFileContent(pluginsFile);
 }
 
-// This method will be DEPRECATED in favor of _writeFlutterPluginsList.
-// TODO(franciscojma): Remove once deprecated.
-//
-/// Writes the .flutter-plugins and .flutter-plugins-dependencies files based on the list of plugins.
-/// If there aren't any plugins, then the files aren't written to disk.
-///
-/// Finally, returns [true] if .flutter-plugins or .flutter-plugins-dependencies have changed,
-/// otherwise returns [false].
-bool _writeFlutterPluginsListLegacy(FlutterProject project, List<Plugin> plugins) {
+List<dynamic> _createLegacyPluginDependencyGraph(List<Plugin> plugins) {
   final List<dynamic> directAppDependencies = <dynamic>[];
-  const String info = 'This is a generated file; do not edit or check into version control.';
-  final StringBuffer flutterPluginsBuffer = StringBuffer('# $info\n');
-
   final Set<String> pluginNames = <String>{};
   for (final Plugin plugin in plugins) {
     pluginNames.add(plugin.name);
   }
   for (final Plugin plugin in plugins) {
-    flutterPluginsBuffer.write('${plugin.name}=${fsUtils.escapePath(plugin.path)}\n');
     directAppDependencies.add(<String, dynamic>{
       'name': plugin.name,
       // Extract the plugin dependencies which happen to be plugins.
       'dependencies': <String>[...plugin.dependencies.where(pluginNames.contains)],
     });
   }
+  return directAppDependencies;
+}
+
+// This method will be DEPRECATED in favor of _writeFlutterPluginsList.
+// TODO(franciscojma): Remove once deprecated.
+//
+/// Writes the .flutter-plugins files based on the list of plugins.
+/// If there aren't any plugins, then the files aren't written to disk. The .flutter-plugins-dependencies file
+/// is now udpated by |_writeFlutterPluginsList()| which is backwards-compatible.
+///
+/// Finally, returns [true] if .flutter-plugins has changed, otherwise returns [false].
+bool _writeFlutterPluginsListLegacy(FlutterProject project, List<Plugin> plugins) {
+  const String info = 'This is a generated file; do not edit or check into version control.';
+  final StringBuffer flutterPluginsBuffer = StringBuffer('# $info\n');
+
+  for (final Plugin plugin in plugins) {
+    flutterPluginsBuffer.write('${plugin.name}=${escapePath(plugin.path)}\n');
+  }
   final File pluginsFile = project.flutterPluginsFile;
   final String oldPluginFileContent = _readFileContent(pluginsFile);
   final String pluginFileContent = flutterPluginsBuffer.toString();
-  if (pluginNames.isNotEmpty) {
+  if (plugins.isNotEmpty) {
     pluginsFile.writeAsStringSync(pluginFileContent, flush: true);
   } else {
     if (pluginsFile.existsSync()) {
       pluginsFile.deleteSync();
     }
   }
-
-  final File dependenciesFile = project.flutterPluginsDependenciesFile;
-  final String oldDependenciesFileContent = _readFileContent(dependenciesFile);
-  final String dependenciesFileContent = json.encode(<String, dynamic>{
-      '_info': '// $info',
-      'dependencyGraph': directAppDependencies,
-    });
-  if (pluginNames.isNotEmpty) {
-    dependenciesFile.writeAsStringSync(dependenciesFileContent, flush: true);
-  } else {
-    if (dependenciesFile.existsSync()) {
-      dependenciesFile.deleteSync();
-    }
-  }
-
-  return oldPluginFileContent != _readFileContent(pluginsFile)
-      || oldDependenciesFileContent != _readFileContent(dependenciesFile);
+  return oldPluginFileContent != _readFileContent(pluginsFile);
 }
 
 /// Returns the contents of [File] or [null] if that file does not exist.

@@ -146,9 +146,6 @@ class FlutterProject {
   File get packagesFile => directory.childFile('.packages');
 
   /// The `.flutter-plugins` file of this project.
-  File get flutterPluginsJsonFile => directory.childFile('.flutter-plugins.json');
-
-  /// The `.flutter-plugins` file of this project.
   File get flutterPluginsFile => directory.childFile('.flutter-plugins');
 
   /// The `.flutter-plugins-dependencies` file of this project,
