@@ -430,8 +430,8 @@ class NestedScrollViewState extends State<NestedScrollView> {
             scrollDirection: widget.scrollDirection,
             reverse: widget.reverse,
             physics: widget.physics != null
-                ? widget.physics.applyTo(const ClampingScrollPhysics())
-                : const ClampingScrollPhysics(),
+              ? widget.physics.applyTo(const ClampingScrollPhysics())
+              : const ClampingScrollPhysics(),
             controller: _coordinator._outerController,
             slivers: widget._buildSlivers(
               context,
@@ -640,7 +640,10 @@ class _NestedScrollCoordinator implements ScrollActivityDelegate, ScrollHoldCont
 
   @override
   void goIdle() {
-    beginActivity(_createIdleScrollActivity(_outerPosition), _createIdleScrollActivity);
+    beginActivity(
+      _createIdleScrollActivity(_outerPosition),
+      _createIdleScrollActivity,
+    );
   }
 
   @override
