@@ -35,7 +35,6 @@ void main() {
       flutterProject = MockFlutterProject();
       when(flutterProject.directory).thenReturn(fs.directory('/'));
       when(flutterProject.flutterPluginsFile).thenReturn(flutterProject.directory.childFile('.flutter-plugins'));
-      when(flutterProject.flutterPluginsJsonFile).thenReturn(flutterProject.directory.childFile('.flutter-plugins.json'));
       when(flutterProject.flutterPluginsDependenciesFile).thenReturn(flutterProject.directory.childFile('.flutter-plugins-dependencies'));
       iosProject = MockIosProject();
       when(flutterProject.ios).thenReturn(iosProject);
@@ -276,7 +275,6 @@ dependencies:
         refreshPluginsList(flutterProject);
         expect(flutterProject.flutterPluginsFile.existsSync(), false);
         expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), false);
-        expect(flutterProject.flutterPluginsJsonFile.existsSync(), false);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -285,12 +283,10 @@ dependencies:
       testUsingContext('Refreshing the plugin list deletes the plugin file when there were plugins but no longer are', () {
         flutterProject.flutterPluginsFile.createSync();
         flutterProject.flutterPluginsDependenciesFile.createSync();
-        flutterProject.flutterPluginsJsonFile.createSync();
 
         refreshPluginsList(flutterProject);
         expect(flutterProject.flutterPluginsFile.existsSync(), false);
         expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), false);
-        expect(flutterProject.flutterPluginsJsonFile.existsSync(), false);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
@@ -310,7 +306,6 @@ dependencies:
 
         refreshPluginsList(flutterProject);
         expect(flutterProject.flutterPluginsFile.existsSync(), true);
-        expect(flutterProject.flutterPluginsJsonFile.existsSync(), true);
         expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), true);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
@@ -318,7 +313,7 @@ dependencies:
       });
 
       // TODO(franciscojma): Remove logic for .flutter-plugins and .flutter-plugin-dependencies once they are deprecated.
-      testUsingContext('Refreshing the plugin list modifies .flutter-plugins.json, .flutter-plugins and .flutter-plugins-dependencies when there are plugins', () {
+      testUsingContext('Refreshing the plugin list modifies .flutter-plugins and .flutter-plugins-dependencies when there are plugins', () {
         createPluginWithDependencies(name: 'plugin-a', dependencies: const <String>['plugin-b', 'plugin-c', 'random-package']);
         createPluginWithDependencies(name: 'plugin-b', dependencies: const <String>['plugin-c']);
         createPluginWithDependencies(name: 'plugin-c', dependencies: const <String>[]);
@@ -343,27 +338,8 @@ dependencies:
           'plugin-c=/.tmp_rand0/plugin.rand2/\n'
           ''
         );
+        print(flutterProject.flutterPluginsDependenciesFile.readAsStringSync());
         expect(flutterProject.flutterPluginsDependenciesFile.readAsStringSync(),
-          '{'
-            '"_info":"// This is a generated file; do not edit or check into version control.",'
-            '"dependencyGraph":['
-              '{'
-                '"name":"plugin-a",'
-                '"dependencies":["plugin-b","plugin-c"]'
-              '},'
-              '{'
-                '"name":"plugin-b",'
-                '"dependencies":["plugin-c"]'
-              '},'
-              '{'
-                '"name":"plugin-c",'
-                '"dependencies":[]'
-              '}'
-            ']'
-          '}'
-        );
-        expect(flutterProject.flutterPluginsJsonFile.existsSync(), true);
-        expect(flutterProject.flutterPluginsJsonFile.readAsStringSync(),
           '{'
             '"_info":"// This is a generated file; do not edit or check into version control.",'
             '"plugins":{'
@@ -371,12 +347,50 @@ dependencies:
                 '{'
                   '"name":"test",'
                   '"path":"test_path",'
-                  '"dependencies":[]'
+                  '"dependencies":['
+                  ']'
                 '}'
               ']'
-            '}'
+            '},'
+            '"dependencyGraph":['
+              '{'
+                '"name":"plugin-a",'
+                '"dependencies":['
+                  '"plugin-b",'
+                  '"plugin-c"'
+                ']'
+              '},'
+              '{'
+                '"name":"plugin-b",'
+                '"dependencies":['
+                  '"plugin-c"'
+                ']'
+              '},'
+              '{'
+                '"name":"plugin-c",'
+                '"dependencies":['
+                ']'
+              '}'
+            '],'
+            '"date_created":"2020-01-13 17:25:41.914283",'
+            '"version":"0.0.0-unknown"'
           '}'
         );
+        // expect(flutterProject.flutterPluginsJsonFile.existsSync(), true);
+        // expect(flutterProject.flutterPluginsJsonFile.readAsStringSync(),
+        //   '{'
+        //     '"_info":"// This is a generated file; do not edit or check into version control.",'
+        //     '"plugins":{'
+        //       '"ios":['
+        //         '{'
+        //           '"name":"test",'
+        //           '"path":"test_path",'
+        //           '"dependencies":[]'
+        //         '}'
+        //       ']'
+        //     '}'
+        //   '}'
+        // );
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
