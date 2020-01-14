@@ -38,9 +38,13 @@ class AotBuilder {
     if (platform == null) {
       throwToolExit('No AOT build platform specified');
     }
+    
+    // This code is currently dead, but will be updated as we move iOS to assemble.
+    // See also: https://github.com/flutter/flutter/issues/32925
     if (_canUseAssemble(platform)
         && extraGenSnapshotOptions?.isEmpty != false
         && extraFrontEndOptions?.isEmpty != false) {
+      assert(false);
       await _buildWithAssemble(
         targetFile: mainDartFile,
         outputDir: outputPath,
@@ -196,6 +200,8 @@ class AotBuilder {
     bool quiet
   }) async {
     // This code is currently dead, but will be updated as we move iOS to assemble.
+    // See also: https://github.com/flutter/flutter/issues/32925
+    assert(false);
     Status status;
     if (!quiet) {
       final String typeName = globals.artifacts.getEngineType(targetPlatform, buildMode);
