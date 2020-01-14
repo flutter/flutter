@@ -2091,6 +2091,8 @@ class _InputDecoratorState extends State<InputDecorator> with TickerProviderStat
       child: Text(
         decoration.hintText,
         style: hintStyle,
+        textDirection: decoration.hintTextDirection,
+        textAlign: decoration.hintTextAlign,
         overflow: TextOverflow.ellipsis,
         textAlign: textAlign,
         maxLines: decoration.hintMaxLines,
@@ -2426,6 +2428,8 @@ class InputDecoration {
     this.helperMaxLines,
     this.hintText,
     this.hintStyle,
+    this.hintTextDirection,
+    this.hintTextAlign,
     this.hintMaxLines,
     this.errorText,
     this.errorStyle,
@@ -2471,6 +2475,8 @@ class InputDecoration {
     @required this.hintText,
     this.hasFloatingPlaceholder = true,
     this.hintStyle,
+    this.hintTextDirection,
+    this.hintTextAlign,
     this.filled = false,
     this.fillColor,
     this.focusColor,
@@ -2586,6 +2592,31 @@ class InputDecoration {
   /// If null, defaults to a value derived from the base [TextStyle] for the
   /// input field and the current [Theme].
   final TextStyle hintStyle;
+
+  /// {@template flutter.widgets.inputDecorator.hintTextAlign}
+  /// How the hint text should be aligned horizontally.
+  ///
+  /// Defaults to [TextAlign.start] and cannot be null.
+  /// {@endtemplate}
+  final TextAlign hintTextAlign;
+
+  /// {@template flutter.widgets.inputDecorator.hintTextDirection}
+  /// The directionality of the text.
+  ///
+  /// This decides how [hintTextAlign] values like [TextAlign.start] and
+  /// [TextAlign.end] are interpreted.
+  ///
+  /// This is also used to disambiguate how to render bidirectional text. For
+  /// example, if the text is an English phrase followed by a Hebrew phrase,
+  /// in a [TextDirection.ltr] context the English phrase will be on the left
+  /// and the Hebrew phrase to its right, while in a [TextDirection.rtl]
+  /// context, the English phrase will be on the right and the Hebrew phrase on
+  /// its left.
+  ///
+  /// Defaults to the ambient [Directionality], if any.
+  ///
+  /// {@endtemplate}
+  final TextDirection hintTextDirection;
 
   /// The maximum number of lines the [hintText] can occupy.
   ///
@@ -3080,6 +3111,8 @@ class InputDecoration {
     int helperMaxLines,
     String hintText,
     TextStyle hintStyle,
+    TextDirection hintTextDirection,
+    TextAlign hintTextAlign,
     int hintMaxLines,
     String errorText,
     TextStyle errorStyle,
@@ -3121,6 +3154,8 @@ class InputDecoration {
       helperMaxLines : helperMaxLines ?? this.helperMaxLines,
       hintText: hintText ?? this.hintText,
       hintStyle: hintStyle ?? this.hintStyle,
+      hintTextDirection: hintTextDirection ?? this.hintTextDirection,
+      hintTextAlign: hintTextAlign ?? this.hintTextAlign,
       hintMaxLines: hintMaxLines ?? this.hintMaxLines,
       errorText: errorText ?? this.errorText,
       errorStyle: errorStyle ?? this.errorStyle,
