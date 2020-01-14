@@ -8,7 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import 'app_bar.dart';
-import 'colors.dart';
 import 'debug.dart';
 import 'input_border.dart';
 import 'input_decorator.dart';
