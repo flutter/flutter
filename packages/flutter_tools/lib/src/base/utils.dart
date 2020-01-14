@@ -9,9 +9,7 @@ import 'package:intl/intl.dart';
 import 'package:meta/meta.dart';
 
 import '../convert.dart';
-import '../globals.dart' as globals;
 import 'file_system.dart';
-import 'io.dart' as io;
 import 'terminal.dart';
 
 /// Convert `foo_bar` to `fooBar`.
@@ -51,27 +49,8 @@ String getEnumName(dynamic enumItem) {
   return index == -1 ? name : name.substring(index + 1);
 }
 
-File getUniqueFile(Directory dir, String baseName, String ext) {
-  final FileSystem fs = dir.fileSystem;
-  int i = 1;
-
-  while (true) {
-    final String name = '${baseName}_${i.toString().padLeft(2, '0')}.$ext';
-    final File file = fs.file(globals.fs.path.join(dir.path, name));
-    if (!file.existsSync()) {
-      return file;
-    }
-    i++;
-  }
-}
-
 String toPrettyJson(Object jsonable) {
   return const JsonEncoder.withIndent('  ').convert(jsonable) + '\n';
-}
-
-/// Return a String - with units - for the size in MB of the given number of bytes.
-String getSizeAsMB(int bytesLength) {
-  return '${(bytesLength / (1024 * 1024)).toStringAsFixed(1)}MB';
 }
 
 final NumberFormat kSecondsFormat = NumberFormat('0.0');
@@ -86,11 +65,9 @@ String getElapsedAsMilliseconds(Duration duration) {
   return '${kMillisecondsFormat.format(duration.inMilliseconds)}ms';
 }
 
-/// Return a relative path if [fullPath] is contained by the cwd, else return an
-/// absolute path.
-String getDisplayPath(String fullPath) {
-  final String cwd = globals.fs.currentDirectory.path + globals.fs.path.separator;
-  return fullPath.startsWith(cwd) ? fullPath.substring(cwd.length) : fullPath;
+/// Return a String - with units - for the size in MB of the given number of bytes.
+String getSizeAsMB(int bytesLength) {
+  return '${(bytesLength / (1024 * 1024)).toStringAsFixed(1)}MB';
 }
 
 /// A class to maintain a list of items, fire events when items are added or
@@ -313,13 +290,6 @@ String wrapText(String text, { int columnWidth, int hangingIndent, int indent, b
     ));
   }
   return result.join('\n');
-}
-
-void writePidFile(String pidFile) {
-  if (pidFile != null) {
-    // Write our pid to the file.
-    globals.fs.file(pidFile).writeAsStringSync(io.pid.toString());
-  }
 }
 
 // Used to represent a run of ANSI control sequences next to a visible

@@ -14,6 +14,7 @@ import 'package:webkit_inspection_protocol/webkit_inspection_protocol.dart'
 import '../application_package.dart';
 import '../base/async_guard.dart';
 import '../base/common.dart';
+import '../base/file_system.dart';
 import '../base/io.dart';
 import '../base/logger.dart';
 import '../base/net.dart';
@@ -388,7 +389,10 @@ class _ExperimentalResidentWebRunner extends ResidentWebRunner {
       return 1;
     }
     final String modeName = debuggingOptions.buildInfo.friendlyModeName;
-    globals.printStatus('Launching ${getDisplayPath(target)} on ${device.device.name} in $modeName mode...');
+    globals.printStatus(
+      'Launching ${fsUtils.getDisplayPath(target)} '
+      'on ${device.device.name} in $modeName mode...',
+    );
     final String effectiveHostname = debuggingOptions.hostname ?? 'localhost';
     final int hostPort = debuggingOptions.port == null
         ? await os.findFreePort()
@@ -587,7 +591,9 @@ class _DwdsResidentWebRunner extends ResidentWebRunner {
     }
     final String modeName = debuggingOptions.buildInfo.friendlyModeName;
     globals.printStatus(
-        'Launching ${getDisplayPath(target)} on ${device.device.name} in $modeName mode...');
+      'Launching ${fsUtils.getDisplayPath(target)} '
+      'on ${device.device.name} in $modeName mode...',
+    );
     Status buildStatus;
     bool statusActive = false;
     try {
