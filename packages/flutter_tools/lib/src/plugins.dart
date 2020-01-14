@@ -497,7 +497,6 @@ Future<void> _writeAndroidPluginRegistrant(FlutterProject project, List<Plugin> 
               'following https://flutter.dev/go/android-plugin-migration.'
             );
           }
-          break;
         }
       }
       templateContent = _androidPluginRegistryTemplateNewEmbedding;
