@@ -151,4 +151,4 @@ flutter:
       uri: "../../../third_party/dart/sdk/lib/vmservice/vmservice.dart"
 
     vmservice_io:
-      uri: "../../../third_party/dart/runtime/bin/vmservice/vmservice_io.dart"
+      uri: "../../../third_party/dart/sdk/lib/_internal/vm/bin/vmservice_io.dart"

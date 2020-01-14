@@ -2,7 +2,6 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
-import("//third_party/dart/runtime/bin/vmservice/vmservice_sources.gni")
 import("$flutter_root/common/config.gni")
 import("$flutter_root/testing/testing.gni")
 
