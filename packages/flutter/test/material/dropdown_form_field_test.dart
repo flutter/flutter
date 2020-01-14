@@ -195,39 +195,93 @@ void main() {
     expect(value, equals('three'));
   });
 
-  testWidgets('DropdownButtonFormFieldState value changes when option selected',
-      (WidgetTester tester) async {
+  testWidgets('DropdownButtonFormFieldState value updates when a different option is selected', (WidgetTester tester) async {
     final String value = 'one';
-    final GlobalKey<FormFieldState<String>> stateKey =
-        GlobalKey<FormFieldState<String>>();
+    final GlobalKey<FormFieldState<String>> stateKey = GlobalKey<FormFieldState<String>>();
 
     await tester.pumpWidget(
-      Builder(
-        builder: (BuildContext context) {
-          return MaterialApp(
-            home: Material(
-              child: DropdownButtonFormField<String>(
-                key: stateKey,
+      MaterialApp(
+        home: Material(
+          child: DropdownButtonFormField<String>(
+            key: stateKey,
+            value: value,
+            onChanged: (String newValue) {},
+            items: menuItems.map((String value) {
+              return DropdownMenuItem<String>(
                 value: value,
-                items: menuItems.map((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-                }).toList(),
-                onChanged: (_) {},
-              ),
-            ),
-          );
-        },
-      ),
+                child: Text(value),
+              );
+            }).toList(),
+          ),
+        ),
+      )
     );
+
+    // [FormField] value is properly initialized.
     expect(stateKey.currentState.value, equals('one'));
+
+    // Tap [DropdownButton] to open dropdown menu.
     await tester.tap(find.text('one'));
     await tester.pumpAndSettle();
+
+    // Tap [DropdownMenuItem] for an item other than the initial item.
     await tester.tap(find.text('three').last);
     await tester.pumpAndSettle();
+
+    // [FormField] should update to selected item value.
     expect(stateKey.currentState.value, equals('three'));
+  });
+
+  testWidgets('DropdownButtonFormFieldState internal InputDecorator isEmpty property is correct', (WidgetTester tester) async {
+    final GlobalKey<FormFieldState<String>> stateKey = GlobalKey<FormFieldState<String>>();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Material(
+          child: DropdownButtonFormField<String>(
+            key: stateKey,
+            hint: Text("Hint"),
+            onChanged: (String newValue) {},
+            items: menuItems.map((String value) {
+              return DropdownMenuItem<String>(
+                value: value,
+                child: Text(value),
+              );
+            }).toList(),
+          ),
+        ),
+      )
+    );
+
+    // [FormField] value is initially null.
+    expect(stateKey.currentState.value, equals(null));
+    // [InputDecorator] isEmpty property is true.
+    expect((tester.widget(find.byType(InputDecorator)) as InputDecorator).isEmpty, equals(true));
+
+    // Tap [DropdownButton] to open dropdown menu.
+    await tester.tap(find.text("Hint"));
+    await tester.pumpAndSettle();
+
+    // Tap outside the [DropdownButton] to close dropdown menu without selecting an option.
+    await tester.tapAt(Offset.zero);
+    await tester.pumpAndSettle();
+
+    // [FormField] value is still null.
+    expect(stateKey.currentState.value, equals(null));
+    // [InputDecorator] isEmpty property is still true.
+    expect((tester.widget(find.byType(InputDecorator)) as InputDecorator).isEmpty, equals(true));
+
+    // Tap [DropdownButton] to open dropdown menu.
+    await tester.tap(find.text('Hint'));
+    await tester.pumpAndSettle();
+    // Tap [DropdownMenuItem] for an item other than the initial item.
+    await tester.tap(find.text('three').last);
+    await tester.pumpAndSettle();
+
+    // [FormField] should update to selected item value.
+    expect(stateKey.currentState.value, equals('three'));
+    // [InputDecorator] isEmpty property is now false.
+    expect((tester.widget(find.byType(InputDecorator)) as InputDecorator).isEmpty, equals(false));
   });
 
   testWidgets('DropdownButtonFormField arrow icon aligns with the edge of button when expanded', (WidgetTester tester) async {
