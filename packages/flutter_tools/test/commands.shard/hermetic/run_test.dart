@@ -77,7 +77,7 @@ void main() {
         ]);
         fail('Expect exception');
       } catch (e) {
-        expect(e.toString(), isNot(contains('--fast-start is not supported with --use-application-binary')));
+        expect(e.toString(), contains('--fast-start is not supported with --use-application-binary'));
       }
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
@@ -115,10 +115,10 @@ void main() {
       }
 
       final BufferLogger bufferLogger = globals.logger as BufferLogger;
-      expect(bufferLogger.statusText, isNot(contains(
+      expect(bufferLogger.statusText, contains(
         'Using --fast-start option with device mockdevice, but this device '
         'does not support it. Overriding the setting to false.'
-      )));
+      ));
     }, overrides: <Type, Generator>{
       FileSystem: () => MemoryFileSystem(),
       ProcessManager: () => FakeProcessManager.any(),
