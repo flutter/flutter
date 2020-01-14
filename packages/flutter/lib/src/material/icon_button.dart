@@ -291,6 +291,19 @@ class IconButton extends StatelessWidget {
   final bool enableFeedback;
 
   /// Box constraints for the button.
+  ///
+  /// When unspecified, defaults to:
+  /// ```dart
+  /// const BoxConstraints(
+  ///   minWidth: kMinInteractiveDimension,
+  ///   minHeight: kMinInteractiveDimension,
+  /// )
+  /// ```
+  /// where [kMinInteractiveDimension] is 48.0, and then with visual density
+  /// applied.
+  ///
+  /// The visual density uses the [visualDensity] parameter if specified,
+  /// and `Theme.of(context).visualDensity` otherwise.
   final BoxConstraints constraints;
 
   @override
