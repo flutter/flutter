@@ -8,7 +8,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 
-import 'animated_switcher_test.dart';
 import 'observer_tester.dart';
 import 'semantics_tester.dart';
 

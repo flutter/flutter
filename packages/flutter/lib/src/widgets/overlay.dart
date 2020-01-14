@@ -451,7 +451,7 @@ class OverlayState extends State<Overlay> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    // These list is filled backwards and then reversed below before
+    // This list is filled backwards and then reversed below before
     // it is added to the tree.
     final List<Widget> children = <Widget>[];
     bool onstage = true;
