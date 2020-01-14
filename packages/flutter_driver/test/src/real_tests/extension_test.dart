@@ -600,6 +600,12 @@ void main() {
       expect(await getTextInternal(ByValueKey('text3')), 'Hello3');
       expect(await getTextInternal(ByValueKey('text4')), 'Hello4');
       expect(await getTextInternal(ByValueKey('text5')), 'Hello5');
+
+      //Check if error thrown for other types
+      final Map<String, String> arguments = GetText(ByValueKey('column'), timeout: const Duration(seconds: 1)).serialize();
+      final Map<String, dynamic> response = await extension.call(arguments);
+      expect(response['isError'], true);
+      expect(response['response'], contains('is currently not supported by getText'));
     });
   });
 
