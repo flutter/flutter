@@ -18,6 +18,7 @@ import 'globals.dart' as globals;
 import 'macos/cocoapods.dart';
 import 'platform_plugins.dart';
 import 'project.dart';
+import 'base/time.dart';
 import 'version.dart';
 
 void _renderTemplateToFile(String template, dynamic context, String filePath) {
@@ -407,7 +408,7 @@ bool _writeFlutterPluginsList(FlutterProject project, List<Plugin> plugins) {
 
   result['plugins'] = pluginsMap;
   result['dependencyGraph'] = _createLegacyPluginDependencyGraph(plugins);
-  result['date_created'] = DateTime.now().toString();
+  result['date_created'] = systemClock.now().toString();
   result['version'] = FlutterVersion().frameworkVersion;
 
   final File pluginsFile = project.flutterPluginsDependenciesFile;
