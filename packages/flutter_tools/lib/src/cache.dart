@@ -346,7 +346,10 @@ class Cache {
   /// [entity] doesn't exist.
   bool isOlderThanToolsStamp(FileSystemEntity entity) {
     final File flutterToolsStamp = getStampFileFor('flutter_tools');
-    return isOlderThanReference(entity: entity, referenceFile: flutterToolsStamp);
+    return fsUtils.isOlderThanReference(
+      entity: entity,
+      referenceFile: flutterToolsStamp,
+    );
   }
 
   bool isUpToDate() => _artifacts.every((ArtifactSet artifact) => artifact.isUpToDate());
@@ -912,7 +915,7 @@ class AndroidMavenArtifacts extends ArtifactSet {
       );
     try {
       final String gradleExecutable = gradle.absolute.path;
-      final String flutterSdk = escapePath(Cache.flutterRoot);
+      final String flutterSdk = fsUtils.escapePath(Cache.flutterRoot);
       final RunResult processResult = await processUtils.run(
         <String>[
           gradleExecutable,
