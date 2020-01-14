@@ -258,32 +258,8 @@ abstract class FlutterProjectPlatform {
   /// Plugin's platform config key, i.e., "macos", "ios".
   String get pluginConfigKey;
 
-  /// Whether a the platform exists in the project.
+  /// Whether the platform exists in the project.
   bool existsSync();
-
-  /// Creates a list with the project plugins supported for the current platform.
-  List<Map<String, dynamic>> pluginsList(List<Plugin>plugins) {
-    final Iterable<Plugin> platformPlugins = plugins.where((Plugin p) {
-      return p.platforms.containsKey(pluginConfigKey);
-    });
-
-    final Set<String> pluginNames = <String>{};
-    for (final Plugin plugin in plugins) {
-      pluginNames.add(plugin.name);
-    }
-
-    final List<Map<String, dynamic>> list = <Map<String, dynamic>>[];
-    for (final Plugin plugin in platformPlugins) {
-      list.add(<String, dynamic>{
-        'name': plugin.name,
-        'path': escapePath(plugin.path),
-        'dependencies': <String>[
-          ...plugin.dependencies.where(pluginNames.contains)
-        ]
-      });
-    }
-    return list;
-  }
 }
 
 /// Represents an Xcode-based sub-project.

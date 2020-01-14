@@ -312,75 +312,75 @@ List<Plugin> findPlugins(FlutterProject project) {
   return plugins;
 }
 
+  /// Filters [plugins] to those supported by this platform.
+  List<Map<String, dynamic>> _filterPluginsByPlatform(List<Plugin>plugins, String platformKey) {
+    final Iterable<Plugin> platformPlugins = plugins.where((Plugin p) {
+      return p.platforms.containsKey(platformKey);
+    });
+
+    final Set<String> pluginNames = <String>{};
+    for (final Plugin plugin in plugins) {
+      pluginNames.add(plugin.name);
+    }
+
+    final List<Map<String, dynamic>> list = <Map<String, dynamic>>[];
+    for (final Plugin plugin in platformPlugins) {
+      list.add(<String, dynamic>{
+        'name': plugin.name,
+        'path': escapePath(plugin.path),
+        'dependencies': <String>[
+          ...plugin.dependencies.where(pluginNames.contains)
+        ]
+      });
+    }
+    return list;
+  }
+
 /// Writes the .flutter-plugins-dependencies file based on the list of plugins.
 /// If there aren't any plugins, then the files aren't written to disk. The resulting
 /// file looks something like this:
 /// {
-///     "_info": "// This is a generated file; do not edit or check into version control.",
-///     "plugins": {
-///         "ios": [
-///             {
-///                 "name": "plugin-a",
-///                 "path": "/path/to/plugin/pubspec",
-///                 "dependencies": []
-///             },
-///             {
-///                 "name": "plugin-b",
-///                 "path": "/path/to/plugin/pubspec",
-///                 "dependencies": [
-///                     "plugin-c",
-///                     "plugin-d"
-///                 ]
-///             }
-///         ],
-///         "macos": [
-///             {
-///                 "name": "plugin-a",
-///                 "path": "/path/to/plugin/pubspec",
-///                 "dependencies": [
-///                    plugin-b,
-///                 ]
-///             },
-///             {
-///                 "name": "plugin-b",
-///                 "path": "/path/to/plugin/pubspec",
-///                "dependencies": [
-///                     "plugin-c"
-///                 ]
-///             }
-///         ],
+///   "info": "This is a generated file; do not edit or check into version control.",
+///   "plugins": {
+///     "ios": [
+///       {
+///         "name": "test",
+///         "path": "test_path",
+///         "dependencies": []
+///       }
+///     ],
+///     "android": [],
+///     "macos": [],
+///     "linux": [],
+///     "windows": [],
+///     "web": []
+///   },
+///   "dependencyGraph": [
+///     {
+///       "name": "plugin-a",
+///       "dependencies": [
+///         "plugin-b",
+///         "plugin-c"
+///       ]
+///     },
+///     {
+///       "name": "plugin-b",
+///       "dependencies": [
+///         "plugin-c"
+///       ]
+///     },
+///     {
+///       "name": "plugin-c",
+///       "dependencies": []
 ///     }
-///     "dependencyGraph": [
-///       {
-///           "name": "e2e",
-///           "dependencies": [
-///           ]
-///        },
-///       {
-///           "name": "shared_preferences",
-///           "dependencies": [
-///              "shared_preferences_macos",
-///              "shared_preferences_web"
-///           ]
-///        },
-///       {
-///           "name": "shared_preferences_macos",
-///           "dependencies": [
-///           ]
-///        },
-///        {
-///           "name": "shared_preferences_web",
-///           "dependencies": [
-///           ]
-///         }
-///     ]
-///     "date_created": "2020-01-13T22:42:48.743606Z",
-///     "version": "1.13.1-pre.341"
+///   ],
+///   "date_created": "1970-01-01 00:00:00.000",
+///   "version": "0.0.0-unknown"
 /// }
 /// Note that the dependencyGraph object is kept for backwards compatibility and will be removed once migration
 /// is complete.
 ///
-/// Finally, returns [true] if .flutter-plugins.json has changed,
+/// Finally, returns [true] if .flutter-plugins-dependencies has changed,
 /// otherwise returns [false].
 bool _writeFlutterPluginsList(FlutterProject project, List<Plugin> plugins) {
   final File pluginsFile = project.flutterPluginsDependenciesFile;
@@ -392,13 +392,20 @@ bool _writeFlutterPluginsList(FlutterProject project, List<Plugin> plugins) {
     return false;
   }
 
+  final String iosKey = project.ios.pluginConfigKey;
+  final String androidKey = project.android.pluginConfigKey;
+  final String macosKey = project.macos.pluginConfigKey;
+  final String linuxKey = project.linux.pluginConfigKey;
+  final String windowsKey = project.windows.pluginConfigKey;
+  final String webKey = project.web.pluginConfigKey;
+
   final Map<String, dynamic> pluginsMap = <String, dynamic>{};
-  pluginsMap[project.ios.pluginConfigKey] = project.ios.pluginsList(plugins);
-  pluginsMap[project.android.pluginConfigKey] = project.android.pluginsList(plugins);
-  pluginsMap[project.macos.pluginConfigKey] = project.macos.pluginsList(plugins);
-  pluginsMap[project.linux.pluginConfigKey] = project.linux.pluginsList(plugins);
-  pluginsMap[project.windows.pluginConfigKey] = project.windows.pluginsList(plugins);
-  pluginsMap[project.web.pluginConfigKey] = project.web.pluginsList(plugins);
+  pluginsMap[iosKey] = _filterPluginsByPlatform(plugins, iosKey);
+  pluginsMap[androidKey] = _filterPluginsByPlatform(plugins, androidKey);
+  pluginsMap[macosKey] = _filterPluginsByPlatform(plugins, macosKey);
+  pluginsMap[linuxKey] = _filterPluginsByPlatform(plugins, linuxKey);
+  pluginsMap[windowsKey] = _filterPluginsByPlatform(plugins, windowsKey);
+  pluginsMap[webKey] = _filterPluginsByPlatform(plugins, webKey);
 
   final Map<String, dynamic> result = <String, dynamic> {};
 
@@ -410,9 +417,9 @@ bool _writeFlutterPluginsList(FlutterProject project, List<Plugin> plugins) {
 
   final String oldPluginFileContent = _readFileContent(pluginsFile);
   final String pluginFileContent = json.encode(result);
-   pluginsFile.writeAsStringSync(pluginFileContent, flush: true);
+  pluginsFile.writeAsStringSync(pluginFileContent, flush: true);
 
-  return oldPluginFileContent != _readFileContent(pluginsFile);
+  return oldPluginFileContent != pluginFileContent;
 }
 
 List<dynamic> _createLegacyPluginDependencyGraph(List<Plugin> plugins) {

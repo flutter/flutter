@@ -45,38 +45,32 @@ void main() {
       when(iosProject.pluginRegistrantHost).thenReturn(flutterProject.directory.childDirectory('Runner'));
       when(iosProject.podfile).thenReturn(flutterProject.directory.childDirectory('ios').childFile('Podfile'));
       when(iosProject.podManifestLock).thenReturn(flutterProject.directory.childDirectory('ios').childFile('Podfile.lock'));
-      when(iosProject.pluginsList(any)).thenReturn(<Map<String,dynamic>>[]);
       when(iosProject.pluginConfigKey).thenReturn('ios');
       when(iosProject.existsSync()).thenReturn(false);
       macosProject = MockMacOSProject();
       when(flutterProject.macos).thenReturn(macosProject);
       when(macosProject.podfile).thenReturn(flutterProject.directory.childDirectory('macos').childFile('Podfile'));
       when(macosProject.podManifestLock).thenReturn(flutterProject.directory.childDirectory('macos').childFile('Podfile.lock'));
-      when(macosProject.pluginsList(any)).thenReturn(<Map<String,dynamic>>[]);
       when(macosProject.pluginConfigKey).thenReturn('macos');
       when(macosProject.existsSync()).thenReturn(false);
       androidProject = MockAndroidProject();
       when(flutterProject.android).thenReturn(androidProject);
       when(androidProject.pluginRegistrantHost).thenReturn(flutterProject.directory.childDirectory('android').childDirectory('app'));
       when(androidProject.hostAppGradleRoot).thenReturn(flutterProject.directory.childDirectory('android'));
-      when(androidProject.pluginsList(any)).thenReturn(<Map<String,dynamic>>[]);
       when(androidProject.pluginConfigKey).thenReturn('android');
       when(androidProject.existsSync()).thenReturn(false);
       webProject = MockWebProject();
       when(flutterProject.web).thenReturn(webProject);
       when(webProject.libDirectory).thenReturn(flutterProject.directory.childDirectory('lib'));
       when(webProject.existsSync()).thenReturn(true);
-      when(webProject.pluginsList(any)).thenReturn(<Map<String,dynamic>>[]);
       when(webProject.pluginConfigKey).thenReturn('web');
       when(webProject.existsSync()).thenReturn(false);
       windowsProject = MockWindowsProject();
       when(flutterProject.windows).thenReturn(windowsProject);
-      when(windowsProject.pluginsList(any)).thenReturn(<Map<String,dynamic>>[]);
       when(windowsProject.pluginConfigKey).thenReturn('windows');
       when(windowsProject.existsSync()).thenReturn(false);
       linuxProject = MockLinuxProject();
       when(flutterProject.linux).thenReturn(linuxProject);
-      when(linuxProject.pluginsList(any)).thenReturn(<Map<String,dynamic>>[]);
       when(linuxProject.pluginConfigKey).thenReturn('linux');
       when(linuxProject.existsSync()).thenReturn(false);
 
@@ -298,15 +292,7 @@ dependencies:
 
       testUsingContext('Refreshing the plugin list creates a plugin directory when there are plugins', () {
         configureDummyPackageAsPlugin();
-        final List<Map<String, dynamic>> dummyPluginsList = <Map<String,dynamic>>[
-          <String,dynamic>{
-            'name': 'test',
-            'path': 'test_path',
-            'dependencies': <String>[],
-        }];
-
         when(iosProject.existsSync()).thenReturn(true);
-        when(iosProject.pluginsList(any)).thenReturn(dummyPluginsList);
 
         refreshPluginsList(flutterProject);
         expect(flutterProject.flutterPluginsFile.existsSync(), true);
@@ -323,15 +309,7 @@ dependencies:
         when(mockClock.now()).thenAnswer(
           (Invocation _) => DateTime(1970, 1, 1)
         );
-        final List<Map<String, dynamic>> dummyPluginsList = <Map<String,dynamic>>[
-          <String,dynamic>{
-            'name': 'test',
-            'path': 'test_path',
-            'dependencies': <String>[],
-        }];
-
         when(iosProject.existsSync()).thenReturn(true);
-        when(iosProject.pluginsList(any)).thenReturn(dummyPluginsList);
 
         refreshPluginsList(flutterProject);
 
@@ -350,13 +328,48 @@ dependencies:
             '"plugins":{'
               '"ios":['
                 '{'
-                  '"name":"test",'
-                  '"path":"test_path",'
+                  '"name":"plugin-a",'
+                  '"path":"/.tmp_rand0/plugin.rand0/",'
                   '"dependencies":['
+                    '"plugin-b",'
+                    '"plugin-c"'
                   ']'
+                '},'
+                '{'
+                  '"name":"plugin-b",'
+                  '"path":"/.tmp_rand0/plugin.rand1/",'
+                  '"dependencies":['
+                    '"plugin-c"'
+                  ']'
+                '},'
+                '{'
+                  '"name":"plugin-c",'
+                  '"path":"/.tmp_rand0/plugin.rand2/",'
+                  '"dependencies":[]'
                 '}'
               '],'
-              '"android":[],'
+              '"android":['
+                '{'
+                  '"name":"plugin-a",'
+                  '"path":"/.tmp_rand0/plugin.rand0/",'
+                  '"dependencies":['
+                    '"plugin-b",'
+                    '"plugin-c"'
+                  ']'
+                '},'
+                '{'
+                  '"name":"plugin-b",'
+                  '"path":"/.tmp_rand0/plugin.rand1/",'
+                  '"dependencies":['
+                    '"plugin-c"'
+                  ']'
+                '},'
+                '{'
+                  '"name":"plugin-c",'
+                  '"path":"/.tmp_rand0/plugin.rand2/",'
+                  '"dependencies":[]'
+                '}'
+              '],'
               '"macos":[],'
               '"linux":[],'
               '"windows":[],'
@@ -378,8 +391,7 @@ dependencies:
               '},'
               '{'
                 '"name":"plugin-c",'
-                '"dependencies":['
-                ']'
+                '"dependencies":[]'
               '}'
             '],'
             '"date_created":"1970-01-01 00:00:00.000",'
@@ -418,9 +430,9 @@ dependencies:
         }];
 
         when(iosProject.existsSync()).thenReturn(true);
-        when(iosProject.pluginsList(any)).thenReturn(dummyPluginsList);
+        // when(iosProject.pluginsList(any)).thenReturn(dummyPluginsList);
         when(macosProject.existsSync()).thenReturn(true);
-        when(macosProject.pluginsList(any)).thenReturn(dummyPluginsList);
+        // when(macosProject.pluginsList(any)).thenReturn(dummyPluginsList);
 
         refreshPluginsList(flutterProject);
         expect(iosProject.podManifestLock.existsSync(), false);
