@@ -261,7 +261,9 @@ class MinimumTextContrastGuideline extends AccessibilityGuideline {
           assert(false);
         }
       } else {
-        return Evaluation.fail('Unable to find element matching semantic node: $data');
+        // If we can't find the text node then assume the label does not
+        // correspond to actual text.
+        return result;
       }
 
       if (_isNodeOffScreen(paintBounds, tester.binding.window)) {

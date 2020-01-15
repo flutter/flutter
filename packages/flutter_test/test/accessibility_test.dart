@@ -162,7 +162,7 @@ void main() {
       handle.dispose();
     });
 
-    testWidgets('label without corresponding text fails', (WidgetTester tester) async {
+    testWidgets('label without corresponding text does not fail', (WidgetTester tester) async {
       final SemanticsHandle handle = tester.ensureSemantics();
       await tester.pumpWidget(_boilerplate(
         Semantics(
@@ -177,7 +177,7 @@ void main() {
       ));
 
       final Evaluation result = await textContrastGuideline.evaluate(tester);
-      expect(result.passed, false);
+      expect(result.passed, true);
       handle.dispose();
     });
 
