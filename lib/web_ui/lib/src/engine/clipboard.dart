@@ -36,7 +36,7 @@ class ClipboardMessageHandler {
 /// APIs and the browser.
 abstract class CopyToClipboardStrategy {
   factory CopyToClipboardStrategy() {
-    return (html.window.navigator.clipboard.writeText != null)
+    return (html.window.navigator.clipboard?.writeText != null)
         ? ClipboardAPICopyStrategy()
         : ExecCommandCopyStrategy();
   }
@@ -52,7 +52,7 @@ abstract class CopyToClipboardStrategy {
 abstract class PasteFromClipboardStrategy {
   factory PasteFromClipboardStrategy() {
     return (browserEngine == BrowserEngine.firefox ||
-            html.window.navigator.clipboard.readText == null)
+            html.window.navigator.clipboard?.readText == null)
         ? ExecCommandPasteStrategy()
         : ClipboardAPIPasteStrategy();
   }
@@ -91,9 +91,43 @@ class ClipboardAPIPasteStrategy implements PasteFromClipboardStrategy {
 class ExecCommandCopyStrategy implements CopyToClipboardStrategy {
   @override
   void setData(String text) {
-    // TODO(nurhan): https://github.com/flutter/flutter/issues/48578
-    print('Clipboard is only implemented for browsers '
-        'supporting Clipboard API. Use context menu for text editing.');
+    // Copy content to clipboard with execCommand.
+    // See: https://developers.google.com/web/updates/2015/04/cut-and-copy-commands
+    final html.TextAreaElement tempTextArea = _appendTemporaryTextArea();
+    tempTextArea.value = text;
+    tempTextArea.focus();
+    tempTextArea.select();
+    try {
+      final bool result = html.document.execCommand('copy');
+      if (!result) {
+        print('copy is not successful');
+      }
+    } catch (e) {
+      print('copy is not successful ${e.message}');
+    } finally {
+      _removeTemporaryTextArea(tempTextArea);
+    }
+  }
+
+  html.TextAreaElement _appendTemporaryTextArea() {
+    final html.TextAreaElement tempElement = html.TextAreaElement();
+    final html.CssStyleDeclaration elementStyle = tempElement.style;
+    elementStyle
+      ..position = 'absolute'
+      ..top = '-99999px'
+      ..left = '-99999px'
+      ..opacity = '0'
+      ..color = 'transparent'
+      ..backgroundColor = 'transparent'
+      ..background = 'transparent';
+
+    html.document.body.append(tempElement);
+
+    return tempElement;
+  }
+
+  void _removeTemporaryTextArea(html.HtmlElement element) {
+    element?.remove();
   }
 }
 
