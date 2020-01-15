@@ -422,17 +422,9 @@ dependencies:
         simulatePodInstallRun(iosProject);
         simulatePodInstallRun(macosProject);
         configureDummyPackageAsPlugin();
-        final List<Map<String, dynamic>> dummyPluginsList = <Map<String,dynamic>>[
-          <String,dynamic>{
-            'name': 'test',
-            'path': 'test_path',
-            'dependencies': <String>[],
-        }];
 
         when(iosProject.existsSync()).thenReturn(true);
-        // when(iosProject.pluginsList(any)).thenReturn(dummyPluginsList);
         when(macosProject.existsSync()).thenReturn(true);
-        // when(macosProject.pluginsList(any)).thenReturn(dummyPluginsList);
 
         refreshPluginsList(flutterProject);
         expect(iosProject.podManifestLock.existsSync(), false);
