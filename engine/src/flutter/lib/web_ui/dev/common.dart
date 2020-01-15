@@ -51,6 +51,7 @@ abstract class PlatformBinding {
   String getFirefoxExecutablePath(io.Directory versionDir);
   String getFirefoxLatestVersionUrl();
   String getSafariSystemExecutablePath();
+  String getCommandToRunEdge();
 }
 
 const String _kBaseDownloadUrl =
@@ -86,6 +87,12 @@ class _WindowsBinding implements PlatformBinding {
   @override
   String getSafariSystemExecutablePath() =>
       throw UnsupportedError('Safari is not supported on Windows');
+
+  // TODO(nurhan): Add code to check and install MicrosoftEdgeLauncher
+  // if missing.
+  // See: https://github.com/flutter/flutter/issues/48823
+  @override
+  String getCommandToRunEdge() => 'MicrosoftEdgeLauncher';
 }
 
 class _LinuxBinding implements PlatformBinding {
@@ -118,6 +125,10 @@ class _LinuxBinding implements PlatformBinding {
   @override
   String getSafariSystemExecutablePath() =>
       throw UnsupportedError('Safari is not supported on Linux');
+
+  @override
+  String getCommandToRunEdge() =>
+      throw UnsupportedError('Edge is not supported on Linux');
 }
 
 class _MacBinding implements PlatformBinding {
@@ -155,6 +166,10 @@ class _MacBinding implements PlatformBinding {
   @override
   String getSafariSystemExecutablePath() =>
       '/Applications/Safari.app/Contents/MacOS/Safari';
+
+  @override
+  String getCommandToRunEdge() =>
+      throw UnimplementedError('Tests for Edge are not implemented for MacOS.');
 }
 
 class BrowserInstallation {
