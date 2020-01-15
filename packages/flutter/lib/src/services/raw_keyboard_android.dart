@@ -442,7 +442,7 @@ class RawKeyEventDataAndroid extends RawKeyEventData {
 
   @override
   String toString() {
-    return '$runtimeType(keyLabel: $keyLabel flags: $flags, codePoint: $codePoint, '
+    return '${objectRuntimeType(this, 'RawKeyEventDataAndroid')}(keyLabel: $keyLabel flags: $flags, codePoint: $codePoint, '
       'keyCode: $keyCode, scanCode: $scanCode, metaState: $metaState, '
       'modifiers down: $modifiersPressed)';
   }

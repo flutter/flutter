@@ -127,7 +127,7 @@ class RawKeyEventDataLinux extends RawKeyEventData {
 
   @override
   String toString() {
-    return '$runtimeType(keyLabel: $keyLabel, keyCode: $keyCode, scanCode: $scanCode,'
+    return '${objectRuntimeType(this, 'RawKeyEventDataLinux')}(keyLabel: $keyLabel, keyCode: $keyCode, scanCode: $scanCode,'
         ' unicodeScalarValues: $unicodeScalarValues, modifiers: $modifiers, '
         'modifiers down: $modifiersPressed)';
   }

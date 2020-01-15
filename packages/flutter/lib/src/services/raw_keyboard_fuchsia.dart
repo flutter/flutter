@@ -287,7 +287,7 @@ class RawKeyEventDataFuchsia extends RawKeyEventData {
 
   @override
   String toString() {
-    return '$runtimeType(hidUsage: $hidUsage, codePoint: $codePoint, modifiers: $modifiers, '
+    return '${objectRuntimeType(this, 'RawKeyEventDataFuchsia')}(hidUsage: $hidUsage, codePoint: $codePoint, modifiers: $modifiers, '
         'modifiers down: $modifiersPressed)';
   }
 }
