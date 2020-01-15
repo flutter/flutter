@@ -10,6 +10,7 @@ import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/ios/xcodeproj.dart';
 import 'package:flutter_tools/src/plugins.dart';
 import 'package:flutter_tools/src/project.dart';
+import 'package:flutter_tools/src/version.dart';
 import 'package:meta/meta.dart';
 import 'package:mockito/mockito.dart';
 
@@ -29,10 +30,12 @@ void main() {
     File packagesFile;
     Directory dummyPackageDirectory;
     SystemClock mockClock;
+    FlutterVersion mockVersion;
 
     setUp(() async {
       fs = MemoryFileSystem();
       mockClock = MockClock();
+      mockVersion = MockFlutterVersion();
 
       // Add basic properties to the Flutter project and subprojects
       flutterProject = MockFlutterProject();
@@ -309,6 +312,9 @@ dependencies:
         when(mockClock.now()).thenAnswer(
           (Invocation _) => DateTime(1970, 1, 1)
         );
+        when(mockVersion.frameworkVersion).thenAnswer(
+          (Invocation _) => '1.0.0'
+        );
         when(iosProject.existsSync()).thenReturn(true);
 
         refreshPluginsList(flutterProject);
@@ -395,13 +401,14 @@ dependencies:
               '}'
             '],'
             '"date_created":"1970-01-01 00:00:00.000",'
-            '"version":"0.0.0-unknown"'
+            '"version":"1.0.0"'
           '}'
         );
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
         SystemClock: () => mockClock,
+        FlutterVersion: () => mockVersion
       });
 
       testUsingContext('Changes to the plugin list invalidates the Cocoapod lockfiles', () {
@@ -769,4 +776,3 @@ class MockXcodeProjectInterpreter extends Mock implements XcodeProjectInterprete
 class MockWebProject extends Mock implements WebProject {}
 class MockWindowsProject extends Mock implements WindowsProject {}
 class MockLinuxProject extends Mock implements LinuxProject {}
-class MockClock extends Mock implements SystemClock {}

@@ -413,7 +413,7 @@ bool _writeFlutterPluginsList(FlutterProject project, List<Plugin> plugins) {
   result['plugins'] = pluginsMap;
   result['dependencyGraph'] = _createLegacyPluginDependencyGraph(plugins);
   result['date_created'] = systemClock.now().toString();
-  result['version'] = FlutterVersion().frameworkVersion;
+  result['version'] = flutterVersion.frameworkVersion;
 
   final String oldPluginFileContent = _readFileContent(pluginsFile);
   final String pluginFileContent = json.encode(result);
