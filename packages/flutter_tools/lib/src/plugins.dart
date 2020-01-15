@@ -427,6 +427,7 @@ List<dynamic> _createPluginDependencyGraph(List<Plugin> plugins) {
 
 // The .flutter-plugins file will be DEPRECATED in favor of .flutter-plugins-dependencies.
 // TODO(franciscojma): Remove this method once deprecated.
+// https://github.com/flutter/flutter/issues/48918
 //
 /// Writes the .flutter-plugins files based on the list of plugins.
 /// If there aren't any plugins, then the files aren't written to disk.
