@@ -8,6 +8,8 @@
 
 import 'dart:async' show Future, Stream, StreamSubscription;
 
+import 'package:flutter/foundation.dart';
+
 import 'framework.dart';
 
 // Examples can assume:
@@ -262,7 +264,7 @@ class AsyncSnapshot<T> {
   bool get hasError => error != null;
 
   @override
-  String toString() => '$runtimeType($connectionState, $data, $error)';
+  String toString() => '${objectRuntimeType(this, 'AsyncSnapshot')}($connectionState, $data, $error)';
 
   @override
   bool operator ==(Object other) {

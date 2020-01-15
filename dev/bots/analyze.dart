@@ -44,6 +44,9 @@ Future<void> run(List<String> arguments) async {
     exitWithError(<String>['The analyze.dart script must be run with --enable-asserts.']);
   }
 
+  print('$clock runtimeType in toString...');
+  await verifyNoRuntimeTypeInToString(flutterRoot);
+
   print('$clock Unexpected binaries...');
   await verifyNoBinaries(flutterRoot);
 
@@ -539,6 +542,58 @@ Future<void> verifyInternationalizations() async {
       'Did you forget to run gen_localizations.dart after updating a .arb file?',
     ]);
   }
+}
+
+Future<void> verifyNoRuntimeTypeInToString(String workingDirectory) async {
+  final String flutterLib = path.join(workingDirectory, 'packages', 'flutter', 'lib');
+  final Set<String> excludedFiles = <String>{
+    path.join(flutterLib, 'src', 'foundation', 'object.dart'), // Calls this from within an assert.
+  };
+  final List<File> files = _allFiles(flutterLib, 'dart', minimumMatches: 400)
+      .where((File file) => !excludedFiles.contains(file.path))
+      .toList();
+  final RegExp toStringRegExp = RegExp(r'^\s+String\s+to(.+?)?String(.+?)?\(\)\s+(\{|=>)');
+  final List<String> problems = <String>[];
+  for (final File file in files) {
+    final List<String> lines = file.readAsLinesSync();
+    for (int index = 0; index < lines.length; index++) {
+      if (toStringRegExp.hasMatch(lines[index])) {
+        final int sourceLine = index + 1;
+        bool _checkForRuntimeType(String line) {
+          if (line.contains(r'$runtimeType') || line.contains('runtimeType.toString()')) {
+            problems.add('${file.path}:$sourceLine}: toString calls runtimeType.toString');
+            return true;
+          }
+          return false;
+        }
+        if (_checkForRuntimeType(lines[index])) {
+          continue;
+        }
+        if (lines[index].contains('=>')) {
+          while (!lines[index].contains(';')) {
+            index++;
+            assert(index < lines.length, 'Source file $file has unterminated toString method.');
+            if (_checkForRuntimeType(lines[index])) {
+              break;
+            }
+          }
+        } else {
+          int openBraceCount = '{'.allMatches(lines[index]).length - '}'.allMatches(lines[index]).length;
+          while (!lines[index].contains('}') && openBraceCount > 0) {
+            index++;
+            assert(index < lines.length, 'Source file $file has unbalanced braces in a toString method.');
+            if (_checkForRuntimeType(lines[index])) {
+              break;
+            }
+            openBraceCount += '{'.allMatches(lines[index]).length;
+            openBraceCount -= '}'.allMatches(lines[index]).length;
+          }
+        }
+      }
+    }
+  }
+  if (problems.isNotEmpty)
+    exitWithError(problems);
 }
 
 Future<void> verifyNoTrailingSpaces(String workingDirectory, { int minimumMatches = 4000 }) async {
