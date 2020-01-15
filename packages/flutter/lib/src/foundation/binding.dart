@@ -15,6 +15,7 @@ import 'assertions.dart';
 import 'basic_types.dart';
 import 'constants.dart';
 import 'debug.dart';
+import 'object.dart';
 import 'platform.dart';
 import 'print.dart';
 
@@ -546,7 +547,7 @@ abstract class BindingBase {
   }
 
   @override
-  String toString() => '<$runtimeType>';
+  String toString() => '<${objectRuntimeType(this, 'BindingBase')}>';
 }
 
 /// Terminate the Flutter application.

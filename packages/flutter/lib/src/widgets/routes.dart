@@ -354,10 +354,10 @@ abstract class TransitionRoute<T> extends OverlayRoute<T> {
   }
 
   /// A short description of this route useful for debugging.
-  String get debugLabel => '$runtimeType';
+  String get debugLabel => '${objectRuntimeType(this, 'TransitionRoute')}';
 
   @override
-  String toString() => '$runtimeType(animation: $_controller)';
+  String toString() => '${objectRuntimeType(this, 'TransitionRoute')}(animation: $_controller)';
 }
 
 /// An entry in the history of a [LocalHistoryRoute].
@@ -1366,7 +1366,7 @@ abstract class ModalRoute<T> extends TransitionRoute<T> with LocalHistoryRoute<T
   }
 
   @override
-  String toString() => '$runtimeType($settings, animation: $_animation)';
+  String toString() => '${objectRuntimeType(this, 'ModalRoute')}($settings, animation: $_animation)';
 }
 
 /// A modal route that overlays a widget over the current route.
