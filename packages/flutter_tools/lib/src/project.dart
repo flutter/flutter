@@ -255,7 +255,7 @@ class FlutterProject {
 /// Base class for projects per platform.
 abstract class FlutterProjectPlatform {
 
-  /// Plugin's platform config key, i.e., "macos", "ios".
+  /// Plugin's platform config key, e.g., "macos", "ios".
   String get pluginConfigKey;
 
   /// Whether the platform exists in the project.

@@ -180,7 +180,6 @@ public class DummyPluginAClass {
       // Verify the dependencyGraph object is valid. The rest of the contents of this file are not relevant to the
       // dependency graph and are tested by unit tests.
       final List<dynamic> dependencyGraph = jsonContent['dependencyGraph'] as List<dynamic>;
-        print(jsonContent);
       const String kExpectedPluginsDependenciesContent =
         '['
           '{'

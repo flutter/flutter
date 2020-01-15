@@ -312,16 +312,11 @@ List<Plugin> findPlugins(FlutterProject project) {
   return plugins;
 }
 
-  /// Filters [plugins] to those supported by this platform.
+  /// Filters [plugins] to those supported by [platformKey].
   List<Map<String, dynamic>> _filterPluginsByPlatform(List<Plugin>plugins, String platformKey) {
     final Iterable<Plugin> platformPlugins = plugins.where((Plugin p) {
       return p.platforms.containsKey(platformKey);
     });
-
-    final Set<String> pluginNames = <String>{};
-    for (final Plugin plugin in plugins) {
-      pluginNames.add(plugin.name);
-    }
 
     final List<Map<String, dynamic>> list = <Map<String, dynamic>>[];
     for (final Plugin plugin in platformPlugins) {
@@ -335,7 +330,7 @@ List<Plugin> findPlugins(FlutterProject project) {
 
 /// Writes the .flutter-plugins-dependencies file based on the list of plugins.
 /// If there aren't any plugins, then the files aren't written to disk. The resulting
-/// file looks something like this:
+/// file looks something like this (orderof keys is not guaranteed):
 /// {
 ///   "info": "This is a generated file; do not edit or check into version control.",
 ///   "plugins": {
@@ -418,10 +413,8 @@ bool _writeFlutterPluginsList(FlutterProject project, List<Plugin> plugins) {
 
 List<dynamic> _createPluginDependencyGraph(List<Plugin> plugins) {
   final List<dynamic> directAppDependencies = <dynamic>[];
-  final Set<String> pluginNames = <String>{};
-  for (final Plugin plugin in plugins) {
-    pluginNames.add(plugin.name);
-  }
+
+  final Set<String> pluginNames = plugins.map((Plugin plugin) => plugin.name).toSet();
   for (final Plugin plugin in plugins) {
     directAppDependencies.add(<String, dynamic>{
       'name': plugin.name,
@@ -432,12 +425,11 @@ List<dynamic> _createPluginDependencyGraph(List<Plugin> plugins) {
   return directAppDependencies;
 }
 
-// This method will be DEPRECATED in favor of _writeFlutterPluginsList.
-// TODO(franciscojma): Remove once deprecated.
+// The .flutter-plugins file will be DEPRECATED in favor of .flutter-plugins-dependencies.
+// TODO(franciscojma): Remove this method once deprecated.
 //
 /// Writes the .flutter-plugins files based on the list of plugins.
-/// If there aren't any plugins, then the files aren't written to disk. The .flutter-plugins-dependencies file
-/// is now udpated by |_writeFlutterPluginsList()| which is backwards-compatible.
+/// If there aren't any plugins, then the files aren't written to disk.
 ///
 /// Finally, returns [true] if .flutter-plugins has changed, otherwise returns [false].
 bool _writeFlutterPluginsListLegacy(FlutterProject project, List<Plugin> plugins) {

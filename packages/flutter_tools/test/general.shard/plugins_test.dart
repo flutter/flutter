@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+import 'dart:convert';
+
 import 'package:file/file.dart';
 import 'package:file/memory.dart';
 import 'package:flutter_tools/src/base/time.dart';
@@ -309,16 +311,20 @@ dependencies:
         createPluginWithDependencies(name: 'plugin-a', dependencies: const <String>['plugin-b', 'plugin-c', 'random-package']);
         createPluginWithDependencies(name: 'plugin-b', dependencies: const <String>['plugin-c']);
         createPluginWithDependencies(name: 'plugin-c', dependencies: const <String>[]);
-        when(mockClock.now()).thenAnswer(
-          (Invocation _) => DateTime(1970, 1, 1)
-        );
-        when(mockVersion.frameworkVersion).thenAnswer(
-          (Invocation _) => '1.0.0'
-        );
         when(iosProject.existsSync()).thenReturn(true);
+
+        final DateTime dateCreated = DateTime(1970, 1, 1);
+        when(mockClock.now()).thenAnswer(
+          (Invocation _) => dateCreated
+        );
+        const String version = '1.0.0';
+        when(mockVersion.frameworkVersion).thenAnswer(
+          (Invocation _) => version
+        );
 
         refreshPluginsList(flutterProject);
 
+        // Verify .flutter-plugins-dependencies is configured correctly.
         expect(flutterProject.flutterPluginsFile.existsSync(), true);
         expect(flutterProject.flutterPluginsDependenciesFile.existsSync(), true);
         expect(flutterProject.flutterPluginsFile.readAsStringSync(),
@@ -328,66 +334,66 @@ dependencies:
           'plugin-c=/.tmp_rand0/plugin.rand2/\n'
           ''
         );
-        expect(flutterProject.flutterPluginsDependenciesFile.readAsStringSync(),
-          '{'
-            '"info":"This is a generated file; do not edit or check into version control.",'
-            '"plugins":{'
-              '"ios":['
-                '{'
-                  '"name":"plugin-a",'
-                  '"path":"/.tmp_rand0/plugin.rand0/"'
-                '},'
-                '{'
-                  '"name":"plugin-b",'
-                  '"path":"/.tmp_rand0/plugin.rand1/"'
-                '},'
-                '{'
-                  '"name":"plugin-c",'
-                  '"path":"/.tmp_rand0/plugin.rand2/"'
-                '}'
-              '],'
-              '"android":['
-                '{'
-                  '"name":"plugin-a",'
-                  '"path":"/.tmp_rand0/plugin.rand0/"'
-                '},'
-                '{'
-                  '"name":"plugin-b",'
-                  '"path":"/.tmp_rand0/plugin.rand1/"'
-                '},'
-                '{'
-                  '"name":"plugin-c",'
-                  '"path":"/.tmp_rand0/plugin.rand2/"'
-                '}'
-              '],'
-              '"macos":[],'
-              '"linux":[],'
-              '"windows":[],'
-              '"web":[]'
-            '},'
-            '"dependencyGraph":['
-              '{'
-                '"name":"plugin-a",'
-                '"dependencies":['
-                  '"plugin-b",'
-                  '"plugin-c"'
-                ']'
-              '},'
-              '{'
-                '"name":"plugin-b",'
-                '"dependencies":['
-                  '"plugin-c"'
-                ']'
-              '},'
-              '{'
-                '"name":"plugin-c",'
-                '"dependencies":[]'
-              '}'
-            '],'
-            '"date_created":"1970-01-01 00:00:00.000",'
-            '"version":"1.0.0"'
-          '}'
-        );
+
+        final String pluginsString = flutterProject.flutterPluginsDependenciesFile.readAsStringSync();
+        final Map<String, dynamic> jsonContent = json.decode(pluginsString) as  Map<String, dynamic>;
+        expect(jsonContent['info'], 'This is a generated file; do not edit or check into version control.');
+
+        final Map<String, dynamic> plugins = jsonContent['plugins'] as Map<String, dynamic>;
+        final List<dynamic> expectedPlugins = <dynamic>[
+          <String, String> {
+            'name': 'plugin-a',
+            'path': '/.tmp_rand0/plugin.rand0/'
+          },
+          <String, String> {
+            'name': 'plugin-b',
+            'path': '/.tmp_rand0/plugin.rand1/'
+          },
+          <String, String> {
+            'name': 'plugin-c',
+            'path': '/.tmp_rand0/plugin.rand2/'
+          },
+        ];
+        expect(plugins['ios'], expectedPlugins);
+        expect(plugins['android'], expectedPlugins);
+        expect(plugins['macos'], <dynamic>[]);
+        expect(plugins['windows'], <dynamic>[]);
+        expect(plugins['linux'], <dynamic>[]);
+        expect(plugins['web'], <dynamic>[]);
+
+        final List<dynamic> expectedDependencyGraph = <dynamic>[
+          <String, dynamic> {
+            'name': 'plugin-a',
+            'dependencies': <String>[
+              'plugin-b',
+              'plugin-c'
+            ]
+          },
+          <String, dynamic> {
+            'name': 'plugin-b',
+            'dependencies': <String>[
+              'plugin-c'
+            ]
+          },
+          <String, dynamic> {
+            'name': 'plugin-c',
+            'dependencies': <String>[]
+          },
+        ];
+
+        expect(jsonContent['dependencyGraph'], expectedDependencyGraph);
+        expect(jsonContent['date_created'], dateCreated.toString());
+        expect(jsonContent['version'], version);
+
+        // Make sure tests are updated if a new object is added/removed.
+        final List<String> expectedKeys = <String>[
+          'info',
+          'plugins',
+          'dependencyGraph',
+          'date_created',
+          'version',
+        ];
+        expect(jsonContent.keys, expectedKeys);
       }, overrides: <Type, Generator>{
         FileSystem: () => fs,
         ProcessManager: () => FakeProcessManager.any(),
