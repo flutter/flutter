@@ -52,12 +52,6 @@ queue time, whether it is manually marked flaky, and the agent it was run on.
 It has actions to download the log, rerun the task, and view the agent on
 the agent dashboard.
 
-The example below shows that a commit broke the build, which was then fixed
-by a followup commit. It also shows that Chrome Infra (left-most task) decided
-to skip running a task.
-
-![Broken Test](images/broken-test.png)
-
 ## Why is a task stuck on "new task" status?
 
 The dashboard aggregates build results from multiple build environments,
