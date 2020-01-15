@@ -21,24 +21,40 @@ void main() {
       mockVisualStudio = MockVisualStudio();
       // Default values regardless of whether VS is installed or not.
       when(mockVisualStudio.workloadDescription).thenReturn('Desktop development');
-      when(mockVisualStudio.necessaryComponentDescriptions(any)).thenReturn(<String>['A', 'B']);
+      when(mockVisualStudio.minimumVersionDescription).thenReturn('2019');
+      when(mockVisualStudio.necessaryComponentDescriptions()).thenReturn(<String>['A', 'B']);
     });
 
     // Assigns default values for a complete VS installation with necessary components.
     void _configureMockVisualStudioAsInstalled() {
       when(mockVisualStudio.isInstalled).thenReturn(true);
+      when(mockVisualStudio.isAtLeastMinimumVersion).thenReturn(true);
+      when(mockVisualStudio.isPrerelease).thenReturn(false);
+      when(mockVisualStudio.isComplete).thenReturn(true);
+      when(mockVisualStudio.isLaunchable).thenReturn(true);
+      when(mockVisualStudio.isRebootRequired).thenReturn(false);
+      when(mockVisualStudio.hasNecessaryComponents).thenReturn(true);
+      when(mockVisualStudio.fullVersion).thenReturn('16.2');
+      when(mockVisualStudio.displayName).thenReturn('Visual Studio Community 2019');
+    }
+
+    // Assigns default values for a complete VS installation that is too old.
+    void _configureMockVisualStudioAsTooOld() {
+      when(mockVisualStudio.isInstalled).thenReturn(true);
+      when(mockVisualStudio.isAtLeastMinimumVersion).thenReturn(false);
       when(mockVisualStudio.isPrerelease).thenReturn(false);
       when(mockVisualStudio.isComplete).thenReturn(true);
       when(mockVisualStudio.isLaunchable).thenReturn(true);
       when(mockVisualStudio.isRebootRequired).thenReturn(false);
       when(mockVisualStudio.hasNecessaryComponents).thenReturn(true);
       when(mockVisualStudio.fullVersion).thenReturn('15.1');
-      when(mockVisualStudio.displayName).thenReturn('Visual Studio Community 2019');
+      when(mockVisualStudio.displayName).thenReturn('Visual Studio Community 2017');
     }
 
     // Assigns default values for a missing VS installation.
     void _configureMockVisualStudioAsNotInstalled() {
       when(mockVisualStudio.isInstalled).thenReturn(false);
+      when(mockVisualStudio.isAtLeastMinimumVersion).thenReturn(false);
       when(mockVisualStudio.isPrerelease).thenReturn(false);
       when(mockVisualStudio.isComplete).thenReturn(false);
       when(mockVisualStudio.isLaunchable).thenReturn(false);
@@ -97,6 +113,23 @@ void main() {
       VisualStudio: () => mockVisualStudio,
     });
 
+    testUsingContext('Emits partial status when Visual Studio is installed but too old', () async {
+      _configureMockVisualStudioAsTooOld();
+      const VisualStudioValidator validator = VisualStudioValidator();
+      final ValidationResult result = await validator.validate();
+      final ValidationMessage expectedMessage = ValidationMessage.error(
+        userMessages.visualStudioTooOld(
+          visualStudio.minimumVersionDescription,
+          visualStudio.workloadDescription,
+          visualStudio.necessaryComponentDescriptions(),
+        ),
+      );
+      expect(result.messages.contains(expectedMessage), true);
+      expect(result.type, ValidationType.partial);
+    }, overrides: <Type, Generator>{
+      VisualStudio: () => mockVisualStudio,
+    });
+
 
     testUsingContext('Emits partial status when Visual Studio is installed without necessary components', () async {
       _configureMockVisualStudioAsInstalled();
@@ -127,7 +160,7 @@ void main() {
       final ValidationMessage expectedMessage = ValidationMessage.error(
         userMessages.visualStudioMissing(
           visualStudio.workloadDescription,
-          visualStudio.necessaryComponentDescriptions(validator.majorVersion),
+          visualStudio.necessaryComponentDescriptions(),
         ),
       );
       expect(result.messages.contains(expectedMessage), true);
